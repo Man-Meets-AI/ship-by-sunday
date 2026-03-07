@@ -18,6 +18,14 @@ Last updated: 2026-03-07
 - Recording is the founder-critical path starting tomorrow.
 - App shell stack is now locked to `Next.js` on `Vercel` with `Stripe` for checkout and `Clerk` for auth.
 
+## Immediate next priorities
+
+1. Parker completes Day 1 recording prep and records `Overview + CEO Block`
+2. Define the exact Stripe -> Clerk -> `Start Here` access handoff
+3. Decide where lesson videos and downloads will live
+4. Apply the course-ops structure to the actual product setup
+5. Turn the locked guarantee and funnel recommendations into actual checkout copy
+
 ## Critical path
 
 1. Record core lessons
@@ -81,10 +89,19 @@ Last updated: 2026-03-07
 - [ ] Create the actual recording folder structure on disk
 - [ ] Have one weak idea example, one tightened user statement, one outcome rewrite, one flow example, and one scope-cut example ready
 
-## Founder-only actions
+## Parker / Founder workstream
 
 - [ ] Commit to the recording calendar
 - [ ] Record `Day 1: Overview + CEO Block` on Sunday, March 8, 2026
+- [ ] Fill in the actual recording start time in [founder-recording-checklists.md](/Users/parkerrex/Projects/manmeetsai-workspace/founder-recording-checklists.md)
+- [ ] Confirm the exact Day 1 examples to use on camera
+- [ ] Approve the exact post-purchase access flow once proposed
+- [ ] Approve only launch-blocking proof claims or design choices
+
+## Founder-only actions
+
+- [ ] Parker commits to the recording calendar
+- [ ] Parker records `Day 1: Overview + CEO Block` on Sunday, March 8, 2026
 - [ ] Approve only launch-blocking proof claims or design choices
 
 ## Master tracker
@@ -94,6 +111,9 @@ Last updated: 2026-03-07
 | Launch ops | Maintain the master tracker and critical path | Launch Chief of Staff / COO | in progress | none | no | `todo.md` |
 | Launch ops | Convert priorities into the next 7-day operating sequence | Launch Chief of Staff / COO | ready | none | no | updated `todo.md` sequence |
 | Launch ops | Keep tripwire, large outbound, and vanity work deprioritized | Launch Chief of Staff / COO | in progress | none | no | blocker notes in `todo.md` |
+| Founder | Record Day 1: Overview + CEO Block | Parker / Founder | founder | recording prep complete | yes | raw recordings for Day 1 |
+| Founder | Approve exact Stripe-to-Clerk post-purchase access handoff | Parker / Founder | blocked | handoff options prepared | yes | approved handoff decision |
+| Founder | Approve only launch-blocking proof claims and visuals | Parker / Founder | ready | proof asset shortlist | yes | approved proof list |
 | Recording | Finalize the recording sprint packets | Founder Recording Producer | in progress | none | no | [recording-sprint-packets.md](/Users/parkerrex/Projects/manmeetsai-workspace/recording-sprint-packets.md) |
 | Recording | Finalize the founder-facing session checklists | Founder Recording Producer | in progress | none | yes | [founder-recording-checklists.md](/Users/parkerrex/Projects/manmeetsai-workspace/founder-recording-checklists.md) |
 | Recording | Prepare Day 1 tabs, files, examples, and demo states | Founder Recording Producer | ready | session time set | yes | Day 1 checklist completed |
@@ -112,6 +132,7 @@ Last updated: 2026-03-07
 | Email | Draft subject lines and preview text bank | Lifecycle Email Strategist | completed | launch email draft | no | [launch-emails.md](/Users/parkerrex/Projects/manmeetsai-workspace/launch-emails.md) |
 | Delivery / onboarding | Lock app shell to Next.js on Vercel with Stripe and Clerk | Launch Chief of Staff / COO | completed | founder input received | yes | [stack-decision.md](/Users/parkerrex/Projects/manmeetsai-workspace/stack-decision.md) |
 | Delivery / onboarding | Choose exact Stripe-to-Clerk post-purchase handoff flow | Launch Chief of Staff / COO | blocked | flow details still open | yes | [stack-decision.md](/Users/parkerrex/Projects/manmeetsai-workspace/stack-decision.md) |
+| Delivery / onboarding | Decide where lesson videos and downloads live | Launch Chief of Staff / COO | blocked | hosting options not yet chosen | yes | hosting decision memo |
 | Delivery / onboarding | Map purchase confirmation, access, login, and start-here flow | Course Operations Producer | blocked | handoff flow decision | no | onboarding flow map |
 | Delivery / onboarding | Define support inbox, response ownership, and escalation path | Course Operations Producer | ready | none | no | support flow doc |
 | Design | List only day-one launch-blocking assets | Design Production Lead | completed | offer locked | no | [design-launch-assets.md](/Users/parkerrex/Projects/manmeetsai-workspace/design-launch-assets.md) |
@@ -139,7 +160,15 @@ Last updated: 2026-03-07
 - [ ] Own and maintain the master tracker in `todo.md`
 - [ ] Convert this tracker into the next 7-day sequence
 - [ ] Choose the exact Stripe-to-Clerk post-purchase handoff flow
+- [ ] Choose where lesson videos and downloads live
 - [ ] Keep noncritical work visibly deprioritized
+
+### Parker / Founder
+
+- [ ] Put the actual recording time into `founder-recording-checklists.md`
+- [ ] Finalize the Day 1 examples to use on camera
+- [ ] Record `Day 1: Overview + CEO Block`
+- [ ] Approve the post-purchase access flow once the options are proposed
 
 ### Founder Recording Producer
 
@@ -200,8 +229,9 @@ Last updated: 2026-03-07
 
 ## What should get worked on before you film
 
+- Parker / Founder: lock the Day 1 start time and examples
 - Founder Recording Producer: Day 1 prep
-- Launch Chief of Staff / COO: lock the next 7-day operating sequence
+- Launch Chief of Staff / COO: define Stripe-to-Clerk handoff options and hosting options
 - Offer and Funnel Strategist: apply the locked guarantee language to checkout copy
 - Course Operations Producer: apply the worksheet and naming decisions to the actual course setup
 
