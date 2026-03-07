@@ -16,13 +16,13 @@ Last updated: 2026-03-07
 - The product now needs to become real: recording, delivery, onboarding, launch emails, QA.
 - Tripwire is deprioritized.
 - Recording is the founder-critical path starting tomorrow.
-- App shell stack is now locked to `Next.js` on `Vercel`.
+- App shell stack is now locked to `Next.js` on `Vercel` with `Stripe` for checkout and `Clerk` for auth.
 
 ## Critical path
 
 1. Record core lessons
 2. Finalize course structure and worksheet usage
-3. Choose checkout provider and access flow details
+3. Choose the exact post-purchase handoff and access flow details
 4. Draft launch emails and buyer onboarding emails
 5. Prepare analytics, QA, and bug tracking
 6. Prepare only launch-blocking design assets
@@ -40,7 +40,7 @@ Last updated: 2026-03-07
 
 - Review the Day 1 pickup list
 - Apply the course-ops lesson structure and worksheet decisions to the actual course setup
-- Confirm the exact checkout provider and access flow details
+- Confirm the exact Stripe-to-Clerk post-purchase handoff details
 
 ### Day 3: Tuesday, March 10, 2026
 
@@ -110,9 +110,9 @@ Last updated: 2026-03-07
 | Email | Draft launch email sequence: announcement through close | Lifecycle Email Strategist | completed | offer locked | no | [launch-emails.md](/Users/parkerrex/Projects/manmeetsai-workspace/launch-emails.md) |
 | Email | Draft buyer onboarding sequence from purchase to first lesson action | Lifecycle Email Strategist | completed | onboarding flow direction | no | [launch-emails.md](/Users/parkerrex/Projects/manmeetsai-workspace/launch-emails.md) |
 | Email | Draft subject lines and preview text bank | Lifecycle Email Strategist | completed | launch email draft | no | [launch-emails.md](/Users/parkerrex/Projects/manmeetsai-workspace/launch-emails.md) |
-| Delivery / onboarding | Lock app shell to Next.js on Vercel | Launch Chief of Staff / COO | completed | founder input received | yes | [stack-decision.md](/Users/parkerrex/Projects/manmeetsai-workspace/stack-decision.md) |
-| Delivery / onboarding | Choose checkout provider and access flow details | Launch Chief of Staff / COO | blocked | provider choice still open | yes | [stack-decision.md](/Users/parkerrex/Projects/manmeetsai-workspace/stack-decision.md) |
-| Delivery / onboarding | Map purchase confirmation, access, login, and start-here flow | Course Operations Producer | blocked | checkout provider decision | no | onboarding flow map |
+| Delivery / onboarding | Lock app shell to Next.js on Vercel with Stripe and Clerk | Launch Chief of Staff / COO | completed | founder input received | yes | [stack-decision.md](/Users/parkerrex/Projects/manmeetsai-workspace/stack-decision.md) |
+| Delivery / onboarding | Choose exact Stripe-to-Clerk post-purchase handoff flow | Launch Chief of Staff / COO | blocked | flow details still open | yes | [stack-decision.md](/Users/parkerrex/Projects/manmeetsai-workspace/stack-decision.md) |
+| Delivery / onboarding | Map purchase confirmation, access, login, and start-here flow | Course Operations Producer | blocked | handoff flow decision | no | onboarding flow map |
 | Delivery / onboarding | Define support inbox, response ownership, and escalation path | Course Operations Producer | ready | none | no | support flow doc |
 | Design | List only day-one launch-blocking assets | Design Production Lead | completed | offer locked | no | [design-launch-assets.md](/Users/parkerrex/Projects/manmeetsai-workspace/design-launch-assets.md) |
 | Design | Prepare proof assets and checkout-supporting visuals | Design Production Lead | completed | proof claims approved | yes | [design-launch-assets.md](/Users/parkerrex/Projects/manmeetsai-workspace/design-launch-assets.md) |
@@ -138,7 +138,7 @@ Last updated: 2026-03-07
 
 - [ ] Own and maintain the master tracker in `todo.md`
 - [ ] Convert this tracker into the next 7-day sequence
-- [ ] Choose the checkout provider and access flow details
+- [ ] Choose the exact Stripe-to-Clerk post-purchase handoff flow
 - [ ] Keep noncritical work visibly deprioritized
 
 ### Founder Recording Producer
@@ -225,7 +225,7 @@ Last updated: 2026-03-07
 | 2026-03-07 | Offer / funnel | Drafted guarantee, checkout copy direction, CTA flow, and mismatch notes | Offer and Funnel Strategist | [offer-funnel-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/offer-funnel-plan.md) | apply once stack is chosen |
 | 2026-03-07 | Email | Drafted first-pass launch and onboarding emails | Lifecycle Email Strategist | [launch-emails.md](/Users/parkerrex/Projects/manmeetsai-workspace/launch-emails.md) | adapt after stack decision |
 | 2026-03-07 | Analytics / QA | Drafted KPI spec, event map, buyer journey QA script, and bug tracker format | Analytics and QA Operator | [analytics-qa-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/analytics-qa-plan.md) | implement when stack is chosen |
-| 2026-03-07 | Delivery / onboarding | Locked app shell to Next.js on Vercel | Launch Chief of Staff / COO | [stack-decision.md](/Users/parkerrex/Projects/manmeetsai-workspace/stack-decision.md) | choose checkout provider next |
+| 2026-03-07 | Delivery / onboarding | Locked app shell to Next.js on Vercel with Stripe and Clerk | Launch Chief of Staff / COO | [stack-decision.md](/Users/parkerrex/Projects/manmeetsai-workspace/stack-decision.md) | define post-purchase handoff next |
 | 2026-03-07 | Offer / funnel | Locked final action-based guarantee language | Offer and Funnel Strategist | [offer-funnel-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/offer-funnel-plan.md) | apply to checkout |
 | 2026-03-07 | Design | Drafted launch-blocking asset plan | Design Production Lead | [design-launch-assets.md](/Users/parkerrex/Projects/manmeetsai-workspace/design-launch-assets.md) | produce only must-have assets |
 | 2026-03-07 | YouTube | Drafted launch YouTube concept slate and first credibility video recommendation | YouTube Launch Producer | [youtube-launch-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/youtube-launch-plan.md) | script later if needed |

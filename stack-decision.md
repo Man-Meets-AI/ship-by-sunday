@@ -6,6 +6,8 @@ Last updated: 2026-03-07
 
 - App / course shell: `Next.js`
 - Deployment: `Vercel`
+- Checkout: `Stripe`
+- Auth: `Clerk`
 
 ## What this means
 
@@ -26,13 +28,12 @@ This aligns with:
 
 ## Still open
 
-- checkout provider
-- payment flow details
-- auth / access method
+- exact Stripe checkout flow details
+- exact Clerk access / post-purchase handoff flow
 - where downloads and lesson video hosting will live
 
 ## Recommended next decision
 
-Choose the checkout provider next.
+Choose the exact post-purchase handoff flow next.
 
 That is now the real blocker, not the app stack itself.

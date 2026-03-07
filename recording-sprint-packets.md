@@ -31,7 +31,8 @@ This document is for first-pass recording only. The priority is forward motion, 
 Use the same default stack across Build and Ship so the student experience stays coherent:
 
 - Frontend: `Next.js + Tailwind`
-- Data/auth: `Supabase` or hardcoded data if needed to keep momentum
+- Auth: `Clerk`
+- Data: `Supabase` or hardcoded data if needed to keep momentum
 - Deployment: `Vercel`
 - Design: `Figma`
 - Prompting method: brief-driven, one screen at a time
