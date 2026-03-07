@@ -69,22 +69,22 @@ Last updated: 2026-03-07
 | Delivery / onboarding | Choose checkout and course hosting stack | Launch Chief of Staff / COO | blocked | founder preference or implementation constraints | yes | stack decision memo |
 | Delivery / onboarding | Map purchase confirmation, access, login, and start-here flow | Course Operations Producer | blocked | stack decision | no | onboarding flow map |
 | Delivery / onboarding | Define support inbox, response ownership, and escalation path | Course Operations Producer | ready | none | no | support flow doc |
-| Design | List only day-one launch-blocking assets | Design Production Lead | ready | offer locked | no | launch asset list |
-| Design | Prepare proof assets and checkout-supporting visuals | Design Production Lead | ready | proof claims approved | yes | proof asset brief |
-| Design | Prepare minimal lesson cover / thumbnail direction | Design Production Lead | ready | lesson naming conventions | no | thumbnail / cover spec |
+| Design | List only day-one launch-blocking assets | Design Production Lead | completed | offer locked | no | [design-launch-assets.md](/Users/parkerrex/Projects/manmeetsai-workspace/design-launch-assets.md) |
+| Design | Prepare proof assets and checkout-supporting visuals | Design Production Lead | completed | proof claims approved | yes | [design-launch-assets.md](/Users/parkerrex/Projects/manmeetsai-workspace/design-launch-assets.md) |
+| Design | Prepare minimal lesson cover / thumbnail direction | Design Production Lead | completed | lesson naming conventions | no | [design-launch-assets.md](/Users/parkerrex/Projects/manmeetsai-workspace/design-launch-assets.md) |
 | Design | Ignore full Instagram grid until core launch blockers are handled | Design Production Lead | in progress | none | no | deprioritized |
 | Analytics / QA | Define KPI dashboard for launch | Analytics and QA Operator | completed | none | no | [analytics-qa-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/analytics-qa-plan.md) |
 | Analytics / QA | Define event map across landing page, checkout, purchase, onboarding, activation | Analytics and QA Operator | completed | stack direction helps but not required | no | [analytics-qa-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/analytics-qa-plan.md) |
 | Analytics / QA | Draft end-to-end buyer journey QA script | Analytics and QA Operator | completed | landing page and onboarding assumptions | no | [analytics-qa-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/analytics-qa-plan.md) |
 | Analytics / QA | Create bug tracker format and severity system | Analytics and QA Operator | completed | none | no | [analytics-qa-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/analytics-qa-plan.md) |
-| Outbound | Define domain, inbox, SPF, DKIM, DMARC, warmup requirements | Outbound Systems and Deliverability Lead | ready | none | no | outbound setup checklist |
-| Outbound | Draft Instantly architecture and pre-send checklist | Outbound Systems and Deliverability Lead | ready | domain strategy | no | Instantly setup notes |
+| Outbound | Define domain, inbox, SPF, DKIM, DMARC, warmup requirements | Outbound Systems and Deliverability Lead | completed | none | no | [outbound-setup-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/outbound-setup-plan.md) |
+| Outbound | Draft Instantly architecture and pre-send checklist | Outbound Systems and Deliverability Lead | completed | domain strategy | no | [outbound-setup-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/outbound-setup-plan.md) |
 | Outbound | Hold execution until buyer journey is stable | Outbound Systems and Deliverability Lead | in progress | none | no | deprioritized execution note |
 | Lists | Tighten target segments around junior and mid-level engineers | List Building and Target Researcher | ready | offer locked | no | segment definitions |
 | Lists | Define list schema and qualification rules | List Building and Target Researcher | ready | target segments | no | list schema |
 | Lists | Build only sample targets and angle notes, not scale lists yet | List Building and Target Researcher | ready | schema | no | sample target sheet |
-| YouTube | Draft 3 launch-relevant video concepts | YouTube Launch Producer | ready | offer locked | no | concept slate |
-| YouTube | Pick 1 fast credibility video to prioritize | YouTube Launch Producer | ready | concept slate | yes | recommended first video |
+| YouTube | Draft 3 launch-relevant video concepts | YouTube Launch Producer | completed | offer locked | no | [youtube-launch-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/youtube-launch-plan.md) |
+| YouTube | Pick 1 fast credibility video to prioritize | YouTube Launch Producer | completed | concept slate | yes | [youtube-launch-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/youtube-launch-plan.md) |
 | YouTube | Hold full scripting until recording and delivery are stable | YouTube Launch Producer | in progress | none | no | deprioritized scripts note |
 
 ## By role
@@ -124,9 +124,9 @@ Last updated: 2026-03-07
 
 ### Design Production Lead
 
-- [ ] Produce launch-blocking asset list
-- [ ] Produce proof asset brief
-- [ ] Produce minimal thumbnail / lesson cover spec
+- [x] Produce launch-blocking asset list
+- [x] Produce proof asset brief
+- [x] Produce minimal thumbnail / lesson cover spec
 
 ### Analytics and QA Operator
 
@@ -137,9 +137,9 @@ Last updated: 2026-03-07
 
 ### Outbound Systems and Deliverability Lead
 
-- [ ] Produce outbound setup checklist
-- [ ] Produce domain / inbox / authentication requirements
-- [ ] Produce Instantly setup notes
+- [x] Produce outbound setup checklist
+- [x] Produce domain / inbox / authentication requirements
+- [x] Produce Instantly setup notes
 
 ### List Building and Target Researcher
 
@@ -149,8 +149,8 @@ Last updated: 2026-03-07
 
 ### YouTube Launch Producer
 
-- [ ] Produce concept slate
-- [ ] Recommend first credibility video
+- [x] Produce concept slate
+- [x] Recommend first credibility video
 - [ ] Hold full scripts until core launch blockers are reduced
 
 ## What should get worked on before you film
@@ -180,6 +180,9 @@ Last updated: 2026-03-07
 | 2026-03-07 | Offer / funnel | Drafted guarantee, checkout copy direction, CTA flow, and mismatch notes | Offer and Funnel Strategist | [offer-funnel-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/offer-funnel-plan.md) | apply once stack is chosen |
 | 2026-03-07 | Email | Drafted first-pass launch and onboarding emails | Lifecycle Email Strategist | [launch-emails.md](/Users/parkerrex/Projects/manmeetsai-workspace/launch-emails.md) | adapt after stack decision |
 | 2026-03-07 | Analytics / QA | Drafted KPI spec, event map, buyer journey QA script, and bug tracker format | Analytics and QA Operator | [analytics-qa-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/analytics-qa-plan.md) | implement when stack is chosen |
+| 2026-03-07 | Design | Drafted launch-blocking asset plan, proof asset brief, and minimal thumbnail direction | Design Production Lead | [design-launch-assets.md](/Users/parkerrex/Projects/manmeetsai-workspace/design-launch-assets.md) | use only must-have assets first |
+| 2026-03-07 | YouTube | Drafted first launch-fit concept slate and recommended first credibility video | YouTube Launch Producer | [youtube-launch-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/youtube-launch-plan.md) | hold full scripts until recording is stable |
+| 2026-03-07 | Outbound | Drafted outbound setup, domain/authentication, warmup, and Instantly planning notes | Outbound Systems and Deliverability Lead | [outbound-setup-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/outbound-setup-plan.md) | do not execute until buyer flow is stable |
 
 ## Later-phase work
 
