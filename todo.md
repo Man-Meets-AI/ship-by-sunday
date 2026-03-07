@@ -80,9 +80,9 @@ Last updated: 2026-03-07
 | Outbound | Define domain, inbox, SPF, DKIM, DMARC, warmup requirements | Outbound Systems and Deliverability Lead | completed | none | no | [outbound-setup-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/outbound-setup-plan.md) |
 | Outbound | Draft Instantly architecture and pre-send checklist | Outbound Systems and Deliverability Lead | completed | domain strategy | no | [outbound-setup-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/outbound-setup-plan.md) |
 | Outbound | Hold execution until buyer journey is stable | Outbound Systems and Deliverability Lead | in progress | none | no | deprioritized execution note |
-| Lists | Tighten target segments around junior and mid-level engineers | List Building and Target Researcher | ready | offer locked | no | segment definitions |
-| Lists | Define list schema and qualification rules | List Building and Target Researcher | ready | target segments | no | list schema |
-| Lists | Build only sample targets and angle notes, not scale lists yet | List Building and Target Researcher | ready | schema | no | sample target sheet |
+| Lists | Tighten target segments around junior and mid-level engineers | List Building and Target Researcher | completed | offer locked | no | [list-building-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/list-building-plan.md) |
+| Lists | Define list schema and qualification rules | List Building and Target Researcher | completed | target segments | no | [list-building-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/list-building-plan.md) |
+| Lists | Build only sample targets and angle notes, not scale lists yet | List Building and Target Researcher | completed | schema | no | [list-building-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/list-building-plan.md) |
 | YouTube | Draft 3 launch-relevant video concepts | YouTube Launch Producer | completed | offer locked | no | [youtube-launch-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/youtube-launch-plan.md) |
 | YouTube | Pick 1 fast credibility video to prioritize | YouTube Launch Producer | completed | concept slate | yes | [youtube-launch-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/youtube-launch-plan.md) |
 | YouTube | Hold full scripting until recording and delivery are stable | YouTube Launch Producer | in progress | none | no | deprioritized scripts note |
@@ -143,9 +143,9 @@ Last updated: 2026-03-07
 
 ### List Building and Target Researcher
 
-- [ ] Produce segment definitions
-- [ ] Produce list schema
-- [ ] Produce sample target sheet with hooks
+- [x] Produce segment definitions
+- [x] Produce list schema
+- [x] Produce sample target sheet with hooks
 
 ### YouTube Launch Producer
 
@@ -180,6 +180,10 @@ Last updated: 2026-03-07
 | 2026-03-07 | Offer / funnel | Drafted guarantee, checkout copy direction, CTA flow, and mismatch notes | Offer and Funnel Strategist | [offer-funnel-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/offer-funnel-plan.md) | apply once stack is chosen |
 | 2026-03-07 | Email | Drafted first-pass launch and onboarding emails | Lifecycle Email Strategist | [launch-emails.md](/Users/parkerrex/Projects/manmeetsai-workspace/launch-emails.md) | adapt after stack decision |
 | 2026-03-07 | Analytics / QA | Drafted KPI spec, event map, buyer journey QA script, and bug tracker format | Analytics and QA Operator | [analytics-qa-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/analytics-qa-plan.md) | implement when stack is chosen |
+| 2026-03-07 | Design | Drafted launch-blocking asset plan | Design Production Lead | [design-launch-assets.md](/Users/parkerrex/Projects/manmeetsai-workspace/design-launch-assets.md) | produce only must-have assets |
+| 2026-03-07 | YouTube | Drafted launch YouTube concept slate and first credibility video recommendation | YouTube Launch Producer | [youtube-launch-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/youtube-launch-plan.md) | script later if needed |
+| 2026-03-07 | Outbound | Drafted planning-only deliverability and Instantly setup plan | Outbound Systems and Deliverability Lead | [outbound-setup-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/outbound-setup-plan.md) | hold execution until buyer flow is stable |
+| 2026-03-07 | Lists | Drafted target segments, list schema, and sample-target approach | List Building and Target Researcher | [list-building-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/list-building-plan.md) | use later for controlled outreach |
 | 2026-03-07 | Design | Drafted launch-blocking asset plan, proof asset brief, and minimal thumbnail direction | Design Production Lead | [design-launch-assets.md](/Users/parkerrex/Projects/manmeetsai-workspace/design-launch-assets.md) | use only must-have assets first |
 | 2026-03-07 | YouTube | Drafted first launch-fit concept slate and recommended first credibility video | YouTube Launch Producer | [youtube-launch-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/youtube-launch-plan.md) | hold full scripts until recording is stable |
 | 2026-03-07 | Outbound | Drafted outbound setup, domain/authentication, warmup, and Instantly planning notes | Outbound Systems and Deliverability Lead | [outbound-setup-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/outbound-setup-plan.md) | do not execute until buyer flow is stable |
