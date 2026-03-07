@@ -235,7 +235,7 @@ Full body:
 
 `“What if I buy it and still do not finish?”`
 
-`Then the first block should make that obvious fast. The guarantee is built around that exact concern.`
+`Then the CEO Block should make that obvious fast. If you complete it within 14 days and do not leave with a clear One-Page Product Brief and a tighter MVP scope, you can email us for a refund.`
 
 `“Is this for total beginners?”`
 

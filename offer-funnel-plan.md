@@ -26,9 +26,9 @@ The offer is already strong enough to sell. The remaining job is to remove hesit
 
 Use a conditional, action-based guarantee. It fits the product better than a generic no-questions-asked refund and reinforces the identity of doing the rep.
 
-### Recommended guarantee
+### Final locked guarantee
 
-`Complete the first block within 14 days. If you do not leave with a clearer product brief and build plan, email us and we will refund you.`
+`Complete the CEO Block within 14 days. If you do not leave with a clear One-Page Product Brief and a tighter MVP scope, email us and we will refund you.`
 
 ### Why this works
 
@@ -39,7 +39,7 @@ Use a conditional, action-based guarantee. It fits the product better than a gen
 
 ### Checkout microcopy
 
-`This sprint is built to be completed. If you complete the first block within 14 days and do not leave with a clearer brief and plan, email us for a refund.`
+`This sprint is built to be completed. Complete the CEO Block within 14 days. If you do not leave with a clear One-Page Product Brief and a tighter MVP scope, email us for a refund.`
 
 ## Checkout Copy Recommendations
 

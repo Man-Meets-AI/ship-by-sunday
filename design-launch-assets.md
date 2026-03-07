@@ -85,6 +85,10 @@ Reduce hesitation right before purchase with fast trust cues.
 
 `yes`
 
+### Final guarantee wording
+
+`Complete the CEO Block within 14 days. If you do not leave with a clear One-Page Product Brief and a tighter MVP scope, email us and we will refund you.`
+
 ### Asset name
 
 `4-block artifact graphic`

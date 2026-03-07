@@ -40,7 +40,6 @@ Last updated: 2026-03-07
 
 - [ ] Commit to the recording calendar
 - [ ] Record `Day 1: Overview + CEO Block` on Sunday, March 8, 2026
-- [ ] Approve guarantee / refund language once drafted
 - [ ] Approve only launch-blocking proof claims or design choices
 
 ## Master tracker
@@ -157,7 +156,7 @@ Last updated: 2026-03-07
 
 - Founder Recording Producer: Day 1 prep
 - Launch Chief of Staff / COO: lock the next 7-day operating sequence
-- Offer and Funnel Strategist: choose the final guarantee version for checkout
+- Offer and Funnel Strategist: apply the locked guarantee language to checkout copy
 - Course Operations Producer: apply the worksheet and naming decisions to the actual course setup
 
 ## What can wait until after recording starts
@@ -180,6 +179,7 @@ Last updated: 2026-03-07
 | 2026-03-07 | Offer / funnel | Drafted guarantee, checkout copy direction, CTA flow, and mismatch notes | Offer and Funnel Strategist | [offer-funnel-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/offer-funnel-plan.md) | apply once stack is chosen |
 | 2026-03-07 | Email | Drafted first-pass launch and onboarding emails | Lifecycle Email Strategist | [launch-emails.md](/Users/parkerrex/Projects/manmeetsai-workspace/launch-emails.md) | adapt after stack decision |
 | 2026-03-07 | Analytics / QA | Drafted KPI spec, event map, buyer journey QA script, and bug tracker format | Analytics and QA Operator | [analytics-qa-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/analytics-qa-plan.md) | implement when stack is chosen |
+| 2026-03-07 | Offer / funnel | Locked final action-based guarantee language | Offer and Funnel Strategist | [offer-funnel-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/offer-funnel-plan.md) | apply to checkout |
 | 2026-03-07 | Design | Drafted launch-blocking asset plan | Design Production Lead | [design-launch-assets.md](/Users/parkerrex/Projects/manmeetsai-workspace/design-launch-assets.md) | produce only must-have assets |
 | 2026-03-07 | YouTube | Drafted launch YouTube concept slate and first credibility video recommendation | YouTube Launch Producer | [youtube-launch-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/youtube-launch-plan.md) | script later if needed |
 | 2026-03-07 | Outbound | Drafted planning-only deliverability and Instantly setup plan | Outbound Systems and Deliverability Lead | [outbound-setup-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/outbound-setup-plan.md) | hold execution until buyer flow is stable |
