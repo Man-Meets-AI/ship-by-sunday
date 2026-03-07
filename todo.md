@@ -27,6 +27,50 @@ Last updated: 2026-03-07
 6. Prepare only launch-blocking design assets
 7. Run end-to-end buyer journey QA
 
+## Next 7 days
+
+### Day 1: Sunday, March 8, 2026
+
+- Record `Day 1: Overview + CEO Block`
+- Log pickups immediately after recording
+- Confirm final guarantee language is reflected in checkout planning
+
+### Day 2: Monday, March 9, 2026
+
+- Review the Day 1 pickup list
+- Apply the course-ops lesson structure and worksheet decisions to the actual course setup
+- Decide the checkout + course-hosting stack
+
+### Day 3: Tuesday, March 10, 2026
+
+- Record `Day 2: Design Block`
+- Draft the actual checkout page copy using the locked guarantee
+- Draft the `Start Here` onboarding path in the chosen system
+
+### Day 4: Wednesday, March 11, 2026
+
+- Record `Day 3: Build Block`
+- Configure the core onboarding flow: purchase, access, `Start Here`, first lesson
+- Prepare the launch-blocking proof assets and worksheet previews
+
+### Day 5: Thursday, March 12, 2026
+
+- Record `Day 4: Ship Block`
+- Finalize the first-pass launch emails and buyer onboarding emails against the real onboarding flow
+- Set up KPI tracking and bug tracker
+
+### Day 6: Friday, March 13, 2026
+
+- Run pickups only for material clarity / demo issues
+- QA landing page, checkout, access email, `Start Here`, first lesson, and Worksheet 01 flow
+- Fix only revenue-impacting or trust-impacting issues
+
+### Day 7: Saturday, March 14, 2026
+
+- Dry run the buyer journey end to end
+- Confirm the course library, downloads, and support path are coherent
+- Decide what is safe to publish now and what remains held back
+
 ## Before filming tomorrow
 
 - [ ] Put actual session time into [founder-recording-checklists.md](/Users/parkerrex/Projects/manmeetsai-workspace/founder-recording-checklists.md)
