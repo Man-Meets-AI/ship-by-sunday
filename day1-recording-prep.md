@@ -6,6 +6,15 @@ Use this for `Day 1: Overview + CEO Block`.
 
 The goal is not to find the perfect example. The goal is to have one clean example for each teaching beat so you do not stop recording to think.
 
+## Four final artifacts to preview in `0.1`
+
+Use this list when you explain what the student will leave with by the end of the sprint:
+
+- `Worksheet 01: One-Page Product Brief`
+- `Worksheet 02: Build-Ready Design Spec`
+- `Worksheet 03: Build Plan + Agent Brief`
+- `Worksheet 04: Launch Plan + Feedback Tracker`
+
 ## Core example app
 
 Use this as the main through-line for Day 1:
@@ -55,6 +64,14 @@ Why it is stronger:
 
 `Do not start with "I want to build an AI app." Start with "this person has this annoying problem in this moment."`
 
+### 3 candidate problems to show on screen
+
+Use this if you want to match the guide literally and show three candidate problems in a notes app:
+
+1. `After team meetings, startup operators lose action items and waste time rewriting notes.`
+2. `Freelancers forget client follow-ups because project notes are scattered across docs and chat threads.`
+3. `Small teams lose track of recurring process tasks because nobody owns the checklist after the meeting ends.`
+
 ## 2. Blurry user vs tightened user
 
 ### Blurry user
@@ -68,6 +85,10 @@ Why it is stronger:
 ### Tightened user
 
 `This app is for early-stage startup operators who run internal team meetings and need a faster way to turn messy notes into clear action items.`
+
+### Sentence stem
+
+`This app is for ___ who need ___ without ___.`
 
 ### Fill-in sentence
 
@@ -134,6 +155,16 @@ Use this during `1.5 Map the Core Flow`.
 3. user reviews and edits
 4. user copies or shares the summary
 5. team gets a clean follow-up record
+
+### Messy vs clean flow
+
+Messy flow:
+
+`record meeting -> upload file -> transcribe audio -> identify speakers -> summarize notes -> generate tasks -> assign owners -> sync calendar -> send follow-up email -> track analytics`
+
+Clean flow:
+
+`paste notes -> generate summary -> review -> share -> done`
 
 ### Value moment
 
