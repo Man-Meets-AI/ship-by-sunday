@@ -1,0 +1,7 @@
+.next
+node_modules
+.pnpm-store
+*.log
+marketing-desktop.png
+marketing-mobile.png
+marketing-mobile-final.png
