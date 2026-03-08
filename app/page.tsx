@@ -239,27 +239,27 @@ export default function Page() {
             {blocks.map((block) => (
               <article
                 key={block.name}
-                className="group flex min-h-[18rem] flex-col justify-between bg-white p-5"
+                className="group flex min-h-[18rem] flex-col justify-between bg-white p-5 transition-colors duration-200 lg:hover:bg-ink lg:hover:text-paper"
               >
                 <div className="flex items-center justify-between gap-3">
-                  <span className="font-display text-[2rem] uppercase leading-none sm:text-3xl">
+                  <span className="font-display text-[2rem] uppercase leading-none transition-colors duration-200 sm:text-3xl lg:group-hover:text-paper">
                     {block.name}
                   </span>
-                  <span className="text-sm font-light text-ink/60">
+                  <span className="text-sm font-light text-ink/60 transition-colors duration-200 lg:group-hover:text-paper/65">
                     {block.eyebrow}
                   </span>
                 </div>
 
-                <div className="mt-6 space-y-2">
-                  <p className="font-sans text-base font-medium text-ink/85 lg:text-transparent lg:transition-colors lg:duration-150 lg:group-hover:text-ink/85">
+                <div className="mt-6 space-y-2 border-t border-line/25 pt-4 transition-colors duration-200 lg:border-transparent lg:pt-8 lg:group-hover:border-paper/25">
+                  <p className="font-sans text-base font-medium text-ink/85 transition-all duration-200 lg:translate-y-3 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100 lg:group-hover:text-paper">
                     {block.hover[0]}
                   </p>
-                  <p className="font-sans text-base font-medium text-ink/85 lg:text-transparent lg:transition-colors lg:duration-150 lg:group-hover:text-ink/85">
+                  <p className="font-sans text-base font-medium text-ink/85 transition-all duration-200 lg:translate-y-3 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100 lg:group-hover:text-paper">
                     {block.hover[1]}
                   </p>
                 </div>
 
-                <p className="mt-8 text-sm font-semibold uppercase tracking-[0.18em] text-ink/45">
+                <p className="mt-8 text-sm font-semibold uppercase tracking-[0.18em] text-ink/45 transition-colors duration-200 lg:group-hover:text-paper/55">
                   Hover or tap for the rest below
                 </p>
               </article>
