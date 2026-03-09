@@ -1,6 +1,6 @@
 # Ship by Sunday Todo
 
-Last updated: 2026-03-07
+Last updated: 2026-03-08
 
 ## Status legend
 
@@ -258,6 +258,7 @@ Last updated: 2026-03-07
 | 2026-03-07 | Delivery / onboarding | Locked app shell to Next.js on Vercel with Stripe and Clerk | Launch Chief of Staff / COO | [stack-decision.md](/Users/parkerrex/Projects/manmeetsai-workspace/stack-decision.md) | define post-purchase handoff next |
 | 2026-03-07 | Offer / funnel | Locked final action-based guarantee language | Offer and Funnel Strategist | [offer-funnel-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/offer-funnel-plan.md) | apply to checkout |
 | 2026-03-07 | Design | Drafted launch-blocking asset plan | Design Production Lead | [design-launch-assets.md](/Users/parkerrex/Projects/manmeetsai-workspace/design-launch-assets.md) | produce only must-have assets |
+| 2026-03-08 | Landing page | Updated FAQ copy and changed the section to click-to-expand accordion behavior | Offer and Funnel Strategist | [app/page.tsx](/Users/parkerrex/Projects/manmeetsai-workspace/app/page.tsx) | QA FAQ interaction on mobile and desktop |
 | 2026-03-07 | YouTube | Drafted launch YouTube concept slate and first credibility video recommendation | YouTube Launch Producer | [youtube-launch-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/youtube-launch-plan.md) | script later if needed |
 | 2026-03-07 | Outbound | Drafted planning-only deliverability and Instantly setup plan | Outbound Systems and Deliverability Lead | [outbound-setup-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/outbound-setup-plan.md) | hold execution until buyer flow is stable |
 | 2026-03-07 | Lists | Drafted target segments, list schema, and sample-target approach | List Building and Target Researcher | [list-building-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/list-building-plan.md) | use later for controlled outreach |

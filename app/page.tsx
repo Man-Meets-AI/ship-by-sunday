@@ -1,4 +1,5 @@
 import Image from "next/image";
+import FAQAccordion from "./faq-accordion";
 
 const proofImage = "/founder-proof.jpg";
 
@@ -89,27 +90,22 @@ const faqs = [
   {
     question: "Is this for beginners?",
     answer:
-      "No. This is for junior and mid-level engineers who can already code and want a cleaner system for finishing and shipping."
+      "No. This is for people who already know the basics of software and want a system for finishing and deploying."
   },
   {
     question: "Do I need to be a senior engineer?",
     answer:
-      "No. You do not need senior-level mastery. You do need enough technical fluency to move through the build with structure."
+      "No. The point is to help non-senior engineers close the loop and ship useful apps with structure."
   },
   {
     question: "Is this live or on-demand?",
     answer:
-      "It is fully on-demand. You get the walkthroughs, guide, and worksheets immediately and move through the sprint at your own pace."
+      "It is fully on-demand. You get videos plus a digital guide/workbook you can use at your own pace."
   },
   {
-    question: "What kind of app is a good fit?",
+    question: "What kind of app is a good fit for this?",
     answer:
-      "Scoped web apps, tools, MVPs, and narrow utilities are the best fit. This is not built for giant multi-system products in version one."
-  },
-  {
-    question: "What if I buy and don't finish?",
-    answer:
-      "Complete the CEO Block within 14 days. If you do not leave with a clear One-Page Product Brief and a tighter MVP scope, email us and we will refund you."
+      "Simple web apps, internal tools, niche SaaS ideas, and scoped MVPs are the best fit. This is not for massive multi-system builds."
   }
 ];
 
@@ -416,21 +412,7 @@ export default function Page() {
 
         <div className="grid gap-4 lg:grid-cols-[1.1fr_1fr]">
           <SectionFrame>
-            <div className="grid gap-[1px] border border-line bg-line">
-              {faqs.map((faq) => (
-                <details key={faq.question} className="group bg-white">
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-5 text-left text-xl font-medium leading-tight sm:text-2xl">
-                    <span>{faq.question}</span>
-                    <span className="grid size-12 place-items-center border border-line text-lg transition-transform group-open:rotate-45">
-                      +
-                    </span>
-                  </summary>
-                  <div className="border-t border-line px-5 py-5 text-base leading-relaxed text-ink/75 sm:text-lg">
-                    {faq.answer}
-                  </div>
-                </details>
-              ))}
-            </div>
+            <FAQAccordion items={faqs} />
           </SectionFrame>
 
           <SectionFrame className="flex items-center justify-center">
