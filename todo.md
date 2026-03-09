@@ -132,10 +132,13 @@ Last updated: 2026-03-08
 | Email | Draft buyer onboarding sequence from purchase to first lesson action | Lifecycle Email Strategist | completed | onboarding flow direction | no | [docs/email/launch-and-onboarding.md](docs/email/launch-and-onboarding.md) |
 | Email | Draft subject lines and preview text bank | Lifecycle Email Strategist | completed | launch email draft | no | [docs/email/launch-and-onboarding.md](docs/email/launch-and-onboarding.md) |
 | Delivery / onboarding | Lock app shell to Next.js on Vercel with Stripe and Clerk | Launch Chief of Staff / COO | completed | founder input received | yes | [docs/delivery-onboarding/stack-decision.md](docs/delivery-onboarding/stack-decision.md) |
+| Delivery / onboarding | Stand up Clerk + Convex foundation for auth, entitlements, mission map, artifacts, and lesson autosave | Launch Chief of Staff / COO | completed | stack locked | no | Next app routes + `convex/` foundation |
 | Delivery / onboarding | Choose exact Stripe-to-Clerk post-purchase handoff flow | Launch Chief of Staff / COO | blocked | flow details still open | yes | [docs/delivery-onboarding/stack-decision.md](docs/delivery-onboarding/stack-decision.md) |
 | Delivery / onboarding | Decide where lesson videos and downloads live | Launch Chief of Staff / COO | blocked | hosting options not yet chosen | yes | hosting decision memo |
 | Delivery / onboarding | Map purchase confirmation, access, login, and start-here flow | Course Operations Producer | blocked | handoff flow decision | no | onboarding flow map |
 | Delivery / onboarding | Define support inbox, response ownership, and escalation path | Course Operations Producer | ready | none | no | support flow doc |
+| Delivery / onboarding | Replace placeholder Clerk envs and set the real Clerk issuer domain for Convex auth | Launch Chief of Staff / COO | ready | Clerk app keys available | no | working auth env setup |
+| Delivery / onboarding | Wire Stripe purchase events into Convex entitlements | Launch Chief of Staff / COO | blocked | exact handoff flow still open | yes | live purchase-to-access grant path |
 | Design | List only day-one launch-blocking assets | Design Production Lead | completed | offer locked | no | [docs/design/launch-assets.md](docs/design/launch-assets.md) |
 | Design | Prepare proof assets and checkout-supporting visuals | Design Production Lead | completed | proof claims approved | yes | [docs/design/launch-assets.md](docs/design/launch-assets.md) |
 | Design | Prepare minimal lesson cover / thumbnail direction | Design Production Lead | completed | lesson naming conventions | no | [docs/design/launch-assets.md](docs/design/launch-assets.md) |
@@ -257,6 +260,7 @@ Last updated: 2026-03-08
 | 2026-03-07 | Email | Drafted first-pass launch and onboarding emails | Lifecycle Email Strategist | [docs/email/launch-and-onboarding.md](docs/email/launch-and-onboarding.md) | adapt after stack decision |
 | 2026-03-07 | Analytics / QA | Drafted KPI spec, event map, buyer journey QA script, and bug tracker format | Analytics and QA Operator | [docs/analytics-qa/plan.md](docs/analytics-qa/plan.md) | implement when stack is chosen |
 | 2026-03-07 | Delivery / onboarding | Locked app shell to Next.js on Vercel with Stripe and Clerk | Launch Chief of Staff / COO | [docs/delivery-onboarding/stack-decision.md](docs/delivery-onboarding/stack-decision.md) | define post-purchase handoff next |
+| 2026-03-09 | Delivery / onboarding | Implemented Clerk auth, Convex schema/functions, protected product routes, mission map, artifacts view, and lesson autosave foundation | Launch Chief of Staff / COO | Next app routes + `convex/` foundation | replace placeholder Clerk envs and wire Stripe entitlements |
 | 2026-03-07 | Offer / funnel | Locked final action-based guarantee language | Offer and Funnel Strategist | [docs/offer-funnel/plan.md](docs/offer-funnel/plan.md) | apply to checkout |
 | 2026-03-07 | Design | Drafted launch-blocking asset plan | Design Production Lead | [docs/design/launch-assets.md](docs/design/launch-assets.md) | produce only must-have assets |
 | 2026-03-08 | Landing page | Updated FAQ copy and changed the section to click-to-expand accordion behavior | Offer and Funnel Strategist | [app/page.tsx](app/page.tsx) | QA FAQ interaction on mobile and desktop |

@@ -21,6 +21,7 @@ Launch `Ship by Sunday` so a cold or warm visitor can:
 - Core audience: junior and mid-level engineers who can code, have ideas, and keep getting stuck before anything goes live
 - Product format: on-demand videos plus a digital guide/workbook
 - Landing page strategy and offer critique are complete enough to move on
+- App stack: `Next.js` app on `Vercel` with `Clerk` for auth, `Convex` for app data, and `Stripe` for checkout / entitlement handoff
 - Tripwire is deprioritized for now
 
 ## Current Priorities
@@ -122,8 +123,26 @@ Founder time should be reserved for:
 - Use the relevant role file before doing substantial work in that domain.
 - Treat `main.md` as the higher-level launch OS and sequencing reference.
 - Write generated workstream docs into `docs/<workstream>/` and keep repo root reserved for control files.
+- Treat `app/lessonRegistry.ts` as the curriculum and lesson-contract source of truth.
+- Treat `convex/` as the source of truth for app data, entitlements, and lesson state.
 - Prefer shipping one concrete, validated output over creating five partial drafts.
 - If a task is not on the critical path, label it as later-phase work.
+
+## App Workflow
+
+- Public marketing lives in `app/`.
+- Protected product routes currently live at `/mission`, `/lesson/[lessonId]`, `/artifacts`, `/settings`, and `/access-required`.
+- Clerk handles identity and route protection.
+- Convex handles course entitlements, lesson autosave, mission progress, and artifact listing.
+- `Stripe` is still the next integration step for paid access. Do not fake webhook completion or purchase state.
+
+## Local Development
+
+- Use `pnpm run dev:web` for the Next.js app.
+- Use `pnpm run dev:convex` for the local Convex deployment.
+- Use `pnpm run typecheck` for TypeScript verification.
+- Use `pnpm run check` before closing meaningful app-shell or onboarding-stack work.
+- Use `.env.local.example` as the tracked env template. Real local credentials stay in `.env.local`.
 
 ## Subagent Model
 

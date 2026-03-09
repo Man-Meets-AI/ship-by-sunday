@@ -5,3 +5,6 @@ node_modules
 marketing-desktop.png
 marketing-mobile.png
 marketing-mobile-final.png
+
+.env.local
+*.tsbuildinfo

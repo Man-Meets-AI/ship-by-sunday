@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
 import { Bebas_Neue, Manrope } from "next/font/google";
+
+import { ConvexClientProvider } from "@/components/convex-client-provider";
 
 import "./globals.css";
 
@@ -21,13 +24,17 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-  children
+	children
 }: Readonly<{
-  children: React.ReactNode;
+	children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en" className={`${display.variable} ${sans.variable}`}>
-      <body>{children}</body>
-    </html>
-  );
+	return (
+		<html lang="en" className={`${display.variable} ${sans.variable}`}>
+			<body>
+				<ClerkProvider>
+					<ConvexClientProvider>{children}</ConvexClientProvider>
+				</ClerkProvider>
+			</body>
+		</html>
+	);
 }
