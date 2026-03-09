@@ -215,10 +215,10 @@ For this example, the answer is:
 
 Before you record, have these open:
 
-- [founder-recording-checklists.md](/Users/parkerrex/Projects/manmeetsai-workspace/founder-recording-checklists.md)
-- [ship_by_sunday_recording_guide_detailed.pdf](/Users/parkerrex/Projects/manmeetsai-workspace/assets/ship_by_sunday_recording_guide_detailed.pdf)
-- [ship_by_sunday_worksheets.pdf](/Users/parkerrex/Projects/manmeetsai-workspace/assets/ship_by_sunday_worksheets.pdf)
-- this file: [day1-recording-prep.md](/Users/parkerrex/Projects/manmeetsai-workspace/day1-recording-prep.md)
+- [founder checklists](./founder-checklists.md)
+- [ship_by_sunday_recording_guide_detailed.pdf](../../assets/ship_by_sunday_recording_guide_detailed.pdf)
+- [ship_by_sunday_worksheets.pdf](../../assets/ship_by_sunday_worksheets.pdf)
+- this file: [day-1-prep.md](./day-1-prep.md)
 
 ## 8. Minimal rule for tomorrow
 

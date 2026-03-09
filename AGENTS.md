@@ -121,6 +121,7 @@ Founder time should be reserved for:
 - Start from `todo.md` for current launch status and priorities.
 - Use the relevant role file before doing substantial work in that domain.
 - Treat `main.md` as the higher-level launch OS and sequencing reference.
+- Write generated workstream docs into `docs/<workstream>/` and keep repo root reserved for control files.
 - Prefer shipping one concrete, validated output over creating five partial drafts.
 - If a task is not on the critical path, label it as later-phase work.
 
@@ -180,7 +181,7 @@ Bad assignment:
 
 Good assignment:
 
-- “Use `roles/lifecycle-email-strategist.md` to draft the first-pass launch email sequence and write it into `launch-emails.md`. Do not write tripwire emails. Stop after the first core sequence draft.”
+- “Use `roles/lifecycle-email-strategist.md` to draft the first-pass launch email sequence and write it into `docs/email/launch-and-onboarding.md`. Do not write tripwire emails. Stop after the first core sequence draft.”
 
 ## Founder-Free Execution Rule
 
@@ -280,6 +281,7 @@ If that is not obvious, update `todo.md` first before doing more work.
 
 - `todo.md`: current launch tracker and immediate priorities
 - `main.md`: launch OS, critical path, and sprint sequencing
+- `docs/`: canonical home for generated workstream docs
 - `roles/`: role-by-role prompts and ownership
 - `assets/`: course materials, packets, worksheets, and guides
 

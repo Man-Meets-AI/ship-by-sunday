@@ -21,10 +21,10 @@ This aligns with:
 
 ## Already supported by existing docs
 
-- [recording-sprint-packets.md](/Users/parkerrex/Projects/manmeetsai-workspace/recording-sprint-packets.md)
-- [course-ops-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/course-ops-plan.md)
-- [offer-funnel-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/offer-funnel-plan.md)
-- [analytics-qa-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/analytics-qa-plan.md)
+- [recording sprint packets](../recording/sprint-packets.md)
+- [course ops plan](../course-ops/plan.md)
+- [offer and funnel plan](../offer-funnel/plan.md)
+- [analytics and QA plan](../analytics-qa/plan.md)
 
 ## Still open
 
