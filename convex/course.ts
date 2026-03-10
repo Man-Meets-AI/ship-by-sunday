@@ -281,7 +281,19 @@ export const getLessonState = query({
 			.filter((state: any) => state.status === "completed")
 			.map((state: any) => state.lessonId);
 
-		ensureLessonIsUnlocked(lesson.id, completedLessonIds);
+		const unlockedLessonIds = new Set(getUnlockedLessonIds(completedLessonIds));
+		const canOpenLesson =
+			unlockedLessonIds.has(lesson.id) || completedLessonIds.includes(lesson.id);
+
+		if (!canOpenLesson) {
+			return {
+				accessStatus: "locked",
+				lessonId: lesson.id,
+				title: lesson.title,
+				shortTitle: lesson.shortTitle,
+				requiredLessonId: lesson.prevLessonId ?? null,
+			};
+		}
 
 		const lessonState = lessonStates.find((state: any) => state.lessonId === lesson.id);
 		const pinnedArtifacts = (lesson.pinnedArtifacts ?? [])
@@ -303,6 +315,7 @@ export const getLessonState = query({
 			.filter(Boolean);
 
 		return {
+			accessStatus: "unlocked",
 			lesson,
 			fieldValues: normalizeFieldValues(
 				lessonState?.fieldValues as any,

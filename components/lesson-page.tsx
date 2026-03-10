@@ -24,11 +24,20 @@ type LessonChromeState = {
 };
 
 type LessonState = {
+	accessStatus: "unlocked";
 	lesson: LessonConfig;
 	fieldValues: Record<string, unknown>;
 	status: string;
 	pinnedArtifacts: PinnedArtifact[];
 	isImplemented: boolean;
+};
+
+type LockedLessonState = {
+	accessStatus: "locked";
+	lessonId: string;
+	title: string;
+	shortTitle: string;
+	requiredLessonId: string | null;
 };
 
 function getDefaultCoachPanel(lesson: LessonConfig): LessonChromeState["activeCoachPanel"] {
@@ -78,7 +87,7 @@ export function LessonPage({
 	const lessonState = useQuery(
 		api.course.getLessonState,
 		isAuthenticated ? { lessonId } : "skip",
-	) as LessonState | undefined;
+	) as LessonState | LockedLessonState | undefined;
 	const saveLessonDraft = useMutation(api.course.saveLessonDraft);
 	const completeLesson = useMutation(api.course.completeLesson);
 	const [fieldValues, setFieldValues] = useState<Record<string, unknown>>({});
@@ -90,7 +99,7 @@ export function LessonPage({
 	const lastSavedSnapshot = useRef("");
 
 	useEffect(() => {
-		if (!lessonState) {
+		if (!lessonState || lessonState.accessStatus !== "unlocked") {
 			return;
 		}
 
@@ -104,7 +113,7 @@ export function LessonPage({
 	}, [lessonId, lessonState]);
 
 	useEffect(() => {
-		if (!lessonState) {
+		if (!lessonState || lessonState.accessStatus !== "unlocked") {
 			return;
 		}
 
@@ -132,7 +141,11 @@ export function LessonPage({
 	}, [chromeState, lessonId]);
 
 	useEffect(() => {
-		if (!lessonState || initializedForLessonId.current !== lessonId) {
+		if (
+			!lessonState ||
+			lessonState.accessStatus !== "unlocked" ||
+			initializedForLessonId.current !== lessonId
+		) {
 			return;
 		}
 
@@ -158,7 +171,60 @@ export function LessonPage({
 		return () => window.clearTimeout(timeout);
 	}, [fieldValues, lessonId, lessonState, saveLessonDraft]);
 
-	if (lessonState === undefined || chromeState === null) {
+	if (lessonState === undefined) {
+		return (
+			<ProductShell currentLessonId={lessonId}>
+				<ViewerGate>
+					<section className="rounded-[26px] border border-product-border bg-product-surface/78 px-5 py-10 text-center shadow-panel backdrop-blur-xl">
+						<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+							Loading lesson
+						</p>
+						<p className="mt-4 font-display text-4xl uppercase tracking-[0.08em] text-product-text">
+							Loading
+						</p>
+					</section>
+				</ViewerGate>
+			</ProductShell>
+		);
+	}
+
+	if (lessonState.accessStatus === "locked") {
+		return (
+			<ProductShell currentLessonId={lessonId}>
+				<ViewerGate>
+					<section className="rounded-[26px] border border-product-border bg-product-surface/78 px-5 py-10 text-center shadow-panel backdrop-blur-xl">
+						<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+							Lesson locked
+						</p>
+						<p className="mt-4 font-display text-4xl uppercase tracking-[0.08em] text-product-text">
+							{lessonState.lessonId} {lessonState.shortTitle}
+						</p>
+						<p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-product-muted sm:mx-auto">
+							This lesson is locked. Go back to the mission map and finish{" "}
+							{lessonState.requiredLessonId ?? "the previous unlocked lesson"} first.
+						</p>
+						<div className="mt-6 flex flex-wrap justify-center gap-3">
+							<button
+								type="button"
+								onClick={() => router.back()}
+								className="rounded-full border border-product-border bg-product-surface px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-text transition-colors hover:bg-product-surface-alt"
+							>
+								Go back
+							</button>
+							<Link
+								href="/mission"
+								className="rounded-full border border-product-accent bg-product-chip px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
+							>
+								Open mission
+							</Link>
+						</div>
+					</section>
+				</ViewerGate>
+			</ProductShell>
+		);
+	}
+
+	if (chromeState === null) {
 		return (
 			<ProductShell currentLessonId={lessonId}>
 				<ViewerGate>

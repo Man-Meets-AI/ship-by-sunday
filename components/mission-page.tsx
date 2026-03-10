@@ -161,22 +161,20 @@ export function MissionPage() {
 										(lesson) =>
 											lesson.status === "in_progress" || lesson.status === "available",
 									) ?? block.lessons[0];
-
-								return (
-									<Link
-										key={block.id}
-										href={`/lesson/${blockNextLesson.id}`}
-										className={`group overflow-hidden rounded-[28px] border border-product-border bg-product-surface/70 shadow-panel backdrop-blur-xl transition-transform hover:-translate-y-1 ${
-											status === "locked" ? "pointer-events-none opacity-55" : ""
-										}`}
-									>
+								const cardClass = `group overflow-hidden rounded-[28px] border border-product-border bg-product-surface/70 shadow-panel backdrop-blur-xl ${
+									status === "locked"
+										? "cursor-not-allowed opacity-55"
+										: "transition-transform hover:-translate-y-1"
+								}`;
+								const cardContent = (
+									<>
 										<div className="relative h-[240px] overflow-hidden">
 											<Image
 												src={blockImages[block.id] ?? blockImages.CEO}
 												alt={`${block.label} block`}
 												fill
-												className={`object-cover transition-transform duration-300 group-hover:scale-105 ${
-													status === "locked" ? "grayscale" : ""
+												className={`object-cover transition-transform duration-300 ${
+													status === "locked" ? "grayscale" : "group-hover:scale-105"
 												}`}
 												sizes="(min-width: 1280px) 25vw, (min-width: 768px) 50vw, 100vw"
 											/>
@@ -223,6 +221,28 @@ export function MissionPage() {
 												</p>
 											</div>
 										</div>
+									</>
+								);
+
+								if (status === "locked") {
+									return (
+										<article
+											key={block.id}
+											aria-disabled="true"
+											className={cardClass}
+										>
+											{cardContent}
+										</article>
+									);
+								}
+
+								return (
+									<Link
+										key={block.id}
+										href={`/lesson/${blockNextLesson.id}`}
+										className={cardClass}
+									>
+										{cardContent}
 									</Link>
 								);
 							})}

@@ -294,15 +294,13 @@ function ShellInner({
 							<div className="flex gap-2 overflow-x-auto pb-1">
 								{activeBlock.lessons.map((lesson) => {
 									const isCurrent = lesson.id === currentLessonId;
-									return (
-										<Link
-											key={lesson.id}
-											href={`/lesson/${lesson.id}`}
-											className={`min-w-[136px] rounded-[18px] border px-3 py-3 transition-transform hover:-translate-y-0.5 ${lessonRailClass(
-												isCurrent,
-												lesson.status,
-											)}`}
-										>
+									const isLocked = lesson.status === "locked";
+									const railClass = `min-w-[136px] rounded-[18px] border px-3 py-3 ${lessonRailClass(
+										isCurrent,
+										lesson.status,
+									)} ${isLocked ? "cursor-not-allowed" : "transition-transform hover:-translate-y-0.5"}`;
+									const railContent = (
+										<>
 											<p className="font-mono text-[10px] uppercase tracking-[0.22em] text-current/70">
 												{lesson.id}
 											</p>
@@ -312,6 +310,28 @@ function ShellInner({
 											<p className="mt-2 text-xs font-medium text-current/75">
 												{lesson.status.replace("_", " ")}
 											</p>
+										</>
+									);
+
+									if (isLocked) {
+										return (
+											<div
+												key={lesson.id}
+												aria-disabled="true"
+												className={railClass}
+											>
+												{railContent}
+											</div>
+										);
+									}
+
+									return (
+										<Link
+											key={lesson.id}
+											href={`/lesson/${lesson.id}`}
+											className={railClass}
+										>
+											{railContent}
 										</Link>
 									);
 								})}
