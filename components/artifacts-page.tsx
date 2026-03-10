@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useConvexAuth, useQuery } from "convex/react";
 
+import { getLessonHref } from "@/app/lessonRegistry";
 import { api } from "@/convex/_generated/api";
 import { ProductShell } from "@/components/product-shell";
 import { ViewerGate } from "@/components/viewer-gate";
@@ -23,23 +24,29 @@ export function ArtifactsPage() {
 
 	return (
 		<ProductShell
-			title="Artifacts"
-			subtitle="Every saved output that has been completed inside the sprint."
+			title="Saved Work"
+			subtitle="Your completed outputs in one place."
 		>
 			<ViewerGate>
 				<section className="rounded-none border border-product-border bg-product-surface/78 p-5 shadow-panel backdrop-blur-xl">
-					<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
-						Artifact library
-					</p>
+					<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">Completed outputs</p>
 					{artifacts === undefined ? (
 						<p className="mt-4 text-sm font-medium text-product-muted">
-							Loading completed artifacts.
+							Loading your saved work.
 						</p>
 					) : artifacts.length === 0 ? (
-						<p className="mt-4 text-sm font-medium text-product-muted">
-							Nothing has been completed yet. Start from the mission map and
-							finish the first lesson to populate this view.
-						</p>
+						<div className="mt-4 space-y-4">
+							<p className="text-sm font-medium text-product-muted">
+								Nothing has been completed yet. Finish your first lesson and the
+								work will show up here automatically.
+							</p>
+							<Link
+								href="/mission"
+								className="inline-flex rounded-none border border-product-accent bg-product-chip px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
+							>
+								Open mission
+							</Link>
+						</div>
 					) : (
 						<div className="mt-4 grid gap-4 md:grid-cols-2">
 							{artifacts.map((artifact) => (
@@ -58,7 +65,7 @@ export function ArtifactsPage() {
 									</p>
 									<div className="mt-4 space-y-2 text-sm font-medium text-product-text">
 										{artifact.fields.length === 0 ? (
-											<p>No structured preview yet.</p>
+											<p>No preview yet.</p>
 										) : (
 											artifact.fields.slice(0, 4).map(([fieldId, value]) => (
 												<div
@@ -70,7 +77,7 @@ export function ArtifactsPage() {
 													</p>
 													<p className="mt-2 break-words">
 														{Array.isArray(value)
-															? JSON.stringify(value)
+															? value.join(", ")
 															: String(value)}
 													</p>
 												</div>
@@ -78,7 +85,7 @@ export function ArtifactsPage() {
 										)}
 									</div>
 									<Link
-										href={`/lesson/${artifact.lessonId}`}
+										href={getLessonHref(artifact.lessonId)}
 										className="mt-4 inline-flex rounded-none border border-product-accent bg-product-chip px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
 									>
 										Open lesson

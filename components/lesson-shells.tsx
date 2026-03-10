@@ -2,7 +2,11 @@
 
 import Link from "next/link";
 
-import { getLesson, type LessonConfig } from "@/app/lessonRegistry";
+import {
+	getLesson,
+	type ChecklistItemValue,
+	type LessonConfig,
+} from "@/app/lessonRegistry";
 import type { LessonContent } from "@/content/lessons/types";
 
 export type PinnedArtifact = {
@@ -18,6 +22,8 @@ type BaseLessonShellProps = {
 	lesson: LessonConfig;
 	objectiveCollapsed: boolean;
 	onToggleObjective: () => void;
+	objectiveChecklistItems: ChecklistItemValue[];
+	onObjectiveChecklistToggle: (index: number, checked: boolean) => void;
 	coachVisible: boolean;
 	activeCoachPanel: CoachPanelKey;
 	onCoachPanelChange: (panel: CoachPanelKey) => void;
@@ -39,27 +45,72 @@ function formatArtifactValue(value: unknown) {
 	return Array.isArray(value) ? JSON.stringify(value) : String(value);
 }
 
+function ChecklistRow({
+	label,
+	checked,
+	onChange,
+}: {
+	label: string;
+	checked: boolean;
+	onChange: (checked: boolean) => void;
+}) {
+	return (
+		<label
+			className={`flex items-center gap-3 rounded-none border px-3 py-2 transition-colors ${
+				checked
+					? "border-product-accent bg-product-chip text-product-text"
+					: "border-product-border bg-product-surface text-product-text"
+			}`}
+		>
+			<input
+				type="checkbox"
+				checked={checked}
+				onChange={(event) => onChange(event.target.checked)}
+				className="size-4 rounded-none border-product-border accent-[rgb(var(--product-accent))]"
+			/>
+			<span className={`text-sm font-medium ${checked ? "line-through opacity-70" : ""}`}>
+				{label}
+			</span>
+		</label>
+	);
+}
+
 function ObjectivePanel({
 	lesson,
 	collapsed,
 	onToggle,
+	objectiveChecklistItems,
+	onObjectiveChecklistToggle,
 }: {
 	lesson: LessonConfig;
 	collapsed: boolean;
 	onToggle: () => void;
+	objectiveChecklistItems: ChecklistItemValue[];
+	onObjectiveChecklistToggle: (index: number, checked: boolean) => void;
 }) {
 	const nextLesson = lesson.nextLessonId ? getLesson(lesson.nextLessonId) : undefined;
+	const completedCount = objectiveChecklistItems.filter((item) => item.checked).length;
 
 	if (collapsed) {
 		return (
-			<aside className="flex min-h-[320px] flex-col items-center justify-between rounded-none border border-product-border bg-product-surface/78 p-3 shadow-panel backdrop-blur-xl">
-				<div className="text-center">
-					<p className="font-mono text-[10px] uppercase tracking-[0.24em] text-product-muted">
-						Objective
-					</p>
-					<p className="mt-3 font-display text-3xl uppercase leading-none tracking-[0.06em] text-product-text">
-						{lesson.id}
-					</p>
+			<aside className="flex min-h-[320px] min-w-0 flex-col items-center justify-between rounded-none border border-product-border bg-product-surface/82 p-3 shadow-panel backdrop-blur-xl xl:h-full xl:min-h-0 xl:overflow-y-auto">
+				<div className="w-full space-y-3">
+					<div className="border border-product-border bg-product-surface px-2 py-2 text-center">
+						<p className="font-mono text-[10px] uppercase tracking-[0.24em] text-product-muted">
+							Objective
+						</p>
+						<p className="mt-2 font-display text-3xl uppercase leading-none tracking-[0.06em] text-product-text">
+							{lesson.id}
+						</p>
+					</div>
+					<div className="border border-product-border bg-product-surface-strong/90 px-2 py-2 text-center">
+						<p className="font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
+							Ready
+						</p>
+						<p className="mt-1 font-display text-2xl uppercase leading-none tracking-[0.05em] text-product-text">
+							{completedCount}/{objectiveChecklistItems.length}
+						</p>
+					</div>
 				</div>
 				<button
 					type="button"
@@ -73,58 +124,78 @@ function ObjectivePanel({
 	}
 
 	return (
-		<aside className="rounded-none border border-product-border bg-product-surface/78 p-5 shadow-panel backdrop-blur-xl">
-			<div className="flex items-start justify-between gap-3">
-				<div>
-					<p className="font-mono text-[11px] uppercase tracking-[0.22em] text-product-muted">
-						Current objective
-					</p>
-					<h2 className="mt-3 font-display text-4xl uppercase leading-none tracking-[0.06em] text-product-text">
-						{lesson.id}
-					</h2>
+		<aside className="min-w-0 rounded-none border border-product-border bg-product-surface/82 shadow-panel backdrop-blur-lg xl:h-full xl:min-h-0 xl:overflow-y-auto">
+			<div className="sticky top-0 z-10 border-b border-product-border bg-product-surface/95 px-4 py-4 backdrop-blur-lg">
+				<div className="flex items-start justify-between gap-3">
+					<div className="space-y-3">
+						<p className="font-mono text-[11px] uppercase tracking-[0.22em] text-product-muted">
+							Current objective
+						</p>
+						<div className="inline-flex border border-product-border bg-product-surface-strong/90 px-3 py-2">
+							<h2 className="font-display text-4xl uppercase leading-none tracking-[0.06em] text-product-text">
+								{lesson.id}
+							</h2>
+						</div>
+					</div>
+					<button
+						type="button"
+						onClick={onToggle}
+						className="rounded-none border border-product-border bg-product-surface-alt/80 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.22em] text-product-text"
+					>
+						Collapse
+					</button>
 				</div>
-				<button
-					type="button"
-					onClick={onToggle}
-					className="rounded-none border border-product-border bg-product-surface-alt/80 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.22em] text-product-text"
-				>
-					Collapse
-				</button>
 			</div>
-			<p className="mt-4 font-mono text-sm uppercase tracking-[0.08em] text-product-text">
-				{lesson.objectiveTitle}
-			</p>
-			<p className="mt-4 text-sm font-medium leading-relaxed text-product-muted">
-				{lesson.helperText ?? lesson.winCondition}
-			</p>
-
-			<div className="mt-6 rounded-none border border-product-border bg-product-surface-strong/80 p-4">
-				<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
-					Checklist
-				</p>
-				<ul className="mt-3 space-y-2 text-sm font-medium text-product-text">
-					{lesson.checklist.map((item) => (
-						<li key={item}>[ ] {item}</li>
-					))}
-				</ul>
-			</div>
-
-			<div className="mt-4 rounded-none border border-product-border bg-product-surface-strong/80 p-4">
-				<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
-					Output
-				</p>
-				<p className="mt-3 font-display text-2xl uppercase leading-none tracking-[0.05em] text-product-text">
-					{lesson.artifact.label}
-				</p>
-			</div>
-
-			<div className="mt-4 rounded-none border border-product-border bg-product-surface-strong/80 p-4">
-				<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
-					Next unlock
-				</p>
-				<p className="mt-3 font-mono text-sm uppercase tracking-[0.08em] text-product-text">
-					{nextLesson ? `${nextLesson.id} ${nextLesson.shortTitle}` : "Mission"}
-				</p>
+			<div className="space-y-3 p-4">
+				<div className="border border-product-border bg-product-surface-strong/90 p-3">
+					<p className="font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
+						Win condition
+					</p>
+					<p className="mt-3 font-mono text-sm uppercase tracking-[0.08em] text-product-text">
+						{lesson.objectiveTitle}
+					</p>
+					<p className="mt-3 text-sm font-medium leading-relaxed text-product-muted">
+						{lesson.helperText ?? lesson.winCondition}
+					</p>
+				</div>
+				<div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+					<div className="border border-product-border bg-product-surface p-3">
+						<p className="font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
+							Output
+						</p>
+						<p className="mt-3 font-display text-2xl uppercase leading-none tracking-[0.05em] text-product-text">
+							{lesson.artifact.label}
+						</p>
+					</div>
+					<div className="border border-product-border bg-product-surface p-3">
+						<p className="font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
+							Next unlock
+						</p>
+						<p className="mt-3 font-mono text-sm uppercase tracking-[0.08em] text-product-text">
+							{nextLesson ? `${nextLesson.id} ${nextLesson.shortTitle}` : "Mission"}
+						</p>
+					</div>
+				</div>
+				<div className="border border-product-border bg-product-surface-strong/90 p-3">
+					<div className="flex items-center justify-between gap-3">
+						<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+							Checklist
+						</p>
+						<div className="border border-product-border bg-product-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-product-text">
+							{completedCount}/{objectiveChecklistItems.length} ready
+						</div>
+					</div>
+					<div className="mt-3 space-y-2">
+						{objectiveChecklistItems.map((item, index) => (
+							<ChecklistRow
+								key={item.label}
+								label={item.label}
+								checked={item.checked}
+								onChange={(checked) => onObjectiveChecklistToggle(index, checked)}
+							/>
+						))}
+					</div>
+				</div>
 			</div>
 		</aside>
 	);
@@ -276,30 +347,58 @@ function CoachPanel({
 	];
 
 	return (
-		<aside className="rounded-none border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-xl">
-			<div className="border-b border-product-border px-5 py-4">
-				<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
-					Coach
-				</p>
+		<aside className="min-w-0 rounded-none border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-xl xl:h-full xl:min-h-0 xl:overflow-y-auto">
+			<div className="sticky top-0 z-10 border-b border-product-border bg-product-surface/95 px-5 py-4 backdrop-blur-lg">
+				<div className="flex items-center justify-between gap-3">
+					<div>
+						<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+							Coach
+						</p>
+						<p className="mt-1 text-sm font-medium text-product-muted">
+							Watch, reference, and examples
+						</p>
+					</div>
+					<div className="border border-product-border bg-product-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-product-text">
+						{activePanel}
+					</div>
+				</div>
 			</div>
 			<div>
 				{sections.map((section) => {
 					const isOpen = section.key === activePanel;
 					return (
-						<div key={section.key} className="border-b border-product-border last:border-b-0">
+						<div
+							key={section.key}
+							className={`border-b border-product-border last:border-b-0 ${
+								isOpen ? "bg-product-surface-strong/65" : ""
+							}`}
+						>
 							<button
 								type="button"
 								onClick={() => onPanelChange(section.key)}
-								className="flex w-full items-center justify-between px-5 py-4 text-left"
+								className="flex w-full items-center justify-between px-5 py-4 text-left transition-colors hover:bg-product-surface-strong/50"
 							>
-								<span className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-text">
-									{section.label}
-								</span>
+								<div className="flex items-center gap-3">
+									<span
+										className={`inline-block h-2.5 w-2.5 border ${
+											isOpen
+												? "border-product-accent bg-product-accent"
+												: "border-product-border bg-product-surface"
+										}`}
+									/>
+									<span className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-text">
+										{section.label}
+									</span>
+								</div>
 								<span className="font-mono text-[10px] uppercase tracking-[0.24em] text-product-muted">
 									{isOpen ? "open" : "closed"}
 								</span>
 							</button>
-							{isOpen ? <div className="px-5 pb-5">{section.content}</div> : null}
+							{isOpen ? (
+								<div className="border-t border-product-border/80 px-5 py-5">
+									{section.content}
+								</div>
+							) : null}
 						</div>
 					);
 				})}
@@ -312,6 +411,8 @@ export function LessonShellSplit({
 	lesson,
 	objectiveCollapsed,
 	onToggleObjective,
+	objectiveChecklistItems,
+	onObjectiveChecklistToggle,
 	coachVisible,
 	activeCoachPanel,
 	onCoachPanelChange,
@@ -321,20 +422,29 @@ export function LessonShellSplit({
 	footer,
 }: BaseLessonShellProps) {
 	return (
-		<div className="grid gap-4 xl:grid-cols-[minmax(0,320px)_minmax(0,1fr)_minmax(340px,380px)]">
+		<div className="grid gap-3 xl:h-full xl:min-h-0 xl:grid-cols-[minmax(0,270px)_minmax(0,1fr)_minmax(280px,320px)]">
 			<ObjectivePanel
 				lesson={lesson}
 				collapsed={objectiveCollapsed}
 				onToggle={onToggleObjective}
+				objectiveChecklistItems={objectiveChecklistItems}
+				onObjectiveChecklistToggle={onObjectiveChecklistToggle}
 			/>
-			<section className="rounded-none border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-xl">
-				<div className="border-b border-product-border px-5 py-4">
-					<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
-						Workbench - {lesson.id}
-					</p>
+			<section className="min-w-0 rounded-none border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-lg xl:flex xl:min-h-0 xl:flex-col">
+				<div className="sticky top-0 z-10 border-b border-product-border bg-product-surface/95 px-4 py-3 backdrop-blur-lg">
+					<div className="flex items-center justify-between gap-3">
+						<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+							Workbench - {lesson.id}
+						</p>
+						<div className="border border-product-border bg-product-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-product-text">
+							{lesson.shortTitle}
+						</div>
+					</div>
 				</div>
-				<div className="px-5 py-5">{children}</div>
-				<div className="border-t border-product-border bg-product-surface-strong/70 px-5 py-4">
+				<div className="min-w-0 px-4 py-4 xl:min-h-0 xl:flex-1 xl:overflow-y-auto">
+					{children}
+				</div>
+				<div className="shrink-0 border-t border-product-border bg-product-surface-strong/70 px-4 py-3">
 					{footer}
 				</div>
 			</section>
@@ -346,7 +456,7 @@ export function LessonShellSplit({
 					pinnedArtifacts={pinnedArtifacts}
 				/>
 			) : (
-				<div className="rounded-none border border-dashed border-product-border bg-product-surface/60 p-5 text-sm font-medium leading-relaxed text-product-muted shadow-panel backdrop-blur-xl">
+				<div className="rounded-none border border-dashed border-product-border bg-product-surface/60 p-4 text-sm font-medium leading-relaxed text-product-muted shadow-panel backdrop-blur-lg xl:min-h-0 xl:overflow-y-auto">
 					Coach hidden. Use the HUD toggle to reopen the lesson video and reference
 					panels.
 				</div>
@@ -359,6 +469,8 @@ export function LessonShellFocus({
 	lesson,
 	objectiveCollapsed,
 	onToggleObjective,
+	objectiveChecklistItems,
+	onObjectiveChecklistToggle,
 	coachVisible,
 	activeCoachPanel,
 	onCoachPanelChange,
@@ -368,28 +480,37 @@ export function LessonShellFocus({
 	footer,
 }: BaseLessonShellProps) {
 	return (
-		<div className="relative space-y-4">
-			<div className="grid gap-4 xl:grid-cols-[minmax(0,128px)_minmax(0,1fr)]">
+		<div className="relative space-y-4 xl:h-full xl:min-h-0 xl:space-y-0">
+			<div className="grid gap-3 xl:h-full xl:min-h-0 xl:grid-cols-[88px_minmax(0,1fr)]">
 				<ObjectivePanel
 					lesson={lesson}
 					collapsed={objectiveCollapsed}
 					onToggle={onToggleObjective}
+					objectiveChecklistItems={objectiveChecklistItems}
+					onObjectiveChecklistToggle={onObjectiveChecklistToggle}
 				/>
-				<section className="rounded-none border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-xl">
-					<div className="border-b border-product-border px-5 py-4">
-						<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
-							Focus workspace - {lesson.id}
-						</p>
+				<section className="min-w-0 rounded-none border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-lg xl:flex xl:min-h-0 xl:flex-col">
+					<div className="sticky top-0 z-10 border-b border-product-border bg-product-surface/95 px-4 py-3 backdrop-blur-lg">
+						<div className="flex items-center justify-between gap-3">
+							<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+								Focus workspace - {lesson.id}
+							</p>
+							<div className="border border-product-border bg-product-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-product-text">
+								Focus mode
+							</div>
+						</div>
 					</div>
-					<div className="px-5 py-5 xl:pr-[360px]">{children}</div>
-					<div className="border-t border-product-border bg-product-surface-strong/70 px-5 py-4">
+					<div className="min-w-0 px-4 py-4 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:pr-[300px]">
+						{children}
+					</div>
+					<div className="shrink-0 border-t border-product-border bg-product-surface-strong/70 px-4 py-3">
 						{footer}
 					</div>
 				</section>
 			</div>
 
 			{coachVisible ? (
-				<div className="xl:pointer-events-none xl:absolute xl:right-6 xl:top-6 xl:w-[320px]">
+				<div className="xl:pointer-events-none xl:absolute xl:right-4 xl:top-4 xl:max-h-[calc(100%-1rem)] xl:w-[284px]">
 					<div className="xl:pointer-events-auto">
 						<CoachPanel
 							coachContent={coachContent}

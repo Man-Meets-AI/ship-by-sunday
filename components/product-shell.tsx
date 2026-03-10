@@ -9,6 +9,7 @@ import { useConvexAuth, useQuery } from "convex/react";
 import { getLesson } from "@/app/lessonRegistry";
 import { api } from "@/convex/_generated/api";
 import { ProductThemeProvider, useProductTheme } from "@/components/product-theme-provider";
+import { SkillRail } from "@/components/skill-rail";
 
 const navItems = [
 	{ href: "/mission", label: "Mission" },
@@ -48,6 +49,7 @@ type ProductShellProps = {
 	onLayoutModeChange?: (mode: LayoutMode) => void;
 	coachVisible?: boolean;
 	onCoachToggle?: () => void;
+	viewportMode?: "document" | "app";
 };
 
 function isBlockActive(block: MissionState["blocks"][number]) {
@@ -67,22 +69,6 @@ function blockStatusClass(status: "completed" | "active" | "locked") {
 	}
 }
 
-function lessonRailClass(isCurrent: boolean, status: string) {
-	if (isCurrent) {
-		return "border-product-accent bg-product-chip text-product-accent shadow-panel";
-	}
-
-	if (status === "completed") {
-		return "border-product-border bg-product-surface text-product-text";
-	}
-
-	if (status === "in_progress" || status === "available") {
-		return "border-product-border bg-product-surface-alt/80 text-product-text";
-	}
-
-	return "border-product-border/60 bg-product-surface-strong/70 text-product-muted";
-}
-
 function ShellInner({
 	children,
 	title,
@@ -93,6 +79,7 @@ function ShellInner({
 	onLayoutModeChange,
 	coachVisible,
 	onCoachToggle,
+	viewportMode = "document",
 }: ProductShellProps) {
 	const pathname = usePathname();
 	const { theme, toggleTheme } = useProductTheme();
@@ -149,28 +136,38 @@ function ShellInner({
 			  }
 			: undefined;
 
+	const shellClassName =
+		viewportMode === "app"
+			? "min-h-screen bg-product-bg text-product-text xl:h-dvh xl:overflow-hidden"
+			: "min-h-screen bg-product-bg text-product-text";
+
+	const shellInnerClassName =
+		viewportMode === "app"
+			? "mx-auto flex min-h-screen max-w-[1920px] flex-col gap-3 px-2 py-2 sm:px-3 sm:py-3 xl:h-full xl:min-h-0"
+			: "mx-auto flex min-h-screen max-w-[1920px] flex-col gap-3 px-2 py-2 sm:px-3 sm:py-3";
+
 	return (
-		<main className="min-h-screen bg-product-bg text-product-text" style={backgroundStyle}>
-			<div className="mx-auto flex min-h-screen max-w-[1728px] flex-col gap-4 px-3 py-3 sm:px-4 sm:py-4">
-				<header className="overflow-hidden rounded-none border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-xl">
-					<div className="flex flex-col gap-4 px-4 py-4 lg:px-6">
-						<div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-							<div className="space-y-4">
-								<div className="flex flex-wrap items-center gap-4">
+		<main className={shellClassName} style={backgroundStyle}>
+			<div className={shellInnerClassName}>
+				<header className="shrink-0 overflow-hidden rounded-none border border-product-border bg-product-surface/76 shadow-panel backdrop-blur-lg">
+					<div className="flex flex-col gap-2 px-3 py-2 lg:px-5">
+						<div className="flex flex-col gap-2 xl:flex-row xl:items-start xl:justify-between">
+							<div className="space-y-2">
+								<div className="flex flex-wrap items-center gap-3">
 									<Link
 										href="/mission"
-										className="font-display text-3xl uppercase tracking-[0.08em] text-product-text sm:text-4xl"
+										className="font-display text-[1.55rem] uppercase tracking-[0.08em] text-product-text sm:text-[1.9rem]"
 									>
 										Ship by Sunday
 									</Link>
-									<nav className="flex flex-wrap gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-product-muted sm:text-xs">
+									<nav className="flex flex-wrap gap-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-product-muted sm:text-[11px]">
 										{navItems.map((item) => {
 											const isActive = pathname === item.href;
 											return (
 												<Link
 													key={item.href}
 													href={item.href}
-													className={`rounded-none border px-3 py-2 transition-colors ${
+													className={`rounded-none border px-2.5 py-1.5 transition-colors ${
 														isActive
 															? "border-product-accent bg-product-chip text-product-accent"
 															: "border-product-border bg-product-surface-alt/70 text-product-text hover:bg-product-surface"
@@ -183,17 +180,17 @@ function ShellInner({
 									</nav>
 								</div>
 
-									{mission ? (
-										<div className="flex flex-wrap items-start gap-2 font-mono text-[11px] uppercase tracking-[0.18em] sm:text-xs">
+								{mission ? (
+									<div className="flex flex-wrap items-start gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] sm:text-[11px]">
 											{mission.blocks.map((block) => {
 												const status = (blockStatuses.get(block.id) ??
 													"locked") as "completed" | "active" | "locked";
 												return (
 													<div
 														key={block.id}
-													className={`rounded-none border px-3 py-2 ${blockStatusClass(status)}`}
+													className={`rounded-none border px-2.5 py-1.5 ${blockStatusClass(status)}`}
 												>
-													<div className="flex items-center gap-2">
+													<div className="flex items-center gap-1.5">
 														<span>[ {block.label} ]</span>
 														<span className="text-[10px] tracking-[0.24em] text-current/80">
 															{status}
@@ -206,12 +203,12 @@ function ShellInner({
 								) : null}
 							</div>
 
-							<div className="flex flex-col gap-4 xl:items-end">
-								<div className="flex flex-wrap items-center gap-2">
+							<div className="flex flex-col gap-2 xl:items-end">
+								<div className="flex flex-wrap items-center gap-1.5">
 									<button
 										type="button"
 										onClick={toggleTheme}
-										className="rounded-none border border-product-border bg-product-surface-alt/80 px-3 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-product-text transition-colors hover:bg-product-surface"
+										className="rounded-none border border-product-border bg-product-surface-alt/80 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-product-text transition-colors hover:bg-product-surface"
 									>
 										{theme === "dark" ? "Light mode" : "Dark mode"}
 									</button>
@@ -224,7 +221,7 @@ function ShellInner({
 														key={mode}
 														type="button"
 														onClick={() => onLayoutModeChange(mode)}
-														className={`rounded-none px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.2em] transition-colors sm:px-4 ${
+														className={`rounded-none px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] transition-colors sm:px-3 ${
 															isActive
 																? "bg-product-chip text-product-accent"
 																: "text-product-muted hover:text-product-text"
@@ -240,7 +237,7 @@ function ShellInner({
 										<button
 											type="button"
 											onClick={onCoachToggle}
-											className={`rounded-none border px-3 py-2 font-mono text-[11px] uppercase tracking-[0.2em] transition-colors ${
+											className={`rounded-none border px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] transition-colors ${
 												coachVisible
 													? "border-product-accent bg-product-chip text-product-accent"
 													: "border-product-border bg-product-surface-alt/80 text-product-muted hover:text-product-text"
@@ -249,27 +246,26 @@ function ShellInner({
 											Coach
 										</button>
 									) : null}
+									<div className="border-l border-product-border/70 pl-2 text-right">
+										<p className="font-mono text-[9px] uppercase tracking-[0.22em] text-product-muted">
+											Progress
+										</p>
+										<p className="mt-0.5 font-display text-[1.4rem] uppercase leading-none tracking-[0.08em] text-product-text sm:text-[1.65rem]">
+											{mission ? `${mission.progressCount}/${mission.totalLessons}` : "--/--"}
+										</p>
+									</div>
 									<UserButton />
-								</div>
-
-								<div className="text-right">
-									<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
-										Progress
-									</p>
-									<p className="mt-1 font-display text-4xl uppercase leading-none tracking-[0.08em] text-product-text sm:text-5xl">
-										{mission ? `${mission.progressCount}/${mission.totalLessons}` : "--/--"}
-									</p>
 								</div>
 							</div>
 						</div>
 
 						{title ? (
-							<div className="rounded-none border border-product-border bg-product-surface-strong/80 px-4 py-4">
-								<p className="font-display text-3xl uppercase tracking-[0.08em] text-product-text sm:text-4xl">
+							<div className="rounded-none border border-product-border bg-product-surface-strong/78 px-4 py-2.5">
+								<p className="font-display text-[1.55rem] uppercase tracking-[0.08em] text-product-text sm:text-[1.85rem]">
 									{title}
 								</p>
 								{subtitle ? (
-									<p className="mt-2 max-w-3xl text-sm font-medium leading-relaxed text-product-muted">
+									<p className="mt-1 max-w-4xl text-[13px] font-medium leading-relaxed text-product-muted">
 										{subtitle}
 									</p>
 								) : null}
@@ -278,64 +274,17 @@ function ShellInner({
 					</div>
 				</header>
 
-				<div className="flex-1">{children}</div>
+				<div className="flex min-h-0 flex-1 flex-col">{children}</div>
 
 				{activeBlock ? (
-					<footer className="overflow-hidden rounded-none border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-xl">
-						<div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between lg:px-6">
-							<div>
-								<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
-									Skills
-								</p>
-								<p className="mt-1 text-sm font-medium text-product-muted">
-									{activeBlock.label} sprint path
-								</p>
-							</div>
-							<div className="flex gap-2 overflow-x-auto pb-1">
-								{activeBlock.lessons.map((lesson) => {
-									const isCurrent = lesson.id === currentLessonId;
-									const isLocked = lesson.status === "locked";
-									const railClass = `min-w-[136px] rounded-none border px-3 py-3 ${lessonRailClass(
-										isCurrent,
-										lesson.status,
-									)} ${isLocked ? "cursor-not-allowed" : "transition-transform hover:-translate-y-0.5"}`;
-									const railContent = (
-										<>
-											<p className="font-mono text-[10px] uppercase tracking-[0.22em] text-current/70">
-												{lesson.id}
-											</p>
-											<p className="mt-2 font-display text-xl uppercase leading-none tracking-[0.05em]">
-												{lesson.shortTitle}
-											</p>
-											<p className="mt-2 text-xs font-medium text-current/75">
-												{lesson.status.replace("_", " ")}
-											</p>
-										</>
-									);
-
-									if (isLocked) {
-										return (
-											<div
-												key={lesson.id}
-												aria-disabled="true"
-												className={railClass}
-											>
-												{railContent}
-											</div>
-										);
-									}
-
-									return (
-										<Link
-											key={lesson.id}
-											href={`/lesson/${lesson.id}`}
-											className={railClass}
-										>
-											{railContent}
-										</Link>
-									);
-								})}
-							</div>
+					<footer className="shrink-0 overflow-hidden rounded-none border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-lg">
+						<div className="px-3 py-3 lg:px-5">
+							<SkillRail
+								label="Skills"
+								subtitle={`${activeBlock.label} sprint path`}
+								lessons={activeBlock.lessons}
+								currentLessonId={currentLessonId}
+							/>
 						</div>
 					</footer>
 				) : null}

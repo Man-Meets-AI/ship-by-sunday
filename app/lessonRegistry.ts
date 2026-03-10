@@ -28,6 +28,11 @@ export type UploadFieldValue = {
 	previewUrl?: string;
 };
 
+export type ChecklistItemValue = {
+	label: string;
+	checked: boolean;
+};
+
 export type PanelDefaultState = {
 	objective: "open" | "collapsed";
 	coach: "docked" | "minimized" | "pip";
@@ -1006,13 +1011,19 @@ export const lessonRegistry: LessonConfig[] = [
 		winCondition: "The local environment is running and confirmed.",
 		panelDefaults: focusPanelDefaults,
 		pinnedArtifacts: ["agent_build_brief"],
-		workbenchFields: [
-			{
-				id: "environment_ready",
-				label: "Environment ready",
-				kind: "checklist",
-				required: true,
-			},
+			workbenchFields: [
+				{
+					id: "environment_ready",
+					label: "Environment ready",
+					kind: "checklist",
+					required: true,
+					options: [
+						"Open the starter or repo",
+						"Install dependencies",
+						"Run the app locally",
+						"Capture confirmation",
+					],
+				},
 			{
 				id: "environment_notes",
 				label: "Environment notes",
@@ -1096,14 +1107,19 @@ export const lessonRegistry: LessonConfig[] = [
 		winCondition: "The core flow works locally from start to finish.",
 		panelDefaults: focusPanelDefaults,
 		pinnedArtifacts: ["core_flow_image", "agent_build_brief"],
-		workbenchFields: [
-			{
-				id: "core_flow_status",
-				label: "Core flow working locally",
-				kind: "checklist",
-				required: true,
-			},
-		],
+			workbenchFields: [
+				{
+					id: "core_flow_status",
+					label: "Core flow working locally",
+					kind: "checklist",
+					required: true,
+					options: [
+						"Implement the core path",
+						"Verify each step works",
+						"Mark the flow as working locally",
+					],
+				},
+			],
 	},
 	{
 		id: "3.5",
@@ -1238,13 +1254,18 @@ export const lessonRegistry: LessonConfig[] = [
 		winCondition: "The ship checklist is complete.",
 		panelDefaults: splitPanelDefaults,
 		pinnedArtifacts: ["build_summary"],
-		workbenchFields: [
-			{
-				id: "ship_ready_checklist",
-				label: "Ship Checklist",
-				kind: "checklist",
-				required: true,
-			},
+			workbenchFields: [
+				{
+					id: "ship_ready_checklist",
+					label: "Ship Checklist",
+					kind: "checklist",
+					required: true,
+					options: [
+						"Remove nonessential work",
+						"Confirm one clear path",
+						"Prepare to deploy",
+					],
+				},
 			{
 				id: "last_cut",
 				label: "Any last thing to cut?",
@@ -1499,6 +1520,10 @@ export function getNextLesson(id: string): LessonConfig | undefined {
 export function getPreviousLesson(id: string): LessonConfig | undefined {
 	const lesson = getLesson(id);
 	return lesson?.prevLessonId ? getLesson(lesson.prevLessonId) : undefined;
+}
+
+export function getLessonHref(id: string): string {
+	return id === "0.0" ? "/mission" : `/lesson/${id}`;
 }
 
 export function getProgressTotal(): number {

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 
 import {
+	type ChecklistItemValue,
 	type LessonConfig,
 	type UploadFieldValue,
 	type WorkbenchField,
@@ -11,6 +12,7 @@ import {
 import type { LessonContent } from "@/content/lessons/types";
 import { api } from "@/convex/_generated/api";
 import type { PinnedArtifact } from "@/components/lesson-shells";
+import { isChecklistItemArray } from "@/lib/course/registry";
 
 function toLineList(value: unknown) {
 	if (!Array.isArray(value)) {
@@ -67,7 +69,64 @@ function formatArtifactValue(value: unknown) {
 		return upload.fileName ?? "Uploaded file";
 	}
 
+	if (isChecklistItemArray(value)) {
+		return value
+			.filter((item) => item.checked)
+			.map((item) => item.label)
+			.join(", ");
+	}
+
 	return Array.isArray(value) ? JSON.stringify(value) : String(value);
+}
+
+function CheckboxRow({
+	label,
+	checked,
+	onChange,
+}: {
+	label: string;
+	checked: boolean;
+	onChange: (checked: boolean) => void;
+}) {
+	return (
+		<label className="flex items-center gap-3 rounded-none border border-product-border bg-product-surface px-4 py-3">
+			<input
+				type="checkbox"
+				checked={checked}
+				onChange={(event) => onChange(event.target.checked)}
+				className="size-5 rounded-none border-product-border accent-[rgb(var(--product-accent))]"
+			/>
+			<span className="text-sm font-medium text-product-text">{label}</span>
+		</label>
+	);
+}
+
+function normalizeChecklistValue(
+	value: unknown,
+	options: string[],
+): ChecklistItemValue[] {
+	if (isChecklistItemArray(value)) {
+		return options.map((option) => {
+			const existing = value.find((item) => item.label === option);
+			return {
+				label: option,
+				checked: existing?.checked ?? false,
+			};
+		});
+	}
+
+	if (Array.isArray(value) && value.every((item) => typeof item === "string")) {
+		const selected = new Set(value as string[]);
+		return options.map((option) => ({
+			label: option,
+			checked: selected.has(option),
+		}));
+	}
+
+	return options.map((option) => ({
+		label: option,
+		checked: false,
+	}));
 }
 
 function UploadFieldControl({
@@ -191,16 +250,18 @@ function WorkbenchCard({
 	eyebrow?: string;
 }) {
 	return (
-		<div className="rounded-none border border-product-border bg-product-surface-strong/80 p-4">
-			{eyebrow ? (
-				<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
-					{eyebrow}
+		<div className="rounded-none border border-product-border bg-product-surface-strong/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]">
+			<div className="border-b border-product-border/80 px-4 py-3">
+				{eyebrow ? (
+					<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+						{eyebrow}
+					</p>
+				) : null}
+				<p className={`${eyebrow ? "mt-2" : ""} font-display text-2xl uppercase tracking-[0.05em] text-product-text`}>
+					{title}
 				</p>
-			) : null}
-			<p className="mt-2 font-display text-2xl uppercase tracking-[0.05em] text-product-text">
-				{title}
-			</p>
-			<div className="mt-4">{children}</div>
+			</div>
+			<div className="p-4">{children}</div>
 		</div>
 	);
 }
@@ -218,9 +279,17 @@ function DetailList({
 
 	return (
 		<WorkbenchCard title={label} eyebrow="Lesson guide">
-			<div className="space-y-2 text-sm font-medium leading-relaxed text-product-muted">
-				{items.map((item) => (
-					<p key={item}>[ ] {item}</p>
+			<div className="space-y-2">
+				{items.map((item, index) => (
+					<div
+						key={item}
+						className="flex items-start gap-3 border border-product-border bg-product-surface px-3 py-3 text-sm font-medium leading-relaxed text-product-muted"
+					>
+						<div className="mt-0.5 border border-product-border bg-product-surface-strong px-2 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-product-text">
+							{index + 1}
+						</div>
+						<p className="min-w-0 flex-1">{item}</p>
+					</div>
 				))}
 			</div>
 		</WorkbenchCard>
@@ -345,17 +414,11 @@ function FieldControl({
 
 	if (field.kind === "toggle") {
 		return (
-			<label className="flex items-center justify-between rounded-none border border-product-border bg-product-surface px-4 py-3">
-				<span className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-text">
-					{field.label}
-				</span>
-				<input
-					type="checkbox"
-					checked={Boolean(value)}
-					onChange={(event) => onChange(event.target.checked)}
-					className="size-5 accent-[rgb(var(--product-accent))]"
-				/>
-			</label>
+			<CheckboxRow
+				label={field.label}
+				checked={Boolean(value)}
+				onChange={onChange}
+			/>
 		);
 	}
 
@@ -382,6 +445,34 @@ function FieldControl({
 	}
 
 	if (field.kind === "checklist" || field.kind === "board") {
+		if (field.kind === "checklist") {
+			const options = field.options ?? [];
+			const checklistItems = normalizeChecklistValue(value, options);
+
+			return (
+				<div className="block">
+					<span className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+						{field.label}
+					</span>
+					<div className="mt-2 space-y-2">
+						{checklistItems.map((item, index) => (
+							<CheckboxRow
+								key={item.label}
+								label={item.label}
+								checked={item.checked}
+								onChange={(checked) => {
+									const nextItems = checklistItems.map((current, currentIndex) =>
+										currentIndex === index ? { ...current, checked } : current,
+									);
+									onChange(nextItems);
+								}}
+							/>
+						))}
+					</div>
+				</div>
+			);
+		}
+
 		return (
 			<label className="block">
 				<span className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
@@ -477,18 +568,28 @@ export function WorkbenchRenderer({
 }) {
 	const fields = lesson.workbenchFields ?? [];
 	const titleBlock = (
-		<div>
-			<h1 className="font-display text-4xl uppercase leading-none tracking-[0.06em] text-product-text sm:text-5xl">
-				{lesson.title}
-			</h1>
-			{lessonContent.lessonMeta.runtimeLabel ? (
-				<p className="mt-4 font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
-					Runtime {lessonContent.lessonMeta.runtimeLabel}
+		<div className="border border-product-border bg-product-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
+			<div className="flex flex-wrap items-center gap-2 border-b border-product-border px-4 py-3">
+				<div className="border border-product-border bg-product-surface-strong px-2 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-product-text">
+					Lesson {lesson.id}
+				</div>
+				<div className="border border-product-border bg-product-chip px-2 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-product-text">
+					{lesson.artifact.label}
+				</div>
+				{lessonContent.lessonMeta.runtimeLabel ? (
+					<div className="border border-product-border bg-product-surface-alt/80 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
+						{lessonContent.lessonMeta.runtimeLabel}
+					</div>
+				) : null}
+			</div>
+			<div className="space-y-4 px-4 py-5">
+				<h1 className="font-display text-4xl uppercase leading-none tracking-[0.06em] text-product-text sm:text-5xl">
+					{lesson.title}
+				</h1>
+				<p className="max-w-4xl text-sm font-medium leading-relaxed text-product-muted">
+					{lessonContent.intro}
 				</p>
-			) : null}
-			<p className="mt-4 max-w-3xl text-sm font-medium leading-relaxed text-product-muted">
-				{lessonContent.intro}
-			</p>
+			</div>
 		</div>
 	);
 	const metaCards = (

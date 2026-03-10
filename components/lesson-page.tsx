@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 
-import type { LessonConfig } from "@/app/lessonRegistry";
+import {
+	getLessonHref,
+	type ChecklistItemValue,
+	type LessonConfig,
+} from "@/app/lessonRegistry";
 import type { LessonContent } from "@/content/lessons/types";
 import { api } from "@/convex/_generated/api";
 import { WorkbenchRenderer } from "@/components/lesson-workbench";
@@ -16,6 +20,9 @@ import {
 } from "@/components/lesson-shells";
 import { ProductShell } from "@/components/product-shell";
 import { ViewerGate } from "@/components/viewer-gate";
+import { isChecklistItemArray } from "@/lib/course/registry";
+
+const OBJECTIVE_CHECKLIST_FIELD_ID = "__objectiveChecklist";
 
 type LessonChromeState = {
 	layoutMode: "split" | "focus";
@@ -59,6 +66,26 @@ function getDefaultChromeState(lesson: LessonConfig): LessonChromeState {
 
 function storageKey(lessonId: string) {
 	return `sbs:lesson-ui:${lessonId}`;
+}
+
+function normalizeObjectiveChecklist(
+	checklist: string[],
+	value: unknown,
+): ChecklistItemValue[] {
+	if (isChecklistItemArray(value)) {
+		return checklist.map((item) => {
+			const existing = value.find((entry) => entry.label === item);
+			return {
+				label: item,
+				checked: existing?.checked ?? false,
+			};
+		});
+	}
+
+	return checklist.map((item) => ({
+		label: item,
+		checked: false,
+	}));
 }
 
 function isChromeState(value: unknown): value is LessonChromeState {
@@ -260,11 +287,11 @@ export function LessonPage({
 	}
 
 	const { lesson, pinnedArtifacts } = lessonState;
-	const previousHref = lesson.prevLessonId
-		? lesson.prevLessonId === "0.0"
-			? "/mission"
-			: `/lesson/${lesson.prevLessonId}`
-		: null;
+	const previousHref = lesson.prevLessonId ? getLessonHref(lesson.prevLessonId) : null;
+	const objectiveChecklistItems = normalizeObjectiveChecklist(
+		lesson.checklist,
+		fieldValues[OBJECTIVE_CHECKLIST_FIELD_ID],
+	);
 
 	const setValue = (fieldId: string, value: unknown) => {
 		setFieldValues((current) => ({
@@ -344,6 +371,7 @@ export function LessonPage({
 	return (
 		<ProductShell
 			currentLessonId={lessonId}
+			viewportMode="app"
 			layoutMode={chromeState.layoutMode}
 			onLayoutModeChange={(layoutMode) =>
 				setChromeState((current) =>
@@ -390,6 +418,13 @@ export function LessonPage({
 									: current,
 							)
 						}
+						objectiveChecklistItems={objectiveChecklistItems}
+						onObjectiveChecklistToggle={(index, checked) => {
+							const nextItems = objectiveChecklistItems.map((item, itemIndex) =>
+								itemIndex === index ? { ...item, checked } : item,
+							);
+							setValue(OBJECTIVE_CHECKLIST_FIELD_ID, nextItems);
+						}}
 						pinnedArtifacts={pinnedArtifacts}
 						coachContent={lessonContent.coach}
 						footer={footer}
@@ -423,6 +458,13 @@ export function LessonPage({
 									: current,
 							)
 						}
+						objectiveChecklistItems={objectiveChecklistItems}
+						onObjectiveChecklistToggle={(index, checked) => {
+							const nextItems = objectiveChecklistItems.map((item, itemIndex) =>
+								itemIndex === index ? { ...item, checked } : item,
+							);
+							setValue(OBJECTIVE_CHECKLIST_FIELD_ID, nextItems);
+						}}
 						pinnedArtifacts={pinnedArtifacts}
 						coachContent={lessonContent.coach}
 						footer={footer}

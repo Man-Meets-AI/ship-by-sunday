@@ -4,6 +4,7 @@ import {
 	type ArtifactType,
 	type BlockConfig,
 	type BlockId,
+	type ChecklistItemValue,
 	type LessonConfig,
 	type UploadFieldValue,
 	type WorkbenchField,
@@ -31,6 +32,7 @@ const LESSONS_BY_ARTIFACT_KEY = new Map(
 	lessonRegistry.map((lesson) => [lesson.artifact.key, lesson]),
 );
 const BLOCKS_BY_ID = new Map(blocks.map((block) => [block.id, block]));
+export const PRIVATE_FIELD_PREFIX = "__";
 
 export type PersistedFieldValue =
 	| boolean
@@ -38,6 +40,7 @@ export type PersistedFieldValue =
 	| string
 	| string[]
 	| string[][]
+	| ChecklistItemValue[]
 	| UploadFieldValue
 	| Record<string, unknown>
 	| null;
@@ -51,6 +54,20 @@ export function isUploadFieldValue(value: unknown): value is UploadFieldValue {
 		!Array.isArray(value) &&
 		"kind" in value &&
 		(value as { kind?: string }).kind === "upload"
+	);
+}
+
+export function isChecklistItemArray(value: unknown): value is ChecklistItemValue[] {
+	return (
+		Array.isArray(value) &&
+		value.every(
+			(item) =>
+				Boolean(item) &&
+				typeof item === "object" &&
+				!Array.isArray(item) &&
+				typeof (item as { label?: unknown }).label === "string" &&
+				typeof (item as { checked?: unknown }).checked === "boolean",
+		)
 	);
 }
 
@@ -110,6 +127,10 @@ export function getRequiredFields(lesson: LessonConfig) {
 }
 
 function isFilled(value: PersistedFieldValue | undefined) {
+	if (isChecklistItemArray(value)) {
+		return value.some((item) => item.checked);
+	}
+
 	if (typeof value === "string") {
 		return value.trim().length > 0;
 	}
@@ -137,9 +158,19 @@ export function validateRequiredFields(
 	lesson: LessonConfig,
 	fieldValues: PersistedFieldValues,
 ) {
-	return getRequiredFields(lesson).every((field) =>
-		isFilled(fieldValues[field.id]),
-	);
+	return getRequiredFields(lesson).every((field) => {
+		const value = fieldValues[field.id];
+
+		if (field.kind === "checklist") {
+			return (
+				isChecklistItemArray(value) &&
+				value.length > 0 &&
+				value.every((item) => item.checked)
+			);
+		}
+
+		return isFilled(value);
+	});
 }
 
 export function normalizeFieldValues(
@@ -187,6 +218,6 @@ export function buildArtifactPreview(
 		artifactType: lesson.artifact.type as ArtifactType,
 		lessonId: lesson.id,
 		lessonTitle: lesson.title,
-		fields: nonEmptyEntries,
+		fields: nonEmptyEntries.filter(([fieldId]) => !fieldId.startsWith(PRIVATE_FIELD_PREFIX)),
 	};
 }

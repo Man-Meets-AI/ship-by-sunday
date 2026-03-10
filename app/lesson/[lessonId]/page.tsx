@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { getLessonContent } from "@/content/lessons";
 import { LessonPage } from "@/components/lesson-page";
@@ -9,6 +9,9 @@ export default async function Page({
 	params: Promise<{ lessonId: string }>;
 }) {
 	const { lessonId } = await params;
+	if (lessonId === "0.0") {
+		redirect("/mission");
+	}
 	const lessonContent = getLessonContent(lessonId);
 
 	if (!lessonContent) {
