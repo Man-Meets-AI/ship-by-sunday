@@ -7,4 +7,5 @@ marketing-mobile.png
 marketing-mobile-final.png
 
 .env.local
+.env.production
 *.tsbuildinfo

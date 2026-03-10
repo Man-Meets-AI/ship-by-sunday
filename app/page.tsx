@@ -1,4 +1,6 @@
 import Image from "next/image";
+import Link from "next/link";
+import { CheckoutButton } from "@/components/checkout-button";
 import FAQAccordion from "./faq-accordion";
 
 const proofImage = "/founder-proof.jpg";
@@ -151,6 +153,15 @@ export default function Page() {
       <div className="mx-auto flex min-h-screen max-w-[1280px] flex-col gap-4 px-3 py-3 sm:px-5 sm:py-5">
         <section className="border border-line bg-white px-4 py-4 shadow-card sm:px-6 sm:py-5">
           <div className="mx-auto flex max-w-5xl flex-col items-center text-center">
+            <div className="mb-4 flex w-full justify-end">
+              <Link
+                href="/sign-in"
+                className="inline-flex border border-line bg-white px-4 py-2 font-display text-2xl uppercase tracking-[0.04em] text-ink transition-transform duration-150 hover:-translate-y-1"
+              >
+                Log in
+              </Link>
+            </div>
+
             <div className="mb-5 flex w-full items-center justify-between gap-4 text-[11px] font-bold uppercase tracking-[0.26em] text-ink/65 sm:text-xs">
               <span>One weekend</span>
               <span className="font-display text-2xl tracking-[0.08em] text-ink">
@@ -173,12 +184,10 @@ export default function Page() {
             </p>
 
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
-              <a
-                href="#pricing"
+              <CheckoutButton
+                label="Get instant access"
                 className="inline-flex min-w-full items-center justify-center border border-line bg-ink px-6 py-4 font-display text-[2rem] uppercase tracking-[0.04em] text-paper transition-transform duration-150 hover:-translate-y-1 sm:min-w-72 sm:px-8 sm:text-3xl"
-              >
-                Get instant access
-              </a>
+              />
               <a
                 href="#system"
                 className="inline-flex min-w-full items-center justify-center border border-line bg-white px-6 py-4 font-display text-[2rem] uppercase tracking-[0.04em] text-ink transition-transform duration-150 hover:-translate-y-1 sm:min-w-72 sm:px-8 sm:text-3xl"
@@ -441,7 +450,7 @@ export default function Page() {
               circling unfinished ideas and ship a real v1 with AI.
             </p>
             <div className="mt-8 text-6xl font-semibold tracking-[-0.05em] sm:text-7xl">
-              $499
+              $500
             </div>
             <p className="mt-4 max-w-sm text-sm font-semibold uppercase tracking-[0.1em] text-paper/80">
               Immediate access. No subscription. Lifetime access.
@@ -468,15 +477,13 @@ export default function Page() {
             </div>
 
             <div className="mt-6 text-6xl font-semibold tracking-[-0.04em]">
-              $499
+              $500
             </div>
 
-            <a
-              href="#pricing"
+            <CheckoutButton
+              label="Get instant access"
               className="mt-6 inline-flex items-center justify-center border border-line bg-ink px-6 py-4 font-display text-[2rem] uppercase tracking-[0.04em] text-paper transition-transform duration-150 hover:-translate-y-1 sm:text-3xl"
-            >
-              Get instant access
-            </a>
+            />
 
             <p className="mt-6 max-w-lg text-sm font-semibold uppercase leading-relaxed tracking-[0.08em] text-ink/70">
               Complete the CEO Block within 14 days. If you do not leave with a

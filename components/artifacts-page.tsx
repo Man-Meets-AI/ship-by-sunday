@@ -1,14 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useQuery } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
 
 import { api } from "@/convex/_generated/api";
 import { ProductShell } from "@/components/product-shell";
 import { ViewerGate } from "@/components/viewer-gate";
 
 export function ArtifactsPage() {
-	const artifacts = useQuery(api.course.listArtifacts) as
+	const { isAuthenticated } = useConvexAuth();
+	const artifacts = useQuery(
+		api.course.listArtifacts,
+		isAuthenticated ? {} : "skip",
+	) as
 		| Array<{
 				lessonId: string;
 				artifactLabel: string;

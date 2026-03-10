@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useQuery } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
 
 import { api } from "@/convex/_generated/api";
 import { ProductShell } from "@/components/product-shell";
@@ -21,7 +21,11 @@ function statusClasses(status: "available" | "completed" | "in_progress" | "lock
 }
 
 export function MissionPage() {
-	const mission = useQuery(api.course.getMissionState) as
+	const { isAuthenticated } = useConvexAuth();
+	const mission = useQuery(
+		api.course.getMissionState,
+		isAuthenticated ? {} : "skip",
+	) as
 		| {
 				progressCount: number;
 				totalLessons: number;

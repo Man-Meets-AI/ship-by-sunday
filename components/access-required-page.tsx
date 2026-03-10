@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { useQuery } from "convex/react";
 
 import { api } from "@/convex/_generated/api";
+import { CheckoutButton } from "@/components/checkout-button";
 import { ProductShell } from "@/components/product-shell";
 
 export function AccessRequiredPage() {
@@ -53,17 +54,15 @@ export function AccessRequiredPage() {
 				) : null}
 
 				<div className="mt-6 flex flex-wrap gap-3">
+					<CheckoutButton
+						label="Buy access"
+						className="inline-flex border border-line bg-ink px-4 py-3 font-display text-2xl uppercase tracking-[0.04em] text-paper"
+					/>
 					<Link
 						href="/"
-						className="inline-flex border border-line bg-ink px-4 py-3 font-display text-2xl uppercase tracking-[0.04em] text-paper"
-					>
-						Back home
-					</Link>
-					<Link
-						href="/settings"
 						className="inline-flex border border-line bg-white px-4 py-3 font-display text-2xl uppercase tracking-[0.04em] text-ink"
 					>
-						Account
+						Back home
 					</Link>
 				</div>
 			</section>

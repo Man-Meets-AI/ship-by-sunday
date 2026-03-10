@@ -142,6 +142,63 @@ export const grantEntitlement = internalMutation({
 	},
 });
 
+export const grantEntitlementFromStripe = mutation({
+	args: {
+		webhookSecret: v.string(),
+		clerkUserId: v.string(),
+		courseSlug: v.optional(v.string()),
+		stripeCustomerId: v.optional(v.string()),
+		stripeCheckoutSessionId: v.optional(v.string()),
+		stripePaymentIntentId: v.optional(v.string()),
+	},
+	returns: v.any(),
+	handler: async (ctx, args) => {
+		if (
+			!process.env.STRIPE_WEBHOOK_SECRET ||
+			args.webhookSecret !== process.env.STRIPE_WEBHOOK_SECRET
+		) {
+			throw new ConvexError("Invalid webhook secret");
+		}
+
+		const courseSlug = args.courseSlug ?? COURSE_SLUG;
+		const now = Date.now();
+		const existingEntitlement = await ctx.db
+			.query("courseEntitlements")
+			.withIndex("by_clerk_user_id_and_course_slug", (queryBuilder: any) =>
+				queryBuilder.eq("clerkUserId", args.clerkUserId).eq("courseSlug", courseSlug),
+			)
+			.unique();
+
+		if (existingEntitlement) {
+			await ctx.db.patch(existingEntitlement._id, {
+				status: "active",
+				source: "stripe_webhook",
+				stripeCustomerId: args.stripeCustomerId,
+				stripeCheckoutSessionId: args.stripeCheckoutSessionId,
+				stripePaymentIntentId: args.stripePaymentIntentId,
+				updatedAt: now,
+				revokedAt: undefined,
+			});
+
+			return { courseSlug, granted: "patched" };
+		}
+
+		await ctx.db.insert("courseEntitlements", {
+			clerkUserId: args.clerkUserId,
+			courseSlug,
+			status: "active",
+			source: "stripe_webhook",
+			stripeCustomerId: args.stripeCustomerId,
+			stripeCheckoutSessionId: args.stripeCheckoutSessionId,
+			stripePaymentIntentId: args.stripePaymentIntentId,
+			grantedAt: now,
+			updatedAt: now,
+		});
+
+		return { courseSlug, granted: "inserted" };
+	},
+});
+
 export const getMissionState = query({
 	args: {},
 	returns: v.any(),

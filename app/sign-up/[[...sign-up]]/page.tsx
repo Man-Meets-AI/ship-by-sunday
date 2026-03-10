@@ -9,7 +9,7 @@ export default function Page() {
 						card: "shadow-none border border-[#111111]",
 					},
 				}}
-				forceRedirectUrl="/mission"
+				fallbackRedirectUrl="/mission"
 			/>
 		</main>
 	);

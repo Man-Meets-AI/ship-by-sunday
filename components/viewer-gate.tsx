@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useQuery } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
 
 import { api } from "@/convex/_generated/api";
 
@@ -12,17 +12,18 @@ export function ViewerGate({
 	children: React.ReactNode;
 }) {
 	const router = useRouter();
+	const { isAuthenticated, isLoading } = useConvexAuth();
 	const access = useQuery(api.course.viewerAccess) as
 		| { hasAccess: boolean }
 		| undefined;
 
 	useEffect(() => {
-		if (access && !access.hasAccess) {
+		if (!isLoading && access && !access.hasAccess) {
 			router.replace("/access-required");
 		}
-	}, [access, router]);
+	}, [access, isLoading, router]);
 
-	if (access === undefined || !access.hasAccess) {
+	if (isLoading || !isAuthenticated || access === undefined || !access.hasAccess) {
 		return (
 			<section className="border border-line bg-white px-5 py-10 text-center shadow-card">
 				<p className="font-display text-4xl uppercase tracking-[0.04em]">

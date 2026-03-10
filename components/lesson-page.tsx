@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { useMutation, useQuery } from "convex/react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 
 import type { WorkbenchField } from "@/app/lessonRegistry";
 import { api } from "@/convex/_generated/api";
@@ -55,7 +55,11 @@ export function LessonPage({
 	lessonId: string;
 }) {
 	const router = useRouter();
-	const lessonState = useQuery(api.course.getLessonState, { lessonId }) as
+	const { isAuthenticated } = useConvexAuth();
+	const lessonState = useQuery(
+		api.course.getLessonState,
+		isAuthenticated ? { lessonId } : "skip",
+	) as
 		| {
 				lesson: {
 					id: string;
