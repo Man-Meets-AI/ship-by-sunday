@@ -1,6 +1,6 @@
 # Ship by Sunday Course Ops Plan
 
-Last updated: 2026-03-07
+Last updated: 2026-03-10
 
 ## Objective
 
@@ -18,11 +18,16 @@ Lessons:
 
 1. Welcome to Ship by Sunday
 2. How the Sprint Works
-3. Duplicate the templates and open the sprint workspace
+
+Current in-product mapping:
+
+- `0.0` Mission Map
+- `0.1` Welcome to Ship by Sunday
+- `0.2` How the Sprint Works
+- setup actions happen inside the Start Here lesson flow instead of as a third standalone lesson
 
 Downloads:
 
-- Friday Prep Sheet
 - Student Packet
 - Worksheet Packet
 
@@ -100,13 +105,14 @@ Core artifact:
 
 Use this order in the product:
 
-1. `Start Here`
-2. `CEO Block`
-3. `Design Block`
-4. `Build Block`
-5. `Ship Block`
-6. `Downloads`
-7. `Support`
+1. `Mission`
+2. `Start Here`
+3. `CEO Block`
+4. `Design Block`
+5. `Build Block`
+6. `Ship Block`
+7. `Artifacts`
+8. `Settings`
 
 Do not surface every file everywhere. Students should see the current module, the current worksheet, and the next action. Everything else can be one click away.
 
@@ -174,7 +180,7 @@ Download naming:
 
 ### Worksheet rule
 
-Ship only the four canonical worksheets plus the Friday Prep Sheet on day one. Anything else increases friction unless it clearly helps completion.
+Ship only the four canonical worksheets plus the Student Packet on day one. Anything else increases friction unless it clearly helps completion.
 
 ## Start Here Flow
 

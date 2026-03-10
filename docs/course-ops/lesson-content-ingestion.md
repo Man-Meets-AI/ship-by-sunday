@@ -4,14 +4,14 @@ Last updated: 2026-03-10
 
 ## Goal
 
-Take the lesson material that already exists across recording docs, prep docs, worksheets, and future video exports, and load it into the product without turning `app/lessonRegistry.ts` into a giant content dump.
+Turn the lesson material in the repo into structured, reviewable, app-ready lesson content without turning `app/lessonRegistry.ts` into a giant content dump.
 
-The system should keep one clear separation:
+The system now keeps one clear separation:
 
 - `app/lessonRegistry.ts` owns lesson order, progression, workbench type, artifact contract, and shell defaults
 - a separate lesson-content layer owns copy, video links, transcript text, examples, downloads, and source references
 
-## Recommended source-of-truth model
+## Current source-of-truth model
 
 ### 1. Keep the registry structural
 
@@ -28,38 +28,28 @@ The system should keep one clear separation:
 
 Do not keep long transcript text, example banks, or resource lists in the registry.
 
-### 2. Add one content file per lesson
+### 2. Keep one lesson content module per lesson slug
 
-Create a new folder:
+The product now uses:
 
-`content/lessons/`
+- `content/lessons/<lesson-slug>.ts`
+- `content/lessons/generated.ts`
+- `content/source/recording-blueprint.json`
 
-Recommended shape:
+The slugs follow the recording file naming convention from `docs/recording/founder-checklists.md`.
 
-- `content/lessons/00-01-welcome-to-ship-by-sunday.ts`
-- `content/lessons/00-02-how-the-sprint-works.ts`
-- `content/lessons/01-01-start-with-the-problem.ts`
-- ...
-- `content/lessons/04-06-final-wrap.ts`
+### 3. Keep one central index
 
-Use the slugs already defined in `docs/recording/founder-checklists.md`.
+`content/lessons/index.ts` now:
 
-### 3. Add one central index
+- imports the generated barrel
+- exports a typed `lessonContentById`
+- validates that every content file points to a real lesson id
+- guarantees that every non-mission lesson resolves to content at build time
 
-Create:
+## Current lesson content schema
 
-`content/lessons/index.ts`
-
-It should:
-
-- import every lesson content module
-- export a typed `lessonContentById`
-- validate that every content file points to a real lesson id
-- make it easy to detect missing lesson content during build
-
-## Recommended lesson content schema
-
-Each lesson file should export a typed object like this:
+Each lesson file now exports a typed object like this:
 
 ```ts
 export type LessonContent = {
@@ -67,13 +57,27 @@ export type LessonContent = {
   slug: string;
   status: "outline" | "draft" | "ready";
   intro: string;
+  lessonMeta: {
+    runtimeLabel?: string;
+    goal: string;
+    purpose: string;
+  };
+  actionCard: {
+    jobNow: string;
+    timebox: string;
+    comeBackWith: string;
+  };
   coach: {
     video?: {
+      status: "pending" | "ready";
       provider: "mux" | "vimeo" | "loom" | "youtube" | "file";
-      url: string;
+      url?: string;
       durationLabel?: string;
     };
-    transcript?: string;
+    transcript?: {
+      status: "empty" | "ready";
+      body?: string;
+    };
     examples?: Array<{
       id: string;
       title: string;
@@ -88,7 +92,7 @@ export type LessonContent = {
   };
   workbench: {
     prompt?: string;
-    steps?: string[];
+    teachingPoints?: string[];
     emptyState?: string;
     templateDownloadLabel?: string;
     templateDownloadHref?: string;
@@ -97,9 +101,9 @@ export type LessonContent = {
 };
 ```
 
-This is enough for launch.
+This is enough for launch. The app renders `goal`, `purpose`, runtime, and the action card directly in the lesson UI.
 
-Do not add a CMS, rich text editor, or database-backed authoring flow first.
+We are still intentionally not using a CMS or database-backed authoring flow.
 
 ## What should populate each field
 
@@ -111,6 +115,26 @@ Best sources:
 
 - `docs/recording/sprint-packets.md`
 - lesson-specific prep docs like `docs/recording/day-1-prep.md`
+
+### `lessonMeta`
+
+Use:
+
+- `goal` for the sharp lesson outcome
+- `purpose` for the short explanation of why the lesson exists
+- `runtimeLabel` for the runtime shown in the lesson header
+
+These now come from the recording blueprint parser.
+
+### `actionCard`
+
+Use the blueprint pause prompt directly:
+
+- `jobNow`
+- `timebox`
+- `comeBackWith`
+
+This is the core student handoff surface in the lesson player.
 
 ### `coach.video`
 
@@ -126,15 +150,12 @@ If no transcript exists yet, leave it empty rather than inventing summary copy.
 
 ### `coach.examples`
 
-Use the concrete example material already prepared for teaching:
+Use the concrete example material already prepared for teaching. Right now the generator creates:
 
-- weak vs strong problem examples
-- user statement examples
-- outcome statement examples
-- scope-cut examples
-- research examples
-- storyboard / rough screen examples
-- demo examples
+- lesson-specific guidance cards from the recording blueprint
+- curated overrides for the most important CEO lessons
+
+The next pass should continue replacing generated guidance with stronger lesson-specific examples where we have them.
 
 These are already referenced in:
 
@@ -143,13 +164,12 @@ These are already referenced in:
 
 ### `coach.resources`
 
-Use only launch-relevant downloads and links:
+Use only launch-relevant downloads and links. Right now the app serves:
 
 - worksheet packet
-- specific worksheet PDF anchor or extracted file
-- Friday Prep Sheet
-- Student Packet
-- lesson-specific template or prompt sheet
+- student packet
+- block-specific worksheet links
+- lesson-specific template prompts where we have them
 
 Do not dump every asset into every lesson.
 
@@ -158,27 +178,36 @@ Do not dump every asset into every lesson.
 Use this for text that belongs in the middle of the lesson player rather than the coach rail:
 
 - the short prompt above the inputs
-- numbered steps for upload/capture lessons
+- `teachingPoints` for what the lesson covers
 - “what good looks like” copy for focus lessons
 - template-download CTA for sketch / flow / storyboard lessons
 
-## Best ingestion workflow
+## Current ingestion workflow
 
-### Phase 1. Build the content layer by hand from markdown docs
+### Step 1. Parse the recording blueprint
 
-Start with:
+Use:
 
-- `0.1`
-- `0.2`
-- all CEO block lessons
+- `scripts/build-lesson-content-from-blueprint.mjs`
 
-Reason:
+It:
 
-- the best current source material is already in markdown
-- the CEO block is the first student path
-- this avoids waiting on transcript cleanup for every lesson
+- parses `assets/ship_by_sunday_recording_blueprint_v3.md`
+- validates wireframe shell/workbench defaults against the registry
+- writes `content/source/recording-blueprint.json`
+- regenerates the lesson content modules and generated barrel
 
-### Phase 2. Add media and transcript URLs after hosting is chosen
+### Step 2. Curate the generated output
+
+The generator gives us full coverage for `0.1` through `4.6`, but the generated content still benefits from editorial cleanup.
+
+Use this next for:
+
+- stronger lesson-specific examples
+- better resource links
+- better copy on the most commercially important lessons
+
+### Step 3. Add media and transcript URLs after hosting is chosen
 
 Once video hosting is locked:
 
@@ -186,9 +215,9 @@ Once video hosting is locked:
 - attach transcript text or transcript file output
 - add any thumbnail/poster URL if needed
 
-### Phase 3. Backfill Design, Build, and Ship content
+### Step 4. Keep design/build/ship refining from the same system
 
-Use the same lesson-file pattern for the remaining blocks.
+Do not go back to hand-maintained outline placeholders. Continue using the generator plus curated overrides.
 
 ## What not to do
 
@@ -207,29 +236,24 @@ Use the same lesson-file pattern for the remaining blocks.
 - keeps product structure separate from lesson content
 - no vendor or CMS dependency before launch
 
-## Concrete implementation sequence
+## Current implementation status
 
-1. Create `content/lessons/` and the shared `LessonContent` type.
-2. Build `content/lessons/index.ts` with a strict map keyed by lesson id.
-3. Update the lesson page to merge structural lesson config with lesson content at render time.
-4. Replace placeholder coach content with content-file data.
-5. Add day-one content first: `0.1`, `0.2`, `1.1` through `1.7`.
-6. Add video/transcript URLs only after hosting is finalized.
-7. Backfill the remaining blocks.
+- `content/lessons/` exists
+- `content/source/recording-blueprint.json` exists
+- the lesson page already merges structural lesson config with generated lesson content
+- the full curriculum has generated lesson content from `0.1` through `4.6`
+- the remaining work is editorial refinement and media attachment, not plumbing
 
-## First files to create
+## Highest-leverage next files to refine
 
-These are the highest-leverage first-pass content files:
+These are the best next editorial targets:
 
-- `content/lessons/00-01-welcome-to-ship-by-sunday.ts`
-- `content/lessons/00-02-how-the-sprint-works.ts`
-- `content/lessons/01-01-start-with-the-problem.ts`
-- `content/lessons/01-02-pick-one-user.ts`
-- `content/lessons/01-03-define-the-outcome.ts`
-- `content/lessons/01-04-light-research-not-a-thesis.ts`
-- `content/lessons/01-05-map-the-core-flow.ts`
-- `content/lessons/01-06-kill-scope.ts`
-- `content/lessons/01-07-ceo-block-wrap-up.ts`
+- `content/lessons/03-03-brief-the-agent-correctly.ts`
+- `content/lessons/03-04-build-the-core-flow.ts`
+- `content/lessons/03-05-debug-without-spiraling.ts`
+- `content/lessons/04-02-deploy-the-app.ts`
+- `content/lessons/04-04-send-it-to-real-humans.ts`
+- `content/lessons/04-05-capture-feedback-and-plan-version-two.ts`
 
 ## Founder dependencies
 

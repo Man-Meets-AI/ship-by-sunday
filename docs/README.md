@@ -28,6 +28,7 @@ This folder is the canonical home for generated launch workstream docs.
 - `recording/founder-checklists.md`
 - `recording/day-1-prep.md`
 - `course-ops/plan.md`
+- `course-ops/lesson-content-ingestion.md`
 - `offer-funnel/plan.md`
 - `email/launch-and-onboarding.md`
 - `delivery-onboarding/stack-decision.md`
