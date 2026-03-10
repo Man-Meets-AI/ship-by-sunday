@@ -152,7 +152,7 @@ function ShellInner({
 	return (
 		<main className="min-h-screen bg-product-bg text-product-text" style={backgroundStyle}>
 			<div className="mx-auto flex min-h-screen max-w-[1728px] flex-col gap-4 px-3 py-3 sm:px-4 sm:py-4">
-				<header className="overflow-hidden rounded-[24px] border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-xl">
+				<header className="overflow-hidden rounded-none border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-xl">
 					<div className="flex flex-col gap-4 px-4 py-4 lg:px-6">
 						<div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
 							<div className="space-y-4">
@@ -170,7 +170,7 @@ function ShellInner({
 												<Link
 													key={item.href}
 													href={item.href}
-													className={`rounded-full border px-3 py-2 transition-colors ${
+													className={`rounded-none border px-3 py-2 transition-colors ${
 														isActive
 															? "border-product-accent bg-product-chip text-product-accent"
 															: "border-product-border bg-product-surface-alt/70 text-product-text hover:bg-product-surface"
@@ -191,7 +191,7 @@ function ShellInner({
 												return (
 													<div
 														key={block.id}
-													className={`rounded-full border px-3 py-2 ${blockStatusClass(status)}`}
+													className={`rounded-none border px-3 py-2 ${blockStatusClass(status)}`}
 												>
 													<div className="flex items-center gap-2">
 														<span>[ {block.label} ]</span>
@@ -211,12 +211,12 @@ function ShellInner({
 									<button
 										type="button"
 										onClick={toggleTheme}
-										className="rounded-full border border-product-border bg-product-surface-alt/80 px-3 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-product-text transition-colors hover:bg-product-surface"
+										className="rounded-none border border-product-border bg-product-surface-alt/80 px-3 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-product-text transition-colors hover:bg-product-surface"
 									>
 										{theme === "dark" ? "Light mode" : "Dark mode"}
 									</button>
 									{onLayoutModeChange ? (
-										<div className="flex rounded-full border border-product-border bg-product-surface-strong/70 p-1">
+										<div className="flex rounded-none border border-product-border bg-product-surface-strong/70 p-1">
 											{(["split", "focus"] as LayoutMode[]).map((mode) => {
 												const isActive = layoutMode === mode;
 												return (
@@ -224,7 +224,7 @@ function ShellInner({
 														key={mode}
 														type="button"
 														onClick={() => onLayoutModeChange(mode)}
-														className={`rounded-full px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.2em] transition-colors sm:px-4 ${
+														className={`rounded-none px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.2em] transition-colors sm:px-4 ${
 															isActive
 																? "bg-product-chip text-product-accent"
 																: "text-product-muted hover:text-product-text"
@@ -240,7 +240,7 @@ function ShellInner({
 										<button
 											type="button"
 											onClick={onCoachToggle}
-											className={`rounded-full border px-3 py-2 font-mono text-[11px] uppercase tracking-[0.2em] transition-colors ${
+											className={`rounded-none border px-3 py-2 font-mono text-[11px] uppercase tracking-[0.2em] transition-colors ${
 												coachVisible
 													? "border-product-accent bg-product-chip text-product-accent"
 													: "border-product-border bg-product-surface-alt/80 text-product-muted hover:text-product-text"
@@ -264,7 +264,7 @@ function ShellInner({
 						</div>
 
 						{title ? (
-							<div className="rounded-[20px] border border-product-border bg-product-surface-strong/80 px-4 py-4">
+							<div className="rounded-none border border-product-border bg-product-surface-strong/80 px-4 py-4">
 								<p className="font-display text-3xl uppercase tracking-[0.08em] text-product-text sm:text-4xl">
 									{title}
 								</p>
@@ -281,7 +281,7 @@ function ShellInner({
 				<div className="flex-1">{children}</div>
 
 				{activeBlock ? (
-					<footer className="overflow-hidden rounded-[24px] border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-xl">
+					<footer className="overflow-hidden rounded-none border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-xl">
 						<div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between lg:px-6">
 							<div>
 								<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
@@ -295,7 +295,7 @@ function ShellInner({
 								{activeBlock.lessons.map((lesson) => {
 									const isCurrent = lesson.id === currentLessonId;
 									const isLocked = lesson.status === "locked";
-									const railClass = `min-w-[136px] rounded-[18px] border px-3 py-3 ${lessonRailClass(
+									const railClass = `min-w-[136px] rounded-none border px-3 py-3 ${lessonRailClass(
 										isCurrent,
 										lesson.status,
 									)} ${isLocked ? "cursor-not-allowed" : "transition-transform hover:-translate-y-0.5"}`;

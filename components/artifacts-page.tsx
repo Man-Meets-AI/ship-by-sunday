@@ -27,7 +27,7 @@ export function ArtifactsPage() {
 			subtitle="Every saved output that has been completed inside the sprint."
 		>
 			<ViewerGate>
-				<section className="rounded-[26px] border border-product-border bg-product-surface/78 p-5 shadow-panel backdrop-blur-xl">
+				<section className="rounded-none border border-product-border bg-product-surface/78 p-5 shadow-panel backdrop-blur-xl">
 					<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
 						Artifact library
 					</p>
@@ -45,7 +45,7 @@ export function ArtifactsPage() {
 							{artifacts.map((artifact) => (
 								<article
 									key={artifact.lessonId}
-									className="rounded-[22px] border border-product-border bg-product-surface-strong/80 p-4"
+									className="rounded-none border border-product-border bg-product-surface-strong/80 p-4"
 								>
 									<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
 										{artifact.lessonId}
@@ -63,7 +63,7 @@ export function ArtifactsPage() {
 											artifact.fields.slice(0, 4).map(([fieldId, value]) => (
 												<div
 													key={fieldId}
-													className="rounded-[18px] border border-product-border bg-product-surface p-3"
+													className="rounded-none border border-product-border bg-product-surface p-3"
 												>
 													<p className="font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
 														{fieldId.replaceAll("_", " ")}
@@ -79,7 +79,7 @@ export function ArtifactsPage() {
 									</div>
 									<Link
 										href={`/lesson/${artifact.lessonId}`}
-										className="mt-4 inline-flex rounded-full border border-product-accent bg-product-chip px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
+										className="mt-4 inline-flex rounded-none border border-product-accent bg-product-chip px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
 									>
 										Open lesson
 									</Link>

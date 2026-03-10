@@ -96,7 +96,7 @@ export function MissionPage() {
 		<ProductShell currentBlockId={mission?.blocks.find((block) => blockStatus(block) !== "locked")?.id}>
 			<ViewerGate>
 				{mission === undefined ? (
-					<section className="rounded-[26px] border border-product-border bg-product-surface/78 px-5 py-10 text-center shadow-panel backdrop-blur-xl">
+					<section className="rounded-none border border-product-border bg-product-surface/78 px-5 py-10 text-center shadow-panel backdrop-blur-xl">
 						<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
 							Loading mission map
 						</p>
@@ -106,7 +106,7 @@ export function MissionPage() {
 					</section>
 				) : (
 					<div className="space-y-4">
-						<section className="rounded-[28px] border border-product-border bg-product-surface/70 px-5 py-6 shadow-panel backdrop-blur-xl lg:px-6">
+						<section className="rounded-none border border-product-border bg-product-surface/70 px-5 py-6 shadow-panel backdrop-blur-xl lg:px-6">
 							<div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
 								<div>
 									<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
@@ -123,7 +123,7 @@ export function MissionPage() {
 									</p>
 								</div>
 
-								<div className="rounded-[22px] border border-product-border bg-product-surface-strong/75 px-5 py-4">
+								<div className="rounded-none border border-product-border bg-product-surface-strong/75 px-5 py-4">
 									<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
 										Next action
 									</p>
@@ -139,7 +139,7 @@ export function MissionPage() {
 											</p>
 											<Link
 												href={`/lesson/${nextLesson.id}`}
-												className="mt-4 inline-flex rounded-full border border-product-accent bg-product-chip px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
+												className="mt-4 inline-flex rounded-none border border-product-accent bg-product-chip px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
 											>
 												Open lesson
 											</Link>
@@ -161,7 +161,7 @@ export function MissionPage() {
 										(lesson) =>
 											lesson.status === "in_progress" || lesson.status === "available",
 									) ?? block.lessons[0];
-								const cardClass = `group overflow-hidden rounded-[28px] border border-product-border bg-product-surface/70 shadow-panel backdrop-blur-xl ${
+								const cardClass = `group overflow-hidden rounded-none border border-product-border bg-product-surface/70 shadow-panel backdrop-blur-xl ${
 									status === "locked"
 										? "cursor-not-allowed opacity-55"
 										: "transition-transform hover:-translate-y-1"
@@ -200,11 +200,11 @@ export function MissionPage() {
 												{block.lessons.map((lesson) => (
 													<span
 														key={lesson.id}
-														className={`inline-flex items-center gap-2 rounded-full px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-product-text ${railDotClass(
+														className={`inline-flex items-center gap-2 rounded-none px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-product-text ${railDotClass(
 															lesson.status,
 														)}`}
 													>
-														<span className="size-2 rounded-full bg-current" />
+														<span className="size-2 rounded-none bg-current" />
 														{lesson.id}
 													</span>
 												))}
