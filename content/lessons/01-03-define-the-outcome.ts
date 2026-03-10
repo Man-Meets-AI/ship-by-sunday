@@ -1,47 +1,60 @@
 import type { LessonContent } from "@/content/lessons/types";
 
-export const defineTheOutcomeLessonContent: LessonContent = {
-	lessonId: "1.3",
-	slug: "01-03-define-the-outcome",
-	status: "draft",
-	intro:
-		"Define the changed state for the user. The student should leave this lesson with one clear outcome statement that describes what gets better, not just what the app contains.",
-	coach: {
-		video: {
-			status: "pending",
-			title: "Define the Outcome",
-		},
-		transcript: {
-			status: "empty",
-		},
-		examples: [
-			{
-				id: "feature-vs-outcome",
-				title: "Feature-heavy statement vs outcome statement",
-				body:
-					"Feature-heavy: 'The app uses AI to summarize meetings, organize notes, and generate next steps.' Outcome: 'The app helps startup operators leave a meeting with a clean action summary they can review and send in minutes.'",
-			},
-			{
-				id: "short-version",
-				title: "Shortest version",
-				body:
-					"'Turn messy meeting notes into a clear action summary in minutes.' People want the changed state on the other side of the feature list.",
-			},
-		],
-	},
-	workbench: {
-		prompt:
-			"Write one user-facing outcome statement. Describe what gets better for the user, not what the app includes.",
-		steps: [
-			"Keep the statement observable.",
-			"Name what is different for the user after the app works.",
-			"Cut anything that reads like a feature list.",
-		],
-		emptyState:
-			"If you are listing capabilities, rewrite it as the changed state the user wants.",
-	},
-	sourceRefs: [
-		"docs/recording/day-1-prep.md",
-		"docs/recording/sprint-packets.md",
-	],
+export const lesson0103DefineTheOutcomeLessonContent: LessonContent = {
+  "lessonId": "1.3",
+  "slug": "01-03-define-the-outcome",
+  "status": "draft",
+  "intro": "Students need to define the promised outcome so the product can be judged by a result, not a pile of features.",
+  "lessonMeta": {
+    "runtimeLabel": "5-6 min",
+    "goal": "Translate features into transformation.",
+    "purpose": "Students need to define the promised outcome so the product can be judged by a result, not a pile of features."
+  },
+  "actionCard": {
+    "jobNow": "Write one user-facing outcome statement.",
+    "timebox": "5 minutes",
+    "comeBackWith": "One clear promised outcome."
+  },
+  "coach": {
+    "video": {
+      "status": "pending",
+      "title": "Define the Outcome"
+    },
+    "transcript": {
+      "status": "empty"
+    },
+    "examples": [
+      {
+        "id": "features-vs-outcome",
+        "title": "Feature list vs outcome",
+        "body": "Feature-heavy: 'The app uses AI to summarize meetings, organize notes, and generate next steps.' Outcome: 'The app helps startup operators leave a meeting with a clean action summary they can review and send in minutes.'"
+      },
+      {
+        "id": "shortest-version",
+        "title": "Shortest version",
+        "body": "'Turn messy meeting notes into a clear action summary in minutes.' People buy the changed state, not the feature list."
+      }
+    ],
+    "resources": [
+      {
+        "id": "worksheet-01",
+        "label": "Worksheet 01 — One-Page Product Brief",
+        "href": "/downloads/ship-by-sunday-worksheets.pdf",
+        "kind": "download"
+      }
+    ]
+  },
+  "workbench": {
+    "prompt": "People buy outcomes, not tools.",
+    "teachingPoints": [
+      "Write one sentence that starts with: After using this, the user can...",
+      "Give weak feature-heavy examples, then rewrite them into outcomes.",
+      "Tie this outcome to what will be shown in the demo later."
+    ],
+    "emptyState": "People buy outcomes, not tools."
+  },
+  "sourceRefs": [
+    "assets/ship_by_sunday_recording_blueprint_v3.md",
+    "assets/ship_by_sunday_wireframes_v_1 (1).md"
+  ]
 };

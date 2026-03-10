@@ -10,6 +10,7 @@ import {
 	getUnlockedLessonIds,
 	isLessonImplemented,
 	normalizeFieldValues,
+	prepareFieldValuesForPersistence,
 	validateRequiredFields,
 } from "../lib/course/registry";
 
@@ -58,6 +59,41 @@ function ensureLessonIsUnlocked(lessonId: string, completedLessonIds: string[]) 
 	if (!unlockedLessonIds.has(lessonId) && !completedLessonIds.includes(lessonId)) {
 		throw new ConvexError("Lesson is still locked");
 	}
+}
+
+async function hydrateUploadUrls(ctx: any, fieldValues: Record<string, unknown>) {
+	const values = normalizeFieldValues(fieldValues as any);
+
+	return Object.fromEntries(
+		await Promise.all(
+			Object.entries(values).map(async ([fieldId, value]) => {
+				if (
+					!value ||
+					typeof value !== "object" ||
+					Array.isArray(value) ||
+					!("kind" in value) ||
+					(value as { kind?: string }).kind !== "upload" ||
+					!("storageId" in value) ||
+					!(value as { storageId?: string }).storageId
+				) {
+					return [fieldId, value];
+				}
+
+				const url = await ctx.storage.getUrl(
+					(value as { storageId: string }).storageId as any,
+				);
+
+				return [
+					fieldId,
+					{
+						...(value as Record<string, unknown>),
+						status: "stored",
+						url: url ?? undefined,
+					},
+				];
+			}),
+		),
+	);
 }
 
 export const viewerAccess = query({
@@ -347,7 +383,8 @@ export const getLessonState = query({
 		return {
 			accessStatus: "unlocked",
 			lesson,
-			fieldValues: normalizeFieldValues(
+			fieldValues: await hydrateUploadUrls(
+				ctx,
 				lessonState?.fieldValues as any,
 			),
 			status: lessonState?.status ?? "not_started",
@@ -388,7 +425,7 @@ export const saveLessonDraft = mutation({
 
 		if (existingState) {
 			await ctx.db.patch(existingState._id, {
-				fieldValues: args.fieldValues,
+				fieldValues: prepareFieldValuesForPersistence(args.fieldValues as any),
 				status:
 					existingState.status === "completed" ? "completed" : "in_progress",
 				updatedAt: now,
@@ -403,7 +440,7 @@ export const saveLessonDraft = mutation({
 				status: "in_progress",
 				artifactKey: lesson.artifact.key,
 				artifactType: lesson.artifact.type,
-				fieldValues: args.fieldValues,
+				fieldValues: prepareFieldValuesForPersistence(args.fieldValues as any),
 				startedAt: now,
 				updatedAt: now,
 				lastViewedAt: now,
@@ -504,7 +541,7 @@ export const completeLesson = mutation({
 
 		if (existingState) {
 			await ctx.db.patch(existingState._id, {
-				fieldValues: args.fieldValues,
+				fieldValues: prepareFieldValuesForPersistence(args.fieldValues as any),
 				status: "completed",
 				updatedAt: now,
 				lastViewedAt: now,
@@ -519,7 +556,7 @@ export const completeLesson = mutation({
 				status: "completed",
 				artifactKey: lesson.artifact.key,
 				artifactType: lesson.artifact.type,
-				fieldValues: args.fieldValues,
+				fieldValues: prepareFieldValuesForPersistence(args.fieldValues as any),
 				startedAt: now,
 				updatedAt: now,
 				lastViewedAt: now,

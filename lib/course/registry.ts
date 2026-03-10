@@ -44,6 +44,16 @@ export type PersistedFieldValue =
 
 export type PersistedFieldValues = Record<string, PersistedFieldValue>;
 
+export function isUploadFieldValue(value: unknown): value is UploadFieldValue {
+	return (
+		value !== null &&
+		typeof value === "object" &&
+		!Array.isArray(value) &&
+		"kind" in value &&
+		(value as { kind?: string }).kind === "upload"
+	);
+}
+
 export function getOrderedLessons() {
 	return [...lessonRegistry].sort((left, right) => left.order - right.order);
 }
@@ -136,6 +146,30 @@ export function normalizeFieldValues(
 	fieldValues: PersistedFieldValues | null | undefined,
 ) {
 	return fieldValues ?? {};
+}
+
+export function prepareFieldValuesForPersistence(
+	fieldValues: PersistedFieldValues,
+) {
+	return Object.fromEntries(
+		Object.entries(fieldValues).map(([fieldId, value]) => {
+			if (!isUploadFieldValue(value)) {
+				return [fieldId, value];
+			}
+
+			return [
+				fieldId,
+				{
+					kind: "upload",
+					status: value.storageId ? "stored" : value.status,
+					fileName: value.fileName,
+					mimeType: value.mimeType,
+					size: value.size,
+					storageId: value.storageId,
+				} satisfies UploadFieldValue,
+			];
+		}),
+	) as PersistedFieldValues;
 }
 
 export function buildArtifactPreview(

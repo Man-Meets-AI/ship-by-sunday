@@ -23,7 +23,9 @@ export type UploadFieldValue = {
 	fileName?: string;
 	mimeType?: string;
 	size?: number;
+	storageId?: string;
 	url?: string;
+	previewUrl?: string;
 };
 
 export type PanelDefaultState = {

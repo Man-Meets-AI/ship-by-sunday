@@ -1,0 +1,65 @@
+import type { LessonContent } from "@/content/lessons/types";
+
+export const lesson0303BriefTheAgentCorrectlyLessonContent: LessonContent = {
+  "lessonId": "3.3",
+  "slug": "03-03-brief-the-agent-correctly",
+  "status": "draft",
+  "intro": "The student must learn to direct the model step by step.",
+  "lessonMeta": {
+    "runtimeLabel": "8-10 min",
+    "goal": "Teach controlled delegation.",
+    "purpose": "The student must learn to direct the model step by step."
+  },
+  "actionCard": {
+    "jobNow": "Use your brief to ask the agent to implement only the first screen or first step of the flow.",
+    "timebox": "15 minutes",
+    "comeBackWith": "The first implemented screen."
+  },
+  "coach": {
+    "video": {
+      "status": "pending",
+      "title": "Brief the Agent Correctly"
+    },
+    "transcript": {
+      "status": "empty"
+    },
+    "examples": [
+      {
+        "id": "key-line",
+        "title": "Key line",
+        "body": "The model needs constraints, sequence, and a definition of done. Ask for one step at a time."
+      },
+      {
+        "id": "avoid-this",
+        "title": "Avoid this",
+        "body": "Do not imply the first output should be perfect. Do not let them ask for the whole app at once."
+      },
+      {
+        "id": "lock-it-in",
+        "title": "Lock it in",
+        "body": "Great. The app has started. Now we build the spine end to end."
+      }
+    ],
+    "resources": [
+      {
+        "id": "worksheet-03",
+        "label": "Worksheet 03 — Build Plan + Agent Brief",
+        "href": "/downloads/ship-by-sunday-worksheets.pdf",
+        "kind": "download"
+      }
+    ]
+  },
+  "workbench": {
+    "prompt": "The model needs constraints, sequence, and a definition of done.",
+    "teachingPoints": [
+      "Show how to request only the first screen or first flow step.",
+      "Show how to correct the agent when it drifts.",
+      "Emphasize iteration over one giant magic prompt."
+    ],
+    "emptyState": "The model needs constraints, sequence, and a definition of done."
+  },
+  "sourceRefs": [
+    "assets/ship_by_sunday_recording_blueprint_v3.md",
+    "assets/ship_by_sunday_wireframes_v_1 (1).md"
+  ]
+};

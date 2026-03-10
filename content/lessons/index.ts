@@ -1,26 +1,6 @@
 import { lessonRegistry, type LessonConfig } from "@/app/lessonRegistry";
-import { ceoBlockWrapUpLessonContent } from "@/content/lessons/01-07-ceo-block-wrap-up";
-import { killScopeLessonContent } from "@/content/lessons/01-06-kill-scope";
-import { mapTheCoreFlowLessonContent } from "@/content/lessons/01-05-map-the-core-flow";
-import { lightResearchNotAThesisLessonContent } from "@/content/lessons/01-04-light-research-not-a-thesis";
-import { defineTheOutcomeLessonContent } from "@/content/lessons/01-03-define-the-outcome";
-import { pickOneUserLessonContent } from "@/content/lessons/01-02-pick-one-user";
-import { startWithTheProblemLessonContent } from "@/content/lessons/01-01-start-with-the-problem";
-import { howTheSprintWorksLessonContent } from "@/content/lessons/00-02-how-the-sprint-works";
-import { welcomeToShipBySundayLessonContent } from "@/content/lessons/00-01-welcome-to-ship-by-sunday";
+import { authoredLessonContent } from "@/content/lessons/generated";
 import type { LessonContent } from "@/content/lessons/types";
-
-const authoredLessonContent = [
-	welcomeToShipBySundayLessonContent,
-	howTheSprintWorksLessonContent,
-	startWithTheProblemLessonContent,
-	pickOneUserLessonContent,
-	defineTheOutcomeLessonContent,
-	lightResearchNotAThesisLessonContent,
-	mapTheCoreFlowLessonContent,
-	killScopeLessonContent,
-	ceoBlockWrapUpLessonContent,
-] as const satisfies readonly LessonContent[];
 
 const lessonSlugById: Record<string, string> = {
 	"0.1": "00-01-welcome-to-ship-by-sunday",
@@ -61,6 +41,16 @@ function buildOutlineLessonContent(lesson: LessonConfig): LessonContent {
 		intro:
 			lesson.helperText ??
 			"This lesson outline exists, but the final student-facing copy has not been attached yet.",
+		lessonMeta: {
+			runtimeLabel: undefined,
+			goal: lesson.winCondition,
+			purpose: lesson.helperText ?? lesson.winCondition,
+		},
+		actionCard: {
+			jobNow: lesson.checklist[0] ?? "Complete the lesson rep.",
+			timebox: "10 minutes",
+			comeBackWith: lesson.artifact.label,
+		},
 		coach: {
 			video: {
 				status: "pending",
@@ -71,8 +61,8 @@ function buildOutlineLessonContent(lesson: LessonConfig): LessonContent {
 			},
 		},
 		workbench: {
-			prompt: lesson.helperText ?? lesson.winCondition,
-			steps: lesson.checklist,
+			prompt: lesson.winCondition,
+			teachingPoints: lesson.checklist,
 			emptyState:
 				"Lesson copy for this step is still being attached. Use the checklist and workbench contract for now.",
 		},

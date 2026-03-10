@@ -1,47 +1,60 @@
 import type { LessonContent } from "@/content/lessons/types";
 
-export const pickOneUserLessonContent: LessonContent = {
-	lessonId: "1.2",
-	slug: "01-02-pick-one-user",
-	status: "draft",
-	intro:
-		"Choose one reachable user in one specific moment. Broad beats vague in theory, but specific beats broad when you are trying to get to a real first version.",
-	coach: {
-		video: {
-			status: "pending",
-			title: "Pick One User",
-		},
-		transcript: {
-			status: "empty",
-		},
-		examples: [
-			{
-				id: "blurry-vs-tight",
-				title: "Blurry user vs tightened user",
-				body:
-					"Blurry: 'This app is for teams.' Tightened: 'This app is for early-stage startup operators who run internal team meetings and need a faster way to turn messy notes into clear action items.'",
-			},
-			{
-				id: "sentence-stem",
-				title: "Sentence stem",
-				body:
-					"Use: 'This app is for ___ who need ___ without ___.' Keep the user reachable this week, not just theoretically valuable.",
-			},
-		],
-	},
-	workbench: {
-		prompt:
-			"Carry forward one problem from 1.1, then name one actual user who has it in a specific moment.",
-		steps: [
-			"Pick the strongest candidate problem from 1.1.",
-			"Name one specific user, not a broad market.",
-			"Describe what that user does today instead.",
-		],
-		emptyState:
-			"If the user sounds like a market category, it is still too broad.",
-	},
-	sourceRefs: [
-		"docs/recording/day-1-prep.md",
-		"docs/recording/sprint-packets.md",
-	],
+export const lesson0102PickOneUserLessonContent: LessonContent = {
+  "lessonId": "1.2",
+  "slug": "01-02-pick-one-user",
+  "status": "draft",
+  "intro": "The student needs one user in one situation. Broad audiences kill speed.",
+  "lessonMeta": {
+    "runtimeLabel": "5-7 min",
+    "goal": "Force specificity and constraint.",
+    "purpose": "The student needs one user in one situation. Broad audiences kill speed."
+  },
+  "actionCard": {
+    "jobNow": "Complete the sentence \"This app is for...\" and lock one user.",
+    "timebox": "10 minutes",
+    "comeBackWith": "One clear user statement."
+  },
+  "coach": {
+    "video": {
+      "status": "pending",
+      "title": "Pick One User"
+    },
+    "transcript": {
+      "status": "empty"
+    },
+    "examples": [
+      {
+        "id": "blurry-vs-tight-user",
+        "title": "Blurry vs tightened user",
+        "body": "Blurry: 'This app is for teams.' Tightened: 'This app is for early-stage startup operators who run internal team meetings and need a faster way to turn messy notes into clear action items.'"
+      },
+      {
+        "id": "user-sentence-stem",
+        "title": "Sentence stem",
+        "body": "Use: 'This app is for ___ who need ___ without ___.' The goal is one reachable user in one actual moment."
+      }
+    ],
+    "resources": [
+      {
+        "id": "worksheet-01",
+        "label": "Worksheet 01 — One-Page Product Brief",
+        "href": "/downloads/ship-by-sunday-worksheets.pdf",
+        "kind": "download"
+      }
+    ]
+  },
+  "workbench": {
+    "prompt": "Not everyone. Not the whole market. One real user type in one real moment.",
+    "teachingPoints": [
+      "Use the sentence: This app is for \\_\\_\\_ who need \\_\\_\\_ without \\_\\_\\_.",
+      "Show a bad target and tighten it to something usable.",
+      "Explain the difference between a segment and a situation."
+    ],
+    "emptyState": "Not everyone. Not the whole market. One real user type in one real moment."
+  },
+  "sourceRefs": [
+    "assets/ship_by_sunday_recording_blueprint_v3.md",
+    "assets/ship_by_sunday_wireframes_v_1 (1).md"
+  ]
 };

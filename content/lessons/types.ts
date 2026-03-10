@@ -1,5 +1,23 @@
 export type LessonContentStatus = "outline" | "draft" | "ready";
 
+export type ParsedLessonBlueprint = {
+	lessonId: string;
+	title: string;
+	runtimeLabel: string;
+	goal: string;
+	purpose: string;
+	suggestedOpeningLines: string[];
+	beatsToCover: string[];
+	onScreen: string[];
+	watchouts: string[];
+	suggestedClose: string[];
+	pausePrompt: {
+		jobNow: string;
+		timebox: string;
+		comeBackWith: string;
+	};
+};
+
 export type LessonVideoContent = {
 	status: "pending" | "ready";
 	provider?: "mux" | "vimeo" | "loom" | "youtube" | "file";
@@ -32,6 +50,16 @@ export type LessonContent = {
 	slug: string;
 	status: LessonContentStatus;
 	intro: string;
+	lessonMeta: {
+		runtimeLabel?: string;
+		goal: string;
+		purpose: string;
+	};
+	actionCard: {
+		jobNow: string;
+		timebox: string;
+		comeBackWith: string;
+	};
 	coach: {
 		video?: LessonVideoContent;
 		transcript?: LessonTranscriptContent;
@@ -40,7 +68,7 @@ export type LessonContent = {
 	};
 	workbench: {
 		prompt?: string;
-		steps?: string[];
+		teachingPoints?: string[];
 		emptyState?: string;
 		templateDownloadLabel?: string;
 		templateDownloadHref?: string;

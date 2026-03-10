@@ -1,0 +1,66 @@
+import type { LessonContent } from "@/content/lessons/types";
+
+export const lesson0403RecordASimpleDemoLessonContent: LessonContent = {
+  "lessonId": "4.3",
+  "slug": "04-03-record-a-simple-demo",
+  "status": "draft",
+  "intro": "A short walkthrough makes the app real to other people quickly.",
+  "lessonMeta": {
+    "runtimeLabel": "5-7 min",
+    "goal": "Create a low-friction asset for sharing.",
+    "purpose": "A short walkthrough makes the app real to other people quickly."
+  },
+  "actionCard": {
+    "jobNow": "Record a 30-60 second walkthrough of the core flow.",
+    "timebox": "10 minutes",
+    "comeBackWith": "One demo clip."
+  },
+  "coach": {
+    "video": {
+      "status": "pending",
+      "title": "Record a Simple Demo"
+    },
+    "transcript": {
+      "status": "empty"
+    },
+    "examples": [
+      {
+        "id": "key-line",
+        "title": "Key line",
+        "body": "A quick demo lowers confusion and increases response rate. Show the flow, not your entire worldview."
+      },
+      {
+        "id": "avoid-this",
+        "title": "Avoid this",
+        "body": "Do not over-edit. Do not turn this into content production class."
+      },
+      {
+        "id": "lock-it-in",
+        "title": "Lock it in",
+        "body": "Good. Now the product is easier to send. Next, actually send it."
+      }
+    ],
+    "resources": [
+      {
+        "id": "worksheet-04",
+        "label": "Worksheet 04 — Launch Plan + Feedback Tracker",
+        "href": "/downloads/ship-by-sunday-worksheets.pdf",
+        "kind": "download"
+      }
+    ]
+  },
+  "workbench": {
+    "prompt": "A quick demo lowers confusion and increases response rate.",
+    "teachingPoints": [
+      "Use a simple script: problem, what it does, one core flow, outcome.",
+      "Keep the camera / narration optional if needed."
+    ],
+    "emptyState": "A quick demo lowers confusion and increases response rate.",
+    "templateDownloadLabel": "Open Worksheet 04 demo prompt",
+    "templateDownloadHref": "/downloads/ship-by-sunday-worksheets.pdf"
+  },
+  "sourceRefs": [
+    "assets/ship_by_sunday_recording_blueprint_v3.md",
+    "assets/ship_by_sunday_wireframes_v_1 (1).md"
+  ]
+};

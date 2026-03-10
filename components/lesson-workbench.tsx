@@ -1,11 +1,15 @@
 "use client";
 
+import { useState } from "react";
+import { useMutation } from "convex/react";
+
 import {
 	type LessonConfig,
 	type UploadFieldValue,
 	type WorkbenchField,
 } from "@/app/lessonRegistry";
 import type { LessonContent } from "@/content/lessons/types";
+import { api } from "@/convex/_generated/api";
 import type { PinnedArtifact } from "@/components/lesson-shells";
 
 function toLineList(value: unknown) {
@@ -66,6 +70,117 @@ function formatArtifactValue(value: unknown) {
 	return Array.isArray(value) ? JSON.stringify(value) : String(value);
 }
 
+function UploadFieldControl({
+	field,
+	value,
+	onChange,
+}: {
+	field: WorkbenchField;
+	value: unknown;
+	onChange: (value: unknown) => void;
+}) {
+	const generateUploadUrl = useMutation(api.uploads.generateUploadUrl);
+	const upload = getUploadMetadata(value);
+	const [isUploading, setIsUploading] = useState(false);
+	const [uploadError, setUploadError] = useState<string | null>(null);
+	const previewUrl = upload?.previewUrl ?? upload?.url;
+
+	return (
+		<label className="block">
+			<span className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+				{field.label}
+			</span>
+			<div className="mt-2 rounded-none border border-dashed border-product-border bg-product-surface px-4 py-4">
+				<input
+					type="file"
+					accept={field.kind === "image_upload" ? "image/*" : "video/*"}
+					disabled={isUploading}
+					onChange={async (event) => {
+						const file = event.target.files?.[0];
+						if (!file) {
+							onChange({
+								kind: "upload",
+								status: "empty",
+							} satisfies UploadFieldValue);
+							return;
+						}
+
+						setUploadError(null);
+						setIsUploading(true);
+
+						try {
+							const uploadUrl = await generateUploadUrl();
+							const response = await fetch(uploadUrl, {
+								method: "POST",
+								headers: {
+									"Content-Type": file.type || "application/octet-stream",
+								},
+								body: file,
+							});
+
+							if (!response.ok) {
+								throw new Error("Upload failed");
+							}
+
+							const result = (await response.json()) as { storageId?: string };
+							if (!result.storageId) {
+								throw new Error("Missing storage id");
+							}
+
+							onChange({
+								kind: "upload",
+								status: "stored",
+								fileName: file.name,
+								mimeType: file.type,
+								size: file.size,
+								storageId: result.storageId,
+								previewUrl: URL.createObjectURL(file),
+							} satisfies UploadFieldValue);
+						} catch {
+							setUploadError("Upload failed. Try again.");
+						} finally {
+							setIsUploading(false);
+							event.target.value = "";
+						}
+					}}
+					className="w-full text-sm font-medium text-product-text file:mr-4 file:rounded-none file:border file:border-product-border file:bg-product-chip file:px-4 file:py-2 file:font-mono file:text-[11px] file:uppercase file:tracking-[0.22em] file:text-product-accent disabled:cursor-not-allowed disabled:opacity-70"
+				/>
+				<div className="mt-4 space-y-2 text-sm font-medium text-product-muted">
+					{isUploading ? (
+						<p>Uploading file to lesson storage...</p>
+					) : upload?.fileName ? (
+						<>
+							<p className="text-product-text">{upload.fileName}</p>
+							<p>Saved to lesson storage. It will persist with this lesson state.</p>
+						</>
+					) : (
+						<p>
+							Choose a file and it will upload to lesson storage before the lesson
+							draft is saved.
+						</p>
+					)}
+					{uploadError ? <p className="text-[#a83232]">{uploadError}</p> : null}
+				</div>
+				{previewUrl ? (
+					field.kind === "image_upload" ? (
+						<img
+							src={previewUrl}
+							alt={upload?.fileName ?? "Uploaded preview"}
+							className="mt-4 max-h-64 w-full rounded-none border border-product-border object-contain"
+						/>
+					) : (
+						<video
+							controls
+							src={previewUrl}
+							className="mt-4 max-h-64 w-full rounded-none border border-product-border"
+						/>
+					)
+				) : null}
+			</div>
+		</label>
+	);
+}
+
 function WorkbenchCard({
 	title,
 	children,
@@ -87,6 +202,28 @@ function WorkbenchCard({
 			</p>
 			<div className="mt-4">{children}</div>
 		</div>
+	);
+}
+
+function DetailList({
+	items,
+	label,
+}: {
+	items: string[];
+	label: string;
+}) {
+	if (items.length === 0) {
+		return null;
+	}
+
+	return (
+		<WorkbenchCard title={label} eyebrow="Lesson guide">
+			<div className="space-y-2 text-sm font-medium leading-relaxed text-product-muted">
+				{items.map((item) => (
+					<p key={item}>[ ] {item}</p>
+				))}
+			</div>
+		</WorkbenchCard>
 	);
 }
 
@@ -296,55 +433,7 @@ function FieldControl({
 	}
 
 	if (field.kind === "image_upload" || field.kind === "video_upload") {
-		const upload = getUploadMetadata(value);
-		return (
-			<label className="block">
-				<span className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
-					{field.label}
-				</span>
-				<div className="mt-2 rounded-none border border-dashed border-product-border bg-product-surface px-4 py-4">
-					<input
-						type="file"
-						accept={field.kind === "image_upload" ? "image/*" : "video/*"}
-						onChange={(event) => {
-							const file = event.target.files?.[0];
-							if (!file) {
-								onChange({
-									kind: "upload",
-									status: "empty",
-								} satisfies UploadFieldValue);
-								return;
-							}
-
-							onChange({
-								kind: "upload",
-								status: "selected",
-								fileName: file.name,
-								mimeType: file.type,
-								size: file.size,
-							} satisfies UploadFieldValue);
-						}}
-						className="w-full text-sm font-medium text-product-text file:mr-4 file:rounded-none file:border file:border-product-border file:bg-product-chip file:px-4 file:py-2 file:font-mono file:text-[11px] file:uppercase file:tracking-[0.22em] file:text-product-accent"
-					/>
-					<div className="mt-4 space-y-2 text-sm font-medium text-product-muted">
-						{upload?.fileName ? (
-							<>
-								<p className="text-product-text">{upload.fileName}</p>
-								<p>
-									File metadata is saved for now. Durable upload storage is the next
-									step after the layout refactor.
-								</p>
-							</>
-						) : (
-							<p>
-								Select a file to mark this artifact as attached. Persistent media
-								storage is not wired yet.
-							</p>
-						)}
-					</div>
-				</div>
-			</label>
-		);
+		return <UploadFieldControl field={field} value={value} onChange={onChange} />;
 	}
 
 	return null;
@@ -392,20 +481,37 @@ export function WorkbenchRenderer({
 			<h1 className="font-display text-4xl uppercase leading-none tracking-[0.06em] text-product-text sm:text-5xl">
 				{lesson.title}
 			</h1>
+			{lessonContent.lessonMeta.runtimeLabel ? (
+				<p className="mt-4 font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+					Runtime {lessonContent.lessonMeta.runtimeLabel}
+				</p>
+			) : null}
 			<p className="mt-4 max-w-3xl text-sm font-medium leading-relaxed text-product-muted">
 				{lessonContent.intro}
 			</p>
 		</div>
 	);
-	const stepsCard =
-		lessonContent.workbench.steps && lessonContent.workbench.steps.length > 0 ? (
-			<WorkbenchCard title="Steps" eyebrow="What to do">
-				<div className="space-y-2 text-sm font-medium leading-relaxed text-product-muted">
-					{lessonContent.workbench.steps.map((step) => (
-						<p key={step}>[ ] {step}</p>
-					))}
-				</div>
+	const metaCards = (
+		<div className="grid gap-4 lg:grid-cols-2">
+			<WorkbenchCard title="Goal" eyebrow="What matters">
+				<p className="text-sm font-medium leading-relaxed text-product-muted">
+					{lessonContent.lessonMeta.goal}
+				</p>
 			</WorkbenchCard>
+			<WorkbenchCard title="Purpose" eyebrow="Why this exists">
+				<p className="text-sm font-medium leading-relaxed text-product-muted">
+					{lessonContent.lessonMeta.purpose}
+				</p>
+			</WorkbenchCard>
+		</div>
+	);
+	const teachingPointsCard =
+		lessonContent.workbench.teachingPoints &&
+		lessonContent.workbench.teachingPoints.length > 0 ? (
+			<DetailList
+				items={lessonContent.workbench.teachingPoints}
+				label="What this lesson covers"
+			/>
 		) : null;
 	const promptCard = lessonContent.workbench.prompt ? (
 		<WorkbenchCard title="Prompt" eyebrow="Workbench">
@@ -414,12 +520,52 @@ export function WorkbenchRenderer({
 			</p>
 		</WorkbenchCard>
 	) : null;
+	const templateCard =
+		lessonContent.workbench.templateDownloadLabel &&
+		lessonContent.workbench.templateDownloadHref ? (
+			<WorkbenchCard title="Template" eyebrow="Reference">
+				<a
+					href={lessonContent.workbench.templateDownloadHref}
+					className="inline-flex rounded-none border border-product-border bg-product-surface px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-text transition-colors hover:bg-product-surface-alt"
+				>
+					{lessonContent.workbench.templateDownloadLabel}
+				</a>
+			</WorkbenchCard>
+		) : null;
+	const actionCard = (
+		<WorkbenchCard title="Your job now" eyebrow="Pause and rep">
+			<div className="space-y-4 text-sm font-medium leading-relaxed text-product-muted">
+				<p>{lessonContent.actionCard.jobNow}</p>
+				<div className="grid gap-3 md:grid-cols-2">
+					<div className="border border-product-border bg-product-surface p-3">
+						<p className="font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
+							Timebox
+						</p>
+						<p className="mt-2 text-product-text">
+							{lessonContent.actionCard.timebox}
+						</p>
+					</div>
+					<div className="border border-product-border bg-product-surface p-3">
+						<p className="font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
+							Come back with
+						</p>
+						<p className="mt-2 text-product-text">
+							{lessonContent.actionCard.comeBackWith}
+						</p>
+					</div>
+				</div>
+			</div>
+		</WorkbenchCard>
+	);
 
 	if (lesson.workbench === "guided_form") {
 		return (
 			<div className="space-y-6">
 				{titleBlock}
+				{metaCards}
 				{promptCard}
+				{teachingPointsCard}
+				{actionCard}
 				<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
 				<div className="space-y-5">
 					{renderFields(fields, fieldValues, onFieldChange, pinnedArtifacts)}
@@ -433,7 +579,10 @@ export function WorkbenchRenderer({
 		return (
 			<div className="space-y-6">
 				{titleBlock}
+				{metaCards}
 				{promptCard}
+				{teachingPointsCard}
+				{actionCard}
 				{tableField ? (
 					<WorkbenchCard title={tableField.label} eyebrow="Research table">
 						<FieldControl
@@ -456,7 +605,10 @@ export function WorkbenchRenderer({
 		return (
 			<div className="space-y-6">
 				{titleBlock}
+				{metaCards}
 				{promptCard}
+				{teachingPointsCard}
+				{actionCard}
 				{boardField ? (
 					<WorkbenchCard title={boardField.label} eyebrow="Reference board">
 						<FieldControl
@@ -478,8 +630,11 @@ export function WorkbenchRenderer({
 		return (
 			<div className="space-y-6">
 				{titleBlock}
+				{metaCards}
 				{promptCard}
-				{stepsCard}
+				{teachingPointsCard}
+				{templateCard}
+				{actionCard}
 				<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
 				<div className="grid gap-4 lg:grid-cols-2">
 					{renderFields(fields, fieldValues, onFieldChange, pinnedArtifacts)}
@@ -493,8 +648,10 @@ export function WorkbenchRenderer({
 		return (
 			<div className="space-y-6">
 				{titleBlock}
+				{metaCards}
 				{promptCard}
-				{stepsCard}
+				{teachingPointsCard}
+				{actionCard}
 				<div className="grid gap-4 lg:grid-cols-2">
 					{leftField ? (
 						<WorkbenchCard title={leftField.label} eyebrow="In scope">
@@ -528,7 +685,10 @@ export function WorkbenchRenderer({
 		return (
 			<div className="space-y-6">
 				{titleBlock}
+				{metaCards}
 				{promptCard}
+				{teachingPointsCard}
+				{actionCard}
 				<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
 				<div className="space-y-5">
 					{renderFields(fields, fieldValues, onFieldChange, pinnedArtifacts)}
@@ -541,8 +701,10 @@ export function WorkbenchRenderer({
 		return (
 			<div className="space-y-6">
 				{titleBlock}
+				{metaCards}
 				{promptCard}
-				{stepsCard}
+				{teachingPointsCard}
+				{actionCard}
 				<div className="grid gap-4 md:grid-cols-2">
 					{renderFields(fields, fieldValues, onFieldChange, pinnedArtifacts)}
 				</div>
@@ -555,8 +717,10 @@ export function WorkbenchRenderer({
 		return (
 			<div className="space-y-6">
 				{titleBlock}
+				{metaCards}
 				{promptCard}
-				{stepsCard}
+				{teachingPointsCard}
+				{actionCard}
 				{tableField ? (
 					<WorkbenchCard title={tableField.label} eyebrow="Tracker">
 						<FieldControl
@@ -587,8 +751,10 @@ export function WorkbenchRenderer({
 		return (
 			<div className="space-y-6">
 				{titleBlock}
+				{metaCards}
 				{promptCard}
-				{stepsCard}
+				{teachingPointsCard}
+				{actionCard}
 				<WorkbenchCard title="External workspace" eyebrow="Focus mode">
 					<p className="text-sm font-medium leading-relaxed text-product-muted">
 						{actionLabel}

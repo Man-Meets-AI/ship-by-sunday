@@ -1,0 +1,65 @@
+import type { LessonContent } from "@/content/lessons/types";
+
+export const lesson0305DebugWithoutSpiralingLessonContent: LessonContent = {
+  "lessonId": "3.5",
+  "slug": "03-05-debug-without-spiraling",
+  "status": "draft",
+  "intro": "This lesson protects morale.",
+  "lessonMeta": {
+    "runtimeLabel": "8-10 min",
+    "goal": "Keep them focused on blocker bugs.",
+    "purpose": "This lesson protects morale."
+  },
+  "actionCard": {
+    "jobNow": "Fix the 1-3 issues blocking your core flow.",
+    "timebox": "20 minutes",
+    "comeBackWith": "An app that works locally from start to finish."
+  },
+  "coach": {
+    "video": {
+      "status": "pending",
+      "title": "Debug Without Spiraling"
+    },
+    "transcript": {
+      "status": "empty"
+    },
+    "examples": [
+      {
+        "id": "key-line",
+        "title": "Key line",
+        "body": "Not every bug matters equally. Fix the things blocking the core flow first."
+      },
+      {
+        "id": "avoid-this",
+        "title": "Avoid this",
+        "body": "Do not let this turn into a debugging masterclass. Stay ruthless about priorities."
+      },
+      {
+        "id": "lock-it-in",
+        "title": "Lock it in",
+        "body": "If the core flow works locally, you are ready to ship."
+      }
+    ],
+    "resources": [
+      {
+        "id": "worksheet-03",
+        "label": "Worksheet 03 — Build Plan + Agent Brief",
+        "href": "/downloads/ship-by-sunday-worksheets.pdf",
+        "kind": "download"
+      }
+    ]
+  },
+  "workbench": {
+    "prompt": "Not every bug matters equally.",
+    "teachingPoints": [
+      "Show how to identify blocker bugs vs cosmetic bugs.",
+      "Use the agent to isolate and fix issues.",
+      "Explain what gets left for version two."
+    ],
+    "emptyState": "Not every bug matters equally."
+  },
+  "sourceRefs": [
+    "assets/ship_by_sunday_recording_blueprint_v3.md",
+    "assets/ship_by_sunday_wireframes_v_1 (1).md"
+  ]
+};
