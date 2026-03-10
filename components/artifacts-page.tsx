@@ -27,16 +27,16 @@ export function ArtifactsPage() {
 			subtitle="Every saved output that has been completed inside the sprint."
 		>
 			<ViewerGate>
-				<section className="border border-line bg-white p-5 shadow-card">
-					<p className="text-xs font-bold uppercase tracking-[0.18em] text-ink/60">
+				<section className="rounded-[26px] border border-product-border bg-product-surface/78 p-5 shadow-panel backdrop-blur-xl">
+					<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
 						Artifact library
 					</p>
 					{artifacts === undefined ? (
-						<p className="mt-4 text-sm font-medium text-ink/70">
+						<p className="mt-4 text-sm font-medium text-product-muted">
 							Loading completed artifacts.
 						</p>
 					) : artifacts.length === 0 ? (
-						<p className="mt-4 text-sm font-medium text-ink/70">
+						<p className="mt-4 text-sm font-medium text-product-muted">
 							Nothing has been completed yet. Start from the mission map and
 							finish the first lesson to populate this view.
 						</p>
@@ -45,24 +45,27 @@ export function ArtifactsPage() {
 							{artifacts.map((artifact) => (
 								<article
 									key={artifact.lessonId}
-									className="border border-line bg-paper p-4"
+									className="rounded-[22px] border border-product-border bg-product-surface-strong/80 p-4"
 								>
-									<p className="text-xs font-bold uppercase tracking-[0.18em] text-ink/60">
+									<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
 										{artifact.lessonId}
 									</p>
-									<h2 className="mt-2 font-display text-3xl uppercase leading-none tracking-[0.04em]">
+									<h2 className="mt-2 font-display text-3xl uppercase leading-none tracking-[0.05em] text-product-text">
 										{artifact.artifactLabel}
 									</h2>
-									<p className="mt-2 text-sm font-medium text-ink/70">
+									<p className="mt-2 text-sm font-medium text-product-muted">
 										{artifact.lessonTitle}
 									</p>
-									<div className="mt-4 space-y-2 text-sm font-medium text-ink/80">
+									<div className="mt-4 space-y-2 text-sm font-medium text-product-text">
 										{artifact.fields.length === 0 ? (
 											<p>No structured preview yet.</p>
 										) : (
 											artifact.fields.slice(0, 4).map(([fieldId, value]) => (
-												<div key={fieldId} className="border border-line bg-white p-3">
-													<p className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink/55">
+												<div
+													key={fieldId}
+													className="rounded-[18px] border border-product-border bg-product-surface p-3"
+												>
+													<p className="font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
 														{fieldId.replaceAll("_", " ")}
 													</p>
 													<p className="mt-2 break-words">
@@ -76,7 +79,7 @@ export function ArtifactsPage() {
 									</div>
 									<Link
 										href={`/lesson/${artifact.lessonId}`}
-										className="mt-4 inline-flex border border-line bg-ink px-3 py-2 font-display text-xl uppercase tracking-[0.04em] text-paper"
+										className="mt-4 inline-flex rounded-full border border-product-accent bg-product-chip px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
 									>
 										Open lesson
 									</Link>

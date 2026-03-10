@@ -12,7 +12,7 @@ export default function Page() {
 			subtitle="Manage the signed-in account that owns your Ship by Sunday access."
 		>
 			<ViewerGate>
-				<section className="border border-line bg-white p-5 shadow-card">
+				<section className="rounded-[26px] border border-product-border bg-product-surface/78 p-5 shadow-panel backdrop-blur-xl">
 					<UserProfile path="/settings" />
 				</section>
 			</ViewerGate>

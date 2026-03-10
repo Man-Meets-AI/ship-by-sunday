@@ -1,6 +1,6 @@
 # Ship by Sunday Todo
 
-Last updated: 2026-03-08
+Last updated: 2026-03-10
 
 ## Status legend
 
@@ -133,6 +133,7 @@ Last updated: 2026-03-08
 | Email | Draft subject lines and preview text bank | Lifecycle Email Strategist | completed | launch email draft | no | [docs/email/launch-and-onboarding.md](docs/email/launch-and-onboarding.md) |
 | Delivery / onboarding | Lock app shell to Next.js on Vercel with Stripe and Clerk | Launch Chief of Staff / COO | completed | founder input received | yes | [docs/delivery-onboarding/stack-decision.md](docs/delivery-onboarding/stack-decision.md) |
 | Delivery / onboarding | Stand up Clerk + Convex foundation for auth, entitlements, mission map, artifacts, and lesson autosave | Launch Chief of Staff / COO | completed | stack locked | no | Next app routes + `convex/` foundation |
+| Delivery / onboarding | Implement registry-driven mission and lesson shell system for product content | Launch Chief of Staff / COO | completed | lesson registry + Figma shell concepts | no | product shell + mission/lesson layout components |
 | Delivery / onboarding | Wire Stripe Checkout, success/cancel flow, and webhook-based Convex entitlement grant | Launch Chief of Staff / COO | in progress | Stripe webhook secret and endpoint registration still need to be finalized | no | Stripe checkout + webhook code path |
 | Delivery / onboarding | Choose exact Stripe-to-Clerk post-purchase handoff flow | Launch Chief of Staff / COO | blocked | flow details still open | yes | [docs/delivery-onboarding/stack-decision.md](docs/delivery-onboarding/stack-decision.md) |
 | Delivery / onboarding | Decide where lesson videos and downloads live | Launch Chief of Staff / COO | blocked | hosting options not yet chosen | yes | hosting decision memo |
@@ -258,6 +259,7 @@ Last updated: 2026-03-08
 | 2026-03-07 | Recording | Drafted founder-facing session checklists | Founder Recording Producer | [docs/recording/founder-checklists.md](docs/recording/founder-checklists.md) | add actual session time |
 | 2026-03-07 | Course ops | Drafted lesson architecture, worksheet audit, Start Here flow, and QA checklist | Course Operations Producer | [docs/course-ops/plan.md](docs/course-ops/plan.md) | apply during course setup |
 | 2026-03-07 | Offer / funnel | Drafted guarantee, checkout copy direction, CTA flow, and mismatch notes | Offer and Funnel Strategist | [docs/offer-funnel/plan.md](docs/offer-funnel/plan.md) | apply once stack is chosen |
+| 2026-03-10 | Delivery / onboarding | Replaced the old product shell with a registry-driven mission-control UI, split/focus lesson shells, reusable workbench renderers, and product-only light/dark themes | Launch Chief of Staff / COO | protected app routes + `components/` shell/workbench refactor | attach real lesson media and asset URLs next |
 | 2026-03-07 | Email | Drafted first-pass launch and onboarding emails | Lifecycle Email Strategist | [docs/email/launch-and-onboarding.md](docs/email/launch-and-onboarding.md) | adapt after stack decision |
 | 2026-03-07 | Analytics / QA | Drafted KPI spec, event map, buyer journey QA script, and bug tracker format | Analytics and QA Operator | [docs/analytics-qa/plan.md](docs/analytics-qa/plan.md) | implement when stack is chosen |
 | 2026-03-07 | Delivery / onboarding | Locked app shell to Next.js on Vercel with Stripe and Clerk | Launch Chief of Staff / COO | [docs/delivery-onboarding/stack-decision.md](docs/delivery-onboarding/stack-decision.md) | define post-purchase handoff next |

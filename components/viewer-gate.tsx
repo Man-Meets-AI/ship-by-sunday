@@ -25,11 +25,11 @@ export function ViewerGate({
 
 	if (isLoading || !isAuthenticated || access === undefined || !access.hasAccess) {
 		return (
-			<section className="border border-line bg-white px-5 py-10 text-center shadow-card">
-				<p className="font-display text-4xl uppercase tracking-[0.04em]">
+			<section className="rounded-[26px] border border-product-border bg-product-surface/78 px-5 py-10 text-center shadow-panel backdrop-blur-xl">
+				<p className="font-display text-4xl uppercase tracking-[0.08em] text-product-text">
 					Checking access
 				</p>
-				<p className="mt-3 text-sm font-medium text-ink/70">
+				<p className="mt-3 text-sm font-medium text-product-muted">
 					Loading your course access and mission state.
 				</p>
 			</section>

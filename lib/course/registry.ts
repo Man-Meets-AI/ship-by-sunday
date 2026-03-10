@@ -5,6 +5,7 @@ import {
 	type BlockConfig,
 	type BlockId,
 	type LessonConfig,
+	type UploadFieldValue,
 	type WorkbenchField,
 } from "../../app/lessonRegistry";
 
@@ -17,6 +18,8 @@ export const SUPPORTED_FIELD_KINDS = new Set<WorkbenchField["kind"]>([
 	"number",
 	"toggle",
 	"select",
+	"image_upload",
+	"video_upload",
 	"table",
 	"board",
 	"checklist",
@@ -35,6 +38,7 @@ export type PersistedFieldValue =
 	| string
 	| string[]
 	| string[][]
+	| UploadFieldValue
 	| Record<string, unknown>
 	| null;
 

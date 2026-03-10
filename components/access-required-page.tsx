@@ -30,24 +30,24 @@ export function AccessRequiredPage() {
 			title="Access Required"
 			subtitle="You are signed in, but this account does not have an active Ship by Sunday entitlement yet."
 		>
-			<section className="border border-line bg-white p-6 shadow-card">
-				<p className="text-xs font-bold uppercase tracking-[0.18em] text-ink/60">
+			<section className="rounded-[26px] border border-product-border bg-product-surface/78 p-6 shadow-panel backdrop-blur-xl">
+				<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
 					Account state
 				</p>
-				<p className="mt-3 font-display text-4xl uppercase leading-none tracking-[0.04em]">
+				<p className="mt-3 font-display text-4xl uppercase leading-none tracking-[0.08em] text-product-text">
 					{access?.status ?? "Checking"}
 				</p>
-				<p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-ink/75">
+				<p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-product-muted">
 					The auth flow is live, but paid access is still granted through the
 					Convex entitlement layer. Until Stripe is wired, use an active
 					entitlement record for your Clerk user to unlock the product shell.
 				</p>
 				{access?.clerkUserId ? (
-					<div className="mt-5 border border-line bg-paper p-4">
-						<p className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink/55">
+					<div className="mt-5 rounded-[20px] border border-product-border bg-product-surface-strong/80 p-4">
+						<p className="font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
 							Clerk user id
 						</p>
-						<p className="mt-2 break-all font-mono text-sm text-ink">
+						<p className="mt-2 break-all font-mono text-sm text-product-text">
 							{access.clerkUserId}
 						</p>
 					</div>
@@ -56,11 +56,11 @@ export function AccessRequiredPage() {
 				<div className="mt-6 flex flex-wrap gap-3">
 					<CheckoutButton
 						label="Buy access"
-						className="inline-flex border border-line bg-ink px-4 py-3 font-display text-2xl uppercase tracking-[0.04em] text-paper"
+						className="inline-flex rounded-full border border-product-accent bg-product-chip px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
 					/>
 					<Link
 						href="/"
-						className="inline-flex border border-line bg-white px-4 py-3 font-display text-2xl uppercase tracking-[0.04em] text-ink"
+						className="inline-flex rounded-full border border-product-border bg-product-surface px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-text transition-colors hover:bg-product-surface-alt"
 					>
 						Back home
 					</Link>

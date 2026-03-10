@@ -17,6 +17,49 @@ export type CoachMode = "docked" | "pip";
 
 export type ExternalTool = "figma" | "code" | "deploy" | "recording";
 
+export type UploadFieldValue = {
+	kind: "upload";
+	status: "empty" | "selected" | "stored";
+	fileName?: string;
+	mimeType?: string;
+	size?: number;
+	url?: string;
+};
+
+export type CoachVideoContent = {
+	status: "pending" | "ready";
+	title?: string;
+	url?: string;
+	posterUrl?: string;
+	durationLabel?: string;
+};
+
+export type CoachTranscriptContent = {
+	status: "empty" | "ready";
+	body?: string;
+};
+
+export type CoachExampleContent = {
+	id: string;
+	title: string;
+	body: string;
+	artifactKeys?: string[];
+};
+
+export type CoachResourceContent = {
+	id: string;
+	label: string;
+	href: string;
+	kind: "download" | "external" | "internal";
+};
+
+export type LessonCoachContent = {
+	video?: CoachVideoContent;
+	transcript?: CoachTranscriptContent;
+	examples?: CoachExampleContent[];
+	resources?: CoachResourceContent[];
+};
+
 export type PanelDefaultState = {
 	objective: "open" | "collapsed";
 	coach: "docked" | "minimized" | "pip";
@@ -91,6 +134,7 @@ export type LessonConfig = {
 	panelDefaults: PanelDefaultState;
 	pinnedArtifacts?: string[];
 	workbenchFields?: WorkbenchField[];
+	coachContent?: LessonCoachContent;
 	notes?: string[];
 };
 
@@ -1427,4 +1471,3 @@ export function getDefaultShellForLesson(id: string): ShellType | undefined {
 export function getDefaultCoachModeForLesson(id: string): CoachMode | undefined {
 	return getLesson(id)?.coachMode;
 }
-
