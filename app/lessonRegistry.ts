@@ -26,40 +26,6 @@ export type UploadFieldValue = {
 	url?: string;
 };
 
-export type CoachVideoContent = {
-	status: "pending" | "ready";
-	title?: string;
-	url?: string;
-	posterUrl?: string;
-	durationLabel?: string;
-};
-
-export type CoachTranscriptContent = {
-	status: "empty" | "ready";
-	body?: string;
-};
-
-export type CoachExampleContent = {
-	id: string;
-	title: string;
-	body: string;
-	artifactKeys?: string[];
-};
-
-export type CoachResourceContent = {
-	id: string;
-	label: string;
-	href: string;
-	kind: "download" | "external" | "internal";
-};
-
-export type LessonCoachContent = {
-	video?: CoachVideoContent;
-	transcript?: CoachTranscriptContent;
-	examples?: CoachExampleContent[];
-	resources?: CoachResourceContent[];
-};
-
 export type PanelDefaultState = {
 	objective: "open" | "collapsed";
 	coach: "docked" | "minimized" | "pip";
@@ -134,7 +100,6 @@ export type LessonConfig = {
 	panelDefaults: PanelDefaultState;
 	pinnedArtifacts?: string[];
 	workbenchFields?: WorkbenchField[];
-	coachContent?: LessonCoachContent;
 	notes?: string[];
 };
 
@@ -191,21 +156,109 @@ export const lessonRegistry: LessonConfig[] = [
 			type: "mixed",
 			required: false,
 		},
-		nextLessonId: "1.1",
-		unlocks: ["1.1"],
+		nextLessonId: "0.1",
+		unlocks: ["0.1"],
 		coachMode: "docked",
 		objectiveTitle: "Mission Overview",
 		checklist: [
 			"Understand the 4-block sprint",
 			"See the lesson path",
-			"Start the CEO block",
+			"Start with Welcome",
 		],
 		helperText: "This is navigation and orientation, not a graded lesson.",
-		winCondition: "User understands the path and launches the first CEO lesson.",
+		winCondition: "User understands the path and launches Start Here.",
 		panelDefaults: missionPanelDefaults,
 		notes: [
 			"Use this as the home / dashboard screen.",
 			"Do not treat builder roles as the primary progression model.",
+		],
+	},
+	{
+		id: "0.1",
+		order: 0.1,
+		block: "CEO",
+		title: "Welcome to Ship by Sunday",
+		shortTitle: "Welcome",
+		shell: "split",
+		workbench: "guided_form",
+		artifact: {
+			key: "weekend_shipping_goal",
+			label: "Weekend Shipping Goal",
+			type: "text",
+			required: true,
+		},
+		nextLessonId: "0.2",
+		prevLessonId: "0.0",
+		unlocks: ["0.2"],
+		coachMode: "docked",
+		objectiveTitle: "Start Here 0.1 — Welcome to Ship by Sunday",
+		checklist: [
+			"See the 4-block path",
+			"Define the thing you are here to ship",
+			"Commit to doing reps instead of just watching",
+		],
+		helperText: "This is the orientation rep. Keep the goal small and concrete.",
+		winCondition: "A concrete weekend shipping goal is saved.",
+		panelDefaults: splitPanelDefaults,
+		workbenchFields: [
+			{
+				id: "weekend_goal",
+				label: "What are you here to ship this weekend?",
+				kind: "textarea",
+				required: true,
+				rows: 4,
+				placeholder: "Name the smallest believable thing you want live by Sunday.",
+			},
+		],
+	},
+	{
+		id: "0.2",
+		order: 0.2,
+		block: "CEO",
+		title: "How the Sprint Works",
+		shortTitle: "Sprint",
+		shell: "split",
+		workbench: "console_checklist",
+		artifact: {
+			key: "sprint_setup_state",
+			label: "Sprint Setup State",
+			type: "checklist",
+			required: true,
+		},
+		nextLessonId: "1.1",
+		prevLessonId: "0.1",
+		unlocks: ["1.1"],
+		coachMode: "docked",
+		objectiveTitle: "Start Here 0.2 — How the Sprint Works",
+		checklist: [
+			"Open the worksheet packet",
+			"Understand the 4 blocks",
+			"Get ready to start CEO 1.1",
+		],
+		helperText: "Set up the sprint so the first block starts with zero confusion.",
+		winCondition: "The sprint setup checklist is complete.",
+		panelDefaults: splitPanelDefaults,
+		workbenchFields: [
+			{
+				id: "worksheet_packet_open",
+				label: "Worksheet packet open",
+				kind: "toggle",
+				required: true,
+			},
+			{
+				id: "workspace_ready",
+				label: "Templates and working folder ready",
+				kind: "toggle",
+				required: true,
+			},
+			{
+				id: "ceo_block_commitment",
+				label: "What is your first concrete move in CEO 1.1?",
+				kind: "textarea",
+				required: true,
+				rows: 3,
+				placeholder: "Example: write 3 candidate problems from work this week.",
+			},
 		],
 	},
 	{
@@ -223,7 +276,7 @@ export const lessonRegistry: LessonConfig[] = [
 			required: true,
 		},
 		nextLessonId: "1.2",
-		prevLessonId: "0.0",
+		prevLessonId: "0.2",
 		unlocks: ["1.2"],
 		coachMode: "docked",
 		objectiveTitle: "CEO 1.1 — Start With the Problem",

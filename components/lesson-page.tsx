@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 
 import type { LessonConfig } from "@/app/lessonRegistry";
+import type { LessonContent } from "@/content/lessons/types";
 import { api } from "@/convex/_generated/api";
 import { WorkbenchRenderer } from "@/components/lesson-workbench";
 import {
@@ -79,8 +80,10 @@ function isChromeState(value: unknown): value is LessonChromeState {
 
 export function LessonPage({
 	lessonId,
+	lessonContent,
 }: {
 	lessonId: string;
+	lessonContent: LessonContent;
 }) {
 	const router = useRouter();
 	const { isAuthenticated } = useConvexAuth();
@@ -88,6 +91,7 @@ export function LessonPage({
 		api.course.getLessonState,
 		isAuthenticated ? { lessonId } : "skip",
 	) as LessonState | LockedLessonState | undefined;
+	const markLessonViewed = useMutation(api.course.markLessonViewed);
 	const saveLessonDraft = useMutation(api.course.saveLessonDraft);
 	const completeLesson = useMutation(api.course.completeLesson);
 	const [fieldValues, setFieldValues] = useState<Record<string, unknown>>({});
@@ -96,6 +100,7 @@ export function LessonPage({
 	);
 	const [chromeState, setChromeState] = useState<LessonChromeState | null>(null);
 	const initializedForLessonId = useRef<string | null>(null);
+	const lastMarkedLessonId = useRef<string | null>(null);
 	const lastSavedSnapshot = useRef("");
 
 	useEffect(() => {
@@ -171,11 +176,24 @@ export function LessonPage({
 		return () => window.clearTimeout(timeout);
 	}, [fieldValues, lessonId, lessonState, saveLessonDraft]);
 
+	useEffect(() => {
+		if (!lessonState || lessonState.accessStatus !== "unlocked") {
+			return;
+		}
+
+		if (lastMarkedLessonId.current === lessonId) {
+			return;
+		}
+
+		lastMarkedLessonId.current = lessonId;
+		void markLessonViewed({ lessonId });
+	}, [lessonId, lessonState, markLessonViewed]);
+
 	if (lessonState === undefined) {
 		return (
 			<ProductShell currentLessonId={lessonId}>
 				<ViewerGate>
-					<section className="rounded-[26px] border border-product-border bg-product-surface/78 px-5 py-10 text-center shadow-panel backdrop-blur-xl">
+					<section className="rounded-none border border-product-border bg-product-surface/78 px-5 py-10 text-center shadow-panel backdrop-blur-xl">
 						<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
 							Loading lesson
 						</p>
@@ -192,7 +210,7 @@ export function LessonPage({
 		return (
 			<ProductShell currentLessonId={lessonId}>
 				<ViewerGate>
-					<section className="rounded-[26px] border border-product-border bg-product-surface/78 px-5 py-10 text-center shadow-panel backdrop-blur-xl">
+					<section className="rounded-none border border-product-border bg-product-surface/78 px-5 py-10 text-center shadow-panel backdrop-blur-xl">
 						<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
 							Lesson locked
 						</p>
@@ -207,13 +225,13 @@ export function LessonPage({
 							<button
 								type="button"
 								onClick={() => router.back()}
-								className="rounded-full border border-product-border bg-product-surface px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-text transition-colors hover:bg-product-surface-alt"
+								className="rounded-none border border-product-border bg-product-surface px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-text transition-colors hover:bg-product-surface-alt"
 							>
 								Go back
 							</button>
 							<Link
 								href="/mission"
-								className="rounded-full border border-product-accent bg-product-chip px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
+								className="rounded-none border border-product-accent bg-product-chip px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
 							>
 								Open mission
 							</Link>
@@ -228,7 +246,7 @@ export function LessonPage({
 		return (
 			<ProductShell currentLessonId={lessonId}>
 				<ViewerGate>
-					<section className="rounded-[26px] border border-product-border bg-product-surface/78 px-5 py-10 text-center shadow-panel backdrop-blur-xl">
+					<section className="rounded-none border border-product-border bg-product-surface/78 px-5 py-10 text-center shadow-panel backdrop-blur-xl">
 						<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
 							Loading lesson
 						</p>
@@ -242,6 +260,11 @@ export function LessonPage({
 	}
 
 	const { lesson, pinnedArtifacts } = lessonState;
+	const previousHref = lesson.prevLessonId
+		? lesson.prevLessonId === "0.0"
+			? "/mission"
+			: `/lesson/${lesson.prevLessonId}`
+		: null;
 
 	const setValue = (fieldId: string, value: unknown) => {
 		setFieldValues((current) => ({
@@ -257,10 +280,10 @@ export function LessonPage({
 				{saveStatus === "idle" ? "ready" : saveStatus}.
 			</div>
 			<div className="flex flex-wrap gap-3">
-				{lesson.prevLessonId ? (
+				{previousHref ? (
 					<Link
-						href={`/lesson/${lesson.prevLessonId}`}
-						className="rounded-full border border-product-border bg-product-surface px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-text transition-colors hover:bg-product-surface-alt"
+						href={previousHref}
+						className="rounded-none border border-product-border bg-product-surface px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-text transition-colors hover:bg-product-surface-alt"
 					>
 						Back
 					</Link>
@@ -279,7 +302,7 @@ export function LessonPage({
 							},
 						);
 					}}
-					className="rounded-full border border-product-border bg-product-surface px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-text transition-colors hover:bg-product-surface-alt"
+					className="rounded-none border border-product-border bg-product-surface px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-text transition-colors hover:bg-product-surface-alt"
 				>
 					Save draft
 				</button>
@@ -300,7 +323,7 @@ export function LessonPage({
 							},
 						);
 					}}
-					className="rounded-full border border-product-accent bg-product-chip px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
+					className="rounded-none border border-product-accent bg-product-chip px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
 				>
 					Complete lesson
 				</button>
@@ -311,6 +334,7 @@ export function LessonPage({
 	const workbench = (
 		<WorkbenchRenderer
 			lesson={lesson}
+			lessonContent={lessonContent}
 			fieldValues={fieldValues}
 			onFieldChange={setValue}
 			pinnedArtifacts={pinnedArtifacts}
@@ -367,6 +391,7 @@ export function LessonPage({
 							)
 						}
 						pinnedArtifacts={pinnedArtifacts}
+						coachContent={lessonContent.coach}
 						footer={footer}
 					>
 						{workbench}
@@ -399,6 +424,7 @@ export function LessonPage({
 							)
 						}
 						pinnedArtifacts={pinnedArtifacts}
+						coachContent={lessonContent.coach}
 						footer={footer}
 					>
 						{workbench}

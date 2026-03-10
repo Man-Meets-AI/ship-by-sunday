@@ -1,11 +1,19 @@
-"use client";
+import { notFound } from "next/navigation";
 
-import { useParams } from "next/navigation";
-
+import { getLessonContent } from "@/content/lessons";
 import { LessonPage } from "@/components/lesson-page";
 
-export default function Page() {
-	const params = useParams<{ lessonId: string }>();
+export default async function Page({
+	params,
+}: {
+	params: Promise<{ lessonId: string }>;
+}) {
+	const { lessonId } = await params;
+	const lessonContent = getLessonContent(lessonId);
 
-	return <LessonPage lessonId={params.lessonId} />;
+	if (!lessonContent) {
+		notFound();
+	}
+
+	return <LessonPage lessonId={lessonId} lessonContent={lessonContent} />;
 }

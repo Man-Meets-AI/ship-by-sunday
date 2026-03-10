@@ -86,6 +86,36 @@ export const viewerAccess = query({
 	},
 });
 
+export const getResumeDestination = query({
+	args: {},
+	returns: v.any(),
+	handler: async (ctx) => {
+		const clerkUserId = await requireActiveEntitlement(ctx);
+		const lessonStates = await getViewerLessonStates(ctx, clerkUserId);
+
+		const latestLessonState = [...lessonStates]
+			.filter((state: any) => Boolean(getLessonById(state.lessonId)))
+			.sort((left: any, right: any) => {
+				const leftTimestamp = left.lastViewedAt ?? left.updatedAt ?? left.startedAt ?? 0;
+				const rightTimestamp =
+					right.lastViewedAt ?? right.updatedAt ?? right.startedAt ?? 0;
+				return rightTimestamp - leftTimestamp;
+			})[0];
+
+		if (!latestLessonState) {
+			return {
+				destination: "/mission",
+				lessonId: null,
+			};
+		}
+
+		return {
+			destination: `/lesson/${latestLessonState.lessonId}`,
+			lessonId: latestLessonState.lessonId,
+		};
+	},
+});
+
 export const grantEntitlement = internalMutation({
 	args: {
 		clerkUserId: v.string(),
@@ -381,6 +411,61 @@ export const saveLessonDraft = mutation({
 		}
 
 		return { savedAt: now };
+	},
+});
+
+export const markLessonViewed = mutation({
+	args: {
+		lessonId: v.string(),
+	},
+	returns: v.any(),
+	handler: async (ctx, args) => {
+		const clerkUserId = await requireActiveEntitlement(ctx);
+		const lesson = getLessonById(args.lessonId);
+
+		if (!lesson) {
+			throw new ConvexError("Lesson not found");
+		}
+
+		const lessonStates = await getViewerLessonStates(ctx, clerkUserId);
+		const completedLessonIds = lessonStates
+			.filter((state: any) => state.status === "completed")
+			.map((state: any) => state.lessonId);
+
+		ensureLessonIsUnlocked(lesson.id, completedLessonIds);
+
+		const existingState = await ctx.db
+			.query("lessonStates")
+			.withIndex("by_clerk_user_id_and_lesson_id", (queryBuilder: any) =>
+				queryBuilder.eq("clerkUserId", clerkUserId).eq("lessonId", lesson.id),
+			)
+			.unique();
+		const now = Date.now();
+
+		if (existingState) {
+			await ctx.db.patch(existingState._id, {
+				lastViewedAt: now,
+				updatedAt: existingState.updatedAt ?? now,
+			});
+
+			return { viewedAt: now, created: false };
+		}
+
+		await ctx.db.insert("lessonStates", {
+			clerkUserId,
+			courseSlug: COURSE_SLUG,
+			lessonId: lesson.id,
+			blockId: lesson.block,
+			status: "not_started",
+			artifactKey: lesson.artifact.key,
+			artifactType: lesson.artifact.type,
+			fieldValues: {},
+			startedAt: now,
+			updatedAt: now,
+			lastViewedAt: now,
+		});
+
+		return { viewedAt: now, created: true };
 	},
 });
 

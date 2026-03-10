@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CheckoutButton } from "@/components/checkout-button";
+import { HomeRedirectGate } from "@/components/home-redirect-gate";
 import FAQAccordion from "./faq-accordion";
 
 const proofImage = "/founder-proof.jpg";
@@ -147,10 +148,18 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function Page() {
+export default async function Page({
+  searchParams
+}: {
+  searchParams?: Promise<{ marketing?: string }>;
+}) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const allowMarketing = resolvedSearchParams?.marketing === "1";
+
   return (
-    <main className="bg-paper text-ink">
-      <div className="mx-auto flex min-h-screen max-w-[1280px] flex-col gap-4 px-3 py-3 sm:px-5 sm:py-5">
+    <HomeRedirectGate allowMarketing={allowMarketing}>
+      <main className="bg-paper text-ink">
+        <div className="mx-auto flex min-h-screen max-w-[1280px] flex-col gap-4 px-3 py-3 sm:px-5 sm:py-5">
         <section className="border border-line bg-white px-4 py-4 shadow-card sm:px-6 sm:py-5">
           <div className="mx-auto flex max-w-5xl flex-col items-center text-center">
             <div className="mb-4 flex w-full justify-end">
@@ -511,7 +520,8 @@ export default function Page() {
             Ship by Sunday
           </p>
         </footer>
-      </div>
-    </main>
+        </div>
+      </main>
+    </HomeRedirectGate>
   );
 }

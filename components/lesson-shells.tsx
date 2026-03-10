@@ -2,11 +2,8 @@
 
 import Link from "next/link";
 
-import {
-	getLesson,
-	type LessonCoachContent,
-	type LessonConfig,
-} from "@/app/lessonRegistry";
+import { getLesson, type LessonConfig } from "@/app/lessonRegistry";
+import type { LessonContent } from "@/content/lessons/types";
 
 export type PinnedArtifact = {
 	artifactKey: string;
@@ -25,6 +22,7 @@ type BaseLessonShellProps = {
 	activeCoachPanel: CoachPanelKey;
 	onCoachPanelChange: (panel: CoachPanelKey) => void;
 	pinnedArtifacts: PinnedArtifact[];
+	coachContent: LessonContent["coach"];
 	children: React.ReactNode;
 	footer: React.ReactNode;
 };
@@ -54,7 +52,7 @@ function ObjectivePanel({
 
 	if (collapsed) {
 		return (
-			<aside className="flex min-h-[320px] flex-col items-center justify-between rounded-[22px] border border-product-border bg-product-surface/78 p-3 shadow-panel backdrop-blur-xl">
+			<aside className="flex min-h-[320px] flex-col items-center justify-between rounded-none border border-product-border bg-product-surface/78 p-3 shadow-panel backdrop-blur-xl">
 				<div className="text-center">
 					<p className="font-mono text-[10px] uppercase tracking-[0.24em] text-product-muted">
 						Objective
@@ -66,7 +64,7 @@ function ObjectivePanel({
 				<button
 					type="button"
 					onClick={onToggle}
-					className="rounded-full border border-product-border bg-product-surface-alt/80 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.22em] text-product-text"
+					className="rounded-none border border-product-border bg-product-surface-alt/80 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.22em] text-product-text"
 				>
 					Open
 				</button>
@@ -75,7 +73,7 @@ function ObjectivePanel({
 	}
 
 	return (
-		<aside className="rounded-[26px] border border-product-border bg-product-surface/78 p-5 shadow-panel backdrop-blur-xl">
+		<aside className="rounded-none border border-product-border bg-product-surface/78 p-5 shadow-panel backdrop-blur-xl">
 			<div className="flex items-start justify-between gap-3">
 				<div>
 					<p className="font-mono text-[11px] uppercase tracking-[0.22em] text-product-muted">
@@ -88,7 +86,7 @@ function ObjectivePanel({
 				<button
 					type="button"
 					onClick={onToggle}
-					className="rounded-full border border-product-border bg-product-surface-alt/80 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.22em] text-product-text"
+					className="rounded-none border border-product-border bg-product-surface-alt/80 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.22em] text-product-text"
 				>
 					Collapse
 				</button>
@@ -100,7 +98,7 @@ function ObjectivePanel({
 				{lesson.helperText ?? lesson.winCondition}
 			</p>
 
-			<div className="mt-6 rounded-[20px] border border-product-border bg-product-surface-strong/80 p-4">
+			<div className="mt-6 rounded-none border border-product-border bg-product-surface-strong/80 p-4">
 				<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
 					Checklist
 				</p>
@@ -111,7 +109,7 @@ function ObjectivePanel({
 				</ul>
 			</div>
 
-			<div className="mt-4 rounded-[20px] border border-product-border bg-product-surface-strong/80 p-4">
+			<div className="mt-4 rounded-none border border-product-border bg-product-surface-strong/80 p-4">
 				<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
 					Output
 				</p>
@@ -120,7 +118,7 @@ function ObjectivePanel({
 				</p>
 			</div>
 
-			<div className="mt-4 rounded-[20px] border border-product-border bg-product-surface-strong/80 p-4">
+			<div className="mt-4 rounded-none border border-product-border bg-product-surface-strong/80 p-4">
 				<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
 					Next unlock
 				</p>
@@ -138,7 +136,7 @@ function CoachPanel({
 	onPanelChange,
 	pinnedArtifacts,
 }: {
-	coachContent?: LessonCoachContent;
+	coachContent: LessonContent["coach"];
 	activePanel: CoachPanelKey;
 	onPanelChange: (panel: CoachPanelKey) => void;
 	pinnedArtifacts: PinnedArtifact[];
@@ -160,7 +158,7 @@ function CoachPanel({
 						<video
 							controls
 							poster={coachContent.video.posterUrl}
-							className="w-full rounded-[18px] border border-product-border bg-product-surface-strong"
+							className="w-full rounded-none border border-product-border bg-product-surface-strong"
 							src={coachContent.video.url}
 						/>
 						<p className="text-xs font-medium uppercase tracking-[0.18em] text-product-muted">
@@ -168,7 +166,7 @@ function CoachPanel({
 						</p>
 					</div>
 				) : (
-					<div className="rounded-[18px] border border-dashed border-product-border bg-product-surface-strong/70 p-4 text-sm font-medium leading-relaxed text-product-muted">
+					<div className="rounded-none border border-dashed border-product-border bg-product-surface-strong/70 p-4 text-sm font-medium leading-relaxed text-product-muted">
 						Video hosting is not wired yet. The watch slot is ready for the lesson
 						asset once upload and delivery are finalized.
 					</div>
@@ -198,7 +196,7 @@ function CoachPanel({
 						{examples.map((example) => (
 							<div
 								key={example.id}
-								className="rounded-[18px] border border-product-border bg-product-surface-strong/80 p-4"
+								className="rounded-none border border-product-border bg-product-surface-strong/80 p-4"
 							>
 								<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
 									{example.title}
@@ -214,7 +212,7 @@ function CoachPanel({
 						{pinnedArtifacts.slice(0, 3).map((artifact) => (
 							<div
 								key={artifact.artifactKey}
-								className="rounded-[18px] border border-product-border bg-product-surface-strong/80 p-4"
+								className="rounded-none border border-product-border bg-product-surface-strong/80 p-4"
 							>
 								<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
 									{artifact.lessonTitle}
@@ -259,7 +257,7 @@ function CoachPanel({
 								key={resource.id}
 								href={resource.href}
 								target={resource.kind === "external" ? "_blank" : undefined}
-								className="block rounded-[18px] border border-product-border bg-product-surface-strong/80 p-4 transition-colors hover:bg-product-surface-alt"
+								className="block rounded-none border border-product-border bg-product-surface-strong/80 p-4 transition-colors hover:bg-product-surface-alt"
 							>
 								<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
 									{resource.kind}
@@ -278,7 +276,7 @@ function CoachPanel({
 	];
 
 	return (
-		<aside className="rounded-[26px] border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-xl">
+		<aside className="rounded-none border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-xl">
 			<div className="border-b border-product-border px-5 py-4">
 				<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
 					Coach
@@ -318,6 +316,7 @@ export function LessonShellSplit({
 	activeCoachPanel,
 	onCoachPanelChange,
 	pinnedArtifacts,
+	coachContent,
 	children,
 	footer,
 }: BaseLessonShellProps) {
@@ -328,7 +327,7 @@ export function LessonShellSplit({
 				collapsed={objectiveCollapsed}
 				onToggle={onToggleObjective}
 			/>
-			<section className="rounded-[28px] border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-xl">
+			<section className="rounded-none border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-xl">
 				<div className="border-b border-product-border px-5 py-4">
 					<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
 						Workbench - {lesson.id}
@@ -341,13 +340,13 @@ export function LessonShellSplit({
 			</section>
 			{coachVisible ? (
 				<CoachPanel
-					coachContent={lesson.coachContent}
+					coachContent={coachContent}
 					activePanel={activeCoachPanel}
 					onPanelChange={onCoachPanelChange}
 					pinnedArtifacts={pinnedArtifacts}
 				/>
 			) : (
-				<div className="rounded-[26px] border border-dashed border-product-border bg-product-surface/60 p-5 text-sm font-medium leading-relaxed text-product-muted shadow-panel backdrop-blur-xl">
+				<div className="rounded-none border border-dashed border-product-border bg-product-surface/60 p-5 text-sm font-medium leading-relaxed text-product-muted shadow-panel backdrop-blur-xl">
 					Coach hidden. Use the HUD toggle to reopen the lesson video and reference
 					panels.
 				</div>
@@ -364,6 +363,7 @@ export function LessonShellFocus({
 	activeCoachPanel,
 	onCoachPanelChange,
 	pinnedArtifacts,
+	coachContent,
 	children,
 	footer,
 }: BaseLessonShellProps) {
@@ -375,7 +375,7 @@ export function LessonShellFocus({
 					collapsed={objectiveCollapsed}
 					onToggle={onToggleObjective}
 				/>
-				<section className="rounded-[28px] border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-xl">
+				<section className="rounded-none border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-xl">
 					<div className="border-b border-product-border px-5 py-4">
 						<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
 							Focus workspace - {lesson.id}
@@ -392,7 +392,7 @@ export function LessonShellFocus({
 				<div className="xl:pointer-events-none xl:absolute xl:right-6 xl:top-6 xl:w-[320px]">
 					<div className="xl:pointer-events-auto">
 						<CoachPanel
-							coachContent={lesson.coachContent}
+							coachContent={coachContent}
 							activePanel={activeCoachPanel}
 							onPanelChange={onCoachPanelChange}
 							pinnedArtifacts={pinnedArtifacts}
