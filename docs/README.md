@@ -6,7 +6,7 @@ This folder is the canonical home for generated launch workstream docs.
 
 - `todo.md`: current status, owners, blockers, and the next operating sequence
 - `main.md`: launch OS, critical path, and launch-wide constraints
-- `lib/course/manifest.ts` + `content/lessons/`: curriculum and lesson-structure contract
+- `lib/course/`: curriculum, lesson structure, and student-facing lesson content
 - `convex/`: entitlement, progress, autosave, and buyer-access state
 - `docs/<workstream>/`: workstream decisions, plans, and supporting detail
 

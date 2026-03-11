@@ -4,8 +4,7 @@
 
 - `app/`: route entrypoints and route-local UI
 - `components/`: shared UI shells and view components
-- `lib/course/`: course domain contracts, helpers, and registry logic
-- `content/lessons/`: lesson-content modules and generated lesson barrel
+- `lib/course/`: course domain contracts, resources, manual lesson definitions, and registry logic
 - `convex/`: entitlements, mission state, lesson state, and uploads
 
 ## Purchase to access flow
@@ -18,13 +17,7 @@
 
 ## Product state flow
 
-- `lib/course/manifest.ts` defines the course contract.
+- `lib/course/manifest.ts` assembles the course contract.
+- `lib/course/lessons/*.ts` own the manual lesson definitions and student-facing content.
 - `lib/course/registry.ts` derives runtime helpers from that contract.
-- `content/lessons/index.ts` joins the course contract with lesson-content modules.
 - `convex/course.ts` stores progress and entitlement state.
-
-## Generated content
-
-- `scripts/build-lesson-content-from-blueprint.mjs` generates lesson modules and the generated lesson barrel.
-- Generated outputs must be reproducible from tracked source inputs.
-- Do not hand-edit machine-owned outputs without updating the generator or the source inputs.
