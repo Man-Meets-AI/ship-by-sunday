@@ -1,5 +1,5 @@
 import { ConvexError, v } from "convex/values";
-import { internalMutation, mutation, query } from "./_generated/server";
+import type { LessonConfig } from "../lib/course/contracts";
 import { requireConvexEnv } from "./env";
 import {
 	COURSE_SLUG,
@@ -8,7 +8,6 @@ import {
 	getLessonByArtifactKey,
 	getLessonById,
 	getOrderedBlocks,
-	getOrderedLessons,
 	getStudentFacingLessons,
 	getUnlockedLessonIds,
 	isLessonFieldShapeCompatible,
@@ -16,9 +15,39 @@ import {
 	normalizeLessonFieldValues,
 	normalizeFieldValues,
 	prepareFieldValuesForPersistence,
+	type PersistedFieldValues,
 } from "../lib/course/registry";
+import type { Doc } from "./_generated/dataModel";
+import {
+	internalMutation,
+	mutation,
+	query,
+	type MutationCtx,
+	type QueryCtx,
+} from "./_generated/server";
 
-async function requireViewer(ctx: any) {
+type CourseReadCtx = QueryCtx | MutationCtx;
+type LessonStateDoc = Doc<"lessonStates">;
+
+type ViewerCourseState = {
+	clerkUserId: string;
+	lessonStates: LessonStateDoc[];
+	lessonStateByLessonId: Map<string, LessonStateDoc>;
+	compatibleCompletedLessonIds: string[];
+	compatibleCompletedLessonIdSet: Set<string>;
+	unlockedLessonIds: Set<string>;
+};
+
+type LessonStateUpsertOptions =
+	| {
+			mode: "view";
+	  }
+	| {
+			mode: "draft" | "complete";
+			fieldValues: PersistedFieldValues;
+	  };
+
+async function requireViewer(ctx: CourseReadCtx) {
 	const identity = await ctx.auth.getUserIdentity();
 
 	if (!identity) {
@@ -28,7 +57,7 @@ async function requireViewer(ctx: any) {
 	return identity.subject;
 }
 
-async function getEntitlementByCourse(ctx: any, clerkUserId: string) {
+async function getEntitlementByCourse(ctx: CourseReadCtx, clerkUserId: string) {
 	return ctx.db
 		.query("courseEntitlements")
 		.withIndex("by_clerk_user_id_and_course_slug", (queryBuilder: any) =>
@@ -37,7 +66,7 @@ async function getEntitlementByCourse(ctx: any, clerkUserId: string) {
 		.unique();
 }
 
-async function requireActiveEntitlement(ctx: any) {
+async function requireActiveEntitlement(ctx: CourseReadCtx) {
 	const clerkUserId = await requireViewer(ctx);
 	const entitlement = await getEntitlementByCourse(ctx, clerkUserId);
 
@@ -48,7 +77,10 @@ async function requireActiveEntitlement(ctx: any) {
 	return clerkUserId;
 }
 
-async function getViewerLessonStates(ctx: any, clerkUserId: string) {
+async function getViewerLessonStates(
+	ctx: CourseReadCtx,
+	clerkUserId: string,
+): Promise<LessonStateDoc[]> {
 	return ctx.db
 		.query("lessonStates")
 		.withIndex("by_clerk_user_id_and_status", (queryBuilder: any) =>
@@ -57,22 +89,167 @@ async function getViewerLessonStates(ctx: any, clerkUserId: string) {
 		.collect();
 }
 
+function getCompatibleCompletedLessonIds(lessonStates: LessonStateDoc[]) {
+	return lessonStates.flatMap((state) => {
+		if (state.status !== "completed") {
+			return [];
+		}
+
+		const lesson = getLessonById(state.lessonId);
+		if (
+			!lesson ||
+			!isLessonFieldShapeCompatible(
+				lesson,
+				state.fieldValues as PersistedFieldValues,
+			)
+		) {
+			return [];
+		}
+
+		return [state.lessonId];
+	});
+}
+
+async function loadViewerCourseState(
+	ctx: CourseReadCtx,
+): Promise<ViewerCourseState> {
+	const clerkUserId = await requireActiveEntitlement(ctx);
+	const lessonStates = await getViewerLessonStates(ctx, clerkUserId);
+	const compatibleCompletedLessonIds =
+		getCompatibleCompletedLessonIds(lessonStates);
+
+	return {
+		clerkUserId,
+		lessonStates,
+		lessonStateByLessonId: new Map(
+			lessonStates.map((state) => [state.lessonId, state]),
+		),
+		compatibleCompletedLessonIds,
+		compatibleCompletedLessonIdSet: new Set(compatibleCompletedLessonIds),
+		unlockedLessonIds: new Set(
+			getUnlockedLessonIds(compatibleCompletedLessonIds),
+		),
+	};
+}
+
+function canAccessLesson(lessonId: string, viewerState: ViewerCourseState) {
+	return (
+		viewerState.unlockedLessonIds.has(lessonId) ||
+		viewerState.compatibleCompletedLessonIdSet.has(lessonId) ||
+		viewerState.lessonStateByLessonId.has(lessonId)
+	);
+}
+
 function ensureLessonIsUnlocked(
 	lessonId: string,
-	completedLessonIds: string[],
+	viewerState: ViewerCourseState,
 ) {
-	const unlockedLessonIds = new Set(getUnlockedLessonIds(completedLessonIds));
-
-	if (
-		!unlockedLessonIds.has(lessonId) &&
-		!completedLessonIds.includes(lessonId)
-	) {
+	if (!canAccessLesson(lessonId, viewerState)) {
 		throw new ConvexError("Lesson is still locked");
 	}
 }
 
+function isCompatibleLessonState(
+	lesson: LessonConfig,
+	lessonState: LessonStateDoc | null | undefined,
+) {
+	return (
+		Boolean(lessonState) &&
+		isLessonFieldShapeCompatible(
+			lesson,
+			lessonState?.fieldValues as PersistedFieldValues,
+		)
+	);
+}
+
+function getNormalizedLessonFieldValues(
+	lesson: LessonConfig,
+	lessonState: LessonStateDoc | null | undefined,
+) {
+	return normalizeLessonFieldValues(
+		lesson,
+		(lessonState?.fieldValues ?? {}) as PersistedFieldValues,
+	);
+}
+
+async function upsertLessonState(
+	ctx: MutationCtx,
+	viewerState: ViewerCourseState,
+	lesson: LessonConfig,
+	options: LessonStateUpsertOptions,
+) {
+	const existingState = viewerState.lessonStateByLessonId.get(lesson.id);
+	const now = Date.now();
+
+	if (options.mode === "view") {
+		if (existingState) {
+			await ctx.db.patch(existingState._id, {
+				lastViewedAt: now,
+				updatedAt: existingState.updatedAt ?? now,
+			});
+
+			return { created: false, timestamp: now };
+		}
+
+		await ctx.db.insert("lessonStates", {
+			clerkUserId: viewerState.clerkUserId,
+			courseSlug: COURSE_SLUG,
+			lessonId: lesson.id,
+			blockId: lesson.block,
+			status: "not_started",
+			artifactKey: lesson.artifact.key,
+			artifactType: lesson.artifact.type,
+			fieldValues: {},
+			startedAt: now,
+			updatedAt: now,
+			lastViewedAt: now,
+		});
+
+		return { created: true, timestamp: now };
+	}
+
+	const fieldValues = prepareFieldValuesForPersistence(
+		lesson,
+		options.fieldValues,
+	);
+
+	if (existingState) {
+		await ctx.db.patch(existingState._id, {
+			fieldValues,
+			status:
+				options.mode === "complete"
+					? "completed"
+					: existingState.status === "completed"
+						? "completed"
+						: "in_progress",
+			updatedAt: now,
+			lastViewedAt: now,
+			...(options.mode === "complete" ? { completedAt: now } : {}),
+		});
+
+		return { created: false, timestamp: now };
+	}
+
+	await ctx.db.insert("lessonStates", {
+		clerkUserId: viewerState.clerkUserId,
+		courseSlug: COURSE_SLUG,
+		lessonId: lesson.id,
+		blockId: lesson.block,
+		status: options.mode === "complete" ? "completed" : "in_progress",
+		artifactKey: lesson.artifact.key,
+		artifactType: lesson.artifact.type,
+		fieldValues,
+		startedAt: now,
+		updatedAt: now,
+		lastViewedAt: now,
+		...(options.mode === "complete" ? { completedAt: now } : {}),
+	});
+
+	return { created: true, timestamp: now };
+}
+
 async function hydrateUploadUrls(
-	ctx: any,
+	ctx: QueryCtx,
 	fieldValues: Record<string, unknown>,
 ) {
 	const values = normalizeFieldValues(fieldValues as any);
@@ -284,33 +461,24 @@ export const getMissionState = query({
 	args: {},
 	returns: v.any(),
 	handler: async (ctx) => {
-		const clerkUserId = await requireActiveEntitlement(ctx);
-		const lessonStates = await getViewerLessonStates(ctx, clerkUserId);
-		const completedLessonIds = lessonStates
-			.filter((state: any) => {
-				if (state.status !== "completed") {
-					return false;
-				}
-
-				const lesson = getLessonById(state.lessonId);
-				return lesson
-					? isLessonFieldShapeCompatible(lesson, state.fieldValues as any)
-					: false;
-			})
-			.map((state: any) => state.lessonId);
-		const unlockedLessonIds = new Set(getUnlockedLessonIds(completedLessonIds));
+		const viewerState = await loadViewerCourseState(ctx);
 		const lessons = getStudentFacingLessons().map((lesson) => {
-			const lessonState = lessonStates.find(
-				(state: any) => state.lessonId === lesson.id,
+			const lessonState = viewerState.lessonStateByLessonId.get(lesson.id);
+			const lessonStateIsCompatible = isCompatibleLessonState(
+				lesson,
+				lessonState,
 			);
 			let status: "locked" | "available" | "in_progress" | "completed" =
 				"locked";
 
-			if (lessonState?.status === "completed") {
+			if (viewerState.compatibleCompletedLessonIdSet.has(lesson.id)) {
 				status = "completed";
-			} else if (lessonState?.status === "in_progress") {
+			} else if (
+				lessonState?.status === "in_progress" &&
+				lessonStateIsCompatible
+			) {
 				status = "in_progress";
-			} else if (unlockedLessonIds.has(lesson.id)) {
+			} else if (canAccessLesson(lesson.id, viewerState)) {
 				status = "available";
 			}
 
@@ -357,7 +525,7 @@ export const getMissionState = query({
 			progressCount,
 			totalLessons: lessons.length,
 			blocks: missionBlocks,
-			unlockedLessonIds: Array.from(unlockedLessonIds).filter(
+			unlockedLessonIds: Array.from(viewerState.unlockedLessonIds).filter(
 				(lessonId) => lessonId !== "0.0",
 			),
 		};
@@ -368,80 +536,60 @@ export const getLessonState = query({
 	args: { lessonId: v.string() },
 	returns: v.any(),
 	handler: async (ctx, args) => {
-		const clerkUserId = await requireActiveEntitlement(ctx);
+		const viewerState = await loadViewerCourseState(ctx);
 		const lesson = getLessonById(args.lessonId);
 
 		if (!lesson) {
 			throw new ConvexError("Lesson not found");
 		}
 
-		const lessonStates = await getViewerLessonStates(ctx, clerkUserId);
-		const completedLessonIds = lessonStates
-			.filter((state: any) => {
-				if (state.status !== "completed") {
-					return false;
-				}
-
-				const stateLesson = getLessonById(state.lessonId);
-				return stateLesson
-					? isLessonFieldShapeCompatible(stateLesson, state.fieldValues as any)
-					: false;
-			})
-			.map((state: any) => state.lessonId);
-
-		const unlockedLessonIds = new Set(getUnlockedLessonIds(completedLessonIds));
-		const canOpenLesson =
-			unlockedLessonIds.has(lesson.id) ||
-			completedLessonIds.includes(lesson.id);
+		const canOpenLesson = canAccessLesson(lesson.id, viewerState);
 
 		if (!canOpenLesson) {
 			return {
 				accessStatus: "locked",
-				lessonId: lesson.id,
-				title: lesson.title,
-				shortTitle: lesson.shortTitle,
-				requiredLessonId: lesson.prevLessonId ?? null,
 			};
 		}
 
-		const lessonState = lessonStates.find(
-			(state: any) => state.lessonId === lesson.id,
+		const lessonState = viewerState.lessonStateByLessonId.get(lesson.id);
+		const lessonStateIsCompatible = isCompatibleLessonState(
+			lesson,
+			lessonState,
 		);
-		const lessonStateIsCompatible = lessonState
-			? isLessonFieldShapeCompatible(lesson, lessonState.fieldValues as any)
-			: false;
 		const pinnedArtifacts = (lesson.pinnedArtifacts ?? [])
 			.map((artifactKey) => {
 				const sourceLesson = getLessonByArtifactKey(artifactKey);
 				const sourceState = sourceLesson
-					? lessonStates.find(
-							(state: any) => state.lessonId === sourceLesson.id,
-						)
+					? viewerState.lessonStateByLessonId.get(sourceLesson.id)
 					: null;
 
-				if (!sourceLesson || !sourceState) {
+				if (
+					!sourceLesson ||
+					!sourceState ||
+					!isCompatibleLessonState(sourceLesson, sourceState)
+				) {
 					return null;
 				}
 
 				return buildArtifactPreview(
 					sourceLesson,
-					normalizeLessonFieldValues(sourceLesson, sourceState.fieldValues as any),
+					getNormalizedLessonFieldValues(sourceLesson, sourceState),
 				);
 			})
 			.filter(Boolean);
 
 		return {
 			accessStatus: "unlocked",
-			lesson,
 			fieldValues: await hydrateUploadUrls(
 				ctx,
-				lessonStateIsCompatible ? (lessonState?.fieldValues as any) : {},
+				lessonStateIsCompatible
+					? getNormalizedLessonFieldValues(lesson, lessonState)
+					: {},
 			),
 			status: lessonStateIsCompatible
 				? (lessonState?.status ?? "not_started")
 				: "not_started",
 			pinnedArtifacts,
-			isImplemented: isLessonImplemented(lesson),
 		};
 	},
 });
@@ -453,68 +601,21 @@ export const saveLessonDraft = mutation({
 	},
 	returns: v.any(),
 	handler: async (ctx, args) => {
-		const clerkUserId = await requireActiveEntitlement(ctx);
+		const viewerState = await loadViewerCourseState(ctx);
 		const lesson = getLessonById(args.lessonId);
 
 		if (!lesson) {
 			throw new ConvexError("Lesson not found");
 		}
 
-		const lessonStates = await getViewerLessonStates(ctx, clerkUserId);
-		const completedLessonIds = lessonStates
-			.filter((state: any) => {
-				if (state.status !== "completed") {
-					return false;
-				}
+		ensureLessonIsUnlocked(lesson.id, viewerState);
 
-				const stateLesson = getLessonById(state.lessonId);
-				return stateLesson
-					? isLessonFieldShapeCompatible(stateLesson, state.fieldValues as any)
-					: false;
-			})
-			.map((state: any) => state.lessonId);
+		const result = await upsertLessonState(ctx, viewerState, lesson, {
+			mode: "draft",
+			fieldValues: args.fieldValues as PersistedFieldValues,
+		});
 
-		ensureLessonIsUnlocked(lesson.id, completedLessonIds);
-
-		const existingState = await ctx.db
-			.query("lessonStates")
-			.withIndex("by_clerk_user_id_and_lesson_id", (queryBuilder: any) =>
-				queryBuilder.eq("clerkUserId", clerkUserId).eq("lessonId", lesson.id),
-			)
-			.unique();
-		const now = Date.now();
-
-		if (existingState) {
-			await ctx.db.patch(existingState._id, {
-				fieldValues: prepareFieldValuesForPersistence(
-					lesson,
-					args.fieldValues as any,
-				),
-				status:
-					existingState.status === "completed" ? "completed" : "in_progress",
-				updatedAt: now,
-				lastViewedAt: now,
-			});
-		} else {
-			await ctx.db.insert("lessonStates", {
-				clerkUserId,
-				courseSlug: COURSE_SLUG,
-				lessonId: lesson.id,
-				blockId: lesson.block,
-				status: "in_progress",
-				artifactKey: lesson.artifact.key,
-				artifactType: lesson.artifact.type,
-				fieldValues: prepareFieldValuesForPersistence(
-					lesson,
-					args.fieldValues as any,
-				),
-				startedAt: now,
-				updatedAt: now,
-				lastViewedAt: now,
-			});
-		}
-
-		return { savedAt: now };
+		return { savedAt: result.timestamp };
 	},
 });
 
@@ -524,61 +625,20 @@ export const markLessonViewed = mutation({
 	},
 	returns: v.any(),
 	handler: async (ctx, args) => {
-		const clerkUserId = await requireActiveEntitlement(ctx);
+		const viewerState = await loadViewerCourseState(ctx);
 		const lesson = getLessonById(args.lessonId);
 
 		if (!lesson) {
 			throw new ConvexError("Lesson not found");
 		}
 
-		const lessonStates = await getViewerLessonStates(ctx, clerkUserId);
-		const completedLessonIds = lessonStates
-			.filter((state: any) => {
-				if (state.status !== "completed") {
-					return false;
-				}
+		ensureLessonIsUnlocked(lesson.id, viewerState);
 
-				const stateLesson = getLessonById(state.lessonId);
-				return stateLesson
-					? isLessonFieldShapeCompatible(stateLesson, state.fieldValues as any)
-					: false;
-			})
-			.map((state: any) => state.lessonId);
-
-		ensureLessonIsUnlocked(lesson.id, completedLessonIds);
-
-		const existingState = await ctx.db
-			.query("lessonStates")
-			.withIndex("by_clerk_user_id_and_lesson_id", (queryBuilder: any) =>
-				queryBuilder.eq("clerkUserId", clerkUserId).eq("lessonId", lesson.id),
-			)
-			.unique();
-		const now = Date.now();
-
-		if (existingState) {
-			await ctx.db.patch(existingState._id, {
-				lastViewedAt: now,
-				updatedAt: existingState.updatedAt ?? now,
-			});
-
-			return { viewedAt: now, created: false };
-		}
-
-		await ctx.db.insert("lessonStates", {
-			clerkUserId,
-			courseSlug: COURSE_SLUG,
-			lessonId: lesson.id,
-			blockId: lesson.block,
-			status: "not_started",
-			artifactKey: lesson.artifact.key,
-			artifactType: lesson.artifact.type,
-			fieldValues: {},
-			startedAt: now,
-			updatedAt: now,
-			lastViewedAt: now,
+		const result = await upsertLessonState(ctx, viewerState, lesson, {
+			mode: "view",
 		});
 
-		return { viewedAt: now, created: true };
+		return { viewedAt: result.timestamp, created: result.created };
 	},
 });
 
@@ -589,28 +649,14 @@ export const completeLesson = mutation({
 	},
 	returns: v.any(),
 	handler: async (ctx, args) => {
-		const clerkUserId = await requireActiveEntitlement(ctx);
+		const viewerState = await loadViewerCourseState(ctx);
 		const lesson = getLessonById(args.lessonId);
 
 		if (!lesson) {
 			throw new ConvexError("Lesson not found");
 		}
 
-		const lessonStates = await getViewerLessonStates(ctx, clerkUserId);
-		const completedLessonIds = lessonStates
-			.filter((state: any) => {
-				if (state.status !== "completed") {
-					return false;
-				}
-
-				const stateLesson = getLessonById(state.lessonId);
-				return stateLesson
-					? isLessonFieldShapeCompatible(stateLesson, state.fieldValues as any)
-					: false;
-			})
-			.map((state: any) => state.lessonId);
-
-		ensureLessonIsUnlocked(lesson.id, completedLessonIds);
+		ensureLessonIsUnlocked(lesson.id, viewerState);
 
 		const completionIssues = getCompletionIssues(lesson, args.fieldValues);
 		if (completionIssues.length > 0) {
@@ -621,46 +667,15 @@ export const completeLesson = mutation({
 			});
 		}
 
-		const existingState = await ctx.db
-			.query("lessonStates")
-			.withIndex("by_clerk_user_id_and_lesson_id", (queryBuilder: any) =>
-				queryBuilder.eq("clerkUserId", clerkUserId).eq("lessonId", lesson.id),
-			)
-			.unique();
-		const now = Date.now();
+		const result = await upsertLessonState(ctx, viewerState, lesson, {
+			mode: "complete",
+			fieldValues: args.fieldValues as PersistedFieldValues,
+		});
 
-		if (existingState) {
-			await ctx.db.patch(existingState._id, {
-				fieldValues: prepareFieldValuesForPersistence(
-					lesson,
-					args.fieldValues as any,
-				),
-				status: "completed",
-				updatedAt: now,
-				lastViewedAt: now,
-				completedAt: now,
-			});
-		} else {
-			await ctx.db.insert("lessonStates", {
-				clerkUserId,
-				courseSlug: COURSE_SLUG,
-				lessonId: lesson.id,
-				blockId: lesson.block,
-				status: "completed",
-				artifactKey: lesson.artifact.key,
-				artifactType: lesson.artifact.type,
-				fieldValues: prepareFieldValuesForPersistence(
-					lesson,
-					args.fieldValues as any,
-				),
-				startedAt: now,
-				updatedAt: now,
-				lastViewedAt: now,
-				completedAt: now,
-			});
-		}
-
-		return { completedAt: now, nextLessonId: lesson.nextLessonId ?? null };
+		return {
+			completedAt: result.timestamp,
+			nextLessonId: lesson.nextLessonId ?? null,
+		};
 	},
 });
 
@@ -668,32 +683,22 @@ export const listArtifacts = query({
 	args: {},
 	returns: v.any(),
 	handler: async (ctx) => {
-		const clerkUserId = await requireActiveEntitlement(ctx);
-		const lessonStates = await getViewerLessonStates(ctx, clerkUserId);
+		const viewerState = await loadViewerCourseState(ctx);
 
-		return lessonStates
-			.filter((state: any) => {
-				if (state.status !== "completed") {
-					return false;
-				}
-
-				const lesson = getLessonById(state.lessonId);
-				return lesson
-					? isLessonFieldShapeCompatible(lesson, state.fieldValues as any)
-					: false;
-			})
-			.map((state: any) => {
-				const lesson = getLessonById(state.lessonId);
-				if (!lesson) {
+		return viewerState.compatibleCompletedLessonIds
+			.map((lessonId) => {
+				const lesson = getLessonById(lessonId);
+				const lessonState = viewerState.lessonStateByLessonId.get(lessonId);
+				if (!lesson || !lessonState) {
 					return null;
 				}
 
 				return {
 					...buildArtifactPreview(
 						lesson,
-						normalizeLessonFieldValues(lesson, state.fieldValues as any),
+						getNormalizedLessonFieldValues(lesson, lessonState),
 					),
-					completedAt: state.completedAt ?? state.updatedAt,
+					completedAt: lessonState.completedAt ?? lessonState.updatedAt,
 				};
 			})
 			.filter(Boolean);

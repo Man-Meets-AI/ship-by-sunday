@@ -8,7 +8,6 @@ import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import {
 	getLesson,
 	getLessonHref,
-	type LessonContent,
 	type LessonConfig,
 } from "@/lib/course/manifest";
 import { api } from "@/convex/_generated/api";
@@ -33,33 +32,21 @@ type LessonChromeState = {
 	activeCoachPanel: "watch" | "transcript" | "examples" | "resources";
 };
 
-type LessonState = {
+type UnlockedLessonState = {
 	accessStatus: "unlocked";
-	lesson: LessonConfig;
 	fieldValues: Record<string, unknown>;
 	status: string;
 	pinnedArtifacts: PinnedArtifact[];
-	isImplemented: boolean;
 };
 
 type LockedLessonState = {
 	accessStatus: "locked";
-	lessonId: string;
-	title: string;
-	shortTitle: string;
-	requiredLessonId: string | null;
 };
 
 type CompletionErrorData = {
 	code: "INCOMPLETE_LESSON";
 	message: string;
 	issues?: CompletionIssue[];
-};
-
-const FALLBACK_CHROME_STATE: LessonChromeState = {
-	layoutMode: "split",
-	coachVisible: true,
-	activeCoachPanel: "watch",
 };
 
 function getCompletionErrorData(error: unknown): CompletionErrorData | null {
@@ -129,26 +116,26 @@ function isChromeState(value: unknown): value is LessonChromeState {
 export function LessonPage({
 	initialTheme,
 	lessonId,
-	lessonContent,
 }: {
 	initialTheme: ProductTheme;
 	lessonId: string;
-	lessonContent: LessonContent;
 }) {
+	const lesson = getLesson(lessonId);
+	if (!lesson) {
+		throw new Error(`Unknown lesson: ${lessonId}`);
+	}
+
+	const lessonContent = lesson.content;
 	const router = useRouter();
 	const { isAuthenticated, isLoading } = useConvexAuth();
-	const manifestLesson = getLesson(lessonId);
 	const fallbackChromeState = useMemo(
-		() =>
-			manifestLesson
-				? getDefaultChromeState(manifestLesson)
-				: FALLBACK_CHROME_STATE,
-		[manifestLesson],
+		() => getDefaultChromeState(lesson),
+		[lesson],
 	);
 	const lessonState = useQuery(
 		api.course.getLessonState,
 		isAuthenticated && !isLoading ? { lessonId } : "skip",
-	) as LessonState | LockedLessonState | undefined;
+	) as UnlockedLessonState | LockedLessonState | undefined;
 	const markLessonViewed = useMutation(api.course.markLessonViewed);
 	const saveLessonDraft = useMutation(api.course.saveLessonDraft);
 	const completeLesson = useMutation(api.course.completeLesson);
@@ -187,10 +174,7 @@ export function LessonPage({
 	}, [lessonId, lessonState]);
 
 	useEffect(() => {
-		const defaults =
-			lessonState && lessonState.accessStatus === "unlocked"
-				? getDefaultChromeState(lessonState.lesson)
-				: fallbackChromeState;
+		const defaults = fallbackChromeState;
 		const stored = window.localStorage.getItem(storageKey(lessonId));
 		if (!stored) {
 			setChromeState(defaults);
@@ -203,7 +187,7 @@ export function LessonPage({
 		} catch {
 			setChromeState(defaults);
 		}
-	}, [fallbackChromeState, lessonId, lessonState]);
+	}, [fallbackChromeState, lessonId]);
 
 	useEffect(() => {
 		window.localStorage.setItem(
@@ -294,12 +278,11 @@ export function LessonPage({
 						Lesson locked
 					</p>
 					<p className="mt-2 font-display text-xl uppercase tracking-[0.08em] text-product-text">
-						{lessonState.lessonId} {lessonState.shortTitle}
+						{lesson.id} {lesson.shortTitle}
 					</p>
 					<p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-product-muted sm:mx-auto">
 						This lesson is locked. Go back to the mission map and finish{" "}
-						{lessonState.requiredLessonId ?? "the previous unlocked lesson"}{" "}
-						first.
+						{lesson.prevLessonId ?? "the previous unlocked lesson"} first.
 					</p>
 					<div className="mt-6 flex flex-wrap justify-center gap-3">
 						<button
@@ -321,7 +304,7 @@ export function LessonPage({
 		);
 	}
 
-	const { lesson, pinnedArtifacts } = lessonState;
+	const { pinnedArtifacts } = lessonState;
 	const previousHref = lesson.prevLessonId
 		? getLessonHref(lesson.prevLessonId)
 		: null;

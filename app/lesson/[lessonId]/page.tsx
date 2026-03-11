@@ -27,7 +27,6 @@ export default async function Page({
 			key={lessonId}
 			initialTheme={initialTheme}
 			lessonId={lessonId}
-			lessonContent={lesson.content}
 		/>
 	);
 }
