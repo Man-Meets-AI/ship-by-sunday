@@ -280,7 +280,7 @@ export default async function Page({
 						<div className="mb-4 flex w-full justify-end">
 							<Link
 								href="/sign-in"
-								className="inline-flex border border-line bg-white px-4 py-2 font-display text-2xl uppercase tracking-[0.04em] text-ink transition-transform duration-150 hover:-translate-y-1"
+								className="sbs-hover-lift sbs-press-feedback inline-flex border border-line bg-white px-4 py-2 font-display text-2xl uppercase tracking-[0.04em] text-ink"
 							>
 								Log in
 							</Link>
@@ -310,11 +310,11 @@ export default async function Page({
 						<div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
 							<CheckoutButton
 								label="Get instant access"
-								className="inline-flex min-w-full items-center justify-center border border-line bg-ink px-6 py-4 font-display text-[2rem] uppercase tracking-[0.04em] text-paper transition-transform duration-150 hover:-translate-y-1 sm:min-w-72 sm:px-8 sm:text-3xl"
+								className="sbs-hover-lift inline-flex min-w-full items-center justify-center border border-line bg-ink px-6 py-4 font-display text-[2rem] uppercase tracking-[0.04em] text-paper sm:min-w-72 sm:px-8 sm:text-3xl"
 							/>
 							<a
 								href="#how-it-works"
-								className="inline-flex min-w-full items-center justify-center border border-line bg-white px-6 py-4 font-display text-[2rem] uppercase tracking-[0.04em] text-ink transition-transform duration-150 hover:-translate-y-1 sm:min-w-72 sm:px-8 sm:text-3xl"
+								className="sbs-hover-lift sbs-press-feedback inline-flex min-w-full items-center justify-center border border-line bg-white px-6 py-4 font-display text-[2rem] uppercase tracking-[0.04em] text-ink sm:min-w-72 sm:px-8 sm:text-3xl"
 							>
 								See how it works
 							</a>
@@ -724,7 +724,7 @@ export default async function Page({
 
 						<CheckoutButton
 							label="Get instant access"
-							className="mt-6 inline-flex items-center justify-center border border-line bg-ink px-6 py-4 font-display text-[2rem] uppercase tracking-[0.04em] text-paper transition-transform duration-150 hover:-translate-y-1 sm:text-3xl"
+							className="sbs-hover-lift mt-6 inline-flex items-center justify-center border border-line bg-ink px-6 py-4 font-display text-[2rem] uppercase tracking-[0.04em] text-paper sm:text-3xl"
 						/>
 
 						<p className="mt-6 max-w-lg text-sm font-semibold uppercase leading-relaxed tracking-[0.08em] text-ink/70">

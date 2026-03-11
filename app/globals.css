@@ -15,6 +15,11 @@
 	--product-accent-soft: 38 38 38;
 	--product-chip: 236 231 222;
 	--product-shadow: 17 17 17;
+	--motion-fast: 120ms;
+	--motion-base: 180ms;
+	--motion-slow: 240ms;
+	--ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+	--ease-exit: cubic-bezier(0.4, 0, 1, 1);
 }
 
 html {
@@ -88,4 +93,52 @@ html[data-product-theme="light"] .product-theme {
 	--product-accent-soft: 38 38 38;
 	--product-chip: 236 231 222;
 	--product-shadow: 17 17 17;
+}
+
+@layer utilities {
+	.sbs-press-feedback {
+		transition:
+			transform var(--motion-fast) var(--ease-standard),
+			opacity var(--motion-fast) var(--ease-standard),
+			background-color var(--motion-fast) var(--ease-standard),
+			color var(--motion-fast) var(--ease-standard),
+			border-color var(--motion-fast) var(--ease-standard),
+			box-shadow var(--motion-base) var(--ease-standard);
+		will-change: transform;
+	}
+
+	.sbs-press-feedback:active {
+		transform: scale(0.985) translateY(1px);
+	}
+
+	.sbs-hover-lift {
+		transition:
+			transform var(--motion-fast) var(--ease-standard),
+			box-shadow var(--motion-base) var(--ease-standard),
+			background-color var(--motion-fast) var(--ease-standard),
+			color var(--motion-fast) var(--ease-standard),
+			border-color var(--motion-fast) var(--ease-standard);
+	}
+
+	@media (hover: hover) and (pointer: fine) {
+		.sbs-hover-lift:hover {
+			transform: translateY(-4px);
+		}
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	html {
+		scroll-behavior: auto;
+	}
+
+	.sbs-press-feedback,
+	.sbs-hover-lift {
+		transition: none;
+	}
+
+	.sbs-press-feedback:active,
+	.sbs-hover-lift:hover {
+		transform: none;
+	}
 }
