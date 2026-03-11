@@ -6,6 +6,13 @@ It does not replace the root `todo.md`, which remains the launch tracker and sou
 
 ## Active
 
+- [x] Fix shared lesson validation so required fields stay clean until completion is attempted, remount lesson state cleanly across route transitions, and tighten lesson `1.1` so each problem entry explicitly includes who has the problem
+- [x] Reframe the mission map around one active level instead of four equal dashboard cards
+- [x] Replace the lesson spreadsheet with a current-block challenge board and a secondary mission path
+- [x] Add block-level progression metadata and verify the new mission map layout with typecheck
+- [x] Improve lesson workbench text hierarchy so title, action, and field labels read in a clearer order
+- [x] Normalize the 0.2 roadmap block descriptions so the block name only appears in the card header
+- [x] Harden refresh UX by removing theme flicker, server-redirecting entitled users before home-page render, and replacing blocking product-route loading cards with shell-native skeletons
 - [x] Make the top HUD block chips non-selectable
 - [x] Update the 0.2 lesson checklist copy to the new student-facing wording
 - [x] Remove escaped `\\=` artifacts from generated lesson copy
@@ -29,6 +36,21 @@ It does not replace the root `todo.md`, which remains the launch tracker and sou
 
 ## Review
 
+- Outcome: Required lesson fields now stay visually clean until the learner actually tries to complete the lesson, the lesson route remounts by `lessonId` so completion state does not leak into the next screen, and lesson `1.1` now explicitly tells the student to include who has each problem in every candidate entry.
+- Verification: `pnpm exec eslint components/lesson-page.tsx 'app/lesson/[lessonId]/page.tsx' lib/course/manifest.ts tests/unit/course-registry.test.ts`, `pnpm exec prettier --check components/lesson-page.tsx 'app/lesson/[lessonId]/page.tsx' lib/course/manifest.ts tests/unit/course-registry.test.ts assets/ship_by_sunday_recording_blueprint_v3.md content/lessons/01-01-start-with-the-problem.ts content/source/recording-blueprint.json tasks/todo.md tasks/lessons.md todo.md`, `pnpm run test:unit`, `pnpm run test:smoke`, and `pnpm run typecheck`
+- Follow-up: Browser-QA the `0.2 -> 1.1` handoff plus one later required lesson on desktop and mobile to confirm there is no first-paint validation flash and the new `1.1` prompt copy reads clearly.
+- Outcome: Refreshes now keep the saved product theme stable from first paint, redirect entitled users from `/` and protected route entrypoints on the server, and replace the old blocking loading cards with shell-native mission/artifact/lesson skeletons while lesson chrome state hydrates in place.
+- Verification: `pnpm exec tsc --noEmit`, the successful `eslint . --max-warnings=0` phase inside `pnpm run check`, and `pnpm exec prettier --check` on the touched refresh-UX files. `pnpm run check` still fails at the repo-wide `prettier --check` phase because 35 broader files are not Prettier-clean, including generated lesson content and a few unrelated local files outside this change set.
+- Follow-up: Browser-QA light/dark refresh behavior on `/`, `/mission`, one lesson route, `/artifacts`, `/settings`, and `/access-required` on desktop and mobile before calling the buyer flow fully hardened.
+- Outcome: The mission map now treats `CEO -> DESIGN -> BUILD -> SHIP` as four ascending levels, with one active-level hero, supporting side cards for the other levels, a current-block challenge board, and a demoted full mission path instead of the old equal-weight dashboard plus spreadsheet roadmap.
+- Verification: `pnpm exec eslint components/mission-page.tsx lib/course/manifest.ts`, `pnpm exec tsc --noEmit`, `pnpm run typecheck`, and `pnpm exec prettier --check components/mission-page.tsx lib/course/manifest.ts tasks/todo.md tasks/lessons.md`
+- Follow-up: Browser QA `/mission` in an authenticated session on desktop and mobile to tune spacing, copy density, and how much of the full mission path should stay visible above the fold.
+- Outcome: The lesson workbench now has clearer hierarchy: quieter metadata, a more prominent title and intro, a dedicated `Next step` card, and stronger field labels.
+- Verification: `pnpm exec eslint components/lesson-workbench.tsx` and targeted `rg` checks for `fieldLabelClass`, `Next step`, `Finish with`, and the updated title block classes. `pnpm exec tsc --noEmit` still fails on a separate existing `initialTheme` typing issue around `ProductShell`.
+- Follow-up: Once the unrelated `initialTheme` typing issue is fixed, run a full typecheck and do browser QA on a few guided-form lessons to tune spacing.
+- Outcome: The static roadmap cards in lesson `0.2` now strip leading `CEO Block =`, `Design Block =`, `Build Block =`, and `Ship Block =` so the block name only appears once in the card header.
+- Verification: `pnpm exec tsc --noEmit`, `pnpm exec eslint components/lesson-workbench.tsx`, and `rg -n 'normalizeRoadmapBlockDescription|Block\\\\s*=|CEO Block =|Design Block =' components/lesson-workbench.tsx`
+- Follow-up: If you want the roadmap body copy even tighter, the next pass can rewrite the four block descriptions directly instead of normalizing the generated strings at render time.
 - Outcome: The top HUD block chips now use `select-none`, so their labels and lock icons can’t be highlighted like regular text.
 - Verification: `pnpm exec tsc --noEmit`, `pnpm exec eslint components/product-shell.tsx`, and `rg -n 'select-none items-center' components/product-shell.tsx`
 - Follow-up: If the rest of the top HUD should also behave like chrome, the same treatment can be extended to the nav labels and progress counter.
