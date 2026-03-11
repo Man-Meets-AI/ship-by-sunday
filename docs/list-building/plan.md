@@ -1,6 +1,6 @@
 # Ship by Sunday List Building Plan
 
-Last updated: 2026-03-07
+Last updated: 2026-03-11
 
 ## Goal
 
@@ -24,16 +24,16 @@ The correct order is:
 
 The highest-fit buyer is:
 
-- junior or mid-level engineer
-- can code
+- builder who can already prototype or get things working
 - has ideas or half-started projects
 - wants leverage outside the day job
 - keeps not finishing
 - is interested in AI-assisted building, not pure theory
+- would resonate with a software-guided sprint rather than a generic course
 
 ## Segment definitions
 
-### Segment 1: Junior engineers with side-project intent
+### Segment 1: Builders with side-project intent
 
 Why they fit:
 
@@ -44,7 +44,7 @@ Why they fit:
 
 Qualification criteria:
 
-- title suggests junior engineer, software engineer I, frontend engineer, full-stack engineer, or early-career builder
+- title or public profile suggests early-career engineer, technical builder, or strong side-project operator
 - public signals of side-project interest, AI-tool interest, hackathon behavior, or dev-tool curiosity
 - evidence of unfinished or in-progress public work is a positive fit signal
 
@@ -52,7 +52,7 @@ Recommended angle:
 
 - `You do not need more tutorials. You need a cleaner system for finishing a real v1.`
 
-### Segment 2: Mid-level engineers with unfinished product ideas
+### Segment 2: Product-minded technical builders with unfinished ideas
 
 Why they fit:
 
@@ -68,7 +68,7 @@ Qualification criteria:
 
 Recommended angle:
 
-- `You can already code. The bottleneck is not skill. It is sequence and scope discipline.`
+- `You can already build. The bottleneck is not just skill. It is product judgment, design direction, and execution structure.`
 
 ### Segment 3: Warm-adjacent technical builders
 
@@ -175,7 +175,7 @@ Use case:
 
 A target is worth keeping if at least `3` of these are true:
 
-- they are a junior or mid-level engineer
+- they are a technical builder or engineering-adjacent builder
 - they publicly show side-project or builder intent
 - they engage with AI coding, product building, or dev-tool content
 - they show evidence of unfinished or experimental projects

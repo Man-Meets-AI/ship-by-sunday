@@ -45,6 +45,12 @@ export type LessonResourceContent = {
 	kind: "download" | "internal" | "external";
 };
 
+export type LessonWorkbenchSectionContent = {
+	instruction?: string;
+	exampleLabel?: string;
+	example?: string;
+};
+
 export type LessonContent = {
 	lessonId: string;
 	slug: string;
@@ -72,6 +78,7 @@ export type LessonContent = {
 		emptyState?: string;
 		templateDownloadLabel?: string;
 		templateDownloadHref?: string;
+		sections?: Record<string, LessonWorkbenchSectionContent>;
 	};
 	sourceRefs: string[];
 };

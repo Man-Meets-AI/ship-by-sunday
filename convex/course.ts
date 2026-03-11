@@ -11,10 +11,11 @@ import {
 	getOrderedLessons,
 	getStudentFacingLessons,
 	getUnlockedLessonIds,
+	isLessonFieldShapeCompatible,
 	isLessonImplemented,
+	normalizeLessonFieldValues,
 	normalizeFieldValues,
 	prepareFieldValuesForPersistence,
-	validateRequiredFields,
 } from "../lib/course/registry";
 
 async function requireViewer(ctx: any) {
@@ -286,7 +287,16 @@ export const getMissionState = query({
 		const clerkUserId = await requireActiveEntitlement(ctx);
 		const lessonStates = await getViewerLessonStates(ctx, clerkUserId);
 		const completedLessonIds = lessonStates
-			.filter((state: any) => state.status === "completed")
+			.filter((state: any) => {
+				if (state.status !== "completed") {
+					return false;
+				}
+
+				const lesson = getLessonById(state.lessonId);
+				return lesson
+					? isLessonFieldShapeCompatible(lesson, state.fieldValues as any)
+					: false;
+			})
 			.map((state: any) => state.lessonId);
 		const unlockedLessonIds = new Set(getUnlockedLessonIds(completedLessonIds));
 		const lessons = getStudentFacingLessons().map((lesson) => {
@@ -367,7 +377,16 @@ export const getLessonState = query({
 
 		const lessonStates = await getViewerLessonStates(ctx, clerkUserId);
 		const completedLessonIds = lessonStates
-			.filter((state: any) => state.status === "completed")
+			.filter((state: any) => {
+				if (state.status !== "completed") {
+					return false;
+				}
+
+				const stateLesson = getLessonById(state.lessonId);
+				return stateLesson
+					? isLessonFieldShapeCompatible(stateLesson, state.fieldValues as any)
+					: false;
+			})
 			.map((state: any) => state.lessonId);
 
 		const unlockedLessonIds = new Set(getUnlockedLessonIds(completedLessonIds));
@@ -388,6 +407,9 @@ export const getLessonState = query({
 		const lessonState = lessonStates.find(
 			(state: any) => state.lessonId === lesson.id,
 		);
+		const lessonStateIsCompatible = lessonState
+			? isLessonFieldShapeCompatible(lesson, lessonState.fieldValues as any)
+			: false;
 		const pinnedArtifacts = (lesson.pinnedArtifacts ?? [])
 			.map((artifactKey) => {
 				const sourceLesson = getLessonByArtifactKey(artifactKey);
@@ -403,7 +425,7 @@ export const getLessonState = query({
 
 				return buildArtifactPreview(
 					sourceLesson,
-					normalizeFieldValues(sourceState.fieldValues as any),
+					normalizeLessonFieldValues(sourceLesson, sourceState.fieldValues as any),
 				);
 			})
 			.filter(Boolean);
@@ -413,9 +435,11 @@ export const getLessonState = query({
 			lesson,
 			fieldValues: await hydrateUploadUrls(
 				ctx,
-				lessonState?.fieldValues as any,
+				lessonStateIsCompatible ? (lessonState?.fieldValues as any) : {},
 			),
-			status: lessonState?.status ?? "not_started",
+			status: lessonStateIsCompatible
+				? (lessonState?.status ?? "not_started")
+				: "not_started",
 			pinnedArtifacts,
 			isImplemented: isLessonImplemented(lesson),
 		};
@@ -438,7 +462,16 @@ export const saveLessonDraft = mutation({
 
 		const lessonStates = await getViewerLessonStates(ctx, clerkUserId);
 		const completedLessonIds = lessonStates
-			.filter((state: any) => state.status === "completed")
+			.filter((state: any) => {
+				if (state.status !== "completed") {
+					return false;
+				}
+
+				const stateLesson = getLessonById(state.lessonId);
+				return stateLesson
+					? isLessonFieldShapeCompatible(stateLesson, state.fieldValues as any)
+					: false;
+			})
 			.map((state: any) => state.lessonId);
 
 		ensureLessonIsUnlocked(lesson.id, completedLessonIds);
@@ -453,7 +486,10 @@ export const saveLessonDraft = mutation({
 
 		if (existingState) {
 			await ctx.db.patch(existingState._id, {
-				fieldValues: prepareFieldValuesForPersistence(args.fieldValues as any),
+				fieldValues: prepareFieldValuesForPersistence(
+					lesson,
+					args.fieldValues as any,
+				),
 				status:
 					existingState.status === "completed" ? "completed" : "in_progress",
 				updatedAt: now,
@@ -468,7 +504,10 @@ export const saveLessonDraft = mutation({
 				status: "in_progress",
 				artifactKey: lesson.artifact.key,
 				artifactType: lesson.artifact.type,
-				fieldValues: prepareFieldValuesForPersistence(args.fieldValues as any),
+				fieldValues: prepareFieldValuesForPersistence(
+					lesson,
+					args.fieldValues as any,
+				),
 				startedAt: now,
 				updatedAt: now,
 				lastViewedAt: now,
@@ -494,7 +533,16 @@ export const markLessonViewed = mutation({
 
 		const lessonStates = await getViewerLessonStates(ctx, clerkUserId);
 		const completedLessonIds = lessonStates
-			.filter((state: any) => state.status === "completed")
+			.filter((state: any) => {
+				if (state.status !== "completed") {
+					return false;
+				}
+
+				const stateLesson = getLessonById(state.lessonId);
+				return stateLesson
+					? isLessonFieldShapeCompatible(stateLesson, state.fieldValues as any)
+					: false;
+			})
 			.map((state: any) => state.lessonId);
 
 		ensureLessonIsUnlocked(lesson.id, completedLessonIds);
@@ -550,7 +598,16 @@ export const completeLesson = mutation({
 
 		const lessonStates = await getViewerLessonStates(ctx, clerkUserId);
 		const completedLessonIds = lessonStates
-			.filter((state: any) => state.status === "completed")
+			.filter((state: any) => {
+				if (state.status !== "completed") {
+					return false;
+				}
+
+				const stateLesson = getLessonById(state.lessonId);
+				return stateLesson
+					? isLessonFieldShapeCompatible(stateLesson, state.fieldValues as any)
+					: false;
+			})
 			.map((state: any) => state.lessonId);
 
 		ensureLessonIsUnlocked(lesson.id, completedLessonIds);
@@ -574,7 +631,10 @@ export const completeLesson = mutation({
 
 		if (existingState) {
 			await ctx.db.patch(existingState._id, {
-				fieldValues: prepareFieldValuesForPersistence(args.fieldValues as any),
+				fieldValues: prepareFieldValuesForPersistence(
+					lesson,
+					args.fieldValues as any,
+				),
 				status: "completed",
 				updatedAt: now,
 				lastViewedAt: now,
@@ -589,7 +649,10 @@ export const completeLesson = mutation({
 				status: "completed",
 				artifactKey: lesson.artifact.key,
 				artifactType: lesson.artifact.type,
-				fieldValues: prepareFieldValuesForPersistence(args.fieldValues as any),
+				fieldValues: prepareFieldValuesForPersistence(
+					lesson,
+					args.fieldValues as any,
+				),
 				startedAt: now,
 				updatedAt: now,
 				lastViewedAt: now,
@@ -609,7 +672,16 @@ export const listArtifacts = query({
 		const lessonStates = await getViewerLessonStates(ctx, clerkUserId);
 
 		return lessonStates
-			.filter((state: any) => state.status === "completed")
+			.filter((state: any) => {
+				if (state.status !== "completed") {
+					return false;
+				}
+
+				const lesson = getLessonById(state.lessonId);
+				return lesson
+					? isLessonFieldShapeCompatible(lesson, state.fieldValues as any)
+					: false;
+			})
 			.map((state: any) => {
 				const lesson = getLessonById(state.lessonId);
 				if (!lesson) {
@@ -619,7 +691,7 @@ export const listArtifacts = query({
 				return {
 					...buildArtifactPreview(
 						lesson,
-						normalizeFieldValues(state.fieldValues as any),
+						normalizeLessonFieldValues(lesson, state.fieldValues as any),
 					),
 					completedAt: state.completedAt ?? state.updatedAt,
 				};

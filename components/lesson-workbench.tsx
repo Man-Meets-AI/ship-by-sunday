@@ -9,13 +9,19 @@ import {
 	type LessonConfig,
 	type UploadFieldValue,
 	type WorkbenchField,
+	type WorkbenchSection,
 } from "@/lib/course/manifest";
 import type { LessonContent } from "@/content/lessons/types";
 import { api } from "@/convex/_generated/api";
 import type { PinnedArtifact } from "@/components/lesson-shells";
 import {
+	getCandidateProblemOptions,
+	getObjectiveTasks,
 	getOrderedBlocks,
+	getWorkbenchSectionStates,
+	getWorkbenchSections,
 	getStudentFacingLessons,
+	isFilled,
 	isChecklistItemArray,
 } from "@/lib/course/registry";
 
@@ -257,24 +263,166 @@ function WorkbenchCard({
 	eyebrow?: string;
 }) {
 	return (
-		<div className="rounded-none border border-product-border bg-product-surface-strong/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]">
-			<div className="flex items-baseline gap-2 border-b border-product-border/80 px-3 py-1.5">
+		<div className="rounded-none border border-product-border/70 bg-product-surface-strong/70">
+			<div className="flex items-baseline gap-2 border-b border-product-border/60 px-3 py-1.5">
 				{eyebrow ? (
 					<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
 						{eyebrow}
 					</span>
 				) : null}
-				<span className="font-display text-sm uppercase tracking-[0.05em] text-product-text">
+				<span className="font-display text-sm uppercase tracking-[0.04em] text-product-text">
 					{title}
 				</span>
 			</div>
-			<div className="px-3 py-2">{children}</div>
+			<div className="px-3 py-3">{children}</div>
 		</div>
 	);
 }
 
+function getArtifactContextTitle(artifact: PinnedArtifact) {
+	if (
+		artifact.artifactKey === "user_statement" &&
+		artifact.fields.some(([label]) => label === "Chosen problem")
+	) {
+		return "Current direction";
+	}
+
+	return artifact.artifactLabel;
+}
+
 const fieldLabelClass =
-	"font-mono text-[10px] uppercase tracking-[0.18em] text-product-text/72";
+	"text-[11px] font-medium leading-snug text-product-text";
+
+const inputBaseClass =
+	"mt-1.5 w-full rounded-none border border-product-border/80 bg-product-surface px-3 py-2 text-sm leading-relaxed text-product-text outline-none transition-colors placeholder:text-product-muted/55 focus:border-product-accent";
+
+function inputWidthClass(field: WorkbenchField) {
+	if (field.inputWidth === "compact") {
+		return "max-w-xl";
+	}
+
+	if (field.inputWidth === "wide") {
+		return "max-w-none";
+	}
+
+	return "max-w-3xl";
+}
+
+function SectionCard({
+	section,
+	lessonContent,
+	children,
+	isComplete,
+	blocked = false,
+	blockedMessage,
+}: {
+	section: WorkbenchSection;
+	lessonContent: LessonContent;
+	children: React.ReactNode;
+	isComplete: boolean;
+	blocked?: boolean;
+	blockedMessage?: string;
+}) {
+	const sectionContent = lessonContent.workbench.sections?.[section.id];
+
+	return (
+		<section
+			className={`rounded-none border border-product-border/70 ${
+				blocked ? "bg-product-surface/35" : "bg-product-surface/55"
+			}`}
+		>
+			<div className="border-b border-product-border/60 px-4 py-3">
+				<div className="flex flex-wrap items-center justify-between gap-2">
+					<div className="space-y-1">
+						{section.eyebrow ? (
+							<p className="font-mono text-[9px] uppercase tracking-[0.18em] text-product-muted">
+								{section.eyebrow}
+							</p>
+						) : null}
+						<h2 className="font-display text-base uppercase tracking-[0.04em] text-product-text">
+							{section.title}
+						</h2>
+					</div>
+					<span className="font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
+						{blocked ? "Locked" : isComplete ? "Ready" : "In progress"}
+					</span>
+				</div>
+				{blocked && blockedMessage ? (
+					<p className="mt-2 max-w-2xl text-[12px] font-medium leading-relaxed text-product-muted">
+						{blockedMessage}
+					</p>
+				) : null}
+				{sectionContent?.instruction ?? section.instruction ? (
+					<p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-product-muted">
+						{sectionContent?.instruction ?? section.instruction}
+					</p>
+				) : null}
+				{sectionContent?.example ? (
+					<div className="mt-3 max-w-2xl border border-product-border/60 bg-product-surface-strong/65 px-3 py-2">
+						<p className="font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
+							{sectionContent.exampleLabel ?? "Example"}
+						</p>
+						<p className="mt-1 text-[12px] leading-relaxed text-product-text">
+							{sectionContent.example}
+						</p>
+					</div>
+				) : null}
+			</div>
+			<div className="px-4 py-4">
+				<fieldset disabled={blocked} className={blocked ? "opacity-45" : ""}>
+					{children}
+				</fieldset>
+			</div>
+		</section>
+	);
+}
+
+function StatusRail({
+	lessonContent,
+	completedTaskCount,
+	totalTaskCount,
+}: {
+	lessonContent: LessonContent;
+	completedTaskCount: number;
+	totalTaskCount: number;
+}) {
+	return (
+		<div className="grid gap-px border border-product-border/60 bg-product-border/60 sm:grid-cols-[minmax(0,1.7fr)_minmax(160px,0.6fr)_minmax(220px,0.9fr)_minmax(140px,0.5fr)]">
+			<div className="bg-product-surface px-3 py-3">
+				<p className="font-mono text-[9px] uppercase tracking-[0.18em] text-product-muted">
+					Do this now
+				</p>
+				<p className="mt-1 text-[12px] leading-relaxed text-product-text">
+					{lessonContent.actionCard.jobNow}
+				</p>
+			</div>
+			<div className="bg-product-surface px-3 py-3">
+				<p className="font-mono text-[9px] uppercase tracking-[0.18em] text-product-muted">
+					Timebox
+				</p>
+				<p className="mt-1 text-[12px] leading-relaxed text-product-text">
+					{lessonContent.actionCard.timebox}
+				</p>
+			</div>
+			<div className="bg-product-surface px-3 py-3">
+				<p className="font-mono text-[9px] uppercase tracking-[0.18em] text-product-muted">
+					Finish with
+				</p>
+				<p className="mt-1 text-[12px] leading-relaxed text-product-text">
+					{lessonContent.actionCard.comeBackWith}
+				</p>
+			</div>
+			<div className="bg-product-surface px-3 py-3">
+				<p className="font-mono text-[9px] uppercase tracking-[0.18em] text-product-muted">
+					Progress
+				</p>
+				<p className="mt-1 text-[12px] leading-relaxed text-product-text">
+					{completedTaskCount}/{totalTaskCount}
+				</p>
+			</div>
+		</div>
+	);
+}
 
 function ArtifactContext({
 	pinnedArtifacts,
@@ -290,7 +438,7 @@ function ArtifactContext({
 			{pinnedArtifacts.map((artifact) => (
 				<WorkbenchCard
 					key={artifact.artifactKey}
-					title={artifact.artifactLabel}
+					title={getArtifactContextTitle(artifact)}
 					eyebrow={artifact.lessonTitle}
 				>
 					<div className="space-y-1 text-xs font-medium text-product-muted">
@@ -300,7 +448,7 @@ function ArtifactContext({
 							artifact.fields.slice(0, 3).map(([key, value]) => (
 								<div key={key}>
 									<p className="font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
-										{key.replaceAll("_", " ")}
+										{key}
 									</p>
 									<p className="mt-1 text-product-text">
 										{formatArtifactValue(value)}
@@ -312,6 +460,133 @@ function ArtifactContext({
 				</WorkbenchCard>
 			))}
 		</div>
+	);
+}
+
+function CandidateProblemHandoff({
+	sourceArtifactKey,
+	selectionFieldId,
+	fieldValues,
+	onFieldChange,
+	pinnedArtifacts,
+	invalidFieldIds,
+}: {
+	sourceArtifactKey: string;
+	selectionFieldId: string;
+	fieldValues: Record<string, unknown>;
+	onFieldChange: (fieldId: string, value: unknown) => void;
+	pinnedArtifacts: PinnedArtifact[];
+	invalidFieldIds: Set<string>;
+}) {
+	const sourceArtifact = pinnedArtifacts.find(
+		(artifact) => artifact.artifactKey === sourceArtifactKey,
+	);
+	const candidateProblems = getCandidateProblemOptions(sourceArtifact?.fieldValues);
+	const selectedProblemIndex =
+		typeof fieldValues[selectionFieldId] === "number"
+			? (fieldValues[selectionFieldId] as number)
+			: typeof fieldValues[selectionFieldId] === "string"
+				? Number(fieldValues[selectionFieldId])
+				: null;
+	const selectedProblem =
+		selectedProblemIndex !== null
+			? candidateProblems.find((problem) => problem.index === selectedProblemIndex)
+			: null;
+
+	return (
+		<WorkbenchCard title="Choose one candidate problem" eyebrow="Carry forward">
+			<div className="space-y-3">
+				<p className="max-w-2xl text-[12px] leading-relaxed text-product-muted">
+					Pick one of the three problems you just wrote. This becomes your
+					working direction for the next CEO lessons.
+				</p>
+				{selectedProblem ? (
+					<div className="space-y-3">
+						<div className="border border-product-accent/60 bg-product-chip/50 px-3 py-3">
+							<div className="flex flex-wrap items-center justify-between gap-2">
+								<div>
+									<p className="font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
+										Chosen direction
+									</p>
+									<p className="mt-1 font-display text-sm uppercase tracking-[0.04em] text-product-text">
+										Candidate problem {selectedProblem.index}
+									</p>
+								</div>
+								<button
+									type="button"
+									onClick={() => {
+										onFieldChange(selectionFieldId, null);
+										onFieldChange("selected_problem_owner", "");
+										onFieldChange("selected_problem_statement", "");
+									}}
+									className="inline-flex border border-product-border bg-product-surface px-2 py-1 font-mono text-[9px] uppercase tracking-[0.18em] text-product-text transition-colors hover:bg-product-surface-alt"
+								>
+									Change selection
+								</button>
+							</div>
+							<div className="mt-3 space-y-2 text-[12px] leading-relaxed text-product-text">
+								<div>
+									<p className="font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
+										Problem owner
+									</p>
+									<p className="mt-1">{selectedProblem.owner}</p>
+								</div>
+								<div>
+									<p className="font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
+										Problem statement
+									</p>
+									<p className="mt-1">{selectedProblem.statement}</p>
+								</div>
+							</div>
+						</div>
+						<p className="text-[11px] leading-relaxed text-product-muted">
+							Now define the specific user inside this chosen problem.
+						</p>
+					</div>
+				) : candidateProblems.length > 0 ? (
+					<div className="grid gap-3 lg:grid-cols-3">
+						{candidateProblems.map((problem) => (
+							<button
+								key={problem.index}
+								type="button"
+								onClick={() => {
+									onFieldChange(selectionFieldId, problem.index);
+									onFieldChange("selected_problem_owner", problem.owner);
+									onFieldChange(
+										"selected_problem_statement",
+										problem.statement,
+									);
+								}}
+								className="border border-product-border bg-product-surface px-3 py-3 text-left transition-colors hover:bg-product-surface-strong"
+							>
+								<p className="font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
+									Candidate {problem.index}
+								</p>
+								<p className="mt-2 font-display text-sm uppercase tracking-[0.04em] text-product-text">
+									{problem.owner}
+								</p>
+								<p className="mt-2 text-[12px] leading-relaxed text-product-text">
+									{problem.statement}
+								</p>
+								<p className="mt-3 font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
+									Use this problem
+								</p>
+							</button>
+						))}
+					</div>
+				) : (
+					<div className="border border-dashed border-product-border bg-product-surface px-3 py-3 text-[12px] leading-relaxed text-product-muted">
+						The candidate problems from the last lesson are not available yet.
+						Go back to `1.1` and finish that page first.
+					</div>
+				)}
+				{invalidFieldIds.has(selectionFieldId) ? (
+					<p className="text-[11px] font-medium leading-relaxed text-[#a83232]">
+						Choose one candidate problem before continuing.
+					</p>
+				) : null}
+			</div>
+		</WorkbenchCard>
 	);
 }
 
@@ -422,7 +697,7 @@ function FieldControl({
 				<span className={fieldLabelClass}>
 					{field.label}
 				</span>
-				<div className="mt-1 rounded-none border border-product-border bg-product-surface px-2.5 py-2 text-xs font-medium text-product-text">
+				<div className="mt-1.5 rounded-none border border-product-border/80 bg-product-surface px-3 py-3 text-xs font-medium text-product-text">
 					{linkedArtifact ? (
 						<div className="space-y-1.5">
 							<p className="font-display text-sm uppercase tracking-[0.05em]">
@@ -436,7 +711,7 @@ function FieldControl({
 								linkedArtifact.fields.slice(0, 3).map(([key, entryValue]) => (
 									<div key={key}>
 										<p className="font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
-											{key.replaceAll("_", " ")}
+											{key}
 										</p>
 										<p className="mt-1">{formatArtifactValue(entryValue)}</p>
 									</div>
@@ -455,7 +730,7 @@ function FieldControl({
 
 	if (field.kind === "text" || field.kind === "url") {
 		return (
-			<label className="block">
+			<label className={`block ${inputWidthClass(field)}`}>
 				<span className={fieldLabelClass}>
 					{field.label}
 				</span>
@@ -464,7 +739,7 @@ function FieldControl({
 					value={typeof value === "string" ? value : ""}
 					onChange={(event) => onChange(event.target.value)}
 					placeholder={field.placeholder}
-					className="mt-1 w-full rounded-none border border-product-border bg-product-surface px-2.5 py-1.5 text-sm text-product-text outline-none focus:border-product-accent"
+					className={inputBaseClass}
 				/>
 			</label>
 		);
@@ -472,7 +747,7 @@ function FieldControl({
 
 	if (field.kind === "number") {
 		return (
-			<label className="block">
+			<label className={`block ${inputWidthClass(field)}`}>
 				<span className={fieldLabelClass}>
 					{field.label}
 				</span>
@@ -480,7 +755,7 @@ function FieldControl({
 					type="number"
 					value={typeof value === "number" ? value : ""}
 					onChange={(event) => onChange(Number(event.target.value) || 0)}
-					className="mt-1 w-full rounded-none border border-product-border bg-product-surface px-2.5 py-1.5 text-sm text-product-text outline-none focus:border-product-accent"
+					className={inputBaseClass}
 				/>
 			</label>
 		);
@@ -498,14 +773,14 @@ function FieldControl({
 
 	if (field.kind === "select") {
 		return (
-			<label className="block">
+			<label className={`block ${inputWidthClass(field)}`}>
 				<span className={fieldLabelClass}>
 					{field.label}
 				</span>
 				<select
 					value={typeof value === "string" ? value : ""}
 					onChange={(event) => onChange(event.target.value)}
-					className="mt-1 w-full rounded-none border border-product-border bg-product-surface px-2.5 py-1.5 text-sm text-product-text outline-none focus:border-product-accent"
+					className={inputBaseClass}
 				>
 					<option value="">Select one</option>
 					{field.options?.map((option) => (
@@ -551,7 +826,7 @@ function FieldControl({
 		}
 
 		return (
-			<label className="block">
+			<label className={`block ${inputWidthClass(field)}`}>
 				<span className={fieldLabelClass}>
 					{field.label}
 				</span>
@@ -560,7 +835,7 @@ function FieldControl({
 					onChange={(event) => onChange(parseLines(event.target.value))}
 					rows={field.rows ?? 6}
 					placeholder="One item per line"
-					className="mt-1 w-full rounded-none border border-product-border bg-product-surface px-2.5 py-1.5 text-sm text-product-text outline-none focus:border-product-accent"
+					className={inputBaseClass}
 				/>
 			</label>
 		);
@@ -568,7 +843,7 @@ function FieldControl({
 
 	if (field.kind === "table") {
 		return (
-			<label className="block">
+			<label className={`block ${inputWidthClass(field)}`}>
 				<span className={fieldLabelClass}>
 					{field.label}
 				</span>
@@ -577,7 +852,7 @@ function FieldControl({
 					onChange={(event) => onChange(parseTable(event.target.value))}
 					rows={6}
 					placeholder="One row per line. Separate columns with |"
-					className="mt-1 w-full rounded-none border border-product-border bg-product-surface px-2.5 py-1.5 font-mono text-sm text-product-text outline-none focus:border-product-accent"
+					className={`${inputBaseClass} font-mono`}
 				/>
 			</label>
 		);
@@ -585,7 +860,7 @@ function FieldControl({
 
 	if (field.kind === "textarea") {
 		return (
-			<label className="block">
+			<label className={`block ${inputWidthClass(field)}`}>
 				<span className={fieldLabelClass}>
 					{field.label}
 				</span>
@@ -594,7 +869,7 @@ function FieldControl({
 					onChange={(event) => onChange(event.target.value)}
 					rows={field.rows ?? 5}
 					placeholder={field.placeholder}
-					className="mt-1 w-full rounded-none border border-product-border bg-product-surface px-2.5 py-1.5 text-sm text-product-text outline-none focus:border-product-accent"
+					className={inputBaseClass}
 				/>
 			</label>
 		);
@@ -621,8 +896,8 @@ function renderFields(
 			key={field.id}
 			className={
 				invalidFieldIds.has(field.id)
-					? "rounded-none border border-[#a83232] bg-[rgba(168,50,50,0.06)] p-2"
-					: ""
+					? "rounded-none border border-[#a83232] bg-[rgba(168,50,50,0.06)] p-3"
+					: "p-0"
 			}
 		>
 			<FieldControl
@@ -631,13 +906,23 @@ function renderFields(
 				onChange={(value) => onFieldChange(field.id, value)}
 				pinnedArtifacts={pinnedArtifacts}
 			/>
+			{field.example ? (
+				<div className="mt-2 max-w-2xl border border-product-border/60 bg-product-surface-strong/65 px-3 py-2">
+					<p className="font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
+						{field.exampleLabel ?? "Example"}
+					</p>
+					<p className="mt-1 text-[12px] leading-relaxed text-product-text">
+						{field.example}
+					</p>
+				</div>
+			) : null}
 			{field.helpText ? (
-				<p className="mt-0.5 text-[10px] font-medium leading-snug text-product-muted">
+				<p className="mt-2 max-w-2xl text-[11px] leading-relaxed text-product-muted">
 					{field.helpText}
 				</p>
 			) : null}
 			{invalidFieldIds.has(field.id) ? (
-				<p className="mt-1 text-[10px] font-medium leading-snug text-[#a83232]">
+				<p className="mt-2 text-[11px] font-medium leading-snug text-[#a83232]">
 					Finish this before continuing.
 				</p>
 			) : null}
@@ -661,13 +946,19 @@ export function WorkbenchRenderer({
 	invalidFieldIds?: Set<string>;
 }) {
 	const fields = lesson.workbenchFields ?? [];
+	const workbenchSections = getWorkbenchSections(lesson);
+	const sectionStates = getWorkbenchSectionStates(lesson, fieldValues as any);
+	const objectiveTasks = getObjectiveTasks(lesson, fieldValues as any);
+	const completedTaskCount = objectiveTasks.filter(
+		(task) => task.status === "complete",
+	).length;
 	const titleBlock = (
-		<div className="space-y-2 border-b border-product-border/60 pb-3">
+		<div className="space-y-3">
 			<div className="flex flex-wrap items-center gap-1.5 text-product-muted">
-				<span className="border border-product-border bg-product-surface-strong/70 px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-[0.18em]">
+				<span className="border border-product-border/70 bg-product-surface-strong/70 px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-[0.18em]">
 					{lesson.id}
 				</span>
-				<span className="border border-product-border bg-product-surface px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-[0.18em]">
+				<span className="border border-product-border/70 bg-product-surface px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-[0.18em]">
 					{lesson.artifact.label}
 				</span>
 				{lessonContent.lessonMeta.runtimeLabel ? (
@@ -676,10 +967,10 @@ export function WorkbenchRenderer({
 					</span>
 				) : null}
 			</div>
-			<h1 className="font-display text-lg uppercase leading-tight tracking-[0.05em] text-product-text sm:text-xl">
+			<h1 className="max-w-3xl font-display text-2xl uppercase leading-tight tracking-[0.04em] text-product-text sm:text-[2rem]">
 				{lesson.title}
 			</h1>
-			<p className="max-w-3xl text-[12px] leading-relaxed text-product-muted">
+			<p className="max-w-3xl text-[13px] leading-relaxed text-product-muted">
 				{lessonContent.intro}
 			</p>
 		</div>
@@ -697,47 +988,78 @@ export function WorkbenchRenderer({
 			</WorkbenchCard>
 		) : null;
 	const actionCard = (
-		<WorkbenchCard title="Next step" eyebrow="Do this now">
-			<div className="space-y-2">
-				<p className="text-[12px] leading-snug text-product-text">
-					{lessonContent.actionCard.jobNow}
-				</p>
-				<div className="grid gap-2 sm:grid-cols-2">
-					<div className="border border-product-border bg-product-surface px-2.5 py-2">
-						<p className="font-mono text-[8px] uppercase tracking-[0.15em] text-product-muted">
-							Timebox
-						</p>
-						<p className="mt-1 text-[11px] leading-snug text-product-text">
-							{lessonContent.actionCard.timebox}
-						</p>
-					</div>
-					<div className="border border-product-border bg-product-surface px-2.5 py-2">
-						<p className="font-mono text-[8px] uppercase tracking-[0.15em] text-product-muted">
-							Finish with
-						</p>
-						<p className="mt-1 text-[11px] leading-snug text-product-text">
-							{lessonContent.actionCard.comeBackWith}
-						</p>
-					</div>
-				</div>
-			</div>
-		</WorkbenchCard>
+		<StatusRail
+			lessonContent={lessonContent}
+			completedTaskCount={completedTaskCount}
+			totalTaskCount={Math.max(objectiveTasks.length, 1)}
+		/>
 	);
 
 	if (lesson.workbench === "guided_form") {
+		const visiblePinnedArtifacts = lesson.handoff
+			? pinnedArtifacts.filter(
+					(artifact) => artifact.artifactKey !== lesson.handoff?.sourceArtifactKey,
+				)
+			: pinnedArtifacts;
+
 		return (
-			<div className="space-y-3">
+			<div className="mx-auto max-w-4xl space-y-4">
 				{titleBlock}
 				{actionCard}
-				<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
-				<div className="space-y-2">
-					{renderFields(
-						fields,
-						fieldValues,
-						onFieldChange,
-						pinnedArtifacts,
-						invalidFieldIds,
-					)}
+				{lesson.handoff?.mode === "select_candidate_problem" ? (
+					<CandidateProblemHandoff
+						sourceArtifactKey={lesson.handoff.sourceArtifactKey}
+						selectionFieldId={lesson.handoff.selectionFieldId}
+						fieldValues={fieldValues}
+						onFieldChange={onFieldChange}
+						pinnedArtifacts={pinnedArtifacts}
+						invalidFieldIds={invalidFieldIds}
+					/>
+				) : null}
+				<ArtifactContext pinnedArtifacts={visiblePinnedArtifacts} />
+				<div className="space-y-3">
+					{workbenchSections.map((section) => {
+						const sectionFields = fields.filter((field) =>
+							section.fieldIds.includes(field.id),
+						);
+						const sectionState = sectionStates.find(
+							(state) => state.id === section.id,
+						);
+						const blocked = (section.blockedByFieldIds ?? []).some(
+							(fieldId) => !isFilled(fieldValues[fieldId] as any),
+						);
+						const layoutClass =
+							section.layout === "split"
+								? "grid gap-3 lg:grid-cols-[minmax(220px,0.7fr)_minmax(0,1.3fr)]"
+								: section.layout === "compact"
+									? "grid gap-3 md:grid-cols-2"
+									: "space-y-3";
+
+						return (
+							<SectionCard
+								key={section.id}
+								section={section}
+								lessonContent={lessonContent}
+								isComplete={sectionState?.isComplete ?? false}
+								blocked={blocked}
+								blockedMessage={
+									blocked
+										? "First, choose one candidate problem above to unlock this section."
+										: undefined
+								}
+							>
+								<div className={layoutClass}>
+									{renderFields(
+										sectionFields,
+										fieldValues,
+										onFieldChange,
+										pinnedArtifacts,
+										invalidFieldIds,
+									)}
+								</div>
+							</SectionCard>
+						);
+					})}
 				</div>
 			</div>
 		);
@@ -746,7 +1068,7 @@ export function WorkbenchRenderer({
 	if (lesson.workbench === "score_table") {
 		const [tableField, ...restFields] = fields;
 		return (
-			<div className="space-y-3">
+			<div className="mx-auto max-w-4xl space-y-4">
 				{titleBlock}
 				{actionCard}
 				{tableField ? (
@@ -775,7 +1097,7 @@ export function WorkbenchRenderer({
 	if (lesson.workbench === "collector_board") {
 		const [boardField, ...restFields] = fields;
 		return (
-			<div className="space-y-3">
+			<div className="mx-auto max-w-4xl space-y-4">
 				{titleBlock}
 				{actionCard}
 				{boardField ? (
@@ -803,7 +1125,7 @@ export function WorkbenchRenderer({
 
 	if (lesson.workbench === "capture_upload") {
 		return (
-			<div className="space-y-3">
+			<div className="mx-auto max-w-4xl space-y-4">
 				{titleBlock}
 				{templateCard}
 				{actionCard}
@@ -824,7 +1146,7 @@ export function WorkbenchRenderer({
 	if (lesson.workbench === "scope_split") {
 		const [leftField, rightField, ...restFields] = fields;
 		return (
-			<div className="space-y-3">
+			<div className="mx-auto max-w-4xl space-y-4">
 				{titleBlock}
 				{actionCard}
 				<div className="grid gap-2 lg:grid-cols-2">
@@ -864,7 +1186,7 @@ export function WorkbenchRenderer({
 
 	if (lesson.workbench === "brief_assembler") {
 		return (
-			<div className="space-y-3">
+			<div className="mx-auto max-w-4xl space-y-4">
 				{titleBlock}
 				{actionCard}
 				<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
@@ -883,7 +1205,7 @@ export function WorkbenchRenderer({
 
 	if (lesson.workbench === "console_checklist") {
 		return (
-			<div className="space-y-3">
+			<div className="mx-auto max-w-4xl space-y-4">
 				{titleBlock}
 				{actionCard}
 				<div className="grid gap-2 md:grid-cols-2">
@@ -901,7 +1223,7 @@ export function WorkbenchRenderer({
 
 	if (lesson.workbench === "roadmap_overview") {
 		return (
-			<div className="space-y-3">
+			<div className="mx-auto max-w-4xl space-y-4">
 				{titleBlock}
 				{actionCard}
 				<SprintRoadmapOverview lessonContent={lessonContent} />
@@ -912,7 +1234,7 @@ export function WorkbenchRenderer({
 	if (lesson.workbench === "tracker_log") {
 		const [tableField, ...restFields] = fields;
 		return (
-			<div className="space-y-3">
+			<div className="mx-auto max-w-4xl space-y-4">
 				{titleBlock}
 				{actionCard}
 				{tableField ? (
@@ -949,7 +1271,7 @@ export function WorkbenchRenderer({
 						: "Open the code workspace and keep this lesson brief beside it.";
 
 		return (
-			<div className="space-y-3">
+			<div className="mx-auto max-w-4xl space-y-4">
 				{titleBlock}
 				{actionCard}
 				<WorkbenchCard title="External workspace" eyebrow="Focus mode">
@@ -972,7 +1294,7 @@ export function WorkbenchRenderer({
 	}
 
 	return (
-		<div className="space-y-3">
+		<div className="mx-auto max-w-4xl space-y-4">
 			{titleBlock}
 			<div className="rounded-none border border-dashed border-product-border bg-product-surface-strong/70 p-5 text-sm font-medium leading-relaxed text-product-muted">
 				This workbench type has not been wired yet.

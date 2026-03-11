@@ -1,6 +1,6 @@
 # Ship by Sunday Outbound Setup and Deliverability Plan
 
-Last updated: 2026-03-07
+Last updated: 2026-03-11
 
 ## Goal
 
@@ -11,8 +11,10 @@ This is a planning document. It is not a recommendation to scale outbound immedi
 ## Current setup assumptions
 
 - Core offer: `Ship by Sunday`
-- Core audience: junior and mid-level engineers who can code, have ideas, and keep getting stuck before anything goes live
+- Core audience: builders who can already prototype or get things working, but keep getting stuck before they ship a real v1
 - Primary promise: `Go from idea to v1 this weekend`
+- Core mechanism: `The Product Trinity`
+- Vehicle: software-guided weekend sprint + Ship by Sunday workspace
 - Tooling target: `Instantly`
 - Current priority: get the product, buyer journey, and onboarding stable before outbound execution
 - Outbound should stay in planning mode until:
@@ -55,6 +57,8 @@ Domain pattern examples:
 
 Do not use sketchy or confusing domains that damage trust.
 Keep them brand-adjacent and human-readable.
+
+Use messaging that makes Ship by Sunday sound like a system for finishing, not like a generic course or AI coding product.
 
 ### Inbox strategy
 

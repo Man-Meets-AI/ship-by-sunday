@@ -5,12 +5,57 @@ import { redirectEntitledHomeVisitor } from "@/lib/server/course-access";
 import FAQAccordion from "./faq-accordion";
 
 const proofImage = "/founder-proof.jpg";
+const missionImage = "/product/mission-bg.png";
 
 const outcomes = [
 	"A clear scoped product brief",
-	"A screen-by-screen plan",
+	"A build-ready screen plan",
 	"A working deployed v1",
 	"A live link you can share",
+];
+
+const reframeCards = [
+	{
+		title: "Code is faster than ever",
+		description:
+			"AI can generate far more code than most builders can reliably direct.",
+	},
+	{
+		title: "Product judgment is still hard",
+		description:
+			"You still have to decide what to build first, what to cut, and what makes the v1 worth shipping.",
+	},
+	{
+		title: "Design direction is still hard",
+		description:
+			"You still need enough structure on flows and screens to avoid building a confusing product.",
+	},
+	{
+		title: "Scattered execution kills momentum",
+		description:
+			"Most unfinished projects die because the thinking is spread across too many tabs, docs, prompts, and half-decisions.",
+	},
+];
+
+const trinityCards = [
+	{
+		name: "Product strategy",
+		prompt: "What should I build first? What do I cut?",
+		description:
+			"Start with the user, the problem, and the tightest v1 you can actually finish.",
+	},
+	{
+		name: "Design",
+		prompt: "What should this feel like? What needs to exist on each screen?",
+		description:
+			"Map the flow, define the screens, and create enough direction that the build does not drift.",
+	},
+	{
+		name: "Development",
+		prompt: "How do I actually get this built and live without spiraling?",
+		description:
+			"Turn the plan into a working app, keep the core flow intact, and get it live without treating launch like a separate project.",
+	},
 ];
 
 const blocks = [
@@ -72,52 +117,122 @@ const blocks = [
 	},
 ];
 
-const deliverables = [
-	"On-demand walkthroughs",
-	"Digital guide & workbook",
-	"Product brief worksheets",
-	"Design & wireframe prompts",
-	"Build workflow",
-	"Deploy checklists",
-	"Lifetime access",
+const audienceCards = [
+	{
+		title: "You can already get things working",
+		description:
+			"You have enough fluency to prototype, test ideas, and get something moving.",
+	},
+	{
+		title: "You keep ending up with rough demos instead of real products",
+		description:
+			"The problem is not starting. The problem is finishing something coherent enough to ship.",
+	},
+	{
+		title: "You do not need more theory",
+		description:
+			"You need a cleaner process for scoping, designing, building, and deploying without getting lost in the middle.",
+	},
+	{
+		title:
+			"You need better product judgment, design direction, and execution structure",
+		description:
+			"That is the gap between a rough prototype and a real v1 people can actually use.",
+	},
+];
+
+const offerGroups = [
+	{
+		name: "Ship by Sunday workspace",
+		description:
+			"Keeps product thinking, design direction, and build execution in one place.",
+	},
+	{
+		name: "Guided weekend sprint",
+		description:
+			"The 4-block path that takes you from rough idea to shipped v1.",
+	},
+	{
+		name: "On-demand walkthroughs + workbook",
+		description:
+			"Practical support, prompts, worksheets, and checklists that keep each block moving.",
+	},
+	{
+		name: "Product Management for Beginners",
+		description:
+			"Included bonus for builders who do not trust their product judgment yet.",
+	},
+];
+
+const workspacePreviews = [
+	{
+		name: "CEO Block",
+		src: "/product/block-ceo.png",
+		description: "Scope the right app before you start building.",
+	},
+	{
+		name: "Design Block",
+		src: "/product/block-design.png",
+		description: "Turn the plan into screens, flows, and build direction.",
+	},
+	{
+		name: "Build Block",
+		src: "/product/block-build.png",
+		description: "Keep the implementation focused on the real v1.",
+	},
+	{
+		name: "Ship Block",
+		src: "/product/block-ship.png",
+		description: "Get it live and stop sitting on unfinished work.",
+	},
 ];
 
 const proofPoints = [
 	"10 years in product, from design to engineering",
 	"Scaled Delivery Dudes to $73M GMV and a $23M acquisition",
 	"Built GPTs for Devs to 100K users in its first week",
-	"Taught 110+ engineers with participation from Google and Microsoft",
+	"Taught 110+ students through Vibe with AI",
 ];
 
 const faqs = [
 	{
-		question: "Is this for beginners?",
+		question: "Who is this for?",
 		answer:
-			"No. This is for people who already know the basics of software and want a system for finishing and deploying.",
+			"Builders who can already prototype or get things working, but keep getting stuck before they ship a real v1.",
 	},
 	{
-		question: "Do I need to be a senior engineer?",
+		question: "Is this a coding course?",
 		answer:
-			"No. The point is to help non-senior engineers close the loop and ship useful apps with structure.",
+			"No. Coding is part of the process, but Ship by Sunday is really about getting product strategy, design, and development to work together so something real ships.",
 	},
 	{
-		question: "Is this live or on-demand?",
+		question: "Do I need product experience?",
 		answer:
-			"It is fully on-demand. You get videos plus a digital guide/workbook you can use at your own pace.",
+			"No. But if product judgment feels like your weak spot, Product Management for Beginners is included as a bonus.",
+	},
+	{
+		question: "Do I need to be good at design?",
+		answer:
+			"No. You need enough design direction to make a usable, coherent v1. This is not about becoming a professional designer in a weekend.",
+	},
+	{
+		question: "Why does the workspace matter?",
+		answer:
+			"Because scattered execution kills momentum. Ship by Sunday keeps product thinking, design direction, and build execution in one place so you are not juggling random tabs and half-decisions.",
 	},
 	{
 		question: "What kind of app is a good fit for this?",
 		answer:
-			"Simple web apps, internal tools, niche SaaS ideas, and scoped MVPs are the best fit. This is not for massive multi-system builds.",
+			"Scoped web apps, MVPs, narrow tools, and practical products are the best fit. It is not for giant multi-system startup ideas.",
 	},
 ];
 
-const whatYouGet = [
-	"4-block shipping system",
+const pricingIncludes = [
+	"Ship by Sunday workspace",
+	"4-block sprint",
 	"On-demand walkthroughs",
-	"Digital guide + workbook",
-	"Prompts + worksheets",
-	"Deploy checklists",
+	"Workbook + prompts",
+	"Product Management for Beginners bonus",
 	"Lifetime access",
 ];
 
@@ -176,20 +291,20 @@ export default async function Page({
 							<span className="font-display text-2xl tracking-[0.08em] text-ink">
 								MMAI
 							</span>
-							<span>Design & build</span>
+							<span>Prototype to v1</span>
 						</div>
 
 						<h1 className="font-display text-[3rem] uppercase leading-[0.84] tracking-[-0.04em] text-ink sm:text-[7rem] lg:text-[8.4rem]">
-							Go from idea to
+							Turn rough prototypes
 							<span className="block text-ink sm:inline sm:pl-4 sm:text-white sm:[text-shadow:-2px_-2px_0_#111,2px_-2px_0_#111,-2px_2px_0_#111,2px_2px_0_#111]">
-								v1 in one weekend
+								into real v1s
 							</span>
 						</h1>
 
 						<p className="mt-5 max-w-3xl text-pretty text-base font-medium leading-relaxed text-ink/80 sm:text-xl">
-							An on-demand weekend system for junior and mid-level engineers who
-							can code, have ideas, and want a structured way to actually ship
-							with AI.
+							Ship by Sunday is a software-guided weekend sprint for builders
+							who can already prototype, but need product judgment, design
+							direction, and execution structure to ship a real v1.
 						</p>
 
 						<div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
@@ -198,16 +313,15 @@ export default async function Page({
 								className="inline-flex min-w-full items-center justify-center border border-line bg-ink px-6 py-4 font-display text-[2rem] uppercase tracking-[0.04em] text-paper transition-transform duration-150 hover:-translate-y-1 sm:min-w-72 sm:px-8 sm:text-3xl"
 							/>
 							<a
-								href="#system"
+								href="#how-it-works"
 								className="inline-flex min-w-full items-center justify-center border border-line bg-white px-6 py-4 font-display text-[2rem] uppercase tracking-[0.04em] text-ink transition-transform duration-150 hover:-translate-y-1 sm:min-w-72 sm:px-8 sm:text-3xl"
 							>
-								See the curriculum
+								See how it works
 							</a>
 						</div>
 
 						<p className="mt-5 text-sm font-semibold text-ink/70 sm:text-base">
-							On-demand videos + digital guide/workbook. Lifetime access. Start
-							this weekend.
+							Workspace + sprint + on-demand walkthroughs + lifetime access
 						</p>
 					</div>
 				</section>
@@ -237,16 +351,78 @@ export default async function Page({
 					</div>
 				</SectionFrame>
 
-				<SectionFrame id="system" className="relative overflow-hidden">
-					<div className="absolute inset-y-0 left-1/2 hidden w-px -translate-x-1/2 bg-line/15 lg:block" />
-					<SectionLabel>System</SectionLabel>
+				<SectionFrame className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+					<div>
+						<SectionLabel>Why Builders Get Stuck</SectionLabel>
+						<h2 className="mt-3 max-w-4xl font-display text-[2.7rem] uppercase leading-[0.84] tracking-[-0.04em] sm:text-[5rem]">
+							Why builders who can already code still don&apos;t ship
+						</h2>
+					</div>
+					<div className="flex items-end">
+						<p className="max-w-md text-sm font-semibold leading-relaxed text-ink/75 sm:text-base">
+							Development is no longer the main bottleneck. Product clarity and
+							design clarity now matter more because code is faster and cheaper
+							than ever.
+						</p>
+					</div>
+					<div className="grid gap-[1px] border border-line bg-line lg:col-span-2 lg:grid-cols-4">
+						{reframeCards.map((card) => (
+							<div key={card.title} className="bg-white p-5">
+								<p className="font-display text-[1.7rem] uppercase leading-[0.9] tracking-[-0.03em] sm:text-[2.2rem]">
+									{card.title}
+								</p>
+								<p className="mt-4 text-sm font-medium leading-relaxed text-ink/75 sm:text-base">
+									{card.description}
+								</p>
+							</div>
+						))}
+					</div>
+				</SectionFrame>
+
+				<SectionFrame id="how-it-works" className="relative overflow-hidden">
+					<SectionLabel>Mechanism</SectionLabel>
 					<div className="mt-3 max-w-4xl">
 						<h2 className="font-display text-[2.7rem] uppercase leading-[0.84] tracking-[-0.04em] sm:text-[5rem]">
-							The 4-block shipping system
+							The Product Trinity
 						</h2>
 						<p className="mt-3 max-w-3xl text-pretty text-base font-medium leading-relaxed text-ink/75 sm:text-xl">
-							Each block reduces ambiguity and sets up the next so you stop
-							wandering and keep moving.
+							Shipping is not just a coding problem. It is a coordination
+							problem across product strategy, design, and development.
+						</p>
+					</div>
+
+					<div className="mt-8 grid gap-[1px] border border-line bg-line lg:grid-cols-3">
+						{trinityCards.map((card) => (
+							<article key={card.name} className="bg-white p-5 sm:p-6">
+								<p className="font-display text-[2.1rem] uppercase leading-none tracking-[-0.03em] sm:text-[2.8rem]">
+									{card.name}
+								</p>
+								<p className="mt-5 text-base font-black uppercase leading-tight tracking-[0.04em] text-ink/85 sm:text-lg">
+									{card.prompt}
+								</p>
+								<p className="mt-4 text-sm font-medium leading-relaxed text-ink/75 sm:text-base">
+									{card.description}
+								</p>
+							</article>
+						))}
+					</div>
+
+					<p className="mt-6 max-w-3xl text-base font-semibold leading-relaxed text-ink/80 sm:text-lg">
+						Ship by Sunday gives you a workspace and sprint built to keep those
+						three parts moving together.
+					</p>
+				</SectionFrame>
+
+				<SectionFrame id="system" className="relative overflow-hidden">
+					<div className="absolute inset-y-0 left-1/2 hidden w-px -translate-x-1/2 bg-line/15 lg:block" />
+					<SectionLabel>Sprint Path</SectionLabel>
+					<div className="mt-3 max-w-4xl">
+						<h2 className="font-display text-[2.7rem] uppercase leading-[0.84] tracking-[-0.04em] sm:text-[5rem]">
+							The 4-block path to a real v1
+						</h2>
+						<p className="mt-3 max-w-3xl text-pretty text-base font-medium leading-relaxed text-ink/75 sm:text-xl">
+							The Product Trinity explains why people stay stuck. The 4-block
+							sprint is how Ship by Sunday gets you unstuck.
 						</p>
 					</div>
 
@@ -284,13 +460,13 @@ export default async function Page({
 
 				<section className="bg-accent px-6 py-10 text-center text-paper shadow-card">
 					<h2 className="font-display text-[2.7rem] uppercase leading-[0.84] tracking-[-0.04em] sm:text-[5rem]">
-						Not theory.
-						<span className="block">Deliverables.</span>
+						Not more content.
+						<span className="block">A better process.</span>
 					</h2>
 					<p className="mx-auto mt-4 max-w-3xl text-pretty text-base leading-relaxed text-paper/80 sm:text-xl">
-						Each block ends with a real artifact: a brief, a plan, a build, or a
-						deployment. You are not buying more information. You are buying a
-						finishing system.
+						Each block ends with a real artifact. You are not buying another
+						theory library. You are buying a system for turning rough prototypes
+						into something real.
 					</p>
 				</section>
 
@@ -298,11 +474,11 @@ export default async function Page({
 					<SectionFrame className="lg:sticky lg:top-4 lg:self-start">
 						<SectionLabel>Block deep dive</SectionLabel>
 						<h2 className="mt-4 font-display text-[2.8rem] uppercase leading-[0.82] tracking-[-0.04em] sm:text-[3.6rem]">
-							The blocks
+							The sprint
 						</h2>
 						<p className="mt-4 text-base leading-relaxed text-ink/75">
-							The page sells the system. This section proves each block has a
-							real job and a real artifact.
+							The mechanism explains why builders get stuck. This section shows
+							how the sprint actually gets them moving.
 						</p>
 					</SectionFrame>
 
@@ -347,33 +523,35 @@ export default async function Page({
 					</div>
 				</div>
 
-				<SectionFrame className="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
+				<SectionFrame className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
 					<div className="border border-line p-5">
 						<h2 className="font-display text-[2.6rem] uppercase leading-[0.84] tracking-[-0.04em] sm:text-[5rem]">
-							Built for engineers
+							Built for builders
 							<span className="block text-ink sm:text-white sm:[text-shadow:-2px_-2px_0_#111,2px_-2px_0_#111,-2px_2px_0_#111,2px_2px_0_#111]">
-								who don&apos;t finish
+								who can already prototype
 							</span>
 						</h2>
 					</div>
 					<div className="flex items-end border border-line p-5">
 						<p className="text-base leading-relaxed text-ink/75 sm:text-lg">
-							For junior and mid-level engineers who can code, have product
-							ideas, and keep getting stuck before anything goes live.
+							Not for total beginners. Not for giant multi-system startup ideas.
 						</p>
 					</div>
-					<div className="border border-line p-5 text-base leading-relaxed text-ink/75 sm:text-lg">
-						You do not need to be a senior engineer. You do need a clear system
-						for scoping, building, and shipping without getting lost in the
-						middle.
-					</div>
-					<div className="border border-line p-5 text-base leading-relaxed text-ink/75 sm:text-lg">
-						This is for people who already have enough technical fluency to
-						start. The product exists to help them finally close the loop.
+					<div className="grid gap-[1px] border border-line bg-line lg:col-span-2 lg:grid-cols-2">
+						{audienceCards.map((card) => (
+							<div key={card.title} className="bg-white p-5">
+								<p className="font-display text-[2rem] uppercase leading-[0.88] tracking-[-0.03em] sm:text-[2.8rem]">
+									{card.title}
+								</p>
+								<p className="mt-4 text-sm font-medium leading-relaxed text-ink/75 sm:text-base">
+									{card.description}
+								</p>
+							</div>
+						))}
 					</div>
 				</SectionFrame>
 
-				<div className="grid gap-4 lg:grid-cols-[1.1fr_1fr]">
+				<div className="grid gap-4 lg:grid-cols-[1.05fr_1fr]">
 					<SectionFrame>
 						<div className="flex items-end justify-between gap-4 border-b border-line pb-4">
 							<div>
@@ -383,22 +561,74 @@ export default async function Page({
 								</h2>
 							</div>
 							<span className="font-display text-3xl uppercase sm:text-4xl">
-								{deliverables.length}
+								{offerGroups.length}
 							</span>
 						</div>
 
 						<div className="mt-4 grid gap-[1px] border border-line bg-line">
-							{deliverables.map((item) => (
-								<div
-									key={item}
-									className="bg-white px-5 py-5 font-display text-[1.45rem] uppercase leading-none tracking-[0.03em] sm:text-[2.4rem]"
-								>
-									{item}
+							{offerGroups.map((item) => (
+								<div key={item.name} className="bg-white p-5">
+									<p className="font-display text-[1.55rem] uppercase leading-none tracking-[0.03em] sm:text-[2.4rem]">
+										{item.name}
+									</p>
+									<p className="mt-3 max-w-xl text-sm font-medium leading-relaxed text-ink/75 sm:text-base">
+										{item.description}
+									</p>
 								</div>
 							))}
 						</div>
 					</SectionFrame>
 
+					<SectionFrame className="flex flex-col gap-6">
+						<div>
+							<SectionLabel>Inside Ship by Sunday</SectionLabel>
+							<h2 className="mt-3 font-display text-[2.7rem] uppercase leading-[0.84] tracking-[-0.04em] sm:text-[5rem]">
+								Everything under one roof
+							</h2>
+							<p className="mt-4 max-w-xl text-base leading-relaxed text-ink/75 sm:text-lg">
+								You will not be juggling docs, prompts, worksheets, and random
+								tabs. Ship by Sunday keeps product thinking, design direction,
+								and build execution in one place.
+							</p>
+						</div>
+
+						<div className="relative min-h-[18rem] overflow-hidden border border-line bg-ink">
+							<Image
+								src={missionImage}
+								alt="Ship by Sunday workspace preview"
+								fill
+								className="object-cover opacity-85"
+								sizes="(max-width: 1024px) 100vw, 42vw"
+							/>
+						</div>
+
+						<div className="grid gap-[1px] border border-line bg-line sm:grid-cols-2">
+							{workspacePreviews.map((preview) => (
+								<div key={preview.name} className="bg-white">
+									<div className="relative min-h-[8rem] border-b border-line">
+										<Image
+											src={preview.src}
+											alt={`${preview.name} workspace preview`}
+											fill
+											className="object-cover"
+											sizes="(max-width: 640px) 100vw, 20vw"
+										/>
+									</div>
+									<div className="p-4">
+										<p className="font-display text-[1.6rem] uppercase leading-none tracking-[0.03em]">
+											{preview.name}
+										</p>
+										<p className="mt-3 text-sm font-medium leading-relaxed text-ink/75">
+											{preview.description}
+										</p>
+									</div>
+								</div>
+							))}
+						</div>
+					</SectionFrame>
+				</div>
+
+				<div className="grid gap-4 lg:grid-cols-[1.1fr_1fr]">
 					<SectionFrame className="flex flex-col gap-6">
 						<div className="border border-line p-4">
 							<SectionLabel>Built by someone who ships</SectionLabel>
@@ -413,7 +643,14 @@ export default async function Page({
 								))}
 							</div>
 						</div>
-						<div className="relative min-h-[22rem] overflow-hidden border border-line bg-ink">
+						<p className="text-sm leading-relaxed text-ink/70 sm:text-base">
+							This is not theory from the sidelines. It is a system shaped by
+							years of shipping products, tools, and MVPs in public.
+						</p>
+					</SectionFrame>
+
+					<SectionFrame className="flex flex-col gap-6">
+						<div className="relative min-h-[24rem] overflow-hidden border border-line bg-ink">
 							<Image
 								src={proofImage}
 								alt="Founder proof visual"
@@ -423,8 +660,9 @@ export default async function Page({
 							/>
 						</div>
 						<p className="text-sm leading-relaxed text-ink/70 sm:text-base">
-							This isn&apos;t theory from the sidelines. It&apos;s a system
-							shaped by years of shipping products, tools, and MVPs in public.
+							Built by someone who has moved from design to engineering to
+							product and knows what it takes to turn rough ideas into shippable
+							products.
 						</p>
 					</SectionFrame>
 				</div>
@@ -453,8 +691,8 @@ export default async function Page({
 							<span className="block">this weekend</span>
 						</h2>
 						<p className="mt-4 max-w-md text-base leading-relaxed text-paper/80 sm:text-lg">
-							A structured, on-demand system for engineers who want to stop
-							circling unfinished ideas and ship a real v1 with AI.
+							A software-guided weekend sprint for builders who can already
+							prototype, but need a better system to ship a real v1.
 						</p>
 						<div className="mt-8 text-6xl font-semibold tracking-[-0.05em] sm:text-7xl">
 							$500
@@ -470,7 +708,7 @@ export default async function Page({
 							Get instant access
 						</h2>
 						<div className="mt-6 grid gap-[1px] border border-line bg-line">
-							{whatYouGet.map((item) => (
+							{pricingIncludes.map((item) => (
 								<div key={item} className="grid grid-cols-[56px_1fr] bg-white">
 									<div className="grid place-items-center border-r border-line text-2xl">
 										✓

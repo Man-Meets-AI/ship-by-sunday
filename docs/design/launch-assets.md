@@ -1,6 +1,6 @@
 # Ship by Sunday Design Launch Assets
 
-Last updated: 2026-03-07
+Last updated: 2026-03-11
 
 ## Goal
 
@@ -34,7 +34,7 @@ Turn the abstract credibility section into clear, visual proof that the founder 
 - `10 years in product, from design to engineering`
 - `Scaled Delivery Dudes to $73M GMV and a $23M acquisition`
 - `Built GPTs for Devs to 100K users in its first week`
-- `Taught 110+ engineers through Vibe with AI`
+- `Taught 110+ students through Vibe with AI`
 
 ### Visual direction
 
@@ -66,9 +66,9 @@ Reduce hesitation right before purchase with fast trust cues.
 
 ### Copy needed
 
-- `On-demand videos + digital guide/workbook`
+- `Workspace + sprint + on-demand walkthroughs`
 - `Lifetime access`
-- `Built for junior and mid-level engineers`
+- `Built for builders who can already prototype`
 - `14-day action-based guarantee`
 
 ### Visual direction

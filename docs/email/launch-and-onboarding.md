@@ -1,11 +1,14 @@
 # Ship by Sunday Launch Emails
 
-Last updated: 2026-03-07
+Last updated: 2026-03-11
 
 ## Notes
 
-- Audience: junior and mid-level engineers who can code, have ideas, and keep getting stuck before anything goes live
+- Audience: builders who can already prototype or get things working, but keep getting stuck before they ship a real v1
 - Promise: `Go from idea to v1 this weekend`
+- Mechanism: `The Product Trinity`
+- Vehicle: `Ship by Sunday` as the workspace + guided 4-block sprint
+- Bonus: `Product Management for Beginners` for buyers who do not trust their product judgment yet
 - Tone: calm, direct, operator-level, no hype
 - Primary CTA: `Get Instant Access`
 
@@ -39,7 +42,7 @@ Subject line options:
 
 - `Ship by Sunday is live`
 - `Go from idea to v1 this weekend`
-- `For engineers who keep not finishing`
+- `For builders who keep not finishing`
 
 Preview text:
 
@@ -49,9 +52,11 @@ Full body:
 
 `Ship by Sunday is live.`
 
-`It is built for junior and mid-level engineers who can code, have ideas, and keep getting stuck before anything goes live.`
+`It is built for builders who can already prototype, but keep getting stuck before they ship a real v1.`
 
-`The point of this product is not to make you feel informed. It is to help you make one full rep from idea to shipped v1.`
+`The point of this product is not to make you feel informed. It is to help you make one full rep from rough prototype to shipped v1.`
+
+`The Product Trinity is the idea behind it: product strategy, design, and development working together instead of getting handled in isolation.`
 
 `Inside, the sprint is broken into 4 blocks:`
 
@@ -63,7 +68,9 @@ Full body:
 
 `Ship Block: deploy it, share it, and close the loop`
 
-`You also get the worksheets, guide, and prompts that keep the whole thing moving.`
+`You also get the workspace, worksheets, guide, and prompts that keep the whole thing moving.`
+
+`And if product judgment is the part you trust least, Product Management for Beginners is included as a bonus.`
 
 `If you have a graveyard of half-started ideas, this is for you.`
 
@@ -103,7 +110,7 @@ Preview text:
 
 Full body:
 
-`A lot of engineers do not have a starting problem. They have a finishing problem.`
+`A lot of builders do not have a starting problem. They have a finishing problem.`
 
 `They can code.`
 
@@ -157,7 +164,7 @@ Target segment:
 Subject line options:
 
 - `What you actually get inside Ship by Sunday`
-- `The 4-block shipping system`
+- `The 4-block sprint`
 - `How the weekend sprint works`
 
 Preview text:
@@ -237,9 +244,9 @@ Full body:
 
 `Then the CEO Block should make that obvious fast. If you complete it within 14 days and do not leave with a clear One-Page Product Brief and a tighter MVP scope, you can email us for a refund.`
 
-`“Is this for total beginners?”`
+`“Is this for someone who has never built before?”`
 
-`No. It is for engineers who can already code and want to stop circling unfinished ideas.`
+`No. It is for builders who can already prototype and want to stop circling unfinished ideas.`
 
 `“Will this work for my giant app idea?”`
 
@@ -286,7 +293,7 @@ Full body:
 
 `It is not for everyone.`
 
-`It is for engineers who can code, want leverage outside the day job, and are tired of watching their own ideas die half-built.`
+`It is for builders who can already prototype, want leverage outside the day job, and are tired of watching their own ideas die half-built.`
 
 `If that is you, this is your reminder to stop hovering and make one full rep.`
 

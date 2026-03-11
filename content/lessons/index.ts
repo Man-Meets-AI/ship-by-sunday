@@ -1,6 +1,7 @@
 import { lessonRegistry, type LessonConfig } from "@/lib/course/manifest";
 import { lessonContentManifest } from "@/lib/course/content-manifest";
 import { authoredLessonContent } from "@/content/lessons/generated";
+import { lessonContentOverrides } from "@/content/lessons/overrides";
 import type { LessonContent } from "@/content/lessons/types";
 
 const internalCoachExampleIds = new Set(["key-line", "lock-it-in", "avoid-this"]);
@@ -26,6 +27,32 @@ function sanitizeLessonContentForStudent(content: LessonContent): LessonContent 
 					!internalCoachExampleIds.has(example.id) &&
 					!internalCoachExampleTitles.has(example.title.trim().toLowerCase()),
 			),
+		},
+	};
+}
+
+function mergeLessonContent(
+	base: LessonContent,
+	override: (typeof lessonContentOverrides)[string] | undefined,
+): LessonContent {
+	if (!override) {
+		return base;
+	}
+
+	return {
+		...base,
+		intro: override.intro ?? base.intro,
+		actionCard: {
+			...base.actionCard,
+			...override.actionCard,
+		},
+		workbench: {
+			...base.workbench,
+			...override.workbench,
+			sections: {
+				...base.workbench.sections,
+				...override.workbench?.sections,
+			},
 		},
 	};
 }
@@ -85,7 +112,10 @@ function buildLessonContentMap() {
 		}
 
 		const content =
-			authoredByLessonId.get(lesson.id) ?? buildOutlineLessonContent(lesson);
+			mergeLessonContent(
+				authoredByLessonId.get(lesson.id) ?? buildOutlineLessonContent(lesson),
+				lessonContentOverrides[lesson.id],
+			);
 		const expectedSlug = lessonContentManifest.lessons[content.lessonId]?.slug;
 		if (!expectedSlug) {
 			throw new Error(`Missing lesson slug for ${content.lessonId}`);

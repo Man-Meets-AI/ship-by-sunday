@@ -62,6 +62,33 @@ export type ArtifactContract = {
 	dependsOn?: string[];
 };
 
+export type WorkbenchSectionLayout = "stack" | "split" | "compact";
+
+export type WorkbenchSection = {
+	id: string;
+	title: string;
+	eyebrow?: string;
+	instruction?: string;
+	layout?: WorkbenchSectionLayout;
+	fieldIds: string[];
+	completionLabel?: string;
+	blockedByFieldIds?: string[];
+};
+
+export type ObjectiveMode = "generated" | "manual";
+
+export type ObjectiveTaskDefinition = {
+	id?: string;
+	label: string;
+};
+
+export type LessonHandoff = {
+	mode: "select_candidate_problem";
+	sourceArtifactKey: string;
+	selectionFieldId: string;
+	persistToArtifact: boolean;
+};
+
 export type WorkbenchField = {
 	id: string;
 	label: string;
@@ -83,6 +110,11 @@ export type WorkbenchField = {
 	helpText?: string;
 	options?: string[];
 	rows?: number;
+	example?: string;
+	exampleLabel?: string;
+	inputWidth?: "compact" | "default" | "wide";
+	artifactPreviewLabel?: string;
+	taskLabel?: string;
 	linkedArtifactKey?: string;
 };
 
@@ -102,11 +134,16 @@ export type LessonConfig = {
 	externalTool?: ExternalTool;
 	objectiveTitle: string;
 	checklist: string[];
+	objectiveMode?: ObjectiveMode;
+	objectiveTasks?: ObjectiveTaskDefinition[];
+	handoff?: LessonHandoff;
 	helperText?: string;
 	winCondition: string;
 	panelDefaults: PanelDefaultState;
 	pinnedArtifacts?: string[];
+	fieldShapeVersion?: number;
 	workbenchFields?: WorkbenchField[];
+	workbenchSections?: WorkbenchSection[];
 	notes?: string[];
 };
 
@@ -235,6 +272,18 @@ export const lessonRegistry: LessonConfig[] = [
 			"This is the orientation rep. Keep the goal small and concrete.",
 		winCondition: "A concrete weekend shipping goal is saved.",
 		panelDefaults: splitPanelDefaults,
+		workbenchSections: [
+			{
+				id: "weekend_goal",
+				eyebrow: "Set the target",
+				title: "Define your weekend ship",
+				instruction:
+					"Name the smallest believable thing you want live by Sunday. If you could not describe done in one sentence, it is still too big.",
+				layout: "stack",
+				fieldIds: ["weekend_goal"],
+				completionLabel: "Weekend goal defined",
+			},
+		],
 		workbenchFields: [
 			{
 				id: "weekend_goal",
@@ -242,8 +291,9 @@ export const lessonRegistry: LessonConfig[] = [
 				kind: "textarea",
 				required: true,
 				rows: 4,
-				placeholder:
-					"Name the smallest believable thing you want live by Sunday.",
+				placeholder: "The smallest believable thing you want live by Sunday.",
+				inputWidth: "wide",
+				artifactPreviewLabel: "Weekend ship goal",
 			},
 		],
 	},
@@ -267,6 +317,7 @@ export const lessonRegistry: LessonConfig[] = [
 		coachMode: "docked",
 		objectiveTitle: "Start Here 0.2 — How the Sprint Works",
 		checklist: ["Download Figma, VSCode", "Review the 4 Blocks"],
+		objectiveMode: "manual",
 		helperText:
 			"Set up the sprint so the first block starts with zero confusion.",
 		winCondition: "The sprint setup checklist is complete.",
@@ -299,39 +350,110 @@ export const lessonRegistry: LessonConfig[] = [
 		helperText: "Do not rank them here. Generate candidates first.",
 		winCondition: "Three candidate problems are saved.",
 		panelDefaults: splitPanelDefaults,
-		workbenchFields: [
+		fieldShapeVersion: 2,
+		workbenchSections: [
 			{
 				id: "problem_1",
-				label: "Problem 1 (include who has it)",
-				kind: "textarea",
-				required: true,
-				rows: 3,
-				placeholder:
-					"Example: Startup operators lose action items after meetings and waste time rebuilding them.",
-				helpText:
-					"Write the painful problem and name the person or group living with it.",
+				eyebrow: "Candidate 1",
+				title: "Candidate problem 1",
+				instruction:
+					"Start with a person or group you can picture clearly, then describe the painful problem they keep hitting.",
+				layout: "split",
+				fieldIds: ["problem_1_who", "problem_1_pain"],
+				completionLabel: "Candidate problem 1 written",
 			},
 			{
 				id: "problem_2",
-				label: "Problem 2 (include who has it)",
-				kind: "textarea",
-				required: true,
-				rows: 3,
-				placeholder:
-					"Example: Freelancers forget client follow-ups because their notes are scattered.",
-				helpText:
-					"Keep it grounded in a real life or work context, not a vague market idea.",
+				eyebrow: "Candidate 2",
+				title: "Candidate problem 2",
+				instruction:
+					"Keep it rooted in real life or work. If it sounds like a market category, tighten it back to a real person in a real moment.",
+				layout: "split",
+				fieldIds: ["problem_2_who", "problem_2_pain"],
+				completionLabel: "Candidate problem 2 written",
 			},
 			{
 				id: "problem_3",
-				label: "Problem 3 (include who has it)",
+				eyebrow: "Candidate 3",
+				title: "Candidate problem 3",
+				instruction:
+					"Write the problem as something painful and recurring, not as a product idea or a feature wishlist.",
+				layout: "split",
+				fieldIds: ["problem_3_who", "problem_3_pain"],
+				completionLabel: "Candidate problem 3 written",
+			},
+		],
+		workbenchFields: [
+			{
+				id: "problem_1_who",
+				label: "Who has this problem?",
+				kind: "text",
+				required: true,
+				placeholder: "Startup operators",
+				inputWidth: "compact",
+				artifactPreviewLabel: "Problem 1: who",
+				taskLabel: "Problem owner 1",
+			},
+			{
+				id: "problem_1_pain",
+				label: "What painful problem keeps happening?",
 				kind: "textarea",
 				required: true,
 				rows: 3,
-				placeholder:
-					"Example: Small teams lose recurring process tasks because nobody owns the checklist after meetings.",
 				helpText:
-					"Name the person or group inside the problem statement itself.",
+					"Describe the recurring pain in plain language. Keep it specific enough that the person would recognize themselves in it.",
+				placeholder: "They lose action items after meetings and waste time rebuilding them.",
+				inputWidth: "wide",
+				artifactPreviewLabel: "Problem 1: pain",
+				taskLabel: "Problem statement 1",
+			},
+			{
+				id: "problem_2_who",
+				label: "Who has this problem?",
+				kind: "text",
+				required: true,
+				placeholder: "Freelancers",
+				inputWidth: "compact",
+				artifactPreviewLabel: "Problem 2: who",
+				taskLabel: "Problem owner 2",
+			},
+			{
+				id: "problem_2_pain",
+				label: "What painful problem keeps happening?",
+				kind: "textarea",
+				required: true,
+				rows: 3,
+				helpText:
+					"Keep it grounded in a real life or work context, not a vague market idea.",
+				placeholder:
+					"They forget client follow-ups because their notes and next steps are scattered.",
+				inputWidth: "wide",
+				artifactPreviewLabel: "Problem 2: pain",
+				taskLabel: "Problem statement 2",
+			},
+			{
+				id: "problem_3_who",
+				label: "Who has this problem?",
+				kind: "text",
+				required: true,
+				placeholder: "Small teams",
+				inputWidth: "compact",
+				artifactPreviewLabel: "Problem 3: who",
+				taskLabel: "Problem owner 3",
+			},
+			{
+				id: "problem_3_pain",
+				label: "What painful problem keeps happening?",
+				kind: "textarea",
+				required: true,
+				rows: 3,
+				helpText:
+					"Name the person or group inside the problem itself, then describe the repeated pain they deal with.",
+				placeholder:
+					"They lose recurring process tasks because nobody owns the checklist after meetings.",
+				inputWidth: "wide",
+				artifactPreviewLabel: "Problem 3: pain",
+				taskLabel: "Problem statement 3",
 			},
 		],
 	},
@@ -356,49 +478,91 @@ export const lessonRegistry: LessonConfig[] = [
 		coachMode: "docked",
 		objectiveTitle: "CEO 1.2 — Pick One User",
 		checklist: [
-			"Carry forward one chosen problem",
-			"Name one specific user",
-			"Describe when the problem hits",
-			"Confirm you can reach them this week",
+			"Choose candidate problem",
+			"Chosen user",
+			"Pain moment",
+			"Current workaround",
+			"Reachability",
 		],
-		helperText: "Specific beats broad. Reachable beats aspirational.",
+		handoff: {
+			mode: "select_candidate_problem",
+			sourceArtifactKey: "candidate_problems",
+			selectionFieldId: "selected_problem_index",
+			persistToArtifact: true,
+		},
+		helperText: "Pick one of the three problems you just wrote, then define the user living with it.",
 		winCondition: "One clear user statement is saved.",
 		panelDefaults: splitPanelDefaults,
+		fieldShapeVersion: 2,
 		pinnedArtifacts: ["candidate_problems"],
-		workbenchFields: [
+		workbenchSections: [
 			{
-				id: "chosen_problem",
-				label: "Chosen Problem",
-				kind: "readonly",
-				linkedArtifactKey: "candidate_problems",
+				id: "user_statement",
+				eyebrow: "Pick the person",
+				title: "Lock one reachable user",
+				instruction:
+					"Now that you have chosen the problem, name the most specific reachable user living with it.",
+				layout: "stack",
+				fieldIds: ["user_type", "pain_moment"],
+				completionLabel: "User and pain moment defined",
+				blockedByFieldIds: ["selected_problem_index"],
 			},
 			{
+				id: "reality_check",
+				eyebrow: "Reality check",
+				title: "Confirm this is grounded",
+				instruction:
+					"Show how they solve it today, then prove you can reach them this week. Reachable beats aspirational.",
+				layout: "stack",
+				fieldIds: ["current_solution", "reachability"],
+				completionLabel: "Current workaround and reachability confirmed",
+				blockedByFieldIds: ["selected_problem_index"],
+			},
+		],
+		workbenchFields: [
+			{
 				id: "user_type",
-				label: "This app is for...",
+				label: "Chosen user",
 				kind: "text",
 				required: true,
-				placeholder: "A narrow, specific user",
+				placeholder: "Early-stage startup operators who run team meetings",
+				inputWidth: "wide",
+				artifactPreviewLabel: "User",
+				taskLabel: "Chosen user",
 			},
 			{
 				id: "pain_moment",
-				label: "When this problem hits...",
+				label: "When does this problem hit?",
 				kind: "textarea",
 				required: true,
 				rows: 3,
+				placeholder:
+					"Right after team meetings, when decisions and next steps need to get shared fast.",
+				inputWidth: "wide",
+				artifactPreviewLabel: "Pain moment",
+				taskLabel: "Pain moment",
 			},
 			{
 				id: "current_solution",
-				label: "How they solve it today",
+				label: "How do they handle it today?",
 				kind: "textarea",
 				required: true,
 				rows: 3,
+				placeholder: "Messy notes, memory, and a manual cleanup pass after the meeting.",
+				inputWidth: "wide",
+				artifactPreviewLabel: "Current workaround",
+				taskLabel: "Current workaround",
 			},
 			{
 				id: "reachability",
-				label: "Why I can reach them this week",
+				label: "Why can you reach them this week?",
 				kind: "textarea",
 				required: true,
 				rows: 2,
+				placeholder: "I already know a few people like this and can show them a demo.",
+				inputWidth: "wide",
+				artifactPreviewLabel: "Reachability",
+				taskLabel: "Reachability",
 			},
 		],
 	},
@@ -431,13 +595,40 @@ export const lessonRegistry: LessonConfig[] = [
 			"Describe what gets better for the user, not what the app contains.",
 		winCondition: "One clear outcome statement is saved.",
 		panelDefaults: splitPanelDefaults,
-		pinnedArtifacts: ["candidate_problems", "user_statement"],
+		pinnedArtifacts: ["user_statement"],
+		workbenchSections: [
+			{
+				id: "outcome",
+				eyebrow: "Promise",
+				title: "Write the promised outcome",
+				instruction:
+					"State the changed condition for the user. This should read like a result they can feel or observe, not a feature list.",
+				layout: "stack",
+				fieldIds: ["outcome"],
+				completionLabel: "Outcome statement written",
+			},
+			{
+				id: "evidence",
+				eyebrow: "Make it real",
+				title: "Show what success looks like",
+				instruction:
+					"Describe the visible proof that the outcome happened and what is different for the user once it works.",
+				layout: "stack",
+				fieldIds: ["success_looks_like", "difference_for_user"],
+				completionLabel: "Outcome proof described",
+			},
+		],
 		workbenchFields: [
 			{
 				id: "outcome",
 				label: "One clear user-facing outcome statement",
 				kind: "text",
 				required: true,
+				placeholder:
+					"Startup operators leave a meeting with a clean action summary they can review and send in minutes.",
+				inputWidth: "wide",
+				artifactPreviewLabel: "Outcome statement",
+				taskLabel: "Outcome statement",
 			},
 			{
 				id: "success_looks_like",
@@ -445,6 +636,11 @@ export const lessonRegistry: LessonConfig[] = [
 				kind: "textarea",
 				required: true,
 				rows: 3,
+				placeholder:
+					"They can paste notes, review a usable action summary, and share it without rebuilding everything by hand.",
+				inputWidth: "wide",
+				artifactPreviewLabel: "Success looks like",
+				taskLabel: "Success looks like",
 			},
 			{
 				id: "difference_for_user",
@@ -452,6 +648,11 @@ export const lessonRegistry: LessonConfig[] = [
 				kind: "textarea",
 				required: true,
 				rows: 3,
+				placeholder:
+					"They stop losing decisions in messy notes and can close the loop while the meeting is still fresh.",
+				inputWidth: "wide",
+				artifactPreviewLabel: "Difference for the user",
+				taskLabel: "Difference for user",
 			},
 		],
 	},
@@ -484,11 +685,7 @@ export const lessonRegistry: LessonConfig[] = [
 		helperText: "Collect signal fast. Do not turn this into a thesis project.",
 		winCondition: "2–3 research entries and one summary insight are saved.",
 		panelDefaults: splitPanelDefaults,
-		pinnedArtifacts: [
-			"candidate_problems",
-			"user_statement",
-			"outcome_statement",
-		],
+		pinnedArtifacts: ["user_statement", "outcome_statement"],
 		workbenchFields: [
 			{
 				id: "research_table",
@@ -637,7 +834,6 @@ export const lessonRegistry: LessonConfig[] = [
 		winCondition: "The product brief is assembled and locked.",
 		panelDefaults: splitPanelDefaults,
 		pinnedArtifacts: [
-			"candidate_problems",
 			"user_statement",
 			"outcome_statement",
 			"research_notes",

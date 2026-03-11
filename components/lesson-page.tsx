@@ -8,7 +8,6 @@ import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import {
 	getLesson,
 	getLessonHref,
-	type ChecklistItemValue,
 	type LessonConfig,
 } from "@/lib/course/manifest";
 import type { LessonContent } from "@/content/lessons/types";
@@ -22,7 +21,7 @@ import {
 import { ProductShell } from "@/components/product-shell";
 import {
 	getCompletionIssues,
-	isChecklistItemArray,
+	getObjectiveTasks,
 	OBJECTIVE_CHECKLIST_FIELD_ID,
 	type CompletionIssue,
 } from "@/lib/course/registry";
@@ -111,26 +110,6 @@ function storageKey(lessonId: string) {
 	return `sbs:lesson-ui:${lessonId}`;
 }
 
-function normalizeObjectiveChecklist(
-	checklist: string[],
-	value: unknown,
-): ChecklistItemValue[] {
-	if (isChecklistItemArray(value)) {
-		return checklist.map((item) => {
-			const existing = value.find((entry) => entry.label === item);
-			return {
-				label: item,
-				checked: existing?.checked ?? false,
-			};
-		});
-	}
-
-	return checklist.map((item) => ({
-		label: item,
-		checked: false,
-	}));
-}
-
 function isChromeState(value: unknown): value is LessonChromeState {
 	if (!value || typeof value !== "object") {
 		return false;
@@ -157,7 +136,7 @@ export function LessonPage({
 	lessonContent: LessonContent;
 }) {
 	const router = useRouter();
-	const { isAuthenticated } = useConvexAuth();
+	const { isAuthenticated, isLoading } = useConvexAuth();
 	const manifestLesson = getLesson(lessonId);
 	const fallbackChromeState = useMemo(
 		() =>
@@ -168,7 +147,7 @@ export function LessonPage({
 	);
 	const lessonState = useQuery(
 		api.course.getLessonState,
-		isAuthenticated ? { lessonId } : "skip",
+		isAuthenticated && !isLoading ? { lessonId } : "skip",
 	) as LessonState | LockedLessonState | undefined;
 	const markLessonViewed = useMutation(api.course.markLessonViewed);
 	const saveLessonDraft = useMutation(api.course.saveLessonDraft);
@@ -346,11 +325,14 @@ export function LessonPage({
 	const previousHref = lesson.prevLessonId
 		? getLessonHref(lesson.prevLessonId)
 		: null;
-	const objectiveChecklistItems = normalizeObjectiveChecklist(
-		lesson.checklist,
-		fieldValues[OBJECTIVE_CHECKLIST_FIELD_ID],
-	);
+	const objectiveTasks = getObjectiveTasks(lesson, fieldValues as any);
 	const completionIssues = getCompletionIssues(lesson, fieldValues as any);
+	const completedObjectiveCount = objectiveTasks.filter(
+		(task) => task.status === "complete",
+	).length;
+	const nextIncompleteObjective = objectiveTasks.find(
+		(task) => task.status !== "complete",
+	);
 	const validationVisible =
 		completionAttempted ||
 		serverCompletionIssues.length > 0 ||
@@ -368,6 +350,10 @@ export function LessonPage({
 	const showCompletionFeedback =
 		validationVisible &&
 		(displayedCompletionIssues.length > 0 || Boolean(serverCompletionMessage));
+	const lessonReadyToComplete =
+		completionIssues.length === 0 &&
+		objectiveTasks.length > 0 &&
+		lessonState.status !== "completed";
 
 	const setValue = (fieldId: string, value: unknown) => {
 		if (serverCompletionIssues.length > 0) {
@@ -383,20 +369,51 @@ export function LessonPage({
 		}));
 	};
 
+	const setObjectiveTaskChecked = (taskId: string, checked: boolean) => {
+		const manualTasks = objectiveTasks.filter((task) => task.source === "manual");
+		if (manualTasks.length === 0) {
+			return;
+		}
+
+		setValue(
+			OBJECTIVE_CHECKLIST_FIELD_ID,
+			manualTasks.map((task) => ({
+				label: task.label,
+				checked:
+					task.id === taskId ? checked : task.status === "complete",
+			})),
+		);
+	};
+
 	const footer = (
 		<div className="flex flex-col gap-2 lg:flex-row lg:items-center">
-			{showCompletionFeedback ? (
-				<div className="max-w-2xl text-xs font-medium leading-relaxed text-[#a83232]">
-					<p>{serverCompletionMessage ?? "Finish these before continuing:"}</p>
-					{displayedCompletionIssues.length > 0 ? (
-						<p className="mt-1">
-							{displayedCompletionIssues
-								.map((issue) => issue.label)
-								.join(" • ")}
-						</p>
-					) : null}
-				</div>
-			) : null}
+			<div className="max-w-2xl space-y-1">
+				<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
+					Progress {completedObjectiveCount}/{Math.max(objectiveTasks.length, 1)}
+				</p>
+				{lessonReadyToComplete && !showCompletionFeedback ? (
+					<p className="text-xs font-medium leading-relaxed text-product-accent">
+						Everything on this page is filled out. Complete the lesson.
+					</p>
+				) : null}
+				{nextIncompleteObjective && !showCompletionFeedback ? (
+					<p className="text-xs leading-relaxed text-product-muted">
+						Next up: {nextIncompleteObjective.label}
+					</p>
+				) : null}
+				{showCompletionFeedback ? (
+					<div className="text-xs font-medium leading-relaxed text-[#a83232]">
+						<p>{serverCompletionMessage ?? "Finish these before continuing:"}</p>
+						{displayedCompletionIssues.length > 0 ? (
+							<p className="mt-1">
+								{displayedCompletionIssues
+									.map((issue) => issue.label)
+									.join(" • ")}
+							</p>
+						) : null}
+					</div>
+				) : null}
+			</div>
 			<div className="flex flex-wrap justify-end gap-2 lg:ml-auto">
 				{previousHref ? (
 					<Link
@@ -442,7 +459,11 @@ export function LessonPage({
 							},
 						);
 					}}
-					className="rounded-none border border-product-accent bg-product-chip px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
+					className={
+						lessonReadyToComplete
+							? "rounded-none border border-product-accent bg-product-accent px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-bg shadow-[0_0_0_1px_rgba(var(--product-accent),0.3),0_0_18px_rgba(var(--product-accent),0.22)] transition-all hover:brightness-95 motion-safe:animate-pulse"
+							: "rounded-none border border-product-accent bg-product-chip px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
+					}
 				>
 					Complete lesson
 				</button>
@@ -475,13 +496,8 @@ export function LessonPage({
 							coachVisible: true,
 						}))
 					}
-					objectiveChecklistItems={objectiveChecklistItems}
-					onObjectiveChecklistToggle={(index, checked) => {
-						const nextItems = objectiveChecklistItems.map((item, itemIndex) =>
-							itemIndex === index ? { ...item, checked } : item,
-						);
-						setValue(OBJECTIVE_CHECKLIST_FIELD_ID, nextItems);
-					}}
+					objectiveTasks={objectiveTasks}
+					onObjectiveTaskToggle={setObjectiveTaskChecked}
 					pinnedArtifacts={pinnedArtifacts}
 					coachContent={lessonContent.coach}
 					footer={footer}
@@ -500,13 +516,8 @@ export function LessonPage({
 							coachVisible: true,
 						}))
 					}
-					objectiveChecklistItems={objectiveChecklistItems}
-					onObjectiveChecklistToggle={(index, checked) => {
-						const nextItems = objectiveChecklistItems.map((item, itemIndex) =>
-							itemIndex === index ? { ...item, checked } : item,
-						);
-						setValue(OBJECTIVE_CHECKLIST_FIELD_ID, nextItems);
-					}}
+					objectiveTasks={objectiveTasks}
+					onObjectiveTaskToggle={setObjectiveTaskChecked}
 					pinnedArtifacts={pinnedArtifacts}
 					coachContent={lessonContent.coach}
 					footer={footer}

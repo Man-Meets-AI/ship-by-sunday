@@ -41,6 +41,7 @@ If a workstream doc conflicts with `todo.md` or the implemented app state, updat
 - `course-ops/plan.md`
 - `course-ops/lesson-content-ingestion.md`
 - `offer-funnel/plan.md`
+- `offer-funnel/messaging-foundation.md`
 - `email/launch-and-onboarding.md`
 - `delivery-onboarding/stack-decision.md`
 - `analytics-qa/plan.md`

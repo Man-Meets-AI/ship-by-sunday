@@ -1,7 +1,12 @@
 import {
+	buildArtifactPreview,
+	FIELD_SHAPE_VERSION_FIELD_ID,
 	getCompletionIssues,
 	getLessonById,
 	getLessonHref,
+	getObjectiveTasks,
+	getWorkbenchSectionStates,
+	normalizeLessonFieldValues,
 	OBJECTIVE_CHECKLIST_FIELD_ID,
 	getStudentFacingLessons,
 	getUnlockedLessonIds,
@@ -40,33 +45,25 @@ describe("course registry", () => {
 
 		const issues = getCompletionIssues(lesson!, {});
 
-		expect(issues.map((issue) => issue.label)).toContain(
-			"What are you here to ship this weekend?",
-		);
+		expect(issues.map((issue) => issue.label)).toContain("Weekend ship goal");
 	});
 
-	it("reports unchecked objective items as completion blockers", () => {
-		const lesson = getLessonById("0.1");
+	it("keeps manual task fallback for lessons without observable workbench fields", () => {
+		const lesson = getLessonById("0.2");
 		expect(lesson).toBeTruthy();
 
-		const issues = getCompletionIssues(lesson!, {
-			weekend_goal: "Ship a tiny scheduling tool",
+		const tasks = getObjectiveTasks(lesson!, {
 			[OBJECTIVE_CHECKLIST_FIELD_ID]: [
-				{ label: "See the 4-block path", checked: true },
-				{
-					label: "Define the thing you are here to ship",
-					checked: false,
-				},
-				{
-					label: "Commit to doing reps instead of just watching",
-					checked: false,
-				},
+				{ label: "Download Figma, VSCode", checked: true },
+				{ label: "Review the 4 Blocks", checked: false },
 			],
 		});
 
-		expect(issues.filter((issue) => issue.kind === "objective")).toHaveLength(
-			2,
-		);
+		expect(tasks.map((task) => task.status)).toEqual([
+			"complete",
+			"incomplete",
+		]);
+		expect(tasks.every((task) => task.interactive)).toBe(true);
 	});
 
 	it("keeps lesson 1.1 prompts aligned with naming who has the problem", () => {
@@ -77,9 +74,194 @@ describe("course registry", () => {
 			(field) => field.required,
 		);
 		expect(requiredFields?.map((field) => field.label)).toEqual([
-			"Problem 1 (include who has it)",
-			"Problem 2 (include who has it)",
-			"Problem 3 (include who has it)",
+			"Who has this problem?",
+			"What painful problem keeps happening?",
+			"Who has this problem?",
+			"What painful problem keeps happening?",
+			"Who has this problem?",
+			"What painful problem keeps happening?",
+		]);
+	});
+
+	it("tracks section progress for the redesigned 1.1 workbench", () => {
+		const lesson = getLessonById("1.1");
+		expect(lesson).toBeTruthy();
+
+		const sectionStates = getWorkbenchSectionStates(lesson!, {
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+			problem_1_who: "Startup operators",
+			problem_1_pain:
+				"They lose action items after meetings and waste time rebuilding them.",
+			problem_2_who: "Freelancers",
+		});
+
+		expect(sectionStates.map((section) => section.isComplete)).toEqual([
+			true,
+			false,
+			false,
+		]);
+		expect(sectionStates[1]?.completionLabel).toBe("Candidate problem 2 written");
+	});
+
+	it("derives specific generated task labels for lesson 1.1", () => {
+		const lesson = getLessonById("1.1");
+		expect(lesson).toBeTruthy();
+
+		const tasks = getObjectiveTasks(lesson!, {
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+			problem_1_who: "Startup operators",
+			problem_1_pain:
+				"They lose action items after meetings and waste time rebuilding them.",
+		});
+
+		expect(tasks.map((task) => task.label)).toEqual([
+			"Problem owner 1",
+			"Problem statement 1",
+			"Problem owner 2",
+			"Problem statement 2",
+			"Problem owner 3",
+			"Problem statement 3",
+		]);
+		expect(tasks.map((task) => task.status)).toEqual([
+			"complete",
+			"complete",
+			"incomplete",
+			"incomplete",
+			"incomplete",
+			"incomplete",
+		]);
+	});
+
+	it("derives option-level generated tasks for console checklist lessons", () => {
+		const lesson = getLessonById("3.2");
+		expect(lesson).toBeTruthy();
+
+		const tasks = getObjectiveTasks(lesson!, {
+			environment_ready: [
+				{ label: "Open the starter or repo", checked: true },
+				{ label: "Install dependencies", checked: true },
+				{ label: "Run the app locally", checked: false },
+				{ label: "Capture confirmation", checked: false },
+			],
+		});
+
+		expect(tasks.map((task) => task.label)).toEqual([
+			"Open the starter or repo",
+			"Install dependencies",
+			"Run the app locally",
+			"Capture confirmation",
+		]);
+		expect(tasks.map((task) => task.status)).toEqual([
+			"complete",
+			"complete",
+			"incomplete",
+			"incomplete",
+		]);
+	});
+
+	it("makes candidate selection the first required task on lesson 1.2", () => {
+		const lesson = getLessonById("1.2");
+		expect(lesson).toBeTruthy();
+
+		const tasks = getObjectiveTasks(lesson!, {
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+		});
+
+		expect(tasks[0]?.label).toBe("Choose candidate problem");
+		expect(tasks[0]?.status).toBe("incomplete");
+	});
+
+	it("requires a chosen candidate problem before 1.2 can complete", () => {
+		const lesson = getLessonById("1.2");
+		expect(lesson).toBeTruthy();
+
+		const issues = getCompletionIssues(lesson!, {
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+			user_type: "Early-stage startup operators",
+			pain_moment: "Right after meetings when the notes are still messy.",
+			current_solution: "They clean up notes by hand.",
+			reachability: "I know a few people like this already.",
+		});
+
+		expect(issues.map((issue) => issue.label)).toContain(
+			"Choose candidate problem",
+		);
+	});
+
+	it("drops stale field values when a lesson field shape version changes", () => {
+		const lesson = getLessonById("1.1");
+		expect(lesson).toBeTruthy();
+
+		expect(
+			normalizeLessonFieldValues(lesson!, {
+				problem_1:
+					"Startup operators lose action items after meetings and waste time rebuilding them.",
+			}),
+		).toEqual({});
+
+		expect(
+			normalizeLessonFieldValues(lesson!, {
+				[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+				problem_1_who: "Startup operators",
+			}),
+		).toEqual({
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+			problem_1_who: "Startup operators",
+		});
+	});
+
+	it("drops stale 1.2 drafts that predate the candidate-selection handoff", () => {
+		const lesson = getLessonById("1.2");
+		expect(lesson).toBeTruthy();
+
+		expect(
+			normalizeLessonFieldValues(lesson!, {
+				user_type: "Early-stage startup operators",
+				pain_moment: "Right after meetings.",
+			}),
+		).toEqual({});
+	});
+
+	it("uses learner-facing preview labels for structured artifact output", () => {
+		const lesson = getLessonById("1.1");
+		expect(lesson).toBeTruthy();
+
+		const preview = buildArtifactPreview(lesson!, {
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+			problem_1_who: "Startup operators",
+			problem_1_pain:
+				"They lose action items after meetings and waste time rebuilding them.",
+		});
+
+		expect(preview.fields).toEqual([
+			["Problem 1: who", "Startup operators"],
+			[
+				"Problem 1: pain",
+				"They lose action items after meetings and waste time rebuilding them.",
+			],
+		]);
+	});
+
+	it("carries the chosen problem into the 1.2 artifact preview", () => {
+		const lesson = getLessonById("1.2");
+		expect(lesson).toBeTruthy();
+
+		const preview = buildArtifactPreview(lesson!, {
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+			selected_problem_index: 1,
+			selected_problem_owner: "Startup operators",
+			selected_problem_statement:
+				"They lose action items after meetings and waste time rebuilding them.",
+			user_type: "Early-stage startup operators who run team meetings",
+		});
+
+		expect(preview.fields.slice(0, 3)).toEqual([
+			["Chosen problem owner", "Startup operators"],
+			[
+				"Chosen problem",
+				"They lose action items after meetings and waste time rebuilding them.",
+			],
+			["User", "Early-stage startup operators who run team meetings"],
 		]);
 	});
 });

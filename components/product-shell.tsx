@@ -90,10 +90,10 @@ function ShellInner({
 }: ProductShellProps) {
 	const pathname = usePathname();
 	const { theme, toggleTheme } = useProductTheme();
-	const { isAuthenticated } = useConvexAuth();
+	const { isAuthenticated, isLoading } = useConvexAuth();
 	const mission = useQuery(
 		api.course.getMissionState,
-		isAuthenticated ? {} : "skip",
+		isAuthenticated && !isLoading ? {} : "skip",
 	) as MissionState | undefined;
 
 	const derivedLessonBlockId = currentLessonId

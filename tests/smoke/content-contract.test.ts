@@ -20,4 +20,19 @@ describe("lesson content contract", () => {
 			expect(content?.slug).toBe(manifestEntry?.slug);
 		}
 	});
+
+	it("attaches section-level learner guidance for the redesigned CEO guided lessons", () => {
+		const problemLesson = lessonContentById.get("1.1");
+		const userLesson = lessonContentById.get("1.2");
+
+		expect(problemLesson?.workbench.sections?.problem_1?.example).toContain(
+			"Startup operators",
+		);
+		expect(userLesson?.workbench.sections?.reality_check?.instruction).toContain(
+			"reach them this week",
+		);
+		expect(userLesson?.intro).toContain(
+			"Pick one of the three problems you just wrote",
+		);
+	});
 });

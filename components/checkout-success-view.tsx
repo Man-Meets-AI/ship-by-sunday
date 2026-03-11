@@ -36,7 +36,7 @@ export function CheckoutSuccessView({
 		<ProductShell
 			initialTheme={initialTheme}
 			title="Payment received"
-			subtitle="We’re unlocking your access now."
+			subtitle="We’re unlocking your Ship by Sunday access now."
 		>
 			<section className="border border-line bg-white p-6 shadow-card">
 				<p className="text-xs font-bold uppercase tracking-[0.18em] text-ink/60">
@@ -46,7 +46,7 @@ export function CheckoutSuccessView({
 					{access?.hasAccess ? "Access ready" : "Finalizing access"}
 				</p>
 				<p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-ink/75">
-					This page will send you into the course automatically as soon as
+					This page will send you into Ship by Sunday automatically as soon as
 					access is ready. If it takes longer than a few seconds, use one of the
 					buttons below.
 				</p>

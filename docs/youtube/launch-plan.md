@@ -1,6 +1,6 @@
 # Ship by Sunday YouTube Launch Plan
 
-Last updated: 2026-03-07
+Last updated: 2026-03-11
 
 ## Goal
 
@@ -10,11 +10,10 @@ This plan is intentionally narrow. It is for launch support, not for building a 
 
 ## Audience
 
-- junior and mid-level engineers
-- can code
-- have ideas
-- keep not finishing
-- want proof, momentum, and a clear system
+- builders who can already prototype or get things working
+- can code enough to start, but keep stopping before a real v1
+- want proof, momentum, product judgment, and a clear path to shipping
+- respond to direct explanations of why good builders still do not ship
 
 ## Recommended first credibility video
 
@@ -28,7 +27,7 @@ Warm or adjacent builders who keep starting and stopping.
 
 ### Title options
 
-- `Why smart engineers still do not ship apps`
+- `Why smart builders still do not ship apps`
 - `The real reason your app never gets finished`
 - `Most unfinished apps die in the same place`
 
@@ -37,6 +36,7 @@ Warm or adjacent builders who keep starting and stopping.
 - `If you can code, have ideas, and still do not get anything live, your problem probably is not skill. It is sequence.`
 - `Most unfinished apps do not die because the founder is lazy. They die because the path is muddy from the start.`
 - `The messy middle kills more apps than the hard parts do.`
+- `Development is no longer the main bottleneck. Product judgment and design direction are what still slow builders down.`
 
 ### Thumbnail idea
 
@@ -47,7 +47,8 @@ Warm or adjacent builders who keep starting and stopping.
 
 ### CTA path
 
-- early verbal fit check: this is for engineers who can code but do not finish
+- early verbal fit check: this is for builders who can already prototype but do not finish
+- mid-video introduce the Product Trinity
 - mid-video introduce the 4-block idea
 - end CTA: `If you want the full system, check out Ship by Sunday`
 

@@ -50,7 +50,7 @@ export function AccessRequiredPage({
 
 				<div className="mt-6 flex flex-wrap gap-3">
 					<CheckoutButton
-						label="Buy access"
+						label="Get instant access"
 						className="inline-flex rounded-none border border-product-accent bg-product-chip px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
 					/>
 					<Link

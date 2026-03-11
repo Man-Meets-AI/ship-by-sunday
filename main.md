@@ -18,8 +18,11 @@ Ship a sellable, deliverable, promotable version of `Ship by Sunday` that can ta
 
 - Core offer: `Ship by Sunday`
 - Core promise: `Go from idea to v1 this weekend`
-- Core audience: junior and mid-level engineers who can code, have ideas, and keep getting stuck before anything goes live
-- Product format: on-demand videos plus a digital guide/workbook
+- Core audience: builders who can already prototype or get things working, but keep getting stuck before they ship a real v1
+- Core mechanism: `The Product Trinity` = product strategy, design, and development working together
+- Product format: software-guided weekend sprint plus on-demand walkthroughs, digital guide/workbook, prompts, and worksheets
+- Product vehicle: the `Ship by Sunday` workspace plus the guided 4-block sprint
+- Fear-reducing bonus: `Product Management for Beginners` for buyers who do not trust their product judgment yet
 - App stack: `Next.js` on `Vercel` with `Clerk` for auth, `Convex` for app data, and `Stripe` for checkout / entitlement handoff
 - Tripwire is deprioritized until the core buyer journey is stable
 

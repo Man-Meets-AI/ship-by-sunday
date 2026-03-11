@@ -1,6 +1,6 @@
 # Ship by Sunday Offer and Funnel Plan
 
-Last updated: 2026-03-10
+Last updated: 2026-03-11
 
 ## Objective
 
@@ -12,14 +12,56 @@ The offer is already strong enough to sell. The remaining job is to remove hesit
 
 - Product: `Ship by Sunday`
 - Promise: `Go from idea to v1 this weekend`
-- Audience: junior and mid-level engineers who can code, have ideas, and keep getting stuck before anything goes live
-- Format: on-demand videos + digital guide/workbook
+- Audience: builders who can already prototype or get things working, but keep getting stuck before they ship a real v1
+- Format: software-guided weekend sprint + on-demand walkthroughs + digital guide/workbook
+
+## Positioning Update
+
+### Core reframe
+
+Development is no longer the main bottleneck.
+
+Product clarity and design clarity now matter more because code is faster and cheaper than ever.
+
+### Unique mechanism
+
+`The Product Trinity`
+
+The Product Trinity is our name for the three things that now need to work together:
+
+1. product strategy
+2. design
+3. development
+
+The point is not to turn the buyer into a full-time PM, designer, and expert builder.
+
+The point is to give them a better system for making good enough decisions across all three so they can ship a real v1.
+
+### Vehicle
+
+`Ship by Sunday`
+
+Ship by Sunday is the practical vehicle for the mechanism:
+
+- the workspace
+- the guided sprint
+- the on-demand walkthroughs
+- the worksheets and prompts
+
+### Bonus
+
+`Product Management for Beginners`
+
+This is a fear-reducing bonus for the buyer who thinks:
+
+`I can build, but I do not trust my product judgment.`
 
 ## Current Friction Points
 
 - The landing page promise is sharp and the checkout trigger now exists, but the live post-purchase support path still needs to be hardened.
 - The buyer still needs a clean answer to `what happens immediately after I pay?`, and the docs should match the actual success flow.
 - The buyer also needs a believable risk-reversal that matches the product.
+- The buyer now also needs a clean explanation for why this is different from another build course or AI coding product.
 - The strongest objection remains: `What if I buy this and still do not finish?`
 
 ## Current Implementation Reality
@@ -44,7 +86,7 @@ Use a conditional, action-based guarantee. It fits the product better than a gen
 - it reduces buyer risk
 - it aligns the refund with actual use of the product
 - it avoids inviting passive buyers to consume and refund
-- it reinforces that the course is action-first
+- it reinforces that the product is action-first
 
 ### Checkout microcopy
 
@@ -58,15 +100,17 @@ Use a conditional, action-based guarantee. It fits the product better than a gen
 
 ### Checkout support copy
 
-`A structured, on-demand weekend system for engineers who want to stop circling unfinished ideas and ship a real v1 with AI.`
+`A software-guided weekend sprint for builders who can already prototype, but need a better system to ship a real v1.`
 
 ### What the buyer gets
 
-- 4-block shipping system
+- Ship by Sunday workspace
+- 4-block guided sprint
 - on-demand video walkthroughs
 - digital guide + workbook
 - prompts + worksheets
 - deploy checklists
+- Product Management for Beginners bonus
 - lifetime access
 
 ### Price line
@@ -75,7 +119,7 @@ Use a conditional, action-based guarantee. It fits the product better than a gen
 
 ### Trust line
 
-`Immediate access. No subscription. Lifetime access. Built for engineers who want to finish, not just watch.`
+`Immediate access. No subscription. Lifetime access. Built for builders who want to finish, not just watch.`
 
 ## CTA Flow
 
@@ -87,7 +131,7 @@ Primary CTA:
 
 Secondary CTA:
 
-- `See the curriculum`
+- `See how it works`
 
 Landing page job:
 
@@ -170,11 +214,23 @@ Answer:
 
 - `This is not sold as information. It is sold as a system for finishing and shipping.`
 
+### `I can already build things`
+
+Answer:
+
+- `That helps, but the real bottleneck now is not just development. It is product judgment, design direction, and execution structure.`
+
 ### `I do not need another course`
 
 Answer:
 
 - `That is exactly why this is structured as a guided rep with artifacts, not a theory library.`
+
+### `I am not a product person`
+
+Answer:
+
+- `You do not need to become a full-time PM. You need enough product judgment to scope the right v1, and the offer includes Product Management for Beginners to close that gap.`
 
 ### `What if I buy it and still do not finish`
 
@@ -186,7 +242,7 @@ Answer:
 
 Answer:
 
-- `You do not need to become a senior engineer before shipping something useful. You do need a cleaner sequence.`
+- `You do not need to become an expert before shipping something useful. You do need a cleaner sequence.`
 
 ### `Will this work for my app idea`
 
@@ -199,7 +255,7 @@ Answer:
 - If the recorded lessons feel too broad or too tool-tour-heavy, the promise will feel sharper than the product.
 - If checkout promises a smooth student experience but onboarding is clunky, trust will break immediately.
 - If the first block does not produce a visible artifact fast, the action-based guarantee loses force.
-- If the course ships too many worksheets or side assets, the product will feel heavier than the sales page suggests.
+- If the product ships too many worksheets or side assets, it will feel heavier than the sales page suggests.
 
 ## Recommendation
 

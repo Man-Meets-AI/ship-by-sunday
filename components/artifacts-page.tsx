@@ -34,10 +34,10 @@ export function ArtifactsPage({
 }: {
 	initialTheme: ProductTheme;
 }) {
-	const { isAuthenticated } = useConvexAuth();
+	const { isAuthenticated, isLoading } = useConvexAuth();
 	const artifacts = useQuery(
 		api.course.listArtifacts,
-		isAuthenticated ? {} : "skip",
+		isAuthenticated && !isLoading ? {} : "skip",
 	) as
 		| Array<{
 				lessonId: string;
@@ -98,7 +98,7 @@ export function ArtifactsPage({
 												className="rounded-none border border-product-border bg-product-surface p-3"
 											>
 												<p className="font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
-													{fieldId.replaceAll("_", " ")}
+													{fieldId}
 												</p>
 												<p className="mt-2 break-words">
 													{Array.isArray(value)

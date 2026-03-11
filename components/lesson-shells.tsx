@@ -2,16 +2,14 @@
 
 import Link from "next/link";
 
-import {
-	getLesson,
-	type ChecklistItemValue,
-	type LessonConfig,
-} from "@/lib/course/manifest";
+import { getLesson, type LessonConfig } from "@/lib/course/manifest";
 import type { LessonContent } from "@/content/lessons/types";
+import type { ObjectiveTask, PersistedFieldValues } from "@/lib/course/registry";
 
 export type PinnedArtifact = {
 	artifactKey: string;
 	artifactLabel: string;
+	fieldValues: PersistedFieldValues;
 	fields: Array<[string, unknown]>;
 	lessonTitle: string;
 };
@@ -20,8 +18,8 @@ type CoachPanelKey = "watch" | "transcript" | "examples" | "resources";
 
 type BaseLessonShellProps = {
 	lesson: LessonConfig;
-	objectiveChecklistItems: ChecklistItemValue[];
-	onObjectiveChecklistToggle: (index: number, checked: boolean) => void;
+	objectiveTasks: ObjectiveTask[];
+	onObjectiveTaskToggle: (taskId: string, checked: boolean) => void;
 	coachVisible: boolean;
 	activeCoachPanel: CoachPanelKey;
 	onCoachPanelChange: (panel: CoachPanelKey) => void;
@@ -47,7 +45,7 @@ function formatArtifactValue(value: unknown) {
 	return Array.isArray(value) ? JSON.stringify(value) : String(value);
 }
 
-function ChecklistRow({
+function ManualTaskRow({
 	label,
 	checked,
 	onChange,
@@ -77,24 +75,74 @@ function ChecklistRow({
 	);
 }
 
+function GeneratedTaskRow({
+	label,
+	complete,
+}: {
+	label: string;
+	complete: boolean;
+}) {
+	return (
+		<div className="flex items-start gap-2 px-1 py-1">
+			<span
+				className={`mt-0.5 inline-block h-3 w-3 shrink-0 border ${
+					complete
+						? "border-product-accent bg-product-accent"
+						: "border-product-border bg-product-surface"
+				}`}
+			/>
+			<span
+				className={`text-[11px] leading-snug ${
+					complete ? "text-product-muted line-through" : "text-product-text"
+				}`}
+			>
+				{label}
+			</span>
+		</div>
+	);
+}
+
 function ObjectivePanel({
 	lesson,
-	objectiveChecklistItems,
-	onObjectiveChecklistToggle,
+	objectiveTasks,
+	onObjectiveTaskToggle,
 }: {
 	lesson: LessonConfig;
-	objectiveChecklistItems: ChecklistItemValue[];
-	onObjectiveChecklistToggle: (index: number, checked: boolean) => void;
+	objectiveTasks: ObjectiveTask[];
+	onObjectiveTaskToggle: (taskId: string, checked: boolean) => void;
 }) {
 	const nextLesson = lesson.nextLessonId
 		? getLesson(lesson.nextLessonId)
 		: undefined;
-	const completedCount = objectiveChecklistItems.filter(
-		(item) => item.checked,
+	const completedCount = objectiveTasks.filter(
+		(task) => task.status === "complete",
 	).length;
+	const sectionIds = Array.from(
+		new Set(
+			objectiveTasks
+				.map((task) => task.sectionId)
+				.filter((sectionId): sectionId is string => Boolean(sectionId)),
+		),
+	);
+	const shouldGroupBySection = sectionIds.length > 1;
+	const taskGroups = shouldGroupBySection
+		? sectionIds.map((sectionId) => ({
+				id: sectionId,
+				title:
+					objectiveTasks.find((task) => task.sectionId === sectionId)?.sectionTitle ??
+					sectionId,
+				tasks: objectiveTasks.filter((task) => task.sectionId === sectionId),
+			}))
+		: [
+				{
+					id: "all",
+					title: null,
+					tasks: objectiveTasks,
+				},
+			];
 
 	return (
-		<aside className="flex min-w-0 flex-col rounded-none border border-product-border bg-product-surface/82 shadow-panel backdrop-blur-lg xl:h-full xl:min-h-0">
+		<aside className="flex min-w-0 flex-col rounded-none border border-product-border/70 bg-product-surface/68 shadow-panel backdrop-blur-lg xl:h-full xl:min-h-0">
 			{/* Header */}
 			<div className="sticky top-0 z-10 shrink-0 border-b border-product-border bg-product-surface/95 px-3 py-1.5 backdrop-blur-lg">
 				<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
@@ -121,26 +169,45 @@ function ObjectivePanel({
 					</p>
 				</div>
 
-				{/* Checklist */}
+				{/* Tasks */}
 				<div className="px-3 py-2">
 					<div className="mb-1.5 flex items-center justify-between gap-2">
 						<p className="font-mono text-[8px] uppercase tracking-[0.2em] text-product-muted">
-							Checklist
+							Tasks
 						</p>
 						<p className="font-mono text-[9px] tabular-nums tracking-[0.15em] text-product-muted">
-							{completedCount}/{objectiveChecklistItems.length}
+							{completedCount}/{objectiveTasks.length}
 						</p>
 					</div>
-					<div className="space-y-0.5">
-						{objectiveChecklistItems.map((item, index) => (
-							<ChecklistRow
-								key={item.label}
-								label={item.label}
-								checked={item.checked}
-								onChange={(checked) =>
-									onObjectiveChecklistToggle(index, checked)
-								}
-							/>
+					<div className="space-y-2">
+						{taskGroups.map((group) => (
+							<div key={group.id} className="space-y-0.5">
+								{group.title ? (
+									<p className="font-mono text-[8px] uppercase tracking-[0.18em] text-product-muted">
+										{group.title}
+									</p>
+								) : null}
+								<div className="space-y-0.5">
+									{group.tasks.map((task) =>
+										task.interactive ? (
+											<ManualTaskRow
+												key={task.id}
+												label={task.label}
+												checked={task.status === "complete"}
+												onChange={(checked) =>
+													onObjectiveTaskToggle(task.id, checked)
+												}
+											/>
+										) : (
+											<GeneratedTaskRow
+												key={task.id}
+												label={task.label}
+												complete={task.status === "complete"}
+											/>
+										),
+									)}
+								</div>
+							</div>
 						))}
 					</div>
 				</div>
@@ -261,7 +328,7 @@ function CoachPanel({
 										artifact.fields.slice(0, 2).map(([key, value]) => (
 											<div key={key}>
 												<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
-													{key.replaceAll("_", " ")}
+													{key}
 												</p>
 												<p className="mt-0.5 text-product-text">
 													{formatArtifactValue(value)}
@@ -310,7 +377,7 @@ function CoachPanel({
 	];
 
 	return (
-		<aside className="min-w-0 rounded-none border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-xl xl:h-full xl:min-h-0 xl:overflow-y-auto">
+		<aside className="min-w-0 rounded-none border border-product-border/70 bg-product-surface/68 shadow-panel backdrop-blur-xl xl:h-full xl:min-h-0 xl:overflow-y-auto">
 			<div className="sticky top-0 z-10 border-b border-product-border bg-product-surface/95 px-3 py-1.5 backdrop-blur-lg">
 				<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
 					Coach
@@ -359,8 +426,8 @@ function CoachPanel({
 
 export function LessonShellSplit({
 	lesson,
-	objectiveChecklistItems,
-	onObjectiveChecklistToggle,
+	objectiveTasks,
+	onObjectiveTaskToggle,
 	coachVisible,
 	activeCoachPanel,
 	onCoachPanelChange,
@@ -373,10 +440,10 @@ export function LessonShellSplit({
 		<div className="grid gap-3 xl:h-full xl:min-h-0 xl:grid-cols-[minmax(0,270px)_minmax(0,1fr)_minmax(280px,320px)]">
 			<ObjectivePanel
 				lesson={lesson}
-				objectiveChecklistItems={objectiveChecklistItems}
-				onObjectiveChecklistToggle={onObjectiveChecklistToggle}
+				objectiveTasks={objectiveTasks}
+				onObjectiveTaskToggle={onObjectiveTaskToggle}
 			/>
-			<section className="min-w-0 rounded-none border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-lg xl:flex xl:min-h-0 xl:flex-col">
+			<section className="min-w-0 rounded-none border border-product-border/75 bg-product-surface/82 shadow-panel backdrop-blur-lg xl:flex xl:min-h-0 xl:flex-col">
 				<div className="sticky top-0 z-10 border-b border-product-border bg-product-surface/95 px-3 py-1.5 backdrop-blur-lg">
 					<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
 						Workbench
@@ -397,7 +464,7 @@ export function LessonShellSplit({
 					pinnedArtifacts={pinnedArtifacts}
 				/>
 			) : (
-				<div className="rounded-none border border-dashed border-product-border bg-product-surface/60 px-2 py-2 text-xs font-medium leading-snug text-product-muted shadow-panel backdrop-blur-lg xl:min-h-0 xl:overflow-y-auto">
+			<div className="rounded-none border border-dashed border-product-border/70 bg-product-surface/55 px-2 py-2 text-xs font-medium leading-snug text-product-muted shadow-panel backdrop-blur-lg xl:min-h-0 xl:overflow-y-auto">
 					Coach hidden. Use HUD toggle to reopen.
 				</div>
 			)}
@@ -411,7 +478,7 @@ export function LessonShellFocus({
 	footer,
 }: BaseLessonShellProps) {
 	return (
-		<section className="min-w-0 rounded-none border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-lg xl:flex xl:h-full xl:min-h-0 xl:flex-col">
+		<section className="min-w-0 rounded-none border border-product-border/75 bg-product-surface/82 shadow-panel backdrop-blur-lg xl:flex xl:h-full xl:min-h-0 xl:flex-col">
 			<div className="sticky top-0 z-10 border-b border-product-border bg-product-surface/95 px-3 py-1.5 backdrop-blur-lg">
 				<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
 					Workbench
