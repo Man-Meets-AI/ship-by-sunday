@@ -2,9 +2,12 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-export type ProductTheme = "dark" | "light";
-
-const STORAGE_KEY = "sbs:theme";
+import {
+	PRODUCT_THEME_COOKIE_NAME,
+	PRODUCT_THEME_STORAGE_KEY,
+	isProductTheme,
+	type ProductTheme,
+} from "@/lib/product-theme";
 
 type ProductThemeContextValue = {
 	theme: ProductTheme;
@@ -16,35 +19,39 @@ const ProductThemeContext = createContext<ProductThemeContextValue | null>(
 	null,
 );
 
-function isProductTheme(value: string | null): value is ProductTheme {
-	return value === "dark" || value === "light";
-}
-
 export function ProductThemeProvider({
+	initialTheme,
 	children,
 }: {
+	initialTheme: ProductTheme;
 	children: React.ReactNode;
 }) {
-	const [theme, setThemeState] = useState<ProductTheme>("dark");
+	const [theme, setThemeState] = useState<ProductTheme>(() => {
+		if (typeof document !== "undefined") {
+			const rootTheme = document.documentElement.dataset.productTheme;
+			if (isProductTheme(rootTheme)) {
+				return rootTheme;
+			}
+		}
+
+		return initialTheme;
+	});
 
 	useEffect(() => {
-		const storedTheme = window.localStorage.getItem(STORAGE_KEY);
-		if (isProductTheme(storedTheme)) {
-			setThemeState(storedTheme);
-		}
-	}, []);
+		document.documentElement.dataset.productTheme = theme;
+		window.localStorage.setItem(PRODUCT_THEME_STORAGE_KEY, theme);
+		document.cookie = `${PRODUCT_THEME_COOKIE_NAME}=${theme}; path=/; max-age=31536000; SameSite=Lax`;
+	}, [theme]);
 
 	const value = useMemo<ProductThemeContextValue>(
 		() => ({
 			theme,
 			setTheme: (nextTheme) => {
 				setThemeState(nextTheme);
-				window.localStorage.setItem(STORAGE_KEY, nextTheme);
 			},
 			toggleTheme: () => {
 				const nextTheme = theme === "dark" ? "light" : "dark";
 				setThemeState(nextTheme);
-				window.localStorage.setItem(STORAGE_KEY, nextTheme);
 			},
 		}),
 		[theme],

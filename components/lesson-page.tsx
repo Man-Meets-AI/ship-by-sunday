@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 
 import {
+	getLesson,
 	getLessonHref,
 	type ChecklistItemValue,
 	type LessonConfig,
@@ -19,13 +20,13 @@ import {
 	type PinnedArtifact,
 } from "@/components/lesson-shells";
 import { ProductShell } from "@/components/product-shell";
-import { ViewerGate } from "@/components/viewer-gate";
 import {
 	getCompletionIssues,
 	isChecklistItemArray,
 	OBJECTIVE_CHECKLIST_FIELD_ID,
 	type CompletionIssue,
 } from "@/lib/course/registry";
+import type { ProductTheme } from "@/lib/product-theme";
 
 type LessonChromeState = {
 	layoutMode: "split" | "focus";
@@ -54,6 +55,12 @@ type CompletionErrorData = {
 	code: "INCOMPLETE_LESSON";
 	message: string;
 	issues?: CompletionIssue[];
+};
+
+const FALLBACK_CHROME_STATE: LessonChromeState = {
+	layoutMode: "split",
+	coachVisible: true,
+	activeCoachPanel: "watch",
 };
 
 function getCompletionErrorData(error: unknown): CompletionErrorData | null {
@@ -141,14 +148,24 @@ function isChromeState(value: unknown): value is LessonChromeState {
 }
 
 export function LessonPage({
+	initialTheme,
 	lessonId,
 	lessonContent,
 }: {
+	initialTheme: ProductTheme;
 	lessonId: string;
 	lessonContent: LessonContent;
 }) {
 	const router = useRouter();
 	const { isAuthenticated } = useConvexAuth();
+	const manifestLesson = getLesson(lessonId);
+	const fallbackChromeState = useMemo(
+		() =>
+			manifestLesson
+				? getDefaultChromeState(manifestLesson)
+				: FALLBACK_CHROME_STATE,
+		[manifestLesson],
+	);
 	const lessonState = useQuery(
 		api.course.getLessonState,
 		isAuthenticated ? { lessonId } : "skip",
@@ -167,9 +184,8 @@ export function LessonPage({
 	const [serverCompletionMessage, setServerCompletionMessage] = useState<
 		string | null
 	>(null);
-	const [chromeState, setChromeState] = useState<LessonChromeState | null>(
-		null,
-	);
+	const [chromeState, setChromeState] =
+		useState<LessonChromeState>(fallbackChromeState);
 	const initializedForLessonId = useRef<string | null>(null);
 	const lastMarkedLessonId = useRef<string | null>(null);
 	const lastSavedSnapshot = useRef("");
@@ -192,11 +208,10 @@ export function LessonPage({
 	}, [lessonId, lessonState]);
 
 	useEffect(() => {
-		if (!lessonState || lessonState.accessStatus !== "unlocked") {
-			return;
-		}
-
-		const defaults = getDefaultChromeState(lessonState.lesson);
+		const defaults =
+			lessonState && lessonState.accessStatus === "unlocked"
+				? getDefaultChromeState(lessonState.lesson)
+				: fallbackChromeState;
 		const stored = window.localStorage.getItem(storageKey(lessonId));
 		if (!stored) {
 			setChromeState(defaults);
@@ -209,13 +224,9 @@ export function LessonPage({
 		} catch {
 			setChromeState(defaults);
 		}
-	}, [lessonId, lessonState]);
+	}, [fallbackChromeState, lessonId, lessonState]);
 
 	useEffect(() => {
-		if (!chromeState) {
-			return;
-		}
-
 		window.localStorage.setItem(
 			storageKey(lessonId),
 			JSON.stringify(chromeState),
@@ -266,73 +277,67 @@ export function LessonPage({
 		void markLessonViewed({ lessonId });
 	}, [lessonId, lessonState, markLessonViewed]);
 
+	const shellProps = {
+		initialTheme,
+		currentLessonId: lessonId,
+		viewportMode: "app" as const,
+		layoutMode: chromeState.layoutMode,
+		onLayoutModeChange: (layoutMode: LessonChromeState["layoutMode"]) =>
+			setChromeState((current) => ({
+				...current,
+				layoutMode,
+			})),
+		coachVisible:
+			chromeState.layoutMode === "split" ? chromeState.coachVisible : false,
+		onCoachToggle:
+			chromeState.layoutMode === "split"
+				? () =>
+						setChromeState((current) => ({
+							...current,
+							coachVisible: !current.coachVisible,
+						}))
+				: undefined,
+	};
+
 	if (lessonState === undefined) {
 		return (
-			<ProductShell currentLessonId={lessonId}>
-				<ViewerGate>
-					<section className="rounded-none border border-product-border bg-product-surface/78 px-4 py-6 text-center shadow-panel backdrop-blur-xl">
-						<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
-							Loading lesson
-						</p>
-						<p className="mt-2 font-display text-xl uppercase tracking-[0.08em] text-product-text">
-							Loading
-						</p>
-					</section>
-				</ViewerGate>
+			<ProductShell {...shellProps}>
+				<LessonSkeleton layoutMode={chromeState.layoutMode} />
 			</ProductShell>
 		);
 	}
 
 	if (lessonState.accessStatus === "locked") {
 		return (
-			<ProductShell currentLessonId={lessonId}>
-				<ViewerGate>
-					<section className="rounded-none border border-product-border bg-product-surface/78 px-4 py-6 text-center shadow-panel backdrop-blur-xl">
-						<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
-							Lesson locked
-						</p>
-						<p className="mt-2 font-display text-xl uppercase tracking-[0.08em] text-product-text">
-							{lessonState.lessonId} {lessonState.shortTitle}
-						</p>
-						<p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-product-muted sm:mx-auto">
-							This lesson is locked. Go back to the mission map and finish{" "}
-							{lessonState.requiredLessonId ?? "the previous unlocked lesson"}{" "}
-							first.
-						</p>
-						<div className="mt-6 flex flex-wrap justify-center gap-3">
-							<button
-								type="button"
-								onClick={() => router.back()}
-								className="rounded-none border border-product-border bg-product-surface px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-text transition-colors hover:bg-product-surface-alt"
-							>
-								Go back
-							</button>
-							<Link
-								href="/mission"
-								className="rounded-none border border-product-accent bg-product-chip px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
-							>
-								Open mission
-							</Link>
-						</div>
-					</section>
-				</ViewerGate>
-			</ProductShell>
-		);
-	}
-
-	if (chromeState === null) {
-		return (
-			<ProductShell currentLessonId={lessonId}>
-				<ViewerGate>
-					<section className="rounded-none border border-product-border bg-product-surface/78 px-4 py-6 text-center shadow-panel backdrop-blur-xl">
-						<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
-							Loading lesson
-						</p>
-						<p className="mt-2 font-display text-xl uppercase tracking-[0.08em] text-product-text">
-							Loading
-						</p>
-					</section>
-				</ViewerGate>
+			<ProductShell initialTheme={initialTheme} currentLessonId={lessonId}>
+				<section className="rounded-none border border-product-border bg-product-surface/78 px-4 py-6 text-center shadow-panel backdrop-blur-xl">
+					<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+						Lesson locked
+					</p>
+					<p className="mt-2 font-display text-xl uppercase tracking-[0.08em] text-product-text">
+						{lessonState.lessonId} {lessonState.shortTitle}
+					</p>
+					<p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-product-muted sm:mx-auto">
+						This lesson is locked. Go back to the mission map and finish{" "}
+						{lessonState.requiredLessonId ?? "the previous unlocked lesson"}{" "}
+						first.
+					</p>
+					<div className="mt-6 flex flex-wrap justify-center gap-3">
+						<button
+							type="button"
+							onClick={() => router.back()}
+							className="rounded-none border border-product-border bg-product-surface px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-text transition-colors hover:bg-product-surface-alt"
+						>
+							Go back
+						</button>
+						<Link
+							href="/mission"
+							className="rounded-none border border-product-accent bg-product-chip px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
+						>
+							Open mission
+						</Link>
+					</div>
+				</section>
 			</ProductShell>
 		);
 	}
@@ -346,15 +351,22 @@ export function LessonPage({
 		fieldValues[OBJECTIVE_CHECKLIST_FIELD_ID],
 	);
 	const completionIssues = getCompletionIssues(lesson, fieldValues as any);
-	const displayedCompletionIssues =
-		completionIssues.length > 0 ? completionIssues : serverCompletionIssues;
+	const validationVisible =
+		completionAttempted ||
+		serverCompletionIssues.length > 0 ||
+		Boolean(serverCompletionMessage);
+	const displayedCompletionIssues = validationVisible
+		? serverCompletionIssues.length > 0
+			? serverCompletionIssues
+			: completionIssues
+		: [];
 	const invalidFieldIds = new Set(
 		displayedCompletionIssues
 			.filter((issue) => issue.kind === "field")
 			.map((issue) => issue.id),
 	);
 	const showCompletionFeedback =
-		completionAttempted &&
+		validationVisible &&
 		(displayedCompletionIssues.length > 0 || Boolean(serverCompletionMessage));
 
 	const setValue = (fieldId: string, value: unknown) => {
@@ -450,95 +462,105 @@ export function LessonPage({
 	);
 
 	return (
-		<ProductShell
-			currentLessonId={lessonId}
-			viewportMode="app"
-			layoutMode={chromeState.layoutMode}
-			onLayoutModeChange={(layoutMode) =>
-				setChromeState((current) =>
-					current ? { ...current, layoutMode } : current,
-				)
-			}
-			coachVisible={
-				chromeState.layoutMode === "split" ? chromeState.coachVisible : false
-			}
-			onCoachToggle={
-				chromeState.layoutMode === "split"
-					? () =>
-							setChromeState((current) =>
-								current
-									? {
-											...current,
-											coachVisible: !current.coachVisible,
-										}
-									: current,
-							)
-					: undefined
-			}
-		>
-			<ViewerGate>
-				{chromeState.layoutMode === "focus" ? (
-					<LessonShellFocus
-						lesson={lesson}
-						coachVisible={chromeState.coachVisible}
-						activeCoachPanel={chromeState.activeCoachPanel}
-						onCoachPanelChange={(activeCoachPanel) =>
-							setChromeState((current) =>
-								current
-									? {
-											...current,
-											activeCoachPanel,
-											coachVisible: true,
-										}
-									: current,
-							)
-						}
-						objectiveChecklistItems={objectiveChecklistItems}
-						onObjectiveChecklistToggle={(index, checked) => {
-							const nextItems = objectiveChecklistItems.map(
-								(item, itemIndex) =>
-									itemIndex === index ? { ...item, checked } : item,
-							);
-							setValue(OBJECTIVE_CHECKLIST_FIELD_ID, nextItems);
-						}}
-						pinnedArtifacts={pinnedArtifacts}
-						coachContent={lessonContent.coach}
-						footer={footer}
-					>
-						{workbench}
-					</LessonShellFocus>
-				) : (
-					<LessonShellSplit
-						lesson={lesson}
-						coachVisible={chromeState.coachVisible}
-						activeCoachPanel={chromeState.activeCoachPanel}
-						onCoachPanelChange={(activeCoachPanel) =>
-							setChromeState((current) =>
-								current
-									? {
-											...current,
-											activeCoachPanel,
-											coachVisible: true,
-										}
-									: current,
-							)
-						}
-						objectiveChecklistItems={objectiveChecklistItems}
-						onObjectiveChecklistToggle={(index, checked) => {
-							const nextItems = objectiveChecklistItems.map(
-								(item, itemIndex) =>
-									itemIndex === index ? { ...item, checked } : item,
-							);
-							setValue(OBJECTIVE_CHECKLIST_FIELD_ID, nextItems);
-						}}
-						pinnedArtifacts={pinnedArtifacts}
-						coachContent={lessonContent.coach}
-						footer={footer}
-					>
-						{workbench}
-					</LessonShellSplit>
-				)}
-			</ViewerGate>
+		<ProductShell {...shellProps}>
+			{chromeState.layoutMode === "focus" ? (
+				<LessonShellFocus
+					lesson={lesson}
+					coachVisible={chromeState.coachVisible}
+					activeCoachPanel={chromeState.activeCoachPanel}
+					onCoachPanelChange={(activeCoachPanel) =>
+						setChromeState((current) => ({
+							...current,
+							activeCoachPanel,
+							coachVisible: true,
+						}))
+					}
+					objectiveChecklistItems={objectiveChecklistItems}
+					onObjectiveChecklistToggle={(index, checked) => {
+						const nextItems = objectiveChecklistItems.map((item, itemIndex) =>
+							itemIndex === index ? { ...item, checked } : item,
+						);
+						setValue(OBJECTIVE_CHECKLIST_FIELD_ID, nextItems);
+					}}
+					pinnedArtifacts={pinnedArtifacts}
+					coachContent={lessonContent.coach}
+					footer={footer}
+				>
+					{workbench}
+				</LessonShellFocus>
+			) : (
+				<LessonShellSplit
+					lesson={lesson}
+					coachVisible={chromeState.coachVisible}
+					activeCoachPanel={chromeState.activeCoachPanel}
+					onCoachPanelChange={(activeCoachPanel) =>
+						setChromeState((current) => ({
+							...current,
+							activeCoachPanel,
+							coachVisible: true,
+						}))
+					}
+					objectiveChecklistItems={objectiveChecklistItems}
+					onObjectiveChecklistToggle={(index, checked) => {
+						const nextItems = objectiveChecklistItems.map((item, itemIndex) =>
+							itemIndex === index ? { ...item, checked } : item,
+						);
+						setValue(OBJECTIVE_CHECKLIST_FIELD_ID, nextItems);
+					}}
+					pinnedArtifacts={pinnedArtifacts}
+					coachContent={lessonContent.coach}
+					footer={footer}
+				>
+					{workbench}
+				</LessonShellSplit>
+			)}
 		</ProductShell>
+	);
+}
+
+function SkeletonPanel({
+	label,
+	className = "",
+}: {
+	label: string;
+	className?: string;
+}) {
+	return (
+		<section
+			className={`min-w-0 rounded-none border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-lg ${className}`}
+		>
+			<div className="border-b border-product-border bg-product-surface/95 px-3 py-1.5 backdrop-blur-lg">
+				<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
+					{label}
+				</p>
+			</div>
+			<div className="space-y-2 p-3">
+				<div className="h-3 w-3/4 bg-product-border/15" />
+				<div className="h-3 w-full bg-product-border/10" />
+				<div className="h-20 border border-product-border/40 bg-product-surface-strong/70" />
+			</div>
+		</section>
+	);
+}
+
+function LessonSkeleton({
+	layoutMode,
+}: {
+	layoutMode: LessonChromeState["layoutMode"];
+}) {
+	if (layoutMode === "focus") {
+		return (
+			<div className="animate-pulse xl:h-full xl:min-h-0">
+				<SkeletonPanel label="Workbench" className="xl:h-full" />
+			</div>
+		);
+	}
+
+	return (
+		<div className="grid animate-pulse gap-3 xl:h-full xl:min-h-0 xl:grid-cols-[minmax(0,270px)_minmax(0,1fr)_minmax(280px,320px)]">
+			<SkeletonPanel label="Objective" className="xl:h-full" />
+			<SkeletonPanel label="Workbench" className="xl:h-full" />
+			<SkeletonPanel label="Coach" className="xl:h-full" />
+		</div>
 	);
 }

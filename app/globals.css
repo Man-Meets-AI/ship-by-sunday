@@ -61,24 +61,6 @@ summary::-webkit-details-marker {
 	position: relative;
 	min-height: 100vh;
 	color: rgb(var(--product-text));
-}
-
-.product-theme[data-theme="light"] {
-	color-scheme: light;
-	--product-bg: 245 241 234;
-	--product-surface: 255 255 255;
-	--product-surface-strong: 245 241 234;
-	--product-surface-alt: 236 231 222;
-	--product-border: 26 26 26;
-	--product-text: 17 17 17;
-	--product-muted: 86 78 64;
-	--product-accent: 17 17 17;
-	--product-accent-soft: 38 38 38;
-	--product-chip: 236 231 222;
-	--product-shadow: 17 17 17;
-}
-
-.product-theme[data-theme="dark"] {
 	color-scheme: dark;
 	--product-bg: 11 11 11;
 	--product-surface: 18 18 20;
@@ -91,4 +73,19 @@ summary::-webkit-details-marker {
 	--product-accent-soft: 149 255 255;
 	--product-chip: 23 25 30;
 	--product-shadow: 0 0 0;
+}
+
+html[data-product-theme="light"] .product-theme {
+	color-scheme: light;
+	--product-bg: 245 241 234;
+	--product-surface: 255 255 255;
+	--product-surface-strong: 245 241 234;
+	--product-surface-alt: 236 231 222;
+	--product-border: 26 26 26;
+	--product-text: 17 17 17;
+	--product-muted: 86 78 64;
+	--product-accent: 17 17 17;
+	--product-accent-soft: 38 38 38;
+	--product-chip: 236 231 222;
+	--product-shadow: 17 17 17;
 }

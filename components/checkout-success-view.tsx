@@ -7,8 +7,13 @@ import { useConvexAuth, useQuery } from "convex/react";
 
 import { api } from "@/convex/_generated/api";
 import { ProductShell } from "@/components/product-shell";
+import type { ProductTheme } from "@/lib/product-theme";
 
-export function CheckoutSuccessView() {
+export function CheckoutSuccessView({
+	initialTheme,
+}: {
+	initialTheme: ProductTheme;
+}) {
 	const router = useRouter();
 	const { isAuthenticated } = useConvexAuth();
 	const access = useQuery(
@@ -29,6 +34,7 @@ export function CheckoutSuccessView() {
 
 	return (
 		<ProductShell
+			initialTheme={initialTheme}
 			title="Payment received"
 			subtitle="We’re unlocking your access now."
 		>

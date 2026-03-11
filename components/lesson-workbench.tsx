@@ -151,7 +151,7 @@ function UploadFieldControl({
 
 	return (
 		<label className="block">
-			<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
+			<span className={fieldLabelClass}>
 				{field.label}
 			</span>
 			<div className="mt-1 rounded-none border border-dashed border-product-border bg-product-surface px-2.5 py-2">
@@ -273,6 +273,9 @@ function WorkbenchCard({
 	);
 }
 
+const fieldLabelClass =
+	"font-mono text-[10px] uppercase tracking-[0.18em] text-product-text/72";
+
 function ArtifactContext({
 	pinnedArtifacts,
 }: {
@@ -319,6 +322,16 @@ const roadmapBlockDescriptionsById: Record<BlockId, string> = {
 	SHIP: "Deploy, demo, share, and capture the first feedback loop.",
 };
 
+function normalizeRoadmapBlockDescription(
+	blockLabel: string,
+	description: string,
+) {
+	return description.replace(
+		new RegExp(`^${blockLabel}\\s+Block\\s*=\\s*`, "i"),
+		"",
+	);
+}
+
 function SprintRoadmapOverview({
 	lessonContent,
 }: {
@@ -326,9 +339,11 @@ function SprintRoadmapOverview({
 }) {
 	const orderedBlocks = getOrderedBlocks().map((block, index) => ({
 		...block,
-		description:
+		description: normalizeRoadmapBlockDescription(
+			block.label,
 			lessonContent.workbench.teachingPoints?.[index] ??
-			roadmapBlockDescriptionsById[block.id],
+				roadmapBlockDescriptionsById[block.id],
+		),
 		lessons: getStudentFacingLessons().filter((lesson) => lesson.block === block.id),
 	}));
 
@@ -404,7 +419,7 @@ function FieldControl({
 	if (field.kind === "readonly") {
 		return (
 			<label className="block">
-				<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
+				<span className={fieldLabelClass}>
 					{field.label}
 				</span>
 				<div className="mt-1 rounded-none border border-product-border bg-product-surface px-2.5 py-2 text-xs font-medium text-product-text">
@@ -441,7 +456,7 @@ function FieldControl({
 	if (field.kind === "text" || field.kind === "url") {
 		return (
 			<label className="block">
-				<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
+				<span className={fieldLabelClass}>
 					{field.label}
 				</span>
 				<input
@@ -458,7 +473,7 @@ function FieldControl({
 	if (field.kind === "number") {
 		return (
 			<label className="block">
-				<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
+				<span className={fieldLabelClass}>
 					{field.label}
 				</span>
 				<input
@@ -484,7 +499,7 @@ function FieldControl({
 	if (field.kind === "select") {
 		return (
 			<label className="block">
-				<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
+				<span className={fieldLabelClass}>
 					{field.label}
 				</span>
 				<select
@@ -510,7 +525,7 @@ function FieldControl({
 
 			return (
 				<div className="block">
-					<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
+					<span className={fieldLabelClass}>
 						{field.label}
 					</span>
 					<div className="mt-2 space-y-2">
@@ -537,7 +552,7 @@ function FieldControl({
 
 		return (
 			<label className="block">
-				<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
+				<span className={fieldLabelClass}>
 					{field.label}
 				</span>
 				<textarea
@@ -554,7 +569,7 @@ function FieldControl({
 	if (field.kind === "table") {
 		return (
 			<label className="block">
-				<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
+				<span className={fieldLabelClass}>
 					{field.label}
 				</span>
 				<textarea
@@ -571,7 +586,7 @@ function FieldControl({
 	if (field.kind === "textarea") {
 		return (
 			<label className="block">
-				<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
+				<span className={fieldLabelClass}>
 					{field.label}
 				</span>
 				<textarea
@@ -647,28 +662,24 @@ export function WorkbenchRenderer({
 }) {
 	const fields = lesson.workbenchFields ?? [];
 	const titleBlock = (
-		<div>
-			<div className="flex flex-wrap items-baseline gap-1.5 text-product-muted">
-				<span className="font-mono text-[8px] uppercase tracking-[0.18em]">
+		<div className="space-y-2 border-b border-product-border/60 pb-3">
+			<div className="flex flex-wrap items-center gap-1.5 text-product-muted">
+				<span className="border border-product-border bg-product-surface-strong/70 px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-[0.18em]">
 					{lesson.id}
 				</span>
-				<span className="text-[8px] text-product-border/60">/</span>
-				<span className="font-mono text-[8px] uppercase tracking-[0.18em]">
+				<span className="border border-product-border bg-product-surface px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-[0.18em]">
 					{lesson.artifact.label}
 				</span>
 				{lessonContent.lessonMeta.runtimeLabel ? (
-					<>
-						<span className="text-[8px] text-product-border/60">/</span>
-						<span className="font-mono text-[8px] uppercase tracking-[0.18em]">
-							{lessonContent.lessonMeta.runtimeLabel}
-						</span>
-					</>
+					<span className="font-mono text-[8px] uppercase tracking-[0.18em] text-product-muted">
+						{lessonContent.lessonMeta.runtimeLabel}
+					</span>
 				) : null}
 			</div>
-			<h1 className="mt-1 font-display text-base uppercase leading-tight tracking-[0.06em] text-product-text sm:text-lg">
+			<h1 className="font-display text-lg uppercase leading-tight tracking-[0.05em] text-product-text sm:text-xl">
 				{lesson.title}
 			</h1>
-			<p className="mt-1 max-w-3xl text-[11px] leading-relaxed text-product-muted">
+			<p className="max-w-3xl text-[12px] leading-relaxed text-product-muted">
 				{lessonContent.intro}
 			</p>
 		</div>
@@ -686,26 +697,31 @@ export function WorkbenchRenderer({
 			</WorkbenchCard>
 		) : null;
 	const actionCard = (
-		<div className="border-t border-product-border/50 pt-2">
-			<p className="text-[11px] leading-snug text-product-muted">
-				{lessonContent.actionCard.jobNow}
-			</p>
-			<div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-0.5 text-[10px] text-product-muted">
-				<span>
-					<span className="font-mono text-[8px] uppercase tracking-[0.15em]">
-						Timebox
-					</span>{" "}
-					<span className="text-product-text">
-						{lessonContent.actionCard.timebox}
-					</span>
-				</span>
-				<span>
-					<span className="text-product-text">
-						{lessonContent.actionCard.comeBackWith}
-					</span>
-				</span>
+		<WorkbenchCard title="Next step" eyebrow="Do this now">
+			<div className="space-y-2">
+				<p className="text-[12px] leading-snug text-product-text">
+					{lessonContent.actionCard.jobNow}
+				</p>
+				<div className="grid gap-2 sm:grid-cols-2">
+					<div className="border border-product-border bg-product-surface px-2.5 py-2">
+						<p className="font-mono text-[8px] uppercase tracking-[0.15em] text-product-muted">
+							Timebox
+						</p>
+						<p className="mt-1 text-[11px] leading-snug text-product-text">
+							{lessonContent.actionCard.timebox}
+						</p>
+					</div>
+					<div className="border border-product-border bg-product-surface px-2.5 py-2">
+						<p className="font-mono text-[8px] uppercase tracking-[0.15em] text-product-muted">
+							Finish with
+						</p>
+						<p className="mt-1 text-[11px] leading-snug text-product-text">
+							{lessonContent.actionCard.comeBackWith}
+						</p>
+					</div>
+				</div>
 			</div>
-		</div>
+		</WorkbenchCard>
 	);
 
 	if (lesson.workbench === "guided_form") {

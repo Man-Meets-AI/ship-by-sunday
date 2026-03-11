@@ -8,8 +8,13 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { CheckoutButton } from "@/components/checkout-button";
 import { ProductShell } from "@/components/product-shell";
+import type { ProductTheme } from "@/lib/product-theme";
 
-export function AccessRequiredPage() {
+export function AccessRequiredPage({
+	initialTheme,
+}: {
+	initialTheme: ProductTheme;
+}) {
 	const router = useRouter();
 	const access = useQuery(api.course.viewerAccess) as
 		| {
@@ -26,6 +31,7 @@ export function AccessRequiredPage() {
 
 	return (
 		<ProductShell
+			initialTheme={initialTheme}
 			title="Access Required"
 			subtitle="This account can sign in, but it does not have course access yet."
 		>
@@ -34,11 +40,12 @@ export function AccessRequiredPage() {
 					Account access
 				</p>
 				<p className="mt-3 font-display text-4xl uppercase leading-none tracking-[0.08em] text-product-text">
-					{access === undefined ? "Checking" : "No active access"}
+					No active access
 				</p>
 				<p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-product-muted">
-					If you have not bought Ship by Sunday yet, use the button below. If
-					you just checked out, wait a few seconds and open Mission again.
+					{access === undefined
+						? "Checking purchase status in the background. If you just checked out, this page will update automatically."
+						: "If you have not bought Ship by Sunday yet, use the button below. If you just checked out, wait a few seconds and open Mission again."}
 				</p>
 
 				<div className="mt-6 flex flex-wrap gap-3">

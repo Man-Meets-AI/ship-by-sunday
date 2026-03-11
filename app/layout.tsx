@@ -3,6 +3,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Bebas_Neue, Manrope } from "next/font/google";
 
 import { ConvexClientProvider } from "@/components/convex-client-provider";
+import { getProductThemeBootstrapScript } from "@/lib/product-theme";
+import { getInitialProductTheme } from "@/lib/server/product-theme";
 
 import "./globals.css";
 
@@ -23,13 +25,27 @@ export const metadata: Metadata = {
 		"Go from idea to v1 this weekend with an action-first system for engineers who want to stop circling unfinished ideas.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
+	const initialTheme = await getInitialProductTheme();
+
 	return (
-		<html lang="en" className={`${display.variable} ${sans.variable}`}>
+		<html
+			lang="en"
+			data-product-theme={initialTheme}
+			suppressHydrationWarning
+			className={`${display.variable} ${sans.variable}`}
+		>
+			<head>
+				<script
+					dangerouslySetInnerHTML={{
+						__html: getProductThemeBootstrapScript(),
+					}}
+				/>
+			</head>
 			<body>
 				<ClerkProvider>
 					<ConvexClientProvider>{children}</ConvexClientProvider>

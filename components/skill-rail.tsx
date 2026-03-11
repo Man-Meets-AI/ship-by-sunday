@@ -83,6 +83,7 @@ export function SkillRail({
 						<Link
 							key={lesson.id}
 							href={getLessonHref(lesson.id)}
+							scroll={false}
 							className={`${classes} hover:bg-product-accent/8 hover:text-product-text`}
 						>
 							{content}

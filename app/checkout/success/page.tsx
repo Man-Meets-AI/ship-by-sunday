@@ -1,8 +1,11 @@
 import { Suspense } from "react";
 
 import { CheckoutSuccessView } from "@/components/checkout-success-view";
+import { getInitialProductTheme } from "@/lib/server/product-theme";
 
-export default function Page() {
+export default async function Page() {
+	const initialTheme = await getInitialProductTheme();
+
 	return (
 		<Suspense
 			fallback={
@@ -18,7 +21,7 @@ export default function Page() {
 				</main>
 			}
 		>
-			<CheckoutSuccessView />
+			<CheckoutSuccessView initialTheme={initialTheme} />
 		</Suspense>
 	);
 }
