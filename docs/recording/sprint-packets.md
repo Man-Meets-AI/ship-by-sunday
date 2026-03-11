@@ -395,21 +395,21 @@ Resolve only the issues that materially improve clarity, actionability, or trust
 ### Pickup tracker
 
 | Lesson | Problem | Severity | Fix needed | Owner | Done |
-| --- | --- | --- | --- | --- | --- |
-|  |  |  |  |  |  |
-|  |  |  |  |  |  |
-|  |  |  |  |  |  |
+| ------ | ------- | -------- | ---------- | ----- | ---- |
+|        |         |          |            |       |      |
+|        |         |          |            |       |      |
+|        |         |          |            |       |      |
 
 ## Daily Progress Tracker
 
-| Session | Scope | Planned runtime | Actual runtime | Status | Pickup count |
-| --- | --- | --- | --- | --- | --- |
-| 0 | Prep | 45-60 min |  | Not started |  |
-| 1 | Overview + CEO | 90-120 min |  | Not started |  |
-| 2 | Design | 75-105 min |  | Not started |  |
-| 3 | Build | 90-120 min |  | Not started |  |
-| 4 | Ship | 60-90 min |  | Not started |  |
-| 5 | Pickups | 45-90 min |  | Not started |  |
+| Session | Scope          | Planned runtime | Actual runtime | Status      | Pickup count |
+| ------- | -------------- | --------------- | -------------- | ----------- | ------------ |
+| 0       | Prep           | 45-60 min       |                | Not started |              |
+| 1       | Overview + CEO | 90-120 min      |                | Not started |              |
+| 2       | Design         | 75-105 min      |                | Not started |              |
+| 3       | Build          | 90-120 min      |                | Not started |              |
+| 4       | Ship           | 60-90 min       |                | Not started |              |
+| 5       | Pickups        | 45-90 min       |                | Not started |              |
 
 ## Founder Notes To Reuse On Camera
 

@@ -2,52 +2,53 @@
 
 Last updated: 2026-03-10
 
-## Locked decision
+## Locked stack
 
 - App / course shell: `Next.js`
 - Deployment: `Vercel`
 - Checkout: `Stripe`
 - Auth: `Clerk`
+- App data and lesson state: `Convex`
 
-## What this means
+## Current handoff architecture
 
-The marketing site, checkout handoff pages, onboarding shell, `Start Here` page, and course navigation should be planned around a `Next.js` app deployed on `Vercel`.
+The app is no longer choosing a stack. It is now hardening the live access flow already implemented around that stack.
 
-This aligns with:
+Current flow:
 
-- the recording / instructor materials
-- the default teaching stack inside the course
-- a fast path to shipping the public site and product shell
-
-## Already supported by existing docs
-
-- [recording sprint packets](../recording/sprint-packets.md)
-- [course ops plan](../course-ops/plan.md)
-- [offer and funnel plan](../offer-funnel/plan.md)
-- [analytics and QA plan](../analytics-qa/plan.md)
-
-## Still open
-
-- exact Stripe checkout flow details
-- exact Clerk access / post-purchase handoff flow
-- final lesson video hosting path
+1. The landing page CTA sends signed-out visitors to Clerk sign-in with a redirect back to pricing.
+2. Signed-in users call `POST /api/stripe/checkout`, which creates a Stripe Checkout Session with `clerkUserId` and `courseSlug` metadata.
+3. Stripe sends buyers to `/checkout/success` after payment.
+4. `POST /api/stripe/webhook` validates the Stripe signature and grants the Convex entitlement.
+5. The success page polls `viewerAccess` and redirects entitled buyers into `/mission`.
+6. Returning entitled users who hit `/` are resumed into `/mission` or their last worked lesson unless they explicitly use `?marketing=1`.
+7. Users without access fall back to `/access-required`, where they can retry Mission, go home, or buy access.
 
 ## Current implementation status
 
 - Protected product routes are live in the Next.js app.
-- The public home page now resumes entitled users into their last worked lesson, with `?marketing=1` as an explicit landing-page override.
-- Start Here lessons `0.1` and `0.2` are in the lesson registry and content system.
-- Lesson image/video uploads now persist to Convex storage and rehydrate into the lesson player.
+- Convex already handles entitlements, lesson autosave, mission progress, artifact listing, resume routing, and upload persistence.
+- Start Here lessons `0.1` and `0.2` are in the lesson registry and content system, with `0.0` as the mission-orientation screen.
 - Worksheet and student-packet downloads are currently served from `public/downloads/`.
+- Stripe checkout creation, success/cancel screens, and webhook grant logic are implemented in code.
 
-## Still intentionally deferred
+## What is still not live-ready
 
-- final hosted lesson video URLs
-- transcript attachment for recorded lessons
-- any richer download/library system beyond the current public download links
+- Stripe still needs final webhook secret configuration and endpoint registration in the live environment.
+- Clerk still needs real production envs and the correct issuer domain wired through Convex auth.
+- Final lesson video hosting is still undecided.
+- There is no implemented transactional access email yet.
+- Support inbox ownership and escalation path are still undefined.
 
-## Recommended next decision
+## What is intentionally deferred
 
-Choose the exact post-purchase handoff flow and video hosting path next.
+- final transcript attachment workflow
+- richer download-library packaging beyond the current public links
+- any second-pass onboarding automation beyond the minimal launch flow
 
-Those are now the real blockers, not the app stack itself.
+## Recommended next actions
+
+1. Register the Stripe webhook and verify the entitlement grant end to end.
+2. Replace any placeholder Clerk envs and confirm Convex auth against the real issuer.
+3. Decide the lesson video hosting path and attach the first real lesson media.
+4. Define the support fallback and decide whether launch needs a transactional access email or can rely on the current in-app success flow.

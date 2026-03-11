@@ -4,18 +4,18 @@ Last updated: 2026-03-10
 
 ## Goal
 
-Turn the lesson material in the repo into structured, reviewable, app-ready lesson content without turning `app/lessonRegistry.ts` into a giant content dump.
+Turn the lesson material in the repo into structured, reviewable, app-ready lesson content without turning `lib/course/manifest.ts` into a giant content dump.
 
 The system now keeps one clear separation:
 
-- `app/lessonRegistry.ts` owns lesson order, progression, workbench type, artifact contract, and shell defaults
+- `lib/course/manifest.ts` owns lesson order, progression, workbench type, artifact contract, and shell defaults
 - a separate lesson-content layer owns copy, video links, transcript text, examples, downloads, and source references
 
 ## Current source-of-truth model
 
 ### 1. Keep the registry structural
 
-`app/lessonRegistry.ts` should stay focused on:
+`lib/course/manifest.ts` should stay focused on:
 
 - `id`
 - `title`
@@ -53,51 +53,51 @@ Each lesson file now exports a typed object like this:
 
 ```ts
 export type LessonContent = {
-  lessonId: string;
-  slug: string;
-  status: "outline" | "draft" | "ready";
-  intro: string;
-  lessonMeta: {
-    runtimeLabel?: string;
-    goal: string;
-    purpose: string;
-  };
-  actionCard: {
-    jobNow: string;
-    timebox: string;
-    comeBackWith: string;
-  };
-  coach: {
-    video?: {
-      status: "pending" | "ready";
-      provider: "mux" | "vimeo" | "loom" | "youtube" | "file";
-      url?: string;
-      durationLabel?: string;
-    };
-    transcript?: {
-      status: "empty" | "ready";
-      body?: string;
-    };
-    examples?: Array<{
-      id: string;
-      title: string;
-      body: string;
-    }>;
-    resources?: Array<{
-      id: string;
-      label: string;
-      href: string;
-      kind: "download" | "internal" | "external";
-    }>;
-  };
-  workbench: {
-    prompt?: string;
-    teachingPoints?: string[];
-    emptyState?: string;
-    templateDownloadLabel?: string;
-    templateDownloadHref?: string;
-  };
-  sourceRefs: string[];
+	lessonId: string;
+	slug: string;
+	status: "outline" | "draft" | "ready";
+	intro: string;
+	lessonMeta: {
+		runtimeLabel?: string;
+		goal: string;
+		purpose: string;
+	};
+	actionCard: {
+		jobNow: string;
+		timebox: string;
+		comeBackWith: string;
+	};
+	coach: {
+		video?: {
+			status: "pending" | "ready";
+			provider: "mux" | "vimeo" | "loom" | "youtube" | "file";
+			url?: string;
+			durationLabel?: string;
+		};
+		transcript?: {
+			status: "empty" | "ready";
+			body?: string;
+		};
+		examples?: Array<{
+			id: string;
+			title: string;
+			body: string;
+		}>;
+		resources?: Array<{
+			id: string;
+			label: string;
+			href: string;
+			kind: "download" | "internal" | "external";
+		}>;
+	};
+	workbench: {
+		prompt?: string;
+		teachingPoints?: string[];
+		emptyState?: string;
+		templateDownloadLabel?: string;
+		templateDownloadHref?: string;
+	};
+	sourceRefs: string[];
 };
 ```
 

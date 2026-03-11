@@ -1,12 +1,18 @@
 # Ship by Sunday Analytics and QA Plan
 
-Last updated: 2026-03-07
+Last updated: 2026-03-10
 
 ## Objective
 
 Make the launch measurable and catch revenue-impacting failures before they cost trust.
 
 The day-one rule is simple: track only the numbers that change decisions, and test every buyer-facing step like it is already broken.
+
+## Current Implementation Reality
+
+- There is no production analytics instrumentation wired in the app yet.
+- The real buyer path today is landing page CTA -> Clerk sign-in if needed -> Stripe-hosted checkout -> `/checkout/success` -> entitlement grant -> `/mission` -> `Start Here`.
+- Use the implemented route flow as the QA source of truth. Do not keep testing against an older imagined flow.
 
 ## KPI Dashboard Spec
 
@@ -33,7 +39,7 @@ Track these daily:
 
 ### Messaging / channel signal
 
-- email click-through rate
+- email click-through rate once launch emails are live
 - reply rate if outbound is active later
 - sales by source
 
@@ -64,9 +70,9 @@ Track these daily:
 ### Onboarding
 
 - `confirmation_view`
-- `access_email_sent`
 - `start_here_view`
 - `lesson_intro_start`
+- `access_email_sent` only if a transactional access email is actually implemented before launch
 
 ### Activation
 
@@ -80,6 +86,7 @@ Track these daily:
 - Do not over-instrument before launch.
 - The minimum viable event map is landing page -> checkout -> purchase -> first lesson -> first worksheet.
 - If tooling is limited, prioritize `purchase_complete`, `start_here_view`, and `worksheet_01_open` first.
+- Do not create QA steps or event expectations for an access email unless that email is actually built.
 
 ## Buyer Journey QA Script
 
@@ -92,26 +99,32 @@ Track these daily:
 - [ ] FAQ interactions work if interactive
 - [ ] no obvious copy/layout breaks
 
-### Phase 2: Checkout
+### Phase 2: Auth and checkout
 
-- [ ] checkout page loads
+- [ ] signed-out CTA sends the buyer to Clerk sign-in and back to pricing cleanly
+- [ ] signed-in CTA starts checkout successfully
+- [ ] Stripe-hosted checkout loads
 - [ ] price is correct
 - [ ] guarantee / refund copy is present
 - [ ] purchase button works
 - [ ] failed payment path is understandable
+- [ ] cancel redirect works
 - [ ] confirmation redirect works
 
 ### Phase 3: Access and onboarding
 
 - [ ] confirmation page displays correctly
-- [ ] access email arrives
+- [ ] webhook grants entitlement
+- [ ] success page redirects to `/mission` once access is ready
+- [ ] delayed-access fallback buttons work
 - [ ] login / access link works
-- [ ] `Start Here` page is obvious
+- [ ] `Mission` makes `Start Here` obvious
 - [ ] worksheet packet is accessible
 - [ ] first lesson is accessible
 
 ### Phase 4: Activation
 
+- [ ] student can find `0.1` and `0.2`
 - [ ] student can find Worksheet 01
 - [ ] student can identify the first action
 - [ ] module order is clear
@@ -120,6 +133,7 @@ Track these daily:
 
 ### Phase 5: Support and recovery
 
+- [ ] access-required page explains next steps clearly
 - [ ] support contact path exists
 - [ ] refund request path is documented
 - [ ] bug report path is documented
@@ -128,9 +142,9 @@ Track these daily:
 
 Use this structure:
 
-| ID | Date | Area | Issue | Severity | Owner | Status | Repro steps | Fix needed |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-|  |  |  |  |  |  |  |  |  |
+| ID  | Date | Area | Issue | Severity | Owner | Status | Repro steps | Fix needed |
+| --- | ---- | ---- | ----- | -------- | ----- | ------ | ----------- | ---------- |
+|     |      |      |       |          |       |        |             |            |
 
 ## Severity Definitions
 

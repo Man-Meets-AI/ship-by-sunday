@@ -1,6 +1,6 @@
 # Ship by Sunday Founder Recording Checklists
 
-Last updated: 2026-03-07
+Last updated: 2026-03-10
 
 Use this document during the actual recording sprint.
 
@@ -8,7 +8,7 @@ The rule is simple: do not think about curriculum architecture while recording. 
 
 ## Recommended first recording session
 
-Film `Day 1: Overview + CEO Block` first on `Sunday, March 8, 2026`.
+Film `Day 1: Overview + CEO Block` first at the next scheduled recording slot.
 
 This is the right first session because:
 
@@ -17,11 +17,11 @@ This is the right first session because:
 - it has lower technical failure risk than Build or Ship
 - it gives you the core positioning language you will keep reusing later
 
-## Tonight preflight
+## Preflight before the next session
 
-Do this on `Saturday, March 7, 2026` before stopping for the night.
+Do this before the next recording session.
 
-- [ ] lock tomorrow’s session to `Day 1: Overview + CEO Block`
+- [ ] lock the next session to `Day 1: Overview + CEO Block`
 - [ ] create the actual recording folder structure on disk
 - [ ] put Worksheet 01 and the Friday Prep Sheet in one easy-to-open folder
 - [ ] prepare the staircase / 4-block visual
@@ -31,10 +31,10 @@ Do this on `Saturday, March 7, 2026` before stopping for the night.
 - [ ] prepare one simple core-flow example
 - [ ] prepare one scope-cut example using the Sunday Test
 - [ ] test mic, camera, screen share, and notifications
-- [ ] close everything not needed for tomorrow’s recording
-- [ ] write tomorrow’s session start time below
+- [ ] close everything not needed for the recording
+- [ ] write the next session start time below
 
-Tomorrow start time: `__________`
+Next session start time: `__________`
 
 ## File Naming Convention
 
@@ -86,7 +86,7 @@ Run this before every session:
 
 ## Day 0: Prep
 
-Date: `Saturday, March 7, 2026`
+Date: `__________`
 
 Target runtime: `45-60 min`
 
@@ -118,7 +118,7 @@ Target runtime: `45-60 min`
 
 ## Day 1: Overview + CEO Block
 
-Date: `Sunday, March 8, 2026`
+Date: `__________`
 
 Target runtime: `90-120 min`
 
@@ -339,18 +339,18 @@ Target runtime: `45-90 min`
 ### Pickup log
 
 | Lesson | Problem | Severity | Fix needed | Done |
-| --- | --- | --- | --- | --- |
-|  |  |  |  |  |
-|  |  |  |  |  |
-|  |  |  |  |  |
+| ------ | ------- | -------- | ---------- | ---- |
+|        |         |          |            |      |
+|        |         |          |            |      |
+|        |         |          |            |      |
 
 ## Final Session Tracker
 
-| Day | Session | Date | Runtime | Status | Notes |
-| --- | --- | --- | --- | --- | --- |
-| 0 | Prep |  |  | Not started |  |
-| 1 | Overview + CEO |  |  | Not started |  |
-| 2 | Design |  |  | Not started |  |
-| 3 | Build |  |  | Not started |  |
-| 4 | Ship |  |  | Not started |  |
-| 5 | Pickups |  |  | Not started |  |
+| Day | Session        | Date | Runtime | Status      | Notes |
+| --- | -------------- | ---- | ------- | ----------- | ----- |
+| 0   | Prep           |      |         | Not started |       |
+| 1   | Overview + CEO |      |         | Not started |       |
+| 2   | Design         |      |         | Not started |       |
+| 3   | Build          |      |         | Not started |       |
+| 4   | Ship           |      |         | Not started |       |
+| 5   | Pickups        |      |         | Not started |       |

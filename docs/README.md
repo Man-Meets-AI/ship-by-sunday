@@ -2,6 +2,16 @@
 
 This folder is the canonical home for generated launch workstream docs.
 
+## Source Of Truth Order
+
+- `todo.md`: current status, owners, blockers, and the next operating sequence
+- `main.md`: launch OS, critical path, and launch-wide constraints
+- `lib/course/manifest.ts` + `content/lessons/`: curriculum and lesson-structure contract
+- `convex/`: entitlement, progress, autosave, and buyer-access state
+- `docs/<workstream>/`: workstream decisions, plans, and supporting detail
+
+If a workstream doc conflicts with `todo.md` or the implemented app state, update the doc. Do not preserve stale planning language for its own sake.
+
 ## Rules
 
 - Keep `AGENTS.md`, `main.md`, `todo.md`, and `roles/` at repo root.
@@ -21,6 +31,7 @@ This folder is the canonical home for generated launch workstream docs.
 - `list-building/`: audience segments, schema, and qualification rules
 - `youtube/`: launch-fit video concepts and CTA paths
 - `design/`: launch visuals, brand system, and creative production docs
+- `dev/`: developer onboarding and architecture notes
 
 ## Current Canonical Files
 
@@ -39,3 +50,4 @@ This folder is the canonical home for generated launch workstream docs.
 - `design/launch-assets.md`
 - `design/brand-visual-system.md`
 - `design/creative-playbook.md`
+- `dev/architecture.md`

@@ -123,7 +123,7 @@ Founder time should be reserved for:
 - Use the relevant role file before doing substantial work in that domain.
 - Treat `main.md` as the higher-level launch OS and sequencing reference.
 - Write generated workstream docs into `docs/<workstream>/` and keep repo root reserved for control files.
-- Treat `app/lessonRegistry.ts` as the curriculum and lesson-contract source of truth.
+- Treat `lib/course/manifest.ts` as the curriculum and lesson-contract source of truth.
 - Treat `convex/` as the source of truth for app data, entitlements, and lesson state.
 - Prefer shipping one concrete, validated output over creating five partial drafts.
 - If a task is not on the critical path, label it as later-phase work.
@@ -134,7 +134,7 @@ Founder time should be reserved for:
 - Protected product routes currently live at `/mission`, `/lesson/[lessonId]`, `/artifacts`, `/settings`, and `/access-required`.
 - Clerk handles identity and route protection.
 - Convex handles course entitlements, lesson autosave, mission progress, and artifact listing.
-- `Stripe` is still the next integration step for paid access. Do not fake webhook completion or purchase state.
+- `Stripe` checkout and webhook access handoff exist in code, but do not fake webhook completion or purchase state.
 
 ## Local Development
 
@@ -313,3 +313,61 @@ When in doubt:
 1. Ask whether the work directly helps sell, deliver, or support `Ship by Sunday`
 2. Ask whether it reduces a launch blocker
 3. If not, push it down the stack
+
+## Codex Operating Addendum
+
+### 1. Plan Mode Default
+
+- Enter plan mode for any non-trivial task with 3 or more steps or architectural decisions
+- If something goes sideways, stop and re-plan immediately instead of continuing on the same path
+- Use plan mode for verification steps, not just implementation
+- Write detailed specs up front to reduce ambiguity
+
+### 2. Subagent Strategy
+
+- Use subagents liberally to keep the main context window clean
+- Offload research, exploration, and parallel analysis to subagents
+- For complex problems, use more compute via subagents
+- Keep one task per subagent for focused execution
+
+### 3. Self-Improvement Loop
+
+- After any correction from the user, update `tasks/lessons.md` with the pattern
+- Write rules that prevent the same mistake from recurring
+- Ruthlessly iterate on these lessons until the mistake rate drops
+- Review lessons at session start when they are relevant to the project
+
+### 4. Verification Before Done
+
+- Never mark a task complete without proving it works
+- Diff behavior between `main` and your changes when relevant
+- Ask: `Would a staff engineer approve this?`
+- Run tests, check logs, and demonstrate correctness
+
+### 5. Demand Elegance (Balanced)
+
+- For non-trivial changes, pause and ask whether there is a more elegant way
+- If a fix feels hacky, revisit it with: `Knowing everything I know now, implement the elegant solution`
+- Skip this for simple, obvious fixes and do not over-engineer
+- Challenge your own work before presenting it
+
+### 6. Autonomous Bug Fixing
+
+- When given a bug report, fix it without asking for hand-holding
+- Point at logs, errors, or failing tests, then resolve them
+- Avoid unnecessary context switching from the user
+- Fix failing CI tests without waiting for implementation instructions
+
+## Task Management
+
+1. **Plan First**: Write the plan to `tasks/todo.md` with checkable items
+2. **Verify Plan**: Check in before starting implementation
+3. **Track Progress**: Mark items complete as you go
+4. **Explain Changes**: Provide a high-level summary at each step
+5. **Document Results**: Add a review section to `tasks/todo.md`
+6. **Capture Lessons**: Update `tasks/lessons.md` after corrections
+
+## Core Principles
+
+- **Simplicity First**: Make every change as simple as possible. Impact minimal code.
+- **No Laziness**: Find root causes. No temporary fixes. Senior developer standards.

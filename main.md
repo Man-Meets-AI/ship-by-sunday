@@ -1,297 +1,128 @@
 # Ship by Sunday Launch OS
 
+Last updated: 2026-03-11
+
 ## Launch objective
 
-Ship a sellable, deliverable, promotable version of Ship by Sunday that can take cold traffic, warm audience traffic, and outbound traffic without breaking trust.
+Ship a sellable, deliverable, promotable version of `Ship by Sunday` that can take cold traffic, warm audience traffic, and later outbound traffic without breaking trust.
 
-## Definition of done
+## North Star buyer journey
 
-A stranger can:
+1. Understand the offer quickly
+2. Buy cleanly
+3. Get access without confusion
+4. Land in `Mission` / `Start Here` immediately
+5. Complete the first worksheet and make progress toward a shipped v1
 
-1. see the offer
-2. understand the promise
-3. buy it
-4. get onboarded
-5. consume the first lessons
-6. complete the first worksheet
-7. see proof that the system works
-8. get support if stuck
+## What is locked
 
-## What is already in place
+- Core offer: `Ship by Sunday`
+- Core promise: `Go from idea to v1 this weekend`
+- Core audience: junior and mid-level engineers who can code, have ideas, and keep getting stuck before anything goes live
+- Product format: on-demand videos plus a digital guide/workbook
+- App stack: `Next.js` on `Vercel` with `Clerk` for auth, `Convex` for app data, and `Stripe` for checkout / entitlement handoff
+- Tripwire is deprioritized until the core buyer journey is stable
 
-* Recording guide
-* Student workbook
-* Master graphic guide for promotional assets
-* Website design mostly complete, pending final review against latest messaging
+## Current state as of Tuesday, March 10, 2026
 
-## Non-negotiable rule
+- The public landing page, FAQ, and primary pricing CTA are live in `app/`.
+- Protected product routes are live at `/mission`, `/lesson/[lessonId]`, `/artifacts`, `/settings`, and `/access-required`.
+- `lib/course/manifest.ts` and `content/lessons/` now cover the full structured curriculum, including `0.0`, `0.1`, and `0.2` for the start-here flow.
+- Convex already handles lesson autosave, progress, locked lesson gating, entitlement checks, artifact listing, upload persistence, and homepage resume routing.
+- Stripe checkout creation, success/cancel pages, and the webhook grant path are implemented in the app.
+- The remaining launch blockers are not architecture. They are live-env activation, recording completion, final media hosting, support ownership, analytics, and QA.
 
-Do not scale traffic or outbound until the offer, buyer journey, and first-student experience are clean.
+## Live blockers
 
-## Worksheet decision framework
+1. Founder recording status is not fully logged, and the next committed recording slot still needs to be explicit in `docs/recording/founder-checklists.md`.
+2. The Stripe webhook path exists in code but still needs final env setup and endpoint registration for live entitlement grants.
+3. Clerk production envs and issuer configuration still need to replace any local placeholder setup.
+4. Final lesson video hosting is still undecided.
+5. Support inbox ownership and the exact refund / access-help path are still undefined.
+6. Analytics instrumentation and end-to-end buyer journey QA are not complete.
 
-Every worksheet should survive only if it does one of these jobs:
+## Critical path now
 
-* increases completion rate
-* reduces confusion at a key step
-* creates a useful artifact the student needs later
-* improves perceived value without adding friction
+1. Record and upload the core lessons
+2. Activate the live purchase-to-access handoff
+3. Choose video hosting and attach real lesson media
+4. Tighten the post-purchase onboarding and support path
+5. Instrument the minimum viable analytics
+6. Run end-to-end QA across purchase, access, first lesson, and Worksheet 01
 
-Remove or merge any worksheet that:
+## Current product handoff
 
-* repeats content already inside the workbook
-* is not explicitly used in a lesson
-* asks for thinking without producing a decision or artifact
-* adds friction early in the sprint
-* would not be missed if deleted
+1. Logged-out visitors click `Get instant access` and are sent to Clerk sign-in.
+2. Signed-in buyers start Stripe Checkout from the landing page CTA.
+3. Stripe success lands on `/checkout/success`, which waits for the entitlement to be granted.
+4. The webhook grants the Convex entitlement.
+5. The success page redirects the buyer into `/mission`.
+6. Returning entitled users who land on `/` are resumed into `/mission` or their last worked lesson unless they use `?marketing=1`.
 
-### Recommended worksheet rule
+## Decisions still open
 
-* Keep only the 4 core worksheets that map directly to the 4 blocks
-* Add optional companion worksheets only if they are clearly labeled as optional tools
-* Turn weak standalone worksheets into in-workbook prompts, examples, or checklists
+- Final lesson video host / delivery path
+- Support inbox and response owner
+- Whether launch includes a transactional access email or relies on the in-app success flow first
+- Final founder approval on proof claims and any launch-blocking access-flow wording
 
-## Remaining workstreams
+## Founder-only work
 
-### 1) Offer and product readiness
+- Set the next recording slot and log it in `docs/recording/founder-checklists.md`
+- Record `Day 1: Overview + CEO Block`
+- Confirm the exact examples to use on camera
+- Approve only launch-blocking proof claims, visuals, and access-flow wording
 
-* Finalize promise, positioning, outcomes, and objection handling
-* Review website against latest offer language
-* Define tripwire offer and how it ladders into core offer
-* Finalize pricing, guarantee, FAQ, and refund language
-* Decide whether all existing worksheets stay, get merged, or get removed
-* Confirm lesson order, naming, and student-facing navigation
+## What not to work on now
 
-### 2) Content production
+- Tripwire packaging
+- Full Instagram grid
+- Large outbound volume
+- Expanded YouTube library
+- Nice-to-have extra worksheets
+- Additional nurture sequences beyond the core launch flow
 
-* Record all core lessons
-* Edit lessons and add callouts / screen shares where needed
-* Export and upload final lesson files
-* Create lesson thumbnails / covers / in-product visuals
-* QA every lesson for audio, pacing, and screen legibility
+## Next 7 days
 
-### 3) Delivery and customer experience
+### Tuesday, March 10, 2026
 
-* Set up checkout and payment flows
-* Set up course hosting / product delivery environment
-* Build welcome flow: purchase confirmation, login/access, start-here instructions
-* Build support flow: inbox, response ownership, escalation path
-* Build progress path: Start Here, 4 blocks, worksheets, next action
-* Test student experience end to end on desktop and mobile
+- Rebaseline docs and tracker to the real product state
+- Confirm the founder recording calendar and Day 1 status
+- Prepare the webhook / Clerk env activation checklist
 
-### 4) Marketing assets
+### Wednesday, March 11, 2026
 
-* Generate promotional graphics from master guide
-* Produce 9-post Instagram grid
-* Create sales page graphics and embedded proof sections
-* Create YouTube thumbnails and supporting visual assets
-* Create outreach assets: screenshots, social proof cards, founder visuals
+- Record `Day 1: Overview + CEO Block` or log pickups if it was already recorded
+- Register the Stripe webhook endpoint and secret
+- QA purchase -> entitlement -> `Mission` redirect
 
-### 5) Messaging and campaigns
+### Thursday, March 12, 2026
 
-* Write email sequence: waitlist / launch / cart / follow-up / customer onboarding
-* Write outreach copy: cold email, DM, partner outreach, alumni/friendlies
-* Write YouTube scripts tied to launch narrative
-* Write Instagram captions / carousel copy / CTA structure
-* Write tripwire funnel copy and bump / upsell copy
+- Decide the lesson video hosting path
+- Attach first real lesson media and validate download links
+- Tighten success-page and access-required copy against the actual handoff
 
-### 6) Outbound infrastructure
+### Friday, March 13, 2026
 
-* Build outreach target lists
-* Segment targets by founder, operator, designer, engineer, creator, warm contact
-* Set up sending domains, inboxes, warmup, authentication, and tracking
-* Configure Instantly campaign structure and limits
-* Load sequences and target lists
-* Test deliverability before scaling volume
+- Define the support inbox, owner, and refund-response path
+- Set up the minimal event instrumentation and bug tracker
+- Validate the `Start Here` and Worksheet 01 path
 
-### 7) Analytics and launch ops
+### Saturday, March 14, 2026
 
-* Define launch dashboard: traffic, opt-ins, sales, CAC, reply rate, booked calls if any, conversion by source
-* Set up event tracking across landing pages and checkout
-* Create daily KPI review sheet
-* Create issue tracker for launch bugs and blockers
-* Create daily standup cadence and ownership
+- QA landing page, sign-in, checkout, success, `Mission`, first lesson, and worksheet flow on desktop and mobile
+- Fix only revenue-impacting or trust-impacting issues
 
-## Critical path
+### Sunday, March 15, 2026
 
-These are the items that can block revenue or create broken trust if not done:
+- Record the next block or complete pickups
+- Confirm the course library, downloads, and support path are coherent
 
-1. Final offer and website review
-2. Checkout + course delivery + onboarding
-3. Core lessons recorded and uploaded
-4. Sales page graphics + proof assets
-5. Launch emails written
-6. Tripwire defined and implemented
-7. Outbound domains/inboxes/Instantly setup with deliverability checks
-8. End-to-end QA of the buyer journey
+### Monday, March 16, 2026
 
-## Important but not blocking day-one revenue
+- Decide what is safe to publish now
+- Hold back anything that is not stable enough for the first student
 
-* Full 9-post Instagram grid
-* Large outreach volume before deliverability is proven
-* Long-form YouTube launch library beyond first 1–2 videos
-* Nice-to-have extra worksheets
-* Expanded nurture sequences beyond launch core
+## Operating rule
 
-## Proposed workstreams and owners
-
-### Founder / face of product
-
-* Record lessons
-* Approve messaging
-* Approve graphics
-* Record launch video assets
-* Record YouTube content
-
-### Ops / launch management
-
-* Maintain master launch tracker
-* Sequence dependencies
-* QA deliverability, checkout, and onboarding
-* Track blockers daily
-* Drive deadlines and approvals
-
-### Design
-
-* Generate promotional graphics
-* Finalize sales page visuals
-* Produce Instagram grid
-* Produce thumbnail system
-
-### Growth / copy
-
-* Emails
-* Outreach copy
-* YouTube scripts
-* Landing page revisions
-* Tripwire funnel copy
-
-### Tech / implementation
-
-* Website updates
-* Checkout and product delivery
-* Analytics
-* Instantly setup
-* Tracking and automations
-
-## Recommended launch order
-
-### Phase 1: Lock the offer
-
-* Final offer language
-* Website review
-* Pricing / guarantee / FAQ
-* Tripwire strategy
-* Worksheet cleanup decision
-
-### Phase 2: Make the product real
-
-* Record and upload core lessons
-* QA audio/video
-* Build onboarding and delivery flow
-* Test workbook + worksheet usage inside lessons
-
-### Phase 3: Build launch assets
-
-* Sales page graphics
-* 9-post grid
-* Email sequence
-* Outreach copy
-* YouTube scripts and thumbnails
-
-### Phase 4: Build distribution engine
-
-* Target lists
-* Instantly infrastructure
-* Domain setup and deliverability checks
-* Load campaigns
-* Warm up audience with first content drops
-
-### Phase 5: Launch QA and go live
-
-* Test purchase flow
-* Test access emails
-* Test lesson delivery
-* Test analytics
-* Dry run launch day sequence
-
-## 14-day operating sprint
-
-### Days 1-2
-
-* Finalize offer language and website review
-* Decide worksheet keep / merge / remove
-* Finalize tripwire
-* Lock launch tracker and owners
-
-### Days 3-6
-
-* Record core lessons
-* Edit and upload first-pass lessons
-* Build onboarding and course delivery
-* Draft all launch emails
-
-### Days 7-9
-
-* Create graphics for sales page + Instagram + thumbnails
-* Write and load outreach sequences
-* Build target lists
-* Configure Instantly infrastructure
-
-### Days 10-11
-
-* Write and finalize YouTube scripts
-* Implement tripwire funnel
-* QA website, checkout, analytics, onboarding
-
-### Days 12-14
-
-* Publish first content assets
-* Launch email sequence
-* Begin controlled outbound
-* Review KPIs daily and fix bottlenecks fast
-
-## Daily operating cadence
-
-### Daily standup
-
-* What shipped yesterday?
-* What is blocked?
-* What must ship today?
-* What approval is needed from founder?
-
-### Daily scoreboard
-
-* lessons recorded
-* lessons uploaded
-* graphics completed
-* emails completed
-* outreach targets added
-* domains/inboxes ready
-* pages QA'd
-* blockers open
-
-## Immediate next moves
-
-1. Do a full website review against the current offer and messaging
-2. Audit every worksheet and cut ruthlessly
-3. Lock the tripwire structure
-4. Schedule and execute lesson recording sprint
-5. Build launch copy set: emails, outreach, YouTube scripts
-6. Stand up delivery, analytics, and Instantly infrastructure
-7. Run end-to-end QA before traffic or outbound volume
-
-## AI team member prompts
-
-Each role prompt now lives in its own file:
-
-1. [Launch Chief of Staff / COO](roles/launch-chief-of-staff-coo.md)
-2. [Offer and Funnel Strategist](roles/offer-and-funnel-strategist.md)
-3. [Course Operations Producer](roles/course-operations-producer.md)
-4. [Lifecycle Email Strategist](roles/lifecycle-email-strategist.md)
-5. [Outbound Systems and Deliverability Lead](roles/outbound-systems-and-deliverability-lead.md)
-6. [List Building and Target Researcher](roles/list-building-and-target-researcher.md)
-7. [Design Production Lead](roles/design-production-lead.md)
-8. [YouTube Launch Producer](roles/youtube-launch-producer.md)
-9. [Analytics and QA Operator](roles/analytics-and-qa-operator.md)
-10. [Founder Recording Producer](roles/founder-recording-producer.md)
+If a task does not directly help sell, deliver, onboard, or support the first student, it is later-phase work.

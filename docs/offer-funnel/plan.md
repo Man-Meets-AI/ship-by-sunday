@@ -1,6 +1,6 @@
 # Ship by Sunday Offer and Funnel Plan
 
-Last updated: 2026-03-07
+Last updated: 2026-03-10
 
 ## Objective
 
@@ -17,10 +17,19 @@ The offer is already strong enough to sell. The remaining job is to remove hesit
 
 ## Current Friction Points
 
-- The landing page promise is now sharp, but checkout and post-purchase expectations are not yet defined.
-- The buyer still needs a clean answer to `what happens immediately after I pay?`
+- The landing page promise is sharp and the checkout trigger now exists, but the live post-purchase support path still needs to be hardened.
+- The buyer still needs a clean answer to `what happens immediately after I pay?`, and the docs should match the actual success flow.
 - The buyer also needs a believable risk-reversal that matches the product.
 - The strongest objection remains: `What if I buy this and still do not finish?`
+
+## Current Implementation Reality
+
+- The primary CTA on the landing page is `Get instant access`.
+- Logged-out buyers are pushed into Clerk sign-in and then back to pricing.
+- Signed-in buyers start Stripe-hosted checkout from the landing page CTA.
+- After payment, buyers land on `/checkout/success`, which waits for the entitlement to land and then redirects them into `/mission`.
+- Returning entitled users who land on `/` are resumed into the product unless they explicitly use `?marketing=1`.
+- There is not yet a live transactional access email, so checkout copy should not promise one as the primary handoff.
 
 ## Guarantee / Refund Recommendation
 
@@ -86,6 +95,7 @@ Landing page job:
 - show the outcomes
 - prove the founder can teach this credibly
 - make checkout feel like the obvious next step
+- if the buyer is not signed in, send them to sign-in without losing the pricing context
 
 ### Checkout
 
@@ -99,18 +109,20 @@ Checkout job:
 - clarify what happens after payment
 - reinforce the guarantee
 - keep focus on the first rep, not lifetime theory value
+- match the actual Stripe-hosted checkout flow instead of implying a custom in-app cart
 
 ### Post-purchase confirmation
 
 Primary CTA:
 
-- `Start Here`
+- `Open Mission`
 
 Confirmation page job:
 
 - confirm payment
-- reassure the buyer they are in the right place
-- direct them to the first action immediately
+- reassure the buyer they are in the right place while access finalizes
+- direct them into `Mission` and then `Start Here` immediately
+- provide a fallback if access is delayed for a few seconds
 
 ## Post-Purchase Expectation Setting
 
@@ -124,13 +136,14 @@ Headline:
 
 Support line:
 
-- `Do not try to watch everything first. Open the sprint workspace, review the 4-block path, and begin with the CEO Block.`
+- `Do not try to watch everything first. Open Mission, review the 4-block path, watch the two intro lessons, and begin with the CEO Block.`
 
 Checklist:
 
-- `Check your email for access details`
-- `Open the worksheet packet`
+- `Wait on the success page while access finalizes`
+- `Open Mission`
 - `Watch the 2 intro lessons`
+- `Open the worksheet packet`
 - `Start Worksheet 01`
 
 ### First onboarding email direction
@@ -144,6 +157,10 @@ Body goal:
 - reduce overwhelm
 - make the first action obvious
 - reinforce the product is meant to be completed
+
+Rule:
+
+- do not promise an access email as the primary delivery mechanism until it exists in the product
 
 ## Objections To Handle Near Checkout
 
@@ -192,7 +209,8 @@ The clean path is:
 
 1. landing page makes the sale
 2. checkout removes risk
-3. confirmation page tells the buyer exactly where to start
-4. onboarding email gets them into the first artifact fast
+3. confirmation page gets the buyer into `Mission`
+4. `Start Here` gets them into the first artifact fast
+5. onboarding email reinforces the same next step once that email is implemented
 
 That is enough for launch.
