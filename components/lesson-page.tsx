@@ -372,13 +372,10 @@ export function LessonPage({
 	};
 
 	const footer = (
-		<div className="flex flex-col gap-2 lg:flex-row lg:items-start">
+		<div className="flex flex-col gap-2 lg:flex-row lg:items-center">
 			{showCompletionFeedback ? (
 				<div className="max-w-2xl text-xs font-medium leading-relaxed text-[#a83232]">
-					<p>
-						{serverCompletionMessage ??
-							"Finish these before continuing:"}
-					</p>
+					<p>{serverCompletionMessage ?? "Finish these before continuing:"}</p>
 					{displayedCompletionIssues.length > 0 ? (
 						<p className="mt-1">
 							{displayedCompletionIssues
@@ -392,7 +389,7 @@ export function LessonPage({
 				{previousHref ? (
 					<Link
 						href={previousHref}
-						className="px-1 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted transition-colors hover:text-product-text"
+						className="inline-flex items-center px-1 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted transition-colors hover:text-product-text"
 					>
 						Back
 					</Link>
@@ -421,9 +418,7 @@ export function LessonPage({
 							(error: unknown) => {
 								const completionError = getCompletionErrorData(error);
 								if (completionError) {
-									setServerCompletionIssues(
-										completionError.issues ?? [],
-									);
+									setServerCompletionIssues(completionError.issues ?? []);
 									setServerCompletionMessage(completionError.message);
 									return;
 								}

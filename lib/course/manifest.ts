@@ -10,6 +10,7 @@ export type WorkbenchType =
 	| "scope_split"
 	| "brief_assembler"
 	| "console_checklist"
+	| "roadmap_overview"
 	| "tracker_log"
 	| "external_workspace";
 
@@ -223,7 +224,7 @@ export const lessonRegistry: LessonConfig[] = [
 		title: "How the Sprint Works",
 		shortTitle: "Sprint",
 		shell: "split",
-		workbench: "console_checklist",
+		workbench: "roadmap_overview",
 		artifact: {
 			key: "sprint_setup_state",
 			label: "Sprint Setup State",
@@ -236,36 +237,13 @@ export const lessonRegistry: LessonConfig[] = [
 		coachMode: "docked",
 		objectiveTitle: "Start Here 0.2 — How the Sprint Works",
 		checklist: [
-			"Open the worksheet packet",
-			"Understand the 4 blocks",
-			"Get ready to start CEO 1.1",
+			"Download Figma, VSCode",
+			"Review the 4 Blocks",
 		],
 		helperText:
 			"Set up the sprint so the first block starts with zero confusion.",
 		winCondition: "The sprint setup checklist is complete.",
 		panelDefaults: splitPanelDefaults,
-		workbenchFields: [
-			{
-				id: "worksheet_packet_open",
-				label: "Worksheet packet open",
-				kind: "toggle",
-				required: true,
-			},
-			{
-				id: "workspace_ready",
-				label: "Templates and working folder ready",
-				kind: "toggle",
-				required: true,
-			},
-			{
-				id: "ceo_block_commitment",
-				label: "What is your first concrete move in CEO 1.1?",
-				kind: "textarea",
-				required: true,
-				rows: 3,
-				placeholder: "Example: write 3 candidate problems from work this week.",
-			},
-		],
 	},
 	{
 		id: "1.1",

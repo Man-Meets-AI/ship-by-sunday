@@ -104,6 +104,7 @@ function stripMarkdown(value) {
 		.replace(/\*\*/g, "")
 		.replace(/`/g, "")
 		.replace(/\\\+/g, "+")
+		.replace(/\\=/g, "=")
 		.replace(/\\-/g, "-")
 		.replace(/\s+/g, " ")
 		.trim();

@@ -6,6 +6,11 @@ It does not replace the root `todo.md`, which remains the launch tracker and sou
 
 ## Active
 
+- [x] Make the top HUD block chips non-selectable
+- [x] Update the 0.2 lesson checklist copy to the new student-facing wording
+- [x] Remove escaped `\\=` artifacts from generated lesson copy
+- [x] Replace lesson 0.2’s form input with a static sprint-roadmap explainer component
+- [x] Fix the app-shell layout so the footer stays pinned to the viewport bottom and the centered header overlay does not block header clicks
 - [x] Make the app-shell top bar and bottom skill rail edge-to-edge instead of floating panels
 - [x] Remove the `Deliver` label from the student action-card metadata row
 - [x] Sanitize generated lesson content so only student-facing intro and coach content reaches the product
@@ -24,6 +29,21 @@ It does not replace the root `todo.md`, which remains the launch tracker and sou
 
 ## Review
 
+- Outcome: The top HUD block chips now use `select-none`, so their labels and lock icons can’t be highlighted like regular text.
+- Verification: `pnpm exec tsc --noEmit`, `pnpm exec eslint components/product-shell.tsx`, and `rg -n 'select-none items-center' components/product-shell.tsx`
+- Follow-up: If the rest of the top HUD should also behave like chrome, the same treatment can be extended to the nav labels and progress counter.
+- Outcome: Start Here `0.2` now uses the shorter checklist copy: `Download Figma, VSCode` and `Review the 4 Blocks`.
+- Verification: `pnpm exec tsc --noEmit` and `rg -n 'Download Figma, VSCode|Review the 4 Blocks|Start Here 0\\.2' lib/course/manifest.ts`
+- Follow-up: If you want, the `0.2` action-card copy can be tightened next so it matches the new checklist language more closely.
+- Outcome: The blueprint parser now unescapes `\\=` before generating lesson content, so roadmap lines like `Design Block = ...` render cleanly instead of showing a literal backslash.
+- Verification: `node scripts/build-lesson-content-from-blueprint.mjs`, `pnpm exec tsc --noEmit`, `pnpm exec eslint scripts/build-lesson-content-from-blueprint.mjs`, and `rg -n '\\\\=' content/lessons content/source/recording-blueprint.json`
+- Follow-up: Keep parser cleanup rules aligned with the markdown export quirks of the source blueprint so future punctuation artifacts are removed during generation.
+- Outcome: Start Here `0.2` no longer asks for a concrete text response; it now renders a static sprint-roadmap explainer built from the actual block and lesson registry.
+- Verification: `pnpm exec tsc --noEmit`, `pnpm exec eslint components/lesson-workbench.tsx lib/course/manifest.ts`, and targeted `rg` checks for the new `roadmap_overview` lesson type and the removed `ceo_block_commitment` field.
+- Follow-up: Visual QA lesson `0.2` to confirm the static roadmap reads clearly and feels aligned with the mission-page roadmap.
+- Outcome: The app-shell `main` is a real flex column again, so short lesson pages keep the footer at the viewport bottom, and the centered header overlay no longer steals clicks from the nav or controls.
+- Verification: `pnpm exec tsc --noEmit` and `pnpm exec eslint components/product-shell.tsx`
+- Follow-up: Quick browser QA on a short lesson route is still worth doing to confirm the footer behavior feels right on both desktop and laptop heights.
 - Outcome: App-shell routes now use full-width top and bottom chrome instead of inset floating header/footer panels, while the main content remains centered and padded inside the viewport.
 - Verification: `pnpm exec tsc --noEmit` and `pnpm exec eslint components/product-shell.tsx components/skill-rail.tsx`
 - Follow-up: Visual QA the app-shell routes in both lesson split/focus layouts plus mission/settings/artifacts to confirm the chrome feels intentional at each breakpoint.

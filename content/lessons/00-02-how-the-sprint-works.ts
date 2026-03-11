@@ -43,10 +43,10 @@ export const lesson0002HowTheSprintWorksLessonContent: LessonContent = {
   "workbench": {
     "prompt": "Each block solves a different problem, and each one sets up the next.",
     "teachingPoints": [
-      "CEO Block \\= choose the problem, customer, and scope.",
-      "Design Block \\= make the product concrete enough to build.",
-      "Build Block \\= use AI to implement the core product without spiraling.",
-      "Ship Block \\= deploy, share, and gather first feedback."
+      "CEO Block = choose the problem, customer, and scope.",
+      "Design Block = make the product concrete enough to build.",
+      "Build Block = use AI to implement the core product without spiraling.",
+      "Ship Block = deploy, share, and gather first feedback."
     ],
     "emptyState": "Each block solves a different problem, and each one sets up the next."
   },

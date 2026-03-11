@@ -147,7 +147,7 @@ function ShellInner({
 
 	const shellClassName =
 		viewportMode === "app"
-			? "min-h-screen bg-product-bg text-product-text xl:h-dvh xl:overflow-hidden"
+			? "flex min-h-screen flex-col bg-product-bg text-product-text xl:h-dvh xl:overflow-hidden"
 			: "min-h-screen bg-product-bg text-product-text";
 
 	const shellInnerClassName =
@@ -204,8 +204,8 @@ function ShellInner({
 
 			{/* Center: block progression */}
 			{mission ? (
-				<div className="pointer-events-auto absolute inset-0 hidden items-center justify-center lg:flex">
-					<div className="flex items-center">
+				<div className="pointer-events-none absolute inset-0 hidden items-center justify-center lg:flex">
+					<div className="pointer-events-auto flex select-none items-center">
 						{mission.blocks.map((block, i) => {
 							const status = (blockStatuses.get(block.id) ??
 								"locked") as "completed" | "active" | "locked";
