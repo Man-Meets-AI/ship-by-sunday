@@ -23,9 +23,9 @@ describe("course registry", () => {
 	});
 
 	it("keeps mission out of the student-facing lesson sequence", () => {
-		expect(getStudentFacingLessons().some((lesson) => lesson.id === "0.0")).toBe(
-			false,
-		);
+		expect(
+			getStudentFacingLessons().some((lesson) => lesson.id === "0.0"),
+		).toBe(false);
 		expect(getStudentFacingLessons()[0]?.id).toBe("0.1");
 	});
 
@@ -64,6 +64,22 @@ describe("course registry", () => {
 			],
 		});
 
-		expect(issues.filter((issue) => issue.kind === "objective")).toHaveLength(2);
+		expect(issues.filter((issue) => issue.kind === "objective")).toHaveLength(
+			2,
+		);
+	});
+
+	it("keeps lesson 1.1 prompts aligned with naming who has the problem", () => {
+		const lesson = getLessonById("1.1");
+		expect(lesson).toBeTruthy();
+
+		const requiredFields = lesson!.workbenchFields?.filter(
+			(field) => field.required,
+		);
+		expect(requiredFields?.map((field) => field.label)).toEqual([
+			"Problem 1 (include who has it)",
+			"Problem 2 (include who has it)",
+			"Problem 3 (include who has it)",
+		]);
 	});
 });

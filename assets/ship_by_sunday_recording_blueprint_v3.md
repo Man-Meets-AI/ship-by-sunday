@@ -199,7 +199,7 @@ This block is about making the right thing before you try to make the thing righ
 
 ### **Pause prompt**
 
-**•** Your job now: Write down 3 annoying problems from your life or work that would actually be worth solving.
+**•** Your job now: Write down 3 annoying problems from your life or work that would actually be worth solving, and name who has each one.
 
 **•** Timebox: 10 minutes
 

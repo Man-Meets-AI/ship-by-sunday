@@ -113,15 +113,45 @@ export type LessonConfig = {
 export type BlockConfig = {
 	id: BlockId;
 	label: string;
+	level: number;
+	summary: string;
 	order: number;
 	startsLocked: boolean;
 };
 
 export const blocks: BlockConfig[] = [
-	{ id: "CEO", label: "CEO", order: 1, startsLocked: false },
-	{ id: "DESIGN", label: "DESIGN", order: 2, startsLocked: true },
-	{ id: "BUILD", label: "BUILD", order: 3, startsLocked: true },
-	{ id: "SHIP", label: "SHIP", order: 4, startsLocked: true },
+	{
+		id: "CEO",
+		label: "CEO",
+		level: 1,
+		summary: "Choose the problem, user, outcome, and scope before you build.",
+		order: 1,
+		startsLocked: false,
+	},
+	{
+		id: "DESIGN",
+		label: "DESIGN",
+		level: 2,
+		summary: "Turn the idea into a buildable first version.",
+		order: 2,
+		startsLocked: true,
+	},
+	{
+		id: "BUILD",
+		label: "BUILD",
+		level: 3,
+		summary: "Make the core flow work locally without spiraling.",
+		order: 3,
+		startsLocked: true,
+	},
+	{
+		id: "SHIP",
+		label: "SHIP",
+		level: 4,
+		summary: "Get the app live, send it, and capture real feedback.",
+		order: 4,
+		startsLocked: true,
+	},
 ];
 
 export const splitPanelDefaults: PanelDefaultState = {
@@ -236,10 +266,7 @@ export const lessonRegistry: LessonConfig[] = [
 		unlocks: ["1.1"],
 		coachMode: "docked",
 		objectiveTitle: "Start Here 0.2 — How the Sprint Works",
-		checklist: [
-			"Download Figma, VSCode",
-			"Review the 4 Blocks",
-		],
+		checklist: ["Download Figma, VSCode", "Review the 4 Blocks"],
 		helperText:
 			"Set up the sprint so the first block starts with zero confusion.",
 		winCondition: "The sprint setup checklist is complete.",
@@ -275,24 +302,36 @@ export const lessonRegistry: LessonConfig[] = [
 		workbenchFields: [
 			{
 				id: "problem_1",
-				label: "Problem 1",
+				label: "Problem 1 (include who has it)",
 				kind: "textarea",
 				required: true,
 				rows: 3,
+				placeholder:
+					"Example: Startup operators lose action items after meetings and waste time rebuilding them.",
+				helpText:
+					"Write the painful problem and name the person or group living with it.",
 			},
 			{
 				id: "problem_2",
-				label: "Problem 2",
+				label: "Problem 2 (include who has it)",
 				kind: "textarea",
 				required: true,
 				rows: 3,
+				placeholder:
+					"Example: Freelancers forget client follow-ups because their notes are scattered.",
+				helpText:
+					"Keep it grounded in a real life or work context, not a vague market idea.",
 			},
 			{
 				id: "problem_3",
-				label: "Problem 3",
+				label: "Problem 3 (include who has it)",
 				kind: "textarea",
 				required: true,
 				rows: 3,
+				placeholder:
+					"Example: Small teams lose recurring process tasks because nobody owns the checklist after meetings.",
+				helpText:
+					"Name the person or group inside the problem statement itself.",
 			},
 		],
 	},

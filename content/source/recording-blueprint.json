@@ -1,893 +1,847 @@
 [
-  {
-    "lessonId": "0.1",
-    "title": "Welcome to Ship by Sunday",
-    "runtimeLabel": "4-6 min",
-    "goal": "Set the contract: this is for completion, not consumption.",
-    "purpose": "Reset the student's behavior. They need to feel guided, slightly challenged, and clear on what this weekend is actually for.",
-    "suggestedOpeningLines": [
-      "Welcome to Ship by Sunday. This is not designed to be watched. It is designed to be completed.",
-      "I am going to show you what matters, then I am going to tell you to pause and go do the rep.",
-      "By the end of this sprint, you do not need to know everything. You need one finished rep."
-    ],
-    "beatsToCover": [
-      "What this sprint is: structured, on-demand, one focused weekend.",
-      "What this sprint is not: a binge course, a bootcamp, a passive masterclass.",
-      "What they leave with: brief, spec, build, live URL.",
-      "The rule: do not skip ahead, do not hoard theory, do not wait to feel ready."
-    ],
-    "onScreen": [
-      "You on camera.",
-      "Show the 4-block staircase graphic.",
-      "Flash the 4 end artifacts so the finish line feels real."
-    ],
-    "watchouts": [
-      "Do not over-credential yourself here. Keep it crisp.",
-      "Do not explain every block in depth yet; just orient them."
-    ],
-    "suggestedClose": [
-      "Good. Now you know the rules. Next, I will show you the full path so nothing feels mysterious."
-    ],
-    "pausePrompt": {
-      "jobNow": "Create a sprint folder and duplicate the provided templates / worksheets.",
-      "timebox": "10 minutes",
-      "comeBackWith": "A ready workspace with all four worksheets open."
-    }
-  },
-  {
-    "lessonId": "0.2",
-    "title": "How the Sprint Works",
-    "runtimeLabel": "5-7 min",
-    "goal": "Show the sequence and remove uncertainty.",
-    "purpose": "Give them the map before the climb. They should understand why each block exists and what breaks if they rush it.",
-    "suggestedOpeningLines": [
-      "Each block solves a different problem, and each one sets up the next.",
-      "If you half-do the CEO Block, you pay for it in the Build Block.",
-      "This sprint works because we compress the right decisions, not because we cram in more content."
-    ],
-    "beatsToCover": [
-      "CEO Block = choose the problem, customer, and scope.",
-      "Design Block = make the product concrete enough to build.",
-      "Build Block = use AI to implement the core product without spiraling.",
-      "Ship Block = deploy, share, and gather first feedback."
-    ],
-    "onScreen": [
-      "Use the block diagram and put one artifact under each block.",
-      "If possible, show a bad example: vague idea -\\> messy design -\\> confusing build."
-    ],
-    "watchouts": [
-      "Do not let this sound academic. Keep it tactical."
-    ],
-    "suggestedClose": [
-      "Perfect. You know the path. Let's start with the first thing most people mess up: what to build."
-    ],
-    "pausePrompt": {
-      "jobNow": "Skim the 4 worksheets end to end.",
-      "timebox": "5 minutes",
-      "comeBackWith": "A clear sense of what gets produced in each block."
-    }
-  },
-  {
-    "lessonId": "1.1",
-    "title": "Start With the Problem",
-    "runtimeLabel": "6-8 min",
-    "goal": "Get them out of feature-land and into pain-land.",
-    "purpose": "Strong apps start with an annoying, expensive, or emotionally charged problem. Novelty is weaker than pain.",
-    "suggestedOpeningLines": [
-      "Do not start with \"I want to build an AI app.\" Start with \"someone has this painful problem.\"",
-      "Pain creates urgency. Urgency creates value.",
-      "You are hunting for friction, not cleverness."
-    ],
-    "beatsToCover": [
-      "Contrast weak starts with stronger problem statements.",
-      "Explain why personal pain is often the best starting point.",
-      "Give 2-3 examples from your own life or products."
-    ],
-    "onScreen": [
-      "Whiteboard or notepad with 3 weak ideas and 3 stronger problem statements.",
-      "Show your own note-taking pattern if you have one."
-    ],
-    "watchouts": [
-      "Do not let this become startup theory.",
-      "Do not drift into TAM or market size yet."
-    ],
-    "suggestedClose": [
-      "You now have raw material. Next, we are going to choose one user, because vague users create vague products."
-    ],
-    "pausePrompt": {
-      "jobNow": "Write down 3 annoying problems from your life or work that would actually be worth solving.",
-      "timebox": "10 minutes",
-      "comeBackWith": "Three candidate problems."
-    }
-  },
-  {
-    "lessonId": "1.2",
-    "title": "Pick One User",
-    "runtimeLabel": "5-7 min",
-    "goal": "Force specificity and constraint.",
-    "purpose": "The student needs one user in one situation. Broad audiences kill speed.",
-    "suggestedOpeningLines": [
-      "Not everyone. Not the whole market. One real user type in one real moment.",
-      "Specificity is not limiting; it is what lets you build something coherent fast.",
-      "A narrow user is easier to design for, easier to write for, and easier to test."
-    ],
-    "beatsToCover": [
-      "Use the sentence: This app is for \\_\\_\\_ who need \\_\\_\\_ without \\_\\_\\_.",
-      "Show a bad target and tighten it to something usable.",
-      "Explain the difference between a segment and a situation."
-    ],
-    "onScreen": [
-      "Fill the user sentence live on screen.",
-      "If possible, show two variants and explain why one is sharper."
-    ],
-    "watchouts": [
-      "Do not open up multiple personas.",
-      "Do not let them stack three user groups into one app."
-    ],
-    "suggestedClose": [
-      "Good. Now we know who this is for. Next, define what changes for them if this works."
-    ],
-    "pausePrompt": {
-      "jobNow": "Complete the sentence \"This app is for...\" and lock one user.",
-      "timebox": "10 minutes",
-      "comeBackWith": "One clear user statement."
-    }
-  },
-  {
-    "lessonId": "1.3",
-    "title": "Define the Outcome",
-    "runtimeLabel": "5-6 min",
-    "goal": "Translate features into transformation.",
-    "purpose": "Students need to define the promised outcome so the product can be judged by a result, not a pile of features.",
-    "suggestedOpeningLines": [
-      "People buy outcomes, not tools.",
-      "Your app is a machine for creating one better future state.",
-      "If you cannot say the result simply, the product is still foggy."
-    ],
-    "beatsToCover": [
-      "Write one sentence that starts with: After using this, the user can...",
-      "Give weak feature-heavy examples, then rewrite them into outcomes.",
-      "Tie this outcome to what will be shown in the demo later."
-    ],
-    "onScreen": [
-      "Show the before/after of weak vs strong promise lines on screen."
-    ],
-    "watchouts": [
-      "Do not overpromise money or business results.",
-      "Keep the outcome grounded and demonstrable."
-    ],
-    "suggestedClose": [
-      "Now we have the problem, the user, and the outcome. Next, we do just enough research to avoid building blind."
-    ],
-    "pausePrompt": {
-      "jobNow": "Write one user-facing outcome statement.",
-      "timebox": "5 minutes",
-      "comeBackWith": "One clear promised outcome."
-    }
-  },
-  {
-    "lessonId": "1.4",
-    "title": "Light Research, Not a Thesis",
-    "runtimeLabel": "8-10 min",
-    "goal": "Gather signal without disappearing into research hell.",
-    "purpose": "Students need pattern awareness, not a dissertation.",
-    "suggestedOpeningLines": [
-      "You are not writing a market report. You are trying to understand how this gets solved today.",
-      "Look for existing solutions, user complaints, and repeated expectations.",
-      "Borrow patterns. Avoid blind reinvention."
-    ],
-    "beatsToCover": [
-      "Show quick scans of Google, app stores, Reddit, or product sites.",
-      "Capture: what they do well, what they do poorly, what users seem to care about.",
-      "Keep the note format brutally simple."
-    ],
-    "onScreen": [
-      "Screen-share a fast research pass and capture 3 short notes."
-    ],
-    "watchouts": [
-      "Do not let this become competitor paralysis.",
-      "No long rants about strategy books."
-    ],
-    "suggestedClose": [
-      "Good. You have enough signal. Now turn the product into a simple journey."
-    ],
-    "pausePrompt": {
-      "jobNow": "Find 2-3 existing solutions and write down what they do well, badly, and what users seem to care about.",
-      "timebox": "20 minutes",
-      "comeBackWith": "Three short research notes."
-    }
-  },
-  {
-    "lessonId": "1.5",
-    "title": "Map the Core Flow",
-    "runtimeLabel": "7-9 min",
-    "goal": "Turn the app into a 5-7 step user journey.",
-    "purpose": "This is where the product becomes navigable. If they cannot map it, they cannot design or build it cleanly.",
-    "suggestedOpeningLines": [
-      "If you cannot explain the flow in 5 to 7 steps, it is probably too muddy.",
-      "Words and arrows are enough. This is a functional map, not a mural.",
-      "Beginning, middle, end."
-    ],
-    "beatsToCover": [
-      "List actors if needed, but keep it light.",
-      "Write the ending first if that helps.",
-      "Focus on the critical moment where the product actually delivers value."
-    ],
-    "onScreen": [
-      "Draw the flow live with simple boxes and arrows."
-    ],
-    "watchouts": [
-      "Do not add edge cases too early.",
-      "Do not let them map three different products at once."
-    ],
-    "suggestedClose": [
-      "Now we know the path. Last step: cut scope until this can actually ship."
-    ],
-    "pausePrompt": {
-      "jobNow": "Map the core flow in 5-7 steps using only words and arrows.",
-      "timebox": "10 minutes",
-      "comeBackWith": "A simple flow map."
-    }
-  },
-  {
-    "lessonId": "1.6",
-    "title": "Kill Scope",
-    "runtimeLabel": "6-8 min",
-    "goal": "Prevent weekend death by feature creep.",
-    "purpose": "The key behavior here is subtraction.",
-    "suggestedOpeningLines": [
-      "A smaller shipped app beats a larger imaginary one.",
-      "Version one is not supposed to impress everyone. It is supposed to work.",
-      "What has to exist by Sunday? Everything else is later."
-    ],
-    "beatsToCover": [
-      "Split features into: must-have, nice-to-have, definitely-not-now.",
-      "Define what good enough for Sunday means.",
-      "Cut at least three things live."
-    ],
-    "onScreen": [
-      "Show the worksheet being tightened in real time."
-    ],
-    "watchouts": [
-      "Do not let them hide bloat behind future-proofing.",
-      "Keep the win condition explicit."
-    ],
-    "suggestedClose": [
-      "Great. You now have a brief. Next, we turn the idea into something concrete enough to build."
-    ],
-    "pausePrompt": {
-      "jobNow": "Fill out the MVP section and cut at least 3 things.",
-      "timebox": "10 minutes",
-      "comeBackWith": "A tighter MVP scope."
-    }
-  },
-  {
-    "lessonId": "1.7",
-    "title": "CEO Block Wrap-Up",
-    "runtimeLabel": "3-5 min",
-    "goal": "Lock the brief so the next block has real inputs.",
-    "purpose": "This is the handoff from thinking to form.",
-    "suggestedOpeningLines": [
-      "By now, somebody else should be able to understand what you are building in under 60 seconds.",
-      "If the brief is foggy, fix it now. It does not get cheaper later."
-    ],
-    "beatsToCover": [
-      "Review the completed worksheet quickly.",
-      "Point to the problem, user, outcome, flow, and scope."
-    ],
-    "onScreen": [
-      "Show the final one-page brief."
-    ],
-    "watchouts": [
-      "Do not introduce new concepts here."
-    ],
-    "suggestedClose": [
-      "Nice. The app now exists on paper. In the next block, we make it visible."
-    ],
-    "pausePrompt": {
-      "jobNow": "Complete Worksheet 01 fully.",
-      "timebox": "15 minutes",
-      "comeBackWith": "A finished one-page product brief."
-    }
-  },
-  {
-    "lessonId": "2.1",
-    "title": "Find References First",
-    "runtimeLabel": "6-8 min",
-    "goal": "Stop them from inventing from a blank brain.",
-    "purpose": "Use reference gathering to reduce randomness and raise taste quickly.",
-    "suggestedOpeningLines": [
-      "Do not design from a blank brain.",
-      "Steal structure, not identity.",
-      "References compress years of pattern exposure into minutes."
-    ],
-    "beatsToCover": [
-      "Show where you actually look: Mobbin, Spotted in Prod, SaaS sites, apps, whatever you really use.",
-      "Capture both UX flow and visual tone.",
-      "Tell them what to notice: layout, hierarchy, motion, trust cues."
-    ],
-    "onScreen": [
-      "Screen-share a fast reference hunt and drag 3-5 screenshots into one board."
-    ],
-    "watchouts": [
-      "Do not let them scroll forever.",
-      "Do not let this become moodboard cosplay."
-    ],
-    "suggestedClose": [
-      "Good. You have raw visual ingredients. Now sketch the product before software gets involved."
-    ],
-    "pausePrompt": {
-      "jobNow": "Gather 3-5 references close to your desired flow or look.",
-      "timebox": "10 minutes",
-      "comeBackWith": "A mini inspiration board."
-    }
-  },
-  {
-    "lessonId": "2.2",
-    "title": "Sketch Before Software",
-    "runtimeLabel": "7-9 min",
-    "goal": "Get them using paper to remove ambiguity fast.",
-    "purpose": "Sketching is speed. It forces decisions before the build starts lying to you.",
-    "suggestedOpeningLines": [
-      "Paper is still one of the fastest ways to make an app less abstract.",
-      "Ugly sketches are fine. Vague prompts are not.",
-      "You are not making art. You are making decisions."
-    ],
-    "beatsToCover": [
-      "Show boxes, arrows, rough controls, labels.",
-      "Use one core flow and sketch only the important screens.",
-      "If stuck, use a 6-up exercise and make six ugly variants fast."
-    ],
-    "onScreen": [
-      "Overhead camera or a quick paper demo. Keep it raw."
-    ],
-    "watchouts": [
-      "Do not over-teach sketching theory.",
-      "Do not apologize for roughness."
-    ],
-    "suggestedClose": [
-      "Perfect. Now we string these moments into a sequence."
-    ],
-    "pausePrompt": {
-      "jobNow": "Sketch the core screens of your app on paper.",
-      "timebox": "15 minutes",
-      "comeBackWith": "Rough paper sketches of the main screens."
-    }
-  },
-  {
-    "lessonId": "2.3",
-    "title": "Storyboard the Journey",
-    "runtimeLabel": "6-8 min",
-    "goal": "Turn sketches into an ordered experience.",
-    "purpose": "This helps them think in scenes rather than isolated screens.",
-    "suggestedOpeningLines": [
-      "A good storyboard reduces confusion before code starts.",
-      "Products are journeys, not just pages.",
-      "Sequence creates clarity."
-    ],
-    "beatsToCover": [
-      "Start with where the user first encounters the product.",
-      "Move through the key task.",
-      "End on the outcome or completion moment."
-    ],
-    "onScreen": [
-      "Lay the sketches or frames left to right and narrate the user moving through them."
-    ],
-    "watchouts": [
-      "Do not explode into every edge case.",
-      "Keep the spine of the product visible."
-    ],
-    "suggestedClose": [
-      "Now that the flow is clear, let us get just enough Figma under your fingers to move quickly."
-    ],
-    "pausePrompt": {
-      "jobNow": "Lay out the user journey screen by screen.",
-      "timebox": "15 minutes",
-      "comeBackWith": "A storyboard of the experience."
-    }
-  },
-  {
-    "lessonId": "2.4",
-    "title": "Figma Basics for Speed",
-    "runtimeLabel": "8-10 min",
-    "goal": "Remove friction around the tool itself.",
-    "purpose": "Teach only the basics required to survive the sprint.",
-    "suggestedOpeningLines": [
-      "This is not Figma school. This is enough Figma to keep the sprint moving.",
-      "Fluency matters because awkward tools slow decisions.",
-      "Practice beats explanation here."
-    ],
-    "beatsToCover": [
-      "Show frames, move, duplicate, resize, align, and basic layout behavior.",
-      "Demonstrate the hotkeys you actually want them to practice.",
-      "Keep the file simple and repeatable."
-    ],
-    "onScreen": [
-      "Screen-share the provided Figma file and do the hotkeys in rhythm."
-    ],
-    "watchouts": [
-      "Do not show the whole Figma universe.",
-      "Do not drift into auto-layout philosophy unless it directly helps this sprint."
-    ],
-    "suggestedClose": [
-      "Good. Now use the tool to translate the sketches into rough screens."
-    ],
-    "pausePrompt": {
-      "jobNow": "Open the provided Figma file and practice the core hotkeys until they feel less weird.",
-      "timebox": "5 minutes",
-      "comeBackWith": "Basic comfort moving around the file."
-    }
-  },
-  {
-    "lessonId": "2.5",
-    "title": "Turn Sketches Into Rough Screens",
-    "runtimeLabel": "10-12 min",
-    "goal": "Create buildable roughs, not polished comps.",
-    "purpose": "They need just enough fidelity that the build becomes translation instead of guesswork.",
-    "suggestedOpeningLines": [
-      "Your job is clarity, not beauty.",
-      "Rough screens are enough if the hierarchy and flow are obvious.",
-      "AI builds better from concrete screens than from vibes."
-    ],
-    "beatsToCover": [
-      "Build 3-5 key screens only.",
-      "Place content, controls, hierarchy, and basic labels.",
-      "Add small notes where something important needs explaining."
-    ],
-    "onScreen": [
-      "Screen-share the creation of one rough screen from scratch."
-    ],
-    "watchouts": [
-      "Do not chase pixel perfection.",
-      "Keep momentum higher than polish."
-    ],
-    "suggestedClose": [
-      "Now give the product just enough style direction that it stops feeling generic."
-    ],
-    "pausePrompt": {
-      "jobNow": "Create rough versions of your main screens in Figma.",
-      "timebox": "20 minutes",
-      "comeBackWith": "Three to five rough screens."
-    }
-  },
-  {
-    "lessonId": "2.6",
-    "title": "Choose a Visual Direction",
-    "runtimeLabel": "5-7 min",
-    "goal": "Set a simple visual system for the build.",
-    "purpose": "Students need direction, not a giant brand package.",
-    "suggestedOpeningLines": [
-      "You do not need a full brand system. You need a coherent direction.",
-      "Pick a feel, not fifty options.",
-      "A little taste goes a long way when the layout is already clear."
-    ],
-    "beatsToCover": [
-      "Choose one type direction, one spacing feel, one UI vibe.",
-      "Define 3 simple style rules.",
-      "Tie those rules back to the references."
-    ],
-    "onScreen": [
-      "Show quick before/after polish on a rough screen."
-    ],
-    "watchouts": [
-      "Do not teach branding theory for 20 minutes.",
-      "Avoid unnecessary logo talk unless it matters to the flow."
-    ],
-    "suggestedClose": [
-      "Great. The product is now concrete. Next, we turn this into working software."
-    ],
-    "pausePrompt": {
-      "jobNow": "Choose a visual direction and write 3 style rules.",
-      "timebox": "10 minutes",
-      "comeBackWith": "A simple visual direction."
-    }
-  },
-  {
-    "lessonId": "2.7",
-    "title": "Design Block Wrap-Up",
-    "runtimeLabel": "3-5 min",
-    "goal": "Lock the design spec before building begins.",
-    "purpose": "This is the handoff from concept to implementation.",
-    "suggestedOpeningLines": [
-      "When this block is done, building should feel like translation, not guessing.",
-      "If the key screens are unclear, fix them now."
-    ],
-    "beatsToCover": [
-      "Review the reference board, screen list, rough frames, and style rules."
-    ],
-    "onScreen": [
-      "Show the completed design spec / worksheet."
-    ],
-    "watchouts": [
-      "Do not start coding here."
-    ],
-    "suggestedClose": [
-      "Good. The build phase is next. We are done guessing."
-    ],
-    "pausePrompt": {
-      "jobNow": "Complete Worksheet 02 fully.",
-      "timebox": "15 minutes",
-      "comeBackWith": "A finished build-ready design spec."
-    }
-  },
-  {
-    "lessonId": "3.1",
-    "title": "Build From the Brief",
-    "runtimeLabel": "5-7 min",
-    "goal": "Teach them to prompt from clarity, not vibes.",
-    "purpose": "The model is only as useful as the instructions it gets.",
-    "suggestedOpeningLines": [
-      "Do not prompt from vibes. Prompt from clarity.",
-      "Most AI builds fail before the code starts because the product is still foggy.",
-      "Your brief is the build's source of truth."
-    ],
-    "beatsToCover": [
-      "Show the difference between a weak prompt and a strong brief-based prompt.",
-      "Explain what the agent needs: product, user, flow, scope, definition of done."
-    ],
-    "onScreen": [
-      "Paste the brief into an agent template on screen."
-    ],
-    "watchouts": [
-      "Do not ask the model to be creative where accuracy matters.",
-      "Do not overcomplicate the prompt structure."
-    ],
-    "suggestedClose": [
-      "Nice. Now let us get the environment ready so you can actually run the thing."
-    ],
-    "pausePrompt": {
-      "jobNow": "Copy your product brief and design spec into the agent brief template.",
-      "timebox": "10 minutes",
-      "comeBackWith": "A completed agent brief."
-    }
-  },
-  {
-    "lessonId": "3.2",
-    "title": "Set Up the Environment",
-    "runtimeLabel": "8-10 min",
-    "goal": "Get the starter project running without wandering.",
-    "purpose": "Students need one path, one repo, one local success state.",
-    "suggestedOpeningLines": [
-      "Pick one path and move.",
-      "The goal is to see the app running locally, not to become an infrastructure engineer.",
-      "If setup is messy, the rest of the sprint gets emotionally expensive."
-    ],
-    "beatsToCover": [
-      "Open the starter repo.",
-      "Run the commands.",
-      "Show the browser running the local app.",
-      "Point to the minimum folders that matter."
-    ],
-    "onScreen": [
-      "Screen-share terminal + editor + browser."
-    ],
-    "watchouts": [
-      "Do not compare five editors or three deployment providers.",
-      "Avoid rabbit holes on version control unless absolutely necessary."
-    ],
-    "suggestedClose": [
-      "Good. Now you have a running shell. Next, brief the agent the right way."
-    ],
-    "pausePrompt": {
-      "jobNow": "Open the starter project and get it running locally in your browser.",
-      "timebox": "15 minutes",
-      "comeBackWith": "A working local environment."
-    }
-  },
-  {
-    "lessonId": "3.3",
-    "title": "Brief the Agent Correctly",
-    "runtimeLabel": "8-10 min",
-    "goal": "Teach controlled delegation.",
-    "purpose": "The student must learn to direct the model step by step.",
-    "suggestedOpeningLines": [
-      "The model needs constraints, sequence, and a definition of done.",
-      "Ask for one step at a time.",
-      "Review output like a product lead, not a spectator."
-    ],
-    "beatsToCover": [
-      "Show how to request only the first screen or first flow step.",
-      "Show how to correct the agent when it drifts.",
-      "Emphasize iteration over one giant magic prompt."
-    ],
-    "onScreen": [
-      "Real prompting on screen, not fake perfect examples."
-    ],
-    "watchouts": [
-      "Do not imply the first output should be perfect.",
-      "Do not let them ask for the whole app at once."
-    ],
-    "suggestedClose": [
-      "Great. The app has started. Now we build the spine end to end."
-    ],
-    "pausePrompt": {
-      "jobNow": "Use your brief to ask the agent to implement only the first screen or first step of the flow.",
-      "timebox": "15 minutes",
-      "comeBackWith": "The first implemented screen."
-    }
-  },
-  {
-    "lessonId": "3.4",
-    "title": "Build the Core Flow",
-    "runtimeLabel": "12-15 min",
-    "goal": "Implement the main path before edge cases.",
-    "purpose": "This is the heart of the block.",
-    "suggestedOpeningLines": [
-      "Build the spine first.",
-      "One screen at a time. One user path at a time.",
-      "If the core flow works, you are winning."
-    ],
-    "beatsToCover": [
-      "Implement the main user path end to end.",
-      "Check handoff between screens.",
-      "Keep the success state visible."
-    ],
-    "onScreen": [
-      "Show the flow working as it gets stitched together."
-    ],
-    "watchouts": [
-      "Do not chase every edge case.",
-      "Do not drift into architecture theory."
-    ],
-    "suggestedClose": [
-      "Good. Now let us stop bugs from eating the whole weekend."
-    ],
-    "pausePrompt": {
-      "jobNow": "Implement the main user flow end to end.",
-      "timebox": "30-45 minutes",
-      "comeBackWith": "The core product flow working locally."
-    }
-  },
-  {
-    "lessonId": "3.5",
-    "title": "Debug Without Spiraling",
-    "runtimeLabel": "8-10 min",
-    "goal": "Keep them focused on blocker bugs.",
-    "purpose": "This lesson protects morale.",
-    "suggestedOpeningLines": [
-      "Not every bug matters equally.",
-      "Fix the things blocking the core flow first.",
-      "Good enough for Sunday is the standard."
-    ],
-    "beatsToCover": [
-      "Show how to identify blocker bugs vs cosmetic bugs.",
-      "Use the agent to isolate and fix issues.",
-      "Explain what gets left for version two."
-    ],
-    "onScreen": [
-      "Screen-share one or two real bug fixes."
-    ],
-    "watchouts": [
-      "Do not let this turn into a debugging masterclass.",
-      "Stay ruthless about priorities."
-    ],
-    "suggestedClose": [
-      "If the core flow works locally, you are ready to ship."
-    ],
-    "pausePrompt": {
-      "jobNow": "Fix the 1-3 issues blocking your core flow.",
-      "timebox": "20 minutes",
-      "comeBackWith": "An app that works locally from start to finish."
-    }
-  },
-  {
-    "lessonId": "3.6",
-    "title": "Build Block Wrap-Up",
-    "runtimeLabel": "3-5 min",
-    "goal": "Lock the local milestone and prep for deployment.",
-    "purpose": "This is the handoff from local product to public product.",
-    "suggestedOpeningLines": [
-      "By now, the app should work locally even if it is still ugly.",
-      "Ugly and working is enough for the next block."
-    ],
-    "beatsToCover": [
-      "Review the definition of done, blocker fixes, and what still does not matter yet."
-    ],
-    "onScreen": [
-      "Show the local app completing the core flow."
-    ],
-    "watchouts": [
-      "Do not start polishing forever.",
-      "Move them toward deployment."
-    ],
-    "suggestedClose": [
-      "Nice. The product works on your machine. Next, it needs to leave your machine."
-    ],
-    "pausePrompt": {
-      "jobNow": "Complete Worksheet 03 fully.",
-      "timebox": "10 minutes",
-      "comeBackWith": "A working local app and a completed agent brief."
-    }
-  },
-  {
-    "lessonId": "4.1",
-    "title": "Ship the Core, Not the Fantasy",
-    "runtimeLabel": "5-6 min",
-    "goal": "Mentally prepare them to launch imperfect work.",
-    "purpose": "Most students stall here because they compare the current product to the dream product.",
-    "suggestedOpeningLines": [
-      "Ugly and live beats beautiful and trapped.",
-      "Version one is supposed to prove the core, not satisfy every fantasy.",
-      "The question is simple: does the main promise work?"
-    ],
-    "beatsToCover": [
-      "Define the shipping checklist.",
-      "Separate critical from optional.",
-      "Show what good enough to ship looks like."
-    ],
-    "onScreen": [
-      "On screen, make a short ship checklist."
-    ],
-    "watchouts": [
-      "Do not feed perfectionism.",
-      "Do not turn this into brand polish hour."
-    ],
-    "suggestedClose": [
-      "Good. Now we are going to get a URL, because that changes the psychology instantly."
-    ],
-    "pausePrompt": {
-      "jobNow": "Write down what must work before this app is allowed to ship.",
-      "timebox": "5 minutes",
-      "comeBackWith": "A simple ship checklist."
-    }
-  },
-  {
-    "lessonId": "4.2",
-    "title": "Deploy the App",
-    "runtimeLabel": "8-10 min",
-    "goal": "Get the app live fast.",
-    "purpose": "The student needs a public URL, not a deep lesson on infra.",
-    "suggestedOpeningLines": [
-      "The goal is a URL, not infrastructure mastery.",
-      "Pick the simplest deployment path and move.",
-      "Verify the live app immediately."
-    ],
-    "beatsToCover": [
-      "Walk through deployment.",
-      "Show environment variables only if truly needed.",
-      "Test the live URL and the core flow."
-    ],
-    "onScreen": [
-      "Screen-share the deployment start to finish."
-    ],
-    "watchouts": [
-      "Do not compare deployment platforms.",
-      "Keep the energy high once the URL appears."
-    ],
-    "suggestedClose": [
-      "Nice. The app is live. Now make it easier to understand and easier to share."
-    ],
-    "pausePrompt": {
-      "jobNow": "Deploy the app and get a live link.",
-      "timebox": "20 minutes",
-      "comeBackWith": "A live URL."
-    }
-  },
-  {
-    "lessonId": "4.3",
-    "title": "Record a Simple Demo",
-    "runtimeLabel": "5-7 min",
-    "goal": "Create a low-friction asset for sharing.",
-    "purpose": "A short walkthrough makes the app real to other people quickly.",
-    "suggestedOpeningLines": [
-      "A quick demo lowers confusion and increases response rate.",
-      "Show the flow, not your entire worldview.",
-      "Thirty to sixty seconds is enough."
-    ],
-    "beatsToCover": [
-      "Use a simple script: problem, what it does, one core flow, outcome.",
-      "Keep the camera / narration optional if needed."
-    ],
-    "onScreen": [
-      "Record a bare-bones demo on screen."
-    ],
-    "watchouts": [
-      "Do not over-edit.",
-      "Do not turn this into content production class."
-    ],
-    "suggestedClose": [
-      "Good. Now the product is easier to send. Next, actually send it."
-    ],
-    "pausePrompt": {
-      "jobNow": "Record a 30-60 second walkthrough of the core flow.",
-      "timebox": "10 minutes",
-      "comeBackWith": "One demo clip."
-    }
-  },
-  {
-    "lessonId": "4.4",
-    "title": "Send It to Real Humans",
-    "runtimeLabel": "6-8 min",
-    "goal": "Break the fear barrier and start feedback.",
-    "purpose": "This lesson is about courage and momentum, not scale.",
-    "suggestedOpeningLines": [
-      "You do not need fifty users today. You need five real sends.",
-      "Small distribution is still real distribution.",
-      "Feedback starts with exposure."
-    ],
-    "beatsToCover": [
-      "Choose the first 5 people.",
-      "Use a simple outreach message.",
-      "Ask for confusion, friction, and usefulness - not compliments."
-    ],
-    "onScreen": [
-      "Show the send list and the outreach script."
-    ],
-    "watchouts": [
-      "Do not let them delay because they want a perfect landing page.",
-      "Do not ask vague feedback questions."
-    ],
-    "suggestedClose": [
-      "Good. The product is in the world. Last step: capture what happens and choose version two intelligently."
-    ],
-    "pausePrompt": {
-      "jobNow": "Send the app to 5 people using the provided script.",
-      "timebox": "15 minutes",
-      "comeBackWith": "Five real sends."
-    }
-  },
-  {
-    "lessonId": "4.5",
-    "title": "Capture Feedback and Plan Version Two",
-    "runtimeLabel": "6-8 min",
-    "goal": "Turn first responses into direction.",
-    "purpose": "This is where the sprint stops being a one-off and becomes a loop.",
-    "suggestedOpeningLines": [
-      "Feedback is useful when it changes decisions.",
-      "Confusion beats compliments as a signal.",
-      "Version two should be chosen, not guessed."
-    ],
-    "beatsToCover": [
-      "Log the first feedback.",
-      "Sort it into confusion, bugs, and opportunity.",
-      "Choose the top 3 improvements only."
-    ],
-    "onScreen": [
-      "Show a simple feedback tracker and prioritization grid."
-    ],
-    "watchouts": [
-      "Do not let them promise a full roadmap.",
-      "Keep it tight and actionable."
-    ],
-    "suggestedClose": [
-      "That is the loop. You scoped it, designed it, built it, shipped it, and learned from it."
-    ],
-    "pausePrompt": {
-      "jobNow": "Log the first feedback you get and choose the top 3 improvements for version two.",
-      "timebox": "15 minutes",
-      "comeBackWith": "A next-steps list."
-    }
-  },
-  {
-    "lessonId": "4.6",
-    "title": "Final Wrap",
-    "runtimeLabel": "3-5 min",
-    "goal": "Close the identity shift.",
-    "purpose": "The student needs to feel the transformation in behavior, not just the completion of content.",
-    "suggestedOpeningLines": [
-      "Most people never complete a full rep. You did.",
-      "The goal was never to know everything. The goal was to become someone who ships.",
-      "Now do it again with better instincts."
-    ],
-    "beatsToCover": [
-      "Recap the 4 artifacts.",
-      "Name the rep they just finished.",
-      "Invite them to iterate, not disappear."
-    ],
-    "onScreen": [
-      "Show all 4 artifacts side by side: brief, spec, build, live URL."
-    ],
-    "watchouts": [
-      "Do not add new teaching here.",
-      "Make it feel earned and closed."
-    ],
-    "suggestedClose": [
-      "Live beats stuck. Shared beats hidden. Finished beats almost."
-    ],
-    "pausePrompt": {
-      "jobNow": "Review all four worksheets and write down your next iteration date.",
-      "timebox": "10 minutes",
-      "comeBackWith": "A clear plan for version two or the next app."
-    }
-  }
+	{
+		"lessonId": "0.1",
+		"title": "Welcome to Ship by Sunday",
+		"runtimeLabel": "4-6 min",
+		"goal": "Set the contract: this is for completion, not consumption.",
+		"purpose": "Reset the student's behavior. They need to feel guided, slightly challenged, and clear on what this weekend is actually for.",
+		"suggestedOpeningLines": [
+			"Welcome to Ship by Sunday. This is not designed to be watched. It is designed to be completed.",
+			"I am going to show you what matters, then I am going to tell you to pause and go do the rep.",
+			"By the end of this sprint, you do not need to know everything. You need one finished rep."
+		],
+		"beatsToCover": [
+			"What this sprint is: structured, on-demand, one focused weekend.",
+			"What this sprint is not: a binge course, a bootcamp, a passive masterclass.",
+			"What they leave with: brief, spec, build, live URL.",
+			"The rule: do not skip ahead, do not hoard theory, do not wait to feel ready."
+		],
+		"onScreen": [
+			"You on camera.",
+			"Show the 4-block staircase graphic.",
+			"Flash the 4 end artifacts so the finish line feels real."
+		],
+		"watchouts": [
+			"Do not over-credential yourself here. Keep it crisp.",
+			"Do not explain every block in depth yet; just orient them."
+		],
+		"suggestedClose": [
+			"Good. Now you know the rules. Next, I will show you the full path so nothing feels mysterious."
+		],
+		"pausePrompt": {
+			"jobNow": "Create a sprint folder and duplicate the provided templates / worksheets.",
+			"timebox": "10 minutes",
+			"comeBackWith": "A ready workspace with all four worksheets open."
+		}
+	},
+	{
+		"lessonId": "0.2",
+		"title": "How the Sprint Works",
+		"runtimeLabel": "5-7 min",
+		"goal": "Show the sequence and remove uncertainty.",
+		"purpose": "Give them the map before the climb. They should understand why each block exists and what breaks if they rush it.",
+		"suggestedOpeningLines": [
+			"Each block solves a different problem, and each one sets up the next.",
+			"If you half-do the CEO Block, you pay for it in the Build Block.",
+			"This sprint works because we compress the right decisions, not because we cram in more content."
+		],
+		"beatsToCover": [
+			"CEO Block = choose the problem, customer, and scope.",
+			"Design Block = make the product concrete enough to build.",
+			"Build Block = use AI to implement the core product without spiraling.",
+			"Ship Block = deploy, share, and gather first feedback."
+		],
+		"onScreen": [
+			"Use the block diagram and put one artifact under each block.",
+			"If possible, show a bad example: vague idea -\\> messy design -\\> confusing build."
+		],
+		"watchouts": ["Do not let this sound academic. Keep it tactical."],
+		"suggestedClose": [
+			"Perfect. You know the path. Let's start with the first thing most people mess up: what to build."
+		],
+		"pausePrompt": {
+			"jobNow": "Skim the 4 worksheets end to end.",
+			"timebox": "5 minutes",
+			"comeBackWith": "A clear sense of what gets produced in each block."
+		}
+	},
+	{
+		"lessonId": "1.1",
+		"title": "Start With the Problem",
+		"runtimeLabel": "6-8 min",
+		"goal": "Get them out of feature-land and into pain-land.",
+		"purpose": "Strong apps start with an annoying, expensive, or emotionally charged problem. Novelty is weaker than pain.",
+		"suggestedOpeningLines": [
+			"Do not start with \"I want to build an AI app.\" Start with \"someone has this painful problem.\"",
+			"Pain creates urgency. Urgency creates value.",
+			"You are hunting for friction, not cleverness."
+		],
+		"beatsToCover": [
+			"Contrast weak starts with stronger problem statements.",
+			"Explain why personal pain is often the best starting point.",
+			"Give 2-3 examples from your own life or products."
+		],
+		"onScreen": [
+			"Whiteboard or notepad with 3 weak ideas and 3 stronger problem statements.",
+			"Show your own note-taking pattern if you have one."
+		],
+		"watchouts": [
+			"Do not let this become startup theory.",
+			"Do not drift into TAM or market size yet."
+		],
+		"suggestedClose": [
+			"You now have raw material. Next, we are going to choose one user, because vague users create vague products."
+		],
+		"pausePrompt": {
+			"jobNow": "Write down 3 annoying problems from your life or work that would actually be worth solving, and name who has each one.",
+			"timebox": "10 minutes",
+			"comeBackWith": "Three candidate problems."
+		}
+	},
+	{
+		"lessonId": "1.2",
+		"title": "Pick One User",
+		"runtimeLabel": "5-7 min",
+		"goal": "Force specificity and constraint.",
+		"purpose": "The student needs one user in one situation. Broad audiences kill speed.",
+		"suggestedOpeningLines": [
+			"Not everyone. Not the whole market. One real user type in one real moment.",
+			"Specificity is not limiting; it is what lets you build something coherent fast.",
+			"A narrow user is easier to design for, easier to write for, and easier to test."
+		],
+		"beatsToCover": [
+			"Use the sentence: This app is for \\_\\_\\_ who need \\_\\_\\_ without \\_\\_\\_.",
+			"Show a bad target and tighten it to something usable.",
+			"Explain the difference between a segment and a situation."
+		],
+		"onScreen": [
+			"Fill the user sentence live on screen.",
+			"If possible, show two variants and explain why one is sharper."
+		],
+		"watchouts": [
+			"Do not open up multiple personas.",
+			"Do not let them stack three user groups into one app."
+		],
+		"suggestedClose": [
+			"Good. Now we know who this is for. Next, define what changes for them if this works."
+		],
+		"pausePrompt": {
+			"jobNow": "Complete the sentence \"This app is for...\" and lock one user.",
+			"timebox": "10 minutes",
+			"comeBackWith": "One clear user statement."
+		}
+	},
+	{
+		"lessonId": "1.3",
+		"title": "Define the Outcome",
+		"runtimeLabel": "5-6 min",
+		"goal": "Translate features into transformation.",
+		"purpose": "Students need to define the promised outcome so the product can be judged by a result, not a pile of features.",
+		"suggestedOpeningLines": [
+			"People buy outcomes, not tools.",
+			"Your app is a machine for creating one better future state.",
+			"If you cannot say the result simply, the product is still foggy."
+		],
+		"beatsToCover": [
+			"Write one sentence that starts with: After using this, the user can...",
+			"Give weak feature-heavy examples, then rewrite them into outcomes.",
+			"Tie this outcome to what will be shown in the demo later."
+		],
+		"onScreen": [
+			"Show the before/after of weak vs strong promise lines on screen."
+		],
+		"watchouts": [
+			"Do not overpromise money or business results.",
+			"Keep the outcome grounded and demonstrable."
+		],
+		"suggestedClose": [
+			"Now we have the problem, the user, and the outcome. Next, we do just enough research to avoid building blind."
+		],
+		"pausePrompt": {
+			"jobNow": "Write one user-facing outcome statement.",
+			"timebox": "5 minutes",
+			"comeBackWith": "One clear promised outcome."
+		}
+	},
+	{
+		"lessonId": "1.4",
+		"title": "Light Research, Not a Thesis",
+		"runtimeLabel": "8-10 min",
+		"goal": "Gather signal without disappearing into research hell.",
+		"purpose": "Students need pattern awareness, not a dissertation.",
+		"suggestedOpeningLines": [
+			"You are not writing a market report. You are trying to understand how this gets solved today.",
+			"Look for existing solutions, user complaints, and repeated expectations.",
+			"Borrow patterns. Avoid blind reinvention."
+		],
+		"beatsToCover": [
+			"Show quick scans of Google, app stores, Reddit, or product sites.",
+			"Capture: what they do well, what they do poorly, what users seem to care about.",
+			"Keep the note format brutally simple."
+		],
+		"onScreen": [
+			"Screen-share a fast research pass and capture 3 short notes."
+		],
+		"watchouts": [
+			"Do not let this become competitor paralysis.",
+			"No long rants about strategy books."
+		],
+		"suggestedClose": [
+			"Good. You have enough signal. Now turn the product into a simple journey."
+		],
+		"pausePrompt": {
+			"jobNow": "Find 2-3 existing solutions and write down what they do well, badly, and what users seem to care about.",
+			"timebox": "20 minutes",
+			"comeBackWith": "Three short research notes."
+		}
+	},
+	{
+		"lessonId": "1.5",
+		"title": "Map the Core Flow",
+		"runtimeLabel": "7-9 min",
+		"goal": "Turn the app into a 5-7 step user journey.",
+		"purpose": "This is where the product becomes navigable. If they cannot map it, they cannot design or build it cleanly.",
+		"suggestedOpeningLines": [
+			"If you cannot explain the flow in 5 to 7 steps, it is probably too muddy.",
+			"Words and arrows are enough. This is a functional map, not a mural.",
+			"Beginning, middle, end."
+		],
+		"beatsToCover": [
+			"List actors if needed, but keep it light.",
+			"Write the ending first if that helps.",
+			"Focus on the critical moment where the product actually delivers value."
+		],
+		"onScreen": ["Draw the flow live with simple boxes and arrows."],
+		"watchouts": [
+			"Do not add edge cases too early.",
+			"Do not let them map three different products at once."
+		],
+		"suggestedClose": [
+			"Now we know the path. Last step: cut scope until this can actually ship."
+		],
+		"pausePrompt": {
+			"jobNow": "Map the core flow in 5-7 steps using only words and arrows.",
+			"timebox": "10 minutes",
+			"comeBackWith": "A simple flow map."
+		}
+	},
+	{
+		"lessonId": "1.6",
+		"title": "Kill Scope",
+		"runtimeLabel": "6-8 min",
+		"goal": "Prevent weekend death by feature creep.",
+		"purpose": "The key behavior here is subtraction.",
+		"suggestedOpeningLines": [
+			"A smaller shipped app beats a larger imaginary one.",
+			"Version one is not supposed to impress everyone. It is supposed to work.",
+			"What has to exist by Sunday? Everything else is later."
+		],
+		"beatsToCover": [
+			"Split features into: must-have, nice-to-have, definitely-not-now.",
+			"Define what good enough for Sunday means.",
+			"Cut at least three things live."
+		],
+		"onScreen": ["Show the worksheet being tightened in real time."],
+		"watchouts": [
+			"Do not let them hide bloat behind future-proofing.",
+			"Keep the win condition explicit."
+		],
+		"suggestedClose": [
+			"Great. You now have a brief. Next, we turn the idea into something concrete enough to build."
+		],
+		"pausePrompt": {
+			"jobNow": "Fill out the MVP section and cut at least 3 things.",
+			"timebox": "10 minutes",
+			"comeBackWith": "A tighter MVP scope."
+		}
+	},
+	{
+		"lessonId": "1.7",
+		"title": "CEO Block Wrap-Up",
+		"runtimeLabel": "3-5 min",
+		"goal": "Lock the brief so the next block has real inputs.",
+		"purpose": "This is the handoff from thinking to form.",
+		"suggestedOpeningLines": [
+			"By now, somebody else should be able to understand what you are building in under 60 seconds.",
+			"If the brief is foggy, fix it now. It does not get cheaper later."
+		],
+		"beatsToCover": [
+			"Review the completed worksheet quickly.",
+			"Point to the problem, user, outcome, flow, and scope."
+		],
+		"onScreen": ["Show the final one-page brief."],
+		"watchouts": ["Do not introduce new concepts here."],
+		"suggestedClose": [
+			"Nice. The app now exists on paper. In the next block, we make it visible."
+		],
+		"pausePrompt": {
+			"jobNow": "Complete Worksheet 01 fully.",
+			"timebox": "15 minutes",
+			"comeBackWith": "A finished one-page product brief."
+		}
+	},
+	{
+		"lessonId": "2.1",
+		"title": "Find References First",
+		"runtimeLabel": "6-8 min",
+		"goal": "Stop them from inventing from a blank brain.",
+		"purpose": "Use reference gathering to reduce randomness and raise taste quickly.",
+		"suggestedOpeningLines": [
+			"Do not design from a blank brain.",
+			"Steal structure, not identity.",
+			"References compress years of pattern exposure into minutes."
+		],
+		"beatsToCover": [
+			"Show where you actually look: Mobbin, Spotted in Prod, SaaS sites, apps, whatever you really use.",
+			"Capture both UX flow and visual tone.",
+			"Tell them what to notice: layout, hierarchy, motion, trust cues."
+		],
+		"onScreen": [
+			"Screen-share a fast reference hunt and drag 3-5 screenshots into one board."
+		],
+		"watchouts": [
+			"Do not let them scroll forever.",
+			"Do not let this become moodboard cosplay."
+		],
+		"suggestedClose": [
+			"Good. You have raw visual ingredients. Now sketch the product before software gets involved."
+		],
+		"pausePrompt": {
+			"jobNow": "Gather 3-5 references close to your desired flow or look.",
+			"timebox": "10 minutes",
+			"comeBackWith": "A mini inspiration board."
+		}
+	},
+	{
+		"lessonId": "2.2",
+		"title": "Sketch Before Software",
+		"runtimeLabel": "7-9 min",
+		"goal": "Get them using paper to remove ambiguity fast.",
+		"purpose": "Sketching is speed. It forces decisions before the build starts lying to you.",
+		"suggestedOpeningLines": [
+			"Paper is still one of the fastest ways to make an app less abstract.",
+			"Ugly sketches are fine. Vague prompts are not.",
+			"You are not making art. You are making decisions."
+		],
+		"beatsToCover": [
+			"Show boxes, arrows, rough controls, labels.",
+			"Use one core flow and sketch only the important screens.",
+			"If stuck, use a 6-up exercise and make six ugly variants fast."
+		],
+		"onScreen": ["Overhead camera or a quick paper demo. Keep it raw."],
+		"watchouts": [
+			"Do not over-teach sketching theory.",
+			"Do not apologize for roughness."
+		],
+		"suggestedClose": ["Perfect. Now we string these moments into a sequence."],
+		"pausePrompt": {
+			"jobNow": "Sketch the core screens of your app on paper.",
+			"timebox": "15 minutes",
+			"comeBackWith": "Rough paper sketches of the main screens."
+		}
+	},
+	{
+		"lessonId": "2.3",
+		"title": "Storyboard the Journey",
+		"runtimeLabel": "6-8 min",
+		"goal": "Turn sketches into an ordered experience.",
+		"purpose": "This helps them think in scenes rather than isolated screens.",
+		"suggestedOpeningLines": [
+			"A good storyboard reduces confusion before code starts.",
+			"Products are journeys, not just pages.",
+			"Sequence creates clarity."
+		],
+		"beatsToCover": [
+			"Start with where the user first encounters the product.",
+			"Move through the key task.",
+			"End on the outcome or completion moment."
+		],
+		"onScreen": [
+			"Lay the sketches or frames left to right and narrate the user moving through them."
+		],
+		"watchouts": [
+			"Do not explode into every edge case.",
+			"Keep the spine of the product visible."
+		],
+		"suggestedClose": [
+			"Now that the flow is clear, let us get just enough Figma under your fingers to move quickly."
+		],
+		"pausePrompt": {
+			"jobNow": "Lay out the user journey screen by screen.",
+			"timebox": "15 minutes",
+			"comeBackWith": "A storyboard of the experience."
+		}
+	},
+	{
+		"lessonId": "2.4",
+		"title": "Figma Basics for Speed",
+		"runtimeLabel": "8-10 min",
+		"goal": "Remove friction around the tool itself.",
+		"purpose": "Teach only the basics required to survive the sprint.",
+		"suggestedOpeningLines": [
+			"This is not Figma school. This is enough Figma to keep the sprint moving.",
+			"Fluency matters because awkward tools slow decisions.",
+			"Practice beats explanation here."
+		],
+		"beatsToCover": [
+			"Show frames, move, duplicate, resize, align, and basic layout behavior.",
+			"Demonstrate the hotkeys you actually want them to practice.",
+			"Keep the file simple and repeatable."
+		],
+		"onScreen": [
+			"Screen-share the provided Figma file and do the hotkeys in rhythm."
+		],
+		"watchouts": [
+			"Do not show the whole Figma universe.",
+			"Do not drift into auto-layout philosophy unless it directly helps this sprint."
+		],
+		"suggestedClose": [
+			"Good. Now use the tool to translate the sketches into rough screens."
+		],
+		"pausePrompt": {
+			"jobNow": "Open the provided Figma file and practice the core hotkeys until they feel less weird.",
+			"timebox": "5 minutes",
+			"comeBackWith": "Basic comfort moving around the file."
+		}
+	},
+	{
+		"lessonId": "2.5",
+		"title": "Turn Sketches Into Rough Screens",
+		"runtimeLabel": "10-12 min",
+		"goal": "Create buildable roughs, not polished comps.",
+		"purpose": "They need just enough fidelity that the build becomes translation instead of guesswork.",
+		"suggestedOpeningLines": [
+			"Your job is clarity, not beauty.",
+			"Rough screens are enough if the hierarchy and flow are obvious.",
+			"AI builds better from concrete screens than from vibes."
+		],
+		"beatsToCover": [
+			"Build 3-5 key screens only.",
+			"Place content, controls, hierarchy, and basic labels.",
+			"Add small notes where something important needs explaining."
+		],
+		"onScreen": ["Screen-share the creation of one rough screen from scratch."],
+		"watchouts": [
+			"Do not chase pixel perfection.",
+			"Keep momentum higher than polish."
+		],
+		"suggestedClose": [
+			"Now give the product just enough style direction that it stops feeling generic."
+		],
+		"pausePrompt": {
+			"jobNow": "Create rough versions of your main screens in Figma.",
+			"timebox": "20 minutes",
+			"comeBackWith": "Three to five rough screens."
+		}
+	},
+	{
+		"lessonId": "2.6",
+		"title": "Choose a Visual Direction",
+		"runtimeLabel": "5-7 min",
+		"goal": "Set a simple visual system for the build.",
+		"purpose": "Students need direction, not a giant brand package.",
+		"suggestedOpeningLines": [
+			"You do not need a full brand system. You need a coherent direction.",
+			"Pick a feel, not fifty options.",
+			"A little taste goes a long way when the layout is already clear."
+		],
+		"beatsToCover": [
+			"Choose one type direction, one spacing feel, one UI vibe.",
+			"Define 3 simple style rules.",
+			"Tie those rules back to the references."
+		],
+		"onScreen": ["Show quick before/after polish on a rough screen."],
+		"watchouts": [
+			"Do not teach branding theory for 20 minutes.",
+			"Avoid unnecessary logo talk unless it matters to the flow."
+		],
+		"suggestedClose": [
+			"Great. The product is now concrete. Next, we turn this into working software."
+		],
+		"pausePrompt": {
+			"jobNow": "Choose a visual direction and write 3 style rules.",
+			"timebox": "10 minutes",
+			"comeBackWith": "A simple visual direction."
+		}
+	},
+	{
+		"lessonId": "2.7",
+		"title": "Design Block Wrap-Up",
+		"runtimeLabel": "3-5 min",
+		"goal": "Lock the design spec before building begins.",
+		"purpose": "This is the handoff from concept to implementation.",
+		"suggestedOpeningLines": [
+			"When this block is done, building should feel like translation, not guessing.",
+			"If the key screens are unclear, fix them now."
+		],
+		"beatsToCover": [
+			"Review the reference board, screen list, rough frames, and style rules."
+		],
+		"onScreen": ["Show the completed design spec / worksheet."],
+		"watchouts": ["Do not start coding here."],
+		"suggestedClose": ["Good. The build phase is next. We are done guessing."],
+		"pausePrompt": {
+			"jobNow": "Complete Worksheet 02 fully.",
+			"timebox": "15 minutes",
+			"comeBackWith": "A finished build-ready design spec."
+		}
+	},
+	{
+		"lessonId": "3.1",
+		"title": "Build From the Brief",
+		"runtimeLabel": "5-7 min",
+		"goal": "Teach them to prompt from clarity, not vibes.",
+		"purpose": "The model is only as useful as the instructions it gets.",
+		"suggestedOpeningLines": [
+			"Do not prompt from vibes. Prompt from clarity.",
+			"Most AI builds fail before the code starts because the product is still foggy.",
+			"Your brief is the build's source of truth."
+		],
+		"beatsToCover": [
+			"Show the difference between a weak prompt and a strong brief-based prompt.",
+			"Explain what the agent needs: product, user, flow, scope, definition of done."
+		],
+		"onScreen": ["Paste the brief into an agent template on screen."],
+		"watchouts": [
+			"Do not ask the model to be creative where accuracy matters.",
+			"Do not overcomplicate the prompt structure."
+		],
+		"suggestedClose": [
+			"Nice. Now let us get the environment ready so you can actually run the thing."
+		],
+		"pausePrompt": {
+			"jobNow": "Copy your product brief and design spec into the agent brief template.",
+			"timebox": "10 minutes",
+			"comeBackWith": "A completed agent brief."
+		}
+	},
+	{
+		"lessonId": "3.2",
+		"title": "Set Up the Environment",
+		"runtimeLabel": "8-10 min",
+		"goal": "Get the starter project running without wandering.",
+		"purpose": "Students need one path, one repo, one local success state.",
+		"suggestedOpeningLines": [
+			"Pick one path and move.",
+			"The goal is to see the app running locally, not to become an infrastructure engineer.",
+			"If setup is messy, the rest of the sprint gets emotionally expensive."
+		],
+		"beatsToCover": [
+			"Open the starter repo.",
+			"Run the commands.",
+			"Show the browser running the local app.",
+			"Point to the minimum folders that matter."
+		],
+		"onScreen": ["Screen-share terminal + editor + browser."],
+		"watchouts": [
+			"Do not compare five editors or three deployment providers.",
+			"Avoid rabbit holes on version control unless absolutely necessary."
+		],
+		"suggestedClose": [
+			"Good. Now you have a running shell. Next, brief the agent the right way."
+		],
+		"pausePrompt": {
+			"jobNow": "Open the starter project and get it running locally in your browser.",
+			"timebox": "15 minutes",
+			"comeBackWith": "A working local environment."
+		}
+	},
+	{
+		"lessonId": "3.3",
+		"title": "Brief the Agent Correctly",
+		"runtimeLabel": "8-10 min",
+		"goal": "Teach controlled delegation.",
+		"purpose": "The student must learn to direct the model step by step.",
+		"suggestedOpeningLines": [
+			"The model needs constraints, sequence, and a definition of done.",
+			"Ask for one step at a time.",
+			"Review output like a product lead, not a spectator."
+		],
+		"beatsToCover": [
+			"Show how to request only the first screen or first flow step.",
+			"Show how to correct the agent when it drifts.",
+			"Emphasize iteration over one giant magic prompt."
+		],
+		"onScreen": ["Real prompting on screen, not fake perfect examples."],
+		"watchouts": [
+			"Do not imply the first output should be perfect.",
+			"Do not let them ask for the whole app at once."
+		],
+		"suggestedClose": [
+			"Great. The app has started. Now we build the spine end to end."
+		],
+		"pausePrompt": {
+			"jobNow": "Use your brief to ask the agent to implement only the first screen or first step of the flow.",
+			"timebox": "15 minutes",
+			"comeBackWith": "The first implemented screen."
+		}
+	},
+	{
+		"lessonId": "3.4",
+		"title": "Build the Core Flow",
+		"runtimeLabel": "12-15 min",
+		"goal": "Implement the main path before edge cases.",
+		"purpose": "This is the heart of the block.",
+		"suggestedOpeningLines": [
+			"Build the spine first.",
+			"One screen at a time. One user path at a time.",
+			"If the core flow works, you are winning."
+		],
+		"beatsToCover": [
+			"Implement the main user path end to end.",
+			"Check handoff between screens.",
+			"Keep the success state visible."
+		],
+		"onScreen": ["Show the flow working as it gets stitched together."],
+		"watchouts": [
+			"Do not chase every edge case.",
+			"Do not drift into architecture theory."
+		],
+		"suggestedClose": [
+			"Good. Now let us stop bugs from eating the whole weekend."
+		],
+		"pausePrompt": {
+			"jobNow": "Implement the main user flow end to end.",
+			"timebox": "30-45 minutes",
+			"comeBackWith": "The core product flow working locally."
+		}
+	},
+	{
+		"lessonId": "3.5",
+		"title": "Debug Without Spiraling",
+		"runtimeLabel": "8-10 min",
+		"goal": "Keep them focused on blocker bugs.",
+		"purpose": "This lesson protects morale.",
+		"suggestedOpeningLines": [
+			"Not every bug matters equally.",
+			"Fix the things blocking the core flow first.",
+			"Good enough for Sunday is the standard."
+		],
+		"beatsToCover": [
+			"Show how to identify blocker bugs vs cosmetic bugs.",
+			"Use the agent to isolate and fix issues.",
+			"Explain what gets left for version two."
+		],
+		"onScreen": ["Screen-share one or two real bug fixes."],
+		"watchouts": [
+			"Do not let this turn into a debugging masterclass.",
+			"Stay ruthless about priorities."
+		],
+		"suggestedClose": [
+			"If the core flow works locally, you are ready to ship."
+		],
+		"pausePrompt": {
+			"jobNow": "Fix the 1-3 issues blocking your core flow.",
+			"timebox": "20 minutes",
+			"comeBackWith": "An app that works locally from start to finish."
+		}
+	},
+	{
+		"lessonId": "3.6",
+		"title": "Build Block Wrap-Up",
+		"runtimeLabel": "3-5 min",
+		"goal": "Lock the local milestone and prep for deployment.",
+		"purpose": "This is the handoff from local product to public product.",
+		"suggestedOpeningLines": [
+			"By now, the app should work locally even if it is still ugly.",
+			"Ugly and working is enough for the next block."
+		],
+		"beatsToCover": [
+			"Review the definition of done, blocker fixes, and what still does not matter yet."
+		],
+		"onScreen": ["Show the local app completing the core flow."],
+		"watchouts": [
+			"Do not start polishing forever.",
+			"Move them toward deployment."
+		],
+		"suggestedClose": [
+			"Nice. The product works on your machine. Next, it needs to leave your machine."
+		],
+		"pausePrompt": {
+			"jobNow": "Complete Worksheet 03 fully.",
+			"timebox": "10 minutes",
+			"comeBackWith": "A working local app and a completed agent brief."
+		}
+	},
+	{
+		"lessonId": "4.1",
+		"title": "Ship the Core, Not the Fantasy",
+		"runtimeLabel": "5-6 min",
+		"goal": "Mentally prepare them to launch imperfect work.",
+		"purpose": "Most students stall here because they compare the current product to the dream product.",
+		"suggestedOpeningLines": [
+			"Ugly and live beats beautiful and trapped.",
+			"Version one is supposed to prove the core, not satisfy every fantasy.",
+			"The question is simple: does the main promise work?"
+		],
+		"beatsToCover": [
+			"Define the shipping checklist.",
+			"Separate critical from optional.",
+			"Show what good enough to ship looks like."
+		],
+		"onScreen": ["On screen, make a short ship checklist."],
+		"watchouts": [
+			"Do not feed perfectionism.",
+			"Do not turn this into brand polish hour."
+		],
+		"suggestedClose": [
+			"Good. Now we are going to get a URL, because that changes the psychology instantly."
+		],
+		"pausePrompt": {
+			"jobNow": "Write down what must work before this app is allowed to ship.",
+			"timebox": "5 minutes",
+			"comeBackWith": "A simple ship checklist."
+		}
+	},
+	{
+		"lessonId": "4.2",
+		"title": "Deploy the App",
+		"runtimeLabel": "8-10 min",
+		"goal": "Get the app live fast.",
+		"purpose": "The student needs a public URL, not a deep lesson on infra.",
+		"suggestedOpeningLines": [
+			"The goal is a URL, not infrastructure mastery.",
+			"Pick the simplest deployment path and move.",
+			"Verify the live app immediately."
+		],
+		"beatsToCover": [
+			"Walk through deployment.",
+			"Show environment variables only if truly needed.",
+			"Test the live URL and the core flow."
+		],
+		"onScreen": ["Screen-share the deployment start to finish."],
+		"watchouts": [
+			"Do not compare deployment platforms.",
+			"Keep the energy high once the URL appears."
+		],
+		"suggestedClose": [
+			"Nice. The app is live. Now make it easier to understand and easier to share."
+		],
+		"pausePrompt": {
+			"jobNow": "Deploy the app and get a live link.",
+			"timebox": "20 minutes",
+			"comeBackWith": "A live URL."
+		}
+	},
+	{
+		"lessonId": "4.3",
+		"title": "Record a Simple Demo",
+		"runtimeLabel": "5-7 min",
+		"goal": "Create a low-friction asset for sharing.",
+		"purpose": "A short walkthrough makes the app real to other people quickly.",
+		"suggestedOpeningLines": [
+			"A quick demo lowers confusion and increases response rate.",
+			"Show the flow, not your entire worldview.",
+			"Thirty to sixty seconds is enough."
+		],
+		"beatsToCover": [
+			"Use a simple script: problem, what it does, one core flow, outcome.",
+			"Keep the camera / narration optional if needed."
+		],
+		"onScreen": ["Record a bare-bones demo on screen."],
+		"watchouts": [
+			"Do not over-edit.",
+			"Do not turn this into content production class."
+		],
+		"suggestedClose": [
+			"Good. Now the product is easier to send. Next, actually send it."
+		],
+		"pausePrompt": {
+			"jobNow": "Record a 30-60 second walkthrough of the core flow.",
+			"timebox": "10 minutes",
+			"comeBackWith": "One demo clip."
+		}
+	},
+	{
+		"lessonId": "4.4",
+		"title": "Send It to Real Humans",
+		"runtimeLabel": "6-8 min",
+		"goal": "Break the fear barrier and start feedback.",
+		"purpose": "This lesson is about courage and momentum, not scale.",
+		"suggestedOpeningLines": [
+			"You do not need fifty users today. You need five real sends.",
+			"Small distribution is still real distribution.",
+			"Feedback starts with exposure."
+		],
+		"beatsToCover": [
+			"Choose the first 5 people.",
+			"Use a simple outreach message.",
+			"Ask for confusion, friction, and usefulness - not compliments."
+		],
+		"onScreen": ["Show the send list and the outreach script."],
+		"watchouts": [
+			"Do not let them delay because they want a perfect landing page.",
+			"Do not ask vague feedback questions."
+		],
+		"suggestedClose": [
+			"Good. The product is in the world. Last step: capture what happens and choose version two intelligently."
+		],
+		"pausePrompt": {
+			"jobNow": "Send the app to 5 people using the provided script.",
+			"timebox": "15 minutes",
+			"comeBackWith": "Five real sends."
+		}
+	},
+	{
+		"lessonId": "4.5",
+		"title": "Capture Feedback and Plan Version Two",
+		"runtimeLabel": "6-8 min",
+		"goal": "Turn first responses into direction.",
+		"purpose": "This is where the sprint stops being a one-off and becomes a loop.",
+		"suggestedOpeningLines": [
+			"Feedback is useful when it changes decisions.",
+			"Confusion beats compliments as a signal.",
+			"Version two should be chosen, not guessed."
+		],
+		"beatsToCover": [
+			"Log the first feedback.",
+			"Sort it into confusion, bugs, and opportunity.",
+			"Choose the top 3 improvements only."
+		],
+		"onScreen": ["Show a simple feedback tracker and prioritization grid."],
+		"watchouts": [
+			"Do not let them promise a full roadmap.",
+			"Keep it tight and actionable."
+		],
+		"suggestedClose": [
+			"That is the loop. You scoped it, designed it, built it, shipped it, and learned from it."
+		],
+		"pausePrompt": {
+			"jobNow": "Log the first feedback you get and choose the top 3 improvements for version two.",
+			"timebox": "15 minutes",
+			"comeBackWith": "A next-steps list."
+		}
+	},
+	{
+		"lessonId": "4.6",
+		"title": "Final Wrap",
+		"runtimeLabel": "3-5 min",
+		"goal": "Close the identity shift.",
+		"purpose": "The student needs to feel the transformation in behavior, not just the completion of content.",
+		"suggestedOpeningLines": [
+			"Most people never complete a full rep. You did.",
+			"The goal was never to know everything. The goal was to become someone who ships.",
+			"Now do it again with better instincts."
+		],
+		"beatsToCover": [
+			"Recap the 4 artifacts.",
+			"Name the rep they just finished.",
+			"Invite them to iterate, not disappear."
+		],
+		"onScreen": [
+			"Show all 4 artifacts side by side: brief, spec, build, live URL."
+		],
+		"watchouts": [
+			"Do not add new teaching here.",
+			"Make it feel earned and closed."
+		],
+		"suggestedClose": [
+			"Live beats stuck. Shared beats hidden. Finished beats almost."
+		],
+		"pausePrompt": {
+			"jobNow": "Review all four worksheets and write down your next iteration date.",
+			"timebox": "10 minutes",
+			"comeBackWith": "A clear plan for version two or the next app."
+		}
+	}
 ]
