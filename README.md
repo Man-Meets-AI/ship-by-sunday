@@ -53,8 +53,10 @@ pnpm run check
 - Public marketing lives in `app/`
 - Protected product routes are `/mission`, `/lesson/[lessonId]`, `/artifacts`, `/settings`, and `/access-required`
 - Shared course-domain logic lives in `lib/course/`
-- Lesson content modules live in `content/lessons/`
+- Manual lesson definitions and student-facing lesson content live in `lib/course/lessons/`
+- Lesson pages resolve static lesson definitions locally from `lib/course`
 - Convex functions live in `convex/`
+- Convex stores dynamic course state only: entitlements, progress, uploads, and hydrated lesson draft data
 
 The buyer path is:
 
