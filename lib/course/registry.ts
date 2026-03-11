@@ -8,7 +8,7 @@ import {
 	type LessonConfig,
 	type UploadFieldValue,
 	type WorkbenchField,
-} from "../../app/lessonRegistry";
+} from "./manifest";
 
 export const COURSE_SLUG = "ship-by-sunday";
 
@@ -27,12 +27,21 @@ export const SUPPORTED_FIELD_KINDS = new Set<WorkbenchField["kind"]>([
 	"readonly",
 ]);
 
-const LESSONS_BY_ID = new Map(lessonRegistry.map((lesson) => [lesson.id, lesson]));
+const LESSONS_BY_ID = new Map(
+	lessonRegistry.map((lesson) => [lesson.id, lesson]),
+);
 const LESSONS_BY_ARTIFACT_KEY = new Map(
 	lessonRegistry.map((lesson) => [lesson.artifact.key, lesson]),
 );
 const BLOCKS_BY_ID = new Map(blocks.map((block) => [block.id, block]));
 export const PRIVATE_FIELD_PREFIX = "__";
+export const OBJECTIVE_CHECKLIST_FIELD_ID = `${PRIVATE_FIELD_PREFIX}objectiveChecklist`;
+
+export type CompletionIssue = {
+	id: string;
+	label: string;
+	kind: "field" | "objective";
+};
 
 export type PersistedFieldValue =
 	| boolean
@@ -57,7 +66,9 @@ export function isUploadFieldValue(value: unknown): value is UploadFieldValue {
 	);
 }
 
-export function isChecklistItemArray(value: unknown): value is ChecklistItemValue[] {
+export function isChecklistItemArray(
+	value: unknown,
+): value is ChecklistItemValue[] {
 	return (
 		Array.isArray(value) &&
 		value.every(
@@ -73,6 +84,14 @@ export function isChecklistItemArray(value: unknown): value is ChecklistItemValu
 
 export function getOrderedLessons() {
 	return [...lessonRegistry].sort((left, right) => left.order - right.order);
+}
+
+export function isStudentFacingLesson(lesson: LessonConfig) {
+	return lesson.id !== "0.0";
+}
+
+export function getStudentFacingLessons() {
+	return getOrderedLessons().filter(isStudentFacingLesson);
 }
 
 export function getOrderedBlocks() {
@@ -158,19 +177,64 @@ export function validateRequiredFields(
 	lesson: LessonConfig,
 	fieldValues: PersistedFieldValues,
 ) {
-	return getRequiredFields(lesson).every((field) => {
+	return getCompletionIssues(lesson, fieldValues).length === 0;
+}
+
+export function getCompletionIssues(
+	lesson: LessonConfig,
+	fieldValues: PersistedFieldValues,
+) {
+	const issues: CompletionIssue[] = [];
+
+	for (const field of getRequiredFields(lesson)) {
 		const value = fieldValues[field.id];
 
 		if (field.kind === "checklist") {
-			return (
+			const checklistIsComplete =
 				isChecklistItemArray(value) &&
 				value.length > 0 &&
-				value.every((item) => item.checked)
-			);
+				value.every((item) => item.checked);
+
+			if (!checklistIsComplete) {
+				issues.push({
+					id: field.id,
+					label: field.label,
+					kind: "field",
+				});
+			}
+			continue;
 		}
 
-		return isFilled(value);
+		if (!isFilled(value)) {
+			issues.push({
+				id: field.id,
+				label: field.label,
+				kind: "field",
+			});
+		}
+	}
+
+	const objectiveValue = fieldValues[OBJECTIVE_CHECKLIST_FIELD_ID];
+	const objectiveItems = lesson.checklist.map((label) => {
+		const existing = isChecklistItemArray(objectiveValue)
+			? objectiveValue.find((item) => item.label === label)
+			: undefined;
+
+		return {
+			label,
+			checked: existing?.checked ?? false,
+		};
 	});
+
+	for (const item of objectiveItems.filter((item) => !item.checked)) {
+		issues.push({
+			id: OBJECTIVE_CHECKLIST_FIELD_ID,
+			label: item.label,
+			kind: "objective",
+		});
+	}
+
+	return issues;
 }
 
 export function normalizeFieldValues(
@@ -218,6 +282,8 @@ export function buildArtifactPreview(
 		artifactType: lesson.artifact.type as ArtifactType,
 		lessonId: lesson.id,
 		lessonTitle: lesson.title,
-		fields: nonEmptyEntries.filter(([fieldId]) => !fieldId.startsWith(PRIVATE_FIELD_PREFIX)),
+		fields: nonEmptyEntries.filter(
+			([fieldId]) => !fieldId.startsWith(PRIVATE_FIELD_PREFIX),
+		),
 	};
 }

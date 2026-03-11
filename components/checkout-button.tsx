@@ -33,9 +33,10 @@ export function CheckoutButton({
 			const response = await fetch("/api/stripe/checkout", {
 				method: "POST",
 			});
-			const data = (await response.json().catch(() => null)) as
-				| { error?: string; url?: string }
-				| null;
+			const data = (await response.json().catch(() => null)) as {
+				error?: string;
+				url?: string;
+			} | null;
 
 			if (response.status === 401) {
 				router.push(

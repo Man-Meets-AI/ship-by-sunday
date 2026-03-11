@@ -7,24 +7,24 @@ import { ConvexClientProvider } from "@/components/convex-client-provider";
 import "./globals.css";
 
 const display = Bebas_Neue({
-  variable: "--font-display",
-  subsets: ["latin"],
-  weight: "400"
+	variable: "--font-display",
+	subsets: ["latin"],
+	weight: "400",
 });
 
 const sans = Manrope({
-  variable: "--font-sans",
-  subsets: ["latin"]
+	variable: "--font-sans",
+	subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "Ship by Sunday",
-  description:
-    "Go from idea to v1 this weekend with an action-first system for engineers who want to stop circling unfinished ideas."
+	title: "Ship by Sunday",
+	description:
+		"Go from idea to v1 this weekend with an action-first system for engineers who want to stop circling unfinished ideas.",
 };
 
 export default function RootLayout({
-	children
+	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {

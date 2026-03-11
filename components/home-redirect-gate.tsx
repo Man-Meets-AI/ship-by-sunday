@@ -28,19 +28,34 @@ export function HomeRedirectGate({
 		| undefined;
 
 	useEffect(() => {
-		if (!isLoaded || !userId || allowMarketing || !access?.hasAccess || !resume?.destination) {
+		if (
+			!isLoaded ||
+			!userId ||
+			allowMarketing ||
+			!access?.hasAccess ||
+			!resume?.destination
+		) {
 			return;
 		}
 
 		router.replace(resume.destination);
-	}, [access?.hasAccess, allowMarketing, isLoaded, resume?.destination, router, userId]);
+	}, [
+		access?.hasAccess,
+		allowMarketing,
+		isLoaded,
+		resume?.destination,
+		router,
+		userId,
+	]);
 
 	if (!isLoaded) {
 		return (
 			<main className="bg-paper text-ink">
 				<div className="mx-auto flex min-h-screen max-w-[1280px] items-center justify-center px-3 py-3 sm:px-5 sm:py-5">
 					<section className="border border-line bg-white px-6 py-10 text-center shadow-card">
-						<p className="font-display text-4xl uppercase tracking-[0.04em]">Loading</p>
+						<p className="font-display text-4xl uppercase tracking-[0.04em]">
+							Loading
+						</p>
 						<p className="mt-3 text-sm font-medium text-ink/70">
 							Checking whether you should resume the product.
 						</p>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useConvexAuth, useQuery } from "convex/react";
 
-import { getLessonHref } from "@/app/lessonRegistry";
+import { getLessonHref } from "@/lib/course/manifest";
 import { api } from "@/convex/_generated/api";
 import { ProductShell } from "@/components/product-shell";
 import { ViewerGate } from "@/components/viewer-gate";
@@ -29,7 +29,9 @@ export function ArtifactsPage() {
 		>
 			<ViewerGate>
 				<section className="rounded-none border border-product-border bg-product-surface/78 p-5 shadow-panel backdrop-blur-xl">
-					<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">Completed outputs</p>
+					<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+						Completed outputs
+					</p>
 					{artifacts === undefined ? (
 						<p className="mt-4 text-sm font-medium text-product-muted">
 							Loading your saved work.

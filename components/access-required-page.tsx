@@ -30,13 +30,15 @@ export function AccessRequiredPage() {
 			subtitle="This account can sign in, but it does not have course access yet."
 		>
 			<section className="rounded-none border border-product-border bg-product-surface/78 p-6 shadow-panel backdrop-blur-xl">
-				<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">Account access</p>
+				<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+					Account access
+				</p>
 				<p className="mt-3 font-display text-4xl uppercase leading-none tracking-[0.08em] text-product-text">
 					{access === undefined ? "Checking" : "No active access"}
 				</p>
 				<p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-product-muted">
-					If you have not bought Ship by Sunday yet, use the button below. If you
-					just checked out, wait a few seconds and open Mission again.
+					If you have not bought Ship by Sunday yet, use the button below. If
+					you just checked out, wait a few seconds and open Mission again.
 				</p>
 
 				<div className="mt-6 flex flex-wrap gap-3">

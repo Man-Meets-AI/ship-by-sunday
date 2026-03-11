@@ -9,7 +9,7 @@ import {
 	getLessonHref,
 	type ChecklistItemValue,
 	type LessonConfig,
-} from "@/app/lessonRegistry";
+} from "@/lib/course/manifest";
 import type { LessonContent } from "@/content/lessons/types";
 import { api } from "@/convex/_generated/api";
 import { WorkbenchRenderer } from "@/components/lesson-workbench";
@@ -20,13 +20,15 @@ import {
 } from "@/components/lesson-shells";
 import { ProductShell } from "@/components/product-shell";
 import { ViewerGate } from "@/components/viewer-gate";
-import { isChecklistItemArray } from "@/lib/course/registry";
-
-const OBJECTIVE_CHECKLIST_FIELD_ID = "__objectiveChecklist";
+import {
+	getCompletionIssues,
+	isChecklistItemArray,
+	OBJECTIVE_CHECKLIST_FIELD_ID,
+	type CompletionIssue,
+} from "@/lib/course/registry";
 
 type LessonChromeState = {
 	layoutMode: "split" | "focus";
-	objectiveCollapsed: boolean;
 	coachVisible: boolean;
 	activeCoachPanel: "watch" | "transcript" | "examples" | "resources";
 };
@@ -48,7 +50,42 @@ type LockedLessonState = {
 	requiredLessonId: string | null;
 };
 
-function getDefaultCoachPanel(lesson: LessonConfig): LessonChromeState["activeCoachPanel"] {
+type CompletionErrorData = {
+	code: "INCOMPLETE_LESSON";
+	message: string;
+	issues?: CompletionIssue[];
+};
+
+function getCompletionErrorData(error: unknown): CompletionErrorData | null {
+	if (!error || typeof error !== "object" || !("data" in error)) {
+		return null;
+	}
+
+	const data = (error as { data?: unknown }).data;
+	if (!data || typeof data !== "object") {
+		return null;
+	}
+
+	const candidate = data as Partial<CompletionErrorData>;
+	if (candidate.code !== "INCOMPLETE_LESSON") {
+		return null;
+	}
+
+	return {
+		code: "INCOMPLETE_LESSON",
+		message:
+			typeof candidate.message === "string"
+				? candidate.message
+				: "Finish the required work before continuing.",
+		issues: Array.isArray(candidate.issues)
+			? (candidate.issues as CompletionIssue[])
+			: [],
+	};
+}
+
+function getDefaultCoachPanel(
+	lesson: LessonConfig,
+): LessonChromeState["activeCoachPanel"] {
 	if (lesson.panelDefaults.transcript === "open") return "transcript";
 	if (lesson.panelDefaults.examples === "open") return "examples";
 	if (lesson.panelDefaults.resources === "open") return "resources";
@@ -58,7 +95,6 @@ function getDefaultCoachPanel(lesson: LessonConfig): LessonChromeState["activeCo
 function getDefaultChromeState(lesson: LessonConfig): LessonChromeState {
 	return {
 		layoutMode: lesson.shell === "focus" ? "focus" : "split",
-		objectiveCollapsed: lesson.panelDefaults.objective === "collapsed",
 		coachVisible: lesson.panelDefaults.coach !== "minimized",
 		activeCoachPanel: getDefaultCoachPanel(lesson),
 	};
@@ -96,7 +132,6 @@ function isChromeState(value: unknown): value is LessonChromeState {
 	const candidate = value as Partial<LessonChromeState>;
 	return (
 		(candidate.layoutMode === "split" || candidate.layoutMode === "focus") &&
-		typeof candidate.objectiveCollapsed === "boolean" &&
 		typeof candidate.coachVisible === "boolean" &&
 		(candidate.activeCoachPanel === "watch" ||
 			candidate.activeCoachPanel === "transcript" ||
@@ -122,10 +157,19 @@ export function LessonPage({
 	const saveLessonDraft = useMutation(api.course.saveLessonDraft);
 	const completeLesson = useMutation(api.course.completeLesson);
 	const [fieldValues, setFieldValues] = useState<Record<string, unknown>>({});
-	const [saveStatus, setSaveStatus] = useState<"idle" | "saved" | "saving" | "error">(
-		"idle",
+	const [saveStatus, setSaveStatus] = useState<
+		"idle" | "saved" | "saving" | "error"
+	>("idle");
+	const [completionAttempted, setCompletionAttempted] = useState(false);
+	const [serverCompletionIssues, setServerCompletionIssues] = useState<
+		CompletionIssue[]
+	>([]);
+	const [serverCompletionMessage, setServerCompletionMessage] = useState<
+		string | null
+	>(null);
+	const [chromeState, setChromeState] = useState<LessonChromeState | null>(
+		null,
 	);
-	const [chromeState, setChromeState] = useState<LessonChromeState | null>(null);
 	const initializedForLessonId = useRef<string | null>(null);
 	const lastMarkedLessonId = useRef<string | null>(null);
 	const lastSavedSnapshot = useRef("");
@@ -141,6 +185,9 @@ export function LessonPage({
 			initializedForLessonId.current = lessonId;
 			lastSavedSnapshot.current = JSON.stringify(nextValues);
 			setSaveStatus("idle");
+			setCompletionAttempted(false);
+			setServerCompletionIssues([]);
+			setServerCompletionMessage(null);
 		}
 	}, [lessonId, lessonState]);
 
@@ -169,7 +216,10 @@ export function LessonPage({
 			return;
 		}
 
-		window.localStorage.setItem(storageKey(lessonId), JSON.stringify(chromeState));
+		window.localStorage.setItem(
+			storageKey(lessonId),
+			JSON.stringify(chromeState),
+		);
 	}, [chromeState, lessonId]);
 
 	useEffect(() => {
@@ -220,11 +270,11 @@ export function LessonPage({
 		return (
 			<ProductShell currentLessonId={lessonId}>
 				<ViewerGate>
-					<section className="rounded-none border border-product-border bg-product-surface/78 px-5 py-10 text-center shadow-panel backdrop-blur-xl">
+					<section className="rounded-none border border-product-border bg-product-surface/78 px-4 py-6 text-center shadow-panel backdrop-blur-xl">
 						<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
 							Loading lesson
 						</p>
-						<p className="mt-4 font-display text-4xl uppercase tracking-[0.08em] text-product-text">
+						<p className="mt-2 font-display text-xl uppercase tracking-[0.08em] text-product-text">
 							Loading
 						</p>
 					</section>
@@ -237,16 +287,17 @@ export function LessonPage({
 		return (
 			<ProductShell currentLessonId={lessonId}>
 				<ViewerGate>
-					<section className="rounded-none border border-product-border bg-product-surface/78 px-5 py-10 text-center shadow-panel backdrop-blur-xl">
+					<section className="rounded-none border border-product-border bg-product-surface/78 px-4 py-6 text-center shadow-panel backdrop-blur-xl">
 						<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
 							Lesson locked
 						</p>
-						<p className="mt-4 font-display text-4xl uppercase tracking-[0.08em] text-product-text">
+						<p className="mt-2 font-display text-xl uppercase tracking-[0.08em] text-product-text">
 							{lessonState.lessonId} {lessonState.shortTitle}
 						</p>
 						<p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-product-muted sm:mx-auto">
 							This lesson is locked. Go back to the mission map and finish{" "}
-							{lessonState.requiredLessonId ?? "the previous unlocked lesson"} first.
+							{lessonState.requiredLessonId ?? "the previous unlocked lesson"}{" "}
+							first.
 						</p>
 						<div className="mt-6 flex flex-wrap justify-center gap-3">
 							<button
@@ -273,11 +324,11 @@ export function LessonPage({
 		return (
 			<ProductShell currentLessonId={lessonId}>
 				<ViewerGate>
-					<section className="rounded-none border border-product-border bg-product-surface/78 px-5 py-10 text-center shadow-panel backdrop-blur-xl">
+					<section className="rounded-none border border-product-border bg-product-surface/78 px-4 py-6 text-center shadow-panel backdrop-blur-xl">
 						<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
 							Loading lesson
 						</p>
-						<p className="mt-4 font-display text-4xl uppercase tracking-[0.08em] text-product-text">
+						<p className="mt-2 font-display text-xl uppercase tracking-[0.08em] text-product-text">
 							Loading
 						</p>
 					</section>
@@ -287,13 +338,33 @@ export function LessonPage({
 	}
 
 	const { lesson, pinnedArtifacts } = lessonState;
-	const previousHref = lesson.prevLessonId ? getLessonHref(lesson.prevLessonId) : null;
+	const previousHref = lesson.prevLessonId
+		? getLessonHref(lesson.prevLessonId)
+		: null;
 	const objectiveChecklistItems = normalizeObjectiveChecklist(
 		lesson.checklist,
 		fieldValues[OBJECTIVE_CHECKLIST_FIELD_ID],
 	);
+	const completionIssues = getCompletionIssues(lesson, fieldValues as any);
+	const displayedCompletionIssues =
+		completionIssues.length > 0 ? completionIssues : serverCompletionIssues;
+	const invalidFieldIds = new Set(
+		displayedCompletionIssues
+			.filter((issue) => issue.kind === "field")
+			.map((issue) => issue.id),
+	);
+	const showCompletionFeedback =
+		completionAttempted &&
+		(displayedCompletionIssues.length > 0 || Boolean(serverCompletionMessage));
 
 	const setValue = (fieldId: string, value: unknown) => {
+		if (serverCompletionIssues.length > 0) {
+			setServerCompletionIssues([]);
+		}
+		if (serverCompletionMessage) {
+			setServerCompletionMessage(null);
+		}
+
 		setFieldValues((current) => ({
 			...current,
 			[fieldId]: value,
@@ -301,16 +372,27 @@ export function LessonPage({
 	};
 
 	const footer = (
-		<div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-			<div className="text-sm font-medium text-product-muted">
-				Status: {lessonState.status.replace("_", " ")}. Autosave:{" "}
-				{saveStatus === "idle" ? "ready" : saveStatus}.
-			</div>
-			<div className="flex flex-wrap gap-3">
+		<div className="flex flex-col gap-2 lg:flex-row lg:items-start">
+			{showCompletionFeedback ? (
+				<div className="max-w-2xl text-xs font-medium leading-relaxed text-[#a83232]">
+					<p>
+						{serverCompletionMessage ??
+							"Finish these before continuing:"}
+					</p>
+					{displayedCompletionIssues.length > 0 ? (
+						<p className="mt-1">
+							{displayedCompletionIssues
+								.map((issue) => issue.label)
+								.join(" • ")}
+						</p>
+					) : null}
+				</div>
+			) : null}
+			<div className="flex flex-wrap justify-end gap-2 lg:ml-auto">
 				{previousHref ? (
 					<Link
 						href={previousHref}
-						className="rounded-none border border-product-border bg-product-surface px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-text transition-colors hover:bg-product-surface-alt"
+						className="px-1 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted transition-colors hover:text-product-text"
 					>
 						Back
 					</Link>
@@ -318,26 +400,17 @@ export function LessonPage({
 				<button
 					type="button"
 					onClick={() => {
-						setSaveStatus("saving");
-						void saveLessonDraft({ lessonId, fieldValues }).then(
-							() => {
-								lastSavedSnapshot.current = JSON.stringify(fieldValues);
-								setSaveStatus("saved");
-							},
-							() => {
-								setSaveStatus("error");
-							},
-						);
-					}}
-					className="rounded-none border border-product-border bg-product-surface px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-text transition-colors hover:bg-product-surface-alt"
-				>
-					Save draft
-				</button>
-				<button
-					type="button"
-					onClick={() => {
+						setCompletionAttempted(true);
+						setServerCompletionIssues([]);
+						setServerCompletionMessage(null);
+
+						if (completionIssues.length > 0) {
+							return;
+						}
+
 						void completeLesson({ lessonId, fieldValues }).then(
 							(result: { nextLessonId: string | null }) => {
+								setCompletionAttempted(false);
 								if (result.nextLessonId) {
 									router.push(`/lesson/${result.nextLessonId}`);
 									return;
@@ -345,12 +418,24 @@ export function LessonPage({
 
 								router.push("/mission");
 							},
-							() => {
+							(error: unknown) => {
+								const completionError = getCompletionErrorData(error);
+								if (completionError) {
+									setServerCompletionIssues(
+										completionError.issues ?? [],
+									);
+									setServerCompletionMessage(completionError.message);
+									return;
+								}
+
 								setSaveStatus("error");
+								setServerCompletionMessage(
+									"Unable to complete the lesson right now. Try again.",
+								);
 							},
 						);
 					}}
-					className="rounded-none border border-product-accent bg-product-chip px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
+					className="rounded-none border border-product-accent bg-product-chip px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
 				>
 					Complete lesson
 				</button>
@@ -365,6 +450,7 @@ export function LessonPage({
 			fieldValues={fieldValues}
 			onFieldChange={setValue}
 			pinnedArtifacts={pinnedArtifacts}
+			invalidFieldIds={invalidFieldIds}
 		/>
 	);
 
@@ -378,33 +464,27 @@ export function LessonPage({
 					current ? { ...current, layoutMode } : current,
 				)
 			}
-			coachVisible={chromeState.coachVisible}
-			onCoachToggle={() =>
-				setChromeState((current) =>
-					current
-						? {
-								...current,
-								coachVisible: !current.coachVisible,
-						  }
-						: current,
-				)
+			coachVisible={
+				chromeState.layoutMode === "split" ? chromeState.coachVisible : false
+			}
+			onCoachToggle={
+				chromeState.layoutMode === "split"
+					? () =>
+							setChromeState((current) =>
+								current
+									? {
+											...current,
+											coachVisible: !current.coachVisible,
+										}
+									: current,
+							)
+					: undefined
 			}
 		>
 			<ViewerGate>
 				{chromeState.layoutMode === "focus" ? (
 					<LessonShellFocus
 						lesson={lesson}
-						objectiveCollapsed={chromeState.objectiveCollapsed}
-						onToggleObjective={() =>
-							setChromeState((current) =>
-								current
-									? {
-											...current,
-											objectiveCollapsed: !current.objectiveCollapsed,
-									  }
-									: current,
-							)
-						}
 						coachVisible={chromeState.coachVisible}
 						activeCoachPanel={chromeState.activeCoachPanel}
 						onCoachPanelChange={(activeCoachPanel) =>
@@ -414,14 +494,15 @@ export function LessonPage({
 											...current,
 											activeCoachPanel,
 											coachVisible: true,
-									  }
+										}
 									: current,
 							)
 						}
 						objectiveChecklistItems={objectiveChecklistItems}
 						onObjectiveChecklistToggle={(index, checked) => {
-							const nextItems = objectiveChecklistItems.map((item, itemIndex) =>
-								itemIndex === index ? { ...item, checked } : item,
+							const nextItems = objectiveChecklistItems.map(
+								(item, itemIndex) =>
+									itemIndex === index ? { ...item, checked } : item,
 							);
 							setValue(OBJECTIVE_CHECKLIST_FIELD_ID, nextItems);
 						}}
@@ -434,17 +515,6 @@ export function LessonPage({
 				) : (
 					<LessonShellSplit
 						lesson={lesson}
-						objectiveCollapsed={chromeState.objectiveCollapsed}
-						onToggleObjective={() =>
-							setChromeState((current) =>
-								current
-									? {
-											...current,
-											objectiveCollapsed: !current.objectiveCollapsed,
-									  }
-									: current,
-							)
-						}
 						coachVisible={chromeState.coachVisible}
 						activeCoachPanel={chromeState.activeCoachPanel}
 						onCoachPanelChange={(activeCoachPanel) =>
@@ -454,14 +524,15 @@ export function LessonPage({
 											...current,
 											activeCoachPanel,
 											coachVisible: true,
-									  }
+										}
 									: current,
 							)
 						}
 						objectiveChecklistItems={objectiveChecklistItems}
 						onObjectiveChecklistToggle={(index, checked) => {
-							const nextItems = objectiveChecklistItems.map((item, itemIndex) =>
-								itemIndex === index ? { ...item, checked } : item,
+							const nextItems = objectiveChecklistItems.map(
+								(item, itemIndex) =>
+									itemIndex === index ? { ...item, checked } : item,
 							);
 							setValue(OBJECTIVE_CHECKLIST_FIELD_ID, nextItems);
 						}}

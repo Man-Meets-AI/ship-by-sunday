@@ -15,18 +15,18 @@ Use when the lesson output is created inside the product.
 
 Regions:
 
-* **Top HUD** = macro progression
-* **Left Objective Drawer** = checklist / output / unlock
-* **Center Workbench** = primary action surface
-* **Right Coach Dock** = watch / transcript / examples / resources
-* **Bottom Skill Rail** = lesson progression within current block
+- **Top HUD** = macro progression
+- **Left Objective Drawer** = checklist / output / unlock
+- **Center Workbench** = primary action surface
+- **Right Coach Dock** = watch / transcript / examples / resources
+- **Bottom Skill Rail** = lesson progression within current block
 
 Default state:
 
-* objective drawer open
-* coach dock open
-* transcript collapsed
-* examples collapsed
+- objective drawer open
+- coach dock open
+- transcript collapsed
+- examples collapsed
 
 ## Shell B — Focus Shell
 
@@ -34,48 +34,48 @@ Use when the real work happens in Figma, code, deploy tools, or recording tools.
 
 Regions:
 
-* **Top HUD** = macro progression
-* **Center Workbench** = near full width
-* **Coach PiP** = movable mini player
-* **Objective Drawer** = collapsed by default
-* **Bottom Skill Rail** = persistent
+- **Top HUD** = macro progression
+- **Center Workbench** = near full width
+- **Coach PiP** = movable mini player
+- **Objective Drawer** = collapsed by default
+- **Bottom Skill Rail** = persistent
 
 Default state:
 
-* objective drawer collapsed
-* coach in PiP
-* transcript/resources in overlays
+- objective drawer collapsed
+- coach in PiP
+- transcript/resources in overlays
 
 ## Workbench Types
 
-* `guided_form`
-* `score_table`
-* `collector_board`
-* `capture_upload`
-* `scope_split`
-* `brief_assembler`
-* `console_checklist`
-* `tracker_log`
-* `external_workspace`
+- `guided_form`
+- `score_table`
+- `collector_board`
+- `capture_upload`
+- `scope_split`
+- `brief_assembler`
+- `console_checklist`
+- `tracker_log`
+- `external_workspace`
 
 ## Shared Controls
 
 Top right view controls:
 
-* **Split**
-* **Focus**
-* **Coach**
+- **Split**
+- **Focus**
+- **Coach**
 
 Objective drawer states:
 
-* expanded
-* collapsed rail
+- expanded
+- collapsed rail
 
 Coach states:
 
-* docked
-* minimized
-* PiP
+- docked
+- minimized
+- PiP
 
 ---
 
@@ -815,15 +815,14 @@ Coach states:
 
 ## What should NOT be custom-built right now
 
-* drag-and-drop flow mapper
-* in-app sketch editor
-* in-app storyboard editor
-* full Figma replacement
-* full IDE replacement
+- drag-and-drop flow mapper
+- in-app sketch editor
+- in-app storyboard editor
+- full Figma replacement
+- full IDE replacement
 
 Use upload / embed / link patterns instead.
 
 ## Progress Counter Note
 
 The visual system can keep `0 / 21` as placeholder for now, but the lesson registry should be the source of truth before engineering freeze.
-

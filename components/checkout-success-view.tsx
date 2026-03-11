@@ -40,9 +40,9 @@ export function CheckoutSuccessView() {
 					{access?.hasAccess ? "Access ready" : "Finalizing access"}
 				</p>
 				<p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-ink/75">
-					This page will send you into the course automatically as soon as access
-					is ready. If it takes longer than a few seconds, use one of the buttons
-					below.
+					This page will send you into the course automatically as soon as
+					access is ready. If it takes longer than a few seconds, use one of the
+					buttons below.
 				</p>
 				<div className="mt-6 flex flex-wrap gap-3">
 					<Link

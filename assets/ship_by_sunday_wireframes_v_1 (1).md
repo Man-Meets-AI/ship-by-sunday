@@ -10,9 +10,11 @@ Each lesson = **shell + workbench + artifact**.
 # 0. Global UI System
 
 ## Shell A — Split Shell
+
 Use when the lesson output is created inside the product.
 
 Regions:
+
 - **Top HUD** = macro progression
 - **Left Objective Drawer** = checklist / output / unlock
 - **Center Workbench** = primary action surface
@@ -20,15 +22,18 @@ Regions:
 - **Bottom Skill Rail** = lesson progression within current block
 
 Default state:
+
 - objective drawer open
 - coach dock open
 - transcript collapsed
 - examples collapsed
 
 ## Shell B — Focus Shell
+
 Use when the real work happens in Figma, code, deploy tools, or recording tools.
 
 Regions:
+
 - **Top HUD** = macro progression
 - **Center Workbench** = near full width
 - **Coach PiP** = movable mini player
@@ -36,11 +41,13 @@ Regions:
 - **Bottom Skill Rail** = persistent
 
 Default state:
+
 - objective drawer collapsed
 - coach in PiP
 - transcript/resources in overlays
 
 ## Workbench Types
+
 - `guided_form`
 - `score_table`
 - `collector_board`
@@ -52,16 +59,20 @@ Default state:
 - `external_workspace`
 
 ## Shared Controls
+
 Top right view controls:
+
 - **Split**
 - **Focus**
 - **Coach**
 
 Objective drawer states:
+
 - expanded
 - collapsed rail
 
 Coach states:
+
 - docked
 - minimized
 - PiP
@@ -102,6 +113,7 @@ Coach states:
 # CEO Block
 
 ## 1.1 Start With the Problem
+
 **Shell:** Split
 **Workbench:** guided_form
 **Artifact:** 3 Candidate Problems
@@ -123,6 +135,7 @@ Coach states:
 ```
 
 ## 1.2 Pick One User
+
 **Shell:** Split
 **Workbench:** guided_form
 **Artifact:** User Statement
@@ -145,6 +158,7 @@ Coach states:
 ```
 
 ## 1.3 Define the Outcome
+
 **Shell:** Split
 **Workbench:** guided_form
 **Artifact:** Outcome Statement
@@ -168,6 +182,7 @@ Coach states:
 ```
 
 ## 1.4 Light Research, Not a Thesis
+
 **Shell:** Split
 **Workbench:** score_table
 **Artifact:** Research Notes
@@ -191,6 +206,7 @@ Coach states:
 ```
 
 ## 1.5 Map the Core Flow
+
 **Shell:** Split
 **Workbench:** capture_upload
 **Artifact:** Core Flow Image
@@ -214,6 +230,7 @@ Coach states:
 ```
 
 ## 1.6 Scope Hammer
+
 **Shell:** Split
 **Workbench:** scope_split
 **Artifact:** Scope Boundary
@@ -237,6 +254,7 @@ Coach states:
 ```
 
 ## 1.7 CEO Wrap-Up
+
 **Shell:** Split
 **Workbench:** brief_assembler
 **Artifact:** Product Brief
@@ -269,6 +287,7 @@ Coach states:
 # DESIGN Block
 
 ## 2.1 Find References First
+
 **Shell:** Split
 **Workbench:** collector_board
 **Artifact:** Reference Board
@@ -292,6 +311,7 @@ Coach states:
 ```
 
 ## 2.2 Sketch Before Software
+
 **Shell:** Split
 **Workbench:** capture_upload
 **Artifact:** Sketch Set
@@ -313,6 +333,7 @@ Coach states:
 ```
 
 ## 2.3 Storyboard the Journey
+
 **Shell:** Split
 **Workbench:** capture_upload
 **Artifact:** Storyboard Image
@@ -334,6 +355,7 @@ Coach states:
 ```
 
 ## 2.4 Figma Basics for Speed
+
 **Shell:** Focus
 **Workbench:** external_workspace
 **Artifact:** Figma file ready
@@ -356,6 +378,7 @@ Coach states:
 ```
 
 ## 2.5 Turn Sketches Into Rough Screens
+
 **Shell:** Focus
 **Workbench:** external_workspace
 **Artifact:** 3–5 Rough Screens
@@ -380,6 +403,7 @@ Coach states:
 ```
 
 ## 2.6 Choose a Visual Direction
+
 **Shell:** Split
 **Workbench:** guided_form
 **Artifact:** Visual Direction
@@ -402,6 +426,7 @@ Coach states:
 ```
 
 ## 2.7 Design Wrap-Up
+
 **Shell:** Split
 **Workbench:** brief_assembler
 **Artifact:** Design Spec
@@ -432,6 +457,7 @@ Coach states:
 # BUILD Block
 
 ## 3.1 Build From the Brief
+
 **Shell:** Split
 **Workbench:** brief_assembler
 **Artifact:** Agent Build Brief
@@ -455,6 +481,7 @@ Coach states:
 ```
 
 ## 3.2 Set Up the Environment
+
 **Shell:** Focus
 **Workbench:** console_checklist
 **Artifact:** Working Local Environment
@@ -483,6 +510,7 @@ Coach states:
 ```
 
 ## 3.3 Brief the Agent Correctly
+
 **Shell:** Focus
 **Workbench:** external_workspace
 **Artifact:** First Implemented Slice
@@ -506,6 +534,7 @@ Coach states:
 ```
 
 ## 3.4 Build the Core Flow
+
 **Shell:** Focus
 **Workbench:** external_workspace
 **Artifact:** Core Flow Working Locally
@@ -531,6 +560,7 @@ Coach states:
 ```
 
 ## 3.5 Debug Without Spiraling
+
 **Shell:** Focus
 **Workbench:** tracker_log
 **Artifact:** Blocker Log + Working App
@@ -555,6 +585,7 @@ Coach states:
 ```
 
 ## 3.6 Build Wrap-Up
+
 **Shell:** Split
 **Workbench:** brief_assembler
 **Artifact:** Working Local App + Build Summary
@@ -582,6 +613,7 @@ Coach states:
 # SHIP Block
 
 ## 4.1 Ship the Core, Not the Fantasy
+
 **Shell:** Split
 **Workbench:** console_checklist
 **Artifact:** Ship Checklist
@@ -605,6 +637,7 @@ Coach states:
 ```
 
 ## 4.2 Deploy the App
+
 **Shell:** Focus
 **Workbench:** external_workspace
 **Artifact:** Live URL
@@ -629,6 +662,7 @@ Coach states:
 ```
 
 ## 4.3 Record a Simple Demo
+
 **Shell:** Split
 **Workbench:** capture_upload
 **Artifact:** Demo Clip
@@ -650,6 +684,7 @@ Coach states:
 ```
 
 ## 4.4 Send It to Real Humans
+
 **Shell:** Split
 **Workbench:** tracker_log
 **Artifact:** Send Log
@@ -672,6 +707,7 @@ Coach states:
 ```
 
 ## 4.5 Capture Feedback and Plan V2
+
 **Shell:** Split
 **Workbench:** tracker_log
 **Artifact:** Feedback Log + V2 Priorities
@@ -695,6 +731,7 @@ Coach states:
 ```
 
 ## 4.6 Final Wrap
+
 **Shell:** Split
 **Workbench:** brief_assembler
 **Artifact:** Final Mission Record
@@ -722,6 +759,7 @@ Coach states:
 # Bottom Skill Rail Mapping
 
 ## CEO
+
 1.1 Start With the Problem
 1.2 Pick One User
 1.3 Define the Outcome
@@ -731,6 +769,7 @@ Coach states:
 1.7 CEO Wrap-Up
 
 ## DESIGN
+
 2.1 Find References First
 2.2 Sketch Before Software
 2.3 Storyboard the Journey
@@ -740,6 +779,7 @@ Coach states:
 2.7 Design Wrap-Up
 
 ## BUILD
+
 3.1 Build From the Brief
 3.2 Set Up the Environment
 3.3 Brief the Agent Correctly
@@ -748,6 +788,7 @@ Coach states:
 3.6 Build Wrap-Up
 
 ## SHIP
+
 4.1 Ship the Core, Not the Fantasy
 4.2 Deploy the App
 4.3 Record a Simple Demo
@@ -760,6 +801,7 @@ Coach states:
 # Build Notes
 
 ## What should be coded as reusable components first
+
 1. `LessonShellSplit`
 2. `LessonShellFocus`
 3. `ObjectiveDrawer`
@@ -772,6 +814,7 @@ Coach states:
 10. `ArtifactStore`
 
 ## What should NOT be custom-built right now
+
 - drag-and-drop flow mapper
 - in-app sketch editor
 - in-app storyboard editor
@@ -781,5 +824,5 @@ Coach states:
 Use upload / embed / link patterns instead.
 
 ## Progress Counter Note
-The visual system can keep `0 / 21` as placeholder for now, but the lesson registry should be the source of truth before engineering freeze.
 
+The visual system can keep `0 / 21` as placeholder for now, but the lesson registry should be the source of truth before engineering freeze.

@@ -8,7 +8,7 @@ import {
 	type LessonConfig,
 	type UploadFieldValue,
 	type WorkbenchField,
-} from "@/app/lessonRegistry";
+} from "@/lib/course/manifest";
 import type { LessonContent } from "@/content/lessons/types";
 import { api } from "@/convex/_generated/api";
 import type { PinnedArtifact } from "@/components/lesson-shells";
@@ -89,14 +89,14 @@ function CheckboxRow({
 	onChange: (checked: boolean) => void;
 }) {
 	return (
-		<label className="flex items-center gap-3 rounded-none border border-product-border bg-product-surface px-4 py-3">
+		<label className="flex items-center gap-2 rounded-none border border-product-border bg-product-surface px-2.5 py-1.5">
 			<input
 				type="checkbox"
 				checked={checked}
 				onChange={(event) => onChange(event.target.checked)}
-				className="size-5 rounded-none border-product-border accent-[rgb(var(--product-accent))]"
+				className="size-3.5 rounded-none border-product-border accent-[rgb(var(--product-accent))]"
 			/>
-			<span className="text-sm font-medium text-product-text">{label}</span>
+			<span className="text-xs font-medium text-product-text">{label}</span>
 		</label>
 	);
 }
@@ -146,10 +146,10 @@ function UploadFieldControl({
 
 	return (
 		<label className="block">
-			<span className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+			<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
 				{field.label}
 			</span>
-			<div className="mt-2 rounded-none border border-dashed border-product-border bg-product-surface px-4 py-4">
+			<div className="mt-1 rounded-none border border-dashed border-product-border bg-product-surface px-2.5 py-2">
 				<input
 					type="file"
 					accept={field.kind === "image_upload" ? "image/*" : "video/*"}
@@ -204,18 +204,20 @@ function UploadFieldControl({
 					}}
 					className="w-full text-sm font-medium text-product-text file:mr-4 file:rounded-none file:border file:border-product-border file:bg-product-chip file:px-4 file:py-2 file:font-mono file:text-[11px] file:uppercase file:tracking-[0.22em] file:text-product-accent disabled:cursor-not-allowed disabled:opacity-70"
 				/>
-				<div className="mt-4 space-y-2 text-sm font-medium text-product-muted">
+				<div className="mt-2 space-y-1 text-xs font-medium text-product-muted">
 					{isUploading ? (
 						<p>Uploading file to lesson storage...</p>
 					) : upload?.fileName ? (
 						<>
 							<p className="text-product-text">{upload.fileName}</p>
-							<p>Saved to lesson storage. It will persist with this lesson state.</p>
+							<p>
+								Saved to lesson storage. It will persist with this lesson state.
+							</p>
 						</>
 					) : (
 						<p>
-							Choose a file and it will upload to lesson storage before the lesson
-							draft is saved.
+							Choose a file and it will upload to lesson storage before the
+							lesson draft is saved.
 						</p>
 					)}
 					{uploadError ? <p className="text-[#a83232]">{uploadError}</p> : null}
@@ -251,65 +253,39 @@ function WorkbenchCard({
 }) {
 	return (
 		<div className="rounded-none border border-product-border bg-product-surface-strong/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]">
-			<div className="border-b border-product-border/80 px-4 py-3">
+			<div className="flex items-baseline gap-2 border-b border-product-border/80 px-3 py-1.5">
 				{eyebrow ? (
-					<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+					<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
 						{eyebrow}
-					</p>
+					</span>
 				) : null}
-				<p className={`${eyebrow ? "mt-2" : ""} font-display text-2xl uppercase tracking-[0.05em] text-product-text`}>
+				<span className="font-display text-sm uppercase tracking-[0.05em] text-product-text">
 					{title}
-				</p>
+				</span>
 			</div>
-			<div className="p-4">{children}</div>
+			<div className="px-3 py-2">{children}</div>
 		</div>
 	);
 }
 
-function DetailList({
-	items,
-	label,
+function ArtifactContext({
+	pinnedArtifacts,
 }: {
-	items: string[];
-	label: string;
+	pinnedArtifacts: PinnedArtifact[];
 }) {
-	if (items.length === 0) {
-		return null;
-	}
-
-	return (
-		<WorkbenchCard title={label} eyebrow="Lesson guide">
-			<div className="space-y-2">
-				{items.map((item, index) => (
-					<div
-						key={item}
-						className="flex items-start gap-3 border border-product-border bg-product-surface px-3 py-3 text-sm font-medium leading-relaxed text-product-muted"
-					>
-						<div className="mt-0.5 border border-product-border bg-product-surface-strong px-2 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-product-text">
-							{index + 1}
-						</div>
-						<p className="min-w-0 flex-1">{item}</p>
-					</div>
-				))}
-			</div>
-		</WorkbenchCard>
-	);
-}
-
-function ArtifactContext({ pinnedArtifacts }: { pinnedArtifacts: PinnedArtifact[] }) {
 	if (pinnedArtifacts.length === 0) {
 		return null;
 	}
 
 	return (
-		<div className="grid gap-3 md:grid-cols-2">
+		<div className="grid gap-2 md:grid-cols-2">
 			{pinnedArtifacts.map((artifact) => (
 				<WorkbenchCard
 					key={artifact.artifactKey}
 					title={artifact.artifactLabel}
 					eyebrow={artifact.lessonTitle}
 				>
-					<div className="space-y-2 text-sm font-medium text-product-muted">
+					<div className="space-y-1 text-xs font-medium text-product-muted">
 						{artifact.fields.length === 0 ? (
 							<p>No saved preview yet.</p>
 						) : (
@@ -318,7 +294,9 @@ function ArtifactContext({ pinnedArtifacts }: { pinnedArtifacts: PinnedArtifact[
 									<p className="font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
 										{key.replaceAll("_", " ")}
 									</p>
-									<p className="mt-1 text-product-text">{formatArtifactValue(value)}</p>
+									<p className="mt-1 text-product-text">
+										{formatArtifactValue(value)}
+									</p>
 								</div>
 							))
 						)}
@@ -341,23 +319,27 @@ function FieldControl({
 	pinnedArtifacts: PinnedArtifact[];
 }) {
 	const linkedArtifact = field.linkedArtifactKey
-		? pinnedArtifacts.find((artifact) => artifact.artifactKey === field.linkedArtifactKey)
+		? pinnedArtifacts.find(
+				(artifact) => artifact.artifactKey === field.linkedArtifactKey,
+			)
 		: null;
 
 	if (field.kind === "readonly") {
 		return (
 			<label className="block">
-				<span className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+				<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
 					{field.label}
 				</span>
-				<div className="mt-2 rounded-none border border-product-border bg-product-surface px-4 py-4 text-sm font-medium text-product-text">
+				<div className="mt-1 rounded-none border border-product-border bg-product-surface px-2.5 py-2 text-xs font-medium text-product-text">
 					{linkedArtifact ? (
-						<div className="space-y-3">
-							<p className="font-display text-xl uppercase tracking-[0.05em]">
+						<div className="space-y-1.5">
+							<p className="font-display text-sm uppercase tracking-[0.05em]">
 								{linkedArtifact.artifactLabel}
 							</p>
 							{linkedArtifact.fields.length === 0 ? (
-								<p className="text-product-muted">No artifact preview saved yet.</p>
+								<p className="text-product-muted">
+									No artifact preview saved yet.
+								</p>
 							) : (
 								linkedArtifact.fields.slice(0, 3).map(([key, entryValue]) => (
 									<div key={key}>
@@ -382,7 +364,7 @@ function FieldControl({
 	if (field.kind === "text" || field.kind === "url") {
 		return (
 			<label className="block">
-				<span className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+				<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
 					{field.label}
 				</span>
 				<input
@@ -390,7 +372,7 @@ function FieldControl({
 					value={typeof value === "string" ? value : ""}
 					onChange={(event) => onChange(event.target.value)}
 					placeholder={field.placeholder}
-					className="mt-2 w-full rounded-none border border-product-border bg-product-surface px-4 py-3 text-base font-medium text-product-text outline-none focus:border-product-accent"
+					className="mt-1 w-full rounded-none border border-product-border bg-product-surface px-2.5 py-1.5 text-sm text-product-text outline-none focus:border-product-accent"
 				/>
 			</label>
 		);
@@ -399,14 +381,14 @@ function FieldControl({
 	if (field.kind === "number") {
 		return (
 			<label className="block">
-				<span className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+				<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
 					{field.label}
 				</span>
 				<input
 					type="number"
 					value={typeof value === "number" ? value : ""}
 					onChange={(event) => onChange(Number(event.target.value) || 0)}
-					className="mt-2 w-full rounded-none border border-product-border bg-product-surface px-4 py-3 text-base font-medium text-product-text outline-none focus:border-product-accent"
+					className="mt-1 w-full rounded-none border border-product-border bg-product-surface px-2.5 py-1.5 text-sm text-product-text outline-none focus:border-product-accent"
 				/>
 			</label>
 		);
@@ -425,13 +407,13 @@ function FieldControl({
 	if (field.kind === "select") {
 		return (
 			<label className="block">
-				<span className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+				<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
 					{field.label}
 				</span>
 				<select
 					value={typeof value === "string" ? value : ""}
 					onChange={(event) => onChange(event.target.value)}
-					className="mt-2 w-full rounded-none border border-product-border bg-product-surface px-4 py-3 text-base font-medium text-product-text outline-none focus:border-product-accent"
+					className="mt-1 w-full rounded-none border border-product-border bg-product-surface px-2.5 py-1.5 text-sm text-product-text outline-none focus:border-product-accent"
 				>
 					<option value="">Select one</option>
 					{field.options?.map((option) => (
@@ -451,7 +433,7 @@ function FieldControl({
 
 			return (
 				<div className="block">
-					<span className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+					<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
 						{field.label}
 					</span>
 					<div className="mt-2 space-y-2">
@@ -461,8 +443,11 @@ function FieldControl({
 								label={item.label}
 								checked={item.checked}
 								onChange={(checked) => {
-									const nextItems = checklistItems.map((current, currentIndex) =>
-										currentIndex === index ? { ...current, checked } : current,
+									const nextItems = checklistItems.map(
+										(current, currentIndex) =>
+											currentIndex === index
+												? { ...current, checked }
+												: current,
 									);
 									onChange(nextItems);
 								}}
@@ -475,7 +460,7 @@ function FieldControl({
 
 		return (
 			<label className="block">
-				<span className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+				<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
 					{field.label}
 				</span>
 				<textarea
@@ -483,7 +468,7 @@ function FieldControl({
 					onChange={(event) => onChange(parseLines(event.target.value))}
 					rows={field.rows ?? 6}
 					placeholder="One item per line"
-					className="mt-2 w-full rounded-none border border-product-border bg-product-surface px-4 py-3 text-base font-medium text-product-text outline-none focus:border-product-accent"
+					className="mt-1 w-full rounded-none border border-product-border bg-product-surface px-2.5 py-1.5 text-sm text-product-text outline-none focus:border-product-accent"
 				/>
 			</label>
 		);
@@ -492,7 +477,7 @@ function FieldControl({
 	if (field.kind === "table") {
 		return (
 			<label className="block">
-				<span className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+				<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
 					{field.label}
 				</span>
 				<textarea
@@ -500,7 +485,7 @@ function FieldControl({
 					onChange={(event) => onChange(parseTable(event.target.value))}
 					rows={6}
 					placeholder="One row per line. Separate columns with |"
-					className="mt-2 w-full rounded-none border border-product-border bg-product-surface px-4 py-3 font-mono text-sm text-product-text outline-none focus:border-product-accent"
+					className="mt-1 w-full rounded-none border border-product-border bg-product-surface px-2.5 py-1.5 font-mono text-sm text-product-text outline-none focus:border-product-accent"
 				/>
 			</label>
 		);
@@ -509,7 +494,7 @@ function FieldControl({
 	if (field.kind === "textarea") {
 		return (
 			<label className="block">
-				<span className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+				<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
 					{field.label}
 				</span>
 				<textarea
@@ -517,14 +502,16 @@ function FieldControl({
 					onChange={(event) => onChange(event.target.value)}
 					rows={field.rows ?? 5}
 					placeholder={field.placeholder}
-					className="mt-2 w-full rounded-none border border-product-border bg-product-surface px-4 py-3 text-base font-medium text-product-text outline-none focus:border-product-accent"
+					className="mt-1 w-full rounded-none border border-product-border bg-product-surface px-2.5 py-1.5 text-sm text-product-text outline-none focus:border-product-accent"
 				/>
 			</label>
 		);
 	}
 
 	if (field.kind === "image_upload" || field.kind === "video_upload") {
-		return <UploadFieldControl field={field} value={value} onChange={onChange} />;
+		return (
+			<UploadFieldControl field={field} value={value} onChange={onChange} />
+		);
 	}
 
 	return null;
@@ -535,9 +522,17 @@ function renderFields(
 	fieldValues: Record<string, unknown>,
 	onFieldChange: (fieldId: string, value: unknown) => void,
 	pinnedArtifacts: PinnedArtifact[],
+	invalidFieldIds: Set<string>,
 ) {
 	return fields.map((field) => (
-		<div key={field.id}>
+		<div
+			key={field.id}
+			className={
+				invalidFieldIds.has(field.id)
+					? "rounded-none border border-[#a83232] bg-[rgba(168,50,50,0.06)] p-2"
+					: ""
+			}
+		>
 			<FieldControl
 				field={field}
 				value={fieldValues[field.id]}
@@ -545,8 +540,13 @@ function renderFields(
 				pinnedArtifacts={pinnedArtifacts}
 			/>
 			{field.helpText ? (
-				<p className="mt-2 text-xs font-medium leading-relaxed text-product-muted">
+				<p className="mt-0.5 text-[10px] font-medium leading-snug text-product-muted">
 					{field.helpText}
+				</p>
+			) : null}
+			{invalidFieldIds.has(field.id) ? (
+				<p className="mt-1 text-[10px] font-medium leading-snug text-[#a83232]">
+					Finish this before continuing.
 				</p>
 			) : null}
 		</div>
@@ -559,117 +559,92 @@ export function WorkbenchRenderer({
 	fieldValues,
 	onFieldChange,
 	pinnedArtifacts,
+	invalidFieldIds = new Set<string>(),
 }: {
 	lesson: LessonConfig;
 	lessonContent: LessonContent;
 	fieldValues: Record<string, unknown>;
 	onFieldChange: (fieldId: string, value: unknown) => void;
 	pinnedArtifacts: PinnedArtifact[];
+	invalidFieldIds?: Set<string>;
 }) {
 	const fields = lesson.workbenchFields ?? [];
 	const titleBlock = (
-		<div className="border border-product-border bg-product-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
-			<div className="flex flex-wrap items-center gap-2 border-b border-product-border px-4 py-3">
-				<div className="border border-product-border bg-product-surface-strong px-2 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-product-text">
-					Lesson {lesson.id}
-				</div>
-				<div className="border border-product-border bg-product-chip px-2 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-product-text">
+		<div>
+			<div className="flex flex-wrap items-baseline gap-1.5 text-product-muted">
+				<span className="font-mono text-[8px] uppercase tracking-[0.18em]">
+					{lesson.id}
+				</span>
+				<span className="text-[8px] text-product-border/60">/</span>
+				<span className="font-mono text-[8px] uppercase tracking-[0.18em]">
 					{lesson.artifact.label}
-				</div>
+				</span>
 				{lessonContent.lessonMeta.runtimeLabel ? (
-					<div className="border border-product-border bg-product-surface-alt/80 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
-						{lessonContent.lessonMeta.runtimeLabel}
-					</div>
+					<>
+						<span className="text-[8px] text-product-border/60">/</span>
+						<span className="font-mono text-[8px] uppercase tracking-[0.18em]">
+							{lessonContent.lessonMeta.runtimeLabel}
+						</span>
+					</>
 				) : null}
 			</div>
-			<div className="space-y-4 px-4 py-5">
-				<h1 className="font-display text-4xl uppercase leading-none tracking-[0.06em] text-product-text sm:text-5xl">
-					{lesson.title}
-				</h1>
-				<p className="max-w-4xl text-sm font-medium leading-relaxed text-product-muted">
-					{lessonContent.intro}
-				</p>
-			</div>
-		</div>
-	);
-	const metaCards = (
-		<div className="grid gap-4 lg:grid-cols-2">
-			<WorkbenchCard title="Goal" eyebrow="What matters">
-				<p className="text-sm font-medium leading-relaxed text-product-muted">
-					{lessonContent.lessonMeta.goal}
-				</p>
-			</WorkbenchCard>
-			<WorkbenchCard title="Purpose" eyebrow="Why this exists">
-				<p className="text-sm font-medium leading-relaxed text-product-muted">
-					{lessonContent.lessonMeta.purpose}
-				</p>
-			</WorkbenchCard>
-		</div>
-	);
-	const teachingPointsCard =
-		lessonContent.workbench.teachingPoints &&
-		lessonContent.workbench.teachingPoints.length > 0 ? (
-			<DetailList
-				items={lessonContent.workbench.teachingPoints}
-				label="What this lesson covers"
-			/>
-		) : null;
-	const promptCard = lessonContent.workbench.prompt ? (
-		<WorkbenchCard title="Prompt" eyebrow="Workbench">
-			<p className="text-sm font-medium leading-relaxed text-product-muted">
-				{lessonContent.workbench.prompt}
+			<h1 className="mt-1 font-display text-base uppercase leading-tight tracking-[0.06em] text-product-text sm:text-lg">
+				{lesson.title}
+			</h1>
+			<p className="mt-1 max-w-3xl text-[11px] leading-relaxed text-product-muted">
+				{lessonContent.intro}
 			</p>
-		</WorkbenchCard>
-	) : null;
+		</div>
+	);
 	const templateCard =
 		lessonContent.workbench.templateDownloadLabel &&
 		lessonContent.workbench.templateDownloadHref ? (
 			<WorkbenchCard title="Template" eyebrow="Reference">
 				<a
 					href={lessonContent.workbench.templateDownloadHref}
-					className="inline-flex rounded-none border border-product-border bg-product-surface px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-text transition-colors hover:bg-product-surface-alt"
+					className="inline-flex rounded-none border border-product-border bg-product-surface px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.22em] text-product-text transition-colors hover:bg-product-surface-alt"
 				>
 					{lessonContent.workbench.templateDownloadLabel}
 				</a>
 			</WorkbenchCard>
 		) : null;
 	const actionCard = (
-		<WorkbenchCard title="Your job now" eyebrow="Pause and rep">
-			<div className="space-y-4 text-sm font-medium leading-relaxed text-product-muted">
-				<p>{lessonContent.actionCard.jobNow}</p>
-				<div className="grid gap-3 md:grid-cols-2">
-					<div className="border border-product-border bg-product-surface p-3">
-						<p className="font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
-							Timebox
-						</p>
-						<p className="mt-2 text-product-text">
-							{lessonContent.actionCard.timebox}
-						</p>
-					</div>
-					<div className="border border-product-border bg-product-surface p-3">
-						<p className="font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
-							Come back with
-						</p>
-						<p className="mt-2 text-product-text">
-							{lessonContent.actionCard.comeBackWith}
-						</p>
-					</div>
-				</div>
+		<div className="border-t border-product-border/50 pt-2">
+			<p className="text-[11px] leading-snug text-product-muted">
+				{lessonContent.actionCard.jobNow}
+			</p>
+			<div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-0.5 text-[10px] text-product-muted">
+				<span>
+					<span className="font-mono text-[8px] uppercase tracking-[0.15em]">
+						Timebox
+					</span>{" "}
+					<span className="text-product-text">
+						{lessonContent.actionCard.timebox}
+					</span>
+				</span>
+				<span>
+					<span className="text-product-text">
+						{lessonContent.actionCard.comeBackWith}
+					</span>
+				</span>
 			</div>
-		</WorkbenchCard>
+		</div>
 	);
 
 	if (lesson.workbench === "guided_form") {
 		return (
-			<div className="space-y-6">
+			<div className="space-y-3">
 				{titleBlock}
-				{metaCards}
-				{promptCard}
-				{teachingPointsCard}
 				{actionCard}
 				<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
-				<div className="space-y-5">
-					{renderFields(fields, fieldValues, onFieldChange, pinnedArtifacts)}
+				<div className="space-y-2">
+					{renderFields(
+						fields,
+						fieldValues,
+						onFieldChange,
+						pinnedArtifacts,
+						invalidFieldIds,
+					)}
 				</div>
 			</div>
 		);
@@ -678,11 +653,8 @@ export function WorkbenchRenderer({
 	if (lesson.workbench === "score_table") {
 		const [tableField, ...restFields] = fields;
 		return (
-			<div className="space-y-6">
+			<div className="space-y-3">
 				{titleBlock}
-				{metaCards}
-				{promptCard}
-				{teachingPointsCard}
 				{actionCard}
 				{tableField ? (
 					<WorkbenchCard title={tableField.label} eyebrow="Research table">
@@ -694,8 +666,14 @@ export function WorkbenchRenderer({
 						/>
 					</WorkbenchCard>
 				) : null}
-				<div className="grid gap-4 md:grid-cols-2">
-					{renderFields(restFields, fieldValues, onFieldChange, pinnedArtifacts)}
+				<div className="grid gap-2 md:grid-cols-2">
+					{renderFields(
+						restFields,
+						fieldValues,
+						onFieldChange,
+						pinnedArtifacts,
+						invalidFieldIds,
+					)}
 				</div>
 			</div>
 		);
@@ -704,11 +682,8 @@ export function WorkbenchRenderer({
 	if (lesson.workbench === "collector_board") {
 		const [boardField, ...restFields] = fields;
 		return (
-			<div className="space-y-6">
+			<div className="space-y-3">
 				{titleBlock}
-				{metaCards}
-				{promptCard}
-				{teachingPointsCard}
 				{actionCard}
 				{boardField ? (
 					<WorkbenchCard title={boardField.label} eyebrow="Reference board">
@@ -720,8 +695,14 @@ export function WorkbenchRenderer({
 						/>
 					</WorkbenchCard>
 				) : null}
-				<div className="grid gap-4 md:grid-cols-2">
-					{renderFields(restFields, fieldValues, onFieldChange, pinnedArtifacts)}
+				<div className="grid gap-2 md:grid-cols-2">
+					{renderFields(
+						restFields,
+						fieldValues,
+						onFieldChange,
+						pinnedArtifacts,
+						invalidFieldIds,
+					)}
 				</div>
 			</div>
 		);
@@ -729,16 +710,19 @@ export function WorkbenchRenderer({
 
 	if (lesson.workbench === "capture_upload") {
 		return (
-			<div className="space-y-6">
+			<div className="space-y-3">
 				{titleBlock}
-				{metaCards}
-				{promptCard}
-				{teachingPointsCard}
 				{templateCard}
 				{actionCard}
 				<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
-				<div className="grid gap-4 lg:grid-cols-2">
-					{renderFields(fields, fieldValues, onFieldChange, pinnedArtifacts)}
+				<div className="grid gap-2 lg:grid-cols-2">
+					{renderFields(
+						fields,
+						fieldValues,
+						onFieldChange,
+						pinnedArtifacts,
+						invalidFieldIds,
+					)}
 				</div>
 			</div>
 		);
@@ -747,13 +731,10 @@ export function WorkbenchRenderer({
 	if (lesson.workbench === "scope_split") {
 		const [leftField, rightField, ...restFields] = fields;
 		return (
-			<div className="space-y-6">
+			<div className="space-y-3">
 				{titleBlock}
-				{metaCards}
-				{promptCard}
-				{teachingPointsCard}
 				{actionCard}
-				<div className="grid gap-4 lg:grid-cols-2">
+				<div className="grid gap-2 lg:grid-cols-2">
 					{leftField ? (
 						<WorkbenchCard title={leftField.label} eyebrow="In scope">
 							<FieldControl
@@ -775,8 +756,14 @@ export function WorkbenchRenderer({
 						</WorkbenchCard>
 					) : null}
 				</div>
-				<div className="space-y-5">
-					{renderFields(restFields, fieldValues, onFieldChange, pinnedArtifacts)}
+				<div className="space-y-2">
+					{renderFields(
+						restFields,
+						fieldValues,
+						onFieldChange,
+						pinnedArtifacts,
+						invalidFieldIds,
+					)}
 				</div>
 			</div>
 		);
@@ -784,15 +771,18 @@ export function WorkbenchRenderer({
 
 	if (lesson.workbench === "brief_assembler") {
 		return (
-			<div className="space-y-6">
+			<div className="space-y-3">
 				{titleBlock}
-				{metaCards}
-				{promptCard}
-				{teachingPointsCard}
 				{actionCard}
 				<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
-				<div className="space-y-5">
-					{renderFields(fields, fieldValues, onFieldChange, pinnedArtifacts)}
+				<div className="space-y-2">
+					{renderFields(
+						fields,
+						fieldValues,
+						onFieldChange,
+						pinnedArtifacts,
+						invalidFieldIds,
+					)}
 				</div>
 			</div>
 		);
@@ -800,14 +790,17 @@ export function WorkbenchRenderer({
 
 	if (lesson.workbench === "console_checklist") {
 		return (
-			<div className="space-y-6">
+			<div className="space-y-3">
 				{titleBlock}
-				{metaCards}
-				{promptCard}
-				{teachingPointsCard}
 				{actionCard}
-				<div className="grid gap-4 md:grid-cols-2">
-					{renderFields(fields, fieldValues, onFieldChange, pinnedArtifacts)}
+				<div className="grid gap-2 md:grid-cols-2">
+					{renderFields(
+						fields,
+						fieldValues,
+						onFieldChange,
+						pinnedArtifacts,
+						invalidFieldIds,
+					)}
 				</div>
 			</div>
 		);
@@ -816,11 +809,8 @@ export function WorkbenchRenderer({
 	if (lesson.workbench === "tracker_log") {
 		const [tableField, ...restFields] = fields;
 		return (
-			<div className="space-y-6">
+			<div className="space-y-3">
 				{titleBlock}
-				{metaCards}
-				{promptCard}
-				{teachingPointsCard}
 				{actionCard}
 				{tableField ? (
 					<WorkbenchCard title={tableField.label} eyebrow="Tracker">
@@ -832,8 +822,14 @@ export function WorkbenchRenderer({
 						/>
 					</WorkbenchCard>
 				) : null}
-				<div className="grid gap-4 md:grid-cols-2">
-					{renderFields(restFields, fieldValues, onFieldChange, pinnedArtifacts)}
+				<div className="grid gap-2 md:grid-cols-2">
+					{renderFields(
+						restFields,
+						fieldValues,
+						onFieldChange,
+						pinnedArtifacts,
+						invalidFieldIds,
+					)}
 				</div>
 			</div>
 		);
@@ -850,27 +846,30 @@ export function WorkbenchRenderer({
 						: "Open the code workspace and keep this lesson brief beside it.";
 
 		return (
-			<div className="space-y-6">
+			<div className="space-y-3">
 				{titleBlock}
-				{metaCards}
-				{promptCard}
-				{teachingPointsCard}
 				{actionCard}
 				<WorkbenchCard title="External workspace" eyebrow="Focus mode">
-					<p className="text-sm font-medium leading-relaxed text-product-muted">
+					<p className="text-xs font-medium leading-snug text-product-muted">
 						{actionLabel}
 					</p>
 				</WorkbenchCard>
 				<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
-				<div className="grid gap-4 md:grid-cols-2">
-					{renderFields(fields, fieldValues, onFieldChange, pinnedArtifacts)}
+				<div className="grid gap-2 md:grid-cols-2">
+					{renderFields(
+						fields,
+						fieldValues,
+						onFieldChange,
+						pinnedArtifacts,
+						invalidFieldIds,
+					)}
 				</div>
 			</div>
 		);
 	}
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-3">
 			{titleBlock}
 			<div className="rounded-none border border-dashed border-product-border bg-product-surface-strong/70 p-5 text-sm font-medium leading-relaxed text-product-muted">
 				This workbench type has not been wired yet.

@@ -1,12 +1,6 @@
 "use client";
 
-import {
-	createContext,
-	useContext,
-	useEffect,
-	useMemo,
-	useState,
-} from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 export type ProductTheme = "dark" | "light";
 
@@ -18,7 +12,9 @@ type ProductThemeContextValue = {
 	toggleTheme: () => void;
 };
 
-const ProductThemeContext = createContext<ProductThemeContextValue | null>(null);
+const ProductThemeContext = createContext<ProductThemeContextValue | null>(
+	null,
+);
 
 function isProductTheme(value: string | null): value is ProductTheme {
 	return value === "dark" || value === "light";

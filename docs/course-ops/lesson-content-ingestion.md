@@ -101,7 +101,7 @@ export type LessonContent = {
 };
 ```
 
-This is enough for launch. The app renders `goal`, `purpose`, runtime, and the action card directly in the lesson UI.
+This is enough for launch. The app renders the lesson intro, runtime, action card, resources, and approved coach/example content in the lesson UI.
 
 We are still intentionally not using a CMS or database-backed authoring flow.
 
@@ -124,7 +124,7 @@ Use:
 - `purpose` for the short explanation of why the lesson exists
 - `runtimeLabel` for the runtime shown in the lesson header
 
-These now come from the recording blueprint parser.
+These now come from the recording blueprint parser, but `goal` and `purpose` should be treated as internal content-shaping fields unless explicitly promoted into student-facing copy.
 
 ### `actionCard`
 
@@ -150,12 +150,9 @@ If no transcript exists yet, leave it empty rather than inventing summary copy.
 
 ### `coach.examples`
 
-Use the concrete example material already prepared for teaching. Right now the generator creates:
+Use only concrete student-helpful example material. Right now the generator keeps curated overrides for the most important CEO lessons and does not surface generic teacher-script cards from the blueprint.
 
-- lesson-specific guidance cards from the recording blueprint
-- curated overrides for the most important CEO lessons
-
-The next pass should continue replacing generated guidance with stronger lesson-specific examples where we have them.
+The next pass should continue adding stronger lesson-specific examples where we have them.
 
 These are already referenced in:
 

@@ -1,12 +1,15 @@
 import { ConvexError, v } from "convex/values";
 import { internalMutation, mutation, query } from "./_generated/server";
+import { requireConvexEnv } from "./env";
 import {
 	COURSE_SLUG,
 	buildArtifactPreview,
+	getCompletionIssues,
 	getLessonByArtifactKey,
 	getLessonById,
 	getOrderedBlocks,
 	getOrderedLessons,
+	getStudentFacingLessons,
 	getUnlockedLessonIds,
 	isLessonImplemented,
 	normalizeFieldValues,
@@ -53,15 +56,24 @@ async function getViewerLessonStates(ctx: any, clerkUserId: string) {
 		.collect();
 }
 
-function ensureLessonIsUnlocked(lessonId: string, completedLessonIds: string[]) {
+function ensureLessonIsUnlocked(
+	lessonId: string,
+	completedLessonIds: string[],
+) {
 	const unlockedLessonIds = new Set(getUnlockedLessonIds(completedLessonIds));
 
-	if (!unlockedLessonIds.has(lessonId) && !completedLessonIds.includes(lessonId)) {
+	if (
+		!unlockedLessonIds.has(lessonId) &&
+		!completedLessonIds.includes(lessonId)
+	) {
 		throw new ConvexError("Lesson is still locked");
 	}
 }
 
-async function hydrateUploadUrls(ctx: any, fieldValues: Record<string, unknown>) {
+async function hydrateUploadUrls(
+	ctx: any,
+	fieldValues: Record<string, unknown>,
+) {
 	const values = normalizeFieldValues(fieldValues as any);
 
 	return Object.fromEntries(
@@ -132,7 +144,8 @@ export const getResumeDestination = query({
 		const latestLessonState = [...lessonStates]
 			.filter((state: any) => Boolean(getLessonById(state.lessonId)))
 			.sort((left: any, right: any) => {
-				const leftTimestamp = left.lastViewedAt ?? left.updatedAt ?? left.startedAt ?? 0;
+				const leftTimestamp =
+					left.lastViewedAt ?? left.updatedAt ?? left.startedAt ?? 0;
 				const rightTimestamp =
 					right.lastViewedAt ?? right.updatedAt ?? right.startedAt ?? 0;
 				return rightTimestamp - leftTimestamp;
@@ -174,7 +187,9 @@ export const grantEntitlement = internalMutation({
 		const existingEntitlement = await ctx.db
 			.query("courseEntitlements")
 			.withIndex("by_clerk_user_id_and_course_slug", (queryBuilder: any) =>
-				queryBuilder.eq("clerkUserId", args.clerkUserId).eq("courseSlug", courseSlug),
+				queryBuilder
+					.eq("clerkUserId", args.clerkUserId)
+					.eq("courseSlug", courseSlug),
 			)
 			.unique();
 
@@ -219,10 +234,7 @@ export const grantEntitlementFromStripe = mutation({
 	},
 	returns: v.any(),
 	handler: async (ctx, args) => {
-		if (
-			!process.env.STRIPE_WEBHOOK_SECRET ||
-			args.webhookSecret !== process.env.STRIPE_WEBHOOK_SECRET
-		) {
+		if (args.webhookSecret !== requireConvexEnv("STRIPE_WEBHOOK_SECRET")) {
 			throw new ConvexError("Invalid webhook secret");
 		}
 
@@ -231,7 +243,9 @@ export const grantEntitlementFromStripe = mutation({
 		const existingEntitlement = await ctx.db
 			.query("courseEntitlements")
 			.withIndex("by_clerk_user_id_and_course_slug", (queryBuilder: any) =>
-				queryBuilder.eq("clerkUserId", args.clerkUserId).eq("courseSlug", courseSlug),
+				queryBuilder
+					.eq("clerkUserId", args.clerkUserId)
+					.eq("courseSlug", courseSlug),
 			)
 			.unique();
 
@@ -275,9 +289,12 @@ export const getMissionState = query({
 			.filter((state: any) => state.status === "completed")
 			.map((state: any) => state.lessonId);
 		const unlockedLessonIds = new Set(getUnlockedLessonIds(completedLessonIds));
-		const lessons = getOrderedLessons().map((lesson) => {
-			const lessonState = lessonStates.find((state: any) => state.lessonId === lesson.id);
-			let status: "locked" | "available" | "in_progress" | "completed" = "locked";
+		const lessons = getStudentFacingLessons().map((lesson) => {
+			const lessonState = lessonStates.find(
+				(state: any) => state.lessonId === lesson.id,
+			);
+			let status: "locked" | "available" | "in_progress" | "completed" =
+				"locked";
 
 			if (lessonState?.status === "completed") {
 				status = "completed";
@@ -299,10 +316,14 @@ export const getMissionState = query({
 			};
 		});
 
-		const progressCount = lessons.filter((lesson) => lesson.status === "completed").length;
+		const progressCount = lessons.filter(
+			(lesson) => lesson.status === "completed",
+		).length;
 
 		const missionBlocks = getOrderedBlocks().map((block) => {
-			const blockLessons = lessons.filter((lesson) => lesson.block === block.id);
+			const blockLessons = lessons.filter(
+				(lesson) => lesson.block === block.id,
+			);
 			const completedCount = blockLessons.filter(
 				(lesson) => lesson.status === "completed",
 			).length;
@@ -326,7 +347,9 @@ export const getMissionState = query({
 			progressCount,
 			totalLessons: lessons.length,
 			blocks: missionBlocks,
-			unlockedLessonIds: Array.from(unlockedLessonIds),
+			unlockedLessonIds: Array.from(unlockedLessonIds).filter(
+				(lessonId) => lessonId !== "0.0",
+			),
 		};
 	},
 });
@@ -349,7 +372,8 @@ export const getLessonState = query({
 
 		const unlockedLessonIds = new Set(getUnlockedLessonIds(completedLessonIds));
 		const canOpenLesson =
-			unlockedLessonIds.has(lesson.id) || completedLessonIds.includes(lesson.id);
+			unlockedLessonIds.has(lesson.id) ||
+			completedLessonIds.includes(lesson.id);
 
 		if (!canOpenLesson) {
 			return {
@@ -361,12 +385,16 @@ export const getLessonState = query({
 			};
 		}
 
-		const lessonState = lessonStates.find((state: any) => state.lessonId === lesson.id);
+		const lessonState = lessonStates.find(
+			(state: any) => state.lessonId === lesson.id,
+		);
 		const pinnedArtifacts = (lesson.pinnedArtifacts ?? [])
 			.map((artifactKey) => {
 				const sourceLesson = getLessonByArtifactKey(artifactKey);
 				const sourceState = sourceLesson
-					? lessonStates.find((state: any) => state.lessonId === sourceLesson.id)
+					? lessonStates.find(
+							(state: any) => state.lessonId === sourceLesson.id,
+						)
 					: null;
 
 				if (!sourceLesson || !sourceState) {
@@ -527,8 +555,13 @@ export const completeLesson = mutation({
 
 		ensureLessonIsUnlocked(lesson.id, completedLessonIds);
 
-		if (!validateRequiredFields(lesson, args.fieldValues)) {
-			throw new ConvexError("Required fields are missing");
+		const completionIssues = getCompletionIssues(lesson, args.fieldValues);
+		if (completionIssues.length > 0) {
+			throw new ConvexError({
+				code: "INCOMPLETE_LESSON",
+				message: "Finish the required work before continuing.",
+				issues: completionIssues,
+			});
 		}
 
 		const existingState = await ctx.db

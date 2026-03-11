@@ -3,7 +3,7 @@
 
 Curriculum \+ Sherpa scripts for recording the sprint
 
-*Teach \-\> Show \-\> Pause \-\> Rep \-\> Return*
+_Teach \-\> Show \-\> Pause \-\> Rep \-\> Return_
 
 **What this document is for:** Use this on your iPad while recording so every lesson stays clear, practical, and action-first.
 

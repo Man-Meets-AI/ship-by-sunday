@@ -6,11 +6,7 @@ import { useConvexAuth, useQuery } from "convex/react";
 
 import { api } from "@/convex/_generated/api";
 
-export function ViewerGate({
-	children,
-}: {
-	children: React.ReactNode;
-}) {
+export function ViewerGate({ children }: { children: React.ReactNode }) {
 	const router = useRouter();
 	const { isAuthenticated, isLoading } = useConvexAuth();
 	const access = useQuery(api.course.viewerAccess) as
@@ -23,7 +19,12 @@ export function ViewerGate({
 		}
 	}, [access, isLoading, router]);
 
-	if (isLoading || !isAuthenticated || access === undefined || !access.hasAccess) {
+	if (
+		isLoading ||
+		!isAuthenticated ||
+		access === undefined ||
+		!access.hasAccess
+	) {
 		return (
 			<section className="rounded-none border border-product-border bg-product-surface/78 px-5 py-10 text-center shadow-panel backdrop-blur-xl">
 				<p className="font-display text-4xl uppercase tracking-[0.08em] text-product-text">

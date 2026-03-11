@@ -1,7 +1,9 @@
+import { requireConvexEnv } from "./env";
+
 export default {
 	providers: [
 		{
-			domain: process.env.CLERK_FRONTEND_API_URL,
+			domain: requireConvexEnv("CLERK_FRONTEND_API_URL"),
 			applicationID: "convex",
 		},
 	],

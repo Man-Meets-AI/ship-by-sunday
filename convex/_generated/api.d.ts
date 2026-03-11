@@ -9,6 +9,7 @@
  */
 
 import type * as course from "../course.js";
+import type * as env from "../env.js";
 import type * as uploads from "../uploads.js";
 
 import type {
@@ -19,6 +20,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   course: typeof course;
+  env: typeof env;
   uploads: typeof uploads;
 }>;
 

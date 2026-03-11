@@ -1,42 +1,44 @@
-import { lessonRegistry, type LessonConfig } from "@/app/lessonRegistry";
+import { lessonRegistry, type LessonConfig } from "@/lib/course/manifest";
+import { lessonContentManifest } from "@/lib/course/content-manifest";
 import { authoredLessonContent } from "@/content/lessons/generated";
 import type { LessonContent } from "@/content/lessons/types";
 
-const lessonSlugById: Record<string, string> = {
-	"0.1": "00-01-welcome-to-ship-by-sunday",
-	"0.2": "00-02-how-the-sprint-works",
-	"1.1": "01-01-start-with-the-problem",
-	"1.2": "01-02-pick-one-user",
-	"1.3": "01-03-define-the-outcome",
-	"1.4": "01-04-light-research-not-a-thesis",
-	"1.5": "01-05-map-the-core-flow",
-	"1.6": "01-06-kill-scope",
-	"1.7": "01-07-ceo-block-wrap-up",
-	"2.1": "02-01-find-references-first",
-	"2.2": "02-02-sketch-before-software",
-	"2.3": "02-03-storyboard-the-journey",
-	"2.4": "02-04-figma-basics-for-speed",
-	"2.5": "02-05-turn-sketches-into-rough-screens",
-	"2.6": "02-06-choose-a-visual-direction",
-	"2.7": "02-07-design-block-wrap-up",
-	"3.1": "03-01-build-from-the-brief",
-	"3.2": "03-02-set-up-the-environment",
-	"3.3": "03-03-brief-the-agent-correctly",
-	"3.4": "03-04-build-the-core-flow",
-	"3.5": "03-05-debug-without-spiraling",
-	"3.6": "03-06-build-block-wrap-up",
-	"4.1": "04-01-ship-the-core-not-the-fantasy",
-	"4.2": "04-02-deploy-the-app",
-	"4.3": "04-03-record-a-simple-demo",
-	"4.4": "04-04-send-it-to-real-humans",
-	"4.5": "04-05-capture-feedback-and-plan-version-two",
-	"4.6": "04-06-final-wrap",
-};
+const internalCoachExampleIds = new Set(["key-line", "lock-it-in", "avoid-this"]);
+const internalCoachExampleTitles = new Set([
+	"key line",
+	"lock it in",
+	"avoid this",
+]);
+
+function sanitizeLessonContentForStudent(content: LessonContent): LessonContent {
+	const sanitizedIntro =
+		content.status !== "outline" && content.workbench.prompt
+			? content.workbench.prompt
+			: content.intro;
+
+	return {
+		...content,
+		intro: sanitizedIntro,
+		coach: {
+			...content.coach,
+			examples: content.coach.examples?.filter(
+				(example) =>
+					!internalCoachExampleIds.has(example.id) &&
+					!internalCoachExampleTitles.has(example.title.trim().toLowerCase()),
+			),
+		},
+	};
+}
 
 function buildOutlineLessonContent(lesson: LessonConfig): LessonContent {
+	const slug = lessonContentManifest.lessons[lesson.id]?.slug;
+	if (!slug) {
+		throw new Error(`Missing lesson slug for ${lesson.id}`);
+	}
+
 	return {
 		lessonId: lesson.id,
-		slug: lessonSlugById[lesson.id] ?? lesson.id.replace(".", "-"),
+		slug,
 		status: "outline",
 		intro:
 			lesson.helperText ??
@@ -71,7 +73,9 @@ function buildOutlineLessonContent(lesson: LessonConfig): LessonContent {
 }
 
 function buildLessonContentMap() {
-	const authoredByLessonId = new Map(authoredLessonContent.map((lesson) => [lesson.lessonId, lesson]));
+	const authoredByLessonId = new Map(
+		authoredLessonContent.map((lesson) => [lesson.lessonId, lesson]),
+	);
 	const seenSlugs = new Set<string>();
 	const output = new Map<string, LessonContent>();
 
@@ -80,8 +84,9 @@ function buildLessonContentMap() {
 			continue;
 		}
 
-		const content = authoredByLessonId.get(lesson.id) ?? buildOutlineLessonContent(lesson);
-		const expectedSlug = lessonSlugById[content.lessonId];
+		const content =
+			authoredByLessonId.get(lesson.id) ?? buildOutlineLessonContent(lesson);
+		const expectedSlug = lessonContentManifest.lessons[content.lessonId]?.slug;
 		if (!expectedSlug) {
 			throw new Error(`Missing lesson slug for ${content.lessonId}`);
 		}
@@ -95,13 +100,17 @@ function buildLessonContentMap() {
 		}
 
 		seenSlugs.add(content.slug);
-		output.set(content.lessonId, content);
+		output.set(content.lessonId, sanitizeLessonContentForStudent(content));
 	}
 
 	for (const content of authoredLessonContent) {
-		const lessonExists = lessonRegistry.some((lesson) => lesson.id === content.lessonId);
+		const lessonExists = lessonRegistry.some(
+			(lesson) => lesson.id === content.lessonId,
+		);
 		if (!lessonExists) {
-			throw new Error(`Lesson content points to missing lesson id ${content.lessonId}`);
+			throw new Error(
+				`Lesson content points to missing lesson id ${content.lessonId}`,
+			);
 		}
 	}
 

@@ -12,163 +12,89 @@ const wireframesPath = path.join(
 	"assets",
 	"ship_by_sunday_wireframes_v_1 (1).md",
 );
-const registryPath = path.join(rootDir, "app", "lessonRegistry.ts");
+const registryPath = path.join(rootDir, "lib", "course", "manifest.ts");
 const contentDir = path.join(rootDir, "content", "lessons");
 const sourceDir = path.join(rootDir, "content", "source");
 const intermediatePath = path.join(sourceDir, "recording-blueprint.json");
 const generatedBarrelPath = path.join(contentDir, "generated.ts");
-
-const worksheetResourcesByBlock = {
-	"0": [
-		{
-			id: "student-packet",
-			label: "Student Packet",
-			href: "/downloads/ship-by-sunday-student-packet.pdf",
-			kind: "download",
-		},
-		{
-			id: "worksheet-packet",
-			label: "Worksheet Packet",
-			href: "/downloads/ship-by-sunday-worksheets.pdf",
-			kind: "download",
-		},
-	],
-	"1": [
-		{
-			id: "worksheet-01",
-			label: "Worksheet 01 — One-Page Product Brief",
-			href: "/downloads/ship-by-sunday-worksheets.pdf",
-			kind: "download",
-		},
-	],
-	"2": [
-		{
-			id: "worksheet-02",
-			label: "Worksheet 02 — Build-Ready Design Spec",
-			href: "/downloads/ship-by-sunday-worksheets.pdf",
-			kind: "download",
-		},
-	],
-	"3": [
-		{
-			id: "worksheet-03",
-			label: "Worksheet 03 — Build Plan + Agent Brief",
-			href: "/downloads/ship-by-sunday-worksheets.pdf",
-			kind: "download",
-		},
-	],
-	"4": [
-		{
-			id: "worksheet-04",
-			label: "Worksheet 04 — Launch Plan + Feedback Tracker",
-			href: "/downloads/ship-by-sunday-worksheets.pdf",
-			kind: "download",
-		},
-	],
-};
-
-const templateResourceByLessonId = {
-	"1.5": {
-		label: "Open Worksheet 01 template",
-		href: "/downloads/ship-by-sunday-worksheets.pdf",
-	},
-	"2.2": {
-		label: "Open Worksheet 02 template",
-		href: "/downloads/ship-by-sunday-worksheets.pdf",
-	},
-	"2.3": {
-		label: "Open Worksheet 02 storyboard template",
-		href: "/downloads/ship-by-sunday-worksheets.pdf",
-	},
-	"4.3": {
-		label: "Open Worksheet 04 demo prompt",
-		href: "/downloads/ship-by-sunday-worksheets.pdf",
-	},
-};
+const contentManifestPath = path.join(
+	rootDir,
+	"lib",
+	"course",
+	"content-manifest.json",
+);
 
 const exampleOverridesByLessonId = {
-	"1.1": [
+	1.1: [
 		{
 			id: "weak-vs-strong-problem",
 			title: "Weak vs stronger problem",
-			body:
-				"Weak: 'I want to build an AI meeting app.' Stronger: 'After team meetings, early-stage startup operators lose action items, forget decisions, and waste time turning messy notes into clear follow-up tasks.'",
+			body: "Weak: 'I want to build an AI meeting app.' Stronger: 'After team meetings, early-stage startup operators lose action items, forget decisions, and waste time turning messy notes into clear follow-up tasks.'",
 		},
 		{
 			id: "candidate-problems",
 			title: "Three candidate problems",
-			body:
-				"1. Startup operators lose action items after meetings. 2. Freelancers forget client follow-ups because notes are scattered. 3. Small teams lose recurring process tasks because nobody owns the checklist after the meeting ends.",
+			body: "1. Startup operators lose action items after meetings. 2. Freelancers forget client follow-ups because notes are scattered. 3. Small teams lose recurring process tasks because nobody owns the checklist after the meeting ends.",
 		},
 	],
-	"1.2": [
+	1.2: [
 		{
 			id: "blurry-vs-tight-user",
 			title: "Blurry vs tightened user",
-			body:
-				"Blurry: 'This app is for teams.' Tightened: 'This app is for early-stage startup operators who run internal team meetings and need a faster way to turn messy notes into clear action items.'",
+			body: "Blurry: 'This app is for teams.' Tightened: 'This app is for early-stage startup operators who run internal team meetings and need a faster way to turn messy notes into clear action items.'",
 		},
 		{
 			id: "user-sentence-stem",
 			title: "Sentence stem",
-			body:
-				"Use: 'This app is for ___ who need ___ without ___.' The goal is one reachable user in one actual moment.",
+			body: "Use: 'This app is for ___ who need ___ without ___.' The goal is one reachable user in one actual moment.",
 		},
 	],
-	"1.3": [
+	1.3: [
 		{
 			id: "features-vs-outcome",
 			title: "Feature list vs outcome",
-			body:
-				"Feature-heavy: 'The app uses AI to summarize meetings, organize notes, and generate next steps.' Outcome: 'The app helps startup operators leave a meeting with a clean action summary they can review and send in minutes.'",
+			body: "Feature-heavy: 'The app uses AI to summarize meetings, organize notes, and generate next steps.' Outcome: 'The app helps startup operators leave a meeting with a clean action summary they can review and send in minutes.'",
 		},
 		{
 			id: "shortest-version",
 			title: "Shortest version",
-			body:
-				"'Turn messy meeting notes into a clear action summary in minutes.' People buy the changed state, not the feature list.",
+			body: "'Turn messy meeting notes into a clear action summary in minutes.' People buy the changed state, not the feature list.",
 		},
 	],
-	"1.4": [
+	1.4: [
 		{
 			id: "reference-note-grid",
 			title: "Simple research note grid",
-			body:
-				"Reference 1: clean summary output, weak task ownership, users care about speed and clarity. Reference 2: easy-to-scan action items, too many extra features, users care about sharing fast. Reference 3: familiar note-taking pattern, generic output, users care about trustworthy summaries.",
+			body: "Reference 1: clean summary output, weak task ownership, users care about speed and clarity. Reference 2: easy-to-scan action items, too many extra features, users care about sharing fast. Reference 3: familiar note-taking pattern, generic output, users care about trustworthy summaries.",
 		},
 		{
 			id: "research-line",
 			title: "Research line",
-			body:
-				"'You are not writing a market report. You are just trying not to build blind.'",
+			body: "'You are not writing a market report. You are just trying not to build blind.'",
 		},
 	],
-	"1.5": [
+	1.5: [
 		{
 			id: "five-step-flow",
 			title: "5-step flow",
-			body:
-				"1. User pastes meeting notes. 2. App generates a short action summary. 3. User reviews and edits. 4. User copies or shares the summary. 5. Team gets a clean follow-up record.",
+			body: "1. User pastes meeting notes. 2. App generates a short action summary. 3. User reviews and edits. 4. User copies or shares the summary. 5. Team gets a clean follow-up record.",
 		},
 		{
 			id: "messy-vs-clean-flow",
 			title: "Messy flow vs clean flow",
-			body:
-				"Messy: record meeting, upload file, transcribe, identify speakers, summarize, generate tasks, assign owners, sync calendar, send email, track analytics. Clean: paste notes, generate summary, review, share, done.",
+			body: "Messy: record meeting, upload file, transcribe, identify speakers, summarize, generate tasks, assign owners, sync calendar, send email, track analytics. Clean: paste notes, generate summary, review, share, done.",
 		},
 	],
-	"1.6": [
+	1.6: [
 		{
 			id: "oversized-vs-v1",
 			title: "Oversized idea vs weekend v1",
-			body:
-				"Oversized: meeting platform with uploads, transcription, workspaces, search, Slack, calendar sync, speaker recognition, follow-up emails, and analytics. V1: paste notes, generate summary, review, copy or share.",
+			body: "Oversized: meeting platform with uploads, transcription, workspaces, search, Slack, calendar sync, speaker recognition, follow-up emails, and analytics. V1: paste notes, generate summary, review, copy or share.",
 		},
 		{
 			id: "sunday-test",
 			title: "Sunday Test",
-			body:
-				"Ask: 'What has to work by Sunday for the promise to still be true?' For the example app: a user can paste notes, get a usable summary, and share it.",
+			body: "Ask: 'What has to work by Sunday for the promise to still be true?' For the example app: a user can paste notes, get a usable summary, and share it.",
 		},
 	],
 };
@@ -229,7 +155,8 @@ function parsePausePrompt(sectionBody) {
 	const timebox =
 		lines.find((line) => line.toLowerCase().startsWith("timebox:")) ?? "";
 	const comeBackWith =
-		lines.find((line) => line.toLowerCase().startsWith("come back with:")) ?? "";
+		lines.find((line) => line.toLowerCase().startsWith("come back with:")) ??
+		"";
 
 	return {
 		jobNow: jobNow.replace(/^Your job now:\s*/i, "").trim(),
@@ -301,10 +228,15 @@ function validateWireframeLayouts(wireframes, registry) {
 	for (const [lessonId, expected] of wireframes.entries()) {
 		const actual = registry.get(lessonId);
 		if (!actual) {
-			throw new Error(`Wireframe lesson ${lessonId} is missing from lessonRegistry.ts`);
+			throw new Error(
+				`Wireframe lesson ${lessonId} is missing from lib/course/manifest.ts`,
+			);
 		}
 
-		if (expected.shell !== actual.shell || expected.workbench !== actual.workbench) {
+		if (
+			expected.shell !== actual.shell ||
+			expected.workbench !== actual.workbench
+		) {
 			throw new Error(
 				`Layout mismatch for ${lessonId}: wireframes expect ${expected.shell}/${expected.workbench}, registry has ${actual.shell}/${actual.workbench}`,
 			);
@@ -312,57 +244,35 @@ function validateWireframeLayouts(wireframes, registry) {
 	}
 }
 
-function buildSlug(lessonId, title) {
-	const [block, step] = lessonId.split(".");
-	const normalizedTitle = title
-		.toLowerCase()
-		.replace(/[^a-z0-9]+/g, "-")
-		.replace(/^-+|-+$/g, "");
-	return `${block.padStart(2, "0")}-${step.padStart(2, "0")}-${normalizedTitle}`;
-}
-
 function toCoachExamples(blueprintLesson) {
 	if (exampleOverridesByLessonId[blueprintLesson.lessonId]) {
 		return exampleOverridesByLessonId[blueprintLesson.lessonId];
 	}
 
-	const examples = [];
-	if (blueprintLesson.suggestedOpeningLines.length > 0) {
-		examples.push({
-			id: "key-line",
-			title: "Key line",
-			body: blueprintLesson.suggestedOpeningLines.slice(0, 2).join(" "),
-		});
-	}
-	if (blueprintLesson.watchouts.length > 0) {
-		examples.push({
-			id: "avoid-this",
-			title: "Avoid this",
-			body: blueprintLesson.watchouts.join(" "),
-		});
-	}
-	if (blueprintLesson.suggestedClose.length > 0) {
-		examples.push({
-			id: "lock-it-in",
-			title: "Lock it in",
-			body: blueprintLesson.suggestedClose.join(" "),
-		});
-	}
-	return examples;
+	return [];
 }
 
-function toLessonSpecificResources(blueprintLesson) {
+function toLessonSpecificResources(blueprintLesson, contentManifest) {
 	const blockKey = blueprintLesson.lessonId.split(".")[0];
-	return [...(worksheetResourcesByBlock[blockKey] ?? [])];
+	return [...(contentManifest.worksheetResourcesByBlock[blockKey] ?? [])];
 }
 
-function buildLessonContent(blueprintLesson) {
-	const templateResource = templateResourceByLessonId[blueprintLesson.lessonId];
+function buildLessonContent(blueprintLesson, contentManifest) {
+	const slug = contentManifest.lessons[blueprintLesson.lessonId]?.slug;
+	if (!slug) {
+		throw new Error(`Missing lesson slug for ${blueprintLesson.lessonId}`);
+	}
+
+	const templateResource =
+		contentManifest.templateResourcesByLessonId[blueprintLesson.lessonId];
 	return {
 		lessonId: blueprintLesson.lessonId,
-		slug: buildSlug(blueprintLesson.lessonId, blueprintLesson.title),
+		slug,
 		status: "draft",
-		intro: blueprintLesson.purpose,
+		intro:
+			blueprintLesson.suggestedOpeningLines[0] ??
+			blueprintLesson.goal ??
+			blueprintLesson.purpose,
 		lessonMeta: {
 			runtimeLabel: blueprintLesson.runtimeLabel,
 			goal: blueprintLesson.goal,
@@ -382,15 +292,13 @@ function buildLessonContent(blueprintLesson) {
 				status: "empty",
 			},
 			examples: toCoachExamples(blueprintLesson),
-			resources: toLessonSpecificResources(blueprintLesson),
+			resources: toLessonSpecificResources(blueprintLesson, contentManifest),
 		},
 		workbench: {
-			prompt:
-				blueprintLesson.suggestedOpeningLines[0] ?? blueprintLesson.goal,
+			prompt: blueprintLesson.suggestedOpeningLines[0] ?? blueprintLesson.goal,
 			teachingPoints: blueprintLesson.beatsToCover,
 			emptyState:
-				blueprintLesson.suggestedOpeningLines[0] ??
-				blueprintLesson.purpose,
+				blueprintLesson.suggestedOpeningLines[0] ?? blueprintLesson.purpose,
 			templateDownloadLabel: templateResource?.label,
 			templateDownloadHref: templateResource?.href,
 		},
@@ -404,7 +312,8 @@ function buildLessonContent(blueprintLesson) {
 async function writeLessonModule(lessonContent) {
 	const constantName = slugToConstant(lessonContent.slug);
 	const modulePath = path.join(contentDir, `${lessonContent.slug}.ts`);
-	const source = `import type { LessonContent } from "@/content/lessons/types";
+	const source = `// Generated by scripts/build-lesson-content-from-blueprint.mjs. Do not edit by hand.
+import type { LessonContent } from "@/content/lessons/types";
 
 export const ${constantName}: LessonContent = ${JSON.stringify(lessonContent, null, 2)};
 `;
@@ -423,7 +332,8 @@ async function writeGeneratedBarrel(entries) {
 	const exports = entries
 		.map(({ constantName }) => `\t${constantName},`)
 		.join("\n");
-	const source = `${imports}
+	const source = `// Generated by scripts/build-lesson-content-from-blueprint.mjs. Do not edit by hand.
+${imports}
 import type { LessonContent } from "@/content/lessons/types";
 
 export const authoredLessonContent = [
@@ -435,15 +345,24 @@ ${exports}
 }
 
 async function main() {
-	const [blueprintMarkdown, wireframesMarkdown, registrySource] = await Promise.all([
+	const [
+		blueprintMarkdown,
+		wireframesMarkdown,
+		registrySource,
+		contentManifestRaw,
+	] = await Promise.all([
 		fs.readFile(blueprintPath, "utf8"),
 		fs.readFile(wireframesPath, "utf8"),
 		fs.readFile(registryPath, "utf8"),
+		fs.readFile(contentManifestPath, "utf8"),
 	]);
+	const contentManifest = JSON.parse(contentManifestRaw);
 
 	const parsedLessons = parseBlueprint(blueprintMarkdown);
 	if (parsedLessons.length !== 28) {
-		throw new Error(`Expected 28 lessons in blueprint, found ${parsedLessons.length}`);
+		throw new Error(
+			`Expected 28 lessons in blueprint, found ${parsedLessons.length}`,
+		);
 	}
 
 	validateWireframeLayouts(
@@ -452,9 +371,14 @@ async function main() {
 	);
 
 	await fs.mkdir(sourceDir, { recursive: true });
-	await fs.writeFile(intermediatePath, `${JSON.stringify(parsedLessons, null, 2)}\n`);
+	await fs.writeFile(
+		intermediatePath,
+		`${JSON.stringify(parsedLessons, null, 2)}\n`,
+	);
 
-	const lessonContents = parsedLessons.map(buildLessonContent);
+	const lessonContents = parsedLessons.map((lesson) =>
+		buildLessonContent(lesson, contentManifest),
+	);
 	const entries = [];
 	for (const lessonContent of lessonContents) {
 		const generated = await writeLessonModule(lessonContent);
