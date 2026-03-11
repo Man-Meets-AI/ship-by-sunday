@@ -1,0 +1,45 @@
+import fs from "node:fs";
+import path from "node:path";
+
+function readSource(relativePath: string) {
+	return fs.readFileSync(path.join(process.cwd(), relativePath), "utf8");
+}
+
+describe("lesson state contract", () => {
+	it("keeps the lesson route free of duplicated lesson content props", () => {
+		const source = readSource("app/lesson/[lessonId]/page.tsx");
+
+		expect(source).toContain("<LessonPage");
+		expect(source).not.toContain("lessonContent={");
+	});
+
+	it("resolves static lesson definitions locally in the lesson page", () => {
+		const source = readSource("components/lesson-page.tsx");
+
+		expect(source).toContain("const lesson = getLesson(lessonId);");
+		expect(source).toContain("const lessonContent = lesson.content;");
+		expect(source).not.toContain("lessonState.lesson");
+		expect(source).toContain("{lesson.id} {lesson.shortTitle}");
+		expect(source).toContain(
+			'{lesson.prevLessonId ?? "the previous unlocked lesson"} first.',
+		);
+	});
+
+	it("keeps Convex lesson state payloads limited to dynamic data", () => {
+		const source = readSource("convex/course.ts");
+		const getLessonStateBlock = source.slice(
+			source.indexOf("export const getLessonState = query({"),
+			source.indexOf("export const saveLessonDraft = mutation({"),
+		);
+
+		expect(getLessonStateBlock).toContain('accessStatus: "locked"');
+		expect(getLessonStateBlock).toContain(
+			"fieldValues: await hydrateUploadUrls(",
+		);
+		expect(getLessonStateBlock).toContain("status: lessonStateIsCompatible");
+		expect(getLessonStateBlock).toContain("pinnedArtifacts,");
+		expect(getLessonStateBlock).not.toContain("requiredLessonId:");
+		expect(getLessonStateBlock).not.toContain("shortTitle:");
+		expect(getLessonStateBlock).not.toMatch(/\blesson\s*:/);
+	});
+});
