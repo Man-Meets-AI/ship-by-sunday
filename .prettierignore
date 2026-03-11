@@ -1,0 +1,8 @@
+.claude
+.codex
+.convex
+.next
+coverage
+node_modules
+pnpm-lock.yaml
+convex/_generated

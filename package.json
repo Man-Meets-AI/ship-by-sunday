@@ -1,32 +1,43 @@
 {
-  "name": "ship-by-sunday-site",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "dev:web": "next dev",
-    "dev:convex": "convex dev --typecheck disable",
-    "build": "next build",
-    "start": "next start",
-    "typecheck": "tsc --noEmit",
-    "check": "pnpm run typecheck && pnpm run build",
-    "stripe:create-product": "node --env-file=.env.local scripts/create-stripe-product.mjs"
-  },
-  "dependencies": {
-    "@clerk/nextjs": "^7.0.1",
-    "convex": "^1.32.0",
-    "next": "15.2.8",
-    "react": "19.0.3",
-    "react-dom": "19.0.3",
-    "stripe": "^20.4.1"
-  },
-  "devDependencies": {
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.3",
-    "@types/react-dom": "19.0.3",
-    "autoprefixer": "10.4.20",
-    "postcss": "8.5.3",
-    "tailwindcss": "3.4.17",
-    "typescript": "5.8.2"
-  }
+	"name": "ship-by-sunday-site",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"dev": "concurrently -k -n web,convex -c auto \"pnpm run dev:web\" \"pnpm run dev:convex\"",
+		"dev:web": "next dev",
+    "dev:convex": "convex dev --local --local-force-upgrade",
+		"build": "next build",
+		"start": "next start",
+		"typecheck": "next build --no-lint",
+		"lint": "eslint . --max-warnings=0",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"test:unit": "vitest run tests/unit",
+		"test:smoke": "vitest run tests/smoke",
+		"check": "pnpm run lint && pnpm run format:check && pnpm run test:unit && pnpm run test:smoke && pnpm run build",
+		"stripe:create-product": "node --env-file=.env.local scripts/create-stripe-product.mjs"
+	},
+	"dependencies": {
+		"@clerk/nextjs": "^7.0.1",
+		"convex": "^1.32.0",
+		"next": "15.2.8",
+		"react": "19.0.3",
+		"react-dom": "19.0.3",
+		"stripe": "^20.4.1",
+		"zod": "^4.3.6"
+	},
+	"devDependencies": {
+		"@types/node": "22.13.10",
+		"@types/react": "19.0.3",
+		"@types/react-dom": "19.0.3",
+		"autoprefixer": "10.4.20",
+		"concurrently": "^9.2.1",
+		"eslint": "^9.39.4",
+		"eslint-config-next": "^16.1.6",
+		"postcss": "8.5.3",
+		"prettier": "^3.8.1",
+		"tailwindcss": "3.4.17",
+		"typescript": "5.8.2",
+		"vitest": "^4.0.18"
+	}
 }

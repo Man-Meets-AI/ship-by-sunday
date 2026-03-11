@@ -1,4 +1,5 @@
 .next
+.next.stale*
 node_modules
 .pnpm-store
 *.log
@@ -8,4 +9,8 @@ marketing-mobile-final.png
 
 .env.local
 .env.production
+.claude/settings.local.json
 *.tsbuildinfo
+coverage
+playwright-report
+test-results
