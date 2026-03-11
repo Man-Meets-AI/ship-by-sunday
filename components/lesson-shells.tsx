@@ -3,8 +3,11 @@
 import Link from "next/link";
 
 import { getLesson, type LessonConfig } from "@/lib/course/manifest";
-import type { LessonContent } from "@/content/lessons/types";
-import type { ObjectiveTask, PersistedFieldValues } from "@/lib/course/registry";
+import type { LessonContent } from "@/lib/course/manifest";
+import type {
+	ObjectiveTask,
+	PersistedFieldValues,
+} from "@/lib/course/registry";
 
 export type PinnedArtifact = {
 	artifactKey: string;
@@ -129,8 +132,8 @@ function ObjectivePanel({
 		? sectionIds.map((sectionId) => ({
 				id: sectionId,
 				title:
-					objectiveTasks.find((task) => task.sectionId === sectionId)?.sectionTitle ??
-					sectionId,
+					objectiveTasks.find((task) => task.sectionId === sectionId)
+						?.sectionTitle ?? sectionId,
 				tasks: objectiveTasks.filter((task) => task.sectionId === sectionId),
 			}))
 		: [
@@ -219,9 +222,7 @@ function ObjectivePanel({
 					Next unlock
 				</p>
 				<p className="mt-0.5 text-[11px] font-medium leading-tight text-product-text">
-					{nextLesson
-						? `${nextLesson.id} ${nextLesson.shortTitle}`
-						: "Mission"}
+					{nextLesson ? `${nextLesson.id} ${nextLesson.shortTitle}` : "Mission"}
 				</p>
 			</div>
 		</aside>
@@ -302,7 +303,7 @@ function CoachPanel({
 								<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
 									{example.title}
 								</p>
-								<p className="mt-1 text-xs font-medium leading-snug text-product-text">
+								<p className="mt-1 whitespace-pre-wrap text-xs font-medium leading-snug text-product-text">
 									{example.body}
 								</p>
 							</div>
@@ -464,7 +465,7 @@ export function LessonShellSplit({
 					pinnedArtifacts={pinnedArtifacts}
 				/>
 			) : (
-			<div className="rounded-none border border-dashed border-product-border/70 bg-product-surface/55 px-2 py-2 text-xs font-medium leading-snug text-product-muted shadow-panel backdrop-blur-lg xl:min-h-0 xl:overflow-y-auto">
+				<div className="rounded-none border border-dashed border-product-border/70 bg-product-surface/55 px-2 py-2 text-xs font-medium leading-snug text-product-muted shadow-panel backdrop-blur-lg xl:min-h-0 xl:overflow-y-auto">
 					Coach hidden. Use HUD toggle to reopen.
 				</div>
 			)}

@@ -7,11 +7,11 @@ import {
 	type BlockId,
 	type ChecklistItemValue,
 	type LessonConfig,
+	type LessonContent,
 	type UploadFieldValue,
 	type WorkbenchField,
 	type WorkbenchSection,
 } from "@/lib/course/manifest";
-import type { LessonContent } from "@/content/lessons/types";
 import { api } from "@/convex/_generated/api";
 import type { PinnedArtifact } from "@/components/lesson-shells";
 import {
@@ -157,9 +157,7 @@ function UploadFieldControl({
 
 	return (
 		<label className="block">
-			<span className={fieldLabelClass}>
-				{field.label}
-			</span>
+			<span className={fieldLabelClass}>{field.label}</span>
 			<div className="mt-1 rounded-none border border-dashed border-product-border bg-product-surface px-2.5 py-2">
 				<input
 					type="file"
@@ -323,8 +321,6 @@ function SectionCard({
 	blocked?: boolean;
 	blockedMessage?: string;
 }) {
-	const sectionContent = lessonContent.workbench.sections?.[section.id];
-
 	return (
 		<section
 			className={`rounded-none border border-product-border/70 ${
@@ -352,20 +348,10 @@ function SectionCard({
 						{blockedMessage}
 					</p>
 				) : null}
-				{sectionContent?.instruction ?? section.instruction ? (
+				{section.instruction ? (
 					<p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-product-muted">
-						{sectionContent?.instruction ?? section.instruction}
+						{section.instruction}
 					</p>
-				) : null}
-				{sectionContent?.example ? (
-					<div className="mt-3 max-w-2xl border border-product-border/60 bg-product-surface-strong/65 px-3 py-2">
-						<p className="font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
-							{sectionContent.exampleLabel ?? "Example"}
-						</p>
-						<p className="mt-1 text-[12px] leading-relaxed text-product-text">
-							{sectionContent.example}
-						</p>
-					</div>
 				) : null}
 			</div>
 			<div className="px-4 py-4">
@@ -481,7 +467,9 @@ function CandidateProblemHandoff({
 	const sourceArtifact = pinnedArtifacts.find(
 		(artifact) => artifact.artifactKey === sourceArtifactKey,
 	);
-	const candidateProblems = getCandidateProblemOptions(sourceArtifact?.fieldValues);
+	const candidateProblems = getCandidateProblemOptions(
+		sourceArtifact?.fieldValues,
+	);
 	const selectedProblemIndex =
 		typeof fieldValues[selectionFieldId] === "number"
 			? (fieldValues[selectionFieldId] as number)
@@ -490,7 +478,9 @@ function CandidateProblemHandoff({
 				: null;
 	const selectedProblem =
 		selectedProblemIndex !== null
-			? candidateProblems.find((problem) => problem.index === selectedProblemIndex)
+			? candidateProblems.find(
+					(problem) => problem.index === selectedProblemIndex,
+				)
 			: null;
 
 	return (
@@ -592,7 +582,8 @@ function CandidateProblemHandoff({
 
 const roadmapBlockDescriptionsById: Record<BlockId, string> = {
 	CEO: "Choose the problem, user, outcome, flow, and scope before you build.",
-	DESIGN: "Turn the brief into screens and decisions so the build is translation, not guessing.",
+	DESIGN:
+		"Turn the brief into screens and decisions so the build is translation, not guessing.",
 	BUILD: "Use AI and your tools to implement the core flow without spiraling.",
 	SHIP: "Deploy, demo, share, and capture the first feedback loop.",
 };
@@ -619,7 +610,9 @@ function SprintRoadmapOverview({
 			lessonContent.workbench.teachingPoints?.[index] ??
 				roadmapBlockDescriptionsById[block.id],
 		),
-		lessons: getStudentFacingLessons().filter((lesson) => lesson.block === block.id),
+		lessons: getStudentFacingLessons().filter(
+			(lesson) => lesson.block === block.id,
+		),
 	}));
 
 	return (
@@ -694,9 +687,7 @@ function FieldControl({
 	if (field.kind === "readonly") {
 		return (
 			<label className="block">
-				<span className={fieldLabelClass}>
-					{field.label}
-				</span>
+				<span className={fieldLabelClass}>{field.label}</span>
 				<div className="mt-1.5 rounded-none border border-product-border/80 bg-product-surface px-3 py-3 text-xs font-medium text-product-text">
 					{linkedArtifact ? (
 						<div className="space-y-1.5">
@@ -731,9 +722,7 @@ function FieldControl({
 	if (field.kind === "text" || field.kind === "url") {
 		return (
 			<label className={`block ${inputWidthClass(field)}`}>
-				<span className={fieldLabelClass}>
-					{field.label}
-				</span>
+				<span className={fieldLabelClass}>{field.label}</span>
 				<input
 					type={field.kind === "url" ? "url" : "text"}
 					value={typeof value === "string" ? value : ""}
@@ -748,9 +737,7 @@ function FieldControl({
 	if (field.kind === "number") {
 		return (
 			<label className={`block ${inputWidthClass(field)}`}>
-				<span className={fieldLabelClass}>
-					{field.label}
-				</span>
+				<span className={fieldLabelClass}>{field.label}</span>
 				<input
 					type="number"
 					value={typeof value === "number" ? value : ""}
@@ -774,9 +761,7 @@ function FieldControl({
 	if (field.kind === "select") {
 		return (
 			<label className={`block ${inputWidthClass(field)}`}>
-				<span className={fieldLabelClass}>
-					{field.label}
-				</span>
+				<span className={fieldLabelClass}>{field.label}</span>
 				<select
 					value={typeof value === "string" ? value : ""}
 					onChange={(event) => onChange(event.target.value)}
@@ -800,9 +785,7 @@ function FieldControl({
 
 			return (
 				<div className="block">
-					<span className={fieldLabelClass}>
-						{field.label}
-					</span>
+					<span className={fieldLabelClass}>{field.label}</span>
 					<div className="mt-2 space-y-2">
 						{checklistItems.map((item, index) => (
 							<CheckboxRow
@@ -827,9 +810,7 @@ function FieldControl({
 
 		return (
 			<label className={`block ${inputWidthClass(field)}`}>
-				<span className={fieldLabelClass}>
-					{field.label}
-				</span>
+				<span className={fieldLabelClass}>{field.label}</span>
 				<textarea
 					value={toLineList(value)}
 					onChange={(event) => onChange(parseLines(event.target.value))}
@@ -844,9 +825,7 @@ function FieldControl({
 	if (field.kind === "table") {
 		return (
 			<label className={`block ${inputWidthClass(field)}`}>
-				<span className={fieldLabelClass}>
-					{field.label}
-				</span>
+				<span className={fieldLabelClass}>{field.label}</span>
 				<textarea
 					value={toTableText(value)}
 					onChange={(event) => onChange(parseTable(event.target.value))}
@@ -861,9 +840,7 @@ function FieldControl({
 	if (field.kind === "textarea") {
 		return (
 			<label className={`block ${inputWidthClass(field)}`}>
-				<span className={fieldLabelClass}>
-					{field.label}
-				</span>
+				<span className={fieldLabelClass}>{field.label}</span>
 				<textarea
 					value={typeof value === "string" ? value : ""}
 					onChange={(event) => onChange(event.target.value)}
@@ -906,16 +883,6 @@ function renderFields(
 				onChange={(value) => onFieldChange(field.id, value)}
 				pinnedArtifacts={pinnedArtifacts}
 			/>
-			{field.example ? (
-				<div className="mt-2 max-w-2xl border border-product-border/60 bg-product-surface-strong/65 px-3 py-2">
-					<p className="font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
-						{field.exampleLabel ?? "Example"}
-					</p>
-					<p className="mt-1 text-[12px] leading-relaxed text-product-text">
-						{field.example}
-					</p>
-				</div>
-			) : null}
 			{field.helpText ? (
 				<p className="mt-2 max-w-2xl text-[11px] leading-relaxed text-product-muted">
 					{field.helpText}
@@ -998,7 +965,8 @@ export function WorkbenchRenderer({
 	if (lesson.workbench === "guided_form") {
 		const visiblePinnedArtifacts = lesson.handoff
 			? pinnedArtifacts.filter(
-					(artifact) => artifact.artifactKey !== lesson.handoff?.sourceArtifactKey,
+					(artifact) =>
+						artifact.artifactKey !== lesson.handoff?.sourceArtifactKey,
 				)
 			: pinnedArtifacts;
 

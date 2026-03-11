@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 
-import { getLessonContent } from "@/content/lessons";
 import { LessonPage } from "@/components/lesson-page";
+import { getLesson } from "@/lib/course";
 import { requireCourseAccess } from "@/lib/server/course-access";
 import { getInitialProductTheme } from "@/lib/server/product-theme";
 
@@ -16,9 +16,9 @@ export default async function Page({
 	if (lessonId === "0.0") {
 		redirect("/mission");
 	}
-	const lessonContent = getLessonContent(lessonId);
+	const lesson = getLesson(lessonId);
 
-	if (!lessonContent) {
+	if (!lesson) {
 		notFound();
 	}
 
@@ -27,7 +27,7 @@ export default async function Page({
 			key={lessonId}
 			initialTheme={initialTheme}
 			lessonId={lessonId}
-			lessonContent={lessonContent}
+			lessonContent={lesson.content}
 		/>
 	);
 }

@@ -8,9 +8,9 @@ import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import {
 	getLesson,
 	getLessonHref,
+	type LessonContent,
 	type LessonConfig,
 } from "@/lib/course/manifest";
-import type { LessonContent } from "@/content/lessons/types";
 import { api } from "@/convex/_generated/api";
 import { WorkbenchRenderer } from "@/components/lesson-workbench";
 import {
@@ -370,7 +370,9 @@ export function LessonPage({
 	};
 
 	const setObjectiveTaskChecked = (taskId: string, checked: boolean) => {
-		const manualTasks = objectiveTasks.filter((task) => task.source === "manual");
+		const manualTasks = objectiveTasks.filter(
+			(task) => task.source === "manual",
+		);
 		if (manualTasks.length === 0) {
 			return;
 		}
@@ -379,8 +381,7 @@ export function LessonPage({
 			OBJECTIVE_CHECKLIST_FIELD_ID,
 			manualTasks.map((task) => ({
 				label: task.label,
-				checked:
-					task.id === taskId ? checked : task.status === "complete",
+				checked: task.id === taskId ? checked : task.status === "complete",
 			})),
 		);
 	};
@@ -389,7 +390,8 @@ export function LessonPage({
 		<div className="flex flex-col gap-2 lg:flex-row lg:items-center">
 			<div className="max-w-2xl space-y-1">
 				<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
-					Progress {completedObjectiveCount}/{Math.max(objectiveTasks.length, 1)}
+					Progress {completedObjectiveCount}/
+					{Math.max(objectiveTasks.length, 1)}
 				</p>
 				{lessonReadyToComplete && !showCompletionFeedback ? (
 					<p className="text-xs font-medium leading-relaxed text-product-accent">
@@ -403,7 +405,9 @@ export function LessonPage({
 				) : null}
 				{showCompletionFeedback ? (
 					<div className="text-xs font-medium leading-relaxed text-[#a83232]">
-						<p>{serverCompletionMessage ?? "Finish these before continuing:"}</p>
+						<p>
+							{serverCompletionMessage ?? "Finish these before continuing:"}
+						</p>
 						{displayedCompletionIssues.length > 0 ? (
 							<p className="mt-1">
 								{displayedCompletionIssues

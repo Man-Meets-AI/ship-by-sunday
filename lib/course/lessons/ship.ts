@@ -1,0 +1,457 @@
+import { createPendingLessonCoach } from "../content-helpers";
+import {
+	focusPanelDefaults,
+	splitPanelDefaults,
+	type LessonConfig,
+} from "../contracts";
+import {
+	WORKSHEET_04_DEMO_PROMPT_DOWNLOAD,
+	WORKSHEET_04_RESOURCES,
+} from "../resources";
+
+export const shipLessons = [
+	{
+		id: "4.1",
+		slug: "04-01-ship-the-core-not-the-fantasy",
+		order: 21,
+		block: "SHIP",
+		title: "Ship the Core, Not the Fantasy",
+		shortTitle: "Ship Core",
+		shell: "split",
+		workbench: "console_checklist",
+		artifact: {
+			key: "ship_checklist",
+			label: "Ship Checklist",
+			type: "checklist",
+			required: true,
+			dependsOn: ["build_summary"],
+		},
+		nextLessonId: "4.2",
+		prevLessonId: "3.6",
+		unlocks: ["4.2"],
+		coachMode: "docked",
+		objectiveTitle: "SHIP 4.1 — Ship the Core, Not the Fantasy",
+		checklist: [
+			"Remove nonessential work",
+			"Confirm one clear path",
+			"Prepare to deploy",
+		],
+		helperText: "Only the core path has to ship.",
+		winCondition: "The ship checklist is complete.",
+		panelDefaults: splitPanelDefaults,
+		pinnedArtifacts: ["build_summary"],
+		workbenchFields: [
+			{
+				id: "ship_ready_checklist",
+				label: "Ship Checklist",
+				kind: "checklist",
+				required: true,
+				options: [
+					"Remove nonessential work",
+					"Confirm one clear path",
+					"Prepare to deploy",
+				],
+			},
+			{
+				id: "last_cut",
+				label: "Any last thing to cut?",
+				kind: "text",
+			},
+		],
+		content: {
+			status: "draft",
+			intro: "Ugly and live beats beautiful and trapped.",
+			lessonMeta: {
+				runtimeLabel: "5-6 min",
+				goal: "Mentally prepare them to launch imperfect work.",
+				purpose:
+					"Most students stall here because they compare the current product to the dream product.",
+			},
+			actionCard: {
+				jobNow: "Write down what must work before this app is allowed to ship.",
+				timebox: "5 minutes",
+				comeBackWith: "A simple ship checklist.",
+			},
+			coach: createPendingLessonCoach({
+				title: "Ship the Core, Not the Fantasy",
+				resources: WORKSHEET_04_RESOURCES,
+			}),
+			workbench: {
+				prompt: "Ugly and live beats beautiful and trapped.",
+				teachingPoints: [
+					"Define the shipping checklist.",
+					"Separate critical from optional.",
+					"Show what good enough to ship looks like.",
+				],
+				emptyState: "Ugly and live beats beautiful and trapped.",
+			},
+		},
+	},
+	{
+		id: "4.2",
+		slug: "04-02-deploy-the-app",
+		order: 22,
+		block: "SHIP",
+		title: "Deploy the App",
+		shortTitle: "Deploy",
+		shell: "focus",
+		workbench: "external_workspace",
+		artifact: {
+			key: "live_url",
+			label: "Live URL",
+			type: "link",
+			required: true,
+			dependsOn: ["ship_checklist"],
+		},
+		nextLessonId: "4.3",
+		prevLessonId: "4.1",
+		unlocks: ["4.3"],
+		coachMode: "pip",
+		externalTool: "deploy",
+		objectiveTitle: "SHIP 4.2 — Deploy the App",
+		checklist: [
+			"Open the deploy platform",
+			"Complete the deploy",
+			"Save the live URL",
+			"Verify it is live",
+		],
+		helperText: "Use focus mode. The actual work is in the deploy tool.",
+		winCondition: "A verified live URL is saved.",
+		panelDefaults: focusPanelDefaults,
+		pinnedArtifacts: ["ship_checklist"],
+		workbenchFields: [
+			{
+				id: "live_url",
+				label: "Live URL",
+				kind: "url",
+				required: true,
+			},
+			{
+				id: "live_verified",
+				label: "Live verified",
+				kind: "toggle",
+				required: true,
+			},
+		],
+		content: {
+			status: "draft",
+			intro: "The goal is a URL, not infrastructure mastery.",
+			lessonMeta: {
+				runtimeLabel: "8-10 min",
+				goal: "Get the app live fast.",
+				purpose: "The student needs a public URL, not a deep lesson on infra.",
+			},
+			actionCard: {
+				jobNow: "Deploy the app and get a live link.",
+				timebox: "20 minutes",
+				comeBackWith: "A live URL.",
+			},
+			coach: createPendingLessonCoach({
+				title: "Deploy the App",
+				resources: WORKSHEET_04_RESOURCES,
+			}),
+			workbench: {
+				prompt: "The goal is a URL, not infrastructure mastery.",
+				teachingPoints: [
+					"Walk through deployment.",
+					"Show environment variables only if truly needed.",
+					"Test the live URL and the core flow.",
+				],
+				emptyState: "The goal is a URL, not infrastructure mastery.",
+			},
+		},
+	},
+	{
+		id: "4.3",
+		slug: "04-03-record-a-simple-demo",
+		order: 23,
+		block: "SHIP",
+		title: "Record a Simple Demo",
+		shortTitle: "Demo",
+		shell: "split",
+		workbench: "capture_upload",
+		artifact: {
+			key: "demo_clip",
+			label: "Demo Clip",
+			type: "video",
+			required: true,
+			dependsOn: ["live_url"],
+		},
+		nextLessonId: "4.4",
+		prevLessonId: "4.2",
+		unlocks: ["4.4"],
+		coachMode: "docked",
+		externalTool: "recording",
+		objectiveTitle: "SHIP 4.3 — Record a Simple Demo",
+		checklist: [
+			"Record a 30–60 second clip",
+			"Show the problem and solution",
+			"Upload the clip",
+		],
+		helperText:
+			"Use upload rather than building a recorder into the product first.",
+		winCondition: "A demo clip is uploaded.",
+		panelDefaults: splitPanelDefaults,
+		pinnedArtifacts: ["live_url"],
+		workbenchFields: [
+			{
+				id: "demo_upload",
+				label: "Upload Demo Clip",
+				kind: "video_upload",
+				required: true,
+			},
+		],
+		content: {
+			status: "draft",
+			intro: "A quick demo lowers confusion and increases response rate.",
+			lessonMeta: {
+				runtimeLabel: "5-7 min",
+				goal: "Create a low-friction asset for sharing.",
+				purpose:
+					"A short walkthrough makes the app real to other people quickly.",
+			},
+			actionCard: {
+				jobNow: "Record a 30-60 second walkthrough of the core flow.",
+				timebox: "10 minutes",
+				comeBackWith: "One demo clip.",
+			},
+			coach: createPendingLessonCoach({
+				title: "Record a Simple Demo",
+				resources: WORKSHEET_04_RESOURCES,
+			}),
+			workbench: {
+				prompt: "A quick demo lowers confusion and increases response rate.",
+				teachingPoints: [
+					"Use a simple script: problem, what it does, one core flow, outcome.",
+					"Keep the camera / narration optional if needed.",
+				],
+				emptyState:
+					"A quick demo lowers confusion and increases response rate.",
+				...WORKSHEET_04_DEMO_PROMPT_DOWNLOAD,
+			},
+		},
+	},
+	{
+		id: "4.4",
+		slug: "04-04-send-it-to-real-humans",
+		order: 24,
+		block: "SHIP",
+		title: "Send It to Real Humans",
+		shortTitle: "Send",
+		shell: "split",
+		workbench: "tracker_log",
+		artifact: {
+			key: "send_log",
+			label: "Send Log",
+			type: "table",
+			required: true,
+			dependsOn: ["demo_clip"],
+		},
+		nextLessonId: "4.5",
+		prevLessonId: "4.3",
+		unlocks: ["4.5"],
+		coachMode: "docked",
+		objectiveTitle: "SHIP 4.4 — Send It to Real Humans",
+		checklist: ["Make 5 sends", "Log who got it", "Capture replies"],
+		helperText: "This is a real send tracker, not a motivational screen.",
+		winCondition: "Five sends are logged.",
+		panelDefaults: splitPanelDefaults,
+		pinnedArtifacts: ["live_url", "demo_clip"],
+		workbenchFields: [
+			{
+				id: "send_table",
+				label: "Send Tracker",
+				kind: "table",
+				required: true,
+			},
+		],
+		content: {
+			status: "draft",
+			intro: "You do not need fifty users today. You need five real sends.",
+			lessonMeta: {
+				runtimeLabel: "6-8 min",
+				goal: "Break the fear barrier and start feedback.",
+				purpose: "This lesson is about courage and momentum, not scale.",
+			},
+			actionCard: {
+				jobNow: "Send the app to 5 people using the provided script.",
+				timebox: "15 minutes",
+				comeBackWith: "Five real sends.",
+			},
+			coach: createPendingLessonCoach({
+				title: "Send It to Real Humans",
+				resources: WORKSHEET_04_RESOURCES,
+			}),
+			workbench: {
+				prompt: "You do not need fifty users today. You need five real sends.",
+				teachingPoints: [
+					"Choose the first 5 people.",
+					"Use a simple outreach message.",
+					"Ask for confusion, friction, and usefulness - not compliments.",
+				],
+				emptyState:
+					"You do not need fifty users today. You need five real sends.",
+			},
+		},
+	},
+	{
+		id: "4.5",
+		slug: "04-05-capture-feedback-and-plan-version-two",
+		order: 25,
+		block: "SHIP",
+		title: "Capture Feedback and Plan Version Two",
+		shortTitle: "Feedback",
+		shell: "split",
+		workbench: "tracker_log",
+		artifact: {
+			key: "feedback_log",
+			label: "Feedback Log + V2 Priorities",
+			type: "mixed",
+			required: true,
+			dependsOn: ["send_log"],
+		},
+		nextLessonId: "4.6",
+		prevLessonId: "4.4",
+		unlocks: ["4.6"],
+		coachMode: "docked",
+		objectiveTitle: "SHIP 4.5 — Capture Feedback and Plan Version Two",
+		checklist: ["Add feedback", "Group patterns", "Name the top 3 v2 items"],
+		helperText: "Capture raw signal, then force prioritization.",
+		winCondition: "Feedback entries and top 3 v2 priorities are saved.",
+		panelDefaults: splitPanelDefaults,
+		pinnedArtifacts: ["send_log"],
+		workbenchFields: [
+			{
+				id: "feedback_table",
+				label: "Feedback Log",
+				kind: "table",
+				required: true,
+			},
+			{
+				id: "v2_priority_1",
+				label: "Top V2 Priority 1",
+				kind: "text",
+				required: true,
+			},
+			{
+				id: "v2_priority_2",
+				label: "Top V2 Priority 2",
+				kind: "text",
+				required: true,
+			},
+			{
+				id: "v2_priority_3",
+				label: "Top V2 Priority 3",
+				kind: "text",
+				required: true,
+			},
+		],
+		content: {
+			status: "draft",
+			intro: "Feedback is useful when it changes decisions.",
+			lessonMeta: {
+				runtimeLabel: "6-8 min",
+				goal: "Turn first responses into direction.",
+				purpose:
+					"This is where the sprint stops being a one-off and becomes a loop.",
+			},
+			actionCard: {
+				jobNow:
+					"Log the first feedback you get and choose the top 3 improvements for version two.",
+				timebox: "15 minutes",
+				comeBackWith: "A next-steps list.",
+			},
+			coach: createPendingLessonCoach({
+				title: "Capture Feedback and Plan Version Two",
+				resources: WORKSHEET_04_RESOURCES,
+			}),
+			workbench: {
+				prompt: "Feedback is useful when it changes decisions.",
+				teachingPoints: [
+					"Log the first feedback.",
+					"Sort it into confusion, bugs, and opportunity.",
+					"Choose the top 3 improvements only.",
+				],
+				emptyState: "Feedback is useful when it changes decisions.",
+			},
+		},
+	},
+	{
+		id: "4.6",
+		slug: "04-06-final-wrap",
+		order: 26,
+		block: "SHIP",
+		title: "Final Wrap",
+		shortTitle: "Final",
+		shell: "split",
+		workbench: "brief_assembler",
+		artifact: {
+			key: "final_mission_record",
+			label: "Final Mission Record",
+			type: "brief",
+			required: true,
+			dependsOn: ["live_url", "demo_clip", "send_log", "feedback_log"],
+		},
+		prevLessonId: "4.5",
+		coachMode: "docked",
+		objectiveTitle: "SHIP 4.6 — Final Wrap",
+		checklist: [
+			"Confirm live URL",
+			"Confirm demo clip",
+			"Confirm sends",
+			"Confirm feedback log",
+			"Complete the sprint",
+		],
+		helperText:
+			"This is the final mission record, not another planning artifact.",
+		winCondition:
+			"The mission record is assembled and the sprint is marked complete.",
+		panelDefaults: splitPanelDefaults,
+		pinnedArtifacts: ["live_url", "demo_clip", "send_log", "feedback_log"],
+		workbenchFields: [
+			{
+				id: "shipped_reflection",
+				label: "What did I ship?",
+				kind: "textarea",
+				required: true,
+				rows: 4,
+			},
+			{
+				id: "next_reflection",
+				label: "What is next?",
+				kind: "textarea",
+				required: true,
+				rows: 4,
+			},
+		],
+		content: {
+			status: "draft",
+			intro: "Most people never complete a full rep. You did.",
+			lessonMeta: {
+				runtimeLabel: "3-5 min",
+				goal: "Close the identity shift.",
+				purpose:
+					"The student needs to feel the transformation in behavior, not just the completion of content.",
+			},
+			actionCard: {
+				jobNow:
+					"Review all four worksheets and write down your next iteration date.",
+				timebox: "10 minutes",
+				comeBackWith: "A clear plan for version two or the next app.",
+			},
+			coach: createPendingLessonCoach({
+				title: "Final Wrap",
+				resources: WORKSHEET_04_RESOURCES,
+			}),
+			workbench: {
+				prompt: "Most people never complete a full rep. You did.",
+				teachingPoints: [
+					"Recap the 4 artifacts.",
+					"Name the rep they just finished.",
+					"Invite them to iterate, not disappear.",
+				],
+				emptyState: "Most people never complete a full rep. You did.",
+			},
+		},
+	},
+] satisfies LessonConfig[];
