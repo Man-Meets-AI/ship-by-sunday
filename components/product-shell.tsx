@@ -20,6 +20,10 @@ const navItems = [
 	{ href: "/settings", label: "Settings" },
 ];
 
+function isNavItemActive(pathname: string, href: string) {
+	return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 type LayoutMode = "split" | "focus";
 
 type MissionState = {
@@ -179,7 +183,7 @@ function ShellInner({
 
 				<nav className="flex gap-1 font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted sm:text-[10px]">
 					{navItems.map((item) => {
-						const isActive = pathname === item.href;
+						const isActive = isNavItemActive(pathname, item.href);
 						return (
 							<Link
 								key={item.href}
