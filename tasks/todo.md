@@ -6,6 +6,8 @@ It does not replace the root `todo.md`, which remains the launch tracker and sou
 
 ## Active
 
+- [x] Clean up lesson `1.5` so the pinned context reads as `Our user` and `Outcome statement`, remove the research preview and dead template-preview field, swap the worksheet PDF handoff to the canonical FigJam core-flow template, rename the upload to `core flow screenshot`, and update the shared artifact/template card behavior plus tests
+- [x] Rework lesson `1.4` into an import-first research flow with a main-workbench prompt card, pasteback parsing into the existing table and summary fields, and parser/test coverage for real Deep Research output noise
 - [x] Add a dynamic lesson `1.4` research prompt resource card that builds from lessons `1.2` and `1.3`, supports copy/manual paste, and keeps the scope to structured prompt output only
 - [x] Replace the lesson pipe-delimited table textarea with a shared editable table field, add manifest column metadata, clean up duplicated table headers, and update table artifact previews
 - [x] Add a system-punch lesson completion celebration that visibly rewards completion before auto-advancing
@@ -40,6 +42,7 @@ It does not replace the root `todo.md`, which remains the launch tracker and sou
 - [x] Normalize the 0.2 roadmap block descriptions so the block name only appears in the card header
 - [x] Harden refresh UX by removing theme flicker, server-redirecting entitled users before home-page render, and replacing blocking product-route loading cards with shell-native skeletons
 - [x] Make the top HUD block chips non-selectable
+- [x] Make the lesson workbench header badges non-selectable
 - [x] Update the 0.2 lesson checklist copy to the new student-facing wording
 - [x] Remove escaped `\\=` artifacts from generated lesson copy
 - [x] Replace lesson 0.2’s form input with a static sprint-roadmap explainer component
@@ -62,6 +65,12 @@ It does not replace the root `todo.md`, which remains the launch tracker and sou
 
 ## Review
 
+- Outcome: Cleaned up lesson `1.5` so it now shows only the `Our user` and `Outcome statement` pinned context cards, drops the old research preview and dead template-preview field, swaps the worksheet PDF CTA to the canonical FigJam template, renames the upload flow around a `core flow screenshot`, and updates the shared artifact/template cards so curated titles no longer render a duplicated lesson-title header.
+- Verification: `pnpm exec vitest run tests/unit/course-registry.test.ts tests/unit/lesson-workbench-renderer.test.tsx`, `pnpm run typecheck`, and `pnpm run check` (fails only on unrelated pre-existing formatting issues in `components/lesson-workbench/modes/guided-form-workbench.tsx`, `docs/design/motion-practical-examples.md`, `package.json`, and `tests/smoke/content-contract.test.ts`)
+- Follow-up: Browser-QA lesson `1.5` with real saved `1.2` and `1.3` artifacts to confirm the new pinned-card headers, the external FigJam handoff, and the upload wording all read cleanly in the live product shell.
+- Outcome: Reworked lesson `1.4` into an import-first research workflow by adding lesson-level `promptImport` config, moving the competitor-research prompt logic into shared helpers, rendering the prompt copy / pasteback flow in the main `score_table` workbench, parsing pasted ChatGPT output back into the existing `research_table` and `research_summary` fields, and removing the duplicate prompt card from coach resources.
+- Verification: `pnpm exec vitest run tests/unit/research-prompt.test.ts tests/unit/lesson-workbench-renderer.test.tsx tests/unit/lesson-shells.test.tsx`, `pnpm exec eslint lib/course/contracts.ts lib/course/research-prompt.ts lib/course/lessons/ceo.ts components/lesson-shells.tsx components/lesson-workbench/modes/score-table-workbench.tsx tests/unit/research-prompt.test.ts tests/unit/lesson-workbench-renderer.test.tsx tests/unit/lesson-shells.test.tsx`, and `pnpm run typecheck`
+- Follow-up: Browser-QA the live `1.2 -> 1.3 -> 1.4` flow on desktop and mobile with one real ChatGPT Deep Research pasteback to tune the import helper copy, parser tolerance, and post-import editing feel.
 - Outcome: Added a typed `copy_prompt` lesson resource path, a dynamic competitor-research prompt builder sourced from the saved `1.2` user/problem context and `1.3` outcome context, and a new lesson `1.4` coach-resource card that lets the learner copy the prompt or manually copy from a readonly block while still falling back cleanly when prior context is missing.
 - Verification: `pnpm exec vitest run tests/unit/research-prompt.test.ts tests/unit/lesson-shells.test.tsx tests/unit/lesson-workbench-renderer.test.tsx` and `pnpm run typecheck`
 - Follow-up: Browser-QA lesson `1.4` in the live app after completing `1.2` and `1.3`, then confirm the prompt feels strong in ChatGPT Deep Research and that the returned `|` rows paste cleanly into the existing table flow.
@@ -170,6 +179,9 @@ It does not replace the root `todo.md`, which remains the launch tracker and sou
 - Outcome: The top HUD block chips now use `select-none`, so their labels and lock icons can’t be highlighted like regular text.
 - Verification: `pnpm exec tsc --noEmit`, `pnpm exec eslint components/product-shell.tsx`, and `rg -n 'select-none items-center' components/product-shell.tsx`
 - Follow-up: If the rest of the top HUD should also behave like chrome, the same treatment can be extended to the nav labels and progress counter.
+- Outcome: The lesson workbench header metadata row now uses `select-none`, so the lesson id, artifact label, and runtime badge behave like fixed chrome instead of highlightable text while the lesson title and intro remain selectable.
+- Verification: `pnpm exec vitest run tests/unit/lesson-workbench-renderer.test.tsx` and `pnpm exec eslint components/lesson-workbench/shared/workbench-header.tsx tests/unit/lesson-workbench-renderer.test.tsx`
+- Follow-up: Browser-QA one guided-form lesson and lesson `1.4` specifically to confirm only the badge row lost text selection.
 - Outcome: Start Here `0.2` now uses the shorter checklist copy: `Download Figma, VSCode` and `Review the 4 Blocks`.
 - Verification: `pnpm exec tsc --noEmit` and `rg -n 'Download Figma, VSCode|Review the 4 Blocks|Start Here 0\\.2' lib/course/manifest.ts`
 - Follow-up: If you want, the `0.2` action-card copy can be tightened next so it matches the new checklist language more closely.
