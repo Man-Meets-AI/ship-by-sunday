@@ -16,6 +16,18 @@ export type CompetitorResearchPromptContext = {
 	};
 };
 
+export type ScopeBoundaryPromptContext = CompetitorResearchPromptContext & {
+	research?: {
+		summary?: string;
+		rows: Array<{
+			solutionName: string;
+			whatItDoesWell: string;
+			whereItFallsShort: string;
+			whatUsersCareAboutMost: string;
+		}>;
+	};
+};
+
 export type PromptTemplateArtifactContext = {
 	artifactKey: string;
 	fieldValues: PersistedFieldValues;
@@ -31,8 +43,25 @@ export type CompetitorResearchImportResult = {
 	summary: string;
 };
 
+export type ScopeBoundaryImportResult = {
+	inScope: string[];
+	outOfScope: string[];
+	rationale: string;
+};
+
 const RESEARCH_TABLE_HEADING = "research table";
 const KEY_PATTERN_HEADING = "key pattern i noticed";
+const KEEP_IN_V1_HEADINGS = ["keep in v1", "in scope", "in scope features"];
+const CUT_FROM_V1_HEADINGS = [
+	"cut from v1",
+	"out of scope",
+	"out of scope features",
+];
+const V1_RATIONALE_HEADINGS = [
+	"why this version is enough",
+	"why this is enough for v1",
+	"v1 rationale",
+];
 
 function formatContextLine(label: string, value?: string) {
 	if (!value) {
@@ -54,6 +83,40 @@ function getTrimmedFieldValue(
 
 	const trimmed = value.trim();
 	return trimmed.length > 0 ? trimmed : null;
+}
+
+function getResearchRows(
+	fieldValues: PersistedFieldValues,
+	fieldId: string,
+) {
+	const value = fieldValues[fieldId];
+	if (!Array.isArray(value)) {
+		return [];
+	}
+
+	return value
+		.filter(
+			(row): row is string[] =>
+				Array.isArray(row) && row.every((cell) => typeof cell === "string"),
+		)
+		.map((row) => row.map((cell) => cell.trim()))
+		.filter(
+			(row) =>
+				row.length >= 4 && row.slice(0, 4).every((cell) => cell.length > 0),
+		)
+		.map(
+			([
+				solutionName,
+				whatItDoesWell,
+				whereItFallsShort,
+				whatUsersCareAboutMost,
+			]) => ({
+				solutionName,
+				whatItDoesWell,
+				whereItFallsShort,
+				whatUsersCareAboutMost,
+			}),
+		);
 }
 
 export function getCompetitorResearchPromptContext(
@@ -113,6 +176,38 @@ export function getCompetitorResearchPromptContext(
 					"difference_for_user",
 				) ?? undefined,
 		},
+	};
+}
+
+function getScopeBoundaryPromptContext(
+	pinnedArtifacts: PromptTemplateArtifactContext[],
+): ScopeBoundaryPromptContext | null {
+	const baseContext = getCompetitorResearchPromptContext(pinnedArtifacts);
+	if (!baseContext) {
+		return null;
+	}
+
+	const researchArtifact =
+		pinnedArtifacts.find(
+			(artifact) => artifact.artifactKey === "research_notes",
+		) ?? null;
+	const researchRows = researchArtifact
+		? getResearchRows(researchArtifact.fieldValues, "research_table").slice(0, 3)
+		: [];
+	const researchSummary = researchArtifact
+		? (getTrimmedFieldValue(researchArtifact.fieldValues, "research_summary") ??
+			undefined)
+		: undefined;
+
+	return {
+		...baseContext,
+		research:
+			researchRows.length > 0 || researchSummary
+				? {
+						rows: researchRows,
+						summary: researchSummary,
+					}
+				: undefined,
 	};
 }
 
@@ -216,29 +311,117 @@ export function buildCompetitorResearchPrompt(
 	].join("\n");
 }
 
+export function buildScopeBoundaryPrompt(context: ScopeBoundaryPromptContext) {
+	const contextLines = [
+		formatContextLine("User", context.user.statement),
+		formatContextLine("Problem to solve", context.user.problem),
+		formatContextLine("Pain moment", context.user.painMoment),
+		formatContextLine("Current workaround", context.user.currentSolution),
+		formatContextLine("Reachability", context.user.reachability),
+		formatContextLine("Desired outcome", context.outcome.statement),
+		formatContextLine("Success looks like", context.outcome.successLooksLike),
+		formatContextLine("Difference for user", context.outcome.differenceForUser),
+	].filter((line): line is string => Boolean(line));
+	const researchLines = [
+		...(context.research?.rows ?? []).map(
+			(row) =>
+				`- ${row.solutionName}: does well -> ${row.whatItDoesWell}; falls short -> ${row.whereItFallsShort}; users care about -> ${row.whatUsersCareAboutMost}`,
+		),
+		formatContextLine("Research pattern", context.research?.summary),
+	].filter((line): line is string => Boolean(line));
+
+	return [
+		"You are helping a builder cut an MVP to the smallest believable version they can ship in a weekend sprint.",
+		"",
+		"Your job is to recommend the narrowest v1 that still lets the user reach the promised outcome in one clean core flow.",
+		"Prefer subtraction over ambition.",
+		"",
+		"Do not turn this into a roadmap, platform plan, or future-state vision.",
+		"",
+		"Context to scope against:",
+		...contextLines,
+		"",
+		"Research signal to keep in mind:",
+		...(researchLines.length > 0
+			? researchLines
+			: [
+					"- No extra research notes were saved. Scope from the user, problem, and outcome only.",
+				]),
+		"",
+		"Scoping rules:",
+		"- Assume one primary user, one core flow, and one believable weekend build.",
+		"- Keep the Keep in v1 section to 3-5 items max.",
+		"- Every Keep in v1 item should be necessary for the user to reach the outcome.",
+		"- Phrase features as crisp user-facing capabilities, not vague themes or engineering chores.",
+		"- Use the Cut from v1 section to name tempting extras builders often add too early.",
+		"- Avoid dashboards, analytics, settings, collaboration, team roles, notifications, admin panels, integrations, billing, or platform-level extras unless they are absolutely required for the user to reach the outcome in the core flow.",
+		"- If something sounds nice but is not necessary for the user to get the win, cut it.",
+		"",
+		"Required output format:",
+		"",
+		"Keep in v1",
+		"- Output this section as a simple bullet list only.",
+		"- One feature or capability per bullet.",
+		"",
+		"Cut from v1",
+		"- Output this section as a simple bullet list only.",
+		"- Include at least 3 cuts.",
+		"",
+		"Why this version is enough",
+		"- Write 2-4 concise sentences.",
+		"- Explain why this smaller version is still believable and useful for the user.",
+		"",
+		"Output rules:",
+		"- Return only these three sections in this order:",
+		"  1. Keep in v1",
+		"  2. Cut from v1",
+		"  3. Why this version is enough",
+		"- Do not add intro text.",
+		"- Do not add conclusion text.",
+		"- Do not add any extra sections.",
+		"- Do not include citations or source lists.",
+	].join("\n");
+}
+
 export function getPromptTemplateState(
 	promptTemplateId: LessonPromptTemplateId,
 	pinnedArtifacts: PromptTemplateArtifactContext[],
 ): PromptTemplateState {
-	if (promptTemplateId !== "competitor_research") {
+	if (promptTemplateId === "competitor_research") {
+		const context = getCompetitorResearchPromptContext(pinnedArtifacts);
+		if (!context) {
+			return {
+				prompt: null,
+				disabledReason:
+					"Finish lessons 1.2 and 1.3 first so we can build this prompt from your chosen user and outcome.",
+			};
+		}
+
 		return {
-			prompt: null,
-			disabledReason: "This prompt template is not wired yet.",
+			prompt: buildCompetitorResearchPrompt(context),
+			disabledReason: null,
 		};
 	}
 
-	const context = getCompetitorResearchPromptContext(pinnedArtifacts);
-	if (!context) {
+	if (promptTemplateId === "scope_boundary") {
+		const context = getScopeBoundaryPromptContext(pinnedArtifacts);
+		if (!context) {
+			return {
+				prompt: null,
+				disabledReason:
+					"Finish lessons 1.2 through 1.4 first so we can build this scope cut from your chosen user, outcome, and research.",
+			};
+		}
+
 		return {
-			prompt: null,
-			disabledReason:
-				"Finish lessons 1.2 and 1.3 first so we can build this prompt from your chosen user and outcome.",
+			prompt: buildScopeBoundaryPrompt(context),
+			disabledReason: null,
 		};
 	}
 
 	return {
-		prompt: buildCompetitorResearchPrompt(context),
-		disabledReason: null,
+		prompt: null,
+		disabledReason: "This prompt template is not wired yet.",
 	};
 }
 
@@ -289,41 +472,55 @@ function stripInlineCitations(value: string) {
 	);
 }
 
-function collectSectionLines(input: string) {
-	const tableLines: string[] = [];
-	const summaryLines: string[] = [];
-	let currentSection: "table" | "summary" | null = null;
+function collectNamedSectionLines<TSection extends string>(
+	input: string,
+	headingAliases: Record<TSection, string[]>,
+) {
+	const sections = {} as Record<TSection, string[]>;
+	const headingMap = new Map<string, TSection>();
+	let currentSection: TSection | null = null;
+
+	for (const sectionKey of Object.keys(headingAliases) as TSection[]) {
+		sections[sectionKey] = [];
+	}
+
+	for (const [sectionKey, aliases] of Object.entries(headingAliases) as Array<
+		[TSection, string[]]
+	>) {
+		for (const alias of aliases) {
+			headingMap.set(alias, sectionKey);
+		}
+	}
 
 	for (const rawLine of input.replace(/\r\n?/gu, "\n").split("\n")) {
 		const normalizedHeading = normalizeHeadingText(rawLine);
+		const nextSection = headingMap.get(normalizedHeading);
 
-		if (normalizedHeading === RESEARCH_TABLE_HEADING) {
-			currentSection = "table";
+		if (nextSection) {
+			currentSection = nextSection;
 			continue;
 		}
 
-		if (normalizedHeading === KEY_PATTERN_HEADING) {
-			currentSection = "summary";
+		if (!currentSection || isFootnoteDefinition(rawLine)) {
 			continue;
 		}
 
-		if (!currentSection) {
-			continue;
-		}
-
-		if (isFootnoteDefinition(rawLine)) {
-			continue;
-		}
-
-		if (currentSection === "table") {
-			tableLines.push(rawLine);
-			continue;
-		}
-
-		summaryLines.push(rawLine);
+		sections[currentSection].push(rawLine);
 	}
 
-	return { tableLines, summaryLines };
+	return sections;
+}
+
+function collectSectionLines(input: string) {
+	const sections = collectNamedSectionLines(input, {
+		table: [RESEARCH_TABLE_HEADING],
+		summary: [KEY_PATTERN_HEADING],
+	});
+
+	return {
+		tableLines: sections.table,
+		summaryLines: sections.summary,
+	};
 }
 
 function isHeaderLikeRow(cells: string[]) {
@@ -385,7 +582,7 @@ function parseResearchTableRows(lines: string[]) {
 	return rows;
 }
 
-function parseResearchSummary(lines: string[]) {
+function parseParagraphSection(lines: string[], emptyMessage: string) {
 	const summary = lines
 		.map((line) =>
 			normalizeSpacing(stripListPrefix(stripInlineCitations(line))),
@@ -395,12 +592,29 @@ function parseResearchSummary(lines: string[]) {
 		.trim();
 
 	if (summary.length === 0) {
-		throw new Error(
-			"Paste the full response with a Key pattern I noticed section so we can fill the summary field.",
-		);
+		throw new Error(emptyMessage);
 	}
 
 	return summary;
+}
+
+function parseResearchSummary(lines: string[]) {
+	return parseParagraphSection(
+		lines,
+		"Paste the full response with a Key pattern I noticed section so we can fill the summary field.",
+	);
+}
+
+function parseScopeList(lines: string[], emptyMessage: string) {
+	const items = lines
+		.map((line) => normalizeSpacing(stripListPrefix(stripInlineCitations(line))))
+		.filter((line) => line.length > 0 && !isMarkdownTableDivider(line));
+
+	if (items.length === 0) {
+		throw new Error(emptyMessage);
+	}
+
+	return items;
 }
 
 export function parseCompetitorResearchImport(
@@ -426,28 +640,81 @@ export function parseCompetitorResearchImport(
 	};
 }
 
+export function parseScopeBoundaryImport(
+	input: string,
+): ScopeBoundaryImportResult {
+	const trimmed = input.trim();
+	if (trimmed.length === 0) {
+		throw new Error(
+			"Paste the full ChatGPT response that includes Keep in v1, Cut from v1, and Why this version is enough.",
+		);
+	}
+
+	const sections = collectNamedSectionLines(trimmed, {
+		inScope: KEEP_IN_V1_HEADINGS,
+		outOfScope: CUT_FROM_V1_HEADINGS,
+		rationale: V1_RATIONALE_HEADINGS,
+	});
+
+	if (
+		sections.inScope.length === 0 ||
+		sections.outOfScope.length === 0 ||
+		sections.rationale.length === 0
+	) {
+		throw new Error(
+			"Paste the full ChatGPT response that includes Keep in v1, Cut from v1, and Why this version is enough.",
+		);
+	}
+
+	return {
+		inScope: parseScopeList(
+			sections.inScope,
+			"Paste the full response with a Keep in v1 section that contains at least one usable item.",
+		),
+		outOfScope: parseScopeList(
+			sections.outOfScope,
+			"Paste the full response with a Cut from v1 section that contains at least one usable item.",
+		),
+		rationale: parseParagraphSection(
+			sections.rationale,
+			"Paste the full response with a Why this version is enough section so we can fill the v1 rationale.",
+		),
+	};
+}
+
 export function parsePromptTemplateImport(
 	promptTemplateId: LessonPromptTemplateId,
 	input: string,
 ) {
-	if (promptTemplateId !== "competitor_research") {
-		throw new Error("This prompt import is not wired yet.");
+	if (promptTemplateId === "competitor_research") {
+		return parseCompetitorResearchImport(input);
 	}
 
-	return parseCompetitorResearchImport(input);
+	if (promptTemplateId === "scope_boundary") {
+		return parseScopeBoundaryImport(input);
+	}
+
+	throw new Error("This prompt import is not wired yet.");
 }
 
 export function buildPromptImportFieldValues(
 	promptImport: LessonPromptImport,
 	input: string,
 ) {
-	const imported = parsePromptTemplateImport(
-		promptImport.promptTemplateId,
-		input,
-	);
+	if (promptImport.promptTemplateId === "competitor_research") {
+		const imported = parseCompetitorResearchImport(input);
+
+		return {
+			[promptImport.tableFieldId]: imported.rows,
+			[promptImport.summaryFieldId]: imported.summary,
+		};
+	}
+
+	const imported = parseScopeBoundaryImport(input);
 
 	return {
-		[promptImport.tableFieldId]: imported.rows,
-		[promptImport.summaryFieldId]: imported.summary,
+		[promptImport.inScopeFieldId]: imported.inScope,
+		[promptImport.outOfScopeFieldId]: imported.outOfScope,
+		[promptImport.rationaleFieldId]: imported.rationale,
 	};
 }

@@ -167,7 +167,9 @@ export type LessonExampleContent = {
 	body: string;
 };
 
-export type LessonPromptTemplateId = "competitor_research";
+export type LessonPromptTemplateId =
+	| "competitor_research"
+	| "scope_boundary";
 
 export type LessonLinkResourceContent = {
 	id: string;
@@ -184,11 +186,18 @@ export type LessonPromptResourceContent = {
 	promptTemplateId: LessonPromptTemplateId;
 };
 
-export type LessonPromptImport = {
-	promptTemplateId: LessonPromptTemplateId;
-	tableFieldId: string;
-	summaryFieldId: string;
-};
+export type LessonPromptImport =
+	| {
+			promptTemplateId: "competitor_research";
+			tableFieldId: string;
+			summaryFieldId: string;
+	  }
+	| {
+			promptTemplateId: "scope_boundary";
+			inScopeFieldId: string;
+			outOfScopeFieldId: string;
+			rationaleFieldId: string;
+	  };
 
 export type LessonResourceContent =
 	| LessonLinkResourceContent

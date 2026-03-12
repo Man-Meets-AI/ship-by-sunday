@@ -59,7 +59,7 @@ export function renderCollectionFieldControl(
 					value={toLineList(value)}
 					onChange={(event) => onChange(parseLines(event.target.value))}
 					rows={field.rows ?? 6}
-					placeholder="One item per line"
+					placeholder={field.placeholder ?? "One item per line"}
 					className={inputBaseClass}
 				/>
 			</label>
