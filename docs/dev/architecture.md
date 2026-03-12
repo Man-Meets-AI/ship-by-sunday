@@ -15,7 +15,7 @@
 - `components/lesson-workbench/fields/` owns field-kind controls and pure parsing helpers.
 - `components/lesson-workbench/shared/` owns shell-level primitives that are reused across modes.
 - See `docs/dev/lesson-workbench.md` for the working rules and file-boundary guardrails.
-- `components/lesson-shells.tsx` owns the coach dock, including dynamic resource cards like lesson `1.4`'s copyable research prompt.
+- `components/lesson-shells.tsx` owns the coach dock and shared dock resource rendering.
 
 ## Purchase to access flow
 
@@ -29,7 +29,7 @@
 
 - `lib/course/manifest.ts` assembles the course contract.
 - `lib/course/lessons/*.ts` own the manual lesson definitions and student-facing content.
-- `lib/course/research-prompt.ts` owns prompt templates that are built from saved lesson context before rendering in the coach dock.
+- `lib/course/research-prompt.ts` owns prompt templates, prompt-context helpers, and pasteback parsing for prompt-driven lesson imports such as lesson `1.4`.
 - `lib/course/registry.ts` derives runtime helpers from that contract.
 - `app/lesson/[lessonId]/page.tsx` validates the lesson ID server-side, then the lesson page resolves the static lesson definition locally from `lib/course`.
 - `convex/course.ts` stores dynamic course state only: entitlements, access gating, lesson progress, uploads, pinned artifact previews, and hydrated draft field values.

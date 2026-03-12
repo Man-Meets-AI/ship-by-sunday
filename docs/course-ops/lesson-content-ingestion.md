@@ -55,11 +55,11 @@ Use shared resource constants for:
 - worksheet 01 through 04 links
 - template-download links already reused across multiple lessons
 
-Use lesson-specific coach resources for:
+Use lesson-specific prompt import config or coach resources for:
 
-- copyable prompt cards such as lesson `1.4`'s custom competitor-research prompt
-- resource bodies that explain how the learner should use the prompt or tool
+- prompt-driven workbench flows such as lesson `1.4`'s competitor-research copy/pasteback path
 - prompt template ids that resolve through `lib/course/research-prompt.ts`
+- coach-dock resources that still belong in the dock, such as worksheet links or external references
 
 Use recording docs as human reference only:
 

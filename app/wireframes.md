@@ -191,16 +191,19 @@ Coach states:
 ┌──── CURRENT OBJECTIVE ────┬────────────── WORKBENCH 1.4 ──────────────┬──── COACH ────┐
 │ CEO 1.4                   │ Light Research, Not a Thesis              │ WATCH          │
 │                           │                                           │ [video]        │
-│ Checklist                 │ Research Table                            │                │
-│ [ ] Add 2–3 competitors   │ ┌────────────┬─────────┬─────────┬──────┐ │ TRANSCRIPT     │
-│ [ ] Note what they do     │ │ Competitor │ Good    │ Poor    │Care? │ │ [collapsed]    │
-│ [ ] Extract 2–3 insights  │ ├────────────┼─────────┼─────────┼──────┤ │                │
-│                           │ │ [input]    │ [text]  │ [text]  │[text]│ │ EXAMPLES       │
-│ Output                    │ │ [input]    │ [text]  │ [text]  │[text]│ │ sample row      │
-│ Research Notes            │ │ [input]    │ [text]  │ [text]  │[text]│ │                │
-│                           │ └────────────┴─────────┴─────────┴──────┘ │ RESOURCES      │
-│ Next Unlock               │ Bottom summary:                           │ links / prompts│
-│ Map the Core Flow         │ Key pattern I noticed [ multiline ]       │                │
+│ Checklist                 │ Import research                           │                │
+│ [ ] Add 2–3 competitors   │ [ Copy prompt ] [ readonly prompt block ] │ TRANSCRIPT     │
+│ [ ] Note what they do     │ [ paste ChatGPT response textarea ]       │ [collapsed]    │
+│ [ ] Extract 2–3 insights  │ [ Import into table ] [ success / error ] │                │
+│                           │                                           │ EXAMPLES       │
+│ Output                    │ Research Table                            │ sample row      │
+│ Research Notes            │ ┌────────────┬─────────┬─────────┬──────┐ │                │
+│                           │ │ Competitor │ Good    │ Poor    │Care? │ │ RESOURCES      │
+│ Next Unlock               │ ├────────────┼─────────┼─────────┼──────┤ │ worksheet only │
+│ Map the Core Flow         │ │ [input]    │ [text]  │ [text]  │[text]│ │                │
+│                           │ │ [input]    │ [text]  │ [text]  │[text]│ │                │
+│                           │ └────────────┴─────────┴─────────┴──────┘ │                │
+│                           │ Key pattern I noticed [ multiline ]       │                │
 │                           │                               [Back][Next]│                │
 └───────────────────────────┴───────────────────────────────────────────┴────────────────┘
 ```

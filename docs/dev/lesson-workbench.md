@@ -41,6 +41,13 @@ Each workbench mode gets its own file.
 
 Do not collapse similar modes into a generic meta-mode unless multiple real changes prove the duplication is a maintenance problem.
 
+Prompt-import rules:
+
+- If a lesson needs a main-workbench `copy prompt -> paste result` loop, declare it explicitly on `lesson.promptImport`.
+- Keep prompt-template building and pasted-output parsing in `lib/course/research-prompt.ts`, not inside the lesson shell or the lesson page.
+- Keep the mode-specific import UI local to the matching workbench mode.
+- Imported output should hydrate existing lesson fields; do not add one-off persistence paths for prompt imports.
+
 ### `fields/`
 
 - `field-control.tsx` is the dispatcher.
@@ -93,6 +100,7 @@ Current coverage for the split lives in:
 
 - `tests/unit/lesson-workbench-helpers.test.ts`
 - `tests/unit/lesson-workbench-renderer.test.tsx`
+- `tests/unit/research-import-workbench.test.tsx`
 
 These tests are intentionally narrow:
 
