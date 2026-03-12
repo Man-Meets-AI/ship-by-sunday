@@ -6,7 +6,7 @@ description: Run focused interactive browser QA against a supplied app URL and r
 
 Use this skill to run a bounded browser QA pass against a specific product and environment.
 
-This is a workspace-local skill. It uses [references/browser-qa-reference.md](references/browser-qa-reference.md) for the QA workflow and [references/internal-test-accounts.json](references/internal-test-accounts.json) for the canonical shared test account.
+This is a workspace-local skill. It uses [references/qa-browser-reference.md](references/qa-browser-reference.md) for the QA workflow and [references/internal-test-accounts.json](references/internal-test-accounts.json) for the canonical shared test account.
 
 ## Required Inputs
 
@@ -39,7 +39,7 @@ If a required input is missing, ask once before opening the browser.
 ## Read Order
 
 1. Read the user's request and extract the required inputs.
-2. Read the relevant sections of [references/browser-qa-reference.md](references/browser-qa-reference.md).
+2. Read the relevant sections of [references/qa-browser-reference.md](references/qa-browser-reference.md).
 3. If the target is this repo and the flow touches the buyer journey, read [docs/analytics-qa/plan.md](../../../docs/analytics-qa/plan.md) for the current route and severity language.
 4. If the flow needs auth on this repo, read the Clerk-backed preflight section in the QA reference and use the repo-local helper commands before entering credentials.
 5. Run the smallest matching playbook with the browser tools already available in Codex.
