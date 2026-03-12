@@ -4,6 +4,7 @@
 
 ### Changed
 
+- Stage rail `Q` and `E` navigation now moves across unlocked stage boundaries, so you can jump from the end of one block into the first lesson of the next block and back without reopening the mission map.
 - Reworked lesson `1.5` into a video-first paper exercise so students now watch the walkthrough, sketch the core flow off-screen, and upload one photo instead of using the in-app flow editor.
 - Reworked the Build block to be prompt-led instead of worksheet filler.
 - Added a new kickoff step that lets students choose a starting path, generate a stronger build prompt, and move into the first slice faster.
