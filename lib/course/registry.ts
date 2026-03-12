@@ -151,16 +151,37 @@ export function getUnlockedLessonIds(completedLessonIds: string[]) {
 			continue;
 		}
 
-		for (const token of lesson.unlocks ?? []) {
-			if (token.includes(".")) {
-				unlocked.add(token);
-			}
+		for (const lessonId of lesson.unlocks?.lessons ?? []) {
+			unlocked.add(lessonId);
 		}
 	}
 
 	return getOrderedLessons()
 		.filter((lesson) => unlocked.has(lesson.id))
 		.map((lesson) => lesson.id);
+}
+
+export function getUnlockedBlockIds(completedLessonIds: string[]) {
+	const unlocked = new Set<BlockId>(
+		getOrderedBlocks()
+			.filter((block) => !block.startsLocked)
+			.map((block) => block.id),
+	);
+
+	for (const lessonId of completedLessonIds) {
+		const lesson = getLessonById(lessonId);
+		if (!lesson) {
+			continue;
+		}
+
+		for (const blockId of lesson.unlocks?.blocks ?? []) {
+			unlocked.add(blockId);
+		}
+	}
+
+	return getOrderedBlocks()
+		.filter((block) => unlocked.has(block.id))
+		.map((block) => block.id);
 }
 
 export function isLessonImplemented(lesson: LessonConfig) {
@@ -256,40 +277,29 @@ function getManualObjectiveTaskDefinitions(
 }
 
 function getHandoffPersistedFieldIds(handoff: LessonHandoff | undefined) {
-	if (!handoff || !handoff.persistToArtifact) {
+	if (!handoff) {
 		return [];
 	}
 
-	if (handoff.mode === "select_candidate_problem") {
-		return [
-			handoff.selectionFieldId,
-			"selected_problem_owner",
-			"selected_problem_statement",
-		];
-	}
-
-	return [handoff.selectionFieldId];
+	return [
+		handoff.selectionFieldId,
+		...(handoff.persistedFields ?? []).map((field) => field.targetFieldId),
+	];
 }
 
 export function getCandidateProblemOptions(
+	handoff: LessonHandoff | null | undefined,
 	fieldValues: PersistedFieldValues | null | undefined,
 ): CandidateProblemOption[] {
-	const values = normalizeFieldValues(fieldValues);
-	const indexes = Array.from(
-		new Set(
-			Object.keys(values)
-				.map((fieldId) => {
-					const match = fieldId.match(/^problem_(\d+)_(who|pain)$/);
-					return match ? Number(match[1]) : null;
-				})
-				.filter((index): index is number => Number.isFinite(index)),
-		),
-	).sort((left, right) => left - right);
+	if (!handoff || handoff.mode !== "select_candidate_problem") {
+		return [];
+	}
 
-	return indexes
-		.map((index) => {
-			const owner = values[`problem_${index}_who`];
-			const statement = values[`problem_${index}_pain`];
+	const values = normalizeFieldValues(fieldValues);
+	return handoff.options
+		.map((option) => {
+			const owner = values[option.ownerSourceFieldId];
+			const statement = values[option.statementSourceFieldId];
 
 			if (typeof owner !== "string" || typeof statement !== "string") {
 				return null;
@@ -300,7 +310,7 @@ export function getCandidateProblemOptions(
 			}
 
 			return {
-				index,
+				index: option.index,
 				owner: owner.trim(),
 				statement: statement.trim(),
 			} satisfies CandidateProblemOption;
@@ -638,17 +648,17 @@ export function buildArtifactPreview(
 	const usedFieldIds = new Set<string>();
 
 	if (lesson.handoff?.mode === "select_candidate_problem") {
-		const owner = values.selected_problem_owner;
-		const statement = values.selected_problem_statement;
+		for (const field of lesson.handoff.persistedFields ?? []) {
+			const value = values[field.targetFieldId];
+			if (!isFilled(value)) {
+				continue;
+			}
 
-		if (typeof owner === "string" && owner.trim()) {
-			previewEntries.push(["Chosen problem owner", owner.trim()]);
-			usedFieldIds.add("selected_problem_owner");
-		}
-
-		if (typeof statement === "string" && statement.trim()) {
-			previewEntries.push(["Chosen problem", statement.trim()]);
-			usedFieldIds.add("selected_problem_statement");
+			previewEntries.push([
+				field.previewLabel,
+				typeof value === "string" ? value.trim() : value,
+			]);
+			usedFieldIds.add(field.targetFieldId);
 		}
 	}
 
@@ -684,6 +694,7 @@ export function buildArtifactPreview(
 	return {
 		artifactKey: lesson.artifact.key,
 		artifactLabel: lesson.artifact.label,
+		contextTitle: lesson.artifact.contextTitle,
 		artifactType: lesson.artifact.type as ArtifactType,
 		lessonId: lesson.id,
 		lessonTitle: lesson.title,

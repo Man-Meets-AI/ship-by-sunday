@@ -12,6 +12,7 @@ import type {
 export type PinnedArtifact = {
 	artifactKey: string;
 	artifactLabel: string;
+	contextTitle?: string;
 	fieldValues: PersistedFieldValues;
 	fields: Array<[string, unknown]>;
 	lessonTitle: string;
