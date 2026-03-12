@@ -111,7 +111,7 @@ describe("WorkbenchRenderer", () => {
 			},
 			{
 				lessonId: "1.5",
-				expected: "Upload Core Flow Screenshot",
+				expected: "Core flow stage",
 			},
 			{
 				lessonId: "1.6",
@@ -229,12 +229,12 @@ describe("WorkbenchRenderer", () => {
 		);
 	});
 
-	it("renders upload instructions for capture-upload lessons", () => {
+	it("renders stage-save and fallback controls for lesson 1.5", () => {
 		const markup = renderLessonWorkbench("1.5");
 
-		expect(markup).toContain(
-			"Choose a file and it will upload to lesson storage before the lesson draft is saved.",
-		);
+		expect(markup).toContain("Save image");
+		expect(markup).toContain("Upload external screenshot");
+		expect(markup).toContain("Use Figma instead");
 	});
 
 	it("renders the lesson metadata badges as non-selectable chrome", () => {
@@ -259,8 +259,9 @@ describe("WorkbenchRenderer", () => {
 		);
 		expect(markup).toContain('target="_blank"');
 		expect(markup).toContain('rel="noreferrer"');
-		expect(markup).toContain("Upload Core Flow Screenshot");
-		expect(markup).toContain("A core flow screenshot.");
+		expect(markup).toContain("Core flow stage");
+		expect(markup).toContain("Saved artifact");
+		expect(markup).toContain("Upload external screenshot");
 		expect(markup).toContain("Our user");
 		expect(markup).toContain("Outcome statement");
 		expect(markup).not.toContain("Research Notes");

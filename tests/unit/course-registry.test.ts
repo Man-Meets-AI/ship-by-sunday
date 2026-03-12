@@ -83,6 +83,51 @@ describe("course registry", () => {
 		expect(issues.map((issue) => issue.label)).toContain("Research Table");
 	});
 
+	it("requires 1.5 to save the generated map image before completion", () => {
+		const lesson = getLessonById("1.5");
+		expect(lesson).toBeTruthy();
+
+		const issues = getCompletionIssues(lesson!, {
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 4,
+			flow_actors: ["Startup operators"],
+			flow_steps: [
+				["Startup operators", "Paste notes"],
+				["Startup operators", "Generate summary"],
+				["Startup operators", "Review"],
+				["Startup operators", "Share"],
+				["Startup operators", "Close the loop"],
+			],
+			flow_ending: "They leave with a clean action summary in minutes.",
+		});
+
+		expect(issues.map((issue) => issue.label)).toContain(
+			"Save current map image",
+		);
+	});
+
+	it("requires 1.5 to fill 5-7 complete steps", () => {
+		const lesson = getLessonById("1.5");
+		expect(lesson).toBeTruthy();
+
+		const issues = getCompletionIssues(lesson!, {
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 4,
+			flow_actors: ["Startup operators"],
+			flow_steps: [
+				["Startup operators", "Paste notes"],
+				["Startup operators", "Generate summary"],
+				["Startup operators", ""],
+			],
+			flow_ending: "They leave with a clean action summary in minutes.",
+			__core_flow_image_upload: {
+				kind: "upload",
+				status: "stored",
+				storageId: "core-flow-image",
+			},
+		});
+
+		expect(issues.map((issue) => issue.label)).toContain("Map 5-7 steps");
+	});
+
 	it("keeps manual task fallback for lessons without observable workbench fields", () => {
 		const lesson = getLessonById("0.2");
 		expect(lesson).toBeTruthy();
@@ -392,6 +437,35 @@ describe("course registry", () => {
 		});
 
 		expect(preview.contextTitle).toBe("Outcome statement");
+	});
+
+	it("keeps the private 1.5 saved-image field out of artifact previews", () => {
+		const lesson = getLessonById("1.5");
+		expect(lesson).toBeTruthy();
+
+		const preview = buildArtifactPreview(lesson!, {
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 4,
+			flow_actors: ["Startup operators"],
+			flow_steps: [
+				["Startup operators", "Paste notes"],
+				["Startup operators", "Generate summary"],
+				["Startup operators", "Review"],
+				["Startup operators", "Share"],
+				["Startup operators", "Close the loop"],
+			],
+			flow_ending: "They leave with a clean action summary in minutes.",
+			__core_flow_image_upload: {
+				kind: "upload",
+				status: "stored",
+				storageId: "core-flow-image",
+			},
+		});
+
+		expect(preview.fields.map(([label]) => label)).toEqual([
+			"Actors",
+			"Flow steps",
+			"Value moment",
+		]);
 	});
 
 	it("formats table artifact previews into readable summaries", () => {
