@@ -842,12 +842,20 @@ export const ceoLessons = [
 				label: "Keep in v1",
 				kind: "board",
 				required: true,
+				placeholder:
+					"One feature per line. Keep only what must exist for the user to get the win.",
+				artifactPreviewLabel: "Keep in v1",
+				taskLabel: "Keep in v1",
 			},
 			{
 				id: "out_of_scope",
 				label: "Cut from v1",
 				kind: "board",
 				required: true,
+				placeholder:
+					"One cut per line. Name the tempting extras that do not belong in the weekend build.",
+				artifactPreviewLabel: "Cut from v1",
+				taskLabel: "Cut from v1",
 			},
 			{
 				id: "v1_rationale",
@@ -855,6 +863,8 @@ export const ceoLessons = [
 				kind: "textarea",
 				required: true,
 				rows: 3,
+				artifactPreviewLabel: "Why this version is enough",
+				taskLabel: "Why this version is enough",
 			},
 		],
 		content: {
@@ -876,20 +886,12 @@ export const ceoLessons = [
 				resources: WORKSHEET_01_RESOURCES,
 				examples: SCOPE_EXAMPLES,
 			}),
-				placeholder:
-					"One feature per line. Keep only what must exist for the user to get the win.",
-				artifactPreviewLabel: "Keep in v1",
-				taskLabel: "Keep in v1",
 			workbench: {
 				prompt: "A smaller shipped app beats a larger imaginary one.",
 				teachingPoints: [
 					"Start from the generated cut list, then delete one more thing.",
 					"Keep the product inside one believable user win.",
 					"If a feature helps later but is not required for the core outcome, cut it.",
-				placeholder:
-					"One cut per line. Name the tempting extras that do not belong in the weekend build.",
-				artifactPreviewLabel: "Cut from v1",
-				taskLabel: "Cut from v1",
 				],
 				emptyState: "A smaller shipped app beats a larger imaginary one.",
 			},
@@ -897,8 +899,6 @@ export const ceoLessons = [
 	},
 	{
 		id: "1.7",
-				artifactPreviewLabel: "Why this version is enough",
-				taskLabel: "Why this version is enough",
 		slug: "01-07-ceo-block-wrap-up",
 		order: 7,
 		block: "CEO",
