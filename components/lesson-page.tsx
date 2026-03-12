@@ -49,6 +49,15 @@ type CompletionErrorData = {
 	issues?: CompletionIssue[];
 };
 
+type CompletionPhase = "idle" | "submitting" | "celebrating";
+
+type CompletionPayload = {
+	completedLessonId: string;
+	artifactLabel: string;
+	nextLessonId: string | null;
+	nextLessonLabel: string | null;
+};
+
 function getCompletionErrorData(error: unknown): CompletionErrorData | null {
 	if (!error || typeof error !== "object" || !("data" in error)) {
 		return null;
@@ -74,6 +83,17 @@ function getCompletionErrorData(error: unknown): CompletionErrorData | null {
 			? (candidate.issues as CompletionIssue[])
 			: [],
 	};
+}
+
+function getCompletionNavigationDelayMs() {
+	if (
+		typeof window !== "undefined" &&
+		window.matchMedia("(prefers-reduced-motion: reduce)").matches
+	) {
+		return 250;
+	}
+
+	return 900;
 }
 
 function getDefaultCoachPanel(
@@ -143,6 +163,10 @@ export function LessonPage({
 	const [saveStatus, setSaveStatus] = useState<
 		"idle" | "saved" | "saving" | "error"
 	>("idle");
+	const [completionPhase, setCompletionPhase] =
+		useState<CompletionPhase>("idle");
+	const [completionPayload, setCompletionPayload] =
+		useState<CompletionPayload | null>(null);
 	const [completionAttempted, setCompletionAttempted] = useState(false);
 	const [serverCompletionIssues, setServerCompletionIssues] = useState<
 		CompletionIssue[]
@@ -155,6 +179,16 @@ export function LessonPage({
 	const initializedForLessonId = useRef<string | null>(null);
 	const lastMarkedLessonId = useRef<string | null>(null);
 	const lastSavedSnapshot = useRef("");
+	const completionTimeoutRef = useRef<number | null>(null);
+
+	useEffect(
+		() => () => {
+			if (completionTimeoutRef.current !== null) {
+				window.clearTimeout(completionTimeoutRef.current);
+			}
+		},
+		[],
+	);
 
 	useEffect(() => {
 		if (!lessonState || lessonState.accessStatus !== "unlocked") {
@@ -167,9 +201,15 @@ export function LessonPage({
 			initializedForLessonId.current = lessonId;
 			lastSavedSnapshot.current = JSON.stringify(nextValues);
 			setSaveStatus("idle");
+			setCompletionPhase("idle");
+			setCompletionPayload(null);
 			setCompletionAttempted(false);
 			setServerCompletionIssues([]);
 			setServerCompletionMessage(null);
+			if (completionTimeoutRef.current !== null) {
+				window.clearTimeout(completionTimeoutRef.current);
+				completionTimeoutRef.current = null;
+			}
 		}
 	}, [lessonId, lessonState]);
 
@@ -260,6 +300,13 @@ export function LessonPage({
 							coachVisible: !current.coachVisible,
 						}))
 				: undefined,
+		completionCue:
+			completionPhase === "celebrating" && completionPayload
+				? {
+						completedLessonId: completionPayload.completedLessonId,
+						nextLessonId: completionPayload.nextLessonId,
+					}
+				: null,
 	};
 
 	if (lessonState === undefined) {
@@ -337,6 +384,13 @@ export function LessonPage({
 		completionIssues.length === 0 &&
 		objectiveTasks.length > 0 &&
 		lessonState.status !== "completed";
+	const isCompleting = completionPhase === "submitting";
+	const isCelebrating = completionPhase === "celebrating";
+	const completionButtonDisabled = isCompleting || isCelebrating;
+	const completionNextLine = completionPayload?.nextLessonLabel
+		? `Next unlocked: ${completionPayload.nextLessonLabel}`
+		: "Mission updated";
+	const showCelebrationBanner = isCelebrating && completionPayload;
 
 	const setValue = (fieldId: string, value: unknown) => {
 		if (serverCompletionIssues.length > 0) {
@@ -370,90 +424,198 @@ export function LessonPage({
 	};
 
 	const footer = (
-		<div className="flex flex-col gap-2 lg:flex-row lg:items-center">
-			<div className="max-w-2xl space-y-1">
-				<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
-					Progress {completedObjectiveCount}/
-					{Math.max(objectiveTasks.length, 1)}
-				</p>
-				{lessonReadyToComplete && !showCompletionFeedback ? (
-					<p className="text-xs font-medium leading-relaxed text-product-accent">
-						Everything on this page is filled out. Complete the lesson.
-					</p>
-				) : null}
-				{nextIncompleteObjective && !showCompletionFeedback ? (
-					<p className="text-xs leading-relaxed text-product-muted">
-						Next up: {nextIncompleteObjective.label}
-					</p>
-				) : null}
-				{showCompletionFeedback ? (
-					<div className="text-xs font-medium leading-relaxed text-[#a83232]">
-						<p>
-							{serverCompletionMessage ?? "Finish these before continuing:"}
-						</p>
-						{displayedCompletionIssues.length > 0 ? (
-							<p className="mt-1">
-								{displayedCompletionIssues
-									.map((issue) => issue.label)
-									.join(" • ")}
-							</p>
-						) : null}
-					</div>
-				) : null}
-			</div>
-			<div className="flex flex-wrap justify-end gap-2 lg:ml-auto">
-				{previousHref ? (
-					<Link
-						href={previousHref}
-						className="inline-flex items-center px-1 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted transition-colors hover:text-product-text"
-					>
-						Back
-					</Link>
-				) : null}
-				<button
-					type="button"
-					onClick={() => {
-						setCompletionAttempted(true);
-						setServerCompletionIssues([]);
-						setServerCompletionMessage(null);
-
-						if (completionIssues.length > 0) {
-							return;
-						}
-
-						void completeLesson({ lessonId, fieldValues }).then(
-							(result: { nextLessonId: string | null }) => {
-								setCompletionAttempted(false);
-								if (result.nextLessonId) {
-									router.push(`/lesson/${result.nextLessonId}`);
-									return;
-								}
-
-								router.push("/mission");
-							},
-							(error: unknown) => {
-								const completionError = getCompletionErrorData(error);
-								if (completionError) {
-									setServerCompletionIssues(completionError.issues ?? []);
-									setServerCompletionMessage(completionError.message);
-									return;
-								}
-
-								setSaveStatus("error");
-								setServerCompletionMessage(
-									"Unable to complete the lesson right now. Try again.",
-								);
-							},
-						);
-					}}
-					className={
-						lessonReadyToComplete
-							? "rounded-none border border-product-accent bg-product-accent px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-bg shadow-[0_0_0_1px_rgba(var(--product-accent),0.3),0_0_18px_rgba(var(--product-accent),0.22)] transition-all hover:brightness-95 motion-safe:animate-pulse"
-							: "rounded-none border border-product-accent bg-product-chip px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
-					}
+		<div
+			className={`flex flex-col gap-3 ${
+				isCelebrating
+					? "sbs-completion-footer rounded-none border border-product-accent/30 bg-product-accent/[0.07] px-3 py-3"
+					: ""
+			}`}
+		>
+			{showCelebrationBanner ? (
+				<div
+					role="status"
+					aria-live="polite"
+					className="sbs-completion-banner mx-auto flex w-full max-w-xl flex-col items-center gap-1 rounded-none border border-product-accent/35 bg-product-surface-strong/95 px-4 py-3 text-center shadow-[0_0_0_1px_rgba(var(--product-accent),0.14),0_18px_36px_rgba(var(--product-shadow),0.35)]"
 				>
-					Complete lesson
-				</button>
+					<div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-product-accent">
+						<span className="inline-flex h-5 w-5 items-center justify-center border border-product-accent/60 bg-product-accent/14 text-product-accent">
+							<svg
+								width="10"
+								height="10"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="3"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+							>
+								<polyline points="20 6 9 17 4 12" />
+							</svg>
+						</span>
+						System updated
+					</div>
+					<p className="font-display text-[1.65rem] uppercase leading-none tracking-[0.06em] text-product-text sm:text-[2rem]">
+						Lesson cleared
+					</p>
+					<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-text">
+						Artifact locked: {completionPayload.artifactLabel}
+					</p>
+					<p className="text-xs font-medium leading-relaxed text-product-muted">
+						{completionNextLine}
+					</p>
+				</div>
+			) : null}
+			<div className="flex flex-col gap-2 lg:flex-row lg:items-center">
+				<div className="max-w-2xl space-y-1">
+					<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
+						Progress {completedObjectiveCount}/
+						{Math.max(objectiveTasks.length, 1)}
+					</p>
+					{isCelebrating && completionPayload ? (
+						<>
+							<p className="text-xs font-medium leading-relaxed text-product-accent">
+								Artifact locked: {completionPayload.artifactLabel}
+							</p>
+							<p className="text-xs leading-relaxed text-product-text">
+								{completionNextLine}
+							</p>
+						</>
+					) : lessonReadyToComplete && !showCompletionFeedback ? (
+						<p className="text-xs font-medium leading-relaxed text-product-accent">
+							Everything on this page is filled out. Complete the lesson.
+						</p>
+					) : null}
+					{nextIncompleteObjective &&
+					!showCompletionFeedback &&
+					!isCelebrating ? (
+						<p className="text-xs leading-relaxed text-product-muted">
+							Next up: {nextIncompleteObjective.label}
+						</p>
+					) : null}
+					{showCompletionFeedback && !isCelebrating ? (
+						<div className="text-xs font-medium leading-relaxed text-[#a83232]">
+							<p>
+								{serverCompletionMessage ?? "Finish these before continuing:"}
+							</p>
+							{displayedCompletionIssues.length > 0 ? (
+								<p className="mt-1">
+									{displayedCompletionIssues
+										.map((issue) => issue.label)
+										.join(" • ")}
+								</p>
+							) : null}
+						</div>
+					) : null}
+				</div>
+				<div className="flex flex-wrap justify-end gap-2 lg:ml-auto">
+					{previousHref ? (
+						<Link
+							href={previousHref}
+							className="inline-flex items-center px-1 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted transition-colors hover:text-product-text"
+						>
+							Back
+						</Link>
+					) : null}
+					<button
+						type="button"
+						disabled={completionButtonDisabled}
+						aria-busy={isCompleting}
+						onClick={() => {
+							if (completionButtonDisabled) {
+								return;
+							}
+
+							setCompletionAttempted(true);
+							setServerCompletionIssues([]);
+							setServerCompletionMessage(null);
+
+							if (completionIssues.length > 0) {
+								return;
+							}
+
+							if (completionTimeoutRef.current !== null) {
+								window.clearTimeout(completionTimeoutRef.current);
+								completionTimeoutRef.current = null;
+							}
+
+							setCompletionPhase("submitting");
+
+							void completeLesson({ lessonId, fieldValues }).then(
+								(result: { nextLessonId: string | null }) => {
+									const nextLesson = result.nextLessonId
+										? getLesson(result.nextLessonId)
+										: null;
+
+									setCompletionPayload({
+										completedLessonId: lessonId,
+										artifactLabel: lesson.artifact.label,
+										nextLessonId: result.nextLessonId,
+										nextLessonLabel: nextLesson
+											? `${nextLesson.id} ${nextLesson.shortTitle}`
+											: null,
+									});
+									setCompletionPhase("celebrating");
+									setCompletionAttempted(false);
+									completionTimeoutRef.current = window.setTimeout(() => {
+										completionTimeoutRef.current = null;
+
+										if (result.nextLessonId) {
+											router.push(`/lesson/${result.nextLessonId}`);
+											return;
+										}
+
+										router.push("/mission");
+									}, getCompletionNavigationDelayMs());
+								},
+								(error: unknown) => {
+									setCompletionPhase("idle");
+									const completionError = getCompletionErrorData(error);
+									if (completionError) {
+										setServerCompletionIssues(completionError.issues ?? []);
+										setServerCompletionMessage(completionError.message);
+										return;
+									}
+
+									setSaveStatus("error");
+									setServerCompletionMessage(
+										"Unable to complete the lesson right now. Try again.",
+									);
+								},
+							);
+						}}
+						className={
+							isCelebrating
+								? "sbs-press-feedback inline-flex items-center gap-1.5 rounded-none border border-product-accent bg-product-accent px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-bg shadow-[0_0_0_1px_rgba(var(--product-accent),0.3),0_0_18px_rgba(var(--product-accent),0.24)]"
+								: isCompleting
+									? "inline-flex items-center gap-1.5 rounded-none border border-product-accent bg-product-accent px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-bg shadow-[0_0_0_1px_rgba(var(--product-accent),0.24)]"
+									: lessonReadyToComplete
+										? "sbs-press-feedback inline-flex items-center gap-1.5 rounded-none border border-product-accent bg-product-accent px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-bg shadow-[0_0_0_1px_rgba(var(--product-accent),0.3),0_0_18px_rgba(var(--product-accent),0.22)] transition-all hover:brightness-95 motion-safe:animate-pulse"
+										: "sbs-hover-lift sbs-press-feedback inline-flex items-center gap-1.5 rounded-none border border-product-accent bg-product-chip px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
+						}
+					>
+						{isCelebrating ? (
+							<>
+								<svg
+									width="10"
+									height="10"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="3"
+									strokeLinecap="round"
+									strokeLinejoin="round"
+								>
+									<polyline points="20 6 9 17 4 12" />
+								</svg>
+								Lesson cleared
+							</>
+						) : isCompleting ? (
+							"Locking in..."
+						) : (
+							"Complete lesson"
+						)}
+					</button>
+				</div>
 			</div>
 		</div>
 	);

@@ -12,7 +12,10 @@ import {
 	ProductThemeProvider,
 	useProductTheme,
 } from "@/components/product-theme-provider";
-import { SkillRail } from "@/components/skill-rail";
+import {
+	SkillRail,
+	type SkillRailCompletionCue,
+} from "@/components/skill-rail";
 import type { ProductTheme } from "@/lib/product-theme";
 
 const navItems = [
@@ -59,6 +62,7 @@ type ProductShellProps = {
 	coachVisible?: boolean;
 	onCoachToggle?: () => void;
 	viewportMode?: "document" | "app";
+	completionCue?: SkillRailCompletionCue | null;
 };
 
 function isBlockActive(block: MissionState["blocks"][number]) {
@@ -91,6 +95,7 @@ function ShellInner({
 	coachVisible,
 	onCoachToggle,
 	viewportMode = "document",
+	completionCue,
 }: ProductShellProps) {
 	const pathname = usePathname();
 	const { theme, toggleTheme } = useProductTheme();
@@ -409,6 +414,7 @@ function ShellInner({
 						label={activeBlock.label}
 						lessons={activeBlock.lessons}
 						currentLessonId={currentLessonId}
+						completionCue={completionCue}
 					/>
 				</div>
 			</footer>
