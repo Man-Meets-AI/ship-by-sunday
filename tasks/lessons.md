@@ -5,6 +5,10 @@ Use this file to capture recurring mistakes, corrections, and guardrails for fut
 ## Lessons
 
 - Date: 2026-03-12
+  Pattern: I left Scope Hammer as three blank manual fields even though the earlier CEO lessons had already captured enough context to generate a first-pass scope cut, which made the lesson feel like another exhausting form instead of a momentum step.
+  Rule: When a later lesson asks the learner to synthesize context that already exists in upstream artifacts, default to a generated prompt/import flow before asking for blank manual entry. Keep the structured fields only as editable cleanup surfaces.
+  How to verify next time: Check whether prior artifacts already contain the real inputs, and if they do, confirm the page opens with a copyable prompt or prefilled recommendation instead of an empty board/textarea trio.
+- Date: 2026-03-12
   Pattern: I left a pinned-artifact card using both the source-lesson title and a curated context title, which made the `1.5` core-flow page read like repeated headers, and I left stale worksheet-PDF placeholder UI in place after the actual handoff should have moved to an external FigJam template.
   Rule: When a lesson artifact has a curated learner-facing context title, render that as the only card header. If a worksheet handoff moves to an external workspace like FigJam, remove any dead placeholder fields and rename the downstream artifact/upload copy to match the real student output.
   How to verify next time: Open the downstream lesson with saved upstream artifacts, read the pinned cards top-to-bottom for duplicate header language, confirm there is no dead placeholder block, and confirm the template CTA plus upload label describe the same deliverable.
