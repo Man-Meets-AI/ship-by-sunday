@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Bebas_Neue, Manrope } from "next/font/google";
+import "@xyflow/react/dist/style.css";
 
 import { ConvexClientProvider } from "@/components/convex-client-provider";
 import { getProductThemeBootstrapScript } from "@/lib/product-theme";

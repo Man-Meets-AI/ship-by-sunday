@@ -7,6 +7,7 @@ export type WorkbenchType =
 	| "score_table"
 	| "collector_board"
 	| "capture_upload"
+	| "core_flow_map"
 	| "scope_split"
 	| "brief_assembler"
 	| "console_checklist"

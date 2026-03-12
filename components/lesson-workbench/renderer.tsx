@@ -9,6 +9,7 @@ import {
 
 import { BriefAssemblerWorkbench } from "./modes/brief-assembler-workbench";
 import { CaptureUploadWorkbench } from "./modes/capture-upload-workbench";
+import { CoreFlowMapWorkbench } from "./modes/core-flow-map-workbench";
 import { CollectorBoardWorkbench } from "./modes/collector-board-workbench";
 import { ConsoleChecklistWorkbench } from "./modes/console-checklist-workbench";
 import { ExternalWorkspaceWorkbench } from "./modes/external-workspace-workbench";
@@ -26,6 +27,7 @@ const modeRenderers: Record<WorkbenchType, WorkbenchModeComponent> = {
 	score_table: ScoreTableWorkbench,
 	collector_board: CollectorBoardWorkbench,
 	capture_upload: CaptureUploadWorkbench,
+	core_flow_map: CoreFlowMapWorkbench,
 	scope_split: ScopeSplitWorkbench,
 	brief_assembler: BriefAssemblerWorkbench,
 	console_checklist: ConsoleChecklistWorkbench,
@@ -55,6 +57,7 @@ export function WorkbenchRenderer({
 	onFieldChange,
 	pinnedArtifacts,
 	invalidFieldIds = new Set<string>(),
+	fieldValuesReady = true,
 }: WorkbenchRendererProps) {
 	const fields = lesson.workbenchFields ?? [];
 	const workbenchSections = getWorkbenchSections(lesson);
@@ -80,6 +83,7 @@ export function WorkbenchRenderer({
 			onFieldChange={onFieldChange}
 			pinnedArtifacts={pinnedArtifacts}
 			invalidFieldIds={invalidFieldIds}
+			fieldValuesReady={fieldValuesReady}
 			fields={fields}
 			objectiveTasks={objectiveTasks}
 			completedTaskCount={completedTaskCount}

@@ -49,6 +49,27 @@ body {
 	font-family: var(--font-sans), sans-serif;
 }
 
+.sbs-core-flow-stage {
+	background:
+		linear-gradient(rgba(17, 17, 17, 0.045) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(17, 17, 17, 0.045) 1px, transparent 1px),
+		rgb(var(--product-surface-strong));
+	background-size: 28px 28px, 28px 28px, auto;
+}
+
+.sbs-core-flow-stage .react-flow__renderer,
+.sbs-core-flow-stage .react-flow__pane {
+	cursor: grab;
+}
+
+.sbs-core-flow-stage .react-flow__pane:active {
+	cursor: grabbing;
+}
+
+.sbs-core-flow-stage .react-flow__edge-path {
+	stroke-linecap: square;
+}
+
 * {
 	box-sizing: border-box;
 }

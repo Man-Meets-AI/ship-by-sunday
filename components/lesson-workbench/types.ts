@@ -19,6 +19,7 @@ export type WorkbenchRendererProps = {
 	onFieldChange: (fieldId: string, value: unknown) => void;
 	pinnedArtifacts: PinnedArtifact[];
 	invalidFieldIds?: Set<string>;
+	fieldValuesReady?: boolean;
 };
 
 type WorkbenchSharedState = {

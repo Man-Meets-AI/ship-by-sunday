@@ -160,6 +160,7 @@ export function LessonPage({
 	const saveLessonDraft = useMutation(api.course.saveLessonDraft);
 	const completeLesson = useMutation(api.course.completeLesson);
 	const [fieldValues, setFieldValues] = useState<Record<string, unknown>>({});
+	const [fieldValuesReady, setFieldValuesReady] = useState(false);
 	const [saveStatus, setSaveStatus] = useState<
 		"idle" | "saved" | "saving" | "error"
 	>("idle");
@@ -191,7 +192,12 @@ export function LessonPage({
 	);
 
 	useEffect(() => {
+		setFieldValuesReady(false);
+	}, [lessonId]);
+
+	useEffect(() => {
 		if (!lessonState || lessonState.accessStatus !== "unlocked") {
+			setFieldValuesReady(false);
 			return;
 		}
 
@@ -201,6 +207,7 @@ export function LessonPage({
 			initializedForLessonId.current = lessonId;
 			lastSavedSnapshot.current = JSON.stringify(nextValues);
 			setSaveStatus("idle");
+			setFieldValuesReady(true);
 			setCompletionPhase("idle");
 			setCompletionPayload(null);
 			setCompletionAttempted(false);
@@ -210,7 +217,10 @@ export function LessonPage({
 				window.clearTimeout(completionTimeoutRef.current);
 				completionTimeoutRef.current = null;
 			}
+			return;
 		}
+
+		setFieldValuesReady(true);
 	}, [lessonId, lessonState]);
 
 	useEffect(() => {
@@ -628,6 +638,7 @@ export function LessonPage({
 			onFieldChange={setValue}
 			pinnedArtifacts={pinnedArtifacts}
 			invalidFieldIds={invalidFieldIds}
+			fieldValuesReady={fieldValuesReady}
 		/>
 	);
 

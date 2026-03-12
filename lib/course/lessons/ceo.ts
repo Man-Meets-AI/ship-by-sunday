@@ -10,6 +10,13 @@ import {
 	WORKSHEET_01_FIGJAM_TEMPLATE_DOWNLOAD,
 	WORKSHEET_01_RESOURCES,
 } from "../resources";
+import {
+	CORE_FLOW_ACTORS_FIELD_ID,
+	CORE_FLOW_ENDING_FIELD_ID,
+	CORE_FLOW_IMAGE_FIELD_ID,
+	CORE_FLOW_STEP_COLUMNS,
+	CORE_FLOW_STEPS_FIELD_ID,
+} from "../core-flow-map";
 
 const START_WITH_PROBLEM_EXAMPLES: LessonExampleContent[] = [
 	{
@@ -728,10 +735,10 @@ export const ceoLessons = [
 		title: "Map the Core Flow",
 		shortTitle: "Flow",
 		shell: "split",
-		workbench: "capture_upload",
+		workbench: "core_flow_map",
 		artifact: {
 			key: "core_flow_image",
-			label: "Core Flow Screenshot",
+			label: "Core Flow Map",
 			type: "image",
 			required: true,
 			dependsOn: ["user_statement", "outcome_statement"],
@@ -742,19 +749,45 @@ export const ceoLessons = [
 		coachMode: "docked",
 		objectiveTitle: "CEO 1.5 — Map the Core Flow",
 		checklist: [
-			"Duplicate the FigJam template",
-			"Keep it to 5–7 steps",
-			"Upload one clean core flow screenshot",
+			"Lock the actors",
+			"Map the flow in 5-7 steps",
+			"Save the current map image",
 		],
 		helperText:
-			"Duplicate the FigJam template, map the core flow in 5-7 steps with words and arrows, then upload one clean screenshot.",
-		winCondition: "A core flow screenshot is uploaded and saved.",
+			"Build the map in the stage first. Keep the flow to 5-7 steps, then save the current map image before continuing.",
+		winCondition: "The core flow map is saved as a lesson image.",
 		panelDefaults: splitPanelDefaults,
+		fieldShapeVersion: 4,
 		pinnedArtifacts: ["user_statement", "outcome_statement"],
 		workbenchFields: [
 			{
-				id: "flow_upload",
-				label: "Upload Core Flow Screenshot",
+				id: CORE_FLOW_ACTORS_FIELD_ID,
+				label: "Actors",
+				kind: "board",
+				required: true,
+				artifactPreviewLabel: "Actors",
+				taskLabel: "Lock the actors",
+			},
+			{
+				id: CORE_FLOW_STEPS_FIELD_ID,
+				label: "Flow steps",
+				kind: "table",
+				required: true,
+				columns: CORE_FLOW_STEP_COLUMNS,
+				artifactPreviewLabel: "Flow steps",
+				taskLabel: "Map 5-7 steps",
+			},
+			{
+				id: CORE_FLOW_ENDING_FIELD_ID,
+				label: "Value moment",
+				kind: "text",
+				required: true,
+				artifactPreviewLabel: "Value moment",
+				taskLabel: "Define the value moment",
+			},
+			{
+				id: CORE_FLOW_IMAGE_FIELD_ID,
+				label: "Save current map image",
 				kind: "image_upload",
 				required: true,
 			},
@@ -771,9 +804,9 @@ export const ceoLessons = [
 			},
 			actionCard: {
 				jobNow:
-					"Duplicate the FigJam template, map the core flow in 5-7 steps using only words and arrows, then upload a screenshot.",
-				timebox: "10 minutes",
-				comeBackWith: "A core flow screenshot.",
+					"Use the stage to map the core flow, keep it to 5-7 steps, then save the current map image.",
+				timebox: "12 minutes",
+				comeBackWith: "A saved core flow map image.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Map the Core Flow",
@@ -782,14 +815,14 @@ export const ceoLessons = [
 			}),
 			workbench: {
 				prompt:
-					"Duplicate the FigJam template, keep the map to 5-7 steps, then upload one screenshot of the finished core flow.",
+					"Map the flow in the stage, keep it to 5-7 steps, and save the current map image before you continue.",
 				teachingPoints: [
 					"List actors if needed, but keep it light.",
 					"Write the ending first if that helps.",
 					"Focus on the critical moment where the product actually delivers value.",
 				],
 				emptyState:
-					"Duplicate the FigJam template, keep the map to 5-7 steps, then upload one screenshot of the finished core flow.",
+					"Start with one actor, one ending, and the shortest believable 5-step path between them.",
 				...WORKSHEET_01_FIGJAM_TEMPLATE_DOWNLOAD,
 			},
 		},

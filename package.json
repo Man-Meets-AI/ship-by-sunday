@@ -5,7 +5,7 @@
 	"scripts": {
 		"dev": "concurrently -k -n web,convex -c auto \"pnpm run dev:web\" \"pnpm run dev:convex\"",
 		"dev:web": "next dev",
-    "dev:convex": "convex dev --local --local-force-upgrade",
+		"dev:convex": "convex dev --local --local-force-upgrade",
 		"build": "next build",
 		"start": "next start",
 		"typecheck": "next build --no-lint",
@@ -19,7 +19,9 @@
 	},
 	"dependencies": {
 		"@clerk/nextjs": "^7.0.1",
+		"@xyflow/react": "^12.10.1",
 		"convex": "^1.32.0",
+		"html-to-image": "1.11.11",
 		"next": "15.2.8",
 		"react": "19.0.3",
 		"react-dom": "19.0.3",
