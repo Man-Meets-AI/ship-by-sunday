@@ -4,6 +4,7 @@ import {
 	createReferenceGalleryValue,
 	FIELD_SHAPE_VERSION_FIELD_ID,
 	getLessonById,
+	normalizeLessonFieldValues,
 	getObjectiveTasks,
 	isLessonFieldShapeCompatible,
 } from "@/lib/course";
@@ -44,18 +45,25 @@ describe("visual direction lesson contract", () => {
 		});
 	});
 
-	it("treats the old style-rule draft shape as incompatible", () => {
+	it("adapts the old style-rule draft shape into the current visual-direction contract", () => {
 		const lesson = getLessonById("2.6");
 		expect(lesson).toBeTruthy();
+		const legacyFieldValues = {
+			style_rule_1: "Quiet typography",
+			style_rule_2: "Dense spacing",
+			style_rule_3: "Sharp cards",
+			avoid_rule: "Soft gradients",
+		};
 
+		expect(isLessonFieldShapeCompatible(lesson!, legacyFieldValues)).toBe(true);
 		expect(
-			isLessonFieldShapeCompatible(lesson!, {
-				style_rule_1: "Quiet typography",
-				style_rule_2: "Dense spacing",
-				style_rule_3: "Sharp cards",
-				avoid_rule: "Soft gradients",
-			}),
-		).toBe(false);
+			normalizeLessonFieldValues(lesson!, legacyFieldValues),
+		).toMatchObject({
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+			visual_direction_notes:
+				"Style rule 1: Quiet typography\nStyle rule 2: Dense spacing\nStyle rule 3: Sharp cards\nAvoid: Soft gradients",
+			visual_guide_markdown: expect.stringContaining("## Direction Rules"),
+		});
 	});
 
 	it("summarizes visual-direction artifacts without dumping the saved markdown", () => {

@@ -139,6 +139,20 @@ function getReferenceBoardArtifact() {
 	});
 }
 
+function getLegacyReferenceBoardArtifact() {
+	const lesson = getLessonById("2.1");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {
+		reference_board: [
+			"https://images.example.com/ref-1.png",
+			"Editorial onboarding flow",
+			"https://images.example.com/ref-2.png",
+		],
+		reference_patterns: "Tight cards and dense hierarchy.",
+	});
+}
+
 function getSketchSetArtifact() {
 	const lesson = getLessonById("2.2");
 	expect(lesson).toBeTruthy();
@@ -160,6 +174,21 @@ function getSketchSetArtifact() {
 				url: "https://example.com/sketch-2.jpg",
 			},
 		],
+	});
+}
+
+function getLegacySketchSetArtifact() {
+	const lesson = getLessonById("2.2");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {
+		sketch_upload: {
+			kind: "upload",
+			status: "stored",
+			storageId: "legacy-sketch-1",
+			fileName: "legacy-screen-1.jpg",
+			url: "https://example.com/legacy-screen-1.jpg",
+		},
 	});
 }
 
@@ -196,6 +225,18 @@ function getVisualDirectionArtifact() {
 		visual_guide_markdown: `# Visual Guide
 ## Overall Direction
 Keep the interface sharp and editorial.`,
+	});
+}
+
+function getLegacyVisualDirectionArtifact() {
+	const lesson = getLessonById("2.6");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {
+		style_rule_1: "Quiet typography",
+		style_rule_2: "Dense spacing",
+		style_rule_3: "Sharp cards",
+		avoid_rule: "Soft gradients",
 	});
 }
 
@@ -845,6 +886,128 @@ describe("course registry", () => {
 				reference_gallery: threeReferences,
 			})[0]?.isComplete,
 		).toBe(true);
+	});
+
+	it("adapts legacy 2.1 board rows into the current reference gallery contract", () => {
+		const lesson = getLessonById("2.1");
+		const wrapUpLesson = getLessonById("2.7");
+		expect(lesson).toBeTruthy();
+		expect(wrapUpLesson).toBeTruthy();
+
+		const normalized = normalizeLessonFieldValues(lesson!, {
+			reference_board: [
+				"https://images.example.com/ref-1.png",
+				"Editorial onboarding flow",
+				" https://images.example.com/ref-2.png ",
+				"",
+			],
+			reference_patterns: "Tight cards and dense hierarchy.",
+		});
+		const pinnedArtifacts = [
+			getLegacyReferenceBoardArtifact(),
+			getSketchSetArtifact(),
+			getStoryboardImageArtifact(),
+			getRoughScreensArtifact(),
+			getVisualDirectionArtifact(),
+		];
+
+		expect(normalized).toMatchObject({
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+			reference_gallery: {
+				kind: "reference_gallery",
+				items: [
+					{
+						id: "legacy-reference-1",
+						source: "remote_url",
+						url: "https://images.example.com/ref-1.png",
+					},
+					{
+						id: "legacy-reference-2",
+						source: "remote_url",
+						fileName: "Editorial onboarding flow",
+					},
+					{
+						id: "legacy-reference-3",
+						source: "remote_url",
+						url: "https://images.example.com/ref-2.png",
+					},
+				],
+			},
+		});
+		expect(
+			getObjectiveTasks(wrapUpLesson!, {}, { pinnedArtifacts }).find(
+				(task) => task.id === "design-spec:references",
+			)?.status,
+		).toBe("complete");
+	});
+
+	it("adapts legacy 2.2 single uploads into the current sketch array contract", () => {
+		const lesson = getLessonById("2.2");
+		const wrapUpLesson = getLessonById("2.7");
+		expect(lesson).toBeTruthy();
+		expect(wrapUpLesson).toBeTruthy();
+
+		const normalized = normalizeLessonFieldValues(lesson!, {
+			sketch_upload: {
+				kind: "upload",
+				status: "stored",
+				storageId: "legacy-sketch-1",
+				fileName: "legacy-screen-1.jpg",
+				url: "https://example.com/legacy-screen-1.jpg",
+			},
+		});
+		const pinnedArtifacts = [
+			getReferenceBoardArtifact(),
+			getLegacySketchSetArtifact(),
+			getStoryboardImageArtifact(),
+			getRoughScreensArtifact(),
+			getVisualDirectionArtifact(),
+		];
+
+		expect(normalized.sketch_upload).toEqual([
+			expect.objectContaining({
+				storageId: "legacy-sketch-1",
+				fileName: "legacy-screen-1.jpg",
+			}),
+		]);
+		expect(
+			getObjectiveTasks(wrapUpLesson!, {}, { pinnedArtifacts }).find(
+				(task) => task.id === "design-spec:sketches",
+			)?.status,
+		).toBe("complete");
+	});
+
+	it("adapts legacy 2.6 style rules into the current visual-direction contract", () => {
+		const lesson = getLessonById("2.6");
+		const wrapUpLesson = getLessonById("2.7");
+		expect(lesson).toBeTruthy();
+		expect(wrapUpLesson).toBeTruthy();
+
+		const normalized = normalizeLessonFieldValues(lesson!, {
+			style_rule_1: "Quiet typography",
+			style_rule_2: "Dense spacing",
+			style_rule_3: "Sharp cards",
+			avoid_rule: "Soft gradients",
+		});
+		const pinnedArtifacts = [
+			getReferenceBoardArtifact(),
+			getSketchSetArtifact(),
+			getStoryboardImageArtifact(),
+			getRoughScreensArtifact(),
+			getLegacyVisualDirectionArtifact(),
+		];
+
+		expect(normalized).toMatchObject({
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+			visual_direction_notes:
+				"Style rule 1: Quiet typography\nStyle rule 2: Dense spacing\nStyle rule 3: Sharp cards\nAvoid: Soft gradients",
+			visual_guide_markdown: expect.stringContaining("## Avoid"),
+		});
+		expect(
+			getObjectiveTasks(wrapUpLesson!, {}, { pinnedArtifacts }).find(
+				(task) => task.id === "design-spec:visual-direction",
+			)?.status,
+		).toBe("complete");
 	});
 
 	it("composes 2.7 into a curated design spec from saved Design artifacts", () => {

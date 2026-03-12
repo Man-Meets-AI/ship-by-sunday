@@ -5,6 +5,7 @@ import {
 } from "@/lib/course";
 import {
 	completeLesson,
+	getResumeDestination,
 	getLessonState,
 	getMissionState,
 	listArtifacts,
@@ -69,6 +70,44 @@ function createCompletedLessonState(
 	};
 }
 
+function createLessonState(
+	lessonId: string,
+	options: {
+		status?: "not_started" | "in_progress" | "completed";
+		fieldValues?: Record<string, unknown>;
+		lastViewedAt?: number;
+		updatedAt?: number;
+		startedAt?: number;
+		completedAt?: number;
+	} = {},
+) {
+	const lesson = getLessonById(lessonId);
+	if (!lesson) {
+		throw new Error(
+			`Lesson ${lessonId} must exist for course-state lifecycle tests.`,
+		);
+	}
+
+	return {
+		_id: `lesson_state_${lessonId}_${options.status ?? "not_started"}`,
+		_creationTime: 1,
+		clerkUserId,
+		courseSlug: COURSE_SLUG,
+		lessonId: lesson.id,
+		blockId: lesson.block,
+		status: options.status ?? "not_started",
+		artifactKey: lesson.artifact.key,
+		artifactType: lesson.artifact.type,
+		fieldValues: options.fieldValues ?? {},
+		startedAt: options.startedAt ?? 10,
+		updatedAt: options.updatedAt ?? 20,
+		lastViewedAt: options.lastViewedAt ?? 30,
+		...(options.status === "completed"
+			? { completedAt: options.completedAt ?? 40 }
+			: {}),
+	};
+}
+
 function createCourseCtx({
 	lessonStates = [],
 	patch = vi.fn().mockResolvedValue(undefined),
@@ -130,7 +169,7 @@ describe("course state lifecycle", () => {
 		vi.restoreAllMocks();
 	});
 
-	it("treats incompatible completed rows as available instead of completed in mission state", async () => {
+	it("keeps incompatible completed rows locked when they are no longer on the unlock path", async () => {
 		const staleState = createStaleCompletedLessonState();
 		const ctx = createCourseCtx({ lessonStates: [staleState] });
 
@@ -143,10 +182,10 @@ describe("course state lifecycle", () => {
 			.find((lesson: { id: string }) => lesson.id === "1.1");
 
 		expect(mission.progressCount).toBe(0);
-		expect(missionLesson?.status).toBe("available");
+		expect(missionLesson?.status).toBe("locked");
 	});
 
-	it("reopens an incompatible completed lesson as unlocked with a clean draft state", async () => {
+	it("returns locked for an incompatible completed lesson that only survives as stale state", async () => {
 		const staleState = createStaleCompletedLessonState();
 		const ctx = createCourseCtx({ lessonStates: [staleState] });
 
@@ -154,11 +193,8 @@ describe("course state lifecycle", () => {
 			lessonId: "1.1",
 		});
 
-		expect(lessonState).toMatchObject({
-			accessStatus: "unlocked",
-			status: "not_started",
-			fieldValues: {},
-			pinnedArtifacts: [],
+		expect(lessonState).toEqual({
+			accessStatus: "locked",
 		});
 	});
 
@@ -171,7 +207,7 @@ describe("course state lifecycle", () => {
 		expect(artifacts).toEqual([]);
 	});
 
-	it("allows draft resaves against an incompatible completed row without re-querying the lesson row", async () => {
+	it("does not allow draft saves against an incompatible completed row that is no longer accessible", async () => {
 		const staleState = createStaleCompletedLessonState();
 		const patch = vi.fn().mockResolvedValue(undefined);
 		const insert = vi.fn().mockResolvedValue("new_lesson_state");
@@ -184,31 +220,18 @@ describe("course state lifecycle", () => {
 
 		vi.spyOn(Date, "now").mockReturnValue(fixedNow);
 
-		const result = await (saveLessonDraft as any)._handler(ctx, {
-			lessonId: "1.1",
-			fieldValues: {
-				problem_1_who: "Startup operators",
-				problem_1_pain:
-					"They lose action items after meetings and waste time rebuilding them.",
-			},
-		});
-
-		expect(result).toEqual({ savedAt: fixedNow });
-		expect(insert).not.toHaveBeenCalled();
-		expect(patch).toHaveBeenCalledWith(
-			staleState._id,
-			expect.objectContaining({
-				status: "completed",
-				updatedAt: fixedNow,
-				lastViewedAt: fixedNow,
-				fieldValues: expect.objectContaining({
+		await expect(
+			(saveLessonDraft as any)._handler(ctx, {
+				lessonId: "1.1",
+				fieldValues: {
 					problem_1_who: "Startup operators",
 					problem_1_pain:
 						"They lose action items after meetings and waste time rebuilding them.",
-					[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
-				}),
+				},
 			}),
-		);
+		).rejects.toThrow("Lesson is still locked");
+		expect(insert).not.toHaveBeenCalled();
+		expect(patch).not.toHaveBeenCalled();
 	});
 
 	it("completes a lesson and returns the next lesson id for the celebration flow", async () => {
@@ -288,6 +311,142 @@ describe("course state lifecycle", () => {
 				],
 			},
 		});
+	});
+
+	it("does not reopen stale 2.7 rows when the prerequisite chain no longer counts", async () => {
+		const ctx = createCourseCtx({
+			lessonStates: [
+				createLessonState("2.6", {
+					status: "completed",
+					fieldValues: {
+						style_rule_1: "",
+						[FIELD_SHAPE_VERSION_FIELD_ID]: 1,
+					},
+					lastViewedAt: 200,
+				}),
+				createLessonState("2.7", {
+					status: "not_started",
+					lastViewedAt: 250,
+				}),
+			],
+		});
+
+		const lessonState = await (getLessonState as any)._handler(ctx, {
+			lessonId: "2.7",
+		});
+		const resume = await (getResumeDestination as any)._handler(ctx);
+
+		expect(lessonState).toEqual({ accessStatus: "locked" });
+		expect(resume).toEqual({
+			destination: "/mission",
+			lessonId: null,
+		});
+	});
+
+	it("resumes to the most recently viewed lesson that is still accessible", async () => {
+		const ctx = createCourseCtx({
+			lessonStates: [
+				createLessonState("2.7", {
+					status: "not_started",
+					lastViewedAt: 250,
+				}),
+				createLessonState("1.7", {
+					status: "completed",
+					lastViewedAt: 200,
+					fieldValues: {
+						who: "Startup operators",
+						outcome: "Leave meetings with clear next steps.",
+						evidence: "Speed matters most after the call.",
+						flow: "Paste notes -> review -> share",
+						scope: "Core path only",
+					},
+					completedAt: 180,
+				}),
+			],
+		});
+
+		const resume = await (getResumeDestination as any)._handler(ctx);
+
+		expect(resume).toEqual({
+			destination: "/lesson/1.7",
+			lessonId: "1.7",
+		});
+	});
+
+	it("ignores in-progress upstream artifacts when building the 2.7 stage-unlock summary", async () => {
+		const ctx = createCourseCtx({
+			lessonStates: [
+				createCompletedLessonState("1.7"),
+				createLessonState("2.1", {
+					status: "in_progress",
+					fieldValues: {
+						[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+						reference_gallery: {
+							kind: "reference_gallery",
+							items: [
+								{
+									id: "remote-1",
+									source: "remote_url",
+									url: "https://images.example.com/ref-1.png",
+								},
+								{
+									id: "remote-2",
+									source: "remote_url",
+									url: "https://images.example.com/ref-2.png",
+								},
+								{
+									id: "remote-3",
+									source: "remote_url",
+									url: "https://images.example.com/ref-3.png",
+								},
+							],
+						},
+					},
+				}),
+				createCompletedLessonState("2.2", {
+					sketch_upload: [
+						{
+							kind: "upload",
+							status: "stored",
+							fileName: "screen-1.jpg",
+							storageId: "sketch-1",
+						},
+					],
+				}),
+				createCompletedLessonState("2.3", {
+					storyboard_upload: {
+						kind: "upload",
+						status: "stored",
+						fileName: "storyboard.png",
+						storageId: "storyboard-1",
+					},
+				}),
+				createCompletedLessonState("2.5"),
+				createCompletedLessonState("2.6", {
+					[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+					visual_direction_notes:
+						"Quiet, editorial, and sharp with tighter spacing and stronger contrast.",
+					visual_guide_markdown: `# Visual Guide
+## Overall Direction
+Keep the interface sharp and editorial.`,
+				}),
+			],
+		});
+
+		const lessonState = await (getLessonState as any)._handler(ctx, {
+			lessonId: "2.7",
+		});
+
+		expect(lessonState).toMatchObject({
+			accessStatus: "unlocked",
+			status: "not_started",
+		});
+		expect(
+			lessonState.pinnedArtifacts.some(
+				(artifact: { artifactKey: string }) =>
+					artifact.artifactKey === "reference_board",
+			),
+		).toBe(false);
 	});
 
 	it("throws the structured incomplete-lesson error when required fields are missing", async () => {

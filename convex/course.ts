@@ -54,6 +54,10 @@ type LessonStateUpsertOptions =
 			fieldValues: PersistedFieldValues;
 	  };
 
+type PinnedArtifactOptions = {
+	requireCompletedSource: boolean;
+};
+
 async function requireViewer(ctx: CourseReadCtx) {
 	const identity = await ctx.auth.getUserIdentity();
 
@@ -142,8 +146,7 @@ async function loadViewerCourseState(
 function canAccessLesson(lessonId: string, viewerState: ViewerCourseState) {
 	return (
 		viewerState.unlockedLessonIds.has(lessonId) ||
-		viewerState.compatibleCompletedLessonIdSet.has(lessonId) ||
-		viewerState.lessonStateByLessonId.has(lessonId)
+		viewerState.compatibleCompletedLessonIdSet.has(lessonId)
 	);
 }
 
@@ -176,6 +179,13 @@ function getNormalizedLessonFieldValues(
 	return normalizeLessonFieldValues(
 		lesson,
 		(lessonState?.fieldValues ?? {}) as PersistedFieldValues,
+	);
+}
+
+function requireCompletedPinnedArtifacts(lesson: LessonConfig) {
+	return (
+		lesson.workbench === "brief_assembler" &&
+		lesson.briefAssembler?.variant === "stage_unlock"
 	);
 }
 
@@ -318,13 +328,17 @@ async function buildResolvedArtifactPreviewForLesson(
 	viewerState: ViewerCourseState,
 	lesson: LessonConfig,
 	cache: Map<string, ArtifactPreview | null>,
+	options: PinnedArtifactOptions,
 ): Promise<ArtifactPreview | null> {
 	if (cache.has(lesson.id)) {
 		return cache.get(lesson.id) ?? null;
 	}
 
 	const lessonState = viewerState.lessonStateByLessonId.get(lesson.id);
-	if (!isCompatibleLessonState(lesson, lessonState)) {
+	if (
+		!isCompatibleLessonState(lesson, lessonState) ||
+		(options.requireCompletedSource && lessonState?.status !== "completed")
+	) {
 		cache.set(lesson.id, null);
 		return null;
 	}
@@ -341,6 +355,7 @@ async function buildResolvedArtifactPreviewForLesson(
 				viewerState,
 				sourceLesson,
 				cache,
+				options,
 			);
 		}),
 	);
@@ -364,6 +379,9 @@ async function getResolvedPinnedArtifactsForLesson(
 	lesson: LessonConfig,
 ) {
 	const cache = new Map<string, ArtifactPreview | null>();
+	const options = {
+		requireCompletedSource: requireCompletedPinnedArtifacts(lesson),
+	};
 
 	const pinnedArtifacts = await Promise.all(
 		(lesson.pinnedArtifacts ?? []).map(async (artifactKey) => {
@@ -377,6 +395,7 @@ async function getResolvedPinnedArtifactsForLesson(
 				viewerState,
 				sourceLesson,
 				cache,
+				options,
 			);
 		}),
 	);
@@ -414,11 +433,11 @@ export const getResumeDestination = query({
 	args: {},
 	returns: v.any(),
 	handler: async (ctx) => {
-		const clerkUserId = await requireActiveEntitlement(ctx);
-		const lessonStates = await getViewerLessonStates(ctx, clerkUserId);
+		const viewerState = await loadViewerCourseState(ctx);
 
-		const latestLessonState = [...lessonStates]
+		const latestAccessibleLessonState = [...viewerState.lessonStates]
 			.filter((state: any) => Boolean(getLessonById(state.lessonId)))
+			.filter((state: any) => canAccessLesson(state.lessonId, viewerState))
 			.sort((left: any, right: any) => {
 				const leftTimestamp =
 					left.lastViewedAt ?? left.updatedAt ?? left.startedAt ?? 0;
@@ -427,7 +446,7 @@ export const getResumeDestination = query({
 				return rightTimestamp - leftTimestamp;
 			})[0];
 
-		if (!latestLessonState) {
+		if (!latestAccessibleLessonState) {
 			return {
 				destination: "/mission",
 				lessonId: null,
@@ -435,8 +454,8 @@ export const getResumeDestination = query({
 		}
 
 		return {
-			destination: `/lesson/${latestLessonState.lessonId}`,
-			lessonId: latestLessonState.lessonId,
+			destination: `/lesson/${latestAccessibleLessonState.lessonId}`,
+			lessonId: latestAccessibleLessonState.lessonId,
 		};
 	},
 });
@@ -739,6 +758,7 @@ export const completeLesson = mutation({
 		}
 
 		ensureLessonIsUnlocked(lesson.id, viewerState);
+		const requireCompletedSource = requireCompletedPinnedArtifacts(lesson);
 
 		const pinnedArtifacts = (lesson.pinnedArtifacts ?? [])
 			.map((artifactKey) => {
@@ -750,7 +770,8 @@ export const completeLesson = mutation({
 				if (
 					!sourceLesson ||
 					!sourceState ||
-					!isCompatibleLessonState(sourceLesson, sourceState)
+					!isCompatibleLessonState(sourceLesson, sourceState) ||
+					(requireCompletedSource && sourceState.status !== "completed")
 				) {
 					return null;
 				}
@@ -805,6 +826,7 @@ export const listArtifacts = query({
 						viewerState,
 						lesson,
 						new Map(),
+						{ requireCompletedSource: false },
 					);
 					if (!preview) {
 						return null;
