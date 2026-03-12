@@ -5,6 +5,10 @@ Use this file to capture recurring mistakes, corrections, and guardrails for fut
 ## Lessons
 
 - Date: 2026-03-12
+  Pattern: I proposed a form-first preview for a lesson output that the user actually wanted to feel like a reusable premium asset, which would have made the experience feel cheap even if the data model underneath was clean.
+  Rule: If a lesson output is meant to become a reusable visual asset later, default to a real stage or canvas surface early. Keep the underlying data structured, but do not make the learner experience feel like a worksheet pretending to be a tool.
+  How to verify next time: Ask whether the output is only data capture or a visual asset the learner should feel confident reusing. If it is an asset, browser-QA the first render and make sure it feels like a product tool before closing the work.
+- Date: 2026-03-12
   Pattern: I left Scope Hammer as three blank manual fields even though the earlier CEO lessons had already captured enough context to generate a first-pass scope cut, which made the lesson feel like another exhausting form instead of a momentum step.
   Rule: When a later lesson asks the learner to synthesize context that already exists in upstream artifacts, default to a generated prompt/import flow before asking for blank manual entry. Keep the structured fields only as editable cleanup surfaces.
   How to verify next time: Check whether prior artifacts already contain the real inputs, and if they do, confirm the page opens with a copyable prompt or prefilled recommendation instead of an empty board/textarea trio.
