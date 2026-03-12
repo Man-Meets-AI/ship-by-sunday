@@ -7,6 +7,15 @@
 - `lib/course/`: course domain contracts, resources, manual lesson definitions, and registry logic
 - `convex/`: entitlements, mission state, lesson state, and uploads
 
+## Lesson workbench
+
+- `components/lesson-workbench.tsx` is the public workbench facade.
+- `components/lesson-workbench/renderer.tsx` handles runtime derivation plus typed mode dispatch.
+- `components/lesson-workbench/modes/` owns mode-specific layout and behavior.
+- `components/lesson-workbench/fields/` owns field-kind controls and pure parsing helpers.
+- `components/lesson-workbench/shared/` owns shell-level primitives that are reused across modes.
+- See `docs/dev/lesson-workbench.md` for the working rules and file-boundary guardrails.
+
 ## Purchase to access flow
 
 1. The landing page CTA starts checkout for signed-in users.
