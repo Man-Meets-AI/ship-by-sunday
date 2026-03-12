@@ -263,6 +263,36 @@ export const shipLessons = [
 				label: "Send Tracker",
 				kind: "table",
 				required: true,
+				columns: [
+					{
+						id: "person",
+						label: "Person",
+						kind: "text",
+						placeholder: "Who received it?",
+						width: "compact",
+					},
+					{
+						id: "channel",
+						label: "Channel",
+						kind: "text",
+						placeholder: "Email, DM, text...",
+						width: "compact",
+					},
+					{
+						id: "sent",
+						label: "Sent?",
+						kind: "select",
+						options: ["Yes", "No"],
+						placeholder: "Select one",
+						width: "compact",
+					},
+					{
+						id: "reply",
+						label: "Reply",
+						kind: "text",
+						placeholder: "What came back?",
+					},
+				],
 			},
 		],
 		content: {
@@ -326,6 +356,30 @@ export const shipLessons = [
 				label: "Feedback Log",
 				kind: "table",
 				required: true,
+				columns: [
+					{
+						id: "source",
+						label: "Source",
+						kind: "text",
+						placeholder: "Who or where?",
+						width: "compact",
+					},
+					{
+						id: "whatTheySaid",
+						label: "What They Said",
+						kind: "text",
+						placeholder: "Capture the raw signal",
+						width: "wide",
+					},
+					{
+						id: "priority",
+						label: "Priority",
+						kind: "select",
+						options: ["1", "2", "3"],
+						placeholder: "Select one",
+						width: "compact",
+					},
+				],
 			},
 			{
 				id: "v2_priority_1",

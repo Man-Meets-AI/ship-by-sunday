@@ -2,6 +2,7 @@ import type {
 	ChecklistItemValue,
 	UploadFieldValue,
 } from "@/lib/course/manifest";
+import { parseLegacyTableText, toLegacyTableText } from "@/lib/course/table";
 import { isChecklistItemArray } from "@/lib/course/registry";
 
 export function toLineList(value: unknown) {
@@ -13,13 +14,7 @@ export function toLineList(value: unknown) {
 }
 
 export function toTableText(value: unknown) {
-	if (!Array.isArray(value)) {
-		return "";
-	}
-
-	return value
-		.map((row) => (Array.isArray(row) ? row.join(" | ") : String(row)))
-		.join("\n");
+	return toLegacyTableText(value);
 }
 
 export function parseLines(value: string) {
@@ -30,15 +25,7 @@ export function parseLines(value: string) {
 }
 
 export function parseTable(value: string) {
-	return value
-		.split("\n")
-		.map((row) =>
-			row
-				.split("|")
-				.map((column) => column.trim())
-				.filter(Boolean),
-		)
-		.filter((row) => row.length > 0);
+	return parseLegacyTableText(value);
 }
 
 export function normalizeChecklistValue(

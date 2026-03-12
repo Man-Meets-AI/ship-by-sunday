@@ -353,6 +353,35 @@ export const buildLessons = [
 				label: "Blocker Log",
 				kind: "table",
 				required: true,
+				columns: [
+					{
+						id: "blocker",
+						label: "Blocker",
+						kind: "text",
+						placeholder: "What is breaking?",
+						width: "compact",
+					},
+					{
+						id: "cause",
+						label: "What Caused It",
+						kind: "text",
+						placeholder: "Root cause",
+					},
+					{
+						id: "fixTried",
+						label: "Fix Tried",
+						kind: "text",
+						placeholder: "What you tried",
+					},
+					{
+						id: "resolved",
+						label: "Resolved?",
+						kind: "select",
+						options: ["Yes", "No"],
+						placeholder: "Select one",
+						width: "compact",
+					},
+				],
 			},
 			{
 				id: "app_stable",

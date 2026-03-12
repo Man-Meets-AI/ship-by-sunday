@@ -13,6 +13,7 @@ import {
 	type WorkbenchField,
 	type WorkbenchSection,
 } from "./manifest";
+import { formatTablePreview, getFilledTableRows } from "./table";
 
 export const COURSE_SLUG = "ship-by-sunday";
 
@@ -243,7 +244,11 @@ function normalizeTaskLabel(label: string) {
 }
 
 function getFieldTaskLabel(field: WorkbenchField) {
-	return field.taskLabel ?? field.artifactPreviewLabel ?? normalizeTaskLabel(field.label);
+	return (
+		field.taskLabel ??
+		field.artifactPreviewLabel ??
+		normalizeTaskLabel(field.label)
+	);
 }
 
 function normalizeLegacyChecklistItems(
@@ -325,12 +330,10 @@ export function isLessonFieldShapeCompatible(
 	const values = normalizeFieldValues(fieldValues);
 	const expectedVersion = getFieldShapeVersion(lesson);
 	const storedVersion = values[FIELD_SHAPE_VERSION_FIELD_ID];
-	const knownFieldIds = new Set(
-		[
-			...(lesson.workbenchFields ?? []).map((field) => field.id),
-			...getHandoffPersistedFieldIds(lesson.handoff),
-		],
-	);
+	const knownFieldIds = new Set([
+		...(lesson.workbenchFields ?? []).map((field) => field.id),
+		...getHandoffPersistedFieldIds(lesson.handoff),
+	]);
 	const nonPrivateFieldIds = Object.keys(values).filter(
 		(fieldId) => !fieldId.startsWith(PRIVATE_FIELD_PREFIX),
 	);
@@ -371,6 +374,14 @@ export function isFilled(value: PersistedFieldValue | undefined) {
 	}
 
 	if (Array.isArray(value)) {
+		if (value.some((item) => Array.isArray(item))) {
+			return value.some(
+				(item) =>
+					Array.isArray(item) &&
+					item.some((cell) => String(cell ?? "").trim().length > 0),
+			);
+		}
+
 		return value.length > 0;
 	}
 
@@ -402,13 +413,16 @@ export function getObjectiveTasks(
 			definitions,
 		);
 
-		return definitions.map((definition, index) => ({
-			id: definition.id ?? definition.label,
-			label: definition.label,
-			status: manualItems[index]?.checked ? "complete" : "incomplete",
-			source: "manual",
-			interactive: true,
-		} satisfies ObjectiveTask));
+		return definitions.map(
+			(definition, index) =>
+				({
+					id: definition.id ?? definition.label,
+					label: definition.label,
+					status: manualItems[index]?.checked ? "complete" : "incomplete",
+					source: "manual",
+					interactive: true,
+				}) satisfies ObjectiveTask,
+		);
 	}
 
 	const fieldsById = new Map(
@@ -455,8 +469,7 @@ export function getObjectiveTasks(
 				isChecklistItemArray(value)
 					? value.filter((item) => item.checked).map((item) => item.label)
 					: Array.isArray(value)
-						? value
-								.filter((item): item is string => typeof item === "string")
+						? value.filter((item): item is string => typeof item === "string")
 						: [],
 			);
 
@@ -574,25 +587,34 @@ export function prepareFieldValuesForPersistence(
 	lesson: LessonConfig,
 	fieldValues: PersistedFieldValues,
 ) {
+	const fieldsById = new Map(
+		(lesson.workbenchFields ?? []).map((field) => [field.id, field]),
+	);
+
 	return {
 		...Object.fromEntries(
-		Object.entries(fieldValues).map(([fieldId, value]) => {
-			if (!isUploadFieldValue(value)) {
-				return [fieldId, value];
-			}
+			Object.entries(fieldValues).map(([fieldId, value]) => {
+				const field = fieldsById.get(fieldId);
+				if (field?.kind === "table") {
+					return [fieldId, getFilledTableRows(value, field.columns)];
+				}
 
-			return [
-				fieldId,
-				{
-					kind: "upload",
-					status: value.storageId ? "stored" : value.status,
-					fileName: value.fileName,
-					mimeType: value.mimeType,
-					size: value.size,
-					storageId: value.storageId,
-				} satisfies UploadFieldValue,
-			];
-		}),
+				if (!isUploadFieldValue(value)) {
+					return [fieldId, value];
+				}
+
+				return [
+					fieldId,
+					{
+						kind: "upload",
+						status: value.storageId ? "stored" : value.status,
+						fileName: value.fileName,
+						mimeType: value.mimeType,
+						size: value.size,
+						storageId: value.storageId,
+					} satisfies UploadFieldValue,
+				];
+			}),
 		),
 		[FIELD_SHAPE_VERSION_FIELD_ID]: getFieldShapeVersion(lesson),
 	} as PersistedFieldValues;
@@ -633,7 +655,8 @@ export function getWorkbenchSectionStates(
 			totalRequiredFields,
 			completedRequiredFields,
 			isComplete:
-				totalRequiredFields === 0 || completedRequiredFields === totalRequiredFields,
+				totalRequiredFields === 0 ||
+				completedRequiredFields === totalRequiredFields,
 			incompleteFieldIds,
 		} satisfies WorkbenchSectionState;
 	});
@@ -663,7 +686,10 @@ export function buildArtifactPreview(
 	}
 
 	for (const field of lesson.workbenchFields ?? []) {
-		if (field.id.startsWith(PRIVATE_FIELD_PREFIX) || usedFieldIds.has(field.id)) {
+		if (
+			field.id.startsWith(PRIVATE_FIELD_PREFIX) ||
+			usedFieldIds.has(field.id)
+		) {
 			continue;
 		}
 
@@ -673,8 +699,10 @@ export function buildArtifactPreview(
 		}
 
 		previewEntries.push([
-			field.artifactPreviewLabel ?? field.label ?? field.id.replaceAll("_", " "),
-			value,
+			field.artifactPreviewLabel ??
+				field.label ??
+				field.id.replaceAll("_", " "),
+			field.kind === "table" ? formatTablePreview(value, field.columns) : value,
 		]);
 		usedFieldIds.add(field.id);
 	}

@@ -640,6 +640,34 @@ export const ceoLessons = [
 				label: "Research Table",
 				kind: "table",
 				required: true,
+				columns: [
+					{
+						id: "competitor",
+						label: "Competitor",
+						kind: "text",
+						placeholder: "Name the product",
+						width: "compact",
+					},
+					{
+						id: "good",
+						label: "Good",
+						kind: "text",
+						placeholder: "What it does well",
+					},
+					{
+						id: "poor",
+						label: "Poor",
+						kind: "text",
+						placeholder: "Where it breaks down",
+					},
+					{
+						id: "usersCareAbout",
+						label: "Users Care About",
+						kind: "text",
+						placeholder: "What matters most",
+						width: "wide",
+					},
+				],
 				helpText: "Columns: Competitor, Good, Poor, Users Care About",
 			},
 			{

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { formatArtifactValue } from "@/components/lesson-workbench/shared/artifact-format";
 import { getLesson, type LessonConfig } from "@/lib/course/manifest";
 import type { LessonContent } from "@/lib/course/manifest";
 import type {
@@ -32,22 +33,6 @@ type BaseLessonShellProps = {
 	children: React.ReactNode;
 	footer: React.ReactNode;
 };
-
-function formatArtifactValue(value: unknown) {
-	if (!value) {
-		return "No saved value yet.";
-	}
-
-	if (
-		typeof value === "object" &&
-		!Array.isArray(value) &&
-		"fileName" in (value as object)
-	) {
-		return String((value as { fileName?: string }).fileName ?? "Uploaded file");
-	}
-
-	return Array.isArray(value) ? JSON.stringify(value) : String(value);
-}
 
 function ManualTaskRow({
 	label,

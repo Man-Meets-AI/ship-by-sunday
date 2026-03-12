@@ -43,4 +43,5 @@ export type FieldControlProps = {
 	value: unknown;
 	onChange: (value: unknown) => void;
 	pinnedArtifacts: PinnedArtifact[];
+	showLabel?: boolean;
 };

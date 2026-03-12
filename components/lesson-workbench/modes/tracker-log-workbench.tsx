@@ -34,6 +34,7 @@ export function TrackerLogWorkbench({
 						value={fieldValues[tableField.id]}
 						onChange={(value) => onFieldChange(tableField.id, value)}
 						pinnedArtifacts={pinnedArtifacts}
+						showLabel={false}
 					/>
 				</WorkbenchCard>
 			) : null}

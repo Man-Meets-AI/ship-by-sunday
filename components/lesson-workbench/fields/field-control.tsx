@@ -9,6 +9,7 @@ export function FieldControl({
 	value,
 	onChange,
 	pinnedArtifacts,
+	showLabel = true,
 }: FieldControlProps) {
 	if (field.kind === "readonly") {
 		return (
@@ -25,6 +26,7 @@ export function FieldControl({
 		field,
 		value,
 		onChange,
+		{ showLabel },
 	);
 	if (collectionControl) {
 		return collectionControl;

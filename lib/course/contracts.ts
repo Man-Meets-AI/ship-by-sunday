@@ -100,6 +100,15 @@ export type CandidateProblemPersistedField = {
 	previewLabel: string;
 };
 
+export type TableColumnConfig = {
+	id: string;
+	label: string;
+	kind: "text" | "select";
+	placeholder?: string;
+	options?: string[];
+	width?: "compact" | "default" | "wide";
+};
+
 export type LessonHandoff = {
 	mode: "select_candidate_problem";
 	sourceArtifactKey: string;
@@ -130,6 +139,7 @@ export type WorkbenchField = {
 	options?: string[];
 	rows?: number;
 	inputWidth?: "compact" | "default" | "wide";
+	columns?: TableColumnConfig[];
 	artifactPreviewLabel?: string;
 	taskLabel?: string;
 	linkedArtifactKey?: string;

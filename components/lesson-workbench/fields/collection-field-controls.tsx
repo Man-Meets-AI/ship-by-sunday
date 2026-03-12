@@ -1,6 +1,7 @@
 import type { WorkbenchField } from "@/lib/course/manifest";
 
 import { CheckboxRow } from "./checkbox-row";
+import { EditableTableField } from "./editable-table-field";
 import {
 	fieldLabelClass,
 	inputBaseClass,
@@ -18,10 +19,15 @@ export function renderCollectionFieldControl(
 	field: WorkbenchField,
 	value: unknown,
 	onChange: (value: unknown) => void,
+	renderOptions?: {
+		showLabel?: boolean;
+	},
 ) {
+	const showLabel = renderOptions?.showLabel ?? true;
+
 	if (field.kind === "checklist") {
-		const options = field.options ?? [];
-		const checklistItems = normalizeChecklistValue(value, options);
+		const checklistOptions = field.options ?? [];
+		const checklistItems = normalizeChecklistValue(value, checklistOptions);
 
 		return (
 			<div className="block">
@@ -61,15 +67,32 @@ export function renderCollectionFieldControl(
 	}
 
 	if (field.kind === "table") {
+		if (field.columns && field.columns.length > 0) {
+			return (
+				<EditableTableField
+					field={field}
+					value={value}
+					onChange={onChange}
+					showLabel={showLabel}
+				/>
+			);
+		}
+
+		const tableTextareaClass = showLabel
+			? inputBaseClass
+			: inputBaseClass.replace("mt-1.5 ", "");
+
 		return (
 			<label className={`block ${inputWidthClass(field)}`}>
-				<span className={fieldLabelClass}>{field.label}</span>
+				{showLabel ? (
+					<span className={fieldLabelClass}>{field.label}</span>
+				) : null}
 				<textarea
 					value={toTableText(value)}
 					onChange={(event) => onChange(parseTable(event.target.value))}
 					rows={6}
 					placeholder="One row per line. Separate columns with |"
-					className={`${inputBaseClass} font-mono`}
+					className={`${tableTextareaClass} font-mono`}
 				/>
 			</label>
 		);

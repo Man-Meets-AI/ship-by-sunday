@@ -5,6 +5,7 @@ import { useConvexAuth, useQuery } from "convex/react";
 
 import { getLessonHref } from "@/lib/course/manifest";
 import { api } from "@/convex/_generated/api";
+import { formatArtifactValue } from "@/components/lesson-workbench/shared/artifact-format";
 import { ProductShell } from "@/components/product-shell";
 import type { ProductTheme } from "@/lib/product-theme";
 
@@ -101,9 +102,7 @@ export function ArtifactsPage({
 													{fieldId}
 												</p>
 												<p className="mt-2 break-words">
-													{Array.isArray(value)
-														? value.join(", ")
-														: String(value)}
+													{formatArtifactValue(value)}
 												</p>
 											</div>
 										))
