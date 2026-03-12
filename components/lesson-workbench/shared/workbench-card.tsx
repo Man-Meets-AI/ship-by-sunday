@@ -3,7 +3,7 @@ export function WorkbenchCard({
 	children,
 	eyebrow,
 }: {
-	title: string;
+	title?: string;
 	children: React.ReactNode;
 	eyebrow?: string;
 }) {
@@ -15,9 +15,11 @@ export function WorkbenchCard({
 						{eyebrow}
 					</span>
 				) : null}
-				<span className="font-display text-sm uppercase tracking-[0.04em] text-product-text">
-					{title}
-				</span>
+				{title ? (
+					<span className="font-display text-sm uppercase tracking-[0.04em] text-product-text">
+						{title}
+					</span>
+				) : null}
 			</div>
 			<div className="px-3 py-3">{children}</div>
 		</div>

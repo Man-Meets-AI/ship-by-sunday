@@ -54,7 +54,11 @@ function getCandidateProblemsArtifact(): PinnedArtifact {
 
 describe("WorkbenchRenderer", () => {
 	it("renders representative workbench modes without hitting the fallback", () => {
-		const scenarios = [
+		const scenarios: Array<{
+			lessonId: string;
+			expected: string;
+			pinnedArtifacts?: PinnedArtifact[];
+		}> = [
 			{
 				lessonId: "0.2",
 				expected: "Sprint roadmap",
@@ -138,10 +142,10 @@ describe("WorkbenchRenderer", () => {
 		expect(markup).toContain("Competitor");
 		expect(markup).toContain("Users Care About");
 		expect(markup).toContain(
-			'<span class="font-display text-sm uppercase tracking-[0.04em] text-product-text">Research Table</span>',
+			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Research table</span>',
 		);
 		expect(markup).not.toContain(
-			'<span class="text-[11px] font-medium leading-snug text-product-text">Research Table</span>',
+			'<span class="font-display text-sm uppercase tracking-[0.04em] text-product-text">Research Table</span>',
 		);
 	});
 

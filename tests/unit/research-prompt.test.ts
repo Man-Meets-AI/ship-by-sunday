@@ -24,7 +24,9 @@ describe("buildCompetitorResearchPrompt", () => {
 			},
 		});
 
-		expect(prompt).toContain("Act as a deep research analyst.");
+		expect(prompt).toContain(
+			"You are doing a fast competitor / adjacent-solution research pass for a product-building workflow.",
+		);
 		expect(prompt).toContain("- User: Startup operators");
 		expect(prompt).toContain(
 			"- Problem to solve: They lose action items after meetings and waste time rebuilding them.",
@@ -32,16 +34,25 @@ describe("buildCompetitorResearchPrompt", () => {
 		expect(prompt).toContain(
 			"- Desired outcome: Startup operators leave a meeting with a clean action summary they can review and send in minutes.",
 		);
+		expect(prompt).toContain(
+			"- Reachability: I already know a few operators who would try this this week.",
+		);
+		expect(prompt).toContain(
+			"- Difference for user: They stop losing decisions in messy notes and can close the loop while the meeting is still fresh.",
+		);
 		expect(prompt).toContain("Research Table");
 		expect(prompt).toContain("Key pattern I noticed");
+		expect(prompt).toContain("Evidence standard:");
+		expect(prompt).toContain("Selection guidance:");
+		expect(prompt).toContain("Writing guidance:");
 		expect(prompt).toContain("- Do not use markdown table syntax.");
 		expect(prompt).toContain("- Do not add a header row.");
 		expect(prompt).toContain(
-			"- Paste the raw | delimited lines into the Research Table field in Ship by Sunday.",
+			"solution name | what it does well | where it falls short | what users care about most",
 		);
 	});
 
-	it("omits empty optional context lines while keeping the pasteback rules intact", () => {
+	it("omits empty optional context lines while keeping the output rules intact", () => {
 		const prompt = buildCompetitorResearchPrompt({
 			user: {
 				statement: "Freelancers",
@@ -55,14 +66,12 @@ describe("buildCompetitorResearchPrompt", () => {
 
 		expect(prompt).not.toContain("Pain moment:");
 		expect(prompt).not.toContain("Current workaround:");
-		expect(prompt).not.toContain("Why I can reach them quickly:");
+		expect(prompt).not.toContain("Reachability:");
 		expect(prompt).not.toContain("Success looks like:");
-		expect(prompt).not.toContain("What should feel different for the user:");
+		expect(prompt).not.toContain("Difference for user:");
 		expect(prompt).toContain(
 			"- Keep the Research Table section as raw | delimited lines only.",
 		);
-		expect(prompt).toContain(
-			"- Paste the 2-4 sentence summary into the Key pattern I noticed field.",
-		);
+		expect(prompt).toContain("- Do not add intro text");
 	});
 });

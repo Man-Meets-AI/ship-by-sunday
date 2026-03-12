@@ -28,7 +28,7 @@ export function ScoreTableWorkbench({
 				totalTaskCount={Math.max(objectiveTasks.length, 1)}
 			/>
 			{tableField ? (
-				<WorkbenchCard title={tableField.label} eyebrow="Research table">
+				<WorkbenchCard eyebrow="Research table">
 					<FieldControl
 						field={tableField}
 						value={fieldValues[tableField.id]}
