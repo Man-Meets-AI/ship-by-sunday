@@ -13,6 +13,7 @@ import {
 	ProductThemeProvider,
 	useProductTheme,
 } from "@/components/product-theme-provider";
+import { getProductShellBlockNavigationTarget } from "@/components/product-shell-navigation";
 import {
 	SkillRail,
 	type SkillRailCompletionCue,
@@ -229,6 +230,48 @@ function ShellInner({
 								| "completed"
 								| "active"
 								| "locked";
+							const target = getProductShellBlockNavigationTarget(block);
+							const chipClassName = `flex items-center gap-1.5 rounded-none border px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] ${blockStatusClass(status)} ${
+								target
+									? "transition-colors hover:border-product-accent/70 hover:bg-product-accent/8 hover:text-product-accent"
+									: ""
+							}`;
+							const chipContent = (
+								<>
+									<span>{block.label}</span>
+									{status === "completed" ? (
+										<svg
+											width="10"
+											height="10"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="3"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+										>
+											<polyline points="20 6 9 17 4 12" />
+										</svg>
+									) : status === "active" ? (
+										<div className="h-1.5 w-1.5 rounded-full bg-product-accent" />
+									) : (
+										<svg
+											width="10"
+											height="10"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2.5"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											className="opacity-50"
+										>
+											<rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+											<path d="M7 11V7a5 5 0 0 1 10 0v4" />
+										</svg>
+									)}
+								</>
+							);
 							return (
 								<div key={block.id} className="flex items-center">
 									{i > 0 && (
@@ -240,49 +283,24 @@ function ShellInner({
 											}`}
 										/>
 									)}
-									<div
-										className={`flex items-center gap-1.5 rounded-none border px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] ${blockStatusClass(status)}`}
-									>
-										<span>{block.label}</span>
-										{status === "completed" ? (
-											<svg
-												width="10"
-												height="10"
-												viewBox="0 0 24 24"
-												fill="none"
-												stroke="currentColor"
-												strokeWidth="3"
-												strokeLinecap="round"
-												strokeLinejoin="round"
-											>
-												<polyline points="20 6 9 17 4 12" />
-											</svg>
-										) : status === "active" ? (
-											<div className="h-1.5 w-1.5 rounded-full bg-product-accent" />
-										) : (
-											<svg
-												width="10"
-												height="10"
-												viewBox="0 0 24 24"
-												fill="none"
-												stroke="currentColor"
-												strokeWidth="2.5"
-												strokeLinecap="round"
-												strokeLinejoin="round"
-												className="opacity-50"
-											>
-												<rect
-													x="3"
-													y="11"
-													width="18"
-													height="11"
-													rx="2"
-													ry="2"
-												/>
-												<path d="M7 11V7a5 5 0 0 1 10 0v4" />
-											</svg>
-										)}
-									</div>
+									{target ? (
+										<Link
+											href={target.href}
+											scroll={false}
+											title={`Open ${block.label}`}
+											aria-label={`Open ${block.label}`}
+											aria-current={
+												block.id === resolvedBlockId ? "page" : undefined
+											}
+											className={chipClassName}
+										>
+											{chipContent}
+										</Link>
+									) : (
+										<div aria-disabled="true" className={chipClassName}>
+											{chipContent}
+										</div>
+									)}
 								</div>
 							);
 						})}

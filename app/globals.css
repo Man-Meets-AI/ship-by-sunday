@@ -54,7 +54,10 @@ body {
 		linear-gradient(rgba(17, 17, 17, 0.045) 1px, transparent 1px),
 		linear-gradient(90deg, rgba(17, 17, 17, 0.045) 1px, transparent 1px),
 		rgb(var(--product-surface-strong));
-	background-size: 28px 28px, 28px 28px, auto;
+	background-size:
+		28px 28px,
+		28px 28px,
+		auto;
 }
 
 .sbs-core-flow-stage .react-flow__renderer,
