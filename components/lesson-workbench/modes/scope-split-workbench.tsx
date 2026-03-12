@@ -1,6 +1,7 @@
 import type { WorkbenchModeProps } from "../types";
 import { FieldControl } from "../fields/field-control";
 import { FieldList } from "../fields/field-list";
+import { PromptImportCard } from "../shared/prompt-import-card";
 import { StatusRail } from "../shared/status-rail";
 import { WorkbenchCard } from "../shared/workbench-card";
 import { WorkbenchContainer } from "../shared/workbench-container";
@@ -27,6 +28,13 @@ export function ScopeSplitWorkbench({
 				completedTaskCount={completedTaskCount}
 				totalTaskCount={Math.max(objectiveTasks.length, 1)}
 			/>
+			{lesson.promptImport ? (
+				<PromptImportCard
+					lesson={lesson}
+					onFieldChange={onFieldChange}
+					pinnedArtifacts={pinnedArtifacts}
+				/>
+			) : null}
 			<div className="grid gap-2 lg:grid-cols-2">
 				{leftField ? (
 					<WorkbenchCard label={leftField.label}>
