@@ -41,6 +41,16 @@ Each workbench mode gets its own file.
 
 Do not collapse similar modes into a generic meta-mode unless multiple real changes prove the duplication is a maintenance problem.
 
+Brief-assembler rules:
+
+- `brief_assembler` can stay the default generic summary mode for lessons that still need to show a normal artifact context plus a few local fields.
+- If a wrap-up lesson is primarily locking upstream work instead of collecting new inputs, declare a `lesson.briefAssembler` config instead of hard-coding one-off UI inside the shell.
+- Current reusable variant: `stage_unlock`
+  - use it for block-end lessons that should feel like a level clear
+  - keep the hero, next-step label, skill strip, and CTA copy in lesson config
+  - use a resolved artifact-preview path so the wrap-up artifact is composed from pinned upstream artifacts instead of staying empty
+- The first acceptance case is `1.7`; future wrap-ups should copy the contract shape before inventing a new renderer.
+
 Prompt-import rules:
 
 - If a lesson needs a main-workbench `copy prompt -> paste result` loop, declare it explicitly on `lesson.promptImport`.
@@ -110,6 +120,9 @@ Current coverage for the split lives in:
 - `tests/unit/lesson-workbench-helpers.test.ts`
 - `tests/unit/lesson-workbench-renderer.test.tsx`
 - `tests/unit/research-import-workbench.test.tsx`
+- `tests/unit/course-registry.test.ts`
+- `tests/smoke/content-contract.test.ts`
+- `tests/smoke/lesson-completion-celebration.test.ts`
 
 These tests are intentionally narrow:
 
@@ -118,3 +131,5 @@ These tests are intentionally narrow:
 - representative mode rendering
 - capture-upload render path
 - guided-form handoff render path
+- stage-unlock wrap-up rendering and composed artifact previews
+- declarative wrap-up contract checks for lessons like `1.7`

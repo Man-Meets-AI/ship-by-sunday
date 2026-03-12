@@ -239,6 +239,23 @@ export type LessonContent = {
 
 export type LessonCoachContent = LessonContent["coach"];
 
+export type BriefAssemblerConfig =
+	| {
+			variant?: "default";
+	  }
+	| {
+			variant: "stage_unlock";
+			heroEyebrow: string;
+			heroTitle: string;
+			heroBody: string;
+			nextStepLabel: string;
+			skills: string[];
+			readyStateCopy?: string;
+			completionCtaLabel?: string;
+			celebrationEyebrow?: string;
+			celebrationTitle?: string;
+	  };
+
 export type LessonConfig = {
 	id: string;
 	slug: string;
@@ -267,6 +284,7 @@ export type LessonConfig = {
 	workbenchFields?: WorkbenchField[];
 	workbenchSections?: WorkbenchSection[];
 	promptImport?: LessonPromptImport;
+	briefAssembler?: BriefAssemblerConfig;
 	notes?: string[];
 	content: LessonContent;
 };

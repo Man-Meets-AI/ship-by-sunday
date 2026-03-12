@@ -55,6 +55,28 @@ Each lesson workbench should follow the same order:
 - Keep validation quiet until the learner tries to complete the lesson
 - The footer should answer: `How far through this am I?`
 
+### Wrap-up and unlock screens
+
+Some lessons should not feel like one more worksheet.
+
+If a lesson is a block-end handoff and the real work already happened upstream, treat it as a stage-unlock screen instead of a generic summary dump.
+
+Use this order:
+
+1. Completion hero
+2. Short stat strip
+3. Curated `What you built` recap
+4. Skill recap
+5. Footer CTA that names the next unlocked stage
+
+Rules:
+
+- Congratulate the learner explicitly
+- Make the next stage obvious in the hero and again in the footer
+- Show the best parts of what they built, not every raw field
+- Keep the reward system-level and short; no confetti or novelty animation
+- Reuse shell completion cues so the footer, banner, and rail all reinforce the same unlock moment
+
 ## Hierarchy rules
 
 - One dominant task area per lesson
@@ -135,3 +157,4 @@ The redesign is correct when:
 - progress is visible before lesson completion
 - examples no longer depend on placeholder text
 - old prelaunch drafts for changed lessons do not leak into the new UI
+- block wrap-up lessons can feel like a stage clear without inventing a one-off shell path

@@ -184,6 +184,18 @@ html[data-product-theme="light"] .product-theme {
 		}
 	}
 
+	@keyframes sbs-stage-unlock-enter {
+		from {
+			opacity: 0;
+			transform: translateY(10px);
+		}
+
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
 	.sbs-completion-banner {
 		animation: sbs-completion-banner-in var(--motion-base) var(--ease-standard);
 		transform-origin: center bottom;
@@ -227,6 +239,18 @@ html[data-product-theme="light"] .product-theme {
 		transform-origin: center center;
 	}
 
+	.sbs-stage-unlock-hero {
+		animation: sbs-stage-unlock-enter var(--motion-base) var(--ease-standard);
+	}
+
+	.sbs-stage-unlock-card,
+	.sbs-stage-unlock-chip {
+		opacity: 0;
+		animation: sbs-stage-unlock-enter var(--motion-base) var(--ease-standard)
+			forwards;
+		animation-delay: var(--sbs-stage-unlock-delay, 0ms);
+	}
+
 	.sbs-press-feedback {
 		transition:
 			transform var(--motion-fast) var(--ease-standard),
@@ -268,7 +292,10 @@ html[data-product-theme="light"] .product-theme {
 	.sbs-completion-banner,
 	.sbs-completion-footer,
 	.sbs-rail-complete-sweep,
-	.sbs-rail-unlock-slot {
+	.sbs-rail-unlock-slot,
+	.sbs-stage-unlock-hero,
+	.sbs-stage-unlock-card,
+	.sbs-stage-unlock-chip {
 		transition: none;
 		animation: none;
 	}
@@ -280,7 +307,9 @@ html[data-product-theme="light"] .product-theme {
 
 	.sbs-completion-banner,
 	.sbs-rail-complete-sweep,
-	.sbs-rail-unlock-slot {
+	.sbs-rail-unlock-slot,
+	.sbs-stage-unlock-card,
+	.sbs-stage-unlock-chip {
 		opacity: 1;
 	}
 }

@@ -5,6 +5,10 @@ Use this file to capture recurring mistakes, corrections, and guardrails for fut
 ## Lessons
 
 - Date: 2026-03-12
+  Pattern: I left a block wrap-up lesson as a generic artifact dump even though the learner had already done the real work upstream, which made the handoff feel flat and left the downstream artifact effectively empty.
+  Rule: When a wrap-up lesson has little or no new input of its own, compose the artifact from the saved upstream artifacts and treat the screen as a reward + handoff moment, not another plain form or context dump.
+  How to verify next time: Check whether the wrap-up lesson is creating new information or locking existing information. If it is locking existing information, confirm the artifact preview is composed from prior lesson outputs, the shell progress is nonzero, and the page makes the next stage obvious before you close the work.
+- Date: 2026-03-12
   Pattern: I proposed a form-first preview for a lesson output that the user actually wanted to feel like a reusable premium asset, which would have made the experience feel cheap even if the data model underneath was clean.
   Rule: If a lesson output is meant to become a reusable visual asset later, default to a real stage or canvas surface early. Keep the underlying data structured, but do not make the learner experience feel like a worksheet pretending to be a tool.
   How to verify next time: Ask whether the output is only data capture or a visual asset the learner should feel confident reusing. If it is an asset, browser-QA the first render and make sure it feels like a product tool before closing the work.

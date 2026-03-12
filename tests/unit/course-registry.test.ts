@@ -1,5 +1,6 @@
 import {
 	buildArtifactPreview,
+	buildResolvedArtifactPreview,
 	FIELD_SHAPE_VERSION_FIELD_ID,
 	getCandidateProblemOptions,
 	getCompletionIssues,
@@ -15,6 +16,95 @@ import {
 	getUnlockedLessonIds,
 	lessonRegistry,
 } from "@/lib/course";
+
+function getUserStatementArtifact() {
+	const lesson = getLessonById("1.2");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {
+		[FIELD_SHAPE_VERSION_FIELD_ID]: 3,
+		selected_problem_index: 1,
+		selected_problem_owner: "Startup operators",
+		selected_problem_statement:
+			"They lose action items after meetings and waste time rebuilding them.",
+		pain_moment:
+			"Right after team meetings when they need to share next steps fast.",
+		current_solution:
+			"Messy notes, memory, and a manual cleanup pass after the meeting.",
+		reachability:
+			"I already know a few operators who would try this this week.",
+	});
+}
+
+function getOutcomeStatementArtifact() {
+	const lesson = getLessonById("1.3");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {
+		outcome:
+			"Startup operators leave a meeting with a clean action summary they can review and send in minutes.",
+		success_looks_like:
+			"They can paste notes, review a usable action summary, and share it without rebuilding everything by hand.",
+		difference_for_user:
+			"They stop losing decisions in messy notes and can close the loop while the meeting is still fresh.",
+	});
+}
+
+function getResearchNotesArtifact() {
+	const lesson = getLessonById("1.4");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {
+		research_table: [
+			["Notion", "Fast setup", "Weak export", "Speed"],
+			["Coda", "Flexible docs", "Too much setup", "Customization"],
+			["Tana", "Strong structure", "Steep learning curve", "Clean workflows"],
+		],
+		research_summary:
+			"People care most about speed and clarity after the meeting, not giant knowledge-management features.",
+	});
+}
+
+function getCoreFlowArtifact() {
+	const lesson = getLessonById("1.5");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {
+		[FIELD_SHAPE_VERSION_FIELD_ID]: 4,
+		flow_actors: ["Startup operators"],
+		flow_steps: [
+			["Startup operators", "Paste notes"],
+			["Startup operators", "Generate summary"],
+			["Startup operators", "Review action items"],
+			["Startup operators", "Share next steps"],
+			["Startup operators", "Close the loop"],
+		],
+		flow_ending: "They leave with a clean action summary in minutes.",
+		__core_flow_image_upload: {
+			kind: "upload",
+			status: "stored",
+			storageId: "core-flow-image",
+			url: "https://example.com/core-flow.png",
+		},
+	});
+}
+
+function getScopeBoundaryArtifact() {
+	const lesson = getLessonById("1.6");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {
+		in_scope: ["Paste notes", "Generate summary", "Share next steps"],
+		out_of_scope: [
+			"Team collaboration",
+			"Project dashboards",
+			"CRM sync",
+			"Analytics",
+		],
+		v1_rationale:
+			"If the operator can move from messy notes to a clean action summary fast, the first version did its job.",
+	});
+}
 
 describe("course registry", () => {
 	it("keeps mission and welcome available before progress exists", () => {
@@ -465,6 +555,100 @@ describe("course registry", () => {
 			"Actors",
 			"Flow steps",
 			"Value moment",
+		]);
+	});
+
+	it("composes a non-empty product brief from saved CEO artifacts", () => {
+		const lesson = getLessonById("1.7");
+		expect(lesson).toBeTruthy();
+
+		const preview = buildResolvedArtifactPreview(lesson!, {}, [
+			getUserStatementArtifact(),
+			getOutcomeStatementArtifact(),
+			getResearchNotesArtifact(),
+			getCoreFlowArtifact(),
+			getScopeBoundaryArtifact(),
+		]);
+
+		expect(preview.fields.map(([label]) => label)).toEqual([
+			"Who",
+			"Outcome",
+			"Evidence",
+			"Flow",
+			"Scope",
+		]);
+		expect(preview.fieldValues.research_signal_count).toBe(3);
+		expect(preview.fieldValues.flow_step_count).toBe(5);
+		expect(preview.fieldValues.scope_cut_count).toBe(4);
+		expect(preview.fieldValues.flow_image_url).toBe(
+			"https://example.com/core-flow.png",
+		);
+	});
+
+	it("derives 1.7 progress tasks from the saved CEO block artifacts", () => {
+		const lesson = getLessonById("1.7");
+		expect(lesson).toBeTruthy();
+
+		const pinnedArtifacts = [
+			getUserStatementArtifact(),
+			getOutcomeStatementArtifact(),
+			getResearchNotesArtifact(),
+			getCoreFlowArtifact(),
+			getScopeBoundaryArtifact(),
+		];
+		const preview = buildResolvedArtifactPreview(lesson!, {}, pinnedArtifacts);
+		const tasks = getObjectiveTasks(lesson!, {}, {
+			pinnedArtifacts,
+			resolvedArtifactPreview: preview,
+		});
+
+		expect(tasks.map((task) => task.label)).toEqual([
+			"Lock the user and problem",
+			"Lock the outcome",
+			"Bring in real evidence",
+			"Carry the core flow into Design",
+			"Keep the v1 brutally small",
+			"Assemble the product brief",
+		]);
+		expect(tasks.every((task) => task.status === "complete")).toBe(true);
+	});
+
+	it("composes no-field brief assembler lessons from their pinned artifacts", () => {
+		const lesson = getLessonById("2.7");
+		expect(lesson).toBeTruthy();
+
+		const preview = buildResolvedArtifactPreview(lesson!, {}, [
+			{
+				artifactKey: "reference_board",
+				artifactLabel: "Reference Board",
+				contextTitle: "Reference board",
+				artifactType: "board",
+				lessonId: "2.1",
+				lessonTitle: "Find References First",
+				fieldValues: { reference_patterns: "Soft cards and tight layouts" },
+				fields: [["What patterns keep repeating?", "Soft cards and tight layouts"]],
+			},
+			{
+				artifactKey: "visual_direction",
+				artifactLabel: "Visual Direction",
+				contextTitle: "Visual direction",
+				artifactType: "text",
+				lessonId: "2.6",
+				lessonTitle: "Choose a Visual Direction",
+				fieldValues: { visual_direction: "Quiet, editorial, and sharp" },
+				fields: [["Visual Direction", "Quiet, editorial, and sharp"]],
+			},
+		]);
+
+		expect(preview.fields).toEqual([
+			[
+				"Reference board",
+				"What patterns keep repeating?: Soft cards and tight layouts",
+			],
+			[
+				"Visual direction",
+				"Visual Direction: Quiet, editorial, and sharp",
+			],
 		]);
 	});
 

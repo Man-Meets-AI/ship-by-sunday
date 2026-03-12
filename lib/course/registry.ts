@@ -99,6 +99,22 @@ export type CandidateProblemOption = {
 	statement: string;
 };
 
+export type ArtifactPreview = {
+	artifactKey: string;
+	artifactLabel: string;
+	contextTitle?: string;
+	artifactType: ArtifactType;
+	lessonId: string;
+	lessonTitle: string;
+	fieldValues: PersistedFieldValues;
+	fields: Array<[string, unknown]>;
+};
+
+type ObjectiveTaskContext = {
+	pinnedArtifacts?: ArtifactPreview[];
+	resolvedArtifactPreview?: ArtifactPreview | null;
+};
+
 export function isUploadFieldValue(value: unknown): value is UploadFieldValue {
 	return (
 		value !== null &&
@@ -402,6 +418,267 @@ export function isFilled(value: PersistedFieldValue | undefined) {
 	return false;
 }
 
+function isStageUnlockBriefAssembler(lesson: LessonConfig) {
+	return (
+		lesson.workbench === "brief_assembler" &&
+		lesson.briefAssembler?.variant === "stage_unlock"
+	);
+}
+
+function hasOwnArtifactFields(lesson: LessonConfig) {
+	return getRequiredFields(lesson).length > 0;
+}
+
+function formatArtifactSummaryValue(value: unknown) {
+	if (isUploadFieldValue(value)) {
+		return value.fileName ?? "Saved upload";
+	}
+
+	if (isChecklistItemArray(value)) {
+		return value
+			.filter((item) => item.checked)
+			.map((item) => item.label)
+			.join(", ");
+	}
+
+	if (Array.isArray(value)) {
+		if (value.some((item) => Array.isArray(item))) {
+			return formatTablePreview(value);
+		}
+
+		if (value.every((item) => typeof item === "string")) {
+			return value
+				.map((item) => item.trim())
+				.filter(Boolean)
+				.join(", ");
+		}
+
+		return JSON.stringify(value);
+	}
+
+	if (value === null || value === undefined) {
+		return "";
+	}
+
+	return String(value).trim();
+}
+
+function getPinnedArtifactByKey(
+	pinnedArtifacts: ArtifactPreview[],
+	artifactKey: string,
+) {
+	return pinnedArtifacts.find((artifact) => artifact.artifactKey === artifactKey);
+}
+
+function getFieldString(
+	artifact: ArtifactPreview | undefined,
+	fieldId: string,
+) {
+	const value = artifact?.fieldValues[fieldId];
+	return typeof value === "string" ? value.trim() : "";
+}
+
+function countFilledLines(value: unknown) {
+	if (!Array.isArray(value)) {
+		return 0;
+	}
+
+	return value.filter(
+		(entry): entry is string =>
+			typeof entry === "string" && entry.trim().length > 0,
+	).length;
+}
+
+function summarizePinnedArtifact(artifact: ArtifactPreview, limit = 2) {
+	if (artifact.fields.length === 0) {
+		return "Saved and ready.";
+	}
+
+	return artifact.fields
+		.slice(0, limit)
+		.map(([label, value]) => {
+			const formattedValue = formatArtifactSummaryValue(value);
+			return formattedValue ? `${label}: ${formattedValue}` : label;
+		})
+		.join(" • ");
+}
+
+function buildCompositeBriefPreview(
+	lesson: LessonConfig,
+	pinnedArtifacts: ArtifactPreview[],
+): ArtifactPreview {
+	const fields = pinnedArtifacts.map((artifact) => [
+		artifact.contextTitle ?? artifact.artifactLabel,
+		summarizePinnedArtifact(artifact),
+	]) as Array<[string, unknown]>;
+
+	return {
+		artifactKey: lesson.artifact.key,
+		artifactLabel: lesson.artifact.label,
+		contextTitle: lesson.artifact.contextTitle,
+		artifactType: lesson.artifact.type as ArtifactType,
+		lessonId: lesson.id,
+		lessonTitle: lesson.title,
+		fieldValues: Object.fromEntries(
+			pinnedArtifacts.map((artifact) => [
+				artifact.artifactKey,
+				summarizePinnedArtifact(artifact, 3),
+			]),
+		) as PersistedFieldValues,
+		fields,
+	};
+}
+
+function buildProductBriefPreview(
+	lesson: LessonConfig,
+	pinnedArtifacts: ArtifactPreview[],
+): ArtifactPreview {
+	const userArtifact = getPinnedArtifactByKey(pinnedArtifacts, "user_statement");
+	const outcomeArtifact = getPinnedArtifactByKey(
+		pinnedArtifacts,
+		"outcome_statement",
+	);
+	const researchArtifact = getPinnedArtifactByKey(pinnedArtifacts, "research_notes");
+	const flowArtifact = getPinnedArtifactByKey(pinnedArtifacts, "core_flow_image");
+	const scopeArtifact = getPinnedArtifactByKey(pinnedArtifacts, "scope_boundary");
+
+	const researchSignalCount = getFilledTableRows(
+		researchArtifact?.fieldValues.research_table,
+	).length;
+	const flowState = getCoreFlowDraftState(flowArtifact?.fieldValues ?? {});
+	const keepCount = countFilledLines(scopeArtifact?.fieldValues.in_scope);
+	const cutCount = countFilledLines(scopeArtifact?.fieldValues.out_of_scope);
+	const flowImageValue = flowArtifact?.fieldValues[CORE_FLOW_IMAGE_FIELD_ID];
+	const flowImageUrl =
+		isUploadFieldValue(flowImageValue) && typeof flowImageValue.url === "string"
+			? flowImageValue.url
+			: null;
+
+	const who = [
+		getFieldString(userArtifact, "selected_problem_owner"),
+		getFieldString(userArtifact, "selected_problem_statement")
+			? `Problem: ${getFieldString(
+					userArtifact,
+					"selected_problem_statement",
+				)}`
+			: "",
+		getFieldString(userArtifact, "pain_moment")
+			? `Pain moment: ${getFieldString(userArtifact, "pain_moment")}`
+			: "",
+	]
+		.filter(Boolean)
+		.join("\n");
+	const outcome = [
+		getFieldString(outcomeArtifact, "outcome"),
+		getFieldString(outcomeArtifact, "success_looks_like")
+			? `Success looks like: ${getFieldString(
+					outcomeArtifact,
+					"success_looks_like",
+				)}`
+			: "",
+		getFieldString(outcomeArtifact, "difference_for_user")
+			? `Difference for the user: ${getFieldString(
+					outcomeArtifact,
+					"difference_for_user",
+				)}`
+			: "",
+	]
+		.filter(Boolean)
+		.join("\n");
+	const evidence = [
+		researchSignalCount > 0
+			? `${researchSignalCount} research signal${
+					researchSignalCount === 1 ? "" : "s"
+				} captured`
+			: "",
+		getFieldString(researchArtifact, "research_summary")
+			? `Key pattern: ${getFieldString(researchArtifact, "research_summary")}`
+			: "",
+	]
+		.filter(Boolean)
+		.join("\n");
+	const flow = [
+		flowState.validActorCount > 0
+			? `${flowState.validActorCount} actor${
+					flowState.validActorCount === 1 ? "" : "s"
+				} across ${flowState.filledStepCount} step${
+					flowState.filledStepCount === 1 ? "" : "s"
+				}`
+			: "",
+		flowState.endingDraft
+			? `Value moment: ${flowState.endingDraft}`
+			: "",
+	]
+		.filter(Boolean)
+		.join("\n");
+	const scope = [
+		keepCount > 0 || cutCount > 0
+			? `${keepCount} keep${keepCount === 1 ? "" : "s"} in v1 • ${cutCount} cut${
+					cutCount === 1 ? "" : "s"
+				}`
+			: "",
+		getFieldString(scopeArtifact, "v1_rationale")
+			? `Why this version is enough: ${getFieldString(
+					scopeArtifact,
+					"v1_rationale",
+				)}`
+			: "",
+	]
+		.filter(Boolean)
+		.join("\n");
+
+	return {
+		artifactKey: lesson.artifact.key,
+		artifactLabel: lesson.artifact.label,
+		contextTitle: lesson.artifact.contextTitle,
+		artifactType: lesson.artifact.type as ArtifactType,
+		lessonId: lesson.id,
+		lessonTitle: lesson.title,
+		fieldValues: {
+			who,
+			outcome,
+			evidence,
+			flow,
+			scope,
+			user_locked_count: who ? 1 : 0,
+			outcome_defined_count: outcome ? 1 : 0,
+			research_signal_count: researchSignalCount,
+			flow_step_count: flowState.filledStepCount,
+			scope_cut_count: cutCount,
+			flow_image_url: flowImageUrl,
+		},
+		fields: ([
+			["Who", who],
+			["Outcome", outcome],
+			["Evidence", evidence],
+			["Flow", flow],
+			["Scope", scope],
+		] as Array<[string, unknown]>).filter(
+			([, value]) => typeof value === "string" && value.trim().length > 0,
+		),
+	};
+}
+
+export function buildResolvedArtifactPreview(
+	lesson: LessonConfig,
+	fieldValues: PersistedFieldValues,
+	pinnedArtifacts: ArtifactPreview[] = [],
+): ArtifactPreview {
+	if (
+		lesson.workbench === "brief_assembler" &&
+		!hasOwnArtifactFields(lesson) &&
+		pinnedArtifacts.length > 0
+	) {
+		if (lesson.artifact.key === "product_brief") {
+			return buildProductBriefPreview(lesson, pinnedArtifacts);
+		}
+
+		return buildCompositeBriefPreview(lesson, pinnedArtifacts);
+	}
+
+	return buildArtifactPreview(lesson, fieldValues);
+}
+
 export function validateRequiredFields(
 	lesson: LessonConfig,
 	fieldValues: PersistedFieldValues,
@@ -412,9 +689,17 @@ export function validateRequiredFields(
 export function getObjectiveTasks(
 	lesson: LessonConfig,
 	fieldValues: PersistedFieldValues,
+	context: ObjectiveTaskContext = {},
 ): ObjectiveTask[] {
 	const values = normalizeLessonFieldValues(lesson, fieldValues);
 	const objectiveMode = getObjectiveMode(lesson);
+	const resolvedArtifactPreview =
+		context.resolvedArtifactPreview ??
+		buildResolvedArtifactPreview(
+			lesson,
+			values,
+			context.pinnedArtifacts ?? [],
+		);
 
 	if (objectiveMode === "manual") {
 		const definitions = getManualObjectiveTaskDefinitions(lesson);
@@ -433,6 +718,70 @@ export function getObjectiveTasks(
 					interactive: true,
 				}) satisfies ObjectiveTask,
 		);
+	}
+
+	if (isStageUnlockBriefAssembler(lesson)) {
+		const hasWho = isFilled(resolvedArtifactPreview.fieldValues.who as any);
+		const hasOutcome = isFilled(resolvedArtifactPreview.fieldValues.outcome as any);
+		const hasEvidence = isFilled(
+			resolvedArtifactPreview.fieldValues.evidence as any,
+		);
+		const hasFlow = isFilled(resolvedArtifactPreview.fieldValues.flow as any);
+		const hasScope = isFilled(resolvedArtifactPreview.fieldValues.scope as any);
+		const hasBrief = [hasWho, hasOutcome, hasEvidence, hasFlow, hasScope].every(
+			Boolean,
+		);
+
+		return [
+			{
+				id: "product-brief:who",
+				label: "Lock the user and problem",
+				status: hasWho ? "complete" : "incomplete",
+				source: "field",
+				fieldId: "product-brief:who",
+				interactive: false,
+			},
+			{
+				id: "product-brief:outcome",
+				label: "Lock the outcome",
+				status: hasOutcome ? "complete" : "incomplete",
+				source: "field",
+				fieldId: "product-brief:outcome",
+				interactive: false,
+			},
+			{
+				id: "product-brief:evidence",
+				label: "Bring in real evidence",
+				status: hasEvidence ? "complete" : "incomplete",
+				source: "field",
+				fieldId: "product-brief:evidence",
+				interactive: false,
+			},
+			{
+				id: "product-brief:flow",
+				label: "Carry the core flow into Design",
+				status: hasFlow ? "complete" : "incomplete",
+				source: "field",
+				fieldId: "product-brief:flow",
+				interactive: false,
+			},
+			{
+				id: "product-brief:scope",
+				label: "Keep the v1 brutally small",
+				status: hasScope ? "complete" : "incomplete",
+				source: "field",
+				fieldId: "product-brief:scope",
+				interactive: false,
+			},
+			{
+				id: "product-brief:assembled",
+				label: "Assemble the product brief",
+				status: hasBrief ? "complete" : "incomplete",
+				source: "field",
+				fieldId: "product-brief:assembled",
+				interactive: false,
+			},
+		];
 	}
 
 	if (lesson.workbench === "core_flow_map") {
@@ -573,11 +922,12 @@ export function getObjectiveTasks(
 export function getCompletionIssues(
 	lesson: LessonConfig,
 	fieldValues: PersistedFieldValues,
+	context: ObjectiveTaskContext = {},
 ) {
 	const values = normalizeLessonFieldValues(lesson, fieldValues);
 
 	if (lesson.workbench === "core_flow_map") {
-		return getObjectiveTasks(lesson, values)
+		return getObjectiveTasks(lesson, values, context)
 			.filter((task) => task.status !== "complete")
 			.map((task) => ({
 				id: task.fieldId ?? task.id,
@@ -589,7 +939,7 @@ export function getCompletionIssues(
 	const objectiveMode = getObjectiveMode(lesson);
 
 	if (objectiveMode === "generated") {
-		return getObjectiveTasks(lesson, values)
+		return getObjectiveTasks(lesson, values, context)
 			.filter((task) => task.status !== "complete")
 			.map((task) => ({
 				id: task.fieldId ?? task.id,
@@ -742,7 +1092,7 @@ export function getWorkbenchSectionStates(
 export function buildArtifactPreview(
 	lesson: LessonConfig,
 	fieldValues: PersistedFieldValues,
-) {
+): ArtifactPreview {
 	const values = normalizeLessonFieldValues(lesson, fieldValues);
 	const previewEntries: Array<[string, PersistedFieldValue]> = [];
 	const usedFieldIds = new Set<string>();

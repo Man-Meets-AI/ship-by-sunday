@@ -19,6 +19,7 @@ import {
 } from "@/components/lesson-shells";
 import { ProductShell } from "@/components/product-shell";
 import {
+	buildResolvedArtifactPreview,
 	getCompletionIssues,
 	getObjectiveTasks,
 	OBJECTIVE_CHECKLIST_FIELD_ID,
@@ -111,6 +112,12 @@ function getDefaultChromeState(lesson: LessonConfig): LessonChromeState {
 		coachVisible: lesson.panelDefaults.coach !== "minimized",
 		activeCoachPanel: getDefaultCoachPanel(lesson),
 	};
+}
+
+function getStageUnlockConfig(lesson: LessonConfig) {
+	return lesson.briefAssembler?.variant === "stage_unlock"
+		? lesson.briefAssembler
+		: null;
 }
 
 function storageKey(lessonId: string) {
@@ -362,11 +369,23 @@ export function LessonPage({
 	}
 
 	const { pinnedArtifacts } = lessonState;
+	const stageUnlockConfig = getStageUnlockConfig(lesson);
 	const previousHref = lesson.prevLessonId
 		? getLessonHref(lesson.prevLessonId)
 		: null;
-	const objectiveTasks = getObjectiveTasks(lesson, fieldValues as any);
-	const completionIssues = getCompletionIssues(lesson, fieldValues as any);
+	const resolvedArtifactPreview = buildResolvedArtifactPreview(
+		lesson,
+		fieldValues as any,
+		pinnedArtifacts as any,
+	);
+	const objectiveTasks = getObjectiveTasks(lesson, fieldValues as any, {
+		pinnedArtifacts: pinnedArtifacts as any,
+		resolvedArtifactPreview,
+	});
+	const completionIssues = getCompletionIssues(lesson, fieldValues as any, {
+		pinnedArtifacts: pinnedArtifacts as any,
+		resolvedArtifactPreview,
+	});
 	const completedObjectiveCount = objectiveTasks.filter(
 		(task) => task.status === "complete",
 	).length;
@@ -397,9 +416,28 @@ export function LessonPage({
 	const isCompleting = completionPhase === "submitting";
 	const isCelebrating = completionPhase === "celebrating";
 	const completionButtonDisabled = isCompleting || isCelebrating;
-	const completionNextLine = completionPayload?.nextLessonLabel
-		? `Next unlocked: ${completionPayload.nextLessonLabel}`
-		: "Mission updated";
+	const completionNextLine = stageUnlockConfig
+		? `Next: ${stageUnlockConfig.nextStepLabel}`
+		: completionPayload?.nextLessonLabel
+			? `Next unlocked: ${completionPayload.nextLessonLabel}`
+			: "Mission updated";
+	const completionArtifactLine = stageUnlockConfig
+		? `${lesson.artifact.label} locked. Design has a real handoff now.`
+		: completionPayload
+			? `Artifact locked: ${completionPayload.artifactLabel}`
+			: null;
+	const readyStateCopy =
+		stageUnlockConfig?.readyStateCopy ??
+		"Everything on this page is filled out. Complete the lesson.";
+	const completionActionLabel =
+		stageUnlockConfig?.completionCtaLabel ?? "Complete lesson";
+	const completionPendingLabel = stageUnlockConfig
+		? "Unlocking..."
+		: "Locking in...";
+	const celebrationEyebrow =
+		stageUnlockConfig?.celebrationEyebrow ?? "System updated";
+	const celebrationTitle =
+		stageUnlockConfig?.celebrationTitle ?? "Lesson cleared";
 	const showCelebrationBanner = isCelebrating && completionPayload;
 
 	const setValue = (fieldId: string, value: unknown) => {
@@ -462,14 +500,16 @@ export function LessonPage({
 								<polyline points="20 6 9 17 4 12" />
 							</svg>
 						</span>
-						System updated
+						{celebrationEyebrow}
 					</div>
 					<p className="font-display text-[1.65rem] uppercase leading-none tracking-[0.06em] text-product-text sm:text-[2rem]">
-						Lesson cleared
+						{celebrationTitle}
 					</p>
-					<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-text">
-						Artifact locked: {completionPayload.artifactLabel}
-					</p>
+					{completionArtifactLine ? (
+						<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-text">
+							{completionArtifactLine}
+						</p>
+					) : null}
 					<p className="text-xs font-medium leading-relaxed text-product-muted">
 						{completionNextLine}
 					</p>
@@ -483,16 +523,18 @@ export function LessonPage({
 					</p>
 					{isCelebrating && completionPayload ? (
 						<>
-							<p className="text-xs font-medium leading-relaxed text-product-accent">
-								Artifact locked: {completionPayload.artifactLabel}
-							</p>
+							{completionArtifactLine ? (
+								<p className="text-xs font-medium leading-relaxed text-product-accent">
+									{completionArtifactLine}
+								</p>
+							) : null}
 							<p className="text-xs leading-relaxed text-product-text">
 								{completionNextLine}
 							</p>
 						</>
 					) : lessonReadyToComplete && !showCompletionFeedback ? (
 						<p className="text-xs font-medium leading-relaxed text-product-accent">
-							Everything on this page is filled out. Complete the lesson.
+							{readyStateCopy}
 						</p>
 					) : null}
 					{nextIncompleteObjective &&
@@ -617,12 +659,12 @@ export function LessonPage({
 								>
 									<polyline points="20 6 9 17 4 12" />
 								</svg>
-								Lesson cleared
+								{celebrationTitle}
 							</>
 						) : isCompleting ? (
-							"Locking in..."
+							completionPendingLabel
 						) : (
-							"Complete lesson"
+							completionActionLabel
 						)}
 					</button>
 				</div>

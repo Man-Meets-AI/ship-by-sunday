@@ -51,11 +51,26 @@ describe("lesson content contract", () => {
 			"Weak idea vs painful problem",
 		);
 		expect(userLesson?.content.intro).toContain(
-			"Pick one of the three problems you just wrote",
+			"Pick the problem to carry forward",
 		);
 		expect(userLesson?.workbenchSections?.[1]?.instruction).toContain(
 			"reach them this week",
 		);
+	});
+
+	it("keeps stage-unlock wrap-up lessons declarative and pointed at a real next step", () => {
+		const wrapUpLesson = getLessonById("1.7");
+		expect(wrapUpLesson).toBeTruthy();
+		expect(wrapUpLesson?.workbench).toBe("brief_assembler");
+		expect(wrapUpLesson?.briefAssembler?.variant).toBe("stage_unlock");
+		expect(wrapUpLesson?.briefAssembler).toMatchObject({
+			heroEyebrow: "CEO block complete",
+			heroTitle: "Design unlocked",
+			nextStepLabel: "DESIGN 2.1 — Find References First",
+			completionCtaLabel: "Unlock Design",
+		});
+		expect(wrapUpLesson?.briefAssembler?.skills?.length).toBeGreaterThanOrEqual(4);
+		expect((wrapUpLesson?.pinnedArtifacts ?? []).length).toBeGreaterThanOrEqual(4);
 	});
 
 	it("keeps candidate-problem handoff contracts explicit and internally valid", () => {

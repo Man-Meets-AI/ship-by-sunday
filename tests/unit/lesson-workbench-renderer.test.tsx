@@ -85,6 +85,62 @@ function getOutcomeStatementArtifact(): PinnedArtifact {
 	});
 }
 
+function getResearchNotesArtifact(): PinnedArtifact {
+	const lesson = getLessonById("1.4");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {
+		research_table: [
+			["Notion", "Fast setup", "Weak export", "Speed"],
+			["Coda", "Flexible docs", "Too much setup", "Customization"],
+			["Tana", "Strong structure", "Steep learning curve", "Clean workflows"],
+		],
+		research_summary:
+			"People care most about speed and clarity after the meeting, not giant knowledge-management features.",
+	});
+}
+
+function getCoreFlowArtifact(): PinnedArtifact {
+	const lesson = getLessonById("1.5");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {
+		__fieldShapeVersion: 4,
+		flow_actors: ["Startup operators"],
+		flow_steps: [
+			["Startup operators", "Paste notes"],
+			["Startup operators", "Generate summary"],
+			["Startup operators", "Review action items"],
+			["Startup operators", "Share next steps"],
+			["Startup operators", "Close the loop"],
+		],
+		flow_ending: "They leave with a clean action summary in minutes.",
+		__core_flow_image_upload: {
+			kind: "upload",
+			status: "stored",
+			storageId: "core-flow-image",
+			url: "https://example.com/core-flow.png",
+		},
+	});
+}
+
+function getScopeBoundaryArtifact(): PinnedArtifact {
+	const lesson = getLessonById("1.6");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {
+		in_scope: ["Paste notes", "Generate summary", "Share next steps"],
+		out_of_scope: [
+			"Team collaboration",
+			"Project dashboards",
+			"CRM sync",
+			"Analytics",
+		],
+		v1_rationale:
+			"If the operator can move from messy notes to a clean action summary fast, the first version did its job.",
+	});
+}
+
 describe("WorkbenchRenderer", () => {
 	it("renders representative workbench modes without hitting the fallback", () => {
 		const scenarios: Array<{
@@ -271,5 +327,35 @@ describe("WorkbenchRenderer", () => {
 		);
 		expect(markup).not.toContain("Pick One User");
 		expect(markup).not.toContain("Define the Outcome");
+	});
+
+	it("renders lesson 1.7 as a stage-unlock wrap-up instead of a raw artifact dump", () => {
+		const markup = renderLessonWorkbench("1.7", {
+			pinnedArtifacts: [
+				getUserStatementArtifact(),
+				getOutcomeStatementArtifact(),
+				getResearchNotesArtifact(),
+				getCoreFlowArtifact(),
+				getScopeBoundaryArtifact(),
+			],
+		});
+
+		expect(markup).toContain("CEO block complete");
+		expect(markup).toContain("Design unlocked");
+		expect(markup).toContain("Next: DESIGN 2.1 — Find References First");
+		expect(markup).toContain("1 user locked");
+		expect(markup).toContain("3 research signals");
+		expect(markup).toContain("What you built");
+		expect(markup).toContain("Skills you flexed");
+		expect(markup).toContain("Problem framing");
+		expect(markup).toContain("Scope discipline");
+		expect(markup).toContain("Who");
+		expect(markup).toContain("Outcome");
+		expect(markup).toContain("Evidence");
+		expect(markup).toContain("Flow");
+		expect(markup).toContain("Scope");
+		expect(markup).toContain("https://example.com/core-flow.png");
+		expect(markup).not.toContain("ArtifactContext");
+		expect(markup).not.toContain("No saved preview yet.");
 	});
 });

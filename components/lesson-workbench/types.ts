@@ -8,6 +8,7 @@ import type {
 	WorkbenchSection,
 } from "@/lib/course/manifest";
 import type {
+	ArtifactPreview,
 	ObjectiveTask,
 	WorkbenchSectionState,
 } from "@/lib/course/registry";
@@ -20,6 +21,7 @@ export type WorkbenchRendererProps = {
 	pinnedArtifacts: PinnedArtifact[];
 	invalidFieldIds?: Set<string>;
 	fieldValuesReady?: boolean;
+	resolvedArtifactPreview?: ArtifactPreview | null;
 };
 
 type WorkbenchSharedState = {

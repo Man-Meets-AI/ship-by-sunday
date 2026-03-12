@@ -3,7 +3,7 @@ import type { LessonConfig } from "../lib/course/contracts";
 import { requireConvexEnv } from "./env";
 import {
 	COURSE_SLUG,
-	buildArtifactPreview,
+	buildResolvedArtifactPreview,
 	getCompletionIssues,
 	getLessonByArtifactKey,
 	getLessonById,
@@ -15,6 +15,7 @@ import {
 	normalizeLessonFieldValues,
 	normalizeFieldValues,
 	prepareFieldValuesForPersistence,
+	type ArtifactPreview,
 	type PersistedFieldValues,
 } from "../lib/course/registry";
 import type { Doc } from "./_generated/dataModel";
@@ -284,6 +285,77 @@ async function hydrateUploadUrls(
 			}),
 		),
 	);
+}
+
+async function buildResolvedArtifactPreviewForLesson(
+	ctx: QueryCtx,
+	viewerState: ViewerCourseState,
+	lesson: LessonConfig,
+	cache: Map<string, ArtifactPreview | null>,
+): Promise<ArtifactPreview | null> {
+	if (cache.has(lesson.id)) {
+		return cache.get(lesson.id) ?? null;
+	}
+
+	const lessonState = viewerState.lessonStateByLessonId.get(lesson.id);
+	if (!isCompatibleLessonState(lesson, lessonState)) {
+		cache.set(lesson.id, null);
+		return null;
+	}
+
+	const pinnedArtifacts = await Promise.all(
+		(lesson.pinnedArtifacts ?? []).map(async (artifactKey) => {
+			const sourceLesson = getLessonByArtifactKey(artifactKey);
+			if (!sourceLesson) {
+				return null;
+			}
+
+			return buildResolvedArtifactPreviewForLesson(
+				ctx,
+				viewerState,
+				sourceLesson,
+				cache,
+			);
+		}),
+	);
+
+	const preview = buildResolvedArtifactPreview(
+		lesson,
+		(await hydrateUploadUrls(
+			ctx,
+			getNormalizedLessonFieldValues(lesson, lessonState),
+		)) as PersistedFieldValues,
+		pinnedArtifacts.filter(Boolean) as ArtifactPreview[],
+	);
+
+	cache.set(lesson.id, preview);
+	return preview;
+}
+
+async function getResolvedPinnedArtifactsForLesson(
+	ctx: QueryCtx,
+	viewerState: ViewerCourseState,
+	lesson: LessonConfig,
+) {
+	const cache = new Map<string, ArtifactPreview | null>();
+
+	const pinnedArtifacts = await Promise.all(
+		(lesson.pinnedArtifacts ?? []).map(async (artifactKey) => {
+			const sourceLesson = getLessonByArtifactKey(artifactKey);
+			if (!sourceLesson) {
+				return null;
+			}
+
+			return buildResolvedArtifactPreviewForLesson(
+				ctx,
+				viewerState,
+				sourceLesson,
+				cache,
+			);
+		}),
+	);
+
+	return pinnedArtifacts.filter(Boolean) as ArtifactPreview[];
 }
 
 export const viewerAccess = query({
@@ -556,27 +628,11 @@ export const getLessonState = query({
 			lesson,
 			lessonState,
 		);
-		const pinnedArtifacts = (lesson.pinnedArtifacts ?? [])
-			.map((artifactKey) => {
-				const sourceLesson = getLessonByArtifactKey(artifactKey);
-				const sourceState = sourceLesson
-					? viewerState.lessonStateByLessonId.get(sourceLesson.id)
-					: null;
-
-				if (
-					!sourceLesson ||
-					!sourceState ||
-					!isCompatibleLessonState(sourceLesson, sourceState)
-				) {
-					return null;
-				}
-
-				return buildArtifactPreview(
-					sourceLesson,
-					getNormalizedLessonFieldValues(sourceLesson, sourceState),
-				);
-			})
-			.filter(Boolean);
+		const pinnedArtifacts = await getResolvedPinnedArtifactsForLesson(
+			ctx,
+			viewerState,
+			lesson,
+		);
 
 		return {
 			accessStatus: "unlocked",
@@ -658,7 +714,31 @@ export const completeLesson = mutation({
 
 		ensureLessonIsUnlocked(lesson.id, viewerState);
 
-		const completionIssues = getCompletionIssues(lesson, args.fieldValues);
+		const pinnedArtifacts = (lesson.pinnedArtifacts ?? [])
+			.map((artifactKey) => {
+				const sourceLesson = getLessonByArtifactKey(artifactKey);
+				const sourceState = sourceLesson
+					? viewerState.lessonStateByLessonId.get(sourceLesson.id)
+					: null;
+
+				if (
+					!sourceLesson ||
+					!sourceState ||
+					!isCompatibleLessonState(sourceLesson, sourceState)
+				) {
+					return null;
+				}
+
+				return buildResolvedArtifactPreview(
+					sourceLesson,
+					getNormalizedLessonFieldValues(sourceLesson, sourceState),
+				);
+			})
+			.filter(Boolean) as ArtifactPreview[];
+
+		const completionIssues = getCompletionIssues(lesson, args.fieldValues, {
+			pinnedArtifacts,
+		});
 		if (completionIssues.length > 0) {
 			throw new ConvexError({
 				code: "INCOMPLETE_LESSON",
@@ -685,22 +765,31 @@ export const listArtifacts = query({
 	handler: async (ctx) => {
 		const viewerState = await loadViewerCourseState(ctx);
 
-		return viewerState.compatibleCompletedLessonIds
-			.map((lessonId) => {
+		return (
+			await Promise.all(
+				viewerState.compatibleCompletedLessonIds.map(async (lessonId) => {
 				const lesson = getLessonById(lessonId);
 				const lessonState = viewerState.lessonStateByLessonId.get(lessonId);
 				if (!lesson || !lessonState) {
 					return null;
 				}
 
+				const preview = await buildResolvedArtifactPreviewForLesson(
+					ctx,
+					viewerState,
+					lesson,
+					new Map(),
+				);
+				if (!preview) {
+					return null;
+				}
+
 				return {
-					...buildArtifactPreview(
-						lesson,
-						getNormalizedLessonFieldValues(lesson, lessonState),
-					),
+					...preview,
 					completedAt: lessonState.completedAt ?? lessonState.updatedAt,
 				};
-			})
-			.filter(Boolean);
+				}),
+			)
+		).filter(Boolean);
 	},
 });

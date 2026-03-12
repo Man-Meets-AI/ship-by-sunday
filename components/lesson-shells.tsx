@@ -9,18 +9,11 @@ import { getLesson, type LessonConfig } from "@/lib/course/manifest";
 import type { LessonContent } from "@/lib/course/manifest";
 import { getPromptTemplateState } from "@/lib/course/research-prompt";
 import type {
+	ArtifactPreview,
 	ObjectiveTask,
-	PersistedFieldValues,
 } from "@/lib/course/registry";
 
-export type PinnedArtifact = {
-	artifactKey: string;
-	artifactLabel: string;
-	contextTitle?: string;
-	fieldValues: PersistedFieldValues;
-	fields: Array<[string, unknown]>;
-	lessonTitle: string;
-};
+export type PinnedArtifact = ArtifactPreview;
 
 function getPromptResourceState(
 	resource: LessonPromptResourceContent,

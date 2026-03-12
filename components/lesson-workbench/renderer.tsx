@@ -2,6 +2,7 @@
 
 import type { WorkbenchType } from "@/lib/course/manifest";
 import {
+	buildResolvedArtifactPreview,
 	getObjectiveTasks,
 	getWorkbenchSectionStates,
 	getWorkbenchSections,
@@ -60,9 +61,17 @@ export function WorkbenchRenderer({
 	fieldValuesReady = true,
 }: WorkbenchRendererProps) {
 	const fields = lesson.workbenchFields ?? [];
+	const resolvedArtifactPreview = buildResolvedArtifactPreview(
+		lesson,
+		fieldValues as any,
+		pinnedArtifacts as any,
+	);
 	const workbenchSections = getWorkbenchSections(lesson);
 	const sectionStates = getWorkbenchSectionStates(lesson, fieldValues as any);
-	const objectiveTasks = getObjectiveTasks(lesson, fieldValues as any);
+	const objectiveTasks = getObjectiveTasks(lesson, fieldValues as any, {
+		pinnedArtifacts: pinnedArtifacts as any,
+		resolvedArtifactPreview,
+	});
 	const completedTaskCount = objectiveTasks.filter(
 		(task) => task.status === "complete",
 	).length;
@@ -84,6 +93,7 @@ export function WorkbenchRenderer({
 			pinnedArtifacts={pinnedArtifacts}
 			invalidFieldIds={invalidFieldIds}
 			fieldValuesReady={fieldValuesReady}
+			resolvedArtifactPreview={resolvedArtifactPreview}
 			fields={fields}
 			objectiveTasks={objectiveTasks}
 			completedTaskCount={completedTaskCount}

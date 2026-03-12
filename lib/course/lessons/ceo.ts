@@ -963,7 +963,7 @@ export const ceoLessons = [
 			"Confirm the product brief",
 			"Lock the artifact",
 		],
-		helperText: "This is the handoff artifact into Design.",
+		helperText: "CEO block complete. Lock the brief and move into Design.",
 		winCondition: "The product brief is assembled and locked.",
 		panelDefaults: splitPanelDefaults,
 		pinnedArtifacts: [
@@ -973,19 +973,39 @@ export const ceoLessons = [
 			"core_flow_image",
 			"scope_boundary",
 		],
+		briefAssembler: {
+			variant: "stage_unlock",
+			heroEyebrow: "CEO block complete",
+			heroTitle: "Design unlocked",
+			heroBody:
+				"You turned a fuzzy idea into a real product direction. The user, outcome, evidence, flow, and scope are all locked into one handoff brief now.",
+			nextStepLabel: "DESIGN 2.1 — Find References First",
+			skills: [
+				"Problem framing",
+				"User clarity",
+				"Outcome definition",
+				"Evidence gathering",
+				"Flow mapping",
+				"Scope discipline",
+			],
+			readyStateCopy: "CEO block complete. Lock the brief and unlock Design.",
+			completionCtaLabel: "Unlock Design",
+			celebrationEyebrow: "CEO block complete",
+			celebrationTitle: "Design unlocked",
+		},
 		content: {
 			status: "draft",
 			intro:
-				"By now, somebody else should be able to understand what you are building in under 60 seconds.",
+				"You did the hardest part: you turned a vague idea into a clear first version.",
 			lessonMeta: {
-				runtimeLabel: "3-5 min",
+				runtimeLabel: "2-3 min",
 				goal: "Lock the brief so the next block has real inputs.",
 				purpose: "This is the handoff from thinking to form.",
 			},
 			actionCard: {
-				jobNow: "Complete Worksheet 01 fully.",
-				timebox: "15 minutes",
-				comeBackWith: "A finished one-page product brief.",
+				jobNow: "Take a fast victory lap, review the brief, then unlock Design.",
+				timebox: "2 minutes",
+				comeBackWith: "A locked product brief and a clear jump into Design.",
 			},
 			coach: createPendingLessonCoach({
 				title: "CEO Block Wrap-Up",
@@ -993,13 +1013,13 @@ export const ceoLessons = [
 			}),
 			workbench: {
 				prompt:
-					"By now, somebody else should be able to understand what you are building in under 60 seconds.",
+					"This should now read like a real handoff instead of a pile of notes.",
 				teachingPoints: [
-					"Review the completed worksheet quickly.",
-					"Point to the problem, user, outcome, flow, and scope.",
+					"Review the problem, user, outcome, flow, and scope as one story.",
+					"Make the transition into Design feel earned and obvious.",
 				],
 				emptyState:
-					"By now, somebody else should be able to understand what you are building in under 60 seconds.",
+					"This should now read like a real handoff instead of a pile of notes.",
 			},
 		},
 	},
