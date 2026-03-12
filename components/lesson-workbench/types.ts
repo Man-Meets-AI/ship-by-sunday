@@ -12,6 +12,7 @@ import type {
 	ObjectiveTask,
 	WorkbenchSectionState,
 } from "@/lib/course/registry";
+import type { StageUnlockSummary } from "@/lib/course/stage-unlock";
 
 export type WorkbenchRendererProps = {
 	lesson: LessonConfig;
@@ -22,6 +23,7 @@ export type WorkbenchRendererProps = {
 	invalidFieldIds?: Set<string>;
 	fieldValuesReady?: boolean;
 	resolvedArtifactPreview?: ArtifactPreview | null;
+	stageUnlockSummary?: StageUnlockSummary | null;
 };
 
 type WorkbenchSharedState = {

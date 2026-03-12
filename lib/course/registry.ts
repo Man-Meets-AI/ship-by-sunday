@@ -31,6 +31,7 @@ import {
 	isReferenceGalleryValue,
 	toPersistedReferenceGalleryValue,
 } from "./reference-gallery";
+import { buildStageUnlockSummary } from "./stage-unlock";
 import { formatTablePreview, getFilledTableRows } from "./table";
 
 export const COURSE_SLUG = "ship-by-sunday";
@@ -452,13 +453,6 @@ export function isFilled(value: PersistedFieldValue | undefined) {
 	return false;
 }
 
-function isStageUnlockBriefAssembler(lesson: LessonConfig) {
-	return (
-		lesson.workbench === "brief_assembler" &&
-		lesson.briefAssembler?.variant === "stage_unlock"
-	);
-}
-
 function hasOwnArtifactFields(lesson: LessonConfig) {
 	return getRequiredFields(lesson).length > 0;
 }
@@ -567,15 +561,6 @@ function buildVisualDirectionPreview(
 	};
 }
 
-function getPinnedArtifactByKey(
-	pinnedArtifacts: ArtifactPreview[],
-	artifactKey: string,
-) {
-	return pinnedArtifacts.find(
-		(artifact) => artifact.artifactKey === artifactKey,
-	);
-}
-
 function getFieldMinimumItems(field: WorkbenchField) {
 	return Math.max(field.minItems ?? 1, 1);
 }
@@ -586,25 +571,6 @@ function isFieldComplete(field: WorkbenchField, value: PersistedFieldValue) {
 	}
 
 	return isFilled(value);
-}
-
-function getFieldString(
-	artifact: ArtifactPreview | undefined,
-	fieldId: string,
-) {
-	const value = artifact?.fieldValues[fieldId];
-	return typeof value === "string" ? value.trim() : "";
-}
-
-function countFilledLines(value: unknown) {
-	if (!Array.isArray(value)) {
-		return 0;
-	}
-
-	return value.filter(
-		(entry): entry is string =>
-			typeof entry === "string" && entry.trim().length > 0,
-	).length;
 }
 
 function getTrimmedFieldValue(
@@ -660,159 +626,21 @@ function buildCompositeBriefPreview(
 	};
 }
 
-function buildProductBriefPreview(
-	lesson: LessonConfig,
-	pinnedArtifacts: ArtifactPreview[],
-): ArtifactPreview {
-	const userArtifact = getPinnedArtifactByKey(
-		pinnedArtifacts,
-		"user_statement",
-	);
-	const outcomeArtifact = getPinnedArtifactByKey(
-		pinnedArtifacts,
-		"outcome_statement",
-	);
-	const researchArtifact = getPinnedArtifactByKey(
-		pinnedArtifacts,
-		"research_notes",
-	);
-	const flowArtifact = getPinnedArtifactByKey(
-		pinnedArtifacts,
-		"core_flow_image",
-	);
-	const scopeArtifact = getPinnedArtifactByKey(
-		pinnedArtifacts,
-		"scope_boundary",
-	);
-
-	const researchSignalCount = getFilledTableRows(
-		researchArtifact?.fieldValues.research_table,
-	).length;
-	const flowState = getCoreFlowDraftState(flowArtifact?.fieldValues ?? {});
-	const keepCount = countFilledLines(scopeArtifact?.fieldValues.in_scope);
-	const cutCount = countFilledLines(scopeArtifact?.fieldValues.out_of_scope);
-	const flowImageValue = flowArtifact?.fieldValues[CORE_FLOW_IMAGE_FIELD_ID];
-	const flowImageUrl =
-		isUploadFieldValue(flowImageValue) && typeof flowImageValue.url === "string"
-			? flowImageValue.url
-			: null;
-
-	const who = [
-		getFieldString(userArtifact, "selected_problem_owner"),
-		getFieldString(userArtifact, "selected_problem_statement")
-			? `Problem: ${getFieldString(userArtifact, "selected_problem_statement")}`
-			: "",
-		getFieldString(userArtifact, "pain_moment")
-			? `Pain moment: ${getFieldString(userArtifact, "pain_moment")}`
-			: "",
-	]
-		.filter(Boolean)
-		.join("\n");
-	const outcome = [
-		getFieldString(outcomeArtifact, "outcome"),
-		getFieldString(outcomeArtifact, "success_looks_like")
-			? `Success looks like: ${getFieldString(
-					outcomeArtifact,
-					"success_looks_like",
-				)}`
-			: "",
-		getFieldString(outcomeArtifact, "difference_for_user")
-			? `Difference for the user: ${getFieldString(
-					outcomeArtifact,
-					"difference_for_user",
-				)}`
-			: "",
-	]
-		.filter(Boolean)
-		.join("\n");
-	const evidence = [
-		researchSignalCount > 0
-			? `${researchSignalCount} research signal${
-					researchSignalCount === 1 ? "" : "s"
-				} captured`
-			: "",
-		getFieldString(researchArtifact, "research_summary")
-			? `Key pattern: ${getFieldString(researchArtifact, "research_summary")}`
-			: "",
-	]
-		.filter(Boolean)
-		.join("\n");
-	const flow = [
-		flowState.validActorCount > 0
-			? `${flowState.validActorCount} actor${
-					flowState.validActorCount === 1 ? "" : "s"
-				} across ${flowState.filledStepCount} step${
-					flowState.filledStepCount === 1 ? "" : "s"
-				}`
-			: "",
-		flowState.endingDraft ? `Value moment: ${flowState.endingDraft}` : "",
-	]
-		.filter(Boolean)
-		.join("\n");
-	const scope = [
-		keepCount > 0 || cutCount > 0
-			? `${keepCount} keep${keepCount === 1 ? "" : "s"} in v1 • ${cutCount} cut${
-					cutCount === 1 ? "" : "s"
-				}`
-			: "",
-		getFieldString(scopeArtifact, "v1_rationale")
-			? `Why this version is enough: ${getFieldString(
-					scopeArtifact,
-					"v1_rationale",
-				)}`
-			: "",
-	]
-		.filter(Boolean)
-		.join("\n");
-
-	return {
-		artifactKey: lesson.artifact.key,
-		artifactLabel: lesson.artifact.label,
-		contextTitle: lesson.artifact.contextTitle,
-		artifactType: lesson.artifact.type as ArtifactType,
-		lessonId: lesson.id,
-		lessonTitle: lesson.title,
-		fieldValues: {
-			who,
-			outcome,
-			evidence,
-			flow,
-			scope,
-			user_locked_count: who ? 1 : 0,
-			outcome_defined_count: outcome ? 1 : 0,
-			research_signal_count: researchSignalCount,
-			flow_step_count: flowState.filledStepCount,
-			scope_cut_count: cutCount,
-			flow_image_url: flowImageUrl,
-		},
-		fields: (
-			[
-				["Who", who],
-				["Outcome", outcome],
-				["Evidence", evidence],
-				["Flow", flow],
-				["Scope", scope],
-			] as Array<[string, unknown]>
-		).filter(
-			([, value]) => typeof value === "string" && value.trim().length > 0,
-		),
-	};
-}
-
 export function buildResolvedArtifactPreview(
 	lesson: LessonConfig,
 	fieldValues: PersistedFieldValues,
 	pinnedArtifacts: ArtifactPreview[] = [],
 ): ArtifactPreview {
+	const stageUnlockSummary = buildStageUnlockSummary(lesson, pinnedArtifacts);
+	if (stageUnlockSummary) {
+		return stageUnlockSummary.preview as ArtifactPreview;
+	}
+
 	if (
 		lesson.workbench === "brief_assembler" &&
 		!hasOwnArtifactFields(lesson) &&
 		pinnedArtifacts.length > 0
 	) {
-		if (lesson.artifact.key === "product_brief") {
-			return buildProductBriefPreview(lesson, pinnedArtifacts);
-		}
-
 		return buildCompositeBriefPreview(lesson, pinnedArtifacts);
 	}
 
@@ -833,9 +661,10 @@ export function getObjectiveTasks(
 ): ObjectiveTask[] {
 	const values = normalizeLessonFieldValues(lesson, fieldValues);
 	const objectiveMode = getObjectiveMode(lesson);
-	const resolvedArtifactPreview =
-		context.resolvedArtifactPreview ??
-		buildResolvedArtifactPreview(lesson, values, context.pinnedArtifacts ?? []);
+	const stageUnlockSummary = buildStageUnlockSummary(
+		lesson,
+		context.pinnedArtifacts ?? [],
+	);
 
 	if (objectiveMode === "manual") {
 		const definitions = getManualObjectiveTaskDefinitions(lesson);
@@ -856,70 +685,18 @@ export function getObjectiveTasks(
 		);
 	}
 
-	if (isStageUnlockBriefAssembler(lesson)) {
-		const hasWho = isFilled(resolvedArtifactPreview.fieldValues.who as any);
-		const hasOutcome = isFilled(
-			resolvedArtifactPreview.fieldValues.outcome as any,
+	if (stageUnlockSummary) {
+		return stageUnlockSummary.tasks.map(
+			(task) =>
+				({
+					id: task.id,
+					label: task.label,
+					status: task.status,
+					source: "field",
+					fieldId: task.id,
+					interactive: false,
+				}) satisfies ObjectiveTask,
 		);
-		const hasEvidence = isFilled(
-			resolvedArtifactPreview.fieldValues.evidence as any,
-		);
-		const hasFlow = isFilled(resolvedArtifactPreview.fieldValues.flow as any);
-		const hasScope = isFilled(resolvedArtifactPreview.fieldValues.scope as any);
-		const hasBrief = [hasWho, hasOutcome, hasEvidence, hasFlow, hasScope].every(
-			Boolean,
-		);
-
-		return [
-			{
-				id: "product-brief:who",
-				label: "Lock the user and problem",
-				status: hasWho ? "complete" : "incomplete",
-				source: "field",
-				fieldId: "product-brief:who",
-				interactive: false,
-			},
-			{
-				id: "product-brief:outcome",
-				label: "Lock the outcome",
-				status: hasOutcome ? "complete" : "incomplete",
-				source: "field",
-				fieldId: "product-brief:outcome",
-				interactive: false,
-			},
-			{
-				id: "product-brief:evidence",
-				label: "Bring in real evidence",
-				status: hasEvidence ? "complete" : "incomplete",
-				source: "field",
-				fieldId: "product-brief:evidence",
-				interactive: false,
-			},
-			{
-				id: "product-brief:flow",
-				label: "Carry the core flow into Design",
-				status: hasFlow ? "complete" : "incomplete",
-				source: "field",
-				fieldId: "product-brief:flow",
-				interactive: false,
-			},
-			{
-				id: "product-brief:scope",
-				label: "Keep the v1 brutally small",
-				status: hasScope ? "complete" : "incomplete",
-				source: "field",
-				fieldId: "product-brief:scope",
-				interactive: false,
-			},
-			{
-				id: "product-brief:assembled",
-				label: "Assemble the product brief",
-				status: hasBrief ? "complete" : "incomplete",
-				source: "field",
-				fieldId: "product-brief:assembled",
-				interactive: false,
-			},
-		];
 	}
 
 	if (lesson.workbench === "core_flow_map") {

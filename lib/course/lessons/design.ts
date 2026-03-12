@@ -497,13 +497,14 @@ export const designLessons = [
 		coachMode: "docked",
 		objectiveTitle: "DESIGN 2.7 — Design Wrap-Up",
 		checklist: [
-			"Review references",
-			"Review sketches",
-			"Review storyboard",
-			"Review visual direction",
+			"Lock the reference direction",
+			"Carry the sketches into the handoff",
+			"Lock the storyboard flow",
+			"Carry the rough screens into Build",
+			"Save visualguide.md for Build",
 			"Lock the design spec",
 		],
-		helperText: "This is the handoff artifact into Build.",
+		helperText: "Design block complete. Lock the spec and unlock Build.",
 		winCondition: "The design spec is assembled and locked.",
 		panelDefaults: splitPanelDefaults,
 		pinnedArtifacts: [
@@ -513,32 +514,54 @@ export const designLessons = [
 			"rough_screens",
 			"visual_direction",
 		],
+		briefAssembler: {
+			variant: "stage_unlock",
+			preset: "design",
+			heroEyebrow: "Design block complete",
+			heroTitle: "Build unlocked",
+			heroBody:
+				"You now have the reference direction, screen plan, flow, and visual guide Build needs. Open the next block and translate instead of guessing.",
+			nextStepLabel: "BUILD 3.1 — Build From the Brief",
+			skills: [
+				"Flow sequencing",
+				"Screen planning",
+				"Hierarchy",
+				"Visual direction",
+				"Handoff clarity",
+			],
+			artifactReadyCopy:
+				"Build now has the screens, flow, and visual direction it needs.",
+			readyStateCopy: "Design block complete. Lock the spec and unlock Build.",
+			completionCtaLabel: "Unlock Build",
+			celebrationEyebrow: "Design block complete",
+			celebrationTitle: "Build unlocked",
+		},
 		content: {
 			status: "draft",
 			intro:
-				"When this block is done, building should feel like translation, not guessing.",
+				"You are not walking into Build blind. The screens, flow, and visual direction are already locked, so the next block starts from control.",
 			lessonMeta: {
 				runtimeLabel: "3-5 min",
 				goal: "Lock the design spec before building begins.",
 				purpose: "This is the handoff from concept to implementation.",
 			},
 			actionCard: {
-				jobNow: "Complete Worksheet 02 fully.",
-				timebox: "15 minutes",
-				comeBackWith: "A finished build-ready design spec.",
+				jobNow:
+					"Take a fast build-handoff pass, confirm the spec reads cleanly, then unlock Build.",
+				timebox: "2 minutes",
+				comeBackWith: "A locked design spec and a clear jump into Build.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Design Block Wrap-Up",
 				resources: WORKSHEET_02_RESOURCES,
 			}),
 			workbench: {
-				prompt:
-					"When this block is done, building should feel like translation, not guessing.",
+				prompt: "Build should now feel like translation, not guessing.",
 				teachingPoints: [
-					"Review the reference board, screen list, rough frames, and style rules.",
+					"Check that Build now has a reference direction, a screen plan, a locked flow, and a saved visual guide.",
+					"The job here is confidence: Build should start from a real handoff, not from vibes.",
 				],
-				emptyState:
-					"When this block is done, building should feel like translation, not guessing.",
+				emptyState: "Build should now feel like translation, not guessing.",
 			},
 		},
 	},

@@ -975,6 +975,7 @@ export const ceoLessons = [
 		],
 		briefAssembler: {
 			variant: "stage_unlock",
+			preset: "ceo",
 			heroEyebrow: "CEO block complete",
 			heroTitle: "Design unlocked",
 			heroBody:
@@ -988,6 +989,8 @@ export const ceoLessons = [
 				"Flow mapping",
 				"Scope discipline",
 			],
+			artifactReadyCopy:
+				"You are not guessing anymore. Design gets a real handoff now.",
 			readyStateCopy: "CEO block complete. Lock the brief and unlock Design.",
 			completionCtaLabel: "Unlock Design",
 			celebrationEyebrow: "CEO block complete",
@@ -1003,7 +1006,8 @@ export const ceoLessons = [
 				purpose: "This is the handoff from thinking to form.",
 			},
 			actionCard: {
-				jobNow: "Take a fast victory lap, review the brief, then unlock Design.",
+				jobNow:
+					"Take a fast victory lap, review the brief, then unlock Design.",
 				timebox: "2 minutes",
 				comeBackWith: "A locked product brief and a clear jump into Design.",
 			},

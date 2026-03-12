@@ -268,17 +268,21 @@ export type LessonContent = {
 
 export type LessonCoachContent = LessonContent["coach"];
 
+export type StageUnlockPreset = "ceo" | "design";
+
 export type BriefAssemblerConfig =
 	| {
 			variant?: "default";
 	  }
 	| {
 			variant: "stage_unlock";
+			preset: StageUnlockPreset;
 			heroEyebrow: string;
 			heroTitle: string;
 			heroBody: string;
 			nextStepLabel: string;
 			skills: string[];
+			artifactReadyCopy?: string;
 			readyStateCopy?: string;
 			completionCtaLabel?: string;
 			celebrationEyebrow?: string;

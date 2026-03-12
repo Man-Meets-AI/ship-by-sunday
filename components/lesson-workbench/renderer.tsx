@@ -7,6 +7,7 @@ import {
 	getWorkbenchSectionStates,
 	getWorkbenchSections,
 } from "@/lib/course/registry";
+import { buildStageUnlockSummary } from "@/lib/course/stage-unlock";
 
 import { BriefAssemblerWorkbench } from "./modes/brief-assembler-workbench";
 import { CaptureUploadWorkbench } from "./modes/capture-upload-workbench";
@@ -72,6 +73,10 @@ export function WorkbenchRenderer({
 		fieldValues as any,
 		pinnedArtifacts as any,
 	);
+	const stageUnlockSummary = buildStageUnlockSummary(
+		lesson,
+		pinnedArtifacts as any,
+	);
 	const workbenchSections = getWorkbenchSections(lesson);
 	const sectionStates = getWorkbenchSectionStates(lesson, fieldValues as any);
 	const objectiveTasks = getObjectiveTasks(lesson, fieldValues as any, {
@@ -99,6 +104,7 @@ export function WorkbenchRenderer({
 			pinnedArtifacts={pinnedArtifacts}
 			invalidFieldIds={invalidFieldIds}
 			fieldValuesReady={fieldValuesReady}
+			stageUnlockSummary={stageUnlockSummary}
 			resolvedArtifactPreview={resolvedArtifactPreview}
 			fields={fields}
 			objectiveTasks={objectiveTasks}
