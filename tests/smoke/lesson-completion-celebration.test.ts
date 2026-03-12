@@ -10,6 +10,7 @@ describe("lesson completion celebration contract", () => {
 		const source = readSource("components/lesson-page.tsx");
 		const ceoLessonSource = readSource("lib/course/lessons/ceo.ts");
 		const designLessonSource = readSource("lib/course/lessons/design.ts");
+		const buildLessonSource = readSource("lib/course/lessons/build.ts");
 
 		expect(source).toContain(
 			'type CompletionPhase = "idle" | "submitting" | "celebrating";',
@@ -37,6 +38,10 @@ describe("lesson completion celebration contract", () => {
 			'heroEyebrow: "Design block complete"',
 		);
 		expect(designLessonSource).toContain('preset: "design"');
+		expect(buildLessonSource).toContain('completionCtaLabel: "Unlock Ship"');
+		expect(buildLessonSource).toContain('celebrationTitle: "Ship unlocked"');
+		expect(buildLessonSource).toContain('heroEyebrow: "Build block complete"');
+		expect(buildLessonSource).toContain('preset: "build"');
 	});
 
 	it("passes a temporary completion cue into the product shell and rail", () => {

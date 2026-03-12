@@ -61,13 +61,17 @@ describe("lesson content contract", () => {
 	it("keeps stage-unlock wrap-up lessons declarative and pointed at a real next step", () => {
 		const ceoWrapUpLesson = getLessonById("1.7");
 		const designWrapUpLesson = getLessonById("2.7");
+		const buildWrapUpLesson = getLessonById("3.6");
 
 		expect(ceoWrapUpLesson).toBeTruthy();
 		expect(designWrapUpLesson).toBeTruthy();
+		expect(buildWrapUpLesson).toBeTruthy();
 		expect(ceoWrapUpLesson?.workbench).toBe("brief_assembler");
 		expect(designWrapUpLesson?.workbench).toBe("brief_assembler");
+		expect(buildWrapUpLesson?.workbench).toBe("brief_assembler");
 		expect(ceoWrapUpLesson?.briefAssembler?.variant).toBe("stage_unlock");
 		expect(designWrapUpLesson?.briefAssembler?.variant).toBe("stage_unlock");
+		expect(buildWrapUpLesson?.briefAssembler?.variant).toBe("stage_unlock");
 		expect(ceoWrapUpLesson?.briefAssembler).toMatchObject({
 			preset: "ceo",
 			heroEyebrow: "CEO block complete",
@@ -82,6 +86,14 @@ describe("lesson content contract", () => {
 			nextStepLabel: "BUILD 3.1 — Generate the Build Prompt",
 			completionCtaLabel: "Unlock Build",
 		});
+		expect(buildWrapUpLesson?.briefAssembler).toMatchObject({
+			preset: "build",
+			leadVideo: true,
+			heroEyebrow: "Build block complete",
+			heroTitle: "Ship unlocked",
+			nextStepLabel: "SHIP 4.1 — Ship the Core, Not the Fantasy",
+			completionCtaLabel: "Unlock Ship",
+		});
 		expect(
 			ceoWrapUpLesson?.briefAssembler?.skills?.length,
 		).toBeGreaterThanOrEqual(4);
@@ -94,17 +106,24 @@ describe("lesson content contract", () => {
 		expect(
 			(designWrapUpLesson?.pinnedArtifacts ?? []).length,
 		).toBeGreaterThanOrEqual(5);
+		expect(
+			(buildWrapUpLesson?.pinnedArtifacts ?? []).length,
+		).toBeGreaterThanOrEqual(4);
 	});
 
-	it("keeps the Build block rewired around a kickoff prompt and local handoff", () => {
+	it("keeps the Build block rewired around a kickoff prompt, watch-first execution, and a Ship handoff", () => {
 		const kickoffLesson = getLessonById("3.1");
 		const starterLesson = getLessonById("3.2");
 		const firstScreenLesson = getLessonById("3.3");
+		const coreUxLesson = getLessonById("3.4");
+		const debugLesson = getLessonById("3.5");
 		const handoffLesson = getLessonById("3.6");
 
 		expect(kickoffLesson).toBeTruthy();
 		expect(starterLesson).toBeTruthy();
 		expect(firstScreenLesson).toBeTruthy();
+		expect(coreUxLesson).toBeTruthy();
+		expect(debugLesson).toBeTruthy();
 		expect(handoffLesson).toBeTruthy();
 
 		expect(kickoffLesson).toMatchObject({
@@ -121,7 +140,12 @@ describe("lesson content contract", () => {
 		expect(starterLesson?.shell).toBe("watch");
 		expect(starterLesson?.workbenchFields ?? []).toEqual([]);
 		expect(firstScreenLesson?.title).toBe("Build the First Screen");
+		expect(coreUxLesson?.shell).toBe("watch");
+		expect(coreUxLesson?.workbenchFields ?? []).toEqual([]);
+		expect(debugLesson?.shell).toBe("watch");
+		expect(debugLesson?.workbenchFields ?? []).toEqual([]);
 		expect(handoffLesson?.artifact.label).toBe("Local Build Handoff");
+		expect(handoffLesson?.briefAssembler?.preset).toBe("build");
 	});
 
 	it("keeps candidate-problem handoff contracts explicit and internally valid", () => {

@@ -1,29 +1,47 @@
 import type { CSSProperties } from "react";
 
+import { LessonVideoSurface } from "@/components/lesson-video-surface";
+
 import type { WorkbenchModeProps } from "../../types";
 import { WorkbenchCard } from "../../shared/workbench-card";
 import { WorkbenchContainer } from "../../shared/workbench-container";
 import { StageUnlockSectionCard } from "./stage-unlock-section-card";
 
-function getEmptyStateCopy(preset: "ceo" | "design") {
-	return preset === "design"
-		? "Finish the earlier Design work to generate the final Build handoff."
-		: "Finish the earlier CEO work to generate the final product brief.";
+function getEmptyStateCopy(preset: "ceo" | "design" | "build") {
+	switch (preset) {
+		case "design":
+			return "Finish the earlier Design work to generate the final Build handoff.";
+		case "build":
+			return "Finish the earlier Build work to generate the Ship handoff.";
+		default:
+			return "Finish the earlier CEO work to generate the final product brief.";
+	}
 }
 
 export function StageUnlockWorkbench({
 	lesson,
+	lessonContent,
 	stageUnlockSummary,
-}: Pick<WorkbenchModeProps, "lesson" | "stageUnlockSummary">) {
+}: Pick<
+	WorkbenchModeProps,
+	"lesson" | "lessonContent" | "stageUnlockSummary"
+>) {
 	if (lesson.briefAssembler?.variant !== "stage_unlock") {
 		return null;
 	}
 
 	const summary = stageUnlockSummary;
+	const showLeadVideo = lesson.briefAssembler.leadVideo;
 
 	return (
 		<WorkbenchContainer>
 			<div className="space-y-3">
+				{showLeadVideo ? (
+					<LessonVideoSurface
+						coachContent={lessonContent.coach}
+						variant="watch-shell"
+					/>
+				) : null}
 				<section className="sbs-stage-unlock-hero rounded-none border border-product-accent/25 bg-product-accent/[0.06] px-4 py-4 shadow-[0_0_0_1px_rgba(var(--product-accent),0.12),0_18px_40px_rgba(var(--product-shadow),0.12)]">
 					<div className="flex flex-wrap items-start justify-between gap-3">
 						<div className="space-y-3">

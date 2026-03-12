@@ -276,6 +276,53 @@ describe("course registry", () => {
 		);
 	});
 
+	it("configures lessons 3.4 and 3.5 as watch-only lessons while keeping the Build unlock chain stable", () => {
+		const coreUxLesson = getLessonById("3.4");
+		const debugLesson = getLessonById("3.5");
+		const wrapUpLesson = getLessonById("3.6");
+		expect(coreUxLesson).toBeTruthy();
+		expect(debugLesson).toBeTruthy();
+		expect(wrapUpLesson).toBeTruthy();
+
+		expect(coreUxLesson?.shell).toBe("watch");
+		expect(coreUxLesson?.workbenchFields ?? []).toEqual([]);
+		expect(getObjectiveTasks(coreUxLesson!, {})).toEqual([]);
+		expect(getCompletionIssues(coreUxLesson!, {})).toEqual([]);
+		expect(debugLesson?.artifact.dependsOn).toContain(
+			"core_flow_working_locally",
+		);
+
+		expect(debugLesson?.shell).toBe("watch");
+		expect(debugLesson?.workbenchFields ?? []).toEqual([]);
+		expect(getObjectiveTasks(debugLesson!, {})).toEqual([]);
+		expect(getCompletionIssues(debugLesson!, {})).toEqual([]);
+		expect(wrapUpLesson?.artifact.dependsOn).toContain("blocker_log");
+	});
+
+	it("configures lesson 3.6 as a focus-only Ship-unlock wrap-up with a composed build summary", () => {
+		const lesson = getLessonById("3.6");
+		const nextLesson = getLessonById("4.1");
+		expect(lesson).toBeTruthy();
+		expect(nextLesson).toBeTruthy();
+
+		expect(lesson).toMatchObject({
+			shell: "focus",
+			availableLayoutModes: ["focus"],
+			workbench: "brief_assembler",
+		});
+		expect(lesson?.workbenchFields ?? []).toEqual([]);
+		expect(lesson?.briefAssembler).toMatchObject({
+			variant: "stage_unlock",
+			preset: "build",
+			leadVideo: true,
+			heroEyebrow: "Build block complete",
+			heroTitle: "Ship unlocked",
+			nextStepLabel: "SHIP 4.1 — Ship the Core, Not the Fantasy",
+			completionCtaLabel: "Unlock Ship",
+		});
+		expect(nextLesson?.artifact.dependsOn).toContain("build_summary");
+	});
+
 	it("declares columns for every table workbench field", () => {
 		const tableFields = lessonRegistry.flatMap((lesson) =>
 			(lesson.workbenchFields ?? []).filter((field) => field.kind === "table"),

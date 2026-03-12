@@ -554,77 +554,87 @@ Coach states:
 
 ## 3.4 Build the Core Flow
 
-**Shell:** Focus
+**Shell:** Watch
 **Workbench:** external_workspace
 **Artifact:** Core Flow Working Locally
 
 ```text
-┌──────────────────────────────────── FOCUS WORKSPACE 3.4 ────────────────────────────────────┐
-│ SHIP BY SUNDAY      [CEO ✓] [DESIGN ✓] [BUILD ACTIVE] [SHIP LOCKED]      [Split][Focus]   │
+┌──────────────────────────────────── WATCH SHELL 3.4 ────────────────────────────────────────┐
+│ SHIP BY SUNDAY      [CEO ✓] [DESIGN ✓] [BUILD ACTIVE] [SHIP LOCKED]                        │
 ├───────────────────────────────────────────────────────────────────────────────────────────────┤
-│ [Collapsed Objective Rail]                                                                    │
 │                                                                                               │
-│ IDE / Builder Workspace                                                                        │
+│ BUILD 3.4 · Core Flow Working Locally · 12-15 min                                             │
+│ Build the Core UX                                                                              │
+│ Watch the walkthrough, then keep building the core path in your editor until it works.        │
 │                                                                                               │
-│ Side overlay: Core flow checklist                                                              │
-│ [ ] Step 1 works                                                                               │
-│ [ ] Step 2 works                                                                               │
-│ [ ] Step 3 works                                                                               │
-│ [ ] End state works                                                                            │
+│ ┌───────────────────────────────────────────────────────────────────────────────────────────┐ │
+│ │                                Lesson video                                               │ │
+│ │                 Watch the core-UX walkthrough before building further                     │ │
+│ │                                                                                           │ │
+│ └───────────────────────────────────────────────────────────────────────────────────────────┘ │
 │                                                                                               │
-│ Coach PiP [video]                                                                              │
-│                                                                                               │
-│ [Mark core flow working] [Back] [Next]                                                         │
+│ [Back] [Complete lesson]                                                                       │
 └───────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## 3.5 Debug Without Spiraling
 
-**Shell:** Focus
+**Shell:** Watch
 **Workbench:** tracker_log
 **Artifact:** Blocker Log + Working App
 
 ```text
-┌──────────────────────────────────── FOCUS WORKSPACE 3.5 ────────────────────────────────────┐
-│ SHIP BY SUNDAY      [CEO ✓] [DESIGN ✓] [BUILD ACTIVE] [SHIP LOCKED]      [Split][Focus]   │
+┌──────────────────────────────────── WATCH SHELL 3.5 ────────────────────────────────────────┐
+│ SHIP BY SUNDAY      [CEO ✓] [DESIGN ✓] [BUILD ACTIVE] [SHIP LOCKED]                        │
 ├───────────────────────────────────────────────────────────────────────────────────────────────┤
-│ [Collapsed Objective Rail]                                                                    │
 │                                                                                               │
-│ Debug Log                                                                                      │
-│ ┌─────────────┬──────────────┬──────────────┬────────────┐                                    │
-│ │ Blocker     │ What caused  │ Fix tried    │ Resolved?  │                                    │
-│ ├─────────────┼──────────────┼──────────────┼────────────┤                                    │
-│ │ [text]      │ [text]       │ [text]       │ [yes/no]   │                                    │
-│ └─────────────┴──────────────┴──────────────┴────────────┘                                    │
+│ BUILD 3.5 · Blocker Log + Working App · 8-10 min                                              │
+│ Debug the Core UX                                                                              │
+│ Watch the debugging pass, then stabilize the core path in your editor without spiraling.      │
 │                                                                                               │
-│ IDE / preview remains primary                                                                  │
-│ Coach PiP [video]                                                                              │
-│ [Mark app stable] [Back] [Next]                                                                │
+│ ┌───────────────────────────────────────────────────────────────────────────────────────────┐ │
+│ │                                Lesson video                                               │ │
+│ │                    Watch the blocker-first debugging walkthrough first                    │ │
+│ │                                                                                           │ │
+│ └───────────────────────────────────────────────────────────────────────────────────────────┘ │
+│                                                                                               │
+│ [Back] [Complete lesson]                                                                       │
 └───────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## 3.6 Build Wrap-Up
 
-**Shell:** Split
+**Shell:** Focus
 **Workbench:** brief_assembler
-**Artifact:** Working Local App + Build Summary
+**Artifact:** Local Build Handoff
 
 ```text
-┌──── CURRENT OBJECTIVE ────┬────────────── WORKBENCH 3.6 ──────────────┬──── COACH ────┐
-│ BUILD 3.6                 │ Build Wrap-Up                             │ WATCH          │
-│                           │                                           │ [video]        │
-│ Checklist                 │ Build Summary                             │                │
-│ [ ] Confirm local app     │ - brief used                             │ TRANSCRIPT     │
-│ [ ] Confirm core flow     │ - core flow complete                     │ [collapsed]    │
-│ [ ] Capture blockers      │ - blocker log                            │                │
-│ [ ] Save next handoff     │ - local run confirmation                 │ EXAMPLES       │
-│                           │                                           │ sample handoff │
-│ Output                    │ What is working now? [ multiline ]       │                │
-│ Build Summary             │ What is not built yet? [ multiline ]     │ RESOURCES      │
-│                           │ Local URL / repo ref [ input ]           │ [collapsed]    │
-│ Next Unlock               │                               [Back][Next]│                │
-│ Ship 4.1                  │                                           │                │
-└───────────────────────────┴───────────────────────────────────────────┴────────────────┘
+┌──────────────────────────────────── FOCUS WORKSPACE 3.6 ────────────────────────────────────┐
+│ SHIP BY SUNDAY      [CEO ✓] [DESIGN ✓] [BUILD ACTIVE] [SHIP LOCKED]                        │
+├───────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                               │
+│ ┌───────────────────────────────────────────────────────────────────────────────────────────┐ │
+│ │                                Lesson video                                               │ │
+│ │                   Watch the Build wrap-up before moving into Ship                        │ │
+│ │                                                                                           │ │
+│ └───────────────────────────────────────────────────────────────────────────────────────────┘ │
+│                                                                                               │
+│ Build block complete                                                                          │
+│ Ship unlocked                                                                                 │
+│ Next: SHIP 4.1 — Ship the Core, Not the Fantasy                                               │
+│                                                                                               │
+│ Stats: [Path] [Environment] [Core UX] [Stability]                                             │
+│                                                                                               │
+│ What Ship now has                                                                             │
+│ - Build plan                                                                                  │
+│ - Local environment                                                                           │
+│ - Core UX                                                                                     │
+│ - Stability pass                                                                              │
+│                                                                                               │
+│ Skills you flexed: Prompt control / Slice planning / Local setup / Debugging                  │
+│                                                                                               │
+│ [Back] [Unlock Ship]                                                                          │
+└───────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---

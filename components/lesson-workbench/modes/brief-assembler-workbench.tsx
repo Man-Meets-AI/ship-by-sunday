@@ -7,6 +7,7 @@ export function BriefAssemblerWorkbench(props: WorkbenchModeProps) {
 		return (
 			<StageUnlockWorkbench
 				lesson={props.lesson}
+				lessonContent={props.lessonContent}
 				stageUnlockSummary={props.stageUnlockSummary}
 			/>
 		);

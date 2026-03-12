@@ -250,7 +250,8 @@ export const buildLessons = [
 					"Implement one screen or one narrow workflow slice, not the whole product.",
 					"Capture the result before you decide what the next slice should be.",
 				],
-				emptyState: "Build one screen or slice, then return here with the result.",
+				emptyState:
+					"Build one screen or slice, then return here with the result.",
 			},
 		},
 	},
@@ -261,7 +262,7 @@ export const buildLessons = [
 		block: "BUILD",
 		title: "Build the Core UX",
 		shortTitle: "Core UX",
-		shell: "focus",
+		shell: "watch",
 		workbench: "external_workspace",
 		artifact: {
 			key: "core_flow_working_locally",
@@ -283,27 +284,16 @@ export const buildLessons = [
 		],
 		fieldShapeVersion: 2,
 		helperText:
-			"Keep the core path moving. Add the smallest backend or data support the flow actually needs, then validate.",
-		winCondition: "The core UX works locally from start to finish.",
+			"Watch the walkthrough, then keep building the core path in your editor until the local flow works end to end.",
+		winCondition:
+			"The walkthrough is complete and the learner is ready to keep building the core UX locally.",
 		panelDefaults: focusPanelDefaults,
 		pinnedArtifacts: ["core_flow_image", "agent_build_brief"],
-		workbenchFields: [
-			{
-				id: "core_flow_status",
-				label: "Core UX working locally",
-				kind: "checklist",
-				required: true,
-				options: [
-					"Build the next screens or steps one at a time",
-					"Add only the missing data, auth, or backend support",
-					"Validate the local path from start to finish",
-				],
-			},
-		],
+		workbenchFields: [],
 		content: {
 			status: "draft",
 			intro:
-				"Move screen by screen. Add missing support only when the core path forces the issue.",
+				"Watch the pass, then keep building screen by screen until the core path works locally from start to finish.",
 			lessonMeta: {
 				runtimeLabel: "12-15 min",
 				goal: "Turn the first slice into a usable local core experience.",
@@ -312,9 +302,9 @@ export const buildLessons = [
 			},
 			actionCard: {
 				jobNow:
-					"Keep building the core path screen by screen. Add only the data or auth support the flow actually needs, then validate it locally.",
+					"Watch the walkthrough, then keep building the core path screen by screen in your editor and validate it locally.",
 				timebox: "30-45 minutes",
-				comeBackWith: "The core UX working locally.",
+				comeBackWith: "A local core flow that works end to end.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Build the Core UX",
@@ -339,7 +329,7 @@ export const buildLessons = [
 		block: "BUILD",
 		title: "Debug the Core UX",
 		shortTitle: "Debug",
-		shell: "focus",
+		shell: "watch",
 		workbench: "tracker_log",
 		artifact: {
 			key: "blocker_log",
@@ -362,57 +352,16 @@ export const buildLessons = [
 		],
 		fieldShapeVersion: 2,
 		helperText:
-			"Not every bug matters equally. Fix the blockers, log the rest, and protect momentum.",
-		winCondition: "The blocker log is captured and the core UX is marked stable.",
+			"Watch the debugging pass, then fix the blocker issues in your editor without turning the lesson into a rewrite spiral.",
+		winCondition:
+			"The walkthrough is complete and the learner is ready to stabilize the core UX locally.",
 		panelDefaults: focusPanelDefaults,
 		pinnedArtifacts: ["core_flow_working_locally"],
-		workbenchFields: [
-			{
-				id: "blocker_table",
-				label: "Blocker log",
-				kind: "table",
-				required: true,
-				columns: [
-					{
-						id: "blocker",
-						label: "Blocker",
-						kind: "text",
-						placeholder: "What is breaking?",
-						width: "compact",
-					},
-					{
-						id: "cause",
-						label: "Root cause",
-						kind: "text",
-						placeholder: "What actually caused it?",
-					},
-					{
-						id: "fixTried",
-						label: "What you tried",
-						kind: "text",
-						placeholder: "Logs, screenshot, Playwright, or provider fix",
-					},
-					{
-						id: "resolved",
-						label: "Resolved?",
-						kind: "select",
-						options: ["Yes", "No"],
-						placeholder: "Select one",
-						width: "compact",
-					},
-				],
-			},
-			{
-				id: "app_stable",
-				label: "Core UX stable",
-				kind: "toggle",
-				required: true,
-			},
-		],
+		workbenchFields: [],
 		content: {
 			status: "draft",
 			intro:
-				"Use evidence when you debug. Logs, screenshots, and Playwright beat guessing every time.",
+				"Watch the pass, then debug with evidence so the core UX gets stable without dragging you into a rabbit hole.",
 			lessonMeta: {
 				runtimeLabel: "8-10 min",
 				goal: "Fix blocker issues without falling into a rewrite spiral.",
@@ -421,23 +370,23 @@ export const buildLessons = [
 			},
 			actionCard: {
 				jobNow:
-					"Fix the blocker issues in the core UX. Use logs, screenshots, and Playwright where they help, then mark the local path stable.",
+					"Watch the walkthrough, then fix the blocker issues in the core UX using logs, screenshots, and Playwright where they help.",
 				timebox: "20 minutes",
-				comeBackWith: "A stable core UX and a logged fix trail.",
+				comeBackWith: "A stable local core UX.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Debug the Core UX",
 				resources: WORKSHEET_03_RESOURCES,
 			}),
 			workbench: {
-				prompt:
-					"Use evidence to debug and stop once the blockers are gone.",
+				prompt: "Use evidence to debug and stop once the blockers are gone.",
 				teachingPoints: [
 					"Use logs first when the error already tells you what broke.",
 					"Use screenshots when the UI looks wrong or the failure is visual.",
 					"Use Playwright to reproduce the core path and catch the last rough edges.",
 				],
-				emptyState: "Log the blocker issues, then fix only the ones that block the core path.",
+				emptyState:
+					"Log the blocker issues, then fix only the ones that block the core path.",
 			},
 		},
 	},
@@ -448,7 +397,8 @@ export const buildLessons = [
 		block: "BUILD",
 		title: "Lock the Local Build",
 		shortTitle: "Handoff",
-		shell: "split",
+		shell: "focus",
+		availableLayoutModes: ["focus"],
 		workbench: "brief_assembler",
 		artifact: {
 			key: "build_summary",
@@ -464,50 +414,53 @@ export const buildLessons = [
 		nextLessonId: "4.1",
 		prevLessonId: "3.5",
 		unlocks: { lessons: ["4.1"], blocks: ["SHIP"] },
-		coachMode: "docked",
+		coachMode: "pip",
 		objectiveTitle: "BUILD 3.6 — Lock the Local Build",
 		checklist: [
-			"Confirm what works now",
-			"Log what is intentionally unfinished",
-			"Save the local handoff",
+			"Carry the build plan forward",
+			"Carry the working local baseline forward",
+			"Carry the stable core path forward",
+			"Unlock Ship",
 		],
 		fieldShapeVersion: 2,
 		helperText:
-			"Ship is next. Capture the real local milestone before you change context.",
-		winCondition: "The local build handoff is saved.",
-		panelDefaults: splitPanelDefaults,
+			"Build block complete. Lock the real local handoff, then move into Ship from proof instead of guesswork.",
+		winCondition: "The Build handoff is assembled and Ship is unlocked.",
+		panelDefaults: focusPanelDefaults,
 		pinnedArtifacts: [
 			"agent_build_brief",
 			"working_local_environment",
 			"core_flow_working_locally",
 			"blocker_log",
 		],
-		workbenchFields: [
-			{
-				id: "working_now",
-				label: "What is working now?",
-				kind: "textarea",
-				required: true,
-				rows: 4,
-			},
-			{
-				id: "not_built_yet",
-				label: "What is intentionally unfinished?",
-				kind: "textarea",
-				required: true,
-				rows: 4,
-			},
-			{
-				id: "local_url_or_repo",
-				label: "Local URL or repo reference",
-				kind: "text",
-				required: true,
-			},
-		],
+		workbenchFields: [],
+		briefAssembler: {
+			variant: "stage_unlock",
+			preset: "build",
+			leadVideo: true,
+			heroEyebrow: "Build block complete",
+			heroTitle: "Ship unlocked",
+			heroBody:
+				"You now have a real local baseline, a built core path, and a blocker-first debug pass behind you. Move into Ship from proof, not from guesswork.",
+			nextStepLabel: "SHIP 4.1 — Ship the Core, Not the Fantasy",
+			skills: [
+				"Prompt control",
+				"Slice planning",
+				"Local setup",
+				"Core-flow implementation",
+				"Blocker-first debugging",
+			],
+			artifactReadyCopy:
+				"Ship now gets the current local baseline, the working path, and the real constraints that still matter.",
+			readyStateCopy: "Build block complete. Lock the handoff and unlock Ship.",
+			completionCtaLabel: "Unlock Ship",
+			celebrationEyebrow: "Build block complete",
+			celebrationTitle: "Ship unlocked",
+		},
 		content: {
 			status: "draft",
 			intro:
-				"Lock the local milestone before you move into Ship. The handoff should be honest, clear, and small enough to act on.",
+				"Take the quick victory lap, lock the real local milestone, and move into Ship with a clean handoff instead of another recap form.",
 			lessonMeta: {
 				runtimeLabel: "4-6 min",
 				goal: "Capture the stable local build and what still needs to wait.",
@@ -516,9 +469,9 @@ export const buildLessons = [
 			},
 			actionCard: {
 				jobNow:
-					"Write down what works now, what is intentionally unfinished, and where the current local build lives.",
-				timebox: "10 minutes",
-				comeBackWith: "A clean local build handoff into Ship.",
+					"Watch the wrap-up, review what Build now has, then unlock Ship with the current local handoff.",
+				timebox: "2-3 minutes",
+				comeBackWith: "A clean handoff into Ship.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Lock the Local Build",
@@ -532,8 +485,7 @@ export const buildLessons = [
 					"Be explicit about what is unfinished so Ship stays focused on the core, not the fantasy backlog.",
 					"Keep one clean local reference so you always know what build you are shipping next.",
 				],
-				emptyState:
-					"Capture the local milestone before you move into Ship.",
+				emptyState: "Capture the local milestone before you move into Ship.",
 			},
 		},
 	},

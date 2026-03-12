@@ -33,7 +33,7 @@ describe("lesson layout modes", () => {
 	});
 
 	it("treats watch lessons as focus-only layouts with no toggle", () => {
-		for (const lessonId of ["2.4", "2.5"]) {
+		for (const lessonId of ["2.4", "2.5", "3.4", "3.5"]) {
 			const lesson = getLessonById(lessonId);
 			expect(lesson).toBeTruthy();
 
@@ -42,5 +42,16 @@ describe("lesson layout modes", () => {
 			expect(lessonSupportsLayoutToggle(lesson!)).toBe(false);
 			expect(normalizeLayoutModeForLesson(lesson!, "split")).toBe("focus");
 		}
+	});
+
+	it("locks lesson 3.6 to focus mode and coerces stale split state", () => {
+		const lesson = getLessonById("3.6");
+		expect(lesson).toBeTruthy();
+
+		expect(getAvailableLayoutModesForLesson(lesson!)).toEqual(["focus"]);
+		expect(getDefaultLayoutModeForLesson(lesson!)).toBe("focus");
+		expect(lessonSupportsLayoutToggle(lesson!)).toBe(false);
+		expect(normalizeLayoutModeForLesson(lesson!, "split")).toBe("focus");
+		expect(normalizeLayoutModeForLesson(lesson!, "focus")).toBe("focus");
 	});
 });

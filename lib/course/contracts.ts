@@ -270,7 +270,7 @@ export type LessonContent = {
 
 export type LessonCoachContent = LessonContent["coach"];
 
-export type StageUnlockPreset = "ceo" | "design";
+export type StageUnlockPreset = "ceo" | "design" | "build";
 
 export type BriefAssemblerConfig =
 	| {
@@ -279,6 +279,7 @@ export type BriefAssemblerConfig =
 	| {
 			variant: "stage_unlock";
 			preset: StageUnlockPreset;
+			leadVideo?: boolean;
 			heroEyebrow: string;
 			heroTitle: string;
 			heroBody: string;

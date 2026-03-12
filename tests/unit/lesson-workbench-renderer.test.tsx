@@ -112,7 +112,10 @@ function getProductBriefArtifact(): PinnedArtifact {
 				"Evidence",
 				"People care most about speed and clarity after the meeting, not giant knowledge-management features.",
 			],
-			["Flow", "Paste notes -> generate summary -> review action items -> share"],
+			[
+				"Flow",
+				"Paste notes -> generate summary -> review action items -> share",
+			],
 			["Scope", "One core flow only. No analytics or team features yet."],
 		],
 	};
@@ -127,7 +130,8 @@ function getDesignSpecArtifact(): PinnedArtifact {
 		lessonId: "2.7",
 		lessonTitle: "Design Wrap-Up",
 		fieldValues: {
-			references: "Sharp editorial references with dark surfaces and dense hierarchy.",
+			references:
+				"Sharp editorial references with dark surfaces and dense hierarchy.",
 			sketches: "Landing page hero plus a review screen.",
 			storyboard: "5-step core flow from notes to sendable summary.",
 			roughScreens: "Hero, summary review, and share state.",
@@ -148,6 +152,39 @@ function getDesignSpecArtifact(): PinnedArtifact {
 			],
 		],
 	};
+}
+
+function getBuildBriefArtifact(): PinnedArtifact {
+	const lesson = getLessonById("3.1");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {
+		build_path: "Use template",
+		first_slice: "Notes review screen",
+		definition_of_done:
+			"The review screen renders locally, accepts notes, and shows a clean summary path without breaking.",
+	});
+}
+
+function getWorkingLocalEnvironmentArtifact(): PinnedArtifact {
+	const lesson = getLessonById("3.2");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {});
+}
+
+function getCoreUxWorkingArtifact(): PinnedArtifact {
+	const lesson = getLessonById("3.4");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {});
+}
+
+function getBlockerLogArtifact(): PinnedArtifact {
+	const lesson = getLessonById("3.5");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {});
 }
 
 function getResearchNotesArtifact(): PinnedArtifact {
@@ -350,8 +387,14 @@ describe("WorkbenchRenderer", () => {
 				expected: "External workspace",
 			},
 			{
-				lessonId: "3.5",
-				expected: "Blocker Log",
+				lessonId: "3.6",
+				expected: "Ship unlocked",
+				pinnedArtifacts: [
+					getBuildBriefArtifact(),
+					getWorkingLocalEnvironmentArtifact(),
+					getCoreUxWorkingArtifact(),
+					getBlockerLogArtifact(),
+				],
 			},
 			{
 				lessonId: "4.1",
@@ -392,7 +435,9 @@ describe("WorkbenchRenderer", () => {
 			expect(markup).toContain("Custom path");
 			expect(markup).toContain("https://github.com/example/starter");
 			expect(markup).toContain("Source-of-truth product brief");
-			expect(markup).toContain("First slice to build now: Marketing hero and CTA");
+			expect(markup).toContain(
+				"First slice to build now: Marketing hero and CTA",
+			);
 			expect(markup).toContain("What I cover in this block");
 			expect(markup).toContain("Build screen by screen");
 		} finally {
@@ -447,14 +492,14 @@ describe("WorkbenchRenderer", () => {
 	});
 
 	it("renders tracker lessons with semantic table controls", () => {
-		const markup = renderLessonWorkbench("3.5", {
+		const markup = renderLessonWorkbench("4.4", {
 			fieldValues: {
-				blocker_table: [["Auth bug", "Missing env", "Retried login", "No"]],
+				send_table: [["Taylor", "Email", "Yes", "Looks promising"]],
 			},
 		});
 
 		expect(markup).toContain("<table");
-		expect(markup).toContain("Resolved?");
+		expect(markup).toContain("Reply");
 		expect(markup).toContain("Add Row");
 	});
 
@@ -733,6 +778,34 @@ Make the UI feel editorial and high-contrast.`,
 		expect(markup).toContain("Handoff clarity");
 		expect(markup).toContain("https://images.example.com/ref-1.png");
 		expect(markup).toContain("https://example.com/storyboard.png");
+		expect(markup).not.toContain("ArtifactContext");
+		expect(markup).not.toContain("No saved preview yet.");
+	});
+
+	it("renders lesson 3.6 as a Ship-unlock wrap-up with a lead video surface", () => {
+		const markup = renderLessonWorkbench("3.6", {
+			pinnedArtifacts: [
+				getBuildBriefArtifact(),
+				getWorkingLocalEnvironmentArtifact(),
+				getCoreUxWorkingArtifact(),
+				getBlockerLogArtifact(),
+			],
+		});
+
+		expect(markup).toContain("Watch video");
+		expect(markup).toContain("Video placeholder");
+		expect(markup).toContain("Build block complete");
+		expect(markup).toContain("Ship unlocked");
+		expect(markup).toContain("Next: SHIP 4.1 — Ship the Core, Not the Fantasy");
+		expect(markup).toContain("What Ship now has");
+		expect(markup).toContain("Build plan");
+		expect(markup).toContain("Local environment");
+		expect(markup).toContain("Core UX");
+		expect(markup).toContain("Stability pass");
+		expect(markup).toContain("Starting path: Use template");
+		expect(markup).toContain("First slice: Notes review screen");
+		expect(markup).toContain("Prompt control");
+		expect(markup).toContain("Blocker-first debugging");
 		expect(markup).not.toContain("ArtifactContext");
 		expect(markup).not.toContain("No saved preview yet.");
 	});

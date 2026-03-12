@@ -489,6 +489,131 @@ function buildDesignStageUnlockSummary(
 	};
 }
 
+function buildBuildStageUnlockSummary(
+	lesson: LessonConfig,
+	pinnedArtifacts: StageUnlockPinnedArtifact[],
+): StageUnlockSummary {
+	const buildBriefArtifact = getPinnedArtifactByKey(
+		pinnedArtifacts,
+		"agent_build_brief",
+	);
+	const localEnvironmentArtifact = getPinnedArtifactByKey(
+		pinnedArtifacts,
+		"working_local_environment",
+	);
+	const coreUxArtifact = getPinnedArtifactByKey(
+		pinnedArtifacts,
+		"core_flow_working_locally",
+	);
+	const blockerLogArtifact = getPinnedArtifactByKey(
+		pinnedArtifacts,
+		"blocker_log",
+	);
+
+	const buildPath = getFieldString(buildBriefArtifact, "build_path");
+	const firstSlice = getFieldString(buildBriefArtifact, "first_slice");
+	const definitionOfDone = getFieldString(
+		buildBriefArtifact,
+		"definition_of_done",
+	);
+
+	const buildPlan = [
+		buildPath ? `Starting path: ${buildPath}` : "",
+		firstSlice ? `First slice: ${firstSlice}` : "",
+		definitionOfDone ? `Done condition: ${definitionOfDone}` : "",
+	]
+		.filter(Boolean)
+		.join("\n");
+	const localEnvironment = localEnvironmentArtifact
+		? "The starter or repo is running locally, so Ship starts from a working baseline instead of a setup problem."
+		: "";
+	const coreUx = coreUxArtifact
+		? "The core path works locally end to end, so Ship starts from a real product flow instead of a partial stub."
+		: "";
+	const debugPass = blockerLogArtifact
+		? "The core UX made it through a blocker-first debug pass, so Ship can stay focused on the path that matters."
+		: "";
+
+	const sections = (
+		[
+			{ label: "Build plan", value: buildPlan },
+			{ label: "Local environment", value: localEnvironment },
+			{ label: "Core UX", value: coreUx },
+			{ label: "Stability pass", value: debugPass },
+		] as StageUnlockSection[]
+	).filter((section) => section.value.length > 0);
+
+	const hasBuildSummary =
+		Boolean(buildPlan) &&
+		Boolean(localEnvironmentArtifact) &&
+		Boolean(coreUxArtifact) &&
+		Boolean(blockerLogArtifact);
+
+	return {
+		preview: createPreview(
+			lesson,
+			{
+				build_plan: buildPlan,
+				local_environment: localEnvironment,
+				core_ux: coreUx,
+				debug_pass: debugPass,
+				starting_path_locked_count: buildPath ? 1 : 0,
+				local_environment_ready_count: localEnvironmentArtifact ? 1 : 0,
+				core_ux_ready_count: coreUxArtifact ? 1 : 0,
+				debug_pass_complete_count: blockerLogArtifact ? 1 : 0,
+			},
+			sections.map((section) => [section.label, section.value]),
+		),
+		stats: [
+			{
+				label: "Path",
+				value: `${buildPath ? 1 : 0} locked`,
+			},
+			{
+				label: "Environment",
+				value: `${localEnvironmentArtifact ? 1 : 0} ready`,
+			},
+			{
+				label: "Core UX",
+				value: `${coreUxArtifact ? 1 : 0} working`,
+			},
+			{
+				label: "Stability",
+				value: `${blockerLogArtifact ? 1 : 0} pass complete`,
+			},
+		],
+		sectionHeading: "What Ship now has",
+		sections,
+		tasks: [
+			{
+				id: "build-summary:plan",
+				label: "Lock the starting path and first slice",
+				status: buildPlan ? "complete" : "incomplete",
+			},
+			{
+				id: "build-summary:environment",
+				label: "Carry the local environment into Ship",
+				status: localEnvironmentArtifact ? "complete" : "incomplete",
+			},
+			{
+				id: "build-summary:core-ux",
+				label: "Carry the working core UX forward",
+				status: coreUxArtifact ? "complete" : "incomplete",
+			},
+			{
+				id: "build-summary:debug",
+				label: "Bring the stability pass into Ship",
+				status: blockerLogArtifact ? "complete" : "incomplete",
+			},
+			{
+				id: "build-summary:assembled",
+				label: "Assemble the Build handoff",
+				status: hasBuildSummary ? "complete" : "incomplete",
+			},
+		],
+	};
+}
+
 export function isStageUnlockBriefAssembler(lesson: LessonConfig) {
 	return (
 		lesson.workbench === "brief_assembler" &&
@@ -513,6 +638,8 @@ export function buildStageUnlockSummary(
 			return buildCeoStageUnlockSummary(lesson, pinnedArtifacts);
 		case "design":
 			return buildDesignStageUnlockSummary(lesson, pinnedArtifacts);
+		case "build":
+			return buildBuildStageUnlockSummary(lesson, pinnedArtifacts);
 		default:
 			return null;
 	}

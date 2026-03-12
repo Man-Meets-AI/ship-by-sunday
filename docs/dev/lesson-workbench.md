@@ -56,8 +56,8 @@ Brief-assembler rules:
 - If a wrap-up lesson is primarily locking upstream work instead of collecting new inputs, declare a `lesson.briefAssembler` config instead of hard-coding one-off UI inside the shell.
 - Current reusable variant: `stage_unlock`
   - use it for block-end lessons that should feel like a level clear
-  - keep the hero, next-step label, skill strip, CTA copy, and preset key in lesson config
-  - use an explicit preset like `ceo` or `design` instead of inferring behavior from the artifact key
+  - keep the hero, next-step label, skill strip, CTA copy, optional lead-video flag, and preset key in lesson config
+  - use an explicit preset like `ceo`, `design`, or `build` instead of inferring behavior from the artifact key
   - use a resolved artifact-preview path so the wrap-up artifact is composed from pinned upstream artifacts instead of staying empty
 - The first acceptance case is `1.7`; future wrap-ups should copy the contract shape before inventing a new renderer.
 
