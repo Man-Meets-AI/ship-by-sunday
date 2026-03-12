@@ -77,6 +77,7 @@ Only cross-mode presentation primitives belong here.
 
 - `WorkbenchContainer`
 - `WorkbenchHeader`
+- `WorkbenchHeaderLabel`
 - `WorkbenchCard`
 - `SectionCard`
 - `StatusRail`
@@ -85,6 +86,13 @@ Only cross-mode presentation primitives belong here.
 - artifact formatting helpers
 
 If a component needs lesson-specific logic to make sense, it probably belongs in `modes/`, not `shared/`.
+
+Header rules:
+
+- Workbench container headers should render one thin all-caps label only.
+- Do not pair a quiet eyebrow with a second bold uppercase title inside the same workbench card or section shell.
+- When a surface previously had both, keep the more specific title text and render it through the shared thin label primitive.
+- `WorkbenchSection.eyebrow` can remain in lesson config for compatibility, but `SectionCard` should not render it.
 
 ## Guardrails
 

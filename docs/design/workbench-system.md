@@ -59,6 +59,7 @@ Each lesson workbench should follow the same order:
 
 - One dominant task area per lesson
 - Metadata always reads lower than lesson title, intro, and fields
+- Workbench container headers should use one thin all-caps label, not an eyebrow-plus-bold-title pair
 - Examples belong below the relevant input or section, not inside placeholders
 - Use spacing and width first, borders second
 - Keep the workbench column narrow enough to feel focused
@@ -91,6 +92,10 @@ Shared guided-form lessons should support reusable section metadata:
 - `completionLabel`
 
 Section-level runtime content can optionally override the section instruction and example copy for a specific lesson.
+
+Rendering note:
+
+- `eyebrow` can stay in the lesson contract for compatibility, but the shared section shell should render only the section title as the visible header label.
 
 ## CEO-block first-pass rules
 

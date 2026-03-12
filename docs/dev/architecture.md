@@ -13,7 +13,7 @@
 - `components/lesson-workbench/renderer.tsx` handles runtime derivation plus typed mode dispatch.
 - `components/lesson-workbench/modes/` owns mode-specific layout and behavior.
 - `components/lesson-workbench/fields/` owns field-kind controls and pure parsing helpers.
-- `components/lesson-workbench/shared/` owns shell-level primitives that are reused across modes.
+- `components/lesson-workbench/shared/` owns shell-level primitives that are reused across modes, including the single thin-label workbench header treatment.
 - See `docs/dev/lesson-workbench.md` for the working rules and file-boundary guardrails.
 - `components/lesson-shells.tsx` owns the coach dock and shared dock resource rendering.
 
