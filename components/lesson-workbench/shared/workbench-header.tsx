@@ -9,7 +9,7 @@ export function WorkbenchHeader({
 }) {
 	return (
 		<div className="space-y-3">
-			<div className="flex flex-wrap items-center gap-1.5 text-product-muted">
+			<div className="flex flex-wrap items-center gap-1.5 text-product-muted select-none">
 				<span className="border border-product-border/70 bg-product-surface-strong/70 px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-[0.18em]">
 					{lesson.id}
 				</span>
