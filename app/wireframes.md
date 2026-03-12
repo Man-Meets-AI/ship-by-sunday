@@ -228,26 +228,32 @@ Coach states:
 
 ## 1.5 Map the Core Flow
 
-**Shell:** Split
-**Workbench:** capture_upload
+**Shell:** Focus
+**Workbench:** paper_photo_upload
 **Artifact:** Core Flow Image
 
 ```text
-┌──── CURRENT OBJECTIVE ────┬────────────── WORKBENCH 1.5 ──────────────┬──── COACH ────┐
-│ CEO 1.5                   │ Map the Core Flow                         │ WATCH          │
-│                           │                                           │ [video]        │
-│ Checklist                 │ 1. Draw the flow on paper / tablet        │                │
-│ [ ] Watch the example     │ 2. 5–7 steps max                          │ TRANSCRIPT     │
-│ [ ] Draw the flow         │ 3. One actor first                        │ [collapsed]    │
-│ [ ] Upload a photo        │                                           │                │
-│                           │ [ Static template preview ]               │ EXAMPLES       │
-│ Output                    │                                           │ good example   │
-│ Core Flow Image           │ [Download Template]                       │ bad example    │
-│                           │ [Upload Image]                            │                │
-│ Next Unlock               │                                           │ RESOURCES      │
-│ Scope Hammer              │ Uploaded artifact preview                 │ printable sheet│
-│                           │ [ Replace ] [ Mark Complete ] [Back][Next]│                │
-└───────────────────────────┴───────────────────────────────────────────┴────────────────┘
+┌────────────────────────────── WORKBENCH 1.5 ──────────────────────────────┐
+│ Map the Core Flow                                                         │
+│                                                                           │
+│ WATCH FIRST                                                               │
+│ [ large lesson video ]                                                    │
+│                                                                           │
+│ DO THIS NOW                                                               │
+│ 1. Watch the walkthrough                                                  │
+│ 2. Draw the core flow on paper in 5–7 steps                               │
+│ 3. Take one clear photo                                                   │
+│ 4. Upload it here                                                         │
+│                                                                           │
+│ UPLOAD THE PHOTO                                                          │
+│ [ file input ]                                                            │
+│ [ uploaded image preview ]                                                │
+│                                                                           │
+│ NEED CONTEXT?                                                             │
+│ [ Our user ] [ Outcome statement ]                                        │
+│                                                                           │
+│ [Back]                                                     [Complete]     │
+└───────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## 1.6 Scope Hammer
