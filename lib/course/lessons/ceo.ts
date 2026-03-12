@@ -824,23 +824,34 @@ export const ceoLessons = [
 		winCondition:
 			"In-scope list, out-of-scope list, and v1 rationale are saved.",
 		panelDefaults: splitPanelDefaults,
-		pinnedArtifacts: ["core_flow_image"],
+		pinnedArtifacts: [
+			"user_statement",
+			"outcome_statement",
+			"research_notes",
+			"core_flow_image",
+		],
+		promptImport: {
+			promptTemplateId: "scope_boundary",
+			inScopeFieldId: "in_scope",
+			outOfScopeFieldId: "out_of_scope",
+			rationaleFieldId: "v1_rationale",
+		},
 		workbenchFields: [
 			{
 				id: "in_scope",
-				label: "In Scope Features",
+				label: "Keep in v1",
 				kind: "board",
 				required: true,
 			},
 			{
 				id: "out_of_scope",
-				label: "Out of Scope Features",
+				label: "Cut from v1",
 				kind: "board",
 				required: true,
 			},
 			{
 				id: "v1_rationale",
-				label: "Why this is enough for v1",
+				label: "Why this version is enough",
 				kind: "textarea",
 				required: true,
 				rows: 3,
@@ -855,7 +866,8 @@ export const ceoLessons = [
 				purpose: "The key behavior here is subtraction.",
 			},
 			actionCard: {
-				jobNow: "Fill out the MVP section and cut at least 3 things.",
+				jobNow:
+					"Use the prompt to get a first-pass scope cut, then tighten it until the app feels brutally small.",
 				timebox: "10 minutes",
 				comeBackWith: "A tighter MVP scope.",
 			},
@@ -864,12 +876,20 @@ export const ceoLessons = [
 				resources: WORKSHEET_01_RESOURCES,
 				examples: SCOPE_EXAMPLES,
 			}),
+				placeholder:
+					"One feature per line. Keep only what must exist for the user to get the win.",
+				artifactPreviewLabel: "Keep in v1",
+				taskLabel: "Keep in v1",
 			workbench: {
 				prompt: "A smaller shipped app beats a larger imaginary one.",
 				teachingPoints: [
-					"Split features into: must-have, nice-to-have, definitely-not-now.",
-					"Define what good enough for Sunday means.",
-					"Cut at least three things live.",
+					"Start from the generated cut list, then delete one more thing.",
+					"Keep the product inside one believable user win.",
+					"If a feature helps later but is not required for the core outcome, cut it.",
+				placeholder:
+					"One cut per line. Name the tempting extras that do not belong in the weekend build.",
+				artifactPreviewLabel: "Cut from v1",
+				taskLabel: "Cut from v1",
 				],
 				emptyState: "A smaller shipped app beats a larger imaginary one.",
 			},
@@ -877,6 +897,8 @@ export const ceoLessons = [
 	},
 	{
 		id: "1.7",
+				artifactPreviewLabel: "Why this version is enough",
+				taskLabel: "Why this version is enough",
 		slug: "01-07-ceo-block-wrap-up",
 		order: 7,
 		block: "CEO",
