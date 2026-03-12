@@ -28,3 +28,7 @@ Use this file to capture recurring mistakes, corrections, and guardrails for fut
   Pattern: I inferred that the block labels should be deemphasized even though the product intent was that `CEO -> DESIGN -> BUILD -> SHIP` are the four ascending levels.
   Rule: For progression UI work, confirm whether existing labels are taxonomy, narrative flavor, or the actual level system before redesigning hierarchy around them.
   How to verify next time: Check the role docs, tracker notes, and user language for whether a label is meant to be preserved as the progression spine or translated into supporting copy.
+- Date: 2026-03-12
+  Pattern: I added a ready-to-complete state, but the actual lesson completion moment still felt emotionally flat because the only visible success signal was a subtle progress-rail change during immediate navigation.
+  Rule: In student flows, completion must trigger a visible multi-surface success response before route changes. At minimum: CTA success morph, explicit completion copy, and one shell-level progression cue, all with reduced-motion-safe fallbacks.
+  How to verify next time: Complete a lesson in the live UI and confirm the success moment is noticeable without hunting for it, the reward survives long enough to register before navigation, and reduced-motion users still get clear non-animated state changes.

@@ -6,6 +6,7 @@ It does not replace the root `todo.md`, which remains the launch tracker and sou
 
 ## Active
 
+- [x] Add a system-punch lesson completion celebration that visibly rewards completion before auto-advancing
 - [x] Clean up lesson `1.2`’s handoff chooser so it uses one clear title, uniform problem cards, and aligned carry-forward language across the workbench and task model
 - [x] Simplify lesson `1.2` so selecting a candidate problem also locks the user, remove the duplicate user-entry step, and keep the lesson focused on pain moment, workaround, and reachability
 - [x] Refactor `lib/course` unlock and candidate-problem handoff conventions into explicit lesson contracts so the registry and workbench stop depending on string parsing and hard-coded persisted field ids
@@ -59,6 +60,9 @@ It does not replace the root `todo.md`, which remains the launch tracker and sou
 
 ## Review
 
+- Outcome: Added a lesson-completion celebration flow that holds navigation briefly after a successful `completeLesson`, morphs the CTA into a success state, shows a centered `Lesson cleared` banner with artifact/next-unlock copy, and drives a matching completion cue through the bottom skill rail with CSS-first motion plus reduced-motion fallbacks.
+- Verification: `pnpm exec vitest run tests/unit/skill-rail.test.tsx tests/unit/course-state-lifecycle.test.ts tests/smoke/lesson-completion-celebration.test.ts tests/smoke/lesson-state-contract.test.ts tests/smoke/motion-phase-one.test.ts` and `pnpm run typecheck`
+- Follow-up: Browser-QA the celebration on desktop and mobile in both split and focus lesson layouts to tune the 900ms timing, banner weight, and rail visibility against the live feel.
 - Outcome: Cleaned up lesson `1.2`’s handoff chooser so it no longer uses the stacked `Carry forward` + `Choose one candidate problem` header, renamed the section to `Pick the problem to carry forward`, made the problem cards a uniform full-height structure with pinned action rows, and aligned the left-rail task copy to the same wording.
 - Verification: `pnpm exec vitest run tests/unit/course-registry.test.ts tests/unit/lesson-workbench-renderer.test.tsx` and `pnpm run typecheck`
 - Follow-up: Browser-QA lesson `1.2` with one short, one medium, and one long problem statement to confirm the CTA rows align and the selected-state summary reads cleanly at desktop and laptop widths.
