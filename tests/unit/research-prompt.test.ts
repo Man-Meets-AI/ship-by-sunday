@@ -1,12 +1,13 @@
 import {
+	buildBuildKickoffPrompt,
 	buildCompetitorResearchPrompt,
-	buildVisualDirectionGuidePrompt,
 	buildScopeBoundaryPrompt,
 	buildPromptImportFieldValues,
+	buildVisualDirectionGuidePrompt,
 	getPromptTemplateState,
 	parseCompetitorResearchImport,
-	parseVisualDirectionGuideImport,
 	parseScopeBoundaryImport,
+	parseVisualDirectionGuideImport,
 } from "@/lib/course/research-prompt";
 
 describe("buildCompetitorResearchPrompt", () => {
@@ -324,6 +325,117 @@ describe("buildVisualDirectionGuidePrompt", () => {
 				},
 			).prompt,
 		).toContain("https://images.example.com/ref-1.png");
+	});
+});
+
+describe("buildBuildKickoffPrompt", () => {
+	it("builds the kickoff prompt from saved product and design handoff context", () => {
+		const prompt = buildBuildKickoffPrompt({
+			buildPath: "template",
+			templateRepoUrl: "https://github.com/example/starter",
+			firstSlice: "Marketing hero and CTA",
+			definitionOfDone:
+				"The hero renders locally, the CTA is clickable, and Playwright confirms the core path loads.",
+			productBrief: [
+				["Who", "Startup operators with messy post-meeting action items."],
+				[
+					"Outcome",
+					"Leave the meeting with a clean action summary they can review and send in minutes.",
+				],
+			].map(([label, body]) => ({ label, body })),
+			designSpec: [
+				[
+					"Rough screens",
+					"Hero, summary review, and share state with dark surfaces.",
+				],
+				[
+					"Visual direction",
+					"High contrast, tight spacing, and obvious trust hierarchy.",
+				],
+			].map(([label, body]) => ({ label, body })),
+		});
+
+		expect(prompt).toContain(
+			"You are helping a builder implement a sharp weekend-v1 from a locked product brief and design spec.",
+		);
+		expect(prompt).toContain("- Starting path: Use template");
+		expect(prompt).toContain(
+			"- First slice to build now: Marketing hero and CTA",
+		);
+		expect(prompt).toContain(
+			"Starter repo: https://github.com/example/starter",
+		);
+		expect(prompt).toContain("## Source-of-truth product brief");
+		expect(prompt).toContain("### Who");
+		expect(prompt).toContain("## Source-of-truth design spec");
+		expect(prompt).toContain("## Validation");
+		expect(prompt).toContain("## Stop condition");
+	});
+
+	it("requires a configured template URL before returning the template path prompt", () => {
+		const originalRepoUrl =
+			process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL;
+		delete process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL;
+
+		try {
+			const state = getPromptTemplateState(
+				"build_kickoff_prompt",
+				[
+					{
+						artifactKey: "product_brief",
+						fieldValues: {},
+						fields: [["Who", "Startup operators"]],
+					},
+					{
+						artifactKey: "design_spec",
+						fieldValues: {},
+						fields: [["Rough screens", "Hero and summary review"]],
+					},
+				],
+				{
+					build_path: "Use template",
+					first_slice: "Marketing hero and CTA",
+					definition_of_done:
+						"The hero renders locally, the CTA is clickable, and Playwright confirms the core path loads.",
+				},
+			);
+
+			expect(state.prompt).toBeNull();
+			expect(state.disabledReason).toContain(
+				"NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL",
+			);
+		} finally {
+			process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL =
+				originalRepoUrl;
+		}
+	});
+
+	it("returns the custom-path prompt without needing a template URL", () => {
+		const state = getPromptTemplateState(
+			"build_kickoff_prompt",
+			[
+				{
+					artifactKey: "product_brief",
+					fieldValues: {},
+					fields: [["Who", "Startup operators"]],
+				},
+				{
+					artifactKey: "design_spec",
+					fieldValues: {},
+					fields: [["Rough screens", "Hero and summary review"]],
+				},
+			],
+			{
+				build_path: "Custom path",
+				first_slice: "Marketing hero and CTA",
+				definition_of_done:
+					"The hero renders locally, the CTA is clickable, and Playwright confirms the core path loads.",
+			},
+		);
+
+		expect(state.disabledReason).toBeNull();
+		expect(state.prompt).toContain("- Starting path: Custom path");
+		expect(state.prompt).not.toContain("Starter repo:");
 	});
 });
 

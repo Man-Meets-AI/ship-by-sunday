@@ -79,7 +79,7 @@ describe("lesson content contract", () => {
 			preset: "design",
 			heroEyebrow: "Design block complete",
 			heroTitle: "Build unlocked",
-			nextStepLabel: "BUILD 3.1 — Build From the Brief",
+			nextStepLabel: "BUILD 3.1 — Generate the Build Prompt",
 			completionCtaLabel: "Unlock Build",
 		});
 		expect(
@@ -94,6 +94,32 @@ describe("lesson content contract", () => {
 		expect(
 			(designWrapUpLesson?.pinnedArtifacts ?? []).length,
 		).toBeGreaterThanOrEqual(5);
+	});
+
+	it("keeps the Build block rewired around a kickoff prompt and local handoff", () => {
+		const kickoffLesson = getLessonById("3.1");
+		const starterLesson = getLessonById("3.2");
+		const firstScreenLesson = getLessonById("3.3");
+		const handoffLesson = getLessonById("3.6");
+
+		expect(kickoffLesson).toBeTruthy();
+		expect(starterLesson).toBeTruthy();
+		expect(firstScreenLesson).toBeTruthy();
+		expect(handoffLesson).toBeTruthy();
+
+		expect(kickoffLesson).toMatchObject({
+			title: "Generate the Build Prompt",
+			workbench: "build_kickoff",
+			fieldShapeVersion: 2,
+		});
+		expect(kickoffLesson?.workbenchFields?.map((field) => field.id)).toEqual([
+			"build_path",
+			"first_slice",
+			"definition_of_done",
+		]);
+		expect(starterLesson?.title).toBe("Get the Starter Running");
+		expect(firstScreenLesson?.title).toBe("Build the First Screen");
+		expect(handoffLesson?.artifact.label).toBe("Local Build Handoff");
 	});
 
 	it("keeps candidate-problem handoff contracts explicit and internally valid", () => {

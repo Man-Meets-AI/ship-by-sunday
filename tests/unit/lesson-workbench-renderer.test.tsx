@@ -85,6 +85,71 @@ function getOutcomeStatementArtifact(): PinnedArtifact {
 	});
 }
 
+function getProductBriefArtifact(): PinnedArtifact {
+	return {
+		artifactKey: "product_brief",
+		artifactLabel: "Product Brief",
+		contextTitle: "Product brief",
+		artifactType: "brief",
+		lessonId: "1.7",
+		lessonTitle: "CEO Wrap-Up",
+		fieldValues: {
+			who: "Startup operators",
+			outcome:
+				"Leave the meeting with a clean action summary they can review and send in minutes.",
+			evidence:
+				"People care most about speed and clarity after the meeting, not giant knowledge-management features.",
+			flow: "Paste notes -> generate summary -> review action items -> share",
+			scope: "One core flow only. No analytics or team features yet.",
+		},
+		fields: [
+			["Who", "Startup operators with messy post-meeting action items."],
+			[
+				"Outcome",
+				"Leave the meeting with a clean action summary they can review and send in minutes.",
+			],
+			[
+				"Evidence",
+				"People care most about speed and clarity after the meeting, not giant knowledge-management features.",
+			],
+			["Flow", "Paste notes -> generate summary -> review action items -> share"],
+			["Scope", "One core flow only. No analytics or team features yet."],
+		],
+	};
+}
+
+function getDesignSpecArtifact(): PinnedArtifact {
+	return {
+		artifactKey: "design_spec",
+		artifactLabel: "Design Spec",
+		contextTitle: "Design spec",
+		artifactType: "brief",
+		lessonId: "2.7",
+		lessonTitle: "Design Wrap-Up",
+		fieldValues: {
+			references: "Sharp editorial references with dark surfaces and dense hierarchy.",
+			sketches: "Landing page hero plus a review screen.",
+			storyboard: "5-step core flow from notes to sendable summary.",
+			roughScreens: "Hero, summary review, and share state.",
+			visualDirection:
+				"High contrast, tight spacing, and obvious trust hierarchy.",
+		},
+		fields: [
+			[
+				"Reference board",
+				"Sharp editorial references with dark surfaces and dense hierarchy.",
+			],
+			["Sketch set", "Landing page hero plus a review screen."],
+			["Storyboard image", "5-step core flow from notes to sendable summary."],
+			["Rough screens", "Hero, summary review, and share state."],
+			[
+				"Visual direction",
+				"High contrast, tight spacing, and obvious trust hierarchy.",
+			],
+		],
+	};
+}
+
 function getResearchNotesArtifact(): PinnedArtifact {
 	const lesson = getLessonById("1.4");
 	expect(lesson).toBeTruthy();
@@ -277,24 +342,12 @@ describe("WorkbenchRenderer", () => {
 			},
 			{
 				lessonId: "3.1",
-				expected: "Definition of done",
-				pinnedArtifacts: [
-					{
-						artifactKey: "user_statement",
-						artifactLabel: "User Statement",
-						contextTitle: "Our user",
-						lessonTitle: "Pick One User",
-						fieldValues: {},
-						fields: [
-							["Chosen problem", "Operators lose the meeting thread."],
-							["User", "Startup operators"],
-						],
-					},
-				],
+				expected: "Starting path",
+				pinnedArtifacts: [getProductBriefArtifact(), getDesignSpecArtifact()],
 			},
 			{
 				lessonId: "3.2",
-				expected: "Environment ready",
+				expected: "Starter running locally",
 			},
 			{
 				lessonId: "3.3",
@@ -315,6 +368,63 @@ describe("WorkbenchRenderer", () => {
 			expect(markup).not.toContain(
 				"This workbench type has not been wired yet.",
 			);
+		}
+	});
+
+	it("renders lesson 3.1 with a generated build prompt and the template CTA when configured", () => {
+		const originalRepoUrl =
+			process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL;
+		process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL =
+			"https://github.com/example/starter";
+
+		try {
+			const markup = renderLessonWorkbench("3.1", {
+				fieldValues: {
+					build_path: "Use template",
+					first_slice: "Marketing hero and CTA",
+					definition_of_done:
+						"The hero renders locally, the CTA is clickable, and Playwright confirms the core path loads.",
+				},
+				pinnedArtifacts: [getProductBriefArtifact(), getDesignSpecArtifact()],
+			});
+
+			expect(markup).toContain("Use template");
+			expect(markup).toContain("Custom path");
+			expect(markup).toContain("https://github.com/example/starter");
+			expect(markup).toContain("Source-of-truth product brief");
+			expect(markup).toContain("First slice to build now: Marketing hero and CTA");
+			expect(markup).toContain("What I cover in this block");
+			expect(markup).toContain("Build screen by screen");
+		} finally {
+			process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL =
+				originalRepoUrl;
+		}
+	});
+
+	it("keeps the 3.1 template CTA hidden when no starter repo is configured", () => {
+		const originalRepoUrl =
+			process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL;
+		delete process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL;
+
+		try {
+			const markup = renderLessonWorkbench("3.1", {
+				fieldValues: {
+					build_path: "Use template",
+					first_slice: "Marketing hero and CTA",
+					definition_of_done:
+						"The hero renders locally, the CTA is clickable, and Playwright confirms the core path loads.",
+				},
+				pinnedArtifacts: [getProductBriefArtifact(), getDesignSpecArtifact()],
+			});
+
+			expect(markup).toContain("Starter repo link is not configured yet.");
+			expect(markup).toContain(
+				"The starter template path is not configured yet. Choose Custom path for now or set NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL.",
+			);
+			expect(markup).not.toContain("https://github.com/example/starter");
+		} finally {
+			process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL =
+				originalRepoUrl;
 		}
 	});
 
@@ -609,7 +719,7 @@ Make the UI feel editorial and high-contrast.`,
 
 		expect(markup).toContain("Design block complete");
 		expect(markup).toContain("Build unlocked");
-		expect(markup).toContain("Next: BUILD 3.1 — Build From the Brief");
+		expect(markup).toContain("Next: BUILD 3.1 — Generate the Build Prompt");
 		expect(markup).toContain("What Build now has");
 		expect(markup).toContain("References");
 		expect(markup).toContain("Sketches");
