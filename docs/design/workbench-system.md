@@ -108,6 +108,19 @@ Section-level runtime content can optionally override the section instruction an
 - Use explicit workbench field-shape versioning so stale prelaunch drafts are cleared instead of misread
 - Keep artifact previews readable by using learner-facing labels and hiding private storage keys
 
+## Manifest contract rules
+
+- Lesson unlocks must be declared explicitly in the lesson manifest:
+  - `unlocks.lessons` for next lesson ids
+  - `unlocks.blocks` for next block ids
+- Cross-lesson handoffs should not infer structure from field names. If a lesson needs structured source data from a prior artifact, declare the source mapping explicitly on the handoff config.
+- `select_candidate_problem` handoffs should declare:
+  - `selectionFieldId`
+  - `options` with `index`, `ownerSourceFieldId`, and `statementSourceFieldId`
+  - `persistedFields` for any copied snapshot fields that should be stored on the target lesson artifact
+- Artifact titles that need special learner-facing context should use explicit manifest metadata such as `artifact.contextTitle`, not preview-label sniffing in the renderer.
+- Contract tests should validate that handoff source field ids exist and that persisted handoff target ids are unique.
+
 ## Acceptance bar
 
 The redesign is correct when:
