@@ -45,7 +45,8 @@ Prompt-import rules:
 
 - If a lesson needs a main-workbench `copy prompt -> paste result` loop, declare it explicitly on `lesson.promptImport`.
 - Keep prompt-template building and pasted-output parsing in `lib/course/research-prompt.ts`, not inside the lesson shell or the lesson page.
-- Keep the mode-specific import UI local to the matching workbench mode.
+- Keep the shared prompt-import UI in `shared/prompt-import-card.tsx`, then render it from the matching workbench mode instead of re-implementing the flow per lesson.
+- Current prompt templates are `competitor_research` and `scope_boundary`. Add new templates by extending the typed prompt contract first, then hydrate existing lesson fields from the pasted result instead of adding a custom persistence path.
 - Imported output should hydrate existing lesson fields; do not add one-off persistence paths for prompt imports.
 
 ### `fields/`
