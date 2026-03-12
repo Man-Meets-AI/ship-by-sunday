@@ -8,6 +8,14 @@ Last updated: 2026-03-12
 - `components/lesson-workbench.tsx` is intentionally a thin facade that re-exports `WorkbenchRenderer`.
 - `components/lesson-page.tsx` and any future consumers should keep importing from the facade, not from internal module paths.
 
+## Shell rules
+
+- `watch` is a lesson-shell layout, not a workbench mode.
+- Watch lessons should skip `WorkbenchRenderer` entirely and use `lesson.content.coach.video` as the primary surface.
+- Watch lessons should not expose split/focus toggles, objective rails, or coach docks.
+- Use watch lessons only when the learner's in-product job is genuinely just to watch and continue.
+- Future Build lessons can opt into `watch` one lesson at a time; do not mass-convert focus lessons by default.
+
 ## Internal module split
 
 The workbench implementation now lives under `components/lesson-workbench/` and is split in this order:

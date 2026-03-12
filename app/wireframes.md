@@ -1,6 +1,6 @@
 # Ship by Sunday — Full Wireframe Pack v1
 
-This pack freezes the product into **2 shells** and maps every lesson to a reusable workbench pattern.
+This pack freezes the product into **3 shells** and maps every lesson to a reusable workbench pattern.
 
 **Rule:** stop designing bespoke screens.
 Each lesson = **shell + workbench + artifact**.
@@ -45,6 +45,24 @@ Default state:
 - objective drawer collapsed
 - coach in PiP
 - transcript/resources in overlays
+
+## Shell C — Watch Shell
+
+Use when the in-product job is simply to watch the lesson and move on.
+
+Regions:
+
+- **Top HUD** = macro progression
+- **Center Video Surface** = large lesson video or placeholder
+- **Footer Actions** = back + complete
+- **Bottom Skill Rail** = persistent
+
+Default state:
+
+- no split/focus toggle
+- no objective drawer
+- no coach dock
+- future Build lessons can opt into this shell individually when they are truly watch-only
 
 ## Workbench Types
 
@@ -337,44 +355,45 @@ Coach states:
 
 ## 2.3 Storyboard the Journey
 
-**Shell:** Split
+**Shell:** Focus
 **Workbench:** capture_upload
 **Artifact:** Storyboard Image
 
 ```text
-┌──── CURRENT OBJECTIVE ────┬────────────── WORKBENCH 2.3 ──────────────┬──── COACH ────┐
-│ DESIGN 2.3                │ Storyboard the Journey                    │ WATCH          │
-│                           │                                           │ [video]        │
-│ Checklist                 │ 1. Show the user moving screen to screen  │                │
-│ [ ] Draw 5–7 frames       │ 2. Capture state change                   │ TRANSCRIPT     │
-│ [ ] Upload storyboard     │                                           │ [collapsed]    │
-│                           │ [ Static storyboard template ]            │                │
-│ Output                    │ [Upload Image]                            │ EXAMPLES       │
-│ Storyboard Image          │                                           │ before/after   │
-│                           │ Uploaded preview                          │                │
-│ Next Unlock               │ [ Replace ] [ Mark Complete ] [Back][Next]│ RESOURCES      │
-│ Figma Basics for Speed    │                                           │ [collapsed]    │
-└───────────────────────────┴───────────────────────────────────────────┴────────────────┘
+┌──────────────────────────────────── FOCUS WORKSPACE 2.3 ────────────────────────────────────┐
+│ SHIP BY SUNDAY      [CEO ✓] [DESIGN ACTIVE] [BUILD LOCKED] [SHIP LOCKED]                    │
+├───────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Storyboard the Journey                                                                       │
+│ Storyboard this offline on paper, tablet, or Excalidraw. One clean image is enough.        │
+│                                                                                               │
+│ [ Printable storyboard worksheet ]                                                            │
+│ [ Do this now / timebox / finish with ]                                                       │
+│ [ Sketch Set context ]                                                                        │
+│ [ Upload storyboard image ]                                                                   │
+│ [ Uploaded preview ]                                                                          │
+│                                                                                               │
+│                                                       [Back] [Complete Lesson]               │
+└───────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## 2.4 Figma Basics for Speed
 
-**Shell:** Focus
+**Shell:** Watch
 **Workbench:** external_workspace
 **Artifact:** Figma file ready
 
 ```text
-┌──────────────────────────────────── FOCUS WORKSPACE 2.4 ────────────────────────────────────┐
-│ SHIP BY SUNDAY      [CEO ✓] [DESIGN ACTIVE] [BUILD LOCKED] [SHIP LOCKED]   [Split][Focus] │
+┌──────────────────────────────────── WATCH SHELL 2.4 ─────────────────────────────────────────┐
+│ SHIP BY SUNDAY      [CEO ✓] [DESIGN ACTIVE] [BUILD LOCKED] [SHIP LOCKED]                    │
 ├───────────────────────────────────────────────────────────────────────────────────────────────┤
-│ [Collapsed Objective Rail]                                                                    │
+│ 2.4   FIGMA FILE READY   8-10 MIN                                                            │
+│ FIGMA BASICS FOR SPEED                                                                       │
+│ This is enough Figma to keep the sprint moving.                                              │
 │                                                                                               │
-│                              FIGMA EMBED / LAUNCH FIGMA                                      │
+│                                [ lesson video / placeholder ]                                │
 │                                                                                               │
-│                     [ Open Figma ]   [ Open Starter File ]   [ View Hotkeys ]                │
-│                                                                                               │
-│ Coach PiP [video]                                                                             │
-│                                                                                               │
+├───────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                           [Back] [Complete lesson]           │
 ├───────────────────────────────────────────────────────────────────────────────────────────────┤
 │ Bottom skill rail                                                                             │
 └───────────────────────────────────────────────────────────────────────────────────────────────┘
