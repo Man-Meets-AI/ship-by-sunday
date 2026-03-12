@@ -4,6 +4,10 @@ Use this file to capture recurring mistakes, corrections, and guardrails for fut
 
 ## Lessons
 
+- Date: 2026-03-12
+  Pattern: I left a pinned-artifact card using both the source-lesson title and a curated context title, which made the `1.5` core-flow page read like repeated headers, and I left stale worksheet-PDF placeholder UI in place after the actual handoff should have moved to an external FigJam template.
+  Rule: When a lesson artifact has a curated learner-facing context title, render that as the only card header. If a worksheet handoff moves to an external workspace like FigJam, remove any dead placeholder fields and rename the downstream artifact/upload copy to match the real student output.
+  How to verify next time: Open the downstream lesson with saved upstream artifacts, read the pinned cards top-to-bottom for duplicate header language, confirm there is no dead placeholder block, and confirm the template CTA plus upload label describe the same deliverable.
 - Date: 2026-03-11
   Pattern: I mounted Clerk's `UserProfile` on a normal App Router page at `/settings`, which broke as soon as Clerk tried to navigate to its internal path-based subroutes.
   Rule: Any Next App Router route that hosts Clerk components with path-based navigation, such as `UserProfile`, must live under an optional catch-all segment like `[[...rest]]`, and the protected middleware matcher must cover the same base path with `(.*)`.

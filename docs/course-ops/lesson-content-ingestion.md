@@ -54,6 +54,13 @@ Use shared resource constants for:
 - worksheet packet
 - worksheet 01 through 04 links
 - template-download links already reused across multiple lessons
+- external template links, such as the `1.5` core-flow FigJam handoff
+
+When a lesson points to an external template link:
+
+- keep the handoff explicit in the lesson copy
+- open the external workspace in a new tab
+- rename the downstream upload field to match the actual student output
 
 Use lesson-specific prompt import config or coach resources for:
 

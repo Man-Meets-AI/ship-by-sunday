@@ -42,12 +42,14 @@ Lessons:
 3. Define the Outcome
 4. Light Research, Not a Thesis
 5. Map the Core Flow
+   Student action: duplicate the core-flow FigJam template, map the flow in 5 to 7 steps, then upload one screenshot.
 6. Kill Scope
 7. CEO Block Wrap-Up
 
 Core artifact:
 
 - Worksheet 01: One-Page Product Brief
+- `1.5` uses a separate FigJam template for the core-flow map and keeps the upload distinct from the later storyboard lesson
 
 ### Module 2: Design Block
 
