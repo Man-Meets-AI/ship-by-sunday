@@ -37,7 +37,7 @@ That is what this doc is designed to do.
 
 ## The Offer In One Sentence
 
-Ship by Sunday is a software-guided weekend sprint for builders who can already prototype, but need product judgment, design direction, and execution structure to ship a real v1.
+Ship by Sunday is a custom software-backed weekend sprint for builders who struggle to get a v1 out the door.
 
 ## The Short Version
 
@@ -156,7 +156,7 @@ Ship by Sunday is the practical vehicle for the Product Trinity.
 
 It is not just a course title.
 
-It is the software-guided sprint and workspace that helps the buyer apply the mechanism in one place.
+It is the custom software-backed sprint and workspace that helps the buyer apply the mechanism in one place.
 
 ### Why that matters
 
@@ -276,7 +276,7 @@ Ship by Sunday helps builders turn rough prototypes into real v1s.
 
 ### Audience line
 
-Ship by Sunday is for builders who can already prototype, but need product judgment, design direction, and execution structure to ship a real v1.
+Ship by Sunday is for builders who struggle to get a v1 out the door.
 
 ### Mechanism line
 

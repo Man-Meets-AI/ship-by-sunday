@@ -12,8 +12,8 @@ The offer is already strong enough to sell. The remaining job is to remove hesit
 
 - Product: `Ship by Sunday`
 - Promise: `Go from idea to v1 this weekend`
-- Audience: builders who can already prototype or get things working, but keep getting stuck before they ship a real v1
-- Format: software-guided weekend sprint + on-demand walkthroughs + digital guide/workbook
+- Audience: builders who struggle to get a v1 out the door
+- Format: custom software-backed weekend sprint + on-demand walkthroughs + digital guide/workbook
 
 ## Positioning Update
 
@@ -100,7 +100,7 @@ Use a conditional, action-based guarantee. It fits the product better than a gen
 
 ### Checkout support copy
 
-`A software-guided weekend sprint for builders who can already prototype, but need a better system to ship a real v1.`
+`A custom software-backed weekend sprint for builders who struggle to get a v1 out the door.`
 
 ### What the buyer gets
 
