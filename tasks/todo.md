@@ -6,6 +6,7 @@ It does not replace the root `todo.md`, which remains the launch tracker and sou
 
 ## Active
 
+- [x] Add a dynamic lesson `1.4` research prompt resource card that builds from lessons `1.2` and `1.3`, supports copy/manual paste, and keeps the scope to structured prompt output only
 - [x] Replace the lesson pipe-delimited table textarea with a shared editable table field, add manifest column metadata, clean up duplicated table headers, and update table artifact previews
 - [x] Add a system-punch lesson completion celebration that visibly rewards completion before auto-advancing
 - [x] Clean up lesson `1.2`’s handoff chooser so it uses one clear title, uniform problem cards, and aligned carry-forward language across the workbench and task model
@@ -61,6 +62,9 @@ It does not replace the root `todo.md`, which remains the launch tracker and sou
 
 ## Review
 
+- Outcome: Added a typed `copy_prompt` lesson resource path, a dynamic competitor-research prompt builder sourced from the saved `1.2` user/problem context and `1.3` outcome context, and a new lesson `1.4` coach-resource card that lets the learner copy the prompt or manually copy from a readonly block while still falling back cleanly when prior context is missing.
+- Verification: `pnpm exec vitest run tests/unit/research-prompt.test.ts tests/unit/lesson-shells.test.tsx tests/unit/lesson-workbench-renderer.test.tsx` and `pnpm run typecheck`
+- Follow-up: Browser-QA lesson `1.4` in the live app after completing `1.2` and `1.3`, then confirm the prompt feels strong in ChatGPT Deep Research and that the returned `|` rows paste cleanly into the existing table flow.
 - Outcome: Replaced the lesson table textarea pattern with a shared editable table control that renders semantic desktop tables and mobile row cards, added manifest-backed column metadata for every current `kind: table` lesson, hid duplicated inner table labels inside primary card wrappers, and converted table artifact previews into readable row summaries while keeping persistence backward-compatible as `string[][]`.
 - Verification: `pnpm exec vitest run tests/unit/lesson-workbench-helpers.test.ts tests/unit/course-registry.test.ts tests/unit/lesson-workbench-renderer.test.tsx`, `pnpm run typecheck`, and `pnpm exec eslint components/artifacts-page.tsx components/lesson-shells.tsx components/lesson-workbench/fields/collection-field-controls.tsx components/lesson-workbench/fields/editable-table-field.tsx components/lesson-workbench/fields/field-control.tsx components/lesson-workbench/fields/value-codecs.ts components/lesson-workbench/modes/score-table-workbench.tsx components/lesson-workbench/modes/tracker-log-workbench.tsx components/lesson-workbench/shared/artifact-format.ts components/lesson-workbench/types.ts lib/course/contracts.ts lib/course/lessons/build.ts lib/course/lessons/ceo.ts lib/course/lessons/ship.ts lib/course/registry.ts lib/course/table.ts tests/unit/course-registry.test.ts tests/unit/lesson-workbench-helpers.test.ts tests/unit/lesson-workbench-renderer.test.tsx`
 - Follow-up: Browser-QA lessons `1.4`, `3.5`, `4.4`, and `4.5` on desktop and mobile to tune column widths, row-card density, and how much table preview detail should remain visible in saved-work surfaces.

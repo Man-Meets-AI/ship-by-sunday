@@ -55,6 +55,12 @@ Use shared resource constants for:
 - worksheet 01 through 04 links
 - template-download links already reused across multiple lessons
 
+Use lesson-specific coach resources for:
+
+- copyable prompt cards such as lesson `1.4`'s custom competitor-research prompt
+- resource bodies that explain how the learner should use the prompt or tool
+- prompt template ids that resolve through `lib/course/research-prompt.ts`
+
 Use recording docs as human reference only:
 
 - `docs/recording/day-1-prep.md`
