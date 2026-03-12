@@ -7,6 +7,7 @@ import {
 import {
 	DESIGN_REFERENCE_RESOURCES,
 	WORKSHEET_02_RESOURCES,
+	WORKSHEET_02_STORYBOARD_RESOURCES,
 	WORKSHEET_02_STORYBOARD_TEMPLATE_DOWNLOAD,
 	WORKSHEET_02_TEMPLATE_DOWNLOAD,
 } from "../resources";
@@ -193,11 +194,11 @@ export const designLessons = [
 		objectiveTitle: "DESIGN 2.3 — Storyboard the Journey",
 		checklist: [
 			"Map 5–7 frames in order",
-			"Use paper, tablet, or Excalidraw",
-			"Upload one clean photo or export",
+			"Use the printable PDF, FigJam, or plain paper",
+			"Upload one clean photo or screenshot",
 		],
 		helperText:
-			"Storyboard this offline on paper, a tablet, or Excalidraw. One clean image is enough.",
+			"Use the printable PDF, the FigJam template, or plain paper. Five to seven hand-drawn rectangles is enough if the sequence is clear.",
 		winCondition:
 			"A storyboard image is uploaded and ready for the Figma step.",
 		panelDefaults: focusPanelDefaults,
@@ -209,39 +210,39 @@ export const designLessons = [
 				kind: "image_upload",
 				required: true,
 				helpText:
-					"A phone photo, tablet screenshot, or Excalidraw export is enough. Upload one clean image before moving into Figma.",
+					"A phone photo of hand-drawn boxes, a FigJam or tablet screenshot, or an Excalidraw export is enough. Upload one clean image before moving into Figma.",
 			},
 		],
 		content: {
 			status: "draft",
 			intro:
-				"Storyboard the flow off-screen first. Paper, tablet, or Excalidraw is fine.",
+				"Storyboard the flow off-screen first. Use the printable PDF, the FigJam template, or just draw 5-7 rectangles on paper.",
 			lessonMeta: {
 				runtimeLabel: "6-8 min",
 				goal: "Turn rough screens into one ordered user journey.",
 				purpose:
-					"This keeps the flow clear before they touch Figma or over-polish anything.",
+					"This keeps the flow clear before they touch Figma. Sequence and clarity matter more than polished UI.",
 			},
 			actionCard: {
 				jobNow:
-					"Storyboard the user journey off-screen in 5-7 frames, then upload one clean image.",
+					"Use the printable PDF, the FigJam template, or plain paper to storyboard the user journey in 5-7 frames, then upload one clean image.",
 				timebox: "15 minutes",
 				comeBackWith: "One storyboard image that shows the journey in order.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Storyboard the Journey",
-				resources: WORKSHEET_02_RESOURCES,
+				resources: WORKSHEET_02_STORYBOARD_RESOURCES,
 			}),
 			workbench: {
 				prompt:
-					"Do this off-screen. Sequence the journey first, then bring back one clean image.",
+					"Do this off-screen. Use the printable PDF, the FigJam template, or plain paper, then bring back one clean image.",
 				teachingPoints: [
-					"Paper, tablet, or Excalidraw all count.",
-					"Show the key screens or state changes in order, not polished UI.",
-					"One photo or export is enough. Figma comes next.",
+					"Printable PDF, FigJam, or hand-drawn rectangles all count.",
+					"Show the key screens or state changes in order. Sequence beats polished UI.",
+					"One photo or screenshot is enough. Figma comes next.",
 				],
 				emptyState:
-					"Do this off-screen. Sequence the journey first, then bring back one clean image.",
+					"Do this off-screen. Use the printable PDF, the FigJam template, or plain paper, then bring back one clean image.",
 				...WORKSHEET_02_STORYBOARD_TEMPLATE_DOWNLOAD,
 			},
 		},
@@ -317,7 +318,7 @@ export const designLessons = [
 		block: "DESIGN",
 		title: "Turn Sketches Into Rough Screens",
 		shortTitle: "Rough Screens",
-		shell: "focus",
+		shell: "watch",
 		workbench: "external_workspace",
 		artifact: {
 			key: "rough_screens",
@@ -337,25 +338,12 @@ export const designLessons = [
 			"Use sketches as the source",
 			"Mark rough screens ready",
 		],
-		helperText: "The product hosts the lesson. Figma is the actual workbench.",
+		helperText:
+			"Watch the walkthrough, then build the rough screens in your Figma file.",
 		winCondition:
-			"The user marks rough screens complete and saves the Figma state.",
+			"The walkthrough is complete and the learner is ready to rough out the screens in Figma.",
 		panelDefaults: focusPanelDefaults,
 		pinnedArtifacts: ["sketch_set", "storyboard_image", "figma_file_ready"],
-		workbenchFields: [
-			{
-				id: "rough_screen_status",
-				label: "Rough screens ready",
-				kind: "toggle",
-				required: true,
-			},
-			{
-				id: "rough_screen_notes",
-				label: "What is in the rough screens?",
-				kind: "textarea",
-				rows: 3,
-			},
-		],
 		content: {
 			status: "draft",
 			intro: "Your job is clarity, not beauty.",
@@ -366,9 +354,10 @@ export const designLessons = [
 					"They need just enough fidelity that the build becomes translation instead of guesswork.",
 			},
 			actionCard: {
-				jobNow: "Create rough versions of your main screens in Figma.",
-				timebox: "20 minutes",
-				comeBackWith: "Three to five rough screens.",
+				jobNow:
+					"Watch the walkthrough, then turn the sketches into 3-5 rough screens in Figma.",
+				timebox: "10-12 minutes",
+				comeBackWith: "A clear plan for the first rough screens to build.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Turn Sketches Into Rough Screens",

@@ -75,6 +75,27 @@ function renderResearchLessonResources(pinnedArtifacts: PinnedArtifact[] = []) {
 	);
 }
 
+function renderStoryboardLessonResources() {
+	const lesson = getLessonById("2.3");
+	expect(lesson).toBeTruthy();
+
+	return renderToStaticMarkup(
+		<LessonShellSplit
+			lesson={lesson!}
+			objectiveTasks={[]}
+			onObjectiveTaskToggle={() => {}}
+			coachVisible
+			activeCoachPanel="resources"
+			onCoachPanelChange={() => {}}
+			pinnedArtifacts={[]}
+			coachContent={lesson!.content.coach}
+			footer={<div>Footer</div>}
+		>
+			<div>Workbench</div>
+		</LessonShellSplit>,
+	);
+}
+
 function renderWatchLesson(
 	overrides?: Parameters<typeof LessonShellWatch>[0]["coachContent"],
 ) {
@@ -111,6 +132,31 @@ describe("LessonShellSplit resources", () => {
 		expect(markup).not.toContain(
 			"The prompt will appear here once your chosen user and outcome are saved.",
 		);
+	});
+
+	it("renders lesson 2.3 coach resources with a FigJam storyboard option", () => {
+		const markup = renderStoryboardLessonResources();
+
+		expect(markup).toContain("Worksheet 02 — Build-Ready Design Spec");
+		expect(markup).toContain("Digital storyboard option (FigJam)");
+		expect(markup).toContain(
+			"https://www.figma.com/board/csR3w46LJaHNU0RKHVOJDB/Ship-by-Sunday-Template?node-id=0-1",
+		);
+		expect(markup).toContain('target="_blank"');
+	});
+
+	it("keeps the storyboard FigJam resource isolated to lesson 2.3", () => {
+		const lesson = getLessonById("2.2");
+		expect(lesson).toBeTruthy();
+		const resources = lesson?.content.coach.resources ?? [];
+
+		expect(
+			resources.some(
+				(resource) =>
+					resource.kind === "external" &&
+					resource.href.includes("Ship-by-Sunday-Template"),
+			),
+		).toBe(false);
 	});
 });
 

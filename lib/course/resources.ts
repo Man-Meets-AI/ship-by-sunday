@@ -56,6 +56,16 @@ export const WORKSHEET_01_RESOURCES: LessonResourceContent[] = [
 export const WORKSHEET_02_RESOURCES: LessonResourceContent[] = [
 	WORKSHEET_02_RESOURCE,
 ];
+export const STORYBOARD_FIGJAM_RESOURCE: LessonResourceContent = {
+	id: "storyboard-figjam-template",
+	label: "Digital storyboard option (FigJam)",
+	href: "https://www.figma.com/board/csR3w46LJaHNU0RKHVOJDB/Ship-by-Sunday-Template?node-id=0-1",
+	kind: "external",
+};
+export const WORKSHEET_02_STORYBOARD_RESOURCES: LessonResourceContent[] = [
+	WORKSHEET_02_RESOURCE,
+	STORYBOARD_FIGJAM_RESOURCE,
+];
 
 export const DESIGN_REFERENCE_RESOURCES: LessonResourceContent[] = [
 	WORKSHEET_02_RESOURCE,
@@ -146,7 +156,7 @@ export const WORKSHEET_02_TEMPLATE_DOWNLOAD: LessonTemplateResource = {
 export const WORKSHEET_02_STORYBOARD_TEMPLATE_DOWNLOAD: LessonTemplateResource =
 	{
 		templateDownloadLabel: "Open printable storyboard worksheet",
-		templateDownloadHref: "/downloads/ship-by-sunday-worksheets.pdf",
+		templateDownloadHref: "/downloads/ship-by-sunday-storyboard-template.pdf",
 	};
 
 export const WORKSHEET_04_DEMO_PROMPT_DOWNLOAD: LessonTemplateResource = {

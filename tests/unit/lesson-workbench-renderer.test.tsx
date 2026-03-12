@@ -337,15 +337,18 @@ describe("WorkbenchRenderer", () => {
 		const markup = renderLessonWorkbench("2.3");
 
 		expect(markup).toContain(
-			"Storyboard the flow off-screen first. Paper, tablet, or Excalidraw is fine.",
+			"Storyboard the flow off-screen first. Use the printable PDF, the FigJam template, or just draw 5-7 rectangles on paper.",
 		);
 		expect(markup).toContain("Open printable storyboard worksheet");
 		expect(markup).toContain(
-			"Storyboard the user journey off-screen in 5-7 frames, then upload one clean image.",
+			"/downloads/ship-by-sunday-storyboard-template.pdf",
+		);
+		expect(markup).toContain(
+			"Use the printable PDF, the FigJam template, or plain paper to storyboard the user journey in 5-7 frames, then upload one clean image.",
 		);
 		expect(markup).toContain("Upload storyboard image");
 		expect(markup).toContain(
-			"A phone photo, tablet screenshot, or Excalidraw export is enough. Upload one clean image before moving into Figma.",
+			"A phone photo of hand-drawn boxes, a FigJam or tablet screenshot, or an Excalidraw export is enough. Upload one clean image before moving into Figma.",
 		);
 		expect(markup).toContain(
 			"Choose a file and it will upload to lesson storage before the lesson draft is saved.",

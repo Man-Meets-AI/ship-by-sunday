@@ -249,8 +249,9 @@ Plan for a `75-105 min` recording block.
 
 - Show quick reference gathering and pattern capture
 - Sketch one short flow on paper or tablet
-- Turn that sketch into a 5-7 frame storyboard on paper, tablet, or Excalidraw
-- Upload one clean storyboard photo or export before moving into Figma
+- Turn that sketch into a 5-7 frame storyboard using the printable PDF, the FigJam board, or plain paper with hand-drawn rectangles
+- Tell students sequence and clarity matter more than polished UI
+- Upload one clean storyboard photo or screenshot before moving into Figma
 - Demonstrate only the Figma moves needed for this sprint
 - Turn rough sketches into rough screens live
 - Pick one visual direction without spiraling on aesthetics
