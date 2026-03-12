@@ -1,7 +1,9 @@
 import {
 	buildCompetitorResearchPrompt,
+	buildScopeBoundaryPrompt,
 	buildPromptImportFieldValues,
 	parseCompetitorResearchImport,
+	parseScopeBoundaryImport,
 } from "@/lib/course/research-prompt";
 
 describe("buildCompetitorResearchPrompt", () => {
@@ -181,6 +183,148 @@ Key pattern I noticed
 Users want speed first.`),
 		).toThrow(
 			"Paste the full response with a Research Table section that contains at least one usable row.",
+		);
+	});
+});
+
+describe("buildScopeBoundaryPrompt", () => {
+	it("builds a scope-cut prompt from saved user, outcome, and research context", () => {
+		const prompt = buildScopeBoundaryPrompt({
+			user: {
+				statement: "Startup operators",
+				problem:
+					"They lose action items after meetings and waste time rebuilding them.",
+				painMoment:
+					"Right after team meetings when they need to share next steps fast.",
+				currentSolution:
+					"Messy notes, memory, and a manual cleanup pass after the meeting.",
+			},
+			outcome: {
+				statement:
+					"Startup operators leave a meeting with a clean action summary they can review and send in minutes.",
+				successLooksLike:
+					"They can paste notes, review a usable action summary, and share it without rebuilding everything by hand.",
+			},
+			research: {
+				rows: [
+					{
+						solutionName: "Notion",
+						whatItDoesWell: "Fast capture",
+						whereItFallsShort: "Weak workflow handoff",
+						whatUsersCareAboutMost: "Speed",
+					},
+				],
+				summary:
+					"Users want speed first, but they do not trust generic summaries when the workflow gets more real.",
+			},
+		});
+
+		expect(prompt).toContain(
+			"You are helping a builder cut an MVP to the smallest believable version they can ship in a weekend sprint.",
+		);
+		expect(prompt).toContain("- User: Startup operators");
+		expect(prompt).toContain(
+			"- Desired outcome: Startup operators leave a meeting with a clean action summary they can review and send in minutes.",
+		);
+		expect(prompt).toContain(
+			"- Notion: does well -> Fast capture; falls short -> Weak workflow handoff; users care about -> Speed",
+		);
+		expect(prompt).toContain(
+			"- Research pattern: Users want speed first, but they do not trust generic summaries when the workflow gets more real.",
+		);
+		expect(prompt).toContain("Keep in v1");
+		expect(prompt).toContain("Cut from v1");
+		expect(prompt).toContain("Why this version is enough");
+		expect(prompt).toContain(
+			"- Avoid dashboards, analytics, settings, collaboration, team roles, notifications, admin panels, integrations, billing, or platform-level extras unless they are absolutely required for the user to reach the outcome in the core flow.",
+		);
+		expect(prompt).toContain("- Return only these three sections in this order:");
+	});
+});
+
+describe("parseScopeBoundaryImport", () => {
+	it("parses a clean three-section response into keep, cut, and rationale fields", () => {
+		const parsed = parseScopeBoundaryImport(`Keep in v1
+- Paste meeting notes
+- Generate a clean action summary
+
+Cut from v1
+- Slack integration
+- Team analytics dashboard
+
+Why this version is enough
+The user can get from messy notes to a usable action summary in one pass, which creates a real before-and-after win this weekend.`);
+
+		expect(parsed).toEqual({
+			inScope: [
+				"Paste meeting notes",
+				"Generate a clean action summary",
+			],
+			outOfScope: ["Slack integration", "Team analytics dashboard"],
+			rationale:
+				"The user can get from messy notes to a usable action summary in one pass, which creates a real before-and-after win this weekend.",
+		});
+	});
+
+	it("accepts alternate scope headings and numbered lists", () => {
+		const parsed = parseScopeBoundaryImport(`## In Scope Features
+1. Paste meeting notes
+2. Review and send the action summary
+
+## Out of Scope Features
+1. Calendar sync
+2. Multi-user workspaces
+
+## Why this is enough for v1
+This version proves the user can close the loop immediately after the meeting.`);
+
+		expect(parsed.inScope).toEqual([
+			"Paste meeting notes",
+			"Review and send the action summary",
+		]);
+		expect(parsed.outOfScope).toEqual([
+			"Calendar sync",
+			"Multi-user workspaces",
+		]);
+		expect(parsed.rationale).toBe(
+			"This version proves the user can close the loop immediately after the meeting.",
+		);
+	});
+
+	it("returns field updates for the scope lesson import mapping", () => {
+		const updates = buildPromptImportFieldValues(
+			{
+				promptTemplateId: "scope_boundary",
+				inScopeFieldId: "in_scope",
+				outOfScopeFieldId: "out_of_scope",
+				rationaleFieldId: "v1_rationale",
+			},
+			`Keep in v1
+- Paste meeting notes
+
+Cut from v1
+- Slack integration
+
+Why this version is enough
+It gives the user one clean win this weekend.`,
+		);
+
+		expect(updates).toEqual({
+			in_scope: ["Paste meeting notes"],
+			out_of_scope: ["Slack integration"],
+			v1_rationale: "It gives the user one clean win this weekend.",
+		});
+	});
+
+	it("throws a clear error when a required scope section is missing", () => {
+		expect(() =>
+			parseScopeBoundaryImport(`Keep in v1
+- Paste meeting notes
+
+Cut from v1
+- Slack integration`),
+		).toThrow(
+			"Paste the full ChatGPT response that includes Keep in v1, Cut from v1, and Why this version is enough.",
 		);
 	});
 });

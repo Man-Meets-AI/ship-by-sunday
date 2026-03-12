@@ -115,7 +115,7 @@ describe("WorkbenchRenderer", () => {
 			},
 			{
 				lessonId: "1.6",
-				expected: "In Scope Features",
+				expected: "Keep in v1",
 			},
 			{
 				lessonId: "2.1",
