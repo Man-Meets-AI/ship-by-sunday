@@ -127,6 +127,36 @@ describe("WorkbenchRenderer", () => {
 		}
 	});
 
+	it("renders the research workbench as a single-title semantic table", () => {
+		const markup = renderLessonWorkbench("1.4", {
+			fieldValues: {
+				research_table: [["Notion", "Fast setup", "Weak export", "Speed"]],
+			},
+		});
+
+		expect(markup).toContain("<table");
+		expect(markup).toContain("Competitor");
+		expect(markup).toContain("Users Care About");
+		expect(markup).toContain(
+			'<span class="font-display text-sm uppercase tracking-[0.04em] text-product-text">Research Table</span>',
+		);
+		expect(markup).not.toContain(
+			'<span class="text-[11px] font-medium leading-snug text-product-text">Research Table</span>',
+		);
+	});
+
+	it("renders tracker lessons with semantic table controls", () => {
+		const markup = renderLessonWorkbench("3.5", {
+			fieldValues: {
+				blocker_table: [["Auth bug", "Missing env", "Retried login", "No"]],
+			},
+		});
+
+		expect(markup).toContain("<table");
+		expect(markup).toContain("Resolved?");
+		expect(markup).toContain("Add Row");
+	});
+
 	it("shows candidate problem choices for lesson 1.2 handoff", () => {
 		const markup = renderLessonWorkbench("1.2", {
 			pinnedArtifacts: [getCandidateProblemsArtifact()],

@@ -6,6 +6,7 @@ import {
 	getLessonById,
 	getLessonHref,
 	getObjectiveTasks,
+	prepareFieldValuesForPersistence,
 	getWorkbenchSectionStates,
 	getUnlockedBlockIds,
 	normalizeLessonFieldValues,
@@ -51,6 +52,17 @@ describe("course registry", () => {
 		expect(getLessonById("4.6")?.title).toBe("Final Wrap");
 	});
 
+	it("declares columns for every table workbench field", () => {
+		const tableFields = lessonRegistry.flatMap((lesson) =>
+			(lesson.workbenchFields ?? []).filter((field) => field.kind === "table"),
+		);
+
+		expect(tableFields.length).toBeGreaterThan(0);
+		expect(tableFields.every((field) => (field.columns?.length ?? 0) > 0)).toBe(
+			true,
+		);
+	});
+
 	it("reports missing required field labels for incomplete lessons", () => {
 		const lesson = getLessonById("0.1");
 		expect(lesson).toBeTruthy();
@@ -58,6 +70,17 @@ describe("course registry", () => {
 		const issues = getCompletionIssues(lesson!, {});
 
 		expect(issues.map((issue) => issue.label)).toContain("Weekend ship goal");
+	});
+
+	it("treats blank table rows as incomplete work", () => {
+		const lesson = getLessonById("1.4");
+		expect(lesson).toBeTruthy();
+
+		const issues = getCompletionIssues(lesson!, {
+			research_table: [["", "", "", ""]],
+		});
+
+		expect(issues.map((issue) => issue.label)).toContain("Research Table");
 	});
 
 	it("keeps manual task fallback for lessons without observable workbench fields", () => {
@@ -112,7 +135,9 @@ describe("course registry", () => {
 			false,
 			false,
 		]);
-		expect(sectionStates[1]?.completionLabel).toBe("Candidate problem 2 written");
+		expect(sectionStates[1]?.completionLabel).toBe(
+			"Candidate problem 2 written",
+		);
 	});
 
 	it("derives specific generated task labels for lesson 1.1", () => {
@@ -355,5 +380,41 @@ describe("course registry", () => {
 			["Pain moment", "Right after meetings when the notes are still messy."],
 		]);
 		expect(preview.contextTitle).toBe("Current direction");
+	});
+
+	it("formats table artifact previews into readable summaries", () => {
+		const lesson = getLessonById("4.4");
+		expect(lesson).toBeTruthy();
+
+		const preview = buildArtifactPreview(lesson!, {
+			send_table: [
+				["Ava", "Email", "Yes", "Asked for a demo"],
+				["Leo", "DM", "No", "No reply yet"],
+			],
+		});
+
+		expect(preview.fields).toEqual([
+			[
+				"Send Tracker",
+				"2 rows: Person: Ava | Channel: Email | Sent?: Yes | Reply: Asked for a demo; Person: Leo | Channel: DM | Sent?: No | Reply: No reply yet",
+			],
+		]);
+	});
+
+	it("drops blank table rows before lesson state persistence", () => {
+		const lesson = getLessonById("1.4");
+		expect(lesson).toBeTruthy();
+
+		expect(
+			prepareFieldValuesForPersistence(lesson!, {
+				research_table: [
+					["", "", "", ""],
+					["Notion", "Fast setup", "Weak export", "Speed"],
+				],
+			}),
+		).toEqual({
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 1,
+			research_table: [["Notion", "Fast setup", "Weak export", "Speed"]],
+		});
 	});
 });

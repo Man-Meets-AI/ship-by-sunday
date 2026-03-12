@@ -7,6 +7,12 @@ import {
 	toLineList,
 	toTableText,
 } from "@/components/lesson-workbench/fields/value-codecs";
+import {
+	formatTablePreview,
+	getFilledTableRows,
+	getLabeledTableRows,
+	getTableRows,
+} from "@/lib/course/table";
 
 describe("lesson workbench helpers", () => {
 	it("round-trips line-list values", () => {
@@ -30,6 +36,83 @@ describe("lesson workbench helpers", () => {
 			["Gamma", "Delta"],
 		]);
 		expect(toTableText(parseTable(input))).toBe("Alpha | Beta\nGamma | Delta");
+	});
+
+	it("coerces table rows to the declared column count", () => {
+		const columns = [
+			{ id: "competitor", label: "Competitor", kind: "text" as const },
+			{ id: "good", label: "Good", kind: "text" as const },
+			{ id: "poor", label: "Poor", kind: "text" as const },
+		];
+
+		expect(
+			getTableRows([["Alpha"], ["Beta", "Fast", "Clunky", "Ignore"]], columns),
+		).toEqual([
+			["Alpha", "", ""],
+			["Beta", "Fast", "Clunky"],
+		]);
+	});
+
+	it("ignores blank rows when deriving filled table data", () => {
+		const columns = [
+			{ id: "source", label: "Source", kind: "text" as const },
+			{ id: "feedback", label: "Feedback", kind: "text" as const },
+		];
+
+		expect(
+			getFilledTableRows(
+				[
+					["", ""],
+					["Reddit", "Wanted export"],
+				],
+				columns,
+			),
+		).toEqual([["Reddit", "Wanted export"]]);
+		expect(
+			getLabeledTableRows(
+				[
+					["", ""],
+					["Reddit", "Wanted export"],
+				],
+				columns,
+			),
+		).toEqual([{ source: "Reddit", feedback: "Wanted export" }]);
+	});
+
+	it("formats nested table arrays as readable previews", () => {
+		expect(
+			formatArtifactValue([
+				["Notion", "Fast setup", "Weak structure"],
+				["Coda", "Flexible", "Too much setup"],
+			]),
+		).toBe(
+			"2 rows: Notion | Fast setup | Weak structure; Coda | Flexible | Too much setup",
+		);
+	});
+
+	it("formats labeled table previews from column metadata", () => {
+		const columns = [
+			{ id: "person", label: "Person", kind: "text" as const },
+			{ id: "channel", label: "Channel", kind: "text" as const },
+			{
+				id: "sent",
+				label: "Sent?",
+				kind: "select" as const,
+				options: ["Yes", "No"],
+			},
+		];
+
+		expect(
+			formatTablePreview(
+				[
+					["Ava", "Email", "Yes"],
+					["Leo", "DM", "No"],
+				],
+				columns,
+			),
+		).toBe(
+			"2 rows: Person: Ava | Channel: Email | Sent?: Yes; Person: Leo | Channel: DM | Sent?: No",
+		);
 	});
 
 	it("normalizes checklist values from existing structured entries", () => {
