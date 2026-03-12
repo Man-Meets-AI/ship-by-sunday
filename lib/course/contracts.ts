@@ -167,12 +167,26 @@ export type LessonExampleContent = {
 	body: string;
 };
 
-export type LessonResourceContent = {
+export type LessonPromptTemplateId = "competitor_research";
+
+export type LessonLinkResourceContent = {
 	id: string;
 	label: string;
 	href: string;
 	kind: "download" | "internal" | "external";
 };
+
+export type LessonPromptResourceContent = {
+	id: string;
+	label: string;
+	kind: "copy_prompt";
+	body?: string;
+	promptTemplateId: LessonPromptTemplateId;
+};
+
+export type LessonResourceContent =
+	| LessonLinkResourceContent
+	| LessonPromptResourceContent;
 
 export type LessonTemplateResource = {
 	templateDownloadLabel: string;

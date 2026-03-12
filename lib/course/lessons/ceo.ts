@@ -6,6 +6,7 @@ import {
 	type LessonExampleContent,
 } from "../contracts";
 import {
+	WORKSHEET_01_RESOURCE,
 	WORKSHEET_01_RESOURCES,
 	WORKSHEET_01_TEMPLATE_DOWNLOAD,
 } from "../resources";
@@ -101,6 +102,17 @@ Reference 3
 
 You are not writing a market report. You are trying not to build blind.`,
 	},
+];
+
+const RESEARCH_RESOURCES = [
+	{
+		id: "custom-competitor-research-prompt",
+		label: "Copy your custom research prompt",
+		kind: "copy_prompt" as const,
+		body: "Built from your chosen user and outcome. Paste it into ChatGPT Deep Research or another frontier model, then paste the returned rows into this lesson.",
+		promptTemplateId: "competitor_research" as const,
+	},
+	WORKSHEET_01_RESOURCE,
 ];
 
 const CORE_FLOW_EXAMPLES: LessonExampleContent[] = [
@@ -695,7 +707,7 @@ export const ceoLessons = [
 			},
 			coach: createPendingLessonCoach({
 				title: "Light Research, Not a Thesis",
-				resources: WORKSHEET_01_RESOURCES,
+				resources: RESEARCH_RESOURCES,
 				examples: RESEARCH_EXAMPLES,
 			}),
 			workbench: {

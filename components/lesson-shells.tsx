@@ -1,10 +1,16 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 import { formatArtifactValue } from "@/components/lesson-workbench/shared/artifact-format";
+import type { LessonPromptResourceContent } from "@/lib/course/contracts";
 import { getLesson, type LessonConfig } from "@/lib/course/manifest";
 import type { LessonContent } from "@/lib/course/manifest";
+import {
+	buildCompetitorResearchPrompt,
+	type CompetitorResearchPromptContext,
+} from "@/lib/course/research-prompt";
 import type {
 	ObjectiveTask,
 	PersistedFieldValues,
@@ -18,6 +24,221 @@ export type PinnedArtifact = {
 	fields: Array<[string, unknown]>;
 	lessonTitle: string;
 };
+
+function getPinnedArtifact(
+	pinnedArtifacts: PinnedArtifact[],
+	artifactKey: string,
+): PinnedArtifact | null {
+	return (
+		pinnedArtifacts.find((artifact) => artifact.artifactKey === artifactKey) ??
+		null
+	);
+}
+
+function getTrimmedFieldValue(
+	fieldValues: PersistedFieldValues,
+	fieldId: string,
+): string | null {
+	const value = fieldValues[fieldId];
+	if (typeof value !== "string") {
+		return null;
+	}
+
+	const trimmed = value.trim();
+	return trimmed.length > 0 ? trimmed : null;
+}
+
+function getCompetitorResearchPromptContext(
+	pinnedArtifacts: PinnedArtifact[],
+): CompetitorResearchPromptContext | null {
+	const userArtifact = getPinnedArtifact(pinnedArtifacts, "user_statement");
+	const outcomeArtifact = getPinnedArtifact(
+		pinnedArtifacts,
+		"outcome_statement",
+	);
+
+	if (!userArtifact || !outcomeArtifact) {
+		return null;
+	}
+
+	const user = getTrimmedFieldValue(
+		userArtifact.fieldValues,
+		"selected_problem_owner",
+	);
+	const problem = getTrimmedFieldValue(
+		userArtifact.fieldValues,
+		"selected_problem_statement",
+	);
+	const outcome = getTrimmedFieldValue(outcomeArtifact.fieldValues, "outcome");
+
+	if (!user || !problem || !outcome) {
+		return null;
+	}
+
+	return {
+		user: {
+			statement: user,
+			problem,
+			painMoment:
+				getTrimmedFieldValue(userArtifact.fieldValues, "pain_moment") ??
+				undefined,
+			currentSolution:
+				getTrimmedFieldValue(userArtifact.fieldValues, "current_solution") ??
+				undefined,
+			reachability:
+				getTrimmedFieldValue(userArtifact.fieldValues, "reachability") ??
+				undefined,
+		},
+		outcome: {
+			statement: outcome,
+			successLooksLike:
+				getTrimmedFieldValue(
+					outcomeArtifact.fieldValues,
+					"success_looks_like",
+				) ?? undefined,
+			differenceForUser:
+				getTrimmedFieldValue(
+					outcomeArtifact.fieldValues,
+					"difference_for_user",
+				) ?? undefined,
+		},
+	};
+}
+
+function getPromptResourceState(
+	resource: LessonPromptResourceContent,
+	pinnedArtifacts: PinnedArtifact[],
+) {
+	if (resource.promptTemplateId !== "competitor_research") {
+		return {
+			prompt: null,
+			disabledReason: "This prompt template is not wired yet.",
+		};
+	}
+
+	const context = getCompetitorResearchPromptContext(pinnedArtifacts);
+	if (!context) {
+		return {
+			prompt: null,
+			disabledReason:
+				"Finish lessons 1.2 and 1.3 first so we can build this prompt from your chosen user and outcome.",
+		};
+	}
+
+	return {
+		prompt: buildCompetitorResearchPrompt(context),
+		disabledReason: null,
+	};
+}
+
+function CopyPromptResourceCard({
+	resource,
+	pinnedArtifacts,
+}: {
+	resource: LessonPromptResourceContent;
+	pinnedArtifacts: PinnedArtifact[];
+}) {
+	const [copyState, setCopyState] = useState<"idle" | "copied" | "error">(
+		"idle",
+	);
+	const resetTimeoutRef = useRef<number | null>(null);
+	const { prompt, disabledReason } = getPromptResourceState(
+		resource,
+		pinnedArtifacts,
+	);
+
+	useEffect(() => {
+		return () => {
+			if (resetTimeoutRef.current !== null) {
+				window.clearTimeout(resetTimeoutRef.current);
+			}
+		};
+	}, []);
+
+	useEffect(() => {
+		setCopyState("idle");
+	}, [prompt, disabledReason]);
+
+	const copyPrompt = () => {
+		if (!prompt || disabledReason) {
+			return;
+		}
+
+		if (!navigator.clipboard?.writeText) {
+			setCopyState("error");
+			return;
+		}
+
+		void navigator.clipboard.writeText(prompt).then(
+			() => {
+				if (resetTimeoutRef.current !== null) {
+					window.clearTimeout(resetTimeoutRef.current);
+				}
+
+				setCopyState("copied");
+				resetTimeoutRef.current = window.setTimeout(() => {
+					resetTimeoutRef.current = null;
+					setCopyState("idle");
+				}, 1600);
+			},
+			() => {
+				setCopyState("error");
+			},
+		);
+	};
+
+	return (
+		<div className="rounded-none border border-product-border bg-product-surface-strong/80 px-2 py-2">
+			<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
+				custom prompt
+			</p>
+			<p className="mt-0.5 text-xs font-medium text-product-text">
+				{resource.label}
+			</p>
+			{resource.body ? (
+				<p className="mt-1 text-xs font-medium leading-snug text-product-muted">
+					{resource.body}
+				</p>
+			) : null}
+			{disabledReason ? (
+				<p className="mt-1 text-xs font-medium leading-snug text-product-muted">
+					{disabledReason}
+				</p>
+			) : null}
+			<div className="mt-2 flex flex-wrap items-center gap-2">
+				<button
+					type="button"
+					onClick={copyPrompt}
+					disabled={Boolean(disabledReason)}
+					className="rounded-none border border-product-accent bg-product-chip px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg disabled:cursor-not-allowed disabled:border-product-border disabled:bg-product-surface disabled:text-product-muted"
+				>
+					{copyState === "copied" ? "Copied" : "Copy prompt"}
+				</button>
+				{copyState === "error" && !disabledReason ? (
+					<p className="text-[11px] font-medium leading-snug text-product-muted">
+						Clipboard unavailable. Copy from the prompt block below.
+					</p>
+				) : null}
+			</div>
+			<div className="mt-2 rounded-none border border-product-border/80 bg-product-surface px-2 py-2">
+				{prompt ? (
+					<textarea
+						readOnly
+						value={prompt}
+						rows={14}
+						className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[11px] leading-relaxed text-product-text outline-none"
+						aria-label={`${resource.label} prompt`}
+					/>
+				) : (
+					<p className="text-[11px] font-medium leading-snug text-product-muted">
+						The prompt will appear here once your chosen user and outcome are
+						saved.
+					</p>
+				)}
+			</div>
+		</div>
+	);
+}
 
 type CoachPanelKey = "watch" | "transcript" | "examples" | "resources";
 
@@ -339,21 +560,29 @@ function CoachPanel({
 			content:
 				resources.length > 0 ? (
 					<div className="space-y-1.5">
-						{resources.map((resource) => (
-							<Link
-								key={resource.id}
-								href={resource.href}
-								target={resource.kind === "external" ? "_blank" : undefined}
-								className="block rounded-none border border-product-border bg-product-surface-strong/80 px-2 py-1.5 transition-colors hover:bg-product-surface-alt"
-							>
-								<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
-									{resource.kind}
-								</p>
-								<p className="mt-0.5 text-xs font-medium text-product-text">
-									{resource.label}
-								</p>
-							</Link>
-						))}
+						{resources.map((resource) =>
+							resource.kind === "copy_prompt" ? (
+								<CopyPromptResourceCard
+									key={resource.id}
+									resource={resource}
+									pinnedArtifacts={pinnedArtifacts}
+								/>
+							) : (
+								<Link
+									key={resource.id}
+									href={resource.href}
+									target={resource.kind === "external" ? "_blank" : undefined}
+									className="block rounded-none border border-product-border bg-product-surface-strong/80 px-2 py-1.5 transition-colors hover:bg-product-surface-alt"
+								>
+									<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
+										{resource.kind}
+									</p>
+									<p className="mt-0.5 text-xs font-medium text-product-text">
+										{resource.label}
+									</p>
+								</Link>
+							),
+						)}
 					</div>
 				) : (
 					<p className="text-xs font-medium leading-snug text-product-muted">
