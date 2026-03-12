@@ -75,35 +75,25 @@ function renderResearchLessonResources(pinnedArtifacts: PinnedArtifact[] = []) {
 }
 
 describe("LessonShellSplit resources", () => {
-	it("renders the custom research prompt card and worksheet link for lesson 1.4", () => {
+	it("keeps lesson 1.4 coach resources focused on the worksheet link", () => {
 		const markup = renderResearchLessonResources([
 			getUserStatementArtifact(),
 			getOutcomeStatementArtifact(),
 		]);
 
-		expect(markup).toContain("Copy your custom research prompt");
-		expect(markup).toContain(
-			"Paste it into ChatGPT Deep Research or another frontier model",
-		);
-		expect(markup).toContain("Copy prompt");
-		expect(markup).toContain("- User: Startup operators");
-		expect(markup).toContain("Research Table");
 		expect(markup).toContain("Worksheet 01 — One-Page Product Brief");
 		expect(markup).toContain("/downloads/ship-by-sunday-worksheets.pdf");
-		expect(markup).not.toMatch(/<button[^>]*disabled=""/);
+		expect(markup).not.toContain("Copy your custom research prompt");
+		expect(markup).not.toContain("Copy prompt");
 	});
 
-	it("keeps the prompt card visible but disables copy when prior context is missing", () => {
+	it("does not reintroduce the old prompt resource card when context is missing", () => {
 		const markup = renderResearchLessonResources();
 
-		expect(markup).toContain("Copy your custom research prompt");
-		expect(markup).toContain(
-			"Finish lessons 1.2 and 1.3 first so we can build this prompt from your chosen user and outcome.",
-		);
-		expect(markup).toContain(
+		expect(markup).toContain("Worksheet 01 — One-Page Product Brief");
+		expect(markup).not.toContain("Copy your custom research prompt");
+		expect(markup).not.toContain(
 			"The prompt will appear here once your chosen user and outcome are saved.",
 		);
-		expect(markup).toMatch(/<button[^>]*disabled=""/);
-		expect(markup).toContain("Worksheet 01 — One-Page Product Brief");
 	});
 });
