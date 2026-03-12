@@ -156,6 +156,19 @@ describe("course registry", () => {
 		expect(nextLesson?.artifact.dependsOn).toContain("figma_file_ready");
 	});
 
+	it("configures lesson 2.5 as a watch-only lesson while keeping 2.6 gated on rough screens", () => {
+		const lesson = getLessonById("2.5");
+		const nextLesson = getLessonById("2.6");
+		expect(lesson).toBeTruthy();
+		expect(nextLesson).toBeTruthy();
+
+		expect(lesson?.shell).toBe("watch");
+		expect(lesson?.workbenchFields ?? []).toEqual([]);
+		expect(getObjectiveTasks(lesson!, {})).toEqual([]);
+		expect(getCompletionIssues(lesson!, {})).toEqual([]);
+		expect(nextLesson?.artifact.dependsOn).toContain("rough_screens");
+	});
+
 	it("declares columns for every table workbench field", () => {
 		const tableFields = lessonRegistry.flatMap((lesson) =>
 			(lesson.workbenchFields ?? []).filter((field) => field.kind === "table"),

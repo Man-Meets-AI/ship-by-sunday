@@ -401,24 +401,22 @@ Coach states:
 
 ## 2.5 Turn Sketches Into Rough Screens
 
-**Shell:** Focus
+**Shell:** Watch
 **Workbench:** external_workspace
 **Artifact:** 3–5 Rough Screens
 
 ```text
-┌──────────────────────────────────── FOCUS WORKSPACE 2.5 ────────────────────────────────────┐
-│ SHIP BY SUNDAY      [CEO ✓] [DESIGN ACTIVE] [BUILD LOCKED] [SHIP LOCKED]   [Split][Focus] │
+┌──────────────────────────────────── WATCH SHELL 2.5 ────────────────────────────────────────┐
+│ SHIP BY SUNDAY      [CEO ✓] [DESIGN ACTIVE] [BUILD LOCKED] [SHIP LOCKED]                    │
 ├───────────────────────────────────────────────────────────────────────────────────────────────┤
-│ [Collapsed Objective Rail]                                                                    │
+│ 2.5   3-5 ROUGH SCREENS   10-12 MIN                                                           │
+│ TURN SKETCHES INTO ROUGH SCREENS                                                              │
+│ Your job is clarity, not beauty.                                                              │
 │                                                                                               │
-│                         FIGMA EMBED / SCREEN-BUILD WORKSPACE                                 │
+│                                [ lesson video / placeholder ]                                │
 │                                                                                               │
-│                    Left overlay: uploaded sketches / storyboard references                    │
-│                    Center: live Figma                                                         │
-│                                                                                               │
-│ Coach PiP [video]                                                                             │
-│                                                                                               │
-│                    [Mark rough screens ready] [Back] [Next]                                   │
+├───────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                           [Back] [Complete lesson]           │
 ├───────────────────────────────────────────────────────────────────────────────────────────────┤
 │ Bottom skill rail                                                                             │
 └───────────────────────────────────────────────────────────────────────────────────────────────┘
