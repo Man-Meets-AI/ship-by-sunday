@@ -1,11 +1,13 @@
 import {
 	buildArtifactPreview,
 	FIELD_SHAPE_VERSION_FIELD_ID,
+	getCandidateProblemOptions,
 	getCompletionIssues,
 	getLessonById,
 	getLessonHref,
 	getObjectiveTasks,
 	getWorkbenchSectionStates,
+	getUnlockedBlockIds,
 	normalizeLessonFieldValues,
 	OBJECTIVE_CHECKLIST_FIELD_ID,
 	getStudentFacingLessons,
@@ -20,6 +22,16 @@ describe("course registry", () => {
 
 	it("unlocks the sprint intro after welcome is completed", () => {
 		expect(getUnlockedLessonIds(["0.1"])).toContain("0.2");
+	});
+
+	it("keeps CEO available by default and unlocks later blocks explicitly", () => {
+		expect(getUnlockedBlockIds([])).toEqual(["CEO"]);
+		expect(getUnlockedBlockIds(["1.7"])).toEqual(["CEO", "DESIGN"]);
+		expect(getUnlockedBlockIds(["1.7", "2.7"])).toEqual([
+			"CEO",
+			"DESIGN",
+			"BUILD",
+		]);
 	});
 
 	it("routes mission through the mission screen and lessons through lesson pages", () => {
@@ -222,6 +234,64 @@ describe("course registry", () => {
 		).toEqual({});
 	});
 
+	it("derives candidate options from the lesson handoff config instead of field-id parsing", () => {
+		const lesson = getLessonById("1.2");
+		expect(lesson?.handoff).toBeTruthy();
+
+		const options = getCandidateProblemOptions(lesson!.handoff, {
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+			problem_1_who: "Startup operators",
+			problem_1_pain: "They lose action items after meetings.",
+			problem_2_who: "Agency owners",
+			problem_2_pain: "They lose client next steps after calls.",
+			problem_3_who: "Freelancers",
+			problem_3_pain: "They forget follow-ups after discovery calls.",
+			problem_4_who: "Should be ignored",
+			problem_4_pain: "This is not in the handoff config.",
+		});
+
+		expect(options).toEqual([
+			{
+				index: 1,
+				owner: "Startup operators",
+				statement: "They lose action items after meetings.",
+			},
+			{
+				index: 2,
+				owner: "Agency owners",
+				statement: "They lose client next steps after calls.",
+			},
+			{
+				index: 3,
+				owner: "Freelancers",
+				statement: "They forget follow-ups after discovery calls.",
+			},
+		]);
+	});
+
+	it("accepts the configured handoff persisted fields as a compatible 1.2 field shape", () => {
+		const lesson = getLessonById("1.2");
+		expect(lesson).toBeTruthy();
+
+		expect(
+			normalizeLessonFieldValues(lesson!, {
+				[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+				selected_problem_index: 1,
+				selected_problem_owner: "Startup operators",
+				selected_problem_statement:
+					"They lose action items after meetings and waste time rebuilding them.",
+				user_type: "Early-stage startup operators who run team meetings",
+			}),
+		).toEqual({
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+			selected_problem_index: 1,
+			selected_problem_owner: "Startup operators",
+			selected_problem_statement:
+				"They lose action items after meetings and waste time rebuilding them.",
+			user_type: "Early-stage startup operators who run team meetings",
+		});
+	});
+
 	it("uses learner-facing preview labels for structured artifact output", () => {
 		const lesson = getLessonById("1.1");
 		expect(lesson).toBeTruthy();
@@ -263,5 +333,6 @@ describe("course registry", () => {
 			],
 			["User", "Early-stage startup operators who run team meetings"],
 		]);
+		expect(preview.contextTitle).toBe("Current direction");
 	});
 });

@@ -58,6 +58,45 @@ describe("lesson content contract", () => {
 		);
 	});
 
+	it("keeps candidate-problem handoff contracts explicit and internally valid", () => {
+		for (const lesson of lessonRegistry) {
+			if (lesson.handoff?.mode !== "select_candidate_problem") {
+				continue;
+			}
+
+			const sourceLesson = lessonRegistry.find(
+				(candidate) => candidate.artifact.key === lesson.handoff?.sourceArtifactKey,
+			);
+			expect(
+				sourceLesson,
+				`missing source lesson for ${lesson.id} handoff ${lesson.handoff.sourceArtifactKey}`,
+			).toBeTruthy();
+
+			const sourceFieldIds = new Set(
+				(sourceLesson?.workbenchFields ?? []).map((field) => field.id),
+			);
+
+			for (const option of lesson.handoff.options) {
+				expect(
+					sourceFieldIds.has(option.ownerSourceFieldId),
+					`${lesson.id} handoff owner field missing: ${option.ownerSourceFieldId}`,
+				).toBe(true);
+				expect(
+					sourceFieldIds.has(option.statementSourceFieldId),
+					`${lesson.id} handoff statement field missing: ${option.statementSourceFieldId}`,
+				).toBe(true);
+			}
+
+			const persistedFieldIds = (lesson.handoff.persistedFields ?? []).map(
+				(field) => field.targetFieldId,
+			);
+			expect(
+				new Set(persistedFieldIds).size,
+				`${lesson.id} handoff persisted fields must be unique`,
+			).toBe(persistedFieldIds.length);
+		}
+	});
+
 	it("removes center-workbench examples from lesson sections and fields", () => {
 		for (const lesson of lessonRegistry) {
 			for (const section of lesson.workbenchSections ?? []) {
