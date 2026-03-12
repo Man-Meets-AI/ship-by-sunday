@@ -109,10 +109,7 @@ function PromptImportCard({
 	};
 
 	return (
-		<WorkbenchCard
-			title="Copy prompt -> paste result"
-			eyebrow="Import research"
-		>
+		<WorkbenchCard label="Copy prompt -> paste result">
 			<div className="space-y-4">
 				<ol className="space-y-1 text-sm leading-relaxed text-product-text">
 					<li>1. Copy the prompt built from your chosen user and outcome.</li>
@@ -165,7 +162,7 @@ function PromptImportCard({
 				</div>
 
 				<label className="block">
-					<span className="font-display text-sm uppercase tracking-[0.04em] text-product-text">
+					<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
 						Paste ChatGPT response
 					</span>
 					<textarea
@@ -252,7 +249,7 @@ export function ScoreTableWorkbench({
 				/>
 			) : null}
 			{tableField ? (
-				<WorkbenchCard eyebrow="Research table">
+				<WorkbenchCard label="Research table">
 					<FieldControl
 						field={tableField}
 						value={fieldValues[tableField.id]}

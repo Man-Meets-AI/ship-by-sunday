@@ -1,5 +1,7 @@
 import type { WorkbenchSection } from "@/lib/course/manifest";
 
+import { WorkbenchHeaderLabel } from "./workbench-header-label";
+
 export function SectionCard({
 	section,
 	children,
@@ -21,19 +23,10 @@ export function SectionCard({
 		>
 			<div className="border-b border-product-border/60 px-4 py-3">
 				<div className="flex flex-wrap items-center justify-between gap-2">
-					<div className="space-y-1">
-						{section.eyebrow ? (
-							<p className="font-mono text-[9px] uppercase tracking-[0.18em] text-product-muted">
-								{section.eyebrow}
-							</p>
-						) : null}
-						<h2 className="font-display text-base uppercase tracking-[0.04em] text-product-text">
-							{section.title}
-						</h2>
-					</div>
-					<span className="font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
+					<WorkbenchHeaderLabel as="h2">{section.title}</WorkbenchHeaderLabel>
+					<WorkbenchHeaderLabel className="tracking-[0.16em]">
 						{blocked ? "Locked" : isComplete ? "Ready" : "In progress"}
-					</span>
+					</WorkbenchHeaderLabel>
 				</div>
 				{blocked && blockedMessage ? (
 					<p className="mt-2 max-w-2xl text-[12px] font-medium leading-relaxed text-product-muted">

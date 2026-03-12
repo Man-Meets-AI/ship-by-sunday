@@ -28,7 +28,7 @@ export function CollectorBoardWorkbench({
 				totalTaskCount={Math.max(objectiveTasks.length, 1)}
 			/>
 			{boardField ? (
-				<WorkbenchCard title={boardField.label} eyebrow="Reference board">
+				<WorkbenchCard label={boardField.label}>
 					<FieldControl
 						field={boardField}
 						value={fieldValues[boardField.id]}

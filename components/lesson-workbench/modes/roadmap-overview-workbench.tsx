@@ -5,6 +5,7 @@ import {
 } from "@/lib/course/registry";
 
 import type { WorkbenchModeProps } from "../types";
+import { WorkbenchHeaderLabel } from "../shared/workbench-header-label";
 import { StatusRail } from "../shared/status-rail";
 import { WorkbenchContainer } from "../shared/workbench-container";
 import { WorkbenchHeader } from "../shared/workbench-header";
@@ -63,9 +64,9 @@ function SprintRoadmapOverview({
 					>
 						<div className="border-b border-product-border px-3 py-2">
 							<div className="flex items-center justify-between gap-2">
-								<p className="font-display text-sm uppercase tracking-[0.06em] text-product-text">
+								<WorkbenchHeaderLabel as="p">
 									{block.label}
-								</p>
+								</WorkbenchHeaderLabel>
 								<span className="font-mono text-[8px] uppercase tracking-[0.15em] text-product-muted">
 									{block.lessons.length} lessons
 								</span>

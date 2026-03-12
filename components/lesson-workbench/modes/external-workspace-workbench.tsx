@@ -34,7 +34,7 @@ export function ExternalWorkspaceWorkbench({
 				completedTaskCount={completedTaskCount}
 				totalTaskCount={Math.max(objectiveTasks.length, 1)}
 			/>
-			<WorkbenchCard title="External workspace" eyebrow="Focus mode">
+			<WorkbenchCard label="External workspace">
 				<p className="text-xs font-medium leading-snug text-product-muted">
 					{actionLabel}
 				</p>

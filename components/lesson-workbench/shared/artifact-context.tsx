@@ -17,8 +17,7 @@ export function ArtifactContext({
 			{pinnedArtifacts.map((artifact) => (
 				<WorkbenchCard
 					key={artifact.artifactKey}
-					title={artifact.contextTitle ?? artifact.artifactLabel}
-					eyebrow={artifact.contextTitle ? undefined : artifact.lessonTitle}
+					label={artifact.contextTitle ?? artifact.artifactLabel}
 				>
 					<div className="space-y-1 text-xs font-medium text-product-muted">
 						{artifact.fields.length === 0 ? (

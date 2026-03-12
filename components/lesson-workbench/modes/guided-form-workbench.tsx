@@ -7,6 +7,7 @@ import { ArtifactContext } from "../shared/artifact-context";
 import { SectionCard } from "../shared/section-card";
 import { StatusRail } from "../shared/status-rail";
 import { WorkbenchContainer } from "../shared/workbench-container";
+import { WorkbenchHeaderLabel } from "../shared/workbench-header-label";
 import { WorkbenchHeader } from "../shared/workbench-header";
 
 const HANDOFF_TITLE = "Pick the problem to carry forward";
@@ -56,9 +57,7 @@ function CandidateProblemHandoff({
 	return (
 		<section className="rounded-none border border-product-border/70 bg-product-surface/55">
 			<div className="border-b border-product-border/60 px-4 py-3">
-				<h2 className="font-display text-base uppercase tracking-[0.04em] text-product-text">
-					{HANDOFF_TITLE}
-				</h2>
+				<WorkbenchHeaderLabel as="h2">{HANDOFF_TITLE}</WorkbenchHeaderLabel>
 				<p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-product-muted">
 					{HANDOFF_HELPER_COPY}
 				</p>
@@ -221,11 +220,7 @@ export function GuidedFormWorkbench({
 							section={section}
 							isComplete={sectionState?.isComplete ?? false}
 							blocked={blocked}
-							blockedMessage={
-								blocked
-									? HANDOFF_BLOCKED_COPY
-									: undefined
-							}
+							blockedMessage={blocked ? HANDOFF_BLOCKED_COPY : undefined}
 						>
 							<FieldList
 								fields={sectionFields}

@@ -19,7 +19,7 @@ export function TemplateDownloadCard({
 	);
 
 	return (
-		<WorkbenchCard title="Template" eyebrow="Reference">
+		<WorkbenchCard label="Template">
 			<a
 				href={lessonContent.workbench.templateDownloadHref}
 				target={isExternalLink ? "_blank" : undefined}

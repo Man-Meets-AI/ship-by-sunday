@@ -29,7 +29,7 @@ export function ScopeSplitWorkbench({
 			/>
 			<div className="grid gap-2 lg:grid-cols-2">
 				{leftField ? (
-					<WorkbenchCard title={leftField.label} eyebrow="In scope">
+					<WorkbenchCard label={leftField.label}>
 						<FieldControl
 							field={leftField}
 							value={fieldValues[leftField.id]}
@@ -39,7 +39,7 @@ export function ScopeSplitWorkbench({
 					</WorkbenchCard>
 				) : null}
 				{rightField ? (
-					<WorkbenchCard title={rightField.label} eyebrow="Out of scope">
+					<WorkbenchCard label={rightField.label}>
 						<FieldControl
 							field={rightField}
 							value={fieldValues[rightField.id]}

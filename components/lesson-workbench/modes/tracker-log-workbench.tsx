@@ -28,7 +28,7 @@ export function TrackerLogWorkbench({
 				totalTaskCount={Math.max(objectiveTasks.length, 1)}
 			/>
 			{tableField ? (
-				<WorkbenchCard title={tableField.label} eyebrow="Tracker">
+				<WorkbenchCard label={tableField.label}>
 					<FieldControl
 						field={tableField}
 						value={fieldValues[tableField.id]}
