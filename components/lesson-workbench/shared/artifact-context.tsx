@@ -3,10 +3,6 @@ import type { PinnedArtifact } from "@/components/lesson-shells";
 import { formatArtifactValue } from "./artifact-format";
 import { WorkbenchCard } from "./workbench-card";
 
-function getArtifactContextTitle(artifact: PinnedArtifact) {
-	return artifact.contextTitle ?? artifact.artifactLabel;
-}
-
 export function ArtifactContext({
 	pinnedArtifacts,
 }: {
@@ -21,8 +17,8 @@ export function ArtifactContext({
 			{pinnedArtifacts.map((artifact) => (
 				<WorkbenchCard
 					key={artifact.artifactKey}
-					title={getArtifactContextTitle(artifact)}
-					eyebrow={artifact.lessonTitle}
+					title={artifact.contextTitle ?? artifact.artifactLabel}
+					eyebrow={artifact.contextTitle ? undefined : artifact.lessonTitle}
 				>
 					<div className="space-y-1 text-xs font-medium text-product-muted">
 						{artifact.fields.length === 0 ? (

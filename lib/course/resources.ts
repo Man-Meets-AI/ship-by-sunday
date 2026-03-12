@@ -68,6 +68,12 @@ export const WORKSHEET_01_TEMPLATE_DOWNLOAD: LessonTemplateResource = {
 	templateDownloadHref: "/downloads/ship-by-sunday-worksheets.pdf",
 };
 
+export const WORKSHEET_01_FIGJAM_TEMPLATE_DOWNLOAD: LessonTemplateResource = {
+	templateDownloadLabel: "Open FigJam template",
+	templateDownloadHref:
+		"https://www.figma.com/board/csR3w46LJaHNU0RKHVOJDB/Template-for-Storyboard?node-id=0-1",
+};
+
 export const WORKSHEET_02_TEMPLATE_DOWNLOAD: LessonTemplateResource = {
 	templateDownloadLabel: "Open Worksheet 02 template",
 	templateDownloadHref: "/downloads/ship-by-sunday-worksheets.pdf",
