@@ -115,11 +115,11 @@ describe("WorkbenchRenderer", () => {
 			},
 			{
 				lessonId: "1.6",
-				expected: "In scope",
+				expected: "In Scope Features",
 			},
 			{
 				lessonId: "2.1",
-				expected: "Reference board",
+				expected: "Reference Board",
 			},
 			{
 				lessonId: "3.1",
@@ -148,7 +148,7 @@ describe("WorkbenchRenderer", () => {
 			},
 			{
 				lessonId: "3.5",
-				expected: "Tracker",
+				expected: "Blocker Log",
 			},
 		];
 
