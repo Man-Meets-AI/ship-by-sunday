@@ -4,6 +4,7 @@ import type {
 	BlockConfig,
 	BlockId,
 	CoachMode,
+	LessonLayoutMode,
 	LessonConfig,
 	ShellType,
 } from "./contracts";
@@ -102,6 +103,49 @@ export function canEnterLesson(
 
 export function getDefaultShellForLesson(id: string): ShellType | undefined {
 	return getLesson(id)?.shell;
+}
+
+const DEFAULT_LESSON_LAYOUT_MODES = [
+	"split",
+	"focus",
+] as const satisfies readonly LessonLayoutMode[];
+
+export function getAvailableLayoutModesForLesson(
+	lesson: Pick<LessonConfig, "availableLayoutModes">,
+): LessonLayoutMode[] {
+	return lesson.availableLayoutModes?.length
+		? [...lesson.availableLayoutModes]
+		: [...DEFAULT_LESSON_LAYOUT_MODES];
+}
+
+export function getDefaultLayoutModeForLesson(
+	lesson: Pick<LessonConfig, "availableLayoutModes" | "shell">,
+): LessonLayoutMode {
+	const availableLayoutModes = getAvailableLayoutModesForLesson(lesson);
+	const preferredLayoutMode = lesson.shell === "focus" ? "focus" : "split";
+
+	return availableLayoutModes.includes(preferredLayoutMode)
+		? preferredLayoutMode
+		: (availableLayoutModes[0] ?? "split");
+}
+
+export function normalizeLayoutModeForLesson(
+	lesson: Pick<LessonConfig, "availableLayoutModes" | "shell">,
+	layoutMode: unknown,
+): LessonLayoutMode {
+	if (layoutMode === "split" || layoutMode === "focus") {
+		return getAvailableLayoutModesForLesson(lesson).includes(layoutMode)
+			? layoutMode
+			: getDefaultLayoutModeForLesson(lesson);
+	}
+
+	return getDefaultLayoutModeForLesson(lesson);
+}
+
+export function lessonSupportsLayoutToggle(
+	lesson: Pick<LessonConfig, "availableLayoutModes">,
+): boolean {
+	return getAvailableLayoutModesForLesson(lesson).length > 1;
 }
 
 export function getDefaultCoachModeForLesson(

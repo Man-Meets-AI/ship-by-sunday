@@ -1,6 +1,7 @@
 export type BlockId = "CEO" | "DESIGN" | "BUILD" | "SHIP";
 
 export type ShellType = "split" | "focus" | "mission";
+export type LessonLayoutMode = "split" | "focus";
 
 export type WorkbenchType =
 	| "guided_form"
@@ -264,6 +265,7 @@ export type LessonConfig = {
 	title: string;
 	shortTitle: string;
 	shell: ShellType;
+	availableLayoutModes?: LessonLayoutMode[];
 	workbench: WorkbenchType;
 	artifact: ArtifactContract;
 	nextLessonId?: string;

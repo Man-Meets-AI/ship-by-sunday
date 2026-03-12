@@ -169,7 +169,8 @@ export const designLessons = [
 		block: "DESIGN",
 		title: "Storyboard the Journey",
 		shortTitle: "Storyboard",
-		shell: "split",
+		shell: "focus",
+		availableLayoutModes: ["focus"],
 		workbench: "capture_upload",
 		artifact: {
 			key: "storyboard_image",
@@ -181,51 +182,59 @@ export const designLessons = [
 		nextLessonId: "2.4",
 		prevLessonId: "2.2",
 		unlocks: { lessons: ["2.4"] },
-		coachMode: "docked",
+		coachMode: "pip",
 		objectiveTitle: "DESIGN 2.3 — Storyboard the Journey",
 		checklist: [
-			"Draw 5–7 frames",
-			"Show the user moving through the experience",
-			"Upload one clean storyboard",
+			"Map 5–7 frames in order",
+			"Use paper, tablet, or Excalidraw",
+			"Upload one clean photo or export",
 		],
-		helperText: "This should capture the journey, not polish.",
-		winCondition: "A storyboard image is uploaded.",
-		panelDefaults: splitPanelDefaults,
+		helperText:
+			"Storyboard this offline on paper, a tablet, or Excalidraw. One clean image is enough.",
+		winCondition:
+			"A storyboard image is uploaded and ready for the Figma step.",
+		panelDefaults: focusPanelDefaults,
 		pinnedArtifacts: ["sketch_set"],
 		workbenchFields: [
 			{
 				id: "storyboard_upload",
-				label: "Upload Storyboard",
+				label: "Upload storyboard image",
 				kind: "image_upload",
 				required: true,
+				helpText:
+					"A phone photo, tablet screenshot, or Excalidraw export is enough. Upload one clean image before moving into Figma.",
 			},
 		],
 		content: {
 			status: "draft",
-			intro: "A good storyboard reduces confusion before code starts.",
+			intro:
+				"Storyboard the flow off-screen first. Paper, tablet, or Excalidraw is fine.",
 			lessonMeta: {
 				runtimeLabel: "6-8 min",
-				goal: "Turn sketches into an ordered experience.",
+				goal: "Turn rough screens into one ordered user journey.",
 				purpose:
-					"This helps them think in scenes rather than isolated screens.",
+					"This keeps the flow clear before they touch Figma or over-polish anything.",
 			},
 			actionCard: {
-				jobNow: "Lay out the user journey screen by screen.",
+				jobNow:
+					"Storyboard the user journey off-screen in 5-7 frames, then upload one clean image.",
 				timebox: "15 minutes",
-				comeBackWith: "A storyboard of the experience.",
+				comeBackWith: "One storyboard image that shows the journey in order.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Storyboard the Journey",
 				resources: WORKSHEET_02_RESOURCES,
 			}),
 			workbench: {
-				prompt: "A good storyboard reduces confusion before code starts.",
+				prompt:
+					"Do this off-screen. Sequence the journey first, then bring back one clean image.",
 				teachingPoints: [
-					"Start with where the user first encounters the product.",
-					"Move through the key task.",
-					"End on the outcome or completion moment.",
+					"Paper, tablet, or Excalidraw all count.",
+					"Show the key screens or state changes in order, not polished UI.",
+					"One photo or export is enough. Figma comes next.",
 				],
-				emptyState: "A good storyboard reduces confusion before code starts.",
+				emptyState:
+					"Do this off-screen. Sequence the journey first, then bring back one clean image.",
 				...WORKSHEET_02_STORYBOARD_TEMPLATE_DOWNLOAD,
 			},
 		},

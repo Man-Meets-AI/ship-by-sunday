@@ -6,9 +6,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 
 import {
+	getDefaultLayoutModeForLesson,
 	getLesson,
 	getLessonHref,
+	lessonSupportsLayoutToggle,
+	normalizeLayoutModeForLesson,
 	type LessonConfig,
+	type LessonLayoutMode,
 } from "@/lib/course/manifest";
 import { api } from "@/convex/_generated/api";
 import { WorkbenchRenderer } from "@/components/lesson-workbench";
@@ -28,7 +32,7 @@ import {
 import type { ProductTheme } from "@/lib/product-theme";
 
 type LessonChromeState = {
-	layoutMode: "split" | "focus";
+	layoutMode: LessonLayoutMode;
 	coachVisible: boolean;
 	activeCoachPanel: "watch" | "transcript" | "examples" | "resources";
 };
@@ -108,7 +112,7 @@ function getDefaultCoachPanel(
 
 function getDefaultChromeState(lesson: LessonConfig): LessonChromeState {
 	return {
-		layoutMode: lesson.shell === "focus" ? "focus" : "split",
+		layoutMode: getDefaultLayoutModeForLesson(lesson),
 		coachVisible: lesson.panelDefaults.coach !== "minimized",
 		activeCoachPanel: getDefaultCoachPanel(lesson),
 	};
@@ -240,11 +244,19 @@ export function LessonPage({
 
 		try {
 			const parsed = JSON.parse(stored);
-			setChromeState(isChromeState(parsed) ? parsed : defaults);
+			if (!isChromeState(parsed)) {
+				setChromeState(defaults);
+				return;
+			}
+
+			setChromeState({
+				...parsed,
+				layoutMode: normalizeLayoutModeForLesson(lesson, parsed.layoutMode),
+			});
 		} catch {
 			setChromeState(defaults);
 		}
-	}, [fallbackChromeState, lessonId]);
+	}, [fallbackChromeState, lesson, lessonId]);
 
 	useEffect(() => {
 		window.localStorage.setItem(
@@ -302,11 +314,13 @@ export function LessonPage({
 		currentLessonId: lessonId,
 		viewportMode: "app" as const,
 		layoutMode: chromeState.layoutMode,
-		onLayoutModeChange: (layoutMode: LessonChromeState["layoutMode"]) =>
-			setChromeState((current) => ({
-				...current,
-				layoutMode,
-			})),
+		onLayoutModeChange: lessonSupportsLayoutToggle(lesson)
+			? (layoutMode: LessonChromeState["layoutMode"]) =>
+					setChromeState((current) => ({
+						...current,
+						layoutMode: normalizeLayoutModeForLesson(lesson, layoutMode),
+					}))
+			: undefined,
 		coachVisible:
 			chromeState.layoutMode === "split" ? chromeState.coachVisible : false,
 		onCoachToggle:

@@ -81,7 +81,7 @@ export const WORKSHEET_02_TEMPLATE_DOWNLOAD: LessonTemplateResource = {
 
 export const WORKSHEET_02_STORYBOARD_TEMPLATE_DOWNLOAD: LessonTemplateResource =
 	{
-		templateDownloadLabel: "Open Worksheet 02 storyboard template",
+		templateDownloadLabel: "Open printable storyboard worksheet",
 		templateDownloadHref: "/downloads/ship-by-sunday-worksheets.pdf",
 	};
 
