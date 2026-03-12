@@ -52,4 +52,5 @@ If a workstream doc conflicts with `todo.md` or the implemented app state, updat
 - `design/brand-visual-system.md`
 - `design/creative-playbook.md`
 - `dev/architecture.md`
+- `dev/course-state-lifecycle.md`
 - `dev/convex-sop.md`

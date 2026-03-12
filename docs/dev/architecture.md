@@ -31,3 +31,4 @@
 - `lib/course/registry.ts` derives runtime helpers from that contract.
 - `app/lesson/[lessonId]/page.tsx` validates the lesson ID server-side, then the lesson page resolves the static lesson definition locally from `lib/course`.
 - `convex/course.ts` stores dynamic course state only: entitlements, access gating, lesson progress, uploads, pinned artifact previews, and hydrated draft field values.
+- `convex/course.ts` should route lesson-state reads and writes through one internal viewer-state lifecycle so mission status, lesson access, artifacts, and draft/complete mutations all share the same compatibility rules.
