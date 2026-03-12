@@ -4,6 +4,7 @@ import {
 	getLessonById,
 } from "@/lib/course";
 import {
+	completeLesson,
 	getLessonState,
 	getMissionState,
 	listArtifacts,
@@ -179,5 +180,52 @@ describe("course state lifecycle", () => {
 				}),
 			}),
 		);
+	});
+
+	it("completes a lesson and returns the next lesson id for the celebration flow", async () => {
+		const insert = vi.fn().mockResolvedValue("new_lesson_state");
+		const ctx = createCourseCtx({ insert });
+		const fixedNow = 1_700_000_000_100;
+
+		vi.spyOn(Date, "now").mockReturnValue(fixedNow);
+
+		const result = await (completeLesson as any)._handler(ctx, {
+			lessonId: "0.1",
+			fieldValues: {
+				weekend_goal: "Ship a working internal AI ops helper by Sunday.",
+			},
+		});
+
+		expect(result).toEqual({
+			completedAt: fixedNow,
+			nextLessonId: "0.2",
+		});
+		expect(insert).toHaveBeenCalledWith(
+			"lessonStates",
+			expect.objectContaining({
+				lessonId: "0.1",
+				status: "completed",
+				completedAt: fixedNow,
+				fieldValues: expect.objectContaining({
+					weekend_goal: "Ship a working internal AI ops helper by Sunday.",
+				}),
+			}),
+		);
+	});
+
+	it("throws the structured incomplete-lesson error when required fields are missing", async () => {
+		const ctx = createCourseCtx();
+
+		await expect(
+			(completeLesson as any)._handler(ctx, {
+				lessonId: "0.1",
+				fieldValues: {},
+			}),
+		).rejects.toMatchObject({
+			data: expect.objectContaining({
+				code: "INCOMPLETE_LESSON",
+				message: "Finish the required work before continuing.",
+			}),
+		});
 	});
 });
