@@ -6,6 +6,7 @@ It does not replace the root `todo.md`, which remains the launch tracker and sou
 
 ## Active
 
+- [x] Replace the lesson pipe-delimited table textarea with a shared editable table field, add manifest column metadata, clean up duplicated table headers, and update table artifact previews
 - [x] Add a system-punch lesson completion celebration that visibly rewards completion before auto-advancing
 - [x] Clean up lesson `1.2`’s handoff chooser so it uses one clear title, uniform problem cards, and aligned carry-forward language across the workbench and task model
 - [x] Simplify lesson `1.2` so selecting a candidate problem also locks the user, remove the duplicate user-entry step, and keep the lesson focused on pain moment, workaround, and reachability
@@ -60,6 +61,9 @@ It does not replace the root `todo.md`, which remains the launch tracker and sou
 
 ## Review
 
+- Outcome: Replaced the lesson table textarea pattern with a shared editable table control that renders semantic desktop tables and mobile row cards, added manifest-backed column metadata for every current `kind: table` lesson, hid duplicated inner table labels inside primary card wrappers, and converted table artifact previews into readable row summaries while keeping persistence backward-compatible as `string[][]`.
+- Verification: `pnpm exec vitest run tests/unit/lesson-workbench-helpers.test.ts tests/unit/course-registry.test.ts tests/unit/lesson-workbench-renderer.test.tsx`, `pnpm run typecheck`, and `pnpm exec eslint components/artifacts-page.tsx components/lesson-shells.tsx components/lesson-workbench/fields/collection-field-controls.tsx components/lesson-workbench/fields/editable-table-field.tsx components/lesson-workbench/fields/field-control.tsx components/lesson-workbench/fields/value-codecs.ts components/lesson-workbench/modes/score-table-workbench.tsx components/lesson-workbench/modes/tracker-log-workbench.tsx components/lesson-workbench/shared/artifact-format.ts components/lesson-workbench/types.ts lib/course/contracts.ts lib/course/lessons/build.ts lib/course/lessons/ceo.ts lib/course/lessons/ship.ts lib/course/registry.ts lib/course/table.ts tests/unit/course-registry.test.ts tests/unit/lesson-workbench-helpers.test.ts tests/unit/lesson-workbench-renderer.test.tsx`
+- Follow-up: Browser-QA lessons `1.4`, `3.5`, `4.4`, and `4.5` on desktop and mobile to tune column widths, row-card density, and how much table preview detail should remain visible in saved-work surfaces.
 - Outcome: Added a lesson-completion celebration flow that holds navigation briefly after a successful `completeLesson`, morphs the CTA into a success state, shows a centered `Lesson cleared` banner with artifact/next-unlock copy, and drives a matching completion cue through the bottom skill rail with CSS-first motion plus reduced-motion fallbacks.
 - Verification: `pnpm exec vitest run tests/unit/skill-rail.test.tsx tests/unit/course-state-lifecycle.test.ts tests/smoke/lesson-completion-celebration.test.ts tests/smoke/lesson-state-contract.test.ts tests/smoke/motion-phase-one.test.ts` and `pnpm run typecheck`
 - Follow-up: Browser-QA the celebration on desktop and mobile in both split and focus lesson layouts to tune the 900ms timing, banner weight, and rail visibility against the live feel.
