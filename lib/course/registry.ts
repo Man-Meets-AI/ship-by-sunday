@@ -14,16 +14,7 @@ import {
 	type WorkbenchField,
 	type WorkbenchSection,
 } from "./manifest";
-import {
-	CORE_FLOW_ACTORS_FIELD_ID,
-	CORE_FLOW_ENDING_FIELD_ID,
-	CORE_FLOW_IMAGE_FIELD_ID,
-	CORE_FLOW_MAX_ACTORS,
-	CORE_FLOW_MAX_STEPS,
-	CORE_FLOW_MIN_STEPS,
-	CORE_FLOW_STEPS_FIELD_ID,
-	getCoreFlowDraftState,
-} from "./core-flow-map";
+import { CORE_FLOW_IMAGE_FIELD_ID } from "./core-flow";
 import {
 	getReferenceGalleryCount as getStoredReferenceGalleryCount,
 	getReferenceGallerySummary,
@@ -876,62 +867,6 @@ export function getObjectiveTasks(
 		);
 	}
 
-	if (lesson.workbench === "core_flow_map") {
-		const flowState = getCoreFlowDraftState(values);
-
-		return [
-			{
-				id: CORE_FLOW_ACTORS_FIELD_ID,
-				label: "Lock the actors",
-				status:
-					flowState.validActorCount >= 1 &&
-					flowState.validActorCount <= CORE_FLOW_MAX_ACTORS
-						? "complete"
-						: "incomplete",
-				source: "field",
-				fieldId: CORE_FLOW_ACTORS_FIELD_ID,
-				sectionId: "actors",
-				sectionTitle: "Actors",
-				interactive: false,
-			},
-			{
-				id: CORE_FLOW_STEPS_FIELD_ID,
-				label: "Map 5-7 steps",
-				status:
-					flowState.filledStepCount >= CORE_FLOW_MIN_STEPS &&
-					flowState.filledStepCount <= CORE_FLOW_MAX_STEPS &&
-					!flowState.hasPartialStep
-						? "complete"
-						: "incomplete",
-				source: "field",
-				fieldId: CORE_FLOW_STEPS_FIELD_ID,
-				sectionId: "steps",
-				sectionTitle: "Flow",
-				interactive: false,
-			},
-			{
-				id: CORE_FLOW_ENDING_FIELD_ID,
-				label: "Define the value moment",
-				status: flowState.endingDraft ? "complete" : "incomplete",
-				source: "field",
-				fieldId: CORE_FLOW_ENDING_FIELD_ID,
-				sectionId: "ending",
-				sectionTitle: "Ending",
-				interactive: false,
-			},
-			{
-				id: CORE_FLOW_IMAGE_FIELD_ID,
-				label: "Save current map image",
-				status: flowState.hasSavedImage ? "complete" : "incomplete",
-				source: "field",
-				fieldId: CORE_FLOW_IMAGE_FIELD_ID,
-				sectionId: "image",
-				sectionTitle: "Saved image",
-				interactive: false,
-			},
-		];
-	}
-
 	const fieldsById = new Map(
 		(lesson.workbenchFields ?? []).map((field) => [field.id, field]),
 	);
@@ -1017,16 +952,6 @@ export function getCompletionIssues(
 	context: ObjectiveTaskContext = {},
 ) {
 	const values = normalizeLessonFieldValues(lesson, fieldValues);
-
-	if (lesson.workbench === "core_flow_map") {
-		return getObjectiveTasks(lesson, values, context)
-			.filter((task) => task.status !== "complete")
-			.map((task) => ({
-				id: task.fieldId ?? task.id,
-				label: task.label,
-				kind: "field" as const,
-			}));
-	}
 
 	const objectiveMode = getObjectiveMode(lesson);
 

@@ -13,10 +13,10 @@ import { BriefAssemblerWorkbench } from "./modes/brief-assembler-workbench";
 import { BuildKickoffWorkbench } from "./modes/build-kickoff-workbench";
 import { CaptureUploadWorkbench } from "./modes/capture-upload-workbench";
 import { CollectorBoardWorkbench } from "./modes/collector-board-workbench";
-import { CoreFlowMapWorkbench } from "./modes/core-flow-map-workbench";
 import { ConsoleChecklistWorkbench } from "./modes/console-checklist-workbench";
 import { ExternalWorkspaceWorkbench } from "./modes/external-workspace-workbench";
 import { GuidedFormWorkbench } from "./modes/guided-form-workbench";
+import { PaperPhotoUploadWorkbench } from "./modes/paper-photo-upload-workbench";
 import { ReferenceGalleryWorkbench } from "./modes/reference-gallery-workbench";
 import { RoadmapOverviewWorkbench } from "./modes/roadmap-overview-workbench";
 import { SketchUploadWorkbench } from "./modes/sketch-upload-workbench";
@@ -33,9 +33,9 @@ const modeRenderers: Record<WorkbenchType, WorkbenchModeComponent> = {
 	score_table: ScoreTableWorkbench,
 	collector_board: CollectorBoardWorkbench,
 	capture_upload: CaptureUploadWorkbench,
+	paper_photo_upload: PaperPhotoUploadWorkbench,
 	sketch_upload: SketchUploadWorkbench,
 	reference_gallery: ReferenceGalleryWorkbench,
-	core_flow_map: CoreFlowMapWorkbench,
 	scope_split: ScopeSplitWorkbench,
 	brief_assembler: BriefAssemblerWorkbench,
 	build_kickoff: BuildKickoffWorkbench,

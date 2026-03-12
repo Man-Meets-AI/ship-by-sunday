@@ -1,8 +1,5 @@
 import type { ArtifactType, LessonConfig, UploadFieldValue } from "./contracts";
-import {
-	CORE_FLOW_IMAGE_FIELD_ID,
-	getCoreFlowDraftState,
-} from "./core-flow-map";
+import { CORE_FLOW_IMAGE_FIELD_ID } from "./core-flow";
 import {
 	getReferenceGalleryCount,
 	getReferenceGalleryImageUrls,
@@ -162,7 +159,6 @@ function buildCeoStageUnlockSummary(
 	const researchSignalCount = getFilledTableRows(
 		researchArtifact?.fieldValues.research_table,
 	).length;
-	const flowState = getCoreFlowDraftState(flowArtifact?.fieldValues ?? {});
 	const keepCount = countFilledLines(scopeArtifact?.fieldValues.in_scope);
 	const cutCount = countFilledLines(scopeArtifact?.fieldValues.out_of_scope);
 	const flowImageValue = flowArtifact?.fieldValues[CORE_FLOW_IMAGE_FIELD_ID];
@@ -211,16 +207,7 @@ function buildCeoStageUnlockSummary(
 	]
 		.filter(Boolean)
 		.join("\n");
-	const flow = [
-		flowState.validActorCount > 0
-			? `${flowState.validActorCount} actor${
-					flowState.validActorCount === 1 ? "" : "s"
-				} across ${flowState.filledStepCount} step${
-					flowState.filledStepCount === 1 ? "" : "s"
-				}`
-			: "",
-		flowState.endingDraft ? `Value moment: ${flowState.endingDraft}` : "",
-	]
+	const flow = [flowImageUrl ? "1 core flow photo saved for Design" : ""]
 		.filter(Boolean)
 		.join("\n");
 	const scope = [
@@ -262,7 +249,7 @@ function buildCeoStageUnlockSummary(
 				user_locked_count: who ? 1 : 0,
 				outcome_defined_count: outcome ? 1 : 0,
 				research_signal_count: researchSignalCount,
-				flow_step_count: flowState.filledStepCount,
+				flow_step_count: flowImageUrl ? 1 : 0,
 				scope_cut_count: cutCount,
 				flow_image_url: flowImageUrl,
 			},
@@ -280,7 +267,7 @@ function buildCeoStageUnlockSummary(
 			},
 			{
 				label: "Flow",
-				value: `${getCountLabel(flowState.filledStepCount, "step")} flow`,
+				value: flowImageUrl ? "1 flow image ready" : "0 flow images ready",
 			},
 			{ label: "Scope", value: `${getCountLabel(cutCount, "cut")} made` },
 		],

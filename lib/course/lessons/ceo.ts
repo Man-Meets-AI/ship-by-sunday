@@ -5,18 +5,8 @@ import {
 	type LessonConfig,
 	type LessonExampleContent,
 } from "../contracts";
-import {
-	WORKSHEET_01_RESOURCE,
-	WORKSHEET_01_FIGJAM_TEMPLATE_DOWNLOAD,
-	WORKSHEET_01_RESOURCES,
-} from "../resources";
-import {
-	CORE_FLOW_ACTORS_FIELD_ID,
-	CORE_FLOW_ENDING_FIELD_ID,
-	CORE_FLOW_IMAGE_FIELD_ID,
-	CORE_FLOW_STEP_COLUMNS,
-	CORE_FLOW_STEPS_FIELD_ID,
-} from "../core-flow-map";
+import { CORE_FLOW_IMAGE_FIELD_ID } from "../core-flow";
+import { WORKSHEET_01_RESOURCE, WORKSHEET_01_RESOURCES } from "../resources";
 
 const START_WITH_PROBLEM_EXAMPLES: LessonExampleContent[] = [
 	{
@@ -734,8 +724,9 @@ export const ceoLessons = [
 		block: "CEO",
 		title: "Map the Core Flow",
 		shortTitle: "Flow",
-		shell: "split",
-		workbench: "core_flow_map",
+		shell: "focus",
+		availableLayoutModes: ["focus"],
+		workbench: "paper_photo_upload",
 		artifact: {
 			key: "core_flow_image",
 			label: "Core Flow Map",
@@ -749,64 +740,42 @@ export const ceoLessons = [
 		coachMode: "docked",
 		objectiveTitle: "CEO 1.5 — Map the Core Flow",
 		checklist: [
-			"Lock the actors",
-			"Map the flow in 5-7 steps",
-			"Save the current map image",
+			"Watch the walkthrough",
+			"Draw the core flow on paper",
+			"Upload one clear photo",
 		],
 		helperText:
-			"Build the map in the stage first. Keep the flow to 5-7 steps, then save the current map image before continuing.",
+			"Watch the walkthrough, draw the core flow off-screen with paper and pen, then upload one clean photo before continuing.",
 		winCondition: "The core flow map is saved as a lesson image.",
-		panelDefaults: splitPanelDefaults,
-		fieldShapeVersion: 4,
+		panelDefaults: focusPanelDefaults,
+		fieldShapeVersion: 5,
 		pinnedArtifacts: ["user_statement", "outcome_statement"],
 		workbenchFields: [
 			{
-				id: CORE_FLOW_ACTORS_FIELD_ID,
-				label: "Actors",
-				kind: "board",
-				required: true,
-				artifactPreviewLabel: "Actors",
-				taskLabel: "Lock the actors",
-			},
-			{
-				id: CORE_FLOW_STEPS_FIELD_ID,
-				label: "Flow steps",
-				kind: "table",
-				required: true,
-				columns: CORE_FLOW_STEP_COLUMNS,
-				artifactPreviewLabel: "Flow steps",
-				taskLabel: "Map 5-7 steps",
-			},
-			{
-				id: CORE_FLOW_ENDING_FIELD_ID,
-				label: "Value moment",
-				kind: "text",
-				required: true,
-				artifactPreviewLabel: "Value moment",
-				taskLabel: "Define the value moment",
-			},
-			{
 				id: CORE_FLOW_IMAGE_FIELD_ID,
-				label: "Save current map image",
+				label: "Upload core flow photo",
 				kind: "image_upload",
 				required: true,
+				helpText:
+					"A paper photo is ideal. A tablet sketch, FigJam screenshot, or another off-screen image still counts if the 5-7 step flow is clear.",
+				taskLabel: "Upload core flow photo",
 			},
 		],
 		content: {
 			status: "draft",
 			intro:
-				"If you cannot explain the flow in 5 to 7 steps, it is probably too muddy.",
+				"Watch the walkthrough, map the core flow on paper, and upload one clean photo before you move on.",
 			lessonMeta: {
-				runtimeLabel: "7-9 min",
-				goal: "Turn the app into a 5-7 step user journey.",
+				runtimeLabel: "6-8 min",
+				goal: "Get the core flow out of your head and onto paper fast.",
 				purpose:
-					"This is where the product becomes navigable. If they cannot map it, they cannot design or build it cleanly.",
+					"This keeps the product concrete before Design. A clear hand-drawn flow is enough for the next step.",
 			},
 			actionCard: {
 				jobNow:
-					"Use the stage to map the core flow, keep it to 5-7 steps, then save the current map image.",
-				timebox: "12 minutes",
-				comeBackWith: "A saved core flow map image.",
+					"Watch the lesson, draw the core flow on paper in 5-7 steps, then upload one clear photo.",
+				timebox: "15 minutes",
+				comeBackWith: "One uploaded core flow photo.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Map the Core Flow",
@@ -815,15 +784,14 @@ export const ceoLessons = [
 			}),
 			workbench: {
 				prompt:
-					"Map the flow in the stage, keep it to 5-7 steps, and save the current map image before you continue.",
+					"Do this off-screen. Watch first, map the core flow on paper, and bring back one clean photo.",
 				teachingPoints: [
-					"List actors if needed, but keep it light.",
-					"Write the ending first if that helps.",
-					"Focus on the critical moment where the product actually delivers value.",
+					"Paper and pen is the default. Do it fast, not beautifully.",
+					"Keep it to 5-7 steps and make the sequence easy to follow.",
+					"If you already did it on a tablet or digitally, one clean screenshot still counts.",
 				],
 				emptyState:
-					"Start with one actor, one ending, and the shortest believable 5-step path between them.",
-				...WORKSHEET_01_FIGJAM_TEMPLATE_DOWNLOAD,
+					"Do this off-screen. Watch first, map the core flow on paper, and bring back one clean photo.",
 			},
 		},
 	},
