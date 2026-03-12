@@ -237,6 +237,14 @@ describe("WorkbenchRenderer", () => {
 		);
 	});
 
+	it("renders the lesson metadata badges as non-selectable chrome", () => {
+		const markup = renderLessonWorkbench("1.5");
+
+		expect(markup).toContain(
+			'<div class="flex flex-wrap items-center gap-1.5 text-product-muted select-none">',
+		);
+	});
+
 	it("renders lesson 1.5 with the FigJam template and clean pinned context cards", () => {
 		const markup = renderLessonWorkbench("1.5", {
 			pinnedArtifacts: [
