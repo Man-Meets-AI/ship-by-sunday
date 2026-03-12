@@ -207,16 +207,7 @@ function getCoreFlowArtifact(): PinnedArtifact {
 	expect(lesson).toBeTruthy();
 
 	return buildArtifactPreview(lesson!, {
-		__fieldShapeVersion: 4,
-		flow_actors: ["Startup operators"],
-		flow_steps: [
-			["Startup operators", "Paste notes"],
-			["Startup operators", "Generate summary"],
-			["Startup operators", "Review action items"],
-			["Startup operators", "Share next steps"],
-			["Startup operators", "Close the loop"],
-		],
-		flow_ending: "They leave with a clean action summary in minutes.",
+		__fieldShapeVersion: 5,
 		__core_flow_image_upload: {
 			kind: "upload",
 			status: "stored",
@@ -358,7 +349,7 @@ describe("WorkbenchRenderer", () => {
 			},
 			{
 				lessonId: "1.5",
-				expected: "Core flow stage",
+				expected: "Upload the photo",
 			},
 			{
 				lessonId: "1.6",
@@ -538,12 +529,12 @@ describe("WorkbenchRenderer", () => {
 		);
 	});
 
-	it("renders stage-save and fallback controls for lesson 1.5", () => {
+	it("renders the upload control for lesson 1.5", () => {
 		const markup = renderLessonWorkbench("1.5");
 
-		expect(markup).toContain("Save image");
-		expect(markup).toContain("Upload external screenshot");
-		expect(markup).toContain("Use Figma instead");
+		expect(markup).toContain("Upload core flow photo");
+		expect(markup).toContain("Watch first");
+		expect(markup).toContain("Watch video");
 	});
 
 	it("renders the lesson metadata badges as non-selectable chrome", () => {
@@ -554,7 +545,7 @@ describe("WorkbenchRenderer", () => {
 		);
 	});
 
-	it("renders lesson 1.5 with the FigJam template and clean pinned context cards", () => {
+	it("renders lesson 1.5 as a video-first paper upload lesson", () => {
 		const markup = renderLessonWorkbench("1.5", {
 			pinnedArtifacts: [
 				getUserStatementArtifact(),
@@ -562,24 +553,18 @@ describe("WorkbenchRenderer", () => {
 			],
 		});
 
-		expect(markup).toContain("Open FigJam template");
+		expect(markup).toContain("Watch first");
+		expect(markup).toContain("Do this now");
+		expect(markup).toContain("Upload the photo");
 		expect(markup).toContain(
-			"https://www.figma.com/board/csR3w46LJaHNU0RKHVOJDB/Template-for-Storyboard?node-id=0-1",
+			"Draw the core flow off-screen with paper and pen. Keep it to 5-7 steps, take one clear photo, and upload it here.",
 		);
-		expect(markup).toContain('target="_blank"');
-		expect(markup).toContain('rel="noreferrer"');
-		expect(markup).toContain("Core flow stage");
-		expect(markup).toContain("Saved artifact");
-		expect(markup).toContain("Upload external screenshot");
+		expect(markup).toContain("Need context?");
 		expect(markup).toContain("Our user");
 		expect(markup).toContain("Outcome statement");
-		expect(markup).not.toContain("Research Notes");
-		expect(markup).not.toContain("Template Preview");
-		expect(markup).not.toContain(
-			"This field will populate from an earlier saved artifact.",
-		);
-		expect(markup).not.toContain("Pick One User");
-		expect(markup).not.toContain("Define the Outcome");
+		expect(markup).not.toContain("Core flow stage");
+		expect(markup).not.toContain("Save image");
+		expect(markup).not.toContain("Use Figma instead");
 	});
 
 	it("renders lesson 2.3 as an offline storyboard upload handoff", () => {

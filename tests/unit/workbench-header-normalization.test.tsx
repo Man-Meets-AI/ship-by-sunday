@@ -138,11 +138,11 @@ describe("Workbench header normalization", () => {
 	});
 
 	it("keeps template, pinned context, and import cards on thin labels across lesson workbenches", () => {
-		const lessonOneFive = getLessonById("1.5");
-		expect(lessonOneFive).toBeTruthy();
+		const storyboardLesson = getLessonById("2.3");
+		expect(storyboardLesson).toBeTruthy();
 
 		const templateMarkup = renderToStaticMarkup(
-			<TemplateDownloadCard lessonContent={lessonOneFive!.content} />,
+			<TemplateDownloadCard lessonContent={storyboardLesson!.content} />,
 		);
 		const importWorkbenchMarkup = renderLessonWorkbench("1.4", {
 			pinnedArtifacts: [
@@ -165,6 +165,12 @@ describe("Workbench header normalization", () => {
 		);
 		expect(importWorkbenchMarkup).toContain(
 			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Research table</span>',
+		);
+		expect(captureUploadMarkup).toContain(
+			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Do this now</span>',
+		);
+		expect(captureUploadMarkup).toContain(
+			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Upload the photo</span>',
 		);
 		expect(captureUploadMarkup).toContain(
 			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Our user</span>',

@@ -71,16 +71,7 @@ function getCoreFlowArtifact() {
 	expect(lesson).toBeTruthy();
 
 	return buildArtifactPreview(lesson!, {
-		[FIELD_SHAPE_VERSION_FIELD_ID]: 4,
-		flow_actors: ["Startup operators"],
-		flow_steps: [
-			["Startup operators", "Paste notes"],
-			["Startup operators", "Generate summary"],
-			["Startup operators", "Review action items"],
-			["Startup operators", "Share next steps"],
-			["Startup operators", "Close the loop"],
-		],
-		flow_ending: "They leave with a clean action summary in minutes.",
+		[FIELD_SHAPE_VERSION_FIELD_ID]: 5,
 		__core_flow_image_upload: {
 			kind: "upload",
 			status: "stored",
@@ -395,29 +386,20 @@ describe("course registry", () => {
 		expect(issues.map((issue) => issue.label)).toContain("Research Table");
 	});
 
-	it("requires 1.5 to save the generated map image before completion", () => {
+	it("requires 1.5 to upload a core flow photo before completion", () => {
 		const lesson = getLessonById("1.5");
 		expect(lesson).toBeTruthy();
 
 		const issues = getCompletionIssues(lesson!, {
-			[FIELD_SHAPE_VERSION_FIELD_ID]: 4,
-			flow_actors: ["Startup operators"],
-			flow_steps: [
-				["Startup operators", "Paste notes"],
-				["Startup operators", "Generate summary"],
-				["Startup operators", "Review"],
-				["Startup operators", "Share"],
-				["Startup operators", "Close the loop"],
-			],
-			flow_ending: "They leave with a clean action summary in minutes.",
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 5,
 		});
 
 		expect(issues.map((issue) => issue.label)).toContain(
-			"Save current map image",
+			"Upload core flow photo",
 		);
 	});
 
-	it("requires 1.5 to fill 5-7 complete steps", () => {
+	it("still requires the uploaded photo when legacy 1.5 structured fields exist without one", () => {
 		const lesson = getLessonById("1.5");
 		expect(lesson).toBeTruthy();
 
@@ -430,14 +412,11 @@ describe("course registry", () => {
 				["Startup operators", ""],
 			],
 			flow_ending: "They leave with a clean action summary in minutes.",
-			__core_flow_image_upload: {
-				kind: "upload",
-				status: "stored",
-				storageId: "core-flow-image",
-			},
 		});
 
-		expect(issues.map((issue) => issue.label)).toContain("Map 5-7 steps");
+		expect(issues.map((issue) => issue.label)).toContain(
+			"Upload core flow photo",
+		);
 	});
 
 	it("keeps manual task fallback for lessons without observable workbench fields", () => {
@@ -753,16 +732,7 @@ describe("course registry", () => {
 		expect(lesson).toBeTruthy();
 
 		const preview = buildArtifactPreview(lesson!, {
-			[FIELD_SHAPE_VERSION_FIELD_ID]: 4,
-			flow_actors: ["Startup operators"],
-			flow_steps: [
-				["Startup operators", "Paste notes"],
-				["Startup operators", "Generate summary"],
-				["Startup operators", "Review"],
-				["Startup operators", "Share"],
-				["Startup operators", "Close the loop"],
-			],
-			flow_ending: "They leave with a clean action summary in minutes.",
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 5,
 			__core_flow_image_upload: {
 				kind: "upload",
 				status: "stored",
@@ -770,11 +740,7 @@ describe("course registry", () => {
 			},
 		});
 
-		expect(preview.fields.map(([label]) => label)).toEqual([
-			"Actors",
-			"Flow steps",
-			"Value moment",
-		]);
+		expect(preview.fields).toEqual([]);
 	});
 
 	it("composes a non-empty product brief from saved CEO artifacts", () => {
@@ -797,7 +763,7 @@ describe("course registry", () => {
 			"Scope",
 		]);
 		expect(preview.fieldValues.research_signal_count).toBe(3);
-		expect(preview.fieldValues.flow_step_count).toBe(5);
+		expect(preview.fieldValues.flow_step_count).toBe(1);
 		expect(preview.fieldValues.scope_cut_count).toBe(4);
 		expect(preview.fieldValues.flow_image_url).toBe(
 			"https://example.com/core-flow.png",
