@@ -5,6 +5,7 @@ import {
 	type LessonConfig,
 } from "../contracts";
 import {
+	DESIGN_REFERENCE_RESOURCES,
 	WORKSHEET_02_RESOURCES,
 	WORKSHEET_02_STORYBOARD_TEMPLATE_DOWNLOAD,
 	WORKSHEET_02_TEMPLATE_DOWNLOAD,
@@ -19,11 +20,11 @@ export const designLessons = [
 		title: "Find References First",
 		shortTitle: "References",
 		shell: "split",
-		workbench: "collector_board",
+		workbench: "reference_gallery",
 		artifact: {
 			key: "reference_board",
-			label: "Reference Board",
-			type: "board",
+			label: "Reference Gallery",
+			type: "images",
 			required: true,
 			dependsOn: ["product_brief"],
 		},
@@ -31,63 +32,64 @@ export const designLessons = [
 		prevLessonId: "1.7",
 		unlocks: { lessons: ["2.2"] },
 		coachMode: "docked",
+		fieldShapeVersion: 2,
 		objectiveTitle: "DESIGN 2.1 — Find References First",
 		checklist: [
-			"Add 5–10 references",
-			"Save what you like",
-			"Tag patterns you want to reuse",
+			"Save at least 3 references",
+			"Aim for 5–10 total references",
+			"Keep only the styles you want to borrow",
 		],
 		helperText:
-			"Collect references before you open Figma for real design work.",
-		winCondition: "A usable reference board is saved.",
-		panelDefaults: splitPanelDefaults,
+			"Collect reference images before you open Figma so your first design pass starts from real taste instead of guesses.",
+		winCondition: "At least 3 reference images are saved.",
+		panelDefaults: {
+			...splitPanelDefaults,
+			resources: "open",
+		},
 		pinnedArtifacts: ["product_brief"],
 		workbenchFields: [
 			{
-				id: "reference_input",
-				label: "Paste a link or add an image",
-				kind: "url",
-			},
-			{
-				id: "reference_board",
-				label: "Reference Board",
-				kind: "board",
+				id: "reference_gallery",
+				label: "Reference Gallery",
+				kind: "reference_gallery",
 				required: true,
-			},
-			{
-				id: "reference_patterns",
-				label: "What patterns keep repeating?",
-				kind: "textarea",
-				required: true,
-				rows: 3,
+				minItems: 3,
+				taskLabel: "Save at least 3 references",
+				artifactPreviewLabel: "Reference Gallery",
+				helpText:
+					"Drag in screenshots, paste clipboard images, or add direct image URLs. Inspiration site links belong in Coach Resources.",
 			},
 		],
 		content: {
 			status: "draft",
-			intro: "Do not design from a blank brain.",
+			intro:
+				"Do not design from a blank brain. Save the styles you want to borrow first.",
 			lessonMeta: {
 				runtimeLabel: "6-8 min",
 				goal: "Stop them from inventing from a blank brain.",
 				purpose:
-					"Use reference gathering to reduce randomness and raise taste quickly.",
+					"Use visual references to reduce randomness, sharpen taste, and make later design choices faster.",
 			},
 			actionCard: {
-				jobNow: "Gather 3-5 references close to your desired flow or look.",
+				jobNow:
+					"Save at least 3 references that feel close to the product style or flow you want.",
 				timebox: "10 minutes",
-				comeBackWith: "A mini inspiration board.",
+				comeBackWith: "A mini gallery of references you want to borrow from.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Find References First",
-				resources: WORKSHEET_02_RESOURCES,
+				resources: DESIGN_REFERENCE_RESOURCES,
 			}),
 			workbench: {
-				prompt: "Do not design from a blank brain.",
+				prompt:
+					"Save references you want to borrow from before you make your own screens.",
 				teachingPoints: [
-					"Show where you actually look: Mobbin, Spotted in Prod, SaaS sites, apps, whatever you really use.",
-					"Capture both UX flow and visual tone.",
-					"Tell them what to notice: layout, hierarchy, motion, trust cues.",
+					"Look for references that are close to your desired flow, hierarchy, motion, or trust cues.",
+					"Keep only the images that reflect the product taste you actually want to borrow.",
+					"Use Coach Resources for inspiration sites, then bring the saved screenshots back here.",
 				],
-				emptyState: "Do not design from a blank brain.",
+				emptyState:
+					"Save reference images here first, then use them later to shape your rough screens and visual direction.",
 			},
 		},
 	},
@@ -98,8 +100,8 @@ export const designLessons = [
 		block: "DESIGN",
 		title: "Sketch Before Software",
 		shortTitle: "Sketch",
-		shell: "split",
-		workbench: "capture_upload",
+		shell: "focus",
+		workbench: "sketch_upload",
 		artifact: {
 			key: "sketch_set",
 			label: "Sketch Set",
@@ -114,19 +116,23 @@ export const designLessons = [
 		objectiveTitle: "DESIGN 2.2 — Sketch Before Software",
 		checklist: [
 			"Draw 3–5 rough screens",
-			"Keep them ugly",
-			"Upload the sketches",
+			"Upload at least one clear photo",
+			"Move on once the sketch set is saved",
 		],
-		helperText: "Use upload, not an in-app sketch editor.",
+		helperText: "Sketch 3-5 rough screens, upload clear photos, then move on.",
 		winCondition: "A sketch set is uploaded.",
-		panelDefaults: splitPanelDefaults,
+		panelDefaults: focusPanelDefaults,
 		pinnedArtifacts: ["product_brief", "reference_board"],
 		workbenchFields: [
 			{
 				id: "sketch_upload",
-				label: "Upload Sketches",
-				kind: "image_upload",
+				label: "Upload sketch set",
+				kind: "image_uploads",
 				required: true,
+				minItems: 1,
+				taskLabel: "Upload at least one sketch photo",
+				helpText:
+					"One clear set is enough. The point is to make the app concrete before software gets involved.",
 			},
 		],
 		content: {
@@ -140,9 +146,10 @@ export const designLessons = [
 					"Sketching is speed. It forces decisions before the build starts lying to you.",
 			},
 			actionCard: {
-				jobNow: "Sketch the core screens of your app on paper.",
+				jobNow:
+					"Sketch 3-5 rough screens, upload clear photos, and keep moving.",
 				timebox: "15 minutes",
-				comeBackWith: "Rough paper sketches of the main screens.",
+				comeBackWith: "A saved sketch set you can carry into storyboarding.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Sketch Before Software",
@@ -246,7 +253,7 @@ export const designLessons = [
 		block: "DESIGN",
 		title: "Figma Basics for Speed",
 		shortTitle: "Figma",
-		shell: "focus",
+		shell: "watch",
 		workbench: "external_workspace",
 		artifact: {
 			key: "figma_file_ready",
@@ -266,18 +273,11 @@ export const designLessons = [
 			"Learn the minimum controls",
 			"Confirm the file is ready",
 		],
-		helperText: "Use focus mode. The real work is in Figma.",
-		winCondition: "User launches and confirms the Figma workspace.",
+		helperText: "Watch the walkthrough, then move into the Figma file.",
+		winCondition:
+			"The walkthrough is complete and the learner is ready for Figma.",
 		panelDefaults: focusPanelDefaults,
 		pinnedArtifacts: ["reference_board", "sketch_set", "storyboard_image"],
-		workbenchFields: [
-			{
-				id: "figma_url",
-				label: "Figma File URL",
-				kind: "url",
-				required: true,
-			},
-		],
 		content: {
 			status: "draft",
 			intro:

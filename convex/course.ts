@@ -12,12 +12,18 @@ import {
 	getUnlockedLessonIds,
 	isLessonFieldShapeCompatible,
 	isLessonImplemented,
+	isUploadFieldValue,
+	isUploadFieldValueArray,
 	normalizeLessonFieldValues,
 	normalizeFieldValues,
 	prepareFieldValuesForPersistence,
 	type ArtifactPreview,
 	type PersistedFieldValues,
 } from "../lib/course/registry";
+import {
+	hydrateReferenceGalleryValue,
+	isReferenceGalleryValue,
+} from "../lib/course/reference-gallery";
 import type { Doc } from "./_generated/dataModel";
 import {
 	internalMutation,
@@ -255,32 +261,52 @@ async function hydrateUploadUrls(
 ) {
 	const values = normalizeFieldValues(fieldValues as any);
 
+	async function hydrateUploadValue(value: Record<string, unknown>) {
+		const url = await ctx.storage.getUrl(
+			(value as { storageId: string }).storageId as any,
+		);
+
+		return {
+			...value,
+			status: "stored",
+			url: url ?? undefined,
+		};
+	}
+
 	return Object.fromEntries(
 		await Promise.all(
 			Object.entries(values).map(async ([fieldId, value]) => {
-				if (
-					!value ||
-					typeof value !== "object" ||
-					Array.isArray(value) ||
-					!("kind" in value) ||
-					(value as { kind?: string }).kind !== "upload" ||
-					!("storageId" in value) ||
-					!(value as { storageId?: string }).storageId
-				) {
+				if (isReferenceGalleryValue(value)) {
+					return [
+						fieldId,
+						await hydrateReferenceGalleryValue(value, async (storageId) =>
+							ctx.storage.getUrl(storageId as any),
+						),
+					];
+				}
+
+				if (isUploadFieldValueArray(value)) {
+					return [
+						fieldId,
+						await Promise.all(
+							value.map(async (item) => {
+								if (!item.storageId) {
+									return item;
+								}
+
+								return hydrateUploadValue(item as Record<string, unknown>);
+							}),
+						),
+					];
+				}
+
+				if (!isUploadFieldValue(value) || !value.storageId) {
 					return [fieldId, value];
 				}
 
-				const url = await ctx.storage.getUrl(
-					(value as { storageId: string }).storageId as any,
-				);
-
 				return [
 					fieldId,
-					{
-						...(value as Record<string, unknown>),
-						status: "stored",
-						url: url ?? undefined,
-					},
+					await hydrateUploadValue(value as Record<string, unknown>),
 				];
 			}),
 		),
@@ -768,26 +794,26 @@ export const listArtifacts = query({
 		return (
 			await Promise.all(
 				viewerState.compatibleCompletedLessonIds.map(async (lessonId) => {
-				const lesson = getLessonById(lessonId);
-				const lessonState = viewerState.lessonStateByLessonId.get(lessonId);
-				if (!lesson || !lessonState) {
-					return null;
-				}
+					const lesson = getLessonById(lessonId);
+					const lessonState = viewerState.lessonStateByLessonId.get(lessonId);
+					if (!lesson || !lessonState) {
+						return null;
+					}
 
-				const preview = await buildResolvedArtifactPreviewForLesson(
-					ctx,
-					viewerState,
-					lesson,
-					new Map(),
-				);
-				if (!preview) {
-					return null;
-				}
+					const preview = await buildResolvedArtifactPreviewForLesson(
+						ctx,
+						viewerState,
+						lesson,
+						new Map(),
+					);
+					if (!preview) {
+						return null;
+					}
 
-				return {
-					...preview,
-					completedAt: lessonState.completedAt ?? lessonState.updatedAt,
-				};
+					return {
+						...preview,
+						completedAt: lessonState.completedAt ?? lessonState.updatedAt,
+					};
 				}),
 			)
 		).filter(Boolean);

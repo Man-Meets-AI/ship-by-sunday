@@ -2,6 +2,7 @@ import type { FieldControlProps } from "../types";
 import { renderBasicFieldControl } from "./basic-field-controls";
 import { renderCollectionFieldControl } from "./collection-field-controls";
 import { ReadonlyFieldControl } from "./readonly-field-control";
+import { ReferenceGalleryFieldControl } from "./reference-gallery-field-control";
 import { UploadFieldControl } from "./upload-field-control";
 
 export function FieldControl({
@@ -32,7 +33,22 @@ export function FieldControl({
 		return collectionControl;
 	}
 
-	if (field.kind === "image_upload" || field.kind === "video_upload") {
+	if (field.kind === "reference_gallery") {
+		return (
+			<ReferenceGalleryFieldControl
+				field={field}
+				value={value}
+				onChange={onChange}
+				showLabel={showLabel}
+			/>
+		);
+	}
+
+	if (
+		field.kind === "image_upload" ||
+		field.kind === "image_uploads" ||
+		field.kind === "video_upload"
+	) {
 		return (
 			<UploadFieldControl field={field} value={value} onChange={onChange} />
 		);

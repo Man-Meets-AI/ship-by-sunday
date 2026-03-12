@@ -8,10 +8,7 @@ import type { LessonPromptResourceContent } from "@/lib/course/contracts";
 import { getLesson, type LessonConfig } from "@/lib/course/manifest";
 import type { LessonContent } from "@/lib/course/manifest";
 import { getPromptTemplateState } from "@/lib/course/research-prompt";
-import type {
-	ArtifactPreview,
-	ObjectiveTask,
-} from "@/lib/course/registry";
+import type { ArtifactPreview, ObjectiveTask } from "@/lib/course/registry";
 
 export type PinnedArtifact = ArtifactPreview;
 
@@ -145,6 +142,70 @@ type BaseLessonShellProps = {
 	children: React.ReactNode;
 	footer: React.ReactNode;
 };
+
+type WatchLessonShellProps = {
+	lesson: LessonConfig;
+	coachContent: LessonContent["coach"];
+	footer: React.ReactNode;
+};
+
+function LessonVideoSurface({
+	coachContent,
+	variant = "panel",
+}: {
+	coachContent: LessonContent["coach"];
+	variant?: "panel" | "watch-shell";
+}) {
+	const video = coachContent?.video;
+	const isWatchShell = variant === "watch-shell";
+
+	if (video?.status === "ready" && video.url) {
+		return (
+			<div className={isWatchShell ? "space-y-3" : "space-y-1.5"}>
+				<video
+					controls
+					poster={video.posterUrl}
+					className={
+						isWatchShell
+							? "aspect-video w-full rounded-none border border-product-border bg-product-surface-strong shadow-panel"
+							: "w-full rounded-none border border-product-border bg-product-surface-strong"
+					}
+					src={video.url}
+				/>
+				{video.title || video.durationLabel ? (
+					<div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-medium uppercase tracking-[0.18em] text-product-muted">
+						{video.title ? <p>{video.title}</p> : null}
+						{video.durationLabel ? <p>{video.durationLabel}</p> : null}
+					</div>
+				) : null}
+			</div>
+		);
+	}
+
+	if (isWatchShell) {
+		return (
+			<div className="flex aspect-video min-h-[320px] w-full items-center justify-center rounded-none border border-dashed border-product-border bg-product-surface-strong/70 px-6 py-8 text-center shadow-panel">
+				<div className="max-w-md space-y-3">
+					<p className="font-mono text-[10px] uppercase tracking-[0.24em] text-product-muted">
+						Watch video
+					</p>
+					<p className="font-display text-2xl uppercase tracking-[0.08em] text-product-text sm:text-3xl">
+						Video placeholder
+					</p>
+					<p className="text-sm font-medium leading-relaxed text-product-muted">
+						The lesson video will appear here when it is attached.
+					</p>
+				</div>
+			</div>
+		);
+	}
+
+	return (
+		<div className="rounded-none border border-dashed border-product-border bg-product-surface-strong/70 px-2 py-2 text-xs font-medium leading-snug text-product-muted">
+			Video not wired yet.
+		</div>
+	);
+}
 
 function ManualTaskRow({
 	label,
@@ -353,24 +414,7 @@ function CoachPanel({
 		{
 			key: "watch",
 			label: "Watch",
-			content:
-				coachContent?.video?.status === "ready" && coachContent.video.url ? (
-					<div className="space-y-1.5">
-						<video
-							controls
-							poster={coachContent.video.posterUrl}
-							className="w-full rounded-none border border-product-border bg-product-surface-strong"
-							src={coachContent.video.url}
-						/>
-						<p className="text-[10px] font-medium uppercase tracking-[0.18em] text-product-muted">
-							{coachContent.video.title ?? "Lesson video"}
-						</p>
-					</div>
-				) : (
-					<div className="rounded-none border border-dashed border-product-border bg-product-surface-strong/70 px-2 py-2 text-xs font-medium leading-snug text-product-muted">
-						Video not wired yet.
-					</div>
-				),
+			content: <LessonVideoSurface coachContent={coachContent} />,
 		},
 		{
 			key: "transcript",
@@ -422,7 +466,7 @@ function CoachPanel({
 								</p>
 								<div className="mt-1 space-y-1 text-xs font-medium text-product-muted">
 									{artifact.fields.length === 0 ? (
-										<p>No saved preview yet.</p>
+										<p>No preview details attached.</p>
 									) : (
 										artifact.fields.slice(0, 2).map(([key, value]) => (
 											<div key={key}>
@@ -596,6 +640,45 @@ export function LessonShellFocus({
 			</div>
 			<div className="shrink-0 border-t border-product-border bg-product-surface-strong/70 px-3 py-2">
 				{footer}
+			</div>
+		</section>
+	);
+}
+
+export function LessonShellWatch({
+	lesson,
+	coachContent,
+	footer,
+}: WatchLessonShellProps) {
+	return (
+		<section className="min-w-0 rounded-none border border-product-border/75 bg-product-surface/82 shadow-panel backdrop-blur-lg xl:flex xl:h-full xl:min-h-0 xl:flex-col">
+			<div className="min-w-0 px-4 py-4 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:px-6 xl:py-6">
+				<div className="mx-auto flex w-full max-w-5xl flex-col gap-5">
+					<div className="space-y-3 border-b border-product-border/70 pb-4">
+						<div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
+							<p>{lesson.id}</p>
+							<p>{lesson.artifact.label}</p>
+							{lesson.content.lessonMeta.runtimeLabel ? (
+								<p>{lesson.content.lessonMeta.runtimeLabel}</p>
+							) : null}
+						</div>
+						<div className="space-y-2">
+							<h1 className="max-w-4xl font-display text-[2rem] uppercase leading-none tracking-[0.06em] text-product-text sm:text-[2.6rem]">
+								{lesson.title}
+							</h1>
+							<p className="max-w-3xl text-sm font-medium leading-relaxed text-product-muted sm:text-base">
+								{lesson.content.intro}
+							</p>
+						</div>
+					</div>
+					<LessonVideoSurface
+						coachContent={coachContent}
+						variant="watch-shell"
+					/>
+				</div>
+			</div>
+			<div className="shrink-0 border-t border-product-border bg-product-surface-strong/70 px-4 py-3 xl:px-6">
+				<div className="mx-auto w-full max-w-5xl">{footer}</div>
 			</div>
 		</section>
 	);

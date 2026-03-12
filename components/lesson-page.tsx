@@ -19,6 +19,7 @@ import { WorkbenchRenderer } from "@/components/lesson-workbench";
 import {
 	LessonShellFocus,
 	LessonShellSplit,
+	LessonShellWatch,
 	type PinnedArtifact,
 } from "@/components/lesson-shells";
 import { ProductShell } from "@/components/product-shell";
@@ -157,6 +158,7 @@ export function LessonPage({
 	}
 
 	const lessonContent = lesson.content;
+	const isWatchLesson = lesson.shell === "watch";
 	const router = useRouter();
 	const { isAuthenticated, isLoading } = useConvexAuth();
 	const fallbackChromeState = useMemo(
@@ -314,17 +316,20 @@ export function LessonPage({
 		currentLessonId: lessonId,
 		viewportMode: "app" as const,
 		layoutMode: chromeState.layoutMode,
-		onLayoutModeChange: lessonSupportsLayoutToggle(lesson)
-			? (layoutMode: LessonChromeState["layoutMode"]) =>
-					setChromeState((current) => ({
-						...current,
-						layoutMode: normalizeLayoutModeForLesson(lesson, layoutMode),
-					}))
-			: undefined,
+		onLayoutModeChange:
+			!isWatchLesson && lessonSupportsLayoutToggle(lesson)
+				? (layoutMode: LessonChromeState["layoutMode"]) =>
+						setChromeState((current) => ({
+							...current,
+							layoutMode: normalizeLayoutModeForLesson(lesson, layoutMode),
+						}))
+				: undefined,
 		coachVisible:
-			chromeState.layoutMode === "split" ? chromeState.coachVisible : false,
+			!isWatchLesson && chromeState.layoutMode === "split"
+				? chromeState.coachVisible
+				: false,
 		onCoachToggle:
-			chromeState.layoutMode === "split"
+			!isWatchLesson && chromeState.layoutMode === "split"
 				? () =>
 						setChromeState((current) => ({
 							...current,
@@ -343,7 +348,10 @@ export function LessonPage({
 	if (lessonState === undefined) {
 		return (
 			<ProductShell {...shellProps}>
-				<LessonSkeleton layoutMode={chromeState.layoutMode} />
+				<LessonSkeleton
+					shell={lesson.shell}
+					layoutMode={chromeState.layoutMode}
+				/>
 			</ProductShell>
 		);
 	}
@@ -425,7 +433,7 @@ export function LessonPage({
 		(displayedCompletionIssues.length > 0 || Boolean(serverCompletionMessage));
 	const lessonReadyToComplete =
 		completionIssues.length === 0 &&
-		objectiveTasks.length > 0 &&
+		(isWatchLesson || objectiveTasks.length > 0) &&
 		lessonState.status !== "completed";
 	const isCompleting = completionPhase === "submitting";
 	const isCelebrating = completionPhase === "celebrating";
@@ -485,7 +493,125 @@ export function LessonPage({
 		);
 	};
 
-	const footer = (
+	const handleCompleteLesson = () => {
+		if (completionButtonDisabled) {
+			return;
+		}
+
+		setCompletionAttempted(true);
+		setServerCompletionIssues([]);
+		setServerCompletionMessage(null);
+
+		if (completionIssues.length > 0) {
+			return;
+		}
+
+		if (completionTimeoutRef.current !== null) {
+			window.clearTimeout(completionTimeoutRef.current);
+			completionTimeoutRef.current = null;
+		}
+
+		setCompletionPhase("submitting");
+
+		void completeLesson({ lessonId, fieldValues }).then(
+			(result: { nextLessonId: string | null }) => {
+				const nextLesson = result.nextLessonId
+					? getLesson(result.nextLessonId)
+					: null;
+
+				setCompletionPayload({
+					completedLessonId: lessonId,
+					artifactLabel: lesson.artifact.label,
+					nextLessonId: result.nextLessonId,
+					nextLessonLabel: nextLesson
+						? `${nextLesson.id} ${nextLesson.shortTitle}`
+						: null,
+				});
+				setCompletionPhase("celebrating");
+				setCompletionAttempted(false);
+				completionTimeoutRef.current = window.setTimeout(() => {
+					completionTimeoutRef.current = null;
+
+					if (result.nextLessonId) {
+						router.push(`/lesson/${result.nextLessonId}`);
+						return;
+					}
+
+					router.push("/mission");
+				}, getCompletionNavigationDelayMs());
+			},
+			(error: unknown) => {
+				setCompletionPhase("idle");
+				const completionError = getCompletionErrorData(error);
+				if (completionError) {
+					setServerCompletionIssues(completionError.issues ?? []);
+					setServerCompletionMessage(completionError.message);
+					return;
+				}
+
+				setSaveStatus("error");
+				setServerCompletionMessage(
+					"Unable to complete the lesson right now. Try again.",
+				);
+			},
+		);
+	};
+
+	const completionAction = (
+		<button
+			type="button"
+			disabled={completionButtonDisabled}
+			aria-busy={isCompleting}
+			onClick={handleCompleteLesson}
+			className={
+				isCelebrating
+					? "sbs-press-feedback inline-flex items-center gap-1.5 rounded-none border border-product-accent bg-product-accent px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-bg shadow-[0_0_0_1px_rgba(var(--product-accent),0.3),0_0_18px_rgba(var(--product-accent),0.24)]"
+					: isCompleting
+						? "inline-flex items-center gap-1.5 rounded-none border border-product-accent bg-product-accent px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-bg shadow-[0_0_0_1px_rgba(var(--product-accent),0.24)]"
+						: lessonReadyToComplete
+							? "sbs-press-feedback inline-flex items-center gap-1.5 rounded-none border border-product-accent bg-product-accent px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-bg shadow-[0_0_0_1px_rgba(var(--product-accent),0.3),0_0_18px_rgba(var(--product-accent),0.22)] transition-all hover:brightness-95 motion-safe:animate-pulse"
+							: "sbs-hover-lift sbs-press-feedback inline-flex items-center gap-1.5 rounded-none border border-product-accent bg-product-chip px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
+			}
+		>
+			{isCelebrating ? (
+				<>
+					<svg
+						width="10"
+						height="10"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth="3"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+					>
+						<polyline points="20 6 9 17 4 12" />
+					</svg>
+					{celebrationTitle}
+				</>
+			) : isCompleting ? (
+				completionPendingLabel
+			) : (
+				completionActionLabel
+			)}
+		</button>
+	);
+
+	const footerActions = (
+		<div className="flex flex-wrap justify-end gap-2 lg:ml-auto">
+			{previousHref ? (
+				<Link
+					href={previousHref}
+					className="inline-flex items-center px-1 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted transition-colors hover:text-product-text"
+				>
+					Back
+				</Link>
+			) : null}
+			{completionAction}
+		</div>
+	);
+
+	const standardFooter = (
 		<div
 			className={`flex flex-col gap-3 ${
 				isCelebrating
@@ -573,120 +699,42 @@ export function LessonPage({
 						</div>
 					) : null}
 				</div>
-				<div className="flex flex-wrap justify-end gap-2 lg:ml-auto">
-					{previousHref ? (
-						<Link
-							href={previousHref}
-							className="inline-flex items-center px-1 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted transition-colors hover:text-product-text"
-						>
-							Back
-						</Link>
-					) : null}
-					<button
-						type="button"
-						disabled={completionButtonDisabled}
-						aria-busy={isCompleting}
-						onClick={() => {
-							if (completionButtonDisabled) {
-								return;
-							}
-
-							setCompletionAttempted(true);
-							setServerCompletionIssues([]);
-							setServerCompletionMessage(null);
-
-							if (completionIssues.length > 0) {
-								return;
-							}
-
-							if (completionTimeoutRef.current !== null) {
-								window.clearTimeout(completionTimeoutRef.current);
-								completionTimeoutRef.current = null;
-							}
-
-							setCompletionPhase("submitting");
-
-							void completeLesson({ lessonId, fieldValues }).then(
-								(result: { nextLessonId: string | null }) => {
-									const nextLesson = result.nextLessonId
-										? getLesson(result.nextLessonId)
-										: null;
-
-									setCompletionPayload({
-										completedLessonId: lessonId,
-										artifactLabel: lesson.artifact.label,
-										nextLessonId: result.nextLessonId,
-										nextLessonLabel: nextLesson
-											? `${nextLesson.id} ${nextLesson.shortTitle}`
-											: null,
-									});
-									setCompletionPhase("celebrating");
-									setCompletionAttempted(false);
-									completionTimeoutRef.current = window.setTimeout(() => {
-										completionTimeoutRef.current = null;
-
-										if (result.nextLessonId) {
-											router.push(`/lesson/${result.nextLessonId}`);
-											return;
-										}
-
-										router.push("/mission");
-									}, getCompletionNavigationDelayMs());
-								},
-								(error: unknown) => {
-									setCompletionPhase("idle");
-									const completionError = getCompletionErrorData(error);
-									if (completionError) {
-										setServerCompletionIssues(completionError.issues ?? []);
-										setServerCompletionMessage(completionError.message);
-										return;
-									}
-
-									setSaveStatus("error");
-									setServerCompletionMessage(
-										"Unable to complete the lesson right now. Try again.",
-									);
-								},
-							);
-						}}
-						className={
-							isCelebrating
-								? "sbs-press-feedback inline-flex items-center gap-1.5 rounded-none border border-product-accent bg-product-accent px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-bg shadow-[0_0_0_1px_rgba(var(--product-accent),0.3),0_0_18px_rgba(var(--product-accent),0.24)]"
-								: isCompleting
-									? "inline-flex items-center gap-1.5 rounded-none border border-product-accent bg-product-accent px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-bg shadow-[0_0_0_1px_rgba(var(--product-accent),0.24)]"
-									: lessonReadyToComplete
-										? "sbs-press-feedback inline-flex items-center gap-1.5 rounded-none border border-product-accent bg-product-accent px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-bg shadow-[0_0_0_1px_rgba(var(--product-accent),0.3),0_0_18px_rgba(var(--product-accent),0.22)] transition-all hover:brightness-95 motion-safe:animate-pulse"
-										: "sbs-hover-lift sbs-press-feedback inline-flex items-center gap-1.5 rounded-none border border-product-accent bg-product-chip px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
-						}
-					>
-						{isCelebrating ? (
-							<>
-								<svg
-									width="10"
-									height="10"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									strokeWidth="3"
-									strokeLinecap="round"
-									strokeLinejoin="round"
-								>
-									<polyline points="20 6 9 17 4 12" />
-								</svg>
-								{celebrationTitle}
-							</>
-						) : isCompleting ? (
-							completionPendingLabel
-						) : (
-							completionActionLabel
-						)}
-					</button>
-				</div>
+				{footerActions}
 			</div>
 		</div>
 	);
 
-	const workbench = (
+	const compactFooter = (
+		<div className="flex flex-col gap-2">
+			{showCompletionFeedback && !isCelebrating ? (
+				<div className="text-xs font-medium leading-relaxed text-[#a83232]">
+					<p>{serverCompletionMessage ?? "Finish these before continuing:"}</p>
+					{displayedCompletionIssues.length > 0 ? (
+						<p className="mt-1">
+							{displayedCompletionIssues
+								.map((issue) => issue.label)
+								.join(" • ")}
+						</p>
+					) : null}
+				</div>
+			) : null}
+			<div className="flex flex-wrap items-center justify-end gap-2">
+				{previousHref ? (
+					<Link
+						href={previousHref}
+						className="inline-flex items-center px-1 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted transition-colors hover:text-product-text"
+					>
+						Back
+					</Link>
+				) : null}
+				{completionAction}
+			</div>
+		</div>
+	);
+
+	const footer = isWatchLesson ? compactFooter : standardFooter;
+
+	const workbench = isWatchLesson ? null : (
 		<WorkbenchRenderer
 			lesson={lesson}
 			lessonContent={lessonContent}
@@ -700,7 +748,13 @@ export function LessonPage({
 
 	return (
 		<ProductShell {...shellProps}>
-			{chromeState.layoutMode === "focus" ? (
+			{isWatchLesson ? (
+				<LessonShellWatch
+					lesson={lesson}
+					coachContent={lessonContent.coach}
+					footer={footer}
+				/>
+			) : chromeState.layoutMode === "focus" ? (
 				<LessonShellFocus
 					lesson={lesson}
 					coachVisible={chromeState.coachVisible}
@@ -771,10 +825,31 @@ function SkeletonPanel({
 }
 
 function LessonSkeleton({
+	shell,
 	layoutMode,
 }: {
+	shell: LessonConfig["shell"];
 	layoutMode: LessonChromeState["layoutMode"];
 }) {
+	if (shell === "watch") {
+		return (
+			<section className="animate-pulse rounded-none border border-product-border/75 bg-product-surface/82 shadow-panel backdrop-blur-lg">
+				<div className="space-y-5 px-4 py-4 xl:px-6 xl:py-6">
+					<div className="space-y-3 border-b border-product-border/70 pb-4">
+						<div className="flex gap-2">
+							<div className="h-3 w-12 bg-product-border/15" />
+							<div className="h-3 w-24 bg-product-border/10" />
+							<div className="h-3 w-14 bg-product-border/10" />
+						</div>
+						<div className="h-10 w-2/3 bg-product-border/15" />
+						<div className="h-4 w-3/4 bg-product-border/10" />
+					</div>
+					<div className="aspect-video border border-product-border/40 bg-product-surface-strong/70" />
+				</div>
+			</section>
+		);
+	}
+
 	if (layoutMode === "focus") {
 		return (
 			<div className="animate-pulse xl:h-full xl:min-h-0">

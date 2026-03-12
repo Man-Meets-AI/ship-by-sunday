@@ -7,6 +7,7 @@ import { useMemo } from "react";
 import { useConvexAuth, useQuery } from "convex/react";
 
 import { getLesson } from "@/lib/course/manifest";
+import type { LessonLayoutMode } from "@/lib/course/manifest";
 import { api } from "@/convex/_generated/api";
 import {
 	ProductThemeProvider,
@@ -27,7 +28,7 @@ function isNavItemActive(pathname: string, href: string) {
 	return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-type LayoutMode = "split" | "focus";
+type LayoutMode = LessonLayoutMode;
 
 type MissionState = {
 	progressCount: number;

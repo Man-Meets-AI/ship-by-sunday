@@ -3,7 +3,10 @@ import type {
 	UploadFieldValue,
 } from "@/lib/course/manifest";
 import { parseLegacyTableText, toLegacyTableText } from "@/lib/course/table";
-import { isChecklistItemArray } from "@/lib/course/registry";
+import {
+	isChecklistItemArray,
+	isUploadFieldValue,
+} from "@/lib/course/registry";
 
 export function toLineList(value: unknown) {
 	if (!Array.isArray(value)) {
@@ -57,13 +60,13 @@ export function normalizeChecklistValue(
 }
 
 export function getUploadMetadata(value: unknown): UploadFieldValue | null {
-	if (!value || typeof value !== "object" || Array.isArray(value)) {
-		return null;
+	return isUploadFieldValue(value) ? value : null;
+}
+
+export function getUploadMetadataList(value: unknown): UploadFieldValue[] {
+	if (!Array.isArray(value)) {
+		return [];
 	}
 
-	if ("kind" in value && (value as { kind?: string }).kind === "upload") {
-		return value as UploadFieldValue;
-	}
-
-	return null;
+	return value.filter(isUploadFieldValue);
 }

@@ -1,6 +1,6 @@
 import type { PinnedArtifact } from "@/components/lesson-shells";
 
-import { formatArtifactValue } from "./artifact-format";
+import { ArtifactPreviewContent } from "./artifact-preview-content";
 import { WorkbenchCard } from "./workbench-card";
 
 export function ArtifactContext({
@@ -19,22 +19,7 @@ export function ArtifactContext({
 					key={artifact.artifactKey}
 					label={artifact.contextTitle ?? artifact.artifactLabel}
 				>
-					<div className="space-y-1 text-xs font-medium text-product-muted">
-						{artifact.fields.length === 0 ? (
-							<p>No saved preview yet.</p>
-						) : (
-							artifact.fields.slice(0, 3).map(([key, value]) => (
-								<div key={key}>
-									<p className="font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
-										{key}
-									</p>
-									<p className="mt-1 text-product-text">
-										{formatArtifactValue(value)}
-									</p>
-								</div>
-							))
-						)}
-					</div>
+					<ArtifactPreviewContent artifact={artifact} />
 				</WorkbenchCard>
 			))}
 		</div>

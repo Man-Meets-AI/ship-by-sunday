@@ -9,6 +9,7 @@ import {
 	type LessonHandoff,
 	type ObjectiveMode,
 	type ObjectiveTaskDefinition,
+	type ReferenceGalleryValue,
 	type UploadFieldValue,
 	type WorkbenchField,
 	type WorkbenchSection,
@@ -23,9 +24,24 @@ import {
 	CORE_FLOW_STEPS_FIELD_ID,
 	getCoreFlowDraftState,
 } from "./core-flow-map";
+import {
+	getReferenceGalleryCount as getStoredReferenceGalleryCount,
+	getReferenceGallerySummary,
+	getReferenceGalleryItems,
+	isReferenceGalleryValue,
+	toPersistedReferenceGalleryValue,
+} from "./reference-gallery";
 import { formatTablePreview, getFilledTableRows } from "./table";
 
 export const COURSE_SLUG = "ship-by-sunday";
+
+export {
+	getReferenceGalleryCount,
+	getReferenceGalleryItems,
+	getReferenceGallerySummary,
+	isReferenceGalleryValue,
+	toPersistedReferenceGalleryValue,
+} from "./reference-gallery";
 
 export const SUPPORTED_FIELD_KINDS = new Set<WorkbenchField["kind"]>([
 	"text",
@@ -38,6 +54,7 @@ export const SUPPORTED_FIELD_KINDS = new Set<WorkbenchField["kind"]>([
 	"video_upload",
 	"table",
 	"board",
+	"reference_gallery",
 	"checklist",
 	"readonly",
 ]);
@@ -66,6 +83,7 @@ export type PersistedFieldValue =
 	| string[]
 	| string[][]
 	| ChecklistItemValue[]
+	| ReferenceGalleryValue
 	| UploadFieldValue
 	| Record<string, unknown>
 	| null;
@@ -122,6 +140,14 @@ export function isUploadFieldValue(value: unknown): value is UploadFieldValue {
 		!Array.isArray(value) &&
 		"kind" in value &&
 		(value as { kind?: string }).kind === "upload"
+	);
+}
+
+export function isUploadFieldValueArray(
+	value: unknown,
+): value is UploadFieldValue[] {
+	return (
+		Array.isArray(value) && value.every((item) => isUploadFieldValue(item))
 	);
 }
 
@@ -383,6 +409,14 @@ export function isLessonFieldShapeCompatible(
 }
 
 export function isFilled(value: PersistedFieldValue | undefined) {
+	if (isReferenceGalleryValue(value)) {
+		return value.items.length > 0;
+	}
+
+	if (isUploadFieldValueArray(value)) {
+		return value.some((item) => Boolean(item.storageId || item.url));
+	}
+
 	if (isChecklistItemArray(value)) {
 		return value.some((item) => item.checked);
 	}
@@ -429,9 +463,28 @@ function hasOwnArtifactFields(lesson: LessonConfig) {
 	return getRequiredFields(lesson).length > 0;
 }
 
+function getUploadFieldValueSummary(value: unknown) {
+	const count = isUploadFieldValueArray(value)
+		? value.filter((item) => Boolean(item.storageId || item.url)).length
+		: 0;
+	if (count === 0) {
+		return "";
+	}
+
+	return `${count} image${count === 1 ? "" : "s"} uploaded`;
+}
+
 function formatArtifactSummaryValue(value: unknown) {
 	if (isUploadFieldValue(value)) {
 		return value.fileName ?? "Saved upload";
+	}
+
+	if (isUploadFieldValueArray(value)) {
+		return getUploadFieldValueSummary(value);
+	}
+
+	if (isReferenceGalleryValue(value)) {
+		return getReferenceGallerySummary(value);
 	}
 
 	if (isChecklistItemArray(value)) {
@@ -467,7 +520,21 @@ function getPinnedArtifactByKey(
 	pinnedArtifacts: ArtifactPreview[],
 	artifactKey: string,
 ) {
-	return pinnedArtifacts.find((artifact) => artifact.artifactKey === artifactKey);
+	return pinnedArtifacts.find(
+		(artifact) => artifact.artifactKey === artifactKey,
+	);
+}
+
+function getFieldMinimumItems(field: WorkbenchField) {
+	return Math.max(field.minItems ?? 1, 1);
+}
+
+function isFieldComplete(field: WorkbenchField, value: PersistedFieldValue) {
+	if (field.kind === "reference_gallery") {
+		return getStoredReferenceGalleryCount(value) >= getFieldMinimumItems(field);
+	}
+
+	return isFilled(value);
 }
 
 function getFieldString(
@@ -533,14 +600,26 @@ function buildProductBriefPreview(
 	lesson: LessonConfig,
 	pinnedArtifacts: ArtifactPreview[],
 ): ArtifactPreview {
-	const userArtifact = getPinnedArtifactByKey(pinnedArtifacts, "user_statement");
+	const userArtifact = getPinnedArtifactByKey(
+		pinnedArtifacts,
+		"user_statement",
+	);
 	const outcomeArtifact = getPinnedArtifactByKey(
 		pinnedArtifacts,
 		"outcome_statement",
 	);
-	const researchArtifact = getPinnedArtifactByKey(pinnedArtifacts, "research_notes");
-	const flowArtifact = getPinnedArtifactByKey(pinnedArtifacts, "core_flow_image");
-	const scopeArtifact = getPinnedArtifactByKey(pinnedArtifacts, "scope_boundary");
+	const researchArtifact = getPinnedArtifactByKey(
+		pinnedArtifacts,
+		"research_notes",
+	);
+	const flowArtifact = getPinnedArtifactByKey(
+		pinnedArtifacts,
+		"core_flow_image",
+	);
+	const scopeArtifact = getPinnedArtifactByKey(
+		pinnedArtifacts,
+		"scope_boundary",
+	);
 
 	const researchSignalCount = getFilledTableRows(
 		researchArtifact?.fieldValues.research_table,
@@ -557,10 +636,7 @@ function buildProductBriefPreview(
 	const who = [
 		getFieldString(userArtifact, "selected_problem_owner"),
 		getFieldString(userArtifact, "selected_problem_statement")
-			? `Problem: ${getFieldString(
-					userArtifact,
-					"selected_problem_statement",
-				)}`
+			? `Problem: ${getFieldString(userArtifact, "selected_problem_statement")}`
 			: "",
 		getFieldString(userArtifact, "pain_moment")
 			? `Pain moment: ${getFieldString(userArtifact, "pain_moment")}`
@@ -605,9 +681,7 @@ function buildProductBriefPreview(
 					flowState.filledStepCount === 1 ? "" : "s"
 				}`
 			: "",
-		flowState.endingDraft
-			? `Value moment: ${flowState.endingDraft}`
-			: "",
+		flowState.endingDraft ? `Value moment: ${flowState.endingDraft}` : "",
 	]
 		.filter(Boolean)
 		.join("\n");
@@ -647,13 +721,15 @@ function buildProductBriefPreview(
 			scope_cut_count: cutCount,
 			flow_image_url: flowImageUrl,
 		},
-		fields: ([
-			["Who", who],
-			["Outcome", outcome],
-			["Evidence", evidence],
-			["Flow", flow],
-			["Scope", scope],
-		] as Array<[string, unknown]>).filter(
+		fields: (
+			[
+				["Who", who],
+				["Outcome", outcome],
+				["Evidence", evidence],
+				["Flow", flow],
+				["Scope", scope],
+			] as Array<[string, unknown]>
+		).filter(
 			([, value]) => typeof value === "string" && value.trim().length > 0,
 		),
 	};
@@ -695,11 +771,7 @@ export function getObjectiveTasks(
 	const objectiveMode = getObjectiveMode(lesson);
 	const resolvedArtifactPreview =
 		context.resolvedArtifactPreview ??
-		buildResolvedArtifactPreview(
-			lesson,
-			values,
-			context.pinnedArtifacts ?? [],
-		);
+		buildResolvedArtifactPreview(lesson, values, context.pinnedArtifacts ?? []);
 
 	if (objectiveMode === "manual") {
 		const definitions = getManualObjectiveTaskDefinitions(lesson);
@@ -722,7 +794,9 @@ export function getObjectiveTasks(
 
 	if (isStageUnlockBriefAssembler(lesson)) {
 		const hasWho = isFilled(resolvedArtifactPreview.fieldValues.who as any);
-		const hasOutcome = isFilled(resolvedArtifactPreview.fieldValues.outcome as any);
+		const hasOutcome = isFilled(
+			resolvedArtifactPreview.fieldValues.outcome as any,
+		);
 		const hasEvidence = isFilled(
 			resolvedArtifactPreview.fieldValues.evidence as any,
 		);
@@ -907,7 +981,7 @@ export function getObjectiveTasks(
 		tasks.push({
 			id: field.id,
 			label: getFieldTaskLabel(field),
-			status: isFilled(value) ? "complete" : "incomplete",
+			status: isFieldComplete(field, value) ? "complete" : "incomplete",
 			source: "field",
 			fieldId: field.id,
 			sectionId: section?.sectionId,
@@ -969,7 +1043,7 @@ export function getCompletionIssues(
 			continue;
 		}
 
-		if (!isFilled(value)) {
+		if (!isFieldComplete(field, value)) {
 			issues.push({
 				id: field.id,
 				label: getFieldTaskLabel(field),
@@ -1026,6 +1100,32 @@ export function prepareFieldValuesForPersistence(
 					return [fieldId, getFilledTableRows(value, field.columns)];
 				}
 
+				if (
+					field?.kind === "reference_gallery" &&
+					isReferenceGalleryValue(value)
+				) {
+					return [fieldId, toPersistedReferenceGalleryValue(value)];
+				}
+
+				if (field?.kind === "image_uploads" && isUploadFieldValueArray(value)) {
+					return [
+						fieldId,
+						value
+							.filter((item) => Boolean(item.storageId))
+							.map(
+								(item) =>
+									({
+										kind: "upload",
+										status: item.storageId ? "stored" : item.status,
+										fileName: item.fileName,
+										mimeType: item.mimeType,
+										size: item.size,
+										storageId: item.storageId,
+									}) satisfies UploadFieldValue,
+							),
+					];
+				}
+
 				if (!isUploadFieldValue(value)) {
 					return [fieldId, value];
 				}
@@ -1068,7 +1168,7 @@ export function getWorkbenchSectionStates(
 			requiredFields.push(field);
 		}
 		const incompleteFieldIds = requiredFields
-			.filter((field) => !isFilled(values[field.id]))
+			.filter((field) => !isFieldComplete(field, values[field.id]))
 			.map((field) => field.id);
 		const totalRequiredFields = requiredFields.length;
 		const completedRequiredFields =

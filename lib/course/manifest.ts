@@ -109,10 +109,17 @@ const DEFAULT_LESSON_LAYOUT_MODES = [
 	"split",
 	"focus",
 ] as const satisfies readonly LessonLayoutMode[];
+const WATCH_LESSON_LAYOUT_MODES = [
+	"focus",
+] as const satisfies readonly LessonLayoutMode[];
 
 export function getAvailableLayoutModesForLesson(
-	lesson: Pick<LessonConfig, "availableLayoutModes">,
+	lesson: Pick<LessonConfig, "availableLayoutModes" | "shell">,
 ): LessonLayoutMode[] {
+	if (lesson.shell === "watch" && !lesson.availableLayoutModes?.length) {
+		return [...WATCH_LESSON_LAYOUT_MODES];
+	}
+
 	return lesson.availableLayoutModes?.length
 		? [...lesson.availableLayoutModes]
 		: [...DEFAULT_LESSON_LAYOUT_MODES];
@@ -122,7 +129,8 @@ export function getDefaultLayoutModeForLesson(
 	lesson: Pick<LessonConfig, "availableLayoutModes" | "shell">,
 ): LessonLayoutMode {
 	const availableLayoutModes = getAvailableLayoutModesForLesson(lesson);
-	const preferredLayoutMode = lesson.shell === "focus" ? "focus" : "split";
+	const preferredLayoutMode =
+		lesson.shell === "focus" || lesson.shell === "watch" ? "focus" : "split";
 
 	return availableLayoutModes.includes(preferredLayoutMode)
 		? preferredLayoutMode
@@ -143,7 +151,7 @@ export function normalizeLayoutModeForLesson(
 }
 
 export function lessonSupportsLayoutToggle(
-	lesson: Pick<LessonConfig, "availableLayoutModes">,
+	lesson: Pick<LessonConfig, "availableLayoutModes" | "shell">,
 ): boolean {
 	return getAvailableLayoutModesForLesson(lesson).length > 1;
 }

@@ -5,7 +5,7 @@ import { useConvexAuth, useQuery } from "convex/react";
 
 import { getLessonHref } from "@/lib/course/manifest";
 import { api } from "@/convex/_generated/api";
-import { formatArtifactValue } from "@/components/lesson-workbench/shared/artifact-format";
+import { ArtifactPreviewContent } from "@/components/lesson-workbench/shared/artifact-preview-content";
 import { ProductShell } from "@/components/product-shell";
 import type { ProductTheme } from "@/lib/product-theme";
 
@@ -41,9 +41,11 @@ export function ArtifactsPage({
 		isAuthenticated && !isLoading ? {} : "skip",
 	) as
 		| Array<{
+				artifactKey: string;
 				lessonId: string;
 				artifactLabel: string;
 				lessonTitle: string;
+				fieldValues: Record<string, unknown>;
 				fields: Array<[string, unknown]>;
 		  }>
 		| undefined;
@@ -89,24 +91,11 @@ export function ArtifactsPage({
 								<p className="mt-2 text-sm font-medium text-product-muted">
 									{artifact.lessonTitle}
 								</p>
-								<div className="mt-4 space-y-2 text-sm font-medium text-product-text">
-									{artifact.fields.length === 0 ? (
-										<p>No preview yet.</p>
-									) : (
-										artifact.fields.slice(0, 4).map(([fieldId, value]) => (
-											<div
-												key={fieldId}
-												className="rounded-none border border-product-border bg-product-surface p-3"
-											>
-												<p className="font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
-													{fieldId}
-												</p>
-												<p className="mt-2 break-words">
-													{formatArtifactValue(value)}
-												</p>
-											</div>
-										))
-									)}
+								<div className="mt-4 rounded-none border border-product-border bg-product-surface p-3">
+									<ArtifactPreviewContent
+										artifact={artifact as any}
+										maxTextFields={4}
+									/>
 								</div>
 								<Link
 									href={getLessonHref(artifact.lessonId)}

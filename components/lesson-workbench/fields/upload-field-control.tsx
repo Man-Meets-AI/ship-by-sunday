@@ -6,7 +6,8 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { UploadFieldValue, WorkbenchField } from "@/lib/course/manifest";
 
-import { getUploadMetadata } from "./value-codecs";
+import { uploadFilesToLessonStorage } from "./upload-storage";
+import { getUploadMetadata, getUploadMetadataList } from "./value-codecs";
 import { fieldLabelClass } from "./field-styles";
 
 export function UploadFieldControl({
@@ -19,10 +20,13 @@ export function UploadFieldControl({
 	onChange: (value: unknown) => void;
 }) {
 	const generateUploadUrl = useMutation(api.uploads.generateUploadUrl);
+	const uploads = getUploadMetadataList(value);
 	const upload = getUploadMetadata(value);
 	const [isUploading, setIsUploading] = useState(false);
 	const [uploadError, setUploadError] = useState<string | null>(null);
+	const isMultiImageField = field.kind === "image_uploads";
 	const previewUrl = upload?.previewUrl ?? upload?.url;
+	const accept = field.kind === "video_upload" ? "video/*" : "image/*";
 
 	return (
 		<label className="block">
@@ -30,15 +34,18 @@ export function UploadFieldControl({
 			<div className="mt-1 rounded-none border border-dashed border-product-border bg-product-surface px-2.5 py-2">
 				<input
 					type="file"
-					accept={field.kind === "image_upload" ? "image/*" : "video/*"}
+					accept={accept}
+					multiple={isMultiImageField}
 					disabled={isUploading}
 					onChange={async (event) => {
-						const file = event.target.files?.[0];
-						if (!file) {
-							onChange({
-								kind: "upload",
-								status: "empty",
-							} satisfies UploadFieldValue);
+						const files = Array.from(event.target.files ?? []);
+						if (files.length === 0) {
+							if (!isMultiImageField) {
+								onChange({
+									kind: "upload",
+									status: "empty",
+								} satisfies UploadFieldValue);
+							}
 							return;
 						}
 
@@ -46,33 +53,15 @@ export function UploadFieldControl({
 						setIsUploading(true);
 
 						try {
-							const uploadUrl = await generateUploadUrl();
-							const response = await fetch(uploadUrl, {
-								method: "POST",
-								headers: {
-									"Content-Type": file.type || "application/octet-stream",
-								},
-								body: file,
+							const nextUploads = await uploadFilesToLessonStorage({
+								files,
+								generateUploadUrl,
 							});
-
-							if (!response.ok) {
-								throw new Error("Upload failed");
+							if (isMultiImageField) {
+								onChange([...uploads, ...nextUploads]);
+							} else {
+								onChange(nextUploads[0] ?? { kind: "upload", status: "empty" });
 							}
-
-							const result = (await response.json()) as { storageId?: string };
-							if (!result.storageId) {
-								throw new Error("Missing storage id");
-							}
-
-							onChange({
-								kind: "upload",
-								status: "stored",
-								fileName: file.name,
-								mimeType: file.type,
-								size: file.size,
-								storageId: result.storageId,
-								previewUrl: URL.createObjectURL(file),
-							} satisfies UploadFieldValue);
 						} catch {
 							setUploadError("Upload failed. Try again.");
 						} finally {
@@ -84,7 +73,16 @@ export function UploadFieldControl({
 				/>
 				<div className="mt-2 space-y-1 text-xs font-medium text-product-muted">
 					{isUploading ? (
-						<p>Uploading file to lesson storage...</p>
+						<p>
+							Uploading file{isMultiImageField ? "s" : ""} to lesson storage...
+						</p>
+					) : isMultiImageField && uploads.length > 0 ? (
+						<>
+							<p className="text-product-text">
+								{uploads.length} image{uploads.length === 1 ? "" : "s"} saved
+							</p>
+							<p>Each image is stored before the lesson draft is saved.</p>
+						</>
 					) : upload?.fileName ? (
 						<>
 							<p className="text-product-text">{upload.fileName}</p>
@@ -100,7 +98,25 @@ export function UploadFieldControl({
 					)}
 					{uploadError ? <p className="text-[#a83232]">{uploadError}</p> : null}
 				</div>
-				{previewUrl ? (
+				{isMultiImageField && uploads.length > 0 ? (
+					<div className="mt-4 grid gap-2 sm:grid-cols-2">
+						{uploads.map((item, index) => {
+							const itemPreviewUrl = item.previewUrl ?? item.url;
+							if (!itemPreviewUrl) {
+								return null;
+							}
+
+							return (
+								<img
+									key={`${item.storageId ?? item.fileName ?? "upload"}-${index}`}
+									src={itemPreviewUrl}
+									alt={item.fileName ?? `Uploaded preview ${index + 1}`}
+									className="max-h-48 w-full rounded-none border border-product-border object-cover"
+								/>
+							);
+						})}
+					</div>
+				) : previewUrl ? (
 					field.kind === "image_upload" ? (
 						<img
 							src={previewUrl}

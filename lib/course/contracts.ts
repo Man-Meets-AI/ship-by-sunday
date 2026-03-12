@@ -1,13 +1,15 @@
 export type BlockId = "CEO" | "DESIGN" | "BUILD" | "SHIP";
 
-export type ShellType = "split" | "focus" | "mission";
+export type ShellType = "split" | "focus" | "watch" | "mission";
 export type LessonLayoutMode = "split" | "focus";
 
 export type WorkbenchType =
 	| "guided_form"
 	| "score_table"
 	| "collector_board"
+	| "reference_gallery"
 	| "capture_upload"
+	| "sketch_upload"
 	| "core_flow_map"
 	| "scope_split"
 	| "brief_assembler"
@@ -29,6 +31,22 @@ export type UploadFieldValue = {
 	storageId?: string;
 	url?: string;
 	previewUrl?: string;
+};
+
+export type ReferenceGalleryItem = {
+	id: string;
+	source: "upload" | "remote_url";
+	url?: string;
+	previewUrl?: string;
+	fileName?: string;
+	mimeType?: string;
+	size?: number;
+	storageId?: string;
+};
+
+export type ReferenceGalleryValue = {
+	kind: "reference_gallery";
+	items: ReferenceGalleryItem[];
 };
 
 export type ChecklistItemValue = {
@@ -130,12 +148,15 @@ export type WorkbenchField = {
 		| "toggle"
 		| "select"
 		| "image_upload"
+		| "image_uploads"
 		| "video_upload"
 		| "table"
 		| "board"
+		| "reference_gallery"
 		| "checklist"
 		| "readonly";
 	required?: boolean;
+	minItems?: number;
 	placeholder?: string;
 	helpText?: string;
 	options?: string[];
@@ -169,9 +190,7 @@ export type LessonExampleContent = {
 	body: string;
 };
 
-export type LessonPromptTemplateId =
-	| "competitor_research"
-	| "scope_boundary";
+export type LessonPromptTemplateId = "competitor_research" | "scope_boundary";
 
 export type LessonLinkResourceContent = {
 	id: string;

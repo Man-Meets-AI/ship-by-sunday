@@ -56,6 +56,70 @@ export const WORKSHEET_01_RESOURCES: LessonResourceContent[] = [
 export const WORKSHEET_02_RESOURCES: LessonResourceContent[] = [
 	WORKSHEET_02_RESOURCE,
 ];
+
+export const DESIGN_REFERENCE_RESOURCES: LessonResourceContent[] = [
+	WORKSHEET_02_RESOURCE,
+	{
+		id: "ref-mobbin",
+		label: "Mobbin",
+		href: "https://mobbin.design",
+		kind: "external",
+	},
+	{
+		id: "ref-spotted-in-prod",
+		label: "Spotted in Prod",
+		href: "https://spottedinprod.com",
+		kind: "external",
+	},
+	{
+		id: "ref-curated",
+		label: "Curated",
+		href: "https://www.curated.design",
+		kind: "external",
+	},
+	{
+		id: "ref-landing-love",
+		label: "Landing Love",
+		href: "https://www.landing.love",
+		kind: "external",
+	},
+	{
+		id: "ref-navbar-gallery",
+		label: "Navbar Gallery",
+		href: "https://www.navbar.gallery",
+		kind: "external",
+	},
+	{
+		id: "ref-cta-gallery",
+		label: "CTA Gallery",
+		href: "https://www.cta.gallery",
+		kind: "external",
+	},
+	{
+		id: "ref-app-motion",
+		label: "App Motion",
+		href: "https://appmotion.design",
+		kind: "external",
+	},
+	{
+		id: "ref-rebrand-gallery",
+		label: "Rebrand Gallery",
+		href: "https://www.rebrand.gallery",
+		kind: "external",
+	},
+	{
+		id: "ref-hugeicons",
+		label: "Hugeicons",
+		href: "https://hugeicons.com",
+		kind: "external",
+	},
+	{
+		id: "ref-component-gallery",
+		label: "Component Gallery",
+		href: "https://www.component.gallery",
+		kind: "external",
+	},
+];
 export const WORKSHEET_03_RESOURCES: LessonResourceContent[] = [
 	WORKSHEET_03_RESOURCE,
 ];
