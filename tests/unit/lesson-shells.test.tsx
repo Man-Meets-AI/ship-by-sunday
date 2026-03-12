@@ -96,6 +96,33 @@ function renderStoryboardLessonResources() {
 	);
 }
 
+function renderVisualDirectionLessonResources(
+	activeCoachPanel:
+		| "watch"
+		| "transcript"
+		| "examples"
+		| "resources" = "transcript",
+) {
+	const lesson = getLessonById("2.6");
+	expect(lesson).toBeTruthy();
+
+	return renderToStaticMarkup(
+		<LessonShellSplit
+			lesson={lesson!}
+			objectiveTasks={[]}
+			onObjectiveTaskToggle={() => {}}
+			coachVisible
+			activeCoachPanel={activeCoachPanel}
+			onCoachPanelChange={() => {}}
+			pinnedArtifacts={[]}
+			coachContent={lesson!.content.coach}
+			footer={<div>Footer</div>}
+		>
+			<div>Workbench</div>
+		</LessonShellSplit>,
+	);
+}
+
 function renderWatchLesson(
 	overrides?: Parameters<typeof LessonShellWatch>[0]["coachContent"],
 ) {
@@ -157,6 +184,15 @@ describe("LessonShellSplit resources", () => {
 					resource.href.includes("Ship-by-Sunday-Template"),
 			),
 		).toBe(false);
+	});
+
+	it("hides the duplicate watch panel when the lesson video lives in the workbench", () => {
+		const markup = renderVisualDirectionLessonResources();
+
+		expect(markup).not.toContain(">Watch<");
+		expect(markup).toContain(">Transcript<");
+		expect(markup).toContain(">Examples<");
+		expect(markup).toContain(">Resources<");
 	});
 });
 

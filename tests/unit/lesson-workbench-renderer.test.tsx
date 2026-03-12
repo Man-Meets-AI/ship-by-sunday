@@ -141,6 +141,35 @@ function getScopeBoundaryArtifact(): PinnedArtifact {
 	});
 }
 
+function getReferenceBoardArtifact(): PinnedArtifact {
+	const lesson = getLessonById("2.1");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {
+		__fieldShapeVersion: 2,
+		reference_gallery: {
+			kind: "reference_gallery",
+			items: [
+				{
+					id: "remote-1",
+					source: "remote_url",
+					url: "https://images.example.com/ref-1.png",
+				},
+				{
+					id: "remote-2",
+					source: "remote_url",
+					url: "https://images.example.com/ref-2.png",
+				},
+				{
+					id: "remote-3",
+					source: "remote_url",
+					url: "https://images.example.com/ref-3.png",
+				},
+			],
+		},
+	});
+}
+
 describe("WorkbenchRenderer", () => {
 	it("renders representative workbench modes without hitting the fallback", () => {
 		const scenarios: Array<{
@@ -180,6 +209,11 @@ describe("WorkbenchRenderer", () => {
 			{
 				lessonId: "2.2",
 				expected: "Sketch rules",
+			},
+			{
+				lessonId: "2.6",
+				expected: "Follow this order",
+				pinnedArtifacts: [getReferenceBoardArtifact()],
 			},
 			{
 				lessonId: "3.1",
@@ -413,6 +447,34 @@ describe("WorkbenchRenderer", () => {
 		expect(markup).not.toContain(
 			"Choose a file and it will upload to lesson storage before the lesson draft is saved.",
 		);
+	});
+
+	it("renders lesson 2.6 as a visual-direction prompt workflow", () => {
+		const lesson = getLessonById("2.6");
+		expect(lesson?.workbench).toBe("visual_direction");
+
+		const markup = renderLessonWorkbench("2.6", {
+			fieldValues: {
+				visual_direction_notes:
+					"Keep the references sharp and editorial, tighten the spacing, and make the trust hierarchy more obvious.",
+				visual_guide_markdown: `# Visual Guide
+## Overall Direction
+Make the UI feel editorial and high-contrast.`,
+			},
+			pinnedArtifacts: [getReferenceBoardArtifact()],
+		});
+
+		expect(markup).toContain("Watch lesson");
+		expect(markup).toContain("Reference gallery");
+		expect(markup).toContain("Follow this order");
+		expect(markup).toContain("Copy prompt -&gt; paste visualguide.md");
+		expect(markup).toContain("Saved visualguide.md");
+		expect(markup).toContain("https://images.example.com/ref-1.png");
+		expect(markup).toContain("https://images.example.com/ref-2.png");
+		expect(markup).toContain("https://images.example.com/ref-3.png");
+		expect(markup).toContain("https://images.example.com/ref-1.png");
+		expect(markup).not.toContain("Style Rule 1");
+		expect(markup).not.toContain("Avoid...");
 	});
 
 	it("renders lesson 2.1 with gallery progress copy once references exist", () => {

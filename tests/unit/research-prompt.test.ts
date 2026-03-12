@@ -1,8 +1,11 @@
 import {
 	buildCompetitorResearchPrompt,
+	buildVisualDirectionGuidePrompt,
 	buildScopeBoundaryPrompt,
 	buildPromptImportFieldValues,
+	getPromptTemplateState,
 	parseCompetitorResearchImport,
+	parseVisualDirectionGuideImport,
 	parseScopeBoundaryImport,
 } from "@/lib/course/research-prompt";
 
@@ -238,7 +241,89 @@ describe("buildScopeBoundaryPrompt", () => {
 		expect(prompt).toContain(
 			"- Avoid dashboards, analytics, settings, collaboration, team roles, notifications, admin panels, integrations, billing, or platform-level extras unless they are absolutely required for the user to reach the outcome in the core flow.",
 		);
-		expect(prompt).toContain("- Return only these three sections in this order:");
+		expect(prompt).toContain(
+			"- Return only these three sections in this order:",
+		);
+	});
+});
+
+describe("buildVisualDirectionGuidePrompt", () => {
+	it("builds a visual-guide prompt from saved references and a direction note", () => {
+		const prompt = buildVisualDirectionGuidePrompt({
+			directionNotes:
+				"Push the references toward a sharper editorial landing page with tighter spacing, darker surfaces, and more trust-heavy hierarchy.",
+			referenceImageUrls: [
+				"https://images.example.com/ref-1.png",
+				"https://images.example.com/ref-2.png",
+			],
+		});
+
+		expect(prompt).toContain(
+			"You are helping a builder turn saved visual references into a practical app visual system they can build from this weekend.",
+		);
+		expect(prompt).toContain(
+			"- Push the references toward a sharper editorial landing page with tighter spacing, darker surfaces, and more trust-heavy hierarchy.",
+		);
+		expect(prompt).toContain(
+			"- Reference 1: https://images.example.com/ref-1.png",
+		);
+		expect(prompt).toContain(
+			"- Reference 2: https://images.example.com/ref-2.png",
+		);
+		expect(prompt).toContain(
+			"Return only the markdown contents of `visualguide.md`.",
+		);
+		expect(prompt).toContain("## Components and UI Patterns");
+		expect(prompt).toContain("## What To Avoid");
+	});
+
+	it("requires both saved references and a local direction note for prompt state", () => {
+		expect(
+			getPromptTemplateState("visual_direction_guide", [
+				{
+					artifactKey: "reference_board",
+					fieldValues: {
+						reference_gallery: {
+							kind: "reference_gallery",
+							items: [
+								{
+									id: "remote-1",
+									source: "remote_url",
+									url: "https://images.example.com/ref-1.png",
+								},
+							],
+						},
+					},
+				},
+			]).disabledReason,
+		).toContain("Save at least one visual direction note here");
+
+		expect(
+			getPromptTemplateState(
+				"visual_direction_guide",
+				[
+					{
+						artifactKey: "reference_board",
+						fieldValues: {
+							reference_gallery: {
+								kind: "reference_gallery",
+								items: [
+									{
+										id: "remote-1",
+										source: "remote_url",
+										url: "https://images.example.com/ref-1.png",
+									},
+								],
+							},
+						},
+					},
+				],
+				{
+					visual_direction_notes:
+						"Keep the hero bold, editorial, and high contrast.",
+				},
+			).prompt,
+		).toContain("https://images.example.com/ref-1.png");
 	});
 });
 
@@ -256,10 +341,7 @@ Why this version is enough
 The user can get from messy notes to a usable action summary in one pass, which creates a real before-and-after win this weekend.`);
 
 		expect(parsed).toEqual({
-			inScope: [
-				"Paste meeting notes",
-				"Generate a clean action summary",
-			],
+			inScope: ["Paste meeting notes", "Generate a clean action summary"],
 			outOfScope: ["Slack integration", "Team analytics dashboard"],
 			rationale:
 				"The user can get from messy notes to a usable action summary in one pass, which creates a real before-and-after win this weekend.",
@@ -325,6 +407,62 @@ Cut from v1
 - Slack integration`),
 		).toThrow(
 			"Paste the full ChatGPT response that includes Keep in v1, Cut from v1, and Why this version is enough.",
+		);
+	});
+});
+
+describe("parseVisualDirectionGuideImport", () => {
+	it("accepts raw markdown for visualguide.md", () => {
+		const parsed = parseVisualDirectionGuideImport(`# Visual Guide
+## Overall Direction
+Keep the UI sharp and dense.`);
+
+		expect(parsed).toBe(`# Visual Guide
+## Overall Direction
+Keep the UI sharp and dense.`);
+	});
+
+	it("strips one fenced markdown wrapper before saving", () => {
+		const parsed = parseVisualDirectionGuideImport(`\`\`\`markdown
+# Visual Guide
+## Overall Direction
+Keep the UI sharp and dense.
+\`\`\``);
+
+		expect(parsed).toBe(`# Visual Guide
+## Overall Direction
+Keep the UI sharp and dense.`);
+	});
+
+	it("returns field updates for the visual-direction lesson import mapping", () => {
+		const updates = buildPromptImportFieldValues(
+			{
+				promptTemplateId: "visual_direction_guide",
+				markdownFieldId: "visual_guide_markdown",
+			},
+			`# Visual Guide
+## Overall Direction
+Keep the UI sharp and dense.`,
+		);
+
+		expect(updates).toEqual({
+			visual_guide_markdown: `# Visual Guide
+## Overall Direction
+Keep the UI sharp and dense.`,
+		});
+	});
+
+	it("rejects fenced markdown with extra commentary around it", () => {
+		expect(() =>
+			parseVisualDirectionGuideImport(`Here is your file:
+
+\`\`\`markdown
+# Visual Guide
+## Overall Direction
+Keep the UI sharp and dense.
+\`\`\``),
+		).toThrow(
+			"Paste only the raw `visualguide.md` markdown or one fenced markdown block with no extra commentary.",
 		);
 	});
 });
