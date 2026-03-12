@@ -43,6 +43,7 @@ export function ScoreTableWorkbench({
 					lesson={lesson}
 					onFieldChange={onFieldChange}
 					pinnedArtifacts={pinnedArtifacts}
+					fieldValues={fieldValues}
 				/>
 			) : null}
 			{tableField ? (

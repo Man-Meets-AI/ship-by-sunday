@@ -38,6 +38,14 @@ type LessonChromeState = {
 	activeCoachPanel: "watch" | "transcript" | "examples" | "resources";
 };
 
+function getAvailableCoachPanels(
+	lesson: LessonConfig,
+): LessonChromeState["activeCoachPanel"][] {
+	return lesson.coachVideoPlacement === "workbench"
+		? ["transcript", "examples", "resources"]
+		: ["watch", "transcript", "examples", "resources"];
+}
+
 type UnlockedLessonState = {
 	accessStatus: "unlocked";
 	fieldValues: Record<string, unknown>;
@@ -105,10 +113,26 @@ function getCompletionNavigationDelayMs() {
 function getDefaultCoachPanel(
 	lesson: LessonConfig,
 ): LessonChromeState["activeCoachPanel"] {
-	if (lesson.panelDefaults.transcript === "open") return "transcript";
-	if (lesson.panelDefaults.examples === "open") return "examples";
-	if (lesson.panelDefaults.resources === "open") return "resources";
-	return "watch";
+	const availablePanels = getAvailableCoachPanels(lesson);
+	if (
+		lesson.panelDefaults.transcript === "open" &&
+		availablePanels.includes("transcript")
+	) {
+		return "transcript";
+	}
+	if (
+		lesson.panelDefaults.examples === "open" &&
+		availablePanels.includes("examples")
+	) {
+		return "examples";
+	}
+	if (
+		lesson.panelDefaults.resources === "open" &&
+		availablePanels.includes("resources")
+	) {
+		return "resources";
+	}
+	return availablePanels[0] ?? "watch";
 }
 
 function getDefaultChromeState(lesson: LessonConfig): LessonChromeState {
@@ -254,6 +278,11 @@ export function LessonPage({
 			setChromeState({
 				...parsed,
 				layoutMode: normalizeLayoutModeForLesson(lesson, parsed.layoutMode),
+				activeCoachPanel: getAvailableCoachPanels(lesson).includes(
+					parsed.activeCoachPanel,
+				)
+					? parsed.activeCoachPanel
+					: defaults.activeCoachPanel,
 			});
 		} catch {
 			setChromeState(defaults);

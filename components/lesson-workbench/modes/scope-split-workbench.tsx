@@ -33,6 +33,7 @@ export function ScopeSplitWorkbench({
 					lesson={lesson}
 					onFieldChange={onFieldChange}
 					pinnedArtifacts={pinnedArtifacts}
+					fieldValues={fieldValues}
 				/>
 			) : null}
 			<div className="grid gap-2 lg:grid-cols-2">

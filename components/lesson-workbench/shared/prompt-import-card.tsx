@@ -76,7 +76,9 @@ const PROMPT_IMPORT_COPY: Record<LessonPromptTemplateId, PromptImportUiCopy> = {
 				return "Imported suggestions. You can edit the fields below.";
 			}
 
-			const keepCount = Array.isArray(nextFieldValues[promptImport.inScopeFieldId])
+			const keepCount = Array.isArray(
+				nextFieldValues[promptImport.inScopeFieldId],
+			)
 				? (nextFieldValues[promptImport.inScopeFieldId] as string[]).length
 				: 0;
 			const cutCount = Array.isArray(
@@ -90,13 +92,49 @@ const PROMPT_IMPORT_COPY: Record<LessonPromptTemplateId, PromptImportUiCopy> = {
 			}, and a v1 rationale. You can tighten everything below.`;
 		},
 	},
+	visual_direction_guide: {
+		cardLabel: "Copy prompt -> paste visualguide.md",
+		steps: [
+			"Copy the prompt built from your saved references and direction note.",
+			"Run it in your preferred coding agent to generate `visualguide.md`.",
+			"Paste the returned markdown back here so this lesson can save and preview it.",
+		],
+		enabledNote:
+			"Built from your saved references and the direction note you wrote above so the guide stays tied to the look you actually want.",
+		pasteLabel: "Paste visualguide.md markdown",
+		pastePlaceholder:
+			"Paste the raw contents of visualguide.md or one fenced markdown block with only that file inside.",
+		importButtonLabel: "Save visualguide.md",
+		importHint:
+			"The import stores the markdown in this lesson so `2.7` can preview the visual direction cleanly.",
+		getSuccessMessage: (nextFieldValues, promptImport) => {
+			if (promptImport.promptTemplateId !== "visual_direction_guide") {
+				return "Imported suggestions. You can edit the fields below.";
+			}
+
+			const markdown = nextFieldValues[promptImport.markdownFieldId];
+			const lineCount =
+				typeof markdown === "string"
+					? markdown.split(/\r?\n/u).filter((line) => line.trim().length > 0)
+							.length
+					: 0;
+
+			return `Saved visualguide.md with ${lineCount} non-empty ${
+				lineCount === 1 ? "line" : "lines"
+			}. You can keep editing the saved markdown below.`;
+		},
+	},
 };
 
 export function PromptImportCard({
 	lesson,
 	onFieldChange,
 	pinnedArtifacts,
-}: Pick<WorkbenchModeProps, "lesson" | "onFieldChange" | "pinnedArtifacts">) {
+	fieldValues,
+}: Pick<
+	WorkbenchModeProps,
+	"lesson" | "onFieldChange" | "pinnedArtifacts" | "fieldValues"
+>) {
 	const promptImport = lesson.promptImport;
 	const [copyState, setCopyState] = useState<"idle" | "copied" | "error">(
 		"idle",
@@ -107,9 +145,14 @@ export function PromptImportCard({
 		message: string;
 	} | null>(null);
 	const resetTimeoutRef = useRef<number | null>(null);
-	const promptTemplateId = promptImport?.promptTemplateId ?? "competitor_research";
+	const promptTemplateId =
+		promptImport?.promptTemplateId ?? "competitor_research";
 	const promptState = promptImport
-		? getPromptTemplateState(promptImport.promptTemplateId, pinnedArtifacts)
+		? getPromptTemplateState(
+				promptImport.promptTemplateId,
+				pinnedArtifacts,
+				fieldValues as any,
+			)
 		: { prompt: null, disabledReason: "This prompt import is not wired yet." };
 	const uiCopy = PROMPT_IMPORT_COPY[promptTemplateId];
 
@@ -231,7 +274,8 @@ export function PromptImportCard({
 						/>
 					) : (
 						<p className="text-[11px] font-medium leading-snug text-product-muted">
-							The prompt will appear here once the earlier CEO context is saved.
+							The prompt will appear here once the required lesson context is
+							saved.
 						</p>
 					)}
 				</div>

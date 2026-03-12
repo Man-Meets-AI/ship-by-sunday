@@ -382,7 +382,7 @@ export const designLessons = [
 		title: "Choose a Visual Direction",
 		shortTitle: "Direction",
 		shell: "split",
-		workbench: "guided_form",
+		workbench: "visual_direction",
 		artifact: {
 			key: "visual_direction",
 			label: "Visual Direction",
@@ -394,55 +394,62 @@ export const designLessons = [
 		prevLessonId: "2.5",
 		unlocks: { lessons: ["2.7"] },
 		coachMode: "docked",
+		coachVideoPlacement: "workbench",
 		objectiveTitle: "DESIGN 2.6 — Choose a Visual Direction",
 		checklist: [
-			"Pick a direction",
-			"Write 3 style rules",
-			"Name what to avoid",
+			"Review the references",
+			"Write the direction note",
+			"Save visualguide.md",
 		],
-		helperText: "Make the visual rules explicit before Build starts.",
-		winCondition: "Three style rules and one avoid-rule are saved.",
+		helperText:
+			"Turn your saved references into one practical visual guide before Build starts.",
 		panelDefaults: splitPanelDefaults,
+		fieldShapeVersion: 2,
 		pinnedArtifacts: ["reference_board", "rough_screens"],
+		promptImport: {
+			promptTemplateId: "visual_direction_guide",
+			markdownFieldId: "visual_guide_markdown",
+		},
 		workbenchFields: [
 			{
-				id: "style_rule_1",
-				label: "Style Rule 1",
-				kind: "text",
+				id: "visual_direction_notes",
+				label: "Visual direction note",
+				kind: "textarea",
 				required: true,
+				rows: 5,
+				placeholder:
+					"Name the visual shifts you want the guide to push: hierarchy, type feel, surfaces, contrast, spacing, trust cues, interaction tone, and what to avoid.",
+				artifactPreviewLabel: "Direction note",
+				taskLabel: "Write the direction note",
 			},
 			{
-				id: "style_rule_2",
-				label: "Style Rule 2",
-				kind: "text",
+				id: "visual_guide_markdown",
+				label: "Saved visualguide.md",
+				kind: "textarea",
 				required: true,
-			},
-			{
-				id: "style_rule_3",
-				label: "Style Rule 3",
-				kind: "text",
-				required: true,
-			},
-			{
-				id: "avoid_rule",
-				label: "Avoid...",
-				kind: "text",
-				required: true,
+				rows: 14,
+				placeholder:
+					"Paste the returned visualguide.md markdown here after you run the prompt in your coding agent.",
+				artifactPreviewLabel: "visualguide.md",
+				taskLabel: "Save visualguide.md",
 			},
 		],
+		winCondition: "A saved direction note and visualguide.md are ready.",
 		content: {
 			status: "draft",
 			intro:
-				"You do not need a full brand system. You need a coherent direction.",
+				"You do not need a giant brand package. You need one coherent visual guide the build can follow.",
 			lessonMeta: {
 				runtimeLabel: "5-7 min",
-				goal: "Set a simple visual system for the build.",
-				purpose: "Students need direction, not a giant brand package.",
+				goal: "Turn your references into a build-ready visual direction.",
+				purpose:
+					"Students need one sharp guide file, not another blank design exercise.",
 			},
 			actionCard: {
-				jobNow: "Choose a visual direction and write 3 style rules.",
+				jobNow:
+					"Review the references, write the direction note, then save `visualguide.md` back into the lesson.",
 				timebox: "10 minutes",
-				comeBackWith: "A simple visual direction.",
+				comeBackWith: "A saved `visualguide.md`.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Choose a Visual Direction",
@@ -450,14 +457,14 @@ export const designLessons = [
 			}),
 			workbench: {
 				prompt:
-					"You do not need a full brand system. You need a coherent direction.",
+					"You are translating saved references into one practical visual guide for the build.",
 				teachingPoints: [
-					"Choose one type direction, one spacing feel, one UI vibe.",
-					"Define 3 simple style rules.",
-					"Tie those rules back to the references.",
+					"Review the references before you ask an agent to generate anything.",
+					"Write the visual shifts you want in plain English, not vague taste words.",
+					"Save the returned `visualguide.md` so the Design wrap-up can carry it forward.",
 				],
 				emptyState:
-					"You do not need a full brand system. You need a coherent direction.",
+					"You do not need a full brand system. You need one guide file the build can actually follow.",
 			},
 		},
 	},

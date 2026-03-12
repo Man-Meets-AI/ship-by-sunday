@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
+import { LessonVideoSurface } from "@/components/lesson-video-surface";
 import { formatArtifactValue } from "@/components/lesson-workbench/shared/artifact-format";
 import type { LessonPromptResourceContent } from "@/lib/course/contracts";
 import { getLesson, type LessonConfig } from "@/lib/course/manifest";
@@ -148,64 +149,6 @@ type WatchLessonShellProps = {
 	coachContent: LessonContent["coach"];
 	footer: React.ReactNode;
 };
-
-function LessonVideoSurface({
-	coachContent,
-	variant = "panel",
-}: {
-	coachContent: LessonContent["coach"];
-	variant?: "panel" | "watch-shell";
-}) {
-	const video = coachContent?.video;
-	const isWatchShell = variant === "watch-shell";
-
-	if (video?.status === "ready" && video.url) {
-		return (
-			<div className={isWatchShell ? "space-y-3" : "space-y-1.5"}>
-				<video
-					controls
-					poster={video.posterUrl}
-					className={
-						isWatchShell
-							? "aspect-video w-full rounded-none border border-product-border bg-product-surface-strong shadow-panel"
-							: "w-full rounded-none border border-product-border bg-product-surface-strong"
-					}
-					src={video.url}
-				/>
-				{video.title || video.durationLabel ? (
-					<div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-medium uppercase tracking-[0.18em] text-product-muted">
-						{video.title ? <p>{video.title}</p> : null}
-						{video.durationLabel ? <p>{video.durationLabel}</p> : null}
-					</div>
-				) : null}
-			</div>
-		);
-	}
-
-	if (isWatchShell) {
-		return (
-			<div className="flex aspect-video min-h-[320px] w-full items-center justify-center rounded-none border border-dashed border-product-border bg-product-surface-strong/70 px-6 py-8 text-center shadow-panel">
-				<div className="max-w-md space-y-3">
-					<p className="font-mono text-[10px] uppercase tracking-[0.24em] text-product-muted">
-						Watch video
-					</p>
-					<p className="font-display text-2xl uppercase tracking-[0.08em] text-product-text sm:text-3xl">
-						Video placeholder
-					</p>
-					<p className="text-sm font-medium leading-relaxed text-product-muted">
-						The lesson video will appear here when it is attached.
-					</p>
-				</div>
-			</div>
-		);
-	}
-
-	return (
-		<div className="rounded-none border border-dashed border-product-border bg-product-surface-strong/70 px-2 py-2 text-xs font-medium leading-snug text-product-muted">
-			Video not wired yet.
-		</div>
-	);
-}
 
 function ManualTaskRow({
 	label,
@@ -389,11 +332,13 @@ function ObjectivePanel({
 }
 
 function CoachPanel({
+	lesson,
 	coachContent,
 	activePanel,
 	onPanelChange,
 	pinnedArtifacts,
 }: {
+	lesson: LessonConfig;
 	coachContent: LessonContent["coach"];
 	activePanel: CoachPanelKey;
 	onPanelChange: (panel: CoachPanelKey) => void;
@@ -406,7 +351,7 @@ function CoachPanel({
 	);
 	const resources = coachContent?.resources ?? [];
 
-	const sections: Array<{
+	const sectionDefinitions: Array<{
 		key: CoachPanelKey;
 		label: string;
 		content: React.ReactNode;
@@ -526,6 +471,9 @@ function CoachPanel({
 				),
 		},
 	];
+	const sections = sectionDefinitions.filter((section) =>
+		lesson.coachVideoPlacement === "workbench" ? section.key !== "watch" : true,
+	);
 
 	return (
 		<aside className="min-w-0 rounded-none border border-product-border/70 bg-product-surface/68 shadow-panel backdrop-blur-xl xl:h-full xl:min-h-0 xl:overflow-y-auto">
@@ -609,6 +557,7 @@ export function LessonShellSplit({
 			</section>
 			{coachVisible ? (
 				<CoachPanel
+					lesson={lesson}
 					coachContent={coachContent}
 					activePanel={activeCoachPanel}
 					onPanelChange={onCoachPanelChange}

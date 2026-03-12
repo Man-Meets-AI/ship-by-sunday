@@ -1,5 +1,6 @@
 import type { LessonPromptImport, LessonPromptTemplateId } from "./contracts";
 import type { PersistedFieldValues } from "./registry";
+import { getReferenceGalleryImageUrls } from "./reference-gallery";
 
 export type CompetitorResearchPromptContext = {
 	user: {
@@ -26,6 +27,11 @@ export type ScopeBoundaryPromptContext = CompetitorResearchPromptContext & {
 			whatUsersCareAboutMost: string;
 		}>;
 	};
+};
+
+export type VisualDirectionGuidePromptContext = {
+	directionNotes: string;
+	referenceImageUrls: string[];
 };
 
 export type PromptTemplateArtifactContext = {
@@ -85,10 +91,7 @@ function getTrimmedFieldValue(
 	return trimmed.length > 0 ? trimmed : null;
 }
 
-function getResearchRows(
-	fieldValues: PersistedFieldValues,
-	fieldId: string,
-) {
+function getResearchRows(fieldValues: PersistedFieldValues, fieldId: string) {
 	const value = fieldValues[fieldId];
 	if (!Array.isArray(value)) {
 		return [];
@@ -192,7 +195,10 @@ function getScopeBoundaryPromptContext(
 			(artifact) => artifact.artifactKey === "research_notes",
 		) ?? null;
 	const researchRows = researchArtifact
-		? getResearchRows(researchArtifact.fieldValues, "research_table").slice(0, 3)
+		? getResearchRows(researchArtifact.fieldValues, "research_table").slice(
+				0,
+				3,
+			)
 		: [];
 	const researchSummary = researchArtifact
 		? (getTrimmedFieldValue(researchArtifact.fieldValues, "research_summary") ??
@@ -208,6 +214,35 @@ function getScopeBoundaryPromptContext(
 						summary: researchSummary,
 					}
 				: undefined,
+	};
+}
+
+function getVisualDirectionGuidePromptContext(
+	pinnedArtifacts: PromptTemplateArtifactContext[],
+	fieldValues: PersistedFieldValues,
+): VisualDirectionGuidePromptContext | null {
+	const referenceArtifact =
+		pinnedArtifacts.find(
+			(artifact) => artifact.artifactKey === "reference_board",
+		) ?? null;
+	const directionNotes = getTrimmedFieldValue(
+		fieldValues,
+		"visual_direction_notes",
+	);
+	const referenceImageUrls = referenceArtifact
+		? getReferenceGalleryImageUrls(
+				referenceArtifact.fieldValues.reference_gallery,
+				8,
+			)
+		: [];
+
+	if (!directionNotes || referenceImageUrls.length === 0) {
+		return null;
+	}
+
+	return {
+		directionNotes,
+		referenceImageUrls,
 	};
 }
 
@@ -383,9 +418,59 @@ export function buildScopeBoundaryPrompt(context: ScopeBoundaryPromptContext) {
 	].join("\n");
 }
 
+export function buildVisualDirectionGuidePrompt(
+	context: VisualDirectionGuidePromptContext,
+) {
+	const referenceLines = context.referenceImageUrls.map(
+		(url, index) => `- Reference ${index + 1}: ${url}`,
+	);
+
+	return [
+		"You are helping a builder turn saved visual references into a practical app visual system they can build from this weekend.",
+		"",
+		"Your job is to write one markdown file named `visualguide.md` that gives a coding agent enough visual direction to build a coherent first version without inventing the design from scratch.",
+		"",
+		"Do not write implementation code.",
+		"Do not explain your process.",
+		"Do not add intro text or outro text outside the markdown file contents.",
+		"",
+		"Direction note from the builder:",
+		`- ${context.directionNotes}`,
+		"",
+		"Reference images to study:",
+		...referenceLines,
+		"",
+		"File requirements for `visualguide.md`:",
+		"- Keep it practical and build-oriented, not brand-agency fluff.",
+		"- Translate the references into rules a coding agent can follow.",
+		"- Stay specific about hierarchy, typography feel, spacing, surfaces, contrast, interaction tone, and what to avoid.",
+		"- Tie the visual guidance back to the references instead of inventing a new style direction.",
+		"- Assume the builder wants a sharp v1, not a full design system.",
+		"",
+		"Use this markdown structure exactly:",
+		"# Visual Guide",
+		"## Overall Direction",
+		"## Design Principles",
+		"## Typography Direction",
+		"## Color and Contrast",
+		"## Layout and Spacing",
+		"## Components and UI Patterns",
+		"## Interaction Tone",
+		"## What To Avoid",
+		"",
+		"Each section should be concise, concrete, and action-oriented.",
+		"",
+		"Output rules:",
+		"- Return only the markdown contents of `visualguide.md`.",
+		"- Do not wrap the file in prose before or after the markdown.",
+		"- If you use a code fence, it must contain only the markdown file and nothing else.",
+	].join("\n");
+}
+
 export function getPromptTemplateState(
 	promptTemplateId: LessonPromptTemplateId,
 	pinnedArtifacts: PromptTemplateArtifactContext[],
+	fieldValues: PersistedFieldValues = {},
 ): PromptTemplateState {
 	if (promptTemplateId === "competitor_research") {
 		const context = getCompetitorResearchPromptContext(pinnedArtifacts);
@@ -415,6 +500,25 @@ export function getPromptTemplateState(
 
 		return {
 			prompt: buildScopeBoundaryPrompt(context),
+			disabledReason: null,
+		};
+	}
+
+	if (promptTemplateId === "visual_direction_guide") {
+		const context = getVisualDirectionGuidePromptContext(
+			pinnedArtifacts,
+			fieldValues,
+		);
+		if (!context) {
+			return {
+				prompt: null,
+				disabledReason:
+					"Save at least one visual direction note here and make sure your `2.1` reference gallery is available before building this prompt.",
+			};
+		}
+
+		return {
+			prompt: buildVisualDirectionGuidePrompt(context),
 			disabledReason: null,
 		};
 	}
@@ -607,7 +711,9 @@ function parseResearchSummary(lines: string[]) {
 
 function parseScopeList(lines: string[], emptyMessage: string) {
 	const items = lines
-		.map((line) => normalizeSpacing(stripListPrefix(stripInlineCitations(line))))
+		.map((line) =>
+			normalizeSpacing(stripListPrefix(stripInlineCitations(line))),
+		)
 		.filter((line) => line.length > 0 && !isMarkdownTableDivider(line));
 
 	if (items.length === 0) {
@@ -615,6 +721,37 @@ function parseScopeList(lines: string[], emptyMessage: string) {
 	}
 
 	return items;
+}
+
+function extractMarkdownDocument(input: string) {
+	const trimmed = input.trim();
+	if (trimmed.length === 0) {
+		throw new Error(
+			"Paste the returned `visualguide.md` markdown so we can save it in the lesson.",
+		);
+	}
+
+	if (!trimmed.includes("```")) {
+		return trimmed;
+	}
+
+	const fencedMatch = trimmed.match(
+		/^```(?:md|markdown)?\s*\n?([\s\S]*?)\n?```$/iu,
+	);
+	if (!fencedMatch) {
+		throw new Error(
+			"Paste only the raw `visualguide.md` markdown or one fenced markdown block with no extra commentary.",
+		);
+	}
+
+	const document = fencedMatch[1]?.trim() ?? "";
+	if (document.length === 0) {
+		throw new Error(
+			"Paste the returned `visualguide.md` markdown so we can save it in the lesson.",
+		);
+	}
+
+	return document;
 }
 
 export function parseCompetitorResearchImport(
@@ -682,6 +819,10 @@ export function parseScopeBoundaryImport(
 	};
 }
 
+export function parseVisualDirectionGuideImport(input: string) {
+	return extractMarkdownDocument(input);
+}
+
 export function parsePromptTemplateImport(
 	promptTemplateId: LessonPromptTemplateId,
 	input: string,
@@ -692,6 +833,10 @@ export function parsePromptTemplateImport(
 
 	if (promptTemplateId === "scope_boundary") {
 		return parseScopeBoundaryImport(input);
+	}
+
+	if (promptTemplateId === "visual_direction_guide") {
+		return parseVisualDirectionGuideImport(input);
 	}
 
 	throw new Error("This prompt import is not wired yet.");
@@ -707,6 +852,12 @@ export function buildPromptImportFieldValues(
 		return {
 			[promptImport.tableFieldId]: imported.rows,
 			[promptImport.summaryFieldId]: imported.summary,
+		};
+	}
+
+	if (promptImport.promptTemplateId === "visual_direction_guide") {
+		return {
+			[promptImport.markdownFieldId]: parseVisualDirectionGuideImport(input),
 		};
 	}
 

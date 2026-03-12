@@ -516,6 +516,57 @@ function formatArtifactSummaryValue(value: unknown) {
 	return String(value).trim();
 }
 
+function truncatePreviewText(value: string, maxLength = 160) {
+	if (value.length <= maxLength) {
+		return value;
+	}
+
+	return `${value.slice(0, maxLength - 3).trimEnd()}...`;
+}
+
+function getMarkdownDocumentTitle(markdown: string) {
+	const match = markdown.match(/^#\s+(.+)$/mu);
+	return match?.[1]?.trim() ?? null;
+}
+
+function buildVisualDirectionPreview(
+	lesson: LessonConfig,
+	fieldValues: PersistedFieldValues,
+): ArtifactPreview {
+	const values = normalizeLessonFieldValues(lesson, fieldValues);
+	const directionNote = getTrimmedFieldValue(values, "visual_direction_notes");
+	const visualGuideMarkdown = getTrimmedFieldValue(
+		values,
+		"visual_guide_markdown",
+	);
+	const visualGuideLabel = visualGuideMarkdown
+		? (getMarkdownDocumentTitle(visualGuideMarkdown) ?? "Guide saved")
+		: "";
+
+	return {
+		artifactKey: lesson.artifact.key,
+		artifactLabel: lesson.artifact.label,
+		contextTitle: lesson.artifact.contextTitle,
+		artifactType: lesson.artifact.type as ArtifactType,
+		lessonId: lesson.id,
+		lessonTitle: lesson.title,
+		fieldValues: values,
+		fields: (
+			[
+				directionNote
+					? (["Direction note", truncatePreviewText(directionNote)] as [
+							string,
+							unknown,
+						])
+					: null,
+				visualGuideLabel
+					? (["visualguide.md", visualGuideLabel] as [string, unknown])
+					: null,
+			] as Array<[string, unknown] | null>
+		).filter((entry): entry is [string, unknown] => Boolean(entry)),
+	};
+}
+
 function getPinnedArtifactByKey(
 	pinnedArtifacts: ArtifactPreview[],
 	artifactKey: string,
@@ -554,6 +605,19 @@ function countFilledLines(value: unknown) {
 		(entry): entry is string =>
 			typeof entry === "string" && entry.trim().length > 0,
 	).length;
+}
+
+function getTrimmedFieldValue(
+	fieldValues: PersistedFieldValues,
+	fieldId: string,
+) {
+	const value = fieldValues[fieldId];
+	if (typeof value !== "string") {
+		return null;
+	}
+
+	const trimmed = value.trim();
+	return trimmed.length > 0 ? trimmed : null;
 }
 
 function summarizePinnedArtifact(artifact: ArtifactPreview, limit = 2) {
@@ -1193,6 +1257,10 @@ export function buildArtifactPreview(
 	lesson: LessonConfig,
 	fieldValues: PersistedFieldValues,
 ): ArtifactPreview {
+	if (lesson.artifact.key === "visual_direction") {
+		return buildVisualDirectionPreview(lesson, fieldValues);
+	}
+
 	const values = normalizeLessonFieldValues(lesson, fieldValues);
 	const previewEntries: Array<[string, PersistedFieldValue]> = [];
 	const usedFieldIds = new Set<string>();

@@ -21,6 +21,7 @@ import { SketchUploadWorkbench } from "./modes/sketch-upload-workbench";
 import { ScoreTableWorkbench } from "./modes/score-table-workbench";
 import { ScopeSplitWorkbench } from "./modes/scope-split-workbench";
 import { TrackerLogWorkbench } from "./modes/tracker-log-workbench";
+import { VisualDirectionWorkbench } from "./modes/visual-direction-workbench";
 import type { WorkbenchModeComponent, WorkbenchRendererProps } from "./types";
 import { WorkbenchContainer } from "./shared/workbench-container";
 import { WorkbenchHeader } from "./shared/workbench-header";
@@ -39,6 +40,7 @@ const modeRenderers: Record<WorkbenchType, WorkbenchModeComponent> = {
 	roadmap_overview: RoadmapOverviewWorkbench,
 	tracker_log: TrackerLogWorkbench,
 	external_workspace: ExternalWorkspaceWorkbench,
+	visual_direction: VisualDirectionWorkbench,
 };
 
 function UnsupportedWorkbench({

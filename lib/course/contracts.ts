@@ -16,9 +16,11 @@ export type WorkbenchType =
 	| "console_checklist"
 	| "roadmap_overview"
 	| "tracker_log"
-	| "external_workspace";
+	| "external_workspace"
+	| "visual_direction";
 
 export type CoachMode = "docked" | "pip";
+export type CoachVideoPlacement = "coach" | "workbench";
 
 export type ExternalTool = "figma" | "code" | "deploy" | "recording";
 
@@ -190,7 +192,10 @@ export type LessonExampleContent = {
 	body: string;
 };
 
-export type LessonPromptTemplateId = "competitor_research" | "scope_boundary";
+export type LessonPromptTemplateId =
+	| "competitor_research"
+	| "scope_boundary"
+	| "visual_direction_guide";
 
 export type LessonLinkResourceContent = {
 	id: string;
@@ -218,6 +223,10 @@ export type LessonPromptImport =
 			inScopeFieldId: string;
 			outOfScopeFieldId: string;
 			rationaleFieldId: string;
+	  }
+	| {
+			promptTemplateId: "visual_direction_guide";
+			markdownFieldId: string;
 	  };
 
 export type LessonResourceContent =
@@ -291,6 +300,7 @@ export type LessonConfig = {
 	prevLessonId?: string;
 	unlocks?: LessonUnlockTargets;
 	coachMode: CoachMode;
+	coachVideoPlacement?: CoachVideoPlacement;
 	externalTool?: ExternalTool;
 	objectiveTitle: string;
 	checklist: string[];
