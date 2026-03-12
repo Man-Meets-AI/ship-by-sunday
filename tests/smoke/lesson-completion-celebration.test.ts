@@ -8,7 +8,8 @@ function readSource(relativePath: string) {
 describe("lesson completion celebration contract", () => {
 	it("keeps lesson completion in a local state machine before route navigation", () => {
 		const source = readSource("components/lesson-page.tsx");
-		const lessonSource = readSource("lib/course/lessons/ceo.ts");
+		const ceoLessonSource = readSource("lib/course/lessons/ceo.ts");
+		const designLessonSource = readSource("lib/course/lessons/design.ts");
 
 		expect(source).toContain(
 			'type CompletionPhase = "idle" | "submitting" | "celebrating";',
@@ -26,9 +27,16 @@ describe("lesson completion celebration contract", () => {
 		expect(source).toContain("Next unlocked:");
 		expect(source).toContain("completionActionLabel");
 		expect(source).toContain("celebrationTitle");
-		expect(lessonSource).toContain('completionCtaLabel: "Unlock Design"');
-		expect(lessonSource).toContain('celebrationTitle: "Design unlocked"');
-		expect(lessonSource).toContain('heroEyebrow: "CEO block complete"');
+		expect(ceoLessonSource).toContain('completionCtaLabel: "Unlock Design"');
+		expect(ceoLessonSource).toContain('celebrationTitle: "Design unlocked"');
+		expect(ceoLessonSource).toContain('heroEyebrow: "CEO block complete"');
+		expect(ceoLessonSource).toContain('preset: "ceo"');
+		expect(designLessonSource).toContain('completionCtaLabel: "Unlock Build"');
+		expect(designLessonSource).toContain('celebrationTitle: "Build unlocked"');
+		expect(designLessonSource).toContain(
+			'heroEyebrow: "Design block complete"',
+		);
+		expect(designLessonSource).toContain('preset: "design"');
 	});
 
 	it("passes a temporary completion cue into the product shell and rail", () => {

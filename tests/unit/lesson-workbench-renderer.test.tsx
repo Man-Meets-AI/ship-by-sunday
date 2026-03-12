@@ -170,6 +170,66 @@ function getReferenceBoardArtifact(): PinnedArtifact {
 	});
 }
 
+function getSketchSetArtifact(): PinnedArtifact {
+	const lesson = getLessonById("2.2");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {
+		sketch_upload: [
+			{
+				kind: "upload",
+				status: "stored",
+				storageId: "sketch-1",
+				fileName: "screen-1.jpg",
+				url: "https://example.com/sketch-1.jpg",
+			},
+			{
+				kind: "upload",
+				status: "stored",
+				storageId: "sketch-2",
+				fileName: "screen-2.jpg",
+				url: "https://example.com/sketch-2.jpg",
+			},
+		],
+	});
+}
+
+function getStoryboardImageArtifact(): PinnedArtifact {
+	const lesson = getLessonById("2.3");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {
+		storyboard_upload: {
+			kind: "upload",
+			status: "stored",
+			storageId: "storyboard-1",
+			fileName: "storyboard.png",
+			url: "https://example.com/storyboard.png",
+		},
+	});
+}
+
+function getRoughScreensArtifact(): PinnedArtifact {
+	const lesson = getLessonById("2.5");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {});
+}
+
+function getVisualDirectionArtifact(): PinnedArtifact {
+	const lesson = getLessonById("2.6");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {
+		__fieldShapeVersion: 2,
+		visual_direction_notes:
+			"Keep the references sharp and editorial, tighten the spacing, and make the trust hierarchy more obvious.",
+		visual_guide_markdown: `# Visual Guide
+## Overall Direction
+Make the UI feel editorial and high-contrast.`,
+	});
+}
+
 describe("WorkbenchRenderer", () => {
 	it("renders representative workbench modes without hitting the fallback", () => {
 		const scenarios: Array<{
@@ -532,6 +592,37 @@ Make the UI feel editorial and high-contrast.`,
 		expect(markup).toContain("Flow");
 		expect(markup).toContain("Scope");
 		expect(markup).toContain("https://example.com/core-flow.png");
+		expect(markup).not.toContain("ArtifactContext");
+		expect(markup).not.toContain("No saved preview yet.");
+	});
+
+	it("renders lesson 2.7 as a build-unlock wrap-up instead of a raw artifact dump", () => {
+		const markup = renderLessonWorkbench("2.7", {
+			pinnedArtifacts: [
+				getReferenceBoardArtifact(),
+				getSketchSetArtifact(),
+				getStoryboardImageArtifact(),
+				getRoughScreensArtifact(),
+				getVisualDirectionArtifact(),
+			],
+		});
+
+		expect(markup).toContain("Design block complete");
+		expect(markup).toContain("Build unlocked");
+		expect(markup).toContain("Next: BUILD 3.1 — Build From the Brief");
+		expect(markup).toContain("What Build now has");
+		expect(markup).toContain("References");
+		expect(markup).toContain("Sketches");
+		expect(markup).toContain("Storyboard");
+		expect(markup).toContain("Guide");
+		expect(markup).toContain("Reference direction");
+		expect(markup).toContain("Screen plan");
+		expect(markup).toContain("Flow sequence");
+		expect(markup).toContain("Visual direction");
+		expect(markup).toContain("Flow sequencing");
+		expect(markup).toContain("Handoff clarity");
+		expect(markup).toContain("https://images.example.com/ref-1.png");
+		expect(markup).toContain("https://example.com/storyboard.png");
 		expect(markup).not.toContain("ArtifactContext");
 		expect(markup).not.toContain("No saved preview yet.");
 	});

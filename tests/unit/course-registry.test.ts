@@ -107,6 +107,98 @@ function getScopeBoundaryArtifact() {
 	});
 }
 
+function getReferenceBoardArtifact() {
+	const lesson = getLessonById("2.1");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {
+		[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+		reference_gallery: createReferenceGalleryValue([
+			{
+				id: "upload-1",
+				source: "upload",
+				storageId: "storage-1",
+				url: "https://cdn.example.com/ref-1.png",
+			},
+			{
+				id: "remote-1",
+				source: "remote_url",
+				url: "https://images.example.com/ref-2.png",
+			},
+			{
+				id: "remote-2",
+				source: "remote_url",
+				url: "https://images.example.com/ref-3.png",
+			},
+			{
+				id: "remote-3",
+				source: "remote_url",
+				url: "https://images.example.com/ref-4.png",
+			},
+		]),
+	});
+}
+
+function getSketchSetArtifact() {
+	const lesson = getLessonById("2.2");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {
+		sketch_upload: [
+			{
+				kind: "upload",
+				status: "stored",
+				storageId: "sketch-1",
+				fileName: "screen-1.jpg",
+				url: "https://example.com/sketch-1.jpg",
+			},
+			{
+				kind: "upload",
+				status: "stored",
+				storageId: "sketch-2",
+				fileName: "screen-2.jpg",
+				url: "https://example.com/sketch-2.jpg",
+			},
+		],
+	});
+}
+
+function getStoryboardImageArtifact() {
+	const lesson = getLessonById("2.3");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {
+		storyboard_upload: {
+			kind: "upload",
+			status: "stored",
+			storageId: "storyboard-1",
+			fileName: "storyboard.png",
+			url: "https://example.com/storyboard.png",
+		},
+	});
+}
+
+function getRoughScreensArtifact() {
+	const lesson = getLessonById("2.5");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {});
+}
+
+function getVisualDirectionArtifact() {
+	const lesson = getLessonById("2.6");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {
+		[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+		visual_direction_notes:
+			"Quiet, editorial, and sharp with tighter spacing and stronger contrast.",
+		visual_guide_markdown: `# Visual Guide
+## Overall Direction
+Keep the interface sharp and editorial.`,
+	});
+}
+
 describe("course registry", () => {
 	it("keeps mission and welcome available before progress exists", () => {
 		expect(getUnlockedLessonIds([])).toEqual(["0.0", "0.1"]);
@@ -696,88 +788,76 @@ describe("course registry", () => {
 		).toBe(true);
 	});
 
-	it("composes no-field brief assembler lessons from their pinned artifacts", () => {
+	it("composes 2.7 into a curated design spec from saved Design artifacts", () => {
 		const lesson = getLessonById("2.7");
 		expect(lesson).toBeTruthy();
 
 		const preview = buildResolvedArtifactPreview(lesson!, {}, [
-			{
-				artifactKey: "reference_board",
-				artifactLabel: "Reference Gallery",
-				contextTitle: "Reference gallery",
-				artifactType: "images",
-				lessonId: "2.1",
-				lessonTitle: "Find References First",
-				fieldValues: {
-					reference_gallery: createReferenceGalleryValue([
-						{
-							id: "upload-1",
-							source: "upload",
-							storageId: "storage-1",
-							url: "https://cdn.example.com/ref-1.png",
-						},
-						{
-							id: "remote-1",
-							source: "remote_url",
-							url: "https://images.example.com/ref-2.png",
-						},
-						{
-							id: "remote-2",
-							source: "remote_url",
-							url: "https://images.example.com/ref-3.png",
-						},
-						{
-							id: "remote-3",
-							source: "remote_url",
-							url: "https://images.example.com/ref-4.png",
-						},
-					]),
-				},
-				fields: [
-					[
-						"Reference Gallery",
-						createReferenceGalleryValue([
-							{
-								id: "upload-1",
-								source: "upload",
-								storageId: "storage-1",
-								url: "https://cdn.example.com/ref-1.png",
-							},
-							{
-								id: "remote-1",
-								source: "remote_url",
-								url: "https://images.example.com/ref-2.png",
-							},
-							{
-								id: "remote-2",
-								source: "remote_url",
-								url: "https://images.example.com/ref-3.png",
-							},
-							{
-								id: "remote-3",
-								source: "remote_url",
-								url: "https://images.example.com/ref-4.png",
-							},
-						]),
-					],
-				],
-			},
-			{
-				artifactKey: "visual_direction",
-				artifactLabel: "Visual Direction",
-				contextTitle: "Visual direction",
-				artifactType: "text",
-				lessonId: "2.6",
-				lessonTitle: "Choose a Visual Direction",
-				fieldValues: { visual_direction: "Quiet, editorial, and sharp" },
-				fields: [["Visual Direction", "Quiet, editorial, and sharp"]],
-			},
+			getReferenceBoardArtifact(),
+			getSketchSetArtifact(),
+			getStoryboardImageArtifact(),
+			getRoughScreensArtifact(),
+			getVisualDirectionArtifact(),
 		]);
 
-		expect(preview.fields).toEqual([
-			["Reference gallery", "Reference Gallery: 4 saved references"],
-			["Visual direction", "Visual Direction: Quiet, editorial, and sharp"],
+		expect(preview.fields.map(([label]) => label)).toEqual([
+			"Reference direction",
+			"Screen plan",
+			"Flow sequence",
+			"Visual direction",
 		]);
+		expect(preview.fieldValues.reference_saved_count).toBe(4);
+		expect(preview.fieldValues.sketch_uploaded_count).toBe(2);
+		expect(preview.fieldValues.storyboard_locked_count).toBe(1);
+		expect(preview.fieldValues.visual_guide_saved_count).toBe(1);
+		expect(preview.fieldValues).not.toHaveProperty("rough_screen_notes");
+		expect(preview.fields).toEqual([
+			[
+				"Reference direction",
+				"4 saved references locked the patterns, hierarchy, and taste Build should borrow from.",
+			],
+			[
+				"Screen plan",
+				"The 3-5 rough screens are ready, so Build can start from a real screen plan instead of a blank editor.",
+			],
+			[
+				"Flow sequence",
+				"The storyboard already sequences the core user path, so the first implemented slice has a clear flow to follow.",
+			],
+			[
+				"Visual direction",
+				"Direction: Quiet, editorial, and sharp with tighter spacing and stronger contrast.\nVisual Guide is saved for implementation.",
+			],
+		]);
+	});
+
+	it("derives 2.7 progress tasks from the saved Design block artifacts", () => {
+		const lesson = getLessonById("2.7");
+		expect(lesson).toBeTruthy();
+
+		const tasks = getObjectiveTasks(
+			lesson!,
+			{},
+			{
+				pinnedArtifacts: [
+					getReferenceBoardArtifact(),
+					getSketchSetArtifact(),
+					getStoryboardImageArtifact(),
+					getRoughScreensArtifact(),
+					getVisualDirectionArtifact(),
+				],
+			},
+		);
+
+		expect(tasks.map((task) => task.label)).toEqual([
+			"Lock the reference direction",
+			"Carry the sketches into the handoff",
+			"Lock the storyboard flow",
+			"Carry the rough screens into Build",
+			"Save visualguide.md for Build",
+			"Assemble the design spec",
+		]);
+		expect(tasks.every((task) => task.status === "complete")).toBe(true);
 	});
 
 	it("formats table artifact previews into readable summaries", () => {

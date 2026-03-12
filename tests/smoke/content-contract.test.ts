@@ -59,18 +59,41 @@ describe("lesson content contract", () => {
 	});
 
 	it("keeps stage-unlock wrap-up lessons declarative and pointed at a real next step", () => {
-		const wrapUpLesson = getLessonById("1.7");
-		expect(wrapUpLesson).toBeTruthy();
-		expect(wrapUpLesson?.workbench).toBe("brief_assembler");
-		expect(wrapUpLesson?.briefAssembler?.variant).toBe("stage_unlock");
-		expect(wrapUpLesson?.briefAssembler).toMatchObject({
+		const ceoWrapUpLesson = getLessonById("1.7");
+		const designWrapUpLesson = getLessonById("2.7");
+
+		expect(ceoWrapUpLesson).toBeTruthy();
+		expect(designWrapUpLesson).toBeTruthy();
+		expect(ceoWrapUpLesson?.workbench).toBe("brief_assembler");
+		expect(designWrapUpLesson?.workbench).toBe("brief_assembler");
+		expect(ceoWrapUpLesson?.briefAssembler?.variant).toBe("stage_unlock");
+		expect(designWrapUpLesson?.briefAssembler?.variant).toBe("stage_unlock");
+		expect(ceoWrapUpLesson?.briefAssembler).toMatchObject({
+			preset: "ceo",
 			heroEyebrow: "CEO block complete",
 			heroTitle: "Design unlocked",
 			nextStepLabel: "DESIGN 2.1 — Find References First",
 			completionCtaLabel: "Unlock Design",
 		});
-		expect(wrapUpLesson?.briefAssembler?.skills?.length).toBeGreaterThanOrEqual(4);
-		expect((wrapUpLesson?.pinnedArtifacts ?? []).length).toBeGreaterThanOrEqual(4);
+		expect(designWrapUpLesson?.briefAssembler).toMatchObject({
+			preset: "design",
+			heroEyebrow: "Design block complete",
+			heroTitle: "Build unlocked",
+			nextStepLabel: "BUILD 3.1 — Build From the Brief",
+			completionCtaLabel: "Unlock Build",
+		});
+		expect(
+			ceoWrapUpLesson?.briefAssembler?.skills?.length,
+		).toBeGreaterThanOrEqual(4);
+		expect(
+			designWrapUpLesson?.briefAssembler?.skills?.length,
+		).toBeGreaterThanOrEqual(5);
+		expect(
+			(ceoWrapUpLesson?.pinnedArtifacts ?? []).length,
+		).toBeGreaterThanOrEqual(4);
+		expect(
+			(designWrapUpLesson?.pinnedArtifacts ?? []).length,
+		).toBeGreaterThanOrEqual(5);
 	});
 
 	it("keeps candidate-problem handoff contracts explicit and internally valid", () => {
@@ -80,7 +103,8 @@ describe("lesson content contract", () => {
 			}
 
 			const sourceLesson = lessonRegistry.find(
-				(candidate) => candidate.artifact.key === lesson.handoff?.sourceArtifactKey,
+				(candidate) =>
+					candidate.artifact.key === lesson.handoff?.sourceArtifactKey,
 			);
 			expect(
 				sourceLesson,

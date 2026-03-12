@@ -30,6 +30,20 @@ describe("visual direction lesson contract", () => {
 		]);
 	});
 
+	it("turns lesson 2.7 into a design stage-unlock handoff for Build", () => {
+		const lesson = getLessonById("2.7");
+		expect(lesson).toBeTruthy();
+
+		expect(lesson?.briefAssembler).toMatchObject({
+			variant: "stage_unlock",
+			preset: "design",
+			heroEyebrow: "Design block complete",
+			heroTitle: "Build unlocked",
+			nextStepLabel: "BUILD 3.1 — Build From the Brief",
+			completionCtaLabel: "Unlock Build",
+		});
+	});
+
 	it("treats the old style-rule draft shape as incompatible", () => {
 		const lesson = getLessonById("2.6");
 		expect(lesson).toBeTruthy();
@@ -72,7 +86,7 @@ Use one confident display face with a dense supporting sans.`,
 		);
 	});
 
-	it("keeps 2.7 brief previews concise when visual direction is pinned", () => {
+	it("keeps 2.7 build-unlock previews curated when Design artifacts are pinned", () => {
 		const lesson = getLessonById("2.7");
 		expect(lesson).toBeTruthy();
 
@@ -137,6 +151,54 @@ Use one confident display face with a dense supporting sans.`,
 				],
 			},
 			{
+				artifactKey: "sketch_set",
+				artifactLabel: "Sketch Set",
+				contextTitle: "Sketch set",
+				artifactType: "images",
+				lessonId: "2.2",
+				lessonTitle: "Sketch Before Software",
+				fieldValues: {
+					sketch_upload: [
+						{
+							kind: "upload",
+							status: "stored",
+							storageId: "sketch-1",
+							fileName: "screen-1.jpg",
+							url: "https://example.com/sketch-1.jpg",
+						},
+					],
+				},
+				fields: [["Upload sketch set", "screen-1.jpg"]],
+			},
+			{
+				artifactKey: "storyboard_image",
+				artifactLabel: "Storyboard Image",
+				contextTitle: "Storyboard image",
+				artifactType: "image",
+				lessonId: "2.3",
+				lessonTitle: "Storyboard the Journey",
+				fieldValues: {
+					storyboard_upload: {
+						kind: "upload",
+						status: "stored",
+						storageId: "storyboard-1",
+						fileName: "storyboard.png",
+						url: "https://example.com/storyboard.png",
+					},
+				},
+				fields: [["Upload storyboard image", "storyboard.png"]],
+			},
+			{
+				artifactKey: "rough_screens",
+				artifactLabel: "3–5 Rough Screens",
+				contextTitle: "3–5 rough screens",
+				artifactType: "mixed",
+				lessonId: "2.5",
+				lessonTitle: "Turn Sketches Into Rough Screens",
+				fieldValues: {},
+				fields: [],
+			},
+			{
 				artifactKey: "visual_direction",
 				artifactLabel: "Visual Direction",
 				contextTitle: "Visual direction",
@@ -161,10 +223,21 @@ Keep the interface sharp and editorial.`,
 		]);
 
 		expect(preview.fields).toEqual([
-			["Reference gallery", "Reference Gallery: 4 saved references"],
+			[
+				"Reference direction",
+				"4 saved references locked the patterns, hierarchy, and taste Build should borrow from.",
+			],
+			[
+				"Screen plan",
+				"The 3-5 rough screens are ready, so Build can start from a real screen plan instead of a blank editor.",
+			],
+			[
+				"Flow sequence",
+				"The storyboard already sequences the core user path, so the first implemented slice has a clear flow to follow.",
+			],
 			[
 				"Visual direction",
-				"Direction note: Quiet, editorial, and sharp with tighter spacing and stronger contrast. • visualguide.md: Visual Guide",
+				"Direction: Quiet, editorial, and sharp with tighter spacing and stronger contrast.\nVisual Guide is saved for implementation.",
 			],
 		]);
 	});
