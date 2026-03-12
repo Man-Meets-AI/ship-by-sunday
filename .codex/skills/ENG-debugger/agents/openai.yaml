@@ -1,0 +1,4 @@
+interface:
+  display_name: "ENG-Debugger"
+  short_description: "Investigate root cause, choose direct fix vs plan-then-fix, and remediate bugs with tracked tasks."
+  default_prompt: "Use $ENG-debugger to investigate this issue, decide whether it needs direct remediation or plan-then-fix execution, and implement the fix with tracked tasks."

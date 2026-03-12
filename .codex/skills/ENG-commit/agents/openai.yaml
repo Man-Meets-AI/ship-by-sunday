@@ -1,0 +1,4 @@
+interface:
+  display_name: "ENG-COMMIT"
+  short_description: "Land finished feature work with clean commits."
+  default_prompt: "Use $ENG-commit to review the diff, stage only the files that belong to the work, make clean conventional commits, update tracker/docs as needed, push, and return a terse handoff."

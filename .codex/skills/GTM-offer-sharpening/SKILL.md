@@ -1,9 +1,8 @@
----
-name: offer-sharpening
+name: GTM-offer-sharpening
 description: Sharpen an offer by identifying the real buyer, simplifying the promise, naming a distinct mechanism, surfacing limiting beliefs, mapping objections and bonus roles, and separating founder-brand from company-brand messaging. Use when the user says "sharpen this offer," "make this less generic," "find the unique mechanism," "name the process behind this offer," "map objections," "separate founder brand from company brand," or "position this offer."
 ---
 
-# Offer Sharpening
+# GTM-Offer Sharpening
 
 Use this skill when an offer feels generic, too broad, hard to explain, weakly differentiated, or commercially soft.
 

@@ -1,9 +1,8 @@
----
-name: practical-motion
+name: ENG-practical-motion
 description: Review, critique, design, or implement UI motion using practical scenario-to-fix heuristics. Use when the user asks to improve animations, hover states, transitions, microinteractions, loading states, tooltips/popovers, route changes, drag motion, or when an interface "feels off" and the likely problem is timing, motion structure, or interaction feedback.
 ---
 
-# Practical Motion
+# ENG-Practical Motion
 
 Use this skill when the job is to make motion feel better in a shippable way.
 

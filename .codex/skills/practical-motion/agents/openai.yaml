@@ -1,4 +1,0 @@
-interface:
-  display_name: "Practical Motion"
-  short_description: "Review or improve UI motion using scenario-to-fix heuristics."
-  default_prompt: "Use the practical-motion skill to diagnose, review, or implement UI motion improvements."

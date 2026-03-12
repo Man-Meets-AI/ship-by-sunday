@@ -10,6 +10,24 @@ Use this file to capture recurring mistakes, corrections, and guardrails for fut
   How to verify next time: Compare the lesson against the current watch-only lessons before implementing, confirm the main action is watching rather than filling fields, and browser-QA that the screen reads as video-first on first load.
 
 - Date: 2026-03-12
+  Pattern: I reached for a skill during a direct prompt-rewrite request, which added unnecessary process when the user wanted a plain rewritten artifact immediately.
+  Rule: When the user explicitly asks for a direct rewrite or copy-paste-ready prompt, return the rewritten artifact directly and do not invoke skills unless they also ask for a reusable workflow or skill.
+  How to verify next time: Check whether the user wants a reusable system or just a rewritten deliverable. If it is just the deliverable, respond with the artifact itself and skip skill usage.
+
+- Date: 2026-03-12
+  Pattern: I treated a planning handoff skill like a mixed planning-and-build lane, which blurred the workstream boundary and made the skill name misleading once an engineering review pass was introduced.
+  Rule: When the output is meant to be a plan for another agent, keep the skill plan-only, name it as a planning lane, and make adjacent review lanes consume the same packet instead of inventing a second artifact type.
+  How to verify next time: Before closing any planning-skill change, check whether the skill edits code; if it does, it is not purely a planning lane. Confirm the downstream review step enriches the same machine-readable packet and that the skill name matches the actual responsibility.
+
+- Date: 2026-03-12
+  Pattern: I designed browser QA around a shared auth account but left user provisioning implicit, which makes auth smoke tests flaky and creates a false assumption that the Clerk user already exists.
+  Rule: Any browser-QA flow that depends on auth must verify provisioning prerequisites first. For this repo's Clerk instance, that means checking for the shared test user before sign-in and treating SSO or other non-password auth as a separate mode instead of forcing the password account.
+  How to verify next time: Before closing QA-skill changes or auth smoke work, confirm there is one canonical test-account source, a concrete preflight path exists, and the workflow stops cleanly when the sign-in surface is not compatible with the default auth model.
+- Date: 2026-03-12
+  Pattern: I left component structure rules implicit, which risks shipping oversized UI files that mix presentation with stateful or behavioral logic.
+  Rule: Never create a component longer than 150 lines. If a component exceeds that limit, split it automatically and keep UI separate from logic by moving behavior into hooks, helpers, or controller components.
+  How to verify next time: Before closing any UI task, check component file length and confirm rendering stays in the component while non-presentational logic lives outside the presentational layer.
+- Date: 2026-03-12
   Pattern: I left a block wrap-up lesson as a generic artifact dump even though the learner had already done the real work upstream, which made the handoff feel flat and left the downstream artifact effectively empty.
   Rule: When a wrap-up lesson has little or no new input of its own, compose the artifact from the saved upstream artifacts and treat the screen as a reward + handoff moment, not another plain form or context dump.
   How to verify next time: Check whether the wrap-up lesson is creating new information or locking existing information. If it is locking existing information, confirm the artifact preview is composed from prior lesson outputs, the shell progress is nonzero, and the page makes the next stage obvious before you close the work.
