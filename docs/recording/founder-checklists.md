@@ -229,27 +229,27 @@ Target runtime: `90-120 min`
 ### Open before recording
 
 - [ ] Worksheet 03: Build Plan + Agent Brief
-- [ ] canonical build brief
+- [ ] canonical build prompt
 - [ ] starter repo
 - [ ] local environment already tested
-- [ ] agent brief template
+- [ ] template-path CTA target
 - [ ] one-screen-at-a-time build checklist
 - [ ] debugging example
 
 ### Lesson checklist
 
-- [ ] `03-01-build-from-the-brief`
-- [ ] `03-02-set-up-the-environment`
-- [ ] `03-03-brief-the-agent-correctly`
-- [ ] `03-04-build-the-core-flow`
-- [ ] `03-05-debug-without-spiraling`
-- [ ] `03-06-build-block-wrap-up`
+- [ ] `03-01-generate-the-build-prompt`
+- [ ] `03-02-get-the-starter-running`
+- [ ] `03-03-build-the-first-screen`
+- [ ] `03-04-build-the-core-ux`
+- [ ] `03-05-debug-the-core-ux`
+- [ ] `03-06-lock-the-local-build`
 
 ### Must show on screen
 
-- [ ] brief driving the build order
+- [ ] brief and spec driving the build order
+- [ ] build prompt generated live
 - [ ] environment setup
-- [ ] agent brief filled in live
 - [ ] one screen at a time build flow
 - [ ] one bug-fix loop with a stop condition
 - [ ] local app demo
@@ -257,6 +257,7 @@ Target runtime: `90-120 min`
 ### Key lines to land
 
 - [ ] `Build from the brief, not from vibes.`
+- [ ] `Start with a path, a first slice, and a stop condition.`
 - [ ] `One screen. One step. One definition of done.`
 - [ ] `Prompting quality is downstream from brief quality.`
 - [ ] `Debugging should protect momentum.`

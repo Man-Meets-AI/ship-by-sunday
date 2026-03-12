@@ -75,12 +75,12 @@ Purpose: translate the brief into a working local v1 without chaos.
 
 Lessons:
 
-1. Build From the Brief
-2. Set Up the Environment
-3. Brief the Agent Correctly
-4. Build the Core Flow
-5. Debug Without Spiraling
-6. Build Block Wrap-Up
+1. Generate the Build Prompt
+2. Get the Starter Running
+3. Build the First Screen
+4. Build the Core UX
+5. Debug the Core UX
+6. Lock the Local Build
 
 Core artifact:
 

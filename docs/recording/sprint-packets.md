@@ -79,12 +79,12 @@ This keeps founder energy focused and prevents Build from swallowing the whole s
 
 ### Build Block
 
-- `3.1` Build From the Brief
-- `3.2` Set Up the Environment
-- `3.3` Brief the Agent Correctly
-- `3.4` Build the Core Flow
-- `3.5` Debug Without Spiraling
-- `3.6` Build Block Wrap-Up
+- `3.1` Generate the Build Prompt
+- `3.2` Get the Starter Running
+- `3.3` Build the First Screen
+- `3.4` Build the Core UX
+- `3.5` Debug the Core UX
+- `3.6` Lock the Local Build
 
 ### Ship Block
 
@@ -272,12 +272,12 @@ Show the student how to move from brief to local working app without chaos.
 
 ### Lessons to record today
 
-- `3.1` Build From the Brief
-- `3.2` Set Up the Environment
-- `3.3` Brief the Agent Correctly
-- `3.4` Build the Core Flow
-- `3.5` Debug Without Spiraling
-- `3.6` Build Block Wrap-Up
+- `3.1` Generate the Build Prompt
+- `3.2` Get the Starter Running
+- `3.3` Build the First Screen
+- `3.4` Build the Core UX
+- `3.5` Debug the Core UX
+- `3.6` Lock the Local Build
 
 ### Estimated teaching runtime
 
@@ -288,16 +288,17 @@ Plan for a `90-120 min` recording block.
 ### Needed assets
 
 - Worksheet 03: Build Plan + Agent Brief
-- Canonical example build brief
+- Canonical example build prompt
 - Starter repo
 - Local environment already tested
-- Agent brief template
+- Template-path CTA target
 - One-screen-at-a-time build checklist
 - Debugging examples with one broken state and one fix path
 
 ### Talking points
 
 - Build from the brief, not from vibes.
+- Start with a path, a first slice, and a stop condition.
 - One screen. One step. One definition of done.
 - Standardization is a feature.
 - Prompting quality is downstream from brief quality.
@@ -305,9 +306,9 @@ Plan for a `90-120 min` recording block.
 
 ### Screen-share plan
 
-- Show the brief and how it drives the build order
+- Show the brief and spec driving the build order
+- Choose the starting path and generate the build prompt live
 - Walk through environment setup cleanly
-- Build the agent brief live from Worksheet 03
 - Demonstrate one screen at a time, not the whole app in one jump
 - Show one bug-fix loop with a clear stop condition
 - Show a local app demo before closing the block
