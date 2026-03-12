@@ -1,6 +1,6 @@
 # Motion Opportunities Plan
 
-Last updated: 2026-03-11
+Last updated: 2026-03-12
 
 ## Goal
 
@@ -9,7 +9,8 @@ Use the practical motion patterns in `docs/design/motion-practical-examples.md` 
 ## Status
 
 - Phase 1 shipped on 2026-03-11 across the checkout CTA, checkout-success, access-required, and FAQ surfaces.
-- Next recommended implementation pass: Phase 2, focused on lesson autosave/completion feedback, shell orientation, and mission-map unlock continuity.
+- Phase 2 partially shipped on 2026-03-12 for lesson completion feedback and bottom-rail unlock continuity.
+- Next recommended implementation pass: finish the rest of Phase 2, focused on shell orientation/state transitions and mission-map unlock continuity.
 
 ## Implementation stance
 
@@ -50,9 +51,27 @@ Shipped on 2026-03-11 because these sit closest to conversion or post-purchase c
 
 Ship these next because they reduce confusion once someone has bought.
 
+Status on 2026-03-12:
+
+- Shipped: lesson completion celebration with CTA success morph, centered completion banner, reduced-motion-safe delay before auto-advance, and bottom skill-rail completion/unlock cue.
+- Still open: quieter autosave feedback, shell orientation transitions, and mission-map unlock feedback after returning from a completed lesson.
+
 1. Lesson autosave and completion feedback
 2. Persistent shell orientation and layout changes
 3. Mission-map progress and unlock feedback
+
+### Phase 2 implementation note: lesson completion celebration
+
+The lesson-completion moment now follows this sequence:
+
+1. Student clicks `Complete lesson`
+2. Mutation enters a local `submitting` phase
+3. On success, the footer CTA morphs to `Lesson cleared`
+4. A centered banner confirms the artifact lock-in and next unlock
+5. The bottom skill rail plays a completion sweep on the cleared lesson and a short ping on the next unlocked lesson
+6. The route auto-advances after `900ms`, or `250ms` under `prefers-reduced-motion`
+
+This should remain the default completion pattern for lesson flows unless a future block-level or mission-level celebration intentionally overrides it.
 
 ### Phase 3: Learning-flow polish
 
