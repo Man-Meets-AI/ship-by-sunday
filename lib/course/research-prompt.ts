@@ -1,3 +1,6 @@
+import type { LessonPromptImport, LessonPromptTemplateId } from "./contracts";
+import type { PersistedFieldValues } from "./registry";
+
 export type CompetitorResearchPromptContext = {
 	user: {
 		statement: string;
@@ -13,6 +16,24 @@ export type CompetitorResearchPromptContext = {
 	};
 };
 
+export type PromptTemplateArtifactContext = {
+	artifactKey: string;
+	fieldValues: PersistedFieldValues;
+};
+
+export type PromptTemplateState = {
+	prompt: string | null;
+	disabledReason: string | null;
+};
+
+export type CompetitorResearchImportResult = {
+	rows: string[][];
+	summary: string;
+};
+
+const RESEARCH_TABLE_HEADING = "research table";
+const KEY_PATTERN_HEADING = "key pattern i noticed";
+
 function formatContextLine(label: string, value?: string) {
 	if (!value) {
 		return null;
@@ -20,6 +41,79 @@ function formatContextLine(label: string, value?: string) {
 
 	const trimmed = value.trim();
 	return trimmed.length > 0 ? `- ${label}: ${trimmed}` : null;
+}
+
+function getTrimmedFieldValue(
+	fieldValues: PersistedFieldValues,
+	fieldId: string,
+): string | null {
+	const value = fieldValues[fieldId];
+	if (typeof value !== "string") {
+		return null;
+	}
+
+	const trimmed = value.trim();
+	return trimmed.length > 0 ? trimmed : null;
+}
+
+export function getCompetitorResearchPromptContext(
+	pinnedArtifacts: PromptTemplateArtifactContext[],
+): CompetitorResearchPromptContext | null {
+	const userArtifact =
+		pinnedArtifacts.find(
+			(artifact) => artifact.artifactKey === "user_statement",
+		) ?? null;
+	const outcomeArtifact =
+		pinnedArtifacts.find(
+			(artifact) => artifact.artifactKey === "outcome_statement",
+		) ?? null;
+
+	if (!userArtifact || !outcomeArtifact) {
+		return null;
+	}
+
+	const user = getTrimmedFieldValue(
+		userArtifact.fieldValues,
+		"selected_problem_owner",
+	);
+	const problem = getTrimmedFieldValue(
+		userArtifact.fieldValues,
+		"selected_problem_statement",
+	);
+	const outcome = getTrimmedFieldValue(outcomeArtifact.fieldValues, "outcome");
+
+	if (!user || !problem || !outcome) {
+		return null;
+	}
+
+	return {
+		user: {
+			statement: user,
+			problem,
+			painMoment:
+				getTrimmedFieldValue(userArtifact.fieldValues, "pain_moment") ??
+				undefined,
+			currentSolution:
+				getTrimmedFieldValue(userArtifact.fieldValues, "current_solution") ??
+				undefined,
+			reachability:
+				getTrimmedFieldValue(userArtifact.fieldValues, "reachability") ??
+				undefined,
+		},
+		outcome: {
+			statement: outcome,
+			successLooksLike:
+				getTrimmedFieldValue(
+					outcomeArtifact.fieldValues,
+					"success_looks_like",
+				) ?? undefined,
+			differenceForUser:
+				getTrimmedFieldValue(
+					outcomeArtifact.fieldValues,
+					"difference_for_user",
+				) ?? undefined,
+		},
+	};
 }
 
 export function buildCompetitorResearchPrompt(
@@ -98,7 +192,8 @@ export function buildCompetitorResearchPrompt(
 		"- Do not use markdown table syntax.",
 		"- Do not add a header row.",
 		"- Do not number the lines.",
-		"- Do not add bullets",
+		"- Do not add bullets.",
+		"- Do not include citations, source lists, or a references appendix in the returned output.",
 		"- Each line must follow this exact field order:",
 		"solution name | what it does well | where it falls short | what users care about most",
 		"",
@@ -107,6 +202,7 @@ export function buildCompetitorResearchPrompt(
 		"- Under it, write a short synthesis of the main pattern across the solutions",
 		"- Keep this synthesis brief, concrete, and decision-useful",
 		"- If the evidence is thin or mixed, say that clearly",
+		"- Do not add citations or source notes here either",
 		"",
 		"Output rules:",
 		"- Return only these two sections:",
@@ -118,4 +214,240 @@ export function buildCompetitorResearchPrompt(
 		"- Do not add conclusion text",
 		"- Do not add any extra sections",
 	].join("\n");
+}
+
+export function getPromptTemplateState(
+	promptTemplateId: LessonPromptTemplateId,
+	pinnedArtifacts: PromptTemplateArtifactContext[],
+): PromptTemplateState {
+	if (promptTemplateId !== "competitor_research") {
+		return {
+			prompt: null,
+			disabledReason: "This prompt template is not wired yet.",
+		};
+	}
+
+	const context = getCompetitorResearchPromptContext(pinnedArtifacts);
+	if (!context) {
+		return {
+			prompt: null,
+			disabledReason:
+				"Finish lessons 1.2 and 1.3 first so we can build this prompt from your chosen user and outcome.",
+		};
+	}
+
+	return {
+		prompt: buildCompetitorResearchPrompt(context),
+		disabledReason: null,
+	};
+}
+
+function normalizeHeadingText(line: string) {
+	return line
+		.trim()
+		.replace(/^#{1,6}\s*/, "")
+		.replace(/^[-*+]\s+/, "")
+		.replace(/^\d+[.)]\s+/, "")
+		.replace(/:$/, "")
+		.trim()
+		.toLowerCase();
+}
+
+function stripListPrefix(line: string) {
+	return line
+		.trim()
+		.replace(/^[-*+]\s+/, "")
+		.replace(/^\d+[.)]\s+/, "");
+}
+
+function isFootnoteDefinition(line: string) {
+	return /^\[\d+\]:\s+/u.test(line.trim());
+}
+
+function isMarkdownTableDivider(line: string) {
+	return /^\|?[\s:-]+(?:\|[\s:-]+)+\|?$/u.test(line.trim());
+}
+
+function normalizeSpacing(value: string) {
+	return value
+		.replace(/\s{2,}/gu, " ")
+		.replace(/\s+([.,;:!?])/gu, "$1")
+		.replace(/\(\s*\)/gu, "")
+		.trim();
+}
+
+function stripInlineCitations(value: string) {
+	return normalizeSpacing(
+		value
+			.replace(
+				/\(\s*(?:\[[^\]]+\]\[\d+\]|\[[^\]]+\]\([^)]+\)|https?:\/\/[^)\s]+|www\.[^)\s]+)(?:\s*,\s*(?:\[[^\]]+\]\[\d+\]|\[[^\]]+\]\([^)]+\)|https?:\/\/[^)\s]+|www\.[^)\s]+))*\s*\)/gu,
+				"",
+			)
+			.replace(/\[([^\]]+)\]\[\d+\]/gu, "$1")
+			.replace(/\[([^\]]+)\]\(([^)]+)\)/gu, "$1")
+			.replace(/\s*\[\d+\]/gu, ""),
+	);
+}
+
+function collectSectionLines(input: string) {
+	const tableLines: string[] = [];
+	const summaryLines: string[] = [];
+	let currentSection: "table" | "summary" | null = null;
+
+	for (const rawLine of input.replace(/\r\n?/gu, "\n").split("\n")) {
+		const normalizedHeading = normalizeHeadingText(rawLine);
+
+		if (normalizedHeading === RESEARCH_TABLE_HEADING) {
+			currentSection = "table";
+			continue;
+		}
+
+		if (normalizedHeading === KEY_PATTERN_HEADING) {
+			currentSection = "summary";
+			continue;
+		}
+
+		if (!currentSection) {
+			continue;
+		}
+
+		if (isFootnoteDefinition(rawLine)) {
+			continue;
+		}
+
+		if (currentSection === "table") {
+			tableLines.push(rawLine);
+			continue;
+		}
+
+		summaryLines.push(rawLine);
+	}
+
+	return { tableLines, summaryLines };
+}
+
+function isHeaderLikeRow(cells: string[]) {
+	if (cells.length !== 4) {
+		return false;
+	}
+
+	const [first, second, third, fourth] = cells.map((cell) =>
+		cell.trim().toLowerCase(),
+	);
+
+	return (
+		(first.includes("solution") || first.includes("competitor")) &&
+		(second.includes("does well") || second === "good") &&
+		(third.includes("falls short") || third === "poor") &&
+		fourth.includes("care")
+	);
+}
+
+function parseResearchTableRows(lines: string[]) {
+	const rows: string[][] = [];
+
+	for (const rawLine of lines) {
+		const cleanedLine = stripListPrefix(stripInlineCitations(rawLine));
+		if (cleanedLine.length === 0 || isMarkdownTableDivider(cleanedLine)) {
+			continue;
+		}
+
+		const normalizedLine = cleanedLine
+			.replace(/^\|/u, "")
+			.replace(/\|$/u, "")
+			.trim();
+		if (normalizedLine.length === 0 || !normalizedLine.includes("|")) {
+			continue;
+		}
+
+		const cells = normalizedLine
+			.split("|")
+			.map((cell) => normalizeSpacing(stripInlineCitations(cell)));
+		if (isHeaderLikeRow(cells) || cells.every((cell) => cell.length === 0)) {
+			continue;
+		}
+
+		if (cells.length !== 4 || cells.some((cell) => cell.length === 0)) {
+			throw new Error(
+				"Paste the ChatGPT response with each research row in this format: solution name | what it does well | where it falls short | what users care about most.",
+			);
+		}
+
+		rows.push(cells);
+	}
+
+	if (rows.length === 0) {
+		throw new Error(
+			"Paste the full response with a Research Table section that contains at least one usable row.",
+		);
+	}
+
+	return rows;
+}
+
+function parseResearchSummary(lines: string[]) {
+	const summary = lines
+		.map((line) =>
+			normalizeSpacing(stripListPrefix(stripInlineCitations(line))),
+		)
+		.filter((line) => line.length > 0 && !isFootnoteDefinition(line))
+		.join("\n")
+		.trim();
+
+	if (summary.length === 0) {
+		throw new Error(
+			"Paste the full response with a Key pattern I noticed section so we can fill the summary field.",
+		);
+	}
+
+	return summary;
+}
+
+export function parseCompetitorResearchImport(
+	input: string,
+): CompetitorResearchImportResult {
+	const trimmed = input.trim();
+	if (trimmed.length === 0) {
+		throw new Error(
+			"Paste the full ChatGPT response that includes both Research Table and Key pattern I noticed.",
+		);
+	}
+
+	const { tableLines, summaryLines } = collectSectionLines(trimmed);
+	if (tableLines.length === 0 || summaryLines.length === 0) {
+		throw new Error(
+			"Paste the full ChatGPT response that includes both Research Table and Key pattern I noticed.",
+		);
+	}
+
+	return {
+		rows: parseResearchTableRows(tableLines),
+		summary: parseResearchSummary(summaryLines),
+	};
+}
+
+export function parsePromptTemplateImport(
+	promptTemplateId: LessonPromptTemplateId,
+	input: string,
+) {
+	if (promptTemplateId !== "competitor_research") {
+		throw new Error("This prompt import is not wired yet.");
+	}
+
+	return parseCompetitorResearchImport(input);
+}
+
+export function buildPromptImportFieldValues(
+	promptImport: LessonPromptImport,
+	input: string,
+) {
+	const imported = parsePromptTemplateImport(
+		promptImport.promptTemplateId,
+		input,
+	);
+
+	return {
+		[promptImport.tableFieldId]: imported.rows,
+		[promptImport.summaryFieldId]: imported.summary,
+	};
 }

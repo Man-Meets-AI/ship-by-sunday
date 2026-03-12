@@ -184,6 +184,12 @@ export type LessonPromptResourceContent = {
 	promptTemplateId: LessonPromptTemplateId;
 };
 
+export type LessonPromptImport = {
+	promptTemplateId: LessonPromptTemplateId;
+	tableFieldId: string;
+	summaryFieldId: string;
+};
+
 export type LessonResourceContent =
 	| LessonLinkResourceContent
 	| LessonPromptResourceContent;
@@ -250,6 +256,7 @@ export type LessonConfig = {
 	fieldShapeVersion?: number;
 	workbenchFields?: WorkbenchField[];
 	workbenchSections?: WorkbenchSection[];
+	promptImport?: LessonPromptImport;
 	notes?: string[];
 	content: LessonContent;
 };

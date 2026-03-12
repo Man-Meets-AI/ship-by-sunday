@@ -7,8 +7,8 @@ import {
 } from "../contracts";
 import {
 	WORKSHEET_01_RESOURCE,
+	WORKSHEET_01_FIGJAM_TEMPLATE_DOWNLOAD,
 	WORKSHEET_01_RESOURCES,
-	WORKSHEET_01_TEMPLATE_DOWNLOAD,
 } from "../resources";
 
 const START_WITH_PROBLEM_EXAMPLES: LessonExampleContent[] = [
@@ -104,16 +104,7 @@ You are not writing a market report. You are trying not to build blind.`,
 	},
 ];
 
-const RESEARCH_RESOURCES = [
-	{
-		id: "custom-competitor-research-prompt",
-		label: "Copy your custom research prompt",
-		kind: "copy_prompt" as const,
-		body: "Built from your chosen user and outcome. Paste it into ChatGPT Deep Research or another frontier model, then paste the returned rows into this lesson.",
-		promptTemplateId: "competitor_research" as const,
-	},
-	WORKSHEET_01_RESOURCE,
-];
+const RESEARCH_RESOURCES = [WORKSHEET_01_RESOURCE];
 
 const CORE_FLOW_EXAMPLES: LessonExampleContent[] = [
 	{
@@ -342,7 +333,7 @@ export const ceoLessons = [
 		artifact: {
 			key: "user_statement",
 			label: "User Statement",
-			contextTitle: "Current direction",
+			contextTitle: "Our user",
 			type: "text",
 			required: true,
 			dependsOn: ["candidate_problems"],
@@ -507,6 +498,7 @@ export const ceoLessons = [
 		artifact: {
 			key: "outcome_statement",
 			label: "Outcome Statement",
+			contextTitle: "Outcome statement",
 			type: "text",
 			required: true,
 			dependsOn: ["user_statement"],
@@ -646,6 +638,11 @@ export const ceoLessons = [
 		winCondition: "2–3 research entries and one summary insight are saved.",
 		panelDefaults: splitPanelDefaults,
 		pinnedArtifacts: ["user_statement", "outcome_statement"],
+		promptImport: {
+			promptTemplateId: "competitor_research",
+			tableFieldId: "research_table",
+			summaryFieldId: "research_summary",
+		},
 		workbenchFields: [
 			{
 				id: "research_table",
@@ -734,7 +731,7 @@ export const ceoLessons = [
 		workbench: "capture_upload",
 		artifact: {
 			key: "core_flow_image",
-			label: "Core Flow Image",
+			label: "Core Flow Screenshot",
 			type: "image",
 			required: true,
 			dependsOn: ["user_statement", "outcome_statement"],
@@ -745,23 +742,19 @@ export const ceoLessons = [
 		coachMode: "docked",
 		objectiveTitle: "CEO 1.5 — Map the Core Flow",
 		checklist: [
-			"Draw the flow on paper or tablet",
+			"Duplicate the FigJam template",
 			"Keep it to 5–7 steps",
-			"Upload one clean image",
+			"Upload one clean core flow screenshot",
 		],
-		helperText: "Do not build a custom flow editor. Use template + upload.",
-		winCondition: "A usable core-flow image is uploaded and saved.",
+		helperText:
+			"Duplicate the FigJam template, map the core flow in 5-7 steps with words and arrows, then upload one clean screenshot.",
+		winCondition: "A core flow screenshot is uploaded and saved.",
 		panelDefaults: splitPanelDefaults,
-		pinnedArtifacts: ["user_statement", "outcome_statement", "research_notes"],
+		pinnedArtifacts: ["user_statement", "outcome_statement"],
 		workbenchFields: [
 			{
-				id: "template_preview",
-				label: "Template Preview",
-				kind: "readonly",
-			},
-			{
 				id: "flow_upload",
-				label: "Upload Core Flow Image",
+				label: "Upload Core Flow Screenshot",
 				kind: "image_upload",
 				required: true,
 			},
@@ -777,9 +770,10 @@ export const ceoLessons = [
 					"This is where the product becomes navigable. If they cannot map it, they cannot design or build it cleanly.",
 			},
 			actionCard: {
-				jobNow: "Map the core flow in 5-7 steps using only words and arrows.",
+				jobNow:
+					"Duplicate the FigJam template, map the core flow in 5-7 steps using only words and arrows, then upload a screenshot.",
 				timebox: "10 minutes",
-				comeBackWith: "A simple flow map.",
+				comeBackWith: "A core flow screenshot.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Map the Core Flow",
@@ -788,15 +782,15 @@ export const ceoLessons = [
 			}),
 			workbench: {
 				prompt:
-					"If you cannot explain the flow in 5 to 7 steps, it is probably too muddy.",
+					"Duplicate the FigJam template, keep the map to 5-7 steps, then upload one screenshot of the finished core flow.",
 				teachingPoints: [
 					"List actors if needed, but keep it light.",
 					"Write the ending first if that helps.",
 					"Focus on the critical moment where the product actually delivers value.",
 				],
 				emptyState:
-					"If you cannot explain the flow in 5 to 7 steps, it is probably too muddy.",
-				...WORKSHEET_01_TEMPLATE_DOWNLOAD,
+					"Duplicate the FigJam template, keep the map to 5-7 steps, then upload one screenshot of the finished core flow.",
+				...WORKSHEET_01_FIGJAM_TEMPLATE_DOWNLOAD,
 			},
 		},
 	},

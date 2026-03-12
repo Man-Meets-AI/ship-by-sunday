@@ -7,10 +7,7 @@ import { formatArtifactValue } from "@/components/lesson-workbench/shared/artifa
 import type { LessonPromptResourceContent } from "@/lib/course/contracts";
 import { getLesson, type LessonConfig } from "@/lib/course/manifest";
 import type { LessonContent } from "@/lib/course/manifest";
-import {
-	buildCompetitorResearchPrompt,
-	type CompetitorResearchPromptContext,
-} from "@/lib/course/research-prompt";
+import { getPromptTemplateState } from "@/lib/course/research-prompt";
 import type {
 	ObjectiveTask,
 	PersistedFieldValues,
@@ -25,110 +22,11 @@ export type PinnedArtifact = {
 	lessonTitle: string;
 };
 
-function getPinnedArtifact(
-	pinnedArtifacts: PinnedArtifact[],
-	artifactKey: string,
-): PinnedArtifact | null {
-	return (
-		pinnedArtifacts.find((artifact) => artifact.artifactKey === artifactKey) ??
-		null
-	);
-}
-
-function getTrimmedFieldValue(
-	fieldValues: PersistedFieldValues,
-	fieldId: string,
-): string | null {
-	const value = fieldValues[fieldId];
-	if (typeof value !== "string") {
-		return null;
-	}
-
-	const trimmed = value.trim();
-	return trimmed.length > 0 ? trimmed : null;
-}
-
-function getCompetitorResearchPromptContext(
-	pinnedArtifacts: PinnedArtifact[],
-): CompetitorResearchPromptContext | null {
-	const userArtifact = getPinnedArtifact(pinnedArtifacts, "user_statement");
-	const outcomeArtifact = getPinnedArtifact(
-		pinnedArtifacts,
-		"outcome_statement",
-	);
-
-	if (!userArtifact || !outcomeArtifact) {
-		return null;
-	}
-
-	const user = getTrimmedFieldValue(
-		userArtifact.fieldValues,
-		"selected_problem_owner",
-	);
-	const problem = getTrimmedFieldValue(
-		userArtifact.fieldValues,
-		"selected_problem_statement",
-	);
-	const outcome = getTrimmedFieldValue(outcomeArtifact.fieldValues, "outcome");
-
-	if (!user || !problem || !outcome) {
-		return null;
-	}
-
-	return {
-		user: {
-			statement: user,
-			problem,
-			painMoment:
-				getTrimmedFieldValue(userArtifact.fieldValues, "pain_moment") ??
-				undefined,
-			currentSolution:
-				getTrimmedFieldValue(userArtifact.fieldValues, "current_solution") ??
-				undefined,
-			reachability:
-				getTrimmedFieldValue(userArtifact.fieldValues, "reachability") ??
-				undefined,
-		},
-		outcome: {
-			statement: outcome,
-			successLooksLike:
-				getTrimmedFieldValue(
-					outcomeArtifact.fieldValues,
-					"success_looks_like",
-				) ?? undefined,
-			differenceForUser:
-				getTrimmedFieldValue(
-					outcomeArtifact.fieldValues,
-					"difference_for_user",
-				) ?? undefined,
-		},
-	};
-}
-
 function getPromptResourceState(
 	resource: LessonPromptResourceContent,
 	pinnedArtifacts: PinnedArtifact[],
 ) {
-	if (resource.promptTemplateId !== "competitor_research") {
-		return {
-			prompt: null,
-			disabledReason: "This prompt template is not wired yet.",
-		};
-	}
-
-	const context = getCompetitorResearchPromptContext(pinnedArtifacts);
-	if (!context) {
-		return {
-			prompt: null,
-			disabledReason:
-				"Finish lessons 1.2 and 1.3 first so we can build this prompt from your chosen user and outcome.",
-		};
-	}
-
-	return {
-		prompt: buildCompetitorResearchPrompt(context),
-		disabledReason: null,
-	};
+	return getPromptTemplateState(resource.promptTemplateId, pinnedArtifacts);
 }
 
 function CopyPromptResourceCard({
