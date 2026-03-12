@@ -15,7 +15,9 @@
 		"test:unit": "vitest run tests/unit",
 		"test:smoke": "vitest run tests/smoke",
 		"check": "pnpm run lint && pnpm run format:check && pnpm run test:unit && pnpm run test:smoke && pnpm run build",
-		"stripe:create-product": "node --env-file=.env.local scripts/create-stripe-product.mjs"
+		"stripe:create-product": "node --env-file=.env.local scripts/create-stripe-product.mjs",
+		"clerk:test-user:check": "node --env-file=.env.local scripts/ensure-clerk-test-user.mjs check",
+		"clerk:test-user:create": "node --env-file=.env.local scripts/ensure-clerk-test-user.mjs create"
 	},
 	"dependencies": {
 		"@clerk/nextjs": "^7.0.1",

@@ -1,0 +1,4 @@
+interface:
+  display_name: "QA-Browser"
+  short_description: "Run focused browser smoke tests and return a bug report."
+  default_prompt: "Use $QA-Browser to QA this product. Start from the base URL, confirm the environment, target flow, and whether destructive actions are allowed, then confirm the software name only if it is not obvious from the URL. If the flow needs auth on this repo, inspect the sign-in surface first, run the Clerk test-user preflight before entering credentials, and stop for SSO or other non-password auth instead of forcing the shared password user. Return a structured bug report."

@@ -1,0 +1,15 @@
+{
+  "defaultScope": "ship-by-sunday-clerk-instance",
+  "accounts": {
+    "ship-by-sunday-clerk-instance": {
+      "softwareName": "Ship by Sunday",
+      "provider": "clerk",
+      "scope": "ship-by-sunday-clerk-instance",
+      "authMode": "password",
+      "email": "Test@test.com",
+      "password": "Test123456!",
+      "firstName": "Test",
+      "lastName": "User"
+    }
+  }
+}
