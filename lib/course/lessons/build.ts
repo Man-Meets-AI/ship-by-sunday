@@ -111,8 +111,8 @@ export const buildLessons = [
 		block: "BUILD",
 		title: "Get the Starter Running",
 		shortTitle: "Starter",
-		shell: "focus",
-		workbench: "console_checklist",
+		shell: "watch",
+		workbench: "external_workspace",
 		artifact: {
 			key: "working_local_environment",
 			label: "Working Local Environment",
@@ -134,32 +134,12 @@ export const buildLessons = [
 		],
 		fieldShapeVersion: 2,
 		helperText:
-			"Use focus mode. The real work happens in the editor and terminal, not in the lesson shell.",
-		winCondition: "The starter is running locally and the setup notes are saved.",
+			"Watch the walkthrough, then get the starter running in your editor and terminal.",
+		winCondition:
+			"The walkthrough is complete and the learner is ready to get the starter running locally.",
 		panelDefaults: focusPanelDefaults,
 		pinnedArtifacts: ["agent_build_brief"],
-		workbenchFields: [
-			{
-				id: "environment_ready",
-				label: "Starter running locally",
-				kind: "checklist",
-				required: true,
-				options: [
-					"Open the starter or repo",
-					"Install dependencies with the project package manager",
-					"Run the app locally",
-					"Note the key files and envs",
-				],
-			},
-			{
-				id: "environment_notes",
-				label: "What files or envs matter here?",
-				kind: "textarea",
-				rows: 4,
-				helpText:
-					"Write the smallest useful orientation: package manager, entrypoints, env file, and anything blocking the local run.",
-			},
-		],
+		workbenchFields: [],
 		content: {
 			status: "draft",
 			intro:
@@ -172,9 +152,9 @@ export const buildLessons = [
 			},
 			actionCard: {
 				jobNow:
-					"Open the starter or repo, install dependencies, run it locally, and note the few files and envs that matter.",
+					"Watch the walkthrough, then open the starter or repo and get it running locally in your editor.",
 				timebox: "15 minutes",
-				comeBackWith: "A working local environment and lean setup notes.",
+				comeBackWith: "A clean local starting point for the next build lesson.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Get the Starter Running",

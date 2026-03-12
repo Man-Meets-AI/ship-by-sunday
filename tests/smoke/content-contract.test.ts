@@ -118,6 +118,8 @@ describe("lesson content contract", () => {
 			"definition_of_done",
 		]);
 		expect(starterLesson?.title).toBe("Get the Starter Running");
+		expect(starterLesson?.shell).toBe("watch");
+		expect(starterLesson?.workbenchFields ?? []).toEqual([]);
 		expect(firstScreenLesson?.title).toBe("Build the First Screen");
 		expect(handoffLesson?.artifact.label).toBe("Local Build Handoff");
 	});

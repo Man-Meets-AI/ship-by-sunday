@@ -346,16 +346,16 @@ describe("WorkbenchRenderer", () => {
 				pinnedArtifacts: [getProductBriefArtifact(), getDesignSpecArtifact()],
 			},
 			{
-				lessonId: "3.2",
-				expected: "Starter running locally",
-			},
-			{
 				lessonId: "3.3",
 				expected: "External workspace",
 			},
 			{
 				lessonId: "3.5",
 				expected: "Blocker Log",
+			},
+			{
+				lessonId: "4.1",
+				expected: "Ship Checklist",
 			},
 		];
 

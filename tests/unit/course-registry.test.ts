@@ -261,6 +261,21 @@ describe("course registry", () => {
 		expect(nextLesson?.artifact.dependsOn).toContain("rough_screens");
 	});
 
+	it("configures lesson 3.2 as a watch-only lesson while keeping 3.3 gated on the local-environment artifact", () => {
+		const lesson = getLessonById("3.2");
+		const nextLesson = getLessonById("3.3");
+		expect(lesson).toBeTruthy();
+		expect(nextLesson).toBeTruthy();
+
+		expect(lesson?.shell).toBe("watch");
+		expect(lesson?.workbenchFields ?? []).toEqual([]);
+		expect(getObjectiveTasks(lesson!, {})).toEqual([]);
+		expect(getCompletionIssues(lesson!, {})).toEqual([]);
+		expect(nextLesson?.artifact.dependsOn).toContain(
+			"working_local_environment",
+		);
+	});
+
 	it("declares columns for every table workbench field", () => {
 		const tableFields = lessonRegistry.flatMap((lesson) =>
 			(lesson.workbenchFields ?? []).filter((field) => field.kind === "table"),
@@ -424,28 +439,25 @@ describe("course registry", () => {
 	});
 
 	it("derives option-level generated tasks for console checklist lessons", () => {
-		const lesson = getLessonById("3.2");
+		const lesson = getLessonById("4.1");
 		expect(lesson).toBeTruthy();
 
 		const tasks = getObjectiveTasks(lesson!, {
-			environment_ready: [
-				{ label: "Open the starter or repo", checked: true },
-				{ label: "Install dependencies", checked: true },
-				{ label: "Run the app locally", checked: false },
-				{ label: "Capture confirmation", checked: false },
+			ship_ready_checklist: [
+				{ label: "Remove nonessential work", checked: true },
+				{ label: "Confirm one clear path", checked: true },
+				{ label: "Prepare to deploy", checked: false },
 			],
 		});
 
 		expect(tasks.map((task) => task.label)).toEqual([
-			"Open the starter or repo",
-			"Install dependencies",
-			"Run the app locally",
-			"Capture confirmation",
+			"Remove nonessential work",
+			"Confirm one clear path",
+			"Prepare to deploy",
 		]);
 		expect(tasks.map((task) => task.status)).toEqual([
 			"complete",
 			"complete",
-			"incomplete",
 			"incomplete",
 		]);
 	});

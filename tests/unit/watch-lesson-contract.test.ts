@@ -9,8 +9,8 @@ import {
 } from "@/lib/course";
 
 describe("watch lesson contract", () => {
-	it("keeps lessons 2.4 and 2.5 in a focus-only watch layout", () => {
-		for (const lessonId of ["2.4", "2.5"]) {
+	it("keeps lessons 2.4, 2.5, and 3.2 in a focus-only watch layout", () => {
+		for (const lessonId of ["2.4", "2.5", "3.2"]) {
 			const lesson = getLessonById(lessonId);
 			expect(lesson).toBeTruthy();
 
@@ -44,5 +44,19 @@ describe("watch lesson contract", () => {
 		expect(getObjectiveTasks(lesson!, {})).toEqual([]);
 		expect(getCompletionIssues(lesson!, {})).toEqual([]);
 		expect(nextLesson?.artifact.dependsOn).toContain("rough_screens");
+	});
+
+	it("treats lesson 3.2 as a watch-only lesson with no required in-product fields", () => {
+		const lesson = getLessonById("3.2");
+		const nextLesson = getLessonById("3.3");
+		expect(lesson).toBeTruthy();
+		expect(nextLesson).toBeTruthy();
+
+		expect(lesson?.workbenchFields ?? []).toEqual([]);
+		expect(getObjectiveTasks(lesson!, {})).toEqual([]);
+		expect(getCompletionIssues(lesson!, {})).toEqual([]);
+		expect(nextLesson?.artifact.dependsOn).toContain(
+			"working_local_environment",
+		);
 	});
 });
