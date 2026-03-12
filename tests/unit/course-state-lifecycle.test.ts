@@ -40,6 +40,35 @@ function createStaleCompletedLessonState() {
 	};
 }
 
+function createCompletedLessonState(
+	lessonId: string,
+	fieldValues: Record<string, unknown> = {},
+) {
+	const lesson = getLessonById(lessonId);
+	if (!lesson) {
+		throw new Error(
+			`Lesson ${lessonId} must exist for course-state lifecycle tests.`,
+		);
+	}
+
+	return {
+		_id: `lesson_state_${lessonId}`,
+		_creationTime: 1,
+		clerkUserId,
+		courseSlug: COURSE_SLUG,
+		lessonId: lesson.id,
+		blockId: lesson.block,
+		status: "completed" as const,
+		artifactKey: lesson.artifact.key,
+		artifactType: lesson.artifact.type,
+		fieldValues,
+		startedAt: 10,
+		updatedAt: 20,
+		lastViewedAt: 30,
+		completedAt: 40,
+	};
+}
+
 function createCourseCtx({
 	lessonStates = [],
 	patch = vi.fn().mockResolvedValue(undefined),
@@ -211,6 +240,54 @@ describe("course state lifecycle", () => {
 				}),
 			}),
 		);
+	});
+
+	it("hydrates stored sketch upload arrays with signed urls on read", async () => {
+		const ctx = createCourseCtx({
+			lessonStates: [
+				createCompletedLessonState("1.7"),
+				createCompletedLessonState("2.1"),
+				createCompletedLessonState("2.2", {
+					sketch_upload: [
+						{
+							kind: "upload",
+							status: "stored",
+							fileName: "screen-1.jpg",
+							storageId: "sketch-1",
+						},
+						{
+							kind: "upload",
+							status: "stored",
+							fileName: "screen-2.jpg",
+							storageId: "sketch-2",
+						},
+					],
+				}),
+			],
+		});
+
+		const lessonState = await (getLessonState as any)._handler(ctx, {
+			lessonId: "2.2",
+		});
+
+		expect(lessonState).toMatchObject({
+			accessStatus: "unlocked",
+			status: "completed",
+			fieldValues: {
+				sketch_upload: [
+					expect.objectContaining({
+						fileName: "screen-1.jpg",
+						storageId: "sketch-1",
+						url: "https://example.com/upload",
+					}),
+					expect.objectContaining({
+						fileName: "screen-2.jpg",
+						storageId: "sketch-2",
+						url: "https://example.com/upload",
+					}),
+				],
+			},
+		});
 	});
 
 	it("throws the structured incomplete-lesson error when required fields are missing", async () => {

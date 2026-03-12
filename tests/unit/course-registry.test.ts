@@ -1,6 +1,7 @@
 import {
 	buildArtifactPreview,
 	buildResolvedArtifactPreview,
+	createReferenceGalleryValue,
 	FIELD_SHAPE_VERSION_FIELD_ID,
 	getCandidateProblemOptions,
 	getCompletionIssues,
@@ -140,6 +141,19 @@ describe("course registry", () => {
 	it("keeps the lesson registry available through the shared course domain", () => {
 		expect(lessonRegistry.length).toBeGreaterThan(20);
 		expect(getLessonById("4.6")?.title).toBe("Final Wrap");
+	});
+
+	it("configures lesson 2.4 as a watch-only lesson with no required in-product fields", () => {
+		const lesson = getLessonById("2.4");
+		const nextLesson = getLessonById("2.5");
+		expect(lesson).toBeTruthy();
+		expect(nextLesson).toBeTruthy();
+
+		expect(lesson?.shell).toBe("watch");
+		expect(lesson?.workbenchFields ?? []).toEqual([]);
+		expect(getObjectiveTasks(lesson!, {})).toEqual([]);
+		expect(getCompletionIssues(lesson!, {})).toEqual([]);
+		expect(nextLesson?.artifact.dependsOn).toContain("figma_file_ready");
 	});
 
 	it("declares columns for every table workbench field", () => {
@@ -597,10 +611,14 @@ describe("course registry", () => {
 			getScopeBoundaryArtifact(),
 		];
 		const preview = buildResolvedArtifactPreview(lesson!, {}, pinnedArtifacts);
-		const tasks = getObjectiveTasks(lesson!, {}, {
-			pinnedArtifacts,
-			resolvedArtifactPreview: preview,
-		});
+		const tasks = getObjectiveTasks(
+			lesson!,
+			{},
+			{
+				pinnedArtifacts,
+				resolvedArtifactPreview: preview,
+			},
+		);
 
 		expect(tasks.map((task) => task.label)).toEqual([
 			"Lock the user and problem",
@@ -613,6 +631,58 @@ describe("course registry", () => {
 		expect(tasks.every((task) => task.status === "complete")).toBe(true);
 	});
 
+	it("requires at least 3 saved references to complete lesson 2.1", () => {
+		const lesson = getLessonById("2.1");
+		expect(lesson).toBeTruthy();
+
+		const twoReferences = createReferenceGalleryValue([
+			{
+				id: "upload-1",
+				source: "upload",
+				storageId: "storage-1",
+				fileName: "hero.png",
+			},
+			{
+				id: "remote-1",
+				source: "remote_url",
+				url: "https://images.example.com/card.png",
+			},
+		]);
+		const threeReferences = createReferenceGalleryValue([
+			...twoReferences.items,
+			{
+				id: "remote-2",
+				source: "remote_url",
+				url: "https://images.example.com/nav.png",
+			},
+		]);
+
+		expect(
+			getCompletionIssues(lesson!, {
+				[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+				reference_gallery: twoReferences,
+			}),
+		).toEqual([
+			{
+				id: "reference_gallery",
+				label: "Save at least 3 references",
+				kind: "field",
+			},
+		]);
+		expect(
+			getCompletionIssues(lesson!, {
+				[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+				reference_gallery: threeReferences,
+			}),
+		).toEqual([]);
+		expect(
+			getWorkbenchSectionStates(lesson!, {
+				[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+				reference_gallery: threeReferences,
+			})[0]?.isComplete,
+		).toBe(true);
+	});
+
 	it("composes no-field brief assembler lessons from their pinned artifacts", () => {
 		const lesson = getLessonById("2.7");
 		expect(lesson).toBeTruthy();
@@ -620,13 +690,64 @@ describe("course registry", () => {
 		const preview = buildResolvedArtifactPreview(lesson!, {}, [
 			{
 				artifactKey: "reference_board",
-				artifactLabel: "Reference Board",
-				contextTitle: "Reference board",
-				artifactType: "board",
+				artifactLabel: "Reference Gallery",
+				contextTitle: "Reference gallery",
+				artifactType: "images",
 				lessonId: "2.1",
 				lessonTitle: "Find References First",
-				fieldValues: { reference_patterns: "Soft cards and tight layouts" },
-				fields: [["What patterns keep repeating?", "Soft cards and tight layouts"]],
+				fieldValues: {
+					reference_gallery: createReferenceGalleryValue([
+						{
+							id: "upload-1",
+							source: "upload",
+							storageId: "storage-1",
+							url: "https://cdn.example.com/ref-1.png",
+						},
+						{
+							id: "remote-1",
+							source: "remote_url",
+							url: "https://images.example.com/ref-2.png",
+						},
+						{
+							id: "remote-2",
+							source: "remote_url",
+							url: "https://images.example.com/ref-3.png",
+						},
+						{
+							id: "remote-3",
+							source: "remote_url",
+							url: "https://images.example.com/ref-4.png",
+						},
+					]),
+				},
+				fields: [
+					[
+						"Reference Gallery",
+						createReferenceGalleryValue([
+							{
+								id: "upload-1",
+								source: "upload",
+								storageId: "storage-1",
+								url: "https://cdn.example.com/ref-1.png",
+							},
+							{
+								id: "remote-1",
+								source: "remote_url",
+								url: "https://images.example.com/ref-2.png",
+							},
+							{
+								id: "remote-2",
+								source: "remote_url",
+								url: "https://images.example.com/ref-3.png",
+							},
+							{
+								id: "remote-3",
+								source: "remote_url",
+								url: "https://images.example.com/ref-4.png",
+							},
+						]),
+					],
+				],
 			},
 			{
 				artifactKey: "visual_direction",
@@ -641,14 +762,8 @@ describe("course registry", () => {
 		]);
 
 		expect(preview.fields).toEqual([
-			[
-				"Reference board",
-				"What patterns keep repeating?: Soft cards and tight layouts",
-			],
-			[
-				"Visual direction",
-				"Visual Direction: Quiet, editorial, and sharp",
-			],
+			["Reference gallery", "Reference Gallery: 4 saved references"],
+			["Visual direction", "Visual Direction: Quiet, editorial, and sharp"],
 		]);
 	});
 
@@ -686,5 +801,116 @@ describe("course registry", () => {
 			[FIELD_SHAPE_VERSION_FIELD_ID]: 1,
 			research_table: [["Notion", "Fast setup", "Weak export", "Speed"]],
 		});
+	});
+
+	it("strips local preview urls before persisting a reference gallery", () => {
+		const lesson = getLessonById("2.1");
+		expect(lesson).toBeTruthy();
+
+		expect(
+			prepareFieldValuesForPersistence(lesson!, {
+				reference_gallery: createReferenceGalleryValue([
+					{
+						id: "upload-1",
+						source: "upload",
+						fileName: "hero.png",
+						mimeType: "image/png",
+						size: 1024,
+						storageId: "storage-1",
+						previewUrl: "blob:http://localhost/hero",
+					},
+					{
+						id: "remote-1",
+						source: "remote_url",
+						url: "https://images.example.com/ref.png",
+					},
+				]),
+			}),
+		).toEqual({
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+			reference_gallery: {
+				kind: "reference_gallery",
+				items: [
+					{
+						id: "upload-1",
+						source: "upload",
+						fileName: "hero.png",
+						mimeType: "image/png",
+						size: 1024,
+						storageId: "storage-1",
+					},
+					{
+						id: "remote-1",
+						source: "remote_url",
+						url: "https://images.example.com/ref.png",
+					},
+				],
+			},
+		});
+	});
+
+	it("strips preview-only data from multi-image sketch uploads before persistence", () => {
+		const lesson = getLessonById("2.2");
+		expect(lesson).toBeTruthy();
+
+		expect(
+			prepareFieldValuesForPersistence(lesson!, {
+				sketch_upload: [
+					{
+						kind: "upload",
+						status: "stored",
+						fileName: "screen-1.jpg",
+						storageId: "sketch-1",
+						previewUrl: "blob:http://localhost/sketch-1",
+					},
+					{
+						kind: "upload",
+						status: "stored",
+						fileName: "screen-2.jpg",
+						storageId: "sketch-2",
+						url: "https://example.com/sketch-2.jpg",
+						previewUrl: "blob:http://localhost/sketch-2",
+					},
+				],
+			}),
+		).toEqual({
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 1,
+			sketch_upload: [
+				{
+					kind: "upload",
+					status: "stored",
+					fileName: "screen-1.jpg",
+					mimeType: undefined,
+					size: undefined,
+					storageId: "sketch-1",
+				},
+				{
+					kind: "upload",
+					status: "stored",
+					fileName: "screen-2.jpg",
+					mimeType: undefined,
+					size: undefined,
+					storageId: "sketch-2",
+				},
+			],
+		});
+	});
+
+	it("treats one stored sketch image as enough to complete lesson 2.2", () => {
+		const lesson = getLessonById("2.2");
+		expect(lesson).toBeTruthy();
+
+		const issues = getCompletionIssues(lesson!, {
+			sketch_upload: [
+				{
+					kind: "upload",
+					status: "stored",
+					fileName: "screen-1.jpg",
+					storageId: "sketch-1",
+				},
+			],
+		});
+
+		expect(issues).toEqual([]);
 	});
 });

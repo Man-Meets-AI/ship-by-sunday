@@ -175,7 +175,11 @@ describe("WorkbenchRenderer", () => {
 			},
 			{
 				lessonId: "2.1",
-				expected: "Reference Board",
+				expected: "Drop references here",
+			},
+			{
+				lessonId: "2.2",
+				expected: "Sketch rules",
 			},
 			{
 				lessonId: "3.1",
@@ -327,6 +331,114 @@ describe("WorkbenchRenderer", () => {
 		);
 		expect(markup).not.toContain("Pick One User");
 		expect(markup).not.toContain("Define the Outcome");
+	});
+
+	it("renders lesson 2.3 as an offline storyboard upload handoff", () => {
+		const markup = renderLessonWorkbench("2.3");
+
+		expect(markup).toContain(
+			"Storyboard the flow off-screen first. Paper, tablet, or Excalidraw is fine.",
+		);
+		expect(markup).toContain("Open printable storyboard worksheet");
+		expect(markup).toContain(
+			"Storyboard the user journey off-screen in 5-7 frames, then upload one clean image.",
+		);
+		expect(markup).toContain("Upload storyboard image");
+		expect(markup).toContain(
+			"A phone photo, tablet screenshot, or Excalidraw export is enough. Upload one clean image before moving into Figma.",
+		);
+		expect(markup).toContain(
+			"Choose a file and it will upload to lesson storage before the lesson draft is saved.",
+		);
+		expect(markup).not.toContain(
+			"A good storyboard reduces confusion before code starts.",
+		);
+	});
+
+	it("renders lesson 2.2 as a focus-first sketch upload sprint", () => {
+		const lesson = getLessonById("2.2");
+		expect(lesson?.shell).toBe("focus");
+		expect(lesson?.workbench).toBe("sketch_upload");
+
+		const markup = renderLessonWorkbench("2.2", {
+			fieldValues: {
+				sketch_upload: [
+					{
+						kind: "upload",
+						status: "stored",
+						fileName: "screen-1.jpg",
+						storageId: "sketch-1",
+						previewUrl: "https://example.com/sketch-1.jpg",
+					},
+				],
+			},
+			pinnedArtifacts: [
+				{
+					artifactKey: "product_brief",
+					artifactLabel: "Product Brief",
+					contextTitle: "Product brief",
+					artifactType: "brief",
+					lessonId: "1.7",
+					lessonTitle: "CEO Wrap-Up",
+					fieldValues: { who: "Startup operators" },
+					fields: [["Who", "Startup operators"]],
+				},
+				{
+					artifactKey: "reference_board",
+					artifactLabel: "Reference Board",
+					contextTitle: "Reference board",
+					artifactType: "board",
+					lessonId: "2.1",
+					lessonTitle: "Find References First",
+					fieldValues: { reference_patterns: "Tight cards" },
+					fields: [["What patterns keep repeating?", "Tight cards"]],
+				},
+			],
+		});
+
+		expect(markup).toContain("Watch first");
+		expect(markup).toContain("Sketch rules");
+		expect(markup).toContain("Keep it moving");
+		expect(markup).toContain(
+			"1 sketch image saved. Add more if you want, or continue.",
+		);
+		expect(markup).toContain("Add more sketches");
+		expect(markup).toContain("Replace all");
+		expect(markup).toContain("Remove");
+		expect(markup).toContain("Need context?");
+		expect(markup).toContain("https://example.com/sketch-1.jpg");
+		expect(markup).not.toContain(
+			"Choose a file and it will upload to lesson storage before the lesson draft is saved.",
+		);
+	});
+
+	it("renders lesson 2.1 with gallery progress copy once references exist", () => {
+		const markup = renderLessonWorkbench("2.1", {
+			fieldValues: {
+				reference_gallery: {
+					kind: "reference_gallery",
+					items: [
+						{
+							id: "upload-1",
+							source: "upload",
+							storageId: "storage-1",
+							fileName: "hero.png",
+							previewUrl: "blob:http://localhost/hero",
+						},
+						{
+							id: "remote-1",
+							source: "remote_url",
+							url: "https://images.example.com/ref.png",
+						},
+					],
+				},
+			},
+		});
+
+		expect(markup).toContain("2 saved of 3 minimum references.");
+		expect(markup).toContain("Click zone to arm paste");
+		expect(markup).toContain("Add image URL");
+		expect(markup).toContain("Remove");
 	});
 
 	it("renders lesson 1.7 as a stage-unlock wrap-up instead of a raw artifact dump", () => {

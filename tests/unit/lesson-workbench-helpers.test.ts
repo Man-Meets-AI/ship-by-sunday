@@ -1,12 +1,18 @@
 import { formatArtifactValue } from "@/components/lesson-workbench/shared/artifact-format";
 import {
 	getUploadMetadata,
+	getUploadMetadataList,
 	normalizeChecklistValue,
 	parseLines,
 	parseTable,
 	toLineList,
 	toTableText,
 } from "@/components/lesson-workbench/fields/value-codecs";
+import {
+	appendSketchUploads,
+	removeSketchUploadAt,
+	replaceSketchUploads,
+} from "@/components/lesson-workbench/modes/sketch-upload-workbench";
 import {
 	formatTablePreview,
 	getFilledTableRows,
@@ -148,6 +154,7 @@ describe("lesson workbench helpers", () => {
 
 		expect(getUploadMetadata(uploadValue)).toEqual(uploadValue);
 		expect(getUploadMetadata("nope")).toBeNull();
+		expect(getUploadMetadataList([uploadValue, "nope"])).toEqual([uploadValue]);
 	});
 
 	it("formats artifact values for uploads and checklist selections", () => {
@@ -165,5 +172,59 @@ describe("lesson workbench helpers", () => {
 				{ label: "Run the app locally", checked: true },
 			]),
 		).toBe("Open the starter or repo, Run the app locally");
+		expect(
+			formatArtifactValue([
+				{
+					kind: "upload",
+					status: "stored",
+					fileName: "screen-1.jpg",
+					storageId: "sketch-1",
+				},
+				{
+					kind: "upload",
+					status: "stored",
+					fileName: "screen-2.jpg",
+					storageId: "sketch-2",
+				},
+			]),
+		).toBe("2 images uploaded");
+	});
+
+	it("adds, replaces, and removes sketch uploads without disturbing the remaining gallery", () => {
+		const first = [
+			{
+				kind: "upload" as const,
+				status: "stored" as const,
+				fileName: "screen-1.jpg",
+				storageId: "sketch-1",
+			},
+		];
+		const second = [
+			{
+				kind: "upload" as const,
+				status: "stored" as const,
+				fileName: "screen-2.jpg",
+				storageId: "sketch-2",
+			},
+			{
+				kind: "upload" as const,
+				status: "stored" as const,
+				fileName: "screen-3.jpg",
+				storageId: "sketch-3",
+			},
+		];
+
+		const appended = appendSketchUploads(first, second);
+		expect(appended.map((item) => item.storageId)).toEqual([
+			"sketch-1",
+			"sketch-2",
+			"sketch-3",
+		]);
+		expect(
+			removeSketchUploadAt(appended, 1).map((item) => item.storageId),
+		).toEqual(["sketch-1", "sketch-3"]);
+		expect(
+			replaceSketchUploads(appended, second).map((item) => item.storageId),
+		).toEqual(["sketch-2", "sketch-3"]);
 	});
 });

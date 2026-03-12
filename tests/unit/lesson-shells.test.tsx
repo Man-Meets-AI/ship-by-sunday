@@ -16,6 +16,7 @@ globalThis.React = React;
 
 import {
 	LessonShellSplit,
+	LessonShellWatch,
 	type PinnedArtifact,
 } from "@/components/lesson-shells";
 import { buildArtifactPreview, getLessonById } from "@/lib/course";
@@ -74,6 +75,21 @@ function renderResearchLessonResources(pinnedArtifacts: PinnedArtifact[] = []) {
 	);
 }
 
+function renderWatchLesson(
+	overrides?: Parameters<typeof LessonShellWatch>[0]["coachContent"],
+) {
+	const lesson = getLessonById("2.4");
+	expect(lesson).toBeTruthy();
+
+	return renderToStaticMarkup(
+		<LessonShellWatch
+			lesson={lesson!}
+			coachContent={overrides ?? lesson!.content.coach}
+			footer={<div>Footer</div>}
+		/>,
+	);
+}
+
 describe("LessonShellSplit resources", () => {
 	it("keeps lesson 1.4 coach resources focused on the worksheet link", () => {
 		const markup = renderResearchLessonResources([
@@ -95,5 +111,36 @@ describe("LessonShellSplit resources", () => {
 		expect(markup).not.toContain(
 			"The prompt will appear here once your chosen user and outcome are saved.",
 		);
+	});
+});
+
+describe("LessonShellWatch", () => {
+	it("renders the watch shell around a ready video without workbench chrome", () => {
+		const markup = renderWatchLesson({
+			video: {
+				status: "ready",
+				url: "https://example.com/lesson.mp4",
+				title: "Figma Basics for Speed",
+				durationLabel: "8-10 min",
+			},
+		});
+
+		expect(markup).toContain("Figma Basics for Speed");
+		expect(markup).toContain("https://example.com/lesson.mp4");
+		expect(markup).toContain("8-10 min");
+		expect(markup).not.toContain("Workbench");
+		expect(markup).not.toContain("Objective");
+		expect(markup).not.toContain("Coach");
+	});
+
+	it("renders a large placeholder when the lesson video is still pending", () => {
+		const markup = renderWatchLesson();
+
+		expect(markup).toContain("Watch video");
+		expect(markup).toContain("Video placeholder");
+		expect(markup).toContain(
+			"The lesson video will appear here when it is attached.",
+		);
+		expect(markup).not.toContain("Video not wired yet.");
 	});
 });
