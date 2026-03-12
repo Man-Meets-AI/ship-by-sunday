@@ -166,7 +166,7 @@ export const ceoLessons = [
 		},
 		nextLessonId: "1.2",
 		prevLessonId: "0.2",
-		unlocks: ["1.2"],
+		unlocks: { lessons: ["1.2"] },
 		coachMode: "docked",
 		objectiveTitle: "CEO 1.1 — Start With the Problem",
 		checklist: [
@@ -330,13 +330,14 @@ export const ceoLessons = [
 		artifact: {
 			key: "user_statement",
 			label: "User Statement",
+			contextTitle: "Current direction",
 			type: "text",
 			required: true,
 			dependsOn: ["candidate_problems"],
 		},
 		nextLessonId: "1.3",
 		prevLessonId: "1.1",
-		unlocks: ["1.3"],
+		unlocks: { lessons: ["1.3"] },
 		coachMode: "docked",
 		objectiveTitle: "CEO 1.2 — Pick One User",
 		checklist: [
@@ -350,7 +351,35 @@ export const ceoLessons = [
 			mode: "select_candidate_problem",
 			sourceArtifactKey: "candidate_problems",
 			selectionFieldId: "selected_problem_index",
-			persistToArtifact: true,
+			options: [
+				{
+					index: 1,
+					ownerSourceFieldId: "problem_1_who",
+					statementSourceFieldId: "problem_1_pain",
+				},
+				{
+					index: 2,
+					ownerSourceFieldId: "problem_2_who",
+					statementSourceFieldId: "problem_2_pain",
+				},
+				{
+					index: 3,
+					ownerSourceFieldId: "problem_3_who",
+					statementSourceFieldId: "problem_3_pain",
+				},
+			],
+			persistedFields: [
+				{
+					targetFieldId: "selected_problem_owner",
+					source: "owner",
+					previewLabel: "Chosen problem owner",
+				},
+				{
+					targetFieldId: "selected_problem_statement",
+					source: "statement",
+					previewLabel: "Chosen problem",
+				},
+			],
 		},
 		helperText:
 			"Pick one of the three problems you just wrote, then define the user living with it.",
@@ -482,7 +511,7 @@ export const ceoLessons = [
 		},
 		nextLessonId: "1.4",
 		prevLessonId: "1.2",
-		unlocks: ["1.4"],
+		unlocks: { lessons: ["1.4"] },
 		coachMode: "docked",
 		objectiveTitle: "CEO 1.3 — Define the Outcome",
 		checklist: [
@@ -602,7 +631,7 @@ export const ceoLessons = [
 		},
 		nextLessonId: "1.5",
 		prevLessonId: "1.3",
-		unlocks: ["1.5"],
+		unlocks: { lessons: ["1.5"] },
 		coachMode: "docked",
 		objectiveTitle: "CEO 1.4 — Light Research, Not a Thesis",
 		checklist: [
@@ -682,7 +711,7 @@ export const ceoLessons = [
 		},
 		nextLessonId: "1.6",
 		prevLessonId: "1.4",
-		unlocks: ["1.6"],
+		unlocks: { lessons: ["1.6"] },
 		coachMode: "docked",
 		objectiveTitle: "CEO 1.5 — Map the Core Flow",
 		checklist: [
@@ -759,7 +788,7 @@ export const ceoLessons = [
 		},
 		nextLessonId: "1.7",
 		prevLessonId: "1.5",
-		unlocks: ["1.7"],
+		unlocks: { lessons: ["1.7"] },
 		coachMode: "docked",
 		objectiveTitle: "CEO 1.6 — Scope Hammer",
 		checklist: [
@@ -847,7 +876,7 @@ export const ceoLessons = [
 		},
 		nextLessonId: "2.1",
 		prevLessonId: "1.6",
-		unlocks: ["2.1", "DESIGN_BLOCK"],
+		unlocks: { lessons: ["2.1"], blocks: ["DESIGN"] },
 		coachMode: "docked",
 		objectiveTitle: "CEO 1.7 — CEO Wrap-Up",
 		checklist: [

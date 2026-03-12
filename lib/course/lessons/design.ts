@@ -29,7 +29,7 @@ export const designLessons = [
 		},
 		nextLessonId: "2.2",
 		prevLessonId: "1.7",
-		unlocks: ["2.2"],
+		unlocks: { lessons: ["2.2"] },
 		coachMode: "docked",
 		objectiveTitle: "DESIGN 2.1 — Find References First",
 		checklist: [
@@ -109,7 +109,7 @@ export const designLessons = [
 		},
 		nextLessonId: "2.3",
 		prevLessonId: "2.1",
-		unlocks: ["2.3"],
+		unlocks: { lessons: ["2.3"] },
 		coachMode: "docked",
 		objectiveTitle: "DESIGN 2.2 — Sketch Before Software",
 		checklist: [
@@ -180,7 +180,7 @@ export const designLessons = [
 		},
 		nextLessonId: "2.4",
 		prevLessonId: "2.2",
-		unlocks: ["2.4"],
+		unlocks: { lessons: ["2.4"] },
 		coachMode: "docked",
 		objectiveTitle: "DESIGN 2.3 — Storyboard the Journey",
 		checklist: [
@@ -248,7 +248,7 @@ export const designLessons = [
 		},
 		nextLessonId: "2.5",
 		prevLessonId: "2.3",
-		unlocks: ["2.5"],
+		unlocks: { lessons: ["2.5"] },
 		coachMode: "pip",
 		externalTool: "figma",
 		objectiveTitle: "DESIGN 2.4 — Figma Basics for Speed",
@@ -319,7 +319,7 @@ export const designLessons = [
 		},
 		nextLessonId: "2.6",
 		prevLessonId: "2.4",
-		unlocks: ["2.6"],
+		unlocks: { lessons: ["2.6"] },
 		coachMode: "pip",
 		externalTool: "figma",
 		objectiveTitle: "DESIGN 2.5 — Turn Sketches Into Rough Screens",
@@ -394,7 +394,7 @@ export const designLessons = [
 		},
 		nextLessonId: "2.7",
 		prevLessonId: "2.5",
-		unlocks: ["2.7"],
+		unlocks: { lessons: ["2.7"] },
 		coachMode: "docked",
 		objectiveTitle: "DESIGN 2.6 — Choose a Visual Direction",
 		checklist: [
@@ -488,7 +488,7 @@ export const designLessons = [
 		},
 		nextLessonId: "3.1",
 		prevLessonId: "2.6",
-		unlocks: ["3.1", "BUILD_BLOCK"],
+		unlocks: { lessons: ["3.1"], blocks: ["BUILD"] },
 		coachMode: "docked",
 		objectiveTitle: "DESIGN 2.7 — Design Wrap-Up",
 		checklist: [

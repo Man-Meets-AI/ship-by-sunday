@@ -20,7 +20,7 @@ export const startHereLessons = [
 			required: false,
 		},
 		nextLessonId: "0.1",
-		unlocks: ["0.1"],
+		unlocks: { lessons: ["0.1"] },
 		coachMode: "docked",
 		objectiveTitle: "Mission Overview",
 		checklist: [
@@ -80,7 +80,7 @@ export const startHereLessons = [
 		},
 		nextLessonId: "0.2",
 		prevLessonId: "0.0",
-		unlocks: ["0.2"],
+		unlocks: { lessons: ["0.2"] },
 		coachMode: "docked",
 		objectiveTitle: "Start Here 0.1 — Welcome to Ship by Sunday",
 		checklist: [
@@ -167,7 +167,7 @@ export const startHereLessons = [
 		},
 		nextLessonId: "1.1",
 		prevLessonId: "0.1",
-		unlocks: ["1.1"],
+		unlocks: { lessons: ["1.1"] },
 		coachMode: "docked",
 		objectiveTitle: "Start Here 0.2 — How the Sprint Works",
 		checklist: ["Download Figma, VSCode", "Review the 4 Blocks"],

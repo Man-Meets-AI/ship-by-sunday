@@ -56,6 +56,7 @@ export type ArtifactType =
 export type ArtifactContract = {
 	key: string;
 	label: string;
+	contextTitle?: string;
 	type: ArtifactType;
 	required: boolean;
 	sourceLessonId?: string;
@@ -82,11 +83,29 @@ export type ObjectiveTaskDefinition = {
 	label: string;
 };
 
+export type LessonUnlockTargets = {
+	lessons?: string[];
+	blocks?: BlockId[];
+};
+
+export type CandidateProblemHandoffOption = {
+	index: number;
+	ownerSourceFieldId: string;
+	statementSourceFieldId: string;
+};
+
+export type CandidateProblemPersistedField = {
+	targetFieldId: string;
+	source: "owner" | "statement";
+	previewLabel: string;
+};
+
 export type LessonHandoff = {
 	mode: "select_candidate_problem";
 	sourceArtifactKey: string;
 	selectionFieldId: string;
-	persistToArtifact: boolean;
+	options: CandidateProblemHandoffOption[];
+	persistedFields?: CandidateProblemPersistedField[];
 };
 
 export type WorkbenchField = {
@@ -192,7 +211,7 @@ export type LessonConfig = {
 	artifact: ArtifactContract;
 	nextLessonId?: string;
 	prevLessonId?: string;
-	unlocks?: string[];
+	unlocks?: LessonUnlockTargets;
 	coachMode: CoachMode;
 	externalTool?: ExternalTool;
 	objectiveTitle: string;
