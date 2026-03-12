@@ -16,10 +16,14 @@ Use this file to capture recurring mistakes, corrections, and guardrails for fut
   Pattern: I described Ship by Sunday in course-like language that made the custom software feel secondary and used a weaker ICP phrase than the user's preferred wording.
   Rule: When public-facing offer copy describes Ship by Sunday, make the custom software explicit and prefer `builders who struggle to get a v1 out the door` over more indirect capability-based phrasing unless a narrower segment is intentionally needed.
   How to verify next time: Check hero, checkout, and offer-summary lines for whether the software is named in the description and whether the ICP wording matches the chosen phrase before presenting recommendations.
-- Date:
-  Pattern:
-  Rule:
-  How to verify next time:
+- Date: 2026-03-12
+  Pattern: I added a second user-selection step in lesson `1.2` even though the learner had already chosen the user by selecting a candidate problem from the prior handoff.
+  Rule: When a prior lesson handoff already locks the actor, the next lesson must treat that carried-forward value as the source of truth instead of asking the learner to re-enter or redefine the same actor.
+  How to verify next time: Trace the handoff artifact first, confirm whether the selected record already contains the actor, and browser-QA the next lesson to make sure the learner chooses that actor exactly once.
+- Date: 2026-03-12
+  Pattern: I reused the generic eyebrow-plus-title card pattern for the `1.2` handoff chooser even though both lines were giving the same instruction and making the section read like duplicated headers.
+  Rule: If a workbench section is the primary action on the page, give it one clear heading. Do not stack eyebrow and title copy that say the same thing, and make selection cards use a fixed structure so CTA rows align across uneven content lengths.
+  How to verify next time: Read the section top-to-bottom without context, confirm the main instruction appears once, and browser-QA mixed-length cards to make sure the action row lands at the same height.
 - Date: 2026-03-11
   Pattern: I inferred that the block labels should be deemphasized even though the product intent was that `CEO -> DESIGN -> BUILD -> SHIP` are the four ascending levels.
   Rule: For progression UI work, confirm whether existing labels are taxonomy, narrative flavor, or the actual level system before redesigning hierarchy around them.

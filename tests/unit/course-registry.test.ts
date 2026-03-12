@@ -179,7 +179,8 @@ describe("course registry", () => {
 			[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
 		});
 
-		expect(tasks[0]?.label).toBe("Choose candidate problem");
+		expect(tasks[0]?.label).toBe("Pick problem to carry forward");
+		expect(tasks[0]?.sectionTitle).toBe("Chosen problem");
 		expect(tasks[0]?.status).toBe("incomplete");
 	});
 
@@ -188,15 +189,14 @@ describe("course registry", () => {
 		expect(lesson).toBeTruthy();
 
 		const issues = getCompletionIssues(lesson!, {
-			[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
-			user_type: "Early-stage startup operators",
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 3,
 			pain_moment: "Right after meetings when the notes are still messy.",
 			current_solution: "They clean up notes by hand.",
 			reachability: "I know a few people like this already.",
 		});
 
 		expect(issues.map((issue) => issue.label)).toContain(
-			"Choose candidate problem",
+			"Pick problem to carry forward",
 		);
 	});
 
@@ -229,6 +229,23 @@ describe("course registry", () => {
 		expect(
 			normalizeLessonFieldValues(lesson!, {
 				user_type: "Early-stage startup operators",
+				pain_moment: "Right after meetings.",
+			}),
+		).toEqual({});
+	});
+
+	it("drops stale 1.2 drafts from the old duplicate user field shape", () => {
+		const lesson = getLessonById("1.2");
+		expect(lesson).toBeTruthy();
+
+		expect(
+			normalizeLessonFieldValues(lesson!, {
+				[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+				selected_problem_index: 1,
+				selected_problem_owner: "Startup operators",
+				selected_problem_statement:
+					"They lose action items after meetings and waste time rebuilding them.",
+				user_type: "Early-stage startup operators who run team meetings",
 				pain_moment: "Right after meetings.",
 			}),
 		).toEqual({});
@@ -275,20 +292,24 @@ describe("course registry", () => {
 
 		expect(
 			normalizeLessonFieldValues(lesson!, {
-				[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+				[FIELD_SHAPE_VERSION_FIELD_ID]: 3,
 				selected_problem_index: 1,
 				selected_problem_owner: "Startup operators",
 				selected_problem_statement:
 					"They lose action items after meetings and waste time rebuilding them.",
-				user_type: "Early-stage startup operators who run team meetings",
+				pain_moment: "Right after meetings when the notes are still messy.",
+				current_solution: "They clean up notes by hand.",
+				reachability: "I know a few people like this already.",
 			}),
 		).toEqual({
-			[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 3,
 			selected_problem_index: 1,
 			selected_problem_owner: "Startup operators",
 			selected_problem_statement:
 				"They lose action items after meetings and waste time rebuilding them.",
-			user_type: "Early-stage startup operators who run team meetings",
+			pain_moment: "Right after meetings when the notes are still messy.",
+			current_solution: "They clean up notes by hand.",
+			reachability: "I know a few people like this already.",
 		});
 	});
 
@@ -317,21 +338,21 @@ describe("course registry", () => {
 		expect(lesson).toBeTruthy();
 
 		const preview = buildArtifactPreview(lesson!, {
-			[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 3,
 			selected_problem_index: 1,
 			selected_problem_owner: "Startup operators",
 			selected_problem_statement:
 				"They lose action items after meetings and waste time rebuilding them.",
-			user_type: "Early-stage startup operators who run team meetings",
+			pain_moment: "Right after meetings when the notes are still messy.",
 		});
 
 		expect(preview.fields.slice(0, 3)).toEqual([
-			["Chosen problem owner", "Startup operators"],
+			["User", "Startup operators"],
 			[
 				"Chosen problem",
 				"They lose action items after meetings and waste time rebuilding them.",
 			],
-			["User", "Early-stage startup operators who run team meetings"],
+			["Pain moment", "Right after meetings when the notes are still messy."],
 		]);
 		expect(preview.contextTitle).toBe("Current direction");
 	});

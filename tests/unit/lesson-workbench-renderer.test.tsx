@@ -65,7 +65,7 @@ describe("WorkbenchRenderer", () => {
 			},
 			{
 				lessonId: "1.2",
-				expected: "Choose one candidate problem",
+				expected: "Pick the problem to carry forward",
 				pinnedArtifacts: [getCandidateProblemsArtifact()],
 			},
 			{
@@ -133,9 +133,33 @@ describe("WorkbenchRenderer", () => {
 			invalidFieldIds: new Set(["selected_problem_index"]),
 		});
 
-		expect(markup).toContain("Candidate 1");
+		expect(markup).toContain("Problem 1");
 		expect(markup).toContain("Startup operators");
-		expect(markup).toContain("Choose one candidate problem before continuing.");
+		expect(markup).toContain(
+			"Pick the problem to carry forward before continuing.",
+		);
+		expect(markup).not.toContain("Carry forward");
+	});
+
+	it("treats the selected problem owner as the chosen user on lesson 1.2", () => {
+		const markup = renderLessonWorkbench("1.2", {
+			pinnedArtifacts: [getCandidateProblemsArtifact()],
+			fieldValues: {
+				selected_problem_index: 1,
+				selected_problem_owner: "Startup operators",
+				selected_problem_statement:
+					"They lose action items after meetings and waste time rebuilding them.",
+			},
+		});
+
+		expect(markup).toContain("Chosen user");
+		expect(markup).toContain("Problem 1");
+		expect(markup).toContain(
+			"The selected problem owner is your user. Now ground this direction in a real moment, a current workaround, and a path to reach them.",
+		);
+		expect(markup).not.toContain(
+			"Now define the specific user inside this chosen problem.",
+		);
 	});
 
 	it("renders upload instructions for capture-upload lessons", () => {

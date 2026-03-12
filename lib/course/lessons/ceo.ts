@@ -341,8 +341,7 @@ export const ceoLessons = [
 		coachMode: "docked",
 		objectiveTitle: "CEO 1.2 — Pick One User",
 		checklist: [
-			"Choose candidate problem",
-			"Chosen user",
+			"Pick problem to carry forward",
 			"Pain moment",
 			"Current workaround",
 			"Reachability",
@@ -372,7 +371,7 @@ export const ceoLessons = [
 				{
 					targetFieldId: "selected_problem_owner",
 					source: "owner",
-					previewLabel: "Chosen problem owner",
+					previewLabel: "User",
 				},
 				{
 					targetFieldId: "selected_problem_statement",
@@ -382,21 +381,21 @@ export const ceoLessons = [
 			],
 		},
 		helperText:
-			"Pick one of the three problems you just wrote, then define the user living with it.",
+			"Pick the problem to carry forward. That choice already locks the user. Now ground it in a real moment, a current workaround, and a path to reach them.",
 		winCondition: "One clear user statement is saved.",
 		panelDefaults: splitPanelDefaults,
-		fieldShapeVersion: 2,
+		fieldShapeVersion: 3,
 		pinnedArtifacts: ["candidate_problems"],
 		workbenchSections: [
 			{
-				id: "user_statement",
-				eyebrow: "Pick the person",
-				title: "Lock one reachable user",
+				id: "pain_moment",
+				eyebrow: "Make it concrete",
+				title: "Define when this problem hits",
 				instruction:
-					"Choose one specific reachable user inside the problem you just selected. Broad audiences slow everything down.",
+					"Choosing the problem to carry forward already chose the user. Now capture the moment when this problem is most painful for them.",
 				layout: "stack",
-				fieldIds: ["user_type", "pain_moment"],
-				completionLabel: "User and pain moment defined",
+				fieldIds: ["pain_moment"],
+				completionLabel: "Pain moment defined",
 				blockedByFieldIds: ["selected_problem_index"],
 			},
 			{
@@ -404,7 +403,7 @@ export const ceoLessons = [
 				eyebrow: "Reality check",
 				title: "Confirm this is grounded",
 				instruction:
-					"Make sure this is a real person with a current workaround and a path to reach them this week.",
+					"Make sure this is a real user with a current workaround and a path to reach them this week.",
 				layout: "stack",
 				fieldIds: ["current_solution", "reachability"],
 				completionLabel: "Current workaround and reachability confirmed",
@@ -412,16 +411,6 @@ export const ceoLessons = [
 			},
 		],
 		workbenchFields: [
-			{
-				id: "user_type",
-				label: "Chosen user",
-				kind: "text",
-				required: true,
-				placeholder: "Early-stage startup operators who run team meetings",
-				inputWidth: "wide",
-				artifactPreviewLabel: "User",
-				taskLabel: "Chosen user",
-			},
 			{
 				id: "pain_moment",
 				label: "When does this problem hit?",
@@ -462,7 +451,7 @@ export const ceoLessons = [
 		content: {
 			status: "draft",
 			intro:
-				"Pick one of the three problems you just wrote. Then name the most specific reachable user living with that problem.",
+				"Pick the problem to carry forward. That choice already locks the user. Now ground it in a real moment, a current workaround, and a path to reach them.",
 			lessonMeta: {
 				runtimeLabel: "5-7 min",
 				goal: "Force specificity and constraint.",
@@ -471,9 +460,10 @@ export const ceoLessons = [
 			},
 			actionCard: {
 				jobNow:
-					"Choose one candidate problem to carry forward, then define the user living with it.",
+					"Pick the problem to carry forward, then define when it hits, how they handle it today, and why you can reach them.",
 				timebox: "10 minutes",
-				comeBackWith: "One chosen problem and one clear user statement.",
+				comeBackWith:
+					"One chosen problem grounded in a real moment and reachable path.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Pick One User",
@@ -482,14 +472,14 @@ export const ceoLessons = [
 			}),
 			workbench: {
 				prompt:
-					"Pick one of the three problems you just wrote. Then name the most specific reachable user living with that problem.",
+					"Pick the problem to carry forward. That choice already locks the user. Now ground it in a real moment, a current workaround, and a path to reach them.",
 				teachingPoints: [
-					"Use the sentence: This app is for ___ who need ___ without ___.",
-					"Show a bad target and tighten it to something usable.",
-					"Explain the difference between a segment and a situation.",
+					"Choosing the problem to carry forward already chooses the user.",
+					"Name the moment when this problem feels sharpest for them.",
+					"Pressure-test reachability before you move on.",
 				],
 				emptyState:
-					"Pick one of the three problems you just wrote. Then name the most specific reachable user living with that problem.",
+					"Pick the problem to carry forward. That choice already locks the user. Now ground it in a real moment, a current workaround, and a path to reach them.",
 			},
 		},
 	},

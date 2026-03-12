@@ -6,6 +6,8 @@ It does not replace the root `todo.md`, which remains the launch tracker and sou
 
 ## Active
 
+- [x] Clean up lesson `1.2`’s handoff chooser so it uses one clear title, uniform problem cards, and aligned carry-forward language across the workbench and task model
+- [x] Simplify lesson `1.2` so selecting a candidate problem also locks the user, remove the duplicate user-entry step, and keep the lesson focused on pain moment, workaround, and reachability
 - [x] Refactor `lib/course` unlock and candidate-problem handoff conventions into explicit lesson contracts so the registry and workbench stop depending on string parsing and hard-coded persisted field ids
 - [x] Refactor the lesson-state lifecycle in `convex/course.ts` behind shared viewer-state and upsert helpers so mission, lesson, save, view, complete, and artifacts all use one compatibility-aware path
 - [x] Refactor lesson state so Convex only returns dynamic lesson data and the lesson page resolves static lesson definitions from `lib/course`
@@ -57,6 +59,12 @@ It does not replace the root `todo.md`, which remains the launch tracker and sou
 
 ## Review
 
+- Outcome: Cleaned up lesson `1.2`’s handoff chooser so it no longer uses the stacked `Carry forward` + `Choose one candidate problem` header, renamed the section to `Pick the problem to carry forward`, made the problem cards a uniform full-height structure with pinned action rows, and aligned the left-rail task copy to the same wording.
+- Verification: `pnpm exec vitest run tests/unit/course-registry.test.ts tests/unit/lesson-workbench-renderer.test.tsx` and `pnpm run typecheck`
+- Follow-up: Browser-QA lesson `1.2` with one short, one medium, and one long problem statement to confirm the CTA rows align and the selected-state summary reads cleanly at desktop and laptop widths.
+- Outcome: Simplified lesson `1.2` so the chosen candidate problem now also defines the user, removed the duplicate `Chosen user` field, promoted the carried-forward owner snapshot to the learner-facing `User` preview label, and rewrote the workbench copy to focus the lesson on pain moment, current workaround, and reachability.
+- Verification: `pnpm exec vitest run tests/unit/course-registry.test.ts tests/unit/lesson-workbench-renderer.test.tsx` and `pnpm run typecheck`
+- Follow-up: Browser-QA the `1.1 -> 1.2 -> 1.3` flow to confirm stale `1.2` drafts reset cleanly, the user is only chosen once, and the pinned `User Statement` card reads clearly in the live shell.
 - Outcome: Refactored the course unlock and candidate-problem handoff contract so lesson manifests now declare lesson/block unlock targets, candidate-problem source mappings, persisted handoff snapshot fields, and artifact context titles explicitly; the registry/workbench no longer infer these from token parsing, regex field reconstruction, or hard-coded handoff ids.
 - Verification: `pnpm exec vitest run tests/unit/course-registry.test.ts tests/unit/lesson-workbench-renderer.test.tsx tests/smoke/content-contract.test.ts` and `pnpm run typecheck`
 - Follow-up: Browser-QA the `1.2 -> 1.3 -> 1.4` handoff flow plus one artifacts-page pass to confirm the new explicit current-direction metadata reads cleanly in the live UI.

@@ -433,14 +433,14 @@ export function getObjectiveTasks(
 	if (lesson.handoff?.mode === "select_candidate_problem") {
 		tasks.push({
 			id: lesson.handoff.selectionFieldId,
-			label: "Choose candidate problem",
+			label: "Pick problem to carry forward",
 			status: isFilled(values[lesson.handoff.selectionFieldId])
 				? "complete"
 				: "incomplete",
 			source: "handoff",
 			fieldId: lesson.handoff.selectionFieldId,
 			sectionId: "handoff",
-			sectionTitle: "Carry forward",
+			sectionTitle: "Chosen problem",
 			interactive: false,
 		});
 	}
