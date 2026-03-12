@@ -500,30 +500,29 @@ Coach states:
 └───────────────────────────┴───────────────────────────────────────────┴────────────────┘
 ```
 
-## 3.2 Set Up the Environment
+## 3.2 Get the Starter Running
 
-**Shell:** Focus
-**Workbench:** console_checklist
+**Shell:** Watch
+**Workbench:** external_workspace
 **Artifact:** Working Local Environment
 
 ```text
-┌──────────────────────────────────── FOCUS WORKSPACE 3.2 ────────────────────────────────────┐
-│ SHIP BY SUNDAY      [CEO ✓] [DESIGN ✓] [BUILD ACTIVE] [SHIP LOCKED]      [Split][Focus]   │
+┌──────────────────────────────────── WATCH SHELL 3.2 ─────────────────────────────────────────┐
+│ SHIP BY SUNDAY      [CEO ✓] [DESIGN ✓] [BUILD ACTIVE] [SHIP LOCKED]                         │
 ├───────────────────────────────────────────────────────────────────────────────────────────────┤
-│ [Collapsed Objective Rail]                                                                    │
+│ BUILD 3.2     Working Local Environment     8-10 min                                          │
 │                                                                                               │
-│ Launch your local environment                                                                  │
+│ Get the Starter Running                                                                        │
+│ Get one local success state first. You do not need to master the whole stack before you move.│
 │                                                                                               │
-│ Checklist panel overlay:                                                                       │
-│ [ ] Repo / starter opened                                                                      │
-│ [ ] Dependencies installed                                                                     │
-│ [ ] App runs locally                                                                           │
-│ [ ] Screenshot / confirmation captured                                                         │
+│ ┌───────────────────────────────────────────────────────────────────────────────────────────┐ │
+│ │                                                                                           │ │
+│ │                                Lesson video                                               │ │
+│ │                    Watch the local setup walkthrough first                                │ │
+│ │                                                                                           │ │
+│ └───────────────────────────────────────────────────────────────────────────────────────────┘ │
 │                                                                                               │
-│ Main area: terminal / IDE / setup instructions                                                 │
-│ Coach PiP [video]                                                                              │
-│                                                                                               │
-│ [Mark environment ready] [Back] [Next]                                                         │
+│ [Back] [Complete lesson]                                                                       │
 ├───────────────────────────────────────────────────────────────────────────────────────────────┤
 │ Bottom skill rail                                                                              │
 └───────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -801,7 +800,7 @@ Coach states:
 ## BUILD
 
 3.1 Build From the Brief
-3.2 Set Up the Environment
+3.2 Get the Starter Running
 3.3 Brief the Agent Correctly
 3.4 Build the Core Flow
 3.5 Debug Without Spiraling

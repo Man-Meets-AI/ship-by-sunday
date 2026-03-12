@@ -6,6 +6,7 @@ It does not replace the root `todo.md`, which remains the launch tracker and sou
 
 ## Active
 
+- [x] Convert lesson `3.2` into a watch-shell lesson so the local-environment step is mainly video like the other watch-first lessons, remove the in-product checklist fields, and update the contract/tests/tracker notes around the new shell behavior
 - [x] Redesign lesson `2.6` into a visual-direction prompt workflow with an embedded video, read-only `2.1` reference gallery reuse, a saved direction note, `visualguide.md` prompt pasteback, concise downstream previews, and the required docs/tracker/test updates
 - [x] Turn Jakub Kr's interface-detail article into a reusable workspace-local `interface-polish` skill with a recipes reference, UI metadata, tracker updates, and validation smoke checks
 - [x] Audit local Codex session history, classify recurring work, and recommend which patterns should become skills vs plugins/tools vs agents vs `AGENTS.md` rules in `docs/dev/codex-session-audit.md`
@@ -78,6 +79,9 @@ It does not replace the root `todo.md`, which remains the launch tracker and sou
 
 ## Review
 
+- Outcome: Converted lesson `3.2` into a watch-shell Build lesson so the local-environment step now uses the same large video-first surface as the other watch-only lessons, removed the in-product checklist/notes fields, and synced the Build contract plus wireframe source of truth to the new behavior.
+- Verification: `pnpm exec prettier --check lib/course/lessons/build.ts tests/unit/course-registry.test.ts tests/unit/watch-lesson-contract.test.ts tests/unit/lesson-workbench-renderer.test.tsx tests/smoke/content-contract.test.ts app/wireframes.md tasks/todo.md`, `pnpm exec vitest run tests/unit/course-registry.test.ts tests/unit/watch-lesson-contract.test.ts tests/unit/lesson-workbench-renderer.test.tsx tests/smoke/content-contract.test.ts`, and `pnpm run typecheck`.
+- Follow-up: Browser-QA `3.2 -> 3.3` on desktop/mobile with a real hosted lesson video so the watch-shell pacing and the handoff into the first external workspace step can be tuned against live lesson state.
 - Outcome: Rebuilt lesson `2.6` around a dedicated `visual_direction` workbench that embeds the lesson video beside the saved `2.1` reference gallery, captures a required direction note, generates a `visualguide.md` prompt from references plus local notes, saves pasted markdown back into the lesson, suppresses the duplicate coach Watch panel, and keeps `2.7` preview summaries concise instead of dumping the full markdown body.
 - Verification: `pnpm exec vitest run tests/unit/research-prompt.test.ts tests/unit/lesson-workbench-renderer.test.tsx tests/unit/course-registry.test.ts tests/unit/lesson-shells.test.tsx` and `pnpm run typecheck`. `pnpm run check` still fails at the repo-wide `prettier --check .` step because unrelated existing files remain unformatted, including `app/globals.css`, `components/lesson-workbench/modes/brief-assembler-workbench.tsx`, `components/lesson-workbench/modes/core-flow-map-workbench.tsx`, `docs/design/motion-practical-examples.md`, `docs/dev/codex-session-audit.md`, `lib/course/core-flow-map.ts`, `lib/course/lessons/ceo.ts`, `tests/smoke/content-contract.test.ts`, `tests/unit/core-flow-map.test.ts`, `tests/unit/research-import-workbench.test.tsx`, and `tests/unit/storyboard-lesson-contract.test.ts`.
 - Follow-up: Browser-QA `2.5 -> 2.6 -> 2.7` on desktop and mobile with real lesson state so the embedded-video layout, prompt copy flow, markdown persistence, and wrap-up preview can be tuned against actual auth/data.

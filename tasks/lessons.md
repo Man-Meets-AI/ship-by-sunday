@@ -5,6 +5,11 @@ Use this file to capture recurring mistakes, corrections, and guardrails for fut
 ## Lessons
 
 - Date: 2026-03-12
+  Pattern: I left lesson `3.2` in a heavy focus-workbench layout even though the user wanted it to behave like the repo's existing watch-first lessons, which created unnecessary checklist chrome where the main job was to watch the walkthrough and then move into the editor.
+  Rule: When a lesson's primary job is to watch a walkthrough and then continue off-screen, match the existing watch-shell contract instead of inventing a custom form/checklist view. Keep the surface mainly video unless the user explicitly wants additional in-product capture.
+  How to verify next time: Compare the lesson against the current watch-only lessons before implementing, confirm the main action is watching rather than filling fields, and browser-QA that the screen reads as video-first on first load.
+
+- Date: 2026-03-12
   Pattern: I left a block wrap-up lesson as a generic artifact dump even though the learner had already done the real work upstream, which made the handoff feel flat and left the downstream artifact effectively empty.
   Rule: When a wrap-up lesson has little or no new input of its own, compose the artifact from the saved upstream artifacts and treat the screen as a reward + handoff moment, not another plain form or context dump.
   How to verify next time: Check whether the wrap-up lesson is creating new information or locking existing information. If it is locking existing information, confirm the artifact preview is composed from prior lesson outputs, the shell progress is nonzero, and the page makes the next stage obvious before you close the work.
