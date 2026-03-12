@@ -46,6 +46,7 @@ Each workbench mode gets its own file.
   - guided-form handoff UI stays in `guided-form-workbench.tsx`
   - roadmap block rendering stays in `roadmap-overview-workbench.tsx`
   - external-tool messaging stays in `external-workspace-workbench.tsx`
+  - visual-direction prompt workflows stay in `visual-direction-workbench.tsx`
 
 Do not collapse similar modes into a generic meta-mode unless multiple real changes prove the duplication is a maintenance problem.
 
@@ -64,8 +65,14 @@ Prompt-import rules:
 - If a lesson needs a main-workbench `copy prompt -> paste result` loop, declare it explicitly on `lesson.promptImport`.
 - Keep prompt-template building and pasted-output parsing in `lib/course/research-prompt.ts`, not inside the lesson shell or the lesson page.
 - Keep the shared prompt-import UI in `shared/prompt-import-card.tsx`, then render it from the matching workbench mode instead of re-implementing the flow per lesson.
-- Current prompt templates are `competitor_research` and `scope_boundary`. Add new templates by extending the typed prompt contract first, then hydrate existing lesson fields from the pasted result instead of adding a custom persistence path.
+- Current prompt templates are `competitor_research`, `scope_boundary`, and `visual_direction_guide`. Add new templates by extending the typed prompt contract first, then hydrate existing lesson fields from the pasted result instead of adding a custom persistence path.
 - Imported output should hydrate existing lesson fields; do not add one-off persistence paths for prompt imports.
+
+Embedded-video rules:
+
+- If a split-shell lesson needs the video inside the main workbench, declare `lesson.coachVideoPlacement = "workbench"` instead of duplicating the video in both the workbench and the coach rail.
+- Keep `lesson.content.coach.video` as the single source of truth for the video payload even when the workbench renders it.
+- When the video lives in the workbench, the coach rail should omit the Watch section and fall back to transcript/examples/resources.
 
 ### `fields/`
 
