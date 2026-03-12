@@ -52,6 +52,39 @@ function getCandidateProblemsArtifact(): PinnedArtifact {
 	});
 }
 
+function getUserStatementArtifact(): PinnedArtifact {
+	const lesson = getLessonById("1.2");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {
+		__fieldShapeVersion: 3,
+		selected_problem_index: 1,
+		selected_problem_owner: "Startup operators",
+		selected_problem_statement:
+			"They lose action items after meetings and waste time rebuilding them.",
+		pain_moment:
+			"Right after team meetings when they need to share next steps fast.",
+		current_solution:
+			"Messy notes, memory, and a manual cleanup pass after the meeting.",
+		reachability:
+			"I already know a few operators who would try this this week.",
+	});
+}
+
+function getOutcomeStatementArtifact(): PinnedArtifact {
+	const lesson = getLessonById("1.3");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {
+		outcome:
+			"Startup operators leave a meeting with a clean action summary they can review and send in minutes.",
+		success_looks_like:
+			"They can paste notes, review a usable action summary, and share it without rebuilding everything by hand.",
+		difference_for_user:
+			"They stop losing decisions in messy notes and can close the loop while the meeting is still fresh.",
+	});
+}
+
 describe("WorkbenchRenderer", () => {
 	it("renders representative workbench modes without hitting the fallback", () => {
 		const scenarios: Array<{
@@ -78,7 +111,7 @@ describe("WorkbenchRenderer", () => {
 			},
 			{
 				lessonId: "1.5",
-				expected: "Upload Core Flow Image",
+				expected: "Upload Core Flow Screenshot",
 			},
 			{
 				lessonId: "1.6",
@@ -95,7 +128,7 @@ describe("WorkbenchRenderer", () => {
 					{
 						artifactKey: "user_statement",
 						artifactLabel: "User Statement",
-						contextTitle: "Current direction",
+						contextTitle: "Our user",
 						lessonTitle: "Pick One User",
 						fieldValues: {},
 						fields: [
@@ -202,5 +235,32 @@ describe("WorkbenchRenderer", () => {
 		expect(markup).toContain(
 			"Choose a file and it will upload to lesson storage before the lesson draft is saved.",
 		);
+	});
+
+	it("renders lesson 1.5 with the FigJam template and clean pinned context cards", () => {
+		const markup = renderLessonWorkbench("1.5", {
+			pinnedArtifacts: [
+				getUserStatementArtifact(),
+				getOutcomeStatementArtifact(),
+			],
+		});
+
+		expect(markup).toContain("Open FigJam template");
+		expect(markup).toContain(
+			"https://www.figma.com/board/csR3w46LJaHNU0RKHVOJDB/Template-for-Storyboard?node-id=0-1",
+		);
+		expect(markup).toContain('target="_blank"');
+		expect(markup).toContain('rel="noreferrer"');
+		expect(markup).toContain("Upload Core Flow Screenshot");
+		expect(markup).toContain("A core flow screenshot.");
+		expect(markup).toContain("Our user");
+		expect(markup).toContain("Outcome statement");
+		expect(markup).not.toContain("Research Notes");
+		expect(markup).not.toContain("Template Preview");
+		expect(markup).not.toContain(
+			"This field will populate from an earlier saved artifact.",
+		);
+		expect(markup).not.toContain("Pick One User");
+		expect(markup).not.toContain("Define the Outcome");
 	});
 });

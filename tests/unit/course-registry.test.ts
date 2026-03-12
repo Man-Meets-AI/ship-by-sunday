@@ -379,7 +379,19 @@ describe("course registry", () => {
 			],
 			["Pain moment", "Right after meetings when the notes are still messy."],
 		]);
-		expect(preview.contextTitle).toBe("Current direction");
+		expect(preview.contextTitle).toBe("Our user");
+	});
+
+	it("uses a curated outcome title in the 1.3 artifact preview", () => {
+		const lesson = getLessonById("1.3");
+		expect(lesson).toBeTruthy();
+
+		const preview = buildArtifactPreview(lesson!, {
+			outcome:
+				"Startup operators leave a meeting with a clean action summary they can review and send in minutes.",
+		});
+
+		expect(preview.contextTitle).toBe("Outcome statement");
 	});
 
 	it("formats table artifact previews into readable summaries", () => {
