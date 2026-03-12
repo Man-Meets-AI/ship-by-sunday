@@ -1,18 +1,21 @@
 "use client";
 
+import { useEffect, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { getLessonHref } from "@/lib/course/manifest";
+import {
+	getSkillRailNavigation,
+	getSkillRailShortcutDirection,
+	shouldHandleSkillRailShortcut,
+	type SkillRailLesson,
+	type SkillRailNavigationTarget,
+} from "@/components/skill-rail-navigation";
 
 export type SkillRailCompletionCue = {
 	completedLessonId: string;
 	nextLessonId: string | null;
-};
-
-type SkillRailLesson = {
-	id: string;
-	shortTitle: string;
-	status: "available" | "completed" | "in_progress" | "locked";
 };
 
 function slotClasses({
@@ -53,18 +56,104 @@ function slotClasses({
 	return `${base} text-product-muted/30`;
 }
 
+function SkillRailNavKey({
+	label,
+	title,
+	target,
+}: {
+	label: "Q" | "E";
+	title: string;
+	target: SkillRailNavigationTarget | null;
+}) {
+	const className = `sbs-rail-nav-key font-mono text-[10px] uppercase tracking-[0.22em] ${
+		target
+			? "cursor-pointer text-product-text transition-colors hover:text-product-accent"
+			: "cursor-not-allowed text-product-muted/40"
+	}`;
+
+	if (!target) {
+		return (
+			<button
+				type="button"
+				disabled
+				title={title}
+				aria-label={title}
+				aria-keyshortcuts={label}
+				data-disabled="true"
+				className={className}
+			>
+				{label}
+			</button>
+		);
+	}
+
+	return (
+		<Link
+			href={target.href}
+			scroll={false}
+			title={title}
+			aria-label={title}
+			aria-keyshortcuts={label}
+			data-disabled="false"
+			className={className}
+		>
+			{label}
+		</Link>
+	);
+}
+
 export function SkillRail({
 	label,
 	lessons,
+	navigationLessons,
 	currentLessonId,
 	completionCue,
 }: {
 	label: string;
 	subtitle?: string;
 	lessons: SkillRailLesson[];
+	navigationLessons?: SkillRailLesson[];
 	currentLessonId?: string;
 	completionCue?: SkillRailCompletionCue | null;
 }) {
+	const router = useRouter();
+	const showStageNavigation = Boolean(currentLessonId);
+	const resolvedNavigationLessons = navigationLessons ?? lessons;
+	const { previousTarget, nextTarget } = useMemo(
+		() => getSkillRailNavigation(resolvedNavigationLessons, currentLessonId),
+		[resolvedNavigationLessons, currentLessonId],
+	);
+
+	useEffect(() => {
+		if (!currentLessonId) {
+			return;
+		}
+
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (!shouldHandleSkillRailShortcut(event)) {
+				return;
+			}
+
+			const direction = getSkillRailShortcutDirection(event.key);
+			const target =
+				direction === "previous"
+					? previousTarget
+					: direction === "next"
+						? nextTarget
+						: null;
+
+			if (!target) {
+				return;
+			}
+
+			event.preventDefault();
+			router.push(target.href, { scroll: false });
+		};
+
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [currentLessonId, nextTarget, previousTarget, router]);
+
 	return (
 		<div className="flex w-full min-w-0 items-stretch">
 			<div className="flex shrink-0 items-center border-r border-product-border/25 px-3">
@@ -74,6 +163,13 @@ export function SkillRail({
 			</div>
 
 			<div className="flex min-w-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+				{showStageNavigation ? (
+					<SkillRailNavKey
+						label="Q"
+						title="Open previous lesson in this stage"
+						target={previousTarget}
+					/>
+				) : null}
 				{lessons.map((lesson) => {
 					const isCurrent = lesson.id === currentLessonId;
 					const isCompleting = completionCue?.completedLessonId === lesson.id;
@@ -140,6 +236,13 @@ export function SkillRail({
 						</Link>
 					);
 				})}
+				{showStageNavigation ? (
+					<SkillRailNavKey
+						label="E"
+						title="Open next lesson in this stage"
+						target={nextTarget}
+					/>
+				) : null}
 			</div>
 		</div>
 	);

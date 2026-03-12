@@ -414,6 +414,9 @@ function ShellInner({
 					<SkillRail
 						label={activeBlock.label}
 						lessons={activeBlock.lessons}
+						navigationLessons={mission?.blocks.flatMap(
+							(block) => block.lessons,
+						)}
 						currentLessonId={currentLessonId}
 						completionCue={completionCue}
 					/>

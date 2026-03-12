@@ -239,6 +239,43 @@ html[data-product-theme="light"] .product-theme {
 		transform-origin: center center;
 	}
 
+	.sbs-rail-nav-key {
+		position: relative;
+		display: inline-flex;
+		min-width: 2.25rem;
+		height: 2.25rem;
+		align-items: center;
+		justify-content: center;
+		border-right: 1px solid rgba(var(--product-border), 0.25);
+		background: linear-gradient(
+			180deg,
+			rgba(var(--product-surface-strong), 0.82),
+			rgba(var(--product-surface), 0.96)
+		);
+		box-shadow: inset 0 0 0 1px rgba(var(--product-border), 0.06);
+	}
+
+	.sbs-rail-nav-key[data-disabled="false"]:hover {
+		background:
+			linear-gradient(
+				180deg,
+				rgba(var(--product-accent), 0.12),
+				rgba(var(--product-accent), 0.04)
+			),
+			rgba(var(--product-surface), 0.96);
+	}
+
+	.sbs-rail-nav-key[data-disabled="false"]:focus-visible {
+		outline: none;
+		box-shadow:
+			inset 0 0 0 1px rgba(var(--product-accent), 0.32),
+			0 0 0 1px rgba(var(--product-accent), 0.22);
+	}
+
+	.sbs-rail-nav-key[data-disabled="true"] {
+		opacity: 0.45;
+	}
+
 	.sbs-stage-unlock-hero {
 		animation: sbs-stage-unlock-enter var(--motion-base) var(--ease-standard);
 	}
