@@ -339,19 +339,20 @@ Coach states:
 **Artifact:** Storyboard Image
 
 ```text
-┌──── CURRENT OBJECTIVE ────┬────────────── WORKBENCH 2.3 ──────────────┬──── COACH ────┐
-│ DESIGN 2.3                │ Storyboard the Journey                    │ WATCH          │
-│                           │                                           │ [video]        │
-│ Checklist                 │ 1. Show the user moving screen to screen  │                │
-│ [ ] Draw 5–7 frames       │ 2. Capture state change                   │ TRANSCRIPT     │
-│ [ ] Upload storyboard     │                                           │ [collapsed]    │
-│                           │ [ Static storyboard template ]            │                │
-│ Output                    │ [Upload Image]                            │ EXAMPLES       │
-│ Storyboard Image          │                                           │ before/after   │
-│                           │ Uploaded preview                          │                │
-│ Next Unlock               │ [ Replace ] [ Mark Complete ] [Back][Next]│ RESOURCES      │
-│ Figma Basics for Speed    │                                           │ [collapsed]    │
-└───────────────────────────┴───────────────────────────────────────────┴────────────────┘
+┌──────────────────────────────────── FOCUS WORKSPACE 2.3 ────────────────────────────────────┐
+│ SHIP BY SUNDAY      [CEO ✓] [DESIGN ACTIVE] [BUILD LOCKED] [SHIP LOCKED]                    │
+├───────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Storyboard the Journey                                                                       │
+│ Storyboard this offline on paper, tablet, or Excalidraw. One clean image is enough.        │
+│                                                                                               │
+│ [ Printable storyboard worksheet ]                                                            │
+│ [ Do this now / timebox / finish with ]                                                       │
+│ [ Sketch Set context ]                                                                        │
+│ [ Upload storyboard image ]                                                                   │
+│ [ Uploaded preview ]                                                                          │
+│                                                                                               │
+│                                                       [Back] [Complete Lesson]               │
+└───────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## 2.4 Figma Basics for Speed

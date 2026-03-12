@@ -249,7 +249,8 @@ Plan for a `75-105 min` recording block.
 
 - Show quick reference gathering and pattern capture
 - Sketch one short flow on paper or tablet
-- Convert the sketch into a storyboard
+- Turn that sketch into a 5-7 frame storyboard on paper, tablet, or Excalidraw
+- Upload one clean storyboard photo or export before moving into Figma
 - Demonstrate only the Figma moves needed for this sprint
 - Turn rough sketches into rough screens live
 - Pick one visual direction without spiraling on aesthetics
@@ -259,6 +260,7 @@ Plan for a `75-105 min` recording block.
 
 - Figma lesson becomes a tool tour instead of a sprint lesson
 - Visual direction section gets too taste-based
+- Storyboard lesson turns into a tool demo instead of an offline sequencing step
 - Storyboard lesson does not stay tied to the core flow
 
 ## Session 3: Build Block
