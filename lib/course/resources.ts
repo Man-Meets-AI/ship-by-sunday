@@ -137,6 +137,11 @@ export const WORKSHEET_04_RESOURCES: LessonResourceContent[] = [
 	WORKSHEET_04_RESOURCE,
 ];
 
+export function getBuildStarterTemplateRepoUrl() {
+	const value = process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL?.trim();
+	return value ? value : null;
+}
+
 export const WORKSHEET_01_TEMPLATE_DOWNLOAD: LessonTemplateResource = {
 	templateDownloadLabel: "Open Worksheet 01 template",
 	templateDownloadHref: "/downloads/ship-by-sunday-worksheets.pdf",

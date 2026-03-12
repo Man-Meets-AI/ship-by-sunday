@@ -124,6 +124,24 @@ const PROMPT_IMPORT_COPY: Record<LessonPromptTemplateId, PromptImportUiCopy> = {
 			}. You can keep editing the saved markdown below.`;
 		},
 	},
+	build_kickoff_prompt: {
+		cardLabel: "Build kickoff prompts stay in the workbench",
+		steps: [
+			"Use the dedicated build kickoff workbench instead of this shared import flow.",
+			"Choose a starting path, define the first slice, and copy the generated prompt there.",
+			"Do not paste anything back into this card.",
+		],
+		enabledNote:
+			"Build kickoff prompts are copy-only and do not support pasteback import.",
+		pasteLabel: "Not used",
+		pastePlaceholder:
+			"Build kickoff prompts do not support pasteback import in this shared card.",
+		importButtonLabel: "Not supported",
+		importHint:
+			"Use the build kickoff workbench instead of the shared prompt-import flow.",
+		getSuccessMessage: () =>
+			"Build kickoff prompts do not support pasteback import.",
+	},
 };
 
 export function PromptImportCard({

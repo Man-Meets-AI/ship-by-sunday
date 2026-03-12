@@ -10,6 +10,7 @@ import {
 import { buildStageUnlockSummary } from "@/lib/course/stage-unlock";
 
 import { BriefAssemblerWorkbench } from "./modes/brief-assembler-workbench";
+import { BuildKickoffWorkbench } from "./modes/build-kickoff-workbench";
 import { CaptureUploadWorkbench } from "./modes/capture-upload-workbench";
 import { CollectorBoardWorkbench } from "./modes/collector-board-workbench";
 import { CoreFlowMapWorkbench } from "./modes/core-flow-map-workbench";
@@ -37,6 +38,7 @@ const modeRenderers: Record<WorkbenchType, WorkbenchModeComponent> = {
 	core_flow_map: CoreFlowMapWorkbench,
 	scope_split: ScopeSplitWorkbench,
 	brief_assembler: BriefAssemblerWorkbench,
+	build_kickoff: BuildKickoffWorkbench,
 	console_checklist: ConsoleChecklistWorkbench,
 	roadmap_overview: RoadmapOverviewWorkbench,
 	tracker_log: TrackerLogWorkbench,

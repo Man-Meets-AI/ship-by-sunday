@@ -34,9 +34,25 @@ export type VisualDirectionGuidePromptContext = {
 	referenceImageUrls: string[];
 };
 
+export type BuildKickoffPromptContext = {
+	buildPath: "template" | "custom";
+	firstSlice: string;
+	definitionOfDone: string;
+	templateRepoUrl?: string;
+	productBrief: Array<{
+		label: string;
+		body: string;
+	}>;
+	designSpec: Array<{
+		label: string;
+		body: string;
+	}>;
+};
+
 export type PromptTemplateArtifactContext = {
 	artifactKey: string;
 	fieldValues: PersistedFieldValues;
+	fields?: Array<[string, unknown]>;
 };
 
 export type PromptTemplateState = {
@@ -246,6 +262,95 @@ function getVisualDirectionGuidePromptContext(
 	};
 }
 
+function isTemplateBuildPath(value: string | null) {
+	return value?.trim().toLowerCase() === "use template";
+}
+
+function getArtifactSections(artifact: PromptTemplateArtifactContext | null) {
+	if (!artifact) {
+		return [];
+	}
+
+	if (artifact.fields?.length) {
+		return artifact.fields
+			.map(([label, value]) => ({
+				label,
+				body:
+					typeof value === "string"
+						? value.trim()
+						: String(value ?? "").trim(),
+			}))
+			.filter((section) => section.body.length > 0);
+	}
+
+	return Object.entries(artifact.fieldValues)
+		.filter(
+			([fieldId, value]) =>
+				!fieldId.startsWith("__") && typeof value === "string",
+		)
+		.map(([fieldId, value]) => ({
+			label: fieldId.replaceAll("_", " "),
+			body: (value as string).trim(),
+		}))
+		.filter((section) => section.body.length > 0);
+}
+
+function getBuildKickoffPromptContext(
+	pinnedArtifacts: PromptTemplateArtifactContext[],
+	fieldValues: PersistedFieldValues,
+): BuildKickoffPromptContext | null {
+	const productBrief =
+		pinnedArtifacts.find((artifact) => artifact.artifactKey === "product_brief") ??
+		null;
+	const designSpec =
+		pinnedArtifacts.find((artifact) => artifact.artifactKey === "design_spec") ??
+		null;
+	const buildPathValue = getTrimmedFieldValue(fieldValues, "build_path");
+	const firstSlice = getTrimmedFieldValue(fieldValues, "first_slice");
+	const definitionOfDone = getTrimmedFieldValue(
+		fieldValues,
+		"definition_of_done",
+	);
+
+	if (
+		!productBrief ||
+		!designSpec ||
+		!buildPathValue ||
+		!firstSlice ||
+		!definitionOfDone
+	) {
+		return null;
+	}
+
+	const buildPath = isTemplateBuildPath(buildPathValue)
+		? "template"
+		: buildPathValue.toLowerCase() === "custom path"
+			? "custom"
+			: null;
+	if (!buildPath) {
+		return null;
+	}
+
+	const productBriefSections = getArtifactSections(productBrief);
+	const designSpecSections = getArtifactSections(designSpec);
+	if (productBriefSections.length === 0 || designSpecSections.length === 0) {
+		return null;
+	}
+
+	return {
+		buildPath,
+		firstSlice,
+		definitionOfDone,
+		templateRepoUrl:
+			buildPath === "template"
+				? process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL?.trim() ||
+					undefined
+				: undefined,
+		productBrief: productBriefSections,
+		designSpec: designSpecSections,
+	};
+}
+
 export function buildCompetitorResearchPrompt(
 	context: CompetitorResearchPromptContext,
 ) {
@@ -344,6 +449,60 @@ export function buildCompetitorResearchPrompt(
 		"- Do not add conclusion text",
 		"- Do not add any extra sections",
 	].join("\n");
+}
+
+export function buildBuildKickoffPrompt(context: BuildKickoffPromptContext) {
+	const productBriefLines = context.productBrief.flatMap((section) => [
+		`### ${section.label}`,
+		section.body,
+		"",
+	]);
+	const designSpecLines = context.designSpec.flatMap((section) => [
+		`### ${section.label}`,
+		section.body,
+		"",
+	]);
+	const pathLine =
+		context.buildPath === "template"
+			? "Use the starter template path for this build."
+			: "Use the existing repo or create the project from scratch if needed.";
+	const templateLine = context.templateRepoUrl
+		? `Starter repo: ${context.templateRepoUrl}`
+		: null;
+
+	return [
+		"You are helping a builder implement a sharp weekend-v1 from a locked product brief and design spec.",
+		"",
+		"Start from this exact setup:",
+		`- Starting path: ${context.buildPath === "template" ? "Use template" : "Custom path"}`,
+		"- Build goal: implement the first working slice of the product, not the whole app.",
+		`- First slice to build now: ${context.firstSlice}`,
+		`- Definition of done: ${context.definitionOfDone}`,
+		`- Path rule: ${pathLine}`,
+		templateLine,
+		"",
+		"## Source-of-truth product brief",
+		...productBriefLines,
+		"## Source-of-truth design spec",
+		...designSpecLines,
+		"## Constraints",
+		"- Build only the first slice named above.",
+		"- Follow the brief and design spec instead of inventing new product scope.",
+		"- Keep the implementation inside the existing stack and file structure unless a missing dependency forces a small change.",
+		"- If the slice needs minimal backend, auth, or data-model support, add only what is required for this slice and stop there.",
+		"- Do not jump ahead to future screens, polish passes, or refactors that are not blocking this slice.",
+		"- If credentials, env vars, or provider setup are missing, stop and say exactly what is missing instead of faking it.",
+		"",
+		"## Validation",
+		"- Run the app locally.",
+		"- Use Playwright to verify the implemented slice or the closest testable path.",
+		"- Return the result, any blocker found, and the next smallest build step.",
+		"",
+		"## Stop condition",
+		"- Stop after the first slice is working and validated, or after you hit a real blocker with a clear explanation.",
+	]
+		.filter(Boolean)
+		.join("\n");
 }
 
 export function buildScopeBoundaryPrompt(context: ScopeBoundaryPromptContext) {
@@ -519,6 +678,30 @@ export function getPromptTemplateState(
 
 		return {
 			prompt: buildVisualDirectionGuidePrompt(context),
+			disabledReason: null,
+		};
+	}
+
+	if (promptTemplateId === "build_kickoff_prompt") {
+		const context = getBuildKickoffPromptContext(pinnedArtifacts, fieldValues);
+		if (!context) {
+			return {
+				prompt: null,
+				disabledReason:
+					"Finish Design 2.7, choose a starting path, name the first slice, and define done before we build this prompt.",
+			};
+		}
+
+		if (context.buildPath === "template" && !context.templateRepoUrl) {
+			return {
+				prompt: null,
+				disabledReason:
+					"The starter template path is not configured yet. Choose Custom path for now or set NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL.",
+			};
+		}
+
+		return {
+			prompt: buildBuildKickoffPrompt(context),
 			disabledReason: null,
 		};
 	}
@@ -837,6 +1020,10 @@ export function parsePromptTemplateImport(
 
 	if (promptTemplateId === "visual_direction_guide") {
 		return parseVisualDirectionGuideImport(input);
+	}
+
+	if (promptTemplateId === "build_kickoff_prompt") {
+		throw new Error("Build kickoff prompts do not support pasteback import.");
 	}
 
 	throw new Error("This prompt import is not wired yet.");

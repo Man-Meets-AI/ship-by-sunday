@@ -17,6 +17,7 @@ export type WorkbenchType =
 	| "roadmap_overview"
 	| "tracker_log"
 	| "external_workspace"
+	| "build_kickoff"
 	| "visual_direction";
 
 export type CoachMode = "docked" | "pip";
@@ -195,7 +196,8 @@ export type LessonExampleContent = {
 export type LessonPromptTemplateId =
 	| "competitor_research"
 	| "scope_boundary"
-	| "visual_direction_guide";
+	| "visual_direction_guide"
+	| "build_kickoff_prompt";
 
 export type LessonLinkResourceContent = {
 	id: string;
