@@ -167,21 +167,21 @@ function getBuildBriefArtifact(): PinnedArtifact {
 }
 
 function getWorkingLocalEnvironmentArtifact(): PinnedArtifact {
-	const lesson = getLessonById("3.2");
+	const lesson = getLessonById("3.5");
 	expect(lesson).toBeTruthy();
 
 	return buildArtifactPreview(lesson!, {});
 }
 
 function getCoreUxWorkingArtifact(): PinnedArtifact {
-	const lesson = getLessonById("3.4");
+	const lesson = getLessonById("3.8");
 	expect(lesson).toBeTruthy();
 
 	return buildArtifactPreview(lesson!, {});
 }
 
 function getBlockerLogArtifact(): PinnedArtifact {
-	const lesson = getLessonById("3.5");
+	const lesson = getLessonById("3.9");
 	expect(lesson).toBeTruthy();
 
 	return buildArtifactPreview(lesson!, {});
@@ -375,10 +375,10 @@ describe("WorkbenchRenderer", () => {
 			},
 			{
 				lessonId: "3.3",
-				expected: "External workspace",
+				expected: "Figma MCP installed",
 			},
 			{
-				lessonId: "3.6",
+				lessonId: "3.10",
 				expected: "Ship unlocked",
 				pinnedArtifacts: [
 					getBuildBriefArtifact(),
@@ -430,7 +430,9 @@ describe("WorkbenchRenderer", () => {
 				"First slice to build now: Marketing hero and CTA",
 			);
 			expect(markup).toContain("What I cover in this block");
-			expect(markup).toContain("Build screen by screen");
+			expect(markup).toContain(
+				"Choose template vs custom path before touching implementation details.",
+			);
 		} finally {
 			process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL =
 				originalRepoUrl;
@@ -535,6 +537,20 @@ describe("WorkbenchRenderer", () => {
 		expect(markup).toContain("Upload core flow photo");
 		expect(markup).toContain("Watch first");
 		expect(markup).toContain("Watch video");
+	});
+
+	it("renders lesson 0.1 as a video-first welcome rep without the status rail", () => {
+		const lesson = getLessonById("0.1");
+		expect(lesson?.coachVideoPlacement).toBe("workbench");
+
+		const markup = renderLessonWorkbench("0.1");
+
+		expect(markup).toContain("Watch first");
+		expect(markup).toContain("Watch video");
+		expect(markup).toContain("Define your weekend ship");
+		expect(markup).not.toContain("Do this now");
+		expect(markup).not.toContain("Timebox");
+		expect(markup).not.toContain("Finish with");
 	});
 
 	it("renders the lesson metadata badges as non-selectable chrome", () => {
@@ -749,7 +765,7 @@ Make the UI feel editorial and high-contrast.`,
 
 		expect(markup).toContain("Design block complete");
 		expect(markup).toContain("Build unlocked");
-		expect(markup).toContain("Next: BUILD 3.1 — Generate the Build Prompt");
+		expect(markup).toContain("Next: BUILD 3.1 — Lock Build Path and Scope");
 		expect(markup).toContain("What Build now has");
 		expect(markup).toContain("References");
 		expect(markup).toContain("Sketches");
@@ -767,8 +783,8 @@ Make the UI feel editorial and high-contrast.`,
 		expect(markup).not.toContain("No saved preview yet.");
 	});
 
-	it("renders lesson 3.6 as a Ship-unlock wrap-up with a lead video surface", () => {
-		const markup = renderLessonWorkbench("3.6", {
+	it("renders lesson 3.10 as a Ship-unlock wrap-up with a lead video surface", () => {
+		const markup = renderLessonWorkbench("3.10", {
 			pinnedArtifacts: [
 				getBuildBriefArtifact(),
 				getWorkingLocalEnvironmentArtifact(),
@@ -787,10 +803,12 @@ Make the UI feel editorial and high-contrast.`,
 		expect(markup).toContain("Local environment");
 		expect(markup).toContain("Core UX");
 		expect(markup).toContain("Stability pass");
-		expect(markup).toContain("Starting path: Use template");
-		expect(markup).toContain("First slice: Notes review screen");
-		expect(markup).toContain("Prompt control");
-		expect(markup).toContain("Blocker-first debugging");
+		expect(markup).toContain("Starting path");
+		expect(markup).toContain("Use template");
+		expect(markup).toContain("First slice");
+		expect(markup).toContain("Notes review screen");
+		expect(markup).toContain("Scope control");
+		expect(markup).toContain("Evidence-driven debugging");
 		expect(markup).not.toContain("ArtifactContext");
 		expect(markup).not.toContain("No saved preview yet.");
 	});

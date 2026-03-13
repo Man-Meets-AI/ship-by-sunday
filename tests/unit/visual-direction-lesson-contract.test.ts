@@ -40,7 +40,7 @@ describe("visual direction lesson contract", () => {
 			preset: "design",
 			heroEyebrow: "Design block complete",
 			heroTitle: "Build unlocked",
-			nextStepLabel: "BUILD 3.1 — Generate the Build Prompt",
+			nextStepLabel: "BUILD 3.1 — Lock Build Path and Scope",
 			completionCtaLabel: "Unlock Build",
 		});
 	});

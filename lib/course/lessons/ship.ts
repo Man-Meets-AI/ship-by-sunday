@@ -13,7 +13,7 @@ export const shipLessons = [
 	{
 		id: "4.1",
 		slug: "04-01-ship-the-core-not-the-fantasy",
-		order: 21,
+		order: 25,
 		block: "SHIP",
 		title: "Ship the Core, Not the Fantasy",
 		shortTitle: "Ship Core",
@@ -27,7 +27,7 @@ export const shipLessons = [
 			dependsOn: ["build_summary"],
 		},
 		nextLessonId: "4.2",
-		prevLessonId: "3.6",
+		prevLessonId: "3.10",
 		unlocks: { lessons: ["4.2"] },
 		coachMode: "docked",
 		objectiveTitle: "SHIP 4.1 — Ship the Core, Not the Fantasy",
@@ -90,7 +90,7 @@ export const shipLessons = [
 	{
 		id: "4.2",
 		slug: "04-02-deploy-the-app",
-		order: 22,
+		order: 26,
 		block: "SHIP",
 		title: "Deploy the App",
 		shortTitle: "Deploy",
@@ -164,7 +164,7 @@ export const shipLessons = [
 	{
 		id: "4.3",
 		slug: "04-03-record-a-simple-demo",
-		order: 23,
+		order: 27,
 		block: "SHIP",
 		title: "Record a Simple Demo",
 		shortTitle: "Demo",
@@ -234,7 +234,7 @@ export const shipLessons = [
 	{
 		id: "4.4",
 		slug: "04-04-send-it-to-real-humans",
-		order: 24,
+		order: 28,
 		block: "SHIP",
 		title: "Send It to Real Humans",
 		shortTitle: "Send",
@@ -327,7 +327,7 @@ export const shipLessons = [
 	{
 		id: "4.5",
 		slug: "04-05-capture-feedback-and-plan-version-two",
-		order: 25,
+		order: 29,
 		block: "SHIP",
 		title: "Capture Feedback and Plan Version Two",
 		shortTitle: "Feedback",
@@ -433,7 +433,7 @@ export const shipLessons = [
 	{
 		id: "4.6",
 		slug: "04-06-final-wrap",
-		order: 26,
+		order: 30,
 		block: "SHIP",
 		title: "Final Wrap",
 		shortTitle: "Final",

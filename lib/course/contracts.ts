@@ -191,6 +191,9 @@ export type LessonExampleContent = {
 	id: string;
 	title: string;
 	body: string;
+	imageSrc?: string;
+	imageAlt?: string;
+	imageCaption?: string;
 };
 
 export type LessonPromptTemplateId =

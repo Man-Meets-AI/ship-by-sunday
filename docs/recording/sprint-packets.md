@@ -79,12 +79,16 @@ This keeps founder energy focused and prevents Build from swallowing the whole s
 
 ### Build Block
 
-- `3.1` Generate the Build Prompt
-- `3.2` Get the Starter Running
-- `3.3` Build the First Screen
-- `3.4` Build the Core UX
-- `3.5` Debug the Core UX
-- `3.6` Lock the Local Build
+- `3.1` Lock Build Path and Scope
+- `3.2` Map the Repo and Starter
+- `3.3` Install MCPs and Skills
+- `3.4` Wire DB, Auth, and Payments
+- `3.5` Switch to Sandbox and Boot Local
+- `3.6` Read and Execute AI Plans
+- `3.7` Implement the First Slice
+- `3.8` Build the Core UX End-to-End
+- `3.9` Debug and Stabilize Without Spiraling
+- `3.10` Finalize Build Handoff and Unlock Ship
 
 ### Ship Block
 
@@ -272,16 +276,20 @@ Show the student how to move from brief to local working app without chaos.
 
 ### Lessons to record today
 
-- `3.1` Generate the Build Prompt
-- `3.2` Get the Starter Running
-- `3.3` Build the First Screen
-- `3.4` Build the Core UX
-- `3.5` Debug the Core UX
-- `3.6` Lock the Local Build
+- `3.1` Lock Build Path and Scope
+- `3.2` Map the Repo and Starter
+- `3.3` Install MCPs and Skills
+- `3.4` Wire DB, Auth, and Payments
+- `3.5` Switch to Sandbox and Boot Local
+- `3.6` Read and Execute AI Plans
+- `3.7` Implement the First Slice
+- `3.8` Build the Core UX End-to-End
+- `3.9` Debug and Stabilize Without Spiraling
+- `3.10` Finalize Build Handoff and Unlock Ship
 
 ### Estimated teaching runtime
 
-`~44-57 min`
+`~68-92 min`
 
 Plan for a `90-120 min` recording block.
 

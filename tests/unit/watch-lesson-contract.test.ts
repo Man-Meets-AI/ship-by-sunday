@@ -9,8 +9,8 @@ import {
 } from "@/lib/course";
 
 describe("watch lesson contract", () => {
-	it("keeps lessons 2.4, 2.5, 3.2, 3.4, and 3.5 in a focus-only watch layout", () => {
-		for (const lessonId of ["2.4", "2.5", "3.2", "3.4", "3.5"]) {
+	it("keeps watch lessons in a focus-only watch layout", () => {
+		for (const lessonId of ["2.4", "2.5", "3.2", "3.5", "3.8", "3.9"]) {
 			const lesson = getLessonById(lessonId);
 			expect(lesson).toBeTruthy();
 
@@ -55,14 +55,26 @@ describe("watch lesson contract", () => {
 		expect(lesson?.workbenchFields ?? []).toEqual([]);
 		expect(getObjectiveTasks(lesson!, {})).toEqual([]);
 		expect(getCompletionIssues(lesson!, {})).toEqual([]);
+		expect(nextLesson?.artifact.dependsOn).toContain("repo_orientation_ready");
+	});
+
+	it("treats lesson 3.5 as a watch-only lesson with no required in-product fields", () => {
+		const lesson = getLessonById("3.5");
+		const nextLesson = getLessonById("3.6");
+		expect(lesson).toBeTruthy();
+		expect(nextLesson).toBeTruthy();
+
+		expect(lesson?.workbenchFields ?? []).toEqual([]);
+		expect(getObjectiveTasks(lesson!, {})).toEqual([]);
+		expect(getCompletionIssues(lesson!, {})).toEqual([]);
 		expect(nextLesson?.artifact.dependsOn).toContain(
 			"working_local_environment",
 		);
 	});
 
-	it("treats lesson 3.4 as a watch-only lesson with no required in-product fields", () => {
-		const lesson = getLessonById("3.4");
-		const nextLesson = getLessonById("3.5");
+	it("treats lesson 3.8 as a watch-only lesson with no required in-product fields", () => {
+		const lesson = getLessonById("3.8");
+		const nextLesson = getLessonById("3.9");
 		expect(lesson).toBeTruthy();
 		expect(nextLesson).toBeTruthy();
 
@@ -74,9 +86,9 @@ describe("watch lesson contract", () => {
 		);
 	});
 
-	it("treats lesson 3.5 as a watch-only lesson with no required in-product fields", () => {
-		const lesson = getLessonById("3.5");
-		const nextLesson = getLessonById("3.6");
+	it("treats lesson 3.9 as a watch-only lesson with no required in-product fields", () => {
+		const lesson = getLessonById("3.9");
+		const nextLesson = getLessonById("3.10");
 		expect(lesson).toBeTruthy();
 		expect(nextLesson).toBeTruthy();
 

@@ -521,7 +521,7 @@ export const designLessons = [
 			heroTitle: "Build unlocked",
 			heroBody:
 				"You now have the reference direction, screen plan, flow, and visual guide Build needs. Open the next block and translate instead of guessing.",
-			nextStepLabel: "BUILD 3.1 — Generate the Build Prompt",
+			nextStepLabel: "BUILD 3.1 — Lock Build Path and Scope",
 			skills: [
 				"Flow sequencing",
 				"Screen planning",

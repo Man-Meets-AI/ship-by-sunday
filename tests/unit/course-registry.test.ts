@@ -293,7 +293,7 @@ describe("course registry", () => {
 		expect(nextLesson?.artifact.dependsOn).toContain("rough_screens");
 	});
 
-	it("configures lesson 3.2 as a watch-only lesson while keeping 3.3 gated on the local-environment artifact", () => {
+	it("configures lesson 3.2 as a watch-only orientation lesson while keeping 3.3 gated on repo orientation", () => {
 		const lesson = getLessonById("3.2");
 		const nextLesson = getLessonById("3.3");
 		expect(lesson).toBeTruthy();
@@ -304,35 +304,49 @@ describe("course registry", () => {
 		expect(getObjectiveTasks(lesson!, {})).toEqual([]);
 		expect(getCompletionIssues(lesson!, {})).toEqual([]);
 		expect(nextLesson?.artifact.dependsOn).toContain(
-			"working_local_environment",
+			"repo_orientation_ready",
 		);
 	});
 
-	it("configures lessons 3.4 and 3.5 as watch-only lessons while keeping the Build unlock chain stable", () => {
-		const coreUxLesson = getLessonById("3.4");
-		const debugLesson = getLessonById("3.5");
-		const wrapUpLesson = getLessonById("3.6");
-		expect(coreUxLesson).toBeTruthy();
-		expect(debugLesson).toBeTruthy();
-		expect(wrapUpLesson).toBeTruthy();
-
-		expect(coreUxLesson?.shell).toBe("watch");
-		expect(coreUxLesson?.workbenchFields ?? []).toEqual([]);
-		expect(getObjectiveTasks(coreUxLesson!, {})).toEqual([]);
-		expect(getCompletionIssues(coreUxLesson!, {})).toEqual([]);
-		expect(debugLesson?.artifact.dependsOn).toContain(
-			"core_flow_working_locally",
-		);
-
-		expect(debugLesson?.shell).toBe("watch");
-		expect(debugLesson?.workbenchFields ?? []).toEqual([]);
-		expect(getObjectiveTasks(debugLesson!, {})).toEqual([]);
-		expect(getCompletionIssues(debugLesson!, {})).toEqual([]);
-		expect(wrapUpLesson?.artifact.dependsOn).toContain("blocker_log");
+	it("keeps Build lesson navigation chained from 3.1 through 3.10", () => {
+		for (const [currentId, nextId] of [
+			["3.1", "3.2"],
+			["3.2", "3.3"],
+			["3.3", "3.4"],
+			["3.4", "3.5"],
+			["3.5", "3.6"],
+			["3.6", "3.7"],
+			["3.7", "3.8"],
+			["3.8", "3.9"],
+			["3.9", "3.10"],
+			["3.10", "4.1"],
+		] as const) {
+			expect(getLessonById(currentId)?.nextLessonId).toBe(nextId);
+			expect(getLessonById(nextId)?.prevLessonId).toBe(currentId);
+		}
 	});
 
-	it("configures lesson 3.6 as a focus-only Ship-unlock wrap-up with a composed build summary", () => {
-		const lesson = getLessonById("3.6");
+	it("keeps Build block lesson count at 10 in sequence order", () => {
+		const buildLessonIds = lessonRegistry
+			.filter((lesson) => lesson.block === "BUILD")
+			.map((lesson) => lesson.id);
+
+		expect(buildLessonIds).toEqual([
+			"3.1",
+			"3.2",
+			"3.3",
+			"3.4",
+			"3.5",
+			"3.6",
+			"3.7",
+			"3.8",
+			"3.9",
+			"3.10",
+		]);
+	});
+
+	it("configures lesson 3.10 as a focus-only Ship-unlock wrap-up with a composed build summary", () => {
+		const lesson = getLessonById("3.10");
 		const nextLesson = getLessonById("4.1");
 		expect(lesson).toBeTruthy();
 		expect(nextLesson).toBeTruthy();
@@ -341,6 +355,7 @@ describe("course registry", () => {
 			shell: "focus",
 			availableLayoutModes: ["focus"],
 			workbench: "brief_assembler",
+			fieldShapeVersion: 3,
 		});
 		expect(lesson?.workbenchFields ?? []).toEqual([]);
 		expect(lesson?.briefAssembler).toMatchObject({

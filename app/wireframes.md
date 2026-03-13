@@ -482,15 +482,15 @@ Coach states:
 
 # BUILD Block
 
-## 3.1 Build From the Brief
+## 3.1 Lock Build Path and Scope
 
 **Shell:** Split
-**Workbench:** brief_assembler
+**Workbench:** build_kickoff
 **Artifact:** Agent Build Brief
 
 ```text
 ┌──── CURRENT OBJECTIVE ────┬────────────── WORKBENCH 3.1 ──────────────┬──── COACH ────┐
-│ BUILD 3.1                 │ Build From the Brief                      │ WATCH          │
+│ BUILD 3.1                 │ Lock Build Path and Scope                 │ WATCH          │
 │                           │                                           │ [video]        │
 │ Checklist                 │ Agent Brief                               │                │
 │ [ ] Pull in CEO brief     │ Product: [ from CEO ]                     │ TRANSCRIPT     │
@@ -499,32 +499,32 @@ Coach states:
 │ [ ] Define first slice    │ Scope:   [ from CEO ]                     │ EXAMPLES       │
 │                           │ Design:  [ from Design ]                  │ build brief    │
 │ Output                    │                                           │                │
-│ Agent Build Brief         │ First screen to build [ input ]           │ RESOURCES      │
+│ Agent Build Brief         │ First slice to build [ input ]            │ RESOURCES      │
 │                           │ Definition of done [ multiline ]          │ starter prompt │
 │ Next Unlock               │                               [Back][Next]│                │
-│ Set Up the Environment    │                                           │                │
+│ Map the Repo and Starter  │                                           │                │
 └───────────────────────────┴───────────────────────────────────────────┴────────────────┘
 ```
 
-## 3.2 Get the Starter Running
+## 3.2 Map the Repo and Starter
 
 **Shell:** Watch
 **Workbench:** external_workspace
-**Artifact:** Working Local Environment
+**Artifact:** Repo Orientation Notes
 
 ```text
 ┌──────────────────────────────────── WATCH SHELL 3.2 ─────────────────────────────────────────┐
 │ SHIP BY SUNDAY      [CEO ✓] [DESIGN ✓] [BUILD ACTIVE] [SHIP LOCKED]                         │
 ├───────────────────────────────────────────────────────────────────────────────────────────────┤
-│ BUILD 3.2     Working Local Environment     8-10 min                                          │
+│ BUILD 3.2     Repo Orientation Notes      8-10 min                                            │
 │                                                                                               │
-│ Get the Starter Running                                                                        │
-│ Get one local success state first. You do not need to master the whole stack before you move.│
+│ Map the Repo and Starter                                                                       │
+│ Lock scripts, key files, and env locations before wiring providers or building screens.       │
 │                                                                                               │
 │ ┌───────────────────────────────────────────────────────────────────────────────────────────┐ │
 │ │                                                                                           │ │
 │ │                                Lesson video                                               │ │
-│ │                    Watch the local setup walkthrough first                                │ │
+│ │                  Watch the repo-orientation walkthrough first                             │ │
 │ │                                                                                           │ │
 │ └───────────────────────────────────────────────────────────────────────────────────────────┘ │
 │                                                                                               │
@@ -534,11 +534,11 @@ Coach states:
 └───────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## 3.3 Brief the Agent Correctly
+## 3.3 Install MCPs and Skills
 
 **Shell:** Focus
-**Workbench:** external_workspace
-**Artifact:** First Implemented Slice
+**Workbench:** guided_form
+**Artifact:** Tooling Stack Ready
 
 ```text
 ┌──────────────────────────────────── FOCUS WORKSPACE 3.3 ────────────────────────────────────┐
@@ -546,61 +546,61 @@ Coach states:
 ├───────────────────────────────────────────────────────────────────────────────────────────────┤
 │ [Collapsed Objective Rail]                                                                    │
 │                                                                                               │
-│ Agent / IDE Workspace                                                                          │
+│ Guided setup workspace                                                                         │
 │ ┌───────────────────────────────┬───────────────────────────────────────────────────────────┐ │
-│ │ Prompt brief drawer           │ Code / builder area                                       │ │
-│ │ - product brief               │                                                           │ │
-│ │ - design spec                 │                                                           │ │
-│ │ - first slice                 │                                                           │ │
+│ │ Tooling checklist             │ Setup notes                                               │ │
+│ │ - Figma MCP                   │                                                           │ │
+│ │ - Playwright MCP              │                                                           │ │
+│ │ - provider skills             │                                                           │ │
 │ └───────────────────────────────┴───────────────────────────────────────────────────────────┘ │
 │ Coach PiP [video]                                                                              │
-│ [Capture result] [Back] [Next]                                                                 │
+│ [Save tooling stack] [Back] [Next]                                                             │
 └───────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## 3.4 Build the Core Flow
+## 3.4 Wire DB, Auth, and Payments
 
-**Shell:** Watch
+**Shell:** Focus
 **Workbench:** external_workspace
-**Artifact:** Core Flow Working Locally
+**Artifact:** Integration Setup Complete
 
 ```text
-┌──────────────────────────────────── WATCH SHELL 3.4 ────────────────────────────────────────┐
+┌──────────────────────────────────── FOCUS WORKSPACE 3.4 ────────────────────────────────────┐
 │ SHIP BY SUNDAY      [CEO ✓] [DESIGN ✓] [BUILD ACTIVE] [SHIP LOCKED]                        │
 ├───────────────────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                               │
-│ BUILD 3.4 · Core Flow Working Locally · 12-15 min                                             │
-│ Build the Core UX                                                                              │
-│ Watch the walkthrough, then keep building the core path in your editor until it works.        │
+│ BUILD 3.4 · Integration Setup Complete · 12-15 min                                             │
+│ Wire DB, Auth, and Payments                                                                    │
+│ Set env keys, auth templates, Stripe objects, and webhook flow before implementation expands. │
 │                                                                                               │
 │ ┌───────────────────────────────────────────────────────────────────────────────────────────┐ │
 │ │                                Lesson video                                               │ │
-│ │                 Watch the core-UX walkthrough before building further                     │ │
+│ │                 Watch the integration walkthrough before continuing                       │ │
 │ │                                                                                           │ │
 │ └───────────────────────────────────────────────────────────────────────────────────────────┘ │
 │                                                                                               │
-│ [Back] [Complete lesson]                                                                       │
+│ [Save integration setup] [Back] [Next]                                                         │
 └───────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## 3.5 Debug Without Spiraling
+## 3.5 Switch to Sandbox and Boot Local
 
 **Shell:** Watch
-**Workbench:** tracker_log
-**Artifact:** Blocker Log + Working App
+**Workbench:** external_workspace
+**Artifact:** Working Local Environment
 
 ```text
 ┌──────────────────────────────────── WATCH SHELL 3.5 ────────────────────────────────────────┐
 │ SHIP BY SUNDAY      [CEO ✓] [DESIGN ✓] [BUILD ACTIVE] [SHIP LOCKED]                        │
 ├───────────────────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                               │
-│ BUILD 3.5 · Blocker Log + Working App · 8-10 min                                              │
-│ Debug the Core UX                                                                              │
-│ Watch the debugging pass, then stabilize the core path in your editor without spiraling.      │
+│ BUILD 3.5 · Working Local Environment · 8-10 min                                               │
+│ Switch to Sandbox and Boot Local                                                               │
+│ Switch to test keys, refresh webhook values, and verify a clean local baseline run.           │
 │                                                                                               │
 │ ┌───────────────────────────────────────────────────────────────────────────────────────────┐ │
 │ │                                Lesson video                                               │ │
-│ │                    Watch the blocker-first debugging walkthrough first                    │ │
+│ │                    Watch the sandbox/local-baseline walkthrough first                     │ │
 │ │                                                                                           │ │
 │ └───────────────────────────────────────────────────────────────────────────────────────────┘ │
 │                                                                                               │
@@ -608,14 +608,14 @@ Coach states:
 └───────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## 3.6 Build Wrap-Up
+## 3.10 Finalize Build Handoff and Unlock Ship
 
 **Shell:** Focus
 **Workbench:** brief_assembler
 **Artifact:** Local Build Handoff
 
 ```text
-┌──────────────────────────────────── FOCUS WORKSPACE 3.6 ────────────────────────────────────┐
+┌─────────────────────────────────── FOCUS WORKSPACE 3.10 ────────────────────────────────────┐
 │ SHIP BY SUNDAY      [CEO ✓] [DESIGN ✓] [BUILD ACTIVE] [SHIP LOCKED]                        │
 ├───────────────────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                               │
@@ -815,12 +815,16 @@ Coach states:
 
 ## BUILD
 
-3.1 Build From the Brief
-3.2 Get the Starter Running
-3.3 Brief the Agent Correctly
-3.4 Build the Core Flow
-3.5 Debug Without Spiraling
-3.6 Build Wrap-Up
+3.1 Lock Build Path and Scope
+3.2 Map the Repo and Starter
+3.3 Install MCPs and Skills
+3.4 Wire DB, Auth, and Payments
+3.5 Switch to Sandbox and Boot Local
+3.6 Read and Execute AI Plans
+3.7 Implement the First Slice
+3.8 Build the Core UX End-to-End
+3.9 Debug and Stabilize Without Spiraling
+3.10 Finalize Build Handoff and Unlock Ship
 
 ## SHIP
 

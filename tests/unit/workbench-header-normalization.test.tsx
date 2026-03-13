@@ -188,7 +188,7 @@ describe("Workbench header normalization", () => {
 
 	it("renders roadmap block cards and external workspace cards with the thin label style", () => {
 		const roadmapMarkup = renderLessonWorkbench("0.2");
-		const externalWorkspaceMarkup = renderLessonWorkbench("3.3");
+		const externalWorkspaceMarkup = renderLessonWorkbench("3.4");
 
 		expect(roadmapMarkup).toContain(
 			'<p class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">CEO</p>',

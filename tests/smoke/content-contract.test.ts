@@ -61,7 +61,7 @@ describe("lesson content contract", () => {
 	it("keeps stage-unlock wrap-up lessons declarative and pointed at a real next step", () => {
 		const ceoWrapUpLesson = getLessonById("1.7");
 		const designWrapUpLesson = getLessonById("2.7");
-		const buildWrapUpLesson = getLessonById("3.6");
+		const buildWrapUpLesson = getLessonById("3.10");
 
 		expect(ceoWrapUpLesson).toBeTruthy();
 		expect(designWrapUpLesson).toBeTruthy();
@@ -83,7 +83,7 @@ describe("lesson content contract", () => {
 			preset: "design",
 			heroEyebrow: "Design block complete",
 			heroTitle: "Build unlocked",
-			nextStepLabel: "BUILD 3.1 — Generate the Build Prompt",
+			nextStepLabel: "BUILD 3.1 — Lock Build Path and Scope",
 			completionCtaLabel: "Unlock Build",
 		});
 		expect(buildWrapUpLesson?.briefAssembler).toMatchObject({
@@ -111,35 +111,50 @@ describe("lesson content contract", () => {
 		).toBeGreaterThanOrEqual(4);
 	});
 
-	it("keeps the Build block rewired around a kickoff prompt, watch-first execution, and a Ship handoff", () => {
+	it("keeps the Build block rewired into the 10-lesson production flow", () => {
 		const kickoffLesson = getLessonById("3.1");
-		const starterLesson = getLessonById("3.2");
-		const firstScreenLesson = getLessonById("3.3");
-		const coreUxLesson = getLessonById("3.4");
-		const debugLesson = getLessonById("3.5");
-		const handoffLesson = getLessonById("3.6");
+		const orientationLesson = getLessonById("3.2");
+		const toolingLesson = getLessonById("3.3");
+		const integrationLesson = getLessonById("3.4");
+		const sandboxLesson = getLessonById("3.5");
+		const planLesson = getLessonById("3.6");
+		const firstSliceLesson = getLessonById("3.7");
+		const coreUxLesson = getLessonById("3.8");
+		const debugLesson = getLessonById("3.9");
+		const handoffLesson = getLessonById("3.10");
 
 		expect(kickoffLesson).toBeTruthy();
-		expect(starterLesson).toBeTruthy();
-		expect(firstScreenLesson).toBeTruthy();
+		expect(orientationLesson).toBeTruthy();
+		expect(toolingLesson).toBeTruthy();
+		expect(integrationLesson).toBeTruthy();
+		expect(sandboxLesson).toBeTruthy();
+		expect(planLesson).toBeTruthy();
+		expect(firstSliceLesson).toBeTruthy();
 		expect(coreUxLesson).toBeTruthy();
 		expect(debugLesson).toBeTruthy();
 		expect(handoffLesson).toBeTruthy();
 
 		expect(kickoffLesson).toMatchObject({
-			title: "Generate the Build Prompt",
+			title: "Lock Build Path and Scope",
 			workbench: "build_kickoff",
-			fieldShapeVersion: 2,
+			fieldShapeVersion: 3,
 		});
 		expect(kickoffLesson?.workbenchFields?.map((field) => field.id)).toEqual([
 			"build_path",
 			"first_slice",
 			"definition_of_done",
 		]);
-		expect(starterLesson?.title).toBe("Get the Starter Running");
-		expect(starterLesson?.shell).toBe("watch");
-		expect(starterLesson?.workbenchFields ?? []).toEqual([]);
-		expect(firstScreenLesson?.title).toBe("Build the First Screen");
+		expect(orientationLesson?.title).toBe("Map the Repo and Starter");
+		expect(orientationLesson?.shell).toBe("watch");
+		expect(toolingLesson?.title).toBe("Install MCPs and Skills");
+		expect(toolingLesson?.workbench).toBe("guided_form");
+		expect(integrationLesson?.title).toBe("Wire DB, Auth, and Payments");
+		expect(integrationLesson?.workbench).toBe("external_workspace");
+		expect(sandboxLesson?.title).toBe("Switch to Sandbox and Boot Local");
+		expect(sandboxLesson?.shell).toBe("watch");
+		expect(planLesson?.title).toBe("Read and Execute AI Plans");
+		expect(planLesson?.workbench).toBe("guided_form");
+		expect(firstSliceLesson?.title).toBe("Implement the First Slice");
 		expect(coreUxLesson?.shell).toBe("watch");
 		expect(coreUxLesson?.workbenchFields ?? []).toEqual([]);
 		expect(debugLesson?.shell).toBe("watch");

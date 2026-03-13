@@ -238,12 +238,16 @@ Target runtime: `90-120 min`
 
 ### Lesson checklist
 
-- [ ] `03-01-generate-the-build-prompt`
-- [ ] `03-02-get-the-starter-running`
-- [ ] `03-03-build-the-first-screen`
-- [ ] `03-04-build-the-core-ux`
-- [ ] `03-05-debug-the-core-ux`
-- [ ] `03-06-lock-the-local-build`
+- [ ] `03-01-lock-build-path-and-scope`
+- [ ] `03-02-map-the-repo-and-starter`
+- [ ] `03-03-install-mcps-and-skills`
+- [ ] `03-04-wire-db-auth-and-payments`
+- [ ] `03-05-switch-to-sandbox-and-boot-local`
+- [ ] `03-06-read-and-execute-ai-plans`
+- [ ] `03-07-implement-the-first-slice`
+- [ ] `03-08-build-the-core-ux-end-to-end`
+- [ ] `03-09-debug-and-stabilize-without-spiraling`
+- [ ] `03-10-finalize-build-handoff-and-unlock-ship`
 
 ### Must show on screen
 

@@ -138,6 +138,27 @@ function renderWatchLesson(
 	);
 }
 
+function renderBuildLessonExamples() {
+	const lesson = getLessonById("3.1");
+	expect(lesson).toBeTruthy();
+
+	return renderToStaticMarkup(
+		<LessonShellSplit
+			lesson={lesson!}
+			objectiveTasks={[]}
+			onObjectiveTaskToggle={() => {}}
+			coachVisible
+			activeCoachPanel="examples"
+			onCoachPanelChange={() => {}}
+			pinnedArtifacts={[]}
+			coachContent={lesson!.content.coach}
+			footer={<div>Footer</div>}
+		>
+			<div>Workbench</div>
+		</LessonShellSplit>,
+	);
+}
+
 describe("LessonShellSplit resources", () => {
 	it("keeps lesson 1.4 coach resources focused on the worksheet link", () => {
 		const markup = renderResearchLessonResources([
@@ -193,6 +214,15 @@ describe("LessonShellSplit resources", () => {
 		expect(markup).toContain(">Transcript<");
 		expect(markup).toContain(">Examples<");
 		expect(markup).toContain(">Resources<");
+	});
+
+	it("renders optional coach example images when provided by lesson content", () => {
+		const markup = renderBuildLessonExamples();
+
+		expect(markup).toContain("/course/build-guide-images/image1.png");
+		expect(markup).toContain(
+			"Use one controlled prompt, not a wide open request.",
+		);
 	});
 });
 

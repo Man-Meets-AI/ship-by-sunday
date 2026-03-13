@@ -75,12 +75,16 @@ Purpose: translate the brief into a working local v1 without chaos.
 
 Lessons:
 
-1. Generate the Build Prompt
-2. Get the Starter Running
-3. Build the First Screen
-4. Build the Core UX
-5. Debug the Core UX
-6. Lock the Local Build
+1. Lock Build Path and Scope
+2. Map the Repo and Starter
+3. Install MCPs and Skills
+4. Wire DB, Auth, and Payments
+5. Switch to Sandbox and Boot Local
+6. Read and Execute AI Plans
+7. Implement the First Slice
+8. Build the Core UX End-to-End
+9. Debug and Stabilize Without Spiraling
+10. Finalize Build Handoff and Unlock Ship
 
 Core artifact:
 

@@ -44,7 +44,7 @@ describe("lesson layout modes", () => {
 	});
 
 	it("treats watch lessons as focus-only layouts with no toggle", () => {
-		for (const lessonId of ["2.4", "2.5", "3.4", "3.5"]) {
+		for (const lessonId of ["2.4", "2.5", "3.2", "3.5", "3.8", "3.9"]) {
 			const lesson = getLessonById(lessonId);
 			expect(lesson).toBeTruthy();
 
@@ -55,8 +55,8 @@ describe("lesson layout modes", () => {
 		}
 	});
 
-	it("locks lesson 3.6 to focus mode and coerces stale split state", () => {
-		const lesson = getLessonById("3.6");
+	it("locks lesson 3.10 to focus mode and coerces stale split state", () => {
+		const lesson = getLessonById("3.10");
 		expect(lesson).toBeTruthy();
 
 		expect(getAvailableLayoutModesForLesson(lesson!)).toEqual(["focus"]);

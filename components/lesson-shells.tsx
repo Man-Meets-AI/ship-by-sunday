@@ -393,6 +393,21 @@ function CoachPanel({
 								<p className="mt-1 whitespace-pre-wrap text-xs font-medium leading-snug text-product-text">
 									{example.body}
 								</p>
+								{example.imageSrc ? (
+									<div className="mt-2 space-y-1">
+										<img
+											src={example.imageSrc}
+											alt={example.imageAlt ?? example.title}
+											className="w-full rounded-none border border-product-border/70 bg-product-bg object-contain"
+											loading="lazy"
+										/>
+										{example.imageCaption ? (
+											<p className="text-[11px] font-medium leading-snug text-product-muted">
+												{example.imageCaption}
+											</p>
+										) : null}
+									</div>
+								) : null}
 							</div>
 						))}
 					</div>

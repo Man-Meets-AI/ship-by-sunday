@@ -9,6 +9,9 @@ describe("watch lesson shell contract", () => {
 	it("routes watch lessons through a dedicated shell and compact footer path", () => {
 		const source = readSource("components/lesson-page.tsx");
 		const shellSource = readSource("components/lesson-shells.tsx");
+		const videoSurfaceSource = readSource(
+			"components/lesson-video-surface.tsx",
+		);
 
 		expect(source).toContain('const isWatchLesson = lesson.shell === "watch";');
 		expect(source).toMatch(
@@ -20,7 +23,8 @@ describe("watch lesson shell contract", () => {
 			"const footer = isWatchLesson ? compactFooter : standardFooter;",
 		);
 		expect(source).toContain("<LessonShellWatch");
-		expect(shellSource).toContain("Watch video");
-		expect(shellSource).toContain("Video placeholder");
+		expect(shellSource).toContain('variant="watch-shell"');
+		expect(videoSurfaceSource).toContain("Watch video");
+		expect(videoSurfaceSource).toContain("Video placeholder");
 	});
 });

@@ -1,0 +1,545 @@
+Build Block
+
+Build Block 
+
+The build loop.
+
+GitHub.
+
+Setting up a Landing Page
+
+Using next.js . React. Typescript.
+
+We are going to use an IDE which is like a browser for your files and a
+terminal. Every terminal for every MacBook comes with a terminal.
+
+I'm going to give you guys the brief overview of how all this stuff
+works, but there's really just a few commands that you actually need to
+know when you're building a simple app.
+
+Lay of the Land
+
+Web projects use a bunch of Lego blocks that are called packages, and
+that's what this folder is. They're called node_modules, but you could
+just think of them as Lego blocks. There's going to be a manager that
+manages those Lego blocks. Used to be that people would fight over this,
+but it's more important just to use whatever AI is accustomed to using.
+
+Important Files
+
+We have a couple important files that the AI will likely end up asking
+you about, and it's just good to know, so I'll give you a quick
+overview. The environment files are essentially a list of your passwords
+for different accounts. When you're building your app on your computer,
+that's called the local environment, and you'll have that list of
+passwords there. When you actually get it off your computer and onto the
+internet, your list of passwords will be on the company that's
+responsible for hosting your site, which is Vercel.
+
+Knowing these few things will make it a lot easier when you're prompting
+your way around the codebase. You can think of it as just a bunch of
+different files and different folders. Every app does a few things:
+
+- It needs to be able to authenticate, which means it knows that it's
+  who you are versus the next person.
+- It needs to be able to authorize, which means it knows, "Okay, we know
+  who you are, but are you able to have access to this part of the app?"
+
+Apps' databases are just giant spreadsheets that use that authentication
+part that we talked about to let you see information or not see
+information. You have ways of getting new information on the page;
+that's data fetching. You have something that's called state management,
+which is, if something changes on another computer (let's say your
+friend's looking at the same screen), does yours need to change as well?
+Those are all small details, but I think it's good to at least know the
+terms.
+
+And it uses something called components, which, if you're familiar with
+Figma, are just reusable pieces of code. If you went on amazon.com,
+you'd notice that they have a nav bar; that nav bar looks the same in
+most places. Maybe there's one or two changes depending on if you're
+shopping for groceries or not, but they're not rewriting that code over
+and over and over again. There's one component and then maybe a few
+changes within it.
+
+As far as styles go, we're going to be using something that's called
+Tailwind. Before Tailwind, you'd have to write a bunch of code in a
+language called CSS, which was a cascading style sheet. You don't really
+need to know that, but that's just something that you would point out to
+the coding agent if you were trying to make style changes.
+
+Templates:
+
+This product you bought is free-to-access.
+
+If you’re not including payments, then you can follow this one:
+https://github.com/get-convex/template-nextjs-clerk.git
+
+And just ignore the parts about Stripe in the lessons.
+
+Marketing Site
+
+Now we're going to set up the marketing site, and this is the thing that
+every user will see, so it's also known as the home page or the index
+route. This is what anyone in the world can go and look at without
+buying your thing, and its role is to communicate what product or
+service you're offering. In our case, an app is typically going to solve
+a problem, typically has a headline, and it tries to speak to the
+particular customer profile of the person.
+
+This goes into all the work that we did up front here before we started
+coding and before we started designing, which is just: who is this for,
+what problem does it solve? That's the language that we use on the
+homepage so that when someone sees it and they have that problem and
+it's a big enough problem, they're going to want to buy.
+
+So you've already found your inspiration. You've already gone and come
+up with examples, and now it's time to use your coding agent.
+
+I assume you have Codex or Claude code already set up. If you don't, you
+can go to one of their links and get it set up. There's plenty of
+information online about that. We're going to set up just one tool
+before we get going here.
+
+1.  MCPS were going to get:
+
+1.  Figma:
+    https://help.figma.com/hc/en-us/articles/32132100833559-Guide-to-the-Figma-MCP-server
+2.  Playwright
+
+What this is going to let us do is take our pixel-perfect design and
+have it built for us. It's going to also use playwright, which is used
+primarily for testing, without having actually click through screens.
+
+Deploying & GitHub
+
+Setting up your core UX for users.
+
+So for this, I’ll list out all the steps involved with me actually
+making the product.
+
+We need to go beyond static websites to building something dynamic. This
+requires adding a few pieces that were typically tricky pre-ai.
+
+Don’t get worried - if you have any questions go and ask ai using the
+explainer prompt.
+
+Setting up Skills and MCPS
+
+2.  I start by getting all the skills needed. Skills are essentially a
+    list of instructions used for the AI model to know exactly what to
+    do. Theyre put out by the companies who produce that software. So
+    theyre typifcally very helpful.
+3.  Skills were going to get:
+
+1.  Convex Skill
+
+1.  This will allow us to set up our database.
+    https://github.com/waynesutton/convexskills
+
+2.  Clerk Skill https://github.com/clerk/skills
+
+1.  This allows us to have our authentication setup properly.
+    Authentication allows users to sign up to our app.
+
+3.  Stripe Skill https://docs.stripe.com/building-with-llms  
+    https://github.com/stripe/ai/blob/main/skills/stripe-best-practices/SKILL.md
+     
+
+1.  This allows us to connect to stripe so we can process payments.
+2.  If you don’t have a stripe account, you need to get that set up now
+
+Setting up DB, Authentication and Payments
+
+1.  Next we’re going to write our prompt. $skill is how we summon a
+    skill inside of the prompt, or in claude code it’s done by writing a
+    slash command.
+2.  You can call multiple skills in the same prompt. So we’re going to
+    do just that.
+
+[]
+
+3.  Now we need to get a few keys called environment variables. These
+    are the passwords involved.
+
+1.  Get Stripe Key and Publishable Key
+
+4.  Now we need to ask Codex to create the product and the price.
+5.  Now we need to set up a webhook
+6.  Now we need to authenticate our Shell.
+7.  We need to sign up for Convex & Clerk
+8.  Inside of Clerk we’ll get a few env vars. These are basically
+    passwords.
+9.  The deployment means is this the live app or the test app. We’re
+    building the test one. We’ll get more into keys in a few minutes.
+10. We have one last step in Clerk that will allow us to connect it to
+    Convex, our database. This lets Clerk and Convex be on the same page
+    as to who paid for our product!
+
+[]
+
+[]
+
+[]
+
+What to do in Clerk
+
+  1. Open Clerk Dashboard
+
+  2. Go to JWT Templates
+
+  3. Create a new template from the Convex preset
+
+  4. Do not rename it. It must be exactly convex
+
+  5. Make sure the issuer matches your current Clerk frontend API domain
+
+Docs:
+
+  - https://docs.convex.dev/auth/clerk
+
+  - https://docs.convex.dev/auth/debug
+
+  - https://clerk.com/docs/integration/convex
+
+[]
+
+Testing & Sandbox Keys
+
+We successfully created our product - but we did so in a live
+environment. If we were to go back and test our app, we’d find that it’s
+going to try to charge us real money.
+We dont want to do that.
+
+So instead, we’re going to ask our code agent to stop the project.
+
+Click on your account name and then create a sandbox. This is going to
+ask if you want to copy it, and that's what we're going to do. This then
+takes the product and then copies it down. We'll change out those keys,
+and that way you can test without actually getting charged.
+
+If we had not done this, then it would have actually charged us.
+
+Ask your coding agent to create the product again and get the webhook
+secret.
+
+[]
+
+ [] 
+
+ 
+
+Implementing the UX 
+
+We've finished all of the annoying bits of this, and now we can actually
+implement our screen.
+
+Now, luckily, this is kind of the purpose of this system. We've picked
+the right tech, and we've thought about all the design beforehand, so
+now we can just cruise through things.
+
+So, what I'll do is open up my design file. I will tell the AI the
+following: We're going to be going screen by screen to implement this.
+If you find anything along the way where we don't have data model
+support, we'll tag the data model and add something so that we have it
+in convex. Otherwise, complete the screen. Come back to me after you've
+looked at it with Playwright.
+
+So now if you do run into any bugs, all you do is you copy and paste.
+
+Don't forget to use skills, as those are going to be what gets you out
+of trouble with specific providers.
+
+[]
+
+Implementing Core UX 
+
+We didn’t get our designs perfect. Thats ok. Now we can get things into
+code. THe important part is that we have the user flow, and the core ux
+outlined.
+
+It would actually NOT make sense to go full pixel perfect.
+
+You learn more as you get something built.
+
+[] []
+
+I spent a bunch of time chatting with ChatGPT to hammer out what I
+thought would make sense such that we wouldnt have to repeat ourselves
+over and over and over again.
+
+In our case. I was writing a curriculum. THen I wrote a guide for
+recording all of this. Then afterwards I realized that I needed to find
+a faster system to get this into screens. ]
+
+AI is also GREAT at workflows. So I asked it to help me come up with a
+workflow. The output of that chat is what I used above.
+
+I use the $figma skill, pass in the concepts, then pass in the design
+crit.
+
+While that goes off and does its thing I’ll actually go do something
+else.
+
+The planning, the thinking, the design. That’s the part that matters.
+
+[]
+
+Next it will ask me a series of questions.
+
+Next I get a BIG old plan.
+
+PLAN Mission-Control Lesson Layout System
+
+Summary
+
+- Replace the current ProductShell plus monolithic LessonPage with a
+  product-only workspace system that matches the Figma dark shell, keeps
+  the existing palette as a light-mode option, and covers /mission plus
+  all lesson routes in one implementation wave.
+- Keep layouts registry-driven from app/lessonRegistry.ts: mission stays
+  fixed, each lesson keeps its current shell as the default view, and
+  every non-mission lesson supports a client- side split/focus override
+  plus collapsible objective/coach chrome.
+- Keep marketing pages out of scope. This refactor applies to protected
+  product routes only.
+
+Implementation Changes
+
+- Introduce a product-scoped theme provider for protected routes only.
+  Default to dark, persist the choice in localStorage as sbs:theme, and
+  expose the toggle in the top HUD. Do not add next-themes; use a
+  lightweight data-theme attribute and semantic CSS variables.
+- Convert hardcoded protected-route colors into semantic tokens for
+  background, surface, border, HUD, rail, text, muted text, and accent
+  states. Light mode maps to the current palette. Dark mode maps to the
+  Figma shell, including the dark chrome, translucent panels, blue
+  active accents, and wider workbench proportions.
+- Do not block shell work on exact Figma font sourcing. Use the current
+  loaded brand fonts plus a mono chrome style for HUD, coach, and
+  workbench labels until exact font assets are available.
+- Replace ProductShell with a shared ProductWorkspaceShell that owns the
+  top HUD, route nav, block progression, progress count, theme toggle,
+  split/focus controls, coach toggle, and bottom skill rail. /mission,
+  /lesson/[lessonId], /artifacts, and / settings all consume this shell;
+  only /mission and lesson bodies get redesigned in this pass.
+- Redesign /mission as the Figma-style mission control home: 4 block
+  cards, registry-driven block state, direct entry to the next available
+  lesson, and the bottom skill rail. Use registry truth for progress, so
+  the HUD denominator becomes 26 lessons plus the separate mission
+  screen.
+- Promote the Figma dark-shell background and block art into checked-in
+  assets under public/ so the product UI does not depend on expiring
+  Figma URLs. and resources payloads. Missing content renders
+  intentional
+- Keep shell, coachMode, and panelDefaults as the default layout seed.
+  Persist per-lesson UI chrome overrides in localStorage as
+  sbs:lesson-ui:. Do not store layout preferences in Convex.
+- Replace the monolithic lesson renderer with LessonShellSplit,
+  LessonShellFocus, and WorkbenchRenderer. The shell owns layout only.
+  The workbench owns lesson interaction. Pinned artifacts move out of
+  the shell sidebar and become inline context cards or readonly fields
+  inside the workbench.
+- Implement one renderer per workbench type instead of one giant field
+  switch: guided_form, score_table, collector_board, capture_upload,
+  scope_split, brief_assembler, console_checklist, tracker_log, and
+  external_workspace.
+- Back those workbench renderers with reusable field controls for text,
+  textarea, select, toggle, table, board, readonly, and upload
+  placeholder states.
+- Add a stable UploadFieldValue object shape for image_upload and
+  video_upload fields so layout work does not need to change when
+  storage lands. This phase only needs the renderer contract and local
+  preview or empty states; durable student upload storage remains a
+  separate implementation dependency.
+- Keep Convex lesson progress, autosave, completion, and artifact
+  preview flows intact. getLessonState only needs to return the richer
+  registry payload. No schema migration is required because fieldValues
+  already accepts objects.
+
+Public Interfaces / Types
+
+- LessonConfig gains coachContent with typed video, transcript,
+  examples, and resources.
+- PersistedFieldValue expands to include an UploadFieldValue object for
+  image and video workbench fields.
+- LessonPage stops owning layout details directly and instead passes
+  lesson data, field values, save/complete actions, and pinned artifacts
+  into LessonShell* plus WorkbenchRenderer.
+
+Test Plan
+
+- Run pnpm run typecheck and pnpm run build.
+- Manually QA /mission, /lesson/1.1, /lesson/1.5, /lesson/2.4, /
+  lesson/3.5, and /lesson/4.3 to cover mission, split, focus, upload,
+  external workspace, and tracker layouts.
+- Verify dark is the default, the theme toggle persists across refresh
+  and navigation, and light mode reuses the current palette without
+  broken contrast.
+- Verify split/focus/coach state persists per lesson, defaults come from
+  the registry, and switching views never drops autosaved field values.
+- Verify empty coach content, missing uploads, and unhosted media show
+  intentional placeholder states instead of blank panels or runtime
+  errors.
+- Verify HUD progression, bottom skill rail, next/back navigation, and
+  progress counts all reflect registry truth on mission and lesson
+  routes.
+- Verify tablet and mobile collapse behavior: HUD stays usable,
+  objective and coach panels collapse cleanly, and focus mode keeps the
+  workbench primary.
+
+Assumptions
+
+- This first implementation wave includes the mission/home redesign plus
+  lesson shells; marketing pages stay unchanged.
+- Video hosting, transcript files, examples, and download URLs are not
+  blockers for the shell refactor; the UI ships with typed content slots
+  and graceful empty states.
+- Typography parity is secondary to color, layout, and interaction
+  parity for this pass.
+
+—
+
+What do I do with the plan
+
+I recommend skimming through it. You’ll start to pick up on what some of
+it means. You can always ask the code agent to help you fix things
+after.
+
+Once that got done, I got pretty dang close to the designs, but I needed
+to go and click around and find some of the rougher edges.
+
+[]
+
+The fastest way to do that was to find edge cases where it's like, "Oh,
+maybe this user shouldn't be able to go do this thing just yet." In my
+case, it's a locked lesson, so I clicked on that and I got an error. I
+can just grab that text and come up with a plan. If I can't go and view
+that content, then I need a plan.
+
+[]
+
+PRO TIP: THe more you know, the more leverage you actually get. Knowing
+the codebase is super helpful.
+
+Asking to refactor is part of vibe coding  agentic engineering.
+
+Cleaning Up Your CodeBase
+
+› how might we clean up the project so its easier for devs to work on?
+
+A prompt like the one above goes a LONG way. The purpose of it is so
+that your system can get cleaned up, and documented. This lets future
+coding agents add to your project and makes your life a lot easier!
+
+It’ll suggest up to ten methods for cleaning up your project. You want
+to ask it to come up with a phased approach that doesn’t interfere with
+our launch .
+
+This will generate a new plan that you can then let the coding agent
+run.
+
+Cleaning is different from Refactoring. 
+
+Use the following prompt
+
+[]
+
+Then spin out new ones
+
+[]
+
+Debugging 
+
+It’s inevitable that the AI can and will make mistakes. It’s just how
+you handle them that makes the difference.
+
+You want your AI agent to be equipped with everything it needs to solve
+the problem.
+
+Logs. These are error messages. The $convex skill allows your AI agent
+to look into what’s going on when you have an error.
+
+The Playwright MCP is used for finding things that appear when you’d
+usually go to manually click around.
+
+Tip: Use image uploads, and logs when possible.
+
+[] []
+
+The Feature Loop
+
+The rest of the implementation sounds silly, but you're essentially:
+
+1.  coming up with a plan
+2.  asking it to implement it
+3.  waiting for it to implement
+4.  then testing it in the browser
+
+When you run into an issue, paste in screenshots or errors where you
+can. Ask it to fix it. That's it.
+
+[]
+
+Running Multiple Agents in Parallel
+
+Avoid worktrees. Theyre complicated. It’s more pain than its worth.
+
+INstead you can imagine that these agents are all working in tandem. So
+long as they dont touch the same files, things stay clean!
+
+[]
+
+Documentation Matters
+
+ 
+
+Improving Code Quality
+
+Do this one time.
+
+While you may not care to read all the code, the nature of all the code
+gen means that we should be cleaning things up as we go.
+
+We have 1 skill that could be really helpful here:
+$vercel-best-practices.
+
+We can ask it to find 3 areas tht need to be refactored.
+
+Call Convex to make a pass of improvements
+
+Common Bugs Issues:
+
+Whats NPM / PNPM / BUN? 
+
+The PM stands for package manager. Think of a package manager as an app
+store for code people have already written. Instead of using a website
+to look for the apps, you just tell the package manager to install the
+package you want. Package = code already written. Theres packages for
+how to handle timezones, how to show the weather on your page, you name
+it!
+
+NPM is the old one. PNPM is a newer one. BUN is the newest one. I notice
+that most Coding Agents prefer using PNPM, so dont bother asking it to
+use something it prefers using.
+
+The page is stale!!!
+
+This means that your AI Agent  may have built the app for use on the
+web, in an effort to find errors. This is not good when you dont want to
+have to restart your app.
+
+So you just ask the AI agent to “please stop our services” then “start
+our services”
+
+[]
+
+When I Make a Payment, I’m not shown screens for paid users
+
+[]
+
+[]
+
+Login Is Still Not Working
+
+[]
