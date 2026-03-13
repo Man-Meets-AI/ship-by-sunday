@@ -144,4 +144,23 @@ describe("ProductShell", () => {
 		expect(markup).not.toContain('aria-label="Open BUILD"');
 		expect(markup).toContain('aria-disabled="true"');
 	});
+
+	it("lets app surfaces opt into page scrolling without the fixed viewport shell", () => {
+		const markup = renderToStaticMarkup(
+			<ProductShell
+				initialTheme="light"
+				showSkillRail={false}
+				viewportMode="app"
+				appScrollMode="page"
+			>
+				<div>Body</div>
+			</ProductShell>,
+		);
+
+		expect(markup).toContain(
+			'class="flex min-h-screen flex-col bg-product-bg text-product-text"',
+		);
+		expect(markup).not.toContain("xl:h-dvh");
+		expect(markup).not.toContain("xl:overflow-hidden");
+	});
 });

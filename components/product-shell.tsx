@@ -64,6 +64,7 @@ type ProductShellProps = {
 	coachVisible?: boolean;
 	onCoachToggle?: () => void;
 	viewportMode?: "document" | "app";
+	appScrollMode?: "viewport" | "page";
 	completionCue?: SkillRailCompletionCue | null;
 };
 
@@ -97,6 +98,7 @@ function ShellInner({
 	coachVisible,
 	onCoachToggle,
 	viewportMode = "document",
+	appScrollMode = "viewport",
 	completionCue,
 }: ProductShellProps) {
 	const pathname = usePathname();
@@ -160,7 +162,9 @@ function ShellInner({
 
 	const shellClassName =
 		viewportMode === "app"
-			? "flex min-h-screen flex-col bg-product-bg text-product-text xl:h-dvh xl:overflow-hidden"
+			? appScrollMode === "page"
+				? "flex min-h-screen flex-col bg-product-bg text-product-text"
+				: "flex min-h-screen flex-col bg-product-bg text-product-text xl:h-dvh xl:overflow-hidden"
 			: "min-h-screen bg-product-bg text-product-text";
 
 	const shellInnerClassName =

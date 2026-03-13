@@ -82,6 +82,7 @@ export const startHereLessons = [
 		prevLessonId: "0.0",
 		unlocks: { lessons: ["0.2"] },
 		coachMode: "docked",
+		coachVideoPlacement: "workbench",
 		objectiveTitle: "Start Here 0.1 — Welcome to Ship by Sunday",
 		checklist: [
 			"See the 4-block path",

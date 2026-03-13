@@ -1,3 +1,4 @@
+import { LessonVideoSurface } from "@/components/lesson-video-surface";
 import type { LessonHandoff } from "@/lib/course/manifest";
 import { getCandidateProblemOptions, isFilled } from "@/lib/course/registry";
 
@@ -6,6 +7,7 @@ import { FieldList } from "../fields/field-list";
 import { ArtifactContext } from "../shared/artifact-context";
 import { SectionCard } from "../shared/section-card";
 import { StatusRail } from "../shared/status-rail";
+import { WorkbenchCard } from "../shared/workbench-card";
 import { WorkbenchContainer } from "../shared/workbench-container";
 import { WorkbenchHeaderLabel } from "../shared/workbench-header-label";
 import { WorkbenchHeader } from "../shared/workbench-header";
@@ -177,15 +179,25 @@ export function GuidedFormWorkbench({
 					artifact.artifactKey !== lesson.handoff?.sourceArtifactKey,
 			)
 		: pinnedArtifacts;
+	const showInlineVideo = lesson.coachVideoPlacement === "workbench";
 
 	return (
 		<WorkbenchContainer>
 			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
-			<StatusRail
-				lessonContent={lessonContent}
-				completedTaskCount={completedTaskCount}
-				totalTaskCount={Math.max(objectiveTasks.length, 1)}
-			/>
+			{showInlineVideo ? (
+				<WorkbenchCard label="Watch first">
+					<LessonVideoSurface
+						coachContent={lessonContent.coach}
+						variant="watch-shell"
+					/>
+				</WorkbenchCard>
+			) : (
+				<StatusRail
+					lessonContent={lessonContent}
+					completedTaskCount={completedTaskCount}
+					totalTaskCount={Math.max(objectiveTasks.length, 1)}
+				/>
+			)}
 			{lesson.handoff?.mode === "select_candidate_problem" ? (
 				<CandidateProblemHandoff
 					handoff={lesson.handoff}
