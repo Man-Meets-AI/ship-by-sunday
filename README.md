@@ -23,6 +23,8 @@ pnpm install
 cp .env.local.example .env.local
 ```
 
+Set `APP_BASE_URL` to the canonical host you want Stripe to use for checkout success and cancel redirects. For local development, keep it on `http://localhost:3000`.
+
 3. Start the full local stack:
 
 ```bash
@@ -36,6 +38,13 @@ pnpm run dev:web
 pnpm run dev:convex
 ```
 
+## Codex Integration
+
+The optional in-app Codex account and generation routes require a runtime that can spawn the `codex` binary and persist per-user app-server state.
+
+- Local development: enabled by default
+- Vercel: disabled by default unless you explicitly set `CODEX_APP_SERVER_ENABLED=true` on a compatible runtime
+
 ## Common Commands
 
 ```bash
@@ -46,6 +55,8 @@ pnpm run test:smoke
 pnpm run build
 pnpm run check
 ```
+
+The full testing runbook lives in [docs/dev/testing.md](docs/dev/testing.md).
 
 For local Stripe checkout testing, use:
 
@@ -63,7 +74,7 @@ The purchase-to-access behavior contract lives in [docs/delivery-onboarding/stac
 - Landing-page copy, offer framing, and media: `app/page.tsx`, `app/faq-accordion.tsx`, and `public/`
 - Student workspace UI and shell behavior: `components/` and `app/mission/page.tsx`
 - Theme tokens and visual language: `app/globals.css`
-- Purchase, entitlement, and access flow: `app/api/stripe/*`, `app/checkout/*`, and `convex/course.ts`
+- Purchase, entitlement, and access flow: `app/api/stripe/*`, `app/checkout/*`, and `convex/course/`
 - Optional starter-template and Codex-assisted build helpers: `.env.local.example`, `scripts/`, and `app/api/codex/*`
 
 More detail: [docs/dev/customization.md](docs/dev/customization.md)

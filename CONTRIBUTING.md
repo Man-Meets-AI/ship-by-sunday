@@ -15,7 +15,7 @@ If you are changing checkout or access behavior, read [docs/delivery-onboarding/
 - Marketing copy and landing-page sections: `app/page.tsx` and `public/`
 - Shared student UI and lesson shells: `components/`
 - Curriculum, lesson sequence, and lesson copy: `lib/course/manifest.ts` and `lib/course/lessons/*.ts`
-- Purchase, success, cancel, and webhook behavior: `app/api/stripe/*`, `app/checkout/*`, and `convex/course.ts`
+- Purchase, success, cancel, and webhook behavior: `app/api/stripe/*`, `app/checkout/*`, and `convex/course/`
 - Theme, spacing, and global UI tokens: `app/globals.css`
 - Runtime architecture and deeper developer notes: `docs/dev/`
 
@@ -26,6 +26,12 @@ The short customization map lives in [docs/dev/customization.md](docs/dev/custom
 - Docs-only changes: verify links and paths you touched.
 - UI or lesson-content changes: run `pnpm run typecheck` and the focused tests for the affected area.
 - Shared shell, auth, checkout, entitlement, or route-protection changes: run `pnpm run check`.
+
+For the local QA accounts, browser-testing flow, and Stripe sandbox handoff path, use [docs/dev/testing.md](docs/dev/testing.md).
+
+## Community Standards
+
+By participating, follow the expectations in [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## Public Vs Internal Docs
 

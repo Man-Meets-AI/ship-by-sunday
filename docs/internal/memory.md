@@ -1,5 +1,17 @@
 # Memory
 
+## Lesson workbench readability guardrail
+
+- Date: 2026-03-13
+- Problem: lesson screens had drifted into repeated `8px` to `12px` typography, same-weight bordered slabs, and too many one-off spacing choices, which made guided and support surfaces feel more like dense worksheets than an intentional product.
+- Durable decision:
+  - keep the shared readability contract in `components/lesson-workbench/shared/workbench-readability.ts`
+  - prove major readability changes on lesson `1.2 Pick One User` first, then propagate through shared shells and cards
+  - when a lesson mode needs different density, extend the shared readability primitives instead of reintroducing custom tiny-label classes
+- Current reference docs:
+  - `docs/internal/design/workbench-system.md`
+  - `docs/internal/design/workbench-readability-system.md`
+
 ## Local Stripe + Convex webhook setup
 
 - Date: 2026-03-13
@@ -33,5 +45,17 @@
 - Current repo status at this note:
   - real `checkout.session.completed` events exist on the app Stripe account with the correct `clerkUserId` and `courseSlug` metadata
   - local checkout creation and Stripe payment completion work
-  - local webhook/account/env mismatches were found and partially corrected
-  - the final `webhook -> Convex entitlement -> auto redirect to /mission` path still needs one clean, confirmed pass after setup stabilization
+  - local webhook/account/env mismatches were found and corrected by re-running `pnpm run stripe:listen:local` and restarting the web app after the fresh secret sync
+  - the final `webhook -> Convex entitlement -> auto redirect to /mission` path has now been confirmed locally with a sandbox checkout that reached `/mission`
+
+## Local testing runbook
+
+- Date: 2026-03-13
+- Durable decision:
+  - treat `docs/dev/testing.md` as the obvious local testing entrypoint for this repo
+  - keep shared Clerk QA account prep, browser QA flow, and Stripe sandbox verification documented there instead of spreading them across README notes and internal memory only
+  - cross-link `docs/dev/testing.md` from public docs and `AGENTS.md` so contributors and agents use the same path first
+- Use this runbook when:
+  - you need the correct command matrix quickly
+  - you need to test signed-out vs non-entitled vs entitled user flows
+  - you need to verify a local paid Stripe handoff without re-deriving the sequence from old notes

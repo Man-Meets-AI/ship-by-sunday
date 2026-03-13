@@ -97,8 +97,8 @@ Upload rules:
 
 - Preserve the existing `UploadFieldValue` shape.
 - Keep `useMutation(api.uploads.generateUploadUrl)` in the upload field control.
-- Do not move persistence cleanup out of `lib/course/registry.ts`.
-- Do not move URL hydration out of `convex/course.ts`.
+- Keep persistence cleanup inside `lib/course/registry/persistence.ts` unless the public registry barrel is intentionally being redesigned.
+- Keep upload URL hydration inside the `convex/course/` lesson-state and artifact paths unless that backend split is intentionally being redesigned.
 
 ### `shared/`
 
@@ -115,6 +115,12 @@ Only cross-mode presentation primitives belong here.
 - artifact formatting helpers
 
 If a component needs lesson-specific logic to make sense, it probably belongs in `modes/`, not `shared/`.
+
+Readability rules:
+
+- Shared typography, spacing, and card rhythm now live in `shared/workbench-readability.ts`.
+- If a lesson needs denser or looser treatment, prefer extending those shared primitives before adding one-off text-size or padding classes in the mode file.
+- Lesson `1.2 Pick One User` is the proving surface for the current readability system; the critique and decisions are documented in `docs/internal/design/workbench-readability-system.md`.
 
 Header rules:
 

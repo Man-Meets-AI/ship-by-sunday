@@ -4,9 +4,12 @@
 
 ### Changed
 
+- Replaced the local sign-in and sign-up route branding with repo-owned `Ship by Sunday` headings and forced those auth links to stay on the local routes instead of jumping to the hosted Clerk domain.
+- Hardened `/checkout/success` so it now validates `session_id` against Stripe and shows distinct states for missing session, invalid session, sign-in required, wrong account, payment pending, and validated paid checkout.
+- Added an explicit local testing runbook in `docs/dev/testing.md` that covers code checks, shared QA accounts, browser QA flow, and Stripe sandbox verification.
 - Removed lesson `2.7` from the live student flow, so finishing `2.6` now unlocks Build directly and the old Design wrap-up no longer interrupts momentum.
 - Turned lesson `3.1` into a watch-only Build kickoff, so students now go from Design straight into the kickoff video and then into repo mapping instead of filling out another in-app prompt step.
-- Tightened the shared lesson-workbench readability system with calmer type hierarchy, spacing, field chrome, and support cards so guided, focus, watch, and stage-unlock lessons scan faster.
+- Tightened the shared lesson-workbench readability system by using lesson `1.2 Pick One User` as the proving surface, then pushing calmer type hierarchy, spacing, field chrome, and support-card rhythm across guided, focus, watch, prompt-import, and stage-unlock states.
 - Tightened lesson `1.6` so Scope Hammer now reads as a manual-first decision pass with ordered keep/cut lists, clearer draft provenance, and a stronger Sunday-sized boundary check.
 - Simplified lesson `1.5` so the core-flow page now teaches one clear instruction path, trims repeated scaffolding, and gives `1.6` a cleaner uploaded-map handoff.
 - Simplified the bottom lesson rail so students now move with left/right navigation, see lighter step markers instead of repeated status badges, and get clearer stage-boundary movement without visible `Q` / `E` shortcut teaching.

@@ -27,16 +27,23 @@ Current flow in code:
    - matching `payment_intent_data.metadata`
    - `allow_promotion_codes: true`
    - `billing_address_collection: "auto"`
-   - `success_url = /checkout/success?session_id={CHECKOUT_SESSION_ID}`
-   - `cancel_url = /checkout/cancel`
+   - `success_url` prefers `APP_BASE_URL` and falls back to the active local/dev host only when no canonical app URL is configured
+   - `cancel_url` follows the same rule
 5. Stripe-hosted checkout returns the buyer to `/checkout/success`.
 6. `POST /api/stripe/webhook` verifies the `stripe-signature` header with `STRIPE_WEBHOOK_SECRET`.
 7. The webhook only handles `checkout.session.completed` and `checkout.session.async_payment_succeeded`.
 8. The webhook extracts `clerkUserId` from `session.metadata.clerkUserId`, falling back to `client_reference_id`, then calls `api.course.grantEntitlementFromStripe`.
 9. Convex re-checks the same `STRIPE_WEBHOOK_SECRET` before upserting an `active` entitlement keyed by `clerkUserId + courseSlug`, while also storing Stripe customer / checkout-session / payment-intent IDs when present.
-10. `/checkout/success` does not currently validate the `session_id` against Stripe. It waits for authenticated `viewerAccess`, rotates status copy while entitlement is pending, and redirects to `/mission` about 700ms after access becomes active.
-11. If the buyer opens `/access-required`, that page also polls `viewerAccess`, auto-redirects to `/mission` when access appears, and otherwise offers three paths: retry Mission, go home, or start checkout from that account.
-12. Returning entitled users who land on `/` are redirected server-side to `/mission` or their most recently viewed accessible lesson, unless they explicitly use `?marketing=1`.
+10. `/checkout/success` reads `session_id` server-side, validates the Stripe Checkout Session, and renders distinct states for:
+   - missing session id
+   - invalid session id
+   - sign-in required
+   - wrong account for the checkout
+   - payment still pending
+   - validated paid session waiting on entitlement
+11. For a validated paid session, the success page waits for authenticated `viewerAccess`, rotates status copy while entitlement is pending, and redirects to `/mission` about 700ms after access becomes active.
+12. If the buyer opens `/access-required`, that page also polls `viewerAccess`, auto-redirects to `/mission` when access appears, and otherwise offers recovery paths based on signed-out vs signed-in-without-access state.
+13. Returning entitled users who land on `/` are redirected server-side to `/mission` or their most recently viewed accessible lesson, unless they explicitly use `?marketing=1`.
 
 ## Current implementation status
 
@@ -49,6 +56,7 @@ Current flow in code:
   - `STRIPE_PRICE_ID` for a dashboard-managed price
   - inline fallback `price_data` for a one-time USD charge of `50000` cents (`$500`)
 - Convex auth is wired through `convex/auth.config.ts` and expects the Clerk JWT template app ID `convex` with `CLERK_FRONTEND_API_URL` as the provider domain.
+- Server-side Clerk -> Convex calls now explicitly request the Clerk `convex` JWT template instead of relying on Clerk’s default token shape.
 
 ## Local development note
 
@@ -87,11 +95,20 @@ That verifier checks the latest real `checkout.session.completed` event on the a
 
 If those drift, local checkout can succeed, real `checkout.session.completed` events can exist on Stripe, and `/checkout/success` can still hang on entitlement polling because the webhook grant path never completes.
 
+Current verified local sequence:
+
+1. Start `pnpm run dev`.
+2. Start `pnpm run stripe:listen:local`.
+3. If the listener prints a fresh webhook secret, restart the web app so `/api/stripe/webhook` uses the new value.
+4. Complete a sandbox checkout with card `4242 4242 4242 4242`.
+5. Confirm Stripe forwards `checkout.session.completed`.
+6. Confirm the webhook logs `grant_succeeded`.
+7. Confirm the buyer leaves `/checkout/success` and reaches `/mission`.
+
 ## What is still not live-ready
 
 - Stripe still needs live webhook endpoint registration and verified delivery against the deployed environment.
 - Clerk and Convex still need a real production auth check, not just local wiring. The risky point is issuer/domain mismatch around `CLERK_FRONTEND_API_URL` and the `convex` JWT template.
-- `/checkout/success` trusts authenticated `viewerAccess`; it does not currently verify the `session_id` query param with Stripe. That is acceptable for the current thin flow, but it should be treated as an implementation constraint, not a stronger payment-proof guarantee than the code actually provides.
 - The buyer handoff still depends on the purchaser finishing checkout in the same signed-in browser context used to query `viewerAccess`.
 - Final lesson video hosting is still undecided.
 - There is no transactional access email in code today.
@@ -108,6 +125,6 @@ If those drift, local checkout can succeed, real `checkout.session.completed` ev
 
 1. Register the live Stripe webhook endpoint, run a real purchase in test mode, and confirm entitlement insert / patch behavior in Convex.
 2. Verify the production Clerk -> Convex auth chain with the real `convex` JWT template and final `CLERK_FRONTEND_API_URL`.
-3. Run the first full buyer journey QA pass against the deployed environment, including the delayed-entitlement recovery path on `/access-required`.
+3. Run the first full buyer journey QA pass against the deployed environment, including the delayed-entitlement recovery path on `/access-required` and the validated-session states on `/checkout/success`.
 4. Decide whether the launch can rely on in-app access handoff only, or whether a transactional access email is required before launch.
 5. Decide the lesson video hosting path and attach the first real lesson media.

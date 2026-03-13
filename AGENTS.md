@@ -150,6 +150,7 @@ Founder time should be reserved for:
 - Use `pnpm run dev:convex` for the local Convex deployment.
 - Use `pnpm run typecheck` for TypeScript verification.
 - Use `pnpm run check` before closing meaningful app-shell or onboarding-stack work.
+- Treat `docs/dev/testing.md` as the obvious testing runbook for code checks, QA-Browser flows, shared Clerk QA accounts, and Stripe sandbox verification.
 - For QA-Browser auth accounts (non-entitled vs entitled), follow `docs/dev/qa-browser-auth.md`.
 - Use `.env.local.example` as the tracked env template. Real local credentials stay in `.env.local`.
 

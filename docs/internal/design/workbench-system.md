@@ -2,6 +2,8 @@
 
 Last updated: 2026-03-11
 
+Read alongside: `docs/internal/design/workbench-readability-system.md` for the shared typography, spacing, and scan-order contract proved in lesson `1.2`.
+
 ## Goal
 
 Make every student workbench feel like an active guided product, not a styled worksheet.

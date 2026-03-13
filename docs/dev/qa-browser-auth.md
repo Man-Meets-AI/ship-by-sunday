@@ -1,5 +1,7 @@
 # QA-Browser Auth Accounts
 
+For the broader local testing flow, including lint/unit/smoke commands and Stripe sandbox checkout verification, start with [testing.md](testing.md).
+
 Use two Clerk QA accounts for browser testing in this repo:
 
 - non-entitled: auth + `/access-required` flows
@@ -33,4 +35,3 @@ pnpm run clerk:test-user:prepare:entitled
 1. For auth/access fallback QA, use the non-entitled account.
 2. For mission/lesson QA, run `pnpm run clerk:test-user:prepare:entitled` first and use the entitled account.
 3. If Clerk is configured for SSO, magic link, passkey, OTP, or other non-password flows, stop and provide compatible test identity instructions.
-
