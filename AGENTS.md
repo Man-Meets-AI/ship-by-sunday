@@ -32,10 +32,10 @@ Launch `Ship by Sunday` so a cold or warm visitor can:
 Do these before vanity work:
 
 1. Record the core lessons
-2. Stand up checkout, delivery, and onboarding
-3. Finalize lesson order, worksheet usage, and student-facing structure
-4. Draft launch emails and onboarding emails
-5. Prepare launch QA, analytics, and bug tracking
+2. Finish the live `Stripe` -> `Clerk` -> `Convex` purchase-to-access handoff
+3. Decide final lesson video hosting and attach the first real lesson media
+4. Define the support inbox / ownership path and tighten live post-purchase `Start Here` guidance
+5. Instrument minimum viable launch analytics and run the first full buyer journey QA pass
 
 ## What Not To Get Distracted By
 
@@ -122,9 +122,12 @@ Founder time should be reserved for:
 
 ## How To Work In This Repo
 
-- Start from `todo.md` for current launch status and priorities.
+- Start from `todo.md` for current launch status, priorities, owner roles, and blockers.
+- Use `tasks/todo.md` for engineer-local execution checklists and review notes. It does not replace `todo.md`.
+- Use `tasks/lessons.md` to capture recurring mistakes and new repo guardrails after corrections.
 - Use the relevant role file before doing substantial work in that domain.
 - Treat `main.md` as the higher-level launch OS and sequencing reference.
+- Treat `docs/delivery-onboarding/stack-decision.md` as the source of truth for the live purchase-to-access flow.
 - Write generated workstream docs into `docs/<workstream>/` and keep repo root reserved for control files.
 - Treat `lib/course/manifest.ts` as the curriculum and lesson-contract source of truth.
 - Treat `convex/` as the source of truth for app data, entitlements, and lesson state.
@@ -133,11 +136,13 @@ Founder time should be reserved for:
 
 ## App Workflow
 
-- Public marketing lives in `app/`.
+- Public marketing and checkout entry live in `app/`.
 - Protected product routes currently live at `/mission`, `/lesson/[lessonId]`, `/artifacts`, `/settings`, and `/access-required`.
+- Returning entitled users who land on `/` are resumed into `/mission` or their last worked lesson unless they explicitly use `?marketing=1`.
+- `Start Here` currently lives inside the lesson system as `0.0`, `0.1`, and `0.2`, not as a separate public onboarding page.
 - Clerk handles identity and route protection.
 - Convex handles course entitlements, lesson autosave, mission progress, and artifact listing.
-- `Stripe` checkout and webhook access handoff exist in code, but do not fake webhook completion or purchase state.
+- `Stripe` checkout creation, success/cancel pages, and the webhook access handoff exist in code, but do not fake webhook completion or purchase state.
 
 ## Local Development
 
@@ -279,13 +284,15 @@ If that is not obvious, update `todo.md` first before doing more work.
 
 ## Operating Rules
 
-- Prioritize: offer clarity, recording, delivery, checkout, onboarding, launch copy, key visuals, outbound infrastructure, QA
+- Prioritize: recording, live purchase-to-access handoff, lesson media hosting, onboarding/support path, launch copy, analytics/QA, and only launch-blocking visuals or outbound setup
 - Deprioritize vanity tasks
 - Push toward decisions, not discussions
 - Reduce ambiguity for the buyer and for the team
 - Use specific claims, not vague hype
 - Do not invent proof
 - Assume flows are broken until tested
+- Treat checkout/access as incomplete until the real `Stripe` webhook, production Clerk envs, and Convex entitlement grant are verified end to end.
+- Treat lesson delivery as incomplete until at least one real hosted lesson asset is attached and validated in-product.
 
 ## Definition Of Done
 
@@ -302,7 +309,10 @@ If that is not obvious, update `todo.md` first before doing more work.
 ## Source Of Truth Files
 
 - `todo.md`: current launch tracker and immediate priorities
+- `tasks/todo.md`: engineer-local execution checklist and review log
+- `tasks/lessons.md`: recurring corrections and implementation guardrails
 - `main.md`: launch OS, critical path, and sprint sequencing
+- `docs/delivery-onboarding/stack-decision.md`: current purchase-to-access behavior contract
 - `docs/`: canonical home for generated workstream docs
 - `roles/`: role-by-role prompts and ownership
 - `assets/`: course materials, packets, worksheets, and guides
@@ -328,9 +338,9 @@ When in doubt:
 
 ### 2. Subagent Strategy
 
-- Use subagents liberally to keep the main context window clean
-- Offload research, exploration, and parallel analysis to subagents
-- For complex problems, use more compute via subagents
+- Use subagents only when delegation is explicitly allowed by the current environment and the workstream already satisfies the repo's subagent rules
+- Offload bounded research, exploration, and parallel analysis to subagents when the owner role and deliverable are clear
+- For complex problems, use more compute via subagents only when the work is not blocked on founder judgment
 - Keep one task per subagent for focused execution
 
 ### 3. Self-Improvement Loop
