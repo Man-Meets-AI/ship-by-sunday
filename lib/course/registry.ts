@@ -770,6 +770,15 @@ function getLessonSpecificCompletionMessage(
 		}
 	}
 
+	if (lesson.id === "1.4") {
+		if (fieldId === "research_table") {
+			return "Add 2-3 real alternatives or workarounds and note what each one reveals.";
+		}
+		if (fieldId === "research_summary") {
+			return "State the pattern that should change what you build, copy, or avoid in your v1.";
+		}
+	}
+
 	if (lesson.id !== "1.1") {
 		return undefined;
 	}

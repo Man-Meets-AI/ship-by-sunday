@@ -641,13 +641,16 @@ export const ceoLessons = [
 		coachMode: "docked",
 		objectiveTitle: "CEO 1.4 — Light Research, Not a Thesis",
 		checklist: [
-			"Add 2–3 competitors or references",
-			"Note what they do well",
-			"Note what they do poorly",
-			"Capture what users seem to care about",
+			"Review 2–3 real alternatives or workarounds",
+			"Capture what each one proves from a real surface",
+			"Note what users seem to care about most",
+			"Decide what your v1 should keep, avoid, or differentiate",
 		],
-		helperText: "Collect signal fast. Do not turn this into a thesis project.",
-		winCondition: "2–3 research entries and one summary insight are saved.",
+		helperText:
+			"Collect just enough outside signal to decide what your v1 should copy, avoid, or differentiate.",
+		winCondition: "2–3 grounded research entries and one clear v1 decision are saved.",
+		nextStepLabel:
+			"Map the flow that keeps the useful patterns and avoids the common breakdowns you found.",
 		panelDefaults: splitPanelDefaults,
 		pinnedArtifacts: ["user_statement", "outcome_statement"],
 		promptImport: {
@@ -688,15 +691,27 @@ export const ceoLessons = [
 						placeholder: "What matters most",
 						width: "wide",
 					},
+					{
+						id: "evidenceSeen",
+						label: "Evidence Seen",
+						kind: "text",
+						placeholder: "Pricing page, onboarding, review thread",
+						width: "compact",
+					},
 				],
-				helpText: "Columns: Competitor, Good, Poor, Users Care About",
+				helpText:
+					"Keep each row grounded in one concrete surface you actually checked.",
 			},
 			{
 				id: "research_summary",
-				label: "Key pattern I noticed",
+				label: "What this means for my v1",
 				kind: "textarea",
 				required: true,
 				rows: 3,
+				placeholder:
+					"Users care about speed, but they lose trust when the workflow gets messy. Keep the flow tight, reviewable, and easy to send.",
+				helpText:
+					"Across the rows, decide what to copy, avoid, or differentiate for this user and outcome.",
 			},
 		],
 		content: {
@@ -710,9 +725,9 @@ export const ceoLessons = [
 			},
 			actionCard: {
 				jobNow:
-					"Find 2-3 existing solutions and write down what they do well, badly, and what users seem to care about.",
+					"Check 2-3 real solutions or workarounds, note what you actually observed, and finish with one decision about what your v1 should keep, avoid, or differentiate.",
 				timebox: "20 minutes",
-				comeBackWith: "Three short research notes.",
+				comeBackWith: "2-3 grounded research notes and one v1 decision.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Light Research, Not a Thesis",
@@ -723,9 +738,9 @@ export const ceoLessons = [
 				prompt:
 					"You are not writing a market report. You are trying to understand how this gets solved today.",
 				teachingPoints: [
-					"Show quick scans of Google, app stores, Reddit, or product sites.",
-					"Capture: what they do well, what they do poorly, what users seem to care about.",
-					"Keep the note format brutally simple.",
+					"Start with 2-3 quick scans of real alternatives or current workarounds.",
+					"Note what you actually observed and which surface gave you that signal.",
+					"Finish with what your v1 should copy, avoid, or differentiate.",
 				],
 				emptyState:
 					"You are not writing a market report. You are trying to understand how this gets solved today.",

@@ -17,6 +17,8 @@ type PromptImportUiCopy = {
 	summary: string;
 	workflowHint: string;
 	enabledNote: string;
+	launcherLabel?: string;
+	collapsedByDefault?: boolean;
 	pasteLabel: string;
 	pastePlaceholder: string;
 	pasteToggleLabel: string;
@@ -30,20 +32,22 @@ type PromptImportUiCopy = {
 
 const PROMPT_IMPORT_COPY: Record<LessonPromptTemplateId, PromptImportUiCopy> = {
 	competitor_research: {
-		cardLabel: "Optional AI assist",
+		cardLabel: "Need a fast AI starter?",
 		summary:
-			"Use this only if you want a fast first pass. You can skip it and fill the research table manually below.",
+			"Start with 2-3 quick manual scans. Use AI only if you want a starter draft after you know what you are looking for.",
 		workflowHint:
-			"Copy or generate the starter research, paste the result, then tighten the rows below.",
+			"Scan real solutions first, then use AI to speed up row drafting or sharpen the final decision.",
 		enabledNote:
 			"Built from your saved user and outcome so the research stays narrow and decision-useful.",
+		launcherLabel: "Use AI starter",
+		collapsedByDefault: true,
 		pasteLabel: "Paste ChatGPT response",
 		pastePlaceholder:
-			"Paste the full response with both sections: Research Table and Key pattern I noticed.",
+			"Paste the full response with both sections: Research Table and What this means for my v1.",
 		pasteToggleLabel: "Paste result",
 		importButtonLabel: "Import into table",
 		importHint:
-			"The import replaces the saved research rows and summary, then you can clean them up below.",
+			"The import replaces the saved research rows and v1 decision, then you can tighten the evidence and judgment below.",
 		getSuccessMessage: (nextFieldValues, promptImport) => {
 			if (promptImport.promptTemplateId !== "competitor_research") {
 				return "Imported suggestions. You can edit the fields below.";
@@ -55,7 +59,7 @@ const PROMPT_IMPORT_COPY: Record<LessonPromptTemplateId, PromptImportUiCopy> = {
 				? (nextFieldValues[promptImport.tableFieldId] as string[][]).length
 				: 0;
 
-			return `Imported ${importedRows} research ${importedRows === 1 ? "row" : "rows"}. You can edit the table and summary below.`;
+			return `Imported ${importedRows} research ${importedRows === 1 ? "row" : "rows"}. Tighten the evidence and v1 decision below.`;
 		},
 	},
 	scope_boundary: {
@@ -178,6 +182,9 @@ export function PromptImportCard({
 			)
 		: { prompt: null, disabledReason: "This prompt import is not wired yet." };
 	const uiCopy = PROMPT_IMPORT_COPY[promptTemplateId];
+	const [showAssistTools, setShowAssistTools] = useState(
+		!uiCopy.collapsedByDefault,
+	);
 
 	useEffect(() => {
 		return () => {
@@ -197,6 +204,12 @@ export function PromptImportCard({
 			setShowPaste(true);
 		}
 	}, [pastedResponse]);
+
+	useEffect(() => {
+		if (showPrompt || showPaste || importFeedback) {
+			setShowAssistTools(true);
+		}
+	}, [importFeedback, showPaste, showPrompt]);
 
 	if (!promptImport) {
 		return null;
@@ -336,44 +349,59 @@ export function PromptImportCard({
 				)}
 
 				<div className="flex flex-wrap items-center gap-2">
-					<button
-						type="button"
-						onClick={copyPrompt}
-						disabled={Boolean(promptState.disabledReason)}
-						className="rounded-none border border-product-accent bg-product-chip px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg disabled:cursor-not-allowed disabled:border-product-border disabled:bg-product-surface disabled:text-product-muted"
-					>
-						{copyState === "copied" ? "Copied" : "Copy prompt"}
-					</button>
+					{uiCopy.collapsedByDefault ? (
+						<button
+							type="button"
+							onClick={() => setShowAssistTools((current) => !current)}
+							className="rounded-none border border-product-border bg-product-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent focus-visible:border-product-accent focus-visible:text-product-accent focus-visible:outline-hidden"
+						>
+							{showAssistTools
+								? "Hide AI starter"
+								: (uiCopy.launcherLabel ?? "Open AI assist")}
+						</button>
+					) : null}
+					{showAssistTools ? (
+						<>
+							<button
+								type="button"
+								onClick={copyPrompt}
+								disabled={Boolean(promptState.disabledReason)}
+								className="rounded-none border border-product-accent bg-product-chip px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg disabled:cursor-not-allowed disabled:border-product-border disabled:bg-product-surface disabled:text-product-muted"
+							>
+								{copyState === "copied" ? "Copied" : "Copy prompt"}
+							</button>
+							<button
+								type="button"
+								onClick={() => void generateWithCodex()}
+								disabled={Boolean(promptState.disabledReason) || isGenerating}
+								className="rounded-none border border-product-border bg-product-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent disabled:cursor-not-allowed disabled:border-product-border disabled:text-product-muted"
+							>
+								{isGenerating ? "Generating..." : "Generate with Codex"}
+							</button>
+							<button
+								type="button"
+								onClick={() => setShowPaste((current) => !current)}
+								className="rounded-none border border-product-border bg-product-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent focus-visible:border-product-accent focus-visible:text-product-accent focus-visible:outline-hidden"
+							>
+								{showPaste ? "Hide paste box" : uiCopy.pasteToggleLabel}
+							</button>
+							<button
+								type="button"
+								onClick={() => setShowPrompt((current) => !current)}
+								className="rounded-none border border-product-border bg-product-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent focus-visible:border-product-accent focus-visible:text-product-accent focus-visible:outline-hidden"
+							>
+								{showPrompt ? "Hide prompt" : "View prompt"}
+							</button>
+						</>
+					) : null}
 					{copyState === "error" && !promptState.disabledReason ? (
 						<p className="text-[11px] font-medium leading-snug text-product-muted">
 							Clipboard unavailable. Copy from the prompt block below.
 						</p>
 					) : null}
-					<button
-						type="button"
-						onClick={() => void generateWithCodex()}
-						disabled={Boolean(promptState.disabledReason) || isGenerating}
-						className="rounded-none border border-product-border bg-product-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent disabled:cursor-not-allowed disabled:border-product-border disabled:text-product-muted"
-					>
-						{isGenerating ? "Generating..." : "Generate with Codex"}
-					</button>
-					<button
-						type="button"
-						onClick={() => setShowPaste((current) => !current)}
-						className="rounded-none border border-product-border bg-product-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent focus-visible:border-product-accent focus-visible:text-product-accent focus-visible:outline-hidden"
-					>
-						{showPaste ? "Hide paste box" : uiCopy.pasteToggleLabel}
-					</button>
-					<button
-						type="button"
-						onClick={() => setShowPrompt((current) => !current)}
-						className="rounded-none border border-product-border bg-product-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent focus-visible:border-product-accent focus-visible:text-product-accent focus-visible:outline-hidden"
-					>
-						{showPrompt ? "Hide prompt" : "View prompt"}
-					</button>
 				</div>
 
-				{showPrompt ? (
+				{showAssistTools && showPrompt ? (
 					<div className="rounded-none border border-product-border/80 bg-product-surface px-2 py-2">
 						{promptState.prompt ? (
 							<textarea
@@ -392,7 +420,7 @@ export function PromptImportCard({
 					</div>
 				) : null}
 
-				{showPaste ? (
+				{showAssistTools && showPaste ? (
 					<div className="space-y-3 rounded-none border border-product-border/80 bg-product-surface px-3 py-3">
 						<label className="block">
 							<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">

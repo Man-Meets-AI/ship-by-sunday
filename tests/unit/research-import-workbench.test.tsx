@@ -50,8 +50,20 @@ function getResearchNotesArtifact(): PinnedArtifact {
 
 	return buildArtifactPreview(lesson!, {
 		research_table: [
-			["Notion", "Fast setup", "Weak export", "Speed"],
-			["Tana", "Flexible workflows", "Steeper learning curve", "Flexibility"],
+			[
+				"Notion",
+				"Fast setup",
+				"Weak export",
+				"Speed",
+				"Pricing page",
+			],
+			[
+				"Tana",
+				"Flexible workflows",
+				"Steeper learning curve",
+				"Flexibility",
+				"Review thread",
+			],
 		],
 		research_summary:
 			"Users want speed first, but they get frustrated when the workflow falls apart under real use.",
@@ -101,32 +113,37 @@ describe("Research import workbench", () => {
 	it("renders the prompt import flow in the main 1.4 workbench", () => {
 		const markup = renderResearchWorkbench();
 
-		expect(markup).toContain("Optional AI assist");
+		expect(markup).toContain("Research target");
+		expect(markup).toContain("Promise to pressure-test");
+		expect(markup).toContain("Need a fast AI starter?");
 		expect(markup).toContain(
-			"Use this only if you want a fast first pass. You can skip it and fill the research table manually below.",
+			"Start with 2-3 quick manual scans. Use AI only if you want a starter draft after you know what you are looking for.",
 		);
-		expect(markup).toContain("Paste result");
-		expect(markup).toContain("View prompt");
-		expect(markup).toContain("Copy prompt");
-		expect(markup).toContain("Generate with Codex");
-		expect(markup).toContain("Key pattern I noticed");
+		expect(markup).toContain("Use AI starter");
+		expect(markup).not.toContain("Copy prompt");
+		expect(markup).not.toContain("Generate with Codex");
+		expect(markup).toContain("Evidence Seen");
+		expect(markup).toContain("What this means for my v1");
 		expect(markup).not.toContain("Paste ChatGPT response");
 	});
 
 	it("renders imported research values while keeping the manual editing controls visible", () => {
 		const markup = renderResearchWorkbench({
-			research_table: [["Notion", "Fast setup", "Weak export", "Speed"]],
+			research_table: [
+				["Notion", "Fast setup", "Weak export", "Speed", "Pricing page"],
+			],
 			research_summary:
 				"Users care about speed first, but real workflows break on edge cases.",
 		});
 
 		expect(markup).toContain("Notion");
 		expect(markup).toContain("Fast setup");
+		expect(markup).toContain("Pricing page");
 		expect(markup).toContain("Add Row");
 		expect(markup).toContain(
 			"Users care about speed first, but real workflows break on edge cases.",
 		);
-		expect(markup).toContain("Key pattern I noticed");
+		expect(markup).toContain("What this means for my v1");
 	});
 });
 

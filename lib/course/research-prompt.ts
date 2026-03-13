@@ -72,7 +72,10 @@ export type ScopeBoundaryImportResult = {
 };
 
 const RESEARCH_TABLE_HEADING = "research table";
-const KEY_PATTERN_HEADING = "key pattern i noticed";
+const RESEARCH_SUMMARY_HEADINGS = [
+	"what this means for my v1",
+	"key pattern i noticed",
+];
 const KEEP_IN_V1_HEADINGS = ["keep in v1", "in scope", "in scope features"];
 const CUT_FROM_V1_HEADINGS = [
 	"cut from v1",
@@ -412,6 +415,7 @@ export function buildCompetitorResearchPrompt(
 		"2. what it does well",
 		"3. where it falls short",
 		"4. what users seem to care about most",
+		"5. what evidence you saw",
 		"",
 		"Writing guidance:",
 		"- Keep every field concise and specific",
@@ -419,6 +423,7 @@ export function buildCompetitorResearchPrompt(
 		"- Focus on the parts that would matter to a builder deciding what to emulate, avoid, or differentiate from",
 		"- Prefer sharp observations over broad summaries",
 		"- Mention uncertainty plainly when needed",
+		'- In "what evidence you saw", name the concrete surface briefly, such as product page, pricing page, onboarding flow, help doc, review thread, or app store listing.',
 		"",
 		"Required output format:",
 		"",
@@ -430,11 +435,11 @@ export function buildCompetitorResearchPrompt(
 		"- Do not add bullets.",
 		"- Do not include citations, source lists, or a references appendix in the returned output.",
 		"- Each line must follow this exact field order:",
-		"solution name | what it does well | where it falls short | what users care about most",
+		"solution name | what it does well | where it falls short | what users care about most | what evidence you saw",
 		"",
-		"Key pattern I noticed",
-		"- After the Research Table, add this section label exactly: Key pattern I noticed",
-		"- Under it, write a short synthesis of the main pattern across the solutions",
+		"What this means for my v1",
+		"- After the Research Table, add this section label exactly: What this means for my v1",
+		"- Under it, write a short synthesis of the main pattern across the solutions and the product decision it should change",
 		"- Keep this synthesis brief, concrete, and decision-useful",
 		"- If the evidence is thin or mixed, say that clearly",
 		"- Do not add citations or source notes here either",
@@ -442,7 +447,7 @@ export function buildCompetitorResearchPrompt(
 		"Output rules:",
 		"- Return only these two sections:",
 		"  1. Research Table",
-		"  2. Key pattern I noticed",
+		"  2. What this means for my v1",
 		"- Keep the Research Table section as raw | delimited lines only.",
 		"- Keep the Research Table clean enough to paste directly into structured product fields with minimal cleanup",
 		"- Do not add intro text",
@@ -801,7 +806,7 @@ function collectNamedSectionLines<TSection extends string>(
 function collectSectionLines(input: string) {
 	const sections = collectNamedSectionLines(input, {
 		table: [RESEARCH_TABLE_HEADING],
-		summary: [KEY_PATTERN_HEADING],
+		summary: RESEARCH_SUMMARY_HEADINGS,
 	});
 
 	return {
@@ -811,11 +816,11 @@ function collectSectionLines(input: string) {
 }
 
 function isHeaderLikeRow(cells: string[]) {
-	if (cells.length !== 4) {
+	if (cells.length !== 4 && cells.length !== 5) {
 		return false;
 	}
 
-	const [first, second, third, fourth] = cells.map((cell) =>
+	const [first, second, third, fourth, fifth] = cells.map((cell) =>
 		cell.trim().toLowerCase(),
 	);
 
@@ -823,7 +828,11 @@ function isHeaderLikeRow(cells: string[]) {
 		(first.includes("solution") || first.includes("competitor")) &&
 		(second.includes("does well") || second === "good") &&
 		(third.includes("falls short") || third === "poor") &&
-		fourth.includes("care")
+		fourth.includes("care") &&
+		(fifth === undefined ||
+			fifth.includes("evidence") ||
+			fifth.includes("source") ||
+			fifth.includes("saw"))
 	);
 }
 
@@ -851,9 +860,12 @@ function parseResearchTableRows(lines: string[]) {
 			continue;
 		}
 
-		if (cells.length !== 4 || cells.some((cell) => cell.length === 0)) {
+		if (
+			(cells.length !== 4 && cells.length !== 5) ||
+			cells.slice(0, 4).some((cell) => cell.length === 0)
+		) {
 			throw new Error(
-				"Paste the ChatGPT response with each research row in this format: solution name | what it does well | where it falls short | what users care about most.",
+				"Paste the ChatGPT response with each research row in this format: solution name | what it does well | where it falls short | what users care about most | what evidence you saw.",
 			);
 		}
 
@@ -888,7 +900,7 @@ function parseParagraphSection(lines: string[], emptyMessage: string) {
 function parseResearchSummary(lines: string[]) {
 	return parseParagraphSection(
 		lines,
-		"Paste the full response with a Key pattern I noticed section so we can fill the summary field.",
+		"Paste the full response with a What this means for my v1 section so we can fill the summary field.",
 	);
 }
 
@@ -943,14 +955,14 @@ export function parseCompetitorResearchImport(
 	const trimmed = input.trim();
 	if (trimmed.length === 0) {
 		throw new Error(
-			"Paste the full ChatGPT response that includes both Research Table and Key pattern I noticed.",
+			"Paste the full ChatGPT response that includes both Research Table and What this means for my v1.",
 		);
 	}
 
 	const { tableLines, summaryLines } = collectSectionLines(trimmed);
 	if (tableLines.length === 0 || summaryLines.length === 0) {
 		throw new Error(
-			"Paste the full ChatGPT response that includes both Research Table and Key pattern I noticed.",
+			"Paste the full ChatGPT response that includes both Research Table and What this means for my v1.",
 		);
 	}
 

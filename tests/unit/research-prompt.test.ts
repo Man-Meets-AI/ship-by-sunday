@@ -51,7 +51,7 @@ describe("buildCompetitorResearchPrompt", () => {
 			"- Difference for user: They stop losing decisions in messy notes and can close the loop while the meeting is still fresh.",
 		);
 		expect(prompt).toContain("Research Table");
-		expect(prompt).toContain("Key pattern I noticed");
+		expect(prompt).toContain("What this means for my v1");
 		expect(prompt).toContain("Evidence standard:");
 		expect(prompt).toContain("Selection guidance:");
 		expect(prompt).toContain("Writing guidance:");
@@ -61,7 +61,10 @@ describe("buildCompetitorResearchPrompt", () => {
 			"- Do not include citations, source lists, or a references appendix in the returned output.",
 		);
 		expect(prompt).toContain(
-			"solution name | what it does well | where it falls short | what users care about most",
+			"solution name | what it does well | where it falls short | what users care about most | what evidence you saw",
+		);
+		expect(prompt).toContain(
+			'In "what evidence you saw", name the concrete surface briefly, such as product page, pricing page, onboarding flow, help doc, review thread, or app store listing.',
 		);
 	});
 
@@ -93,20 +96,21 @@ describe("buildCompetitorResearchPrompt", () => {
 describe("parseCompetitorResearchImport", () => {
 	it("parses a clean two-section response into rows and summary", () => {
 		const parsed = parseCompetitorResearchImport(`Research Table
-Notion | Fast setup | Weak export | Speed
-Tana | Flexible workflows | Steeper learning curve | Adaptability
+Notion | Fast setup | Weak export | Speed | Pricing page
+Tana | Flexible workflows | Steeper learning curve | Adaptability | App store listing
 
-Key pattern I noticed
+What this means for my v1
 Users care about speed first, but they keep running into limits when the workflow gets more real.`);
 
 		expect(parsed).toEqual({
 			rows: [
-				["Notion", "Fast setup", "Weak export", "Speed"],
+				["Notion", "Fast setup", "Weak export", "Speed", "Pricing page"],
 				[
 					"Tana",
 					"Flexible workflows",
 					"Steeper learning curve",
 					"Adaptability",
+					"App store listing",
 				],
 			],
 			summary:
@@ -116,12 +120,12 @@ Users care about speed first, but they keep running into limits when the workflo
 
 	it("cleans citations, markdown-table noise, and footnotes from a Deep Research style paste", () => {
 		const parsed = parseCompetitorResearchImport(`## Research Table
-| solution name | what it does well | where it falls short | what users care about most |
-| --- | --- | --- | --- |
-buildspace / Nights and Weekends | Strongest evidence for a structured "make and ship" process instead of just coding; participants describe concrete challenges around creating, getting feedback, and marketing, plus motivating community mechanics like leaderboards. ([camhouser.com][1]) | It is no longer active, and even positive reviews note it did not teach subject-matter specifics; users still had to be resourceful on tools and execution details. ([buildspace.so][2]) | A real process, accountability, and momentum around shipping rather than endless learning. ([camhouser.com][1])
-2. Lovable | Very good at turning prompts into a working UI and MVP fast; Lovable positions itself as a fast AI app builder, and users report getting functional frontends in hours or days instead of weeks. ([Lovable][3]) | Repeated public discussion says the hard part starts after the first build: backend logic, auth, data boundaries, deployment, scaling, and maintainability are where users get stuck or move to other tools. ([Reddit][4]) | Speed to first version, one-click-ish progress, and whether the app can survive the jump from demo to real production use. ([Reddit][5])
+| solution name | what it does well | where it falls short | what users care about most | what evidence you saw |
+| --- | --- | --- | --- | --- |
+buildspace / Nights and Weekends | Strongest evidence for a structured "make and ship" process instead of just coding; participants describe concrete challenges around creating, getting feedback, and marketing, plus motivating community mechanics like leaderboards. ([camhouser.com][1]) | It is no longer active, and even positive reviews note it did not teach subject-matter specifics; users still had to be resourceful on tools and execution details. ([buildspace.so][2]) | A real process, accountability, and momentum around shipping rather than endless learning. ([camhouser.com][1]) | public review + product site
+2. Lovable | Very good at turning prompts into a working UI and MVP fast; Lovable positions itself as a fast AI app builder, and users report getting functional frontends in hours or days instead of weeks. ([Lovable][3]) | Repeated public discussion says the hard part starts after the first build: backend logic, auth, data boundaries, deployment, scaling, and maintainability are where users get stuck or move to other tools. ([Reddit][4]) | Speed to first version, one-click-ish progress, and whether the app can survive the jump from demo to real production use. ([Reddit][5]) | product site + Reddit threads
 
-### Key pattern I noticed
+### What this means for my v1
 Across the options, the gap is not "can I generate an app?" It is "can I reliably go from idea to shipped product with structure?" Fast builders like Lovable win on immediate output, while courses and YouTube win on guidance, but public evidence keeps pointing to the same missing layer: scoping, architecture, auth, deployment, debugging, and production judgment. ([Reddit][5])
 
 [1]: https://www.camhouser.com/a-review-of-buildspaces-nights-and-weekends-program/
@@ -136,12 +140,14 @@ Across the options, the gap is not "can I generate an app?" It is "can I reliabl
 				'Strongest evidence for a structured "make and ship" process instead of just coding; participants describe concrete challenges around creating, getting feedback, and marketing, plus motivating community mechanics like leaderboards.',
 				"It is no longer active, and even positive reviews note it did not teach subject-matter specifics; users still had to be resourceful on tools and execution details.",
 				"A real process, accountability, and momentum around shipping rather than endless learning.",
+				"public review + product site",
 			],
 			[
 				"Lovable",
 				"Very good at turning prompts into a working UI and MVP fast; Lovable positions itself as a fast AI app builder, and users report getting functional frontends in hours or days instead of weeks.",
 				"Repeated public discussion says the hard part starts after the first build: backend logic, auth, data boundaries, deployment, scaling, and maintainability are where users get stuck or move to other tools.",
 				"Speed to first version, one-click-ish progress, and whether the app can survive the jump from demo to real production use.",
+				"product site + Reddit threads",
 			],
 		]);
 		expect(parsed.summary).toBe(
@@ -157,14 +163,16 @@ Across the options, the gap is not "can I generate an app?" It is "can I reliabl
 				summaryFieldId: "research_summary",
 			},
 			`Research Table
-Notion | Fast setup | Weak export | Speed
+Notion | Fast setup | Weak export | Speed | Pricing page
 
-Key pattern I noticed
+What this means for my v1
 Users want speed first.`,
 		);
 
 		expect(updates).toEqual({
-			research_table: [["Notion", "Fast setup", "Weak export", "Speed"]],
+			research_table: [
+				["Notion", "Fast setup", "Weak export", "Speed", "Pricing page"],
+			],
 			research_summary: "Users want speed first.",
 		});
 	});
@@ -174,16 +182,27 @@ Users want speed first.`,
 			parseCompetitorResearchImport(`Research Table
 Notion | Fast setup | Weak export | Speed`),
 		).toThrow(
-			"Paste the full ChatGPT response that includes both Research Table and Key pattern I noticed.",
+			"Paste the full ChatGPT response that includes both Research Table and What this means for my v1.",
 		);
 	});
 
-	it("throws a clear error when rows are not pipe-delimited into four cells", () => {
+	it("accepts older four-cell research rows and leaves the new evidence cell blank", () => {
+		const parsed = parseCompetitorResearchImport(`Research Table
+Notion | Fast setup | Weak export | Speed
+
+Key pattern I noticed
+Users want speed first.`);
+
+		expect(parsed.rows).toEqual([["Notion", "Fast setup", "Weak export", "Speed"]]);
+		expect(parsed.summary).toBe("Users want speed first.");
+	});
+
+	it("throws a clear error when rows are not pipe-delimited into usable cells", () => {
 		expect(() =>
 			parseCompetitorResearchImport(`Research Table
 Notion - Fast setup - Weak export - Speed
 
-Key pattern I noticed
+What this means for my v1
 Users want speed first.`),
 		).toThrow(
 			"Paste the full response with a Research Table section that contains at least one usable row.",
