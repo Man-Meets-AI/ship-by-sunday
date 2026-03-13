@@ -4,6 +4,7 @@
 
 ### Changed
 
+- Simplified the bottom lesson rail so students now move with left/right navigation, see lighter step markers instead of repeated status badges, and get clearer stage-boundary movement without visible `Q` / `E` shortcut teaching.
 - Tightened lesson `1.7` so the CEO wrap-up now requires a quick handoff review before `Unlock Design`, reframes the summary around Design-ready constraints, adds direct repair links back to weak CEO steps, and gives `2.1` a clearer brief-to-references bridge.
 - Reworked lesson `1.3` so students now get inline weak-to-strong outcome coaching, clearer promise/proof/pain-removed prompts, a live `Outcome Statement` preview, and stronger continuity into `1.4`.
 - Reworked lesson `1.2` so choosing a user now feels like a real commitment, with inline decision criteria, pressure-test guidance, a live `User Statement` preview, and clearer completion coaching.

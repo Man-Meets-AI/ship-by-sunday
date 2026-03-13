@@ -2,6 +2,7 @@ import {
 	getSkillRailNavigation,
 	getSkillRailShortcutDirection,
 	isEditableShortcutTarget,
+	isInteractiveShortcutTarget,
 	shouldHandleSkillRailShortcut,
 	type SkillRailLesson,
 } from "@/components/skill-rail-navigation";
@@ -112,7 +113,9 @@ describe("skill rail navigation", () => {
 });
 
 describe("skill rail shortcuts", () => {
-	it("maps Q and E to previous and next", () => {
+	it("maps arrow keys to previous and next while keeping Q/E as fallback aliases", () => {
+		expect(getSkillRailShortcutDirection("ArrowLeft")).toBe("previous");
+		expect(getSkillRailShortcutDirection("arrowright")).toBe("next");
 		expect(getSkillRailShortcutDirection("q")).toBe("previous");
 		expect(getSkillRailShortcutDirection("Q")).toBe("previous");
 		expect(getSkillRailShortcutDirection("e")).toBe("next");
@@ -145,10 +148,34 @@ describe("skill rail shortcuts", () => {
 		).toBe(false);
 	});
 
-	it("only handles unmodified Q/E presses outside editable fields", () => {
+	it("blocks arrow shortcuts on interactive media and controls", () => {
+		expect(
+			isInteractiveShortcutTarget({
+				tagName: "video",
+			} as EventTarget),
+		).toBe(true);
+		expect(
+			isInteractiveShortcutTarget({
+				tagName: "button",
+			} as EventTarget),
+		).toBe(true);
+		expect(
+			isInteractiveShortcutTarget({
+				tagName: "div",
+				getAttribute: (name: string) => (name === "role" ? "button" : null),
+			} as EventTarget),
+		).toBe(true);
+		expect(
+			isInteractiveShortcutTarget({
+				tagName: "div",
+			} as EventTarget),
+		).toBe(false);
+	});
+
+	it("only handles unmodified navigation presses outside editable or interactive targets", () => {
 		expect(
 			shouldHandleSkillRailShortcut({
-				key: "q",
+				key: "ArrowLeft",
 				target: {
 					tagName: "body",
 				} as EventTarget,
@@ -156,7 +183,7 @@ describe("skill rail shortcuts", () => {
 		).toBe(true);
 		expect(
 			shouldHandleSkillRailShortcut({
-				key: "e",
+				key: "ArrowRight",
 				target: {
 					tagName: "body",
 				} as EventTarget,
@@ -168,6 +195,14 @@ describe("skill rail shortcuts", () => {
 				key: "q",
 				target: {
 					tagName: "textarea",
+				} as EventTarget,
+			}),
+		).toBe(false);
+		expect(
+			shouldHandleSkillRailShortcut({
+				key: "ArrowRight",
+				target: {
+					tagName: "video",
 				} as EventTarget,
 			}),
 		).toBe(false);

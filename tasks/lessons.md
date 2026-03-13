@@ -5,6 +5,11 @@ Use this file to capture recurring mistakes, corrections, and guardrails for fut
 ## Lessons
 
 - Date: 2026-03-13
+  Pattern: I over-corrected the bottom lesson rail by stacking a progress summary, explicit state badges, and visible `Q` / `E` teaching into the same strip, which made adjacent navigation feel heavier than the user job and mismatched how people actually try to move through lessons.
+  Rule: For persistent lesson footer navigation, keep the rail focused on adjacent movement. Do not combine macro progress copy, per-step status badges, and shortcut education in the same bar. Default the visible mental model to left/right movement, keep any `Q` / `E` fallback hidden, and make cross-stage movement explicit only at the boundary button.
+  How to verify next time: Open a mid-block lesson and a stage-end lesson, confirm the footer reads as one navigation strip at a glance, confirm there is no extra summary/hint row, and confirm `ArrowLeft` / `ArrowRight` work only when focus is not inside forms, buttons, links, or video controls.
+
+- Date: 2026-03-13
   Pattern: I updated `STRIPE_WEBHOOK_SECRET` in `.env.local` after starting `stripe listen`, but local checkout still hung because Convex validates the same secret from its own deployment env and that value was still stale.
   Rule: For local Stripe webhook testing in this repo, always treat webhook setup as a 3-part sync: the active `stripe listen` secret, `.env.local`, and `convex env`. After starting or restarting the Stripe listener, update `.env.local`, run `convex env set STRIPE_WEBHOOK_SECRET <new secret>`, and restart the local web server if needed.
   How to verify next time: Run `stripe listen --forward-to localhost:3000/api/stripe/webhook`, confirm the same secret appears in `.env.local` and `node ./node_modules/convex/bin/main.js env list`, then trigger or complete a test checkout and verify `/api/stripe/webhook` receives `checkout.session.completed` without signature errors.

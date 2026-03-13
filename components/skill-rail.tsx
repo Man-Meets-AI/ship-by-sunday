@@ -41,19 +41,6 @@ function getRailStepState(
 	return "upcoming";
 }
 
-function getRailStepStateLabel(state: RailStepState) {
-	switch (state) {
-		case "done":
-			return "Done";
-		case "current":
-			return "Current";
-		case "upcoming":
-			return "Upcoming";
-		default:
-			return "Locked";
-	}
-}
-
 function slotClasses({
 	state,
 	isCompleting,
@@ -153,19 +140,81 @@ function RailStepIcon({ state }: { state: RailStepState }) {
 	);
 }
 
+function getLessonAriaLabel(lesson: SkillRailLesson, state: RailStepState) {
+	if (state === "current") {
+		return `${lesson.shortTitle}. Current lesson.`;
+	}
+
+	if (state === "done") {
+		return `${lesson.shortTitle}. Completed lesson.`;
+	}
+
+	if (state === "locked") {
+		return `${lesson.shortTitle}. Locked.`;
+	}
+
+	return `${lesson.shortTitle}. Available lesson.`;
+}
+
+function isCrossStageNavigationTarget(
+	target: SkillRailNavigationTarget | null,
+	lessons: SkillRailLesson[],
+) {
+	if (!target) {
+		return false;
+	}
+
+	return !lessons.some((lesson) => lesson.id === target.id);
+}
+
+function SkillRailChevron({ direction }: { direction: "previous" | "next" }) {
+	return (
+		<svg
+			aria-hidden="true"
+			width="10"
+			height="10"
+			viewBox="0 0 10 10"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="1.6"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			className="shrink-0"
+		>
+			{direction === "previous" ? (
+				<polyline points="6.5 1.75 3 5 6.5 8.25" />
+			) : (
+				<polyline points="3.5 1.75 7 5 3.5 8.25" />
+			)}
+		</svg>
+	);
+}
+
 function SkillRailNavButton({
 	direction,
 	target,
+	isCrossStage,
 }: {
 	direction: "previous" | "next";
 	target: SkillRailNavigationTarget | null;
+	isCrossStage: boolean;
 }) {
-	const shortcutKey = direction === "previous" ? "Q" : "E";
-	const actionLabel = direction === "previous" ? "Previous" : "Next";
+	const shortcutKeys =
+		direction === "previous" ? "ArrowLeft Q" : "ArrowRight E";
+	const actionLabel =
+		direction === "previous"
+			? isCrossStage
+				? "Previous stage"
+				: "Previous"
+			: isCrossStage
+				? "Next stage"
+				: "Next";
 	const title = target
-		? `Open ${direction} lesson`
+		? `Open ${direction} ${isCrossStage ? "stage" : "lesson"}${
+				target.shortTitle ? `: ${target.shortTitle}` : ""
+			}`
 		: `No ${direction} lesson available`;
-	const className = `flex h-11 min-w-[96px] shrink-0 items-center justify-center gap-1 border-r border-product-border/25 px-2 font-mono text-[9px] uppercase tracking-[0.16em] transition-colors ${
+	const className = `flex h-11 min-w-[104px] shrink-0 items-center justify-center gap-1.5 border-r border-product-border/25 px-2.5 font-mono text-[9px] uppercase tracking-[0.16em] transition-colors ${
 		target
 			? "cursor-pointer bg-product-surface/86 text-product-text hover:bg-product-accent/10 hover:text-product-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-product-accent/50"
 			: "cursor-not-allowed bg-product-surface/74 text-product-muted/45"
@@ -173,8 +222,11 @@ function SkillRailNavButton({
 
 	const content = (
 		<>
+			{direction === "previous" ? (
+				<SkillRailChevron direction="previous" />
+			) : null}
 			<span>{actionLabel}</span>
-			<span className="text-product-muted">({shortcutKey})</span>
+			{direction === "next" ? <SkillRailChevron direction="next" /> : null}
 		</>
 	);
 
@@ -185,7 +237,7 @@ function SkillRailNavButton({
 				disabled
 				title={title}
 				aria-label={title}
-				aria-keyshortcuts={shortcutKey}
+				aria-keyshortcuts={shortcutKeys}
 				data-disabled="true"
 				className={className}
 			>
@@ -200,7 +252,7 @@ function SkillRailNavButton({
 			scroll={false}
 			title={title}
 			aria-label={title}
-			aria-keyshortcuts={shortcutKey}
+			aria-keyshortcuts={shortcutKeys}
 			data-disabled="false"
 			className={className}
 		>
@@ -227,15 +279,7 @@ function SkillRailStep({
 		isCompleting,
 		isUnlocking,
 	});
-	const statusLabel = getRailStepStateLabel(state);
-	const stateBadgeClass =
-		state === "current"
-			? "border-product-accent/60 bg-product-accent/16 text-product-accent"
-			: state === "done"
-				? "border-product-accent/45 bg-product-accent/10 text-product-accent"
-				: state === "locked"
-					? "border-product-border/40 bg-product-surface-strong/40 text-product-muted/70"
-					: "border-product-border/60 bg-product-surface/80 text-product-muted";
+	const accessibilityLabel = getLessonAriaLabel(lesson, state);
 
 	const content = (
 		<>
@@ -259,16 +303,9 @@ function SkillRailStep({
 			) : null}
 			<div className="relative z-[1] flex min-w-0 items-center gap-2">
 				<RailStepIcon state={state} />
-				<div className="flex min-w-0 flex-col">
-					<span className="truncate text-[11px] font-semibold uppercase tracking-[0.08em]">
-						{lesson.shortTitle}
-					</span>
-					<span
-						className={`inline-flex w-fit rounded-none border px-1 py-[1px] text-[8px] font-mono uppercase tracking-[0.14em] ${stateBadgeClass}`}
-					>
-						{statusLabel}
-					</span>
-				</div>
+				<span className="truncate text-[11px] font-semibold uppercase tracking-[0.08em]">
+					{lesson.shortTitle}
+				</span>
 			</div>
 			{(state === "current" || isCompleting) && (
 				<span className="absolute bottom-0 left-0 z-[1] h-[2px] w-full bg-product-accent" />
@@ -281,7 +318,7 @@ function SkillRailStep({
 			<button
 				type="button"
 				aria-disabled="true"
-				aria-label={`${lesson.shortTitle}. Locked.`}
+				aria-label={accessibilityLabel}
 				title={LOCKED_LESSON_REASON}
 				onClick={(event) => {
 					event.preventDefault();
@@ -297,6 +334,7 @@ function SkillRailStep({
 		<Link
 			href={getLessonHref(lesson.id)}
 			scroll={false}
+			aria-label={accessibilityLabel}
 			aria-current={isCurrent ? "step" : undefined}
 			className={`${classes} hover:bg-product-accent/8 hover:text-product-text`}
 		>
@@ -326,16 +364,11 @@ export function SkillRail({
 		() => getSkillRailNavigation(resolvedNavigationLessons, currentLessonId),
 		[resolvedNavigationLessons, currentLessonId],
 	);
-	const completedCount = lessons.filter(
-		(lesson) => lesson.status === "completed",
-	).length;
-	const currentVisibleIndex = currentLessonId
-		? lessons.findIndex((lesson) => lesson.id === currentLessonId)
-		: -1;
-	const progressSummary =
-		currentVisibleIndex >= 0
-			? `Step ${currentVisibleIndex + 1} of ${lessons.length} • ${completedCount} completed`
-			: `${completedCount} of ${lessons.length} completed`;
+	const previousIsCrossStage = isCrossStageNavigationTarget(
+		previousTarget,
+		lessons,
+	);
+	const nextIsCrossStage = isCrossStageNavigationTarget(nextTarget, lessons);
 
 	useEffect(() => {
 		if (!currentLessonId) {
@@ -368,47 +401,41 @@ export function SkillRail({
 	}, [currentLessonId, nextTarget, previousTarget, router]);
 
 	return (
-		<div className="flex w-full min-w-0 flex-col gap-1.5">
-			<div className="flex items-center justify-between gap-3 px-1">
-				<div className="flex min-w-0 items-center gap-2">
-					<span className="font-mono text-[9px] uppercase tracking-[0.3em] text-product-muted">
-						{label}
-					</span>
-					<p className="truncate font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
-						{progressSummary}
-					</p>
-				</div>
-				{showStageNavigation ? (
-					<p className="hidden shrink-0 font-mono text-[9px] uppercase tracking-[0.14em] text-product-muted sm:block">
-						Use Q / E to move
-					</p>
-				) : null}
-			</div>
-			<div className="flex min-w-0 items-stretch border border-product-border/30 bg-product-surface/78">
-				{showStageNavigation ? (
-					<SkillRailNavButton direction="previous" target={previousTarget} />
-				) : null}
-				<div className="flex min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-					{lessons.map((lesson) => {
-						const isCurrent = lesson.id === currentLessonId;
-						const state = getRailStepState(lesson, currentLessonId);
+		<nav
+			aria-label={`${label} lesson navigation`}
+			className="flex w-full min-w-0 items-stretch border border-product-border/30 bg-product-surface/78"
+		>
+			{showStageNavigation ? (
+				<SkillRailNavButton
+					direction="previous"
+					target={previousTarget}
+					isCrossStage={previousIsCrossStage}
+				/>
+			) : null}
+			<div className="flex min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+				{lessons.map((lesson) => {
+					const isCurrent = lesson.id === currentLessonId;
+					const state = getRailStepState(lesson, currentLessonId);
 
-						return (
-							<SkillRailStep
-								key={lesson.id}
-								lesson={lesson}
-								state={state}
-								isCurrent={isCurrent}
-								isCompleting={completionCue?.completedLessonId === lesson.id}
-								isUnlocking={completionCue?.nextLessonId === lesson.id}
-							/>
-						);
-					})}
-				</div>
-				{showStageNavigation ? (
-					<SkillRailNavButton direction="next" target={nextTarget} />
-				) : null}
+					return (
+						<SkillRailStep
+							key={lesson.id}
+							lesson={lesson}
+							state={state}
+							isCurrent={isCurrent}
+							isCompleting={completionCue?.completedLessonId === lesson.id}
+							isUnlocking={completionCue?.nextLessonId === lesson.id}
+						/>
+					);
+				})}
 			</div>
-		</div>
+			{showStageNavigation ? (
+				<SkillRailNavButton
+					direction="next"
+					target={nextTarget}
+					isCrossStage={nextIsCrossStage}
+				/>
+			) : null}
+		</nav>
 	);
 }

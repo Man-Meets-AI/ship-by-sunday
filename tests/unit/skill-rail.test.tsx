@@ -65,8 +65,8 @@ describe("SkillRail", () => {
 		expect(markup).toContain(">Previous<");
 		expect(markup).toContain(">Next<");
 		expect(markup).toContain("Carry forward");
-		expect(markup).toContain(">Current<");
-		expect(markup).toContain(">Locked<");
+		expect(markup).toContain('aria-current="step"');
+		expect(markup).toContain('aria-label="Carry forward. Locked."');
 	});
 
 	it("skips the unlock ping when there is no next lesson", () => {
@@ -118,7 +118,7 @@ describe("SkillRail", () => {
 		);
 
 		expect(markup).toContain('href="/lesson/1.1"');
-		expect(markup).toContain('aria-label="Open previous lesson"');
+		expect(markup).toContain('aria-label="Open previous lesson: Problem"');
 		expect(markup).toContain('data-disabled="false"');
 	});
 
@@ -190,7 +190,7 @@ describe("SkillRail", () => {
 		);
 
 		expect(markup).toContain('href="/lesson/2.1"');
-		expect(markup).toContain('aria-label="Open next lesson"');
+		expect(markup).toContain('aria-label="Open next stage: References"');
 		expect(markup).toContain(">Scope<");
 		expect(markup).toContain(">Brief<");
 		expect(markup).not.toContain(">References<");
@@ -234,11 +234,11 @@ describe("SkillRail", () => {
 		);
 
 		expect(markup).toContain('href="/lesson/1.7"');
-		expect(markup).toContain('aria-label="Open previous lesson"');
+		expect(markup).toContain('aria-label="Open previous stage: Brief"');
 		expect(markup).not.toContain(">Brief<");
 	});
 
-	it("disables Q on the first lesson and E on the last lesson", () => {
+	it("disables adjacent nav at the first and last visible lesson", () => {
 		const firstMarkup = renderToStaticMarkup(
 			<SkillRail
 				label="CEO"
@@ -325,10 +325,36 @@ describe("SkillRail", () => {
 			/>,
 		);
 
-		expect(markup).toContain("Step 2 of 3");
-		expect(markup).toContain("1 completed");
-		expect(markup).toContain(">Done<");
-		expect(markup).toContain(">Current<");
-		expect(markup).toContain(">Upcoming<");
+		expect(markup).not.toContain("Step 2 of 3");
+		expect(markup).not.toContain("1 completed");
+		expect(markup).not.toContain(">Done<");
+		expect(markup).not.toContain(">Current<");
+		expect(markup).not.toContain(">Upcoming<");
+		expect(markup).toContain('aria-label="Problem. Completed lesson."');
+		expect(markup).toContain('aria-label="User. Current lesson."');
+		expect(markup).toContain('aria-label="Outcome. Available lesson."');
+	});
+
+	it("drops the persistent Q/E hint row from the rail", () => {
+		const markup = renderToStaticMarkup(
+			<SkillRail
+				label="CEO"
+				currentLessonId="1.2"
+				lessons={[
+					{
+						id: "1.1",
+						shortTitle: "Problem",
+						status: "completed",
+					},
+					{
+						id: "1.2",
+						shortTitle: "User",
+						status: "in_progress",
+					},
+				]}
+			/>,
+		);
+
+		expect(markup).not.toContain("Use Q / E to move");
 	});
 });

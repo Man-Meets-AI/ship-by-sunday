@@ -26,6 +26,34 @@ type SkillRailShortcutEvent = {
 };
 
 const EDITABLE_TAGS = new Set(["INPUT", "TEXTAREA", "SELECT"]);
+const INTERACTIVE_TAGS = new Set(["A", "AUDIO", "BUTTON", "SUMMARY", "VIDEO"]);
+const INTERACTIVE_ROLES = new Set([
+	"button",
+	"checkbox",
+	"link",
+	"menuitem",
+	"option",
+	"radio",
+	"slider",
+	"switch",
+	"tab",
+]);
+
+type ShortcutTargetCandidate = {
+	tagName?: string;
+	isContentEditable?: boolean;
+	getAttribute?: (name: string) => string | null;
+};
+
+function toShortcutTargetCandidate(
+	target: EventTarget | null,
+): ShortcutTargetCandidate | null {
+	if (!target || typeof target !== "object") {
+		return null;
+	}
+
+	return target as ShortcutTargetCandidate;
+}
 
 function isNavigableLesson(
 	lesson: SkillRailLesson | undefined,
@@ -78,6 +106,14 @@ export function getSkillRailNavigation(
 export function getSkillRailShortcutDirection(key: string) {
 	const normalizedKey = key.toLowerCase();
 
+	if (normalizedKey === "arrowleft" || normalizedKey === "left") {
+		return "previous" as const;
+	}
+
+	if (normalizedKey === "arrowright" || normalizedKey === "right") {
+		return "next" as const;
+	}
+
 	if (normalizedKey === "q") {
 		return "previous" as const;
 	}
@@ -90,15 +126,10 @@ export function getSkillRailShortcutDirection(key: string) {
 }
 
 export function isEditableShortcutTarget(target: EventTarget | null) {
-	if (!target || typeof target !== "object") {
+	const candidate = toShortcutTargetCandidate(target);
+	if (!candidate) {
 		return false;
 	}
-
-	const candidate = target as {
-		tagName?: string;
-		isContentEditable?: boolean;
-		getAttribute?: (name: string) => string | null;
-	};
 
 	if (
 		typeof candidate.tagName === "string" &&
@@ -117,6 +148,23 @@ export function isEditableShortcutTarget(target: EventTarget | null) {
 	);
 }
 
+export function isInteractiveShortcutTarget(target: EventTarget | null) {
+	const candidate = toShortcutTargetCandidate(target);
+	if (!candidate) {
+		return false;
+	}
+
+	if (
+		typeof candidate.tagName === "string" &&
+		INTERACTIVE_TAGS.has(candidate.tagName.toUpperCase())
+	) {
+		return true;
+	}
+
+	const roleValue = candidate.getAttribute?.("role");
+	return typeof roleValue === "string" && INTERACTIVE_ROLES.has(roleValue);
+}
+
 export function shouldHandleSkillRailShortcut(event: SkillRailShortcutEvent) {
 	if (event.defaultPrevented || event.repeat) {
 		return false;
@@ -130,5 +178,8 @@ export function shouldHandleSkillRailShortcut(event: SkillRailShortcutEvent) {
 		return false;
 	}
 
-	return !isEditableShortcutTarget(event.target);
+	return (
+		!isEditableShortcutTarget(event.target) &&
+		!isInteractiveShortcutTarget(event.target)
+	);
 }
