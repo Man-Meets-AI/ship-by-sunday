@@ -14,6 +14,10 @@
 	--product-accent-soft: 38 38 38;
 	--product-chip: 236 231 222;
 	--product-shadow: 17 17 17;
+	--product-scrollbar-size: 8px;
+	--product-scrollbar-thumb: rgba(var(--product-border), 0.34);
+	--product-scrollbar-thumb-hover: rgba(var(--product-border), 0.5);
+	--product-scrollbar-track: transparent;
 	--motion-fast: 120ms;
 	--motion-base: 180ms;
 	--motion-slow: 240ms;
@@ -79,6 +83,35 @@ a {
 
 summary::-webkit-details-marker {
 	display: none;
+}
+
+* {
+	scrollbar-width: thin;
+	scrollbar-color: var(--product-scrollbar-thumb) var(--product-scrollbar-track);
+}
+
+*::-webkit-scrollbar {
+	width: var(--product-scrollbar-size);
+	height: var(--product-scrollbar-size);
+}
+
+*::-webkit-scrollbar-track {
+	background: var(--product-scrollbar-track);
+}
+
+*::-webkit-scrollbar-thumb {
+	background-color: var(--product-scrollbar-thumb);
+	border: 2px solid transparent;
+	border-radius: 999px;
+	background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+	background-color: var(--product-scrollbar-thumb-hover);
+}
+
+*::-webkit-scrollbar-corner {
+	background: var(--product-scrollbar-track);
 }
 
 .product-theme {
