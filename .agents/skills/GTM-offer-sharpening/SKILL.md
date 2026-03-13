@@ -13,11 +13,11 @@ This is a Man Meets AI workspace skill. It is meant to sharpen offer logic first
 Read inputs in this order:
 
 1. The current offer doc, landing-page copy, checkout copy, or notes the user wants sharpened.
-2. [docs/offer-funnel/messaging-foundation.md](../../../docs/offer-funnel/messaging-foundation.md) if it exists and is relevant.
+2. [docs/internal/offer-funnel/messaging-foundation.md](../../../docs/internal/offer-funnel/messaging-foundation.md) if it exists and is relevant.
 3. These research docs as the reasoning framework:
-   - [docs/offer-funnel/research/brand/iman-personal-brand-research-notes.md](../../../docs/offer-funnel/research/brand/iman-personal-brand-research-notes.md)
-   - [docs/offer-funnel/research/brand/iman-personal-brand-transcript.md](../../../docs/offer-funnel/research/brand/iman-personal-brand-transcript.md)
-   - [docs/offer-funnel/research/2026-03-11-iman-gadzhi-80-20-marketing-sales-transcript.md](../../../docs/offer-funnel/research/2026-03-11-iman-gadzhi-80-20-marketing-sales-transcript.md)
+   - [docs/internal/offer-funnel/research/brand/iman-personal-brand-research-notes.md](../../../docs/internal/offer-funnel/research/brand/iman-personal-brand-research-notes.md)
+   - [docs/internal/offer-funnel/research/brand/iman-personal-brand-transcript.md](../../../docs/internal/offer-funnel/research/brand/iman-personal-brand-transcript.md)
+   - [docs/internal/offer-funnel/research/2026-03-11-iman-gadzhi-80-20-marketing-sales-transcript.md](../../../docs/internal/offer-funnel/research/2026-03-11-iman-gadzhi-80-20-marketing-sales-transcript.md)
 4. Any new transcript, research notes, or positioning memo included in the current task. Treat these as additive evidence, not proof for public claims.
 
 ## Core Rules

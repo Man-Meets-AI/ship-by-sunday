@@ -6,7 +6,7 @@ description: Review, critique, design, or implement UI motion using practical sc
 
 Use this skill when the job is to make motion feel better in a shippable way.
 
-This is a workspace-local skill. It uses [docs/design/motion-practical-examples.md](../../../docs/design/motion-practical-examples.md) as the main reference for scenario matching, defaults, and implementation heuristics.
+This is a workspace-local skill. It uses [docs/internal/design/motion-practical-examples.md](../../../docs/internal/design/motion-practical-examples.md) as the main reference for scenario matching, defaults, and implementation heuristics.
 
 ## Read Order
 
@@ -18,7 +18,7 @@ This is a workspace-local skill. It uses [docs/design/motion-practical-examples.
    - component or page code
    - screenshot, video, or image
    - design doc or motion note
-3. Read the relevant sections of [docs/design/motion-practical-examples.md](../../../docs/design/motion-practical-examples.md).
+3. Read the relevant sections of [docs/internal/design/motion-practical-examples.md](../../../docs/internal/design/motion-practical-examples.md).
 4. If motion already exists in the codebase, inspect the current timing, easing, transform, and wrapper patterns before changing anything.
 
 ## Use This Skill For
@@ -59,7 +59,7 @@ This is a workspace-local skill. It uses [docs/design/motion-practical-examples.
    - What feels wrong?
    - When does it happen?
    - Is the issue feedback, entrance/exit, layout motion, loading, or performance?
-2. Map the problem to the closest scenario category in [docs/design/motion-practical-examples.md](../../../docs/design/motion-practical-examples.md).
+2. Map the problem to the closest scenario category in [docs/internal/design/motion-practical-examples.md](../../../docs/internal/design/motion-practical-examples.md).
 3. Choose the smallest viable fix.
    - timing
    - easing

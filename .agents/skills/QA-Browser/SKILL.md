@@ -40,7 +40,7 @@ If a required input is missing, ask once before opening the browser.
 
 1. Read the user's request and extract the required inputs.
 2. Read the relevant sections of [references/qa-browser-reference.md](references/qa-browser-reference.md).
-3. If the target is this repo and the flow touches the buyer journey, read [docs/analytics-qa/plan.md](../../../docs/analytics-qa/plan.md) for the current route and severity language.
+3. If the target is this repo and the flow touches the buyer journey, read [docs/internal/analytics-qa/plan.md](../../../docs/internal/analytics-qa/plan.md) for the current route and severity language.
 4. If the flow needs auth on this repo, read the Clerk-backed preflight section in the QA reference and use the repo-local helper commands before entering credentials.
 5. Run the smallest matching playbook with the browser tools already available in Codex.
 6. Return the structured bug report from the reference file.
