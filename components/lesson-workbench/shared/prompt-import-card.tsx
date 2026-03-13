@@ -63,13 +63,15 @@ const PROMPT_IMPORT_COPY: Record<LessonPromptTemplateId, PromptImportUiCopy> = {
 		},
 	},
 	scope_boundary: {
-		cardLabel: "Optional AI assist",
+		cardLabel: "Stuck? Use AI as backup",
 		summary:
-			"Use this only if you want a first-pass scope cut. You can skip it and tighten the keep / cut decisions manually below.",
+			"Make the keep / cut decision yourself first. Use this only if you get stuck and need a tighter first-pass cut to react to.",
 		workflowHint:
-			"Copy or generate the scope cut, paste the result, then refine the keep and cut lists below.",
+			"Try one manual pass, then copy or generate the scope cut, paste the result, and tighten the decisions below.",
 		enabledNote:
 			"Built from your earlier CEO work so you start from a tight recommendation instead of another blank scope form.",
+		launcherLabel: "Open backup assist",
+		collapsedByDefault: true,
 		pasteLabel: "Paste ChatGPT scope cut",
 		pastePlaceholder:
 			"Paste the full response with these sections: Keep in v1, Cut from v1, and Why this version is enough.",

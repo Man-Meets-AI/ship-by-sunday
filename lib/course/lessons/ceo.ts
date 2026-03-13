@@ -5,7 +5,10 @@ import {
 	type LessonConfig,
 	type LessonExampleContent,
 } from "../contracts";
-import { CORE_FLOW_IMAGE_FIELD_ID } from "../core-flow";
+import {
+	CORE_FLOW_IMAGE_FIELD_ID,
+	CORE_FLOW_QUALITY_CHECKS_FIELD_ID,
+} from "../core-flow";
 import { WORKSHEET_01_RESOURCE, WORKSHEET_01_RESOURCES } from "../resources";
 
 const START_WITH_PROBLEM_EXAMPLES: LessonExampleContent[] = [
@@ -648,7 +651,8 @@ export const ceoLessons = [
 		],
 		helperText:
 			"Collect just enough outside signal to decide what your v1 should copy, avoid, or differentiate.",
-		winCondition: "2–3 grounded research entries and one clear v1 decision are saved.",
+		winCondition:
+			"2–3 grounded research entries and one clear v1 decision are saved.",
 		nextStepLabel:
 			"Map the flow that keeps the useful patterns and avoids the common breakdowns you found.",
 		panelDefaults: splitPanelDefaults,
@@ -790,6 +794,20 @@ export const ceoLessons = [
 					"A paper photo is ideal. A tablet sketch, FigJam screenshot, or another off-screen image still counts if the 5-7 step flow is clear.",
 				taskLabel: "Upload core flow photo",
 			},
+			{
+				id: CORE_FLOW_QUALITY_CHECKS_FIELD_ID,
+				label: "Core flow quality checks",
+				kind: "checklist",
+				required: true,
+				options: [
+					"It stays focused on one user's shortest path",
+					"The value moment is obvious",
+					"Someone else could follow the sequence",
+				],
+				helpText:
+					"Use this as a quick legibility check before you lock the lesson and cut scope next.",
+				taskLabel: "Confirm the uploaded flow is clear enough to cut scope",
+			},
 		],
 		content: {
 			status: "draft",
@@ -830,8 +848,8 @@ export const ceoLessons = [
 		slug: "01-06-kill-scope",
 		order: 6,
 		block: "CEO",
-		title: "Scope Hammer",
-		shortTitle: "Scope",
+		title: "Kill Scope",
+		shortTitle: "Kill Scope",
 		shell: "split",
 		workbench: "scope_split",
 		artifact: {
@@ -845,13 +863,15 @@ export const ceoLessons = [
 		prevLessonId: "1.5",
 		unlocks: { lessons: ["1.7"] },
 		coachMode: "docked",
-		objectiveTitle: "CEO 1.6 — Scope Hammer",
+		objectiveTitle: "CEO 1.6 — Kill Scope",
+		nextStepLabel: "Turn this cut line into your CEO brief in 1.7.",
 		checklist: [
-			"Define what stays in v1",
-			"Define what is explicitly out of scope",
-			"Write why this is enough for v1",
+			"Keep only the few essentials that make the promise true",
+			"Name at least three tempting extras you are cutting",
+			"Defend why this smaller version is still enough",
 		],
-		helperText: "Cut fantasy. Keep the smallest believable version.",
+		helperText:
+			"Keep the smallest believable version. If it does not help this user get the promised win by Sunday, cut it.",
 		winCondition:
 			"In-scope list, out-of-scope list, and v1 rationale are saved.",
 		panelDefaults: splitPanelDefaults,
@@ -873,8 +893,11 @@ export const ceoLessons = [
 				label: "Keep in v1",
 				kind: "board",
 				required: true,
+				minItems: 3,
 				placeholder:
 					"One feature per line. Keep only what must exist for the user to get the win.",
+				helpText:
+					"Target 3-5 user-facing capabilities. If it does not directly move this user through the core flow, cut it.",
 				artifactPreviewLabel: "Keep in v1",
 				taskLabel: "Keep in v1",
 			},
@@ -883,19 +906,27 @@ export const ceoLessons = [
 				label: "Cut from v1",
 				kind: "board",
 				required: true,
+				minItems: 3,
 				placeholder:
 					"One cut per line. Name the tempting extras that do not belong in the weekend build.",
+				helpText:
+					"Call out at least 3 tempting extras you are explicitly refusing to build this weekend.",
 				artifactPreviewLabel: "Cut from v1",
 				taskLabel: "Cut from v1",
 			},
 			{
 				id: "v1_rationale",
-				label: "Why this version is enough",
+				label: "Why this smaller version still delivers the promise",
 				kind: "textarea",
 				required: true,
 				rows: 3,
-				artifactPreviewLabel: "Why this version is enough",
-				taskLabel: "Why this version is enough",
+				placeholder:
+					"What has to work by Sunday for the promise to still be true? Defend why this smaller version still gets the user to the win.",
+				helpText:
+					"Write the proof, not reassurance. Tie this back to the user, the promised outcome, and the shortest usable flow.",
+				artifactPreviewLabel:
+					"Why this smaller version still delivers the promise",
+				taskLabel: "Defend why this smaller version still works",
 			},
 		],
 		content: {
@@ -908,9 +939,9 @@ export const ceoLessons = [
 			},
 			actionCard: {
 				jobNow:
-					"Use the prompt to get a first-pass scope cut, then tighten it until the app feels brutally small.",
+					"Cut this down to the smallest believable Sunday-sized v1, then use AI only if you get stuck after a first pass.",
 				timebox: "10 minutes",
-				comeBackWith: "A tighter MVP scope.",
+				comeBackWith: "A brutally small scope boundary you can defend.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Kill Scope",
@@ -920,9 +951,9 @@ export const ceoLessons = [
 			workbench: {
 				prompt: "A smaller shipped app beats a larger imaginary one.",
 				teachingPoints: [
-					"Start from the generated cut list, then delete one more thing.",
-					"Keep the product inside one believable user win.",
-					"If a feature helps later but is not required for the core outcome, cut it.",
+					"Keep only 3-5 user-facing capabilities in v1.",
+					"Cut at least 3 tempting extras that are not required for the core win.",
+					"If a feature helps later but is not required for this user to reach the promised outcome, cut it.",
 				],
 				emptyState: "A smaller shipped app beats a larger imaginary one.",
 			},

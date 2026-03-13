@@ -420,6 +420,9 @@ describe("course registry", () => {
 		expect(issues.map((issue) => issue.label)).toContain(
 			"Upload core flow photo",
 		);
+		expect(issues.map((issue) => issue.label)).toContain(
+			"It stays focused on one user's shortest path",
+		);
 	});
 
 	it("still requires the uploaded photo when legacy 1.5 structured fields exist without one", () => {
@@ -439,6 +442,88 @@ describe("course registry", () => {
 
 		expect(issues.map((issue) => issue.label)).toContain(
 			"Upload core flow photo",
+		);
+	});
+
+	it("requires 1.5 quality checks even after the flow image is uploaded", () => {
+		const lesson = getLessonById("1.5");
+		expect(lesson).toBeTruthy();
+
+		const issues = getCompletionIssues(lesson!, {
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 5,
+			__core_flow_image_upload: {
+				kind: "upload",
+				status: "stored",
+				fileName: "core-flow.jpg",
+				storageId: "storage-id",
+			},
+		});
+
+		expect(issues.map((issue) => issue.label)).toContain(
+			"It stays focused on one user's shortest path",
+		);
+		expect(issues.map((issue) => issue.label)).not.toContain(
+			"Upload core flow photo",
+		);
+	});
+
+	it("requires lesson 1.6 to keep at least three essentials, cut at least three extras, and defend the smaller version", () => {
+		const lesson = getLessonById("1.6");
+		expect(lesson).toBeTruthy();
+
+		const issues = getCompletionIssues(lesson!, {
+			in_scope: ["Paste notes", "Generate summary"],
+			out_of_scope: ["Slack integration"],
+			v1_rationale: "",
+		});
+
+		expect(issues).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					id: "in_scope",
+					message:
+						"Keep 3-5 essential capabilities only. If it does not help this user reach the promised win by Sunday, cut it.",
+				}),
+				expect.objectContaining({
+					id: "out_of_scope",
+					message:
+						"Name at least 3 tempting extras you are explicitly cutting from this weekend's v1.",
+				}),
+				expect.objectContaining({
+					id: "v1_rationale",
+					message:
+						"Defend why this smaller version still gets the user to the promised outcome by Sunday.",
+				}),
+			]),
+		);
+	});
+
+	it("blocks lesson 1.6 completion when the keep list still exceeds five items", () => {
+		const lesson = getLessonById("1.6");
+		expect(lesson).toBeTruthy();
+
+		const issues = getCompletionIssues(lesson!, {
+			in_scope: [
+				"Paste notes",
+				"Generate summary",
+				"Review summary",
+				"Share next steps",
+				"Export summary",
+				"Analytics dashboard",
+			],
+			out_of_scope: ["Slack integration", "Team workspace", "Calendar sync"],
+			v1_rationale:
+				"This still works because the operator can go from notes to a usable summary in one pass.",
+		});
+
+		expect(issues).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					id: "in_scope",
+					message:
+						"Cut harder. Keep only 3-5 essentials so this still fits a believable Sunday-sized v1.",
+				}),
+			]),
 		);
 	});
 
@@ -1142,13 +1227,13 @@ describe("course registry", () => {
 		expect(
 			prepareFieldValuesForPersistence(lesson!, {
 				research_table: [
-					["", "", "", ""],
-					["Notion", "Fast setup", "Weak export", "Speed"],
+					["", "", "", "", ""],
+					["Notion", "Fast setup", "Weak export", "Speed", ""],
 				],
 			}),
 		).toEqual({
 			[FIELD_SHAPE_VERSION_FIELD_ID]: 1,
-			research_table: [["Notion", "Fast setup", "Weak export", "Speed"]],
+			research_table: [["Notion", "Fast setup", "Weak export", "Speed", ""]],
 		});
 	});
 

@@ -583,7 +583,7 @@ describe("WorkbenchRenderer", () => {
 
 		expect(markup).toContain("Upload core flow photo");
 		expect(markup).toContain("Watch first");
-		expect(markup).toContain("Watch video");
+		expect(markup).toContain("Walkthrough pending");
 	});
 
 	it("renders lesson 0.1 as a video-first welcome rep without the status rail", () => {
@@ -617,14 +617,20 @@ describe("WorkbenchRenderer", () => {
 		});
 
 		expect(markup).toContain("Watch first");
-		expect(markup).toContain("Do this now");
+		expect(markup).toContain("Anchor the flow");
+		expect(markup).toContain("Before you step away");
 		expect(markup).toContain("Upload the photo");
+		expect(markup).toContain("Check the upload");
+		expect(markup).toContain("The walkthrough is still being attached.");
 		expect(markup).toContain(
-			"Draw the core flow off-screen with paper and pen. Keep it to 5-7 steps, take one clear photo, and upload it here.",
+			"input -&gt; generate result -&gt; review -&gt; share -&gt; done",
 		);
-		expect(markup).toContain("Need context?");
-		expect(markup).toContain("Our user");
-		expect(markup).toContain("Outcome statement");
+		expect(markup).toContain("User");
+		expect(markup).toContain("Promise");
+		expect(markup).toContain("Startup operators");
+		expect(markup).toContain(
+			"It stays focused on one user&#x27;s shortest path",
+		);
 		expect(markup).not.toContain("Core flow stage");
 		expect(markup).not.toContain("Save image");
 		expect(markup).not.toContain("Use Figma instead");

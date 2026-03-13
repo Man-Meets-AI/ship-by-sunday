@@ -50,13 +50,7 @@ function getResearchNotesArtifact(): PinnedArtifact {
 
 	return buildArtifactPreview(lesson!, {
 		research_table: [
-			[
-				"Notion",
-				"Fast setup",
-				"Weak export",
-				"Speed",
-				"Pricing page",
-			],
+			["Notion", "Fast setup", "Weak export", "Speed", "Pricing page"],
 			[
 				"Tana",
 				"Flexible workflows",
@@ -67,6 +61,21 @@ function getResearchNotesArtifact(): PinnedArtifact {
 		],
 		research_summary:
 			"Users want speed first, but they get frustrated when the workflow falls apart under real use.",
+	});
+}
+
+function getCoreFlowArtifact(): PinnedArtifact {
+	const lesson = getLessonById("1.5");
+	expect(lesson).toBeTruthy();
+
+	return buildArtifactPreview(lesson!, {
+		__fieldShapeVersion: 5,
+		__core_flow_image_upload: {
+			kind: "upload",
+			status: "stored",
+			storageId: "core-flow-image",
+			url: "https://example.com/core-flow.png",
+		},
 	});
 }
 
@@ -103,6 +112,7 @@ function renderScopeWorkbench(fieldValues?: Record<string, unknown>) {
 				getUserStatementArtifact(),
 				getOutcomeStatementArtifact(),
 				getResearchNotesArtifact(),
+				getCoreFlowArtifact(),
 			]}
 			invalidFieldIds={new Set<string>()}
 		/>,
@@ -151,30 +161,26 @@ describe("Scope import workbench", () => {
 	it("renders the scope-cut prompt import flow in the main 1.6 workbench", () => {
 		const markup = renderScopeWorkbench();
 
-		expect(markup).toContain("Optional AI assist");
+		expect(markup).toContain("Scope against this");
+		expect(markup).toContain("Sunday test");
+		expect(markup).toContain("Saved core flow");
+		expect(markup).toContain("Stuck? Use AI as backup");
 		expect(markup).toContain(
-			"Use this only if you want a first-pass scope cut. You can skip it and tighten the keep / cut decisions manually below.",
+			"Make the keep / cut decision yourself first. Use this only if you get stuck and need a tighter first-pass cut to react to.",
 		);
-		expect(markup).toContain("Paste scope cut");
-		expect(markup).toContain("View prompt");
-		expect(markup).toContain("Copy prompt");
-		expect(markup).toContain("Generate with Codex");
+		expect(markup).toContain("Open backup assist");
 		expect(markup).toContain("Keep in v1");
 		expect(markup).toContain("Cut from v1");
-		expect(markup).toContain("Why this version is enough");
+		expect(markup).toContain(
+			"Why this smaller version still delivers the promise",
+		);
 		expect(markup).not.toContain("Paste ChatGPT scope cut");
 	});
 
 	it("renders imported scope values while keeping the manual editing controls visible", () => {
 		const markup = renderScopeWorkbench({
-			in_scope: [
-				"Paste meeting notes",
-				"Generate a clean action summary",
-			],
-			out_of_scope: [
-				"Slack integration",
-				"Team analytics dashboard",
-			],
+			in_scope: ["Paste meeting notes", "Generate a clean action summary"],
+			out_of_scope: ["Slack integration", "Team analytics dashboard"],
 			v1_rationale:
 				"This version is enough because the user can go from raw notes to a usable action summary in one pass.",
 		});
@@ -185,6 +191,8 @@ describe("Scope import workbench", () => {
 		expect(markup).toContain(
 			"This version is enough because the user can go from raw notes to a usable action summary in one pass.",
 		);
-		expect(markup).toContain("Optional AI assist");
+		expect(markup).toContain("Use 1.5 as the cut line");
+		expect(markup).toContain("Not tight enough yet");
+		expect(markup).toContain("Stuck? Use AI as backup");
 	});
 });
