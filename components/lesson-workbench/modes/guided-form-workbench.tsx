@@ -244,7 +244,7 @@ export function GuidedFormWorkbench({
 						(state) => state.id === section.id,
 					);
 					const blocked = (section.blockedByFieldIds ?? []).some(
-						(fieldId) => !isFilled(fieldValues[fieldId] as any),
+						(fieldId) => !isFilled(fieldValues[fieldId]),
 					);
 					const layoutClass =
 						section.layout === "split"

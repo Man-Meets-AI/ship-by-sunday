@@ -2,171 +2,55 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useConvexAuth, useMutation, useQuery } from "convex/react";
 
-import {
-	getDefaultLayoutModeForLesson,
-	getLesson,
-	getLessonHref,
-	lessonSupportsLayoutToggle,
-	normalizeLayoutModeForLesson,
-	type LessonConfig,
-	type LessonLayoutMode,
-} from "@/lib/course/manifest";
-import { api } from "@/convex/_generated/api";
-import { WorkbenchRenderer } from "@/components/lesson-workbench";
 import {
 	LessonShellFocus,
 	LessonShellSplit,
 	LessonShellWatch,
-	type PinnedArtifact,
 } from "@/components/lesson-shells";
+import { useLessonChromeState } from "@/components/lesson-page/use-lesson-chrome-state";
+import { useLessonCompletion } from "@/components/lesson-page/use-lesson-completion";
+import {
+	type LessonSaveStatus,
+	useLessonState,
+} from "@/components/lesson-page/use-lesson-state";
+import { WorkbenchRenderer } from "@/components/lesson-workbench";
 import { ProductShell } from "@/components/product-shell";
 import {
 	buildResolvedArtifactPreview,
 	getCompletionIssues,
 	getObjectiveTasks,
 	OBJECTIVE_CHECKLIST_FIELD_ID,
-	type CompletionIssue,
 } from "@/lib/course/registry";
+import {
+	getLesson,
+	getLessonHref,
+	lessonSupportsLayoutToggle,
+	type LessonConfig,
+	type LessonLayoutMode,
+} from "@/lib/course/manifest";
 import type { ProductTheme } from "@/lib/product-theme";
 
-type LessonChromeState = {
-	layoutMode: LessonLayoutMode;
-	coachVisible: boolean;
-	activeCoachPanel: "watch" | "transcript" | "examples" | "resources";
-};
-
-function getAvailableCoachPanels(
-	lesson: LessonConfig,
-): LessonChromeState["activeCoachPanel"][] {
-	return lesson.coachVideoPlacement === "workbench"
-		? ["transcript", "examples", "resources"]
-		: ["watch", "transcript", "examples", "resources"];
-}
-
-type UnlockedLessonState = {
-	accessStatus: "unlocked";
-	fieldValues: Record<string, unknown>;
-	status: string;
-	pinnedArtifacts: PinnedArtifact[];
-};
-
-type LockedLessonState = {
-	accessStatus: "locked";
-};
-
-type CompletionErrorData = {
-	code: "INCOMPLETE_LESSON";
-	message: string;
-	issues?: CompletionIssue[];
-};
-
-type CompletionPhase = "idle" | "submitting" | "celebrating";
-
-type CompletionPayload = {
-	completedLessonId: string;
-	artifactLabel: string;
-	nextLessonId: string | null;
-	nextLessonLabel: string | null;
-};
-
-function getCompletionErrorData(error: unknown): CompletionErrorData | null {
-	if (!error || typeof error !== "object" || !("data" in error)) {
-		return null;
-	}
-
-	const data = (error as { data?: unknown }).data;
-	if (!data || typeof data !== "object") {
-		return null;
-	}
-
-	const candidate = data as Partial<CompletionErrorData>;
-	if (candidate.code !== "INCOMPLETE_LESSON") {
-		return null;
-	}
-
-	return {
-		code: "INCOMPLETE_LESSON",
-		message:
-			typeof candidate.message === "string"
-				? candidate.message
-				: "Finish the required work before continuing.",
-		issues: Array.isArray(candidate.issues)
-			? (candidate.issues as CompletionIssue[])
-			: [],
-	};
-}
-
-function getCompletionNavigationDelayMs() {
-	if (
-		typeof window !== "undefined" &&
-		window.matchMedia("(prefers-reduced-motion: reduce)").matches
-	) {
-		return 250;
-	}
-
-	return 900;
-}
-
-function getDefaultCoachPanel(
-	lesson: LessonConfig,
-): LessonChromeState["activeCoachPanel"] {
-	const availablePanels = getAvailableCoachPanels(lesson);
-	if (
-		lesson.panelDefaults.transcript === "open" &&
-		availablePanels.includes("transcript")
-	) {
-		return "transcript";
-	}
-	if (
-		lesson.panelDefaults.examples === "open" &&
-		availablePanels.includes("examples")
-	) {
-		return "examples";
-	}
-	if (
-		lesson.panelDefaults.resources === "open" &&
-		availablePanels.includes("resources")
-	) {
-		return "resources";
-	}
-	return availablePanels[0] ?? "watch";
-}
-
-function getDefaultChromeState(lesson: LessonConfig): LessonChromeState {
-	return {
-		layoutMode: getDefaultLayoutModeForLesson(lesson),
-		coachVisible: lesson.panelDefaults.coach !== "minimized",
-		activeCoachPanel: getDefaultCoachPanel(lesson),
-	};
-}
-
-function getStageUnlockConfig(lesson: LessonConfig) {
-	return lesson.briefAssembler?.variant === "stage_unlock"
-		? lesson.briefAssembler
-		: null;
-}
-
-function storageKey(lessonId: string) {
-	return `sbs:lesson-ui:${lessonId}`;
-}
-
-function isChromeState(value: unknown): value is LessonChromeState {
-	if (!value || typeof value !== "object") {
-		return false;
-	}
-
-	const candidate = value as Partial<LessonChromeState>;
-	return (
-		(candidate.layoutMode === "split" || candidate.layoutMode === "focus") &&
-		typeof candidate.coachVisible === "boolean" &&
-		(candidate.activeCoachPanel === "watch" ||
-			candidate.activeCoachPanel === "transcript" ||
-			candidate.activeCoachPanel === "examples" ||
-			candidate.activeCoachPanel === "resources")
-	);
+function getSaveStatusMeta(saveStatus: LessonSaveStatus) {
+	return saveStatus === "saving"
+		? {
+				label: "Saving draft...",
+				className: "text-product-muted",
+			}
+		: saveStatus === "saved"
+			? {
+					label: "All changes saved",
+					className: "text-product-accent",
+				}
+			: saveStatus === "error"
+				? {
+						label: "Save failed. Edit any field to retry.",
+						className: "text-[#a83232]",
+					}
+				: {
+						label: "Draft not changed yet",
+						className: "text-product-muted",
+					};
 }
 
 export function LessonPage({
@@ -176,6 +60,7 @@ export function LessonPage({
 	initialTheme: ProductTheme;
 	lessonId: string;
 }) {
+	const router = useRouter();
 	const lesson = getLesson(lessonId);
 	if (!lesson) {
 		throw new Error(`Unknown lesson: ${lessonId}`);
@@ -183,160 +68,72 @@ export function LessonPage({
 
 	const lessonContent = lesson.content;
 	const isWatchLesson = lesson.shell === "watch";
-	const router = useRouter();
-	const { isAuthenticated, isLoading } = useConvexAuth();
-	const fallbackChromeState = useMemo(
-		() => getDefaultChromeState(lesson),
-		[lesson],
+	const {
+		lessonState,
+		fieldValues,
+		fieldValuesReady,
+		saveStatus,
+		setFieldValue,
+		setSaveStatusError,
+	} = useLessonState({ lessonId });
+	const { chromeState, setLayoutMode, toggleCoach, setActiveCoachPanel } =
+		useLessonChromeState({ lesson, lessonId });
+	const pinnedArtifacts =
+		lessonState?.accessStatus === "unlocked" ? lessonState.pinnedArtifacts : [];
+	const previousHref = lesson.prevLessonId
+		? getLessonHref(lesson.prevLessonId)
+		: null;
+	const resolvedArtifactPreview = buildResolvedArtifactPreview(
+		lesson,
+		fieldValues,
+		pinnedArtifacts,
 	);
-	const lessonState = useQuery(
-		api.course.getLessonState,
-		isAuthenticated && !isLoading ? { lessonId } : "skip",
-	) as UnlockedLessonState | LockedLessonState | undefined;
-	const markLessonViewed = useMutation(api.course.markLessonViewed);
-	const saveLessonDraft = useMutation(api.course.saveLessonDraft);
-	const completeLesson = useMutation(api.course.completeLesson);
-	const [fieldValues, setFieldValues] = useState<Record<string, unknown>>({});
-	const [fieldValuesReady, setFieldValuesReady] = useState(false);
-	const [saveStatus, setSaveStatus] = useState<
-		"idle" | "saved" | "saving" | "error"
-	>("idle");
-	const [completionPhase, setCompletionPhase] =
-		useState<CompletionPhase>("idle");
-	const [completionPayload, setCompletionPayload] =
-		useState<CompletionPayload | null>(null);
-	const [serverCompletionIssues, setServerCompletionIssues] = useState<
-		CompletionIssue[]
-	>([]);
-	const [serverCompletionMessage, setServerCompletionMessage] = useState<
-		string | null
-	>(null);
-	const [chromeState, setChromeState] =
-		useState<LessonChromeState>(fallbackChromeState);
-	const initializedForLessonId = useRef<string | null>(null);
-	const lastMarkedLessonId = useRef<string | null>(null);
-	const lastSavedSnapshot = useRef("");
-	const completionTimeoutRef = useRef<number | null>(null);
-
-	useEffect(
-		() => () => {
-			if (completionTimeoutRef.current !== null) {
-				window.clearTimeout(completionTimeoutRef.current);
-			}
-		},
-		[],
-	);
-
-	useEffect(() => {
-		setFieldValuesReady(false);
-	}, [lessonId]);
-
-	useEffect(() => {
-		if (!lessonState || lessonState.accessStatus !== "unlocked") {
-			setFieldValuesReady(false);
-			return;
-		}
-
-		if (initializedForLessonId.current !== lessonId) {
-			const nextValues = lessonState.fieldValues ?? {};
-			setFieldValues(nextValues);
-			initializedForLessonId.current = lessonId;
-			lastSavedSnapshot.current = JSON.stringify(nextValues);
-			setSaveStatus("idle");
-			setFieldValuesReady(true);
-			setCompletionPhase("idle");
-			setCompletionPayload(null);
-			setServerCompletionIssues([]);
-			setServerCompletionMessage(null);
-			if (completionTimeoutRef.current !== null) {
-				window.clearTimeout(completionTimeoutRef.current);
-				completionTimeoutRef.current = null;
-			}
-			return;
-		}
-
-		setFieldValuesReady(true);
-	}, [lessonId, lessonState]);
-
-	useEffect(() => {
-		const defaults = fallbackChromeState;
-		const stored = window.localStorage.getItem(storageKey(lessonId));
-		if (!stored) {
-			setChromeState(defaults);
-			return;
-		}
-
-		try {
-			const parsed = JSON.parse(stored);
-			if (!isChromeState(parsed)) {
-				setChromeState(defaults);
-				return;
-			}
-
-			setChromeState({
-				...parsed,
-				layoutMode: normalizeLayoutModeForLesson(lesson, parsed.layoutMode),
-				activeCoachPanel: getAvailableCoachPanels(lesson).includes(
-					parsed.activeCoachPanel,
-				)
-					? parsed.activeCoachPanel
-					: defaults.activeCoachPanel,
-			});
-		} catch {
-			setChromeState(defaults);
-		}
-	}, [fallbackChromeState, lesson, lessonId]);
-
-	useEffect(() => {
-		window.localStorage.setItem(
-			storageKey(lessonId),
-			JSON.stringify(chromeState),
-		);
-	}, [chromeState, lessonId]);
-
-	useEffect(() => {
-		if (
-			!lessonState ||
-			lessonState.accessStatus !== "unlocked" ||
-			initializedForLessonId.current !== lessonId
-		) {
-			return;
-		}
-
-		const snapshot = JSON.stringify(fieldValues);
-		if (snapshot === lastSavedSnapshot.current) {
-			return;
-		}
-
-		setSaveStatus("saving");
-
-		const timeout = window.setTimeout(() => {
-			void saveLessonDraft({ lessonId, fieldValues }).then(
-				() => {
-					lastSavedSnapshot.current = JSON.stringify(fieldValues);
-					setSaveStatus("saved");
-				},
-				() => {
-					setSaveStatus("error");
-				},
-			);
-		}, 650);
-
-		return () => window.clearTimeout(timeout);
-	}, [fieldValues, lessonId, lessonState, saveLessonDraft]);
-
-	useEffect(() => {
-		if (!lessonState || lessonState.accessStatus !== "unlocked") {
-			return;
-		}
-
-		if (lastMarkedLessonId.current === lessonId) {
-			return;
-		}
-
-		lastMarkedLessonId.current = lessonId;
-		void markLessonViewed({ lessonId });
-	}, [lessonId, lessonState, markLessonViewed]);
+	const objectiveTasks = getObjectiveTasks(lesson, fieldValues, {
+		pinnedArtifacts,
+		resolvedArtifactPreview,
+	});
+	const completionIssues = getCompletionIssues(lesson, fieldValues, {
+		pinnedArtifacts,
+		resolvedArtifactPreview,
+	});
+	const completedObjectiveCount = objectiveTasks.filter(
+		(task) => task.status === "complete",
+	).length;
+	const {
+		completionPayload,
+		completionCue,
+		displayedCompletionIssues,
+		invalidFieldIds,
+		invalidFieldMessages,
+		serverCompletionMessage,
+		showCompletionFeedback,
+		lessonReadyToComplete,
+		isCompleting,
+		isCelebrating,
+		completionButtonDisabled,
+		pendingIssueSummary,
+		hasMorePendingIssues,
+		completionNextLine,
+		completionArtifactLine,
+		readyStateCopy,
+		completionPendingLabel,
+		celebrationEyebrow,
+		celebrationTitle,
+		showCelebrationBanner,
+		completionButtonLabel,
+		clearCompletionFeedback,
+		handleCompletionAction,
+	} = useLessonCompletion({
+		lessonId,
+		lesson,
+		fieldValues,
+		completionIssues,
+		objectiveTaskCount: objectiveTasks.length,
+		isWatchLesson,
+		lessonStatus:
+			lessonState?.accessStatus === "unlocked" ? lessonState.status : "locked",
+		onUnexpectedSaveError: setSaveStatusError,
+	});
 
 	const shellProps = {
 		initialTheme,
@@ -345,11 +142,7 @@ export function LessonPage({
 		layoutMode: chromeState.layoutMode,
 		onLayoutModeChange:
 			!isWatchLesson && lessonSupportsLayoutToggle(lesson)
-				? (layoutMode: LessonChromeState["layoutMode"]) =>
-						setChromeState((current) => ({
-							...current,
-							layoutMode: normalizeLayoutModeForLesson(lesson, layoutMode),
-						}))
+				? (layoutMode: LessonLayoutMode) => setLayoutMode(layoutMode)
 				: undefined,
 		coachVisible:
 			!isWatchLesson && chromeState.layoutMode === "split"
@@ -357,19 +150,9 @@ export function LessonPage({
 				: false,
 		onCoachToggle:
 			!isWatchLesson && chromeState.layoutMode === "split"
-				? () =>
-						setChromeState((current) => ({
-							...current,
-							coachVisible: !current.coachVisible,
-						}))
+				? () => toggleCoach()
 				: undefined,
-		completionCue:
-			completionPhase === "celebrating" && completionPayload
-				? {
-						completedLessonId: completionPayload.completedLessonId,
-						nextLessonId: completionPayload.nextLessonId,
-					}
-				: null,
+		completionCue: null,
 	};
 
 	if (lessonState === undefined) {
@@ -417,124 +200,11 @@ export function LessonPage({
 		);
 	}
 
-	const { pinnedArtifacts } = lessonState;
-	const stageUnlockConfig = getStageUnlockConfig(lesson);
-	const previousHref = lesson.prevLessonId
-		? getLessonHref(lesson.prevLessonId)
-		: null;
-	const resolvedArtifactPreview = buildResolvedArtifactPreview(
-		lesson,
-		fieldValues as any,
-		pinnedArtifacts as any,
-	);
-	const objectiveTasks = getObjectiveTasks(lesson, fieldValues as any, {
-		pinnedArtifacts: pinnedArtifacts as any,
-		resolvedArtifactPreview,
-	});
-	const completionIssues = getCompletionIssues(lesson, fieldValues as any, {
-		pinnedArtifacts: pinnedArtifacts as any,
-		resolvedArtifactPreview,
-	});
-	const completedObjectiveCount = objectiveTasks.filter(
-		(task) => task.status === "complete",
-	).length;
-	const validationVisible =
-		serverCompletionIssues.length > 0 || Boolean(serverCompletionMessage);
-	const displayedCompletionIssues = validationVisible
-		? serverCompletionIssues.length > 0
-			? serverCompletionIssues
-			: completionIssues
-		: [];
-	const invalidFieldIds = new Set(
-		displayedCompletionIssues
-			.filter((issue) => issue.kind === "field")
-			.map((issue) => issue.id),
-	);
-	const invalidFieldMessages = new Map(
-		displayedCompletionIssues
-			.filter(
-				(issue): issue is CompletionIssue & { message: string } =>
-					issue.kind === "field" &&
-					"message" in issue &&
-					typeof issue.message === "string",
-			)
-			.map((issue) => [issue.id, issue.message]),
-	);
-	const showCompletionFeedback =
-		validationVisible &&
-		(displayedCompletionIssues.length > 0 || Boolean(serverCompletionMessage));
-	const lessonReadyToComplete =
-		completionIssues.length === 0 &&
-		(isWatchLesson || objectiveTasks.length > 0) &&
-		lessonState.status !== "completed";
-	const isCompleting = completionPhase === "submitting";
-	const isCelebrating = completionPhase === "celebrating";
-	const requiresManualContinuation = lesson.id === "1.1";
-	const completionButtonDisabled =
-		isCompleting ||
-		(isCelebrating && !requiresManualContinuation) ||
-		(!isCelebrating && !lessonReadyToComplete);
-	const pendingCompletionIssues = completionIssues.map((issue) => issue.label);
-	const pendingIssueSummary = pendingCompletionIssues.slice(0, 3).join(" • ");
-	const hasMorePendingIssues = pendingCompletionIssues.length > 3;
-	const completionNextLine = stageUnlockConfig
-		? `Next: ${stageUnlockConfig.nextStepLabel}`
-		: lesson.nextStepLabel
-			? `Next: ${lesson.nextStepLabel}`
-			: completionPayload?.nextLessonLabel
-				? `Next unlocked: ${completionPayload.nextLessonLabel}`
-				: "Mission updated";
-	const completionArtifactLine = stageUnlockConfig
-		? `${lesson.artifact.label} locked. Design has a real handoff now.`
-		: completionPayload
-			? `Artifact locked: ${completionPayload.artifactLabel}`
-			: null;
-	const readyStateCopy =
-		stageUnlockConfig?.readyStateCopy ??
-		"Everything on this page is filled out. Complete the lesson.";
-	const completionActionLabel =
-		stageUnlockConfig?.completionCtaLabel ?? "Complete lesson";
-	const completionPendingLabel = stageUnlockConfig
-		? "Unlocking..."
-		: "Locking in...";
-	const celebrationEyebrow =
-		stageUnlockConfig?.celebrationEyebrow ?? "System updated";
-	const celebrationTitle =
-		stageUnlockConfig?.celebrationTitle ?? "Lesson cleared";
-	const showCelebrationBanner = isCelebrating && completionPayload;
-	const saveStatusMeta =
-		saveStatus === "saving"
-			? {
-					label: "Saving draft...",
-					className: "text-product-muted",
-				}
-			: saveStatus === "saved"
-				? {
-						label: "All changes saved",
-						className: "text-product-accent",
-					}
-				: saveStatus === "error"
-					? {
-							label: "Save failed. Edit any field to retry.",
-							className: "text-[#a83232]",
-						}
-					: {
-							label: "Draft not changed yet",
-							className: "text-product-muted",
-						};
+	const saveStatusMeta = getSaveStatusMeta(saveStatus);
 
 	const setValue = (fieldId: string, value: unknown) => {
-		if (serverCompletionIssues.length > 0) {
-			setServerCompletionIssues([]);
-		}
-		if (serverCompletionMessage) {
-			setServerCompletionMessage(null);
-		}
-
-		setFieldValues((current) => ({
-			...current,
-			[fieldId]: value,
-		}));
+		clearCompletionFeedback();
+		setFieldValue(fieldId, value);
 	};
 
 	const setObjectiveTaskChecked = (taskId: string, checked: boolean) => {
@@ -552,83 +222,6 @@ export function LessonPage({
 				checked: task.id === taskId ? checked : task.status === "complete",
 			})),
 		);
-	};
-
-	const navigateToNextStep = (nextLessonId: string | null) => {
-		if (nextLessonId) {
-			router.push(`/lesson/${nextLessonId}`);
-			return;
-		}
-
-		router.push("/mission");
-	};
-
-	const handleCompleteLesson = () => {
-		if (completionButtonDisabled) {
-			return;
-		}
-
-		setServerCompletionIssues([]);
-		setServerCompletionMessage(null);
-
-		if (completionIssues.length > 0) {
-			return;
-		}
-
-		if (completionTimeoutRef.current !== null) {
-			window.clearTimeout(completionTimeoutRef.current);
-			completionTimeoutRef.current = null;
-		}
-
-		setCompletionPhase("submitting");
-
-		void completeLesson({ lessonId, fieldValues }).then(
-			(result: { nextLessonId: string | null }) => {
-				const nextLesson = result.nextLessonId
-					? getLesson(result.nextLessonId)
-					: null;
-
-				setCompletionPayload({
-					completedLessonId: lessonId,
-					artifactLabel: lesson.artifact.label,
-					nextLessonId: result.nextLessonId,
-					nextLessonLabel: nextLesson
-						? `${nextLesson.id} ${nextLesson.shortTitle}`
-						: null,
-				});
-				setCompletionPhase("celebrating");
-				if (requiresManualContinuation) {
-					return;
-				}
-				completionTimeoutRef.current = window.setTimeout(() => {
-					completionTimeoutRef.current = null;
-					navigateToNextStep(result.nextLessonId);
-				}, getCompletionNavigationDelayMs());
-			},
-			(error: unknown) => {
-				setCompletionPhase("idle");
-				const completionError = getCompletionErrorData(error);
-				if (completionError) {
-					setServerCompletionIssues(completionError.issues ?? []);
-					setServerCompletionMessage(completionError.message);
-					return;
-				}
-
-				setSaveStatus("error");
-				setServerCompletionMessage(
-					"Unable to complete the lesson right now. Try again.",
-				);
-			},
-		);
-	};
-
-	const handleCompletionAction = () => {
-		if (isCelebrating && requiresManualContinuation && completionPayload) {
-			navigateToNextStep(completionPayload.nextLessonId);
-			return;
-		}
-
-		handleCompleteLesson();
 	};
 
 	const completionAction = (
@@ -661,20 +254,10 @@ export function LessonPage({
 					>
 						<polyline points="20 6 9 17 4 12" />
 					</svg>
-					{celebrationTitle}
+					{completionButtonLabel}
 				</>
-			) : isCompleting ? (
-				completionPendingLabel
-			) : isCelebrating && requiresManualContinuation ? (
-				completionPayload?.nextLessonLabel ? (
-					`Continue to ${completionPayload.nextLessonLabel}`
-				) : (
-					"Back to mission"
-				)
-			) : lessonReadyToComplete ? (
-				completionActionLabel
 			) : (
-				"Complete required steps"
+				completionButtonLabel
 			)}
 		</button>
 	);
@@ -826,7 +409,6 @@ export function LessonPage({
 	);
 
 	const footer = isWatchLesson ? compactFooter : standardFooter;
-
 	const workbench = isWatchLesson ? null : (
 		<WorkbenchRenderer
 			lesson={lesson}
@@ -841,7 +423,7 @@ export function LessonPage({
 	);
 
 	return (
-		<ProductShell {...shellProps}>
+		<ProductShell {...shellProps} completionCue={completionCue}>
 			{isWatchLesson ? (
 				<LessonShellWatch
 					lesson={lesson}
@@ -853,13 +435,7 @@ export function LessonPage({
 					lesson={lesson}
 					coachVisible={chromeState.coachVisible}
 					activeCoachPanel={chromeState.activeCoachPanel}
-					onCoachPanelChange={(activeCoachPanel) =>
-						setChromeState((current) => ({
-							...current,
-							activeCoachPanel,
-							coachVisible: true,
-						}))
-					}
+					onCoachPanelChange={setActiveCoachPanel}
 					objectiveTasks={objectiveTasks}
 					onObjectiveTaskToggle={setObjectiveTaskChecked}
 					pinnedArtifacts={pinnedArtifacts}
@@ -873,13 +449,7 @@ export function LessonPage({
 					lesson={lesson}
 					coachVisible={chromeState.coachVisible}
 					activeCoachPanel={chromeState.activeCoachPanel}
-					onCoachPanelChange={(activeCoachPanel) =>
-						setChromeState((current) => ({
-							...current,
-							activeCoachPanel,
-							coachVisible: true,
-						}))
-					}
+					onCoachPanelChange={setActiveCoachPanel}
 					objectiveTasks={objectiveTasks}
 					onObjectiveTaskToggle={setObjectiveTaskChecked}
 					pinnedArtifacts={pinnedArtifacts}
@@ -923,7 +493,7 @@ function LessonSkeleton({
 	layoutMode,
 }: {
 	shell: LessonConfig["shell"];
-	layoutMode: LessonChromeState["layoutMode"];
+	layoutMode: LessonLayoutMode;
 }) {
 	if (shell === "watch") {
 		return (

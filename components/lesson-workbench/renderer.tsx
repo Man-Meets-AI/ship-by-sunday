@@ -73,17 +73,14 @@ export function WorkbenchRenderer({
 	const fields = lesson.workbenchFields ?? [];
 	const resolvedArtifactPreview = buildResolvedArtifactPreview(
 		lesson,
-		fieldValues as any,
-		pinnedArtifacts as any,
+		fieldValues,
+		pinnedArtifacts,
 	);
-	const stageUnlockSummary = buildStageUnlockSummary(
-		lesson,
-		pinnedArtifacts as any,
-	);
+	const stageUnlockSummary = buildStageUnlockSummary(lesson, pinnedArtifacts);
 	const workbenchSections = getWorkbenchSections(lesson);
-	const sectionStates = getWorkbenchSectionStates(lesson, fieldValues as any);
-	const objectiveTasks = getObjectiveTasks(lesson, fieldValues as any, {
-		pinnedArtifacts: pinnedArtifacts as any,
+	const sectionStates = getWorkbenchSectionStates(lesson, fieldValues);
+	const objectiveTasks = getObjectiveTasks(lesson, fieldValues, {
+		pinnedArtifacts,
 		resolvedArtifactPreview,
 	});
 	const completedTaskCount = objectiveTasks.filter(

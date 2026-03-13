@@ -8,6 +8,9 @@ function readSource(relativePath: string) {
 describe("watch lesson shell contract", () => {
 	it("routes watch lessons through a dedicated shell and compact footer path", () => {
 		const source = readSource("components/lesson-page.tsx");
+		const completionSource = readSource(
+			"components/lesson-page/use-lesson-completion.ts",
+		);
 		const shellSource = readSource("components/lesson-shells.tsx");
 		const videoSurfaceSource = readSource(
 			"components/lesson-video-surface.tsx",
@@ -18,7 +21,9 @@ describe("watch lesson shell contract", () => {
 			/onLayoutModeChange:\s*!isWatchLesson && lessonSupportsLayoutToggle\(lesson\)/,
 		);
 		expect(source).toMatch(/coachVisible:\s*!isWatchLesson &&/);
-		expect(source).toContain("(isWatchLesson || objectiveTasks.length > 0)");
+		expect(completionSource).toContain(
+			"(isWatchLesson || objectiveTaskCount > 0)",
+		);
 		expect(source).toContain(
 			"const footer = isWatchLesson ? compactFooter : standardFooter;",
 		);

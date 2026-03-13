@@ -6,6 +6,26 @@ import {
 	workbenchTitleClass,
 } from "./workbench-readability";
 
+function renderLessonTitle(title: string) {
+	const protectedPhrase = "Ship by Sunday";
+	const phraseStart = title.indexOf(protectedPhrase);
+
+	if (phraseStart === -1) {
+		return title;
+	}
+
+	const before = title.slice(0, phraseStart);
+	const after = title.slice(phraseStart + protectedPhrase.length);
+
+	return (
+		<>
+			{before}
+			<span className="whitespace-nowrap">{protectedPhrase}</span>
+			{after}
+		</>
+	);
+}
+
 export function WorkbenchHeader({
 	lesson,
 	lessonContent,
@@ -28,7 +48,7 @@ export function WorkbenchHeader({
 					</span>
 				) : null}
 			</div>
-			<h1 className={workbenchTitleClass}>{lesson.title}</h1>
+			<h1 className={workbenchTitleClass}>{renderLessonTitle(lesson.title)}</h1>
 			<p className={workbenchIntroCopyClass}>{lessonContent.intro}</p>
 		</div>
 	);

@@ -30,7 +30,7 @@ export function BuildKickoffWorkbench({
 	const promptState = getPromptTemplateState(
 		"build_kickoff_prompt",
 		pinnedArtifacts,
-		fieldValues as any,
+		fieldValues,
 	);
 	const flow = useBuildKickoffFlow({ fieldValues, onFieldChange, fields });
 

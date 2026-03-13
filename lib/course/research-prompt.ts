@@ -1,5 +1,9 @@
 import type { LessonPromptImport, LessonPromptTemplateId } from "./contracts";
 import type { PersistedFieldValues } from "./registry";
+import {
+	normalizeFieldValues,
+	type FieldValuesSource,
+} from "./registry/shared";
 import { getReferenceGalleryImageUrls } from "./reference-gallery";
 
 export type CompetitorResearchPromptContext = {
@@ -299,8 +303,9 @@ function getArtifactSections(artifact: PromptTemplateArtifactContext | null) {
 
 function getBuildKickoffPromptContext(
 	pinnedArtifacts: PromptTemplateArtifactContext[],
-	fieldValues: PersistedFieldValues,
+	fieldValues: FieldValuesSource,
 ): BuildKickoffPromptContext | null {
+	const values = normalizeFieldValues(fieldValues);
 	const productBrief =
 		pinnedArtifacts.find(
 			(artifact) => artifact.artifactKey === "product_brief",
@@ -309,12 +314,9 @@ function getBuildKickoffPromptContext(
 		pinnedArtifacts.find(
 			(artifact) => artifact.artifactKey === "design_spec",
 		) ?? null;
-	const buildPathValue = getTrimmedFieldValue(fieldValues, "build_path");
-	const firstSlice = getTrimmedFieldValue(fieldValues, "first_slice");
-	const definitionOfDone = getTrimmedFieldValue(
-		fieldValues,
-		"definition_of_done",
-	);
+	const buildPathValue = getTrimmedFieldValue(values, "build_path");
+	const firstSlice = getTrimmedFieldValue(values, "first_slice");
+	const definitionOfDone = getTrimmedFieldValue(values, "definition_of_done");
 
 	if (
 		!productBrief ||
@@ -635,8 +637,10 @@ export function buildVisualDirectionGuidePrompt(
 export function getPromptTemplateState(
 	promptTemplateId: LessonPromptTemplateId,
 	pinnedArtifacts: PromptTemplateArtifactContext[],
-	fieldValues: PersistedFieldValues = {},
+	fieldValues: FieldValuesSource = {},
 ): PromptTemplateState {
+	const values = normalizeFieldValues(fieldValues);
+
 	if (promptTemplateId === "competitor_research") {
 		const context = getCompetitorResearchPromptContext(pinnedArtifacts);
 		if (!context) {
@@ -672,7 +676,7 @@ export function getPromptTemplateState(
 	if (promptTemplateId === "visual_direction_guide") {
 		const context = getVisualDirectionGuidePromptContext(
 			pinnedArtifacts,
-			fieldValues,
+			values,
 		);
 		if (!context) {
 			return {
@@ -689,7 +693,7 @@ export function getPromptTemplateState(
 	}
 
 	if (promptTemplateId === "build_kickoff_prompt") {
-		const context = getBuildKickoffPromptContext(pinnedArtifacts, fieldValues);
+		const context = getBuildKickoffPromptContext(pinnedArtifacts, values);
 		if (!context) {
 			return {
 				prompt: null,

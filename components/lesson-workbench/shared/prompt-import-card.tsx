@@ -191,7 +191,7 @@ export function PromptImportCard({
 		? getPromptTemplateState(
 				promptImport.promptTemplateId,
 				pinnedArtifacts,
-				fieldValues as any,
+				fieldValues,
 			)
 		: { prompt: null, disabledReason: "This prompt import is not wired yet." };
 	const uiCopy = PROMPT_IMPORT_COPY[promptTemplateId];

@@ -26,10 +26,10 @@ describe("lesson state contract", () => {
 	});
 
 	it("keeps Convex lesson state payloads limited to dynamic data", () => {
-		const source = readSource("convex/course.ts");
+		const source = readSource("convex/course/lessonState.ts");
 		const getLessonStateBlock = source.slice(
-			source.indexOf("export const getLessonState = query({"),
-			source.indexOf("export const saveLessonDraft = mutation({"),
+			source.indexOf("export async function getLessonStateHandler("),
+			source.indexOf("export const saveLessonDraftArgs ="),
 		);
 
 		expect(getLessonStateBlock).toContain('accessStatus: "locked"');
@@ -41,5 +41,15 @@ describe("lesson state contract", () => {
 		expect(getLessonStateBlock).not.toContain("requiredLessonId:");
 		expect(getLessonStateBlock).not.toContain("shortTitle:");
 		expect(getLessonStateBlock).not.toMatch(/\blesson\s*:/);
+	});
+
+	it("keeps convex/course.ts as the stable API entrypoint after the split", () => {
+		const source = readSource("convex/course.ts");
+
+		expect(source).toContain('from "./course/lessonState"');
+		expect(source).toContain('from "./course/mission"');
+		expect(source).toContain('from "./course/artifacts"');
+		expect(source).toContain("export const getLessonState = query({");
+		expect(source).toContain("handler: getLessonStateHandler,");
 	});
 });

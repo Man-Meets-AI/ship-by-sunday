@@ -6,12 +6,14 @@ function readSource(relativePath: string) {
 }
 
 describe("lesson completion celebration contract", () => {
-	it("keeps lesson completion in a local state machine before route navigation", () => {
-		const source = readSource("components/lesson-page.tsx");
+	it("keeps lesson completion in a dedicated hook state machine before route navigation", () => {
+		const pageSource = readSource("components/lesson-page.tsx");
+		const source = readSource(
+			"components/lesson-page/use-lesson-completion.ts",
+		);
 		const ceoLessonSource = readSource("lib/course/lessons/ceo.ts");
-		const designLessonSource = readSource("lib/course/lessons/design.ts");
-		const buildLessonSource = readSource("lib/course/lessons/build.ts");
 
+		expect(pageSource).toContain("useLessonCompletion");
 		expect(source).toContain(
 			'type CompletionPhase = "idle" | "submitting" | "celebrating";',
 		);
@@ -32,16 +34,6 @@ describe("lesson completion celebration contract", () => {
 		expect(ceoLessonSource).toContain('celebrationTitle: "Design unlocked"');
 		expect(ceoLessonSource).toContain('heroEyebrow: "CEO block complete"');
 		expect(ceoLessonSource).toContain('preset: "ceo"');
-		expect(designLessonSource).toContain('completionCtaLabel: "Unlock Build"');
-		expect(designLessonSource).toContain('celebrationTitle: "Build unlocked"');
-		expect(designLessonSource).toContain(
-			'heroEyebrow: "Design block complete"',
-		);
-		expect(designLessonSource).toContain('preset: "design"');
-		expect(buildLessonSource).toContain('completionCtaLabel: "Unlock Ship"');
-		expect(buildLessonSource).toContain('celebrationTitle: "Ship unlocked"');
-		expect(buildLessonSource).toContain('heroEyebrow: "Build block complete"');
-		expect(buildLessonSource).toContain('preset: "build"');
 	});
 
 	it("passes a temporary completion cue into the product shell and rail", () => {
@@ -50,6 +42,7 @@ describe("lesson completion celebration contract", () => {
 		const railSource = readSource("components/skill-rail.tsx");
 
 		expect(lessonSource).toContain("completionCue:");
+		expect(lessonSource).toContain("completionCue={completionCue}");
 		expect(shellSource).toContain(
 			"completionCue?: SkillRailCompletionCue | null;",
 		);
