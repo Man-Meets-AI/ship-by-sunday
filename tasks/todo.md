@@ -6,6 +6,10 @@ It does not replace the root `todo.md`, which remains the launch tracker and sou
 
 ## Active
 
+
+- [x] Diagnose why lesson `1.4` feels overwhelming by checking its student goal, shell layout, and prompt-import workbench against the live lesson contract
+- [x] Simplify lesson `1.4` so the screen leads one action at a time, keeps AI help available but secondary, and removes non-essential shell density
+- [x] Verify the lesson `1.4` simplification with targeted renderer/import tests, then log the UX decision and follow-up QA notes
 - [x] Polish the `access-required` page so it no longer reads like a stretched empty slab by constraining the main card width, improving hierarchy/step readability, and tightening action/help panel grouping while preserving existing entitlement trust-state copy
 - [x] Implement managed ChatGPT-backed Codex integration with account connect/logout/status routes, Convex connection/run persistence, settings connect UI, and in-lesson `Generate with Codex` for prompt-import workflows while keeping manual fallback intact
 - [x] Remove the outdated `app/wireframes.md` source file and harden lesson `3.2` UX with real completion evidence, inline watch guidance, transcript/resource visibility, and accessible shell controls
@@ -105,6 +109,9 @@ It does not replace the root `todo.md`, which remains the launch tracker and sou
 ## Review
 
 - Outcome: Polished the `access-required` surface by constraining it to a centered max-width card, introducing a two-column composition (primary actions + support guidance), upgrading step status cards with clearer state contrast and detail text, and refining button sizing/spacing so the no-access state reads intentional instead of stretched across the full shell width.
+- Outcome: Simplified lesson `1.4` around the real student job by demoting the prompt-import flow into an optional progressive-disclosure `AI assist` card, keeping manual research entry visible as the primary action, and collapsing the split-shell layout to two columns whenever the coach is hidden so the page no longer reserves a dead rail.
+- Verification: `pnpm exec vitest run tests/unit/research-import-workbench.test.tsx tests/unit/lesson-shells.test.tsx tests/unit/lesson-workbench-renderer.test.tsx tests/unit/workbench-header-normalization.test.tsx` and `pnpm run typecheck`.
+- Follow-up: Browser-QA lesson `1.4` with the entitled Clerk QA user on desktop and mobile to tune the compact assist-card density, confirm the hidden-coach collapse feels natural, and check whether `1.6` wants the same tighter pacing in live usage.
 - Verification: `pnpm exec vitest run tests/smoke/motion-phase-one.test.ts` and `pnpm run typecheck`.
 - Follow-up: Browser-QA `/access-required` on desktop/mobile in both light and dark themes to tune card density and confirm long helper copy does not wrap awkwardly at tablet breakpoints.
 - Outcome: Rebuilt the bottom stage rail around functional navigation clarity by replacing single-letter keycaps with explicit `Previous (Q)` / `Next (E)` controls, adding a visible progress summary (`Step X of Y • N completed`), and rendering every lesson chip with explicit state labels (`Done`, `Current`, `Upcoming`, `Locked`) plus icon cues so users can immediately parse status.
