@@ -4,6 +4,7 @@ import { Bebas_Neue, Manrope } from "next/font/google";
 import "@xyflow/react/dist/style.css";
 
 import { ConvexClientProvider } from "@/components/convex-client-provider";
+import { productConfig } from "@/config/product";
 import { getProductThemeBootstrapScript } from "@/lib/product-theme";
 import { getInitialProductTheme } from "@/lib/server/product-theme";
 
@@ -21,9 +22,8 @@ const sans = Manrope({
 });
 
 export const metadata: Metadata = {
-	title: "Ship by Sunday",
-	description:
-		"Go from idea to v1 this weekend with an action-first system for engineers who want to stop circling unfinished ideas.",
+	title: productConfig.name,
+	description: productConfig.metadataDescription,
 };
 
 export default async function RootLayout({

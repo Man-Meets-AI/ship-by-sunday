@@ -7,7 +7,7 @@ type FAQItem = {
 	answer: string;
 };
 
-export default function FAQAccordion({ items }: { items: FAQItem[] }) {
+export default function FAQAccordion({ items }: { items: readonly FAQItem[] }) {
 	const [openQuestion, setOpenQuestion] = useState<string | null>(null);
 
 	return (

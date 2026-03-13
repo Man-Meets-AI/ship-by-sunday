@@ -3,6 +3,7 @@ import { fetchMutation } from "convex/nextjs";
 import Stripe from "stripe";
 
 import { api } from "@/convex/_generated/api";
+import { COURSE_SLUG } from "@/lib/course/registry";
 import { requireServerEnv, serverEnv } from "@/lib/env/server";
 
 function getWebhookStripe() {
@@ -69,7 +70,7 @@ export async function POST(request: Request) {
 	const session = event.data.object as Stripe.Checkout.Session;
 	const clerkUserId =
 		session.metadata?.clerkUserId ?? session.client_reference_id ?? undefined;
-	const courseSlug = session.metadata?.courseSlug ?? "ship-by-sunday";
+	const courseSlug = session.metadata?.courseSlug ?? COURSE_SLUG;
 
 	if (!clerkUserId) {
 		logStripeWebhook("error", {

@@ -1,8 +1,8 @@
-export * from "@/lib/course/manifest";
-export * from "@/lib/course/core-flow";
-export * from "@/lib/course/registry";
-export * from "@/lib/course/research-prompt";
-export * from "@/lib/course/resources";
+export * from "./manifest";
+export * from "./core-flow";
+export * from "./registry";
+export * from "./research-prompt";
+export * from "./resources";
 export {
 	countReferenceGalleryItems,
 	createReferenceGalleryValue,
@@ -12,4 +12,4 @@ export {
 	hydrateReferenceGalleryValue,
 	isReferenceGalleryItem,
 	toPersistedReferenceGalleryValue,
-} from "@/lib/course/reference-gallery";
+} from "./reference-gallery";

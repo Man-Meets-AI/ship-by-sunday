@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 
 import { LessonPage } from "@/components/lesson-page";
+import { getLegacyLessonRedirect } from "@/legacy/lesson-routes";
 import { getLesson } from "@/lib/course";
 import { requireCourseAccess } from "@/lib/server/course-access";
 import { getInitialProductTheme } from "@/lib/server/product-theme";
@@ -13,11 +14,10 @@ export default async function Page({
 	await requireCourseAccess();
 	const initialTheme = await getInitialProductTheme();
 	const { lessonId } = await params;
-	if (lessonId === "0.0") {
-		redirect("/mission");
-	}
-	if (lessonId === "2.7") {
-		redirect("/lesson/3.1");
+
+	const legacyRedirect = getLegacyLessonRedirect(lessonId);
+	if (legacyRedirect) {
+		redirect(legacyRedirect);
 	}
 	const lesson = getLesson(lessonId);
 

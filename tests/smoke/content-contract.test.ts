@@ -1,6 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { productConfig } from "@/config/product";
+import { homePageContent } from "@/content/marketing/home";
+import { legacyLessonRedirects } from "@/legacy/lesson-routes";
 import { getLessonById, lessonRegistry } from "@/lib/course";
 
 function walkSourceFiles(root: string): string[] {
@@ -36,6 +39,36 @@ describe("lesson content contract", () => {
 				`duplicate slug ${lesson.slug} on ${lesson.id}`,
 			).toBe(false);
 			seenSlugs.add(lesson.slug);
+		}
+	});
+
+	it("keeps product config and public marketing content aligned", () => {
+		expect(productConfig.name).toBeTruthy();
+		expect(productConfig.courseSlug).toMatch(/^[a-z0-9-]+$/);
+		expect(homePageContent.hero.body).toContain(productConfig.name);
+		expect(homePageContent.pricingSection.priceDisplay).toBe(
+			productConfig.priceDisplay,
+		);
+		expect(homePageContent.offerSection.items.at(-1)?.name).toBe(
+			productConfig.bonusName,
+		);
+		expect(homePageContent.footerWordmark).toBe(productConfig.name);
+	});
+
+	it("keeps legacy lesson redirects pointed at supported destinations", () => {
+		for (const [lessonId, destination] of Object.entries(
+			legacyLessonRedirects,
+		)) {
+			expect(lessonId).toMatch(/^\d+\.\d+$/);
+
+			if (destination === "/mission") {
+				expect(lessonId).toBe("0.0");
+				continue;
+			}
+
+			expect(destination.startsWith("/lesson/")).toBe(true);
+			const redirectedLessonId = destination.replace("/lesson/", "");
+			expect(getLessonById(redirectedLessonId)).toBeTruthy();
 		}
 	});
 

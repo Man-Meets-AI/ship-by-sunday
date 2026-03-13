@@ -1,11 +1,10 @@
 import Stripe from "stripe";
 
+import { productConfig } from "@/config/product";
 import { requireServerEnv, serverEnv } from "@/lib/env/server";
 import { COURSE_SLUG } from "@/lib/course/registry";
 
 export const STRIPE_API_VERSION = "2026-02-25.clover";
-export const STRIPE_PRODUCT_NAME = "Ship by Sunday";
-export const STRIPE_PRICE_AMOUNT = 50000;
 
 let stripeClient: Stripe | null = null;
 
@@ -29,15 +28,15 @@ export function getStripeLineItem() {
 
 	return {
 		price_data: {
-			currency: "usd",
+			currency: productConfig.currency,
 			product_data: {
-				name: STRIPE_PRODUCT_NAME,
-				description: "Go from idea to v1 this weekend.",
+				name: productConfig.name,
+				description: productConfig.promise,
 				metadata: {
 					courseSlug: COURSE_SLUG,
 				},
 			},
-			unit_amount: STRIPE_PRICE_AMOUNT,
+			unit_amount: productConfig.priceUsdCents,
 		},
 		quantity: 1,
 	};
