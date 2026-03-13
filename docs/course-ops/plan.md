@@ -63,11 +63,10 @@ Lessons:
 4. Figma Basics for Speed
 5. Turn Sketches Into Rough Screens
 6. Choose a Visual Direction
-7. Design Block Wrap-Up
 
 Core artifact:
 
-- Worksheet 02: Build-Ready Design Spec
+- Rough screens + storyboard handoff
 
 ### Module 3: Build Block
 
@@ -75,7 +74,7 @@ Purpose: translate the brief into a working local v1 without chaos.
 
 Lessons:
 
-1. Lock Build Path and Scope
+1. Build Kickoff
 2. Map the Repo and Starter
 3. Install MCPs and Skills
 4. Wire DB, Auth, and Payments
@@ -88,7 +87,7 @@ Lessons:
 
 Core artifact:
 
-- Worksheet 03: Build Plan + Agent Brief
+- Local Build Handoff
 
 ### Module 4: Ship Block
 

@@ -11,9 +11,9 @@
 	"screenGroups": [
 		{
 			"id": "build-kickoff",
-			"title": "Lock Path and Scope",
+			"title": "Build Kickoff",
 			"lessonIds": ["3.1"],
-			"goal": "Define starting path, first slice, and done condition."
+			"goal": "Carry the brief, storyboard, and rough screens into Build without another summary step."
 		},
 		{
 			"id": "repo-orientation",
@@ -75,21 +75,21 @@
 			"id": "B-3.1-01",
 			"lessonId": "3.1",
 			"screenGroupId": "build-kickoff",
-			"title": "Choose build path",
-			"action": "Select template or custom repo path.",
-			"definitionOfDone": "Path is explicit in lesson artifact.",
-			"evidence": ["Path selection"],
-			"dependsOn": ["product_brief", "design_spec"],
+			"title": "Watch the Build kickoff",
+			"action": "Review the kickoff walkthrough and note the inputs Build inherits.",
+			"definitionOfDone": "Student understands the brief, storyboard, and rough-screen handoff.",
+			"evidence": ["kickoff completion"],
+			"dependsOn": ["product_brief", "storyboard_image", "rough_screens"],
 			"imageRefs": ["image1.png"]
 		},
 		{
 			"id": "B-3.1-02",
 			"lessonId": "3.1",
 			"screenGroupId": "build-kickoff",
-			"title": "Lock first slice and done condition",
-			"action": "Define one narrow slice and measurable done rule.",
-			"definitionOfDone": "First slice and done condition are both present.",
-			"evidence": ["first_slice", "definition_of_done"],
+			"title": "Move into repo mapping next",
+			"action": "Open the repo orientation lesson immediately after the kickoff.",
+			"definitionOfDone": "Build continues into real file mapping instead of another prep step.",
+			"evidence": ["3.2 entry"],
 			"dependsOn": ["B-3.1-01"],
 			"imageRefs": ["image20.png"]
 		},

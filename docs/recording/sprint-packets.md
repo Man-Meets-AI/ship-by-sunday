@@ -75,11 +75,10 @@ This keeps founder energy focused and prevents Build from swallowing the whole s
 - `2.4` Figma Basics for Speed
 - `2.5` Turn Sketches Into Rough Screens
 - `2.6` Choose a Visual Direction
-- `2.7` Design Block Wrap-Up
 
 ### Build Block
 
-- `3.1` Lock Build Path and Scope
+- `3.1` Build Kickoff
 - `3.2` Map the Repo and Starter
 - `3.3` Install MCPs and Skills
 - `3.4` Wire DB, Auth, and Payments
@@ -222,23 +221,21 @@ Turn the brief into enough structure and visual direction to build cleanly.
 - `2.4` Figma Basics for Speed
 - `2.5` Turn Sketches Into Rough Screens
 - `2.6` Choose a Visual Direction
-- `2.7` Design Block Wrap-Up
 
 ### Estimated teaching runtime
 
-`~45-59 min`
+`~41-53 min`
 
 Plan for a `75-105 min` recording block.
 
 ### Needed assets
 
-- Worksheet 02: Build-Ready Design Spec
+- Rough screen example before and after cleanup
 - 2 to 3 references for the canonical example app
 - Paper sketch or tablet sketch setup
 - Storyboard example
 - Figma file with starter frame
 - Hotkey notes for the exact moves taught
-- Rough screen example before and after cleanup
 - Simple visual direction examples
 
 ### Talking points
@@ -259,7 +256,6 @@ Plan for a `75-105 min` recording block.
 - Demonstrate only the Figma moves needed for this sprint
 - Turn rough sketches into rough screens live
 - Pick one visual direction without spiraling on aesthetics
-- Fill Worksheet 02 on screen as decisions are made
 
 ### Pickup risks
 
@@ -276,7 +272,7 @@ Show the student how to move from brief to local working app without chaos.
 
 ### Lessons to record today
 
-- `3.1` Lock Build Path and Scope
+- `3.1` Build Kickoff
 - `3.2` Map the Repo and Starter
 - `3.3` Install MCPs and Skills
 - `3.4` Wire DB, Auth, and Payments

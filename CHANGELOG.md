@@ -4,6 +4,10 @@
 
 ### Changed
 
+- Removed lesson `2.7` from the live student flow, so finishing `2.6` now unlocks Build directly and the old Design wrap-up no longer interrupts momentum.
+- Turned lesson `3.1` into a watch-only Build kickoff, so students now go from Design straight into the kickoff video and then into repo mapping instead of filling out another in-app prompt step.
+- Tightened the shared lesson-workbench readability system with calmer type hierarchy, spacing, field chrome, and support cards so guided, focus, watch, and stage-unlock lessons scan faster.
+- Tightened lesson `1.6` so Scope Hammer now reads as a manual-first decision pass with ordered keep/cut lists, clearer draft provenance, and a stronger Sunday-sized boundary check.
 - Simplified lesson `1.5` so the core-flow page now teaches one clear instruction path, trims repeated scaffolding, and gives `1.6` a cleaner uploaded-map handoff.
 - Simplified the bottom lesson rail so students now move with left/right navigation, see lighter step markers instead of repeated status badges, and get clearer stage-boundary movement without visible `Q` / `E` shortcut teaching.
 - Tightened lesson `1.7` so the CEO wrap-up now requires a quick handoff review before `Unlock Design`, reframes the summary around Design-ready constraints, adds direct repair links back to weak CEO steps, and gives `2.1` a clearer brief-to-references bridge.
