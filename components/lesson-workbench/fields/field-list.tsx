@@ -9,6 +9,7 @@ export function FieldList({
 	onFieldChange,
 	pinnedArtifacts,
 	invalidFieldIds,
+	invalidFieldMessages = new Map<string, string>(),
 	className,
 }: {
 	fields: WorkbenchField[];
@@ -16,6 +17,7 @@ export function FieldList({
 	onFieldChange: (fieldId: string, value: unknown) => void;
 	pinnedArtifacts: PinnedArtifact[];
 	invalidFieldIds: Set<string>;
+	invalidFieldMessages?: Map<string, string>;
 	className?: string;
 }) {
 	return (
@@ -42,7 +44,8 @@ export function FieldList({
 					) : null}
 					{invalidFieldIds.has(field.id) ? (
 						<p className="mt-2 text-[11px] font-medium leading-snug text-[#a83232]">
-							Finish this before continuing.
+							{invalidFieldMessages.get(field.id) ??
+								"Finish this before continuing."}
 						</p>
 					) : null}
 				</div>

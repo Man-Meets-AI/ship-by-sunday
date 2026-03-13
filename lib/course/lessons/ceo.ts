@@ -168,14 +168,15 @@ export const ceoLessons = [
 		prevLessonId: "0.2",
 		unlocks: { lessons: ["1.2"] },
 		coachMode: "docked",
-		objectiveTitle: "CEO 1.1 — Start With the Problem",
+		objectiveTitle: "Leave with 3 real candidate pains",
 		checklist: [
 			"Write 3 real problems",
 			"Name who has each problem",
 			"Keep them grounded in life or work",
 		],
-		helperText: "Do not rank them here. Generate candidates first.",
-		winCondition: "Three candidate problems are saved.",
+		helperText:
+			"Generate three grounded candidate pains now. You will choose one to carry into 1.2 next.",
+		winCondition: "Three grounded candidate problems are saved and ready.",
 		panelDefaults: splitPanelDefaults,
 		fieldShapeVersion: 2,
 		workbenchSections: [

@@ -11,6 +11,7 @@ import { WorkbenchCard } from "../shared/workbench-card";
 import { WorkbenchContainer } from "../shared/workbench-container";
 import { WorkbenchHeaderLabel } from "../shared/workbench-header-label";
 import { WorkbenchHeader } from "../shared/workbench-header";
+import { StartWithProblemSupport } from "./start-with-problem-support";
 
 const HANDOFF_TITLE = "Pick the problem to carry forward";
 const HANDOFF_HELPER_COPY =
@@ -167,6 +168,7 @@ export function GuidedFormWorkbench({
 	onFieldChange,
 	pinnedArtifacts,
 	invalidFieldIds,
+	invalidFieldMessages,
 	fields,
 	objectiveTasks,
 	workbenchSections,
@@ -180,6 +182,7 @@ export function GuidedFormWorkbench({
 			)
 		: pinnedArtifacts;
 	const showInlineVideo = lesson.coachVideoPlacement === "workbench";
+	const showStartWithProblemSupport = lesson.id === "1.1";
 
 	return (
 		<WorkbenchContainer>
@@ -198,6 +201,12 @@ export function GuidedFormWorkbench({
 					totalTaskCount={Math.max(objectiveTasks.length, 1)}
 				/>
 			)}
+			{showStartWithProblemSupport ? (
+				<StartWithProblemSupport
+					lessonContent={lessonContent}
+					fieldValues={fieldValues}
+				/>
+			) : null}
 			{lesson.handoff?.mode === "select_candidate_problem" ? (
 				<CandidateProblemHandoff
 					handoff={lesson.handoff}
@@ -240,6 +249,7 @@ export function GuidedFormWorkbench({
 								onFieldChange={onFieldChange}
 								pinnedArtifacts={pinnedArtifacts}
 								invalidFieldIds={invalidFieldIds}
+								invalidFieldMessages={invalidFieldMessages}
 								className={layoutClass}
 							/>
 						</SectionCard>

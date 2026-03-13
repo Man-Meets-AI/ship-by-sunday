@@ -528,6 +528,31 @@ describe("course registry", () => {
 		]);
 	});
 
+	it("returns coaching-specific completion messages for lesson 1.1 fields", () => {
+		const lesson = getLessonById("1.1");
+		expect(lesson).toBeTruthy();
+
+		const issues = getCompletionIssues(lesson!, {
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+			problem_1_who: "Startup operators",
+		});
+
+		expect(issues).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					id: "problem_1_pain",
+					message:
+						"Candidate 1: describe the recurring pain they keep running into, not the product idea you want to build.",
+				}),
+				expect.objectContaining({
+					id: "problem_2_who",
+					message:
+						"Candidate 2: name a real person or group, not a broad audience.",
+				}),
+			]),
+		);
+	});
+
 	it("derives option-level generated tasks for console checklist lessons", () => {
 		const lesson = getLessonById("4.1");
 		expect(lesson).toBeTruthy();

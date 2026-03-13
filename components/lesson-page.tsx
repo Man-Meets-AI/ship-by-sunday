@@ -450,6 +450,16 @@ export function LessonPage({
 			.filter((issue) => issue.kind === "field")
 			.map((issue) => issue.id),
 	);
+	const invalidFieldMessages = new Map(
+		displayedCompletionIssues
+			.filter(
+				(issue): issue is CompletionIssue & { message: string } =>
+					issue.kind === "field" &&
+					"message" in issue &&
+					typeof issue.message === "string",
+			)
+			.map((issue) => [issue.id, issue.message]),
+	);
 	const showCompletionFeedback =
 		validationVisible &&
 		(displayedCompletionIssues.length > 0 || Boolean(serverCompletionMessage));
@@ -459,8 +469,11 @@ export function LessonPage({
 		lessonState.status !== "completed";
 	const isCompleting = completionPhase === "submitting";
 	const isCelebrating = completionPhase === "celebrating";
+	const requiresManualContinuation = lesson.id === "1.1";
 	const completionButtonDisabled =
-		isCompleting || isCelebrating || !lessonReadyToComplete;
+		isCompleting ||
+		(isCelebrating && !requiresManualContinuation) ||
+		(!isCelebrating && !lessonReadyToComplete);
 	const pendingCompletionIssues = completionIssues.map((issue) => issue.label);
 	const pendingIssueSummary = pendingCompletionIssues.slice(0, 3).join(" • ");
 	const hasMorePendingIssues = pendingCompletionIssues.length > 3;
@@ -539,6 +552,15 @@ export function LessonPage({
 		);
 	};
 
+	const navigateToNextStep = (nextLessonId: string | null) => {
+		if (nextLessonId) {
+			router.push(`/lesson/${nextLessonId}`);
+			return;
+		}
+
+		router.push("/mission");
+	};
+
 	const handleCompleteLesson = () => {
 		if (completionButtonDisabled) {
 			return;
@@ -573,15 +595,12 @@ export function LessonPage({
 						: null,
 				});
 				setCompletionPhase("celebrating");
+				if (requiresManualContinuation) {
+					return;
+				}
 				completionTimeoutRef.current = window.setTimeout(() => {
 					completionTimeoutRef.current = null;
-
-					if (result.nextLessonId) {
-						router.push(`/lesson/${result.nextLessonId}`);
-						return;
-					}
-
-					router.push("/mission");
+					navigateToNextStep(result.nextLessonId);
 				}, getCompletionNavigationDelayMs());
 			},
 			(error: unknown) => {
@@ -601,12 +620,21 @@ export function LessonPage({
 		);
 	};
 
+	const handleCompletionAction = () => {
+		if (isCelebrating && requiresManualContinuation && completionPayload) {
+			navigateToNextStep(completionPayload.nextLessonId);
+			return;
+		}
+
+		handleCompleteLesson();
+	};
+
 	const completionAction = (
 		<button
 			type="button"
 			disabled={completionButtonDisabled}
 			aria-busy={isCompleting}
-			onClick={handleCompleteLesson}
+			onClick={handleCompletionAction}
 			className={
 				isCelebrating
 					? "sbs-press-feedback inline-flex items-center gap-1.5 rounded-none border border-product-accent bg-product-accent px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-bg shadow-[0_0_0_1px_rgba(var(--product-accent),0.3),0_0_18px_rgba(var(--product-accent),0.24)]"
@@ -635,6 +663,12 @@ export function LessonPage({
 				</>
 			) : isCompleting ? (
 				completionPendingLabel
+			) : isCelebrating && requiresManualContinuation ? (
+				completionPayload?.nextLessonLabel ? (
+					`Continue to ${completionPayload.nextLessonLabel}`
+				) : (
+					"Back to mission"
+				)
 			) : lessonReadyToComplete ? (
 				completionActionLabel
 			) : (
@@ -743,11 +777,13 @@ export function LessonPage({
 								{serverCompletionMessage ?? "Finish these before continuing:"}
 							</p>
 							{displayedCompletionIssues.length > 0 ? (
-								<p className="mt-1">
-									{displayedCompletionIssues
-										.map((issue) => issue.label)
-										.join(" • ")}
-								</p>
+								<div className="mt-1 space-y-1">
+									{displayedCompletionIssues.map((issue) => (
+										<p key={`${issue.id}-${issue.label}`}>
+											{issue.message ?? issue.label}
+										</p>
+									))}
+								</div>
 							) : null}
 						</div>
 					) : null}
@@ -763,11 +799,13 @@ export function LessonPage({
 				<div className="text-xs font-medium leading-relaxed text-[#a83232]">
 					<p>{serverCompletionMessage ?? "Finish these before continuing:"}</p>
 					{displayedCompletionIssues.length > 0 ? (
-						<p className="mt-1">
-							{displayedCompletionIssues
-								.map((issue) => issue.label)
-								.join(" • ")}
-						</p>
+						<div className="mt-1 space-y-1">
+							{displayedCompletionIssues.map((issue) => (
+								<p key={`${issue.id}-${issue.label}`}>
+									{issue.message ?? issue.label}
+								</p>
+							))}
+						</div>
 					) : null}
 				</div>
 			) : null}
@@ -795,6 +833,7 @@ export function LessonPage({
 			onFieldChange={setValue}
 			pinnedArtifacts={pinnedArtifacts}
 			invalidFieldIds={invalidFieldIds}
+			invalidFieldMessages={invalidFieldMessages}
 			fieldValuesReady={fieldValuesReady}
 		/>
 	);

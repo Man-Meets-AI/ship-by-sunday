@@ -66,6 +66,7 @@ export type CompletionIssue = {
 	id: string;
 	label: string;
 	kind: "field" | "objective";
+	message?: string;
 };
 
 export type PersistedFieldValue =
@@ -738,6 +739,25 @@ function getFieldMinimumItems(field: WorkbenchField) {
 	return Math.max(field.minItems ?? 1, 1);
 }
 
+function getLessonSpecificCompletionMessage(
+	lesson: LessonConfig,
+	fieldId: string,
+) {
+	if (lesson.id !== "1.1") {
+		return undefined;
+	}
+
+	const match = fieldId.match(/^problem_(\d+)_(who|pain)$/);
+	if (!match) {
+		return undefined;
+	}
+
+	const [, index, type] = match;
+	return type === "who"
+		? `Candidate ${index}: name a real person or group, not a broad audience.`
+		: `Candidate ${index}: describe the recurring pain they keep running into, not the product idea you want to build.`;
+}
+
 function isFieldComplete(field: WorkbenchField, value: PersistedFieldValue) {
 	if (field.kind === "reference_gallery") {
 		return getStoredReferenceGalleryCount(value) >= getFieldMinimumItems(field);
@@ -968,7 +988,7 @@ export function getCompletionIssues(
 	lesson: LessonConfig,
 	fieldValues: PersistedFieldValues,
 	context: ObjectiveTaskContext = {},
-) {
+): CompletionIssue[] {
 	const values = normalizeLessonFieldValues(lesson, fieldValues);
 
 	const objectiveMode = getObjectiveMode(lesson);
@@ -980,6 +1000,9 @@ export function getCompletionIssues(
 				id: task.fieldId ?? task.id,
 				label: task.label,
 				kind: "field" as const,
+				message: task.fieldId
+					? getLessonSpecificCompletionMessage(lesson, task.fieldId)
+					: undefined,
 			}));
 	}
 
@@ -1009,6 +1032,7 @@ export function getCompletionIssues(
 				id: field.id,
 				label: getFieldTaskLabel(field),
 				kind: "field",
+				message: getLessonSpecificCompletionMessage(lesson, field.id),
 			});
 		}
 	}

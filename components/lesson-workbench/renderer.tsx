@@ -67,6 +67,7 @@ export function WorkbenchRenderer({
 	onFieldChange,
 	pinnedArtifacts,
 	invalidFieldIds = new Set<string>(),
+	invalidFieldMessages = new Map<string, string>(),
 	fieldValuesReady = true,
 }: WorkbenchRendererProps) {
 	const fields = lesson.workbenchFields ?? [];
@@ -105,6 +106,7 @@ export function WorkbenchRenderer({
 			onFieldChange={onFieldChange}
 			pinnedArtifacts={pinnedArtifacts}
 			invalidFieldIds={invalidFieldIds}
+			invalidFieldMessages={invalidFieldMessages}
 			fieldValuesReady={fieldValuesReady}
 			stageUnlockSummary={stageUnlockSummary}
 			resolvedArtifactPreview={resolvedArtifactPreview}

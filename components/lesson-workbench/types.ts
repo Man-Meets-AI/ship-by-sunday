@@ -21,6 +21,7 @@ export type WorkbenchRendererProps = {
 	onFieldChange: (fieldId: string, value: unknown) => void;
 	pinnedArtifacts: PinnedArtifact[];
 	invalidFieldIds?: Set<string>;
+	invalidFieldMessages?: Map<string, string>;
 	fieldValuesReady?: boolean;
 	resolvedArtifactPreview?: ArtifactPreview | null;
 	stageUnlockSummary?: StageUnlockSummary | null;
@@ -37,6 +38,7 @@ type WorkbenchSharedState = {
 export type WorkbenchModeProps = WorkbenchRendererProps &
 	WorkbenchSharedState & {
 		invalidFieldIds: Set<string>;
+		invalidFieldMessages: Map<string, string>;
 	};
 
 export type WorkbenchModeComponent = (

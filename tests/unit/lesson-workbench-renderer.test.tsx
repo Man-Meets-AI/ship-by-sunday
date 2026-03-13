@@ -405,6 +405,29 @@ describe("WorkbenchRenderer", () => {
 		}
 	});
 
+	it("renders lesson 1.1 with inline quality guidance and comparison support", () => {
+		const markup = renderLessonWorkbench("1.1", {
+			fieldValues: {
+				problem_1_who: "Startup operators",
+				problem_1_pain:
+					"They lose action items after meetings and waste time rebuilding them.",
+				problem_2_who: "Teams",
+				problem_2_pain: "AI app for meeting notes",
+			},
+		});
+
+		expect(markup).toContain("Quality bar");
+		expect(markup).toContain("Compare your three candidates");
+		expect(markup).toContain("Candidate 1");
+		expect(markup).toContain("Candidate 2");
+		expect(markup).toContain("Candidate 3");
+		expect(markup).toContain("1.2 Pick One User");
+		expect(markup).toContain("Reads more like pain than a product idea.");
+		expect(markup).toContain(
+			"Sharpen beyond broad labels like teams, founders, or users.",
+		);
+	});
+
 	it("renders lesson 3.1 with a generated build prompt and the template CTA when configured", () => {
 		const originalRepoUrl =
 			process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL;

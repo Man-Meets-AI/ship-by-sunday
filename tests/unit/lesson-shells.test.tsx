@@ -75,6 +75,27 @@ function renderResearchLessonResources(pinnedArtifacts: PinnedArtifact[] = []) {
 	);
 }
 
+function renderStartWithProblemWatchPanel() {
+	const lesson = getLessonById("1.1");
+	expect(lesson).toBeTruthy();
+
+	return renderToStaticMarkup(
+		<LessonShellSplit
+			lesson={lesson!}
+			objectiveTasks={[]}
+			onObjectiveTaskToggle={() => {}}
+			coachVisible
+			activeCoachPanel="watch"
+			onCoachPanelChange={() => {}}
+			pinnedArtifacts={[]}
+			coachContent={lesson!.content.coach}
+			footer={<div>Footer</div>}
+		>
+			<div>Workbench</div>
+		</LessonShellSplit>,
+	);
+}
+
 function renderResearchLessonWithHiddenCoach() {
 	const lesson = getLessonById("1.4");
 	expect(lesson).toBeTruthy();
@@ -203,13 +224,24 @@ describe("LessonShellSplit resources", () => {
 		);
 	});
 
+	it("uses the stronger no-video fallback copy on lesson 1.1", () => {
+		const markup = renderStartWithProblemWatchPanel();
+
+		expect(markup).toContain("No lesson video yet");
+		expect(markup).toContain("Use the guided path");
+		expect(markup).toContain(
+			"Lean on the inline examples, the worksheet, and the compare-your-three recap while you draft grounded candidate problems.",
+		);
+		expect(markup).not.toContain("Video placeholder");
+	});
+
 	it("collapses the hidden coach rail instead of reserving a dead third column", () => {
 		const markup = renderResearchLessonWithHiddenCoach();
 
-		expect(markup).toContain(
-			"xl:grid-cols-[minmax(0,270px)_minmax(0,1fr)]",
+		expect(markup).toContain("xl:grid-cols-[minmax(0,270px)_minmax(0,1fr)]");
+		expect(markup).not.toContain(
+			"Coach hidden. Use the top-right coach toggle",
 		);
-		expect(markup).not.toContain("Coach hidden. Use the top-right coach toggle");
 	});
 
 	it("renders lesson 2.3 coach resources with a FigJam storyboard option", () => {

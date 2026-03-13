@@ -353,6 +353,14 @@ function CoachPanel({
 			example.title.trim().toLowerCase() !== "avoid this",
 	);
 	const resources = coachContent?.resources ?? [];
+	const emptyVideoState =
+		lesson.id === "1.1"
+			? {
+					eyebrow: "No lesson video yet",
+					title: "Use the guided path",
+					body: "This lesson is still fully usable. Lean on the inline examples, the worksheet, and the compare-your-three recap while you draft grounded candidate problems.",
+				}
+			: undefined;
 
 	const sectionDefinitions: Array<{
 		key: CoachPanelKey;
@@ -362,7 +370,12 @@ function CoachPanel({
 		{
 			key: "watch",
 			label: "Watch",
-			content: <LessonVideoSurface coachContent={coachContent} />,
+			content: (
+				<LessonVideoSurface
+					coachContent={coachContent}
+					emptyState={emptyVideoState}
+				/>
+			),
 		},
 		{
 			key: "transcript",
