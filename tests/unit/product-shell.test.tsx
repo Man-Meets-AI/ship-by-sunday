@@ -91,6 +91,19 @@ const missionState = {
 	],
 };
 
+let nonSkipQueryCallCount = 0;
+
+const useQueryMock = vi.fn((_query: unknown, args: unknown) => {
+	if (args === "skip") {
+		return undefined;
+	}
+
+	nonSkipQueryCallCount += 1;
+	return nonSkipQueryCallCount === 1
+		? { hasAccess: true, status: "active" }
+		: missionState;
+});
+
 vi.mock("next/link", () => ({
 	default: ({
 		children,
@@ -117,7 +130,7 @@ vi.mock("convex/react", () => ({
 		isAuthenticated: true,
 		isLoading: false,
 	}),
-	useQuery: () => missionState,
+	useQuery: (query: unknown, args: unknown) => useQueryMock(query, args),
 }));
 
 vi.mock("@clerk/nextjs", () => ({
@@ -129,6 +142,11 @@ globalThis.React = React;
 import { ProductShell } from "@/components/product-shell";
 
 describe("ProductShell", () => {
+	beforeEach(() => {
+		useQueryMock.mockClear();
+		nonSkipQueryCallCount = 0;
+	});
+
 	it("renders unlocked header blocks as links and keeps locked blocks inert", () => {
 		const markup = renderToStaticMarkup(
 			<ProductShell initialTheme="light" showSkillRail={false}>
@@ -162,5 +180,24 @@ describe("ProductShell", () => {
 		);
 		expect(markup).not.toContain("xl:h-dvh");
 		expect(markup).not.toContain("xl:overflow-hidden");
+	});
+
+	it("skips mission queries when mission data is explicitly disabled", () => {
+		const markup = renderToStaticMarkup(
+			<ProductShell
+				initialTheme="light"
+				showSkillRail={false}
+				enableMissionQuery={false}
+			>
+				<div>Body</div>
+			</ProductShell>,
+		);
+
+		expect(useQueryMock).toHaveBeenCalled();
+		expect(useQueryMock.mock.calls.some((call) => call[1] === "skip")).toBe(
+			true,
+		);
+		expect(markup).toContain("--/--");
+		expect(markup).not.toContain('aria-label="Open CEO"');
 	});
 });

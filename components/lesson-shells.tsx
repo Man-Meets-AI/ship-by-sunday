@@ -5,7 +5,10 @@ import Link from "next/link";
 
 import { LessonVideoSurface } from "@/components/lesson-video-surface";
 import { formatArtifactValue } from "@/components/lesson-workbench/shared/artifact-format";
-import type { LessonPromptResourceContent } from "@/lib/course/contracts";
+import type {
+	LessonPromptResourceContent,
+	LessonResourceContent,
+} from "@/lib/course/contracts";
 import { getLesson, type LessonConfig } from "@/lib/course/manifest";
 import type { LessonContent } from "@/lib/course/manifest";
 import { getPromptTemplateState } from "@/lib/course/research-prompt";
@@ -115,7 +118,7 @@ function CopyPromptResourceCard({
 						readOnly
 						value={prompt}
 						rows={14}
-						className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[11px] leading-relaxed text-product-text outline-none"
+						className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[11px] leading-relaxed text-product-text outline-hidden"
 						aria-label={`${resource.label} prompt`}
 					/>
 				) : (
@@ -580,7 +583,7 @@ export function LessonShellSplit({
 				/>
 			) : (
 				<div className="rounded-none border border-dashed border-product-border/70 bg-product-surface/55 px-2 py-2 text-xs font-medium leading-snug text-product-muted shadow-panel backdrop-blur-lg xl:min-h-0 xl:overflow-y-auto">
-					Coach hidden. Use HUD toggle to reopen.
+					Coach hidden. Use the top-right coach toggle to reopen.
 				</div>
 			)}
 		</div>
@@ -614,12 +617,19 @@ export function LessonShellWatch({
 	coachContent,
 	footer,
 }: WatchLessonShellProps) {
+	const resourceLinks = (coachContent.resources ?? []).filter(
+		(
+			resource,
+		): resource is Exclude<LessonResourceContent, { kind: "copy_prompt" }> =>
+			resource.kind !== "copy_prompt",
+	);
+
 	return (
 		<section className="min-w-0 rounded-none border border-product-border/75 bg-product-surface/82 shadow-panel backdrop-blur-lg xl:flex xl:h-full xl:min-h-0 xl:flex-col">
 			<div className="min-w-0 px-4 py-4 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:px-6 xl:py-6">
 				<div className="mx-auto flex w-full max-w-5xl flex-col gap-5">
 					<div className="space-y-3 border-b border-product-border/70 pb-4">
-						<div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
+						<div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] uppercase tracking-[0.16em] text-product-muted">
 							<p>{lesson.id}</p>
 							<p>{lesson.artifact.label}</p>
 							{lesson.content.lessonMeta.runtimeLabel ? (
@@ -627,7 +637,7 @@ export function LessonShellWatch({
 							) : null}
 						</div>
 						<div className="space-y-2">
-							<h1 className="max-w-4xl font-display text-[2rem] uppercase leading-none tracking-[0.06em] text-product-text sm:text-[2.6rem]">
+							<h1 className="max-w-4xl text-balance font-display text-[2rem] uppercase leading-none tracking-[0.06em] text-product-text sm:text-[2.6rem]">
 								{lesson.title}
 							</h1>
 							<p className="max-w-3xl text-sm font-medium leading-relaxed text-product-muted sm:text-base">
@@ -639,6 +649,36 @@ export function LessonShellWatch({
 						coachContent={coachContent}
 						variant="watch-shell"
 					/>
+					{coachContent.transcript?.status === "ready" &&
+					coachContent.transcript.body ? (
+						<section className="rounded-none border border-product-border bg-product-surface-strong/70 px-4 py-4">
+							<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-product-muted">
+								Transcript
+							</p>
+							<p className="mt-2 whitespace-pre-wrap text-sm font-medium leading-relaxed text-product-text">
+								{coachContent.transcript.body}
+							</p>
+						</section>
+					) : null}
+					{resourceLinks.length > 0 ? (
+						<section className="rounded-none border border-product-border bg-product-surface-strong/70 px-4 py-4">
+							<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-product-muted">
+								Resources
+							</p>
+							<div className="mt-2 grid gap-2 sm:grid-cols-2">
+								{resourceLinks.map((resource) => (
+									<Link
+										key={resource.id}
+										href={resource.href}
+										target={resource.kind === "external" ? "_blank" : undefined}
+										className="rounded-none border border-product-border bg-product-surface px-3 py-2 text-sm font-medium text-product-text transition-colors hover:bg-product-surface-alt"
+									>
+										{resource.label}
+									</Link>
+								))}
+							</div>
+						</section>
+					) : null}
 				</div>
 			</div>
 			<div className="shrink-0 border-t border-product-border bg-product-surface-strong/70 px-4 py-3 xl:px-6">

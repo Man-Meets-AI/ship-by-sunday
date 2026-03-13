@@ -71,3 +71,22 @@ Use this file to capture recurring mistakes, corrections, and guardrails for fut
   Pattern: I added a ready-to-complete state, but the actual lesson completion moment still felt emotionally flat because the only visible success signal was a subtle progress-rail change during immediate navigation.
   Rule: In student flows, completion must trigger a visible multi-surface success response before route changes. At minimum: CTA success morph, explicit completion copy, and one shell-level progression cue, all with reduced-motion-safe fallbacks.
   How to verify next time: Complete a lesson in the live UI and confirm the success moment is noticeable without hunting for it, the reward survives long enough to register before navigation, and reduced-motion users still get clear non-animated state changes.
+- Date: 2026-03-13
+  Pattern: I let a machine-readable planning skill return raw JSON-only output, which preserved structure but made the result awkward to review and reuse in normal chat workflows.
+  Rule: When an artifact must stay machine-parseable but will still be read in chat, return it with the smallest human shell possible: one short markdown heading and one fenced code block, with no extra prose.
+  How to verify next time: Read the output in chat, confirm it is visually scannable without losing parseability, and make sure a downstream agent can still copy the payload directly from the fenced block.
+
+- Date: 2026-03-13
+  Pattern: I left skill docs pointing at `~/.codex/skills` even though this machine's canonical user-managed skill store is `/Users/parkerrex/.agents/skills`, which creates path drift and install confusion.
+  Rule: On this machine, any user-managed skill path, script path, or install guidance must point to `/Users/parkerrex/.agents/skills` unless the task is explicitly about Codex system skills.
+  How to verify next time: Search changed skill docs for `.codex/skills`, compare the instructions against the repo AGENTS guardrails, and confirm example commands resolve to real files under `.agents/skills`.
+
+- Date: 2026-03-13
+  Pattern: I let skill discovery guidance jump straight to global installs even though the local workflow is supposed to check existing `.agents` coverage first and route managed adoption through Team Hub.
+  Rule: For this setup, skill discovery is local-first. Search the current skill inventory before suggesting installs, and route new managed skills through `/Users/parkerrex/Projects/team-wiki` or a deliberate local fork instead of ad hoc global installs.
+  How to verify next time: Before recommending installation, check whether an existing skill already covers the task, and confirm any install or adoption instructions match the `.agents` plus Team Hub workflow.
+
+- Date: 2026-03-13
+  Pattern: I started from screen-level critique patterns instead of enforcing a goal-clarity gate that ties the UI to product outcomes and business outcomes.
+  Rule: For UX critique work, never start from surface form alone. First establish product goal, surface goal, business model, and relevant metrics, then critique gaps and propose prioritized solutions with explicit trade-offs.
+  How to verify next time: Before delivering critique output, confirm the response includes goal context, `Problems I Notice`, `Solutions I Recommend`, trade-off rationale, and a narrative summary that ties user impact to business impact.

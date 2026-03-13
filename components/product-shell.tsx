@@ -51,6 +51,11 @@ type MissionState = {
 	}>;
 };
 
+type ViewerAccessState = {
+	hasAccess: boolean;
+	status: string;
+};
+
 type ProductShellProps = {
 	children: React.ReactNode;
 	initialTheme: ProductTheme;
@@ -66,6 +71,7 @@ type ProductShellProps = {
 	viewportMode?: "document" | "app";
 	appScrollMode?: "viewport" | "page";
 	completionCue?: SkillRailCompletionCue | null;
+	enableMissionQuery?: boolean;
 };
 
 function isBlockActive(block: MissionState["blocks"][number]) {
@@ -123,13 +129,18 @@ function ShellInner({
 	viewportMode = "document",
 	appScrollMode = "viewport",
 	completionCue,
+	enableMissionQuery = true,
 }: ProductShellProps) {
 	const pathname = usePathname();
 	const { theme, toggleTheme } = useProductTheme();
 	const { isAuthenticated, isLoading } = useConvexAuth();
+	const viewerAccess = useQuery(
+		api.course.viewerAccess,
+		isAuthenticated && !isLoading ? {} : "skip",
+	) as ViewerAccessState | undefined;
 	const mission = useQuery(
 		api.course.getMissionState,
-		isAuthenticated && !isLoading ? {} : "skip",
+		enableMissionQuery && viewerAccess?.hasAccess ? {} : "skip",
 	) as MissionState | undefined;
 
 	const derivedLessonBlockId = currentLessonId
@@ -337,11 +348,12 @@ function ShellInner({
 						<button
 							type="button"
 							title="Split view"
+							aria-label="Switch to split view"
 							onClick={() => onLayoutModeChange("split")}
 							className={`rounded-none p-1 transition-colors ${
 								layoutMode === "split"
-									? "bg-product-chip text-product-accent"
-									: "text-product-muted hover:text-product-text"
+									? "bg-product-chip text-product-accent focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-product-accent"
+									: "text-product-muted hover:text-product-text focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-product-accent"
 							}`}
 						>
 							<svg
@@ -361,11 +373,12 @@ function ShellInner({
 						<button
 							type="button"
 							title="Focus view"
+							aria-label="Switch to focus view"
 							onClick={() => onLayoutModeChange("focus")}
 							className={`rounded-none p-1 transition-colors ${
 								layoutMode === "focus"
-									? "bg-product-chip text-product-accent"
-									: "text-product-muted hover:text-product-text"
+									? "bg-product-chip text-product-accent focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-product-accent"
+									: "text-product-muted hover:text-product-text focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-product-accent"
 							}`}
 						>
 							<svg
@@ -383,11 +396,46 @@ function ShellInner({
 						</button>
 					</div>
 				) : null}
+				{onCoachToggle ? (
+					<button
+						type="button"
+						onClick={onCoachToggle}
+						aria-pressed={coachVisible}
+						title={coachVisible ? "Hide coach panel" : "Show coach panel"}
+						className={`rounded-none border p-1 transition-colors ${
+							coachVisible
+								? "border-product-accent bg-product-chip text-product-accent"
+								: "border-product-border bg-product-surface-alt/80 text-product-text hover:bg-product-surface"
+						}`}
+					>
+						<svg
+							width="12"
+							height="12"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="2"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+						>
+							<rect x="3" y="4" width="18" height="16" rx="2" />
+							<line x1="8" y1="4" x2="8" y2="20" />
+							<line x1="11" y1="9" x2="18" y2="9" />
+							<line x1="11" y1="13" x2="18" y2="13" />
+						</svg>
+						<span className="sr-only">
+							{coachVisible ? "Hide coach panel" : "Show coach panel"}
+						</span>
+					</button>
+				) : null}
 				<button
 					type="button"
 					onClick={toggleTheme}
 					title={theme === "dark" ? "Light mode" : "Dark mode"}
-					className="rounded-none border border-product-border bg-product-surface-alt/80 p-1 text-product-text transition-colors hover:bg-product-surface"
+					aria-label={
+						theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+					}
+					className="rounded-none border border-product-border bg-product-surface-alt/80 p-1 text-product-text transition-colors hover:bg-product-surface focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-product-accent"
 				>
 					{theme === "dark" ? (
 						<svg

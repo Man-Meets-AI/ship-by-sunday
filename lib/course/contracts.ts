@@ -326,6 +326,7 @@ export type LessonConfig = {
 	workbenchSections?: WorkbenchSection[];
 	promptImport?: LessonPromptImport;
 	briefAssembler?: BriefAssemblerConfig;
+	requireReadyVideoForCompletion?: boolean;
 	notes?: string[];
 	content: LessonContent;
 };

@@ -145,7 +145,18 @@ describe("lesson content contract", () => {
 			"definition_of_done",
 		]);
 		expect(orientationLesson?.title).toBe("Map the Repo and Starter");
-		expect(orientationLesson?.shell).toBe("watch");
+		expect(orientationLesson).toMatchObject({
+			shell: "focus",
+			availableLayoutModes: ["focus"],
+			coachVideoPlacement: "workbench",
+		});
+		expect(
+			orientationLesson?.workbenchFields?.map((field) => field.id),
+		).toEqual([
+			"repo_orientation_checklist",
+			"startup_command",
+			"repo_map_notes",
+		]);
 		expect(toolingLesson?.title).toBe("Install MCPs and Skills");
 		expect(toolingLesson?.workbench).toBe("guided_form");
 		expect(integrationLesson?.title).toBe("Wire DB, Auth, and Payments");

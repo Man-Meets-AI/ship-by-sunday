@@ -68,6 +68,25 @@ describe("ensure-clerk-test-user", () => {
 		expect(fetchImpl).toHaveBeenCalledTimes(1);
 	});
 
+	it("queries Clerk users with a lowercase email to avoid case-sensitive misses", async () => {
+		const fetchImpl = vi.fn().mockResolvedValue({
+			ok: true,
+			json: vi.fn().mockResolvedValue([]),
+		});
+
+		await checkClerkTestUser({
+			account: {
+				...account,
+				email: "Test@Test.com",
+			},
+			secretKey: "sk_test_123",
+			fetchImpl,
+		});
+
+		const requestUrl = new URL(String(fetchImpl.mock.calls[0]?.[0]));
+		expect(requestUrl.searchParams.get("query")).toBe("test@test.com");
+	});
+
 	it("creates the user after a missing check", async () => {
 		const fetchImpl = vi
 			.fn()

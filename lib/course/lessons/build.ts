@@ -194,95 +194,96 @@ export const buildLessons = [
 			},
 		},
 	},
-		{
-			id: "3.2",
-			slug: "03-02-map-the-repo-and-starter",
-			order: 16,
-			block: "BUILD",
-			title: "Map the Repo and Starter",
-			shortTitle: "Repo",
-			shell: "focus",
-			availableLayoutModes: ["focus"],
-			workbench: "external_workspace",
-			artifact: {
-				key: "repo_orientation_ready",
-				label: "Repo Orientation Notes",
+	{
+		id: "3.2",
+		slug: "03-02-map-the-repo-and-starter",
+		order: 16,
+		block: "BUILD",
+		title: "Map the Repo and Starter",
+		shortTitle: "Repo",
+		shell: "focus",
+		availableLayoutModes: ["focus"],
+		workbench: "external_workspace",
+		artifact: {
+			key: "repo_orientation_ready",
+			label: "Repo Orientation Notes",
 			type: "checklist",
 			required: true,
 			dependsOn: ["agent_build_brief"],
 		},
-			nextLessonId: "3.3",
-			prevLessonId: "3.1",
-			unlocks: { lessons: ["3.3"] },
-			coachMode: "pip",
-			coachVideoPlacement: "workbench",
-			externalTool: "code",
-			objectiveTitle: "BUILD 3.2 — Map the Repo and Starter",
-			checklist: [
-				"Review the walkthrough, then open the repo locally.",
-				"Confirm package manager and startup command.",
-				"Map env files and the first route/screen for your slice.",
-			],
-			fieldShapeVersion: 3,
-			helperText:
-				"Watch first, then capture enough repo evidence that the next Build steps stay grounded in real files.",
-			winCondition:
-				"Repo orientation is captured with startup command, env locations, and first slice entrypoint.",
-			panelDefaults: focusPanelDefaults,
-			pinnedArtifacts: ["agent_build_brief"],
-			workbenchFields: [
-				{
-					id: "repo_orientation_checklist",
-					label: "Repo orientation checklist",
-					kind: "checklist",
-					required: true,
-					options: [
-						"Opened the codebase and confirmed the package manager.",
-						"Confirmed the local startup command runs the app.",
-						"Located env files and the first route/screen for my slice.",
-					],
-					taskLabel: "Complete the repo orientation checklist",
-				},
-				{
-					id: "startup_command",
-					label: "Startup command",
-					kind: "text",
-					required: true,
-					placeholder: "pnpm run dev:web",
-					helpText:
-						"Save the exact command you will use to boot local development.",
-					taskLabel: "Save the startup command",
-				},
-				{
-					id: "repo_map_notes",
-					label: "Env files + first slice entrypoint",
-					kind: "textarea",
-					required: true,
-					rows: 4,
-					placeholder:
-						".env.local for keys, app/lesson/[lessonId]/page.tsx for lesson route entry...",
-					helpText:
-						"List the key env file paths and where your first implementation slice should land.",
-					taskLabel: "Save env and entrypoint notes",
-				},
-			],
-			content: {
-				status: "draft",
-				intro:
-					"Before wiring providers, map the repo and capture the key paths. This keeps every next prompt anchored in the real codebase.",
-				lessonMeta: {
-					runtimeLabel: "8-10 min",
-					goal: "Understand the minimum repo layout needed for Build.",
-					purpose:
-						"Reduce random prompting by anchoring around real files and scripts.",
-				},
-				actionCard: {
-					jobNow:
-						"Watch the walkthrough, run the repo once, then capture startup command + env and entrypoint notes.",
-					timebox: "8-10 minutes",
-					comeBackWith:
-						"A saved repo-orientation artifact with concrete file paths and commands.",
-				},
+		nextLessonId: "3.3",
+		prevLessonId: "3.1",
+		unlocks: { lessons: ["3.3"] },
+		coachMode: "pip",
+		coachVideoPlacement: "workbench",
+		externalTool: "code",
+		objectiveTitle: "BUILD 3.2 — Map the Repo and Starter",
+		checklist: [
+			"Review the walkthrough, then open the repo locally.",
+			"Confirm package manager and startup command.",
+			"Map env files and the first route/screen for your slice.",
+		],
+		fieldShapeVersion: 3,
+		requireReadyVideoForCompletion: true,
+		helperText:
+			"Watch first, then capture enough repo evidence that the next Build steps stay grounded in real files.",
+		winCondition:
+			"Repo orientation is captured with startup command, env locations, and first slice entrypoint.",
+		panelDefaults: focusPanelDefaults,
+		pinnedArtifacts: ["agent_build_brief"],
+		workbenchFields: [
+			{
+				id: "repo_orientation_checklist",
+				label: "Repo orientation checklist",
+				kind: "checklist",
+				required: true,
+				options: [
+					"Opened the codebase and confirmed the package manager.",
+					"Confirmed the local startup command runs the app.",
+					"Located env files and the first route/screen for my slice.",
+				],
+				taskLabel: "Complete the repo orientation checklist",
+			},
+			{
+				id: "startup_command",
+				label: "Startup command",
+				kind: "text",
+				required: true,
+				placeholder: "pnpm run dev:web",
+				helpText:
+					"Save the exact command you will use to boot local development.",
+				taskLabel: "Save the startup command",
+			},
+			{
+				id: "repo_map_notes",
+				label: "Env files + first slice entrypoint",
+				kind: "textarea",
+				required: true,
+				rows: 4,
+				placeholder:
+					".env.local for keys, app/lesson/[lessonId]/page.tsx for lesson route entry...",
+				helpText:
+					"List the key env file paths and where your first implementation slice should land.",
+				taskLabel: "Save env and entrypoint notes",
+			},
+		],
+		content: {
+			status: "draft",
+			intro:
+				"Before wiring providers, map the repo and capture the key paths. This keeps every next prompt anchored in the real codebase.",
+			lessonMeta: {
+				runtimeLabel: "8-10 min",
+				goal: "Understand the minimum repo layout needed for Build.",
+				purpose:
+					"Reduce random prompting by anchoring around real files and scripts.",
+			},
+			actionCard: {
+				jobNow:
+					"Watch the walkthrough, run the repo once, then capture startup command + env and entrypoint notes.",
+				timebox: "8-10 minutes",
+				comeBackWith:
+					"A saved repo-orientation artifact with concrete file paths and commands.",
+			},
 			coach: buildCoach("Map the Repo and Starter", [
 				{
 					id: "repo-lay-of-land",
@@ -461,47 +462,44 @@ export const buildLessons = [
 		],
 		fieldShapeVersion: 3,
 		helperText:
-			"Wire integrations in one pass: env keys, auth template, payment objects, and webhook path.",
+			"Run setup in one sequence, then capture evidence so the integration stack is reproducible.",
 		winCondition:
-			"Database, authentication, and payment integrations are connected in the local stack.",
+			"Database, authentication, and payment integrations are connected and verified in local test mode.",
 		panelDefaults: focusPanelDefaults,
 		pinnedArtifacts: ["tooling_stack_ready", "agent_build_brief"],
 		workbenchFields: [
 			{
-				id: "env_keys_ready",
-				label: "Environment keys set",
-				kind: "toggle",
+				id: "integration_checkpoints",
+				label: "Integration checkpoints",
+				kind: "checklist",
 				required: true,
-				taskLabel: "Set environment keys",
+				options: [
+					"Set environment variables",
+					"Wire Clerk + Convex JWT template",
+					"Create product + price + webhook path",
+					"Validate integration flow in local test mode",
+				],
+				taskLabel: "Complete integration checkpoints",
 			},
 			{
-				id: "clerk_convex_template_ready",
-				label: "Clerk JWT template configured for Convex",
-				kind: "toggle",
+				id: "integration_verification_log",
+				label: "Verification log",
+				kind: "textarea",
 				required: true,
-				taskLabel: "Configure Clerk + Convex auth",
-			},
-			{
-				id: "stripe_objects_ready",
-				label: "Stripe product and price created",
-				kind: "toggle",
-				required: true,
-				taskLabel: "Create Stripe objects",
-			},
-			{
-				id: "webhook_ready",
-				label: "Webhook endpoint and secret configured",
-				kind: "toggle",
-				required: true,
-				taskLabel: "Configure webhook",
+				rows: 6,
+				helpText:
+					"Document concrete evidence for each checkpoint: endpoint paths, dashboard object IDs, commands run, and the local flow result.",
+				placeholder:
+					"- Env keys: ...\n- JWT template: ...\n- Stripe objects: ...\n- Webhook + local validation: ...",
+				taskLabel: "Capture verification evidence",
 			},
 			{
 				id: "integration_notes",
-				label: "Integration notes",
+				label: "Follow-up notes (optional)",
 				kind: "textarea",
 				rows: 3,
 				helpText:
-					"Capture final provider or dashboard notes needed for reproducible setup.",
+					"Optional: capture anything you still need to clean up before the next Build lesson.",
 			},
 		],
 		content: {
@@ -516,9 +514,9 @@ export const buildLessons = [
 			},
 			actionCard: {
 				jobNow:
-					"Complete provider wiring and verify each integration checkpoint before moving to sandbox testing.",
+					"Complete provider wiring in sequence and log proof for each checkpoint before moving on.",
 				timebox: "25 minutes",
-				comeBackWith: "A connected local integration stack.",
+				comeBackWith: "A connected local stack with verification notes.",
 			},
 			coach: buildCoach(
 				"Wire DB, Auth, and Payments",

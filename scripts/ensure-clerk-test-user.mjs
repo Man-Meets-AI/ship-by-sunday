@@ -80,7 +80,8 @@ async function fetchClerkUsersByQuery({
 }) {
 	const url = new URL("/v1/users", apiBaseUrl);
 	url.searchParams.set("limit", "10");
-	url.searchParams.set("query", email);
+	// Clerk user search can be case-sensitive for query matching.
+	url.searchParams.set("query", email.toLowerCase());
 
 	const response = await fetchImpl(url, {
 		headers: {
@@ -241,22 +242,46 @@ export async function runCli({
 	env = process.env,
 	fetchImpl = fetch,
 } = {}) {
-	const [mode] = args;
+	const [mode, ...restArgs] = args;
 
 	if (mode !== "check" && mode !== "create") {
 		return {
 			exitCode: 1,
 			payload: result("error", {
 				message:
-					"Usage: node --env-file=.env.local scripts/ensure-clerk-test-user.mjs <check|create>",
+					"Usage: node --env-file=.env.local scripts/ensure-clerk-test-user.mjs <check|create> [--scope=<scope>] [--scope <scope>]",
 			}),
 		};
+	}
+
+	let requestedScope = env.CLERK_TEST_USER_SCOPE;
+	for (let i = 0; i < restArgs.length; i += 1) {
+		const current = restArgs[i];
+		if (current?.startsWith("--scope=")) {
+			requestedScope = current.slice("--scope=".length);
+			continue;
+		}
+
+		if (current === "--scope") {
+			const next = restArgs[i + 1];
+			if (!next || next.startsWith("--")) {
+				return {
+					exitCode: 1,
+					payload: result("error", {
+						message: "Missing value for --scope.",
+					}),
+				};
+			}
+
+			requestedScope = next;
+			i += 1;
+		}
 	}
 
 	let account;
 
 	try {
-		account = await loadConfiguredAccount();
+		account = await loadConfiguredAccount({ scope: requestedScope });
 	} catch (error) {
 		return {
 			exitCode: 1,

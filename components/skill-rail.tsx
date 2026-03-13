@@ -18,19 +18,53 @@ export type SkillRailCompletionCue = {
 	nextLessonId: string | null;
 };
 
+const LOCKED_LESSON_REASON = "Complete the previous required lesson to unlock.";
+
+type RailStepState = "done" | "current" | "upcoming" | "locked";
+
+function getRailStepState(
+	lesson: SkillRailLesson,
+	currentLessonId?: string,
+): RailStepState {
+	if (lesson.id === currentLessonId) {
+		return "current";
+	}
+
+	if (lesson.status === "completed") {
+		return "done";
+	}
+
+	if (lesson.status === "locked") {
+		return "locked";
+	}
+
+	return "upcoming";
+}
+
+function getRailStepStateLabel(state: RailStepState) {
+	switch (state) {
+		case "done":
+			return "Done";
+		case "current":
+			return "Current";
+		case "upcoming":
+			return "Upcoming";
+		default:
+			return "Locked";
+	}
+}
+
 function slotClasses({
-	isCurrent,
-	status,
+	state,
 	isCompleting,
 	isUnlocking,
 }: {
-	isCurrent: boolean;
-	status: SkillRailLesson["status"];
+	state: RailStepState;
 	isCompleting: boolean;
 	isUnlocking: boolean;
 }) {
 	const base =
-		"relative flex h-9 shrink-0 items-center overflow-hidden border-r border-product-border/25 px-3 text-[11px] font-medium uppercase tracking-wide transition-colors duration-100";
+		"relative flex h-11 min-w-[118px] shrink-0 items-center gap-2 overflow-hidden border-r border-product-border/25 px-3 transition-colors duration-100";
 
 	if (isCompleting) {
 		return `${base} bg-product-accent/14 text-product-accent shadow-[inset_0_0_0_1px_rgba(var(--product-accent),0.28)]`;
@@ -40,36 +74,109 @@ function slotClasses({
 		return `${base} bg-product-accent/8 text-product-text`;
 	}
 
-	if (isCurrent) {
-		return `${base} bg-product-accent/12 text-product-accent`;
+	if (state === "current") {
+		return `${base} bg-product-accent/14 text-product-text shadow-[inset_0_0_0_1px_rgba(var(--product-accent),0.28)]`;
 	}
 
-	if (status === "completed") {
-		return `${base} text-product-text/70`;
+	if (state === "done") {
+		return `${base} bg-product-surface/82 text-product-text/80`;
 	}
 
-	if (status === "in_progress" || status === "available") {
-		return `${base} text-product-muted`;
+	if (state === "upcoming") {
+		return `${base} bg-product-surface/70 text-product-muted`;
 	}
 
-	// locked
-	return `${base} text-product-muted/30`;
+	return `${base} bg-product-surface/64 text-product-muted/45`;
 }
 
-function SkillRailNavKey({
-	label,
-	title,
+function RailStepIcon({ state }: { state: RailStepState }) {
+	if (state === "done") {
+		return (
+			<span
+				aria-hidden="true"
+				className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-product-accent/45 text-product-accent"
+			>
+				<svg
+					width="10"
+					height="10"
+					viewBox="0 0 12 12"
+					fill="none"
+					stroke="currentColor"
+					strokeWidth="2"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+				>
+					<polyline points="2 6.5 4.5 9 10 3.5" />
+				</svg>
+			</span>
+		);
+	}
+
+	if (state === "locked") {
+		return (
+			<span
+				aria-hidden="true"
+				className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-product-border/60 text-product-muted/60"
+			>
+				<svg
+					width="9"
+					height="9"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					strokeWidth="2"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+				>
+					<rect x="4.5" y="10" width="15" height="10" rx="2" />
+					<path d="M8 10V7a4 4 0 0 1 8 0v3" />
+				</svg>
+			</span>
+		);
+	}
+
+	return (
+		<span
+			aria-hidden="true"
+			className={`inline-flex h-4 w-4 items-center justify-center rounded-full border ${
+				state === "current"
+					? "border-product-accent bg-product-accent/25"
+					: "border-product-border/70"
+			}`}
+		>
+			<span
+				className={`h-1.5 w-1.5 rounded-full ${
+					state === "current" ? "bg-product-accent" : "bg-product-muted/55"
+				}`}
+			/>
+		</span>
+	);
+}
+
+function SkillRailNavButton({
+	direction,
 	target,
 }: {
-	label: "Q" | "E";
-	title: string;
+	direction: "previous" | "next";
 	target: SkillRailNavigationTarget | null;
 }) {
-	const className = `sbs-rail-nav-key font-mono text-[10px] uppercase tracking-[0.22em] ${
+	const shortcutKey = direction === "previous" ? "Q" : "E";
+	const actionLabel = direction === "previous" ? "Previous" : "Next";
+	const title = target
+		? `Open ${direction} lesson`
+		: `No ${direction} lesson available`;
+	const className = `flex h-11 min-w-[96px] shrink-0 items-center justify-center gap-1 border-r border-product-border/25 px-2 font-mono text-[9px] uppercase tracking-[0.16em] transition-colors ${
 		target
-			? "cursor-pointer text-product-text transition-colors hover:text-product-accent"
-			: "cursor-not-allowed text-product-muted/40"
+			? "cursor-pointer bg-product-surface/86 text-product-text hover:bg-product-accent/10 hover:text-product-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-product-accent/50"
+			: "cursor-not-allowed bg-product-surface/74 text-product-muted/45"
 	}`;
+
+	const content = (
+		<>
+			<span>{actionLabel}</span>
+			<span className="text-product-muted">({shortcutKey})</span>
+		</>
+	);
 
 	if (!target) {
 		return (
@@ -78,11 +185,11 @@ function SkillRailNavKey({
 				disabled
 				title={title}
 				aria-label={title}
-				aria-keyshortcuts={label}
+				aria-keyshortcuts={shortcutKey}
 				data-disabled="true"
 				className={className}
 			>
-				{label}
+				{content}
 			</button>
 		);
 	}
@@ -93,11 +200,107 @@ function SkillRailNavKey({
 			scroll={false}
 			title={title}
 			aria-label={title}
-			aria-keyshortcuts={label}
+			aria-keyshortcuts={shortcutKey}
 			data-disabled="false"
 			className={className}
 		>
-			{label}
+			{content}
+		</Link>
+	);
+}
+
+function SkillRailStep({
+	lesson,
+	state,
+	isCompleting,
+	isUnlocking,
+	isCurrent,
+}: {
+	lesson: SkillRailLesson;
+	state: RailStepState;
+	isCompleting: boolean;
+	isUnlocking: boolean;
+	isCurrent: boolean;
+}) {
+	const classes = slotClasses({
+		state,
+		isCompleting,
+		isUnlocking,
+	});
+	const statusLabel = getRailStepStateLabel(state);
+	const stateBadgeClass =
+		state === "current"
+			? "border-product-accent/60 bg-product-accent/16 text-product-accent"
+			: state === "done"
+				? "border-product-accent/45 bg-product-accent/10 text-product-accent"
+				: state === "locked"
+					? "border-product-border/40 bg-product-surface-strong/40 text-product-muted/70"
+					: "border-product-border/60 bg-product-surface/80 text-product-muted";
+
+	const content = (
+		<>
+			{isCompleting ? (
+				<>
+					<span
+						aria-hidden="true"
+						className="pointer-events-none absolute inset-0 sbs-rail-complete-slot"
+					/>
+					<span
+						aria-hidden="true"
+						className="pointer-events-none absolute inset-y-0 left-[-20%] w-1/2 sbs-rail-complete-sweep"
+					/>
+				</>
+			) : null}
+			{isUnlocking ? (
+				<span
+					aria-hidden="true"
+					className="pointer-events-none absolute inset-0 sbs-rail-unlock-slot"
+				/>
+			) : null}
+			<div className="relative z-[1] flex min-w-0 items-center gap-2">
+				<RailStepIcon state={state} />
+				<div className="flex min-w-0 flex-col">
+					<span className="truncate text-[11px] font-semibold uppercase tracking-[0.08em]">
+						{lesson.shortTitle}
+					</span>
+					<span
+						className={`inline-flex w-fit rounded-none border px-1 py-[1px] text-[8px] font-mono uppercase tracking-[0.14em] ${stateBadgeClass}`}
+					>
+						{statusLabel}
+					</span>
+				</div>
+			</div>
+			{(state === "current" || isCompleting) && (
+				<span className="absolute bottom-0 left-0 z-[1] h-[2px] w-full bg-product-accent" />
+			)}
+		</>
+	);
+
+	if (state === "locked") {
+		return (
+			<button
+				type="button"
+				aria-disabled="true"
+				aria-label={`${lesson.shortTitle}. Locked.`}
+				title={LOCKED_LESSON_REASON}
+				onClick={(event) => {
+					event.preventDefault();
+				}}
+				className={`${classes} cursor-not-allowed text-left`}
+			>
+				{content}
+			</button>
+		);
+	}
+
+	return (
+		<Link
+			href={getLessonHref(lesson.id)}
+			scroll={false}
+			aria-current={isCurrent ? "step" : undefined}
+			className={`${classes} hover:bg-product-accent/8 hover:text-product-text`}
+		>
+			{content}
 		</Link>
 	);
 }
@@ -123,6 +326,16 @@ export function SkillRail({
 		() => getSkillRailNavigation(resolvedNavigationLessons, currentLessonId),
 		[resolvedNavigationLessons, currentLessonId],
 	);
+	const completedCount = lessons.filter(
+		(lesson) => lesson.status === "completed",
+	).length;
+	const currentVisibleIndex = currentLessonId
+		? lessons.findIndex((lesson) => lesson.id === currentLessonId)
+		: -1;
+	const progressSummary =
+		currentVisibleIndex >= 0
+			? `Step ${currentVisibleIndex + 1} of ${lessons.length} • ${completedCount} completed`
+			: `${completedCount} of ${lessons.length} completed`;
 
 	useEffect(() => {
 		if (!currentLessonId) {
@@ -155,93 +368,45 @@ export function SkillRail({
 	}, [currentLessonId, nextTarget, previousTarget, router]);
 
 	return (
-		<div className="flex w-full min-w-0 items-stretch">
-			<div className="flex shrink-0 items-center border-r border-product-border/25 px-3">
-				<span className="font-mono text-[9px] uppercase tracking-[0.3em] text-product-muted">
-					{label}
-				</span>
-			</div>
-
-			<div className="flex min-w-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+		<div className="flex w-full min-w-0 flex-col gap-1.5">
+			<div className="flex items-center justify-between gap-3 px-1">
+				<div className="flex min-w-0 items-center gap-2">
+					<span className="font-mono text-[9px] uppercase tracking-[0.3em] text-product-muted">
+						{label}
+					</span>
+					<p className="truncate font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
+						{progressSummary}
+					</p>
+				</div>
 				{showStageNavigation ? (
-					<SkillRailNavKey
-						label="Q"
-						title="Open previous lesson in this stage"
-						target={previousTarget}
-					/>
+					<p className="hidden shrink-0 font-mono text-[9px] uppercase tracking-[0.14em] text-product-muted sm:block">
+						Use Q / E to move
+					</p>
 				) : null}
-				{lessons.map((lesson) => {
-					const isCurrent = lesson.id === currentLessonId;
-					const isCompleting = completionCue?.completedLessonId === lesson.id;
-					const isUnlocking = completionCue?.nextLessonId === lesson.id;
-					const classes = slotClasses({
-						isCurrent,
-						status: lesson.status,
-						isCompleting,
-						isUnlocking,
-					});
-
-					const content = (
-						<>
-							{isCompleting ? (
-								<>
-									<span
-										aria-hidden="true"
-										className="pointer-events-none absolute inset-0 sbs-rail-complete-slot"
-									/>
-									<span
-										aria-hidden="true"
-										className="pointer-events-none absolute inset-y-0 left-[-20%] w-1/2 sbs-rail-complete-sweep"
-									/>
-								</>
-							) : null}
-							{isUnlocking ? (
-								<span
-									aria-hidden="true"
-									className="pointer-events-none absolute inset-0 sbs-rail-unlock-slot"
-								/>
-							) : null}
-							<span className="relative z-[1] whitespace-nowrap">
-								{lesson.shortTitle}
-							</span>
-							{lesson.status === "completed" && !isCurrent && !isCompleting && (
-								<span className="absolute bottom-0 left-0 z-[1] h-[2px] w-full bg-product-accent/40" />
-							)}
-							{(isCurrent || isCompleting) && (
-								<span className="absolute bottom-0 left-0 z-[1] h-[2px] w-full bg-product-accent" />
-							)}
-						</>
-					);
-
-					if (lesson.status === "locked") {
-						return (
-							<div
-								key={lesson.id}
-								aria-disabled="true"
-								className={`${classes} cursor-not-allowed`}
-							>
-								{content}
-							</div>
-						);
-					}
-
-					return (
-						<Link
-							key={lesson.id}
-							href={getLessonHref(lesson.id)}
-							scroll={false}
-							className={`${classes} hover:bg-product-accent/8 hover:text-product-text`}
-						>
-							{content}
-						</Link>
-					);
-				})}
+			</div>
+			<div className="flex min-w-0 items-stretch border border-product-border/30 bg-product-surface/78">
 				{showStageNavigation ? (
-					<SkillRailNavKey
-						label="E"
-						title="Open next lesson in this stage"
-						target={nextTarget}
-					/>
+					<SkillRailNavButton direction="previous" target={previousTarget} />
+				) : null}
+				<div className="flex min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+					{lessons.map((lesson) => {
+						const isCurrent = lesson.id === currentLessonId;
+						const state = getRailStepState(lesson, currentLessonId);
+
+						return (
+							<SkillRailStep
+								key={lesson.id}
+								lesson={lesson}
+								state={state}
+								isCurrent={isCurrent}
+								isCompleting={completionCue?.completedLessonId === lesson.id}
+								isUnlocking={completionCue?.nextLessonId === lesson.id}
+							/>
+						);
+					})}
+				</div>
+				{showStageNavigation ? (
+					<SkillRailNavButton direction="next" target={nextTarget} />
 				) : null}
 			</div>
 		</div>

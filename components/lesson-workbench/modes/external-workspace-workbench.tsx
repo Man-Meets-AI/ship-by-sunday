@@ -1,3 +1,8 @@
+import Link from "next/link";
+
+import { LessonVideoSurface } from "@/components/lesson-video-surface";
+import type { LessonResourceContent } from "@/lib/course/manifest";
+
 import type { WorkbenchModeProps } from "../types";
 import { FieldList } from "../fields/field-list";
 import { ArtifactContext } from "../shared/artifact-context";
@@ -17,6 +22,13 @@ export function ExternalWorkspaceWorkbench({
 	objectiveTasks,
 	completedTaskCount,
 }: WorkbenchModeProps) {
+	const transcript = lessonContent.coach.transcript;
+	const resourceLinks = (lessonContent.coach.resources ?? []).filter(
+		(
+			resource,
+		): resource is Exclude<LessonResourceContent, { kind: "copy_prompt" }> =>
+			resource.kind !== "copy_prompt",
+	);
 	const actionLabel =
 		lesson.externalTool === "figma"
 			? "Open Figma and keep this brief beside it."
@@ -34,11 +46,58 @@ export function ExternalWorkspaceWorkbench({
 				completedTaskCount={completedTaskCount}
 				totalTaskCount={Math.max(objectiveTasks.length, 1)}
 			/>
+			<WorkbenchCard label="Watch first">
+				<div className="space-y-3">
+					<p className="text-xs font-medium leading-snug text-product-muted">
+						Watch the walkthrough once, then run the setup in sequence.
+					</p>
+					<LessonVideoSurface coachContent={lessonContent.coach} />
+				</div>
+			</WorkbenchCard>
 			<WorkbenchCard label="External workspace">
 				<p className="text-xs font-medium leading-snug text-product-muted">
 					{actionLabel}
 				</p>
 			</WorkbenchCard>
+			{lesson.checklist.length > 0 ? (
+				<WorkbenchCard label="Run this sequence">
+					<ol className="space-y-1.5 pl-4 text-xs font-medium leading-relaxed text-product-text">
+						{lesson.checklist.map((item) => (
+							<li key={item} className="list-decimal break-words">
+								{item}
+							</li>
+						))}
+					</ol>
+				</WorkbenchCard>
+			) : null}
+			{transcript?.status === "ready" && transcript.body ? (
+				<WorkbenchCard label="Transcript">
+					<p className="whitespace-pre-wrap text-xs font-medium leading-relaxed text-product-text">
+						{transcript.body}
+					</p>
+				</WorkbenchCard>
+			) : null}
+			{resourceLinks.length > 0 ? (
+				<WorkbenchCard label="Resources">
+					<div className="space-y-1.5">
+						{resourceLinks.map((resource) => (
+							<Link
+								key={resource.id}
+								href={resource.href}
+								target={resource.kind === "external" ? "_blank" : undefined}
+								className="block rounded-none border border-product-border bg-product-surface-strong/80 px-2 py-1.5 transition-colors hover:bg-product-surface-alt"
+							>
+								<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
+									{resource.kind}
+								</p>
+								<p className="mt-0.5 text-xs font-medium text-product-text">
+									{resource.label}
+								</p>
+							</Link>
+						))}
+					</div>
+				</WorkbenchCard>
+			) : null}
 			<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
 			<FieldList
 				fields={fields}

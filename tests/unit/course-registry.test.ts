@@ -293,19 +293,27 @@ describe("course registry", () => {
 		expect(nextLesson?.artifact.dependsOn).toContain("rough_screens");
 	});
 
-	it("configures lesson 3.2 as a watch-only orientation lesson while keeping 3.3 gated on repo orientation", () => {
+	it("configures lesson 3.2 as a focus-only orientation lesson with required evidence while keeping 3.3 gated on repo orientation", () => {
 		const lesson = getLessonById("3.2");
 		const nextLesson = getLessonById("3.3");
 		expect(lesson).toBeTruthy();
 		expect(nextLesson).toBeTruthy();
 
-		expect(lesson?.shell).toBe("watch");
-		expect(lesson?.workbenchFields ?? []).toEqual([]);
-		expect(getObjectiveTasks(lesson!, {})).toEqual([]);
-		expect(getCompletionIssues(lesson!, {})).toEqual([]);
-		expect(nextLesson?.artifact.dependsOn).toContain(
-			"repo_orientation_ready",
-		);
+		expect(lesson).toMatchObject({
+			shell: "focus",
+			availableLayoutModes: ["focus"],
+			workbench: "external_workspace",
+			coachVideoPlacement: "workbench",
+			fieldShapeVersion: 3,
+		});
+		expect((lesson?.workbenchFields ?? []).map((field) => field.id)).toEqual([
+			"repo_orientation_checklist",
+			"startup_command",
+			"repo_map_notes",
+		]);
+		expect(getObjectiveTasks(lesson!, {}).length).toBeGreaterThan(0);
+		expect(getCompletionIssues(lesson!, {}).length).toBeGreaterThan(0);
+		expect(nextLesson?.artifact.dependsOn).toContain("repo_orientation_ready");
 	});
 
 	it("keeps Build lesson navigation chained from 3.1 through 3.10", () => {

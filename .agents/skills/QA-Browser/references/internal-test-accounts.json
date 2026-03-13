@@ -7,9 +7,19 @@
       "scope": "ship-by-sunday-clerk-instance",
       "authMode": "password",
       "email": "Test@test.com",
-      "password": "Test123456!",
+      "password": "SBS_QA_Codex_8Yv2!mN4#rL7",
       "firstName": "Test",
       "lastName": "User"
+    },
+    "ship-by-sunday-clerk-entitled": {
+      "softwareName": "Ship by Sunday",
+      "provider": "clerk",
+      "scope": "ship-by-sunday-clerk-entitled",
+      "authMode": "password",
+      "email": "test-entitled@test.com",
+      "password": "SBS_QA_Codex_8Yv2!mN4#rL7",
+      "firstName": "Test",
+      "lastName": "Entitled"
     }
   }
 }

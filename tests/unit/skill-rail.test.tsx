@@ -62,9 +62,11 @@ describe("SkillRail", () => {
 		expect(markup).toContain("sbs-rail-complete-slot");
 		expect(markup).toContain("sbs-rail-complete-sweep");
 		expect(markup).toContain("sbs-rail-unlock-slot");
-		expect(markup).toContain(">Q<");
-		expect(markup).toContain(">E<");
+		expect(markup).toContain(">Previous<");
+		expect(markup).toContain(">Next<");
 		expect(markup).toContain("Carry forward");
+		expect(markup).toContain(">Current<");
+		expect(markup).toContain(">Locked<");
 	});
 
 	it("skips the unlock ping when there is no next lesson", () => {
@@ -116,7 +118,7 @@ describe("SkillRail", () => {
 		);
 
 		expect(markup).toContain('href="/lesson/1.1"');
-		expect(markup).toContain("Open previous lesson in this stage");
+		expect(markup).toContain('aria-label="Open previous lesson"');
 		expect(markup).toContain('data-disabled="false"');
 	});
 
@@ -145,7 +147,7 @@ describe("SkillRail", () => {
 			/>,
 		);
 
-		expect(markup).toContain("Open next lesson in this stage");
+		expect(markup).toContain('aria-label="No next lesson available"');
 		expect(markup).toContain('data-disabled="true"');
 		expect(markup).not.toContain('href="/lesson/1.3"');
 	});
@@ -188,7 +190,7 @@ describe("SkillRail", () => {
 		);
 
 		expect(markup).toContain('href="/lesson/2.1"');
-		expect(markup).toContain("Open next lesson in this stage");
+		expect(markup).toContain('aria-label="Open next lesson"');
 		expect(markup).toContain(">Scope<");
 		expect(markup).toContain(">Brief<");
 		expect(markup).not.toContain(">References<");
@@ -232,7 +234,7 @@ describe("SkillRail", () => {
 		);
 
 		expect(markup).toContain('href="/lesson/1.7"');
-		expect(markup).toContain("Open previous lesson in this stage");
+		expect(markup).toContain('aria-label="Open previous lesson"');
 		expect(markup).not.toContain(">Brief<");
 	});
 
@@ -274,11 +276,9 @@ describe("SkillRail", () => {
 			/>,
 		);
 
-		expect(firstMarkup).toContain(
-			'aria-label="Open previous lesson in this stage"',
-		);
+		expect(firstMarkup).toContain('aria-label="No previous lesson available"');
 		expect(firstMarkup).toContain('data-disabled="true"');
-		expect(lastMarkup).toContain('aria-label="Open next lesson in this stage"');
+		expect(lastMarkup).toContain('aria-label="No next lesson available"');
 		expect(lastMarkup).toContain('data-disabled="true"');
 	});
 
@@ -296,7 +296,39 @@ describe("SkillRail", () => {
 			/>,
 		);
 
-		expect(markup).not.toContain("Open previous lesson in this stage");
-		expect(markup).not.toContain("Open next lesson in this stage");
+		expect(markup).not.toContain("Open previous lesson");
+		expect(markup).not.toContain("Open next lesson");
+	});
+
+	it("shows explicit progress and state labels for navigation context", () => {
+		const markup = renderToStaticMarkup(
+			<SkillRail
+				label="CEO"
+				currentLessonId="1.2"
+				lessons={[
+					{
+						id: "1.1",
+						shortTitle: "Problem",
+						status: "completed",
+					},
+					{
+						id: "1.2",
+						shortTitle: "User",
+						status: "in_progress",
+					},
+					{
+						id: "1.3",
+						shortTitle: "Outcome",
+						status: "available",
+					},
+				]}
+			/>,
+		);
+
+		expect(markup).toContain("Step 2 of 3");
+		expect(markup).toContain("1 completed");
+		expect(markup).toContain(">Done<");
+		expect(markup).toContain(">Current<");
+		expect(markup).toContain(">Upcoming<");
 	});
 });

@@ -10,7 +10,7 @@ import {
 
 describe("watch lesson contract", () => {
 	it("keeps watch lessons in a focus-only watch layout", () => {
-		for (const lessonId of ["2.4", "2.5", "3.2", "3.5", "3.8", "3.9"]) {
+		for (const lessonId of ["2.4", "2.5", "3.5", "3.8", "3.9"]) {
 			const lesson = getLessonById(lessonId);
 			expect(lesson).toBeTruthy();
 
@@ -46,15 +46,30 @@ describe("watch lesson contract", () => {
 		expect(nextLesson?.artifact.dependsOn).toContain("rough_screens");
 	});
 
-	it("treats lesson 3.2 as a watch-only lesson with no required in-product fields", () => {
+	it("treats lesson 3.2 as a focus-only repo orientation step with required evidence", () => {
 		const lesson = getLessonById("3.2");
 		const nextLesson = getLessonById("3.3");
 		expect(lesson).toBeTruthy();
 		expect(nextLesson).toBeTruthy();
 
-		expect(lesson?.workbenchFields ?? []).toEqual([]);
-		expect(getObjectiveTasks(lesson!, {})).toEqual([]);
-		expect(getCompletionIssues(lesson!, {})).toEqual([]);
+		expect(lesson?.shell).toBe("focus");
+		expect(getAvailableLayoutModesForLesson(lesson!)).toEqual(["focus"]);
+		expect(getDefaultLayoutModeForLesson(lesson!)).toBe("focus");
+		expect(lessonSupportsLayoutToggle(lesson!)).toBe(false);
+		expect(normalizeLayoutModeForLesson(lesson!, "split")).toBe("focus");
+		expect((lesson?.workbenchFields ?? []).map((field) => field.id)).toEqual([
+			"repo_orientation_checklist",
+			"startup_command",
+			"repo_map_notes",
+		]);
+		expect(getObjectiveTasks(lesson!, {}).length).toBeGreaterThan(0);
+		const emptyIssues = getCompletionIssues(lesson!, {});
+		expect(emptyIssues.length).toBeGreaterThan(0);
+		expect(
+			emptyIssues.some(
+				(issue) => issue.label === "Lesson video is attached and ready",
+			),
+		).toBe(true);
 		expect(nextLesson?.artifact.dependsOn).toContain("repo_orientation_ready");
 	});
 

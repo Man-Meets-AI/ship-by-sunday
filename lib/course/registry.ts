@@ -472,6 +472,11 @@ function getFieldTaskLabel(field: WorkbenchField) {
 	);
 }
 
+function isLessonVideoReady(lesson: LessonConfig) {
+	const video = lesson.content.coach.video;
+	return video?.status === "ready" && Boolean(video.url);
+}
+
 function normalizeLegacyChecklistItems(
 	value: unknown,
 	definitions: ObjectiveTaskDefinition[],
@@ -885,6 +890,19 @@ export function getObjectiveTasks(
 	}
 
 	const tasks: ObjectiveTask[] = [];
+
+	if (lesson.requireReadyVideoForCompletion) {
+		tasks.push({
+			id: "__coach_video_ready",
+			label: "Lesson video is attached and ready",
+			status: isLessonVideoReady(lesson) ? "complete" : "incomplete",
+			source: "field",
+			fieldId: "__coach_video_ready",
+			sectionId: "watch",
+			sectionTitle: "Watch",
+			interactive: false,
+		});
+	}
 
 	if (lesson.handoff?.mode === "select_candidate_problem") {
 		tasks.push({

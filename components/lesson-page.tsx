@@ -205,7 +205,6 @@ export function LessonPage({
 		useState<CompletionPhase>("idle");
 	const [completionPayload, setCompletionPayload] =
 		useState<CompletionPayload | null>(null);
-	const [completionAttempted, setCompletionAttempted] = useState(false);
 	const [serverCompletionIssues, setServerCompletionIssues] = useState<
 		CompletionIssue[]
 	>([]);
@@ -247,7 +246,6 @@ export function LessonPage({
 			setFieldValuesReady(true);
 			setCompletionPhase("idle");
 			setCompletionPayload(null);
-			setCompletionAttempted(false);
 			setServerCompletionIssues([]);
 			setServerCompletionMessage(null);
 			if (completionTimeoutRef.current !== null) {
@@ -440,13 +438,8 @@ export function LessonPage({
 	const completedObjectiveCount = objectiveTasks.filter(
 		(task) => task.status === "complete",
 	).length;
-	const nextIncompleteObjective = objectiveTasks.find(
-		(task) => task.status !== "complete",
-	);
 	const validationVisible =
-		completionAttempted ||
-		serverCompletionIssues.length > 0 ||
-		Boolean(serverCompletionMessage);
+		serverCompletionIssues.length > 0 || Boolean(serverCompletionMessage);
 	const displayedCompletionIssues = validationVisible
 		? serverCompletionIssues.length > 0
 			? serverCompletionIssues
@@ -466,7 +459,11 @@ export function LessonPage({
 		lessonState.status !== "completed";
 	const isCompleting = completionPhase === "submitting";
 	const isCelebrating = completionPhase === "celebrating";
-	const completionButtonDisabled = isCompleting || isCelebrating;
+	const completionButtonDisabled =
+		isCompleting || isCelebrating || !lessonReadyToComplete;
+	const pendingCompletionIssues = completionIssues.map((issue) => issue.label);
+	const pendingIssueSummary = pendingCompletionIssues.slice(0, 3).join(" • ");
+	const hasMorePendingIssues = pendingCompletionIssues.length > 3;
 	const completionNextLine = stageUnlockConfig
 		? `Next: ${stageUnlockConfig.nextStepLabel}`
 		: completionPayload?.nextLessonLabel
@@ -490,6 +487,26 @@ export function LessonPage({
 	const celebrationTitle =
 		stageUnlockConfig?.celebrationTitle ?? "Lesson cleared";
 	const showCelebrationBanner = isCelebrating && completionPayload;
+	const saveStatusMeta =
+		saveStatus === "saving"
+			? {
+					label: "Saving draft...",
+					className: "text-product-muted",
+				}
+			: saveStatus === "saved"
+				? {
+						label: "All changes saved",
+						className: "text-product-accent",
+					}
+				: saveStatus === "error"
+					? {
+							label: "Save failed. Edit any field to retry.",
+							className: "text-[#a83232]",
+						}
+					: {
+							label: "Draft not changed yet",
+							className: "text-product-muted",
+						};
 
 	const setValue = (fieldId: string, value: unknown) => {
 		if (serverCompletionIssues.length > 0) {
@@ -527,7 +544,6 @@ export function LessonPage({
 			return;
 		}
 
-		setCompletionAttempted(true);
 		setServerCompletionIssues([]);
 		setServerCompletionMessage(null);
 
@@ -557,7 +573,6 @@ export function LessonPage({
 						: null,
 				});
 				setCompletionPhase("celebrating");
-				setCompletionAttempted(false);
 				completionTimeoutRef.current = window.setTimeout(() => {
 					completionTimeoutRef.current = null;
 
@@ -599,7 +614,7 @@ export function LessonPage({
 						? "inline-flex items-center gap-1.5 rounded-none border border-product-accent bg-product-accent px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-bg shadow-[0_0_0_1px_rgba(var(--product-accent),0.24)]"
 						: lessonReadyToComplete
 							? "sbs-press-feedback inline-flex items-center gap-1.5 rounded-none border border-product-accent bg-product-accent px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-bg shadow-[0_0_0_1px_rgba(var(--product-accent),0.3),0_0_18px_rgba(var(--product-accent),0.22)] transition-all hover:brightness-95 motion-safe:animate-pulse"
-							: "sbs-hover-lift sbs-press-feedback inline-flex items-center gap-1.5 rounded-none border border-product-accent bg-product-chip px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
+							: "inline-flex cursor-not-allowed items-center gap-1.5 rounded-none border border-product-border bg-product-surface px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted"
 			}
 		>
 			{isCelebrating ? (
@@ -620,8 +635,10 @@ export function LessonPage({
 				</>
 			) : isCompleting ? (
 				completionPendingLabel
-			) : (
+			) : lessonReadyToComplete ? (
 				completionActionLabel
+			) : (
+				"Complete required steps"
 			)}
 		</button>
 	);
@@ -690,6 +707,11 @@ export function LessonPage({
 						Progress {completedObjectiveCount}/
 						{Math.max(objectiveTasks.length, 1)}
 					</p>
+					<p
+						className={`text-xs font-medium leading-relaxed ${saveStatusMeta.className}`}
+					>
+						{saveStatusMeta.label}
+					</p>
 					{isCelebrating && completionPayload ? (
 						<>
 							{completionArtifactLine ? (
@@ -706,11 +728,13 @@ export function LessonPage({
 							{readyStateCopy}
 						</p>
 					) : null}
-					{nextIncompleteObjective &&
+					{!lessonReadyToComplete &&
 					!showCompletionFeedback &&
-					!isCelebrating ? (
+					!isCelebrating &&
+					pendingIssueSummary ? (
 						<p className="text-xs leading-relaxed text-product-muted">
-							Next up: {nextIncompleteObjective.label}
+							Complete before continuing: {pendingIssueSummary}
+							{hasMorePendingIssues ? " • ..." : ""}
 						</p>
 					) : null}
 					{showCompletionFeedback && !isCelebrating ? (
