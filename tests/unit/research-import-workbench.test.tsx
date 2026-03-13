@@ -133,7 +133,7 @@ describe("Research import workbench", () => {
 		expect(markup).not.toContain("Copy prompt");
 		expect(markup).not.toContain("Generate with Codex");
 		expect(markup).toContain("Evidence Seen");
-		expect(markup).toContain("What this means for my v1");
+		expect(markup).toContain("Key pattern I noticed");
 		expect(markup).not.toContain("Paste ChatGPT response");
 	});
 
@@ -148,12 +148,11 @@ describe("Research import workbench", () => {
 
 		expect(markup).toContain("Notion");
 		expect(markup).toContain("Fast setup");
-		expect(markup).toContain("Pricing page");
 		expect(markup).toContain("Add Row");
 		expect(markup).toContain(
 			"Users care about speed first, but real workflows break on edge cases.",
 		);
-		expect(markup).toContain("What this means for my v1");
+		expect(markup).toContain("Key pattern I noticed");
 	});
 });
 
@@ -161,19 +160,19 @@ describe("Scope import workbench", () => {
 	it("renders the scope-cut prompt import flow in the main 1.6 workbench", () => {
 		const markup = renderScopeWorkbench();
 
+		expect(markup).toContain("What this step does");
+		expect(markup).toContain("Current draft");
 		expect(markup).toContain("Scope against this");
-		expect(markup).toContain("Sunday test");
 		expect(markup).toContain("Saved core flow");
-		expect(markup).toContain("Stuck? Use AI as backup");
+		expect(markup).toContain("Need a backup cut?");
 		expect(markup).toContain(
-			"Make the keep / cut decision yourself first. Use this only if you get stuck and need a tighter first-pass cut to react to.",
+			"Start manually. Use backup assist only if you need a first-pass scope cut to react to.",
 		);
 		expect(markup).toContain("Open backup assist");
-		expect(markup).toContain("Keep in v1");
-		expect(markup).toContain("Cut from v1");
-		expect(markup).toContain(
-			"Why this smaller version still delivers the promise",
-		);
+		expect(markup).toContain("1. Keep in v1");
+		expect(markup).toContain("2. Cut from v1");
+		expect(markup).toContain("3. Why this version is enough");
+		expect(markup).toContain("Next up in 1.7 Brief");
 		expect(markup).not.toContain("Paste ChatGPT scope cut");
 	});
 
@@ -192,7 +191,8 @@ describe("Scope import workbench", () => {
 			"This version is enough because the user can go from raw notes to a usable action summary in one pass.",
 		);
 		expect(markup).toContain("Use 1.5 as the cut line");
-		expect(markup).toContain("Not tight enough yet");
-		expect(markup).toContain("Stuck? Use AI as backup");
+		expect(markup).toContain("Name more cuts");
+		expect(markup).toContain("Saved draft");
+		expect(markup).toContain("Need a backup cut?");
 	});
 });

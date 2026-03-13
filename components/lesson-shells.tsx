@@ -4,6 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 import { LessonVideoSurface } from "@/components/lesson-video-surface";
+import {
+	workbenchChromeLabelClass,
+	workbenchPanelClass,
+} from "@/components/lesson-workbench/shared/workbench-readability";
 import { formatArtifactValue } from "@/components/lesson-workbench/shared/artifact-format";
 import type {
 	LessonPromptResourceContent,
@@ -80,24 +84,22 @@ function CopyPromptResourceCard({
 	};
 
 	return (
-		<div className="rounded-none border border-product-border bg-product-surface-strong/80 px-2 py-2">
-			<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
-				custom prompt
-			</p>
-			<p className="mt-0.5 text-xs font-medium text-product-text">
+		<div className="rounded-none border border-product-border/55 bg-product-surface-strong/80 px-4 py-4">
+			<p className={workbenchChromeLabelClass}>custom prompt</p>
+			<p className="mt-2 text-[14px] font-semibold leading-[1.45] text-product-text">
 				{resource.label}
 			</p>
 			{resource.body ? (
-				<p className="mt-1 text-xs font-medium leading-snug text-product-muted">
+				<p className="mt-2 text-[13px] leading-[1.7] text-product-muted">
 					{resource.body}
 				</p>
 			) : null}
 			{disabledReason ? (
-				<p className="mt-1 text-xs font-medium leading-snug text-product-muted">
+				<p className="mt-2 text-[13px] leading-[1.7] text-product-muted">
 					{disabledReason}
 				</p>
 			) : null}
-			<div className="mt-2 flex flex-wrap items-center gap-2">
+			<div className="mt-3 flex flex-wrap items-center gap-2">
 				<button
 					type="button"
 					onClick={copyPrompt}
@@ -107,22 +109,22 @@ function CopyPromptResourceCard({
 					{copyState === "copied" ? "Copied" : "Copy prompt"}
 				</button>
 				{copyState === "error" && !disabledReason ? (
-					<p className="text-[11px] font-medium leading-snug text-product-muted">
+					<p className="text-[12px] leading-[1.6] text-product-muted">
 						Clipboard unavailable. Copy from the prompt block below.
 					</p>
 				) : null}
 			</div>
-			<div className="mt-2 rounded-none border border-product-border/80 bg-product-surface px-2 py-2">
+			<div className="mt-3 rounded-none border border-product-border/55 bg-product-surface px-3 py-3">
 				{prompt ? (
 					<textarea
 						readOnly
 						value={prompt}
 						rows={14}
-						className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[11px] leading-relaxed text-product-text outline-hidden"
+						className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[12px] leading-[1.68] text-product-text outline-hidden"
 						aria-label={`${resource.label} prompt`}
 					/>
 				) : (
-					<p className="text-[11px] font-medium leading-snug text-product-muted">
+					<p className="text-[12px] leading-[1.6] text-product-muted">
 						The prompt will appear here once your chosen user and outcome are
 						saved.
 					</p>
@@ -175,7 +177,7 @@ function ManualTaskRow({
 				className="size-3 shrink-0 rounded-none border-product-border accent-[rgb(var(--product-accent))]"
 			/>
 			<span
-				className={`text-[11px] leading-snug ${checked ? "text-product-muted line-through" : ""}`}
+				className={`text-[12px] leading-[1.5] ${checked ? "text-product-muted line-through" : ""}`}
 			>
 				{label}
 			</span>
@@ -200,7 +202,7 @@ function GeneratedTaskRow({
 				}`}
 			/>
 			<span
-				className={`text-[11px] leading-snug ${
+				className={`text-[12px] leading-[1.5] ${
 					complete ? "text-product-muted line-through" : "text-product-text"
 				}`}
 			>
@@ -253,50 +255,44 @@ function ObjectivePanel({
 			];
 
 	return (
-		<aside className="flex min-w-0 flex-col rounded-none border border-product-border/70 bg-product-surface/68 shadow-panel backdrop-blur-lg xl:h-full xl:min-h-0">
+		<aside
+			className={`flex min-w-0 flex-col xl:h-full xl:min-h-0 ${workbenchPanelClass}`}
+		>
 			{/* Header */}
-			<div className="sticky top-0 z-10 shrink-0 border-b border-product-border bg-product-surface/95 px-3 py-1.5 backdrop-blur-lg">
-				<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
-					{lesson.objectiveTitle}
-				</p>
+			<div className="sticky top-0 z-10 shrink-0 border-b border-product-border/55 bg-product-surface/95 px-4 py-2 backdrop-blur-lg">
+				<p className={workbenchChromeLabelClass}>{lesson.objectiveTitle}</p>
 			</div>
 
 			{/* Scrollable body */}
 			<div className="min-h-0 flex-1 overflow-y-auto">
 				{/* Helper text */}
-				<div className="border-b border-product-border/60 px-3 py-2">
-					<p className="text-[11px] font-medium leading-snug text-product-muted">
+				<div className="border-b border-product-border/45 px-4 py-3">
+					<p className="text-[13px] leading-[1.7] text-product-muted">
 						{lesson.helperText ?? lesson.winCondition}
 					</p>
 				</div>
 
 				{/* Output */}
-				<div className="border-b border-product-border/60 px-3 py-1.5">
-					<p className="font-mono text-[8px] uppercase tracking-[0.2em] text-product-muted">
-						Output
-					</p>
-					<p className="mt-0.5 text-[11px] font-medium leading-tight text-product-text">
+				<div className="border-b border-product-border/45 px-4 py-3">
+					<p className={workbenchChromeLabelClass}>Output</p>
+					<p className="mt-2 text-[13px] font-semibold leading-[1.45] text-product-text">
 						{lesson.artifact.label}
 					</p>
 				</div>
 
 				{/* Tasks */}
-				<div className="px-3 py-2">
-					<div className="mb-1.5 flex items-center justify-between gap-2">
-						<p className="font-mono text-[8px] uppercase tracking-[0.2em] text-product-muted">
-							Tasks
-						</p>
-						<p className="font-mono text-[9px] tabular-nums tracking-[0.15em] text-product-muted">
+				<div className="px-4 py-4">
+					<div className="mb-3 flex items-center justify-between gap-2">
+						<p className={workbenchChromeLabelClass}>Tasks</p>
+						<p className="font-mono text-[10px] tabular-nums tracking-[0.15em] text-product-muted">
 							{completedCount}/{objectiveTasks.length}
 						</p>
 					</div>
-					<div className="space-y-2">
+					<div className="space-y-3">
 						{taskGroups.map((group) => (
-							<div key={group.id} className="space-y-0.5">
+							<div key={group.id} className="space-y-1.5">
 								{group.title ? (
-									<p className="font-mono text-[8px] uppercase tracking-[0.18em] text-product-muted">
-										{group.title}
-									</p>
+									<p className={workbenchChromeLabelClass}>{group.title}</p>
 								) : null}
 								<div className="space-y-0.5">
 									{group.tasks.map((task) =>
@@ -325,11 +321,11 @@ function ObjectivePanel({
 			</div>
 
 			{/* Next unlock — pinned to bottom */}
-			<div className="shrink-0 border-t border-product-border bg-product-surface-strong/70 px-3 py-1.5">
-				<p className="font-mono text-[8px] uppercase tracking-[0.2em] text-product-muted">
+			<div className="shrink-0 border-t border-product-border/55 bg-product-surface-strong/70 px-4 py-3">
+				<p className={workbenchChromeLabelClass}>
 					{lesson.nextStepLabel ? "Next step" : "Next unlock"}
 				</p>
-				<p className="mt-0.5 text-[11px] font-medium leading-tight text-product-text">
+				<p className="mt-2 text-[13px] font-semibold leading-[1.45] text-product-text">
 					{nextStepLabel}
 				</p>
 			</div>
@@ -400,16 +396,14 @@ function CoachPanel({
 			label: "Examples",
 			content:
 				examples.length > 0 ? (
-					<div className="space-y-1.5">
+					<div className="space-y-3">
 						{examples.map((example) => (
 							<div
 								key={example.id}
-								className="rounded-none border border-product-border bg-product-surface-strong/80 px-2 py-1.5"
+								className="rounded-none border border-product-border/55 bg-product-surface-strong/80 px-4 py-4"
 							>
-								<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
-									{example.title}
-								</p>
-								<p className="mt-1 whitespace-pre-wrap text-xs font-medium leading-snug text-product-text">
+								<p className={workbenchChromeLabelClass}>{example.title}</p>
+								<p className="mt-2 whitespace-pre-wrap text-[13px] leading-[1.68] text-product-text">
 									{example.body}
 								</p>
 								{example.imageSrc ? (
@@ -421,7 +415,7 @@ function CoachPanel({
 											loading="lazy"
 										/>
 										{example.imageCaption ? (
-											<p className="text-[11px] font-medium leading-snug text-product-muted">
+											<p className="text-[12px] leading-[1.6] text-product-muted">
 												{example.imageCaption}
 											</p>
 										) : null}
@@ -431,28 +425,26 @@ function CoachPanel({
 						))}
 					</div>
 				) : pinnedArtifacts.length > 0 ? (
-					<div className="space-y-1.5">
+					<div className="space-y-3">
 						{pinnedArtifacts.slice(0, 3).map((artifact) => (
 							<div
 								key={artifact.artifactKey}
-								className="rounded-none border border-product-border bg-product-surface-strong/80 px-2 py-1.5"
+								className="rounded-none border border-product-border/55 bg-product-surface-strong/80 px-4 py-4"
 							>
-								<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
+								<p className={workbenchChromeLabelClass}>
 									{artifact.lessonTitle}
 								</p>
-								<p className="mt-1 font-display text-sm uppercase tracking-[0.05em] text-product-text">
+								<p className="mt-2 font-display text-[1.05rem] uppercase tracking-[0.04em] text-product-text">
 									{artifact.artifactLabel}
 								</p>
-								<div className="mt-1 space-y-1 text-xs font-medium text-product-muted">
+								<div className="mt-3 space-y-2 text-[13px] leading-[1.65] text-product-muted">
 									{artifact.fields.length === 0 ? (
 										<p>No preview details attached.</p>
 									) : (
 										artifact.fields.slice(0, 2).map(([key, value]) => (
 											<div key={key}>
-												<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
-													{key}
-												</p>
-												<p className="mt-0.5 text-product-text">
+												<p className={workbenchChromeLabelClass}>{key}</p>
+												<p className="mt-1 text-[14px] leading-[1.68] text-product-text">
 													{formatArtifactValue(value)}
 												</p>
 											</div>
@@ -463,7 +455,7 @@ function CoachPanel({
 						))}
 					</div>
 				) : (
-					<p className="text-xs font-medium leading-snug text-product-muted">
+					<p className="text-[13px] leading-[1.7] text-product-muted">
 						Examples will show here when attached.
 					</p>
 				),
@@ -473,7 +465,7 @@ function CoachPanel({
 			label: "Resources",
 			content:
 				resources.length > 0 ? (
-					<div className="space-y-1.5">
+					<div className="space-y-3">
 						{resources.map((resource) =>
 							resource.kind === "copy_prompt" ? (
 								<CopyPromptResourceCard
@@ -486,12 +478,10 @@ function CoachPanel({
 									key={resource.id}
 									href={resource.href}
 									target={resource.kind === "external" ? "_blank" : undefined}
-									className="block rounded-none border border-product-border bg-product-surface-strong/80 px-2 py-1.5 transition-colors hover:bg-product-surface-alt"
+									className="block rounded-none border border-product-border/55 bg-product-surface-strong/80 px-4 py-4 transition-colors hover:bg-product-surface-alt"
 								>
-									<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
-										{resource.kind}
-									</p>
-									<p className="mt-0.5 text-xs font-medium text-product-text">
+									<p className={workbenchChromeLabelClass}>{resource.kind}</p>
+									<p className="mt-2 text-[14px] font-semibold leading-[1.45] text-product-text">
 										{resource.label}
 									</p>
 								</Link>
@@ -499,7 +489,7 @@ function CoachPanel({
 						)}
 					</div>
 				) : (
-					<p className="text-xs font-medium leading-snug text-product-muted">
+					<p className="text-[13px] leading-[1.7] text-product-muted">
 						Resources will show here when assigned.
 					</p>
 				),
@@ -510,11 +500,11 @@ function CoachPanel({
 	);
 
 	return (
-		<aside className="min-w-0 rounded-none border border-product-border/70 bg-product-surface/68 shadow-panel backdrop-blur-xl xl:h-full xl:min-h-0 xl:overflow-y-auto">
-			<div className="sticky top-0 z-10 border-b border-product-border bg-product-surface/95 px-3 py-1.5 backdrop-blur-lg">
-				<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
-					Coach
-				</p>
+		<aside
+			className={`min-w-0 xl:h-full xl:min-h-0 xl:overflow-y-auto ${workbenchPanelClass}`}
+		>
+			<div className="sticky top-0 z-10 border-b border-product-border/55 bg-product-surface/95 px-4 py-2 backdrop-blur-lg">
+				<p className={workbenchChromeLabelClass}>Coach</p>
 			</div>
 			<div>
 				{sections.map((section) => {
@@ -529,7 +519,7 @@ function CoachPanel({
 							<button
 								type="button"
 								onClick={() => onPanelChange(section.key)}
-								className="flex w-full items-center justify-between px-3 py-2 text-left transition-colors hover:bg-product-surface-strong/50"
+								className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-product-surface-strong/50"
 							>
 								<div className="flex items-center gap-2">
 									<span
@@ -539,13 +529,13 @@ function CoachPanel({
 												: "border-product-border bg-product-surface"
 										}`}
 									/>
-									<span className="font-mono text-[10px] uppercase tracking-[0.2em] text-product-text">
+									<span className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-text">
 										{section.label}
 									</span>
 								</div>
 							</button>
 							{isOpen ? (
-								<div className="border-t border-product-border/80 px-3 py-3">
+								<div className="border-t border-product-border/45 px-4 py-4">
 									{section.content}
 								</div>
 							) : null}
@@ -580,16 +570,16 @@ export function LessonShellSplit({
 				objectiveTasks={objectiveTasks}
 				onObjectiveTaskToggle={onObjectiveTaskToggle}
 			/>
-			<section className="min-w-0 rounded-none border border-product-border/75 bg-product-surface/82 shadow-panel backdrop-blur-lg xl:flex xl:min-h-0 xl:flex-col">
-				<div className="sticky top-0 z-10 border-b border-product-border bg-product-surface/95 px-3 py-1.5 backdrop-blur-lg">
-					<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
-						Workbench
-					</p>
+			<section
+				className={`min-w-0 xl:flex xl:min-h-0 xl:flex-col ${workbenchPanelClass}`}
+			>
+				<div className="sticky top-0 z-10 border-b border-product-border/55 bg-product-surface/95 px-4 py-2 backdrop-blur-lg">
+					<p className={workbenchChromeLabelClass}>Workbench</p>
 				</div>
-				<div className="min-w-0 px-3 py-2 xl:min-h-0 xl:flex-1 xl:overflow-y-auto">
+				<div className="min-w-0 px-4 py-4 xl:min-h-0 xl:flex-1 xl:overflow-y-auto sm:px-5">
 					{children}
 				</div>
-				<div className="shrink-0 border-t border-product-border bg-product-surface-strong/70 px-3 py-2">
+				<div className="shrink-0 border-t border-product-border/55 bg-product-surface-strong/70 px-4 py-3 sm:px-5">
 					{footer}
 				</div>
 			</section>
@@ -612,16 +602,16 @@ export function LessonShellFocus({
 	footer,
 }: BaseLessonShellProps) {
 	return (
-		<section className="min-w-0 rounded-none border border-product-border/75 bg-product-surface/82 shadow-panel backdrop-blur-lg xl:flex xl:h-full xl:min-h-0 xl:flex-col">
-			<div className="sticky top-0 z-10 border-b border-product-border bg-product-surface/95 px-3 py-1.5 backdrop-blur-lg">
-				<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
-					Workbench
-				</p>
+		<section
+			className={`min-w-0 xl:flex xl:h-full xl:min-h-0 xl:flex-col ${workbenchPanelClass}`}
+		>
+			<div className="sticky top-0 z-10 border-b border-product-border/55 bg-product-surface/95 px-4 py-2 backdrop-blur-lg">
+				<p className={workbenchChromeLabelClass}>Workbench</p>
 			</div>
-			<div className="min-w-0 px-3 py-2 xl:min-h-0 xl:flex-1 xl:overflow-y-auto">
+			<div className="min-w-0 px-4 py-4 xl:min-h-0 xl:flex-1 xl:overflow-y-auto sm:px-5">
 				{children}
 			</div>
-			<div className="shrink-0 border-t border-product-border bg-product-surface-strong/70 px-3 py-2">
+			<div className="shrink-0 border-t border-product-border/55 bg-product-surface-strong/70 px-4 py-3 sm:px-5">
 				{footer}
 			</div>
 		</section>
@@ -641,11 +631,13 @@ export function LessonShellWatch({
 	);
 
 	return (
-		<section className="min-w-0 rounded-none border border-product-border/75 bg-product-surface/82 shadow-panel backdrop-blur-lg xl:flex xl:h-full xl:min-h-0 xl:flex-col">
+		<section
+			className={`min-w-0 xl:flex xl:h-full xl:min-h-0 xl:flex-col ${workbenchPanelClass}`}
+		>
 			<div className="min-w-0 px-4 py-4 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:px-6 xl:py-6">
 				<div className="mx-auto flex w-full max-w-5xl flex-col gap-5">
 					<div className="space-y-3 border-b border-product-border/70 pb-4">
-						<div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] uppercase tracking-[0.16em] text-product-muted">
+						<div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
 							<p>{lesson.id}</p>
 							<p>{lesson.artifact.label}</p>
 							{lesson.content.lessonMeta.runtimeLabel ? (
@@ -653,10 +645,10 @@ export function LessonShellWatch({
 							) : null}
 						</div>
 						<div className="space-y-2">
-							<h1 className="max-w-4xl text-balance font-display text-[2rem] uppercase leading-none tracking-[0.06em] text-product-text sm:text-[2.6rem]">
+							<h1 className="max-w-4xl text-balance font-display text-[2.2rem] uppercase leading-[0.92] tracking-[0.05em] text-product-text sm:text-[2.85rem]">
 								{lesson.title}
 							</h1>
-							<p className="max-w-3xl text-sm font-medium leading-relaxed text-product-muted sm:text-base">
+							<p className="max-w-[64ch] text-[15px] leading-[1.72] text-product-muted sm:text-[16px]">
 								{lesson.content.intro}
 							</p>
 						</div>
@@ -667,27 +659,23 @@ export function LessonShellWatch({
 					/>
 					{coachContent.transcript?.status === "ready" &&
 					coachContent.transcript.body ? (
-						<section className="rounded-none border border-product-border bg-product-surface-strong/70 px-4 py-4">
-							<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-product-muted">
-								Transcript
-							</p>
-							<p className="mt-2 whitespace-pre-wrap text-sm font-medium leading-relaxed text-product-text">
+						<section className="rounded-none border border-product-border/55 bg-product-surface-strong/70 px-5 py-5">
+							<p className={workbenchChromeLabelClass}>Transcript</p>
+							<p className="mt-3 max-w-[64ch] whitespace-pre-wrap text-[15px] leading-[1.72] text-product-text">
 								{coachContent.transcript.body}
 							</p>
 						</section>
 					) : null}
 					{resourceLinks.length > 0 ? (
-						<section className="rounded-none border border-product-border bg-product-surface-strong/70 px-4 py-4">
-							<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-product-muted">
-								Resources
-							</p>
-							<div className="mt-2 grid gap-2 sm:grid-cols-2">
+						<section className="rounded-none border border-product-border/55 bg-product-surface-strong/70 px-5 py-5">
+							<p className={workbenchChromeLabelClass}>Resources</p>
+							<div className="mt-3 grid gap-3 sm:grid-cols-2">
 								{resourceLinks.map((resource) => (
 									<Link
 										key={resource.id}
 										href={resource.href}
 										target={resource.kind === "external" ? "_blank" : undefined}
-										className="rounded-none border border-product-border bg-product-surface px-3 py-2 text-sm font-medium text-product-text transition-colors hover:bg-product-surface-alt"
+										className="rounded-none border border-product-border/55 bg-product-surface px-4 py-3 text-[14px] font-medium text-product-text transition-colors hover:bg-product-surface-alt"
 									>
 										{resource.label}
 									</Link>
@@ -697,7 +685,7 @@ export function LessonShellWatch({
 					) : null}
 				</div>
 			</div>
-			<div className="shrink-0 border-t border-product-border bg-product-surface-strong/70 px-4 py-3 xl:px-6">
+			<div className="shrink-0 border-t border-product-border/55 bg-product-surface-strong/70 px-4 py-3 xl:px-6">
 				<div className="mx-auto w-full max-w-5xl">{footer}</div>
 			</div>
 		</section>

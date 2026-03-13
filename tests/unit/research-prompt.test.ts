@@ -268,7 +268,7 @@ describe("buildScopeBoundaryPrompt", () => {
 });
 
 describe("buildVisualDirectionGuidePrompt", () => {
-	it("builds a visual-guide prompt from saved references and a direction note", () => {
+	it("builds a visual-guide prompt from a direction note and optional references", () => {
 		const prompt = buildVisualDirectionGuidePrompt({
 			directionNotes:
 				"Push the references toward a sharper editorial landing page with tighter spacing, darker surfaces, and more trust-heavy hierarchy.",
@@ -279,7 +279,7 @@ describe("buildVisualDirectionGuidePrompt", () => {
 		});
 
 		expect(prompt).toContain(
-			"You are helping a builder turn saved visual references into a practical app visual system they can build from this weekend.",
+			"You are helping a builder turn rough screens and a stated visual direction into a practical app visual system they can build from this weekend.",
 		);
 		expect(prompt).toContain(
 			"- Push the references toward a sharper editorial landing page with tighter spacing, darker surfaces, and more trust-heavy hierarchy.",
@@ -297,53 +297,30 @@ describe("buildVisualDirectionGuidePrompt", () => {
 		expect(prompt).toContain("## What To Avoid");
 	});
 
-	it("requires both saved references and a local direction note for prompt state", () => {
+	it("requires a local direction note for prompt state", () => {
 		expect(
-			getPromptTemplateState("visual_direction_guide", [
-				{
-					artifactKey: "reference_board",
-					fieldValues: {
-						reference_gallery: {
-							kind: "reference_gallery",
-							items: [
-								{
-									id: "remote-1",
-									source: "remote_url",
-									url: "https://images.example.com/ref-1.png",
-								},
-							],
-						},
-					},
-				},
-			]).disabledReason,
+			getPromptTemplateState("visual_direction_guide", []).disabledReason,
 		).toContain("Save at least one visual direction note here");
 
 		expect(
 			getPromptTemplateState(
 				"visual_direction_guide",
-				[
-					{
-						artifactKey: "reference_board",
-						fieldValues: {
-							reference_gallery: {
-								kind: "reference_gallery",
-								items: [
-									{
-										id: "remote-1",
-										source: "remote_url",
-										url: "https://images.example.com/ref-1.png",
-									},
-								],
-							},
-						},
-					},
-				],
+				[],
 				{
 					visual_direction_notes:
 						"Keep the hero bold, editorial, and high contrast.",
 				},
 			).prompt,
-		).toContain("https://images.example.com/ref-1.png");
+		).toContain("Keep the hero bold, editorial, and high contrast.");
+	});
+
+	it("omits the reference section when no saved references are available", () => {
+		const prompt = buildVisualDirectionGuidePrompt({
+			directionNotes:
+				"Keep the hero bold, editorial, and high contrast.",
+		});
+
+		expect(prompt).not.toContain("Reference images to study:");
 	});
 });
 

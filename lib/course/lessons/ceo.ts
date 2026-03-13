@@ -6,7 +6,10 @@ import {
 	type LessonExampleContent,
 } from "../contracts";
 import { CORE_FLOW_IMAGE_FIELD_ID } from "../core-flow";
-import { WORKSHEET_01_RESOURCE, WORKSHEET_01_RESOURCES } from "../resources";
+import {
+	PRODUCT_BRIEF_TEMPLATE_RESOURCE,
+	PRODUCT_BRIEF_TEMPLATE_RESOURCES,
+} from "../resources";
 
 const START_WITH_PROBLEM_EXAMPLES: LessonExampleContent[] = [
 	{
@@ -101,7 +104,7 @@ You are not writing a market report. You are trying not to build blind.`,
 	},
 ];
 
-const RESEARCH_RESOURCES = [WORKSHEET_01_RESOURCE];
+const RESEARCH_RESOURCES = [PRODUCT_BRIEF_TEMPLATE_RESOURCE];
 
 const CORE_FLOW_EXAMPLES: LessonExampleContent[] = [
 	{
@@ -303,7 +306,7 @@ export const ceoLessons = [
 			},
 			coach: createPendingLessonCoach({
 				title: "Start With the Problem",
-				resources: WORKSHEET_01_RESOURCES,
+				resources: PRODUCT_BRIEF_TEMPLATE_RESOURCES,
 				examples: START_WITH_PROBLEM_EXAMPLES,
 			}),
 			workbench: {
@@ -472,7 +475,7 @@ export const ceoLessons = [
 			},
 			coach: createPendingLessonCoach({
 				title: "Pick One User",
-				resources: WORKSHEET_01_RESOURCES,
+				resources: PRODUCT_BRIEF_TEMPLATE_RESOURCES,
 				examples: PICK_ONE_USER_EXAMPLES,
 			}),
 			workbench: {
@@ -605,7 +608,7 @@ export const ceoLessons = [
 			},
 			coach: createPendingLessonCoach({
 				title: "Define the Outcome",
-				resources: WORKSHEET_01_RESOURCES,
+				resources: PRODUCT_BRIEF_TEMPLATE_RESOURCES,
 				examples: OUTCOME_EXAMPLES,
 			}),
 			workbench: {
@@ -794,7 +797,7 @@ export const ceoLessons = [
 			},
 			coach: createPendingLessonCoach({
 				title: "Map the Core Flow",
-				resources: WORKSHEET_01_RESOURCES,
+				resources: PRODUCT_BRIEF_TEMPLATE_RESOURCES,
 				examples: CORE_FLOW_EXAMPLES,
 			}),
 			workbench: {
@@ -836,7 +839,7 @@ export const ceoLessons = [
 			"Define what is explicitly out of scope",
 			"Write why this is enough for v1",
 		],
-		helperText: "Cut fantasy. Keep the smallest believable version.",
+		helperText: "Turn the core flow into the smallest believable weekend v1.",
 		winCondition:
 			"In-scope list, out-of-scope list, and v1 rationale are saved.",
 		panelDefaults: splitPanelDefaults,
@@ -885,7 +888,8 @@ export const ceoLessons = [
 		],
 		content: {
 			status: "draft",
-			intro: "A smaller shipped app beats a larger imaginary one.",
+			intro:
+				"Cut the product down to the smallest believable weekend v1 before you write the brief.",
 			lessonMeta: {
 				runtimeLabel: "6-8 min",
 				goal: "Prevent weekend death by feature creep.",
@@ -893,23 +897,24 @@ export const ceoLessons = [
 			},
 			actionCard: {
 				jobNow:
-					"Use the prompt to get a first-pass scope cut, then tighten it until the app feels brutally small.",
+					"Decide what stays, decide what gets cut, and use backup assist only if you need a first-pass draft to react to.",
 				timebox: "10 minutes",
 				comeBackWith: "A tighter MVP scope.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Kill Scope",
-				resources: WORKSHEET_01_RESOURCES,
+				resources: PRODUCT_BRIEF_TEMPLATE_RESOURCES,
 				examples: SCOPE_EXAMPLES,
 			}),
 			workbench: {
 				prompt: "A smaller shipped app beats a larger imaginary one.",
 				teachingPoints: [
-					"Start from the generated cut list, then delete one more thing.",
+					"Order the keep list from most essential to least.",
 					"Keep the product inside one believable user win.",
 					"If a feature helps later but is not required for the core outcome, cut it.",
 				],
-				emptyState: "A smaller shipped app beats a larger imaginary one.",
+				emptyState:
+					"Cut the product down to the smallest believable weekend v1 before you write the brief.",
 			},
 		},
 	},
@@ -1010,7 +1015,7 @@ export const ceoLessons = [
 			},
 			coach: createPendingLessonCoach({
 				title: "CEO Block Wrap-Up",
-				resources: WORKSHEET_01_RESOURCES,
+				resources: PRODUCT_BRIEF_TEMPLATE_RESOURCES,
 			}),
 			workbench: {
 				prompt:

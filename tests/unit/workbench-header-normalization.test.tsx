@@ -13,6 +13,7 @@ import { SectionCard } from "@/components/lesson-workbench/shared/section-card";
 import { TemplateDownloadCard } from "@/components/lesson-workbench/shared/template-download-card";
 import { ArtifactContext } from "@/components/lesson-workbench/shared/artifact-context";
 import { WorkbenchCard } from "@/components/lesson-workbench/shared/workbench-card";
+import { workbenchChromeLabelClass } from "@/components/lesson-workbench/shared/workbench-readability";
 import type { PinnedArtifact } from "@/components/lesson-shells";
 import { buildArtifactPreview, getLessonById } from "@/lib/course";
 
@@ -80,7 +81,7 @@ describe("Workbench header normalization", () => {
 		);
 
 		expect(markup).toContain(
-			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Template</span>',
+			`<span class="${workbenchChromeLabelClass}">Template</span>`,
 		);
 		expect(markup).not.toContain("font-display text-sm uppercase");
 	});
@@ -101,7 +102,7 @@ describe("Workbench header normalization", () => {
 		);
 
 		expect(markup).toContain(
-			'<h2 class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Define your weekend ship</h2>',
+			`<h2 class="${workbenchChromeLabelClass}">Define your weekend ship</h2>`,
 		);
 		expect(markup).not.toContain("Set the target");
 		expect(markup).not.toContain("font-display text-base uppercase");
@@ -126,10 +127,10 @@ describe("Workbench header normalization", () => {
 		);
 
 		expect(artifactContextMarkup).toContain(
-			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Our user</span>',
+			`<span class="${workbenchChromeLabelClass}">Our user</span>`,
 		);
 		expect(readonlyMarkup).toContain(
-			'<p class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">User Statement</p>',
+			`<p class="${workbenchChromeLabelClass}">User Statement</p>`,
 		);
 		expect(artifactContextMarkup).not.toContain(
 			"font-display text-sm uppercase",
@@ -158,25 +159,25 @@ describe("Workbench header normalization", () => {
 		});
 
 		expect(templateMarkup).toContain(
-			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Template</span>',
+			`<span class="${workbenchChromeLabelClass}">Template</span>`,
 		);
 		expect(importWorkbenchMarkup).toContain(
-			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Optional AI assist</span>',
+			`<span class="${workbenchChromeLabelClass}">Need a fast AI starter?</span>`,
 		);
 		expect(importWorkbenchMarkup).toContain(
-			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Research table</span>',
+			`<span class="${workbenchChromeLabelClass}">Research table</span>`,
 		);
 		expect(captureUploadMarkup).toContain(
-			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Do this now</span>',
+			`<p class="${workbenchChromeLabelClass}">Do this now</p>`,
 		);
 		expect(captureUploadMarkup).toContain(
-			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Upload the map</span>',
+			`<span class="${workbenchChromeLabelClass}">Upload the map</span>`,
 		);
 		expect(captureUploadMarkup).toContain(
-			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Our user</span>',
+			`<span class="${workbenchChromeLabelClass}">User</span>`,
 		);
 		expect(captureUploadMarkup).toContain(
-			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Outcome statement</span>',
+			`<span class="${workbenchChromeLabelClass}">Promise</span>`,
 		);
 		expect(importWorkbenchMarkup).not.toContain(
 			"font-display text-sm uppercase tracking-[0.04em]",
@@ -191,13 +192,13 @@ describe("Workbench header normalization", () => {
 		const externalWorkspaceMarkup = renderLessonWorkbench("3.4");
 
 		expect(roadmapMarkup).toContain(
-			'<p class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">CEO</p>',
+			`<p class="${workbenchChromeLabelClass}">CEO</p>`,
 		);
 		expect(roadmapMarkup).not.toContain(
 			'font-display text-sm uppercase tracking-[0.06em] text-product-text">CEO</p>',
 		);
 		expect(externalWorkspaceMarkup).toContain(
-			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">External workspace</span>',
+			`<span class="${workbenchChromeLabelClass}">External workspace</span>`,
 		);
 	});
 });

@@ -1,13 +1,9 @@
 import { LessonVideoSurface } from "@/components/lesson-video-surface";
-import { LayoutGrid } from "@/components/ui/layout-grid";
-import {
-	getReferenceGalleryItemImageUrl,
-	getReferenceGalleryItems,
-} from "@/lib/course/reference-gallery";
 
 import { FieldControl } from "../fields/field-control";
 import { PromptImportCard } from "../shared/prompt-import-card";
 import { StatusRail } from "../shared/status-rail";
+import { ArtifactContext } from "../shared/artifact-context";
 import { WorkbenchCard } from "../shared/workbench-card";
 import { WorkbenchContainer } from "../shared/workbench-container";
 import { WorkbenchHeader } from "../shared/workbench-header";
@@ -23,33 +19,6 @@ function InvalidFieldMessage({ visible }: { visible: boolean }) {
 			This step is required before you can complete the lesson.
 		</p>
 	);
-}
-
-function ReferenceGalleryPreview({ fieldValue }: { fieldValue: unknown }) {
-	const items = getReferenceGalleryItems(fieldValue)
-		.map((item) => {
-			const src = getReferenceGalleryItemImageUrl(item);
-			return src
-				? {
-						id: item.id,
-						src,
-						alt: item.fileName ?? "Saved reference",
-					}
-				: null;
-		})
-		.filter((item): item is { id: string; src: string; alt: string } =>
-			Boolean(item),
-		);
-
-	if (items.length === 0) {
-		return (
-			<p className="text-sm font-medium leading-relaxed text-product-muted">
-				Your saved `2.1` references will appear here once they are available.
-			</p>
-		);
-	}
-
-	return <LayoutGrid items={items} />;
 }
 
 export function VisualDirectionWorkbench({
@@ -69,9 +38,6 @@ export function VisualDirectionWorkbench({
 	const markdownField = fields.find(
 		(field) => field.id === "visual_guide_markdown",
 	);
-	const referenceArtifact = pinnedArtifacts.find(
-		(artifact) => artifact.artifactKey === "reference_board",
-	);
 
 	return (
 		<WorkbenchContainer className="max-w-6xl">
@@ -85,21 +51,19 @@ export function VisualDirectionWorkbench({
 				<WorkbenchCard label="Watch lesson">
 					<LessonVideoSurface coachContent={lessonContent.coach} />
 				</WorkbenchCard>
-				<WorkbenchCard label="Reference gallery">
+				<WorkbenchCard label="Screen context">
 					<div className="space-y-3">
 						<p className="text-sm font-medium leading-relaxed text-product-muted">
-							Use the references you saved in `2.1` to lock the vibe before you
-							ask a coding agent for `visualguide.md`.
+							Use your rough screens to lock the visual direction before you ask
+							a coding agent for `visualguide.md`.
 						</p>
-						<ReferenceGalleryPreview
-							fieldValue={referenceArtifact?.fieldValues.reference_gallery}
-						/>
+						<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
 					</div>
 				</WorkbenchCard>
 			</div>
 			<WorkbenchCard label="Follow this order">
 				<ol className="space-y-2 text-sm leading-relaxed text-product-text">
-					<li>1. Review the lesson video and the saved references together.</li>
+					<li>1. Review the lesson video and your rough screens together.</li>
 					<li>2. Write the visual changes or direction you want to push.</li>
 					<li>
 						3. Copy the generated prompt into your preferred coding agent.

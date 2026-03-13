@@ -159,33 +159,6 @@ function renderStoryboardLessonResources() {
 	);
 }
 
-function renderVisualDirectionLessonResources(
-	activeCoachPanel:
-		| "watch"
-		| "transcript"
-		| "examples"
-		| "resources" = "transcript",
-) {
-	const lesson = getLessonById("2.6");
-	expect(lesson).toBeTruthy();
-
-	return renderToStaticMarkup(
-		<LessonShellSplit
-			lesson={lesson!}
-			objectiveTasks={[]}
-			onObjectiveTaskToggle={() => {}}
-			coachVisible
-			activeCoachPanel={activeCoachPanel}
-			onCoachPanelChange={() => {}}
-			pinnedArtifacts={[]}
-			coachContent={lesson!.content.coach}
-			footer={<div>Footer</div>}
-		>
-			<div>Workbench</div>
-		</LessonShellSplit>,
-	);
-}
-
 function renderWatchLesson(
 	overrides?: Parameters<typeof LessonShellWatch>[0]["coachContent"],
 ) {
@@ -201,24 +174,16 @@ function renderWatchLesson(
 	);
 }
 
-function renderBuildLessonExamples() {
+function renderBuildKickoffWatchShell() {
 	const lesson = getLessonById("3.1");
 	expect(lesson).toBeTruthy();
 
 	return renderToStaticMarkup(
-		<LessonShellSplit
+		<LessonShellWatch
 			lesson={lesson!}
-			objectiveTasks={[]}
-			onObjectiveTaskToggle={() => {}}
-			coachVisible
-			activeCoachPanel="examples"
-			onCoachPanelChange={() => {}}
-			pinnedArtifacts={[]}
 			coachContent={lesson!.content.coach}
 			footer={<div>Footer</div>}
-		>
-			<div>Workbench</div>
-		</LessonShellSplit>,
+		/>,
 	);
 }
 
@@ -300,22 +265,12 @@ describe("LessonShellSplit resources", () => {
 		).toBe(false);
 	});
 
-	it("hides the duplicate watch panel when the lesson video lives in the workbench", () => {
-		const markup = renderVisualDirectionLessonResources();
+	it("renders build kickoff resources in the watch shell", () => {
+		const markup = renderBuildKickoffWatchShell();
 
-		expect(markup).not.toContain(">Watch<");
-		expect(markup).toContain(">Transcript<");
-		expect(markup).toContain(">Examples<");
-		expect(markup).toContain(">Resources<");
-	});
-
-	it("renders optional coach example images when provided by lesson content", () => {
-		const markup = renderBuildLessonExamples();
-
-		expect(markup).toContain("/course/build-guide-images/image1.png");
-		expect(markup).toContain(
-			"Use one controlled prompt, not a wide open request.",
-		);
+		expect(markup).toContain("Build Plan Template");
+		expect(markup).toContain("Figma MCP setup guide");
+		expect(markup).toContain("Playwright MCP docs");
 	});
 });
 

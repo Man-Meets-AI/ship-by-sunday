@@ -66,10 +66,10 @@ export function ArtifactPreviewContent({
 		: [];
 
 	return (
-		<div className="space-y-2 text-xs font-medium text-product-muted">
+		<div className="space-y-3 text-[13px] leading-[1.68] text-product-muted">
 			{galleryField ? (
 				<div className="space-y-2">
-					<p className="font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
+					<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
 						{galleryField.label}
 					</p>
 					<div className="grid grid-cols-2 gap-2">
@@ -86,14 +86,14 @@ export function ArtifactPreviewContent({
 							</div>
 						))}
 					</div>
-					<p className="text-product-text">
+					<p className="max-w-[52ch] text-[14px] leading-[1.68] text-product-text">
 						{formatArtifactValue(galleryField.value)}
 					</p>
 				</div>
 			) : null}
 			{uploadGalleryField ? (
 				<div className="space-y-2">
-					<p className="font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
+					<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
 						{uploadGalleryField.label}
 					</p>
 					<div className="grid grid-cols-2 gap-2">
@@ -110,7 +110,7 @@ export function ArtifactPreviewContent({
 							</div>
 						))}
 					</div>
-					<p className="text-product-text">
+					<p className="max-w-[52ch] text-[14px] leading-[1.68] text-product-text">
 						{formatArtifactValue(uploadGalleryField.value)}
 					</p>
 				</div>
@@ -120,10 +120,10 @@ export function ArtifactPreviewContent({
 			) : (
 				textFields.map(([key, value]) => (
 					<div key={key}>
-						<p className="font-mono text-[10px] uppercase tracking-[0.22em] text-product-muted">
+						<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
 							{key}
 						</p>
-						<p className="mt-1 text-product-text">
+						<p className="mt-1 max-w-[52ch] text-[14px] leading-[1.68] text-product-text">
 							{formatArtifactValue(value)}
 						</p>
 					</div>

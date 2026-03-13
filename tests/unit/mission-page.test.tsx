@@ -2,8 +2,8 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 const missionState = {
-	progressCount: 21,
-	totalLessons: 32,
+	progressCount: 20,
+	totalLessons: 31,
 	blocks: [
 		{
 			id: "CEO",
@@ -74,8 +74,8 @@ const missionState = {
 			id: "DESIGN",
 			label: "DESIGN",
 			order: 2,
-			completedCount: 7,
-			totalLessons: 7,
+			completedCount: 6,
+			totalLessons: 6,
 			lessons: [
 				{
 					id: "2.1",
@@ -125,14 +125,6 @@ const missionState = {
 					artifactLabel: "Visual guide",
 					isImplemented: true,
 				},
-				{
-					id: "2.7",
-					title: "Design Wrap",
-					shortTitle: "Wrap",
-					status: "completed" as const,
-					artifactLabel: "Design spec",
-					isImplemented: true,
-				},
 			],
 		},
 		{
@@ -144,10 +136,10 @@ const missionState = {
 			lessons: [
 				{
 					id: "3.1",
-					title: "Lock Build Path and Scope",
-					shortTitle: "Scope",
+					title: "Build Kickoff",
+					shortTitle: "Kickoff",
 					status: "locked" as const,
-					artifactLabel: "Build Prompt + Starting Path",
+					artifactLabel: "Build kickoff ready",
 					isImplemented: true,
 				},
 				{

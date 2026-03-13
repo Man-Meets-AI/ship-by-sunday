@@ -1,6 +1,12 @@
 import type { WorkbenchSection } from "@/lib/course/manifest";
 
 import { WorkbenchHeaderLabel } from "./workbench-header-label";
+import {
+	workbenchCardBodyClass,
+	workbenchCardClass,
+	workbenchCardHeaderClass,
+	workbenchSupportCopyClass,
+} from "./workbench-readability";
 
 export function SectionCard({
 	section,
@@ -17,11 +23,9 @@ export function SectionCard({
 }) {
 	return (
 		<section
-			className={`rounded-none border border-product-border/70 ${
-				blocked ? "bg-product-surface/35" : "bg-product-surface/55"
-			}`}
+			className={`${workbenchCardClass} ${blocked ? "bg-product-surface/45" : ""}`}
 		>
-			<div className="border-b border-product-border/60 px-4 py-3">
+			<div className={workbenchCardHeaderClass}>
 				<div className="flex flex-wrap items-center justify-between gap-2">
 					<WorkbenchHeaderLabel as="h2">{section.title}</WorkbenchHeaderLabel>
 					<WorkbenchHeaderLabel className="tracking-[0.16em]">
@@ -29,17 +33,17 @@ export function SectionCard({
 					</WorkbenchHeaderLabel>
 				</div>
 				{blocked && blockedMessage ? (
-					<p className="mt-2 max-w-2xl text-[12px] font-medium leading-relaxed text-product-muted">
+					<p className={`mt-3 ${workbenchSupportCopyClass}`}>
 						{blockedMessage}
 					</p>
 				) : null}
 				{section.instruction ? (
-					<p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-product-muted">
+					<p className={`mt-3 ${workbenchSupportCopyClass}`}>
 						{section.instruction}
 					</p>
 				) : null}
 			</div>
-			<div className="px-4 py-4">
+			<div className={workbenchCardBodyClass}>
 				<fieldset disabled={blocked} className={blocked ? "opacity-45" : ""}>
 					{children}
 				</fieldset>

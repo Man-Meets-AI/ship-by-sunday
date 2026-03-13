@@ -21,13 +21,13 @@ export function FieldList({
 	className?: string;
 }) {
 	return (
-		<div className={className}>
+		<div className={className ? `space-y-5 ${className}` : "space-y-5"}>
 			{fields.map((field) => (
 				<div
 					key={field.id}
 					className={
 						invalidFieldIds.has(field.id)
-							? "rounded-none border border-[#a83232] bg-[rgba(168,50,50,0.06)] p-3"
+							? "rounded-none border border-[#a83232] bg-[rgba(168,50,50,0.06)] p-4"
 							: "p-0"
 					}
 				>
@@ -38,12 +38,12 @@ export function FieldList({
 						pinnedArtifacts={pinnedArtifacts}
 					/>
 					{field.helpText ? (
-						<p className="mt-2 max-w-2xl text-[11px] leading-relaxed text-product-muted">
+						<p className="mt-3 max-w-[64ch] text-[13px] leading-[1.7] text-product-muted">
 							{field.helpText}
 						</p>
 					) : null}
 					{invalidFieldIds.has(field.id) ? (
-						<p className="mt-2 text-[11px] font-medium leading-snug text-[#a83232]">
+						<p className="mt-3 text-[12px] font-medium leading-[1.6] text-[#a83232]">
 							{invalidFieldMessages.get(field.id) ??
 								"Finish this before continuing."}
 						</p>

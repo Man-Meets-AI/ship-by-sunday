@@ -50,7 +50,13 @@ export function getReferenceGalleryItems(
 	value: unknown,
 ): ReferenceGalleryItem[] {
 	if (isReferenceGalleryValue(value)) {
-		return value.items;
+		return value.items.filter((item) => {
+			if (item.source === "upload") {
+				return Boolean(item.storageId || item.url || item.previewUrl);
+			}
+
+			return typeof item.url === "string" && item.url.trim().length > 0;
+		});
 	}
 
 	return [];

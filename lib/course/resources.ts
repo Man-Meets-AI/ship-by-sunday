@@ -24,16 +24,12 @@ export const START_HERE_RESOURCES: LessonResourceContent[] = [
 	CORE_TEMPLATES_RESOURCE,
 ];
 
-export const WORKSHEET_PACKET_RESOURCE = CORE_TEMPLATES_RESOURCE;
-
 export const PRODUCT_BRIEF_TEMPLATE_RESOURCE: LessonResourceContent = {
 	id: "product-brief-template",
 	label: "Product Brief Template",
 	href: CORE_TEMPLATES_PDF_HREF,
 	kind: "download",
 };
-
-export const WORKSHEET_01_RESOURCE = PRODUCT_BRIEF_TEMPLATE_RESOURCE;
 
 export const DESIGN_SPEC_TEMPLATE_RESOURCE: LessonResourceContent = {
 	id: "design-spec-template",
@@ -42,16 +38,12 @@ export const DESIGN_SPEC_TEMPLATE_RESOURCE: LessonResourceContent = {
 	kind: "download",
 };
 
-export const WORKSHEET_02_RESOURCE = DESIGN_SPEC_TEMPLATE_RESOURCE;
-
 export const BUILD_PLAN_TEMPLATE_RESOURCE: LessonResourceContent = {
 	id: "build-plan-template",
 	label: "Build Plan Template",
 	href: CORE_TEMPLATES_PDF_HREF,
 	kind: "download",
 };
-
-export const WORKSHEET_03_RESOURCE = BUILD_PLAN_TEMPLATE_RESOURCE;
 
 export const LAUNCH_TRACKER_TEMPLATE_RESOURCE: LessonResourceContent = {
 	id: "launch-tracker-template",
@@ -60,16 +52,12 @@ export const LAUNCH_TRACKER_TEMPLATE_RESOURCE: LessonResourceContent = {
 	kind: "download",
 };
 
-export const WORKSHEET_04_RESOURCE = LAUNCH_TRACKER_TEMPLATE_RESOURCE;
-
 export const PRODUCT_BRIEF_TEMPLATE_RESOURCES: LessonResourceContent[] = [
 	PRODUCT_BRIEF_TEMPLATE_RESOURCE,
 ];
-export const WORKSHEET_01_RESOURCES = PRODUCT_BRIEF_TEMPLATE_RESOURCES;
 export const DESIGN_SPEC_TEMPLATE_RESOURCES: LessonResourceContent[] = [
 	DESIGN_SPEC_TEMPLATE_RESOURCE,
 ];
-export const WORKSHEET_02_RESOURCES = DESIGN_SPEC_TEMPLATE_RESOURCES;
 export const STORYBOARD_FIGJAM_RESOURCE: LessonResourceContent = {
 	id: "storyboard-figjam-template",
 	label: "Digital storyboard option (FigJam)",
@@ -80,7 +68,6 @@ export const STORYBOARD_TEMPLATE_RESOURCES: LessonResourceContent[] = [
 	DESIGN_SPEC_TEMPLATE_RESOURCE,
 	STORYBOARD_FIGJAM_RESOURCE,
 ];
-export const WORKSHEET_02_STORYBOARD_RESOURCES = STORYBOARD_TEMPLATE_RESOURCES;
 
 export const DESIGN_REFERENCE_RESOURCES: LessonResourceContent[] = [
 	DESIGN_SPEC_TEMPLATE_RESOURCE,
@@ -148,11 +135,9 @@ export const DESIGN_REFERENCE_RESOURCES: LessonResourceContent[] = [
 export const BUILD_PLAN_TEMPLATE_RESOURCES: LessonResourceContent[] = [
 	BUILD_PLAN_TEMPLATE_RESOURCE,
 ];
-export const WORKSHEET_03_RESOURCES = BUILD_PLAN_TEMPLATE_RESOURCES;
 export const LAUNCH_TRACKER_TEMPLATE_RESOURCES: LessonResourceContent[] = [
 	LAUNCH_TRACKER_TEMPLATE_RESOURCE,
 ];
-export const WORKSHEET_04_RESOURCES = LAUNCH_TRACKER_TEMPLATE_RESOURCES;
 
 export function getBuildStarterTemplateRepoUrl() {
 	const value = process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL?.trim();
@@ -164,35 +149,23 @@ export const PRODUCT_BRIEF_TEMPLATE_DOWNLOAD: LessonTemplateResource = {
 	templateDownloadHref: CORE_TEMPLATES_PDF_HREF,
 };
 
-export const WORKSHEET_01_TEMPLATE_DOWNLOAD = PRODUCT_BRIEF_TEMPLATE_DOWNLOAD;
-
 export const CORE_FLOW_FIGJAM_TEMPLATE_DOWNLOAD: LessonTemplateResource = {
 	templateDownloadLabel: "Open FigJam template",
 	templateDownloadHref:
 		"https://www.figma.com/board/csR3w46LJaHNU0RKHVOJDB/Template-for-Storyboard?node-id=0-1",
 };
 
-export const WORKSHEET_01_FIGJAM_TEMPLATE_DOWNLOAD =
-	CORE_FLOW_FIGJAM_TEMPLATE_DOWNLOAD;
-
 export const DESIGN_SPEC_TEMPLATE_DOWNLOAD: LessonTemplateResource = {
 	templateDownloadLabel: "Open design spec template",
 	templateDownloadHref: CORE_TEMPLATES_PDF_HREF,
 };
-
-export const WORKSHEET_02_TEMPLATE_DOWNLOAD = DESIGN_SPEC_TEMPLATE_DOWNLOAD;
 
 export const STORYBOARD_TEMPLATE_DOWNLOAD: LessonTemplateResource = {
 	templateDownloadLabel: "Open printable storyboard template",
 	templateDownloadHref: "/downloads/ship-by-sunday-storyboard-template.pdf",
 };
 
-export const WORKSHEET_02_STORYBOARD_TEMPLATE_DOWNLOAD =
-	STORYBOARD_TEMPLATE_DOWNLOAD;
-
 export const SHIP_DEMO_PROMPT_DOWNLOAD: LessonTemplateResource = {
 	templateDownloadLabel: "Open ship demo prompt",
 	templateDownloadHref: CORE_TEMPLATES_PDF_HREF,
 };
-
-export const WORKSHEET_04_DEMO_PROMPT_DOWNLOAD = SHIP_DEMO_PROMPT_DOWNLOAD;

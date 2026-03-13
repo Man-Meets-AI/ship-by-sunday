@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 
 import type { StageUnlockSection } from "@/lib/course/stage-unlock";
+import { workbenchChromeLabelClass } from "../../shared/workbench-readability";
 
 function splitSectionLines(value: string) {
 	const lines = value
@@ -55,7 +56,7 @@ export function StageUnlockSectionCard({
 			<div className="border-b border-product-border/35 px-4 py-3">
 				<div className="flex flex-wrap items-center justify-between gap-2">
 					<p
-						className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted"
+						className={workbenchChromeLabelClass}
 						style={{ textWrap: "balance" }}
 					>
 						{section.label}
@@ -81,9 +82,7 @@ export function StageUnlockSectionCard({
 									key={`${section.label}-${lineIndex}`}
 									className="space-y-1"
 								>
-									<p className="font-mono text-[10px] uppercase tracking-[0.16em] text-product-muted">
-										{keyValue.label}
-									</p>
+									<p className={workbenchChromeLabelClass}>{keyValue.label}</p>
 									<p
 										className="text-[13px] leading-7 text-product-text"
 										style={{ overflowWrap: "anywhere" }}
@@ -136,9 +135,7 @@ export function StageUnlockSectionCard({
 				) : null}
 				{sourceLines.length ? (
 					<div className="border-t border-product-border/30 pt-3">
-						<p className="font-mono text-[10px] uppercase tracking-[0.16em] text-product-muted">
-							Sources
-						</p>
+						<p className={workbenchChromeLabelClass}>Sources</p>
 						<ul className="mt-2 space-y-1.5">
 							{sourceLines.map((line, lineIndex) => (
 								<li

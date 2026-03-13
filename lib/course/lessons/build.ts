@@ -1,12 +1,11 @@
 import { createPendingLessonCoach } from "../content-helpers";
 import {
 	focusPanelDefaults,
-	splitPanelDefaults,
 	type LessonConfig,
 	type LessonExampleContent,
 	type LessonResourceContent,
 } from "../contracts";
-import { WORKSHEET_03_RESOURCES } from "../resources";
+import { BUILD_PLAN_TEMPLATE_RESOURCES } from "../resources";
 
 const BUILD_GUIDE_IMAGE_BASE = "/course/build-guide-images";
 
@@ -55,10 +54,8 @@ const BUILD_TROUBLESHOOTING_RESOURCES: LessonResourceContent[] = [
 	},
 ];
 
-function withBuildWorksheetResources(
-	extraResources: LessonResourceContent[] = [],
-) {
-	return [...WORKSHEET_03_RESOURCES, ...extraResources];
+function withBuildPlanResources(extraResources: LessonResourceContent[] = []) {
+	return [...BUILD_PLAN_TEMPLATE_RESOURCES, ...extraResources];
 }
 
 function buildCoach(
@@ -69,7 +66,7 @@ function buildCoach(
 	return createPendingLessonCoach({
 		title,
 		examples,
-		resources: withBuildWorksheetResources(extraResources),
+		resources: withBuildPlanResources(extraResources),
 	});
 }
 
@@ -83,114 +80,67 @@ export const buildLessons = [
 		slug: "03-01-lock-build-path-and-scope",
 		order: 15,
 		block: "BUILD",
-		title: "Lock Build Path and Scope",
-		shortTitle: "Scope",
-		shell: "split",
-		workbench: "build_kickoff",
+		title: "Build Kickoff",
+		shortTitle: "Kickoff",
+		shell: "watch",
+		workbench: "external_workspace",
 		artifact: {
 			key: "agent_build_brief",
-			label: "Build Prompt + Starting Path",
-			type: "brief",
+			label: "Build Kickoff Ready",
+			type: "video",
 			required: true,
-			dependsOn: ["product_brief", "design_spec"],
+			dependsOn: ["product_brief", "storyboard_image", "rough_screens"],
 		},
 		nextLessonId: "3.2",
-		prevLessonId: "2.7",
+		prevLessonId: "2.6",
 		unlocks: { lessons: ["3.2"] },
-		coachMode: "docked",
-		objectiveTitle: "BUILD 3.1 — Lock Build Path and Scope",
+		coachMode: "pip",
+		externalTool: "code",
+		objectiveTitle: "BUILD 3.1 — Build Kickoff",
 		checklist: [
-			"Choose your starting path",
-			"Name the first slice",
-			"Define done for the first slice",
+			"Watch the kickoff all the way through",
+			"Notice how the story, screens, and brief carry into Build",
+			"Move straight into repo mapping next",
 		],
 		fieldShapeVersion: 3,
 		helperText:
-			"Lock one path, one slice, and one clear done condition before coding.",
-		winCondition: "The build path, first slice, and done condition are locked.",
-		panelDefaults: splitPanelDefaults,
-		pinnedArtifacts: ["product_brief", "design_spec"],
-		workbenchFields: [
-			{
-				id: "build_path",
-				label: "Starting path",
-				kind: "select",
-				required: true,
-				options: ["Use template", "Custom path"],
-				artifactPreviewLabel: "Starting path",
-				taskLabel: "Choose a starting path",
-			},
-			{
-				id: "first_slice",
-				label: "First slice to build now",
-				kind: "text",
-				required: true,
-				helpText:
-					"One screen or one workflow only. Keep it small enough to ship and verify quickly.",
-				placeholder:
-					"Example: User can create an account and reach the Mission page.",
-			},
-			{
-				id: "definition_of_done",
-				label: "Definition of done",
-				kind: "textarea",
-				required: true,
-				rows: 4,
-				helpText:
-					"Describe the visible user outcome that proves this slice is complete.",
-				placeholder:
-					"Example: New user signs up, lands on Mission, and sees Day 1 checklist without errors.",
-			},
-		],
+			"Watch the kickoff, understand the handoff, then move directly into the repo.",
+		winCondition:
+			"The kickoff is clear and Build is ready to start in the repo.",
+		panelDefaults: focusPanelDefaults,
+		pinnedArtifacts: ["product_brief", "storyboard_image", "rough_screens"],
+		workbenchFields: [],
 		content: {
 			status: "draft",
 			intro:
-				"Lock your build path and first shippable slice. Make three decisions, then generate a build-ready prompt.",
+				"Design is done. Use this kickoff to understand how Build starts, then move straight into the repo instead of doing another in-product exercise.",
 			lessonMeta: {
-				runtimeLabel: "7-9 min",
-				goal: "Create one controlled implementation brief.",
+				runtimeLabel: "4-6 min",
+				goal: "Start Build with the right handoff and no fake extra step.",
 				purpose:
-					"Prevent scope drift and force a concrete first move in Build.",
+					"Carry the real handoff forward, then begin working in the codebase immediately.",
 			},
 			actionCard: {
 				jobNow:
-					"Choose a path, name one narrow slice, and define done before generating your build prompt.",
-				timebox: "10 minutes",
-				comeBackWith: "A generated Build Prompt + Starting Path artifact.",
+					"Watch the kickoff, understand what Build is carrying forward, then move into lesson 3.2.",
+				timebox: "5 minutes",
+				comeBackWith:
+					"A clean Build start with no extra prep screen in the way.",
 			},
-			coach: buildCoach(
-				"Lock Build Path and Scope",
-				[
-					{
-						id: "scope-path-visual",
-						title: "Path and scope framing",
-						body: "Lock the path first, then lock one slice and one done condition.",
-						imageSrc: guideImage("image1.png"),
-						imageAlt: "Prompt and setup snippet from the Build guide",
-						imageCaption: "Use one controlled prompt, not a wide open request.",
-					},
-					{
-						id: "build-loop-framing",
-						title: "Build loop overview",
-						body: "The loop works when scope is narrow and decisions are explicit.",
-						imageSrc: guideImage("image20.png"),
-						imageAlt: "Build process screenshot with setup context",
-						imageCaption:
-							"You are preparing execution constraints before implementation starts.",
-					},
-				],
-				BUILD_TOOLING_RESOURCES,
-			),
+			coach: createPendingLessonCoach({
+				title: "Build Kickoff",
+				resources: withBuildPlanResources(BUILD_TOOLING_RESOURCES),
+			}),
 			workbench: {
 				prompt:
-					"Choose your path, lock one slice, define done, then generate your build brief.",
+					"Watch the kickoff, carry the handoff forward, then move straight into repo mapping.",
 				teachingPoints: [
-					"Choose template vs custom path before touching implementation details.",
-					"Treat your first slice like a checkpoint, not a prototype of the whole app.",
-					"Leave cleanup and expansion for later lessons.",
+					"Do not stop for another summary screen between Design and Build.",
+					"Carry the product brief, storyboard, and rough screens into the repo.",
+					"Start Build by orienting inside real files, not by filling out more fields in-app.",
 				],
 				emptyState:
-					"Choose a path and define your first slice to generate your build kickoff prompt.",
+					"Watch the kickoff, then move directly into the repo in the next lesson.",
 			},
 		},
 	},
@@ -230,7 +180,7 @@ export const buildLessons = [
 		winCondition:
 			"Repo orientation is captured with startup command, env locations, and first slice entrypoint.",
 		panelDefaults: focusPanelDefaults,
-		pinnedArtifacts: ["agent_build_brief"],
+		pinnedArtifacts: ["product_brief", "storyboard_image", "rough_screens"],
 		workbenchFields: [
 			{
 				id: "repo_orientation_checklist",
@@ -466,7 +416,12 @@ export const buildLessons = [
 		winCondition:
 			"Database, authentication, and payment integrations are connected and verified in local test mode.",
 		panelDefaults: focusPanelDefaults,
-		pinnedArtifacts: ["tooling_stack_ready", "agent_build_brief"],
+		pinnedArtifacts: [
+			"tooling_stack_ready",
+			"product_brief",
+			"storyboard_image",
+			"rough_screens",
+		],
 		workbenchFields: [
 			{
 				id: "integration_checkpoints",
@@ -679,7 +634,12 @@ export const buildLessons = [
 			"Do not blindly run giant plans. Distill them into an execution brief you can control.",
 		winCondition: "The plan is translated into a practical execution brief.",
 		panelDefaults: focusPanelDefaults,
-		pinnedArtifacts: ["working_local_environment", "agent_build_brief"],
+		pinnedArtifacts: [
+			"working_local_environment",
+			"product_brief",
+			"storyboard_image",
+			"rough_screens",
+		],
 		workbenchFields: [
 			{
 				id: "plan_goal",
@@ -796,8 +756,9 @@ export const buildLessons = [
 		panelDefaults: focusPanelDefaults,
 		pinnedArtifacts: [
 			"execution_plan_review",
-			"agent_build_brief",
-			"design_spec",
+			"product_brief",
+			"storyboard_image",
+			"rough_screens",
 		],
 		workbenchFields: [
 			{
@@ -897,7 +858,11 @@ export const buildLessons = [
 			"Keep extending the core path screen by screen until the end-to-end local flow works.",
 		winCondition: "The core UX path works locally from start to finish.",
 		panelDefaults: focusPanelDefaults,
-		pinnedArtifacts: ["first_implemented_slice", "design_spec"],
+		pinnedArtifacts: [
+			"first_implemented_slice",
+			"storyboard_image",
+			"rough_screens",
+		],
 		workbenchFields: [],
 		content: {
 			status: "draft",
@@ -1081,7 +1046,7 @@ export const buildLessons = [
 		coachMode: "pip",
 		objectiveTitle: "BUILD 3.10 — Finalize Build Handoff and Unlock Ship",
 		checklist: [
-			"Carry build plan forward",
+			"Carry kickoff context forward",
 			"Carry local baseline forward",
 			"Carry stable core path forward",
 			"Carry blocker context forward",
@@ -1109,14 +1074,14 @@ export const buildLessons = [
 				"You now have a working local baseline, a stable core path, and blocker context. Enter Ship from proof, not assumption.",
 			nextStepLabel: "SHIP 4.1 — Ship the Core, Not the Fantasy",
 			skills: [
-				"Scope control",
+				"Kickoff alignment",
 				"Tooling setup",
 				"Provider wiring",
 				"Slice implementation",
 				"Evidence-driven debugging",
 			],
 			artifactReadyCopy:
-				"Ship now receives the real local baseline, working path, and blocker constraints.",
+				"Ship now receives the kickoff context, real local baseline, working path, and blocker constraints.",
 			readyStateCopy: "Build block complete. Lock the handoff and unlock Ship.",
 			completionCtaLabel: "Unlock Ship",
 			celebrationEyebrow: "Build block complete",

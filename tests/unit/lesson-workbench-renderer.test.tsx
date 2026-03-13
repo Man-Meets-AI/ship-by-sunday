@@ -8,6 +8,10 @@ vi.mock("convex/react", () => ({
 globalThis.React = React;
 
 import { WorkbenchRenderer } from "@/components/lesson-workbench";
+import {
+	workbenchChromeLabelClass,
+	workbenchMetaRowClass,
+} from "@/components/lesson-workbench/shared/workbench-readability";
 import type { PinnedArtifact } from "@/components/lesson-shells";
 import { buildArtifactPreview, getLessonById } from "@/lib/course";
 
@@ -121,49 +125,11 @@ function getProductBriefArtifact(): PinnedArtifact {
 	};
 }
 
-function getDesignSpecArtifact(): PinnedArtifact {
-	return {
-		artifactKey: "design_spec",
-		artifactLabel: "Design Spec",
-		contextTitle: "Design spec",
-		artifactType: "brief",
-		lessonId: "2.7",
-		lessonTitle: "Design Wrap-Up",
-		fieldValues: {
-			references:
-				"Sharp editorial references with dark surfaces and dense hierarchy.",
-			sketches: "Landing page hero plus a review screen.",
-			storyboard: "5-step core flow from notes to sendable summary.",
-			roughScreens: "Hero, summary review, and share state.",
-			visualDirection:
-				"High contrast, tight spacing, and obvious trust hierarchy.",
-		},
-		fields: [
-			[
-				"Reference board",
-				"Sharp editorial references with dark surfaces and dense hierarchy.",
-			],
-			["Sketch set", "Landing page hero plus a review screen."],
-			["Storyboard image", "5-step core flow from notes to sendable summary."],
-			["Rough screens", "Hero, summary review, and share state."],
-			[
-				"Visual direction",
-				"High contrast, tight spacing, and obvious trust hierarchy.",
-			],
-		],
-	};
-}
-
 function getBuildBriefArtifact(): PinnedArtifact {
 	const lesson = getLessonById("3.1");
 	expect(lesson).toBeTruthy();
 
-	return buildArtifactPreview(lesson!, {
-		build_path: "Use template",
-		first_slice: "Notes review screen",
-		definition_of_done:
-			"The review screen renders locally, accepts notes, and shows a clean summary path without breaking.",
-	});
+	return buildArtifactPreview(lesson!, {});
 }
 
 function getWorkingLocalEnvironmentArtifact(): PinnedArtifact {
@@ -309,20 +275,6 @@ function getRoughScreensArtifact(): PinnedArtifact {
 	return buildArtifactPreview(lesson!, {});
 }
 
-function getVisualDirectionArtifact(): PinnedArtifact {
-	const lesson = getLessonById("2.6");
-	expect(lesson).toBeTruthy();
-
-	return buildArtifactPreview(lesson!, {
-		__fieldShapeVersion: 2,
-		visual_direction_notes:
-			"Keep the references sharp and editorial, tighten the spacing, and make the trust hierarchy more obvious.",
-		visual_guide_markdown: `# Visual Guide
-## Overall Direction
-Make the UI feel editorial and high-contrast.`,
-	});
-}
-
 describe("WorkbenchRenderer", () => {
 	it("renders representative workbench modes without hitting the fallback", () => {
 		const scenarios: Array<{
@@ -357,7 +309,7 @@ describe("WorkbenchRenderer", () => {
 			},
 			{
 				lessonId: "2.1",
-				expected: "Drop references here",
+				expected: "Find References First",
 			},
 			{
 				lessonId: "2.2",
@@ -365,13 +317,16 @@ describe("WorkbenchRenderer", () => {
 			},
 			{
 				lessonId: "2.6",
-				expected: "Follow this order",
-				pinnedArtifacts: [getReferenceBoardArtifact()],
+				expected: "Choose a Visual Direction",
 			},
 			{
 				lessonId: "3.1",
-				expected: "Choose your starting path",
-				pinnedArtifacts: [getProductBriefArtifact(), getDesignSpecArtifact()],
+				expected: "Watch the kickoff all the way through",
+				pinnedArtifacts: [
+					getProductBriefArtifact(),
+					getStoryboardImageArtifact(),
+					getRoughScreensArtifact(),
+				],
 			},
 			{
 				lessonId: "3.3",
@@ -428,60 +383,48 @@ describe("WorkbenchRenderer", () => {
 		);
 	});
 
-	it("renders lesson 3.1 with a generated build prompt and the template CTA when configured", () => {
-		const originalRepoUrl =
-			process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL;
-		process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL =
-			"https://github.com/example/starter";
+	it("renders lesson 1.6 with explicit scope framing, ordered lists, and draft provenance", () => {
+		const markup = renderLessonWorkbench("1.6", {
+			fieldValues: {
+				in_scope: ["Paste notes", "Generate summary", "Share next steps"],
+				out_of_scope: ["Team collaboration", "Project dashboards", "CRM sync"],
+				v1_rationale:
+					"This is enough because the operator can move from messy notes to a clean action summary in one pass.",
+				__scope_boundary_source: "generated_codex",
+			},
+			pinnedArtifacts: [
+				getUserStatementArtifact(),
+				getOutcomeStatementArtifact(),
+				getResearchNotesArtifact(),
+				getCoreFlowArtifact(),
+			],
+		});
 
-		try {
-			const markup = renderLessonWorkbench("3.1", {
-				fieldValues: {
-					build_path: "Use template",
-					first_slice: "Marketing hero and CTA",
-					definition_of_done:
-						"The hero renders locally, the CTA is clickable, and Playwright confirms the core path loads.",
-				},
-				pinnedArtifacts: [getProductBriefArtifact(), getDesignSpecArtifact()],
-			});
-
-			expect(markup).toContain("Step 1: Choose your starting path");
-			expect(markup).toContain(">Use template<");
-			expect(markup).toContain("Generate build prompt");
-			expect(markup).toContain(
-				"Your prompt will appear here after generation.",
-			);
-			expect(markup).not.toContain("Source-of-truth product brief");
-		} finally {
-			process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL =
-				originalRepoUrl;
-		}
+		expect(markup).toContain("What this step does");
+		expect(markup).toContain("Current draft");
+		expect(markup).toContain("Started from Codex");
+		expect(markup).toContain("1. Keep in v1");
+		expect(markup).toContain("2. Cut from v1");
+		expect(markup).toContain("3. Why this version is enough");
+		expect(markup).toContain("Next up in 1.7 Brief");
 	});
 
-	it("keeps the 3.1 template CTA hidden when no starter repo is configured", () => {
-		const originalRepoUrl =
-			process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL;
-		delete process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL;
+	it("renders lesson 3.1 as a watch-first Build kickoff with repo-facing resources", () => {
+		const markup = renderLessonWorkbench("3.1", {
+			pinnedArtifacts: [
+				getProductBriefArtifact(),
+				getStoryboardImageArtifact(),
+				getRoughScreensArtifact(),
+			],
+		});
 
-		try {
-			const markup = renderLessonWorkbench("3.1", {
-				fieldValues: {
-					build_path: "Use template",
-					first_slice: "Marketing hero and CTA",
-					definition_of_done:
-						"The hero renders locally, the CTA is clickable, and Playwright confirms the core path loads.",
-				},
-				pinnedArtifacts: [getProductBriefArtifact(), getDesignSpecArtifact()],
-			});
-
-			expect(markup).toContain(
-				"The starter template path is not configured yet. Choose Custom path for now or set NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL.",
-			);
-			expect(markup).not.toContain("https://github.com/example/starter");
-		} finally {
-			process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL =
-				originalRepoUrl;
-		}
+		expect(markup).toContain("Build Kickoff");
+		expect(markup).toContain("Watch the kickoff all the way through");
+		expect(markup).toContain("Build Plan Template");
+		expect(markup).toContain("Figma MCP setup guide");
+		expect(markup).toContain("Playwright MCP docs");
+		expect(markup).not.toContain("Generate build prompt");
+		expect(markup).not.toContain("Step 1: Choose your starting path");
 	});
 
 	it("renders the research workbench as a single-title semantic table", () => {
@@ -495,7 +438,7 @@ describe("WorkbenchRenderer", () => {
 		expect(markup).toContain("Competitor");
 		expect(markup).toContain("Users Care About");
 		expect(markup).toContain(
-			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Research table</span>',
+			`<span class="${workbenchChromeLabelClass}">Research table</span>`,
 		);
 		expect(markup).not.toContain(
 			'<span class="font-display text-sm uppercase tracking-[0.04em] text-product-text">Research Table</span>',
@@ -603,9 +546,7 @@ describe("WorkbenchRenderer", () => {
 	it("renders the lesson metadata badges as non-selectable chrome", () => {
 		const markup = renderLessonWorkbench("1.5");
 
-		expect(markup).toContain(
-			'<div class="flex flex-wrap items-center gap-1.5 text-product-muted select-none">',
-		);
+		expect(markup).toContain(`<div class="${workbenchMetaRowClass}">`);
 	});
 
 	it("renders lesson 1.5 as a video-first paper upload lesson", () => {
@@ -687,16 +628,6 @@ describe("WorkbenchRenderer", () => {
 					fieldValues: { who: "Startup operators" },
 					fields: [["Who", "Startup operators"]],
 				},
-				{
-					artifactKey: "reference_board",
-					artifactLabel: "Reference Board",
-					contextTitle: "Reference board",
-					artifactType: "board",
-					lessonId: "2.1",
-					lessonTitle: "Find References First",
-					fieldValues: { reference_patterns: "Tight cards" },
-					fields: [["What patterns keep repeating?", "Tight cards"]],
-				},
 			],
 		});
 
@@ -714,63 +645,6 @@ describe("WorkbenchRenderer", () => {
 		expect(markup).not.toContain(
 			"Choose a file and it will upload to lesson storage before the lesson draft is saved.",
 		);
-	});
-
-	it("renders lesson 2.6 as a visual-direction prompt workflow", () => {
-		const lesson = getLessonById("2.6");
-		expect(lesson?.workbench).toBe("visual_direction");
-
-		const markup = renderLessonWorkbench("2.6", {
-			fieldValues: {
-				visual_direction_notes:
-					"Keep the references sharp and editorial, tighten the spacing, and make the trust hierarchy more obvious.",
-				visual_guide_markdown: `# Visual Guide
-## Overall Direction
-Make the UI feel editorial and high-contrast.`,
-			},
-			pinnedArtifacts: [getReferenceBoardArtifact()],
-		});
-
-		expect(markup).toContain("Watch lesson");
-		expect(markup).toContain("Reference gallery");
-		expect(markup).toContain("Follow this order");
-		expect(markup).toContain("AI assist");
-		expect(markup).toContain("Saved visualguide.md");
-		expect(markup).toContain("https://images.example.com/ref-1.png");
-		expect(markup).toContain("https://images.example.com/ref-2.png");
-		expect(markup).toContain("https://images.example.com/ref-3.png");
-		expect(markup).toContain("https://images.example.com/ref-1.png");
-		expect(markup).not.toContain("Style Rule 1");
-		expect(markup).not.toContain("Avoid...");
-	});
-
-	it("renders lesson 2.1 with gallery progress copy once references exist", () => {
-		const markup = renderLessonWorkbench("2.1", {
-			fieldValues: {
-				reference_gallery: {
-					kind: "reference_gallery",
-					items: [
-						{
-							id: "upload-1",
-							source: "upload",
-							storageId: "storage-1",
-							fileName: "hero.png",
-							previewUrl: "blob:http://localhost/hero",
-						},
-						{
-							id: "remote-1",
-							source: "remote_url",
-							url: "https://images.example.com/ref.png",
-						},
-					],
-				},
-			},
-		});
-
-		expect(markup).toContain("2 saved of 3 minimum references.");
-		expect(markup).toContain("Click zone to arm paste");
-		expect(markup).toContain("Add image URL");
-		expect(markup).toContain("Remove");
 	});
 
 	it("renders lesson 1.7 as a stage-unlock wrap-up instead of a raw artifact dump", () => {
@@ -808,37 +682,6 @@ Make the UI feel editorial and high-contrast.`,
 		expect(markup).not.toContain("No saved preview yet.");
 	});
 
-	it("renders lesson 2.7 as a build-unlock wrap-up instead of a raw artifact dump", () => {
-		const markup = renderLessonWorkbench("2.7", {
-			pinnedArtifacts: [
-				getReferenceBoardArtifact(),
-				getSketchSetArtifact(),
-				getStoryboardImageArtifact(),
-				getRoughScreensArtifact(),
-				getVisualDirectionArtifact(),
-			],
-		});
-
-		expect(markup).toContain("Design block complete");
-		expect(markup).toContain("Build unlocked");
-		expect(markup).toContain("Next: BUILD 3.1 — Lock Build Path and Scope");
-		expect(markup).toContain("What Build now has");
-		expect(markup).toContain("References");
-		expect(markup).toContain("Sketches");
-		expect(markup).toContain("Storyboard");
-		expect(markup).toContain("Guide");
-		expect(markup).toContain("Reference direction");
-		expect(markup).toContain("Screen plan");
-		expect(markup).toContain("Flow sequence");
-		expect(markup).toContain("Visual direction");
-		expect(markup).toContain("Flow sequencing");
-		expect(markup).toContain("Handoff clarity");
-		expect(markup).toContain("https://images.example.com/ref-1.png");
-		expect(markup).toContain("https://example.com/storyboard.png");
-		expect(markup).not.toContain("ArtifactContext");
-		expect(markup).not.toContain("No saved preview yet.");
-	});
-
 	it("renders lesson 3.10 as a Ship-unlock wrap-up with a lead video surface", () => {
 		const markup = renderLessonWorkbench("3.10", {
 			pinnedArtifacts: [
@@ -855,15 +698,14 @@ Make the UI feel editorial and high-contrast.`,
 		expect(markup).toContain("Ship unlocked");
 		expect(markup).toContain("Next: SHIP 4.1 — Ship the Core, Not the Fantasy");
 		expect(markup).toContain("What Ship now has");
-		expect(markup).toContain("Build plan");
+		expect(markup).toContain("Kickoff");
 		expect(markup).toContain("Local environment");
 		expect(markup).toContain("Core UX");
 		expect(markup).toContain("Stability pass");
-		expect(markup).toContain("Starting path");
-		expect(markup).toContain("Use template");
-		expect(markup).toContain("First slice");
-		expect(markup).toContain("Notes review screen");
-		expect(markup).toContain("Scope control");
+		expect(markup).toContain(
+			"Build started from the saved brief, storyboard, and rough screens",
+		);
+		expect(markup).toContain("Kickoff alignment");
 		expect(markup).toContain("Evidence-driven debugging");
 		expect(markup).not.toContain("ArtifactContext");
 		expect(markup).not.toContain("No saved preview yet.");

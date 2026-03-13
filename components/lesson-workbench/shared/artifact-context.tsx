@@ -13,7 +13,7 @@ export function ArtifactContext({
 	}
 
 	return (
-		<div className="grid gap-2 md:grid-cols-2">
+		<div className="grid gap-3 md:grid-cols-2">
 			{pinnedArtifacts.map((artifact) => (
 				<WorkbenchCard
 					key={artifact.artifactKey}

@@ -33,12 +33,13 @@ body {
 			90deg,
 			transparent 0,
 			transparent calc(50% - 1px),
-			rgba(17, 17, 17, 0.06) calc(50% - 1px),
-			rgba(17, 17, 17, 0.06) calc(50% + 1px),
+			rgba(17, 17, 17, 0.035) calc(50% - 1px),
+			rgba(17, 17, 17, 0.035) calc(50% + 1px),
 			transparent calc(50% + 1px)
 		),
-		linear-gradient(rgba(17, 17, 17, 0.04) 1px, transparent 1px),
-		linear-gradient(90deg, rgba(17, 17, 17, 0.04) 1px, transparent 1px), #f5f1ea;
+		linear-gradient(rgba(17, 17, 17, 0.025) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(17, 17, 17, 0.025) 1px, transparent 1px),
+		#f5f1ea;
 	background-size:
 		100% 100%,
 		100% 160px,
@@ -46,6 +47,9 @@ body {
 		auto;
 	color: #111111;
 	font-family: var(--font-sans), sans-serif;
+	line-height: 1.5;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
 }
 
 .sbs-core-flow-stage {

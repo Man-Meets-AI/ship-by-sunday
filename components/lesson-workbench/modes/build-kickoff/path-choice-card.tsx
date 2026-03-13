@@ -1,5 +1,7 @@
 "use client";
 
+import { workbenchChromeLabelClass } from "../../shared/workbench-readability";
+
 function getChoiceClass(selected: boolean, invalid: boolean, disabled = false) {
 	if (disabled) {
 		return "border-product-border/50 bg-product-surface text-product-muted opacity-80";
@@ -28,21 +30,19 @@ export function PathChoiceCard({
 	onChoosePath: (path: "Use template" | "Custom path") => void;
 }) {
 	return (
-		<div className="grid gap-2 md:grid-cols-2">
+		<div className="grid gap-4 md:grid-cols-2">
 			<div
-				className={`border px-3 py-3 ${getChoiceClass(
+				className={`border px-4 py-4 ${getChoiceClass(
 					currentPath === "Use template",
 					invalid,
 					!templateRepoUrl,
 				)}`}
 			>
-				<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
-					Use template repo
-				</p>
-				<p className="mt-2 text-sm font-medium leading-snug">
+				<p className={workbenchChromeLabelClass}>Use template repo</p>
+				<p className="mt-3 text-[15px] font-semibold leading-[1.4]">
 					Start from the shared setup and move straight into implementation.
 				</p>
-				<p className="mt-2 text-[11px] leading-relaxed text-product-muted">
+				<p className="mt-3 text-[13px] leading-[1.7] text-product-muted">
 					Best when you want setup handled so you can focus on the first real
 					slice.
 				</p>
@@ -67,26 +67,24 @@ export function PathChoiceCard({
 					) : null}
 				</div>
 				{!templateRepoUrl ? (
-					<p className="mt-2 text-[11px] leading-relaxed text-product-muted">
+					<p className="mt-3 text-[13px] leading-[1.7] text-product-muted">
 						Template repo not connected yet. Continue with custom path or
 						connect it now.
 					</p>
 				) : null}
 			</div>
 			<div
-				className={`border px-3 py-3 ${getChoiceClass(
+				className={`border px-4 py-4 ${getChoiceClass(
 					currentPath === "Custom path",
 					invalid,
 				)}`}
 			>
-				<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
-					Use your current repo
-				</p>
-				<p className="mt-2 text-sm font-medium leading-snug">
+				<p className={workbenchChromeLabelClass}>Use your current repo</p>
+				<p className="mt-3 text-[15px] font-semibold leading-[1.4]">
 					Keep your existing stack and scope the prompt to your current
 					codebase.
 				</p>
-				<p className="mt-2 text-[11px] leading-relaxed text-product-muted">
+				<p className="mt-3 text-[13px] leading-[1.7] text-product-muted">
 					Best when you already have a starter, an existing repo, or a stack you
 					need to preserve.
 				</p>
@@ -110,7 +108,7 @@ export function PathChoiceValidationMessage({ invalid }: { invalid: boolean }) {
 	}
 
 	return (
-		<p className="mt-3 text-[11px] font-medium leading-snug text-[#a83232]">
+		<p className="mt-3 text-[12px] font-medium leading-[1.6] text-[#a83232]">
 			Choose a starting path before continuing.
 		</p>
 	);

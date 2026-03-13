@@ -1,7 +1,6 @@
 import type { ElementType, ReactNode } from "react";
 
-const workbenchHeaderLabelClass =
-	"font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted";
+import { workbenchChromeLabelClass } from "./workbench-readability";
 
 export function WorkbenchHeaderLabel({
 	as: Component = "span",
@@ -16,8 +15,8 @@ export function WorkbenchHeaderLabel({
 		<Component
 			className={
 				className
-					? `${workbenchHeaderLabelClass} ${className}`
-					: workbenchHeaderLabelClass
+					? `${workbenchChromeLabelClass} ${className}`
+					: workbenchChromeLabelClass
 			}
 		>
 			{children}

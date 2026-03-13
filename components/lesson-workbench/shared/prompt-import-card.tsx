@@ -11,6 +11,7 @@ import {
 
 import type { WorkbenchModeProps } from "../types";
 import { WorkbenchCard } from "./workbench-card";
+import { workbenchChromeLabelClass } from "./workbench-readability";
 
 type PromptImportUiCopy = {
 	cardLabel: string;
@@ -28,6 +29,13 @@ type PromptImportUiCopy = {
 		nextFieldValues: Record<string, unknown>,
 		promptImport: LessonPromptImport,
 	) => string;
+};
+
+export type PromptImportAppliedContext = {
+	promptTemplateId: LessonPromptTemplateId;
+	source: "pasted" | "generated";
+	rawResponse: string;
+	nextFieldValues: Record<string, unknown>;
 };
 
 const PROMPT_IMPORT_COPY: Record<LessonPromptTemplateId, PromptImportUiCopy> = {
@@ -63,11 +71,11 @@ const PROMPT_IMPORT_COPY: Record<LessonPromptTemplateId, PromptImportUiCopy> = {
 		},
 	},
 	scope_boundary: {
-		cardLabel: "Stuck? Use AI as backup",
+		cardLabel: "Need a backup cut?",
 		summary:
-			"Make the keep / cut decision yourself first. Use this only if you get stuck and need a tighter first-pass cut to react to.",
+			"Start manually. Use backup assist only if you need a first-pass scope cut to react to.",
 		workflowHint:
-			"Try one manual pass, then copy or generate the scope cut, paste the result, and tighten the decisions below.",
+			"It uses your saved user, outcome, research, and core flow. Generated or pasted results replace the saved draft below until you tighten them.",
 		enabledNote:
 			"Built from your earlier CEO work so you start from a tight recommendation instead of another blank scope form.",
 		launcherLabel: "Open backup assist",
@@ -107,14 +115,14 @@ const PROMPT_IMPORT_COPY: Record<LessonPromptTemplateId, PromptImportUiCopy> = {
 		workflowHint:
 			"Copy or generate the guide, paste the markdown, then clean it up below.",
 		enabledNote:
-			"Built from your saved references and the direction note you wrote above so the guide stays tied to the look you actually want.",
+			"Built from your rough screens and the direction note you wrote above so the guide stays tied to the product you actually plan to build.",
 		pasteLabel: "Paste visualguide.md markdown",
 		pastePlaceholder:
 			"Paste the raw contents of visualguide.md or one fenced markdown block with only that file inside.",
 		pasteToggleLabel: "Paste visualguide.md",
 		importButtonLabel: "Save visualguide.md",
 		importHint:
-			"The import stores the markdown in this lesson so `2.7` can preview the visual direction cleanly.",
+			"The import stores the markdown in this lesson so Build can start from the saved visual direction instead of guesswork.",
 		getSuccessMessage: (nextFieldValues, promptImport) => {
 			if (promptImport.promptTemplateId !== "visual_direction_guide") {
 				return "Imported suggestions. You can edit the fields below.";
@@ -157,10 +165,13 @@ export function PromptImportCard({
 	onFieldChange,
 	pinnedArtifacts,
 	fieldValues,
+	onImportApplied,
 }: Pick<
 	WorkbenchModeProps,
 	"lesson" | "onFieldChange" | "pinnedArtifacts" | "fieldValues"
->) {
+> & {
+	onImportApplied?: (context: PromptImportAppliedContext) => void;
+}) {
 	const promptImport = lesson.promptImport;
 	const [copyState, setCopyState] = useState<"idle" | "copied" | "error">(
 		"idle",
@@ -246,7 +257,11 @@ export function PromptImportCard({
 		);
 	};
 
-	const applyImportedResponse = (rawResponse: string, source: string) => {
+	const applyImportedResponse = (
+		rawResponse: string,
+		sourceLabel: string,
+		source: PromptImportAppliedContext["source"],
+	) => {
 		try {
 			const nextFieldValues = buildPromptImportFieldValues(
 				promptImport,
@@ -259,9 +274,15 @@ export function PromptImportCard({
 			setPastedResponse(rawResponse);
 			setShowPrompt(false);
 			setShowPaste(false);
+			onImportApplied?.({
+				promptTemplateId: promptImport.promptTemplateId,
+				source,
+				rawResponse,
+				nextFieldValues,
+			});
 			setImportFeedback({
 				tone: "success",
-				message: `${source}: ${uiCopy.getSuccessMessage(nextFieldValues, promptImport)}`,
+				message: `${sourceLabel}: ${uiCopy.getSuccessMessage(nextFieldValues, promptImport)}`,
 			});
 		} catch (error) {
 			setImportFeedback({
@@ -276,7 +297,7 @@ export function PromptImportCard({
 	};
 
 	const importResponse = () => {
-		applyImportedResponse(pastedResponse, "Imported");
+		applyImportedResponse(pastedResponse, "Imported", "pasted");
 	};
 
 	const generateWithCodex = async () => {
@@ -317,7 +338,7 @@ export function PromptImportCard({
 				return;
 			}
 
-			applyImportedResponse(data.output, "Generated with Codex");
+			applyImportedResponse(data.output, "Generated with Codex", "generated");
 		} catch {
 			setImportFeedback({
 				tone: "error",
@@ -332,20 +353,20 @@ export function PromptImportCard({
 		<WorkbenchCard label={uiCopy.cardLabel}>
 			<div className="space-y-3">
 				<div className="space-y-1.5">
-					<p className="text-sm leading-relaxed text-product-text">
+					<p className="text-[14px] leading-[1.7] text-product-text">
 						{uiCopy.summary}
 					</p>
-					<p className="text-[11px] font-medium leading-snug text-product-muted">
+					<p className="text-[13px] leading-[1.7] text-product-muted">
 						{uiCopy.workflowHint}
 					</p>
 				</div>
 
 				{promptState.disabledReason ? (
-					<p className="text-xs font-medium leading-snug text-product-muted">
+					<p className="text-[13px] leading-[1.7] text-product-muted">
 						{promptState.disabledReason}
 					</p>
 				) : (
-					<p className="text-xs font-medium leading-snug text-product-muted">
+					<p className="text-[13px] leading-[1.7] text-product-muted">
 						{uiCopy.enabledNote}
 					</p>
 				)}
@@ -397,24 +418,24 @@ export function PromptImportCard({
 						</>
 					) : null}
 					{copyState === "error" && !promptState.disabledReason ? (
-						<p className="text-[11px] font-medium leading-snug text-product-muted">
+						<p className="text-[12px] leading-[1.6] text-product-muted">
 							Clipboard unavailable. Copy from the prompt block below.
 						</p>
 					) : null}
 				</div>
 
 				{showAssistTools && showPrompt ? (
-					<div className="rounded-none border border-product-border/80 bg-product-surface px-2 py-2">
+					<div className="rounded-none border border-product-border/65 bg-product-surface px-3 py-3">
 						{promptState.prompt ? (
 							<textarea
 								readOnly
 								value={promptState.prompt}
 								rows={12}
-								className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[11px] leading-relaxed text-product-text outline-hidden"
+								className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[12px] leading-[1.68] text-product-text outline-hidden"
 								aria-label={`${lesson.title} prompt`}
 							/>
 						) : (
-							<p className="text-[11px] font-medium leading-snug text-product-muted">
+							<p className="text-[12px] leading-[1.6] text-product-muted">
 								The prompt will appear here once the required lesson context is
 								saved.
 							</p>
@@ -423,9 +444,9 @@ export function PromptImportCard({
 				) : null}
 
 				{showAssistTools && showPaste ? (
-					<div className="space-y-3 rounded-none border border-product-border/80 bg-product-surface px-3 py-3">
+					<div className="space-y-3 rounded-none border border-product-border/65 bg-product-surface px-4 py-4">
 						<label className="block">
-							<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
+							<span className={workbenchChromeLabelClass}>
 								{uiCopy.pasteLabel}
 							</span>
 							<textarea
@@ -438,7 +459,7 @@ export function PromptImportCard({
 								}}
 								rows={8}
 								placeholder={uiCopy.pastePlaceholder}
-								className="mt-1.5 w-full rounded-none border border-product-border bg-product-surface px-3 py-2 text-sm leading-relaxed text-product-text outline-hidden transition-colors placeholder:text-product-muted/55 focus-visible:border-product-accent"
+								className="mt-2 w-full rounded-none border border-product-border/65 bg-product-surface px-4 py-3 text-[15px] leading-[1.6] text-product-text outline-hidden transition-colors placeholder:text-product-muted/55 focus-visible:border-product-accent"
 								aria-label={uiCopy.pasteLabel}
 							/>
 						</label>
@@ -452,7 +473,7 @@ export function PromptImportCard({
 							>
 								{uiCopy.importButtonLabel}
 							</button>
-							<p className="text-[11px] font-medium leading-snug text-product-muted">
+							<p className="text-[12px] leading-[1.6] text-product-muted">
 								{uiCopy.importHint}
 							</p>
 						</div>
@@ -462,7 +483,7 @@ export function PromptImportCard({
 				<div aria-live="polite" className="min-h-[1.25rem]">
 					{importFeedback ? (
 						<p
-							className={`text-[11px] font-medium leading-snug ${
+							className={`text-[12px] leading-[1.6] ${
 								importFeedback.tone === "success"
 									? "text-product-accent"
 									: "text-[#a83232]"

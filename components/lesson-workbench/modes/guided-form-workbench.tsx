@@ -235,7 +235,7 @@ export function GuidedFormWorkbench({
 				<DefineOutcomeSupport fieldValues={fieldValues} />
 			) : null}
 			<ArtifactContext pinnedArtifacts={visiblePinnedArtifacts} />
-			<div className="space-y-3">
+			<div className="space-y-4">
 				{workbenchSections.map((section) => {
 					const sectionFields = fields.filter((field) =>
 						section.fieldIds.includes(field.id),
@@ -248,10 +248,10 @@ export function GuidedFormWorkbench({
 					);
 					const layoutClass =
 						section.layout === "split"
-							? "grid gap-3 lg:grid-cols-[minmax(220px,0.7fr)_minmax(0,1.3fr)]"
+							? "grid gap-4 lg:grid-cols-[minmax(240px,0.75fr)_minmax(0,1.25fr)]"
 							: section.layout === "compact"
-								? "grid gap-3 md:grid-cols-2"
-								: "space-y-3";
+								? "grid gap-4 md:grid-cols-2"
+								: "space-y-4";
 
 					return (
 						<SectionCard

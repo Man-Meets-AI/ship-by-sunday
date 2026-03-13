@@ -313,40 +313,10 @@ describe("course state lifecycle", () => {
 		});
 	});
 
-	it("does not reopen stale 2.7 rows when the prerequisite chain no longer counts", async () => {
-		const ctx = createCourseCtx({
-			lessonStates: [
-				createLessonState("2.6", {
-					status: "completed",
-					fieldValues: {
-						style_rule_1: "",
-						[FIELD_SHAPE_VERSION_FIELD_ID]: 1,
-					},
-					lastViewedAt: 200,
-				}),
-				createLessonState("2.7", {
-					status: "not_started",
-					lastViewedAt: 250,
-				}),
-			],
-		});
-
-		const lessonState = await (getLessonState as any)._handler(ctx, {
-			lessonId: "2.7",
-		});
-		const resume = await (getResumeDestination as any)._handler(ctx);
-
-		expect(lessonState).toEqual({ accessStatus: "locked" });
-		expect(resume).toEqual({
-			destination: "/mission",
-			lessonId: null,
-		});
-	});
-
 	it("resumes to the most recently viewed lesson that is still accessible", async () => {
 		const ctx = createCourseCtx({
 			lessonStates: [
-				createLessonState("2.7", {
+				createLessonState("3.1", {
 					status: "not_started",
 					lastViewedAt: 250,
 				}),
@@ -371,82 +341,6 @@ describe("course state lifecycle", () => {
 			destination: "/lesson/1.7",
 			lessonId: "1.7",
 		});
-	});
-
-	it("ignores in-progress upstream artifacts when building the 2.7 stage-unlock summary", async () => {
-		const ctx = createCourseCtx({
-			lessonStates: [
-				createCompletedLessonState("1.7"),
-				createLessonState("2.1", {
-					status: "in_progress",
-					fieldValues: {
-						[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
-						reference_gallery: {
-							kind: "reference_gallery",
-							items: [
-								{
-									id: "remote-1",
-									source: "remote_url",
-									url: "https://images.example.com/ref-1.png",
-								},
-								{
-									id: "remote-2",
-									source: "remote_url",
-									url: "https://images.example.com/ref-2.png",
-								},
-								{
-									id: "remote-3",
-									source: "remote_url",
-									url: "https://images.example.com/ref-3.png",
-								},
-							],
-						},
-					},
-				}),
-				createCompletedLessonState("2.2", {
-					sketch_upload: [
-						{
-							kind: "upload",
-							status: "stored",
-							fileName: "screen-1.jpg",
-							storageId: "sketch-1",
-						},
-					],
-				}),
-				createCompletedLessonState("2.3", {
-					storyboard_upload: {
-						kind: "upload",
-						status: "stored",
-						fileName: "storyboard.png",
-						storageId: "storyboard-1",
-					},
-				}),
-				createCompletedLessonState("2.5"),
-				createCompletedLessonState("2.6", {
-					[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
-					visual_direction_notes:
-						"Quiet, editorial, and sharp with tighter spacing and stronger contrast.",
-					visual_guide_markdown: `# Visual Guide
-## Overall Direction
-Keep the interface sharp and editorial.`,
-				}),
-			],
-		});
-
-		const lessonState = await (getLessonState as any)._handler(ctx, {
-			lessonId: "2.7",
-		});
-
-		expect(lessonState).toMatchObject({
-			accessStatus: "unlocked",
-			status: "not_started",
-		});
-		expect(
-			lessonState.pinnedArtifacts.some(
-				(artifact: { artifactKey: string }) =>
-					artifact.artifactKey === "reference_board",
-			),
-		).toBe(false);
 	});
 
 	it("throws the structured incomplete-lesson error when required fields are missing", async () => {

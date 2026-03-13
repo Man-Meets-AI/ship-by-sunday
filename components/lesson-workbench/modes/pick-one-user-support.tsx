@@ -3,11 +3,23 @@ import { getCandidateProblemOptions } from "@/lib/course/registry";
 
 import type { WorkbenchModeProps } from "../types";
 import { WorkbenchCard } from "../shared/workbench-card";
+import {
+	workbenchBodyCopyClass,
+	workbenchChromeLabelClass,
+	workbenchInsetClass,
+	workbenchSupportCopyClass,
+} from "../shared/workbench-readability";
 
 const BROAD_AUDIENCE_PATTERN =
 	/\b(users?|people|everyone|anyone|business(?:es)?|companies|founders|teams)\b/i;
 const RECURRING_PAIN_PATTERN =
 	/\b(after|when|during|every|each|because|without|before|still)\b/i;
+
+type PreviewRow = {
+	label: string;
+	filled: boolean;
+	value: string;
+};
 
 function getTextValue(fieldValues: Record<string, unknown>, fieldId: string) {
 	const value = fieldValues[fieldId];
@@ -26,10 +38,52 @@ function getCandidateSignals(problem: { owner: string; statement: string }) {
 			? `Specific enough to picture: ${problem.owner}`
 			: "Sharpen the user beyond a broad audience label.",
 		painLooksGrounded
-			? "Pain reads like a real repeated moment."
-			: "Pressure-test whether the pain sounds recurring enough.",
-		"Ask whether you can get this in front of them this week.",
+			? "Pain reads like a repeated moment."
+			: "Make sure the pain sounds recurring, not generic.",
+		"Bias toward the user you can reach this week.",
 	];
+}
+
+function SummaryFieldCard({
+	row,
+	className,
+}: {
+	row: PreviewRow;
+	className?: string;
+}) {
+	return (
+		<div
+			className={`${workbenchInsetClass} px-4 py-4 sm:px-5 ${className ?? ""}`.trim()}
+		>
+			<p className={workbenchChromeLabelClass}>{row.label}</p>
+			<p
+				className={`mt-3 text-[14px] leading-[1.7] ${
+					row.filled ? "text-product-text" : "text-product-muted"
+				}`}
+			>
+				{row.value}
+			</p>
+		</div>
+	);
+}
+
+function StatementPreviewRows({ previewRows }: { previewRows: PreviewRow[] }) {
+	return (
+		<div className={`${workbenchInsetClass} divide-y divide-product-border/35`}>
+			{previewRows.map((row) => (
+				<div key={row.label} className="px-4 py-4 sm:px-5">
+					<p className={workbenchChromeLabelClass}>{row.label}</p>
+					<p
+						className={`mt-2 max-w-[52ch] text-[14px] leading-[1.72] ${
+							row.filled ? "text-product-text" : "text-product-muted"
+						}`}
+					>
+						{row.value}
+					</p>
+				</div>
+			))}
+		</div>
+	);
 }
 
 export function PickOneUserSupport({
@@ -65,11 +119,12 @@ export function PickOneUserSupport({
 					(problem) => problem.index === selectedProblemIndex,
 				)
 			: null;
-	const previewRows = [
+	const previewRows: PreviewRow[] = [
 		{
 			label: "User",
 			filled: Boolean(
-				getTextValue(fieldValues, "selected_problem_owner") || selectedProblem?.owner,
+				getTextValue(fieldValues, "selected_problem_owner") ||
+				selectedProblem?.owner,
 			),
 			value:
 				getTextValue(fieldValues, "selected_problem_owner") ||
@@ -80,7 +135,7 @@ export function PickOneUserSupport({
 			label: "Chosen problem",
 			filled: Boolean(
 				getTextValue(fieldValues, "selected_problem_statement") ||
-					selectedProblem?.statement,
+				selectedProblem?.statement,
 			),
 			value:
 				getTextValue(fieldValues, "selected_problem_statement") ||
@@ -111,32 +166,32 @@ export function PickOneUserSupport({
 	];
 
 	return (
-		<div className="space-y-3">
+		<div className="space-y-4">
 			<WorkbenchCard label="Choose the user to build for">
-				<div className="space-y-3 text-[12px] leading-relaxed text-product-text">
-					<p>
+				<div className="space-y-4">
+					<p className={workbenchBodyCopyClass}>
 						Choose the one user-problem pair you can test fastest. This is the
 						commitment that shapes the rest of the CEO block.
 					</p>
-					<ul className="grid gap-2 md:grid-cols-3">
+					<div className="grid gap-3 md:grid-cols-3">
 						{[
 							"Pick a specific person or group, not a broad audience.",
 							"Choose the pain that sounds repeated and recognizable.",
 							"Bias toward the user you can reach this week.",
 						].map((item) => (
-							<li
+							<div
 								key={item}
-								className="border border-product-border/60 bg-product-surface px-3 py-2"
+								className={`${workbenchInsetClass} px-4 py-3 text-[13px] leading-[1.62] text-product-text`}
 							>
 								{item}
-							</li>
+							</div>
 						))}
-					</ul>
-					<p className="text-[11px] text-product-muted">
+					</div>
+					<p className={workbenchSupportCopyClass}>
 						You can switch choices anytime before completing the lesson.
 					</p>
 					{candidateProblems.length > 0 ? (
-						<div className="grid gap-3 lg:grid-cols-3">
+						<div className="grid gap-4 xl:grid-cols-3">
 							{candidateProblems.map((problem) => {
 								const isSelected = problem.index === selectedProblemIndex;
 								const isDimmed = selectedProblemIndex !== null && !isSelected;
@@ -156,19 +211,19 @@ export function PickOneUserSupport({
 												);
 											}
 										}}
-										className={`flex h-full flex-col border px-4 py-4 text-left transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[rgb(var(--product-accent))] ${
+										className={`flex h-full flex-col px-5 py-5 text-left transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[rgb(var(--product-accent))] ${
 											isSelected
-												? "border-product-accent bg-product-chip/55"
+												? `${workbenchInsetClass} border-product-accent bg-product-chip/65`
 												: isDimmed
-													? "border-product-border/70 bg-product-surface/45 hover:bg-product-surface/60"
-													: "border-product-border bg-product-surface hover:bg-product-surface-strong"
+													? `${workbenchInsetClass} bg-product-surface/55 hover:bg-product-surface/70`
+													: `${workbenchInsetClass} hover:bg-product-surface-strong/75`
 										}`}
 									>
 										<div className="flex items-center justify-between gap-3">
-											<p className="font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
+											<p className={workbenchChromeLabelClass}>
 												Problem {problem.index}
 											</p>
-											<p className="font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
+											<p className={workbenchChromeLabelClass}>
 												{isSelected
 													? "Current choice"
 													: isDimmed
@@ -176,18 +231,18 @@ export function PickOneUserSupport({
 														: "Available"}
 											</p>
 										</div>
-										<p className="mt-3 font-display text-sm uppercase tracking-[0.04em] text-product-text">
+										<p className="mt-4 text-balance font-display text-[1.35rem] uppercase leading-[0.92] tracking-[0.04em] text-product-text">
 											{problem.owner}
 										</p>
-										<p className="mt-3 flex-1 text-[12px] leading-relaxed text-product-text">
+										<p className="mt-4 flex-1 text-[14px] leading-[1.72] text-product-text">
 											{problem.statement}
 										</p>
-										<ul className="mt-4 space-y-1 border-t border-product-border/60 pt-3 text-[11px] leading-relaxed text-product-muted">
+										<ul className="mt-5 space-y-2 border-t border-product-border/35 pt-4 text-[12px] leading-[1.65] text-product-muted">
 											{getCandidateSignals(problem).map((signal) => (
 												<li key={`${problem.index}-${signal}`}>{signal}</li>
 											))}
 										</ul>
-										<p className="mt-4 font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
+										<p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.16em] text-product-muted">
 											{isSelected ? "Selected" : "Commit to this user"}
 										</p>
 									</button>
@@ -195,73 +250,56 @@ export function PickOneUserSupport({
 							})}
 						</div>
 					) : (
-						<div className="border border-dashed border-product-border bg-product-surface px-4 py-4 text-product-muted">
+						<div
+							className={`${workbenchInsetClass} px-4 py-4 text-[14px] leading-[1.7] text-product-muted`}
+						>
 							The problems from `1.1` are not available yet. Go back and finish
 							that page first.
 						</div>
 					)}
 					{invalidFieldIds.has(handoff.selectionFieldId) ? (
-						<p className="text-[11px] font-medium leading-relaxed text-[#a83232]">
+						<p className="text-[12px] font-medium leading-[1.6] text-[#a83232]">
 							Choose the one user-problem pair you can test fastest.
 						</p>
 					) : null}
 				</div>
 			</WorkbenchCard>
 			<WorkbenchCard label="Pressure-test your choice">
-				<div className="space-y-3 text-[12px] leading-relaxed text-product-text">
-					<p>
+				<div className="space-y-4">
+					<p className={workbenchSupportCopyClass}>
 						Before you move on, make sure this is a real user with a real moment
 						of pain and a path to reach them soon.
 					</p>
-					<div className="grid gap-3 md:grid-cols-3">
-						{previewRows.slice(2).map((row) => (
-							<div
-								key={row.label}
-								className="border border-product-border/60 bg-product-surface px-3 py-3"
-							>
-								<p className="font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
-									{row.label}
-								</p>
-								<p
-									className={`mt-2 ${row.filled ? "text-product-text" : "text-product-muted"}`}
-								>
-									{row.value}
-								</p>
-							</div>
-						))}
+					<div className="grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+						<SummaryFieldCard row={previewRows[2]} className="h-full" />
+						<div className="space-y-4">
+							<SummaryFieldCard row={previewRows[3]} />
+							<SummaryFieldCard row={previewRows[4]} />
+						</div>
 					</div>
 					{selectedProblem ? (
-						<p className="text-[11px] text-product-muted">
-							You picked <strong>{selectedProblem.owner}</strong>. The detailed
-							notes below should prove this is the user you want to serve first.
+						<p className={workbenchSupportCopyClass}>
+							You picked{" "}
+							<strong className="text-product-text">
+								{selectedProblem.owner}
+							</strong>
+							. The detailed notes below should prove this is the user you want
+							to serve first.
 						</p>
 					) : (
-						<p className="text-[11px] text-product-muted">
+						<p className={workbenchSupportCopyClass}>
 							Pick a user above to unlock the detailed notes below.
 						</p>
 					)}
 				</div>
 			</WorkbenchCard>
 			<WorkbenchCard label="User statement preview">
-				<div className="space-y-3 text-[12px] leading-relaxed text-product-text">
-					<p>
+				<div className="space-y-4">
+					<p className={workbenchSupportCopyClass}>
 						This is the direction <code className="mx-1 font-mono">1.3</code>{" "}
 						will inherit next.
 					</p>
-					<div className="space-y-2 border border-product-border/60 bg-product-surface px-4 py-4">
-						{previewRows.map((row) => (
-							<div key={row.label}>
-								<p className="font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
-									{row.label}
-								</p>
-								<p
-									className={`mt-1 ${row.filled ? "text-product-text" : "text-product-muted"}`}
-								>
-									{row.value}
-								</p>
-							</div>
-						))}
-					</div>
+					<StatementPreviewRows previewRows={previewRows} />
 				</div>
 			</WorkbenchCard>
 		</div>

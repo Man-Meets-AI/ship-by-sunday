@@ -8,7 +8,7 @@ import {
 
 describe("lesson layout modes", () => {
 	it("keeps split-shell lessons switchable between split and focus", () => {
-		const lesson = getLessonById("3.1");
+		const lesson = getLessonById("1.2");
 		expect(lesson).toBeTruthy();
 
 		expect(getAvailableLayoutModesForLesson(lesson!)).toEqual([
@@ -44,7 +44,7 @@ describe("lesson layout modes", () => {
 	});
 
 	it("treats watch lessons as focus-only layouts with no toggle", () => {
-		for (const lessonId of ["2.4", "2.5", "3.5", "3.8", "3.9"]) {
+		for (const lessonId of ["2.4", "2.5", "2.6", "3.1", "3.5", "3.8", "3.9"]) {
 			const lesson = getLessonById(lessonId);
 			expect(lesson).toBeTruthy();
 

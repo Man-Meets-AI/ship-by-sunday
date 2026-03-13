@@ -222,19 +222,13 @@ function adaptLegacyReferenceBoardFieldValues(
 		]),
 		reference_gallery: {
 			kind: "reference_gallery",
-			items: rows.map((row, index) =>
-				isUrlString(row)
-					? {
-							id: `legacy-reference-${index + 1}`,
-							source: "remote_url",
-							url: row,
-						}
-					: {
-							id: `legacy-reference-${index + 1}`,
-							source: "remote_url",
-							fileName: row,
-						},
-			),
+			items: rows
+				.filter((row) => isUrlString(row))
+				.map((row, index) => ({
+					id: `legacy-reference-${index + 1}`,
+					source: "remote_url",
+					url: row,
+				})),
 		} satisfies ReferenceGalleryValue,
 		[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
 	};

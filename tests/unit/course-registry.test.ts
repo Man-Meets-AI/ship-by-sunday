@@ -205,32 +205,6 @@ function getRoughScreensArtifact() {
 	return buildArtifactPreview(lesson!, {});
 }
 
-function getVisualDirectionArtifact() {
-	const lesson = getLessonById("2.6");
-	expect(lesson).toBeTruthy();
-
-	return buildArtifactPreview(lesson!, {
-		[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
-		visual_direction_notes:
-			"Quiet, editorial, and sharp with tighter spacing and stronger contrast.",
-		visual_guide_markdown: `# Visual Guide
-## Overall Direction
-Keep the interface sharp and editorial.`,
-	});
-}
-
-function getLegacyVisualDirectionArtifact() {
-	const lesson = getLessonById("2.6");
-	expect(lesson).toBeTruthy();
-
-	return buildArtifactPreview(lesson!, {
-		style_rule_1: "Quiet typography",
-		style_rule_2: "Dense spacing",
-		style_rule_3: "Sharp cards",
-		avoid_rule: "Soft gradients",
-	});
-}
-
 describe("course registry", () => {
 	it("keeps mission and welcome available before progress exists", () => {
 		expect(getUnlockedLessonIds([])).toEqual(["0.0", "0.1"]);
@@ -243,7 +217,7 @@ describe("course registry", () => {
 	it("keeps CEO available by default and unlocks later blocks explicitly", () => {
 		expect(getUnlockedBlockIds([])).toEqual(["CEO"]);
 		expect(getUnlockedBlockIds(["1.7"])).toEqual(["CEO", "DESIGN"]);
-		expect(getUnlockedBlockIds(["1.7", "2.7"])).toEqual([
+		expect(getUnlockedBlockIds(["1.7", "2.6"])).toEqual([
 			"CEO",
 			"DESIGN",
 			"BUILD",
@@ -291,6 +265,31 @@ describe("course registry", () => {
 		expect(getObjectiveTasks(lesson!, {})).toEqual([]);
 		expect(getCompletionIssues(lesson!, {})).toEqual([]);
 		expect(nextLesson?.artifact.dependsOn).toContain("rough_screens");
+	});
+
+	it("configures lesson 3.1 as a watch-only kickoff that follows 2.6 directly", () => {
+		const lesson = getLessonById("3.1");
+		const previousLesson = getLessonById("2.6");
+		const nextLesson = getLessonById("3.2");
+		expect(lesson).toBeTruthy();
+		expect(previousLesson).toBeTruthy();
+		expect(nextLesson).toBeTruthy();
+
+		expect(lesson).toMatchObject({
+			title: "Build Kickoff",
+			shell: "watch",
+			workbench: "external_workspace",
+			prevLessonId: "2.6",
+			fieldShapeVersion: 3,
+		});
+		expect(lesson?.workbenchFields ?? []).toEqual([]);
+		expect(lesson?.artifact.dependsOn).toEqual([
+			"product_brief",
+			"storyboard_image",
+			"rough_screens",
+		]);
+		expect(previousLesson?.nextLessonId).toBe("3.1");
+		expect(nextLesson?.artifact.dependsOn).toContain("agent_build_brief");
 	});
 
 	it("configures lesson 3.2 as a focus-only orientation lesson with required evidence while keeping 3.3 gated on repo orientation", () => {
@@ -892,10 +891,14 @@ describe("course registry", () => {
 		const preview = buildResolvedArtifactPreview(lesson!, {}, pinnedArtifacts);
 
 		expect(
-			getCompletionIssues(lesson!, {}, {
-				pinnedArtifacts,
-				resolvedArtifactPreview: preview,
-			}).map((issue) => issue.label),
+			getCompletionIssues(
+				lesson!,
+				{},
+				{
+					pinnedArtifacts,
+					resolvedArtifactPreview: preview,
+				},
+			).map((issue) => issue.label),
 		).toEqual([
 			"A designer could tell who this is for.",
 			"The promised outcome is specific and visible.",
@@ -929,63 +932,19 @@ describe("course registry", () => {
 		).toEqual([]);
 	});
 
-	it("requires at least 3 saved references to complete lesson 2.1", () => {
+	it("treats lesson 2.1 as a watch-only step with no required in-product fields", () => {
 		const lesson = getLessonById("2.1");
 		expect(lesson).toBeTruthy();
 
-		const twoReferences = createReferenceGalleryValue([
-			{
-				id: "upload-1",
-				source: "upload",
-				storageId: "storage-1",
-				fileName: "hero.png",
-			},
-			{
-				id: "remote-1",
-				source: "remote_url",
-				url: "https://images.example.com/card.png",
-			},
-		]);
-		const threeReferences = createReferenceGalleryValue([
-			...twoReferences.items,
-			{
-				id: "remote-2",
-				source: "remote_url",
-				url: "https://images.example.com/nav.png",
-			},
-		]);
-
-		expect(
-			getCompletionIssues(lesson!, {
-				[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
-				reference_gallery: twoReferences,
-			}),
-		).toEqual([
-			{
-				id: "reference_gallery",
-				label: "Save at least 3 references",
-				kind: "field",
-			},
-		]);
-		expect(
-			getCompletionIssues(lesson!, {
-				[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
-				reference_gallery: threeReferences,
-			}),
-		).toEqual([]);
-		expect(
-			getWorkbenchSectionStates(lesson!, {
-				[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
-				reference_gallery: threeReferences,
-			})[0]?.isComplete,
-		).toBe(true);
+		expect(lesson?.shell).toBe("watch");
+		expect(lesson?.workbenchFields ?? []).toEqual([]);
+		expect(getCompletionIssues(lesson!, {})).toEqual([]);
+		expect(getObjectiveTasks(lesson!, {})).toEqual([]);
 	});
 
-	it("adapts legacy 2.1 board rows into the current reference gallery contract", () => {
+	it("ignores legacy 2.1 board rows because the lesson is now watch-only", () => {
 		const lesson = getLessonById("2.1");
-		const wrapUpLesson = getLessonById("2.7");
 		expect(lesson).toBeTruthy();
-		expect(wrapUpLesson).toBeTruthy();
 
 		const normalized = normalizeLessonFieldValues(lesson!, {
 			reference_board: [
@@ -996,49 +955,12 @@ describe("course registry", () => {
 			],
 			reference_patterns: "Tight cards and dense hierarchy.",
 		});
-		const pinnedArtifacts = [
-			getLegacyReferenceBoardArtifact(),
-			getSketchSetArtifact(),
-			getStoryboardImageArtifact(),
-			getRoughScreensArtifact(),
-			getVisualDirectionArtifact(),
-		];
-
-		expect(normalized).toMatchObject({
-			[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
-			reference_gallery: {
-				kind: "reference_gallery",
-				items: [
-					{
-						id: "legacy-reference-1",
-						source: "remote_url",
-						url: "https://images.example.com/ref-1.png",
-					},
-					{
-						id: "legacy-reference-2",
-						source: "remote_url",
-						fileName: "Editorial onboarding flow",
-					},
-					{
-						id: "legacy-reference-3",
-						source: "remote_url",
-						url: "https://images.example.com/ref-2.png",
-					},
-				],
-			},
-		});
-		expect(
-			getObjectiveTasks(wrapUpLesson!, {}, { pinnedArtifacts }).find(
-				(task) => task.id === "design-spec:references",
-			)?.status,
-		).toBe("complete");
+		expect(normalized).toEqual({});
 	});
 
 	it("adapts legacy 2.2 single uploads into the current sketch array contract", () => {
 		const lesson = getLessonById("2.2");
-		const wrapUpLesson = getLessonById("2.7");
 		expect(lesson).toBeTruthy();
-		expect(wrapUpLesson).toBeTruthy();
 
 		const normalized = normalizeLessonFieldValues(lesson!, {
 			sketch_upload: {
@@ -1049,32 +971,17 @@ describe("course registry", () => {
 				url: "https://example.com/legacy-screen-1.jpg",
 			},
 		});
-		const pinnedArtifacts = [
-			getReferenceBoardArtifact(),
-			getLegacySketchSetArtifact(),
-			getStoryboardImageArtifact(),
-			getRoughScreensArtifact(),
-			getVisualDirectionArtifact(),
-		];
-
 		expect(normalized.sketch_upload).toEqual([
 			expect.objectContaining({
 				storageId: "legacy-sketch-1",
 				fileName: "legacy-screen-1.jpg",
 			}),
 		]);
-		expect(
-			getObjectiveTasks(wrapUpLesson!, {}, { pinnedArtifacts }).find(
-				(task) => task.id === "design-spec:sketches",
-			)?.status,
-		).toBe("complete");
 	});
 
-	it("adapts legacy 2.6 style rules into the current visual-direction contract", () => {
+	it("ignores legacy 2.6 visual-direction fields because the lesson is now watch-only", () => {
 		const lesson = getLessonById("2.6");
-		const wrapUpLesson = getLessonById("2.7");
 		expect(lesson).toBeTruthy();
-		expect(wrapUpLesson).toBeTruthy();
 
 		const normalized = normalizeLessonFieldValues(lesson!, {
 			style_rule_1: "Quiet typography",
@@ -1082,97 +989,11 @@ describe("course registry", () => {
 			style_rule_3: "Sharp cards",
 			avoid_rule: "Soft gradients",
 		});
-		const pinnedArtifacts = [
-			getReferenceBoardArtifact(),
-			getSketchSetArtifact(),
-			getStoryboardImageArtifact(),
-			getRoughScreensArtifact(),
-			getLegacyVisualDirectionArtifact(),
-		];
-
-		expect(normalized).toMatchObject({
-			[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
-			visual_direction_notes:
-				"Style rule 1: Quiet typography\nStyle rule 2: Dense spacing\nStyle rule 3: Sharp cards\nAvoid: Soft gradients",
-			visual_guide_markdown: expect.stringContaining("## Avoid"),
-		});
-		expect(
-			getObjectiveTasks(wrapUpLesson!, {}, { pinnedArtifacts }).find(
-				(task) => task.id === "design-spec:visual-direction",
-			)?.status,
-		).toBe("complete");
+		expect(normalized).toEqual({});
 	});
 
-	it("composes 2.7 into a curated design spec from saved Design artifacts", () => {
-		const lesson = getLessonById("2.7");
-		expect(lesson).toBeTruthy();
-
-		const preview = buildResolvedArtifactPreview(lesson!, {}, [
-			getReferenceBoardArtifact(),
-			getSketchSetArtifact(),
-			getStoryboardImageArtifact(),
-			getRoughScreensArtifact(),
-			getVisualDirectionArtifact(),
-		]);
-
-		expect(preview.fields.map(([label]) => label)).toEqual([
-			"Reference direction",
-			"Screen plan",
-			"Flow sequence",
-			"Visual direction",
-		]);
-		expect(preview.fieldValues.reference_saved_count).toBe(4);
-		expect(preview.fieldValues.sketch_uploaded_count).toBe(2);
-		expect(preview.fieldValues.storyboard_locked_count).toBe(1);
-		expect(preview.fieldValues.visual_guide_saved_count).toBe(1);
-		expect(preview.fieldValues).not.toHaveProperty("rough_screen_notes");
-		expect(preview.fields).toEqual([
-			[
-				"Reference direction",
-				"4 saved references locked the patterns, hierarchy, and taste Build should borrow from.",
-			],
-			[
-				"Screen plan",
-				"The 3-5 rough screens are ready, so Build can start from a real screen plan instead of a blank editor.",
-			],
-			[
-				"Flow sequence",
-				"The storyboard already sequences the core user path, so the first implemented slice has a clear flow to follow.",
-			],
-			[
-				"Visual direction",
-				"Direction: Quiet, editorial, and sharp with tighter spacing and stronger contrast.\nVisual Guide is saved for implementation.",
-			],
-		]);
-	});
-
-	it("derives 2.7 progress tasks from the saved Design block artifacts", () => {
-		const lesson = getLessonById("2.7");
-		expect(lesson).toBeTruthy();
-
-		const tasks = getObjectiveTasks(
-			lesson!,
-			{},
-			{
-				pinnedArtifacts: [
-					getReferenceBoardArtifact(),
-					getSketchSetArtifact(),
-					getStoryboardImageArtifact(),
-					getRoughScreensArtifact(),
-					getVisualDirectionArtifact(),
-				],
-			},
-		);
-
-		expect(tasks.map((task) => task.label)).toEqual([
-			"Lock the reference direction",
-			"Carry the sketches into the handoff",
-			"Lock the storyboard flow",
-			"Carry the rough screens into Build",
-			"Save visualguide.md for Build",
-			"Assemble the design spec",
-		]);
-		expect(tasks.every((task) => task.status === "complete")).toBe(true);
+	it("removes lesson 2.7 from the live registry after the cutover", () => {
+		expect(getLessonById("2.7")).toBeNull();
 	});
 
 	it("formats table artifact previews into readable summaries", () => {
@@ -1211,7 +1032,7 @@ describe("course registry", () => {
 		});
 	});
 
-	it("strips local preview urls before persisting a reference gallery", () => {
+	it("leaves 2.1 field values untouched during persistence because the lesson is watch-only", () => {
 		const lesson = getLessonById("2.1");
 		expect(lesson).toBeTruthy();
 
@@ -1235,7 +1056,7 @@ describe("course registry", () => {
 				]),
 			}),
 		).toEqual({
-			[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
+			[FIELD_SHAPE_VERSION_FIELD_ID]: 1,
 			reference_gallery: {
 				kind: "reference_gallery",
 				items: [
@@ -1246,6 +1067,7 @@ describe("course registry", () => {
 						mimeType: "image/png",
 						size: 1024,
 						storageId: "storage-1",
+						previewUrl: "blob:http://localhost/hero",
 					},
 					{
 						id: "remote-1",

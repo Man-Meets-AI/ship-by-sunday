@@ -1,15 +1,10 @@
 import { createPendingLessonCoach } from "../content-helpers";
+import { focusPanelDefaults, type LessonConfig } from "../contracts";
 import {
-	focusPanelDefaults,
-	splitPanelDefaults,
-	type LessonConfig,
-} from "../contracts";
-import {
-	DESIGN_REFERENCE_RESOURCES,
-	WORKSHEET_02_RESOURCES,
-	WORKSHEET_02_STORYBOARD_RESOURCES,
-	WORKSHEET_02_STORYBOARD_TEMPLATE_DOWNLOAD,
-	WORKSHEET_02_TEMPLATE_DOWNLOAD,
+	DESIGN_SPEC_TEMPLATE_DOWNLOAD,
+	DESIGN_SPEC_TEMPLATE_RESOURCES,
+	STORYBOARD_TEMPLATE_DOWNLOAD,
+	STORYBOARD_TEMPLATE_RESOURCES,
 } from "../resources";
 
 export const designLessons = [
@@ -20,12 +15,12 @@ export const designLessons = [
 		block: "DESIGN",
 		title: "Find References First",
 		shortTitle: "References",
-		shell: "split",
+		shell: "watch",
 		workbench: "reference_gallery",
 		artifact: {
 			key: "reference_board",
-			label: "Reference Gallery",
-			type: "images",
+			label: "Reference Direction",
+			type: "text",
 			required: true,
 			dependsOn: ["product_brief"],
 		},
@@ -33,64 +28,47 @@ export const designLessons = [
 		prevLessonId: "1.7",
 		unlocks: { lessons: ["2.2"] },
 		coachMode: "docked",
-		fieldShapeVersion: 2,
 		objectiveTitle: "DESIGN 2.1 — Find References First",
-		checklist: [
-			"Save at least 3 references",
-			"Aim for 5–10 total references",
-			"Keep only the styles you want to borrow",
-		],
+		checklist: ["Watch the walkthrough", "Move into sketching"],
 		helperText:
-			"Collect reference images before you open Figma so your first design pass starts from real taste instead of guesses.",
-		winCondition: "At least 3 reference images are saved.",
+			"Watch the walkthrough, then move into sketching without getting stuck organizing references in the app.",
+		winCondition:
+			"The walkthrough is complete and the student is ready to sketch.",
 		panelDefaults: {
-			...splitPanelDefaults,
-			resources: "open",
+			...focusPanelDefaults,
+			resources: "collapsed",
 		},
 		pinnedArtifacts: ["product_brief"],
-		workbenchFields: [
-			{
-				id: "reference_gallery",
-				label: "Reference Gallery",
-				kind: "reference_gallery",
-				required: true,
-				minItems: 3,
-				taskLabel: "Save at least 3 references",
-				artifactPreviewLabel: "Reference Gallery",
-				helpText:
-					"Drag in screenshots, paste clipboard images, or add direct image URLs. Inspiration site links belong in Coach Resources.",
-			},
-		],
+		workbenchFields: [],
 		content: {
 			status: "draft",
 			intro:
-				"Do not design from a blank brain. Save the styles you want to borrow first.",
+				"Watch the walkthrough, get the taste calibration, then move straight into sketching.",
 			lessonMeta: {
-				runtimeLabel: "6-8 min",
-				goal: "Stop them from inventing from a blank brain.",
+				runtimeLabel: "4-6 min",
+				goal: "Calm the student down before they start sketching.",
 				purpose:
-					"Use visual references to reduce randomness, sharpen taste, and make later design choices faster.",
+					"Set the visual bar for the Design block without adding another in-product step before they draw.",
 			},
 			actionCard: {
 				jobNow:
-					"Save at least 3 references that feel close to the product style or flow you want.",
-				timebox: "10 minutes",
-				comeBackWith: "A mini gallery of references you want to borrow from.",
+					"Watch the lesson, grab the core principle, and go sketch while the direction is fresh.",
+				timebox: "5 minutes",
+				comeBackWith: "Enough clarity to start sketching without freezing.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Find References First",
-				resources: DESIGN_REFERENCE_RESOURCES,
+				resources: [],
 			}),
 			workbench: {
-				prompt:
-					"Save references you want to borrow from before you make your own screens.",
+				prompt: "Watch the walkthrough, then move immediately into sketching.",
 				teachingPoints: [
-					"Look for references that are close to your desired flow, hierarchy, motion, or trust cues.",
-					"Keep only the images that reflect the product taste you actually want to borrow.",
-					"Use Coach Resources for inspiration sites, then bring the saved screenshots back here.",
+					"Do not stall out collecting a huge moodboard.",
+					"Borrow the taste cues that matter, then keep moving.",
+					"Sketching is the next real step.",
 				],
 				emptyState:
-					"Save reference images here first, then use them later to shape your rough screens and visual direction.",
+					"Watch the lesson, then move into sketching while the direction is still clear.",
 			},
 		},
 	},
@@ -123,7 +101,7 @@ export const designLessons = [
 		helperText: "Sketch 3-5 rough screens, upload clear photos, then move on.",
 		winCondition: "A sketch set is uploaded.",
 		panelDefaults: focusPanelDefaults,
-		pinnedArtifacts: ["product_brief", "reference_board"],
+		pinnedArtifacts: ["product_brief"],
 		workbenchFields: [
 			{
 				id: "sketch_upload",
@@ -154,7 +132,7 @@ export const designLessons = [
 			},
 			coach: createPendingLessonCoach({
 				title: "Sketch Before Software",
-				resources: WORKSHEET_02_RESOURCES,
+				resources: DESIGN_SPEC_TEMPLATE_RESOURCES,
 			}),
 			workbench: {
 				prompt:
@@ -166,7 +144,7 @@ export const designLessons = [
 				],
 				emptyState:
 					"Paper is still one of the fastest ways to make an app less abstract.",
-				...WORKSHEET_02_TEMPLATE_DOWNLOAD,
+				...DESIGN_SPEC_TEMPLATE_DOWNLOAD,
 			},
 		},
 	},
@@ -231,7 +209,7 @@ export const designLessons = [
 			},
 			coach: createPendingLessonCoach({
 				title: "Storyboard the Journey",
-				resources: WORKSHEET_02_STORYBOARD_RESOURCES,
+				resources: STORYBOARD_TEMPLATE_RESOURCES,
 			}),
 			workbench: {
 				prompt:
@@ -243,7 +221,7 @@ export const designLessons = [
 				],
 				emptyState:
 					"Do this off-screen. Use the printable PDF, the FigJam template, or plain paper, then bring back one clean image.",
-				...WORKSHEET_02_STORYBOARD_TEMPLATE_DOWNLOAD,
+				...STORYBOARD_TEMPLATE_DOWNLOAD,
 			},
 		},
 	},
@@ -278,7 +256,7 @@ export const designLessons = [
 		winCondition:
 			"The walkthrough is complete and the learner is ready for Figma.",
 		panelDefaults: focusPanelDefaults,
-		pinnedArtifacts: ["reference_board", "sketch_set", "storyboard_image"],
+		pinnedArtifacts: ["sketch_set", "storyboard_image"],
 		content: {
 			status: "draft",
 			intro:
@@ -296,7 +274,7 @@ export const designLessons = [
 			},
 			coach: createPendingLessonCoach({
 				title: "Figma Basics for Speed",
-				resources: WORKSHEET_02_RESOURCES,
+				resources: DESIGN_SPEC_TEMPLATE_RESOURCES,
 			}),
 			workbench: {
 				prompt:
@@ -361,7 +339,7 @@ export const designLessons = [
 			},
 			coach: createPendingLessonCoach({
 				title: "Turn Sketches Into Rough Screens",
-				resources: WORKSHEET_02_RESOURCES,
+				resources: DESIGN_SPEC_TEMPLATE_RESOURCES,
 			}),
 			workbench: {
 				prompt: "Your job is clarity, not beauty.",
@@ -381,187 +359,58 @@ export const designLessons = [
 		block: "DESIGN",
 		title: "Choose a Visual Direction",
 		shortTitle: "Direction",
-		shell: "split",
+		shell: "watch",
 		workbench: "visual_direction",
 		artifact: {
 			key: "visual_direction",
-			label: "Visual Direction",
+			label: "Visual Direction Walkthrough",
 			type: "text",
 			required: true,
 			dependsOn: ["rough_screens"],
 		},
-		nextLessonId: "2.7",
+		nextLessonId: "3.1",
 		prevLessonId: "2.5",
-		unlocks: { lessons: ["2.7"] },
+		unlocks: { lessons: ["3.1"], blocks: ["BUILD"] },
 		coachMode: "docked",
-		coachVideoPlacement: "workbench",
 		objectiveTitle: "DESIGN 2.6 — Choose a Visual Direction",
-		checklist: [
-			"Review the references",
-			"Write the direction note",
-			"Save visualguide.md",
-		],
+		checklist: ["Watch the walkthrough", "Move straight into Build"],
 		helperText:
-			"Turn your saved references into one practical visual guide before Build starts.",
-		panelDefaults: splitPanelDefaults,
-		fieldShapeVersion: 2,
-		pinnedArtifacts: ["reference_board", "rough_screens"],
-		promptImport: {
-			promptTemplateId: "visual_direction_guide",
-			markdownFieldId: "visual_guide_markdown",
-		},
-		workbenchFields: [
-			{
-				id: "visual_direction_notes",
-				label: "Visual direction note",
-				kind: "textarea",
-				required: true,
-				rows: 5,
-				placeholder:
-					"Name the visual shifts you want the guide to push: hierarchy, type feel, surfaces, contrast, spacing, trust cues, interaction tone, and what to avoid.",
-				artifactPreviewLabel: "Direction note",
-				taskLabel: "Write the direction note",
-			},
-			{
-				id: "visual_guide_markdown",
-				label: "Saved visualguide.md",
-				kind: "textarea",
-				required: true,
-				rows: 14,
-				placeholder:
-					"Paste the returned visualguide.md markdown here after you run the prompt in your coding agent.",
-				artifactPreviewLabel: "visualguide.md",
-				taskLabel: "Save visualguide.md",
-			},
-		],
-		winCondition: "A saved direction note and visualguide.md are ready.",
+			"Watch the walkthrough, lock the visual bar in your head, then move straight into Build.",
+		panelDefaults: focusPanelDefaults,
+		pinnedArtifacts: ["rough_screens"],
+		workbenchFields: [],
+		winCondition:
+			"The walkthrough is complete and the student is ready to start Build.",
 		content: {
 			status: "draft",
 			intro:
-				"You do not need a giant brand package. You need one coherent visual guide the build can follow.",
+				"Watch the walkthrough, set the visual bar, then move straight into Build.",
 			lessonMeta: {
-				runtimeLabel: "5-7 min",
-				goal: "Turn your references into a build-ready visual direction.",
+				runtimeLabel: "4-6 min",
+				goal: "Set the visual bar without adding another in-product task.",
 				purpose:
-					"Students need one sharp guide file, not another blank design exercise.",
+					"Keep momentum high while making the founder's visual call legible before Build.",
 			},
 			actionCard: {
 				jobNow:
-					"Review the references, write the direction note, then save `visualguide.md` back into the lesson.",
-				timebox: "10 minutes",
-				comeBackWith: "A saved `visualguide.md`.",
+					"Watch the lesson, absorb the visual standard, then move straight into Build.",
+				timebox: "5 minutes",
+				comeBackWith:
+					"Enough clarity to carry the Design block directly into Build.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Choose a Visual Direction",
-				resources: WORKSHEET_02_RESOURCES,
+				resources: [],
 			}),
 			workbench: {
 				prompt:
-					"You are translating saved references into one practical visual guide for the build.",
+					"Watch the walkthrough, then carry that visual direction straight into Build.",
 				teachingPoints: [
-					"Review the references before you ask an agent to generate anything.",
-					"Write the visual shifts you want in plain English, not vague taste words.",
-					"Save the returned `visualguide.md` so the Design wrap-up can carry it forward.",
+					"Do not turn this into another homework step.",
+					"Use the video to calibrate the visual standard.",
+					"Move into Build while the direction is still fresh.",
 				],
-				emptyState:
-					"You do not need a full brand system. You need one guide file the build can actually follow.",
-			},
-		},
-	},
-	{
-		id: "2.7",
-		slug: "02-07-design-block-wrap-up",
-		order: 14,
-		block: "DESIGN",
-		title: "Design Wrap-Up",
-		shortTitle: "Spec",
-		shell: "split",
-		workbench: "brief_assembler",
-		artifact: {
-			key: "design_spec",
-			label: "Design Spec",
-			type: "brief",
-			required: true,
-			dependsOn: [
-				"reference_board",
-				"sketch_set",
-				"storyboard_image",
-				"figma_file_ready",
-				"rough_screens",
-				"visual_direction",
-			],
-		},
-		nextLessonId: "3.1",
-		prevLessonId: "2.6",
-		unlocks: { lessons: ["3.1"], blocks: ["BUILD"] },
-		coachMode: "docked",
-		objectiveTitle: "DESIGN 2.7 — Design Wrap-Up",
-		checklist: [
-			"Lock the reference direction",
-			"Carry the sketches into the handoff",
-			"Lock the storyboard flow",
-			"Carry the rough screens into Build",
-			"Save visualguide.md for Build",
-			"Lock the design spec",
-		],
-		helperText: "Design block complete. Lock the spec and unlock Build.",
-		winCondition: "The design spec is assembled and locked.",
-		panelDefaults: splitPanelDefaults,
-		pinnedArtifacts: [
-			"reference_board",
-			"sketch_set",
-			"storyboard_image",
-			"rough_screens",
-			"visual_direction",
-		],
-		briefAssembler: {
-			variant: "stage_unlock",
-			preset: "design",
-			heroEyebrow: "Design block complete",
-			heroTitle: "Build unlocked",
-			heroBody:
-				"You now have the reference direction, screen plan, flow, and visual guide Build needs. Open the next block and translate instead of guessing.",
-			nextStepLabel: "BUILD 3.1 — Lock Build Path and Scope",
-			skills: [
-				"Flow sequencing",
-				"Screen planning",
-				"Hierarchy",
-				"Visual direction",
-				"Handoff clarity",
-			],
-			artifactReadyCopy:
-				"Build now has the screens, flow, and visual direction it needs.",
-			readyStateCopy: "Design block complete. Lock the spec and unlock Build.",
-			completionCtaLabel: "Unlock Build",
-			celebrationEyebrow: "Design block complete",
-			celebrationTitle: "Build unlocked",
-		},
-		content: {
-			status: "draft",
-			intro:
-				"You are not walking into Build blind. The screens, flow, and visual direction are already locked, so the next block starts from control.",
-			lessonMeta: {
-				runtimeLabel: "3-5 min",
-				goal: "Lock the design spec before building begins.",
-				purpose: "This is the handoff from concept to implementation.",
-			},
-			actionCard: {
-				jobNow:
-					"Take a fast build-handoff pass, confirm the spec reads cleanly, then unlock Build.",
-				timebox: "2 minutes",
-				comeBackWith: "A locked design spec and a clear jump into Build.",
-			},
-			coach: createPendingLessonCoach({
-				title: "Design Block Wrap-Up",
-				resources: WORKSHEET_02_RESOURCES,
-			}),
-			workbench: {
-				prompt: "Build should now feel like translation, not guessing.",
-				teachingPoints: [
-					"Check that Build now has a reference direction, a screen plan, a locked flow, and a saved visual guide.",
-					"The job here is confidence: Build should start from a real handoff, not from vibes.",
-				],
-				emptyState: "Build should now feel like translation, not guessing.",
+				emptyState: "Watch the walkthrough, then move directly into Build.",
 			},
 		},
 	},

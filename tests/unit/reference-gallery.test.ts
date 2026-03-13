@@ -1,6 +1,8 @@
 import {
+	countReferenceGalleryItems,
 	createReferenceGalleryValue,
 	hydrateReferenceGalleryValue,
+	toPersistedReferenceGalleryValue,
 } from "@/lib/course";
 
 describe("reference gallery helpers", () => {
@@ -39,6 +41,34 @@ describe("reference gallery helpers", () => {
 					id: "remote-1",
 					source: "remote_url",
 					url: "https://images.example.com/ref.png",
+				},
+			],
+		});
+	});
+
+	it("ignores remote references that do not include an image URL", () => {
+		const value = createReferenceGalleryValue([
+			{
+				id: "remote-1",
+				source: "remote_url",
+				url: "https://images.example.com/ref.png",
+			},
+			{
+				id: "remote-2",
+				source: "remote_url",
+				fileName: "Product brief block",
+			},
+		]);
+
+		expect(countReferenceGalleryItems(value)).toBe(1);
+		expect(toPersistedReferenceGalleryValue(value)).toEqual({
+			kind: "reference_gallery",
+			items: [
+				{
+					id: "remote-1",
+					source: "remote_url",
+					url: "https://images.example.com/ref.png",
+					fileName: undefined,
 				},
 			],
 		});

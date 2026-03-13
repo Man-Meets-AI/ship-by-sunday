@@ -31,7 +31,7 @@ export type ScopeBoundaryPromptContext = CompetitorResearchPromptContext & {
 
 export type VisualDirectionGuidePromptContext = {
 	directionNotes: string;
-	referenceImageUrls: string[];
+	referenceImageUrls?: string[];
 };
 
 export type BuildKickoffPromptContext = {
@@ -255,13 +255,14 @@ function getVisualDirectionGuidePromptContext(
 			)
 		: [];
 
-	if (!directionNotes || referenceImageUrls.length === 0) {
+	if (!directionNotes) {
 		return null;
 	}
 
 	return {
 		directionNotes,
-		referenceImageUrls,
+		referenceImageUrls:
+			referenceImageUrls.length > 0 ? referenceImageUrls : undefined,
 	};
 }
 
@@ -585,12 +586,12 @@ export function buildScopeBoundaryPrompt(context: ScopeBoundaryPromptContext) {
 export function buildVisualDirectionGuidePrompt(
 	context: VisualDirectionGuidePromptContext,
 ) {
-	const referenceLines = context.referenceImageUrls.map(
+	const referenceLines = (context.referenceImageUrls ?? []).map(
 		(url, index) => `- Reference ${index + 1}: ${url}`,
 	);
 
 	return [
-		"You are helping a builder turn saved visual references into a practical app visual system they can build from this weekend.",
+		"You are helping a builder turn rough screens and a stated visual direction into a practical app visual system they can build from this weekend.",
 		"",
 		"Your job is to write one markdown file named `visualguide.md` that gives a coding agent enough visual direction to build a coherent first version without inventing the design from scratch.",
 		"",
@@ -600,9 +601,9 @@ export function buildVisualDirectionGuidePrompt(
 		"",
 		"Direction note from the builder:",
 		`- ${context.directionNotes}`,
-		"",
-		"Reference images to study:",
-		...referenceLines,
+		...(referenceLines.length > 0
+			? ["", "Reference images to study:", ...referenceLines]
+			: []),
 		"",
 		"File requirements for `visualguide.md`:",
 		"- Keep it practical and build-oriented, not brand-agency fluff.",
@@ -677,7 +678,7 @@ export function getPromptTemplateState(
 			return {
 				prompt: null,
 				disabledReason:
-					"Save at least one visual direction note here and make sure your `2.1` reference gallery is available before building this prompt.",
+					"Save at least one visual direction note here before building this prompt.",
 			};
 		}
 

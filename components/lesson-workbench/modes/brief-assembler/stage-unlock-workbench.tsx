@@ -6,9 +6,20 @@ import type { StageUnlockSection } from "@/lib/course/stage-unlock";
 import type { WorkbenchModeProps } from "../../types";
 import { WorkbenchCard } from "../../shared/workbench-card";
 import { WorkbenchContainer } from "../../shared/workbench-container";
+import { workbenchChromeLabelClass } from "../../shared/workbench-readability";
 import { StageUnlockBridgeCard } from "./stage-unlock-bridge-card";
 import { StageUnlockReviewCard } from "./stage-unlock-review-card";
 import { StageUnlockSectionCard } from "./stage-unlock-section-card";
+
+type StageUnlockWorkbenchProps = {
+	lesson: WorkbenchModeProps["lesson"];
+	lessonContent: WorkbenchModeProps["lessonContent"];
+	fieldValues?: WorkbenchModeProps["fieldValues"];
+	onFieldChange?: WorkbenchModeProps["onFieldChange"];
+	invalidFieldIds?: WorkbenchModeProps["invalidFieldIds"];
+	invalidFieldMessages?: WorkbenchModeProps["invalidFieldMessages"];
+	stageUnlockSummary: WorkbenchModeProps["stageUnlockSummary"];
+};
 
 function getEmptyStateCopy(preset: "ceo" | "design" | "build") {
 	switch (preset) {
@@ -43,21 +54,12 @@ function getSectionGridClass(section: StageUnlockSection) {
 export function StageUnlockWorkbench({
 	lesson,
 	lessonContent,
-	fieldValues,
-	onFieldChange,
-	invalidFieldIds,
-	invalidFieldMessages,
+	fieldValues = {},
+	onFieldChange = () => {},
+	invalidFieldIds = new Set<string>(),
+	invalidFieldMessages = new Map<string, string>(),
 	stageUnlockSummary,
-}: Pick<
-	WorkbenchModeProps,
-	| "lesson"
-	| "lessonContent"
-	| "fieldValues"
-	| "onFieldChange"
-	| "invalidFieldIds"
-	| "invalidFieldMessages"
-	| "stageUnlockSummary"
->) {
+}: StageUnlockWorkbenchProps) {
 	if (lesson.briefAssembler?.variant !== "stage_unlock") {
 		return null;
 	}
@@ -107,9 +109,7 @@ export function StageUnlockWorkbench({
 							</div>
 						</div>
 						<div className="sbs-stage-unlock-card min-w-[220px] bg-product-surface/80 px-4 py-4 shadow-[0_0_0_1px_rgba(var(--product-accent),0.16),0_14px_30px_rgba(var(--product-shadow),0.18)] backdrop-blur-xl">
-							<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
-								Artifact locked next
-							</p>
+							<p className={workbenchChromeLabelClass}>Artifact locked next</p>
 							<p
 								className="mt-3 font-display text-[1.25rem] uppercase leading-[0.92] tracking-[0.04em] text-product-text"
 								style={{ textWrap: "balance" }}
@@ -135,9 +135,7 @@ export function StageUnlockWorkbench({
 								} as CSSProperties
 							}
 						>
-							<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
-								{stat.label}
-							</p>
+							<p className={workbenchChromeLabelClass}>{stat.label}</p>
 							<p
 								className="mt-3 text-base font-medium leading-tight text-product-text sm:text-[15px]"
 								style={{ fontVariantNumeric: "tabular-nums" }}
@@ -170,7 +168,7 @@ export function StageUnlockWorkbench({
 				{reviewField ? (
 					<StageUnlockReviewCard
 						field={reviewField}
-						value={fieldValues[reviewField.id]}
+						value={fieldValues?.[reviewField.id]}
 						onChange={(value) => onFieldChange(reviewField.id, value)}
 						invalid={invalidFieldIds.has(reviewField.id)}
 						invalidMessage={invalidFieldMessages.get(reviewField.id)}

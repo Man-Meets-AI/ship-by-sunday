@@ -7,11 +7,11 @@ type WorkbenchContainerProps = {
 export function WorkbenchContainer({
 	children,
 	className,
-	maxWidthClassName = "max-w-4xl",
+	maxWidthClassName = "max-w-[58rem]",
 }: WorkbenchContainerProps) {
 	return (
 		<div
-			className={`mx-auto ${maxWidthClassName} space-y-4 ${className ?? ""}`.trim()}
+			className={`mx-auto ${maxWidthClassName} space-y-5 ${className ?? ""}`.trim()}
 		>
 			{children}
 		</div>

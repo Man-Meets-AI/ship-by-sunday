@@ -10,7 +10,16 @@ import {
 
 describe("watch lesson contract", () => {
 	it("keeps watch lessons in a focus-only watch layout", () => {
-		for (const lessonId of ["2.4", "2.5", "3.5", "3.8", "3.9"]) {
+		for (const lessonId of [
+			"2.1",
+			"2.4",
+			"2.5",
+			"2.6",
+			"3.1",
+			"3.5",
+			"3.8",
+			"3.9",
+		]) {
 			const lesson = getLessonById(lessonId);
 			expect(lesson).toBeTruthy();
 
@@ -34,6 +43,18 @@ describe("watch lesson contract", () => {
 		expect(nextLesson?.artifact.dependsOn).toContain("figma_file_ready");
 	});
 
+	it("treats lesson 2.1 as a watch-only lesson with no required in-product fields", () => {
+		const lesson = getLessonById("2.1");
+		const nextLesson = getLessonById("2.2");
+		expect(lesson).toBeTruthy();
+		expect(nextLesson).toBeTruthy();
+
+		expect(lesson?.workbenchFields ?? []).toEqual([]);
+		expect(getObjectiveTasks(lesson!, {})).toEqual([]);
+		expect(getCompletionIssues(lesson!, {})).toEqual([]);
+		expect(nextLesson?.artifact.dependsOn).toContain("reference_board");
+	});
+
 	it("treats lesson 2.5 as a watch-only lesson with no required in-product fields", () => {
 		const lesson = getLessonById("2.5");
 		const nextLesson = getLessonById("2.6");
@@ -44,6 +65,32 @@ describe("watch lesson contract", () => {
 		expect(getObjectiveTasks(lesson!, {})).toEqual([]);
 		expect(getCompletionIssues(lesson!, {})).toEqual([]);
 		expect(nextLesson?.artifact.dependsOn).toContain("rough_screens");
+	});
+
+	it("treats lesson 2.6 as a watch-only lesson with no required in-product fields", () => {
+		const lesson = getLessonById("2.6");
+		const nextLesson = getLessonById("3.1");
+		expect(lesson).toBeTruthy();
+		expect(nextLesson).toBeTruthy();
+
+		expect(lesson?.workbenchFields ?? []).toEqual([]);
+		expect(getObjectiveTasks(lesson!, {})).toEqual([]);
+		expect(getCompletionIssues(lesson!, {})).toEqual([]);
+		expect(nextLesson?.artifact.dependsOn).toContain("product_brief");
+		expect(nextLesson?.artifact.dependsOn).toContain("storyboard_image");
+		expect(nextLesson?.artifact.dependsOn).toContain("rough_screens");
+	});
+
+	it("treats lesson 3.1 as a watch-only kickoff with no required in-product fields", () => {
+		const lesson = getLessonById("3.1");
+		const nextLesson = getLessonById("3.2");
+		expect(lesson).toBeTruthy();
+		expect(nextLesson).toBeTruthy();
+
+		expect(lesson?.workbenchFields ?? []).toEqual([]);
+		expect(getObjectiveTasks(lesson!, {})).toEqual([]);
+		expect(getCompletionIssues(lesson!, {})).toEqual([]);
+		expect(nextLesson?.artifact.dependsOn).toContain("agent_build_brief");
 	});
 
 	it("treats lesson 3.2 as a focus-only repo orientation step with required evidence", () => {

@@ -10,6 +10,7 @@ import { StatusRail } from "../shared/status-rail";
 import { WorkbenchCard } from "../shared/workbench-card";
 import { WorkbenchContainer } from "../shared/workbench-container";
 import { WorkbenchHeader } from "../shared/workbench-header";
+import { workbenchChromeLabelClass } from "../shared/workbench-readability";
 
 export function ExternalWorkspaceWorkbench({
 	lesson,
@@ -48,20 +49,20 @@ export function ExternalWorkspaceWorkbench({
 			/>
 			<WorkbenchCard label="Watch first">
 				<div className="space-y-3">
-					<p className="text-xs font-medium leading-snug text-product-muted">
+					<p className="text-[13px] leading-[1.7] text-product-muted">
 						Watch the walkthrough once, then run the setup in sequence.
 					</p>
 					<LessonVideoSurface coachContent={lessonContent.coach} />
 				</div>
 			</WorkbenchCard>
 			<WorkbenchCard label="External workspace">
-				<p className="text-xs font-medium leading-snug text-product-muted">
+				<p className="text-[13px] leading-[1.7] text-product-muted">
 					{actionLabel}
 				</p>
 			</WorkbenchCard>
 			{lesson.checklist.length > 0 ? (
 				<WorkbenchCard label="Run this sequence">
-					<ol className="space-y-1.5 pl-4 text-xs font-medium leading-relaxed text-product-text">
+					<ol className="space-y-2 pl-5 text-[14px] leading-[1.68] text-product-text">
 						{lesson.checklist.map((item) => (
 							<li key={item} className="list-decimal break-words">
 								{item}
@@ -72,7 +73,7 @@ export function ExternalWorkspaceWorkbench({
 			) : null}
 			{transcript?.status === "ready" && transcript.body ? (
 				<WorkbenchCard label="Transcript">
-					<p className="whitespace-pre-wrap text-xs font-medium leading-relaxed text-product-text">
+					<p className="max-w-[64ch] whitespace-pre-wrap text-[14px] leading-[1.72] text-product-text">
 						{transcript.body}
 					</p>
 				</WorkbenchCard>
@@ -85,12 +86,10 @@ export function ExternalWorkspaceWorkbench({
 								key={resource.id}
 								href={resource.href}
 								target={resource.kind === "external" ? "_blank" : undefined}
-								className="block rounded-none border border-product-border bg-product-surface-strong/80 px-2 py-1.5 transition-colors hover:bg-product-surface-alt"
+								className="block rounded-none border border-product-border/55 bg-product-surface-strong/80 px-4 py-4 transition-colors hover:bg-product-surface-alt"
 							>
-								<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
-									{resource.kind}
-								</p>
-								<p className="mt-0.5 text-xs font-medium text-product-text">
+								<p className={workbenchChromeLabelClass}>{resource.kind}</p>
+								<p className="mt-2 text-[14px] font-semibold leading-[1.45] text-product-text">
 									{resource.label}
 								</p>
 							</Link>
@@ -105,7 +104,7 @@ export function ExternalWorkspaceWorkbench({
 				onFieldChange={onFieldChange}
 				pinnedArtifacts={pinnedArtifacts}
 				invalidFieldIds={invalidFieldIds}
-				className="grid gap-2 md:grid-cols-2"
+				className="grid gap-4 md:grid-cols-2"
 			/>
 		</WorkbenchContainer>
 	);

@@ -1,9 +1,5 @@
 import type { ArtifactType, LessonConfig, UploadFieldValue } from "./contracts";
 import { CORE_FLOW_IMAGE_FIELD_ID } from "./core-flow";
-import {
-	getReferenceGalleryCount,
-	getReferenceGalleryImageUrls,
-} from "./reference-gallery";
 import { getFilledTableRows } from "./table";
 
 type StageUnlockPreview = {
@@ -225,9 +221,7 @@ function buildCeoStageUnlockSummary(
 		.filter(Boolean)
 		.join("\n");
 	const evidence = [
-		researchSignalCount > 0
-			? `Signals captured: ${researchSignalCount}`
-			: "",
+		researchSignalCount > 0 ? `Signals captured: ${researchSignalCount}` : "",
 		getFieldString(researchArtifact, "research_summary")
 			? `Pattern to design around: ${getFieldString(
 					researchArtifact,
@@ -393,8 +387,7 @@ function buildCeoStageUnlockSummary(
 		bridge: {
 			eyebrow: "Carry this into Design",
 			title: "Collect references for this exact brief",
-			body:
-				"In 2.1, choose references for this user, this promised outcome, and this one core flow only. Do not widen the product again.",
+			body: "In 2.1, choose references for this user, this promised outcome, and this one core flow only. Do not widen the product again.",
 			highlights: bridgeHighlights,
 		},
 	};
@@ -404,10 +397,6 @@ function buildDesignStageUnlockSummary(
 	lesson: LessonConfig,
 	pinnedArtifacts: StageUnlockPinnedArtifact[],
 ): StageUnlockSummary {
-	const referenceArtifact = getPinnedArtifactByKey(
-		pinnedArtifacts,
-		"reference_board",
-	);
 	const sketchArtifact = getPinnedArtifactByKey(pinnedArtifacts, "sketch_set");
 	const storyboardArtifact = getPinnedArtifactByKey(
 		pinnedArtifacts,
@@ -417,60 +406,22 @@ function buildDesignStageUnlockSummary(
 		pinnedArtifacts,
 		"rough_screens",
 	);
-	const visualDirectionArtifact = getPinnedArtifactByKey(
-		pinnedArtifacts,
-		"visual_direction",
-	);
 
-	const referenceCount = getReferenceGalleryCount(
-		referenceArtifact?.fieldValues.reference_gallery,
-	);
 	const sketchCount = getUploadCount(sketchArtifact?.fieldValues.sketch_upload);
 	const storyboardImageUrl = getUploadUrl(
 		storyboardArtifact?.fieldValues.storyboard_upload,
 	);
-	const visualDirectionNote = getFieldString(
-		visualDirectionArtifact,
-		"visual_direction_notes",
-	);
-	const visualGuideMarkdown = getFieldString(
-		visualDirectionArtifact,
-		"visual_guide_markdown",
-	);
-	const visualGuideTitle = visualGuideMarkdown
-		? (getMarkdownDocumentTitle(visualGuideMarkdown) ?? "Visual Guide")
-		: "";
 	const hasRoughScreens = Boolean(roughScreensArtifact);
 	const hasStoryboard = Boolean(storyboardImageUrl);
-	const hasVisualGuide = Boolean(visualGuideMarkdown);
-	const referencePreviewUrls = getReferenceGalleryImageUrls(
-		referenceArtifact?.fieldValues.reference_gallery,
-		4,
-	);
-
-	const referenceDirection = referenceCount
-		? `${getCountLabel(referenceCount, "saved reference")} locked the patterns, hierarchy, and taste Build should borrow from.`
-		: "";
 	const screenPlan = hasRoughScreens
 		? "The 3-5 rough screens are ready, so Build can start from a real screen plan instead of a blank editor."
 		: "";
 	const flowSequence = hasStoryboard
 		? "The storyboard already sequences the core user path, so the first implemented slice has a clear flow to follow."
 		: "";
-	const visualDirection = [
-		visualDirectionNote ? `Direction: ${visualDirectionNote}` : "",
-		hasVisualGuide ? `${visualGuideTitle} is saved for implementation.` : "",
-	]
-		.filter(Boolean)
-		.join("\n");
 
 	const sections = (
 		[
-			{
-				label: "Reference direction",
-				value: referenceDirection,
-				galleryImageUrls: referencePreviewUrls,
-			},
 			{
 				label: "Screen plan",
 				value: screenPlan,
@@ -480,44 +431,24 @@ function buildDesignStageUnlockSummary(
 				value: flowSequence,
 				imageUrl: storyboardImageUrl,
 			},
-			{
-				label: "Visual direction",
-				value: visualDirection,
-			},
 		] as StageUnlockSection[]
 	).filter((section) => section.value.length > 0);
 
-	const hasReferenceDirection = referenceCount >= 3;
 	const hasSketches = sketchCount > 0;
-	const hasVisualDirection =
-		Boolean(visualDirectionNote) && Boolean(visualGuideMarkdown);
-	const hasDesignSpec =
-		hasReferenceDirection &&
-		hasSketches &&
-		hasStoryboard &&
-		hasRoughScreens &&
-		hasVisualDirection;
+	const hasDesignSpec = hasSketches && hasStoryboard && hasRoughScreens;
 
 	return {
 		preview: createPreview(
 			lesson,
 			{
-				reference_direction: referenceDirection,
 				screen_plan: screenPlan,
 				flow_sequence: flowSequence,
-				visual_direction: visualDirection,
-				reference_saved_count: referenceCount,
 				sketch_uploaded_count: sketchCount,
 				storyboard_locked_count: hasStoryboard ? 1 : 0,
-				visual_guide_saved_count: hasVisualGuide ? 1 : 0,
 			},
 			sections.map((section) => [section.label, section.value]),
 		),
 		stats: [
-			{
-				label: "References",
-				value: `${referenceCount} saved`,
-			},
 			{
 				label: "Sketches",
 				value: `${sketchCount} uploaded`,
@@ -526,19 +457,10 @@ function buildDesignStageUnlockSummary(
 				label: "Storyboard",
 				value: `${hasStoryboard ? 1 : 0} locked`,
 			},
-			{
-				label: "Guide",
-				value: `${hasVisualGuide ? 1 : 0} saved`,
-			},
 		],
 		sectionHeading: "What Build now has",
 		sections,
 		tasks: [
-			{
-				id: "design-spec:references",
-				label: "Lock the reference direction",
-				status: hasReferenceDirection ? "complete" : "incomplete",
-			},
 			{
 				id: "design-spec:sketches",
 				label: "Carry the sketches into the handoff",
@@ -555,11 +477,6 @@ function buildDesignStageUnlockSummary(
 				status: hasRoughScreens ? "complete" : "incomplete",
 			},
 			{
-				id: "design-spec:visual-direction",
-				label: "Save visualguide.md for Build",
-				status: hasVisualDirection ? "complete" : "incomplete",
-			},
-			{
 				id: "design-spec:assembled",
 				label: "Assemble the design spec",
 				status: hasDesignSpec ? "complete" : "incomplete",
@@ -572,7 +489,7 @@ function buildBuildStageUnlockSummary(
 	lesson: LessonConfig,
 	pinnedArtifacts: StageUnlockPinnedArtifact[],
 ): StageUnlockSummary {
-	const buildBriefArtifact = getPinnedArtifactByKey(
+	const kickoffArtifact = getPinnedArtifactByKey(
 		pinnedArtifacts,
 		"agent_build_brief",
 	);
@@ -589,20 +506,10 @@ function buildBuildStageUnlockSummary(
 		"blocker_log",
 	);
 
-	const buildPath = getFieldString(buildBriefArtifact, "build_path");
-	const firstSlice = getFieldString(buildBriefArtifact, "first_slice");
-	const definitionOfDone = getFieldString(
-		buildBriefArtifact,
-		"definition_of_done",
-	);
-
-	const buildPlan = [
-		buildPath ? `Starting path: ${buildPath}` : "",
-		firstSlice ? `First slice: ${firstSlice}` : "",
-		definitionOfDone ? `Done condition: ${definitionOfDone}` : "",
-	]
-		.filter(Boolean)
-		.join("\n");
+	const kickoffReady = Boolean(kickoffArtifact);
+	const kickoffContext = kickoffReady
+		? "Build started from the saved brief, storyboard, and rough screens, so implementation opened from a real handoff instead of another summary step."
+		: "";
 	const localEnvironment = localEnvironmentArtifact
 		? "The starter or repo is running locally, so Ship starts from a working baseline instead of a setup problem."
 		: "";
@@ -615,7 +522,7 @@ function buildBuildStageUnlockSummary(
 
 	const sections = (
 		[
-			{ label: "Build plan", value: buildPlan },
+			{ label: "Kickoff", value: kickoffContext },
 			{ label: "Local environment", value: localEnvironment },
 			{ label: "Core UX", value: coreUx },
 			{ label: "Stability pass", value: debugPass },
@@ -623,7 +530,7 @@ function buildBuildStageUnlockSummary(
 	).filter((section) => section.value.length > 0);
 
 	const hasBuildSummary =
-		Boolean(buildPlan) &&
+		kickoffReady &&
 		Boolean(localEnvironmentArtifact) &&
 		Boolean(coreUxArtifact) &&
 		Boolean(blockerLogArtifact);
@@ -632,11 +539,11 @@ function buildBuildStageUnlockSummary(
 		preview: createPreview(
 			lesson,
 			{
-				build_plan: buildPlan,
+				kickoff_context: kickoffContext,
 				local_environment: localEnvironment,
 				core_ux: coreUx,
 				debug_pass: debugPass,
-				starting_path_locked_count: buildPath ? 1 : 0,
+				kickoff_ready_count: kickoffReady ? 1 : 0,
 				local_environment_ready_count: localEnvironmentArtifact ? 1 : 0,
 				core_ux_ready_count: coreUxArtifact ? 1 : 0,
 				debug_pass_complete_count: blockerLogArtifact ? 1 : 0,
@@ -645,8 +552,8 @@ function buildBuildStageUnlockSummary(
 		),
 		stats: [
 			{
-				label: "Path",
-				value: `${buildPath ? 1 : 0} locked`,
+				label: "Kickoff",
+				value: `${kickoffReady ? 1 : 0} aligned`,
 			},
 			{
 				label: "Environment",
@@ -666,8 +573,8 @@ function buildBuildStageUnlockSummary(
 		tasks: [
 			{
 				id: "build-summary:plan",
-				label: "Lock the starting path and first slice",
-				status: buildPlan ? "complete" : "incomplete",
+				label: "Carry the kickoff context into Ship",
+				status: kickoffReady ? "complete" : "incomplete",
 			},
 			{
 				id: "build-summary:environment",

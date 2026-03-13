@@ -16,6 +16,9 @@ export default async function Page({
 	if (lessonId === "0.0") {
 		redirect("/mission");
 	}
+	if (lessonId === "2.7") {
+		redirect("/lesson/3.1");
+	}
 	const lesson = getLesson(lessonId);
 
 	if (!lesson) {

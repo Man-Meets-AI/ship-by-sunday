@@ -50,27 +50,21 @@ describe("lesson content contract", () => {
 		expect(problemLesson?.content.coach.examples?.[0]?.title).toBe(
 			"Weak idea vs painful problem",
 		);
-		expect(userLesson?.content.intro).toContain(
-			"Pick the problem to carry forward",
-		);
+		expect(userLesson?.content.intro).toContain("test fastest");
 		expect(userLesson?.workbenchSections?.[1]?.instruction).toContain(
 			"reach them this week",
 		);
 	});
 
-	it("keeps stage-unlock wrap-up lessons declarative and pointed at a real next step", () => {
+	it("keeps the remaining stage-unlock wrap-up lessons declarative and pointed at a real next step", () => {
 		const ceoWrapUpLesson = getLessonById("1.7");
-		const designWrapUpLesson = getLessonById("2.7");
 		const buildWrapUpLesson = getLessonById("3.10");
 
 		expect(ceoWrapUpLesson).toBeTruthy();
-		expect(designWrapUpLesson).toBeTruthy();
 		expect(buildWrapUpLesson).toBeTruthy();
 		expect(ceoWrapUpLesson?.workbench).toBe("brief_assembler");
-		expect(designWrapUpLesson?.workbench).toBe("brief_assembler");
 		expect(buildWrapUpLesson?.workbench).toBe("brief_assembler");
 		expect(ceoWrapUpLesson?.briefAssembler?.variant).toBe("stage_unlock");
-		expect(designWrapUpLesson?.briefAssembler?.variant).toBe("stage_unlock");
 		expect(buildWrapUpLesson?.briefAssembler?.variant).toBe("stage_unlock");
 		expect(ceoWrapUpLesson?.briefAssembler).toMatchObject({
 			preset: "ceo",
@@ -78,13 +72,6 @@ describe("lesson content contract", () => {
 			heroTitle: "CEO brief ready to lock",
 			nextStepLabel: "DESIGN 2.1 — Find References First",
 			completionCtaLabel: "Unlock Design",
-		});
-		expect(designWrapUpLesson?.briefAssembler).toMatchObject({
-			preset: "design",
-			heroEyebrow: "Design block complete",
-			heroTitle: "Build unlocked",
-			nextStepLabel: "BUILD 3.1 — Lock Build Path and Scope",
-			completionCtaLabel: "Unlock Build",
 		});
 		expect(buildWrapUpLesson?.briefAssembler).toMatchObject({
 			preset: "build",
@@ -98,17 +85,12 @@ describe("lesson content contract", () => {
 			ceoWrapUpLesson?.briefAssembler?.skills?.length,
 		).toBeGreaterThanOrEqual(4);
 		expect(
-			designWrapUpLesson?.briefAssembler?.skills?.length,
-		).toBeGreaterThanOrEqual(5);
-		expect(
 			(ceoWrapUpLesson?.pinnedArtifacts ?? []).length,
 		).toBeGreaterThanOrEqual(4);
 		expect(
-			(designWrapUpLesson?.pinnedArtifacts ?? []).length,
-		).toBeGreaterThanOrEqual(5);
-		expect(
 			(buildWrapUpLesson?.pinnedArtifacts ?? []).length,
 		).toBeGreaterThanOrEqual(4);
+		expect(getLessonById("2.7")).toBeNull();
 	});
 
 	it("keeps the Build block rewired into the 10-lesson production flow", () => {
@@ -135,15 +117,12 @@ describe("lesson content contract", () => {
 		expect(handoffLesson).toBeTruthy();
 
 		expect(kickoffLesson).toMatchObject({
-			title: "Lock Build Path and Scope",
-			workbench: "build_kickoff",
+			title: "Build Kickoff",
+			shell: "watch",
+			workbench: "external_workspace",
 			fieldShapeVersion: 3,
 		});
-		expect(kickoffLesson?.workbenchFields?.map((field) => field.id)).toEqual([
-			"build_path",
-			"first_slice",
-			"definition_of_done",
-		]);
+		expect(kickoffLesson?.workbenchFields ?? []).toEqual([]);
 		expect(orientationLesson?.title).toBe("Map the Repo and Starter");
 		expect(orientationLesson).toMatchObject({
 			shell: "focus",
