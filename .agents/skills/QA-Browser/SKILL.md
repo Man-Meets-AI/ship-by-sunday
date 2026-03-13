@@ -76,11 +76,12 @@ If a required input is missing, ask once before opening the browser.
 4. If the playbook needs auth, inspect the sign-in surface first.
 5. If the sign-in surface clearly supports password auth and the target is this repo or another explicitly confirmed repo on the same Clerk instance, run `pnpm run clerk:test-user:check`.
 6. If that check returns `missing`, ask once before running `pnpm run clerk:test-user:create`.
-7. If the sign-in surface is SSO-only, magic-link-only, passkey-only, social-only, OTP-only, or otherwise not compatible with the shared password user, stop and ask for the correct test identity or SSO instructions.
-8. Sign in only after preflight is satisfied.
-9. Execute the defined checkpoints without expanding scope.
-10. Capture only the evidence needed to explain failures.
-11. Return a structured bug report with passes, findings, blocked checks, evidence, and recommended next fixes.
+7. If the requested flow requires entitlement (mission/lesson/protected product checks), run `pnpm run clerk:test-user:prepare:entitled` and sign in with the entitled QA account from the canonical JSON file.
+8. If the sign-in surface is SSO-only, magic-link-only, passkey-only, social-only, OTP-only, or otherwise not compatible with the shared password user, stop and ask for the correct test identity or SSO instructions.
+9. Sign in only after preflight is satisfied.
+10. Execute the defined checkpoints without expanding scope.
+11. Capture only the evidence needed to explain failures.
+12. Return a structured bug report with passes, findings, blocked checks, evidence, and recommended next fixes.
 
 ## Escalation Rules
 

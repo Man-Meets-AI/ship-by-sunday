@@ -8,6 +8,17 @@ The canonical shared test account lives in [internal-test-accounts.json](interna
 
 Use that account only for the user's own apps, this repo, or other environments the user confirms share this internal test account. Do not try it on arbitrary third-party software.
 
+For this repo, use two QA identities:
+
+- `ship-by-sunday-clerk-instance` (non-entitled): auth and access-required checks
+- `ship-by-sunday-clerk-entitled` (entitled): mission and lesson checks
+
+Helper commands:
+
+- non-entitled check/create: `pnpm run clerk:test-user:check` / `pnpm run clerk:test-user:create`
+- entitled check/create: `pnpm run clerk:test-user:check:entitled` / `pnpm run clerk:test-user:create:entitled`
+- entitled prepare (create + grant entitlement): `pnpm run clerk:test-user:prepare:entitled`
+
 ## Input Contract
 
 Required inputs:
@@ -41,7 +52,8 @@ Before `auth smoke`, `protected route`, or an auth-dependent `post-purchase acce
 1. Inspect the sign-in surface first.
 2. If password auth is clearly available, run `pnpm run clerk:test-user:check`.
 3. If that returns `missing`, ask once before running `pnpm run clerk:test-user:create`.
-4. If the sign-in surface is SSO-only, enterprise-domain-routed, magic-link-only, passkey-only, social-only, OTP-only, or otherwise incompatible with the shared password user, stop and ask for the correct test identity or SSO instructions.
+4. For mission/lesson QA that requires entitlement, run `pnpm run clerk:test-user:prepare:entitled` first and use the entitled account from the canonical JSON file.
+5. If the sign-in surface is SSO-only, enterprise-domain-routed, magic-link-only, passkey-only, social-only, OTP-only, or otherwise incompatible with the shared password user, stop and ask for the correct test identity or SSO instructions.
 
 Do not attempt Clerk provisioning on arbitrary non-repo apps unless the user explicitly says they use the same Clerk instance or supplies an equivalent admin helper.
 

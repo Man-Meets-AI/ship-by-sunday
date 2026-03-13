@@ -79,7 +79,7 @@ async function fetchClerkUsersByQuery({
 	fetchImpl = fetch,
 }) {
 	const url = new URL("/v1/users", apiBaseUrl);
-	url.searchParams.set("limit", "10");
+	url.searchParams.set("limit", "100");
 	// Clerk user search can be case-sensitive for query matching.
 	url.searchParams.set("query", email.toLowerCase());
 
@@ -227,6 +227,26 @@ export async function ensureClerkTestUser({
 		apiBaseUrl,
 		fetchImpl,
 	});
+
+	if (
+		created.status === "blocked" &&
+		created.raw?.errors?.[0]?.code === "email_address_exists"
+	) {
+		const recheck = await checkClerkTestUser({
+			account,
+			secretKey,
+			apiBaseUrl,
+			fetchImpl,
+		});
+
+		if (recheck.status === "exists") {
+			return result("exists", {
+				...summarizeAccount(account),
+				message: "Clerk test user already exists.",
+				clerkUserId: recheck.clerkUserId ?? null,
+			});
+		}
+	}
 
 	return result(created.status, {
 		...summarizeAccount(account),

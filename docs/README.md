@@ -54,3 +54,4 @@ If a workstream doc conflicts with `todo.md` or the implemented app state, updat
 - `dev/architecture.md`
 - `dev/course-state-lifecycle.md`
 - `dev/convex-sop.md`
+- `dev/qa-browser-auth.md`

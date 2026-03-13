@@ -162,6 +162,42 @@ describe("ensure-clerk-test-user", () => {
 		});
 	});
 
+	it("treats email_address_exists as idempotent when the follow-up lookup finds the user", async () => {
+		const fetchImpl = vi
+			.fn()
+			// initial check -> missing
+			.mockResolvedValueOnce({
+				ok: true,
+				json: vi.fn().mockResolvedValue([]),
+			})
+			// create -> email already exists
+			.mockResolvedValueOnce({
+				ok: false,
+				status: 400,
+				json: vi.fn().mockResolvedValue({
+					errors: [{ code: "email_address_exists" }],
+				}),
+			})
+			// recheck -> exists
+			.mockResolvedValueOnce({
+				ok: true,
+				json: vi.fn().mockResolvedValue([makeUser(account.email, "user_exists")]),
+			});
+
+		const result = await ensureClerkTestUser({
+			account,
+			secretKey: "sk_test_123",
+			fetchImpl,
+		});
+
+		expect(result).toMatchObject({
+			status: "exists",
+			clerkUserId: "user_exists",
+			email: account.email,
+		});
+		expect(fetchImpl).toHaveBeenCalledTimes(3);
+	});
+
 	it("returns a cli usage error for an invalid mode", async () => {
 		const result = await runCli({
 			args: ["nope"],
@@ -171,5 +207,41 @@ describe("ensure-clerk-test-user", () => {
 
 		expect(result.exitCode).toBe(1);
 		expect(result.payload.status).toBe("error");
+	});
+
+	it("uses the requested scope when passed via --scope", async () => {
+		const fetchImpl = vi.fn().mockResolvedValue({
+			ok: true,
+			json: vi.fn().mockResolvedValue([]),
+		});
+
+		const result = await runCli({
+			args: ["check", "--scope", "ship-by-sunday-clerk-entitled"],
+			env: { CLERK_SECRET_KEY: "sk_test_123" },
+			fetchImpl,
+		});
+
+		expect(result.exitCode).toBe(0);
+		expect(result.payload).toMatchObject({
+			status: "missing",
+			scope: "ship-by-sunday-clerk-entitled",
+			email: "test-entitled@test.com",
+		});
+		const requestUrl = new URL(String(fetchImpl.mock.calls[0]?.[0]));
+		expect(requestUrl.searchParams.get("query")).toBe("test-entitled@test.com");
+	});
+
+	it("returns a cli usage error when --scope is missing a value", async () => {
+		const result = await runCli({
+			args: ["check", "--scope"],
+			env: { CLERK_SECRET_KEY: "sk_test_123" },
+			fetchImpl: vi.fn(),
+		});
+
+		expect(result.exitCode).toBe(1);
+		expect(result.payload).toMatchObject({
+			status: "error",
+			message: "Missing value for --scope.",
+		});
 	});
 });

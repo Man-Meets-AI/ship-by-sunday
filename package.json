@@ -17,7 +17,10 @@
 		"check": "pnpm run lint && pnpm run format:check && pnpm run test:unit && pnpm run test:smoke && pnpm run build",
 		"stripe:create-product": "node --env-file=.env.local scripts/create-stripe-product.mjs",
 		"clerk:test-user:check": "node --env-file=.env.local scripts/ensure-clerk-test-user.mjs check",
-		"clerk:test-user:create": "node --env-file=.env.local scripts/ensure-clerk-test-user.mjs create"
+		"clerk:test-user:create": "node --env-file=.env.local scripts/ensure-clerk-test-user.mjs create",
+		"clerk:test-user:check:entitled": "CLERK_TEST_USER_SCOPE=ship-by-sunday-clerk-entitled node --env-file=.env.local scripts/ensure-clerk-test-user.mjs check",
+		"clerk:test-user:create:entitled": "CLERK_TEST_USER_SCOPE=ship-by-sunday-clerk-entitled node --env-file=.env.local scripts/ensure-clerk-test-user.mjs create",
+		"clerk:test-user:prepare:entitled": "CLERK_TEST_USER_SCOPE=ship-by-sunday-clerk-entitled node --env-file=.env.local scripts/ensure-clerk-entitled-test-user.mjs"
 	},
 	"dependencies": {
 		"@clerk/nextjs": "^7.0.4",
