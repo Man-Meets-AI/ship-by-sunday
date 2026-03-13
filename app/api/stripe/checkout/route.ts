@@ -2,6 +2,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 import { COURSE_SLUG } from "@/lib/course/registry";
+import { getAppBaseUrl } from "@/lib/server/app-url";
 import { getStripe, getStripeLineItem } from "@/lib/stripe";
 
 export async function POST(request: Request) {
@@ -17,13 +18,13 @@ export async function POST(request: Request) {
 	try {
 		const stripe = getStripe();
 		const user = await currentUser();
-		const origin = new URL(request.url).origin;
+		const appBaseUrl = getAppBaseUrl(request);
 		const session = await stripe.checkout.sessions.create({
 			mode: "payment",
 			allow_promotion_codes: true,
 			billing_address_collection: "auto",
-			cancel_url: `${origin}/checkout/cancel`,
-			success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+			cancel_url: `${appBaseUrl}/checkout/cancel`,
+			success_url: `${appBaseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
 			client_reference_id: userId,
 			customer_email: user?.primaryEmailAddress?.emailAddress,
 			line_items: [getStripeLineItem()],

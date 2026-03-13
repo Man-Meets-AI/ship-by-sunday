@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 
-import { withCodexAppServerClient } from "@/lib/codex/app-server";
+import {
+	getCodexAppServerUnavailableMessage,
+	withCodexAppServerClient,
+} from "@/lib/codex/app-server";
 
 import {
 	accountIsManagedChatGpt,
-	requireApiSession,
+	getApiAuthErrorResponse,
+	requireEntitledApiSession,
 	upsertViewerCodexConnection,
 } from "../../_lib/helpers";
 
@@ -12,7 +16,7 @@ export const runtime = "nodejs";
 
 export async function GET() {
 	try {
-		const session = await requireApiSession();
+		const session = await requireEntitledApiSession();
 
 		const result = await withCodexAppServerClient(
 			{ clerkUserId: session.userId },
@@ -39,11 +43,13 @@ export async function GET() {
 
 		return NextResponse.json(result);
 	} catch (error) {
-		if (error instanceof Error && error.message === "UNAUTHORIZED") {
-			return NextResponse.json(
-				{ error: "Sign in before managing Codex connection." },
-				{ status: 401 },
-			);
+		const authErrorResponse = getApiAuthErrorResponse(error, {
+			unauthorized: "Sign in before managing Codex connection.",
+			forbidden: "Course access is required before managing Codex connection.",
+			unavailable: getCodexAppServerUnavailableMessage(),
+		});
+		if (authErrorResponse) {
+			return authErrorResponse;
 		}
 
 		console.error("codex account/read error", error);

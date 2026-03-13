@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
-import { fetchMutation } from "convex/nextjs";
+import { fetchMutation, fetchQuery } from "convex/nextjs";
+import { NextResponse } from "next/server";
 
 import { api } from "@/convex/_generated/api";
 import type { CodexRateLimitsResponse } from "@/lib/codex/app-server";
@@ -17,6 +18,20 @@ export type ApiSession = {
 	userId: string;
 	token: string;
 };
+
+type ViewerAccess = {
+	hasAccess: boolean;
+	status: string;
+};
+
+type AuthErrorCopy = {
+	unauthorized: string;
+	forbidden: string;
+	unavailable: string;
+};
+
+export const API_UNAUTHORIZED_ERROR = "UNAUTHORIZED";
+export const API_FORBIDDEN_ERROR = "FORBIDDEN";
 
 export function getCodexTurnTimeoutMs() {
 	const parsed = Number.parseInt(
@@ -37,18 +52,57 @@ export function getCodexDefaultModel() {
 export async function requireApiSession(): Promise<ApiSession> {
 	const authState = await auth();
 	if (!authState.userId) {
-		throw new Error("UNAUTHORIZED");
+		throw new Error(API_UNAUTHORIZED_ERROR);
 	}
 
-	const token = await authState.getToken();
+	const token = await authState.getToken({
+		template: "convex",
+	});
 	if (!token) {
-		throw new Error("UNAUTHORIZED");
+		throw new Error(API_UNAUTHORIZED_ERROR);
 	}
 
 	return {
 		userId: authState.userId,
 		token,
 	};
+}
+
+export async function requireEntitledApiSession(): Promise<ApiSession> {
+	const session = await requireApiSession();
+	const access = (await fetchQuery(
+		api.course.viewerAccess,
+		{},
+		{
+			token: session.token,
+		},
+	)) as ViewerAccess;
+
+	if (!access.hasAccess) {
+		throw new Error(API_FORBIDDEN_ERROR);
+	}
+
+	return session;
+}
+
+export function getApiAuthErrorResponse(error: unknown, copy: AuthErrorCopy) {
+	if (!(error instanceof Error)) {
+		return null;
+	}
+
+	if (error.message === API_UNAUTHORIZED_ERROR) {
+		return NextResponse.json({ error: copy.unauthorized }, { status: 401 });
+	}
+
+	if (error.message === API_FORBIDDEN_ERROR) {
+		return NextResponse.json({ error: copy.forbidden }, { status: 403 });
+	}
+
+	if (error.message === "CODEX_APP_SERVER_DISABLED") {
+		return NextResponse.json({ error: copy.unavailable }, { status: 503 });
+	}
+
+	return null;
 }
 
 export function accountIsManagedChatGpt(

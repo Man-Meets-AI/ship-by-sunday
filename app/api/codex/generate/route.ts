@@ -1,14 +1,18 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { withCodexAppServerClient } from "@/lib/codex/app-server";
+import {
+	getCodexAppServerUnavailableMessage,
+	withCodexAppServerClient,
+} from "@/lib/codex/app-server";
 
 import {
 	accountIsManagedChatGpt,
 	getCodexDefaultModel,
 	getCodexTurnTimeoutMs,
+	getApiAuthErrorResponse,
 	recordCodexRun,
-	requireApiSession,
+	requireEntitledApiSession,
 	upsertViewerCodexConnection,
 } from "../_lib/helpers";
 
@@ -34,7 +38,7 @@ export async function POST(request: Request) {
 	const startedAt = Date.now();
 
 	try {
-		session = await requireApiSession();
+		session = await requireEntitledApiSession();
 		const body = (await request.json().catch(() => null)) as unknown;
 		const parsed = generateRequestSchema.safeParse(body);
 		if (!parsed.success) {
@@ -145,11 +149,13 @@ export async function POST(request: Request) {
 			rateLimits: output.rateLimits,
 		});
 	} catch (error) {
-		if (error instanceof Error && error.message === "UNAUTHORIZED") {
-			return NextResponse.json(
-				{ error: "Sign in before using Codex generation." },
-				{ status: 401 },
-			);
+		const authErrorResponse = getApiAuthErrorResponse(error, {
+			unauthorized: "Sign in before using Codex generation.",
+			forbidden: "Course access is required before using Codex generation.",
+			unavailable: getCodexAppServerUnavailableMessage(),
+		});
+		if (authErrorResponse) {
+			return authErrorResponse;
 		}
 
 		if (session && parsedInput) {

@@ -3,6 +3,10 @@ import { createHash } from "node:crypto";
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 
+import { productConfig } from "@/config/product";
+
+export const CODEX_APP_SERVER_DISABLED_ERROR = "CODEX_APP_SERVER_DISABLED";
+
 type JsonRpcId = number;
 
 type JsonRpcRequest = {
@@ -156,6 +160,22 @@ function normalizeThreadTerminalStatus(
 	return "failed";
 }
 
+function isCodexAppServerEnabled() {
+	const explicit = process.env.CODEX_APP_SERVER_ENABLED?.trim().toLowerCase();
+	if (explicit === "true" || explicit === "1") {
+		return true;
+	}
+	if (explicit === "false" || explicit === "0") {
+		return false;
+	}
+
+	return !Boolean(process.env.VERCEL);
+}
+
+export function getCodexAppServerUnavailableMessage() {
+	return "Codex app-server is disabled in this deployment. Enable it only on a runtime that can spawn the Codex binary and persist per-user state.";
+}
+
 async function getCodexUserHome(clerkUserId: string) {
 	const hash = createHash("sha256")
 		.update(clerkUserId)
@@ -187,6 +207,10 @@ export class CodexAppServerClient {
 			return;
 		}
 
+		if (!isCodexAppServerEnabled()) {
+			throw new Error(CODEX_APP_SERVER_DISABLED_ERROR);
+		}
+
 		const codexHome = await getCodexUserHome(this.options.clerkUserId);
 		const codexBinary = process.env.CODEX_BINARY?.trim() || "codex";
 
@@ -209,6 +233,15 @@ export class CodexAppServerClient {
 			console.warn("[codex-app-server]", chunk.trim());
 		});
 
+		this.child.on("error", (error) => {
+			this.closed = true;
+			for (const pending of this.pending.values()) {
+				clearTimeout(pending.timeout);
+				pending.reject(error);
+			}
+			this.pending.clear();
+		});
+
 		this.child.on("exit", (code, signal) => {
 			this.closed = true;
 			const reason = `Codex app-server exited (code=${code ?? "null"}, signal=${signal ?? "null"})`;
@@ -221,8 +254,8 @@ export class CodexAppServerClient {
 
 		await this.request("initialize", {
 			clientInfo: {
-				name: "ship-by-sunday",
-				title: "Ship by Sunday",
+				name: productConfig.appId,
+				title: productConfig.name,
 				version: "0.1.0",
 			},
 			capabilities: {

@@ -133,6 +133,11 @@ export function AccessRequiredPage({
 	const isCheckingAccess = access === undefined;
 	const isSignedOut =
 		accessStatus === "signed_out" || accessStatus === "missing_token";
+	const shellSubtitle = isCheckingAccess
+		? "We’re checking whether this signed-in account already has access."
+		: isSignedOut
+			? "Sign in with the same account used at checkout so we can check your access."
+			: "This signed-in account does not have Ship by Sunday access yet.";
 	const title = isCheckingAccess
 		? "Checking access"
 		: isSignedOut
@@ -218,7 +223,7 @@ export function AccessRequiredPage({
 		<ProductShell
 			initialTheme={initialTheme}
 			title="Access Required"
-			subtitle="This account can sign in, but it does not have course access yet."
+			subtitle={shellSubtitle}
 			enableMissionQuery={false}
 			showSkillRail={false}
 		>

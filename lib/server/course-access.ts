@@ -1,11 +1,11 @@
 import "server-only";
 
-import { auth } from "@clerk/nextjs/server";
 import { fetchQuery } from "convex/nextjs";
 import { redirect } from "next/navigation";
 
 import { api } from "@/convex/_generated/api";
 import { COURSE_SLUG } from "@/lib/course/registry";
+import { getConvexServerSession } from "@/lib/server/convex-auth";
 
 type ViewerAccess = {
 	clerkUserId: string | null;
@@ -19,23 +19,8 @@ type ResumeDestination = {
 	lessonId: string | null;
 };
 
-async function getServerSession() {
-	const authState = await auth();
-	if (!authState.userId) {
-		return {
-			userId: null,
-			token: null,
-		};
-	}
-
-	return {
-		userId: authState.userId,
-		token: await authState.getToken(),
-	};
-}
-
 export async function getServerViewerAccess(): Promise<ViewerAccess> {
-	const session = await getServerSession();
+	const session = await getConvexServerSession();
 	if (!session.userId || !session.token) {
 		return {
 			clerkUserId: session.userId,
@@ -60,7 +45,7 @@ export async function getServerResumeDestination() {
 		return null;
 	}
 
-	const session = await getServerSession();
+	const session = await getConvexServerSession();
 	if (!session.token) {
 		return null;
 	}
