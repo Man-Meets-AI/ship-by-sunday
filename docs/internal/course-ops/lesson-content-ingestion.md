@@ -70,9 +70,9 @@ Use lesson-specific prompt import config or coach resources for:
 
 Use recording docs as human reference only:
 
-- `docs/recording/day-1-prep.md`
-- `docs/recording/sprint-packets.md`
-- `docs/recording/founder-checklists.md`
+- `docs/internal/recording/day-1-prep.md`
+- `docs/internal/recording/sprint-packets.md`
+- `docs/internal/recording/founder-checklists.md`
 
 These docs can inform edits, but they are not a code-generation source.
 

@@ -4,7 +4,7 @@ Last updated: 2026-03-12
 
 ## Goal
 
-Use the practical motion patterns in `docs/design/motion-practical-examples.md` to improve the launch-critical buyer and student journey without turning the product into a motion project.
+Use the practical motion patterns in `docs/internal/design/motion-practical-examples.md` to improve the launch-critical buyer and student journey without turning the product into a motion project.
 
 ## Status
 

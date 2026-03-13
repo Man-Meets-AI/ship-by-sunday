@@ -1,57 +1,32 @@
-# Ship by Sunday Docs Hub
+# Docs
 
-This folder is the canonical home for generated launch workstream docs.
+The docs tree is split into public contributor docs and internal launch-operation docs.
 
-## Source Of Truth Order
+## Read First
 
-- `todo.md`: current status, owners, blockers, and the next operating sequence
-- `main.md`: launch OS, critical path, and launch-wide constraints
-- `lib/course/`: curriculum, lesson structure, and student-facing lesson content
-- `convex/`: entitlement, progress, autosave, and buyer-access state
-- `docs/<workstream>/`: workstream decisions, plans, and supporting detail
+- [../README.md](../README.md)
+- [../CONTRIBUTING.md](../CONTRIBUTING.md)
+- [dev/architecture.md](dev/architecture.md)
+- [dev/customization.md](dev/customization.md)
 
-If a workstream doc conflicts with `todo.md` or the implemented app state, update the doc. Do not preserve stale planning language for its own sake.
+## Public Docs
 
-## Rules
+- [dev/architecture.md](dev/architecture.md): runtime surfaces, course state flow, and purchase-to-access behavior
+- [dev/customization.md](dev/customization.md): the safest places to tailor curriculum, UI, marketing, and purchase flow
+- [dev/lesson-workbench.md](dev/lesson-workbench.md): workbench renderer boundaries and UI architecture
+- [dev/course-state-lifecycle.md](dev/course-state-lifecycle.md): how lesson progress, artifacts, and viewer state interact
+- [dev/convex-sop.md](dev/convex-sop.md): Convex deployment and environment workflow
+- [dev/qa-browser-auth.md](dev/qa-browser-auth.md): QA auth-account setup for browser testing
+- [delivery-onboarding/stack-decision.md](delivery-onboarding/stack-decision.md): source of truth for the live purchase-to-access handoff
 
-- Keep `AGENTS.md`, `main.md`, `todo.md`, and `roles/` at repo root.
-- Put all generated planning, execution, and role-output docs under `docs/<workstream>/`.
-- Use short filenames inside each workstream folder.
-- Link to repo files with relative markdown links, not absolute local filesystem paths.
+## Internal Docs
 
-## Workstream Map
+- [internal/README.md](internal/README.md): tracker, launch OS, role prompts, workstream plans, and internal research
 
-- `recording/`: founder prep, session packets, and pickup tracking
-- `course-ops/`: course structure, worksheets, onboarding flow, and support notes
-- `offer-funnel/`: offer framing, checkout copy, guarantee, and CTA flow
-- `email/`: launch and buyer onboarding email drafts
-- `delivery-onboarding/`: stack decisions and access-flow decisions
-- `analytics-qa/`: KPI tracking, event map, QA script, and bug tracking
-- `outbound/`: deliverability, inbox, domain, and sending setup
-- `list-building/`: audience segments, schema, and qualification rules
-- `youtube/`: launch-fit video concepts and CTA paths
-- `design/`: launch visuals, brand system, and creative production docs
-- `dev/`: developer onboarding and architecture notes
+If the repo becomes more public over time, `docs/internal/` is the first candidate to move into a private operations repo without changing the public contributor path.
 
-## Current Canonical Files
+## Placement Rules
 
-- `recording/sprint-packets.md`
-- `recording/founder-checklists.md`
-- `recording/day-1-prep.md`
-- `course-ops/plan.md`
-- `course-ops/lesson-content-ingestion.md`
-- `offer-funnel/plan.md`
-- `offer-funnel/messaging-foundation.md`
-- `email/launch-and-onboarding.md`
-- `delivery-onboarding/stack-decision.md`
-- `analytics-qa/plan.md`
-- `outbound/setup-plan.md`
-- `list-building/plan.md`
-- `youtube/launch-plan.md`
-- `design/launch-assets.md`
-- `design/brand-visual-system.md`
-- `design/creative-playbook.md`
-- `dev/architecture.md`
-- `dev/course-state-lifecycle.md`
-- `dev/convex-sop.md`
-- `dev/qa-browser-auth.md`
+- Put public developer or product-behavior docs in `docs/dev/` or another clearly product-facing docs folder.
+- Put launch operations, founder workflow, workstream planning, and internal research in `docs/internal/`.
+- Keep root docs focused on what the app is, how to run it, how to contribute, and what is intentionally customizable.

@@ -13,7 +13,7 @@ This is the source-of-truth messaging doc for:
 - objection handling
 - checkout-supporting copy
 
-It is based on the consultant transcript in `docs/offer-funnel/research/2026-03-11-iman-gadzhi-80-20-marketing-sales-transcript.md` plus the strategy decisions we made after reviewing it.
+It is based on the consultant transcript in `docs/internal/offer-funnel/research/2026-03-11-iman-gadzhi-80-20-marketing-sales-transcript.md` plus the strategy decisions we made after reviewing it.
 
 The job of this doc is simple:
 

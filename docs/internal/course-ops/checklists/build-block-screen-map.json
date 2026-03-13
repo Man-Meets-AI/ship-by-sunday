@@ -270,8 +270,8 @@
 	],
 	"imageDirectory": "public/course/build-guide-images",
 	"rawSourceFiles": [
-		"docs/course-ops/sources/google-doc-build-tab/build-section-raw.md",
-		"docs/course-ops/sources/google-doc-build-tab/build-section-raw.txt",
-		"docs/course-ops/sources/google-doc-build-tab/build-image-context-map.tsv"
+		"docs/internal/course-ops/sources/google-doc-build-tab/build-section-raw.md",
+		"docs/internal/course-ops/sources/google-doc-build-tab/build-section-raw.txt",
+		"docs/internal/course-ops/sources/google-doc-build-tab/build-image-context-map.tsv"
 	]
 }

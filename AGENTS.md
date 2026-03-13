@@ -47,65 +47,65 @@ Do these before vanity work:
 
 ## Team
 
-These are the working launch roles in `roles/` and what each one owns.
+These are the working launch roles in `docs/internal/roles/` and what each one owns.
 
 ### Launch Chief of Staff / COO
 
-File: `roles/launch-chief-of-staff-coo.md`
+File: `docs/internal/roles/launch-chief-of-staff-coo.md`
 
 Owns launch sequencing, priorities, blockers, dependencies, founder-only asks, and daily operating cadence.
 
 ### Offer and Funnel Strategist
 
-File: `roles/offer-and-funnel-strategist.md`
+File: `docs/internal/roles/offer-and-funnel-strategist.md`
 
 Owns offer clarity, funnel logic, objection handling, guarantee language, CTA logic, and commercial consistency.
 
 ### Course Operations Producer
 
-File: `roles/course-operations-producer.md`
+File: `docs/internal/roles/course-operations-producer.md`
 
 Owns lesson structure, student journey, worksheet audit, start-here flow, upload checklist, and support documentation.
 
 ### Founder Recording Producer
 
-File: `roles/founder-recording-producer.md`
+File: `docs/internal/roles/founder-recording-producer.md`
 
 Owns recording packets, lesson-by-lesson recording schedule, talking points, screen-share notes, and pickup tracking.
 
 ### Lifecycle Email Strategist
 
-File: `roles/lifecycle-email-strategist.md`
+File: `docs/internal/roles/lifecycle-email-strategist.md`
 
 Owns launch emails, buyer onboarding emails, subject lines, sequence order, and segmentation logic.
 
 ### Design Production Lead
 
-File: `roles/design-production-lead.md`
+File: `docs/internal/roles/design-production-lead.md`
 
 Owns sales page graphics, proof assets, thumbnails, promo visuals, and launch asset prioritization.
 
 ### Analytics and QA Operator
 
-File: `roles/analytics-and-qa-operator.md`
+File: `docs/internal/roles/analytics-and-qa-operator.md`
 
 Owns KPI tracking, event map, end-to-end QA, bug logging, and buyer journey validation.
 
 ### Outbound Systems and Deliverability Lead
 
-File: `roles/outbound-systems-and-deliverability-lead.md`
+File: `docs/internal/roles/outbound-systems-and-deliverability-lead.md`
 
 Owns outbound setup, domains, inboxes, warmup, Instantly architecture, and deliverability risk management.
 
 ### List Building and Target Researcher
 
-File: `roles/list-building-and-target-researcher.md`
+File: `docs/internal/roles/list-building-and-target-researcher.md`
 
 Owns target segment definitions, outreach list quality, personalization fields, and fit-based segmentation.
 
 ### YouTube Launch Producer
 
-File: `roles/youtube-launch-producer.md`
+File: `docs/internal/roles/youtube-launch-producer.md`
 
 Owns launch-relevant YouTube concepts, scripts, hooks, thumbnails, and CTA paths into the core offer.
 
@@ -122,13 +122,13 @@ Founder time should be reserved for:
 
 ## How To Work In This Repo
 
-- Start from `todo.md` for current launch status, priorities, owner roles, and blockers.
-- Use `tasks/todo.md` for engineer-local execution checklists and review notes. It does not replace `todo.md`.
+- Start from `docs/internal/todo.md` for current launch status, priorities, owner roles, and blockers.
+- Use `tasks/todo.md` for engineer-local execution checklists and review notes. It does not replace `docs/internal/todo.md`.
 - Use `tasks/lessons.md` to capture recurring mistakes and new repo guardrails after corrections.
 - Use the relevant role file before doing substantial work in that domain.
-- Treat `main.md` as the higher-level launch OS and sequencing reference.
+- Treat `docs/internal/main.md` as the higher-level launch OS and sequencing reference.
 - Treat `docs/delivery-onboarding/stack-decision.md` as the source of truth for the live purchase-to-access flow.
-- Write generated workstream docs into `docs/<workstream>/` and keep repo root reserved for control files.
+- Write generated launch workstream docs into `docs/internal/<workstream>/` and keep root docs focused on product purpose, setup, contribution, and customization.
 - Treat `lib/course/manifest.ts` as the curriculum and lesson-contract source of truth.
 - Treat `convex/` as the source of truth for app data, entitlements, and lesson state.
 - Prefer shipping one concrete, validated output over creating five partial drafts.
@@ -155,7 +155,7 @@ Founder time should be reserved for:
 
 ## Subagent Model
 
-Use the role files in `roles/` as the operating model for subagents.
+Use the role files in `docs/internal/roles/` as the operating model for subagents.
 
 The purpose of subagents is simple:
 
@@ -165,7 +165,7 @@ The purpose of subagents is simple:
 
 Do not spawn subagents casually. Spawn them only when:
 
-- the workstream is already defined in `todo.md`
+- the workstream is already defined in `docs/internal/todo.md`
 - the owner role is clear
 - the deliverable is concrete
 - the work does not require immediate founder judgment
@@ -179,7 +179,7 @@ Do not spawn subagents for:
 
 ## Role-To-Subagent Mapping
 
-Every role in `roles/` can be used as a focused subagent lane.
+Every role in `docs/internal/roles/` can be used as a focused subagent lane.
 
 - `launch-chief-of-staff-coo.md`: sequencing, tracker maintenance, blockers, priorities
 - `founder-recording-producer.md`: recording packets, checklists, pickups, founder prep
@@ -209,7 +209,7 @@ Bad assignment:
 
 Good assignment:
 
-- “Use `roles/lifecycle-email-strategist.md` to draft the first-pass launch email sequence and write it into `docs/email/launch-and-onboarding.md`. Do not write tripwire emails. Stop after the first core sequence draft.”
+- “Use `docs/internal/roles/lifecycle-email-strategist.md` to draft the first-pass launch email sequence and write it into `docs/internal/email/launch-and-onboarding.md`. Do not write tripwire emails. Stop after the first core sequence draft.”
 
 ## Founder-Free Execution Rule
 
@@ -239,26 +239,26 @@ We keep ruthless detail on:
 - what got done
 - what still needs founder action
 
-`todo.md` is the operational source of truth.
+`docs/internal/todo.md` is the operational source of truth.
 
 Before starting meaningful work:
 
-- confirm the task exists in `todo.md`
+- confirm the task exists in `docs/internal/todo.md`
 - confirm the owner role
 - confirm the output file
 
 After completing meaningful work:
 
-- update the task status in `todo.md`
+- update the task status in `docs/internal/todo.md`
 - add the produced file or output reference
 - log what changed in the completed-work section
 - note any new blockers or dependencies created
 
-If work is done but not logged in `todo.md`, treat it as not operationally complete.
+If work is done but not logged in `docs/internal/todo.md`, treat it as not operationally complete.
 
 ## Completed Work Log
 
-Maintain a running completed-work log in `todo.md`.
+Maintain a running completed-work log in `docs/internal/todo.md`.
 
 Each meaningful completed item should capture:
 
@@ -281,7 +281,7 @@ At any moment, the repo should make it obvious:
 - what is blocked
 - what shipped recently
 
-If that is not obvious, update `todo.md` first before doing more work.
+If that is not obvious, update `docs/internal/todo.md` first before doing more work.
 
 ## Operating Rules
 
@@ -309,13 +309,13 @@ If that is not obvious, update `todo.md` first before doing more work.
 
 ## Source Of Truth Files
 
-- `todo.md`: current launch tracker and immediate priorities
+- `docs/internal/todo.md`: current launch tracker and immediate priorities
 - `tasks/todo.md`: engineer-local execution checklist and review log
 - `tasks/lessons.md`: recurring corrections and implementation guardrails
-- `main.md`: launch OS, critical path, and sprint sequencing
+- `docs/internal/main.md`: launch OS, critical path, and sprint sequencing
 - `docs/delivery-onboarding/stack-decision.md`: current purchase-to-access behavior contract
-- `docs/`: canonical home for generated workstream docs
-- `roles/`: role-by-role prompts and ownership
+- `docs/internal/`: canonical home for generated launch workstream docs
+- `docs/internal/roles/`: role-by-role prompts and ownership
 - `assets/`: course materials, packets, worksheets, and guides
 
 ## Default Working Stance

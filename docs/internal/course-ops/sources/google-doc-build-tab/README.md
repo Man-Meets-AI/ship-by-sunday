@@ -24,7 +24,7 @@
 
 ## Linked outputs
 
-- Digest checklist: `docs/course-ops/checklists/build-block-step-checklist.md`
-- Screen-map JSON: `docs/course-ops/checklists/build-block-screen-map.json`
+- Digest checklist: `docs/internal/course-ops/checklists/build-block-step-checklist.md`
+- Screen-map JSON: `docs/internal/course-ops/checklists/build-block-screen-map.json`
 - Build images: `assets/course/build-guide-images/`
 - Runtime image copies: `public/course/build-guide-images/`
