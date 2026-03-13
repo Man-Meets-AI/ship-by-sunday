@@ -98,7 +98,7 @@ function CandidateProblemHandoff({
 											onFieldChange(field.targetFieldId, "");
 										}
 									}}
-									className="inline-flex border border-product-border bg-product-surface px-2 py-1 font-mono text-[9px] uppercase tracking-[0.18em] text-product-text transition-colors hover:bg-product-surface-alt focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[rgb(var(--product-accent))]"
+									className="inline-flex border border-product-border bg-product-surface px-2 py-1 font-mono text-[9px] uppercase tracking-[0.18em] text-product-text transition-colors hover:bg-product-surface-alt focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[rgb(var(--product-accent))]"
 								>
 									Change selection
 								</button>
@@ -125,7 +125,7 @@ function CandidateProblemHandoff({
 										);
 									}
 								}}
-								className="flex h-full flex-col border border-product-border bg-product-surface px-4 py-4 text-left transition-colors hover:bg-product-surface-strong focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[rgb(var(--product-accent))]"
+								className="flex h-full flex-col border border-product-border bg-product-surface px-4 py-4 text-left transition-colors hover:bg-product-surface-strong focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[rgb(var(--product-accent))]"
 							>
 								<p className="font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
 									Problem {problem.index}

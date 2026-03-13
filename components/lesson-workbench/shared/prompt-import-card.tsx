@@ -350,7 +350,7 @@ export function PromptImportCard({
 							readOnly
 							value={promptState.prompt}
 							rows={14}
-							className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[11px] leading-relaxed text-product-text outline-none"
+							className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[11px] leading-relaxed text-product-text outline-hidden"
 							aria-label={`${lesson.title} prompt`}
 						/>
 					) : (
@@ -375,7 +375,7 @@ export function PromptImportCard({
 						}}
 						rows={10}
 						placeholder={uiCopy.pastePlaceholder}
-						className="mt-1.5 w-full rounded-none border border-product-border bg-product-surface px-3 py-2 text-sm leading-relaxed text-product-text outline-none transition-colors placeholder:text-product-muted/55 focus-visible:border-product-accent"
+						className="mt-1.5 w-full rounded-none border border-product-border bg-product-surface px-3 py-2 text-sm leading-relaxed text-product-text outline-hidden transition-colors placeholder:text-product-muted/55 focus-visible:border-product-accent"
 						aria-label={uiCopy.pasteLabel}
 					/>
 				</label>
@@ -385,7 +385,7 @@ export function PromptImportCard({
 						type="button"
 						onClick={importResponse}
 						disabled={pastedResponse.trim().length === 0}
-						className="rounded-none border border-product-border bg-product-surface px-3 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent focus-visible:border-product-accent focus-visible:text-product-accent focus-visible:outline-none disabled:cursor-not-allowed disabled:border-product-border/70 disabled:text-product-muted"
+						className="rounded-none border border-product-border bg-product-surface px-3 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent focus-visible:border-product-accent focus-visible:text-product-accent focus-visible:outline-hidden disabled:cursor-not-allowed disabled:border-product-border/70 disabled:text-product-muted"
 					>
 						{uiCopy.importButtonLabel}
 					</button>

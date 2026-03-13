@@ -108,7 +108,7 @@ export function BuildPromptCard({
 						readOnly
 						value={prompt}
 						rows={18}
-						className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[11px] leading-relaxed text-product-text outline-none"
+						className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[11px] leading-relaxed text-product-text outline-hidden"
 						aria-label="Build kickoff prompt"
 					/>
 				) : (

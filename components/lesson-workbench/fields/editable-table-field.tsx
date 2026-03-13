@@ -8,10 +8,10 @@ import {
 import { fieldLabelClass } from "./field-styles";
 
 const cellInputClass =
-	"w-full min-w-0 border-0 bg-transparent px-3 py-2 text-sm leading-relaxed text-product-text outline-none transition-colors placeholder:text-product-muted/55 focus-visible:bg-product-surface-strong/80";
+	"w-full min-w-0 border-0 bg-transparent px-3 py-2 text-sm leading-relaxed text-product-text outline-hidden transition-colors placeholder:text-product-muted/55 focus-visible:bg-product-surface-strong/80";
 
 const actionButtonClass =
-	"inline-flex items-center justify-center rounded-none border border-product-border bg-product-surface px-3 py-2 text-[11px] font-mono uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent focus-visible:border-product-accent focus-visible:text-product-accent focus-visible:outline-none";
+	"inline-flex items-center justify-center rounded-none border border-product-border bg-product-surface px-3 py-2 text-[11px] font-mono uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent focus-visible:border-product-accent focus-visible:text-product-accent focus-visible:outline-hidden";
 
 function getColumnWidthClass(column: TableColumnConfig) {
 	if (column.width === "compact") {

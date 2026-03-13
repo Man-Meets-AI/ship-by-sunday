@@ -309,7 +309,7 @@ export function ReferenceGalleryFieldControl({
 						void addImageUrl(pastedText);
 					}
 				}}
-				className={`border border-dashed px-4 py-4 outline-none transition-colors ${
+				className={`border border-dashed px-4 py-4 outline-hidden transition-colors ${
 					savedCount === 0 ? "min-h-[22rem]" : ""
 				} ${
 					dropActive || pasteArmed
