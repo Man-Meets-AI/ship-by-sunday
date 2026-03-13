@@ -11,6 +11,7 @@ import { WorkbenchCard } from "../shared/workbench-card";
 import { WorkbenchContainer } from "../shared/workbench-container";
 import { WorkbenchHeaderLabel } from "../shared/workbench-header-label";
 import { WorkbenchHeader } from "../shared/workbench-header";
+import { DefineOutcomeSupport } from "./define-outcome-support";
 import { PickOneUserSupport } from "./pick-one-user-support";
 import { StartWithProblemSupport } from "./start-with-problem-support";
 
@@ -185,6 +186,7 @@ export function GuidedFormWorkbench({
 	const showInlineVideo = lesson.coachVideoPlacement === "workbench";
 	const showStartWithProblemSupport = lesson.id === "1.1";
 	const showPickOneUserSupport = lesson.id === "1.2";
+	const showDefineOutcomeSupport = lesson.id === "1.3";
 
 	return (
 		<WorkbenchContainer>
@@ -209,7 +211,8 @@ export function GuidedFormWorkbench({
 					fieldValues={fieldValues}
 				/>
 			) : null}
-			{showPickOneUserSupport && lesson.handoff?.mode === "select_candidate_problem" ? (
+			{showPickOneUserSupport &&
+			lesson.handoff?.mode === "select_candidate_problem" ? (
 				<PickOneUserSupport
 					handoff={lesson.handoff}
 					fieldValues={fieldValues}
@@ -227,6 +230,9 @@ export function GuidedFormWorkbench({
 					pinnedArtifacts={pinnedArtifacts}
 					invalidFieldIds={invalidFieldIds}
 				/>
+			) : null}
+			{showDefineOutcomeSupport ? (
+				<DefineOutcomeSupport fieldValues={fieldValues} />
 			) : null}
 			<ArtifactContext pinnedArtifacts={visiblePinnedArtifacts} />
 			<div className="space-y-3">

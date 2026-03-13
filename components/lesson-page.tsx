@@ -479,9 +479,11 @@ export function LessonPage({
 	const hasMorePendingIssues = pendingCompletionIssues.length > 3;
 	const completionNextLine = stageUnlockConfig
 		? `Next: ${stageUnlockConfig.nextStepLabel}`
-		: completionPayload?.nextLessonLabel
-			? `Next unlocked: ${completionPayload.nextLessonLabel}`
-			: "Mission updated";
+		: lesson.nextStepLabel
+			? `Next: ${lesson.nextStepLabel}`
+			: completionPayload?.nextLessonLabel
+				? `Next unlocked: ${completionPayload.nextLessonLabel}`
+				: "Mission updated";
 	const completionArtifactLine = stageUnlockConfig
 		? `${lesson.artifact.label} locked. Design has a real handoff now.`
 		: completionPayload

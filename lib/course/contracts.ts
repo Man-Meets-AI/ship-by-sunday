@@ -327,6 +327,7 @@ export type LessonConfig = {
 	promptImport?: LessonPromptImport;
 	briefAssembler?: BriefAssemblerConfig;
 	requireReadyVideoForCompletion?: boolean;
+	nextStepLabel?: string;
 	notes?: string[];
 	content: LessonContent;
 };

@@ -75,6 +75,27 @@ function renderResearchLessonResources(pinnedArtifacts: PinnedArtifact[] = []) {
 	);
 }
 
+function renderOutcomeLessonShell() {
+	const lesson = getLessonById("1.3");
+	expect(lesson).toBeTruthy();
+
+	return renderToStaticMarkup(
+		<LessonShellSplit
+			lesson={lesson!}
+			objectiveTasks={[]}
+			onObjectiveTaskToggle={() => {}}
+			coachVisible
+			activeCoachPanel="examples"
+			onCoachPanelChange={() => {}}
+			pinnedArtifacts={[getUserStatementArtifact()]}
+			coachContent={lesson!.content.coach}
+			footer={<div>Footer</div>}
+		>
+			<div>Workbench</div>
+		</LessonShellSplit>,
+	);
+}
+
 function renderStartWithProblemWatchPanel() {
 	const lesson = getLessonById("1.1");
 	expect(lesson).toBeTruthy();
@@ -222,6 +243,16 @@ describe("LessonShellSplit resources", () => {
 		expect(markup).not.toContain(
 			"The prompt will appear here once your chosen user and outcome are saved.",
 		);
+	});
+
+	it("uses a narrative next-step handoff on lesson 1.3", () => {
+		const markup = renderOutcomeLessonShell();
+
+		expect(markup).toContain("Next step");
+		expect(markup).toContain(
+			"Find evidence that this promised outcome matters in the real world.",
+		);
+		expect(markup).not.toContain("Next unlock");
 	});
 
 	it("uses the stronger no-video fallback copy on lesson 1.1", () => {

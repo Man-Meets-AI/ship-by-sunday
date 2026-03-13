@@ -449,7 +449,8 @@ export const ceoLessons = [
 				inputWidth: "wide",
 				artifactPreviewLabel: "Reachability",
 				taskLabel: "Reachability",
-				helpText: "State the real path you have to get this in front of them fast.",
+				helpText:
+					"State the real path you have to get this in front of them fast.",
 			},
 		],
 		content: {
@@ -508,24 +509,26 @@ export const ceoLessons = [
 		prevLessonId: "1.2",
 		unlocks: { lessons: ["1.4"] },
 		coachMode: "docked",
-		objectiveTitle: "CEO 1.3 — Define the Outcome",
+		objectiveTitle: "Leave with one promised outcome you can pressure-test",
 		checklist: [
-			"Use the chosen user",
-			"Write one clear user-facing outcome",
-			"Keep it observable",
+			"Write one promised outcome",
+			"Show the observable proof",
+			"Name what pain gets easier",
 		],
 		helperText:
-			"Describe what gets better for the user, not what the app contains.",
-		winCondition: "One clear outcome statement is saved.",
+			"Define one user-visible promise now. Lesson 1.4 will pressure-test whether it matters in the real world.",
+		winCondition: "One clear, testable outcome statement is saved.",
+		nextStepLabel:
+			"Find evidence that this promised outcome matters in the real world.",
 		panelDefaults: splitPanelDefaults,
 		pinnedArtifacts: ["user_statement"],
 		workbenchSections: [
 			{
 				id: "outcome",
 				eyebrow: "Promise",
-				title: "Write the promised outcome",
+				title: "Write the promise",
 				instruction:
-					"State the changed condition for the user. If it sounds like a feature list, rewrite it as a result.",
+					"State the changed condition for the user in one sentence. If it sounds like a feature list, rewrite it as what becomes true for them.",
 				layout: "stack",
 				fieldIds: ["outcome"],
 				completionLabel: "Outcome statement written",
@@ -533,9 +536,9 @@ export const ceoLessons = [
 			{
 				id: "evidence",
 				eyebrow: "Make it real",
-				title: "Show what success looks like",
+				title: "Pressure-test the promise",
 				instruction:
-					"Describe what the user can now do and what stops being painful once the product works.",
+					"Use these two fields to prove the promise is real: what the user can now do, and what pain becomes easier or disappears.",
 				layout: "stack",
 				fieldIds: ["success_looks_like", "difference_for_user"],
 				completionLabel: "Outcome proof described",
@@ -544,38 +547,44 @@ export const ceoLessons = [
 		workbenchFields: [
 			{
 				id: "outcome",
-				label: "One clear user-facing outcome statement",
+				label: "Promised outcome",
 				kind: "text",
 				required: true,
 				placeholder:
 					"Startup operators leave a meeting with a clean action summary they can review and send in minutes.",
+				helpText:
+					"Write the one result the user gets after using the product, not the feature list inside it.",
 				inputWidth: "wide",
 				artifactPreviewLabel: "Outcome statement",
 				taskLabel: "Outcome statement",
 			},
 			{
 				id: "success_looks_like",
-				label: "Success looks like...",
+				label: "Observable proof of success",
 				kind: "textarea",
 				required: true,
 				rows: 3,
 				placeholder:
 					"They can paste notes, review a usable action summary, and share it without rebuilding everything by hand.",
+				helpText:
+					"Show what the user can now do, finish, or send once the promise is true.",
 				inputWidth: "wide",
-				artifactPreviewLabel: "Success looks like",
-				taskLabel: "Success looks like",
+				artifactPreviewLabel: "Observable proof",
+				taskLabel: "Observable proof",
 			},
 			{
 				id: "difference_for_user",
-				label: "What will be different for the user?",
+				label: "Pain removed for the user",
 				kind: "textarea",
 				required: true,
 				rows: 3,
 				placeholder:
 					"They stop losing decisions in messy notes and can close the loop while the meeting is still fresh.",
+				helpText:
+					"Name the friction, confusion, or delay that becomes easier or disappears for them.",
 				inputWidth: "wide",
-				artifactPreviewLabel: "Difference for the user",
-				taskLabel: "Difference for user",
+				artifactPreviewLabel: "Pain removed",
+				taskLabel: "Pain removed",
 			},
 		],
 		content: {
@@ -588,9 +597,11 @@ export const ceoLessons = [
 					"Students need to define the promised outcome so the product can be judged by a result, not a pile of features.",
 			},
 			actionCard: {
-				jobNow: "Write one user-facing outcome statement.",
+				jobNow:
+					"Write one promised outcome the user can feel, then prove what success looks like and what pain gets easier.",
 				timebox: "5 minutes",
-				comeBackWith: "One clear promised outcome.",
+				comeBackWith:
+					"One clear promised outcome you can pressure-test in 1.4.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Define the Outcome",

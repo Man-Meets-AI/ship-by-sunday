@@ -547,10 +547,34 @@ describe("WorkbenchRenderer", () => {
 		expect(markup).toContain("Not chosen");
 		expect(markup).toContain("User statement preview");
 		expect(markup).toContain(
-			"This is the direction <code class=\"mx-1 font-mono\">1.3</code> will inherit next.",
+			'This is the direction <code class="mx-1 font-mono">1.3</code> will inherit next.',
 		);
 		expect(markup).not.toContain(
 			"Now define the specific user inside this chosen problem.",
+		);
+	});
+
+	it("renders lesson 1.3 with inline outcome coaching and a live preview", () => {
+		const markup = renderLessonWorkbench("1.3", {
+			fieldValues: {
+				outcome:
+					"AI app with dashboards and workflow features for meeting summaries.",
+			},
+			pinnedArtifacts: [getUserStatementArtifact()],
+		});
+
+		expect(markup).toContain("Turn features into outcomes");
+		expect(markup).toContain("Weak example");
+		expect(markup).toContain("Stronger rewrite");
+		expect(markup).toContain("Promised outcome");
+		expect(markup).toContain("Observable proof");
+		expect(markup).toContain("Pain removed");
+		expect(markup).toContain("Outcome statement preview");
+		expect(markup).toContain(
+			"This draft still reads feature-heavy. Rewrite it as what changes for the user after the product works.",
+		);
+		expect(markup).toContain(
+			'This is the promise <code class="mx-1 font-mono">1.4</code> will pressure-test next.',
 		);
 	});
 

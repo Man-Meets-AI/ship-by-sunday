@@ -604,9 +604,9 @@ describe("course registry", () => {
 		expect(issues.map((issue) => issue.label)).toContain(
 			"Commit to the user behind the problem",
 		);
-		expect(issues.find((issue) => issue.id === "selected_problem_index")?.message).toBe(
-			"Choose the one user-problem pair you can test fastest.",
-		);
+		expect(
+			issues.find((issue) => issue.id === "selected_problem_index")?.message,
+		).toBe("Choose the one user-problem pair you can test fastest.");
 	});
 
 	it("drops stale field values when a lesson field shape version changes", () => {
@@ -776,6 +776,23 @@ describe("course registry", () => {
 		});
 
 		expect(preview.contextTitle).toBe("Outcome statement");
+	});
+
+	it("uses lesson-specific completion coaching on lesson 1.3", () => {
+		const lesson = getLessonById("1.3");
+		expect(lesson).toBeTruthy();
+
+		const issues = getCompletionIssues(lesson!, {
+			outcome:
+				"AI app with dashboards and workflow features for meeting summaries.",
+		});
+
+		expect(
+			issues.find((issue) => issue.id === "success_looks_like")?.message,
+		).toBe("Show what the user can now do or finish when this works.");
+		expect(
+			issues.find((issue) => issue.id === "difference_for_user")?.message,
+		).toBe("Describe what pain disappears or gets easier for them.");
 	});
 
 	it("keeps the private 1.5 saved-image field out of artifact previews", () => {

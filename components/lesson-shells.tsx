@@ -222,6 +222,9 @@ function ObjectivePanel({
 	const nextLesson = lesson.nextLessonId
 		? getLesson(lesson.nextLessonId)
 		: undefined;
+	const nextStepLabel =
+		lesson.nextStepLabel ??
+		(nextLesson ? `${nextLesson.id} ${nextLesson.shortTitle}` : "Mission");
 	const completedCount = objectiveTasks.filter(
 		(task) => task.status === "complete",
 	).length;
@@ -324,10 +327,10 @@ function ObjectivePanel({
 			{/* Next unlock — pinned to bottom */}
 			<div className="shrink-0 border-t border-product-border bg-product-surface-strong/70 px-3 py-1.5">
 				<p className="font-mono text-[8px] uppercase tracking-[0.2em] text-product-muted">
-					Next unlock
+					{lesson.nextStepLabel ? "Next step" : "Next unlock"}
 				</p>
 				<p className="mt-0.5 text-[11px] font-medium leading-tight text-product-text">
-					{nextLesson ? `${nextLesson.id} ${nextLesson.shortTitle}` : "Mission"}
+					{nextStepLabel}
 				</p>
 			</div>
 		</aside>

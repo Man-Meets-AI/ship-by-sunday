@@ -758,6 +758,18 @@ function getLessonSpecificCompletionMessage(
 		}
 	}
 
+	if (lesson.id === "1.3") {
+		if (fieldId === "outcome") {
+			return "Rewrite this as what changes for the user, not what the product contains.";
+		}
+		if (fieldId === "success_looks_like") {
+			return "Show what the user can now do or finish when this works.";
+		}
+		if (fieldId === "difference_for_user") {
+			return "Describe what pain disappears or gets easier for them.";
+		}
+	}
+
 	if (lesson.id !== "1.1") {
 		return undefined;
 	}

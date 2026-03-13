@@ -4,6 +4,7 @@
 
 ### Changed
 
+- Reworked lesson `1.3` so students now get inline weak-to-strong outcome coaching, clearer promise/proof/pain-removed prompts, a live `Outcome Statement` preview, and stronger continuity into `1.4`.
 - Reworked lesson `1.2` so choosing a user now feels like a real commitment, with inline decision criteria, pressure-test guidance, a live `User Statement` preview, and clearer completion coaching.
 - Added managed ChatGPT/Codex account connection in `Settings` and in-app `Generate with Codex` for prompt-import lessons (`1.4`, `1.6`, `2.6`) while keeping manual copy/paste fallback intact.
 - Fixed the top lesson-shell stage chips so unlocked blocks now show a `ready` state instead of a false `locked` state, keeping chip visuals consistent with actual clickable access.
