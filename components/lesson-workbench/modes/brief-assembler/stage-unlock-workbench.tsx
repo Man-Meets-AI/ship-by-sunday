@@ -6,6 +6,8 @@ import type { StageUnlockSection } from "@/lib/course/stage-unlock";
 import type { WorkbenchModeProps } from "../../types";
 import { WorkbenchCard } from "../../shared/workbench-card";
 import { WorkbenchContainer } from "../../shared/workbench-container";
+import { StageUnlockBridgeCard } from "./stage-unlock-bridge-card";
+import { StageUnlockReviewCard } from "./stage-unlock-review-card";
 import { StageUnlockSectionCard } from "./stage-unlock-section-card";
 
 function getEmptyStateCopy(preset: "ceo" | "design" | "build") {
@@ -41,10 +43,20 @@ function getSectionGridClass(section: StageUnlockSection) {
 export function StageUnlockWorkbench({
 	lesson,
 	lessonContent,
+	fieldValues,
+	onFieldChange,
+	invalidFieldIds,
+	invalidFieldMessages,
 	stageUnlockSummary,
 }: Pick<
 	WorkbenchModeProps,
-	"lesson" | "lessonContent" | "stageUnlockSummary"
+	| "lesson"
+	| "lessonContent"
+	| "fieldValues"
+	| "onFieldChange"
+	| "invalidFieldIds"
+	| "invalidFieldMessages"
+	| "stageUnlockSummary"
 >) {
 	if (lesson.briefAssembler?.variant !== "stage_unlock") {
 		return null;
@@ -52,6 +64,9 @@ export function StageUnlockWorkbench({
 
 	const summary = stageUnlockSummary;
 	const showLeadVideo = lesson.briefAssembler.leadVideo;
+	const reviewField = lesson.workbenchFields?.find(
+		(field) => field.id === "brief_review_checks",
+	);
 
 	return (
 		<WorkbenchContainer maxWidthClassName="max-w-5xl">
@@ -83,12 +98,15 @@ export function StageUnlockWorkbench({
 								<div className="inline-flex border border-product-accent/30 bg-product-surface/84 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-product-accent shadow-[inset_0_0_0_1px_rgba(var(--product-accent),0.08)]">
 									Next: {lesson.briefAssembler.nextStepLabel}
 								</div>
-								<p className="text-[11px] leading-relaxed text-product-muted">
+								<p
+									className="max-w-sm text-[11px] leading-relaxed text-product-muted"
+									style={{ textWrap: "balance" }}
+								>
 									{getNextStepSupportCopy(lesson.briefAssembler.preset)}
 								</p>
 							</div>
 						</div>
-						<div className="sbs-stage-unlock-card min-w-[220px] border border-product-accent/20 bg-product-surface/80 px-4 py-4 shadow-panel backdrop-blur-xl">
+						<div className="sbs-stage-unlock-card min-w-[220px] bg-product-surface/80 px-4 py-4 shadow-[0_0_0_1px_rgba(var(--product-accent),0.16),0_14px_30px_rgba(var(--product-shadow),0.18)] backdrop-blur-xl">
 							<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
 								Artifact locked next
 							</p>
@@ -148,6 +166,20 @@ export function StageUnlockWorkbench({
 						</p>
 					)}
 				</WorkbenchCard>
+
+				{reviewField ? (
+					<StageUnlockReviewCard
+						field={reviewField}
+						value={fieldValues[reviewField.id]}
+						onChange={(value) => onFieldChange(reviewField.id, value)}
+						invalid={invalidFieldIds.has(reviewField.id)}
+						invalidMessage={invalidFieldMessages.get(reviewField.id)}
+					/>
+				) : null}
+
+				{summary?.bridge ? (
+					<StageUnlockBridgeCard bridge={summary.bridge} />
+				) : null}
 
 				<WorkbenchCard label="Skills you flexed">
 					<div className="flex flex-wrap gap-2.5">

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { CSSProperties } from "react";
 
 import type { StageUnlockSection } from "@/lib/course/stage-unlock";
@@ -52,9 +53,22 @@ export function StageUnlockSectionCard({
 			}
 		>
 			<div className="border-b border-product-border/35 px-4 py-3">
-				<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
-					{section.label}
-				</p>
+				<div className="flex flex-wrap items-center justify-between gap-2">
+					<p
+						className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted"
+						style={{ textWrap: "balance" }}
+					>
+						{section.label}
+					</p>
+					{section.action ? (
+						<Link
+							href={section.action.href}
+							className="inline-flex items-center border border-product-border/70 bg-product-surface/88 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted transition-colors hover:border-product-accent/35 hover:text-product-text"
+						>
+							{section.action.label}
+						</Link>
+					) : null}
+				</div>
 			</div>
 			<div className="space-y-4 px-4 py-4">
 				<div className="space-y-3">
@@ -100,23 +114,23 @@ export function StageUnlockSectionCard({
 						{section.galleryImageUrls.map((imageUrl, imageIndex) => (
 							<div
 								key={`${section.label}-${imageUrl}`}
-								className="aspect-[4/3] overflow-hidden border border-product-border/50 bg-product-surface-strong shadow-[inset_0_0_0_1px_rgba(var(--product-text),0.08)]"
+								className="aspect-[4/3] overflow-hidden bg-product-surface-strong shadow-[0_0_0_1px_rgba(var(--product-text),0.08),0_10px_20px_rgba(var(--product-shadow),0.12)]"
 							>
 								<img
 									src={imageUrl}
 									alt={`${section.label} reference ${imageIndex + 1}`}
-									className="h-full w-full object-cover"
+									className="h-full w-full object-cover outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
 								/>
 							</div>
 						))}
 					</div>
 				) : null}
 				{section.imageUrl ? (
-					<div className="overflow-hidden border border-product-border/50 bg-product-surface-strong shadow-[inset_0_0_0_1px_rgba(var(--product-text),0.08)]">
+					<div className="overflow-hidden bg-product-surface-strong shadow-[0_0_0_1px_rgba(var(--product-text),0.08),0_10px_20px_rgba(var(--product-shadow),0.12)]">
 						<img
 							src={section.imageUrl}
 							alt={`${section.label} preview`}
-							className="h-40 w-full object-cover sm:h-48"
+							className="h-40 w-full object-cover outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10 sm:h-48"
 						/>
 					</div>
 				) : null}

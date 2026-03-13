@@ -583,7 +583,7 @@ describe("WorkbenchRenderer", () => {
 
 		expect(markup).toContain("Upload core flow photo");
 		expect(markup).toContain("Watch first");
-		expect(markup).toContain("Walkthrough pending");
+		expect(markup).toContain("Watch video");
 	});
 
 	it("renders lesson 0.1 as a video-first welcome rep without the status rail", () => {
@@ -617,20 +617,14 @@ describe("WorkbenchRenderer", () => {
 		});
 
 		expect(markup).toContain("Watch first");
-		expect(markup).toContain("Anchor the flow");
-		expect(markup).toContain("Before you step away");
+		expect(markup).toContain("Do this now");
 		expect(markup).toContain("Upload the photo");
-		expect(markup).toContain("Check the upload");
-		expect(markup).toContain("The walkthrough is still being attached.");
 		expect(markup).toContain(
-			"input -&gt; generate result -&gt; review -&gt; share -&gt; done",
+			"Draw the core flow off-screen with paper and pen. Keep it to 5-7 steps, take one clear photo, and upload it here.",
 		);
-		expect(markup).toContain("User");
-		expect(markup).toContain("Promise");
-		expect(markup).toContain("Startup operators");
-		expect(markup).toContain(
-			"It stays focused on one user&#x27;s shortest path",
-		);
+		expect(markup).toContain("Need context?");
+		expect(markup).toContain("Our user");
+		expect(markup).toContain("Outcome statement");
 		expect(markup).not.toContain("Core flow stage");
 		expect(markup).not.toContain("Save image");
 		expect(markup).not.toContain("Use Figma instead");
@@ -787,19 +781,24 @@ Make the UI feel editorial and high-contrast.`,
 		});
 
 		expect(markup).toContain("CEO block complete");
-		expect(markup).toContain("Design unlocked");
+		expect(markup).toContain("CEO brief ready to lock");
 		expect(markup).toContain("Next: DESIGN 2.1 — Find References First");
-		expect(markup).toContain("1 user locked");
-		expect(markup).toContain("3 research signals");
-		expect(markup).toContain("What you built");
+		expect(markup).toContain("Locked and specific");
+		expect(markup).toContain("Grounded in 3 signals");
+		expect(markup).toContain("What Design gets now");
+		expect(markup).toContain("Review and lock");
+		expect(markup).toContain("A designer could tell who this is for.");
+		expect(markup).toContain("Collect references for this exact brief");
 		expect(markup).toContain("Skills you flexed");
 		expect(markup).toContain("Problem framing");
 		expect(markup).toContain("Scope discipline");
-		expect(markup).toContain("Who");
-		expect(markup).toContain("Outcome");
-		expect(markup).toContain("Evidence");
-		expect(markup).toContain("Flow");
-		expect(markup).toContain("Scope");
+		expect(markup).toContain("Who Design Is For");
+		expect(markup).toContain("Outcome to Deliver");
+		expect(markup).toContain("Evidence to Preserve");
+		expect(markup).toContain("Core Flow to Keep");
+		expect(markup).toContain("What Not to Design Yet");
+		expect(markup).toContain("Edit user");
+		expect(markup).toContain("Do not widen the product again.");
 		expect(markup).toContain("https://example.com/core-flow.png");
 		expect(markup).not.toContain("ArtifactContext");
 		expect(markup).not.toContain("No saved preview yet.");

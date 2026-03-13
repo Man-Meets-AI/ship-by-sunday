@@ -75,7 +75,7 @@ describe("lesson content contract", () => {
 		expect(ceoWrapUpLesson?.briefAssembler).toMatchObject({
 			preset: "ceo",
 			heroEyebrow: "CEO block complete",
-			heroTitle: "Design unlocked",
+			heroTitle: "CEO brief ready to lock",
 			nextStepLabel: "DESIGN 2.1 — Find References First",
 			completionCtaLabel: "Unlock Design",
 		});

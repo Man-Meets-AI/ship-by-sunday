@@ -743,15 +743,6 @@ function getLessonSpecificCompletionMessage(
 	lesson: LessonConfig,
 	fieldId: string,
 ) {
-	if (lesson.id === "1.5") {
-		if (fieldId === "__core_flow_image_upload") {
-			return "Upload one clear photo of the core flow before you continue.";
-		}
-		if (fieldId === "core_flow_quality_checks") {
-			return "Confirm the flow stays tight, the value moment is obvious, and another person could follow it.";
-		}
-	}
-
 	if (lesson.id === "1.2") {
 		if (fieldId === "selected_problem_index") {
 			return "Choose the one user-problem pair you can test fastest.";
@@ -779,27 +770,6 @@ function getLessonSpecificCompletionMessage(
 		}
 	}
 
-	if (lesson.id === "1.4") {
-		if (fieldId === "research_table") {
-			return "Add 2-3 real alternatives or workarounds and note what each one reveals.";
-		}
-		if (fieldId === "research_summary") {
-			return "State the pattern that should change what you build, copy, or avoid in your v1.";
-		}
-	}
-
-	if (lesson.id === "1.6") {
-		if (fieldId === "in_scope") {
-			return "Keep 3-5 essential capabilities only. If it does not help this user reach the promised win by Sunday, cut it.";
-		}
-		if (fieldId === "out_of_scope") {
-			return "Name at least 3 tempting extras you are explicitly cutting from this weekend's v1.";
-		}
-		if (fieldId === "v1_rationale") {
-			return "Defend why this smaller version still gets the user to the promised outcome by Sunday.";
-		}
-	}
-
 	if (lesson.id !== "1.1") {
 		return undefined;
 	}
@@ -815,65 +785,9 @@ function getLessonSpecificCompletionMessage(
 		: `Candidate ${index}: describe the recurring pain they keep running into, not the product idea you want to build.`;
 }
 
-function getLessonSpecificAdditionalCompletionIssues(
-	lesson: LessonConfig,
-	values: PersistedFieldValues,
-): CompletionIssue[] {
-	if (lesson.id !== "1.6") {
-		return [];
-	}
-
-	const keepCount = Array.isArray(values.in_scope)
-		? values.in_scope.filter(
-				(item): item is string =>
-					typeof item === "string" && item.trim().length > 0,
-			).length
-		: 0;
-
-	return keepCount > 5
-		? [
-				{
-					id: "in_scope",
-					label: "Keep in v1",
-					kind: "field",
-					message:
-						"Cut harder. Keep only 3-5 essentials so this still fits a believable Sunday-sized v1.",
-				},
-			]
-		: [];
-}
-
 function isFieldComplete(field: WorkbenchField, value: PersistedFieldValue) {
 	if (field.kind === "reference_gallery") {
 		return getStoredReferenceGalleryCount(value) >= getFieldMinimumItems(field);
-	}
-
-	if (isUploadFieldValueArray(value)) {
-		return (
-			value.filter((item) => Boolean(item.storageId || item.url)).length >=
-			getFieldMinimumItems(field)
-		);
-	}
-
-	if (Array.isArray(value)) {
-		if (value.some((item) => Array.isArray(item))) {
-			return (
-				value.filter(
-					(item) =>
-						Array.isArray(item) &&
-						item.some((cell) => String(cell ?? "").trim().length > 0),
-				).length >= getFieldMinimumItems(field)
-			);
-		}
-
-		if (value.every((item) => typeof item === "string")) {
-			return (
-				value.filter((item) => item.trim().length > 0).length >=
-				getFieldMinimumItems(field)
-			);
-		}
-
-		return value.length >= getFieldMinimumItems(field);
 	}
 
 	return isFilled(value);
@@ -991,23 +905,6 @@ export function getObjectiveTasks(
 		);
 	}
 
-	if (stageUnlockSummary) {
-		return stageUnlockSummary.tasks.map(
-			(task) =>
-				({
-					id: task.id,
-					label: task.label,
-					status: task.status,
-					source: "field",
-					fieldId: task.id,
-					interactive: false,
-				}) satisfies ObjectiveTask,
-		);
-	}
-
-	const fieldsById = new Map(
-		(lesson.workbenchFields ?? []).map((field) => [field.id, field]),
-	);
 	const sectionByFieldId = new Map<
 		string,
 		{ sectionId: string; sectionTitle: string }
@@ -1023,6 +920,22 @@ export function getObjectiveTasks(
 	}
 
 	const tasks: ObjectiveTask[] = [];
+
+	if (stageUnlockSummary) {
+		tasks.push(
+			...stageUnlockSummary.tasks.map(
+				(task) =>
+					({
+						id: task.id,
+						label: task.label,
+						status: task.status,
+						source: "field",
+						fieldId: task.id,
+						interactive: false,
+					}) satisfies ObjectiveTask,
+			),
+		);
+	}
 
 	if (lesson.requireReadyVideoForCompletion) {
 		tasks.push({
@@ -1110,19 +1023,16 @@ export function getCompletionIssues(
 	const objectiveMode = getObjectiveMode(lesson);
 
 	if (objectiveMode === "generated") {
-		return [
-			...getObjectiveTasks(lesson, values, context)
-				.filter((task) => task.status !== "complete")
-				.map((task) => ({
-					id: task.fieldId ?? task.id,
-					label: task.label,
-					kind: "field" as const,
-					message: task.fieldId
-						? getLessonSpecificCompletionMessage(lesson, task.fieldId)
-						: undefined,
-				})),
-			...getLessonSpecificAdditionalCompletionIssues(lesson, values),
-		];
+		return getObjectiveTasks(lesson, values, context)
+			.filter((task) => task.status !== "complete")
+			.map((task) => ({
+				id: task.fieldId ?? task.id,
+				label: task.label,
+				kind: "field" as const,
+				message: task.fieldId
+					? getLessonSpecificCompletionMessage(lesson, task.fieldId)
+					: undefined,
+			}));
 	}
 
 	const issues: CompletionIssue[] = [];
@@ -1165,8 +1075,6 @@ export function getCompletionIssues(
 			kind: "objective",
 		});
 	}
-
-	issues.push(...getLessonSpecificAdditionalCompletionIssues(lesson, values));
 
 	return issues;
 }

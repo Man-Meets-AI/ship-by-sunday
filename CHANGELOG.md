@@ -4,13 +4,13 @@
 
 ### Changed
 
+- Tightened lesson `1.7` so the CEO wrap-up now requires a quick handoff review before `Unlock Design`, reframes the summary around Design-ready constraints, adds direct repair links back to weak CEO steps, and gives `2.1` a clearer brief-to-references bridge.
 - Reworked lesson `1.3` so students now get inline weak-to-strong outcome coaching, clearer promise/proof/pain-removed prompts, a live `Outcome Statement` preview, and stronger continuity into `1.4`.
 - Reworked lesson `1.2` so choosing a user now feels like a real commitment, with inline decision criteria, pressure-test guidance, a live `User Statement` preview, and clearer completion coaching.
 - Added managed ChatGPT/Codex account connection in `Settings` and in-app `Generate with Codex` for prompt-import lessons (`1.4`, `1.6`, `2.6`) while keeping manual copy/paste fallback intact.
 - Fixed the top lesson-shell stage chips so unlocked blocks now show a `ready` state instead of a false `locked` state, keeping chip visuals consistent with actual clickable access.
 - Reworked the `access-required` screen into clearer `Already paid` vs `Need to buy access` decision paths so buyers can recover access faster without guesswork.
 - Simplified lesson prompt-import UX by demoting AI import to an optional assist flow, keeping manual editing primary, and collapsing split layouts when coach is hidden so screens do not reserve dead space.
-- Strengthened lesson `1.4` so research now stays anchored to the saved user/outcome, captures lightweight evidence per row, turns the summary into a concrete v1 decision, and keeps AI assist tucked behind an optional starter flow.
 
 ## 2026-03-12
 

@@ -24,11 +24,17 @@ export type StageUnlockStat = {
 	value: string;
 };
 
+export type StageUnlockSectionAction = {
+	label: string;
+	href: string;
+};
+
 export type StageUnlockSection = {
 	label: string;
 	value: string;
 	imageUrl?: string | null;
 	galleryImageUrls?: string[];
+	action?: StageUnlockSectionAction;
 };
 
 export type StageUnlockTask = {
@@ -37,12 +43,20 @@ export type StageUnlockTask = {
 	status: "complete" | "incomplete";
 };
 
+export type StageUnlockBridge = {
+	eyebrow: string;
+	title: string;
+	body: string;
+	highlights: string[];
+};
+
 export type StageUnlockSummary = {
 	preview: StageUnlockPreview;
 	stats: StageUnlockStat[];
 	sectionHeading: string;
 	sections: StageUnlockSection[];
 	tasks: StageUnlockTask[];
+	bridge?: StageUnlockBridge;
 };
 
 function getPinnedArtifactByKey(
@@ -95,6 +109,17 @@ function getCountLabel(
 	plural = `${singular}s`,
 ) {
 	return `${count} ${count === 1 ? singular : plural}`;
+}
+
+function getStringList(value: unknown) {
+	if (!Array.isArray(value)) {
+		return [];
+	}
+
+	return value
+		.filter((entry): entry is string => typeof entry === "string")
+		.map((entry) => entry.trim())
+		.filter(Boolean);
 }
 
 function getUploadCount(value: unknown) {
@@ -159,6 +184,10 @@ function buildCeoStageUnlockSummary(
 	const researchSignalCount = getFilledTableRows(
 		researchArtifact?.fieldValues.research_table,
 	).length;
+	const keepItems = getStringList(scopeArtifact?.fieldValues.in_scope);
+	const cutItems = getStringList(scopeArtifact?.fieldValues.out_of_scope);
+	const primaryKeepItems = keepItems.slice(0, 5);
+	const primaryCutItems = cutItems.slice(0, 5);
 	const keepCount = countFilledLines(scopeArtifact?.fieldValues.in_scope);
 	const cutCount = countFilledLines(scopeArtifact?.fieldValues.out_of_scope);
 	const flowImageValue = flowArtifact?.fieldValues[CORE_FLOW_IMAGE_FIELD_ID];
@@ -197,27 +226,39 @@ function buildCeoStageUnlockSummary(
 		.join("\n");
 	const evidence = [
 		researchSignalCount > 0
-			? `${researchSignalCount} research signal${
-					researchSignalCount === 1 ? "" : "s"
-				} captured`
+			? `Signals captured: ${researchSignalCount}`
 			: "",
 		getFieldString(researchArtifact, "research_summary")
-			? `Key pattern: ${getFieldString(researchArtifact, "research_summary")}`
+			? `Pattern to design around: ${getFieldString(
+					researchArtifact,
+					"research_summary",
+				)}`
 			: "",
 	]
 		.filter(Boolean)
 		.join("\n");
-	const flow = [flowImageUrl ? "1 core flow photo saved for Design" : ""]
+	const flow = [
+		flowImageUrl
+			? "Use the saved core-flow image as the source of truth for screen sequencing."
+			: "",
+		getFieldString(userArtifact, "pain_moment")
+			? `Start from: ${getFieldString(userArtifact, "pain_moment")}`
+			: "",
+		getFieldString(outcomeArtifact, "outcome")
+			? `Design toward: ${getFieldString(outcomeArtifact, "outcome")}`
+			: "",
+	]
 		.filter(Boolean)
 		.join("\n");
 	const scope = [
-		keepCount > 0 || cutCount > 0
-			? `${keepCount} keep${keepCount === 1 ? "" : "s"} in v1 • ${cutCount} cut${
-					cutCount === 1 ? "" : "s"
-				}`
+		primaryKeepItems.length > 0
+			? `Keep in v1: ${primaryKeepItems.join(", ")}`
+			: "",
+		primaryCutItems.length > 0
+			? `Do not design yet: ${primaryCutItems.join(", ")}`
 			: "",
 		getFieldString(scopeArtifact, "v1_rationale")
-			? `Why this version is enough: ${getFieldString(
+			? `Why this smaller version still wins: ${getFieldString(
 					scopeArtifact,
 					"v1_rationale",
 				)}`
@@ -228,14 +269,46 @@ function buildCeoStageUnlockSummary(
 
 	const sections = (
 		[
-			{ label: "Who", value: who },
-			{ label: "Outcome", value: outcome },
-			{ label: "Evidence", value: evidence },
-			{ label: "Flow", value: flow, imageUrl: flowImageUrl },
-			{ label: "Scope", value: scope },
+			{
+				label: "Who Design Is For",
+				value: who,
+				action: { label: "Edit user", href: "/lesson/1.2" },
+			},
+			{
+				label: "Outcome to Deliver",
+				value: outcome,
+				action: { label: "Edit outcome", href: "/lesson/1.3" },
+			},
+			{
+				label: "Evidence to Preserve",
+				value: evidence,
+				action: { label: "Edit evidence", href: "/lesson/1.4" },
+			},
+			{
+				label: "Core Flow to Keep",
+				value: flow,
+				imageUrl: flowImageUrl,
+				action: { label: "Edit flow", href: "/lesson/1.5" },
+			},
+			{
+				label: "What Not to Design Yet",
+				value: scope,
+				action: { label: "Edit scope", href: "/lesson/1.6" },
+			},
 		] as StageUnlockSection[]
 	).filter((section) => section.value.length > 0);
 	const hasBrief = sections.length === 5;
+	const bridgeHighlights = [
+		getFieldString(userArtifact, "selected_problem_owner")
+			? `Design for ${getFieldString(userArtifact, "selected_problem_owner")}`
+			: "",
+		getFieldString(outcomeArtifact, "outcome")
+			? `Optimize for ${getFieldString(outcomeArtifact, "outcome")}`
+			: "",
+		primaryKeepItems.length > 0
+			? `Stay inside ${primaryKeepItems.join(", ")}`
+			: "",
+	].filter(Boolean);
 
 	return {
 		preview: createPreview(
@@ -256,22 +329,34 @@ function buildCeoStageUnlockSummary(
 			sections.map((section) => [section.label, section.value]),
 		),
 		stats: [
-			{ label: "Who", value: `${getCountLabel(who ? 1 : 0, "user")} locked` },
+			{
+				label: "User",
+				value: who ? "Locked and specific" : "Still undefined",
+			},
 			{
 				label: "Outcome",
-				value: `${getCountLabel(outcome ? 1 : 0, "outcome")} defined`,
+				value: outcome ? "Clear win to design for" : "Still undefined",
 			},
 			{
 				label: "Evidence",
-				value: `${getCountLabel(researchSignalCount, "research signal")}`,
+				value:
+					researchSignalCount > 0
+						? `Grounded in ${getCountLabel(researchSignalCount, "signal")}`
+						: "No signals saved",
 			},
 			{
 				label: "Flow",
-				value: flowImageUrl ? "1 flow image ready" : "0 flow images ready",
+				value: flowImageUrl ? "Saved and visible" : "Still missing",
 			},
-			{ label: "Scope", value: `${getCountLabel(cutCount, "cut")} made` },
+			{
+				label: "Scope",
+				value:
+					keepCount > 0 || cutCount > 0
+						? "Constrained for a weekend v1"
+						: "Still too loose",
+			},
 		],
-		sectionHeading: "What you built",
+		sectionHeading: "What Design gets now",
 		sections,
 		tasks: [
 			{
@@ -305,6 +390,13 @@ function buildCeoStageUnlockSummary(
 				status: hasBrief ? "complete" : "incomplete",
 			},
 		],
+		bridge: {
+			eyebrow: "Carry this into Design",
+			title: "Collect references for this exact brief",
+			body:
+				"In 2.1, choose references for this user, this promised outcome, and this one core flow only. Do not widen the product again.",
+			highlights: bridgeHighlights,
+		},
 	};
 }
 

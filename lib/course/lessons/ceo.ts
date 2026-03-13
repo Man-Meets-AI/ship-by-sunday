@@ -5,10 +5,7 @@ import {
 	type LessonConfig,
 	type LessonExampleContent,
 } from "../contracts";
-import {
-	CORE_FLOW_IMAGE_FIELD_ID,
-	CORE_FLOW_QUALITY_CHECKS_FIELD_ID,
-} from "../core-flow";
+import { CORE_FLOW_IMAGE_FIELD_ID } from "../core-flow";
 import { WORKSHEET_01_RESOURCE, WORKSHEET_01_RESOURCES } from "../resources";
 
 const START_WITH_PROBLEM_EXAMPLES: LessonExampleContent[] = [
@@ -644,17 +641,13 @@ export const ceoLessons = [
 		coachMode: "docked",
 		objectiveTitle: "CEO 1.4 — Light Research, Not a Thesis",
 		checklist: [
-			"Review 2–3 real alternatives or workarounds",
-			"Capture what each one proves from a real surface",
-			"Note what users seem to care about most",
-			"Decide what your v1 should keep, avoid, or differentiate",
+			"Add 2–3 competitors or references",
+			"Note what they do well",
+			"Note what they do poorly",
+			"Capture what users seem to care about",
 		],
-		helperText:
-			"Collect just enough outside signal to decide what your v1 should copy, avoid, or differentiate.",
-		winCondition:
-			"2–3 grounded research entries and one clear v1 decision are saved.",
-		nextStepLabel:
-			"Map the flow that keeps the useful patterns and avoids the common breakdowns you found.",
+		helperText: "Collect signal fast. Do not turn this into a thesis project.",
+		winCondition: "2–3 research entries and one summary insight are saved.",
 		panelDefaults: splitPanelDefaults,
 		pinnedArtifacts: ["user_statement", "outcome_statement"],
 		promptImport: {
@@ -695,27 +688,15 @@ export const ceoLessons = [
 						placeholder: "What matters most",
 						width: "wide",
 					},
-					{
-						id: "evidenceSeen",
-						label: "Evidence Seen",
-						kind: "text",
-						placeholder: "Pricing page, onboarding, review thread",
-						width: "compact",
-					},
 				],
-				helpText:
-					"Keep each row grounded in one concrete surface you actually checked.",
+				helpText: "Columns: Competitor, Good, Poor, Users Care About",
 			},
 			{
 				id: "research_summary",
-				label: "What this means for my v1",
+				label: "Key pattern I noticed",
 				kind: "textarea",
 				required: true,
 				rows: 3,
-				placeholder:
-					"Users care about speed, but they lose trust when the workflow gets messy. Keep the flow tight, reviewable, and easy to send.",
-				helpText:
-					"Across the rows, decide what to copy, avoid, or differentiate for this user and outcome.",
 			},
 		],
 		content: {
@@ -729,9 +710,9 @@ export const ceoLessons = [
 			},
 			actionCard: {
 				jobNow:
-					"Check 2-3 real solutions or workarounds, note what you actually observed, and finish with one decision about what your v1 should keep, avoid, or differentiate.",
+					"Find 2-3 existing solutions and write down what they do well, badly, and what users seem to care about.",
 				timebox: "20 minutes",
-				comeBackWith: "2-3 grounded research notes and one v1 decision.",
+				comeBackWith: "Three short research notes.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Light Research, Not a Thesis",
@@ -742,9 +723,9 @@ export const ceoLessons = [
 				prompt:
 					"You are not writing a market report. You are trying to understand how this gets solved today.",
 				teachingPoints: [
-					"Start with 2-3 quick scans of real alternatives or current workarounds.",
-					"Note what you actually observed and which surface gave you that signal.",
-					"Finish with what your v1 should copy, avoid, or differentiate.",
+					"Show quick scans of Google, app stores, Reddit, or product sites.",
+					"Capture: what they do well, what they do poorly, what users seem to care about.",
+					"Keep the note format brutally simple.",
 				],
 				emptyState:
 					"You are not writing a market report. You are trying to understand how this gets solved today.",
@@ -794,20 +775,6 @@ export const ceoLessons = [
 					"A paper photo is ideal. A tablet sketch, FigJam screenshot, or another off-screen image still counts if the 5-7 step flow is clear.",
 				taskLabel: "Upload core flow photo",
 			},
-			{
-				id: CORE_FLOW_QUALITY_CHECKS_FIELD_ID,
-				label: "Core flow quality checks",
-				kind: "checklist",
-				required: true,
-				options: [
-					"It stays focused on one user's shortest path",
-					"The value moment is obvious",
-					"Someone else could follow the sequence",
-				],
-				helpText:
-					"Use this as a quick legibility check before you lock the lesson and cut scope next.",
-				taskLabel: "Confirm the uploaded flow is clear enough to cut scope",
-			},
 		],
 		content: {
 			status: "draft",
@@ -848,8 +815,8 @@ export const ceoLessons = [
 		slug: "01-06-kill-scope",
 		order: 6,
 		block: "CEO",
-		title: "Kill Scope",
-		shortTitle: "Kill Scope",
+		title: "Scope Hammer",
+		shortTitle: "Scope",
 		shell: "split",
 		workbench: "scope_split",
 		artifact: {
@@ -863,15 +830,13 @@ export const ceoLessons = [
 		prevLessonId: "1.5",
 		unlocks: { lessons: ["1.7"] },
 		coachMode: "docked",
-		objectiveTitle: "CEO 1.6 — Kill Scope",
-		nextStepLabel: "Turn this cut line into your CEO brief in 1.7.",
+		objectiveTitle: "CEO 1.6 — Scope Hammer",
 		checklist: [
-			"Keep only the few essentials that make the promise true",
-			"Name at least three tempting extras you are cutting",
-			"Defend why this smaller version is still enough",
+			"Define what stays in v1",
+			"Define what is explicitly out of scope",
+			"Write why this is enough for v1",
 		],
-		helperText:
-			"Keep the smallest believable version. If it does not help this user get the promised win by Sunday, cut it.",
+		helperText: "Cut fantasy. Keep the smallest believable version.",
 		winCondition:
 			"In-scope list, out-of-scope list, and v1 rationale are saved.",
 		panelDefaults: splitPanelDefaults,
@@ -893,11 +858,8 @@ export const ceoLessons = [
 				label: "Keep in v1",
 				kind: "board",
 				required: true,
-				minItems: 3,
 				placeholder:
 					"One feature per line. Keep only what must exist for the user to get the win.",
-				helpText:
-					"Target 3-5 user-facing capabilities. If it does not directly move this user through the core flow, cut it.",
 				artifactPreviewLabel: "Keep in v1",
 				taskLabel: "Keep in v1",
 			},
@@ -906,27 +868,19 @@ export const ceoLessons = [
 				label: "Cut from v1",
 				kind: "board",
 				required: true,
-				minItems: 3,
 				placeholder:
 					"One cut per line. Name the tempting extras that do not belong in the weekend build.",
-				helpText:
-					"Call out at least 3 tempting extras you are explicitly refusing to build this weekend.",
 				artifactPreviewLabel: "Cut from v1",
 				taskLabel: "Cut from v1",
 			},
 			{
 				id: "v1_rationale",
-				label: "Why this smaller version still delivers the promise",
+				label: "Why this version is enough",
 				kind: "textarea",
 				required: true,
 				rows: 3,
-				placeholder:
-					"What has to work by Sunday for the promise to still be true? Defend why this smaller version still gets the user to the win.",
-				helpText:
-					"Write the proof, not reassurance. Tie this back to the user, the promised outcome, and the shortest usable flow.",
-				artifactPreviewLabel:
-					"Why this smaller version still delivers the promise",
-				taskLabel: "Defend why this smaller version still works",
+				artifactPreviewLabel: "Why this version is enough",
+				taskLabel: "Why this version is enough",
 			},
 		],
 		content: {
@@ -939,9 +893,9 @@ export const ceoLessons = [
 			},
 			actionCard: {
 				jobNow:
-					"Cut this down to the smallest believable Sunday-sized v1, then use AI only if you get stuck after a first pass.",
+					"Use the prompt to get a first-pass scope cut, then tighten it until the app feels brutally small.",
 				timebox: "10 minutes",
-				comeBackWith: "A brutally small scope boundary you can defend.",
+				comeBackWith: "A tighter MVP scope.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Kill Scope",
@@ -951,9 +905,9 @@ export const ceoLessons = [
 			workbench: {
 				prompt: "A smaller shipped app beats a larger imaginary one.",
 				teachingPoints: [
-					"Keep only 3-5 user-facing capabilities in v1.",
-					"Cut at least 3 tempting extras that are not required for the core win.",
-					"If a feature helps later but is not required for this user to reach the promised outcome, cut it.",
+					"Start from the generated cut list, then delete one more thing.",
+					"Keep the product inside one believable user win.",
+					"If a feature helps later but is not required for the core outcome, cut it.",
 				],
 				emptyState: "A smaller shipped app beats a larger imaginary one.",
 			},
@@ -992,7 +946,8 @@ export const ceoLessons = [
 			"Confirm the product brief",
 			"Lock the artifact",
 		],
-		helperText: "CEO block complete. Lock the brief and move into Design.",
+		helperText:
+			"Review the assembled brief, confirm it is sharp enough for Design, then lock it and continue.",
 		winCondition: "The product brief is assembled and locked.",
 		panelDefaults: splitPanelDefaults,
 		pinnedArtifacts: [
@@ -1002,13 +957,26 @@ export const ceoLessons = [
 			"core_flow_image",
 			"scope_boundary",
 		],
+		workbenchFields: [
+			{
+				id: "brief_review_checks",
+				label: "Ready to lock checks",
+				kind: "checklist",
+				required: true,
+				options: [
+					"A designer could tell who this is for.",
+					"The promised outcome is specific and visible.",
+					"The v1 is still brutally small.",
+				],
+			},
+		],
 		briefAssembler: {
 			variant: "stage_unlock",
 			preset: "ceo",
 			heroEyebrow: "CEO block complete",
-			heroTitle: "Design unlocked",
+			heroTitle: "CEO brief ready to lock",
 			heroBody:
-				"You turned a fuzzy idea into a real product direction. The user, outcome, evidence, flow, and scope are all locked into one handoff brief now.",
+				"You already did the hard thinking. Use this page to verify the brief reads like a real design handoff before you unlock the next block.",
 			nextStepLabel: "DESIGN 2.1 — Find References First",
 			skills: [
 				"Problem framing",
@@ -1036,7 +1004,7 @@ export const ceoLessons = [
 			},
 			actionCard: {
 				jobNow:
-					"Take a fast victory lap, review the brief, then unlock Design.",
+					"Review the brief, confirm it is tight enough for Design, then unlock the next block.",
 				timebox: "2 minutes",
 				comeBackWith: "A locked product brief and a clear jump into Design.",
 			},
@@ -1048,8 +1016,8 @@ export const ceoLessons = [
 				prompt:
 					"This should now read like a real handoff instead of a pile of notes.",
 				teachingPoints: [
-					"Review the problem, user, outcome, flow, and scope as one story.",
-					"Make the transition into Design feel earned and obvious.",
+					"Review the problem, user, outcome, flow, and scope as one design handoff.",
+					"Only unlock Design once the brief still feels brutally small and specific.",
 				],
 				emptyState:
 					"This should now read like a real handoff instead of a pile of notes.",

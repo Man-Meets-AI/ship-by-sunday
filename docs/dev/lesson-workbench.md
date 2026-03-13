@@ -59,6 +59,8 @@ Brief-assembler rules:
   - keep the hero, next-step label, skill strip, CTA copy, optional lead-video flag, and preset key in lesson config
   - use an explicit preset like `ceo`, `design`, or `build` instead of inferring behavior from the artifact key
   - use a resolved artifact-preview path so the wrap-up artifact is composed from pinned upstream artifacts instead of staying empty
+  - allow the wrap-up to add a lightweight required checklist field when the student must explicitly review and lock the handoff before the CTA becomes valid
+  - keep repair links and next-step bridge copy inside the stage-unlock summary contract so block wrap-ups can point back to weak source lessons without custom shell logic
 - The first acceptance case is `1.7`; future wrap-ups should copy the contract shape before inventing a new renderer.
 
 Prompt-import rules:
