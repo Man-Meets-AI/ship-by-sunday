@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-03-13
+
+### Changed
+
+- Fixed the top lesson-shell stage chips so unlocked blocks now show a `ready` state instead of a false `locked` state, keeping chip visuals consistent with actual clickable access.
+
 ## 2026-03-12
 
 ### Changed

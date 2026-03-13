@@ -75,12 +75,35 @@ function isBlockActive(block: MissionState["blocks"][number]) {
 	);
 }
 
-function blockStatusClass(status: "completed" | "active" | "locked") {
+type ProductShellBlockStatus = "completed" | "active" | "ready" | "locked";
+
+function getProductShellBlockStatus(
+	block: MissionState["blocks"][number],
+	activeId: string | undefined,
+): ProductShellBlockStatus {
+	if (block.completedCount === block.totalLessons) {
+		return "completed";
+	}
+
+	if (block.id === activeId) {
+		return "active";
+	}
+
+	if (block.lessons.some((lesson) => lesson.status !== "locked")) {
+		return "ready";
+	}
+
+	return "locked";
+}
+
+function blockStatusClass(status: ProductShellBlockStatus) {
 	switch (status) {
 		case "completed":
 			return "border-product-border bg-product-surface text-product-text";
 		case "active":
 			return "border-product-accent bg-product-chip text-product-accent shadow-[0_0_0_1px_var(--product-accent)]";
+		case "ready":
+			return "border-product-border bg-product-surface-alt/90 text-product-text";
 		default:
 			return "border-product-border/40 bg-product-surface-strong/40 text-product-muted opacity-50";
 	}
@@ -127,7 +150,7 @@ function ShellInner({
 
 	const blockStatuses = useMemo(() => {
 		if (!mission) {
-			return new Map<string, "completed" | "active" | "locked">();
+			return new Map<string, ProductShellBlockStatus>();
 		}
 
 		const activeId =
@@ -137,12 +160,7 @@ function ShellInner({
 
 		return new Map(
 			mission.blocks.map((block) => {
-				const status =
-					block.completedCount === block.totalLessons
-						? "completed"
-						: block.id === activeId
-							? "active"
-							: "locked";
+				const status = getProductShellBlockStatus(block, activeId);
 
 				return [block.id, status];
 			}),
@@ -230,10 +248,8 @@ function ShellInner({
 				<div className="pointer-events-none absolute inset-0 hidden items-center justify-center lg:flex">
 					<div className="pointer-events-auto flex select-none items-center">
 						{mission.blocks.map((block, i) => {
-							const status = (blockStatuses.get(block.id) ?? "locked") as
-								| "completed"
-								| "active"
-								| "locked";
+							const status = (blockStatuses.get(block.id) ??
+								"locked") as ProductShellBlockStatus;
 							const target = getProductShellBlockNavigationTarget(block);
 							const chipClassName = `flex items-center gap-1.5 rounded-none border px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] ${blockStatusClass(status)} ${
 								target
@@ -258,6 +274,8 @@ function ShellInner({
 										</svg>
 									) : status === "active" ? (
 										<div className="h-1.5 w-1.5 rounded-full bg-product-accent" />
+									) : status === "ready" ? (
+										<div className="h-1.5 w-1.5 rounded-full border border-current" />
 									) : (
 										<svg
 											width="10"
