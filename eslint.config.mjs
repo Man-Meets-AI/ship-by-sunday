@@ -1,7 +1,9 @@
+import convexPlugin from "@convex-dev/eslint-plugin";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
+	...convexPlugin.configs.recommended,
 	...nextVitals,
 	{
 		rules: {

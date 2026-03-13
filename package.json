@@ -38,6 +38,7 @@
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {
+		"@convex-dev/eslint-plugin": "^1.1.1",
 		"@tailwindcss/postcss": "4.2.1",
 		"@types/node": "25.5.0",
 		"@types/react": "19.2.14",
