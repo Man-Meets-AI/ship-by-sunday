@@ -155,7 +155,7 @@ const offerGroups = [
 	{
 		name: "On-demand walkthroughs + workbook",
 		description:
-			"Practical support, prompts, worksheets, and checklists that keep each block moving.",
+			"Practical support, prompts, templates, and checklists that keep each block moving.",
 	},
 	{
 		name: "Product Management for Beginners",
@@ -586,7 +586,7 @@ export default async function Page({
 								Everything under one roof
 							</h2>
 							<p className="mt-4 max-w-xl text-base leading-relaxed text-ink/75 sm:text-lg">
-								You will not be juggling docs, prompts, worksheets, and random
+								You will not be juggling docs, prompts, templates, and random
 								tabs. Ship by Sunday keeps product thinking, design direction,
 								and build execution in one place.
 							</p>

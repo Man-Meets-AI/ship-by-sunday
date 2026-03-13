@@ -41,7 +41,7 @@ export const startHereLessons = [
 			lessonMeta: {
 				runtimeLabel: "2-3 min",
 				goal: "Orient the student before the sprint starts.",
-				purpose: "This screen is navigation and context, not a worksheet rep.",
+				purpose: "This screen is navigation and context, not a real sprint step.",
 			},
 			actionCard: {
 				jobNow: "Open Welcome and start the first real lesson.",
@@ -129,9 +129,9 @@ export const startHereLessons = [
 			},
 			actionCard: {
 				jobNow:
-					"Create a sprint folder and duplicate the provided templates / worksheets.",
+					"Create a sprint folder and open the core materials you will use this weekend.",
 				timebox: "10 minutes",
-				comeBackWith: "A ready workspace with all four worksheets open.",
+				comeBackWith: "A ready workspace with the core materials and tools open.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Welcome to Ship by Sunday",
@@ -188,7 +188,7 @@ export const startHereLessons = [
 					"Give them the map before the climb. They should understand why each block exists and what breaks if they rush it.",
 			},
 			actionCard: {
-				jobNow: "Skim the 4 worksheets end to end.",
+				jobNow: "Skim the 4 blocks end to end.",
 				timebox: "5 minutes",
 				comeBackWith: "A clear sense of what gets produced in each block.",
 			},

@@ -640,7 +640,7 @@ describe("WorkbenchRenderer", () => {
 		expect(markup).toContain(
 			"Storyboard the flow off-screen first. Use the printable PDF, the FigJam template, or just draw 5-7 rectangles on paper.",
 		);
-		expect(markup).toContain("Open printable storyboard worksheet");
+		expect(markup).toContain("Open printable storyboard template");
 		expect(markup).toContain(
 			"/downloads/ship-by-sunday-storyboard-template.pdf",
 		);

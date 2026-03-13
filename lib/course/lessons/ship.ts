@@ -5,8 +5,8 @@ import {
 	type LessonConfig,
 } from "../contracts";
 import {
-	WORKSHEET_04_DEMO_PROMPT_DOWNLOAD,
-	WORKSHEET_04_RESOURCES,
+	LAUNCH_TRACKER_TEMPLATE_RESOURCES,
+	SHIP_DEMO_PROMPT_DOWNLOAD,
 } from "../resources";
 
 export const shipLessons = [
@@ -74,7 +74,7 @@ export const shipLessons = [
 			},
 			coach: createPendingLessonCoach({
 				title: "Ship the Core, Not the Fantasy",
-				resources: WORKSHEET_04_RESOURCES,
+				resources: LAUNCH_TRACKER_TEMPLATE_RESOURCES,
 			}),
 			workbench: {
 				prompt: "Ugly and live beats beautiful and trapped.",
@@ -148,7 +148,7 @@ export const shipLessons = [
 			},
 			coach: createPendingLessonCoach({
 				title: "Deploy the App",
-				resources: WORKSHEET_04_RESOURCES,
+				resources: LAUNCH_TRACKER_TEMPLATE_RESOURCES,
 			}),
 			workbench: {
 				prompt: "The goal is a URL, not infrastructure mastery.",
@@ -217,7 +217,7 @@ export const shipLessons = [
 			},
 			coach: createPendingLessonCoach({
 				title: "Record a Simple Demo",
-				resources: WORKSHEET_04_RESOURCES,
+				resources: LAUNCH_TRACKER_TEMPLATE_RESOURCES,
 			}),
 			workbench: {
 				prompt: "A quick demo lowers confusion and increases response rate.",
@@ -227,7 +227,7 @@ export const shipLessons = [
 				],
 				emptyState:
 					"A quick demo lowers confusion and increases response rate.",
-				...WORKSHEET_04_DEMO_PROMPT_DOWNLOAD,
+				...SHIP_DEMO_PROMPT_DOWNLOAD,
 			},
 		},
 	},
@@ -310,7 +310,7 @@ export const shipLessons = [
 			},
 			coach: createPendingLessonCoach({
 				title: "Send It to Real Humans",
-				resources: WORKSHEET_04_RESOURCES,
+				resources: LAUNCH_TRACKER_TEMPLATE_RESOURCES,
 			}),
 			workbench: {
 				prompt: "You do not need fifty users today. You need five real sends.",
@@ -417,7 +417,7 @@ export const shipLessons = [
 			},
 			coach: createPendingLessonCoach({
 				title: "Capture Feedback and Plan Version Two",
-				resources: WORKSHEET_04_RESOURCES,
+				resources: LAUNCH_TRACKER_TEMPLATE_RESOURCES,
 			}),
 			workbench: {
 				prompt: "Feedback is useful when it changes decisions.",
@@ -489,13 +489,13 @@ export const shipLessons = [
 			},
 			actionCard: {
 				jobNow:
-					"Review all four worksheets and write down your next iteration date.",
+					"Review the four core artifacts and write down your next iteration date.",
 				timebox: "10 minutes",
 				comeBackWith: "A clear plan for version two or the next app.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Final Wrap",
-				resources: WORKSHEET_04_RESOURCES,
+				resources: LAUNCH_TRACKER_TEMPLATE_RESOURCES,
 			}),
 			workbench: {
 				prompt: "Most people never complete a full rep. You did.",

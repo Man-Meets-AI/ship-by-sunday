@@ -223,14 +223,14 @@ function renderBuildLessonExamples() {
 }
 
 describe("LessonShellSplit resources", () => {
-	it("keeps lesson 1.4 coach resources focused on the worksheet link", () => {
+	it("keeps lesson 1.4 coach resources focused on the product brief template", () => {
 		const markup = renderResearchLessonResources([
 			getUserStatementArtifact(),
 			getOutcomeStatementArtifact(),
 		]);
 
-		expect(markup).toContain("Worksheet 01 — One-Page Product Brief");
-		expect(markup).toContain("/downloads/ship-by-sunday-worksheets.pdf");
+		expect(markup).toContain("Product Brief Template");
+		expect(markup).toContain("/downloads/ship-by-sunday-core-templates.pdf");
 		expect(markup).not.toContain("Copy your custom research prompt");
 		expect(markup).not.toContain("Copy prompt");
 	});
@@ -238,7 +238,7 @@ describe("LessonShellSplit resources", () => {
 	it("does not reintroduce the old prompt resource card when context is missing", () => {
 		const markup = renderResearchLessonResources();
 
-		expect(markup).toContain("Worksheet 01 — One-Page Product Brief");
+		expect(markup).toContain("Product Brief Template");
 		expect(markup).not.toContain("Copy your custom research prompt");
 		expect(markup).not.toContain(
 			"The prompt will appear here once your chosen user and outcome are saved.",
@@ -261,7 +261,7 @@ describe("LessonShellSplit resources", () => {
 		expect(markup).toContain("No lesson video yet");
 		expect(markup).toContain("Use the guided path");
 		expect(markup).toContain(
-			"Lean on the inline examples, the worksheet, and the compare-your-three recap while you draft grounded candidate problems.",
+			"Lean on the inline examples, the guided prompts, and the compare-your-three recap while you draft grounded candidate problems.",
 		);
 		expect(markup).not.toContain("Video placeholder");
 	});
@@ -278,7 +278,7 @@ describe("LessonShellSplit resources", () => {
 	it("renders lesson 2.3 coach resources with a FigJam storyboard option", () => {
 		const markup = renderStoryboardLessonResources();
 
-		expect(markup).toContain("Worksheet 02 — Build-Ready Design Spec");
+		expect(markup).toContain("Design Spec Template");
 		expect(markup).toContain("Digital storyboard option (FigJam)");
 		expect(markup).toContain(
 			"https://www.figma.com/board/csR3w46LJaHNU0RKHVOJDB/Ship-by-Sunday-Template?node-id=0-1",

@@ -5,6 +5,11 @@ Use this file to capture recurring mistakes, corrections, and guardrails for fut
 ## Lessons
 
 - Date: 2026-03-13
+  Pattern: I left `worksheet` language in buyer-facing and student-facing app copy even though the live product is no longer positioned around worksheets, which made `Start Here`, coach resources, and landing-page copy promise an asset model the product does not actually use.
+  Rule: When naming deliverables or support assets in this repo, use the nouns the product actually ships now. If the experience is centered on templates, artifacts, or the guided sprint, remove stale worksheet language across landing, Start Here, coach resources, template CTAs, and tests in the same sweep.
+  How to verify next time: Before closing any copy or curriculum sweep, run `rg -n -i "worksheet|worksheets" app components lib tests --glob '!**/*.md'` and confirm the remaining user-facing paths use the current product vocabulary.
+
+- Date: 2026-03-13
   Pattern: I over-corrected the bottom lesson rail by stacking a progress summary, explicit state badges, and visible `Q` / `E` teaching into the same strip, which made adjacent navigation feel heavier than the user job and mismatched how people actually try to move through lessons.
   Rule: For persistent lesson footer navigation, keep the rail focused on adjacent movement. Do not combine macro progress copy, per-step status badges, and shortcut education in the same bar. Default the visible mental model to left/right movement, keep any `Q` / `E` fallback hidden, and make cross-stage movement explicit only at the boundary button.
   How to verify next time: Open a mid-block lesson and a stage-end lesson, confirm the footer reads as one navigation strip at a glance, confirm there is no extra summary/hint row, and confirm `ArrowLeft` / `ArrowRight` work only when focus is not inside forms, buttons, links, or video controls.

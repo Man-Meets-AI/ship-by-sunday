@@ -361,7 +361,7 @@ function CoachPanel({
 			? {
 					eyebrow: "No lesson video yet",
 					title: "Use the guided path",
-					body: "This lesson is still fully usable. Lean on the inline examples, the worksheet, and the compare-your-three recap while you draft grounded candidate problems.",
+					body: "This lesson is still fully usable. Lean on the inline examples, the guided prompts, and the compare-your-three recap while you draft grounded candidate problems.",
 				}
 			: undefined;
 
