@@ -205,34 +205,42 @@ export function ReferenceGalleryFieldControl({
 	}
 
 	const addControls = (
-		<div className="flex flex-col gap-2 lg:flex-row lg:items-center">
-			<div className="flex flex-wrap items-center gap-2">
+		<div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+			<div className="flex flex-wrap items-center gap-2.5">
 				<button
 					type="button"
 					onClick={() => inputRef.current?.click()}
 					disabled={isUploading}
-					className="sbs-press-feedback border border-product-accent bg-product-chip px-3 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-product-accent disabled:cursor-not-allowed disabled:border-product-border disabled:bg-product-surface disabled:text-product-muted"
+					className="sbs-press-feedback border border-product-accent/70 bg-product-chip px-3 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-product-accent shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_1px_2px_-1px_rgba(0,0,0,0.08)] disabled:cursor-not-allowed disabled:border-product-border disabled:bg-product-surface disabled:text-product-muted"
 				>
 					{isUploading ? "Uploading..." : "Browse images"}
 				</button>
-				<span className="text-xs font-medium text-product-muted">
-					Click the capture zone, then paste an image.
-				</span>
+				<div className="flex flex-wrap gap-1.5 text-[10px] font-mono uppercase tracking-[0.16em] text-product-muted">
+					<span className="border border-product-border/70 bg-product-surface/70 px-2 py-1">
+						Drag
+					</span>
+					<span className="border border-product-border/70 bg-product-surface/70 px-2 py-1">
+						Paste
+					</span>
+					<span className="border border-product-border/70 bg-product-surface/70 px-2 py-1">
+						Upload
+					</span>
+				</div>
 			</div>
-			<div className="flex flex-1 flex-col gap-2 sm:flex-row">
+			<div className="flex w-full flex-1 flex-col gap-2 sm:flex-row lg:max-w-[29rem]">
 				<input
 					type="url"
 					value={urlInput}
 					onChange={(event) => setUrlInput(event.target.value)}
 					placeholder="Paste a direct image URL"
-					className={inputBaseClass.replace("mt-1.5 ", "")}
+					className={`${inputBaseClass.replace("mt-1.5 ", "")} min-w-0`}
 					disabled={isUploading}
 				/>
 				<button
 					type="button"
 					onClick={() => void addImageUrl()}
 					disabled={isUploading || urlInput.trim().length === 0}
-					className="sbs-press-feedback border border-product-border bg-product-surface px-3 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-product-text disabled:cursor-not-allowed disabled:text-product-muted"
+					className="sbs-press-feedback border border-product-border/80 bg-product-surface px-3 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-product-text shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_1px_2px_-1px_rgba(0,0,0,0.08)] disabled:cursor-not-allowed disabled:text-product-muted"
 				>
 					Add image URL
 				</button>
@@ -246,7 +254,7 @@ export function ReferenceGalleryFieldControl({
 				{showLabel ? (
 					<span className={fieldLabelClass}>{field.label}</span>
 				) : null}
-				<p className="mt-1 text-xs font-medium leading-snug text-product-muted">
+				<p className="mt-1 max-w-2xl text-balance text-xs font-medium leading-snug text-product-muted">
 					Save at least {minItems} visual references you want to borrow from.
 					Aim for 5-10 if you need more range.
 				</p>
@@ -309,12 +317,12 @@ export function ReferenceGalleryFieldControl({
 						void addImageUrl(pastedText);
 					}
 				}}
-				className={`border border-dashed px-4 py-4 outline-hidden transition-colors ${
+				className={`border border-dashed px-4 py-4 outline-hidden transition-[border-color,background-color,box-shadow] ${
 					savedCount === 0 ? "min-h-[22rem]" : ""
 				} ${
 					dropActive || pasteArmed
-						? "border-product-accent bg-product-surface"
-						: "border-product-border bg-product-surface-strong/65"
+						? "border-product-accent bg-product-surface shadow-[0_0_0_1px_rgba(var(--product-accent),0.18),0_8px_24px_rgba(15,23,42,0.08)]"
+						: "border-product-border/80 bg-product-surface-strong/65 shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_8px_24px_rgba(15,23,42,0.05)]"
 				}`}
 			>
 				<div className="flex h-full flex-col justify-between gap-4">
@@ -323,12 +331,12 @@ export function ReferenceGalleryFieldControl({
 							<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
 								Reference capture
 							</p>
-							<p className="text-sm font-medium text-product-text">
+							<p className="text-sm font-medium tabular-nums text-product-text">
 								{savedCount === 0
 									? "Drop references here or click into the zone and paste."
 									: `${savedCount} saved of ${minItems} minimum references.`}
 							</p>
-							<p className="max-w-2xl text-xs font-medium leading-snug text-product-muted">
+							<p className="max-w-2xl text-balance text-xs font-medium leading-snug text-product-muted">
 								Use direct image files or direct image URLs only. Keep site
 								discovery in Resources.
 							</p>
@@ -342,18 +350,18 @@ export function ReferenceGalleryFieldControl({
 
 					{savedCount === 0 ? (
 						<div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
-							<div className="flex min-h-[13rem] items-center justify-center border border-product-border/60 bg-product-surface/70 px-6 text-center">
+							<div className="flex min-h-[13rem] items-center justify-center border border-product-border/60 bg-product-surface/70 px-6 text-center shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_8px_22px_rgba(15,23,42,0.04)]">
 								<div className="space-y-2">
-									<p className="font-display text-3xl uppercase tracking-[0.04em] text-product-text">
+									<p className="font-display text-3xl uppercase tracking-[0.04em] text-balance text-product-text">
 										Build your visual direction first
 									</p>
-									<p className="mx-auto max-w-xl text-sm font-medium leading-relaxed text-product-muted">
+									<p className="mx-auto max-w-xl text-balance text-sm font-medium leading-relaxed text-product-muted">
 										Collect screenshots that match the flow, hierarchy, and vibe
 										you want before you open Figma for real work.
 									</p>
 								</div>
 							</div>
-							<div className="space-y-3 border border-product-border/60 bg-product-surface/70 p-3">
+							<div className="space-y-3 border border-product-border/60 bg-product-surface/70 p-3 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_8px_22px_rgba(15,23,42,0.04)]">
 								<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
 									Add references
 								</p>
@@ -362,7 +370,7 @@ export function ReferenceGalleryFieldControl({
 						</div>
 					) : (
 						<div className="space-y-4">
-							<div className="border border-product-border/60 bg-product-surface/75 p-3">
+							<div className="border border-product-border/60 bg-product-surface/75 p-3 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_8px_22px_rgba(15,23,42,0.04)]">
 								{addControls}
 							</div>
 							<LayoutGrid

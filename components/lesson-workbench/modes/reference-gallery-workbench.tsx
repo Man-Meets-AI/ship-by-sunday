@@ -32,7 +32,7 @@ export function ReferenceGalleryWorkbench({
 				<div
 					className={
 						invalidFieldIds.has(galleryField.id)
-							? "rounded-none border border-[#a83232] bg-[rgba(168,50,50,0.06)] p-3"
+							? "rounded-none border border-[#a83232]/75 bg-[rgba(168,50,50,0.06)] p-3 shadow-[0_0_0_1px_rgba(168,50,50,0.08),0_8px_24px_rgba(168,50,50,0.08)]"
 							: "p-0"
 					}
 				>
