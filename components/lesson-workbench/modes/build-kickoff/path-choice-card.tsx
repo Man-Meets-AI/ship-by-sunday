@@ -1,7 +1,5 @@
 "use client";
 
-import { WorkbenchCard } from "../../shared/workbench-card";
-
 function getChoiceClass(selected: boolean, invalid: boolean, disabled = false) {
 	if (disabled) {
 		return "border-product-border/50 bg-product-surface text-product-muted opacity-80";
@@ -30,77 +28,90 @@ export function PathChoiceCard({
 	onChoosePath: (path: "Use template" | "Custom path") => void;
 }) {
 	return (
-		<WorkbenchCard label="Starting path">
-			<div className="grid gap-2 md:grid-cols-2">
-				<div
-					className={`border px-3 py-3 ${getChoiceClass(
-						currentPath === "Use template",
-						invalid,
-						!templateRepoUrl,
-					)}`}
-				>
-					<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
-						Use template
-					</p>
-					<p className="mt-2 text-sm font-medium leading-snug">
-						Start from the shared repo and move straight into implementation.
-					</p>
-					<p className="mt-2 text-[11px] leading-relaxed text-product-muted">
-						Best when you want the boring setup handled so you can focus on the
-						first real slice.
-					</p>
-					<div className="mt-3">
-						{templateRepoUrl ? (
-							<button
-								type="button"
-								onClick={() => {
-									onChoosePath("Use template");
-									window.open(templateRepoUrl, "_blank", "noopener,noreferrer");
-								}}
-								className="inline-flex border border-product-accent bg-product-chip px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
-							>
-								Use template
-							</button>
-						) : (
-							<p className="text-[11px] leading-relaxed text-product-muted">
-								Starter repo link is not configured yet.
-							</p>
-						)}
-					</div>
-				</div>
-				<div
-					className={`border px-3 py-3 ${getChoiceClass(
-						currentPath === "Custom path",
-						invalid,
-					)}`}
-				>
-					<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
-						Custom path
-					</p>
-					<p className="mt-2 text-sm font-medium leading-snug">
-						Use your own repo or start clean, then let the prompt keep the work
-						tight.
-					</p>
-					<p className="mt-2 text-[11px] leading-relaxed text-product-muted">
-						Best when you already have a starter, a current repo, or a different
-						stack you need to respect.
-					</p>
-					<div className="mt-3">
-						<button
-							type="button"
-							onClick={() => onChoosePath("Custom path")}
-							className="inline-flex border border-product-border bg-product-surface px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:bg-product-surface-alt"
+		<div className="grid gap-2 md:grid-cols-2">
+			<div
+				className={`border px-3 py-3 ${getChoiceClass(
+					currentPath === "Use template",
+					invalid,
+					!templateRepoUrl,
+				)}`}
+			>
+				<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
+					Use template repo
+				</p>
+				<p className="mt-2 text-sm font-medium leading-snug">
+					Start from the shared setup and move straight into implementation.
+				</p>
+				<p className="mt-2 text-[11px] leading-relaxed text-product-muted">
+					Best when you want setup handled so you can focus on the first real
+					slice.
+				</p>
+				<div className="mt-3 flex flex-wrap items-center gap-2">
+					<button
+						type="button"
+						onClick={() => onChoosePath("Use template")}
+						disabled={!templateRepoUrl}
+						className="inline-flex border border-product-accent bg-product-chip px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg disabled:cursor-not-allowed disabled:border-product-border disabled:bg-product-surface disabled:text-product-muted"
+					>
+						Choose template
+					</button>
+					{templateRepoUrl ? (
+						<a
+							href={templateRepoUrl}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="inline-flex border border-product-border px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:bg-product-surface-alt"
 						>
-							Start custom path
-						</button>
-					</div>
+							Open template
+						</a>
+					) : null}
+				</div>
+				{!templateRepoUrl ? (
+					<p className="mt-2 text-[11px] leading-relaxed text-product-muted">
+						Template repo not connected yet. Continue with custom path or
+						connect it now.
+					</p>
+				) : null}
+			</div>
+			<div
+				className={`border px-3 py-3 ${getChoiceClass(
+					currentPath === "Custom path",
+					invalid,
+				)}`}
+			>
+				<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
+					Use your current repo
+				</p>
+				<p className="mt-2 text-sm font-medium leading-snug">
+					Keep your existing stack and scope the prompt to your current
+					codebase.
+				</p>
+				<p className="mt-2 text-[11px] leading-relaxed text-product-muted">
+					Best when you already have a starter, an existing repo, or a stack you
+					need to preserve.
+				</p>
+				<div className="mt-3">
+					<button
+						type="button"
+						onClick={() => onChoosePath("Custom path")}
+						className="inline-flex border border-product-border bg-product-surface px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:bg-product-surface-alt"
+					>
+						Choose custom path
+					</button>
 				</div>
 			</div>
-			{invalid ? (
-				<p className="mt-3 text-[11px] font-medium leading-snug text-[#a83232]">
-					Choose a starting path before continuing.
-				</p>
-			) : null}
-		</WorkbenchCard>
+		</div>
+	);
+}
+
+export function PathChoiceValidationMessage({ invalid }: { invalid: boolean }) {
+	if (!invalid) {
+		return null;
+	}
+
+	return (
+		<p className="mt-3 text-[11px] font-medium leading-snug text-[#a83232]">
+			Choose a starting path before continuing.
+		</p>
 	);
 }

@@ -370,7 +370,7 @@ describe("WorkbenchRenderer", () => {
 			},
 			{
 				lessonId: "3.1",
-				expected: "Starting path",
+				expected: "Choose your starting path",
 				pinnedArtifacts: [getProductBriefArtifact(), getDesignSpecArtifact()],
 			},
 			{
@@ -422,17 +422,13 @@ describe("WorkbenchRenderer", () => {
 				pinnedArtifacts: [getProductBriefArtifact(), getDesignSpecArtifact()],
 			});
 
-			expect(markup).toContain("Use template");
-			expect(markup).toContain("Custom path");
-			expect(markup).toContain("https://github.com/example/starter");
-			expect(markup).toContain("Source-of-truth product brief");
+			expect(markup).toContain("Step 1: Choose your starting path");
+			expect(markup).toContain(">Use template<");
+			expect(markup).toContain("Generate build prompt");
 			expect(markup).toContain(
-				"First slice to build now: Marketing hero and CTA",
+				"Your prompt will appear here after generation.",
 			);
-			expect(markup).toContain("What I cover in this block");
-			expect(markup).toContain(
-				"Choose template vs custom path before touching implementation details.",
-			);
+			expect(markup).not.toContain("Source-of-truth product brief");
 		} finally {
 			process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL =
 				originalRepoUrl;
@@ -455,7 +451,6 @@ describe("WorkbenchRenderer", () => {
 				pinnedArtifacts: [getProductBriefArtifact(), getDesignSpecArtifact()],
 			});
 
-			expect(markup).toContain("Starter repo link is not configured yet.");
 			expect(markup).toContain(
 				"The starter template path is not configured yet. Choose Custom path for now or set NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL.",
 			);

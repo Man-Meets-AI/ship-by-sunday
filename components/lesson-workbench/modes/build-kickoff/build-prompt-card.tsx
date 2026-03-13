@@ -7,10 +7,15 @@ import { WorkbenchCard } from "../../shared/workbench-card";
 export function BuildPromptCard({
 	prompt,
 	disabledReason,
+	readyToGenerate,
+	resetKey,
 }: {
 	prompt: string | null;
 	disabledReason: string | null;
+	readyToGenerate: boolean;
+	resetKey: string;
 }) {
+	const [showPrompt, setShowPrompt] = useState(false);
 	const [copyState, setCopyState] = useState<"idle" | "copied" | "error">(
 		"idle",
 	);
@@ -25,11 +30,17 @@ export function BuildPromptCard({
 	}, []);
 
 	useEffect(() => {
+		setShowPrompt(false);
 		setCopyState("idle");
-	}, [prompt, disabledReason]);
+	}, [resetKey, readyToGenerate, prompt, disabledReason]);
 
 	const copyPrompt = () => {
-		if (!prompt || disabledReason || !navigator.clipboard?.writeText) {
+		if (
+			!prompt ||
+			disabledReason ||
+			!showPrompt ||
+			!navigator.clipboard?.writeText
+		) {
 			setCopyState("error");
 			return;
 		}
@@ -51,33 +62,48 @@ export function BuildPromptCard({
 	};
 
 	return (
-		<WorkbenchCard label="Build prompt">
-			<p className="text-xs font-medium leading-relaxed text-product-muted">
-				Copy this into your coding agent after you choose a path and lock the
-				first slice.
+		<WorkbenchCard label="Generate your build prompt">
+			<p className="text-xs leading-relaxed text-product-muted">
+				We combine your path, slice, and done condition into a copy-ready brief
+				for your coding agent.
 			</p>
-			{disabledReason ? (
-				<p className="mt-2 text-[11px] leading-relaxed text-product-muted">
-					{disabledReason}
-				</p>
-			) : null}
 			<div className="mt-3 flex flex-wrap items-center gap-2">
 				<button
 					type="button"
-					onClick={copyPrompt}
-					disabled={!prompt || Boolean(disabledReason)}
+					onClick={() => setShowPrompt(true)}
+					disabled={!readyToGenerate || !prompt || Boolean(disabledReason)}
 					className="inline-flex border border-product-accent bg-product-chip px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg disabled:cursor-not-allowed disabled:border-product-border disabled:bg-product-surface disabled:text-product-muted"
 				>
-					{copyState === "copied" ? "Copied" : "Copy prompt"}
+					Generate build prompt
 				</button>
-				{copyState === "error" && prompt && !disabledReason ? (
+				{showPrompt ? (
+					<button
+						type="button"
+						onClick={copyPrompt}
+						disabled={!prompt || Boolean(disabledReason)}
+						className="inline-flex border border-product-border bg-product-surface px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:bg-product-surface-alt disabled:cursor-not-allowed disabled:border-product-border disabled:bg-product-surface disabled:text-product-muted"
+					>
+						{copyState === "copied" ? "Copied" : "Copy prompt"}
+					</button>
+				) : null}
+				{copyState === "error" && prompt && !disabledReason && showPrompt ? (
 					<p className="text-[11px] leading-relaxed text-product-muted">
 						Clipboard unavailable. Copy from the prompt block below.
 					</p>
 				) : null}
 			</div>
+			{!readyToGenerate ? (
+				<p className="mt-2 text-[11px] leading-relaxed text-product-muted">
+					Complete Steps 1-3 to generate prompt.
+				</p>
+			) : null}
+			{readyToGenerate && disabledReason ? (
+				<p className="mt-2 text-[11px] leading-relaxed text-product-muted">
+					{disabledReason}
+				</p>
+			) : null}
 			<div className="mt-3 border border-product-border/70 bg-product-surface px-3 py-3">
-				{prompt ? (
+				{showPrompt && prompt ? (
 					<textarea
 						readOnly
 						value={prompt}
@@ -87,8 +113,7 @@ export function BuildPromptCard({
 					/>
 				) : (
 					<p className="text-[11px] leading-relaxed text-product-muted">
-						The build prompt will appear here once the path, first slice, and
-						definition of done are saved.
+						Your prompt will appear here after generation.
 					</p>
 				)}
 			</div>

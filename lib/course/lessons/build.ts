@@ -100,13 +100,13 @@ export const buildLessons = [
 		coachMode: "docked",
 		objectiveTitle: "BUILD 3.1 — Lock Build Path and Scope",
 		checklist: [
-			"Choose template path or custom repo",
-			"Define the first slice",
-			"Define stop condition and done condition",
+			"Choose your starting path",
+			"Name the first slice",
+			"Define done for the first slice",
 		],
 		fieldShapeVersion: 3,
 		helperText:
-			"Do not start from vibes. Start from one path, one slice, and one stop condition.",
+			"Lock one path, one slice, and one clear done condition before coding.",
 		winCondition: "The build path, first slice, and done condition are locked.",
 		panelDefaults: splitPanelDefaults,
 		pinnedArtifacts: ["product_brief", "design_spec"],
@@ -126,7 +126,9 @@ export const buildLessons = [
 				kind: "text",
 				required: true,
 				helpText:
-					"Name one narrow screen or workflow slice only. Keep it small enough to ship and verify quickly.",
+					"One screen or one workflow only. Keep it small enough to ship and verify quickly.",
+				placeholder:
+					"Example: User can create an account and reach the Mission page.",
 			},
 			{
 				id: "definition_of_done",
@@ -135,13 +137,15 @@ export const buildLessons = [
 				required: true,
 				rows: 4,
 				helpText:
-					"Write the visible user outcome that proves this slice is done.",
+					"Describe the visible user outcome that proves this slice is complete.",
+				placeholder:
+					"Example: New user signs up, lands on Mission, and sees Day 1 checklist without errors.",
 			},
 		],
 		content: {
 			status: "draft",
 			intro:
-				"This block starts with control. You will lock the build path, first slice, and stop condition before writing code.",
+				"Lock your build path and first shippable slice. Make three decisions, then generate a build-ready prompt.",
 			lessonMeta: {
 				runtimeLabel: "7-9 min",
 				goal: "Create one controlled implementation brief.",
@@ -150,9 +154,9 @@ export const buildLessons = [
 			},
 			actionCard: {
 				jobNow:
-					"Choose your path, lock one slice, and define done so your coding agent gets one clear brief.",
+					"Choose a path, name one narrow slice, and define done before generating your build prompt.",
 				timebox: "10 minutes",
-				comeBackWith: "A saved Build Prompt + Starting Path artifact.",
+				comeBackWith: "A generated Build Prompt + Starting Path artifact.",
 			},
 			coach: buildCoach(
 				"Lock Build Path and Scope",
@@ -179,7 +183,7 @@ export const buildLessons = [
 			),
 			workbench: {
 				prompt:
-					"One path. One slice. One done condition. Then build from that brief.",
+					"Choose your path, lock one slice, define done, then generate your build brief.",
 				teachingPoints: [
 					"Choose template vs custom path before touching implementation details.",
 					"Treat your first slice like a checkpoint, not a prototype of the whole app.",
@@ -190,57 +194,95 @@ export const buildLessons = [
 			},
 		},
 	},
-	{
-		id: "3.2",
-		slug: "03-02-map-the-repo-and-starter",
-		order: 16,
-		block: "BUILD",
-		title: "Map the Repo and Starter",
-		shortTitle: "Repo",
-		shell: "watch",
-		workbench: "external_workspace",
-		artifact: {
-			key: "repo_orientation_ready",
-			label: "Repo Orientation Notes",
+		{
+			id: "3.2",
+			slug: "03-02-map-the-repo-and-starter",
+			order: 16,
+			block: "BUILD",
+			title: "Map the Repo and Starter",
+			shortTitle: "Repo",
+			shell: "focus",
+			availableLayoutModes: ["focus"],
+			workbench: "external_workspace",
+			artifact: {
+				key: "repo_orientation_ready",
+				label: "Repo Orientation Notes",
 			type: "checklist",
 			required: true,
 			dependsOn: ["agent_build_brief"],
 		},
-		nextLessonId: "3.3",
-		prevLessonId: "3.1",
-		unlocks: { lessons: ["3.3"] },
-		coachMode: "pip",
-		externalTool: "code",
-		objectiveTitle: "BUILD 3.2 — Map the Repo and Starter",
-		checklist: [
-			"Confirm starter or repo baseline",
-			"Map important files and folders",
-			"Document package manager and scripts",
-		],
-		fieldShapeVersion: 3,
-		helperText:
-			"Watch first, then orient yourself to the repo so prompting is grounded in real file paths.",
-		winCondition:
-			"Repo orientation is complete and you can explain where implementation starts.",
-		panelDefaults: focusPanelDefaults,
-		pinnedArtifacts: ["agent_build_brief"],
-		workbenchFields: [],
-		content: {
-			status: "draft",
-			intro:
-				"Before wiring providers, map the repo. You need the file map and scripts so your prompts stay precise.",
-			lessonMeta: {
-				runtimeLabel: "6-8 min",
-				goal: "Understand the minimum repo layout needed for Build.",
-				purpose:
-					"Reduce random prompting by anchoring around real files and scripts.",
-			},
-			actionCard: {
-				jobNow:
-					"Review the repo orientation pass, then confirm where app routes, env files, and startup scripts live.",
-				timebox: "12 minutes",
-				comeBackWith: "A clear baseline map of the codebase.",
-			},
+			nextLessonId: "3.3",
+			prevLessonId: "3.1",
+			unlocks: { lessons: ["3.3"] },
+			coachMode: "pip",
+			coachVideoPlacement: "workbench",
+			externalTool: "code",
+			objectiveTitle: "BUILD 3.2 — Map the Repo and Starter",
+			checklist: [
+				"Review the walkthrough, then open the repo locally.",
+				"Confirm package manager and startup command.",
+				"Map env files and the first route/screen for your slice.",
+			],
+			fieldShapeVersion: 3,
+			helperText:
+				"Watch first, then capture enough repo evidence that the next Build steps stay grounded in real files.",
+			winCondition:
+				"Repo orientation is captured with startup command, env locations, and first slice entrypoint.",
+			panelDefaults: focusPanelDefaults,
+			pinnedArtifacts: ["agent_build_brief"],
+			workbenchFields: [
+				{
+					id: "repo_orientation_checklist",
+					label: "Repo orientation checklist",
+					kind: "checklist",
+					required: true,
+					options: [
+						"Opened the codebase and confirmed the package manager.",
+						"Confirmed the local startup command runs the app.",
+						"Located env files and the first route/screen for my slice.",
+					],
+					taskLabel: "Complete the repo orientation checklist",
+				},
+				{
+					id: "startup_command",
+					label: "Startup command",
+					kind: "text",
+					required: true,
+					placeholder: "pnpm run dev:web",
+					helpText:
+						"Save the exact command you will use to boot local development.",
+					taskLabel: "Save the startup command",
+				},
+				{
+					id: "repo_map_notes",
+					label: "Env files + first slice entrypoint",
+					kind: "textarea",
+					required: true,
+					rows: 4,
+					placeholder:
+						".env.local for keys, app/lesson/[lessonId]/page.tsx for lesson route entry...",
+					helpText:
+						"List the key env file paths and where your first implementation slice should land.",
+					taskLabel: "Save env and entrypoint notes",
+				},
+			],
+			content: {
+				status: "draft",
+				intro:
+					"Before wiring providers, map the repo and capture the key paths. This keeps every next prompt anchored in the real codebase.",
+				lessonMeta: {
+					runtimeLabel: "8-10 min",
+					goal: "Understand the minimum repo layout needed for Build.",
+					purpose:
+						"Reduce random prompting by anchoring around real files and scripts.",
+				},
+				actionCard: {
+					jobNow:
+						"Watch the walkthrough, run the repo once, then capture startup command + env and entrypoint notes.",
+					timebox: "8-10 minutes",
+					comeBackWith:
+						"A saved repo-orientation artifact with concrete file paths and commands.",
+				},
 			coach: buildCoach("Map the Repo and Starter", [
 				{
 					id: "repo-lay-of-land",
@@ -256,7 +298,8 @@ export const buildLessons = [
 					body: "Focus on env files, app entry points, and package scripts.",
 					imageSrc: guideImage("image15.png"),
 					imageAlt: "Important setup panel from Build guide",
-					imageCaption: "Most implementation blockers come from missing setup context.",
+					imageCaption:
+						"Most implementation blockers come from missing setup context.",
 				},
 			]),
 			workbench: {
@@ -589,7 +632,8 @@ export const buildLessons = [
 					body: "Confirm the app starts cleanly before opening the next implementation lesson.",
 					imageSrc: guideImage("image21.png"),
 					imageAlt: "Local app workflow screenshot",
-					imageCaption: "Treat a clean local boot as a required Build checkpoint.",
+					imageCaption:
+						"Treat a clean local boot as a required Build checkpoint.",
 				},
 			]),
 			workbench: {
@@ -653,8 +697,7 @@ export const buildLessons = [
 				kind: "textarea",
 				required: true,
 				rows: 4,
-				helpText:
-					"List the implementation phases in practical order.",
+				helpText: "List the implementation phases in practical order.",
 			},
 			{
 				id: "plan_risks",
@@ -937,7 +980,8 @@ export const buildLessons = [
 		fieldShapeVersion: 3,
 		helperText:
 			"Stabilize the core path with evidence-driven debugging, not exploratory rewrites.",
-		winCondition: "Blockers are logged and the core UX is stable enough for Ship.",
+		winCondition:
+			"Blockers are logged and the core UX is stable enough for Ship.",
 		panelDefaults: focusPanelDefaults,
 		pinnedArtifacts: ["core_flow_working_locally"],
 		workbenchFields: [],
@@ -966,8 +1010,7 @@ export const buildLessons = [
 						body: "Use logs and screenshots first, then ask for one fix pass and retest immediately.",
 						imageSrc: guideImage("image10.png"),
 						imageAlt: "Debugging screenshot with logs",
-						imageCaption:
-							"Evidence quality determines fix quality.",
+						imageCaption: "Evidence quality determines fix quality.",
 					},
 					{
 						id: "feature-loop",
@@ -975,7 +1018,8 @@ export const buildLessons = [
 						body: "Plan -> implement -> test in browser. Repeat only on blockers.",
 						imageSrc: guideImage("image4.png"),
 						imageAlt: "Feature loop diagram",
-						imageCaption: "Keep one loop per blocker and avoid rewrite spirals.",
+						imageCaption:
+							"Keep one loop per blocker and avoid rewrite spirals.",
 					},
 					{
 						id: "parallel-safe",
@@ -1116,8 +1160,7 @@ export const buildLessons = [
 				},
 			]),
 			workbench: {
-				prompt:
-					"Assemble a factual Build summary so Ship starts with clarity.",
+				prompt: "Assemble a factual Build summary so Ship starts with clarity.",
 				teachingPoints: [
 					"Carry verified outcomes, not aspirational scope.",
 					"List unresolved constraints explicitly.",

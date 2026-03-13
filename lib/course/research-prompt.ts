@@ -276,9 +276,7 @@ function getArtifactSections(artifact: PromptTemplateArtifactContext | null) {
 			.map(([label, value]) => ({
 				label,
 				body:
-					typeof value === "string"
-						? value.trim()
-						: String(value ?? "").trim(),
+					typeof value === "string" ? value.trim() : String(value ?? "").trim(),
 			}))
 			.filter((section) => section.body.length > 0);
 	}
@@ -300,11 +298,13 @@ function getBuildKickoffPromptContext(
 	fieldValues: PersistedFieldValues,
 ): BuildKickoffPromptContext | null {
 	const productBrief =
-		pinnedArtifacts.find((artifact) => artifact.artifactKey === "product_brief") ??
-		null;
+		pinnedArtifacts.find(
+			(artifact) => artifact.artifactKey === "product_brief",
+		) ?? null;
 	const designSpec =
-		pinnedArtifacts.find((artifact) => artifact.artifactKey === "design_spec") ??
-		null;
+		pinnedArtifacts.find(
+			(artifact) => artifact.artifactKey === "design_spec",
+		) ?? null;
 	const buildPathValue = getTrimmedFieldValue(fieldValues, "build_path");
 	const firstSlice = getTrimmedFieldValue(fieldValues, "first_slice");
 	const definitionOfDone = getTrimmedFieldValue(
@@ -688,7 +688,7 @@ export function getPromptTemplateState(
 			return {
 				prompt: null,
 				disabledReason:
-					"Finish Design 2.7, choose a starting path, name the first slice, and define done before we build this prompt.",
+					"Finish Design 2.7 and complete Steps 1-3 before generating this prompt.",
 			};
 		}
 
