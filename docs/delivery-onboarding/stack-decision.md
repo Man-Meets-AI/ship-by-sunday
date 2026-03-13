@@ -50,6 +50,43 @@ Current flow in code:
   - inline fallback `price_data` for a one-time USD charge of `50000` cents (`$500`)
 - Convex auth is wired through `convex/auth.config.ts` and expects the Clerk JWT template app ID `convex` with `CLERK_FRONTEND_API_URL` as the provider domain.
 
+## Local development note
+
+Local Stripe QA has one extra dependency that is easy to miss:
+
+1. The Stripe CLI listener must be authenticated against the same Stripe account as the app's `STRIPE_SECRET_KEY`.
+2. The current listener's `STRIPE_WEBHOOK_SECRET` must be updated in both `.env.local` and the active Convex env.
+3. The local buyer flow should use `localhost:3000` consistently, not a mix of `localhost` and `127.0.0.1`.
+
+The repo now includes a helper command for this:
+
+- `pnpm run stripe:listen:local`
+
+That command starts `stripe listen` with the app's `STRIPE_SECRET_KEY`, captures the fresh webhook signing secret, writes it into `.env.local`, and syncs the same value into Convex env. For manual sync only, use:
+
+- `pnpm run stripe:webhook:sync -- --secret whsec_...`
+
+Before a fresh local checkout pass, run:
+
+- `pnpm run stripe:local:doctor`
+
+That command reports:
+
+- the app Stripe account id
+- the default Stripe CLI account id
+- `.env.local` webhook secret presence
+- Convex webhook secret presence
+- secret parity across app and Convex env
+- reachability of `localhost:3000` and the local Convex URL
+
+After a local sandbox checkout, run:
+
+- `pnpm run stripe:local:verify`
+
+That verifier checks the latest real `checkout.session.completed` event on the app account against the corresponding Convex entitlement row and reports pass/fail for the payment, metadata, entitlement status, source, and session-id linkage.
+
+If those drift, local checkout can succeed, real `checkout.session.completed` events can exist on Stripe, and `/checkout/success` can still hang on entitlement polling because the webhook grant path never completes.
+
 ## What is still not live-ready
 
 - Stripe still needs live webhook endpoint registration and verified delivery against the deployed environment.

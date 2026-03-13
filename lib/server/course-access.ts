@@ -104,5 +104,9 @@ export async function redirectAuthorizedAccessRequiredVisitor() {
 		redirect("/mission");
 	}
 
+	if (access.status === "signed_out" || access.status === "missing_token") {
+		redirect(`/sign-in?redirect_url=${encodeURIComponent("/access-required")}`);
+	}
+
 	return access;
 }

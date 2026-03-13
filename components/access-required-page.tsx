@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { startTransition, useEffect, useState } from "react";
 import { useQuery } from "convex/react";
 
 import { api } from "@/convex/_generated/api";
@@ -16,12 +16,6 @@ type AccessProgressStep = {
 	label: string;
 	state: AccessStepState;
 	detail: string;
-};
-
-type AccessAction = {
-	href: string;
-	label: string;
-	tone: "primary" | "secondary";
 };
 
 function AccessProgress({ steps }: { steps: readonly AccessProgressStep[] }) {
@@ -109,43 +103,16 @@ function AccessHelpPanel({ isCheckingAccess }: { isCheckingAccess: boolean }) {
 	);
 }
 
-function AccessDecisionPanel({
-	title,
-	description,
-	actions,
-}: {
-	title: string;
-	description: string;
-	actions: readonly AccessAction[];
-}) {
-	return (
-		<div className="border border-product-border/55 bg-product-surface-strong/72 p-4">
-			<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
-				{title}
-			</p>
-			<p className="mt-3 text-sm leading-relaxed text-product-text">
-				{description}
-			</p>
-			<div className="mt-4 flex flex-wrap gap-2.5">
-				{actions.map((action) => {
-					const className =
-						action.tone === "primary"
-							? "border-product-accent bg-product-accent/10 text-product-accent hover:bg-product-accent hover:text-product-bg"
-							: "border-product-border bg-product-surface text-product-text hover:bg-product-surface-alt";
+function formatRefreshTime(timestamp: number | null) {
+	if (!timestamp) {
+		return null;
+	}
 
-					return (
-						<Link
-							key={action.label}
-							href={action.href}
-							className={`sbs-hover-lift sbs-press-feedback inline-flex min-w-[11rem] justify-center rounded-none border px-4 py-3 font-mono text-[11px] uppercase tracking-[0.2em] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-product-accent ${className}`}
-						>
-							{action.label}
-						</Link>
-					);
-				})}
-			</div>
-		</div>
-	);
+	return new Intl.DateTimeFormat("en-US", {
+		hour: "numeric",
+		minute: "2-digit",
+		second: "2-digit",
+	}).format(timestamp);
 }
 
 export function AccessRequiredPage({
@@ -160,60 +127,92 @@ export function AccessRequiredPage({
 				status: string;
 		  }
 		| undefined;
+	const [isRetryingAccess, setIsRetryingAccess] = useState(false);
+	const [lastRefreshAt, setLastRefreshAt] = useState<number | null>(null);
+	const accessStatus = access?.status ?? "loading";
 	const isCheckingAccess = access === undefined;
+	const isSignedOut =
+		accessStatus === "signed_out" || accessStatus === "missing_token";
 	const title = isCheckingAccess
 		? "Checking access"
-		: "Access not attached to this account";
+		: isSignedOut
+			? "Sign in to check your access"
+			: "Access not attached to this account";
 	const helperCopy = isCheckingAccess
 		? "We’re checking your purchase status in the background so we can send you into Ship by Sunday automatically."
-		: "We could not find an active Ship by Sunday entitlement on this account. Most people here either just completed checkout and need a few more seconds, or they are signed into a different email than the one used at purchase.";
+		: isSignedOut
+			? "This route is part of the protected buyer journey. Sign in first so we can check whether your Ship by Sunday purchase is attached to your account."
+			: "We could not find an active Ship by Sunday entitlement on this account. Most people here either just completed checkout and need a few more seconds, or they are signed into a different email than the one used at purchase.";
 	const accessStateLabel = isCheckingAccess
 		? "Purchase sync in progress"
-		: access?.status === "none"
-			? "No active entitlement found"
-			: `Entitlement status: ${access?.status ?? "unknown"}`;
+		: isSignedOut
+			? "Sign-in required"
+			: access?.status === "none"
+				? "No active entitlement found"
+				: `Entitlement status: ${access?.status ?? "unknown"}`;
 	const progressSteps = [
 		{
 			label: "Signed in",
-			state: "complete",
-			detail: "Identity confirmed.",
+			state: isSignedOut ? "active" : "complete",
+			detail: isSignedOut
+				? "Sign in to load account access."
+				: "Identity confirmed.",
 		},
 		{
 			label: "Check purchase",
-			state: isCheckingAccess ? "active" : "complete",
+			state: isCheckingAccess ? "active" : isSignedOut ? "pending" : "complete",
 			detail: isCheckingAccess
 				? "Looking for recent Stripe entitlement events."
-				: "Purchase lookup completed.",
+				: isSignedOut
+					? "We can only check entitlement after auth."
+					: "Purchase lookup completed.",
 		},
 		{
-			label: isCheckingAccess ? "Waiting on access" : "Choose next step",
-			state: isCheckingAccess ? "pending" : "active",
+			label: isCheckingAccess
+				? "Waiting on access"
+				: isSignedOut
+					? "Continue to sign in"
+					: "Choose next step",
+			state: isCheckingAccess || isSignedOut ? "pending" : "active",
 			detail: isCheckingAccess
 				? "Auto-refresh is active."
-				: "Pick your best next action below.",
+				: isSignedOut
+					? "Return here after account auth."
+					: "Pick your best next action below.",
 		},
 	] as const;
-	const retryActions = [
-		{
-			href: "/mission",
-			label: isCheckingAccess ? "Open mission" : "Retry access check",
-			tone: "primary",
-		},
-		{
-			href: "/",
-			label: "Back home",
-			tone: "secondary",
-		},
-	] as const satisfies readonly AccessAction[];
 	const purchaseDecisionDescription = isCheckingAccess
 		? "If you already paid, keep this page open. If nothing changes after a short wait, you can still check mission manually."
-		: "If you completed checkout already, use retry access check first. Buy access only if this account has not purchased yet.";
+		: isSignedOut
+			? "If you have already purchased, sign in with the same email you used at checkout before trying anything else."
+			: "If you completed checkout already, use retry access check first. Buy access only if this account has not purchased yet.";
+	const lastRefreshLabel = formatRefreshTime(lastRefreshAt);
 
 	useEffect(() => {
 		if (access?.hasAccess) {
 			router.replace("/mission");
 		}
 	}, [access, router]);
+
+	useEffect(() => {
+		if (!isRetryingAccess || isCheckingAccess) {
+			return;
+		}
+
+		const timeout = window.setTimeout(() => {
+			setIsRetryingAccess(false);
+		}, 1200);
+
+		return () => window.clearTimeout(timeout);
+	}, [isCheckingAccess, isRetryingAccess]);
+
+	function handleRetryAccessCheck() {
+		setIsRetryingAccess(true);
+		setLastRefreshAt(Date.now());
+		startTransition(() => {
+			router.refresh();
+		});
+	}
 
 	return (
 		<ProductShell
@@ -270,11 +269,66 @@ export function AccessRequiredPage({
 									: "translate-y-0 opacity-100"
 							}`}
 						>
-							<AccessDecisionPanel
-								title="Already paid"
-								description="Use this path if you already bought Ship by Sunday and just need the access grant to catch up with your account."
-								actions={retryActions}
-							/>
+							<div className="border border-product-border/55 bg-product-surface-strong/72 p-4">
+								<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
+									Already paid
+								</p>
+								<p className="mt-3 text-sm leading-relaxed text-product-text">
+									{isSignedOut
+										? "Use this path if you already bought Ship by Sunday and need to sign in with the same account used at checkout."
+										: "Use this path if you already bought Ship by Sunday and just need the access grant to catch up with your account."}
+								</p>
+								<div className="mt-4 flex flex-wrap gap-2.5">
+									{isSignedOut ? (
+										<>
+											<Link
+												href="/sign-in?redirect_url=%2Faccess-required"
+												className="sbs-hover-lift sbs-press-feedback inline-flex min-w-[11rem] justify-center rounded-none border border-product-accent bg-product-accent/10 px-4 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-product-accent hover:bg-product-accent hover:text-product-bg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-product-accent"
+											>
+												Sign in
+											</Link>
+											<Link
+												href="/"
+												className="sbs-hover-lift sbs-press-feedback inline-flex min-w-[11rem] justify-center rounded-none border border-product-border bg-product-surface px-4 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-product-text hover:bg-product-surface-alt focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-product-accent"
+											>
+												Back home
+											</Link>
+										</>
+									) : (
+										<>
+											<button
+												type="button"
+												onClick={handleRetryAccessCheck}
+												disabled={isRetryingAccess}
+												aria-busy={isRetryingAccess}
+												className="sbs-hover-lift sbs-press-feedback inline-flex min-w-[11rem] justify-center rounded-none border border-product-accent bg-product-accent/10 px-4 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-product-accent hover:bg-product-accent hover:text-product-bg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-product-accent disabled:cursor-not-allowed disabled:opacity-70"
+											>
+												{isRetryingAccess
+													? "Refreshing access..."
+													: "Retry access check"}
+											</button>
+											<Link
+												href="/"
+												className="sbs-hover-lift sbs-press-feedback inline-flex min-w-[11rem] justify-center rounded-none border border-product-border bg-product-surface px-4 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-product-text hover:bg-product-surface-alt focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-product-accent"
+											>
+												Back home
+											</Link>
+										</>
+									)}
+								</div>
+								{!isSignedOut ? (
+									<p
+										className="mt-3 text-[11px] uppercase tracking-[0.12em] text-product-muted"
+										aria-live="polite"
+									>
+										{isRetryingAccess
+											? "Refreshing entitlement status now."
+											: lastRefreshLabel
+												? `Last checked ${lastRefreshLabel}`
+												: "No manual refresh yet."}
+									</p>
+								) : null}
+							</div>
 							<div className="border border-product-border/55 bg-product-surface-strong/72 p-4">
 								<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
 									Need to buy access
@@ -283,11 +337,18 @@ export function AccessRequiredPage({
 									{purchaseDecisionDescription}
 								</p>
 								<div className="mt-4 flex flex-wrap gap-2.5">
-									{!isCheckingAccess ? (
+									{!isCheckingAccess && !isSignedOut ? (
 										<CheckoutButton
 											label="Buy access now"
 											className="sbs-hover-lift inline-flex min-w-[12rem] justify-center rounded-none border border-product-accent bg-product-accent/10 px-4 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-product-accent hover:bg-product-accent hover:text-product-bg"
 										/>
+									) : isSignedOut ? (
+										<Link
+											href="/sign-in?redirect_url=%2Faccess-required"
+											className="sbs-hover-lift sbs-press-feedback inline-flex min-w-[12rem] justify-center rounded-none border border-product-accent bg-product-accent/10 px-4 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-product-accent hover:bg-product-accent hover:text-product-bg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-product-accent"
+										>
+											Sign in first
+										</Link>
 									) : null}
 									<Link
 										href="/"

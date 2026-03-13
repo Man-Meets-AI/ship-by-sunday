@@ -27,6 +27,7 @@ import {
 import type { Doc } from "./_generated/dataModel";
 import {
 	internalMutation,
+	internalQuery,
 	mutation,
 	query,
 	type MutationCtx,
@@ -571,6 +572,45 @@ export const grantEntitlementFromStripe = mutation({
 		});
 
 		return { courseSlug, granted: "inserted" };
+	},
+});
+
+export const getEntitlementDebug = internalQuery({
+	args: {
+		clerkUserId: v.optional(v.string()),
+		courseSlug: v.optional(v.string()),
+		stripeCheckoutSessionId: v.optional(v.string()),
+	},
+	returns: v.any(),
+	handler: async (ctx, args) => {
+		if (args.stripeCheckoutSessionId) {
+			const entitlement = await ctx.db
+				.query("courseEntitlements")
+				.withIndex("by_stripe_checkout_session_id", (queryBuilder: any) =>
+					queryBuilder.eq(
+						"stripeCheckoutSessionId",
+						args.stripeCheckoutSessionId,
+					),
+				)
+				.unique();
+
+			return entitlement ?? null;
+		}
+
+		if (!args.clerkUserId) {
+			return null;
+		}
+
+		const entitlement = await ctx.db
+			.query("courseEntitlements")
+			.withIndex("by_clerk_user_id_and_course_slug", (queryBuilder: any) =>
+				queryBuilder
+					.eq("clerkUserId", args.clerkUserId)
+					.eq("courseSlug", args.courseSlug ?? COURSE_SLUG),
+			)
+			.unique();
+
+		return entitlement ?? null;
 	},
 });
 

@@ -4,6 +4,16 @@ Use this file to capture recurring mistakes, corrections, and guardrails for fut
 
 ## Lessons
 
+- Date: 2026-03-13
+  Pattern: I updated `STRIPE_WEBHOOK_SECRET` in `.env.local` after starting `stripe listen`, but local checkout still hung because Convex validates the same secret from its own deployment env and that value was still stale.
+  Rule: For local Stripe webhook testing in this repo, always treat webhook setup as a 3-part sync: the active `stripe listen` secret, `.env.local`, and `convex env`. After starting or restarting the Stripe listener, update `.env.local`, run `convex env set STRIPE_WEBHOOK_SECRET <new secret>`, and restart the local web server if needed.
+  How to verify next time: Run `stripe listen --forward-to localhost:3000/api/stripe/webhook`, confirm the same secret appears in `.env.local` and `node ./node_modules/convex/bin/main.js env list`, then trigger or complete a test checkout and verify `/api/stripe/webhook` receives `checkout.session.completed` without signature errors.
+
+- Date: 2026-03-13
+  Pattern: I initially assumed Stripe CLI account context would naturally match the app's `STRIPE_SECRET_KEY`, but the local listener was authenticated to a different Stripe account, which made real checkout events invisible to the forwarder even though sandbox payments succeeded.
+  Rule: For local Stripe QA, never trust the default Stripe CLI account. Start listeners with the app secret key or a repo helper that does it for you, and verify the listener account matches the app account before debugging webhook behavior.
+  How to verify next time: Print the Stripe account from `STRIPE_SECRET_KEY`, then run the listener via `pnpm run stripe:listen:local` and confirm real `checkout.session.completed` events on the app account correspond to webhook deliveries on the local route.
+
 - Date: 2026-03-12
   Pattern: I left lesson `3.2` in a heavy focus-workbench layout even though the user wanted it to behave like the repo's existing watch-first lessons, which created unnecessary checklist chrome where the main job was to watch the walkthrough and then move into the editor.
   Rule: When a lesson's primary job is to watch a walkthrough and then continue off-screen, match the existing watch-shell contract instead of inventing a custom form/checklist view. Keep the surface mainly video unless the user explicitly wants additional in-product capture.

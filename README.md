@@ -36,6 +36,52 @@ pnpm run dev:web
 pnpm run dev:convex
 ```
 
+## Local Stripe testing
+
+Local checkout success depends on Stripe webhook delivery into the same local Next app and the same webhook secret being present in both `.env.local` and the active Convex env.
+
+1. Start the app on `localhost:3000`.
+2. Start local Convex dev.
+3. Start Stripe forwarding against the same Stripe account as `STRIPE_SECRET_KEY`:
+
+```bash
+pnpm run stripe:listen:local
+```
+
+That command starts `stripe listen`, detects the fresh webhook signing secret, updates `.env.local`, and syncs the same value into Convex env automatically.
+
+4. Run the local doctor before a fresh buyer-flow pass:
+
+```bash
+pnpm run stripe:local:doctor
+```
+
+5. If you already have a listener secret and only need to sync it manually:
+
+```bash
+pnpm run stripe:webhook:sync -- --secret whsec_...
+```
+
+6. Verify Convex picked it up:
+
+```bash
+node --env-file=.env.local ./node_modules/convex/bin/main.js env list
+```
+
+Use `localhost:3000` consistently during local buyer-flow testing. Mixing `127.0.0.1` and `localhost` makes auth and webhook debugging harder.
+
+After a sandbox checkout completes, verify the real handoff deterministically:
+
+```bash
+pnpm run stripe:local:verify
+```
+
+You can also target a specific session:
+
+```bash
+pnpm run stripe:local:verify -- --session-id cs_test_...
+```
+
 ## Useful commands
 
 ```bash
