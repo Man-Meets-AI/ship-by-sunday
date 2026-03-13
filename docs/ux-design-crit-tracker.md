@@ -21,8 +21,9 @@ Tracks the lesson-by-lesson UX critique sweep in canonical lesson order starting
 | `3.1`     | Lock Build Path and Scope    | completed       | `docs/ux-design-crit/3.1.md` | 2026-03-13 | `3.2 Map the Repo and Starter`     |
 | `3.2`     | Map the Repo and Starter     | completed       | `docs/ux-design-crit/3.2.md` | 2026-03-13 | `3.3 Install MCPs and Skills`      |
 | `3.3`     | Install MCPs and Skills      | completed       | `docs/ux-design-crit/3.3.md` | 2026-03-13 | `3.4 Wire DB, Auth, and Payments`  |
+| `3.4`     | Wire DB, Auth, and Payments  | completed       | `docs/ux-design-crit/3.4.md` | 2026-03-13 | `3.5 Switch to Sandbox and Boot Local` |
 
 ## Sweep status
 
-- Last completed critique: `3.3 Install MCPs and Skills`
-- Next lesson to critique: `3.4 Wire DB, Auth, and Payments`
+- Last completed critique: `3.4 Wire DB, Auth, and Payments`
+- Next lesson to critique: `3.5 Switch to Sandbox and Boot Local`

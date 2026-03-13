@@ -2,6 +2,7 @@
 .next.stale*
 node_modules
 .pnpm-store
+.DS_Store
 *.log
 marketing-desktop.png
 marketing-mobile.png
