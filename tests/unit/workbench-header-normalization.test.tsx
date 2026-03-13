@@ -161,7 +161,7 @@ describe("Workbench header normalization", () => {
 			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Template</span>',
 		);
 		expect(importWorkbenchMarkup).toContain(
-			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Copy prompt -&gt; paste result</span>',
+			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Optional AI assist</span>',
 		);
 		expect(importWorkbenchMarkup).toContain(
 			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Research table</span>',

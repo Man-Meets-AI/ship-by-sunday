@@ -553,8 +553,12 @@ export function LessonShellSplit({
 	children,
 	footer,
 }: BaseLessonShellProps) {
+	const gridClassName = coachVisible
+		? "grid gap-3 xl:h-full xl:min-h-0 xl:grid-cols-[minmax(0,270px)_minmax(0,1fr)_minmax(280px,320px)]"
+		: "grid gap-3 xl:h-full xl:min-h-0 xl:grid-cols-[minmax(0,270px)_minmax(0,1fr)]";
+
 	return (
-		<div className="grid gap-3 xl:h-full xl:min-h-0 xl:grid-cols-[minmax(0,270px)_minmax(0,1fr)_minmax(280px,320px)]">
+		<div className={gridClassName}>
 			<ObjectivePanel
 				lesson={lesson}
 				objectiveTasks={objectiveTasks}
@@ -581,11 +585,7 @@ export function LessonShellSplit({
 					onPanelChange={onCoachPanelChange}
 					pinnedArtifacts={pinnedArtifacts}
 				/>
-			) : (
-				<div className="rounded-none border border-dashed border-product-border/70 bg-product-surface/55 px-2 py-2 text-xs font-medium leading-snug text-product-muted shadow-panel backdrop-blur-lg xl:min-h-0 xl:overflow-y-auto">
-					Coach hidden. Use the top-right coach toggle to reopen.
-				</div>
-			)}
+			) : null}
 		</div>
 	);
 }

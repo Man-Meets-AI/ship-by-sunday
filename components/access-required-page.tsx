@@ -18,6 +18,12 @@ type AccessProgressStep = {
 	detail: string;
 };
 
+type AccessAction = {
+	href: string;
+	label: string;
+	tone: "primary" | "secondary";
+};
+
 function AccessProgress({ steps }: { steps: readonly AccessProgressStep[] }) {
 	return (
 		<div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -103,6 +109,45 @@ function AccessHelpPanel({ isCheckingAccess }: { isCheckingAccess: boolean }) {
 	);
 }
 
+function AccessDecisionPanel({
+	title,
+	description,
+	actions,
+}: {
+	title: string;
+	description: string;
+	actions: readonly AccessAction[];
+}) {
+	return (
+		<div className="border border-product-border/55 bg-product-surface-strong/72 p-4">
+			<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
+				{title}
+			</p>
+			<p className="mt-3 text-sm leading-relaxed text-product-text">
+				{description}
+			</p>
+			<div className="mt-4 flex flex-wrap gap-2.5">
+				{actions.map((action) => {
+					const className =
+						action.tone === "primary"
+							? "border-product-accent bg-product-accent/10 text-product-accent hover:bg-product-accent hover:text-product-bg"
+							: "border-product-border bg-product-surface text-product-text hover:bg-product-surface-alt";
+
+					return (
+						<Link
+							key={action.label}
+							href={action.href}
+							className={`sbs-hover-lift sbs-press-feedback inline-flex min-w-[11rem] justify-center rounded-none border px-4 py-3 font-mono text-[11px] uppercase tracking-[0.2em] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-product-accent ${className}`}
+						>
+							{action.label}
+						</Link>
+					);
+				})}
+			</div>
+		</div>
+	);
+}
+
 export function AccessRequiredPage({
 	initialTheme,
 }: {
@@ -116,10 +161,17 @@ export function AccessRequiredPage({
 		  }
 		| undefined;
 	const isCheckingAccess = access === undefined;
-	const title = isCheckingAccess ? "Checking access" : "No active access";
+	const title = isCheckingAccess
+		? "Checking access"
+		: "Access not attached to this account";
 	const helperCopy = isCheckingAccess
-		? "We’re checking your purchase status in the background. If you just checked out, this page will update automatically."
-		: "We could not find course access on this account yet. If you already bought Ship by Sunday, wait a few seconds and try Mission again.";
+		? "We’re checking your purchase status in the background so we can send you into Ship by Sunday automatically."
+		: "We could not find an active Ship by Sunday entitlement on this account. Most people here either just completed checkout and need a few more seconds, or they are signed into a different email than the one used at purchase.";
+	const accessStateLabel = isCheckingAccess
+		? "Purchase sync in progress"
+		: access?.status === "none"
+			? "No active entitlement found"
+			: `Entitlement status: ${access?.status ?? "unknown"}`;
 	const progressSteps = [
 		{
 			label: "Signed in",
@@ -141,6 +193,21 @@ export function AccessRequiredPage({
 				: "Pick your best next action below.",
 		},
 	] as const;
+	const retryActions = [
+		{
+			href: "/mission",
+			label: isCheckingAccess ? "Open mission" : "Retry access check",
+			tone: "primary",
+		},
+		{
+			href: "/",
+			label: "Back home",
+			tone: "secondary",
+		},
+	] as const satisfies readonly AccessAction[];
+	const purchaseDecisionDescription = isCheckingAccess
+		? "If you already paid, keep this page open. If nothing changes after a short wait, you can still check mission manually."
+		: "If you completed checkout already, use retry access check first. Buy access only if this account has not purchased yet.";
 
 	useEffect(() => {
 		if (access?.hasAccess) {
@@ -185,6 +252,9 @@ export function AccessRequiredPage({
 							<span className="border border-product-border/45 bg-product-surface px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-product-muted">
 								Auto refresh enabled
 							</span>
+							<span className="border border-product-border/45 bg-product-surface px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-product-muted">
+								{accessStateLabel}
+							</span>
 						</div>
 						<h1 className="mt-4 font-display text-3xl uppercase leading-none tracking-[0.08em] text-product-text sm:text-4xl">
 							{title}
@@ -194,30 +264,39 @@ export function AccessRequiredPage({
 						</p>
 						<AccessProgress steps={progressSteps} />
 						<div
-							className={`mt-7 flex flex-wrap gap-3 transition-all duration-200 ease-out motion-reduce:transition-none ${
+							className={`mt-7 grid gap-3 transition-all duration-200 ease-out motion-reduce:transition-none lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] ${
 								isCheckingAccess
-									? "translate-y-[4px] opacity-70"
+									? "translate-y-[4px] opacity-85"
 									: "translate-y-0 opacity-100"
 							}`}
 						>
-							{!isCheckingAccess ? (
-								<CheckoutButton
-									label="Get instant access"
-									className="sbs-hover-lift inline-flex min-w-[14.5rem] justify-center rounded-none border border-product-accent bg-product-accent/10 px-4 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-product-accent hover:bg-product-accent hover:text-product-bg"
-								/>
-							) : null}
-							<Link
-								href="/mission"
-								className="sbs-hover-lift sbs-press-feedback inline-flex min-w-[11rem] justify-center rounded-none border border-product-border bg-product-surface px-4 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-product-text hover:bg-product-surface-alt focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-product-accent"
-							>
-								Open mission
-							</Link>
-							<Link
-								href="/"
-								className="sbs-hover-lift sbs-press-feedback inline-flex min-w-[11rem] justify-center rounded-none border border-product-border bg-product-surface px-4 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-product-text hover:bg-product-surface-alt focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-product-accent"
-							>
-								Back home
-							</Link>
+							<AccessDecisionPanel
+								title="Already paid"
+								description="Use this path if you already bought Ship by Sunday and just need the access grant to catch up with your account."
+								actions={retryActions}
+							/>
+							<div className="border border-product-border/55 bg-product-surface-strong/72 p-4">
+								<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
+									Need to buy access
+								</p>
+								<p className="mt-3 text-sm leading-relaxed text-product-text">
+									{purchaseDecisionDescription}
+								</p>
+								<div className="mt-4 flex flex-wrap gap-2.5">
+									{!isCheckingAccess ? (
+										<CheckoutButton
+											label="Buy access now"
+											className="sbs-hover-lift inline-flex min-w-[12rem] justify-center rounded-none border border-product-accent bg-product-accent/10 px-4 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-product-accent hover:bg-product-accent hover:text-product-bg"
+										/>
+									) : null}
+									<Link
+										href="/"
+										className="sbs-hover-lift sbs-press-feedback inline-flex min-w-[11rem] justify-center rounded-none border border-product-border bg-product-surface px-4 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-product-text hover:bg-product-surface-alt focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-product-accent"
+									>
+										See offer
+									</Link>
+								</div>
+							</div>
 						</div>
 					</div>
 					<AccessHelpPanel isCheckingAccess={isCheckingAccess} />

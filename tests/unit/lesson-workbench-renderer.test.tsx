@@ -678,7 +678,7 @@ Make the UI feel editorial and high-contrast.`,
 		expect(markup).toContain("Watch lesson");
 		expect(markup).toContain("Reference gallery");
 		expect(markup).toContain("Follow this order");
-		expect(markup).toContain("Copy prompt -&gt; paste visualguide.md");
+		expect(markup).toContain("AI assist");
 		expect(markup).toContain("Saved visualguide.md");
 		expect(markup).toContain("https://images.example.com/ref-1.png");
 		expect(markup).toContain("https://images.example.com/ref-2.png");

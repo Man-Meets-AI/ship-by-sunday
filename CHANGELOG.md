@@ -6,6 +6,8 @@
 
 - Added managed ChatGPT/Codex account connection in `Settings` and in-app `Generate with Codex` for prompt-import lessons (`1.4`, `1.6`, `2.6`) while keeping manual copy/paste fallback intact.
 - Fixed the top lesson-shell stage chips so unlocked blocks now show a `ready` state instead of a false `locked` state, keeping chip visuals consistent with actual clickable access.
+- Reworked the `access-required` screen into clearer `Already paid` vs `Need to buy access` decision paths so buyers can recover access faster without guesswork.
+- Simplified lesson prompt-import UX by demoting AI import to an optional assist flow, keeping manual editing primary, and collapsing split layouts when coach is hidden so screens do not reserve dead space.
 
 ## 2026-03-12
 

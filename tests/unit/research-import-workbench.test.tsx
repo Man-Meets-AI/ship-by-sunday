@@ -101,15 +101,16 @@ describe("Research import workbench", () => {
 	it("renders the prompt import flow in the main 1.4 workbench", () => {
 		const markup = renderResearchWorkbench();
 
-		expect(markup).toContain("Copy prompt -&gt; paste result");
+		expect(markup).toContain("Optional AI assist");
 		expect(markup).toContain(
-			"1. Copy the prompt built from your chosen user and outcome.",
+			"Use this only if you want a fast first pass. You can skip it and fill the research table manually below.",
 		);
-		expect(markup).toContain("Paste ChatGPT response");
-		expect(markup).toContain("Import into table");
+		expect(markup).toContain("Paste result");
+		expect(markup).toContain("View prompt");
+		expect(markup).toContain("Copy prompt");
 		expect(markup).toContain("Generate with Codex");
-		expect(markup).toContain("- User: Startup operators");
 		expect(markup).toContain("Key pattern I noticed");
+		expect(markup).not.toContain("Paste ChatGPT response");
 	});
 
 	it("renders imported research values while keeping the manual editing controls visible", () => {
@@ -133,18 +134,18 @@ describe("Scope import workbench", () => {
 	it("renders the scope-cut prompt import flow in the main 1.6 workbench", () => {
 		const markup = renderScopeWorkbench();
 
-		expect(markup).toContain("Copy prompt -&gt; paste scope cut");
+		expect(markup).toContain("Optional AI assist");
 		expect(markup).toContain(
-			"1. Copy the scope-cut prompt built from your saved problem, user, outcome, and research.",
+			"Use this only if you want a first-pass scope cut. You can skip it and tighten the keep / cut decisions manually below.",
 		);
-		expect(markup).toContain("Paste ChatGPT scope cut");
-		expect(markup).toContain("Import scope cut");
+		expect(markup).toContain("Paste scope cut");
+		expect(markup).toContain("View prompt");
+		expect(markup).toContain("Copy prompt");
 		expect(markup).toContain("Generate with Codex");
-		expect(markup).toContain("- User: Startup operators");
-		expect(markup).toContain("- Research pattern:");
 		expect(markup).toContain("Keep in v1");
 		expect(markup).toContain("Cut from v1");
 		expect(markup).toContain("Why this version is enough");
+		expect(markup).not.toContain("Paste ChatGPT scope cut");
 	});
 
 	it("renders imported scope values while keeping the manual editing controls visible", () => {
@@ -167,6 +168,6 @@ describe("Scope import workbench", () => {
 		expect(markup).toContain(
 			"This version is enough because the user can go from raw notes to a usable action summary in one pass.",
 		);
-		expect(markup).toContain("Copy prompt -&gt; paste scope cut");
+		expect(markup).toContain("Optional AI assist");
 	});
 });

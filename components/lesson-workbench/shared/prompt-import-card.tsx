@@ -14,10 +14,12 @@ import { WorkbenchCard } from "./workbench-card";
 
 type PromptImportUiCopy = {
 	cardLabel: string;
-	steps: [string, string, string];
+	summary: string;
+	workflowHint: string;
 	enabledNote: string;
 	pasteLabel: string;
 	pastePlaceholder: string;
+	pasteToggleLabel: string;
 	importButtonLabel: string;
 	importHint: string;
 	getSuccessMessage: (
@@ -28,17 +30,17 @@ type PromptImportUiCopy = {
 
 const PROMPT_IMPORT_COPY: Record<LessonPromptTemplateId, PromptImportUiCopy> = {
 	competitor_research: {
-		cardLabel: "Copy prompt -> paste result",
-		steps: [
-			"Copy the prompt built from your chosen user and outcome.",
-			"Run it in ChatGPT Deep Research or another frontier model.",
-			"Paste the full response back here to fill the table below.",
-		],
+		cardLabel: "Optional AI assist",
+		summary:
+			"Use this only if you want a fast first pass. You can skip it and fill the research table manually below.",
+		workflowHint:
+			"Copy or generate the starter research, paste the result, then tighten the rows below.",
 		enabledNote:
 			"Built from your saved user and outcome so the research stays narrow and decision-useful.",
 		pasteLabel: "Paste ChatGPT response",
 		pastePlaceholder:
 			"Paste the full response with both sections: Research Table and Key pattern I noticed.",
+		pasteToggleLabel: "Paste result",
 		importButtonLabel: "Import into table",
 		importHint:
 			"The import replaces the saved research rows and summary, then you can clean them up below.",
@@ -57,17 +59,17 @@ const PROMPT_IMPORT_COPY: Record<LessonPromptTemplateId, PromptImportUiCopy> = {
 		},
 	},
 	scope_boundary: {
-		cardLabel: "Copy prompt -> paste scope cut",
-		steps: [
-			"Copy the scope-cut prompt built from your saved problem, user, outcome, and research.",
-			"Run it in ChatGPT or another strong model to get a first-pass MVP cut.",
-			"Paste the full response back here to fill the keep, cut, and rationale fields below.",
-		],
+		cardLabel: "Optional AI assist",
+		summary:
+			"Use this only if you want a first-pass scope cut. You can skip it and tighten the keep / cut decisions manually below.",
+		workflowHint:
+			"Copy or generate the scope cut, paste the result, then refine the keep and cut lists below.",
 		enabledNote:
 			"Built from your earlier CEO work so you start from a tight recommendation instead of another blank scope form.",
 		pasteLabel: "Paste ChatGPT scope cut",
 		pastePlaceholder:
 			"Paste the full response with these sections: Keep in v1, Cut from v1, and Why this version is enough.",
+		pasteToggleLabel: "Paste scope cut",
 		importButtonLabel: "Import scope cut",
 		importHint:
 			"The import replaces your saved keep/cut lists and rationale, then you can tighten them below.",
@@ -93,17 +95,17 @@ const PROMPT_IMPORT_COPY: Record<LessonPromptTemplateId, PromptImportUiCopy> = {
 		},
 	},
 	visual_direction_guide: {
-		cardLabel: "Copy prompt -> paste visualguide.md",
-		steps: [
-			"Copy the prompt built from your saved references and direction note.",
-			"Run it in your preferred coding agent to generate `visualguide.md`.",
-			"Paste the returned markdown back here so this lesson can save and preview it.",
-		],
+		cardLabel: "AI assist",
+		summary:
+			"Copy or generate a first-pass `visualguide.md`, then paste it back here and edit the saved markdown below.",
+		workflowHint:
+			"Copy or generate the guide, paste the markdown, then clean it up below.",
 		enabledNote:
 			"Built from your saved references and the direction note you wrote above so the guide stays tied to the look you actually want.",
 		pasteLabel: "Paste visualguide.md markdown",
 		pastePlaceholder:
 			"Paste the raw contents of visualguide.md or one fenced markdown block with only that file inside.",
+		pasteToggleLabel: "Paste visualguide.md",
 		importButtonLabel: "Save visualguide.md",
 		importHint:
 			"The import stores the markdown in this lesson so `2.7` can preview the visual direction cleanly.",
@@ -126,16 +128,16 @@ const PROMPT_IMPORT_COPY: Record<LessonPromptTemplateId, PromptImportUiCopy> = {
 	},
 	build_kickoff_prompt: {
 		cardLabel: "Build kickoff prompts stay in the workbench",
-		steps: [
+		summary:
 			"Use the dedicated build kickoff workbench instead of this shared import flow.",
-			"Choose a starting path, define the first slice, and copy the generated prompt there.",
-			"Do not paste anything back into this card.",
-		],
+		workflowHint:
+			"Choose a path, define the first slice, and copy the generated prompt there.",
 		enabledNote:
 			"Build kickoff prompts are copy-only and do not support pasteback import.",
 		pasteLabel: "Not used",
 		pastePlaceholder:
 			"Build kickoff prompts do not support pasteback import in this shared card.",
+		pasteToggleLabel: "Paste not used",
 		importButtonLabel: "Not supported",
 		importHint:
 			"Use the build kickoff workbench instead of the shared prompt-import flow.",
@@ -163,6 +165,8 @@ export function PromptImportCard({
 		message: string;
 	} | null>(null);
 	const [isGenerating, setIsGenerating] = useState(false);
+	const [showPrompt, setShowPrompt] = useState(false);
+	const [showPaste, setShowPaste] = useState(false);
 	const resetTimeoutRef = useRef<number | null>(null);
 	const promptTemplateId =
 		promptImport?.promptTemplateId ?? "competitor_research";
@@ -188,6 +192,12 @@ export function PromptImportCard({
 		setImportFeedback(null);
 	}, [promptState.prompt, promptState.disabledReason]);
 
+	useEffect(() => {
+		if (pastedResponse.trim().length > 0) {
+			setShowPaste(true);
+		}
+	}, [pastedResponse]);
+
 	if (!promptImport) {
 		return null;
 	}
@@ -199,6 +209,7 @@ export function PromptImportCard({
 
 		if (!navigator.clipboard?.writeText) {
 			setCopyState("error");
+			setShowPrompt(true);
 			return;
 		}
 
@@ -231,6 +242,8 @@ export function PromptImportCard({
 			}
 
 			setPastedResponse(rawResponse);
+			setShowPrompt(false);
+			setShowPaste(false);
 			setImportFeedback({
 				tone: "success",
 				message: `${source}: ${uiCopy.getSuccessMessage(nextFieldValues, promptImport)}`,
@@ -243,6 +256,7 @@ export function PromptImportCard({
 						? error.message
 						: "We could not parse that response. Paste the full ChatGPT output and try again.",
 			});
+			setShowPaste(true);
 		}
 	};
 
@@ -301,14 +315,15 @@ export function PromptImportCard({
 
 	return (
 		<WorkbenchCard label={uiCopy.cardLabel}>
-			<div className="space-y-4">
-				<ol className="space-y-1 text-sm leading-relaxed text-product-text">
-					{uiCopy.steps.map((step, index) => (
-						<li key={step}>
-							{index + 1}. {step}
-						</li>
-					))}
-				</ol>
+			<div className="space-y-3">
+				<div className="space-y-1.5">
+					<p className="text-sm leading-relaxed text-product-text">
+						{uiCopy.summary}
+					</p>
+					<p className="text-[11px] font-medium leading-snug text-product-muted">
+						{uiCopy.workflowHint}
+					</p>
+				</div>
 
 				{promptState.disabledReason ? (
 					<p className="text-xs font-medium leading-snug text-product-muted">
@@ -342,57 +357,77 @@ export function PromptImportCard({
 					>
 						{isGenerating ? "Generating..." : "Generate with Codex"}
 					</button>
-				</div>
-
-				<div className="rounded-none border border-product-border/80 bg-product-surface px-2 py-2">
-					{promptState.prompt ? (
-						<textarea
-							readOnly
-							value={promptState.prompt}
-							rows={14}
-							className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[11px] leading-relaxed text-product-text outline-hidden"
-							aria-label={`${lesson.title} prompt`}
-						/>
-					) : (
-						<p className="text-[11px] font-medium leading-snug text-product-muted">
-							The prompt will appear here once the required lesson context is
-							saved.
-						</p>
-					)}
-				</div>
-
-				<label className="block">
-					<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
-						{uiCopy.pasteLabel}
-					</span>
-					<textarea
-						value={pastedResponse}
-						onChange={(event) => {
-							setPastedResponse(event.target.value);
-							if (importFeedback) {
-								setImportFeedback(null);
-							}
-						}}
-						rows={10}
-						placeholder={uiCopy.pastePlaceholder}
-						className="mt-1.5 w-full rounded-none border border-product-border bg-product-surface px-3 py-2 text-sm leading-relaxed text-product-text outline-hidden transition-colors placeholder:text-product-muted/55 focus-visible:border-product-accent"
-						aria-label={uiCopy.pasteLabel}
-					/>
-				</label>
-
-				<div className="flex flex-wrap items-center gap-2">
 					<button
 						type="button"
-						onClick={importResponse}
-						disabled={pastedResponse.trim().length === 0}
-						className="rounded-none border border-product-border bg-product-surface px-3 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent focus-visible:border-product-accent focus-visible:text-product-accent focus-visible:outline-hidden disabled:cursor-not-allowed disabled:border-product-border/70 disabled:text-product-muted"
+						onClick={() => setShowPaste((current) => !current)}
+						className="rounded-none border border-product-border bg-product-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent focus-visible:border-product-accent focus-visible:text-product-accent focus-visible:outline-hidden"
 					>
-						{uiCopy.importButtonLabel}
+						{showPaste ? "Hide paste box" : uiCopy.pasteToggleLabel}
 					</button>
-					<p className="text-[11px] font-medium leading-snug text-product-muted">
-						{uiCopy.importHint}
-					</p>
+					<button
+						type="button"
+						onClick={() => setShowPrompt((current) => !current)}
+						className="rounded-none border border-product-border bg-product-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent focus-visible:border-product-accent focus-visible:text-product-accent focus-visible:outline-hidden"
+					>
+						{showPrompt ? "Hide prompt" : "View prompt"}
+					</button>
 				</div>
+
+				{showPrompt ? (
+					<div className="rounded-none border border-product-border/80 bg-product-surface px-2 py-2">
+						{promptState.prompt ? (
+							<textarea
+								readOnly
+								value={promptState.prompt}
+								rows={12}
+								className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[11px] leading-relaxed text-product-text outline-hidden"
+								aria-label={`${lesson.title} prompt`}
+							/>
+						) : (
+							<p className="text-[11px] font-medium leading-snug text-product-muted">
+								The prompt will appear here once the required lesson context is
+								saved.
+							</p>
+						)}
+					</div>
+				) : null}
+
+				{showPaste ? (
+					<div className="space-y-3 rounded-none border border-product-border/80 bg-product-surface px-3 py-3">
+						<label className="block">
+							<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
+								{uiCopy.pasteLabel}
+							</span>
+							<textarea
+								value={pastedResponse}
+								onChange={(event) => {
+									setPastedResponse(event.target.value);
+									if (importFeedback) {
+										setImportFeedback(null);
+									}
+								}}
+								rows={8}
+								placeholder={uiCopy.pastePlaceholder}
+								className="mt-1.5 w-full rounded-none border border-product-border bg-product-surface px-3 py-2 text-sm leading-relaxed text-product-text outline-hidden transition-colors placeholder:text-product-muted/55 focus-visible:border-product-accent"
+								aria-label={uiCopy.pasteLabel}
+							/>
+						</label>
+
+						<div className="flex flex-wrap items-center gap-2">
+							<button
+								type="button"
+								onClick={importResponse}
+								disabled={pastedResponse.trim().length === 0}
+								className="rounded-none border border-product-border bg-product-surface px-3 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent focus-visible:border-product-accent focus-visible:text-product-accent focus-visible:outline-hidden disabled:cursor-not-allowed disabled:border-product-border/70 disabled:text-product-muted"
+							>
+								{uiCopy.importButtonLabel}
+							</button>
+							<p className="text-[11px] font-medium leading-snug text-product-muted">
+								{uiCopy.importHint}
+							</p>
+						</div>
+					</div>
+				) : null}
 
 				<div aria-live="polite" className="min-h-[1.25rem]">
 					{importFeedback ? (

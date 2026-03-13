@@ -75,6 +75,27 @@ function renderResearchLessonResources(pinnedArtifacts: PinnedArtifact[] = []) {
 	);
 }
 
+function renderResearchLessonWithHiddenCoach() {
+	const lesson = getLessonById("1.4");
+	expect(lesson).toBeTruthy();
+
+	return renderToStaticMarkup(
+		<LessonShellSplit
+			lesson={lesson!}
+			objectiveTasks={[]}
+			onObjectiveTaskToggle={() => {}}
+			coachVisible={false}
+			activeCoachPanel="resources"
+			onCoachPanelChange={() => {}}
+			pinnedArtifacts={[]}
+			coachContent={lesson!.content.coach}
+			footer={<div>Footer</div>}
+		>
+			<div>Workbench</div>
+		</LessonShellSplit>,
+	);
+}
+
 function renderStoryboardLessonResources() {
 	const lesson = getLessonById("2.3");
 	expect(lesson).toBeTruthy();
@@ -180,6 +201,15 @@ describe("LessonShellSplit resources", () => {
 		expect(markup).not.toContain(
 			"The prompt will appear here once your chosen user and outcome are saved.",
 		);
+	});
+
+	it("collapses the hidden coach rail instead of reserving a dead third column", () => {
+		const markup = renderResearchLessonWithHiddenCoach();
+
+		expect(markup).toContain(
+			"xl:grid-cols-[minmax(0,270px)_minmax(0,1fr)]",
+		);
+		expect(markup).not.toContain("Coach hidden. Use the top-right coach toggle");
 	});
 
 	it("renders lesson 2.3 coach resources with a FigJam storyboard option", () => {
