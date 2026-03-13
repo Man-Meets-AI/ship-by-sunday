@@ -170,7 +170,7 @@ describe("Workbench header normalization", () => {
 			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Do this now</span>',
 		);
 		expect(captureUploadMarkup).toContain(
-			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Upload the photo</span>',
+			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Upload the map</span>',
 		);
 		expect(captureUploadMarkup).toContain(
 			'<span class="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">Our user</span>',

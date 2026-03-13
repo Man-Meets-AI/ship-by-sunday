@@ -757,10 +757,10 @@ export const ceoLessons = [
 		checklist: [
 			"Watch the walkthrough",
 			"Draw the core flow on paper",
-			"Upload one clear photo",
+			"Upload one legible photo",
 		],
 		helperText:
-			"Watch the walkthrough, draw the core flow off-screen with paper and pen, then upload one clean photo before continuing.",
+			"Map the core flow on paper in 5-7 steps, then upload one legible photo before continuing.",
 		winCondition: "The core flow map is saved as a lesson image.",
 		panelDefaults: focusPanelDefaults,
 		fieldShapeVersion: 5,
@@ -772,14 +772,14 @@ export const ceoLessons = [
 				kind: "image_upload",
 				required: true,
 				helpText:
-					"A paper photo is ideal. A tablet sketch, FigJam screenshot, or another off-screen image still counts if the 5-7 step flow is clear.",
+					"Paper is preferred, but a tablet sketch or digital screenshot still counts if the 5-7 step flow is legible.",
 				taskLabel: "Upload core flow photo",
 			},
 		],
 		content: {
 			status: "draft",
 			intro:
-				"Watch the walkthrough, map the core flow on paper, and upload one clean photo before you move on.",
+				"Map the core flow on paper, then upload one legible photo before you move on.",
 			lessonMeta: {
 				runtimeLabel: "6-8 min",
 				goal: "Get the core flow out of your head and onto paper fast.",
@@ -788,9 +788,9 @@ export const ceoLessons = [
 			},
 			actionCard: {
 				jobNow:
-					"Watch the lesson, draw the core flow on paper in 5-7 steps, then upload one clear photo.",
+					"Map the core flow on paper in 5-7 steps, then upload one legible photo.",
 				timebox: "15 minutes",
-				comeBackWith: "One uploaded core flow photo.",
+				comeBackWith: "One legible core flow photo.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Map the Core Flow",
@@ -799,14 +799,14 @@ export const ceoLessons = [
 			}),
 			workbench: {
 				prompt:
-					"Do this off-screen. Watch first, map the core flow on paper, and bring back one clean photo.",
+					"Do this off-screen. Map the core flow on paper and bring back one legible photo.",
 				teachingPoints: [
 					"Paper and pen is the default. Do it fast, not beautifully.",
 					"Keep it to 5-7 steps and make the sequence easy to follow.",
 					"If you already did it on a tablet or digitally, one clean screenshot still counts.",
 				],
 				emptyState:
-					"Do this off-screen. Watch first, map the core flow on paper, and bring back one clean photo.",
+					"Do this off-screen. Map the core flow on paper and bring back one legible photo.",
 			},
 		},
 	},
