@@ -340,7 +340,7 @@ describe("WorkbenchRenderer", () => {
 			},
 			{
 				lessonId: "1.2",
-				expected: "Pick the problem to carry forward",
+				expected: "Choose the user to build for",
 				pinnedArtifacts: [getCandidateProblemsArtifact()],
 			},
 			{
@@ -522,8 +522,11 @@ describe("WorkbenchRenderer", () => {
 
 		expect(markup).toContain("Problem 1");
 		expect(markup).toContain("Startup operators");
+		expect(markup).toContain("Choose the user to build for");
+		expect(markup).toContain("Pressure-test your choice");
+		expect(markup).toContain("Commit to this user");
 		expect(markup).toContain(
-			"Pick the problem to carry forward before continuing.",
+			"Choose the one user-problem pair you can test fastest.",
 		);
 		expect(markup).not.toContain("Carry forward");
 	});
@@ -539,10 +542,12 @@ describe("WorkbenchRenderer", () => {
 			},
 		});
 
-		expect(markup).toContain("Chosen user");
+		expect(markup).toContain("Current choice");
 		expect(markup).toContain("Problem 1");
+		expect(markup).toContain("Not chosen");
+		expect(markup).toContain("User statement preview");
 		expect(markup).toContain(
-			"The selected problem owner is your user. Now ground this direction in a real moment, a current workaround, and a path to reach them.",
+			"This is the direction <code class=\"mx-1 font-mono\">1.3</code> will inherit next.",
 		);
 		expect(markup).not.toContain(
 			"Now define the specific user inside this chosen problem.",

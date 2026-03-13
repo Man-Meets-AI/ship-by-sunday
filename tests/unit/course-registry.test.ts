@@ -585,7 +585,7 @@ describe("course registry", () => {
 			[FIELD_SHAPE_VERSION_FIELD_ID]: 2,
 		});
 
-		expect(tasks[0]?.label).toBe("Pick problem to carry forward");
+		expect(tasks[0]?.label).toBe("Commit to the user behind the problem");
 		expect(tasks[0]?.sectionTitle).toBe("Chosen problem");
 		expect(tasks[0]?.status).toBe("incomplete");
 	});
@@ -602,7 +602,10 @@ describe("course registry", () => {
 		});
 
 		expect(issues.map((issue) => issue.label)).toContain(
-			"Pick problem to carry forward",
+			"Commit to the user behind the problem",
+		);
+		expect(issues.find((issue) => issue.id === "selected_problem_index")?.message).toBe(
+			"Choose the one user-problem pair you can test fastest.",
 		);
 	});
 

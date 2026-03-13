@@ -743,6 +743,21 @@ function getLessonSpecificCompletionMessage(
 	lesson: LessonConfig,
 	fieldId: string,
 ) {
+	if (lesson.id === "1.2") {
+		if (fieldId === "selected_problem_index") {
+			return "Choose the one user-problem pair you can test fastest.";
+		}
+		if (fieldId === "pain_moment") {
+			return "Name the exact moment this becomes painful for them.";
+		}
+		if (fieldId === "current_solution") {
+			return "Describe the workaround they already use today.";
+		}
+		if (fieldId === "reachability") {
+			return "State how you can get this in front of them this week.";
+		}
+	}
+
 	if (lesson.id !== "1.1") {
 		return undefined;
 	}
@@ -927,7 +942,10 @@ export function getObjectiveTasks(
 	if (lesson.handoff?.mode === "select_candidate_problem") {
 		tasks.push({
 			id: lesson.handoff.selectionFieldId,
-			label: "Pick problem to carry forward",
+			label:
+				lesson.id === "1.2"
+					? "Commit to the user behind the problem"
+					: "Pick problem to carry forward",
 			status: isFilled(values[lesson.handoff.selectionFieldId])
 				? "complete"
 				: "incomplete",

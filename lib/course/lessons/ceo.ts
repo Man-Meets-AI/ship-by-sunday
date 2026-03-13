@@ -342,7 +342,7 @@ export const ceoLessons = [
 		coachMode: "docked",
 		objectiveTitle: "CEO 1.2 — Pick One User",
 		checklist: [
-			"Pick problem to carry forward",
+			"Commit to the user behind the problem",
 			"Pain moment",
 			"Current workaround",
 			"Reachability",
@@ -382,7 +382,7 @@ export const ceoLessons = [
 			],
 		},
 		helperText:
-			"Pick the problem to carry forward. That choice already locks the user. Now ground it in a real moment, a current workaround, and a path to reach them.",
+			"Leave this lesson with one reachable user in one painful moment. Commit to the user behind the problem, then prove the pain is real and reachable.",
 		winCondition: "One clear user statement is saved.",
 		panelDefaults: splitPanelDefaults,
 		fieldShapeVersion: 3,
@@ -423,6 +423,7 @@ export const ceoLessons = [
 				inputWidth: "wide",
 				artifactPreviewLabel: "Pain moment",
 				taskLabel: "Pain moment",
+				helpText: "Name the exact moment when this becomes painful for them.",
 			},
 			{
 				id: "current_solution",
@@ -435,6 +436,7 @@ export const ceoLessons = [
 				inputWidth: "wide",
 				artifactPreviewLabel: "Current workaround",
 				taskLabel: "Current workaround",
+				helpText: "Describe the workaround they already rely on right now.",
 			},
 			{
 				id: "reachability",
@@ -447,12 +449,13 @@ export const ceoLessons = [
 				inputWidth: "wide",
 				artifactPreviewLabel: "Reachability",
 				taskLabel: "Reachability",
+				helpText: "State the real path you have to get this in front of them fast.",
 			},
 		],
 		content: {
 			status: "draft",
 			intro:
-				"Pick the problem to carry forward. That choice already locks the user. Now ground it in a real moment, a current workaround, and a path to reach them.",
+				"Choose the one user-problem pair you can test fastest. Then ground it in a real pain moment, a current workaround, and a path to reach them this week.",
 			lessonMeta: {
 				runtimeLabel: "5-7 min",
 				goal: "Force specificity and constraint.",
@@ -461,10 +464,10 @@ export const ceoLessons = [
 			},
 			actionCard: {
 				jobNow:
-					"Pick the problem to carry forward, then define when it hits, how they handle it today, and why you can reach them.",
+					"Commit to the user behind the problem, then prove when the pain hits, how they handle it now, and how you will reach them this week.",
 				timebox: "10 minutes",
 				comeBackWith:
-					"One chosen problem grounded in a real moment and reachable path.",
+					"One chosen user statement grounded in a real moment and reachable path.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Pick One User",
@@ -473,14 +476,14 @@ export const ceoLessons = [
 			}),
 			workbench: {
 				prompt:
-					"Pick the problem to carry forward. That choice already locks the user. Now ground it in a real moment, a current workaround, and a path to reach them.",
+					"Choose the one user-problem pair you can test fastest, then ground it in a real moment, a current workaround, and a path to reach them.",
 				teachingPoints: [
 					"Choosing the problem to carry forward already chooses the user.",
 					"Name the moment when this problem feels sharpest for them.",
-					"Pressure-test reachability before you move on.",
+					"Bias toward the user you can actually reach this week.",
 				],
 				emptyState:
-					"Pick the problem to carry forward. That choice already locks the user. Now ground it in a real moment, a current workaround, and a path to reach them.",
+					"Choose the one user-problem pair you can test fastest, then ground it in a real moment, a current workaround, and a path to reach them.",
 			},
 		},
 	},
