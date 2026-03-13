@@ -19,11 +19,14 @@
 
 ## Purchase to access flow
 
-1. The landing page CTA starts checkout for signed-in users.
-2. Signed-out users are redirected through Clerk first.
-3. `POST /api/stripe/checkout` creates the Stripe Checkout Session.
-4. `POST /api/stripe/webhook` verifies the signature and grants access in Convex.
-5. `/checkout/success` polls access and redirects to `/mission`.
+1. `components/checkout-button.tsx` sends signed-out buyers to Clerk sign-in with a redirect back to `#pricing`.
+2. `POST /api/stripe/checkout` creates the Stripe Checkout Session, sets `client_reference_id`, `customer_email`, and both session/payment-intent metadata from the Clerk user and `courseSlug`, and returns the Stripe-hosted checkout URL.
+3. Stripe returns buyers to `/checkout/success?session_id=...` or `/checkout/cancel`.
+4. `POST /api/stripe/webhook` verifies the Stripe signature, accepts only completed / async-succeeded checkout events, and calls Convex to upsert the active entitlement.
+5. `api.course.grantEntitlementFromStripe` re-checks `STRIPE_WEBHOOK_SECRET` inside Convex before patching or inserting the entitlement row.
+6. `/checkout/success` does not read back the Stripe session today. It polls `api.course.viewerAccess` and redirects to `/mission` once access is active.
+7. `/access-required` uses the same `viewerAccess` query and auto-recovers to `/mission` if entitlement appears later.
+8. The home page server-side redirect path uses `getServerResumeDestination`, so entitled users landing on `/` resume to `/mission` or their most recently viewed accessible lesson unless `?marketing=1` is present.
 
 ## Product state flow
 

@@ -1,6 +1,6 @@
 # Ship by Sunday Stack Decision
 
-Last updated: 2026-03-10
+Last updated: 2026-03-13
 
 ## Locked stack
 
@@ -12,33 +12,54 @@ Last updated: 2026-03-10
 
 ## Current handoff architecture
 
-The app is no longer choosing a stack. It is now hardening the live access flow already implemented around that stack.
+The app is no longer deciding a stack. The real work is documenting the exact implementation that already exists, then closing the remaining live-env and QA gaps around it.
 
-Current flow:
+Current flow in code:
 
-1. The landing page CTA sends signed-out visitors to Clerk sign-in with a redirect back to pricing.
-2. Signed-in users call `POST /api/stripe/checkout`, which creates a Stripe Checkout Session with `clerkUserId` and `courseSlug` metadata.
-3. Stripe sends buyers to `/checkout/success` after payment.
-4. `POST /api/stripe/webhook` validates the Stripe signature and grants the Convex entitlement.
-5. The success page polls `viewerAccess` and redirects entitled buyers into `/mission`.
-6. Returning entitled users who hit `/` are resumed into `/mission` or their last worked lesson unless they explicitly use `?marketing=1`.
-7. Users without access fall back to `/access-required`, where they can retry Mission, go home, or buy access.
+1. The landing-page CTA uses `components/checkout-button.tsx`.
+2. Signed-out visitors are pushed to `/sign-in?redirect_url=<current-path>#pricing`, so the buyer returns to pricing after Clerk auth.
+3. Signed-in visitors call `POST /api/stripe/checkout`.
+4. The checkout route creates a Stripe Checkout Session with:
+   - `client_reference_id = clerkUserId`
+   - `customer_email` from Clerk `currentUser()`
+   - `metadata.clerkUserId`
+   - `metadata.courseSlug`
+   - matching `payment_intent_data.metadata`
+   - `allow_promotion_codes: true`
+   - `billing_address_collection: "auto"`
+   - `success_url = /checkout/success?session_id={CHECKOUT_SESSION_ID}`
+   - `cancel_url = /checkout/cancel`
+5. Stripe-hosted checkout returns the buyer to `/checkout/success`.
+6. `POST /api/stripe/webhook` verifies the `stripe-signature` header with `STRIPE_WEBHOOK_SECRET`.
+7. The webhook only handles `checkout.session.completed` and `checkout.session.async_payment_succeeded`.
+8. The webhook extracts `clerkUserId` from `session.metadata.clerkUserId`, falling back to `client_reference_id`, then calls `api.course.grantEntitlementFromStripe`.
+9. Convex re-checks the same `STRIPE_WEBHOOK_SECRET` before upserting an `active` entitlement keyed by `clerkUserId + courseSlug`, while also storing Stripe customer / checkout-session / payment-intent IDs when present.
+10. `/checkout/success` does not currently validate the `session_id` against Stripe. It waits for authenticated `viewerAccess`, rotates status copy while entitlement is pending, and redirects to `/mission` about 700ms after access becomes active.
+11. If the buyer opens `/access-required`, that page also polls `viewerAccess`, auto-redirects to `/mission` when access appears, and otherwise offers three paths: retry Mission, go home, or start checkout from that account.
+12. Returning entitled users who land on `/` are redirected server-side to `/mission` or their most recently viewed accessible lesson, unless they explicitly use `?marketing=1`.
 
 ## Current implementation status
 
-- Protected product routes are live in the Next.js app.
+- Protected product routes are live in the Next.js app: `/mission`, `/lesson/[lessonId]`, `/artifacts`, `/settings`, and `/access-required`.
 - Convex already handles entitlements, lesson autosave, mission progress, artifact listing, resume routing, and upload persistence.
-- Start Here lessons `0.1` and `0.2` are in the lesson registry and content system, with `0.0` as the mission-orientation screen.
+- Start Here now lives as lesson `0.0` through `0.2` inside the protected lesson system, not as a separate public onboarding page.
 - Worksheet and student-packet downloads are currently served from `public/downloads/`.
 - Stripe checkout creation, success/cancel screens, and webhook grant logic are implemented in code.
+- The current Stripe price path supports either:
+  - `STRIPE_PRICE_ID` for a dashboard-managed price
+  - inline fallback `price_data` for a one-time USD charge of `50000` cents (`$500`)
+- Convex auth is wired through `convex/auth.config.ts` and expects the Clerk JWT template app ID `convex` with `CLERK_FRONTEND_API_URL` as the provider domain.
 
 ## What is still not live-ready
 
-- Stripe still needs final webhook secret configuration and endpoint registration in the live environment.
-- Clerk still needs real production envs and the correct issuer domain wired through Convex auth.
+- Stripe still needs live webhook endpoint registration and verified delivery against the deployed environment.
+- Clerk and Convex still need a real production auth check, not just local wiring. The risky point is issuer/domain mismatch around `CLERK_FRONTEND_API_URL` and the `convex` JWT template.
+- `/checkout/success` trusts authenticated `viewerAccess`; it does not currently verify the `session_id` query param with Stripe. That is acceptable for the current thin flow, but it should be treated as an implementation constraint, not a stronger payment-proof guarantee than the code actually provides.
+- The buyer handoff still depends on the purchaser finishing checkout in the same signed-in browser context used to query `viewerAccess`.
 - Final lesson video hosting is still undecided.
-- There is no implemented transactional access email yet.
+- There is no transactional access email in code today.
 - Support inbox ownership and escalation path are still undefined.
+- The flow still needs a full real-environment QA pass across landing page -> sign-in -> checkout -> success -> mission -> Start Here.
 
 ## What is intentionally deferred
 
@@ -48,7 +69,8 @@ Current flow:
 
 ## Recommended next actions
 
-1. Register the Stripe webhook and verify the entitlement grant end to end.
-2. Replace any placeholder Clerk envs and confirm Convex auth against the real issuer.
-3. Decide the lesson video hosting path and attach the first real lesson media.
-4. Define the support fallback and decide whether launch needs a transactional access email or can rely on the current in-app success flow.
+1. Register the live Stripe webhook endpoint, run a real purchase in test mode, and confirm entitlement insert / patch behavior in Convex.
+2. Verify the production Clerk -> Convex auth chain with the real `convex` JWT template and final `CLERK_FRONTEND_API_URL`.
+3. Run the first full buyer journey QA pass against the deployed environment, including the delayed-entitlement recovery path on `/access-required`.
+4. Decide whether the launch can rely on in-app access handoff only, or whether a transactional access email is required before launch.
+5. Decide the lesson video hosting path and attach the first real lesson media.
