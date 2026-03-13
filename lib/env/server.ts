@@ -7,6 +7,10 @@ const serverEnvSchema = z.object({
 	STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
 	STRIPE_PRICE_ID: z.string().min(1).optional(),
 	STRIPE_PRODUCT_ID: z.string().min(1).optional(),
+	CODEX_BINARY: z.string().min(1).optional(),
+	CODEX_APP_SERVER_HOME_ROOT: z.string().min(1).optional(),
+	CODEX_APP_SERVER_MODEL: z.string().min(1).optional(),
+	CODEX_APP_SERVER_TIMEOUT_MS: z.string().min(1).optional(),
 });
 
 export const serverEnv = serverEnvSchema.parse({
@@ -16,6 +20,10 @@ export const serverEnv = serverEnvSchema.parse({
 	STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
 	STRIPE_PRICE_ID: process.env.STRIPE_PRICE_ID,
 	STRIPE_PRODUCT_ID: process.env.STRIPE_PRODUCT_ID,
+	CODEX_BINARY: process.env.CODEX_BINARY,
+	CODEX_APP_SERVER_HOME_ROOT: process.env.CODEX_APP_SERVER_HOME_ROOT,
+	CODEX_APP_SERVER_MODEL: process.env.CODEX_APP_SERVER_MODEL,
+	CODEX_APP_SERVER_TIMEOUT_MS: process.env.CODEX_APP_SERVER_TIMEOUT_MS,
 });
 
 export function requireServerEnv<K extends keyof typeof serverEnv>(key: K) {

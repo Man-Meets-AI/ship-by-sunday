@@ -162,6 +162,7 @@ export function PromptImportCard({
 		tone: "success" | "error";
 		message: string;
 	} | null>(null);
+	const [isGenerating, setIsGenerating] = useState(false);
 	const resetTimeoutRef = useRef<number | null>(null);
 	const promptTemplateId =
 		promptImport?.promptTemplateId ?? "competitor_research";
@@ -219,19 +220,20 @@ export function PromptImportCard({
 		);
 	};
 
-	const importResponse = () => {
+	const applyImportedResponse = (rawResponse: string, source: string) => {
 		try {
 			const nextFieldValues = buildPromptImportFieldValues(
 				promptImport,
-				pastedResponse,
+				rawResponse,
 			);
 			for (const [fieldId, value] of Object.entries(nextFieldValues)) {
 				onFieldChange(fieldId, value);
 			}
 
+			setPastedResponse(rawResponse);
 			setImportFeedback({
 				tone: "success",
-				message: uiCopy.getSuccessMessage(nextFieldValues, promptImport),
+				message: `${source}: ${uiCopy.getSuccessMessage(nextFieldValues, promptImport)}`,
 			});
 		} catch (error) {
 			setImportFeedback({
@@ -241,6 +243,59 @@ export function PromptImportCard({
 						? error.message
 						: "We could not parse that response. Paste the full ChatGPT output and try again.",
 			});
+		}
+	};
+
+	const importResponse = () => {
+		applyImportedResponse(pastedResponse, "Imported");
+	};
+
+	const generateWithCodex = async () => {
+		if (!promptState.prompt || promptState.disabledReason) {
+			return;
+		}
+
+		setIsGenerating(true);
+		setImportFeedback(null);
+
+		try {
+			const response = await fetch("/api/codex/generate", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					templateId: promptImport.promptTemplateId,
+					prompt: promptState.prompt,
+					lessonId: lesson.id,
+				}),
+			});
+			const data = (await response.json().catch(() => null)) as {
+				output?: string;
+				error?: string;
+				code?: string;
+			} | null;
+
+			if (!response.ok || !data?.output) {
+				const message =
+					data?.code === "account_not_connected"
+						? "Connect your Codex account in Settings before generating."
+						: (data?.error ?? "Unable to generate with Codex right now.");
+				setImportFeedback({
+					tone: "error",
+					message,
+				});
+				return;
+			}
+
+			applyImportedResponse(data.output, "Generated with Codex");
+		} catch {
+			setImportFeedback({
+				tone: "error",
+				message: "Unable to generate with Codex right now.",
+			});
+		} finally {
+			setIsGenerating(false);
 		}
 	};
 
@@ -279,6 +334,14 @@ export function PromptImportCard({
 							Clipboard unavailable. Copy from the prompt block below.
 						</p>
 					) : null}
+					<button
+						type="button"
+						onClick={() => void generateWithCodex()}
+						disabled={Boolean(promptState.disabledReason) || isGenerating}
+						className="rounded-none border border-product-border bg-product-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent disabled:cursor-not-allowed disabled:border-product-border disabled:text-product-muted"
+					>
+						{isGenerating ? "Generating..." : "Generate with Codex"}
+					</button>
 				</div>
 
 				<div className="rounded-none border border-product-border/80 bg-product-surface px-2 py-2">

@@ -107,6 +107,7 @@ describe("Research import workbench", () => {
 		);
 		expect(markup).toContain("Paste ChatGPT response");
 		expect(markup).toContain("Import into table");
+		expect(markup).toContain("Generate with Codex");
 		expect(markup).toContain("- User: Startup operators");
 		expect(markup).toContain("Key pattern I noticed");
 	});
@@ -138,6 +139,7 @@ describe("Scope import workbench", () => {
 		);
 		expect(markup).toContain("Paste ChatGPT scope cut");
 		expect(markup).toContain("Import scope cut");
+		expect(markup).toContain("Generate with Codex");
 		expect(markup).toContain("- User: Startup operators");
 		expect(markup).toContain("- Research pattern:");
 		expect(markup).toContain("Keep in v1");

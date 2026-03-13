@@ -1,5 +1,6 @@
 import { UserProfile } from "@clerk/nextjs";
 
+import { CodexConnectionCard } from "@/components/codex-connection-card";
 import { ProductShell } from "@/components/product-shell";
 import { requireCourseAccess } from "@/lib/server/course-access";
 import { getInitialProductTheme } from "@/lib/server/product-theme";
@@ -26,6 +27,8 @@ export default async function Page() {
 						Manage the signed-in account that owns your Ship by Sunday access.
 					</p>
 				</section>
+
+				<CodexConnectionCard />
 
 				<section className="overflow-hidden rounded-none border border-product-border bg-product-surface/78 p-2 shadow-panel backdrop-blur-xl sm:p-4">
 					<UserProfile path="/settings" />

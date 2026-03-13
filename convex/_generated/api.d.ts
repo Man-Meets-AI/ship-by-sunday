@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as codex from "../codex.js";
 import type * as course from "../course.js";
 import type * as env from "../env.js";
 import type * as uploads from "../uploads.js";
@@ -19,6 +20,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  codex: typeof codex;
   course: typeof course;
   env: typeof env;
   uploads: typeof uploads;

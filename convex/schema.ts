@@ -63,4 +63,32 @@ export default defineSchema({
 		.index("by_clerk_user_id_and_lesson_id", ["clerkUserId", "lessonId"])
 		.index("by_clerk_user_id_and_status", ["clerkUserId", "status"])
 		.index("by_clerk_user_id_and_artifact_key", ["clerkUserId", "artifactKey"]),
+	codexConnections: defineTable({
+		clerkUserId: v.string(),
+		authMode: v.union(v.literal("managed_chatgpt")),
+		accountId: v.optional(v.string()),
+		planType: v.optional(v.string()),
+		connectedAt: v.optional(v.number()),
+		status: v.union(
+			v.literal("connecting"),
+			v.literal("connected"),
+			v.literal("disconnected"),
+			v.literal("error"),
+		),
+		lastRateLimitSnapshot: v.optional(v.any()),
+		updatedAt: v.number(),
+	})
+		.index("by_clerk_user_id", ["clerkUserId"])
+		.index("by_clerk_user_id_and_status", ["clerkUserId", "status"]),
+	codexRuns: defineTable({
+		userId: v.string(),
+		lessonId: v.optional(v.string()),
+		templateId: v.string(),
+		status: v.union(v.literal("success"), v.literal("error")),
+		latencyMs: v.optional(v.number()),
+		errorCode: v.optional(v.string()),
+		createdAt: v.number(),
+	})
+		.index("by_user_id", ["userId"])
+		.index("by_user_id_and_template_id", ["userId", "templateId"]),
 });
