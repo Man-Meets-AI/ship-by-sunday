@@ -36,6 +36,7 @@ export default async function RootLayout({
 	return (
 		<html
 			lang="en"
+			data-scroll-behavior="smooth"
 			data-product-theme={initialTheme}
 			suppressHydrationWarning
 			className={`${display.variable} ${sans.variable}`}
