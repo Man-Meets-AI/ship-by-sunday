@@ -1,6 +1,6 @@
 # Ship by Sunday Todo
 
-Last updated: 2026-03-13
+Last updated: 2026-03-14
 
 ## Status legend
 
@@ -494,6 +494,7 @@ Last updated: 2026-03-13
 | 2026-03-13 | Course ops | Simplified the bottom lesson rail into one lighter navigation strip by removing the summary row and explicit state badges, switching the visible navigation affordance from `Q` / `E` to left/right arrows, and keeping cross-stage movement explicit at the boundary buttons while preserving quiet `Q` / `E` fallback support | Course Operations Producer | `components/skill-rail.tsx` + `components/skill-rail-navigation.ts` + `tests/unit/skill-rail.test.tsx` + `tests/unit/skill-rail-navigation.test.ts` + `tasks/todo.md` + `tasks/lessons.md` + `todo.md` | browser-QA one mid-block lesson plus one stage-boundary lesson on desktop/mobile to confirm arrow navigation feels natural and does not hijack focused controls |
 | 2026-03-13 | Delivery / onboarding | Refactored the main lesson route into hook-driven orchestration by moving Convex read/save state, chrome persistence, and completion flow into dedicated lesson-page hooks, splitting the shared lesson shells into smaller presentational pieces, and verifying the live shell with the entitled QA account on local lesson `0.1` | Launch Chief of Staff / COO | `components/lesson-page.tsx` + `components/lesson-page/` + `components/lesson-shells.tsx` + `components/lesson-shells/` + targeted lesson shell/state tests + `tasks/todo.md` | browser-QA a later unlocked split lesson once the seeded QA account has progress beyond Start Here so the same refactor is exercised against a fuller lesson-state payload |
 | 2026-03-13 | Launch ops / docs | Reorganized the repo surface so public entry docs now explain the app, setup, contribution path, and intended customization points, while the launch tracker, launch OS, role prompts, workstream plans, and internal research live under `docs/internal/` instead of driving the root experience | Launch Chief of Staff / COO | [README.md](../../README.md) + [CONTRIBUTING.md](../../CONTRIBUTING.md) + [docs/README.md](../README.md) + [docs/dev/customization.md](../dev/customization.md) + [docs/internal/README.md](README.md) + [AGENTS.md](../../AGENTS.md) + [docs/internal/todo.md](todo.md) + [docs/internal/main.md](main.md) | move `docs/internal/` to a private repo later if contributor traffic grows and the internal operating surface should disappear from the public checkout entirely |
+| 2026-03-14 | Launch ops / docs | Re-audited `AGENTS.md` against the live repo and tightened the guardrails around current product vocabulary, local Stripe QA commands, runtime-vs-doc precedence, and the same-browser-context purchase handoff assumption | Launch Chief of Staff / COO | [AGENTS.md](../../AGENTS.md) + [docs/internal/todo.md](todo.md) | keep `AGENTS.md`, `docs/dev/testing.md`, and `docs/delivery-onboarding/stack-decision.md` aligned whenever the local QA flow or buyer handoff changes |
 
 ## Later-phase work
 

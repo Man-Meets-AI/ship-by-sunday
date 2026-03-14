@@ -20,7 +20,7 @@ Launch `Ship by Sunday` so a cold or warm visitor can:
 - Core promise: `Go from idea to v1 this weekend`
 - Core audience: builders who can already prototype or get things working, but keep getting stuck before they ship a real v1
 - Core mechanism: `The Product Trinity` = product strategy, design, and development working together
-- Product format: software-guided weekend sprint plus on-demand walkthroughs, digital guide/workbook, prompts, and worksheets
+- Product format: software-guided weekend sprint plus on-demand walkthroughs, digital guide/workbook, prompts, templates, and artifacts
 - Product vehicle: the `Ship by Sunday` workspace plus the guided 4-block sprint
 - Fear-reducing bonus: `Product Management for Beginners` for buyers who do not trust their product judgment yet
 - Landing page strategy and offer critique are complete enough to move on
@@ -65,7 +65,7 @@ Owns offer clarity, funnel logic, objection handling, guarantee language, CTA lo
 
 File: `docs/internal/roles/course-operations-producer.md`
 
-Owns lesson structure, student journey, worksheet audit, start-here flow, upload checklist, and support documentation.
+Owns lesson structure, student journey, template/resource audit, start-here flow, upload checklist, and support documentation.
 
 ### Founder Recording Producer
 
@@ -128,6 +128,7 @@ Founder time should be reserved for:
 - Use the relevant role file before doing substantial work in that domain.
 - Treat `docs/internal/main.md` as the higher-level launch OS and sequencing reference.
 - Treat `docs/delivery-onboarding/stack-decision.md` as the source of truth for the live purchase-to-access flow.
+- When older internal launch docs drift from the live runtime, prefer `docs/delivery-onboarding/stack-decision.md`, `docs/dev/testing.md`, `tasks/lessons.md`, and the current code / route shape over stale planning language.
 - Write generated launch workstream docs into `docs/internal/<workstream>/` and keep root docs focused on product purpose, setup, contribution, and customization.
 - Treat `lib/course/manifest.ts` as the curriculum and lesson-contract source of truth.
 - Treat `convex/` as the source of truth for app data, entitlements, and lesson state.
@@ -143,15 +144,19 @@ Founder time should be reserved for:
 - Clerk handles identity and route protection.
 - Convex handles course entitlements, lesson autosave, mission progress, and artifact listing.
 - `Stripe` checkout creation, success/cancel pages, and the webhook access handoff exist in code, but do not fake webhook completion or purchase state.
+- The current paid handoff assumes checkout completes in the same signed-in browser context that polls `viewerAccess` on `/checkout/success` and `/access-required`.
 
 ## Local Development
 
+- Use `pnpm run dev` when you need the full local stack with the Next.js app and local Convex together.
 - Use `pnpm run dev:web` for the Next.js app.
 - Use `pnpm run dev:convex` for the local Convex deployment.
 - Use `pnpm run typecheck` for TypeScript verification.
 - Use `pnpm run check` before closing meaningful app-shell or onboarding-stack work.
 - Treat `docs/dev/testing.md` as the obvious testing runbook for code checks, QA-Browser flows, shared Clerk QA accounts, and Stripe sandbox verification.
 - For QA-Browser auth accounts (non-entitled vs entitled), follow `docs/dev/qa-browser-auth.md`.
+- For local paid checkout QA, run `pnpm run stripe:listen:local`, then `pnpm run stripe:local:doctor`, and use `pnpm run stripe:local:verify` after checkout to confirm the entitlement row.
+- Keep local checkout QA on `http://localhost:3000` and do not mix `localhost` with `127.0.0.1`.
 - Use `.env.local.example` as the tracked env template. Real local credentials stay in `.env.local`.
 
 ## Subagent Model
@@ -184,7 +189,7 @@ Every role in `docs/internal/roles/` can be used as a focused subagent lane.
 
 - `launch-chief-of-staff-coo.md`: sequencing, tracker maintenance, blockers, priorities
 - `founder-recording-producer.md`: recording packets, checklists, pickups, founder prep
-- `course-operations-producer.md`: lesson architecture, worksheet audit, start-here path, student experience
+- `course-operations-producer.md`: lesson architecture, template/resource audit, start-here path, student experience
 - `offer-and-funnel-strategist.md`: guarantee, checkout copy, CTA logic, funnel consistency
 - `lifecycle-email-strategist.md`: launch emails, onboarding emails, subject lines
 - `design-production-lead.md`: launch-blocking visuals, proof assets, lesson covers, thumbnails
@@ -292,6 +297,7 @@ If that is not obvious, update `docs/internal/todo.md` first before doing more w
 - Reduce ambiguity for the buyer and for the team
 - Use specific claims, not vague hype
 - Do not invent proof
+- Do not reintroduce stale worksheet wording into user-facing app or lesson copy; prefer `templates`, `artifacts`, or sprint language unless the file is explicitly about legacy/internal asset audits.
 - Assume flows are broken until tested
 - Treat checkout/access as incomplete until the real `Stripe` webhook, production Clerk envs, and Convex entitlement grant are verified end to end.
 - Treat lesson delivery as incomplete until at least one real hosted lesson asset is attached and validated in-product.
@@ -317,7 +323,7 @@ If that is not obvious, update `docs/internal/todo.md` first before doing more w
 - `docs/delivery-onboarding/stack-decision.md`: current purchase-to-access behavior contract
 - `docs/internal/`: canonical home for generated launch workstream docs
 - `docs/internal/roles/`: role-by-role prompts and ownership
-- `assets/`: course materials, packets, worksheets, and guides
+- `assets/`: course materials, packets, templates, and guides
 
 ## Default Working Stance
 
