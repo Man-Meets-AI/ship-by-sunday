@@ -4,6 +4,21 @@ Use this file to capture recurring mistakes, corrections, and guardrails for fut
 
 ## Lessons
 
+- Date: 2026-03-14
+  Pattern: I kept reading or updating a root `todo.md` from shared skills even after this repo moved its operational tracker to `docs/internal/todo.md`, which risks missing the real launch state and writing to a stale pointer file.
+  Rule: In this repo, treat `docs/internal/todo.md` as the canonical tracker unless the task explicitly says otherwise. Shared planning, docs, and critique workflows should prefer the repo's canonical tracker path, not assume a root `todo.md`.
+  How to verify next time: Before using any planning or docs workflow, confirm which tracker file `AGENTS.md` names as the source of truth, and if a skill says `todo.md`, adapt it to `docs/internal/todo.md` when that file exists.
+
+- Date: 2026-03-14
+  Pattern: I produced planning output that was structurally correct but not immediately executable, and the next user move collapsed into repeated `Implement the plan.` follow-ups instead of a clean coding handoff.
+  Rule: When a planning artifact is meant for a downstream builder, make the execution entry obvious inside the plan itself. The chosen slice, first implementation milestone, affected systems, and first verification step should be explicit enough that a follow-up coding pass can start without re-planning.
+  How to verify next time: Re-read the final plan and ask whether a coding agent could start from it without another clarification turn. If the first file area, first milestone, or first validation step is still implicit, the plan is not ready.
+
+- Date: 2026-03-14
+  Pattern: I left a user-managed implementation skill routing to a `$shadcn` specialist that is not actually installed in this environment, which creates dead-end guidance and weakens trust in the skill graph.
+  Rule: Never tell the agent to call a specialist unless that specialist is actually available in the current repo or home-managed skill inventory. If a framework-specific helper is absent, preserve the existing system and route to the closest installed specialist instead of naming a missing one.
+  How to verify next time: Before closing any skill edit, search the live skill inventory and confirm every referenced specialist exists. If a skill name does not resolve to a real `SKILL.md`, remove or conditionalize the route.
+
 - Date: 2026-03-13
   Pattern: I left `worksheet` language in buyer-facing and student-facing app copy even though the live product is no longer positioned around worksheets, which made `Start Here`, coach resources, and landing-page copy promise an asset model the product does not actually use.
   Rule: When naming deliverables or support assets in this repo, use the nouns the product actually ships now. If the experience is centered on templates, artifacts, or the guided sprint, remove stale worksheet language across landing, Start Here, coach resources, template CTAs, and tests in the same sweep.
