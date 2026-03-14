@@ -36,6 +36,84 @@ From recent history entries:
 3. `clerk`: 6
 4. `docs`: 6
 
+## Run update: 2026-03-14 11:15 ET
+
+### Additional signal from this pass
+
+- Manual threads after excluding automation prompts: 208
+- Direct follow-up prompt `Implement the plan.`: 17
+- Direct local-ops prompt `restart our services.`: 5
+
+Manual-thread skill mentions in this pass:
+
+1. `docs`: 36
+2. `figma`: 13
+3. `convex`: 11
+4. `ux-design-crit`: 9
+5. `clerk`: 7
+6. `shadcn`: 4
+
+### Additional findings and fixes from this pass
+
+#### A. Planning handoffs still leak ambiguity into execution
+
+Evidence:
+
+- `Implement the plan.` recurred 17 times.
+- `prd-strategy` came up directly in planning-workflow refinement threads.
+
+Risk:
+
+- The plan artifact is structurally valid but not always executable without a second interpretation pass.
+
+Fix applied:
+
+- Strengthened [`/Users/parkerrex/Projects/team-wiki/.agents/skills/prd-strategy/SKILL.md`](/Users/parkerrex/Projects/team-wiki/.agents/skills/prd-strategy/SKILL.md) so the chosen slice must make the first implementation milestone, affected systems, and first verification step obvious enough for a direct coding handoff.
+
+#### B. Deprecated UX naming is still sticky in real usage
+
+Evidence:
+
+- `ux-design-crit` appeared 9 times in manual threads from this pass.
+- `design-ux-crit` appeared only once in the same slice.
+
+Risk:
+
+- Keeping two full bodies invites drift while the deprecated alias remains the live muscle-memory prompt.
+
+Fix applied:
+
+- Converted [`/Users/parkerrex/.agents/skills/ux-design-crit/SKILL.md`](/Users/parkerrex/.agents/skills/ux-design-crit/SKILL.md) into a compatibility alias that explicitly routes to `design-ux-crit` instead of carrying its own duplicate doctrine.
+
+#### C. `eng-implement` still had a dead specialist route
+
+Evidence:
+
+- `shadcn` appeared 4 times in manual threads from this pass.
+- The implementation skill still told agents to call `$shadcn` even though no `shadcn` skill is installed in the current runtime.
+
+Risk:
+
+- Agents get routed into a non-existent teammate, which weakens trust in the skill graph and encourages improvisation.
+
+Fix applied:
+
+- Updated [`/Users/parkerrex/Projects/team-wiki/.agents/skills/eng-implement/SKILL.md`](/Users/parkerrex/Projects/team-wiki/.agents/skills/eng-implement/SKILL.md) so shadcn/ui routing is conditional on an actually installed `shadcn` skill.
+
+#### D. Local service recovery is recurring but still not codified
+
+Evidence:
+
+- `restart our services.` appeared 5 times in the same 14-day window.
+
+Risk:
+
+- Repeated local restart work still depends on ad hoc shell knowledge instead of a stable contract.
+
+Recommended fix:
+
+- If the pattern continues next run, add a narrow local-dev restart skill with service discovery, restart order, health checks, and rollback guidance.
+
 ## Ranked findings
 
 ### 1. High-use skills still assumed a root `todo.md` after the repo moved its tracker
@@ -148,6 +226,9 @@ Recommended fix:
 
 1. Updated five high-use skills to prefer the canonical internal tracker path when a repo uses one.
 2. Added one new local lesson to prevent future tracker-path drift.
+3. Added two new local lessons covering executable plan handoffs and missing-specialist routing.
+4. Updated the `ux-design-crit` alias so it defers to the canonical `design-ux-crit` workflow.
+5. Updated team-owned `prd-strategy` and `eng-implement` source skills, then republished them to the home skill store.
 
 ## Deferred work
 
