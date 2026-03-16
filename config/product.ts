@@ -15,6 +15,7 @@ export const productConfig = {
 	bonusName: "Product Management for Beginners",
 	images: {
 		founderProof: "/founder-proof.jpg",
+		logo: "/ship-by-sunday.png",
 		missionPreview: "/product/mission-bg.png",
 	},
 } as const;

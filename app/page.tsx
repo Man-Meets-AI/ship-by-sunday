@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CheckoutButton } from "@/components/checkout-button";
+import { ProductBrand } from "@/components/product-brand";
 import { homePageContent } from "@/content/marketing/home";
 import { redirectEntitledHomeVisitor } from "@/lib/server/course-access";
 import FAQAccordion from "./faq-accordion";
@@ -74,9 +75,14 @@ export default async function Page({
 
 						<div className="mb-5 flex w-full items-center justify-between gap-4 text-[11px] font-bold uppercase tracking-[0.26em] text-ink/65 sm:text-xs">
 							<span>{hero.topBarStart}</span>
-							<span className="font-display text-2xl tracking-[0.08em] text-ink">
-								{hero.topBarMark}
-							</span>
+							<ProductBrand
+								href="/"
+								priority
+								showLabel={false}
+								imageSize={44}
+								className="justify-center"
+								imageClassName="rounded-xl"
+							/>
 							<span>{hero.topBarEnd}</span>
 						</div>
 

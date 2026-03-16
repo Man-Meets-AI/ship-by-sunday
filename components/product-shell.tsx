@@ -13,6 +13,7 @@ import {
 	ProductThemeProvider,
 	useProductTheme,
 } from "@/components/product-theme-provider";
+import { ProductBrand } from "@/components/product-brand";
 import { getProductShellBlockNavigationTarget } from "@/components/product-shell-navigation";
 import {
 	SkillRail,
@@ -214,12 +215,12 @@ function ShellInner({
 		>
 			{/* Left: logo + nav */}
 			<div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-				<Link
+				<ProductBrand
 					href="/mission"
-					className="font-display text-base uppercase tracking-[0.08em] text-product-text sm:text-lg"
-				>
-					Ship by Sunday
-				</Link>
+					imageSize={30}
+					imageClassName="rounded-[6px]"
+					labelClassName="font-display text-base uppercase tracking-[0.08em] text-product-text sm:text-lg"
+				/>
 
 				<nav className="flex gap-1 font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted sm:text-[10px]">
 					{navItems.map((item) => {
