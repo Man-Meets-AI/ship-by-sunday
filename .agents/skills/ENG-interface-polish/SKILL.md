@@ -1,3 +1,4 @@
+---
 name: ENG-interface-polish
 description: Review, critique, or implement the small UI details that make interfaces feel more refined. Use when the user asks to polish a UI, improve how an interface feels, fix number jitter, tighten text wrapping, clean up border radius relationships, sharpen icon or content alignment, replace harsh borders with softer surface treatment, improve image framing, or add light interaction polish without doing a full redesign or motion-system pass.
 ---

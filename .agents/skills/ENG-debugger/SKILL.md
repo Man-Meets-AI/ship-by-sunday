@@ -1,3 +1,4 @@
+---
 name: ENG-debugger
 description: Investigate software incidents, identify root cause, decide whether direct remediation or an extra planning step is needed, and implement the safest fix with tracked tasks. Use when the user asks to debug a bug, find root cause, diagnose an issue, trace a failure, fix a regression, or remediate a production incident.
 ---

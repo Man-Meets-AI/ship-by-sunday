@@ -1,3 +1,4 @@
+---
 name: ENG-commit
 description: Land finished engineering work cleanly by reviewing the diff, staging only owned files, splitting the work into small logical conventional commits, updating tests and docs where needed, pushing the branch, and returning a terse handoff. Use when feature work is done and the user asks to commit, land, stage, split commits, clean up a branch, or push finished changes.
 ---

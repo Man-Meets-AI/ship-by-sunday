@@ -1,3 +1,4 @@
+---
 name: QA-Browser
 description: Run focused interactive browser QA against a supplied app URL and return a structured bug report. Use when the user asks to QA a flow, smoke test staging, test sign-in, check onboarding, verify checkout, validate protected routes, or inspect a buyer or student journey in a real browser.
 ---
