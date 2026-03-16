@@ -6,6 +6,10 @@ It does not replace `docs/internal/todo.md`, which remains the launch tracker an
 
 ## Active
 
+- [x] Replace the old default site icon with the provided Ship by Sunday favicon pack
+- [x] Update the visible app/auth brand surfaces to use the new Ship by Sunday logo asset instead of plain text-only branding where appropriate
+- [x] Verify the favicon/logo wiring with targeted checks and log the outcome
+
 - [x] Tighten the landing-page marketing payload so the hero, offer stack, pricing bundle, and FAQs reflect the guided workspace, starter template, paste-ready instructions, walkthrough volume, and PM bonus clearly
 - [x] Verify the updated homepage copy with `pnpm run typecheck` and a manual read-through of `content/marketing/home.ts`
 
@@ -200,6 +204,10 @@ It does not replace `docs/internal/todo.md`, which remains the launch tracker an
 - [x] Verify the repo with lint, format check, unit tests, smoke tests, `typecheck`, and `check`
 
 ## Review
+
+- Outcome: Replaced the placeholder site icon path with the final Ship by Sunday favicon pack, added a proper web manifest, copied the provided logo asset into `public/`, and introduced a shared `ProductBrand` component so the landing-page top bar, app shell header, and auth pages now render the real logo instead of the old placeholder/text-only mark.
+- Verification: `pnpm run typecheck`, `curl -s http://localhost:3000/ | rg -o '<link[^>]+rel=\"[^\"]+\"[^>]+>|<title>[^<]+</title>'`, `curl -I -s http://localhost:3000/favicon.ico`, `curl -I -s http://localhost:3000/apple-touch-icon.png`, and `curl -s http://localhost:3000/manifest.webmanifest`.
+- Follow-up: Hard-refresh the deployed site once these assets ship so browsers drop the old favicon cache; if launch wants the logo applied to more marketing surfaces later, keep using `components/product-brand.tsx` instead of reintroducing one-off brand markup.
 
 - Outcome: Tightened the landing-page marketing payload so the hero now sells `Ship by Sunday` as a guided workspace, the offer stack names the starter template and exact paste-ready Codex instructions directly, the walkthrough value is framed as `30+ walkthroughs showing the full system in action`, the PM bonus now reads as a concrete 25-video course, and the FAQ/pricing copy answers the new starter-template and example-build objections more directly.
 - Verification: `pnpm run typecheck` plus a manual read-through of `content/marketing/home.ts`.
