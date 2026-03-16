@@ -15,10 +15,11 @@ export const homePageContent = {
 		topBarEnd: "Prototype to v1",
 		headlineLead: "Turn rough prototypes",
 		headlineAccent: "into real v1s",
-		body: `${productName} is a software-guided weekend sprint for builders who can already prototype, but need product judgment, design direction, and execution structure to ship a real v1.`,
+		body: `${productName} is a guided workspace for builders who can already prototype, but need a clearer system to actually ship. You get a starter template, exact paste-ready Codex instructions, and 30+ walkthroughs showing the full system in action so you can go from idea to real v1 this weekend.`,
 		primaryCta: "Get instant access",
 		secondaryCta: "See how it works",
-		eyebrow: "Workspace + sprint + on-demand walkthroughs + lifetime access",
+		eyebrow:
+			"Guided workspace + starter template + exact paste-ready Codex instructions + 30+ walkthroughs",
 	},
 	outcomesSection: {
 		label: "Outcomes",
@@ -158,9 +159,9 @@ export const homePageContent = {
 		],
 	},
 	processCallout: {
-		titleLead: "Not more content.",
-		titleAccent: "A better process.",
-		body: "Each block ends with a real artifact. You are not buying another theory library. You are buying a system for turning rough prototypes into something real.",
+		titleLead: "Not another course.",
+		titleAccent: "A system you open and follow.",
+		body: "Each block ends with a real artifact. You are not bouncing between random docs, prompts, and tabs. You are inside a guided workspace, following a structured path, and building something real.",
 	},
 	audienceSection: {
 		titleLead: "Built for builders",
@@ -195,28 +196,39 @@ export const homePageContent = {
 		stackTitle: "The stack",
 		insideLabel: `Inside ${productName}`,
 		insideTitle: "Everything under one roof",
-		insideIntro: `You will not be juggling docs, prompts, templates, and random tabs. ${productName} keeps product thinking, design direction, and build execution in one place.`,
+		insideIntro:
+			"Everything is built to reduce friction. Instead of piecing together advice from scattered videos, notes, and prompts, you get one guided workspace that keeps product thinking, design direction, and execution moving together.",
 		missionAlt: `${productName} workspace preview`,
 		items: [
 			{
-				name: `${productName} workspace`,
+				name: `${productName} guided workspace`,
 				description:
-					"Keeps product thinking, design direction, and build execution in one place.",
+					"A guided workspace that walks you through the sprint from rough idea to shipped v1.",
 			},
 			{
-				name: "Guided weekend sprint",
+				name: "4-block guided sprint",
 				description:
-					"The 4-block path that takes you from rough idea to shipped v1.",
+					"A clear path for scoping, designing, building, and shipping without losing momentum in the middle.",
 			},
 			{
-				name: "On-demand walkthroughs + workbook",
+				name: "Starter template",
 				description:
-					"Practical support, prompts, templates, and checklists that keep each block moving.",
+					"A ready-to-use starting point so you are never stuck staring at a blank screen.",
+			},
+			{
+				name: "Exact paste-ready Codex instructions",
+				description:
+					"Use the exact instructions you need to move fast in Figma and in the build without overthinking prompts.",
+			},
+			{
+				name: "30+ walkthroughs showing the full system in action",
+				description:
+					"Watch the entire process used on a real build from first scope to live deployment.",
 			},
 			{
 				name: bonusName,
 				description:
-					"Included bonus for builders who do not trust their product judgment yet.",
+					"A 25-video bonus course for builders who want stronger product judgment while they ship.",
 			},
 		],
 		workspacePreviews: [
@@ -268,7 +280,7 @@ export const homePageContent = {
 			},
 			{
 				question: "Is this a coding course?",
-				answer: `No. Coding is part of the process, but ${productName} is really about getting product strategy, design, and development to work together so something real ships.`,
+				answer: `It includes walkthroughs, but ${productName} is not just a video course. It is a guided workspace built to help you scope, design, build, and ship a real v1.`,
 			},
 			{
 				question: "Do I need product experience?",
@@ -288,6 +300,26 @@ export const homePageContent = {
 				answer:
 					"Scoped web apps, MVPs, narrow tools, and practical products are the best fit. It is not for giant multi-system startup ideas.",
 			},
+			{
+				question: "What is the starter template?",
+				answer:
+					"It is a ready-to-use starting point inside the system that helps you skip blank-page paralysis and start moving immediately.",
+			},
+			{
+				question: "What are the Codex instructions?",
+				answer:
+					"They are exact paste-ready instructions you can use to move through the design and build process faster without having to figure out every prompt from scratch.",
+			},
+			{
+				question: "What do the walkthroughs actually show?",
+				answer:
+					"They show the full system in action on a real build, so you can see how the process works from start to finish instead of trying to piece it together yourself.",
+			},
+			{
+				question: "Do I have to use the same stack as the example build?",
+				answer:
+					"No. The example build shows the process in action. You can apply the same system to the stack that fits your app.",
+			},
 		],
 	},
 	pricingSection: {
@@ -295,17 +327,18 @@ export const homePageContent = {
 		titleLead: "Go from idea to v1",
 		titleAccent: "this weekend",
 		intro:
-			"A software-guided weekend sprint for builders who can already prototype, but need a better system to ship a real v1.",
+			"A guided workspace, starter template, exact paste-ready Codex instructions, and 30+ walkthroughs showing the full system in action. Everything you need to go from rough prototype to shipped v1 this weekend.",
 		priceDisplay: productConfig.priceDisplay,
 		eyebrow: "Immediate access. No subscription. Lifetime access.",
 		paymentLabel: "One-time payment",
 		ctaTitle: "Get instant access",
 		includes: [
-			`${productName} workspace`,
-			"4-block sprint",
-			"On-demand walkthroughs",
-			"Workbook + prompts",
-			`${bonusName} bonus`,
+			`${productName} guided workspace`,
+			"4-block guided sprint",
+			"Starter template",
+			"Exact paste-ready Codex instructions",
+			"30+ walkthroughs showing the full system in action",
+			"25-video Product Management for Beginners bonus",
 			"Lifetime access",
 		],
 		guarantee:

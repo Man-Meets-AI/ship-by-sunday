@@ -6,6 +6,9 @@ It does not replace `docs/internal/todo.md`, which remains the launch tracker an
 
 ## Active
 
+- [x] Tighten the landing-page marketing payload so the hero, offer stack, pricing bundle, and FAQs reflect the guided workspace, starter template, paste-ready instructions, walkthrough volume, and PM bonus clearly
+- [x] Verify the updated homepage copy with `pnpm run typecheck` and a manual read-through of `content/marketing/home.ts`
+
 - [x] Add one obvious local testing runbook under `docs/dev/` that covers code checks, shared QA accounts, browser QA, and Stripe sandbox verification
 - [x] Cross-link the testing runbook from `README.md`, `CONTRIBUTING.md`, `docs/README.md`, `docs/dev/qa-browser-auth.md`, and `AGENTS.md`
 - [x] Verify the testing docs point to the right commands and source docs without broken paths
@@ -197,6 +200,10 @@ It does not replace `docs/internal/todo.md`, which remains the launch tracker an
 - [x] Verify the repo with lint, format check, unit tests, smoke tests, `typecheck`, and `check`
 
 ## Review
+
+- Outcome: Tightened the landing-page marketing payload so the hero now sells `Ship by Sunday` as a guided workspace, the offer stack names the starter template and exact paste-ready Codex instructions directly, the walkthrough value is framed as `30+ walkthroughs showing the full system in action`, the PM bonus now reads as a concrete 25-video course, and the FAQ/pricing copy answers the new starter-template and example-build objections more directly.
+- Verification: `pnpm run typecheck` plus a manual read-through of `content/marketing/home.ts`.
+- Follow-up: Browser-QA the live homepage once convenient to confirm the longer hero and offer-stack labels still scan cleanly on mobile and that the pricing checklist does not feel too dense.
 
 - Outcome: Added `docs/dev/testing.md` as the obvious local testing entry point for code checks, QA-Browser account prep, browser QA, and Stripe sandbox handoff verification; then linked that runbook from `README.md`, `CONTRIBUTING.md`, `docs/README.md`, `docs/dev/qa-browser-auth.md`, and `AGENTS.md` so both contributors and repo agents see the same testing path first.
 - Verification: `rg -n "testing\\.md|qa-browser-auth\\.md|stripe:listen:local|clerk:test-user:prepare:entitled" README.md CONTRIBUTING.md docs/README.md docs/dev/testing.md docs/dev/qa-browser-auth.md AGENTS.md` plus a manual read-through of `docs/dev/testing.md`.
