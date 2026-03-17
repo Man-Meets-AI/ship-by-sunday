@@ -136,7 +136,7 @@ export function AccessRequiredPage({
 	const shellSubtitle = isCheckingAccess
 		? "We’re checking whether this signed-in account already has access."
 		: isSignedOut
-			? "Sign in with the same account used at checkout so we can check your access."
+			? "Use the same account you used at checkout so we can reconnect your access."
 			: "This signed-in account does not have Ship by Sunday access yet.";
 	const title = isCheckingAccess
 		? "Checking access"
@@ -146,7 +146,7 @@ export function AccessRequiredPage({
 	const helperCopy = isCheckingAccess
 		? "We’re checking your purchase status in the background so we can send you into Ship by Sunday automatically."
 		: isSignedOut
-			? "This route is part of the protected buyer journey. Sign in first so we can check whether your Ship by Sunday purchase is attached to your account."
+			? "If you already paid, sign in with the same email you used at checkout. If you have not purchased yet, review the offer before starting checkout."
 			: "We could not find an active Ship by Sunday entitlement on this account. Most people here either just completed checkout and need a few more seconds, or they are signed into a different email than the one used at purchase.";
 	const accessStateLabel = isCheckingAccess
 		? "Purchase sync in progress"

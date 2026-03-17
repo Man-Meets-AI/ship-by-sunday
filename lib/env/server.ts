@@ -1,5 +1,14 @@
 import { z } from "zod";
 
+function normalizeEnvValue(value: string | undefined) {
+	if (typeof value !== "string") {
+		return value;
+	}
+
+	const normalized = value.trim();
+	return normalized.length > 0 ? normalized : undefined;
+}
+
 const serverEnvSchema = z.object({
 	APP_BASE_URL: z.string().url().optional(),
 	CLERK_SECRET_KEY: z.string().min(1).optional(),
@@ -16,18 +25,24 @@ const serverEnvSchema = z.object({
 });
 
 export const serverEnv = serverEnvSchema.parse({
-	APP_BASE_URL: process.env.APP_BASE_URL,
-	CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
-	CLERK_FRONTEND_API_URL: process.env.CLERK_FRONTEND_API_URL,
-	STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
-	STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
-	STRIPE_PRICE_ID: process.env.STRIPE_PRICE_ID,
-	STRIPE_PRODUCT_ID: process.env.STRIPE_PRODUCT_ID,
-	CODEX_BINARY: process.env.CODEX_BINARY,
-	CODEX_APP_SERVER_ENABLED: process.env.CODEX_APP_SERVER_ENABLED,
-	CODEX_APP_SERVER_HOME_ROOT: process.env.CODEX_APP_SERVER_HOME_ROOT,
-	CODEX_APP_SERVER_MODEL: process.env.CODEX_APP_SERVER_MODEL,
-	CODEX_APP_SERVER_TIMEOUT_MS: process.env.CODEX_APP_SERVER_TIMEOUT_MS,
+	APP_BASE_URL: normalizeEnvValue(process.env.APP_BASE_URL),
+	CLERK_SECRET_KEY: normalizeEnvValue(process.env.CLERK_SECRET_KEY),
+	CLERK_FRONTEND_API_URL: normalizeEnvValue(process.env.CLERK_FRONTEND_API_URL),
+	STRIPE_SECRET_KEY: normalizeEnvValue(process.env.STRIPE_SECRET_KEY),
+	STRIPE_WEBHOOK_SECRET: normalizeEnvValue(process.env.STRIPE_WEBHOOK_SECRET),
+	STRIPE_PRICE_ID: normalizeEnvValue(process.env.STRIPE_PRICE_ID),
+	STRIPE_PRODUCT_ID: normalizeEnvValue(process.env.STRIPE_PRODUCT_ID),
+	CODEX_BINARY: normalizeEnvValue(process.env.CODEX_BINARY),
+	CODEX_APP_SERVER_ENABLED: normalizeEnvValue(
+		process.env.CODEX_APP_SERVER_ENABLED,
+	),
+	CODEX_APP_SERVER_HOME_ROOT: normalizeEnvValue(
+		process.env.CODEX_APP_SERVER_HOME_ROOT,
+	),
+	CODEX_APP_SERVER_MODEL: normalizeEnvValue(process.env.CODEX_APP_SERVER_MODEL),
+	CODEX_APP_SERVER_TIMEOUT_MS: normalizeEnvValue(
+		process.env.CODEX_APP_SERVER_TIMEOUT_MS,
+	),
 });
 
 export function requireServerEnv<K extends keyof typeof serverEnv>(key: K) {
