@@ -6,6 +6,16 @@ It does not replace `docs/internal/todo.md`, which remains the launch tracker an
 
 ## Active
 
+- [ ] Bootstrap `shadcn/ui` in the existing Next.js app with a real `components.json`, keeping Tailwind v4, RSC, TypeScript, `app/globals.css`, and the repo `@/*` alias intact
+- [ ] Add the shadcn foundation files and dependencies (`components/ui`, `lib/utils`, `Button` primitive, shared variant utility) without breaking the current product theme runtime
+- [ ] Map shadcn semantic theme tokens onto the existing `Ship by Sunday` product tokens so shadcn defaults inherit our palettes, type direction, and motion behavior instead of introducing a second visual system
+- [ ] Replace the homepage and checkout-entry CTA path with the shared shadcn `Button` primitive first, then verify the hover, focus, loading, and disabled states in-browser
+- [ ] Audit duplicate hand-rolled button/action class strings across marketing, checkout, access gating, docs, and course surfaces, then migrate the highest-traffic paths to shared button variants before touching low-value screens
+- [ ] Decide whether to import the full shadcn catalog after the button/token migration; if we do, treat it as a separate registry import plus QA pass instead of folding it into the homepage hover fix
+
+- Planning note: `shadcn` migration is structurally compatible with this repo (`Next.js` app router, `TypeScript`, `RSC`, `Tailwind v4`, `@` alias), but it is not currently installed and should be treated as a UI-system project, not a one-line hover patch.
+- Planning note: If we really want the whole official catalog, scope it as a second pass after the shared button/token layer lands. The official `@shadcn` registry currently exposes 405 items total, with the core `registry:ui` layer sitting underneath that larger surface of examples and blocks.
+
 - [x] Add the Product Management for Beginners bonus to the post-purchase `/mission` setup area near starter repo access without distracting from `Start Here`
 - [x] Cover the mission bonus placement with focused component and route regression tests
 - [x] Verify the mission bonus slice, then log the outcome in the local and launch trackers
