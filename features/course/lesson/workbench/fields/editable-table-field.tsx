@@ -2,6 +2,19 @@ import type {
 	TableColumnConfig,
 	WorkbenchField,
 } from "@/features/course/lesson/model/manifest";
+import { Button } from "@/components/ui/button";
+import {
+	assert,
+	assertNever,
+} from "@/features/course/lesson/lib/assert";
+import { Input } from "@/components/ui/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import {
 	createEmptyTableRow,
 	getTableRows,
@@ -9,12 +22,6 @@ import {
 } from "@/features/course/lesson/model/table";
 
 import { fieldLabelClass } from "./field-styles";
-
-const cellInputClass =
-	"w-full min-w-0 border-0 bg-transparent px-3 py-2 text-sm leading-relaxed text-product-text outline-hidden transition-colors placeholder:text-product-muted/55 focus-visible:bg-product-surface-strong/80";
-
-const actionButtonClass =
-	"inline-flex items-center justify-center rounded-none border border-product-border bg-product-surface px-3 py-2 text-[11px] font-mono uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent focus-visible:border-product-accent focus-visible:text-product-accent focus-visible:outline-hidden";
 
 function getColumnWidthClass(column: TableColumnConfig) {
 	if (column.width === "compact") {
@@ -58,36 +65,46 @@ function TableCellControl({
 }) {
 	const controlName = `${field.id}-${rowIndex}-${column.id}`;
 
-	if (column.kind === "select") {
-		return (
-			<select
-				name={controlName}
-				aria-label={`${field.label} row ${rowIndex + 1} ${column.label}`}
-				value={value}
-				onChange={(event) => onChange(event.target.value)}
-				className={cellInputClass}
-			>
-				<option value="">{column.placeholder ?? "Select one"}</option>
-				{column.options?.map((option) => (
-					<option key={option} value={option}>
-						{option}
-					</option>
-				))}
-			</select>
-		);
+	switch (column.kind) {
+		case "select": {
+			assert(
+				column.options,
+				`Table column "${column.id}" is missing options.`,
+			);
+
+			return (
+				<Select value={value} onValueChange={onChange}>
+					<SelectTrigger
+						aria-label={`${field.label} row ${rowIndex + 1} ${column.label}`}
+						className="w-full border-0 bg-transparent px-3 py-2"
+					>
+						<SelectValue placeholder={column.placeholder ?? "Select one"} />
+					</SelectTrigger>
+					<SelectContent>
+						{column.options.map((option) => (
+							<SelectItem key={option} value={option}>
+								{option}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+			);
+		}
+		case "text":
+			return (
+				<Input
+					type="text"
+					name={controlName}
+					aria-label={`${field.label} row ${rowIndex + 1} ${column.label}`}
+					value={value}
+					onChange={(event) => onChange(event.target.value)}
+					placeholder={column.placeholder}
+					className="border-0 bg-transparent px-3 py-2"
+				/>
+			);
 	}
 
-	return (
-		<input
-			type="text"
-			name={controlName}
-			aria-label={`${field.label} row ${rowIndex + 1} ${column.label}`}
-			value={value}
-			onChange={(event) => onChange(event.target.value)}
-			placeholder={column.placeholder}
-			className={cellInputClass}
-		/>
-	);
+	return assertNever(column.kind, "Unhandled table column kind");
 }
 
 export function EditableTableField({
@@ -101,7 +118,8 @@ export function EditableTableField({
 	onChange: (value: unknown) => void;
 	showLabel?: boolean;
 }) {
-	const columns = field.columns ?? [];
+	assert(field.columns?.length, `Table field "${field.id}" is missing columns.`);
+	const columns = field.columns;
 	const draftRows = getDraftRows(value, columns);
 	const rowKeyCounts = new Map<string, number>();
 	const rowEntries = draftRows.map((row, rowIndex) => ({
@@ -183,7 +201,7 @@ export function EditableTableField({
 												field={field}
 												column={column}
 												rowIndex={rowIndex}
-												value={row[columnIndex] ?? ""}
+												value={row[columnIndex]}
 												onChange={(nextValue) =>
 													updateCell(rowIndex, columnIndex, nextValue)
 												}
@@ -191,14 +209,16 @@ export function EditableTableField({
 										</td>
 									))}
 									<td className="align-top">
-										<button
+										<Button
 											type="button"
 											onClick={() => removeRow(rowIndex)}
 											aria-label={`Remove row ${rowIndex + 1} from ${field.label}`}
-											className={`${actionButtonClass} m-2`}
+											variant="outline"
+											size="sm"
+											className="m-2"
 										>
 											Remove
-										</button>
+										</Button>
 									</td>
 								</tr>
 							))}
@@ -215,14 +235,15 @@ export function EditableTableField({
 								<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
 									Row {rowIndex + 1}
 								</p>
-								<button
+								<Button
 									type="button"
 									onClick={() => removeRow(rowIndex)}
 									aria-label={`Remove row ${rowIndex + 1} from ${field.label}`}
-									className={actionButtonClass}
+									variant="outline"
+									size="sm"
 								>
 									Remove
-								</button>
+								</Button>
 							</div>
 							<div className="space-y-3">
 								{columns.map((column, columnIndex) => (
@@ -233,7 +254,7 @@ export function EditableTableField({
 												field={field}
 												column={column}
 												rowIndex={rowIndex}
-												value={row[columnIndex] ?? ""}
+												value={row[columnIndex]}
 												onChange={(nextValue) =>
 													updateCell(rowIndex, columnIndex, nextValue)
 												}
@@ -246,11 +267,11 @@ export function EditableTableField({
 					))}
 				</div>
 				<div className="flex justify-start">
-					<button type="button" onClick={addRow} className={actionButtonClass}>
+					<Button type="button" onClick={addRow} variant="outline" size="sm">
 						Add Row
-					</button>
+					</Button>
 				</div>
-				{draftRows.length === 1 && isTableRowBlank(draftRows[0] ?? []) ? (
+				{draftRows.length === 1 && isTableRowBlank(draftRows[0]) ? (
 					<p className="text-[11px] font-medium leading-relaxed text-product-muted">
 						Add the first row when you find a useful data point.
 					</p>

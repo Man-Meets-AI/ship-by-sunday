@@ -2,8 +2,10 @@
 
 import { useMutation } from "convex/react";
 import { useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 import { LessonVideoPlayer } from "@/features/course/lesson/components/lesson-video-player";
+import { assert } from "@/features/course/lesson/lib/assert";
 import type {
 	UploadFieldValue,
 	WorkbenchField,
@@ -19,12 +21,6 @@ import { WorkbenchCard } from "../shared/workbench-card";
 import { WorkbenchContainer } from "../shared/workbench-container";
 import { WorkbenchHeader } from "../shared/workbench-header";
 import type { WorkbenchModeProps } from "../types";
-
-const primaryButtonClass =
-	"inline-flex items-center justify-center rounded-none border border-product-accent bg-product-chip px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg disabled:cursor-not-allowed disabled:border-product-border disabled:bg-product-surface disabled:text-product-muted";
-
-const secondaryButtonClass =
-	"inline-flex items-center justify-center rounded-none border border-product-border bg-product-surface px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:bg-product-surface-alt disabled:cursor-not-allowed disabled:opacity-60";
 
 export function appendSketchUploads(
 	currentUploads: UploadFieldValue[],
@@ -46,6 +42,11 @@ export function removeSketchUploadAt(
 ) {
 	return currentUploads.filter((_, currentIndex) => currentIndex !== index);
 }
+
+type UploadState =
+	| { status: "idle" }
+	| { status: "uploading" }
+	| { status: "error"; message: string };
 
 function getSketchUploadField(fields: WorkbenchField[]) {
 	return (
@@ -97,26 +98,36 @@ export function SketchUploadWorkbench({
 	completedTaskCount,
 }: WorkbenchModeProps) {
 	const generateUploadUrl = useMutation(api.uploads.generateUploadUrl);
-	const uploadField = getSketchUploadField(fields);
-	const uploadFieldId = uploadField?.id ?? "sketch_upload";
+	const sketchUploadField = getSketchUploadField(fields);
+	assert(
+		sketchUploadField,
+		"Sketch upload workbench requires an upload field.",
+	);
+	const uploadField = sketchUploadField;
+	const uploadFieldId = uploadField.id;
 	const uploads = getUploadMetadataList(fieldValues[uploadFieldId]);
-	const [isUploading, setIsUploading] = useState(false);
-	const [uploadError, setUploadError] = useState<string | null>(null);
+	const [uploadState, setUploadState] = useState<UploadState>({
+		status: "idle",
+	});
 	const appendInputRef = useRef<HTMLInputElement | null>(null);
 	const replaceInputRef = useRef<HTMLInputElement | null>(null);
 	const isInvalid = invalidFieldIds.has(uploadFieldId);
+	const isUploading = uploadState.status === "uploading";
 
 	async function handleFileSelection(
 		fileList: FileList | null,
 		mode: "append" | "replace",
 	) {
-		const files = Array.from(fileList ?? []);
-		if (!uploadField || files.length === 0) {
+		if (!fileList) {
 			return;
 		}
 
-		setUploadError(null);
-		setIsUploading(true);
+		const files = Array.from(fileList);
+		if (files.length === 0) {
+			return;
+		}
+
+		setUploadState({ status: "uploading" });
 
 		try {
 			const nextUploads = await uploadFilesToLessonStorage({
@@ -127,11 +138,13 @@ export function SketchUploadWorkbench({
 				mode === "replace"
 					? replaceSketchUploads(uploads, nextUploads)
 					: appendSketchUploads(uploads, nextUploads);
-			onFieldChange(uploadField.id, nextValue);
+			onFieldChange(uploadFieldId, nextValue);
+			setUploadState({ status: "idle" });
 		} catch {
-			setUploadError("Upload failed. Try again.");
-		} finally {
-			setIsUploading(false);
+			setUploadState({
+				status: "error",
+				message: "Upload failed. Try again.",
+			});
 		}
 	}
 
@@ -160,7 +173,7 @@ export function SketchUploadWorkbench({
 					</ul>
 				</div>
 			</WorkbenchCard>
-			<WorkbenchCard label={uploadField?.label ?? "Upload sketch set"}>
+			<WorkbenchCard label={uploadField.label}>
 				<div className="space-y-4">
 					<div
 						className={`rounded-none border-2 border-dashed px-4 py-8 text-center ${
@@ -182,23 +195,25 @@ export function SketchUploadWorkbench({
 								: "Take clear photos of the sketches and drop them here. One good set is enough to continue."}
 						</p>
 						<div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-							<button
+							<Button
 								type="button"
 								onClick={() => appendInputRef.current?.click()}
-								disabled={isUploading || !uploadField}
-								className={primaryButtonClass}
+								disabled={isUploading}
+								variant="secondary"
+								size="sm"
 							>
 								{uploads.length > 0 ? "Add more sketches" : "Upload sketches"}
-							</button>
+							</Button>
 							{uploads.length > 0 ? (
-								<button
+								<Button
 									type="button"
 									onClick={() => replaceInputRef.current?.click()}
-									disabled={isUploading || !uploadField}
-									className={secondaryButtonClass}
+									disabled={isUploading}
+									variant="outline"
+									size="sm"
 								>
 									Replace all
-								</button>
+								</Button>
 							) : null}
 						</div>
 						<input
@@ -231,14 +246,14 @@ export function SketchUploadWorkbench({
 								Uploading images to lesson storage...
 							</p>
 						) : null}
-						{uploadField?.helpText ? (
+						{uploadField.helpText ? (
 							<p className="mt-2 text-[11px] leading-relaxed text-product-muted">
 								{uploadField.helpText}
 							</p>
 						) : null}
-						{uploadError ? (
+						{uploadState.status === "error" ? (
 							<p className="mt-2 text-[11px] font-medium text-danger">
-								{uploadError}
+								{uploadState.message}
 							</p>
 						) : null}
 						{isInvalid ? (

@@ -1,11 +1,17 @@
 import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
 
-import { CheckboxRow } from "./checkbox-row";
+import { Input } from "@/components/ui/input";
+import { assert } from "@/features/course/lesson/lib/assert";
 import {
-	fieldLabelClass,
-	inputBaseClass,
-	inputWidthClass,
-} from "./field-styles";
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { CheckboxRow } from "./checkbox-row";
+import { fieldLabelClass, inputWidthClass } from "./field-styles";
 
 export function renderBasicFieldControl(
 	field: WorkbenchField,
@@ -16,12 +22,12 @@ export function renderBasicFieldControl(
 		return (
 			<label className={`block ${inputWidthClass(field)}`}>
 				<span className={fieldLabelClass}>{field.label}</span>
-				<input
+				<Input
 					type={field.kind === "url" ? "url" : "text"}
 					value={typeof value === "string" ? value : ""}
 					onChange={(event) => onChange(event.target.value)}
 					placeholder={field.placeholder}
-					className={inputBaseClass}
+					className="mt-2"
 				/>
 			</label>
 		);
@@ -31,11 +37,11 @@ export function renderBasicFieldControl(
 		return (
 			<label className={`block ${inputWidthClass(field)}`}>
 				<span className={fieldLabelClass}>{field.label}</span>
-				<input
+				<Input
 					type="number"
 					value={typeof value === "number" ? value : ""}
-					onChange={(event) => onChange(Number(event.target.value) || 0)}
-					className={inputBaseClass}
+					onChange={(event) => onChange(Number(event.target.value))}
+					className="mt-2"
 				/>
 			</label>
 		);
@@ -52,21 +58,26 @@ export function renderBasicFieldControl(
 	}
 
 	if (field.kind === "select") {
+		assert(field.options, `Select field "${field.id}" is missing options.`);
+
 		return (
 			<label className={`block ${inputWidthClass(field)}`}>
 				<span className={fieldLabelClass}>{field.label}</span>
-				<select
+				<Select
 					value={typeof value === "string" ? value : ""}
-					onChange={(event) => onChange(event.target.value)}
-					className={inputBaseClass}
+					onValueChange={onChange}
 				>
-					<option value="">Select one</option>
-					{field.options?.map((option) => (
-						<option key={option} value={option}>
-							{option}
-						</option>
-					))}
-				</select>
+					<SelectTrigger className="mt-2">
+						<SelectValue placeholder="Select one" />
+					</SelectTrigger>
+					<SelectContent>
+						{field.options.map((option) => (
+							<SelectItem key={option} value={option}>
+								{option}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
 			</label>
 		);
 	}
@@ -75,12 +86,12 @@ export function renderBasicFieldControl(
 		return (
 			<label className={`block ${inputWidthClass(field)}`}>
 				<span className={fieldLabelClass}>{field.label}</span>
-				<textarea
+				<Textarea
 					value={typeof value === "string" ? value : ""}
 					onChange={(event) => onChange(event.target.value)}
 					rows={field.rows ?? 5}
 					placeholder={field.placeholder}
-					className={inputBaseClass}
+					className="mt-2"
 				/>
 			</label>
 		);

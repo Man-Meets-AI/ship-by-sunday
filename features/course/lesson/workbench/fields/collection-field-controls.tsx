@@ -1,12 +1,10 @@
 import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
 
+import { Textarea } from "@/components/ui/textarea";
+import { assert } from "@/features/course/lesson/lib/assert";
 import { CheckboxRow } from "./checkbox-row";
 import { EditableTableField } from "./editable-table-field";
-import {
-	fieldLabelClass,
-	inputBaseClass,
-	inputWidthClass,
-} from "./field-styles";
+import { fieldLabelClass, inputWidthClass } from "./field-styles";
 import {
 	normalizeChecklistValue,
 	parseLines,
@@ -26,7 +24,8 @@ export function renderCollectionFieldControl(
 	const showLabel = renderOptions?.showLabel ?? true;
 
 	if (field.kind === "checklist") {
-		const checklistOptions = field.options ?? [];
+		assert(field.options, `Checklist field "${field.id}" is missing options.`);
+		const checklistOptions = field.options;
 		const checklistItems = normalizeChecklistValue(value, checklistOptions);
 
 		return (
@@ -55,12 +54,12 @@ export function renderCollectionFieldControl(
 		return (
 			<label className={`block ${inputWidthClass(field)}`}>
 				<span className={fieldLabelClass}>{field.label}</span>
-				<textarea
+				<Textarea
 					value={toLineList(value)}
 					onChange={(event) => onChange(parseLines(event.target.value))}
 					rows={field.rows ?? 6}
 					placeholder={field.placeholder ?? "One item per line"}
-					className={inputBaseClass}
+					className="mt-2"
 				/>
 			</label>
 		);
@@ -78,21 +77,17 @@ export function renderCollectionFieldControl(
 			);
 		}
 
-		const tableTextareaClass = showLabel
-			? inputBaseClass
-			: inputBaseClass.replace("mt-1.5 ", "");
-
 		return (
 			<label className={`block ${inputWidthClass(field)}`}>
 				{showLabel ? (
 					<span className={fieldLabelClass}>{field.label}</span>
 				) : null}
-				<textarea
+				<Textarea
 					value={toTableText(value)}
 					onChange={(event) => onChange(parseTable(event.target.value))}
 					rows={6}
 					placeholder="One row per line. Separate columns with |"
-					className={`${tableTextareaClass} font-mono`}
+					className={showLabel ? "mt-2 font-mono" : "font-mono"}
 				/>
 			</label>
 		);

@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { apiRouteConfig, timingConfig } from "@/config/product";
+import { assertNever } from "@/features/course/lesson/lib/assert";
 import type {
 	LessonPromptImport,
 	LessonPromptTemplateId,
@@ -26,20 +29,19 @@ type PromptImportUiCopy = {
 	pasteToggleLabel: string;
 	importButtonLabel: string;
 	importHint: string;
-	getSuccessMessage: (
-		nextFieldValues: Record<string, unknown>,
-		promptImport: LessonPromptImport,
-	) => string;
 };
 
 export type PromptImportAppliedContext = {
-	promptTemplateId: LessonPromptTemplateId;
+	promptTemplateId: LessonPromptImport["promptTemplateId"];
 	source: "pasted" | "generated";
 	rawResponse: string;
 	nextFieldValues: Record<string, unknown>;
 };
 
-const PROMPT_IMPORT_COPY: Record<LessonPromptTemplateId, PromptImportUiCopy> = {
+const PROMPT_IMPORT_COPY: Record<
+	LessonPromptImport["promptTemplateId"],
+	PromptImportUiCopy
+> = {
 	competitor_research: {
 		cardLabel: "Need a fast AI starter?",
 		summary:
@@ -57,19 +59,6 @@ const PROMPT_IMPORT_COPY: Record<LessonPromptTemplateId, PromptImportUiCopy> = {
 		importButtonLabel: "Import into table",
 		importHint:
 			"The import replaces the saved research rows and v1 decision, then you can tighten the evidence and judgment below.",
-		getSuccessMessage: (nextFieldValues, promptImport) => {
-			if (promptImport.promptTemplateId !== "competitor_research") {
-				return "Imported suggestions. You can edit the fields below.";
-			}
-
-			const importedRows = Array.isArray(
-				nextFieldValues[promptImport.tableFieldId],
-			)
-				? (nextFieldValues[promptImport.tableFieldId] as string[][]).length
-				: 0;
-
-			return `Imported ${importedRows} research ${importedRows === 1 ? "row" : "rows"}. Tighten the evidence and v1 decision below.`;
-		},
 	},
 	scope_boundary: {
 		cardLabel: "Need a backup cut?",
@@ -88,26 +77,6 @@ const PROMPT_IMPORT_COPY: Record<LessonPromptTemplateId, PromptImportUiCopy> = {
 		importButtonLabel: "Import scope cut",
 		importHint:
 			"The import replaces your saved keep/cut lists and rationale, then you can tighten them below.",
-		getSuccessMessage: (nextFieldValues, promptImport) => {
-			if (promptImport.promptTemplateId !== "scope_boundary") {
-				return "Imported suggestions. You can edit the fields below.";
-			}
-
-			const keepCount = Array.isArray(
-				nextFieldValues[promptImport.inScopeFieldId],
-			)
-				? (nextFieldValues[promptImport.inScopeFieldId] as string[]).length
-				: 0;
-			const cutCount = Array.isArray(
-				nextFieldValues[promptImport.outOfScopeFieldId],
-			)
-				? (nextFieldValues[promptImport.outOfScopeFieldId] as string[]).length
-				: 0;
-
-			return `Imported ${keepCount} keep ${keepCount === 1 ? "item" : "items"}, ${cutCount} cut ${
-				cutCount === 1 ? "item" : "items"
-			}, and a v1 rationale. You can tighten everything below.`;
-		},
 	},
 	visual_direction_guide: {
 		cardLabel: "AI assist",
@@ -124,11 +93,46 @@ const PROMPT_IMPORT_COPY: Record<LessonPromptTemplateId, PromptImportUiCopy> = {
 		importButtonLabel: "Save visualguide.md",
 		importHint:
 			"The import stores the markdown in this lesson so Build can start from the saved visual direction instead of guesswork.",
-		getSuccessMessage: (nextFieldValues, promptImport) => {
-			if (promptImport.promptTemplateId !== "visual_direction_guide") {
-				return "Imported suggestions. You can edit the fields below.";
-			}
+	},
+};
 
+type PromptImportFeedback =
+	| { tone: "success"; message: string }
+	| { tone: "error"; message: string };
+
+type ActivePanel = "prompt" | "paste" | null;
+
+function getImportSuccessMessage(
+	nextFieldValues: Record<string, unknown>,
+	promptImport: LessonPromptImport,
+) {
+	switch (promptImport.promptTemplateId) {
+		case "competitor_research": {
+			const importedRows = Array.isArray(
+				nextFieldValues[promptImport.tableFieldId],
+			)
+				? (nextFieldValues[promptImport.tableFieldId] as string[][]).length
+				: 0;
+
+			return `Imported ${importedRows} research ${importedRows === 1 ? "row" : "rows"}. Tighten the evidence and v1 decision below.`;
+		}
+		case "scope_boundary": {
+			const keepCount = Array.isArray(
+				nextFieldValues[promptImport.inScopeFieldId],
+			)
+				? (nextFieldValues[promptImport.inScopeFieldId] as string[]).length
+				: 0;
+			const cutCount = Array.isArray(
+				nextFieldValues[promptImport.outOfScopeFieldId],
+			)
+				? (nextFieldValues[promptImport.outOfScopeFieldId] as string[]).length
+				: 0;
+
+			return `Imported ${keepCount} keep ${keepCount === 1 ? "item" : "items"}, ${cutCount} cut ${
+				cutCount === 1 ? "item" : "items"
+			}, and a v1 rationale. You can tighten everything below.`;
+		}
+		case "visual_direction_guide": {
 			const markdown = nextFieldValues[promptImport.markdownFieldId];
 			const lineCount =
 				typeof markdown === "string"
@@ -139,27 +143,14 @@ const PROMPT_IMPORT_COPY: Record<LessonPromptTemplateId, PromptImportUiCopy> = {
 			return `Saved visualguide.md with ${lineCount} non-empty ${
 				lineCount === 1 ? "line" : "lines"
 			}. You can keep editing the saved markdown below.`;
-		},
-	},
-	build_kickoff_prompt: {
-		cardLabel: "Build kickoff prompts stay in the workbench",
-		summary:
-			"Use the dedicated build kickoff workbench instead of this shared import flow.",
-		workflowHint:
-			"Choose a path, define the first slice, and copy the generated prompt there.",
-		enabledNote:
-			"Build kickoff prompts are copy-only and do not support pasteback import.",
-		pasteLabel: "Not used",
-		pastePlaceholder:
-			"Build kickoff prompts do not support pasteback import in this shared card.",
-		pasteToggleLabel: "Paste not used",
-		importButtonLabel: "Not supported",
-		importHint:
-			"Use the build kickoff workbench instead of the shared prompt-import flow.",
-		getSuccessMessage: () =>
-			"Build kickoff prompts do not support pasteback import.",
-	},
-};
+		}
+	}
+
+	return assertNever(
+		promptImport,
+		"Unhandled prompt import template",
+	);
+}
 
 export function PromptImportCard({
 	lesson,
@@ -173,34 +164,54 @@ export function PromptImportCard({
 > & {
 	onImportApplied?: (context: PromptImportAppliedContext) => void;
 }) {
-	const promptImport = lesson.promptImport;
+	if (!lesson.promptImport) {
+		return null;
+	}
+
+	return (
+		<PromptImportCardBody
+			lesson={lesson}
+			promptImport={lesson.promptImport}
+			onFieldChange={onFieldChange}
+			pinnedArtifacts={pinnedArtifacts}
+			fieldValues={fieldValues}
+			onImportApplied={onImportApplied}
+		/>
+	);
+}
+
+function PromptImportCardBody({
+	lesson,
+	promptImport,
+	onFieldChange,
+	pinnedArtifacts,
+	fieldValues,
+	onImportApplied,
+}: Pick<
+	WorkbenchModeProps,
+	"lesson" | "onFieldChange" | "pinnedArtifacts" | "fieldValues"
+> & {
+	promptImport: LessonPromptImport;
+	onImportApplied?: (context: PromptImportAppliedContext) => void;
+}) {
 	const [copyState, setCopyState] = useState<"idle" | "copied" | "error">(
 		"idle",
 	);
 	const [pastedResponse, setPastedResponse] = useState("");
-	const [importFeedback, setImportFeedback] = useState<{
-		tone: "success" | "error";
-		message: string;
-	} | null>(null);
+	const [importFeedback, setImportFeedback] =
+		useState<PromptImportFeedback | null>(null);
 	const [isGenerating, setIsGenerating] = useState(false);
-	const [showPrompt, setShowPrompt] = useState(false);
-	const [showPaste, setShowPaste] = useState(false);
-	const resetTimeoutRef = useRef<number | null>(null);
-	const promptTemplateId =
-		promptImport?.promptTemplateId ?? "competitor_research";
-	const promptState = promptImport
-		? getPromptTemplateState(
-				promptImport.promptTemplateId,
-				pinnedArtifacts,
-				fieldValues,
-			)
-		: { prompt: null, disabledReason: "This prompt import is not wired yet." };
-	const uiCopy = PROMPT_IMPORT_COPY[promptTemplateId];
-	const [showAssistTools, setShowAssistTools] = useState(
-		!uiCopy.collapsedByDefault,
+	const [isAssistToolsOpen, setIsAssistToolsOpen] = useState(
+		!PROMPT_IMPORT_COPY[promptImport.promptTemplateId].collapsedByDefault,
 	);
-	const promptResetKeyRef = useRef<string | null>(null);
-	const promptResetKey = `${promptState.prompt ?? ""}::${promptState.disabledReason ?? ""}`;
+	const [activePanel, setActivePanel] = useState<ActivePanel>(null);
+	const resetTimeoutRef = useRef<number | null>(null);
+	const promptState = getPromptTemplateState(
+		promptImport.promptTemplateId,
+		pinnedArtifacts,
+		fieldValues,
+	);
+	const uiCopy = PROMPT_IMPORT_COPY[promptImport.promptTemplateId];
 
 	useEffect(() => {
 		return () => {
@@ -211,30 +222,9 @@ export function PromptImportCard({
 	}, []);
 
 	useEffect(() => {
-		if (promptResetKeyRef.current === promptResetKey) {
-			return;
-		}
-
-		promptResetKeyRef.current = promptResetKey;
 		setCopyState("idle");
 		setImportFeedback(null);
-	}, [promptResetKey]);
-
-	useEffect(() => {
-		if (pastedResponse.trim().length > 0) {
-			setShowPaste(true);
-		}
-	}, [pastedResponse]);
-
-	useEffect(() => {
-		if (showPrompt || showPaste || importFeedback) {
-			setShowAssistTools(true);
-		}
-	}, [importFeedback, showPaste, showPrompt]);
-
-	if (!promptImport) {
-		return null;
-	}
+	}, [promptState.disabledReason, promptState.prompt]);
 
 	const copyPrompt = () => {
 		if (!promptState.prompt || promptState.disabledReason) {
@@ -243,7 +233,8 @@ export function PromptImportCard({
 
 		if (!navigator.clipboard?.writeText) {
 			setCopyState("error");
-			setShowPrompt(true);
+			setIsAssistToolsOpen(true);
+			setActivePanel("prompt");
 			return;
 		}
 
@@ -261,8 +252,25 @@ export function PromptImportCard({
 			},
 			() => {
 				setCopyState("error");
+				setIsAssistToolsOpen(true);
+				setActivePanel("prompt");
 			},
 		);
+	};
+
+	const toggleAssistTools = () => {
+		setIsAssistToolsOpen((current) => {
+			if (current) {
+				setActivePanel(null);
+			}
+
+			return !current;
+		});
+	};
+
+	const togglePanel = (panel: Exclude<ActivePanel, null>) => {
+		setIsAssistToolsOpen(true);
+		setActivePanel((current) => (current === panel ? null : panel));
 	};
 
 	const applyImportedResponse = (
@@ -280,8 +288,8 @@ export function PromptImportCard({
 			}
 
 			setPastedResponse(rawResponse);
-			setShowPrompt(false);
-			setShowPaste(false);
+			setActivePanel(null);
+			setIsAssistToolsOpen(true);
 			onImportApplied?.({
 				promptTemplateId: promptImport.promptTemplateId,
 				source,
@@ -290,7 +298,7 @@ export function PromptImportCard({
 			});
 			setImportFeedback({
 				tone: "success",
-				message: `${sourceLabel}: ${uiCopy.getSuccessMessage(nextFieldValues, promptImport)}`,
+				message: `${sourceLabel}: ${getImportSuccessMessage(nextFieldValues, promptImport)}`,
 			});
 		} catch (error) {
 			setImportFeedback({
@@ -300,7 +308,8 @@ export function PromptImportCard({
 						? error.message
 						: "We could not parse that response. Paste the full ChatGPT output and try again.",
 			});
-			setShowPaste(true);
+			setIsAssistToolsOpen(true);
+			setActivePanel("paste");
 		}
 	};
 
@@ -381,48 +390,55 @@ export function PromptImportCard({
 
 				<div className="flex flex-wrap items-center gap-2">
 					{uiCopy.collapsedByDefault ? (
-						<button
+						<Button
 							type="button"
-							onClick={() => setShowAssistTools((current) => !current)}
-							className="rounded-none border border-product-border bg-product-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent focus-visible:border-product-accent focus-visible:text-product-accent focus-visible:outline-hidden"
+							onClick={toggleAssistTools}
+							variant="outline"
+							size="xs"
 						>
-							{showAssistTools
+							{isAssistToolsOpen
 								? "Hide AI starter"
 								: (uiCopy.launcherLabel ?? "Open AI assist")}
-						</button>
+						</Button>
 					) : null}
-					{showAssistTools ? (
+					{isAssistToolsOpen ? (
 						<>
-							<button
+							<Button
 								type="button"
 								onClick={copyPrompt}
 								disabled={Boolean(promptState.disabledReason)}
-								className="rounded-none border border-product-accent bg-product-chip px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg disabled:cursor-not-allowed disabled:border-product-border disabled:bg-product-surface disabled:text-product-muted"
+								variant="secondary"
+								size="xs"
 							>
 								{copyState === "copied" ? "Copied" : "Copy prompt"}
-							</button>
-							<button
+							</Button>
+							<Button
 								type="button"
 								onClick={() => void generateWithCodex()}
 								disabled={Boolean(promptState.disabledReason) || isGenerating}
-								className="rounded-none border border-product-border bg-product-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent disabled:cursor-not-allowed disabled:border-product-border disabled:text-product-muted"
+								variant="outline"
+								size="xs"
 							>
 								{isGenerating ? "Generating..." : "Generate with Codex"}
-							</button>
-							<button
+							</Button>
+							<Button
 								type="button"
-								onClick={() => setShowPaste((current) => !current)}
-								className="rounded-none border border-product-border bg-product-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent focus-visible:border-product-accent focus-visible:text-product-accent focus-visible:outline-hidden"
+								onClick={() => togglePanel("paste")}
+								variant="outline"
+								size="xs"
 							>
-								{showPaste ? "Hide paste box" : uiCopy.pasteToggleLabel}
-							</button>
-							<button
+								{activePanel === "paste"
+									? "Hide paste box"
+									: uiCopy.pasteToggleLabel}
+							</Button>
+							<Button
 								type="button"
-								onClick={() => setShowPrompt((current) => !current)}
-								className="rounded-none border border-product-border bg-product-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent focus-visible:border-product-accent focus-visible:text-product-accent focus-visible:outline-hidden"
+								onClick={() => togglePanel("prompt")}
+								variant="outline"
+								size="xs"
 							>
-								{showPrompt ? "Hide prompt" : "View prompt"}
-							</button>
+								{activePanel === "prompt" ? "Hide prompt" : "View prompt"}
+							</Button>
 						</>
 					) : null}
 					{copyState === "error" && !promptState.disabledReason ? (
@@ -432,14 +448,14 @@ export function PromptImportCard({
 					) : null}
 				</div>
 
-				{showAssistTools && showPrompt ? (
+				{isAssistToolsOpen && activePanel === "prompt" ? (
 					<div className="rounded-none border border-product-border/65 bg-product-surface px-3 py-3">
 						{promptState.prompt ? (
-							<textarea
+							<Textarea
 								readOnly
 								value={promptState.prompt}
 								rows={12}
-								className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[12px] leading-[1.68] text-product-text outline-hidden"
+								className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[12px] leading-[1.68] text-product-text"
 								aria-label={`${lesson.title} prompt`}
 							/>
 						) : (
@@ -451,13 +467,13 @@ export function PromptImportCard({
 					</div>
 				) : null}
 
-				{showAssistTools && showPaste ? (
+				{isAssistToolsOpen && activePanel === "paste" ? (
 					<div className="space-y-3 rounded-none border border-product-border/65 bg-product-surface px-4 py-4">
 						<label className="block">
 							<span className={workbenchChromeLabelClass}>
 								{uiCopy.pasteLabel}
 							</span>
-							<textarea
+							<Textarea
 								value={pastedResponse}
 								onChange={(event) => {
 									setPastedResponse(event.target.value);
@@ -467,20 +483,21 @@ export function PromptImportCard({
 								}}
 								rows={8}
 								placeholder={uiCopy.pastePlaceholder}
-								className="mt-2 w-full rounded-none border border-product-border/65 bg-product-surface px-4 py-3 text-[15px] leading-[1.6] text-product-text outline-hidden transition-colors placeholder:text-product-muted/55 focus-visible:border-product-accent"
+								className="mt-2"
 								aria-label={uiCopy.pasteLabel}
 							/>
 						</label>
 
 						<div className="flex flex-wrap items-center gap-2">
-							<button
+							<Button
 								type="button"
 								onClick={importResponse}
 								disabled={pastedResponse.trim().length === 0}
-								className="rounded-none border border-product-border bg-product-surface px-3 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent focus-visible:border-product-accent focus-visible:text-product-accent focus-visible:outline-hidden disabled:cursor-not-allowed disabled:border-product-border/70 disabled:text-product-muted"
+								variant="outline"
+								size="sm"
 							>
 								{uiCopy.importButtonLabel}
-							</button>
+							</Button>
 							<p className="text-[12px] leading-[1.6] text-product-muted">
 								{uiCopy.importHint}
 							</p>
