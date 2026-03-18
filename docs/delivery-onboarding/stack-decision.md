@@ -60,6 +60,7 @@ Current flow in code:
 - Convex auth is wired through `convex/auth.config.ts` and expects the Clerk JWT template app ID `convex` with `CLERK_FRONTEND_API_URL` as the provider domain.
 - Server-side Clerk -> Convex calls now explicitly request the Clerk `convex` JWT template instead of relying on Clerk’s default token shape.
 - Lesson video delivery now uses a repo-local publish pipeline: Auphonic preset processing -> Bunny Stream hosting -> generated `features/course/lesson/model/media.ts` attachments that the lesson registry merges into the app shell.
+- Starter repo access now uses a separate post-purchase provisioning path: entitled buyers save a GitHub username in-app, Convex stores the request state, `/mission` and `/settings` surface the current repo-access status, and local operator scripts send/sync/reset access to `ParkerRex/ship-by-sunday-starter` without changing the Stripe entitlement flow.
 
 ## Local development note
 
@@ -108,6 +109,15 @@ Current verified local sequence:
 6. Confirm the webhook logs `grant_succeeded`.
 7. Confirm the buyer leaves `/checkout/success` and reaches `/mission`.
 
+Starter repo access has its own local operator loop after entitlement:
+
+1. Save the buyer's GitHub username from `/mission` or `/settings`.
+2. Run `pnpm run starter-repo:pending` to confirm the queue item exists.
+3. Run `pnpm run starter-repo:invite` to send the GitHub invite by username.
+4. Accept the invite on the target GitHub account.
+5. Run `pnpm run starter-repo:sync` to mark the record `accepted`.
+6. Confirm `/mission` hides the onboarding card and Build `3.1` enables the template path.
+
 ## Lesson video pipeline
 
 The lesson media path is now explicit:
@@ -130,6 +140,7 @@ Launch implication: the hosting decision is made, but the first real lesson batc
 - Stripe still needs live webhook endpoint registration and verified delivery against the deployed environment.
 - Clerk and Convex still need a real production auth check, not just local wiring. The risky point is issuer/domain mismatch around `CLERK_FRONTEND_API_URL` and the `convex` JWT template.
 - The buyer handoff still depends on the purchaser finishing checkout in the same signed-in browser context used to query `viewerAccess`.
+- Starter repo access is still operator-run for launch; there is no automatic background invite worker or transactional email.
 - The first real lesson media batch still needs to be published through the Bunny pipeline and validated in the lesson shell.
 - There is no transactional access email in code today.
 - Support inbox ownership and escalation path are still undefined.

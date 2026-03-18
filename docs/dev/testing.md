@@ -114,6 +114,36 @@ Use only in local or another clearly safe test environment.
 pnpm run stripe:local:verify -- --session-id <checkout-session-id>
 ```
 
+### Starter repo access QA
+
+Use this after an entitled user reaches `/mission` or `/settings`.
+
+1. Sign in with the entitled account.
+2. Save a GitHub username in the starter repo access card.
+3. Run:
+
+```bash
+pnpm run starter-repo:pending
+pnpm run starter-repo:invite
+```
+
+4. Accept the GitHub invite on that GitHub account.
+5. Run:
+
+```bash
+pnpm run starter-repo:sync
+```
+
+6. Confirm `/mission` hides the onboarding card once access is accepted.
+7. Confirm `/settings` shows the accepted state and `Open starter repo`.
+8. Confirm Build lesson `3.1` now enables `Use template` and `Open template`.
+
+If the wrong GitHub username was invited, reset the record and cancel the stale invite manually in GitHub:
+
+```bash
+pnpm run starter-repo:reset -- --clerkUserId <clerk-user-id>
+```
+
 ## Change-Specific Guidance
 
 - Auth, route protection, or Clerk changes:
@@ -124,6 +154,12 @@ pnpm run stripe:local:verify -- --session-id <checkout-session-id>
   - run `pnpm run check`
   - run the Stripe listener flow
   - verify unpaid and paid checkout-success states
+
+- Starter repo access or Build template-path changes:
+  - run the focused starter repo unit tests
+  - run `pnpm run starter-repo:pending`
+  - run the invite and sync script flow with an entitled test account
+  - verify `3.1` keeps the template path disabled until access is accepted
 
 - Lesson-shell or workbench changes:
   - run `pnpm run typecheck`

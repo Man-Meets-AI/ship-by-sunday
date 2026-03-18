@@ -6,6 +6,38 @@ It does not replace `docs/internal/todo.md`, which remains the launch tracker an
 
 ## Active
 
+- [x] Add the Product Management for Beginners bonus to the post-purchase `/mission` setup area near starter repo access without distracting from `Start Here`
+- [x] Cover the mission bonus placement with focused component and route regression tests
+- [x] Verify the mission bonus slice, then log the outcome in the local and launch trackers
+
+- Outcome: Added an optional `Product Management for Beginners` bonus card to the post-purchase `/mission` setup area beside the starter-repo access card, so buyers can find the YouTube playlist inside the onboarding flow without pulling focus away from the current sprint step.
+- Verification: `pnpm exec vitest run tests/unit/bonus-course-card.test.tsx tests/unit/mission-page.test.tsx tests/unit/starter-repo-access-card.test.tsx`, `pnpm run build`.
+- Follow-up: `pnpm run check` still stops on repo-wide Prettier drift in unrelated files including `content/docs/customize-the-starter.mdx`, `docs/internal/todo.md`, `features/course/lesson/workbench/modes/pick-one-user-support.tsx`, and `tests/unit/course-access.test.ts`; this slice itself is formatted and verified.
+
+- [x] Audit current Biome diagnostics, add the minimum root Biome wiring needed for this repo, and scope fixes to repo-owned runtime/config files only
+- [x] Fix the current Biome diagnostics without changing runtime behavior or broadening formatter churn beyond the affected files
+- [x] Re-run Biome plus the relevant repo verification, then record the outcome and any residual risk
+
+- [x] Restructure the public `/docs` IA so the sidebar groups pages into `Start Here`, `Get Running`, `Build Your Product`, `AI Workflow`, `Troubleshooting`, and `Reference` without breaking existing public URLs
+- [x] Rewrite the existing public starter docs so they match the real runtime (`/mission`, lessons, artifacts, access recovery) and remove stale setup/env guidance
+- [x] Add the guided-build, AI-workflow, troubleshooting, and reference MDX pages sourced from the handwritten Build Block guide and current runtime docs
+- [x] Update the shipped docs branding plus repo doc trackers, then verify the docs surface with a production build and drift checks
+
+- Outcome: Reframed the public `Nextra` docs IA around one clear builder journey, rewrote the existing starter pages to match the real `/mission` and lesson-based runtime, added the new `Build Your Product`, `AI Workflow`, troubleshooting, and reference MDX pages, and updated the shipped docs branding plus repo docs policy notes so the public `/docs` surface now reads like a productized builder guide instead of a thin starter appendix.
+- Verification: `rg -n '/app/projects|`/app`|\\.env\\.production\\.example|STRIPE_PUBLISHABLE_KEY|Starter Docs' content/docs app/docs README.md docs/README.md -S`, `pnpm run build`.
+- Follow-up: `nextra` still warns that brand-new MDX files do not have Git last-modified timestamps yet; that warning should clear once the new docs files exist in commit history.
+
+- [x] Add a dedicated starter-repo access flow that collects a buyer's GitHub username after purchase without changing the existing Stripe -> Clerk -> Convex entitlement handoff
+- [x] Add Convex storage and APIs for starter repo access requests plus internal operator hooks for invite, sync, and reset workflows
+- [x] Add a shared starter-repo access card to `/mission` and `/settings`, and block the Build template path until GitHub repo access is accepted
+- [x] Add local GitHub operator tooling and focused tests for username validation, state transitions, UI states, and script result handling
+- [x] Verify the full slice with Convex codegen, focused unit tests, repo checks, and doc/tracker updates
+
+- Outcome: Added a dedicated `starterRepoAccess` Convex model plus public query/mutation APIs for entitled buyers, internal queue/result/reset hooks for the operator flow, and a shared starter repo card that now appears on `/mission` and `/settings` without touching the Stripe purchase handoff.
+- Outcome: Replaced the old env-driven starter-template URL assumption with one canonical tracked repo config for `ParkerRex/ship-by-sunday-starter`, locked the Build template path until repo access is accepted, and added local `starter-repo:*` scripts to list pending requests, send GitHub invites, sync accepted collaborators, and reset mistaken records.
+- Verification: `pnpm exec vitest run tests/unit/github-username.test.ts tests/unit/starter-repo-access.test.ts tests/unit/starter-repo-access-card.test.tsx tests/unit/path-choice-card.test.tsx tests/unit/settings-page.test.tsx tests/unit/starter-repo-script.test.ts tests/unit/mission-page.test.tsx tests/unit/research-prompt.test.ts`, `pnpm exec convex dev --local --local-force-upgrade --once --typecheck disable --tail-logs disable`, `pnpm exec eslint config/product.ts convex/course.ts convex/course/starterRepoAccess.ts convex/course/validators.ts convex/course/types.ts convex/schema.ts features/starter-repo/lib/github-username.ts features/starter-repo/lib/starter-repo-access-copy.ts features/starter-repo/components/starter-repo-access-form.tsx features/starter-repo/components/starter-repo-access-card.tsx features/course/lesson/model/resources.ts features/course/lesson/model/research-prompt.ts features/course/lesson/workbench/modes/build-kickoff-workbench.tsx features/course/lesson/workbench/modes/build-kickoff/path-choice-card.tsx features/course/mission/components/mission-page.tsx features/settings/components/settings-page.tsx scripts/lib/starter-repo-access.mjs scripts/starter-repo-access.mjs tests/unit/github-username.test.ts tests/unit/starter-repo-access.test.ts tests/unit/starter-repo-access-card.test.tsx tests/unit/path-choice-card.test.tsx tests/unit/settings-page.test.tsx tests/unit/starter-repo-script.test.ts tests/unit/mission-page.test.tsx tests/unit/research-prompt.test.ts tests/script-modules.d.ts`, and `pnpm run build`.
+- Follow-up: `convex dev` still fails repo-wide typechecking without `--typecheck disable` because of pre-existing feature-folder alias issues in `features/course/lesson/model/**`; the starter-repo slice is verified, but that wider Convex/TypeScript debt remains outside this implementation.
+
 - [x] Unify the docs route theme contract so `next-themes`, the root product theme tokens, and the HTML light/dark class stop fighting each other
 - [x] Add a docs-only polish layer for the Nextra shell so the article, sidebar, TOC, and controls read cleanly in both dark and light mode
 - [x] Verify the docs route in both dark and light mode with a real browser pass plus a production build
@@ -284,6 +316,10 @@ It does not replace `docs/internal/todo.md`, which remains the launch tracker an
 - [x] Verify the repo with lint, format check, unit tests, smoke tests, `typecheck`, and `check`
 
 ## Review
+
+- Outcome: Added a scoped root `biome.json`, installed `@biomejs/biome`, added `biome:check` / `biome:write` scripts, and cleared the current Biome findings across the repo-owned app, features, scripts, Convex, and test surfaces without touching generated Convex output or the vendored YouTube effect sandbox.
+- Verification: `pnpm run biome:check`, `pnpm run typecheck`, and `pnpm exec vitest run tests/unit/lesson-shells.test.tsx tests/unit/lesson-layout.test.ts tests/unit/course-registry.test.ts tests/unit/course-state-lifecycle.test.ts tests/unit/watch-lesson-contract.test.ts tests/smoke/motion-phase-one.test.ts`.
+- Follow-up: If you want Biome to replace more of the existing ESLint/Prettier workflow later, the next step is deciding whether to migrate the current `lint`, `format`, and `check` scripts rather than running Biome alongside them.
 
 - Outcome: Unified the runtime theme model around the root-owned `ProductThemeProvider`, removed the old `initialTheme` prop plumbing from product routes, moved global/body styling onto active `product-*` tokens, aliased the legacy `brand-*` values to the current product theme, and migrated marketing, auth, checkout recovery, and shared public branding/surface primitives onto the same token system so the whole product now follows one dark/light theme contract.
 - Verification: `rg -n "text-ink|bg-paper|border-line|bg-ink|text-paper|bg-white|bg-accent|shadow-card" app features shared platform --glob '!**/*.test.*' --glob '!**/*.md'` and `pnpm run typecheck`

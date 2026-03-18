@@ -5,6 +5,7 @@ This folder owns the app data and product-state backend for `Ship by Sunday`.
 ## Current responsibilities
 
 - course entitlements
+- starter repo access requests and provisioning state
 - lesson state and autosave
 - mission progress
 - artifact listing
