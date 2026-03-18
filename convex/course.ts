@@ -45,6 +45,23 @@ import {
 	getResumeDestinationHandler,
 	getResumeDestinationReturns,
 } from "./course/mission";
+import {
+	getStarterRepoAccessArgs,
+	getStarterRepoAccessHandler,
+	getStarterRepoAccessReturns,
+	listStarterRepoAccessQueueArgs,
+	listStarterRepoAccessQueueHandler,
+	listStarterRepoAccessQueueReturns,
+	recordStarterRepoProvisioningResultArgs,
+	recordStarterRepoProvisioningResultHandler,
+	recordStarterRepoProvisioningResultReturns,
+	requestStarterRepoAccessArgs,
+	requestStarterRepoAccessHandler,
+	requestStarterRepoAccessReturns,
+	resetStarterRepoAccessArgs,
+	resetStarterRepoAccessHandler,
+	resetStarterRepoAccessReturns,
+} from "./course/starterRepoAccess";
 
 export const viewerAccess = query({
 	args: viewerAccessArgs,
@@ -74,6 +91,36 @@ export const getEntitlementDebug = internalQuery({
 	args: getEntitlementDebugArgs,
 	returns: getEntitlementDebugReturns,
 	handler: getEntitlementDebugHandler,
+});
+
+export const getStarterRepoAccess = query({
+	args: getStarterRepoAccessArgs,
+	returns: getStarterRepoAccessReturns,
+	handler: getStarterRepoAccessHandler,
+});
+
+export const requestStarterRepoAccess = mutation({
+	args: requestStarterRepoAccessArgs,
+	returns: requestStarterRepoAccessReturns,
+	handler: requestStarterRepoAccessHandler,
+});
+
+export const listStarterRepoAccessQueue = internalQuery({
+	args: listStarterRepoAccessQueueArgs,
+	returns: listStarterRepoAccessQueueReturns,
+	handler: listStarterRepoAccessQueueHandler,
+});
+
+export const recordStarterRepoProvisioningResult = internalMutation({
+	args: recordStarterRepoProvisioningResultArgs,
+	returns: recordStarterRepoProvisioningResultReturns,
+	handler: recordStarterRepoProvisioningResultHandler,
+});
+
+export const resetStarterRepoAccess = internalMutation({
+	args: resetStarterRepoAccessArgs,
+	returns: resetStarterRepoAccessReturns,
+	handler: resetStarterRepoAccessHandler,
 });
 
 export const getMissionState = query({

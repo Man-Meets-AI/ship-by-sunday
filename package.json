@@ -60,3 +60,7 @@
 		"vitest": "^4.1.0"
 	}
 }
+		"starter-repo:pending": "node --env-file=.env.local scripts/starter-repo-access.mjs pending",
+		"starter-repo:invite": "node --env-file=.env.local scripts/starter-repo-access.mjs invite",
+		"starter-repo:sync": "node --env-file=.env.local scripts/starter-repo-access.mjs sync",
+		"starter-repo:reset": "node --env-file=.env.local scripts/starter-repo-access.mjs reset",

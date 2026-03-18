@@ -1,8 +1,9 @@
+import { starterRepoConfig } from "@/config/product";
 import {
 	buildBuildKickoffPrompt,
 	buildCompetitorResearchPrompt,
-	buildScopeBoundaryPrompt,
 	buildPromptImportFieldValues,
+	buildScopeBoundaryPrompt,
 	buildVisualDirectionGuidePrompt,
 	getPromptTemplateState,
 	parseCompetitorResearchImport,
@@ -365,42 +366,31 @@ describe("buildBuildKickoffPrompt", () => {
 		expect(prompt).toContain("## Stop condition");
 	});
 
-	it("requires a configured template URL before returning the template path prompt", () => {
-		const originalRepoUrl =
-			process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL;
-		delete process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL;
-
-		try {
-			const state = getPromptTemplateState(
-				"build_kickoff_prompt",
-				[
-					{
-						artifactKey: "product_brief",
-						fieldValues: {},
-						fields: [["Who", "Startup operators"]],
-					},
-					{
-						artifactKey: "design_spec",
-						fieldValues: {},
-						fields: [["Rough screens", "Hero and summary review"]],
-					},
-				],
+	it("uses the canonical starter repo URL for the template path prompt", () => {
+		const state = getPromptTemplateState(
+			"build_kickoff_prompt",
+			[
 				{
-					build_path: "Use template",
-					first_slice: "Marketing hero and CTA",
-					definition_of_done:
-						"The hero renders locally, the CTA is clickable, and Playwright confirms the core path loads.",
+					artifactKey: "product_brief",
+					fieldValues: {},
+					fields: [["Who", "Startup operators"]],
 				},
-			);
+				{
+					artifactKey: "design_spec",
+					fieldValues: {},
+					fields: [["Rough screens", "Hero and summary review"]],
+				},
+			],
+			{
+				build_path: "Use template",
+				first_slice: "Marketing hero and CTA",
+				definition_of_done:
+					"The hero renders locally, the CTA is clickable, and Playwright confirms the core path loads.",
+			},
+		);
 
-			expect(state.prompt).toBeNull();
-			expect(state.disabledReason).toContain(
-				"NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL",
-			);
-		} finally {
-			process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL =
-				originalRepoUrl;
-		}
+		expect(state.disabledReason).toBeNull();
+		expect(state.prompt).toContain(`Starter repo: ${starterRepoConfig.url}`);
 	});
 
 	it("returns the custom-path prompt without needing a template URL", () => {

@@ -1,13 +1,19 @@
 "use client";
 
+import { useConvexAuth, useQuery } from "convex/react";
+
+import { api } from "@/convex/_generated/api";
 import { getPromptTemplateState } from "@/features/course/lesson/model/research-prompt";
 import { getBuildStarterTemplateRepoUrl } from "@/features/course/lesson/model/resources";
-
-import type { WorkbenchModeProps } from "../types";
+import {
+	getStarterRepoTemplateLockReason,
+	type StarterRepoAccessStatus,
+} from "@/features/starter-repo/lib/starter-repo-access-copy";
 import { FieldList } from "../fields/field-list";
 import { ArtifactContext } from "../shared/artifact-context";
 import { WorkbenchContainer } from "../shared/workbench-container";
 import { WorkbenchHeader } from "../shared/workbench-header";
+import type { WorkbenchModeProps } from "../types";
 import { BuildKickoffProgressCard } from "./build-kickoff/build-kickoff-progress-card";
 import { BuildKickoffStepCard } from "./build-kickoff/build-kickoff-step-card";
 import { BuildPromptCard } from "./build-kickoff/build-prompt-card";
@@ -26,13 +32,41 @@ export function BuildKickoffWorkbench({
 	invalidFieldIds,
 	fields,
 }: WorkbenchModeProps) {
-	const templateRepoUrl = getBuildStarterTemplateRepoUrl();
+	const { isAuthenticated, isLoading } = useConvexAuth();
+	const starterRepoAccess = useQuery(
+		api.course.getStarterRepoAccess,
+		isAuthenticated && !isLoading ? {} : "skip",
+	) as
+		| {
+				status: Exclude<StarterRepoAccessStatus, "loading" | "none">;
+		  }
+		| null
+		| undefined;
 	const promptState = getPromptTemplateState(
 		"build_kickoff_prompt",
 		pinnedArtifacts,
 		fieldValues,
 	);
 	const flow = useBuildKickoffFlow({ fieldValues, onFieldChange, fields });
+	const starterRepoStatus: StarterRepoAccessStatus =
+		starterRepoAccess === undefined
+			? "loading"
+			: starterRepoAccess === null
+				? "none"
+				: starterRepoAccess.status;
+	const hasStarterRepoAccess = starterRepoStatus === "accepted";
+	const templateRepoUrl = hasStarterRepoAccess
+		? getBuildStarterTemplateRepoUrl()
+		: null;
+	const templateLockedReason = hasStarterRepoAccess
+		? null
+		: getStarterRepoTemplateLockReason(starterRepoStatus);
+	const templatePathBlocked =
+		flow.currentPath === "Use template" && !hasStarterRepoAccess;
+	const effectivePrompt = templatePathBlocked ? null : promptState.prompt;
+	const effectiveDisabledReason = templatePathBlocked
+		? templateLockedReason
+		: promptState.disabledReason;
 
 	return (
 		<WorkbenchContainer>
@@ -61,6 +95,7 @@ export function BuildKickoffWorkbench({
 					currentPath={flow.currentPath}
 					invalid={invalidFieldIds.has("build_path")}
 					templateRepoUrl={templateRepoUrl}
+					templateLockedReason={templateLockedReason}
 					onChoosePath={(path) => {
 						onFieldChange("build_path", path);
 						flow.setActiveStep(2);
@@ -113,8 +148,8 @@ export function BuildKickoffWorkbench({
 				) : null}
 			</BuildKickoffStepCard>
 			<BuildPromptCard
-				prompt={promptState.prompt}
-				disabledReason={promptState.disabledReason}
+				prompt={effectivePrompt}
+				disabledReason={effectiveDisabledReason}
 				readyToGenerate={flow.readyToGenerate}
 				resetKey={flow.resetKey}
 			/>

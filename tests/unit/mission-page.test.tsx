@@ -293,6 +293,16 @@ vi.mock("next/link", () => ({
 	),
 }));
 
+vi.mock("@/features/starter-repo/components/starter-repo-access-card", () => ({
+	StarterRepoAccessCard: ({ surface }: { surface: string }) => (
+		<div data-starter-repo-card={surface}>Starter Repo</div>
+	),
+}));
+
+vi.mock("@/features/course/mission/components/bonus-course-card", () => ({
+	BonusCourseCard: () => <div data-bonus-course-card="mission">Bonus Course</div>,
+}));
+
 vi.mock("convex/react", () => ({
 	useConvexAuth: () => ({
 		isAuthenticated: true,
@@ -331,6 +341,8 @@ describe("MissionPage", () => {
 
 		expect(markup).toContain('data-viewport-mode="app"');
 		expect(markup).toContain('data-app-scroll-mode="page"');
+		expect(markup).toContain('data-starter-repo-card="mission"');
+		expect(markup).toContain('data-bonus-course-card="mission"');
 		expect(markup).toContain("Your sprint");
 		expect(markup).toContain("Current step");
 		expect(markup).toContain("Start 1.5");

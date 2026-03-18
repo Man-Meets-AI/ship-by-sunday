@@ -98,6 +98,12 @@ export const entitlementGrantOutcomeValidator = v.union(
 	v.literal("inserted"),
 	v.literal("patched"),
 );
+export const starterRepoAccessProvisioningStatusValidator = v.union(
+	v.literal("requested"),
+	v.literal("invited"),
+	v.literal("accepted"),
+	v.literal("failed"),
+);
 
 const artifactPreviewFields = {
 	artifactKey: v.string(),
@@ -156,6 +162,29 @@ export const entitlementDebugReturnValidator = v.union(
 	entitlementDocumentValidator,
 	v.null(),
 );
+
+export const starterRepoAccessPublicValidator = v.object({
+	githubUsername: v.string(),
+	status: starterRepoAccessProvisioningStatusValidator,
+	requestedAt: v.number(),
+	updatedAt: v.number(),
+	invitedAt: v.optional(v.number()),
+	acceptedAt: v.optional(v.number()),
+	lastError: v.optional(v.string()),
+});
+
+export const starterRepoAccessOperatorItemValidator = v.object({
+	clerkUserId: v.string(),
+	courseSlug: v.string(),
+	githubUsername: v.string(),
+	status: starterRepoAccessProvisioningStatusValidator,
+	requestedAt: v.number(),
+	updatedAt: v.number(),
+	invitedAt: v.optional(v.number()),
+	acceptedAt: v.optional(v.number()),
+	invitationId: v.optional(v.string()),
+	lastError: v.optional(v.string()),
+});
 
 export const missionLessonValidator = v.object({
 	id: v.string(),

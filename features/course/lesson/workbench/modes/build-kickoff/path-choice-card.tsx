@@ -22,11 +22,13 @@ export function PathChoiceCard({
 	currentPath,
 	invalid,
 	templateRepoUrl,
+	templateLockedReason,
 	onChoosePath,
 }: {
 	currentPath: string | null;
 	invalid: boolean;
 	templateRepoUrl: string | null;
+	templateLockedReason: string | null;
 	onChoosePath: (path: "Use template" | "Custom path") => void;
 }) {
 	return (
@@ -68,8 +70,7 @@ export function PathChoiceCard({
 				</div>
 				{!templateRepoUrl ? (
 					<p className="mt-3 text-[13px] leading-[1.7] text-product-muted">
-						Template repo not connected yet. Continue with custom path or
-						connect it now.
+						{templateLockedReason}
 					</p>
 				) : null}
 			</div>

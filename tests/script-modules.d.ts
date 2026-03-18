@@ -135,3 +135,25 @@ declare module "@/scripts/lib/lesson-video-pipeline.mjs" {
 	};
 	export function buildCutOptionsFromArgv(argv: string[]): CutStageOptions;
 }
+
+declare module "@/scripts/lib/starter-repo-access.mjs" {
+	export const STARTER_REPO_OWNER: string;
+	export const STARTER_REPO_NAME: string;
+	export const STARTER_REPO_URL: string;
+
+	export function buildGitHubApiUrl(pathname: string): string;
+	export function getGitHubRequestHeaders(
+		token: string,
+	): Record<string, string>;
+	export function getInviteOutcome(options: {
+		status: number;
+		body: { id?: number | string | null; message?: string | null } | null;
+		username: string;
+	}):
+		| { status: "invited"; invitationId?: string }
+		| { status: "accepted" }
+		| { status: "failed"; lastError: string };
+	export function getCollaboratorSyncOutcome(
+		status: number,
+	): "accepted" | "pending";
+}

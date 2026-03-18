@@ -7,4 +7,5 @@ export type CourseReadCtx = QueryCtx | MutationCtx;
 
 export type CourseEntitlementDoc = Doc<"courseEntitlements">;
 export type CourseEntitlementSource = CourseEntitlementDoc["source"];
+export type StarterRepoAccessDoc = Doc<"starterRepoAccess">;
 export type LessonStateDoc = Doc<"lessonStates">;

@@ -15,6 +15,7 @@ import type * as course_entitlements from "../course/entitlements.js";
 import type * as course_lessonState from "../course/lessonState.js";
 import type * as course_mission from "../course/mission.js";
 import type * as course_shared from "../course/shared.js";
+import type * as course_starterRepoAccess from "../course/starterRepoAccess.js";
 import type * as course_types from "../course/types.js";
 import type * as course_validators from "../course/validators.js";
 import type * as env from "../env.js";
@@ -34,6 +35,7 @@ declare const fullApi: ApiFromModules<{
   "course/lessonState": typeof course_lessonState;
   "course/mission": typeof course_mission;
   "course/shared": typeof course_shared;
+  "course/starterRepoAccess": typeof course_starterRepoAccess;
   "course/types": typeof course_types;
   "course/validators": typeof course_validators;
   env: typeof env;

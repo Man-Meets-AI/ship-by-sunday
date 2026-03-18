@@ -26,6 +26,27 @@ export default defineSchema({
 		.index("by_clerk_user_id_and_course_slug", ["clerkUserId", "courseSlug"])
 		.index("by_stripe_customer_id", ["stripeCustomerId"])
 		.index("by_stripe_checkout_session_id", ["stripeCheckoutSessionId"]),
+	starterRepoAccess: defineTable({
+		clerkUserId: v.string(),
+		courseSlug: v.string(),
+		githubUsername: v.string(),
+		githubUsernameLower: v.string(),
+		status: v.union(
+			v.literal("requested"),
+			v.literal("invited"),
+			v.literal("accepted"),
+			v.literal("failed"),
+		),
+		requestedAt: v.number(),
+		updatedAt: v.number(),
+		invitedAt: v.optional(v.number()),
+		acceptedAt: v.optional(v.number()),
+		invitationId: v.optional(v.string()),
+		lastError: v.optional(v.string()),
+	})
+		.index("by_clerk_user_id_and_course_slug", ["clerkUserId", "courseSlug"])
+		.index("by_status", ["status"])
+		.index("by_github_username_lower", ["githubUsernameLower"]),
 	lessonStates: defineTable({
 		clerkUserId: v.string(),
 		courseSlug: v.string(),

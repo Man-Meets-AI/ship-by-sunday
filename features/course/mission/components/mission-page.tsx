@@ -1,16 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import { useConvexAuth, useQuery } from "convex/react";
+import Link from "next/link";
 
 import { api } from "@/convex/_generated/api";
-import { ProductShell } from "@/features/course/shared/components/product-shell";
 import {
+	type BlockId,
 	getLesson,
 	getLessonHref,
-	type BlockId,
 } from "@/features/course/lesson/model/manifest";
 import { getBlockById } from "@/features/course/lesson/model/registry";
+import { BonusCourseCard } from "@/features/course/mission/components/bonus-course-card";
+import { ProductShell } from "@/features/course/shared/components/product-shell";
+import { StarterRepoAccessCard } from "@/features/starter-repo/components/starter-repo-access-card";
 
 type LessonStatus = "available" | "completed" | "in_progress" | "locked";
 type BlockStatus = "completed" | "active" | "ready" | "locked";
@@ -569,6 +571,10 @@ export function MissionPage() {
 				<LoadingState />
 			) : (
 				<div className="flex flex-1 flex-col gap-4">
+					<div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
+						<StarterRepoAccessCard surface="mission" />
+						<BonusCourseCard />
+					</div>
 					<SprintOverview
 						block={currentBlock}
 						nextBlock={nextBlock}

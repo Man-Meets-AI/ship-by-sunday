@@ -23,7 +23,5 @@ export const START_HERE_RESOURCES: LessonResourceContent[] = [
 ];
 
 export function getBuildStarterTemplateRepoUrl() {
-	const value =
-		process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL?.trim();
-	return value ? value : null;
+	return courseResourceConfig.starterRepo.url;
 }

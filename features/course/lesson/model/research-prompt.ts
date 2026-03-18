@@ -1,10 +1,11 @@
+import { courseResourceConfig } from "@/config/product";
 import type { LessonPromptImport, LessonPromptTemplateId } from "./contracts";
+import { getReferenceGalleryImageUrls } from "./reference-gallery";
 import type { PersistedFieldValues } from "./registry";
 import {
-	normalizeFieldValues,
 	type FieldValuesSource,
+	normalizeFieldValues,
 } from "./registry/shared";
-import { getReferenceGalleryImageUrls } from "./reference-gallery";
 
 export type CompetitorResearchPromptContext = {
 	user: {
@@ -349,8 +350,7 @@ function getBuildKickoffPromptContext(
 		definitionOfDone,
 		templateRepoUrl:
 			buildPath === "template"
-				? process.env.NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL?.trim() ||
-					undefined
+				? courseResourceConfig.starterRepo.url
 				: undefined,
 		productBrief: productBriefSections,
 		designSpec: designSpecSections,
@@ -699,14 +699,6 @@ export function getPromptTemplateState(
 				prompt: null,
 				disabledReason:
 					"Finish Design 2.7 and complete Steps 1-3 before generating this prompt.",
-			};
-		}
-
-		if (context.buildPath === "template" && !context.templateRepoUrl) {
-			return {
-				prompt: null,
-				disabledReason:
-					"The starter template path is not configured yet. Choose Custom path for now or set NEXT_PUBLIC_SHIP_BY_SUNDAY_TEMPLATE_REPO_URL.",
 			};
 		}
 

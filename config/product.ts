@@ -110,11 +110,19 @@ export const productConfig = {
 	priceDisplay: "$500",
 	currency: "usd",
 	bonusName: "Product Management for Beginners",
+	bonusPlaylistUrl:
+		"https://www.youtube.com/playlist?list=PLO6IqfGPRUN1Bof9pACmGc955t4d0J6cM",
 	images: {
 		founderProof: assetPaths.founderProof,
 		logo: assetPaths.logo,
 		missionPreview: assetPaths.missionPreview,
 	},
+} as const;
+
+export const starterRepoConfig = {
+	owner: "ParkerRex",
+	repo: "ship-by-sunday-starter",
+	url: "https://github.com/ParkerRex/ship-by-sunday-starter",
 } as const;
 
 export const manifestConfig = {
@@ -271,6 +279,7 @@ export const courseResourceConfig = {
 			href: "https://www.component.gallery",
 		},
 	],
+	starterRepo: starterRepoConfig,
 } as const;
 
 export const authViewConfig = {
