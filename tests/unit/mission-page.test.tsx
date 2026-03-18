@@ -300,7 +300,9 @@ vi.mock("@/features/starter-repo/components/starter-repo-access-card", () => ({
 }));
 
 vi.mock("@/features/course/mission/components/bonus-course-card", () => ({
-	BonusCourseCard: () => <div data-bonus-course-card="mission">Bonus Course</div>,
+	BonusCourseCard: () => (
+		<div data-bonus-course-card="mission">Bonus Course</div>
+	),
 }));
 
 vi.mock("convex/react", () => ({
