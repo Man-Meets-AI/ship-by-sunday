@@ -1,9 +1,9 @@
 "use client";
 
+import { useConvexAuth, useQuery } from "convex/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useConvexAuth, useQuery } from "convex/react";
 
 import {
 	getCheckoutSuccessHref,
@@ -112,7 +112,7 @@ function getCheckoutHelpContent(
 							"Use Check access only if you want to force one more lookup.",
 							"Keep this tab if you want a clean post-purchase handoff.",
 						],
-				  }
+					}
 				: {
 						title: "What happens next",
 						leadCopy:
@@ -122,7 +122,7 @@ function getCheckoutHelpContent(
 							"If you signed in with a different email, fix that first before retrying.",
 							"Use Check access if the handoff feels stalled.",
 						],
-				  };
+					};
 		case "sign_in_required":
 			return {
 				title: "Use the checkout account",
@@ -493,7 +493,10 @@ export function CheckoutSuccessView({
 								{primaryActionBody}
 							</p>
 							<div className="mt-4 flex flex-wrap gap-2.5">
-								<Link href={primaryActionHref} className={primaryButtonClassName}>
+								<Link
+									href={primaryActionHref}
+									className={primaryButtonClassName}
+								>
 									{primaryActionLabel}
 								</Link>
 								<Link
@@ -502,7 +505,10 @@ export function CheckoutSuccessView({
 								>
 									Check access
 								</Link>
-								<Link href={routeConfig.home} className={secondaryButtonClassName}>
+								<Link
+									href={routeConfig.home}
+									className={secondaryButtonClassName}
+								>
 									Go home
 								</Link>
 							</div>
