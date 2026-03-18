@@ -28,7 +28,7 @@ vi.mock("next/navigation", () => ({
 
 globalThis.React = React;
 
-import { SkillRail } from "@/components/skill-rail";
+import { SkillRail } from "@/features/course/shared/components/skill-rail";
 
 describe("SkillRail", () => {
 	beforeEach(() => {

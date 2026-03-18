@@ -6,3 +6,4 @@ coverage
 node_modules
 pnpm-lock.yaml
 convex/_generated
+scripts/vendor/for_youtube

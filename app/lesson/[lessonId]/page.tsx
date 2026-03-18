@@ -1,10 +1,10 @@
 import { notFound, redirect } from "next/navigation";
 
-import { LessonPage } from "@/components/lesson-page";
-import { getLegacyLessonRedirect } from "@/legacy/lesson-routes";
-import { getLesson } from "@/lib/course";
-import { requireCourseAccess } from "@/lib/server/course-access";
-import { getInitialProductTheme } from "@/lib/server/product-theme";
+import { LessonPage } from "@/features/course/lesson/components/lesson-page";
+import { getLegacyLessonRedirect } from "@/features/course/lesson/utils/legacy-routes";
+import { getLesson } from "@/features/course/lesson/model";
+import { requireCourseAccess } from "@/features/course/access/server/course-access";
+import { getInitialProductTheme } from "@/features/course/shared/server/product-theme";
 
 export default async function Page({
 	params,

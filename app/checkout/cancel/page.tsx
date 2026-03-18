@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { routeConfig } from "@/config/product";
+
 export default function Page() {
 	return (
 		<main className="mx-auto flex min-h-screen max-w-[960px] items-center px-4 py-10">
@@ -16,7 +18,7 @@ export default function Page() {
 				</p>
 				<div className="mt-6 flex flex-wrap gap-3">
 					<Link
-						href="/#pricing"
+						href={`${routeConfig.home}${routeConfig.pricingHash}`}
 						className="inline-flex border border-line bg-ink px-4 py-3 font-display text-2xl uppercase tracking-[0.04em] text-paper"
 					>
 						Back to pricing

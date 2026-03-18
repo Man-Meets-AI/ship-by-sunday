@@ -1,6 +1,6 @@
 # Ship by Sunday Lesson Authoring
 
-Last updated: 2026-03-11
+Last updated: 2026-03-18
 
 ## Goal
 
@@ -8,14 +8,15 @@ Keep every lesson screen editable by hand in one place, without a generator, int
 
 ## Source of truth
 
-- `lib/course/contracts.ts`: typed lesson, workbench, coach, and resource contracts
-- `lib/course/resources.ts`: shared worksheet, packet, and template-link constants
-- `lib/course/lessons/start-here.ts`
-- `lib/course/lessons/ceo.ts`
-- `lib/course/lessons/design.ts`
-- `lib/course/lessons/build.ts`
-- `lib/course/lessons/ship.ts`
-- `lib/course/manifest.ts`: assembles the full ordered registry
+- `features/course/lesson/model/contracts.ts`: typed lesson, workbench, coach, and resource contracts
+- `features/course/lesson/model/resources.ts`: shared worksheet, packet, and template-link constants
+- `features/course/lesson/model/media.ts`: generated lesson video attachment catalog
+- `features/course/lesson/model/lessons/start-here.ts`
+- `features/course/lesson/model/lessons/ceo.ts`
+- `features/course/lesson/model/lessons/design.ts`
+- `features/course/lesson/model/lessons/build.ts`
+- `features/course/lesson/model/lessons/ship.ts`
+- `features/course/lesson/model/manifest.ts`: assembles the full ordered registry
 
 Each lesson definition now owns:
 
@@ -31,10 +32,11 @@ There is no separate `content/lessons/` layer anymore.
 
 ## Editing workflow
 
-1. Find the lesson in its block file under `lib/course/lessons/`.
+1. Find the lesson in its block file under `features/course/lesson/model/lessons/`.
 2. Edit the structure and the student-facing content in the same object.
-3. Reuse shared resource constants from `lib/course/resources.ts` instead of retyping packet links.
-4. Run `pnpm run typecheck` and the content smoke tests after meaningful lesson changes.
+3. Reuse shared resource constants from `features/course/lesson/model/resources.ts` instead of retyping packet links.
+4. For lesson video attachments, use the publish pipeline instead of editing lesson definitions by hand.
+5. Run `pnpm run typecheck` and the content smoke tests after meaningful lesson changes.
 
 ## What belongs where
 
@@ -65,7 +67,7 @@ When a lesson points to an external template link:
 Use lesson-specific prompt import config or coach resources for:
 
 - prompt-driven workbench flows such as lesson `1.4`'s competitor-research copy/pasteback path
-- prompt template ids that resolve through `lib/course/research-prompt.ts`
+- prompt template ids that resolve through `features/course/lesson/model/research-prompt.ts`
 - coach-dock resources that still belong in the dock, such as worksheet links or external references
 
 Use recording docs as human reference only:
@@ -86,9 +88,20 @@ These docs can inform edits, but they are not a code-generation source.
 
 ## Media placeholders
 
-For now, lesson coach video and transcript state stays manual inside the lesson definitions:
+Lesson definitions still own the default pending state for coach video and transcript placeholders:
 
 - `video.status: "pending"` until real media is attached
 - `transcript.status: "empty"` until transcript text is ready
 
-When lesson media is ready, update the matching lesson definition directly.
+When a real lesson video is ready:
+
+1. Rename the approved source file in `.../Ship by Sunday Raw Footage/Ready` to `<lessonId>--<slug>.<ext>`.
+2. Use `pnpm run video:lessons` if you need to confirm the current lesson ids and titles.
+3. Run `pnpm run video:cut:setup` once on a machine before using the local silence-cut stage.
+4. Use `pnpm run video:cut -- --only <fileName>` when you want to inspect the local VAD cut output only.
+5. Use `pnpm run video:publish -- --only <fileName>` when you want to test one video, or `pnpm run video:publish` to process the full ready batch.
+6. By default the publish flow runs the local silence-cut stage first. Use `--skip-cut` only when a file should bypass that stage.
+7. Let the generated `features/course/lesson/model/media.ts` file carry the ready Bunny attachment data into the app for any filenames whose prefix matches a real lesson id.
+8. If a valid `Ready/` filename does not map to a real lesson id yet, the pipeline still uploads it to Bunny and reports it as unattached media instead of blocking the whole batch.
+
+Do not edit lesson definitions directly just to attach a Bunny-hosted lesson video.

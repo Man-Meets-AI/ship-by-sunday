@@ -16,3 +16,6 @@ coverage
 playwright-report
 test-results
 .codex-user-state
+output/video-pipeline
+.venv-video
+.vercel

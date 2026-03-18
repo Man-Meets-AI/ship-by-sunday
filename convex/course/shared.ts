@@ -1,7 +1,7 @@
 import { ConvexError } from "convex/values";
 
 import type { Id } from "../_generated/dataModel";
-import type { LessonConfig } from "../../lib/course/contracts";
+import type { LessonConfig } from "../../features/course/lesson/model/contracts";
 import {
 	COURSE_SLUG,
 	buildResolvedArtifactPreview,
@@ -16,11 +16,11 @@ import {
 	prepareFieldValuesForPersistence,
 	type ArtifactPreview,
 	type PersistedFieldValues,
-} from "../../lib/course/registry";
+} from "../../features/course/lesson/model/registry";
 import {
 	hydrateReferenceGalleryValue,
 	isReferenceGalleryValue,
-} from "../../lib/course/reference-gallery";
+} from "../../features/course/lesson/model/reference-gallery";
 import { requireActiveEntitlement } from "./entitlements";
 import type {
 	CourseMutationCtx,

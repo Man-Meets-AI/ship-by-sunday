@@ -301,7 +301,7 @@ vi.mock("convex/react", () => ({
 	useQuery: () => missionState,
 }));
 
-vi.mock("@/components/product-shell", () => ({
+vi.mock("@/features/course/shared/components/product-shell", () => ({
 	ProductShell: ({
 		children,
 		viewportMode,
@@ -323,7 +323,7 @@ vi.mock("@/components/product-shell", () => ({
 
 globalThis.React = React;
 
-import { MissionPage } from "@/components/mission-page";
+import { MissionPage } from "@/features/course/mission/components/mission-page";
 
 describe("MissionPage", () => {
 	it("prioritizes the current task and demotes the rest of the route", () => {

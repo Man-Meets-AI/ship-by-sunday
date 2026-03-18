@@ -1,6 +1,7 @@
 import { SignIn } from "@clerk/nextjs";
 
-import { ProductBrand } from "@/components/product-brand";
+import { ProductBrand } from "@/shared/branding/product-brand";
+import { authViewConfig, routeConfig } from "@/config/product";
 
 export default function Page() {
 	return (
@@ -25,14 +26,14 @@ export default function Page() {
 				<SignIn
 					appearance={{
 						elements: {
-							card: "shadow-none border border-[#111111]",
+							card: authViewConfig.clerkCardClassName,
 							headerTitle: "hidden",
 							headerSubtitle: "hidden",
 						},
 					}}
-					path="/sign-in"
-					signUpUrl="/sign-up"
-					fallbackRedirectUrl="/mission"
+					path={routeConfig.signIn}
+					signUpUrl={routeConfig.signUp}
+					fallbackRedirectUrl={authViewConfig.fallbackRedirectUrl}
 				/>
 			</div>
 		</main>

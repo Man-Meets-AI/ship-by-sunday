@@ -15,12 +15,8 @@ const convexEnvSchema = z.object({
 });
 
 const convexEnv = convexEnvSchema.parse({
-	CLERK_FRONTEND_API_URL: normalizeEnvValue(
-		process.env.CLERK_FRONTEND_API_URL,
-	),
-	STRIPE_WEBHOOK_SECRET: normalizeEnvValue(
-		process.env.STRIPE_WEBHOOK_SECRET,
-	),
+	CLERK_FRONTEND_API_URL: normalizeEnvValue(process.env.CLERK_FRONTEND_API_URL),
+	STRIPE_WEBHOOK_SECRET: normalizeEnvValue(process.env.STRIPE_WEBHOOK_SECRET),
 });
 
 export function requireConvexEnv<K extends keyof typeof convexEnv>(key: K) {

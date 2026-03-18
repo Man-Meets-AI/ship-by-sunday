@@ -4,7 +4,7 @@ import { z } from "zod";
 import {
 	getCodexAppServerUnavailableMessage,
 	withCodexAppServerClient,
-} from "@/lib/codex/app-server";
+} from "@/features/codex/server/app-server";
 
 import {
 	accountIsManagedChatGpt,
@@ -14,7 +14,7 @@ import {
 	recordCodexRun,
 	requireEntitledApiSession,
 	upsertViewerCodexConnection,
-} from "../_lib/helpers";
+} from "@/features/codex/server/route-helpers";
 
 const generateRequestSchema = z.object({
 	templateId: z.enum([

@@ -1,4 +1,4 @@
-import { getProductShellBlockNavigationTarget } from "@/components/product-shell-navigation";
+import { getProductShellBlockNavigationTarget } from "@/features/course/shared/utils/product-shell-navigation";
 
 describe("product shell block navigation", () => {
 	it("prefers the current or next available lesson inside an unlocked block", () => {

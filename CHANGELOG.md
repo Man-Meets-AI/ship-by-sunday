@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-03-18
+
+### Changed
+
+- Reorganized the runtime into feature-first folders so `app/` stays focused on Next.js entrypoints while marketing, checkout, course runtime, Codex, shared UI, and platform adapters now live under `features/`, `shared/`, and `platform/`.
+
+## 2026-03-17
+
+### Changed
+
+- Added a repo-local lesson video publish pipeline that validates `Ready/` filenames against live lesson ids, runs approved source videos through Auphonic, uploads the processed output to Bunny Stream, generates the app-owned `lib/course/media.ts` attachment catalog, and switches lesson playback to Bunny’s embed player when media is attached.
+
 ## 2026-03-13
 
 ### Changed

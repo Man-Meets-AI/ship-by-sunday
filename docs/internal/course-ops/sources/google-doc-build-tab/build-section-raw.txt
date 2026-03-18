@@ -297,7 +297,7 @@ Summary
   product-only workspace system that matches the Figma dark shell, keeps
   the existing palette as a light-mode option, and covers /mission plus
   all lesson routes in one implementation wave.
-- Keep layouts registry-driven from app/lessonRegistry.ts: mission stays
+- Keep layouts registry-driven from lib/course/manifest.ts: mission stays
   fixed, each lesson keeps its current shell as the default view, and
   every non-mission lesson supports a client- side split/focus override
   plus collapsible objective/coach chrome.

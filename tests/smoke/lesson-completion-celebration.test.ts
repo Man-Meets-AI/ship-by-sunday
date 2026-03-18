@@ -7,11 +7,15 @@ function readSource(relativePath: string) {
 
 describe("lesson completion celebration contract", () => {
 	it("keeps lesson completion in a dedicated hook state machine before route navigation", () => {
-		const pageSource = readSource("components/lesson-page.tsx");
-		const source = readSource(
-			"components/lesson-page/use-lesson-completion.ts",
+		const pageSource = readSource(
+			"features/course/lesson/components/lesson-page.tsx",
 		);
-		const ceoLessonSource = readSource("lib/course/lessons/ceo.ts");
+		const source = readSource(
+			"features/course/lesson/hooks/use-lesson-completion.ts",
+		);
+		const ceoLessonSource = readSource(
+			"features/course/lesson/model/lessons/ceo.ts",
+		);
 
 		expect(pageSource).toContain("useLessonCompletion");
 		expect(source).toContain(
@@ -30,16 +34,21 @@ describe("lesson completion celebration contract", () => {
 		expect(source).toContain("Next unlocked:");
 		expect(source).toContain("completionActionLabel");
 		expect(source).toContain("celebrationTitle");
-		expect(ceoLessonSource).toContain('completionCtaLabel: "Unlock Design"');
-		expect(ceoLessonSource).toContain('celebrationTitle: "Design unlocked"');
-		expect(ceoLessonSource).toContain('heroEyebrow: "CEO block complete"');
-		expect(ceoLessonSource).toContain('preset: "ceo"');
+		expect(ceoLessonSource).toContain("createVideoLesson");
+		expect(ceoLessonSource).not.toContain('preset: "ceo"');
+		expect(ceoLessonSource).not.toContain("completionCtaLabel");
 	});
 
 	it("passes a temporary completion cue into the product shell and rail", () => {
-		const lessonSource = readSource("components/lesson-page.tsx");
-		const shellSource = readSource("components/product-shell.tsx");
-		const railSource = readSource("components/skill-rail.tsx");
+		const lessonSource = readSource(
+			"features/course/lesson/components/lesson-page.tsx",
+		);
+		const shellSource = readSource(
+			"features/course/shared/components/product-shell.tsx",
+		);
+		const railSource = readSource(
+			"features/course/shared/components/skill-rail.tsx",
+		);
 
 		expect(lessonSource).toContain("completionCue:");
 		expect(lessonSource).toContain("completionCue={completionCue}");
@@ -59,14 +68,10 @@ describe("lesson completion celebration contract", () => {
 		expect(source).toContain("@keyframes sbs-completion-footer-lock-in");
 		expect(source).toContain("@keyframes sbs-rail-complete-sweep");
 		expect(source).toContain("@keyframes sbs-rail-unlock-ping");
-		expect(source).toContain("@keyframes sbs-stage-unlock-enter");
 		expect(source).toContain(".sbs-completion-banner");
 		expect(source).toContain(".sbs-completion-footer");
 		expect(source).toContain(".sbs-rail-complete-sweep");
 		expect(source).toContain(".sbs-rail-unlock-slot");
-		expect(source).toContain(".sbs-stage-unlock-hero");
-		expect(source).toContain(".sbs-stage-unlock-card");
-		expect(source).toContain(".sbs-stage-unlock-chip");
 		expect(source).toContain("@media (prefers-reduced-motion: reduce)");
 	});
 });

@@ -181,7 +181,9 @@ describe("ensure-clerk-test-user", () => {
 			// recheck -> exists
 			.mockResolvedValueOnce({
 				ok: true,
-				json: vi.fn().mockResolvedValue([makeUser(account.email, "user_exists")]),
+				json: vi
+					.fn()
+					.mockResolvedValue([makeUser(account.email, "user_exists")]),
 			});
 
 		const result = await ensureClerkTestUser({

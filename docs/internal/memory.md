@@ -5,7 +5,7 @@
 - Date: 2026-03-13
 - Problem: lesson screens had drifted into repeated `8px` to `12px` typography, same-weight bordered slabs, and too many one-off spacing choices, which made guided and support surfaces feel more like dense worksheets than an intentional product.
 - Durable decision:
-  - keep the shared readability contract in `components/lesson-workbench/shared/workbench-readability.ts`
+  - keep the shared readability contract in `features/course/lesson/workbench/shared/workbench-readability.ts`
   - prove major readability changes on lesson `1.2 Pick One User` first, then propagate through shared shells and cards
   - when a lesson mode needs different density, extend the shared readability primitives instead of reintroducing custom tiny-label classes
 - Current reference docs:

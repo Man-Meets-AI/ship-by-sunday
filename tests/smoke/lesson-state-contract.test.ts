@@ -14,7 +14,9 @@ describe("lesson state contract", () => {
 	});
 
 	it("resolves static lesson definitions locally in the lesson page", () => {
-		const source = readSource("components/lesson-page.tsx");
+		const source = readSource(
+			"features/course/lesson/components/lesson-page.tsx",
+		);
 
 		expect(source).toContain("const lesson = getLesson(lessonId);");
 		expect(source).toContain("const lessonContent = lesson.content;");

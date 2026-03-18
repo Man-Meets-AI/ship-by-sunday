@@ -4,7 +4,7 @@ import {
 	getOrderedBlocks,
 	getStudentFacingLessons,
 	isLessonImplemented,
-} from "../../lib/course/registry";
+} from "../../features/course/lesson/model/registry";
 import {
 	canAccessLesson,
 	isCompatibleLessonState,

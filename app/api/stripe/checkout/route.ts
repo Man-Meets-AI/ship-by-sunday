@@ -1,9 +1,10 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-import { COURSE_SLUG } from "@/lib/course/registry";
-import { getAppBaseUrl } from "@/lib/server/app-url";
-import { getStripe, getStripeLineItem } from "@/lib/stripe";
+import { getCheckoutSuccessHref, routeConfig } from "@/config/product";
+import { COURSE_SLUG } from "@/features/course/lesson/model/registry";
+import { getAppBaseUrl } from "@/platform/next/app-url";
+import { getStripe, getStripeLineItem } from "@/platform/billing/stripe";
 
 export async function POST(request: Request) {
 	const { userId } = await auth();
@@ -23,8 +24,8 @@ export async function POST(request: Request) {
 			mode: "payment",
 			allow_promotion_codes: true,
 			billing_address_collection: "auto",
-			cancel_url: `${appBaseUrl}/checkout/cancel`,
-			success_url: `${appBaseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+			cancel_url: `${appBaseUrl}${routeConfig.checkoutCancel}`,
+			success_url: `${appBaseUrl}${getCheckoutSuccessHref("{CHECKOUT_SESSION_ID}")}`,
 			client_reference_id: userId,
 			customer_email: user?.primaryEmailAddress?.emailAddress,
 			line_items: [getStripeLineItem()],

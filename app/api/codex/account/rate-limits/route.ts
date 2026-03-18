@@ -3,14 +3,14 @@ import { NextResponse } from "next/server";
 import {
 	getCodexAppServerUnavailableMessage,
 	withCodexAppServerClient,
-} from "@/lib/codex/app-server";
+} from "@/features/codex/server/app-server";
 
 import {
 	accountIsManagedChatGpt,
 	getApiAuthErrorResponse,
 	requireEntitledApiSession,
 	upsertViewerCodexConnection,
-} from "../../_lib/helpers";
+} from "@/features/codex/server/route-helpers";
 
 export const runtime = "nodejs";
 

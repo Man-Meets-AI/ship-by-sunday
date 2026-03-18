@@ -139,7 +139,7 @@ vi.mock("@clerk/nextjs", () => ({
 
 globalThis.React = React;
 
-import { ProductShell } from "@/components/product-shell";
+import { ProductShell } from "@/features/course/shared/components/product-shell";
 
 describe("ProductShell", () => {
 	beforeEach(() => {

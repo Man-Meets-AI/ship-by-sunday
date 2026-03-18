@@ -8,16 +8,28 @@ function readSource(relativePath: string) {
 describe("phase 1 motion contract", () => {
 	it("defines shared motion utilities with reduced-motion fallbacks", () => {
 		const source = readSource("app/globals.css");
+		const themeSource = readSource(
+			"features/course/shared/utils/product-theme.ts",
+		);
 
-		expect(source).toContain("--motion-fast: 120ms;");
-		expect(source).toContain("--motion-base: 180ms;");
+		expect(themeSource).toContain(
+			'"--motion-fast": `${productThemeConfig.motion.fastMs}ms`',
+		);
+		expect(themeSource).toContain(
+			'"--motion-base": `${productThemeConfig.motion.baseMs}ms`',
+		);
+		expect(themeSource).toContain(
+			'"--ease-standard": productThemeConfig.motion.easeStandard',
+		);
 		expect(source).toContain(".sbs-press-feedback");
 		expect(source).toContain(".sbs-hover-lift");
 		expect(source).toContain("@media (prefers-reduced-motion: reduce)");
 	});
 
 	it("keeps checkout CTA feedback stable during redirect and error states", () => {
-		const source = readSource("components/checkout-button.tsx");
+		const source = readSource(
+			"features/checkout/components/checkout-button.tsx",
+		);
 
 		expect(source).toContain('const loadingLabel = "Redirecting..."');
 		expect(source).toContain("aria-busy={isLoading}");
@@ -29,8 +41,12 @@ describe("phase 1 motion contract", () => {
 	});
 
 	it("keeps the checkout-success and access-required handoff states explicit", () => {
-		const successSource = readSource("components/checkout-success-view.tsx");
-		const accessSource = readSource("components/access-required-page.tsx");
+		const successSource = readSource(
+			"features/checkout/components/checkout-success-view.tsx",
+		);
+		const accessSource = readSource(
+			"features/course/access/components/access-required-page.tsx",
+		);
 
 		expect(successSource).toContain("Payment confirmed");
 		expect(successSource).toContain("Access handoff");
@@ -41,7 +57,9 @@ describe("phase 1 motion contract", () => {
 	});
 
 	it("animates the FAQ answer region instead of hard-swapping it", () => {
-		const source = readSource("app/faq-accordion.tsx");
+		const source = readSource(
+			"features/marketing/components/faq-accordion.tsx",
+		);
 
 		expect(source).toContain("transition-[grid-template-rows]");
 		expect(source).toContain("grid-rows-[1fr]");

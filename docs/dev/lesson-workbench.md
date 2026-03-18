@@ -1,12 +1,12 @@
 # Lesson Workbench Architecture
 
-Last updated: 2026-03-12
+Last updated: 2026-03-18
 
 ## Public entrypoint
 
-- Keep `@/components/lesson-workbench` as the public import surface.
-- `components/lesson-workbench.tsx` is intentionally a thin facade that re-exports `WorkbenchRenderer`.
-- `components/lesson-page.tsx` and any future consumers should keep importing from the facade, not from internal module paths.
+- Keep `@/features/course/lesson/workbench` as the public import surface.
+- `features/course/lesson/workbench/index.ts` is intentionally a thin facade that re-exports `WorkbenchRenderer`.
+- `features/course/lesson/components/lesson-page.tsx` and any future consumers should keep importing from the facade, not from internal module paths.
 
 ## Shell rules
 
@@ -18,7 +18,7 @@ Last updated: 2026-03-12
 
 ## Internal module split
 
-The workbench implementation now lives under `components/lesson-workbench/` and is split in this order:
+The workbench implementation now lives under `features/course/lesson/workbench/` and is split in this order:
 
 1. `renderer.tsx`
 2. `modes/`
@@ -66,7 +66,7 @@ Brief-assembler rules:
 Prompt-import rules:
 
 - If a lesson needs a main-workbench `copy prompt -> paste result` loop, declare it explicitly on `lesson.promptImport`.
-- Keep prompt-template building and pasted-output parsing in `lib/course/research-prompt.ts`, not inside the lesson shell or the lesson page.
+- Keep prompt-template building and pasted-output parsing in `features/course/lesson/model/research-prompt.ts`, not inside the lesson shell or the lesson page.
 - Keep the shared prompt-import UI in `shared/prompt-import-card.tsx`, then render it from the matching workbench mode instead of re-implementing the flow per lesson.
 - Current prompt templates are `competitor_research`, `scope_boundary`, and `visual_direction_guide`. Add new templates by extending the typed prompt contract first, then hydrate existing lesson fields from the pasted result instead of adding a custom persistence path.
 - Imported output should hydrate existing lesson fields; do not add one-off persistence paths for prompt imports.
@@ -82,7 +82,7 @@ Embedded-video rules:
 - `field-control.tsx` is the dispatcher.
 - Split field behavior by field kind, not by lesson mode.
 - Keep pure parsing/normalization helpers in `value-codecs.ts`.
-- Keep table normalization and preview helpers in `lib/course/table.ts`.
+- Keep table normalization and preview helpers in `features/course/lesson/model/table.ts`.
 - Keep upload behavior isolated in `upload-field-control.tsx`.
 
 Table rules:
@@ -97,7 +97,7 @@ Upload rules:
 
 - Preserve the existing `UploadFieldValue` shape.
 - Keep `useMutation(api.uploads.generateUploadUrl)` in the upload field control.
-- Keep persistence cleanup inside `lib/course/registry/persistence.ts` unless the public registry barrel is intentionally being redesigned.
+- Keep persistence cleanup inside `features/course/lesson/model/registry/persistence.ts` unless the public registry barrel is intentionally being redesigned.
 - Keep upload URL hydration inside the `convex/course/` lesson-state and artifact paths unless that backend split is intentionally being redesigned.
 
 ### `shared/`

@@ -4,7 +4,7 @@ import {
 	getCompletionIssues,
 	getLessonById,
 	type PersistedFieldValues,
-} from "../../lib/course/registry";
+} from "../../features/course/lesson/model/registry";
 import {
 	canAccessLesson,
 	ensureLessonIsUnlocked,

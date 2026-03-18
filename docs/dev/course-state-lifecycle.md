@@ -1,10 +1,10 @@
 # Course State Lifecycle
 
-`convex/course/` owns the dynamic runtime state for the product behind the stable public `convex/course.ts` entrypoint. It should not become a second copy of the static course contract that already lives in `lib/course/`.
+`convex/course/` owns the dynamic runtime state for the product behind the stable public `convex/course.ts` entrypoint. It should not become a second copy of the static course contract that now lives in `features/course/lesson/model/`.
 
 ## Ownership split
 
-- `lib/course/`: lesson definitions, unlock graph, field shapes, artifact contracts, and student-facing static content
+- `features/course/lesson/model/`: lesson definitions, unlock graph, field shapes, artifact contracts, and student-facing static content
 - `convex/course/`: entitlements, lesson progress, hydrated draft values, pinned artifact previews, mission status, and artifact listing
 
 If a piece of data can be derived from the lesson registry, keep it out of Convex responses.
@@ -25,7 +25,7 @@ This keeps access, mission progress, and artifact logic on one definition of “
 - Stale completed rows do not produce artifacts.
 - A learner who already has a row for a lesson can still reopen that lesson and resave against the new field shape; the lesson should fall back to an available/not-started state instead of looking completed.
 
-This behavior matches the field-shape versioning rules in `lib/course/registry/`.
+This behavior matches the field-shape versioning rules in `features/course/lesson/model/registry/`.
 
 ## Mutation modes
 

@@ -6,7 +6,7 @@
 
 - Public marketing and pricing pages in `app/`
 - Protected student routes at `/mission`, `/lesson/[lessonId]`, `/artifacts`, `/settings`, and `/access-required`
-- Course structure, lesson contracts, and lesson copy in `lib/course/`
+- Feature-first runtime code in `features/`, with the curriculum and lesson model centered under `features/course/lesson/`
 - Purchase-to-access handoff across Clerk, Stripe, and Convex
 
 ## Quick Start
@@ -70,12 +70,12 @@ The purchase-to-access behavior contract lives in [docs/delivery-onboarding/stac
 
 ## Intentionally Customizable
 
-- Curriculum shape and lesson order: `lib/course/manifest.ts` and `lib/course/lessons/*.ts`
-- Landing-page copy, offer framing, and media: `app/page.tsx`, `app/faq-accordion.tsx`, and `public/`
-- Student workspace UI and shell behavior: `components/` and `app/mission/page.tsx`
+- Curriculum shape and lesson order: `features/course/lesson/model/manifest.ts` and `features/course/lesson/model/lessons/*.ts`
+- Landing-page copy, offer framing, and media: `features/marketing/components/home-page.tsx`, `features/marketing/components/faq-accordion.tsx`, and `public/`
+- Student workspace UI and shell behavior: `features/course/` plus the thin route wrappers in `app/mission/page.tsx` and `app/lesson/[lessonId]/page.tsx`
 - Theme tokens and visual language: `app/globals.css`
-- Purchase, entitlement, and access flow: `app/api/stripe/*`, `app/checkout/*`, and `convex/course/`
-- Optional starter-template and Codex-assisted build helpers: `.env.local.example`, `scripts/`, and `app/api/codex/*`
+- Purchase, entitlement, and access flow: `app/api/stripe/*`, `features/checkout/`, `features/course/access/`, and `convex/course/`
+- Optional starter-template and Codex-assisted build helpers: `.env.local.example`, `scripts/`, `app/api/codex/*`, and `features/codex/`
 
 More detail: [docs/dev/customization.md](docs/dev/customization.md)
 

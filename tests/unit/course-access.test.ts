@@ -12,7 +12,7 @@ vi.mock("convex/nextjs", () => ({
 	fetchQuery: fetchQueryMock,
 }));
 
-vi.mock("@/lib/server/convex-auth", () => ({
+vi.mock("@/platform/auth/convex-auth", () => ({
 	getConvexServerSession: getConvexServerSessionMock,
 }));
 
@@ -39,9 +39,8 @@ describe("course access server helpers", () => {
 			token: null,
 		});
 
-		const { redirectAuthorizedAccessRequiredVisitor } = await import(
-			"@/lib/server/course-access"
-		);
+		const { redirectAuthorizedAccessRequiredVisitor } =
+			await import("@/features/course/access/server/course-access");
 
 		const access = await redirectAuthorizedAccessRequiredVisitor();
 
@@ -65,9 +64,8 @@ describe("course access server helpers", () => {
 			status: "active",
 		});
 
-		const { redirectAuthorizedAccessRequiredVisitor } = await import(
-			"@/lib/server/course-access"
-		);
+		const { redirectAuthorizedAccessRequiredVisitor } =
+			await import("@/features/course/access/server/course-access");
 
 		await redirectAuthorizedAccessRequiredVisitor();
 

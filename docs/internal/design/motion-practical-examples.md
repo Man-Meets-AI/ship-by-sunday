@@ -212,15 +212,15 @@ Use these as starting points, not rigid rules.
 
 ## 11a. Completion Moments and Reward Feedback
 
-| Scenario                                            | Solution                                                                                                      |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Completing work barely feels different              | Trigger at least 3 coordinated signals: CTA morph, explicit success copy, and one shell-level progress cue   |
-| Success copy appears but route changes too quickly  | Hold navigation for `700ms - 1000ms` so the reward can register before leaving the page                      |
+| Scenario                                            | Solution                                                                                                            |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Completing work barely feels different              | Trigger at least 3 coordinated signals: CTA morph, explicit success copy, and one shell-level progress cue          |
+| Success copy appears but route changes too quickly  | Hold navigation for `700ms - 1000ms` so the reward can register before leaving the page                             |
 | Completion effect feels like generic confetti       | Match the product metaphor; use system / mission-control feedback instead of party visuals if the UI is utilitarian |
-| Celebration reads only inside the current component | Echo the success in persistent chrome like rails, step indicators, or progress surfaces                      |
-| Success animation hides what was achieved           | State the concrete win: what locked in, what unlocked, or what changed next                                  |
-| Repeated completions feel noisy                     | Keep each reward short and consistent; do not escalate every lesson into a bigger spectacle                  |
-| Reduced-motion users lose the reward entirely       | Keep copy, icon/state morph, and shell highlight even when travel/sweep effects are removed                  |
+| Celebration reads only inside the current component | Echo the success in persistent chrome like rails, step indicators, or progress surfaces                             |
+| Success animation hides what was achieved           | State the concrete win: what locked in, what unlocked, or what changed next                                         |
+| Repeated completions feel noisy                     | Keep each reward short and consistent; do not escalate every lesson into a bigger spectacle                         |
+| Reduced-motion users lose the reward entirely       | Keep copy, icon/state morph, and shell highlight even when travel/sweep effects are removed                         |
 
 ## 12. Scroll, Reveal, and Viewport-Based Motion
 

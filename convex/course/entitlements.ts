@@ -1,6 +1,6 @@
 import { ConvexError, v } from "convex/values";
 
-import { COURSE_SLUG } from "../../lib/course/registry";
+import { COURSE_SLUG } from "../../features/course/lesson/model/registry";
 import { requireConvexEnv } from "../env";
 import type {
 	CourseEntitlementSource,

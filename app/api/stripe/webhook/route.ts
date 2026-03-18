@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import { fetchMutation } from "convex/nextjs";
 import Stripe from "stripe";
 
+import { apiConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
-import { COURSE_SLUG } from "@/lib/course/registry";
-import { requireServerEnv, serverEnv } from "@/lib/env/server";
+import { COURSE_SLUG } from "@/features/course/lesson/model/registry";
+import { requireServerEnv, serverEnv } from "@/platform/env/server";
 
 function getWebhookStripe() {
 	return new Stripe(requireServerEnv("STRIPE_SECRET_KEY"), {
-		apiVersion: "2026-02-25.clover",
+		apiVersion: apiConfig.stripeApiVersion,
 	});
 }
 

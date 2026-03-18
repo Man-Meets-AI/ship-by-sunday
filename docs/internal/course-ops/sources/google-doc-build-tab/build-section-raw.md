@@ -321,8 +321,8 @@ style="width: 2048.00px; height: 1168.00px; margin-left: 0.00px; margin-top: 0.0
 
 <span class="c0">We successfully created our product - but we did so in
 a live environment. If we were to go back and test our app, we’d find
-that it’s going to try to charge us real money.  
-  
+that it’s going to try to charge us real money.
+
 We dont want to do that. </span>
 
 <span class="c0"> </span>
@@ -356,6 +356,7 @@ style="width: 720.00px; height: 100.00px; margin-left: 0.00px; margin-top: 0.00p
 </span>
 
 #### <span style="overflow: hidden; display: inline-block; margin: 0.00px 0.00px; border: 0.00px solid #000000; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px); width: 720.00px; height: 337.33px;"> <img src="images/image16.png"
+
 style="width: 720.00px; height: 337.33px; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);" /> </span>
 
 #### <span class="c18"> </span>
@@ -489,7 +490,7 @@ style="width: 1118.00px; height: 806.00px; margin-left: 0.00px; margin-top: 0.00
   covers /mission plus all lesson routes in one implementation
   wave.</span>
 - <span class="c0">Keep layouts registry-driven from
-  app/lessonRegistry.ts: mission stays fixed, each lesson keeps its
+  lib/course/manifest.ts: mission stays fixed, each lesson keeps its
   current shell as the default view, and every non-mission lesson
   supports a client- side split/focus override plus collapsible
   objective/coach chrome.</span>

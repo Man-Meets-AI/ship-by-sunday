@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 
-import { getLessonById } from "../../lib/course/registry";
+import { getLessonById } from "../../features/course/lesson/model/registry";
 import {
 	buildResolvedArtifactPreviewForLesson,
 	loadViewerCourseState,

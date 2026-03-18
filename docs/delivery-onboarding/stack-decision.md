@@ -1,6 +1,6 @@
 # Ship by Sunday Stack Decision
 
-Last updated: 2026-03-13
+Last updated: 2026-03-18
 
 ## Locked stack
 
@@ -16,7 +16,7 @@ The app is no longer deciding a stack. The real work is documenting the exact im
 
 Current flow in code:
 
-1. The landing-page CTA uses `components/checkout-button.tsx`.
+1. The landing-page CTA uses `features/checkout/components/checkout-button.tsx`.
 2. Signed-out visitors are pushed to `/sign-in?redirect_url=<current-path>#pricing`, so the buyer returns to pricing after Clerk auth.
 3. Signed-in visitors call `POST /api/stripe/checkout`.
 4. The checkout route creates a Stripe Checkout Session with:
@@ -35,12 +35,14 @@ Current flow in code:
 8. The webhook extracts `clerkUserId` from `session.metadata.clerkUserId`, falling back to `client_reference_id`, then calls `api.course.grantEntitlementFromStripe`.
 9. Convex re-checks the same `STRIPE_WEBHOOK_SECRET` before upserting an `active` entitlement keyed by `clerkUserId + courseSlug`, while also storing Stripe customer / checkout-session / payment-intent IDs when present.
 10. `/checkout/success` reads `session_id` server-side, validates the Stripe Checkout Session, and renders distinct states for:
-   - missing session id
-   - invalid session id
-   - sign-in required
-   - wrong account for the checkout
-   - payment still pending
-   - validated paid session waiting on entitlement
+
+- missing session id
+- invalid session id
+- sign-in required
+- wrong account for the checkout
+- payment still pending
+- validated paid session waiting on entitlement
+
 11. For a validated paid session, the success page waits for authenticated `viewerAccess`, rotates status copy while entitlement is pending, and redirects to `/mission` about 700ms after access becomes active.
 12. If the buyer opens `/access-required`, that page also polls `viewerAccess`, auto-redirects to `/mission` when access appears, and otherwise offers recovery paths based on signed-out vs signed-in-without-access state.
 13. Returning entitled users who land on `/` are redirected server-side to `/mission` or their most recently viewed accessible lesson, unless they explicitly use `?marketing=1`.
@@ -57,6 +59,7 @@ Current flow in code:
   - inline fallback `price_data` for a one-time USD charge of `50000` cents (`$500`)
 - Convex auth is wired through `convex/auth.config.ts` and expects the Clerk JWT template app ID `convex` with `CLERK_FRONTEND_API_URL` as the provider domain.
 - Server-side Clerk -> Convex calls now explicitly request the Clerk `convex` JWT template instead of relying on Clerk’s default token shape.
+- Lesson video delivery now uses a repo-local publish pipeline: Auphonic preset processing -> Bunny Stream hosting -> generated `features/course/lesson/model/media.ts` attachments that the lesson registry merges into the app shell.
 
 ## Local development note
 
@@ -105,12 +108,29 @@ Current verified local sequence:
 6. Confirm the webhook logs `grant_succeeded`.
 7. Confirm the buyer leaves `/checkout/success` and reaches `/mission`.
 
+## Lesson video pipeline
+
+The lesson media path is now explicit:
+
+1. Put an approved lesson master into `/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Ready`.
+2. Name it `<lessonId>--<slug>.<ext>`, for example `2.4--figma-basics.mp4`.
+3. Use `pnpm run video:lessons` when you need the current lesson id list.
+4. Run `pnpm run video:cut:setup` once on a machine before using the silence-cut stage.
+5. Use `pnpm run video:cut -- --only <fileName>` to test only the local VAD cut stage.
+6. Use `pnpm run video:publish -- --only <fileName>` when you want to test the full pipeline on a single file, or `pnpm run video:publish` to process the whole ready batch.
+7. By default the publish flow now does: local VAD silence cut -> Auphonic preset processing -> Bunny upload.
+8. Use `--skip-cut` if a specific file should bypass the local cut stage.
+9. The script validates filenames, uploads successful source files to Bunny, moves successful source files into `Processed/`, and writes a local report to `output/video-pipeline/`.
+10. If the filename prefix matches a real lesson id, the script also updates the generated attachment map in `features/course/lesson/model/media.ts`; if it does not match a lesson yet, the script still uploads it to Bunny and records it as unattached media.
+
+Launch implication: the hosting decision is made, but the first real lesson batch still needs to be published and browser-QA'd in the live shell.
+
 ## What is still not live-ready
 
 - Stripe still needs live webhook endpoint registration and verified delivery against the deployed environment.
 - Clerk and Convex still need a real production auth check, not just local wiring. The risky point is issuer/domain mismatch around `CLERK_FRONTEND_API_URL` and the `convex` JWT template.
 - The buyer handoff still depends on the purchaser finishing checkout in the same signed-in browser context used to query `viewerAccess`.
-- Final lesson video hosting is still undecided.
+- The first real lesson media batch still needs to be published through the Bunny pipeline and validated in the lesson shell.
 - There is no transactional access email in code today.
 - Support inbox ownership and escalation path are still undefined.
 - The flow still needs a full real-environment QA pass across landing page -> sign-in -> checkout -> success -> mission -> Start Here.
@@ -127,4 +147,4 @@ Current verified local sequence:
 2. Verify the production Clerk -> Convex auth chain with the real `convex` JWT template and final `CLERK_FRONTEND_API_URL`.
 3. Run the first full buyer journey QA pass against the deployed environment, including the delayed-entitlement recovery path on `/access-required` and the validated-session states on `/checkout/success`.
 4. Decide whether the launch can rely on in-app access handoff only, or whether a transactional access email is required before launch.
-5. Decide the lesson video hosting path and attach the first real lesson media.
+5. Run the Bunny publish pipeline on the first approved lesson batch, then QA the attached lesson media in-product.

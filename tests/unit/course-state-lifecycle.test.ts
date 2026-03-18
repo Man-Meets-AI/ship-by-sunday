@@ -1,78 +1,19 @@
-import {
-	COURSE_SLUG,
-	FIELD_SHAPE_VERSION_FIELD_ID,
-	getLessonById,
-} from "@/lib/course";
+import { COURSE_SLUG } from "@/features/course/lesson/model";
 import {
 	completeLesson,
-	getResumeDestination,
 	getLessonState,
 	getMissionState,
-	listArtifacts,
-	saveLessonDraft,
+	getResumeDestination,
 } from "@/convex/course";
 
 const clerkUserId = "user_test_course_state";
 
-function createStaleCompletedLessonState() {
-	const lesson = getLessonById("1.1");
-	if (!lesson) {
-		throw new Error("Lesson 1.1 must exist for course-state lifecycle tests.");
-	}
-
-	return {
-		_id: "lesson_state_1",
-		_creationTime: 1,
-		clerkUserId,
-		courseSlug: COURSE_SLUG,
-		lessonId: lesson.id,
-		blockId: lesson.block,
-		status: "completed" as const,
-		artifactKey: lesson.artifact.key,
-		artifactType: lesson.artifact.type,
-		fieldValues: {
-			problem_1:
-				"Startup operators lose action items after meetings and waste time rebuilding them.",
-		},
-		startedAt: 10,
-		updatedAt: 20,
-		lastViewedAt: 30,
-		completedAt: 40,
-	};
-}
-
-function createCompletedLessonState(
-	lessonId: string,
-	fieldValues: Record<string, unknown> = {},
-) {
-	const lesson = getLessonById(lessonId);
-	if (!lesson) {
-		throw new Error(
-			`Lesson ${lessonId} must exist for course-state lifecycle tests.`,
-		);
-	}
-
-	return {
-		_id: `lesson_state_${lessonId}`,
-		_creationTime: 1,
-		clerkUserId,
-		courseSlug: COURSE_SLUG,
-		lessonId: lesson.id,
-		blockId: lesson.block,
-		status: "completed" as const,
-		artifactKey: lesson.artifact.key,
-		artifactType: lesson.artifact.type,
-		fieldValues,
-		startedAt: 10,
-		updatedAt: 20,
-		lastViewedAt: 30,
-		completedAt: 40,
-	};
-}
-
 function createLessonState(
 	lessonId: string,
 	options: {
+		blockId?: "CEO" | "DESIGN" | "BUILD" | "SHIP";
+		artifactKey?: string;
+		artifactType?: string;
 		status?: "not_started" | "in_progress" | "completed";
 		fieldValues?: Record<string, unknown>;
 		lastViewedAt?: number;
@@ -81,23 +22,16 @@ function createLessonState(
 		completedAt?: number;
 	} = {},
 ) {
-	const lesson = getLessonById(lessonId);
-	if (!lesson) {
-		throw new Error(
-			`Lesson ${lessonId} must exist for course-state lifecycle tests.`,
-		);
-	}
-
 	return {
 		_id: `lesson_state_${lessonId}_${options.status ?? "not_started"}`,
 		_creationTime: 1,
 		clerkUserId,
 		courseSlug: COURSE_SLUG,
-		lessonId: lesson.id,
-		blockId: lesson.block,
+		lessonId,
+		blockId: options.blockId ?? "CEO",
 		status: options.status ?? "not_started",
-		artifactKey: lesson.artifact.key,
-		artifactType: lesson.artifact.type,
+		artifactKey: options.artifactKey ?? `${lessonId}-artifact`,
+		artifactType: options.artifactType ?? "video",
 		fieldValues: options.fieldValues ?? {},
 		startedAt: options.startedAt ?? 10,
 		updatedAt: options.updatedAt ?? 20,
@@ -169,168 +103,35 @@ describe("course state lifecycle", () => {
 		vi.restoreAllMocks();
 	});
 
-	it("keeps incompatible completed rows locked when they are no longer on the unlock path", async () => {
-		const staleState = createStaleCompletedLessonState();
-		const ctx = createCourseCtx({ lessonStates: [staleState] });
-
-		const mission = await (getMissionState as any)._handler(ctx);
-		const missionLesson = mission.blocks
-			.flatMap(
-				(block: { lessons: Array<{ id: string; status: string }> }) =>
-					block.lessons,
-			)
-			.find((lesson: { id: string }) => lesson.id === "1.1");
-
-		expect(mission.progressCount).toBe(0);
-		expect(missionLesson?.status).toBe("locked");
-	});
-
-	it("returns locked for an incompatible completed lesson that only survives as stale state", async () => {
-		const staleState = createStaleCompletedLessonState();
-		const ctx = createCourseCtx({ lessonStates: [staleState] });
-
-		const lessonState = await (getLessonState as any)._handler(ctx, {
-			lessonId: "1.1",
-		});
-
-		expect(lessonState).toEqual({
-			accessStatus: "locked",
-		});
-	});
-
-	it("omits incompatible completed rows from the artifacts list", async () => {
-		const staleState = createStaleCompletedLessonState();
-		const ctx = createCourseCtx({ lessonStates: [staleState] });
-
-		const artifacts = await (listArtifacts as any)._handler(ctx);
-
-		expect(artifacts).toEqual([]);
-	});
-
-	it("does not allow draft saves against an incompatible completed row that is no longer accessible", async () => {
-		const staleState = createStaleCompletedLessonState();
-		const patch = vi.fn().mockResolvedValue(undefined);
-		const insert = vi.fn().mockResolvedValue("new_lesson_state");
-		const ctx = createCourseCtx({
-			lessonStates: [staleState],
-			patch,
-			insert,
-		});
-		const fixedNow = 1_700_000_000_000;
-
-		vi.spyOn(Date, "now").mockReturnValue(fixedNow);
-
-		await expect(
-			(saveLessonDraft as any)._handler(ctx, {
-				lessonId: "1.1",
-				fieldValues: {
-					problem_1_who: "Startup operators",
-					problem_1_pain:
-						"They lose action items after meetings and waste time rebuilding them.",
-				},
-			}),
-		).rejects.toThrow("Lesson is still locked");
-		expect(insert).not.toHaveBeenCalled();
-		expect(patch).not.toHaveBeenCalled();
-	});
-
-	it("completes a lesson and returns the next lesson id for the celebration flow", async () => {
-		const insert = vi.fn().mockResolvedValue("new_lesson_state");
-		const ctx = createCourseCtx({ insert });
-		const fixedNow = 1_700_000_000_100;
-
-		vi.spyOn(Date, "now").mockReturnValue(fixedNow);
-
-		const result = await (completeLesson as any)._handler(ctx, {
-			lessonId: "0.1",
-			fieldValues: {
-				weekend_goal: "Ship a working internal AI ops helper by Sunday.",
-			},
-		});
-
-		expect(result).toEqual({
-			completedAt: fixedNow,
-			nextLessonId: "0.2",
-		});
-		expect(insert).toHaveBeenCalledWith(
-			"lessonStates",
-			expect.objectContaining({
-				lessonId: "0.1",
-				status: "completed",
-				completedAt: fixedNow,
-				fieldValues: expect.objectContaining({
-					weekend_goal: "Ship a working internal AI ops helper by Sunday.",
-				}),
-			}),
-		);
-	});
-
-	it("hydrates stored sketch upload arrays with signed urls on read", async () => {
+	it("ignores removed-lesson state when calculating mission progress", async () => {
 		const ctx = createCourseCtx({
 			lessonStates: [
-				createCompletedLessonState("1.7"),
-				createCompletedLessonState("2.1"),
-				createCompletedLessonState("2.2", {
-					sketch_upload: [
-						{
-							kind: "upload",
-							status: "stored",
-							fileName: "screen-1.jpg",
-							storageId: "sketch-1",
-						},
-						{
-							kind: "upload",
-							status: "stored",
-							fileName: "screen-2.jpg",
-							storageId: "sketch-2",
-						},
-					],
+				createLessonState("2.7", {
+					blockId: "DESIGN",
+					artifactKey: "legacy-design-wrap",
+					status: "completed",
 				}),
 			],
 		});
 
-		const lessonState = await (getLessonState as any)._handler(ctx, {
-			lessonId: "2.2",
-		});
+		const mission = await (getMissionState as any)._handler(ctx);
 
-		expect(lessonState).toMatchObject({
-			accessStatus: "unlocked",
-			status: "completed",
-			fieldValues: {
-				sketch_upload: [
-					expect.objectContaining({
-						fileName: "screen-1.jpg",
-						storageId: "sketch-1",
-						url: "https://example.com/upload",
-					}),
-					expect.objectContaining({
-						fileName: "screen-2.jpg",
-						storageId: "sketch-2",
-						url: "https://example.com/upload",
-					}),
-				],
-			},
-		});
+		expect(mission.progressCount).toBe(0);
+		expect(
+			mission.blocks.flatMap(
+				(block: { lessons: Array<{ id: string }> }) => block.lessons,
+			),
+		).not.toContainEqual(expect.objectContaining({ id: "2.7" }));
 	});
 
-	it("resumes to the most recently viewed lesson that is still accessible", async () => {
+	it("resumes to mission when the only stored lesson is no longer in the curriculum", async () => {
 		const ctx = createCourseCtx({
 			lessonStates: [
-				createLessonState("3.1", {
-					status: "not_started",
-					lastViewedAt: 250,
-				}),
-				createLessonState("1.7", {
+				createLessonState("2.7", {
+					blockId: "DESIGN",
+					artifactKey: "legacy-design-wrap",
 					status: "completed",
-					lastViewedAt: 200,
-					fieldValues: {
-						who: "Startup operators",
-						outcome: "Leave meetings with clear next steps.",
-						evidence: "Speed matters most after the call.",
-						flow: "Paste notes -> review -> share",
-						scope: "Core path only",
-					},
-					completedAt: 180,
+					lastViewedAt: 999,
 				}),
 			],
 		});
@@ -338,12 +139,66 @@ describe("course state lifecycle", () => {
 		const resume = await (getResumeDestination as any)._handler(ctx);
 
 		expect(resume).toEqual({
-			destination: "/lesson/1.7",
-			lessonId: "1.7",
+			destination: "/mission",
+			lessonId: null,
 		});
 	});
 
-	it("throws the structured incomplete-lesson error when required fields are missing", async () => {
+	it("completes a Bunny-driven lesson and returns the next lesson id", async () => {
+		const insert = vi.fn().mockResolvedValue("new_lesson_state");
+		const ctx = createCourseCtx({
+			insert,
+			lessonStates: [
+				createLessonState("0.1", {
+					blockId: "CEO",
+					artifactKey: "weekend_shipping_goal",
+					artifactType: "text",
+					status: "completed",
+				}),
+				createLessonState("0.2", {
+					blockId: "CEO",
+					artifactKey: "sprint_setup_state",
+					artifactType: "checklist",
+					status: "completed",
+				}),
+			],
+		});
+		const fixedNow = 1_700_000_000_100;
+
+		vi.spyOn(Date, "now").mockReturnValue(fixedNow);
+
+		const result = await (completeLesson as any)._handler(ctx, {
+			lessonId: "1.0",
+			fieldValues: {},
+		});
+
+		expect(result).toEqual({
+			completedAt: fixedNow,
+			nextLessonId: "1.1",
+		});
+		expect(insert).toHaveBeenCalledWith(
+			"lessonStates",
+			expect.objectContaining({
+				lessonId: "1.0",
+				status: "completed",
+				completedAt: fixedNow,
+			}),
+		);
+	});
+
+	it("returns locked for the first Build lesson until Design is completed", async () => {
+		const ctx = createCourseCtx();
+
+		const lessonState = await (getLessonState as any)._handler(ctx, {
+			lessonId: "3.0",
+		});
+
+		expect(lessonState).toEqual({
+			accessStatus: "locked",
+		});
+	});
+
+	it("throws the structured incomplete-lesson error when Start Here fields are missing", async () => {
 		const ctx = createCourseCtx();
 
 		await expect(

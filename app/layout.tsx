@@ -3,10 +3,13 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Bebas_Neue, Manrope } from "next/font/google";
 import "@xyflow/react/dist/style.css";
 
-import { ConvexClientProvider } from "@/components/convex-client-provider";
-import { productConfig } from "@/config/product";
-import { getProductThemeBootstrapScript } from "@/lib/product-theme";
-import { getInitialProductTheme } from "@/lib/server/product-theme";
+import { ConvexClientProvider } from "@/platform/convex/convex-client-provider";
+import { manifestConfig, productConfig } from "@/config/product";
+import {
+	getProductThemeBootstrapScript,
+	getProductThemeTokenStyles,
+} from "@/features/course/shared/utils/product-theme";
+import { getInitialProductTheme } from "@/features/course/shared/server/product-theme";
 
 import "./globals.css";
 
@@ -26,29 +29,9 @@ export const metadata: Metadata = {
 	description: productConfig.metadataDescription,
 	manifest: "/manifest.webmanifest",
 	icons: {
-		icon: [
-			{ url: "/favicon.ico", sizes: "any" },
-			{ url: "/favicon-16x16.png", type: "image/png", sizes: "16x16" },
-			{ url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
-			{
-				url: "/android-chrome-192x192.png",
-				type: "image/png",
-				sizes: "192x192",
-			},
-			{
-				url: "/android-chrome-512x512.png",
-				type: "image/png",
-				sizes: "512x512",
-			},
-		],
-		apple: [
-			{
-				url: "/apple-touch-icon.png",
-				type: "image/png",
-				sizes: "180x180",
-			},
-		],
-		shortcut: ["/favicon.ico"],
+		icon: [...manifestConfig.metadataIcons.icon],
+		apple: [...manifestConfig.metadataIcons.apple],
+		shortcut: [...manifestConfig.metadataIcons.shortcut],
 	},
 };
 
@@ -67,6 +50,11 @@ export default async function RootLayout({
 			className={`${display.variable} ${sans.variable}`}
 		>
 			<head>
+				<style
+					dangerouslySetInnerHTML={{
+						__html: getProductThemeTokenStyles(),
+					}}
+				/>
 				<script
 					dangerouslySetInnerHTML={{
 						__html: getProductThemeBootstrapScript(),

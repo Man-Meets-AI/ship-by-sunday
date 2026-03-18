@@ -1,0 +1,117 @@
+"use client";
+
+import type { WorkbenchType } from "@/features/course/lesson/model/manifest";
+import {
+	buildResolvedArtifactPreview,
+	getObjectiveTasks,
+	getWorkbenchSectionStates,
+	getWorkbenchSections,
+} from "@/features/course/lesson/model/registry";
+import { buildStageUnlockSummary } from "@/features/course/lesson/model/stage-unlock";
+
+import { BriefAssemblerWorkbench } from "./modes/brief-assembler-workbench";
+import { BuildKickoffWorkbench } from "./modes/build-kickoff-workbench";
+import { CaptureUploadWorkbench } from "./modes/capture-upload-workbench";
+import { CollectorBoardWorkbench } from "./modes/collector-board-workbench";
+import { ConsoleChecklistWorkbench } from "./modes/console-checklist-workbench";
+import { ExternalWorkspaceWorkbench } from "./modes/external-workspace-workbench";
+import { GuidedFormWorkbench } from "./modes/guided-form-workbench";
+import { PaperPhotoUploadWorkbench } from "./modes/paper-photo-upload-workbench";
+import { ReferenceGalleryWorkbench } from "./modes/reference-gallery-workbench";
+import { RoadmapOverviewWorkbench } from "./modes/roadmap-overview-workbench";
+import { SketchUploadWorkbench } from "./modes/sketch-upload-workbench";
+import { ScoreTableWorkbench } from "./modes/score-table-workbench";
+import { ScopeSplitWorkbench } from "./modes/scope-split-workbench";
+import { TrackerLogWorkbench } from "./modes/tracker-log-workbench";
+import { VisualDirectionWorkbench } from "./modes/visual-direction-workbench";
+import type { WorkbenchModeComponent, WorkbenchRendererProps } from "./types";
+import { WorkbenchContainer } from "./shared/workbench-container";
+import { WorkbenchHeader } from "./shared/workbench-header";
+
+const modeRenderers: Record<WorkbenchType, WorkbenchModeComponent> = {
+	guided_form: GuidedFormWorkbench,
+	score_table: ScoreTableWorkbench,
+	collector_board: CollectorBoardWorkbench,
+	capture_upload: CaptureUploadWorkbench,
+	paper_photo_upload: PaperPhotoUploadWorkbench,
+	sketch_upload: SketchUploadWorkbench,
+	reference_gallery: ReferenceGalleryWorkbench,
+	scope_split: ScopeSplitWorkbench,
+	brief_assembler: BriefAssemblerWorkbench,
+	build_kickoff: BuildKickoffWorkbench,
+	console_checklist: ConsoleChecklistWorkbench,
+	roadmap_overview: RoadmapOverviewWorkbench,
+	tracker_log: TrackerLogWorkbench,
+	external_workspace: ExternalWorkspaceWorkbench,
+	visual_direction: VisualDirectionWorkbench,
+};
+
+function UnsupportedWorkbench({
+	lesson,
+	lessonContent,
+}: Pick<WorkbenchRendererProps, "lesson" | "lessonContent">) {
+	return (
+		<WorkbenchContainer>
+			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
+			<div className="rounded-none border border-dashed border-product-border bg-product-surface-strong/70 p-5 text-sm font-medium leading-relaxed text-product-muted">
+				This workbench type has not been wired yet.
+			</div>
+		</WorkbenchContainer>
+	);
+}
+
+export function WorkbenchRenderer({
+	lesson,
+	lessonContent,
+	fieldValues,
+	onFieldChange,
+	pinnedArtifacts,
+	invalidFieldIds = new Set<string>(),
+	invalidFieldMessages = new Map<string, string>(),
+	fieldValuesReady = true,
+}: WorkbenchRendererProps) {
+	const fields = lesson.workbenchFields ?? [];
+	const resolvedArtifactPreview = buildResolvedArtifactPreview(
+		lesson,
+		fieldValues,
+		pinnedArtifacts,
+	);
+	const stageUnlockSummary = buildStageUnlockSummary(lesson, pinnedArtifacts);
+	const workbenchSections = getWorkbenchSections(lesson);
+	const sectionStates = getWorkbenchSectionStates(lesson, fieldValues);
+	const objectiveTasks = getObjectiveTasks(lesson, fieldValues, {
+		pinnedArtifacts,
+		resolvedArtifactPreview,
+	});
+	const completedTaskCount = objectiveTasks.filter(
+		(task) => task.status === "complete",
+	).length;
+
+	const ModeRenderer = modeRenderers[lesson.workbench];
+
+	if (!ModeRenderer) {
+		return (
+			<UnsupportedWorkbench lesson={lesson} lessonContent={lessonContent} />
+		);
+	}
+
+	return (
+		<ModeRenderer
+			lesson={lesson}
+			lessonContent={lessonContent}
+			fieldValues={fieldValues}
+			onFieldChange={onFieldChange}
+			pinnedArtifacts={pinnedArtifacts}
+			invalidFieldIds={invalidFieldIds}
+			invalidFieldMessages={invalidFieldMessages}
+			fieldValuesReady={fieldValuesReady}
+			stageUnlockSummary={stageUnlockSummary}
+			resolvedArtifactPreview={resolvedArtifactPreview}
+			fields={fields}
+			objectiveTasks={objectiveTasks}
+			completedTaskCount={completedTaskCount}
+			workbenchSections={workbenchSections}
+			sectionStates={sectionStates}
+		/>
+	);
+}

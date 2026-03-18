@@ -7,13 +7,15 @@ function readSource(relativePath: string) {
 
 describe("watch lesson shell contract", () => {
 	it("routes watch lessons through a dedicated shell and compact footer path", () => {
-		const source = readSource("components/lesson-page.tsx");
-		const completionSource = readSource(
-			"components/lesson-page/use-lesson-completion.ts",
+		const source = readSource(
+			"features/course/lesson/components/lesson-page.tsx",
 		);
-		const shellSource = readSource("components/lesson-shells.tsx");
+		const completionSource = readSource(
+			"features/course/lesson/hooks/use-lesson-completion.ts",
+		);
+		const shellSource = readSource("features/course/lesson/shells/index.tsx");
 		const videoSurfaceSource = readSource(
-			"components/lesson-video-surface.tsx",
+			"features/course/lesson/components/lesson-video-surface.tsx",
 		);
 
 		expect(source).toContain('const isWatchLesson = lesson.shell === "watch";');

@@ -33,17 +33,17 @@ This is a paid course and workspace product. Revenue quality depends on activati
 
 Inspected surfaces:
 
-- `components/lesson-workbench/modes/pick-one-user-support.tsx`
-- `components/lesson-workbench/modes/guided-form-workbench.tsx`
-- `components/lesson-workbench/shared/workbench-header.tsx`
-- `components/lesson-workbench/shared/status-rail.tsx`
-- `components/lesson-workbench/shared/workbench-card.tsx`
-- `components/lesson-workbench/shared/section-card.tsx`
-- `components/lesson-workbench/shared/artifact-context.tsx`
-- `components/lesson-workbench/shared/artifact-preview-content.tsx`
-- `components/lesson-workbench/fields/field-styles.ts`
-- `components/lesson-workbench/fields/field-list.tsx`
-- `components/lesson-shells.tsx`
+- `features/course/lesson/workbench/modes/pick-one-user-support.tsx`
+- `features/course/lesson/workbench/modes/guided-form-workbench.tsx`
+- `features/course/lesson/workbench/shared/workbench-header.tsx`
+- `features/course/lesson/workbench/shared/status-rail.tsx`
+- `features/course/lesson/workbench/shared/workbench-card.tsx`
+- `features/course/lesson/workbench/shared/section-card.tsx`
+- `features/course/lesson/workbench/shared/artifact-context.tsx`
+- `features/course/lesson/workbench/shared/artifact-preview-content.tsx`
+- `features/course/lesson/workbench/fields/field-styles.ts`
+- `features/course/lesson/workbench/fields/field-list.tsx`
+- `features/course/lesson/shells/index.tsx`
 - `app/globals.css`
 
 ## Problems I Notice

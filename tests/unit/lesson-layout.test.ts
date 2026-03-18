@@ -4,47 +4,26 @@ import {
 	getLessonById,
 	lessonSupportsLayoutToggle,
 	normalizeLayoutModeForLesson,
-} from "@/lib/course";
+} from "@/features/course/lesson/model";
 
 describe("lesson layout modes", () => {
-	it("keeps split-shell lessons switchable between split and focus", () => {
-		const lesson = getLessonById("1.2");
-		expect(lesson).toBeTruthy();
+	it("keeps Start Here lessons switchable between split and focus", () => {
+		for (const lessonId of ["0.1", "0.2"]) {
+			const lesson = getLessonById(lessonId);
+			expect(lesson).toBeTruthy();
 
-		expect(getAvailableLayoutModesForLesson(lesson!)).toEqual([
-			"split",
-			"focus",
-		]);
-		expect(getDefaultLayoutModeForLesson(lesson!)).toBe("split");
-		expect(lessonSupportsLayoutToggle(lesson!)).toBe(true);
-		expect(normalizeLayoutModeForLesson(lesson!, "focus")).toBe("focus");
+			expect(getAvailableLayoutModesForLesson(lesson!)).toEqual([
+				"split",
+				"focus",
+			]);
+			expect(getDefaultLayoutModeForLesson(lesson!)).toBe("split");
+			expect(lessonSupportsLayoutToggle(lesson!)).toBe(true);
+			expect(normalizeLayoutModeForLesson(lesson!, "focus")).toBe("focus");
+		}
 	});
 
-	it("locks lesson 2.3 to focus mode and coerces stale split state", () => {
-		const lesson = getLessonById("2.3");
-		expect(lesson).toBeTruthy();
-
-		expect(getAvailableLayoutModesForLesson(lesson!)).toEqual(["focus"]);
-		expect(getDefaultLayoutModeForLesson(lesson!)).toBe("focus");
-		expect(lessonSupportsLayoutToggle(lesson!)).toBe(false);
-		expect(normalizeLayoutModeForLesson(lesson!, "split")).toBe("focus");
-		expect(normalizeLayoutModeForLesson(lesson!, "focus")).toBe("focus");
-		expect(normalizeLayoutModeForLesson(lesson!, "weird")).toBe("focus");
-	});
-
-	it("locks lesson 1.5 to focus mode so the core-flow stage owns the screen", () => {
-		const lesson = getLessonById("1.5");
-		expect(lesson).toBeTruthy();
-
-		expect(getAvailableLayoutModesForLesson(lesson!)).toEqual(["focus"]);
-		expect(getDefaultLayoutModeForLesson(lesson!)).toBe("focus");
-		expect(lessonSupportsLayoutToggle(lesson!)).toBe(false);
-		expect(normalizeLayoutModeForLesson(lesson!, "split")).toBe("focus");
-		expect(normalizeLayoutModeForLesson(lesson!, "focus")).toBe("focus");
-	});
-
-	it("treats watch lessons as focus-only layouts with no toggle", () => {
-		for (const lessonId of ["2.4", "2.5", "2.6", "3.1", "3.5", "3.8", "3.9"]) {
+	it("locks representative Bunny lessons to focus mode", () => {
+		for (const lessonId of ["1.0", "2.0", "3.0", "3.16", "4.0"]) {
 			const lesson = getLessonById(lessonId);
 			expect(lesson).toBeTruthy();
 
@@ -52,28 +31,7 @@ describe("lesson layout modes", () => {
 			expect(getDefaultLayoutModeForLesson(lesson!)).toBe("focus");
 			expect(lessonSupportsLayoutToggle(lesson!)).toBe(false);
 			expect(normalizeLayoutModeForLesson(lesson!, "split")).toBe("focus");
+			expect(normalizeLayoutModeForLesson(lesson!, "weird")).toBe("focus");
 		}
-	});
-
-	it("locks lesson 3.2 to focus mode so repo orientation stays in one workspace", () => {
-		const lesson = getLessonById("3.2");
-		expect(lesson).toBeTruthy();
-
-		expect(getAvailableLayoutModesForLesson(lesson!)).toEqual(["focus"]);
-		expect(getDefaultLayoutModeForLesson(lesson!)).toBe("focus");
-		expect(lessonSupportsLayoutToggle(lesson!)).toBe(false);
-		expect(normalizeLayoutModeForLesson(lesson!, "split")).toBe("focus");
-		expect(normalizeLayoutModeForLesson(lesson!, "focus")).toBe("focus");
-	});
-
-	it("locks lesson 3.10 to focus mode and coerces stale split state", () => {
-		const lesson = getLessonById("3.10");
-		expect(lesson).toBeTruthy();
-
-		expect(getAvailableLayoutModesForLesson(lesson!)).toEqual(["focus"]);
-		expect(getDefaultLayoutModeForLesson(lesson!)).toBe("focus");
-		expect(lessonSupportsLayoutToggle(lesson!)).toBe(false);
-		expect(normalizeLayoutModeForLesson(lesson!, "split")).toBe("focus");
-		expect(normalizeLayoutModeForLesson(lesson!, "focus")).toBe("focus");
 	});
 });

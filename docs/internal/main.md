@@ -1,6 +1,6 @@
 # Ship by Sunday Launch OS
 
-Last updated: 2026-03-11
+Last updated: 2026-03-18
 
 ## Launch objective
 
@@ -30,17 +30,17 @@ Ship a sellable, deliverable, promotable version of `Ship by Sunday` that can ta
 
 - The public landing page, FAQ, and primary pricing CTA are live in `app/`.
 - Protected product routes are live at `/mission`, `/lesson/[lessonId]`, `/artifacts`, `/settings`, and `/access-required`.
-- `lib/course/manifest.ts` and `content/lessons/` now cover the full structured curriculum, including `0.0`, `0.1`, and `0.2` for the start-here flow.
+- `features/course/lesson/model/manifest.ts` and `features/course/lesson/model/lessons/` now cover the full structured curriculum, including `0.0`, `0.1`, and `0.2` for the start-here flow.
 - Convex already handles lesson autosave, progress, locked lesson gating, entitlement checks, artifact listing, upload persistence, and homepage resume routing.
 - Stripe checkout creation, success/cancel pages, and the webhook grant path are implemented in the app.
-- The remaining launch blockers are not architecture. They are live-env activation, recording completion, final media hosting, support ownership, analytics, and QA.
+- The remaining launch blockers are not architecture. They are live-env activation, recording completion, first lesson media publish + QA, support ownership, analytics, and QA.
 
 ## Live blockers
 
 1. Founder recording status is not fully logged, and the next committed recording slot still needs to be explicit in `docs/internal/recording/founder-checklists.md`.
 2. The Stripe webhook path exists in code but still needs final env setup and endpoint registration for live entitlement grants.
 3. Clerk production envs and issuer configuration still need to replace any local placeholder setup.
-4. Final lesson video hosting is still undecided.
+4. The Bunny/Auphonic lesson video pipeline is implemented, but the first real lesson media batch still needs to be published and checked in the live shell.
 5. Support inbox ownership and the exact refund / access-help path are still undefined.
 6. Analytics instrumentation and end-to-end buyer journey QA are not complete.
 
@@ -48,7 +48,7 @@ Ship a sellable, deliverable, promotable version of `Ship by Sunday` that can ta
 
 1. Record and upload the core lessons
 2. Activate the live purchase-to-access handoff
-3. Choose video hosting and attach real lesson media
+3. Publish the first real lesson media batch through the Bunny pipeline
 4. Tighten the post-purchase onboarding and support path
 5. Instrument the minimum viable analytics
 6. Run end-to-end QA across purchase, access, first lesson, and Worksheet 01
@@ -64,7 +64,6 @@ Ship a sellable, deliverable, promotable version of `Ship by Sunday` that can ta
 
 ## Decisions still open
 
-- Final lesson video host / delivery path
 - Support inbox and response owner
 - Whether launch includes a transactional access email or relies on the in-app success flow first
 - Final founder approval on proof claims and any launch-blocking access-flow wording
@@ -101,8 +100,8 @@ Ship a sellable, deliverable, promotable version of `Ship by Sunday` that can ta
 
 ### Thursday, March 12, 2026
 
-- Decide the lesson video hosting path
-- Attach first real lesson media and validate download links
+- Run the Bunny lesson-media publish pipeline on the first approved lesson batch
+- Browser-QA the first attached lesson videos and validate the in-app player path
 - Tighten success-page and access-required copy against the actual handoff
 
 ### Friday, March 13, 2026

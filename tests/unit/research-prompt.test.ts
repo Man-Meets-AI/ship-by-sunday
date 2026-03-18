@@ -8,7 +8,7 @@ import {
 	parseCompetitorResearchImport,
 	parseScopeBoundaryImport,
 	parseVisualDirectionGuideImport,
-} from "@/lib/course/research-prompt";
+} from "@/features/course/lesson/model/research-prompt";
 
 describe("buildCompetitorResearchPrompt", () => {
 	it("injects the saved user and outcome context into the prompt contract", () => {
@@ -193,7 +193,9 @@ Notion | Fast setup | Weak export | Speed
 Key pattern I noticed
 Users want speed first.`);
 
-		expect(parsed.rows).toEqual([["Notion", "Fast setup", "Weak export", "Speed"]]);
+		expect(parsed.rows).toEqual([
+			["Notion", "Fast setup", "Weak export", "Speed"],
+		]);
 		expect(parsed.summary).toBe("Users want speed first.");
 	});
 
@@ -303,21 +305,16 @@ describe("buildVisualDirectionGuidePrompt", () => {
 		).toContain("Save at least one visual direction note here");
 
 		expect(
-			getPromptTemplateState(
-				"visual_direction_guide",
-				[],
-				{
-					visual_direction_notes:
-						"Keep the hero bold, editorial, and high contrast.",
-				},
-			).prompt,
+			getPromptTemplateState("visual_direction_guide", [], {
+				visual_direction_notes:
+					"Keep the hero bold, editorial, and high contrast.",
+			}).prompt,
 		).toContain("Keep the hero bold, editorial, and high contrast.");
 	});
 
 	it("omits the reference section when no saved references are available", () => {
 		const prompt = buildVisualDirectionGuidePrompt({
-			directionNotes:
-				"Keep the hero bold, editorial, and high contrast.",
+			directionNotes: "Keep the hero bold, editorial, and high contrast.",
 		});
 
 		expect(prompt).not.toContain("Reference images to study:");

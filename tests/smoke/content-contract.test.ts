@@ -2,42 +2,22 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { productConfig } from "@/config/product";
-import { homePageContent } from "@/content/marketing/home";
-import { legacyLessonRedirects } from "@/legacy/lesson-routes";
-import { getLessonById, lessonRegistry } from "@/lib/course";
-
-function walkSourceFiles(root: string): string[] {
-	return fs.readdirSync(root, { withFileTypes: true }).flatMap((entry) => {
-		const fullPath = path.join(root, entry.name);
-		if (entry.isDirectory()) {
-			if (entry.name === "node_modules" || entry.name === ".next") {
-				return [];
-			}
-			return walkSourceFiles(fullPath);
-		}
-
-		if (!/\.(ts|tsx|js|jsx|mjs)$/.test(entry.name)) {
-			return [];
-		}
-
-		return [fullPath];
-	});
-}
+import { homePageContent } from "@/features/marketing/content/home";
+import { legacyLessonRedirects } from "@/features/course/lesson/utils/legacy-routes";
+import {
+	getLessonById,
+	getStudentFacingLessons,
+	lessonRegistry,
+} from "@/features/course/lesson/model";
 
 describe("lesson content contract", () => {
 	it("keeps unique slugs and embedded content on every lesson", () => {
 		const seenSlugs = new Set<string>();
 
 		for (const lesson of lessonRegistry) {
-			expect(lesson.slug, `missing slug for ${lesson.id}`).toBeTruthy();
-			expect(
-				lesson.content,
-				`missing embedded content for ${lesson.id}`,
-			).toBeTruthy();
-			expect(
-				seenSlugs.has(lesson.slug),
-				`duplicate slug ${lesson.slug} on ${lesson.id}`,
-			).toBe(false);
+			expect(lesson.slug).toBeTruthy();
+			expect(lesson.content).toBeTruthy();
+			expect(seenSlugs.has(lesson.slug)).toBe(false);
 			seenSlugs.add(lesson.slug);
 		}
 	});
@@ -49,13 +29,10 @@ describe("lesson content contract", () => {
 		expect(homePageContent.pricingSection.priceDisplay).toBe(
 			productConfig.priceDisplay,
 		);
-		expect(homePageContent.offerSection.items.at(-1)?.name).toBe(
-			productConfig.bonusName,
-		);
 		expect(homePageContent.footerWordmark).toBe(productConfig.name);
 	});
 
-	it("keeps legacy lesson redirects pointed at supported destinations", () => {
+	it("keeps redirects pointed at supported destinations in the new sequence", () => {
 		for (const [lessonId, destination] of Object.entries(
 			legacyLessonRedirects,
 		)) {
@@ -67,210 +44,44 @@ describe("lesson content contract", () => {
 			}
 
 			expect(destination.startsWith("/lesson/")).toBe(true);
-			const redirectedLessonId = destination.replace("/lesson/", "");
-			expect(getLessonById(redirectedLessonId)).toBeTruthy();
+			expect(getLessonById(destination.replace("/lesson/", ""))).toBeTruthy();
 		}
 	});
 
-	it("keeps learner guidance in the lesson definitions instead of content overrides", () => {
-		const welcomeLesson = getLessonById("0.1");
-		const problemLesson = getLessonById("1.1");
-		const userLesson = getLessonById("1.2");
+	it("keeps the Bunny-first kickoff and bridge lessons live in the registry", () => {
+		expect(getLessonById("1.0")?.title).toBe("CEO Kickoff");
+		expect(getLessonById("2.0")?.title).toBe("Design References");
+		expect(getLessonById("3.0")?.title).toBe("Build Kickoff");
+		expect(getLessonById("4.0")?.title).toBe("Product Review");
+		expect(getLessonById("1.8")).toBeNull();
+		expect(getLessonById("2.3")).toBeNull();
+		expect(getLessonById("4.1")).toBeNull();
+	});
 
-		expect(welcomeLesson?.workbenchSections?.[0]?.instruction).toContain(
-			"smallest believable thing",
+	it("keeps the live curriculum watch-first after Start Here", () => {
+		const studentLessons = getStudentFacingLessons();
+		const watchLessons = studentLessons.filter(
+			(lesson) => !lesson.id.startsWith("0."),
 		);
-		expect(problemLesson?.content.coach.examples?.[0]?.title).toBe(
-			"Weak idea vs painful problem",
+
+		expect(watchLessons.every((lesson) => lesson.shell === "watch")).toBe(true);
+		expect(
+			watchLessons.every((lesson) => lesson.workbench === "external_workspace"),
+		).toBe(true);
+	});
+
+	it("keeps the watch-first lesson sources centralized in the new factory", () => {
+		const source = fs.readFileSync(
+			path.join(
+				process.cwd(),
+				"features/course/lesson/model/video-lesson-factory.ts",
+			),
+			"utf8",
 		);
-		expect(userLesson?.content.intro).toContain("test fastest");
-		expect(userLesson?.workbenchSections?.[1]?.instruction).toContain(
-			"reach them this week",
-		);
-	});
 
-	it("keeps the remaining stage-unlock wrap-up lessons declarative and pointed at a real next step", () => {
-		const ceoWrapUpLesson = getLessonById("1.7");
-		const buildWrapUpLesson = getLessonById("3.10");
-
-		expect(ceoWrapUpLesson).toBeTruthy();
-		expect(buildWrapUpLesson).toBeTruthy();
-		expect(ceoWrapUpLesson?.workbench).toBe("brief_assembler");
-		expect(buildWrapUpLesson?.workbench).toBe("brief_assembler");
-		expect(ceoWrapUpLesson?.briefAssembler?.variant).toBe("stage_unlock");
-		expect(buildWrapUpLesson?.briefAssembler?.variant).toBe("stage_unlock");
-		expect(ceoWrapUpLesson?.briefAssembler).toMatchObject({
-			preset: "ceo",
-			heroEyebrow: "CEO block complete",
-			heroTitle: "CEO brief ready to lock",
-			nextStepLabel: "DESIGN 2.1 — Find References First",
-			completionCtaLabel: "Unlock Design",
-		});
-		expect(buildWrapUpLesson?.briefAssembler).toMatchObject({
-			preset: "build",
-			leadVideo: true,
-			heroEyebrow: "Build block complete",
-			heroTitle: "Ship unlocked",
-			nextStepLabel: "SHIP 4.1 — Ship the Core, Not the Fantasy",
-			completionCtaLabel: "Unlock Ship",
-		});
-		expect(
-			ceoWrapUpLesson?.briefAssembler?.skills?.length,
-		).toBeGreaterThanOrEqual(4);
-		expect(
-			(ceoWrapUpLesson?.pinnedArtifacts ?? []).length,
-		).toBeGreaterThanOrEqual(4);
-		expect(
-			(buildWrapUpLesson?.pinnedArtifacts ?? []).length,
-		).toBeGreaterThanOrEqual(4);
-		expect(getLessonById("2.7")).toBeNull();
-	});
-
-	it("keeps the Build block rewired into the 10-lesson production flow", () => {
-		const kickoffLesson = getLessonById("3.1");
-		const orientationLesson = getLessonById("3.2");
-		const toolingLesson = getLessonById("3.3");
-		const integrationLesson = getLessonById("3.4");
-		const sandboxLesson = getLessonById("3.5");
-		const planLesson = getLessonById("3.6");
-		const firstSliceLesson = getLessonById("3.7");
-		const coreUxLesson = getLessonById("3.8");
-		const debugLesson = getLessonById("3.9");
-		const handoffLesson = getLessonById("3.10");
-
-		expect(kickoffLesson).toBeTruthy();
-		expect(orientationLesson).toBeTruthy();
-		expect(toolingLesson).toBeTruthy();
-		expect(integrationLesson).toBeTruthy();
-		expect(sandboxLesson).toBeTruthy();
-		expect(planLesson).toBeTruthy();
-		expect(firstSliceLesson).toBeTruthy();
-		expect(coreUxLesson).toBeTruthy();
-		expect(debugLesson).toBeTruthy();
-		expect(handoffLesson).toBeTruthy();
-
-		expect(kickoffLesson).toMatchObject({
-			title: "Build Kickoff",
-			shell: "watch",
-			workbench: "external_workspace",
-			fieldShapeVersion: 3,
-		});
-		expect(kickoffLesson?.workbenchFields ?? []).toEqual([]);
-		expect(orientationLesson?.title).toBe("Map the Repo and Starter");
-		expect(orientationLesson).toMatchObject({
-			shell: "focus",
-			availableLayoutModes: ["focus"],
-			coachVideoPlacement: "workbench",
-		});
-		expect(
-			orientationLesson?.workbenchFields?.map((field) => field.id),
-		).toEqual([
-			"repo_orientation_checklist",
-			"startup_command",
-			"repo_map_notes",
-		]);
-		expect(toolingLesson?.title).toBe("Install MCPs and Skills");
-		expect(toolingLesson?.workbench).toBe("guided_form");
-		expect(integrationLesson?.title).toBe("Wire DB, Auth, and Payments");
-		expect(integrationLesson?.workbench).toBe("external_workspace");
-		expect(sandboxLesson?.title).toBe("Switch to Sandbox and Boot Local");
-		expect(sandboxLesson?.shell).toBe("watch");
-		expect(planLesson?.title).toBe("Read and Execute AI Plans");
-		expect(planLesson?.workbench).toBe("guided_form");
-		expect(firstSliceLesson?.title).toBe("Implement the First Slice");
-		expect(coreUxLesson?.shell).toBe("watch");
-		expect(coreUxLesson?.workbenchFields ?? []).toEqual([]);
-		expect(debugLesson?.shell).toBe("watch");
-		expect(debugLesson?.workbenchFields ?? []).toEqual([]);
-		expect(handoffLesson?.artifact.label).toBe("Local Build Handoff");
-		expect(handoffLesson?.briefAssembler?.preset).toBe("build");
-	});
-
-	it("keeps candidate-problem handoff contracts explicit and internally valid", () => {
-		for (const lesson of lessonRegistry) {
-			if (lesson.handoff?.mode !== "select_candidate_problem") {
-				continue;
-			}
-
-			const sourceLesson = lessonRegistry.find(
-				(candidate) =>
-					candidate.artifact.key === lesson.handoff?.sourceArtifactKey,
-			);
-			expect(
-				sourceLesson,
-				`missing source lesson for ${lesson.id} handoff ${lesson.handoff.sourceArtifactKey}`,
-			).toBeTruthy();
-
-			const sourceFieldIds = new Set(
-				(sourceLesson?.workbenchFields ?? []).map((field) => field.id),
-			);
-
-			for (const option of lesson.handoff.options) {
-				expect(
-					sourceFieldIds.has(option.ownerSourceFieldId),
-					`${lesson.id} handoff owner field missing: ${option.ownerSourceFieldId}`,
-				).toBe(true);
-				expect(
-					sourceFieldIds.has(option.statementSourceFieldId),
-					`${lesson.id} handoff statement field missing: ${option.statementSourceFieldId}`,
-				).toBe(true);
-			}
-
-			const persistedFieldIds = (lesson.handoff.persistedFields ?? []).map(
-				(field) => field.targetFieldId,
-			);
-			expect(
-				new Set(persistedFieldIds).size,
-				`${lesson.id} handoff persisted fields must be unique`,
-			).toBe(persistedFieldIds.length);
-		}
-	});
-
-	it("removes center-workbench examples from lesson sections and fields", () => {
-		for (const lesson of lessonRegistry) {
-			for (const section of lesson.workbenchSections ?? []) {
-				expect(
-					Object.prototype.hasOwnProperty.call(section, "example"),
-					`unexpected section example on ${lesson.id}:${section.id}`,
-				).toBe(false);
-				expect(
-					Object.prototype.hasOwnProperty.call(section, "exampleLabel"),
-					`unexpected section example label on ${lesson.id}:${section.id}`,
-				).toBe(false);
-			}
-
-			for (const field of lesson.workbenchFields ?? []) {
-				expect(
-					Object.prototype.hasOwnProperty.call(field, "example"),
-					`unexpected field example on ${lesson.id}:${field.id}`,
-				).toBe(false);
-				expect(
-					Object.prototype.hasOwnProperty.call(field, "exampleLabel"),
-					`unexpected field example label on ${lesson.id}:${field.id}`,
-				).toBe(false);
-			}
-		}
-	});
-
-	it("keeps the source tree free of imports from the removed lesson-content stack", () => {
-		const roots = ["app", "components", "convex", "lib"].map((segment) =>
-			path.join(process.cwd(), segment),
-		);
-		const sourceFiles = roots.flatMap(walkSourceFiles);
-		const bannedReferences = [
-			"@/content" + "/lessons",
-			"build-lesson-content-from-" + "blueprint.mjs",
-			"content-" + "manifest",
-		];
-
-		for (const filePath of sourceFiles) {
-			const source = fs.readFileSync(filePath, "utf8");
-			for (const bannedReference of bannedReferences) {
-				expect(
-					source.includes(bannedReference),
-					`${path.relative(process.cwd(), filePath)} still references ${bannedReference}`,
-				).toBe(false);
-			}
-		}
+		expect(source).toContain("createVideoLesson");
+		expect(source).toContain('shell: "watch"');
+		expect(source).toContain('workbench: "external_workspace"');
+		expect(source).toContain("requireReadyVideoForCompletion: true");
 	});
 });

@@ -1,6 +1,6 @@
-import { ArtifactsPage } from "@/components/artifacts-page";
-import { requireCourseAccess } from "@/lib/server/course-access";
-import { getInitialProductTheme } from "@/lib/server/product-theme";
+import { ArtifactsPage } from "@/features/course/artifacts/components/artifacts-page";
+import { requireCourseAccess } from "@/features/course/access/server/course-access";
+import { getInitialProductTheme } from "@/features/course/shared/server/product-theme";
 
 export default async function Page() {
 	await requireCourseAccess();

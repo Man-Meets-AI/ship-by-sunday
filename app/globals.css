@@ -1,30 +1,6 @@
 @import "tailwindcss";
 @config "../tailwind.config.mjs";
 
-:root {
-	color-scheme: light;
-	--product-bg: 245 241 234;
-	--product-surface: 255 255 255;
-	--product-surface-strong: 245 241 234;
-	--product-surface-alt: 236 231 222;
-	--product-border: 26 26 26;
-	--product-text: 17 17 17;
-	--product-muted: 86 78 64;
-	--product-accent: 17 17 17;
-	--product-accent-soft: 38 38 38;
-	--product-chip: 236 231 222;
-	--product-shadow: 17 17 17;
-	--product-scrollbar-size: 8px;
-	--product-scrollbar-thumb: rgba(var(--product-border), 0.34);
-	--product-scrollbar-thumb-hover: rgba(var(--product-border), 0.5);
-	--product-scrollbar-track: transparent;
-	--motion-fast: 120ms;
-	--motion-base: 180ms;
-	--motion-slow: 240ms;
-	--ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
-	--ease-exit: cubic-bezier(0.4, 0, 1, 1);
-}
-
 body {
 	margin: 0;
 	min-height: 100vh;
@@ -33,19 +9,19 @@ body {
 			90deg,
 			transparent 0,
 			transparent calc(50% - 1px),
-			rgba(17, 17, 17, 0.035) calc(50% - 1px),
-			rgba(17, 17, 17, 0.035) calc(50% + 1px),
+			rgb(var(--brand-ink) / 0.035) calc(50% - 1px),
+			rgb(var(--brand-ink) / 0.035) calc(50% + 1px),
 			transparent calc(50% + 1px)
 		),
-		linear-gradient(rgba(17, 17, 17, 0.025) 1px, transparent 1px),
-		linear-gradient(90deg, rgba(17, 17, 17, 0.025) 1px, transparent 1px),
-		#f5f1ea;
+		linear-gradient(rgb(var(--brand-ink) / 0.025) 1px, transparent 1px),
+		linear-gradient(90deg, rgb(var(--brand-ink) / 0.025) 1px, transparent 1px),
+		rgb(var(--brand-paper));
 	background-size:
 		100% 100%,
 		100% 160px,
 		160px 100%,
 		auto;
-	color: #111111;
+	color: rgb(var(--brand-ink));
 	font-family: var(--font-sans), sans-serif;
 	line-height: 1.5;
 	text-rendering: optimizeLegibility;
@@ -54,8 +30,8 @@ body {
 
 .sbs-core-flow-stage {
 	background:
-		linear-gradient(rgba(17, 17, 17, 0.045) 1px, transparent 1px),
-		linear-gradient(90deg, rgba(17, 17, 17, 0.045) 1px, transparent 1px),
+		linear-gradient(rgb(var(--brand-ink) / 0.045) 1px, transparent 1px),
+		linear-gradient(90deg, rgb(var(--brand-ink) / 0.045) 1px, transparent 1px),
 		rgb(var(--product-surface-strong));
 	background-size:
 		28px 28px,
@@ -122,33 +98,22 @@ summary::-webkit-details-marker {
 	position: relative;
 	min-height: 100vh;
 	color: rgb(var(--product-text));
-	color-scheme: dark;
-	--product-bg: 11 11 11;
-	--product-surface: 18 18 20;
-	--product-surface-strong: 10 10 12;
-	--product-surface-alt: 34 34 38;
-	--product-border: 92 92 92;
-	--product-text: 252 252 252;
-	--product-muted: 174 182 194;
-	--product-accent: 75 179 248;
-	--product-accent-soft: 149 255 255;
-	--product-chip: 23 25 30;
-	--product-shadow: 0 0 0;
 }
 
-html[data-product-theme="light"] .product-theme {
-	color-scheme: light;
-	--product-bg: 245 241 234;
-	--product-surface: 255 255 255;
-	--product-surface-strong: 245 241 234;
-	--product-surface-alt: 236 231 222;
-	--product-border: 26 26 26;
-	--product-text: 17 17 17;
-	--product-muted: 86 78 64;
-	--product-accent: 17 17 17;
-	--product-accent-soft: 38 38 38;
-	--product-chip: 236 231 222;
-	--product-shadow: 17 17 17;
+@media (min-width: 640px) {
+	.sbs-hero-outline {
+		text-shadow:
+			-2px -2px 0 rgb(var(--brand-ink)),
+			2px -2px 0 rgb(var(--brand-ink)),
+			-2px 2px 0 rgb(var(--brand-ink)),
+			2px 2px 0 rgb(var(--brand-ink));
+	}
+}
+
+.sbs-danger-card-shadow {
+	box-shadow:
+		0 0 0 1px rgb(var(--brand-danger) / 0.08),
+		0 8px 24px rgb(var(--brand-danger) / 0.08);
 }
 
 @layer utilities {

@@ -5,7 +5,7 @@ import {
 	isInteractiveShortcutTarget,
 	shouldHandleSkillRailShortcut,
 	type SkillRailLesson,
-} from "@/components/skill-rail-navigation";
+} from "@/features/course/shared/utils/skill-rail-navigation";
 
 const sampleLessons: SkillRailLesson[] = [
 	{
@@ -47,6 +47,10 @@ const crossStageLessons: SkillRailLesson[] = [
 		status: "completed",
 	},
 ];
+
+function asEventTarget<T extends object>(value: T): EventTarget {
+	return value as unknown as EventTarget;
+}
 
 describe("skill rail navigation", () => {
 	it("keeps completed previous lessons navigable and blocks locked next lessons", () => {
@@ -126,25 +130,25 @@ describe("skill rail shortcuts", () => {
 		expect(
 			isEditableShortcutTarget({
 				tagName: "input",
-			} as EventTarget),
+			} as unknown as EventTarget),
 		).toBe(true);
 		expect(
 			isEditableShortcutTarget({
 				tagName: "div",
 				isContentEditable: true,
-			} as EventTarget),
+			} as unknown as EventTarget),
 		).toBe(true);
 		expect(
 			isEditableShortcutTarget({
 				tagName: "div",
 				getAttribute: (name: string) =>
 					name === "contenteditable" ? "plaintext-only" : null,
-			} as EventTarget),
+			} as unknown as EventTarget),
 		).toBe(true);
 		expect(
 			isEditableShortcutTarget({
 				tagName: "button",
-			} as EventTarget),
+			} as unknown as EventTarget),
 		).toBe(false);
 	});
 
@@ -152,23 +156,23 @@ describe("skill rail shortcuts", () => {
 		expect(
 			isInteractiveShortcutTarget({
 				tagName: "video",
-			} as EventTarget),
+			} as unknown as EventTarget),
 		).toBe(true);
 		expect(
 			isInteractiveShortcutTarget({
 				tagName: "button",
-			} as EventTarget),
+			} as unknown as EventTarget),
 		).toBe(true);
 		expect(
 			isInteractiveShortcutTarget({
 				tagName: "div",
 				getAttribute: (name: string) => (name === "role" ? "button" : null),
-			} as EventTarget),
+			} as unknown as EventTarget),
 		).toBe(true);
 		expect(
 			isInteractiveShortcutTarget({
 				tagName: "div",
-			} as EventTarget),
+			} as unknown as EventTarget),
 		).toBe(false);
 	});
 
@@ -176,42 +180,42 @@ describe("skill rail shortcuts", () => {
 		expect(
 			shouldHandleSkillRailShortcut({
 				key: "ArrowLeft",
-				target: {
+				target: asEventTarget({
 					tagName: "body",
-				} as EventTarget,
+				}),
 			}),
 		).toBe(true);
 		expect(
 			shouldHandleSkillRailShortcut({
 				key: "ArrowRight",
-				target: {
+				target: asEventTarget({
 					tagName: "body",
-				} as EventTarget,
+				}),
 				metaKey: true,
 			}),
 		).toBe(false);
 		expect(
 			shouldHandleSkillRailShortcut({
 				key: "q",
-				target: {
+				target: asEventTarget({
 					tagName: "textarea",
-				} as EventTarget,
+				}),
 			}),
 		).toBe(false);
 		expect(
 			shouldHandleSkillRailShortcut({
 				key: "ArrowRight",
-				target: {
+				target: asEventTarget({
 					tagName: "video",
-				} as EventTarget,
+				}),
 			}),
 		).toBe(false);
 		expect(
 			shouldHandleSkillRailShortcut({
 				key: "w",
-				target: {
+				target: asEventTarget({
 					tagName: "body",
-				} as EventTarget,
+				}),
 			}),
 		).toBe(false);
 	});

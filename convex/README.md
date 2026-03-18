@@ -36,5 +36,5 @@ Deployment workflow: [docs/dev/convex-sop.md](../docs/dev/convex-sop.md)
 ## Guardrails
 
 - Treat entitlements and lesson progress as production state.
-- Prefer adding tests around pure domain helpers in `lib/course/` before refactoring Convex behavior.
+- Prefer adding tests around pure domain helpers in `features/course/lesson/model/` before refactoring Convex behavior.
 - If a change affects auth, purchase, or access gating, run `pnpm run check` before closing it.

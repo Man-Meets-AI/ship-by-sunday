@@ -1,9 +1,9 @@
 import {
-	countReferenceGalleryItems,
 	createReferenceGalleryValue,
+	getReferenceGalleryCount,
 	hydrateReferenceGalleryValue,
 	toPersistedReferenceGalleryValue,
-} from "@/lib/course";
+} from "@/features/course/lesson/model";
 
 describe("reference gallery helpers", () => {
 	it("hydrates stored gallery uploads back into public URLs", async () => {
@@ -60,7 +60,7 @@ describe("reference gallery helpers", () => {
 			},
 		]);
 
-		expect(countReferenceGalleryItems(value)).toBe(1);
+		expect(getReferenceGalleryCount(value)).toBe(1);
 		expect(toPersistedReferenceGalleryValue(value)).toEqual({
 			kind: "reference_gallery",
 			items: [
