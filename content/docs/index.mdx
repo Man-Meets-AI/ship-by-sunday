@@ -1,0 +1,62 @@
+---
+title: Start Here
+description: Get the Ship by Sunday starter running in the right order without guessing.
+---
+
+# Start Here
+
+`Ship by Sunday Starter` is a Next.js starter for products that need a public landing page, Stripe checkout, Clerk auth, Convex-backed access state, and a protected workspace.
+
+If you are new to this stack, do not start by rewriting auth, payments, or access logic. Start by getting the app running cleanly, then change the obvious product surfaces first.
+
+## The shortest path
+
+1. Read [Local Setup](/docs/local-setup).
+2. Wire [Clerk + Convex Auth](/docs/clerk-convex-auth).
+3. Wire [Stripe Checkout + Webhook](/docs/stripe-checkout-webhook).
+4. Run [Local QA](/docs/local-qa).
+
+## What the starter already gives you
+
+- a public marketing page
+- Clerk sign-in and sign-up
+- Stripe checkout plus success and cancel flows
+- Convex-backed access grants
+- a protected app shell
+- a sample protected feature you can replace
+
+## Change these first
+
+If your goal is to make the starter feel like your product fast, start here:
+
+1. rewrite the brand, promise, and price
+2. rewrite the landing page
+3. replace the sample protected feature
+4. keep the paid-access handoff intact until the app is already shaped like your product
+
+## Do not start here on day one
+
+Leave these surfaces alone until the starter already looks like your product:
+
+- `app/api/stripe/*`
+- `app/checkout/*`
+- `convex/access/*`
+- server-side Clerk to Convex auth wiring
+
+Those files matter, but they are the fragile part of the purchase-to-access contract.
+
+## What success looks like
+
+You are in a good place to customize once you can say all of this is true:
+
+- the app boots locally
+- you can sign in
+- a non-entitled user sees the right locked state
+- an entitled user reaches the protected app
+- checkout and webhook wiring are understood, even if you have not changed them yet
+
+## Jump to the right page
+
+- Need the architecture picture first? Read [How the Starter Works](/docs/how-the-starter-works).
+- Need the local boot path? Read [Local Setup](/docs/local-setup).
+- Need the most common fixes? Start in [Troubleshooting](/docs/troubleshooting/access).

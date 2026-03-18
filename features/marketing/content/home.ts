@@ -9,6 +9,7 @@ export const homePageContent = {
 		missionImage: productConfig.images.missionPreview,
 	},
 	hero: {
+		docsLabel: "Docs",
 		loginLabel: "Log in",
 		topBarStart: "One weekend",
 		topBarMark: productConfig.shortMark,

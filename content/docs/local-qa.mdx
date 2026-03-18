@@ -1,0 +1,87 @@
+---
+title: Local QA
+description: Run the fastest checks first, then verify the real signed-out, non-entitled, entitled, and paid flows locally.
+---
+
+# Local QA
+
+Use this page as the main local verification runbook for the starter.
+
+## Fast code checks
+
+Use these for normal implementation work:
+
+```bash
+pnpm run lint
+pnpm run format:check
+pnpm run test:unit
+pnpm run test:smoke
+pnpm run build
+```
+
+For the full repo gate:
+
+```bash
+pnpm run check
+```
+
+## Shared Clerk QA accounts
+
+Use two real users:
+
+- non-entitled user for sign-in, `/access-required`, wrong-account, and pre-purchase checks
+- entitled user for `/app`, `/app/projects`, `/settings`, and post-access checks
+
+Commands:
+
+```bash
+pnpm run clerk:test-user:check
+pnpm run clerk:test-user:create
+pnpm run clerk:test-user:check:entitled
+pnpm run clerk:test-user:create:entitled
+pnpm run clerk:test-user:prepare:entitled
+```
+
+## Full paid local handoff
+
+Use this only in a safe local test environment.
+
+1. Start the app and local Convex.
+2. Start the Stripe listener.
+3. If the listener prints a fresh webhook secret, restart the web app.
+4. Sign in with the non-entitled account.
+5. Start checkout from the landing page.
+6. Complete payment with Stripe test card `4242 4242 4242 4242`, any future expiry, any CVC, ZIP `10001`.
+7. Confirm Stripe returns to `/checkout/success?session_id=...`.
+8. Confirm the webhook grants access.
+9. Confirm the app redirects into `/app`.
+
+## Recommended flow checks
+
+### Signed-out protected-route smoke
+
+1. Visit `/app` or `/settings` while signed out.
+2. Confirm redirect to sign-in.
+
+### Non-entitled access flow
+
+1. Sign in with the non-entitled account.
+2. Visit `/access-required`.
+3. Confirm the page explains that the account has no active access.
+
+### Entitled access flow
+
+1. Run `pnpm run clerk:test-user:prepare:entitled`.
+2. Sign in with the entitled account.
+3. Confirm `/app`, `/app/projects`, and `/settings` load.
+
+## What success looks like
+
+You are done when the app passes all four realities:
+
+- signed out
+- signed in without access
+- signed in with access
+- newly paid and waiting for access grant
+
+Anything less is partial confidence, not real QA.

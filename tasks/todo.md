@@ -6,6 +6,30 @@ It does not replace `docs/internal/todo.md`, which remains the launch tracker an
 
 ## Active
 
+- [x] Unify the docs route theme contract so `next-themes`, the root product theme tokens, and the HTML light/dark class stop fighting each other
+- [x] Add a docs-only polish layer for the Nextra shell so the article, sidebar, TOC, and controls read cleanly in both dark and light mode
+- [x] Verify the docs route in both dark and light mode with a real browser pass plus a production build
+
+- Outcome: Rewired `/docs` to use the shared `sbs:theme` theme state, added a docs navbar light/dark toggle backed by `next-themes`, synchronized the root theme bootstrap/provider with both `class` and `data-product-theme`, and added a scoped docs-theme stylesheet so the Nextra shell now has readable contrast and deliberate surfaces in both modes.
+- Verification: `pnpm run build`, Playwright theme-toggle pass on `http://localhost:3000/docs`, computed-theme checks for both `html.class` and `data-product-theme`, and dark/light screenshot reviews during the browser pass.
+
+- [x] Stand up a public `Nextra` docs surface at `/docs` inside the existing Next app without changing Clerk protection or the protected app routes
+- [x] Seed the first customer-facing starter docs set from the starter repo source docs and organize it under a `content/docs` MDX tree
+- [x] Add a visible `Docs` entry point on the marketing surface, update the repo docs policy to choose `Nextra`, and verify the docs route plus the existing app build still pass
+
+- Outcome: Added a public `Nextra` starter docs surface under `/docs` inside the existing Next app, seeded it with ten curated setup/architecture/customization/troubleshooting pages sourced from the starter repo docs, added a branded docs navbar/footer plus a visible homepage `Docs` entry point, and updated the repo docs policy so the public starter docs live in `content/docs` while `docs/` stays the contributor/internal docs tree.
+- Verification: `pnpm run build`, `curl -I http://localhost:3000/docs`, `curl -I http://localhost:3000/docs/how-the-starter-works`, and Playwright snapshots of `http://localhost:3000/docs` plus `http://localhost:3000/?marketing=1`.
+- Follow-up: Nextra warns that brand-new local docs pages have no Git modified timestamp yet; that warning should disappear once the new MDX files exist in git history.
+
+- [x] Document the current `video:publish` lesson-media pipeline in Team Wiki’s canonical `Scripts` surface
+- [x] Add a Team Wiki workflow page that explains the Ship by Sunday lesson-media publishing path and why it stays a repo-owned script
+- [x] Scaffold a repo-owned Team Wiki skill for a generalized local-folder `Auphonic -> YouTube` drop-folder pipeline with `setup`, `run`, `watch`, and `status` entrypoints
+- [x] Verify the Team Wiki docs/skill wiring with the publish and validation commands, then log the result in both repos
+
+- Outcome: Added Team Wiki docs for the current Ship by Sunday lesson-media command surface plus a workflow page that makes the script-vs-skill boundary explicit, and scaffolded a repo-owned `gtm-youtube-auphonic-dropfolder` skill with `setup`, `run`, `watch`, `status`, queue-folder handling, sidecar metadata, Auphonic upload, and report generation.
+- Verification: `YOUTUBE_AUPHONIC_DROP_ROOT=/tmp/team-wiki-auphonic-drop-test node ./.agents/skills/gtm-youtube-auphonic-dropfolder/scripts/setup.mjs`, `bun run skills:team:publish`, `bun run typecheck`, and `bun run skills:validate` in `/Users/parkerrex/Projects/team-wiki`.
+- Follow-up: The Team Wiki repo already had in-progress skill-management changes in `scripts/manage-skills.mjs` and `scripts/skills-lib.mjs`; running the publish step regenerated additional teammate docs around those existing changes, so review that repo’s wider doc churn before committing there.
+
 - [x] Move `ProductThemeProvider` ownership to `app/layout.tsx` and remove `initialTheme` pass-through props from app-shell routes
 - [x] Promote `product-*` to the canonical runtime token system and make global/root styles follow the active product theme
 - [x] Migrate marketing, auth, and shared public surfaces onto the unified product token system with small shared primitives

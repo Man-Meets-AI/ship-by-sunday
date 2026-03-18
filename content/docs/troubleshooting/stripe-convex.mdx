@@ -1,0 +1,69 @@
+---
+title: Troubleshooting Stripe and Convex
+description: Diagnose secret drift, account mismatch, and webhook-grant failures before rewriting the checkout or access code.
+---
+
+# Troubleshooting Stripe and Convex
+
+If checkout completes but access does not, assume configuration drift before you assume application logic is wrong.
+
+## Run the built-in health checks
+
+Start here:
+
+```bash
+pnpm run stripe:listen:local
+pnpm run stripe:local:doctor
+pnpm run stripe:local:verify
+```
+
+These commands tell you more, faster, than hand-inspecting random env files.
+
+## The most common failures
+
+### 1. Missing Clerk `convex` JWT template
+
+If that template is missing or misnamed, authenticated server reads can fail even while the user appears signed in.
+
+### 2. Clerk issuer / Convex mismatch
+
+If Clerk and Convex disagree on the issuer/domain, access checks can fail after payment.
+
+### 3. `STRIPE_WEBHOOK_SECRET` drift
+
+The secret must match in both places:
+
+- `.env.local`
+- the active Convex env
+
+If the listener rotated the secret, restart the app.
+
+### 4. Wrong Stripe account
+
+The Stripe CLI must be logged into the same account as the app `STRIPE_SECRET_KEY`.
+
+If those differ, you can see real Stripe events without the starter ever receiving a valid matching webhook.
+
+### 5. Webhook endpoint not actually registered
+
+If Stripe does not reach `POST /api/stripe/webhook`, checkout can finish while access grant never happens.
+
+## Fast debug order
+
+Use this sequence:
+
+1. run the Stripe listener
+2. run `stripe:local:doctor`
+3. confirm secret parity
+4. confirm Stripe account parity
+5. confirm Clerk `convex` template
+6. rerun a real local checkout
+
+## What success looks like
+
+Stripe and Convex are aligned when:
+
+- Stripe forwards `checkout.session.completed`
+- the webhook accepts the signature
+- Convex writes or updates the access grant
+- the buyer leaves `/checkout/success` and lands in `/app`

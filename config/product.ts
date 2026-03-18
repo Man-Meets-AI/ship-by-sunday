@@ -163,6 +163,7 @@ export const manifestConfig = {
 
 export const routeConfig = {
 	home: "/",
+	docs: "/docs",
 	mission: "/mission",
 	accessRequired: "/access-required",
 	artifacts: "/artifacts",

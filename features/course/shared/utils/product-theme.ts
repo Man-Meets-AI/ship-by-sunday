@@ -96,6 +96,8 @@ export function getProductThemeBootstrapScript() {
 			} catch (_) {}
 
 			document.documentElement.dataset.productTheme = theme;
+			document.documentElement.classList.remove("light", "dark");
+			document.documentElement.classList.add(theme);
 			document.cookie =
 				cookieName +
 				"=" +

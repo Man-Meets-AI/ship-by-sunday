@@ -39,8 +39,32 @@ export function ProductThemeProvider({
 
 	useEffect(() => {
 		document.documentElement.dataset.productTheme = theme;
+		document.documentElement.classList.remove("light", "dark");
+		document.documentElement.classList.add(theme);
 		window.localStorage.setItem(PRODUCT_THEME_STORAGE_KEY, theme);
 		document.cookie = getProductThemeCookieString(theme);
+	}, [theme]);
+
+	useEffect(() => {
+		const root = document.documentElement;
+
+		const syncThemeFromDom = () => {
+			const rootTheme = root.dataset.productTheme;
+
+			if (isProductTheme(rootTheme) && rootTheme !== theme) {
+				setThemeState(rootTheme);
+			}
+		};
+
+		const observer = new MutationObserver(syncThemeFromDom);
+		observer.observe(root, {
+			attributes: true,
+			attributeFilter: ["data-product-theme"],
+		});
+
+		return () => {
+			observer.disconnect();
+		};
 	}, [theme]);
 
 	const value = useMemo<ProductThemeContextValue>(

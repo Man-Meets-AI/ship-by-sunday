@@ -1,0 +1,59 @@
+---
+title: Deploy to Vercel
+description: Move the starter to production without breaking auth, webhook verification, or protected access.
+---
+
+# Deploy to Vercel
+
+Production is mostly an env-parity problem.
+
+The most common mistake is getting Vercel, Clerk, Convex, and Stripe individually “working” while the cross-system values still drift.
+
+## Before the first deploy
+
+Prepare production values:
+
+```bash
+cp .env.production.example .env.production
+```
+
+Then make sure production has the right values for:
+
+- Clerk publishable and secret keys
+- Clerk frontend API URL and issuer domain
+- Convex deployment and public URLs
+- Stripe publishable key, secret key, product id, price id
+- live `STRIPE_WEBHOOK_SECRET`
+
+## Vercel checklist
+
+- deploy as a normal Next.js app
+- keep the package manager pinned to the repo version
+- use real production Clerk env values
+- use real production Stripe live keys
+
+## Convex checklist
+
+Convex production must match the same production auth and webhook values used by the app.
+
+Do not leave Convex pointed at:
+
+- an old Clerk instance
+- a dev Clerk instance
+- an outdated Stripe webhook secret
+
+## Post-deploy verification
+
+After deploy, confirm all of this with a real test flow:
+
+1. signed-out visitor hits a protected route and is pushed to sign-in
+2. signed-in non-entitled user reaches `/access-required`
+3. live checkout returns to `/checkout/success`
+4. webhook grants access
+5. newly entitled user reaches `/app`
+
+## What success looks like
+
+Production is healthy when payment, access, and route protection all agree on the same user and the same environment values.
+
+If payment completes but access does not, debug env parity before you rewrite application code.

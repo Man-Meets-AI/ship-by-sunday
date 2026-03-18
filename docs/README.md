@@ -41,6 +41,8 @@ If the repo becomes more public over time, `docs/internal/` is the first candida
 
 ## Docs-Site Readiness
 
-- No Astro/Starlight docs site is checked into this repo today; the markdown files in `docs/` remain the source of truth.
-- If a public docs site is introduced later, default to an Astro/Starlight app deployed on `Vercel` and keep these markdown docs as the canonical content source.
-- Do not introduce an ad hoc docs app with a different stack unless there is a recorded migration decision in `todo.md` and `docs/internal/memory.md`.
+- The public starter docs site now lives at `/docs` inside the main Next app using `Nextra`.
+- Published starter-doc content lives under `content/docs/`.
+- The markdown files in `docs/` remain the source of truth for contributor docs and internal launch docs, not the customer-facing starter docs site.
+- Do not publish `docs/internal/` through the starter docs site.
+- The starter docs site is manually curated in this repo for now; do not add automated sync from the starter repo until there is an explicit decision to support that workflow.

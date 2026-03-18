@@ -1,0 +1,90 @@
+---
+title: Local Setup
+description: Boot the starter locally in the right order so auth and paid access do not drift out of sync.
+---
+
+# Local Setup
+
+The local setup order matters more than most people expect.
+
+Use this order:
+
+1. Clerk
+2. Convex
+3. Stripe
+
+If you skip the order, checkout can appear to work while the access handoff is still broken.
+
+## Before you start
+
+Have these ready:
+
+- Node.js LTS
+- `pnpm`
+- a Clerk account
+- a Convex account
+- a Stripe account
+- a Vercel account for deployment later
+
+## First local boot
+
+Install the repo and copy the local env template:
+
+```bash
+pnpm install
+cp .env.local.example .env.local
+```
+
+Then follow the provider wiring pages in this order:
+
+- [Clerk + Convex Auth](/docs/clerk-convex-auth)
+- [Stripe Checkout + Webhook](/docs/stripe-checkout-webhook)
+
+Once those values are in place:
+
+```bash
+pnpm run dev
+```
+
+Open `http://localhost:3000`.
+
+## Local Convex vs cloud Convex
+
+Use these commands differently:
+
+```bash
+pnpm run dev
+pnpm exec convex dev
+```
+
+- `pnpm run dev` is the normal local app plus local Convex path
+- `pnpm exec convex dev` is the hosted Convex setup or cloud dev sync path
+
+Do not use the cloud command by accident when you only want a normal local run.
+
+## The fastest way to confirm the setup
+
+Once the app boots, validate the basics:
+
+```bash
+pnpm run build
+pnpm run stripe:local:doctor
+```
+
+Then finish the real flow with [Local QA](/docs/local-qa).
+
+## What success looks like
+
+You are ready for real customization when:
+
+- the marketing page loads locally
+- you can reach sign-in
+- Convex connects cleanly
+- Stripe listener setup does not report account or secret drift
+- the app can complete the local QA flow without fake shortcuts
+
+## If this breaks
+
+- Auth issues: go to [Clerk + Convex Auth](/docs/clerk-convex-auth)
+- Checkout/access issues: go to [Stripe Checkout + Webhook](/docs/stripe-checkout-webhook)
+- Access still does not appear: go to [Troubleshooting Access](/docs/troubleshooting/access)

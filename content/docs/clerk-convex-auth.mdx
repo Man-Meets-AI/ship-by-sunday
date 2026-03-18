@@ -1,0 +1,85 @@
+---
+title: Clerk + Convex Auth
+description: Wire Clerk and Convex correctly so sign-in, protected server reads, and access checks all work.
+---
+
+# Clerk + Convex Auth
+
+This is the most important setup page in the starter.
+
+If Clerk and Convex do not agree on the `convex` JWT template and issuer, the app can sign users in while protected server-side reads still fail.
+
+## Required env values
+
+Add these values to `.env.local`:
+
+```bash
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
+CLERK_FRONTEND_API_URL=
+CLERK_JWT_ISSUER_DOMAIN=
+CONVEX_DEPLOYMENT=
+NEXT_PUBLIC_CONVEX_URL=
+NEXT_PUBLIC_CONVEX_SITE_URL=
+```
+
+## Clerk setup
+
+1. Create a Clerk app.
+2. Copy:
+   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+   - `CLERK_SECRET_KEY`
+   - `CLERK_FRONTEND_API_URL`
+3. Set `CLERK_JWT_ISSUER_DOMAIN` to the same issuer/domain Clerk uses for your app.
+
+## The `convex` template is not optional
+
+Inside Clerk:
+
+1. Open your app.
+2. Go to `JWT Templates`.
+3. Create or confirm a template named `convex`.
+4. Use `convex` as the application ID.
+5. Make sure the issuer/domain matches your Clerk frontend API URL.
+
+This starter is hard-wired to that identifier.
+
+## Convex setup
+
+To connect the repo to Convex:
+
+```bash
+pnpm run dev:convex
+```
+
+Or, when you intentionally want a hosted dev deployment:
+
+```bash
+pnpm exec convex dev
+```
+
+Convex will provide or write:
+
+- `CONVEX_DEPLOYMENT`
+- `NEXT_PUBLIC_CONVEX_URL`
+- `NEXT_PUBLIC_CONVEX_SITE_URL`
+
+## What success looks like
+
+You are correctly wired when:
+
+- sign-in works
+- protected routes can read server-side state
+- `/access-required` can tell the difference between signed-out and signed-in users
+- entitlement checks do not fail with a token or issuer mismatch
+
+## If this breaks
+
+Check these in order:
+
+1. the Clerk JWT template is named exactly `convex`
+2. the issuer/domain in Clerk matches the value used by Convex
+3. the Convex env is not still pointed at an old or different Clerk instance
+4. you restarted the app after changing auth env values
+
+If checkout succeeds but access still fails, go straight to [Troubleshooting Stripe and Convex](/docs/troubleshooting/stripe-convex).

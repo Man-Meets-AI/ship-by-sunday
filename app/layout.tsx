@@ -48,7 +48,7 @@ export default async function RootLayout({
 			lang="en"
 			data-product-theme={initialTheme}
 			suppressHydrationWarning
-			className={`${display.variable} ${sans.variable}`}
+			className={`${display.variable} ${sans.variable} ${initialTheme}`}
 		>
 			<head>
 				<style

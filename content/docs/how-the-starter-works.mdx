@@ -1,0 +1,60 @@
+---
+title: How the Starter Works
+description: Understand the repo shape, the purchase-to-access handoff, and the protected app flow before you customize the starter.
+---
+
+# How the Starter Works
+
+This starter is opinionated in one specific way: it gives you the full public-to-paid-to-protected path instead of just a landing page plus loose example code.
+
+## Locked stack
+
+- App shell: `Next.js`
+- Deployment target: `Vercel`
+- Checkout: `Stripe`
+- Auth: `Clerk`
+- App data and access state: `Convex`
+
+## Repo shape
+
+- `app/`: route entrypoints
+- `features/`: product code grouped by domain
+- `shared/`: config, env helpers, shared providers
+- `convex/`: backend functions grouped by domain
+
+## Public and protected routes
+
+The starter splits the app into two clear surfaces:
+
+- public marketing surface on `/`
+- protected product surface on `/app`, `/app/projects`, and `/settings`
+
+That split matters because checkout and access recovery live between those two worlds.
+
+## Purchase-to-access flow
+
+1. A buyer starts from the public landing page.
+2. Signed-out buyers are sent to Clerk sign-in first.
+3. Signed-in buyers call `POST /api/stripe/checkout`.
+4. Stripe hosts the payment flow and returns to `/checkout/success`.
+5. `POST /api/stripe/webhook` verifies the signature and handles completed checkout events.
+6. Convex upserts the active access row.
+7. `/checkout/success` waits for authenticated access state, then redirects into `/app`.
+8. `/access-required` polls the same viewer status and recovers automatically if access appears later.
+
+## Why the Clerk `convex` template matters
+
+The server-side Clerk-to-Convex read path is explicitly wired to the Clerk JWT template named `convex`.
+
+If that template is missing or the issuer is wrong, the app can look mostly fine while protected server reads still fail.
+
+## What success looks like
+
+You understand the starter when you can answer these questions without guessing:
+
+- Which route creates the Stripe Checkout Session?
+- Which route handles the Stripe webhook?
+- Which system is the source of truth for access grants?
+- Which protected routes should a newly entitled user reach?
+
+If any of those are fuzzy, do not rewrite the purchase-to-access path yet. Fix your understanding first.

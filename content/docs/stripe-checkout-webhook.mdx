@@ -1,0 +1,88 @@
+---
+title: Stripe Checkout + Webhook
+description: Wire the Stripe session, webhook secret, and access grant path so payment completion turns into protected access.
+---
+
+# Stripe Checkout + Webhook
+
+The Stripe setup has one job: turn a real paid checkout into a real access grant.
+
+The easiest way to break that path is secret drift between the app and Convex.
+
+## Required Stripe env values
+
+Add these to `.env.local`:
+
+```bash
+STRIPE_PUBLISHABLE_KEY=
+STRIPE_SECRET_KEY=
+STRIPE_PRODUCT_ID=
+STRIPE_PRICE_ID=
+STRIPE_WEBHOOK_SECRET=
+```
+
+## Create the product and price
+
+If you do not already have them, create the Stripe product and default price from the repo:
+
+```bash
+pnpm run stripe:create-product
+```
+
+## Start local webhook forwarding
+
+Use this command for local buyer-flow QA:
+
+```bash
+pnpm run stripe:listen:local
+```
+
+That helper:
+
+- starts Stripe CLI forwarding to `http://localhost:3000/api/stripe/webhook`
+- captures the current webhook signing secret
+- writes that secret into `.env.local`
+- syncs the same secret into the active Convex env
+
+If the listener writes a fresh secret while the app is already running, restart the app before testing checkout.
+
+## The handoff architecture
+
+The starter uses this sequence:
+
+1. signed-in buyer calls `POST /api/stripe/checkout`
+2. Stripe hosts checkout
+3. Stripe returns to `/checkout/success`
+4. Stripe webhook verifies the signature
+5. Convex upserts the active access grant
+6. `/checkout/success` waits for access, then redirects into `/app`
+
+## Health checks
+
+Use these commands before you debug by hand:
+
+```bash
+pnpm run stripe:local:doctor
+pnpm run stripe:local:verify
+```
+
+## What success looks like
+
+The happy path is:
+
+1. checkout completes in Stripe
+2. Stripe forwards `checkout.session.completed`
+3. the webhook grants access
+4. `/checkout/success` stops waiting
+5. the buyer reaches `/app`
+
+## If this breaks
+
+The most common failures are:
+
+- the Stripe CLI is logged into a different Stripe account than `STRIPE_SECRET_KEY`
+- `.env.local` and Convex do not match on `STRIPE_WEBHOOK_SECRET`
+- you changed the webhook secret but did not restart the app
+- Clerk/Convex auth is broken, so the buyer cannot be matched to the right access state
+
+If you are seeing a paid session without access, start with [Troubleshooting Stripe and Convex](/docs/troubleshooting/stripe-convex).

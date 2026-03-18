@@ -1,0 +1,47 @@
+---
+title: Customize the Starter
+description: Change the product-facing surfaces first and leave the fragile paid-access contract alone until you have a clear reason to touch it.
+---
+
+# Customize the Starter
+
+These are the intended extension points for the starter. Change these first instead of scattering one-off edits across the repo.
+
+## Best first changes
+
+| Area                     | What to change first                                    | Verification     |
+| ------------------------ | ------------------------------------------------------- | ---------------- |
+| Brand and offer          | Product name, promise, price, hero copy, FAQ            | `pnpm run build` |
+| Protected app shell      | Nav, app chrome, dashboard framing, account views       | `pnpm run check` |
+| Protected sample feature | Replace the sample protected feature with your real one | `pnpm run check` |
+| Theme and global styling | Colors, typography, spacing, motion defaults            | `pnpm run build` |
+
+## Good first milestone
+
+A strong early milestone is:
+
+1. the public landing page is rewritten
+2. the dashboard framing is rewritten
+3. the sample protected feature is renamed or replaced
+4. the paid-access contract still works
+
+## Leave these alone until later
+
+Do not start by rewriting:
+
+- checkout creation
+- webhook handling
+- access grants
+- success-page recovery logic
+
+Those are the highest-risk parts of the starter.
+
+## Guardrails
+
+- keep the product config as the first place to change name, promise, and price
+- keep the access layer as the source of truth for entitlements
+- keep the purchase-to-access behavior aligned with the verified checkout and webhook contract
+
+## What success looks like
+
+You are customizing cleanly when the starter feels like your product before you have touched the fragile auth and billing path.

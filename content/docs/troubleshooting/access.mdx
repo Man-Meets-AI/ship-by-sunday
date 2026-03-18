@@ -1,0 +1,58 @@
+---
+title: Troubleshooting Access
+description: Fix the most common cases where sign-in works, payment completes, or checkout returns, but protected access still does not appear.
+---
+
+# Troubleshooting Access
+
+Use this page when the app looks close to working, but users still cannot reach the protected product.
+
+## Symptom: sign-in works, but `/access-required` never clears
+
+Check these in order:
+
+1. confirm you are signed in with the same account that started checkout
+2. confirm the user is actually entitled
+3. confirm Clerk + Convex auth is working with the `convex` template
+4. confirm the webhook already granted access
+
+If you skip any of those, you can chase the wrong problem for an hour.
+
+## Symptom: `/checkout/success` keeps waiting
+
+This usually means one of two things:
+
+- the webhook never granted access
+- the app cannot read the right viewer state after payment
+
+Go straight to [Troubleshooting Stripe and Convex](/docs/troubleshooting/stripe-convex) if payment already completed.
+
+## Symptom: the wrong-account state appears
+
+That state is usually telling the truth.
+
+Fix it by:
+
+1. signing out
+2. signing back in with the checkout account
+3. reopening the validated success URL
+
+Do not assume this is a Stripe bug first.
+
+## Local entitlement sanity check
+
+For the local entitled QA user:
+
+```bash
+pnpm run clerk:test-user:prepare:entitled
+```
+
+If the entitled test user still cannot reach `/app`, stop guessing and confirm the access row plus auth template path.
+
+## What success looks like
+
+Access is healthy when:
+
+- non-entitled users reach `/access-required`
+- entitled users reach `/app`
+- a newly paid user leaves `/checkout/success` and reaches the protected app without manual intervention

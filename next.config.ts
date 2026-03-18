@@ -1,4 +1,10 @@
+import nextra from "nextra";
 import type { NextConfig } from "next";
+
+const withNextra = nextra({
+	defaultShowCopyCode: true,
+	search: false,
+});
 
 const nextConfig: NextConfig = {
 	images: {
@@ -11,4 +17,4 @@ const nextConfig: NextConfig = {
 	},
 };
 
-export default nextConfig;
+export default withNextra(nextConfig);
