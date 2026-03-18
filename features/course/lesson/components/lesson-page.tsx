@@ -30,7 +30,6 @@ import {
 	type LessonConfig,
 	type LessonLayoutMode,
 } from "@/features/course/lesson/model/manifest";
-import type { ProductTheme } from "@/features/course/shared/utils/product-theme";
 
 function getSaveStatusMeta(saveStatus: LessonSaveStatus) {
 	return saveStatus === "saving"
@@ -55,10 +54,8 @@ function getSaveStatusMeta(saveStatus: LessonSaveStatus) {
 }
 
 export function LessonPage({
-	initialTheme,
 	lessonId,
 }: {
-	initialTheme: ProductTheme;
 	lessonId: string;
 }) {
 	const router = useRouter();
@@ -136,7 +133,6 @@ export function LessonPage({
 	});
 
 	const shellProps = {
-		initialTheme,
 		currentLessonId: lessonId,
 		viewportMode: "app" as const,
 		layoutMode: chromeState.layoutMode,
@@ -168,7 +164,7 @@ export function LessonPage({
 
 	if (lessonState.accessStatus === "locked") {
 		return (
-			<ProductShell initialTheme={initialTheme} currentLessonId={lessonId}>
+			<ProductShell currentLessonId={lessonId}>
 				<section className="rounded-none border border-product-border bg-product-surface/78 px-4 py-6 text-center shadow-panel backdrop-blur-xl">
 					<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
 						Lesson locked

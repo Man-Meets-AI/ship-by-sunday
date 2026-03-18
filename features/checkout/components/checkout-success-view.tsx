@@ -13,7 +13,6 @@ import {
 } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import { ProductShell } from "@/features/course/shared/components/product-shell";
-import type { ProductTheme } from "@/features/course/shared/utils/product-theme";
 
 type CheckoutSessionState =
 	| {
@@ -41,6 +40,148 @@ type CheckoutSessionState =
 			sessionId: string;
 	  };
 
+type CheckoutProgressState = "complete" | "active" | "pending";
+
+type CheckoutProgressStep = {
+	label: string;
+	state: CheckoutProgressState;
+	detail: string;
+};
+
+function CheckoutProgress({
+	steps,
+}: {
+	steps: readonly CheckoutProgressStep[];
+}) {
+	return (
+		<div className="mt-6 grid gap-3 sm:grid-cols-3">
+			{steps.map((step) => {
+				const isComplete = step.state === "complete";
+				const isActive = step.state === "active";
+				const stepClassName = isActive
+					? "border-product-accent/60 bg-product-accent/8"
+					: isComplete
+						? "border-product-border/70 bg-product-surface"
+						: "border-product-border/40 bg-product-surface-strong/60";
+				const dotClassName = isComplete
+					? "bg-product-text"
+					: isActive
+						? "bg-product-accent/80 motion-safe:animate-pulse"
+						: "bg-product-border/35";
+				const detailClassName = isActive
+					? "text-product-text"
+					: "text-product-muted";
+
+				return (
+					<div
+						key={step.label}
+						className={`border px-3 py-3 transition-colors duration-200 ease-out motion-reduce:transition-none ${stepClassName}`}
+					>
+						<div className="flex items-center justify-between gap-2">
+							<p className="font-mono text-[9px] uppercase tracking-[0.16em] text-product-text">
+								{step.label}
+							</p>
+							<span
+								className={`inline-flex size-2.5 rounded-full transition-colors duration-200 ease-out motion-reduce:transition-none ${dotClassName}`}
+								aria-hidden="true"
+							/>
+						</div>
+						<p className={`mt-2 text-xs leading-relaxed ${detailClassName}`}>
+							{step.detail}
+						</p>
+					</div>
+				);
+			})}
+		</div>
+	);
+}
+
+function getCheckoutHelpContent(
+	checkoutSessionState: CheckoutSessionState,
+	isAccessReady: boolean,
+) {
+	switch (checkoutSessionState.kind) {
+		case "validated":
+			return isAccessReady
+				? {
+						title: "Access confirmed",
+						leadCopy:
+							"Your purchase and entitlement are both confirmed. The next step is just getting you into the workspace.",
+						items: [
+							"Use Open mission if the redirect has not fired yet.",
+							"Use Check access only if you want to force one more lookup.",
+							"Keep this tab if you want a clean post-purchase handoff.",
+						],
+				  }
+				: {
+						title: "What happens next",
+						leadCopy:
+							"Stripe is done. This page is polling your account access and will forward you automatically once the entitlement lands.",
+						items: [
+							"Keep this tab open for a few seconds while the access grant catches up.",
+							"If you signed in with a different email, fix that first before retrying.",
+							"Use Check access if the handoff feels stalled.",
+						],
+				  };
+		case "sign_in_required":
+			return {
+				title: "Use the checkout account",
+				leadCopy:
+					"This browser is not signed in, so we cannot attach the completed checkout to an account yet.",
+				items: [
+					"Sign in with the same email you used during payment.",
+					"Return to this tab after sign-in so the access handoff can finish.",
+					"Do not start a second checkout unless payment actually failed.",
+				],
+			};
+		case "wrong_account":
+			return {
+				title: "Account mismatch",
+				leadCopy:
+					"The purchase exists, but it belongs to a different signed-in account than the one currently open here.",
+				items: [
+					"Switch to the email used at checkout.",
+					"Then use Check access to retry the entitlement lookup.",
+					"Open mission only after the correct account is attached.",
+				],
+			};
+		case "payment_pending":
+			return {
+				title: "Waiting on Stripe",
+				leadCopy:
+					"The success URL resolved, but Stripe still has the payment in a non-final state.",
+				items: [
+					"Give Stripe another moment to settle the payment.",
+					"Come back to this page from the same browser after payment confirms.",
+					"Do not retry checkout unless Stripe shows the payment failed.",
+				],
+			};
+		case "invalid_session":
+			return {
+				title: "Session could not be verified",
+				leadCopy:
+					"This URL does not include a Stripe session we can trust for the access handoff.",
+				items: [
+					"Return to checkout from the offer page if you still need to buy.",
+					"Use Check access if you already paid in this account.",
+					"Keep the success URL intact when testing the live handoff.",
+				],
+			};
+		case "missing_session_id":
+		default:
+			return {
+				title: "No checkout session attached",
+				leadCopy:
+					"This page works as a recovery surface, but it is strongest when it arrives directly from Stripe.",
+				items: [
+					"Use Check access if you already completed purchase on this account.",
+					"Return home if you still need to start checkout.",
+					"Keep the same browser session for the cleanest handoff.",
+				],
+			};
+	}
+}
+
 function getCheckoutSessionCopy(
 	checkoutSessionState: CheckoutSessionState,
 	isAccessReady: boolean,
@@ -61,14 +202,21 @@ function getCheckoutSessionCopy(
 					{
 						label: "Payment confirmed",
 						state: "complete" as const,
+						detail: "Stripe marked the checkout as paid.",
 					},
 					{
 						label: "Access handoff",
 						state: isAccessReady ? ("complete" as const) : ("active" as const),
+						detail: isAccessReady
+							? "Entitlement is attached to this account."
+							: "We are polling for the access grant now.",
 					},
 					{
 						label: "Open mission",
 						state: isAccessReady ? ("active" as const) : ("pending" as const),
+						detail: isAccessReady
+							? "Redirect is ready."
+							: "Mission opens once access confirms.",
 					},
 				],
 			};
@@ -84,14 +232,17 @@ function getCheckoutSessionCopy(
 					{
 						label: "Checkout found",
 						state: "complete" as const,
+						detail: "We located the Stripe session from this success URL.",
 					},
 					{
 						label: "Sign in",
 						state: "active" as const,
+						detail: "Use the same email used during checkout.",
 					},
 					{
 						label: "Unlock access",
 						state: "pending" as const,
+						detail: "Entitlement attaches after account auth.",
 					},
 				],
 			};
@@ -107,14 +258,17 @@ function getCheckoutSessionCopy(
 					{
 						label: "Checkout found",
 						state: "complete" as const,
+						detail: "The payment session exists and looks valid.",
 					},
 					{
 						label: "Account match",
 						state: "active" as const,
+						detail: "Switch to the email used at checkout.",
 					},
 					{
 						label: "Unlock access",
 						state: "pending" as const,
+						detail: "Access can only attach after the account matches.",
 					},
 				],
 			};
@@ -130,14 +284,17 @@ function getCheckoutSessionCopy(
 					{
 						label: "Checkout found",
 						state: "complete" as const,
+						detail: "The Stripe session was located successfully.",
 					},
 					{
 						label: "Payment confirm",
 						state: "active" as const,
+						detail: "Stripe has not finalized this payment yet.",
 					},
 					{
 						label: "Unlock access",
 						state: "pending" as const,
+						detail: "Entitlement waits for Stripe confirmation.",
 					},
 				],
 			};
@@ -153,14 +310,17 @@ function getCheckoutSessionCopy(
 					{
 						label: "Checkout found",
 						state: "active" as const,
+						detail: "This URL did not resolve to a valid Stripe session.",
 					},
 					{
 						label: "Access handoff",
 						state: "pending" as const,
+						detail: "We need a verified checkout session first.",
 					},
 					{
 						label: "Open mission",
 						state: "pending" as const,
+						detail: "Mission stays locked until purchase is confirmed.",
 					},
 				],
 			};
@@ -177,14 +337,17 @@ function getCheckoutSessionCopy(
 					{
 						label: "Checkout found",
 						state: "pending" as const,
+						detail: "No Stripe session is attached to this URL.",
 					},
 					{
 						label: "Access handoff",
 						state: "pending" as const,
+						detail: "Use access check if you already paid.",
 					},
 					{
 						label: "Open mission",
 						state: "pending" as const,
+						detail: "Start checkout first if access has not been purchased.",
 					},
 				],
 			};
@@ -192,10 +355,8 @@ function getCheckoutSessionCopy(
 }
 
 export function CheckoutSuccessView({
-	initialTheme,
 	checkoutSessionState,
 }: {
-	initialTheme: ProductTheme;
 	checkoutSessionState: CheckoutSessionState;
 }) {
 	const router = useRouter();
@@ -230,6 +391,32 @@ export function CheckoutSuccessView({
 					getCheckoutSuccessHref(checkoutSessionState.sessionId),
 				)
 			: getSignInRedirectHref(routeConfig.checkoutSuccess);
+	const helpContent = getCheckoutHelpContent(
+		checkoutSessionState,
+		isAccessReady,
+	);
+	const primaryActionLabel =
+		checkoutSessionState.kind === "sign_in_required"
+			? "Sign in"
+			: "Open mission";
+	const primaryActionHref =
+		checkoutSessionState.kind === "sign_in_required"
+			? signInHref
+			: routeConfig.mission;
+	const primaryActionBody =
+		checkoutSessionState.kind === "sign_in_required"
+			? "Use the exact email from checkout so we can attach the purchase to the right account."
+			: canAutoRedirect
+				? "Your access is ready. Open the workspace now if you do not want to wait for the redirect."
+				: "If the handoff already finished in the background, this will take you into Ship by Sunday. Otherwise you will land on the access check surface.";
+	const secondaryActionBody =
+		checkoutSessionState.kind === "wrong_account"
+			? "Use this after switching accounts to retry the entitlement lookup."
+			: "Use this if the handoff feels stalled, or if you need to re-check access manually.";
+	const primaryButtonClassName =
+		"sbs-hover-lift sbs-press-feedback inline-flex min-w-[12rem] justify-center rounded-none border border-product-accent bg-product-accent/10 px-4 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-product-accent";
+	const secondaryButtonClassName =
+		"sbs-hover-lift sbs-press-feedback inline-flex min-w-[11rem] justify-center rounded-none border border-product-border bg-product-surface px-4 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-product-text transition-colors hover:bg-product-surface-alt focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-product-accent";
 
 	useEffect(() => {
 		if (!canAutoRedirect) {
@@ -257,85 +444,94 @@ export function CheckoutSuccessView({
 
 	return (
 		<ProductShell
-			initialTheme={initialTheme}
 			title={sessionCopy.shellTitle}
 			subtitle={sessionCopy.shellSubtitle}
 		>
-			<section className="border border-line bg-white p-6 shadow-card">
-				<p className="text-xs font-bold uppercase tracking-[0.18em] text-ink/60">
-					Checkout status
-				</p>
-				<div
-					className="mt-4 inline-flex items-center gap-2 border border-line bg-paper/80 px-3 py-2 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-ink/70"
-					role="status"
-					aria-live="polite"
-					aria-atomic="true"
-				>
-					<span
-						className={`inline-flex size-2.5 rounded-full ${
-							canAutoRedirect ? "bg-ink" : "bg-ink/55 motion-safe:animate-pulse"
-						}`}
-						aria-hidden="true"
-					/>
-					{sessionCopy.statusLabel}
-				</div>
-				<p className="mt-4 font-display text-4xl uppercase leading-none tracking-[0.04em]">
-					{sessionCopy.heading}
-				</p>
-				<p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-ink/75">
-					{sessionCopy.body}
-				</p>
-				<div className="mt-6 grid gap-[1px] border border-line bg-line sm:grid-cols-3">
-					{sessionCopy.progressSteps.map((step) => (
-						<div
-							key={step.label}
-							className="bg-white px-4 py-3 transition-colors duration-200 ease-out motion-reduce:transition-none"
-						>
-							<div className="flex items-center gap-2">
+			<section className="relative mx-auto w-full max-w-6xl overflow-hidden border border-product-border/70 bg-product-surface/80 p-5 shadow-panel backdrop-blur-xl sm:p-7">
+				<div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-product-accent/10 to-transparent" />
+				<div className="relative grid gap-7 lg:grid-cols-[minmax(0,1fr)_17rem]">
+					<div>
+						<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+							Checkout status
+						</p>
+						<div className="mt-4 flex flex-wrap items-center gap-2">
+							<div
+								className="inline-flex items-center gap-2 border border-product-border bg-product-surface-strong/80 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted"
+								role="status"
+								aria-live="polite"
+								aria-atomic="true"
+							>
 								<span
-									className={`inline-flex size-2.5 rounded-full transition-colors duration-200 ease-out motion-reduce:transition-none ${
-										step.state === "complete"
-											? "bg-ink"
-											: step.state === "active"
-												? "bg-ink/55 motion-safe:animate-pulse"
-												: "bg-ink/15"
+									className={`inline-flex size-2.5 rounded-full ${
+										canAutoRedirect
+											? "bg-product-text"
+											: "bg-product-accent/80 motion-safe:animate-pulse"
 									}`}
 									aria-hidden="true"
 								/>
-								<p className="text-xs font-bold uppercase tracking-[0.14em] text-ink/80">
-									{step.label}
-								</p>
+								{sessionCopy.statusLabel}
 							</div>
+							<span className="border border-product-border/45 bg-product-surface px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-product-muted">
+								{canAutoRedirect ? "Redirect armed" : "Polling access"}
+							</span>
+							<span className="border border-product-border/45 bg-product-surface px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-product-muted">
+								Manual recovery available
+							</span>
 						</div>
-					))}
-				</div>
-				<div className="mt-6 flex flex-wrap gap-3">
-					{checkoutSessionState.kind === "sign_in_required" ? (
-						<Link
-							href={signInHref}
-							className="sbs-hover-lift sbs-press-feedback inline-flex border border-line bg-ink px-4 py-3 font-display text-2xl uppercase tracking-[0.04em] text-paper"
-						>
-							Sign in
-						</Link>
-					) : null}
-					<Link
-						href={routeConfig.mission}
-						className="sbs-hover-lift sbs-press-feedback inline-flex border border-line bg-ink px-4 py-3 font-display text-2xl uppercase tracking-[0.04em] text-paper"
-					>
-						Open mission
-					</Link>
-					<Link
-						href={routeConfig.accessRequired}
-						className="sbs-hover-lift sbs-press-feedback inline-flex border border-line bg-white px-4 py-3 font-display text-2xl uppercase tracking-[0.04em] text-ink"
-					>
-						Check access
-					</Link>
-					<Link
-						href={routeConfig.home}
-						className="sbs-hover-lift sbs-press-feedback inline-flex border border-line bg-white px-4 py-3 font-display text-2xl uppercase tracking-[0.04em] text-ink"
-					>
-						Go home
-					</Link>
+						<h1 className="mt-4 max-w-3xl text-balance font-display text-3xl uppercase leading-none tracking-[0.08em] text-product-text sm:text-4xl">
+							{sessionCopy.heading}
+						</h1>
+						<p className="mt-4 max-w-2xl text-sm leading-relaxed text-product-muted">
+							{sessionCopy.body}
+						</p>
+						<CheckoutProgress steps={sessionCopy.progressSteps} />
+						<div className="mt-7 border border-product-border/55 bg-product-surface-strong/72 p-4">
+							<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
+								Next step
+							</p>
+							<p className="mt-3 max-w-2xl text-sm leading-relaxed text-product-text">
+								{primaryActionBody}
+							</p>
+							<div className="mt-4 flex flex-wrap gap-2.5">
+								<Link href={primaryActionHref} className={primaryButtonClassName}>
+									{primaryActionLabel}
+								</Link>
+								<Link
+									href={routeConfig.accessRequired}
+									className={secondaryButtonClassName}
+								>
+									Check access
+								</Link>
+								<Link href={routeConfig.home} className={secondaryButtonClassName}>
+									Go home
+								</Link>
+							</div>
+							<p className="mt-3 text-[11px] leading-relaxed text-product-muted">
+								{secondaryActionBody}
+							</p>
+						</div>
+					</div>
+					<aside className="h-fit border border-product-border/55 bg-product-surface-strong/72 p-4">
+						<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
+							{helpContent.title}
+						</p>
+						<p className="mt-3 text-sm leading-relaxed text-product-text">
+							{helpContent.leadCopy}
+						</p>
+						<ul className="mt-4 space-y-2.5">
+							{helpContent.items.map((item) => (
+								<li key={item} className="flex items-start gap-2">
+									<span
+										className="mt-1 inline-flex size-1.5 shrink-0 rounded-full bg-product-accent/80"
+										aria-hidden="true"
+									/>
+									<span className="text-xs leading-relaxed text-product-muted">
+										{item}
+									</span>
+								</li>
+							))}
+						</ul>
+					</aside>
 				</div>
 			</section>
 		</ProductShell>

@@ -5,6 +5,7 @@ import "@xyflow/react/dist/style.css";
 
 import { ConvexClientProvider } from "@/platform/convex/convex-client-provider";
 import { manifestConfig, productConfig } from "@/config/product";
+import { ProductThemeProvider } from "@/features/course/shared/components/product-theme-provider";
 import {
 	getProductThemeBootstrapScript,
 	getProductThemeTokenStyles,
@@ -63,7 +64,9 @@ export default async function RootLayout({
 			</head>
 			<body>
 				<ClerkProvider>
-					<ConvexClientProvider>{children}</ConvexClientProvider>
+					<ProductThemeProvider initialTheme={initialTheme}>
+						<ConvexClientProvider>{children}</ConvexClientProvider>
+					</ProductThemeProvider>
 				</ClerkProvider>
 			</body>
 		</html>

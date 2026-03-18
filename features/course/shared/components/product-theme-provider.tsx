@@ -59,7 +59,7 @@ export function ProductThemeProvider({
 
 	return (
 		<ProductThemeContext.Provider value={value}>
-			<div className="product-theme" data-theme={theme}>
+			<div className="product-theme min-h-screen" data-theme={theme}>
 				{children}
 			</div>
 		</ProductThemeContext.Provider>

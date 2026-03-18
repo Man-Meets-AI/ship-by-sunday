@@ -13,7 +13,6 @@ import {
 import { api } from "@/convex/_generated/api";
 import { CheckoutButton } from "@/features/checkout/components/checkout-button";
 import { ProductShell } from "@/features/course/shared/components/product-shell";
-import type { ProductTheme } from "@/features/course/shared/utils/product-theme";
 
 type AccessStepState = "complete" | "active" | "pending";
 
@@ -120,11 +119,7 @@ function formatRefreshTime(timestamp: number | null) {
 	}).format(timestamp);
 }
 
-export function AccessRequiredPage({
-	initialTheme,
-}: {
-	initialTheme: ProductTheme;
-}) {
+export function AccessRequiredPage() {
 	const router = useRouter();
 	const access = useQuery(api.course.viewerAccess) as
 		| {
@@ -226,7 +221,6 @@ export function AccessRequiredPage({
 
 	return (
 		<ProductShell
-			initialTheme={initialTheme}
 			title="Access Required"
 			subtitle={shellSubtitle}
 			enableMissionQuery={false}

@@ -36,7 +36,7 @@ export function ProductBrand({
 				<span
 					className={
 						labelClassName ||
-						"font-display text-base uppercase tracking-[0.08em] text-ink"
+						"font-display text-base uppercase tracking-[0.08em] text-product-text"
 					}
 				>
 					{productConfig.name}

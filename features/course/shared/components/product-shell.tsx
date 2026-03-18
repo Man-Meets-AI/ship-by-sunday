@@ -11,7 +11,6 @@ import { getLesson } from "@/features/course/lesson/model/manifest";
 import type { LessonLayoutMode } from "@/features/course/lesson/model/manifest";
 import { api } from "@/convex/_generated/api";
 import {
-	ProductThemeProvider,
 	useProductTheme,
 } from "@/features/course/shared/components/product-theme-provider";
 import { ProductBrand } from "@/shared/branding/product-brand";
@@ -20,8 +19,6 @@ import {
 	SkillRail,
 	type SkillRailCompletionCue,
 } from "@/features/course/shared/components/skill-rail";
-import type { ProductTheme } from "@/features/course/shared/utils/product-theme";
-
 const navItems = [
 	{ href: "/artifacts", label: "Artifacts" },
 	{ href: "/settings", label: "Settings" },
@@ -60,7 +57,6 @@ type ViewerAccessState = {
 
 type ProductShellProps = {
 	children: React.ReactNode;
-	initialTheme: ProductTheme;
 	title?: string;
 	subtitle?: string;
 	currentLessonId?: string;
@@ -216,7 +212,7 @@ function ShellInner({
 			{/* Left: logo + nav */}
 			<div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
 				<ProductBrand
-					href={routeConfig.mission}
+					href={routeConfig.home}
 					imageSize={30}
 					imageClassName="rounded-[6px]"
 					labelClassName="font-display text-base uppercase tracking-[0.08em] text-product-text sm:text-lg"
@@ -537,9 +533,5 @@ function ShellInner({
 }
 
 export function ProductShell(props: ProductShellProps) {
-	return (
-		<ProductThemeProvider initialTheme={props.initialTheme}>
-			<ShellInner {...props} />
-		</ProductThemeProvider>
-	);
+	return <ShellInner {...props} />;
 }

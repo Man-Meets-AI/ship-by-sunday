@@ -2,12 +2,10 @@ import { UserProfile } from "@clerk/nextjs";
 
 import { CodexConnectionCard } from "@/features/codex/components/codex-connection-card";
 import { ProductShell } from "@/features/course/shared/components/product-shell";
-import type { ProductTheme } from "@/features/course/shared/utils/product-theme";
 
-export function SettingsPage({ initialTheme }: { initialTheme: ProductTheme }) {
+export function SettingsPage() {
 	return (
 		<ProductShell
-			initialTheme={initialTheme}
 			viewportMode="app"
 			showSkillRail={false}
 		>

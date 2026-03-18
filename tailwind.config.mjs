@@ -8,6 +8,7 @@ const config = {
 	theme: {
 		extend: {
 			colors: {
+				// Deprecated migration bridge. New runtime surfaces should use product-* tokens directly.
 				ink: "rgb(var(--brand-ink) / <alpha-value>)",
 				paper: "rgb(var(--brand-paper) / <alpha-value>)",
 				line: "rgb(var(--brand-line) / <alpha-value>)",

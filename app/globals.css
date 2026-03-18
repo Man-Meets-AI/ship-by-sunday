@@ -9,19 +9,19 @@ body {
 			90deg,
 			transparent 0,
 			transparent calc(50% - 1px),
-			rgb(var(--brand-ink) / 0.035) calc(50% - 1px),
-			rgb(var(--brand-ink) / 0.035) calc(50% + 1px),
+			rgb(var(--product-border) / 0.12) calc(50% - 1px),
+			rgb(var(--product-border) / 0.12) calc(50% + 1px),
 			transparent calc(50% + 1px)
 		),
-		linear-gradient(rgb(var(--brand-ink) / 0.025) 1px, transparent 1px),
-		linear-gradient(90deg, rgb(var(--brand-ink) / 0.025) 1px, transparent 1px),
-		rgb(var(--brand-paper));
+		linear-gradient(rgb(var(--product-border) / 0.06) 1px, transparent 1px),
+		linear-gradient(90deg, rgb(var(--product-border) / 0.06) 1px, transparent 1px),
+		rgb(var(--product-bg));
 	background-size:
 		100% 100%,
 		100% 160px,
 		160px 100%,
 		auto;
-	color: rgb(var(--brand-ink));
+	color: rgb(var(--product-text));
 	font-family: var(--font-sans), sans-serif;
 	line-height: 1.5;
 	text-rendering: optimizeLegibility;
@@ -96,7 +96,6 @@ summary::-webkit-details-marker {
 
 .product-theme {
 	position: relative;
-	min-height: 100vh;
 	color: rgb(var(--product-text));
 }
 

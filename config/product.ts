@@ -273,7 +273,8 @@ export const courseResourceConfig = {
 } as const;
 
 export const authViewConfig = {
-	clerkCardClassName: "shadow-none border border-ink",
+	clerkCardClassName:
+		"rounded-none border border-product-border bg-product-surface/92 text-product-text shadow-panel backdrop-blur-xl",
 	fallbackRedirectUrl: routeConfig.mission,
 } as const;
 

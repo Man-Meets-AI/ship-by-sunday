@@ -11,16 +11,16 @@ export default function FAQAccordion({ items }: { items: readonly FAQItem[] }) {
 	const [openQuestion, setOpenQuestion] = useState<string | null>(null);
 
 	return (
-		<div className="grid gap-[1px] border border-line bg-line">
+		<div className="grid gap-[1px] border border-product-border/60 bg-product-border/35">
 			{items.map((item, index) => {
 				const isOpen = openQuestion === item.question;
 				const panelId = `faq-panel-${index}`;
 
 				return (
-					<div key={item.question} className="bg-white">
+					<div key={item.question} className="bg-product-surface">
 						<button
 							type="button"
-							className="sbs-press-feedback flex w-full items-center justify-between gap-4 px-5 py-5 text-left text-xl font-medium leading-tight transition-colors duration-150 ease-out hover:bg-paper/50 motion-reduce:transition-none sm:text-2xl"
+							className="sbs-press-feedback flex w-full items-center justify-between gap-4 px-5 py-5 text-left text-xl font-medium leading-tight text-product-text transition-colors duration-150 ease-out hover:bg-product-surface-alt motion-reduce:transition-none sm:text-2xl"
 							aria-expanded={isOpen}
 							aria-controls={panelId}
 							onClick={() =>
@@ -31,7 +31,7 @@ export default function FAQAccordion({ items }: { items: readonly FAQItem[] }) {
 						>
 							<span>{item.question}</span>
 							<span
-								className={`grid size-12 place-items-center border border-line text-lg transition-transform duration-200 ease-out motion-reduce:transition-none ${
+								className={`grid size-12 place-items-center border border-product-border/60 text-lg text-product-muted transition-transform duration-200 ease-out motion-reduce:transition-none ${
 									isOpen ? "rotate-45" : "rotate-0"
 								}`}
 								aria-hidden="true"
@@ -51,7 +51,7 @@ export default function FAQAccordion({ items }: { items: readonly FAQItem[] }) {
 								<div
 									id={panelId}
 									aria-hidden={!isOpen}
-									className={`border-t border-line px-5 py-5 text-base leading-relaxed text-ink/75 transition-all duration-200 ease-out motion-reduce:transition-none sm:text-lg ${
+									className={`border-t border-product-border/60 px-5 py-5 text-base leading-relaxed text-product-muted transition-all duration-200 ease-out motion-reduce:transition-none sm:text-lg ${
 										isOpen
 											? "translate-y-0 opacity-100 delay-[40ms]"
 											: "pointer-events-none -translate-y-1 opacity-0"

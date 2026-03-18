@@ -47,13 +47,12 @@ export function getProductThemeCookieString(theme: ProductTheme) {
 export function getProductThemeTokenStyles() {
 	return `
 		:root {
-			color-scheme: light;
 			${serializeCssVariables({
-				"--brand-ink": brandColorConfig.inkRgb,
-				"--brand-paper": brandColorConfig.paperRgb,
-				"--brand-line": brandColorConfig.lineRgb,
-				"--brand-muted": brandColorConfig.mutedRgb,
-				"--brand-accent": brandColorConfig.accentRgb,
+				"--brand-ink": "var(--product-text)",
+				"--brand-paper": "var(--product-bg)",
+				"--brand-line": "var(--product-border)",
+				"--brand-muted": "var(--product-muted)",
+				"--brand-accent": "var(--product-accent)",
 				"--brand-danger": brandColorConfig.dangerRgb,
 				"--brand-danger-soft": brandColorConfig.dangerSoftRgb,
 				"--product-scrollbar-size": `${productThemeConfig.scrollbarSizePx}px`,
@@ -66,15 +65,15 @@ export function getProductThemeTokenStyles() {
 				"--ease-standard": productThemeConfig.motion.easeStandard,
 				"--ease-exit": productThemeConfig.motion.easeExit,
 			})}
-			${getProductThemeVariables(productThemeConfig.palettes.light)}
+			${getProductThemeVariables(productThemeConfig.palettes[DEFAULT_PRODUCT_THEME])}
 		}
 
-		.product-theme {
+		html[data-product-theme="dark"] {
 			color-scheme: ${productThemeConfig.palettes.dark.colorScheme};
 			${getProductThemeVariables(productThemeConfig.palettes.dark)}
 		}
 
-		html[data-product-theme="light"] .product-theme {
+		html[data-product-theme="light"] {
 			color-scheme: ${productThemeConfig.palettes.light.colorScheme};
 			${getProductThemeVariables(productThemeConfig.palettes.light)}
 		}

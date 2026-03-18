@@ -8,7 +8,6 @@ import { getLessonHref } from "@/features/course/lesson/model/manifest";
 import { api } from "@/convex/_generated/api";
 import { ArtifactPreviewContent } from "@/features/course/lesson/workbench/shared/artifact-preview-content";
 import { ProductShell } from "@/features/course/shared/components/product-shell";
-import type { ProductTheme } from "@/features/course/shared/utils/product-theme";
 
 function ArtifactsSkeleton() {
 	return (
@@ -31,11 +30,7 @@ function ArtifactsSkeleton() {
 	);
 }
 
-export function ArtifactsPage({
-	initialTheme,
-}: {
-	initialTheme: ProductTheme;
-}) {
+export function ArtifactsPage() {
 	const { isAuthenticated, isLoading } = useConvexAuth();
 	const artifacts = useQuery(
 		api.course.listArtifacts,
@@ -53,7 +48,6 @@ export function ArtifactsPage({
 
 	return (
 		<ProductShell
-			initialTheme={initialTheme}
 			title="Saved Work"
 			subtitle="Your completed outputs in one place."
 		>

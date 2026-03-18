@@ -11,7 +11,6 @@ import {
 	type BlockId,
 } from "@/features/course/lesson/model/manifest";
 import { getBlockById } from "@/features/course/lesson/model/registry";
-import type { ProductTheme } from "@/features/course/shared/utils/product-theme";
 
 type LessonStatus = "available" | "completed" | "in_progress" | "locked";
 type BlockStatus = "completed" | "active" | "ready" | "locked";
@@ -539,7 +538,7 @@ function LoadingState() {
 	);
 }
 
-export function MissionPage({ initialTheme }: { initialTheme: ProductTheme }) {
+export function MissionPage() {
 	const { isAuthenticated, isLoading } = useConvexAuth();
 	const mission = useQuery(
 		api.course.getMissionState,
@@ -561,7 +560,6 @@ export function MissionPage({ initialTheme }: { initialTheme: ProductTheme }) {
 
 	return (
 		<ProductShell
-			initialTheme={initialTheme}
 			viewportMode="app"
 			appScrollMode="page"
 			showSkillRail={false}
