@@ -6,6 +6,30 @@ It does not replace `docs/internal/todo.md`, which remains the launch tracker an
 
 ## Active
 
+- [x] Move `ProductThemeProvider` ownership to `app/layout.tsx` and remove `initialTheme` pass-through props from app-shell routes
+- [x] Promote `product-*` to the canonical runtime token system and make global/root styles follow the active product theme
+- [x] Migrate marketing, auth, and shared public surfaces onto the unified product token system with small shared primitives
+- [x] Verify the unified theming refactor with route scans, `pnpm run typecheck`, and focused browser QA where feasible
+
+- [x] Trace the app-shell navbar logo destination and confirm why it bypasses the auth-aware home redirect
+- [x] Route the shared app-shell brand link through the canonical home entrypoint so signed-in users resume work and signed-out users land on marketing
+- [x] Verify the navbar-logo fix with a production build/typecheck and log the regression guardrail
+
+- [x] Rework the checkout success screen so it uses the current product-shell visual system instead of the old hardcoded white-panel treatment
+- [x] Keep the existing Stripe/Clerk/Convex state logic intact while improving hierarchy, progress presentation, and action clarity on `/checkout/success`
+- [x] Verify the updated success screen with targeted checks and log the outcome plus any residual risk
+
+- [x] Verify deployed production payment handoff prerequisites across Vercel, Clerk, Convex, and Stripe without exposing secrets
+- [x] Create or confirm a dedicated non-entitled production Clerk QA user for a safe buyer-flow pass
+- [x] Create a one-time live 100% off Stripe promotion path so the real production checkout can be exercised without charging a card
+- [x] Run a real production buyer journey pass on `https://www.man-meets-ai.com` through sign-in, checkout, success, entitlement grant, and `/mission`
+- [x] Capture the evidence, note any defects or blockers, and record the outcome plus residual risk
+
+- Outcome: Ran live-mode production checkout passes against `https://www.man-meets-ai.com` using single-use 100%-off Stripe promotion codes on a dedicated Clerk QA user so the real buyer path could be exercised without charging a card.
+- Outcome: Fixed the live payment handoff by rotating the Stripe webhook endpoint secret, updating `STRIPE_WEBHOOK_SECRET` in Vercel production, updating the same secret in Convex production, redeploying Vercel, deleting the stale Stripe endpoint, and re-verifying that production entitlements are now written with `source: stripe_webhook`.
+- Verification: Vercel production served `www.man-meets-ai.com`; live checkout sessions completed in Stripe; Convex production `courseEntitlements` now shows an `active` row for `user_3B7gwf605QT4IPbZkRGvd2TuAs5` with `source: stripe_webhook` and latest `stripeCheckoutSessionId = cs_live_b1Ab87Kmwwbg7x3KIe562Gry1vWlZPktdyAx8rysdrx1q46ICY3APSGpzr`.
+- Remaining blocker: Post-purchase redirect now reaches `/mission`, but `/mission` still 500s in production for the entitled QA user. Vercel runtime logs show a Clerk `api_response_error` 404 inside `features/course/access/server/course-access.ts`, which strongly suggests the server-side Clerk `convex` JWT-template/token path is still misconfigured in production even though the Stripe -> Vercel -> Convex entitlement grant now works.
+
 - [x] Remove safe leftover junk after the repo stabilization pass, including disposable local artifacts and active docs that still point at deleted runtime paths
 - [x] Keep archival/internal history intact unless it is actively misleading the current runtime or developer workflow
 - [x] Re-run `pnpm run check` after the cleanup sweep and log what was intentionally left in place
@@ -236,6 +260,18 @@ It does not replace `docs/internal/todo.md`, which remains the launch tracker an
 - [x] Verify the repo with lint, format check, unit tests, smoke tests, `typecheck`, and `check`
 
 ## Review
+
+- Outcome: Unified the runtime theme model around the root-owned `ProductThemeProvider`, removed the old `initialTheme` prop plumbing from product routes, moved global/body styling onto active `product-*` tokens, aliased the legacy `brand-*` values to the current product theme, and migrated marketing, auth, checkout recovery, and shared public branding/surface primitives onto the same token system so the whole product now follows one dark/light theme contract.
+- Verification: `rg -n "text-ink|bg-paper|border-line|bg-ink|text-paper|bg-white|bg-accent|shadow-card" app features shared platform --glob '!**/*.test.*' --glob '!**/*.md'` and `pnpm run typecheck`
+- Follow-up: I attempted a live local browser QA pass, but Playwright could not launch because Chrome is already attached to an existing session on this machine. The next manual check should validate `/`, `/sign-in`, `/sign-up`, `/checkout/success`, `/checkout/cancel`, and one authenticated app-shell route in both dark and light themes.
+
+- Outcome: The shared app-shell logo no longer hard-links to `/mission`; it now routes to `/`, which already handles the correct split between public marketing for signed-out users and resume-into-work for entitled signed-in users.
+- Verification: `pnpm run typecheck`
+- Follow-up: Browser-QA the deployed app-shell logo from an entitled session and a signed-out auth surface to confirm the server-side home redirect behaves the same way outside local build validation.
+
+- Outcome: Rebuilt `/checkout/success` onto the current `product-*` token system so the page no longer renders as a hardcoded white slab inside the dark shell; preserved the existing Stripe/Clerk/Convex state machine, added richer progress-step detail for each checkout state, tightened the page hierarchy, moved the actions into a clearer next-step panel, and added a contextual help sidebar that explains what the user should do in each state.
+- Verification: `pnpm run typecheck`
+- Follow-up: Browser-QA the live success states on desktop and mobile once a real or sandbox checkout session is available, especially the validated-but-waiting entitlement state that was only verified here through code/build checks.
 
 - Outcome: Removed the untracked `.agents/plans` one-off plan artifact, cleaned the active docs that still pointed at deleted `components/` / `lib/course/` paths, updated the Convex/backend notes and motion/readability docs to the feature-first layout, and marked the old video-editing plan as implemented history instead of a live runbook; I intentionally left archival critique/history docs alone unless they directly affected the current runtime or contributor workflow.
 - Verification: `rg -n 'components/|lib/course/|legacy/lesson-routes|content/course/build|content/marketing/home|lib/product-theme|lib/server/course-access|lib/server/product-theme|lib/server/app-url|lib/stripe|app/faq-accordion\\.tsx' convex/README.md README.md docs/dev docs/internal/design docs/internal/course-ops/video-editing-pipeline-plan.md docs/delivery-onboarding/stack-decision.md docs/internal/main.md docs/internal/memory.md` and `pnpm run check`

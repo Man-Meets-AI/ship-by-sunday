@@ -4,6 +4,11 @@ Use this file to capture recurring mistakes, corrections, and guardrails for fut
 
 ## Lessons
 
+- Date: 2026-03-18
+  Pattern: I left the shared app-shell brand link pointing straight at `routeConfig.mission`, which bypassed the auth-aware home-entry logic and turned the navbar logo into a dead or fragile destination when `/mission` was not the right direct landing target.
+  Rule: In this repo, shared brand/logo navigation should prefer the canonical home entrypoint unless the surface truly needs a fixed deep link. If `/` already handles signed-out marketing and signed-in resume routing on the server, reuse that path instead of duplicating or bypassing it with a hardcoded protected route.
+  How to verify next time: When wiring any global logo or brand link, trace the existing entry-route redirect behavior first, then browser-QA the logo click from both a signed-out session and an entitled signed-in session.
+
 - Date: 2026-03-14
   Pattern: I kept reading or updating a root `todo.md` from shared skills even after this repo moved its operational tracker to `docs/internal/todo.md`, which risks missing the real launch state and writing to a stale pointer file.
   Rule: In this repo, treat `docs/internal/todo.md` as the canonical tracker unless the task explicitly says otherwise. Shared planning, docs, and critique workflows should prefer the repo's canonical tracker path, not assume a root `todo.md`.
@@ -125,3 +130,8 @@ Use this file to capture recurring mistakes, corrections, and guardrails for fut
   Pattern: I started from screen-level critique patterns instead of enforcing a goal-clarity gate that ties the UI to product outcomes and business outcomes.
   Rule: For UX critique work, never start from surface form alone. First establish product goal, surface goal, business model, and relevant metrics, then critique gaps and propose prioritized solutions with explicit trade-offs.
   How to verify next time: Before delivering critique output, confirm the response includes goal context, `Problems I Notice`, `Solutions I Recommend`, trade-off rationale, and a narrative summary that ties user impact to business impact.
+
+- Date: 2026-03-18
+  Pattern: I polished `/checkout/success` inside the current app shell but left sibling buyer-flow routes on the older `ink/paper/line` palette, which made trust-critical checkout surfaces drift visually and feel like hardcoded placeholders.
+  Rule: When touching any trust-critical buyer-flow route inside the product runtime, audit its neighboring routes for token drift before closing. For app-flow surfaces such as checkout success, checkout cancel, and access recovery, prefer the current `product-*` token system and `ProductShell`-aligned treatment over older standalone `ink/paper/line` cards unless the route is intentionally part of the marketing/auth entry experience.
+  How to verify next time: Run `rg -n "bg-white|border-line|text-ink|bg-paper|bg-ink|text-paper" app/checkout app/access-required app/settings app/mission app/lesson features/checkout features/course features/settings --glob '!**/*.test.*'` and confirm any remaining hits are intentional before marking the UI pass complete.
