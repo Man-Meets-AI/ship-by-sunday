@@ -21,6 +21,13 @@ export function BuildPromptCard({
 		"idle",
 	);
 	const resetTimeoutRef = useRef<number | null>(null);
+	const promptResetKeyRef = useRef<string | null>(null);
+	const promptResetKey = [
+		resetKey,
+		readyToGenerate ? "ready" : "blocked",
+		prompt ?? "",
+		disabledReason ?? "",
+	].join("::");
 
 	useEffect(() => {
 		return () => {
@@ -31,9 +38,14 @@ export function BuildPromptCard({
 	}, []);
 
 	useEffect(() => {
+		if (promptResetKeyRef.current === promptResetKey) {
+			return;
+		}
+
+		promptResetKeyRef.current = promptResetKey;
 		setShowPrompt(false);
 		setCopyState("idle");
-	}, [resetKey, readyToGenerate, prompt, disabledReason]);
+	}, [promptResetKey]);
 
 	const copyPrompt = () => {
 		if (

@@ -1,7 +1,6 @@
 import { SignUp } from "@clerk/nextjs";
-
-import { ProductBrand } from "@/shared/branding/product-brand";
 import { authViewConfig, routeConfig } from "@/config/product";
+import { ProductBrand } from "@/shared/branding/product-brand";
 import { PublicPageFrame, PublicSurfaceCard } from "@/shared/ui/public-surface";
 
 export default function Page() {

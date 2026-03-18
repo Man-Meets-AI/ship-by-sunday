@@ -8,9 +8,9 @@ import {
 
 import {
 	accountIsManagedChatGpt,
+	getApiAuthErrorResponse,
 	getCodexDefaultModel,
 	getCodexTurnTimeoutMs,
-	getApiAuthErrorResponse,
 	recordCodexRun,
 	requireEntitledApiSession,
 	upsertViewerCodexConnection,
@@ -38,7 +38,8 @@ export async function POST(request: Request) {
 	const startedAt = Date.now();
 
 	try {
-		session = await requireEntitledApiSession();
+		const entitledSession = await requireEntitledApiSession();
+		session = entitledSession;
 		const body = (await request.json().catch(() => null)) as unknown;
 		const parsed = generateRequestSchema.safeParse(body);
 		if (!parsed.success) {
@@ -47,16 +48,17 @@ export async function POST(request: Request) {
 				{ status: 400 },
 			);
 		}
-		parsedInput = parsed.data;
+		const requestInput = parsed.data;
+		parsedInput = requestInput;
 
 		const output = await withCodexAppServerClient(
-			{ clerkUserId: session.userId },
+			{ clerkUserId: entitledSession.userId },
 			async (client) => {
 				const accountResult = await client.readAccount(false);
 				const account = accountResult.account ?? null;
 
 				if (!accountIsManagedChatGpt(account)) {
-					await upsertViewerCodexConnection(session!, {
+					await upsertViewerCodexConnection(entitledSession, {
 						status: "disconnected",
 						account,
 						rateLimits: null,
@@ -69,8 +71,8 @@ export async function POST(request: Request) {
 				}
 
 				const generation = await client.generateText({
-					prompt: parsedInput!.prompt,
-					model: parsedInput!.model ?? getCodexDefaultModel(),
+					prompt: requestInput.prompt,
+					model: requestInput.model ?? getCodexDefaultModel(),
 					turnTimeoutMs: getCodexTurnTimeoutMs(),
 				});
 
@@ -81,7 +83,7 @@ export async function POST(request: Request) {
 					console.warn("codex rate-limits read failed after generation", error);
 				}
 
-				await upsertViewerCodexConnection(session!, {
+				await upsertViewerCodexConnection(entitledSession, {
 					status: generation.status === "completed" ? "connected" : "error",
 					account,
 					rateLimits,
@@ -97,9 +99,9 @@ export async function POST(request: Request) {
 		);
 
 		if (output.kind === "disconnected") {
-			await recordCodexRun(session, {
-				lessonId: parsedInput.lessonId,
-				templateId: parsedInput.templateId,
+			await recordCodexRun(entitledSession, {
+				lessonId: requestInput.lessonId,
+				templateId: requestInput.templateId,
 				status: "error",
 				latencyMs: Date.now() - startedAt,
 				errorCode: "account_not_connected",
@@ -116,9 +118,9 @@ export async function POST(request: Request) {
 
 		const text = output.generation.text.trim();
 		if (output.generation.status !== "completed" || text.length === 0) {
-			await recordCodexRun(session, {
-				lessonId: parsedInput.lessonId,
-				templateId: parsedInput.templateId,
+			await recordCodexRun(entitledSession, {
+				lessonId: requestInput.lessonId,
+				templateId: requestInput.templateId,
 				status: "error",
 				latencyMs: Date.now() - startedAt,
 				errorCode: "generation_failed",
@@ -135,9 +137,9 @@ export async function POST(request: Request) {
 			);
 		}
 
-		await recordCodexRun(session, {
-			lessonId: parsedInput.lessonId,
-			templateId: parsedInput.templateId,
+		await recordCodexRun(entitledSession, {
+			lessonId: requestInput.lessonId,
+			templateId: requestInput.templateId,
 			status: "success",
 			latencyMs: Date.now() - startedAt,
 		});

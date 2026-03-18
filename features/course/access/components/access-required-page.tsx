@@ -1,9 +1,9 @@
 "use client";
 
+import { useQuery } from "convex/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
-import { useQuery } from "convex/react";
 
 import {
 	getSignInRedirectHref,

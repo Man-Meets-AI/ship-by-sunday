@@ -1,14 +1,16 @@
 "use client";
 
-import { getReferenceGalleryItemImageUrl } from "@/features/course/lesson/model/reference-gallery";
+import {
+	getReferenceGalleryItemImageUrl,
+	isReferenceGalleryValue,
+} from "@/features/course/lesson/model/reference-gallery";
 import type { ArtifactPreview } from "@/features/course/lesson/model/registry";
-import { isReferenceGalleryValue } from "@/features/course/lesson/model/reference-gallery";
 
 import {
 	formatArtifactValue,
 	getReferenceGalleryPreviewItems,
-	hasUploadGalleryValue,
 	getUploadPreviewItems,
+	hasUploadGalleryValue,
 } from "./artifact-format";
 
 function getReferenceGalleryField(artifact: ArtifactPreview) {
@@ -64,6 +66,7 @@ export function ArtifactPreviewContent({
 	const uploadGalleryItems = uploadGalleryField
 		? getUploadPreviewItems(uploadGalleryField.value).slice(0, 4)
 		: [];
+	const uploadGalleryKeyCounts = new Map<string, number>();
 
 	return (
 		<div className="space-y-3 text-[13px] leading-[1.68] text-product-muted">
@@ -97,18 +100,29 @@ export function ArtifactPreviewContent({
 						{uploadGalleryField.label}
 					</p>
 					<div className="grid grid-cols-2 gap-2">
-						{uploadGalleryItems.map((item, index) => (
-							<div
-								key={`${item.storageId ?? item.fileName ?? "upload"}-${index}`}
-								className="aspect-[4/3] overflow-hidden border border-product-border bg-product-surface"
-							>
-								<img
-									src={item.previewUrl ?? item.url ?? ""}
-									alt={item.fileName ?? "Saved upload"}
-									className="h-full w-full object-cover"
-								/>
-							</div>
-						))}
+						{uploadGalleryItems.map((item) => {
+							const keyBase =
+								item.storageId ??
+								item.fileName ??
+								item.previewUrl ??
+								item.url ??
+								"upload";
+							const occurrence = uploadGalleryKeyCounts.get(keyBase) ?? 0;
+							uploadGalleryKeyCounts.set(keyBase, occurrence + 1);
+
+							return (
+								<div
+									key={`${keyBase}-${occurrence}`}
+									className="aspect-[4/3] overflow-hidden border border-product-border bg-product-surface"
+								>
+									<img
+										src={item.previewUrl ?? item.url ?? ""}
+										alt={item.fileName ?? "Saved upload"}
+										className="h-full w-full object-cover"
+									/>
+								</div>
+							);
+						})}
 					</div>
 					<p className="max-w-[52ch] text-[14px] leading-[1.68] text-product-text">
 						{formatArtifactValue(uploadGalleryField.value)}

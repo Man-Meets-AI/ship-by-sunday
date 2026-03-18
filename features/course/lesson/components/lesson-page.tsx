@@ -4,19 +4,19 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { routeConfig } from "@/config/product";
-import {
-	LessonShellFocus,
-	LessonShellSplit,
-	LessonShellWatch,
-} from "@/features/course/lesson/shells";
 import { useLessonChromeState } from "@/features/course/lesson/hooks/use-lesson-chrome-state";
 import { useLessonCompletion } from "@/features/course/lesson/hooks/use-lesson-completion";
 import {
 	type LessonSaveStatus,
 	useLessonState,
 } from "@/features/course/lesson/hooks/use-lesson-state";
-import { WorkbenchRenderer } from "@/features/course/lesson/workbench";
-import { ProductShell } from "@/features/course/shared/components/product-shell";
+import {
+	getLesson,
+	getLessonHref,
+	type LessonConfig,
+	type LessonLayoutMode,
+	lessonSupportsLayoutToggle,
+} from "@/features/course/lesson/model/manifest";
 import {
 	buildResolvedArtifactPreview,
 	getCompletionIssues,
@@ -24,12 +24,12 @@ import {
 	OBJECTIVE_CHECKLIST_FIELD_ID,
 } from "@/features/course/lesson/model/registry";
 import {
-	getLesson,
-	getLessonHref,
-	lessonSupportsLayoutToggle,
-	type LessonConfig,
-	type LessonLayoutMode,
-} from "@/features/course/lesson/model/manifest";
+	LessonShellFocus,
+	LessonShellSplit,
+	LessonShellWatch,
+} from "@/features/course/lesson/shells";
+import { WorkbenchRenderer } from "@/features/course/lesson/workbench";
+import { ProductShell } from "@/features/course/shared/components/product-shell";
 
 function getSaveStatusMeta(saveStatus: LessonSaveStatus) {
 	return saveStatus === "saving"
@@ -53,11 +53,7 @@ function getSaveStatusMeta(saveStatus: LessonSaveStatus) {
 					};
 }
 
-export function LessonPage({
-	lessonId,
-}: {
-	lessonId: string;
-}) {
+export function LessonPage({ lessonId }: { lessonId: string }) {
 	const router = useRouter();
 	const lesson = getLesson(lessonId);
 	if (!lesson) {
@@ -247,6 +243,7 @@ export function LessonPage({
 						strokeWidth="3"
 						strokeLinecap="round"
 						strokeLinejoin="round"
+						aria-hidden="true"
 					>
 						<polyline points="20 6 9 17 4 12" />
 					</svg>
@@ -297,6 +294,7 @@ export function LessonPage({
 								strokeWidth="3"
 								strokeLinecap="round"
 								strokeLinejoin="round"
+								aria-hidden="true"
 							>
 								<polyline points="20 6 9 17 4 12" />
 							</svg>

@@ -1,6 +1,6 @@
+import { spawn } from "node:child_process";
 import { access } from "node:fs/promises";
 import path from "node:path";
-import { spawn } from "node:child_process";
 
 const VENV_PATH = path.join(process.cwd(), ".venv-video");
 const PYTHON_BIN = path.join(VENV_PATH, "bin", "python");

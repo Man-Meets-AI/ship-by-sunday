@@ -7,10 +7,10 @@ import { getFilledTableRows } from "../table";
 import { getFieldShapeVersion } from "./progression";
 import {
 	FIELD_SHAPE_VERSION_FIELD_ID,
+	type FieldValuesSource,
 	isUploadFieldValue,
 	isUploadFieldValueArray,
 	normalizeFieldValues,
-	type FieldValuesSource,
 	type PersistedFieldValues,
 } from "./shared";
 

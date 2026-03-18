@@ -35,6 +35,7 @@ export function ScopeListEditorCard({
 	onChange,
 }: ScopeListEditorCardProps) {
 	const rows = items.length > 0 ? items : [""];
+	const rowKeyCounts = new Map<string, number>();
 
 	const updateRow = (rowIndex: number, nextValue: string) => {
 		onChange(
@@ -83,30 +84,39 @@ export function ScopeListEditorCard({
 				</div>
 
 				<ol className="space-y-2">
-					{rows.map((item, index) => (
-						<li key={`${field.id}-${index}`} className="flex items-start gap-2">
-							<span className="inline-flex h-9 w-9 shrink-0 items-center justify-center border border-product-border bg-product-surface font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
-								{String(index + 1).padStart(2, "0")}
-							</span>
-							<div className="flex-1">
-								<input
-									type="text"
-									value={item}
-									onChange={(event) => updateRow(index, event.target.value)}
-									placeholder={rowPlaceholder}
-									className={rowInputClass}
-								/>
-							</div>
-							<button
-								type="button"
-								onClick={() => removeRow(index)}
-								className="inline-flex h-9 shrink-0 items-center border border-product-border bg-product-surface px-3 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent"
-								aria-label={`Remove ${field.label} item ${index + 1}`}
+					{rows.map((item, index) => {
+						const keyBase = item.trim().length > 0 ? item : "blank";
+						const occurrence = rowKeyCounts.get(keyBase) ?? 0;
+						rowKeyCounts.set(keyBase, occurrence + 1);
+
+						return (
+							<li
+								key={`${field.id}-${keyBase}-${occurrence}`}
+								className="flex items-start gap-2"
 							>
-								Remove
-							</button>
-						</li>
-					))}
+								<span className="inline-flex h-9 w-9 shrink-0 items-center justify-center border border-product-border bg-product-surface font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
+									{String(index + 1).padStart(2, "0")}
+								</span>
+								<div className="flex-1">
+									<input
+										type="text"
+										value={item}
+										onChange={(event) => updateRow(index, event.target.value)}
+										placeholder={rowPlaceholder}
+										className={rowInputClass}
+									/>
+								</div>
+								<button
+									type="button"
+									onClick={() => removeRow(index)}
+									className="inline-flex h-9 shrink-0 items-center border border-product-border bg-product-surface px-3 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent"
+									aria-label={`Remove ${field.label} item ${index + 1}`}
+								>
+									Remove
+								</button>
+							</li>
+						);
+					})}
 				</ol>
 
 				<div className="flex flex-wrap items-center gap-2">

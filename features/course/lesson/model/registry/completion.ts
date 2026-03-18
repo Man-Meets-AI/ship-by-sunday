@@ -13,12 +13,12 @@ import {
 	getWorkbenchSections,
 } from "./progression";
 import {
-	OBJECTIVE_CHECKLIST_FIELD_ID,
-	isChecklistItemArray,
-	isUploadFieldValueArray,
 	type ArtifactPreview,
 	type CompletionIssue,
 	type FieldValuesSource,
+	isChecklistItemArray,
+	isUploadFieldValueArray,
+	OBJECTIVE_CHECKLIST_FIELD_ID,
 	type ObjectiveTask,
 	type WorkbenchSectionState,
 } from "./shared";

@@ -203,10 +203,11 @@ export async function getEntitlementDebugHandler(
 	},
 ) {
 	if (args.stripeCheckoutSessionId) {
+		const stripeCheckoutSessionId = args.stripeCheckoutSessionId;
 		const entitlement = await ctx.db
 			.query("courseEntitlements")
 			.withIndex("by_stripe_checkout_session_id", (q) =>
-				q.eq("stripeCheckoutSessionId", args.stripeCheckoutSessionId!),
+				q.eq("stripeCheckoutSessionId", stripeCheckoutSessionId),
 			)
 			.unique();
 

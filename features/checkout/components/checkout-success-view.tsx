@@ -167,7 +167,6 @@ function getCheckoutHelpContent(
 					"Keep the success URL intact when testing the live handoff.",
 				],
 			};
-		case "missing_session_id":
 		default:
 			return {
 				title: "No checkout session attached",
@@ -324,7 +323,6 @@ function getCheckoutSessionCopy(
 					},
 				],
 			};
-		case "missing_session_id":
 		default:
 			return {
 				shellTitle: "Complete your access check",

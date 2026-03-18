@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 
 import { timingConfig } from "@/config/product";
-import { workbenchChromeLabelClass } from "@/features/course/lesson/workbench/shared/workbench-readability";
 import type { LessonPromptResourceContent } from "@/features/course/lesson/model/contracts";
 import { getPromptTemplateState } from "@/features/course/lesson/model/research-prompt";
+import { workbenchChromeLabelClass } from "@/features/course/lesson/workbench/shared/workbench-readability";
 
 import type { PinnedArtifact } from "./types";
 
@@ -27,10 +27,12 @@ export function CopyPromptResourceCard({
 		"idle",
 	);
 	const resetTimeoutRef = useRef<number | null>(null);
+	const promptResetKeyRef = useRef<string | null>(null);
 	const { prompt, disabledReason } = getPromptResourceState(
 		resource,
 		pinnedArtifacts,
 	);
+	const promptResetKey = `${prompt ?? ""}::${disabledReason ?? ""}`;
 
 	useEffect(() => {
 		return () => {
@@ -41,8 +43,13 @@ export function CopyPromptResourceCard({
 	}, []);
 
 	useEffect(() => {
+		if (promptResetKeyRef.current === promptResetKey) {
+			return;
+		}
+
+		promptResetKeyRef.current = promptResetKey;
 		setCopyState("idle");
-	}, [prompt, disabledReason]);
+	}, [promptResetKey]);
 
 	const copyPrompt = () => {
 		if (!prompt || disabledReason) {

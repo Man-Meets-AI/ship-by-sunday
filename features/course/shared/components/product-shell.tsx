@@ -1,24 +1,23 @@
 "use client";
 
 import { UserButton } from "@clerk/nextjs";
+import { useConvexAuth, useQuery } from "convex/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
-import { useConvexAuth, useQuery } from "convex/react";
 
 import { assetPaths, routeConfig } from "@/config/product";
-import { getLesson } from "@/features/course/lesson/model/manifest";
-import type { LessonLayoutMode } from "@/features/course/lesson/model/manifest";
 import { api } from "@/convex/_generated/api";
-import {
-	useProductTheme,
-} from "@/features/course/shared/components/product-theme-provider";
-import { ProductBrand } from "@/shared/branding/product-brand";
-import { getProductShellBlockNavigationTarget } from "@/features/course/shared/utils/product-shell-navigation";
+import type { LessonLayoutMode } from "@/features/course/lesson/model/manifest";
+import { getLesson } from "@/features/course/lesson/model/manifest";
+import { useProductTheme } from "@/features/course/shared/components/product-theme-provider";
 import {
 	SkillRail,
 	type SkillRailCompletionCue,
 } from "@/features/course/shared/components/skill-rail";
+import { getProductShellBlockNavigationTarget } from "@/features/course/shared/utils/product-shell-navigation";
+import { ProductBrand } from "@/shared/branding/product-brand";
+
 const navItems = [
 	{ href: "/artifacts", label: "Artifacts" },
 	{ href: "/settings", label: "Settings" },
@@ -277,6 +276,7 @@ function ShellInner({
 											strokeWidth="3"
 											strokeLinecap="round"
 											strokeLinejoin="round"
+											aria-hidden="true"
 										>
 											<polyline points="20 6 9 17 4 12" />
 										</svg>
@@ -295,6 +295,7 @@ function ShellInner({
 											strokeLinecap="round"
 											strokeLinejoin="round"
 											className="opacity-50"
+											aria-hidden="true"
 										>
 											<rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
 											<path d="M7 11V7a5 5 0 0 1 10 0v4" />
@@ -362,6 +363,7 @@ function ShellInner({
 								strokeWidth="2"
 								strokeLinecap="round"
 								strokeLinejoin="round"
+								aria-hidden="true"
 							>
 								<rect x="3" y="3" width="18" height="18" rx="2" />
 								<line x1="12" y1="3" x2="12" y2="21" />
@@ -387,6 +389,7 @@ function ShellInner({
 								strokeWidth="2"
 								strokeLinecap="round"
 								strokeLinejoin="round"
+								aria-hidden="true"
 							>
 								<rect x="3" y="3" width="18" height="18" rx="2" />
 							</svg>
@@ -414,6 +417,7 @@ function ShellInner({
 							strokeWidth="2"
 							strokeLinecap="round"
 							strokeLinejoin="round"
+							aria-hidden="true"
 						>
 							<rect x="3" y="4" width="18" height="16" rx="2" />
 							<line x1="8" y1="4" x2="8" y2="20" />
@@ -444,6 +448,7 @@ function ShellInner({
 							strokeWidth="2"
 							strokeLinecap="round"
 							strokeLinejoin="round"
+							aria-hidden="true"
 						>
 							<circle cx="12" cy="12" r="5" />
 							<line x1="12" y1="1" x2="12" y2="3" />
@@ -465,6 +470,7 @@ function ShellInner({
 							strokeWidth="2"
 							strokeLinecap="round"
 							strokeLinejoin="round"
+							aria-hidden="true"
 						>
 							<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
 						</svg>

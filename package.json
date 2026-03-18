@@ -12,6 +12,8 @@
 		"lint": "eslint . --max-warnings=0",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
+		"biome:check": "biome check .",
+		"biome:write": "biome check --write .",
 		"test:unit": "vitest run tests/unit",
 		"test:smoke": "vitest run tests/smoke",
 		"check": "pnpm run lint && pnpm run format:check && pnpm run test:unit && pnpm run test:smoke && pnpm run build",
@@ -25,6 +27,10 @@
 		"stripe:webhook:sync": "node --env-file=.env.local scripts/local-stripe-webhook.mjs sync",
 		"stripe:local:doctor": "node --env-file=.env.local scripts/local-stripe-doctor.mjs",
 		"stripe:local:verify": "node --env-file=.env.local scripts/verify-local-stripe-checkout.mjs",
+		"starter-repo:pending": "node --env-file=.env.local scripts/starter-repo-access.mjs pending",
+		"starter-repo:invite": "node --env-file=.env.local scripts/starter-repo-access.mjs invite",
+		"starter-repo:sync": "node --env-file=.env.local scripts/starter-repo-access.mjs sync",
+		"starter-repo:reset": "node --env-file=.env.local scripts/starter-repo-access.mjs reset",
 		"clerk:test-user:check": "node --env-file=.env.local scripts/ensure-clerk-test-user.mjs check",
 		"clerk:test-user:create": "node --env-file=.env.local scripts/ensure-clerk-test-user.mjs create",
 		"clerk:test-user:check:entitled": "CLERK_TEST_USER_SCOPE=ship-by-sunday-clerk-entitled node --env-file=.env.local scripts/ensure-clerk-test-user.mjs check",
@@ -45,6 +51,7 @@
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {
+		"@biomejs/biome": "^2.4.8",
 		"@convex-dev/eslint-plugin": "^1.1.1",
 		"@tailwindcss/postcss": "4.2.1",
 		"@types/node": "25.5.0",
@@ -60,7 +67,3 @@
 		"vitest": "^4.1.0"
 	}
 }
-		"starter-repo:pending": "node --env-file=.env.local scripts/starter-repo-access.mjs pending",
-		"starter-repo:invite": "node --env-file=.env.local scripts/starter-repo-access.mjs invite",
-		"starter-repo:sync": "node --env-file=.env.local scripts/starter-repo-access.mjs sync",
-		"starter-repo:reset": "node --env-file=.env.local scripts/starter-repo-access.mjs reset",

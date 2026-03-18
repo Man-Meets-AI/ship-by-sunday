@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CheckoutButton } from "@/features/checkout/components/checkout-button";
-import { ProductBrand } from "@/shared/branding/product-brand";
-import { homePageContent } from "@/features/marketing/content/home";
 import { routeConfig } from "@/config/product";
+import { CheckoutButton } from "@/features/checkout/components/checkout-button";
 import { redirectEntitledHomeVisitor } from "@/features/course/access/server/course-access";
+import { homePageContent } from "@/features/marketing/content/home";
+import { ProductBrand } from "@/shared/branding/product-brand";
 import {
 	PublicPageFrame,
 	PublicSurfaceCard,

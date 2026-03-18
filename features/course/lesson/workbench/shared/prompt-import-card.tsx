@@ -199,6 +199,8 @@ export function PromptImportCard({
 	const [showAssistTools, setShowAssistTools] = useState(
 		!uiCopy.collapsedByDefault,
 	);
+	const promptResetKeyRef = useRef<string | null>(null);
+	const promptResetKey = `${promptState.prompt ?? ""}::${promptState.disabledReason ?? ""}`;
 
 	useEffect(() => {
 		return () => {
@@ -209,9 +211,14 @@ export function PromptImportCard({
 	}, []);
 
 	useEffect(() => {
+		if (promptResetKeyRef.current === promptResetKey) {
+			return;
+		}
+
+		promptResetKeyRef.current = promptResetKey;
 		setCopyState("idle");
 		setImportFeedback(null);
-	}, [promptState.prompt, promptState.disabledReason]);
+	}, [promptResetKey]);
 
 	useEffect(() => {
 		if (pastedResponse.trim().length > 0) {

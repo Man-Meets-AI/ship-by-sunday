@@ -1,7 +1,7 @@
 import {
 	brandColorConfig,
 	productThemeConfig,
-	productThemePalettes,
+	type productThemePalettes,
 } from "@/config/product";
 
 export type ProductTheme = "dark" | "light";

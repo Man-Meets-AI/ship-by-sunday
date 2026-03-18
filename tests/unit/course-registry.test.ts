@@ -1,10 +1,10 @@
 import {
 	getCompletionIssues,
 	getLessonById,
+	getObjectiveTasks,
 	getStudentFacingLessons,
 	getUnlockedBlockIds,
 	getUnlockedLessonIds,
-	getObjectiveTasks,
 	lessonRegistry,
 } from "@/features/course/lesson/model";
 
@@ -113,23 +113,26 @@ describe("course registry", () => {
 		for (const lessonId of ["1.0", "2.0", "3.0", "3.16", "4.0"]) {
 			const lesson = getLessonById(lessonId);
 			expect(lesson).toBeTruthy();
-			expect(lesson?.shell).toBe("watch");
-			expect(lesson?.workbench).toBe("external_workspace");
-			expect(lesson?.workbenchFields ?? []).toEqual([]);
-			expect(lesson?.requireReadyVideoForCompletion).toBe(true);
-			expect(lesson?.content.coach.video).toMatchObject({
+			if (!lesson) {
+				throw new Error(`Expected lesson ${lessonId} to exist.`);
+			}
+			expect(lesson.shell).toBe("watch");
+			expect(lesson.workbench).toBe("external_workspace");
+			expect(lesson.workbenchFields ?? []).toEqual([]);
+			expect(lesson.requireReadyVideoForCompletion).toBe(true);
+			expect(lesson.content.coach.video).toMatchObject({
 				status: "ready",
 				provider: "bunny",
 				libraryId: 619172,
 			});
-			expect(getObjectiveTasks(lesson!, {})).toEqual([
+			expect(getObjectiveTasks(lesson, {})).toEqual([
 				expect.objectContaining({
 					id: "__coach_video_ready",
 					label: "Lesson video is attached and ready",
 					status: "complete",
 				}),
 			]);
-			expect(getCompletionIssues(lesson!, {})).toEqual([]);
+			expect(getCompletionIssues(lesson, {})).toEqual([]);
 		}
 	});
 });

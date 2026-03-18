@@ -1,9 +1,8 @@
 import { notFound, redirect } from "next/navigation";
-
-import { LessonPage } from "@/features/course/lesson/components/lesson-page";
-import { getLegacyLessonRedirect } from "@/features/course/lesson/utils/legacy-routes";
-import { getLesson } from "@/features/course/lesson/model";
 import { requireCourseAccess } from "@/features/course/access/server/course-access";
+import { LessonPage } from "@/features/course/lesson/components/lesson-page";
+import { getLesson } from "@/features/course/lesson/model";
+import { getLegacyLessonRedirect } from "@/features/course/lesson/utils/legacy-routes";
 
 export default async function Page({
 	params,
@@ -23,10 +22,5 @@ export default async function Page({
 		notFound();
 	}
 
-	return (
-		<LessonPage
-			key={lessonId}
-			lessonId={lessonId}
-		/>
-	);
+	return <LessonPage key={lessonId} lessonId={lessonId} />;
 }

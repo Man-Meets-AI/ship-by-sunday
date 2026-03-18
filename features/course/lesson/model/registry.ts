@@ -10,6 +10,7 @@ export {
 	isLessonFieldShapeCompatible,
 	normalizeLessonFieldValues,
 } from "./registry/legacy";
+export { prepareFieldValuesForPersistence } from "./registry/persistence";
 export {
 	getBlockById,
 	getCandidateProblemOptions,
@@ -22,17 +23,16 @@ export {
 	getWorkbenchSections,
 	isLessonImplemented,
 } from "./registry/progression";
-export { prepareFieldValuesForPersistence } from "./registry/persistence";
 export {
+	type ArtifactPreview,
+	type CandidateProblemOption,
 	COURSE_SLUG,
-	OBJECTIVE_CHECKLIST_FIELD_ID,
+	type CompletionIssue,
 	isChecklistItemArray,
 	isUploadFieldValue,
 	isUploadFieldValueArray,
 	normalizeFieldValues,
-	type ArtifactPreview,
-	type CandidateProblemOption,
-	type CompletionIssue,
+	OBJECTIVE_CHECKLIST_FIELD_ID,
 	type ObjectiveTask,
 	type PersistedFieldValue,
 	type PersistedFieldValues,

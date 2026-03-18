@@ -1,7 +1,7 @@
 export * from "./contracts";
 
 import { routeConfig } from "@/config/product";
-import type { BlockConfig, LessonLayoutMode, LessonConfig } from "./contracts";
+import type { BlockConfig, LessonConfig, LessonLayoutMode } from "./contracts";
 import { buildLessons } from "./lessons/build";
 import { ceoLessons } from "./lessons/ceo";
 import { designLessons } from "./lessons/design";

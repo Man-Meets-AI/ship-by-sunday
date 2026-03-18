@@ -3,8 +3,8 @@ import {
 	getSkillRailShortcutDirection,
 	isEditableShortcutTarget,
 	isInteractiveShortcutTarget,
-	shouldHandleSkillRailShortcut,
 	type SkillRailLesson,
+	shouldHandleSkillRailShortcut,
 } from "@/features/course/shared/utils/skill-rail-navigation";
 
 const sampleLessons: SkillRailLesson[] = [

@@ -30,16 +30,19 @@ describe("watch lesson contract", () => {
 		for (const lessonId of ["1.0", "2.1", "3.0", "3.8", "4.0"]) {
 			const lesson = getLessonById(lessonId);
 			expect(lesson).toBeTruthy();
+			if (!lesson) {
+				throw new Error(`Expected lesson ${lessonId} to exist.`);
+			}
 
-			expect(lesson?.workbenchFields ?? []).toEqual([]);
-			expect(getObjectiveTasks(lesson!, {})).toEqual([
+			expect(lesson.workbenchFields ?? []).toEqual([]);
+			expect(getObjectiveTasks(lesson, {})).toEqual([
 				expect.objectContaining({
 					id: "__coach_video_ready",
 					label: "Lesson video is attached and ready",
 					status: "complete",
 				}),
 			]);
-			expect(getCompletionIssues(lesson!, {})).toEqual([]);
+			expect(getCompletionIssues(lesson, {})).toEqual([]);
 		}
 	});
 

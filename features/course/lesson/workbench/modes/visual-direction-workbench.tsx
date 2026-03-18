@@ -1,9 +1,9 @@
 import { LessonVideoSurface } from "@/features/course/lesson/components/lesson-video-surface";
 
 import { FieldControl } from "../fields/field-control";
+import { ArtifactContext } from "../shared/artifact-context";
 import { PromptImportCard } from "../shared/prompt-import-card";
 import { StatusRail } from "../shared/status-rail";
-import { ArtifactContext } from "../shared/artifact-context";
 import { WorkbenchCard } from "../shared/workbench-card";
 import { WorkbenchContainer } from "../shared/workbench-container";
 import { WorkbenchHeader } from "../shared/workbench-header";

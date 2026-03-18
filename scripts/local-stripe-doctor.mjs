@@ -1,5 +1,5 @@
-import { access, readFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
+import { access, readFile } from "node:fs/promises";
 import net from "node:net";
 import path from "node:path";
 import Stripe from "stripe";
@@ -118,8 +118,8 @@ async function getStripeCliConfig() {
 		}, {});
 
 	return {
-		accountId: values["account_id"] ?? null,
-		displayName: values["display_name"] ?? null,
+		accountId: values.account_id ?? null,
+		displayName: values.display_name ?? null,
 	};
 }
 

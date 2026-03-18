@@ -26,9 +26,7 @@ export function PublicPageFrame({
 		<main className={`bg-product-bg text-product-text ${className}`.trim()}>
 			<div
 				className={`mx-auto flex min-h-screen w-full ${maxWidthClassName} px-3 py-3 sm:px-5 sm:py-5 ${
-					centerContent
-						? "items-center justify-center"
-						: "flex-col gap-4"
+					centerContent ? "items-center justify-center" : "flex-col gap-4"
 				} ${contentClassName}`.trim()}
 			>
 				{children}

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { useMutation } from "convex/react";
+import { useEffect, useRef, useState } from "react";
 
 import { api } from "@/convex/_generated/api";
 import type {
@@ -274,7 +274,6 @@ export function ReferenceGalleryFieldControl({
 			/>
 
 			<div
-				role="button"
 				tabIndex={0}
 				onFocus={() => setPasteArmed(true)}
 				onBlur={() => setPasteArmed(false)}
@@ -375,10 +374,16 @@ export function ReferenceGalleryFieldControl({
 							</div>
 							<LayoutGrid
 								items={galleryValue.items
-									.filter((item) => Boolean(item.url))
+									.filter(
+										(
+											item,
+										): item is typeof item & {
+											url: string;
+										} => Boolean(item.url),
+									)
 									.map((item) => ({
 										id: item.id,
-										src: item.url!,
+										src: item.url,
 										alt: item.fileName ?? "Saved reference",
 										onRemove: () => removeItem(item.id),
 									}))}

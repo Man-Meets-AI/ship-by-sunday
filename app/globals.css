@@ -14,7 +14,11 @@ body {
 			transparent calc(50% + 1px)
 		),
 		linear-gradient(rgb(var(--product-border) / 0.06) 1px, transparent 1px),
-		linear-gradient(90deg, rgb(var(--product-border) / 0.06) 1px, transparent 1px),
+		linear-gradient(
+			90deg,
+			rgb(var(--product-border) / 0.06) 1px,
+			transparent 1px
+		),
 		rgb(var(--product-bg));
 	background-size:
 		100% 100%,

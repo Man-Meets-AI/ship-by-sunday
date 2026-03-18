@@ -1,4 +1,9 @@
-import { formatArtifactValue } from "@/features/course/lesson/workbench/shared/artifact-format";
+import {
+	formatTablePreview,
+	getFilledTableRows,
+	getLabeledTableRows,
+	getTableRows,
+} from "@/features/course/lesson/model/table";
 import {
 	getUploadMetadata,
 	getUploadMetadataList,
@@ -13,12 +18,7 @@ import {
 	removeSketchUploadAt,
 	replaceSketchUploads,
 } from "@/features/course/lesson/workbench/modes/sketch-upload-workbench";
-import {
-	formatTablePreview,
-	getFilledTableRows,
-	getLabeledTableRows,
-	getTableRows,
-} from "@/features/course/lesson/model/table";
+import { formatArtifactValue } from "@/features/course/lesson/workbench/shared/artifact-format";
 
 describe("lesson workbench helpers", () => {
 	it("round-trips line-list values", () => {

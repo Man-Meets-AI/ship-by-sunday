@@ -1,6 +1,6 @@
+import type { WorkbenchField } from "@/features/course/lesson/model/contracts";
 import { CheckboxRow } from "@/features/course/lesson/workbench/fields/checkbox-row";
 import { normalizeChecklistValue } from "@/features/course/lesson/workbench/fields/value-codecs";
-import type { WorkbenchField } from "@/features/course/lesson/model/contracts";
 
 import { WorkbenchCard } from "../../shared/workbench-card";
 

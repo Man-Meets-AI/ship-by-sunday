@@ -1,5 +1,5 @@
-import type { PinnedArtifact } from "@/features/course/lesson/shells";
 import { CORE_FLOW_IMAGE_FIELD_ID } from "@/features/course/lesson/model/core-flow";
+import type { PinnedArtifact } from "@/features/course/lesson/shells";
 
 export const SCOPE_SOURCE_FIELD_ID = "__scope_boundary_source";
 

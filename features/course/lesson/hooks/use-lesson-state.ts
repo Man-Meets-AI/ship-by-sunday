@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
+import { useEffect, useRef, useState } from "react";
 
 import { timingConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
-import type { PinnedArtifact } from "@/features/course/lesson/shells";
 import type {
 	PersistedFieldValue,
 	PersistedFieldValues,
 } from "@/features/course/lesson/model/registry";
+import type { PinnedArtifact } from "@/features/course/lesson/shells";
 
 type UnlockedLessonState = {
 	accessStatus: "unlocked";
@@ -40,8 +40,14 @@ export function useLessonState({ lessonId }: { lessonId: string }) {
 	const initializedForLessonId = useRef<string | null>(null);
 	const lastMarkedLessonId = useRef<string | null>(null);
 	const lastSavedSnapshot = useRef("");
+	const activeLessonIdRef = useRef(lessonId);
 
 	useEffect(() => {
+		if (activeLessonIdRef.current === lessonId) {
+			return;
+		}
+
+		activeLessonIdRef.current = lessonId;
 		setFieldValuesReady(false);
 	}, [lessonId]);
 

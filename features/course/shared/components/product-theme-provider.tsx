@@ -3,9 +3,9 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 import {
-	PRODUCT_THEME_STORAGE_KEY,
 	getProductThemeCookieString,
 	isProductTheme,
+	PRODUCT_THEME_STORAGE_KEY,
 	type ProductTheme,
 } from "@/features/course/shared/utils/product-theme";
 

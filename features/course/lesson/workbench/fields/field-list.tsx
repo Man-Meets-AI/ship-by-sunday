@@ -1,5 +1,5 @@
-import type { PinnedArtifact } from "@/features/course/lesson/shells";
 import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
+import type { PinnedArtifact } from "@/features/course/lesson/shells";
 
 import { FieldControl } from "./field-control";
 

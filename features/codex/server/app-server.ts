@@ -1,4 +1,4 @@
-import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
+import { type ChildProcessWithoutNullStreams, spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
@@ -169,7 +169,7 @@ function isCodexAppServerEnabled() {
 		return false;
 	}
 
-	return !Boolean(process.env.VERCEL);
+	return !process.env.VERCEL;
 }
 
 export function getCodexAppServerUnavailableMessage() {
@@ -347,7 +347,17 @@ export class CodexAppServerClient {
 				timeout,
 			});
 
-			this.child!.stdin.write(payload, (error) => {
+			const child = this.child;
+			if (!child) {
+				clearTimeout(timeout);
+				this.pending.delete(id);
+				reject(
+					new Error("Codex app-server exited before the request was sent."),
+				);
+				return;
+			}
+
+			child.stdin.write(payload, (error) => {
 				if (!error) {
 					return;
 				}

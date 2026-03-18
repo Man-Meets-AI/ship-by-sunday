@@ -2,8 +2,6 @@ import Link from "next/link";
 
 import { LessonVideoSurface } from "@/features/course/lesson/components/lesson-video-surface";
 import type { LessonResourceContent } from "@/features/course/lesson/model/manifest";
-
-import type { WorkbenchModeProps } from "../types";
 import { FieldList } from "../fields/field-list";
 import { ArtifactContext } from "../shared/artifact-context";
 import { StatusRail } from "../shared/status-rail";
@@ -11,6 +9,7 @@ import { WorkbenchCard } from "../shared/workbench-card";
 import { WorkbenchContainer } from "../shared/workbench-container";
 import { WorkbenchHeader } from "../shared/workbench-header";
 import { workbenchChromeLabelClass } from "../shared/workbench-readability";
+import type { WorkbenchModeProps } from "../types";
 
 export function ExternalWorkspaceWorkbench({
 	lesson,

@@ -1,6 +1,6 @@
+import { spawn } from "node:child_process";
 import { access, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { spawn } from "node:child_process";
 import Stripe from "stripe";
 
 const WEBHOOK_ENV_KEY = "STRIPE_WEBHOOK_SECRET";
@@ -13,7 +13,9 @@ const CONVEX_BIN_PATH = path.join(
 	"bin",
 	"main.js",
 );
-const ANSI_ESCAPE_PATTERN = /\u001B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])/g;
+const ANSI_ESCAPE_PATTERN_SOURCE =
+	"\\u001B(?:[@-Z\\\\-_]|\\[[0-?]*[ -/]*[@-~])";
+const ANSI_ESCAPE_PATTERN = new RegExp(ANSI_ESCAPE_PATTERN_SOURCE, "g");
 
 function stripAnsi(value) {
 	return value.replaceAll(ANSI_ESCAPE_PATTERN, "");

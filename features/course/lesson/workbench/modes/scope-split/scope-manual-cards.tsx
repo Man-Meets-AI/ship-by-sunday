@@ -1,10 +1,9 @@
+import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
+import type { PinnedArtifact } from "@/features/course/lesson/shells";
 import { FieldList } from "../../fields/field-list";
 import { ScopeListEditorCard } from "./scope-list-editor-card";
 import { ScopeRationaleCard } from "./scope-rationale-card";
 import { getScopeItems } from "./scope-split-state";
-
-import type { PinnedArtifact } from "@/features/course/lesson/shells";
-import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
 
 type ScopeManualCardsProps = {
 	keepField?: WorkbenchField;

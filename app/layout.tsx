@@ -1,16 +1,16 @@
-import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import type { Metadata } from "next";
 import { Bebas_Neue, Manrope } from "next/font/google";
 import "@xyflow/react/dist/style.css";
 
-import { ConvexClientProvider } from "@/platform/convex/convex-client-provider";
 import { manifestConfig, productConfig } from "@/config/product";
 import { ProductThemeProvider } from "@/features/course/shared/components/product-theme-provider";
+import { getInitialProductTheme } from "@/features/course/shared/server/product-theme";
 import {
 	getProductThemeBootstrapScript,
 	getProductThemeTokenStyles,
 } from "@/features/course/shared/utils/product-theme";
-import { getInitialProductTheme } from "@/features/course/shared/server/product-theme";
+import { ConvexClientProvider } from "@/platform/convex/convex-client-provider";
 
 import "./globals.css";
 
@@ -51,16 +51,8 @@ export default async function RootLayout({
 			className={`${display.variable} ${sans.variable} ${initialTheme}`}
 		>
 			<head>
-				<style
-					dangerouslySetInnerHTML={{
-						__html: getProductThemeTokenStyles(),
-					}}
-				/>
-				<script
-					dangerouslySetInnerHTML={{
-						__html: getProductThemeBootstrapScript(),
-					}}
-				/>
+				<style>{getProductThemeTokenStyles()}</style>
+				<script>{getProductThemeBootstrapScript()}</script>
 			</head>
 			<body>
 				<ClerkProvider>

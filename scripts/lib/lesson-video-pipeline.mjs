@@ -1,9 +1,9 @@
-import { createWriteStream, openAsBlob } from "node:fs";
 import { spawn } from "node:child_process";
+import { createWriteStream, openAsBlob } from "node:fs";
 import {
 	mkdir,
-	readFile,
 	readdir,
+	readFile,
 	rename,
 	stat,
 	writeFile,
@@ -868,13 +868,14 @@ async function getAvailableProcessedPath(fileName, runId) {
 	return path.join(PROCESSED_DIRECTORY, `${runId}--${fileName}`);
 }
 
-function runCurlUpload({ apiKey, libraryId, videoId, filePath }) {
-	return new Promise(async (resolve, reject) => {
-		const uploadUrl = `https://video.bunnycdn.com/library/${libraryId}/videos/${videoId}`;
-		const fileStats = await stat(filePath);
-		console.log(
-			`Uploading ${path.basename(filePath)} to Bunny (${formatBytes(fileStats.size)})...`,
-		);
+async function runCurlUpload({ apiKey, libraryId, videoId, filePath }) {
+	const uploadUrl = `https://video.bunnycdn.com/library/${libraryId}/videos/${videoId}`;
+	const fileStats = await stat(filePath);
+	console.log(
+		`Uploading ${path.basename(filePath)} to Bunny (${formatBytes(fileStats.size)})...`,
+	);
+
+	return await new Promise((resolve, reject) => {
 		const child = spawn("curl", [
 			"--fail",
 			"--progress-bar",

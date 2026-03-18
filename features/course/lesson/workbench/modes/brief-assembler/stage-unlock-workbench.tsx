@@ -2,11 +2,10 @@ import type { CSSProperties } from "react";
 
 import { LessonVideoSurface } from "@/features/course/lesson/components/lesson-video-surface";
 import type { StageUnlockSection } from "@/features/course/lesson/model/stage-unlock";
-
-import type { WorkbenchModeProps } from "../../types";
 import { WorkbenchCard } from "../../shared/workbench-card";
 import { WorkbenchContainer } from "../../shared/workbench-container";
 import { workbenchChromeLabelClass } from "../../shared/workbench-readability";
+import type { WorkbenchModeProps } from "../../types";
 import { StageUnlockBridgeCard } from "./stage-unlock-bridge-card";
 import { StageUnlockReviewCard } from "./stage-unlock-review-card";
 import { StageUnlockSectionCard } from "./stage-unlock-section-card";

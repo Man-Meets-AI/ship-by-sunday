@@ -13,10 +13,10 @@ describe("phase 1 motion contract", () => {
 		);
 
 		expect(themeSource).toContain(
-			'"--motion-fast": `${productThemeConfig.motion.fastMs}ms`',
+			`"--motion-fast": \`\${productThemeConfig.motion.fastMs}ms\``,
 		);
 		expect(themeSource).toContain(
-			'"--motion-base": `${productThemeConfig.motion.baseMs}ms`',
+			`"--motion-base": \`\${productThemeConfig.motion.baseMs}ms\``,
 		);
 		expect(themeSource).toContain(
 			'"--ease-standard": productThemeConfig.motion.easeStandard',

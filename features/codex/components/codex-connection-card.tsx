@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { apiRouteConfig } from "@/config/product";
 
@@ -157,7 +157,7 @@ export function CodexConnectionCard() {
 		return [rateLimits.rateLimits];
 	}, [rateLimits]);
 
-	async function loadConnection() {
+	const loadConnection = useCallback(async () => {
 		setIsLoading(true);
 		setFeedback(null);
 
@@ -196,7 +196,7 @@ export function CodexConnectionCard() {
 		} finally {
 			setIsLoading(false);
 		}
-	}
+	}, []);
 
 	async function startManagedLogin() {
 		setIsStartingLogin(true);
@@ -376,7 +376,7 @@ export function CodexConnectionCard() {
 
 	useEffect(() => {
 		void loadConnection();
-	}, []);
+	}, [loadConnection]);
 
 	return (
 		<section className="rounded-none border border-product-border bg-product-surface/78 p-5 shadow-panel backdrop-blur-xl">

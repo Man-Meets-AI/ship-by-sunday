@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { MoonIcon, SunIcon } from "nextra/icons";
 import { useTheme } from "nextra-theme-docs";
+import { useEffect, useState } from "react";
 
 import {
 	getProductThemeCookieString,

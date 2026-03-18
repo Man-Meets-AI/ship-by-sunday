@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useMemo } from "react";
 
 import { getLessonHref } from "@/features/course/lesson/model/manifest";
 import {
 	getSkillRailNavigation,
 	getSkillRailShortcutDirection,
-	shouldHandleSkillRailShortcut,
 	type SkillRailLesson,
 	type SkillRailNavigationTarget,
+	shouldHandleSkillRailShortcut,
 } from "@/features/course/shared/utils/skill-rail-navigation";
 
 export type SkillRailCompletionCue = {
@@ -92,6 +92,7 @@ function RailStepIcon({ state }: { state: RailStepState }) {
 					strokeWidth="2"
 					strokeLinecap="round"
 					strokeLinejoin="round"
+					aria-hidden="true"
 				>
 					<polyline points="2 6.5 4.5 9 10 3.5" />
 				</svg>
@@ -114,6 +115,7 @@ function RailStepIcon({ state }: { state: RailStepState }) {
 					strokeWidth="2"
 					strokeLinecap="round"
 					strokeLinejoin="round"
+					aria-hidden="true"
 				>
 					<rect x="4.5" y="10" width="15" height="10" rx="2" />
 					<path d="M8 10V7a4 4 0 0 1 8 0v3" />

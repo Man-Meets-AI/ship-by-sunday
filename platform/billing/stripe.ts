@@ -1,8 +1,8 @@
 import Stripe from "stripe";
 
 import { apiConfig, productConfig } from "@/config/product";
-import { requireServerEnv, serverEnv } from "@/platform/env/server";
 import { COURSE_SLUG } from "@/features/course/lesson/model/registry";
+import { requireServerEnv, serverEnv } from "@/platform/env/server";
 
 export const STRIPE_API_VERSION = apiConfig.stripeApiVersion;
 

@@ -33,6 +33,16 @@ function getDraftRows(value: unknown, columns: TableColumnConfig[]) {
 	return rows.length > 0 ? rows : [createEmptyTableRow(columns)];
 }
 
+function getStableOccurrenceKey(
+	prefix: string,
+	signature: string,
+	counts: Map<string, number>,
+) {
+	const occurrence = counts.get(signature) ?? 0;
+	counts.set(signature, occurrence + 1);
+	return `${prefix}-${signature}-${occurrence}`;
+}
+
 function TableCellControl({
 	field,
 	column,
@@ -93,6 +103,12 @@ export function EditableTableField({
 }) {
 	const columns = field.columns ?? [];
 	const draftRows = getDraftRows(value, columns);
+	const rowKeyCounts = new Map<string, number>();
+	const rowEntries = draftRows.map((row, rowIndex) => ({
+		row,
+		rowIndex,
+		rowKey: getStableOccurrenceKey(field.id, JSON.stringify(row), rowKeyCounts),
+	}));
 
 	function updateRows(nextRows: string[][]) {
 		onChange(nextRows);
@@ -153,9 +169,9 @@ export function EditableTableField({
 							</tr>
 						</thead>
 						<tbody>
-							{draftRows.map((row, rowIndex) => (
+							{rowEntries.map(({ row, rowIndex, rowKey }) => (
 								<tr
-									key={`${field.id}-row-${rowIndex}`}
+									key={rowKey}
 									className="border-b border-product-border/70 last:border-b-0"
 								>
 									{columns.map((column, columnIndex) => (
@@ -190,9 +206,9 @@ export function EditableTableField({
 					</table>
 				</div>
 				<div className="space-y-3 md:hidden">
-					{draftRows.map((row, rowIndex) => (
+					{rowEntries.map(({ row, rowIndex, rowKey }) => (
 						<div
-							key={`${field.id}-mobile-row-${rowIndex}`}
+							key={`mobile-${rowKey}`}
 							className="rounded-none border border-product-border/80 bg-product-surface p-3"
 						>
 							<div className="mb-3 flex items-center justify-between gap-3">
@@ -210,7 +226,7 @@ export function EditableTableField({
 							</div>
 							<div className="space-y-3">
 								{columns.map((column, columnIndex) => (
-									<label key={column.id} className="block">
+									<div key={column.id} className="block">
 										<span className={fieldLabelClass}>{column.label}</span>
 										<div className="mt-1.5 rounded-none border border-product-border/80 bg-product-surface-strong/70">
 											<TableCellControl
@@ -223,7 +239,7 @@ export function EditableTableField({
 												}
 											/>
 										</div>
-									</label>
+									</div>
 								))}
 							</div>
 						</div>

@@ -21,16 +21,17 @@ export default function Page() {
 						No charge was completed
 					</h1>
 					<p className="mt-4 max-w-2xl text-sm leading-relaxed text-product-muted">
-						You can return to the offer, review the pricing, and restart checkout
-						whenever you are ready. Nothing was charged from this canceled flow.
+						You can return to the offer, review the pricing, and restart
+						checkout whenever you are ready. Nothing was charged from this
+						canceled flow.
 					</p>
 					<div className="mt-7 border border-product-border/55 bg-product-surface-strong/72 p-4">
 						<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
 							Next step
 						</p>
 						<p className="mt-3 max-w-2xl text-sm leading-relaxed text-product-text">
-							Go back to pricing if you still want Ship by Sunday, or return home
-							if you were just checking the offer.
+							Go back to pricing if you still want Ship by Sunday, or return
+							home if you were just checking the offer.
 						</p>
 						<div className="mt-4 flex flex-wrap gap-2.5">
 							<Link

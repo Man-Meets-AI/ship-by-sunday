@@ -4,9 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 
 import {
 	getDefaultLayoutModeForLesson,
-	normalizeLayoutModeForLesson,
 	type LessonConfig,
 	type LessonLayoutMode,
+	normalizeLayoutModeForLesson,
 } from "@/features/course/lesson/model/manifest";
 import type { CoachPanelKey } from "@/features/course/lesson/shells";
 

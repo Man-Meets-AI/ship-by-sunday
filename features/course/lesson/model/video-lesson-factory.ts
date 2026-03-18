@@ -1,7 +1,7 @@
 import { createPendingLessonCoach } from "./content-helpers";
 import {
-	focusPanelDefaults,
 	type BlockId,
+	focusPanelDefaults,
 	type LessonConfig,
 	type LessonUnlockTargets,
 } from "./contracts";

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { routeConfig, timingConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
@@ -142,6 +142,7 @@ export function useLessonCompletion({
 		string | null
 	>(null);
 	const completionTimeoutRef = useRef<number | null>(null);
+	const activeLessonIdRef = useRef(lessonId);
 
 	useEffect(
 		() => () => {
@@ -153,6 +154,11 @@ export function useLessonCompletion({
 	);
 
 	useEffect(() => {
+		if (activeLessonIdRef.current === lessonId) {
+			return;
+		}
+
+		activeLessonIdRef.current = lessonId;
 		setCompletionPhase("idle");
 		setCompletionPayload(null);
 		setServerCompletionIssues([]);

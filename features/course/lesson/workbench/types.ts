@@ -1,6 +1,4 @@
 import type { ReactElement } from "react";
-
-import type { PinnedArtifact } from "@/features/course/lesson/shells";
 import type {
 	LessonConfig,
 	LessonContent,
@@ -13,6 +11,7 @@ import type {
 	WorkbenchSectionState,
 } from "@/features/course/lesson/model/registry";
 import type { StageUnlockSummary } from "@/features/course/lesson/model/stage-unlock";
+import type { PinnedArtifact } from "@/features/course/lesson/shells";
 
 export type WorkbenchRendererProps = {
 	lesson: LessonConfig;

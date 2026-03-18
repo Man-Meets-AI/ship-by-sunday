@@ -5,18 +5,18 @@ import {
 } from "../reference-gallery";
 import { buildStageUnlockSummary } from "../stage-unlock";
 import { formatTablePreview } from "../table";
-import { normalizeLessonFieldValues } from "./legacy";
 import { isFilled } from "./completion";
+import { normalizeLessonFieldValues } from "./legacy";
 import { getRequiredFields } from "./progression";
 import {
-	PRIVATE_FIELD_PREFIX,
+	type ArtifactPreview,
+	type FieldValuesSource,
 	isChecklistItemArray,
 	isUploadFieldValue,
 	isUploadFieldValueArray,
-	type ArtifactPreview,
-	type FieldValuesSource,
 	type PersistedFieldValue,
 	type PersistedFieldValues,
+	PRIVATE_FIELD_PREFIX,
 } from "./shared";
 
 function hasOwnArtifactFields(lesson: LessonConfig) {

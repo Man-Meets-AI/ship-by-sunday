@@ -2,6 +2,7 @@ import { PromptImportCard } from "../shared/prompt-import-card";
 import { StatusRail } from "../shared/status-rail";
 import { WorkbenchContainer } from "../shared/workbench-container";
 import { WorkbenchHeader } from "../shared/workbench-header";
+import type { WorkbenchModeProps } from "../types";
 import { ScopeContextCard } from "./scope-split/scope-context-card";
 import { ScopeManualCards } from "./scope-split/scope-manual-cards";
 import { ScopeOverviewCard } from "./scope-split/scope-overview-card";
@@ -15,8 +16,6 @@ import {
 	SCOPE_SOURCE_FIELD_ID,
 	shouldPreserveImportedScopeSource,
 } from "./scope-split/scope-split-state";
-
-import type { WorkbenchModeProps } from "../types";
 
 export function ScopeSplitWorkbench({
 	lesson,

@@ -1,0 +1,61 @@
+{
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+	"files": {
+		"ignoreUnknown": true,
+		"includes": [
+			"app/**",
+			"config/**",
+			"convex/**",
+			"features/**",
+			"platform/**",
+			"scripts/**",
+			"shared/**",
+			"tests/**",
+			"package.json",
+			"eslint.config.mjs",
+			"next-env.d.ts",
+			"next.config.ts",
+			"!convex/_generated",
+			"!scripts/vendor"
+		]
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "tab"
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"a11y": {
+				"noNoninteractiveTabindex": "off",
+				"noStaticElementInteractions": "off",
+				"useMediaCaption": "off"
+			},
+			"complexity": {
+				"noImportantStyles": "off"
+			},
+			"performance": {
+				"noImgElement": "off"
+			},
+			"suspicious": {
+				"noDocumentCookie": "off"
+			}
+		}
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "double",
+			"jsxQuoteStyle": "double"
+		}
+	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
+		}
+	}
+}

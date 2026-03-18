@@ -1,10 +1,13 @@
 import { ConvexError } from "convex/values";
-
-import type { Id } from "../_generated/dataModel";
 import type { LessonConfig } from "../../features/course/lesson/model/contracts";
 import {
-	COURSE_SLUG,
+	hydrateReferenceGalleryValue,
+	isReferenceGalleryValue,
+} from "../../features/course/lesson/model/reference-gallery";
+import {
+	type ArtifactPreview,
 	buildResolvedArtifactPreview,
+	COURSE_SLUG,
 	getLessonByArtifactKey,
 	getLessonById,
 	getUnlockedLessonIds,
@@ -13,19 +16,15 @@ import {
 	isUploadFieldValueArray,
 	normalizeFieldValues,
 	normalizeLessonFieldValues,
-	prepareFieldValuesForPersistence,
-	type ArtifactPreview,
 	type PersistedFieldValues,
+	prepareFieldValuesForPersistence,
 } from "../../features/course/lesson/model/registry";
-import {
-	hydrateReferenceGalleryValue,
-	isReferenceGalleryValue,
-} from "../../features/course/lesson/model/reference-gallery";
+import type { Id } from "../_generated/dataModel";
 import { requireActiveEntitlement } from "./entitlements";
 import type {
 	CourseMutationCtx,
-	CourseReadCtx,
 	CourseQueryCtx,
+	CourseReadCtx,
 	LessonStateDoc,
 } from "./types";
 

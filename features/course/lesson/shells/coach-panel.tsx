@@ -1,16 +1,16 @@
 import Link from "next/link";
 
 import { LessonVideoSurface } from "@/features/course/lesson/components/lesson-video-surface";
-import { formatArtifactValue } from "@/features/course/lesson/workbench/shared/artifact-format";
-import {
-	workbenchChromeLabelClass,
-	workbenchPanelClass,
-} from "@/features/course/lesson/workbench/shared/workbench-readability";
 import type { LessonResourceContent } from "@/features/course/lesson/model/contracts";
 import type {
 	LessonConfig,
 	LessonContent,
 } from "@/features/course/lesson/model/manifest";
+import { formatArtifactValue } from "@/features/course/lesson/workbench/shared/artifact-format";
+import {
+	workbenchChromeLabelClass,
+	workbenchPanelClass,
+} from "@/features/course/lesson/workbench/shared/workbench-readability";
 
 import { CopyPromptResourceCard } from "./copy-prompt-resource-card";
 import type { CoachPanelKey, PinnedArtifact } from "./types";

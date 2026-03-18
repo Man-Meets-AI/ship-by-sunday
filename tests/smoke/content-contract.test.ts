@@ -2,13 +2,13 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { productConfig } from "@/config/product";
-import { homePageContent } from "@/features/marketing/content/home";
-import { legacyLessonRedirects } from "@/features/course/lesson/utils/legacy-routes";
 import {
 	getLessonById,
 	getStudentFacingLessons,
 	lessonRegistry,
 } from "@/features/course/lesson/model";
+import { legacyLessonRedirects } from "@/features/course/lesson/utils/legacy-routes";
+import { homePageContent } from "@/features/marketing/content/home";
 
 describe("lesson content contract", () => {
 	it("keeps unique slugs and embedded content on every lesson", () => {

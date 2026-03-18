@@ -43,6 +43,8 @@ export function StageUnlockSectionCard({
 	className?: string;
 }) {
 	const { bodyLines, sourceLines } = splitSectionLines(section.value);
+	const bodyLineKeyCounts = new Map<string, number>();
+	const sourceLineKeyCounts = new Map<string, number>();
 
 	return (
 		<div
@@ -75,13 +77,13 @@ export function StageUnlockSectionCard({
 				<div className="space-y-3">
 					{bodyLines.map((line, lineIndex) => {
 						const keyValue = splitLineLabel(line);
+						const lineOccurrence = bodyLineKeyCounts.get(line) ?? 0;
+						bodyLineKeyCounts.set(line, lineOccurrence + 1);
+						const lineKey = `${section.label}-${line}-${lineOccurrence}`;
 
 						if (keyValue) {
 							return (
-								<div
-									key={`${section.label}-${lineIndex}`}
-									className="space-y-1"
-								>
+								<div key={lineKey} className="space-y-1">
 									<p className={workbenchChromeLabelClass}>{keyValue.label}</p>
 									<p
 										className="text-[13px] leading-7 text-product-text"
@@ -95,7 +97,7 @@ export function StageUnlockSectionCard({
 
 						return (
 							<p
-								key={`${section.label}-${lineIndex}`}
+								key={lineKey}
 								className={
 									lineIndex === 0
 										? "text-sm font-medium leading-6 text-product-text"
@@ -137,15 +139,20 @@ export function StageUnlockSectionCard({
 					<div className="border-t border-product-border/30 pt-3">
 						<p className={workbenchChromeLabelClass}>Sources</p>
 						<ul className="mt-2 space-y-1.5">
-							{sourceLines.map((line, lineIndex) => (
-								<li
-									key={`${section.label}-source-${lineIndex}`}
-									className="text-[11px] leading-5 text-product-muted"
-									style={{ overflowWrap: "anywhere" }}
-								>
-									{line}
-								</li>
-							))}
+							{sourceLines.map((line) => {
+								const lineOccurrence = sourceLineKeyCounts.get(line) ?? 0;
+								sourceLineKeyCounts.set(line, lineOccurrence + 1);
+
+								return (
+									<li
+										key={`${section.label}-source-${line}-${lineOccurrence}`}
+										className="text-[11px] leading-5 text-product-muted"
+										style={{ overflowWrap: "anywhere" }}
+									>
+										{line}
+									</li>
+								);
+							})}
 						</ul>
 					</div>
 				) : null}

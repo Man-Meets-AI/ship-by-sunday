@@ -14,18 +14,21 @@ vi.mock("next/link", () => ({
 
 globalThis.React = React;
 
-import { LessonShellWatch } from "@/features/course/lesson/shells";
 import { getLessonById } from "@/features/course/lesson/model";
+import { LessonShellWatch } from "@/features/course/lesson/shells";
 
 describe("LessonShellWatch", () => {
 	it("renders the Bunny-backed watch shell without workbench chrome", () => {
 		const lesson = getLessonById("1.0");
 		expect(lesson).toBeTruthy();
+		if (!lesson) {
+			throw new Error("Expected lesson 1.0 to exist.");
+		}
 
 		const markup = renderToStaticMarkup(
 			<LessonShellWatch
-				lesson={lesson!}
-				coachContent={lesson!.content.coach}
+				lesson={lesson}
+				coachContent={lesson.content.coach}
 				footer={<div>Footer</div>}
 			/>,
 		);
@@ -42,11 +45,14 @@ describe("LessonShellWatch", () => {
 	it("renders ready Bunny media metadata in the watch shell", () => {
 		const lesson = getLessonById("3.16");
 		expect(lesson).toBeTruthy();
+		if (!lesson) {
+			throw new Error("Expected lesson 3.16 to exist.");
+		}
 
 		const markup = renderToStaticMarkup(
 			<LessonShellWatch
-				lesson={lesson!}
-				coachContent={lesson!.content.coach}
+				lesson={lesson}
+				coachContent={lesson.content.coach}
 				footer={<div>Footer</div>}
 			/>,
 		);
@@ -61,12 +67,15 @@ describe("LessonShellWatch", () => {
 	it("renders transcript and resources when they exist", () => {
 		const lesson = getLessonById("4.0");
 		expect(lesson).toBeTruthy();
+		if (!lesson) {
+			throw new Error("Expected lesson 4.0 to exist.");
+		}
 
 		const markup = renderToStaticMarkup(
 			<LessonShellWatch
-				lesson={lesson!}
+				lesson={lesson}
 				coachContent={{
-					...lesson!.content.coach,
+					...lesson.content.coach,
 					transcript: {
 						status: "ready",
 						body: "Ship it, review it, and move on.",
@@ -94,12 +103,15 @@ describe("LessonShellWatch", () => {
 	it("renders the large placeholder when the lesson video is pending", () => {
 		const lesson = getLessonById("4.0");
 		expect(lesson).toBeTruthy();
+		if (!lesson) {
+			throw new Error("Expected lesson 4.0 to exist.");
+		}
 
 		const markup = renderToStaticMarkup(
 			<LessonShellWatch
-				lesson={lesson!}
+				lesson={lesson}
 				coachContent={{
-					...lesson!.content.coach,
+					...lesson.content.coach,
 					video: {
 						status: "pending",
 						title: "Product Review",

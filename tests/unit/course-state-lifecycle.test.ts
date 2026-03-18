@@ -1,10 +1,10 @@
-import { COURSE_SLUG } from "@/features/course/lesson/model";
 import {
 	completeLesson,
 	getLessonState,
 	getMissionState,
 	getResumeDestination,
 } from "@/convex/course";
+import { COURSE_SLUG } from "@/features/course/lesson/model";
 
 const clerkUserId = "user_test_course_state";
 
@@ -98,6 +98,36 @@ function createCourseCtx({
 	};
 }
 
+type CourseCtx = ReturnType<typeof createCourseCtx>;
+
+const getMissionStateHandler = getMissionState as unknown as {
+	_handler: (ctx: CourseCtx) => Promise<{
+		progressCount: number;
+		blocks: Array<{ lessons: Array<{ id: string }> }>;
+	}>;
+};
+
+const getResumeDestinationHandler = getResumeDestination as unknown as {
+	_handler: (ctx: CourseCtx) => Promise<{
+		destination: string;
+		lessonId: string | null;
+	}>;
+};
+
+const completeLessonHandler = completeLesson as unknown as {
+	_handler: (
+		ctx: CourseCtx,
+		args: { lessonId: string; fieldValues: Record<string, unknown> },
+	) => Promise<{ completedAt: number; nextLessonId: string | null }>;
+};
+
+const getLessonStateHandler = getLessonState as unknown as {
+	_handler: (
+		ctx: CourseCtx,
+		args: { lessonId: string },
+	) => Promise<{ accessStatus: string }>;
+};
+
 describe("course state lifecycle", () => {
 	afterEach(() => {
 		vi.restoreAllMocks();
@@ -114,7 +144,7 @@ describe("course state lifecycle", () => {
 			],
 		});
 
-		const mission = await (getMissionState as any)._handler(ctx);
+		const mission = await getMissionStateHandler._handler(ctx);
 
 		expect(mission.progressCount).toBe(0);
 		expect(
@@ -136,7 +166,7 @@ describe("course state lifecycle", () => {
 			],
 		});
 
-		const resume = await (getResumeDestination as any)._handler(ctx);
+		const resume = await getResumeDestinationHandler._handler(ctx);
 
 		expect(resume).toEqual({
 			destination: "/mission",
@@ -167,7 +197,7 @@ describe("course state lifecycle", () => {
 
 		vi.spyOn(Date, "now").mockReturnValue(fixedNow);
 
-		const result = await (completeLesson as any)._handler(ctx, {
+		const result = await completeLessonHandler._handler(ctx, {
 			lessonId: "1.0",
 			fieldValues: {},
 		});
@@ -189,7 +219,7 @@ describe("course state lifecycle", () => {
 	it("returns locked for the first Build lesson until Design is completed", async () => {
 		const ctx = createCourseCtx();
 
-		const lessonState = await (getLessonState as any)._handler(ctx, {
+		const lessonState = await getLessonStateHandler._handler(ctx, {
 			lessonId: "3.0",
 		});
 
@@ -202,7 +232,7 @@ describe("course state lifecycle", () => {
 		const ctx = createCourseCtx();
 
 		await expect(
-			(completeLesson as any)._handler(ctx, {
+			completeLessonHandler._handler(ctx, {
 				lessonId: "0.1",
 				fieldValues: {},
 			}),

@@ -19,14 +19,14 @@ import { GuidedFormWorkbench } from "./modes/guided-form-workbench";
 import { PaperPhotoUploadWorkbench } from "./modes/paper-photo-upload-workbench";
 import { ReferenceGalleryWorkbench } from "./modes/reference-gallery-workbench";
 import { RoadmapOverviewWorkbench } from "./modes/roadmap-overview-workbench";
-import { SketchUploadWorkbench } from "./modes/sketch-upload-workbench";
-import { ScoreTableWorkbench } from "./modes/score-table-workbench";
 import { ScopeSplitWorkbench } from "./modes/scope-split-workbench";
+import { ScoreTableWorkbench } from "./modes/score-table-workbench";
+import { SketchUploadWorkbench } from "./modes/sketch-upload-workbench";
 import { TrackerLogWorkbench } from "./modes/tracker-log-workbench";
 import { VisualDirectionWorkbench } from "./modes/visual-direction-workbench";
-import type { WorkbenchModeComponent, WorkbenchRendererProps } from "./types";
 import { WorkbenchContainer } from "./shared/workbench-container";
 import { WorkbenchHeader } from "./shared/workbench-header";
+import type { WorkbenchModeComponent, WorkbenchRendererProps } from "./types";
 
 const modeRenderers: Record<WorkbenchType, WorkbenchModeComponent> = {
 	guided_form: GuidedFormWorkbench,

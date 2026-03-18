@@ -3,13 +3,13 @@ import type {
 	UploadFieldValue,
 } from "@/features/course/lesson/model/manifest";
 import {
-	parseLegacyTableText,
-	toLegacyTableText,
-} from "@/features/course/lesson/model/table";
-import {
 	isChecklistItemArray,
 	isUploadFieldValue,
 } from "@/features/course/lesson/model/registry";
+import {
+	parseLegacyTableText,
+	toLegacyTableText,
+} from "@/features/course/lesson/model/table";
 
 export function toLineList(value: unknown) {
 	if (!Array.isArray(value)) {

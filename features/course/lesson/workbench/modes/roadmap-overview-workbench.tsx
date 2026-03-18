@@ -3,13 +3,12 @@ import {
 	getOrderedBlocks,
 	getStudentFacingLessons,
 } from "@/features/course/lesson/model/registry";
-
-import type { WorkbenchModeProps } from "../types";
-import { WorkbenchHeaderLabel } from "../shared/workbench-header-label";
-import { workbenchChromeLabelClass } from "../shared/workbench-readability";
 import { StatusRail } from "../shared/status-rail";
 import { WorkbenchContainer } from "../shared/workbench-container";
 import { WorkbenchHeader } from "../shared/workbench-header";
+import { WorkbenchHeaderLabel } from "../shared/workbench-header-label";
+import { workbenchChromeLabelClass } from "../shared/workbench-readability";
+import type { WorkbenchModeProps } from "../types";
 
 const roadmapBlockDescriptionsById: Record<BlockId, string> = {
 	CEO: "Choose the problem, user, outcome, flow, and scope before you build.",

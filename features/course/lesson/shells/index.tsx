@@ -3,16 +3,16 @@
 import Link from "next/link";
 
 import { LessonVideoSurface } from "@/features/course/lesson/components/lesson-video-surface";
-import {
-	workbenchChromeLabelClass,
-	workbenchPanelClass,
-} from "@/features/course/lesson/workbench/shared/workbench-readability";
 import type { LessonResourceContent } from "@/features/course/lesson/model/contracts";
 import type {
 	LessonConfig,
 	LessonContent,
 } from "@/features/course/lesson/model/manifest";
 import type { ObjectiveTask } from "@/features/course/lesson/model/registry";
+import {
+	workbenchChromeLabelClass,
+	workbenchPanelClass,
+} from "@/features/course/lesson/workbench/shared/workbench-readability";
 
 import { CoachPanel } from "./coach-panel";
 import { ObjectivePanel } from "./objective-panel";

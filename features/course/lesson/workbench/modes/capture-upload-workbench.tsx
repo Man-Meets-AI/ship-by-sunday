@@ -1,10 +1,10 @@
-import type { WorkbenchModeProps } from "../types";
 import { FieldList } from "../fields/field-list";
 import { ArtifactContext } from "../shared/artifact-context";
 import { StatusRail } from "../shared/status-rail";
 import { TemplateDownloadCard } from "../shared/template-download-card";
 import { WorkbenchContainer } from "../shared/workbench-container";
 import { WorkbenchHeader } from "../shared/workbench-header";
+import type { WorkbenchModeProps } from "../types";
 
 export function CaptureUploadWorkbench({
 	lesson,

@@ -2,7 +2,7 @@ import type { LessonVideoContent } from "./contracts";
 
 export type LessonMediaMap = Partial<Record<string, LessonVideoContent>>;
 
-const LESSON_MEDIA_JSON = String.raw`{
+const LESSON_MEDIA_JSON = `{
   "1.0": {
     "status": "ready",
     "provider": "bunny",

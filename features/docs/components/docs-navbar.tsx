@@ -2,8 +2,8 @@ import Link from "next/link";
 import { Navbar } from "nextra-theme-docs";
 
 import { routeConfig } from "@/config/product";
-import { ProductBrand } from "@/shared/branding/product-brand";
 import { DocsThemeToggle } from "@/features/docs/components/docs-theme-toggle";
+import { ProductBrand } from "@/shared/branding/product-brand";
 
 const navLinkClassName =
 	"rounded-full border border-product-border/60 bg-product-surface/70 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-product-text transition-colors hover:bg-product-surface-alt";

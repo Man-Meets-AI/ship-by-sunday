@@ -1,17 +1,16 @@
 "use client";
 
-import { useState } from "react";
 import { useMutation } from "convex/react";
+import { useState } from "react";
 
 import { api } from "@/convex/_generated/api";
 import type {
 	UploadFieldValue,
 	WorkbenchField,
 } from "@/features/course/lesson/model/manifest";
-
+import { fieldLabelClass } from "./field-styles";
 import { uploadFilesToLessonStorage } from "./upload-storage";
 import { getUploadMetadata, getUploadMetadataList } from "./value-codecs";
-import { fieldLabelClass } from "./field-styles";
 
 export function UploadFieldControl({
 	field,
@@ -30,6 +29,7 @@ export function UploadFieldControl({
 	const isMultiImageField = field.kind === "image_uploads";
 	const previewUrl = upload?.previewUrl ?? upload?.url;
 	const accept = field.kind === "video_upload" ? "video/*" : "image/*";
+	const uploadPreviewKeyCounts = new Map<string, number>();
 
 	return (
 		<label className="block">
@@ -108,10 +108,13 @@ export function UploadFieldControl({
 							if (!itemPreviewUrl) {
 								return null;
 							}
+							const keyBase = item.storageId ?? item.fileName ?? itemPreviewUrl;
+							const keyOccurrence = uploadPreviewKeyCounts.get(keyBase) ?? 0;
+							uploadPreviewKeyCounts.set(keyBase, keyOccurrence + 1);
 
 							return (
 								<img
-									key={`${item.storageId ?? item.fileName ?? "upload"}-${index}`}
+									key={`${keyBase}-${keyOccurrence}`}
 									src={itemPreviewUrl}
 									alt={item.fileName ?? `Uploaded preview ${index + 1}`}
 									className="max-h-48 w-full rounded-none border border-product-border object-cover"

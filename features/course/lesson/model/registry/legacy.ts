@@ -1,18 +1,18 @@
 import type { LessonConfig, ReferenceGalleryValue } from "../manifest";
 import { isReferenceGalleryValue } from "../reference-gallery";
 import {
-	FIELD_SHAPE_VERSION_FIELD_ID,
-	PRIVATE_FIELD_PREFIX,
-	isUploadFieldValue,
-	isUploadFieldValueArray,
-	normalizeFieldValues,
-	type FieldValuesSource,
-	type PersistedFieldValues,
-} from "./shared";
-import {
 	getFieldShapeVersion,
 	getHandoffPersistedFieldIds,
 } from "./progression";
+import {
+	FIELD_SHAPE_VERSION_FIELD_ID,
+	type FieldValuesSource,
+	isUploadFieldValue,
+	isUploadFieldValueArray,
+	normalizeFieldValues,
+	type PersistedFieldValues,
+	PRIVATE_FIELD_PREFIX,
+} from "./shared";
 
 function getLegacyStringArray(value: unknown) {
 	if (!Array.isArray(value)) {

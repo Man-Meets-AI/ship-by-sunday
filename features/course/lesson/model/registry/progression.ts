@@ -1,18 +1,18 @@
 import {
-	blocks,
-	lessonRegistry,
 	type BlockConfig,
 	type BlockId,
+	blocks,
 	type LessonConfig,
 	type LessonHandoff,
+	lessonRegistry,
 	type ObjectiveMode,
 	type WorkbenchSection,
 } from "../manifest";
 import {
-	SUPPORTED_FIELD_KINDS,
-	normalizeFieldValues,
 	type CandidateProblemOption,
 	type FieldValuesSource,
+	normalizeFieldValues,
+	SUPPORTED_FIELD_KINDS,
 } from "./shared";
 
 const LESSONS_BY_ID = new Map(

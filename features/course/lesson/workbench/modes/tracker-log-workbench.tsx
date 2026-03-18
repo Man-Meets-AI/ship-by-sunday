@@ -1,10 +1,10 @@
-import type { WorkbenchModeProps } from "../types";
 import { FieldControl } from "../fields/field-control";
 import { FieldList } from "../fields/field-list";
 import { StatusRail } from "../shared/status-rail";
 import { WorkbenchCard } from "../shared/workbench-card";
 import { WorkbenchContainer } from "../shared/workbench-container";
 import { WorkbenchHeader } from "../shared/workbench-header";
+import type { WorkbenchModeProps } from "../types";
 
 export function TrackerLogWorkbench({
 	lesson,

@@ -4,16 +4,15 @@ import {
 	getCandidateProblemOptions,
 	isFilled,
 } from "@/features/course/lesson/model/registry";
-
-import type { WorkbenchModeProps } from "../types";
 import { FieldList } from "../fields/field-list";
 import { ArtifactContext } from "../shared/artifact-context";
 import { SectionCard } from "../shared/section-card";
 import { StatusRail } from "../shared/status-rail";
 import { WorkbenchCard } from "../shared/workbench-card";
 import { WorkbenchContainer } from "../shared/workbench-container";
-import { WorkbenchHeaderLabel } from "../shared/workbench-header-label";
 import { WorkbenchHeader } from "../shared/workbench-header";
+import { WorkbenchHeaderLabel } from "../shared/workbench-header-label";
+import type { WorkbenchModeProps } from "../types";
 import { DefineOutcomeSupport } from "./define-outcome-support";
 import { PickOneUserSupport } from "./pick-one-user-support";
 import { StartWithProblemSupport } from "./start-with-problem-support";

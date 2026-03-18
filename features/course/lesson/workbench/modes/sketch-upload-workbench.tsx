@@ -1,10 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
 import { useMutation } from "convex/react";
-
-import { LessonVideoPlayer } from "@/features/course/lesson/components/lesson-video-player";
+import { useRef, useState } from "react";
 import { api } from "@/convex/_generated/api";
+import { LessonVideoPlayer } from "@/features/course/lesson/components/lesson-video-player";
 import type {
 	UploadFieldValue,
 	WorkbenchField,
@@ -255,10 +254,12 @@ export function SketchUploadWorkbench({
 								if (!previewUrl) {
 									return null;
 								}
+								const keyBase =
+									upload.storageId ?? upload.fileName ?? previewUrl;
 
 								return (
 									<div
-										key={`${upload.storageId ?? upload.fileName ?? "sketch"}-${index}`}
+										key={keyBase}
 										className="overflow-hidden border border-product-border bg-product-surface"
 									>
 										<div className="aspect-[4/3] overflow-hidden border-b border-product-border">

@@ -1,5 +1,5 @@
-import type { PinnedArtifact } from "@/features/course/lesson/shells";
 import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
+import type { PinnedArtifact } from "@/features/course/lesson/shells";
 
 import { formatArtifactValue } from "../shared/artifact-format";
 import { WorkbenchHeaderLabel } from "../shared/workbench-header-label";
@@ -20,7 +20,7 @@ export function ReadonlyFieldControl({
 		: null;
 
 	return (
-		<label className="block">
+		<div className="block">
 			<span className={fieldLabelClass}>{field.label}</span>
 			<div className="mt-2 rounded-none border border-product-border/65 bg-product-surface px-4 py-4 text-[14px] leading-[1.68] text-product-text">
 				{linkedArtifact ? (
@@ -47,6 +47,6 @@ export function ReadonlyFieldControl({
 					</p>
 				)}
 			</div>
-		</label>
+		</div>
 	);
 }

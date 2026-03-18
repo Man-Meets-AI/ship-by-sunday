@@ -1,7 +1,5 @@
 import type { LessonHandoff } from "@/features/course/lesson/model/manifest";
 import { getCandidateProblemOptions } from "@/features/course/lesson/model/registry";
-
-import type { WorkbenchModeProps } from "../types";
 import { WorkbenchCard } from "../shared/workbench-card";
 import {
 	workbenchBodyCopyClass,
@@ -9,6 +7,7 @@ import {
 	workbenchInsetClass,
 	workbenchSupportCopyClass,
 } from "../shared/workbench-readability";
+import type { WorkbenchModeProps } from "../types";
 
 const BROAD_AUDIENCE_PATTERN =
 	/\b(users?|people|everyone|anyone|business(?:es)?|companies|founders|teams)\b/i;
@@ -124,7 +123,7 @@ export function PickOneUserSupport({
 			label: "User",
 			filled: Boolean(
 				getTextValue(fieldValues, "selected_problem_owner") ||
-				selectedProblem?.owner,
+					selectedProblem?.owner,
 			),
 			value:
 				getTextValue(fieldValues, "selected_problem_owner") ||
@@ -135,7 +134,7 @@ export function PickOneUserSupport({
 			label: "Chosen problem",
 			filled: Boolean(
 				getTextValue(fieldValues, "selected_problem_statement") ||
-				selectedProblem?.statement,
+					selectedProblem?.statement,
 			),
 			value:
 				getTextValue(fieldValues, "selected_problem_statement") ||

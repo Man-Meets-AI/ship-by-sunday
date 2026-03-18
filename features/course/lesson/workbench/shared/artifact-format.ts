@@ -8,8 +8,8 @@ import {
 	getReferenceGalleryItems,
 	isReferenceGalleryValue,
 } from "@/features/course/lesson/model/reference-gallery";
-import { formatTablePreview } from "@/features/course/lesson/model/table";
 import { isChecklistItemArray } from "@/features/course/lesson/model/registry";
+import { formatTablePreview } from "@/features/course/lesson/model/table";
 
 import {
 	getUploadMetadata,

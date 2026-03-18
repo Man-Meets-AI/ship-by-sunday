@@ -1,20 +1,23 @@
 "use client";
 
-import Link from "next/link";
 import { useConvexAuth, useQuery } from "convex/react";
+import Link from "next/link";
 
 import { routeConfig } from "@/config/product";
-import { getLessonHref } from "@/features/course/lesson/model/manifest";
 import { api } from "@/convex/_generated/api";
+import { getLessonHref } from "@/features/course/lesson/model/manifest";
+import type { ArtifactPreview } from "@/features/course/lesson/model/registry";
 import { ArtifactPreviewContent } from "@/features/course/lesson/workbench/shared/artifact-preview-content";
 import { ProductShell } from "@/features/course/shared/components/product-shell";
+
+const skeletonCardIds = ["one", "two", "three", "four"] as const;
 
 function ArtifactsSkeleton() {
 	return (
 		<div className="mt-4 grid animate-pulse gap-4 md:grid-cols-2">
-			{Array.from({ length: 4 }).map((_, index) => (
+			{skeletonCardIds.map((cardId) => (
 				<article
-					key={index}
+					key={cardId}
 					className="rounded-none border border-product-border bg-product-surface-strong/80 p-4"
 				>
 					<div className="h-2 w-12 bg-product-border/15" />
@@ -35,16 +38,7 @@ export function ArtifactsPage() {
 	const artifacts = useQuery(
 		api.course.listArtifacts,
 		isAuthenticated && !isLoading ? {} : "skip",
-	) as
-		| Array<{
-				artifactKey: string;
-				lessonId: string;
-				artifactLabel: string;
-				lessonTitle: string;
-				fieldValues: Record<string, unknown>;
-				fields: Array<[string, unknown]>;
-		  }>
-		| undefined;
+	) as ArtifactPreview[] | undefined;
 
 	return (
 		<ProductShell
@@ -74,7 +68,7 @@ export function ArtifactsPage() {
 					<div className="mt-4 grid gap-4 md:grid-cols-2">
 						{artifacts.map((artifact) => (
 							<article
-								key={artifact.lessonId}
+								key={artifact.artifactKey}
 								className="rounded-none border border-product-border bg-product-surface-strong/80 p-4"
 							>
 								<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
@@ -88,7 +82,7 @@ export function ArtifactsPage() {
 								</p>
 								<div className="mt-4 rounded-none border border-product-border bg-product-surface p-3">
 									<ArtifactPreviewContent
-										artifact={artifact as any}
+										artifact={artifact}
 										maxTextFields={4}
 									/>
 								</div>

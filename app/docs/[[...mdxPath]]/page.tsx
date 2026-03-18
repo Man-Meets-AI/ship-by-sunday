@@ -4,9 +4,9 @@ import {
 	generateDocsStaticParams,
 	getDocsPageSegments,
 } from "@/features/docs/server/page-paths";
-import { useMDXComponents } from "@/mdx-components";
+import { useMDXComponents as getMDXComponents } from "@/mdx-components";
 
-const Wrapper = useMDXComponents().wrapper;
+const Wrapper = getMDXComponents().wrapper;
 
 export const generateStaticParams = generateDocsStaticParams;
 
