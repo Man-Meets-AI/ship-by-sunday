@@ -2,18 +2,35 @@
 
 import { useState } from "react";
 
-type FAQItem = {
+export type FAQItem = {
 	question: string;
 	answer: string;
 };
 
+type FAQState = { type: "closed" } | { type: "open"; index: number };
+
+function assertNever(value: never): never {
+	throw new Error(`Unknown FAQ state: ${JSON.stringify(value)}`);
+}
+
+function isOpenItem(state: FAQState, index: number) {
+	switch (state.type) {
+		case "closed":
+			return false;
+		case "open":
+			return state.index === index;
+		default:
+			return assertNever(state);
+	}
+}
+
 export default function FAQAccordion({ items }: { items: readonly FAQItem[] }) {
-	const [openQuestion, setOpenQuestion] = useState<string | null>(null);
+	const [state, setState] = useState<FAQState>({ type: "closed" });
 
 	return (
 		<div className="grid gap-[1px] border border-product-border/60 bg-product-border/35">
 			{items.map((item, index) => {
-				const isOpen = openQuestion === item.question;
+				const isOpen = isOpenItem(state, index);
 				const panelId = `faq-panel-${index}`;
 
 				return (
@@ -24,9 +41,7 @@ export default function FAQAccordion({ items }: { items: readonly FAQItem[] }) {
 							aria-expanded={isOpen}
 							aria-controls={panelId}
 							onClick={() =>
-								setOpenQuestion((current) =>
-									current === item.question ? null : item.question,
-								)
+								setState(isOpen ? { type: "closed" } : { type: "open", index })
 							}
 						>
 							<span>{item.question}</span>

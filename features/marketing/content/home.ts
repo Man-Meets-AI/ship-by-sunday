@@ -12,14 +12,14 @@ export const homePageContent = {
 		docsLabel: "Docs",
 		loginLabel: "Log in",
 		topBarStart: "One weekend",
-		topBarMark: productConfig.shortMark,
 		topBarEnd: "Prototype to v1",
 		headlineLead: "Go from app idea",
 		headlineAccent: "to live v1 by Sunday",
 		body: `${productName} is a custom software-backed weekend sprint for builders who can already prototype, but keep getting stuck before they ship. Scope the MVP, map the core screens, build the core flow, and leave with a live app.`,
 		primaryCta: "Get instant access",
 		secondaryCta: "See the 4-block sprint",
-		eyebrow: "One-time payment. Lifetime access. Start the sprint right after checkout.",
+		eyebrow:
+			"One-time payment. Lifetime access. Start the sprint right after checkout.",
 	},
 	outcomesSection: {
 		label: "Outcomes",
@@ -98,8 +98,7 @@ export const homePageContent = {
 		cardHint: "See block details below",
 		deepDiveLabel: "4-block sprint",
 		deepDiveTitle: "How the weekend sprint works",
-		deepDiveIntro:
-			"This is the path: scope it, design it, build it, ship it.",
+		deepDiveIntro: "This is the path: scope it, design it, build it, ship it.",
 		outcomesLabel: "Outcomes",
 		blocks: [
 			{
@@ -378,3 +377,5 @@ export const homePageContent = {
 	],
 	footerWordmark: productName,
 } as const;
+
+export type HomePageContent = typeof homePageContent;
