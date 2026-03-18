@@ -11,34 +11,11 @@ import {
 	routeConfig,
 	timingConfig,
 } from "@/config/product";
+import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
+import { assertNever } from "@/features/course/lesson/lib/assert";
 import { ProductShell } from "@/features/course/shared/components/product-shell";
-
-type CheckoutSessionState =
-	| {
-			kind: "missing_session_id";
-	  }
-	| {
-			kind: "invalid_session";
-			sessionId: string;
-	  }
-	| {
-			kind: "sign_in_required";
-			sessionId: string;
-	  }
-	| {
-			kind: "wrong_account";
-			sessionId: string;
-	  }
-	| {
-			kind: "payment_pending";
-			sessionId: string;
-			paymentStatus: string;
-	  }
-	| {
-			kind: "validated";
-			sessionId: string;
-	  };
+import type { CheckoutSessionState } from "@/features/checkout/server/checkout-session";
 
 type CheckoutProgressState = "complete" | "active" | "pending";
 
@@ -47,6 +24,28 @@ type CheckoutProgressStep = {
 	state: CheckoutProgressState;
 	detail: string;
 };
+
+type CheckoutViewModel = {
+	shellTitle: string;
+	shellSubtitle: string;
+	statusLabel: string;
+	heading: string;
+	body: string;
+	progressSteps: readonly CheckoutProgressStep[];
+	helpTitle: string;
+	helpLeadCopy: string;
+	helpItems: readonly string[];
+	primaryActionLabel: string;
+	primaryActionHref: string;
+	primaryActionBody: string;
+	secondaryActionBody: string;
+};
+
+const validatedStatusCopy = [
+	"Confirming your entitlement.",
+	"Unlocking your Ship by Sunday workspace.",
+	"Preparing your first mission step.",
+] as const;
 
 function CheckoutProgress({
 	steps,
@@ -96,103 +95,17 @@ function CheckoutProgress({
 	);
 }
 
-function getCheckoutHelpContent(
+function getCheckoutViewModel(
 	checkoutSessionState: CheckoutSessionState,
 	isAccessReady: boolean,
-) {
-	switch (checkoutSessionState.kind) {
-		case "validated":
-			return isAccessReady
-				? {
-						title: "Access confirmed",
-						leadCopy:
-							"Your purchase and entitlement are both confirmed. The next step is just getting you into the workspace.",
-						items: [
-							"Use Open mission if the redirect has not fired yet.",
-							"Use Check access only if you want to force one more lookup.",
-							"Keep this tab if you want a clean post-purchase handoff.",
-						],
-					}
-				: {
-						title: "What happens next",
-						leadCopy:
-							"Stripe is done. This page is polling your account access and will forward you automatically once the entitlement lands.",
-						items: [
-							"Keep this tab open for a few seconds while the access grant catches up.",
-							"If you signed in with a different email, fix that first before retrying.",
-							"Use Check access if the handoff feels stalled.",
-						],
-					};
-		case "sign_in_required":
-			return {
-				title: "Use the checkout account",
-				leadCopy:
-					"This browser is not signed in, so we cannot attach the completed checkout to an account yet.",
-				items: [
-					"Sign in with the same email you used during payment.",
-					"Return to this tab after sign-in so the access handoff can finish.",
-					"Do not start a second checkout unless payment actually failed.",
-				],
-			};
-		case "wrong_account":
-			return {
-				title: "Account mismatch",
-				leadCopy:
-					"The purchase exists, but it belongs to a different signed-in account than the one currently open here.",
-				items: [
-					"Switch to the email used at checkout.",
-					"Then use Check access to retry the entitlement lookup.",
-					"Open mission only after the correct account is attached.",
-				],
-			};
-		case "payment_pending":
-			return {
-				title: "Waiting on Stripe",
-				leadCopy:
-					"The success URL resolved, but Stripe still has the payment in a non-final state.",
-				items: [
-					"Give Stripe another moment to settle the payment.",
-					"Come back to this page from the same browser after payment confirms.",
-					"Do not retry checkout unless Stripe shows the payment failed.",
-				],
-			};
-		case "invalid_session":
-			return {
-				title: "Session could not be verified",
-				leadCopy:
-					"This URL does not include a Stripe session we can trust for the access handoff.",
-				items: [
-					"Return to checkout from the offer page if you still need to buy.",
-					"Use Check access if you already paid in this account.",
-					"Keep the success URL intact when testing the live handoff.",
-				],
-			};
-		default:
-			return {
-				title: "No checkout session attached",
-				leadCopy:
-					"This page works as a recovery surface, but it is strongest when it arrives directly from Stripe.",
-				items: [
-					"Use Check access if you already completed purchase on this account.",
-					"Return home if you still need to start checkout.",
-					"Keep the same browser session for the cleanest handoff.",
-				],
-			};
-	}
-}
-
-function getCheckoutSessionCopy(
-	checkoutSessionState: CheckoutSessionState,
-	isAccessReady: boolean,
-	statusCopy: string[],
-	statusIndex: number,
-) {
+	validatedStatusLabel: string,
+): CheckoutViewModel {
 	switch (checkoutSessionState.kind) {
 		case "validated":
 			return {
 				shellTitle: "Payment received",
 				shellSubtitle: "We’re unlocking your Ship by Sunday access now.",
-				statusLabel: isAccessReady ? "Access ready" : statusCopy[statusIndex],
+				statusLabel: isAccessReady ? "Access ready" : validatedStatusLabel,
 				heading: isAccessReady ? "Opening mission" : "Finalizing access",
 				body: isAccessReady
 					? "Your access is live. Sending you into Ship by Sunday now."
@@ -200,24 +113,46 @@ function getCheckoutSessionCopy(
 				progressSteps: [
 					{
 						label: "Payment confirmed",
-						state: "complete" as const,
+						state: "complete",
 						detail: "Stripe marked the checkout as paid.",
 					},
 					{
 						label: "Access handoff",
-						state: isAccessReady ? ("complete" as const) : ("active" as const),
+						state: isAccessReady ? "complete" : "active",
 						detail: isAccessReady
 							? "Entitlement is attached to this account."
 							: "We are polling for the access grant now.",
 					},
 					{
 						label: "Open mission",
-						state: isAccessReady ? ("active" as const) : ("pending" as const),
+						state: isAccessReady ? "active" : "pending",
 						detail: isAccessReady
 							? "Redirect is ready."
 							: "Mission opens once access confirms.",
 					},
 				],
+				helpTitle: isAccessReady ? "Access confirmed" : "What happens next",
+				helpLeadCopy: isAccessReady
+					? "Your purchase and entitlement are both confirmed. The next step is just getting you into the workspace."
+					: "Stripe is done. This page is polling your account access and will forward you automatically once the entitlement lands.",
+				helpItems: isAccessReady
+					? [
+							"Use Open mission if the redirect has not fired yet.",
+							"Use Check access only if you want to force one more lookup.",
+							"Keep this tab if you want a clean post-purchase handoff.",
+						]
+					: [
+							"Keep this tab open for a few seconds while the access grant catches up.",
+							"If you signed in with a different email, fix that first before retrying.",
+							"Use Check access if the handoff feels stalled.",
+						],
+				primaryActionLabel: "Open mission",
+				primaryActionHref: routeConfig.mission,
+				primaryActionBody: isAccessReady
+					? "Your access is ready. Open the workspace now if you do not want to wait for the redirect."
+					: "If the handoff already finished in the background, this will take you into Ship by Sunday. Otherwise you will land on the access check surface.",
+				secondaryActionBody:
+					"Use this if the handoff feels stalled, or if you need to re-check access manually.",
 			};
 		case "sign_in_required":
 			return {
@@ -230,20 +165,36 @@ function getCheckoutSessionCopy(
 				progressSteps: [
 					{
 						label: "Checkout found",
-						state: "complete" as const,
+						state: "complete",
 						detail: "We located the Stripe session from this success URL.",
 					},
 					{
 						label: "Sign in",
-						state: "active" as const,
+						state: "active",
 						detail: "Use the same email used during checkout.",
 					},
 					{
 						label: "Unlock access",
-						state: "pending" as const,
+						state: "pending",
 						detail: "Entitlement attaches after account auth.",
 					},
 				],
+				helpTitle: "Use the checkout account",
+				helpLeadCopy:
+					"This browser is not signed in, so we cannot attach the completed checkout to an account yet.",
+				helpItems: [
+					"Sign in with the same email you used during payment.",
+					"Return to this tab after sign-in so the access handoff can finish.",
+					"Do not start a second checkout unless payment actually failed.",
+				],
+				primaryActionLabel: "Sign in",
+				primaryActionHref: getSignInRedirectHref(
+					getCheckoutSuccessHref(checkoutSessionState.sessionId),
+				),
+				primaryActionBody:
+					"Use the exact email from checkout so we can attach the purchase to the right account.",
+				secondaryActionBody:
+					"Use this if the handoff feels stalled, or if you need to re-check access manually.",
 			};
 		case "wrong_account":
 			return {
@@ -256,20 +207,34 @@ function getCheckoutSessionCopy(
 				progressSteps: [
 					{
 						label: "Checkout found",
-						state: "complete" as const,
+						state: "complete",
 						detail: "The payment session exists and looks valid.",
 					},
 					{
 						label: "Account match",
-						state: "active" as const,
+						state: "active",
 						detail: "Switch to the email used at checkout.",
 					},
 					{
 						label: "Unlock access",
-						state: "pending" as const,
+						state: "pending",
 						detail: "Access can only attach after the account matches.",
 					},
 				],
+				helpTitle: "Account mismatch",
+				helpLeadCopy:
+					"The purchase exists, but it belongs to a different signed-in account than the one currently open here.",
+				helpItems: [
+					"Switch to the email used at checkout.",
+					"Then use Check access to retry the entitlement lookup.",
+					"Open mission only after the correct account is attached.",
+				],
+				primaryActionLabel: "Open mission",
+				primaryActionHref: routeConfig.mission,
+				primaryActionBody:
+					"If the handoff already finished in the background, this will take you into Ship by Sunday. Otherwise you will land on the access check surface.",
+				secondaryActionBody:
+					"Use this after switching accounts to retry the entitlement lookup.",
 			};
 		case "payment_pending":
 			return {
@@ -282,20 +247,34 @@ function getCheckoutSessionCopy(
 				progressSteps: [
 					{
 						label: "Checkout found",
-						state: "complete" as const,
+						state: "complete",
 						detail: "The Stripe session was located successfully.",
 					},
 					{
 						label: "Payment confirm",
-						state: "active" as const,
+						state: "active",
 						detail: "Stripe has not finalized this payment yet.",
 					},
 					{
 						label: "Unlock access",
-						state: "pending" as const,
+						state: "pending",
 						detail: "Entitlement waits for Stripe confirmation.",
 					},
 				],
+				helpTitle: "Waiting on Stripe",
+				helpLeadCopy:
+					"The success URL resolved, but Stripe still has the payment in a non-final state.",
+				helpItems: [
+					"Give Stripe another moment to settle the payment.",
+					"Come back to this page from the same browser after payment confirms.",
+					"Do not retry checkout unless Stripe shows the payment failed.",
+				],
+				primaryActionLabel: "Open mission",
+				primaryActionHref: routeConfig.mission,
+				primaryActionBody:
+					"If the handoff already finished in the background, this will take you into Ship by Sunday. Otherwise you will land on the access check surface.",
+				secondaryActionBody:
+					"Use this if the handoff feels stalled, or if you need to re-check access manually.",
 			};
 		case "invalid_session":
 			return {
@@ -308,22 +287,36 @@ function getCheckoutSessionCopy(
 				progressSteps: [
 					{
 						label: "Checkout found",
-						state: "active" as const,
+						state: "active",
 						detail: "This URL did not resolve to a valid Stripe session.",
 					},
 					{
 						label: "Access handoff",
-						state: "pending" as const,
+						state: "pending",
 						detail: "We need a verified checkout session first.",
 					},
 					{
 						label: "Open mission",
-						state: "pending" as const,
+						state: "pending",
 						detail: "Mission stays locked until purchase is confirmed.",
 					},
 				],
+				helpTitle: "Session could not be verified",
+				helpLeadCopy:
+					"This URL does not include a Stripe session we can trust for the access handoff.",
+				helpItems: [
+					"Return to checkout from the offer page if you still need to buy.",
+					"Use Check access if you already paid in this account.",
+					"Keep the success URL intact when testing the live handoff.",
+				],
+				primaryActionLabel: "Open mission",
+				primaryActionHref: routeConfig.mission,
+				primaryActionBody:
+					"If the handoff already finished in the background, this will take you into Ship by Sunday. Otherwise you will land on the access check surface.",
+				secondaryActionBody:
+					"Use this if the handoff feels stalled, or if you need to re-check access manually.",
 			};
-		default:
+		case "missing_session_id":
 			return {
 				shellTitle: "Complete your access check",
 				shellSubtitle:
@@ -334,22 +327,38 @@ function getCheckoutSessionCopy(
 				progressSteps: [
 					{
 						label: "Checkout found",
-						state: "pending" as const,
+						state: "pending",
 						detail: "No Stripe session is attached to this URL.",
 					},
 					{
 						label: "Access handoff",
-						state: "pending" as const,
+						state: "pending",
 						detail: "Use access check if you already paid.",
 					},
 					{
 						label: "Open mission",
-						state: "pending" as const,
+						state: "pending",
 						detail: "Start checkout first if access has not been purchased.",
 					},
 				],
+				helpTitle: "No checkout session attached",
+				helpLeadCopy:
+					"This page works as a recovery surface, but it is strongest when it arrives directly from Stripe.",
+				helpItems: [
+					"Use Check access if you already completed purchase on this account.",
+					"Return home if you still need to start checkout.",
+					"Keep the same browser session for the cleanest handoff.",
+				],
+				primaryActionLabel: "Open mission",
+				primaryActionHref: routeConfig.mission,
+				primaryActionBody:
+					"If the handoff already finished in the background, this will take you into Ship by Sunday. Otherwise you will land on the access check surface.",
+				secondaryActionBody:
+					"Use this if the handoff feels stalled, or if you need to re-check access manually.",
 			};
 	}
+
+	return assertNever(checkoutSessionState, "Unhandled checkout session state");
 }
 
 export function CheckoutSuccessView({
@@ -366,55 +375,16 @@ export function CheckoutSuccessView({
 	) as
 		| {
 				hasAccess: boolean;
-				status: string;
 		  }
 		| undefined;
 	const isAccessReady = Boolean(access?.hasAccess);
-	const statusCopy = [
-		"Confirming your entitlement.",
-		"Unlocking your Ship by Sunday workspace.",
-		"Preparing your first mission step.",
-	];
 	const canAutoRedirect =
 		checkoutSessionState.kind === "validated" && isAccessReady;
-	const sessionCopy = getCheckoutSessionCopy(
+	const viewModel = getCheckoutViewModel(
 		checkoutSessionState,
 		isAccessReady,
-		statusCopy,
-		statusIndex,
+		validatedStatusCopy[statusIndex],
 	);
-	const signInHref =
-		checkoutSessionState.kind === "sign_in_required"
-			? getSignInRedirectHref(
-					getCheckoutSuccessHref(checkoutSessionState.sessionId),
-				)
-			: getSignInRedirectHref(routeConfig.checkoutSuccess);
-	const helpContent = getCheckoutHelpContent(
-		checkoutSessionState,
-		isAccessReady,
-	);
-	const primaryActionLabel =
-		checkoutSessionState.kind === "sign_in_required"
-			? "Sign in"
-			: "Open mission";
-	const primaryActionHref =
-		checkoutSessionState.kind === "sign_in_required"
-			? signInHref
-			: routeConfig.mission;
-	const primaryActionBody =
-		checkoutSessionState.kind === "sign_in_required"
-			? "Use the exact email from checkout so we can attach the purchase to the right account."
-			: canAutoRedirect
-				? "Your access is ready. Open the workspace now if you do not want to wait for the redirect."
-				: "If the handoff already finished in the background, this will take you into Ship by Sunday. Otherwise you will land on the access check surface.";
-	const secondaryActionBody =
-		checkoutSessionState.kind === "wrong_account"
-			? "Use this after switching accounts to retry the entitlement lookup."
-			: "Use this if the handoff feels stalled, or if you need to re-check access manually.";
-	const primaryButtonClassName =
-		"sbs-hover-lift sbs-press-feedback inline-flex min-w-[12rem] justify-center rounded-none border border-product-accent bg-product-accent/10 px-4 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-product-accent";
-	const secondaryButtonClassName =
-		"sbs-hover-lift sbs-press-feedback inline-flex min-w-[11rem] justify-center rounded-none border border-product-border bg-product-surface px-4 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-product-text transition-colors hover:bg-product-surface-alt focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-product-accent";
 
 	useEffect(() => {
 		if (!canAutoRedirect) {
@@ -434,16 +404,16 @@ export function CheckoutSuccessView({
 		}
 
 		const interval = window.setInterval(() => {
-			setStatusIndex((current) => (current + 1) % statusCopy.length);
+			setStatusIndex((current) => (current + 1) % validatedStatusCopy.length);
 		}, timingConfig.checkoutStatusRotateMs);
 
 		return () => window.clearInterval(interval);
-	}, [checkoutSessionState.kind, isAccessReady, statusCopy.length]);
+	}, [checkoutSessionState.kind, isAccessReady]);
 
 	return (
 		<ProductShell
-			title={sessionCopy.shellTitle}
-			subtitle={sessionCopy.shellSubtitle}
+			title={viewModel.shellTitle}
+			subtitle={viewModel.shellSubtitle}
 		>
 			<section className="relative mx-auto w-full max-w-6xl overflow-hidden border border-product-border/70 bg-product-surface/80 p-5 shadow-panel backdrop-blur-xl sm:p-7">
 				<div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-product-accent/10 to-transparent" />
@@ -467,7 +437,7 @@ export function CheckoutSuccessView({
 									}`}
 									aria-hidden="true"
 								/>
-								{sessionCopy.statusLabel}
+								{viewModel.statusLabel}
 							</div>
 							<span className="border border-product-border/45 bg-product-surface px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-product-muted">
 								{canAutoRedirect ? "Redirect armed" : "Polling access"}
@@ -477,53 +447,61 @@ export function CheckoutSuccessView({
 							</span>
 						</div>
 						<h1 className="mt-4 max-w-3xl text-balance font-display text-3xl uppercase leading-none tracking-[0.08em] text-product-text sm:text-4xl">
-							{sessionCopy.heading}
+							{viewModel.heading}
 						</h1>
 						<p className="mt-4 max-w-2xl text-sm leading-relaxed text-product-muted">
-							{sessionCopy.body}
+							{viewModel.body}
 						</p>
-						<CheckoutProgress steps={sessionCopy.progressSteps} />
+						<CheckoutProgress steps={viewModel.progressSteps} />
 						<div className="mt-7 border border-product-border/55 bg-product-surface-strong/72 p-4">
 							<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
 								Next step
 							</p>
 							<p className="mt-3 max-w-2xl text-sm leading-relaxed text-product-text">
-								{primaryActionBody}
+								{viewModel.primaryActionBody}
 							</p>
 							<div className="mt-4 flex flex-wrap gap-2.5">
-								<Link
-									href={primaryActionHref}
-									className={primaryButtonClassName}
+								<Button
+									asChild
+									variant="default"
+									size="default"
+									className="min-w-[12rem] justify-center"
 								>
-									{primaryActionLabel}
-								</Link>
-								<Link
-									href={routeConfig.accessRequired}
-									className={secondaryButtonClassName}
+									<Link href={viewModel.primaryActionHref}>
+										{viewModel.primaryActionLabel}
+									</Link>
+								</Button>
+								<Button
+									asChild
+									variant="outline"
+									size="default"
+									className="min-w-[11rem] justify-center"
 								>
-									Check access
-								</Link>
-								<Link
-									href={routeConfig.home}
-									className={secondaryButtonClassName}
+									<Link href={routeConfig.accessRequired}>Check access</Link>
+								</Button>
+								<Button
+									asChild
+									variant="outline"
+									size="default"
+									className="min-w-[11rem] justify-center"
 								>
-									Go home
-								</Link>
+									<Link href={routeConfig.home}>Go home</Link>
+								</Button>
 							</div>
 							<p className="mt-3 text-[11px] leading-relaxed text-product-muted">
-								{secondaryActionBody}
+								{viewModel.secondaryActionBody}
 							</p>
 						</div>
 					</div>
 					<aside className="h-fit border border-product-border/55 bg-product-surface-strong/72 p-4">
 						<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
-							{helpContent.title}
+							{viewModel.helpTitle}
 						</p>
 						<p className="mt-3 text-sm leading-relaxed text-product-text">
-							{helpContent.leadCopy}
+							{viewModel.helpLeadCopy}
 						</p>
 						<ul className="mt-4 space-y-2.5">
-							{helpContent.items.map((item) => (
+							{viewModel.helpItems.map((item) => (
 								<li key={item} className="flex items-start gap-2">
 									<span
 										className="mt-1 inline-flex size-1.5 shrink-0 rounded-full bg-product-accent/80"

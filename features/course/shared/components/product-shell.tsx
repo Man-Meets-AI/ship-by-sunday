@@ -4,8 +4,8 @@ import { UserButton } from "@clerk/nextjs";
 import { useConvexAuth, useQuery } from "convex/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo } from "react";
 
+import { Button } from "@/components/ui/button";
 import { assetPaths, routeConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import type { LessonLayoutMode } from "@/features/course/lesson/model/manifest";
@@ -143,7 +143,7 @@ function ShellInner({
 	const derivedLessonBlockId = currentLessonId
 		? getLesson(currentLessonId)?.block
 		: undefined;
-	const resolvedBlockId =
+	const activeBlockId =
 		currentBlockId ??
 		derivedLessonBlockId ??
 		mission?.blocks.find((block) =>
@@ -153,27 +153,16 @@ function ShellInner({
 		mission?.blocks[0]?.id;
 
 	const activeBlock = mission?.blocks.find(
-		(block) => block.id === resolvedBlockId,
+		(block) => block.id === activeBlockId,
 	);
-
-	const blockStatuses = useMemo(() => {
-		if (!mission) {
-			return new Map<string, ProductShellBlockStatus>();
-		}
-
-		const activeId =
-			resolvedBlockId ??
-			mission.blocks.find((block) => isBlockActive(block))?.id ??
-			mission.blocks[0]?.id;
-
-		return new Map(
-			mission.blocks.map((block) => {
-				const status = getProductShellBlockStatus(block, activeId);
-
-				return [block.id, status];
-			}),
-		);
-	}, [mission, resolvedBlockId]);
+	const blockStatuses = mission
+		? new Map(
+				mission.blocks.map((block) => [
+					block.id,
+					getProductShellBlockStatus(block, activeBlockId),
+				]),
+			)
+		: new Map<string, ProductShellBlockStatus>();
 
 	const backgroundStyle =
 		theme === "dark"
@@ -321,7 +310,7 @@ function ShellInner({
 											title={`Open ${block.label}`}
 											aria-label={`Open ${block.label}`}
 											aria-current={
-												block.id === resolvedBlockId ? "page" : undefined
+												block.id === activeBlockId ? "page" : undefined
 											}
 											className={chipClassName}
 										>
@@ -343,15 +332,15 @@ function ShellInner({
 			<div className="flex shrink-0 items-center gap-1.5">
 				{onLayoutModeChange ? (
 					<div className="flex rounded-none border border-product-border bg-product-surface-strong/70 p-px">
-						<button
+						<Button
 							type="button"
 							title="Split view"
 							aria-label="Switch to split view"
 							onClick={() => onLayoutModeChange("split")}
-							className={`rounded-none p-1 transition-colors ${
-								layoutMode === "split"
-									? "bg-product-chip text-product-accent focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-product-accent"
-									: "text-product-muted hover:text-product-text focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-product-accent"
+							variant={layoutMode === "split" ? "secondary" : "ghost"}
+							size="icon"
+							className={`${
+								layoutMode === "split" ? "" : "hover:text-product-text"
 							}`}
 						>
 							<svg
@@ -368,16 +357,16 @@ function ShellInner({
 								<rect x="3" y="3" width="18" height="18" rx="2" />
 								<line x1="12" y1="3" x2="12" y2="21" />
 							</svg>
-						</button>
-						<button
+						</Button>
+						<Button
 							type="button"
 							title="Focus view"
 							aria-label="Switch to focus view"
 							onClick={() => onLayoutModeChange("focus")}
-							className={`rounded-none p-1 transition-colors ${
-								layoutMode === "focus"
-									? "bg-product-chip text-product-accent focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-product-accent"
-									: "text-product-muted hover:text-product-text focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-product-accent"
+							variant={layoutMode === "focus" ? "secondary" : "ghost"}
+							size="icon"
+							className={`${
+								layoutMode === "focus" ? "" : "hover:text-product-text"
 							}`}
 						>
 							<svg
@@ -393,19 +382,21 @@ function ShellInner({
 							>
 								<rect x="3" y="3" width="18" height="18" rx="2" />
 							</svg>
-						</button>
+						</Button>
 					</div>
 				) : null}
 				{onCoachToggle ? (
-					<button
+					<Button
 						type="button"
 						onClick={onCoachToggle}
 						aria-pressed={coachVisible}
 						title={coachVisible ? "Hide coach panel" : "Show coach panel"}
-						className={`rounded-none border p-1 transition-colors ${
+						variant={coachVisible ? "secondary" : "outline"}
+						size="icon"
+						className={`${
 							coachVisible
-								? "border-product-accent bg-product-chip text-product-accent"
-								: "border-product-border bg-product-surface-alt/80 text-product-text hover:bg-product-surface"
+								? ""
+								: "bg-product-surface-alt/80 hover:bg-product-surface"
 						}`}
 					>
 						<svg
@@ -427,16 +418,18 @@ function ShellInner({
 						<span className="sr-only">
 							{coachVisible ? "Hide coach panel" : "Show coach panel"}
 						</span>
-					</button>
+					</Button>
 				) : null}
-				<button
+				<Button
 					type="button"
 					onClick={toggleTheme}
 					title={theme === "dark" ? "Light mode" : "Dark mode"}
 					aria-label={
 						theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
 					}
-					className="rounded-none border border-product-border bg-product-surface-alt/80 p-1 text-product-text transition-colors hover:bg-product-surface focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-product-accent"
+					variant="outline"
+					size="icon"
+					className="bg-product-surface-alt/80 hover:bg-product-surface"
 				>
 					{theme === "dark" ? (
 						<svg
@@ -475,7 +468,7 @@ function ShellInner({
 							<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
 						</svg>
 					)}
-				</button>
+				</Button>
 				<span className="font-mono text-[9px] tracking-[0.2em] text-product-muted">
 					{mission
 						? `${mission.progressCount}/${mission.totalLessons}`

@@ -9,13 +9,16 @@ import {
 	getSignInRedirectHref,
 	routeConfig,
 } from "@/config/product";
+import { Button } from "@/components/ui/button";
+import { assert } from "@/features/course/lesson/lib/assert";
+import { cn } from "@/lib/utils";
 
 export function CheckoutButton({
 	label,
 	className,
 }: {
 	label: string;
-	className: string;
+	className?: string;
 }) {
 	const { userId } = useAuth();
 	const pathname = usePathname();
@@ -38,42 +41,36 @@ export function CheckoutButton({
 		}
 
 		setIsLoading(true);
+		const response = await fetch(apiRouteConfig.stripeCheckout, {
+			method: "POST",
+		});
 
-		try {
-			const response = await fetch(apiRouteConfig.stripeCheckout, {
-				method: "POST",
-			});
-			const data = (await response.json().catch(() => null)) as {
-				error?: string;
-				url?: string;
-			} | null;
-
-			if (response.status === 401) {
-				router.push(signInHref);
-				return;
-			}
-
-			if (!response.ok || !data?.url) {
-				setError(data?.error ?? "Unable to start checkout.");
-				setIsLoading(false);
-				return;
-			}
-
-			window.location.assign(data.url);
-		} catch {
-			setError("Unable to start checkout.");
-			setIsLoading(false);
+		if (response.status === 401) {
+			router.push(signInHref);
+			return;
 		}
+
+		const data = (await response.json()) as { url: string } | { error: string };
+
+		if (!response.ok) {
+			assert("error" in data, "Missing checkout error message.");
+			setError(data.error);
+			setIsLoading(false);
+			return;
+		}
+
+		assert("url" in data, "Missing checkout redirect URL.");
+		window.location.assign(data.url);
 	}
 
 	return (
 		<div className="flex flex-col items-stretch">
-			<button
+			<Button
 				type="button"
 				onClick={() => void handleCheckout()}
 				disabled={isLoading}
 				aria-busy={isLoading}
-				className={`${className} sbs-press-feedback disabled:cursor-not-allowed disabled:opacity-70`}
+				className={cn("disabled:cursor-not-allowed", className)}
 			>
 				<span className="relative inline-grid place-items-center">
 					<span className="invisible inline-flex items-center justify-center gap-2">
@@ -107,7 +104,7 @@ export function CheckoutButton({
 						{loadingLabel}
 					</span>
 				</span>
-			</button>
+			</Button>
 			<div className="min-h-6" aria-live="polite" aria-atomic="true">
 				<p
 					aria-hidden={!error}

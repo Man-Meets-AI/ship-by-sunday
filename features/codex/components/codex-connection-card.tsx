@@ -1,8 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { apiRouteConfig } from "@/config/product";
+import { assert } from "@/features/course/lesson/lib/assert";
 
 type CodexAccount =
 	| {
@@ -54,38 +56,46 @@ type LoginStartResponse = {
 
 type PollResponse = {
 	connected: boolean;
-	status: "connected" | "connecting" | "disconnected";
 	account: CodexAccount;
 	rateLimits: RateLimitsPayload;
 };
 
-function getApiErrorMessage(payload: unknown) {
-	if (!payload || typeof payload !== "object" || !("error" in payload)) {
-		return null;
+type ErrorResponse = {
+	error: string;
+};
+
+type RequestState =
+	| "loading"
+	| "idle"
+	| "starting_login"
+	| "polling"
+	| "refreshing_limits"
+	| "disconnecting";
+
+type ConnectionState = {
+	connected: boolean;
+	account: CodexAccount;
+	rateLimits: RateLimitsPayload;
+	pendingLoginId: string | null;
+};
+
+const emptyConnectionState: ConnectionState = {
+	connected: false,
+	account: null,
+	rateLimits: null,
+	pendingLoginId: null,
+};
+
+function getRateLimitSnapshots(rateLimits: RateLimitsPayload) {
+	if (!rateLimits) {
+		return [];
 	}
 
-	const value = (payload as { error?: unknown }).error;
-	return typeof value === "string" && value.trim().length > 0 ? value : null;
-}
-
-function isAccountReadResponse(
-	payload: unknown,
-): payload is AccountReadResponse {
-	if (!payload || typeof payload !== "object") {
-		return false;
+	if (rateLimits.rateLimitsByLimitId) {
+		return Object.values(rateLimits.rateLimitsByLimitId);
 	}
 
-	const record = payload as Record<string, unknown>;
-	return "connected" in record && "account" in record;
-}
-
-function isPollResponse(payload: unknown): payload is PollResponse {
-	if (!payload || typeof payload !== "object") {
-		return false;
-	}
-
-	const record = payload as Record<string, unknown>;
-	return "status" in record && "connected" in record;
+	return [rateLimits.rateLimits];
 }
 
 function formatResetTimestamp(epochSeconds: number | null) {
@@ -93,11 +103,7 @@ function formatResetTimestamp(epochSeconds: number | null) {
 		return "n/a";
 	}
 
-	try {
-		return new Date(epochSeconds * 1000).toLocaleString();
-	} catch {
-		return "n/a";
-	}
+	return new Date(epochSeconds * 1000).toLocaleString();
 }
 
 function RateLimitRow({
@@ -128,97 +134,84 @@ function RateLimitRow({
 }
 
 export function CodexConnectionCard() {
-	const [isLoading, setIsLoading] = useState(true);
-	const [isStartingLogin, setIsStartingLogin] = useState(false);
-	const [isPolling, setIsPolling] = useState(false);
-	const [isRefreshingLimits, setIsRefreshingLimits] = useState(false);
-	const [isDisconnecting, setIsDisconnecting] = useState(false);
-	const [account, setAccount] = useState<CodexAccount>(null);
-	const [rateLimits, setRateLimits] = useState<RateLimitsPayload>(null);
-	const [connected, setConnected] = useState(false);
-	const [pendingLoginId, setPendingLoginId] = useState<string | null>(null);
+	const [requestState, setRequestState] = useState<RequestState>("loading");
+	const [connection, setConnection] =
+		useState<ConnectionState>(emptyConnectionState);
 	const [feedback, setFeedback] = useState<{
 		tone: "neutral" | "error";
 		message: string;
 	} | null>(null);
+	const rateLimitSnapshots = getRateLimitSnapshots(connection.rateLimits);
 
-	const activeRateLimits = useMemo(() => {
-		if (!rateLimits) {
-			return [];
-		}
+	useEffect(() => {
+		async function loadConnection() {
+			setRequestState("loading");
+			setFeedback(null);
 
-		const fromMap = rateLimits.rateLimitsByLimitId
-			? Object.values(rateLimits.rateLimitsByLimitId)
-			: [];
-		if (fromMap.length > 0) {
-			return fromMap;
-		}
+			try {
+				const response = await fetch(apiRouteConfig.codexAccountRead, {
+					method: "GET",
+				});
+				const data = (await response.json()) as
+					| AccountReadResponse
+					| ErrorResponse;
 
-		return [rateLimits.rateLimits];
-	}, [rateLimits]);
+				if (!response.ok) {
+					assert("error" in data, "Missing Codex account error message.");
+					setFeedback({
+						tone: "error",
+						message: data.error,
+					});
+					return;
+				}
 
-	const loadConnection = useCallback(async () => {
-		setIsLoading(true);
-		setFeedback(null);
-
-		try {
-			const response = await fetch(apiRouteConfig.codexAccountRead, {
-				method: "GET",
-			});
-			const data = (await response.json().catch(() => null)) as
-				| AccountReadResponse
-				| { error?: string }
-				| null;
-			if (!response.ok) {
+				assert("connected" in data, "Unexpected Codex account payload.");
+				setConnection((current) => ({
+					...current,
+					connected: data.connected,
+					account: data.account,
+					rateLimits: data.rateLimits,
+				}));
+			} catch {
 				setFeedback({
 					tone: "error",
-					message:
-						getApiErrorMessage(data) ?? "Unable to load Codex account state.",
+					message: "Unable to load Codex account state.",
 				});
-				return;
+			} finally {
+				setRequestState("idle");
 			}
-			if (!isAccountReadResponse(data)) {
-				setFeedback({
-					tone: "error",
-					message: "Unexpected Codex account payload.",
-				});
-				return;
-			}
-
-			setAccount(data.account ?? null);
-			setRateLimits(data.rateLimits ?? null);
-			setConnected(Boolean(data.connected));
-		} catch {
-			setFeedback({
-				tone: "error",
-				message: "Unable to load Codex account state.",
-			});
-		} finally {
-			setIsLoading(false);
 		}
+
+		void loadConnection();
 	}, []);
 
 	async function startManagedLogin() {
-		setIsStartingLogin(true);
+		setRequestState("starting_login");
 		setFeedback(null);
 
 		try {
 			const response = await fetch(apiRouteConfig.codexAccountLoginStart, {
 				method: "POST",
 			});
-			const data = (await response.json().catch(() => null)) as
+			const data = (await response.json()) as
 				| LoginStartResponse
-				| { error?: string }
-				| null;
-			if (!response.ok || !data || !("authUrl" in data) || !data.authUrl) {
+				| ErrorResponse;
+
+			if (!response.ok) {
+				assert("error" in data, "Missing Codex login error message.");
 				setFeedback({
 					tone: "error",
-					message: getApiErrorMessage(data) ?? "Unable to start Codex login.",
+					message: data.error,
 				});
 				return;
 			}
 
-			setPendingLoginId(data.loginId);
+			assert("authUrl" in data, "Missing Codex auth URL.");
+			assert("loginId" in data, "Missing Codex login id.");
+			setConnection((current) => ({
+				...current,
+				pendingLoginId: data.loginId,
+			}));
 			window.open(data.authUrl, "_blank", "noopener,noreferrer");
 			setFeedback({
 				tone: "neutral",
@@ -231,18 +224,18 @@ export function CodexConnectionCard() {
 				message: "Unable to start Codex login.",
 			});
 		} finally {
-			setIsStartingLogin(false);
+			setRequestState("idle");
 		}
 	}
 
 	async function pollLoginStatus() {
-		setIsPolling(true);
+		setRequestState("polling");
 		setFeedback(null);
 
 		try {
 			const params = new URLSearchParams();
-			if (pendingLoginId) {
-				params.set("loginId", pendingLoginId);
+			if (connection.pendingLoginId) {
+				params.set("loginId", connection.pendingLoginId);
 			}
 			params.set("refresh", "true");
 
@@ -252,31 +245,25 @@ export function CodexConnectionCard() {
 					method: "GET",
 				},
 			);
-			const data = (await response.json().catch(() => null)) as
-				| PollResponse
-				| { error?: string }
-				| null;
+			const data = (await response.json()) as PollResponse | ErrorResponse;
 			if (!response.ok) {
+				assert("error" in data, "Missing Codex poll error message.");
 				setFeedback({
 					tone: "error",
-					message:
-						getApiErrorMessage(data) ?? "Unable to check Codex login status.",
-				});
-				return;
-			}
-			if (!isPollResponse(data)) {
-				setFeedback({
-					tone: "error",
-					message: "Unexpected Codex login payload.",
+					message: data.error,
 				});
 				return;
 			}
 
-			setConnected(Boolean(data.connected));
-			setAccount(data.account ?? null);
-			setRateLimits(data.rateLimits ?? null);
+			assert("connected" in data, "Unexpected Codex login payload.");
+			setConnection((current) => ({
+				...current,
+				connected: data.connected,
+				account: data.account,
+				rateLimits: data.rateLimits,
+				pendingLoginId: data.connected ? null : current.pendingLoginId,
+			}));
 			if (data.connected) {
-				setPendingLoginId(null);
 				setFeedback({
 					tone: "neutral",
 					message: "Codex account connected.",
@@ -293,34 +280,39 @@ export function CodexConnectionCard() {
 				message: "Unable to check Codex login status.",
 			});
 		} finally {
-			setIsPolling(false);
+			setRequestState("idle");
 		}
 	}
 
 	async function refreshRateLimits() {
-		setIsRefreshingLimits(true);
+		setRequestState("refreshing_limits");
 		setFeedback(null);
 
 		try {
 			const response = await fetch(apiRouteConfig.codexAccountRateLimits, {
 				method: "GET",
 			});
-			const data = (await response.json().catch(() => null)) as {
-				connected: boolean;
-				rateLimits: RateLimitsPayload;
-				error?: string;
-			} | null;
+			const data = (await response.json()) as
+				| {
+						connected: boolean;
+						rateLimits: RateLimitsPayload;
+				  }
+				| ErrorResponse;
 			if (!response.ok) {
+				assert("error" in data, "Missing Codex rate limit error message.");
 				setFeedback({
 					tone: "error",
-					message:
-						getApiErrorMessage(data) ?? "Unable to refresh Codex rate limits.",
+					message: data.error,
 				});
 				return;
 			}
 
-			setConnected(Boolean(data?.connected));
-			setRateLimits(data?.rateLimits ?? null);
+			assert("connected" in data, "Unexpected Codex rate limit payload.");
+			setConnection((current) => ({
+				...current,
+				connected: data.connected,
+				rateLimits: data.rateLimits,
+			}));
 			setFeedback({
 				tone: "neutral",
 				message: "Rate limits refreshed.",
@@ -331,35 +323,29 @@ export function CodexConnectionCard() {
 				message: "Unable to refresh Codex rate limits.",
 			});
 		} finally {
-			setIsRefreshingLimits(false);
+			setRequestState("idle");
 		}
 	}
 
 	async function disconnectAccount() {
-		setIsDisconnecting(true);
+		setRequestState("disconnecting");
 		setFeedback(null);
 
 		try {
 			const response = await fetch(apiRouteConfig.codexAccountLogout, {
 				method: "POST",
 			});
-			const data = (await response.json().catch(() => null)) as {
-				ok?: boolean;
-				error?: string;
-			} | null;
+			const data = (await response.json()) as { ok: boolean } | ErrorResponse;
 			if (!response.ok) {
+				assert("error" in data, "Missing Codex disconnect error message.");
 				setFeedback({
 					tone: "error",
-					message:
-						getApiErrorMessage(data) ?? "Unable to disconnect Codex account.",
+					message: data.error,
 				});
 				return;
 			}
 
-			setConnected(false);
-			setAccount(null);
-			setRateLimits(null);
-			setPendingLoginId(null);
+			setConnection(emptyConnectionState);
 			setFeedback({
 				tone: "neutral",
 				message: "Codex account disconnected.",
@@ -370,13 +356,9 @@ export function CodexConnectionCard() {
 				message: "Unable to disconnect Codex account.",
 			});
 		} finally {
-			setIsDisconnecting(false);
+			setRequestState("idle");
 		}
 	}
-
-	useEffect(() => {
-		void loadConnection();
-	}, [loadConnection]);
 
 	return (
 		<section className="rounded-none border border-product-border bg-product-surface/78 p-5 shadow-panel backdrop-blur-xl">
@@ -390,7 +372,7 @@ export function CodexConnectionCard() {
 				Use your own ChatGPT/Codex subscription for in-lesson generation.
 			</p>
 
-			{isLoading ? (
+			{requestState === "loading" ? (
 				<p className="mt-4 text-sm font-medium text-product-muted">
 					Loading Codex connection...
 				</p>
@@ -401,22 +383,22 @@ export function CodexConnectionCard() {
 							Status
 						</p>
 						<p className="mt-1 text-sm font-medium text-product-text">
-							{connected ? "Connected" : "Not connected"}
+							{connection.connected ? "Connected" : "Not connected"}
 						</p>
-						{account?.type === "chatgpt" ? (
+						{connection.account?.type === "chatgpt" ? (
 							<p className="mt-2 text-xs leading-relaxed text-product-muted">
-								{account.email} · plan {account.planType}
+								{connection.account.email} · plan {connection.account.planType}
 							</p>
 						) : null}
 					</div>
 
-					{activeRateLimits.length > 0 ? (
+					{rateLimitSnapshots.length > 0 ? (
 						<div className="rounded-none border border-product-border/70 bg-product-surface px-3 py-3">
 							<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
 								Rate limits
 							</p>
 							<div className="mt-2 space-y-3">
-								{activeRateLimits.map((snapshot) => {
+								{rateLimitSnapshots.map((snapshot) => {
 									const key = snapshot.limitId ?? "default";
 									return (
 										<div
@@ -439,45 +421,55 @@ export function CodexConnectionCard() {
 					) : null}
 
 					<div className="flex flex-wrap items-center gap-2">
-						{connected ? (
+						{connection.connected ? (
 							<>
-								<button
+								<Button
 									type="button"
 									onClick={() => void refreshRateLimits()}
-									disabled={isRefreshingLimits}
-									className="rounded-none border border-product-border bg-product-surface px-3 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent disabled:cursor-not-allowed disabled:opacity-70"
+									disabled={requestState === "refreshing_limits"}
+									variant="outline"
+									size="default"
 								>
-									{isRefreshingLimits ? "Refreshing..." : "Refresh limits"}
-								</button>
-								<button
+									{requestState === "refreshing_limits"
+										? "Refreshing..."
+										: "Refresh limits"}
+								</Button>
+								<Button
 									type="button"
 									onClick={() => void disconnectAccount()}
-									disabled={isDisconnecting}
-									className="rounded-none border border-product-border bg-product-surface px-3 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-70"
+									disabled={requestState === "disconnecting"}
+									variant="destructive"
+									size="default"
 								>
-									{isDisconnecting ? "Disconnecting..." : "Disconnect"}
-								</button>
+									{requestState === "disconnecting"
+										? "Disconnecting..."
+										: "Disconnect"}
+								</Button>
 							</>
 						) : (
 							<>
-								<button
+								<Button
 									type="button"
 									onClick={() => void startManagedLogin()}
-									disabled={isStartingLogin}
-									className="rounded-none border border-product-accent bg-product-chip px-3 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg disabled:cursor-not-allowed disabled:opacity-70"
+									disabled={requestState === "starting_login"}
+									variant="secondary"
+									size="default"
 								>
-									{isStartingLogin
+									{requestState === "starting_login"
 										? "Opening login..."
 										: "Connect Codex account"}
-								</button>
-								<button
+								</Button>
+								<Button
 									type="button"
 									onClick={() => void pollLoginStatus()}
-									disabled={isPolling}
-									className="rounded-none border border-product-border bg-product-surface px-3 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent disabled:cursor-not-allowed disabled:opacity-70"
+									disabled={requestState === "polling"}
+									variant="outline"
+									size="default"
 								>
-									{isPolling ? "Checking..." : "Check login status"}
-								</button>
+									{requestState === "polling"
+										? "Checking..."
+										: "Check login status"}
+								</Button>
 							</>
 						)}
 					</div>

@@ -82,18 +82,18 @@ export async function getCheckoutSessionState(
 	}
 
 	if (
-		session.payment_status !== "paid" &&
-		session.payment_status !== "no_payment_required"
+		session.payment_status === "paid" ||
+		session.payment_status === "no_payment_required"
 	) {
 		return {
-			kind: "payment_pending",
+			kind: "validated",
 			sessionId,
-			paymentStatus: session.payment_status,
 		};
 	}
 
 	return {
-		kind: "validated",
+		kind: "payment_pending",
 		sessionId,
+		paymentStatus: session.payment_status,
 	};
 }

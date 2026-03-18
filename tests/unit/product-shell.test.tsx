@@ -140,6 +140,13 @@ vi.mock("@clerk/nextjs", () => ({
 globalThis.React = React;
 
 import { ProductShell } from "@/features/course/shared/components/product-shell";
+import { ProductThemeProvider } from "@/features/course/shared/components/product-theme-provider";
+
+function renderProductShell(element: React.ReactElement) {
+	return renderToStaticMarkup(
+		<ProductThemeProvider initialTheme="light">{element}</ProductThemeProvider>,
+	);
+}
 
 describe("ProductShell", () => {
 	beforeEach(() => {
@@ -148,8 +155,8 @@ describe("ProductShell", () => {
 	});
 
 	it("renders unlocked header blocks as links and keeps locked blocks inert", () => {
-		const markup = renderToStaticMarkup(
-			<ProductShell initialTheme="light" showSkillRail={false}>
+		const markup = renderProductShell(
+			<ProductShell showSkillRail={false}>
 				<div>Body</div>
 			</ProductShell>,
 		);
@@ -164,9 +171,8 @@ describe("ProductShell", () => {
 	});
 
 	it("lets app surfaces opt into page scrolling without the fixed viewport shell", () => {
-		const markup = renderToStaticMarkup(
+		const markup = renderProductShell(
 			<ProductShell
-				initialTheme="light"
 				showSkillRail={false}
 				viewportMode="app"
 				appScrollMode="page"
@@ -183,12 +189,8 @@ describe("ProductShell", () => {
 	});
 
 	it("skips mission queries when mission data is explicitly disabled", () => {
-		const markup = renderToStaticMarkup(
-			<ProductShell
-				initialTheme="light"
-				showSkillRail={false}
-				enableMissionQuery={false}
-			>
+		const markup = renderProductShell(
+			<ProductShell showSkillRail={false} enableMissionQuery={false}>
 				<div>Body</div>
 			</ProductShell>,
 		);
