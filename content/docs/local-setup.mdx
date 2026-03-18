@@ -1,6 +1,6 @@
 ---
 title: Local Setup
-description: Boot the starter locally in the right order so auth and paid access do not drift out of sync.
+description: Boot the starter locally in the right order so auth, payments, and protected access do not drift out of sync.
 ---
 
 # Local Setup
@@ -13,7 +13,7 @@ Use this order:
 2. Convex
 3. Stripe
 
-If you skip the order, checkout can appear to work while the access handoff is still broken.
+If you skip the order, the app can look close to working while the paid-access handoff is still broken.
 
 ## Before you start
 
@@ -25,6 +25,7 @@ Have these ready:
 - a Convex account
 - a Stripe account
 - a Vercel account for deployment later
+- a GitHub account if you plan to use the Build starter-template path later
 
 ## First local boot
 
@@ -40,7 +41,7 @@ Then follow the provider wiring pages in this order:
 - [Clerk + Convex Auth](/docs/clerk-convex-auth)
 - [Stripe Checkout + Webhook](/docs/stripe-checkout-webhook)
 
-Once those values are in place:
+Once those values are in place, start the full local stack:
 
 ```bash
 pnpm run dev
@@ -48,19 +49,21 @@ pnpm run dev
 
 Open `http://localhost:3000`.
 
-## Local Convex vs cloud Convex
+## Which local command to use
 
-Use these commands differently:
+Use these commands intentionally:
 
 ```bash
 pnpm run dev
-pnpm exec convex dev
+pnpm run dev:web
+pnpm run dev:convex
 ```
 
-- `pnpm run dev` is the normal local app plus local Convex path
-- `pnpm exec convex dev` is the hosted Convex setup or cloud dev sync path
+- `pnpm run dev` starts the app and local Convex together
+- `pnpm run dev:web` starts only the Next.js side
+- `pnpm run dev:convex` starts only the local Convex side
 
-Do not use the cloud command by accident when you only want a normal local run.
+If you intentionally want a hosted Convex dev deployment, use `pnpm exec convex dev` manually and treat that as a different workflow.
 
 ## The fastest way to confirm the setup
 
@@ -78,6 +81,7 @@ Then finish the real flow with [Local QA](/docs/local-qa).
 You are ready for real customization when:
 
 - the marketing page loads locally
+- `/docs` loads locally
 - you can reach sign-in
 - Convex connects cleanly
 - Stripe listener setup does not report account or secret drift

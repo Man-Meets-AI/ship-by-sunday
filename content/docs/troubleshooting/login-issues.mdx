@@ -1,0 +1,39 @@
+---
+title: Login Issues
+description: Diagnose the common cases where sign-in looks close to working but protected reads, entitlements, or session recovery still fail.
+---
+
+# Login Issues
+
+Login problems are often not pure UI problems. They are usually an identity or token-shape mismatch.
+
+## Fast debug order
+
+Check these in order:
+
+1. confirm you are in the right Clerk app
+2. confirm `.env.local` points at that same Clerk app
+3. confirm the JWT template is named exactly `convex`
+4. confirm the template issuer matches the Clerk frontend API domain
+5. restart the app after changing auth values
+
+## Symptom: sign-in looks fine, but protected reads fail
+
+That usually means the browser session exists, but the server-side Clerk -> Convex read path is broken.
+
+Start with:
+
+- the `convex` template name
+- the issuer/domain match
+- the current Clerk app and browser session
+
+## Symptom: `/access-required` cannot tell who you are
+
+This usually means one of two things:
+
+- auth is broken before entitlement is even checked
+- you are signed into the wrong Clerk app or wrong browser account
+
+## What success looks like
+
+Login is healthy when sign-in works, protected routes can read viewer state, and access checks reflect the right account.

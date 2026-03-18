@@ -1,0 +1,49 @@
+---
+title: Set Up DB, Auth, and Payments
+description: Wire the dynamic stack in the right order so sign-in, entitlements, and the paid handoff work together instead of drifting apart.
+---
+
+# Set Up DB, Auth, and Payments
+
+Once the marketing surface is clear enough, wire the dynamic stack in this order:
+
+1. Clerk
+2. Convex
+3. Stripe
+
+## Why this order matters
+
+Clerk identifies the user. Convex stores entitlement and product state. Stripe finishes the payment flow. If those three systems do not agree on the same user and environment values, checkout can look successful while access still fails.
+
+## The plain-English version
+
+- Clerk is your identity system.
+- Convex is your app state and entitlement system.
+- Stripe is your payment system.
+- Environment variables are the private keys and URLs that let those systems talk to each other.
+
+## The setup path
+
+1. Follow [Clerk + Convex Auth](/docs/clerk-convex-auth).
+2. Confirm the Clerk JWT template is named exactly `convex`.
+3. Start or refresh Convex so the app gets the current `NEXT_PUBLIC_CONVEX_URL`.
+4. Follow [Stripe Checkout + Webhook](/docs/stripe-checkout-webhook).
+5. Create the Stripe product and price from the repo scripts.
+6. Start the local Stripe listener and let it sync the current webhook secret.
+
+## Safety rules
+
+- Start in test mode or a safe sandbox first.
+- Do not start with live Stripe mode.
+- Restart the app if the Stripe listener writes a new webhook secret.
+- Keep the app and Convex on the same webhook secret.
+
+## What success looks like
+
+You are wired correctly when:
+
+- sign-in works
+- protected routes can read viewer state
+- checkout starts from the app
+- the webhook grants access
+- `/checkout/success` eventually routes the buyer into `/mission`

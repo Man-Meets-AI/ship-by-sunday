@@ -48,6 +48,14 @@ If those differ, you can see real Stripe events without the starter ever receivi
 
 If Stripe does not reach `POST /api/stripe/webhook`, checkout can finish while access grant never happens.
 
+### 6. Payment succeeded but access still did not grant
+
+If the Stripe event exists and the buyer still cannot reach `/mission`, check:
+
+- whether the webhook used the current signing secret
+- whether Convex accepted the same secret
+- whether the buyer finished checkout in the same signed-in browser context used to read `viewerAccess`
+
 ## Fast debug order
 
 Use this sequence:
@@ -66,4 +74,4 @@ Stripe and Convex are aligned when:
 - Stripe forwards `checkout.session.completed`
 - the webhook accepts the signature
 - Convex writes or updates the access grant
-- the buyer leaves `/checkout/success` and lands in `/app`
+- the buyer leaves `/checkout/success` and lands in `/mission`

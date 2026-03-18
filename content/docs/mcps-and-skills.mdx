@@ -1,0 +1,38 @@
+---
+title: MCPs and Skills
+description: Use tool bridges and reusable instruction packs to make the coding agent more capable without turning prompts into vague wish lists.
+---
+
+# MCPs and Skills
+
+MCPs and skills solve two different problems:
+
+- MCPs give the agent tools or external-system access
+- skills give the agent sharper instructions for a specific provider or workflow
+
+## Good first MCPs
+
+- `Figma` for design context and design-to-code work
+- `Playwright` for browser QA and clicking real flows
+
+## Good first skills
+
+- `Clerk` for authentication work
+- `Convex` for app data and entitlement work
+- `Stripe` for checkout and webhook work
+- any repo-local docs, QA, or workflow skills the project already maintains
+
+## When to use them
+
+- use a provider skill when the problem is provider-specific
+- use Playwright when the answer depends on what actually happens in the browser
+- use Figma when the design file is the source of truth
+- do not invoke everything at once just because it exists
+
+## Practical rule
+
+The more specific the tool or skill, the more specific your prompt should be. Ask for one concrete outcome, not a vague “handle this whole app.”
+
+## What success looks like
+
+You are using MCPs and skills well when the agent has the minimum extra capability needed to solve the current problem cleanly.

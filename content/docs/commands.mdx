@@ -1,0 +1,56 @@
+---
+title: Commands
+description: Keep the short list of repo commands nearby so you can run the app, verify changes, and test the paid handoff without guessing.
+---
+
+# Commands
+
+## Daily development
+
+```bash
+pnpm install
+pnpm run dev
+pnpm run dev:web
+pnpm run dev:convex
+```
+
+## Verification
+
+```bash
+pnpm run build
+pnpm run typecheck
+pnpm run lint
+pnpm run test:unit
+pnpm run test:smoke
+pnpm run check
+```
+
+## Stripe local QA
+
+```bash
+pnpm run stripe:create-product
+pnpm run stripe:listen:local
+pnpm run stripe:webhook:sync -- --secret whsec_...
+pnpm run stripe:local:doctor
+pnpm run stripe:local:verify
+```
+
+## Clerk QA users
+
+```bash
+pnpm run clerk:test-user:check
+pnpm run clerk:test-user:create
+pnpm run clerk:test-user:check:entitled
+pnpm run clerk:test-user:create:entitled
+pnpm run clerk:test-user:prepare:entitled
+```
+
+## Optional lesson-media pipeline
+
+```bash
+pnpm run video:lessons
+pnpm run video:cut:setup
+pnpm run video:cut -- --only <fileName>
+pnpm run video:publish -- --only <fileName>
+pnpm run video:status
+```

@@ -14,12 +14,14 @@ The easiest way to break that path is secret drift between the app and Convex.
 Add these to `.env.local`:
 
 ```bash
-STRIPE_PUBLISHABLE_KEY=
 STRIPE_SECRET_KEY=
 STRIPE_PRODUCT_ID=
 STRIPE_PRICE_ID=
 STRIPE_WEBHOOK_SECRET=
+APP_BASE_URL=
 ```
+
+This repo uses Stripe-hosted Checkout, so there is no public Stripe key in the tracked env template.
 
 ## Create the product and price
 
@@ -46,6 +48,12 @@ That helper:
 
 If the listener writes a fresh secret while the app is already running, restart the app before testing checkout.
 
+## Use test mode first
+
+Do not start by wiring live mode.
+
+Start in a safe sandbox or test-mode environment, get the full handoff working there, and only then mirror the same setup into production.
+
 ## The handoff architecture
 
 The starter uses this sequence:
@@ -55,7 +63,7 @@ The starter uses this sequence:
 3. Stripe returns to `/checkout/success`
 4. Stripe webhook verifies the signature
 5. Convex upserts the active access grant
-6. `/checkout/success` waits for access, then redirects into `/app`
+6. `/checkout/success` waits for access, then redirects into `/mission`
 
 ## Health checks
 
@@ -74,7 +82,7 @@ The happy path is:
 2. Stripe forwards `checkout.session.completed`
 3. the webhook grants access
 4. `/checkout/success` stops waiting
-5. the buyer reaches `/app`
+5. the buyer reaches `/mission`
 
 ## If this breaks
 

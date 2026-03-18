@@ -1,0 +1,44 @@
+---
+title: Build Your Product
+description: Use the starter in the right order so you shape the public surface, wire the handoff, implement the first real UX, and ship without breaking the fragile parts.
+---
+
+# Build Your Product
+
+If your goal is to turn the starter into your product fast, keep the work in this order:
+
+1. set up the marketing site
+2. wire auth, database, and payments
+3. implement the first protected UX
+4. test the full buyer journey
+5. ship live
+
+## Why this order matters
+
+If you start by rewriting checkout or auth, you can spend hours breaking the only part of the app that actually turns a buyer into a signed-in entitled user.
+
+If you start with the obvious product surfaces first, you get a product-shaped app quickly while the paid-access contract stays intact.
+
+## The working rules
+
+- Keep the public offer and the protected product language aligned.
+- Work one screen or one flow at a time.
+- Add data model support only when the screen actually needs it.
+- Use browser QA after each meaningful slice, not just at the end.
+- Keep checkout, webhook, success-page, and access-recovery logic stable until the rest of the app already looks like your product.
+
+## Next pages in this track
+
+- [Set Up the Marketing Site](/docs/set-up-the-marketing-site)
+- [Set Up DB, Auth, and Payments](/docs/set-up-db-auth-and-payments)
+- [Implement the First Protected UX](/docs/implement-the-first-protected-ux)
+- [Test the Buyer Journey](/docs/test-the-buyer-journey)
+- [Ship Live](/docs/ship-live)
+
+## What success looks like
+
+You are using the starter correctly when:
+
+- the app feels like your product before you touch the fragile handoff code
+- the first protected flow is real, not placeholder content
+- the buyer journey is tested end to end before launch

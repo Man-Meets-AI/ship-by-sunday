@@ -11,26 +11,22 @@ If Clerk and Convex do not agree on the `convex` JWT template and issuer, the ap
 
 ## Required env values
 
-Add these values to `.env.local`:
+Make sure `.env.local` has these values:
 
 ```bash
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
 CLERK_SECRET_KEY=
 CLERK_FRONTEND_API_URL=
-CLERK_JWT_ISSUER_DOMAIN=
-CONVEX_DEPLOYMENT=
 NEXT_PUBLIC_CONVEX_URL=
-NEXT_PUBLIC_CONVEX_SITE_URL=
 ```
+
+`NEXT_PUBLIC_CONVEX_URL` usually comes from the Convex tooling once you run the local or hosted dev setup.
 
 ## Clerk setup
 
 1. Create a Clerk app.
-2. Copy:
-   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
-   - `CLERK_SECRET_KEY`
-   - `CLERK_FRONTEND_API_URL`
-3. Set `CLERK_JWT_ISSUER_DOMAIN` to the same issuer/domain Clerk uses for your app.
+2. Copy `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, and `CLERK_FRONTEND_API_URL`.
+3. Keep the Clerk frontend API domain consistent everywhere you wire auth.
 
 ## The `convex` template is not optional
 
@@ -46,23 +42,13 @@ This starter is hard-wired to that identifier.
 
 ## Convex setup
 
-To connect the repo to Convex:
+Connect the repo to Convex with the repo-local command:
 
 ```bash
 pnpm run dev:convex
 ```
 
-Or, when you intentionally want a hosted dev deployment:
-
-```bash
-pnpm exec convex dev
-```
-
-Convex will provide or write:
-
-- `CONVEX_DEPLOYMENT`
-- `NEXT_PUBLIC_CONVEX_URL`
-- `NEXT_PUBLIC_CONVEX_SITE_URL`
+That local flow should give you the `NEXT_PUBLIC_CONVEX_URL` value the app expects. If you intentionally switch to a hosted Convex dev flow later, keep the Clerk app, frontend API domain, and token-template assumptions aligned.
 
 ## What success looks like
 
@@ -78,7 +64,7 @@ You are correctly wired when:
 Check these in order:
 
 1. the Clerk JWT template is named exactly `convex`
-2. the issuer/domain in Clerk matches the value used by Convex
+2. the issuer/domain in Clerk matches the same Clerk frontend API domain used by the app
 3. the Convex env is not still pointed at an old or different Clerk instance
 4. you restarted the app after changing auth env values
 

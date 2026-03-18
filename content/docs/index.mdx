@@ -1,29 +1,31 @@
 ---
 title: Start Here
-description: Get the Ship by Sunday starter running in the right order without guessing.
+description: Get the Ship by Sunday starter running, understand the real handoff, and choose the right next doc without guessing.
 ---
 
 # Start Here
 
-`Ship by Sunday Starter` is a Next.js starter for products that need a public landing page, Stripe checkout, Clerk auth, Convex-backed access state, and a protected workspace.
+`Ship by Sunday Starter` is a tutorial-first starter for builders who want a public landing page, real paid access, and a protected workspace without stitching the whole stack together from scratch.
 
-If you are new to this stack, do not start by rewriting auth, payments, or access logic. Start by getting the app running cleanly, then change the obvious product surfaces first.
+If you are new to this stack, do not start by rewriting auth, payments, or access logic. Get the starter running cleanly, confirm the paid handoff works, and then change the obvious product surfaces first.
 
-## The shortest path
+## What the starter already gives you
+
+- a public marketing surface on `/`
+- a docs surface on `/docs`
+- a protected product surface on `/mission`, `/lesson/[lessonId]`, `/artifacts`, and `/settings`
+- Clerk sign-in and sign-up
+- Stripe-hosted checkout plus success and cancel flows
+- Convex-backed entitlement and resume state
+- a starter template path you can shape into your product
+
+## The fastest path
 
 1. Read [Local Setup](/docs/local-setup).
 2. Wire [Clerk + Convex Auth](/docs/clerk-convex-auth).
 3. Wire [Stripe Checkout + Webhook](/docs/stripe-checkout-webhook).
 4. Run [Local QA](/docs/local-qa).
-
-## What the starter already gives you
-
-- a public marketing page
-- Clerk sign-in and sign-up
-- Stripe checkout plus success and cancel flows
-- Convex-backed access grants
-- a protected app shell
-- a sample protected feature you can replace
+5. Move into [Build Your Product](/docs/build-your-product).
 
 ## Change these first
 
@@ -31,8 +33,8 @@ If your goal is to make the starter feel like your product fast, start here:
 
 1. rewrite the brand, promise, and price
 2. rewrite the landing page
-3. replace the sample protected feature
-4. keep the paid-access handoff intact until the app is already shaped like your product
+3. reshape the protected workspace around your real flow
+4. keep the paid-access handoff intact until the product already feels like yours
 
 ## Do not start here on day one
 
@@ -40,10 +42,24 @@ Leave these surfaces alone until the starter already looks like your product:
 
 - `app/api/stripe/*`
 - `app/checkout/*`
-- `convex/access/*`
+- `convex/course/*`
 - server-side Clerk to Convex auth wiring
 
 Those files matter, but they are the fragile part of the purchase-to-access contract.
+
+## Choose the right track
+
+- Need the architecture picture first? Read [How the Starter Works](/docs/how-the-starter-works).
+- Need the shortest setup path? Read [Local Setup](/docs/local-setup).
+- Need help shaping the starter into your product? Read [Build Your Product](/docs/build-your-product).
+- Need help working with an AI coding agent? Read [IDE + Terminal Basics](/docs/ide-and-terminal-basics) and [The Build Loop](/docs/the-build-loop).
+- Need the fastest debug order? Start in [Troubleshooting Access](/docs/troubleshooting/access).
+
+## Source-of-truth boundaries
+
+- `content/docs/` is the shipped public docs experience.
+- `docs/` is the contributor and engineering source of truth.
+- `docs/internal/` is internal launch ops and should not drive the public builder journey.
 
 ## What success looks like
 
@@ -52,11 +68,5 @@ You are in a good place to customize once you can say all of this is true:
 - the app boots locally
 - you can sign in
 - a non-entitled user sees the right locked state
-- an entitled user reaches the protected app
+- an entitled user reaches `/mission`
 - checkout and webhook wiring are understood, even if you have not changed them yet
-
-## Jump to the right page
-
-- Need the architecture picture first? Read [How the Starter Works](/docs/how-the-starter-works).
-- Need the local boot path? Read [Local Setup](/docs/local-setup).
-- Need the most common fixes? Start in [Troubleshooting](/docs/troubleshooting/access).

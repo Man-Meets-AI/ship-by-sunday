@@ -30,7 +30,7 @@ pnpm run check
 Use two real users:
 
 - non-entitled user for sign-in, `/access-required`, wrong-account, and pre-purchase checks
-- entitled user for `/app`, `/app/projects`, `/settings`, and post-access checks
+- entitled user for `/mission`, `/lesson/[lessonId]`, `/artifacts`, and `/settings` checks
 
 Commands:
 
@@ -54,13 +54,13 @@ Use this only in a safe local test environment.
 6. Complete payment with Stripe test card `4242 4242 4242 4242`, any future expiry, any CVC, ZIP `10001`.
 7. Confirm Stripe returns to `/checkout/success?session_id=...`.
 8. Confirm the webhook grants access.
-9. Confirm the app redirects into `/app`.
+9. Confirm the app redirects into `/mission`.
 
 ## Recommended flow checks
 
 ### Signed-out protected-route smoke
 
-1. Visit `/app` or `/settings` while signed out.
+1. Visit `/mission` or `/settings` while signed out.
 2. Confirm redirect to sign-in.
 
 ### Non-entitled access flow
@@ -73,7 +73,7 @@ Use this only in a safe local test environment.
 
 1. Run `pnpm run clerk:test-user:prepare:entitled`.
 2. Sign in with the entitled account.
-3. Confirm `/app`, `/app/projects`, and `/settings` load.
+3. Confirm `/mission`, one lesson route, `/artifacts`, and `/settings` load.
 
 ## What success looks like
 

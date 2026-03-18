@@ -86,4 +86,4 @@ More detail: [docs/dev/customization.md](docs/dev/customization.md)
 - Architecture: [docs/dev/architecture.md](docs/dev/architecture.md)
 - Internal launch operations: [docs/internal/README.md](docs/internal/README.md)
 
-If you are new to the repo, start with `README.md`, then `CONTRIBUTING.md`, then `docs/README.md`. The internal launch tracker and workstream docs were moved under `docs/internal/` so the public repo surface stays focused on the product and contributor workflow.
+If you are new to the repo, start with `README.md`, then `CONTRIBUTING.md`, then `docs/README.md`. The public builder docs live at `/docs` and are backed by `content/docs`, while `docs/internal/` stays focused on launch ops and internal workstreams.

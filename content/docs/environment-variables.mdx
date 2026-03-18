@@ -1,0 +1,48 @@
+---
+title: Environment Variables
+description: Understand the tracked env contract in plain English so you know which values are required, optional, and provider-specific.
+---
+
+# Environment Variables
+
+Use `.env.local.example` as the tracked contract for local setup.
+
+## Core public runtime
+
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: lets the browser talk to Clerk
+- `NEXT_PUBLIC_CONVEX_URL`: lets the browser talk to Convex
+
+## Core server runtime
+
+- `APP_BASE_URL`: canonical app URL for checkout success and cancel redirects
+- `CLERK_SECRET_KEY`: server-side Clerk access
+- `CLERK_FRONTEND_API_URL`: Clerk frontend API domain used by the auth chain
+- `STRIPE_SECRET_KEY`: Stripe API access
+- `STRIPE_WEBHOOK_SECRET`: verifies the Stripe webhook
+- `STRIPE_PRICE_ID`: optional dashboard-managed price
+- `STRIPE_PRODUCT_ID`: optional product id emitted by the Stripe script
+
+## Optional video pipeline
+
+- `AUPHONIC_API_KEY`
+- `AUPHONIC_PRESET_ID`
+- `BUNNY_STREAM_API_KEY`
+- `BUNNY_STREAM_LIBRARY_ID`
+- `VIDEO_PIPELINE_PYTHON_BIN`
+
+## Optional Codex app-server integration
+
+- `CODEX_BINARY`
+- `CODEX_APP_SERVER_ENABLED`
+- `CODEX_APP_SERVER_HOME_ROOT`
+- `CODEX_APP_SERVER_MODEL`
+- `CODEX_APP_SERVER_TIMEOUT_MS`
+
+## Optional QA helpers
+
+- `CLERK_TEST_USER_SCOPE`
+- `QA_COURSE_SLUG`
+
+## Practical rule
+
+Only set what the current flow actually needs. The app does not require every optional variable on day one.

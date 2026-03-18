@@ -1,0 +1,45 @@
+---
+title: Test the Buyer Journey
+description: Run the real path from marketing page to protected product so you catch trust-breaking issues before launch.
+---
+
+# Test the Buyer Journey
+
+Do not stop at component checks. Test the full buyer journey:
+
+1. landing page
+2. sign-in
+3. checkout
+4. `/checkout/success`
+5. entitlement grant
+6. `/mission`
+7. first protected lesson or product surface
+
+## The four realities
+
+Every pass should cover these states:
+
+- signed out
+- signed in without access
+- signed in with access
+- newly paid and waiting for access grant
+
+## The fastest local flow
+
+1. Follow [Local QA](/docs/local-qa).
+2. Use the non-entitled QA account for locked-state checks.
+3. Use the entitled QA account for product checks.
+4. Run a real local Stripe test checkout before you trust the handoff.
+
+## What to confirm
+
+- signed-out users get pushed into sign-in
+- non-entitled users land on `/access-required`
+- checkout returns to `/checkout/success`
+- the webhook grants access
+- the app recovers automatically into `/mission`
+- at least one protected lesson or core surface loads after access appears
+
+## What success looks like
+
+You are ready for a production pass when the buyer journey works without fake shortcuts or manual database intervention.

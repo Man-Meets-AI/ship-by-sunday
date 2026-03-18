@@ -1,0 +1,47 @@
+---
+title: Prompting Patterns
+description: Use prompt shapes that give the coding agent the right scope, evidence, and stop conditions instead of vague instructions.
+---
+
+# Prompting Patterns
+
+Better prompts do not need to be longer. They need to be clearer.
+
+## Setup prompt shape
+
+Use this when wiring a provider or a local stack:
+
+> Set up the current repo for `<provider>` using the existing architecture. Keep the current routes and source-of-truth boundaries intact. Tell me what env vars or dashboard steps are still needed, and verify the local flow when done.
+
+## Implementation prompt shape
+
+Use this when building a screen or flow:
+
+> Implement `<screen or flow>` in the current repo. Work screen by screen. If data model support is missing, add only the minimum support needed. Otherwise finish the UI and browser-check it.
+
+## Debug prompt shape
+
+Use this when something is failing:
+
+> Here is the exact error, the route, the user state, and the screenshot. Find the root cause, fix it, and prove the flow works again.
+
+## Cleanup prompt shape
+
+Use this when the repo is getting messy:
+
+> Find 3 cleanup opportunities that improve maintainability without changing launch-critical behavior. Use a phased approach that does not interfere with the buyer journey.
+
+## QA prompt shape
+
+Use this when you want a real browser pass:
+
+> Test the flow from `<start route>` to `<end route>` using the correct account state. Log the bugs by severity and include exact reproduction steps.
+
+## The rule underneath all of them
+
+Always include:
+
+- the exact surface you want changed
+- what must stay intact
+- how to verify success
+- a stop condition so the work does not sprawl

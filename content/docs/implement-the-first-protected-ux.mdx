@@ -1,0 +1,46 @@
+---
+title: Implement the First Protected UX
+description: Build the first real protected user flow screen by screen without rewriting the paid-access contract underneath it.
+---
+
+# Implement the First Protected UX
+
+Once the stack is wired, stop thinking in terms of abstract architecture and start thinking in terms of one real user flow.
+
+In this repo, the protected product language is:
+
+- `mission`
+- `lesson/[lessonId]`
+- `artifacts`
+- `settings`
+
+## The working rule
+
+Implement one screen at a time.
+
+If the screen needs new data support, add only the minimum data model support required for that screen. If the current model already supports the screen, finish the UI and move on.
+
+## The workflow
+
+1. Open the design file or written brief.
+2. Pick one screen.
+3. Ask the agent to implement that screen only.
+4. If data model support is missing, add only the minimum support needed.
+5. Browser-check the screen with Playwright or manual QA.
+6. Fix the rough edges before expanding scope.
+
+## Good defaults
+
+- Use Figma for visual direction when you have it.
+- Use Playwright to click the real flow instead of assuming it works.
+- Do not aim for perfect pixel parity on the first pass.
+- Protect the buyer handoff while you reshape the product UI.
+
+## What success looks like
+
+The first protected UX pass is good enough when:
+
+- the product feels like yours
+- the user can move through one real protected flow
+- the flow survives real browser QA
+- you did not break checkout, success, or access recovery

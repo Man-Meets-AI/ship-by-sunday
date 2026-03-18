@@ -1,0 +1,37 @@
+---
+title: Ship Live
+description: Turn a working local build into a safe production launch by checking the real buyer flow, environment parity, and support basics.
+---
+
+# Ship Live
+
+Shipping live is mostly an environment-parity problem plus a buyer-safety problem.
+
+## Before you launch
+
+Make sure all of this is true:
+
+- the marketing page is clear enough to buy from
+- auth works in the real deployed environment
+- checkout returns to the deployed `/checkout/success`
+- the live webhook is registered and verified
+- entitled users reach `/mission`
+- the first protected flow is usable after access appears
+
+## Production checklist
+
+1. Set production env values in Vercel, Clerk, Convex, and Stripe.
+2. Register the live Stripe webhook endpoint.
+3. Run a safe real checkout pass in the deployed environment.
+4. Confirm entitlement grant happens in the deployed environment, not just locally.
+5. Confirm the buyer reaches the protected product after payment.
+
+## Keep these in mind
+
+- This repo currently assumes the buyer completes checkout in the same signed-in browser context used to read access state.
+- If you change auth apps, webhook secrets, or Stripe accounts, re-verify the handoff instead of assuming it still works.
+- Do not promise a support or access path in public copy unless it actually exists.
+
+## What success looks like
+
+Production is ready when a brand-new buyer can understand the offer, buy cleanly, get access without confusion, and start the product immediately.

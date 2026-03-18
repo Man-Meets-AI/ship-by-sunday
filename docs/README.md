@@ -43,6 +43,7 @@ If the repo becomes more public over time, `docs/internal/` is the first candida
 
 - The public starter docs site now lives at `/docs` inside the main Next app using `Nextra`.
 - Published starter-doc content lives under `content/docs/`.
+- The public `/docs` IA is grouped into `Start Here`, `Get Running`, `Build Your Product`, `AI Workflow`, `Troubleshooting`, and `Reference`.
 - The markdown files in `docs/` remain the source of truth for contributor docs and internal launch docs, not the customer-facing starter docs site.
 - Do not publish `docs/internal/` through the starter docs site.
 - The starter docs site is manually curated in this repo for now; do not add automated sync from the starter repo until there is an explicit decision to support that workflow.

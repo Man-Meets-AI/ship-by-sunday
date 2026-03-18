@@ -1,0 +1,35 @@
+---
+title: Parallel Agents
+description: Run multiple agents safely by assigning clear ownership and avoiding overlapping file edits.
+---
+
+# Parallel Agents
+
+Running multiple agents can help, but only when the work is clearly separated.
+
+## The working rule
+
+One agent, one bounded task, one clear ownership area.
+
+## Good uses
+
+- one agent on docs
+- one agent on checkout QA
+- one agent on a protected-screen implementation
+
+## Bad uses
+
+- two agents editing the same files
+- vague “go figure it out” work
+- running parallel agents when the next step depends on one blocking answer
+
+## Practical advice
+
+- avoid worktrees unless you truly need them
+- keep file ownership clear
+- merge or review one bounded result at a time
+- use the main thread to coordinate, not to duplicate work
+
+## What success looks like
+
+Parallel agents help when they increase throughput without creating merge conflict cleanup or duplicated investigation.

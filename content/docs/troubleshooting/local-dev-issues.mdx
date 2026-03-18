@@ -1,0 +1,51 @@
+---
+title: Local Dev Issues
+description: Fix the common local-environment issues that make the app feel stale, out of sync, or randomly broken.
+---
+
+# Local Dev Issues
+
+When local development feels flaky, start with the environment before you assume the code is wrong.
+
+## Symptom: the page looks stale
+
+This usually means the local services or provider state are out of sync.
+
+Try this first:
+
+1. stop the running local services
+2. start them again with `pnpm run dev`
+3. reload the flow and retry the exact steps
+
+## Symptom: env changes do not seem to apply
+
+Check these in order:
+
+1. confirm you changed `.env.local`
+2. restart the app after the env change
+3. if Stripe rewrote the webhook secret, restart the app again
+4. confirm Convex and the app are using the same updated values
+
+## Symptom: local checkout behaves inconsistently
+
+Use `http://localhost:3000` consistently.
+
+Do not mix:
+
+- `localhost`
+- `127.0.0.1`
+
+That drift can break return URLs and local verification assumptions.
+
+## Symptom: the browser flow and the terminal disagree
+
+Run the built-in checks instead of guessing:
+
+```bash
+pnpm run build
+pnpm run stripe:local:doctor
+```
+
+## What success looks like
+
+Local dev is healthy when the app reflects current changes, provider values stay in sync, and the same flow behaves the same way after a clean restart.

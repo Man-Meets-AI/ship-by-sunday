@@ -1,0 +1,42 @@
+---
+title: IDE + Terminal Basics
+description: Learn the small set of editor and terminal concepts that matter when you are building with an AI coding agent.
+---
+
+# IDE + Terminal Basics
+
+An IDE is where you browse files, inspect code, and make changes. The terminal is where you start the app, run checks, and use scripts.
+
+You do not need to become a shell expert to use this starter well. You need a short list of commands and a clear sense of when to run them.
+
+## Commands you will actually use
+
+```bash
+pnpm install
+pnpm run dev
+pnpm run dev:web
+pnpm run dev:convex
+pnpm run build
+pnpm run check
+```
+
+## What each one does
+
+- `pnpm install` installs dependencies
+- `pnpm run dev` starts the app and local Convex together
+- `pnpm run dev:web` starts only the Next.js side
+- `pnpm run dev:convex` starts only the local Convex side
+- `pnpm run build` proves the app still compiles
+- `pnpm run check` runs the full local gate
+
+## When the page feels stale
+
+If the app stops reflecting new changes or provider state:
+
+1. stop the running local services
+2. start them again with `pnpm run dev`
+3. retry the flow before assuming the code is wrong
+
+## What success looks like
+
+You are in good shape when you can start the app, restart it cleanly, and run the basic verification commands without guessing.

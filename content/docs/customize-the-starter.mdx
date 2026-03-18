@@ -9,20 +9,21 @@ These are the intended extension points for the starter. Change these first inst
 
 ## Best first changes
 
-| Area                     | What to change first                                    | Verification     |
-| ------------------------ | ------------------------------------------------------- | ---------------- |
-| Brand and offer          | Product name, promise, price, hero copy, FAQ            | `pnpm run build` |
-| Protected app shell      | Nav, app chrome, dashboard framing, account views       | `pnpm run check` |
-| Protected sample feature | Replace the sample protected feature with your real one | `pnpm run check` |
-| Theme and global styling | Colors, typography, spacing, motion defaults            | `pnpm run build` |
+| Area | What to change first | Verification |
+| --- | --- | --- |
+| Product config | Name, promise, price, and brand-level defaults in `config/product.ts` | `pnpm run build` |
+| Marketing site | Hero copy, proof, FAQ, screenshots, and pricing sections | `pnpm run build` |
+| Protected workspace | Mission framing, lesson chrome, artifacts, and settings surfaces | `pnpm run check` |
+| Theme and styling | Colors, typography, spacing, imagery, and motion defaults | `pnpm run build` |
+| Optional build helpers | Starter-template CTA and Codex-assisted build helpers | targeted checks |
 
 ## Good first milestone
 
 A strong early milestone is:
 
 1. the public landing page is rewritten
-2. the dashboard framing is rewritten
-3. the sample protected feature is renamed or replaced
+2. the protected workspace reflects your product language
+3. the first real protected user flow is visible
 4. the paid-access contract still works
 
 ## Leave these alone until later
@@ -38,7 +39,9 @@ Those are the highest-risk parts of the starter.
 
 ## Guardrails
 
-- keep the product config as the first place to change name, promise, and price
+- keep `config/product.ts` as the first place to change product identity and route constants
+- keep the landing-page offer work inside `features/marketing/**` and `public/`
+- keep the course runtime and lesson model inside `features/course/**`
 - keep the access layer as the source of truth for entitlements
 - keep the purchase-to-access behavior aligned with the verified checkout and webhook contract
 

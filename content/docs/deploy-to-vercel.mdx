@@ -11,19 +11,14 @@ The most common mistake is getting Vercel, Clerk, Convex, and Stripe individuall
 
 ## Before the first deploy
 
-Prepare production values:
-
-```bash
-cp .env.production.example .env.production
-```
-
-Then make sure production has the right values for:
+Prepare production values in your hosting dashboards and provider dashboards. Mirror the same categories you use locally and verify they match across systems:
 
 - Clerk publishable and secret keys
-- Clerk frontend API URL and issuer domain
-- Convex deployment and public URLs
-- Stripe publishable key, secret key, product id, price id
+- Clerk frontend API URL
+- Convex public URL and any deployment values your Convex environment writes
+- Stripe secret key, product id, price id
 - live `STRIPE_WEBHOOK_SECRET`
+- `APP_BASE_URL`
 
 ## Vercel checklist
 
@@ -50,7 +45,7 @@ After deploy, confirm all of this with a real test flow:
 2. signed-in non-entitled user reaches `/access-required`
 3. live checkout returns to `/checkout/success`
 4. webhook grants access
-5. newly entitled user reaches `/app`
+5. newly entitled user reaches `/mission`
 
 ## What success looks like
 

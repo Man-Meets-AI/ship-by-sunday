@@ -12,11 +12,11 @@ import "@/features/docs/styles/docs-theme.css";
 
 export const metadata: Metadata = {
 	title: {
-		default: "Starter Docs",
-		template: "%s | Starter Docs",
+		default: "Ship by Sunday Docs",
+		template: "%s | Ship by Sunday Docs",
 	},
 	description:
-		"Setup, architecture, deployment, and troubleshooting docs for the Ship by Sunday starter.",
+		"Tutorial-first docs for getting the Ship by Sunday starter running, customized, and shipped.",
 };
 
 export default async function DocsLayout({

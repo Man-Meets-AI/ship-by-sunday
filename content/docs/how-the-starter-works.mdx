@@ -1,11 +1,11 @@
 ---
 title: How the Starter Works
-description: Understand the repo shape, the purchase-to-access handoff, and the protected app flow before you customize the starter.
+description: Understand the repo shape, the purchase-to-access handoff, and the protected workspace flow before you customize the starter.
 ---
 
 # How the Starter Works
 
-This starter is opinionated in one specific way: it gives you the full public-to-paid-to-protected path instead of just a landing page plus loose example code.
+This starter is opinionated in one specific way: it gives you the full public-to-paid-to-protected path instead of a landing page plus disconnected example code.
 
 ## Locked stack
 
@@ -20,27 +20,32 @@ This starter is opinionated in one specific way: it gives you the full public-to
 - `app/`: route entrypoints
 - `features/`: product code grouped by domain
 - `shared/`: config, env helpers, shared providers
+- `platform/`: environment parsing and integration adapters
 - `convex/`: backend functions grouped by domain
+- `content/docs/`: shipped public docs for builders
+- `docs/`: contributor docs and engineering references
 
 ## Public and protected routes
 
-The starter splits the app into two clear surfaces:
+The runtime splits into three clear surfaces:
 
 - public marketing surface on `/`
-- protected product surface on `/app`, `/app/projects`, and `/settings`
+- public docs surface on `/docs`
+- protected product surface on `/mission`, `/lesson/[lessonId]`, `/artifacts`, `/settings`, and `/access-required`
 
-That split matters because checkout and access recovery live between those two worlds.
+That split matters because checkout and access recovery live between those worlds.
 
 ## Purchase-to-access flow
 
 1. A buyer starts from the public landing page.
-2. Signed-out buyers are sent to Clerk sign-in first.
+2. Signed-out buyers are sent to Clerk sign-in first and then returned to pricing.
 3. Signed-in buyers call `POST /api/stripe/checkout`.
 4. Stripe hosts the payment flow and returns to `/checkout/success`.
 5. `POST /api/stripe/webhook` verifies the signature and handles completed checkout events.
 6. Convex upserts the active access row.
-7. `/checkout/success` waits for authenticated access state, then redirects into `/app`.
+7. `/checkout/success` waits for authenticated access state, then redirects into `/mission`.
 8. `/access-required` polls the same viewer status and recovers automatically if access appears later.
+9. Returning entitled users who hit `/` are resumed into `/mission` or their most recently worked accessible lesson unless they explicitly force marketing mode.
 
 ## Why the Clerk `convex` template matters
 
@@ -55,6 +60,6 @@ You understand the starter when you can answer these questions without guessing:
 - Which route creates the Stripe Checkout Session?
 - Which route handles the Stripe webhook?
 - Which system is the source of truth for access grants?
-- Which protected routes should a newly entitled user reach?
+- Which protected routes should a newly entitled user reach first?
 
 If any of those are fuzzy, do not rewrite the purchase-to-access path yet. Fix your understanding first.
