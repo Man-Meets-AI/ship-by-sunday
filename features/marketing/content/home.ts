@@ -14,59 +14,60 @@ export const homePageContent = {
 		topBarStart: "One weekend",
 		topBarMark: productConfig.shortMark,
 		topBarEnd: "Prototype to v1",
-		headlineLead: "Turn rough prototypes",
-		headlineAccent: "into real v1s",
-		body: `${productName} is a guided workspace for builders who can already prototype, but need a clearer system to actually ship. You get a starter template, exact paste-ready Codex instructions, and 30+ walkthroughs showing the full system in action so you can go from idea to real v1 this weekend.`,
+		headlineLead: "Go from app idea",
+		headlineAccent: "to live v1 by Sunday",
+		body: `${productName} is a custom software-backed weekend sprint for builders who can already prototype, but keep getting stuck before they ship. Scope the MVP, map the core screens, build the core flow, and leave with a live app.`,
 		primaryCta: "Get instant access",
-		secondaryCta: "See how it works",
-		eyebrow:
-			"Guided workspace + starter template + exact paste-ready Codex instructions + 30+ walkthroughs",
+		secondaryCta: "See the 4-block sprint",
+		eyebrow: "One-time payment. Lifetime access. Start the sprint right after checkout.",
 	},
 	outcomesSection: {
 		label: "Outcomes",
-		title: "By Sunday you'll have",
-		intro: "Not more theory. Four concrete outputs you'll use immediately.",
+		title: "What you'll leave the weekend with",
+		intro:
+			"By Sunday, you should leave with a tighter MVP, a clearer screen flow, a working first version, and a live link you can put in front of people. Best for builders who struggle to get a v1 out the door, not total beginners or giant multi-system ideas.",
 		items: [
-			"A clear scoped product brief",
-			"A build-ready screen plan",
-			"A working deployed v1",
-			"A live link you can share",
+			"A one-page product brief",
+			"A clear screen-by-screen plan",
+			"A working first version",
+			"A live link to test and share",
 		],
 	},
 	whyBuildersGetStuck: {
 		label: "Why Builders Get Stuck",
-		title: "Why builders who can already code still don't ship",
+		title: "Why you can build things but still don't ship",
 		intro:
-			"Development is no longer the main bottleneck. Product clarity and design clarity now matter more because code is faster and cheaper than ever.",
+			"You do not need more tutorials. You need help deciding what to build first, what screens actually matter, and how to keep the build small enough to finish.",
 		cards: [
 			{
-				title: "Code is faster than ever",
+				title: "What should I build first?",
 				description:
-					"AI can generate far more code than most builders can reliably direct.",
+					"Most stalled projects start too broad. You need help choosing the right problem, user, and first version.",
 			},
 			{
-				title: "Product judgment is still hard",
+				title: "What needs to feel usable?",
 				description:
-					"You still have to decide what to build first, what to cut, and what makes the v1 worth shipping.",
+					"A rough demo is not the same as a usable product. You need enough screen and flow clarity to make the app coherent.",
 			},
 			{
-				title: "Design direction is still hard",
+				title: "How do I keep this small enough to ship?",
 				description:
-					"You still need enough structure on flows and screens to avoid building a confusing product.",
+					"The real skill is cutting scope without killing the value. Most unfinished apps die here.",
 			},
 			{
-				title: "Scattered execution kills momentum",
+				title: "How do I get it live without chaos?",
 				description:
-					"Most unfinished projects die because the thinking is spread across too many tabs, docs, prompts, and half-decisions.",
+					"The build, deploy, and first feedback loop need one clean path instead of a mess of tabs, prompts, and half-decisions.",
 			},
 		],
 	},
 	mechanismSection: {
-		label: "Mechanism",
-		title: "The Product Trinity",
+		label: "Why this works",
+		title: "Product, design, and development have to move together",
 		intro:
-			"Shipping is not just a coding problem. It is a coordination problem across product strategy, design, and development.",
-		footer: `${productName} gives you a workspace and sprint built to keep those three parts moving together.`,
+			"Shipping is not just a coding problem. It is a coordination problem.",
+		footer:
+			"We call that The Product Trinity. It is the system behind the sprint, not another framework you have to memorize.",
 		cards: [
 			{
 				name: "Product strategy",
@@ -92,12 +93,13 @@ export const homePageContent = {
 	sprintPathSection: {
 		label: "Sprint Path",
 		title: "The 4-block path to a real v1",
-		intro: `The Product Trinity explains why people stay stuck. The 4-block sprint is how ${productName} gets you unstuck.`,
-		cardHint: "Hover or tap for the rest below",
-		deepDiveLabel: "Block deep dive",
-		deepDiveTitle: "The sprint",
+		intro:
+			"Each block ends with something real, so you keep moving toward a shipped first version instead of getting stuck in theory.",
+		cardHint: "See block details below",
+		deepDiveLabel: "4-block sprint",
+		deepDiveTitle: "How the weekend sprint works",
 		deepDiveIntro:
-			"The mechanism explains why builders get stuck. This section shows how the sprint actually gets them moving.",
+			"This is the path: scope it, design it, build it, ship it.",
 		outcomesLabel: "Outcomes",
 		blocks: [
 			{
@@ -280,8 +282,32 @@ export const homePageContent = {
 					"Builders who can already prototype or get things working, but keep getting stuck before they ship a real v1.",
 			},
 			{
+				question: "What happens right after I pay?",
+				answer:
+					"If you are not signed in yet, you will sign in first. After Stripe checkout, you will land on the success page while access finalizes. As soon as it is ready, you will be sent into Mission to start the sprint.",
+			},
+			{
 				question: "Is this a coding course?",
 				answer: `It includes walkthroughs, but ${productName} is not just a video course. It is a guided workspace built to help you scope, design, build, and ship a real v1.`,
+			},
+			{
+				question: "What if I already know a lot of this?",
+				answer:
+					"Then the value is not more theory. The value is the structure. Ship by Sunday gives you a clean sequence, concrete outputs, and a tighter path from idea to shipped version so you actually finish.",
+			},
+			{
+				question: "What if I buy this and still do not finish?",
+				answer:
+					"The sprint is built around four blocks and concrete outputs so you keep moving. If you complete the CEO Block within 14 days and do not leave with a clear One-Page Product Brief and tighter MVP scope, email us and we will refund you.",
+			},
+			{
+				question: "What kind of app is a good fit for this?",
+				answer:
+					"Scoped web apps, MVPs, narrow tools, and practical products are the best fit. It is not for giant multi-system startup ideas.",
+			},
+			{
+				question: "How long do I get access?",
+				answer: "Lifetime access. One payment, no subscription.",
 			},
 			{
 				question: "Do I need product experience?",
@@ -295,11 +321,6 @@ export const homePageContent = {
 			{
 				question: "Why does the workspace matter?",
 				answer: `Because scattered execution kills momentum. ${productName} keeps product thinking, design direction, and build execution in one place so you are not juggling random tabs and half-decisions.`,
-			},
-			{
-				question: "What kind of app is a good fit for this?",
-				answer:
-					"Scoped web apps, MVPs, narrow tools, and practical products are the best fit. It is not for giant multi-system startup ideas.",
 			},
 			{
 				question: "What is the starter template?",
@@ -328,11 +349,13 @@ export const homePageContent = {
 		titleLead: "Go from idea to v1",
 		titleAccent: "this weekend",
 		intro:
-			"A guided workspace, starter template, exact paste-ready Codex instructions, and 30+ walkthroughs showing the full system in action. Everything you need to go from rough prototype to shipped v1 this weekend.",
+			"A custom software-backed weekend sprint for builders who struggle to get a v1 out the door. Scope the MVP, map the core screens, build the core flow, and get a real first version live.",
 		priceDisplay: productConfig.priceDisplay,
-		eyebrow: "Immediate access. No subscription. Lifetime access.",
+		eyebrow: "One-time payment. Lifetime access. No subscription.",
 		paymentLabel: "One-time payment",
 		ctaTitle: "Get instant access",
+		trustLine:
+			"After checkout, your access finishes syncing and you go straight into Mission to start.",
 		includes: [
 			`${productName} guided workspace`,
 			"4-block guided sprint",

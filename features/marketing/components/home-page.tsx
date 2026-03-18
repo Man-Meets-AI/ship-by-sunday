@@ -116,7 +116,7 @@ export default async function Page({
 						/>
 						<div className="flex flex-col items-stretch">
 							<a
-								href="#how-it-works"
+								href="#system"
 								className={`${publicSecondaryActionClassName} min-w-full sm:min-w-72 sm:px-8`}
 							>
 								{hero.secondaryCta}
@@ -183,38 +183,6 @@ export default async function Page({
 						</div>
 					))}
 				</div>
-			</SectionFrame>
-
-			<SectionFrame id="how-it-works" className="relative overflow-hidden">
-				<SectionLabel>{mechanismSection.label}</SectionLabel>
-				<div className="mt-3 max-w-4xl">
-					<h2 className="font-display text-[2.7rem] uppercase leading-[0.84] tracking-[-0.04em] sm:text-[5rem]">
-						{mechanismSection.title}
-					</h2>
-					<p className="mt-3 max-w-3xl text-pretty text-base font-medium leading-relaxed text-product-muted sm:text-xl">
-						{mechanismSection.intro}
-					</p>
-				</div>
-
-				<div className={`mt-8 ${publicDividerGridClassName} lg:grid-cols-3`}>
-					{mechanismSection.cards.map((card) => (
-						<article key={card.name} className="bg-product-surface p-5 sm:p-6">
-							<p className="font-display text-[2.1rem] uppercase leading-none tracking-[-0.03em] sm:text-[2.8rem]">
-								{card.name}
-							</p>
-							<p className="mt-5 text-base font-black uppercase leading-tight tracking-[0.04em] text-product-text sm:text-lg">
-								{card.prompt}
-							</p>
-							<p className="mt-4 text-sm font-medium leading-relaxed text-product-muted sm:text-base">
-								{card.description}
-							</p>
-						</article>
-					))}
-				</div>
-
-				<p className="mt-6 max-w-3xl text-base font-semibold leading-relaxed text-product-muted sm:text-lg">
-					{mechanismSection.footer}
-				</p>
 			</SectionFrame>
 
 			<SectionFrame id="system" className="relative overflow-hidden">
@@ -322,6 +290,38 @@ export default async function Page({
 					))}
 				</div>
 			</div>
+
+			<SectionFrame className="relative overflow-hidden">
+				<SectionLabel>{mechanismSection.label}</SectionLabel>
+				<div className="mt-3 max-w-4xl">
+					<h2 className="font-display text-[2.7rem] uppercase leading-[0.84] tracking-[-0.04em] sm:text-[5rem]">
+						{mechanismSection.title}
+					</h2>
+					<p className="mt-3 max-w-3xl text-pretty text-base font-medium leading-relaxed text-product-muted sm:text-xl">
+						{mechanismSection.intro}
+					</p>
+				</div>
+
+				<div className={`mt-8 ${publicDividerGridClassName} lg:grid-cols-3`}>
+					{mechanismSection.cards.map((card) => (
+						<article key={card.name} className="bg-product-surface p-5 sm:p-6">
+							<p className="font-display text-[2.1rem] uppercase leading-none tracking-[-0.03em] sm:text-[2.8rem]">
+								{card.name}
+							</p>
+							<p className="mt-5 text-base font-black uppercase leading-tight tracking-[0.04em] text-product-text sm:text-lg">
+								{card.prompt}
+							</p>
+							<p className="mt-4 text-sm font-medium leading-relaxed text-product-muted sm:text-base">
+								{card.description}
+							</p>
+						</article>
+					))}
+				</div>
+
+				<p className="mt-6 max-w-3xl text-base font-semibold leading-relaxed text-product-muted sm:text-lg">
+					{mechanismSection.footer}
+				</p>
+			</SectionFrame>
 
 			<SectionFrame className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
 				<div className="border border-product-border/60 p-5">
@@ -527,6 +527,10 @@ export default async function Page({
 						label={pricingSection.ctaTitle}
 						className={`${publicPrimaryActionClassName} mt-6`}
 					/>
+
+					<p className="mt-4 max-w-lg text-sm leading-relaxed text-product-muted sm:text-base">
+						{pricingSection.trustLine}
+					</p>
 
 					<p className="mt-6 max-w-lg text-sm font-semibold uppercase leading-relaxed tracking-[0.08em] text-product-muted">
 						{pricingSection.guarantee}

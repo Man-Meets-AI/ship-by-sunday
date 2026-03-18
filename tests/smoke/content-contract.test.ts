@@ -26,10 +26,30 @@ describe("lesson content contract", () => {
 		expect(productConfig.name).toBeTruthy();
 		expect(productConfig.courseSlug).toMatch(/^[a-z0-9-]+$/);
 		expect(homePageContent.hero.body).toContain(productConfig.name);
+		expect(homePageContent.hero.secondaryCta).toBe("See the 4-block sprint");
 		expect(homePageContent.pricingSection.priceDisplay).toBe(
 			productConfig.priceDisplay,
 		);
+		expect(homePageContent.pricingSection.trustLine).toBe(
+			"After checkout, your access finishes syncing and you go straight into Mission to start.",
+		);
 		expect(homePageContent.footerWordmark).toBe(productConfig.name);
+	});
+
+	it("keeps the homepage FAQ ordered around the top launch objections", () => {
+		expect(
+			homePageContent.faqSection.items
+				.slice(0, 7)
+				.map((item) => item.question),
+		).toEqual([
+			"Who is this for?",
+			"What happens right after I pay?",
+			"Is this a coding course?",
+			"What if I already know a lot of this?",
+			"What if I buy this and still do not finish?",
+			"What kind of app is a good fit for this?",
+			"How long do I get access?",
+		]);
 	});
 
 	it("keeps redirects pointed at supported destinations in the new sequence", () => {
