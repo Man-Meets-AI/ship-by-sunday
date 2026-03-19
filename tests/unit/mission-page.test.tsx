@@ -339,7 +339,7 @@ import { MissionPage } from "@/features/course/mission/components/mission-page";
 
 describe("MissionPage", () => {
 	it("prioritizes the current task and demotes the rest of the route", () => {
-		const markup = renderToStaticMarkup(<MissionPage initialTheme="light" />);
+		const markup = renderToStaticMarkup(<MissionPage />);
 
 		expect(markup).toContain('data-viewport-mode="app"');
 		expect(markup).toContain('data-app-scroll-mode="page"');

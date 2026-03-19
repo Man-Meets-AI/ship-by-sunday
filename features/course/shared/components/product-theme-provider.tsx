@@ -1,13 +1,14 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo } from "react";
+import { ThemeProvider, useTheme } from "next-themes";
 
 import {
 	getProductThemeCookieString,
 	isProductTheme,
-	PRODUCT_THEME_STORAGE_KEY,
 	type ProductTheme,
 } from "@/features/course/shared/utils/product-theme";
+import { PRODUCT_THEME_STORAGE_KEY } from "@/features/course/shared/utils/product-theme";
 
 type ProductThemeContextValue = {
 	theme: ProductTheme;
@@ -19,66 +20,33 @@ const ProductThemeContext = createContext<ProductThemeContextValue | null>(
 	null,
 );
 
-export function ProductThemeProvider({
+function ProductThemeContextBridge({
 	initialTheme,
 	children,
 }: {
 	initialTheme: ProductTheme;
 	children: React.ReactNode;
 }) {
-	const [theme, setThemeState] = useState<ProductTheme>(() => {
-		if (typeof document !== "undefined") {
-			const rootTheme = document.documentElement.dataset.productTheme;
-			if (isProductTheme(rootTheme)) {
-				return rootTheme;
-			}
-		}
-
-		return initialTheme;
-	});
+	const { resolvedTheme, setTheme } = useTheme();
+	const theme = isProductTheme(resolvedTheme) ? resolvedTheme : initialTheme;
 
 	useEffect(() => {
 		document.documentElement.dataset.productTheme = theme;
-		document.documentElement.classList.remove("light", "dark");
-		document.documentElement.classList.add(theme);
-		window.localStorage.setItem(PRODUCT_THEME_STORAGE_KEY, theme);
 		document.cookie = getProductThemeCookieString(theme);
-	}, [theme]);
-
-	useEffect(() => {
-		const root = document.documentElement;
-
-		const syncThemeFromDom = () => {
-			const rootTheme = root.dataset.productTheme;
-
-			if (isProductTheme(rootTheme) && rootTheme !== theme) {
-				setThemeState(rootTheme);
-			}
-		};
-
-		const observer = new MutationObserver(syncThemeFromDom);
-		observer.observe(root, {
-			attributes: true,
-			attributeFilter: ["data-product-theme"],
-		});
-
-		return () => {
-			observer.disconnect();
-		};
 	}, [theme]);
 
 	const value = useMemo<ProductThemeContextValue>(
 		() => ({
 			theme,
 			setTheme: (nextTheme) => {
-				setThemeState(nextTheme);
+				setTheme(nextTheme);
 			},
 			toggleTheme: () => {
 				const nextTheme = theme === "dark" ? "light" : "dark";
-				setThemeState(nextTheme);
+				setTheme(nextTheme);
 			},
 		}),
-		[theme],
+		[setTheme, theme],
 	);
 
 	return (
@@ -87,6 +55,28 @@ export function ProductThemeProvider({
 				{children}
 			</div>
 		</ProductThemeContext.Provider>
+	);
+}
+
+export function ProductThemeProvider({
+	initialTheme,
+	children,
+}: {
+	initialTheme: ProductTheme;
+	children: React.ReactNode;
+}) {
+	return (
+		<ThemeProvider
+			attribute="class"
+			defaultTheme={initialTheme}
+			enableSystem={false}
+			storageKey={PRODUCT_THEME_STORAGE_KEY}
+			disableTransitionOnChange
+		>
+			<ProductThemeContextBridge initialTheme={initialTheme}>
+				{children}
+			</ProductThemeContextBridge>
+		</ThemeProvider>
 	);
 }
 
