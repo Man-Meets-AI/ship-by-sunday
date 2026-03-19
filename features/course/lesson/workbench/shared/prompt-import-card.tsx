@@ -4,10 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { apiRouteConfig, timingConfig } from "@/config/product";
 import { assertNever } from "@/features/course/lesson/lib/assert";
-import type {
-	LessonPromptImport,
-	LessonPromptTemplateId,
-} from "@/features/course/lesson/model/contracts";
+import type { LessonPromptImport } from "@/features/course/lesson/model/contracts";
 import {
 	buildPromptImportFieldValues,
 	getPromptTemplateState,
@@ -146,10 +143,7 @@ function getImportSuccessMessage(
 		}
 	}
 
-	return assertNever(
-		promptImport,
-		"Unhandled prompt import template",
-	);
+	return assertNever(promptImport, "Unhandled prompt import template");
 }
 
 export function PromptImportCard({

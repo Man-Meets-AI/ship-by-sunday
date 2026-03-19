@@ -1,0 +1,18 @@
+{
+	"$schema": "./node_modules/oxfmt/configuration_schema.json",
+	"singleQuote": false,
+	"trailingComma": "all",
+	"useTabs": true,
+	"printWidth": 80,
+	"sortPackageJson": false,
+	"ignorePatterns": [
+		".claude/**",
+		".agents/**",
+		".convex/**",
+		".next/**",
+		"coverage/**",
+		"node_modules/**",
+		"convex/_generated/**",
+		"scripts/vendor/for_youtube/**"
+	]
+}

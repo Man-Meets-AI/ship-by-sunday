@@ -125,7 +125,7 @@ export function PickOneUserSupport({
 			label: "User",
 			filled: Boolean(
 				getTextValue(fieldValues, "selected_problem_owner") ||
-					selectedProblem?.owner,
+				selectedProblem?.owner,
 			),
 			value:
 				getTextValue(fieldValues, "selected_problem_owner") ||
@@ -136,7 +136,7 @@ export function PickOneUserSupport({
 			label: "Chosen problem",
 			filled: Boolean(
 				getTextValue(fieldValues, "selected_problem_statement") ||
-					selectedProblem?.statement,
+				selectedProblem?.statement,
 			),
 			value:
 				getTextValue(fieldValues, "selected_problem_statement") ||
@@ -236,10 +236,7 @@ export function PickOneUserSupport({
 												status="ready"
 												label={`Problem ${problem.index}`}
 											/>
-											<LessonChromeChip
-												status={chipStatus}
-												label={chipLabel}
-											/>
+											<LessonChromeChip status={chipStatus} label={chipLabel} />
 										</div>
 										<p className="mt-4 text-balance font-display text-[1.35rem] uppercase leading-[0.92] tracking-[0.04em] text-product-text">
 											{problem.owner}

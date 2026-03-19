@@ -3,10 +3,7 @@ import type {
 	WorkbenchField,
 } from "@/features/course/lesson/model/manifest";
 import { Button } from "@/components/ui/button";
-import {
-	assert,
-	assertNever,
-} from "@/features/course/lesson/lib/assert";
+import { assert, assertNever } from "@/features/course/lesson/lib/assert";
 import { Input } from "@/components/ui/input";
 import {
 	Select,
@@ -67,10 +64,7 @@ function TableCellControl({
 
 	switch (column.kind) {
 		case "select": {
-			assert(
-				column.options,
-				`Table column "${column.id}" is missing options.`,
-			);
+			assert(column.options, `Table column "${column.id}" is missing options.`);
 
 			return (
 				<Select value={value} onValueChange={onChange}>
@@ -118,7 +112,10 @@ export function EditableTableField({
 	onChange: (value: unknown) => void;
 	showLabel?: boolean;
 }) {
-	assert(field.columns?.length, `Table field "${field.id}" is missing columns.`);
+	assert(
+		field.columns?.length,
+		`Table field "${field.id}" is missing columns.`,
+	);
 	const columns = field.columns;
 	const draftRows = getDraftRows(value, columns);
 	const rowKeyCounts = new Map<string, number>();

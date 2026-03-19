@@ -38,9 +38,7 @@ describe("lesson content contract", () => {
 
 	it("keeps the homepage FAQ ordered around the top launch objections", () => {
 		expect(
-			homePageContent.faqSection.items
-				.slice(0, 7)
-				.map((item) => item.question),
+			homePageContent.faqSection.items.slice(0, 7).map((item) => item.question),
 		).toEqual([
 			"Who is this for?",
 			"What happens right after I pay?",

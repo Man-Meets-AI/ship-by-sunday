@@ -1,6 +1,6 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
-import { Bebas_Neue, Manrope, Geist } from "next/font/google";
+import { Bebas_Neue, Geist } from "next/font/google";
 import "@xyflow/react/dist/style.css";
 
 import { manifestConfig, productConfig } from "@/config/product";
@@ -21,7 +21,7 @@ const display = Bebas_Neue({
 	weight: "400",
 });
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
 	title: productConfig.name,
@@ -46,7 +46,12 @@ export default async function RootLayout({
 			lang="en"
 			data-product-theme={initialTheme}
 			suppressHydrationWarning
-			className={cn(display.variable, initialTheme, "font-sans", geist.variable)}
+			className={cn(
+				display.variable,
+				initialTheme,
+				"font-sans",
+				geist.variable,
+			)}
 		>
 			<head>
 				<style>{getProductThemeTokenStyles()}</style>

@@ -35,11 +35,21 @@ function LessonChromeChipIcon({ status }: { status: LessonChromeChipStatus }) {
 	}
 
 	if (status === "active") {
-		return <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-current" />;
+		return (
+			<span
+				aria-hidden="true"
+				className="h-1.5 w-1.5 rounded-full bg-current"
+			/>
+		);
 	}
 
 	if (status === "ready") {
-		return <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full border border-current" />;
+		return (
+			<span
+				aria-hidden="true"
+				className="h-1.5 w-1.5 rounded-full border border-current"
+			/>
+		);
 	}
 
 	return (

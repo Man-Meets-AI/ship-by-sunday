@@ -168,7 +168,8 @@ export function ReferenceGalleryFieldControl({
 		} catch {
 			setUploadState({
 				status: "error",
-				message: "Upload failed. Drop or paste image files only, then try again.",
+				message:
+					"Upload failed. Drop or paste image files only, then try again.",
 			});
 		}
 	}
@@ -404,9 +405,7 @@ export function ReferenceGalleryFieldControl({
 			</div>
 
 			{uploadState.status === "error" ? (
-				<p className="text-sm font-medium text-danger">
-					{uploadState.message}
-				</p>
+				<p className="text-sm font-medium text-danger">{uploadState.message}</p>
 			) : null}
 			{field.helpText ? (
 				<p className="text-xs font-medium leading-snug text-product-muted">

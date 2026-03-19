@@ -9,11 +9,9 @@
 		"build": "next build",
 		"start": "next start",
 		"typecheck": "next build",
-		"lint": "eslint . --max-warnings=0",
-		"format": "prettier --write .",
-		"format:check": "prettier --check .",
-		"biome:check": "biome check .",
-		"biome:write": "biome check --write .",
+		"lint": "oxlint --deny-warnings",
+		"format": "oxfmt",
+		"format:check": "oxfmt --check",
 		"test:unit": "vitest run tests/unit",
 		"test:smoke": "vitest run tests/smoke",
 		"check": "pnpm run lint && pnpm run format:check && pnpm run test:unit && pnpm run test:smoke && pnpm run build",
@@ -35,7 +33,8 @@
 		"clerk:test-user:create": "node --env-file=.env.local scripts/ensure-clerk-test-user.mjs create",
 		"clerk:test-user:check:entitled": "CLERK_TEST_USER_SCOPE=ship-by-sunday-clerk-entitled node --env-file=.env.local scripts/ensure-clerk-test-user.mjs check",
 		"clerk:test-user:create:entitled": "CLERK_TEST_USER_SCOPE=ship-by-sunday-clerk-entitled node --env-file=.env.local scripts/ensure-clerk-test-user.mjs create",
-		"clerk:test-user:prepare:entitled": "CLERK_TEST_USER_SCOPE=ship-by-sunday-clerk-entitled node --env-file=.env.local scripts/ensure-clerk-entitled-test-user.mjs"
+		"clerk:test-user:prepare:entitled": "CLERK_TEST_USER_SCOPE=ship-by-sunday-clerk-entitled node --env-file=.env.local scripts/ensure-clerk-entitled-test-user.mjs",
+		"lint:fix": "oxlint --fix --fix-suggestions"
 	},
 	"dependencies": {
 		"@base-ui/react": "^1.3.0",
@@ -59,19 +58,17 @@
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.8",
-		"@convex-dev/eslint-plugin": "^1.1.1",
 		"@tailwindcss/postcss": "4.2.1",
 		"@types/node": "25.5.0",
 		"@types/react": "19.2.14",
 		"@types/react-dom": "19.2.3",
 		"concurrently": "^9.2.1",
-		"eslint": "^9.39.4",
-		"eslint-config-next": "^16.1.6",
 		"postcss": "8.5.8",
-		"prettier": "^3.8.1",
 		"tailwindcss": "4.2.1",
 		"typescript": "5.9.3",
-		"vitest": "^4.1.0"
-	}
+		"vitest": "^4.1.0",
+		"oxfmt": "^0.41.0",
+		"oxlint": "^1.56.0"
+	},
+	"packageManager": "pnpm@9.15.4"
 }

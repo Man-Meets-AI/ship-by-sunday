@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo } from "react";
+import { createContext, useContext, useEffect } from "react";
 import { ThemeProvider, useTheme } from "next-themes";
 
 import {
@@ -35,22 +35,16 @@ function ProductThemeContextBridge({
 		document.cookie = getProductThemeCookieString(theme);
 	}, [theme]);
 
-	const value = useMemo<ProductThemeContextValue>(
-		() => ({
-			theme,
-			setTheme: (nextTheme) => {
-				setTheme(nextTheme);
-			},
-			toggleTheme: () => {
-				const nextTheme = theme === "dark" ? "light" : "dark";
-				setTheme(nextTheme);
-			},
-		}),
-		[setTheme, theme],
-	);
-
 	return (
-		<ProductThemeContext.Provider value={value}>
+		<ProductThemeContext.Provider
+			value={{
+				theme,
+				setTheme,
+				toggleTheme() {
+					setTheme(theme === "dark" ? "light" : "dark");
+				},
+			}}
+		>
 			<div className="product-theme min-h-screen" data-theme={theme}>
 				{children}
 			</div>
