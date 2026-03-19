@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import type { LessonContent } from "@/features/course/lesson/model/manifest";
 
 import { WorkbenchCard } from "./workbench-card";
@@ -20,14 +21,15 @@ export function TemplateDownloadCard({
 
 	return (
 		<WorkbenchCard label="Template">
-			<a
-				href={lessonContent.workbench.templateDownloadHref}
-				target={isExternalLink ? "_blank" : undefined}
-				rel={isExternalLink ? "noreferrer" : undefined}
-				className="inline-flex rounded-none border border-product-border bg-product-surface px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.22em] text-product-text transition-colors hover:bg-product-surface-alt"
-			>
-				{lessonContent.workbench.templateDownloadLabel}
-			</a>
+			<Button asChild variant="outline" size="sm">
+				<a
+					href={lessonContent.workbench.templateDownloadHref}
+					target={isExternalLink ? "_blank" : undefined}
+					rel={isExternalLink ? "noreferrer" : undefined}
+				>
+					{lessonContent.workbench.templateDownloadLabel}
+				</a>
+			</Button>
 		</WorkbenchCard>
 	);
 }

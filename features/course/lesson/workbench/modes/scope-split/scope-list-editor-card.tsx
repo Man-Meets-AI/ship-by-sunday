@@ -1,6 +1,7 @@
 import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
 
-import { inputBaseClass } from "../../fields/field-styles";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { WorkbenchCard } from "../../shared/workbench-card";
 
 type ScopeListEditorCardProps = {
@@ -17,8 +18,6 @@ type ScopeListEditorCardProps = {
 	invalidMessage?: string;
 	onChange: (value: string[]) => void;
 };
-
-const rowInputClass = inputBaseClass.replace("mt-1.5 ", "");
 
 export function ScopeListEditorCard({
 	field,
@@ -46,18 +45,13 @@ export function ScopeListEditorCard({
 	};
 
 	const removeRow = (rowIndex: number) => {
-		if (items.length === 0) {
-			onChange([]);
-			return;
-		}
-
 		onChange(
 			items.filter((_, currentRowIndex) => currentRowIndex !== rowIndex),
 		);
 	};
 
 	const addRow = () => {
-		onChange(items.length > 0 ? [...items, ""] : [""]);
+		onChange([...items, ""]);
 	};
 
 	return (
@@ -98,35 +92,32 @@ export function ScopeListEditorCard({
 									{String(index + 1).padStart(2, "0")}
 								</span>
 								<div className="flex-1">
-									<input
+									<Input
 										type="text"
 										value={item}
 										onChange={(event) => updateRow(index, event.target.value)}
 										placeholder={rowPlaceholder}
-										className={rowInputClass}
+										className="py-2"
 									/>
 								</div>
-								<button
+								<Button
 									type="button"
 									onClick={() => removeRow(index)}
-									className="inline-flex h-9 shrink-0 items-center border border-product-border bg-product-surface px-3 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent"
+									variant="outline"
+									size="sm"
 									aria-label={`Remove ${field.label} item ${index + 1}`}
 								>
 									Remove
-								</button>
+								</Button>
 							</li>
 						);
 					})}
 				</ol>
 
 				<div className="flex flex-wrap items-center gap-2">
-					<button
-						type="button"
-						onClick={addRow}
-						className="inline-flex items-center border border-product-border bg-product-surface px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:border-product-accent hover:text-product-accent"
-					>
+					<Button type="button" onClick={addRow} variant="outline" size="sm">
 						{addButtonLabel}
-					</button>
+					</Button>
 					<p className="text-[11px] leading-relaxed text-product-muted">
 						{supportText}
 					</p>

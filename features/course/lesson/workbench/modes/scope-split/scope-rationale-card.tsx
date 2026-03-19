@@ -1,6 +1,6 @@
 import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
 
-import { inputBaseClass } from "../../fields/field-styles";
+import { Textarea } from "@/components/ui/textarea";
 import { WorkbenchCard } from "../../shared/workbench-card";
 
 type ScopeRationaleCardProps = {
@@ -11,8 +11,6 @@ type ScopeRationaleCardProps = {
 	invalidMessage?: string;
 	onChange: (value: string) => void;
 };
-
-const textareaClass = inputBaseClass.replace("mt-1.5 ", "");
 
 export function ScopeRationaleCard({
 	field,
@@ -52,7 +50,7 @@ export function ScopeRationaleCard({
 					</span>
 				</div>
 
-				<textarea
+				<Textarea
 					value={value}
 					onChange={(event) => onChange(event.target.value)}
 					rows={field.rows ?? 4}
@@ -60,7 +58,7 @@ export function ScopeRationaleCard({
 						field.placeholder ??
 						"This is enough because the user can still get the promised win through one clean core flow this weekend."
 					}
-					className={textareaClass}
+					className="font-mono"
 				/>
 
 				<p className="text-[11px] leading-relaxed text-product-muted">

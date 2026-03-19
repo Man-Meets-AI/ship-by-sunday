@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { Button } from "@/components/ui/button";
 import { routeConfig } from "@/config/product";
 import { useLessonChromeState } from "@/features/course/lesson/hooks/use-lesson-chrome-state";
 import { useLessonCompletion } from "@/features/course/lesson/hooks/use-lesson-completion";
@@ -173,19 +174,17 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
 						{lesson.prevLessonId ?? "the previous unlocked lesson"} first.
 					</p>
 					<div className="mt-6 flex flex-wrap justify-center gap-3">
-						<button
+						<Button
 							type="button"
 							onClick={() => router.back()}
-							className="rounded-none border border-product-border bg-product-surface px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-text transition-colors hover:bg-product-surface-alt"
+							variant="outline"
+							size="default"
 						>
 							Go back
-						</button>
-						<Link
-							href={routeConfig.mission}
-							className="rounded-none border border-product-accent bg-product-chip px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
-						>
-							Open mission
-						</Link>
+						</Button>
+						<Button asChild variant="secondary" size="default">
+							<Link href={routeConfig.mission}>Open mission</Link>
+						</Button>
 					</div>
 				</section>
 			</ProductShell>
@@ -217,20 +216,22 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
 	};
 
 	const completionAction = (
-		<button
+		<Button
 			type="button"
 			disabled={completionButtonDisabled}
 			aria-busy={isCompleting}
 			onClick={handleCompletionAction}
-			className={
+			variant={
 				isCelebrating
-					? "sbs-press-feedback inline-flex items-center gap-1.5 rounded-none border border-product-accent bg-product-accent px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-bg shadow-[0_0_0_1px_rgba(var(--product-accent),0.3),0_0_18px_rgba(var(--product-accent),0.24)]"
+					? "solid"
 					: isCompleting
-						? "inline-flex items-center gap-1.5 rounded-none border border-product-accent bg-product-accent px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-bg shadow-[0_0_0_1px_rgba(var(--product-accent),0.24)]"
+						? "solid"
 						: lessonReadyToComplete
-							? "sbs-press-feedback inline-flex items-center gap-1.5 rounded-none border border-product-accent bg-product-accent px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-bg shadow-[0_0_0_1px_rgba(var(--product-accent),0.3),0_0_18px_rgba(var(--product-accent),0.22)] transition-all hover:brightness-95 motion-safe:animate-pulse"
-							: "inline-flex cursor-not-allowed items-center gap-1.5 rounded-none border border-product-border bg-product-surface px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted"
+							? "solid"
+							: "outline"
 			}
+			size="sm"
+			className={lessonReadyToComplete ? "motion-safe:animate-pulse" : ""}
 		>
 			{isCelebrating ? (
 				<>
@@ -252,7 +253,7 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
 			) : (
 				completionButtonLabel
 			)}
-		</button>
+		</Button>
 	);
 
 	const footerActions = (

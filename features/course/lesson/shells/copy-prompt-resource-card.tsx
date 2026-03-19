@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { timingConfig } from "@/config/product";
 import type { LessonPromptResourceContent } from "@/features/course/lesson/model/contracts";
 import { getPromptTemplateState } from "@/features/course/lesson/model/research-prompt";
@@ -27,12 +29,10 @@ export function CopyPromptResourceCard({
 		"idle",
 	);
 	const resetTimeoutRef = useRef<number | null>(null);
-	const promptResetKeyRef = useRef<string | null>(null);
 	const { prompt, disabledReason } = getPromptResourceState(
 		resource,
 		pinnedArtifacts,
 	);
-	const promptResetKey = `${prompt ?? ""}::${disabledReason ?? ""}`;
 
 	useEffect(() => {
 		return () => {
@@ -43,13 +43,8 @@ export function CopyPromptResourceCard({
 	}, []);
 
 	useEffect(() => {
-		if (promptResetKeyRef.current === promptResetKey) {
-			return;
-		}
-
-		promptResetKeyRef.current = promptResetKey;
 		setCopyState("idle");
-	}, [promptResetKey]);
+	}, [disabledReason, prompt]);
 
 	const copyPrompt = () => {
 		if (!prompt || disabledReason) {
@@ -96,14 +91,15 @@ export function CopyPromptResourceCard({
 				</p>
 			) : null}
 			<div className="mt-3 flex flex-wrap items-center gap-2">
-				<button
+				<Button
 					type="button"
 					onClick={copyPrompt}
 					disabled={Boolean(disabledReason)}
-					className="rounded-none border border-product-accent bg-product-chip px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg disabled:cursor-not-allowed disabled:border-product-border disabled:bg-product-surface disabled:text-product-muted"
+					variant="secondary"
+					size="xs"
 				>
 					{copyState === "copied" ? "Copied" : "Copy prompt"}
-				</button>
+				</Button>
 				{copyState === "error" && !disabledReason ? (
 					<p className="text-[12px] leading-[1.6] text-product-muted">
 						Clipboard unavailable. Copy from the prompt block below.
@@ -112,11 +108,11 @@ export function CopyPromptResourceCard({
 			</div>
 			<div className="mt-3 rounded-none border border-product-border/55 bg-product-surface px-3 py-3">
 				{prompt ? (
-					<textarea
+					<Textarea
 						readOnly
 						value={prompt}
 						rows={14}
-						className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[12px] leading-[1.68] text-product-text outline-hidden"
+						className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[12px] leading-[1.68] text-product-text"
 						aria-label={`${resource.label} prompt`}
 					/>
 				) : (

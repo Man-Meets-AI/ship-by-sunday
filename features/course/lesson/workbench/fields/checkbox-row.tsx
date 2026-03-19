@@ -1,3 +1,5 @@
+import { Checkbox } from "@/components/ui/checkbox";
+
 export function CheckboxRow({
 	label,
 	checked,
@@ -9,11 +11,9 @@ export function CheckboxRow({
 }) {
 	return (
 		<label className="flex items-center gap-2 rounded-none border border-product-border bg-product-surface px-2.5 py-1.5">
-			<input
-				type="checkbox"
+			<Checkbox
 				checked={checked}
-				onChange={(event) => onChange(event.target.checked)}
-				className="size-3.5 rounded-none border-product-border accent-[rgb(var(--product-accent))]"
+				onCheckedChange={(nextChecked) => onChange(Boolean(nextChecked))}
 			/>
 			<span className="text-xs font-medium text-product-text">{label}</span>
 		</label>

@@ -3,6 +3,8 @@
 import { useMutation } from "convex/react";
 import { useEffect, useRef, useState } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { api } from "@/convex/_generated/api";
 import type {
 	ReferenceGalleryItem,
@@ -15,7 +17,12 @@ import {
 } from "@/features/course/lesson/model/reference-gallery";
 import { LayoutGrid } from "@/shared/ui/layout-grid";
 
-import { fieldLabelClass, inputBaseClass } from "./field-styles";
+import { fieldLabelClass } from "./field-styles";
+
+type UploadState =
+	| { status: "idle" }
+	| { status: "uploading" }
+	| { status: "error"; message: string };
 
 function getEmptyGalleryValue(): ReferenceGalleryValue {
 	return {
@@ -83,10 +90,12 @@ export function ReferenceGalleryFieldControl({
 	const minItems = Math.max(field.minItems ?? 1, 1);
 	const savedCount = getReferenceGalleryCount(galleryValue);
 	const [urlInput, setUrlInput] = useState("");
-	const [isUploading, setIsUploading] = useState(false);
+	const [uploadState, setUploadState] = useState<UploadState>({
+		status: "idle",
+	});
 	const [dropActive, setDropActive] = useState(false);
 	const [pasteArmed, setPasteArmed] = useState(false);
-	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+	const isUploading = uploadState.status === "uploading";
 
 	useEffect(() => {
 		latestItemsRef.current = galleryValue.items;
@@ -145,8 +154,7 @@ export function ReferenceGalleryFieldControl({
 			return;
 		}
 
-		setErrorMessage(null);
-		setIsUploading(true);
+		setUploadState({ status: "uploading" });
 
 		try {
 			const imageFiles = files.filter((file) => file.type.startsWith("image/"));
@@ -156,12 +164,12 @@ export function ReferenceGalleryFieldControl({
 
 			const uploadedItems = await Promise.all(imageFiles.map(uploadFile));
 			updateItems([...galleryValue.items, ...uploadedItems]);
+			setUploadState({ status: "idle" });
 		} catch {
-			setErrorMessage(
-				"Upload failed. Drop or paste image files only, then try again.",
-			);
-		} finally {
-			setIsUploading(false);
+			setUploadState({
+				status: "error",
+				message: "Upload failed. Drop or paste image files only, then try again.",
+			});
 		}
 	}
 
@@ -171,8 +179,7 @@ export function ReferenceGalleryFieldControl({
 			return;
 		}
 
-		setErrorMessage(null);
-		setIsUploading(true);
+		setUploadState({ status: "uploading" });
 
 		try {
 			await validateImageUrl(nextUrl);
@@ -186,12 +193,13 @@ export function ReferenceGalleryFieldControl({
 				},
 			]);
 			setUrlInput("");
+			setUploadState({ status: "idle" });
 		} catch {
-			setErrorMessage(
-				"That link is not a direct image. Use the Resources panel for site links.",
-			);
-		} finally {
-			setIsUploading(false);
+			setUploadState({
+				status: "error",
+				message:
+					"That link is not a direct image. Use the Resources panel for site links.",
+			});
 		}
 	}
 
@@ -207,14 +215,15 @@ export function ReferenceGalleryFieldControl({
 	const addControls = (
 		<div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
 			<div className="flex flex-wrap items-center gap-2.5">
-				<button
+				<Button
 					type="button"
 					onClick={() => inputRef.current?.click()}
 					disabled={isUploading}
-					className="sbs-press-feedback border border-product-accent/70 bg-product-chip px-3 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-product-accent shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_1px_2px_-1px_rgba(0,0,0,0.08)] disabled:cursor-not-allowed disabled:border-product-border disabled:bg-product-surface disabled:text-product-muted"
+					variant="secondary"
+					size="default"
 				>
 					{isUploading ? "Uploading..." : "Browse images"}
-				</button>
+				</Button>
 				<div className="flex flex-wrap gap-1.5 text-[10px] font-mono uppercase tracking-[0.16em] text-product-muted">
 					<span className="border border-product-border/70 bg-product-surface/70 px-2 py-1">
 						Drag
@@ -228,22 +237,23 @@ export function ReferenceGalleryFieldControl({
 				</div>
 			</div>
 			<div className="flex w-full flex-1 flex-col gap-2 sm:flex-row lg:max-w-[29rem]">
-				<input
+				<Input
 					type="url"
 					value={urlInput}
 					onChange={(event) => setUrlInput(event.target.value)}
 					placeholder="Paste a direct image URL"
-					className={`${inputBaseClass.replace("mt-1.5 ", "")} min-w-0`}
+					className="min-w-0"
 					disabled={isUploading}
 				/>
-				<button
+				<Button
 					type="button"
 					onClick={() => void addImageUrl()}
 					disabled={isUploading || urlInput.trim().length === 0}
-					className="sbs-press-feedback border border-product-border/80 bg-product-surface px-3 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-product-text shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_1px_2px_-1px_rgba(0,0,0,0.08)] disabled:cursor-not-allowed disabled:text-product-muted"
+					variant="outline"
+					size="default"
 				>
 					Add image URL
-				</button>
+				</Button>
 			</div>
 		</div>
 	);
@@ -288,7 +298,7 @@ export function ReferenceGalleryFieldControl({
 				onDrop={(event) => {
 					event.preventDefault();
 					setDropActive(false);
-					void appendFiles(Array.from(event.dataTransfer.files ?? []));
+					void appendFiles(Array.from(event.dataTransfer.files));
 				}}
 				onPaste={(event) => {
 					const target = event.target;
@@ -299,7 +309,7 @@ export function ReferenceGalleryFieldControl({
 						return;
 					}
 
-					const clipboardItems = Array.from(event.clipboardData.items ?? []);
+					const clipboardItems = Array.from(event.clipboardData.items);
 					const imageFiles = clipboardItems
 						.map((item) => item.getAsFile())
 						.filter((file): file is File => Boolean(file));
@@ -393,8 +403,10 @@ export function ReferenceGalleryFieldControl({
 				</div>
 			</div>
 
-			{errorMessage ? (
-				<p className="text-sm font-medium text-danger">{errorMessage}</p>
+			{uploadState.status === "error" ? (
+				<p className="text-sm font-medium text-danger">
+					{uploadState.message}
+				</p>
 			) : null}
 			{field.helpText ? (
 				<p className="text-xs font-medium leading-snug text-product-muted">

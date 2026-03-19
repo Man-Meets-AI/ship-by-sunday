@@ -1,3 +1,4 @@
+import { Checkbox } from "@/components/ui/checkbox";
 import {
 	getLesson,
 	type LessonConfig,
@@ -19,11 +20,10 @@ function ManualTaskRow({
 }) {
 	return (
 		<label className="flex items-center gap-2 px-1 py-1 transition-colors text-product-text">
-			<input
-				type="checkbox"
+			<Checkbox
 				checked={checked}
-				onChange={(event) => onChange(event.target.checked)}
-				className="size-3 shrink-0 rounded-none border-product-border accent-[rgb(var(--product-accent))]"
+				onCheckedChange={(nextChecked) => onChange(Boolean(nextChecked))}
+				className="size-3 shrink-0"
 			/>
 			<span
 				className={`text-[12px] leading-[1.5] ${checked ? "text-product-muted line-through" : ""}`}

@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { workbenchChromeLabelClass } from "../../shared/workbench-readability";
 
 function getChoiceClass(selected: boolean, invalid: boolean, disabled = false) {
@@ -49,23 +50,25 @@ export function PathChoiceCard({
 					slice.
 				</p>
 				<div className="mt-3 flex flex-wrap items-center gap-2">
-					<button
+					<Button
 						type="button"
 						onClick={() => onChoosePath("Use template")}
 						disabled={!templateRepoUrl}
-						className="inline-flex border border-product-accent bg-product-chip px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg disabled:cursor-not-allowed disabled:border-product-border disabled:bg-product-surface disabled:text-product-muted"
+						variant="secondary"
+						size="sm"
 					>
 						Choose template
-					</button>
+					</Button>
 					{templateRepoUrl ? (
-						<a
-							href={templateRepoUrl}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="inline-flex border border-product-border px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:bg-product-surface-alt"
-						>
-							Open template
-						</a>
+						<Button asChild variant="outline" size="sm">
+							<a
+								href={templateRepoUrl}
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								Open template
+							</a>
+						</Button>
 					) : null}
 				</div>
 				{!templateRepoUrl ? (
@@ -90,13 +93,14 @@ export function PathChoiceCard({
 					need to preserve.
 				</p>
 				<div className="mt-3">
-					<button
+					<Button
 						type="button"
 						onClick={() => onChoosePath("Custom path")}
-						className="inline-flex border border-product-border bg-product-surface px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:bg-product-surface-alt"
+						variant="outline"
+						size="sm"
 					>
 						Choose custom path
-					</button>
+					</Button>
 				</div>
 			</div>
 		</div>

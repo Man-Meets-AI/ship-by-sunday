@@ -3,6 +3,7 @@
 import { useMutation } from "convex/react";
 import { useState } from "react";
 
+import { Input } from "@/components/ui/input";
 import { api } from "@/convex/_generated/api";
 import type {
 	UploadFieldValue,
@@ -35,7 +36,7 @@ export function UploadFieldControl({
 		<label className="block">
 			<span className={fieldLabelClass}>{field.label}</span>
 			<div className="mt-1 rounded-none border border-dashed border-product-border bg-product-surface px-2.5 py-2">
-				<input
+				<Input
 					type="file"
 					accept={accept}
 					multiple={isMultiImageField}
@@ -72,7 +73,7 @@ export function UploadFieldControl({
 							event.target.value = "";
 						}
 					}}
-					className="w-full text-sm font-medium text-product-text file:mr-4 file:rounded-none file:border file:border-product-border file:bg-product-chip file:px-4 file:py-2 file:font-mono file:text-[11px] file:uppercase file:tracking-[0.22em] file:text-product-accent disabled:cursor-not-allowed disabled:opacity-70"
+					className="w-full text-sm font-medium text-product-text file:mr-4 file:rounded-none file:border file:border-product-border file:bg-product-chip file:px-4 file:py-2 file:font-mono file:text-[11px] file:uppercase file:tracking-[0.22em] file:text-product-accent"
 				/>
 				<div className="mt-2 space-y-1 text-xs font-medium text-product-muted">
 					{isUploading ? (

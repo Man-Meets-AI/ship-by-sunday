@@ -1,9 +1,11 @@
 import { LessonVideoSurface } from "@/features/course/lesson/components/lesson-video-surface";
 import type { LessonHandoff } from "@/features/course/lesson/model/manifest";
+import { Button } from "@/components/ui/button";
 import {
 	getCandidateProblemOptions,
 	isFilled,
 } from "@/features/course/lesson/model/registry";
+import { LessonChromeChip } from "@/features/course/lesson/shared/lesson-chrome-chip";
 import { FieldList } from "../fields/field-list";
 import { ArtifactContext } from "../shared/artifact-context";
 import { SectionCard } from "../shared/section-card";
@@ -95,7 +97,7 @@ function CandidateProblemHandoff({
 								</div>
 							</div>
 							<div className="border-t border-product-border/60 px-4 py-3">
-								<button
+								<Button
 									type="button"
 									onClick={() => {
 										onFieldChange(handoff.selectionFieldId, null);
@@ -103,10 +105,11 @@ function CandidateProblemHandoff({
 											onFieldChange(field.targetFieldId, "");
 										}
 									}}
-									className="inline-flex border border-product-border bg-product-surface px-2 py-1 font-mono text-[9px] uppercase tracking-[0.18em] text-product-text transition-colors hover:bg-product-surface-alt focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[rgb(var(--product-accent))]"
+									variant="outline"
+									size="xs"
 								>
 									Change selection
-								</button>
+								</Button>
 							</div>
 						</div>
 						<p className="text-[11px] leading-relaxed text-product-muted">
@@ -116,7 +119,7 @@ function CandidateProblemHandoff({
 				) : candidateProblems.length > 0 ? (
 					<div className="grid gap-3 lg:grid-cols-3">
 						{candidateProblems.map((problem) => (
-							<button
+							<Button
 								key={problem.index}
 								type="button"
 								onClick={() => {
@@ -130,11 +133,14 @@ function CandidateProblemHandoff({
 										);
 									}
 								}}
-								className="flex h-full flex-col border border-product-border bg-product-surface px-4 py-4 text-left transition-colors hover:bg-product-surface-strong focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[rgb(var(--product-accent))]"
+								variant="outline"
+								size="sm"
+								className="flex h-full w-full flex-col items-start px-4 py-4 text-left normal-case tracking-normal"
 							>
-								<p className="font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
-									Problem {problem.index}
-								</p>
+								<LessonChromeChip
+									status="ready"
+									label={`Problem ${problem.index}`}
+								/>
 								<p className="mt-3 font-display text-sm uppercase tracking-[0.04em] text-product-text">
 									{problem.owner}
 								</p>
@@ -142,11 +148,9 @@ function CandidateProblemHandoff({
 									{problem.statement}
 								</p>
 								<div className="mt-4 border-t border-product-border/60 pt-3">
-									<p className="font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
-										Use this problem
-									</p>
+									<LessonChromeChip status="ready" label="Use this problem" />
 								</div>
-							</button>
+							</Button>
 						))}
 					</div>
 				) : (

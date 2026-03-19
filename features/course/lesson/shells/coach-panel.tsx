@@ -1,11 +1,13 @@
 import Link from "next/link";
 
+import { Button } from "@/components/ui/button";
 import { LessonVideoSurface } from "@/features/course/lesson/components/lesson-video-surface";
 import type { LessonResourceContent } from "@/features/course/lesson/model/contracts";
 import type {
 	LessonConfig,
 	LessonContent,
 } from "@/features/course/lesson/model/manifest";
+import { LessonChromeChip } from "@/features/course/lesson/shared/lesson-chrome-chip";
 import { formatArtifactValue } from "@/features/course/lesson/workbench/shared/artifact-format";
 import {
 	workbenchChromeLabelClass,
@@ -182,24 +184,18 @@ export function CoachPanel({
 								isOpen ? "bg-product-surface-strong/65" : ""
 							}`}
 						>
-							<button
+							<Button
 								type="button"
 								onClick={() => onPanelChange(section.key)}
-								className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-product-surface-strong/50"
+								variant="ghost"
+								size="sm"
+								className="flex h-auto w-full items-center justify-between px-4 py-3 text-left normal-case tracking-normal hover:bg-product-surface-strong/50"
 							>
-								<div className="flex items-center gap-2">
-									<span
-										className={`inline-block h-2 w-2 border ${
-											isOpen
-												? "border-product-accent bg-product-accent"
-												: "border-product-border bg-product-surface"
-										}`}
-									/>
-									<span className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-text">
-										{section.label}
-									</span>
-								</div>
-							</button>
+								<LessonChromeChip
+									status={isOpen ? "active" : "ready"}
+									label={section.label}
+								/>
+							</Button>
 							{isOpen ? (
 								<div className="border-t border-product-border/45 px-4 py-4">
 									{section.content}

@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { timingConfig } from "@/config/product";
 import { WorkbenchCard } from "../../shared/workbench-card";
 
@@ -21,13 +23,6 @@ export function BuildPromptCard({
 		"idle",
 	);
 	const resetTimeoutRef = useRef<number | null>(null);
-	const promptResetKeyRef = useRef<string | null>(null);
-	const promptResetKey = [
-		resetKey,
-		readyToGenerate ? "ready" : "blocked",
-		prompt ?? "",
-		disabledReason ?? "",
-	].join("::");
 
 	useEffect(() => {
 		return () => {
@@ -38,22 +33,16 @@ export function BuildPromptCard({
 	}, []);
 
 	useEffect(() => {
-		if (promptResetKeyRef.current === promptResetKey) {
+		setShowPrompt(false);
+		setCopyState("idle");
+	}, [disabledReason, prompt, readyToGenerate, resetKey]);
+
+	const copyPrompt = () => {
+		if (!prompt || disabledReason || !showPrompt) {
 			return;
 		}
 
-		promptResetKeyRef.current = promptResetKey;
-		setShowPrompt(false);
-		setCopyState("idle");
-	}, [promptResetKey]);
-
-	const copyPrompt = () => {
-		if (
-			!prompt ||
-			disabledReason ||
-			!showPrompt ||
-			!navigator.clipboard?.writeText
-		) {
+		if (!navigator.clipboard?.writeText) {
 			setCopyState("error");
 			return;
 		}
@@ -81,23 +70,25 @@ export function BuildPromptCard({
 				for your coding agent.
 			</p>
 			<div className="mt-3 flex flex-wrap items-center gap-2">
-				<button
+				<Button
 					type="button"
 					onClick={() => setShowPrompt(true)}
 					disabled={!readyToGenerate || !prompt || Boolean(disabledReason)}
-					className="inline-flex border border-product-accent bg-product-chip px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg disabled:cursor-not-allowed disabled:border-product-border disabled:bg-product-surface disabled:text-product-muted"
+					variant="secondary"
+					size="sm"
 				>
 					Generate build prompt
-				</button>
+				</Button>
 				{showPrompt ? (
-					<button
+					<Button
 						type="button"
 						onClick={copyPrompt}
 						disabled={!prompt || Boolean(disabledReason)}
-						className="inline-flex border border-product-border bg-product-surface px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:bg-product-surface-alt disabled:cursor-not-allowed disabled:border-product-border disabled:bg-product-surface disabled:text-product-muted"
+						variant="outline"
+						size="sm"
 					>
 						{copyState === "copied" ? "Copied" : "Copy prompt"}
-					</button>
+					</Button>
 				) : null}
 				{copyState === "error" && prompt && !disabledReason && showPrompt ? (
 					<p className="text-[11px] leading-relaxed text-product-muted">
@@ -117,11 +108,11 @@ export function BuildPromptCard({
 			) : null}
 			<div className="mt-3 border border-product-border/70 bg-product-surface px-3 py-3">
 				{showPrompt && prompt ? (
-					<textarea
+					<Textarea
 						readOnly
 						value={prompt}
 						rows={18}
-						className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[11px] leading-relaxed text-product-text outline-hidden"
+						className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[11px] leading-relaxed text-product-text"
 						aria-label="Build kickoff prompt"
 					/>
 				) : (

@@ -1,5 +1,7 @@
 import type { LessonHandoff } from "@/features/course/lesson/model/manifest";
 import { getCandidateProblemOptions } from "@/features/course/lesson/model/registry";
+import { Button } from "@/components/ui/button";
+import { LessonChromeChip } from "@/features/course/lesson/shared/lesson-chrome-chip";
 import { WorkbenchCard } from "../shared/workbench-card";
 import {
 	workbenchBodyCopyClass,
@@ -194,9 +196,24 @@ export function PickOneUserSupport({
 							{candidateProblems.map((problem) => {
 								const isSelected = problem.index === selectedProblemIndex;
 								const isDimmed = selectedProblemIndex !== null && !isSelected;
+								const cardToneClass = isSelected
+									? `${workbenchInsetClass} border-product-accent bg-product-chip/65 shadow-[0_0_0_1px_var(--product-accent)]`
+									: isDimmed
+										? `${workbenchInsetClass} border-product-border/40 bg-product-surface-strong/40 opacity-70`
+										: `${workbenchInsetClass} border-product-border bg-product-surface-alt/90 hover:bg-product-surface`;
+								const chipStatus = isSelected
+									? "active"
+									: isDimmed
+										? "locked"
+										: "ready";
+								const chipLabel = isSelected
+									? "Current choice"
+									: isDimmed
+										? "Not chosen"
+										: "Available";
 
 								return (
-									<button
+									<Button
 										key={problem.index}
 										type="button"
 										onClick={() => {
@@ -210,25 +227,19 @@ export function PickOneUserSupport({
 												);
 											}
 										}}
-										className={`flex h-full flex-col px-5 py-5 text-left transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[rgb(var(--product-accent))] ${
-											isSelected
-												? `${workbenchInsetClass} border-product-accent bg-product-chip/65`
-												: isDimmed
-													? `${workbenchInsetClass} bg-product-surface/55 hover:bg-product-surface/70`
-													: `${workbenchInsetClass} hover:bg-product-surface-strong/75`
-										}`}
+										variant="outline"
+										size="sm"
+										className={`flex h-full w-full flex-col items-start px-5 py-5 text-left normal-case tracking-normal ${cardToneClass}`}
 									>
 										<div className="flex items-center justify-between gap-3">
-											<p className={workbenchChromeLabelClass}>
-												Problem {problem.index}
-											</p>
-											<p className={workbenchChromeLabelClass}>
-												{isSelected
-													? "Current choice"
-													: isDimmed
-														? "Not chosen"
-														: "Available"}
-											</p>
+											<LessonChromeChip
+												status="ready"
+												label={`Problem ${problem.index}`}
+											/>
+											<LessonChromeChip
+												status={chipStatus}
+												label={chipLabel}
+											/>
 										</div>
 										<p className="mt-4 text-balance font-display text-[1.35rem] uppercase leading-[0.92] tracking-[0.04em] text-product-text">
 											{problem.owner}
@@ -244,7 +255,7 @@ export function PickOneUserSupport({
 										<p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.16em] text-product-muted">
 											{isSelected ? "Selected" : "Commit to this user"}
 										</p>
-									</button>
+									</Button>
 								);
 							})}
 						</div>

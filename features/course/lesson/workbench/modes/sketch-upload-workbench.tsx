@@ -288,7 +288,7 @@ export function SketchUploadWorkbench({
 											<p className="min-w-0 truncate text-xs font-medium text-product-text">
 												{upload.fileName ?? `Sketch ${index + 1}`}
 											</p>
-											<button
+											<Button
 												type="button"
 												onClick={() =>
 													onFieldChange(
@@ -296,10 +296,11 @@ export function SketchUploadWorkbench({
 														removeSketchUploadAt(uploads, index),
 													)
 												}
-												className="font-mono text-[10px] uppercase tracking-[0.16em] text-product-muted transition-colors hover:text-product-text"
+												variant="ghost"
+												size="xs"
 											>
 												Remove
-											</button>
+											</Button>
 										</div>
 									</div>
 								);

@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { WorkbenchCard } from "../../shared/workbench-card";
 
 type BuildKickoffStepCardProps = {
@@ -50,13 +51,9 @@ export function BuildKickoffStepCard({
 						{summary}
 					</p>
 					{onEdit ? (
-						<button
-							type="button"
-							onClick={onEdit}
-							className="inline-flex border border-product-border px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.18em] text-product-text transition-colors hover:bg-product-surface-alt"
-						>
+						<Button type="button" onClick={onEdit} variant="outline" size="xs">
 							Edit
-						</button>
+						</Button>
 					) : null}
 				</div>
 			) : null}
