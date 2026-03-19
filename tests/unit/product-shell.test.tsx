@@ -1,5 +1,6 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { ThemeProvider } from "next-themes";
 
 const missionState = {
 	progressCount: 9,
@@ -134,31 +135,45 @@ vi.mock("convex/react", () => ({
 }));
 
 vi.mock("@clerk/nextjs", () => ({
-	UserButton: () => <div data-user-button="true" />,
+	useUser: () => ({
+		isLoaded: true,
+		user: {
+			fullName: "Test User",
+			firstName: "Test",
+			lastName: "User",
+			imageUrl: "",
+			primaryEmailAddress: { emailAddress: "test@example.com" },
+		},
+	}),
+	useClerk: () => ({
+		openUserProfile: vi.fn(),
+		signOut: vi.fn(),
+	}),
 }));
 
 globalThis.React = React;
 
-import { ProductShell } from "@/features/course/shared/components/product-shell";
-import { ProductThemeProvider } from "@/features/course/shared/components/product-theme-provider";
+import { AppShell } from "@/features/course/shared/components/app-shell";
 
-function renderProductShell(element: React.ReactElement) {
+function renderAppShell(element: React.ReactElement) {
 	return renderToStaticMarkup(
-		<ProductThemeProvider initialTheme="light">{element}</ProductThemeProvider>,
+		<ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+			{element}
+		</ThemeProvider>,
 	);
 }
 
-describe("ProductShell", () => {
+describe("AppShell", () => {
 	beforeEach(() => {
 		useQueryMock.mockClear();
 		nonSkipQueryCallCount = 0;
 	});
 
 	it("renders unlocked header blocks as links and keeps locked blocks inert", () => {
-		const markup = renderProductShell(
-			<ProductShell showSkillRail={false}>
+		const markup = renderAppShell(
+			<AppShell showSkillRail={false}>
 				<div>Body</div>
-			</ProductShell>,
+			</AppShell>,
 		);
 
 		expect(markup).toContain('aria-label="Open CEO"');
@@ -167,32 +182,42 @@ describe("ProductShell", () => {
 		expect(markup).toContain('href="/lesson/2.2"');
 		expect(markup).toContain('aria-current="page"');
 		expect(markup).not.toContain('aria-label="Open BUILD"');
-		expect(markup).toContain('aria-disabled="true"');
+		expect(markup).toContain('disabled=""');
+		expect(markup).toContain('data-slot="button"');
+		expect(markup).toContain('data-slot="card"');
+	});
+
+	it("links the header brand to the mission page", () => {
+		const markup = renderAppShell(
+			<AppShell showSkillRail={false}>
+				<div>Body</div>
+			</AppShell>,
+		);
+
+		expect(markup).toContain('href="/mission"');
+		expect(markup).toContain('aria-label="Ship by Sunday"');
+		expect(markup).toContain('aria-label="Open account menu"');
 	});
 
 	it("lets app surfaces opt into page scrolling without the fixed viewport shell", () => {
-		const markup = renderProductShell(
-			<ProductShell
-				showSkillRail={false}
-				viewportMode="app"
-				appScrollMode="page"
-			>
+		const markup = renderAppShell(
+			<AppShell showSkillRail={false} viewportMode="app" appScrollMode="page">
 				<div>Body</div>
-			</ProductShell>,
+			</AppShell>,
 		);
 
 		expect(markup).toContain(
-			'class="flex min-h-screen flex-col bg-product-bg text-product-text"',
+			'class="flex min-h-screen flex-col bg-background text-foreground"',
 		);
 		expect(markup).not.toContain("xl:h-dvh");
 		expect(markup).not.toContain("xl:overflow-hidden");
 	});
 
 	it("skips mission queries when mission data is explicitly disabled", () => {
-		const markup = renderProductShell(
-			<ProductShell showSkillRail={false} enableMissionQuery={false}>
+		const markup = renderAppShell(
+			<AppShell showSkillRail={false} enableMissionQuery={false}>
 				<div>Body</div>
-			</ProductShell>,
+			</AppShell>,
 		);
 
 		expect(useQueryMock).toHaveBeenCalled();

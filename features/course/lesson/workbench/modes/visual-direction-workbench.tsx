@@ -15,7 +15,7 @@ function InvalidFieldMessage({ visible }: { visible: boolean }) {
 	}
 
 	return (
-		<p className="mt-2 text-[11px] font-medium leading-snug text-danger">
+		<p className="mt-2 text-[11px] font-medium leading-snug text-destructive">
 			This step is required before you can complete the lesson.
 		</p>
 	);
@@ -40,7 +40,7 @@ export function VisualDirectionWorkbench({
 	);
 
 	return (
-		<WorkbenchContainer className="max-w-6xl">
+		<WorkbenchContainer>
 			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
 			<StatusRail
 				lessonContent={lessonContent}
@@ -53,7 +53,7 @@ export function VisualDirectionWorkbench({
 				</WorkbenchCard>
 				<WorkbenchCard label="Screen context">
 					<div className="space-y-3">
-						<p className="text-sm font-medium leading-relaxed text-product-muted">
+						<p className="text-sm font-medium leading-relaxed text-muted-foreground">
 							Use your rough screens to lock the visual direction before you ask
 							a coding agent for `visualguide.md`.
 						</p>
@@ -62,7 +62,7 @@ export function VisualDirectionWorkbench({
 				</WorkbenchCard>
 			</div>
 			<WorkbenchCard label="Follow this order">
-				<ol className="space-y-2 text-sm leading-relaxed text-product-text">
+				<ol className="space-y-2 text-sm leading-relaxed text-foreground">
 					<li>1. Review the lesson video and your rough screens together.</li>
 					<li>2. Write the visual changes or direction you want to push.</li>
 					<li>

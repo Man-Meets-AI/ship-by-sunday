@@ -1,6 +1,4 @@
 export const legacyLessonRedirects = {
-	"0.0": "/mission",
-	"1.8": "/lesson/1.7",
 	"2.3": "/lesson/3.0",
 	"2.4": "/lesson/3.0",
 	"2.5": "/lesson/3.0",

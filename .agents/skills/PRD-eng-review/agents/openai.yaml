@@ -1,4 +1,0 @@
-interface:
-  display_name: "PRD - Eng Review"
-  short_description: "Stress-test a plan packet before coding."
-  default_prompt: "Use $PRD-eng-review to review this plan packet, challenge the scope and architecture, and return the same packet with an approval or revision decision."

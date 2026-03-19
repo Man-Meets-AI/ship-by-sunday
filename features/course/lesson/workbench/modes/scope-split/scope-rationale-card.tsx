@@ -31,19 +31,19 @@ export function ScopeRationaleCard({
 			<div className="space-y-3">
 				<div className="flex flex-wrap items-start justify-between gap-2">
 					<div className="max-w-2xl space-y-1">
-						<p className="text-sm leading-relaxed text-product-text">
+						<p className="text-sm leading-relaxed text-foreground">
 							Write the shortest believable defense for why this smaller version
 							is still enough.
 						</p>
-						<p className="text-[11px] leading-relaxed text-product-muted">
+						<p className="text-[11px] leading-relaxed text-muted-foreground">
 							{formulaHint}
 						</p>
 					</div>
 					<span
 						className={`inline-flex items-center border px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] ${
 							isReady
-								? "border-product-accent/40 bg-product-accent/[0.08] text-product-accent"
-								: "border-product-border bg-product-surface text-product-text"
+								? "border-primary/30 bg-primary/5 text-primary"
+								: "border-border bg-background text-foreground"
 						}`}
 					>
 						{isReady ? "Ready" : "Still needed"}
@@ -61,13 +61,13 @@ export function ScopeRationaleCard({
 					className="font-mono"
 				/>
 
-				<p className="text-[11px] leading-relaxed text-product-muted">
+				<p className="text-[11px] leading-relaxed text-muted-foreground">
 					Do not write a roadmap. Write why this reduced version still delivers
 					a believable first win.
 				</p>
 
 				{invalidMessage ? (
-					<p className="text-[11px] font-medium leading-snug text-danger">
+					<p className="text-[11px] font-medium leading-snug text-destructive">
 						{invalidMessage}
 					</p>
 				) : null}

@@ -51,7 +51,9 @@ The optional in-app Codex account and generation routes require a runtime that c
 pnpm run typecheck
 pnpm run lint
 pnpm run test:unit
-pnpm run test:smoke
+pnpm run test:contracts
+pnpm run test:integration
+pnpm run test:browser-smoke
 pnpm run build
 pnpm run check
 ```

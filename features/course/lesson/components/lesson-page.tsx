@@ -2,8 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 import { routeConfig } from "@/config/product";
 import { useLessonChromeState } from "@/features/course/lesson/hooks/use-lesson-chrome-state";
 import { useLessonCompletion } from "@/features/course/lesson/hooks/use-lesson-completion";
@@ -30,27 +33,35 @@ import {
 	LessonShellWatch,
 } from "@/features/course/lesson/shells";
 import { WorkbenchRenderer } from "@/features/course/lesson/workbench";
-import { ProductShell } from "@/features/course/shared/components/product-shell";
+import { AppShell } from "@/features/course/shared/components/app-shell";
+
+function PreviousLessonBackLink({ href }: { href: string }) {
+	return (
+		<Button variant="secondary" size="sm" asChild>
+			<Link href={href}>Back</Link>
+		</Button>
+	);
+}
 
 function getSaveStatusMeta(saveStatus: LessonSaveStatus) {
 	return saveStatus === "saving"
 		? {
 				label: "Saving draft...",
-				className: "text-product-muted",
+				className: "text-muted-foreground",
 			}
 		: saveStatus === "saved"
 			? {
 					label: "All changes saved",
-					className: "text-product-accent",
+					className: "text-primary",
 				}
 			: saveStatus === "error"
 				? {
 						label: "Save failed. Edit any field to retry.",
-						className: "text-danger",
+						className: "text-destructive",
 					}
 				: {
 						label: "Draft not changed yet",
-						className: "text-product-muted",
+						className: "text-muted-foreground",
 					};
 }
 
@@ -71,7 +82,7 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
 		setFieldValue,
 		setSaveStatusError,
 	} = useLessonState({ lessonId });
-	const { chromeState, setLayoutMode, toggleCoach, setActiveCoachPanel } =
+	const { chromeState, setLayoutMode, setActiveCoachPanel } =
 		useLessonChromeState({ lesson, lessonId });
 	const pinnedArtifacts =
 		lessonState?.accessStatus === "unlocked" ? lessonState.pinnedArtifacts : [];
@@ -137,57 +148,51 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
 			!isWatchLesson && lessonSupportsLayoutToggle(lesson)
 				? (layoutMode: LessonLayoutMode) => setLayoutMode(layoutMode)
 				: undefined,
-		coachVisible:
-			!isWatchLesson && chromeState.layoutMode === "split"
-				? chromeState.coachVisible
-				: false,
-		onCoachToggle:
-			!isWatchLesson && chromeState.layoutMode === "split"
-				? () => toggleCoach()
-				: undefined,
 		completionCue: null,
 	};
 
 	if (lessonState === undefined) {
 		return (
-			<ProductShell {...shellProps}>
+			<AppShell {...shellProps}>
 				<LessonSkeleton
 					shell={lesson.shell}
 					layoutMode={chromeState.layoutMode}
 				/>
-			</ProductShell>
+			</AppShell>
 		);
 	}
 
 	if (lessonState.accessStatus === "locked") {
 		return (
-			<ProductShell currentLessonId={lessonId}>
-				<section className="rounded-none border border-product-border bg-product-surface/78 px-4 py-6 text-center shadow-panel backdrop-blur-xl">
-					<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
-						Lesson locked
-					</p>
-					<p className="mt-2 font-display text-xl uppercase tracking-[0.08em] text-product-text">
-						{lesson.id} {lesson.shortTitle}
-					</p>
-					<p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-product-muted sm:mx-auto">
-						This lesson is locked. Go back to the mission map and finish{" "}
-						{lesson.prevLessonId ?? "the previous unlocked lesson"} first.
-					</p>
-					<div className="mt-6 flex flex-wrap justify-center gap-3">
-						<Button
-							type="button"
-							onClick={() => router.back()}
-							variant="outline"
-							size="default"
-						>
-							Go back
-						</Button>
-						<Button asChild variant="secondary" size="default">
-							<Link href={routeConfig.mission}>Open mission</Link>
-						</Button>
-					</div>
-				</section>
-			</ProductShell>
+			<AppShell currentLessonId={lessonId}>
+				<Card className="mx-auto w-full max-w-2xl gap-0 py-0 text-center">
+					<CardContent className="px-4 py-6">
+						<CardTitle className="font-mono text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+							Lesson locked
+						</CardTitle>
+						<p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
+							{lesson.id} {lesson.shortTitle}
+						</p>
+						<p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground sm:mx-auto">
+							This lesson is locked. Go back to the mission map and finish{" "}
+							{lesson.prevLessonId ?? "the previous unlocked lesson"} first.
+						</p>
+						<div className="mt-6 flex flex-wrap justify-center gap-3">
+							<Button
+								type="button"
+								onClick={() => router.back()}
+								variant="secondary"
+								size="default"
+							>
+								Go back
+							</Button>
+							<Button asChild variant="default" size="default">
+								<Link href={routeConfig.mission}>Open mission</Link>
+							</Button>
+						</div>
+					</CardContent>
+				</Card>
+			</AppShell>
 		);
 	}
 
@@ -223,104 +228,64 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
 			onClick={handleCompletionAction}
 			variant={
 				isCelebrating
-					? "solid"
+					? "default"
 					: isCompleting
-						? "solid"
+						? "default"
 						: lessonReadyToComplete
-							? "solid"
+							? "default"
 							: "outline"
 			}
 			size="sm"
-			className={lessonReadyToComplete ? "motion-safe:animate-pulse" : ""}
 		>
-			{isCelebrating ? (
-				<>
-					<svg
-						width="10"
-						height="10"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						strokeWidth="3"
-						strokeLinecap="round"
-						strokeLinejoin="round"
-						aria-hidden="true"
-					>
-						<polyline points="20 6 9 17 4 12" />
-					</svg>
-					{completionButtonLabel}
-				</>
-			) : (
-				completionButtonLabel
-			)}
+			{completionButtonLabel}
 		</Button>
 	);
 
 	const footerActions = (
 		<div className="flex flex-wrap justify-end gap-2 lg:ml-auto">
-			{previousHref ? (
-				<Link
-					href={previousHref}
-					className="inline-flex items-center px-1 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted transition-colors hover:text-product-text"
-				>
-					Back
-				</Link>
-			) : null}
+			{previousHref ? <PreviousLessonBackLink href={previousHref} /> : null}
 			{completionAction}
 		</div>
 	);
 
-	const standardFooter = (
-		<div
-			className={`flex flex-col gap-3 ${
-				isCelebrating
-					? "sbs-completion-footer rounded-none border border-product-accent/30 bg-product-accent/[0.07] px-3 py-3"
-					: ""
-			}`}
-		>
+	const standardFooterInner = (
+		<>
 			{showCelebrationBanner ? (
 				<div
 					role="status"
 					aria-live="polite"
-					className="sbs-completion-banner mx-auto flex w-full max-w-xl flex-col items-center gap-1 rounded-none border border-product-accent/35 bg-product-surface-strong/95 px-4 py-3 text-center shadow-[0_0_0_1px_rgba(var(--product-accent),0.14),0_18px_36px_rgba(var(--product-shadow),0.35)]"
+					className="mx-auto flex w-full max-w-xl flex-col items-center gap-1 text-center"
 				>
-					<div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-product-accent">
-						<span className="inline-flex h-5 w-5 items-center justify-center border border-product-accent/60 bg-product-accent/14 text-product-accent">
-							<svg
-								width="10"
-								height="10"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								strokeWidth="3"
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								aria-hidden="true"
-							>
-								<polyline points="20 6 9 17 4 12" />
-							</svg>
-						</span>
+					<p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary">
 						{celebrationEyebrow}
-					</div>
-					<p className="font-display text-[1.65rem] uppercase leading-none tracking-[0.06em] text-product-text sm:text-[2rem]">
+					</p>
+					<p className="text-2xl font-semibold tracking-tight text-foreground sm:text-[2rem]">
 						{celebrationTitle}
 					</p>
 					{completionArtifactLine ? (
-						<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-text">
+						<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground">
 							{completionArtifactLine}
 						</p>
 					) : null}
-					<p className="text-xs font-medium leading-relaxed text-product-muted">
+					<p className="text-sm leading-7 text-muted-foreground">
 						{completionNextLine}
 					</p>
 				</div>
 			) : null}
 			<div className="flex flex-col gap-2 lg:flex-row lg:items-center">
 				<div className="max-w-2xl space-y-1">
-					<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
+					<CardTitle className="font-mono text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
 						Progress {completedObjectiveCount}/
 						{Math.max(objectiveTasks.length, 1)}
-					</p>
+					</CardTitle>
+					<Progress
+						className="mt-1.5 h-1.5"
+						value={
+							objectiveTasks.length > 0
+								? (completedObjectiveCount / objectiveTasks.length) * 100
+								: 0
+						}
+					/>
 					<p
 						className={`text-xs font-medium leading-relaxed ${saveStatusMeta.className}`}
 					>
@@ -329,16 +294,16 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
 					{isCelebrating && completionPayload ? (
 						<>
 							{completionArtifactLine ? (
-								<p className="text-xs font-medium leading-relaxed text-product-accent">
+								<p className="text-xs font-medium leading-relaxed text-primary">
 									{completionArtifactLine}
 								</p>
 							) : null}
-							<p className="text-xs leading-relaxed text-product-text">
+							<p className="text-xs leading-relaxed text-foreground">
 								{completionNextLine}
 							</p>
 						</>
 					) : lessonReadyToComplete && !showCompletionFeedback ? (
-						<p className="text-xs font-medium leading-relaxed text-product-accent">
+						<p className="text-xs font-medium leading-relaxed text-primary">
 							{readyStateCopy}
 						</p>
 					) : null}
@@ -346,58 +311,67 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
 					!showCompletionFeedback &&
 					!isCelebrating &&
 					pendingIssueSummary ? (
-						<p className="text-xs leading-relaxed text-product-muted">
+						<p className="text-xs leading-relaxed text-muted-foreground">
 							Complete before continuing: {pendingIssueSummary}
 							{hasMorePendingIssues ? " • ..." : ""}
 						</p>
 					) : null}
 					{showCompletionFeedback && !isCelebrating ? (
-						<div className="text-xs font-medium leading-relaxed text-danger">
-							<p>
-								{serverCompletionMessage ?? "Finish these before continuing:"}
-							</p>
-							{displayedCompletionIssues.length > 0 ? (
-								<div className="mt-1 space-y-1">
-									{displayedCompletionIssues.map((issue) => (
-										<p key={`${issue.id}-${issue.label}`}>
-											{issue.message ?? issue.label}
-										</p>
-									))}
-								</div>
-							) : null}
-						</div>
+						<Alert variant="destructive" className="mt-1 py-2">
+							<AlertDescription className="text-xs font-medium text-destructive">
+								<p>
+									{serverCompletionMessage ?? "Finish these before continuing:"}
+								</p>
+								{displayedCompletionIssues.length > 0 ? (
+									<div className="mt-1 space-y-1">
+										{displayedCompletionIssues.map((issue) => (
+											<p key={`${issue.id}-${issue.label}`}>
+												{issue.message ?? issue.label}
+											</p>
+										))}
+									</div>
+								) : null}
+							</AlertDescription>
+						</Alert>
 					) : null}
 				</div>
 				{footerActions}
 			</div>
-		</div>
+		</>
+	);
+
+	const standardFooter = isCelebrating ? (
+		<Card className="gap-0 bg-primary/5 py-0">
+			<CardContent className="flex flex-col gap-3 px-3 py-3">
+				{standardFooterInner}
+			</CardContent>
+		</Card>
+	) : (
+		<div className="flex flex-col gap-3">{standardFooterInner}</div>
 	);
 
 	const compactFooter = (
 		<div className="flex flex-col gap-2">
 			{showCompletionFeedback && !isCelebrating ? (
-				<div className="text-xs font-medium leading-relaxed text-danger">
-					<p>{serverCompletionMessage ?? "Finish these before continuing:"}</p>
-					{displayedCompletionIssues.length > 0 ? (
-						<div className="mt-1 space-y-1">
-							{displayedCompletionIssues.map((issue) => (
-								<p key={`${issue.id}-${issue.label}`}>
-									{issue.message ?? issue.label}
-								</p>
-							))}
-						</div>
-					) : null}
-				</div>
+				<Alert variant="destructive" className="py-2">
+					<AlertDescription className="text-xs font-medium text-destructive">
+						<p>
+							{serverCompletionMessage ?? "Finish these before continuing:"}
+						</p>
+						{displayedCompletionIssues.length > 0 ? (
+							<div className="mt-1 space-y-1">
+								{displayedCompletionIssues.map((issue) => (
+									<p key={`${issue.id}-${issue.label}`}>
+										{issue.message ?? issue.label}
+									</p>
+								))}
+							</div>
+						) : null}
+					</AlertDescription>
+				</Alert>
 			) : null}
 			<div className="flex flex-wrap items-center justify-end gap-2">
-				{previousHref ? (
-					<Link
-						href={previousHref}
-						className="inline-flex items-center px-1 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted transition-colors hover:text-product-text"
-					>
-						Back
-					</Link>
-				) : null}
+				{previousHref ? <PreviousLessonBackLink href={previousHref} /> : null}
 				{completionAction}
 			</div>
 		</div>
@@ -411,6 +385,7 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
 			fieldValues={fieldValues}
 			onFieldChange={setValue}
 			pinnedArtifacts={pinnedArtifacts}
+			layoutMode={chromeState.layoutMode}
 			invalidFieldIds={invalidFieldIds}
 			invalidFieldMessages={invalidFieldMessages}
 			fieldValuesReady={fieldValuesReady}
@@ -418,22 +393,17 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
 	);
 
 	return (
-		<ProductShell {...shellProps} completionCue={completionCue}>
+		<AppShell {...shellProps} completionCue={completionCue}>
 			{isWatchLesson ? (
 				<LessonShellWatch
 					lesson={lesson}
 					coachContent={lessonContent.coach}
 					footer={footer}
+					pinnedArtifacts={pinnedArtifacts}
 				/>
 			) : chromeState.layoutMode === "focus" ? (
 				<LessonShellFocus
 					lesson={lesson}
-					coachVisible={chromeState.coachVisible}
-					activeCoachPanel={chromeState.activeCoachPanel}
-					onCoachPanelChange={setActiveCoachPanel}
-					objectiveTasks={objectiveTasks}
-					onObjectiveTaskToggle={setObjectiveTaskChecked}
-					pinnedArtifacts={pinnedArtifacts}
 					coachContent={lessonContent.coach}
 					footer={footer}
 				>
@@ -442,7 +412,6 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
 			) : (
 				<LessonShellSplit
 					lesson={lesson}
-					coachVisible={chromeState.coachVisible}
 					activeCoachPanel={chromeState.activeCoachPanel}
 					onCoachPanelChange={setActiveCoachPanel}
 					objectiveTasks={objectiveTasks}
@@ -454,7 +423,7 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
 					{workbench}
 				</LessonShellSplit>
 			)}
-		</ProductShell>
+		</AppShell>
 	);
 }
 
@@ -466,20 +435,18 @@ function SkeletonPanel({
 	className?: string;
 }) {
 	return (
-		<section
-			className={`min-w-0 rounded-none border border-product-border bg-product-surface/78 shadow-panel backdrop-blur-lg ${className}`}
-		>
-			<div className="border-b border-product-border bg-product-surface/95 px-3 py-1.5 backdrop-blur-lg">
-				<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-product-muted">
+		<Card className={cn("min-w-0 gap-0 py-0 backdrop-blur-sm", className)}>
+			<div className="border-b border-border bg-card/95 px-3 py-1.5 backdrop-blur-sm">
+				<p className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
 					{label}
 				</p>
 			</div>
 			<div className="space-y-2 p-3">
-				<div className="h-3 w-3/4 bg-product-border/15" />
-				<div className="h-3 w-full bg-product-border/10" />
-				<div className="h-20 border border-product-border/40 bg-product-surface-strong/70" />
+				<div className="h-3 w-3/4 rounded-full bg-muted/70" />
+				<div className="h-3 w-full rounded-full bg-muted/50" />
+				<div className="h-20 rounded-lg border border-input bg-background" />
 			</div>
-		</section>
+		</Card>
 	);
 }
 
@@ -492,20 +459,20 @@ function LessonSkeleton({
 }) {
 	if (shell === "watch") {
 		return (
-			<section className="animate-pulse rounded-none border border-product-border/75 bg-product-surface/82 shadow-panel backdrop-blur-lg">
-				<div className="space-y-5 px-4 py-4 xl:px-6 xl:py-6">
-					<div className="space-y-3 border-b border-product-border/70 pb-4">
+			<Card className="animate-pulse gap-0 bg-card/80 py-0 backdrop-blur-sm">
+				<CardContent className="space-y-5 px-4 py-4 xl:px-6 xl:py-6">
+					<div className="space-y-3 border-b border-border/60 pb-4">
 						<div className="flex gap-2">
-							<div className="h-3 w-12 bg-product-border/15" />
-							<div className="h-3 w-24 bg-product-border/10" />
-							<div className="h-3 w-14 bg-product-border/10" />
+							<div className="h-3 w-12 rounded-full bg-muted/70" />
+							<div className="h-3 w-24 rounded-full bg-muted/50" />
+							<div className="h-3 w-14 rounded-full bg-muted/50" />
 						</div>
-						<div className="h-10 w-2/3 bg-product-border/15" />
-						<div className="h-4 w-3/4 bg-product-border/10" />
+						<div className="h-10 w-2/3 rounded-lg bg-muted/70" />
+						<div className="h-4 w-3/4 rounded-full bg-muted/50" />
 					</div>
-					<div className="aspect-video border border-product-border/40 bg-product-surface-strong/70" />
-				</div>
-			</section>
+					<div className="aspect-video rounded-lg border border-input bg-background/80" />
+				</CardContent>
+			</Card>
 		);
 	}
 

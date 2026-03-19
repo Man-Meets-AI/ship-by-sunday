@@ -46,29 +46,29 @@ export function ScopeOverviewCard({
 			<div className="space-y-4">
 				<div className="grid gap-2 lg:grid-cols-[minmax(0,1fr)_minmax(220px,280px)]">
 					<div className="space-y-2">
-						<p className="text-sm leading-relaxed text-product-text">
+						<p className="text-sm leading-relaxed text-foreground">
 							Cut the product down to one believable weekend v1 before you write
 							the brief.
 						</p>
-						<p className="text-[11px] leading-relaxed text-product-muted">
+						<p className="text-[11px] leading-relaxed text-muted-foreground">
 							The next step should be obvious: decide what stays, decide what
 							goes, then explain why this smaller version is still enough.
 						</p>
 					</div>
-					<div className="border border-product-border/80 bg-product-surface-strong/70 px-3 py-3">
-						<p className="font-mono text-[9px] uppercase tracking-[0.18em] text-product-muted">
+					<div className="border border-border bg-muted/30 px-3 py-3">
+						<p className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
 							Current draft
 						</p>
 						<p
 							className={`mt-2 text-sm leading-snug ${
 								draftStatus.tone === "accent"
-									? "text-product-accent"
-									: "text-product-text"
+									? "text-primary"
+									: "text-foreground"
 							}`}
 						>
 							{draftStatus.label}
 						</p>
-						<p className="mt-1 text-[11px] leading-relaxed text-product-muted">
+						<p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
 							{draftStatus.detail}
 						</p>
 					</div>
@@ -78,47 +78,45 @@ export function ScopeOverviewCard({
 					{steps.map((step, index) => (
 						<li
 							key={step.title}
-							className="border border-product-border/80 bg-product-surface px-3 py-3"
+							className="border border-border bg-background px-3 py-3"
 						>
-							<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
+							<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
 								{String(index + 1).padStart(2, "0")}
 							</p>
-							<p className="mt-2 text-sm leading-snug text-product-text">
+							<p className="mt-2 text-sm leading-snug text-foreground">
 								{step.title}
 							</p>
-							<p className="mt-1 text-[11px] leading-relaxed text-product-muted">
+							<p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
 								{step.body}
 							</p>
-							<p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text">
+							<p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-foreground">
 								{step.status}
 							</p>
 						</li>
 					))}
 				</ol>
 
-				<div className="flex flex-wrap items-start justify-between gap-3 border border-product-border/80 bg-product-surface-strong/70 px-3 py-3">
+				<div className="flex flex-wrap items-start justify-between gap-3 border border-border bg-muted/30 px-3 py-3">
 					<div>
-						<p className="font-mono text-[9px] uppercase tracking-[0.18em] text-product-muted">
+						<p className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
 							Next up in 1.7 Brief
 						</p>
-						<p className="mt-1 text-sm leading-snug text-product-text">
+						<p className="mt-1 text-sm leading-snug text-foreground">
 							These three fields become the saved scope boundary for the brief.
 						</p>
-						<p className="mt-1 text-[11px] leading-relaxed text-product-muted">
+						<p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
 							1.7 should read like one coherent v1, not another brainstorm.
 						</p>
 					</div>
 					<div className="max-w-xs">
 						<p
 							className={`text-sm leading-snug ${
-								boundaryStatus.isReady
-									? "text-product-accent"
-									: "text-product-text"
+								boundaryStatus.isReady ? "text-primary" : "text-foreground"
 							}`}
 						>
 							{boundaryStatus.label}
 						</p>
-						<p className="mt-1 text-[11px] leading-relaxed text-product-muted">
+						<p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
 							{boundaryStatus.detail}
 						</p>
 					</div>

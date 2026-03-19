@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 
+import { CardTitle } from "@/components/ui/card";
 import { LessonVideoSurface } from "@/features/course/lesson/components/lesson-video-surface";
 import { CORE_FLOW_QUALITY_CHECKS_FIELD_ID } from "@/features/course/lesson/model/core-flow";
 import { isLessonVideoReady } from "@/features/course/lesson/model/video";
@@ -12,13 +13,13 @@ import { StatusRail } from "../shared/status-rail";
 import { WorkbenchCard } from "../shared/workbench-card";
 import { WorkbenchContainer } from "../shared/workbench-container";
 import { WorkbenchHeader } from "../shared/workbench-header";
-import { WorkbenchHeaderLabel } from "../shared/workbench-header-label";
 import type { WorkbenchModeProps } from "../types";
 
-const insetPanelClassName =
-	"rounded-none border border-product-border/60 bg-product-surface px-3 py-3 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_2px_rgba(0,0,0,0.05)]";
+const insetPanelClassName = "rounded-lg border border-input bg-card px-3 py-3";
 const altInsetPanelClassName =
-	"rounded-none border border-product-border/60 bg-product-surface-strong/80 px-3 py-3";
+	"rounded-lg border border-input bg-muted/30 px-3 py-3";
+const chromeLabelClass =
+	"text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground";
 
 type CoachExample = {
 	id: string;
@@ -38,7 +39,7 @@ function InvalidFieldMessage({
 	}
 
 	return (
-		<p className="mt-2 text-[11px] font-medium leading-snug text-danger">
+		<p className="mt-2 text-[11px] font-medium leading-snug text-destructive">
 			{message}
 		</p>
 	);
@@ -82,20 +83,24 @@ function FlowContextStrip({
 	return (
 		<div className="grid gap-3 md:grid-cols-2">
 			<InsetPanel>
-				<WorkbenchHeaderLabel>User</WorkbenchHeaderLabel>
-				<p className="mt-2 text-sm font-medium leading-relaxed text-product-text">
+				<CardTitle className="font-mono text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+					User
+				</CardTitle>
+				<p className="mt-2 text-sm font-medium leading-relaxed text-foreground">
 					{selectedUser}
 				</p>
-				<p className="mt-2 text-xs leading-relaxed text-product-muted [text-wrap:pretty]">
+				<p className="mt-2 text-xs leading-relaxed text-muted-foreground [text-wrap:pretty]">
 					Start from the moment this hurts: {userPain}
 				</p>
 			</InsetPanel>
 			<InsetPanel>
-				<WorkbenchHeaderLabel>Promise</WorkbenchHeaderLabel>
-				<p className="mt-2 text-sm font-medium leading-relaxed text-product-text [text-wrap:pretty]">
+				<CardTitle className="font-mono text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+					Promise
+				</CardTitle>
+				<p className="mt-2 text-sm font-medium leading-relaxed text-foreground [text-wrap:pretty]">
 					{outcome}
 				</p>
-				<p className="mt-2 text-xs leading-relaxed text-product-muted [text-wrap:pretty]">
+				<p className="mt-2 text-xs leading-relaxed text-muted-foreground [text-wrap:pretty]">
 					Draw only the shortest believable path that gets this user here.
 				</p>
 			</InsetPanel>
@@ -114,20 +119,24 @@ function PendingVideoFallback({
 }) {
 	return (
 		<div className={`mt-3 space-y-3 ${insetPanelClassName}`}>
-			<p className="text-sm leading-relaxed text-product-text [text-wrap:pretty]">
+			<p className="text-sm leading-relaxed text-foreground [text-wrap:pretty]">
 				Until the walkthrough lands, use one rule: draw the smallest believable
 				path from {currentWorkaround} to {outcome}.
 			</p>
 			{fallbackExamples.length > 0 ? (
 				<details className="group">
-					<summary className="cursor-pointer list-none font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted transition-colors hover:text-product-text [&::-webkit-details-marker]:hidden">
+					<summary
+						className={`${chromeLabelClass} cursor-pointer list-none transition-colors hover:text-foreground [&::-webkit-details-marker]:hidden`}
+					>
 						Need an example?
 					</summary>
 					<div className="mt-3 grid gap-3 md:grid-cols-2">
 						{fallbackExamples.map((example) => (
 							<InsetPanel key={example.id} className={altInsetPanelClassName}>
-								<WorkbenchHeaderLabel>{example.title}</WorkbenchHeaderLabel>
-								<p className="mt-2 text-xs leading-relaxed text-product-muted whitespace-pre-line [text-wrap:pretty]">
+								<CardTitle className="font-mono text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+									{example.title}
+								</CardTitle>
+								<p className="mt-2 whitespace-pre-line text-xs leading-relaxed text-muted-foreground [text-wrap:pretty]">
 									{example.body}
 								</p>
 							</InsetPanel>
@@ -163,26 +172,32 @@ function FlowMappingCard({
 					outcome={outcome}
 				/>
 			) : null}
-			<p className="text-sm leading-relaxed text-product-text [text-wrap:pretty]">
+			<p className="text-sm leading-relaxed text-foreground [text-wrap:pretty]">
 				Draw it on paper in 5-7 steps. Make the moment where the promise becomes
 				real easy to spot.
 			</p>
 			<div className="grid gap-3 md:grid-cols-3">
 				<InsetPanel>
-					<WorkbenchHeaderLabel>Start</WorkbenchHeaderLabel>
-					<p className="mt-2 text-xs leading-relaxed text-product-muted [text-wrap:pretty]">
+					<CardTitle className="font-mono text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+						Start
+					</CardTitle>
+					<p className="mt-2 text-xs leading-relaxed text-muted-foreground [text-wrap:pretty]">
 						{selectedUser} shows up with {currentWorkaround}.
 					</p>
 				</InsetPanel>
 				<InsetPanel>
-					<WorkbenchHeaderLabel>Value moment</WorkbenchHeaderLabel>
-					<p className="mt-2 text-xs leading-relaxed text-product-muted [text-wrap:pretty]">
+					<CardTitle className="font-mono text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+						Value moment
+					</CardTitle>
+					<p className="mt-2 text-xs leading-relaxed text-muted-foreground [text-wrap:pretty]">
 						The user can see a usable result and knows the promise is real.
 					</p>
 				</InsetPanel>
 				<InsetPanel>
-					<WorkbenchHeaderLabel>End</WorkbenchHeaderLabel>
-					<p className="mt-2 text-xs leading-relaxed text-product-muted [text-wrap:pretty]">
+					<CardTitle className="font-mono text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+						End
+					</CardTitle>
+					<p className="mt-2 text-xs leading-relaxed text-muted-foreground [text-wrap:pretty]">
 						{successLooksLike}
 					</p>
 				</InsetPanel>
@@ -250,7 +265,7 @@ export function PaperPhotoUploadWorkbench({
 	const fallbackExamples = (lessonContent.coach.examples ?? []).slice(0, 2);
 
 	return (
-		<WorkbenchContainer className="max-w-6xl">
+		<WorkbenchContainer>
 			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
 			<WorkbenchCard label="Watch first">
 				<LessonVideoSurface
@@ -288,7 +303,7 @@ export function PaperPhotoUploadWorkbench({
 			{uploadField ? (
 				<WorkbenchCard label="Upload the map">
 					<div className="space-y-3">
-						<p className="text-sm leading-relaxed text-product-text [text-wrap:pretty]">
+						<p className="text-sm leading-relaxed text-foreground [text-wrap:pretty]">
 							Upload one legible photo. Paper is preferred, but a tablet or
 							digital screenshot still counts.
 						</p>
@@ -304,14 +319,12 @@ export function PaperPhotoUploadWorkbench({
 							message="Upload one clean core-flow photo before you continue."
 						/>
 						{upload?.fileName ? (
-							<div className="rounded-none border border-product-accent/35 bg-product-chip/35 px-3 py-3 shadow-[0_0_0_1px_rgba(var(--product-accent),0.12),0_1px_2px_rgba(0,0,0,0.05)]">
-								<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-accent">
-									Next up in 1.6
-								</p>
-								<p className="mt-2 text-sm leading-relaxed text-product-text [text-wrap:pretty]">
+							<div className="rounded-lg border border-input bg-card px-3 py-3">
+								<p className={chromeLabelClass}>Next up in 1.6</p>
+								<p className="mt-2 text-sm leading-relaxed text-foreground [text-wrap:pretty]">
 									You will use this map as the cut line for what belongs in v1.
 								</p>
-								<p className="mt-2 text-xs leading-relaxed text-product-muted [text-wrap:pretty]">
+								<p className="mt-2 text-xs leading-relaxed text-muted-foreground [text-wrap:pretty]">
 									Replace it now if the steps are blurry or too crowded to
 									follow.
 								</p>
@@ -323,7 +336,7 @@ export function PaperPhotoUploadWorkbench({
 			{qualityField ? (
 				<WorkbenchCard label="Ready for 1.6?">
 					<div className="space-y-3">
-						<p className="text-xs leading-relaxed text-product-muted [text-wrap:pretty]">
+						<p className="text-xs leading-relaxed text-muted-foreground [text-wrap:pretty]">
 							Before you lock the lesson, confirm the map is focused enough to
 							use as the scope cut line in `1.6`.
 						</p>

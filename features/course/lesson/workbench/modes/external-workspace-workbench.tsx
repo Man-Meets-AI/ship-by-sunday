@@ -1,5 +1,13 @@
 import Link from "next/link";
 
+import { Button } from "@/components/ui/button";
+import {
+	Item,
+	ItemContent,
+	ItemDescription,
+	ItemGroup,
+	ItemTitle,
+} from "@/components/ui/item";
 import { LessonVideoSurface } from "@/features/course/lesson/components/lesson-video-surface";
 import type { LessonResourceContent } from "@/features/course/lesson/model/manifest";
 import { FieldList } from "../fields/field-list";
@@ -8,8 +16,11 @@ import { StatusRail } from "../shared/status-rail";
 import { WorkbenchCard } from "../shared/workbench-card";
 import { WorkbenchContainer } from "../shared/workbench-container";
 import { WorkbenchHeader } from "../shared/workbench-header";
-import { workbenchChromeLabelClass } from "../shared/workbench-readability";
 import type { WorkbenchModeProps } from "../types";
+import { ExternalWorkspacePromptImport } from "./external-workspace-prompt-import";
+
+const resourceKindClass =
+	"text-xs font-medium capitalize text-muted-foreground";
 
 export function ExternalWorkspaceWorkbench({
 	lesson,
@@ -48,55 +59,84 @@ export function ExternalWorkspaceWorkbench({
 			/>
 			<WorkbenchCard label="Watch first">
 				<div className="space-y-3">
-					<p className="text-[13px] leading-[1.7] text-product-muted">
+					<p className="text-sm leading-relaxed text-muted-foreground">
 						Watch the walkthrough once, then run the setup in sequence.
 					</p>
-					<LessonVideoSurface coachContent={lessonContent.coach} />
+					<LessonVideoSurface
+						coachContent={lessonContent.coach}
+						playerFrame="bare"
+					/>
 				</div>
 			</WorkbenchCard>
 			<WorkbenchCard label="External workspace">
-				<p className="text-[13px] leading-[1.7] text-product-muted">
+				<p className="text-sm leading-relaxed text-muted-foreground">
 					{actionLabel}
 				</p>
 			</WorkbenchCard>
 			{lesson.checklist.length > 0 ? (
 				<WorkbenchCard label="Run this sequence">
-					<ol className="space-y-2 pl-5 text-[14px] leading-[1.68] text-product-text">
-						{lesson.checklist.map((item) => (
-							<li key={item} className="list-decimal break-words">
-								{item}
-							</li>
+					<ItemGroup className="gap-2" role="list">
+						{lesson.checklist.map((item, index) => (
+							<Item
+								key={item}
+								variant="outline"
+								size="sm"
+								role="listitem"
+								className="h-auto min-h-0 flex-col items-stretch py-3"
+							>
+								<ItemContent className="min-w-0 gap-1">
+									<ItemTitle className="w-full text-xs font-semibold text-muted-foreground">
+										Step {index + 1}
+									</ItemTitle>
+									<ItemDescription className="line-clamp-none text-foreground">
+										{item}
+									</ItemDescription>
+								</ItemContent>
+							</Item>
 						))}
-					</ol>
+					</ItemGroup>
 				</WorkbenchCard>
 			) : null}
 			{transcript?.status === "ready" && transcript.body ? (
 				<WorkbenchCard label="Transcript">
-					<p className="max-w-[64ch] whitespace-pre-wrap text-[14px] leading-[1.72] text-product-text">
-						{transcript.body}
-					</p>
+					<div className="max-h-72 max-w-prose overflow-y-auto rounded-lg border border-border/60 bg-muted/20 p-3">
+						<p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+							{transcript.body}
+						</p>
+					</div>
 				</WorkbenchCard>
 			) : null}
 			{resourceLinks.length > 0 ? (
 				<WorkbenchCard label="Resources">
-					<div className="space-y-1.5">
+					<div className="space-y-2">
 						{resourceLinks.map((resource) => (
-							<Link
+							<Button
 								key={resource.id}
-								href={resource.href}
-								target={resource.kind === "external" ? "_blank" : undefined}
-								className="block rounded-none border border-product-border/55 bg-product-surface-strong/80 px-4 py-4 transition-colors hover:bg-product-surface-alt"
+								asChild
+								variant="outline"
+								className="h-auto min-h-0 w-full flex-col items-stretch justify-start gap-0 px-4 py-4 text-left font-normal whitespace-normal"
 							>
-								<p className={workbenchChromeLabelClass}>{resource.kind}</p>
-								<p className="mt-2 text-[14px] font-semibold leading-[1.45] text-product-text">
-									{resource.label}
-								</p>
-							</Link>
+								<Link
+									href={resource.href}
+									target={resource.kind === "external" ? "_blank" : undefined}
+								>
+									<p className={resourceKindClass}>{resource.kind}</p>
+									<p className="mt-2 text-sm font-semibold leading-snug text-foreground">
+										{resource.label}
+									</p>
+								</Link>
+							</Button>
 						))}
 					</div>
 				</WorkbenchCard>
 			) : null}
 			<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
+			<ExternalWorkspacePromptImport
+				lesson={lesson}
+				onFieldChange={onFieldChange}
+				pinnedArtifacts={pinnedArtifacts}
+				fieldValues={fieldValues}
+			/>
 			<FieldList
 				fields={fields}
 				fieldValues={fieldValues}

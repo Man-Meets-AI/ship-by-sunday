@@ -1,27 +1,19 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
-import { Bebas_Neue, Geist } from "next/font/google";
 import "@xyflow/react/dist/style.css";
+import { Bebas_Neue } from "next/font/google";
+import { ThemeProvider } from "next-themes";
 
-import { manifestConfig, productConfig } from "@/config/product";
-import { ProductThemeProvider } from "@/features/course/shared/components/product-theme-provider";
-import { getInitialProductTheme } from "@/features/course/shared/server/product-theme";
-import {
-	getProductThemeBootstrapScript,
-	getProductThemeTokenStyles,
-} from "@/features/course/shared/utils/product-theme";
-import { ConvexClientProvider } from "@/platform/convex/convex-client-provider";
-
-import "./globals.css";
-import { cn } from "@/lib/utils";
-
-const display = Bebas_Neue({
-	variable: "--font-display",
+const bebasNeue = Bebas_Neue({
 	subsets: ["latin"],
 	weight: "400",
+	variable: "--font-bebas-neue",
 });
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+import { Toaster } from "@/components/ui/sonner";
+import { manifestConfig, productConfig } from "@/config/product";
+import { ConvexClientProvider } from "@/platform/convex/convex-client-provider";
+import "./globals.css";
 
 export const metadata: Metadata = {
 	title: productConfig.name,
@@ -34,34 +26,23 @@ export const metadata: Metadata = {
 	},
 };
 
-export default async function RootLayout({
+export default function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	const initialTheme = await getInitialProductTheme();
-
 	return (
-		<html
-			lang="en"
-			data-product-theme={initialTheme}
-			suppressHydrationWarning
-			className={cn(
-				display.variable,
-				initialTheme,
-				"font-sans",
-				geist.variable,
-			)}
-		>
-			<head>
-				<style>{getProductThemeTokenStyles()}</style>
-				<script>{getProductThemeBootstrapScript()}</script>
-			</head>
-			<body>
+		<html lang="en" suppressHydrationWarning>
+			<body className={bebasNeue.variable}>
 				<ClerkProvider>
-					<ProductThemeProvider initialTheme={initialTheme}>
+					<ThemeProvider
+						attribute="class"
+						defaultTheme="light"
+						enableSystem={false}
+					>
 						<ConvexClientProvider>{children}</ConvexClientProvider>
-					</ProductThemeProvider>
+						<Toaster />
+					</ThemeProvider>
 				</ClerkProvider>
 			</body>
 		</html>

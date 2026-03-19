@@ -1,20 +1,3 @@
-type ThemeMode = "dark" | "light";
-
-type ProductThemePalette = {
-	colorScheme: ThemeMode;
-	bgRgb: string;
-	surfaceRgb: string;
-	surfaceStrongRgb: string;
-	surfaceAltRgb: string;
-	borderRgb: string;
-	textRgb: string;
-	mutedRgb: string;
-	accentRgb: string;
-	accentSoftRgb: string;
-	chipRgb: string;
-	shadowRgb: string;
-};
-
 export const PRODUCT_APP_ID = "ship-by-sunday" as const;
 export const PRODUCT_COURSE_SLUG = "ship-by-sunday" as const;
 
@@ -32,70 +15,6 @@ export const assetPaths = {
 
 export const brandColorConfig = {
 	whiteHex: "#ffffff",
-	whiteRgb: "255 255 255",
-	inkHex: "#111111",
-	inkRgb: "17 17 17",
-	paperHex: "#f5f1ea",
-	paperRgb: "245 241 234",
-	lineHex: "#1a1a1a",
-	lineRgb: "26 26 26",
-	mutedHex: "#ece7de",
-	mutedRgb: "236 231 222",
-	accentHex: "#262626",
-	accentRgb: "38 38 38",
-	dangerHex: "#a83232",
-	dangerRgb: "168 50 50",
-	dangerSoftHex: "#f0b4b4",
-	dangerSoftRgb: "240 180 180",
-} as const;
-
-export const productThemePalettes = {
-	light: {
-		colorScheme: "light",
-		bgRgb: "245 241 234",
-		surfaceRgb: "255 255 255",
-		surfaceStrongRgb: "245 241 234",
-		surfaceAltRgb: "236 231 222",
-		borderRgb: "26 26 26",
-		textRgb: "17 17 17",
-		mutedRgb: "86 78 64",
-		accentRgb: "17 17 17",
-		accentSoftRgb: "38 38 38",
-		chipRgb: "236 231 222",
-		shadowRgb: "17 17 17",
-	},
-	dark: {
-		colorScheme: "dark",
-		bgRgb: "11 11 11",
-		surfaceRgb: "18 18 20",
-		surfaceStrongRgb: "10 10 12",
-		surfaceAltRgb: "34 34 38",
-		borderRgb: "92 92 92",
-		textRgb: "252 252 252",
-		mutedRgb: "174 182 194",
-		accentRgb: "75 179 248",
-		accentSoftRgb: "149 255 255",
-		chipRgb: "23 25 30",
-		shadowRgb: "0 0 0",
-	},
-} as const satisfies Record<ThemeMode, ProductThemePalette>;
-
-export const productThemeConfig = {
-	defaultTheme: "dark" as const,
-	storageKey: "sbs:theme",
-	cookieName: "sbs-theme",
-	cookieMaxAgeSeconds: 31_536_000,
-	scrollbarSizePx: 8,
-	scrollbarThumbAlpha: 0.34,
-	scrollbarThumbHoverAlpha: 0.5,
-	motion: {
-		fastMs: 120,
-		baseMs: 180,
-		slowMs: 240,
-		easeStandard: "cubic-bezier(0.2, 0.8, 0.2, 1)",
-		easeExit: "cubic-bezier(0.4, 0, 1, 1)",
-	},
-	palettes: productThemePalettes,
 } as const;
 
 export const productConfig = {
@@ -283,8 +202,6 @@ export const courseResourceConfig = {
 } as const;
 
 export const authViewConfig = {
-	clerkCardClassName:
-		"rounded-none border border-product-border bg-product-surface/92 text-product-text shadow-panel backdrop-blur-xl",
 	fallbackRedirectUrl: routeConfig.mission,
 } as const;
 

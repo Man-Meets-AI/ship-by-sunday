@@ -18,9 +18,10 @@ export function ReferenceGalleryWorkbench({
 	completedTaskCount,
 }: WorkbenchModeProps) {
 	const galleryField = fields[0];
+	const isInvalid = galleryField ? invalidFieldIds.has(galleryField.id) : false;
 
 	return (
-		<WorkbenchContainer className="max-w-6xl">
+		<WorkbenchContainer>
 			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
 			<StatusRail
 				lessonContent={lessonContent}
@@ -31,8 +32,8 @@ export function ReferenceGalleryWorkbench({
 			{galleryField ? (
 				<div
 					className={
-						invalidFieldIds.has(galleryField.id)
-							? "sbs-danger-card-shadow rounded-none border border-danger/75 bg-danger/[0.06] p-3"
+						isInvalid
+							? "space-y-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4"
 							: "p-0"
 					}
 				>
@@ -45,8 +46,8 @@ export function ReferenceGalleryWorkbench({
 							showLabel={false}
 						/>
 					</WorkbenchCard>
-					{invalidFieldIds.has(galleryField.id) ? (
-						<p className="mt-2 text-[11px] font-medium leading-snug text-danger">
+					{isInvalid ? (
+						<p className="text-[12px] font-medium leading-[1.6] text-destructive">
 							Save at least {Math.max(galleryField.minItems ?? 1, 1)} references
 							before continuing.
 						</p>

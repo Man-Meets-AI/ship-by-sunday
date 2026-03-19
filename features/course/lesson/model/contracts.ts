@@ -22,6 +22,7 @@ export type WorkbenchType =
 
 export type CoachMode = "docked" | "pip";
 export type CoachVideoPlacement = "coach" | "workbench";
+export type WorkbenchMediaLayout = "stack" | "split";
 
 export type ExternalTool = "figma" | "code" | "deploy" | "recording";
 
@@ -148,6 +149,7 @@ export type WorkbenchField = {
 		| "textarea"
 		| "url"
 		| "number"
+		| "radio_group"
 		| "toggle"
 		| "select"
 		| "image_upload"
@@ -313,6 +315,7 @@ export type LessonConfig = {
 	unlocks?: LessonUnlockTargets;
 	coachMode: CoachMode;
 	coachVideoPlacement?: CoachVideoPlacement;
+	workbenchMediaLayout?: WorkbenchMediaLayout;
 	externalTool?: ExternalTool;
 	objectiveTitle: string;
 	checklist: string[];

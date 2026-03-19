@@ -59,18 +59,18 @@ export function ScopeListEditorCard({
 			<div className="space-y-3">
 				<div className="flex flex-wrap items-start justify-between gap-2">
 					<div className="max-w-2xl space-y-1">
-						<p className="text-sm leading-relaxed text-product-text">
+						<p className="text-sm leading-relaxed text-foreground">
 							{description}
 						</p>
-						<p className="text-[11px] leading-relaxed text-product-muted">
+						<p className="text-[11px] leading-relaxed text-muted-foreground">
 							{orderHint}
 						</p>
 					</div>
 					<span
 						className={`inline-flex items-center border px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] ${
 							healthy
-								? "border-product-accent/40 bg-product-accent/[0.08] text-product-accent"
-								: "border-product-border bg-product-surface text-product-text"
+								? "border-primary/30 bg-primary/5 text-primary"
+								: "border-border bg-background text-foreground"
 						}`}
 					>
 						{countLabel}
@@ -88,7 +88,7 @@ export function ScopeListEditorCard({
 								key={`${field.id}-${keyBase}-${occurrence}`}
 								className="flex items-start gap-2"
 							>
-								<span className="inline-flex h-9 w-9 shrink-0 items-center justify-center border border-product-border bg-product-surface font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
+								<span className="inline-flex h-9 w-9 shrink-0 items-center justify-center border border-border bg-background font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
 									{String(index + 1).padStart(2, "0")}
 								</span>
 								<div className="flex-1">
@@ -118,13 +118,13 @@ export function ScopeListEditorCard({
 					<Button type="button" onClick={addRow} variant="outline" size="sm">
 						{addButtonLabel}
 					</Button>
-					<p className="text-[11px] leading-relaxed text-product-muted">
+					<p className="text-[11px] leading-relaxed text-muted-foreground">
 						{supportText}
 					</p>
 				</div>
 
 				{invalidMessage ? (
-					<p className="text-[11px] font-medium leading-snug text-danger">
+					<p className="text-[11px] font-medium leading-snug text-destructive">
 						{invalidMessage}
 					</p>
 				) : null}

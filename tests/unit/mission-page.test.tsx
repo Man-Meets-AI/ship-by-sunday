@@ -276,6 +276,8 @@ const missionState = {
 	],
 };
 
+let missionQueryResult: typeof missionState | undefined = missionState;
+
 vi.mock("next/link", () => ({
 	default: ({
 		children,
@@ -293,28 +295,28 @@ vi.mock("next/link", () => ({
 	),
 }));
 
-vi.mock("@/features/starter-repo/components/starter-repo-access-card", () => ({
-	StarterRepoAccessCard: ({ surface }: { surface: string }) => (
-		<div data-starter-repo-card={surface}>Starter Repo</div>
-	),
-}));
-
-vi.mock("@/features/course/mission/components/bonus-course-card", () => ({
-	BonusCourseCard: () => (
-		<div data-bonus-course-card="mission">Bonus Course</div>
-	),
-}));
+vi.mock(
+	"@/features/course/mission/components/mission/mission-extras-row",
+	() => ({
+		MissionExtrasRow: () => (
+			<div data-extras-row="true">
+				<div data-starter-repo-card="mission">Starter Repo</div>
+				<div>Product Management for Beginners</div>
+			</div>
+		),
+	}),
+);
 
 vi.mock("convex/react", () => ({
 	useConvexAuth: () => ({
 		isAuthenticated: true,
 		isLoading: false,
 	}),
-	useQuery: () => missionState,
+	useQuery: () => missionQueryResult,
 }));
 
-vi.mock("@/features/course/shared/components/product-shell", () => ({
-	ProductShell: ({
+vi.mock("@/features/course/shared/components/app-shell", () => ({
+	AppShell: ({
 		children,
 		viewportMode,
 		appScrollMode,
@@ -338,22 +340,37 @@ globalThis.React = React;
 import { MissionPage } from "@/features/course/mission/components/mission-page";
 
 describe("MissionPage", () => {
+	beforeEach(() => {
+		missionQueryResult = missionState;
+	});
+
 	it("prioritizes the current task and demotes the rest of the route", () => {
 		const markup = renderToStaticMarkup(<MissionPage />);
 
 		expect(markup).toContain('data-viewport-mode="app"');
 		expect(markup).toContain('data-app-scroll-mode="page"');
 		expect(markup).toContain('data-starter-repo-card="mission"');
-		expect(markup).toContain('data-bonus-course-card="mission"');
-		expect(markup).toContain("Your sprint");
-		expect(markup).toContain("Current step");
+		expect(markup).toContain("Your weekend roadmap");
+		expect(markup).toContain("20 of 31 lessons complete");
 		expect(markup).toContain("Start 1.5");
-		expect(markup).toContain("Done in CEO");
-		expect(markup).toContain("Full weekend");
-		expect(markup).toContain("Sprint route");
+		expect(markup).toContain("All four blocks");
+		expect(markup).toContain('data-slot="card"');
+		expect(markup).toContain('data-slot="badge"');
+		expect(markup).toContain('data-slot="progress"');
+		expect(markup).toContain("Product Management for Beginners");
 		expect(markup).not.toContain("Mission map");
 		expect(markup).not.toContain("Unlock path");
 		expect(markup).not.toContain("Current block challenges");
 		expect(markup).not.toContain("Cleared");
+	});
+
+	it("renders a primitive loading state while mission data is unavailable", () => {
+		missionQueryResult = undefined;
+
+		const markup = renderToStaticMarkup(<MissionPage />);
+
+		expect(markup).toContain("Loading");
+		expect(markup).toContain('data-slot="card"');
+		expect(markup).toContain('data-slot="skeleton"');
 	});
 });

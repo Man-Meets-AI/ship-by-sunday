@@ -1,24 +1,11 @@
+/** @vitest-environment jsdom */
+
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 const pushMock = vi.fn();
-
-vi.mock("next/link", () => ({
-	default: ({
-		children,
-		href,
-		scroll: _scroll,
-		...props
-	}: React.AnchorHTMLAttributes<HTMLAnchorElement> & {
-		href: string;
-		children: React.ReactNode;
-		scroll?: boolean;
-	}) => (
-		<a href={href} {...props}>
-			{children}
-		</a>
-	),
-}));
 
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({
@@ -35,7 +22,7 @@ describe("SkillRail", () => {
 		pushMock.mockReset();
 	});
 
-	it("renders completion sweep and next-unlock ping when given a completion cue", () => {
+	it("highlights the completing lesson and keeps the next step locked in markup", () => {
 		const markup = renderToStaticMarkup(
 			<SkillRail
 				label="CEO"
@@ -59,17 +46,21 @@ describe("SkillRail", () => {
 			/>,
 		);
 
-		expect(markup).toContain("sbs-rail-complete-slot");
-		expect(markup).toContain("sbs-rail-complete-sweep");
-		expect(markup).toContain("sbs-rail-unlock-slot");
+		expect(markup).toContain("bg-primary/10");
+		expect(markup).toContain("border-b-primary");
 		expect(markup).toContain(">Previous<");
 		expect(markup).toContain(">Next<");
 		expect(markup).toContain("Carry forward");
 		expect(markup).toContain('aria-current="step"');
-		expect(markup).toContain('aria-label="Carry forward. Locked."');
+		expect(markup).toContain(
+			'aria-label="Lesson 1 of 2. Start. Current lesson."',
+		);
+		expect(markup).toContain(
+			'aria-label="Lesson 2 of 2. Carry forward. Locked."',
+		);
 	});
 
-	it("skips the unlock ping when there is no next lesson", () => {
+	it("highlights completion on the final lesson without a next-unlock target", () => {
 		const markup = renderToStaticMarkup(
 			<SkillRail
 				label="SHIP"
@@ -88,8 +79,11 @@ describe("SkillRail", () => {
 			/>,
 		);
 
-		expect(markup).toContain("sbs-rail-complete-slot");
-		expect(markup).not.toContain("sbs-rail-unlock-slot");
+		expect(markup).toContain("bg-primary/10");
+		expect(markup).toContain(
+			'aria-label="Lesson 1 of 1. Final wrap. Current lesson."',
+		);
+		expect(markup).not.toContain("Lesson 2 of");
 	});
 
 	it("keeps the previous key enabled for completed lessons", () => {
@@ -117,7 +111,7 @@ describe("SkillRail", () => {
 			/>,
 		);
 
-		expect(markup).toContain('href="/lesson/1.1"');
+		expect(markup).toContain('data-href="/lesson/1.1"');
 		expect(markup).toContain('aria-label="Open previous lesson: Problem"');
 		expect(markup).toContain('data-disabled="false"');
 	});
@@ -149,7 +143,7 @@ describe("SkillRail", () => {
 
 		expect(markup).toContain('aria-label="No next lesson available"');
 		expect(markup).toContain('data-disabled="true"');
-		expect(markup).not.toContain('href="/lesson/1.3"');
+		expect(markup).not.toContain('data-href="/lesson/1.3"');
 	});
 
 	it("uses navigation lessons to cross forward into the next stage while keeping the visible strip scoped", () => {
@@ -189,7 +183,7 @@ describe("SkillRail", () => {
 			/>,
 		);
 
-		expect(markup).toContain('href="/lesson/2.1"');
+		expect(markup).toContain('data-href="/lesson/2.1"');
 		expect(markup).toContain('aria-label="Open next stage: References"');
 		expect(markup).toContain(">Scope<");
 		expect(markup).toContain(">Brief<");
@@ -233,9 +227,45 @@ describe("SkillRail", () => {
 			/>,
 		);
 
-		expect(markup).toContain('href="/lesson/1.7"');
+		expect(markup).toContain('data-href="/lesson/1.7"');
 		expect(markup).toContain('aria-label="Open previous stage: Brief"');
 		expect(markup).not.toContain(">Brief<");
+	});
+
+	it("navigates in place when a rail step is clicked", async () => {
+		const user = userEvent.setup();
+
+		render(
+			<SkillRail
+				label="CEO"
+				currentLessonId="1.2"
+				lessons={[
+					{
+						id: "1.1",
+						shortTitle: "Problem",
+						status: "completed",
+					},
+					{
+						id: "1.2",
+						shortTitle: "User",
+						status: "in_progress",
+					},
+					{
+						id: "1.3",
+						shortTitle: "Outcome",
+						status: "available",
+					},
+				]}
+			/>,
+		);
+
+		await user.click(
+			screen.getByRole("button", {
+				name: "Lesson 3 of 3. Outcome. Available lesson.",
+			}),
+		);
+
+		expect(pushMock).toHaveBeenCalledWith("/lesson/1.3", { scroll: false });
 	});
 
 	it("disables adjacent nav at the first and last visible lesson", () => {
@@ -300,7 +330,7 @@ describe("SkillRail", () => {
 		expect(markup).not.toContain("Open next lesson");
 	});
 
-	it("shows explicit progress and state labels for navigation context", () => {
+	it("shows step position, completion check for finished lessons, and stateful aria labels", () => {
 		const markup = renderToStaticMarkup(
 			<SkillRail
 				label="CEO"
@@ -325,14 +355,19 @@ describe("SkillRail", () => {
 			/>,
 		);
 
-		expect(markup).not.toContain("Step 2 of 3");
-		expect(markup).not.toContain("1 completed");
-		expect(markup).not.toContain(">Done<");
-		expect(markup).not.toContain(">Current<");
-		expect(markup).not.toContain(">Upcoming<");
-		expect(markup).toContain('aria-label="Problem. Completed lesson."');
-		expect(markup).toContain('aria-label="User. Current lesson."');
-		expect(markup).toContain('aria-label="Outcome. Available lesson."');
+		expect(markup).toContain("Lesson 1 of 3");
+		expect(markup).toContain("Lesson 2 of 3");
+		expect(markup).toContain("Lesson 3 of 3");
+		expect(markup).toContain("lucide-check");
+		expect(markup).toContain(
+			'aria-label="Lesson 1 of 3. Problem. Completed lesson."',
+		);
+		expect(markup).toContain(
+			'aria-label="Lesson 2 of 3. User. Current lesson."',
+		);
+		expect(markup).toContain(
+			'aria-label="Lesson 3 of 3. Outcome. Available lesson."',
+		);
 	});
 
 	it("drops the persistent Q/E hint row from the rail", () => {

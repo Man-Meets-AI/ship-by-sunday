@@ -19,10 +19,10 @@ import { LessonShellWatch } from "@/features/course/lesson/shells";
 
 describe("LessonShellWatch", () => {
 	it("renders the Bunny-backed watch shell without workbench chrome", () => {
-		const lesson = getLessonById("1.0");
+		const lesson = getLessonById("1.7");
 		expect(lesson).toBeTruthy();
 		if (!lesson) {
-			throw new Error("Expected lesson 1.0 to exist.");
+			throw new Error("Expected lesson 1.7 to exist.");
 		}
 
 		const markup = renderToStaticMarkup(
@@ -30,16 +30,55 @@ describe("LessonShellWatch", () => {
 				lesson={lesson}
 				coachContent={lesson.content.coach}
 				footer={<div>Footer</div>}
+				pinnedArtifacts={[]}
 			/>,
 		);
 
-		expect(markup).toContain("CEO Kickoff");
-		expect(markup).toContain("CEO Kickoff Video");
+		expect(markup).toContain("Scope Hammer");
+		expect(markup).toContain("Scope boundary");
 		expect(markup).toContain(
-			"https://player.mediadelivery.net/embed/619172/0df1d1d2-098a-425b-b6eb-3c465f0a32e1",
+			"https://player.mediadelivery.net/embed/619172/ce14c05d-c5f2-4b50-b1e8-4911015bdc20",
 		);
 		expect(markup).toContain("Footer");
 		expect(markup).not.toContain("Workbench");
+	});
+
+	it("renders the renamed watch lesson sequence after the restored opening forms", () => {
+		const lesson = getLessonById("1.6");
+		expect(lesson).toBeTruthy();
+		if (!lesson) {
+			throw new Error("Expected lesson 1.6 to exist.");
+		}
+
+		const markup = renderToStaticMarkup(
+			<LessonShellWatch
+				lesson={lesson}
+				coachContent={lesson.content.coach}
+				footer={<div>Footer</div>}
+				pinnedArtifacts={[]}
+			/>,
+		);
+
+		expect(markup).toContain("Light Research, Not a Thesis");
+		expect(markup).toContain("Light Research, Not a Thesis Video");
+		expect(markup).toContain(
+			"https://player.mediadelivery.net/embed/619172/aac17809-c856-4274-badc-12a8b46a407d",
+		);
+		expect(markup).toContain("Light research prompt");
+		expect(markup).toContain("Copy prompt");
+	});
+
+	it("preserves lesson-specific titles when a lesson borrows a media slot", () => {
+		const lesson = getLessonById("1.5");
+		expect(lesson).toBeTruthy();
+		if (!lesson) {
+			throw new Error("Expected lesson 1.5 to exist.");
+		}
+
+		expect(lesson.content.coach.video?.title).toBe("Define the Outcome");
+		expect(lesson.content.coach.video?.videoId).toBe(
+			"59276fe3-0832-455b-8223-2a2974028be8",
+		);
 	});
 
 	it("renders ready Bunny media metadata in the watch shell", () => {
@@ -54,6 +93,7 @@ describe("LessonShellWatch", () => {
 				lesson={lesson}
 				coachContent={lesson.content.coach}
 				footer={<div>Footer</div>}
+				pinnedArtifacts={[]}
 			/>,
 		);
 
@@ -90,6 +130,7 @@ describe("LessonShellWatch", () => {
 					],
 				}}
 				footer={<div>Footer</div>}
+				pinnedArtifacts={[]}
 			/>,
 		);
 
@@ -118,6 +159,7 @@ describe("LessonShellWatch", () => {
 					},
 				}}
 				footer={<div>Footer</div>}
+				pinnedArtifacts={[]}
 			/>,
 		);
 

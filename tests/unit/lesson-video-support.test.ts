@@ -2,6 +2,7 @@ import {
 	getBunnyEmbedUrl,
 	hydrateLessonVideoContent,
 	isLessonVideoReady,
+	resolveLessonMediaKey,
 	resolveLessonVideoUrl,
 } from "@/features/course/lesson/model/video";
 
@@ -38,5 +39,13 @@ describe("lesson video helpers", () => {
 		expect(resolveLessonVideoUrl(bunnyVideo)).toBe(
 			"https://player.mediadelivery.net/embed/619172/video-guid",
 		);
+	});
+
+	it("allows lesson videos to be remapped independently from the media slots", () => {
+		expect(resolveLessonMediaKey("1.1")).toBe("0.1");
+		expect(resolveLessonMediaKey("1.2")).toBe("0.2");
+		expect(resolveLessonMediaKey("1.3")).toBe("1.2");
+		expect(resolveLessonMediaKey("1.4")).toBe("1.3");
+		expect(resolveLessonMediaKey("1.9")).toBe("1.7");
 	});
 });

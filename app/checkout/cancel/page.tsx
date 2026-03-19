@@ -1,55 +1,57 @@
 import Link from "next/link";
 
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { routeConfig } from "@/config/product";
-import { ProductShell } from "@/features/course/shared/components/product-shell";
+import { Button } from "@/components/ui/button";
 
 export default function Page() {
 	return (
-		<ProductShell
-			title="Checkout canceled"
-			subtitle="No charge was completed, and you can restart whenever you're ready."
-			enableMissionQuery={false}
-			showSkillRail={false}
-		>
-			<section className="relative mx-auto w-full max-w-4xl overflow-hidden border border-product-border/70 bg-product-surface/80 p-5 shadow-panel backdrop-blur-xl sm:p-7">
-				<div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-product-accent/10 to-transparent" />
-				<div className="relative">
-					<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
-						Checkout canceled
-					</p>
-					<h1 className="mt-4 max-w-3xl text-balance font-display text-3xl uppercase leading-none tracking-[0.08em] text-product-text sm:text-4xl">
-						No charge was completed
-					</h1>
-					<p className="mt-4 max-w-2xl text-sm leading-relaxed text-product-muted">
+		<main className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
+			<Card className="w-full max-w-2xl">
+				<CardHeader>
+					<CardDescription>Checkout canceled</CardDescription>
+					<CardTitle className="text-3xl">No charge was completed</CardTitle>
+				</CardHeader>
+				<CardContent className="space-y-6">
+					<p className="text-sm text-muted-foreground">
 						You can return to the offer, review the pricing, and restart
 						checkout whenever you are ready. Nothing was charged from this
 						canceled flow.
 					</p>
-					<div className="mt-7 border border-product-border/55 bg-product-surface-strong/72 p-4">
-						<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
-							Next step
-						</p>
-						<p className="mt-3 max-w-2xl text-sm leading-relaxed text-product-text">
+					<div className="rounded-lg border bg-muted/30 p-4">
+						<p className="text-sm font-medium">Next step</p>
+						<p className="mt-2 text-sm text-muted-foreground">
 							Go back to pricing if you still want Ship by Sunday, or return
 							home if you were just checking the offer.
 						</p>
-						<div className="mt-4 flex flex-wrap gap-2.5">
-							<Link
-								href={`${routeConfig.home}${routeConfig.pricingHash}`}
-								className="sbs-hover-lift sbs-press-feedback inline-flex min-w-[12rem] justify-center rounded-none border border-product-accent bg-product-accent/10 px-4 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-product-accent"
-							>
-								Back to pricing
-							</Link>
-							<Link
-								href={routeConfig.home}
-								className="sbs-hover-lift sbs-press-feedback inline-flex min-w-[11rem] justify-center rounded-none border border-product-border bg-product-surface px-4 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-product-text transition-colors hover:bg-product-surface-alt focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-product-accent"
-							>
-								Go home
-							</Link>
-						</div>
 					</div>
-				</div>
-			</section>
-		</ProductShell>
+				</CardContent>
+				<CardFooter className="flex flex-wrap gap-3">
+					<Button
+						asChild
+						variant="secondary"
+						className="min-w-[12rem] justify-center"
+					>
+						<Link href={`${routeConfig.home}${routeConfig.pricingHash}`}>
+							Back to pricing
+						</Link>
+					</Button>
+					<Button
+						asChild
+						variant="outline"
+						className="min-w-[11rem] justify-center"
+					>
+						<Link href={routeConfig.home}>Go home</Link>
+					</Button>
+				</CardFooter>
+			</Card>
+		</main>
 	);
 }

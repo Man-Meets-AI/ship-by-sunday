@@ -5,6 +5,7 @@ import type {
 import { Button } from "@/components/ui/button";
 import { assert, assertNever } from "@/features/course/lesson/lib/assert";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
 	Select,
 	SelectContent,
@@ -17,8 +18,6 @@ import {
 	getTableRows,
 	isTableRowBlank,
 } from "@/features/course/lesson/model/table";
-
-import { fieldLabelClass } from "./field-styles";
 
 function getColumnWidthClass(column: TableColumnConfig) {
 	if (column.width === "compact") {
@@ -70,7 +69,7 @@ function TableCellControl({
 				<Select value={value} onValueChange={onChange}>
 					<SelectTrigger
 						aria-label={`${field.label} row ${rowIndex + 1} ${column.label}`}
-						className="w-full border-0 bg-transparent px-3 py-2"
+						className="w-full border-0 bg-transparent px-3 py-2 text-foreground"
 					>
 						<SelectValue placeholder={column.placeholder ?? "Select one"} />
 					</SelectTrigger>
@@ -93,7 +92,7 @@ function TableCellControl({
 					value={value}
 					onChange={(event) => onChange(event.target.value)}
 					placeholder={column.placeholder}
-					className="border-0 bg-transparent px-3 py-2"
+					className="border-0 bg-transparent px-3 py-2 text-foreground"
 				/>
 			);
 	}
@@ -159,25 +158,25 @@ export function EditableTableField({
 	return (
 		<div className="block">
 			{showLabel ? (
-				<span className={fieldLabelClass}>{field.label}</span>
+				<Label className="text-sm font-medium">{field.label}</Label>
 			) : null}
 			<div className={showLabel ? "mt-1.5 space-y-3" : "space-y-3"}>
-				<div className="hidden overflow-x-auto rounded-none border border-product-border/80 bg-product-surface md:block">
-					<table className="w-full border-collapse text-left">
+				<div className="hidden overflow-x-auto rounded-lg border border-input bg-card md:block">
+					<table className="w-full border-collapse text-left text-sm">
 						<thead>
-							<tr className="border-b border-product-border/80 bg-product-surface-strong/70">
+							<tr className="border-b border-border/60 bg-muted/50">
 								{columns.map((column) => (
 									<th
 										key={column.id}
 										scope="col"
-										className={`border-r border-product-border/70 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted last:border-r-0 ${getColumnWidthClass(column)}`}
+										className={`border-r border-border/60 px-3 py-2 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground last:border-r-0 ${getColumnWidthClass(column)}`}
 									>
 										{column.label}
 									</th>
 								))}
 								<th
 									scope="col"
-									className="w-[1%] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted"
+									className="w-[1%] px-3 py-2 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground"
 								>
 									Actions
 								</th>
@@ -187,12 +186,12 @@ export function EditableTableField({
 							{rowEntries.map(({ row, rowIndex, rowKey }) => (
 								<tr
 									key={rowKey}
-									className="border-b border-product-border/70 last:border-b-0"
+									className="border-b border-border/60 last:border-b-0"
 								>
 									{columns.map((column, columnIndex) => (
 										<td
 											key={column.id}
-											className="border-r border-product-border/70 align-top last:border-r-0"
+											className="border-r border-border/60 align-top last:border-r-0"
 										>
 											<TableCellControl
 												field={field}
@@ -226,10 +225,10 @@ export function EditableTableField({
 					{rowEntries.map(({ row, rowIndex, rowKey }) => (
 						<div
 							key={`mobile-${rowKey}`}
-							className="rounded-none border border-product-border/80 bg-product-surface p-3"
+							className="rounded-lg border border-input bg-card p-3"
 						>
 							<div className="mb-3 flex items-center justify-between gap-3">
-								<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
+								<p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
 									Row {rowIndex + 1}
 								</p>
 								<Button
@@ -245,8 +244,10 @@ export function EditableTableField({
 							<div className="space-y-3">
 								{columns.map((column, columnIndex) => (
 									<div key={column.id} className="block">
-										<span className={fieldLabelClass}>{column.label}</span>
-										<div className="mt-1.5 rounded-none border border-product-border/80 bg-product-surface-strong/70">
+										<span className="text-sm font-medium text-foreground">
+											{column.label}
+										</span>
+										<div className="mt-1.5 rounded-lg border border-input bg-background">
 											<TableCellControl
 												field={field}
 												column={column}
@@ -269,7 +270,7 @@ export function EditableTableField({
 					</Button>
 				</div>
 				{draftRows.length === 1 && isTableRowBlank(draftRows[0]) ? (
-					<p className="text-[11px] font-medium leading-relaxed text-product-muted">
+					<p className="text-[11px] font-medium leading-relaxed text-muted-foreground">
 						Add the first row when you find a useful data point.
 					</p>
 				) : null}

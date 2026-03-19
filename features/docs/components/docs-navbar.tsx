@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { Navbar } from "nextra-theme-docs";
 
+import { ProductBrand } from "@/components/product-brand";
 import { routeConfig } from "@/config/product";
 import { DocsThemeToggle } from "@/features/docs/components/docs-theme-toggle";
-import { ProductBrand } from "@/shared/branding/product-brand";
 
 const navLinkClassName =
-	"rounded-full border border-product-border/60 bg-product-surface/70 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-product-text transition-colors hover:bg-product-surface-alt";
+	"inline-flex h-8 items-center justify-center rounded-lg border bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground";
 
 const pricingHref = `${routeConfig.home}${routeConfig.pricingHash}`;
 
@@ -18,9 +18,9 @@ export function DocsNavbar() {
 					<ProductBrand
 						showLabel
 						imageSize={28}
-						labelClassName="font-display text-sm uppercase tracking-[0.12em] text-product-text sm:text-base"
+						labelClassName="text-sm font-semibold sm:text-base"
 					/>
-					<span className="rounded-full border border-product-border/60 bg-product-surface-strong/80 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-product-muted sm:text-[11px]">
+					<span className="rounded-full border bg-muted px-2.5 py-1 text-[10px] font-medium text-muted-foreground sm:text-[11px]">
 						Starter Docs
 					</span>
 				</div>

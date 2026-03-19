@@ -1,4 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+
+const disableClerkMiddleware = process.env.DISABLE_CLERK_MIDDLEWARE === "1";
 
 const isProtectedRoute = createRouteMatcher([
 	"/mission(.*)",
@@ -7,11 +10,13 @@ const isProtectedRoute = createRouteMatcher([
 	"/settings(.*)",
 ]);
 
-export default clerkMiddleware(async (auth, request) => {
-	if (isProtectedRoute(request)) {
-		await auth.protect();
-	}
-});
+export default disableClerkMiddleware
+	? () => NextResponse.next()
+	: clerkMiddleware(async (auth, request) => {
+			if (isProtectedRoute(request)) {
+				await auth.protect();
+			}
+		});
 
 export const config = {
 	matcher: [

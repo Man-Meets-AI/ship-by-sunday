@@ -28,7 +28,7 @@ export function getOrderedLessons() {
 }
 
 export function isStudentFacingLesson(lesson: LessonConfig) {
-	return lesson.id !== "0.0";
+	return lesson.id !== "1.0";
 }
 
 export function getStudentFacingLessons() {
@@ -52,7 +52,7 @@ export function getBlockById(blockId: BlockId): BlockConfig | null {
 }
 
 export function getUnlockedLessonIds(completedLessonIds: string[]) {
-	const unlocked = new Set<string>(["0.0", "0.1"]);
+	const unlocked = new Set<string>(["1.0", "1.1"]);
 
 	for (const lessonId of completedLessonIds) {
 		const lesson = getLessonById(lessonId);

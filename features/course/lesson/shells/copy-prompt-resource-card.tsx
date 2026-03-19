@@ -7,7 +7,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { timingConfig } from "@/config/product";
 import type { LessonPromptResourceContent } from "@/features/course/lesson/model/contracts";
 import { getPromptTemplateState } from "@/features/course/lesson/model/research-prompt";
-import { workbenchChromeLabelClass } from "@/features/course/lesson/workbench/shared/workbench-readability";
 
 import type { PinnedArtifact } from "./types";
 
@@ -75,53 +74,52 @@ export function CopyPromptResourceCard({
 	};
 
 	return (
-		<div className="rounded-none border border-product-border/55 bg-product-surface-strong/80 px-4 py-4">
-			<p className={workbenchChromeLabelClass}>custom prompt</p>
-			<p className="mt-2 text-[14px] font-semibold leading-[1.45] text-product-text">
-				{resource.label}
-			</p>
-			{resource.body ? (
-				<p className="mt-2 text-[13px] leading-[1.7] text-product-muted">
-					{resource.body}
-				</p>
-			) : null}
+		<div className="space-y-3">
+			<div className="space-y-1">
+				<h3 className="text-base font-semibold leading-snug text-foreground">
+					{resource.label}
+				</h3>
+				{resource.body ? (
+					<p className="text-sm leading-relaxed text-muted-foreground">
+						{resource.body}
+					</p>
+				) : null}
+			</div>
 			{disabledReason ? (
-				<p className="mt-2 text-[13px] leading-[1.7] text-product-muted">
+				<p className="text-sm leading-relaxed text-muted-foreground">
 					{disabledReason}
 				</p>
 			) : null}
-			<div className="mt-3 flex flex-wrap items-center gap-2">
+			<div className="flex flex-wrap items-center gap-2">
 				<Button
 					type="button"
 					onClick={copyPrompt}
 					disabled={Boolean(disabledReason)}
 					variant="secondary"
-					size="xs"
+					size="sm"
 				>
 					{copyState === "copied" ? "Copied" : "Copy prompt"}
 				</Button>
 				{copyState === "error" && !disabledReason ? (
-					<p className="text-[12px] leading-[1.6] text-product-muted">
+					<p className="text-sm text-muted-foreground">
 						Clipboard unavailable. Copy from the prompt block below.
 					</p>
 				) : null}
 			</div>
-			<div className="mt-3 rounded-none border border-product-border/55 bg-product-surface px-3 py-3">
-				{prompt ? (
-					<Textarea
-						readOnly
-						value={prompt}
-						rows={14}
-						className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[12px] leading-[1.68] text-product-text"
-						aria-label={`${resource.label} prompt`}
-					/>
-				) : (
-					<p className="text-[12px] leading-[1.6] text-product-muted">
-						The prompt will appear here once your chosen user and outcome are
-						saved.
-					</p>
-				)}
-			</div>
+			{prompt ? (
+				<Textarea
+					readOnly
+					value={prompt}
+					rows={14}
+					className="min-h-[240px] resize-y font-mono text-sm leading-relaxed"
+					aria-label={`${resource.label} prompt`}
+				/>
+			) : (
+				<p className="text-sm leading-relaxed text-muted-foreground">
+					The prompt will appear here once your chosen user and outcome are
+					saved.
+				</p>
+			)}
 		</div>
 	);
 }

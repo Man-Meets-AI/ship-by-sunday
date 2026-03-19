@@ -3,13 +3,21 @@ import type { LessonVideoContent } from "./contracts";
 export type LessonMediaMap = Partial<Record<string, LessonVideoContent>>;
 
 const LESSON_MEDIA_JSON = `{
-  "1.0": {
+  "0.1": {
     "status": "ready",
     "provider": "bunny",
     "libraryId": 619172,
     "videoId": "0df1d1d2-098a-425b-b6eb-3c465f0a32e1",
-    "title": "CEO Kickoff",
+    "title": "Welcome Video",
     "durationLabel": "6m 37s"
+  },
+  "0.2": {
+    "status": "ready",
+    "provider": "bunny",
+    "libraryId": 619172,
+    "videoId": "00823c2a-bcbf-4871-9a80-f47cdf6ef081",
+    "title": "How the Sprint Works",
+    "durationLabel": "51s"
   },
   "1.1": {
     "status": "ready",

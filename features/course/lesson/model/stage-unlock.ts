@@ -261,28 +261,28 @@ function buildCeoStageUnlockSummary(
 			{
 				label: "Who Design Is For",
 				value: who,
-				action: { label: "Edit user", href: "/lesson/1.2" },
+				action: { label: "Edit user", href: "/lesson/1.4" },
 			},
 			{
 				label: "Outcome to Deliver",
 				value: outcome,
-				action: { label: "Edit outcome", href: "/lesson/1.3" },
+				action: { label: "Edit outcome", href: "/lesson/1.5" },
 			},
 			{
 				label: "Evidence to Preserve",
 				value: evidence,
-				action: { label: "Edit evidence", href: "/lesson/1.4" },
+				action: { label: "Edit evidence", href: "/lesson/1.6" },
 			},
 			{
 				label: "Core Flow to Keep",
 				value: flow,
 				imageUrl: flowImageUrl,
-				action: { label: "Edit flow", href: "/lesson/1.5" },
+				action: { label: "Edit flow", href: "/lesson/1.7" },
 			},
 			{
 				label: "What Not to Design Yet",
 				value: scope,
-				action: { label: "Edit scope", href: "/lesson/1.6" },
+				action: { label: "Edit scope", href: "/lesson/1.8" },
 			},
 		] as StageUnlockSection[]
 	).filter((section) => section.value.length > 0);

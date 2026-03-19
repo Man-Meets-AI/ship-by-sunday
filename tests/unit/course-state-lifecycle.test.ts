@@ -1,8 +1,12 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
+
 import {
 	completeLesson,
 	getLessonState,
 	getMissionState,
 	getResumeDestination,
+	markLessonViewed,
+	saveLessonDraft,
 } from "@/convex/course";
 import { COURSE_SLUG } from "@/features/course/lesson/model";
 
@@ -121,6 +125,20 @@ const completeLessonHandler = completeLesson as unknown as {
 	) => Promise<{ completedAt: number; nextLessonId: string | null }>;
 };
 
+const saveLessonDraftHandler = saveLessonDraft as unknown as {
+	_handler: (
+		ctx: CourseCtx,
+		args: { lessonId: string; fieldValues: Record<string, unknown> },
+	) => Promise<{ savedAt: number }>;
+};
+
+const markLessonViewedHandler = markLessonViewed as unknown as {
+	_handler: (
+		ctx: CourseCtx,
+		args: { lessonId: string },
+	) => Promise<{ viewedAt: number; created: boolean }>;
+};
+
 const getLessonStateHandler = getLessonState as unknown as {
 	_handler: (
 		ctx: CourseCtx,
@@ -179,16 +197,28 @@ describe("course state lifecycle", () => {
 		const ctx = createCourseCtx({
 			insert,
 			lessonStates: [
-				createLessonState("0.1", {
+				createLessonState("1.1", {
 					blockId: "CEO",
 					artifactKey: "weekend_shipping_goal",
 					artifactType: "text",
 					status: "completed",
 				}),
-				createLessonState("0.2", {
+				createLessonState("1.2", {
 					blockId: "CEO",
 					artifactKey: "sprint_setup_state",
 					artifactType: "checklist",
+					status: "completed",
+				}),
+				createLessonState("1.3", {
+					blockId: "CEO",
+					artifactKey: "candidate_problems",
+					artifactType: "mixed",
+					status: "completed",
+				}),
+				createLessonState("1.4", {
+					blockId: "CEO",
+					artifactKey: "user_statement",
+					artifactType: "mixed",
 					status: "completed",
 				}),
 			],
@@ -198,18 +228,23 @@ describe("course state lifecycle", () => {
 		vi.spyOn(Date, "now").mockReturnValue(fixedNow);
 
 		const result = await completeLessonHandler._handler(ctx, {
-			lessonId: "1.0",
-			fieldValues: {},
+			lessonId: "1.5",
+			fieldValues: {
+				outcome: "Operators leave each meeting with a clear action list.",
+				success_looks_like: "They send recap notes within five minutes.",
+				difference_for_user: "Less re-work and fewer dropped follow-ups.",
+			},
 		});
 
 		expect(result).toEqual({
 			completedAt: fixedNow,
-			nextLessonId: "1.1",
+			nextLessonId: "1.6",
 		});
 		expect(insert).toHaveBeenCalledWith(
 			"lessonStates",
 			expect.objectContaining({
-				lessonId: "1.0",
+				lessonId: "1.5",
+				artifactKey: "outcome_statement",
 				status: "completed",
 				completedAt: fixedNow,
 			}),
@@ -233,7 +268,7 @@ describe("course state lifecycle", () => {
 
 		await expect(
 			completeLessonHandler._handler(ctx, {
-				lessonId: "0.1",
+				lessonId: "1.1",
 				fieldValues: {},
 			}),
 		).rejects.toMatchObject({
@@ -242,5 +277,73 @@ describe("course state lifecycle", () => {
 				message: "Finish the required work before continuing.",
 			}),
 		});
+	});
+
+	it("creates a draft state for an unlocked lesson without an existing record", async () => {
+		const insert = vi.fn().mockResolvedValue("draft_lesson_state");
+		const ctx = createCourseCtx({
+			insert,
+		});
+		const fixedNow = 1_700_000_000_200;
+
+		vi.spyOn(Date, "now").mockReturnValue(fixedNow);
+
+		const result = await saveLessonDraftHandler._handler(ctx, {
+			lessonId: "1.1",
+			fieldValues: {},
+		});
+
+		expect(result).toEqual({
+			savedAt: fixedNow,
+		});
+		expect(insert).toHaveBeenCalledWith(
+			"lessonStates",
+			expect.objectContaining({
+				clerkUserId,
+				courseSlug: COURSE_SLUG,
+				lessonId: "1.1",
+				status: "in_progress",
+				fieldValues: expect.objectContaining({
+					__fieldShapeVersion: 1,
+				}),
+				startedAt: fixedNow,
+				updatedAt: fixedNow,
+				lastViewedAt: fixedNow,
+			}),
+		);
+	});
+
+	it("marks an existing lesson as viewed without duplicating its state", async () => {
+		const patch = vi.fn().mockResolvedValue(undefined);
+		const ctx = createCourseCtx({
+			lessonStates: [
+				createLessonState("1.1", {
+					blockId: "CEO",
+					artifactKey: "weekend_shipping_goal",
+					artifactType: "text",
+					status: "in_progress",
+				}),
+			],
+			patch,
+		});
+		const fixedNow = 1_700_000_000_300;
+
+		vi.spyOn(Date, "now").mockReturnValue(fixedNow);
+
+		const result = await markLessonViewedHandler._handler(ctx, {
+			lessonId: "1.1",
+		});
+
+		expect(result).toEqual({
+			viewedAt: fixedNow,
+			created: false,
+		});
+		expect(patch).toHaveBeenCalledWith(
+			"lesson_state_1.1_in_progress",
+			expect.objectContaining({
+				lastViewedAt: fixedNow,
+				updatedAt: 20,
+			}),
+		);
 	});
 });

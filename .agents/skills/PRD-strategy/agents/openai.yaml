@@ -1,5 +1,0 @@
-interface:
-  display_name: "PRD - Strategy"
-  short_description: "Create a coding-agent-ready feature plan packet."
-  default_prompt: "Use $PRD-strategy to turn this request into a machine-readable plan packet with one chosen slice, clear scope, and an eng-review recommendation."
-

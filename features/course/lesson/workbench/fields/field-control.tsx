@@ -11,6 +11,7 @@ export function FieldControl({
 	onChange,
 	pinnedArtifacts,
 	showLabel = true,
+	invalid = false,
 }: FieldControlProps) {
 	if (field.kind === "readonly") {
 		return (
@@ -18,7 +19,9 @@ export function FieldControl({
 		);
 	}
 
-	const basicControl = renderBasicFieldControl(field, value, onChange);
+	const basicControl = renderBasicFieldControl(field, value, onChange, {
+		invalid,
+	});
 	if (basicControl) {
 		return basicControl;
 	}

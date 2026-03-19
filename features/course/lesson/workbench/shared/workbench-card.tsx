@@ -1,10 +1,4 @@
-import { WorkbenchHeaderLabel } from "./workbench-header-label";
-import {
-	workbenchCardBodyClass,
-	workbenchCardClass,
-	workbenchCardHeaderClass,
-} from "./workbench-readability";
-
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export function WorkbenchCard({
 	label,
 	children,
@@ -13,13 +7,15 @@ export function WorkbenchCard({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className={workbenchCardClass}>
+		<Card className="gap-0 py-0">
 			{label ? (
-				<div className={workbenchCardHeaderClass}>
-					<WorkbenchHeaderLabel>{label}</WorkbenchHeaderLabel>
-				</div>
+				<CardHeader className="border-b border-border/60 pb-4">
+					<CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+						{label}
+					</CardTitle>
+				</CardHeader>
 			) : null}
-			<div className={workbenchCardBodyClass}>{children}</div>
-		</div>
+			<CardContent className="py-4">{children}</CardContent>
+		</Card>
 	);
 }

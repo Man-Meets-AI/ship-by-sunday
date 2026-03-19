@@ -1,9 +1,44 @@
+"use client";
+
 import type { LessonContent } from "@/features/course/lesson/model/manifest";
 
 import {
-	workbenchChromeLabelClass,
-	workbenchInsetClass,
-} from "./workbench-readability";
+	Item,
+	ItemContent,
+	ItemDescription,
+	ItemTitle,
+} from "@/components/ui/item";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
+
+function StatusRailItem({
+	label,
+	children,
+	className,
+}: {
+	label: string;
+	children: React.ReactNode;
+	className?: string;
+}) {
+	return (
+		<Item
+			variant="outline"
+			size="sm"
+			role="listitem"
+			className={cn(
+				"h-full min-h-0 flex-col items-stretch gap-0 py-3",
+				className,
+			)}
+		>
+			<ItemContent className="min-w-0 gap-1.5">
+				<ItemTitle className="w-full text-xs font-semibold tracking-tight text-muted-foreground">
+					{label}
+				</ItemTitle>
+				{children}
+			</ItemContent>
+		</Item>
+	);
+}
 
 export function StatusRail({
 	lessonContent,
@@ -14,32 +49,39 @@ export function StatusRail({
 	completedTaskCount: number;
 	totalTaskCount: number;
 }) {
+	const progressValue =
+		totalTaskCount > 0
+			? Math.round((completedTaskCount / totalTaskCount) * 100)
+			: 0;
+
 	return (
-		<div className="grid gap-3 lg:grid-cols-[minmax(0,1.35fr)_minmax(180px,0.7fr)_minmax(220px,0.95fr)_minmax(150px,0.48fr)]">
-			<div className={`${workbenchInsetClass} px-4 py-4`}>
-				<p className={workbenchChromeLabelClass}>Do this now</p>
-				<p className="mt-2 max-w-[34ch] text-[14px] leading-[1.72] text-product-text">
+		<div
+			role="list"
+			className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
+		>
+			<StatusRailItem label="Do this now">
+				<ItemDescription className="line-clamp-4 text-foreground">
 					{lessonContent.actionCard.jobNow}
-				</p>
-			</div>
-			<div className={`${workbenchInsetClass} px-4 py-4`}>
-				<p className={workbenchChromeLabelClass}>Timebox</p>
-				<p className="mt-2 text-[14px] leading-[1.65] text-product-text">
+				</ItemDescription>
+			</StatusRailItem>
+			<StatusRailItem label="Timebox">
+				<ItemDescription className="text-foreground">
 					{lessonContent.actionCard.timebox}
-				</p>
-			</div>
-			<div className={`${workbenchInsetClass} px-4 py-4`}>
-				<p className={workbenchChromeLabelClass}>Finish with</p>
-				<p className="mt-2 max-w-[30ch] text-[14px] leading-[1.72] text-product-text">
+				</ItemDescription>
+			</StatusRailItem>
+			<StatusRailItem label="Finish with">
+				<ItemDescription className="line-clamp-4 text-foreground">
 					{lessonContent.actionCard.comeBackWith}
-				</p>
-			</div>
-			<div className={`${workbenchInsetClass} px-4 py-4`}>
-				<p className={workbenchChromeLabelClass}>Progress</p>
-				<p className="mt-2 text-[14px] leading-[1.65] text-product-text">
-					{completedTaskCount}/{totalTaskCount}
-				</p>
-			</div>
+				</ItemDescription>
+			</StatusRailItem>
+			<StatusRailItem label="Progress">
+				<div className="flex flex-col gap-2">
+					<p className="text-sm font-medium tabular-nums text-foreground">
+						{completedTaskCount}/{totalTaskCount}
+					</p>
+					<Progress value={progressValue} className="h-1.5" />
+				</div>
+			</StatusRailItem>
 		</div>
 	);
 }

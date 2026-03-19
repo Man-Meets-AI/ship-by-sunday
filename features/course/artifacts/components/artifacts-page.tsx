@@ -3,33 +3,81 @@
 import { useConvexAuth, useQuery } from "convex/react";
 import Link from "next/link";
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { routeConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
-import { getLessonHref } from "@/features/course/lesson/model/manifest";
-import type { ArtifactPreview } from "@/features/course/lesson/model/registry";
-import { ArtifactPreviewContent } from "@/features/course/lesson/workbench/shared/artifact-preview-content";
-import { ProductShell } from "@/features/course/shared/components/product-shell";
+import {
+	ArtifactsBlockSection,
+	type BlockGroup,
+} from "@/features/course/artifacts/components/artifacts-block-section";
+import {
+	getLessonById,
+	getOrderedBlocks,
+	type ArtifactPreview,
+} from "@/features/course/lesson/model/registry";
+import { AppShell } from "@/features/course/shared/components/app-shell";
 
-const skeletonCardIds = ["one", "two", "three", "four"] as const;
+function groupByBlock(artifacts: ArtifactPreview[]): BlockGroup[] {
+	const orderedBlocks = getOrderedBlocks();
+	const buckets = new Map<string, ArtifactPreview[]>();
 
-function ArtifactsSkeleton() {
+	for (const artifact of artifacts) {
+		const lesson = getLessonById(artifact.lessonId);
+		const blockId = lesson?.block ?? "CEO";
+		const list = buckets.get(blockId) ?? [];
+		list.push(artifact);
+		buckets.set(blockId, list);
+	}
+
+	return orderedBlocks
+		.filter((block) => buckets.has(block.id))
+		.map((block) => ({
+			block,
+			artifacts: buckets.get(block.id)!,
+		}));
+}
+
+function LoadingState() {
 	return (
-		<div className="mt-4 grid animate-pulse gap-4 md:grid-cols-2">
-			{skeletonCardIds.map((cardId) => (
-				<article
-					key={cardId}
-					className="rounded-none border border-product-border bg-product-surface-strong/80 p-4"
-				>
-					<div className="h-2 w-12 bg-product-border/15" />
-					<div className="mt-3 h-6 w-32 bg-product-border/20" />
-					<div className="mt-3 h-3 w-40 bg-product-border/10" />
-					<div className="mt-4 space-y-2">
-						<div className="h-14 border border-product-border/40 bg-product-surface" />
-						<div className="h-14 border border-product-border/40 bg-product-surface" />
-					</div>
-				</article>
-			))}
-		</div>
+		<Card>
+			<CardHeader>
+				<Skeleton className="h-5 w-36" />
+				<Skeleton className="mt-2 h-4 w-full max-w-md" />
+			</CardHeader>
+			<CardContent className="space-y-4">
+				<Skeleton className="h-28 w-full rounded-md" />
+				<Skeleton className="h-28 w-full rounded-md" />
+			</CardContent>
+		</Card>
+	);
+}
+
+function EmptyState() {
+	return (
+		<Card>
+			<CardHeader className="text-center sm:text-left">
+				<CardTitle>No saved work yet</CardTitle>
+				<CardDescription>
+					Finish a lesson and your outputs show up here, grouped by course
+					block.
+				</CardDescription>
+			</CardHeader>
+			<CardFooter className="justify-center sm:justify-start">
+				<Button asChild>
+					<Link href={routeConfig.mission}>Go to mission</Link>
+				</Button>
+			</CardFooter>
+		</Card>
 	);
 }
 
@@ -40,63 +88,37 @@ export function ArtifactsPage() {
 		isAuthenticated && !isLoading ? {} : "skip",
 	) as ArtifactPreview[] | undefined;
 
+	const groups = artifacts ? groupByBlock(artifacts) : [];
+	const isBusy = artifacts === undefined;
+	const total = artifacts?.length ?? 0;
+
 	return (
-		<ProductShell
-			title="Saved Work"
-			subtitle="Your completed outputs in one place."
-		>
-			<section className="rounded-none border border-product-border bg-product-surface/78 p-5 shadow-panel backdrop-blur-xl">
-				<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
-					Completed outputs
-				</p>
-				{artifacts === undefined ? (
-					<ArtifactsSkeleton />
-				) : artifacts.length === 0 ? (
-					<div className="mt-4 space-y-4">
-						<p className="text-sm font-medium text-product-muted">
-							Nothing has been completed yet. Finish your first lesson and the
-							work will show up here automatically.
+		<AppShell viewportMode="app" appScrollMode="page" showSkillRail={false}>
+			<div className="flex flex-1 flex-col gap-6">
+				<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+					<div className="min-w-0 space-y-1">
+						<h1 className="text-2xl font-semibold">Saved work</h1>
+						<p className="text-sm text-muted-foreground">
+							Your completed lesson outputs in one place.
 						</p>
-						<Link
-							href={routeConfig.mission}
-							className="inline-flex rounded-none border border-product-accent bg-product-chip px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
-						>
-							Open mission
-						</Link>
 					</div>
+					<Badge variant={isBusy ? "outline" : "secondary"} className="w-fit">
+						{isBusy ? "Loading…" : `${total} saved`}
+					</Badge>
+				</div>
+
+				{isBusy ? (
+					<LoadingState />
+				) : total === 0 ? (
+					<EmptyState />
 				) : (
-					<div className="mt-4 grid gap-4 md:grid-cols-2">
-						{artifacts.map((artifact) => (
-							<article
-								key={artifact.artifactKey}
-								className="rounded-none border border-product-border bg-product-surface-strong/80 p-4"
-							>
-								<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
-									{artifact.lessonId}
-								</p>
-								<h2 className="mt-2 font-display text-3xl uppercase leading-none tracking-[0.05em] text-product-text">
-									{artifact.artifactLabel}
-								</h2>
-								<p className="mt-2 text-sm font-medium text-product-muted">
-									{artifact.lessonTitle}
-								</p>
-								<div className="mt-4 rounded-none border border-product-border bg-product-surface p-3">
-									<ArtifactPreviewContent
-										artifact={artifact}
-										maxTextFields={4}
-									/>
-								</div>
-								<Link
-									href={getLessonHref(artifact.lessonId)}
-									className="mt-4 inline-flex rounded-none border border-product-accent bg-product-chip px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
-								>
-									Open lesson
-								</Link>
-							</article>
+					<div className="flex flex-1 flex-col gap-6">
+						{groups.map((group) => (
+							<ArtifactsBlockSection key={group.block.id} group={group} />
 						))}
 					</div>
 				)}
-			</section>
-		</ProductShell>
+			</div>
+		</AppShell>
 	);
 }

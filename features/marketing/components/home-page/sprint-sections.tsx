@@ -1,10 +1,8 @@
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import type { HomePageContent } from "@/features/marketing/content/home";
-import {
-	publicDividerGridClassName,
-	PublicSurfaceCard,
-} from "@/shared/ui/public-surface";
 
-import { SectionFrame, SectionLabel } from "./section-shell";
+import { SectionLabel, SectionStack } from "./section-shell";
 
 type ProcessCallout = HomePageContent["processCallout"];
 type SprintPathSection = HomePageContent["sprintPathSection"];
@@ -15,48 +13,42 @@ export function SprintOverviewSection({
 	sprintPathSection: SprintPathSection;
 }) {
 	return (
-		<SectionFrame id="system" className="relative overflow-hidden">
-			<div className="absolute inset-y-0 left-1/2 hidden w-px -translate-x-1/2 bg-product-border/20 lg:block" />
-			<SectionLabel>{sprintPathSection.label}</SectionLabel>
-			<div className="mt-3 max-w-4xl">
-				<h2 className="font-display text-[2.7rem] uppercase leading-[0.84] tracking-[-0.04em] sm:text-[5rem]">
+		<SectionStack id="system" className="gap-8">
+			<div className="space-y-3">
+				<SectionLabel>{sprintPathSection.label}</SectionLabel>
+				<h2 className="font-marketing-display max-w-4xl text-balance text-3xl uppercase tracking-marketing-section sm:text-5xl">
 					{sprintPathSection.title}
 				</h2>
-				<p className="mt-3 max-w-3xl text-pretty text-base font-medium leading-relaxed text-product-muted sm:text-xl">
+				<p className="max-w-3xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-xl">
 					{sprintPathSection.intro}
 				</p>
 			</div>
-			<div className={`mt-8 ${publicDividerGridClassName} lg:grid-cols-4`}>
+			<div className="grid gap-4 lg:grid-cols-4">
 				{sprintPathSection.blocks.map((block) => (
-					<article
+					<div
 						key={block.name}
-						className="group flex min-h-[18rem] flex-col justify-between bg-product-surface p-5 transition-colors duration-200 lg:hover:bg-product-accent lg:hover:text-product-bg"
+						className="flex min-h-72 flex-col justify-between gap-6 rounded-lg bg-muted/15 px-4 py-5 transition-colors hover:bg-muted/25"
 					>
-						<div className="flex items-center justify-between gap-3">
-							<span className="font-display text-[2rem] uppercase leading-none transition-colors duration-200 sm:text-3xl lg:group-hover:text-product-bg">
-								{block.name}
-							</span>
-							<span className="text-sm font-light text-product-muted transition-colors duration-200 lg:group-hover:text-product-bg/70">
+						<div className="flex items-start justify-between gap-3">
+							<p className="text-2xl font-medium sm:text-3xl">{block.name}</p>
+							<Badge variant="outline" className="shrink-0">
 								{block.eyebrow}
-							</span>
+							</Badge>
 						</div>
-						<div className="mt-6 space-y-2 border-t border-product-border/30 pt-4 transition-colors duration-200 lg:border-transparent lg:pt-8 lg:group-hover:border-product-bg/25">
+						<div className="space-y-2 border-t border-border/60 pt-4">
 							{block.hover.map((item) => (
-								<p
-									key={item}
-									className="font-sans text-base font-medium text-product-text transition-all duration-200 lg:translate-y-3 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100 lg:group-hover:text-product-bg"
-								>
+								<p key={item} className="text-sm font-medium leading-relaxed">
 									{item}
 								</p>
 							))}
 						</div>
-						<p className="mt-8 text-sm font-semibold uppercase tracking-[0.18em] text-product-muted transition-colors duration-200 lg:group-hover:text-product-bg/60">
+						<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
 							{sprintPathSection.cardHint}
 						</p>
-					</article>
+					</div>
 				))}
 			</div>
-		</SectionFrame>
+		</SectionStack>
 	);
 }
 
@@ -66,15 +58,15 @@ export function ProcessCalloutSection({
 	processCallout: ProcessCallout;
 }) {
 	return (
-		<PublicSurfaceCard className="bg-product-accent px-6 py-10 text-center text-product-bg">
-			<h2 className="font-display text-[2.7rem] uppercase leading-[0.84] tracking-[-0.04em] sm:text-[5rem]">
+		<Card className="bg-muted/50 p-8 text-center sm:p-10">
+			<h2 className="font-marketing-display text-balance text-3xl uppercase tracking-marketing-section sm:text-5xl">
 				{processCallout.titleLead}
 				<span className="block">{processCallout.titleAccent}</span>
 			</h2>
-			<p className="mx-auto mt-4 max-w-3xl text-pretty text-base leading-relaxed text-product-bg/80 sm:text-xl">
+			<p className="mx-auto mt-4 max-w-3xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-xl">
 				{processCallout.body}
 			</p>
-		</PublicSurfaceCard>
+		</Card>
 	);
 }
 
@@ -84,56 +76,54 @@ export function SprintDeepDiveSection({
 	sprintPathSection: SprintPathSection;
 }) {
 	return (
-		<div className="grid gap-4 lg:grid-cols-[320px_1fr]">
-			<SectionFrame className="lg:sticky lg:top-4 lg:self-start">
-				<SectionLabel>{sprintPathSection.deepDiveLabel}</SectionLabel>
-				<h2 className="mt-4 font-display text-[2.8rem] uppercase leading-[0.82] tracking-[-0.04em] sm:text-[3.6rem]">
-					{sprintPathSection.deepDiveTitle}
-				</h2>
-				<p className="mt-4 text-base leading-relaxed text-product-muted">
-					{sprintPathSection.deepDiveIntro}
-				</p>
-			</SectionFrame>
-			<div className={publicDividerGridClassName}>
+		<div className="grid gap-6 lg:grid-cols-[minmax(0,20rem)_1fr] lg:gap-8">
+			<SectionStack className="py-0 sm:py-0 lg:sticky lg:top-4 lg:self-start">
+				<div className="space-y-4">
+					<SectionLabel>{sprintPathSection.deepDiveLabel}</SectionLabel>
+					<h2 className="font-marketing-display text-balance text-3xl uppercase tracking-marketing-section sm:text-4xl">
+						{sprintPathSection.deepDiveTitle}
+					</h2>
+					<p className="text-base leading-relaxed text-muted-foreground">
+						{sprintPathSection.deepDiveIntro}
+					</p>
+				</div>
+			</SectionStack>
+			<div className="grid gap-0 divide-y divide-border/80">
 				{sprintPathSection.blocks.map((block) => (
-					<SectionFrame
+					<div
 						key={block.name}
-						className="bg-product-surface/78 shadow-none"
+						className="grid gap-6 py-8 first:pt-0 last:pb-0 sm:py-10 lg:grid-cols-[minmax(0,11rem)_1fr]"
 					>
-						<div className="grid gap-6 lg:grid-cols-[180px_1fr]">
-							<div className="border border-product-border/60 bg-product-surface/78 p-4">
-								<p className="text-sm font-light text-product-muted">
-									{block.eyebrow}
+						<div className="space-y-2">
+							<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+								{block.eyebrow}
+							</p>
+							<p className="text-2xl font-medium">{block.name}</p>
+						</div>
+						<div>
+							<p className="text-xl font-medium leading-tight tracking-tight sm:text-3xl">
+								{block.summary}
+							</p>
+							<p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+								{block.description}
+							</p>
+							<div className="mt-6 space-y-3 rounded-lg bg-muted/15 px-4 py-4">
+								<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+									{sprintPathSection.outcomesLabel}
 								</p>
-								<h3 className="mt-2 font-display text-[2.8rem] uppercase leading-none tracking-[-0.04em]">
-									{block.name}
-								</h3>
-							</div>
-							<div>
-								<p className="text-xl font-medium leading-tight text-product-text sm:text-4xl">
-									{block.summary}
-								</p>
-								<p className="mt-4 max-w-3xl text-base leading-relaxed text-product-muted sm:text-lg">
-									{block.description}
-								</p>
-								<div className="mt-6 border border-product-border/60">
-									<div className="border-b border-product-border/60 bg-product-surface/78 px-4 py-3 text-xs font-bold uppercase tracking-[0.24em] text-product-muted">
-										{sprintPathSection.outcomesLabel}
-									</div>
-									<div className="grid gap-[1px] bg-product-border/35 md:grid-cols-2">
-										{block.artifact.map((item) => (
-											<div
-												key={item}
-												className="bg-product-surface/78 px-4 py-5 text-sm font-black uppercase tracking-[0.06em] text-product-text sm:text-base"
-											>
-												{item}
-											</div>
-										))}
-									</div>
-								</div>
+								<ul className="flex flex-wrap gap-2">
+									{block.artifact.map((item) => (
+										<li
+											key={item}
+											className="max-w-full rounded-md border border-border/60 bg-background/80 px-3 py-1.5 text-left text-sm font-medium leading-snug text-foreground"
+										>
+											{item}
+										</li>
+									))}
+								</ul>
 							</div>
 						</div>
-					</SectionFrame>
+					</div>
 				))}
 			</div>
 		</div>

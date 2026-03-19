@@ -1,4 +1,0 @@
-interface:
-  display_name: "ENG-Interface Polish"
-  short_description: "Audit or improve the small UI details that affect feel."
-  default_prompt: "Use $ENG-interface-polish to audit or improve the small UI details that make this interface feel more refined."

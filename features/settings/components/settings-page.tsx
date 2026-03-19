@@ -1,33 +1,29 @@
-import { UserProfile } from "@clerk/nextjs";
-
-import { CodexConnectionCard } from "@/features/codex/components/codex-connection-card";
-import { ProductShell } from "@/features/course/shared/components/product-shell";
+import { productConfig } from "@/config/product";
 import { StarterRepoAccessCard } from "@/features/starter-repo/components/starter-repo-access-card";
+import { CodexConnectionCard } from "../../codex/components/codex-connection-card";
 
-export function SettingsPage() {
+import { SettingsAccountCard } from "./settings-account-card";
+
+export function SettingsPageContent() {
 	return (
-		<ProductShell viewportMode="app" showSkillRail={false}>
-			<div className="flex flex-1 flex-col gap-3 xl:min-h-0 xl:overflow-y-auto">
-				<section className="rounded-none border border-product-border bg-product-surface/78 p-5 shadow-panel backdrop-blur-xl">
-					<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
-						Account settings
-					</p>
-					<h1 className="mt-3 font-display text-4xl uppercase leading-none tracking-[0.08em] text-product-text">
-						Manage your account
-					</h1>
-					<p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-product-muted">
-						Manage the signed-in account that owns your Ship by Sunday access.
-					</p>
-				</section>
+		<div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 pb-10 pt-2 xl:min-h-0 xl:overflow-y-auto">
+			<div className="space-y-1">
+				<h1 className="text-2xl font-semibold text-foreground">Settings</h1>
+				<p className="text-sm text-muted-foreground">
+					Manage your account, Codex connection, and starter repository for{" "}
+					{productConfig.name}.
+				</p>
+			</div>
 
+			<div className="flex flex-col gap-6">
 				<CodexConnectionCard />
 
 				<StarterRepoAccessCard surface="settings" />
 
-				<section className="overflow-hidden rounded-none border border-product-border bg-product-surface/78 p-2 shadow-panel backdrop-blur-xl sm:p-4">
-					<UserProfile path="/settings" />
-				</section>
+				<SettingsAccountCard />
 			</div>
-		</ProductShell>
+		</div>
 	);
 }
+
+export const SettingsPage = SettingsPageContent;

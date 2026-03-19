@@ -1,12 +1,14 @@
 import type { WorkbenchSection } from "@/features/course/lesson/model/manifest";
 
-import { WorkbenchHeaderLabel } from "./workbench-header-label";
+import { Badge } from "@/components/ui/badge";
 import {
-	workbenchCardBodyClass,
-	workbenchCardClass,
-	workbenchCardHeaderClass,
-	workbenchSupportCopyClass,
-} from "./workbench-readability";
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export function SectionCard({
 	section,
@@ -21,33 +23,31 @@ export function SectionCard({
 	blocked?: boolean;
 	blockedMessage?: string;
 }) {
+	const statusLabel = blocked ? "Locked" : isComplete ? "Ready" : "In progress";
+
 	return (
-		<section
-			className={`${workbenchCardClass} ${blocked ? "bg-product-surface/45" : ""}`}
-		>
-			<div className={workbenchCardHeaderClass}>
+		<Card className={cn(blocked && "bg-muted/30")}>
+			<CardHeader>
 				<div className="flex flex-wrap items-center justify-between gap-2">
-					<WorkbenchHeaderLabel as="h2">{section.title}</WorkbenchHeaderLabel>
-					<WorkbenchHeaderLabel className="tracking-[0.16em]">
-						{blocked ? "Locked" : isComplete ? "Ready" : "In progress"}
-					</WorkbenchHeaderLabel>
+					<CardTitle>{section.title}</CardTitle>
+					<Badge variant="outline" className="text-xs font-normal">
+						{statusLabel}
+					</Badge>
 				</div>
 				{blocked && blockedMessage ? (
-					<p className={`mt-3 ${workbenchSupportCopyClass}`}>
-						{blockedMessage}
-					</p>
+					<CardDescription>{blockedMessage}</CardDescription>
 				) : null}
 				{section.instruction ? (
-					<p className={`mt-3 ${workbenchSupportCopyClass}`}>
+					<CardDescription className={cn(blocked && blockedMessage && "mt-1")}>
 						{section.instruction}
-					</p>
+					</CardDescription>
 				) : null}
-			</div>
-			<div className={workbenchCardBodyClass}>
+			</CardHeader>
+			<CardContent>
 				<fieldset disabled={blocked} className={blocked ? "opacity-45" : ""}>
 					{children}
 				</fieldset>
-			</div>
-		</section>
+			</CardContent>
+		</Card>
 	);
 }

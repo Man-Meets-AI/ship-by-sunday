@@ -1,14 +1,23 @@
-import type { CSSProperties } from "react";
-
 import { LessonVideoSurface } from "@/features/course/lesson/components/lesson-video-surface";
 import type { StageUnlockSection } from "@/features/course/lesson/model/stage-unlock";
-import { WorkbenchCard } from "../../shared/workbench-card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { WorkbenchContainer } from "../../shared/workbench-container";
-import { workbenchChromeLabelClass } from "../../shared/workbench-readability";
 import type { WorkbenchModeProps } from "../../types";
 import { StageUnlockBridgeCard } from "./stage-unlock-bridge-card";
 import { StageUnlockReviewCard } from "./stage-unlock-review-card";
 import { StageUnlockSectionCard } from "./stage-unlock-section-card";
+
+const neutralInsetClass =
+	"rounded-lg border border-input bg-background text-card-foreground";
+
+const neutralHeaderClass = "border-b border-border/60 px-4 py-3 sm:px-5";
+
+const neutralBodyClass = "px-4 py-4 sm:px-5 sm:py-5";
+
+const neutralLabelClass = "text-sm font-medium text-muted-foreground";
+
+const neutralSupportCopyClass =
+	"max-w-[68ch] text-[13px] leading-7 text-muted-foreground";
 
 type StageUnlockWorkbenchProps = {
 	lesson: WorkbenchModeProps["lesson"];
@@ -19,6 +28,11 @@ type StageUnlockWorkbenchProps = {
 	invalidFieldMessages?: WorkbenchModeProps["invalidFieldMessages"];
 	stageUnlockSummary: WorkbenchModeProps["stageUnlockSummary"];
 };
+
+type StageUnlockBriefAssembler = Extract<
+	NonNullable<WorkbenchModeProps["lesson"]["briefAssembler"]>,
+	{ variant: "stage_unlock" }
+>;
 
 function getEmptyStateCopy(preset: "ceo" | "design" | "build") {
 	switch (preset) {
@@ -50,6 +64,140 @@ function getSectionGridClass(section: StageUnlockSection) {
 	return "lg:col-span-1";
 }
 
+function StageUnlockHeroPanel({
+	briefAssembler,
+	artifact,
+}: {
+	briefAssembler: StageUnlockBriefAssembler;
+	artifact: WorkbenchModeProps["lesson"]["artifact"];
+}) {
+	return (
+		<Card className="gap-0 py-0">
+			<CardContent className="p-0">
+				<div className="grid gap-4 p-5 sm:p-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(240px,0.9fr)] lg:items-start">
+					<div className="space-y-4">
+						<div className="space-y-2">
+							<p className={neutralLabelClass}>{briefAssembler.heroEyebrow}</p>
+							<h1
+								className="text-balance text-3xl font-semibold text-foreground sm:text-4xl"
+								style={{ textWrap: "balance" }}
+							>
+								{briefAssembler.heroTitle}
+							</h1>
+						</div>
+						<p className={neutralSupportCopyClass}>{briefAssembler.heroBody}</p>
+						<div className="space-y-1">
+							<p className="text-sm font-medium text-foreground">
+								Next: {briefAssembler.nextStepLabel}
+							</p>
+							<p
+								className="max-w-sm text-sm leading-6 text-muted-foreground"
+								style={{ textWrap: "balance" }}
+							>
+								{getNextStepSupportCopy(briefAssembler.preset)}
+							</p>
+						</div>
+					</div>
+					<div className={`${neutralInsetClass} min-w-[220px] px-4 py-4`}>
+						<p className={neutralLabelClass}>Artifact locked next</p>
+						<p
+							className="mt-3 text-lg font-semibold leading-6 text-foreground"
+							style={{ textWrap: "balance" }}
+						>
+							{artifact.label}
+						</p>
+						<p className="mt-3 text-sm leading-6 text-muted-foreground">
+							{briefAssembler.artifactReadyCopy ??
+								"You are not guessing anymore. The next block gets a real handoff now."}
+						</p>
+					</div>
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
+function StageUnlockStatsGrid({
+	summary,
+}: {
+	summary: StageUnlockWorkbenchProps["stageUnlockSummary"];
+}) {
+	return (
+		<div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+			{summary?.stats.map((stat) => (
+				<div key={stat.label} className={`${neutralInsetClass} px-4 py-4`}>
+					<p className={neutralLabelClass}>{stat.label}</p>
+					<p
+						className="mt-3 text-base font-medium leading-tight text-foreground"
+						style={{ fontVariantNumeric: "tabular-nums" }}
+					>
+						{stat.value}
+					</p>
+				</div>
+			))}
+		</div>
+	);
+}
+
+function StageUnlockSectionsCard({
+	summary,
+	preset,
+}: {
+	summary: StageUnlockWorkbenchProps["stageUnlockSummary"];
+	preset: "ceo" | "design" | "build";
+}) {
+	return (
+		<Card className="gap-0 py-0">
+			<CardHeader className={neutralHeaderClass}>
+				<h2 className="text-sm font-semibold leading-none text-foreground">
+					{summary?.sectionHeading ?? "What you built"}
+				</h2>
+			</CardHeader>
+			<CardContent className={neutralBodyClass}>
+				{summary?.sections.length ? (
+					<div className="grid gap-3 lg:grid-cols-2">
+						{summary.sections.map((section) => (
+							<StageUnlockSectionCard
+								key={section.label}
+								className={getSectionGridClass(section)}
+								section={section}
+							/>
+						))}
+					</div>
+				) : (
+					<p className="max-w-2xl text-sm leading-7 text-muted-foreground">
+						{getEmptyStateCopy(preset)}
+					</p>
+				)}
+			</CardContent>
+		</Card>
+	);
+}
+
+function StageUnlockSkillsCard({ skills }: { skills: string[] }) {
+	return (
+		<Card className="gap-0 py-0">
+			<CardHeader className={neutralHeaderClass}>
+				<h2 className="text-sm font-semibold leading-none text-foreground">
+					Skills you flexed
+				</h2>
+			</CardHeader>
+			<CardContent className={neutralBodyClass}>
+				<div className="flex flex-wrap gap-2">
+					{skills.map((skill) => (
+						<span
+							key={skill}
+							className="inline-flex items-center rounded-md border border-input bg-background px-2.5 py-1.5 text-sm text-muted-foreground"
+						>
+							{skill}
+						</span>
+					))}
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
 export function StageUnlockWorkbench({
 	lesson,
 	lessonContent,
@@ -59,18 +207,20 @@ export function StageUnlockWorkbench({
 	invalidFieldMessages = new Map<string, string>(),
 	stageUnlockSummary,
 }: StageUnlockWorkbenchProps) {
-	if (lesson.briefAssembler?.variant !== "stage_unlock") {
+	const briefAssembler = lesson.briefAssembler;
+
+	if (!briefAssembler || briefAssembler.variant !== "stage_unlock") {
 		return null;
 	}
 
 	const summary = stageUnlockSummary;
-	const showLeadVideo = lesson.briefAssembler.leadVideo;
+	const showLeadVideo = briefAssembler.leadVideo;
 	const reviewField = lesson.workbenchFields?.find(
 		(field) => field.id === "brief_review_checks",
 	);
 
 	return (
-		<WorkbenchContainer maxWidthClassName="max-w-5xl">
+		<WorkbenchContainer>
 			<div className="space-y-4">
 				{showLeadVideo ? (
 					<LessonVideoSurface
@@ -78,91 +228,17 @@ export function StageUnlockWorkbench({
 						variant="watch-shell"
 					/>
 				) : null}
-				<section className="sbs-stage-unlock-hero rounded-none border border-product-accent/30 bg-product-surface/78 px-5 py-5 shadow-panel backdrop-blur-xl sm:px-6 sm:py-6">
-					<div className="grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(240px,0.9fr)] lg:items-start">
-						<div className="space-y-4">
-							<div className="space-y-2">
-								<p className="inline-flex border border-product-accent/30 bg-product-surface/84 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-product-accent shadow-[inset_0_0_0_1px_rgba(var(--product-accent),0.06)]">
-									{lesson.briefAssembler.heroEyebrow}
-								</p>
-								<h1
-									className="max-w-3xl font-display text-[2.2rem] uppercase leading-[0.88] tracking-[0.03em] text-product-text sm:text-[2.9rem]"
-									style={{ textWrap: "balance" }}
-								>
-									{lesson.briefAssembler.heroTitle}
-								</h1>
-							</div>
-							<p className="max-w-2xl text-sm leading-7 text-product-muted sm:text-[15px]">
-								{lesson.briefAssembler.heroBody}
-							</p>
-							<div className="flex flex-wrap items-center gap-2.5">
-								<div className="inline-flex border border-product-accent/30 bg-product-surface/84 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-product-accent shadow-[inset_0_0_0_1px_rgba(var(--product-accent),0.08)]">
-									Next: {lesson.briefAssembler.nextStepLabel}
-								</div>
-								<p
-									className="max-w-sm text-[11px] leading-relaxed text-product-muted"
-									style={{ textWrap: "balance" }}
-								>
-									{getNextStepSupportCopy(lesson.briefAssembler.preset)}
-								</p>
-							</div>
-						</div>
-						<div className="sbs-stage-unlock-card min-w-[220px] bg-product-surface/80 px-4 py-4 shadow-[0_0_0_1px_rgba(var(--product-accent),0.16),0_14px_30px_rgba(var(--product-shadow),0.18)] backdrop-blur-xl">
-							<p className={workbenchChromeLabelClass}>Artifact locked next</p>
-							<p
-								className="mt-3 font-display text-[1.25rem] uppercase leading-[0.92] tracking-[0.04em] text-product-text"
-								style={{ textWrap: "balance" }}
-							>
-								{lesson.artifact.label}
-							</p>
-							<p className="mt-3 text-[12px] leading-6 text-product-muted">
-								{lesson.briefAssembler.artifactReadyCopy ??
-									"You are not guessing anymore. The next block gets a real handoff now."}
-							</p>
-						</div>
-					</div>
-				</section>
+				<StageUnlockHeroPanel
+					artifact={lesson.artifact}
+					briefAssembler={briefAssembler}
+				/>
 
-				<div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-					{summary?.stats.map((stat, index) => (
-						<div
-							key={stat.label}
-							className="sbs-stage-unlock-card rounded-none border border-product-border/70 bg-product-surface/74 px-4 py-4 shadow-panel backdrop-blur-xl"
-							style={
-								{
-									"--sbs-stage-unlock-delay": `${Math.min(index, 4) * 24}ms`,
-								} as CSSProperties
-							}
-						>
-							<p className={workbenchChromeLabelClass}>{stat.label}</p>
-							<p
-								className="mt-3 text-base font-medium leading-tight text-product-text sm:text-[15px]"
-								style={{ fontVariantNumeric: "tabular-nums" }}
-							>
-								{stat.value}
-							</p>
-						</div>
-					))}
-				</div>
+				<StageUnlockStatsGrid summary={summary} />
 
-				<WorkbenchCard label={summary?.sectionHeading ?? "What you built"}>
-					{summary?.sections.length ? (
-						<div className="grid gap-3 lg:grid-cols-2">
-							{summary.sections.map((section, index) => (
-								<StageUnlockSectionCard
-									key={section.label}
-									className={getSectionGridClass(section)}
-									section={section}
-									index={index}
-								/>
-							))}
-						</div>
-					) : (
-						<p className="text-[12px] leading-relaxed text-product-muted">
-							{getEmptyStateCopy(lesson.briefAssembler.preset)}
-						</p>
-					)}
-				</WorkbenchCard>
+				<StageUnlockSectionsCard
+					summary={summary}
+					preset={briefAssembler.preset}
+				/>
 
 				{reviewField ? (
 					<StageUnlockReviewCard
@@ -178,23 +254,7 @@ export function StageUnlockWorkbench({
 					<StageUnlockBridgeCard bridge={summary.bridge} />
 				) : null}
 
-				<WorkbenchCard label="Skills you flexed">
-					<div className="flex flex-wrap gap-2.5">
-						{lesson.briefAssembler.skills.map((skill, index) => (
-							<span
-								key={skill}
-								className="sbs-stage-unlock-chip inline-flex border border-product-accent/25 bg-product-surface/82 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-product-accent shadow-[inset_0_0_0_1px_rgba(var(--product-accent),0.06)] backdrop-blur-md"
-								style={
-									{
-										"--sbs-stage-unlock-delay": `${Math.min(index, 4) * 24}ms`,
-									} as CSSProperties
-								}
-							>
-								{skill}
-							</span>
-						))}
-					</div>
-				</WorkbenchCard>
+				<StageUnlockSkillsCard skills={briefAssembler.skills} />
 			</div>
 		</WorkbenchContainer>
 	);

@@ -1,188 +1,34 @@
-import { LessonVideoSurface } from "@/features/course/lesson/components/lesson-video-surface";
-import type { LessonHandoff } from "@/features/course/lesson/model/manifest";
-import { Button } from "@/components/ui/button";
-import {
-	getCandidateProblemOptions,
-	isFilled,
-} from "@/features/course/lesson/model/registry";
-import { LessonChromeChip } from "@/features/course/lesson/shared/lesson-chrome-chip";
-import { FieldList } from "../fields/field-list";
+import { Separator } from "@/components/ui/separator";
 import { ArtifactContext } from "../shared/artifact-context";
-import { SectionCard } from "../shared/section-card";
 import { StatusRail } from "../shared/status-rail";
-import { WorkbenchCard } from "../shared/workbench-card";
 import { WorkbenchContainer } from "../shared/workbench-container";
 import { WorkbenchHeader } from "../shared/workbench-header";
-import { WorkbenchHeaderLabel } from "../shared/workbench-header-label";
+import { WorkbenchMediaLayout } from "../shared/workbench-media-layout";
 import type { WorkbenchModeProps } from "../types";
+import { FocusInlineLessonVideo } from "../shared/focus-inline-lesson-video";
+import { CandidateProblemHandoff } from "./candidate-problem-handoff";
 import { DefineOutcomeSupport } from "./define-outcome-support";
-import { PickOneUserSupport } from "./pick-one-user-support";
+import { GuidedFormWorkbenchSections } from "./guided-form-workbench-sections";
+import { PickOneUserStatementPreviewCard } from "./pick-one-user-statement-preview-card";
 import { StartWithProblemSupport } from "./start-with-problem-support";
 
-const HANDOFF_TITLE = "Pick the problem to carry forward";
-const HANDOFF_HELPER_COPY =
-	"Pick one of the three problems you just wrote. This becomes your working direction for the next CEO lessons.";
-const HANDOFF_SELECTED_COPY =
-	"The selected problem owner is your user. Now ground this direction in a real moment, a current workaround, and a path to reach them.";
-const HANDOFF_BLOCKED_COPY =
-	"First, pick the problem to carry forward above to unlock this section.";
-const HANDOFF_INVALID_COPY =
-	"Pick the problem to carry forward before continuing.";
+export function GuidedFormWorkbench(props: WorkbenchModeProps) {
+	const {
+		lesson,
+		lessonContent,
+		fieldValues,
+		onFieldChange,
+		pinnedArtifacts,
+		invalidFieldIds,
+		invalidFieldMessages,
+		fields,
+		objectiveTasks,
+		workbenchSections,
+		sectionStates,
+		completedTaskCount,
+		layoutMode,
+	} = props;
 
-function CandidateProblemHandoff({
-	handoff,
-	fieldValues,
-	onFieldChange,
-	pinnedArtifacts,
-	invalidFieldIds,
-}: {
-	handoff: LessonHandoff;
-	fieldValues: Record<string, unknown>;
-	onFieldChange: (fieldId: string, value: unknown) => void;
-	pinnedArtifacts: WorkbenchModeProps["pinnedArtifacts"];
-	invalidFieldIds: Set<string>;
-}) {
-	const sourceArtifact = pinnedArtifacts.find(
-		(artifact) => artifact.artifactKey === handoff.sourceArtifactKey,
-	);
-	const candidateProblems = getCandidateProblemOptions(
-		handoff,
-		sourceArtifact?.fieldValues,
-	);
-	const persistedFields = handoff.persistedFields ?? [];
-	const selectedProblemIndex =
-		typeof fieldValues[handoff.selectionFieldId] === "number"
-			? (fieldValues[handoff.selectionFieldId] as number)
-			: typeof fieldValues[handoff.selectionFieldId] === "string"
-				? Number(fieldValues[handoff.selectionFieldId])
-				: null;
-	const selectedProblem =
-		selectedProblemIndex !== null
-			? candidateProblems.find(
-					(problem) => problem.index === selectedProblemIndex,
-				)
-			: null;
-
-	return (
-		<section className="rounded-none border border-product-border/70 bg-product-surface/55">
-			<div className="border-b border-product-border/60 px-4 py-3">
-				<WorkbenchHeaderLabel as="h2">{HANDOFF_TITLE}</WorkbenchHeaderLabel>
-				<p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-product-muted">
-					{HANDOFF_HELPER_COPY}
-				</p>
-			</div>
-			<div className="space-y-4 px-4 py-4">
-				{selectedProblem ? (
-					<div className="space-y-4">
-						<div className="border border-product-accent/60 bg-product-chip/50">
-							<div className="border-b border-product-border/60 px-4 py-3">
-								<p className="font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
-									Problem {selectedProblem.index}
-								</p>
-							</div>
-							<div className="space-y-3 px-4 py-4 text-[12px] leading-relaxed text-product-text">
-								<div>
-									<p className="font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
-										Chosen user
-									</p>
-									<p className="mt-1 font-display text-sm uppercase tracking-[0.04em] text-product-text">
-										{selectedProblem.owner}
-									</p>
-								</div>
-								<div>
-									<p className="font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
-										Chosen problem
-									</p>
-									<p className="mt-1">{selectedProblem.statement}</p>
-								</div>
-							</div>
-							<div className="border-t border-product-border/60 px-4 py-3">
-								<Button
-									type="button"
-									onClick={() => {
-										onFieldChange(handoff.selectionFieldId, null);
-										for (const field of persistedFields) {
-											onFieldChange(field.targetFieldId, "");
-										}
-									}}
-									variant="outline"
-									size="xs"
-								>
-									Change selection
-								</Button>
-							</div>
-						</div>
-						<p className="text-[11px] leading-relaxed text-product-muted">
-							{HANDOFF_SELECTED_COPY}
-						</p>
-					</div>
-				) : candidateProblems.length > 0 ? (
-					<div className="grid gap-3 lg:grid-cols-3">
-						{candidateProblems.map((problem) => (
-							<Button
-								key={problem.index}
-								type="button"
-								onClick={() => {
-									onFieldChange(handoff.selectionFieldId, problem.index);
-									for (const field of persistedFields) {
-										onFieldChange(
-											field.targetFieldId,
-											field.source === "owner"
-												? problem.owner
-												: problem.statement,
-										);
-									}
-								}}
-								variant="outline"
-								size="sm"
-								className="flex h-full w-full flex-col items-start px-4 py-4 text-left normal-case tracking-normal"
-							>
-								<LessonChromeChip
-									status="ready"
-									label={`Problem ${problem.index}`}
-								/>
-								<p className="mt-3 font-display text-sm uppercase tracking-[0.04em] text-product-text">
-									{problem.owner}
-								</p>
-								<p className="mt-3 flex-1 text-[12px] leading-relaxed text-product-text">
-									{problem.statement}
-								</p>
-								<div className="mt-4 border-t border-product-border/60 pt-3">
-									<LessonChromeChip status="ready" label="Use this problem" />
-								</div>
-							</Button>
-						))}
-					</div>
-				) : (
-					<div className="border border-dashed border-product-border bg-product-surface px-4 py-4 text-[12px] leading-relaxed text-product-muted">
-						The problems from the last lesson are not available yet. Go back to
-						`1.1` and finish that page first.
-					</div>
-				)}
-				{invalidFieldIds.has(handoff.selectionFieldId) ? (
-					<p className="text-[11px] font-medium leading-relaxed text-danger">
-						{HANDOFF_INVALID_COPY}
-					</p>
-				) : null}
-			</div>
-		</section>
-	);
-}
-
-export function GuidedFormWorkbench({
-	lesson,
-	lessonContent,
-	fieldValues,
-	onFieldChange,
-	pinnedArtifacts,
-	invalidFieldIds,
-	invalidFieldMessages,
-	fields,
-	objectiveTasks,
-	workbenchSections,
-	sectionStates,
-	completedTaskCount,
-}: WorkbenchModeProps) {
 	const visiblePinnedArtifacts = lesson.handoff
 		? pinnedArtifacts.filter(
 				(artifact) =>
@@ -190,20 +36,79 @@ export function GuidedFormWorkbench({
 			)
 		: pinnedArtifacts;
 	const showInlineVideo = lesson.coachVideoPlacement === "workbench";
-	const showStartWithProblemSupport = lesson.id === "1.1";
-	const showPickOneUserSupport = lesson.id === "1.2";
-	const showDefineOutcomeSupport = lesson.id === "1.3";
-
-	return (
-		<WorkbenchContainer>
-			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
-			{showInlineVideo ? (
-				<WorkbenchCard label="Watch first">
-					<LessonVideoSurface
-						coachContent={lessonContent.coach}
-						variant="watch-shell"
+	const showSplitWorkbenchMedia =
+		showInlineVideo &&
+		lesson.workbenchMediaLayout === "split" &&
+		layoutMode === "focus";
+	const showStartWithProblemSupport = lesson.id === "1.3";
+	const showPickOneUserStatementPreview =
+		lesson.id === "1.4" && lesson.handoff?.mode === "select_candidate_problem";
+	const showDefineOutcomeSupport = lesson.id === "1.5";
+	const showPrimaryFieldsFirst = showStartWithProblemSupport;
+	const inlineVideoCard = (
+		<FocusInlineLessonVideo coachContent={lessonContent.coach} />
+	);
+	const supportingContent = (
+		<>
+			{showStartWithProblemSupport ? (
+				<StartWithProblemSupport
+					lessonContent={lessonContent}
+					fieldValues={fieldValues}
+					fields={fields}
+					onFieldChange={onFieldChange}
+					invalidFieldIds={invalidFieldIds}
+				/>
+			) : null}
+			{lesson.handoff?.mode === "select_candidate_problem" ? (
+				<>
+					<CandidateProblemHandoff
+						handoff={lesson.handoff}
+						fieldValues={fieldValues}
+						onFieldChange={onFieldChange}
+						pinnedArtifacts={pinnedArtifacts}
+						invalidFieldIds={invalidFieldIds}
 					/>
-				</WorkbenchCard>
+					{showPickOneUserStatementPreview ? (
+						<PickOneUserStatementPreviewCard
+							handoff={lesson.handoff}
+							fieldValues={fieldValues}
+							pinnedArtifacts={pinnedArtifacts}
+						/>
+					) : null}
+				</>
+			) : null}
+			{showDefineOutcomeSupport ? (
+				<DefineOutcomeSupport fieldValues={fieldValues} />
+			) : null}
+			<ArtifactContext pinnedArtifacts={visiblePinnedArtifacts} />
+		</>
+	);
+	const sectionContent = (
+		<GuidedFormWorkbenchSections
+			workbenchSections={workbenchSections}
+			fields={fields}
+			fieldValues={fieldValues}
+			onFieldChange={onFieldChange}
+			pinnedArtifacts={pinnedArtifacts}
+			invalidFieldIds={invalidFieldIds}
+			invalidFieldMessages={invalidFieldMessages}
+			sectionStates={sectionStates}
+		/>
+	);
+
+	const workbenchBody = (
+		<>
+			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
+			<Separator className="bg-border" />
+			{showSplitWorkbenchMedia ? (
+				<WorkbenchMediaLayout media={inlineVideoCard}>
+					<div className="space-y-5">
+						{showPrimaryFieldsFirst ? sectionContent : supportingContent}
+						{showPrimaryFieldsFirst ? supportingContent : sectionContent}
+					</div>
+				</WorkbenchMediaLayout>
+			) : showInlineVideo ? (
+				inlineVideoCard
 			) : (
 				<StatusRail
 					lessonContent={lessonContent}
@@ -211,75 +116,18 @@ export function GuidedFormWorkbench({
 					totalTaskCount={Math.max(objectiveTasks.length, 1)}
 				/>
 			)}
-			{showStartWithProblemSupport ? (
-				<StartWithProblemSupport
-					lessonContent={lessonContent}
-					fieldValues={fieldValues}
-				/>
-			) : null}
-			{showPickOneUserSupport &&
-			lesson.handoff?.mode === "select_candidate_problem" ? (
-				<PickOneUserSupport
-					handoff={lesson.handoff}
-					fieldValues={fieldValues}
-					onFieldChange={onFieldChange}
-					pinnedArtifacts={pinnedArtifacts}
-					invalidFieldIds={invalidFieldIds}
-				/>
-			) : null}
-			{!showPickOneUserSupport &&
-			lesson.handoff?.mode === "select_candidate_problem" ? (
-				<CandidateProblemHandoff
-					handoff={lesson.handoff}
-					fieldValues={fieldValues}
-					onFieldChange={onFieldChange}
-					pinnedArtifacts={pinnedArtifacts}
-					invalidFieldIds={invalidFieldIds}
-				/>
-			) : null}
-			{showDefineOutcomeSupport ? (
-				<DefineOutcomeSupport fieldValues={fieldValues} />
-			) : null}
-			<ArtifactContext pinnedArtifacts={visiblePinnedArtifacts} />
-			<div className="space-y-4">
-				{workbenchSections.map((section) => {
-					const sectionFields = fields.filter((field) =>
-						section.fieldIds.includes(field.id),
-					);
-					const sectionState = sectionStates.find(
-						(state) => state.id === section.id,
-					);
-					const blocked = (section.blockedByFieldIds ?? []).some(
-						(fieldId) => !isFilled(fieldValues[fieldId]),
-					);
-					const layoutClass =
-						section.layout === "split"
-							? "grid gap-4 lg:grid-cols-[minmax(240px,0.75fr)_minmax(0,1.25fr)]"
-							: section.layout === "compact"
-								? "grid gap-4 md:grid-cols-2"
-								: "space-y-4";
-
-					return (
-						<SectionCard
-							key={section.id}
-							section={section}
-							isComplete={sectionState?.isComplete ?? false}
-							blocked={blocked}
-							blockedMessage={blocked ? HANDOFF_BLOCKED_COPY : undefined}
-						>
-							<FieldList
-								fields={sectionFields}
-								fieldValues={fieldValues}
-								onFieldChange={onFieldChange}
-								pinnedArtifacts={pinnedArtifacts}
-								invalidFieldIds={invalidFieldIds}
-								invalidFieldMessages={invalidFieldMessages}
-								className={layoutClass}
-							/>
-						</SectionCard>
-					);
-				})}
-			</div>
-		</WorkbenchContainer>
+			{showSplitWorkbenchMedia
+				? null
+				: showPrimaryFieldsFirst
+					? sectionContent
+					: supportingContent}
+			{showSplitWorkbenchMedia
+				? null
+				: showPrimaryFieldsFirst
+					? supportingContent
+					: sectionContent}
+		</>
 	);
+
+	return <WorkbenchContainer>{workbenchBody}</WorkbenchContainer>;
 }

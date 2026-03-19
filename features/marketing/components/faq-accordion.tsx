@@ -1,84 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@/components/ui/accordion";
 
 export type FAQItem = {
 	question: string;
 	answer: string;
 };
 
-type FAQState = { type: "closed" } | { type: "open"; index: number };
-
-function assertNever(value: never): never {
-	throw new Error(`Unknown FAQ state: ${JSON.stringify(value)}`);
-}
-
-function isOpenItem(state: FAQState, index: number) {
-	switch (state.type) {
-		case "closed":
-			return false;
-		case "open":
-			return state.index === index;
-		default:
-			return assertNever(state);
-	}
-}
-
 export default function FAQAccordion({ items }: { items: readonly FAQItem[] }) {
-	const [state, setState] = useState<FAQState>({ type: "closed" });
-
 	return (
-		<div className="grid gap-[1px] border border-product-border/60 bg-product-border/35">
-			{items.map((item, index) => {
-				const isOpen = isOpenItem(state, index);
-				const panelId = `faq-panel-${index}`;
-
-				return (
-					<div key={item.question} className="bg-product-surface">
-						<button
-							type="button"
-							className="sbs-press-feedback flex w-full items-center justify-between gap-4 px-5 py-5 text-left text-xl font-medium leading-tight text-product-text transition-colors duration-150 ease-out hover:bg-product-surface-alt motion-reduce:transition-none sm:text-2xl"
-							aria-expanded={isOpen}
-							aria-controls={panelId}
-							onClick={() =>
-								setState(isOpen ? { type: "closed" } : { type: "open", index })
-							}
-						>
-							<span>{item.question}</span>
-							<span
-								className={`grid size-12 place-items-center border border-product-border/60 text-lg text-product-muted transition-transform duration-200 ease-out motion-reduce:transition-none ${
-									isOpen ? "rotate-45" : "rotate-0"
-								}`}
-								aria-hidden="true"
-							>
-								+
-							</span>
-						</button>
-
-						<div
-							className={`grid overflow-hidden transition-[grid-template-rows] motion-reduce:transition-none ${
-								isOpen
-									? "grid-rows-[1fr] duration-[220ms] ease-[cubic-bezier(0.2,0.8,0.2,1)]"
-									: "grid-rows-[0fr] duration-[160ms] ease-[cubic-bezier(0.4,0,1,1)]"
-							}`}
-						>
-							<div className="overflow-hidden">
-								<div
-									id={panelId}
-									aria-hidden={!isOpen}
-									className={`border-t border-product-border/60 px-5 py-5 text-base leading-relaxed text-product-muted transition-all duration-200 ease-out motion-reduce:transition-none sm:text-lg ${
-										isOpen
-											? "translate-y-0 opacity-100 delay-[40ms]"
-											: "pointer-events-none -translate-y-1 opacity-0"
-									}`}
-								>
-									{item.answer}
-								</div>
-							</div>
-						</div>
-					</div>
-				);
-			})}
-		</div>
+		<Accordion type="single" collapsible className="w-full">
+			{items.map((item, index) => (
+				<AccordionItem key={item.question} value={`faq-${index}`}>
+					<AccordionTrigger className="text-left text-base sm:text-lg">
+						{item.question}
+					</AccordionTrigger>
+					<AccordionContent className="text-muted-foreground">
+						{item.answer}
+					</AccordionContent>
+				</AccordionItem>
+			))}
+		</Accordion>
 	);
 }

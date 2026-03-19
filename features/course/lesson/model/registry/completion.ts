@@ -122,11 +122,22 @@ function getFieldMinimumItems(field: WorkbenchField) {
 	return Math.max(field.minItems ?? 1, 1);
 }
 
+function countFilledBoardLines(value: unknown) {
+	if (!Array.isArray(value)) {
+		return 0;
+	}
+
+	return value.filter(
+		(item): item is string =>
+			typeof item === "string" && item.trim().length > 0,
+	).length;
+}
+
 function getLessonSpecificCompletionMessage(
 	lesson: LessonConfig,
 	fieldId: string,
 ) {
-	if (lesson.id === "1.2") {
+	if (lesson.id === "1.4") {
 		if (fieldId === "selected_problem_index") {
 			return "Choose the one user-problem pair you can test fastest.";
 		}
@@ -141,7 +152,7 @@ function getLessonSpecificCompletionMessage(
 		}
 	}
 
-	if (lesson.id === "1.3") {
+	if (lesson.id === "1.5") {
 		if (fieldId === "outcome") {
 			return "Rewrite this as what changes for the user, not what the product contains.";
 		}
@@ -153,19 +164,38 @@ function getLessonSpecificCompletionMessage(
 		}
 	}
 
-	if (lesson.id !== "1.1") {
+	if (lesson.id === "1.7") {
+		if (fieldId === "in_scope") {
+			return "Add at least one concrete v1 item—one line each.";
+		}
+		if (fieldId === "out_of_scope") {
+			return "Name at least one thing you are explicitly not building in v1.";
+		}
+		if (fieldId === "v1_rationale") {
+			return "Write a short rationale tying this scope to your user and outcome.";
+		}
+	}
+
+	if (lesson.id !== "1.3") {
 		return undefined;
 	}
 
-	const match = fieldId.match(/^problem_(\d+)_(who|pain)$/);
+	const match = fieldId.match(/^problem_(\d+)_(who|pain|frequency|severity)$/);
 	if (!match) {
 		return undefined;
 	}
 
 	const [, index, type] = match;
-	return type === "who"
-		? `Candidate ${index}: name a real person or group, not a broad audience.`
-		: `Candidate ${index}: describe the recurring pain they keep running into, not the product idea you want to build.`;
+	if (type === "who") {
+		return `Candidate ${index}: name a real person or group, not a broad audience.`;
+	}
+	if (type === "pain") {
+		return `Candidate ${index}: describe the recurring pain they keep running into, not the product idea you want to build.`;
+	}
+	if (type === "frequency") {
+		return `Candidate ${index}: choose how often this pain actually shows up.`;
+	}
+	return `Candidate ${index}: score how painful this problem is from 1 to 10.`;
 }
 
 function isFieldComplete(field: WorkbenchField, value: unknown) {
@@ -174,6 +204,10 @@ function isFieldComplete(field: WorkbenchField, value: unknown) {
 			isReferenceGalleryValue(value) &&
 			value.items.length >= getFieldMinimumItems(field)
 		);
+	}
+
+	if (field.kind === "board") {
+		return countFilledBoardLines(value) >= getFieldMinimumItems(field);
 	}
 
 	return isFilled(value);
@@ -259,7 +293,7 @@ export function getObjectiveTasks(
 		tasks.push({
 			id: lesson.handoff.selectionFieldId,
 			label:
-				lesson.id === "1.2"
+				lesson.id === "1.4"
 					? "Commit to the user behind the problem"
 					: "Pick problem to carry forward",
 			status: isFilled(values[lesson.handoff.selectionFieldId])

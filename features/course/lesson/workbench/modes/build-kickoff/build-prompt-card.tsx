@@ -65,7 +65,7 @@ export function BuildPromptCard({
 
 	return (
 		<WorkbenchCard label="Generate your build prompt">
-			<p className="text-xs leading-relaxed text-product-muted">
+			<p className="text-xs leading-relaxed text-muted-foreground">
 				We combine your path, slice, and done condition into a copy-ready brief
 				for your coding agent.
 			</p>
@@ -91,32 +91,32 @@ export function BuildPromptCard({
 					</Button>
 				) : null}
 				{copyState === "error" && prompt && !disabledReason && showPrompt ? (
-					<p className="text-[11px] leading-relaxed text-product-muted">
+					<p className="text-[11px] leading-relaxed text-muted-foreground">
 						Clipboard unavailable. Copy from the prompt block below.
 					</p>
 				) : null}
 			</div>
 			{!readyToGenerate ? (
-				<p className="mt-2 text-[11px] leading-relaxed text-product-muted">
+				<p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
 					Complete Steps 1-3 to generate prompt.
 				</p>
 			) : null}
 			{readyToGenerate && disabledReason ? (
-				<p className="mt-2 text-[11px] leading-relaxed text-product-muted">
+				<p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
 					{disabledReason}
 				</p>
 			) : null}
-			<div className="mt-3 border border-product-border/70 bg-product-surface px-3 py-3">
+			<div className="mt-3 rounded-lg border border-border bg-background px-3 py-3">
 				{showPrompt && prompt ? (
 					<Textarea
 						readOnly
 						value={prompt}
 						rows={18}
-						className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[11px] leading-relaxed text-product-text"
+						className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[11px] leading-relaxed text-foreground"
 						aria-label="Build kickoff prompt"
 					/>
 				) : (
-					<p className="text-[11px] leading-relaxed text-product-muted">
+					<p className="text-[11px] leading-relaxed text-muted-foreground">
 						Your prompt will appear here after generation.
 					</p>
 				)}

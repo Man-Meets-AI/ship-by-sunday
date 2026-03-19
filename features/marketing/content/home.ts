@@ -176,7 +176,7 @@ export const homePageContent = {
 					"You have enough fluency to prototype, test ideas, and get something moving.",
 			},
 			{
-				title: "You keep ending up with rough demos instead of real products",
+				title: "You keep ending up with rough demos\ninstead of real products",
 				description:
 					"The problem is not starting. The problem is finishing something coherent enough to ship.",
 			},

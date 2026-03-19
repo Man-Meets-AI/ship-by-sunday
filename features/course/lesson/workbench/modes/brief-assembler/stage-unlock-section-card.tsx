@@ -1,8 +1,19 @@
 import Link from "next/link";
-import type { CSSProperties } from "react";
 
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import type { StageUnlockSection } from "@/features/course/lesson/model/stage-unlock";
-import { workbenchChromeLabelClass } from "../../shared/workbench-readability";
+
+const sectionHeaderClass = "border-b border-border/60 px-4 py-3 sm:px-5";
+
+const sectionBodyClass = "px-4 py-4 sm:px-5 sm:py-5";
+
+const sectionTitleClass = "text-sm font-semibold leading-none text-foreground";
+
+const sectionLabelClass = "text-sm font-medium text-muted-foreground";
+
+const sectionActionClass =
+	"inline-flex items-center text-sm font-medium text-foreground underline-offset-4 transition-colors hover:underline";
 
 function splitSectionLines(value: string) {
 	const lines = value
@@ -35,45 +46,29 @@ function splitLineLabel(line: string) {
 
 export function StageUnlockSectionCard({
 	section,
-	index,
 	className,
 }: {
 	section: StageUnlockSection;
-	index: number;
 	className?: string;
 }) {
 	const { bodyLines, sourceLines } = splitSectionLines(section.value);
 	const bodyLineKeyCounts = new Map<string, number>();
 	const sourceLineKeyCounts = new Map<string, number>();
-
 	return (
-		<div
-			className={`sbs-stage-unlock-card rounded-none border border-product-border/70 bg-product-surface/72 shadow-panel backdrop-blur-xl ${className ?? ""}`.trim()}
-			style={
-				{
-					"--sbs-stage-unlock-delay": `${Math.min(index + 1, 4) * 24}ms`,
-				} as CSSProperties
-			}
-		>
-			<div className="border-b border-product-border/35 px-4 py-3">
+		<Card className={cn("gap-0 py-0", className)}>
+			<CardHeader className={sectionHeaderClass}>
 				<div className="flex flex-wrap items-center justify-between gap-2">
-					<p
-						className={workbenchChromeLabelClass}
-						style={{ textWrap: "balance" }}
-					>
+					<p className={sectionTitleClass} style={{ textWrap: "balance" }}>
 						{section.label}
 					</p>
 					{section.action ? (
-						<Link
-							href={section.action.href}
-							className="inline-flex items-center border border-product-border/70 bg-product-surface/88 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted transition-colors hover:border-product-accent/35 hover:text-product-text"
-						>
+						<Link href={section.action.href} className={sectionActionClass}>
 							{section.action.label}
 						</Link>
 					) : null}
 				</div>
-			</div>
-			<div className="space-y-4 px-4 py-4">
+			</CardHeader>
+			<CardContent className={`${sectionBodyClass} space-y-4`}>
 				<div className="space-y-3">
 					{bodyLines.map((line, lineIndex) => {
 						const keyValue = splitLineLabel(line);
@@ -84,9 +79,9 @@ export function StageUnlockSectionCard({
 						if (keyValue) {
 							return (
 								<div key={lineKey} className="space-y-1">
-									<p className={workbenchChromeLabelClass}>{keyValue.label}</p>
+									<p className={sectionLabelClass}>{keyValue.label}</p>
 									<p
-										className="text-[13px] leading-7 text-product-text"
+										className="text-sm leading-7 text-foreground"
 										style={{ overflowWrap: "anywhere" }}
 									>
 										{keyValue.value}
@@ -100,8 +95,8 @@ export function StageUnlockSectionCard({
 								key={lineKey}
 								className={
 									lineIndex === 0
-										? "text-sm font-medium leading-6 text-product-text"
-										: "text-[13px] leading-7 text-product-text"
+										? "text-base font-medium leading-7 text-foreground"
+										: "text-sm leading-7 text-foreground"
 								}
 								style={{ overflowWrap: "anywhere" }}
 							>
@@ -115,29 +110,29 @@ export function StageUnlockSectionCard({
 						{section.galleryImageUrls.map((imageUrl, imageIndex) => (
 							<div
 								key={`${section.label}-${imageUrl}`}
-								className="aspect-[4/3] overflow-hidden bg-product-surface-strong shadow-[0_0_0_1px_rgba(var(--product-text),0.08),0_10px_20px_rgba(var(--product-shadow),0.12)]"
+								className="aspect-[4/3] overflow-hidden rounded-lg border border-border bg-background"
 							>
 								<img
 									src={imageUrl}
 									alt={`${section.label} reference ${imageIndex + 1}`}
-									className="h-full w-full object-cover outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
+									className="h-full w-full object-cover"
 								/>
 							</div>
 						))}
 					</div>
 				) : null}
 				{section.imageUrl ? (
-					<div className="overflow-hidden bg-product-surface-strong shadow-[0_0_0_1px_rgba(var(--product-text),0.08),0_10px_20px_rgba(var(--product-shadow),0.12)]">
+					<div className="overflow-hidden rounded-lg border border-border bg-background">
 						<img
 							src={section.imageUrl}
 							alt={`${section.label} preview`}
-							className="h-40 w-full object-cover outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10 sm:h-48"
+							className="h-40 w-full object-cover sm:h-48"
 						/>
 					</div>
 				) : null}
 				{sourceLines.length ? (
-					<div className="border-t border-product-border/30 pt-3">
-						<p className={workbenchChromeLabelClass}>Sources</p>
+					<div className="border-t border-border/60 pt-3">
+						<p className={sectionLabelClass}>Sources</p>
 						<ul className="mt-2 space-y-1.5">
 							{sourceLines.map((line) => {
 								const lineOccurrence = sourceLineKeyCounts.get(line) ?? 0;
@@ -146,7 +141,7 @@ export function StageUnlockSectionCard({
 								return (
 									<li
 										key={`${section.label}-source-${line}-${lineOccurrence}`}
-										className="text-[11px] leading-5 text-product-muted"
+										className="text-sm leading-6 text-muted-foreground"
 										style={{ overflowWrap: "anywhere" }}
 									>
 										{line}
@@ -156,7 +151,7 @@ export function StageUnlockSectionCard({
 						</ul>
 					</div>
 				) : null}
-			</div>
-		</div>
+			</CardContent>
+		</Card>
 	);
 }

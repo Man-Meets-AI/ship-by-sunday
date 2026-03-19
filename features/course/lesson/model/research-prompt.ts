@@ -647,7 +647,7 @@ export function getPromptTemplateState(
 			return {
 				prompt: null,
 				disabledReason:
-					"Finish lessons 1.2 and 1.3 first so we can build this prompt from your chosen user and outcome.",
+					"Finish lessons 1.4 and 1.5 first so we can build this prompt from your chosen user and outcome.",
 			};
 		}
 
@@ -663,7 +663,7 @@ export function getPromptTemplateState(
 			return {
 				prompt: null,
 				disabledReason:
-					"Finish lessons 1.2 through 1.4 first so we can build this scope cut from your chosen user, outcome, and research.",
+					"Finish lessons 1.4 through 1.6 first so we can build this scope cut from your chosen user, outcome, and research.",
 			};
 		}
 

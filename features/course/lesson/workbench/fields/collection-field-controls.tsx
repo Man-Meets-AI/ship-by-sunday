@@ -1,10 +1,13 @@
+"use client";
+
 import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
 
+import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { assert } from "@/features/course/lesson/lib/assert";
 import { CheckboxRow } from "./checkbox-row";
 import { EditableTableField } from "./editable-table-field";
-import { fieldLabelClass, inputWidthClass } from "./field-styles";
+import { inputWidthClass } from "./field-styles";
 import {
 	normalizeChecklistValue,
 	parseLines,
@@ -29,9 +32,9 @@ export function renderCollectionFieldControl(
 		const checklistItems = normalizeChecklistValue(value, checklistOptions);
 
 		return (
-			<div className="block">
-				<span className={fieldLabelClass}>{field.label}</span>
-				<div className="mt-2 space-y-2">
+			<Field className="block w-full">
+				<FieldLabel>{field.label}</FieldLabel>
+				<FieldContent className="space-y-2">
 					{checklistItems.map((item, index) => (
 						<CheckboxRow
 							key={item.label}
@@ -45,23 +48,25 @@ export function renderCollectionFieldControl(
 							}}
 						/>
 					))}
-				</div>
-			</div>
+				</FieldContent>
+			</Field>
 		);
 	}
 
 	if (field.kind === "board") {
 		return (
-			<label className={`block ${inputWidthClass(field)}`}>
-				<span className={fieldLabelClass}>{field.label}</span>
-				<Textarea
-					value={toLineList(value)}
-					onChange={(event) => onChange(parseLines(event.target.value))}
-					rows={field.rows ?? 6}
-					placeholder={field.placeholder ?? "One item per line"}
-					className="mt-2"
-				/>
-			</label>
+			<Field className={`block ${inputWidthClass(field)}`}>
+				<FieldLabel htmlFor={field.id}>{field.label}</FieldLabel>
+				<FieldContent>
+					<Textarea
+						id={field.id}
+						value={toLineList(value)}
+						onChange={(event) => onChange(parseLines(event.target.value))}
+						rows={field.rows ?? 6}
+						placeholder={field.placeholder ?? "One item per line"}
+					/>
+				</FieldContent>
+			</Field>
 		);
 	}
 
@@ -78,18 +83,21 @@ export function renderCollectionFieldControl(
 		}
 
 		return (
-			<label className={`block ${inputWidthClass(field)}`}>
+			<Field className={`block ${inputWidthClass(field)}`}>
 				{showLabel ? (
-					<span className={fieldLabelClass}>{field.label}</span>
+					<FieldLabel htmlFor={field.id}>{field.label}</FieldLabel>
 				) : null}
-				<Textarea
-					value={toTableText(value)}
-					onChange={(event) => onChange(parseTable(event.target.value))}
-					rows={6}
-					placeholder="One row per line. Separate columns with |"
-					className={showLabel ? "mt-2 font-mono" : "font-mono"}
-				/>
-			</label>
+				<FieldContent>
+					<Textarea
+						id={field.id}
+						value={toTableText(value)}
+						onChange={(event) => onChange(parseTable(event.target.value))}
+						rows={6}
+						placeholder="One row per line. Separate columns with |"
+						className="font-mono"
+					/>
+				</FieldContent>
+			</Field>
 		);
 	}
 

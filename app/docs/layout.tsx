@@ -3,7 +3,7 @@ import { Head } from "nextra/components";
 import { getPageMap } from "nextra/page-map";
 import { Layout } from "nextra-theme-docs";
 
-import { PRODUCT_THEME_STORAGE_KEY } from "@/features/course/shared/utils/product-theme";
+import { DOCS_THEME_STORAGE_KEY } from "@/features/docs/lib/theme-preferences";
 import { DocsFooter } from "@/features/docs/components/docs-footer";
 import { DocsNavbar } from "@/features/docs/components/docs-navbar";
 
@@ -57,7 +57,7 @@ export default async function DocsLayout({
 				nextThemes={{
 					attribute: "class",
 					defaultTheme: "dark",
-					storageKey: PRODUCT_THEME_STORAGE_KEY,
+					storageKey: DOCS_THEME_STORAGE_KEY,
 					disableTransitionOnChange: true,
 				}}
 				pageMap={pageMap}

@@ -3,6 +3,7 @@
 import { useMutation } from "convex/react";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { api } from "@/convex/_generated/api";
 import { LessonVideoPlayer } from "@/features/course/lesson/components/lesson-video-player";
 import { assert } from "@/features/course/lesson/lib/assert";
@@ -48,6 +49,9 @@ type UploadState =
 	| { status: "uploading" }
 	| { status: "error"; message: string };
 
+const chromeLabelClass =
+	"text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground";
+
 function getSketchUploadField(fields: WorkbenchField[]) {
 	return (
 		fields.find((field) => field.kind === "image_uploads") ??
@@ -67,20 +71,24 @@ function InlineLessonVideo({
 		<WorkbenchCard label="Watch first">
 			{video && isLessonVideoReady(video) ? (
 				<div className="space-y-2">
-					<LessonVideoPlayer
-						video={video}
-						title={video.title ?? title}
-						className="w-full rounded-none border border-product-border bg-product-surface"
-					/>
-					<div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-medium text-product-muted">
-						<p className="text-product-text">{video.title ?? title}</p>
+					<Card className="gap-0 overflow-hidden p-0 py-0">
+						<LessonVideoPlayer
+							video={video}
+							title={video.title ?? title}
+							className="aspect-video w-full rounded-none border-0 bg-black object-cover"
+						/>
+					</Card>
+					<div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-medium text-muted-foreground">
+						<p className="text-foreground">{video.title ?? title}</p>
 						{video.durationLabel ? <p>{video.durationLabel}</p> : null}
 					</div>
 				</div>
 			) : (
-				<div className="rounded-none border border-dashed border-product-border bg-product-surface px-3 py-4 text-sm font-medium leading-relaxed text-product-muted">
-					Video not wired yet.
-				</div>
+				<Card className="gap-0 border border-dashed border-border bg-muted/30 py-0 ring-0">
+					<CardContent className="px-3 py-4 text-sm font-medium leading-relaxed text-muted-foreground">
+						Video not wired yet.
+					</CardContent>
+				</Card>
 			)}
 		</WorkbenchCard>
 	);
@@ -162,11 +170,11 @@ export function SketchUploadWorkbench({
 			/>
 			<WorkbenchCard label="Sketch rules">
 				<div className="space-y-2">
-					<p className="text-sm leading-relaxed text-product-text">
+					<p className="text-sm leading-relaxed text-foreground">
 						Sketch 3-5 rough screens on paper or your tablet. Ugly is fine.
 						Clarity is the point.
 					</p>
-					<ul className="space-y-1 text-sm leading-relaxed text-product-muted">
+					<ul className="space-y-1 text-sm leading-relaxed text-muted-foreground">
 						{(lessonContent.workbench.teachingPoints ?? []).map((point) => (
 							<li key={point}>- {point}</li>
 						))}
@@ -178,16 +186,16 @@ export function SketchUploadWorkbench({
 					<div
 						className={`rounded-none border-2 border-dashed px-4 py-8 text-center ${
 							isInvalid
-								? "border-danger bg-danger/[0.06]"
-								: "border-product-border bg-product-surface"
+								? "border-destructive/30 bg-destructive/5"
+								: "border-border bg-card"
 						}`}
 					>
-						<p className="font-mono text-[11px] uppercase tracking-[0.2em] text-product-muted">
+						<p className={chromeLabelClass}>
 							{uploads.length > 0
 								? "Keep it moving"
 								: "Upload proof and move on"}
 						</p>
-						<p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-product-text">
+						<p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-foreground">
 							{uploads.length > 0
 								? `${uploads.length} sketch image${
 										uploads.length === 1 ? "" : "s"
@@ -238,26 +246,26 @@ export function SketchUploadWorkbench({
 								event.target.value = "";
 							}}
 						/>
-						<p className="mt-3 text-[11px] leading-relaxed text-product-muted">
+						<p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
 							Use your phone camera if needed. The goal is speed, not polish.
 						</p>
 						{isUploading ? (
-							<p className="mt-2 text-[11px] font-medium text-product-muted">
+							<p className="mt-2 text-[11px] font-medium text-muted-foreground">
 								Uploading images to lesson storage...
 							</p>
 						) : null}
 						{uploadField.helpText ? (
-							<p className="mt-2 text-[11px] leading-relaxed text-product-muted">
+							<p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
 								{uploadField.helpText}
 							</p>
 						) : null}
 						{uploadState.status === "error" ? (
-							<p className="mt-2 text-[11px] font-medium text-danger">
+							<p className="mt-2 text-[11px] font-medium text-destructive">
 								{uploadState.message}
 							</p>
 						) : null}
 						{isInvalid ? (
-							<p className="mt-2 text-[11px] font-medium text-danger">
+							<p className="mt-2 text-[11px] font-medium text-destructive">
 								Upload at least one sketch image before continuing.
 							</p>
 						) : null}
@@ -273,11 +281,11 @@ export function SketchUploadWorkbench({
 									upload.storageId ?? upload.fileName ?? previewUrl;
 
 								return (
-									<div
+									<Card
 										key={keyBase}
-										className="overflow-hidden border border-product-border bg-product-surface"
+										className="gap-0 overflow-hidden p-0 py-0"
 									>
-										<div className="aspect-[4/3] overflow-hidden border-b border-product-border">
+										<div className="aspect-[4/3] overflow-hidden border-b border-border">
 											<img
 												src={previewUrl}
 												alt={upload.fileName ?? `Sketch ${index + 1}`}
@@ -285,7 +293,7 @@ export function SketchUploadWorkbench({
 											/>
 										</div>
 										<div className="flex items-center justify-between gap-3 px-3 py-2">
-											<p className="min-w-0 truncate text-xs font-medium text-product-text">
+											<p className="min-w-0 truncate text-xs font-medium text-foreground">
 												{upload.fileName ?? `Sketch ${index + 1}`}
 											</p>
 											<Button
@@ -297,12 +305,12 @@ export function SketchUploadWorkbench({
 													)
 												}
 												variant="ghost"
-												size="xs"
+												size="sm"
 											>
 												Remove
 											</Button>
 										</div>
-									</div>
+									</Card>
 								);
 							})}
 						</div>
@@ -311,14 +319,18 @@ export function SketchUploadWorkbench({
 			</WorkbenchCard>
 			<TemplateDownloadCard lessonContent={lessonContent} />
 			{pinnedArtifacts.length > 0 ? (
-				<details className="rounded-none border border-product-border/70 bg-product-surface-strong/70">
-					<summary className="cursor-pointer px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
-						Need context?
-					</summary>
-					<div className="border-t border-product-border/60 px-3 py-3">
-						<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
-					</div>
-				</details>
+				<Card className="gap-0 overflow-hidden p-0 py-0">
+					<details className="w-full">
+						<summary
+							className={`${chromeLabelClass} cursor-pointer px-3 py-2 transition-colors hover:text-foreground`}
+						>
+							Need context?
+						</summary>
+						<div className="border-t border-border px-3 py-3">
+							<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
+						</div>
+					</details>
+				</Card>
 			) : null}
 		</WorkbenchContainer>
 	);

@@ -9,6 +9,9 @@ describe("BonusCourseCard", () => {
 	it("surfaces the included PM bonus with the playlist link and usage guidance", () => {
 		const markup = renderToStaticMarkup(<BonusCourseCard />);
 
+		expect(markup).toContain('data-slot="card"');
+		expect(markup).toContain('data-slot="badge"');
+		expect(markup).toContain('data-slot="button"');
 		expect(markup).toContain("Included bonus");
 		expect(markup).toContain("Product Management for Beginners");
 		expect(markup).toContain("Open YouTube playlist");

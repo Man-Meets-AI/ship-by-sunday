@@ -1,65 +1,21 @@
-import { Checkbox } from "@/components/ui/checkbox";
+"use client";
+
+import { Card, CardTitle } from "@/components/ui/card";
 import {
 	getLesson,
 	type LessonConfig,
 } from "@/features/course/lesson/model/manifest";
 import type { ObjectiveTask } from "@/features/course/lesson/model/registry";
+
 import {
-	workbenchChromeLabelClass,
-	workbenchPanelClass,
-} from "@/features/course/lesson/workbench/shared/workbench-readability";
+	GeneratedObjectiveTaskRow,
+	ManualObjectiveTaskRow,
+} from "./objective-task-rows";
 
-function ManualTaskRow({
-	label,
-	checked,
-	onChange,
-}: {
-	label: string;
-	checked: boolean;
-	onChange: (checked: boolean) => void;
-}) {
-	return (
-		<label className="flex items-center gap-2 px-1 py-1 transition-colors text-product-text">
-			<Checkbox
-				checked={checked}
-				onCheckedChange={(nextChecked) => onChange(Boolean(nextChecked))}
-				className="size-3 shrink-0"
-			/>
-			<span
-				className={`text-[12px] leading-[1.5] ${checked ? "text-product-muted line-through" : ""}`}
-			>
-				{label}
-			</span>
-		</label>
-	);
-}
+const panelCardClass = "flex min-w-0 flex-col gap-0 py-0 xl:h-full xl:min-h-0";
 
-function GeneratedTaskRow({
-	label,
-	complete,
-}: {
-	label: string;
-	complete: boolean;
-}) {
-	return (
-		<div className="flex items-start gap-2 px-1 py-1">
-			<span
-				className={`mt-0.5 inline-block h-3 w-3 shrink-0 border ${
-					complete
-						? "border-product-accent bg-product-accent"
-						: "border-product-border bg-product-surface"
-				}`}
-			/>
-			<span
-				className={`text-[12px] leading-[1.5] ${
-					complete ? "text-product-muted line-through" : "text-product-text"
-				}`}
-			>
-				{label}
-			</span>
-		</div>
-	);
-}
+const eyebrowClass =
+	"font-mono text-[10px] font-medium uppercase tracking-wider text-muted-foreground";
 
 export function ObjectivePanel({
 	lesson,
@@ -98,28 +54,26 @@ export function ObjectivePanel({
 			: [{ id: "all", title: null, tasks: objectiveTasks }];
 
 	return (
-		<aside
-			className={`flex min-w-0 flex-col xl:h-full xl:min-h-0 ${workbenchPanelClass}`}
-		>
-			<div className="sticky top-0 z-10 shrink-0 border-b border-product-border/55 bg-product-surface/95 px-4 py-2 backdrop-blur-lg">
-				<p className={workbenchChromeLabelClass}>{lesson.objectiveTitle}</p>
+		<Card className={panelCardClass}>
+			<div className="sticky top-0 z-10 shrink-0 border-b border-border bg-card/95 px-4 py-2 backdrop-blur">
+				<CardTitle className={eyebrowClass}>{lesson.objectiveTitle}</CardTitle>
 			</div>
 			<div className="min-h-0 flex-1 overflow-y-auto">
-				<div className="border-b border-product-border/45 px-4 py-3">
-					<p className="text-[13px] leading-[1.7] text-product-muted">
+				<div className="border-b border-border/60 px-4 py-3">
+					<p className="text-sm leading-relaxed text-muted-foreground">
 						{lesson.helperText ?? lesson.winCondition}
 					</p>
 				</div>
-				<div className="border-b border-product-border/45 px-4 py-3">
-					<p className={workbenchChromeLabelClass}>Output</p>
-					<p className="mt-2 text-[13px] font-semibold leading-[1.45] text-product-text">
+				<div className="border-b border-border/60 px-4 py-3">
+					<CardTitle className={eyebrowClass}>Output</CardTitle>
+					<p className="mt-2 text-sm font-semibold leading-snug text-foreground">
 						{lesson.artifact.label}
 					</p>
 				</div>
 				<div className="px-4 py-4">
 					<div className="mb-3 flex items-center justify-between gap-2">
-						<p className={workbenchChromeLabelClass}>Tasks</p>
-						<p className="font-mono text-[10px] tabular-nums tracking-[0.15em] text-product-muted">
+						<CardTitle className={eyebrowClass}>Tasks</CardTitle>
+						<p className="font-mono text-xs tabular-nums tracking-wider text-muted-foreground">
 							{completedCount}/{objectiveTasks.length}
 						</p>
 					</div>
@@ -127,13 +81,14 @@ export function ObjectivePanel({
 						{taskGroups.map((group) => (
 							<div key={group.id} className="space-y-1.5">
 								{group.title ? (
-									<p className={workbenchChromeLabelClass}>{group.title}</p>
+									<CardTitle className={eyebrowClass}>{group.title}</CardTitle>
 								) : null}
 								<div className="space-y-0.5">
 									{group.tasks.map((task) =>
 										task.interactive ? (
-											<ManualTaskRow
+											<ManualObjectiveTaskRow
 												key={task.id}
+												taskId={task.id}
 												label={task.label}
 												checked={task.status === "complete"}
 												onChange={(checked) =>
@@ -141,8 +96,9 @@ export function ObjectivePanel({
 												}
 											/>
 										) : (
-											<GeneratedTaskRow
+											<GeneratedObjectiveTaskRow
 												key={task.id}
+												taskId={task.id}
 												label={task.label}
 												complete={task.status === "complete"}
 											/>
@@ -154,14 +110,14 @@ export function ObjectivePanel({
 					</div>
 				</div>
 			</div>
-			<div className="shrink-0 border-t border-product-border/55 bg-product-surface-strong/70 px-4 py-3">
-				<p className={workbenchChromeLabelClass}>
+			<div className="shrink-0 border-t border-border/60 bg-muted/30 px-4 py-3">
+				<CardTitle className={eyebrowClass}>
 					{lesson.nextStepLabel ? "Next step" : "Next unlock"}
-				</p>
-				<p className="mt-2 text-[13px] font-semibold leading-[1.45] text-product-text">
+				</CardTitle>
+				<p className="mt-2 text-sm font-semibold leading-snug text-foreground">
 					{nextStepLabel}
 				</p>
 			</div>
-		</aside>
+		</Card>
 	);
 }

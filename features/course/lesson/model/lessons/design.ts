@@ -9,7 +9,7 @@ export const designLessons = [
 		block: "DESIGN",
 		title: "Design References",
 		shortTitle: "References",
-		prevLessonId: "1.7",
+		prevLessonId: "1.9",
 		nextLessonId: "2.1",
 		intro:
 			"Start the Design block with the live reference lesson from Bunny, then move straight into the core flow remap.",

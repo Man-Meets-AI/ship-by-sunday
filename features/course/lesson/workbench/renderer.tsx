@@ -53,7 +53,7 @@ function UnsupportedWorkbench({
 	return (
 		<WorkbenchContainer>
 			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
-			<div className="rounded-none border border-dashed border-product-border bg-product-surface-strong/70 p-5 text-sm font-medium leading-relaxed text-product-muted">
+			<div className="rounded-none border border-dashed border-border bg-muted/30 p-5 text-sm font-medium leading-relaxed text-muted-foreground">
 				This workbench type has not been wired yet.
 			</div>
 		</WorkbenchContainer>
@@ -66,6 +66,7 @@ export function WorkbenchRenderer({
 	fieldValues,
 	onFieldChange,
 	pinnedArtifacts,
+	layoutMode,
 	invalidFieldIds = new Set<string>(),
 	invalidFieldMessages = new Map<string, string>(),
 	fieldValuesReady = true,
@@ -102,6 +103,7 @@ export function WorkbenchRenderer({
 			fieldValues={fieldValues}
 			onFieldChange={onFieldChange}
 			pinnedArtifacts={pinnedArtifacts}
+			layoutMode={layoutMode}
 			invalidFieldIds={invalidFieldIds}
 			invalidFieldMessages={invalidFieldMessages}
 			fieldValuesReady={fieldValuesReady}

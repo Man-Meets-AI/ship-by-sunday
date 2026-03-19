@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { apiRouteConfig, timingConfig } from "@/config/product";
 import { assertNever } from "@/features/course/lesson/lib/assert";
@@ -12,7 +13,6 @@ import {
 
 import type { WorkbenchModeProps } from "../types";
 import { WorkbenchCard } from "./workbench-card";
-import { workbenchChromeLabelClass } from "./workbench-readability";
 
 type PromptImportUiCopy = {
 	cardLabel: string;
@@ -364,20 +364,20 @@ function PromptImportCardBody({
 		<WorkbenchCard label={uiCopy.cardLabel}>
 			<div className="space-y-3">
 				<div className="space-y-1.5">
-					<p className="text-[14px] leading-[1.7] text-product-text">
+					<p className="text-[14px] leading-[1.7] text-foreground">
 						{uiCopy.summary}
 					</p>
-					<p className="text-[13px] leading-[1.7] text-product-muted">
+					<p className="text-[13px] leading-[1.7] text-muted-foreground">
 						{uiCopy.workflowHint}
 					</p>
 				</div>
 
 				{promptState.disabledReason ? (
-					<p className="text-[13px] leading-[1.7] text-product-muted">
+					<p className="text-[13px] leading-[1.7] text-muted-foreground">
 						{promptState.disabledReason}
 					</p>
 				) : (
-					<p className="text-[13px] leading-[1.7] text-product-muted">
+					<p className="text-[13px] leading-[1.7] text-muted-foreground">
 						{uiCopy.enabledNote}
 					</p>
 				)}
@@ -388,7 +388,7 @@ function PromptImportCardBody({
 							type="button"
 							onClick={toggleAssistTools}
 							variant="outline"
-							size="xs"
+							size="sm"
 						>
 							{isAssistToolsOpen
 								? "Hide AI starter"
@@ -402,7 +402,7 @@ function PromptImportCardBody({
 								onClick={copyPrompt}
 								disabled={Boolean(promptState.disabledReason)}
 								variant="secondary"
-								size="xs"
+								size="sm"
 							>
 								{copyState === "copied" ? "Copied" : "Copy prompt"}
 							</Button>
@@ -411,7 +411,7 @@ function PromptImportCardBody({
 								onClick={() => void generateWithCodex()}
 								disabled={Boolean(promptState.disabledReason) || isGenerating}
 								variant="outline"
-								size="xs"
+								size="sm"
 							>
 								{isGenerating ? "Generating..." : "Generate with Codex"}
 							</Button>
@@ -419,7 +419,7 @@ function PromptImportCardBody({
 								type="button"
 								onClick={() => togglePanel("paste")}
 								variant="outline"
-								size="xs"
+								size="sm"
 							>
 								{activePanel === "paste"
 									? "Hide paste box"
@@ -429,74 +429,78 @@ function PromptImportCardBody({
 								type="button"
 								onClick={() => togglePanel("prompt")}
 								variant="outline"
-								size="xs"
+								size="sm"
 							>
 								{activePanel === "prompt" ? "Hide prompt" : "View prompt"}
 							</Button>
 						</>
 					) : null}
 					{copyState === "error" && !promptState.disabledReason ? (
-						<p className="text-[12px] leading-[1.6] text-product-muted">
+						<p className="text-[12px] leading-[1.6] text-muted-foreground">
 							Clipboard unavailable. Copy from the prompt block below.
 						</p>
 					) : null}
 				</div>
 
 				{isAssistToolsOpen && activePanel === "prompt" ? (
-					<div className="rounded-none border border-product-border/65 bg-product-surface px-3 py-3">
-						{promptState.prompt ? (
-							<Textarea
-								readOnly
-								value={promptState.prompt}
-								rows={12}
-								className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[12px] leading-[1.68] text-product-text"
-								aria-label={`${lesson.title} prompt`}
-							/>
-						) : (
-							<p className="text-[12px] leading-[1.6] text-product-muted">
-								The prompt will appear here once the required lesson context is
-								saved.
-							</p>
-						)}
-					</div>
+					<Card className="gap-0 py-0">
+						<CardContent className="px-3 py-3">
+							{promptState.prompt ? (
+								<Textarea
+									readOnly
+									value={promptState.prompt}
+									rows={12}
+									className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[12px] leading-[1.68] text-foreground"
+									aria-label={`${lesson.title} prompt`}
+								/>
+							) : (
+								<p className="text-[12px] leading-[1.6] text-muted-foreground">
+									The prompt will appear here once the required lesson context
+									is saved.
+								</p>
+							)}
+						</CardContent>
+					</Card>
 				) : null}
 
 				{isAssistToolsOpen && activePanel === "paste" ? (
-					<div className="space-y-3 rounded-none border border-product-border/65 bg-product-surface px-4 py-4">
-						<label className="block">
-							<span className={workbenchChromeLabelClass}>
-								{uiCopy.pasteLabel}
-							</span>
-							<Textarea
-								value={pastedResponse}
-								onChange={(event) => {
-									setPastedResponse(event.target.value);
-									if (importFeedback) {
-										setImportFeedback(null);
-									}
-								}}
-								rows={8}
-								placeholder={uiCopy.pastePlaceholder}
-								className="mt-2"
-								aria-label={uiCopy.pasteLabel}
-							/>
-						</label>
+					<Card className="gap-0 py-0">
+						<CardContent className="space-y-3 px-4 py-4">
+							<label className="block">
+								<span className="font-mono text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+									{uiCopy.pasteLabel}
+								</span>
+								<Textarea
+									value={pastedResponse}
+									onChange={(event) => {
+										setPastedResponse(event.target.value);
+										if (importFeedback) {
+											setImportFeedback(null);
+										}
+									}}
+									rows={8}
+									placeholder={uiCopy.pastePlaceholder}
+									className="mt-2"
+									aria-label={uiCopy.pasteLabel}
+								/>
+							</label>
 
-						<div className="flex flex-wrap items-center gap-2">
-							<Button
-								type="button"
-								onClick={importResponse}
-								disabled={pastedResponse.trim().length === 0}
-								variant="outline"
-								size="sm"
-							>
-								{uiCopy.importButtonLabel}
-							</Button>
-							<p className="text-[12px] leading-[1.6] text-product-muted">
-								{uiCopy.importHint}
-							</p>
-						</div>
-					</div>
+							<div className="flex flex-wrap items-center gap-2">
+								<Button
+									type="button"
+									onClick={importResponse}
+									disabled={pastedResponse.trim().length === 0}
+									variant="outline"
+									size="sm"
+								>
+									{uiCopy.importButtonLabel}
+								</Button>
+								<p className="text-[12px] leading-[1.6] text-muted-foreground">
+									{uiCopy.importHint}
+								</p>
+							</div>
+						</CardContent>
+					</Card>
 				) : null}
 
 				<div aria-live="polite" className="min-h-[1.25rem]">
@@ -504,8 +508,8 @@ function PromptImportCardBody({
 						<p
 							className={`text-[12px] leading-[1.6] ${
 								importFeedback.tone === "success"
-									? "text-product-accent"
-									: "text-danger"
+									? "text-primary"
+									: "text-destructive"
 							}`}
 						>
 							{importFeedback.message}

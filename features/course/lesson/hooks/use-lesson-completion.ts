@@ -76,7 +76,7 @@ function getCompletionButtonLabel({
 	lessonReadyToComplete,
 	completionActionLabel,
 	completionPendingLabel,
-	celebrationTitle,
+	celebrationShortLabel,
 }: {
 	isCelebrating: boolean;
 	isCompleting: boolean;
@@ -85,11 +85,8 @@ function getCompletionButtonLabel({
 	lessonReadyToComplete: boolean;
 	completionActionLabel: string;
 	completionPendingLabel: string;
-	celebrationTitle: string;
+	celebrationShortLabel: string;
 }) {
-	if (isCelebrating) {
-		return celebrationTitle;
-	}
 	if (isCompleting) {
 		return completionPendingLabel;
 	}
@@ -97,6 +94,9 @@ function getCompletionButtonLabel({
 		return completionPayload?.nextLessonLabel
 			? `Continue to ${completionPayload.nextLessonLabel}`
 			: "Back to mission";
+	}
+	if (isCelebrating) {
+		return celebrationShortLabel;
 	}
 	return lessonReadyToComplete
 		? completionActionLabel
@@ -206,7 +206,7 @@ export function useLessonCompletion({
 		lessonStatus !== "completed";
 	const isCompleting = completionPhase === "submitting";
 	const isCelebrating = completionPhase === "celebrating";
-	const requiresManualContinuation = lesson.id === "1.1";
+	const requiresManualContinuation = lesson.id === "1.3";
 	const completionButtonDisabled =
 		isCompleting ||
 		(isCelebrating && !requiresManualContinuation) ||
@@ -237,6 +237,9 @@ export function useLessonCompletion({
 		stageUnlockConfig?.celebrationEyebrow ?? "System updated";
 	const celebrationTitle =
 		stageUnlockConfig?.celebrationTitle ?? "Lesson cleared";
+	const celebrationShortLabel = stageUnlockConfig
+		? "Unlocked"
+		: "Lesson complete";
 
 	const navigateToNextStep = (nextLessonId: string | null) => {
 		router.push(nextLessonId ? `/lesson/${nextLessonId}` : routeConfig.mission);
@@ -279,7 +282,7 @@ export function useLessonCompletion({
 			lessonReadyToComplete,
 			completionActionLabel,
 			completionPendingLabel,
-			celebrationTitle,
+			celebrationShortLabel,
 		}),
 		clearCompletionFeedback: () => {
 			if (serverCompletionIssues.length > 0) {

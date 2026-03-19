@@ -1,21 +1,21 @@
-import Link from "next/link";
+"use client";
 
-import { Button } from "@/components/ui/button";
-import { LessonVideoSurface } from "@/features/course/lesson/components/lesson-video-surface";
-import type { LessonResourceContent } from "@/features/course/lesson/model/contracts";
+import { Card, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 import type {
 	LessonConfig,
 	LessonContent,
 } from "@/features/course/lesson/model/manifest";
-import { LessonChromeChip } from "@/features/course/lesson/shared/lesson-chrome-chip";
-import { formatArtifactValue } from "@/features/course/lesson/workbench/shared/artifact-format";
-import {
-	workbenchChromeLabelClass,
-	workbenchPanelClass,
-} from "@/features/course/lesson/workbench/shared/workbench-readability";
 
-import { CopyPromptResourceCard } from "./copy-prompt-resource-card";
+import { getCoachPanelSections } from "./coach-panel-sections";
 import type { CoachPanelKey, PinnedArtifact } from "./types";
+
+const panelCardClass =
+	"min-w-0 gap-0 py-0 xl:h-full xl:min-h-0 xl:overflow-y-auto";
+
+const coachEyebrowClass =
+	"font-mono text-[10px] font-medium uppercase tracking-wider text-muted-foreground";
 
 export function CoachPanel({
 	lesson,
@@ -30,200 +30,62 @@ export function CoachPanel({
 	onPanelChange: (panel: CoachPanelKey) => void;
 	pinnedArtifacts: PinnedArtifact[];
 }) {
-	const examples = (coachContent?.examples ?? []).filter(
-		(example) =>
-			example.id !== "avoid-this" &&
-			example.title.trim().toLowerCase() !== "avoid this",
-	);
-	const resources = coachContent?.resources ?? [];
 	const emptyVideoState =
-		lesson.id === "1.1"
+		lesson.id === "1.3"
 			? {
 					eyebrow: "No lesson video yet",
 					title: "Use the guided path",
 					body: "This lesson is still fully usable. Lean on the inline examples, the guided prompts, and the compare-your-three recap while you draft grounded candidate problems.",
 				}
 			: undefined;
-	const sections = [
-		{
-			key: "watch" as const,
-			label: "Watch",
-			content: (
-				<LessonVideoSurface
-					coachContent={coachContent}
-					emptyState={emptyVideoState}
-				/>
-			),
-		},
-		{
-			key: "transcript" as const,
-			label: "Transcript",
-			content:
-				coachContent?.transcript?.status === "ready" &&
-				coachContent.transcript.body ? (
-					<p className="whitespace-pre-wrap text-xs font-medium leading-relaxed text-product-text">
-						{coachContent.transcript.body}
-					</p>
-				) : (
-					<p className="text-xs font-medium leading-snug text-product-muted">
-						Transcript will appear here when attached.
-					</p>
-				),
-		},
-		{
-			key: "examples" as const,
-			label: "Examples",
-			content:
-				examples.length > 0 ? (
-					<div className="space-y-3">
-						{examples.map((example) => (
-							<div
-								key={example.id}
-								className="rounded-none border border-product-border/55 bg-product-surface-strong/80 px-4 py-4"
-							>
-								<p className={workbenchChromeLabelClass}>{example.title}</p>
-								<p className="mt-2 whitespace-pre-wrap text-[13px] leading-[1.68] text-product-text">
-									{example.body}
-								</p>
-								{example.imageSrc ? (
-									<div className="mt-2 space-y-1">
-										<img
-											src={example.imageSrc}
-											alt={example.imageAlt ?? example.title}
-											className="w-full rounded-none border border-product-border/70 bg-product-bg object-contain"
-											loading="lazy"
-										/>
-										{example.imageCaption ? (
-											<p className="text-[12px] leading-[1.6] text-product-muted">
-												{example.imageCaption}
-											</p>
-										) : null}
-									</div>
-								) : null}
-							</div>
-						))}
-					</div>
-				) : pinnedArtifacts.length > 0 ? (
-					<div className="space-y-3">
-						{pinnedArtifacts.slice(0, 3).map((artifact) => (
-							<div
-								key={artifact.artifactKey}
-								className="rounded-none border border-product-border/55 bg-product-surface-strong/80 px-4 py-4"
-							>
-								<p className={workbenchChromeLabelClass}>
-									{artifact.lessonTitle}
-								</p>
-								<p className="mt-2 font-display text-[1.05rem] uppercase tracking-[0.04em] text-product-text">
-									{artifact.artifactLabel}
-								</p>
-								<div className="mt-3 space-y-2 text-[13px] leading-[1.65] text-product-muted">
-									{artifact.fields.length === 0 ? (
-										<p>No preview details attached.</p>
-									) : (
-										artifact.fields.slice(0, 2).map(([key, value]) => (
-											<div key={key}>
-												<p className={workbenchChromeLabelClass}>{key}</p>
-												<p className="mt-1 text-[14px] leading-[1.68] text-product-text">
-													{formatArtifactValue(value)}
-												</p>
-											</div>
-										))
-									)}
-								</div>
-							</div>
-						))}
-					</div>
-				) : (
-					<p className="text-[13px] leading-[1.7] text-product-muted">
-						Examples will show here when attached.
-					</p>
-				),
-		},
-		{
-			key: "resources" as const,
-			label: "Resources",
-			content:
-				resources.length > 0 ? (
-					<div className="space-y-3">
-						{resources.map((resource) =>
-							resource.kind === "copy_prompt" ? (
-								<CopyPromptResourceCard
-									key={resource.id}
-									resource={resource}
-									pinnedArtifacts={pinnedArtifacts}
-								/>
-							) : (
-								<ResourceLink key={resource.id} resource={resource} />
-							),
-						)}
-					</div>
-				) : (
-					<p className="text-[13px] leading-[1.7] text-product-muted">
-						Resources will show here when assigned.
-					</p>
-				),
-		},
-	].filter((section) =>
-		lesson.coachVideoPlacement === "workbench" ? section.key !== "watch" : true,
-	);
+	const visibleSections = getCoachPanelSections({
+		coachContent,
+		emptyVideoState,
+		hideWatch: lesson.coachVideoPlacement === "workbench",
+		pinnedArtifacts,
+	});
+
+	const firstKey = visibleSections[0]?.key;
+	const tabValue = visibleSections.some((s) => s.key === activePanel)
+		? activePanel
+		: (firstKey ?? "transcript");
 
 	return (
-		<aside
-			className={`min-w-0 xl:h-full xl:min-h-0 xl:overflow-y-auto ${workbenchPanelClass}`}
-		>
-			<div className="sticky top-0 z-10 border-b border-product-border/55 bg-product-surface/95 px-4 py-2 backdrop-blur-lg">
-				<p className={workbenchChromeLabelClass}>Coach</p>
+		<Card className={cn("flex min-w-0 flex-col", panelCardClass)}>
+			<div className="sticky top-0 z-10 border-b border-border bg-card/95 px-4 py-2 backdrop-blur">
+				<CardTitle className={coachEyebrowClass}>Coach</CardTitle>
 			</div>
-			<div>
-				{sections.map((section) => {
-					const isOpen = section.key === activePanel;
-					return (
-						<div
+			<Tabs
+				value={tabValue}
+				onValueChange={(value) => onPanelChange(value as CoachPanelKey)}
+				className="flex min-h-0 flex-1 flex-col gap-0"
+			>
+				<TabsList
+					variant="line"
+					className="h-auto w-full shrink-0 flex-wrap justify-start gap-0 rounded-none border-0 bg-transparent p-0 px-1 pt-1"
+				>
+					{visibleSections.map((section) => (
+						<TabsTrigger
 							key={section.key}
-							className={`border-b border-product-border last:border-b-0 ${
-								isOpen ? "bg-product-surface-strong/65" : ""
-							}`}
+							value={section.key}
+							className="shrink-0 rounded-md px-2.5 py-2 text-xs"
 						>
-							<Button
-								type="button"
-								onClick={() => onPanelChange(section.key)}
-								variant="ghost"
-								size="sm"
-								className="flex h-auto w-full items-center justify-between px-4 py-3 text-left normal-case tracking-normal hover:bg-product-surface-strong/50"
-							>
-								<LessonChromeChip
-									status={isOpen ? "active" : "ready"}
-									label={section.label}
-								/>
-							</Button>
-							{isOpen ? (
-								<div className="border-t border-product-border/45 px-4 py-4">
-									{section.content}
-								</div>
-							) : null}
-						</div>
-					);
-				})}
-			</div>
-		</aside>
-	);
-}
-
-function ResourceLink({
-	resource,
-}: {
-	resource: Exclude<LessonResourceContent, { kind: "copy_prompt" }>;
-}) {
-	return (
-		<Link
-			href={resource.href}
-			target={resource.kind === "external" ? "_blank" : undefined}
-			className="block rounded-none border border-product-border/55 bg-product-surface-strong/80 px-4 py-4 transition-colors hover:bg-product-surface-alt"
-		>
-			<p className={workbenchChromeLabelClass}>{resource.kind}</p>
-			<p className="mt-2 text-[14px] font-semibold leading-[1.45] text-product-text">
-				{resource.label}
-			</p>
-		</Link>
+							{section.label}
+						</TabsTrigger>
+					))}
+				</TabsList>
+				<div className="min-h-0 flex-1 overflow-y-auto">
+					{visibleSections.map((section) => (
+						<TabsContent
+							key={section.key}
+							value={section.key}
+							className="mt-0 px-4 py-4 focus-visible:ring-0"
+						>
+							{section.content}
+						</TabsContent>
+					))}
+				</div>
+			</Tabs>
+		</Card>
 	);
 }

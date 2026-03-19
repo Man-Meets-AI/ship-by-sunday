@@ -2,6 +2,7 @@ import type { ReactElement } from "react";
 import type {
 	LessonConfig,
 	LessonContent,
+	LessonLayoutMode,
 	WorkbenchField,
 	WorkbenchSection,
 } from "@/features/course/lesson/model/manifest";
@@ -19,6 +20,7 @@ export type WorkbenchRendererProps = {
 	fieldValues: Record<string, unknown>;
 	onFieldChange: (fieldId: string, value: unknown) => void;
 	pinnedArtifacts: PinnedArtifact[];
+	layoutMode: LessonLayoutMode;
 	invalidFieldIds?: Set<string>;
 	invalidFieldMessages?: Map<string, string>;
 	fieldValuesReady?: boolean;
@@ -50,4 +52,5 @@ export type FieldControlProps = {
 	onChange: (value: unknown) => void;
 	pinnedArtifacts: PinnedArtifact[];
 	showLabel?: boolean;
+	invalid?: boolean;
 };

@@ -1,0 +1,65 @@
+import { productConfig } from "@/config/product";
+import {
+	getLessonById,
+	getStudentFacingLessons,
+	lessonRegistry,
+} from "@/features/course/lesson/model";
+import { legacyLessonRedirects } from "@/features/course/lesson/utils/legacy-routes";
+import { homePageContent } from "@/features/marketing/content/home";
+
+describe("curriculum contract", () => {
+	it("keeps unique slugs and embedded content on every lesson", () => {
+		const seenSlugs = new Set<string>();
+
+		for (const lesson of lessonRegistry) {
+			expect(lesson.slug).toBeTruthy();
+			expect(lesson.content).toBeTruthy();
+			expect(seenSlugs.has(lesson.slug)).toBe(false);
+			seenSlugs.add(lesson.slug);
+		}
+	});
+
+	it("keeps product config and public marketing content aligned", () => {
+		expect(productConfig.name).toBeTruthy();
+		expect(productConfig.courseSlug).toMatch(/^[a-z0-9-]+$/);
+		expect(homePageContent.hero.body).toContain(productConfig.name);
+		expect(homePageContent.pricingSection.priceDisplay).toBe(
+			productConfig.priceDisplay,
+		);
+		expect(homePageContent.footerWordmark).toBe(productConfig.name);
+	});
+
+	it("keeps redirects pointed at supported destinations in the live curriculum", () => {
+		for (const [lessonId, destination] of Object.entries(
+			legacyLessonRedirects,
+		)) {
+			expect(lessonId).toMatch(/^\d+\.\d+$/);
+			expect(destination.startsWith("/lesson/")).toBe(true);
+			expect(getLessonById(destination.replace("/lesson/", ""))).toBeTruthy();
+		}
+	});
+
+	it("keeps the restored opening curriculum interactive before watch-first lessons resume", () => {
+		const studentLessons = getStudentFacingLessons();
+		const openingLessonIds = ["1.1", "1.2", "1.3", "1.4", "1.5"];
+		const openingLessons = studentLessons.filter((lesson) =>
+			openingLessonIds.includes(lesson.id),
+		);
+		const watchLessons = studentLessons.filter(
+			(lesson) => !openingLessonIds.includes(lesson.id),
+		);
+
+		expect(openingLessons.every((lesson) => lesson.shell === "split")).toBe(
+			true,
+		);
+		expect(
+			openingLessons.every(
+				(lesson) => lesson.coachVideoPlacement === "workbench",
+			),
+		).toBe(true);
+		expect(watchLessons.every((lesson) => lesson.shell === "watch")).toBe(true);
+		expect(
+			watchLessons.every((lesson) => lesson.workbench === "external_workspace"),
+		).toBe(true);
+	});
+});

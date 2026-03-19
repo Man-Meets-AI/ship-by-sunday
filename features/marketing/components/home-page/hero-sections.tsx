@@ -1,18 +1,10 @@
-import Link from "next/link";
-
-import { routeConfig } from "@/config/product";
+import { Button } from "@/components/ui/button";
 import { CheckoutButton } from "@/features/checkout/components/checkout-button";
 import type { HomePageContent } from "@/features/marketing/content/home";
-import { ProductBrand } from "@/shared/branding/product-brand";
-import {
-	publicDividerGridClassName,
-	publicNavActionClassName,
-	publicPrimaryActionClassName,
-	publicSecondaryActionClassName,
-	PublicSurfaceCard,
-} from "@/shared/ui/public-surface";
 
-import { SectionFrame, SectionLabel } from "./section-shell";
+import { HomeHeroHeadline } from "./home-hero-headline";
+import { HomeHeroTopBar } from "./home-hero-top-bar";
+import { SectionLabel, SectionStack } from "./section-shell";
 
 type Hero = HomePageContent["hero"];
 type Outcomes = HomePageContent["outcomesSection"];
@@ -20,54 +12,29 @@ type WhyBuildersGetStuck = HomePageContent["whyBuildersGetStuck"];
 
 export function HomeHeroSection({ hero }: { hero: Hero }) {
 	return (
-		<PublicSurfaceCard className="px-4 py-4 sm:px-6 sm:py-5">
-			<div className="mx-auto flex max-w-5xl flex-col items-center text-center">
-				<div className="mb-4 flex w-full justify-end gap-2">
-					<Link href={routeConfig.docs} className={publicNavActionClassName}>
-						{hero.docsLabel}
-					</Link>
-					<Link href={routeConfig.signIn} className={publicNavActionClassName}>
-						{hero.loginLabel}
-					</Link>
-				</div>
-				<div className="mb-5 flex w-full items-center justify-between gap-4 text-[11px] font-bold uppercase tracking-[0.26em] text-product-muted sm:text-xs">
-					<span>{hero.topBarStart}</span>
-					<ProductBrand
-						href="/"
-						priority
-						showLabel={false}
-						imageSize={44}
-						className="justify-center"
-						imageClassName="rounded-xl"
-					/>
-					<span>{hero.topBarEnd}</span>
-				</div>
-				<h1 className="font-display text-[3rem] uppercase leading-[0.84] tracking-[-0.04em] text-product-text sm:text-[7rem] lg:text-[8.4rem]">
-					{hero.headlineLead}{" "}
-					<span className="sbs-hero-outline block text-product-text sm:inline sm:pl-4 sm:text-product-bg">
-						{hero.headlineAccent}
-					</span>
-				</h1>
-				<p className="mt-5 max-w-3xl text-pretty text-base font-medium leading-relaxed text-product-muted sm:text-xl">
-					{hero.body}
-				</p>
-				<div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
+		<div className="flex flex-col gap-6 rounded-2xl bg-muted/25 px-6 py-8 sm:gap-8 sm:px-8 sm:py-10">
+			<HomeHeroTopBar hero={hero} />
+			<div className="flex flex-col items-center gap-6 text-center sm:gap-8">
+				<HomeHeroHeadline hero={hero} />
+				<div className="flex w-full max-w-md flex-col gap-3 sm:max-w-none sm:flex-row sm:justify-center">
 					<CheckoutButton
 						label={hero.primaryCta}
-						className={`${publicPrimaryActionClassName} min-w-full sm:min-w-72 sm:px-8`}
+						className="h-11 min-w-full px-8 sm:min-w-72"
 					/>
-					<a
-						href="#system"
-						className={`${publicSecondaryActionClassName} min-w-full sm:min-w-72 sm:px-8`}
+					<Button
+						variant="secondary"
+						size="lg"
+						className="h-11 w-full border border-foreground/20 bg-secondary hover:bg-muted/80 sm:w-72"
+						asChild
 					>
-						{hero.secondaryCta}
-					</a>
+						<a href="#system">{hero.secondaryCta}</a>
+					</Button>
 				</div>
-				<p className="mt-5 text-sm font-semibold text-product-muted sm:text-base">
+				<p className="text-sm font-medium text-muted-foreground sm:text-base">
 					{hero.eyebrow}
 				</p>
 			</div>
-		</PublicSurfaceCard>
+		</div>
 	);
 }
 
@@ -77,31 +44,32 @@ export function OutcomesSection({
 	outcomesSection: Outcomes;
 }) {
 	return (
-		<SectionFrame className="grid gap-4 lg:grid-cols-[2fr_1fr]">
-			<div>
+		<SectionStack
+			withTopRule
+			className="grid gap-6 lg:grid-cols-[2fr_1fr] lg:gap-8"
+		>
+			<div className="space-y-3">
 				<SectionLabel>{outcomesSection.label}</SectionLabel>
-				<h2 className="mt-3 font-display text-[2.7rem] uppercase leading-[0.84] tracking-[-0.04em] sm:text-[5rem]">
+				<h2 className="font-marketing-display text-balance text-3xl uppercase tracking-marketing-section sm:text-5xl">
 					{outcomesSection.title}
 				</h2>
 			</div>
 			<div className="flex items-end">
-				<p className="max-w-sm text-sm font-semibold leading-relaxed text-product-muted sm:text-base">
+				<p className="max-w-sm text-sm leading-relaxed text-muted-foreground sm:text-base">
 					{outcomesSection.intro}
 				</p>
 			</div>
-			<div
-				className={`${publicDividerGridClassName} lg:col-span-2 lg:grid-cols-4`}
-			>
+			<div className="grid gap-4 sm:grid-cols-2 lg:col-span-2 lg:grid-cols-4">
 				{outcomesSection.items.map((item) => (
 					<div
 						key={item}
-						className="flex min-h-40 items-end bg-product-surface p-5 font-sans text-lg font-semibold uppercase leading-tight tracking-[0.02em] text-product-text"
+						className="flex min-h-40 flex-col justify-end rounded-lg bg-muted/15 px-4 py-5"
 					>
-						{item}
+						<p className="text-lg font-medium leading-tight">{item}</p>
 					</div>
 				))}
 			</div>
-		</SectionFrame>
+		</SectionStack>
 	);
 }
 
@@ -111,32 +79,31 @@ export function WhyBuildersGetStuckSection({
 	whyBuildersGetStuck: WhyBuildersGetStuck;
 }) {
 	return (
-		<SectionFrame className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-			<div>
+		<SectionStack className="grid gap-6 lg:grid-cols-[1.4fr_1fr] lg:gap-8">
+			<div className="space-y-3">
 				<SectionLabel>{whyBuildersGetStuck.label}</SectionLabel>
-				<h2 className="mt-3 max-w-4xl font-display text-[2.7rem] uppercase leading-[0.84] tracking-[-0.04em] sm:text-[5rem]">
+				<h2 className="font-marketing-display max-w-4xl text-balance text-3xl uppercase tracking-marketing-section sm:text-5xl">
 					{whyBuildersGetStuck.title}
 				</h2>
 			</div>
 			<div className="flex items-end">
-				<p className="max-w-md text-sm font-semibold leading-relaxed text-product-muted sm:text-base">
+				<p className="max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base">
 					{whyBuildersGetStuck.intro}
 				</p>
 			</div>
-			<div
-				className={`${publicDividerGridClassName} lg:col-span-2 lg:grid-cols-4`}
-			>
+			<div className="grid gap-4 sm:grid-cols-2 lg:col-span-2 lg:grid-cols-4">
 				{whyBuildersGetStuck.cards.map((card) => (
-					<div key={card.title} className="bg-product-surface p-5">
-						<p className="font-display text-[1.7rem] uppercase leading-[0.9] tracking-[-0.03em] sm:text-[2.2rem]">
-							{card.title}
-						</p>
-						<p className="mt-4 text-sm font-medium leading-relaxed text-product-muted sm:text-base">
+					<div
+						key={card.title}
+						className="flex flex-col gap-4 rounded-lg bg-muted/15 px-4 py-5"
+					>
+						<p className="text-2xl font-medium sm:text-[1.9rem]">{card.title}</p>
+						<p className="text-base leading-relaxed text-muted-foreground">
 							{card.description}
 						</p>
 					</div>
 				))}
 			</div>
-		</SectionFrame>
+		</SectionStack>
 	);
 }

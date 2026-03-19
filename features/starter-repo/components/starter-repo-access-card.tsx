@@ -4,6 +4,18 @@ import { useConvexAuth, useQuery } from "convex/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+	Card,
+	CardAction,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { routeConfig, starterRepoConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import {
@@ -26,11 +38,16 @@ type StarterRepoAccessRecord = {
 };
 
 function StatusBadge({ status }: { status: StarterRepoAccessStatus }) {
-	return (
-		<span className="inline-flex rounded-none border border-product-border bg-product-surface px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-product-muted">
-			{getStarterRepoStatusLabel(status)}
-		</span>
-	);
+	const variant =
+		status === "accepted"
+			? "secondary"
+			: status === "failed"
+				? "destructive"
+				: status === "requested" || status === "invited" || status === "loading"
+					? "outline"
+					: "outline";
+
+	return <Badge variant={variant}>{getStarterRepoStatusLabel(status)}</Badge>;
 }
 
 function formatUsername(record: StarterRepoAccessRecord | null | undefined) {
@@ -75,76 +92,83 @@ export function StarterRepoAccessCard({
 		(status === "requested" && isEditingRequested);
 
 	return (
-		<section className="rounded-none border border-product-border bg-product-surface/78 p-5 shadow-panel backdrop-blur-xl">
-			<div className="flex flex-wrap items-start justify-between gap-3">
-				<div className="max-w-3xl">
-					<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-product-muted">
-						Starter repo access
-					</p>
-					<h2 className="mt-3 font-display text-2xl uppercase leading-none tracking-[0.08em] text-product-text">
+		<Card>
+			<CardHeader>
+				<CardTitle className="text-balance">
+					<span className="mb-1 block text-sm font-normal text-muted-foreground">
+						Starter repository
+					</span>
+					<span className="block leading-snug">
 						{getStarterRepoCardTitle(surface, status)}
-					</h2>
-					<p className="mt-3 text-sm leading-relaxed text-product-muted">
-						{getStarterRepoCardBody(surface, status)}
+					</span>
+				</CardTitle>
+				<CardDescription className="text-pretty">
+					{getStarterRepoCardBody(surface, status)}
+				</CardDescription>
+				<CardAction>
+					<StatusBadge status={status} />
+				</CardAction>
+			</CardHeader>
+			<Separator />
+			<CardContent className="space-y-4 pt-6">
+				<div className="space-y-1">
+					<p className="text-sm font-medium text-foreground">
+						{starterRepoConfig.owner}/{starterRepoConfig.repo}
 					</p>
+					{usernameLabel ? (
+						<p className="text-sm text-muted-foreground">
+							GitHub <span className="text-foreground">{usernameLabel}</span>
+						</p>
+					) : null}
 				</div>
-				<StatusBadge status={status} />
-			</div>
-			<div className="mt-4 border border-product-border/60 bg-product-surface-strong/72 p-4">
-				<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
-					Private repo
-				</p>
-				<p className="mt-2 text-sm text-product-text">
-					{starterRepoConfig.owner}/{starterRepoConfig.repo}
-				</p>
-				{usernameLabel ? (
-					<p className="mt-2 text-xs leading-relaxed text-product-muted">
-						Saved GitHub username:{" "}
-						<span className="text-product-text">{usernameLabel}</span>
-					</p>
-				) : null}
-				{status === "failed" && record?.lastError ? (
-					<p className="mt-2 text-xs leading-relaxed text-danger">
-						Last error: {record.lastError}
-					</p>
-				) : null}
-				{showForm ? (
-					<StarterRepoAccessForm
-						initialUsername={record?.githubUsername ?? ""}
-						onSubmitted={() => setIsEditingRequested(false)}
-					/>
-				) : (
-					<div className="mt-4 flex flex-wrap gap-3">
-						{status === "requested" ? (
-							<button
-								type="button"
-								onClick={() => setIsEditingRequested(true)}
-								className="inline-flex rounded-none border border-product-border bg-product-surface px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:bg-product-surface-alt"
-							>
-								Edit username
-							</button>
-						) : null}
-						{status === "invited" || status === "accepted" ? (
-							<a
-								href={starterRepoConfig.url}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="inline-flex rounded-none border border-product-accent bg-product-chip px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-product-accent transition-colors hover:bg-product-accent hover:text-product-bg"
-							>
-								Open starter repo
-							</a>
-						) : null}
-						{surface === "mission" ? (
-							<Link
-								href={routeConfig.settings}
-								className="inline-flex rounded-none border border-product-border bg-product-surface px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-product-text transition-colors hover:bg-product-surface-alt"
-							>
-								Open settings
-							</Link>
-						) : null}
-					</div>
-				)}
-			</div>
-		</section>
+				<Separator />
+				<div className="space-y-4">
+					{status === "failed" && record?.lastError ? (
+						<Alert variant="destructive">
+							<AlertTitle>Provisioning failed</AlertTitle>
+							<AlertDescription>
+								Last error: {record.lastError}
+							</AlertDescription>
+						</Alert>
+					) : null}
+					{showForm ? (
+						<StarterRepoAccessForm
+							initialUsername={record?.githubUsername ?? ""}
+							onSubmitted={() => setIsEditingRequested(false)}
+							surface={surface}
+						/>
+					) : (
+						<div className="flex flex-wrap gap-3">
+							{status === "requested" ? (
+								<Button
+									type="button"
+									onClick={() => setIsEditingRequested(true)}
+									variant="outline"
+									size="sm"
+								>
+									Edit username
+								</Button>
+							) : null}
+							{status === "invited" || status === "accepted" ? (
+								<Button asChild variant="secondary" size="sm">
+									<a
+										href={starterRepoConfig.url}
+										target="_blank"
+										rel="noopener noreferrer"
+									>
+										Open starter repo
+									</a>
+								</Button>
+							) : null}
+							{surface === "mission" ? (
+								<Button asChild variant="outline" size="sm">
+									<Link href={routeConfig.settings}>Open settings</Link>
+								</Button>
+							) : null}
+						</div>
+					)}
+				</div>
+			</CardContent>
+		</Card>
 	);
 }

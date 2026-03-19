@@ -33,8 +33,8 @@ vi.mock("convex/react", () => ({
 	useQuery: (query: unknown) => useQueryMock(query),
 }));
 
-vi.mock("@/features/course/shared/components/product-shell", () => ({
-	ProductShell: ({
+vi.mock("@/features/course/shared/components/app-shell", () => ({
+	AppShell: ({
 		children,
 		title,
 		subtitle,

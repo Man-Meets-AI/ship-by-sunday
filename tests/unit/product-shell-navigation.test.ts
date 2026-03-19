@@ -1,8 +1,8 @@
-import { getProductShellBlockNavigationTarget } from "@/features/course/shared/utils/product-shell-navigation";
+import { getAppShellBlockNavigationTarget } from "@/features/course/shared/utils/app-shell-navigation";
 
 describe("product shell block navigation", () => {
 	it("prefers the current or next available lesson inside an unlocked block", () => {
-		const target = getProductShellBlockNavigationTarget({
+		const target = getAppShellBlockNavigationTarget({
 			id: "DESIGN",
 			lessons: [
 				{
@@ -29,7 +29,7 @@ describe("product shell block navigation", () => {
 	});
 
 	it("falls back to the first unlocked lesson for completed blocks", () => {
-		const target = getProductShellBlockNavigationTarget({
+		const target = getAppShellBlockNavigationTarget({
 			id: "CEO",
 			lessons: [
 				{
@@ -52,7 +52,7 @@ describe("product shell block navigation", () => {
 	});
 
 	it("returns null for fully locked blocks", () => {
-		const target = getProductShellBlockNavigationTarget({
+		const target = getAppShellBlockNavigationTarget({
 			id: "BUILD",
 			lessons: [
 				{

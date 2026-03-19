@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 import { assertNever } from "@/features/course/lesson/lib/assert";
-import { ProductShell } from "@/features/course/shared/components/product-shell";
+import { AppShell } from "@/features/course/shared/components/app-shell";
 import type { CheckoutSessionState } from "@/features/checkout/server/checkout-session";
 
 type CheckoutProgressState = "complete" | "active" | "pending";
@@ -58,26 +58,26 @@ function CheckoutProgress({
 				const isComplete = step.state === "complete";
 				const isActive = step.state === "active";
 				const stepClassName = isActive
-					? "border-product-accent/60 bg-product-accent/8"
+					? "border-primary/50 bg-primary/5"
 					: isComplete
-						? "border-product-border/70 bg-product-surface"
-						: "border-product-border/40 bg-product-surface-strong/60";
+						? "border-border bg-card"
+						: "border-border bg-muted/30";
 				const dotClassName = isComplete
-					? "bg-product-text"
+					? "bg-foreground"
 					: isActive
-						? "bg-product-accent/80 motion-safe:animate-pulse"
-						: "bg-product-border/35";
+						? "bg-primary motion-safe:animate-pulse"
+						: "bg-muted-foreground/50";
 				const detailClassName = isActive
-					? "text-product-text"
-					: "text-product-muted";
+					? "text-foreground"
+					: "text-muted-foreground";
 
 				return (
 					<div
 						key={step.label}
-						className={`border px-3 py-3 transition-colors duration-200 ease-out motion-reduce:transition-none ${stepClassName}`}
+						className={`rounded-lg border px-3 py-3 shadow-sm transition-colors duration-200 ease-out motion-reduce:transition-none ${stepClassName}`}
 					>
 						<div className="flex items-center justify-between gap-2">
-							<p className="font-mono text-[9px] uppercase tracking-[0.16em] text-product-text">
+							<p className="text-xs font-medium uppercase tracking-wide text-foreground">
 								{step.label}
 							</p>
 							<span
@@ -411,20 +411,16 @@ export function CheckoutSuccessView({
 	}, [checkoutSessionState.kind, isAccessReady]);
 
 	return (
-		<ProductShell
-			title={viewModel.shellTitle}
-			subtitle={viewModel.shellSubtitle}
-		>
-			<section className="relative mx-auto w-full max-w-6xl overflow-hidden border border-product-border/70 bg-product-surface/80 p-5 shadow-panel backdrop-blur-xl sm:p-7">
-				<div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-product-accent/10 to-transparent" />
-				<div className="relative grid gap-7 lg:grid-cols-[minmax(0,1fr)_17rem]">
+		<AppShell title={viewModel.shellTitle} subtitle={viewModel.shellSubtitle}>
+			<section className="mx-auto w-full max-w-6xl rounded-xl border bg-card p-6 shadow-sm sm:p-8">
+				<div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_17rem]">
 					<div>
-						<p className="font-mono text-[11px] uppercase tracking-[0.24em] text-product-muted">
+						<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
 							Checkout status
 						</p>
 						<div className="mt-4 flex flex-wrap items-center gap-2">
 							<div
-								className="inline-flex items-center gap-2 border border-product-border bg-product-surface-strong/80 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted"
+								className="inline-flex items-center gap-2 rounded-full border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground"
 								role="status"
 								aria-live="polite"
 								aria-atomic="true"
@@ -432,41 +428,36 @@ export function CheckoutSuccessView({
 								<span
 									className={`inline-flex size-2.5 rounded-full ${
 										canAutoRedirect
-											? "bg-product-text"
-											: "bg-product-accent/80 motion-safe:animate-pulse"
+											? "bg-foreground"
+											: "bg-primary motion-safe:animate-pulse"
 									}`}
 									aria-hidden="true"
 								/>
 								{viewModel.statusLabel}
 							</div>
-							<span className="border border-product-border/45 bg-product-surface px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-product-muted">
+							<span className="rounded-full border bg-background px-2 py-1 text-xs text-muted-foreground">
 								{canAutoRedirect ? "Redirect armed" : "Polling access"}
 							</span>
-							<span className="border border-product-border/45 bg-product-surface px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-product-muted">
+							<span className="rounded-full border bg-background px-2 py-1 text-xs text-muted-foreground">
 								Manual recovery available
 							</span>
 						</div>
-						<h1 className="mt-4 max-w-3xl text-balance font-display text-3xl uppercase leading-none tracking-[0.08em] text-product-text sm:text-4xl">
+						<h1 className="mt-4 max-w-3xl text-balance text-3xl font-semibold text-foreground sm:text-4xl">
 							{viewModel.heading}
 						</h1>
-						<p className="mt-4 max-w-2xl text-sm leading-relaxed text-product-muted">
+						<p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
 							{viewModel.body}
 						</p>
 						<CheckoutProgress steps={viewModel.progressSteps} />
-						<div className="mt-7 border border-product-border/55 bg-product-surface-strong/72 p-4">
-							<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
+						<div className="mt-7 rounded-lg border bg-muted/30 p-4 shadow-sm">
+							<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
 								Next step
 							</p>
-							<p className="mt-3 max-w-2xl text-sm leading-relaxed text-product-text">
+							<p className="mt-3 max-w-2xl text-sm leading-relaxed text-foreground">
 								{viewModel.primaryActionBody}
 							</p>
 							<div className="mt-4 flex flex-wrap gap-2.5">
-								<Button
-									asChild
-									variant="default"
-									size="default"
-									className="min-w-[12rem] justify-center"
-								>
+								<Button asChild className="min-w-[12rem] justify-center">
 									<Link href={viewModel.primaryActionHref}>
 										{viewModel.primaryActionLabel}
 									</Link>
@@ -474,7 +465,6 @@ export function CheckoutSuccessView({
 								<Button
 									asChild
 									variant="outline"
-									size="default"
 									className="min-w-[11rem] justify-center"
 								>
 									<Link href={routeConfig.accessRequired}>Check access</Link>
@@ -482,32 +472,31 @@ export function CheckoutSuccessView({
 								<Button
 									asChild
 									variant="outline"
-									size="default"
 									className="min-w-[11rem] justify-center"
 								>
 									<Link href={routeConfig.home}>Go home</Link>
 								</Button>
 							</div>
-							<p className="mt-3 text-[11px] leading-relaxed text-product-muted">
+							<p className="mt-3 text-xs leading-relaxed text-muted-foreground">
 								{viewModel.secondaryActionBody}
 							</p>
 						</div>
 					</div>
-					<aside className="h-fit border border-product-border/55 bg-product-surface-strong/72 p-4">
-						<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
+					<aside className="h-fit rounded-lg border bg-muted/30 p-4 shadow-sm">
+						<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
 							{viewModel.helpTitle}
 						</p>
-						<p className="mt-3 text-sm leading-relaxed text-product-text">
+						<p className="mt-3 text-sm leading-relaxed text-foreground">
 							{viewModel.helpLeadCopy}
 						</p>
 						<ul className="mt-4 space-y-2.5">
 							{viewModel.helpItems.map((item) => (
 								<li key={item} className="flex items-start gap-2">
 									<span
-										className="mt-1 inline-flex size-1.5 shrink-0 rounded-full bg-product-accent/80"
+										className="mt-1 inline-flex size-1.5 shrink-0 rounded-full bg-primary"
 										aria-hidden="true"
 									/>
-									<span className="text-xs leading-relaxed text-product-muted">
+									<span className="text-xs leading-relaxed text-muted-foreground">
 										{item}
 									</span>
 								</li>
@@ -516,6 +505,6 @@ export function CheckoutSuccessView({
 					</aside>
 				</div>
 			</section>
-		</ProductShell>
+		</AppShell>
 	);
 }

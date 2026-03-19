@@ -3,13 +3,9 @@ import type {
 	LessonContent,
 } from "@/features/course/lesson/model/manifest";
 
-import {
-	workbenchIntroCopyClass,
-	workbenchMetaRowClass,
-	workbenchTitleClass,
-} from "./workbench-readability";
+import { Badge } from "@/components/ui/badge";
 
-function renderLessonTitle(title: string) {
+export function renderLessonTitle(title: string) {
 	const protectedPhrase = "Ship by Sunday";
 	const phraseStart = title.indexOf(protectedPhrase);
 
@@ -37,22 +33,26 @@ export function WorkbenchHeader({
 	lessonContent: LessonContent;
 }) {
 	return (
-		<div className="space-y-4">
-			<div className={workbenchMetaRowClass}>
-				<span className="border border-product-border/55 bg-product-surface-strong/70 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em]">
+		<div className="space-y-3">
+			<div className="flex flex-wrap items-center gap-2 text-muted-foreground">
+				<Badge variant="secondary" className="text-xs font-medium">
 					{lesson.id}
-				</span>
-				<span className="border border-product-border/55 bg-product-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em]">
+				</Badge>
+				<Badge variant="outline" className="text-xs font-medium">
 					{lesson.artifact.label}
-				</span>
+				</Badge>
 				{lessonContent.lessonMeta.runtimeLabel ? (
-					<span className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
+					<span className="text-xs font-medium text-muted-foreground">
 						{lessonContent.lessonMeta.runtimeLabel}
 					</span>
 				) : null}
 			</div>
-			<h1 className={workbenchTitleClass}>{renderLessonTitle(lesson.title)}</h1>
-			<p className={workbenchIntroCopyClass}>{lessonContent.intro}</p>
+			<h1 className="text-balance text-3xl font-semibold text-foreground sm:text-4xl">
+				{renderLessonTitle(lesson.title)}
+			</h1>
+			<p className="max-w-prose pt-0.5 text-sm leading-relaxed text-muted-foreground sm:text-base">
+				{lessonContent.intro}
+			</p>
 		</div>
 	);
 }

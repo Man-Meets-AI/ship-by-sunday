@@ -4,7 +4,9 @@ import { useMutation } from "convex/react";
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { api } from "@/convex/_generated/api";
 import type {
 	ReferenceGalleryItem,
@@ -15,9 +17,7 @@ import {
 	getReferenceGalleryCount,
 	isReferenceGalleryValue,
 } from "@/features/course/lesson/model/reference-gallery";
-import { LayoutGrid } from "@/shared/ui/layout-grid";
-
-import { fieldLabelClass } from "./field-styles";
+import { LayoutGrid } from "./layout-grid";
 
 type UploadState =
 	| { status: "idle" }
@@ -225,14 +225,14 @@ export function ReferenceGalleryFieldControl({
 				>
 					{isUploading ? "Uploading..." : "Browse images"}
 				</Button>
-				<div className="flex flex-wrap gap-1.5 text-[10px] font-mono uppercase tracking-[0.16em] text-product-muted">
-					<span className="border border-product-border/70 bg-product-surface/70 px-2 py-1">
+				<div className="flex flex-wrap gap-1.5 text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+					<span className="rounded-full border border-border/70 bg-muted/40 px-2.5 py-1">
 						Drag
 					</span>
-					<span className="border border-product-border/70 bg-product-surface/70 px-2 py-1">
+					<span className="rounded-full border border-border/70 bg-muted/40 px-2.5 py-1">
 						Paste
 					</span>
-					<span className="border border-product-border/70 bg-product-surface/70 px-2 py-1">
+					<span className="rounded-full border border-border/70 bg-muted/40 px-2.5 py-1">
 						Upload
 					</span>
 				</div>
@@ -263,9 +263,9 @@ export function ReferenceGalleryFieldControl({
 		<div className="space-y-3">
 			<div>
 				{showLabel ? (
-					<span className={fieldLabelClass}>{field.label}</span>
+					<Label className="text-sm font-medium">{field.label}</Label>
 				) : null}
-				<p className="mt-1 max-w-2xl text-balance text-xs font-medium leading-snug text-product-muted">
+				<p className="mt-1 max-w-2xl text-balance text-xs font-medium leading-snug text-muted-foreground">
 					Save at least {minItems} visual references you want to borrow from.
 					Aim for 5-10 if you need more range.
 				</p>
@@ -327,32 +327,32 @@ export function ReferenceGalleryFieldControl({
 						void addImageUrl(pastedText);
 					}
 				}}
-				className={`border border-dashed px-4 py-4 outline-hidden transition-[border-color,background-color,box-shadow] ${
+				className={`rounded-xl border border-dashed px-4 py-4 outline-hidden transition-[border-color,background-color] ${
 					savedCount === 0 ? "min-h-[22rem]" : ""
 				} ${
 					dropActive || pasteArmed
-						? "border-product-accent bg-product-surface shadow-[0_0_0_1px_rgba(var(--product-accent),0.18),0_8px_24px_rgba(15,23,42,0.08)]"
-						: "border-product-border/80 bg-product-surface-strong/65 shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_8px_24px_rgba(15,23,42,0.05)]"
+						? "border-primary/40 bg-muted/30"
+						: "border-border/80 bg-card"
 				}`}
 			>
 				<div className="flex h-full flex-col justify-between gap-4">
 					<div className="flex flex-wrap items-start justify-between gap-3">
 						<div className="space-y-1">
-							<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
+							<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
 								Reference capture
 							</p>
-							<p className="text-sm font-medium tabular-nums text-product-text">
+							<p className="text-sm font-medium tabular-nums text-foreground">
 								{savedCount === 0
 									? "Drop references here or click into the zone and paste."
 									: `${savedCount} saved of ${minItems} minimum references.`}
 							</p>
-							<p className="max-w-2xl text-balance text-xs font-medium leading-snug text-product-muted">
+							<p className="max-w-2xl text-balance text-xs font-medium leading-snug text-muted-foreground">
 								Use direct image files or direct image URLs only. Keep site
 								discovery in Resources.
 							</p>
 						</div>
 						{savedCount > 0 ? (
-							<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
+							<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
 								{pasteArmed ? "Paste ready" : "Click zone to arm paste"}
 							</p>
 						) : null}
@@ -360,29 +360,33 @@ export function ReferenceGalleryFieldControl({
 
 					{savedCount === 0 ? (
 						<div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
-							<div className="flex min-h-[13rem] items-center justify-center border border-product-border/60 bg-product-surface/70 px-6 text-center shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_8px_22px_rgba(15,23,42,0.04)]">
-								<div className="space-y-2">
-									<p className="font-display text-3xl uppercase tracking-[0.04em] text-balance text-product-text">
-										Build your visual direction first
+							<Card className="gap-0 border-border/60 py-0 ring-0">
+								<CardContent className="flex min-h-[13rem] flex-col items-center justify-center px-6 py-8 text-center">
+									<div className="space-y-2">
+										<p className="text-balance text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+											Build your visual direction first
+										</p>
+										<p className="mx-auto max-w-xl text-balance text-sm font-medium leading-relaxed text-muted-foreground">
+											Collect screenshots that match the flow, hierarchy, and
+											vibe you want before you open Figma for real work.
+										</p>
+									</div>
+								</CardContent>
+							</Card>
+							<Card className="gap-0 border-border/60 py-0 ring-0">
+								<CardContent className="space-y-3 p-3">
+									<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+										Add references
 									</p>
-									<p className="mx-auto max-w-xl text-balance text-sm font-medium leading-relaxed text-product-muted">
-										Collect screenshots that match the flow, hierarchy, and vibe
-										you want before you open Figma for real work.
-									</p>
-								</div>
-							</div>
-							<div className="space-y-3 border border-product-border/60 bg-product-surface/70 p-3 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_8px_22px_rgba(15,23,42,0.04)]">
-								<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
-									Add references
-								</p>
-								{addControls}
-							</div>
+									{addControls}
+								</CardContent>
+							</Card>
 						</div>
 					) : (
 						<div className="space-y-4">
-							<div className="border border-product-border/60 bg-product-surface/75 p-3 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_8px_22px_rgba(15,23,42,0.04)]">
-								{addControls}
-							</div>
+							<Card className="gap-0 border-border/60 py-0 ring-0">
+								<CardContent className="p-3">{addControls}</CardContent>
+							</Card>
 							<LayoutGrid
 								items={galleryValue.items
 									.filter(
@@ -405,10 +409,12 @@ export function ReferenceGalleryFieldControl({
 			</div>
 
 			{uploadState.status === "error" ? (
-				<p className="text-sm font-medium text-danger">{uploadState.message}</p>
+				<p className="text-sm font-medium text-destructive">
+					{uploadState.message}
+				</p>
 			) : null}
 			{field.helpText ? (
-				<p className="text-xs font-medium leading-snug text-product-muted">
+				<p className="text-xs font-medium leading-snug text-muted-foreground">
 					{field.helpText}
 				</p>
 			) : null}

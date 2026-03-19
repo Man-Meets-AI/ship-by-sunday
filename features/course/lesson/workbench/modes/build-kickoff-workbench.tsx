@@ -9,6 +9,7 @@ import {
 	getStarterRepoTemplateLockReason,
 	type StarterRepoAccessStatus,
 } from "@/features/starter-repo/lib/starter-repo-access-copy";
+import { Card } from "@/components/ui/card";
 import { FieldList } from "../fields/field-list";
 import { ArtifactContext } from "../shared/artifact-context";
 import { WorkbenchContainer } from "../shared/workbench-container";
@@ -73,14 +74,16 @@ export function BuildKickoffWorkbench({
 			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
 			<BuildKickoffProgressCard items={flow.progressItems} />
 			{pinnedArtifacts.length > 0 ? (
-				<details className="rounded-none border border-product-border/70 bg-product-surface-strong/70">
-					<summary className="cursor-pointer px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-product-muted">
-						Review your context
-					</summary>
-					<div className="border-t border-product-border/60 px-3 py-3">
-						<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
-					</div>
-				</details>
+				<Card className="gap-0 overflow-hidden p-0 py-0">
+					<details className="w-full">
+						<summary className="cursor-pointer list-none px-4 py-3 font-mono text-[10px] font-medium uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground [&::-webkit-details-marker]:hidden">
+							Review your context
+						</summary>
+						<div className="border-t border-border/60 px-4 py-4">
+							<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
+						</div>
+					</details>
+				</Card>
 			) : null}
 			<BuildKickoffStepCard
 				step={1}

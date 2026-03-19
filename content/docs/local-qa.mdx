@@ -15,7 +15,8 @@ Use these for normal implementation work:
 pnpm run lint
 pnpm run format:check
 pnpm run test:unit
-pnpm run test:smoke
+pnpm run test:contracts
+pnpm run test:integration
 pnpm run build
 ```
 
@@ -58,10 +59,16 @@ Use this only in a safe local test environment.
 
 ## Recommended flow checks
 
+For the deterministic browser lane that runs in PR CI:
+
+```bash
+pnpm run test:browser-smoke
+```
+
 ### Signed-out protected-route smoke
 
 1. Visit `/mission` or `/settings` while signed out.
-2. Confirm redirect to sign-in.
+2. Confirm redirect into the access recovery surface.
 
 ### Non-entitled access flow
 

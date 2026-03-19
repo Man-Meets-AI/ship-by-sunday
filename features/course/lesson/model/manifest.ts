@@ -65,7 +65,7 @@ export function getLesson(id: string): LessonConfig | undefined {
 }
 
 export function getLessonHref(id: string): string {
-	return id === "0.0" ? routeConfig.mission : `/lesson/${id}`;
+	return id === "1.0" ? routeConfig.mission : `/lesson/${id}`;
 }
 
 const DEFAULT_LESSON_LAYOUT_MODES = [

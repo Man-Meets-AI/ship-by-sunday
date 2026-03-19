@@ -5,8 +5,10 @@ import { StatusRail } from "../shared/status-rail";
 import { WorkbenchCard } from "../shared/workbench-card";
 import { WorkbenchContainer } from "../shared/workbench-container";
 import { WorkbenchHeader } from "../shared/workbench-header";
-import { workbenchChromeLabelClass } from "../shared/workbench-readability";
 import type { WorkbenchModeProps } from "../types";
+
+const chromeLabelClass =
+	"text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground";
 
 function getPinnedTextValue(
 	pinnedArtifacts: WorkbenchModeProps["pinnedArtifacts"],
@@ -75,27 +77,25 @@ export function ScoreTableWorkbench({
 			{researchUser || promisedOutcome ? (
 				<WorkbenchCard label="Research target">
 					<div className="space-y-2">
-						<p className="text-[13px] leading-[1.7] text-product-muted">
+						<p className="text-[13px] leading-[1.7] text-muted-foreground">
 							Look for evidence that this outcome matters and how current
 							options handle it. Keep the research anchored to this exact bet.
 						</p>
 						<div className="grid gap-3 md:grid-cols-2">
-							<div className="rounded-none border border-product-border/65 bg-product-surface-strong/70 px-4 py-4">
-								<p className={workbenchChromeLabelClass}>User</p>
-								<p className="mt-2 text-[14px] leading-[1.55] text-product-text">
+							<div className="rounded-lg border border-input bg-card px-4 py-4">
+								<p className={chromeLabelClass}>User</p>
+								<p className="mt-2 text-[14px] leading-[1.55] text-foreground">
 									{researchUser ?? "Use your saved user from 1.2."}
 								</p>
 								{researchProblem ? (
-									<p className="mt-2 text-[13px] leading-[1.68] text-product-muted">
+									<p className="mt-2 text-[13px] leading-[1.68] text-muted-foreground">
 										Problem: {researchProblem}
 									</p>
 								) : null}
 							</div>
-							<div className="rounded-none border border-product-border/65 bg-product-surface-strong/70 px-4 py-4">
-								<p className={workbenchChromeLabelClass}>
-									Promise to pressure-test
-								</p>
-								<p className="mt-2 text-[14px] leading-[1.55] text-product-text">
+							<div className="rounded-lg border border-input bg-card px-4 py-4">
+								<p className={chromeLabelClass}>Promise to pressure-test</p>
+								<p className="mt-2 text-[14px] leading-[1.55] text-foreground">
 									{promisedOutcome ?? "Use your saved outcome from 1.3."}
 								</p>
 							</div>
@@ -114,14 +114,14 @@ export function ScoreTableWorkbench({
 			{tableField ? (
 				<WorkbenchCard label="Research table">
 					<div className="mb-3 space-y-1.5">
-						<p className="text-[14px] leading-[1.7] text-product-text">
+						<p className="text-[14px] leading-[1.7] text-foreground">
 							Start with 2-3 quick scans of real alternatives or current
 							workarounds.
 						</p>
-						<p className="text-[13px] leading-[1.7] text-product-muted">
+						<p className="text-[13px] leading-[1.7] text-muted-foreground">
 							For each row, note one concrete surface you checked in{" "}
-							<span className="text-product-text">Evidence Seen</span>. If you
-							are inferring, say it briefly.
+							<span className="text-foreground">Evidence Seen</span>. If you are
+							inferring, say it briefly.
 						</p>
 					</div>
 					<FieldControl

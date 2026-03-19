@@ -14,6 +14,7 @@ export const SUPPORTED_FIELD_KINDS = new Set<WorkbenchField["kind"]>([
 	"textarea",
 	"url",
 	"number",
+	"radio_group",
 	"toggle",
 	"select",
 	"image_upload",

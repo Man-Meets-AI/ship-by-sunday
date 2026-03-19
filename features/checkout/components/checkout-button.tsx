@@ -3,6 +3,7 @@
 import { useAuth } from "@clerk/nextjs";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 import {
 	apiRouteConfig,
@@ -11,7 +12,6 @@ import {
 } from "@/config/product";
 import { Button } from "@/components/ui/button";
 import { assert } from "@/features/course/lesson/lib/assert";
-import { cn } from "@/lib/utils";
 
 export function CheckoutButton({
 	label,
@@ -70,11 +70,11 @@ export function CheckoutButton({
 				onClick={() => void handleCheckout()}
 				disabled={isLoading}
 				aria-busy={isLoading}
-				className={cn("disabled:cursor-not-allowed", className)}
+				className={className}
 			>
 				<span className="relative inline-grid place-items-center">
 					<span className="invisible inline-flex items-center justify-center gap-2">
-						<span className="size-4" aria-hidden="true" />
+						<Loader2 className="size-4" aria-hidden="true" />
 						{reserveLabel}
 					</span>
 					<span
@@ -94,13 +94,7 @@ export function CheckoutButton({
 						}`}
 						aria-hidden={!isLoading}
 					>
-						<span
-							className="relative flex size-4 items-center justify-center"
-							aria-hidden="true"
-						>
-							<span className="absolute inset-0 rounded-full border border-current/25" />
-							<span className="absolute inset-[2px] rounded-full border border-transparent border-t-current motion-safe:animate-spin" />
-						</span>
+						<Loader2 className="size-4 animate-spin" aria-hidden="true" />
 						{loadingLabel}
 					</span>
 				</span>
@@ -108,7 +102,7 @@ export function CheckoutButton({
 			<div className="min-h-6" aria-live="polite" aria-atomic="true">
 				<p
 					aria-hidden={!error}
-					className={`mt-2 text-sm font-semibold uppercase tracking-[0.08em] text-danger transition-all duration-150 ease-out motion-reduce:transition-none ${
+					className={`mt-2 text-sm font-medium text-destructive transition-all duration-150 ease-out motion-reduce:transition-none ${
 						error
 							? "translate-y-0 opacity-100"
 							: "pointer-events-none translate-y-[-4px] opacity-0"

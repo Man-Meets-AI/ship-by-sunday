@@ -1,4 +1,9 @@
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+
 import { WorkbenchCard } from "../../shared/workbench-card";
 
 type BuildKickoffStepCardProps = {
@@ -29,40 +34,45 @@ export function BuildKickoffStepCard({
 	return (
 		<WorkbenchCard label={`Step ${step}: ${title}`}>
 			<div className="flex items-start justify-between gap-3">
-				<p className="max-w-2xl text-xs leading-relaxed text-product-muted">
+				<p className="max-w-2xl text-xs leading-relaxed text-muted-foreground">
 					{helper}
 				</p>
-				<span
-					className={`font-mono text-[9px] uppercase tracking-[0.18em] ${
-						active
-							? "text-product-accent"
-							: complete
-								? "text-product-text"
-								: "text-product-muted"
-					}`}
+				<Badge
+					variant="outline"
+					className={cn(
+						"shrink-0 font-mono text-[9px] uppercase tracking-wider",
+						active && "border-primary/30 text-primary",
+						complete && !active && "text-foreground",
+						!active && !complete && "text-muted-foreground",
+					)}
 				>
 					{statusLabel}
-				</span>
+				</Badge>
 			</div>
 			{active ? <div className="mt-3">{children}</div> : null}
 			{!active && complete ? (
-				<div className="mt-3 flex items-center justify-between gap-3 border border-product-border/60 bg-product-surface px-3 py-2">
-					<p className="text-[11px] leading-relaxed text-product-text">
-						{summary}
-					</p>
-					{onEdit ? (
-						<Button type="button" onClick={onEdit} variant="outline" size="xs">
-							Edit
-						</Button>
-					) : null}
-				</div>
+				<Card className="mt-3 gap-0 py-0">
+					<CardContent className="flex items-center justify-between gap-3 py-3">
+						<p className="text-xs leading-relaxed text-foreground">{summary}</p>
+						{onEdit ? (
+							<Button
+								type="button"
+								onClick={onEdit}
+								variant="outline"
+								size="sm"
+							>
+								Edit
+							</Button>
+						) : null}
+					</CardContent>
+				</Card>
 			) : null}
 			{!active && !complete ? (
-				<div className="mt-3 border border-product-border/60 bg-product-surface px-3 py-2">
-					<p className="text-[11px] leading-relaxed text-product-muted">
+				<Alert className="mt-3">
+					<AlertDescription className="text-xs leading-relaxed">
 						{lockedMessage ?? "Complete the previous step to continue."}
-					</p>
-				</div>
+					</AlertDescription>
+				</Alert>
 			) : null}
 		</WorkbenchCard>
 	);

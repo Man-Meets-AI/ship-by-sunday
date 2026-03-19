@@ -1,7 +1,36 @@
 import type { ReactNode } from "react";
 
-import { PublicSurfaceCard } from "@/shared/ui/public-surface";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
+/** Flat section: spacing and optional top rule—no card ring. */
+export function SectionStack({
+	children,
+	className = "",
+	id,
+	withTopRule = false,
+}: {
+	children: ReactNode;
+	className?: string;
+	id?: string;
+	withTopRule?: boolean;
+}) {
+	return (
+		<section
+			id={id}
+			className={cn(
+				"grid grid-cols-1 gap-6 py-10 sm:gap-8 sm:py-12",
+				withTopRule && "border-t border-border/30",
+				className,
+			)}
+		>
+			{children}
+		</section>
+	);
+}
+
+/** Emphasis surface (pricing CTA, rare callouts)—card + ring. */
 export function SectionFrame({
 	children,
 	className = "",
@@ -12,19 +41,19 @@ export function SectionFrame({
 	id?: string;
 }) {
 	return (
-		<PublicSurfaceCard
-			id={id}
-			className={`px-5 py-6 sm:px-8 sm:py-8 ${className}`}
-		>
+		<Card id={id} className={cn("gap-6 p-6 sm:gap-8 sm:p-8", className)}>
 			{children}
-		</PublicSurfaceCard>
+		</Card>
 	);
 }
 
 export function SectionLabel({ children }: { children: ReactNode }) {
 	return (
-		<p className="font-sans text-xs font-bold uppercase tracking-[0.24em] text-product-muted">
+		<Badge
+			variant="outline"
+			className="w-fit text-xs font-medium uppercase tracking-wide text-muted-foreground"
+		>
 			{children}
-		</p>
+		</Badge>
 	);
 }

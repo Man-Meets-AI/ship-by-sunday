@@ -1,0 +1,508 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const {
+	requireEntitledApiSessionMock,
+	upsertViewerCodexConnectionMock,
+	recordCodexRunMock,
+	withCodexAppServerClientMock,
+} = vi.hoisted(() => ({
+	requireEntitledApiSessionMock: vi.fn(),
+	upsertViewerCodexConnectionMock: vi.fn(),
+	recordCodexRunMock: vi.fn(),
+	withCodexAppServerClientMock: vi.fn(),
+}));
+
+vi.mock("@/features/codex/server/route-helpers", async () => {
+	const actual = await vi.importActual<
+		typeof import("@/features/codex/server/route-helpers")
+	>("@/features/codex/server/route-helpers");
+
+	return {
+		...actual,
+		requireEntitledApiSession: requireEntitledApiSessionMock,
+		upsertViewerCodexConnection: upsertViewerCodexConnectionMock,
+		recordCodexRun: recordCodexRunMock,
+	};
+});
+
+vi.mock("@/features/codex/server/app-server", async () => {
+	const actual = await vi.importActual<
+		typeof import("@/features/codex/server/app-server")
+	>("@/features/codex/server/app-server");
+
+	return {
+		...actual,
+		withCodexAppServerClient: withCodexAppServerClientMock,
+	};
+});
+
+import { GET as getCodexLoginPoll } from "@/app/api/codex/account/login/poll/route";
+import { POST as postCodexLoginStart } from "@/app/api/codex/account/login/start/route";
+import { POST as postCodexLogout } from "@/app/api/codex/account/logout/route";
+import { GET as getCodexAccountRead } from "@/app/api/codex/account/read/route";
+import { GET as getCodexRateLimits } from "@/app/api/codex/account/rate-limits/route";
+import { POST as postCodexGenerate } from "@/app/api/codex/generate/route";
+
+describe("codex route handlers", () => {
+	beforeEach(() => {
+		requireEntitledApiSessionMock.mockReset();
+		upsertViewerCodexConnectionMock.mockReset();
+		recordCodexRunMock.mockReset();
+		withCodexAppServerClientMock.mockReset();
+	});
+
+	function mockClient<T extends Record<string, unknown>>(client: T) {
+		withCodexAppServerClientMock.mockImplementation(async (_ctx, callback) =>
+			callback(client),
+		);
+	}
+
+	it("returns the account state and refreshes the viewer connection", async () => {
+		requireEntitledApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		mockClient({
+			readAccount: vi.fn().mockResolvedValue({
+				account: {
+					type: "chatgpt",
+					email: "builder@example.com",
+					planType: "plus",
+				},
+				requiresOpenaiAuth: false,
+			}),
+			readRateLimits: vi.fn().mockResolvedValue({
+				rateLimits: {
+					limitId: "main",
+					limitName: "Main",
+					primary: null,
+					secondary: null,
+					credits: null,
+					planType: null,
+				},
+				rateLimitsByLimitId: {
+					main: {
+						limitId: "main",
+						limitName: "Main",
+						primary: null,
+						secondary: null,
+						credits: null,
+						planType: null,
+					},
+				},
+			}),
+		});
+		upsertViewerCodexConnectionMock.mockResolvedValue({
+			connectionId: "connection_1",
+			mode: "patched",
+		});
+
+		const response = await getCodexAccountRead();
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(200);
+		expect(body).toMatchObject({
+			connected: true,
+			requiresOpenaiAuth: false,
+			account: {
+				type: "chatgpt",
+				email: "builder@example.com",
+				planType: "plus",
+			},
+		});
+		expect(upsertViewerCodexConnectionMock).toHaveBeenCalledWith(
+			{ userId: "user_123", token: "token_123" },
+			expect.objectContaining({
+				status: "connected",
+				account: {
+					type: "chatgpt",
+					email: "builder@example.com",
+					planType: "plus",
+				},
+			}),
+		);
+	});
+
+	it("starts Codex login and marks the viewer connection as connecting", async () => {
+		requireEntitledApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		mockClient({
+			loginStartManagedChatGPT: vi.fn().mockResolvedValue({
+				loginId: "login_123",
+				authUrl: "https://auth.example.test",
+			}),
+		});
+		upsertViewerCodexConnectionMock.mockResolvedValue({
+			connectionId: "connection_1",
+			mode: "patched",
+		});
+
+		const response = await postCodexLoginStart();
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(200);
+		expect(body).toEqual({
+			ok: true,
+			loginId: "login_123",
+			authUrl: "https://auth.example.test",
+		});
+		expect(upsertViewerCodexConnectionMock).toHaveBeenCalledWith(
+			{ userId: "user_123", token: "token_123" },
+			expect.objectContaining({
+				status: "connecting",
+				account: null,
+				rateLimits: null,
+			}),
+		);
+	});
+
+	it("returns a mapped auth response when Codex access is missing", async () => {
+		requireEntitledApiSessionMock.mockRejectedValue(new Error("FORBIDDEN"));
+
+		const response = await postCodexLoginStart();
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(403);
+		expect(body).toEqual({
+			error: "Course access is required before managing Codex connection.",
+		});
+		expect(withCodexAppServerClientMock).not.toHaveBeenCalled();
+	});
+
+	it("polls the login state using the pending login id and refresh flag", async () => {
+		requireEntitledApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		mockClient({
+			readAccount: vi.fn().mockResolvedValue({
+				account: {
+					type: "apiKey",
+				},
+				requiresOpenaiAuth: true,
+			}),
+		});
+		upsertViewerCodexConnectionMock.mockResolvedValue({
+			connectionId: "connection_1",
+			mode: "patched",
+		});
+
+		const response = await getCodexLoginPoll(
+			new Request(
+				"https://example.test/api/codex/account/login/poll?loginId=login_123&refresh=true",
+			),
+		);
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(200);
+		expect(body).toEqual({
+			connected: false,
+			status: "connecting",
+			account: {
+				type: "apiKey",
+			},
+			rateLimits: null,
+		});
+		expect(upsertViewerCodexConnectionMock).toHaveBeenCalledWith(
+			{ userId: "user_123", token: "token_123" },
+			expect.objectContaining({
+				status: "connecting",
+				account: {
+					type: "apiKey",
+				},
+				rateLimits: null,
+			}),
+		);
+		expect(withCodexAppServerClientMock).toHaveBeenCalledTimes(1);
+	});
+
+	it("disconnects the Codex account and clears the viewer connection", async () => {
+		requireEntitledApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		mockClient({
+			logout: vi.fn().mockResolvedValue(undefined),
+		});
+		upsertViewerCodexConnectionMock.mockResolvedValue({
+			connectionId: "connection_1",
+			mode: "patched",
+		});
+
+		const response = await postCodexLogout();
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(200);
+		expect(body).toEqual({
+			ok: true,
+			connected: false,
+		});
+		expect(upsertViewerCodexConnectionMock).toHaveBeenCalledWith(
+			{ userId: "user_123", token: "token_123" },
+			expect.objectContaining({
+				status: "disconnected",
+				account: null,
+				rateLimits: null,
+			}),
+		);
+	});
+
+	it("returns a disconnected rate-limit state for non-managed accounts", async () => {
+		requireEntitledApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		mockClient({
+			readAccount: vi.fn().mockResolvedValue({
+				account: {
+					type: "apiKey",
+				},
+			}),
+		});
+		upsertViewerCodexConnectionMock.mockResolvedValue({
+			connectionId: "connection_1",
+			mode: "patched",
+		});
+
+		const response = await getCodexRateLimits();
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(200);
+		expect(body).toEqual({
+			connected: false,
+			rateLimits: null,
+		});
+		expect(upsertViewerCodexConnectionMock).toHaveBeenCalledWith(
+			{ userId: "user_123", token: "token_123" },
+			expect.objectContaining({
+				status: "disconnected",
+				account: {
+					type: "apiKey",
+				},
+				rateLimits: null,
+			}),
+		);
+	});
+
+	it("rejects malformed generation payloads before contacting Codex", async () => {
+		requireEntitledApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+
+		const response = await postCodexGenerate(
+			new Request("https://example.test/api/codex/generate", {
+				method: "POST",
+				headers: {
+					"content-type": "application/json",
+				},
+				body: JSON.stringify({
+					templateId: "competitor_research",
+				}),
+			}),
+		);
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(400);
+		expect(body).toEqual({
+			error: "Invalid generation payload.",
+		});
+		expect(withCodexAppServerClientMock).not.toHaveBeenCalled();
+		expect(recordCodexRunMock).not.toHaveBeenCalled();
+	});
+
+	it("returns a disconnected error when the account is not attached yet", async () => {
+		requireEntitledApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		mockClient({
+			readAccount: vi.fn().mockResolvedValue({
+				account: {
+					type: "apiKey",
+				},
+			}),
+		});
+		upsertViewerCodexConnectionMock.mockResolvedValue({
+			connectionId: "connection_1",
+			mode: "patched",
+		});
+		recordCodexRunMock.mockResolvedValue({
+			runId: "run_1",
+			createdAt: 100,
+		});
+
+		const response = await postCodexGenerate(
+			new Request("https://example.test/api/codex/generate", {
+				method: "POST",
+				headers: {
+					"content-type": "application/json",
+				},
+				body: JSON.stringify({
+					templateId: "competitor_research",
+					prompt: "Research the offer",
+				}),
+			}),
+		);
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(409);
+		expect(body).toEqual({
+			error: "Connect your Codex account in Settings before generating.",
+			code: "account_not_connected",
+		});
+		expect(recordCodexRunMock).toHaveBeenCalledWith(
+			{ userId: "user_123", token: "token_123" },
+			expect.objectContaining({
+				templateId: "competitor_research",
+				lessonId: undefined,
+				status: "error",
+				errorCode: "account_not_connected",
+			}),
+		);
+	});
+
+	it("returns trimmed generated output and records a successful run", async () => {
+		requireEntitledApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		mockClient({
+			readAccount: vi.fn().mockResolvedValue({
+				account: {
+					type: "chatgpt",
+					email: "builder@example.com",
+					planType: "plus",
+				},
+			}),
+			generateText: vi.fn().mockResolvedValue({
+				status: "completed",
+				text: "  Output text  ",
+				errorMessage: null,
+			}),
+			readRateLimits: vi.fn().mockResolvedValue({
+				rateLimits: {
+					limitId: "main",
+					limitName: "Main",
+					primary: null,
+					secondary: null,
+					credits: null,
+					planType: null,
+				},
+				rateLimitsByLimitId: null,
+			}),
+		});
+		upsertViewerCodexConnectionMock.mockResolvedValue({
+			connectionId: "connection_1",
+			mode: "patched",
+		});
+		recordCodexRunMock.mockResolvedValue({
+			runId: "run_1",
+			createdAt: 100,
+		});
+
+		const response = await postCodexGenerate(
+			new Request("https://example.test/api/codex/generate", {
+				method: "POST",
+				headers: {
+					"content-type": "application/json",
+				},
+				body: JSON.stringify({
+					templateId: "competitor_research",
+					prompt: "Research the offer",
+					lessonId: "1.1",
+				}),
+			}),
+		);
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(200);
+		expect(body).toMatchObject({
+			ok: true,
+			output: "Output text",
+			account: {
+				type: "chatgpt",
+				email: "builder@example.com",
+				planType: "plus",
+			},
+		});
+		expect(recordCodexRunMock).toHaveBeenCalledWith(
+			{ userId: "user_123", token: "token_123" },
+			expect.objectContaining({
+				templateId: "competitor_research",
+				lessonId: "1.1",
+				status: "success",
+			}),
+		);
+	});
+
+	it("returns a generation failure when Codex does not complete", async () => {
+		requireEntitledApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		mockClient({
+			readAccount: vi.fn().mockResolvedValue({
+				account: {
+					type: "chatgpt",
+					email: "builder@example.com",
+					planType: "plus",
+				},
+			}),
+			generateText: vi.fn().mockResolvedValue({
+				status: "failed",
+				text: " ",
+				errorMessage: "The model failed.",
+			}),
+			readRateLimits: vi.fn().mockResolvedValue({
+				rateLimits: {
+					limitId: "main",
+					limitName: "Main",
+					primary: null,
+					secondary: null,
+					credits: null,
+					planType: null,
+				},
+				rateLimitsByLimitId: null,
+			}),
+		});
+		upsertViewerCodexConnectionMock.mockResolvedValue({
+			connectionId: "connection_1",
+			mode: "patched",
+		});
+		recordCodexRunMock.mockResolvedValue({
+			runId: "run_1",
+			createdAt: 100,
+		});
+
+		const response = await postCodexGenerate(
+			new Request("https://example.test/api/codex/generate", {
+				method: "POST",
+				headers: {
+					"content-type": "application/json",
+				},
+				body: JSON.stringify({
+					templateId: "competitor_research",
+					prompt: "Research the offer",
+				}),
+			}),
+		);
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(502);
+		expect(body).toEqual({
+			error: "The model failed.",
+			code: "generation_failed",
+		});
+		expect(recordCodexRunMock).toHaveBeenCalledWith(
+			{ userId: "user_123", token: "token_123" },
+			expect.objectContaining({
+				templateId: "competitor_research",
+				status: "error",
+				errorCode: "generation_failed",
+			}),
+		);
+	});
+});

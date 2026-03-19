@@ -12,7 +12,6 @@ import type { CoachPanelKey } from "@/features/course/lesson/shells";
 
 export type LessonChromeState = {
 	layoutMode: LessonLayoutMode;
-	coachVisible: boolean;
 	activeCoachPanel: CoachPanelKey;
 };
 
@@ -48,7 +47,6 @@ function getDefaultCoachPanel(lesson: LessonConfig): CoachPanelKey {
 function getDefaultChromeState(lesson: LessonConfig): LessonChromeState {
 	return {
 		layoutMode: getDefaultLayoutModeForLesson(lesson),
-		coachVisible: lesson.panelDefaults.coach !== "minimized",
 		activeCoachPanel: getDefaultCoachPanel(lesson),
 	};
 }
@@ -65,7 +63,6 @@ function isChromeState(value: unknown): value is LessonChromeState {
 	const candidate = value as Partial<LessonChromeState>;
 	return (
 		(candidate.layoutMode === "split" || candidate.layoutMode === "focus") &&
-		typeof candidate.coachVisible === "boolean" &&
 		(candidate.activeCoachPanel === "watch" ||
 			candidate.activeCoachPanel === "transcript" ||
 			candidate.activeCoachPanel === "examples" ||
@@ -131,12 +128,6 @@ export function useLessonChromeState({
 				layoutMode: normalizeLayoutModeForLesson(lesson, layoutMode),
 			}));
 		},
-		toggleCoach: () => {
-			setChromeState((current) => ({
-				...current,
-				coachVisible: !current.coachVisible,
-			}));
-		},
 		setActiveCoachPanel: (activeCoachPanel: CoachPanelKey) => {
 			setChromeState((current) => ({
 				...current,
@@ -145,7 +136,6 @@ export function useLessonChromeState({
 				)
 					? activeCoachPanel
 					: current.activeCoachPanel,
-				coachVisible: true,
 			}));
 		},
 	};
