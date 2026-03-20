@@ -1,7 +1,15 @@
+import type { Metadata } from "next";
 import { TaskResetPassword } from "@clerk/nextjs";
 
 import { AuthPageShell } from "@/features/auth/sign-in/auth-page-shell";
 import { getTaskRedirectUrlComplete } from "@/features/auth/sign-in/sign-in-route-utils";
+
+export const metadata: Metadata = {
+	robots: {
+		index: false,
+		follow: false,
+	},
+};
 
 export default async function Page({
 	searchParams,

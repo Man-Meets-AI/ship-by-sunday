@@ -1,55 +1,117 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const authenticateWithRedirectCallbackMock = vi.fn(
-	(_props?: Record<string, unknown>) => <div data-testid="auth-callback" />,
-);
+const pushMock = vi.fn();
+const setActiveMock = vi.fn();
+const useClerkMock = vi.fn();
+const useSignInMock = vi.fn();
+const useSignUpMock = vi.fn();
 
-vi.mock("next/link", () => ({
-	default: ({
-		children,
-		href,
-		...props
-	}: React.AnchorHTMLAttributes<HTMLAnchorElement> & {
-		children: React.ReactNode;
-		href: string;
-	}) => (
-		<a href={href} {...props}>
-			{children}
-		</a>
-	),
+vi.mock("next/navigation", () => ({
+	useRouter: () => ({
+		push: pushMock,
+	}),
 }));
 
 vi.mock("@clerk/nextjs", () => ({
-	AuthenticateWithRedirectCallback: (props: Record<string, unknown>) =>
-		authenticateWithRedirectCallbackMock(props),
+	useClerk: () => useClerkMock(),
+	useSignIn: () => useSignInMock(),
+	useSignUp: () => useSignUpMock(),
 }));
 
 import { SsoCallbackPage } from "@/features/auth/sign-in/sso-callback-page";
 
+function createSignInState(overrides?: Partial<Record<string, unknown>>) {
+	return {
+		create: vi.fn().mockResolvedValue(undefined),
+		existingSession: undefined,
+		finalize: vi.fn().mockResolvedValue(undefined),
+		isTransferable: false,
+		status: "needs_first_factor",
+		...overrides,
+	};
+}
+
+function createSignUpState(overrides?: Partial<Record<string, unknown>>) {
+	return {
+		existingSession: undefined,
+		isTransferable: false,
+		status: "missing_requirements",
+		...overrides,
+	};
+}
+
 describe("SsoCallbackPage", () => {
-	it("passes the purchase-gated callback configuration to Clerk", () => {
-		render(<SsoCallbackPage redirectPath="/access-required" />);
+	beforeEach(() => {
+		pushMock.mockReset();
+		setActiveMock.mockReset();
+		useClerkMock.mockReset();
+		useSignInMock.mockReset();
+		useSignUpMock.mockReset();
+		useClerkMock.mockReturnValue({
+			loaded: true,
+			setActive: setActiveMock,
+		});
+	});
+
+	it("finalizes a completed OAuth sign-in back to the preserved redirect target", async () => {
+		const signIn = createSignInState({
+			finalize: vi.fn().mockImplementation(async ({ navigate }) => {
+				await navigate({
+					decorateUrl: (url: string) => url,
+					session: null,
+				});
+			}),
+			status: "complete",
+		});
+		useSignInMock.mockReturnValue({ signIn });
+		useSignUpMock.mockReturnValue({ signUp: createSignUpState() });
+
+		render(<SsoCallbackPage redirectPath="/settings" />);
 
 		expect(screen.getByText("Completing Google sign-in")).toBeTruthy();
-		expect(screen.getByTestId("auth-callback")).toBeTruthy();
-		expect(authenticateWithRedirectCallbackMock).toHaveBeenCalledWith(
-			expect.objectContaining({
-				continueSignUpUrl:
-					"/sign-in?redirect_url=%2Faccess-required&auth_error=purchase_required",
-				firstFactorUrl: "/sign-in?redirect_url=%2Faccess-required",
-				resetPasswordUrl: "/sign-in?redirect_url=%2Faccess-required",
-				secondFactorUrl: "/sign-in?redirect_url=%2Faccess-required",
-				signInFallbackRedirectUrl: "/access-required",
-				signInUrl:
-					"/sign-in?redirect_url=%2Faccess-required&auth_error=purchase_required",
-				signUpFallbackRedirectUrl:
-					"/sign-in?redirect_url=%2Faccess-required&auth_error=purchase_required",
-				signUpUrl:
-					"/sign-in?redirect_url=%2Faccess-required&auth_error=purchase_required",
-				transferable: false,
+		await waitFor(() => {
+			expect(pushMock).toHaveBeenCalledWith("/settings");
+		});
+	});
+
+	it("routes a completed OAuth sign-in into the pending Clerk task with the redirect target preserved", async () => {
+		const signIn = createSignInState({
+			finalize: vi.fn().mockImplementation(async ({ navigate }) => {
+				await navigate({
+					decorateUrl: (url: string) => url,
+					session: { currentTask: { key: "choose-organization" } },
+				});
 			}),
-		);
+			status: "complete",
+		});
+		useSignInMock.mockReturnValue({ signIn });
+		useSignUpMock.mockReturnValue({ signUp: createSignUpState() });
+
+		render(<SsoCallbackPage redirectPath="/settings" />);
+
+		await waitFor(() => {
+			expect(pushMock).toHaveBeenCalledWith(
+				"/session-tasks/choose-organization?redirect_url=%2Fsettings",
+			);
+		});
+	});
+
+	it("sends unmatched Google accounts back to sign-in with the purchase-required state", async () => {
+		useSignInMock.mockReturnValue({
+			signIn: createSignInState({
+				isTransferable: true,
+			}),
+		});
+		useSignUpMock.mockReturnValue({ signUp: createSignUpState() });
+
+		render(<SsoCallbackPage redirectPath="/access-required" />);
+
+		await waitFor(() => {
+			expect(pushMock).toHaveBeenCalledWith(
+				"/sign-in?redirect_url=%2Faccess-required&auth_error=purchase_required",
+			);
+		});
 	});
 });

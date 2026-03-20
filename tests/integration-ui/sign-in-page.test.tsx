@@ -170,6 +170,108 @@ describe("SignInPage", () => {
 		});
 	});
 
+	it("redirects a completed password sign-in back to the preserved target", async () => {
+		useSearchParamsMock.mockReturnValue(new URLSearchParams("redirect_url=%2Fsettings"));
+		const signIn = {
+			create: vi.fn().mockResolvedValue({ error: null }),
+			finalize: vi.fn().mockImplementation(async ({ navigate }) => {
+				await navigate({
+					decorateUrl: (url: string) => url,
+					session: null,
+				});
+				return { error: null };
+			}),
+			mfa: {
+				sendEmailCode: vi.fn().mockResolvedValue({ error: null }),
+				sendPhoneCode: vi.fn().mockResolvedValue({ error: null }),
+				verifyBackupCode: vi.fn().mockResolvedValue({ error: null }),
+				verifyEmailCode: vi.fn().mockResolvedValue({ error: null }),
+				verifyPhoneCode: vi.fn().mockResolvedValue({ error: null }),
+				verifyTOTP: vi.fn().mockResolvedValue({ error: null }),
+			},
+			password: vi.fn().mockResolvedValue({ error: null }),
+			reset: vi.fn().mockResolvedValue({ error: null }),
+			resetPasswordEmailCode: {
+				sendCode: vi.fn().mockResolvedValue({ error: null }),
+				submitPassword: vi.fn().mockResolvedValue({ error: null }),
+				verifyCode: vi.fn().mockResolvedValue({ error: null }),
+			},
+			sso: vi.fn().mockResolvedValue({ error: null }),
+			status: "complete",
+			supportedSecondFactors: [],
+		};
+		useSignInMock.mockReturnValue({
+			errors: {
+				fields: { code: null, identifier: null, password: null },
+				global: null,
+				raw: null,
+			},
+			fetchStatus: "idle",
+			signIn,
+		});
+
+		const user = userEvent.setup();
+		render(<SignInPage />);
+
+		await user.type(screen.getByLabelText("Email"), "buyer@example.com");
+		await user.type(screen.getByLabelText("Password"), "supersecret");
+		await user.click(screen.getByRole("button", { name: "Sign in" }));
+
+		expect(pushMock).toHaveBeenCalledWith("/settings");
+	});
+
+	it("routes a completed password sign-in into the pending Clerk task", async () => {
+		useSearchParamsMock.mockReturnValue(new URLSearchParams("redirect_url=%2Fsettings"));
+		const signIn = {
+			create: vi.fn().mockResolvedValue({ error: null }),
+			finalize: vi.fn().mockImplementation(async ({ navigate }) => {
+				await navigate({
+					decorateUrl: (url: string) => url,
+					session: { currentTask: { key: "setup-mfa" } },
+				});
+				return { error: null };
+			}),
+			mfa: {
+				sendEmailCode: vi.fn().mockResolvedValue({ error: null }),
+				sendPhoneCode: vi.fn().mockResolvedValue({ error: null }),
+				verifyBackupCode: vi.fn().mockResolvedValue({ error: null }),
+				verifyEmailCode: vi.fn().mockResolvedValue({ error: null }),
+				verifyPhoneCode: vi.fn().mockResolvedValue({ error: null }),
+				verifyTOTP: vi.fn().mockResolvedValue({ error: null }),
+			},
+			password: vi.fn().mockResolvedValue({ error: null }),
+			reset: vi.fn().mockResolvedValue({ error: null }),
+			resetPasswordEmailCode: {
+				sendCode: vi.fn().mockResolvedValue({ error: null }),
+				submitPassword: vi.fn().mockResolvedValue({ error: null }),
+				verifyCode: vi.fn().mockResolvedValue({ error: null }),
+			},
+			sso: vi.fn().mockResolvedValue({ error: null }),
+			status: "complete",
+			supportedSecondFactors: [],
+		};
+		useSignInMock.mockReturnValue({
+			errors: {
+				fields: { code: null, identifier: null, password: null },
+				global: null,
+				raw: null,
+			},
+			fetchStatus: "idle",
+			signIn,
+		});
+
+		const user = userEvent.setup();
+		render(<SignInPage />);
+
+		await user.type(screen.getByLabelText("Email"), "buyer@example.com");
+		await user.type(screen.getByLabelText("Password"), "supersecret");
+		await user.click(screen.getByRole("button", { name: "Sign in" }));
+
+		expect(pushMock).toHaveBeenCalledWith(
+			"/session-tasks/setup-mfa?redirect_url=%2Fsettings",
+		);
+	});
+
 	it("starts Google sign-in with the preserved redirect target", async () => {
 		useSearchParamsMock.mockReturnValue(
 			new URLSearchParams("redirect_url=%2Faccess-required"),

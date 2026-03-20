@@ -9,6 +9,7 @@ import { assertNever } from "@/features/course/lesson/lib/assert";
 
 import {
 	buildSignInHref,
+	buildSessionTaskHref,
 	buildSsoCallbackHref,
 	getPricingHref,
 	getSafeRedirectPath,
@@ -202,10 +203,14 @@ export function useSignInFlow() {
 		}
 
 		await signIn.finalize({
-			navigate: async ({ decorateUrl }) => {
+			navigate: async ({ decorateUrl, session }) => {
+				const destination = session?.currentTask
+					? buildSessionTaskHref(session.currentTask.key, redirectPath)
+					: redirectPath ?? authViewConfig.fallbackRedirectUrl;
+
 				await navigateWithRouter(
 					router,
-					decorateUrl(redirectPath ?? authViewConfig.fallbackRedirectUrl),
+					decorateUrl(destination),
 				);
 			},
 		});

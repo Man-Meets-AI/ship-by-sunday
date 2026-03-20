@@ -10,6 +10,8 @@ export const sessionTaskUrls = {
 	"setup-mfa": "/session-tasks/setup-mfa",
 } as const;
 
+export type SessionTaskKey = keyof typeof sessionTaskUrls;
+
 const authErrorParam = "auth_error";
 const redirectUrlParam = "redirect_url";
 
@@ -68,6 +70,26 @@ export function buildSsoCallbackHref(redirectPath?: string | null) {
 	return `${ssoCallbackPath}?${redirectUrlParam}=${encodeURIComponent(safeRedirectPath)}`;
 }
 
+export function buildSessionTaskHref(
+	taskKey: string,
+	redirectPath?: string | null,
+) {
+	const taskHref = sessionTaskUrls[taskKey as SessionTaskKey];
+	if (!taskHref) {
+		return getTaskRedirectUrlComplete(redirectPath);
+	}
+
+	const safeRedirectPath = redirectPath
+		? getSafeRedirectPath(redirectPath)
+		: null;
+
+	if (!safeRedirectPath) {
+		return taskHref;
+	}
+
+	return `${taskHref}?${redirectUrlParam}=${encodeURIComponent(safeRedirectPath)}`;
+}
+
 export function getBlockedGoogleSignInHref(redirectPath?: string | null) {
 	return buildSignInHref({
 		redirectPath,
@@ -75,8 +97,8 @@ export function getBlockedGoogleSignInHref(redirectPath?: string | null) {
 	});
 }
 
-export function getTaskRedirectUrlComplete() {
-	return authViewConfig.fallbackRedirectUrl;
+export function getTaskRedirectUrlComplete(redirectPath?: string | null) {
+	return getSafeRedirectPath(redirectPath);
 }
 
 export function getSignInAuthError(rawValue: string | null): SignInAuthError | null {

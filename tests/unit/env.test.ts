@@ -8,11 +8,13 @@ describe("env helpers", () => {
 
 	it("parses the public env through the typed loader", async () => {
 		process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_test_123";
+		process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL = "/sign-in";
 		process.env.NEXT_PUBLIC_CONVEX_URL = "https://example.convex.cloud";
 
 		const { publicEnv } = await import("@/platform/env/public");
 
 		expect(publicEnv.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY).toBe("pk_test_123");
+		expect(publicEnv.NEXT_PUBLIC_CLERK_SIGN_IN_URL).toBe("/sign-in");
 		expect(publicEnv.NEXT_PUBLIC_CONVEX_URL).toBe(
 			"https://example.convex.cloud",
 		);
@@ -20,11 +22,13 @@ describe("env helpers", () => {
 
 	it("trims surrounding whitespace from public env values", async () => {
 		process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = " pk_test_123\n";
+		process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL = " /sign-in \n";
 		process.env.NEXT_PUBLIC_CONVEX_URL = " https://example.convex.cloud \n";
 
 		const { publicEnv } = await import("@/platform/env/public");
 
 		expect(publicEnv.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY).toBe("pk_test_123");
+		expect(publicEnv.NEXT_PUBLIC_CLERK_SIGN_IN_URL).toBe("/sign-in");
 		expect(publicEnv.NEXT_PUBLIC_CONVEX_URL).toBe(
 			"https://example.convex.cloud",
 		);

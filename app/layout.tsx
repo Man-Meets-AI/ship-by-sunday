@@ -16,6 +16,7 @@ import { sessionTaskUrls } from "@/features/auth/sign-in/sign-in-route-utils";
 import { clerkProviderAppearance } from "@/lib/clerk-auth-appearance";
 import { ConvexClientProvider } from "@/platform/convex/convex-client-provider";
 import { publicEnv } from "@/platform/env/public";
+import { serverEnv } from "@/platform/env/server";
 import { getMetadataBase } from "@/platform/next/metadata-base";
 import "./globals.css";
 
@@ -38,8 +39,8 @@ export const metadata: Metadata = {
 		description: productConfig.metadataDescription,
 		images: [
 			{
-				url: productConfig.images.heroPreview,
-				alt: `${productConfig.name} preview`,
+				url: productConfig.images.founderProof,
+				alt: `${productConfig.name} founder proof`,
 			},
 		],
 	},
@@ -47,7 +48,10 @@ export const metadata: Metadata = {
 		card: "summary_large_image",
 		title: productConfig.name,
 		description: productConfig.metadataDescription,
-		images: [productConfig.images.heroPreview],
+		images: [productConfig.images.founderProof],
+	},
+	verification: {
+		google: serverEnv.GOOGLE_SITE_VERIFICATION,
 	},
 	manifest: "/manifest.webmanifest",
 	icons: {
@@ -62,29 +66,29 @@ export default function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	if (publicEnv.NEXT_PUBLIC_CLERK_SIGN_IN_URL === "/sign-in") {
-		return (
-			<html lang="en" suppressHydrationWarning>
-				<body className={bebasNeue.variable}>
-					<ClerkProvider
-						appearance={clerkProviderAppearance}
-						taskUrls={sessionTaskUrls}
-					>
-						<ThemeProvider
-							attribute="class"
-							defaultTheme="light"
-							enableSystem={false}
-						>
-							<ConvexClientProvider>{children}</ConvexClientProvider>
-							<Toaster />
-						</ThemeProvider>
-					</ClerkProvider>
-				</body>
-			</html>
+	if (publicEnv.NEXT_PUBLIC_CLERK_SIGN_IN_URL !== "/sign-in") {
+		throw new Error(
+			"NEXT_PUBLIC_CLERK_SIGN_IN_URL must be set to /sign-in for the custom Clerk auth flow.",
 		);
 	}
 
-	throw new Error(
-		"NEXT_PUBLIC_CLERK_SIGN_IN_URL must be set to /sign-in for the custom Clerk auth flow.",
+	return (
+		<html lang="en" suppressHydrationWarning>
+			<body className={bebasNeue.variable}>
+				<ClerkProvider
+					appearance={clerkProviderAppearance}
+					taskUrls={sessionTaskUrls}
+				>
+					<ThemeProvider
+						attribute="class"
+						defaultTheme="light"
+						enableSystem={false}
+					>
+						<ConvexClientProvider>{children}</ConvexClientProvider>
+						<Toaster />
+					</ThemeProvider>
+				</ClerkProvider>
+			</body>
+		</html>
 	);
 }
