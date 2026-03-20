@@ -26,9 +26,13 @@ export type WorkbenchType =
   | "brand_kit_workbench"
   | "codex_marketing_site"
   | "checkout_qa_loop"
+  | "build_setting_up_slices"
   | "fresh_template_plan"
   | "core_ux_plan_flow"
-  | "core_ux_build";
+  | "core_ux_build"
+  | "skills_quickstart"
+  | "build_ship_roadmap"
+  | "route_access_orientation";
 
 export type CoachMode = "docked" | "pip";
 export type CoachVideoPlacement = "coach" | "workbench";

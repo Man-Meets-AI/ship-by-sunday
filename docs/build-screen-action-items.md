@@ -66,16 +66,12 @@ Action items:
 
 ## 3.4 Wire DB, Auth, and Payments
 
-Source signal:
+**Implemented (workbench `build_ship_roadmap`):** [`features/course/lesson/workbench/modes/build-ship-roadmap/`](features/course/lesson/workbench/modes/build-ship-roadmap/) — orientation lines (web app vs API, protected pages); Convex / Stripe / Clerk / Vercel link `Button`s; `Tabs` (`Build` / `Ship`) with `Card` checklists and `Badge` weights (`Required` / `Later` / `Optional`); out-of-scope `Alert`; concept `Accordion` (protected pages, open graph, SEO, logs); persisted checklists for phases, service accounts, and scope; marketing brief + domain + support email + logging + first testers fields. Lesson config: [`features/course/lesson/content/build.ts`](features/course/lesson/content/build.ts) (`id: "3.4"`).
+
+Source signal (historical):
 - `3.5--how-clerk-works`
 - `3.12--provider-setup`
-
-Action items:
-- Add a `Marketing pages vs protected pages` tab set.
-- Add an `Authentication vs authorization` explainer card.
-- Add a `How protected pages work` copy-prompt card for Codex.
-- Add a `Payments wiring` checklist for `product`, `price`, `secret key`, `publishable key`, and `post-purchase flow`.
-- Add a `What should be public vs gated?` textarea.
+- `3.4--build-day-2-overview`
 
 ## 3.5 Codex Marketing Site
 
@@ -87,15 +83,14 @@ Source signal (historical):
 
 ## 3.6 Switch to Sandbox and Boot Local
 
-Source signal:
+Source signal (historical):
 - `3.11--build-day-2-clone-template`
 - `3.8--env-vars-provider-setup`
 
-Action items:
-- Add a `Local / development / production` explainer.
-- Add a `Boot local` checklist that ends with `run the server`.
-- Add a `Which tabs should be open right now?` checklist for `Convex`, `Clerk`, `Stripe`, and the repo.
-- Add a `Sandbox means safe testing` warning card so students stop confusing it with production.
+**Implemented (workbench `route_access_orientation`):** [`features/course/lesson/workbench/modes/route-access-orientation/`](features/course/lesson/workbench/modes/route-access-orientation/) — framing `Card` (route structure + access control, not auth rewrite) + don’t-overbuild `Alert`; compact `app/` tree with `page.tsx` and named route folders; `Tabs` for public vs protected page lists; tool `Badge`s (`Codex`, `Clerk`, `entitlements`, `page.tsx`, `Control+M`); `Accordion` glossary (auth terms + passport/balcony line); seeded Codex `Textarea` + copy `Button`; required inspection `checklist` (open `app/`, Codex, entitlement read, rename + pin thread); student `Textarea`s (pages public / paywall, protected route map, access stack note, routes to change). Lesson config: [`features/course/lesson/content/build.ts`](features/course/lesson/content/build.ts) (`id: "3.6"`, `fieldShapeVersion: 2`).
+
+Historical action notes (superseded):
+- ~~Local/dev/prod explainer, boot checklist, provider tabs card~~ → product direction is route-access + Codex orientation per current transcript feedback.
 
 ## 3.7 Read and Execute AI Plans
 
@@ -113,12 +108,10 @@ Historical action notes (superseded by the above product spec):
 Source signal:
 - `3.14--build-setting-up-slices`
 
-Action items:
-- Add a `What is a slice?` explainer card.
-- Add a `Present UX -> get slices -> pick one -> build -> test -> loop` visual.
-- Add a `Chosen slice` field.
-- Add a `Why this slice first` field.
-- Add a `Reference UX` upload or screenshot slot for whiteboard / Figma / paper sketch input.
+**Implemented (workbench `build_setting_up_slices`):** [`features/course/lesson/workbench/modes/build-setting-up-slices/`](features/course/lesson/workbench/modes/build-setting-up-slices/) — compact **Build loop** `Card` (numbered steps: core UX → planning mode → review slices → pick one → test in UX) with `Badge`; **Planning mode** `ToggleGroup` (`Plan skill` / `Traditional planning`) plus `Alert` that the plan skill lives in the **copied repository**; **Example prompt** `Card` (problem / belief / uncertainty / link) with copy `Button`; `Accordion` for slice + packet definition and a **niche** research pattern example (`Badge`s); **No Figma yet?** `Alert`; `FieldControl`-backed `Textarea`/`Input`/`checklist` for core UX or prompt, optional reference URL, planner packet paste, next slice, review-before-build checklist, optional user-flow sketch. Lesson config: [`features/course/lesson/content/build.ts`](features/course/lesson/content/build.ts) (`id: "3.8"`).
+
+Historical action notes (superseded):
+- ~~Reference UX upload~~ → paste + optional sketch textarea per shipped spec.
 
 ## 3.9 Implement the First Slice
 
@@ -194,19 +187,16 @@ Action items:
 
 ## 3.16 Finalize Build Handoff and Unlock Ship
 
-Source signal:
-- `3.18--wrapping`
-- overall Build-to-Ship transition
+Workbench: `skills_quickstart` (skills orientation before Ship unlock).
 
-Action items:
-- Add a `Build handoff` summary card with:
-  - current live URL
-  - stack used
-  - keys/providers connected
-  - known rough edges
-- Add a `Ship blockers left` textarea.
-- Add a `Hand this to your favorite LLM` export block that summarizes the build state.
-- Add a `Next up in Ship` checklist.
+Implemented surface:
+- `How skills work` definition card; category `Tabs` (Clerk, Convex, Engineering, QA) with `Badge` roles and copyable `$` tags.
+- Clerk tab includes orchestrator, organizations, setup, Swift/iOS, and testing style entries; Convex / Engineering / QA lists are representative installs.
+- Read-only prompt `Textarea` pattern plus copy buttons (pattern, examples, full quickstart).
+- `Alert` for QA Browser prerequisites (test user, Clerk security in QA, Stripe parity, manual passwords).
+- Resources row: copyable paths for Cursor / Codex skill directories and how to open skill files.
+- `Accordion` for making custom skills; card for “use shipped skills first.”
+- Persisted checklist + “first tagged prompt” `textarea`; artifact `build_skills_quickstart`.
 
 ## Extra tool breakdown to add
 

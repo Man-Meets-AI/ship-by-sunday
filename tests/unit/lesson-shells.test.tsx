@@ -85,7 +85,7 @@ describe("LessonShellWatch", () => {
 		expect(markup).toContain("Finalize Build Handoff and Unlock Ship");
 		expect(markup).toContain("4m 23s");
 		expect(markup).toContain(
-			"Watch Finalize Build Handoff and Unlock Ship, pull the key move forward, and keep momentum.",
+			"Orient to Codex and Cursor skills: where they live, how to tag them with $, and which specialists to use as you move into Ship.",
 		);
 	});
 

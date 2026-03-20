@@ -481,7 +481,7 @@ describe("course registry", () => {
       }),
     ).toEqual([]);
 
-    for (const lessonId of ["2.0", "3.16", "4.0"]) {
+    for (const lessonId of ["2.0", "4.0"]) {
       const lesson = getLessonById(lessonId);
       expect(lesson).toBeTruthy();
       if (!lesson) {
@@ -505,6 +505,22 @@ describe("course registry", () => {
       ]);
       expect(getCompletionIssues(lesson, {})).toEqual([]);
     }
+
+    const skillsHandoff = getLessonById("3.16");
+    expect(skillsHandoff).toBeTruthy();
+    if (!skillsHandoff) {
+      throw new Error("Expected lesson 3.16 to exist.");
+    }
+    expect(skillsHandoff.shell).toBe("split");
+    expect(skillsHandoff.workbench).toBe("skills_quickstart");
+    expect((skillsHandoff.workbenchFields ?? []).length).toBe(2);
+    expect(skillsHandoff.requireReadyVideoForCompletion).toBe(true);
+    expect(skillsHandoff.content.coach.video).toMatchObject({
+      status: "ready",
+      provider: "bunny",
+      libraryId: 619172,
+    });
+    expect(getCompletionIssues(skillsHandoff, {}).length).toBeGreaterThan(0);
 
     const buildKickoff = getLessonById("3.0");
     expect(buildKickoff).toBeTruthy();
