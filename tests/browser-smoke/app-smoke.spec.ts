@@ -7,6 +7,8 @@ test("landing page renders the main offer CTA", async ({ request }) => {
 	expect(response.ok()).toBe(true);
 	expect(html).toContain("Go from app idea");
 	expect(html).toContain("Get instant access");
+	expect(html).toContain('id="system"');
+	expect(html).toContain('id="pricing"');
 });
 
 test("checkout success without a session renders the recovery surface", async ({

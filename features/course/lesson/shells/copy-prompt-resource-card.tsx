@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,6 +16,13 @@ function getPromptResourceState(
 	pinnedArtifacts: PinnedArtifact[],
 ) {
 	return getPromptTemplateState(resource.promptTemplateId, pinnedArtifacts);
+}
+
+function getCopySuccessMessage(resource: LessonPromptResourceContent) {
+	return (
+		resource.copySuccessToastMessage ??
+		"Copied prompt. Go paste it in your favorite model."
+	);
 }
 
 export function CopyPromptResourceCard({
@@ -62,6 +70,7 @@ export function CopyPromptResourceCard({
 				}
 
 				setCopyState("copied");
+				toast.success(getCopySuccessMessage(resource));
 				resetTimeoutRef.current = window.setTimeout(() => {
 					resetTimeoutRef.current = null;
 					setCopyState("idle");

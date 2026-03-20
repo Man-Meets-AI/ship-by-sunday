@@ -4,19 +4,11 @@ import {
 	PricingSectionBlock,
 	ProofAndFaqSection,
 } from "./home-page/closing-sections";
+import { HomeHeroSection } from "./home-page/hero-sections";
+import { ProblemOutcomeSection } from "./home-page/problem-outcome-section";
+import { SprintPathUnifiedSection } from "./home-page/sprint-path-unified-section";
 import {
-	HomeHeroSection,
-	OutcomesSection,
-	WhyBuildersGetStuckSection,
-} from "./home-page/hero-sections";
-import {
-	ProcessCalloutSection,
-	SprintDeepDiveSection,
-	SprintOverviewSection,
-} from "./home-page/sprint-sections";
-import {
-	AudienceFitSection,
-	MechanismStorySection,
+	MechanismAudienceSection,
 	OfferStackSection,
 } from "./home-page/story-sections";
 
@@ -25,23 +17,18 @@ export default function HomePage() {
 		<main className="bg-background text-foreground">
 			<div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:gap-8 sm:px-6 sm:py-8">
 				<HomeHeroSection hero={homePageContent.hero} />
-				<OutcomesSection outcomesSection={homePageContent.outcomesSection} />
-				<WhyBuildersGetStuckSection
+				<ProblemOutcomeSection
+					outcomesSection={homePageContent.outcomesSection}
+					problemOutcomeSection={homePageContent.problemOutcomeSection}
 					whyBuildersGetStuck={homePageContent.whyBuildersGetStuck}
 				/>
-				<SprintOverviewSection
+				<SprintPathUnifiedSection
 					sprintPathSection={homePageContent.sprintPathSection}
 				/>
-				<ProcessCalloutSection
-					processCallout={homePageContent.processCallout}
-				/>
-				<SprintDeepDiveSection
-					sprintPathSection={homePageContent.sprintPathSection}
-				/>
-				<MechanismStorySection
+				<MechanismAudienceSection
+					audienceSection={homePageContent.audienceSection}
 					mechanismSection={homePageContent.mechanismSection}
 				/>
-				<AudienceFitSection audienceSection={homePageContent.audienceSection} />
 				<OfferStackSection
 					missionImage={homePageContent.assets.missionImage}
 					offerSection={homePageContent.offerSection}

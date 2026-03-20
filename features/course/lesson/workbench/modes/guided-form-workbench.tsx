@@ -51,13 +51,7 @@ export function GuidedFormWorkbench(props: WorkbenchModeProps) {
 	const supportingContent = (
 		<>
 			{showStartWithProblemSupport ? (
-				<StartWithProblemSupport
-					lessonContent={lessonContent}
-					fieldValues={fieldValues}
-					fields={fields}
-					onFieldChange={onFieldChange}
-					invalidFieldIds={invalidFieldIds}
-				/>
+				<StartWithProblemSupport lessonContent={lessonContent} />
 			) : null}
 			{lesson.handoff?.mode === "select_candidate_problem" ? (
 				<>

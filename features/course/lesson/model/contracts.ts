@@ -219,6 +219,7 @@ export type LessonPromptResourceContent = {
 	kind: "copy_prompt";
 	body?: string;
 	promptTemplateId: LessonPromptTemplateId;
+	copySuccessToastMessage?: string;
 };
 
 export type LessonPromptImport =

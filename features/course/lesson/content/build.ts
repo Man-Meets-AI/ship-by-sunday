@@ -11,8 +11,6 @@ export const buildLessons = [
 		shortTitle: "Kickoff",
 		prevLessonId: "2.2",
 		nextLessonId: "3.1",
-		intro:
-			"Open the Build block with the filmed kickoff, then move immediately into the actual template and repo sequence from Bunny.",
 		teachingPoints: [
 			"Use this to frame the Build block.",
 			"Do not linger on setup theory after the kickoff.",

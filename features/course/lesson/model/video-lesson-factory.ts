@@ -24,6 +24,7 @@ type VideoLessonSeed = {
 	helperText?: string;
 	intro?: string;
 	teachingPoints?: string[];
+	pinnedArtifacts?: string[];
 	coachResources?: LessonResourceContent[];
 	workbenchFields?: WorkbenchField[];
 	workbenchSections?: WorkbenchSection[];
@@ -57,6 +58,7 @@ export function createVideoLesson({
 	helperText,
 	intro,
 	teachingPoints,
+	pinnedArtifacts,
 	coachResources = [],
 	workbenchFields = [],
 	workbenchSections,
@@ -112,6 +114,7 @@ export function createVideoLesson({
 		winCondition:
 			winConditionOverride ?? `The ${title} walkthrough is complete.`,
 		panelDefaults: focusPanelDefaults,
+		...(pinnedArtifacts?.length ? { pinnedArtifacts } : {}),
 		workbenchFields,
 		...(workbenchSections?.length ? { workbenchSections } : {}),
 		...(promptImport ? { promptImport } : {}),

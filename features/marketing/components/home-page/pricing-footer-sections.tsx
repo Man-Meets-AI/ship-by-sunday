@@ -2,7 +2,7 @@ import { CheckoutButton } from "@/features/checkout/components/checkout-button";
 import type { HomePageContent } from "@/features/marketing/content/home";
 
 import { PricingIncludesList } from "./pricing-includes-list";
-import { SectionFrame, SectionLabel } from "./section-shell";
+import { SectionFrame, SectionLabel, SectionTitle } from "./section-shell";
 
 type FooterNav = HomePageContent["footerNav"];
 type FooterWordmark = HomePageContent["footerWordmark"];
@@ -21,22 +21,22 @@ export function PricingSectionBlock({
 			<div className="flex flex-col gap-8 sm:gap-10">
 				<div className="space-y-4">
 					<SectionLabel>{pricingSection.label}</SectionLabel>
-					<h2 className="font-marketing-display text-balance text-3xl uppercase tracking-marketing-section sm:text-5xl">
+					<SectionTitle>
 						{pricingSection.titleLead}
 						<span className="block">{pricingSection.titleAccent}</span>
-					</h2>
+					</SectionTitle>
 					<p className="max-w-md text-base leading-relaxed text-muted-foreground sm:text-lg">
 						{pricingSection.intro}
 					</p>
 				</div>
 				<div className="space-y-2 rounded-xl bg-muted/20 px-5 py-6 sm:px-6 sm:py-8">
-					<p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+					<p className="text-xs font-medium text-muted-foreground">
 						Investment
 					</p>
-					<p className="font-marketing-display text-5xl font-semibold tracking-marketing-section sm:text-6xl">
+					<p className="text-5xl font-bold tracking-tight text-foreground tabular-nums sm:text-6xl">
 						{pricingSection.priceDisplay}
 					</p>
-					<p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+					<p className="text-sm text-muted-foreground">
 						{pricingSection.eyebrow}
 					</p>
 				</div>
@@ -44,9 +44,9 @@ export function PricingSectionBlock({
 			<SectionFrame className="gap-0 overflow-hidden p-0 shadow-md ring-1 ring-foreground/6">
 				<div className="space-y-4 px-6 pt-6 sm:space-y-5 sm:px-8 sm:pt-8">
 					<SectionLabel>{pricingSection.paymentLabel}</SectionLabel>
-					<h2 className="font-marketing-display text-balance text-3xl uppercase tracking-marketing-section sm:text-5xl">
+					<h3 className="text-balance text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
 						{pricingSection.ctaTitle}
-					</h2>
+					</h3>
 				</div>
 				<div className="px-6 py-6 sm:px-8 sm:py-8">
 					<PricingIncludesList items={pricingSection.includes} />
@@ -54,10 +54,10 @@ export function PricingSectionBlock({
 				<div className="flex flex-col gap-5 border-t border-border/80 bg-muted/35 px-6 py-6 sm:gap-6 sm:px-8 sm:py-8">
 					<div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
 						<div>
-							<p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+							<p className="text-xs font-medium text-muted-foreground">
 								Total due today
 							</p>
-							<p className="font-marketing-display text-4xl font-semibold tracking-marketing-section sm:text-5xl">
+							<p className="text-4xl font-bold tracking-tight text-foreground tabular-nums sm:text-5xl">
 								{pricingSection.priceDisplay}
 							</p>
 						</div>
@@ -70,7 +70,7 @@ export function PricingSectionBlock({
 						<p className="max-w-lg text-sm leading-relaxed sm:text-base">
 							{pricingSection.trustLine}
 						</p>
-						<p className="max-w-lg text-xs font-medium uppercase leading-relaxed tracking-wide sm:text-sm">
+						<p className="max-w-lg text-xs leading-relaxed text-muted-foreground sm:text-sm">
 							{pricingSection.guarantee}
 						</p>
 					</div>
@@ -102,8 +102,8 @@ export function FooterSection({
 					</span>
 				))}
 			</nav>
-			<div className="flex justify-center px-2 py-12 text-center sm:py-16 md:py-20">
-				<p className="font-marketing-display text-balance text-5xl font-semibold uppercase tracking-marketing-section sm:text-7xl md:text-8xl lg:text-9xl">
+			<div className="flex justify-center px-2 py-10 text-center sm:py-14 md:py-16">
+				<p className="text-balance text-4xl font-bold tracking-tight text-muted-foreground sm:text-5xl md:text-6xl">
 					{footerWordmark}
 				</p>
 			</div>

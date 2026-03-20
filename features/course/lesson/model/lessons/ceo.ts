@@ -498,6 +498,7 @@ export const ceoLessons = [
 		shortTitle: "Research",
 		prevLessonId: "1.5",
 		nextLessonId: "1.7",
+		pinnedArtifacts: ["user_statement", "outcome_statement"],
 		coachResources: [
 			{
 				id: "light_research_prompt",
@@ -505,6 +506,8 @@ export const ceoLessons = [
 				kind: "copy_prompt",
 				promptTemplateId: "competitor_research",
 				body: "Copy this into your AI tool to scan alternatives fast—anchored to your chosen user and outcome, not a thesis.",
+				copySuccessToastMessage:
+					"Copied the research prompt. Go paste it in your favorite model.",
 			},
 		],
 	}),
@@ -517,6 +520,7 @@ export const ceoLessons = [
 		shortTitle: "Scope",
 		prevLessonId: "1.6",
 		nextLessonId: "1.8",
+		pinnedArtifacts: ["user_statement", "outcome_statement"],
 		artifact: {
 			key: "scope_boundary",
 			label: "Scope boundary",

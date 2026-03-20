@@ -188,11 +188,20 @@ describe("course registry", () => {
 				.sort(),
 		).toEqual(["difference_for_user", "outcome", "success_looks_like"].sort());
 
+		expect(getLessonById("1.6")?.pinnedArtifacts).toEqual([
+			"user_statement",
+			"outcome_statement",
+		]);
+
 		const scopeHammer = getLessonById("1.7");
 		expect(scopeHammer).toBeTruthy();
 		if (!scopeHammer) {
 			throw new Error("Expected lesson 1.7 to exist.");
 		}
+		expect(scopeHammer.pinnedArtifacts).toEqual([
+			"user_statement",
+			"outcome_statement",
+		]);
 		expect(scopeHammer.workbench).toBe("external_workspace");
 		expect(scopeHammer.artifact.key).toBe("scope_boundary");
 		expect(scopeHammer.artifact.type).toBe("mixed");

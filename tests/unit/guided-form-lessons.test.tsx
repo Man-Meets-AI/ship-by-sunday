@@ -57,11 +57,11 @@ describe("restored guided-form lessons", () => {
 			/>,
 		);
 
-		// Guided sections (3) plus compare UI: desktop grid (3) and one mounted mobile tab panel (1).
-		expect(screen.getAllByText("Who has this problem?")).toHaveLength(7);
+		// Three guided candidate sections only (compare workbench removed).
+		expect(screen.getAllByText("Who has this problem?")).toHaveLength(3);
 		expect(
 			screen.getAllByText("What recurring pain do they keep running into?"),
-		).toHaveLength(7);
+		).toHaveLength(3);
 		expect(screen.getAllByText("How frequent is this problem?")).toHaveLength(
 			3,
 		);

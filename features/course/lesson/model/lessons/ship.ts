@@ -10,8 +10,6 @@ export const shipLessons = [
 		title: "Product Review",
 		shortTitle: "Review",
 		prevLessonId: "3.16",
-		intro:
-			"Start Ship with the one live recorded lesson in Bunny and use it as the current bridge while the rest of the Ship block gets filmed.",
 		teachingPoints: [
 			"Treat this as the live Ship-block bridge for now.",
 			"Use the review to close the loop on what was built.",
