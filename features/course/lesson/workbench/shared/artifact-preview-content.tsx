@@ -23,39 +23,11 @@ import {
 	getUploadPreviewItems,
 	hasUploadGalleryValue,
 } from "./artifact-format";
+import {
+	getReferenceGalleryField,
+	getUploadGalleryField,
+} from "./artifact-preview-fields";
 import { ArtifactPreviewGalleryGrid } from "./artifact-preview-gallery-grid";
-
-function getReferenceGalleryField(artifact: ArtifactPreview) {
-	for (const [label, value] of artifact.fields) {
-		if (isReferenceGalleryValue(value)) {
-			return { label, value };
-		}
-	}
-
-	for (const [fieldId, value] of Object.entries(artifact.fieldValues)) {
-		if (isReferenceGalleryValue(value)) {
-			return { label: fieldId.replaceAll("_", " "), value };
-		}
-	}
-
-	return null;
-}
-
-function getUploadGalleryField(artifact: ArtifactPreview) {
-	for (const [label, value] of artifact.fields) {
-		if (hasUploadGalleryValue(value)) {
-			return { label, value };
-		}
-	}
-
-	for (const [fieldId, value] of Object.entries(artifact.fieldValues)) {
-		if (hasUploadGalleryValue(value)) {
-			return { label: fieldId.replaceAll("_", " "), value };
-		}
-	}
-
-	return null;
-}
 
 export function ArtifactPreviewContent({
 	artifact,

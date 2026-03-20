@@ -22,15 +22,11 @@ import {
 	ItemSeparator,
 	ItemTitle,
 } from "@/components/ui/item";
+import type { BlockGroup } from "@/features/course/artifacts/types";
 import { getLessonHref } from "@/features/course/lesson/model/manifest";
-import type { BlockConfig } from "@/features/course/lesson/model/manifest";
-import type { ArtifactPreview } from "@/features/course/lesson/model/registry";
 import { ArtifactPreviewContent } from "@/features/course/lesson/workbench/shared/artifact-preview-content";
 
-export type BlockGroup = {
-	block: BlockConfig;
-	artifacts: ArtifactPreview[];
-};
+export type { BlockGroup } from "@/features/course/artifacts/types";
 
 export function ArtifactsBlockSection({ group }: { group: BlockGroup }) {
 	const count = group.artifacts.length;

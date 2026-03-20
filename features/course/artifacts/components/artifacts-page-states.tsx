@@ -1,0 +1,51 @@
+import Link from "next/link";
+
+import { Button } from "@/components/ui/button";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+} from "@/components/ui/card";
+import {
+	Empty,
+	EmptyContent,
+	EmptyDescription,
+	EmptyHeader,
+	EmptyTitle,
+} from "@/components/ui/empty";
+import { Skeleton } from "@/components/ui/skeleton";
+import { routeConfig } from "@/config/product";
+
+export function ArtifactsLoadingState() {
+	return (
+		<Card>
+			<CardHeader>
+				<Skeleton className="h-5 w-36" />
+				<Skeleton className="mt-2 h-4 w-full max-w-md" />
+			</CardHeader>
+			<CardContent className="space-y-4">
+				<Skeleton className="h-28 w-full rounded-md" />
+				<Skeleton className="h-28 w-full rounded-md" />
+			</CardContent>
+		</Card>
+	);
+}
+
+export function ArtifactsEmptyState() {
+	return (
+		<Empty>
+			<EmptyHeader>
+				<EmptyTitle>No saved work yet</EmptyTitle>
+				<EmptyDescription>
+					Finish a lesson and your outputs show up here, grouped by course
+					block.
+				</EmptyDescription>
+			</EmptyHeader>
+			<EmptyContent>
+				<Button asChild>
+					<Link href={routeConfig.mission}>Go to mission</Link>
+				</Button>
+			</EmptyContent>
+		</Empty>
+	);
+}
