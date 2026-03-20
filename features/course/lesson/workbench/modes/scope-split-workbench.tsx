@@ -1,11 +1,11 @@
-import { PromptImportCard } from "../shared/prompt-import-card";
+import { Separator } from "@/components/ui/separator";
+import { FocusInlineLessonVideo } from "../shared/focus-inline-lesson-video";
 import { StatusRail } from "../shared/status-rail";
 import { WorkbenchContainer } from "../shared/workbench-container";
 import { WorkbenchHeader } from "../shared/workbench-header";
+import { WorkbenchMediaLayout } from "../shared/workbench-media-layout";
 import type { WorkbenchModeProps } from "../types";
-import { ScopeContextCard } from "./scope-split/scope-context-card";
-import { ScopeManualCards } from "./scope-split/scope-manual-cards";
-import { ScopeOverviewCard } from "./scope-split/scope-overview-card";
+import { ScopeSplitScopeColumn } from "./scope-split/scope-split-scope-column";
 import {
 	countFilledScopeItems,
 	getPinnedCoreFlowImageUrl,
@@ -28,7 +28,16 @@ export function ScopeSplitWorkbench({
 	fields,
 	objectiveTasks,
 	completedTaskCount,
+	layoutMode,
 }: WorkbenchModeProps) {
+	const showInlineVideo = lesson.coachVideoPlacement === "workbench";
+	const showSplitWorkbenchMedia =
+		showInlineVideo &&
+		lesson.workbenchMediaLayout === "split" &&
+		layoutMode === "focus";
+	const inlineVideoCard = (
+		<FocusInlineLessonVideo coachContent={lessonContent.coach} />
+	);
 	const [keepField, cutField, rationaleField, ...restFields] = fields;
 	const chosenUser = getPinnedTextValue(
 		pinnedArtifacts,
@@ -78,63 +87,55 @@ export function ScopeSplitWorkbench({
 		}
 	};
 
+	const scopeColumn = (
+		<ScopeSplitScopeColumn
+			draftStatus={draftStatus}
+			boundaryStatus={boundaryStatus}
+			keepCount={keepCount}
+			cutCount={cutCount}
+			rationaleReady={rationaleReady}
+			chosenUser={chosenUser}
+			chosenProblem={chosenProblem}
+			promisedOutcome={promisedOutcome}
+			coreFlowImageUrl={coreFlowImageUrl}
+			keepField={keepField}
+			cutField={cutField}
+			rationaleField={rationaleField}
+			restFields={restFields}
+			fieldValues={fieldValues}
+			pinnedArtifacts={pinnedArtifacts}
+			invalidFieldIds={invalidFieldIds}
+			invalidFieldMessages={invalidFieldMessages}
+			rationaleValue={rationaleValue}
+			onManualFieldChange={handleManualFieldChange}
+			lesson={lesson}
+			onFieldChange={onFieldChange}
+		/>
+	);
+
 	return (
 		<WorkbenchContainer>
 			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
-			<StatusRail
-				lessonContent={lessonContent}
-				completedTaskCount={completedTaskCount}
-				totalTaskCount={Math.max(objectiveTasks.length, 1)}
-			/>
-			{draftStatus ? (
-				<ScopeOverviewCard
-					keepCount={keepCount}
-					cutCount={cutCount}
-					rationaleReady={rationaleReady}
-					draftStatus={draftStatus}
-					boundaryStatus={boundaryStatus}
-				/>
-			) : null}
-			<ScopeContextCard
-				chosenUser={chosenUser}
-				chosenProblem={chosenProblem}
-				promisedOutcome={promisedOutcome}
-				coreFlowImageUrl={coreFlowImageUrl}
-			/>
-			<ScopeManualCards
-				keepField={keepField}
-				cutField={cutField}
-				rationaleField={rationaleField}
-				restFields={restFields}
-				fieldValues={fieldValues}
-				pinnedArtifacts={pinnedArtifacts}
-				invalidFieldIds={invalidFieldIds}
-				invalidFieldMessages={invalidFieldMessages}
-				keepCount={keepCount}
-				cutCount={cutCount}
-				chosenUser={chosenUser}
-				promisedOutcome={promisedOutcome}
-				rationaleValue={rationaleValue}
-				onFieldChange={handleManualFieldChange}
-			/>
-			{lesson.promptImport ? (
-				<PromptImportCard
-					lesson={lesson}
-					onFieldChange={onFieldChange}
-					pinnedArtifacts={pinnedArtifacts}
-					fieldValues={fieldValues}
-					onImportApplied={({ promptTemplateId, source }) => {
-						if (promptTemplateId !== "scope_boundary") {
-							return;
-						}
-
-						onFieldChange(
-							SCOPE_SOURCE_FIELD_ID,
-							source === "generated" ? "generated_codex" : "imported_chatgpt",
-						);
-					}}
-				/>
-			) : null}
+			<Separator className="bg-border" />
+			{showSplitWorkbenchMedia ? (
+				<WorkbenchMediaLayout media={inlineVideoCard}>
+					<div className="space-y-5">{scopeColumn}</div>
+				</WorkbenchMediaLayout>
+			) : showInlineVideo ? (
+				<>
+					{inlineVideoCard}
+					<div className="mt-5 space-y-5">{scopeColumn}</div>
+				</>
+			) : (
+				<>
+					<StatusRail
+						lessonContent={lessonContent}
+						completedTaskCount={completedTaskCount}
+						totalTaskCount={Math.max(objectiveTasks.length, 1)}
+					/>
+					<div className="space-y-5">{scopeColumn}</div>
+				</>
+			)}
 		</WorkbenchContainer>
 	);
 }

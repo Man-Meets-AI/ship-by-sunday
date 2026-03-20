@@ -15,7 +15,8 @@ export function HomeHeroHeadline({ hero }: { hero: Hero }) {
 					{hero.headlineTailPrefix}
 					<span className="inline-block align-baseline">
 						<span className="sr-only">{hero.headlineTailHover}</span>
-						<span className="inline-block h-[0.72em] min-h-6 w-[7.5ch] min-w-26 align-baseline sm:min-w-29 lg:min-w-32">
+						{/* Match viewBox 300×100 (~3:1): tall enough for text-7xl inside SVG (demo uses a large box; em-sized boxes crush strokes). */}
+						<span className="relative inline-block aspect-[3/1] h-[2.65rem] w-auto min-w-[9.5rem] align-baseline sm:h-[3.15rem] sm:min-w-[11rem] lg:h-[3.85rem] lg:min-w-[12.5rem]">
 							<TextHoverEffect text={hero.headlineTailHover} duration={0.2} />
 						</span>
 					</span>

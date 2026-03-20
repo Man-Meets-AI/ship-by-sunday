@@ -16,9 +16,10 @@ globalThis.React = React;
 
 import { getLessonById } from "@/features/course/lesson/model";
 import { LessonShellWatch } from "@/features/course/lesson/shells";
+import { FocusInlineLessonVideo } from "@/features/course/lesson/workbench/shared/focus-inline-lesson-video";
 
 describe("LessonShellWatch", () => {
-	it("renders the Bunny-backed watch shell without workbench chrome", () => {
+	it("renders Scope Hammer inline video for split-baseline lessons", () => {
 		const lesson = getLessonById("1.7");
 		expect(lesson).toBeTruthy();
 		if (!lesson) {
@@ -26,24 +27,16 @@ describe("LessonShellWatch", () => {
 		}
 
 		const markup = renderToStaticMarkup(
-			<LessonShellWatch
-				lesson={lesson}
-				coachContent={lesson.content.coach}
-				footer={<div>Footer</div>}
-				pinnedArtifacts={[]}
-			/>,
+			<FocusInlineLessonVideo coachContent={lesson.content.coach} />,
 		);
 
-		expect(markup).toContain("Scope Hammer");
-		expect(markup).toContain("Scope boundary");
+		expect(markup).toContain("Watch first");
 		expect(markup).toContain(
 			"https://player.mediadelivery.net/embed/619172/ce14c05d-c5f2-4b50-b1e8-4911015bdc20",
 		);
-		expect(markup).toContain("Footer");
-		expect(markup).not.toContain("Workbench");
 	});
 
-	it("renders the renamed watch lesson sequence after the restored opening forms", () => {
+	it("renders Light Research inline video and leaves copy prompts to coach panel", () => {
 		const lesson = getLessonById("1.6");
 		expect(lesson).toBeTruthy();
 		if (!lesson) {
@@ -51,21 +44,13 @@ describe("LessonShellWatch", () => {
 		}
 
 		const markup = renderToStaticMarkup(
-			<LessonShellWatch
-				lesson={lesson}
-				coachContent={lesson.content.coach}
-				footer={<div>Footer</div>}
-				pinnedArtifacts={[]}
-			/>,
+			<FocusInlineLessonVideo coachContent={lesson.content.coach} />,
 		);
 
-		expect(markup).toContain("Light Research, Not a Thesis");
-		expect(markup).toContain("Light Research, Not a Thesis Video");
+		expect(markup).toContain("Watch first");
 		expect(markup).toContain(
 			"https://player.mediadelivery.net/embed/619172/aac17809-c856-4274-badc-12a8b46a407d",
 		);
-		expect(markup).toContain("Light research prompt");
-		expect(markup).toContain("Copy prompt");
 	});
 
 	it("preserves lesson-specific titles when a lesson borrows a media slot", () => {
