@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Fragment } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,16 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import {
+	Item,
+	ItemActions,
+	ItemContent,
+	ItemDescription,
+	ItemGroup,
+	ItemHeader,
+	ItemSeparator,
+	ItemTitle,
+} from "@/components/ui/item";
 import { getLessonHref } from "@/features/course/lesson/model/manifest";
 import type { BlockConfig } from "@/features/course/lesson/model/manifest";
 import type { ArtifactPreview } from "@/features/course/lesson/model/registry";
@@ -21,30 +31,6 @@ export type BlockGroup = {
 	block: BlockConfig;
 	artifacts: ArtifactPreview[];
 };
-
-function ArtifactRow({ artifact }: { artifact: ArtifactPreview }) {
-	return (
-		<div className="space-y-3">
-			<div className="flex items-start justify-between gap-3">
-				<div className="min-w-0 flex-1 space-y-1">
-					<p className="text-xs text-muted-foreground">{artifact.lessonId}</p>
-					<p className="text-sm font-medium leading-snug">
-						{artifact.artifactLabel}
-					</p>
-					<p className="text-sm text-muted-foreground">
-						{artifact.lessonTitle}
-					</p>
-				</div>
-				<Button asChild variant="outline" size="sm" className="shrink-0">
-					<Link href={getLessonHref(artifact.lessonId)}>Open lesson</Link>
-				</Button>
-			</div>
-			<div className="rounded-md bg-muted/50 p-3">
-				<ArtifactPreviewContent artifact={artifact} maxTextFields={4} />
-			</div>
-		</div>
-	);
-}
 
 export function ArtifactsBlockSection({ group }: { group: BlockGroup }) {
 	const count = group.artifacts.length;
@@ -58,13 +44,42 @@ export function ArtifactsBlockSection({ group }: { group: BlockGroup }) {
 					<Badge variant="secondary">{countLabel}</Badge>
 				</CardAction>
 			</CardHeader>
-			<CardContent className="space-y-6">
-				{group.artifacts.map((artifact, index) => (
-					<div key={artifact.artifactKey}>
-						{index > 0 ? <Separator className="mb-6" /> : null}
-						<ArtifactRow artifact={artifact} />
-					</div>
-				))}
+			<CardContent>
+				<ItemGroup>
+					{group.artifacts.map((artifact, index) => (
+						<Fragment key={artifact.artifactKey}>
+							{index > 0 ? <ItemSeparator className="my-4" /> : null}
+							<Item variant="outline" className="flex-col items-stretch gap-3">
+								<ItemHeader className="w-full">
+									<ItemContent>
+										<ItemDescription className="text-xs">
+											{artifact.lessonId}
+										</ItemDescription>
+										<ItemTitle className="line-clamp-none">
+											{artifact.artifactLabel}
+										</ItemTitle>
+										<ItemDescription>{artifact.lessonTitle}</ItemDescription>
+									</ItemContent>
+									<ItemActions>
+										<Button asChild variant="outline" size="sm">
+											<Link href={getLessonHref(artifact.lessonId)}>
+												Open lesson
+											</Link>
+										</Button>
+									</ItemActions>
+								</ItemHeader>
+								<Card className="bg-muted/30 p-0 shadow-none ring-1 ring-border">
+									<CardContent className="px-3 py-3">
+										<ArtifactPreviewContent
+											artifact={artifact}
+											maxTextFields={4}
+										/>
+									</CardContent>
+								</Card>
+							</Item>
+						</Fragment>
+					))}
+				</ItemGroup>
 			</CardContent>
 		</Card>
 	);
