@@ -4,7 +4,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 const useConvexAuthMock = vi.fn();
 const useQueryMock = vi.fn();
-const usePreloadedQueryMock = vi.fn();
 const replaceMock = vi.fn();
 const refreshMock = vi.fn();
 
@@ -35,7 +34,6 @@ vi.mock("next/navigation", () => ({
 vi.mock("convex/react", () => ({
 	useConvexAuth: () => useConvexAuthMock(),
 	useQuery: (query: unknown, args: unknown) => useQueryMock(query, args),
-	usePreloadedQuery: (payload: unknown) => usePreloadedQueryMock(payload),
 }));
 
 import { CheckoutSuccessView } from "../../features/checkout/components/checkout-success-view";
@@ -49,13 +47,13 @@ function renderView(
 		| { kind: "payment_pending"; sessionId: string; paymentStatus: string }
 		| { kind: "validated"; sessionId: string },
 	options: {
-		preloadedProductAccess?: unknown;
+		initialProductAccess?: unknown;
 	} = {},
 ) {
 	return renderToStaticMarkup(
 		<CheckoutSuccessView
 			checkoutSessionState={checkoutSessionState as never}
-			preloadedProductAccess={options.preloadedProductAccess as never}
+			initialProductAccess={options.initialProductAccess as never}
 		/>,
 	);
 }
@@ -64,7 +62,6 @@ describe("CheckoutSuccessView", () => {
 	beforeEach(() => {
 		useConvexAuthMock.mockReset();
 		useQueryMock.mockReset();
-		usePreloadedQueryMock.mockReset();
 		replaceMock.mockReset();
 		refreshMock.mockReset();
 	});
@@ -120,19 +117,15 @@ describe("CheckoutSuccessView", () => {
 			isLoading: false,
 		});
 		useQueryMock.mockReturnValue(undefined);
-		usePreloadedQueryMock.mockReturnValue({
-			hasAccess: true,
-		});
 
 		const markup = renderView(
 			{
 				kind: "validated",
 				sessionId: "cs_preloaded_123",
 			},
-			{ preloadedProductAccess: {} },
+			{ initialProductAccess: { hasAccess: true } },
 		);
 
-		expect(usePreloadedQueryMock).toHaveBeenCalledTimes(1);
 		expect(markup).toContain("Opening mission");
 		expect(markup).toContain("Access ready");
 	});

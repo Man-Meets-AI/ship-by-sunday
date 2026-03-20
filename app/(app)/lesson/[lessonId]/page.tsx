@@ -3,7 +3,7 @@ import { api } from "@/convex/_generated/api";
 import { LessonPage } from "@/features/course/lesson/components/lesson-page";
 import { getLesson } from "@/features/course/lesson/model";
 import { getLegacyLessonRedirect } from "@/features/course/lesson/utils/legacy-routes";
-import { preloadAuthenticatedQuery } from "@/platform/convex/server-preload";
+import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
 
 export default async function Page({
 	params,
@@ -26,7 +26,7 @@ export default async function Page({
 		<LessonPage
 			key={lessonId}
 			lessonId={lessonId}
-			preloadedMission={await preloadAuthenticatedQuery(
+			initialMission={await fetchAuthenticatedQuery(
 				api.course.getMissionState,
 				{},
 			)}

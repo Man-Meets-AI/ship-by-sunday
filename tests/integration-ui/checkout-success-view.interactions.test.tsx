@@ -5,7 +5,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const useConvexAuthMock = vi.fn();
 const useQueryMock = vi.fn();
-const usePreloadedQueryMock = vi.fn();
 const replaceMock = vi.fn();
 
 vi.mock("next/link", () => ({
@@ -32,7 +31,6 @@ vi.mock("next/navigation", () => ({
 vi.mock("convex/react", () => ({
 	useConvexAuth: () => useConvexAuthMock(),
 	useQuery: () => useQueryMock(),
-	usePreloadedQuery: (payload: unknown) => usePreloadedQueryMock(payload),
 }));
 
 import { CheckoutSuccessView } from "@/features/checkout/components/checkout-success-view";
@@ -41,7 +39,6 @@ describe("CheckoutSuccessView interactions", () => {
 	beforeEach(() => {
 		useConvexAuthMock.mockReset();
 		useQueryMock.mockReset();
-		usePreloadedQueryMock.mockReset();
 		replaceMock.mockReset();
 		vi.useRealTimers();
 	});

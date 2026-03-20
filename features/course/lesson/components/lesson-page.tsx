@@ -1,9 +1,6 @@
 "use client";
 
-import type { Preloaded } from "convex/react";
-import { usePreloadedQuery } from "convex/react";
 import { useRouter } from "next/navigation";
-import { api } from "@/convex/_generated/api";
 import { LessonPageFooter } from "@/features/course/lesson/components/lesson-page-footer";
 import { LessonPageLockedCard } from "@/features/course/lesson/components/lesson-page-locked-card";
 import { LessonPageSkeleton } from "@/features/course/lesson/components/lesson-page-skeleton";
@@ -125,34 +122,12 @@ function LessonPageInner({
 	);
 }
 
-function LessonPagePreloaded({
-	lessonId,
-	preloadedMission,
-}: {
-	lessonId: string;
-	preloadedMission: Preloaded<typeof api.course.getMissionState>;
-}) {
-	return (
-		<LessonPageInner
-			lessonId={lessonId}
-			mission={usePreloadedQuery(preloadedMission) as MissionState}
-		/>
-	);
-}
-
 export function LessonPage({
 	lessonId,
-	preloadedMission,
+	initialMission,
 }: {
 	lessonId: string;
-	preloadedMission?: Preloaded<typeof api.course.getMissionState> | null;
+	initialMission?: MissionState | null;
 }) {
-	return preloadedMission ? (
-		<LessonPagePreloaded
-			lessonId={lessonId}
-			preloadedMission={preloadedMission}
-		/>
-	) : (
-		<LessonPageInner lessonId={lessonId} />
-	);
+	return <LessonPageInner lessonId={lessonId} mission={initialMission ?? undefined} />;
 }

@@ -1,7 +1,6 @@
 import "server-only";
 
-import { preloadQuery, preloadedQueryResult } from "convex/nextjs";
-import type { Preloaded } from "convex/react";
+import { fetchQuery } from "convex/nextjs";
 import type {
 	FunctionArgs,
 	FunctionReference,
@@ -10,7 +9,7 @@ import type {
 
 import { getConvexServerSession } from "@/platform/auth/convex-auth";
 
-export async function preloadAuthenticatedQuery<
+export async function fetchAuthenticatedQuery<
 	Query extends FunctionReference<"query">,
 >(query: Query, args: FunctionArgs<Query>) {
 	const session = await getConvexServerSession();
@@ -18,22 +17,5 @@ export async function preloadAuthenticatedQuery<
 		return null;
 	}
 
-	return preloadQuery(query, args, { token: session.token });
-}
-
-export async function preloadAuthenticatedQueryWithResult<
-	Query extends FunctionReference<"query">,
->(
-	query: Query,
-	args: FunctionArgs<Query>,
-): Promise<{
-	preloaded: Preloaded<Query> | null;
-	result: FunctionReturnType<Query> | null;
-}> {
-	const preloaded = await preloadAuthenticatedQuery(query, args);
-
-	return {
-		preloaded,
-		result: preloaded ? preloadedQueryResult(preloaded) : null,
-	};
+	return fetchQuery(query, args, { token: session.token });
 }

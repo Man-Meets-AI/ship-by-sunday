@@ -1,7 +1,6 @@
 "use client";
 
-import type { Preloaded } from "convex/react";
-import { useConvexAuth, usePreloadedQuery, useQuery } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
@@ -86,36 +85,17 @@ function ArtifactsPageContent({
 	);
 }
 
-function ArtifactsPageLive() {
+export function ArtifactsPage({
+	initialArtifacts,
+}: {
+	initialArtifacts?: ArtifactPreview[] | null;
+}) {
 	const { isAuthenticated, isLoading } = useConvexAuth();
-	const artifacts = useQuery(
+	const liveArtifacts = useQuery(
 		api.course.listArtifacts,
 		isAuthenticated && !isLoading ? {} : "skip",
 	) as ArtifactPreview[] | undefined;
+	const artifacts = liveArtifacts ?? initialArtifacts ?? undefined;
 
 	return <ArtifactsPageContent artifacts={artifacts} />;
-}
-
-function ArtifactsPagePreloaded({
-	preloadedArtifacts,
-}: {
-	preloadedArtifacts: Preloaded<typeof api.course.listArtifacts>;
-}) {
-	return (
-		<ArtifactsPageContent
-			artifacts={usePreloadedQuery(preloadedArtifacts) as ArtifactPreview[]}
-		/>
-	);
-}
-
-export function ArtifactsPage({
-	preloadedArtifacts,
-}: {
-	preloadedArtifacts?: Preloaded<typeof api.course.listArtifacts> | null;
-}) {
-	return preloadedArtifacts ? (
-		<ArtifactsPagePreloaded preloadedArtifacts={preloadedArtifacts} />
-	) : (
-		<ArtifactsPageLive />
-	);
 }

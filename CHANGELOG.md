@@ -6,6 +6,7 @@
 
 - Simplified the starter access model so the code and docs now describe one generic `product access` layer backed by Convex, with a shared protected route-group layout in `app/(app)` instead of repeating page-level access checks.
 - Switched the JavaScript toolchain from `pnpm` plus the leftover ESLint path to Bun plus Oxc, updating package scripts, CI, local helper commands, and the repo’s setup and QA docs to use `bun run` and `bunx`.
+- Hardened protected-route and checkout hydration so pages now render from server-fetched access or mission snapshots first, then resume Clerk-gated live Convex queries without the transient client-side `Unauthorized` error.
 
 ## 2026-03-18
 

@@ -56,8 +56,15 @@ You are correctly wired when:
 
 - sign-in works
 - protected routes can read server-side state
+- protected pages do not throw `Unauthorized` during the first client hydration pass
 - `/access-required` can tell the difference between signed-out and signed-in users
 - product-access checks do not fail with a token or issuer mismatch
+
+## Why the starter now seeds initial data on the server
+
+Protected routes and `/checkout/success` now render from a server-fetched Convex snapshot first, then let Clerk-gated live queries take over in the browser.
+
+That is intentional. It protects the first render from a short Clerk/Convex auth sync gap during hydration, where the browser can briefly lack a Convex identity even though the server already validated the session.
 
 ## If this breaks
 

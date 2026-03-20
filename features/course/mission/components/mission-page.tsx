@@ -1,7 +1,6 @@
 "use client";
 
-import type { Preloaded } from "convex/react";
-import { useConvexAuth, usePreloadedQuery, useQuery } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
 
 import { api } from "@/convex/_generated/api";
 import { MissionExtrasRow } from "@/features/course/mission/components/mission/mission-extras-row";
@@ -52,34 +51,17 @@ function MissionPageContent({ mission }: { mission: MissionState | undefined }) 
 	);
 }
 
-function MissionPageLive() {
+export function MissionPage({
+	initialMission,
+}: {
+	initialMission?: MissionState | null;
+}) {
 	const { isAuthenticated, isLoading } = useConvexAuth();
-	const mission = useQuery(
+	const liveMission = useQuery(
 		api.course.getMissionState,
 		isAuthenticated && !isLoading ? {} : "skip",
 	) as MissionState | undefined;
+	const mission = liveMission ?? initialMission ?? undefined;
 
 	return <MissionPageContent mission={mission} />;
-}
-
-function MissionPagePreloaded({
-	preloadedMission,
-}: {
-	preloadedMission: Preloaded<typeof api.course.getMissionState>;
-}) {
-	return (
-		<MissionPageContent mission={usePreloadedQuery(preloadedMission) as MissionState} />
-	);
-}
-
-export function MissionPage({
-	preloadedMission,
-}: {
-	preloadedMission?: Preloaded<typeof api.course.getMissionState> | null;
-}) {
-	return preloadedMission ? (
-		<MissionPagePreloaded preloadedMission={preloadedMission} />
-	) : (
-		<MissionPageLive />
-	);
 }

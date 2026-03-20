@@ -27,6 +27,18 @@ This usually means one of two things:
 
 Go straight to [Troubleshooting Stripe and Convex](/docs/troubleshooting/stripe-convex) if payment already completed.
 
+## Symptom: a granted user sees `Unauthorized` during page load
+
+That usually means the server-side access check succeeded, but a client-side Convex query fired before Clerk auth finished syncing in the browser.
+
+Start with these checks:
+
+1. confirm the user really has a `granted` product-access row
+2. confirm the failing stack says `Called by client`, not the server-side layout guard
+3. confirm the page is using the server-fetched initial access or mission data path before live Convex queries take over
+
+If the access row exists and the error only appears during hydration, treat it as a Clerk/Convex client-auth timing issue, not a revoked purchase.
+
 ## Symptom: the wrong-account state appears
 
 That state is usually telling the truth.

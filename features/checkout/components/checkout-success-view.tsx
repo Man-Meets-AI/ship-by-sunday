@@ -1,13 +1,13 @@
 "use client";
 
-import type { Preloaded } from "convex/react";
-import { useConvexAuth, usePreloadedQuery, useQuery } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { routeConfig, timingConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import type { CheckoutSessionState } from "@/features/checkout/server/checkout-session";
+import type { ProductAccess } from "@/features/product-access/lib/product-access";
 
 import { CheckoutSuccessSurface } from "./checkout-success-view-surface";
 import {
@@ -64,55 +64,24 @@ function CheckoutSuccessViewContent({
 	);
 }
 
-function CheckoutSuccessViewLive({
+export function CheckoutSuccessView({
 	checkoutSessionState,
+	initialProductAccess,
 }: {
 	checkoutSessionState: CheckoutSessionState;
+	initialProductAccess?: ProductAccess | null;
 }) {
 	const { isAuthenticated } = useConvexAuth();
-	const access = useQuery(
+	const liveAccess = useQuery(
 		api.access.viewerProductAccess,
 		isAuthenticated ? {} : "skip",
-	) as { hasAccess: boolean } | undefined;
+	) as ProductAccess | undefined;
+	const access = liveAccess ?? initialProductAccess ?? undefined;
 
 	return (
 		<CheckoutSuccessViewContent
 			checkoutSessionState={checkoutSessionState}
 			isAccessReady={Boolean(access?.hasAccess)}
 		/>
-	);
-}
-
-function CheckoutSuccessViewPreloaded({
-	checkoutSessionState,
-	preloadedProductAccess,
-}: {
-	checkoutSessionState: CheckoutSessionState;
-	preloadedProductAccess: Preloaded<typeof api.access.viewerProductAccess>;
-}) {
-	const access = usePreloadedQuery(preloadedProductAccess) as { hasAccess: boolean };
-
-	return (
-		<CheckoutSuccessViewContent
-			checkoutSessionState={checkoutSessionState}
-			isAccessReady={Boolean(access.hasAccess)}
-		/>
-	);
-}
-
-export function CheckoutSuccessView({
-	checkoutSessionState,
-	preloadedProductAccess,
-}: {
-	checkoutSessionState: CheckoutSessionState;
-	preloadedProductAccess?: Preloaded<typeof api.access.viewerProductAccess> | null;
-}) {
-	return preloadedProductAccess ? (
-		<CheckoutSuccessViewPreloaded
-			checkoutSessionState={checkoutSessionState}
-			preloadedProductAccess={preloadedProductAccess}
-		/>
-	) : (
-		<CheckoutSuccessViewLive checkoutSessionState={checkoutSessionState} />
 	);
 }
