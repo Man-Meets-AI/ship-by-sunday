@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { apiRouteConfig, timingConfig } from "@/config/product";
 import { assertNever } from "@/features/course/lesson/lib/assert";
+import { copyLessonTextToClipboard } from "@/features/course/lesson/lib/copy-course-prompt";
 import type { LessonPromptImport } from "@/features/course/lesson/model/contracts";
 import {
 	buildPromptImportFieldValues,
@@ -225,29 +226,23 @@ function PromptImportCardBody({
 			return;
 		}
 
-		if (!navigator.clipboard?.writeText) {
-			setCopyState("error");
-			setIsAssistToolsOpen(true);
-			setActivePanel("prompt");
-			return;
-		}
+		void copyLessonTextToClipboard(promptState.prompt, "Prompt copied.").then(
+			(result) => {
+				if (result === "copied") {
+					if (resetTimeoutRef.current !== null) {
+						window.clearTimeout(resetTimeoutRef.current);
+					}
 
-		void navigator.clipboard.writeText(promptState.prompt).then(
-			() => {
-				if (resetTimeoutRef.current !== null) {
-					window.clearTimeout(resetTimeoutRef.current);
+					setCopyState("copied");
+					resetTimeoutRef.current = window.setTimeout(() => {
+						resetTimeoutRef.current = null;
+						setCopyState("idle");
+					}, timingConfig.promptCopyResetMs);
+				} else {
+					setCopyState("error");
+					setIsAssistToolsOpen(true);
+					setActivePanel("prompt");
 				}
-
-				setCopyState("copied");
-				resetTimeoutRef.current = window.setTimeout(() => {
-					resetTimeoutRef.current = null;
-					setCopyState("idle");
-				}, timingConfig.promptCopyResetMs);
-			},
-			() => {
-				setCopyState("error");
-				setIsAssistToolsOpen(true);
-				setActivePanel("prompt");
 			},
 		);
 	};

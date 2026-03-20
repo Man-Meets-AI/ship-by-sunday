@@ -10,7 +10,11 @@ import {
 import { buildStageUnlockSummary } from "@/features/course/lesson/model/stage-unlock";
 
 import { BriefAssemblerWorkbench } from "./modes/brief-assembler-workbench";
-import { BuildKickoffWorkbench } from "./modes/build-kickoff-workbench";
+import { BuildSetupLaunchpadWorkbench } from "./modes/build-setup-launchpad/build-setup-launchpad-workbench";
+import { CompetitorResearchLightWorkbench } from "./modes/competitor-research-light/competitor-research-light-workbench";
+import { ProductionDeployHandoffWorkbench } from "./modes/production-deploy-handoff/production-deploy-handoff-workbench";
+import { BuildProductIterationWorkbench } from "./modes/build-product-iteration/build-product-iteration-workbench";
+import { RepoMapOrientationWorkbench } from "./modes/repo-map-orientation-workbench";
 import { CaptureUploadWorkbench } from "./modes/capture-upload-workbench";
 import { CollectorBoardWorkbench } from "./modes/collector-board-workbench";
 import { ConsoleChecklistWorkbench } from "./modes/console-checklist-workbench";
@@ -19,7 +23,7 @@ import { GuidedFormWorkbench } from "./modes/guided-form-workbench";
 import { PaperPhotoUploadWorkbench } from "./modes/paper-photo-upload-workbench";
 import { ReferenceGalleryWorkbench } from "./modes/reference-gallery-workbench";
 import { RoadmapOverviewWorkbench } from "./modes/roadmap-overview-workbench";
-import { ScopeSplitWorkbench } from "./modes/scope-split-workbench";
+import { CoreFlowSketchWorkbench } from "./modes/core-flow-sketch/core-flow-sketch-workbench";
 import { ScoreTableWorkbench } from "./modes/score-table-workbench";
 import { SketchUploadWorkbench } from "./modes/sketch-upload-workbench";
 import { TrackerLogWorkbench } from "./modes/tracker-log-workbench";
@@ -36,14 +40,18 @@ const modeRenderers: Record<WorkbenchType, WorkbenchModeComponent> = {
 	paper_photo_upload: PaperPhotoUploadWorkbench,
 	sketch_upload: SketchUploadWorkbench,
 	reference_gallery: ReferenceGalleryWorkbench,
-	scope_split: ScopeSplitWorkbench,
+	core_flow_sketch: CoreFlowSketchWorkbench,
 	brief_assembler: BriefAssemblerWorkbench,
-	build_kickoff: BuildKickoffWorkbench,
+	build_setup_launchpad: BuildSetupLaunchpadWorkbench,
 	console_checklist: ConsoleChecklistWorkbench,
 	roadmap_overview: RoadmapOverviewWorkbench,
 	tracker_log: TrackerLogWorkbench,
 	external_workspace: ExternalWorkspaceWorkbench,
 	visual_direction: VisualDirectionWorkbench,
+	competitor_research_light: CompetitorResearchLightWorkbench,
+	repo_map_orientation: RepoMapOrientationWorkbench,
+	production_deploy_handoff: ProductionDeployHandoffWorkbench,
+	build_product_iteration: BuildProductIterationWorkbench,
 };
 
 function UnsupportedWorkbench({
@@ -70,6 +78,7 @@ export function WorkbenchRenderer({
 	invalidFieldIds = new Set<string>(),
 	invalidFieldMessages = new Map<string, string>(),
 	fieldValuesReady = true,
+	workbenchCompletionSlot,
 }: WorkbenchRendererProps) {
 	const fields = lesson.workbenchFields ?? [];
 	const resolvedArtifactPreview = buildResolvedArtifactPreview(
@@ -114,6 +123,7 @@ export function WorkbenchRenderer({
 			completedTaskCount={completedTaskCount}
 			workbenchSections={workbenchSections}
 			sectionStates={sectionStates}
+			workbenchCompletionSlot={workbenchCompletionSlot}
 		/>
 	);
 }

@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { timingConfig } from "@/config/product";
+import { copyCoursePromptToClipboard } from "@/features/course/lesson/lib/copy-course-prompt";
 import type { LessonPromptResourceContent } from "@/features/course/lesson/model/contracts";
 import { getPromptTemplateState } from "@/features/course/lesson/model/research-prompt";
 
@@ -58,28 +58,23 @@ export function CopyPromptResourceCard({
 			return;
 		}
 
-		if (!navigator.clipboard?.writeText) {
-			setCopyState("error");
-			return;
-		}
-
-		void navigator.clipboard.writeText(prompt).then(
-			() => {
+		void copyCoursePromptToClipboard(
+			prompt,
+			getCopySuccessMessage(resource),
+		).then((result) => {
+			if (result === "copied") {
 				if (resetTimeoutRef.current !== null) {
 					window.clearTimeout(resetTimeoutRef.current);
 				}
-
 				setCopyState("copied");
-				toast.success(getCopySuccessMessage(resource));
 				resetTimeoutRef.current = window.setTimeout(() => {
 					resetTimeoutRef.current = null;
 					setCopyState("idle");
 				}, timingConfig.promptCopyResetMs);
-			},
-			() => {
+			} else if (result === "unavailable") {
 				setCopyState("error");
-			},
-		);
+			}
+		});
 	};
 
 	return (

@@ -1,0 +1,69 @@
+"use client";
+
+import Link from "next/link";
+
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { courseResourceConfig, routeConfig } from "@/config/product";
+
+import { WELCOME_RECOMMENDED_STACK_DATE_LABEL } from "./welcome-orientation-constants";
+
+const CORE_TEMPLATES_HREF = courseResourceConfig.downloads.coreTemplatesPdf;
+const STUDENT_PACKET_HREF = courseResourceConfig.downloads.studentPacketPdf;
+
+export function WelcomeOrientationTooling() {
+	return (
+		<div className="space-y-3">
+			<Alert>
+				<AlertTitle>Recommended stack</AlertTitle>
+				<AlertDescription className="text-sm leading-relaxed">
+					Tooling guidance is date-stamped:{" "}
+					<span className="font-medium text-foreground">
+						as of {WELCOME_RECOMMENDED_STACK_DATE_LABEL}
+					</span>
+					. When vendors ship breaking changes, we update the sprint materials—not
+					your discipline.
+				</AlertDescription>
+			</Alert>
+			<Accordion type="single" collapsible className="w-full rounded-lg border border-border">
+				<AccordionItem value="tooling" className="border-0 px-3">
+					<AccordionTrigger className="py-3 text-sm font-medium hover:no-underline">
+						Tooling for this course
+					</AccordionTrigger>
+					<AccordionContent className="space-y-2 pb-3 text-sm leading-relaxed text-muted-foreground">
+						<p>
+							Default path: OpenAI workspace with{" "}
+							<span className="font-medium text-foreground">Codex</span> for
+							implementation. Same sprint if you prefer{" "}
+							<span className="font-medium text-foreground">Claude</span>—pick
+							one stack and finish reps.
+						</p>
+					</AccordionContent>
+				</AccordionItem>
+			</Accordion>
+			<Separator />
+			<div className="flex flex-wrap gap-3">
+				<Button variant="secondary" size="sm" asChild>
+					<a href={CORE_TEMPLATES_HREF} download>
+						Core Templates
+					</a>
+				</Button>
+				<Button variant="secondary" size="sm" asChild>
+					<a href={STUDENT_PACKET_HREF} download>
+						Student Packet
+					</a>
+				</Button>
+				<Button variant="outline" size="sm" asChild>
+					<Link href={routeConfig.docs}>Setup docs</Link>
+				</Button>
+			</div>
+		</div>
+	);
+}

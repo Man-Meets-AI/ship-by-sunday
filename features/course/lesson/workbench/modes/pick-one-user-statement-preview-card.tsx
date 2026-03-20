@@ -6,7 +6,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { getCandidateProblemOptions } from "@/features/course/lesson/model/registry";
 import { cn } from "@/lib/utils";
 import type { WorkbenchModeProps } from "../types";
@@ -44,30 +43,26 @@ export function PickOneUserStatementPreviewCard({
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>User statement preview</CardTitle>
+				<CardTitle>Selected user problem brief</CardTitle>
 				<CardDescription>
-					This is the direction{" "}
-					<code className="rounded bg-muted px-1 font-mono text-xs">1.5</code>{" "}
-					will inherit next.
+					Lesson 1.5 will build on this brief—one committed problem and how you
+					qualified it.
 				</CardDescription>
 			</CardHeader>
-			<CardContent>
-				{previewRows.map((row, index) => (
-					<div key={row.label}>
-						{index > 0 ? <Separator className="my-4" /> : null}
-						<div className="space-y-1">
-							<p className="text-sm font-medium text-muted-foreground">
-								{row.label}
-							</p>
-							<p
-								className={cn(
-									"text-sm leading-relaxed",
-									row.filled ? "text-foreground" : "text-muted-foreground",
-								)}
-							>
-								{row.value}
-							</p>
-						</div>
+			<CardContent className="space-y-6">
+				{previewRows.map((row) => (
+					<div key={row.label} className="space-y-1">
+						<p className="text-sm font-medium text-muted-foreground">
+							{row.label}
+						</p>
+						<p
+							className={cn(
+								"text-sm leading-relaxed",
+								row.filled ? "text-foreground" : "text-muted-foreground",
+							)}
+						>
+							{row.value}
+						</p>
 					</div>
 				))}
 			</CardContent>

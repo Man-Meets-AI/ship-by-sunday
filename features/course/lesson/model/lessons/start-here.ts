@@ -3,6 +3,12 @@ import type { LessonConfig } from "../contracts";
 import { missionPanelDefaults, splitPanelDefaults } from "../contracts";
 import { START_HERE_RESOURCES } from "../resources";
 
+const INTRO_READINESS_CHECKLIST_OPTIONS = [
+	"See the 4-block path",
+	"Define the thing you are here to ship",
+	"Commit to doing reps instead of just watching",
+] as const;
+
 export const startHereLessons = [
 	{
 		id: "1.0",
@@ -76,8 +82,8 @@ export const startHereLessons = [
 		workbench: "guided_form",
 		artifact: {
 			key: "weekend_shipping_goal",
-			label: "Weekend Shipping Goal",
-			type: "text",
+			label: "Ship by Sunday app brief",
+			type: "brief",
 			required: true,
 		},
 		nextLessonId: "1.2",
@@ -86,56 +92,88 @@ export const startHereLessons = [
 		coachMode: "docked",
 		coachVideoPlacement: "workbench",
 		workbenchMediaLayout: "split",
-		objectiveTitle: "Start Here 1.1 — Welcome",
-		checklist: [
-			"See the 4-block path",
-			"Define the thing you are here to ship",
-			"Commit to doing reps instead of just watching",
-		],
+		objectiveTitle: "Weekend app brief + readiness",
+		checklist: [...INTRO_READINESS_CHECKLIST_OPTIONS],
 		helperText:
-			"This is the orientation rep. Keep the goal small and concrete.",
-		winCondition: "A concrete weekend shipping goal is saved.",
+			"Orientation plus a tiny written brief. Keep scope believable for one weekend.",
+		winCondition: "App brief and readiness checklist are saved.",
 		panelDefaults: splitPanelDefaults,
 		workbenchSections: [
 			{
-				id: "weekend_goal",
-				eyebrow: "Set the target",
-				title: "Define your weekend ship",
+				id: "app_brief",
+				eyebrow: "Brief",
+				title: "Ship by Sunday app brief",
 				instruction:
-					"Write the smallest believable thing you want live by Sunday. If it needs a roadmap to explain it, it is too big for this sprint.",
+					"Name the product, the problem, and why shipping this weekend matters. If it needs a roadmap to explain, it is too big for this sprint.",
 				layout: "stack",
-				fieldIds: ["weekend_goal"],
-				completionLabel: "Weekend goal defined",
+				fieldIds: ["app_idea", "problem_to_solve", "why_ship_now"],
+				completionLabel: "Brief captured",
+			},
+			{
+				id: "readiness",
+				eyebrow: "Commit",
+				title: "Readiness",
+				instruction:
+					"Check each line only if you mean it—this gates the lesson.",
+				layout: "stack",
+				fieldIds: ["intro_readiness_checklist"],
+				completionLabel: "Readiness confirmed",
 			},
 		],
 		workbenchFields: [
 			{
-				id: "weekend_goal",
-				label: "What are you here to ship this weekend?",
+				id: "app_idea",
+				label: "What are you building?",
 				kind: "textarea",
 				required: true,
-				rows: 4,
-				placeholder: "The smallest believable thing you want live by Sunday.",
+				rows: 3,
+				placeholder:
+					"One product or slice of a product you can ship by Sunday.",
 				inputWidth: "wide",
-				artifactPreviewLabel: "Weekend ship goal",
+				artifactPreviewLabel: "Building",
+			},
+			{
+				id: "problem_to_solve",
+				label: "What problem does it solve?",
+				kind: "text",
+				required: true,
+				placeholder: "The recurring headache for a specific user.",
+				inputWidth: "wide",
+				artifactPreviewLabel: "Problem",
+			},
+			{
+				id: "why_ship_now",
+				label: "Why is this worth shipping by Sunday?",
+				kind: "text",
+				required: true,
+				placeholder: "Why this weekend—not someday.",
+				inputWidth: "wide",
+				artifactPreviewLabel: "Why now",
+			},
+			{
+				id: "intro_readiness_checklist",
+				label: "Readiness checklist",
+				kind: "checklist",
+				required: true,
+				options: [...INTRO_READINESS_CHECKLIST_OPTIONS],
+				artifactPreviewLabel: "Readiness",
 			},
 		],
 		content: {
 			status: "draft",
 			intro:
-				"Welcome to Ship by Sunday. This is not designed to be watched. It is designed to be completed.",
+				"You work through lessons in order and leave with a brief, a build, and a live URL—not a backlog of unwatched videos.",
 			lessonMeta: {
 				runtimeLabel: "4-6 min",
-				goal: "Set the contract: this is for completion, not consumption.",
+				goal: "Orient fast, then lock a weekend-sized brief.",
 				purpose:
-					"Reset the student's behavior. They need to feel guided, slightly challenged, and clear on what this weekend is actually for.",
+					"Show how the sprint is structured (lessons, software layer, tools), where Product Strategy / UX / Coding show up, and how tooling fits—without drowning in vendor drama.",
 			},
 			actionCard: {
 				jobNow:
-					"Create a sprint folder and open the core materials you will use this weekend.",
-				timebox: "10 minutes",
-				comeBackWith:
-					"A ready workspace with the core materials and tools open.",
+					"Grab Core Templates and the Student Packet; keep them one click away.",
+				timebox: "5 minutes",
+				comeBackWith: "Templates and packet ready in your workspace.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Welcome",
@@ -143,15 +181,14 @@ export const startHereLessons = [
 			}),
 			workbench: {
 				prompt:
-					"Welcome to Ship by Sunday. This is not designed to be watched. It is designed to be completed.",
+					"Skim orientation, then write a brief small enough to finish this weekend.",
 				teachingPoints: [
-					"What this sprint is: structured, on-demand, one focused weekend.",
-					"What this sprint is not: a binge course, a bootcamp, a passive masterclass.",
-					"What they leave with: brief, spec, build, live URL.",
-					"The rule: do not skip ahead, do not hoard theory, do not wait to feel ready.",
+					"Sprint = CEO → Design → Build → Ship, each with concrete outputs.",
+					"Product Trinity = Strategy (what/why), UX (clarity to build), Coding (implementation reps).",
+					"Rule: complete the work in each lesson before moving on.",
 				],
 				emptyState:
-					"Welcome to Ship by Sunday. This is not designed to be watched. It is designed to be completed.",
+					"Skim orientation, then write a brief small enough to finish this weekend.",
 			},
 		},
 	},
@@ -178,16 +215,18 @@ export const startHereLessons = [
 		coachVideoPlacement: "workbench",
 		workbenchMediaLayout: "split",
 		objectiveTitle: "Start Here 1.2 — How the Sprint Works",
-		checklist: ["Download Figma, VSCode", "Review the 4 Blocks"],
+		checklist: [
+			"I have reviewed the sprint map and understand what comes next",
+		],
 		objectiveMode: "manual",
 		helperText:
-			"Set up the sprint so the first block starts with zero confusion.",
-		winCondition: "The sprint setup checklist is complete.",
+			"Lightweight orientation: know where you are, what you will produce, and the next lesson.",
+		winCondition: "Sprint map reviewed and next step is clear.",
 		panelDefaults: splitPanelDefaults,
 		content: {
 			status: "draft",
 			intro:
-				"Each block solves a different problem, and each one sets up the next.",
+				"See how CEO, Design, Build, and Ship fit together and what you will produce before you build.",
 			lessonMeta: {
 				runtimeLabel: "5-7 min",
 				goal: "Show the sequence and remove uncertainty.",
@@ -195,9 +234,11 @@ export const startHereLessons = [
 					"Give them the map before the climb. They should understand why each block exists and what breaks if they rush it.",
 			},
 			actionCard: {
-				jobNow: "Skim the 4 blocks end to end.",
+				jobNow:
+					"Watch the video, scan the sprint path, then continue to the next lesson.",
 				timebox: "5 minutes",
-				comeBackWith: "A clear sense of what gets produced in each block.",
+				comeBackWith:
+					"A clear sense of where you are and what lesson to open next.",
 			},
 			coach: createPendingLessonCoach({
 				title: "How the Sprint Works",
@@ -205,15 +246,15 @@ export const startHereLessons = [
 			}),
 			workbench: {
 				prompt:
-					"Each block solves a different problem, and each one sets up the next.",
+					"CEO, then Design, then Build, then Ship—each block answers a different question.",
 				teachingPoints: [
-					"CEO Block = choose the problem, customer, and scope.",
+					"CEO Block = choose the problem, user, outcome, flow, and scope.",
 					"Design Block = make the product concrete enough to build.",
 					"Build Block = use AI to implement the core product without spiraling.",
 					"Ship Block = deploy, share, and gather first feedback.",
 				],
 				emptyState:
-					"Each block solves a different problem, and each one sets up the next.",
+					"CEO, then Design, then Build, then Ship—each block answers a different question.",
 			},
 		},
 	},

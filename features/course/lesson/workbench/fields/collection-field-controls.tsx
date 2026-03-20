@@ -5,7 +5,7 @@ import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { assert } from "@/features/course/lesson/lib/assert";
-import { CheckboxRow } from "./checkbox-row";
+import { ChecklistOptionRow } from "./checklist-option-row";
 import { EditableTableField } from "./editable-table-field";
 import { inputWidthClass } from "./field-styles";
 import {
@@ -33,21 +33,23 @@ export function renderCollectionFieldControl(
 
 		return (
 			<Field className="block w-full">
-				<FieldLabel>{field.label}</FieldLabel>
-				<FieldContent className="space-y-2">
-					{checklistItems.map((item, index) => (
-						<CheckboxRow
-							key={item.label}
-							label={item.label}
-							checked={item.checked}
-							onChange={(checked) => {
-								const nextItems = checklistItems.map((current, currentIndex) =>
-									currentIndex === index ? { ...current, checked } : current,
-								);
-								onChange(nextItems);
-							}}
-						/>
-					))}
+				{showLabel ? <FieldLabel>{field.label}</FieldLabel> : null}
+				<FieldContent>
+					<div className="divide-y divide-border overflow-hidden rounded-lg border border-border">
+						{checklistItems.map((item, index) => (
+							<ChecklistOptionRow
+								key={`${field.id}-${index}`}
+								label={item.label}
+								checked={item.checked}
+								onChange={(checked) => {
+									const nextItems = checklistItems.map((current, currentIndex) =>
+										currentIndex === index ? { ...current, checked } : current,
+									);
+									onChange(nextItems);
+								}}
+							/>
+						))}
+					</div>
 				</FieldContent>
 			</Field>
 		);

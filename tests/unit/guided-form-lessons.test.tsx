@@ -21,7 +21,9 @@ function StatefulRadioField() {
 					options: ["Hourly", "Daily", "Weekly", "Monthly"],
 				}}
 				value={value}
-				onChange={setValue}
+				onChange={(next) =>
+					setValue(typeof next === "string" ? next : String(next ?? ""))
+				}
 				pinnedArtifacts={[]}
 			/>
 			<p data-testid="selected-frequency">{value}</p>
@@ -73,7 +75,7 @@ describe("restored guided-form lessons", () => {
 		expect(severitySelects).toHaveLength(3);
 	});
 
-	it("renders handoff problem selection plus detail fields on Pick One User", () => {
+	it("renders handoff problem selection plus qualification fields on Pick One User", () => {
 		const lesson = getLessonById("1.4");
 		expect(lesson).toBeTruthy();
 		if (!lesson) {
@@ -113,16 +115,64 @@ describe("restored guided-form lessons", () => {
 			/>,
 		);
 
-		expect(screen.getByText("Pick the problem to carry forward")).toBeTruthy();
+		expect(screen.getByText("Your three problem candidates")).toBeTruthy();
 		expect(screen.getByText("Independent fitness coach")).toBeTruthy();
 		expect(screen.getByText("Solo recruiter")).toBeTruthy();
 		expect(screen.getByText("Agency founder")).toBeTruthy();
 		expect(
-			screen.getByText("What exact moment makes this painful?"),
+			screen.getByRole("textbox", {
+				name: "When does this problem happen?",
+			}),
 		).toBeTruthy();
-		expect(screen.getByText("How do they handle it today?")).toBeTruthy();
-		expect(screen.getByText("How can you reach them this week?")).toBeTruthy();
-		expect(screen.getByText("User statement preview")).toBeTruthy();
-		expect(screen.getAllByText("Use this problem")).toHaveLength(3);
+		expect(
+			screen.getByRole("textbox", {
+				name: "Where / in what situation does it happen?",
+			}),
+		).toBeTruthy();
+		expect(
+			screen.getByRole("textbox", { name: "What is the trigger?" }),
+		).toBeTruthy();
+		expect(
+			screen.getByRole("combobox", { name: "How painful is this?" }),
+		).toBeTruthy();
+		expect(
+			screen.getByRole("textbox", {
+				name: "Why is this painful enough to solve now?",
+			}),
+		).toBeTruthy();
+		expect(screen.getAllByText("Selected user problem brief").length).toBeGreaterThan(
+			0,
+		);
+		expect(screen.getAllByRole("radio")).toHaveLength(3);
+	});
+
+	it("renders Codex orientation panel and capture fields on CEO Skills (1.9)", () => {
+		const lesson = getLessonById("1.9");
+		expect(lesson).toBeTruthy();
+		if (!lesson) {
+			throw new Error("Expected lesson 1.9 to exist.");
+		}
+
+		render(
+			<WorkbenchRenderer
+				lesson={lesson}
+				lessonContent={lesson.content}
+				fieldValues={{}}
+				onFieldChange={() => {}}
+				pinnedArtifacts={[]}
+				layoutMode="focus"
+			/>,
+		);
+
+		expect(screen.getByText("Codex & skills")).toBeTruthy();
+		expect(screen.getByText("What you should see in Codex")).toBeTruthy();
+		expect(
+			screen.getByRole("textbox", { name: "Project / folder name" }),
+		).toBeTruthy();
+		expect(
+			screen.getByRole("textbox", {
+				name: "What am I building and what problem does it solve?",
+			}),
+		).toBeTruthy();
 	});
 });

@@ -112,7 +112,7 @@ const LESSON_MEDIA_JSON = `{
     "provider": "bunny",
     "libraryId": 619172,
     "videoId": "256a5c69-87a9-4f72-9113-761752b21d63",
-    "title": "Clone Template",
+    "title": "Iterate the product with AI",
     "durationLabel": "3m 43s"
   },
   "3.2": {

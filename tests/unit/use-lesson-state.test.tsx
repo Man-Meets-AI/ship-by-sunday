@@ -14,7 +14,14 @@ const saveLessonDraftMutation = vi.fn();
 const unlockedLessonState = {
 	accessStatus: "unlocked" as const,
 	fieldValues: {
-		weekend_goal: "Ship the landing page",
+		app_idea: "Ship the landing page",
+		problem_to_solve: "Onboarding is scattered",
+		why_ship_now: "Pilot users asked for a single place to finish setup",
+		intro_readiness_checklist: [
+			{ label: "See the 4-block path", checked: true },
+			{ label: "Define the thing you are here to ship", checked: true },
+			{ label: "Commit to doing reps instead of just watching", checked: true },
+		],
 		__fieldShapeVersion: 1,
 	},
 	status: "in_progress",
@@ -107,7 +114,10 @@ describe("useLessonState", () => {
 		expect(result.current.fieldValuesReady).toBe(true);
 
 		act(() => {
-			result.current.setFieldValue("weekend_goal", "Ship the onboarding flow");
+			result.current.setFieldValue(
+				"app_idea",
+				"Ship the onboarding flow",
+			);
 		});
 
 		expect(result.current.saveStatus).toBe("idle");

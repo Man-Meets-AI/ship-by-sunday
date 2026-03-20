@@ -100,6 +100,11 @@ export function LessonShellWatch({
 		): resource is Exclude<LessonResourceContent, { kind: "copy_prompt" }> =>
 			resource.kind !== "copy_prompt",
 	);
+	const hasWatchSecondaryContent =
+		copyPromptResources.length > 0 ||
+		(coachContent.transcript?.status === "ready" &&
+			Boolean(coachContent.transcript.body)) ||
+		resourceLinks.length > 0;
 
 	return (
 		<Card className={cn(shellPanelCardClass, "xl:h-full")}>
@@ -124,60 +129,75 @@ export function LessonShellWatch({
 							</p>
 						</div>
 					</div>
-					<LessonVideoSurface
-						coachContent={coachContent}
-						variant="watch-shell"
-					/>
-					{copyPromptResources.length > 0 ? (
-						<div className="space-y-3">
-							{copyPromptResources.map((resource) => (
-								<CopyPromptResourceCard
-									key={resource.id}
-									resource={resource}
-									pinnedArtifacts={pinnedArtifacts}
+					{hasWatchSecondaryContent ? (
+						<div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(300px,0.88fr)_minmax(0,1.12fr)] xl:items-start">
+							<div className="min-w-0 xl:sticky xl:top-0 xl:z-1 xl:self-start">
+								<LessonVideoSurface
+									coachContent={coachContent}
+									variant="watch-shell"
 								/>
-							))}
+							</div>
+							<div className="min-w-0 space-y-5">
+								{copyPromptResources.length > 0 ? (
+									<div className="space-y-3">
+										{copyPromptResources.map((resource) => (
+											<CopyPromptResourceCard
+												key={resource.id}
+												resource={resource}
+												pinnedArtifacts={pinnedArtifacts}
+											/>
+										))}
+									</div>
+								) : null}
+								{coachContent.transcript?.status === "ready" &&
+								coachContent.transcript.body ? (
+									<>
+										<Separator />
+										<section className="space-y-3">
+											<h2 className={shellEyebrowClass}>Transcript</h2>
+											<p className="max-w-[64ch] whitespace-pre-wrap text-sm leading-7 text-foreground">
+												{coachContent.transcript.body}
+											</p>
+										</section>
+									</>
+								) : null}
+								{resourceLinks.length > 0 ? (
+									<>
+										<Separator />
+										<section className="space-y-3">
+											<h2 className={shellEyebrowClass}>Resources</h2>
+											<div className="grid gap-3 sm:grid-cols-2">
+												{resourceLinks.map((resource) => (
+													<Button
+														key={resource.id}
+														asChild
+														variant="outline"
+														className="h-auto min-h-0 justify-start px-4 py-3 text-left font-medium whitespace-normal"
+													>
+														<Link
+															href={resource.href}
+															target={
+																resource.kind === "external"
+																	? "_blank"
+																	: undefined
+															}
+														>
+															{resource.label}
+														</Link>
+													</Button>
+												))}
+											</div>
+										</section>
+									</>
+								) : null}
+							</div>
 						</div>
-					) : null}
-					{coachContent.transcript?.status === "ready" &&
-					coachContent.transcript.body ? (
-						<>
-							<Separator />
-							<section className="space-y-3">
-								<h2 className={shellEyebrowClass}>Transcript</h2>
-								<p className="max-w-[64ch] whitespace-pre-wrap text-sm leading-7 text-foreground">
-									{coachContent.transcript.body}
-								</p>
-							</section>
-						</>
-					) : null}
-					{resourceLinks.length > 0 ? (
-						<>
-							<Separator />
-							<section className="space-y-3">
-								<h2 className={shellEyebrowClass}>Resources</h2>
-								<div className="grid gap-3 sm:grid-cols-2">
-									{resourceLinks.map((resource) => (
-										<Button
-											key={resource.id}
-											asChild
-											variant="outline"
-											className="h-auto min-h-0 justify-start px-4 py-3 text-left font-medium whitespace-normal"
-										>
-											<Link
-												href={resource.href}
-												target={
-													resource.kind === "external" ? "_blank" : undefined
-												}
-											>
-												{resource.label}
-											</Link>
-										</Button>
-									))}
-								</div>
-							</section>
-						</>
-					) : null}
+					) : (
+						<LessonVideoSurface
+							coachContent={coachContent}
+							variant="watch-shell"
+						/>
+					)}
 				</div>
 			</div>
 			<div className="shrink-0 border-t border-border/60 bg-muted/30 px-4 py-3 xl:px-6">

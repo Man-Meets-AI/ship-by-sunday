@@ -31,12 +31,13 @@ const pinnedArtifacts: ArtifactPreview[] = [
 			selected_problem_owner: "Startup operators",
 			selected_problem_statement:
 				"They lose action items after meetings and waste time rebuilding them.",
-			pain_moment:
+			problem_when:
 				"Right after team meetings when they need to share next steps fast.",
-			current_solution:
-				"Messy notes, memory, and a manual cleanup pass after the meeting.",
-			reachability:
-				"I already know a few operators who would try this this week.",
+			problem_where: "At their desk, cleaning up scattered notes.",
+			problem_trigger: "The meeting ends before owners are aligned.",
+			pain_level: "High",
+			pain_why_now:
+				"If they do not ship a recap the same day, follow-ups die for a week.",
 		},
 		fields: [],
 	},
@@ -47,12 +48,15 @@ const pinnedArtifacts: ArtifactPreview[] = [
 		lessonId: "1.5",
 		lessonTitle: "Define the Outcome",
 		fieldValues: {
-			outcome:
-				"Startup operators leave a meeting with a clean action summary they can review and send in minutes.",
-			success_looks_like:
+			messaging_person: "Startup operators",
+			messaging_problem:
+				"They lose action items after meetings and waste time rebuilding them.",
+			messaging_what_it_does:
 				"They can paste notes, review a usable action summary, and share it without rebuilding everything by hand.",
-			difference_for_user:
+			messaging_benefit:
 				"They stop losing decisions in messy notes and can close the loop while the meeting is still fresh.",
+			outcome_statement_body:
+				"Startup operators leave a meeting with a clean action summary they can review and send in minutes.",
 		},
 		fields: [],
 	},

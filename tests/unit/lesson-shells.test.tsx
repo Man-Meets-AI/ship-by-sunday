@@ -19,11 +19,11 @@ import { LessonShellWatch } from "@/features/course/lesson/shells";
 import { FocusInlineLessonVideo } from "@/features/course/lesson/workbench/shared/focus-inline-lesson-video";
 
 describe("LessonShellWatch", () => {
-	it("renders Scope Hammer inline video for split-baseline lessons", () => {
-		const lesson = getLessonById("1.7");
+	it("renders lesson 2.1 inline video for split-baseline lessons", () => {
+		const lesson = getLessonById("2.1");
 		expect(lesson).toBeTruthy();
 		if (!lesson) {
-			throw new Error("Expected lesson 1.7 to exist.");
+			throw new Error("Expected lesson 2.1 to exist.");
 		}
 
 		const markup = renderToStaticMarkup(
@@ -32,11 +32,11 @@ describe("LessonShellWatch", () => {
 
 		expect(markup).toContain("Watch first");
 		expect(markup).toContain(
-			"https://player.mediadelivery.net/embed/619172/ce14c05d-c5f2-4b50-b1e8-4911015bdc20",
+			"https://player.mediadelivery.net/embed/619172/edd73a35-0d4b-4147-8bcd-7ec005d55844",
 		);
 	});
 
-	it("renders Light Research inline video and leaves copy prompts to coach panel", () => {
+	it("renders Light Research inline video", () => {
 		const lesson = getLessonById("1.6");
 		expect(lesson).toBeTruthy();
 		if (!lesson) {

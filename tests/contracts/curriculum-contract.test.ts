@@ -65,7 +65,15 @@ describe("curriculum contract", () => {
     ).toBe(true);
     expect(
       restLessons.every((lesson) =>
-        ["guided_form", "scope_split"].includes(lesson.workbench),
+        [
+          "guided_form",
+          "core_flow_sketch",
+          "competitor_research_light",
+          "build_setup_launchpad",
+          "repo_map_orientation",
+          "production_deploy_handoff",
+          "build_product_iteration",
+        ].includes(lesson.workbench),
       ),
     ).toBe(true);
     expect(

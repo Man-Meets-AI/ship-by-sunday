@@ -11,6 +11,8 @@ import { DefineOutcomeSupport } from "./define-outcome-support";
 import { GuidedFormWorkbenchSections } from "./guided-form-workbench-sections";
 import { PickOneUserStatementPreviewCard } from "./pick-one-user-statement-preview-card";
 import { StartWithProblemSupport } from "./start-with-problem-support";
+import { CeoSkillsCodexPanel } from "./ceo-skills-codex-panel";
+import { WelcomeOrientationPanel } from "./welcome-orientation-panel";
 
 export function GuidedFormWorkbench(props: WorkbenchModeProps) {
 	const {
@@ -27,6 +29,7 @@ export function GuidedFormWorkbench(props: WorkbenchModeProps) {
 		sectionStates,
 		completedTaskCount,
 		layoutMode,
+		workbenchCompletionSlot,
 	} = props;
 
 	const visiblePinnedArtifacts = lesson.handoff
@@ -44,12 +47,28 @@ export function GuidedFormWorkbench(props: WorkbenchModeProps) {
 	const showPickOneUserStatementPreview =
 		lesson.id === "1.4" && lesson.handoff?.mode === "select_candidate_problem";
 	const showDefineOutcomeSupport = lesson.id === "1.5";
+	const showWelcomeOrientation = lesson.id === "1.1";
+	const showCeoSkillsCodexPanel = lesson.id === "1.9";
+	const showWorkbenchCompletionAfterForm =
+		lesson.id === "1.4" && Boolean(workbenchCompletionSlot);
 	const showPrimaryFieldsFirst = showStartWithProblemSupport;
 	const inlineVideoCard = (
 		<FocusInlineLessonVideo coachContent={lessonContent.coach} />
 	);
 	const supportingContent = (
 		<>
+			{showWelcomeOrientation ? (
+				<WelcomeOrientationPanel
+					lessonContent={lessonContent}
+					workbenchCompletionSlot={workbenchCompletionSlot}
+				/>
+			) : null}
+			{showCeoSkillsCodexPanel ? (
+				<CeoSkillsCodexPanel
+					lessonContent={lessonContent}
+					workbenchCompletionSlot={workbenchCompletionSlot}
+				/>
+			) : null}
 			{showStartWithProblemSupport ? (
 				<StartWithProblemSupport lessonContent={lessonContent} />
 			) : null}
@@ -120,6 +139,11 @@ export function GuidedFormWorkbench(props: WorkbenchModeProps) {
 				: showPrimaryFieldsFirst
 					? supportingContent
 					: sectionContent}
+			{showWorkbenchCompletionAfterForm ? (
+				<div className="flex flex-wrap justify-end gap-2">
+					{workbenchCompletionSlot}
+				</div>
+			) : null}
 		</>
 	);
 

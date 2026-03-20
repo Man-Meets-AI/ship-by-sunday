@@ -1,56 +1,58 @@
-import type { ReactElement } from "react";
+import type { ReactElement, ReactNode } from "react";
 import type {
-	LessonConfig,
-	LessonContent,
-	LessonLayoutMode,
-	WorkbenchField,
-	WorkbenchSection,
+  LessonConfig,
+  LessonContent,
+  LessonLayoutMode,
+  WorkbenchField,
+  WorkbenchSection,
 } from "@/features/course/lesson/model/manifest";
 import type {
-	ArtifactPreview,
-	ObjectiveTask,
-	WorkbenchSectionState,
+  ArtifactPreview,
+  ObjectiveTask,
+  WorkbenchSectionState,
 } from "@/features/course/lesson/model/registry";
 import type { StageUnlockSummary } from "@/features/course/lesson/model/stage-unlock";
 import type { PinnedArtifact } from "@/features/course/lesson/shells";
 
 export type WorkbenchRendererProps = {
-	lesson: LessonConfig;
-	lessonContent: LessonContent;
-	fieldValues: Record<string, unknown>;
-	onFieldChange: (fieldId: string, value: unknown) => void;
-	pinnedArtifacts: PinnedArtifact[];
-	layoutMode: LessonLayoutMode;
-	invalidFieldIds?: Set<string>;
-	invalidFieldMessages?: Map<string, string>;
-	fieldValuesReady?: boolean;
-	resolvedArtifactPreview?: ArtifactPreview | null;
-	stageUnlockSummary?: StageUnlockSummary | null;
+  lesson: LessonConfig;
+  lessonContent: LessonContent;
+  fieldValues: Record<string, unknown>;
+  onFieldChange: (fieldId: string, value: unknown) => void;
+  pinnedArtifacts: PinnedArtifact[];
+  layoutMode: LessonLayoutMode;
+  invalidFieldIds?: Set<string>;
+  invalidFieldMessages?: Map<string, string>;
+  fieldValuesReady?: boolean;
+  resolvedArtifactPreview?: ArtifactPreview | null;
+  stageUnlockSummary?: StageUnlockSummary | null;
+  /** Duplicate footer completion control (e.g. lesson 1.1 welcome panel). */
+  workbenchCompletionSlot?: ReactNode;
 };
 
 type WorkbenchSharedState = {
-	fields: WorkbenchField[];
-	objectiveTasks: ObjectiveTask[];
-	completedTaskCount: number;
-	workbenchSections: WorkbenchSection[];
-	sectionStates: WorkbenchSectionState[];
+  fields: WorkbenchField[];
+  objectiveTasks: ObjectiveTask[];
+  completedTaskCount: number;
+  workbenchSections: WorkbenchSection[];
+  sectionStates: WorkbenchSectionState[];
 };
 
 export type WorkbenchModeProps = WorkbenchRendererProps &
-	WorkbenchSharedState & {
-		invalidFieldIds: Set<string>;
-		invalidFieldMessages: Map<string, string>;
-	};
+  WorkbenchSharedState & {
+    invalidFieldIds: Set<string>;
+    invalidFieldMessages: Map<string, string>;
+  };
 
 export type WorkbenchModeComponent = (
-	props: WorkbenchModeProps,
+  props: WorkbenchModeProps,
 ) => ReactElement;
 
 export type FieldControlProps = {
-	field: WorkbenchField;
-	value: unknown;
-	onChange: (value: unknown) => void;
-	pinnedArtifacts: PinnedArtifact[];
-	showLabel?: boolean;
-	invalid?: boolean;
+  field: WorkbenchField;
+  value: unknown;
+  onChange: (value: unknown) => void;
+  pinnedArtifacts: PinnedArtifact[];
+  showLabel?: boolean;
+  invalid?: boolean;
 };

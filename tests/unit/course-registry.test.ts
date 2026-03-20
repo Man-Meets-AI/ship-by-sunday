@@ -15,7 +15,6 @@ const studentFacingIds = [
   "1.4",
   "1.5",
   "1.6",
-  "1.7",
   "1.8",
   "1.9",
   "2.0",
@@ -76,7 +75,7 @@ describe("course registry", () => {
     expect(getStudentFacingLessons().map((lesson) => lesson.id)).toEqual(
       studentFacingIds,
     );
-    expect(lessonRegistry.length).toBe(31);
+    expect(lessonRegistry.length).toBe(30);
     expect(getLessonById("4.0")?.title).toBe("Product Review");
     expect(getLessonById("1.0")?.title).toBe("Mission Map");
     expect(getLessonById("4.6")).toBeNull();
@@ -160,10 +159,14 @@ describe("course registry", () => {
     expect(defineOutcome.shell).toBe("split");
     expect(defineOutcome.workbench).toBe("guided_form");
     expect(defineOutcome.artifact.key).toBe("outcome_statement");
+    expect(defineOutcome.fieldShapeVersion).toBe(2);
     expect((defineOutcome.workbenchFields ?? []).map((f) => f.id)).toEqual([
-      "outcome",
-      "success_looks_like",
-      "difference_for_user",
+      "messaging_person",
+      "messaging_problem",
+      "messaging_what_it_does",
+      "messaging_benefit",
+      "outcome_statement_body",
+      "outcome_self_review",
     ]);
     expect(defineOutcome.requireReadyVideoForCompletion).toBe(true);
     expect(defineOutcome.content.coach.video).toMatchObject({
@@ -177,78 +180,242 @@ describe("course registry", () => {
     expect(outcomeTasks.map((t) => t.id).sort()).toEqual(
       [
         "__coach_video_ready",
-        "difference_for_user",
-        "outcome",
-        "success_looks_like",
+        "messaging_benefit",
+        "messaging_person",
+        "messaging_problem",
+        "messaging_what_it_does",
+        "outcome_statement_body",
       ].sort(),
     );
     expect(
       getCompletionIssues(defineOutcome, {})
         .map((i) => i.id)
         .sort(),
-    ).toEqual(["difference_for_user", "outcome", "success_looks_like"].sort());
+    ).toEqual(
+      [
+        "messaging_benefit",
+        "messaging_person",
+        "messaging_problem",
+        "messaging_what_it_does",
+        "outcome_statement_body",
+      ].sort(),
+    );
 
     expect(getLessonById("1.6")?.pinnedArtifacts).toEqual([
       "user_statement",
       "outcome_statement",
     ]);
 
-    const scopeHammer = getLessonById("1.7");
-    expect(scopeHammer).toBeTruthy();
-    if (!scopeHammer) {
-      throw new Error("Expected lesson 1.7 to exist.");
+    const lightResearch = getLessonById("1.6");
+    expect(lightResearch).toBeTruthy();
+    if (!lightResearch) {
+      throw new Error("Expected lesson 1.6 to exist.");
     }
-    expect(scopeHammer.pinnedArtifacts).toEqual([
+    expect(lightResearch.workbench).toBe("competitor_research_light");
+    expect(lightResearch.artifact.key).toBe("competitor_research_snapshot");
+    expect(lightResearch.artifact.type).toBe("mixed");
+    expect(lightResearch.fieldShapeVersion).toBe(2);
+    expect((lightResearch.workbenchFields ?? []).map((f) => f.id)).toEqual([
+      "research_known_competitors",
+      "research_problem_patterns",
+      "research_pricing_notes",
+      "research_messaging_notes",
+      "research_product_notes",
+      "research_flow_checklist",
+      "research_things_tried",
+      "research_directional_takeaway",
+    ]);
+    const lightResearchIssues = getCompletionIssues(lightResearch, {}).map(
+      (i) => i.id,
+    );
+    expect(new Set(lightResearchIssues)).toEqual(
+      new Set([
+        "research_flow_checklist",
+        "research_known_competitors",
+        "research_directional_takeaway",
+      ]),
+    );
+    expect(
+      lightResearchIssues.filter((id) => id === "research_flow_checklist")
+        .length,
+    ).toBe(5);
+
+    const coreFlow = getLessonById("2.1");
+    expect(coreFlow).toBeTruthy();
+    if (!coreFlow) {
+      throw new Error("Expected lesson 2.1 to exist.");
+    }
+    expect(coreFlow.pinnedArtifacts).toEqual([
       "user_statement",
       "outcome_statement",
     ]);
-    expect(scopeHammer.workbench).toBe("scope_split");
-    expect(scopeHammer.artifact.key).toBe("scope_boundary");
-    expect(scopeHammer.artifact.type).toBe("mixed");
-    expect(scopeHammer.promptImport).toMatchObject({
-      promptTemplateId: "scope_boundary",
-      inScopeFieldId: "in_scope",
-      outOfScopeFieldId: "out_of_scope",
-      rationaleFieldId: "v1_rationale",
-    });
+    expect(coreFlow.workbench).toBe("core_flow_sketch");
+    expect(coreFlow.artifact.key).toBe("core_flow_sketch_state");
+    expect(coreFlow.artifact.type).toBe("mixed");
+    expect(coreFlow.promptImport).toBeUndefined();
+    expect((coreFlow.workbenchFields ?? []).map((field) => field.id)).toEqual(
+      expect.arrayContaining([
+        "core_problem",
+        "core_audience",
+        "core_execution_checklist",
+        "core_named_screens",
+        "core_brand_path",
+      ]),
+    );
     expect(
-      (scopeHammer.workbenchFields ?? []).map((field) => field.id),
-    ).toEqual(["in_scope", "out_of_scope", "v1_rationale"]);
-    expect(
-      getObjectiveTasks(scopeHammer, {})
+      getObjectiveTasks(coreFlow, {})
         .map((task) => task.id)
         .sort(),
     ).toEqual(
       [
         "__coach_video_ready",
-        "in_scope",
-        "out_of_scope",
-        "v1_rationale",
+        "core_audience",
+        "core_brand_path",
+        "core_desired_outcome",
+        "core_execution_checklist:Pick one idea",
+        "core_execution_checklist:Redraw the best flow left to right",
+        "core_execution_checklist:Sketch 8 ideas (Crazy Eights)",
+        "core_execution_checklist:Start 2-minute timer",
+        "core_must_have_features",
+        "core_named_screens",
+        "core_problem",
+        "core_transformation",
       ].sort(),
     );
     expect(
-      getCompletionIssues(scopeHammer, {})
+      getCompletionIssues(coreFlow, {})
         .map((issue) => issue.id)
         .sort(),
-    ).toEqual(["in_scope", "out_of_scope", "v1_rationale"].sort());
+    ).toEqual(
+      [
+        "core_audience",
+        "core_brand_path",
+        "core_desired_outcome",
+        "core_execution_checklist",
+        "core_execution_checklist",
+        "core_execution_checklist",
+        "core_execution_checklist",
+        "core_must_have_features",
+        "core_named_screens",
+        "core_problem",
+        "core_transformation",
+      ].sort(),
+    );
+    const execAll = [
+      { label: "Start 2-minute timer", checked: true },
+      { label: "Sketch 8 ideas (Crazy Eights)", checked: true },
+      { label: "Pick one idea", checked: true },
+      { label: "Redraw the best flow left to right", checked: true },
+    ];
+    const filledCoreIssues = getCompletionIssues(coreFlow, {
+      core_problem: "Parents need faster meal planning.",
+      core_audience: "Busy parents",
+      core_transformation: "Less Sunday stress",
+      core_desired_outcome: "A week of meals planned",
+      core_must_have_features: "Ideas, brand tweak, export",
+      core_named_screens: "Connect GPT → Ideas for Posts",
+      core_brand_path: "I already have a Figma or Canva brand file",
+      core_execution_checklist: execAll,
+    }).map((issue) => issue.id);
     expect(
-      getCompletionIssues(scopeHammer, {
-        in_scope: ["Login"],
-        out_of_scope: ["Billing"],
-        v1_rationale: "Smallest path to first value.",
+      filledCoreIssues.filter((id) => id !== "__coach_video_ready"),
+    ).toEqual([]);
+
+    const badChecklistIssues = getCompletionIssues(coreFlow, {
+      core_problem: "Ok",
+      core_audience: "Ok",
+      core_transformation: "Ok",
+      core_desired_outcome: "Ok",
+      core_must_have_features: "Ok",
+      core_named_screens: "Ok",
+      core_brand_path: "I already have a Figma or Canva brand file",
+      core_execution_checklist: execAll.map((item, i) => ({
+        ...item,
+        checked: i !== 0,
+      })),
+    }).map((issue) => issue.id);
+    expect(badChecklistIssues).toContain("core_execution_checklist");
+    expect(
+      badChecklistIssues.filter(
+        (id) =>
+          id !== "__coach_video_ready" && id !== "core_execution_checklist",
+      ),
+    ).toEqual([]);
+
+    const ceoSkills = getLessonById("1.9");
+    expect(ceoSkills).toBeTruthy();
+    if (!ceoSkills) {
+      throw new Error("Expected lesson 1.9 to exist.");
+    }
+    expect(ceoSkills.artifact.key).toBe("ceo_skills_setup");
+    expect(ceoSkills.artifact.type).toBe("mixed");
+    expect((ceoSkills.workbenchFields ?? []).map((f) => f.id)).toEqual([
+      "ceo_skills_setup_checklist",
+      "codex_project_folder_name",
+      "ceo_skills_building_and_problem",
+      "ceo_skills_workflow_stage",
+    ]);
+    expect(getCompletionIssues(ceoSkills, {}).length).toBeGreaterThan(0);
+    expect(
+      getCompletionIssues(ceoSkills, {
+        ceo_skills_setup_checklist: [
+          { label: "Created or added a project", checked: true },
+          { label: "Started a thread", checked: true },
+          { label: "Downloaded or linked skills", checked: true },
+          { label: "Picked a first skill to try", checked: true },
+        ],
+        codex_project_folder_name: "team-wiki",
+        ceo_skills_building_and_problem:
+          "Internal wiki so ops stops losing playbooks.",
       }),
     ).toEqual([]);
-    expect(
-      getCompletionIssues(scopeHammer, {
-        in_scope: ["   "],
-        out_of_scope: ["Billing"],
-        v1_rationale: "Ok",
-      })
-        .map((issue) => issue.id)
-        .sort(),
-    ).toEqual(["in_scope"]);
 
-    for (const lessonId of ["2.0", "3.0", "3.16", "4.0"]) {
+    const repoMapLesson = getLessonById("3.2");
+    expect(repoMapLesson).toBeTruthy();
+    if (!repoMapLesson) {
+      throw new Error("Expected lesson 3.2 to exist.");
+    }
+    expect(repoMapLesson.workbench).toBe("repo_map_orientation");
+    expect((repoMapLesson.workbenchFields ?? []).map((f) => f.id)).toEqual([
+      "repo_accounts_services",
+    ]);
+    expect(
+      (repoMapLesson.content.coach.resources ?? []).map((r) => r.id),
+    ).toEqual(["repo_map_tool_overview_video", "repo_map_setup_guide"]);
+
+    const deployHandoffLesson = getLessonById("3.14");
+    expect(deployHandoffLesson).toBeTruthy();
+    if (!deployHandoffLesson) {
+      throw new Error("Expected lesson 3.14 to exist.");
+    }
+    expect(deployHandoffLesson.workbench).toBe("production_deploy_handoff");
+    expect(
+      (deployHandoffLesson.workbenchFields ?? []).map((f) => f.id),
+    ).toEqual([
+      "deploy_handoff_steps",
+      "deploy_handoff_product_name",
+      "deploy_handoff_domain",
+      "deploy_handoff_success_checks",
+    ]);
+    expect(getCompletionIssues(deployHandoffLesson, {}).length).toBeGreaterThan(
+      0,
+    );
+    const stepOptions =
+      deployHandoffLesson.workbenchFields?.find(
+        (field) => field.id === "deploy_handoff_steps",
+      )?.options ?? [];
+    expect(
+      getCompletionIssues(deployHandoffLesson, {
+        deploy_handoff_steps: stepOptions.map((label) => ({
+          label,
+          checked: true,
+        })),
+        deploy_handoff_product_name: "Acme",
+        deploy_handoff_domain: "acme.com",
+      }),
+    ).toEqual([]);
+
+    for (const lessonId of ["2.0", "3.16", "4.0"]) {
       const lesson = getLessonById(lessonId);
       expect(lesson).toBeTruthy();
       if (!lesson) {
@@ -272,5 +439,36 @@ describe("course registry", () => {
       ]);
       expect(getCompletionIssues(lesson, {})).toEqual([]);
     }
+
+    const buildKickoff = getLessonById("3.0");
+    expect(buildKickoff).toBeTruthy();
+    if (!buildKickoff) {
+      throw new Error("Expected lesson 3.0 to exist.");
+    }
+    expect(buildKickoff.shell).toBe("split");
+    expect(buildKickoff.workbench).toBe("build_setup_launchpad");
+    expect(
+      (buildKickoff.workbenchFields ?? []).map((field) => field.id),
+    ).toEqual(["build_product_folder_name", "build_setup_prereqs"]);
+    expect(buildKickoff.requireReadyVideoForCompletion).toBe(true);
+    expect(buildKickoff.content.coach.video).toMatchObject({
+      status: "ready",
+      provider: "bunny",
+      libraryId: 619172,
+    });
+    expect(getCompletionIssues(buildKickoff, {}).length).toBeGreaterThan(0);
+    const setupOptions =
+      buildKickoff.workbenchFields?.find(
+        (field) => field.id === "build_setup_prereqs",
+      )?.options ?? [];
+    expect(
+      getCompletionIssues(buildKickoff, {
+        build_product_folder_name: "my-app",
+        build_setup_prereqs: setupOptions.map((label) => ({
+          label,
+          checked: true,
+        })),
+      }),
+    ).toEqual([]);
   });
 });

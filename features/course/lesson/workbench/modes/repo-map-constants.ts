@@ -1,0 +1,84 @@
+import { apiRouteConfig, routeConfig } from "@/config/product";
+
+/** Coach resource ids — keep in sync with `coachResources` on lesson 3.2. */
+export const REPO_MAP_COACH_LINK_IDS = {
+	video: "repo_map_tool_overview_video",
+	guide: "repo_map_setup_guide",
+} as const;
+
+export const REPO_ACCOUNTS_FIELD_ID = "repo_accounts_services" as const;
+
+export type RepoMapBadge = "required" | "nice" | "advanced";
+
+export type RepoMapEntry = {
+	id: string;
+	path: string;
+	badge: RepoMapBadge;
+	summary: string;
+};
+
+export const REPO_MAP_ENTRIES: RepoMapEntry[] = [
+	{
+		id: "app",
+		path: "app/",
+		badge: "required",
+		summary: "Routes and pages (Next.js App Router).",
+	},
+	{
+		id: "components",
+		path: "components/",
+		badge: "required",
+		summary: "Reusable UI blocks shared across pages.",
+	},
+	{
+		id: "convex",
+		path: "convex/",
+		badge: "required",
+		summary: "Backend and database logic (queries, mutations, schema).",
+	},
+	{
+		id: "env",
+		path: ".env / .env.local",
+		badge: "required",
+		summary: "Secrets and API keys for local dev—never commit or paste into chat.",
+	},
+	{
+		id: "agents",
+		path: "AGENTS.md",
+		badge: "nice",
+		summary: "Instructions for AI assistants working in this repo.",
+	},
+	{
+		id: "package",
+		path: "package.json",
+		badge: "required",
+		summary: "Script names and dependencies—your control panel for npm/pnpm commands.",
+	},
+];
+
+export const REPO_ROUTE_EXAMPLES: { path: string; note: string }[] = [
+	{ path: routeConfig.accessRequired, note: "Example gated / access-required page." },
+	{ path: apiRouteConfig.stripeCheckout, note: "API route — server-side Stripe Checkout." },
+	{ path: routeConfig.checkoutSuccess, note: "Post-checkout thank-you route." },
+];
+
+export type CuratedCommandRow =
+	| { kind: "command"; label: string; command: string }
+	| { kind: "note"; label: string; body: string };
+
+export const REPO_CURATED_COMMANDS: CuratedCommandRow[] = [
+	{ kind: "command", label: "Start app", command: "pnpm dev" },
+	{
+		kind: "note",
+		label: "Stop app",
+		body: "In the terminal running the dev server, press Ctrl+C (macOS / Windows / Linux).",
+	},
+	{ kind: "command", label: "Build app", command: "pnpm build" },
+	{
+		kind: "command",
+		label: "Test payments (local)",
+		command: "pnpm stripe:local:verify",
+	},
+];
+
+export const REPO_DEPLOY_DOC_PATH = "/docs/deploy-to-vercel" as const;

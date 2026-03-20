@@ -3,14 +3,14 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 const missionState = {
 	progressCount: 20,
-	totalLessons: 31,
+	totalLessons: 30,
 	blocks: [
 		{
 			id: "CEO",
 			label: "CEO",
 			order: 1,
 			completedCount: 4,
-			totalLessons: 7,
+			totalLessons: 6,
 			lessons: [
 				{
 					id: "1.1",
@@ -58,14 +58,6 @@ const missionState = {
 					shortTitle: "Scope",
 					status: "locked" as const,
 					artifactLabel: "Scope cut",
-					isImplemented: true,
-				},
-				{
-					id: "1.7",
-					title: "Build the Brief",
-					shortTitle: "Brief",
-					status: "locked" as const,
-					artifactLabel: "Product brief",
 					isImplemented: true,
 				},
 			],
@@ -351,7 +343,7 @@ describe("MissionPage", () => {
 		expect(markup).toContain('data-app-scroll-mode="page"');
 		expect(markup).toContain('data-starter-repo-card="mission"');
 		expect(markup).toContain("Your weekend roadmap");
-		expect(markup).toContain("20 of 31 lessons complete");
+		expect(markup).toContain("20 of 30 lessons complete");
 		expect(markup).toContain("Start 1.5");
 		expect(markup).toContain("All four blocks");
 		expect(markup).toContain('data-slot="card"');

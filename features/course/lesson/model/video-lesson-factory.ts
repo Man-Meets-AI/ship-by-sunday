@@ -3,6 +3,7 @@ import {
   type ArtifactContract,
   type BlockId,
   type LessonConfig,
+  type LessonContent,
   type LessonPromptImport,
   type LessonResourceContent,
   type LessonUnlockTargets,
@@ -24,6 +25,10 @@ type VideoLessonSeed = {
   unlockBlocks?: BlockId[];
   helperText?: string;
   intro?: string;
+  /** Overrides default video-first lessonMeta when set. */
+  lessonMeta?: Partial<
+    Pick<LessonContent["lessonMeta"], "goal" | "purpose" | "runtimeLabel">
+  >;
   teachingPoints?: string[];
   pinnedArtifacts?: string[];
   coachResources?: LessonResourceContent[];
@@ -44,8 +49,11 @@ type VideoLessonSeed = {
   actionComeBackWith?: string;
   workbenchPrompt?: string;
   workbenchEmptyState?: string;
-  /** Defaults to `guided_form` (1.1–1.5 baseline). Use `scope_split` for Scope Hammer. */
+  /** Defaults to `guided_form` (1.1–1.5 baseline). */
   workbench?: WorkbenchType;
+  fieldShapeVersion?: number;
+  /** Defaults to true (coach video must be ready for completion). */
+  requireReadyVideoForCompletion?: boolean;
 };
 
 export function createVideoLesson({
@@ -60,6 +68,7 @@ export function createVideoLesson({
   unlockBlocks,
   helperText,
   intro,
+  lessonMeta: lessonMetaOverride,
   teachingPoints,
   pinnedArtifacts,
   coachResources = [],
@@ -76,6 +85,8 @@ export function createVideoLesson({
   workbenchPrompt,
   workbenchEmptyState,
   workbench: workbenchOverride,
+  fieldShapeVersion,
+  requireReadyVideoForCompletion: requireReadyVideoOverride,
 }: VideoLessonSeed): LessonConfig {
   const unlocks: LessonUnlockTargets | undefined =
     nextLessonId || unlockBlocks?.length
@@ -125,16 +136,23 @@ export function createVideoLesson({
     workbenchFields,
     ...(workbenchSections?.length ? { workbenchSections } : {}),
     ...(promptImport ? { promptImport } : {}),
-    requireReadyVideoForCompletion: true,
+    ...(fieldShapeVersion !== undefined ? { fieldShapeVersion } : {}),
+    requireReadyVideoForCompletion: requireReadyVideoOverride ?? true,
     content: {
       status: "ready",
       intro:
         intro ??
         `Watch ${title}, pull the key move forward, and keep momentum.`,
       lessonMeta: {
-        goal: `Understand ${title} well enough to keep moving.`,
+        goal:
+          lessonMetaOverride?.goal ??
+          `Understand ${title} well enough to keep moving.`,
         purpose:
+          lessonMetaOverride?.purpose ??
           "This step is video-first. The goal is to transfer the lesson cleanly without extra in-product ceremony.",
+        ...(lessonMetaOverride?.runtimeLabel
+          ? { runtimeLabel: lessonMetaOverride.runtimeLabel }
+          : {}),
       },
       actionCard: {
         jobNow: actionJobNow ?? `Watch ${title} and keep moving.`,

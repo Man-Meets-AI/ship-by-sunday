@@ -27,7 +27,7 @@ describe("split lesson baseline (former watch cohort)", () => {
   });
 
   it("treats fieldless video lessons as video-complete steps with no required in-product fields", () => {
-    for (const lessonId of ["2.1", "3.0", "3.8", "4.0"]) {
+    for (const lessonId of ["2.0", "3.8", "4.0"]) {
       const lesson = getLessonById(lessonId);
       expect(lesson).toBeTruthy();
       if (!lesson) {
@@ -44,6 +44,36 @@ describe("split lesson baseline (former watch cohort)", () => {
       ]);
       expect(getCompletionIssues(lesson, {})).toEqual([]);
     }
+  });
+
+  it("gates Build kickoff (3.0) on the setup checklist while keeping video ready", () => {
+    const lesson = getLessonById("3.0");
+    expect(lesson).toBeTruthy();
+    if (!lesson) {
+      throw new Error("Expected lesson 3.0 to exist.");
+    }
+
+    expect(lesson.workbench).toBe("build_setup_launchpad");
+    expect((lesson.workbenchFields ?? []).map((field) => field.id)).toEqual([
+      "build_product_folder_name",
+      "build_setup_prereqs",
+    ]);
+
+    const prereqField = lesson.workbenchFields?.find(
+      (field) => field.id === "build_setup_prereqs",
+    );
+    const options = prereqField?.options ?? [];
+    expect(options).toHaveLength(9);
+
+    expect(getCompletionIssues(lesson, {}).length).toBeGreaterThan(0);
+
+    const allChecked = options.map((label) => ({ label, checked: true }));
+    expect(
+      getCompletionIssues(lesson, {
+        build_product_folder_name: "my-app",
+        build_setup_prereqs: allChecked,
+      }),
+    ).toEqual([]);
   });
 
   it("keeps no student-facing watch shells", () => {

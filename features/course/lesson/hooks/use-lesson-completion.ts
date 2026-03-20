@@ -10,6 +10,10 @@ import {
 	getLesson,
 	type LessonConfig,
 } from "@/features/course/lesson/model/manifest";
+import {
+	formatHandoffLabelForLesson,
+	getNextLessonHandoffLabel,
+} from "@/features/course/lesson/model/next-lesson-handoff";
 import type {
 	CompletionIssue,
 	PersistedFieldValues,
@@ -68,7 +72,7 @@ function getCompletionNavigationDelayMs() {
 	return timingConfig.lessonCompletionNavigateMs;
 }
 
-function getCompletionButtonLabel({
+export function getCompletionButtonLabel({
 	isCelebrating,
 	isCompleting,
 	requiresManualContinuation,
@@ -77,6 +81,7 @@ function getCompletionButtonLabel({
 	completionActionLabel,
 	completionPendingLabel,
 	celebrationShortLabel,
+	nextHandoffLabel,
 }: {
 	isCelebrating: boolean;
 	isCompleting: boolean;
@@ -86,6 +91,7 @@ function getCompletionButtonLabel({
 	completionActionLabel: string;
 	completionPendingLabel: string;
 	celebrationShortLabel: string;
+	nextHandoffLabel: string | null;
 }) {
 	if (isCompleting) {
 		return completionPendingLabel;
@@ -98,8 +104,11 @@ function getCompletionButtonLabel({
 	if (isCelebrating) {
 		return celebrationShortLabel;
 	}
-	return lessonReadyToComplete
-		? completionActionLabel
+	if (lessonReadyToComplete) {
+		return completionActionLabel;
+	}
+	return nextHandoffLabel
+		? `Continue to ${nextHandoffLabel}`
 		: "Complete required steps";
 }
 
@@ -200,6 +209,10 @@ export function useLessonCompletion({
 			),
 		[displayedCompletionIssues],
 	);
+	const nextHandoffLabel = useMemo(
+		() => getNextLessonHandoffLabel(lesson),
+		[lesson],
+	);
 	const lessonReadyToComplete =
 		completionIssues.length === 0 &&
 		(isWatchLesson || objectiveTaskCount > 0) &&
@@ -283,6 +296,7 @@ export function useLessonCompletion({
 			completionActionLabel,
 			completionPendingLabel,
 			celebrationShortLabel,
+			nextHandoffLabel,
 		}),
 		clearCompletionFeedback: () => {
 			if (serverCompletionIssues.length > 0) {
@@ -324,7 +338,7 @@ export function useLessonCompletion({
 						artifactLabel: lesson.artifact.label,
 						nextLessonId: result.nextLessonId,
 						nextLessonLabel: nextLesson
-							? `${nextLesson.id} ${nextLesson.shortTitle}`
+							? formatHandoffLabelForLesson(nextLesson)
 							: null,
 					});
 					setCompletionPhase("celebrating");

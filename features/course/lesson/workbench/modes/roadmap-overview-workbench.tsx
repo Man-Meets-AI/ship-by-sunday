@@ -30,14 +30,18 @@ export function RoadmapOverviewWorkbench({
 		/>
 	);
 
+	const showStatusRail = lesson.id !== "1.2";
+
 	const roadmapBody = (
 		<div className="space-y-5">
-			<StatusRail
-				lessonContent={lessonContent}
-				completedTaskCount={completedTaskCount}
-				totalTaskCount={Math.max(objectiveTasks.length, 1)}
-			/>
-			<RoadmapSprintOverview lessonContent={lessonContent} />
+			{showStatusRail ? (
+				<StatusRail
+					lessonContent={lessonContent}
+					completedTaskCount={completedTaskCount}
+					totalTaskCount={Math.max(objectiveTasks.length, 1)}
+				/>
+			) : null}
+			<RoadmapSprintOverview lesson={lesson} lessonContent={lessonContent} />
 		</div>
 	);
 

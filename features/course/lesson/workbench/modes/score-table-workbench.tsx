@@ -63,7 +63,7 @@ export function ScoreTableWorkbench({
 	const promisedOutcome = getPinnedTextValue(
 		pinnedArtifacts,
 		"outcome_statement",
-		"outcome",
+		"outcome_statement_body",
 	);
 
 	return (

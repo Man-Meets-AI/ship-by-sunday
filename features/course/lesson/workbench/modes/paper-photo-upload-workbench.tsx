@@ -236,7 +236,10 @@ export function PaperPhotoUploadWorkbench({
 		) ?? "your chosen user";
 	const userPain =
 		getStringValue(
-			findArtifactValue(pinnedArtifacts, "user_statement", "pain_moment"),
+			findArtifactValue(pinnedArtifacts, "user_statement", "problem_when"),
+		) ??
+		getStringValue(
+			findArtifactValue(pinnedArtifacts, "user_statement", "problem_trigger"),
 		) ??
 		getStringValue(
 			findArtifactValue(
@@ -245,21 +248,28 @@ export function PaperPhotoUploadWorkbench({
 				"selected_problem_statement",
 			),
 		) ??
-		"the exact moment the problem becomes painful";
+		"when and how this problem shows up";
 	const currentWorkaround =
 		getStringValue(
-			findArtifactValue(pinnedArtifacts, "user_statement", "current_solution"),
-		) ?? "the messy workaround they use today";
+			findArtifactValue(pinnedArtifacts, "user_statement", "pain_why_now"),
+		) ??
+		getStringValue(
+			findArtifactValue(pinnedArtifacts, "user_statement", "problem_where"),
+		) ?? "why this problem is painful enough to solve now";
 	const outcome =
 		getStringValue(
-			findArtifactValue(pinnedArtifacts, "outcome_statement", "outcome"),
+			findArtifactValue(
+				pinnedArtifacts,
+				"outcome_statement",
+				"outcome_statement_body",
+			),
 		) ?? "the promised result";
 	const successLooksLike =
 		getStringValue(
 			findArtifactValue(
 				pinnedArtifacts,
 				"outcome_statement",
-				"success_looks_like",
+				"messaging_what_it_does",
 			),
 		) ?? "what the user can review, send, or use when the product works";
 	const fallbackExamples = (lessonContent.coach.examples ?? []).slice(0, 2);

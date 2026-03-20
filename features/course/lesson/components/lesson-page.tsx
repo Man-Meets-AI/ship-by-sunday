@@ -37,7 +37,12 @@ import { AppShell } from "@/features/course/shared/components/app-shell";
 
 function PreviousLessonBackLink({ href }: { href: string }) {
 	return (
-		<Button variant="secondary" size="sm" asChild>
+		<Button
+			variant="secondary"
+			size="default"
+			asChild
+			className={cn("h-auto min-h-8 self-stretch")}
+		>
 			<Link href={href}>Back</Link>
 		</Button>
 	);
@@ -226,16 +231,9 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
 			disabled={completionButtonDisabled}
 			aria-busy={isCompleting}
 			onClick={handleCompletionAction}
-			variant={
-				isCelebrating
-					? "default"
-					: isCompleting
-						? "default"
-						: lessonReadyToComplete
-							? "default"
-							: "outline"
-			}
-			size="sm"
+			variant="default"
+			size="default"
+			className={cn("h-auto min-h-8 max-w-full whitespace-normal")}
 		>
 			{completionButtonLabel}
 		</Button>
@@ -244,7 +242,7 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
 	const footerActions = (
 		<div className="flex flex-wrap justify-end gap-2 lg:ml-auto">
 			{previousHref ? <PreviousLessonBackLink href={previousHref} /> : null}
-			{completionAction}
+			{lesson.id === "1.4" ? null : completionAction}
 		</div>
 	);
 
@@ -389,6 +387,11 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
 			invalidFieldIds={invalidFieldIds}
 			invalidFieldMessages={invalidFieldMessages}
 			fieldValuesReady={fieldValuesReady}
+			workbenchCompletionSlot={
+				lesson.id === "1.1" || lesson.id === "1.4" || lesson.id === "1.9"
+					? completionAction
+					: undefined
+			}
 		/>
 	);
 

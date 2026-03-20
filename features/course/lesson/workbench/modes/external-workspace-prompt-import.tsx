@@ -2,7 +2,9 @@
 
 import { PromptImportCard } from "../shared/prompt-import-card";
 import type { WorkbenchModeProps } from "../types";
-import { SCOPE_SOURCE_FIELD_ID } from "./scope-split/scope-split-state";
+
+/** Optional field when `external_workspace` lessons track prompt import provenance. */
+const SCOPE_SOURCE_FIELD_ID = "scope_boundary_prompt_source";
 
 export function ExternalWorkspacePromptImport({
 	lesson,

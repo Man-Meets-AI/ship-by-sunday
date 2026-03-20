@@ -1,12 +1,32 @@
+"use client";
+
 import type { LessonHandoff } from "@/features/course/lesson/model/manifest";
-import { Button } from "@/components/ui/button";
-import { LessonChromeChip } from "@/features/course/lesson/shared/lesson-chrome-chip";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { CardDescription } from "@/components/ui/card";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { CircleAlertIcon } from "lucide-react";
+import { CandidateProblemHandoffSelected } from "./candidate-problem-handoff-selected";
 
 type CandidateProblem = {
 	index: number;
 	owner: string;
 	statement: string;
 };
+
+function commitSelection(
+	handoff: LessonHandoff,
+	problem: CandidateProblem,
+	persistedFields: NonNullable<LessonHandoff["persistedFields"]>,
+	onFieldChange: (fieldId: string, value: unknown) => void,
+) {
+	onFieldChange(handoff.selectionFieldId, problem.index);
+	for (const field of persistedFields) {
+		onFieldChange(
+			field.targetFieldId,
+			field.source === "owner" ? problem.owner : problem.statement,
+		);
+	}
+}
 
 export function CandidateProblemHandoffContent({
 	handoff,
@@ -27,102 +47,97 @@ export function CandidateProblemHandoffContent({
 	invalidSelection: boolean;
 	invalidCopy: string;
 }) {
+	const toggleValue =
+		selectedProblem !== null && selectedProblem !== undefined
+			? String(selectedProblem.index)
+			: "";
+
+	const otherProblems = selectedProblem
+		? candidateProblems.filter((p) => p.index !== selectedProblem.index)
+		: [];
+
 	return (
-		<>
+		<div className="space-y-4">
+			<Alert>
+				<CircleAlertIcon />
+				<AlertTitle>Commitment step</AlertTitle>
+				<AlertDescription>
+					This is a commitment step, not a full product strategy exercise. Pick
+					one problem and qualify it enough to move on.
+				</AlertDescription>
+			</Alert>
+
 			{selectedProblem ? (
-				<div className="space-y-4">
-					<div className="rounded-lg border border-primary/20 bg-primary/5">
-						<div className="border-b border-border/60 px-4 py-3">
-							<p className="text-[9px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
-								Problem {selectedProblem.index}
-							</p>
-						</div>
-						<div className="space-y-3 px-4 py-4 text-[12px] leading-relaxed text-foreground">
-							<div>
-								<p className="text-[9px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
-									Chosen user
-								</p>
-								<p className="mt-1 text-sm font-semibold text-foreground">
-									{selectedProblem.owner}
-								</p>
-							</div>
-							<div>
-								<p className="text-[9px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
-									Chosen problem
-								</p>
-								<p className="mt-1 text-foreground">
-									{selectedProblem.statement}
-								</p>
-							</div>
-						</div>
-						<div className="border-t border-border/60 px-4 py-3">
-							<Button
-								type="button"
-								onClick={() => {
-									onFieldChange(handoff.selectionFieldId, null);
-									for (const field of persistedFields) {
-										onFieldChange(field.targetFieldId, "");
-									}
-								}}
-								variant="outline"
-								size="sm"
-							>
-								Change selection
-							</Button>
-						</div>
-					</div>
-					<p className="text-[11px] leading-relaxed text-muted-foreground">
-						{selectedCopy}
-					</p>
-				</div>
-			) : candidateProblems.length > 0 ? (
-				<div className="grid gap-3 lg:grid-cols-3">
-					{candidateProblems.map((problem) => (
-						<Button
-							key={problem.index}
-							type="button"
-							onClick={() => {
-								onFieldChange(handoff.selectionFieldId, problem.index);
-								for (const field of persistedFields) {
-									onFieldChange(
-										field.targetFieldId,
-										field.source === "owner"
-											? problem.owner
-											: problem.statement,
-									);
-								}
-							}}
-							variant="outline"
-							size="sm"
-							className="flex h-full w-full flex-col items-start px-4 py-4 text-left normal-case tracking-normal whitespace-normal"
-						>
-							<LessonChromeChip
-								status="ready"
-								label={`Problem ${problem.index}`}
-							/>
-							<p className="mt-3 text-sm font-semibold text-foreground">
-								{problem.owner}
-							</p>
-							<p className="mt-3 flex-1 text-[12px] leading-relaxed text-foreground">
-								{problem.statement}
-							</p>
-							<div className="mt-4 border-t border-border/60 pt-3">
-								<LessonChromeChip status="ready" label="Use this problem" />
-							</div>
-						</Button>
-					))}
-				</div>
-			) : (
-				<div className="border border-dashed border-border bg-background px-4 py-4 text-[12px] leading-relaxed text-muted-foreground">
-					The problems from the last lesson are not available yet. Go back to
-					`1.3` and finish that page first.
-				</div>
-			)}
-			{invalidSelection ? (
-				<p className="text-[11px] font-medium leading-relaxed text-destructive">
-					{invalidCopy}
-				</p>
+				<CandidateProblemHandoffSelected
+					handoff={handoff}
+					selectedProblem={selectedProblem}
+					otherProblems={otherProblems}
+					persistedFields={persistedFields}
+					onFieldChange={onFieldChange}
+					selectedCopy={selectedCopy}
+				/>
 			) : null}
-		</>
+
+			{!selectedProblem && candidateProblems.length > 0 ? (
+				<div className="space-y-2">
+					<CardDescription>
+						Choose one problem. Your three candidates from the previous lesson are
+						below.
+					</CardDescription>
+					<ToggleGroup
+						type="single"
+						className="w-full flex-col"
+						value={toggleValue}
+						onValueChange={(value) => {
+							if (!value) {
+								return;
+							}
+							const index = Number(value);
+							const problem = candidateProblems.find((p) => p.index === index);
+							if (problem) {
+								commitSelection(
+									handoff,
+									problem,
+									persistedFields,
+									onFieldChange,
+								);
+							}
+						}}
+					>
+						{candidateProblems.map((problem) => (
+							<ToggleGroupItem
+								key={problem.index}
+								value={String(problem.index)}
+								aria-label={`Problem ${problem.index}: ${problem.owner}`}
+								className="h-auto min-h-0 w-full flex-col items-start gap-1 py-3 whitespace-normal"
+							>
+								<span className="font-medium">Problem {problem.index}</span>
+								<span className="text-left text-muted-foreground">
+									{problem.owner}
+								</span>
+								<span className="text-left text-sm text-muted-foreground">
+									{problem.statement}
+								</span>
+							</ToggleGroupItem>
+						))}
+					</ToggleGroup>
+				</div>
+			) : null}
+
+			{candidateProblems.length === 0 ? (
+				<CardDescription>
+					The problems from the last lesson are not available yet. Go back to
+					lesson 1.3 and finish that page first.
+				</CardDescription>
+			) : null}
+
+			{invalidSelection ? (
+				<Alert variant="destructive">
+					<CircleAlertIcon />
+					<AlertTitle>Selection required</AlertTitle>
+					<AlertDescription>{invalidCopy}</AlertDescription>
+				</Alert>
+			) : null}
+		</div>
 	);
 }

@@ -1,4 +1,3 @@
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
 	Card,
 	CardContent,
@@ -53,26 +52,16 @@ export function StartWithProblemSupport({
 					that person would recognize immediately.
 				</CardDescription>
 			</CardHeader>
-			<CardContent className="space-y-4 pt-4">
-				{examples.length > 0 ? (
+			{examples.length > 0 ? (
+				<CardContent className="pt-4">
 					<div className="space-y-3">
 						<p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
 							Examples that set the bar
 						</p>
 						<StartWithProblemExampleCards examples={examples} />
 					</div>
-				) : null}
-				<Alert>
-					<AlertTitle>Next lesson handoff</AlertTitle>
-					<AlertDescription>
-						You will choose one of these three problems to carry into{" "}
-						<span className="font-medium text-foreground">
-							1.4 Pick One User
-						</span>
-						.
-					</AlertDescription>
-				</Alert>
-			</CardContent>
+				</CardContent>
+			) : null}
 		</Card>
 	);
 }

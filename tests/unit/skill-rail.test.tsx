@@ -149,34 +149,24 @@ describe("SkillRail", () => {
 	it("uses navigation lessons to cross forward into the next stage while keeping the visible strip scoped", () => {
 		const markup = renderToStaticMarkup(
 			<SkillRail
-				label="CEO"
-				currentLessonId="1.7"
+				label="DESIGN"
+				currentLessonId="2.0"
 				lessons={[
 					{
-						id: "1.6",
-						shortTitle: "Scope",
-						status: "completed",
-					},
-					{
-						id: "1.7",
-						shortTitle: "Brief",
+						id: "2.0",
+						shortTitle: "Refs",
 						status: "completed",
 					},
 				]}
 				navigationLessons={[
 					{
-						id: "1.6",
-						shortTitle: "Scope",
-						status: "completed",
-					},
-					{
-						id: "1.7",
-						shortTitle: "Brief",
+						id: "2.0",
+						shortTitle: "Refs",
 						status: "completed",
 					},
 					{
 						id: "2.1",
-						shortTitle: "References",
+						shortTitle: "Scope",
 						status: "available",
 					},
 				]}
@@ -184,10 +174,9 @@ describe("SkillRail", () => {
 		);
 
 		expect(markup).toContain('data-href="/lesson/2.1"');
-		expect(markup).toContain('aria-label="Open next stage: References"');
-		expect(markup).toContain(">Scope<");
-		expect(markup).toContain(">Brief<");
-		expect(markup).not.toContain(">References<");
+		expect(markup).toContain('aria-label="Open next stage: Scope"');
+		expect(markup).toContain(">Refs<");
+		expect(markup).not.toContain(">Scope<");
 	});
 
 	it("uses navigation lessons to cross backward into the previous stage", () => {
@@ -198,38 +187,38 @@ describe("SkillRail", () => {
 				lessons={[
 					{
 						id: "2.1",
-						shortTitle: "References",
+						shortTitle: "Scope",
 						status: "in_progress",
 					},
 					{
 						id: "2.2",
-						shortTitle: "Sketch",
+						shortTitle: "Find",
 						status: "available",
 					},
 				]}
 				navigationLessons={[
 					{
-						id: "1.7",
-						shortTitle: "Brief",
+						id: "2.0",
+						shortTitle: "Refs",
 						status: "completed",
 					},
 					{
 						id: "2.1",
-						shortTitle: "References",
+						shortTitle: "Scope",
 						status: "in_progress",
 					},
 					{
 						id: "2.2",
-						shortTitle: "Sketch",
+						shortTitle: "Find",
 						status: "available",
 					},
 				]}
 			/>,
 		);
 
-		expect(markup).toContain('data-href="/lesson/1.7"');
-		expect(markup).toContain('aria-label="Open previous stage: Brief"');
-		expect(markup).not.toContain(">Brief<");
+		expect(markup).toContain('data-href="/lesson/2.0"');
+		expect(markup).toContain('aria-label="Open previous stage: Refs"');
+		expect(markup).not.toContain(">Refs<");
 	});
 
 	it("navigates in place when a rail step is clicked", async () => {

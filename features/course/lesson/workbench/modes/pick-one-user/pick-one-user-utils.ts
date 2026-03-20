@@ -27,18 +27,18 @@ export function buildPreviewRows(
 			label: "User",
 			filled: Boolean(
 				getTextValue(fieldValues, "selected_problem_owner") ||
-				selectedProblem?.owner,
+					selectedProblem?.owner,
 			),
 			value:
 				getTextValue(fieldValues, "selected_problem_owner") ||
 				selectedProblem?.owner ||
-				"Choose one user-problem pair above.",
+				"Choose one problem above.",
 		},
 		{
 			label: "Chosen problem",
 			filled: Boolean(
 				getTextValue(fieldValues, "selected_problem_statement") ||
-				selectedProblem?.statement,
+					selectedProblem?.statement,
 			),
 			value:
 				getTextValue(fieldValues, "selected_problem_statement") ||
@@ -46,25 +46,39 @@ export function buildPreviewRows(
 				"The chosen problem will appear here.",
 		},
 		{
-			label: "Pain moment",
-			filled: Boolean(getTextValue(fieldValues, "pain_moment")),
+			label: "When it happens",
+			filled: Boolean(getTextValue(fieldValues, "problem_when")),
 			value:
-				getTextValue(fieldValues, "pain_moment") ||
-				"Name the exact moment this becomes painful.",
+				getTextValue(fieldValues, "problem_when") ||
+				"When does this problem happen?",
 		},
 		{
-			label: "Current workaround",
-			filled: Boolean(getTextValue(fieldValues, "current_solution")),
+			label: "Where / situation",
+			filled: Boolean(getTextValue(fieldValues, "problem_where")),
 			value:
-				getTextValue(fieldValues, "current_solution") ||
-				"Describe how they handle it today.",
+				getTextValue(fieldValues, "problem_where") ||
+				"Where or in what situation does it happen?",
 		},
 		{
-			label: "Reach this week",
-			filled: Boolean(getTextValue(fieldValues, "reachability")),
+			label: "Trigger",
+			filled: Boolean(getTextValue(fieldValues, "problem_trigger")),
 			value:
-				getTextValue(fieldValues, "reachability") ||
-				"State the real path you have to show this to them this week.",
+				getTextValue(fieldValues, "problem_trigger") ||
+				"What triggers the problem?",
+		},
+		{
+			label: "Pain level",
+			filled: Boolean(getTextValue(fieldValues, "pain_level")),
+			value:
+				getTextValue(fieldValues, "pain_level") ||
+				"Low, Medium, or High.",
+		},
+		{
+			label: "Why solve now",
+			filled: Boolean(getTextValue(fieldValues, "pain_why_now")),
+			value:
+				getTextValue(fieldValues, "pain_why_now") ||
+				"Why is this painful enough to solve now?",
 		},
 	];
 }

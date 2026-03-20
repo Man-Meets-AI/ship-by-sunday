@@ -28,44 +28,46 @@ export function CodexConnectionCard() {
 	} = useCodexConnectionCard();
 
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>Connect your subscription</CardTitle>
-				<CardDescription>
-					Use your own ChatGPT/Codex subscription for in-lesson generation.
-				</CardDescription>
-			</CardHeader>
-			<CardContent className="space-y-4">
-				{requestState === "loading" ? (
-					<div
-						className="space-y-3"
-						aria-busy="true"
-						aria-label="Loading connection"
-					>
-						<Skeleton className="h-14 w-full rounded-lg" />
-						<Skeleton className="h-9 w-full max-w-xs" />
-					</div>
-				) : (
-					<div className="space-y-3">
-						<CodexConnectionStatusCard connection={connection} />
+		<div id="codex-connection" className="scroll-mt-8">
+			<Card>
+				<CardHeader>
+					<CardTitle>Connect your subscription</CardTitle>
+					<CardDescription>
+						Use your own ChatGPT/Codex subscription for in-lesson generation.
+					</CardDescription>
+				</CardHeader>
+				<CardContent className="space-y-4">
+					{requestState === "loading" ? (
+						<div
+							className="space-y-3"
+							aria-busy="true"
+							aria-label="Loading connection"
+						>
+							<Skeleton className="h-14 w-full rounded-lg" />
+							<Skeleton className="h-9 w-full max-w-xs" />
+						</div>
+					) : (
+						<div className="space-y-3">
+							<CodexConnectionStatusCard connection={connection} />
 
-						{rateLimitSnapshots.length > 0 ? (
-							<CodexConnectionRateLimitsCard snapshots={rateLimitSnapshots} />
-						) : null}
+							{rateLimitSnapshots.length > 0 ? (
+								<CodexConnectionRateLimitsCard snapshots={rateLimitSnapshots} />
+							) : null}
 
-						<CodexConnectionCardActions
-							connected={connection.connected}
-							requestState={requestState}
-							onStartManagedLogin={startManagedLogin}
-							onPollLoginStatus={pollLoginStatus}
-							onRefreshRateLimits={refreshRateLimits}
-							onDisconnectAccount={disconnectAccount}
-						/>
+							<CodexConnectionCardActions
+								connected={connection.connected}
+								requestState={requestState}
+								onStartManagedLogin={startManagedLogin}
+								onPollLoginStatus={pollLoginStatus}
+								onRefreshRateLimits={refreshRateLimits}
+								onDisconnectAccount={disconnectAccount}
+							/>
 
-						<CodexConnectionCardFeedback feedback={feedback} />
-					</div>
-				)}
-			</CardContent>
-		</Card>
+							<CodexConnectionCardFeedback feedback={feedback} />
+						</div>
+					)}
+				</CardContent>
+			</Card>
+		</div>
 	);
 }
