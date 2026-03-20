@@ -11,6 +11,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { CodeBlock } from "@/components/ui/code-block";
 import { copyCoursePromptToClipboard } from "@/features/course/lesson/lib/copy-course-prompt";
 
 import {
@@ -57,9 +58,12 @@ export function RepoMapCommandsTab() {
 								<CardTitle className="text-sm">{row.label}</CardTitle>
 							</CardHeader>
 							<CardContent>
-								<code className="block rounded-md bg-muted px-2 py-1.5 font-mono text-xs text-foreground">
-									{row.command}
-								</code>
+								<CodeBlock
+									language="bash"
+									filename={`${row.label}.sh`}
+									code={row.command}
+									copyable={false}
+								/>
 							</CardContent>
 						</Card>
 					),

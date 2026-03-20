@@ -10,6 +10,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { CodeBlock } from "@/components/ui/code-block";
 import { timingConfig } from "@/config/product";
 import { copyCoursePromptToClipboard } from "@/features/course/lesson/lib/copy-course-prompt";
 
@@ -73,9 +74,14 @@ export function BuildProductIterationPromptCard() {
 				</Button>
 			</CardHeader>
 			<CardContent>
-				<pre className="max-h-48 overflow-auto rounded-md border border-border bg-muted/40 p-3 text-xs leading-relaxed whitespace-pre-wrap">
-					{BUILD_PRODUCT_ITERATION_CHATGPT_PROMPT}
-				</pre>
+				<CodeBlock
+					language="markdown"
+					filename="build-product-iteration-prompt.md"
+					code={BUILD_PRODUCT_ITERATION_CHATGPT_PROMPT}
+					copyable={false}
+					wrapLongLines
+					contentClassName="max-h-48"
+				/>
 			</CardContent>
 		</Card>
 	);
