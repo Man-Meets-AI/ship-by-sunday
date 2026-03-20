@@ -1,22 +1,22 @@
 import { notFound, redirect } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { LessonPage } from "@/features/course/lesson/components/lesson-page";
-import { getLesson } from "@/features/course/lesson/model";
+import { getLessonByRouteSegment } from "@/features/course/lesson/model";
 import { getLegacyLessonRedirect } from "@/features/course/lesson/utils/legacy-routes";
 import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
 
 export default async function Page({
 	params,
 }: {
-	params: Promise<{ lessonId: string }>;
+	params: Promise<{ lessonKey: string }>;
 }) {
-	const { lessonId } = await params;
+	const { lessonKey } = await params;
 
-	const legacyRedirect = getLegacyLessonRedirect(lessonId);
+	const legacyRedirect = getLegacyLessonRedirect(lessonKey);
 	if (legacyRedirect) {
 		redirect(legacyRedirect);
 	}
-	const lesson = getLesson(lessonId);
+	const lesson = getLessonByRouteSegment(lessonKey);
 
 	if (!lesson) {
 		notFound();
@@ -24,8 +24,8 @@ export default async function Page({
 
 	return (
 		<LessonPage
-			key={lessonId}
-			lessonId={lessonId}
+			key={lesson.lessonKey}
+			lessonKey={lesson.lessonKey}
 			initialMission={await fetchAuthenticatedQuery(
 				api.course.getMissionState,
 				{},

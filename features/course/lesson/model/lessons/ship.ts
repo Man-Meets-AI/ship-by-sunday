@@ -1,4 +1,4 @@
-import type { LessonConfig } from "../contracts";
+import type { LessonSourceConfig } from "../contracts";
 import { createVideoLesson } from "../video-lesson-factory";
 
 export const shipLessons = [
@@ -16,4 +16,4 @@ export const shipLessons = [
 			"The rest of Ship stays out of the student path until the real videos exist.",
 		],
 	}),
-] satisfies LessonConfig[];
+] satisfies LessonSourceConfig[];

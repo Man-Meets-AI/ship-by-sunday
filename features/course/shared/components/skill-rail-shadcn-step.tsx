@@ -33,9 +33,8 @@ export function SkillRailShadcnStep({
 	totalSteps: number;
 	onNavigate: (href: string) => void;
 }) {
-	const position = { stepNumber, totalSteps };
-	const label = getSkillRailStepAriaLabel(lesson, state, position);
-	const lessonHref = getLessonHref(lesson.id);
+	const label = getSkillRailStepAriaLabel(lesson, state);
+	const lessonHref = getLessonHref(lesson.lessonKey);
 
 	let variant: ComponentProps<typeof Button>["variant"] = "ghost";
 	if (isUnlocking) {
@@ -72,7 +71,7 @@ export function SkillRailShadcnStep({
 				onClick={(e) => e.preventDefault()}
 			>
 				<SkillRailShadcnStepBody
-					stepNumber={stepNumber}
+					displayLabel={lesson.displayLabel}
 					shortTitle={lesson.shortTitle}
 					state={state}
 				/>
@@ -91,7 +90,7 @@ export function SkillRailShadcnStep({
 			onClick={() => onNavigate(lessonHref)}
 		>
 			<SkillRailShadcnStepBody
-				stepNumber={stepNumber}
+				displayLabel={lesson.displayLabel}
 				shortTitle={lesson.shortTitle}
 				state={state}
 			/>

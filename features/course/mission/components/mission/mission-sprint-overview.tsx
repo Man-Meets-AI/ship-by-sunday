@@ -114,7 +114,7 @@ export function MissionSprintOverview({
 							</MissionSectionLabel>
 							<div className="flex flex-wrap gap-2">
 								{block.completedLessons.map((lesson) => (
-									<MissionLessonChip key={lesson.id} lesson={lesson} />
+									<MissionLessonChip key={lesson.lessonKey} lesson={lesson} />
 								))}
 							</div>
 						</div>

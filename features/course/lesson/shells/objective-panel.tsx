@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
-	getLesson,
+	getLessonByKey,
 	type LessonConfig,
 } from "@/features/course/lesson/model/manifest";
 import type { ObjectiveTask } from "@/features/course/lesson/model/registry";
@@ -32,8 +32,8 @@ export function ObjectivePanel({
 	objectiveTasks: ObjectiveTask[];
 	onObjectiveTaskToggle: (taskId: string, checked: boolean) => void;
 }) {
-	const nextLesson = lesson.nextLessonId
-		? getLesson(lesson.nextLessonId)
+	const nextLesson = lesson.nextLessonKey
+		? getLessonByKey(lesson.nextLessonKey)
 		: undefined;
 	const nextStepLabel =
 		lesson.nextStepLabel ??

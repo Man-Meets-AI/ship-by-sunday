@@ -55,7 +55,7 @@ export function ArtifactsBlockSection({ group }: { group: BlockGroup }) {
 										size="sm"
 										className="w-full shrink-0 sm:w-auto"
 									>
-										<Link href={getLessonHref(artifact.lessonId)}>
+										<Link href={getLessonHref(artifact.lessonKey)}>
 											Open lesson
 										</Link>
 									</Button>

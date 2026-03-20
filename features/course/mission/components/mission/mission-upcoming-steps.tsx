@@ -20,14 +20,14 @@ export function MissionUpcomingSteps({
 			<MissionSectionLabel>Next in this block</MissionSectionLabel>
 			<ItemGroup className="gap-2">
 				{lessons.map((lesson, index) => (
-					<Item key={lesson.id} variant="outline" size="sm">
+					<Item key={lesson.lessonKey} variant="outline" size="sm">
 						<ItemContent className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 							<div className="min-w-0 space-y-1">
 								<Badge variant={index === 0 ? "default" : "outline"}>
 									{index === 0 ? "Next" : "Then"}
 								</Badge>
 								<p className="text-sm font-medium">
-									<span className="text-muted-foreground">{lesson.id}</span>{" "}
+									<span className="text-muted-foreground">{lesson.displayLabel}</span>{" "}
 									{lesson.shortTitle}
 								</p>
 							</div>

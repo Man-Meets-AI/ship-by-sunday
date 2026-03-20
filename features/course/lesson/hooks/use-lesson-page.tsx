@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 import type { LessonPageFooterProps } from "@/features/course/lesson/components/lesson-page-footer-props";
 import { useLessonPageData } from "@/features/course/lesson/hooks/use-lesson-page-data";
 
-export function useLessonPage(lessonId: string) {
-	const data = useLessonPageData(lessonId);
+export function useLessonPage(lessonKey: string) {
+	const data = useLessonPageData(lessonKey);
 	const {
 		lesson,
 		lessonContent,

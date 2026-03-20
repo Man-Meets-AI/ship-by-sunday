@@ -1,6 +1,10 @@
 import { ConvexError } from "convex/values";
 import type { LessonConfig } from "../../features/course/lesson/model/contracts";
 import {
+	CURRICULUM_VERSION,
+	getLessonByKey,
+} from "../../features/course/lesson/model/manifest";
+import {
 	hydrateReferenceGalleryValue,
 	isReferenceGalleryValue,
 } from "../../features/course/lesson/model/reference-gallery";
@@ -9,8 +13,7 @@ import {
 	buildResolvedArtifactPreview,
 	COURSE_SLUG,
 	getLessonByArtifactKey,
-	getLessonById,
-	getUnlockedLessonIds,
+	getUnlockedLessonKeys,
 	isLessonFieldShapeCompatible,
 	isUploadFieldValue,
 	isUploadFieldValueArray,
@@ -31,10 +34,10 @@ import type {
 export type ViewerCourseState = {
 	clerkUserId: string;
 	lessonStates: LessonStateDoc[];
-	lessonStateByLessonId: Map<string, LessonStateDoc>;
-	compatibleCompletedLessonIds: string[];
-	compatibleCompletedLessonIdSet: Set<string>;
-	unlockedLessonIds: Set<string>;
+	lessonStateByLessonKey: Map<string, LessonStateDoc>;
+	compatibleCompletedLessonKeys: string[];
+	compatibleCompletedLessonKeySet: Set<string>;
+	unlockedLessonKeys: Set<string>;
 };
 
 type LessonStateUpsertOptions =
@@ -72,16 +75,20 @@ async function getViewerLessonStates(
 
 function getCompatibleCompletedLessonIds(lessonStates: LessonStateDoc[]) {
 	return lessonStates.flatMap((state) => {
+		if (state.curriculumVersion !== CURRICULUM_VERSION || !state.lessonKey) {
+			return [];
+		}
+
 		if (state.status !== "completed") {
 			return [];
 		}
 
-		const lesson = getLessonById(state.lessonId);
+		const lesson = getLessonByKey(state.lessonKey);
 		if (!lesson || !isLessonFieldShapeCompatible(lesson, state.fieldValues)) {
 			return [];
 		}
 
-		return [state.lessonId];
+		return [state.lessonKey];
 	});
 }
 
@@ -90,38 +97,44 @@ export async function loadViewerCourseState(
 ): Promise<ViewerCourseState> {
 	const clerkUserId = await requireGrantedProductAccess(ctx);
 	const lessonStates = await getViewerLessonStates(ctx, clerkUserId);
-	const compatibleCompletedLessonIds =
+	const compatibleCompletedLessonKeys =
 		getCompatibleCompletedLessonIds(lessonStates);
+	const currentLessonStates = lessonStates.filter(
+		(state): state is LessonStateDoc & { lessonKey: string } =>
+			state.curriculumVersion === CURRICULUM_VERSION &&
+			typeof state.lessonKey === "string" &&
+			state.lessonKey.length > 0,
+	);
 
 	return {
 		clerkUserId,
-		lessonStates,
-		lessonStateByLessonId: new Map(
-			lessonStates.map((state) => [state.lessonId, state]),
+		lessonStates: currentLessonStates,
+		lessonStateByLessonKey: new Map(
+			currentLessonStates.map((state) => [state.lessonKey, state]),
 		),
-		compatibleCompletedLessonIds,
-		compatibleCompletedLessonIdSet: new Set(compatibleCompletedLessonIds),
-		unlockedLessonIds: new Set(
-			getUnlockedLessonIds(compatibleCompletedLessonIds),
+		compatibleCompletedLessonKeys,
+		compatibleCompletedLessonKeySet: new Set(compatibleCompletedLessonKeys),
+		unlockedLessonKeys: new Set(
+			getUnlockedLessonKeys(compatibleCompletedLessonKeys),
 		),
 	};
 }
 
 export function canAccessLesson(
-	lessonId: string,
+	lessonKey: string,
 	viewerState: ViewerCourseState,
 ) {
 	return (
-		viewerState.unlockedLessonIds.has(lessonId) ||
-		viewerState.compatibleCompletedLessonIdSet.has(lessonId)
+		viewerState.unlockedLessonKeys.has(lessonKey) ||
+		viewerState.compatibleCompletedLessonKeySet.has(lessonKey)
 	);
 }
 
 export function ensureLessonIsUnlocked(
-	lessonId: string,
+	lessonKey: string,
 	viewerState: ViewerCourseState,
 ) {
-	if (!canAccessLesson(lessonId, viewerState)) {
+	if (!canAccessLesson(lessonKey, viewerState)) {
 		throw new ConvexError("Lesson is still locked");
 	}
 }
@@ -157,7 +170,7 @@ export async function upsertLessonState(
 	lesson: LessonConfig,
 	options: LessonStateUpsertOptions,
 ) {
-	const existingState = viewerState.lessonStateByLessonId.get(lesson.id);
+	const existingState = viewerState.lessonStateByLessonKey.get(lesson.lessonKey);
 	const now = Date.now();
 
 	if (options.mode === "view") {
@@ -170,12 +183,14 @@ export async function upsertLessonState(
 			return { created: false, timestamp: now };
 		}
 
-		await ctx.db.insert("lessonStates", {
-			clerkUserId: viewerState.clerkUserId,
-			courseSlug: COURSE_SLUG,
-			lessonId: lesson.id,
-			blockId: lesson.block,
-			status: "not_started",
+			await ctx.db.insert("lessonStates", {
+				clerkUserId: viewerState.clerkUserId,
+				courseSlug: COURSE_SLUG,
+				curriculumVersion: CURRICULUM_VERSION,
+				lessonKey: lesson.lessonKey,
+				lessonId: lesson.displayLabel,
+				blockId: lesson.block,
+				status: "not_started",
 			artifactKey: lesson.artifact.key,
 			artifactType: lesson.artifact.type,
 			fieldValues: {},
@@ -212,7 +227,9 @@ export async function upsertLessonState(
 	await ctx.db.insert("lessonStates", {
 		clerkUserId: viewerState.clerkUserId,
 		courseSlug: COURSE_SLUG,
-		lessonId: lesson.id,
+		curriculumVersion: CURRICULUM_VERSION,
+		lessonKey: lesson.lessonKey,
+		lessonId: lesson.displayLabel,
 		blockId: lesson.block,
 		status: options.mode === "complete" ? "completed" : "in_progress",
 		artifactKey: lesson.artifact.key,
@@ -291,16 +308,16 @@ export async function buildResolvedArtifactPreviewForLesson(
 	cache: Map<string, ArtifactPreview | null>,
 	options: PinnedArtifactOptions,
 ): Promise<ArtifactPreview | null> {
-	if (cache.has(lesson.id)) {
-		return cache.get(lesson.id) ?? null;
+	if (cache.has(lesson.lessonKey)) {
+		return cache.get(lesson.lessonKey) ?? null;
 	}
 
-	const lessonState = viewerState.lessonStateByLessonId.get(lesson.id);
+	const lessonState = viewerState.lessonStateByLessonKey.get(lesson.lessonKey);
 	if (
 		!isCompatibleLessonState(lesson, lessonState) ||
 		(options.requireCompletedSource && lessonState?.status !== "completed")
 	) {
-		cache.set(lesson.id, null);
+		cache.set(lesson.lessonKey, null);
 		return null;
 	}
 
@@ -330,7 +347,7 @@ export async function buildResolvedArtifactPreviewForLesson(
 		pinnedArtifacts.filter(isPresent),
 	);
 
-	cache.set(lesson.id, preview);
+	cache.set(lesson.lessonKey, preview);
 	return preview;
 }
 
@@ -374,7 +391,7 @@ export function getResolvedPinnedArtifactsForCompletion(
 		.map((artifactKey) => {
 			const sourceLesson = getLessonByArtifactKey(artifactKey);
 			const sourceState = sourceLesson
-				? viewerState.lessonStateByLessonId.get(sourceLesson.id)
+				? viewerState.lessonStateByLessonKey.get(sourceLesson.lessonKey)
 				: null;
 
 			if (

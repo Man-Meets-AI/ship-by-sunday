@@ -1,8 +1,8 @@
 import { ConvexError, v } from "convex/values";
+import { getLessonByKey } from "../../features/course/lesson/model/manifest";
 
 import {
 	getCompletionIssues,
-	getLessonById,
 	type PersistedFieldValues,
 } from "../../features/course/lesson/model/registry";
 import {
@@ -20,14 +20,14 @@ import type { CourseMutationCtx, CourseQueryCtx } from "./types";
 import { fieldValuesValidator, lessonStateReturnValidator } from "./validators";
 
 const lessonIdArgs = {
-	lessonId: v.string(),
+	lessonKey: v.string(),
 };
 
 export const getLessonStateArgs = lessonIdArgs;
 export const getLessonStateReturns = lessonStateReturnValidator;
 
-function getLessonOrThrow(lessonId: string) {
-	const lesson = getLessonById(lessonId);
+function getLessonOrThrow(lessonKey: string) {
+	const lesson = getLessonByKey(lessonKey);
 
 	if (!lesson) {
 		throw new ConvexError("Lesson not found");
@@ -38,18 +38,18 @@ function getLessonOrThrow(lessonId: string) {
 
 export async function getLessonStateHandler(
 	ctx: CourseQueryCtx,
-	args: { lessonId: string },
+	args: { lessonKey: string },
 ) {
 	const viewerState = await loadViewerCourseState(ctx);
-	const lesson = getLessonOrThrow(args.lessonId);
+	const lesson = getLessonOrThrow(args.lessonKey);
 
-	if (!canAccessLesson(lesson.id, viewerState)) {
+	if (!canAccessLesson(lesson.lessonKey, viewerState)) {
 		return {
 			accessStatus: "locked" as const,
 		};
 	}
 
-	const lessonState = viewerState.lessonStateByLessonId.get(lesson.id);
+	const lessonState = viewerState.lessonStateByLessonKey.get(lesson.lessonKey);
 	const lessonStateIsCompatible = isCompatibleLessonState(lesson, lessonState);
 	const pinnedArtifacts = await getResolvedPinnedArtifactsForLesson(
 		ctx,
@@ -73,7 +73,7 @@ export async function getLessonStateHandler(
 }
 
 export const saveLessonDraftArgs = {
-	lessonId: v.string(),
+	lessonKey: v.string(),
 	fieldValues: fieldValuesValidator,
 };
 export const saveLessonDraftReturns = v.object({
@@ -83,14 +83,14 @@ export const saveLessonDraftReturns = v.object({
 export async function saveLessonDraftHandler(
 	ctx: CourseMutationCtx,
 	args: {
-		lessonId: string;
+		lessonKey: string;
 		fieldValues: Record<string, unknown>;
 	},
 ) {
 	const viewerState = await loadViewerCourseState(ctx);
-	const lesson = getLessonOrThrow(args.lessonId);
+	const lesson = getLessonOrThrow(args.lessonKey);
 
-	ensureLessonIsUnlocked(lesson.id, viewerState);
+	ensureLessonIsUnlocked(lesson.lessonKey, viewerState);
 
 	const result = await upsertLessonState(ctx, viewerState, lesson, {
 		mode: "draft",
@@ -109,13 +109,13 @@ export const markLessonViewedReturns = v.object({
 export async function markLessonViewedHandler(
 	ctx: CourseMutationCtx,
 	args: {
-		lessonId: string;
+		lessonKey: string;
 	},
 ) {
 	const viewerState = await loadViewerCourseState(ctx);
-	const lesson = getLessonOrThrow(args.lessonId);
+	const lesson = getLessonOrThrow(args.lessonKey);
 
-	ensureLessonIsUnlocked(lesson.id, viewerState);
+	ensureLessonIsUnlocked(lesson.lessonKey, viewerState);
 
 	const result = await upsertLessonState(ctx, viewerState, lesson, {
 		mode: "view",
@@ -125,26 +125,26 @@ export async function markLessonViewedHandler(
 }
 
 export const completeLessonArgs = {
-	lessonId: v.string(),
+	lessonKey: v.string(),
 	fieldValues: fieldValuesValidator,
 };
 export const completeLessonReturns = v.object({
 	completedAt: v.number(),
-	nextLessonId: v.union(v.string(), v.null()),
+	nextLessonKey: v.union(v.string(), v.null()),
 });
 
 export async function completeLessonHandler(
 	ctx: CourseMutationCtx,
 	args: {
-		lessonId: string;
+		lessonKey: string;
 		fieldValues: Record<string, unknown>;
 	},
 ) {
 	const viewerState = await loadViewerCourseState(ctx);
-	const lesson = getLessonOrThrow(args.lessonId);
+	const lesson = getLessonOrThrow(args.lessonKey);
 	const fieldValues = args.fieldValues as PersistedFieldValues;
 
-	ensureLessonIsUnlocked(lesson.id, viewerState);
+	ensureLessonIsUnlocked(lesson.lessonKey, viewerState);
 
 	const completionIssues = getCompletionIssues(lesson, fieldValues, {
 		pinnedArtifacts: getResolvedPinnedArtifactsForCompletion(
@@ -167,6 +167,6 @@ export async function completeLessonHandler(
 
 	return {
 		completedAt: result.timestamp,
-		nextLessonId: lesson.nextLessonId ?? null,
+		nextLessonKey: lesson.nextLessonKey ?? null,
 	};
 }

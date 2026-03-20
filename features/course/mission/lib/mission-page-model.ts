@@ -11,7 +11,9 @@ export type StatusTone = "now" | "next" | "done" | "locked";
 export type MissionBadgeVariant = "default" | "secondary" | "outline" | "ghost";
 
 export type MissionLesson = {
+	lessonKey: string;
 	id: string;
+	displayLabel: string;
 	title: string;
 	shortTitle: string;
 	status: LessonStatus;
@@ -65,11 +67,11 @@ export function getBlockStatus(block: MissionBlock): BlockStatus {
 }
 
 export function enrichLesson(lesson: MissionLesson): EnrichedLesson {
-	const config = getLesson(lesson.id);
+	const config = getLesson(lesson.lessonKey);
 
 	return {
 		...lesson,
-		href: getLessonHref(lesson.id),
+		href: getLessonHref(lesson.lessonKey),
 		objectiveTitle: config?.objectiveTitle ?? `${lesson.id} ${lesson.title}`,
 		helperText: config?.helperText,
 		winCondition:
@@ -87,7 +89,9 @@ export function enrichBlock(block: MissionBlock): EnrichedBlock {
 				lesson.status === "in_progress" || lesson.status === "available",
 		) ?? null;
 	const currentIndex = currentLesson
-		? allLessons.findIndex((lesson) => lesson.id === currentLesson.id)
+		? allLessons.findIndex(
+				(lesson) => lesson.lessonKey === currentLesson.lessonKey,
+			)
 		: -1;
 
 	return {

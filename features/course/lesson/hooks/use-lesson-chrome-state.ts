@@ -51,8 +51,8 @@ function getDefaultChromeState(lesson: LessonConfig): LessonChromeState {
 	};
 }
 
-function storageKey(lessonId: string) {
-	return `sbs:lesson-ui:${lessonId}`;
+function storageKey(lessonKey: string) {
+	return `sbs:lesson-ui:${lessonKey}`;
 }
 
 function isChromeState(value: unknown): value is LessonChromeState {
@@ -72,10 +72,10 @@ function isChromeState(value: unknown): value is LessonChromeState {
 
 export function useLessonChromeState({
 	lesson,
-	lessonId,
+	lessonKey,
 }: {
 	lesson: LessonConfig;
-	lessonId: string;
+	lessonKey: string;
 }) {
 	const fallbackChromeState = useMemo(
 		() => getDefaultChromeState(lesson),
@@ -86,7 +86,7 @@ export function useLessonChromeState({
 
 	useEffect(() => {
 		const defaults = fallbackChromeState;
-		const stored = window.localStorage.getItem(storageKey(lessonId));
+		const stored = window.localStorage.getItem(storageKey(lessonKey));
 		if (!stored) {
 			setChromeState(defaults);
 			return;
@@ -111,14 +111,14 @@ export function useLessonChromeState({
 		} catch {
 			setChromeState(defaults);
 		}
-	}, [fallbackChromeState, lesson, lessonId]);
+	}, [fallbackChromeState, lesson, lessonKey]);
 
 	useEffect(() => {
 		window.localStorage.setItem(
-			storageKey(lessonId),
+			storageKey(lessonKey),
 			JSON.stringify(chromeState),
 		);
-	}, [chromeState, lessonId]);
+	}, [chromeState, lessonKey]);
 
 	return {
 		chromeState,

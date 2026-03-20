@@ -26,11 +26,11 @@ type LessonState = UnlockedLessonState | LockedLessonState | undefined;
 
 export type LessonSaveStatus = "idle" | "saved" | "saving" | "error";
 
-export function useLessonState({ lessonId }: { lessonId: string }) {
+export function useLessonState({ lessonKey }: { lessonKey: string }) {
 	const { isAuthenticated, isLoading } = useConvexAuth();
 	const lessonState = useQuery(
 		api.course.getLessonState,
-		isAuthenticated && !isLoading ? { lessonId } : "skip",
+		isAuthenticated && !isLoading ? { lessonKey } : "skip",
 	) as LessonState;
 	const unlockedLessonState =
 		lessonState?.accessStatus === "unlocked" ? lessonState : null;
@@ -39,17 +39,17 @@ export function useLessonState({ lessonId }: { lessonId: string }) {
 	const [fieldValues, setFieldValues] = useState<PersistedFieldValues>({});
 	const [fieldValuesReady, setFieldValuesReady] = useState(false);
 	const [saveStatus, setSaveStatus] = useState<LessonSaveStatus>("idle");
-	const initializedForLessonId = useRef<string | null>(null);
-	const lastMarkedLessonId = useRef<string | null>(null);
+	const initializedForLessonKey = useRef<string | null>(null);
+	const lastMarkedLessonKey = useRef<string | null>(null);
 	const lastSavedSnapshot = useRef("");
 
 	useEffect(() => {
-		initializedForLessonId.current = null;
+		initializedForLessonKey.current = null;
 		lastSavedSnapshot.current = "";
 		setFieldValues({});
 		setFieldValuesReady(false);
 		setSaveStatus("idle");
-	}, [lessonId]);
+	}, [lessonKey]);
 
 	useEffect(() => {
 		if (!unlockedLessonState) {
@@ -57,10 +57,10 @@ export function useLessonState({ lessonId }: { lessonId: string }) {
 			return;
 		}
 
-		if (initializedForLessonId.current !== lessonId) {
+		if (initializedForLessonKey.current !== lessonKey) {
 			const nextValues = unlockedLessonState.fieldValues;
 			setFieldValues(nextValues);
-			initializedForLessonId.current = lessonId;
+			initializedForLessonKey.current = lessonKey;
 			lastSavedSnapshot.current = JSON.stringify(nextValues);
 			setSaveStatus("idle");
 			setFieldValuesReady(true);
@@ -68,13 +68,13 @@ export function useLessonState({ lessonId }: { lessonId: string }) {
 		}
 
 		setFieldValuesReady(true);
-	}, [lessonId, unlockedLessonState]);
+	}, [lessonKey, unlockedLessonState]);
 
 	useEffect(() => {
 		if (
 			!unlockedLessonState ||
 			!fieldValuesReady ||
-			initializedForLessonId.current !== lessonId
+			initializedForLessonKey.current !== lessonKey
 		) {
 			return;
 		}
@@ -86,7 +86,7 @@ export function useLessonState({ lessonId }: { lessonId: string }) {
 
 		const timeout = window.setTimeout(() => {
 			setSaveStatus("saving");
-			void saveLessonDraft({ lessonId, fieldValues }).then(
+			void saveLessonDraft({ lessonKey, fieldValues }).then(
 				() => {
 					lastSavedSnapshot.current = JSON.stringify(fieldValues);
 					setSaveStatus("saved");
@@ -101,7 +101,7 @@ export function useLessonState({ lessonId }: { lessonId: string }) {
 	}, [
 		fieldValues,
 		fieldValuesReady,
-		lessonId,
+		lessonKey,
 		unlockedLessonState,
 		saveLessonDraft,
 	]);
@@ -111,13 +111,13 @@ export function useLessonState({ lessonId }: { lessonId: string }) {
 			return;
 		}
 
-		if (lastMarkedLessonId.current === lessonId) {
+		if (lastMarkedLessonKey.current === lessonKey) {
 			return;
 		}
 
-		lastMarkedLessonId.current = lessonId;
-		void markLessonViewed({ lessonId });
-	}, [lessonId, unlockedLessonState, markLessonViewed]);
+		lastMarkedLessonKey.current = lessonKey;
+		void markLessonViewed({ lessonKey });
+	}, [lessonKey, unlockedLessonState, markLessonViewed]);
 
 	return {
 		lessonState,

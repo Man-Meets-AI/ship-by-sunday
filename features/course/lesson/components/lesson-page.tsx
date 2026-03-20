@@ -15,10 +15,10 @@ import { WorkbenchRenderer } from "@/features/course/lesson/workbench";
 import { AppShell } from "@/features/course/shared/components/app-shell";
 
 function LessonPageInner({
-	lessonId,
+	lessonKey,
 	mission,
 }: {
-	lessonId: string;
+	lessonKey: string;
 	mission?: MissionState;
 }) {
 	const router = useRouter();
@@ -41,7 +41,7 @@ function LessonPageInner({
 		setObjectiveTaskChecked,
 		completionAction,
 		footerProps,
-	} = useLessonPage(lessonId);
+	} = useLessonPage(lessonKey);
 
 	if (lessonState === undefined) {
 		return (
@@ -56,9 +56,9 @@ function LessonPageInner({
 
 	if (lessonState.accessStatus === "locked") {
 		return (
-			<AppShell currentLessonId={lessonId} mission={mission}>
+			<AppShell currentLessonId={lessonKey} mission={mission}>
 				<LessonPageLockedCard
-					lessonId={lesson.id}
+					lessonId={lesson.displayLabel}
 					shortTitle={lesson.shortTitle}
 					prevLessonId={lesson.prevLessonId ?? null}
 					onGoBack={() => router.back()}
@@ -70,7 +70,7 @@ function LessonPageInner({
 	const footer = <LessonPageFooter {...footerProps} />;
 	const workbench = isWatchLesson ? null : (
 		<WorkbenchRenderer
-			lesson={lesson}
+				lesson={lesson}
 			lessonContent={lessonContent}
 			fieldValues={fieldValues}
 			onFieldChange={setValue}
@@ -123,11 +123,16 @@ function LessonPageInner({
 }
 
 export function LessonPage({
-	lessonId,
+	lessonKey,
 	initialMission,
 }: {
-	lessonId: string;
+	lessonKey: string;
 	initialMission?: MissionState | null;
 }) {
-	return <LessonPageInner lessonId={lessonId} mission={initialMission ?? undefined} />;
+	return (
+		<LessonPageInner
+			lessonKey={lessonKey}
+			mission={initialMission ?? undefined}
+		/>
+	);
 }

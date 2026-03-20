@@ -1,6 +1,8 @@
 import type { Id } from "@/convex/_generated/dataModel";
 
 export type LessonStorageId = Id<"_storage">;
+export type LessonKey = string;
+export type VideoAssetId = string;
 
 export type BlockId = "CEO" | "DESIGN" | "BUILD" | "SHIP";
 
@@ -319,17 +321,23 @@ export type BriefAssemblerConfig =
 
 export type LessonConfig = {
   id: string;
+  lessonKey: LessonKey;
+  displayLabel: string;
+  routeSegment: string;
   slug: string;
   order: number;
   block: BlockId;
   title: string;
   shortTitle: string;
+  videoAssetId?: VideoAssetId | null;
   shell: ShellType;
   availableLayoutModes?: LessonLayoutMode[];
   workbench: WorkbenchType;
   artifact: ArtifactContract;
   nextLessonId?: string;
   prevLessonId?: string;
+  nextLessonKey?: LessonKey;
+  prevLessonKey?: LessonKey;
   unlocks?: LessonUnlockTargets;
   coachMode: CoachMode;
   coachVideoPlacement?: CoachVideoPlacement;
@@ -355,6 +363,16 @@ export type LessonConfig = {
   content: LessonContent;
 };
 
+export type LessonSourceConfig = Omit<
+  LessonConfig,
+  | "lessonKey"
+  | "displayLabel"
+  | "routeSegment"
+  | "videoAssetId"
+  | "nextLessonKey"
+  | "prevLessonKey"
+>;
+
 export type BlockConfig = {
   id: BlockId;
   label: string;
@@ -362,6 +380,28 @@ export type BlockConfig = {
   summary: string;
   order: number;
   startsLocked: boolean;
+};
+
+export type VideoAssetDefinition = LessonVideoContent & {
+  id: VideoAssetId;
+};
+
+export type CurriculumBlockDefinition = BlockConfig;
+
+export type CurriculumLessonDefinition = {
+  sourceId: string;
+  lessonKey: LessonKey;
+  displayLabel: string;
+  routeSegment: string;
+  blockId: BlockId;
+  videoAssetId?: VideoAssetId | null;
+};
+
+export type CurriculumManifest = {
+  version: number;
+  blocks: CurriculumBlockDefinition[];
+  lessons: CurriculumLessonDefinition[];
+  legacyRouteAliases?: Record<string, string>;
 };
 
 export const splitPanelDefaults: PanelDefaultState = {

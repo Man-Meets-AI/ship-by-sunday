@@ -1,8 +1,9 @@
 import {
+	getLessonVideoAsset,
 	getBunnyEmbedUrl,
+	getVideoAsset,
 	hydrateLessonVideoContent,
 	isLessonVideoReady,
-	resolveLessonMediaKey,
 	resolveLessonVideoUrl,
 } from "@/features/course/lesson/model/video";
 
@@ -41,11 +42,13 @@ describe("lesson video helpers", () => {
 		);
 	});
 
-	it("allows lesson videos to be remapped independently from the media slots", () => {
-		expect(resolveLessonMediaKey("1.1")).toBe("0.1");
-		expect(resolveLessonMediaKey("1.2")).toBe("0.2");
-		expect(resolveLessonMediaKey("1.3")).toBe("1.2");
-		expect(resolveLessonMediaKey("1.4")).toBe("1.3");
-		expect(resolveLessonMediaKey("1.9")).toBe("1.7");
+	it("resolves video assets independently from lesson numbering", () => {
+		expect(getVideoAsset("0.1")?.title).toBe("Welcome Video");
+		expect(
+			getLessonVideoAsset({
+				videoAssetId: "1.7",
+			})?.title,
+		).toBe("CEO Skills");
+		expect(getLessonVideoAsset({ videoAssetId: null })).toBeNull();
 	});
 });

@@ -19,8 +19,8 @@ function HeroActive({
 }) {
 	const ctaLabel =
 		lesson.status === "in_progress"
-			? `Resume ${lesson.id}`
-			: `Start ${lesson.id}`;
+			? `Resume ${lesson.displayLabel}`
+			: `Start ${lesson.displayLabel}`;
 
 	return (
 		<>
@@ -32,7 +32,7 @@ function HeroActive({
 					<Badge>Now</Badge>
 				</div>
 				<CardTitle className="text-2xl leading-tight tracking-tight sm:text-3xl">
-					<span className="text-muted-foreground">{lesson.id}</span>{" "}
+					<span className="text-muted-foreground">{lesson.displayLabel}</span>{" "}
 					{lesson.shortTitle}
 				</CardTitle>
 			</CardHeader>

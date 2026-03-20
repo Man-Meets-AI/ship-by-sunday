@@ -1,6 +1,6 @@
+import { getLessonByKey, getLessonHref } from "../../features/course/lesson/model/manifest";
 import {
 	COURSE_SLUG,
-	getLessonById,
 	getOrderedBlocks,
 	getStudentFacingLessons,
 	isLessonImplemented,
@@ -26,26 +26,28 @@ function getLessonStateTimestamp(state: LessonStateDoc) {
 export async function getMissionStateHandler(ctx: CourseQueryCtx) {
 	const viewerState = await loadViewerCourseState(ctx);
 	const lessons = getStudentFacingLessons().map((lesson) => {
-		const lessonState = viewerState.lessonStateByLessonId.get(lesson.id);
+		const lessonState = viewerState.lessonStateByLessonKey.get(lesson.lessonKey);
 		const lessonStateIsCompatible = isCompatibleLessonState(
 			lesson,
 			lessonState,
 		);
 		let status: "locked" | "available" | "in_progress" | "completed" = "locked";
 
-		if (viewerState.compatibleCompletedLessonIdSet.has(lesson.id)) {
+		if (viewerState.compatibleCompletedLessonKeySet.has(lesson.lessonKey)) {
 			status = "completed";
 		} else if (
 			lessonState?.status === "in_progress" &&
 			lessonStateIsCompatible
 		) {
 			status = "in_progress";
-		} else if (canAccessLesson(lesson.id, viewerState)) {
+		} else if (canAccessLesson(lesson.lessonKey, viewerState)) {
 			status = "available";
 		}
 
 		return {
+			lessonKey: lesson.lessonKey,
 			id: lesson.id,
+			displayLabel: lesson.displayLabel,
 			title: lesson.title,
 			shortTitle: lesson.shortTitle,
 			block: lesson.block,
@@ -85,9 +87,7 @@ export async function getMissionStateHandler(ctx: CourseQueryCtx) {
 		progressCount,
 		totalLessons: lessons.length,
 		blocks: missionBlocks,
-		unlockedLessonIds: Array.from(viewerState.unlockedLessonIds).filter(
-			(lessonId) => lessonId !== "0.0",
-		),
+		unlockedLessonKeys: Array.from(viewerState.unlockedLessonKeys),
 	};
 }
 
@@ -98,8 +98,12 @@ export async function getResumeDestinationHandler(ctx: CourseQueryCtx) {
 	const viewerState = await loadViewerCourseState(ctx);
 
 	const latestAccessibleLessonState = [...viewerState.lessonStates]
-		.filter((state) => Boolean(getLessonById(state.lessonId)))
-		.filter((state) => canAccessLesson(state.lessonId, viewerState))
+		.filter((state) => Boolean(state.lessonKey && getLessonByKey(state.lessonKey)))
+		.filter(
+			(state): state is LessonStateDoc & { lessonKey: string } =>
+				typeof state.lessonKey === "string" &&
+				canAccessLesson(state.lessonKey, viewerState),
+		)
 		.sort(
 			(left, right) =>
 				getLessonStateTimestamp(right) - getLessonStateTimestamp(left),
@@ -108,12 +112,12 @@ export async function getResumeDestinationHandler(ctx: CourseQueryCtx) {
 	if (!latestAccessibleLessonState) {
 		return {
 			destination: "/mission",
-			lessonId: null,
+			lessonKey: null,
 		};
 	}
 
 	return {
-		destination: `/lesson/${latestAccessibleLessonState.lessonId}`,
-		lessonId: latestAccessibleLessonState.lessonId,
+		destination: getLessonHref(latestAccessibleLessonState.lessonKey),
+		lessonKey: latestAccessibleLessonState.lessonKey,
 	};
 }

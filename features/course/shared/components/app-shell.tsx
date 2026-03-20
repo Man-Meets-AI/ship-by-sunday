@@ -38,7 +38,7 @@ function ShellInner({
 		currentBlockId ??
 		derivedLessonBlockId ??
 		mission?.blocks.find((block) =>
-			block.lessons.some((lesson) => lesson.id === currentLessonId),
+			block.lessons.some((lesson) => lesson.lessonKey === currentLessonId),
 		)?.id ??
 		mission?.blocks.find((block) => isBlockActive(block))?.id ??
 		mission?.blocks[0]?.id;
@@ -46,7 +46,7 @@ function ShellInner({
 	const activeBlock = mission?.blocks.find(
 		(block) => block.id === activeBlockId,
 	);
-	const lesson11Viewport = currentLessonId === "1.1";
+	const lesson11Viewport = getLesson(currentLessonId ?? "")?.displayLabel === "1.1";
 	const blockStatuses = mission
 		? new Map(
 				mission.blocks.map((block) => [

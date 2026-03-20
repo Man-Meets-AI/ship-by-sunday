@@ -13,7 +13,9 @@ export type AppShellMissionState = {
 		completedCount: number;
 		totalLessons: number;
 		lessons: Array<{
+			lessonKey: string;
 			id: string;
+			displayLabel: string;
 			title: string;
 			shortTitle: string;
 			status: "available" | "completed" | "in_progress" | "locked";

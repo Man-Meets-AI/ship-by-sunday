@@ -1,15 +1,12 @@
-import { getLesson, type LessonConfig } from "./manifest";
+import { getNextLesson, type LessonConfig } from "./manifest";
 
 export function formatHandoffLabelForLesson(next: LessonConfig): string {
-  return `${next.id}: ${next.title}`;
+  return `${next.displayLabel}: ${next.title}`;
 }
 
 /** `id: title` for footer copy; null when there is no configured next lesson. */
 export function getNextLessonHandoffLabel(lesson: LessonConfig): string | null {
-  if (!lesson.nextLessonId) {
-    return null;
-  }
-  const next = getLesson(lesson.nextLessonId);
+  const next = getNextLesson(lesson.lessonKey);
   if (!next) {
     return null;
   }

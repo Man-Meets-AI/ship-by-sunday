@@ -1,5 +1,5 @@
 import { productConfig, routeConfig } from "@/config/product";
-import type { LessonConfig } from "@/features/course/lesson/model/contracts";
+import type { LessonSourceConfig } from "@/features/course/lesson/model/contracts";
 import { createVideoLesson } from "@/features/course/lesson/model/video-lesson-factory";
 import {
 	BRAND_KIT_ACCENT_HEX_FIELD_ID,
@@ -1820,4 +1820,4 @@ Describe exactly what you need, with stack and URLs if relevant.`,
 			},
 		],
 	}),
-] satisfies LessonConfig[];
+] satisfies LessonSourceConfig[];

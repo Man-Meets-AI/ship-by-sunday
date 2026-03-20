@@ -42,7 +42,7 @@ const studentFacingIds = [
 
 describe("course registry", () => {
   it("keeps mission and welcome available before progress exists", () => {
-    expect(getUnlockedLessonIds([])).toEqual(["1.0", "1.1"]);
+    expect(getUnlockedLessonIds([])).toEqual(["1.1"]);
   });
 
   it("unlocks the Bunny-driven sequence at the handoff lessons", () => {
@@ -75,9 +75,9 @@ describe("course registry", () => {
     expect(getStudentFacingLessons().map((lesson) => lesson.id)).toEqual(
       studentFacingIds,
     );
-    expect(lessonRegistry.length).toBe(30);
+    expect(lessonRegistry.length).toBe(29);
     expect(getLessonById("4.0")?.title).toBe("Product Review");
-    expect(getLessonById("1.0")?.title).toBe("Mission Map");
+    expect(getLessonById("1.0")).toBeNull();
     expect(getLessonById("4.6")).toBeNull();
   });
 

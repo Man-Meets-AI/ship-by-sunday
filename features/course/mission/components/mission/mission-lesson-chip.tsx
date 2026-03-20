@@ -7,7 +7,7 @@ import type { EnrichedLesson } from "@/features/course/mission/lib/mission-page-
 export function MissionLessonChip({ lesson }: { lesson: EnrichedLesson }) {
 	const content = (
 		<span className="flex flex-col gap-0.5 text-left sm:flex-row sm:items-center sm:gap-2">
-			<span className="text-xs text-muted-foreground">{lesson.id}</span>
+			<span className="text-xs text-muted-foreground">{lesson.displayLabel}</span>
 			<span className="text-sm font-medium">{lesson.shortTitle}</span>
 		</span>
 	);

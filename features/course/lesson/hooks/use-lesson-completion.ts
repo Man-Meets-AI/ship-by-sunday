@@ -7,7 +7,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { routeConfig, timingConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import {
-	getLesson,
+	getLessonByKey,
+	getLessonHref,
 	type LessonConfig,
 } from "@/features/course/lesson/model/manifest";
 import {
@@ -30,7 +31,7 @@ type CompletionPhase = "idle" | "submitting" | "celebrating";
 type CompletionPayload = {
 	completedLessonId: string;
 	artifactLabel: string;
-	nextLessonId: string | null;
+	nextLessonKey: string | null;
 	nextLessonLabel: string | null;
 };
 
@@ -119,7 +120,7 @@ function getStageUnlockConfig(lesson: LessonConfig) {
 }
 
 export function useLessonCompletion({
-	lessonId,
+	lessonKey,
 	lesson,
 	fieldValues,
 	completionIssues,
@@ -128,7 +129,7 @@ export function useLessonCompletion({
 	lessonStatus,
 	onUnexpectedSaveError,
 }: {
-	lessonId: string;
+	lessonKey: string;
 	lesson: LessonConfig;
 	fieldValues: PersistedFieldValues;
 	completionIssues: CompletionIssue[];
@@ -151,7 +152,7 @@ export function useLessonCompletion({
 		string | null
 	>(null);
 	const completionTimeoutRef = useRef<number | null>(null);
-	const activeLessonIdRef = useRef(lessonId);
+	const activeLessonKeyRef = useRef(lessonKey);
 
 	useEffect(
 		() => () => {
@@ -163,11 +164,11 @@ export function useLessonCompletion({
 	);
 
 	useEffect(() => {
-		if (activeLessonIdRef.current === lessonId) {
+		if (activeLessonKeyRef.current === lessonKey) {
 			return;
 		}
 
-		activeLessonIdRef.current = lessonId;
+		activeLessonKeyRef.current = lessonKey;
 		setCompletionPhase("idle");
 		setCompletionPayload(null);
 		setServerCompletionIssues([]);
@@ -176,7 +177,7 @@ export function useLessonCompletion({
 			window.clearTimeout(completionTimeoutRef.current);
 			completionTimeoutRef.current = null;
 		}
-	}, [lessonId]);
+	}, [lessonKey]);
 
 	const displayedCompletionIssues = useMemo(() => {
 		if (serverCompletionIssues.length === 0 && !serverCompletionMessage) {
@@ -254,8 +255,8 @@ export function useLessonCompletion({
 		? "Unlocked"
 		: "Lesson complete";
 
-	const navigateToNextStep = (nextLessonId: string | null) => {
-		router.push(nextLessonId ? `/lesson/${nextLessonId}` : routeConfig.mission);
+	const navigateToNextStep = (nextLessonKey: string | null) => {
+		router.push(nextLessonKey ? getLessonHref(nextLessonKey) : routeConfig.mission);
 	};
 
 	return {
@@ -264,7 +265,7 @@ export function useLessonCompletion({
 			completionPhase === "celebrating" && completionPayload
 				? {
 						completedLessonId: completionPayload.completedLessonId,
-						nextLessonId: completionPayload.nextLessonId,
+						nextLessonId: completionPayload.nextLessonKey,
 					}
 				: null,
 		displayedCompletionIssues,
@@ -308,7 +309,7 @@ export function useLessonCompletion({
 		},
 		handleCompletionAction: () => {
 			if (isCelebrating && requiresManualContinuation && completionPayload) {
-				navigateToNextStep(completionPayload.nextLessonId);
+				navigateToNextStep(completionPayload.nextLessonKey);
 				return;
 			}
 			if (completionButtonDisabled) {
@@ -327,16 +328,16 @@ export function useLessonCompletion({
 			}
 
 			setCompletionPhase("submitting");
-			void completeLesson({ lessonId, fieldValues }).then(
-				(result: { nextLessonId: string | null }) => {
-					const nextLesson = result.nextLessonId
-						? getLesson(result.nextLessonId)
+			void completeLesson({ lessonKey, fieldValues }).then(
+				(result: { nextLessonKey: string | null }) => {
+					const nextLesson = result.nextLessonKey
+						? getLessonByKey(result.nextLessonKey)
 						: null;
 
 					setCompletionPayload({
-						completedLessonId: lessonId,
+						completedLessonId: lesson.lessonKey,
 						artifactLabel: lesson.artifact.label,
-						nextLessonId: result.nextLessonId,
+						nextLessonKey: result.nextLessonKey,
 						nextLessonLabel: nextLesson
 							? formatHandoffLabelForLesson(nextLesson)
 							: null,
@@ -348,7 +349,7 @@ export function useLessonCompletion({
 
 					completionTimeoutRef.current = window.setTimeout(() => {
 						completionTimeoutRef.current = null;
-						navigateToNextStep(result.nextLessonId);
+						navigateToNextStep(result.nextLessonKey);
 					}, getCompletionNavigationDelayMs());
 				},
 				(error: unknown) => {

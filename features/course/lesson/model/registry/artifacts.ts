@@ -121,6 +121,7 @@ function buildVisualDirectionPreview(
 		artifactLabel: lesson.artifact.label,
 		contextTitle: lesson.artifact.contextTitle,
 		artifactType: lesson.artifact.type as ArtifactType,
+		lessonKey: lesson.lessonKey,
 		lessonId: lesson.id,
 		lessonTitle: lesson.title,
 		fieldValues: values,
@@ -171,6 +172,7 @@ function buildCompositeBriefPreview(
 		artifactLabel: lesson.artifact.label,
 		contextTitle: lesson.artifact.contextTitle,
 		artifactType: lesson.artifact.type as ArtifactType,
+		lessonKey: lesson.lessonKey,
 		lessonId: lesson.id,
 		lessonTitle: lesson.title,
 		fieldValues: Object.fromEntries(
@@ -273,6 +275,7 @@ export function buildArtifactPreview(
 		artifactLabel: lesson.artifact.label,
 		contextTitle: lesson.artifact.contextTitle,
 		artifactType: lesson.artifact.type as ArtifactType,
+		lessonKey: lesson.lessonKey,
 		lessonId: lesson.id,
 		lessonTitle: lesson.title,
 		fieldValues: values,

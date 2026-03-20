@@ -83,6 +83,7 @@ export type ArtifactPreview = {
 	artifactLabel: string;
 	contextTitle?: string;
 	artifactType: ArtifactType;
+	lessonKey: string;
 	lessonId: string;
 	lessonTitle: string;
 	fieldValues: PersistedFieldValues;

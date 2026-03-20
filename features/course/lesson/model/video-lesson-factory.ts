@@ -2,7 +2,7 @@ import { createPendingLessonCoach } from "./content-helpers";
 import {
   type ArtifactContract,
   type BlockId,
-  type LessonConfig,
+  type LessonSourceConfig,
   type LessonContent,
   type LessonPromptImport,
   type LessonResourceContent,
@@ -87,7 +87,7 @@ export function createVideoLesson({
   workbench: workbenchOverride,
   fieldShapeVersion,
   requireReadyVideoForCompletion: requireReadyVideoOverride,
-}: VideoLessonSeed): LessonConfig {
+}: VideoLessonSeed): LessonSourceConfig {
   const unlocks: LessonUnlockTargets | undefined =
     nextLessonId || unlockBlocks?.length
       ? {

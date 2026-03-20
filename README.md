@@ -5,7 +5,7 @@
 ## What Lives Here
 
 - Public marketing and pricing pages in `app/`
-- Protected product routes at `/mission`, `/lesson/[lessonId]`, `/artifacts`, `/settings`, and the recovery surface at `/access-required`
+- Protected product routes at `/mission`, `/lesson/[lessonKey]`, `/artifacts`, `/settings`, and the recovery surface at `/access-required`
 - Feature-first runtime code in `features/`, with the curriculum and lesson model centered under `features/course/lesson/`
 - Purchase-to-access handoff across Clerk, Stripe, and Convex product-access state
 
@@ -72,7 +72,8 @@ The purchase-to-access behavior contract lives in [docs/delivery-onboarding/stac
 
 ## Intentionally Customizable
 
-- Curriculum shape and lesson order: `features/course/lesson/model/manifest.ts` and `features/course/lesson/model/lessons/*.ts`
+- Curriculum shape, stable lesson identity, canonical labels, and route mapping: `features/course/lesson/model/curriculum.ts`
+- Lesson copy, workbench fields, and lesson-specific page behavior: `features/course/lesson/model/lessons/*.ts` and `features/course/lesson/content/build.ts`
 - Landing-page copy, offer framing, and media: `features/marketing/components/home-page.tsx`, `features/marketing/components/faq-accordion.tsx`, and `public/`
 - Student workspace UI and shell behavior: `features/course/` plus the protected route group in `app/(app)/`
 - Theme tokens and visual language: `app/globals.css`
@@ -80,6 +81,17 @@ The purchase-to-access behavior contract lives in [docs/delivery-onboarding/stac
 - Optional starter-template and Codex-assisted build helpers: `.env.local.example`, `scripts/`, `app/api/codex/*`, and `features/codex/`
 
 More detail: [docs/dev/customization.md](docs/dev/customization.md)
+
+## Curriculum Kernel
+
+The course runtime now uses one typed curriculum kernel in [features/course/lesson/model/curriculum.ts](/Users/parkerrex/Projects/manmeetsai-workspace/features/course/lesson/model/curriculum.ts).
+
+- `lessonKey` is the stable internal identity used for routing, navigation, and persisted progress.
+- `displayLabel` is the canonical student-facing label shown across mission, lesson, and rail surfaces.
+- `routeSegment` is the stable URL slug for `/lesson/[lessonKey]`.
+- `videoAssetId` is the lesson-owned link to published lesson media.
+
+Lesson modules still own lesson-specific content and workbench definitions, but they no longer act as the source of truth for sequence, rail numbering, or route identity.
 
 ## Docs
 

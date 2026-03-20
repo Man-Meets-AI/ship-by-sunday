@@ -1,4 +1,4 @@
-import type { LessonConfig } from "../contracts";
+import type { LessonSourceConfig } from "../contracts";
 import { createVideoLesson } from "../video-lesson-factory";
 
 const CORE_FLOW_BRAND_HAVE = "I already have a Figma or Canva brand file";
@@ -178,4 +178,4 @@ export const designLessons = [
       "Move directly into the Build kickoff after this lesson.",
     ],
   }),
-] satisfies LessonConfig[];
+] satisfies LessonSourceConfig[];

@@ -7,11 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import type { SkillRailStepState } from "./skill-rail-shared";
 
 export function SkillRailShadcnStepBody({
-	stepNumber,
+	displayLabel,
 	shortTitle,
 	state,
 }: {
-	stepNumber: number;
+	displayLabel: string;
 	shortTitle: string;
 	state: SkillRailStepState;
 }) {
@@ -25,7 +25,7 @@ export function SkillRailShadcnStepBody({
 						: "size-6 shrink-0 justify-center rounded-full border px-0 py-0 tabular-nums"
 				}
 			>
-				{stepNumber}
+				{displayLabel}
 			</Badge>
 			{state === "done" ? (
 				<Check

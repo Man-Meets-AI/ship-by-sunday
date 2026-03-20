@@ -1,8 +1,8 @@
 import type { LessonVideoContent } from "./contracts";
 
-export type LessonMediaMap = Partial<Record<string, LessonVideoContent>>;
+export type VideoAssetMap = Partial<Record<string, LessonVideoContent>>;
 
-const LESSON_MEDIA_JSON = `{
+const VIDEO_ASSET_JSON = `{
   "0.1": {
     "status": "ready",
     "provider": "bunny",
@@ -245,4 +245,5 @@ const LESSON_MEDIA_JSON = `{
   }
 }`;
 
-export const lessonMedia = JSON.parse(LESSON_MEDIA_JSON) as LessonMediaMap;
+export const videoAssets = JSON.parse(VIDEO_ASSET_JSON) as VideoAssetMap;
+export const lessonMedia = videoAssets;

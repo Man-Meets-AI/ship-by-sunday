@@ -56,19 +56,21 @@ export function SkillRailShadcn({
 				</>
 			) : null}
 			<div className="flex min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-				<div className="flex min-w-max flex-1">
-					{lessons.map((lesson, index) => {
-						const isCurrent = lesson.id === currentLessonId;
-						const state = getSkillRailStepState(lesson, currentLessonId);
-						const isCompleting = completionCue?.completedLessonId === lesson.id;
-						const isUnlocking = completionCue?.nextLessonId === lesson.id;
-						const stepNumber = index + 1;
-						const totalSteps = lessons.length;
+					<div className="flex min-w-max flex-1">
+						{lessons.map((lesson, index) => {
+							const isCurrent = lesson.lessonKey === currentLessonId;
+							const state = getSkillRailStepState(lesson, currentLessonId);
+							const isCompleting =
+								completionCue?.completedLessonId === lesson.lessonKey;
+							const isUnlocking =
+								completionCue?.nextLessonId === lesson.lessonKey;
+							const stepNumber = index + 1;
+							const totalSteps = lessons.length;
 
-						return (
-							<SkillRailShadcnStep
-								key={lesson.id}
-								lesson={lesson}
+							return (
+								<SkillRailShadcnStep
+									key={lesson.lessonKey}
+									lesson={lesson}
 								state={state}
 								isCurrent={isCurrent}
 								isCompleting={isCompleting}

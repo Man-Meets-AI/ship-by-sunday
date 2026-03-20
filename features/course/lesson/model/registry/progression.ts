@@ -5,6 +5,7 @@ import {
 	type LessonConfig,
 	type LessonHandoff,
 	lessonRegistry,
+  lessonKeyIndex,
 	type ObjectiveMode,
 	type WorkbenchSection,
 } from "../manifest";
@@ -18,17 +19,20 @@ import {
 const LESSONS_BY_ID = new Map(
 	lessonRegistry.map((lesson) => [lesson.id, lesson]),
 );
+const LESSONS_BY_KEY = new Map(
+	lessonRegistry.map((lesson) => [lesson.lessonKey, lesson]),
+);
 const LESSONS_BY_ARTIFACT_KEY = new Map(
 	lessonRegistry.map((lesson) => [lesson.artifact.key, lesson]),
 );
 const BLOCKS_BY_ID = new Map(blocks.map((block) => [block.id, block]));
 
 export function getOrderedLessons() {
-	return [...lessonRegistry].sort((left, right) => left.order - right.order);
+	return [...lessonRegistry];
 }
 
 export function isStudentFacingLesson(lesson: LessonConfig) {
-	return lesson.id !== "1.0";
+	return Boolean(lesson.lessonKey);
 }
 
 export function getStudentFacingLessons() {
@@ -43,6 +47,14 @@ export function getLessonById(lessonId: string) {
 	return LESSONS_BY_ID.get(lessonId) ?? null;
 }
 
+export function getLessonByKey(lessonKey: string) {
+	return LESSONS_BY_KEY.get(lessonKey) ?? null;
+}
+
+function resolveLessonByIdentity(identity: string) {
+	return getLessonByKey(identity) ?? getLessonById(identity);
+}
+
 export function getLessonByArtifactKey(artifactKey: string) {
 	return LESSONS_BY_ARTIFACT_KEY.get(artifactKey) ?? null;
 }
@@ -51,34 +63,46 @@ export function getBlockById(blockId: BlockId): BlockConfig | null {
 	return BLOCKS_BY_ID.get(blockId) ?? null;
 }
 
-export function getUnlockedLessonIds(completedLessonIds: string[]) {
-	const unlocked = new Set<string>(["1.0", "1.1"]);
+export function getUnlockedLessonKeys(completedLessonKeys: string[]) {
+	const unlocked = new Set<string>([
+		getStudentFacingLessons()[0]?.lessonKey ?? "",
+	]);
 
-	for (const lessonId of completedLessonIds) {
-		const lesson = getLessonById(lessonId);
+	for (const lessonIdentity of completedLessonKeys) {
+		const lesson = resolveLessonByIdentity(lessonIdentity);
 		if (!lesson) {
 			continue;
 		}
 
-		for (const unlockedLessonId of lesson.unlocks?.lessons ?? []) {
-			unlocked.add(unlockedLessonId);
+		if (lesson.nextLessonKey) {
+			unlocked.add(lesson.nextLessonKey);
 		}
 	}
 
 	return getOrderedLessons()
-		.filter((lesson) => unlocked.has(lesson.id))
-		.map((lesson) => lesson.id);
+		.filter((lesson) => unlocked.has(lesson.lessonKey))
+		.map((lesson) => lesson.lessonKey);
 }
 
-export function getUnlockedBlockIds(completedLessonIds: string[]) {
+export function getUnlockedLessonIds(completedLessonIds: string[]) {
+	const completedLessonKeys = completedLessonIds
+		.map((lessonId) => getLessonById(lessonId)?.lessonKey ?? null)
+		.filter((lessonKey): lessonKey is string => Boolean(lessonKey));
+
+	return getUnlockedLessonKeys(completedLessonKeys)
+		.map((lessonKey) => lessonKeyIndex[lessonKey]?.displayLabel ?? null)
+		.filter((lessonId): lessonId is string => Boolean(lessonId));
+}
+
+export function getUnlockedBlockIds(completedLessonKeys: string[]) {
 	const unlocked = new Set<BlockId>(
 		getOrderedBlocks()
 			.filter((block) => !block.startsLocked)
 			.map((block) => block.id),
 	);
 
-	for (const lessonId of completedLessonIds) {
-		const lesson = getLessonById(lessonId);
+	for (const lessonIdentity of completedLessonKeys) {
+		const lesson = resolveLessonByIdentity(lessonIdentity);
 		if (!lesson) {
 			continue;
 		}

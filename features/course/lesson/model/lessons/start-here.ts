@@ -1,5 +1,5 @@
 import { createPendingLessonCoach } from "../content-helpers";
-import type { LessonConfig } from "../contracts";
+import type { LessonSourceConfig } from "../contracts";
 import { missionPanelDefaults, splitPanelDefaults } from "../contracts";
 import { START_HERE_RESOURCES } from "../resources";
 
@@ -258,4 +258,4 @@ export const startHereLessons = [
 			},
 		},
 	},
-] satisfies LessonConfig[];
+] satisfies LessonSourceConfig[];

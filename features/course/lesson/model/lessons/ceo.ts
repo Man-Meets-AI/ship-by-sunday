@@ -1,5 +1,5 @@
 import { createPendingLessonCoach } from "../content-helpers";
-import { splitPanelDefaults, type LessonConfig } from "../contracts";
+import { splitPanelDefaults, type LessonSourceConfig } from "../contracts";
 import { createVideoLesson } from "../video-lesson-factory";
 
 export const ceoLessons = [
@@ -863,4 +863,4 @@ export const ceoLessons = [
       },
     ],
   }),
-] satisfies LessonConfig[];
+] satisfies LessonSourceConfig[];

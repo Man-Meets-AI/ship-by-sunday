@@ -4,7 +4,7 @@ import { useLessonChromeState } from "@/features/course/lesson/hooks/use-lesson-
 import { useLessonCompletion } from "@/features/course/lesson/hooks/use-lesson-completion";
 import { useLessonState } from "@/features/course/lesson/hooks/use-lesson-state";
 import {
-	getLesson,
+	getLessonByKey,
 	getLessonHref,
 	lessonSupportsLayoutToggle,
 	type LessonLayoutMode,
@@ -16,10 +16,10 @@ import {
 	OBJECTIVE_CHECKLIST_FIELD_ID,
 } from "@/features/course/lesson/model/registry";
 
-export function useLessonPageData(lessonId: string) {
-	const lesson = getLesson(lessonId);
+export function useLessonPageData(lessonKey: string) {
+	const lesson = getLessonByKey(lessonKey);
 	if (!lesson) {
-		throw new Error(`Unknown lesson: ${lessonId}`);
+		throw new Error(`Unknown lesson: ${lessonKey}`);
 	}
 
 	const lessonContent = lesson.content;
@@ -31,13 +31,13 @@ export function useLessonPageData(lessonId: string) {
 		saveStatus,
 		setFieldValue,
 		setSaveStatusError,
-	} = useLessonState({ lessonId });
+	} = useLessonState({ lessonKey });
 	const { chromeState, setLayoutMode, setActiveCoachPanel } =
-		useLessonChromeState({ lesson, lessonId });
+		useLessonChromeState({ lesson, lessonKey });
 	const pinnedArtifacts =
 		lessonState?.accessStatus === "unlocked" ? lessonState.pinnedArtifacts : [];
-	const previousHref = lesson.prevLessonId
-		? getLessonHref(lesson.prevLessonId)
+	const previousHref = lesson.prevLessonKey
+		? getLessonHref(lesson.prevLessonKey)
 		: null;
 	const resolvedArtifactPreview = buildResolvedArtifactPreview(
 		lesson,
@@ -56,7 +56,7 @@ export function useLessonPageData(lessonId: string) {
 		(task) => task.status === "complete",
 	).length;
 	const completion = useLessonCompletion({
-		lessonId,
+		lessonKey,
 		lesson,
 		fieldValues,
 		completionIssues,
@@ -68,13 +68,13 @@ export function useLessonPageData(lessonId: string) {
 	});
 
 	const shellProps = {
-		currentLessonId: lessonId,
+		currentLessonId: lessonKey,
 		viewportMode: "app" as const,
 		layoutMode: chromeState.layoutMode,
 		onLayoutModeChange:
 			!isWatchLesson && lessonSupportsLayoutToggle(lesson)
-				? (layoutMode: LessonLayoutMode) => setLayoutMode(layoutMode)
-				: undefined,
+			? (layoutMode: LessonLayoutMode) => setLayoutMode(layoutMode)
+					: undefined,
 		completionCue: null,
 	};
 

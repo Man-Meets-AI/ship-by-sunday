@@ -2,7 +2,9 @@ import { SkillRailShadcn } from "@/features/course/shared/components/skill-rail-
 import type { SkillRailCompletionCue } from "@/features/course/shared/components/skill-rail";
 
 type FooterLesson = {
+	lessonKey: string;
 	id: string;
+	displayLabel: string;
 	title: string;
 	shortTitle: string;
 	status: "available" | "completed" | "in_progress" | "locked";

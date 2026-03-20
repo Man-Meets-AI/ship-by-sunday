@@ -19,7 +19,7 @@ function isCrossStageNavigationTarget(
 		return false;
 	}
 
-	return !lessons.some((lesson) => lesson.id === target.id);
+	return !lessons.some((lesson) => lesson.lessonKey === target.lessonKey);
 }
 
 export function useSkillRailNavigation({

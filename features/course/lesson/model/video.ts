@@ -1,7 +1,6 @@
 import { apiConfig } from "@/config/product";
 import type { LessonConfig, LessonVideoContent } from "./contracts";
-import { lessonMedia } from "./media";
-import { lessonVideoAssignments } from "./video-assignments";
+import { videoAssets } from "./media";
 
 export function getBunnyEmbedUrl(libraryId: number | string, videoId: string) {
 	return `${apiConfig.bunnyEmbedBaseUrl}/${libraryId}/${videoId}`;
@@ -47,12 +46,18 @@ export function hydrateLessonVideoContent(
 	};
 }
 
-export function resolveLessonMediaKey(lessonId: string): string {
-	return lessonVideoAssignments[lessonId] ?? lessonId;
+export function getVideoAsset(assetId?: string | null) {
+	return assetId ? videoAssets[assetId] ?? null : null;
+}
+
+export function getLessonVideoAsset(
+	lesson: Pick<LessonConfig, "videoAssetId"> | null | undefined,
+) {
+	return lesson ? getVideoAsset(lesson.videoAssetId ?? null) : null;
 }
 
 export function attachGeneratedLessonMedia(lesson: LessonConfig): LessonConfig {
-	const attachedVideo = lessonMedia[resolveLessonMediaKey(lesson.id)];
+	const attachedVideo = getLessonVideoAsset(lesson);
 	const mergedVideo = hydrateLessonVideoContent(
 		attachedVideo
 			? {

@@ -8,8 +8,8 @@ import type { EnrichedLesson } from "@/features/course/mission/lib/mission-page-
 export function MissionCurrentStep({ lesson }: { lesson: EnrichedLesson }) {
 	const ctaLabel =
 		lesson.status === "in_progress"
-			? `Resume ${lesson.id}`
-			: `Start ${lesson.id}`;
+			? `Resume ${lesson.displayLabel}`
+			: `Start ${lesson.displayLabel}`;
 
 	return (
 		<div className="space-y-5">
@@ -17,7 +17,7 @@ export function MissionCurrentStep({ lesson }: { lesson: EnrichedLesson }) {
 				<div className="space-y-1.5">
 					<MissionSectionLabel>Lesson to open</MissionSectionLabel>
 					<p className="text-xl font-semibold tracking-tight sm:text-2xl">
-						<span className="text-muted-foreground">{lesson.id}</span>{" "}
+						<span className="text-muted-foreground">{lesson.displayLabel}</span>{" "}
 						{lesson.shortTitle}
 					</p>
 				</div>

@@ -1,13 +1,15 @@
 import { getLessonHref } from "@/features/course/lesson/model/manifest";
 
 export type SkillRailLesson = {
-	id: string;
+	lessonKey: string;
+	displayLabel: string;
 	shortTitle: string;
 	status: "available" | "completed" | "in_progress" | "locked";
 };
 
 export type SkillRailNavigationTarget = {
-	id: string;
+	lessonKey: string;
+	displayLabel: string;
 	shortTitle: string;
 	status: Exclude<SkillRailLesson["status"], "locked">;
 	href: string;
@@ -77,7 +79,7 @@ function toNavigationTarget(
 
 	return {
 		...lesson,
-		href: getLessonHref(lesson.id),
+		href: getLessonHref(lesson.lessonKey),
 		index,
 	};
 }
@@ -87,7 +89,9 @@ export function getSkillRailNavigation(
 	currentLessonId?: string,
 ) {
 	const currentIndex = currentLessonId
-		? navigationLessons.findIndex((lesson) => lesson.id === currentLessonId)
+		? navigationLessons.findIndex(
+				(lesson) => lesson.lessonKey === currentLessonId,
+			)
 		: -1;
 	const previousLesson =
 		currentIndex > 0 ? navigationLessons[currentIndex - 1] : undefined;

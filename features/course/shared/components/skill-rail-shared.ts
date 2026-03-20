@@ -14,7 +14,7 @@ function getRailStepState(
 	lesson: SkillRailLesson,
 	currentLessonId?: string,
 ): SkillRailStepState {
-	if (lesson.id === currentLessonId) {
+	if (lesson.lessonKey === currentLessonId) {
 		return "current";
 	}
 
@@ -55,11 +55,7 @@ export function getSkillRailStepState(
 export function getSkillRailStepAriaLabel(
 	lesson: SkillRailLesson,
 	state: SkillRailStepState,
-	position?: { stepNumber: number; totalSteps: number },
 ) {
 	const body = lessonAriaBody(lesson, state);
-	if (!position) {
-		return body;
-	}
-	return `Lesson ${position.stepNumber} of ${position.totalSteps}. ${body}`;
+	return `Lesson ${lesson.displayLabel}. ${body}`;
 }

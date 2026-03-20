@@ -17,6 +17,20 @@ globalThis.React = React;
 
 import { SkillRail } from "@/features/course/shared/components/skill-rail";
 
+function createRailLesson(
+	lessonKey: string,
+	displayLabel: string,
+	shortTitle: string,
+	status: "available" | "completed" | "in_progress" | "locked",
+) {
+	return {
+		lessonKey,
+		displayLabel,
+		shortTitle,
+		status,
+	};
+}
+
 describe("SkillRail", () => {
 	beforeEach(() => {
 		pushMock.mockReset();
@@ -26,22 +40,24 @@ describe("SkillRail", () => {
 		const markup = renderToStaticMarkup(
 			<SkillRail
 				label="CEO"
-				currentLessonId="1.1"
+				currentLessonId="welcome-to-ship-by-sunday"
 				completionCue={{
-					completedLessonId: "1.1",
-					nextLessonId: "1.2",
+					completedLessonId: "welcome-to-ship-by-sunday",
+					nextLessonId: "how-the-sprint-works",
 				}}
 				lessons={[
-					{
-						id: "1.1",
-						shortTitle: "Start",
-						status: "in_progress",
-					},
-					{
-						id: "1.2",
-						shortTitle: "Carry forward",
-						status: "locked",
-					},
+					createRailLesson(
+						"welcome-to-ship-by-sunday",
+						"1.1",
+						"Start",
+						"in_progress",
+					),
+					createRailLesson(
+						"how-the-sprint-works",
+						"1.2",
+						"Carry forward",
+						"locked",
+					),
 				]}
 			/>,
 		);
@@ -53,10 +69,10 @@ describe("SkillRail", () => {
 		expect(markup).toContain("Carry forward");
 		expect(markup).toContain('aria-current="step"');
 		expect(markup).toContain(
-			'aria-label="Lesson 1 of 2. Start. Current lesson."',
+			'aria-label="Lesson 1.1. Start. Current lesson."',
 		);
 		expect(markup).toContain(
-			'aria-label="Lesson 2 of 2. Carry forward. Locked."',
+			'aria-label="Lesson 1.2. Carry forward. Locked."',
 		);
 	});
 
@@ -64,54 +80,53 @@ describe("SkillRail", () => {
 		const markup = renderToStaticMarkup(
 			<SkillRail
 				label="SHIP"
-				currentLessonId="4.6"
+				currentLessonId="product-review"
 				completionCue={{
-					completedLessonId: "4.6",
+					completedLessonId: "product-review",
 					nextLessonId: null,
 				}}
 				lessons={[
-					{
-						id: "4.6",
-						shortTitle: "Final wrap",
-						status: "in_progress",
-					},
+					createRailLesson("product-review", "4.0", "Final wrap", "in_progress"),
 				]}
 			/>,
 		);
 
 		expect(markup).toContain("bg-primary/10");
 		expect(markup).toContain(
-			'aria-label="Lesson 1 of 1. Final wrap. Current lesson."',
+			'aria-label="Lesson 4.0. Final wrap. Current lesson."',
 		);
-		expect(markup).not.toContain("Lesson 2 of");
+		expect(markup).not.toContain("Lesson 4.1");
 	});
 
 	it("keeps the previous key enabled for completed lessons", () => {
 		const markup = renderToStaticMarkup(
 			<SkillRail
 				label="CEO"
-				currentLessonId="1.2"
+				currentLessonId="how-the-sprint-works"
 				lessons={[
-					{
-						id: "1.1",
-						shortTitle: "Problem",
-						status: "completed",
-					},
-					{
-						id: "1.2",
-						shortTitle: "User",
-						status: "in_progress",
-					},
-					{
-						id: "1.3",
-						shortTitle: "Outcome",
-						status: "available",
-					},
+					createRailLesson(
+						"welcome-to-ship-by-sunday",
+						"1.1",
+						"Problem",
+						"completed",
+					),
+					createRailLesson(
+						"how-the-sprint-works",
+						"1.2",
+						"User",
+						"in_progress",
+					),
+					createRailLesson(
+						"start-with-the-problem",
+						"1.3",
+						"Outcome",
+						"available",
+					),
 				]}
 			/>,
 		);
 
-		expect(markup).toContain('data-href="/lesson/1.1"');
+		expect(markup).toContain('data-href="/lesson/welcome-to-ship-by-sunday"');
 		expect(markup).toContain('aria-label="Open previous lesson: Problem"');
 		expect(markup).toContain('data-disabled="false"');
 	});
@@ -120,60 +135,51 @@ describe("SkillRail", () => {
 		const markup = renderToStaticMarkup(
 			<SkillRail
 				label="CEO"
-				currentLessonId="1.2"
+				currentLessonId="how-the-sprint-works"
 				lessons={[
-					{
-						id: "1.1",
-						shortTitle: "Problem",
-						status: "completed",
-					},
-					{
-						id: "1.2",
-						shortTitle: "User",
-						status: "in_progress",
-					},
-					{
-						id: "1.3",
-						shortTitle: "Outcome",
-						status: "locked",
-					},
+					createRailLesson(
+						"welcome-to-ship-by-sunday",
+						"1.1",
+						"Problem",
+						"completed",
+					),
+					createRailLesson(
+						"how-the-sprint-works",
+						"1.2",
+						"User",
+						"in_progress",
+					),
+					createRailLesson(
+						"start-with-the-problem",
+						"1.3",
+						"Outcome",
+						"locked",
+					),
 				]}
 			/>,
 		);
 
 		expect(markup).toContain('aria-label="No next lesson available"');
 		expect(markup).toContain('data-disabled="true"');
-		expect(markup).not.toContain('data-href="/lesson/1.3"');
+		expect(markup).not.toContain('data-href="/lesson/start-with-the-problem"');
 	});
 
 	it("uses navigation lessons to cross forward into the next stage while keeping the visible strip scoped", () => {
 		const markup = renderToStaticMarkup(
 			<SkillRail
 				label="DESIGN"
-				currentLessonId="2.0"
+				currentLessonId="design-references"
 				lessons={[
-					{
-						id: "2.0",
-						shortTitle: "Refs",
-						status: "completed",
-					},
+					createRailLesson("design-references", "2.0", "Refs", "completed"),
 				]}
 				navigationLessons={[
-					{
-						id: "2.0",
-						shortTitle: "Refs",
-						status: "completed",
-					},
-					{
-						id: "2.1",
-						shortTitle: "Scope",
-						status: "available",
-					},
+					createRailLesson("design-references", "2.0", "Refs", "completed"),
+					createRailLesson("map-the-core-flow", "2.1", "Scope", "available"),
 				]}
 			/>,
 		);
 
-		expect(markup).toContain('data-href="/lesson/2.1"');
+		expect(markup).toContain('data-href="/lesson/map-the-core-flow"');
 		expect(markup).toContain('aria-label="Open next stage: Scope"');
 		expect(markup).toContain(">Refs<");
 		expect(markup).not.toContain(">Scope<");
@@ -183,40 +189,20 @@ describe("SkillRail", () => {
 		const markup = renderToStaticMarkup(
 			<SkillRail
 				label="DESIGN"
-				currentLessonId="2.1"
+				currentLessonId="map-the-core-flow"
 				lessons={[
-					{
-						id: "2.1",
-						shortTitle: "Scope",
-						status: "in_progress",
-					},
-					{
-						id: "2.2",
-						shortTitle: "Find",
-						status: "available",
-					},
+					createRailLesson("map-the-core-flow", "2.1", "Scope", "in_progress"),
+					createRailLesson("find-references-first", "2.2", "Find", "available"),
 				]}
 				navigationLessons={[
-					{
-						id: "2.0",
-						shortTitle: "Refs",
-						status: "completed",
-					},
-					{
-						id: "2.1",
-						shortTitle: "Scope",
-						status: "in_progress",
-					},
-					{
-						id: "2.2",
-						shortTitle: "Find",
-						status: "available",
-					},
+					createRailLesson("design-references", "2.0", "Refs", "completed"),
+					createRailLesson("map-the-core-flow", "2.1", "Scope", "in_progress"),
+					createRailLesson("find-references-first", "2.2", "Find", "available"),
 				]}
 			/>,
 		);
 
-		expect(markup).toContain('data-href="/lesson/2.0"');
+		expect(markup).toContain('data-href="/lesson/design-references"');
 		expect(markup).toContain('aria-label="Open previous stage: Refs"');
 		expect(markup).not.toContain(">Refs<");
 	});
@@ -227,70 +213,79 @@ describe("SkillRail", () => {
 		render(
 			<SkillRail
 				label="CEO"
-				currentLessonId="1.2"
+				currentLessonId="how-the-sprint-works"
 				lessons={[
-					{
-						id: "1.1",
-						shortTitle: "Problem",
-						status: "completed",
-					},
-					{
-						id: "1.2",
-						shortTitle: "User",
-						status: "in_progress",
-					},
-					{
-						id: "1.3",
-						shortTitle: "Outcome",
-						status: "available",
-					},
+					createRailLesson(
+						"welcome-to-ship-by-sunday",
+						"1.1",
+						"Problem",
+						"completed",
+					),
+					createRailLesson(
+						"how-the-sprint-works",
+						"1.2",
+						"User",
+						"in_progress",
+					),
+					createRailLesson(
+						"start-with-the-problem",
+						"1.3",
+						"Outcome",
+						"available",
+					),
 				]}
 			/>,
 		);
 
 		await user.click(
 			screen.getByRole("button", {
-				name: "Lesson 3 of 3. Outcome. Available lesson.",
+				name: "Lesson 1.3. Outcome. Available lesson.",
 			}),
 		);
 
-		expect(pushMock).toHaveBeenCalledWith("/lesson/1.3", { scroll: false });
+		expect(pushMock).toHaveBeenCalledWith("/lesson/start-with-the-problem", {
+			scroll: false,
+		});
 	});
 
 	it("disables adjacent nav at the first and last visible lesson", () => {
 		const firstMarkup = renderToStaticMarkup(
 			<SkillRail
 				label="CEO"
-				currentLessonId="1.1"
+				currentLessonId="welcome-to-ship-by-sunday"
 				lessons={[
-					{
-						id: "1.1",
-						shortTitle: "Problem",
-						status: "in_progress",
-					},
-					{
-						id: "1.2",
-						shortTitle: "User",
-						status: "available",
-					},
+					createRailLesson(
+						"welcome-to-ship-by-sunday",
+						"1.1",
+						"Problem",
+						"in_progress",
+					),
+					createRailLesson(
+						"how-the-sprint-works",
+						"1.2",
+						"User",
+						"available",
+					),
 				]}
 			/>,
 		);
 		const lastMarkup = renderToStaticMarkup(
 			<SkillRail
 				label="CEO"
-				currentLessonId="1.2"
+				currentLessonId="how-the-sprint-works"
 				lessons={[
-					{
-						id: "1.1",
-						shortTitle: "Problem",
-						status: "completed",
-					},
-					{
-						id: "1.2",
-						shortTitle: "User",
-						status: "in_progress",
-					},
+					createRailLesson(
+						"welcome-to-ship-by-sunday",
+						"1.1",
+						"Problem",
+						"completed",
+					),
+					createRailLesson(
+						"how-the-sprint-works",
+						"1.2",
+						"User",
+						"in_progress",
+					),
 				]}
 			/>,
 		);
@@ -306,11 +301,12 @@ describe("SkillRail", () => {
 			<SkillRail
 				label="CEO"
 				lessons={[
-					{
-						id: "1.1",
-						shortTitle: "Problem",
-						status: "available",
-					},
+					createRailLesson(
+						"welcome-to-ship-by-sunday",
+						"1.1",
+						"Problem",
+						"available",
+					),
 				]}
 			/>,
 		);
@@ -323,39 +319,42 @@ describe("SkillRail", () => {
 		const markup = renderToStaticMarkup(
 			<SkillRail
 				label="CEO"
-				currentLessonId="1.2"
+				currentLessonId="how-the-sprint-works"
 				lessons={[
-					{
-						id: "1.1",
-						shortTitle: "Problem",
-						status: "completed",
-					},
-					{
-						id: "1.2",
-						shortTitle: "User",
-						status: "in_progress",
-					},
-					{
-						id: "1.3",
-						shortTitle: "Outcome",
-						status: "available",
-					},
+					createRailLesson(
+						"welcome-to-ship-by-sunday",
+						"1.1",
+						"Problem",
+						"completed",
+					),
+					createRailLesson(
+						"how-the-sprint-works",
+						"1.2",
+						"User",
+						"in_progress",
+					),
+					createRailLesson(
+						"start-with-the-problem",
+						"1.3",
+						"Outcome",
+						"available",
+					),
 				]}
 			/>,
 		);
 
-		expect(markup).toContain("Lesson 1 of 3");
-		expect(markup).toContain("Lesson 2 of 3");
-		expect(markup).toContain("Lesson 3 of 3");
+		expect(markup).toContain(">1.1<");
+		expect(markup).toContain(">1.2<");
+		expect(markup).toContain(">1.3<");
 		expect(markup).toContain("lucide-check");
 		expect(markup).toContain(
-			'aria-label="Lesson 1 of 3. Problem. Completed lesson."',
+			'aria-label="Lesson 1.1. Problem. Completed lesson."',
 		);
 		expect(markup).toContain(
-			'aria-label="Lesson 2 of 3. User. Current lesson."',
+			'aria-label="Lesson 1.2. User. Current lesson."',
 		);
 		expect(markup).toContain(
-			'aria-label="Lesson 3 of 3. Outcome. Available lesson."',
+			'aria-label="Lesson 1.3. Outcome. Available lesson."',
 		);
 	});
 
@@ -363,18 +362,20 @@ describe("SkillRail", () => {
 		const markup = renderToStaticMarkup(
 			<SkillRail
 				label="CEO"
-				currentLessonId="1.2"
+				currentLessonId="how-the-sprint-works"
 				lessons={[
-					{
-						id: "1.1",
-						shortTitle: "Problem",
-						status: "completed",
-					},
-					{
-						id: "1.2",
-						shortTitle: "User",
-						status: "in_progress",
-					},
+					createRailLesson(
+						"welcome-to-ship-by-sunday",
+						"1.1",
+						"Problem",
+						"completed",
+					),
+					createRailLesson(
+						"how-the-sprint-works",
+						"1.2",
+						"User",
+						"in_progress",
+					),
 				]}
 			/>,
 		);

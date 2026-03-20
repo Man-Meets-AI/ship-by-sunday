@@ -7,55 +7,33 @@ import {
   shouldHandleSkillRailShortcut,
 } from "@/features/course/shared/utils/skill-rail-navigation";
 
+function createRailLesson(
+  lessonKey: string,
+  displayLabel: string,
+  shortTitle: string,
+  status: SkillRailLesson["status"],
+): SkillRailLesson {
+  return {
+    lessonKey,
+    displayLabel,
+    shortTitle,
+    status,
+  };
+}
+
 const sampleLessons: SkillRailLesson[] = [
-  {
-    id: "1.1",
-    shortTitle: "Problem",
-    status: "completed",
-  },
-  {
-    id: "1.2",
-    shortTitle: "User",
-    status: "in_progress",
-  },
-  {
-    id: "1.3",
-    shortTitle: "Outcome",
-    status: "locked",
-  },
+  createRailLesson("welcome-to-ship-by-sunday", "1.1", "Problem", "completed"),
+  createRailLesson("how-the-sprint-works", "1.2", "User", "in_progress"),
+  createRailLesson("start-with-the-problem", "1.3", "Outcome", "locked"),
 ];
 
 const crossStageLessons: SkillRailLesson[] = [
-  {
-    id: "1.6",
-    shortTitle: "Research",
-    status: "completed",
-  },
-  {
-    id: "1.8",
-    shortTitle: "Wrap",
-    status: "completed",
-  },
-  {
-    id: "1.9",
-    shortTitle: "Skills",
-    status: "completed",
-  },
-  {
-    id: "2.0",
-    shortTitle: "Refs",
-    status: "completed",
-  },
-  {
-    id: "2.1",
-    shortTitle: "Scope",
-    status: "available",
-  },
-  {
-    id: "2.2",
-    shortTitle: "Find",
-    status: "completed",
-  },
+  createRailLesson("light-research-not-a-thesis", "1.6", "Research", "completed"),
+  createRailLesson("ceo-wrap-up", "1.8", "Wrap", "completed"),
+  createRailLesson("ceo-skills", "1.9", "Skills", "completed"),
+  createRailLesson("design-references", "2.0", "Refs", "completed"),
+  createRailLesson("map-the-core-flow", "2.1", "Scope", "available"),
+  createRailLesson("find-references-first", "2.2", "Find", "completed"),
 ];
 
 function asEventTarget<T extends object>(value: T): EventTarget {
@@ -64,21 +42,22 @@ function asEventTarget<T extends object>(value: T): EventTarget {
 
 describe("skill rail navigation", () => {
   it("keeps completed previous lessons navigable and blocks locked next lessons", () => {
-    const navigation = getSkillRailNavigation(sampleLessons, "1.2");
+    const navigation = getSkillRailNavigation(sampleLessons, "how-the-sprint-works");
 
     expect(navigation.previousTarget).toMatchObject({
-      id: "1.1",
-      href: "/lesson/1.1",
+      lessonKey: "welcome-to-ship-by-sunday",
+      displayLabel: "1.1",
+      href: "/lesson/welcome-to-ship-by-sunday",
       status: "completed",
     });
     expect(navigation.nextTarget).toBeNull();
   });
 
   it("disables navigation at the start and end of a stage", () => {
-    const first = getSkillRailNavigation(sampleLessons, "1.1");
+    const first = getSkillRailNavigation(sampleLessons, "welcome-to-ship-by-sunday");
     const last = getSkillRailNavigation(
       [sampleLessons[0], sampleLessons[1]],
-      "1.2",
+      "how-the-sprint-works",
     );
 
     expect(first.previousTarget).toBeNull();
@@ -86,21 +65,23 @@ describe("skill rail navigation", () => {
   });
 
   it("crosses forward to the next lesson when the Design entry is unlocked", () => {
-    const navigation = getSkillRailNavigation(crossStageLessons, "2.0");
+    const navigation = getSkillRailNavigation(crossStageLessons, "design-references");
 
     expect(navigation.nextTarget).toMatchObject({
-      id: "2.1",
-      href: "/lesson/2.1",
+      lessonKey: "map-the-core-flow",
+      displayLabel: "2.1",
+      href: "/lesson/map-the-core-flow",
       status: "available",
     });
   });
 
   it("crosses backward to the previous stage's last lesson symmetrically", () => {
-    const navigation = getSkillRailNavigation(crossStageLessons, "2.1");
+    const navigation = getSkillRailNavigation(crossStageLessons, "map-the-core-flow");
 
     expect(navigation.previousTarget).toMatchObject({
-      id: "2.0",
-      href: "/lesson/2.0",
+      lessonKey: "design-references",
+      displayLabel: "2.0",
+      href: "/lesson/design-references",
       status: "completed",
     });
   });
@@ -109,17 +90,19 @@ describe("skill rail navigation", () => {
     const navigation = getSkillRailNavigation(
       [
         {
-          id: "2.0",
+          lessonKey: "design-references",
+          displayLabel: "2.0",
           shortTitle: "Refs",
           status: "completed",
         },
         {
-          id: "2.1",
+          lessonKey: "map-the-core-flow",
+          displayLabel: "2.1",
           shortTitle: "Scope",
           status: "locked",
         },
       ],
-      "2.0",
+      "design-references",
     );
 
     expect(navigation.nextTarget).toBeNull();

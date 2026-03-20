@@ -95,6 +95,7 @@ const artifactPreviewFields = {
 	artifactLabel: v.string(),
 	contextTitle: v.optional(v.string()),
 	artifactType: artifactTypeValidator,
+	lessonKey: v.string(),
 	lessonId: v.string(),
 	lessonTitle: v.string(),
 	fieldValues: fieldValuesValidator,
@@ -109,7 +110,7 @@ export const completedArtifactPreviewValidator = v.object({
 
 export const resumeDestinationReturnValidator = v.object({
 	destination: v.string(),
-	lessonId: v.union(v.string(), v.null()),
+	lessonKey: v.union(v.string(), v.null()),
 });
 
 export const starterRepoAccessPublicValidator = v.object({
@@ -136,7 +137,9 @@ export const starterRepoAccessOperatorItemValidator = v.object({
 });
 
 export const missionLessonValidator = v.object({
+	lessonKey: v.string(),
 	id: v.string(),
+	displayLabel: v.string(),
 	title: v.string(),
 	shortTitle: v.string(),
 	block: blockIdValidator,
@@ -161,7 +164,7 @@ export const missionStateReturnValidator = v.object({
 	progressCount: v.number(),
 	totalLessons: v.number(),
 	blocks: v.array(missionBlockValidator),
-	unlockedLessonIds: v.array(v.string()),
+	unlockedLessonKeys: v.array(v.string()),
 });
 
 export const unlockedLessonStateValidator = v.object({

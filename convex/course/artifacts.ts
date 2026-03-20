@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 
-import { getLessonById } from "../../features/course/lesson/model/registry";
+import { getLessonByKey } from "../../features/course/lesson/model/manifest";
 import {
 	buildResolvedArtifactPreviewForLesson,
 	loadViewerCourseState,
@@ -20,9 +20,9 @@ export async function listArtifactsHandler(ctx: CourseQueryCtx) {
 
 	return (
 		await Promise.all(
-			viewerState.compatibleCompletedLessonIds.map(async (lessonId) => {
-				const lesson = getLessonById(lessonId);
-				const lessonState = viewerState.lessonStateByLessonId.get(lessonId);
+			viewerState.compatibleCompletedLessonKeys.map(async (lessonKey) => {
+				const lesson = getLessonByKey(lessonKey);
+				const lessonState = viewerState.lessonStateByLessonKey.get(lessonKey);
 				if (!lesson || !lessonState) {
 					return null;
 				}

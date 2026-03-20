@@ -10,7 +10,7 @@ import { getConvexServerSession } from "@/platform/auth/convex-auth";
 
 type ResumeDestination = {
 	destination: string;
-	lessonId: string | null;
+	lessonKey: string | null;
 };
 
 export async function getServerProductAccess(): Promise<ProductAccess> {

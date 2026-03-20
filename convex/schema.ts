@@ -51,7 +51,9 @@ export default defineSchema({
 	lessonStates: defineTable({
 		clerkUserId: v.string(),
 		courseSlug: v.string(),
-		lessonId: v.string(),
+		curriculumVersion: v.optional(v.number()),
+		lessonKey: v.optional(v.string()),
+		lessonId: v.optional(v.string()),
 		blockId: v.union(
 			v.literal("CEO"),
 			v.literal("DESIGN"),
@@ -82,7 +84,6 @@ export default defineSchema({
 		lastViewedAt: v.optional(v.number()),
 		completedAt: v.optional(v.number()),
 	})
-		.index("by_clerk_user_id_and_lesson_id", ["clerkUserId", "lessonId"])
 		.index("by_clerk_user_id_and_status", ["clerkUserId", "status"])
 		.index("by_clerk_user_id_and_artifact_key", ["clerkUserId", "artifactKey"]),
 	codexConnections: defineTable({

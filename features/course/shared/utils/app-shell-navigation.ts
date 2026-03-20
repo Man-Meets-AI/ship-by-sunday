@@ -1,7 +1,8 @@
 import { getLessonHref } from "@/features/course/lesson/model/manifest";
 
 export type AppShellBlockLesson = {
-	id: string;
+	lessonKey: string;
+	displayLabel: string;
 	status: "available" | "completed" | "in_progress" | "locked";
 };
 
@@ -12,7 +13,8 @@ export type AppShellBlock = {
 
 export type AppShellBlockNavigationTarget = {
 	blockId: string;
-	lessonId: string;
+	lessonKey: string;
+	displayLabel: string;
 	href: string;
 	status: Exclude<AppShellBlockLesson["status"], "locked">;
 };
@@ -43,8 +45,9 @@ export function getAppShellBlockNavigationTarget(
 
 	return {
 		blockId: block.id,
-		lessonId: targetLesson.id,
-		href: getLessonHref(targetLesson.id),
+		lessonKey: targetLesson.lessonKey,
+		displayLabel: targetLesson.displayLabel,
+		href: getLessonHref(targetLesson.lessonKey),
 		status: targetLesson.status,
 	};
 }
