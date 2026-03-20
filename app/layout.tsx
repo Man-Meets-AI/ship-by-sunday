@@ -13,7 +13,9 @@ const bebasNeue = Bebas_Neue({
 import { Toaster } from "@/components/ui/sonner";
 import { manifestConfig, productConfig } from "@/config/product";
 import { sessionTaskUrls } from "@/features/auth/sign-in/sign-in-route-utils";
+import { clerkProviderAppearance } from "@/lib/clerk-auth-appearance";
 import { ConvexClientProvider } from "@/platform/convex/convex-client-provider";
+import { publicEnv } from "@/platform/env/public";
 import { getMetadataBase } from "@/platform/next/metadata-base";
 import "./globals.css";
 
@@ -60,20 +62,29 @@ export default function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	return (
-		<html lang="en" suppressHydrationWarning>
-			<body className={bebasNeue.variable}>
-				<ClerkProvider taskUrls={sessionTaskUrls}>
-					<ThemeProvider
-						attribute="class"
-						defaultTheme="light"
-						enableSystem={false}
+	if (publicEnv.NEXT_PUBLIC_CLERK_SIGN_IN_URL === "/sign-in") {
+		return (
+			<html lang="en" suppressHydrationWarning>
+				<body className={bebasNeue.variable}>
+					<ClerkProvider
+						appearance={clerkProviderAppearance}
+						taskUrls={sessionTaskUrls}
 					>
-						<ConvexClientProvider>{children}</ConvexClientProvider>
-						<Toaster />
-					</ThemeProvider>
-				</ClerkProvider>
-			</body>
-		</html>
+						<ThemeProvider
+							attribute="class"
+							defaultTheme="light"
+							enableSystem={false}
+						>
+							<ConvexClientProvider>{children}</ConvexClientProvider>
+							<Toaster />
+						</ThemeProvider>
+					</ClerkProvider>
+				</body>
+			</html>
+		);
+	}
+
+	throw new Error(
+		"NEXT_PUBLIC_CLERK_SIGN_IN_URL must be set to /sign-in for the custom Clerk auth flow.",
 	);
 }

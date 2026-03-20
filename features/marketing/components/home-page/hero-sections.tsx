@@ -57,8 +57,10 @@ export function HomeHeroSection({
 							alt={hero.previewImageAlt}
 							width={1600}
 							height={900}
-							priority
 							className="aspect-video h-auto w-full object-cover"
+							placeholder="empty"
+							sizes="(min-width: 1024px) 66vw, 100vw"
+							preload
 						/>
 					</div>
 				</div>

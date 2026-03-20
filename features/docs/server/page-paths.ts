@@ -1,3 +1,5 @@
+import path from "node:path";
+
 import { generateStaticParamsFor } from "nextra/pages";
 
 const DOCS_ROOT_SEGMENT = "docs";
@@ -6,6 +8,22 @@ const generateAllStaticParams = generateStaticParamsFor("mdxPath");
 
 export function getDocsPageSegments(mdxPath?: string[]) {
 	return [DOCS_ROOT_SEGMENT, ...(mdxPath ?? [])];
+}
+
+export function getDocsPagePath(mdxPath?: string[]) {
+	if (!mdxPath || mdxPath.length === 0) {
+		return `/${DOCS_ROOT_SEGMENT}`;
+	}
+
+	return `/${DOCS_ROOT_SEGMENT}/${mdxPath.join("/")}`;
+}
+
+export function getDocsSourcePath(mdxPath?: string[]) {
+	const sourceFile = !mdxPath || mdxPath.length === 0
+		? "index.mdx"
+		: `${mdxPath.join("/")}.mdx`;
+
+	return path.join(process.cwd(), "content/docs", sourceFile);
 }
 
 export async function generateDocsStaticParams() {

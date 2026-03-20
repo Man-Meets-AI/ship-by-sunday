@@ -1,5 +1,6 @@
 import { importPage } from "nextra/pages";
 
+import { buildDocsMetadata } from "@/features/docs/lib/docs-metadata";
 import {
 	generateDocsStaticParams,
 	getDocsPageSegments,
@@ -15,7 +16,7 @@ export async function generateMetadata(props: {
 }) {
 	const { mdxPath } = await props.params;
 	const { metadata } = await importPage(getDocsPageSegments(mdxPath));
-	return metadata;
+	return buildDocsMetadata({ mdxPath, metadata });
 }
 
 export default async function DocsContentPage(props: {

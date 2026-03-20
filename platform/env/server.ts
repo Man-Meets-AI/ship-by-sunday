@@ -11,6 +11,7 @@ function normalizeEnvValue(value: string | undefined) {
 
 const serverEnvSchema = z.object({
 	APP_BASE_URL: z.string().url().optional(),
+	GOOGLE_SITE_VERIFICATION: z.string().min(1).optional(),
 	CLERK_SECRET_KEY: z.string().min(1).optional(),
 	CLERK_FRONTEND_API_URL: z.string().min(1).optional(),
 	STRIPE_SECRET_KEY: z.string().min(1).optional(),
@@ -26,6 +27,9 @@ const serverEnvSchema = z.object({
 
 export const serverEnv = serverEnvSchema.parse({
 	APP_BASE_URL: normalizeEnvValue(process.env.APP_BASE_URL),
+	GOOGLE_SITE_VERIFICATION: normalizeEnvValue(
+		process.env.GOOGLE_SITE_VERIFICATION,
+	),
 	CLERK_SECRET_KEY: normalizeEnvValue(process.env.CLERK_SECRET_KEY),
 	CLERK_FRONTEND_API_URL: normalizeEnvValue(process.env.CLERK_FRONTEND_API_URL),
 	STRIPE_SECRET_KEY: normalizeEnvValue(process.env.STRIPE_SECRET_KEY),

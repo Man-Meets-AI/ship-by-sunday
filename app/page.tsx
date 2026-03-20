@@ -1,6 +1,7 @@
 import HomePage from "@/features/marketing/components/home-page";
 import { redirectGrantedHomeVisitor } from "@/features/product-access/server/product-access";
 import { shouldBypassClerkProtection } from "@/platform/auth/clerk-middleware-bypass";
+import { getHomePageStructuredData } from "@/features/marketing/lib/home-page-structured-data";
 
 export default async function Page({
 	searchParams,
@@ -14,5 +15,15 @@ export default async function Page({
 		await redirectGrantedHomeVisitor({ allowMarketing: marketing === "1" });
 	}
 
-	return <HomePage />;
+	return (
+		<>
+			<script
+				type="application/ld+json"
+				dangerouslySetInnerHTML={{
+					__html: getHomePageStructuredData(),
+				}}
+			/>
+			<HomePage />
+		</>
+	);
 }

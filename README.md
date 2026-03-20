@@ -23,7 +23,9 @@ bun install
 cp .env.local.example .env.local
 ```
 
-Set `APP_BASE_URL` to the canonical host you want Stripe to use for checkout success and cancel redirects. For local development, keep it on `http://localhost:3000`.
+Set `APP_BASE_URL` to the canonical host you want Stripe to use for checkout success and cancel redirects. The same value is also used for SEO metadata, canonical URLs, `robots.txt`, and `sitemap.xml`. For local development, keep it on `http://localhost:3000`.
+
+If you want Google Search Console HTML-tag verification through Next metadata, set `GOOGLE_SITE_VERIFICATION` to the token value from Search Console.
 
 3. Start the full local stack:
 
@@ -69,6 +71,17 @@ bun run stripe:local:verify
 ```
 
 The purchase-to-access behavior contract lives in [docs/delivery-onboarding/stack-decision.md](docs/delivery-onboarding/stack-decision.md).
+
+
+## Public SEO Surface
+
+- Root metadata defaults live in `app/layout.tsx` and resolve absolute canonical hosts through `platform/next/metadata-base.ts`.
+- Public crawl directives are generated from `app/robots.ts` and `app/sitemap.ts`, with docs-backed `lastModified` hints from `content/docs`.
+- Social preview images are generated from `app/opengraph-image.tsx` and `app/twitter-image.tsx`.
+- Docs metadata defaults and per-page canonical/OG/Twitter fields are built through `features/docs/lib/docs-metadata.ts`.
+- Homepage structured data is injected from `app/page.tsx` via `features/marketing/lib/home-page-structured-data.ts`, including `Organization`, `Product`, and `FAQPage` schema.
+- Protected app routes and auth or recovery flows are intentionally marked `noindex` in `app/(app)/layout.tsx` and the individual utility route entrypoints.
+- Rendered SEO regressions are smoke-checked in `tests/browser-smoke/app-smoke.spec.ts`.
 
 ## Intentionally Customizable
 

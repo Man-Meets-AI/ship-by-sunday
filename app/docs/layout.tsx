@@ -4,20 +4,14 @@ import { getPageMap } from "nextra/page-map";
 import { Layout } from "nextra-theme-docs";
 
 import { DOCS_THEME_STORAGE_KEY } from "@/features/docs/lib/theme-preferences";
+import { getDocsMetadataDefaults } from "@/features/docs/lib/docs-metadata";
 import { DocsFooter } from "@/features/docs/components/docs-footer";
 import { DocsNavbar } from "@/features/docs/components/docs-navbar";
 
 import "nextra-theme-docs/style.css";
 import "@/features/docs/styles/docs-theme.css";
 
-export const metadata: Metadata = {
-	title: {
-		default: "Ship by Sunday Docs",
-		template: "%s | Ship by Sunday Docs",
-	},
-	description:
-		"Tutorial-first docs for getting the Ship by Sunday starter running, customized, and shipped.",
-};
+export const metadata: Metadata = getDocsMetadataDefaults();
 
 export default async function DocsLayout({
 	children,
