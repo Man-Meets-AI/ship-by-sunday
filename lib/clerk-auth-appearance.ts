@@ -1,5 +1,5 @@
 /**
- * Clerk `<SignIn />` / `<SignUp />` appearance aligned with shadcn primitives
+ * Clerk prebuilt auth/task appearance aligned with shadcn primitives
  * (`components/ui/input`, `button`, `label`) and semantic tokens.
  */
 const input =

@@ -11,8 +11,6 @@ export const homePageContent = {
   hero: {
     docsLabel: "Docs",
     loginLabel: "Log in",
-    topBarStart: "One weekend",
-    topBarEnd: "Prototype to v1",
     headlineLead: "Go from app idea",
     headlineTailPrefix: "to live v1 ",
     headlineTailHover: "by Sunday",
@@ -24,17 +22,24 @@ export const homePageContent = {
       "A working first version",
       "A live link you can share",
     ],
-    primaryCta: "Get instant access",
-    secondaryCta: "See how it works",
+    primaryCta: "Get Ship by Sunday",
     eyebrow:
       "One-time payment. Lifetime access. Start immediately after checkout.",
     previewImageAlt: "Ship by Sunday 4-block system placeholder",
   },
   sprintPathSection: {
     label: "Sprint Path",
-    title: "The 4-block path to a real v1",
+    titlePrefix: "Coding is not ",
+    titleHighlight: "the bottleneck.",
     intro:
-      "Built for builders who can already prototype but keep getting stuck before they ship. Four blocks, each with a concrete output — inside one guided workspace.",
+      "Most builders do not get stuck because they cannot code. They get stuck because product scope, design direction, execution order, and shipping decisions all break down at once.",
+    supportingPoints: [
+      "We cover the full path: product thinking, design decisions, AI coding, and the final push to ship.",
+      "You get the starter template, exact agent instructions, and the subagents and skills to move faster without guessing.",
+      "Each block gives you a concrete output so you stop collecting ideas and start finishing the right version.",
+    ],
+    valueFrame:
+      "Think of it like a $2,500 product workshop, a build template, and a guided masterclass in product, design, and AI coding all in one.",
   },
   proofSection: {
     label: "Built by someone who ships",
@@ -43,11 +48,45 @@ export const homePageContent = {
     imageAlt: "Founder proof visual",
     imageCaption:
       "Built by someone who has moved from design to engineering to product and knows what it takes to turn rough ideas into shippable products.",
-    points: [
-      "10 years in product, from design to engineering",
-      "Scaled Delivery Dudes to $73M GMV and a $23M acquisition",
-      "Built GPTs for Devs to 100K users in its first week",
-      "Taught 110+ students through Vibe with AI",
+    github: {
+      username: "ParkerRex",
+      profileUrl: "https://github.com/ParkerRex",
+      activityCaption:
+        "commits this year. This system is built by someone who ships every day.",
+    },
+    stats: [
+      {
+        value: "10+",
+        label: "Years in product",
+        description: "From design to engineering",
+      },
+      {
+        value: "$73M",
+        label: "GMV scaled",
+        description: "Delivery Dudes to a $23M acquisition",
+      },
+      {
+        value: "100K",
+        label: "Users in week one",
+        description: "GPTs for Devs launch",
+      },
+      {
+        value: "110+",
+        label: "Students taught",
+        description: "Through Vibe with AI",
+      },
+    ],
+    reachStats: [
+      {
+        value: "8+",
+        label: "Years on YouTube",
+        description: "Teaching product and AI building",
+      },
+      {
+        value: "100s",
+        label: "Paid workshop members",
+        description: "Weekly sessions with builders worldwide",
+      },
     ],
   },
   faqSection: {
@@ -124,15 +163,54 @@ export const homePageContent = {
       },
     ],
   },
+  whatsInsideSection: {
+    label: "What's inside",
+    title: "A workshop, a workspace, and a starter template.",
+    intro:
+      "Three layers designed to get you from raw idea to live product without the usual scramble.",
+    pillars: [
+      {
+        title: "29 guided lessons across 4 blocks",
+        highlightBefore: "Walk through ",
+        highlight: "29 guided lessons",
+        highlightAfter:
+          " organized into four progressive blocks: CEO, Design, Build, and Ship. Each block unlocks the next and ends with a concrete deliverable, not just another video to watch.",
+        supporting:
+          "Video walkthroughs, AI coach, checklists, and artifact capture at every step.",
+        imagePlaceholder: "/placeholder-workshop.svg",
+        imageAlt: "Workshop lesson interface",
+      },
+      {
+        title: "Software-guided workspace with 30 modes",
+        highlightBefore: "Work inside a ",
+        highlight: "software-guided workspace",
+        highlightAfter:
+          " with 30 interactive workbench modes: guided forms, scoring tables, collector boards, sketch uploads, brief assemblers, and deploy handoffs. Real-time progress tracking keeps you moving.",
+        supporting:
+          "Every deliverable is captured as an artifact. No more scattered docs and half-decisions.",
+        imagePlaceholder: "/placeholder-workspace.svg",
+        imageAlt: "Workspace workbench interface",
+      },
+      {
+        title: "Production-ready starter template",
+        highlightBefore: "Clone a ",
+        highlight: "production-ready template",
+        highlightAfter:
+          " wired with Next.js, Convex, Clerk, Stripe, and Vercel. Auth, database, payments, and deploy are already connected. Paste-ready Codex subagent instructions and skills handle the AI-assisted building.",
+        supporting:
+          "30+ pages of docs, GitHub starter repo with automated invite, and a 25-video PM bonus course included.",
+        imagePlaceholder: "/placeholder-template.svg",
+        imageAlt: "Starter template code and stack",
+      },
+    ],
+  },
   pricingSection: {
     label: productName,
     titleLead: "Go from idea to v1",
     titleAccent: "this weekend",
-    intro:
-      "A custom software-backed weekend sprint for builders who struggle to get a v1 out the door. Scope the MVP, map the core screens, build the core flow, and get a real first version live.",
+    intro: "A guided weekend sprint to scope, build, and ship your v1.",
     priceDisplay: productConfig.priceDisplay,
     eyebrow: "One-time payment. Lifetime access. No subscription.",
-    paymentLabel: "One-time payment",
     ctaTitle: "Get instant access",
     trustLine:
       "After checkout, your access finishes syncing and you go straight into Mission to start.",
@@ -148,14 +226,6 @@ export const homePageContent = {
     guarantee:
       "Complete the CEO Block within 14 days. If you do not leave with a clear One-Page Product Brief and a tighter MVP scope, email us and we will refund you.",
   },
-  footerNav: [
-    "Home",
-    productName,
-    "The AI Primer",
-    "Blog",
-    "Shop",
-    "Instagram",
-  ],
   footerWordmark: productName,
 } as const;
 

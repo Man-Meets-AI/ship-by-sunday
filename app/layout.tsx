@@ -12,6 +12,7 @@ const bebasNeue = Bebas_Neue({
 
 import { Toaster } from "@/components/ui/sonner";
 import { manifestConfig, productConfig } from "@/config/product";
+import { sessionTaskUrls } from "@/features/auth/sign-in/sign-in-route-utils";
 import { ConvexClientProvider } from "@/platform/convex/convex-client-provider";
 import "./globals.css";
 
@@ -34,7 +35,7 @@ export default function RootLayout({
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<body className={bebasNeue.variable}>
-				<ClerkProvider>
+				<ClerkProvider taskUrls={sessionTaskUrls}>
 					<ThemeProvider
 						attribute="class"
 						defaultTheme="light"

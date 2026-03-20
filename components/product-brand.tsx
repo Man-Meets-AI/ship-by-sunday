@@ -2,8 +2,11 @@ import Link from "next/link";
 
 import { productConfig } from "@/config/product";
 
+export const productWordmarkFontClassName =
+	"[font-family:var(--font-bebas-neue),ui-sans-serif,system-ui,sans-serif]";
+
 export const productWordmarkClassName =
-	"[font-family:var(--font-bebas-neue),ui-sans-serif,system-ui,sans-serif] text-2xl font-normal leading-none tracking-wide text-foreground sm:text-3xl";
+	`${productWordmarkFontClassName} text-2xl font-normal leading-none tracking-wide text-foreground sm:text-3xl`;
 
 type ProductBrandProps = {
 	href?: string;

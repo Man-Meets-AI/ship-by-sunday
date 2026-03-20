@@ -1,3 +1,4 @@
+import { Cover } from "@/components/ui/cover";
 import type { HomePageContent } from "@/features/marketing/content/home";
 
 type Hero = HomePageContent["hero"];
@@ -12,7 +13,7 @@ export function HomeHeroHeadline({ hero }: { hero: Hero }) {
 				<span className={headlineLineClass}>{hero.headlineLead}</span>
 				<span className={headlineLineClass}>
 					{hero.headlineTailPrefix}
-					{hero.headlineTailHover}
+					<Cover>{hero.headlineTailHover}</Cover>
 				</span>
 			</h1>
 		</div>

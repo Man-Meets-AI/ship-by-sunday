@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { Check } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { CheckoutButton } from "@/features/checkout/components/checkout-button";
 import type { HomePageContent } from "@/features/marketing/content/home";
 
@@ -20,16 +19,7 @@ export function HomeHeroSection({
 	return (
 		<section className="relative mx-auto flex w-full max-w-7xl flex-col items-center justify-center overflow-hidden rounded-[32px] bg-background">
 			<HomeHeroTopBar hero={hero} />
-			<div className="absolute inset-y-0 left-0 hidden w-px bg-border/80 sm:block">
-				<div className="absolute top-0 h-40 w-px bg-linear-to-b from-transparent via-primary/80 to-transparent" />
-			</div>
-			<div className="absolute inset-y-0 right-0 hidden w-px bg-border/80 sm:block">
-				<div className="absolute top-24 h-40 w-px bg-linear-to-b from-transparent via-primary/80 to-transparent" />
-			</div>
-			<div className="absolute inset-x-0 bottom-0 h-px w-full bg-border/80">
-				<div className="absolute inset-x-0 mx-auto h-px w-40 bg-linear-to-r from-transparent via-primary/80 to-transparent" />
-			</div>
-			<div className="flex w-full flex-col items-start gap-8 px-4 py-10 text-left sm:px-8 sm:py-16 lg:px-12 lg:py-20">
+			<div className="flex w-full flex-col items-start gap-8 px-4 py-10 text-left sm:py-16 lg:py-20">
 				<div className="flex w-full max-w-3xl flex-col items-start gap-8">
 					<HomeHeroHeadline hero={hero} />
 					<p className="max-w-2xl text-balance text-lg text-muted-foreground sm:text-xl">
@@ -56,14 +46,6 @@ export function HomeHeroSection({
 						label={hero.primaryCta}
 						className="h-11 min-w-full px-8 sm:min-w-72"
 					/>
-					<Button
-						variant="secondary"
-						size="lg"
-						className="h-11 w-full sm:w-72"
-						asChild
-					>
-						<a href="#system">{hero.secondaryCta}</a>
-					</Button>
 				</div>
 				<p className="max-w-2xl text-sm font-medium text-muted-foreground sm:text-base">
 					{hero.eyebrow}
