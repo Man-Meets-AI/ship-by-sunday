@@ -1,6 +1,8 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
+import { getLessonById } from "@/features/course/lesson/model";
+
 const missionState = {
 	progressCount: 20,
 	totalLessons: 30,
@@ -268,7 +270,24 @@ const missionState = {
 	],
 };
 
-let missionQueryResult: typeof missionState | undefined = missionState;
+const missionStateWithLessonIdentity = {
+	...missionState,
+	blocks: missionState.blocks.map((block) => ({
+		...block,
+		lessons: block.lessons.map((lesson) => {
+			const lessonConfig = getLessonById(lesson.id);
+
+			return {
+				...lesson,
+				lessonKey: lessonConfig?.lessonKey ?? lesson.id,
+				displayLabel: lessonConfig?.displayLabel ?? lesson.id,
+			};
+		}),
+	})),
+};
+
+let missionQueryResult: typeof missionStateWithLessonIdentity | undefined =
+	missionStateWithLessonIdentity;
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -333,7 +352,7 @@ import { MissionPage } from "@/features/course/mission/components/mission-page";
 
 describe("MissionPage", () => {
 	beforeEach(() => {
-		missionQueryResult = missionState;
+		missionQueryResult = missionStateWithLessonIdentity;
 	});
 
 	it("prioritizes the current task and demotes the rest of the route", () => {
@@ -370,7 +389,7 @@ describe("MissionPage", () => {
 		missionQueryResult = undefined;
 
 		const markup = renderToStaticMarkup(
-			<MissionPage initialMission={missionState} />,
+			<MissionPage initialMission={missionStateWithLessonIdentity} />,
 		);
 
 		expect(markup).toContain("20 of 30 lessons complete");
