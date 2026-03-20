@@ -103,12 +103,10 @@ Source signal:
 - `3.6--plan-mode`
 - `3.15--build-core-ux-plan-flow`
 
-Action items:
-- Add `Plan mode` vs `Manual plan` tabs.
-- Add a `Clarifying questions` card so the student expects Codex to ask them.
-- Add a `Reasoning level` toggle group with `Medium`, `High`, and `Extra high`.
-- Add a prompt card for `Do not code yet. Ask me clarifying questions and propose a plan first.`
-- Add a `Why this plan is acceptable` field so the student approves the plan deliberately.
+**Implemented (workbench `fresh_template_plan`):** Goal `Card` + tool `Badge`s (`Codex`, `Convex`, `Next.js`); plan-first `Alert`; `Tabs` (`Plan mode` / `Manual plan`); prefilled manual planning `Textarea`; `ToggleGroup` reasoning (`Medium` / `High` / `Extra high`) with one-line hints; optional reference path `Input`; stack `Checkbox`es (`Convex`, `Next.js`, `Clerk`, `Stripe`) plus optional “other” `Input`; copy-assembled-prompt `Button`; macOS pathname `Accordion` (`Option` → Copy as Pathname); optional Codex plan paste `Textarea`. Lesson copy tightened in [`features/course/lesson/content/build.ts`](features/course/lesson/content/build.ts).
+
+Historical action notes (superseded by the above product spec):
+- Clarifying-questions / explicit “approve plan” fields were not carried into the shipped screen; approval stays in the agent thread.
 
 ## 3.8 Build Setting Up Slices
 
@@ -138,38 +136,27 @@ Action items (shipped direction):
 Source signal:
 - `3.15--build-core-ux-plan-flow`
 
-Action items:
-- Add a `Clarifying questions from Codex` review card.
-- Add a `Plan details` accordion that highlights:
-  - distribution
-  - install flow
-  - AI promise
-  - missing assumptions
-- Add a `Approve this plan` checkbox step.
-- Add a `Whiteboard or screenshot input` for when the student only has a rough sketch.
+Shipped: **`core_ux_plan_flow` workbench** in [`features/course/lesson/workbench/modes/core-ux-plan-flow/`](features/course/lesson/workbench/modes/core-ux-plan-flow/) — commands `Card` (`Shift+Tab` + fallback prompt with copy), `Tabs` (Instructor example vs Your version), instructor `Accordion` + disabled `Select`s with transcript-aligned rationale, student `Input`/`Textarea` fields, plan structure + services `Badge` cards + whiteboard note, single trust `Alert`, compact approved snapshot + `Accordion` for full plan brief, required workflow `checklist`. Lesson config: [`features/course/lesson/content/build.ts`](features/course/lesson/content/build.ts) (`id: "3.10"`).
 
 ## 3.11 Core UX Build
 
 Source signal:
 - `3.16--core-ux-build`
 
-Action items:
-- Add a `Current build target` card pinned above the video.
-- Add a `What should the user be able to do after this pass?` field.
-- Add a `Screenshots for iteration` upload or placeholder card.
-- Add a `QA after build` prompt card.
-- Add a `Do not drift from the approved slice` alert.
+**Implemented (workbench `core_ux_build`):** BYO-AI first-use onboarding—prerequisite + blocking alerts, three-item onboarding checklist with live ChatGPT connection row (Settings link + Convex status), Tabs for Strategy (copyable prompt, Open ChatGPT, “no strategy yet” accordion), Brand (named Ship starter template card + GitHub link / Mission gate + `reference_gallery` brand shots), Source (blog `url` + post-mimic `image_upload`), workflow preview badges (Ideas / Posts), Codex handoff card (one photo of five screens + brief) with brief `textarea` and handoff checklist.
+
+Historical brainstorm (superseded):
+- ~~Current build target card, QA after build, drift alert~~ → replaced by onboarding + source + handoff spec above.
 
 ## 3.12 Core UX Build 3
 
 Source signal:
 - `3.17--core-ux-build3`
 
-Action items:
-- Add a `Third pass = tighten, don’t expand` warning.
-- Add a `What is still rough?` field.
-- Add a `What got better in this pass?` field.
-- Add a `Ready for debug / polish?` decision card.
+**Implemented (workbench `checkout_qa_loop`):** Fresh-account checkout QA loop—goal card, Tabs (Prompt / Issues / Resources), preflight checklist, editable copyable QA prompt (QA skill + Playwright + Stripe test card), Fresh vs Existing `ToggleGroup`, status row (QA browser badge + step + last issue), transcript issue log + steer-the-agent card, README / Clerk / Stripe resource buttons, Alerts (purchase-first UX, stale pricing, not-launch scope). Lesson copy in [`features/course/lesson/content/build.ts`](features/course/lesson/content/build.ts) aligned to QA—not a generic “third UX pass.”
+
+Historical brainstorm (superseded):
+- ~~Third pass tighten / rough-better / debug-ready cards~~ → replaced by QA-loop spec above.
 
 ## 3.13 Debug and Stabilize Without Spiraling
 

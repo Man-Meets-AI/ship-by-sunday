@@ -75,6 +75,10 @@ describe("curriculum contract", () => {
           "build_product_iteration",
           "codex_marketing_site",
           "brand_kit_workbench",
+          "checkout_qa_loop",
+          "fresh_template_plan",
+          "core_ux_plan_flow",
+          "core_ux_build",
         ].includes(lesson.workbench),
       ),
     ).toBe(true);

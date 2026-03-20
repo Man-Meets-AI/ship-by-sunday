@@ -15,6 +15,10 @@ import { CompetitorResearchLightWorkbench } from "./modes/competitor-research-li
 import { ProductionDeployHandoffWorkbench } from "./modes/production-deploy-handoff/production-deploy-handoff-workbench";
 import { BrandKitWorkbench } from "./modes/brand-kit/brand-kit-workbench";
 import { BuildProductIterationWorkbench } from "./modes/build-product-iteration/build-product-iteration-workbench";
+import { CheckoutQaLoopWorkbench } from "./modes/checkout-qa-loop/checkout-qa-loop-workbench";
+import { FreshTemplatePlanWorkbench } from "./modes/fresh-template-plan/fresh-template-plan-workbench";
+import { CoreUxBuildWorkbench } from "./modes/core-ux-build/core-ux-build-workbench";
+import { CoreUxPlanFlowWorkbench } from "./modes/core-ux-plan-flow/core-ux-plan-flow-workbench";
 import { CodexMarketingSiteWorkbench } from "./modes/codex-marketing-site/codex-marketing-site-workbench";
 import { RepoMapOrientationWorkbench } from "./modes/repo-map-orientation-workbench";
 import { CaptureUploadWorkbench } from "./modes/capture-upload-workbench";
@@ -56,6 +60,10 @@ const modeRenderers: Record<WorkbenchType, WorkbenchModeComponent> = {
 	build_product_iteration: BuildProductIterationWorkbench,
 	brand_kit_workbench: BrandKitWorkbench,
 	codex_marketing_site: CodexMarketingSiteWorkbench,
+	checkout_qa_loop: CheckoutQaLoopWorkbench,
+	fresh_template_plan: FreshTemplatePlanWorkbench,
+	core_ux_plan_flow: CoreUxPlanFlowWorkbench,
+	core_ux_build: CoreUxBuildWorkbench,
 };
 
 function UnsupportedWorkbench({
