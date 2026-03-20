@@ -5,22 +5,10 @@ import type { FormEvent } from "react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import {
-	Field,
-	FieldDescription,
-	FieldError,
-	FieldGroup,
-	FieldLabel,
-} from "@/components/ui/field";
-import {
-	InputOTP,
-	InputOTPGroup,
-	InputOTPSlot,
-} from "@/components/ui/input-otp";
-import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { assertNever } from "@/features/course/lesson/lib/assert";
 
+import { SignInResetFields } from "@/features/auth/sign-in/sign-in-reset-fields";
 import type { SignInStep } from "@/features/auth/sign-in/types";
 
 type SignInResetFormProps = {
@@ -122,62 +110,20 @@ export function SignInResetForm({
 				</Alert>
 			) : null}
 			<form className="flex flex-col gap-5" onSubmit={handleSubmit}>
-				<FieldGroup>
-					<FieldDescription>{copy.description}</FieldDescription>
-					{resetStep === "reset_request" ? (
-						<Field data-invalid={Boolean(emailError) || undefined}>
-							<FieldLabel htmlFor="sign-in-reset-email">Email</FieldLabel>
-							<Input
-								id="sign-in-reset-email"
-								autoComplete="email"
-								aria-invalid={Boolean(emailError) || undefined}
-								disabled={isBusy}
-								placeholder="you@company.com"
-								type="email"
-								value={emailAddress}
-								onChange={(event) => setEmailAddress(event.target.value)}
-							/>
-							<FieldError errors={[emailError ?? undefined]} />
-						</Field>
-					) : null}
-					{resetStep === "reset_submit" ? (
-						<Field data-invalid={Boolean(passwordError) || undefined}>
-							<FieldLabel htmlFor="sign-in-new-password">New password</FieldLabel>
-							<Input
-								id="sign-in-new-password"
-								autoComplete="new-password"
-								aria-invalid={Boolean(passwordError) || undefined}
-								disabled={isBusy}
-								type="password"
-								value={newPassword}
-								onChange={(event) => setNewPassword(event.target.value)}
-							/>
-							<FieldError errors={[passwordError ?? undefined]} />
-						</Field>
-					) : null}
-					{resetStep === "reset_verify" ? (
-						<Field data-invalid={Boolean(verificationError) || undefined}>
-							<FieldLabel htmlFor="sign-in-reset-code">Reset code</FieldLabel>
-							<InputOTP
-								id="sign-in-reset-code"
-								inputMode="numeric"
-								maxLength={6}
-								value={verificationCode}
-								onChange={setVerificationCode}
-							>
-								<InputOTPGroup>
-									<InputOTPSlot index={0} />
-									<InputOTPSlot index={1} />
-									<InputOTPSlot index={2} />
-									<InputOTPSlot index={3} />
-									<InputOTPSlot index={4} />
-									<InputOTPSlot index={5} />
-								</InputOTPGroup>
-							</InputOTP>
-							<FieldError errors={[verificationError ?? undefined]} />
-						</Field>
-					) : null}
-				</FieldGroup>
+				<SignInResetFields
+					copy={copy}
+					emailAddress={emailAddress}
+					emailError={emailError}
+					isBusy={isBusy}
+					newPassword={newPassword}
+					passwordError={passwordError}
+					resetStep={resetStep}
+					setEmailAddress={setEmailAddress}
+					setNewPassword={setNewPassword}
+					setVerificationCode={setVerificationCode}
+					verificationCode={verificationCode}
+					verificationError={verificationError}
+				/>
 				<Button className="w-full" disabled={isBusy} type="submit">
 					{isBusy ? <Spinner data-icon="inline-start" /> : null}
 					{copy.submitLabel}
