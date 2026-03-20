@@ -2,6 +2,12 @@ import { ConvexError, v } from "convex/values";
 
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
+import {
+	codexConnectionReturnValidator,
+	codexConnectionWriteResultValidator,
+	codexRateLimitSnapshotsByIdValidator,
+	codexRunWriteResultValidator,
+} from "./codexValidators";
 
 type CodexCtx = QueryCtx | MutationCtx;
 
@@ -25,7 +31,7 @@ async function getConnectionDocsByViewer(ctx: CodexCtx, clerkUserId: string) {
 
 export const getViewerConnection = query({
 	args: {},
-	returns: v.any(),
+	returns: codexConnectionReturnValidator,
 	handler: async (ctx) => {
 		const clerkUserId = await requireViewer(ctx);
 		const docs = await getConnectionDocsByViewer(ctx, clerkUserId);
@@ -51,9 +57,9 @@ export const upsertViewerConnection = mutation({
 		accountId: v.optional(v.string()),
 		planType: v.optional(v.string()),
 		connectedAt: v.optional(v.number()),
-		lastRateLimitSnapshot: v.optional(v.any()),
+		lastRateLimitSnapshot: v.optional(codexRateLimitSnapshotsByIdValidator),
 	},
-	returns: v.any(),
+	returns: codexConnectionWriteResultValidator,
 	handler: async (ctx, args) => {
 		const clerkUserId = await requireViewer(ctx);
 		const now = Date.now();
@@ -84,7 +90,7 @@ export const upsertViewerConnection = mutation({
 			return {
 				connectionId: latest._id,
 				updatedAt: now,
-				mode: "patched",
+				mode: "patched" as const,
 			};
 		}
 
@@ -96,7 +102,7 @@ export const upsertViewerConnection = mutation({
 		return {
 			connectionId,
 			updatedAt: now,
-			mode: "inserted",
+			mode: "inserted" as const,
 		};
 	},
 });
@@ -109,7 +115,7 @@ export const recordRun = mutation({
 		latencyMs: v.optional(v.number()),
 		errorCode: v.optional(v.string()),
 	},
-	returns: v.any(),
+	returns: codexRunWriteResultValidator,
 	handler: async (ctx, args) => {
 		const userId = await requireViewer(ctx);
 		const createdAt = Date.now();

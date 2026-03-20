@@ -12,9 +12,9 @@ If checkout completes but access does not, assume configuration drift before you
 Start here:
 
 ```bash
-pnpm run stripe:listen:local
-pnpm run stripe:local:doctor
-pnpm run stripe:local:verify
+bun run stripe:listen:local
+bun run stripe:local:doctor
+bun run stripe:local:verify
 ```
 
 These commands tell you more, faster, than hand-inspecting random env files.
@@ -29,14 +29,14 @@ If that template is missing or misnamed, authenticated server reads can fail eve
 
 If Clerk and Convex disagree on the issuer/domain, access checks can fail after payment.
 
-### 3. `STRIPE_WEBHOOK_SECRET` drift
+### 3. Stripe secret drift
 
-The secret must match in both places:
+These values must match in both places:
 
 - `.env.local`
 - the active Convex env
 
-If the listener rotated the secret, restart the app.
+The local helper syncs both values. If the listener rotated the webhook secret, restart the app.
 
 ### 4. Wrong Stripe account
 
@@ -46,14 +46,14 @@ If those differ, you can see real Stripe events without the starter ever receivi
 
 ### 5. Webhook endpoint not actually registered
 
-If Stripe does not reach `POST /api/stripe/webhook`, checkout can finish while access grant never happens.
+If Stripe does not reach `POST {NEXT_PUBLIC_CONVEX_URL}/stripe/webhook`, checkout can finish while access grant never happens.
 
 ### 6. Payment succeeded but access still did not grant
 
 If the Stripe event exists and the buyer still cannot reach `/mission`, check:
 
 - whether the webhook used the current signing secret
-- whether Convex accepted the same secret
+- whether Convex accepted the same webhook secret and Stripe secret key
 - whether the buyer finished checkout in the same signed-in browser context used to read `viewerProductAccess`
 
 ## Fast debug order

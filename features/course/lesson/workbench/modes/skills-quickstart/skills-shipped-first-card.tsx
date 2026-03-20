@@ -11,8 +11,8 @@ import {
 export function SkillsShippedFirstCard() {
 	return (
 		<Card>
-			<CardHeader className="space-y-1">
-				<CardTitle className="text-base">Use shipped skills first</CardTitle>
+			<CardHeader>
+				<CardTitle>Use shipped skills first</CardTitle>
 				<CardDescription>
 					Reach for maintained skills before writing your own.
 				</CardDescription>

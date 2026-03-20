@@ -170,8 +170,10 @@ await access(ENV_FILE_PATH);
 
 const stripeAccount = await getStripeAccountSummary();
 const envWebhookSecret = await readEnvValue("STRIPE_WEBHOOK_SECRET");
+const envStripeSecretKey = process.env.STRIPE_SECRET_KEY?.trim() ?? null;
 const convexEnv = await getConvexEnvList();
 const convexWebhookSecret = convexEnv.STRIPE_WEBHOOK_SECRET ?? null;
+const convexStripeSecretKey = convexEnv.STRIPE_SECRET_KEY ?? null;
 const stripeCliConfig = await getStripeCliConfig();
 const webReachable = await canConnect("http://localhost:3000");
 const convexReachable = await canConnect(process.env.NEXT_PUBLIC_CONVEX_URL);
@@ -202,9 +204,21 @@ const checks = [
 		convexWebhookSecret ?? "missing",
 	),
 	formatCheck(
+		"Convex Stripe secret key",
+		Boolean(convexStripeSecretKey),
+		convexStripeSecretKey ? "present" : "missing",
+	),
+	formatCheck(
 		"Webhook secret parity",
 		Boolean(envWebhookSecret) && envWebhookSecret === convexWebhookSecret,
 		envWebhookSecret === convexWebhookSecret ? "matched" : "mismatch",
+	),
+	formatCheck(
+		"Stripe secret key parity",
+		Boolean(envStripeSecretKey) &&
+			Boolean(convexStripeSecretKey) &&
+			envStripeSecretKey === convexStripeSecretKey,
+		envStripeSecretKey === convexStripeSecretKey ? "matched" : "mismatch",
 	),
 	formatCheck(
 		"Web app",

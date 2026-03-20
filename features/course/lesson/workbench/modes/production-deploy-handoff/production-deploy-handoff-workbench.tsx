@@ -1,7 +1,6 @@
 "use client";
 
 import { Separator } from "@/components/ui/separator";
-import { FieldList } from "../../fields/field-list";
 import { ArtifactContext } from "../../shared/artifact-context";
 import { FocusInlineLessonVideo } from "../../shared/focus-inline-lesson-video";
 import { WorkbenchContainer } from "../../shared/workbench-container";
@@ -10,6 +9,8 @@ import { WorkbenchMediaLayout } from "../../shared/workbench-media-layout";
 import type { WorkbenchModeProps } from "../../types";
 
 import { ProductionDeployHandoffBeforeDeployCard } from "./production-deploy-handoff-before-deploy-card";
+import { ProductionDeployHandoffChecklistCard } from "./production-deploy-handoff-checklist-card";
+import { ProductionDeployHandoffContextFieldsCard } from "./production-deploy-handoff-context-fields-card";
 import { ProductionDeployHandoffDeployAlerts } from "./production-deploy-handoff-deploy-alerts";
 import {
 	DEPLOY_DOMAIN_FIELD_ID,
@@ -64,13 +65,12 @@ export function ProductionDeployHandoffWorkbench({
 			<ProductionDeployHandoffBeforeDeployCard />
 			<ProductionDeployHandoffDeployAlerts />
 			{stepsField ? (
-				<FieldList
-					fields={[stepsField]}
-					fieldValues={fieldValues}
+				<ProductionDeployHandoffChecklistCard
+					field={stepsField}
+					fieldValue={fieldValues[stepsField.id]}
 					onFieldChange={onFieldChange}
-					pinnedArtifacts={pinnedArtifacts}
-					invalidFieldIds={invalidFieldIds}
-					invalidFieldMessages={invalidFieldMessages}
+					invalid={invalidFieldIds.has(stepsField.id)}
+					invalidMessage={invalidFieldMessages.get(stepsField.id)}
 				/>
 			) : (
 				<p className="text-sm text-muted-foreground">
@@ -84,11 +84,11 @@ export function ProductionDeployHandoffWorkbench({
 			/>
 			<Separator />
 			{productField && domainField ? (
-				<FieldList
-					fields={[productField, domainField]}
+				<ProductionDeployHandoffContextFieldsCard
+					productField={productField}
+					domainField={domainField}
 					fieldValues={fieldValues}
 					onFieldChange={onFieldChange}
-					pinnedArtifacts={pinnedArtifacts}
 					invalidFieldIds={invalidFieldIds}
 					invalidFieldMessages={invalidFieldMessages}
 				/>
@@ -101,7 +101,6 @@ export function ProductionDeployHandoffWorkbench({
 				field={successField}
 				fieldValues={fieldValues}
 				onFieldChange={onFieldChange}
-				pinnedArtifacts={pinnedArtifacts}
 				invalidFieldIds={invalidFieldIds}
 				invalidFieldMessages={invalidFieldMessages}
 			/>

@@ -1,32 +1,31 @@
-import { LessonVideoSurface } from "@/features/course/lesson/components/lesson-video-surface";
+import type { ReactNode } from "react";
+
 import type { StageUnlockSection } from "@/features/course/lesson/model/stage-unlock";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { WorkbenchContainer } from "../../shared/workbench-container";
+import { Badge } from "@/components/ui/badge";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import type { WorkbenchModeProps } from "../../types";
 import { StageUnlockBridgeCard } from "./stage-unlock-bridge-card";
 import { StageUnlockReviewCard } from "./stage-unlock-review-card";
 import { StageUnlockSectionCard } from "./stage-unlock-section-card";
 
-const neutralInsetClass =
-	"rounded-lg border border-input bg-background text-card-foreground";
+const sectionShellHeaderClass = "border-b border-border/60 px-4 py-3 sm:px-5";
 
-const neutralHeaderClass = "border-b border-border/60 px-4 py-3 sm:px-5";
-
-const neutralBodyClass = "px-4 py-4 sm:px-5 sm:py-5";
-
-const neutralLabelClass = "text-sm font-medium text-muted-foreground";
-
-const neutralSupportCopyClass =
-	"max-w-[68ch] text-[13px] leading-7 text-muted-foreground";
+const sectionShellBodyClass = "px-4 py-4 sm:px-5 sm:py-5";
 
 type StageUnlockWorkbenchProps = {
 	lesson: WorkbenchModeProps["lesson"];
-	lessonContent: WorkbenchModeProps["lessonContent"];
 	fieldValues?: WorkbenchModeProps["fieldValues"];
 	onFieldChange?: WorkbenchModeProps["onFieldChange"];
 	invalidFieldIds?: WorkbenchModeProps["invalidFieldIds"];
 	invalidFieldMessages?: WorkbenchModeProps["invalidFieldMessages"];
 	stageUnlockSummary: WorkbenchModeProps["stageUnlockSummary"];
+	videoSlot?: ReactNode;
 };
 
 type StageUnlockBriefAssembler = Extract<
@@ -77,40 +76,41 @@ function StageUnlockHeroPanel({
 				<div className="grid gap-4 p-5 sm:p-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(240px,0.9fr)] lg:items-start">
 					<div className="space-y-4">
 						<div className="space-y-2">
-							<p className={neutralLabelClass}>{briefAssembler.heroEyebrow}</p>
-							<h1
-								className="text-balance text-3xl font-semibold text-foreground sm:text-4xl"
-								style={{ textWrap: "balance" }}
-							>
+							<p className="text-sm font-medium text-muted-foreground">
+								{briefAssembler.heroEyebrow}
+							</p>
+							<CardTitle className="text-balance text-3xl font-semibold sm:text-4xl">
 								{briefAssembler.heroTitle}
-							</h1>
+							</CardTitle>
 						</div>
-						<p className={neutralSupportCopyClass}>{briefAssembler.heroBody}</p>
+						<CardDescription className="max-w-[68ch] text-[13px] leading-7">
+							{briefAssembler.heroBody}
+						</CardDescription>
 						<div className="space-y-1">
 							<p className="text-sm font-medium text-foreground">
 								Next: {briefAssembler.nextStepLabel}
 							</p>
-							<p
-								className="max-w-sm text-sm leading-6 text-muted-foreground"
-								style={{ textWrap: "balance" }}
-							>
+							<p className="max-w-sm text-sm leading-6 text-muted-foreground">
 								{getNextStepSupportCopy(briefAssembler.preset)}
 							</p>
 						</div>
 					</div>
-					<div className={`${neutralInsetClass} min-w-[220px] px-4 py-4`}>
-						<p className={neutralLabelClass}>Artifact locked next</p>
-						<p
-							className="mt-3 text-lg font-semibold leading-6 text-foreground"
-							style={{ textWrap: "balance" }}
-						>
-							{artifact.label}
-						</p>
-						<p className="mt-3 text-sm leading-6 text-muted-foreground">
-							{briefAssembler.artifactReadyCopy ??
-								"You are not guessing anymore. The next block gets a real handoff now."}
-						</p>
-					</div>
+					<Card className="min-w-[220px] gap-0 py-4 shadow-none ring-1 ring-border">
+						<CardHeader className="pb-2">
+							<CardTitle className="text-sm font-medium text-muted-foreground">
+								Artifact locked next
+							</CardTitle>
+						</CardHeader>
+						<CardContent className="space-y-3 pt-0">
+							<p className="text-lg font-semibold leading-6 text-foreground">
+								{artifact.label}
+							</p>
+							<CardDescription className="text-sm leading-6">
+								{briefAssembler.artifactReadyCopy ??
+									"You are not guessing anymore. The next block gets a real handoff now."}
+							</CardDescription>
+						</CardContent>
+					</Card>
 				</div>
 			</CardContent>
 		</Card>
@@ -125,15 +125,21 @@ function StageUnlockStatsGrid({
 	return (
 		<div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
 			{summary?.stats.map((stat) => (
-				<div key={stat.label} className={`${neutralInsetClass} px-4 py-4`}>
-					<p className={neutralLabelClass}>{stat.label}</p>
-					<p
-						className="mt-3 text-base font-medium leading-tight text-foreground"
-						style={{ fontVariantNumeric: "tabular-nums" }}
-					>
-						{stat.value}
-					</p>
-				</div>
+				<Card
+					key={stat.label}
+					className="gap-0 py-4 shadow-none ring-1 ring-border"
+				>
+					<CardHeader className="pb-2">
+						<CardTitle className="text-sm font-medium text-muted-foreground">
+							{stat.label}
+						</CardTitle>
+					</CardHeader>
+					<CardContent className="pt-0">
+						<p className="text-base font-medium leading-tight text-foreground tabular-nums">
+							{stat.value}
+						</p>
+					</CardContent>
+				</Card>
 			))}
 		</div>
 	);
@@ -148,12 +154,12 @@ function StageUnlockSectionsCard({
 }) {
 	return (
 		<Card className="gap-0 py-0">
-			<CardHeader className={neutralHeaderClass}>
-				<h2 className="text-sm font-semibold leading-none text-foreground">
+			<CardHeader className={sectionShellHeaderClass}>
+				<CardTitle className="text-sm font-semibold leading-none">
 					{summary?.sectionHeading ?? "What you built"}
-				</h2>
+				</CardTitle>
 			</CardHeader>
-			<CardContent className={neutralBodyClass}>
+			<CardContent className={sectionShellBodyClass}>
 				{summary?.sections.length ? (
 					<div className="grid gap-3 lg:grid-cols-2">
 						{summary.sections.map((section) => (
@@ -177,20 +183,17 @@ function StageUnlockSectionsCard({
 function StageUnlockSkillsCard({ skills }: { skills: string[] }) {
 	return (
 		<Card className="gap-0 py-0">
-			<CardHeader className={neutralHeaderClass}>
-				<h2 className="text-sm font-semibold leading-none text-foreground">
+			<CardHeader className={sectionShellHeaderClass}>
+				<CardTitle className="text-sm font-semibold leading-none">
 					Skills you flexed
-				</h2>
+				</CardTitle>
 			</CardHeader>
-			<CardContent className={neutralBodyClass}>
+			<CardContent className={sectionShellBodyClass}>
 				<div className="flex flex-wrap gap-2">
 					{skills.map((skill) => (
-						<span
-							key={skill}
-							className="inline-flex items-center rounded-md border border-input bg-background px-2.5 py-1.5 text-sm text-muted-foreground"
-						>
+						<Badge key={skill} variant="secondary" className="font-normal">
 							{skill}
-						</span>
+						</Badge>
 					))}
 				</div>
 			</CardContent>
@@ -200,12 +203,12 @@ function StageUnlockSkillsCard({ skills }: { skills: string[] }) {
 
 export function StageUnlockWorkbench({
 	lesson,
-	lessonContent,
 	fieldValues = {},
 	onFieldChange = () => {},
 	invalidFieldIds = new Set<string>(),
 	invalidFieldMessages = new Map<string, string>(),
 	stageUnlockSummary,
+	videoSlot = null,
 }: StageUnlockWorkbenchProps) {
 	const briefAssembler = lesson.briefAssembler;
 
@@ -214,20 +217,14 @@ export function StageUnlockWorkbench({
 	}
 
 	const summary = stageUnlockSummary;
-	const showLeadVideo = briefAssembler.leadVideo;
 	const reviewField = lesson.workbenchFields?.find(
 		(field) => field.id === "brief_review_checks",
 	);
 
 	return (
-		<WorkbenchContainer>
+		<div className="w-full space-y-4 pb-1">
 			<div className="space-y-4">
-				{showLeadVideo ? (
-					<LessonVideoSurface
-						coachContent={lessonContent.coach}
-						variant="watch-shell"
-					/>
-				) : null}
+				{videoSlot}
 				<StageUnlockHeroPanel
 					artifact={lesson.artifact}
 					briefAssembler={briefAssembler}
@@ -256,6 +253,6 @@ export function StageUnlockWorkbench({
 
 				<StageUnlockSkillsCard skills={briefAssembler.skills} />
 			</div>
-		</WorkbenchContainer>
+		</div>
 	);
 }

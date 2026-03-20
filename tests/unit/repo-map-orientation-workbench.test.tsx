@@ -38,7 +38,7 @@ describe("repo map orientation workbench (lesson 3.2)", () => {
 		).toBe("/docs/local-setup");
 
 		await user.click(screen.getByRole("tab", { name: /^commands$/i }));
-		expect(screen.getByText("pnpm dev")).toBeTruthy();
+		expect(screen.getByText("bun run dev")).toBeTruthy();
 		expect(
 			screen.getByRole("link", { name: /deploy guide/i }).getAttribute("href"),
 		).toBe("/docs/deploy-to-vercel");

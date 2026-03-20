@@ -1,6 +1,9 @@
 "use client";
 
-import type { UploadFieldValue } from "@/features/course/lesson/model/manifest";
+import type {
+	LessonStorageId,
+	UploadFieldValue,
+} from "@/features/course/lesson/model/manifest";
 
 export async function uploadFilesToLessonStorage({
 	files,
@@ -28,6 +31,7 @@ export async function uploadFilesToLessonStorage({
 			if (!result.storageId) {
 				throw new Error("Missing storage id");
 			}
+			const storageId = result.storageId as LessonStorageId;
 
 			return {
 				kind: "upload",
@@ -35,7 +39,7 @@ export async function uploadFilesToLessonStorage({
 				fileName: file.name,
 				mimeType: file.type,
 				size: file.size,
-				storageId: result.storageId,
+				storageId,
 				previewUrl: URL.createObjectURL(file),
 			} satisfies UploadFieldValue;
 		}),

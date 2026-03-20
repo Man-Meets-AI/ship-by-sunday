@@ -2,14 +2,12 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ArtifactContext } from "../../shared/artifact-context";
-import { FocusInlineLessonVideo } from "../../shared/focus-inline-lesson-video";
-import { WorkbenchContainer } from "../../shared/workbench-container";
-import { WorkbenchHeader } from "../../shared/workbench-header";
-import { WorkbenchMediaLayout } from "../../shared/workbench-media-layout";
 import type { WorkbenchModeProps } from "../../types";
 
 import { BuildProductIterationTabs } from "./build-product-iteration-tabs";
+import { BuildProductIterationWorkbenchHeader } from "./build-product-iteration-workbench-header";
+import { BuildProductIterationWorkbenchInlineVideo } from "./build-product-iteration-workbench-inline-video";
+import { BuildProductIterationWorkbenchPinnedArtifacts } from "./build-product-iteration-workbench-pinned-artifacts";
 
 export function BuildProductIterationWorkbench({
 	lesson,
@@ -29,7 +27,9 @@ export function BuildProductIterationWorkbench({
 		layoutMode === "focus";
 
 	const inlineVideoCard = (
-		<FocusInlineLessonVideo coachContent={lessonContent.coach} />
+		<BuildProductIterationWorkbenchInlineVideo
+			coachContent={lessonContent.coach}
+		/>
 	);
 
 	const body = (
@@ -42,25 +42,35 @@ export function BuildProductIterationWorkbench({
 				fields={fields}
 				fieldValues={fieldValues}
 				onFieldChange={onFieldChange}
-				pinnedArtifacts={pinnedArtifacts}
 				invalidFieldIds={invalidFieldIds}
 				invalidFieldMessages={invalidFieldMessages}
 			/>
 			<Card className="border-dashed bg-muted/20">
 				<CardContent className="pt-4 text-xs text-muted-foreground">
-					Soft launch and distribution are a later step—finish outputs here first.
+					Soft launch and distribution are a later step—finish outputs here
+					first.
 				</CardContent>
 			</Card>
-			<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
+			<BuildProductIterationWorkbenchPinnedArtifacts
+				pinnedArtifacts={pinnedArtifacts}
+			/>
 		</div>
 	);
 
 	return (
-		<WorkbenchContainer>
-			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
+		<div className="w-full space-y-4 pb-1">
+			<BuildProductIterationWorkbenchHeader
+				lesson={lesson}
+				lessonContent={lessonContent}
+			/>
 			<Separator className="bg-border" />
 			{showSplitWorkbenchMedia ? (
-				<WorkbenchMediaLayout media={inlineVideoCard}>{body}</WorkbenchMediaLayout>
+				<div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(300px,0.88fr)_minmax(0,1.12fr)] xl:items-start">
+					<div className="min-w-0 xl:sticky xl:top-0 xl:z-1 xl:self-start">
+						{inlineVideoCard}
+					</div>
+					<div className="min-w-0">{body}</div>
+				</div>
 			) : showInlineVideo ? (
 				<>
 					{inlineVideoCard}
@@ -69,6 +79,6 @@ export function BuildProductIterationWorkbench({
 			) : (
 				body
 			)}
-		</WorkbenchContainer>
+		</div>
 	);
 }

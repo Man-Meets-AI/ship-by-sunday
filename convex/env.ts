@@ -11,11 +11,13 @@ function normalizeEnvValue(value: string | undefined) {
 
 const convexEnvSchema = z.object({
 	CLERK_FRONTEND_API_URL: z.string().min(1).optional(),
+	STRIPE_SECRET_KEY: z.string().min(1).optional(),
 	STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
 });
 
 const convexEnv = convexEnvSchema.parse({
 	CLERK_FRONTEND_API_URL: normalizeEnvValue(process.env.CLERK_FRONTEND_API_URL),
+	STRIPE_SECRET_KEY: normalizeEnvValue(process.env.STRIPE_SECRET_KEY),
 	STRIPE_WEBHOOK_SECRET: normalizeEnvValue(process.env.STRIPE_WEBHOOK_SECRET),
 });
 

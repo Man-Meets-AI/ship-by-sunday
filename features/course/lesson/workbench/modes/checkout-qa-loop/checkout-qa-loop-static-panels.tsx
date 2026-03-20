@@ -9,7 +9,8 @@ export function CheckoutQaLoopStaticPanels() {
 				<AlertTitle>Intended checkout UX</AlertTitle>
 				<AlertDescription>
 					Students should be able to <strong>buy first</strong>, then have the
-					account created from the <strong>email used in Stripe checkout</strong>
+					account created from the{" "}
+					<strong>email used in Stripe checkout</strong>
 					—not forced through a long sign-up detour before paying.
 				</AlertDescription>
 			</Alert>

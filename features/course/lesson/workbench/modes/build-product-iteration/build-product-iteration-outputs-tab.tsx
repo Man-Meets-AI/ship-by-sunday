@@ -36,7 +36,9 @@ export function BuildProductIterationOutputsTab({
 		if (!invalidFieldIds.has(fieldId)) {
 			return null;
 		}
-		return invalidFieldMessages.get(fieldId) ?? "Finish this before continuing.";
+		return (
+			invalidFieldMessages.get(fieldId) ?? "Finish this before continuing."
+		);
 	};
 
 	const strategyVal = stringField(

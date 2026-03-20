@@ -12,8 +12,9 @@ export function SkillsQaBrowserAlert() {
 			<AlertDescription className="space-y-2 text-muted-foreground">
 				<ul className="list-inside list-disc space-y-1 text-sm">
 					<li>
-						Exercise flows as a <strong className="text-foreground">test user</strong>,
-						not your admin account, when you care about real buyer behavior.
+						Exercise flows as a{" "}
+						<strong className="text-foreground">test user</strong>, not your
+						admin account, when you care about real buyer behavior.
 					</li>
 					<li>
 						<strong className="text-foreground">Clerk</strong> may need relaxed
@@ -25,8 +26,8 @@ export function SkillsQaBrowserAlert() {
 					</li>
 					<li>
 						Some flows still need{" "}
-						<strong className="text-foreground">manual password entry</strong> in
-						the browser — do not assume full hands-off auth every time.
+						<strong className="text-foreground">manual password entry</strong>{" "}
+						in the browser — do not assume full hands-off auth every time.
 					</li>
 				</ul>
 			</AlertDescription>

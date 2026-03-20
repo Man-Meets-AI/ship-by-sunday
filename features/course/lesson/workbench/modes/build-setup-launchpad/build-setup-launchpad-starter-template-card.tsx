@@ -54,25 +54,30 @@ export function BuildSetupLaunchpadStarterTemplateCard({
 			</CardHeader>
 			<CardContent className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
 				{templateRepoUrl ? (
-					<Button size="default" asChild className="w-full sm:w-auto">
+					<Button asChild className="w-full sm:w-auto">
 						<a href={templateRepoUrl} target="_blank" rel="noopener noreferrer">
 							Open template on GitHub
 						</a>
 					</Button>
 				) : (
-					<p className="text-sm text-muted-foreground">{templateLockedReason}</p>
+					<p className="text-sm text-muted-foreground">
+						{templateLockedReason}
+					</p>
 				)}
 				<Button
 					type="button"
 					variant="outline"
-					size="default"
 					className="w-full sm:w-auto"
 					onClick={copyRepo}
 				>
 					{copied ? "Copied" : "Copy repo URL"}
 				</Button>
 				<Button variant="ghost" size="sm" className="w-full sm:w-auto" asChild>
-					<a href={downloads.studentPacketPdf} target="_blank" rel="noopener noreferrer">
+					<a
+						href={downloads.studentPacketPdf}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
 						30-page guide (PDF, optional)
 					</a>
 				</Button>

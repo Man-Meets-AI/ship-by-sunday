@@ -107,7 +107,7 @@ export function BuildSetupLaunchpadWorkbench({
 	return (
 		<WorkbenchContainer>
 			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
-			<Separator className="bg-border" />
+			<Separator />
 			{showSplitWorkbenchMedia ? (
 				<WorkbenchMediaLayout media={inlineVideoCard}>
 					{launchpadBody}

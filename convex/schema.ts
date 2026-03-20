@@ -1,5 +1,7 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { fieldValuesValidator } from "./course/validators";
+import { codexRateLimitSnapshotsByIdValidator } from "./codexValidators";
 
 export default defineSchema({
 	productAccessGrants: defineTable({
@@ -74,7 +76,7 @@ export default defineSchema({
 			v.literal("link"),
 			v.literal("mixed"),
 		),
-		fieldValues: v.record(v.string(), v.any()),
+		fieldValues: fieldValuesValidator,
 		startedAt: v.number(),
 		updatedAt: v.number(),
 		lastViewedAt: v.optional(v.number()),
@@ -95,7 +97,7 @@ export default defineSchema({
 			v.literal("disconnected"),
 			v.literal("error"),
 		),
-		lastRateLimitSnapshot: v.optional(v.any()),
+		lastRateLimitSnapshot: v.optional(codexRateLimitSnapshotsByIdValidator),
 		updatedAt: v.number(),
 	})
 		.index("by_clerk_user_id", ["clerkUserId"])

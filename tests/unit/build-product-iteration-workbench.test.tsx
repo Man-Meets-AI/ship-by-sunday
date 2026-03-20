@@ -21,13 +21,9 @@ vi.mock("convex/react", () => ({
 	useQuery: () => undefined,
 }));
 
-vi.mock(
-	"@/features/course/lesson/workbench/shared/focus-inline-lesson-video",
-	() => ({
-		FocusInlineLessonVideo: () =>
-			React.createElement("div", { "data-testid": "inline-video" }),
-	}),
-);
+vi.mock("@/features/course/lesson/lib/copy-course-prompt", () => ({
+	copyCoursePromptToClipboard: vi.fn(() => Promise.resolve("copied" as const)),
+}));
 
 vi.mock("sonner", () => ({
 	toast: {
@@ -35,22 +31,14 @@ vi.mock("sonner", () => ({
 	},
 }));
 
-const copyCoursePromptToClipboard = vi.fn(() =>
-	Promise.resolve("copied" as const),
-);
-
-vi.mock("@/features/course/lesson/lib/copy-course-prompt", () => ({
-	copyCoursePromptToClipboard: (...args: unknown[]) =>
-		copyCoursePromptToClipboard(...args),
-}));
-
+import { copyCoursePromptToClipboard } from "@/features/course/lesson/lib/copy-course-prompt";
 import { getLessonById } from "@/features/course/lesson/model";
 import { WorkbenchRenderer } from "@/features/course/lesson/workbench/renderer";
 
 describe("build product iteration workbench (lesson 3.1)", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		copyCoursePromptToClipboard.mockImplementation(() =>
+		vi.mocked(copyCoursePromptToClipboard).mockImplementation(() =>
 			Promise.resolve("copied"),
 		);
 	});
@@ -125,7 +113,9 @@ describe("build product iteration workbench (lesson 3.1)", () => {
 		);
 
 		expect(copyCoursePromptToClipboard).toHaveBeenCalled();
-		const firstArg = copyCoursePromptToClipboard.mock.calls[0]?.[0];
+		const firstCall = vi.mocked(copyCoursePromptToClipboard).mock.calls[0];
+		expect(firstCall).toBeDefined();
+		const firstArg = firstCall![0];
 		expect(typeof firstArg).toBe("string");
 		expect(firstArg).toContain("Brand strategy instructions");
 	});

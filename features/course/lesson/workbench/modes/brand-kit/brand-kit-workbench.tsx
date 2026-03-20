@@ -73,7 +73,6 @@ export function BrandKitWorkbench({
 	const mainColumn = (
 		<div className="space-y-5">
 			<BrandKitResourcesCard />
-			<Separator className="bg-border" />
 			<BrandKitAlerts />
 			<BrandKitBrandInputsCard
 				title="Brand inputs"
@@ -81,7 +80,6 @@ export function BrandKitWorkbench({
 				fields={pickFields(fields, brandInputIds)}
 				fieldValues={fieldValues}
 				onFieldChange={onFieldChange}
-				pinnedArtifacts={pinnedArtifacts}
 				invalidFieldIds={invalidFieldIds}
 				invalidFieldMessages={invalidFieldMessages}
 			/>
@@ -91,7 +89,6 @@ export function BrandKitWorkbench({
 				fields={pickFields(fields, [BRAND_KIT_NAMING_FIELD_ID])}
 				fieldValues={fieldValues}
 				onFieldChange={onFieldChange}
-				pinnedArtifacts={pinnedArtifacts}
 				invalidFieldIds={invalidFieldIds}
 				invalidFieldMessages={invalidFieldMessages}
 			/>
@@ -102,7 +99,6 @@ export function BrandKitWorkbench({
 				fields={pickFields(fields, uploadIds)}
 				fieldValues={fieldValues}
 				onFieldChange={onFieldChange}
-				pinnedArtifacts={pinnedArtifacts}
 				invalidFieldIds={invalidFieldIds}
 				invalidFieldMessages={invalidFieldMessages}
 			/>

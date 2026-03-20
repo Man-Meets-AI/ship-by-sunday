@@ -1,10 +1,13 @@
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
 import { FieldControl } from "../fields/field-control";
-import { ArtifactContext } from "../shared/artifact-context";
-import { StatusRail } from "../shared/status-rail";
-import { WorkbenchCard } from "../shared/workbench-card";
-import { WorkbenchContainer } from "../shared/workbench-container";
-import { WorkbenchHeader } from "../shared/workbench-header";
+import { ArtifactPreviewContent } from "../shared/artifact-preview-content";
 import type { WorkbenchModeProps } from "../types";
+import {
+	LessonWorkbenchLabeledCard,
+	LessonWorkbenchPageHeader,
+	LessonWorkbenchStatusCards,
+} from "./lesson-workbench-shadcn-chrome";
 
 export function ReferenceGalleryWorkbench({
 	lesson,
@@ -21,23 +24,31 @@ export function ReferenceGalleryWorkbench({
 	const isInvalid = galleryField ? invalidFieldIds.has(galleryField.id) : false;
 
 	return (
-		<WorkbenchContainer>
-			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
-			<StatusRail
+		<div className="w-full space-y-4 pb-1">
+			<LessonWorkbenchPageHeader
+				lesson={lesson}
+				lessonContent={lessonContent}
+			/>
+			<LessonWorkbenchStatusCards
 				lessonContent={lessonContent}
 				completedTaskCount={completedTaskCount}
 				totalTaskCount={Math.max(objectiveTasks.length, 1)}
 			/>
-			<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
+			{pinnedArtifacts.length > 0 ? (
+				<div className="grid gap-3 md:grid-cols-2">
+					{pinnedArtifacts.map((artifact) => (
+						<LessonWorkbenchLabeledCard
+							key={artifact.artifactKey}
+							label={artifact.contextTitle ?? artifact.artifactLabel}
+						>
+							<ArtifactPreviewContent artifact={artifact} />
+						</LessonWorkbenchLabeledCard>
+					))}
+				</div>
+			) : null}
 			{galleryField ? (
-				<div
-					className={
-						isInvalid
-							? "space-y-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4"
-							: "p-0"
-					}
-				>
-					<WorkbenchCard>
+				<div className="space-y-3">
+					<LessonWorkbenchLabeledCard>
 						<FieldControl
 							field={galleryField}
 							value={fieldValues[galleryField.id]}
@@ -45,15 +56,17 @@ export function ReferenceGalleryWorkbench({
 							pinnedArtifacts={pinnedArtifacts}
 							showLabel={false}
 						/>
-					</WorkbenchCard>
+					</LessonWorkbenchLabeledCard>
 					{isInvalid ? (
-						<p className="text-[12px] font-medium leading-[1.6] text-destructive">
-							Save at least {Math.max(galleryField.minItems ?? 1, 1)} references
-							before continuing.
-						</p>
+						<Alert variant="destructive">
+							<AlertDescription>
+								Save at least {Math.max(galleryField.minItems ?? 1, 1)}{" "}
+								references before continuing.
+							</AlertDescription>
+						</Alert>
 					) : null}
 				</div>
 			) : null}
-		</WorkbenchContainer>
+		</div>
 	);
 }

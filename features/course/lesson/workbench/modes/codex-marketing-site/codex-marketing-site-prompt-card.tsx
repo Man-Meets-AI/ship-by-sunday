@@ -1,6 +1,6 @@
 "use client";
 
-import { toast } from "sonner";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,16 +14,18 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { MARKETING_SITE_PROMPT_TEMPLATE } from "./codex-marketing-site-constants";
 
-async function writeClipboard(text: string) {
+async function writeClipboard(text: string): Promise<boolean> {
 	try {
 		await navigator.clipboard.writeText(text);
-		toast.success("Copied to clipboard");
+		return true;
 	} catch {
-		toast.error("Could not copy—try selecting the text manually");
+		return false;
 	}
 }
 
 export function CodexMarketingSitePromptCard() {
+	const [feedback, setFeedback] = useState<string | null>(null);
+
 	return (
 		<Card>
 			<CardHeader className="space-y-1">
@@ -40,14 +42,29 @@ export function CodexMarketingSitePromptCard() {
 					value={MARKETING_SITE_PROMPT_TEMPLATE}
 					aria-label="Marketing site prompt template"
 				/>
-				<Button
-					type="button"
-					variant="secondary"
-					size="sm"
-					onClick={() => void writeClipboard(MARKETING_SITE_PROMPT_TEMPLATE)}
-				>
-					Copy prompt
-				</Button>
+				<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+					<Button
+						type="button"
+						variant="secondary"
+						size="sm"
+						onClick={() => {
+							void writeClipboard(MARKETING_SITE_PROMPT_TEMPLATE).then((ok) => {
+								setFeedback(
+									ok
+										? "Copied to clipboard."
+										: "Could not copy—try selecting the text manually.",
+								);
+							});
+						}}
+					>
+						Copy prompt
+					</Button>
+					{feedback ? (
+						<span className="text-xs text-muted-foreground" aria-live="polite">
+							{feedback}
+						</span>
+					) : null}
+				</div>
 			</CardContent>
 		</Card>
 	);

@@ -30,7 +30,9 @@ export function BuildSetupLaunchpadReferenceAccordion() {
 					Optional: Mac / folder layout
 				</AccordionTrigger>
 				<AccordionContent>
-					<p className="text-sm leading-relaxed text-muted-foreground">{BUILD_SETUP_MAC_TIP}</p>
+					<p className="text-sm leading-relaxed text-muted-foreground">
+						{BUILD_SETUP_MAC_TIP}
+					</p>
 				</AccordionContent>
 			</AccordionItem>
 		</Accordion>

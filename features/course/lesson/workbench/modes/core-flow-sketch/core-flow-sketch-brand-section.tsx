@@ -1,7 +1,6 @@
 "use client";
 
 import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
-import type { PinnedArtifact } from "@/features/course/lesson/shells";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,11 +10,20 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { FieldControl } from "@/features/course/lesson/workbench/fields/field-control";
+import {
+	Field,
+	FieldContent,
+	FieldDescription,
+	FieldLabel,
+} from "@/components/ui/field";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { assert } from "@/features/course/lesson/lib/assert";
 import { copyCoursePromptToClipboard } from "@/features/course/lesson/lib/copy-course-prompt";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { inputWidthClass } from "@/features/course/lesson/workbench/fields/field-styles";
 
 import { BRAND_GUIDE_META_PROMPT } from "./core-flow-sketch-copy";
+import { CoreFlowSketchField } from "./core-flow-sketch-fields";
 
 const NEED_GUIDE_OPTION = "I need to create a brand guide first";
 
@@ -25,7 +33,6 @@ type CoreFlowSketchBrandSectionProps = {
 	fieldValues: Record<string, unknown>;
 	onFieldChange: (fieldId: string, value: unknown) => void;
 	invalidFieldIds: Set<string>;
-	pinnedArtifacts: PinnedArtifact[];
 };
 
 export function CoreFlowSketchBrandSection({
@@ -34,14 +41,21 @@ export function CoreFlowSketchBrandSection({
 	fieldValues,
 	onFieldChange,
 	invalidFieldIds,
-	pinnedArtifacts,
 }: CoreFlowSketchBrandSectionProps) {
 	const pathValue =
 		typeof fieldValues[brandPathField.id] === "string"
 			? (fieldValues[brandPathField.id] as string)
 			: "";
-	const options = brandPathField.options ?? [];
+	assert(
+		brandPathField.options,
+		`Radio group field "${brandPathField.id}" is missing options.`,
+	);
+	const options = brandPathField.options;
 	const showGuide = pathValue === NEED_GUIDE_OPTION;
+	const widthClass = inputWidthClass(brandPathField);
+	const pathHelp = brandPathField.helpText ? (
+		<FieldDescription>{brandPathField.helpText}</FieldDescription>
+	) : null;
 
 	return (
 		<Card>
@@ -52,55 +66,61 @@ export function CoreFlowSketchBrandSection({
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-4">
-				<div className="space-y-2">
-					<p className="text-sm font-medium">{brandPathField.label}</p>
-					<ToggleGroup
-						type="single"
-						value={pathValue || undefined}
-						onValueChange={(next) => {
-							if (next) {
-								onFieldChange(brandPathField.id, next);
-							}
-						}}
-						className="flex flex-col items-stretch gap-2 sm:flex-row sm:flex-wrap"
-					>
-						{options.map((option) => (
-							<ToggleGroupItem
-								key={option}
-								value={option}
-								className="h-auto flex-1 whitespace-normal px-3 py-2 text-left text-sm"
-							>
-								{option}
-							</ToggleGroupItem>
-						))}
-					</ToggleGroup>
-				</div>
-				{showGuide ? (
-					<div className="space-y-3 rounded-md border border-border bg-muted/20 p-3">
-						<p className="text-sm text-muted-foreground">
-							Copy this meta-prompt into ChatGPT to draft a one-page brand
-							guide, then paste your notes below if you want.
-						</p>
-						<Button
-							type="button"
-							size="sm"
-							onClick={() => {
-								void copyCoursePromptToClipboard(
-									BRAND_GUIDE_META_PROMPT,
-									"Copied brand guide prompt.",
-								);
-							}}
+				<Field className={widthClass}>
+					<FieldLabel>{brandPathField.label}</FieldLabel>
+					{pathHelp}
+					<FieldContent>
+						<RadioGroup
+							value={pathValue}
+							onValueChange={(next) => onFieldChange(brandPathField.id, next)}
 						>
-							Copy brand guide prompt
-						</Button>
-						<FieldControl
-							field={brandNotesField}
-							value={fieldValues[brandNotesField.id]}
-							onChange={(value) => onFieldChange(brandNotesField.id, value)}
-							pinnedArtifacts={pinnedArtifacts}
-							invalid={invalidFieldIds.has(brandNotesField.id)}
-						/>
-					</div>
+							{options.map((option, index) => {
+								const optionId = `${brandPathField.id}-${index}`;
+								return (
+									<div key={option} className="flex items-center gap-2">
+										<RadioGroupItem value={option} id={optionId} />
+										<Label
+											htmlFor={optionId}
+											className="cursor-pointer font-normal"
+										>
+											{option}
+										</Label>
+									</div>
+								);
+							})}
+						</RadioGroup>
+					</FieldContent>
+				</Field>
+				{showGuide ? (
+					<Card>
+						<CardHeader className="pb-2">
+							<CardTitle className="text-base">Brand guide helper</CardTitle>
+							<CardDescription>
+								Copy this meta-prompt into ChatGPT to draft a one-page brand
+								guide, then paste your notes below if you want.
+							</CardDescription>
+						</CardHeader>
+						<CardContent className="space-y-3">
+							<Button
+								type="button"
+								size="sm"
+								onClick={() => {
+									void copyCoursePromptToClipboard(
+										BRAND_GUIDE_META_PROMPT,
+										"Copied brand guide prompt.",
+									);
+								}}
+							>
+								Copy brand guide prompt
+							</Button>
+							<CoreFlowSketchField
+								field={brandNotesField}
+								value={fieldValues[brandNotesField.id]}
+								onChange={(v) => onFieldChange(brandNotesField.id, v)}
+								invalid={invalidFieldIds.has(brandNotesField.id)}
+							/>
+						</CardContent>
+					</Card>
 				) : null}
 			</CardContent>
 		</Card>

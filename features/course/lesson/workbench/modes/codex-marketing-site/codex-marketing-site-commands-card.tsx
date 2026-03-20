@@ -1,6 +1,6 @@
 "use client";
 
-import { toast } from "sonner";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -10,19 +10,22 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 import { CODEX_MARKETING_COMMAND_SNIPPETS } from "./codex-marketing-site-constants";
 
-async function writeClipboard(text: string) {
+async function writeClipboard(text: string): Promise<boolean> {
 	try {
 		await navigator.clipboard.writeText(text);
-		toast.success("Copied");
+		return true;
 	} catch {
-		toast.error("Could not copy");
+		return false;
 	}
 }
 
 export function CodexMarketingSiteCommandsCard() {
+	const [feedback, setFeedback] = useState<string | null>(null);
+
 	return (
 		<Card>
 			<CardHeader className="space-y-1">
@@ -32,26 +35,37 @@ export function CodexMarketingSiteCommandsCard() {
 					when you are ready to ship.
 				</CardDescription>
 			</CardHeader>
-			<CardContent className="space-y-3">
-				{CODEX_MARKETING_COMMAND_SNIPPETS.map((snippet) => (
-					<div
-						key={snippet.id}
-						className="flex flex-col gap-2 rounded-md border border-border bg-muted/20 p-3 sm:flex-row sm:items-center sm:justify-between"
-					>
-						<p className="font-mono text-xs leading-relaxed text-foreground">
-							{snippet.text}
-						</p>
-						<Button
-							type="button"
-							variant="secondary"
-							size="sm"
-							className="shrink-0"
-							onClick={() => void writeClipboard(snippet.text)}
-						>
-							Copy
-						</Button>
+			<CardContent className="space-y-0">
+				{CODEX_MARKETING_COMMAND_SNIPPETS.map((snippet, index) => (
+					<div key={snippet.id}>
+						{index > 0 ? <Separator className="my-3" /> : null}
+						<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+							<p className="font-mono text-xs leading-relaxed text-foreground">
+								{snippet.text}
+							</p>
+							<Button
+								type="button"
+								variant="secondary"
+								size="sm"
+								className="shrink-0"
+								onClick={() => {
+									void writeClipboard(snippet.text).then((ok) => {
+										setFeedback(
+											ok ? "Copied to clipboard." : "Could not copy—try selecting the text.",
+										);
+									});
+								}}
+							>
+								Copy
+							</Button>
+						</div>
 					</div>
 				))}
+				{feedback ? (
+					<p className="mt-3 text-xs text-muted-foreground" aria-live="polite">
+						{feedback}
+					</p>
+				) : null}
 			</CardContent>
 		</Card>
 	);

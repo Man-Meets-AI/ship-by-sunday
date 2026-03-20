@@ -59,7 +59,12 @@ export function BuildProductIterationPromptCard() {
 						sections below.
 					</CardDescription>
 				</div>
-				<Button type="button" size="sm" variant="secondary" onClick={copyPrompt}>
+				<Button
+					type="button"
+					size="sm"
+					variant="secondary"
+					onClick={copyPrompt}
+				>
 					{copyState === "copied"
 						? "Copied"
 						: copyState === "error"

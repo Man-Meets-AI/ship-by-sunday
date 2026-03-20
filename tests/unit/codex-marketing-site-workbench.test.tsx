@@ -2,8 +2,7 @@
 
 import React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -21,30 +20,10 @@ vi.mock("convex/react", () => ({
 	useQuery: () => undefined,
 }));
 
-vi.mock(
-	"@/features/course/lesson/workbench/shared/focus-inline-lesson-video",
-	() => ({
-		FocusInlineLessonVideo: () =>
-			React.createElement("div", { "data-testid": "inline-video" }),
-	}),
-);
-
-const toastSuccess = vi.fn();
-vi.mock("sonner", () => ({
-	toast: {
-		success: (...args: unknown[]) => toastSuccess(...args),
-		error: vi.fn(),
-	},
-}));
-
 import { getLessonById } from "@/features/course/lesson/model";
 import { WorkbenchRenderer } from "@/features/course/lesson/workbench/renderer";
 
 describe("codex marketing site workbench (lesson 3.5)", () => {
-	beforeEach(() => {
-		toastSuccess.mockClear();
-	});
-
 	it("renders dependencies, plan-mode alert, prompt card, copy tabs, and handoff", () => {
 		const lesson = getLessonById("3.5");
 		expect(lesson).toBeTruthy();
@@ -100,6 +79,8 @@ describe("codex marketing site workbench (lesson 3.5)", () => {
 		const copyPromptBtn = screen.getByRole("button", { name: /copy prompt/i });
 		fireEvent.click(copyPromptBtn);
 		expect(writeText).toHaveBeenCalled();
-		await waitFor(() => expect(toastSuccess).toHaveBeenCalled());
+		await waitFor(() =>
+			expect(screen.getByText(/copied to clipboard/i)).toBeTruthy(),
+		);
 	});
 });

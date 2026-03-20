@@ -20,7 +20,7 @@ If you skip the order, the app can look close to working while the paid-access h
 Have these ready:
 
 - Node.js LTS
-- `pnpm`
+- `bun`
 - a Clerk account
 - a Convex account
 - a Stripe account
@@ -32,7 +32,7 @@ Have these ready:
 Install the repo and copy the local env template:
 
 ```bash
-pnpm install
+bun install
 cp .env.local.example .env.local
 ```
 
@@ -44,7 +44,7 @@ Then follow the provider wiring pages in this order:
 Once those values are in place, start the full local stack:
 
 ```bash
-pnpm run dev
+bun run dev
 ```
 
 Open `http://localhost:3000`.
@@ -54,24 +54,24 @@ Open `http://localhost:3000`.
 Use these commands intentionally:
 
 ```bash
-pnpm run dev
-pnpm run dev:web
-pnpm run dev:convex
+bun run dev
+bun run dev:web
+bun run dev:convex
 ```
 
-- `pnpm run dev` starts the app and local Convex together
-- `pnpm run dev:web` starts only the Next.js side
-- `pnpm run dev:convex` starts only the local Convex side
+- `bun run dev` starts the app and local Convex together
+- `bun run dev:web` starts only the Next.js side
+- `bun run dev:convex` starts only the local Convex side
 
-If you intentionally want a hosted Convex dev deployment, use `pnpm exec convex dev` manually and treat that as a different workflow.
+If you intentionally want a hosted Convex dev deployment, use `bunx convex dev` manually and treat that as a different workflow.
 
 ## The fastest way to confirm the setup
 
 Once the app boots, validate the basics:
 
 ```bash
-pnpm run build
-pnpm run stripe:local:doctor
+bun run build
+bun run stripe:local:doctor
 ```
 
 Then finish the real flow with [Local QA](/docs/local-qa).

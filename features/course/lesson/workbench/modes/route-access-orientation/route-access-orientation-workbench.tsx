@@ -2,10 +2,16 @@
 
 import { useEffect, useMemo, useRef } from "react";
 
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
 
-import { ArtifactContext } from "../../shared/artifact-context";
+import { ArtifactPreviewContent } from "../../shared/artifact-preview-content";
 import { FocusInlineLessonVideo } from "../../shared/focus-inline-lesson-video";
 import { WorkbenchContainer } from "../../shared/workbench-container";
 import { WorkbenchHeader } from "../../shared/workbench-header";
@@ -95,7 +101,6 @@ export function RouteAccessOrientationWorkbench({
 				value={fieldValues[ROUTE_ACCESS_FIELD_IDS.codexPrompt]}
 				onChange={(v) => onFieldChange(ROUTE_ACCESS_FIELD_IDS.codexPrompt, v)}
 				invalid={invalidFieldIds.has(ROUTE_ACCESS_FIELD_IDS.codexPrompt)}
-				pinnedArtifacts={pinnedArtifacts}
 			/>
 			<RouteAccessInspectionChecklist
 				field={checklistField}
@@ -106,16 +111,29 @@ export function RouteAccessOrientationWorkbench({
 				invalid={invalidFieldIds.has(
 					ROUTE_ACCESS_FIELD_IDS.inspectionChecklist,
 				)}
-				pinnedArtifacts={pinnedArtifacts}
 			/>
 			<RouteAccessStudentFields
 				fieldsById={fieldsById}
 				fieldValues={fieldValues}
 				onFieldChange={onFieldChange}
 				invalidFieldIds={invalidFieldIds}
-				pinnedArtifacts={pinnedArtifacts}
 			/>
-			<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
+			{pinnedArtifacts.length > 0 ? (
+				<div className="grid gap-3 md:grid-cols-2">
+					{pinnedArtifacts.map((artifact) => (
+						<Card key={artifact.artifactKey} className="gap-0 py-0">
+							<CardHeader className="border-b border-border/60 pb-4">
+								<CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+									{artifact.contextTitle ?? artifact.artifactLabel}
+								</CardTitle>
+							</CardHeader>
+							<CardContent className="py-4">
+								<ArtifactPreviewContent artifact={artifact} />
+							</CardContent>
+						</Card>
+					))}
+				</div>
+			) : null}
 		</div>
 	);
 

@@ -113,7 +113,9 @@ export function CompetitorResearchLightWorkbench(props: WorkbenchModeProps) {
 			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
 			<Separator className="bg-border" />
 			{showSplitMedia ? (
-				<WorkbenchMediaLayout media={inlineVideo}>{formBody}</WorkbenchMediaLayout>
+				<WorkbenchMediaLayout media={inlineVideo}>
+					{formBody}
+				</WorkbenchMediaLayout>
 			) : (
 				<>
 					{inlineVideo}

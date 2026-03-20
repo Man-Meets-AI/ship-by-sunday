@@ -126,7 +126,9 @@ export function toPersistedReferenceGalleryValue(
 
 export async function hydrateReferenceGalleryValue(
 	value: unknown,
-	resolveUploadUrl: (storageId: string) => Promise<string | null>,
+	resolveUploadUrl: (
+		storageId: NonNullable<ReferenceGalleryItem["storageId"]>,
+	) => Promise<string | null>,
 ): Promise<ReferenceGalleryValue> {
 	const items = await Promise.all(
 		getReferenceGalleryItems(value).map(async (item) => {

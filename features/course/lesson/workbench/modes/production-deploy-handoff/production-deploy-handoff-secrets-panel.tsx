@@ -11,13 +11,8 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import {
-	Field,
-	FieldContent,
-	FieldDescription,
-	FieldLabel,
-} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import { README_DEPLOY_PROMPT } from "./production-deploy-handoff-constants";
@@ -82,52 +77,44 @@ export function ProductionDeployHandoffSecretsPanel({
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-4">
-				<Field>
-					<FieldLabel htmlFor="deploy-handoff-cf-token">
-						Cloudflare API token
-					</FieldLabel>
-					<FieldContent>
-						<Input
-							id="deploy-handoff-cf-token"
-							type="password"
-							autoComplete="off"
-							value={cloudflareToken}
-							onChange={(e) => setCloudflareToken(e.target.value)}
-							placeholder="Paste token when ready"
-						/>
-					</FieldContent>
-				</Field>
-				<Field>
-					<FieldLabel htmlFor="deploy-handoff-stripe">
+				<div className="space-y-2">
+					<Label htmlFor="deploy-handoff-cf-token">Cloudflare API token</Label>
+					<Input
+						id="deploy-handoff-cf-token"
+						type="password"
+						autoComplete="off"
+						value={cloudflareToken}
+						onChange={(e) => setCloudflareToken(e.target.value)}
+						placeholder="Paste token when ready"
+					/>
+				</div>
+				<div className="space-y-2">
+					<Label htmlFor="deploy-handoff-stripe">
 						Stripe live secret key (paste)
-					</FieldLabel>
-					<FieldContent>
-						<Input
-							id="deploy-handoff-stripe"
-							type="password"
-							autoComplete="off"
-							value={stripeSecret}
-							onChange={(e) => setStripeSecret(e.target.value)}
-							placeholder="sk_live_…"
-						/>
-					</FieldContent>
-				</Field>
-				<Field>
-					<FieldLabel htmlFor="deploy-handoff-clerk">Clerk keys</FieldLabel>
-					<FieldDescription>
+					</Label>
+					<Input
+						id="deploy-handoff-stripe"
+						type="password"
+						autoComplete="off"
+						value={stripeSecret}
+						onChange={(e) => setStripeSecret(e.target.value)}
+						placeholder="sk_live_…"
+					/>
+				</div>
+				<div className="space-y-2">
+					<Label htmlFor="deploy-handoff-clerk">Clerk keys</Label>
+					<p className="text-sm text-muted-foreground">
 						Publishable + secret from your production Clerk instance.
-					</FieldDescription>
-					<FieldContent>
-						<Textarea
-							id="deploy-handoff-clerk"
-							className="min-h-[72px] font-mono text-xs"
-							autoComplete="off"
-							value={clerkKeys}
-							onChange={(e) => setClerkKeys(e.target.value)}
-							placeholder="NEXT_PUBLIC_CLERK_… and CLERK_SECRET_KEY…"
-						/>
-					</FieldContent>
-				</Field>
+					</p>
+					<Textarea
+						id="deploy-handoff-clerk"
+						className="min-h-[72px] font-mono text-xs"
+						autoComplete="off"
+						value={clerkKeys}
+						onChange={(e) => setClerkKeys(e.target.value)}
+						placeholder="NEXT_PUBLIC_CLERK_… and CLERK_SECRET_KEY…"
+					/>
+				</div>
 				<Button type="button" variant="outline" size="sm" onClick={copyFullPacket}>
 					Copy full handoff packet
 				</Button>

@@ -168,16 +168,36 @@ describe("convex/access/model", () => {
 		);
 	});
 
-	it("rejects a mismatched Stripe webhook secret before mutating product access", async () => {
-		const ctx = createAccessCtx();
+	it("grants product access from the verified Stripe path without a client secret arg", async () => {
+		const insert = vi.fn().mockResolvedValue("product_access_1");
+		const ctx = createAccessCtx({
+			insert,
+		});
+
+		vi.spyOn(Date, "now").mockReturnValue(400);
 
 		await expect(
 			moduleUnderTest.grantProductAccessFromStripeHandler(ctx as never, {
-				webhookSecret: "wrong_secret",
 				clerkUserId,
+				stripeCustomerId: "cus_123",
+				stripeCheckoutSessionId: "cs_123",
+				stripePaymentIntentId: "pi_123",
 			}),
-		).rejects.toThrow("Invalid webhook secret");
-		expect(ctx.db.insert).not.toHaveBeenCalled();
-		expect(ctx.db.patch).not.toHaveBeenCalled();
+		).resolves.toEqual({
+			granted: "inserted",
+		});
+		expect(insert).toHaveBeenCalledWith(
+			"productAccessGrants",
+			expect.objectContaining({
+				clerkUserId,
+				status: "granted",
+				source: "stripe_webhook",
+				stripeCustomerId: "cus_123",
+				stripeCheckoutSessionId: "cs_123",
+				stripePaymentIntentId: "pi_123",
+				grantedAt: 400,
+				updatedAt: 400,
+			}),
+		);
 	});
 });

@@ -1,3 +1,7 @@
+import type { Id } from "@/convex/_generated/dataModel";
+
+export type LessonStorageId = Id<"_storage">;
+
 export type BlockId = "CEO" | "DESIGN" | "BUILD" | "SHIP";
 
 export type ShellType = "split" | "focus" | "watch" | "mission";
@@ -46,7 +50,7 @@ export type UploadFieldValue = {
   fileName?: string;
   mimeType?: string;
   size?: number;
-  storageId?: string;
+  storageId?: LessonStorageId;
   url?: string;
   previewUrl?: string;
 };
@@ -59,7 +63,7 @@ export type ReferenceGalleryItem = {
   fileName?: string;
   mimeType?: string;
   size?: number;
-  storageId?: string;
+  storageId?: LessonStorageId;
 };
 
 export type ReferenceGalleryValue = {

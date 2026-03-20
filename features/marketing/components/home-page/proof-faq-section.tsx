@@ -1,15 +1,9 @@
 import Image from "next/image";
 
+import { Badge } from "@/components/ui/badge";
 import type { HomePageContent } from "@/features/marketing/content/home";
 
 import FAQAccordion from "../faq-accordion";
-import {
-	SectionGroupHeading,
-	SectionLabel,
-	SectionLead,
-	SectionStack,
-	SectionTitle,
-} from "./section-shell";
 
 type FAQSection = HomePageContent["faqSection"];
 type ProofSection = HomePageContent["proofSection"];
@@ -24,31 +18,35 @@ export function ProofAndFaqSection({
 	proofSection: ProofSection;
 }) {
 	return (
-		<SectionStack className="gap-10 border-t border-border/30 py-10 sm:gap-12 sm:py-12">
+		<section className="grid gap-10 border-t py-10 sm:gap-12 sm:py-12">
 			<div className="space-y-4">
-				<SectionLabel>{faqSection.label}</SectionLabel>
-				<SectionTitle>
+				<Badge variant="outline">{faqSection.label}</Badge>
+				<h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
 					{faqSection.titleLead}
 					<span className="block">{faqSection.titleAccent}</span>
-				</SectionTitle>
-				<SectionLead className="max-w-2xl">{faqSection.lead}</SectionLead>
+				</h2>
+				<p className="max-w-2xl text-muted-foreground sm:text-lg">
+					{faqSection.lead}
+				</p>
 			</div>
 
 			<div className="grid gap-12 lg:grid-cols-[1.05fr_1fr] lg:items-start lg:gap-14">
 				<div className="flex flex-col gap-6">
 					<div className="space-y-4">
-						<SectionGroupHeading>{proofSection.label}</SectionGroupHeading>
+						<h3 className="text-xl font-semibold tracking-tight sm:text-2xl">
+							{proofSection.label}
+						</h3>
 						<ul className="space-y-3">
 							{proofSection.points.map((point) => (
 								<li
 									key={point}
-									className="text-sm font-medium leading-relaxed sm:text-base"
+									className="text-sm font-medium sm:text-base"
 								>
 									{point}
 								</li>
 							))}
 						</ul>
-						<p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
+						<p className="text-sm text-muted-foreground sm:text-base">
 							{proofSection.intro}
 						</p>
 					</div>
@@ -62,7 +60,7 @@ export function ProofAndFaqSection({
 								sizes="(max-width: 1024px) 100vw, 45vw"
 							/>
 						</div>
-						<p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">
+						<p className="text-xs text-muted-foreground sm:text-sm">
 							{proofSection.imageCaption}
 						</p>
 					</div>
@@ -72,6 +70,6 @@ export function ProofAndFaqSection({
 					<FAQAccordion items={faqSection.items} />
 				</div>
 			</div>
-		</SectionStack>
+		</section>
 	);
 }

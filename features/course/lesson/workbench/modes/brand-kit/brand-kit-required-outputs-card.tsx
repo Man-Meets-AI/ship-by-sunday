@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge";
 import {
 	Card,
 	CardContent,
@@ -6,6 +5,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 const REQUIRED_OUTPUTS = [
 	"Working app name",
@@ -24,42 +24,33 @@ const OPTIONAL_OUTPUTS = [
 export function BrandKitRequiredOutputsCard() {
 	return (
 		<Card>
-			<CardHeader className="space-y-1 pb-3">
-				<CardTitle className="text-base font-semibold">
-					Required outputs
-				</CardTitle>
-				<CardDescription className="text-sm">
+			<CardHeader>
+				<CardTitle>Required outputs</CardTitle>
+				<CardDescription>
 					What you should finish this lesson with—a starter brand kit, not a
 					full workshop.
 				</CardDescription>
 			</CardHeader>
-			<CardContent className="space-y-4 pt-0">
-				<ul className="space-y-2 text-sm leading-relaxed">
-					{REQUIRED_OUTPUTS.map((line) => (
-						<li key={line} className="flex flex-wrap items-start gap-2">
-							<Badge
-								variant="secondary"
-								className="mt-0.5 shrink-0 text-[10px] uppercase tracking-wide"
-							>
-								Required
-							</Badge>
-							<span>{line}</span>
-						</li>
-					))}
-				</ul>
-				<ul className="space-y-2 border-t border-border pt-4 text-sm leading-relaxed text-muted-foreground">
-					{OPTIONAL_OUTPUTS.map((line) => (
-						<li key={line} className="flex flex-wrap items-start gap-2">
-							<Badge
-								variant="outline"
-								className="mt-0.5 shrink-0 text-[10px] uppercase tracking-wide"
-							>
-								Optional
-							</Badge>
-							<span>{line}</span>
-						</li>
-					))}
-				</ul>
+			<CardContent className="space-y-4">
+				<div className="space-y-2">
+					<CardTitle className="text-sm">Required</CardTitle>
+					<ul className="list-disc space-y-1 pl-4 text-sm leading-relaxed">
+						{REQUIRED_OUTPUTS.map((line) => (
+							<li key={line}>{line}</li>
+						))}
+					</ul>
+				</div>
+				<Separator />
+				<div className="space-y-2">
+					<CardTitle className="text-sm text-muted-foreground">
+						Optional
+					</CardTitle>
+					<ul className="list-disc space-y-1 pl-4 text-sm leading-relaxed text-muted-foreground">
+						{OPTIONAL_OUTPUTS.map((line) => (
+							<li key={line}>{line}</li>
+						))}
+					</ul>
+				</div>
 			</CardContent>
 		</Card>
 	);

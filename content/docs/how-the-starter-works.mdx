@@ -43,7 +43,7 @@ That split matters because checkout and access recovery live between those world
 2. Signed-out buyers are sent to Clerk sign-in first and then returned to pricing.
 3. Signed-in buyers call `POST /api/stripe/checkout`.
 4. Stripe hosts the payment flow and returns to `/checkout/success`.
-5. `POST /api/stripe/webhook` verifies the signature and handles completed checkout events.
+5. `POST {NEXT_PUBLIC_CONVEX_URL}/stripe/webhook` verifies the signature and handles completed checkout events.
 6. Convex upserts the active product-access grant.
 7. `/checkout/success` waits for authenticated product-access state, then redirects into `/mission`.
 8. `/access-required` checks the same product-access state and recovers automatically if access appears later.

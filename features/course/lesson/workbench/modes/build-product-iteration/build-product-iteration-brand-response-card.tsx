@@ -8,10 +8,10 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { copyCoursePromptToClipboard } from "@/features/course/lesson/lib/copy-course-prompt";
 import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
-
-import { BuildProductIterationTextareaField } from "./build-product-iteration-textarea-field";
 
 type Props = {
 	strategyField: WorkbenchField | undefined;
@@ -67,22 +67,52 @@ export function BuildProductIterationBrandResponseCard({
 			</CardHeader>
 			<CardContent className="space-y-4">
 				{strategyField ? (
-					<BuildProductIterationTextareaField
-						field={strategyField}
-						value={strategyVal}
-						onChange={(next) => onFieldChange(strategyField.id, next)}
-						invalid={invalidFieldIds.has(strategyField.id)}
-						message={fieldMessage(strategyField.id)}
-					/>
+					<div className="space-y-2">
+						<Label htmlFor={strategyField.id}>{strategyField.label}</Label>
+						<Textarea
+							id={strategyField.id}
+							rows={strategyField.rows ?? 6}
+							placeholder={strategyField.placeholder}
+							value={strategyVal}
+							onChange={(event) =>
+								onFieldChange(strategyField.id, event.target.value)
+							}
+							className={
+								invalidFieldIds.has(strategyField.id)
+									? "border-destructive"
+									: undefined
+							}
+						/>
+						{fieldMessage(strategyField.id) ? (
+							<p className="text-sm text-destructive">
+								{fieldMessage(strategyField.id)}
+							</p>
+						) : null}
+					</div>
 				) : null}
 				{designField ? (
-					<BuildProductIterationTextareaField
-						field={designField}
-						value={designVal}
-						onChange={(next) => onFieldChange(designField.id, next)}
-						invalid={invalidFieldIds.has(designField.id)}
-						message={fieldMessage(designField.id)}
-					/>
+					<div className="space-y-2">
+						<Label htmlFor={designField.id}>{designField.label}</Label>
+						<Textarea
+							id={designField.id}
+							rows={designField.rows ?? 6}
+							placeholder={designField.placeholder}
+							value={designVal}
+							onChange={(event) =>
+								onFieldChange(designField.id, event.target.value)
+							}
+							className={
+								invalidFieldIds.has(designField.id)
+									? "border-destructive"
+									: undefined
+							}
+						/>
+						{fieldMessage(designField.id) ? (
+							<p className="text-sm text-destructive">
+								{fieldMessage(designField.id)}
+							</p>
+						) : null}
+					</div>
 				) : null}
 			</CardContent>
 		</Card>

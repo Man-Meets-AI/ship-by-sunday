@@ -17,7 +17,10 @@ function pickField(fields: WorkbenchField[], id: string) {
 }
 
 const SERVICE_ACCOUNT_BADGES = Object.fromEntries(
-	SERVICE_ACCOUNT_CHECKLIST_OPTIONS.map((label) => [label, "required" as const]),
+	SERVICE_ACCOUNT_CHECKLIST_OPTIONS.map((label) => [
+		label,
+		"required" as const,
+	]),
 );
 
 const SCOPE_BADGES = Object.fromEntries(
@@ -51,15 +54,20 @@ export function BuildShipRoadmapOutputs({
 		) : null;
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-4">
 			<BuildShipRoadmapChecklistCard
 				title="Account readiness"
 				description="Create accounts in each dashboard—do not store passwords here."
 				options={SERVICE_ACCOUNT_CHECKLIST_OPTIONS}
 				badges={SERVICE_ACCOUNT_BADGES}
-				value={fieldValues[BUILD_SHIP_ROADMAP_FIELD_IDS.serviceAccountsChecklist]}
+				value={
+					fieldValues[BUILD_SHIP_ROADMAP_FIELD_IDS.serviceAccountsChecklist]
+				}
 				onChange={(next) =>
-					onFieldChange(BUILD_SHIP_ROADMAP_FIELD_IDS.serviceAccountsChecklist, next)
+					onFieldChange(
+						BUILD_SHIP_ROADMAP_FIELD_IDS.serviceAccountsChecklist,
+						next,
+					)
 				}
 				invalid={invalidFieldIds.has(
 					BUILD_SHIP_ROADMAP_FIELD_IDS.serviceAccountsChecklist,
@@ -74,13 +82,23 @@ export function BuildShipRoadmapOutputs({
 				onChange={(next) =>
 					onFieldChange(BUILD_SHIP_ROADMAP_FIELD_IDS.scopeChecklist, next)
 				}
-				invalid={invalidFieldIds.has(BUILD_SHIP_ROADMAP_FIELD_IDS.scopeChecklist)}
+				invalid={invalidFieldIds.has(
+					BUILD_SHIP_ROADMAP_FIELD_IDS.scopeChecklist,
+				)}
 			/>
-			{renderField(pickField(fields, BUILD_SHIP_ROADMAP_FIELD_IDS.marketingBrief))}
-			{renderField(pickField(fields, BUILD_SHIP_ROADMAP_FIELD_IDS.preferredDomain))}
-			{renderField(pickField(fields, BUILD_SHIP_ROADMAP_FIELD_IDS.supportEmail))}
+			{renderField(
+				pickField(fields, BUILD_SHIP_ROADMAP_FIELD_IDS.marketingBrief),
+			)}
+			{renderField(
+				pickField(fields, BUILD_SHIP_ROADMAP_FIELD_IDS.preferredDomain),
+			)}
+			{renderField(
+				pickField(fields, BUILD_SHIP_ROADMAP_FIELD_IDS.supportEmail),
+			)}
 			{renderField(pickField(fields, BUILD_SHIP_ROADMAP_FIELD_IDS.loggingPlan))}
-			{renderField(pickField(fields, BUILD_SHIP_ROADMAP_FIELD_IDS.firstTesters))}
+			{renderField(
+				pickField(fields, BUILD_SHIP_ROADMAP_FIELD_IDS.firstTesters),
+			)}
 		</div>
 	);
 }

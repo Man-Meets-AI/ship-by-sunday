@@ -23,24 +23,14 @@ function ShellInner({
 	subtitle,
 	currentLessonId,
 	currentBlockId,
+	mission,
 	showSkillRail = true,
 	layoutMode,
 	onLayoutModeChange,
 	viewportMode = "document",
 	appScrollMode = "viewport",
 	completionCue,
-	enableMissionQuery = true,
 }: AppShellProps) {
-	const { isAuthenticated, isLoading } = useConvexAuth();
-	const viewerAccess = useQuery(
-		api.access.viewerProductAccess,
-		isAuthenticated && !isLoading ? {} : "skip",
-	) as AppShellViewerAccessState | undefined;
-	const mission = useQuery(
-		api.course.getMissionState,
-		enableMissionQuery && viewerAccess?.hasAccess ? {} : "skip",
-	) as AppShellMissionState | undefined;
-
 	const derivedLessonBlockId = currentLessonId
 		? getLesson(currentLessonId)?.block
 		: undefined;
@@ -139,6 +129,24 @@ function ShellInner({
 	);
 }
 
+function AppShellWithQuery(props: AppShellProps) {
+	const { isAuthenticated, isLoading } = useConvexAuth();
+	const viewerAccess = useQuery(
+		api.access.viewerProductAccess,
+		isAuthenticated && !isLoading ? {} : "skip",
+	) as AppShellViewerAccessState | undefined;
+	const mission = useQuery(
+		api.course.getMissionState,
+		props.enableMissionQuery && viewerAccess?.hasAccess ? {} : "skip",
+	) as AppShellMissionState | undefined;
+
+	return <ShellInner {...props} mission={mission} />;
+}
+
 export function AppShell(props: AppShellProps) {
-	return <ShellInner {...props} />;
+	if (props.mission || props.enableMissionQuery === false) {
+		return <ShellInner {...props} />;
+	}
+
+	return <AppShellWithQuery {...props} />;
 }

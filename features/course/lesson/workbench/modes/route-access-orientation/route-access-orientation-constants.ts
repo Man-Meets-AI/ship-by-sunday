@@ -42,7 +42,7 @@ export const ROUTE_ACCESS_INSPECTION_CHECKLIST_OPTIONS = [
 	"Scan the named route folders on this screen",
 	"Identify root `page.tsx` (marketing home)",
 	"Paste the Codex prompt and send it",
-	"Read where entitlement / protection is enforced",
+	"Read where product access / protection is enforced",
 	"Rename the thread to `How protected pages work`",
 	"Pin the thread in Codex",
 ] as const;
@@ -64,7 +64,7 @@ export const ROUTE_ACCESS_GLOSSARY_ITEMS: {
 		body: "A gate that blocks product value until purchase or subscription is recognized.",
 	},
 	{
-		term: "Entitlement",
+		term: "Product access",
 		body: "A record that the user has paid (or otherwise earned access). The app checks this before rendering protected routes.",
 	},
 ];

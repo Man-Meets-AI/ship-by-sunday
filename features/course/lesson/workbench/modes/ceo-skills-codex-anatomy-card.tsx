@@ -8,17 +8,16 @@ import {
 
 export function CeoSkillsCodexAnatomyCard() {
 	return (
-		<Card className="gap-0 py-0">
-			<CardHeader className="space-y-1 border-b border-border pb-3">
-				<CardTitle className="text-base font-semibold">
-					What you should see in Codex
-				</CardTitle>
-				<CardDescription className="text-pretty text-sm">
-					Match these spots while the video moves—names can vary slightly by version.
+		<Card>
+			<CardHeader>
+				<CardTitle>What you should see in Codex</CardTitle>
+				<CardDescription className="text-pretty">
+					Match these spots while the video moves—names can vary slightly by
+					version.
 				</CardDescription>
 			</CardHeader>
-			<CardContent className="pt-3 pb-4">
-				<ul className="list-inside list-disc space-y-1.5 text-sm leading-relaxed text-muted-foreground">
+			<CardContent>
+				<ul className="list-inside list-disc space-y-1.5 leading-relaxed text-muted-foreground">
 					<li>
 						<span className="font-medium text-foreground">Left:</span> thread
 						list and history
@@ -28,7 +27,9 @@ export function CeoSkillsCodexAnatomyCard() {
 						start a fresh run
 					</li>
 					<li>
-						<span className="font-medium text-foreground">Projects / folders</span>{" "}
+						<span className="font-medium text-foreground">
+							Projects / folders
+						</span>{" "}
 						area for workspaces
 					</li>
 					<li>

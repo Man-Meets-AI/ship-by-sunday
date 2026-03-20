@@ -1,20 +1,13 @@
 "use client";
 
-import { FieldControl } from "@/features/course/lesson/workbench/fields/field-control";
-import type { WorkbenchModeProps } from "@/features/course/lesson/workbench/types";
+import { Field, FieldContent, FieldError } from "@/components/ui/field";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
+import type { WorkbenchModeProps } from "@/features/course/lesson/workbench/types";
 
-export function CompetitorResearchNotesTabs({
-	pricingField,
-	messagingField,
-	productField,
-	fieldValues,
-	onFieldChange,
-	pinnedArtifacts,
-	invalidFieldIds,
-	invalidFieldMessages,
-}: {
+type CompetitorResearchNotesTabsProps = {
 	pricingField: WorkbenchField;
 	messagingField: WorkbenchField;
 	productField: WorkbenchField;
@@ -23,63 +16,63 @@ export function CompetitorResearchNotesTabs({
 	pinnedArtifacts: WorkbenchModeProps["pinnedArtifacts"];
 	invalidFieldIds: WorkbenchModeProps["invalidFieldIds"];
 	invalidFieldMessages: WorkbenchModeProps["invalidFieldMessages"];
-}) {
+};
+
+export function CompetitorResearchNotesTabs({
+	pricingField,
+	messagingField,
+	productField,
+	fieldValues,
+	onFieldChange,
+	invalidFieldIds,
+	invalidFieldMessages,
+}: CompetitorResearchNotesTabsProps) {
+	const noteTabs = [
+		{ value: "pricing", label: "Pricing", field: pricingField },
+		{ value: "messaging", label: "Messaging", field: messagingField },
+		{ value: "product", label: "Product", field: productField },
+	] as const;
+
 	return (
 		<div className="space-y-2">
-			<p className="text-sm font-medium text-foreground">
+			<Label className="text-sm font-medium text-foreground">
 				Notes by bucket
-			</p>
+			</Label>
 			<Tabs defaultValue="pricing" className="w-full">
 				<TabsList className="grid w-full grid-cols-3">
-					<TabsTrigger value="pricing">Pricing</TabsTrigger>
-					<TabsTrigger value="messaging">Messaging</TabsTrigger>
-					<TabsTrigger value="product">Product</TabsTrigger>
+					{noteTabs.map(({ value, label }) => (
+						<TabsTrigger key={value} value={value}>
+							{label}
+						</TabsTrigger>
+					))}
 				</TabsList>
-				<TabsContent value="pricing" className="pt-3">
-					<FieldControl
-						field={pricingField}
-						value={fieldValues[pricingField.id]}
-						onChange={(value) => onFieldChange(pricingField.id, value)}
-						pinnedArtifacts={pinnedArtifacts}
-						showLabel={false}
-						invalid={invalidFieldIds.has(pricingField.id)}
-					/>
-					{invalidFieldMessages.get(pricingField.id) ? (
-						<p className="mt-1 text-sm text-destructive">
-							{invalidFieldMessages.get(pricingField.id)}
-						</p>
-					) : null}
-				</TabsContent>
-				<TabsContent value="messaging" className="pt-3">
-					<FieldControl
-						field={messagingField}
-						value={fieldValues[messagingField.id]}
-						onChange={(value) => onFieldChange(messagingField.id, value)}
-						pinnedArtifacts={pinnedArtifacts}
-						showLabel={false}
-						invalid={invalidFieldIds.has(messagingField.id)}
-					/>
-					{invalidFieldMessages.get(messagingField.id) ? (
-						<p className="mt-1 text-sm text-destructive">
-							{invalidFieldMessages.get(messagingField.id)}
-						</p>
-					) : null}
-				</TabsContent>
-				<TabsContent value="product" className="pt-3">
-					<FieldControl
-						field={productField}
-						value={fieldValues[productField.id]}
-						onChange={(value) => onFieldChange(productField.id, value)}
-						pinnedArtifacts={pinnedArtifacts}
-						showLabel={false}
-						invalid={invalidFieldIds.has(productField.id)}
-					/>
-					{invalidFieldMessages.get(productField.id) ? (
-						<p className="mt-1 text-sm text-destructive">
-							{invalidFieldMessages.get(productField.id)}
-						</p>
-					) : null}
-				</TabsContent>
+				{noteTabs.map(({ value, field }) => {
+					const invalid = invalidFieldIds.has(field.id);
+					const message = invalidFieldMessages.get(field.id);
+					const currentValue = fieldValues[field.id];
+					const textValue =
+						typeof currentValue === "string" ? currentValue : "";
+
+					return (
+						<TabsContent key={value} value={value} className="pt-3">
+							<Field className="w-full" data-invalid={invalid || undefined}>
+								<FieldContent>
+									<Textarea
+										id={field.id}
+										value={textValue}
+										onChange={(event) =>
+											onFieldChange(field.id, event.target.value)
+										}
+										rows={field.rows ?? 5}
+										placeholder={field.placeholder}
+										aria-invalid={invalid}
+									/>
+								</FieldContent>
+								{message ? <FieldError>{message}</FieldError> : null}
+							</Field>
+						</TabsContent>
+					);
+				})}
 			</Tabs>
 		</div>
 	);

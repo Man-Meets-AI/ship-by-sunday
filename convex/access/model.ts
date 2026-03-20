@@ -1,6 +1,5 @@
 import { ConvexError, v } from "convex/values";
 
-import { requireConvexEnv } from "../env";
 import type {
 	AccessMutationCtx,
 	AccessQueryCtx,
@@ -144,7 +143,6 @@ export async function grantProductAccessHandler(
 }
 
 export const grantProductAccessFromStripeArgs = {
-	webhookSecret: v.string(),
 	clerkUserId: v.string(),
 	stripeCustomerId: v.optional(v.string()),
 	stripeCheckoutSessionId: v.optional(v.string()),
@@ -156,17 +154,12 @@ export const grantProductAccessFromStripeReturns =
 export async function grantProductAccessFromStripeHandler(
 	ctx: AccessMutationCtx,
 	args: {
-		webhookSecret: string;
 		clerkUserId: string;
 		stripeCustomerId?: string;
 		stripeCheckoutSessionId?: string;
 		stripePaymentIntentId?: string;
 	},
 ) {
-	if (args.webhookSecret !== requireConvexEnv("STRIPE_WEBHOOK_SECRET")) {
-		throw new ConvexError("Invalid webhook secret");
-	}
-
 	return upsertProductAccessGrant(ctx, {
 		clerkUserId: args.clerkUserId,
 		source: "stripe_webhook",

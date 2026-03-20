@@ -619,7 +619,7 @@ export async function ensureTranscriptPythonReady(pythonBin = VIDEO_CUT_PYTHON_P
 		await access(pythonBin);
 	} catch {
 		throw createError(
-			`Python environment not found at ${pythonBin}. Run \`pnpm run video:transcripts:setup\` first.`,
+			`Python environment not found at ${pythonBin}. Run \`bun run video:transcripts:setup\` first.`,
 		);
 	}
 
@@ -627,7 +627,7 @@ export async function ensureTranscriptPythonReady(pythonBin = VIDEO_CUT_PYTHON_P
 		await runCommand(pythonBin, ["-c", "import whisper"]);
 	} catch {
 		throw createError(
-			`Whisper is not installed in ${pythonBin}. Run \`pnpm run video:transcripts:setup\` first.`,
+			`Whisper is not installed in ${pythonBin}. Run \`bun run video:transcripts:setup\` first.`,
 		);
 	}
 

@@ -53,16 +53,10 @@ export function CheckoutQaLoopTabPanels({
 
 	return (
 		<Tabs defaultValue="prompt" className="w-full gap-4">
-			<TabsList className="h-auto w-full flex-wrap justify-start gap-1 p-1">
-				<TabsTrigger value="prompt" className="flex-none">
-					Prompt
-				</TabsTrigger>
-				<TabsTrigger value="issues" className="flex-none">
-					Issues
-				</TabsTrigger>
-				<TabsTrigger value="resources" className="flex-none">
-					Resources
-				</TabsTrigger>
+			<TabsList>
+				<TabsTrigger value="prompt">Prompt</TabsTrigger>
+				<TabsTrigger value="issues">Issues</TabsTrigger>
+				<TabsTrigger value="resources">Resources</TabsTrigger>
 			</TabsList>
 			<TabsContent value="prompt" className="space-y-5">
 				<CheckoutQaLoopGoalCard />
@@ -84,7 +78,9 @@ export function CheckoutQaLoopTabPanels({
 				) : null}
 				<CheckoutQaLoopPromptPanel
 					value={fieldValues[CHECKOUT_QA_PROMPT_FIELD_ID]}
-					onChange={(value) => onFieldChange(CHECKOUT_QA_PROMPT_FIELD_ID, value)}
+					onChange={(value) =>
+						onFieldChange(CHECKOUT_QA_PROMPT_FIELD_ID, value)
+					}
 				/>
 				<CheckoutQaLoopStatusRow
 					browserOn={browserOn}

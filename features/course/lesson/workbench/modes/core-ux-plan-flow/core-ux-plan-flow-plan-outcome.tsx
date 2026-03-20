@@ -23,7 +23,9 @@ export function CoreUxPlanFlowPlanOutcome() {
 
 			<Card>
 				<CardHeader className="space-y-1">
-					<CardTitle className="text-base">What the plan should include</CardTitle>
+					<CardTitle className="text-base">
+						What the plan should include
+					</CardTitle>
 					<CardDescription>
 						When you generate the v1 plan, it should name these explicitly.
 					</CardDescription>
@@ -67,8 +69,8 @@ export function CoreUxPlanFlowPlanOutcome() {
 				</CardHeader>
 				<CardContent className="text-sm text-muted-foreground">
 					The same planning flow can start from a whiteboard or paper sketch
-					photo—rough input is fine as long as you still run clarifying questions
-					and review recommendations.
+					photo—rough input is fine as long as you still run clarifying
+					questions and review recommendations.
 				</CardContent>
 			</Card>
 		</div>

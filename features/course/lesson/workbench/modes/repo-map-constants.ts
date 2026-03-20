@@ -50,7 +50,7 @@ export const REPO_MAP_ENTRIES: RepoMapEntry[] = [
 		id: "package",
 		path: "package.json",
 		badge: "required",
-		summary: "Script names and dependencies—your control panel for npm/pnpm commands.",
+		summary: "Script names and dependencies—your control panel for Bun commands.",
 	},
 ];
 
@@ -65,17 +65,17 @@ export type CuratedCommandRow =
 	| { kind: "note"; label: string; body: string };
 
 export const REPO_CURATED_COMMANDS: CuratedCommandRow[] = [
-	{ kind: "command", label: "Start app", command: "pnpm dev" },
+	{ kind: "command", label: "Start app", command: "bun run dev" },
 	{
 		kind: "note",
 		label: "Stop app",
 		body: "In the terminal running the dev server, press Ctrl+C (macOS / Windows / Linux).",
 	},
-	{ kind: "command", label: "Build app", command: "pnpm build" },
+	{ kind: "command", label: "Build app", command: "bun run build" },
 	{
 		kind: "command",
 		label: "Test payments (local)",
-		command: "pnpm stripe:local:verify",
+		command: "bun run stripe:local:verify",
 	},
 ];
 

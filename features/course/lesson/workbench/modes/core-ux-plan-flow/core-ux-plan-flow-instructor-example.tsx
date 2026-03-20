@@ -6,6 +6,7 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
 import {
 	Card,
 	CardContent,
@@ -14,13 +15,6 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { TabsContent } from "@/components/ui/tabs";
 
 import { CORE_UX_PLAN_INSTRUCTOR_DECISIONS } from "./core-ux-plan-flow-constants";
@@ -30,7 +24,9 @@ export function CoreUxPlanFlowInstructorExample() {
 		<TabsContent value="instructor" className="mt-4 space-y-4">
 			<Card>
 				<CardHeader className="space-y-1">
-					<CardTitle className="text-base">Clarifying questions (example)</CardTitle>
+					<CardTitle className="text-base">
+						Clarifying questions (example)
+					</CardTitle>
 					<CardDescription>
 						In planning mode, Codex surfaces questions like these—answer them in
 						your own product terms before you accept defaults.
@@ -40,7 +36,9 @@ export function CoreUxPlanFlowInstructorExample() {
 					<ul className="list-inside list-disc space-y-2 text-sm text-muted-foreground">
 						<li>How will you distribute the release (web-led vs other)?</li>
 						<li>Whether to keep the local Codex bridge in scope.</li>
-						<li>The buyer-facing AI promise (what you actually ship vs imply).</li>
+						<li>
+							The buyer-facing AI promise (what you actually ship vs imply).
+						</li>
 						<li>Where buyers go after purchase to install or finish setup.</li>
 					</ul>
 				</CardContent>
@@ -54,7 +52,10 @@ export function CoreUxPlanFlowInstructorExample() {
 					Open each row to see the chosen answer and why you should read the
 					rationale—not blindly accept the default.
 				</p>
-				<Accordion type="multiple" className="w-full rounded-lg border border-border">
+				<Accordion
+					type="multiple"
+					className="w-full rounded-lg border border-border"
+				>
 					{CORE_UX_PLAN_INSTRUCTOR_DECISIONS.map((decision) => (
 						<AccordionItem key={decision.id} value={decision.id}>
 							<AccordionTrigger className="px-4 text-left text-sm">
@@ -68,22 +69,20 @@ export function CoreUxPlanFlowInstructorExample() {
 									<Label className="text-xs text-muted-foreground">
 										Chosen answer (example)
 									</Label>
-									<Select
-										value={decision.chosenAnswer}
-										disabled
-										onValueChange={() => {}}
-									>
-										<SelectTrigger className="w-full max-w-md">
-											<SelectValue />
-										</SelectTrigger>
-										<SelectContent>
-											{decision.selectOptions.map((opt) => (
-												<SelectItem key={opt} value={opt}>
-													{opt}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
+									<div className="flex flex-wrap items-center gap-2">
+										<Badge
+											variant="secondary"
+											className="max-w-full text-left font-normal"
+										>
+											{decision.chosenAnswer}
+										</Badge>
+									</div>
+									<p className="text-xs text-muted-foreground">
+										Other options from the walkthrough:{" "}
+										{decision.selectOptions
+											.filter((opt) => opt !== decision.chosenAnswer)
+											.join(" · ")}
+									</p>
 								</div>
 								<div>
 									<p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">

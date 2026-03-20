@@ -7,12 +7,12 @@ import {
 
 export function CodexMarketingSiteAdvancedAccordion() {
 	return (
-		<Accordion type="single" collapsible className="w-full rounded-md border border-border px-3">
-			<AccordionItem value="advanced" className="border-none">
-				<AccordionTrigger className="py-3 text-sm font-medium hover:no-underline">
+		<Accordion type="single" collapsible className="w-full">
+			<AccordionItem value="advanced">
+				<AccordionTrigger className="text-sm font-medium hover:no-underline">
 					Optional: advanced ideas
 				</AccordionTrigger>
-				<AccordionContent className="space-y-3 pb-3 text-xs text-muted-foreground">
+				<AccordionContent className="space-y-3 text-xs text-muted-foreground">
 					<div>
 						<p className="font-medium text-foreground">Competitor comparison</p>
 						<p className="mt-1 leading-relaxed">

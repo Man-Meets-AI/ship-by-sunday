@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import {
 	Card,
 	CardContent,
@@ -5,11 +6,9 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { productConfig } from "@/config/product";
 import type { LessonConfig } from "@/features/course/lesson/model/manifest";
 import { getOrderedBlocks } from "@/features/course/lesson/model/registry";
-import { cn } from "@/lib/utils";
 
 export function RoadmapSprintPhaseCard({ lesson }: { lesson: LessonConfig }) {
 	const blocks = getOrderedBlocks();
@@ -48,16 +47,14 @@ export function RoadmapSprintPhaseCard({ lesson }: { lesson: LessonConfig }) {
 									→
 								</span>
 							) : null}
-							<span
-								className={cn(
-									"rounded-md border px-2.5 py-1 text-xs font-semibold tracking-tight",
-									block.id === lesson.block
-										? "border-primary/40 bg-primary/10 text-foreground"
-										: "border-border/60 bg-muted/30 text-muted-foreground",
-								)}
+							<Badge
+								variant={
+									block.id === lesson.block ? "default" : "secondary"
+								}
+								className="text-xs font-semibold tracking-tight"
 							>
 								{block.label}
-							</span>
+							</Badge>
 						</div>
 					))}
 				</div>

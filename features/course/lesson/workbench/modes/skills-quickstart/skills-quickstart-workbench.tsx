@@ -1,5 +1,6 @@
 "use client";
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { FieldList } from "../../fields/field-list";
 import { ArtifactContext } from "../../shared/artifact-context";
@@ -49,18 +50,21 @@ export function SkillsQuickstartWorkbench({
 			<SkillsShippedFirstCard />
 			<SkillsCustomSkillsAccordion />
 			<SkillsResourcesRow />
-			<Separator className="bg-border" />
-			<div className="space-y-2">
-				<h3 className="text-sm font-medium text-foreground">Your checklist</h3>
-				<FieldList
-					fields={fields}
-					fieldValues={fieldValues}
-					onFieldChange={onFieldChange}
-					pinnedArtifacts={pinnedArtifacts}
-					invalidFieldIds={invalidFieldIds}
-					invalidFieldMessages={invalidFieldMessages}
-				/>
-			</div>
+			<Card>
+				<CardHeader>
+					<CardTitle>Your checklist</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<FieldList
+						fields={fields}
+						fieldValues={fieldValues}
+						onFieldChange={onFieldChange}
+						pinnedArtifacts={pinnedArtifacts}
+						invalidFieldIds={invalidFieldIds}
+						invalidFieldMessages={invalidFieldMessages}
+					/>
+				</CardContent>
+			</Card>
 			<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
 		</div>
 	);

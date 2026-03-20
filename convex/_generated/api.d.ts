@@ -13,6 +13,7 @@ import type * as access_model from "../access/model.js";
 import type * as access_types from "../access/types.js";
 import type * as access_validators from "../access/validators.js";
 import type * as codex from "../codex.js";
+import type * as codexValidators from "../codexValidators.js";
 import type * as course from "../course.js";
 import type * as course_artifacts from "../course/artifacts.js";
 import type * as course_lessonState from "../course/lessonState.js";
@@ -22,6 +23,8 @@ import type * as course_starterRepoAccess from "../course/starterRepoAccess.js";
 import type * as course_types from "../course/types.js";
 import type * as course_validators from "../course/validators.js";
 import type * as env from "../env.js";
+import type * as http from "../http.js";
+import type * as stripeWebhook from "../stripeWebhook.js";
 import type * as uploads from "../uploads.js";
 
 import type {
@@ -36,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   "access/types": typeof access_types;
   "access/validators": typeof access_validators;
   codex: typeof codex;
+  codexValidators: typeof codexValidators;
   course: typeof course;
   "course/artifacts": typeof course_artifacts;
   "course/lessonState": typeof course_lessonState;
@@ -45,6 +49,8 @@ declare const fullApi: ApiFromModules<{
   "course/types": typeof course_types;
   "course/validators": typeof course_validators;
   env: typeof env;
+  http: typeof http;
+  stripeWebhook: typeof stripeWebhook;
   uploads: typeof uploads;
 }>;
 

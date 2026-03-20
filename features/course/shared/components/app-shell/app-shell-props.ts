@@ -34,6 +34,7 @@ export type AppShellProps = {
 	subtitle?: string;
 	currentLessonId?: string;
 	currentBlockId?: string;
+	mission?: AppShellMissionState;
 	showSkillRail?: boolean;
 	layoutMode?: LessonLayoutMode;
 	onLayoutModeChange?: (mode: LessonLayoutMode) => void;

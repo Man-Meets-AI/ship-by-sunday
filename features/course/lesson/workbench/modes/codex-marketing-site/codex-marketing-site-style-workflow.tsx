@@ -1,5 +1,4 @@
 import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
-import type { PinnedArtifact } from "@/features/course/lesson/shells";
 import {
 	Card,
 	CardContent,
@@ -10,14 +9,13 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 import { CODEX_MARKETING_SITE_FIELD_IDS } from "./codex-marketing-site-constants";
-import { FieldControl } from "../../fields/field-control";
+import { CodexMarketingSiteMarketingField } from "./codex-marketing-site-marketing-field";
 
 type CodexMarketingSiteStyleWorkflowProps = {
 	styleField: WorkbenchField | undefined;
 	workflowField: WorkbenchField | undefined;
 	fieldValues: Record<string, unknown>;
 	onFieldChange: (fieldId: string, value: unknown) => void;
-	pinnedArtifacts: PinnedArtifact[];
 	invalidFieldIds: Set<string>;
 };
 
@@ -26,7 +24,6 @@ export function CodexMarketingSiteStyleWorkflow({
 	workflowField,
 	fieldValues,
 	onFieldChange,
-	pinnedArtifacts,
 	invalidFieldIds,
 }: CodexMarketingSiteStyleWorkflowProps) {
 	return (
@@ -40,13 +37,14 @@ export function CodexMarketingSiteStyleWorkflow({
 			<CardContent className="space-y-6">
 				{styleField ? (
 					<div className="space-y-2">
-						<FieldControl
+						<CodexMarketingSiteMarketingField
 							field={styleField}
-							value={fieldValues[CODEX_MARKETING_SITE_FIELD_IDS.styleReferenceUrl]}
+							value={
+								fieldValues[CODEX_MARKETING_SITE_FIELD_IDS.styleReferenceUrl]
+							}
 							onChange={(v) =>
 								onFieldChange(CODEX_MARKETING_SITE_FIELD_IDS.styleReferenceUrl, v)
 							}
-							pinnedArtifacts={pinnedArtifacts}
 							invalid={invalidFieldIds.has(styleField.id)}
 						/>
 						<p className="text-xs text-muted-foreground">
@@ -57,13 +55,12 @@ export function CodexMarketingSiteStyleWorkflow({
 				) : null}
 				{styleField && workflowField ? <Separator /> : null}
 				{workflowField ? (
-					<FieldControl
+					<CodexMarketingSiteMarketingField
 						field={workflowField}
 						value={fieldValues[CODEX_MARKETING_SITE_FIELD_IDS.workflow]}
 						onChange={(v) =>
 							onFieldChange(CODEX_MARKETING_SITE_FIELD_IDS.workflow, v)
 						}
-						pinnedArtifacts={pinnedArtifacts}
 						invalid={invalidFieldIds.has(workflowField.id)}
 					/>
 				) : null}

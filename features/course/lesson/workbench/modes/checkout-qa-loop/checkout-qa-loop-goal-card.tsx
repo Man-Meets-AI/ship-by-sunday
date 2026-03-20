@@ -12,7 +12,7 @@ export function CheckoutQaLoopGoalCard() {
 		<Card>
 			<CardHeader className="space-y-2">
 				<CardTitle className="text-base">Lesson goal</CardTitle>
-				<CardDescription className="text-foreground/90">
+				<CardDescription>
 					Test the <strong>fresh-account purchase path</strong> with a real QA
 					pass (local app + payments + agent-driven browser), not generic “do
 					QA.” Capture concrete bugs before you talk about launch.

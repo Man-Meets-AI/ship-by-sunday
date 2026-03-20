@@ -14,7 +14,7 @@ This usually means the local services or provider state are out of sync.
 Try this first:
 
 1. stop the running local services
-2. start them again with `pnpm run dev`
+2. start them again with `bun run dev`
 3. reload the flow and retry the exact steps
 
 ## Symptom: env changes do not seem to apply
@@ -42,8 +42,8 @@ That drift can break return URLs and local verification assumptions.
 Run the built-in checks instead of guessing:
 
 ```bash
-pnpm run build
-pnpm run stripe:local:doctor
+bun run build
+bun run stripe:local:doctor
 ```
 
 ## What success looks like

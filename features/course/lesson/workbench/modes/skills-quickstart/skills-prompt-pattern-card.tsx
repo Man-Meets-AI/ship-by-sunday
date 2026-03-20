@@ -8,6 +8,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import { copySkillsText } from "./skills-quickstart-clipboard";
@@ -17,11 +18,14 @@ import {
 	SKILLS_QUICKSTART_FULL_COPY,
 } from "./skills-quickstart-constants";
 
+const patternTextareaId = "skills-quickstart-prompt-pattern";
+const examplesTextareaId = "skills-quickstart-prompt-examples";
+
 export function SkillsPromptPatternCard() {
 	return (
 		<Card>
-			<CardHeader className="space-y-1">
-				<CardTitle className="text-base">Prompt template</CardTitle>
+			<CardHeader>
+				<CardTitle>Prompt template</CardTitle>
 				<CardDescription>
 					Type <code className="text-foreground">$</code> then the skill slug,
 					then your concrete task on the next lines.
@@ -29,12 +33,12 @@ export function SkillsPromptPatternCard() {
 			</CardHeader>
 			<CardContent className="space-y-4">
 				<div className="space-y-2">
-					<p className="text-xs font-medium text-muted-foreground">Pattern</p>
+					<Label htmlFor={patternTextareaId}>Pattern</Label>
 					<Textarea
+						id={patternTextareaId}
 						readOnly
 						className="min-h-[100px] resize-y font-mono text-xs"
 						value={PROMPT_PATTERN_TEMPLATE}
-						aria-label="Skill prompt pattern"
 					/>
 					<Button
 						type="button"
@@ -48,12 +52,12 @@ export function SkillsPromptPatternCard() {
 					</Button>
 				</div>
 				<div className="space-y-2">
-					<p className="text-xs font-medium text-muted-foreground">Examples</p>
+					<Label htmlFor={examplesTextareaId}>Examples</Label>
 					<Textarea
+						id={examplesTextareaId}
 						readOnly
 						className="min-h-[160px] resize-y font-mono text-xs"
 						value={PROMPT_EXAMPLES_BLOCK}
-						aria-label="Example tagged prompts"
 					/>
 					<div className="flex flex-wrap gap-2">
 						<Button

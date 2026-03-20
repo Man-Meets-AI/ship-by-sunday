@@ -40,7 +40,7 @@ const uploadFieldValueValidator = v.object({
 	fileName: v.optional(v.string()),
 	mimeType: v.optional(v.string()),
 	size: v.optional(v.number()),
-	storageId: v.optional(v.string()),
+	storageId: v.optional(v.id("_storage")),
 	url: v.optional(v.string()),
 	previewUrl: v.optional(v.string()),
 });
@@ -52,7 +52,7 @@ const referenceGalleryItemValidator = v.object({
 	fileName: v.optional(v.string()),
 	mimeType: v.optional(v.string()),
 	size: v.optional(v.number()),
-	storageId: v.optional(v.string()),
+	storageId: v.optional(v.id("_storage")),
 });
 const referenceGalleryValueValidator = v.object({
 	kind: v.literal("reference_gallery"),

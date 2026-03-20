@@ -26,7 +26,8 @@ export function BuildProductIterationWorkflowTab() {
 	return (
 		<div className="space-y-3">
 			<p className="text-sm text-muted-foreground">
-				Three-step loop the instructor uses when iterating with AI—keep it lightweight.
+				Three-step loop the instructor uses when iterating with AI—keep it
+				lightweight.
 			</p>
 			<Accordion type="single" collapsible className="w-full">
 				{STEPS.map((step, index) => (

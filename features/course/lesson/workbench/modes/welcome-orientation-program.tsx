@@ -1,12 +1,13 @@
 "use client";
 
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+	Item,
+	ItemContent,
+	ItemDescription,
+	ItemGroup,
+	ItemTitle,
+} from "@/components/ui/item";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const PROGRAM_TABS = [
@@ -46,13 +47,9 @@ export function WelcomeOrientationProgram() {
 	return (
 		<div className="space-y-4">
 			<Tabs defaultValue="lessons" className="w-full">
-				<TabsList className="h-auto w-full flex-wrap justify-start gap-1">
+				<TabsList variant="line" className="w-full">
 					{PROGRAM_TABS.map((tab) => (
-						<TabsTrigger
-							key={tab.id}
-							value={tab.id}
-							className="text-xs sm:text-sm"
-						>
+						<TabsTrigger key={tab.id} value={tab.id}>
 							{tab.label}
 						</TabsTrigger>
 					))}
@@ -61,32 +58,26 @@ export function WelcomeOrientationProgram() {
 					<TabsContent
 						key={tab.id}
 						value={tab.id}
-						className="mt-3 text-sm leading-relaxed text-muted-foreground"
+						className="text-muted-foreground"
 					>
 						{tab.body}
 					</TabsContent>
 				))}
 			</Tabs>
-			<div>
-				<p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-					Product Trinity
-				</p>
-				<div className="grid gap-2 sm:grid-cols-3">
+			<div className="space-y-2">
+				<Label className="text-muted-foreground">Product Trinity</Label>
+				<ItemGroup className="gap-2">
 					{TRINITY.map((item) => (
-						<Card key={item.title} className="gap-0 py-0">
-							<CardHeader className="border-b border-border pb-2 pt-3">
-								<CardTitle className="text-xs font-medium text-foreground">
-									{item.title}
-								</CardTitle>
-							</CardHeader>
-							<CardContent className="pt-2 pb-3">
-								<CardDescription className="text-xs leading-relaxed text-muted-foreground">
+						<Item key={item.title} variant="outline">
+							<ItemContent>
+								<ItemTitle>{item.title}</ItemTitle>
+								<ItemDescription className="line-clamp-none">
 									{item.body}
-								</CardDescription>
-							</CardContent>
-						</Card>
+								</ItemDescription>
+							</ItemContent>
+						</Item>
 					))}
-				</div>
+				</ItemGroup>
 			</div>
 		</div>
 	);

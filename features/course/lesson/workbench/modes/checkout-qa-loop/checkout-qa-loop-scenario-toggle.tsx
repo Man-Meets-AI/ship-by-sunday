@@ -7,7 +7,8 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import {
 	CHECKOUT_QA_SCENARIO_EXISTING,
@@ -29,7 +30,7 @@ export function CheckoutQaLoopScenarioToggle({
 
 	return (
 		<Card>
-			<CardHeader className="space-y-1 pb-3">
+			<CardHeader className="space-y-1">
 				<CardTitle className="text-base">Test scenario</CardTitle>
 				<CardDescription>
 					Choose which path the prompt should emphasize. Fresh account is the
@@ -37,33 +38,34 @@ export function CheckoutQaLoopScenarioToggle({
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<ToggleGroup
-					type="single"
+				<RadioGroup
 					value={selected}
 					onValueChange={(next) => {
-						if (next) {
-							onChange(next);
-						}
+						onChange(next);
 					}}
-					variant="outline"
-					spacing={0}
-					className="w-full sm:w-auto"
 				>
-					<ToggleGroupItem
-						value={CHECKOUT_QA_SCENARIO_FRESH}
-						aria-label="Fresh account"
-						className="flex-1 px-4 sm:flex-initial"
-					>
-						Fresh account
-					</ToggleGroupItem>
-					<ToggleGroupItem
-						value={CHECKOUT_QA_SCENARIO_EXISTING}
-						aria-label="Existing account"
-						className="flex-1 px-4 sm:flex-initial"
-					>
-						Existing account
-					</ToggleGroupItem>
-				</ToggleGroup>
+					<div className="flex items-center gap-3">
+						<RadioGroupItem
+							value={CHECKOUT_QA_SCENARIO_FRESH}
+							id="checkout-qa-scenario-fresh"
+						/>
+						<Label htmlFor="checkout-qa-scenario-fresh" className="font-normal">
+							Fresh account
+						</Label>
+					</div>
+					<div className="flex items-center gap-3">
+						<RadioGroupItem
+							value={CHECKOUT_QA_SCENARIO_EXISTING}
+							id="checkout-qa-scenario-existing"
+						/>
+						<Label
+							htmlFor="checkout-qa-scenario-existing"
+							className="font-normal"
+						>
+							Existing account
+						</Label>
+					</div>
+				</RadioGroup>
 			</CardContent>
 		</Card>
 	);

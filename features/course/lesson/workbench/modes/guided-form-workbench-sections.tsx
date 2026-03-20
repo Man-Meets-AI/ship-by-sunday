@@ -1,6 +1,15 @@
+import { Badge } from "@/components/ui/badge";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { isFilled } from "@/features/course/lesson/model/registry";
+import { cn } from "@/lib/utils";
+
 import { FieldList } from "../fields/field-list";
-import { SectionCard } from "../shared/section-card";
 import type { WorkbenchModeProps } from "../types";
 
 const HANDOFF_BLOCKED_COPY =
@@ -44,25 +53,47 @@ export function GuidedFormWorkbenchSections({
 						: section.layout === "compact"
 							? "grid gap-6 md:grid-cols-2"
 							: undefined;
+				const statusLabel = blocked
+					? "Locked"
+					: (sectionState?.isComplete ?? false)
+						? "Ready"
+						: "In progress";
 
 				return (
-					<SectionCard
-						key={section.id}
-						section={section}
-						isComplete={sectionState?.isComplete ?? false}
-						blocked={blocked}
-						blockedMessage={blocked ? HANDOFF_BLOCKED_COPY : undefined}
-					>
-						<FieldList
-							fields={sectionFields}
-							fieldValues={fieldValues}
-							onFieldChange={onFieldChange}
-							pinnedArtifacts={pinnedArtifacts}
-							invalidFieldIds={invalidFieldIds}
-							invalidFieldMessages={invalidFieldMessages}
-							className={layoutClass}
-						/>
-					</SectionCard>
+					<Card key={section.id} className={cn(blocked && "bg-muted/30")}>
+						<CardHeader>
+							<div className="flex flex-wrap items-center justify-between gap-2">
+								<CardTitle>{section.title}</CardTitle>
+								<Badge variant="outline" className="text-xs font-normal">
+									{statusLabel}
+								</Badge>
+							</div>
+							{blocked ? (
+								<CardDescription>{HANDOFF_BLOCKED_COPY}</CardDescription>
+							) : null}
+							{section.instruction ? (
+								<CardDescription className={cn(blocked && "mt-1")}>
+									{section.instruction}
+								</CardDescription>
+							) : null}
+						</CardHeader>
+						<CardContent>
+							<fieldset
+								disabled={blocked}
+								className={blocked ? "opacity-45" : ""}
+							>
+								<FieldList
+									fields={sectionFields}
+									fieldValues={fieldValues}
+									onFieldChange={onFieldChange}
+									pinnedArtifacts={pinnedArtifacts}
+									invalidFieldIds={invalidFieldIds}
+									invalidFieldMessages={invalidFieldMessages}
+									className={layoutClass}
+								/>
+							</fieldset>
+						</CardContent>
+					</Card>
 				);
 			})}
 		</div>

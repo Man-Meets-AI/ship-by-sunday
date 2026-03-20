@@ -5,9 +5,8 @@ import {
 	AccordionTrigger,
 } from "@/components/ui/accordion";
 import { CardDescription, CardTitle } from "@/components/ui/card";
-import { Item, ItemContent, ItemGroup } from "@/components/ui/item";
-import type { LessonConfig } from "@/features/course/lesson/model/manifest";
 import type { BlockConfig } from "@/features/course/lesson/model/contracts";
+import type { LessonConfig } from "@/features/course/lesson/model/manifest";
 
 export type RoadmapCatalogBlock = BlockConfig & {
 	description: string;
@@ -49,26 +48,20 @@ export function RoadmapSprintCatalogAccordion({
 										{block.description}
 									</CardDescription>
 								</div>
-								<div className="flex flex-1 flex-col px-2 py-3">
-									<ItemGroup className="gap-1.5">
-										{block.lessons.map((lesson) => (
-											<Item
-												key={lesson.id}
-												variant="outline"
-												size="sm"
-												className="border-border/50 bg-background/60 px-2.5 py-2"
-											>
-												<ItemContent className="flex-row flex-wrap items-baseline gap-x-2 gap-y-0.5">
-													<span className="text-[10px] font-medium tabular-nums text-muted-foreground">
-														{lesson.id}
-													</span>
-													<span className="min-w-0 text-xs leading-snug text-foreground">
-														{lesson.shortTitle}
-													</span>
-												</ItemContent>
-											</Item>
-										))}
-									</ItemGroup>
+								<div className="flex flex-1 flex-col gap-1.5 px-2 py-3">
+									{block.lessons.map((lesson) => (
+										<div
+											key={lesson.id}
+											className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 rounded-md border border-border/50 bg-background/60 px-2.5 py-2"
+										>
+											<span className="text-[10px] font-medium tabular-nums text-muted-foreground">
+												{lesson.id}
+											</span>
+											<span className="min-w-0 text-xs leading-snug text-foreground">
+												{lesson.shortTitle}
+											</span>
+										</div>
+									))}
 								</div>
 							</div>
 						))}

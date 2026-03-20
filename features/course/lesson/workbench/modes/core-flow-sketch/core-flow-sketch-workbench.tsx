@@ -1,14 +1,9 @@
 "use client";
 
-import { Separator } from "@/components/ui/separator";
-import { ArtifactContext } from "@/features/course/lesson/workbench/shared/artifact-context";
-import { FocusInlineLessonVideo } from "@/features/course/lesson/workbench/shared/focus-inline-lesson-video";
-import { WorkbenchContainer } from "@/features/course/lesson/workbench/shared/workbench-container";
-import { WorkbenchHeader } from "@/features/course/lesson/workbench/shared/workbench-header";
-import { WorkbenchMediaLayout } from "@/features/course/lesson/workbench/shared/workbench-media-layout";
 import type { WorkbenchModeProps } from "@/features/course/lesson/workbench/types";
 
 import { CoreFlowSketchTabs } from "./core-flow-sketch-tabs";
+import { CoreFlowSketchWorkbenchShell } from "./core-flow-sketch-workbench-shell";
 
 function pickField(props: WorkbenchModeProps, id: string) {
 	return props.fields.find((field) => field.id === id) ?? null;
@@ -49,44 +44,24 @@ export function CoreFlowSketchWorkbench(props: WorkbenchModeProps) {
 		mustHaves,
 	].filter((field): field is NonNullable<typeof field> => field != null);
 
-	const inlineVideo = (
-		<FocusInlineLessonVideo coachContent={lessonContent.coach} />
-	);
-
-	const tabBody = (
-		<CoreFlowSketchTabs
-			briefFields={briefFields}
-			execution={execution}
-			sketchNotes={sketchNotes}
-			namedScreens={namedScreens}
-			brandPath={brandPath}
-			brandNotes={brandNotes}
-			fieldValues={fieldValues}
-			onFieldChange={onFieldChange}
-			pinnedArtifacts={pinnedArtifacts}
-			invalidFieldIds={invalidFieldIds}
-		/>
-	);
-
-	const main = (
-		<div className="space-y-4">
-			<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
-			{tabBody}
-		</div>
-	);
-
 	return (
-		<WorkbenchContainer>
-			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
-			<Separator className="bg-border" />
-			{showSplitMedia ? (
-				<WorkbenchMediaLayout media={inlineVideo}>{main}</WorkbenchMediaLayout>
-			) : (
-				<>
-					{inlineVideo}
-					{main}
-				</>
-			)}
-		</WorkbenchContainer>
+		<CoreFlowSketchWorkbenchShell
+			lesson={lesson}
+			lessonContent={lessonContent}
+			pinnedArtifacts={pinnedArtifacts}
+			showSplitMedia={showSplitMedia}
+		>
+			<CoreFlowSketchTabs
+				briefFields={briefFields}
+				execution={execution}
+				sketchNotes={sketchNotes}
+				namedScreens={namedScreens}
+				brandPath={brandPath}
+				brandNotes={brandNotes}
+				fieldValues={fieldValues}
+				onFieldChange={onFieldChange}
+				invalidFieldIds={invalidFieldIds}
+			/>
+		</CoreFlowSketchWorkbenchShell>
 	);
 }

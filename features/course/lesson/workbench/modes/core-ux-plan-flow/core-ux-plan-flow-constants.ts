@@ -56,7 +56,8 @@ export const CORE_UX_PLAN_INSTRUCTOR_DECISIONS: CoreUxPlanInstructorDecision[] =
 		{
 			id: "distribution",
 			title: "Release distribution",
-			questionLine: "How will buyers get the product—web-first, store, or something else?",
+			questionLine:
+				"How will buyers get the product—web-first, store, or something else?",
 			chosenAnswer: "web-led install",
 			selectOptions: [
 				"web-led install",
@@ -72,7 +73,8 @@ export const CORE_UX_PLAN_INSTRUCTOR_DECISIONS: CoreUxPlanInstructorDecision[] =
 		{
 			id: "bridge",
 			title: "Local Codex bridge",
-			questionLine: "Do you keep the local Codex bridge in scope for this build?",
+			questionLine:
+				"Do you keep the local Codex bridge in scope for this build?",
 			chosenAnswer: "keep the bridge",
 			selectOptions: [
 				"keep the bridge",
@@ -103,7 +105,8 @@ export const CORE_UX_PLAN_INSTRUCTOR_DECISIONS: CoreUxPlanInstructorDecision[] =
 		{
 			id: "install_path",
 			title: "After purchase, where do buyers install?",
-			questionLine: "Where should buyers land to install or finish setup after they pay?",
+			questionLine:
+				"Where should buyers land to install or finish setup after they pay?",
 			chosenAnswer: "send buyers to the community listing",
 			selectOptions: [
 				"send buyers to the community listing",

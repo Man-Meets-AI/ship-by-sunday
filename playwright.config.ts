@@ -40,7 +40,7 @@ export default defineConfig({
 	],
 	webServer: shouldUseLocalServer
 		? {
-				command: `pnpm exec next build && pnpm exec next start --hostname 127.0.0.1 --port ${localPort}`,
+				command: `bunx next build && bunx next start --hostname 127.0.0.1 --port ${localPort}`,
 				url: baseURL,
 				reuseExistingServer: !process.env.CI,
 				timeout: 240_000,

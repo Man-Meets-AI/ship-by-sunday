@@ -16,88 +16,24 @@ export const homePageContent = {
     headlineLead: "Go from app idea",
     headlineTailPrefix: "to live v1 ",
     headlineTailHover: "by Sunday",
-    body: `${productName} is a custom software-backed weekend sprint for builders who can already prototype, but keep getting stuck before they ship. Scope the MVP, map the core screens, build the core flow, and leave with a live app.`,
-    primaryCta: "Get instant access",
-    secondaryCta: "See the 4-block sprint",
-    eyebrow:
-      "One-time payment. Lifetime access. Start the sprint right after checkout.",
-  },
-  problemOutcomeSection: {
-    label: "The weekend arc",
-    title: "From stuck to shipped by Sunday",
-  },
-  outcomesSection: {
-    title: "What you'll leave the weekend with",
-    intro:
-      "By Sunday, you should leave with a tighter MVP, a clearer screen flow, a working first version, and a live link you can put in front of people.",
-    items: [
+    body: "One guided weekend sprint. Four blocks. One real outcome.",
+    outcomesHeading: "You leave the weekend with",
+    outcomes: [
       "A one-page product brief",
-      "A clear screen-by-screen plan",
+      "A screen-by-screen build plan",
       "A working first version",
-      "A live link to test and share",
+      "A live link you can share",
     ],
-  },
-  whyBuildersGetStuck: {
-    title: "Why you can build things but still don't ship",
-    intro:
-      "The gap is not tutorials—it is scope, screen clarity, and a path small enough to finish.",
-    cards: [
-      {
-        title: "What should I build first?",
-        description:
-          "Most stalled projects start too broad. You need help choosing the right problem, user, and first version.",
-      },
-      {
-        title: "What needs to feel usable?",
-        description:
-          "A rough demo is not the same as a usable product. You need enough screen and flow clarity to make the app coherent.",
-      },
-      {
-        title: "How do I keep this small enough to ship?",
-        description:
-          "The real skill is cutting scope without killing the value. Most unfinished apps die here.",
-      },
-      {
-        title: "How do I get it live without chaos?",
-        description:
-          "The build, deploy, and first feedback loop need one clean path instead of a mess of tabs, prompts, and half-decisions.",
-      },
-    ],
-  },
-  mechanismSection: {
-    label: "Why this works",
-    title: "Product, design, and development have to move together",
-    intro:
-      "Shipping is not just a coding problem. It is a coordination problem.",
-    footer:
-      "We call that The Product Trinity. It is the system behind the sprint, not another framework you have to memorize.",
-    cards: [
-      {
-        name: "Product strategy",
-        prompt: "What should I build first? What do I cut?",
-        description:
-          "Start with the user, the problem, and the tightest v1 you can actually finish.",
-      },
-      {
-        name: "Design",
-        prompt:
-          "What should this feel like? What needs to exist on each screen?",
-        description:
-          "Map the flow, define the screens, and create enough direction that the build does not drift.",
-      },
-      {
-        name: "Development",
-        prompt: "How do I actually get this built and live without spiraling?",
-        description:
-          "Turn the plan into a working app, keep the core flow intact, and get it live without treating launch like a separate project.",
-      },
-    ],
+    primaryCta: "Get instant access",
+    secondaryCta: "See how it works",
+    eyebrow:
+      "One-time payment. Lifetime access. Start immediately after checkout.",
   },
   sprintPathSection: {
     label: "Sprint Path",
     title: "The 4-block path to a real v1",
     intro:
-      "Four blocks, each with a concrete output—inside one guided workspace, not scattered docs and tabs.",
+      "Built for builders who can already prototype but keep getting stuck before they ship. Four blocks, each with a concrete output — inside one guided workspace.",
     outcomesLabel: "Deliverables",
     blocks: [
       {
@@ -156,34 +92,6 @@ export const homePageContent = {
           "Demo asset",
           "First launch plan",
         ],
-      },
-    ],
-  },
-  audienceSection: {
-    titleLead: "Built for builders",
-    titleAccent: "who can already prototype",
-    intro: "Not for total beginners. Not for giant multi-system startup ideas.",
-    cards: [
-      {
-        title: "You can already get things working",
-        description:
-          "You have enough fluency to prototype, test ideas, and get something moving.",
-      },
-      {
-        title: "You keep ending up with rough demos\ninstead of real products",
-        description:
-          "The problem is not starting. The problem is finishing something coherent enough to ship.",
-      },
-      {
-        title: "You do not need more theory",
-        description:
-          "You need a cleaner process for scoping, designing, building, and deploying without getting lost in the middle.",
-      },
-      {
-        title:
-          "You need better product judgment, design direction, and execution structure",
-        description:
-          "That is the gap between a rough prototype and a real v1 people can actually use.",
       },
     ],
   },

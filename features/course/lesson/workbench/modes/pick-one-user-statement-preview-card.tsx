@@ -1,4 +1,3 @@
-import type { LessonHandoff } from "@/features/course/lesson/model/manifest";
 import {
 	Card,
 	CardContent,
@@ -6,6 +5,9 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import type { LessonHandoff } from "@/features/course/lesson/model/manifest";
 import { getCandidateProblemOptions } from "@/features/course/lesson/model/registry";
 import { cn } from "@/lib/utils";
 import type { WorkbenchModeProps } from "../types";
@@ -49,20 +51,23 @@ export function PickOneUserStatementPreviewCard({
 					qualified it.
 				</CardDescription>
 			</CardHeader>
-			<CardContent className="space-y-6">
-				{previewRows.map((row) => (
-					<div key={row.label} className="space-y-1">
-						<p className="text-sm font-medium text-muted-foreground">
-							{row.label}
-						</p>
-						<p
-							className={cn(
-								"text-sm leading-relaxed",
-								row.filled ? "text-foreground" : "text-muted-foreground",
-							)}
-						>
-							{row.value}
-						</p>
+			<CardContent>
+				{previewRows.map((row, index) => (
+					<div key={row.label}>
+						{index > 0 ? <Separator className="my-4" /> : null}
+						<div className="space-y-1.5">
+							<Label className="text-sm font-medium text-muted-foreground">
+								{row.label}
+							</Label>
+							<p
+								className={cn(
+									"text-sm leading-relaxed",
+									row.filled ? "text-foreground" : "text-muted-foreground",
+								)}
+							>
+								{row.value}
+							</p>
+						</div>
 					</div>
 				))}
 			</CardContent>

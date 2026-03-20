@@ -5,13 +5,13 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Kbd, KbdGroup } from "@/components/ui/kbd";
 
 const TOOL_BADGES = [
 	"Codex",
 	"Clerk",
-	"entitlements",
+	"product access",
 	"page.tsx",
-	"Control+M",
 ] as const;
 
 export function RouteAccessToolBadges() {
@@ -31,9 +31,15 @@ export function RouteAccessToolBadges() {
 						</Badge>
 					))}
 				</div>
-				<p className="text-xs text-muted-foreground">
-					<code className="rounded bg-muted px-1">Control+M</code> toggles the
-					agent sidebar in many setups—use your editor’s shortcut if different.
+				<p className="flex flex-wrap items-center gap-x-1 text-xs text-muted-foreground">
+					<KbdGroup className="inline-flex gap-1">
+						<Kbd>Ctrl</Kbd>
+						<Kbd>M</Kbd>
+					</KbdGroup>
+					<span>
+						toggles the agent sidebar in many setups—use your editor’s shortcut
+						if different.
+					</span>
 				</p>
 			</CardHeader>
 		</Card>

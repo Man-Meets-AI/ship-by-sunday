@@ -2,10 +2,10 @@
 
 import { Separator } from "@/components/ui/separator";
 import { TabsContent } from "@/components/ui/tabs";
-import { FieldList } from "../../fields/field-list";
 import type { WorkbenchModeProps } from "../../types";
 
 import { CORE_UX_PLAN_STUDENT_FIELD_IDS } from "./core-ux-plan-flow-constants";
+import { CoreUxPlanFlowShadcnFields } from "./core-ux-plan-flow-shadcn-fields";
 
 function pickStudentFields(props: WorkbenchModeProps) {
 	const set = new Set(CORE_UX_PLAN_STUDENT_FIELD_IDS);
@@ -23,7 +23,7 @@ export function CoreUxPlanFlowStudentWorkspace(props: WorkbenchModeProps) {
 			</p>
 			<Separator />
 			{studentFields.length > 0 ? (
-				<FieldList
+				<CoreUxPlanFlowShadcnFields
 					fields={studentFields}
 					fieldValues={props.fieldValues}
 					onFieldChange={props.onFieldChange}

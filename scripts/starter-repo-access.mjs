@@ -72,8 +72,7 @@ function runCommand(command, args) {
 }
 
 async function runConvex(functionName, payload) {
-	const result = await runCommand("pnpm", [
-		"exec",
+	const result = await runCommand("bunx", [
 		"convex",
 		"run",
 		functionName,

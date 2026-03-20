@@ -7,7 +7,7 @@ import {
 
 export function CodexMarketingSiteHandoffCard() {
 	return (
-		<Card className="border-dashed bg-muted/15">
+		<Card>
 			<CardHeader className="space-y-1">
 				<CardTitle className="text-sm font-medium text-muted-foreground">
 					Next lesson (heads-up)

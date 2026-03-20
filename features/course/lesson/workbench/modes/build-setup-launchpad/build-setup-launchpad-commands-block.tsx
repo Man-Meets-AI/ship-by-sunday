@@ -38,10 +38,13 @@ export function BuildSetupLaunchpadCommandsBlock({
 	return (
 		<Card>
 			<CardHeader className="space-y-1">
-				<CardTitle className="text-base">Commands (from the walkthrough)</CardTitle>
+				<CardTitle className="text-base">
+					Commands (from the walkthrough)
+				</CardTitle>
 				<CardDescription>
-					Copy these into your terminal; swap <code className="text-foreground">YOUR_FOLDER</code>{" "}
-					for the product folder name above.
+					Copy these into your terminal; swap{" "}
+					<code className="text-foreground">YOUR_FOLDER</code> for the product
+					folder name above.
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-3">

@@ -12,18 +12,18 @@ Use this page as the main local verification runbook for the starter.
 Use these for normal implementation work:
 
 ```bash
-pnpm run lint
-pnpm run format:check
-pnpm run test:unit
-pnpm run test:contracts
-pnpm run test:integration
-pnpm run build
+bun run lint
+bun run format:check
+bun run test:unit
+bun run test:contracts
+bun run test:integration
+bun run build
 ```
 
 For the full repo gate:
 
 ```bash
-pnpm run check
+bun run check
 ```
 
 ## Shared Clerk QA accounts
@@ -36,11 +36,11 @@ Use two real users:
 Commands:
 
 ```bash
-pnpm run clerk:test-user:check
-pnpm run clerk:test-user:create
-pnpm run clerk:test-user:check:entitled
-pnpm run clerk:test-user:create:entitled
-pnpm run clerk:test-user:prepare:entitled
+bun run clerk:test-user:check
+bun run clerk:test-user:create
+bun run clerk:test-user:check:entitled
+bun run clerk:test-user:create:entitled
+bun run clerk:test-user:prepare:entitled
 ```
 
 ## Full paid local handoff
@@ -62,7 +62,7 @@ Use this only in a safe local test environment.
 For the deterministic browser lane that runs in PR CI:
 
 ```bash
-pnpm run test:browser-smoke
+bun run test:browser-smoke
 ```
 
 ### Signed-out protected-route smoke
@@ -78,7 +78,7 @@ pnpm run test:browser-smoke
 
 ### Granted-access flow
 
-1. Run `pnpm run clerk:test-user:prepare:entitled`.
+1. Run `bun run clerk:test-user:prepare:entitled`.
 2. Sign in with the granted-access account.
 3. Confirm `/mission`, one lesson route, `/artifacts`, and `/settings` load.
 

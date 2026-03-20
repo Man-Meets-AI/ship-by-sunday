@@ -1,11 +1,17 @@
 "use client";
 
 import type { LessonHandoff } from "@/features/course/lesson/model/manifest";
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { CardDescription, CardTitle } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { CircleAlertIcon } from "lucide-react";
-import { CandidateProblemHandoffSelected } from "./candidate-problem-handoff-selected";
 
 type CandidateProblem = {
 	index: number;
@@ -68,21 +74,58 @@ export function CandidateProblemHandoffContent({
 			</Alert>
 
 			{selectedProblem ? (
-				<CandidateProblemHandoffSelected
-					handoff={handoff}
-					selectedProblem={selectedProblem}
-					otherProblems={otherProblems}
-					persistedFields={persistedFields}
-					onFieldChange={onFieldChange}
-					selectedCopy={selectedCopy}
-				/>
+				<div className="space-y-4">
+					<div className="space-y-2">
+						<CardTitle>Problem {selectedProblem.index}</CardTitle>
+						<CardDescription>{selectedProblem.owner}</CardDescription>
+						<p className="text-sm text-muted-foreground">
+							{selectedProblem.statement}
+						</p>
+					</div>
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						onClick={() => {
+							onFieldChange(handoff.selectionFieldId, null);
+							for (const field of persistedFields) {
+								onFieldChange(field.targetFieldId, "");
+							}
+						}}
+					>
+						Change selection
+					</Button>
+					{otherProblems.length > 0 ? (
+						<Accordion type="multiple" className="w-full">
+							{otherProblems.map((problem) => (
+								<AccordionItem
+									key={problem.index}
+									value={`candidate-${problem.index}`}
+								>
+									<AccordionTrigger>
+										Other candidate · Problem {problem.index}
+									</AccordionTrigger>
+									<AccordionContent>
+										<div className="space-y-2">
+											<p className="text-sm font-medium">{problem.owner}</p>
+											<p className="text-sm text-muted-foreground">
+												{problem.statement}
+											</p>
+										</div>
+									</AccordionContent>
+								</AccordionItem>
+							))}
+						</Accordion>
+					) : null}
+					<p className="text-sm text-muted-foreground">{selectedCopy}</p>
+				</div>
 			) : null}
 
 			{!selectedProblem && candidateProblems.length > 0 ? (
 				<div className="space-y-2">
 					<CardDescription>
-						Choose one problem. Your three candidates from the previous lesson are
-						below.
+						Choose one problem. Your three candidates from the previous lesson
+						are below.
 					</CardDescription>
 					<ToggleGroup
 						type="single"

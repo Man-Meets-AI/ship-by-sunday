@@ -1,0 +1,12 @@
+---
+description: JavaScript/TypeScript package manager and lint/format tooling for this repo
+alwaysApply: true
+---
+
+# JavaScript toolchain
+
+- **Package manager**: Use **bun** for installs, scripts, and workspace commands. Do not use other package managers unless the user explicitly asks for an exception.
+- **Linting**: Use **Oxlint** (`oxlint`). Prefer project scripts: `bun run lint` and `bun run lint:fix`.
+- **Formatting**: Use **Oxformat** (`oxfmt`). Prefer project scripts: `bun run format` and `bun run format:check`.
+
+When suggesting CI, pre-commit, or local checks, align with these tools rather than ESLint or Prettier unless the project config changes.

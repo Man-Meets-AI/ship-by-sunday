@@ -1,4 +1,3 @@
-import { Separator } from "@/components/ui/separator";
 import type { LessonPromptResourceContent } from "@/features/course/lesson/model/contracts";
 import { FieldControl } from "@/features/course/lesson/workbench/fields/field-control";
 import type { WorkbenchModeProps } from "@/features/course/lesson/workbench/types";
@@ -8,10 +7,7 @@ import { CompetitorResearchNotesTabs } from "./competitor-research-notes-tabs";
 import { CompetitorResearchPromptSection } from "./competitor-research-prompt-section";
 import { CompetitorResearchTargetRecap } from "./competitor-research-target-recap";
 
-function fieldById(
-	fields: WorkbenchModeProps["fields"],
-	id: string,
-) {
+function fieldById(fields: WorkbenchModeProps["fields"], id: string) {
 	return fields.find((candidate) => candidate.id === id);
 }
 
@@ -43,12 +39,12 @@ export function CompetitorResearchLightBody({
 
 	return (
 		<div className="space-y-6">
+			<CompetitorResearchTargetRecap pinnedArtifacts={pinnedArtifacts} />
 			<CompetitorResearchPromptSection
 				resource={copyPromptResource}
 				pinnedArtifacts={pinnedArtifacts}
 			/>
-			<Separator />
-			<CompetitorResearchTargetRecap pinnedArtifacts={pinnedArtifacts} />
+			<CompetitorResearchExampleAccordion />
 			{known ? (
 				<FieldControl
 					field={known}
@@ -88,7 +84,6 @@ export function CompetitorResearchLightBody({
 					invalid={invalidFieldIds.has(flow.id)}
 				/>
 			) : null}
-			<CompetitorResearchExampleAccordion />
 			{tried ? (
 				<FieldControl
 					field={tried}

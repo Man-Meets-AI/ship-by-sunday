@@ -5,8 +5,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Item, ItemContent, ItemGroup } from "@/components/ui/item";
-import { CircleIcon } from "lucide-react";
 
 const SPRINT_SEQUENCE_STEPS = [
 	"Problem space",
@@ -31,27 +29,18 @@ export function RoadmapSprintSequencePreview() {
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="px-3 py-4 sm:px-4">
-				<ItemGroup className="gap-1.5" role="list">
-					{SPRINT_SEQUENCE_STEPS.map((label) => (
-						<Item
-							key={label}
-							variant="outline"
-							size="sm"
-							role="listitem"
-							className="border-border/50 bg-muted/10 px-3 py-2"
-						>
-							<ItemContent className="flex-row items-center gap-2.5">
-								<CircleIcon
-									className="size-3.5 shrink-0 text-muted-foreground"
-									aria-hidden
-								/>
-								<span className="text-sm leading-snug text-foreground">
-									{label}
-								</span>
-							</ItemContent>
-						</Item>
+				<ol className="space-y-1 p-0">
+					{SPRINT_SEQUENCE_STEPS.map((label, i) => (
+						<li key={label} className="flex items-center gap-3 py-1">
+							<span className="text-xs tabular-nums text-muted-foreground">
+								{i + 1}.
+							</span>
+							<span className="text-sm leading-snug text-foreground">
+								{label}
+							</span>
+						</li>
 					))}
-				</ItemGroup>
+				</ol>
 			</CardContent>
 		</Card>
 	);

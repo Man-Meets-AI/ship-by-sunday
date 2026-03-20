@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Card,
@@ -8,11 +9,15 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Item } from "@/components/ui/item";
 import { Label } from "@/components/ui/label";
 import { normalizeChecklistValue } from "@/features/course/lesson/workbench/fields/value-codecs";
 
-import type { RoadmapTaskBadge } from "./build-ship-roadmap-constants";
-import { BuildShipRoadmapTaskBadge } from "./build-ship-roadmap-badge";
+import {
+	type RoadmapTaskBadge,
+	ROADMAP_TASK_BADGE_LABELS,
+	ROADMAP_TASK_BADGE_VARIANTS,
+} from "./build-ship-roadmap-constants";
 
 type BuildShipRoadmapChecklistCardProps = {
 	title: string;
@@ -38,48 +43,49 @@ export function BuildShipRoadmapChecklistCard({
 
 	return (
 		<Card
-			className={invalid ? "border-destructive/60 ring-1 ring-destructive/20" : ""}
+			className={
+				invalid ? "border-destructive/60 ring-1 ring-destructive/20" : ""
+			}
 		>
 			<CardHeader className="pb-3">
 				<CardTitle className="text-base">{title}</CardTitle>
-				{description ? (
-					<CardDescription>{description}</CardDescription>
-				) : null}
+				{description ? <CardDescription>{description}</CardDescription> : null}
 			</CardHeader>
-			<CardContent className="space-y-3">
+			<CardContent className="space-y-2">
 				{items.map((item, index) => {
 					const badgeKind = badges[item.label] ?? "required";
 					const controlId = `roadmap-check-${item.label}-${index}`;
 					return (
-						<div
-							key={item.label}
-							className="flex items-start gap-3 rounded-md border border-border/80 bg-muted/20 px-3 py-2.5"
-						>
-							<Checkbox
-								id={controlId}
-								checked={item.checked}
-								onCheckedChange={(checked) => {
-									const next = items.map((row, rowIndex) =>
-										rowIndex === index
-											? { ...row, checked: checked === true }
-											: row,
-									);
-									onChange(next);
-								}}
-								className="mt-0.5"
-							/>
-							<div className="min-w-0 flex-1 space-y-1">
-								<Label
-									htmlFor={controlId}
-									className="cursor-pointer text-sm font-medium leading-snug"
-								>
-									{item.label}
-								</Label>
-								<div>
-									<BuildShipRoadmapTaskBadge kind={badgeKind} />
+						<Item key={item.label} asChild variant="outline" size="xs">
+							<label className="flex cursor-pointer items-start gap-2">
+								<Checkbox
+									id={controlId}
+									checked={item.checked}
+									onCheckedChange={(checked) => {
+										const next = items.map((row, rowIndex) =>
+											rowIndex === index
+												? { ...row, checked: checked === true }
+												: row,
+										);
+										onChange(next);
+									}}
+									className="mt-0.5"
+								/>
+								<div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
+									<Label
+										htmlFor={controlId}
+										className="cursor-pointer text-sm font-medium"
+									>
+										{item.label}
+									</Label>
+									{badgeKind !== "required" ? (
+										<Badge variant={ROADMAP_TASK_BADGE_VARIANTS[badgeKind]}>
+											{ROADMAP_TASK_BADGE_LABELS[badgeKind]}
+										</Badge>
+									) : null}
 								</div>
-							</div>
-						</div>
+							</label>
+						</Item>
 					);
 				})}
 			</CardContent>

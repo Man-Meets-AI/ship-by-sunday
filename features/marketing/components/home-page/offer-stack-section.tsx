@@ -1,15 +1,8 @@
 import Image from "next/image";
 
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import type { HomePageContent } from "@/features/marketing/content/home";
-
-import {
-	SectionGroupHeading,
-	SectionLabel,
-	SectionLead,
-	SectionStack,
-	SectionTitle,
-} from "./section-shell";
 
 type OfferSection = HomePageContent["offerSection"];
 
@@ -21,12 +14,16 @@ export function OfferStackSection({
 	offerSection: OfferSection;
 }) {
 	return (
-		<SectionStack className="gap-10 lg:gap-12">
+		<section className="grid gap-10 py-8 sm:py-10 lg:gap-12">
 			<div className="flex flex-wrap items-end justify-between gap-4">
 				<div className="space-y-4">
-					<SectionLabel>{offerSection.stackLabel}</SectionLabel>
-					<SectionTitle>{offerSection.sectionTitle}</SectionTitle>
-					<SectionLead>{offerSection.insideIntro}</SectionLead>
+					<Badge variant="outline">{offerSection.stackLabel}</Badge>
+					<h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
+						{offerSection.sectionTitle}
+					</h2>
+					<p className="max-w-3xl text-muted-foreground sm:text-lg">
+						{offerSection.insideIntro}
+					</p>
 				</div>
 				<Badge variant="secondary" className="shrink-0">
 					{offerSection.items.length}
@@ -35,8 +32,10 @@ export function OfferStackSection({
 
 			<div className="grid gap-10 lg:grid-cols-[1.05fr_1fr] lg:gap-12">
 				<div className="flex flex-col gap-6">
-					<SectionGroupHeading>{offerSection.stackTitle}</SectionGroupHeading>
-					<div className="divide-y divide-border/60">
+					<h3 className="text-xl font-semibold tracking-tight sm:text-2xl">
+						{offerSection.stackTitle}
+					</h3>
+					<div className="divide-y">
 						{offerSection.items.map((item) => (
 							<div
 								key={item.name}
@@ -45,7 +44,7 @@ export function OfferStackSection({
 								<p className="text-lg font-semibold tracking-tight sm:text-xl">
 									{item.name}
 								</p>
-								<p className="max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+								<p className="max-w-xl text-sm text-muted-foreground sm:text-base">
 									{item.description}
 								</p>
 							</div>
@@ -65,8 +64,8 @@ export function OfferStackSection({
 					</div>
 					<div className="grid gap-6 sm:grid-cols-2 sm:gap-8">
 						{offerSection.workspacePreviews.map((preview) => (
-							<div key={preview.name} className="overflow-hidden rounded-xl">
-								<div className="relative min-h-32 border-b border-border/60">
+							<Card key={preview.name}>
+								<div className="relative min-h-32 border-b">
 									<Image
 										src={preview.src}
 										alt={`${preview.name} workspace preview`}
@@ -75,17 +74,17 @@ export function OfferStackSection({
 										sizes="(max-width: 640px) 100vw, 20vw"
 									/>
 								</div>
-								<div className="space-y-2 px-1 py-4">
+								<CardContent className="space-y-1">
 									<p className="text-base font-semibold">{preview.name}</p>
-									<p className="text-sm leading-relaxed text-muted-foreground">
+									<p className="text-sm text-muted-foreground">
 										{preview.description}
 									</p>
-								</div>
-							</div>
+								</CardContent>
+							</Card>
 						))}
 					</div>
 				</div>
 			</div>
-		</SectionStack>
+		</section>
 	);
 }

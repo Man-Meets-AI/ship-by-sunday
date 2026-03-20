@@ -51,15 +51,11 @@ type PinnedArtifactOptions = {
 };
 
 type UploadHydrationCandidate = Record<string, unknown> & {
-	storageId: string;
+	storageId: Id<"_storage">;
 };
 
 function isPresent<T>(value: T | null): value is T {
 	return value !== null;
-}
-
-function toStorageId(storageId: string) {
-	return storageId as Id<"_storage">;
 }
 
 async function getViewerLessonStates(
@@ -238,7 +234,7 @@ export async function hydrateUploadUrls(
 	const values = normalizeFieldValues(fieldValues);
 
 	async function hydrateUploadValue(value: UploadHydrationCandidate) {
-		const url = await ctx.storage.getUrl(toStorageId(value.storageId));
+		const url = await ctx.storage.getUrl(value.storageId);
 
 		return {
 			...value,
@@ -251,13 +247,14 @@ export async function hydrateUploadUrls(
 		await Promise.all(
 			Object.entries(values).map(async ([fieldId, value]) => {
 				if (isReferenceGalleryValue(value)) {
-					return [
-						fieldId,
-						await hydrateReferenceGalleryValue(value, async (storageId) =>
-							ctx.storage.getUrl(toStorageId(storageId)),
-						),
-					];
-				}
+						return [
+							fieldId,
+							await hydrateReferenceGalleryValue(
+								value,
+								async (storageId) => ctx.storage.getUrl(storageId),
+							),
+						];
+					}
 
 				if (isUploadFieldValueArray(value)) {
 					return [

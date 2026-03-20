@@ -1,8 +1,8 @@
 "use client";
 
-import { Card, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
 import type {
 	LessonConfig,
 	LessonContent,
@@ -10,12 +10,6 @@ import type {
 
 import { getCoachPanelSections } from "./coach-panel-sections";
 import type { CoachPanelKey, PinnedArtifact } from "./types";
-
-const panelCardClass =
-	"min-w-0 gap-0 py-0 xl:h-full xl:min-h-0 xl:overflow-y-auto";
-
-const coachEyebrowClass =
-	"font-mono text-[10px] font-medium uppercase tracking-wider text-muted-foreground";
 
 export function CoachPanel({
 	lesson,
@@ -51,41 +45,38 @@ export function CoachPanel({
 		: (firstKey ?? "transcript");
 
 	return (
-		<Card className={cn("flex min-w-0 flex-col", panelCardClass)}>
-			<div className="sticky top-0 z-10 border-b border-border bg-card/95 px-4 py-2 backdrop-blur">
-				<CardTitle className={coachEyebrowClass}>Coach</CardTitle>
-			</div>
-			<Tabs
-				value={tabValue}
-				onValueChange={(value) => onPanelChange(value as CoachPanelKey)}
-				className="flex min-h-0 flex-1 flex-col gap-0"
-			>
-				<TabsList
-					variant="line"
-					className="h-auto w-full shrink-0 flex-wrap justify-start gap-0 rounded-none border-0 bg-transparent p-0 px-1 pt-1"
+		<Card className="flex min-w-0 flex-col gap-0 py-0 xl:h-full xl:min-h-0">
+			<CardHeader className="border-b border-border">
+				<CardTitle>Coach</CardTitle>
+			</CardHeader>
+			<CardContent className="flex min-h-0 flex-1 flex-col gap-0 p-0">
+				<Tabs
+					value={tabValue}
+					onValueChange={(value) => onPanelChange(value as CoachPanelKey)}
+					className="flex min-h-0 flex-1 flex-col gap-2"
 				>
-					{visibleSections.map((section) => (
-						<TabsTrigger
-							key={section.key}
-							value={section.key}
-							className="shrink-0 rounded-md px-2.5 py-2 text-xs"
-						>
-							{section.label}
-						</TabsTrigger>
-					))}
-				</TabsList>
-				<div className="min-h-0 flex-1 overflow-y-auto">
-					{visibleSections.map((section) => (
-						<TabsContent
-							key={section.key}
-							value={section.key}
-							className="mt-0 px-4 py-4 focus-visible:ring-0"
-						>
-							{section.content}
-						</TabsContent>
-					))}
-				</div>
-			</Tabs>
+					<div className="shrink-0 px-4 pt-4">
+						<TabsList className="h-auto w-full flex-wrap justify-start">
+							{visibleSections.map((section) => (
+								<TabsTrigger key={section.key} value={section.key}>
+									{section.label}
+								</TabsTrigger>
+							))}
+						</TabsList>
+					</div>
+					<ScrollArea className="min-h-0 min-w-0 flex-1 px-4 pb-4">
+						{visibleSections.map((section) => (
+							<TabsContent
+								key={section.key}
+								value={section.key}
+								className="mt-0 py-4 focus-visible:ring-0"
+							>
+								{section.content}
+							</TabsContent>
+						))}
+					</ScrollArea>
+				</Tabs>
+			</CardContent>
 		</Card>
 	);
 }

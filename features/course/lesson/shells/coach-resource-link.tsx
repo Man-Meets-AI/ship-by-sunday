@@ -1,32 +1,41 @@
 import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
-import { CardTitle } from "@/components/ui/card";
+import {
+	Item,
+	ItemContent,
+	ItemDescription,
+	ItemTitle,
+} from "@/components/ui/item";
 import type { LessonResourceContent } from "@/features/course/lesson/model/contracts";
+import { cn } from "@/lib/utils";
 
-export const coachEyebrowClass =
-	"font-mono text-[10px] font-medium uppercase tracking-wider text-muted-foreground";
+import { coachEyebrowClass } from "./coach-panel-typography";
 
 export function CoachResourceLink({
 	resource,
 }: {
 	resource: Exclude<LessonResourceContent, { kind: "copy_prompt" }>;
 }) {
+	const isExternal = resource.kind === "external";
+
 	return (
-		<Button
-			asChild
-			variant="outline"
-			className="h-auto min-h-0 w-full flex-col items-stretch justify-start gap-0 px-4 py-4 text-left font-normal whitespace-normal"
-		>
+		<Item asChild variant="outline" className="w-full items-stretch">
 			<Link
 				href={resource.href}
-				target={resource.kind === "external" ? "_blank" : undefined}
+				target={isExternal ? "_blank" : undefined}
+				rel={isExternal ? "noopener noreferrer" : undefined}
 			>
-				<CardTitle className={coachEyebrowClass}>{resource.kind}</CardTitle>
-				<p className="mt-2 text-[14px] font-semibold leading-[1.45] text-foreground">
-					{resource.label}
-				</p>
+				<ItemContent className="min-w-0">
+					<ItemDescription
+						className={cn(coachEyebrowClass, "line-clamp-none")}
+					>
+						{resource.kind}
+					</ItemDescription>
+					<ItemTitle className="line-clamp-none whitespace-normal text-base font-semibold leading-snug">
+						{resource.label}
+					</ItemTitle>
+				</ItemContent>
 			</Link>
-		</Button>
+		</Item>
 	);
 }

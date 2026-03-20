@@ -38,7 +38,8 @@ export const SKILLS_BY_TAB: Record<SkillTabId, SkillEntry[]> = {
 			slug: "clerk-orchestrator",
 			title: "Orchestrator",
 			role: "auth",
-			description: "Route auth questions when several Clerk skills could apply.",
+			description:
+				"Route auth questions when several Clerk skills could apply.",
 		},
 		{
 			slug: "clerk-orgs",
@@ -116,7 +117,8 @@ export const SKILLS_BY_TAB: Record<SkillTabId, SkillEntry[]> = {
 			slug: "eng-refactor-or-simplify",
 			title: "Simplify / refactor",
 			role: "eng",
-			description: "Reduce complexity without changing the user-visible outcome.",
+			description:
+				"Reduce complexity without changing the user-visible outcome.",
 		},
 	],
 	qa: [

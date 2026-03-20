@@ -38,7 +38,7 @@ export function RepoMapOrientationWorkbench({
 	return (
 		<WorkbenchContainer>
 			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
-			<Separator className="bg-border" />
+			<Separator />
 			{showSplitWorkbenchMedia ? (
 				<WorkbenchMediaLayout media={inlineVideoCard}>
 					<div className="space-y-5">

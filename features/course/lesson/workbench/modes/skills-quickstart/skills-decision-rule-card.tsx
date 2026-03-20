@@ -11,8 +11,8 @@ import {
 export function SkillsDecisionRuleCard() {
 	return (
 		<Card>
-			<CardHeader className="space-y-1">
-				<CardTitle className="text-base">Which category first?</CardTitle>
+			<CardHeader>
+				<CardTitle>Which category first?</CardTitle>
 				<CardDescription>
 					Use this order when you are unsure where to start.
 				</CardDescription>

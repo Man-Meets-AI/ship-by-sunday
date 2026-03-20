@@ -1,13 +1,21 @@
+"use client";
+
 import {
 	Card,
 	CardDescription,
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import {
+	Field,
+	FieldContent,
+	FieldDescription,
+	FieldLabel,
+} from "@/components/ui/field";
+import { Textarea } from "@/components/ui/textarea";
 import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
-import type { PinnedArtifact } from "@/features/course/lesson/shells";
 
-import { FieldControl } from "../../fields/field-control";
+import { inputWidthClass } from "../../fields/field-styles";
 import { ROUTE_ACCESS_FIELD_IDS } from "./route-access-orientation-constants";
 
 const ORDER: (keyof typeof ROUTE_ACCESS_FIELD_IDS)[] = [
@@ -23,7 +31,6 @@ type Props = {
 	fieldValues: Record<string, unknown>;
 	onFieldChange: (fieldId: string, value: unknown) => void;
 	invalidFieldIds: Set<string>;
-	pinnedArtifacts: PinnedArtifact[];
 };
 
 export function RouteAccessStudentFields({
@@ -31,7 +38,6 @@ export function RouteAccessStudentFields({
 	fieldValues,
 	onFieldChange,
 	invalidFieldIds,
-	pinnedArtifacts,
 }: Props) {
 	return (
 		<Card>
@@ -48,18 +54,36 @@ export function RouteAccessStudentFields({
 				{ORDER.map((key) => {
 					const id = ROUTE_ACCESS_FIELD_IDS[key];
 					const field = fieldsById.get(id);
-					if (!field) {
+					if (!field || field.kind !== "textarea") {
 						return null;
 					}
+					const invalid = invalidFieldIds.has(id);
+					const help = field.helpText ? (
+						<FieldDescription>{field.helpText}</FieldDescription>
+					) : null;
 					return (
-						<FieldControl
+						<Field
 							key={id}
-							field={field}
-							value={fieldValues[id]}
-							onChange={(next) => onFieldChange(id, next)}
-							pinnedArtifacts={pinnedArtifacts}
-							invalid={invalidFieldIds.has(id)}
-						/>
+							className={inputWidthClass(field)}
+							data-invalid={invalid || undefined}
+						>
+							<FieldLabel htmlFor={id}>{field.label}</FieldLabel>
+							{help}
+							<FieldContent>
+								<Textarea
+									id={id}
+									value={
+										typeof fieldValues[id] === "string"
+											? fieldValues[id]
+											: ""
+									}
+									onChange={(event) => onFieldChange(id, event.target.value)}
+									rows={field.rows ?? 5}
+									placeholder={field.placeholder}
+									aria-invalid={invalid}
+								/>
+							</FieldContent>
+						</Field>
 					);
 				})}
 			</div>

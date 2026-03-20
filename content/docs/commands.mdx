@@ -8,51 +8,51 @@ description: Keep the short list of repo commands nearby so you can run the app,
 ## Daily development
 
 ```bash
-pnpm install
-pnpm run dev
-pnpm run dev:web
-pnpm run dev:convex
+bun install
+bun run dev
+bun run dev:web
+bun run dev:convex
 ```
 
 ## Verification
 
 ```bash
-pnpm run build
-pnpm run typecheck
-pnpm run lint
-pnpm run test:unit
-pnpm run test:contracts
-pnpm run test:integration
-pnpm run test:browser-smoke
-pnpm run check
+bun run build
+bun run typecheck
+bun run lint
+bun run test:unit
+bun run test:contracts
+bun run test:integration
+bun run test:browser-smoke
+bun run check
 ```
 
 ## Stripe local QA
 
 ```bash
-pnpm run stripe:create-product
-pnpm run stripe:listen:local
-pnpm run stripe:webhook:sync -- --secret whsec_...
-pnpm run stripe:local:doctor
-pnpm run stripe:local:verify
+bun run stripe:create-product
+bun run stripe:listen:local
+bun run stripe:webhook:sync -- --secret whsec_...
+bun run stripe:local:doctor
+bun run stripe:local:verify
 ```
 
 ## Clerk QA users
 
 ```bash
-pnpm run clerk:test-user:check
-pnpm run clerk:test-user:create
-pnpm run clerk:test-user:check:entitled
-pnpm run clerk:test-user:create:entitled
-pnpm run clerk:test-user:prepare:entitled
+bun run clerk:test-user:check
+bun run clerk:test-user:create
+bun run clerk:test-user:check:entitled
+bun run clerk:test-user:create:entitled
+bun run clerk:test-user:prepare:entitled
 ```
 
 ## Optional lesson-media pipeline
 
 ```bash
-pnpm run video:lessons
-pnpm run video:cut:setup
-pnpm run video:cut -- --only <fileName>
-pnpm run video:publish -- --only <fileName>
-pnpm run video:status
+bun run video:lessons
+bun run video:cut:setup
+bun run video:cut -- --only <fileName>
+bun run video:publish -- --only <fileName>
+bun run video:status
 ```

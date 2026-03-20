@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/convex/_generated/api";
 import type {
+	LessonStorageId,
 	ReferenceGalleryItem,
 	ReferenceGalleryValue,
 	WorkbenchField,
@@ -134,6 +135,7 @@ export function ReferenceGalleryFieldControl({
 		if (!result.storageId) {
 			throw new Error("missing-storage-id");
 		}
+		const storageId = result.storageId as LessonStorageId;
 
 		const previewUrl = URL.createObjectURL(file);
 
@@ -143,7 +145,7 @@ export function ReferenceGalleryFieldControl({
 			fileName: file.name,
 			mimeType: file.type,
 			size: file.size,
-			storageId: result.storageId,
+			storageId,
 			url: previewUrl,
 			previewUrl,
 		};

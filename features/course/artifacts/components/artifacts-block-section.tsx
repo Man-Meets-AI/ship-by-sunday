@@ -12,16 +12,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import {
-	Item,
-	ItemActions,
-	ItemContent,
-	ItemDescription,
-	ItemGroup,
-	ItemHeader,
-	ItemSeparator,
-	ItemTitle,
-} from "@/components/ui/item";
+import { Separator } from "@/components/ui/separator";
 import type { BlockGroup } from "@/features/course/artifacts/types";
 import { getLessonHref } from "@/features/course/lesson/model/manifest";
 import { ArtifactPreviewContent } from "@/features/course/lesson/workbench/shared/artifact-preview-content";
@@ -41,29 +32,34 @@ export function ArtifactsBlockSection({ group }: { group: BlockGroup }) {
 				</CardAction>
 			</CardHeader>
 			<CardContent>
-				<ItemGroup>
+				<div className="flex flex-col gap-6">
 					{group.artifacts.map((artifact, index) => (
 						<Fragment key={artifact.artifactKey}>
-							{index > 0 ? <ItemSeparator className="my-4" /> : null}
-							<Item variant="outline" className="flex-col items-stretch gap-3">
-								<ItemHeader className="w-full">
-									<ItemContent>
-										<ItemDescription className="text-xs">
+							{index > 0 ? <Separator /> : null}
+							<div className="flex flex-col gap-3">
+								<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+									<div className="min-w-0 space-y-1">
+										<p className="text-xs text-muted-foreground">
 											{artifact.lessonId}
-										</ItemDescription>
-										<ItemTitle className="line-clamp-none">
+										</p>
+										<p className="text-base font-medium leading-snug">
 											{artifact.artifactLabel}
-										</ItemTitle>
-										<ItemDescription>{artifact.lessonTitle}</ItemDescription>
-									</ItemContent>
-									<ItemActions>
-										<Button asChild variant="outline" size="sm">
-											<Link href={getLessonHref(artifact.lessonId)}>
-												Open lesson
-											</Link>
-										</Button>
-									</ItemActions>
-								</ItemHeader>
+										</p>
+										<p className="text-sm text-muted-foreground">
+											{artifact.lessonTitle}
+										</p>
+									</div>
+									<Button
+										asChild
+										variant="outline"
+										size="sm"
+										className="w-full shrink-0 sm:w-auto"
+									>
+										<Link href={getLessonHref(artifact.lessonId)}>
+											Open lesson
+										</Link>
+									</Button>
+								</div>
 								<Card className="bg-muted/30 p-0 shadow-none ring-1 ring-border">
 									<CardContent className="px-3 py-3">
 										<ArtifactPreviewContent
@@ -72,10 +68,10 @@ export function ArtifactsBlockSection({ group }: { group: BlockGroup }) {
 										/>
 									</CardContent>
 								</Card>
-							</Item>
+							</div>
 						</Fragment>
 					))}
-				</ItemGroup>
+				</div>
 			</CardContent>
 		</Card>
 	);

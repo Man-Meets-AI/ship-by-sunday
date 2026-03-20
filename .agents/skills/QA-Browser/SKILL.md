@@ -75,9 +75,9 @@ If a required input is missing, ask once before opening the browser.
 2. Choose the smallest matching playbook from the reference file.
 3. Open the base URL and validate the entry state.
 4. If the playbook needs auth, inspect the sign-in surface first.
-5. If the sign-in surface clearly supports password auth and the target is this repo or another explicitly confirmed repo on the same Clerk instance, run `pnpm run clerk:test-user:check`.
-6. If that check returns `missing`, ask once before running `pnpm run clerk:test-user:create`.
-7. If the requested flow requires entitlement (mission/lesson/protected product checks), run `pnpm run clerk:test-user:prepare:entitled` and sign in with the entitled QA account from the canonical JSON file.
+5. If the sign-in surface clearly supports password auth and the target is this repo or another explicitly confirmed repo on the same Clerk instance, run `bun run clerk:test-user:check`.
+6. If that check returns `missing`, ask once before running `bun run clerk:test-user:create`.
+7. If the requested flow requires entitlement (mission/lesson/protected product checks), run `bun run clerk:test-user:prepare:entitled` and sign in with the entitled QA account from the canonical JSON file.
 8. If the sign-in surface is SSO-only, magic-link-only, passkey-only, social-only, OTP-only, or otherwise not compatible with the shared password user, stop and ask for the correct test identity or SSO instructions.
 9. Sign in only after preflight is satisfied.
 10. Execute the defined checkpoints without expanding scope.

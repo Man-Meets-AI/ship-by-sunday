@@ -1,19 +1,16 @@
 import Link from "next/link";
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 import type { StageUnlockSection } from "@/features/course/lesson/model/stage-unlock";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 const sectionHeaderClass = "border-b border-border/60 px-4 py-3 sm:px-5";
 
 const sectionBodyClass = "px-4 py-4 sm:px-5 sm:py-5";
 
-const sectionTitleClass = "text-sm font-semibold leading-none text-foreground";
-
 const sectionLabelClass = "text-sm font-medium text-muted-foreground";
-
-const sectionActionClass =
-	"inline-flex items-center text-sm font-medium text-foreground underline-offset-4 transition-colors hover:underline";
 
 function splitSectionLines(value: string) {
 	const lines = value
@@ -58,13 +55,13 @@ export function StageUnlockSectionCard({
 		<Card className={cn("gap-0 py-0", className)}>
 			<CardHeader className={sectionHeaderClass}>
 				<div className="flex flex-wrap items-center justify-between gap-2">
-					<p className={sectionTitleClass} style={{ textWrap: "balance" }}>
+					<CardTitle className="text-sm font-semibold leading-none">
 						{section.label}
-					</p>
+					</CardTitle>
 					{section.action ? (
-						<Link href={section.action.href} className={sectionActionClass}>
-							{section.action.label}
-						</Link>
+						<Button variant="link" asChild className="h-auto p-0 text-sm">
+							<Link href={section.action.href}>{section.action.label}</Link>
+						</Button>
 					) : null}
 				</div>
 			</CardHeader>
@@ -110,7 +107,7 @@ export function StageUnlockSectionCard({
 						{section.galleryImageUrls.map((imageUrl, imageIndex) => (
 							<div
 								key={`${section.label}-${imageUrl}`}
-								className="aspect-[4/3] overflow-hidden rounded-lg border border-border bg-background"
+								className="aspect-4/3 overflow-hidden rounded-lg border border-border bg-background"
 							>
 								<img
 									src={imageUrl}
@@ -131,25 +128,28 @@ export function StageUnlockSectionCard({
 					</div>
 				) : null}
 				{sourceLines.length ? (
-					<div className="border-t border-border/60 pt-3">
-						<p className={sectionLabelClass}>Sources</p>
-						<ul className="mt-2 space-y-1.5">
-							{sourceLines.map((line) => {
-								const lineOccurrence = sourceLineKeyCounts.get(line) ?? 0;
-								sourceLineKeyCounts.set(line, lineOccurrence + 1);
+					<>
+						<Separator />
+						<div className="pt-1">
+							<p className={sectionLabelClass}>Sources</p>
+							<ul className="mt-2 space-y-1.5">
+								{sourceLines.map((line) => {
+									const lineOccurrence = sourceLineKeyCounts.get(line) ?? 0;
+									sourceLineKeyCounts.set(line, lineOccurrence + 1);
 
-								return (
-									<li
-										key={`${section.label}-source-${line}-${lineOccurrence}`}
-										className="text-sm leading-6 text-muted-foreground"
-										style={{ overflowWrap: "anywhere" }}
-									>
-										{line}
-									</li>
-								);
-							})}
-						</ul>
-					</div>
+									return (
+										<li
+											key={`${section.label}-source-${line}-${lineOccurrence}`}
+											className="text-sm leading-6 text-muted-foreground"
+											style={{ overflowWrap: "anywhere" }}
+										>
+											{line}
+										</li>
+									);
+								})}
+							</ul>
+						</div>
+					</>
 				) : null}
 			</CardContent>
 		</Card>

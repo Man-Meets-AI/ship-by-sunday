@@ -1,6 +1,7 @@
 "use client";
 
-import { useConvexAuth, useQuery } from "convex/react";
+import type { Preloaded } from "convex/react";
+import { useConvexAuth, usePreloadedQuery, useQuery } from "convex/react";
 
 import { api } from "@/convex/_generated/api";
 import { MissionExtrasRow } from "@/features/course/mission/components/mission/mission-extras-row";
@@ -15,13 +16,7 @@ import {
 } from "@/features/course/mission/lib/mission-page-model";
 import { AppShell } from "@/features/course/shared/components/app-shell";
 
-export function MissionPage() {
-	const { isAuthenticated, isLoading } = useConvexAuth();
-	const mission = useQuery(
-		api.course.getMissionState,
-		isAuthenticated && !isLoading ? {} : "skip",
-	) as MissionState | undefined;
-
+function MissionPageContent({ mission }: { mission: MissionState | undefined }) {
 	const blocks = mission?.blocks.map(enrichBlock) ?? [];
 	const currentBlock =
 		blocks.find(
@@ -37,6 +32,7 @@ export function MissionPage() {
 			currentBlockId={currentBlock?.id}
 			title="Mission"
 			subtitle="Your weekend, one step at a time"
+			mission={mission}
 		>
 			{mission === undefined || currentBlock === null ? (
 				<MissionLoading />
@@ -53,5 +49,37 @@ export function MissionPage() {
 				</div>
 			)}
 		</AppShell>
+	);
+}
+
+function MissionPageLive() {
+	const { isAuthenticated, isLoading } = useConvexAuth();
+	const mission = useQuery(
+		api.course.getMissionState,
+		isAuthenticated && !isLoading ? {} : "skip",
+	) as MissionState | undefined;
+
+	return <MissionPageContent mission={mission} />;
+}
+
+function MissionPagePreloaded({
+	preloadedMission,
+}: {
+	preloadedMission: Preloaded<typeof api.course.getMissionState>;
+}) {
+	return (
+		<MissionPageContent mission={usePreloadedQuery(preloadedMission) as MissionState} />
+	);
+}
+
+export function MissionPage({
+	preloadedMission,
+}: {
+	preloadedMission?: Preloaded<typeof api.course.getMissionState> | null;
+}) {
+	return preloadedMission ? (
+		<MissionPagePreloaded preloadedMission={preloadedMission} />
+	) : (
+		<MissionPageLive />
 	);
 }

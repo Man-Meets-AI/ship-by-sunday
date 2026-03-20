@@ -23,7 +23,7 @@ export function WelcomeOrientationTooling() {
 		<div className="space-y-3">
 			<Alert>
 				<AlertTitle>Recommended stack</AlertTitle>
-				<AlertDescription className="text-sm leading-relaxed">
+				<AlertDescription>
 					Tooling guidance is date-stamped:{" "}
 					<span className="font-medium text-foreground">
 						as of {WELCOME_RECOMMENDED_STACK_DATE_LABEL}
@@ -32,12 +32,10 @@ export function WelcomeOrientationTooling() {
 					your discipline.
 				</AlertDescription>
 			</Alert>
-			<Accordion type="single" collapsible className="w-full rounded-lg border border-border">
-				<AccordionItem value="tooling" className="border-0 px-3">
-					<AccordionTrigger className="py-3 text-sm font-medium hover:no-underline">
-						Tooling for this course
-					</AccordionTrigger>
-					<AccordionContent className="space-y-2 pb-3 text-sm leading-relaxed text-muted-foreground">
+			<Accordion type="single" collapsible className="w-full">
+				<AccordionItem value="tooling">
+					<AccordionTrigger>Tooling for this course</AccordionTrigger>
+					<AccordionContent className="text-muted-foreground">
 						<p>
 							Default path: OpenAI workspace with{" "}
 							<span className="font-medium text-foreground">Codex</span> for

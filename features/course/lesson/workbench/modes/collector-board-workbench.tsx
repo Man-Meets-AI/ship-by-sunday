@@ -1,10 +1,11 @@
 import { FieldControl } from "../fields/field-control";
 import { FieldList } from "../fields/field-list";
-import { StatusRail } from "../shared/status-rail";
-import { WorkbenchCard } from "../shared/workbench-card";
-import { WorkbenchContainer } from "../shared/workbench-container";
-import { WorkbenchHeader } from "../shared/workbench-header";
 import type { WorkbenchModeProps } from "../types";
+import {
+	LessonWorkbenchLabeledCard,
+	LessonWorkbenchPageHeader,
+	LessonWorkbenchStatusCards,
+} from "./lesson-workbench-shadcn-chrome";
 
 export function CollectorBoardWorkbench({
 	lesson,
@@ -18,24 +19,28 @@ export function CollectorBoardWorkbench({
 	completedTaskCount,
 }: WorkbenchModeProps) {
 	const [boardField, ...restFields] = fields;
+	const totalTaskCount = Math.max(objectiveTasks.length, 1);
 
 	return (
-		<WorkbenchContainer>
-			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
-			<StatusRail
+		<div className="w-full space-y-4 pb-1">
+			<LessonWorkbenchPageHeader
+				lesson={lesson}
+				lessonContent={lessonContent}
+			/>
+			<LessonWorkbenchStatusCards
 				lessonContent={lessonContent}
 				completedTaskCount={completedTaskCount}
-				totalTaskCount={Math.max(objectiveTasks.length, 1)}
+				totalTaskCount={totalTaskCount}
 			/>
 			{boardField ? (
-				<WorkbenchCard label={boardField.label}>
+				<LessonWorkbenchLabeledCard label={boardField.label}>
 					<FieldControl
 						field={boardField}
 						value={fieldValues[boardField.id]}
 						onChange={(value) => onFieldChange(boardField.id, value)}
 						pinnedArtifacts={pinnedArtifacts}
 					/>
-				</WorkbenchCard>
+				</LessonWorkbenchLabeledCard>
 			) : null}
 			<FieldList
 				fields={restFields}
@@ -45,6 +50,6 @@ export function CollectorBoardWorkbench({
 				invalidFieldIds={invalidFieldIds}
 				className="grid gap-2 md:grid-cols-2"
 			/>
-		</WorkbenchContainer>
+		</div>
 	);
 }

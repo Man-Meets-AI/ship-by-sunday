@@ -269,6 +269,7 @@ const missionState = {
 };
 
 let missionQueryResult: typeof missionState | undefined = missionState;
+const usePreloadedQueryMock = vi.fn();
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -305,6 +306,7 @@ vi.mock("convex/react", () => ({
 		isLoading: false,
 	}),
 	useQuery: () => missionQueryResult,
+	usePreloadedQuery: (payload: unknown) => usePreloadedQueryMock(payload),
 }));
 
 vi.mock("@/features/course/shared/components/app-shell", () => ({
@@ -334,6 +336,8 @@ import { MissionPage } from "@/features/course/mission/components/mission-page";
 describe("MissionPage", () => {
 	beforeEach(() => {
 		missionQueryResult = missionState;
+		usePreloadedQueryMock.mockReset();
+		usePreloadedQueryMock.mockReturnValue(missionState);
 	});
 
 	it("prioritizes the current task and demotes the rest of the route", () => {
@@ -364,5 +368,17 @@ describe("MissionPage", () => {
 		expect(markup).toContain("Loading");
 		expect(markup).toContain('data-slot="card"');
 		expect(markup).toContain('data-slot="skeleton"');
+	});
+
+	it("renders from preloaded mission data without the live query", () => {
+		missionQueryResult = undefined;
+
+		const markup = renderToStaticMarkup(
+			<MissionPage preloadedMission={{} as never} />,
+		);
+
+		expect(usePreloadedQueryMock).toHaveBeenCalledTimes(1);
+		expect(markup).toContain("20 of 30 lessons complete");
+		expect(markup).not.toContain("Loading");
 	});
 });

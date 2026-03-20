@@ -1,18 +1,16 @@
 import { Separator } from "@/components/ui/separator";
-import { ArtifactContext } from "../shared/artifact-context";
-import { StatusRail } from "../shared/status-rail";
-import { WorkbenchContainer } from "../shared/workbench-container";
-import { WorkbenchHeader } from "../shared/workbench-header";
-import { WorkbenchMediaLayout } from "../shared/workbench-media-layout";
+
 import type { WorkbenchModeProps } from "../types";
-import { FocusInlineLessonVideo } from "../shared/focus-inline-lesson-video";
-import { CandidateProblemHandoff } from "./candidate-problem-handoff";
-import { DefineOutcomeSupport } from "./define-outcome-support";
+import {
+	GuidedFormInlineVideo,
+	GuidedFormSplitMediaLayout,
+} from "./guided-form-workbench-chrome";
+import { GuidedFormSupportingContent } from "./guided-form-workbench-supporting";
 import { GuidedFormWorkbenchSections } from "./guided-form-workbench-sections";
-import { PickOneUserStatementPreviewCard } from "./pick-one-user-statement-preview-card";
-import { StartWithProblemSupport } from "./start-with-problem-support";
-import { CeoSkillsCodexPanel } from "./ceo-skills-codex-panel";
-import { WelcomeOrientationPanel } from "./welcome-orientation-panel";
+import {
+	LessonWorkbenchPageHeader,
+	LessonWorkbenchStatusCards,
+} from "./lesson-workbench-shadcn-chrome";
 
 export function GuidedFormWorkbench(props: WorkbenchModeProps) {
 	const {
@@ -43,58 +41,24 @@ export function GuidedFormWorkbench(props: WorkbenchModeProps) {
 		showInlineVideo &&
 		lesson.workbenchMediaLayout === "split" &&
 		layoutMode === "focus";
-	const showStartWithProblemSupport = lesson.id === "1.3";
-	const showPickOneUserStatementPreview =
-		lesson.id === "1.4" && lesson.handoff?.mode === "select_candidate_problem";
-	const showDefineOutcomeSupport = lesson.id === "1.5";
-	const showWelcomeOrientation = lesson.id === "1.1";
-	const showCeoSkillsCodexPanel = lesson.id === "1.9";
 	const showWorkbenchCompletionAfterForm =
 		lesson.id === "1.4" && Boolean(workbenchCompletionSlot);
-	const showPrimaryFieldsFirst = showStartWithProblemSupport;
+	const showPrimaryFieldsFirst = lesson.id === "1.3";
+	const totalTasks = Math.max(objectiveTasks.length, 1);
 	const inlineVideoCard = (
-		<FocusInlineLessonVideo coachContent={lessonContent.coach} />
+		<GuidedFormInlineVideo coachContent={lessonContent.coach} />
 	);
 	const supportingContent = (
-		<>
-			{showWelcomeOrientation ? (
-				<WelcomeOrientationPanel
-					lessonContent={lessonContent}
-					workbenchCompletionSlot={workbenchCompletionSlot}
-				/>
-			) : null}
-			{showCeoSkillsCodexPanel ? (
-				<CeoSkillsCodexPanel
-					lessonContent={lessonContent}
-					workbenchCompletionSlot={workbenchCompletionSlot}
-				/>
-			) : null}
-			{showStartWithProblemSupport ? (
-				<StartWithProblemSupport lessonContent={lessonContent} />
-			) : null}
-			{lesson.handoff?.mode === "select_candidate_problem" ? (
-				<>
-					<CandidateProblemHandoff
-						handoff={lesson.handoff}
-						fieldValues={fieldValues}
-						onFieldChange={onFieldChange}
-						pinnedArtifacts={pinnedArtifacts}
-						invalidFieldIds={invalidFieldIds}
-					/>
-					{showPickOneUserStatementPreview ? (
-						<PickOneUserStatementPreviewCard
-							handoff={lesson.handoff}
-							fieldValues={fieldValues}
-							pinnedArtifacts={pinnedArtifacts}
-						/>
-					) : null}
-				</>
-			) : null}
-			{showDefineOutcomeSupport ? (
-				<DefineOutcomeSupport fieldValues={fieldValues} />
-			) : null}
-			<ArtifactContext pinnedArtifacts={visiblePinnedArtifacts} />
-		</>
+		<GuidedFormSupportingContent
+			lesson={lesson}
+			lessonContent={lessonContent}
+			fieldValues={fieldValues}
+			onFieldChange={onFieldChange}
+			pinnedArtifacts={pinnedArtifacts}
+			invalidFieldIds={invalidFieldIds}
+			visiblePinnedArtifacts={visiblePinnedArtifacts}
+			workbenchCompletionSlot={workbenchCompletionSlot}
+		/>
 	);
 	const sectionContent = (
 		<GuidedFormWorkbenchSections
@@ -111,22 +75,25 @@ export function GuidedFormWorkbench(props: WorkbenchModeProps) {
 
 	const workbenchBody = (
 		<>
-			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
+			<LessonWorkbenchPageHeader
+				lesson={lesson}
+				lessonContent={lessonContent}
+			/>
 			<Separator className="bg-border" />
 			{showSplitWorkbenchMedia ? (
-				<WorkbenchMediaLayout media={inlineVideoCard}>
+				<GuidedFormSplitMediaLayout media={inlineVideoCard}>
 					<div className="space-y-5">
 						{showPrimaryFieldsFirst ? sectionContent : supportingContent}
 						{showPrimaryFieldsFirst ? supportingContent : sectionContent}
 					</div>
-				</WorkbenchMediaLayout>
+				</GuidedFormSplitMediaLayout>
 			) : showInlineVideo ? (
 				inlineVideoCard
 			) : (
-				<StatusRail
+				<LessonWorkbenchStatusCards
 					lessonContent={lessonContent}
 					completedTaskCount={completedTaskCount}
-					totalTaskCount={Math.max(objectiveTasks.length, 1)}
+					totalTaskCount={totalTasks}
 				/>
 			)}
 			{showSplitWorkbenchMedia
@@ -147,5 +114,5 @@ export function GuidedFormWorkbench(props: WorkbenchModeProps) {
 		</>
 	);
 
-	return <WorkbenchContainer>{workbenchBody}</WorkbenchContainer>;
+	return <div className="w-full space-y-4 pb-1">{workbenchBody}</div>;
 }

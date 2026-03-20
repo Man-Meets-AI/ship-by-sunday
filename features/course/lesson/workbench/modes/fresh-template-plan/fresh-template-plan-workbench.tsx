@@ -14,11 +14,8 @@ import {
 	FRESH_TEMPLATE_PLAN_DEFAULT_MANUAL_PROMPT,
 	FRESH_TEMPLATE_PLAN_FIELD_IDS,
 } from "./fresh-template-plan-constants";
-import { FreshTemplatePlanGoalAndBadges } from "./fresh-template-plan-goal-and-badges";
-import { FreshTemplatePlanMacPathAccordion } from "./fresh-template-plan-mac-path-accordion";
-import { FreshTemplatePlanPlanFirstAlert } from "./fresh-template-plan-plan-first-alert";
+import { FreshTemplatePlanIntro } from "./fresh-template-plan-intro";
 import { FreshTemplatePlanPromptControls } from "./fresh-template-plan-prompt-controls";
-import { FreshTemplatePlanTabsPanel } from "./fresh-template-plan-tabs-panel";
 
 export function FreshTemplatePlanWorkbench({
 	lesson,
@@ -70,15 +67,12 @@ export function FreshTemplatePlanWorkbench({
 
 	const mainColumn = (
 		<div className="space-y-5">
-			<FreshTemplatePlanGoalAndBadges />
-			<FreshTemplatePlanPlanFirstAlert />
-			<FreshTemplatePlanTabsPanel />
+			<FreshTemplatePlanIntro />
 			<FreshTemplatePlanPromptControls
 				fieldValues={fieldValues}
 				onFieldChange={onFieldChange}
 				invalidFieldIds={invalidFieldIds}
 			/>
-			<FreshTemplatePlanMacPathAccordion />
 			<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
 		</div>
 	);

@@ -16,13 +16,10 @@ vi.mock("next/link", () => ({
 	}) => React.createElement("a", { href, ...props }, children),
 }));
 
-vi.mock(
-	"@/features/course/lesson/workbench/shared/focus-inline-lesson-video",
-	() => ({
-		FocusInlineLessonVideo: () =>
-			React.createElement("div", { "data-testid": "inline-video" }),
-	}),
-);
+vi.mock("@/features/course/lesson/components/lesson-video-player", () => ({
+	LessonVideoPlayer: () =>
+		React.createElement("div", { "data-testid": "lesson-video-player" }),
+}));
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn() } }));
 

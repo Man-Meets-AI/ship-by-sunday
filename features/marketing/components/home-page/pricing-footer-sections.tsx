@@ -1,8 +1,15 @@
+import { Badge } from "@/components/ui/badge";
+import {
+	Card,
+	CardContent,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { CheckoutButton } from "@/features/checkout/components/checkout-button";
 import type { HomePageContent } from "@/features/marketing/content/home";
 
 import { PricingIncludesList } from "./pricing-includes-list";
-import { SectionFrame, SectionLabel, SectionTitle } from "./section-shell";
 
 type FooterNav = HomePageContent["footerNav"];
 type FooterWordmark = HomePageContent["footerWordmark"];
@@ -20,62 +27,65 @@ export function PricingSectionBlock({
 		>
 			<div className="flex flex-col gap-8 sm:gap-10">
 				<div className="space-y-4">
-					<SectionLabel>{pricingSection.label}</SectionLabel>
-					<SectionTitle>
+					<Badge variant="outline">{pricingSection.label}</Badge>
+					<h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
 						{pricingSection.titleLead}
 						<span className="block">{pricingSection.titleAccent}</span>
-					</SectionTitle>
-					<p className="max-w-md text-base leading-relaxed text-muted-foreground sm:text-lg">
+					</h2>
+					<p className="max-w-md text-muted-foreground sm:text-lg">
 						{pricingSection.intro}
 					</p>
 				</div>
-				<div className="space-y-2 rounded-xl bg-muted/20 px-5 py-6 sm:px-6 sm:py-8">
-					<p className="text-xs font-medium text-muted-foreground">
-						Investment
-					</p>
-					<p className="text-5xl font-bold tracking-tight text-foreground tabular-nums sm:text-6xl">
-						{pricingSection.priceDisplay}
-					</p>
-					<p className="text-sm text-muted-foreground">
-						{pricingSection.eyebrow}
-					</p>
-				</div>
+				<Card>
+					<CardContent className="space-y-2">
+						<p className="text-xs font-medium text-muted-foreground">
+							Investment
+						</p>
+						<p className="text-5xl font-bold tracking-tight tabular-nums sm:text-6xl">
+							{pricingSection.priceDisplay}
+						</p>
+						<p className="text-sm text-muted-foreground">
+							{pricingSection.eyebrow}
+						</p>
+					</CardContent>
+				</Card>
 			</div>
-			<SectionFrame className="gap-0 overflow-hidden p-0 shadow-md ring-1 ring-foreground/6">
-				<div className="space-y-4 px-6 pt-6 sm:space-y-5 sm:px-8 sm:pt-8">
-					<SectionLabel>{pricingSection.paymentLabel}</SectionLabel>
-					<h3 className="text-balance text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+
+			<Card>
+				<CardHeader>
+					<Badge variant="outline" className="w-fit">
+						{pricingSection.paymentLabel}
+					</Badge>
+					<CardTitle className="text-xl font-semibold tracking-tight sm:text-2xl">
 						{pricingSection.ctaTitle}
-					</h3>
-				</div>
-				<div className="px-6 py-6 sm:px-8 sm:py-8">
+					</CardTitle>
+				</CardHeader>
+				<CardContent>
 					<PricingIncludesList items={pricingSection.includes} />
-				</div>
-				<div className="flex flex-col gap-5 border-t border-border/80 bg-muted/35 px-6 py-6 sm:gap-6 sm:px-8 sm:py-8">
-					<div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-						<div>
-							<p className="text-xs font-medium text-muted-foreground">
-								Total due today
-							</p>
-							<p className="text-4xl font-bold tracking-tight text-foreground tabular-nums sm:text-5xl">
-								{pricingSection.priceDisplay}
-							</p>
-						</div>
+				</CardContent>
+				<CardFooter className="flex-col items-stretch gap-5">
+					<div>
+						<p className="text-xs font-medium text-muted-foreground">
+							Total due today
+						</p>
+						<p className="text-4xl font-bold tracking-tight tabular-nums sm:text-5xl">
+							{pricingSection.priceDisplay}
+						</p>
 					</div>
 					<CheckoutButton
 						label={pricingSection.ctaTitle}
-						className="h-12 w-full text-base font-semibold shadow-sm"
+						className="h-12 w-full text-base font-semibold"
 					/>
 					<div className="space-y-3 text-muted-foreground">
-						<p className="max-w-lg text-sm leading-relaxed sm:text-base">
+						<p className="max-w-lg text-sm sm:text-base">
 							{pricingSection.trustLine}
 						</p>
-						<p className="max-w-lg text-xs leading-relaxed text-muted-foreground sm:text-sm">
+						<p className="max-w-lg text-xs sm:text-sm">
 							{pricingSection.guarantee}
 						</p>
 					</div>
-				</div>
-			</SectionFrame>
+				</CardFooter>
+			</Card>
 		</div>
 	);
 }
@@ -90,7 +100,7 @@ export function FooterSection({
 	return (
 		<>
 			<nav
-				className="flex flex-wrap justify-center gap-x-6 gap-y-3 border-t border-border/30 py-8 sm:gap-x-8 sm:py-10"
+				className="flex flex-wrap justify-center gap-x-6 gap-y-3 border-t py-8 sm:gap-x-8 sm:py-10"
 				aria-label="Footer"
 			>
 				{footerNav.map((item) => (

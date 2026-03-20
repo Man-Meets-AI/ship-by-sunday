@@ -1,8 +1,9 @@
 import { FieldList } from "../fields/field-list";
-import { StatusRail } from "../shared/status-rail";
-import { WorkbenchContainer } from "../shared/workbench-container";
-import { WorkbenchHeader } from "../shared/workbench-header";
 import type { WorkbenchModeProps } from "../types";
+import {
+	LessonWorkbenchPageHeader,
+	LessonWorkbenchStatusCards,
+} from "./lesson-workbench-shadcn-chrome";
 
 export function ConsoleChecklistWorkbench({
 	lesson,
@@ -15,13 +16,18 @@ export function ConsoleChecklistWorkbench({
 	objectiveTasks,
 	completedTaskCount,
 }: WorkbenchModeProps) {
+	const totalTaskCount = Math.max(objectiveTasks.length, 1);
+
 	return (
-		<WorkbenchContainer>
-			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
-			<StatusRail
+		<div className="w-full space-y-4 pb-1">
+			<LessonWorkbenchPageHeader
+				lesson={lesson}
+				lessonContent={lessonContent}
+			/>
+			<LessonWorkbenchStatusCards
 				lessonContent={lessonContent}
 				completedTaskCount={completedTaskCount}
-				totalTaskCount={Math.max(objectiveTasks.length, 1)}
+				totalTaskCount={totalTaskCount}
 			/>
 			<FieldList
 				fields={fields}
@@ -31,6 +37,6 @@ export function ConsoleChecklistWorkbench({
 				invalidFieldIds={invalidFieldIds}
 				className="grid gap-2 md:grid-cols-2"
 			/>
-		</WorkbenchContainer>
+		</div>
 	);
 }

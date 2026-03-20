@@ -451,7 +451,7 @@ export async function ensureVideoCutPythonReady(options = {}) {
 		const available = await checkPythonModule(pythonBin, moduleName);
 		if (!available) {
 			throw createError(
-				`Missing Python module ${moduleName} for the video cut stage. Run \`pnpm run video:cut:setup\` first.`,
+				`Missing Python module ${moduleName} for the video cut stage. Run \`bun run video:cut:setup\` first.`,
 			);
 		}
 	}
@@ -982,7 +982,7 @@ async function resolveVideoCutPythonBin(explicitPythonBin) {
 	}
 
 	throw createError(
-		"Could not find a usable Python binary for the video cut stage. Run `pnpm run video:cut:setup` first.",
+		"Could not find a usable Python binary for the video cut stage. Run `bun run video:cut:setup` first.",
 	);
 }
 

@@ -9,6 +9,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import type { LessonContent } from "@/features/course/lesson/model/manifest";
 
@@ -32,41 +33,39 @@ export function CeoSkillsCodexPanel({
 		"Orient to Codex layout, skills, and the 0 → 1 spine—then save a short project note.";
 
 	return (
-		<div className="space-y-4">
-			<Card className="gap-0 py-0">
-				<CardHeader className="space-y-3 border-b border-border pb-4">
-					<CardTitle className="text-balance text-xl font-semibold tracking-tight sm:text-2xl">
-						Codex & skills
-					</CardTitle>
-					<CardDescription className="text-pretty text-sm leading-relaxed text-muted-foreground">
-						{purpose}
-					</CardDescription>
-				</CardHeader>
-				<CardContent className="space-y-5 pt-5">
-					<CeoSkillsCodexAlerts />
-					<CeoSkillsCodexAnatomyCard />
-					<CeoSkillsCodexCommandCard />
-					<div className="space-y-2">
-						<p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-							Resources
-						</p>
-						<CeoSkillsCodexResourceButtons />
-					</div>
-					<Separator />
-					<CeoSkillsCodexConceptTabs />
-					<Separator />
-					<div className="grid gap-4 sm:grid-cols-2">
-						<CeoSkillsCodexStarterCard />
-						<CeoSkillsCodexDownloadCard />
-					</div>
-					{workbenchCompletionSlot ? (
-						<div className="flex flex-wrap gap-2 border-t border-border pt-4">
+		<Card>
+			<CardHeader>
+				<CardTitle className="text-balance text-xl tracking-tight sm:text-2xl">
+					Codex & skills
+				</CardTitle>
+				<CardDescription className="text-pretty leading-relaxed">
+					{purpose}
+				</CardDescription>
+			</CardHeader>
+			<CardContent className="space-y-5">
+				<CeoSkillsCodexAlerts />
+				<CeoSkillsCodexAnatomyCard />
+				<CeoSkillsCodexCommandCard />
+				<div className="space-y-2">
+					<Label className="text-muted-foreground">Resources</Label>
+					<CeoSkillsCodexResourceButtons />
+				</div>
+				<Separator />
+				<CeoSkillsCodexConceptTabs />
+				<Separator />
+				<div className="grid gap-4 sm:grid-cols-2">
+					<CeoSkillsCodexStarterCard />
+					<CeoSkillsCodexDownloadCard />
+				</div>
+				{workbenchCompletionSlot ? (
+					<>
+						<Separator />
+						<div className="flex flex-wrap gap-2">
 							{workbenchCompletionSlot}
 						</div>
-					) : null}
-				</CardContent>
-			</Card>
-			<Separator className="bg-border" />
-		</div>
+					</>
+				) : null}
+			</CardContent>
+		</Card>
 	);
 }

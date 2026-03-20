@@ -12,6 +12,21 @@ export const BUILD_SHIP_ROADMAP_FIELD_IDS = {
 
 export type RoadmapTaskBadge = "required" | "later" | "optional";
 
+export const ROADMAP_TASK_BADGE_LABELS: Record<RoadmapTaskBadge, string> = {
+	required: "Required",
+	later: "Later",
+	optional: "Optional",
+};
+
+export const ROADMAP_TASK_BADGE_VARIANTS: Record<
+	RoadmapTaskBadge,
+	"default" | "secondary" | "outline"
+> = {
+	required: "default",
+	later: "secondary",
+	optional: "outline",
+};
+
 export const BUILD_PHASE_CHECKLIST_OPTIONS = [
 	"Marketing site",
 	"Protected pages",

@@ -1,7 +1,6 @@
 "use client";
 
 import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
-import type { PinnedArtifact } from "@/features/course/lesson/shells";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -12,10 +11,10 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FieldControl } from "@/features/course/lesson/workbench/fields/field-control";
 
 import { CoreFlowSketchBrandSection } from "./core-flow-sketch-brand-section";
 import { CoreFlowSketchCrazyEights } from "./core-flow-sketch-crazy-eights";
+import { CoreFlowSketchField } from "./core-flow-sketch-fields";
 import { CoreFlowSketchScreenReference } from "./core-flow-sketch-screen-reference";
 import { CoreFlowSketchTimer } from "./core-flow-sketch-timer";
 
@@ -28,7 +27,6 @@ type CoreFlowSketchTabsProps = {
 	brandNotes: WorkbenchField | null;
 	fieldValues: Record<string, unknown>;
 	onFieldChange: (fieldId: string, value: unknown) => void;
-	pinnedArtifacts: PinnedArtifact[];
 	invalidFieldIds: Set<string>;
 };
 
@@ -41,7 +39,6 @@ export function CoreFlowSketchTabs({
 	brandNotes,
 	fieldValues,
 	onFieldChange,
-	pinnedArtifacts,
 	invalidFieldIds,
 }: CoreFlowSketchTabsProps) {
 	return (
@@ -68,12 +65,11 @@ export function CoreFlowSketchTabs({
 					</AlertDescription>
 				</Alert>
 				{briefFields.map((field) => (
-					<FieldControl
+					<CoreFlowSketchField
 						key={field.id}
 						field={field}
 						value={fieldValues[field.id]}
 						onChange={(value) => onFieldChange(field.id, value)}
-						pinnedArtifacts={pinnedArtifacts}
 						invalid={invalidFieldIds.has(field.id)}
 					/>
 				))}
@@ -82,20 +78,18 @@ export function CoreFlowSketchTabs({
 				<CoreFlowSketchTimer />
 				<CoreFlowSketchCrazyEights />
 				{execution ? (
-					<FieldControl
+					<CoreFlowSketchField
 						field={execution}
 						value={fieldValues[execution.id]}
 						onChange={(value) => onFieldChange(execution.id, value)}
-						pinnedArtifacts={pinnedArtifacts}
 						invalid={invalidFieldIds.has(execution.id)}
 					/>
 				) : null}
 				{sketchNotes ? (
-					<FieldControl
+					<CoreFlowSketchField
 						field={sketchNotes}
 						value={fieldValues[sketchNotes.id]}
 						onChange={(value) => onFieldChange(sketchNotes.id, value)}
-						pinnedArtifacts={pinnedArtifacts}
 						invalid={invalidFieldIds.has(sketchNotes.id)}
 					/>
 				) : null}
@@ -103,11 +97,10 @@ export function CoreFlowSketchTabs({
 			<TabsContent value="screens" className="space-y-4">
 				<CoreFlowSketchScreenReference />
 				{namedScreens ? (
-					<FieldControl
+					<CoreFlowSketchField
 						field={namedScreens}
 						value={fieldValues[namedScreens.id]}
 						onChange={(value) => onFieldChange(namedScreens.id, value)}
-						pinnedArtifacts={pinnedArtifacts}
 						invalid={invalidFieldIds.has(namedScreens.id)}
 					/>
 				) : null}
@@ -120,7 +113,9 @@ export function CoreFlowSketchTabs({
 					</CardHeader>
 					<CardContent className="space-y-2 text-sm text-muted-foreground">
 						<p>Figma or Canva brand file (or plan to create a guide).</p>
-						<p>ChatGPT account for the “Connect GPT” assumption in this flow.</p>
+						<p>
+							ChatGPT account for the “Connect GPT” assumption in this flow.
+						</p>
 						<p>Optional: one template post you might generate from later.</p>
 					</CardContent>
 				</Card>
@@ -131,7 +126,6 @@ export function CoreFlowSketchTabs({
 						fieldValues={fieldValues}
 						onFieldChange={onFieldChange}
 						invalidFieldIds={invalidFieldIds}
-						pinnedArtifacts={pinnedArtifacts}
 					/>
 				) : null}
 				<Alert>

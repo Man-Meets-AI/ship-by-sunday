@@ -1,5 +1,4 @@
 import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
-import type { PinnedArtifact } from "@/features/course/lesson/shells";
 import {
 	Card,
 	CardContent,
@@ -9,13 +8,12 @@ import {
 } from "@/components/ui/card";
 
 import { CODEX_MARKETING_BRIEF_FIELD_ORDER } from "./codex-marketing-site-constants";
-import { FieldControl } from "../../fields/field-control";
+import { CodexMarketingSiteMarketingField } from "./codex-marketing-site-marketing-field";
 
 type CodexMarketingSiteBriefBlockProps = {
 	fieldsById: Map<string, WorkbenchField>;
 	fieldValues: Record<string, unknown>;
 	onFieldChange: (fieldId: string, value: unknown) => void;
-	pinnedArtifacts: PinnedArtifact[];
 	invalidFieldIds: Set<string>;
 };
 
@@ -23,7 +21,6 @@ export function CodexMarketingSiteBriefBlock({
 	fieldsById,
 	fieldValues,
 	onFieldChange,
-	pinnedArtifacts,
 	invalidFieldIds,
 }: CodexMarketingSiteBriefBlockProps) {
 	return (
@@ -47,11 +44,10 @@ export function CodexMarketingSiteBriefBlock({
 							key={fieldId}
 							className={spanTwo ? "sm:col-span-2" : undefined}
 						>
-							<FieldControl
+							<CodexMarketingSiteMarketingField
 								field={field}
 								value={fieldValues[fieldId]}
 								onChange={(v) => onFieldChange(fieldId, v)}
-								pinnedArtifacts={pinnedArtifacts}
 								invalid={invalidFieldIds.has(fieldId)}
 							/>
 						</div>

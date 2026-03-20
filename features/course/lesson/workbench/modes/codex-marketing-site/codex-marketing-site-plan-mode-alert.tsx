@@ -1,8 +1,11 @@
+import { Info } from "lucide-react";
+
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function CodexMarketingSitePlanModeAlert() {
 	return (
 		<Alert>
+			<Info aria-hidden className="size-4" />
 			<AlertTitle>Skip plan mode for this lesson</AlertTitle>
 			<AlertDescription className="text-muted-foreground">
 				Ask your agent for a <strong>copy pass</strong> first—then refine the

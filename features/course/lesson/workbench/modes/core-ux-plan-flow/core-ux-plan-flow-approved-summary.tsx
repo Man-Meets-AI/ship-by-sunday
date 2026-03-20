@@ -6,6 +6,7 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
 	Card,
 	CardContent,
@@ -13,13 +14,13 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { FieldList } from "../../fields/field-list";
 import type { WorkbenchModeProps } from "../../types";
 
 import {
 	CORE_UX_PLAN_FIELD_IDS,
 	CORE_UX_PLAN_BRIEF_FIELD_IDS,
 } from "./core-ux-plan-flow-constants";
+import { CoreUxPlanFlowShadcnFields } from "./core-ux-plan-flow-shadcn-fields";
 
 function str(value: unknown) {
 	return typeof value === "string" ? value.trim() : "";
@@ -33,7 +34,10 @@ function pickBriefFields(props: WorkbenchModeProps) {
 function buildCompactSummary(values: Record<string, unknown>) {
 	const slices = str(values[CORE_UX_PLAN_FIELD_IDS.planSlices]);
 	const install = str(values[CORE_UX_PLAN_FIELD_IDS.installDestination]);
-	const firstSliceLine = slices.split("\n").map((l) => l.trim()).find(Boolean);
+	const firstSliceLine = slices
+		.split("\n")
+		.map((l) => l.trim())
+		.find(Boolean);
 	const parts = [
 		firstSliceLine ? `Slices: ${firstSliceLine}` : null,
 		install ? `Install path: ${install}` : null,
@@ -57,9 +61,11 @@ export function CoreUxPlanFlowApprovedSummary(props: WorkbenchModeProps) {
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-4">
-				<p className="rounded-md border border-border bg-muted/30 p-3 text-sm leading-relaxed text-foreground">
-					{summary}
-				</p>
+				<Alert>
+					<AlertDescription className="text-sm leading-relaxed text-foreground">
+						{summary}
+					</AlertDescription>
+				</Alert>
 				<Accordion type="single" collapsible className="w-full">
 					<AccordionItem value="full-plan">
 						<AccordionTrigger className="text-sm">
@@ -67,7 +73,7 @@ export function CoreUxPlanFlowApprovedSummary(props: WorkbenchModeProps) {
 						</AccordionTrigger>
 						<AccordionContent>
 							{briefFields.length > 0 ? (
-								<FieldList
+								<CoreUxPlanFlowShadcnFields
 									fields={briefFields}
 									fieldValues={props.fieldValues}
 									onFieldChange={props.onFieldChange}

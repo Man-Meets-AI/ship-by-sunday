@@ -8,12 +8,9 @@ import { WorkbenchHeader } from "../../shared/workbench-header";
 import { WorkbenchMediaLayout } from "../../shared/workbench-media-layout";
 import type { WorkbenchModeProps } from "../../types";
 
-import { BuildSettingUpSlicesAccordions } from "./build-setting-up-slices-accordions";
 import { BUILD_SLICES_FIELD_IDS } from "./build-setting-up-slices-constants";
-import { BuildSettingUpSlicesExamplePromptCard } from "./build-setting-up-slices-example-prompt-card";
-import { BuildSettingUpSlicesLoopCard } from "./build-setting-up-slices-loop-card";
-import { BuildSettingUpSlicesMainForm } from "./build-setting-up-slices-main-form";
-import { BuildSettingUpSlicesPlanningPanel } from "./build-setting-up-slices-planning-panel";
+import { BuildSettingUpSlicesFields } from "./build-setting-up-slices-fields";
+import { BuildSettingUpSlicesGuide } from "./build-setting-up-slices-guide";
 
 export function BuildSettingUpSlicesWorkbench({
 	lesson,
@@ -35,14 +32,11 @@ export function BuildSettingUpSlicesWorkbench({
 
 	const mainColumn = (
 		<div className="space-y-5">
-			<BuildSettingUpSlicesLoopCard />
-			<BuildSettingUpSlicesPlanningPanel
+			<BuildSettingUpSlicesGuide
 				value={fieldValues[BUILD_SLICES_FIELD_IDS.planningPath]}
 				onChange={(v) => onFieldChange(BUILD_SLICES_FIELD_IDS.planningPath, v)}
 			/>
-			<BuildSettingUpSlicesExamplePromptCard />
-			<BuildSettingUpSlicesAccordions />
-			<BuildSettingUpSlicesMainForm
+			<BuildSettingUpSlicesFields
 				fields={lesson.workbenchFields ?? []}
 				fieldValues={fieldValues}
 				onFieldChange={onFieldChange}

@@ -1,5 +1,7 @@
+import { Badge } from "@/components/ui/badge";
 import {
 	Card,
+	CardContent,
 	CardDescription,
 	CardHeader,
 	CardTitle,
@@ -21,6 +23,8 @@ export function RouteAccessAppTree() {
 					<code className="rounded bg-muted px-1 py-0.5 text-xs">page.tsx</code>{" "}
 					is a page.
 				</CardDescription>
+			</CardHeader>
+			<CardContent>
 				<div className="rounded-md border border-border bg-muted/40 p-3 font-mono text-xs leading-6">
 					<div className="font-semibold text-foreground">app/</div>
 					<div className="pl-3 text-foreground">
@@ -31,12 +35,13 @@ export function RouteAccessAppTree() {
 					</div>
 					<div className="flex flex-wrap gap-1.5 pl-3 pt-1">
 						{ROUTE_ACCESS_APP_ROUTE_FOLDERS.map((name) => (
-							<span
+							<Badge
 								key={name}
-								className="rounded border border-border bg-background px-2 py-0.5 text-[11px] text-foreground"
+								variant="outline"
+								className="font-mono text-[11px] font-normal"
 							>
 								{name}
-							</span>
+							</Badge>
 						))}
 					</div>
 					<p className="mt-2 pl-3 text-[11px] text-muted-foreground">
@@ -44,7 +49,7 @@ export function RouteAccessAppTree() {
 						core.
 					</p>
 				</div>
-			</CardHeader>
+			</CardContent>
 		</Card>
 	);
 }

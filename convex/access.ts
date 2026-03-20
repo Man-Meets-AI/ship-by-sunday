@@ -1,7 +1,6 @@
 import {
 	internalMutation,
 	internalQuery,
-	mutation,
 	query,
 } from "./_generated/server";
 import {
@@ -31,7 +30,7 @@ export const grantProductAccess = internalMutation({
 	handler: grantProductAccessHandler,
 });
 
-export const grantProductAccessFromStripe = mutation({
+export const grantProductAccessFromStripe = internalMutation({
 	args: grantProductAccessFromStripeArgs,
 	returns: grantProductAccessFromStripeReturns,
 	handler: grantProductAccessFromStripeHandler,

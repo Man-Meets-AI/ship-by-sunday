@@ -4,14 +4,16 @@ import { Button } from "@/components/ui/button";
 import { LessonVideoSurface } from "@/features/course/lesson/components/lesson-video-surface";
 import { renderChecklistLabel } from "@/features/course/lesson/workbench/fields/checklist-label";
 import type { LessonResourceContent } from "@/features/course/lesson/model/manifest";
+
 import { FieldList } from "../fields/field-list";
-import { ArtifactContext } from "../shared/artifact-context";
-import { StatusRail } from "../shared/status-rail";
-import { WorkbenchCard } from "../shared/workbench-card";
-import { WorkbenchContainer } from "../shared/workbench-container";
-import { WorkbenchHeader } from "../shared/workbench-header";
+import { ArtifactPreviewContent } from "../shared/artifact-preview-content";
 import type { WorkbenchModeProps } from "../types";
 import { ExternalWorkspacePromptImport } from "./external-workspace-prompt-import";
+import {
+	LessonWorkbenchLabeledCard,
+	LessonWorkbenchPageHeader,
+	LessonWorkbenchStatusCards,
+} from "./lesson-workbench-shadcn-chrome";
 
 const resourceKindClass =
 	"text-xs font-medium capitalize text-muted-foreground";
@@ -44,14 +46,17 @@ export function ExternalWorkspaceWorkbench({
 					: "Open the code workspace and keep this lesson brief beside it.";
 
 	return (
-		<WorkbenchContainer>
-			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
-			<StatusRail
+		<div className="w-full space-y-4 pb-1">
+			<LessonWorkbenchPageHeader
+				lesson={lesson}
+				lessonContent={lessonContent}
+			/>
+			<LessonWorkbenchStatusCards
 				lessonContent={lessonContent}
 				completedTaskCount={completedTaskCount}
 				totalTaskCount={Math.max(objectiveTasks.length, 1)}
 			/>
-			<WorkbenchCard label="Watch first">
+			<LessonWorkbenchLabeledCard label="Watch first">
 				<div className="space-y-3">
 					<p className="text-sm leading-relaxed text-muted-foreground">
 						Watch the walkthrough once, then run the setup in sequence.
@@ -61,14 +66,14 @@ export function ExternalWorkspaceWorkbench({
 						playerFrame="bare"
 					/>
 				</div>
-			</WorkbenchCard>
-			<WorkbenchCard label="External workspace">
+			</LessonWorkbenchLabeledCard>
+			<LessonWorkbenchLabeledCard label="External workspace">
 				<p className="text-sm leading-relaxed text-muted-foreground">
 					{actionLabel}
 				</p>
-			</WorkbenchCard>
+			</LessonWorkbenchLabeledCard>
 			{lesson.checklist.length > 0 ? (
-				<WorkbenchCard label="Run this sequence">
+				<LessonWorkbenchLabeledCard label="Run this sequence">
 					<div
 						className="divide-y divide-border overflow-hidden rounded-lg border border-border"
 						role="list"
@@ -88,19 +93,19 @@ export function ExternalWorkspaceWorkbench({
 							</div>
 						))}
 					</div>
-				</WorkbenchCard>
+				</LessonWorkbenchLabeledCard>
 			) : null}
 			{transcript?.status === "ready" && transcript.body ? (
-				<WorkbenchCard label="Transcript">
+				<LessonWorkbenchLabeledCard label="Transcript">
 					<div className="max-h-72 max-w-prose overflow-y-auto rounded-lg border border-border/60 bg-muted/20 p-3">
 						<p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
 							{transcript.body}
 						</p>
 					</div>
-				</WorkbenchCard>
+				</LessonWorkbenchLabeledCard>
 			) : null}
 			{resourceLinks.length > 0 ? (
-				<WorkbenchCard label="Resources">
+				<LessonWorkbenchLabeledCard label="Resources">
 					<div className="space-y-2">
 						{resourceLinks.map((resource) => (
 							<Button
@@ -121,9 +126,20 @@ export function ExternalWorkspaceWorkbench({
 							</Button>
 						))}
 					</div>
-				</WorkbenchCard>
+				</LessonWorkbenchLabeledCard>
 			) : null}
-			<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
+			{pinnedArtifacts.length > 0 ? (
+				<div className="grid gap-3 md:grid-cols-2">
+					{pinnedArtifacts.map((artifact) => (
+						<LessonWorkbenchLabeledCard
+							key={artifact.artifactKey}
+							label={artifact.contextTitle ?? artifact.artifactLabel}
+						>
+							<ArtifactPreviewContent artifact={artifact} />
+						</LessonWorkbenchLabeledCard>
+					))}
+				</div>
+			) : null}
 			<ExternalWorkspacePromptImport
 				lesson={lesson}
 				onFieldChange={onFieldChange}
@@ -138,6 +154,6 @@ export function ExternalWorkspaceWorkbench({
 				invalidFieldIds={invalidFieldIds}
 				className="grid gap-4 md:grid-cols-2"
 			/>
-		</WorkbenchContainer>
+		</div>
 	);
 }

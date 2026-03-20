@@ -36,7 +36,7 @@ export function RepoMapOrientationPanel({
 
 	return (
 		<div className="space-y-4">
-			<Alert className="border-border bg-muted/30">
+			<Alert>
 				<AlertDescription className="text-sm leading-relaxed">
 					You will not write code in this lesson—this panel is a cheat sheet you
 					can revisit. You do not need to memorize paths; anchor on where to
@@ -46,11 +46,7 @@ export function RepoMapOrientationPanel({
 			<div className="flex flex-wrap gap-2">
 				{toolVideo ? (
 					<Button variant="default" size="sm" asChild>
-						<a
-							href={toolVideo.href}
-							target="_blank"
-							rel="noopener noreferrer"
-						>
+						<a href={toolVideo.href} target="_blank" rel="noopener noreferrer">
 							{toolVideo.label}
 						</a>
 					</Button>
@@ -60,7 +56,11 @@ export function RepoMapOrientationPanel({
 						<Link
 							href={setupGuide.href}
 							target={setupGuide.kind === "external" ? "_blank" : undefined}
-							rel={setupGuide.kind === "external" ? "noopener noreferrer" : undefined}
+							rel={
+								setupGuide.kind === "external"
+									? "noopener noreferrer"
+									: undefined
+							}
 						>
 							{setupGuide.label}
 						</Link>
@@ -68,13 +68,9 @@ export function RepoMapOrientationPanel({
 				) : null}
 			</div>
 			<Tabs defaultValue="map" className="w-full">
-				<TabsList className="h-auto w-full flex-wrap justify-start gap-1">
-					<TabsTrigger value="map" className="text-xs sm:text-sm">
-						Project map
-					</TabsTrigger>
-					<TabsTrigger value="commands" className="text-xs sm:text-sm">
-						Commands
-					</TabsTrigger>
+				<TabsList className="w-full flex-wrap justify-start">
+					<TabsTrigger value="map">Project map</TabsTrigger>
+					<TabsTrigger value="commands">Commands</TabsTrigger>
 				</TabsList>
 				<TabsContent value="map" className="mt-4">
 					<RepoMapProjectMapTab />

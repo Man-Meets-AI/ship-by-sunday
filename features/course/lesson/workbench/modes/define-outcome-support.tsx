@@ -1,3 +1,5 @@
+import { Separator } from "@/components/ui/separator";
+
 import { getTextValue } from "./define-outcome-support-helpers";
 import { OUTCOME_STATEMENT_BODY_FIELD_ID } from "./define-outcome-constants";
 import { DefineOutcomeCopyStatementButton } from "./define-outcome-copy-statement-button";
@@ -15,8 +17,11 @@ export function DefineOutcomeSupport({
 	return (
 		<div className="space-y-4">
 			<DefineOutcomeGuidanceCard />
+			<Separator />
 			<DefineOutcomeQualityAlerts fieldValues={fieldValues} />
+			<Separator />
 			<DefineOutcomeFutureFormatsAccordion />
+			<Separator />
 			<div className="flex flex-wrap items-center gap-2">
 				<DefineOutcomeCopyStatementButton statement={statement} />
 			</div>

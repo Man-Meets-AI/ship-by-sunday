@@ -17,9 +17,8 @@ import {
 	getStarterRepoTemplateLockReason,
 	type StarterRepoAccessStatus,
 } from "@/features/starter-repo/lib/starter-repo-access-copy";
-import { FieldControl } from "../../fields/field-control";
-import type { PinnedArtifact } from "@/features/course/lesson/shells";
 
+import { BuildProductIterationSetupChecklist } from "./build-product-iteration-setup-checklist";
 import { BuildProductIterationSetupGatingAlert } from "./build-product-iteration-setup-gating-alert";
 import { BuildProductIterationSetupLinks } from "./build-product-iteration-setup-links";
 
@@ -27,7 +26,6 @@ type BuildProductIterationSetupTabProps = {
 	checklistField: WorkbenchField;
 	fieldValues: Record<string, unknown>;
 	onFieldChange: (fieldId: string, value: unknown) => void;
-	pinnedArtifacts: PinnedArtifact[];
 	invalidFieldIds: Set<string>;
 	invalidFieldMessages: Map<string, string>;
 };
@@ -36,7 +34,6 @@ export function BuildProductIterationSetupTab({
 	checklistField,
 	fieldValues,
 	onFieldChange,
-	pinnedArtifacts,
 	invalidFieldIds,
 	invalidFieldMessages,
 }: BuildProductIterationSetupTabProps) {
@@ -96,17 +93,13 @@ export function BuildProductIterationSetupTab({
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-3">
-					<FieldControl
-						field={checklistField}
+					<BuildProductIterationSetupChecklist
+						checklistField={checklistField}
 						value={fieldValues[checklistField.id]}
-						onChange={(value) => onFieldChange(checklistField.id, value)}
-						pinnedArtifacts={pinnedArtifacts}
+						onFieldChange={onFieldChange}
 						invalid={invalid}
-						showLabel={false}
+						message={message}
 					/>
-					{invalid ? (
-						<p className="text-sm text-destructive">{message}</p>
-					) : null}
 				</CardContent>
 			</Card>
 		</div>

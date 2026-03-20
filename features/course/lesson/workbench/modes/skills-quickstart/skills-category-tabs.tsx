@@ -9,6 +9,16 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import {
+	Item,
+	ItemActions,
+	ItemContent,
+	ItemDescription,
+	ItemFooter,
+	ItemGroup,
+	ItemTitle,
+} from "@/components/ui/item";
+import { Kbd } from "@/components/ui/kbd";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { copySkillsText } from "./skills-quickstart-clipboard";
@@ -20,7 +30,9 @@ import {
 	type SkillRole,
 } from "./skills-quickstart-skills-data";
 
-function roleBadgeVariant(role: SkillRole): "default" | "secondary" | "outline" {
+function roleBadgeVariant(
+	role: SkillRole,
+): "default" | "secondary" | "outline" {
 	if (role === "auth") {
 		return "default";
 	}
@@ -33,39 +45,45 @@ function roleBadgeVariant(role: SkillRole): "default" | "secondary" | "outline" 
 function SkillRow({ entry }: { entry: SkillEntry }) {
 	const tagged = `$${entry.slug}`;
 	return (
-		<div className="flex flex-col gap-2 rounded-md border border-border/80 bg-muted/20 px-3 py-2.5 sm:flex-row sm:items-start sm:justify-between">
-			<div className="min-w-0 space-y-1">
-				<div className="flex flex-wrap items-center gap-2">
-					<span className="font-medium text-foreground">{entry.title}</span>
-					<Badge variant={roleBadgeVariant(entry.role)} className="text-[10px]">
+		<Item variant="outline" size="sm">
+			<ItemContent className="min-w-0 flex-1">
+				<ItemTitle className="flex w-full min-w-0 flex-wrap items-center gap-2">
+					<span className="min-w-0">{entry.title}</span>
+					<Badge
+						variant={roleBadgeVariant(entry.role)}
+						className="text-[10px] shrink-0"
+					>
 						{SKILL_ROLE_LABEL[entry.role]}
 					</Badge>
-				</div>
-				<p className="text-xs leading-relaxed text-muted-foreground">
+				</ItemTitle>
+				<ItemDescription className="line-clamp-none text-xs leading-relaxed">
 					{entry.description}
-				</p>
-				<code className="block truncate text-[11px] text-foreground/80">
-					{tagged}
-				</code>
-			</div>
-			<Button
-				type="button"
-				variant="secondary"
-				size="sm"
-				className="shrink-0"
-				onClick={() => void copySkillsText("Copied tag", tagged)}
-			>
-				Copy $tag
-			</Button>
-		</div>
+				</ItemDescription>
+				<ItemFooter className="min-w-0 justify-start">
+					<Kbd className="max-w-full truncate font-mono text-[11px]">
+						{tagged}
+					</Kbd>
+				</ItemFooter>
+			</ItemContent>
+			<ItemActions className="shrink-0">
+				<Button
+					type="button"
+					variant="secondary"
+					size="sm"
+					onClick={() => void copySkillsText("Copied tag", tagged)}
+				>
+					Copy $tag
+				</Button>
+			</ItemActions>
+		</Item>
 	);
 }
 
 export function SkillsCategoryTabs() {
 	return (
 		<Card>
-			<CardHeader className="space-y-1">
-				<CardTitle className="text-base">Skills to recognize</CardTitle>
+			<CardHeader>
+				<CardTitle>Skills to recognize</CardTitle>
 				<CardDescription>
 					Representative specialists from the lesson. Your installed list may
 					differ — match names in Codex / Cursor to what you see here.
@@ -73,18 +91,20 @@ export function SkillsCategoryTabs() {
 			</CardHeader>
 			<CardContent>
 				<Tabs defaultValue="clerk" className="gap-4">
-					<TabsList className="h-auto w-full flex-wrap justify-start gap-1 p-1">
+					<TabsList className="h-auto w-full flex-wrap">
 						{SKILL_TABS.map((tab) => (
-							<TabsTrigger key={tab.id} value={tab.id} className="flex-none">
+							<TabsTrigger key={tab.id} value={tab.id}>
 								{tab.label}
 							</TabsTrigger>
 						))}
 					</TabsList>
 					{SKILL_TABS.map((tab) => (
-						<TabsContent key={tab.id} value={tab.id} className="mt-0 space-y-3">
-							{SKILLS_BY_TAB[tab.id].map((entry) => (
-								<SkillRow key={entry.slug} entry={entry} />
-							))}
+						<TabsContent key={tab.id} value={tab.id} className="mt-0">
+							<ItemGroup className="gap-3">
+								{SKILLS_BY_TAB[tab.id].map((entry) => (
+									<SkillRow key={entry.slug} entry={entry} />
+								))}
+							</ItemGroup>
 						</TabsContent>
 					))}
 				</Tabs>

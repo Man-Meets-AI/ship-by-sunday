@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -80,65 +78,61 @@ export function CompetitorResearchPromptSection({
 	};
 
 	return (
-		<div className="space-y-4">
-			<div className="flex flex-wrap gap-2">
-				<Badge variant="secondary">Lightweight</Badge>
-				<Badge variant="outline">Directional</Badge>
-			</div>
-			<Alert>
-				<AlertDescription>
-					Existing competitors are a positive signal—not a reason to quit.
-					Keep this pass quick and usable, not exhaustive.
-				</AlertDescription>
-			</Alert>
-			<Card>
-				<CardHeader className="space-y-1">
-					<CardTitle className="text-base">{resource.label}</CardTitle>
+		<Card>
+			<CardHeader className="space-y-2">
+				<CardTitle className="text-base">{resource.label}</CardTitle>
+				<CardDescription className="space-y-2">
+					<span className="block">
+						Lightweight, directional pass — quick and usable, not exhaustive.
+					</span>
+					<span className="block">
+						Existing competitors are a positive signal—not a reason to quit.
+					</span>
 					{resource.body ? (
-						<CardDescription>{resource.body}</CardDescription>
+						<span className="block">{resource.body}</span>
 					) : null}
-				</CardHeader>
-				<CardContent className="space-y-3">
-					<div className="flex flex-wrap items-center gap-2">
-						<Button
-							type="button"
-							variant="secondary"
-							size="sm"
-							onClick={copyPrompt}
-							disabled={Boolean(disabledReason)}
-						>
-							{copyState === "copied" ? "Copied" : "Copy prompt"}
-						</Button>
-						<Button type="button" variant="outline" size="sm" asChild>
-							<Link href={`${routeConfig.settings}#codex-connection`}>
-								Connect ChatGPT in settings
-							</Link>
-						</Button>
-					</div>
-					{copyState === "error" && !disabledReason ? (
-						<p className="text-sm text-muted-foreground">
-							Clipboard unavailable. Select and copy from the prompt below.
-						</p>
-					) : null}
-					{disabledReason ? (
-						<p className="text-sm text-muted-foreground">{disabledReason}</p>
-					) : null}
-					{prompt ? (
-						<Textarea
-							readOnly
-							value={prompt}
-							rows={12}
-							className="min-h-[200px] resize-y font-mono text-xs leading-relaxed"
-							aria-label={`${resource.label} full text`}
-						/>
-					) : (
-						<p className="text-sm text-muted-foreground">
-							Save your user and outcome from earlier lessons to generate this
-							prompt.
-						</p>
-					)}
-				</CardContent>
-			</Card>
-		</div>
+				</CardDescription>
+			</CardHeader>
+			<CardContent className="space-y-3">
+				<div className="flex flex-wrap items-center gap-2">
+					<Button
+						type="button"
+						variant="secondary"
+						size="sm"
+						onClick={copyPrompt}
+						disabled={Boolean(disabledReason)}
+					>
+						{copyState === "copied" ? "Copied" : "Copy prompt"}
+					</Button>
+					<Button type="button" variant="outline" size="sm" asChild>
+						<Link href={`${routeConfig.settings}#codex-connection`}>
+							Connect ChatGPT in settings
+						</Link>
+					</Button>
+				</div>
+				{copyState === "error" && !disabledReason ? (
+					<p className="text-sm text-muted-foreground">
+						Clipboard unavailable. Select and copy from the prompt below.
+					</p>
+				) : null}
+				{disabledReason ? (
+					<p className="text-sm text-muted-foreground">{disabledReason}</p>
+				) : null}
+				{prompt ? (
+					<Textarea
+						readOnly
+						value={prompt}
+						rows={12}
+						className="min-h-[200px] resize-y font-mono text-xs leading-relaxed"
+						aria-label={`${resource.label} full text`}
+					/>
+				) : (
+					<p className="text-sm text-muted-foreground">
+						Save your user and outcome from earlier lessons to generate this
+						prompt.
+					</p>
+				)}
+			</CardContent>
+		</Card>
 	);
 }

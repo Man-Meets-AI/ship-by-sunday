@@ -8,6 +8,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 
 type StrategyRow = {
 	key: string;
@@ -28,7 +29,10 @@ const STRATEGY_ROWS: StrategyRow[] = [
 			}
 			const problem = a.fieldValues?.core_problem;
 			if (typeof problem === "string" && problem.trim().length > 0) {
-				return problem.trim().slice(0, 100) + (problem.trim().length > 100 ? "…" : "");
+				return (
+					problem.trim().slice(0, 100) +
+					(problem.trim().length > 100 ? "…" : "")
+				);
 			}
 			const upload = Object.values(a.fieldValues).find(
 				(v) =>
@@ -57,7 +61,9 @@ const STRATEGY_ROWS: StrategyRow[] = [
 				return null;
 			}
 			const t = body.trim();
-			return t.length > 0 ? t.slice(0, 120) + (t.length > 120 ? "…" : "") : null;
+			return t.length > 0
+				? t.slice(0, 120) + (t.length > 120 ? "…" : "")
+				: null;
 		},
 	},
 	{
@@ -106,30 +112,34 @@ export function BuildSetupLaunchpadStrategyCard({
 			<CardHeader className="space-y-1">
 				<CardTitle className="text-base">Next lesson uses these</CardTitle>
 				<CardDescription>
-					Have your day-one notes visible—especially before you edit the marketing page.
+					Have your day-one notes visible—especially before you edit the
+					marketing page.
 				</CardDescription>
 			</CardHeader>
-			<CardContent className="space-y-3">
-				{STRATEGY_ROWS.map((row) => {
-					const preview = row.read(pinnedArtifacts);
-					return (
-						<div
-							key={row.key}
-							className="rounded-md border border-border/80 bg-muted/20 px-3 py-2"
-						>
-							<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-								{row.label}
-							</p>
-							<p className="mt-1 text-sm text-foreground">
-								{preview ?? (
-									<span className="text-muted-foreground">
-										Not pinned yet — {row.fieldHint}
-									</span>
-								)}
-							</p>
-						</div>
-					);
-				})}
+			<CardContent>
+				<Table>
+					<TableBody>
+						{STRATEGY_ROWS.map((row) => {
+							const preview = row.read(pinnedArtifacts);
+							return (
+								<TableRow key={row.key}>
+									<TableCell className="w-[38%] align-top font-medium whitespace-normal">
+										{row.label}
+									</TableCell>
+									<TableCell className="align-top whitespace-normal">
+										{preview ? (
+											<span className="text-foreground">{preview}</span>
+										) : (
+											<span className="text-muted-foreground">
+												Not pinned yet — {row.fieldHint}
+											</span>
+										)}
+									</TableCell>
+								</TableRow>
+							);
+						})}
+					</TableBody>
+				</Table>
 			</CardContent>
 		</Card>
 	);

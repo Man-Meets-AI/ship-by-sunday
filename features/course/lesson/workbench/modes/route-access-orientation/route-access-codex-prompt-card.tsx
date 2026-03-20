@@ -8,10 +8,16 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import {
+	Field,
+	FieldContent,
+	FieldDescription,
+	FieldLabel,
+} from "@/components/ui/field";
+import { Textarea } from "@/components/ui/textarea";
 import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
-import type { PinnedArtifact } from "@/features/course/lesson/shells";
 
-import { FieldControl } from "../../fields/field-control";
+import { inputWidthClass } from "../../fields/field-styles";
 import { copyRouteAccessText } from "./route-access-orientation-clipboard";
 import { ROUTE_ACCESS_CODEX_PROMPT_DEFAULT } from "./route-access-orientation-constants";
 
@@ -20,7 +26,6 @@ type Props = {
 	value: unknown;
 	onChange: (value: unknown) => void;
 	invalid: boolean;
-	pinnedArtifacts: PinnedArtifact[];
 };
 
 export function RouteAccessCodexPromptCard({
@@ -28,9 +33,8 @@ export function RouteAccessCodexPromptCard({
 	value,
 	onChange,
 	invalid,
-	pinnedArtifacts,
 }: Props) {
-	if (!field) {
+	if (!field || field.kind !== "textarea") {
 		return null;
 	}
 
@@ -38,6 +42,10 @@ export function RouteAccessCodexPromptCard({
 		typeof value === "string" && value.trim()
 			? value
 			: ROUTE_ACCESS_CODEX_PROMPT_DEFAULT;
+
+	const help = field.helpText ? (
+		<FieldDescription>{field.helpText}</FieldDescription>
+	) : null;
 
 	return (
 		<Card>
@@ -51,13 +59,23 @@ export function RouteAccessCodexPromptCard({
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-3">
-				<FieldControl
-					field={field}
-					value={value}
-					onChange={onChange}
-					pinnedArtifacts={pinnedArtifacts}
-					invalid={invalid}
-				/>
+				<Field
+					className={inputWidthClass(field)}
+					data-invalid={invalid || undefined}
+				>
+					<FieldLabel htmlFor={field.id}>{field.label}</FieldLabel>
+					{help}
+					<FieldContent>
+						<Textarea
+							id={field.id}
+							value={typeof value === "string" ? value : ""}
+							onChange={(event) => onChange(event.target.value)}
+							rows={field.rows ?? 5}
+							placeholder={field.placeholder}
+							aria-invalid={invalid}
+						/>
+					</FieldContent>
+				</Field>
 				<Button
 					type="button"
 					variant="secondary"

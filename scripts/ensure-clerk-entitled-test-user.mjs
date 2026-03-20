@@ -25,7 +25,7 @@ function runConvexGrant({ clerkUserId, courseSlug }) {
 				source: "manual",
 			}),
 		];
-		const child = spawn("pnpm", args, {
+		const child = spawn("bunx", args, {
 			stdio: ["ignore", "pipe", "pipe"],
 		});
 
@@ -146,7 +146,7 @@ export async function runCli({
 			exitCode: 1,
 			payload: result("error", {
 				message:
-					"Convex product access grant failed. Make sure `pnpm run dev:convex` is running for local QA.",
+					"Convex product access grant failed. Make sure `bun run dev:convex` is running for local QA.",
 				clerkUserId: ensureResult.clerkUserId,
 				scope: account.scope,
 				courseSlug,

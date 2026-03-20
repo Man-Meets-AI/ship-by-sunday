@@ -36,18 +36,15 @@ export function TextHoverEffect({
 		}
 	}, [cursor]);
 
-	const textClass =
-		"fill-transparent font-[helvetica] text-7xl font-bold [text-rendering:geometricPrecision]";
-	const strokeClass = "stroke-neutral-950 dark:stroke-neutral-200";
-	const fillClass =
-		"fill-current font-[helvetica] text-7xl font-bold text-foreground [text-rendering:geometricPrecision]";
+	const fontClass =
+		"font-[helvetica] text-7xl font-bold [text-rendering:geometricPrecision]";
 
 	return (
 		<svg
 			ref={svgRef}
 			width="100%"
 			height="100%"
-			viewBox="0 0 300 100"
+			viewBox="0 0 400 100"
 			xmlns="http://www.w3.org/2000/svg"
 			onMouseEnter={() => setHovered(true)}
 			onMouseLeave={() => setHovered(false)}
@@ -71,7 +68,7 @@ export function TextHoverEffect({
 				<motion.radialGradient
 					id={revealMaskId}
 					gradientUnits="userSpaceOnUse"
-					r="20%"
+					r="30%"
 					initial={{ cx: "50%", cy: "50%" }}
 					animate={maskPosition}
 					transition={{ duration: duration ?? 0, ease: "easeOut" }}
@@ -94,7 +91,7 @@ export function TextHoverEffect({
 				y="50%"
 				textAnchor="middle"
 				dominantBaseline="middle"
-				className={fillClass}
+				className={`fill-current text-foreground ${fontClass}`}
 			>
 				{text}
 			</text>
@@ -103,40 +100,9 @@ export function TextHoverEffect({
 				y="50%"
 				textAnchor="middle"
 				dominantBaseline="middle"
-				strokeWidth="0.3"
-				className={`${textClass} ${strokeClass}`}
-				style={{ opacity: hovered ? 0.7 : 0 }}
-			>
-				{text}
-			</text>
-			<motion.text
-				x="50%"
-				y="50%"
-				textAnchor="middle"
-				dominantBaseline="middle"
-				strokeWidth="0.3"
-				className={`${textClass} ${strokeClass}`}
-				initial={{ strokeDashoffset: 1000, strokeDasharray: 1000 }}
-				animate={{
-					strokeDashoffset: 0,
-					strokeDasharray: 1000,
-				}}
-				transition={{
-					duration: 4,
-					ease: "easeInOut",
-				}}
-			>
-				{text}
-			</motion.text>
-			<text
-				x="50%"
-				y="50%"
-				textAnchor="middle"
-				dominantBaseline="middle"
-				stroke={`url(#${textGradientId})`}
-				strokeWidth="0.3"
+				fill={`url(#${textGradientId})`}
 				mask={`url(#${textMaskId})`}
-				className={textClass}
+				className={fontClass}
 			>
 				{text}
 			</text>

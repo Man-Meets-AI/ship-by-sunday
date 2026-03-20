@@ -2,13 +2,10 @@
 
 import { useState } from "react";
 
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-	ToggleGroup,
-	ToggleGroupItem,
-} from "@/components/ui/toggle-group";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { courseResourceConfig } from "@/config/product";
 
 import {
@@ -18,6 +15,7 @@ import {
 	CEO_SKILLS_WORKFLOW_STEPS,
 	type CeoSkillsStageKey,
 } from "./ceo-skills-lesson-constants";
+import { CeoSkillsCodexSkillExamplesList } from "./ceo-skills-codex-skill-examples-list";
 
 export function CeoSkillsCodexConceptTabs() {
 	const [stage, setStage] = useState<CeoSkillsStageKey>("strategy");
@@ -44,27 +42,26 @@ export function CeoSkillsCodexConceptTabs() {
 					Codex is organized around{" "}
 					<span className="font-medium text-foreground">threads</span> (the
 					conversation),{" "}
-					<span className="font-medium text-foreground">projects</span> (folders /
-					workspaces), and{" "}
-					<span className="font-medium text-foreground">skills</span> (reusable job
-					descriptions Codex can invoke).
+					<span className="font-medium text-foreground">projects</span> (folders
+					/ workspaces), and{" "}
+					<span className="font-medium text-foreground">skills</span> (reusable
+					job descriptions Codex can invoke).
 				</p>
 				<p>
 					On desktop you can jump to skills via{" "}
-					<a
-						className="font-medium text-primary underline-offset-4 hover:underline"
-						href={courseResourceConfig.codexLesson.codexSkillsDeeplink}
-					>
-						Open Skills (codex://skills)
-					</a>
+					<Button variant="link" className="h-auto min-h-0 p-0" asChild>
+						<a href={courseResourceConfig.codexLesson.codexSkillsDeeplink}>
+							Open Skills (codex://skills)
+						</a>
+					</Button>
 					—useful once the app is installed.
 				</p>
 			</TabsContent>
 			<TabsContent value="skills" className="mt-3 space-y-4">
 				<p className="text-sm leading-relaxed text-muted-foreground">
 					Filter examples by stage—this is a{" "}
-					<span className="font-medium text-foreground">guided subset</span>, not the
-					full Codex catalog.
+					<span className="font-medium text-foreground">guided subset</span>,
+					not the full Codex catalog.
 				</p>
 				<ToggleGroup
 					type="single"
@@ -77,46 +74,30 @@ export function CeoSkillsCodexConceptTabs() {
 					className="flex flex-wrap justify-start gap-1"
 				>
 					{CEO_SKILLS_STAGE_KEYS.map((key) => (
-						<ToggleGroupItem key={key} value={key} className="text-xs sm:text-sm">
+						<ToggleGroupItem
+							key={key}
+							value={key}
+							className="text-xs sm:text-sm"
+						>
 							{CEO_SKILLS_STAGE_LABEL[key]}
 						</ToggleGroupItem>
 					))}
 				</ToggleGroup>
-				<ul className="space-y-3">
-					{filtered.map((item) => (
-						<li
-							key={item.id}
-							className="rounded-lg border border-border bg-card/50 px-3 py-2.5"
-						>
-							<div className="flex flex-wrap items-center gap-2">
-								<span className="text-sm font-medium text-foreground">
-									{item.title}
-								</span>
-								{item.badges.map((b) => (
-									<Badge key={b} variant="secondary" className="text-[10px]">
-										{b}
-									</Badge>
-								))}
-							</div>
-							<p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-								{item.body}
-							</p>
-						</li>
-					))}
-				</ul>
+				<CeoSkillsCodexSkillExamplesList examples={filtered} />
 				<Separator />
 				<p className="text-xs leading-relaxed text-muted-foreground">
 					Browse the live catalog on{" "}
-					<a
-						className="font-medium text-primary underline-offset-4 hover:underline"
-						href={courseResourceConfig.codexLesson.openaiSkillsRepo}
-						target="_blank"
-						rel="noreferrer"
-					>
-						github.com/openai/skills
-					</a>
-					—including official examples such as Convex-related skills when you are
-					ready.
+					<Button variant="link" className="h-auto min-h-0 p-0 text-xs" asChild>
+						<a
+							href={courseResourceConfig.codexLesson.openaiSkillsRepo}
+							target="_blank"
+							rel="noreferrer"
+						>
+							github.com/openai/skills
+						</a>
+					</Button>
+					—including official examples such as Convex-related skills when you
+					are ready.
 				</p>
 			</TabsContent>
 			<TabsContent
@@ -125,8 +106,8 @@ export function CeoSkillsCodexConceptTabs() {
 			>
 				<p>
 					The course follows a simple{" "}
-					<span className="font-medium text-foreground">0 → 1</span> spine: decide,
-					clarify, ship a small version.
+					<span className="font-medium text-foreground">0 → 1</span> spine:
+					decide, clarify, ship a small version.
 				</p>
 				<ol className="list-decimal space-y-2 pl-4">
 					{CEO_SKILLS_WORKFLOW_STEPS.map((step) => (

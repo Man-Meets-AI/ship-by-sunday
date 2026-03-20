@@ -14,7 +14,7 @@
 1. Install dependencies:
 
 ```bash
-pnpm install
+bun install
 ```
 
 2. Copy the tracked env template:
@@ -28,14 +28,14 @@ Set `APP_BASE_URL` to the canonical host you want Stripe to use for checkout suc
 3. Start the full local stack:
 
 ```bash
-pnpm run dev
+bun run dev
 ```
 
 If you only need one side of the app:
 
 ```bash
-pnpm run dev:web
-pnpm run dev:convex
+bun run dev:web
+bun run dev:convex
 ```
 
 ## Codex Integration
@@ -48,14 +48,14 @@ The optional in-app Codex account and generation routes require a runtime that c
 ## Common Commands
 
 ```bash
-pnpm run typecheck
-pnpm run lint
-pnpm run test:unit
-pnpm run test:contracts
-pnpm run test:integration
-pnpm run test:browser-smoke
-pnpm run build
-pnpm run check
+bun run typecheck
+bun run lint
+bun run test:unit
+bun run test:contracts
+bun run test:integration
+bun run test:browser-smoke
+bun run build
+bun run check
 ```
 
 The full testing runbook lives in [docs/dev/testing.md](docs/dev/testing.md).
@@ -63,9 +63,9 @@ The full testing runbook lives in [docs/dev/testing.md](docs/dev/testing.md).
 For local Stripe checkout testing, use:
 
 ```bash
-pnpm run stripe:listen:local
-pnpm run stripe:local:doctor
-pnpm run stripe:local:verify
+bun run stripe:listen:local
+bun run stripe:local:doctor
+bun run stripe:local:verify
 ```
 
 The purchase-to-access behavior contract lives in [docs/delivery-onboarding/stack-decision.md](docs/delivery-onboarding/stack-decision.md).
@@ -76,7 +76,7 @@ The purchase-to-access behavior contract lives in [docs/delivery-onboarding/stac
 - Landing-page copy, offer framing, and media: `features/marketing/components/home-page.tsx`, `features/marketing/components/faq-accordion.tsx`, and `public/`
 - Student workspace UI and shell behavior: `features/course/` plus the protected route group in `app/(app)/`
 - Theme tokens and visual language: `app/globals.css`
-- Purchase, product-access, and access flow: `app/api/stripe/*`, `features/checkout/`, `features/product-access/`, `convex/access.ts`, and `convex/course/`
+- Purchase, product-access, and access flow: `app/api/stripe/checkout`, `features/checkout/`, `features/product-access/`, `convex/access.ts`, `convex/http.ts`, and `convex/course/`
 - Optional starter-template and Codex-assisted build helpers: `.env.local.example`, `scripts/`, `app/api/codex/*`, and `features/codex/`
 
 More detail: [docs/dev/customization.md](docs/dev/customization.md)

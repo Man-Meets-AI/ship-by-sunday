@@ -4,7 +4,7 @@ import path from "node:path";
 import Stripe from "stripe";
 
 const WEBHOOK_ENV_KEY = "STRIPE_WEBHOOK_SECRET";
-const DEFAULT_FORWARD_URL = "localhost:3000/api/stripe/webhook";
+const STRIPE_SECRET_ENV_KEY = "STRIPE_SECRET_KEY";
 const ENV_FILE_PATH = path.join(process.cwd(), ".env.local");
 const CONVEX_BIN_PATH = path.join(
 	process.cwd(),
@@ -27,14 +27,23 @@ function printUsage() {
   node --env-file=.env.local scripts/local-stripe-webhook.mjs sync --secret whsec_...
 
 Commands:
-  listen   Start stripe listen against STRIPE_SECRET_KEY, then sync the printed webhook secret into .env.local and Convex env.
+  listen   Start stripe listen against STRIPE_SECRET_KEY, then sync the printed webhook secret plus Stripe secret into Convex env.
   sync     Sync a provided webhook secret into .env.local and Convex env without starting a listener.`);
+}
+
+function getDefaultForwardUrl() {
+	const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL?.trim();
+	if (!convexUrl) {
+		throw new Error("Missing NEXT_PUBLIC_CONVEX_URL in .env.local.");
+	}
+
+	return `${convexUrl.replace(/\/$/, "")}/stripe/webhook`;
 }
 
 function parseArgs(argv) {
 	const [command = "listen", ...rest] = argv;
 	let secret = null;
-	let forwardTo = DEFAULT_FORWARD_URL;
+	let forwardTo = null;
 
 	for (let index = 0; index < rest.length; index += 1) {
 		const current = rest[index];
@@ -147,18 +156,18 @@ async function updateEnvFile(secret) {
 	return "unchanged";
 }
 
-async function syncConvexEnv(secret) {
+async function syncConvexEnv(key, value) {
 	const result = await runCommand(process.execPath, [
 		CONVEX_BIN_PATH,
 		"env",
 		"set",
-		WEBHOOK_ENV_KEY,
-		secret,
+		key,
+		value,
 	]);
 
 	if (result.code !== 0) {
 		throw new Error(
-			`Failed to sync Convex env: ${stripAnsi(result.stderr || result.stdout).trim()}`,
+			`Failed to sync Convex env ${key}: ${stripAnsi(result.stderr || result.stdout).trim()}`,
 		);
 	}
 
@@ -171,13 +180,20 @@ async function syncWebhookSecret(secret) {
 	}
 
 	const envFileStatus = await updateEnvFile(secret);
-	const convexStatus = await syncConvexEnv(secret);
+	const convexWebhookStatus = await syncConvexEnv(WEBHOOK_ENV_KEY, secret);
+	const stripeSecretKey = process.env[STRIPE_SECRET_ENV_KEY]?.trim();
+	const convexStripeSecretStatus = stripeSecretKey
+		? await syncConvexEnv(STRIPE_SECRET_ENV_KEY, stripeSecretKey)
+		: "skipped (missing STRIPE_SECRET_KEY in app env)";
 
 	console.log(`Synced ${WEBHOOK_ENV_KEY}:`);
 	console.log(`- .env.local: ${envFileStatus}`);
-	console.log(`- Convex env: ${convexStatus}`);
+	console.log(`- Convex env (${WEBHOOK_ENV_KEY}): ${convexWebhookStatus}`);
 	console.log(
-		"- Restart `pnpm run dev:web` if it was already running before the secret changed.",
+		`- Convex env (${STRIPE_SECRET_ENV_KEY}): ${convexStripeSecretStatus}`,
+	);
+	console.log(
+		"- Restart `bun run dev:web` if it was already running before the secret changed.",
 	);
 }
 
@@ -195,7 +211,7 @@ async function runListenMode(forwardTo) {
 	await ensureStripeCliAvailable();
 	const account = await getStripeAccountSummary();
 	console.log(`Stripe account: ${account.displayName} (${account.id})`);
-	console.log(`Forward target: http://${forwardTo}`);
+	console.log(`Forward target: ${forwardTo}`);
 
 	const child = spawn(
 		"stripe",
@@ -265,6 +281,7 @@ async function runListenMode(forwardTo) {
 }
 
 const { command, secret, forwardTo } = parseArgs(process.argv.slice(2));
+const resolvedForwardTo = forwardTo ?? getDefaultForwardUrl();
 
 if (command === "help") {
 	printUsage();
@@ -280,7 +297,7 @@ try {
 	if (command === "sync") {
 		await runSyncMode(secret);
 	} else {
-		await runListenMode(forwardTo);
+		await runListenMode(resolvedForwardTo);
 	}
 } catch (error) {
 	console.error(

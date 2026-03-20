@@ -1,20 +1,28 @@
+"use client";
+
 import {
 	Card,
 	CardDescription,
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+	Field,
+	FieldContent,
+	FieldLabel,
+} from "@/components/ui/field";
+import { assert } from "@/features/course/lesson/lib/assert";
 import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
-import type { PinnedArtifact } from "@/features/course/lesson/shells";
 
-import { FieldControl } from "../../fields/field-control";
+import { renderChecklistLabel } from "../../fields/checklist-label";
+import { normalizeChecklistValue } from "../../fields/value-codecs";
 
 type Props = {
 	field: WorkbenchField | undefined;
 	value: unknown;
 	onChange: (value: unknown) => void;
 	invalid: boolean;
-	pinnedArtifacts: PinnedArtifact[];
 };
 
 export function RouteAccessInspectionChecklist({
@@ -22,11 +30,18 @@ export function RouteAccessInspectionChecklist({
 	value,
 	onChange,
 	invalid,
-	pinnedArtifacts,
 }: Props) {
-	if (!field) {
+	if (!field || field.kind !== "checklist") {
 		return null;
 	}
+
+	assert(
+		field.options,
+		`Checklist field "${field.id}" is missing options.`,
+	);
+
+	const checklistOptions = field.options;
+	const checklistItems = normalizeChecklistValue(value, checklistOptions);
 
 	return (
 		<Card>
@@ -39,13 +54,41 @@ export function RouteAccessInspectionChecklist({
 				</CardDescription>
 			</CardHeader>
 			<div className="px-6 pb-6">
-				<FieldControl
-					field={field}
-					value={value}
-					onChange={onChange}
-					pinnedArtifacts={pinnedArtifacts}
-					invalid={invalid}
-				/>
+				<Field className="block w-full" data-invalid={invalid || undefined}>
+					<FieldLabel>{field.label}</FieldLabel>
+					<FieldContent>
+						<div className="divide-y divide-border overflow-hidden rounded-lg border border-border">
+							{checklistItems.map((item, index) => {
+								const optionId = `${field.id}-${index}`;
+								return (
+									<label
+										key={`${field.id}-${index}`}
+										htmlFor={optionId}
+										className="flex cursor-pointer items-start gap-3 px-3 py-2.5"
+									>
+										<Checkbox
+											id={optionId}
+											checked={item.checked}
+											className="mt-0.5"
+											onCheckedChange={(nextChecked) => {
+												const nextItems = checklistItems.map(
+													(current, currentIndex) =>
+														currentIndex === index
+															? { ...current, checked: Boolean(nextChecked) }
+															: current,
+												);
+												onChange(nextItems);
+											}}
+										/>
+										<span className="min-w-0 flex-1 text-sm leading-relaxed font-normal text-foreground">
+											{renderChecklistLabel(item.label)}
+										</span>
+									</label>
+								);
+							})}
+						</div>
+					</FieldContent>
+				</Field>
 			</div>
 		</Card>
 	);

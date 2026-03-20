@@ -4,11 +4,11 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function BrandKitAlerts() {
 	return (
-		<div className="flex flex-col gap-3">
+		<div className="space-y-3">
 			<Alert>
 				<InfoIcon className="size-4" />
 				<AlertTitle>Keep branding simple</AlertTitle>
-				<AlertDescription className="text-muted-foreground">
+				<AlertDescription>
 					One square icon, one wordmark for the header, and no more than one
 					primary plus one accent color. You can always refine later.
 				</AlertDescription>

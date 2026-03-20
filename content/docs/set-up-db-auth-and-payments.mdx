@@ -29,14 +29,14 @@ Clerk identifies the user. Convex stores product access and product state. Strip
 3. Start or refresh Convex so the app gets the current `NEXT_PUBLIC_CONVEX_URL`.
 4. Follow [Stripe Checkout + Webhook](/docs/stripe-checkout-webhook).
 5. Create the Stripe product and price from the repo scripts.
-6. Start the local Stripe listener and let it sync the current webhook secret.
+6. Start the local Stripe listener and let it sync the current webhook secret plus Stripe secret into Convex.
 
 ## Safety rules
 
 - Start in test mode or a safe sandbox first.
 - Do not start with live Stripe mode.
 - Restart the app if the Stripe listener writes a new webhook secret.
-- Keep the app and Convex on the same webhook secret.
+- Keep the app and Convex on the same webhook secret and Stripe secret key.
 
 ## What success looks like
 

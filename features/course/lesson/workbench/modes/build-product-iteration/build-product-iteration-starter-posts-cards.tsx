@@ -8,10 +8,10 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { copyCoursePromptToClipboard } from "@/features/course/lesson/lib/copy-course-prompt";
 import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
-
-import { BuildProductIterationTextareaField } from "./build-product-iteration-textarea-field";
 
 type Props = {
 	starterField: WorkbenchField | undefined;
@@ -72,13 +72,28 @@ export function BuildProductIterationStarterPostsCards({
 				</CardHeader>
 				<CardContent>
 					{starterField ? (
-						<BuildProductIterationTextareaField
-							field={starterField}
-							value={starterVal}
-							onChange={(next) => onFieldChange(starterField.id, next)}
-							invalid={invalidFieldIds.has(starterField.id)}
-							message={fieldMessage(starterField.id)}
-						/>
+						<div className="space-y-2">
+							<Label htmlFor={starterField.id}>{starterField.label}</Label>
+							<Textarea
+								id={starterField.id}
+								rows={starterField.rows ?? 6}
+								placeholder={starterField.placeholder}
+								value={starterVal}
+								onChange={(event) =>
+									onFieldChange(starterField.id, event.target.value)
+								}
+								className={
+									invalidFieldIds.has(starterField.id)
+										? "border-destructive"
+										: undefined
+								}
+							/>
+							{fieldMessage(starterField.id) ? (
+								<p className="text-sm text-destructive">
+									{fieldMessage(starterField.id)}
+								</p>
+							) : null}
+						</div>
 					) : null}
 				</CardContent>
 			</Card>
@@ -92,20 +107,38 @@ export function BuildProductIterationStarterPostsCards({
 							output, not only setup.
 						</CardDescription>
 					</div>
-					<Button type="button" size="sm" variant="outline" onClick={copyExport}>
+					<Button
+						type="button"
+						size="sm"
+						variant="outline"
+						onClick={copyExport}
+					>
 						Export all outputs
 					</Button>
 				</CardHeader>
 				<CardContent>
 					{postsField ? (
 						<div className="space-y-2">
-							<BuildProductIterationTextareaField
-								field={postsField}
+							<Label htmlFor={postsField.id}>{postsField.label}</Label>
+							<Textarea
+								id={postsField.id}
+								rows={postsField.rows ?? 6}
+								placeholder={postsField.placeholder}
 								value={postsVal}
-								onChange={(next) => onFieldChange(postsField.id, next)}
-								invalid={invalidFieldIds.has(postsField.id)}
-								message={fieldMessage(postsField.id)}
+								onChange={(event) =>
+									onFieldChange(postsField.id, event.target.value)
+								}
+								className={
+									invalidFieldIds.has(postsField.id)
+										? "border-destructive"
+										: undefined
+								}
 							/>
+							{fieldMessage(postsField.id) ? (
+								<p className="text-sm text-destructive">
+									{fieldMessage(postsField.id)}
+								</p>
+							) : null}
 							<Button
 								type="button"
 								size="sm"

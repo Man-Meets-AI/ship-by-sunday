@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
+import { Spinner } from "@/components/ui/spinner";
 import type { RequestState } from "@/features/codex/lib/codex-connection-card";
 
 export function CodexConnectionCardActions({
@@ -17,7 +19,7 @@ export function CodexConnectionCardActions({
 	onDisconnectAccount: () => Promise<void>;
 }) {
 	return (
-		<div className="flex flex-wrap items-center gap-2">
+		<ButtonGroup>
 			{connected ? (
 				<>
 					<Button
@@ -27,9 +29,14 @@ export function CodexConnectionCardActions({
 						variant="outline"
 						size="sm"
 					>
-						{requestState === "refreshing_limits"
-							? "Refreshing..."
-							: "Refresh limits"}
+						{requestState === "refreshing_limits" ? (
+							<>
+								<Spinner className="size-3.5" />
+								Refresh
+							</>
+						) : (
+							"Refresh limits"
+						)}
 					</Button>
 					<Button
 						type="button"
@@ -38,9 +45,14 @@ export function CodexConnectionCardActions({
 						variant="destructive"
 						size="sm"
 					>
-						{requestState === "disconnecting"
-							? "Disconnecting..."
-							: "Disconnect"}
+						{requestState === "disconnecting" ? (
+							<>
+								<Spinner className="size-3.5" />
+								Disconnect
+							</>
+						) : (
+							"Disconnect"
+						)}
 					</Button>
 				</>
 			) : (
@@ -52,9 +64,14 @@ export function CodexConnectionCardActions({
 						variant="secondary"
 						size="sm"
 					>
-						{requestState === "starting_login"
-							? "Opening login..."
-							: "Connect Codex account"}
+						{requestState === "starting_login" ? (
+							<>
+								<Spinner className="size-3.5" />
+								Connect
+							</>
+						) : (
+							"Connect Codex account"
+						)}
 					</Button>
 					<Button
 						type="button"
@@ -63,10 +80,17 @@ export function CodexConnectionCardActions({
 						variant="outline"
 						size="sm"
 					>
-						{requestState === "polling" ? "Checking..." : "Check login status"}
+						{requestState === "polling" ? (
+							<>
+								<Spinner className="size-3.5" />
+								Check
+							</>
+						) : (
+							"Check login status"
+						)}
 					</Button>
 				</>
 			)}
-		</div>
+		</ButtonGroup>
 	);
 }

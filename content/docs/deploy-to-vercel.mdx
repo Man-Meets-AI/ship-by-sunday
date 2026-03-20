@@ -29,13 +29,14 @@ Prepare production values in your hosting dashboards and provider dashboards. Mi
 
 ## Convex checklist
 
-Convex production must match the same production auth and webhook values used by the app.
+Convex production must match the same production auth and Stripe values used by the app.
 
 Do not leave Convex pointed at:
 
 - an old Clerk instance
 - a dev Clerk instance
 - an outdated Stripe webhook secret
+- a mismatched Stripe secret key
 
 ## Post-deploy verification
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ArtifactContext } from "../../shared/artifact-context";
 import { FocusInlineLessonVideo } from "../../shared/focus-inline-lesson-video";
@@ -42,26 +43,28 @@ export function BuildShipRoadmapWorkbench({
 				onFieldChange={onFieldChange}
 				invalidFieldIds={invalidFieldIds}
 			/>
-			<Separator className="bg-border" />
-			<div className="space-y-2">
-				<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-					Quick definitions
-				</p>
-				<BuildShipRoadmapConceptsAccordion />
-			</div>
-			<Separator className="bg-border" />
-			<div className="space-y-2">
-				<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-					Save your outputs
-				</p>
-				<BuildShipRoadmapOutputs
-					fields={fields}
-					fieldValues={fieldValues}
-					onFieldChange={onFieldChange}
-					pinnedArtifacts={pinnedArtifacts}
-					invalidFieldIds={invalidFieldIds}
-				/>
-			</div>
+			<Card>
+				<CardHeader>
+					<CardTitle className="text-base">Quick definitions</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<BuildShipRoadmapConceptsAccordion />
+				</CardContent>
+			</Card>
+			<Card>
+				<CardHeader>
+					<CardTitle className="text-base">Save your outputs</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<BuildShipRoadmapOutputs
+						fields={fields}
+						fieldValues={fieldValues}
+						onFieldChange={onFieldChange}
+						pinnedArtifacts={pinnedArtifacts}
+						invalidFieldIds={invalidFieldIds}
+					/>
+				</CardContent>
+			</Card>
 			<ArtifactContext pinnedArtifacts={pinnedArtifacts} />
 		</div>
 	);

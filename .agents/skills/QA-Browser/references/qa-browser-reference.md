@@ -15,9 +15,9 @@ For this repo, use two QA identities:
 
 Helper commands:
 
-- non-entitled check/create: `pnpm run clerk:test-user:check` / `pnpm run clerk:test-user:create`
-- entitled check/create: `pnpm run clerk:test-user:check:entitled` / `pnpm run clerk:test-user:create:entitled`
-- entitled prepare (create + grant entitlement): `pnpm run clerk:test-user:prepare:entitled`
+- non-entitled check/create: `bun run clerk:test-user:check` / `bun run clerk:test-user:create`
+- entitled check/create: `bun run clerk:test-user:check:entitled` / `bun run clerk:test-user:create:entitled`
+- entitled prepare (create + grant entitlement): `bun run clerk:test-user:prepare:entitled`
 
 ## Input Contract
 
@@ -50,9 +50,9 @@ Use this only for this repo or another repo the user explicitly confirms shares 
 Before `auth smoke`, `protected route`, or an auth-dependent `post-purchase access` pass:
 
 1. Inspect the sign-in surface first.
-2. If password auth is clearly available, run `pnpm run clerk:test-user:check`.
-3. If that returns `missing`, ask once before running `pnpm run clerk:test-user:create`.
-4. For mission/lesson QA that requires entitlement, run `pnpm run clerk:test-user:prepare:entitled` first and use the entitled account from the canonical JSON file.
+2. If password auth is clearly available, run `bun run clerk:test-user:check`.
+3. If that returns `missing`, ask once before running `bun run clerk:test-user:create`.
+4. For mission/lesson QA that requires entitlement, run `bun run clerk:test-user:prepare:entitled` first and use the entitled account from the canonical JSON file.
 5. If the sign-in surface is SSO-only, enterprise-domain-routed, magic-link-only, passkey-only, social-only, OTP-only, or otherwise incompatible with the shared password user, stop and ask for the correct test identity or SSO instructions.
 
 Do not attempt Clerk provisioning on arbitrary non-repo apps unless the user explicitly says they use the same Clerk instance or supplies an equivalent admin helper.

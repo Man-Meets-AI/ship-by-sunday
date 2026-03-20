@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { apiRouteConfig, timingConfig } from "@/config/product";
 import { assertNever } from "@/features/course/lesson/lib/assert";
@@ -13,7 +13,6 @@ import {
 } from "@/features/course/lesson/model/research-prompt";
 
 import type { WorkbenchModeProps } from "../types";
-import { WorkbenchCard } from "./workbench-card";
 
 type PromptImportUiCopy = {
 	cardLabel: string;
@@ -356,162 +355,169 @@ function PromptImportCardBody({
 	};
 
 	return (
-		<WorkbenchCard label={uiCopy.cardLabel}>
-			<div className="space-y-3">
-				<div className="space-y-1.5">
-					<p className="text-[14px] leading-[1.7] text-foreground">
-						{uiCopy.summary}
-					</p>
-					<p className="text-[13px] leading-[1.7] text-muted-foreground">
-						{uiCopy.workflowHint}
-					</p>
-				</div>
-
-				{promptState.disabledReason ? (
-					<p className="text-[13px] leading-[1.7] text-muted-foreground">
-						{promptState.disabledReason}
-					</p>
-				) : (
-					<p className="text-[13px] leading-[1.7] text-muted-foreground">
-						{uiCopy.enabledNote}
-					</p>
-				)}
-
-				<div className="flex flex-wrap items-center gap-2">
-					{uiCopy.collapsedByDefault ? (
-						<Button
-							type="button"
-							onClick={toggleAssistTools}
-							variant="outline"
-							size="sm"
-						>
-							{isAssistToolsOpen
-								? "Hide AI starter"
-								: (uiCopy.launcherLabel ?? "Open AI assist")}
-						</Button>
-					) : null}
-					{isAssistToolsOpen ? (
-						<>
-							<Button
-								type="button"
-								onClick={copyPrompt}
-								disabled={Boolean(promptState.disabledReason)}
-								variant="secondary"
-								size="sm"
-							>
-								{copyState === "copied" ? "Copied" : "Copy prompt"}
-							</Button>
-							<Button
-								type="button"
-								onClick={() => void generateWithCodex()}
-								disabled={Boolean(promptState.disabledReason) || isGenerating}
-								variant="outline"
-								size="sm"
-							>
-								{isGenerating ? "Generating..." : "Generate with Codex"}
-							</Button>
-							<Button
-								type="button"
-								onClick={() => togglePanel("paste")}
-								variant="outline"
-								size="sm"
-							>
-								{activePanel === "paste"
-									? "Hide paste box"
-									: uiCopy.pasteToggleLabel}
-							</Button>
-							<Button
-								type="button"
-								onClick={() => togglePanel("prompt")}
-								variant="outline"
-								size="sm"
-							>
-								{activePanel === "prompt" ? "Hide prompt" : "View prompt"}
-							</Button>
-						</>
-					) : null}
-					{copyState === "error" && !promptState.disabledReason ? (
-						<p className="text-[12px] leading-[1.6] text-muted-foreground">
-							Clipboard unavailable. Copy from the prompt block below.
+		<Card className="gap-0 py-0">
+			<CardHeader className="border-b border-border/60 pb-4">
+				<CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+					{uiCopy.cardLabel}
+				</CardTitle>
+			</CardHeader>
+			<CardContent className="py-4">
+				<div className="space-y-3">
+					<div className="space-y-1.5">
+						<p className="text-[14px] leading-[1.7] text-foreground">
+							{uiCopy.summary}
 						</p>
-					) : null}
-				</div>
+						<p className="text-[13px] leading-[1.7] text-muted-foreground">
+							{uiCopy.workflowHint}
+						</p>
+					</div>
 
-				{isAssistToolsOpen && activePanel === "prompt" ? (
-					<Card className="gap-0 py-0">
-						<CardContent className="px-3 py-3">
-							{promptState.prompt ? (
-								<Textarea
-									readOnly
-									value={promptState.prompt}
-									rows={12}
-									className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[12px] leading-[1.68] text-foreground"
-									aria-label={`${lesson.title} prompt`}
-								/>
-							) : (
-								<p className="text-[12px] leading-[1.6] text-muted-foreground">
-									The prompt will appear here once the required lesson context
-									is saved.
-								</p>
-							)}
-						</CardContent>
-					</Card>
-				) : null}
+					{promptState.disabledReason ? (
+						<p className="text-[13px] leading-[1.7] text-muted-foreground">
+							{promptState.disabledReason}
+						</p>
+					) : (
+						<p className="text-[13px] leading-[1.7] text-muted-foreground">
+							{uiCopy.enabledNote}
+						</p>
+					)}
 
-				{isAssistToolsOpen && activePanel === "paste" ? (
-					<Card className="gap-0 py-0">
-						<CardContent className="space-y-3 px-4 py-4">
-							<label className="block">
-								<span className="font-mono text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-									{uiCopy.pasteLabel}
-								</span>
-								<Textarea
-									value={pastedResponse}
-									onChange={(event) => {
-										setPastedResponse(event.target.value);
-										if (importFeedback) {
-											setImportFeedback(null);
-										}
-									}}
-									rows={8}
-									placeholder={uiCopy.pastePlaceholder}
-									className="mt-2"
-									aria-label={uiCopy.pasteLabel}
-								/>
-							</label>
-
-							<div className="flex flex-wrap items-center gap-2">
+					<div className="flex flex-wrap items-center gap-2">
+						{uiCopy.collapsedByDefault ? (
+							<Button
+								type="button"
+								onClick={toggleAssistTools}
+								variant="outline"
+								size="sm"
+							>
+								{isAssistToolsOpen
+									? "Hide AI starter"
+									: (uiCopy.launcherLabel ?? "Open AI assist")}
+							</Button>
+						) : null}
+						{isAssistToolsOpen ? (
+							<>
 								<Button
 									type="button"
-									onClick={importResponse}
-									disabled={pastedResponse.trim().length === 0}
+									onClick={copyPrompt}
+									disabled={Boolean(promptState.disabledReason)}
+									variant="secondary"
+									size="sm"
+								>
+									{copyState === "copied" ? "Copied" : "Copy prompt"}
+								</Button>
+								<Button
+									type="button"
+									onClick={() => void generateWithCodex()}
+									disabled={Boolean(promptState.disabledReason) || isGenerating}
 									variant="outline"
 									size="sm"
 								>
-									{uiCopy.importButtonLabel}
+									{isGenerating ? "Generating..." : "Generate with Codex"}
 								</Button>
-								<p className="text-[12px] leading-[1.6] text-muted-foreground">
-									{uiCopy.importHint}
-								</p>
-							</div>
-						</CardContent>
-					</Card>
-				) : null}
+								<Button
+									type="button"
+									onClick={() => togglePanel("paste")}
+									variant="outline"
+									size="sm"
+								>
+									{activePanel === "paste"
+										? "Hide paste box"
+										: uiCopy.pasteToggleLabel}
+								</Button>
+								<Button
+									type="button"
+									onClick={() => togglePanel("prompt")}
+									variant="outline"
+									size="sm"
+								>
+									{activePanel === "prompt" ? "Hide prompt" : "View prompt"}
+								</Button>
+							</>
+						) : null}
+						{copyState === "error" && !promptState.disabledReason ? (
+							<p className="text-[12px] leading-[1.6] text-muted-foreground">
+								Clipboard unavailable. Copy from the prompt block below.
+							</p>
+						) : null}
+					</div>
 
-				<div aria-live="polite" className="min-h-[1.25rem]">
-					{importFeedback ? (
-						<p
-							className={`text-[12px] leading-[1.6] ${
-								importFeedback.tone === "success"
-									? "text-primary"
-									: "text-destructive"
-							}`}
-						>
-							{importFeedback.message}
-						</p>
+					{isAssistToolsOpen && activePanel === "prompt" ? (
+						<Card className="gap-0 py-0">
+							<CardContent className="px-3 py-3">
+								{promptState.prompt ? (
+									<Textarea
+										readOnly
+										value={promptState.prompt}
+										rows={12}
+										className="w-full resize-y border-0 bg-transparent p-0 font-mono text-[12px] leading-[1.68] text-foreground"
+										aria-label={`${lesson.title} prompt`}
+									/>
+								) : (
+									<p className="text-[12px] leading-[1.6] text-muted-foreground">
+										The prompt will appear here once the required lesson context
+										is saved.
+									</p>
+								)}
+							</CardContent>
+						</Card>
 					) : null}
+
+					{isAssistToolsOpen && activePanel === "paste" ? (
+						<Card className="gap-0 py-0">
+							<CardContent className="space-y-3 px-4 py-4">
+								<label className="block">
+									<span className="font-mono text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+										{uiCopy.pasteLabel}
+									</span>
+									<Textarea
+										value={pastedResponse}
+										onChange={(event) => {
+											setPastedResponse(event.target.value);
+											if (importFeedback) {
+												setImportFeedback(null);
+											}
+										}}
+										rows={8}
+										placeholder={uiCopy.pastePlaceholder}
+										className="mt-2"
+										aria-label={uiCopy.pasteLabel}
+									/>
+								</label>
+
+								<div className="flex flex-wrap items-center gap-2">
+									<Button
+										type="button"
+										onClick={importResponse}
+										disabled={pastedResponse.trim().length === 0}
+										variant="outline"
+										size="sm"
+									>
+										{uiCopy.importButtonLabel}
+									</Button>
+									<p className="text-[12px] leading-[1.6] text-muted-foreground">
+										{uiCopy.importHint}
+									</p>
+								</div>
+							</CardContent>
+						</Card>
+					) : null}
+
+					<div aria-live="polite" className="min-h-[1.25rem]">
+						{importFeedback ? (
+							<p
+								className={`text-[12px] leading-[1.6] ${
+									importFeedback.tone === "success"
+										? "text-primary"
+										: "text-destructive"
+								}`}
+							>
+								{importFeedback.message}
+							</p>
+						) : null}
+					</div>
 				</div>
-			</div>
-		</WorkbenchCard>
+			</CardContent>
+		</Card>
 	);
 }

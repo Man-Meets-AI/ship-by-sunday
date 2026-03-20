@@ -1,10 +1,14 @@
-import { SettingsPageContent } from "@/features/settings/components/settings-page";
-import { AppShell } from "@/features/course/shared/components/app-shell";
+import { api } from "@/convex/_generated/api";
+import { SettingsPageShell } from "@/features/settings/components/settings-page-shell";
+import { preloadAuthenticatedQuery } from "@/platform/convex/server-preload";
 
 export default async function Page() {
 	return (
-		<AppShell viewportMode="app" showSkillRail={false}>
-			<SettingsPageContent />
-		</AppShell>
+		<SettingsPageShell
+			preloadedMission={await preloadAuthenticatedQuery(
+				api.course.getMissionState,
+				{},
+			)}
+		/>
 	);
 }

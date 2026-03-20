@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge";
 import {
 	Card,
 	CardContent,
@@ -6,6 +5,13 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import {
+	Item,
+	ItemContent,
+	ItemDescription,
+	ItemGroup,
+	ItemTitle,
+} from "@/components/ui/item";
 
 import { CORE_FLOW_SCREEN_REFERENCE } from "./core-flow-sketch-copy";
 
@@ -19,15 +25,17 @@ export function CoreFlowSketchScreenReference() {
 					mind.
 				</CardDescription>
 			</CardHeader>
-			<CardContent className="space-y-3">
-				{CORE_FLOW_SCREEN_REFERENCE.map((row) => (
-					<div key={row.label} className="space-y-1">
-						<Badge variant="secondary" className="font-normal">
-							{row.label}
-						</Badge>
-						<p className="text-sm text-muted-foreground">{row.hint}</p>
-					</div>
-				))}
+			<CardContent>
+				<ItemGroup className="gap-3">
+					{CORE_FLOW_SCREEN_REFERENCE.map((row) => (
+						<Item key={row.label} variant="outline" size="sm">
+							<ItemContent>
+								<ItemTitle>{row.label}</ItemTitle>
+								<ItemDescription>{row.hint}</ItemDescription>
+							</ItemContent>
+						</Item>
+					))}
+				</ItemGroup>
 			</CardContent>
 		</Card>
 	);

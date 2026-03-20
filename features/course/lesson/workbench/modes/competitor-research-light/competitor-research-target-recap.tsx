@@ -1,7 +1,5 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { PinnedArtifact } from "@/features/course/lesson/shells/types";
-
-const labelClass =
-	"text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground";
 
 function readPinnedText(
 	pinnedArtifacts: PinnedArtifact[],
@@ -18,6 +16,9 @@ function readPinnedText(
 	const trimmed = value.trim();
 	return trimmed.length > 0 ? trimmed : null;
 }
+
+const recapTitleClass =
+	"text-xs font-medium uppercase tracking-widest text-muted-foreground";
 
 export function CompetitorResearchTargetRecap({
 	pinnedArtifacts,
@@ -46,23 +47,31 @@ export function CompetitorResearchTargetRecap({
 
 	return (
 		<div className="grid gap-3 md:grid-cols-2">
-			<div className="rounded-lg border border-border bg-card px-4 py-4">
-				<p className={labelClass}>User</p>
-				<p className="mt-2 text-sm leading-relaxed text-foreground">
-					{user ?? "Complete lesson 1.4 to pin a user."}
-				</p>
-				{problem ? (
-					<p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-						Problem: {problem}
+			<Card>
+				<CardHeader className="pb-2">
+					<CardTitle className={recapTitleClass}>User</CardTitle>
+				</CardHeader>
+				<CardContent className="space-y-2 pt-0">
+					<p className="text-sm leading-relaxed text-foreground">
+						{user ?? "Complete lesson 1.4 to pin a user."}
 					</p>
-				) : null}
-			</div>
-			<div className="rounded-lg border border-border bg-card px-4 py-4">
-				<p className={labelClass}>Outcome</p>
-				<p className="mt-2 text-sm leading-relaxed text-foreground">
-					{outcome ?? "Complete lesson 1.5 to pin an outcome."}
-				</p>
-			</div>
+					{problem ? (
+						<p className="text-sm leading-relaxed text-muted-foreground">
+							Problem: {problem}
+						</p>
+					) : null}
+				</CardContent>
+			</Card>
+			<Card>
+				<CardHeader className="pb-2">
+					<CardTitle className={recapTitleClass}>Outcome</CardTitle>
+				</CardHeader>
+				<CardContent className="pt-0">
+					<p className="text-sm leading-relaxed text-foreground">
+						{outcome ?? "Complete lesson 1.5 to pin an outcome."}
+					</p>
+				</CardContent>
+			</Card>
 		</div>
 	);
 }

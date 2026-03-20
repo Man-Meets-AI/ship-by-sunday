@@ -10,12 +10,15 @@ import {
 } from "@/components/ui/accordion";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
+	CardContent,
 	CardDescription,
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 
 import {
@@ -23,7 +26,6 @@ import {
 	REPO_ROUTE_EXAMPLES,
 	type RepoMapBadge,
 } from "./repo-map-constants";
-import { RepoMapExplorerColumn } from "./repo-map-explorer-column";
 
 function mapBadgeVariant(badge: RepoMapBadge) {
 	if (badge === "required") {
@@ -60,10 +62,30 @@ export function RepoMapProjectMapTab() {
 				</AlertDescription>
 			</Alert>
 			<div className="grid gap-4 min-[480px]:grid-cols-[minmax(0,140px)_minmax(0,1fr)]">
-				<RepoMapExplorerColumn
-					entries={REPO_MAP_ENTRIES}
-					activeId={activeId}
-				/>
+				<Card>
+					<CardHeader>
+						<CardTitle className="text-sm">Explorer</CardTitle>
+					</CardHeader>
+					<CardContent className="pt-0">
+						<ScrollArea className="h-[min(280px,40vh)]">
+							<div className="flex flex-col gap-1 pr-3">
+								{REPO_MAP_ENTRIES.map((entry) => (
+									<Button
+										key={entry.id}
+										type="button"
+										variant={activeId === entry.id ? "secondary" : "ghost"}
+										size="sm"
+										className="h-auto w-full justify-start py-1.5 font-mono text-xs"
+										onMouseEnter={() => setActiveId(entry.id)}
+										onFocus={() => setActiveId(entry.id)}
+									>
+										{entry.path}
+									</Button>
+								))}
+							</div>
+						</ScrollArea>
+					</CardContent>
+				</Card>
 				<div className="min-w-0 space-y-3">
 					<p className="text-xs text-muted-foreground">
 						<code className="rounded bg-muted px-1 py-0.5 font-mono text-[11px]">
@@ -74,13 +96,8 @@ export function RepoMapProjectMapTab() {
 						theory.”
 					</p>
 					{REPO_MAP_ENTRIES.map((entry) => (
-						<Card
-							key={entry.id}
-							className="gap-0 py-0"
-							onMouseEnter={() => setActiveId(entry.id)}
-							onFocus={() => setActiveId(entry.id)}
-						>
-							<CardHeader className="border-b border-border/80 pb-3 pt-3">
+						<Card key={entry.id} onMouseEnter={() => setActiveId(entry.id)}>
+							<CardHeader>
 								<div className="flex flex-wrap items-center gap-2">
 									<CardTitle className="font-mono text-sm">
 										{entry.path}
@@ -98,24 +115,30 @@ export function RepoMapProjectMapTab() {
 				</div>
 			</div>
 			<Separator />
-			<Accordion type="single" collapsible className="w-full rounded-lg border border-border">
-				<AccordionItem value="routes" className="border-0 px-3">
-					<AccordionTrigger className="py-3 text-sm font-medium hover:no-underline">
-						Route examples under <span className="font-mono">app/</span>
-					</AccordionTrigger>
-					<AccordionContent className="space-y-2 pb-3">
-						<ul className="space-y-2 text-sm text-muted-foreground">
-							{REPO_ROUTE_EXAMPLES.map((row) => (
-								<li key={row.path}>
-									<span className="font-mono text-foreground">{row.path}</span>
-									<span className="mx-2 text-border">—</span>
-									{row.note}
-								</li>
-							))}
-						</ul>
-					</AccordionContent>
-				</AccordionItem>
-			</Accordion>
+			<Card>
+				<CardContent className="pt-6">
+					<Accordion type="single" collapsible className="w-full">
+						<AccordionItem value="routes">
+							<AccordionTrigger className="text-sm font-medium">
+								Route examples under <span className="font-mono">app/</span>
+							</AccordionTrigger>
+							<AccordionContent>
+								<ul className="space-y-2 text-sm text-muted-foreground">
+									{REPO_ROUTE_EXAMPLES.map((row) => (
+										<li key={row.path}>
+											<span className="font-mono text-foreground">
+												{row.path}
+											</span>
+											<span className="mx-2 text-border">—</span>
+											{row.note}
+										</li>
+									))}
+								</ul>
+							</AccordionContent>
+						</AccordionItem>
+					</Accordion>
+				</CardContent>
+			</Card>
 		</div>
 	);
 }

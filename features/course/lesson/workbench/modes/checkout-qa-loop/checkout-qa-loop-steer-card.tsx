@@ -12,7 +12,7 @@ export function CheckoutQaLoopSteerCard() {
 		<Card>
 			<CardHeader className="space-y-2">
 				<CardTitle className="text-base">Steer the agent</CardTitle>
-				<CardDescription className="text-foreground/90">
+				<CardDescription>
 					When Playwright stalls on Clerk, tell the agent explicitly to use the{" "}
 					<strong>Clerk skill</strong> (or your documented Clerk flow) and
 					restate the current goal (fresh purchase, test card, etc.).

@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { productConfig, routeConfig } from "@/config/product";
 import type { HomePageContent } from "@/features/marketing/content/home";
 
+import { HomeHeroThemeToggle } from "./home-hero-theme-toggle";
+
 type Hero = HomePageContent["hero"];
 
 export function HomeHeroTopBar({ hero }: { hero: Hero }) {
@@ -17,6 +19,7 @@ export function HomeHeroTopBar({ hero }: { hero: Hero }) {
 				<Button variant="outline" size="sm" asChild>
 					<Link href={routeConfig.signIn}>{hero.loginLabel}</Link>
 				</Button>
+				<HomeHeroThemeToggle />
 			</div>
 			<div className="mx-auto grid w-full max-w-2xl grid-cols-[1fr_auto_1fr] items-center gap-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
 				<span className="min-w-0 truncate text-left">{hero.topBarStart}</span>

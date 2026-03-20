@@ -69,7 +69,9 @@ export function FreshTemplatePlanStackAndPath({
 				<div className="space-y-2 pt-1">
 					<Label htmlFor={ids.stackOther} className="text-xs font-medium">
 						Other pieces{" "}
-						<span className="font-normal text-muted-foreground">(optional)</span>
+						<span className="font-normal text-muted-foreground">
+							(optional)
+						</span>
 					</Label>
 					<Input
 						id={ids.stackOther}

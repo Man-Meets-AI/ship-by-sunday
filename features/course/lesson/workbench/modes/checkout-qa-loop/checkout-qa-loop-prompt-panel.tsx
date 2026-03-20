@@ -62,9 +62,7 @@ export function CheckoutQaLoopPromptPanel({
 						type="button"
 						size="sm"
 						variant="outline"
-						onClick={() =>
-							onChange(CHECKOUT_QA_INSTRUCTOR_PROMPT)
-						}
+						onClick={() => onChange(CHECKOUT_QA_INSTRUCTOR_PROMPT)}
 					>
 						Reset to template
 					</Button>

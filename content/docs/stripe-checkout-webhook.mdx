@@ -28,7 +28,7 @@ This repo uses Stripe-hosted Checkout, so there is no public Stripe key in the t
 If you do not already have them, create the Stripe product and default price from the repo:
 
 ```bash
-pnpm run stripe:create-product
+bun run stripe:create-product
 ```
 
 ## Start local webhook forwarding
@@ -36,15 +36,15 @@ pnpm run stripe:create-product
 Use this command for local buyer-flow QA:
 
 ```bash
-pnpm run stripe:listen:local
+bun run stripe:listen:local
 ```
 
 That helper:
 
-- starts Stripe CLI forwarding to `http://localhost:3000/api/stripe/webhook`
+- starts Stripe CLI forwarding to `{NEXT_PUBLIC_CONVEX_URL}/stripe/webhook`
 - captures the current webhook signing secret
 - writes that secret into `.env.local`
-- syncs the same secret into the active Convex env
+- syncs that secret and `STRIPE_SECRET_KEY` into the active Convex env
 
 If the listener writes a fresh secret while the app is already running, restart the app before testing checkout.
 
@@ -61,8 +61,8 @@ The starter uses this sequence:
 1. signed-in buyer calls `POST /api/stripe/checkout`
 2. Stripe hosts checkout
 3. Stripe returns to `/checkout/success`
-4. Stripe webhook verifies the signature
-5. Convex upserts the active product-access grant
+4. Stripe webhook hits Convex HTTP at `/stripe/webhook`
+5. Convex verifies the signature and upserts the active product-access grant
 6. `/checkout/success` waits for access, then redirects into `/mission`
 
 ## Health checks
@@ -70,8 +70,8 @@ The starter uses this sequence:
 Use these commands before you debug by hand:
 
 ```bash
-pnpm run stripe:local:doctor
-pnpm run stripe:local:verify
+bun run stripe:local:doctor
+bun run stripe:local:verify
 ```
 
 ## What success looks like
@@ -89,7 +89,7 @@ The happy path is:
 The most common failures are:
 
 - the Stripe CLI is logged into a different Stripe account than `STRIPE_SECRET_KEY`
-- `.env.local` and Convex do not match on `STRIPE_WEBHOOK_SECRET`
+- `.env.local` and Convex do not match on `STRIPE_WEBHOOK_SECRET` or `STRIPE_SECRET_KEY`
 - you changed the webhook secret but did not restart the app
 - Clerk/Convex auth is broken, so the buyer cannot be matched to the right access state
 

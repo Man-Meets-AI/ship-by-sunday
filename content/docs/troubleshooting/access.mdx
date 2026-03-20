@@ -43,7 +43,7 @@ Do not assume this is a Stripe bug first.
 
 Check these in order:
 
-1. run `pnpm run clerk:test-user:prepare:entitled`
+1. run `bun run clerk:test-user:prepare:entitled`
 2. confirm the user really has an active product-access row
 3. confirm the Clerk `convex` template still matches the current app
 4. confirm you are not signed into the wrong Clerk app or stale browser session
@@ -53,7 +53,7 @@ Check these in order:
 For the local granted-access QA user:
 
 ```bash
-pnpm run clerk:test-user:prepare:entitled
+bun run clerk:test-user:prepare:entitled
 ```
 
 If the granted-access test user still cannot reach `/mission`, stop guessing and confirm the access row plus auth template path.

@@ -11,16 +11,6 @@ import {
 	ROUTE_ACCESS_PUBLIC_PAGE_LABELS,
 } from "./route-access-orientation-constants";
 
-function PageList({ items }: { items: readonly string[] }) {
-	return (
-		<ul className="list-inside list-disc space-y-1 text-sm text-foreground">
-			{items.map((item) => (
-				<li key={item}>{item}</li>
-			))}
-		</ul>
-	);
-}
-
 export function RouteAccessPagesTabs() {
 	return (
 		<Card>
@@ -38,10 +28,18 @@ export function RouteAccessPagesTabs() {
 						<TabsTrigger value="protected">Protected pages</TabsTrigger>
 					</TabsList>
 					<TabsContent value="public" className="pt-3">
-						<PageList items={ROUTE_ACCESS_PUBLIC_PAGE_LABELS} />
+						<ul className="list-inside list-disc space-y-1 text-sm text-foreground">
+							{ROUTE_ACCESS_PUBLIC_PAGE_LABELS.map((item) => (
+								<li key={item}>{item}</li>
+							))}
+						</ul>
 					</TabsContent>
 					<TabsContent value="protected" className="pt-3">
-						<PageList items={ROUTE_ACCESS_PROTECTED_PAGE_LABELS} />
+						<ul className="list-inside list-disc space-y-1 text-sm text-foreground">
+							{ROUTE_ACCESS_PROTECTED_PAGE_LABELS.map((item) => (
+								<li key={item}>{item}</li>
+							))}
+						</ul>
 					</TabsContent>
 				</Tabs>
 			</CardHeader>

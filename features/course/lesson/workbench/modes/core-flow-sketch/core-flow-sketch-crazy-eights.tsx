@@ -48,12 +48,14 @@ export function CoreFlowSketchCrazyEights() {
 					aria-label="Crazy Eights eight-box grid"
 				>
 					{Array.from({ length: 8 }, (_, i) => (
-						<div
+						<Card
 							key={i}
-							className="flex aspect-square min-h-[72px] items-start border border-dashed border-border bg-muted/20 p-2 text-xs text-muted-foreground print:border-foreground/30 print:bg-white"
+							className="flex aspect-square min-h-[72px] flex-col border-dashed bg-muted/20 py-0 print:border-foreground/30 print:bg-white"
 						>
-							<span className="font-medium tabular-nums">{i + 1}</span>
-						</div>
+							<CardContent className="flex flex-1 items-start p-2 text-xs text-muted-foreground">
+								<span className="font-medium tabular-nums">{i + 1}</span>
+							</CardContent>
+						</Card>
 					))}
 				</div>
 			</CardContent>

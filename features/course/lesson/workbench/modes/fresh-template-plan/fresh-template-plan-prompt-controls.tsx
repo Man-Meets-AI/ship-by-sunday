@@ -10,18 +10,18 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 
 import { buildFreshTemplatePlanPrompt } from "./build-fresh-template-plan-prompt";
-import { FreshTemplatePlanCodexOutputCard } from "./fresh-template-plan-codex-output-card";
+import { FreshTemplatePlanCodexOutput } from "./fresh-template-plan-codex-output";
 import {
 	FRESH_TEMPLATE_PLAN_DEFAULT_MANUAL_PROMPT,
 	FRESH_TEMPLATE_PLAN_FIELD_IDS,
 	parseFreshTemplatePlanReasoning,
 } from "./fresh-template-plan-constants";
 import { readBool, readString } from "./fresh-template-plan-field-utils";
-import { FreshTemplatePlanReasoningToggle } from "./fresh-template-plan-reasoning-toggle";
+import { FreshTemplatePlanReasoningField } from "./fresh-template-plan-reasoning-field";
 import { FreshTemplatePlanStackAndPath } from "./fresh-template-plan-stack-and-path";
 
 async function writeClipboard(text: string) {
@@ -86,7 +86,7 @@ export function FreshTemplatePlanPromptControls({
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-5">
-					<FreshTemplatePlanReasoningToggle
+					<FreshTemplatePlanReasoningField
 						reasoning={reasoning}
 						invalid={reasoningInvalid}
 						onReasoningChange={(v) => onFieldChange(ids.reasoning, v)}
@@ -100,18 +100,22 @@ export function FreshTemplatePlanPromptControls({
 						includeStripe={includeStripe}
 						onFieldChange={onFieldChange}
 					/>
-					<div className="space-y-2">
-						<Label htmlFor={ids.manualPrompt} className="text-xs font-medium">
+					<Field data-invalid={manualInvalid ? true : undefined}>
+						<FieldLabel htmlFor={ids.manualPrompt}>
 							Manual planning prompt
-						</Label>
-						<Textarea
-							id={ids.manualPrompt}
-							className={`min-h-[120px] resize-y text-sm ${manualInvalid ? "ring-2 ring-destructive" : ""}`}
-							value={manual}
-							onChange={(e) => onFieldChange(ids.manualPrompt, e.target.value)}
-							aria-invalid={manualInvalid}
-						/>
-					</div>
+						</FieldLabel>
+						<FieldContent>
+							<Textarea
+								id={ids.manualPrompt}
+								className="min-h-[120px] resize-y text-sm"
+								value={manual}
+								onChange={(e) =>
+									onFieldChange(ids.manualPrompt, e.target.value)
+								}
+								aria-invalid={manualInvalid}
+							/>
+						</FieldContent>
+					</Field>
 					<Button
 						type="button"
 						variant="secondary"
@@ -123,7 +127,7 @@ export function FreshTemplatePlanPromptControls({
 				</CardContent>
 			</Card>
 
-			<FreshTemplatePlanCodexOutputCard
+			<FreshTemplatePlanCodexOutput
 				codexOutput={codexOutput}
 				onFieldChange={onFieldChange}
 			/>
