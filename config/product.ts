@@ -10,7 +10,6 @@ export const assetPaths = {
   androidChrome512: "/android-chrome-512x512.png",
   founderProof: "/founder-proof.jpg",
   heroPreview: "/4-block-system.svg",
-  logo: "/ship-by-sunday.png",
 } as const;
 
 export const brandColorConfig = {
@@ -34,7 +33,6 @@ export const productConfig = {
   images: {
     founderProof: assetPaths.founderProof,
     heroPreview: assetPaths.heroPreview,
-    logo: assetPaths.logo,
   },
 } as const;
 

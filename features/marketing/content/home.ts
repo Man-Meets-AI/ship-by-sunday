@@ -54,7 +54,7 @@ export const homePageContent = {
     label: "FAQ",
     titleLead: "Common",
     titleAccent: "Questions",
-    lead: "Straight answers beside a short track record—so you know who stands behind the system.",
+    lead: "",
     items: [
       {
         question: "Who is this for?",

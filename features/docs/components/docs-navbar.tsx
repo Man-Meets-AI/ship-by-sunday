@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Navbar } from "nextra-theme-docs";
 
-import { ProductBrand } from "@/components/product-brand";
+import { ProductBrand, productWordmarkClassName } from "@/components/product-brand";
 import { routeConfig } from "@/config/product";
 import { DocsThemeToggle } from "@/features/docs/components/docs-theme-toggle";
 
@@ -15,11 +15,7 @@ export function DocsNavbar() {
 		<Navbar
 			logo={
 				<div className="flex items-center gap-3">
-					<ProductBrand
-						showLabel
-						imageSize={28}
-						labelClassName="text-sm font-semibold sm:text-base"
-					/>
+					<ProductBrand labelClassName={productWordmarkClassName} />
 					<span className="rounded-full border bg-muted px-2.5 py-1 text-[10px] font-medium text-muted-foreground sm:text-[11px]">
 						Starter Docs
 					</span>

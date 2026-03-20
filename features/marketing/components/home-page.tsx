@@ -1,8 +1,9 @@
 import { homePageContent } from "@/features/marketing/content/home";
 import {
+	CommonQuestionsSection,
 	FooterSection,
+	FounderProofSection,
 	PricingSectionBlock,
-	ProofAndFaqSection,
 } from "./home-page/closing-sections";
 import { HomeHeroSection } from "./home-page/hero-sections";
 import { SprintPathUnifiedSection } from "./home-page/sprint-path-unified-section";
@@ -18,11 +19,11 @@ export default function HomePage() {
 				<SprintPathUnifiedSection
 					sprintPathSection={homePageContent.sprintPathSection}
 				/>
-				<ProofAndFaqSection
-					faqSection={homePageContent.faqSection}
+				<FounderProofSection
 					proofImage={homePageContent.assets.proofImage}
 					proofSection={homePageContent.proofSection}
 				/>
+				<CommonQuestionsSection faqSection={homePageContent.faqSection} />
 				<PricingSectionBlock pricingSection={homePageContent.pricingSection} />
 				<FooterSection
 					footerNav={homePageContent.footerNav}
