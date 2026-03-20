@@ -7,7 +7,7 @@ import { getLessonById } from "@/features/course/lesson/model";
 import { WorkbenchRenderer } from "@/features/course/lesson/workbench/renderer";
 
 describe("repo map orientation workbench (lesson 3.2)", () => {
-	it("renders project map, secrets alert, resource buttons, and accounts checklist", async () => {
+	it("renders project map, secrets alert, resource buttons, and commands tab", async () => {
 		const user = userEvent.setup();
 		const lesson = getLessonById("3.2");
 		expect(lesson).toBeTruthy();
@@ -36,10 +36,6 @@ describe("repo map orientation workbench (lesson 3.2)", () => {
 				.getByRole("link", { name: /step-by-step setup guide/i })
 				.getAttribute("href"),
 		).toBe("/docs/local-setup");
-
-		await user.click(screen.getByRole("tab", { name: /^accounts$/i }));
-		expect(screen.getByRole("checkbox", { name: /^GitHub$/ })).toBeTruthy();
-		expect(screen.getByRole("checkbox", { name: /^Stripe$/ })).toBeTruthy();
 
 		await user.click(screen.getByRole("tab", { name: /^commands$/i }));
 		expect(screen.getByText("pnpm dev")).toBeTruthy();

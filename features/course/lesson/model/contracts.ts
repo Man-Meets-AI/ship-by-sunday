@@ -22,7 +22,9 @@ export type WorkbenchType =
   | "competitor_research_light"
   | "repo_map_orientation"
   | "production_deploy_handoff"
-  | "build_product_iteration";
+  | "build_product_iteration"
+  | "brand_kit_workbench"
+  | "codex_marketing_site";
 
 export type CoachMode = "docked" | "pip";
 export type CoachVideoPlacement = "coach" | "workbench";

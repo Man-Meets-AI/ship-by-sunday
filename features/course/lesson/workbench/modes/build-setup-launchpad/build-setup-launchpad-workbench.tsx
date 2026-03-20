@@ -18,7 +18,7 @@ import type { WorkbenchModeProps } from "../../types";
 import { buildSetupInstructorCommandsBlock } from "./build-setup-launchpad-constants";
 import { BuildSetupLaunchpadCommandsBlock } from "./build-setup-launchpad-commands-block";
 import { BuildSetupLaunchpadDevProdAlert } from "./build-setup-launchpad-dev-prod-alert";
-import { BuildSetupLaunchpadEnvTabs } from "./build-setup-launchpad-env-tabs";
+import { BuildSetupLaunchpadEnvDashboardsCard } from "./build-setup-launchpad-env-dashboards-card";
 import { BuildSetupLaunchpadReferenceAccordion } from "./build-setup-launchpad-reference-accordion";
 import { BuildSetupLaunchpadStarterTemplateCard } from "./build-setup-launchpad-starter-template-card";
 import { BuildSetupLaunchpadStatusCard } from "./build-setup-launchpad-status-card";
@@ -96,7 +96,7 @@ export function BuildSetupLaunchpadWorkbench({
 			<BuildSetupLaunchpadCommandsBlock commandsText={commandsText} />
 			<Separator />
 			<BuildSetupLaunchpadDevProdAlert />
-			<BuildSetupLaunchpadEnvTabs />
+			<BuildSetupLaunchpadEnvDashboardsCard />
 			<Separator />
 			<BuildSetupLaunchpadStrategyCard pinnedArtifacts={pinnedArtifacts} />
 			<BuildSetupLaunchpadStatusCard />

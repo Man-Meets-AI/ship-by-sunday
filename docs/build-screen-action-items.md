@@ -79,22 +79,11 @@ Action items:
 
 ## 3.5 Codex Marketing Site
 
-Source signal:
+Implemented in-app as workbench `codex_marketing_site` (lesson `3.5`): dependencies + pinned CEO artifacts, readonly prompt template with copy, structured brief, tabbed landing copy sections, optional style URL, workflow/git checklist, command snippets, plan-mode alert, optional advanced accordion.
+
+Source signal (historical):
 - `3.13--codex-marketing-site`
 - `3.4--build-day-2-overview`
-
-Action items:
-- Add a `Marketing prompt workshop` area with:
-  - core elevator pitch
-  - ICP
-  - problem
-  - pain
-  - outcome
-- Add a `Copy review loop` card for conversational back-and-forth instead of jumping straight to plan mode.
-- Add a `Homepage comparison` section so the student can note `their version vs competitor version`.
-- Add a `Screenshot / style reference` upload slot.
-- Add a `Commit changes now` CTA after copy updates are approved.
-- Add a follow-on card for `Email capture / onboarding` and include `Resend + React Email` as the recommended stack for builder-friendly product emails.
 
 ## 3.6 Switch to Sandbox and Boot Local
 
@@ -135,16 +124,14 @@ Action items:
 
 ## 3.9 Implement the First Slice
 
-Source signal:
-- `3.14--build-setting-up-slices`
-- `3.15--build-core-ux-plan-flow`
+Product intent (current): **brand starter kit** before build—name, Figma export, favicons, hex colors, Stripe branding, domain—implemented as `brand_kit_workbench` with resource buttons, brand inputs, naming textarea, artifact checklist, preview, required outputs, alerts, and reference accordion.
 
-Action items:
-- Add a `First slice build prompt` card.
-- Add a `What changed in this pass?` field.
-- Add a `What still feels wrong?` field for the next loop.
-- Add a `Pause and actually do it now` CTA.
-- Add a `Do not overbuild` warning.
+Source signal (historical notes):
+- Branding + first-asset pass from the Build video track
+
+Action items (shipped direction):
+- Resource `Card` with external tool links (Figma boards, Stripe branding, favicon.io, coolors.co, Cloudflare).
+- `Brand inputs` + naming `Textarea` + required artifact `checklist` + optional icon/wordmark uploads + live preview + `Accordion` quick refs + dual `Alert`s + required outputs list with `Badge`s.
 
 ## 3.10 Build Core UX Plan Flow
 

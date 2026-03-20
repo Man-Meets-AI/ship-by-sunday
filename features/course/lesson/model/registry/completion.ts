@@ -236,6 +236,30 @@ function getLessonSpecificCompletionMessage(
     }
   }
 
+  if (lesson.id === "3.9") {
+    if (fieldId === "brand_kit_app_name") {
+      return "Enter the working app name you will use in the product and Stripe.";
+    }
+    if (fieldId === "brand_kit_initials") {
+      return "Add initials for the compact mark or icon.";
+    }
+    if (fieldId === "brand_kit_domain") {
+      return "Enter the domain you bought or will point at the app.";
+    }
+    if (fieldId === "brand_kit_primary_hex") {
+      return "Set primary color as #RRGGBB.";
+    }
+    if (fieldId === "brand_kit_accent_hex") {
+      return "Set one accent color as #RRGGBB.";
+    }
+    if (fieldId === "brand_kit_naming_exercise") {
+      return "List naming candidates and the working name you chose.";
+    }
+    if (fieldId === "brand_kit_artifact_checklist") {
+      return "Check each artifact step only after it is done for real.";
+    }
+  }
+
   if (lesson.id !== "1.3") {
     return undefined;
   }

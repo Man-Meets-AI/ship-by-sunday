@@ -73,6 +73,8 @@ describe("curriculum contract", () => {
           "repo_map_orientation",
           "production_deploy_handoff",
           "build_product_iteration",
+          "codex_marketing_site",
+          "brand_kit_workbench",
         ].includes(lesson.workbench),
       ),
     ).toBe(true);

@@ -376,9 +376,7 @@ describe("course registry", () => {
       throw new Error("Expected lesson 3.2 to exist.");
     }
     expect(repoMapLesson.workbench).toBe("repo_map_orientation");
-    expect((repoMapLesson.workbenchFields ?? []).map((f) => f.id)).toEqual([
-      "repo_accounts_services",
-    ]);
+    expect((repoMapLesson.workbenchFields ?? []).map((f) => f.id)).toEqual([]);
     expect(
       (repoMapLesson.content.coach.resources ?? []).map((r) => r.id),
     ).toEqual(["repo_map_tool_overview_video", "repo_map_setup_guide"]);
@@ -412,6 +410,74 @@ describe("course registry", () => {
         })),
         deploy_handoff_product_name: "Acme",
         deploy_handoff_domain: "acme.com",
+      }),
+    ).toEqual([]);
+
+    const codexMarketingLesson = getLessonById("3.5");
+    expect(codexMarketingLesson).toBeTruthy();
+    if (!codexMarketingLesson) {
+      throw new Error("Expected lesson 3.5 to exist.");
+    }
+    expect(codexMarketingLesson.workbench).toBe("codex_marketing_site");
+    expect(codexMarketingLesson.artifact.key).toBe(
+      "codex_marketing_site_workspace",
+    );
+    expect(codexMarketingLesson.pinnedArtifacts).toEqual([
+      "core_flow_sketch_state",
+      "outcome_statement",
+      "user_statement",
+    ]);
+    expect(
+      (codexMarketingLesson.workbenchFields ?? []).map((f) => f.id),
+    ).toEqual([
+      "codex_marketing_saved_prompt",
+      "codex_marketing_product",
+      "codex_marketing_audience",
+      "codex_marketing_problem",
+      "codex_marketing_pain",
+      "codex_marketing_frequency",
+      "codex_marketing_why_matters",
+      "codex_marketing_outcome",
+      "codex_marketing_capability",
+      "codex_marketing_copy_eyebrow",
+      "codex_marketing_copy_subheader",
+      "codex_marketing_copy_primary_cta",
+      "codex_marketing_copy_secondary_cta",
+      "codex_marketing_copy_promise",
+      "codex_marketing_copy_highlights",
+      "codex_marketing_copy_faq",
+      "codex_marketing_style_reference_url",
+      "codex_marketing_workflow",
+    ]);
+    expect(
+      getCompletionIssues(codexMarketingLesson, {}).length,
+    ).toBeGreaterThan(0);
+    const marketingWorkflowOptions =
+      codexMarketingLesson.workbenchFields?.find(
+        (field) => field.id === "codex_marketing_workflow",
+      )?.options ?? [];
+    expect(
+      getCompletionIssues(codexMarketingLesson, {
+        codex_marketing_saved_prompt: "Reusable prompt body",
+        codex_marketing_product: "Acme Plugin",
+        codex_marketing_audience: "Designers",
+        codex_marketing_problem: "Slow handoff",
+        codex_marketing_pain: "Wasted hours",
+        codex_marketing_frequency: "Every sprint",
+        codex_marketing_why_matters: "Ship faster",
+        codex_marketing_outcome: "Synced files",
+        codex_marketing_capability: "One-click sync",
+        codex_marketing_copy_eyebrow: "New",
+        codex_marketing_copy_subheader: "Ship handoffs",
+        codex_marketing_copy_primary_cta: "Install",
+        codex_marketing_copy_secondary_cta: "Watch demo",
+        codex_marketing_copy_promise: "Fewer meetings",
+        codex_marketing_copy_highlights: "- Fast\n- Simple",
+        codex_marketing_copy_faq: "Q: …",
+        codex_marketing_workflow: marketingWorkflowOptions.map((label) => ({
+          label,
+          checked: true,
+        })),
       }),
     ).toEqual([]);
 

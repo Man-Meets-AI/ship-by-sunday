@@ -11,11 +11,8 @@ import type {
 	LessonContent,
 	LessonLinkResourceContent,
 	LessonResourceContent,
-	WorkbenchField,
 } from "@/features/course/lesson/model/manifest";
-import type { PinnedArtifact } from "@/features/course/lesson/shells";
 
-import { RepoMapAccountsTab } from "./repo-map-accounts-tab";
 import { RepoMapCommandsTab } from "./repo-map-commands-tab";
 import { REPO_MAP_COACH_LINK_IDS } from "./repo-map-constants";
 import { RepoMapProjectMapTab } from "./repo-map-project-map-tab";
@@ -28,21 +25,9 @@ function isLinkResource(
 
 export function RepoMapOrientationPanel({
 	lessonContent,
-	fieldValues,
-	onFieldChange,
-	fields,
-	pinnedArtifacts,
-	invalidFieldIds,
-	invalidFieldMessages,
 	workbenchCompletionSlot,
 }: {
 	lessonContent: LessonContent;
-	fieldValues: Record<string, unknown>;
-	onFieldChange: (fieldId: string, value: unknown) => void;
-	fields: WorkbenchField[];
-	pinnedArtifacts: PinnedArtifact[];
-	invalidFieldIds: Set<string>;
-	invalidFieldMessages?: Map<string, string>;
 	workbenchCompletionSlot?: ReactNode;
 }) {
 	const links = (lessonContent.coach.resources ?? []).filter(isLinkResource);
@@ -87,25 +72,12 @@ export function RepoMapOrientationPanel({
 					<TabsTrigger value="map" className="text-xs sm:text-sm">
 						Project map
 					</TabsTrigger>
-					<TabsTrigger value="accounts" className="text-xs sm:text-sm">
-						Accounts
-					</TabsTrigger>
 					<TabsTrigger value="commands" className="text-xs sm:text-sm">
 						Commands
 					</TabsTrigger>
 				</TabsList>
 				<TabsContent value="map" className="mt-4">
 					<RepoMapProjectMapTab />
-				</TabsContent>
-				<TabsContent value="accounts" className="mt-4">
-					<RepoMapAccountsTab
-						fields={fields}
-						fieldValues={fieldValues}
-						onFieldChange={onFieldChange}
-						pinnedArtifacts={pinnedArtifacts}
-						invalidFieldIds={invalidFieldIds}
-						invalidFieldMessages={invalidFieldMessages}
-					/>
 				</TabsContent>
 				<TabsContent value="commands" className="mt-4">
 					<RepoMapCommandsTab />

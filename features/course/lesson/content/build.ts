@@ -8,11 +8,26 @@ import {
   DEPLOY_STEP_OPTIONS,
   DEPLOY_SUCCESS_OPTIONS,
 } from "@/features/course/lesson/workbench/modes/production-deploy-handoff/production-deploy-handoff-constants";
-import { REPO_ACCOUNTS_FIELD_ID } from "@/features/course/lesson/workbench/modes/repo-map-constants";
 import {
   BUILD_PRODUCT_ITERATION_FIELD_IDS,
   BUILD_PRODUCT_ITERATION_SETUP_CHECKLIST_OPTIONS,
 } from "@/features/course/lesson/workbench/modes/build-product-iteration/build-product-iteration-constants";
+import {
+  CODEX_MARKETING_SITE_FIELD_IDS,
+  CODEX_MARKETING_WORKFLOW_CHECKLIST_OPTIONS,
+} from "@/features/course/lesson/workbench/modes/codex-marketing-site/codex-marketing-site-constants";
+import {
+  BRAND_KIT_ACCENT_HEX_FIELD_ID,
+  BRAND_KIT_APP_NAME_FIELD_ID,
+  BRAND_KIT_ARTIFACT_CHECKLIST_FIELD_ID,
+  BRAND_KIT_ARTIFACT_CHECKLIST_OPTIONS,
+  BRAND_KIT_DOMAIN_FIELD_ID,
+  BRAND_KIT_ICON_UPLOAD_FIELD_ID,
+  BRAND_KIT_INITIALS_FIELD_ID,
+  BRAND_KIT_NAMING_FIELD_ID,
+  BRAND_KIT_PRIMARY_HEX_FIELD_ID,
+  BRAND_KIT_WORDMARK_UPLOAD_FIELD_ID,
+} from "@/features/course/lesson/workbench/modes/brand-kit/brand-kit-constants";
 import { createVideoLesson } from "@/features/course/lesson/model/video-lesson-factory";
 
 export const buildLessons = [
@@ -224,22 +239,9 @@ export const buildLessons = [
     prevLessonId: "3.1",
     nextLessonId: "3.3",
     workbench: "repo_map_orientation",
-    workbenchFields: [
-      {
-        id: REPO_ACCOUNTS_FIELD_ID,
-        label: "Accounts + services checklist",
-        kind: "checklist",
-        required: true,
-        taskLabel: "Required accounts ready",
-        options: ["GitHub", "Stripe", "Convex", "Clerk"],
-        helpText:
-          "Check each when you can sign in and complete the basics you will need for this repo.",
-      },
-    ],
     checklist: [
       "Watch the repo walkthrough",
       "Skim the project map and commands tabs",
-      "Confirm required accounts are in place",
     ],
     teachingPoints: [
       "Match the folder names you hear to this explorer layout.",
@@ -247,24 +249,24 @@ export const buildLessons = [
       "Use this screen as reference; you do not need to memorize every path.",
     ],
     helperText:
-      "Orientation only: map the starter in VS Code, then check off the services you will lean on.",
+      "Orientation only: map the starter in VS Code and skim where scripts and providers connect.",
     winCondition:
-      "Accounts checklist is complete and you know where routes, UI, backend, secrets, and scripts live.",
+      "You know where routes, UI, backend, secrets, and scripts live in the starter.",
     intro:
       "Ground yourself in the starter the same way you would scan a new repo in VS Code—folders, env files, and the scripts you will run all week.",
     lessonMeta: {
       runtimeLabel: "~5 min + skim",
-      goal: "See how the starter is organized and which external accounts you need next.",
+      goal: "See how the starter is organized before you wire providers in the next lessons.",
       purpose:
         "In-product cheat sheet for app/, components/, convex/, env files, AGENTS.md, and package scripts—lightweight reference, not a build step.",
     },
     actionJobNow:
-      "Watch the walkthrough, skim the Project map and Commands tabs, check off accounts you have access to.",
+      "Watch the walkthrough and skim the Project map and Commands tabs.",
     actionTimebox: "5–10 minutes",
     actionComeBackWith:
       "You know where pages, shared UI, Convex, secrets, agent notes, and npm scripts live.",
     workbenchPrompt:
-      "Use Project map, Accounts, and Commands while you follow along in the editor.",
+      "Use Project map and Commands while you follow along in the editor.",
     workbenchEmptyState:
       "Open the Project map tab and mirror it in your file explorer.",
     coachResources: [
@@ -311,6 +313,239 @@ export const buildLessons = [
     shortTitle: "Marketing Site",
     prevLessonId: "3.4",
     nextLessonId: "3.6",
+    workbench: "codex_marketing_site",
+    pinnedArtifacts: [
+      "core_flow_sketch_state",
+      "outcome_statement",
+      "user_statement",
+    ],
+    artifact: {
+      key: "codex_marketing_site_workspace",
+      label: "Marketing site copy + brief",
+      type: "mixed",
+      required: true,
+    },
+    intro:
+      "Turn your CEO offer inputs into one reusable ChatGPT prompt, draft landing-page copy for your marketing site, refine it conversationally (not plan mode), optionally borrow visual cues from a reference URL, then commit and push.",
+    helperText:
+      "Dependencies first, then brief + copy tabs, workflow checklist, and command snippets. Pinned cards show your earlier user, outcome, and flow notes.",
+    lessonMeta: {
+      runtimeLabel: "~5 min video + copy pass",
+      goal: "Reusable prompt saved, brief filled, first-pass landing copy in all sections, optional style URL, changes committed and pushed.",
+      purpose:
+        "Keep the lesson lightweight: one prompt, one copy pass, optional style reference, explicit git loop—without previewing the next lesson’s UX build.",
+    },
+    teachingPoints: [
+      "Copy the base prompt once, then fill the brief from your pinned artifacts—do not re-explain problem/pain/frequency in prose elsewhere.",
+      "Ask for a pass first; refine in chat. Skip plan mode for this exercise.",
+      "Treat commit + push as part of the outcome, not an afterthought.",
+    ],
+    actionJobNow:
+      "Copy the template prompt, run it with your brief, paste outputs into each copy tab, then commit and push the marketing page.",
+    actionTimebox: "30–50 minutes",
+    actionComeBackWith:
+      "Saved prompt, completed brief, filled copy sections, optional style URL, repo updated on remote.",
+    workbenchPrompt:
+      "Work top to bottom: dependencies → alert → prompt card → brief → copy tabs → style URL → workflow → commands.",
+    workbenchEmptyState:
+      "Start with dependencies and your pinned strategy artifacts.",
+    objectiveTitle: "Build 3.5 — Codex marketing site",
+    winCondition:
+      "Brief + all copy fields done, workflow checklist complete, marketing changes committed and pushed.",
+    checklist: [
+      "Watch the walkthrough",
+      "Save prompt + brief + copy sections on screen",
+      "Commit and push marketing site updates",
+      "Continue to Sandbox boot",
+    ],
+    workbenchFields: [
+      {
+        id: CODEX_MARKETING_SITE_FIELD_IDS.savedPrompt,
+        label: "Your reusable marketing-site prompt",
+        kind: "textarea",
+        required: true,
+        rows: 12,
+        placeholder:
+          "Paste the instructor template, then edit with your product specifics…",
+      },
+      {
+        id: CODEX_MARKETING_SITE_FIELD_IDS.product,
+        label: "Product (one line)",
+        kind: "text",
+        required: true,
+        placeholder: "What you are shipping (e.g. Figma plugin name + job)",
+      },
+      {
+        id: CODEX_MARKETING_SITE_FIELD_IDS.audience,
+        label: "Audience / ICP",
+        kind: "text",
+        required: true,
+        placeholder: "Who it is for",
+      },
+      {
+        id: CODEX_MARKETING_SITE_FIELD_IDS.problem,
+        label: "Problem",
+        kind: "textarea",
+        required: true,
+        rows: 3,
+        placeholder: "The situation they are in",
+      },
+      {
+        id: CODEX_MARKETING_SITE_FIELD_IDS.pain,
+        label: "Pain",
+        kind: "textarea",
+        required: true,
+        rows: 3,
+        placeholder: "What hurts—emotionally or practically",
+      },
+      {
+        id: CODEX_MARKETING_SITE_FIELD_IDS.frequency,
+        label: "Frequency",
+        kind: "text",
+        required: true,
+        placeholder: "How often it shows up",
+      },
+      {
+        id: CODEX_MARKETING_SITE_FIELD_IDS.whyMatters,
+        label: "Why it matters",
+        kind: "textarea",
+        required: true,
+        rows: 3,
+        placeholder: "Stakes if they do nothing",
+      },
+      {
+        id: CODEX_MARKETING_SITE_FIELD_IDS.outcome,
+        label: "Outcome",
+        kind: "text",
+        required: true,
+        placeholder: "What “fixed” looks like",
+      },
+      {
+        id: CODEX_MARKETING_SITE_FIELD_IDS.capability,
+        label: "Product capability",
+        kind: "textarea",
+        required: true,
+        rows: 3,
+        placeholder: "What the product actually does (concrete)",
+      },
+      {
+        id: CODEX_MARKETING_SITE_FIELD_IDS.copyEyebrow,
+        label: "Eyebrow",
+        kind: "textarea",
+        required: true,
+        rows: 2,
+        placeholder: "Paste or draft the eyebrow line…",
+      },
+      {
+        id: CODEX_MARKETING_SITE_FIELD_IDS.copySubheader,
+        label: "Subheader",
+        kind: "textarea",
+        required: true,
+        rows: 4,
+        placeholder: "Supporting line under the headline…",
+      },
+      {
+        id: CODEX_MARKETING_SITE_FIELD_IDS.copyPrimaryCta,
+        label: "Primary CTA",
+        kind: "textarea",
+        required: true,
+        rows: 2,
+        placeholder: "Button or link label + microcopy if needed",
+      },
+      {
+        id: CODEX_MARKETING_SITE_FIELD_IDS.copySecondaryCta,
+        label: "Secondary CTA",
+        kind: "textarea",
+        required: true,
+        rows: 2,
+        placeholder: "Lower-commitment action",
+      },
+      {
+        id: CODEX_MARKETING_SITE_FIELD_IDS.copyPromise,
+        label: "Promise line",
+        kind: "textarea",
+        required: true,
+        rows: 3,
+        placeholder: "Clear promise tied to the outcome",
+      },
+      {
+        id: CODEX_MARKETING_SITE_FIELD_IDS.copyHighlights,
+        label: "Highlights",
+        kind: "textarea",
+        required: true,
+        rows: 6,
+        placeholder: "Bullets—max five concrete capabilities",
+      },
+      {
+        id: CODEX_MARKETING_SITE_FIELD_IDS.copyFaq,
+        label: "FAQ / comparison notes",
+        kind: "textarea",
+        required: true,
+        rows: 6,
+        placeholder: "Short Q&A or vs. alternatives",
+      },
+      {
+        id: CODEX_MARKETING_SITE_FIELD_IDS.styleReferenceUrl,
+        label: "Style reference URL (optional)",
+        kind: "url",
+        required: false,
+        placeholder: "https://…",
+        helpText:
+          "Paste any site whose typography or palette you want to echo—borrow direction, do not copy assets.",
+      },
+      {
+        id: CODEX_MARKETING_SITE_FIELD_IDS.workflow,
+        label: "Workflow checklist",
+        kind: "checklist",
+        required: true,
+        taskLabel: "Workflow complete",
+        options: [...CODEX_MARKETING_WORKFLOW_CHECKLIST_OPTIONS],
+      },
+    ],
+    workbenchSections: [
+      {
+        id: "codex_marketing_brief",
+        title: "Offer brief + prompt",
+        layout: "stack",
+        fieldIds: [
+          CODEX_MARKETING_SITE_FIELD_IDS.savedPrompt,
+          CODEX_MARKETING_SITE_FIELD_IDS.product,
+          CODEX_MARKETING_SITE_FIELD_IDS.audience,
+          CODEX_MARKETING_SITE_FIELD_IDS.problem,
+          CODEX_MARKETING_SITE_FIELD_IDS.pain,
+          CODEX_MARKETING_SITE_FIELD_IDS.frequency,
+          CODEX_MARKETING_SITE_FIELD_IDS.whyMatters,
+          CODEX_MARKETING_SITE_FIELD_IDS.outcome,
+          CODEX_MARKETING_SITE_FIELD_IDS.capability,
+        ],
+        completionLabel: "Brief captured",
+      },
+      {
+        id: "codex_marketing_landing_copy",
+        title: "Landing page copy",
+        layout: "stack",
+        fieldIds: [
+          CODEX_MARKETING_SITE_FIELD_IDS.copyEyebrow,
+          CODEX_MARKETING_SITE_FIELD_IDS.copySubheader,
+          CODEX_MARKETING_SITE_FIELD_IDS.copyPrimaryCta,
+          CODEX_MARKETING_SITE_FIELD_IDS.copySecondaryCta,
+          CODEX_MARKETING_SITE_FIELD_IDS.copyPromise,
+          CODEX_MARKETING_SITE_FIELD_IDS.copyHighlights,
+          CODEX_MARKETING_SITE_FIELD_IDS.copyFaq,
+        ],
+        completionLabel: "Copy sections filled",
+      },
+      {
+        id: "codex_marketing_ship",
+        title: "Style + ship",
+        layout: "stack",
+        fieldIds: [
+          CODEX_MARKETING_SITE_FIELD_IDS.styleReferenceUrl,
+          CODEX_MARKETING_SITE_FIELD_IDS.workflow,
+        ],
+        completionLabel: "Ship loop done",
+      },
+    ],
   }),
   createVideoLesson({
     id: "3.6",
@@ -351,6 +586,111 @@ export const buildLessons = [
     shortTitle: "First Slice",
     prevLessonId: "3.8",
     nextLessonId: "3.10",
+    workbench: "brand_kit_workbench",
+    intro:
+      "Fast brand setup before you build: working name, Figma logo export, favicons, one primary and one accent color, Stripe branding, and a domain—lightweight starter kit, not a full branding workshop.",
+    helperText:
+      "Use the checklist and inputs on screen; open tools from the resource buttons when you need them.",
+    lessonMeta: {
+      runtimeLabel: "Video + brand starter kit",
+      goal: "Leave with a usable starter brand kit: name, domain, 500×500 icon PNG, wordmark, favicon pack, hex colors, and Stripe branding configured.",
+      purpose:
+        "Capture decisions on-screen so you ship assets instead of only watching a branding walkthrough.",
+    },
+    teachingPoints: [
+      "Export one square 500×500 PNG for the app icon, then run it through favicon.io.",
+      "Stripe Settings → Business → Branding should match what you show on the site.",
+      "Stop at two hex codes (primary + accent) for this pass—skip endless palette exploration.",
+    ],
+    actionJobNow:
+      "Fill brand inputs, run the naming exercise, complete the artifact checklist, and wire Stripe + domain.",
+    actionTimebox: "20–45 minutes",
+    actionComeBackWith:
+      "Working name, domain, icon PNG, favicon bundle, hex colors, and Stripe branding updated.",
+    workbenchPrompt:
+      "Treat this screen as the asset checklist—check items only when the file or setting is really done.",
+    workbenchEmptyState:
+      "Start with Brand inputs and the naming exercise, then work the checklist top to bottom.",
+    objectiveTitle: "Build 3.9 — Brand starter kit",
+    winCondition:
+      "Brand inputs saved, naming notes captured, every checklist line checked, and video complete.",
+    checklist: [
+      "Watch the lesson",
+      "Save brand inputs and naming notes",
+      "Complete the artifact checklist",
+    ],
+    workbenchFields: [
+      {
+        id: BRAND_KIT_APP_NAME_FIELD_ID,
+        label: "App name",
+        kind: "text",
+        required: true,
+        placeholder: "Working product name",
+      },
+      {
+        id: BRAND_KIT_INITIALS_FIELD_ID,
+        label: "Initials",
+        kind: "text",
+        required: true,
+        placeholder: "e.g. SBS",
+        helpText: "Short mark for the icon or compact UI.",
+      },
+      {
+        id: BRAND_KIT_DOMAIN_FIELD_ID,
+        label: "Domain",
+        kind: "text",
+        required: true,
+        placeholder: "example.com",
+      },
+      {
+        id: BRAND_KIT_PRIMARY_HEX_FIELD_ID,
+        label: "Primary hex",
+        kind: "text",
+        required: true,
+        placeholder: "#1a1a1a",
+        helpText: "Primary brand color as #RRGGBB.",
+      },
+      {
+        id: BRAND_KIT_ACCENT_HEX_FIELD_ID,
+        label: "Accent hex",
+        kind: "text",
+        required: true,
+        placeholder: "#6366f1",
+        helpText: "One accent only for this pass (#RRGGBB).",
+      },
+      {
+        id: BRAND_KIT_NAMING_FIELD_ID,
+        label: "Naming exercise",
+        kind: "textarea",
+        required: true,
+        rows: 6,
+        placeholder:
+          "List candidate words, constraints, and the working name you chose…",
+      },
+      {
+        id: BRAND_KIT_ICON_UPLOAD_FIELD_ID,
+        label: "Icon upload (optional)",
+        kind: "image_upload",
+        required: false,
+        helpText:
+          "Optional: attach your 500×500 PNG to preview next to the wordmark.",
+      },
+      {
+        id: BRAND_KIT_WORDMARK_UPLOAD_FIELD_ID,
+        label: "Wordmark upload (optional)",
+        kind: "image_upload",
+        required: false,
+        helpText: "Optional: header/wordmark image for the preview card.",
+      },
+      {
+        id: BRAND_KIT_ARTIFACT_CHECKLIST_FIELD_ID,
+        label: "Brand kit checklist",
+        kind: "checklist",
+        required: true,
+        taskLabel: "Brand kit checklist complete",
+        options: [...BRAND_KIT_ARTIFACT_CHECKLIST_OPTIONS],
+      },
+    ],
   }),
   createVideoLesson({
     id: "3.10",

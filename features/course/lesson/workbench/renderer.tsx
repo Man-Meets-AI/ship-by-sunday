@@ -13,7 +13,9 @@ import { BriefAssemblerWorkbench } from "./modes/brief-assembler-workbench";
 import { BuildSetupLaunchpadWorkbench } from "./modes/build-setup-launchpad/build-setup-launchpad-workbench";
 import { CompetitorResearchLightWorkbench } from "./modes/competitor-research-light/competitor-research-light-workbench";
 import { ProductionDeployHandoffWorkbench } from "./modes/production-deploy-handoff/production-deploy-handoff-workbench";
+import { BrandKitWorkbench } from "./modes/brand-kit/brand-kit-workbench";
 import { BuildProductIterationWorkbench } from "./modes/build-product-iteration/build-product-iteration-workbench";
+import { CodexMarketingSiteWorkbench } from "./modes/codex-marketing-site/codex-marketing-site-workbench";
 import { RepoMapOrientationWorkbench } from "./modes/repo-map-orientation-workbench";
 import { CaptureUploadWorkbench } from "./modes/capture-upload-workbench";
 import { CollectorBoardWorkbench } from "./modes/collector-board-workbench";
@@ -52,6 +54,8 @@ const modeRenderers: Record<WorkbenchType, WorkbenchModeComponent> = {
 	repo_map_orientation: RepoMapOrientationWorkbench,
 	production_deploy_handoff: ProductionDeployHandoffWorkbench,
 	build_product_iteration: BuildProductIterationWorkbench,
+	brand_kit_workbench: BrandKitWorkbench,
+	codex_marketing_site: CodexMarketingSiteWorkbench,
 };
 
 function UnsupportedWorkbench({

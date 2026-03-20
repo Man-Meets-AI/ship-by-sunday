@@ -13,12 +13,7 @@ import { RepoMapOrientationPanel } from "./repo-map-orientation-panel";
 export function RepoMapOrientationWorkbench({
 	lesson,
 	lessonContent,
-	fieldValues,
-	onFieldChange,
 	pinnedArtifacts,
-	invalidFieldIds,
-	invalidFieldMessages,
-	fields,
 	objectiveTasks,
 	completedTaskCount,
 	layoutMode,
@@ -36,12 +31,6 @@ export function RepoMapOrientationWorkbench({
 	const panel = (
 		<RepoMapOrientationPanel
 			lessonContent={lessonContent}
-			fieldValues={fieldValues}
-			onFieldChange={onFieldChange}
-			fields={fields}
-			pinnedArtifacts={pinnedArtifacts}
-			invalidFieldIds={invalidFieldIds}
-			invalidFieldMessages={invalidFieldMessages}
 			workbenchCompletionSlot={workbenchCompletionSlot}
 		/>
 	);

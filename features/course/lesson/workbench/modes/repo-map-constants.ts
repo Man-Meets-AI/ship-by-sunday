@@ -6,8 +6,6 @@ export const REPO_MAP_COACH_LINK_IDS = {
 	guide: "repo_map_setup_guide",
 } as const;
 
-export const REPO_ACCOUNTS_FIELD_ID = "repo_accounts_services" as const;
-
 export type RepoMapBadge = "required" | "nice" | "advanced";
 
 export type RepoMapEntry = {
