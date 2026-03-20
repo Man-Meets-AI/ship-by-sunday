@@ -5,9 +5,9 @@
 ## What Lives Here
 
 - Public marketing and pricing pages in `app/`
-- Protected student routes at `/mission`, `/lesson/[lessonId]`, `/artifacts`, `/settings`, and `/access-required`
+- Protected product routes at `/mission`, `/lesson/[lessonId]`, `/artifacts`, `/settings`, and the recovery surface at `/access-required`
 - Feature-first runtime code in `features/`, with the curriculum and lesson model centered under `features/course/lesson/`
-- Purchase-to-access handoff across Clerk, Stripe, and Convex
+- Purchase-to-access handoff across Clerk, Stripe, and Convex product-access state
 
 ## Quick Start
 
@@ -74,9 +74,9 @@ The purchase-to-access behavior contract lives in [docs/delivery-onboarding/stac
 
 - Curriculum shape and lesson order: `features/course/lesson/model/manifest.ts` and `features/course/lesson/model/lessons/*.ts`
 - Landing-page copy, offer framing, and media: `features/marketing/components/home-page.tsx`, `features/marketing/components/faq-accordion.tsx`, and `public/`
-- Student workspace UI and shell behavior: `features/course/` plus the thin route wrappers in `app/mission/page.tsx` and `app/lesson/[lessonId]/page.tsx`
+- Student workspace UI and shell behavior: `features/course/` plus the protected route group in `app/(app)/`
 - Theme tokens and visual language: `app/globals.css`
-- Purchase, entitlement, and access flow: `app/api/stripe/*`, `features/checkout/`, `features/course/access/`, and `convex/course/`
+- Purchase, product-access, and access flow: `app/api/stripe/*`, `features/checkout/`, `features/product-access/`, `convex/access.ts`, and `convex/course/`
 - Optional starter-template and Codex-assisted build helpers: `.env.local.example`, `scripts/`, `app/api/codex/*`, and `features/codex/`
 
 More detail: [docs/dev/customization.md](docs/dev/customization.md)

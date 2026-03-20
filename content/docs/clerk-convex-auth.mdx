@@ -1,6 +1,6 @@
 ---
 title: Clerk + Convex Auth
-description: Wire Clerk and Convex correctly so sign-in, protected server reads, and access checks all work.
+description: Wire Clerk and Convex correctly so sign-in, protected server reads, and product-access checks all work.
 ---
 
 # Clerk + Convex Auth
@@ -57,7 +57,7 @@ You are correctly wired when:
 - sign-in works
 - protected routes can read server-side state
 - `/access-required` can tell the difference between signed-out and signed-in users
-- entitlement checks do not fail with a token or issuer mismatch
+- product-access checks do not fail with a token or issuer mismatch
 
 ## If this breaks
 

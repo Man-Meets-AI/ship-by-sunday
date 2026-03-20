@@ -35,6 +35,8 @@ The runtime splits into three clear surfaces:
 
 That split matters because checkout and access recovery live between those worlds.
 
+`app/(app)/layout.tsx` is the single server-side product-access gate for the protected app routes. Middleware only handles sign-in.
+
 ## Purchase-to-access flow
 
 1. A buyer starts from the public landing page.
@@ -42,10 +44,10 @@ That split matters because checkout and access recovery live between those world
 3. Signed-in buyers call `POST /api/stripe/checkout`.
 4. Stripe hosts the payment flow and returns to `/checkout/success`.
 5. `POST /api/stripe/webhook` verifies the signature and handles completed checkout events.
-6. Convex upserts the active access row.
-7. `/checkout/success` waits for authenticated access state, then redirects into `/mission`.
-8. `/access-required` polls the same viewer status and recovers automatically if access appears later.
-9. Returning entitled users who hit `/` are resumed into `/mission` or their most recently worked accessible lesson unless they explicitly force marketing mode.
+6. Convex upserts the active product-access grant.
+7. `/checkout/success` waits for authenticated product-access state, then redirects into `/mission`.
+8. `/access-required` checks the same product-access state and recovers automatically if access appears later.
+9. Returning users with granted access who hit `/` are resumed into `/mission` or their most recently worked accessible lesson unless they explicitly force marketing mode.
 
 ## Why the Clerk `convex` template matters
 
@@ -59,7 +61,7 @@ You understand the starter when you can answer these questions without guessing:
 
 - Which route creates the Stripe Checkout Session?
 - Which route handles the Stripe webhook?
-- Which system is the source of truth for access grants?
-- Which protected routes should a newly entitled user reach first?
+- Which system is the source of truth for product-access grants?
+- Which protected routes should a newly granted user reach first?
 
 If any of those are fuzzy, do not rewrite the purchase-to-access path yet. Fix your understanding first.

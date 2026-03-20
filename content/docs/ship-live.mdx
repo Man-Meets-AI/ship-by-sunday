@@ -15,7 +15,7 @@ Make sure all of this is true:
 - auth works in the real deployed environment
 - checkout returns to the deployed `/checkout/success`
 - the live webhook is registered and verified
-- entitled users reach `/mission`
+- users with granted access reach `/mission`
 - the first protected flow is usable after access appears
 
 ## Production checklist
@@ -23,7 +23,7 @@ Make sure all of this is true:
 1. Set production env values in Vercel, Clerk, Convex, and Stripe.
 2. Register the live Stripe webhook endpoint.
 3. Run a safe real checkout pass in the deployed environment.
-4. Confirm entitlement grant happens in the deployed environment, not just locally.
+4. Confirm product-access grant happens in the deployed environment, not just locally.
 5. Confirm the buyer reaches the protected product after payment.
 
 ## Keep these in mind

@@ -11,7 +11,7 @@ Do not stop at component checks. Test the full buyer journey:
 2. sign-in
 3. checkout
 4. `/checkout/success`
-5. entitlement grant
+5. product-access grant
 6. `/mission`
 7. first protected lesson or product surface
 
@@ -27,14 +27,14 @@ Every pass should cover these states:
 ## The fastest local flow
 
 1. Follow [Local QA](/docs/local-qa).
-2. Use the non-entitled QA account for locked-state checks.
-3. Use the entitled QA account for product checks.
+2. Use the no-access QA account for locked-state checks.
+3. Use the granted-access QA account for product checks.
 4. Run a real local Stripe test checkout before you trust the handoff.
 
 ## What to confirm
 
 - signed-out users get pushed into sign-in
-- non-entitled users land on `/access-required`
+- users without access land on `/access-required`
 - checkout returns to `/checkout/success`
 - the webhook grants access
 - the app recovers automatically into `/mission`

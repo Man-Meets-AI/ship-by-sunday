@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-03-20
+
+### Changed
+
+- Simplified the starter access model so the code and docs now describe one generic `product access` layer backed by Convex, with a shared protected route-group layout in `app/(app)` instead of repeating page-level access checks.
+
 ## 2026-03-18
 
 ### Changed

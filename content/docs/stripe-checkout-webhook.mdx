@@ -1,11 +1,11 @@
 ---
 title: Stripe Checkout + Webhook
-description: Wire the Stripe session, webhook secret, and access grant path so payment completion turns into protected access.
+description: Wire the Stripe session, webhook secret, and product-access grant path so payment completion turns into protected access.
 ---
 
 # Stripe Checkout + Webhook
 
-The Stripe setup has one job: turn a real paid checkout into a real access grant.
+The Stripe setup has one job: turn a real paid checkout into a real product-access grant.
 
 The easiest way to break that path is secret drift between the app and Convex.
 
@@ -62,7 +62,7 @@ The starter uses this sequence:
 2. Stripe hosts checkout
 3. Stripe returns to `/checkout/success`
 4. Stripe webhook verifies the signature
-5. Convex upserts the active access grant
+5. Convex upserts the active product-access grant
 6. `/checkout/success` waits for access, then redirects into `/mission`
 
 ## Health checks
@@ -80,7 +80,7 @@ The happy path is:
 
 1. checkout completes in Stripe
 2. Stripe forwards `checkout.session.completed`
-3. the webhook grants access
+3. the webhook grants product access
 4. `/checkout/success` stops waiting
 5. the buyer reaches `/mission`
 

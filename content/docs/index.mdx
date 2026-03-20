@@ -16,7 +16,7 @@ If you are new to this stack, do not start by rewriting auth, payments, or acces
 - a protected product surface on `/mission`, `/lesson/[lessonId]`, `/artifacts`, and `/settings`
 - Clerk sign-in and sign-up
 - Stripe-hosted checkout plus success and cancel flows
-- Convex-backed entitlement and resume state
+- Convex-backed product-access and resume state
 - a starter template path you can shape into your product
 
 ## The fastest path
@@ -42,7 +42,7 @@ Leave these surfaces alone until the starter already looks like your product:
 
 - `app/api/stripe/*`
 - `app/checkout/*`
-- `convex/course/*`
+- `convex/access.ts` and `convex/course/*`
 - server-side Clerk to Convex auth wiring
 
 Those files matter, but they are the fragile part of the purchase-to-access contract.
@@ -67,6 +67,6 @@ You are in a good place to customize once you can say all of this is true:
 
 - the app boots locally
 - you can sign in
-- a non-entitled user sees the right locked state
-- an entitled user reaches `/mission`
+- a user without access sees the right locked state
+- a user with granted access reaches `/mission`
 - checkout and webhook wiring are understood, even if you have not changed them yet

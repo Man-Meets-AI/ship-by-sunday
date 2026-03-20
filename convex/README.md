@@ -4,7 +4,7 @@ This folder owns the app data and product-state backend for `Ship by Sunday`.
 
 ## Current responsibilities
 
-- course entitlements
+- product access grants
 - starter repo access requests and provisioning state
 - lesson state and autosave
 - mission progress
@@ -36,6 +36,6 @@ Deployment workflow: [docs/dev/convex-sop.md](../docs/dev/convex-sop.md)
 
 ## Guardrails
 
-- Treat entitlements and lesson progress as production state.
+- Treat product access and lesson progress as production state.
 - Prefer adding tests around pure domain helpers in `features/course/lesson/model/` before refactoring Convex behavior.
 - If a change affects auth, purchase, or access gating, run `pnpm run check` before closing it.

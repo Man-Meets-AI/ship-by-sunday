@@ -1,6 +1,6 @@
 ---
 title: Local QA
-description: Run the fastest checks first, then verify the real signed-out, non-entitled, entitled, and paid flows locally.
+description: Run the fastest checks first, then verify the real signed-out, no-access, granted-access, and paid flows locally.
 ---
 
 # Local QA
@@ -30,8 +30,8 @@ pnpm run check
 
 Use two real users:
 
-- non-entitled user for sign-in, `/access-required`, wrong-account, and pre-purchase checks
-- entitled user for `/mission`, `/lesson/[lessonId]`, `/artifacts`, and `/settings` checks
+- no-access user for sign-in, `/access-required`, wrong-account, and pre-purchase checks
+- granted-access user for `/mission`, `/lesson/[lessonId]`, `/artifacts`, and `/settings` checks
 
 Commands:
 
@@ -50,7 +50,7 @@ Use this only in a safe local test environment.
 1. Start the app and local Convex.
 2. Start the Stripe listener.
 3. If the listener prints a fresh webhook secret, restart the web app.
-4. Sign in with the non-entitled account.
+4. Sign in with the no-access account.
 5. Start checkout from the landing page.
 6. Complete payment with Stripe test card `4242 4242 4242 4242`, any future expiry, any CVC, ZIP `10001`.
 7. Confirm Stripe returns to `/checkout/success?session_id=...`.
@@ -70,16 +70,16 @@ pnpm run test:browser-smoke
 1. Visit `/mission` or `/settings` while signed out.
 2. Confirm redirect into the access recovery surface.
 
-### Non-entitled access flow
+### No-access flow
 
-1. Sign in with the non-entitled account.
+1. Sign in with the no-access account.
 2. Visit `/access-required`.
 3. Confirm the page explains that the account has no active access.
 
-### Entitled access flow
+### Granted-access flow
 
 1. Run `pnpm run clerk:test-user:prepare:entitled`.
-2. Sign in with the entitled account.
+2. Sign in with the granted-access account.
 3. Confirm `/mission`, one lesson route, `/artifacts`, and `/settings` load.
 
 ## What success looks like
@@ -88,7 +88,7 @@ You are done when the app passes all four realities:
 
 - signed out
 - signed in without access
-- signed in with access
+- signed in with granted access
 - newly paid and waiting for access grant
 
 Anything less is partial confidence, not real QA.

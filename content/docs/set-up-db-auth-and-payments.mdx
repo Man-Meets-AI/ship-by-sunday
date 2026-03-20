@@ -1,6 +1,6 @@
 ---
 title: Set Up DB, Auth, and Payments
-description: Wire the dynamic stack in the right order so sign-in, entitlements, and the paid handoff work together instead of drifting apart.
+description: Wire the dynamic stack in the right order so sign-in, product access, and the paid handoff work together instead of drifting apart.
 ---
 
 # Set Up DB, Auth, and Payments
@@ -13,12 +13,12 @@ Once the marketing surface is clear enough, wire the dynamic stack in this order
 
 ## Why this order matters
 
-Clerk identifies the user. Convex stores entitlement and product state. Stripe finishes the payment flow. If those three systems do not agree on the same user and environment values, checkout can look successful while access still fails.
+Clerk identifies the user. Convex stores product access and product state. Stripe finishes the payment flow. If those three systems do not agree on the same user and environment values, checkout can look successful while access still fails.
 
 ## The plain-English version
 
 - Clerk is your identity system.
-- Convex is your app state and entitlement system.
+- Convex is your app state and product-access system.
 - Stripe is your payment system.
 - Environment variables are the private keys and URLs that let those systems talk to each other.
 
@@ -45,5 +45,5 @@ You are wired correctly when:
 - sign-in works
 - protected routes can read viewer state
 - checkout starts from the app
-- the webhook grants access
+- the webhook grants product access
 - `/checkout/success` eventually routes the buyer into `/mission`
