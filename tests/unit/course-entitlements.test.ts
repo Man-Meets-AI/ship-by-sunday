@@ -1,18 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { COURSE_SLUG } from "@/features/course/lesson/model";
+const clerkUserId = "user_product_access_123";
 
-const clerkUserId = "user_entitlement_123";
-
-function createEntitlement(
-	status: "active" | "pending" | "revoked" | "refunded",
+function createProductAccessGrant(
+	status: "granted" | "pending" | "revoked" | "refunded",
 	overrides: Record<string, unknown> = {},
 ) {
 	return {
-		_id: "entitlement_1",
+		_id: "product_access_1",
 		_creationTime: 1,
 		clerkUserId,
-		courseSlug: COURSE_SLUG,
 		status,
 		source: "manual",
 		grantedAt: 10,
@@ -21,12 +18,12 @@ function createEntitlement(
 	};
 }
 
-function createCourseCtx({
-	entitlement = null,
+function createAccessCtx({
+	productAccessGrant = null,
 	patch = vi.fn().mockResolvedValue(undefined),
-	insert = vi.fn().mockResolvedValue("entitlement_1"),
+	insert = vi.fn().mockResolvedValue("product_access_1"),
 }: {
-	entitlement?: Record<string, unknown> | null;
+	productAccessGrant?: Record<string, unknown> | null;
 	patch?: ReturnType<typeof vi.fn>;
 	insert?: ReturnType<typeof vi.fn>;
 } = {}) {
@@ -37,7 +34,7 @@ function createCourseCtx({
 		db: {
 			query: vi.fn(() => ({
 				withIndex: vi.fn(() => ({
-					unique: vi.fn().mockResolvedValue(entitlement),
+					unique: vi.fn().mockResolvedValue(productAccessGrant),
 				})),
 			})),
 			patch,
@@ -46,8 +43,8 @@ function createCourseCtx({
 	};
 }
 
-describe("convex/course/entitlements", () => {
-	let moduleUnderTest: typeof import("@/convex/course/entitlements");
+describe("convex/access/model", () => {
+	let moduleUnderTest: typeof import("@/convex/access/model");
 	const originalEnv = { ...process.env };
 
 	beforeEach(async () => {
@@ -56,7 +53,7 @@ describe("convex/course/entitlements", () => {
 			STRIPE_WEBHOOK_SECRET: "stripe_webhook_secret",
 		};
 		vi.resetModules();
-		moduleUnderTest = await import("@/convex/course/entitlements");
+		moduleUnderTest = await import("@/convex/access/model");
 	});
 
 	afterEach(() => {
@@ -65,72 +62,67 @@ describe("convex/course/entitlements", () => {
 	});
 
 	it("marks signed-out viewers as lacking access", async () => {
-		const ctx = createCourseCtx();
+		const ctx = createAccessCtx();
 		ctx.auth.getUserIdentity.mockResolvedValue(null);
 
 		await expect(
-			moduleUnderTest.viewerAccessHandler(ctx as never),
+			moduleUnderTest.viewerProductAccessHandler(ctx as never),
 		).resolves.toEqual({
 			clerkUserId: null,
-			courseSlug: COURSE_SLUG,
 			hasAccess: false,
 			status: "signed_out",
 		});
 	});
 
-	it("marks a signed-in viewer without entitlement as needing access", async () => {
-		const ctx = createCourseCtx();
+	it("marks a signed-in viewer without product access as needing access", async () => {
+		const ctx = createAccessCtx();
 		ctx.auth.getUserIdentity.mockResolvedValue({ subject: clerkUserId });
 
 		await expect(
-			moduleUnderTest.viewerAccessHandler(ctx as never),
+			moduleUnderTest.viewerProductAccessHandler(ctx as never),
 		).resolves.toEqual({
 			clerkUserId,
-			courseSlug: COURSE_SLUG,
 			hasAccess: false,
-			status: "none",
+			status: "no_access",
 		});
 	});
 
-	it("marks an entitled viewer as active", async () => {
-		const ctx = createCourseCtx({
-			entitlement: createEntitlement("active"),
+	it("marks a granted viewer as active", async () => {
+		const ctx = createAccessCtx({
+			productAccessGrant: createProductAccessGrant("granted"),
 		});
 		ctx.auth.getUserIdentity.mockResolvedValue({ subject: clerkUserId });
 
 		await expect(
-			moduleUnderTest.viewerAccessHandler(ctx as never),
+			moduleUnderTest.viewerProductAccessHandler(ctx as never),
 		).resolves.toEqual({
 			clerkUserId,
-			courseSlug: COURSE_SLUG,
 			hasAccess: true,
-			status: "active",
+			status: "granted",
 		});
 	});
 
-	it("inserts a new entitlement from the manual grant path", async () => {
-		const insert = vi.fn().mockResolvedValue("entitlement_1");
-		const ctx = createCourseCtx({
+	it("inserts a new product-access grant from the manual path", async () => {
+		const insert = vi.fn().mockResolvedValue("product_access_1");
+		const ctx = createAccessCtx({
 			insert,
 		});
 
 		vi.spyOn(Date, "now").mockReturnValue(200);
 
 		await expect(
-			moduleUnderTest.grantEntitlementHandler(ctx as never, {
+			moduleUnderTest.grantProductAccessHandler(ctx as never, {
 				clerkUserId,
 				source: "manual",
 			}),
 		).resolves.toEqual({
-			courseSlug: COURSE_SLUG,
 			granted: "inserted",
 		});
 		expect(insert).toHaveBeenCalledWith(
-			"courseEntitlements",
+			"productAccessGrants",
 			expect.objectContaining({
 				clerkUserId,
-				courseSlug: COURSE_SLUG,
-				status: "active",
+				status: "granted",
 				source: "manual",
 				grantedAt: 200,
 				updatedAt: 200,
@@ -138,11 +130,11 @@ describe("convex/course/entitlements", () => {
 		);
 	});
 
-	it("patches an existing entitlement instead of creating a duplicate", async () => {
+	it("patches an existing product-access grant instead of creating a duplicate", async () => {
 		const patch = vi.fn().mockResolvedValue(undefined);
-		const ctx = createCourseCtx({
-			entitlement: createEntitlement("pending", {
-				_id: "entitlement_existing",
+		const ctx = createAccessCtx({
+			productAccessGrant: createProductAccessGrant("pending", {
+				_id: "product_access_existing",
 				source: "stripe_checkout",
 				updatedAt: 25,
 			}),
@@ -152,22 +144,20 @@ describe("convex/course/entitlements", () => {
 		vi.spyOn(Date, "now").mockReturnValue(300);
 
 		await expect(
-			moduleUnderTest.grantEntitlementHandler(ctx as never, {
+			moduleUnderTest.grantProductAccessHandler(ctx as never, {
 				clerkUserId,
-				courseSlug: COURSE_SLUG,
 				source: "stripe_webhook",
 				stripeCustomerId: "cus_123",
 				stripeCheckoutSessionId: "cs_123",
 				stripePaymentIntentId: "pi_123",
 			}),
 		).resolves.toEqual({
-			courseSlug: COURSE_SLUG,
 			granted: "patched",
 		});
 		expect(patch).toHaveBeenCalledWith(
-			"entitlement_existing",
+			"product_access_existing",
 			expect.objectContaining({
-				status: "active",
+				status: "granted",
 				source: "stripe_webhook",
 				stripeCustomerId: "cus_123",
 				stripeCheckoutSessionId: "cs_123",
@@ -178,14 +168,13 @@ describe("convex/course/entitlements", () => {
 		);
 	});
 
-	it("rejects a mismatched Stripe webhook secret before mutating entitlements", async () => {
-		const ctx = createCourseCtx();
+	it("rejects a mismatched Stripe webhook secret before mutating product access", async () => {
+		const ctx = createAccessCtx();
 
 		await expect(
-			moduleUnderTest.grantEntitlementFromStripeHandler(ctx as never, {
+			moduleUnderTest.grantProductAccessFromStripeHandler(ctx as never, {
 				webhookSecret: "wrong_secret",
 				clerkUserId,
-				courseSlug: COURSE_SLUG,
 			}),
 		).rejects.toThrow("Invalid webhook secret");
 		expect(ctx.db.insert).not.toHaveBeenCalled();

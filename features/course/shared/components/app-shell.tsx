@@ -33,7 +33,7 @@ function ShellInner({
 }: AppShellProps) {
 	const { isAuthenticated, isLoading } = useConvexAuth();
 	const viewerAccess = useQuery(
-		api.course.viewerAccess,
+		api.access.viewerProductAccess,
 		isAuthenticated && !isLoading ? {} : "skip",
 	) as AppShellViewerAccessState | undefined;
 	const mission = useQuery(

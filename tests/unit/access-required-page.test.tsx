@@ -33,31 +33,17 @@ vi.mock("convex/react", () => ({
 	useQuery: (query: unknown) => useQueryMock(query),
 }));
 
-vi.mock("@/features/course/shared/components/app-shell", () => ({
-	AppShell: ({
-		children,
-		title,
-		subtitle,
-	}: {
-		children: React.ReactNode;
-		title: string;
-		subtitle: string;
-	}) => (
-		<div data-product-shell={title} data-subtitle={subtitle}>
-			{children}
-		</div>
-	),
-}));
-
 vi.mock("@/features/checkout/components/checkout-button", () => ({
 	CheckoutButton: ({ label }: { label: string }) => (
-		<div data-checkout-button={label}>{label}</div>
+		<button data-testid="access-required-buy-access" type="button">
+			{label}
+		</button>
 	),
 }));
 
 globalThis.React = React;
 
-import { AccessRequiredPage } from "@/features/course/access/components/access-required-page";
+import { AccessRequiredPage } from "@/features/product-access/components/access-required-page";
 
 describe("AccessRequiredPage", () => {
 	beforeEach(() => {
@@ -66,15 +52,14 @@ describe("AccessRequiredPage", () => {
 		refreshMock.mockReset();
 	});
 
-	it("renders the purchase sync state while viewer access is loading", () => {
+	it("renders the product-access check state while access is loading", () => {
 		useQueryMock.mockReturnValue(undefined);
 
 		const markup = renderToStaticMarkup(<AccessRequiredPage />);
 
-		expect(markup).toContain("Checking access");
-		expect(markup).toContain("Checking course access");
-		expect(markup).toContain("Waiting on access");
-		expect(markup).not.toContain("data-checkout-button");
+		expect(markup).toContain("Checking product access");
+		expect(markup).toContain("Product access check");
+		expect(markup).not.toContain('data-testid="access-required-buy-access"');
 	});
 
 	it("renders the sign-in recovery path for signed-out viewers", () => {
@@ -85,23 +70,38 @@ describe("AccessRequiredPage", () => {
 
 		const markup = renderToStaticMarkup(<AccessRequiredPage />);
 
-		expect(markup).toContain("Sign in to check your access");
+		expect(markup).toContain("Sign in to check your product access");
 		expect(markup).toContain("Sign in first");
-		expect(markup).toContain("Continue to sign in");
-		expect(markup).not.toContain("data-checkout-button");
+		expect(markup).toContain("Sign in");
+		expect(markup).not.toContain('data-testid="access-required-buy-access"');
 	});
 
-	it("renders retry and checkout paths when an entitled account is still missing access", () => {
+	it("renders retry and checkout paths when a signed-in account has no access", () => {
 		useQueryMock.mockReturnValue({
 			hasAccess: false,
-			status: "none",
+			status: "no_access",
 		});
 
 		const markup = renderToStaticMarkup(<AccessRequiredPage />);
 
 		expect(markup).toContain("Access not attached to this account");
 		expect(markup).toContain("Retry access check");
-		expect(markup).toContain("Choose next step");
-		expect(markup).toContain('data-checkout-button="Buy access now"');
+		expect(markup).toContain("Need to buy access");
+		expect(markup).toContain('data-testid="access-required-buy-access"');
+		expect(markup).toContain("Buy access now");
+	});
+
+	it("renders the session refresh state when the Clerk token is missing", () => {
+		useQueryMock.mockReturnValue({
+			hasAccess: false,
+			status: "token_missing",
+		});
+
+		const markup = renderToStaticMarkup(<AccessRequiredPage />);
+
+		expect(markup).toContain("Refresh your account session");
+		expect(markup).toContain("Session refresh needed");
+		expect(markup).toContain("Sign in again");
+		expect(markup).not.toContain('data-testid="access-required-buy-access"');
 	});
 });

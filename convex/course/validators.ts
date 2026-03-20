@@ -83,21 +83,6 @@ export const missionLessonStatusValidator = v.union(
 	v.literal("in_progress"),
 	v.literal("completed"),
 );
-export const entitlementStatusValidator = v.union(
-	v.literal("active"),
-	v.literal("pending"),
-	v.literal("revoked"),
-	v.literal("refunded"),
-);
-export const entitlementSourceValidator = v.union(
-	v.literal("manual"),
-	v.literal("stripe_checkout"),
-	v.literal("stripe_webhook"),
-);
-export const entitlementGrantOutcomeValidator = v.union(
-	v.literal("inserted"),
-	v.literal("patched"),
-);
 export const starterRepoAccessProvisioningStatusValidator = v.union(
 	v.literal("requested"),
 	v.literal("invited"),
@@ -122,46 +107,10 @@ export const completedArtifactPreviewValidator = v.object({
 	completedAt: v.number(),
 });
 
-export const viewerAccessReturnValidator = v.object({
-	clerkUserId: v.union(v.string(), v.null()),
-	courseSlug: v.string(),
-	hasAccess: v.boolean(),
-	status: v.union(
-		v.literal("signed_out"),
-		v.literal("none"),
-		entitlementStatusValidator,
-	),
-});
-
 export const resumeDestinationReturnValidator = v.object({
 	destination: v.string(),
 	lessonId: v.union(v.string(), v.null()),
 });
-
-export const entitlementGrantResultValidator = v.object({
-	courseSlug: v.string(),
-	granted: entitlementGrantOutcomeValidator,
-});
-
-export const entitlementDocumentValidator = v.object({
-	_id: v.id("courseEntitlements"),
-	_creationTime: v.number(),
-	clerkUserId: v.string(),
-	courseSlug: v.string(),
-	status: entitlementStatusValidator,
-	source: entitlementSourceValidator,
-	stripeCustomerId: v.optional(v.string()),
-	stripeCheckoutSessionId: v.optional(v.string()),
-	stripePaymentIntentId: v.optional(v.string()),
-	grantedAt: v.number(),
-	updatedAt: v.number(),
-	revokedAt: v.optional(v.number()),
-});
-
-export const entitlementDebugReturnValidator = v.union(
-	entitlementDocumentValidator,
-	v.null(),
-);
 
 export const starterRepoAccessPublicValidator = v.object({
 	githubUsername: v.string(),

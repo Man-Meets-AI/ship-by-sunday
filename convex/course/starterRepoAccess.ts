@@ -5,7 +5,7 @@ import {
 	toGitHubUsernameLower,
 	validateGitHubUsername,
 } from "../../features/starter-repo/lib/github-username";
-import { requireActiveEntitlement } from "./entitlements";
+import { requireGrantedProductAccess } from "../access/model";
 import type {
 	CourseMutationCtx,
 	CourseQueryCtx,
@@ -79,7 +79,7 @@ export const getStarterRepoAccessReturns = v.union(
 );
 
 export async function getStarterRepoAccessHandler(ctx: CourseQueryCtx) {
-	const clerkUserId = await requireActiveEntitlement(ctx);
+	const clerkUserId = await requireGrantedProductAccess(ctx);
 	const record = await getStarterRepoAccessByCourse(ctx, clerkUserId);
 
 	return toStarterRepoAccessPublic(record);
@@ -99,7 +99,7 @@ export async function requestStarterRepoAccessHandler(
 		githubUsername: string;
 	},
 ) {
-	const clerkUserId = await requireActiveEntitlement(ctx);
+	const clerkUserId = await requireGrantedProductAccess(ctx);
 	const { normalized, error } = validateGitHubUsername(args.githubUsername);
 
 	if (error) {

@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
-	requireEntitledApiSessionMock,
+	requireProductAccessApiSessionMock,
 	upsertViewerCodexConnectionMock,
 	recordCodexRunMock,
 	withCodexAppServerClientMock,
 } = vi.hoisted(() => ({
-	requireEntitledApiSessionMock: vi.fn(),
+	requireProductAccessApiSessionMock: vi.fn(),
 	upsertViewerCodexConnectionMock: vi.fn(),
 	recordCodexRunMock: vi.fn(),
 	withCodexAppServerClientMock: vi.fn(),
@@ -19,7 +19,7 @@ vi.mock("@/features/codex/server/route-helpers", async () => {
 
 	return {
 		...actual,
-		requireEntitledApiSession: requireEntitledApiSessionMock,
+		requireProductAccessApiSession: requireProductAccessApiSessionMock,
 		upsertViewerCodexConnection: upsertViewerCodexConnectionMock,
 		recordCodexRun: recordCodexRunMock,
 	};
@@ -45,7 +45,7 @@ import { POST as postCodexGenerate } from "@/app/api/codex/generate/route";
 
 describe("codex route handlers", () => {
 	beforeEach(() => {
-		requireEntitledApiSessionMock.mockReset();
+		requireProductAccessApiSessionMock.mockReset();
 		upsertViewerCodexConnectionMock.mockReset();
 		recordCodexRunMock.mockReset();
 		withCodexAppServerClientMock.mockReset();
@@ -58,7 +58,7 @@ describe("codex route handlers", () => {
 	}
 
 	it("returns the account state and refreshes the viewer connection", async () => {
-		requireEntitledApiSessionMock.mockResolvedValue({
+		requireProductAccessApiSessionMock.mockResolvedValue({
 			userId: "user_123",
 			token: "token_123",
 		});
@@ -124,7 +124,7 @@ describe("codex route handlers", () => {
 	});
 
 	it("starts Codex login and marks the viewer connection as connecting", async () => {
-		requireEntitledApiSessionMock.mockResolvedValue({
+		requireProductAccessApiSessionMock.mockResolvedValue({
 			userId: "user_123",
 			token: "token_123",
 		});
@@ -159,20 +159,22 @@ describe("codex route handlers", () => {
 	});
 
 	it("returns a mapped auth response when Codex access is missing", async () => {
-		requireEntitledApiSessionMock.mockRejectedValue(new Error("FORBIDDEN"));
+		requireProductAccessApiSessionMock.mockRejectedValue(
+			new Error("FORBIDDEN"),
+		);
 
 		const response = await postCodexLoginStart();
 		const body = (await response.json()) as Record<string, unknown>;
 
 		expect(response.status).toBe(403);
 		expect(body).toEqual({
-			error: "Course access is required before managing Codex connection.",
+			error: "Product access is required before managing Codex connection.",
 		});
 		expect(withCodexAppServerClientMock).not.toHaveBeenCalled();
 	});
 
 	it("polls the login state using the pending login id and refresh flag", async () => {
-		requireEntitledApiSessionMock.mockResolvedValue({
+		requireProductAccessApiSessionMock.mockResolvedValue({
 			userId: "user_123",
 			token: "token_123",
 		});
@@ -219,7 +221,7 @@ describe("codex route handlers", () => {
 	});
 
 	it("disconnects the Codex account and clears the viewer connection", async () => {
-		requireEntitledApiSessionMock.mockResolvedValue({
+		requireProductAccessApiSessionMock.mockResolvedValue({
 			userId: "user_123",
 			token: "token_123",
 		});
@@ -250,7 +252,7 @@ describe("codex route handlers", () => {
 	});
 
 	it("returns a disconnected rate-limit state for non-managed accounts", async () => {
-		requireEntitledApiSessionMock.mockResolvedValue({
+		requireProductAccessApiSessionMock.mockResolvedValue({
 			userId: "user_123",
 			token: "token_123",
 		});
@@ -287,7 +289,7 @@ describe("codex route handlers", () => {
 	});
 
 	it("rejects malformed generation payloads before contacting Codex", async () => {
-		requireEntitledApiSessionMock.mockResolvedValue({
+		requireProductAccessApiSessionMock.mockResolvedValue({
 			userId: "user_123",
 			token: "token_123",
 		});
@@ -314,7 +316,7 @@ describe("codex route handlers", () => {
 	});
 
 	it("returns a disconnected error when the account is not attached yet", async () => {
-		requireEntitledApiSessionMock.mockResolvedValue({
+		requireProductAccessApiSessionMock.mockResolvedValue({
 			userId: "user_123",
 			token: "token_123",
 		});
@@ -365,7 +367,7 @@ describe("codex route handlers", () => {
 	});
 
 	it("returns trimmed generated output and records a successful run", async () => {
-		requireEntitledApiSessionMock.mockResolvedValue({
+		requireProductAccessApiSessionMock.mockResolvedValue({
 			userId: "user_123",
 			token: "token_123",
 		});
@@ -439,7 +441,7 @@ describe("codex route handlers", () => {
 	});
 
 	it("returns a generation failure when Codex does not complete", async () => {
-		requireEntitledApiSessionMock.mockResolvedValue({
+		requireProductAccessApiSessionMock.mockResolvedValue({
 			userId: "user_123",
 			token: "token_123",
 		});

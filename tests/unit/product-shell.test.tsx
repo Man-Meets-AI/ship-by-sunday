@@ -101,7 +101,7 @@ const useQueryMock = vi.fn((_query: unknown, args: unknown) => {
 
 	nonSkipQueryCallCount += 1;
 	return nonSkipQueryCallCount === 1
-		? { hasAccess: true, status: "active" }
+		? { hasAccess: true, status: "granted" }
 		: missionState;
 });
 

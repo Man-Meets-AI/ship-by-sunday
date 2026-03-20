@@ -36,22 +36,6 @@ vi.mock("convex/react", () => ({
 	useQuery: (query: unknown, args: unknown) => useQueryMock(query, args),
 }));
 
-vi.mock("@/features/course/shared/components/app-shell", () => ({
-	AppShell: ({
-		children,
-		title,
-		subtitle,
-	}: {
-		children: React.ReactNode;
-		title: string;
-		subtitle: string;
-	}) => (
-		<div data-product-shell={title} data-subtitle={subtitle}>
-			{children}
-		</div>
-	),
-}));
-
 import { CheckoutSuccessView } from "../../features/checkout/components/checkout-success-view";
 
 function renderView(
@@ -94,7 +78,7 @@ describe("CheckoutSuccessView", () => {
 
 		expect(markup).toContain("Finalizing access");
 		expect(markup).toContain("Polling access");
-		expect(markup).toContain("Confirming your entitlement.");
+		expect(markup).toContain("Confirming your product access.");
 		expect(markup).toContain("What happens next");
 		expect(markup).toContain("Open mission");
 		expect(markup).toContain('href="/mission"');

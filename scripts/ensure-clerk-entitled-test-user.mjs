@@ -18,7 +18,7 @@ function runConvexGrant({ clerkUserId, courseSlug }) {
 			"exec",
 			"convex",
 			"run",
-			"course:grantEntitlement",
+			"access:grantProductAccess",
 			JSON.stringify({
 				clerkUserId,
 				courseSlug,
@@ -129,7 +129,8 @@ export async function runCli({
 		return {
 			exitCode: 1,
 			payload: result("error", {
-				message: "Unable to ensure Clerk test user before entitlement grant.",
+				message:
+					"Unable to ensure Clerk test user before product access grant.",
 				ensureResult,
 			}),
 		};
@@ -145,7 +146,7 @@ export async function runCli({
 			exitCode: 1,
 			payload: result("error", {
 				message:
-					"Convex entitlement grant failed. Make sure `pnpm run dev:convex` is running for local QA.",
+					"Convex product access grant failed. Make sure `pnpm run dev:convex` is running for local QA.",
 				clerkUserId: ensureResult.clerkUserId,
 				scope: account.scope,
 				courseSlug,

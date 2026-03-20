@@ -12,7 +12,7 @@ import {
 	getCodexDefaultModel,
 	getCodexTurnTimeoutMs,
 	recordCodexRun,
-	requireEntitledApiSession,
+	requireProductAccessApiSession,
 	upsertViewerCodexConnection,
 } from "@/features/codex/server/route-helpers";
 
@@ -38,8 +38,8 @@ export async function POST(request: Request) {
 	const startedAt = Date.now();
 
 	try {
-		const entitledSession = await requireEntitledApiSession();
-		session = entitledSession;
+		const productAccessSession = await requireProductAccessApiSession();
+		session = productAccessSession;
 		const body = (await request.json().catch(() => null)) as unknown;
 		const parsed = generateRequestSchema.safeParse(body);
 		if (!parsed.success) {
@@ -52,13 +52,13 @@ export async function POST(request: Request) {
 		parsedInput = requestInput;
 
 		const output = await withCodexAppServerClient(
-			{ clerkUserId: entitledSession.userId },
+			{ clerkUserId: productAccessSession.userId },
 			async (client) => {
 				const accountResult = await client.readAccount(false);
 				const account = accountResult.account ?? null;
 
 				if (!accountIsManagedChatGpt(account)) {
-					await upsertViewerCodexConnection(entitledSession, {
+					await upsertViewerCodexConnection(productAccessSession, {
 						status: "disconnected",
 						account,
 						rateLimits: null,
@@ -83,7 +83,7 @@ export async function POST(request: Request) {
 					console.warn("codex rate-limits read failed after generation", error);
 				}
 
-				await upsertViewerCodexConnection(entitledSession, {
+				await upsertViewerCodexConnection(productAccessSession, {
 					status: generation.status === "completed" ? "connected" : "error",
 					account,
 					rateLimits,
@@ -99,7 +99,7 @@ export async function POST(request: Request) {
 		);
 
 		if (output.kind === "disconnected") {
-			await recordCodexRun(entitledSession, {
+			await recordCodexRun(productAccessSession, {
 				lessonId: requestInput.lessonId,
 				templateId: requestInput.templateId,
 				status: "error",
@@ -118,7 +118,7 @@ export async function POST(request: Request) {
 
 		const text = output.generation.text.trim();
 		if (output.generation.status !== "completed" || text.length === 0) {
-			await recordCodexRun(entitledSession, {
+			await recordCodexRun(productAccessSession, {
 				lessonId: requestInput.lessonId,
 				templateId: requestInput.templateId,
 				status: "error",
@@ -137,7 +137,7 @@ export async function POST(request: Request) {
 			);
 		}
 
-		await recordCodexRun(entitledSession, {
+		await recordCodexRun(productAccessSession, {
 			lessonId: requestInput.lessonId,
 			templateId: requestInput.templateId,
 			status: "success",
@@ -153,7 +153,7 @@ export async function POST(request: Request) {
 	} catch (error) {
 		const authErrorResponse = getApiAuthErrorResponse(error, {
 			unauthorized: "Sign in before using Codex generation.",
-			forbidden: "Course access is required before using Codex generation.",
+			forbidden: "Product access is required before using Codex generation.",
 			unavailable: getCodexAppServerUnavailableMessage(),
 		});
 		if (authErrorResponse) {

@@ -30,8 +30,8 @@ vi.mock("convex/nextjs", () => ({
 
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
-		course: {
-			grantEntitlementFromStripe: "grantEntitlementFromStripe",
+		access: {
+			grantProductAccessFromStripe: "grantProductAccessFromStripe",
 		},
 	},
 }));
@@ -57,7 +57,6 @@ function createCheckoutSession(overrides: Record<string, unknown> = {}) {
 		client_reference_id: "user_123",
 		metadata: {
 			clerkUserId: "user_123",
-			courseSlug: "ship-by-sunday",
 		},
 		customer: "cus_123",
 		payment_intent: "pi_123",
@@ -175,7 +174,7 @@ describe("POST /api/stripe/webhook", () => {
 	it.each([
 		"checkout.session.completed",
 		"checkout.session.async_payment_succeeded",
-	] as const)("grants entitlement for %s events", async (eventType) => {
+	] as const)("grants product access for %s events", async (eventType) => {
 		constructEventMock.mockReturnValue({
 			id: "evt_grant",
 			type: eventType,
@@ -185,7 +184,7 @@ describe("POST /api/stripe/webhook", () => {
 		});
 		fetchMutationMock.mockResolvedValue({
 			mode: "inserted",
-			courseSlug: "ship-by-sunday",
+			granted: "inserted",
 		});
 
 		const infoMock = vi.spyOn(console, "info").mockImplementation(() => {});
@@ -207,10 +206,9 @@ describe("POST /api/stripe/webhook", () => {
 			],
 		]);
 		expect(fetchMutationMock).toHaveBeenCalledWith(
-			"grantEntitlementFromStripe",
+			"grantProductAccessFromStripe",
 			expect.objectContaining({
 				clerkUserId: "user_123",
-				courseSlug: "ship-by-sunday",
 				stripeCheckoutSessionId: "cs_test_123",
 				stripeCustomerId: "cus_123",
 				stripePaymentIntentId: "pi_123",
@@ -220,7 +218,7 @@ describe("POST /api/stripe/webhook", () => {
 		infoMock.mockRestore();
 	});
 
-	it("returns 500 when entitlement persistence fails", async () => {
+	it("returns 500 when product access persistence fails", async () => {
 		constructEventMock.mockReturnValue({
 			id: "evt_failure",
 			type: "checkout.session.completed",
@@ -237,7 +235,7 @@ describe("POST /api/stripe/webhook", () => {
 
 		expect(response.status).toBe(500);
 		expect(await response.json()).toEqual({
-			error: "Unable to grant entitlement.",
+			error: "Unable to grant product access.",
 		});
 	});
 });

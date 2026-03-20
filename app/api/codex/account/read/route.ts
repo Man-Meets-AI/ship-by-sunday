@@ -8,7 +8,7 @@ import {
 import {
 	accountIsManagedChatGpt,
 	getApiAuthErrorResponse,
-	requireEntitledApiSession,
+	requireProductAccessApiSession,
 	upsertViewerCodexConnection,
 } from "@/features/codex/server/route-helpers";
 
@@ -16,7 +16,7 @@ export const runtime = "nodejs";
 
 export async function GET() {
 	try {
-		const session = await requireEntitledApiSession();
+		const session = await requireProductAccessApiSession();
 
 		const result = await withCodexAppServerClient(
 			{ clerkUserId: session.userId },
@@ -45,7 +45,7 @@ export async function GET() {
 	} catch (error) {
 		const authErrorResponse = getApiAuthErrorResponse(error, {
 			unauthorized: "Sign in before managing Codex connection.",
-			forbidden: "Course access is required before managing Codex connection.",
+			forbidden: "Product access is required before managing Codex connection.",
 			unavailable: getCodexAppServerUnavailableMessage(),
 		});
 		if (authErrorResponse) {

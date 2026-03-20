@@ -10,20 +10,6 @@ import {
 	listArtifactsReturns,
 } from "./course/artifacts";
 import {
-	getEntitlementDebugArgs,
-	getEntitlementDebugHandler,
-	getEntitlementDebugReturns,
-	grantEntitlementArgs,
-	grantEntitlementFromStripeArgs,
-	grantEntitlementFromStripeHandler,
-	grantEntitlementFromStripeReturns,
-	grantEntitlementHandler,
-	grantEntitlementReturns,
-	viewerAccessArgs,
-	viewerAccessHandler,
-	viewerAccessReturns,
-} from "./course/entitlements";
-import {
 	completeLessonArgs,
 	completeLessonHandler,
 	completeLessonReturns,
@@ -63,34 +49,10 @@ import {
 	resetStarterRepoAccessReturns,
 } from "./course/starterRepoAccess";
 
-export const viewerAccess = query({
-	args: viewerAccessArgs,
-	returns: viewerAccessReturns,
-	handler: viewerAccessHandler,
-});
-
 export const getResumeDestination = query({
 	args: getResumeDestinationArgs,
 	returns: getResumeDestinationReturns,
 	handler: getResumeDestinationHandler,
-});
-
-export const grantEntitlement = internalMutation({
-	args: grantEntitlementArgs,
-	returns: grantEntitlementReturns,
-	handler: grantEntitlementHandler,
-});
-
-export const grantEntitlementFromStripe = mutation({
-	args: grantEntitlementFromStripeArgs,
-	returns: grantEntitlementFromStripeReturns,
-	handler: grantEntitlementFromStripeHandler,
-});
-
-export const getEntitlementDebug = internalQuery({
-	args: getEntitlementDebugArgs,
-	returns: getEntitlementDebugReturns,
-	handler: getEntitlementDebugHandler,
 });
 
 export const getStarterRepoAccess = query({

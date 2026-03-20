@@ -2,11 +2,10 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
-	courseEntitlements: defineTable({
+	productAccessGrants: defineTable({
 		clerkUserId: v.string(),
-		courseSlug: v.string(),
 		status: v.union(
-			v.literal("active"),
+			v.literal("granted"),
 			v.literal("pending"),
 			v.literal("revoked"),
 			v.literal("refunded"),
@@ -23,7 +22,7 @@ export default defineSchema({
 		updatedAt: v.number(),
 		revokedAt: v.optional(v.number()),
 	})
-		.index("by_clerk_user_id_and_course_slug", ["clerkUserId", "courseSlug"])
+		.index("by_clerk_user_id", ["clerkUserId"])
 		.index("by_stripe_customer_id", ["stripeCustomerId"])
 		.index("by_stripe_checkout_session_id", ["stripeCheckoutSessionId"]),
 	starterRepoAccess: defineTable({

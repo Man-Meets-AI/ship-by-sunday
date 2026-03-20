@@ -5,43 +5,41 @@ import { redirect } from "next/navigation";
 
 import { routeConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
-import { COURSE_SLUG } from "@/features/course/lesson/model/registry";
+import type { ProductAccess } from "@/features/product-access/lib/product-access";
 import { getConvexServerSession } from "@/platform/auth/convex-auth";
-
-type ViewerAccess = {
-	clerkUserId: string | null;
-	courseSlug: string;
-	hasAccess: boolean;
-	status: string;
-};
 
 type ResumeDestination = {
 	destination: string;
 	lessonId: string | null;
 };
 
-export async function getServerViewerAccess(): Promise<ViewerAccess> {
+export async function getServerProductAccess(): Promise<ProductAccess> {
 	const session = await getConvexServerSession();
-	if (!session.userId || !session.token) {
+	if (!session.userId) {
+		return {
+			clerkUserId: null,
+			hasAccess: false,
+			status: "signed_out",
+		};
+	}
+
+	if (!session.token) {
 		return {
 			clerkUserId: session.userId,
-			courseSlug: COURSE_SLUG,
 			hasAccess: false,
-			status: session.userId ? "missing_token" : "signed_out",
+			status: "token_missing",
 		};
 	}
 
 	return (await fetchQuery(
-		api.course.viewerAccess,
+		api.access.viewerProductAccess,
 		{},
-		{
-			token: session.token,
-		},
-	)) as ViewerAccess;
+		{ token: session.token },
+	)) as ProductAccess;
 }
 
 export async function getServerResumeDestination() {
-	const access = await getServerViewerAccess();
+	const access = await getServerProductAccess();
 	if (!access.hasAccess) {
 		return null;
 	}
@@ -54,13 +52,11 @@ export async function getServerResumeDestination() {
 	return (await fetchQuery(
 		api.course.getResumeDestination,
 		{},
-		{
-			token: session.token,
-		},
+		{ token: session.token },
 	)) as ResumeDestination;
 }
 
-export async function redirectEntitledHomeVisitor({
+export async function redirectGrantedHomeVisitor({
 	allowMarketing,
 }: {
 	allowMarketing: boolean;
@@ -75,8 +71,8 @@ export async function redirectEntitledHomeVisitor({
 	}
 }
 
-export async function requireCourseAccess() {
-	const access = await getServerViewerAccess();
+export async function requireProductAccess() {
+	const access = await getServerProductAccess();
 	if (!access.hasAccess) {
 		redirect(routeConfig.accessRequired);
 	}
@@ -84,8 +80,8 @@ export async function requireCourseAccess() {
 	return access;
 }
 
-export async function redirectAuthorizedAccessRequiredVisitor() {
-	const access = await getServerViewerAccess();
+export async function redirectGrantedAccessRequiredVisitor() {
+	const access = await getServerProductAccess();
 	if (access.hasAccess) {
 		redirect(routeConfig.mission);
 	}

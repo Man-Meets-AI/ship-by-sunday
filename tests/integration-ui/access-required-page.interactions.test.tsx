@@ -33,19 +33,13 @@ vi.mock("convex/react", () => ({
 	useQuery: () => useQueryMock(),
 }));
 
-vi.mock("@/features/course/shared/components/app-shell", () => ({
-	AppShell: ({ children }: { children: React.ReactNode }) => (
-		<div>{children}</div>
-	),
-}));
-
 vi.mock("@/features/checkout/components/checkout-button", () => ({
 	CheckoutButton: ({ label }: { label: string }) => (
 		<button type="button">{label}</button>
 	),
 }));
 
-import { AccessRequiredPage } from "@/features/course/access/components/access-required-page";
+import { AccessRequiredPage } from "@/features/product-access/components/access-required-page";
 
 describe("AccessRequiredPage interactions", () => {
 	beforeEach(() => {
@@ -58,7 +52,7 @@ describe("AccessRequiredPage interactions", () => {
 	it("redirects into mission when access becomes ready", () => {
 		useQueryMock.mockReturnValue({
 			hasAccess: true,
-			status: "active",
+			status: "granted",
 		});
 
 		render(<AccessRequiredPage />);
@@ -70,7 +64,7 @@ describe("AccessRequiredPage interactions", () => {
 		vi.useFakeTimers();
 		useQueryMock.mockReturnValue({
 			hasAccess: false,
-			status: "none",
+			status: "no_access",
 		});
 
 		render(<AccessRequiredPage />);
@@ -81,7 +75,7 @@ describe("AccessRequiredPage interactions", () => {
 		expect(refreshMock).toHaveBeenCalledTimes(1);
 		expect(button.textContent).toBe("Refreshing access...");
 		expect(button.getAttribute("aria-busy")).toBe("true");
-		expect(screen.getByText("Refreshing entitlement status now.")).toBeTruthy();
+		expect(screen.getByText("Refreshing product access now.")).toBeTruthy();
 
 		await act(async () => {
 			await vi.advanceTimersByTimeAsync(1_200);

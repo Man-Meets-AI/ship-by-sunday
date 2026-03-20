@@ -27,8 +27,8 @@ vi.mock("convex/nextjs", () => ({
 
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
-		course: {
-			viewerAccess: "course.viewerAccess",
+		access: {
+			viewerProductAccess: "access.viewerProductAccess",
 		},
 		codex: {
 			upsertViewerConnection: "codex.upsertViewerConnection",
@@ -46,7 +46,7 @@ import {
 	getCodexTurnTimeoutMs,
 	recordCodexRun,
 	requireApiSession,
-	requireEntitledApiSession,
+	requireProductAccessApiSession,
 	upsertViewerCodexConnection,
 } from "@/features/codex/server/route-helpers";
 
@@ -128,31 +128,31 @@ describe("codex route helpers", () => {
 		});
 		fetchQueryMock.mockResolvedValue({
 			hasAccess: true,
-			status: "active",
+			status: "granted",
 		});
 
-		await expect(requireEntitledApiSession()).resolves.toEqual({
+		await expect(requireProductAccessApiSession()).resolves.toEqual({
 			userId: "user_123",
 			token: "token_123",
 		});
 		expect(fetchQueryMock).toHaveBeenCalledWith(
-			"course.viewerAccess",
+			"access.viewerProductAccess",
 			{},
 			{ token: "token_123" },
 		);
 	});
 
-	it("rejects unauthorised access before the Convex entitlement lookup", async () => {
+	it("rejects unauthorised access before the product-access lookup", async () => {
 		authMock.mockResolvedValue({
 			userId: "user_123",
 			getToken: vi.fn().mockResolvedValue("token_123"),
 		});
 		fetchQueryMock.mockResolvedValue({
 			hasAccess: false,
-			status: "none",
+			status: "no_access",
 		});
 
-		await expect(requireEntitledApiSession()).rejects.toThrow(
+		await expect(requireProductAccessApiSession()).rejects.toThrow(
 			API_FORBIDDEN_ERROR,
 		);
 	});

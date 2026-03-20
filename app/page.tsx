@@ -1,5 +1,6 @@
-import { redirectEntitledHomeVisitor } from "@/features/course/access/server/course-access";
 import HomePage from "@/features/marketing/components/home-page";
+import { redirectGrantedHomeVisitor } from "@/features/product-access/server/product-access";
+import { shouldBypassClerkProtection } from "@/platform/auth/clerk-middleware-bypass";
 
 export default async function Page({
 	searchParams,
@@ -7,11 +8,10 @@ export default async function Page({
 	searchParams: Promise<{ marketing?: string }>;
 }) {
 	const { marketing } = await searchParams;
-	const disableHomeEntitlementRedirect =
-		process.env.DISABLE_CLERK_MIDDLEWARE === "1";
+	const disableHomeAccessRedirect = shouldBypassClerkProtection();
 
-	if (!disableHomeEntitlementRedirect) {
-		await redirectEntitledHomeVisitor({ allowMarketing: marketing === "1" });
+	if (!disableHomeAccessRedirect) {
+		await redirectGrantedHomeVisitor({ allowMarketing: marketing === "1" });
 	}
 
 	return <HomePage />;

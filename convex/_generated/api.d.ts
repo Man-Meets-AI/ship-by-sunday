@@ -8,10 +8,13 @@
  * @module
  */
 
+import type * as access from "../access.js";
+import type * as access_model from "../access/model.js";
+import type * as access_types from "../access/types.js";
+import type * as access_validators from "../access/validators.js";
 import type * as codex from "../codex.js";
 import type * as course from "../course.js";
 import type * as course_artifacts from "../course/artifacts.js";
-import type * as course_entitlements from "../course/entitlements.js";
 import type * as course_lessonState from "../course/lessonState.js";
 import type * as course_mission from "../course/mission.js";
 import type * as course_shared from "../course/shared.js";
@@ -28,10 +31,13 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  access: typeof access;
+  "access/model": typeof access_model;
+  "access/types": typeof access_types;
+  "access/validators": typeof access_validators;
   codex: typeof codex;
   course: typeof course;
   "course/artifacts": typeof course_artifacts;
-  "course/entitlements": typeof course_entitlements;
   "course/lessonState": typeof course_lessonState;
   "course/mission": typeof course_mission;
   "course/shared": typeof course_shared;

@@ -72,12 +72,12 @@ async function getLatestCheckoutSessionId(stripe) {
 	return events.data[0]?.data?.object?.id ?? null;
 }
 
-async function getEntitlementDebug(sessionId) {
+async function getProductAccessDebug(sessionId) {
 	const payload = JSON.stringify({ stripeCheckoutSessionId: sessionId });
 	const result = await runCommand(process.execPath, [
 		CONVEX_BIN_PATH,
 		"run",
-		"course:getEntitlementDebug",
+		"access:getProductAccessDebug",
 		payload,
 	]);
 
@@ -119,11 +119,11 @@ const clerkUserId =
 const courseSlug = session.metadata?.courseSlug ?? "ship-by-sunday";
 
 const deadline = Date.now() + timeoutMs;
-let entitlement = null;
+let productAccess = null;
 
 while (Date.now() < deadline) {
-	entitlement = await getEntitlementDebug(sessionId);
-	if (entitlement?.status === "active") {
+	productAccess = await getProductAccessDebug(sessionId);
+	if (productAccess?.status === "granted") {
 		break;
 	}
 	await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -141,24 +141,24 @@ printCheck(
 	`clerkUserId=${clerkUserId ?? "missing"}, courseSlug=${courseSlug ?? "missing"}`,
 );
 printCheck(
-	"Convex entitlement found",
-	Boolean(entitlement),
-	entitlement ? `status=${entitlement.status}` : "missing",
+	"Convex product access found",
+	Boolean(productAccess),
+	productAccess ? `status=${productAccess.status}` : "missing",
 );
 printCheck(
-	"Convex entitlement active",
-	entitlement?.status === "active",
-	entitlement ? `status=${entitlement.status}` : "missing",
+	"Convex product access granted",
+	productAccess?.status === "granted",
+	productAccess ? `status=${productAccess.status}` : "missing",
 );
 printCheck(
-	"Entitlement source",
-	entitlement?.source === "stripe_webhook",
-	entitlement ? `source=${entitlement.source}` : "missing",
+	"Product access source",
+	productAccess?.source === "stripe_webhook",
+	productAccess ? `source=${productAccess.source}` : "missing",
 );
 printCheck(
 	"Session id linked",
-	entitlement?.stripeCheckoutSessionId === sessionId,
-	entitlement?.stripeCheckoutSessionId ?? "missing",
+	productAccess?.stripeCheckoutSessionId === sessionId,
+	productAccess?.stripeCheckoutSessionId ?? "missing",
 );
 
 console.log(
@@ -169,7 +169,7 @@ console.log(
 			paymentStatus: session.payment_status,
 			clerkUserId,
 			courseSlug,
-			entitlement,
+			productAccess,
 		},
 		null,
 		2,
@@ -179,10 +179,10 @@ console.log(
 if (
 	session.status !== "complete" ||
 	session.payment_status !== "paid" ||
-	!entitlement ||
-	entitlement.status !== "active" ||
-	entitlement.source !== "stripe_webhook" ||
-	entitlement.stripeCheckoutSessionId !== sessionId
+	!productAccess ||
+	productAccess.status !== "granted" ||
+	productAccess.source !== "stripe_webhook" ||
+	productAccess.stripeCheckoutSessionId !== sessionId
 ) {
 	process.exitCode = 1;
 }

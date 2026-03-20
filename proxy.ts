@@ -1,7 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-const disableClerkMiddleware = process.env.DISABLE_CLERK_MIDDLEWARE === "1";
+import { shouldBypassClerkProtection } from "@/platform/auth/clerk-middleware-bypass";
+
+const disableClerkMiddleware = shouldBypassClerkProtection();
 
 const isProtectedRoute = createRouteMatcher([
 	"/mission(.*)",

@@ -4,7 +4,6 @@ import Stripe from "stripe";
 
 import { apiConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
-import { COURSE_SLUG } from "@/features/course/lesson/model/registry";
 import { requireServerEnv, serverEnv } from "@/platform/env/server";
 
 function getWebhookStripe() {
@@ -71,7 +70,6 @@ export async function POST(request: Request) {
 	const session = event.data.object as Stripe.Checkout.Session;
 	const clerkUserId =
 		session.metadata?.clerkUserId ?? session.client_reference_id ?? undefined;
-	const courseSlug = session.metadata?.courseSlug ?? COURSE_SLUG;
 
 	if (!clerkUserId) {
 		logStripeWebhook("error", {
@@ -94,16 +92,14 @@ export async function POST(request: Request) {
 		eventType: event.type,
 		sessionId: session.id,
 		clerkUserId,
-		courseSlug,
 	});
 
 	try {
 		const grantResult = await fetchMutation(
-			api.course.grantEntitlementFromStripe,
+			api.access.grantProductAccessFromStripe,
 			{
 				webhookSecret,
 				clerkUserId,
-				courseSlug,
 				stripeCustomerId:
 					typeof session.customer === "string" ? session.customer : undefined,
 				stripeCheckoutSessionId: session.id,
@@ -120,7 +116,6 @@ export async function POST(request: Request) {
 			eventType: event.type,
 			sessionId: session.id,
 			clerkUserId,
-			courseSlug,
 			grantResult,
 		});
 	} catch (error) {
@@ -130,11 +125,10 @@ export async function POST(request: Request) {
 			eventType: event.type,
 			sessionId: session.id,
 			clerkUserId,
-			courseSlug,
 			message: error instanceof Error ? error.message : "Unknown grant error",
 		});
 		return NextResponse.json(
-			{ error: "Unable to grant entitlement." },
+			{ error: "Unable to grant product access." },
 			{ status: 500 },
 		);
 	}

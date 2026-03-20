@@ -20,7 +20,7 @@ import {
 	prepareFieldValuesForPersistence,
 } from "../../features/course/lesson/model/registry";
 import type { Id } from "../_generated/dataModel";
-import { requireActiveEntitlement } from "./entitlements";
+import { requireGrantedProductAccess } from "../access/model";
 import type {
 	CourseMutationCtx,
 	CourseQueryCtx,
@@ -92,7 +92,7 @@ function getCompatibleCompletedLessonIds(lessonStates: LessonStateDoc[]) {
 export async function loadViewerCourseState(
 	ctx: CourseReadCtx,
 ): Promise<ViewerCourseState> {
-	const clerkUserId = await requireActiveEntitlement(ctx);
+	const clerkUserId = await requireGrantedProductAccess(ctx);
 	const lessonStates = await getViewerLessonStates(ctx, clerkUserId);
 	const compatibleCompletedLessonIds =
 		getCompatibleCompletedLessonIds(lessonStates);

@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { apiConfig, limitConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import type { CodexRateLimitsResponse } from "@/features/codex/server/app-server";
+import type { ProductAccess } from "@/features/product-access/lib/product-access";
 import { serverEnv } from "@/platform/env/server";
 
 type ManagedChatGptAccount = {
@@ -18,11 +19,6 @@ type CodexAccount = ManagedChatGptAccount | { type: "apiKey" } | null;
 export type ApiSession = {
 	userId: string;
 	token: string;
-};
-
-type ViewerAccess = {
-	hasAccess: boolean;
-	status: string;
 };
 
 type AuthErrorCopy = {
@@ -69,15 +65,15 @@ export async function requireApiSession(): Promise<ApiSession> {
 	};
 }
 
-export async function requireEntitledApiSession(): Promise<ApiSession> {
+export async function requireProductAccessApiSession(): Promise<ApiSession> {
 	const session = await requireApiSession();
 	const access = (await fetchQuery(
-		api.course.viewerAccess,
+		api.access.viewerProductAccess,
 		{},
 		{
 			token: session.token,
 		},
-	)) as ViewerAccess;
+	)) as ProductAccess;
 
 	if (!access.hasAccess) {
 		throw new Error(API_FORBIDDEN_ERROR);

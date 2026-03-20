@@ -2,7 +2,6 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 import { getCheckoutSuccessHref, routeConfig } from "@/config/product";
-import { COURSE_SLUG } from "@/features/course/lesson/model/registry";
 import { getStripe, getStripeLineItem } from "@/platform/billing/stripe";
 import { getAppBaseUrl } from "@/platform/next/app-url";
 
@@ -31,12 +30,10 @@ export async function POST(request: Request) {
 			line_items: [getStripeLineItem()],
 			metadata: {
 				clerkUserId: userId,
-				courseSlug: COURSE_SLUG,
 			},
 			payment_intent_data: {
 				metadata: {
 					clerkUserId: userId,
-					courseSlug: COURSE_SLUG,
 				},
 			},
 		});

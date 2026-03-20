@@ -52,17 +52,16 @@ function createCourseCtx({
 			},
 			db: {
 				query: vi.fn((table: string) => {
-					if (table === "courseEntitlements") {
+					if (table === "productAccessGrants") {
 						return {
 							withIndex: vi.fn(() => ({
 								unique: vi.fn().mockResolvedValue(
 									hasAccess
 										? {
-												_id: "entitlement_1",
+												_id: "product_access_1",
 												_creationTime: 1,
 												clerkUserId,
-												courseSlug: COURSE_SLUG,
-												status: "active",
+												status: "granted",
 												source: "manual",
 												grantedAt: 1,
 												updatedAt: 1,

@@ -18,14 +18,16 @@ vi.mock("@/platform/auth/convex-auth", () => ({
 
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
+		access: {
+			viewerProductAccess: "viewerProductAccess",
+		},
 		course: {
-			viewerAccess: "viewerAccess",
 			getResumeDestination: "getResumeDestination",
 		},
 	},
 }));
 
-describe("course access server helpers", () => {
+describe("product access server helpers", () => {
 	beforeEach(() => {
 		redirectMock.mockReset();
 		fetchQueryMock.mockReset();
@@ -39,10 +41,10 @@ describe("course access server helpers", () => {
 			token: null,
 		});
 
-		const { redirectAuthorizedAccessRequiredVisitor } =
-			await import("@/features/course/access/server/course-access");
+		const { redirectGrantedAccessRequiredVisitor } =
+			await import("@/features/product-access/server/product-access");
 
-		const access = await redirectAuthorizedAccessRequiredVisitor();
+		const access = await redirectGrantedAccessRequiredVisitor();
 
 		expect(access).toMatchObject({
 			hasAccess: false,
@@ -52,22 +54,37 @@ describe("course access server helpers", () => {
 		expect(redirectMock).not.toHaveBeenCalled();
 	});
 
-	it("still redirects entitled visitors into mission", async () => {
+	it("keeps signed-in users with a missing Convex token on the recovery surface", async () => {
+		getConvexServerSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: null,
+		});
+
+		const { getServerProductAccess } =
+			await import("@/features/product-access/server/product-access");
+
+		await expect(getServerProductAccess()).resolves.toEqual({
+			clerkUserId: "user_123",
+			hasAccess: false,
+			status: "token_missing",
+		});
+	});
+
+	it("still redirects granted visitors into mission", async () => {
 		getConvexServerSessionMock.mockResolvedValue({
 			userId: "user_123",
 			token: "token_123",
 		});
 		fetchQueryMock.mockResolvedValue({
-			clerkUserId: "user_123",
-			courseSlug: "ship-by-sunday",
 			hasAccess: true,
-			status: "active",
+			clerkUserId: "user_123",
+			status: "granted",
 		});
 
-		const { redirectAuthorizedAccessRequiredVisitor } =
-			await import("@/features/course/access/server/course-access");
+		const { redirectGrantedAccessRequiredVisitor } =
+			await import("@/features/product-access/server/product-access");
 
-		await redirectAuthorizedAccessRequiredVisitor();
+		await redirectGrantedAccessRequiredVisitor();
 
 		expect(fetchQueryMock).toHaveBeenCalledTimes(1);
 		expect(redirectMock).toHaveBeenCalledWith("/mission");

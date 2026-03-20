@@ -33,12 +33,6 @@ vi.mock("convex/react", () => ({
 	useQuery: () => useQueryMock(),
 }));
 
-vi.mock("@/features/course/shared/components/app-shell", () => ({
-	AppShell: ({ children }: { children: React.ReactNode }) => (
-		<div>{children}</div>
-	),
-}));
-
 import { CheckoutSuccessView } from "@/features/checkout/components/checkout-success-view";
 
 describe("CheckoutSuccessView interactions", () => {
@@ -94,7 +88,7 @@ describe("CheckoutSuccessView interactions", () => {
 			/>,
 		);
 
-		expect(screen.getByText("Confirming your entitlement.")).toBeTruthy();
+		expect(screen.getByText("Confirming your product access.")).toBeTruthy();
 
 		await act(async () => {
 			await vi.advanceTimersByTimeAsync(1_600);

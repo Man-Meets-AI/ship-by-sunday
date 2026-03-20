@@ -42,7 +42,7 @@ type CheckoutViewModel = {
 };
 
 const validatedStatusCopy = [
-	"Confirming your entitlement.",
+	"Confirming your product access.",
 	"Unlocking your Ship by Sunday workspace.",
 	"Preparing your first mission step.",
 ] as const;
@@ -120,7 +120,7 @@ function getCheckoutViewModel(
 						label: "Access handoff",
 						state: isAccessReady ? "complete" : "active",
 						detail: isAccessReady
-							? "Entitlement is attached to this account."
+							? "Product access is attached to this account."
 							: "We are polling for the access grant now.",
 					},
 					{
@@ -133,8 +133,8 @@ function getCheckoutViewModel(
 				],
 				helpTitle: isAccessReady ? "Access confirmed" : "What happens next",
 				helpLeadCopy: isAccessReady
-					? "Your purchase and entitlement are both confirmed. The next step is just getting you into the workspace."
-					: "Stripe is done. This page is polling your account access and will forward you automatically once the entitlement lands.",
+					? "Your purchase and product access are both confirmed. The next step is just getting you into the workspace."
+					: "Stripe is done. This page is polling your account access and will forward you automatically once the product access is ready.",
 				helpItems: isAccessReady
 					? [
 							"Use Open mission if the redirect has not fired yet.",
@@ -176,7 +176,7 @@ function getCheckoutViewModel(
 					{
 						label: "Unlock access",
 						state: "pending",
-						detail: "Entitlement attaches after account auth.",
+						detail: "Product access attaches after account auth.",
 					},
 				],
 				helpTitle: "Use the checkout account",
@@ -226,7 +226,7 @@ function getCheckoutViewModel(
 					"The purchase exists, but it belongs to a different signed-in account than the one currently open here.",
 				helpItems: [
 					"Switch to the email used at checkout.",
-					"Then use Check access to retry the entitlement lookup.",
+					"Then use Check access to retry the product access check.",
 					"Open mission only after the correct account is attached.",
 				],
 				primaryActionLabel: "Open mission",
@@ -234,7 +234,7 @@ function getCheckoutViewModel(
 				primaryActionBody:
 					"If the handoff already finished in the background, this will take you into Ship by Sunday. Otherwise you will land on the access check surface.",
 				secondaryActionBody:
-					"Use this after switching accounts to retry the entitlement lookup.",
+					"Use this after switching accounts to retry the product access check.",
 			};
 		case "payment_pending":
 			return {
@@ -258,7 +258,7 @@ function getCheckoutViewModel(
 					{
 						label: "Unlock access",
 						state: "pending",
-						detail: "Entitlement waits for Stripe confirmation.",
+						detail: "Product access waits for Stripe confirmation.",
 					},
 				],
 				helpTitle: "Waiting on Stripe",
@@ -370,7 +370,7 @@ export function CheckoutSuccessView({
 	const { isAuthenticated } = useConvexAuth();
 	const [statusIndex, setStatusIndex] = useState(0);
 	const access = useQuery(
-		api.course.viewerAccess,
+		api.access.viewerProductAccess,
 		isAuthenticated ? {} : "skip",
 	) as
 		| {
