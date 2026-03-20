@@ -1,8 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import type { HomePageContent } from "@/features/marketing/content/home";
 
-import { SprintPathBlocksAccordion } from "./sprint-path-blocks-accordion";
-
 type SprintPathSection = HomePageContent["sprintPathSection"];
 
 export function SprintPathUnifiedSection({
@@ -21,9 +19,15 @@ export function SprintPathUnifiedSection({
 					{sprintPathSection.intro}
 				</p>
 			</div>
-			<SprintPathBlocksAccordion
-				blocks={sprintPathSection.blocks}
-				outcomesLabel={sprintPathSection.outcomesLabel}
+			<img
+				src="/4-block-system.svg"
+				alt="The 4-Block System — CEO, Design, Build, Ship"
+				className="w-1/2 dark:hidden"
+			/>
+			<img
+				src="/4-block-dark-mode.svg"
+				alt="The 4-Block System — CEO, Design, Build, Ship"
+				className="hidden w-1/2 dark:block"
 			/>
 		</section>
 	);

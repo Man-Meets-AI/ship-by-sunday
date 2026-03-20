@@ -9,6 +9,7 @@ import {
 import { CheckoutButton } from "@/features/checkout/components/checkout-button";
 import type { HomePageContent } from "@/features/marketing/content/home";
 
+import { MarketingThemeToggle } from "./home-hero-theme-toggle";
 import { PricingIncludesList } from "./pricing-includes-list";
 
 type FooterNav = HomePageContent["footerNav"];
@@ -100,7 +101,7 @@ export function FooterSection({
 	return (
 		<>
 			<nav
-				className="flex flex-wrap justify-center gap-x-6 gap-y-3 border-t py-8 sm:gap-x-8 sm:py-10"
+				className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 border-t py-8 sm:gap-x-8 sm:py-10"
 				aria-label="Footer"
 			>
 				{footerNav.map((item) => (
@@ -111,6 +112,10 @@ export function FooterSection({
 						{item}
 					</span>
 				))}
+				<div className="flex items-center gap-3">
+					<span className="text-sm font-medium text-muted-foreground">Theme</span>
+					<MarketingThemeToggle />
+				</div>
 			</nav>
 			<div className="flex justify-center px-2 py-10 text-center sm:py-14 md:py-16">
 				<p className="text-balance text-4xl font-bold tracking-tight text-muted-foreground sm:text-5xl md:text-6xl">

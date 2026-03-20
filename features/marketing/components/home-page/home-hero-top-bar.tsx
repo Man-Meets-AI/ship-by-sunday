@@ -5,43 +5,32 @@ import { Button } from "@/components/ui/button";
 import { productConfig, routeConfig } from "@/config/product";
 import type { HomePageContent } from "@/features/marketing/content/home";
 
-import { HomeHeroThemeToggle } from "./home-hero-theme-toggle";
-
 type Hero = HomePageContent["hero"];
 
 export function HomeHeroTopBar({ hero }: { hero: Hero }) {
 	return (
-		<div className="flex flex-col gap-6">
-			<div className="flex w-full flex-wrap items-center justify-end gap-2">
-				<Button variant="outline" size="sm" asChild>
-					<Link href={routeConfig.docs}>{hero.docsLabel}</Link>
-				</Button>
-				<Button variant="outline" size="sm" asChild>
-					<Link href={routeConfig.signIn}>{hero.loginLabel}</Link>
-				</Button>
-				<HomeHeroThemeToggle />
-			</div>
-			<div className="mx-auto grid w-full max-w-2xl grid-cols-[1fr_auto_1fr] items-center gap-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-				<span className="min-w-0 truncate text-left">{hero.topBarStart}</span>
-				<Button
-					variant="ghost"
-					size="sm"
-					className="h-auto shrink-0 gap-2 py-1"
-					asChild
-				>
-					<Link href="/">
-						<Image
-							src={productConfig.images.logo}
-							alt={`${productConfig.name} logo`}
-							width={44}
-							height={44}
-							priority
-							className="rounded-lg"
-						/>
-					</Link>
-				</Button>
-				<span className="min-w-0 truncate text-right">{hero.topBarEnd}</span>
-			</div>
-		</div>
+		<nav className="flex w-full items-center justify-between border-y border-border/80 px-4 py-4">
+			<Link href="/" className="flex items-center gap-3">
+				<Image
+					src={productConfig.images.logo}
+					alt={`${productConfig.name} logo`}
+					width={40}
+					height={40}
+					priority
+					className="rounded-lg"
+				/>
+				<div className="flex flex-col leading-none">
+					<span className="text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground">
+						{hero.topBarStart}
+					</span>
+					<span className="text-sm font-semibold sm:text-base">
+						{productConfig.name}
+					</span>
+				</div>
+			</Link>
+			<Button variant="outline" size="sm" asChild>
+				<Link href={routeConfig.docs}>{hero.docsLabel}</Link>
+			</Button>
+		</nav>
 	);
 }

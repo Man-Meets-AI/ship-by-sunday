@@ -9,8 +9,8 @@ export const assetPaths = {
   androidChrome192: "/android-chrome-192x192.png",
   androidChrome512: "/android-chrome-512x512.png",
   founderProof: "/founder-proof.jpg",
+  heroPreview: "/4-block-system.svg",
   logo: "/ship-by-sunday.png",
-  missionPreview: "/product/mission-bg.png",
 } as const;
 
 export const brandColorConfig = {
@@ -33,8 +33,8 @@ export const productConfig = {
     "https://www.youtube.com/playlist?list=PLO6IqfGPRUN1Bof9pACmGc955t4d0J6cM",
   images: {
     founderProof: assetPaths.founderProof,
+    heroPreview: assetPaths.heroPreview,
     logo: assetPaths.logo,
-    missionPreview: assetPaths.missionPreview,
   },
 } as const;
 

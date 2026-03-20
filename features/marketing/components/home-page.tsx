@@ -5,20 +5,18 @@ import {
 	ProofAndFaqSection,
 } from "./home-page/closing-sections";
 import { HomeHeroSection } from "./home-page/hero-sections";
-import { OfferStackSection } from "./home-page/offer-stack-section";
 import { SprintPathUnifiedSection } from "./home-page/sprint-path-unified-section";
 
 export default function HomePage() {
 	return (
 		<main className="bg-background text-foreground">
-			<div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:gap-8 sm:px-6 sm:py-8">
-				<HomeHeroSection hero={homePageContent.hero} />
+			<div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:gap-8 sm:px-6 sm:py-8">
+				<HomeHeroSection
+					hero={homePageContent.hero}
+					heroPreviewImage={homePageContent.assets.heroPreviewImage}
+				/>
 				<SprintPathUnifiedSection
 					sprintPathSection={homePageContent.sprintPathSection}
-				/>
-				<OfferStackSection
-					missionImage={homePageContent.assets.missionImage}
-					offerSection={homePageContent.offerSection}
 				/>
 				<ProofAndFaqSection
 					faqSection={homePageContent.faqSection}

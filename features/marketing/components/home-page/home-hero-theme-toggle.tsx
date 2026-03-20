@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
-export function HomeHeroThemeToggle() {
+export function MarketingThemeToggle() {
 	const { resolvedTheme, setTheme } = useTheme();
 	const [mounted, setMounted] = useState(false);
 
@@ -22,13 +22,12 @@ export function HomeHeroThemeToggle() {
 		<Button
 			type="button"
 			variant="outline"
-			size="sm"
-			className="size-7 p-0"
+			size="icon-sm"
 			onClick={() => setTheme(nextTheme)}
 			aria-label={`Switch to ${nextTheme} mode`}
 			title={`Switch to ${nextTheme} mode`}
 		>
-			<Icon className="size-3.5 shrink-0" aria-hidden />
+			<Icon aria-hidden />
 		</Button>
 	);
 }

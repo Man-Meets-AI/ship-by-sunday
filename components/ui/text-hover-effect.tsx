@@ -37,14 +37,15 @@ export function TextHoverEffect({
 	}, [cursor]);
 
 	const fontClass =
-		"font-[helvetica] text-7xl font-bold [text-rendering:geometricPrecision]";
+		"uppercase font-[helvetica] text-7xl font-black [text-rendering:geometricPrecision]";
+	const outlineClass = `fill-transparent stroke-neutral-950 dark:stroke-neutral-200 ${fontClass}`;
 
 	return (
 		<svg
 			ref={svgRef}
 			width="100%"
 			height="100%"
-			viewBox="0 0 400 100"
+			viewBox="0 0 450 100"
 			xmlns="http://www.w3.org/2000/svg"
 			onMouseEnter={() => setHovered(true)}
 			onMouseLeave={() => setHovered(false)}
@@ -86,12 +87,27 @@ export function TextHoverEffect({
 					/>
 				</mask>
 			</defs>
+			<motion.text
+				x="50%"
+				y="50%"
+				textAnchor="middle"
+				dominantBaseline="middle"
+				strokeWidth="0.5"
+				className={outlineClass}
+				initial={{ strokeDashoffset: 1000, strokeDasharray: 1000 }}
+				animate={{ strokeDashoffset: 0, strokeDasharray: 1000 }}
+				transition={{ duration: 4, ease: "easeInOut" }}
+			>
+				{text}
+			</motion.text>
 			<text
 				x="50%"
 				y="50%"
 				textAnchor="middle"
 				dominantBaseline="middle"
-				className={`fill-current text-foreground ${fontClass}`}
+				strokeWidth="0.5"
+				className={outlineClass}
+				style={{ opacity: hovered ? 0.7 : 0 }}
 			>
 				{text}
 			</text>
