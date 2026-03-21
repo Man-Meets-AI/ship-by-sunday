@@ -59,6 +59,12 @@ Use this only in a safe local test environment.
 
 On a new machine or after switching deployments, run `bun run dev:convex` first so `.env.local` contains the current `NEXT_PUBLIC_CONVEX_URL` and `CONVEX_DEPLOYMENT` values.
 
+The easiest way to run the full buyer-flow stack after that is:
+
+```bash
+bun run dev:full
+```
+
 ## Recommended flow checks
 
 For the deterministic browser lane that runs in PR CI:

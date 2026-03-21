@@ -55,6 +55,12 @@ Once those values are in place, start the local app:
 bun run dev
 ```
 
+If you are actively testing checkout or the purchase-to-access handoff, run the full local environment instead:
+
+```bash
+bun run dev:full
+```
+
 Open `http://localhost:3000`.
 
 ## Which local command to use
@@ -63,13 +69,17 @@ Use these commands intentionally:
 
 ```bash
 bun run dev
+bun run dev:full
 bun run dev:web
 bun run dev:convex
+bun run dev:stripe
 ```
 
 - `bun run dev` starts the app locally and keeps your hosted Convex dev deployment synced
+- `bun run dev:full` starts the app, hosted Convex dev sync, and Stripe webhook forwarding together
 - `bun run dev:web` starts only the Next.js side
 - `bun run dev:convex` connects or refreshes your hosted Convex dev deployment and keeps the backend synced
+- `bun run dev:stripe` waits for hosted Convex dev env values, then starts the Stripe listener
 
 This repo does not support Convex's local backend mode as a separate development mode.
 

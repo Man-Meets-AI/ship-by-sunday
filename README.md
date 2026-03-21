@@ -53,15 +53,24 @@ This writes `NEXT_PUBLIC_CONVEX_URL` and `CONVEX_DEPLOYMENT` into `.env.local` f
 bun run dev
 ```
 
+For the full buyer-flow local environment, including Stripe webhook forwarding:
+
+```bash
+bun run dev:full
+```
+
 If you only need one side of the app:
 
 ```bash
 bun run dev:web
 bun run dev:convex
+bun run dev:stripe
 ```
 
 - `bun run dev:web` runs the Next.js app locally
 - `bun run dev:convex` keeps your hosted Convex dev deployment synced and refreshes `.env.local` when you switch deployments
+- `bun run dev:stripe` waits for hosted Convex dev values in `.env.local`, then starts the Stripe listener
+- `bun run dev:full` runs `web + hosted Convex dev + Stripe listener` together for checkout QA
 
 This repo does not support Convex's local backend mode as a first-class development workflow.
 
@@ -91,6 +100,7 @@ The full testing runbook lives in [docs/dev/testing.md](docs/dev/testing.md).
 For Stripe checkout testing from your local machine against hosted Convex dev, use:
 
 ```bash
+bun run dev:full
 bun run stripe:listen:dev
 bun run stripe:dev:doctor
 bun run stripe:dev:verify

@@ -39,6 +39,12 @@ Use this command for local buyer-flow QA against your hosted Convex dev deployme
 bun run stripe:listen:dev
 ```
 
+If you want one command that starts the web app, hosted Convex dev sync, and Stripe forwarding together, use:
+
+```bash
+bun run dev:full
+```
+
 That helper:
 
 - starts Stripe CLI forwarding to `{NEXT_PUBLIC_CONVEX_URL}/stripe/webhook`

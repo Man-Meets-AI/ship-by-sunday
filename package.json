@@ -7,6 +7,8 @@
 		"dev": "concurrently -k -n web,convex -c auto \"bun run dev:web\" \"bun run dev:convex\"",
 		"dev:web": "next dev",
 		"dev:convex": "convex dev",
+		"dev:stripe": "node scripts/dev-stripe-listen-ready.mjs",
+		"dev:full": "concurrently -k -n web,convex,stripe -c auto \"bun run dev:web\" \"bun run dev:convex\" \"bun run dev:stripe\"",
 		"build": "next build",
 		"start": "next start",
 		"typecheck": "next build",
