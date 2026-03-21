@@ -3,7 +3,6 @@ describe("env helpers", () => {
 
 	afterEach(() => {
 		process.env = { ...originalEnv };
-		vi.resetModules();
 	});
 
 	it("parses the public env through the typed loader", async () => {
@@ -11,7 +10,8 @@ describe("env helpers", () => {
 		process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL = "/sign-in";
 		process.env.NEXT_PUBLIC_CONVEX_URL = "https://example.convex.cloud";
 
-		const { publicEnv } = await import("@/platform/env/public");
+		const { loadPublicEnv } = await import("@/platform/env/public");
+		const publicEnv = loadPublicEnv();
 
 		expect(publicEnv.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY).toBe("pk_test_123");
 		expect(publicEnv.NEXT_PUBLIC_CLERK_SIGN_IN_URL).toBe("/sign-in");
@@ -25,13 +25,35 @@ describe("env helpers", () => {
 		process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL = " /sign-in \n";
 		process.env.NEXT_PUBLIC_CONVEX_URL = " https://example.convex.cloud \n";
 
-		const { publicEnv } = await import("@/platform/env/public");
+		const { loadPublicEnv } = await import("@/platform/env/public");
+		const publicEnv = loadPublicEnv();
 
 		expect(publicEnv.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY).toBe("pk_test_123");
 		expect(publicEnv.NEXT_PUBLIC_CLERK_SIGN_IN_URL).toBe("/sign-in");
 		expect(publicEnv.NEXT_PUBLIC_CONVEX_URL).toBe(
 			"https://example.convex.cloud",
 		);
+	});
+
+	it("defaults the Clerk sign-in URL to the local auth route when unset", async () => {
+		process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_test_123";
+		delete process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL;
+		process.env.NEXT_PUBLIC_CONVEX_URL = "https://example.convex.cloud";
+
+		const { loadPublicEnv } = await import("@/platform/env/public");
+		const publicEnv = loadPublicEnv();
+
+		expect(publicEnv.NEXT_PUBLIC_CLERK_SIGN_IN_URL).toBe("/sign-in");
+	});
+
+	it("rejects any Clerk sign-in URL that is not the local auth route", async () => {
+		process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_test_123";
+		process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL = "/login";
+		process.env.NEXT_PUBLIC_CONVEX_URL = "https://example.convex.cloud";
+
+		const { loadPublicEnv } = await import("@/platform/env/public");
+
+		expect(() => loadPublicEnv()).toThrow("/sign-in");
 	});
 
 	it("throws an actionable error when a required server env is requested but missing", async () => {
@@ -48,7 +70,8 @@ describe("env helpers", () => {
 		process.env.APP_BASE_URL = " https://www.man-meets-ai.com \n";
 		process.env.CLERK_FRONTEND_API_URL = " https://clerk.man-meets-ai.com\n";
 
-		const { serverEnv } = await import("@/platform/env/server");
+		const { loadServerEnv } = await import("@/platform/env/server");
+		const serverEnv = loadServerEnv();
 
 		expect(serverEnv.APP_BASE_URL).toBe("https://www.man-meets-ai.com");
 		expect(serverEnv.CLERK_FRONTEND_API_URL).toBe(

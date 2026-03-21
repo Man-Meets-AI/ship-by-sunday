@@ -11,9 +11,12 @@ function normalizeEnvValue(value: string | undefined) {
 
 const serverEnvSchema = z.object({
 	APP_BASE_URL: z.string().url().optional(),
+	ENABLE_OBSERVABILITY_TEST_TRIGGER: z.string().min(1).optional(),
 	GOOGLE_SITE_VERIFICATION: z.string().min(1).optional(),
+	CLERK_AUTHORIZED_PARTIES: z.string().min(1).optional(),
 	CLERK_SECRET_KEY: z.string().min(1).optional(),
 	CLERK_FRONTEND_API_URL: z.string().min(1).optional(),
+	OBSERVABILITY_INGEST_TOKEN: z.string().min(1).optional(),
 	STRIPE_SECRET_KEY: z.string().min(1).optional(),
 	STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
 	STRIPE_PRICE_ID: z.string().min(1).optional(),
@@ -25,29 +28,46 @@ const serverEnvSchema = z.object({
 	CODEX_APP_SERVER_TIMEOUT_MS: z.string().min(1).optional(),
 });
 
-export const serverEnv = serverEnvSchema.parse({
-	APP_BASE_URL: normalizeEnvValue(process.env.APP_BASE_URL),
-	GOOGLE_SITE_VERIFICATION: normalizeEnvValue(
-		process.env.GOOGLE_SITE_VERIFICATION,
-	),
-	CLERK_SECRET_KEY: normalizeEnvValue(process.env.CLERK_SECRET_KEY),
-	CLERK_FRONTEND_API_URL: normalizeEnvValue(process.env.CLERK_FRONTEND_API_URL),
-	STRIPE_SECRET_KEY: normalizeEnvValue(process.env.STRIPE_SECRET_KEY),
-	STRIPE_WEBHOOK_SECRET: normalizeEnvValue(process.env.STRIPE_WEBHOOK_SECRET),
-	STRIPE_PRICE_ID: normalizeEnvValue(process.env.STRIPE_PRICE_ID),
-	STRIPE_PRODUCT_ID: normalizeEnvValue(process.env.STRIPE_PRODUCT_ID),
-	CODEX_BINARY: normalizeEnvValue(process.env.CODEX_BINARY),
-	CODEX_APP_SERVER_ENABLED: normalizeEnvValue(
-		process.env.CODEX_APP_SERVER_ENABLED,
-	),
-	CODEX_APP_SERVER_HOME_ROOT: normalizeEnvValue(
-		process.env.CODEX_APP_SERVER_HOME_ROOT,
-	),
-	CODEX_APP_SERVER_MODEL: normalizeEnvValue(process.env.CODEX_APP_SERVER_MODEL),
-	CODEX_APP_SERVER_TIMEOUT_MS: normalizeEnvValue(
-		process.env.CODEX_APP_SERVER_TIMEOUT_MS,
-	),
-});
+export function loadServerEnv() {
+	return serverEnvSchema.parse({
+		APP_BASE_URL: normalizeEnvValue(process.env.APP_BASE_URL),
+		ENABLE_OBSERVABILITY_TEST_TRIGGER: normalizeEnvValue(
+			process.env.ENABLE_OBSERVABILITY_TEST_TRIGGER,
+		),
+		GOOGLE_SITE_VERIFICATION: normalizeEnvValue(
+			process.env.GOOGLE_SITE_VERIFICATION,
+		),
+		CLERK_AUTHORIZED_PARTIES: normalizeEnvValue(
+			process.env.CLERK_AUTHORIZED_PARTIES,
+		),
+		CLERK_SECRET_KEY: normalizeEnvValue(process.env.CLERK_SECRET_KEY),
+		CLERK_FRONTEND_API_URL: normalizeEnvValue(
+			process.env.CLERK_FRONTEND_API_URL,
+		),
+		OBSERVABILITY_INGEST_TOKEN: normalizeEnvValue(
+			process.env.OBSERVABILITY_INGEST_TOKEN,
+		),
+		STRIPE_SECRET_KEY: normalizeEnvValue(process.env.STRIPE_SECRET_KEY),
+		STRIPE_WEBHOOK_SECRET: normalizeEnvValue(process.env.STRIPE_WEBHOOK_SECRET),
+		STRIPE_PRICE_ID: normalizeEnvValue(process.env.STRIPE_PRICE_ID),
+		STRIPE_PRODUCT_ID: normalizeEnvValue(process.env.STRIPE_PRODUCT_ID),
+		CODEX_BINARY: normalizeEnvValue(process.env.CODEX_BINARY),
+		CODEX_APP_SERVER_ENABLED: normalizeEnvValue(
+			process.env.CODEX_APP_SERVER_ENABLED,
+		),
+		CODEX_APP_SERVER_HOME_ROOT: normalizeEnvValue(
+			process.env.CODEX_APP_SERVER_HOME_ROOT,
+		),
+		CODEX_APP_SERVER_MODEL: normalizeEnvValue(
+			process.env.CODEX_APP_SERVER_MODEL,
+		),
+		CODEX_APP_SERVER_TIMEOUT_MS: normalizeEnvValue(
+			process.env.CODEX_APP_SERVER_TIMEOUT_MS,
+		),
+	});
+}
+
+export const serverEnv = loadServerEnv();
 
 export function requireServerEnv<K extends keyof typeof serverEnv>(key: K) {
 	const value = serverEnv[key];

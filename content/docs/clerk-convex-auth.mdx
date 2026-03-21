@@ -20,10 +20,11 @@ NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/mission
 NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/mission
 CLERK_SECRET_KEY=
 CLERK_FRONTEND_API_URL=
+CLERK_AUTHORIZED_PARTIES=http://localhost:3000
 NEXT_PUBLIC_CONVEX_URL=
 ```
 
-`NEXT_PUBLIC_CONVEX_URL` usually comes from the Convex tooling once you run the local or hosted dev setup.
+`NEXT_PUBLIC_CONVEX_URL` comes from the Convex tooling once you run `bun run dev:convex`. That command also writes `CONVEX_DEPLOYMENT` into `.env.local` so the repo scripts and `convex run` commands target your hosted dev deployment explicitly.
 
 ## Clerk setup
 
@@ -32,6 +33,7 @@ NEXT_PUBLIC_CONVEX_URL=
 3. If you keep the starter’s custom login page, set `NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in` so Clerk OAuth callbacks resolve to the right route.
 4. Set the Clerk fallback redirect URLs to `/mission` so direct visits to auth routes land in the protected app shell.
 5. Keep the Clerk frontend API domain consistent everywhere you wire auth.
+6. Set `CLERK_AUTHORIZED_PARTIES` to the trusted web origins that should be allowed to present Clerk session cookies.
 
 ## The `convex` template is not optional
 
@@ -47,13 +49,13 @@ This starter is hard-wired to that identifier.
 
 ## Convex setup
 
-Connect the repo to Convex with the repo-local command:
+Connect the repo to your hosted Convex dev deployment with:
 
 ```bash
 bun run dev:convex
 ```
 
-That local flow should give you the `NEXT_PUBLIC_CONVEX_URL` value the app expects. If you intentionally switch to a hosted Convex dev flow later, keep the Clerk app, frontend API domain, and token-template assumptions aligned.
+That flow should give you the `NEXT_PUBLIC_CONVEX_URL` value the app expects and set `CONVEX_DEPLOYMENT` for CLI-driven QA helpers. This repo does not support Convex's local backend mode as a first-class workflow, so keep the Clerk app, frontend API domain, and token-template assumptions aligned with your hosted Convex dev deployment.
 
 ## What success looks like
 
@@ -79,7 +81,8 @@ Check these in order:
 1. the Clerk JWT template is named exactly `convex`
 2. the issuer/domain in Clerk matches the same Clerk frontend API domain used by the app
 3. `NEXT_PUBLIC_CLERK_SIGN_IN_URL` is still `/sign-in`
-4. the Convex env is not still pointed at an old or different Clerk instance
-5. you restarted the app after changing auth env values
+4. `CLERK_AUTHORIZED_PARTIES` still includes the current app origin
+5. `NEXT_PUBLIC_CONVEX_URL` and `CONVEX_DEPLOYMENT` are not still pointed at an old or different Convex dev deployment
+6. you restarted the app after changing auth env values
 
 If checkout succeeds but access still fails, go straight to [Troubleshooting Stripe and Convex](/docs/troubleshooting/stripe-convex).

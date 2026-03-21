@@ -112,6 +112,8 @@ describe("SignInPage", () => {
 
 		render(<SignInPage />);
 
+		expect(screen.getByText("Ship by Sunday")).toBeTruthy();
+		expect(screen.getByRole("link", { name: "Home" })).toBeTruthy();
 		expect(
 			screen.getByText("Use the account attached to your purchase to continue."),
 		).toBeTruthy();

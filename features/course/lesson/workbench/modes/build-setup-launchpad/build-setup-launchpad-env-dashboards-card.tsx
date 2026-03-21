@@ -69,16 +69,25 @@ export function BuildSetupLaunchpadEnvDashboardsCard() {
 										</p>
 									</div>
 								</div>
-								<Button asChild variant="ghost" size="sm" className="shrink-0">
-									<a
-										href={provider.href}
-										target="_blank"
-										rel="noopener noreferrer"
-									>
-										<ExternalLink className="size-3.5" />
-										Open dashboard
-									</a>
-								</Button>
+								<div className="flex shrink-0 flex-wrap gap-2">
+									{provider.links.map((link) => (
+										<Button
+											asChild
+											key={link.href}
+											variant={link.variant ?? "ghost"}
+											size="sm"
+										>
+											<a
+												href={link.href}
+												target="_blank"
+												rel="noopener noreferrer"
+											>
+												<ExternalLink className="size-3.5" />
+												{link.label}
+											</a>
+										</Button>
+									))}
+								</div>
 							</div>
 						</Fragment>
 					))}

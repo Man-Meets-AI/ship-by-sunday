@@ -24,6 +24,9 @@ import type * as course_types from "../course/types.js";
 import type * as course_validators from "../course/validators.js";
 import type * as env from "../env.js";
 import type * as http from "../http.js";
+import type * as observability from "../observability.js";
+import type * as observability_model from "../observability/model.js";
+import type * as observability_validators from "../observability/validators.js";
 import type * as stripeWebhook from "../stripeWebhook.js";
 import type * as uploads from "../uploads.js";
 
@@ -50,6 +53,9 @@ declare const fullApi: ApiFromModules<{
   "course/validators": typeof course_validators;
   env: typeof env;
   http: typeof http;
+  observability: typeof observability;
+  "observability/model": typeof observability_model;
+  "observability/validators": typeof observability_validators;
   stripeWebhook: typeof stripeWebhook;
   uploads: typeof uploads;
 }>;

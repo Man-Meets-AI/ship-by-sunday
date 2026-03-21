@@ -80,6 +80,7 @@ describe("codex route helpers", () => {
 				forbidden: "No access.",
 				unavailable: "Unavailable.",
 			},
+			"request_1",
 		);
 		const forbidden = await getApiAuthErrorResponse(
 			new Error(API_FORBIDDEN_ERROR),
@@ -88,6 +89,7 @@ describe("codex route helpers", () => {
 				forbidden: "No access.",
 				unavailable: "Unavailable.",
 			},
+			"request_2",
 		);
 		const unavailable = await getApiAuthErrorResponse(
 			new Error("CODEX_APP_SERVER_DISABLED"),
@@ -96,20 +98,27 @@ describe("codex route helpers", () => {
 				forbidden: "No access.",
 				unavailable: "Unavailable.",
 			},
+			"request_3",
 		);
 
 		expect(await unauthorized?.json()).toEqual({ error: "Sign in first." });
 		expect(unauthorized?.status).toBe(401);
+		expect(unauthorized?.headers.get("x-request-id")).toBe("request_1");
 		expect(await forbidden?.json()).toEqual({ error: "No access." });
 		expect(forbidden?.status).toBe(403);
-		expect(await unavailable?.json()).toEqual({ error: "Unavailable." });
+		expect(forbidden?.headers.get("x-request-id")).toBe("request_2");
+		expect(await unavailable?.json()).toEqual({
+			error: "Unavailable.",
+			requestId: "request_3",
+		});
 		expect(unavailable?.status).toBe(503);
+		expect(unavailable?.headers.get("x-request-id")).toBe("request_3");
 		expect(
 			getApiAuthErrorResponse("nope", {
 				unauthorized: "Sign in first.",
 				forbidden: "No access.",
 				unavailable: "Unavailable.",
-			}),
+			}, "request_4"),
 		).toBeNull();
 	});
 
@@ -119,6 +128,15 @@ describe("codex route helpers", () => {
 		await expect(requireApiSession()).rejects.toThrow(API_UNAUTHORIZED_ERROR);
 		expect(authMock).toHaveBeenCalledTimes(1);
 		expect(fetchQueryMock).not.toHaveBeenCalled();
+	});
+
+	it("rejects sessions that do not produce a Convex token", async () => {
+		authMock.mockResolvedValue({
+			userId: "user_123",
+			getToken: vi.fn().mockResolvedValue(null),
+		});
+
+		await expect(requireApiSession()).rejects.toThrow(API_UNAUTHORIZED_ERROR);
 	});
 
 	it("requires a Clerk token and the access check before allowing Codex actions", async () => {

@@ -22,7 +22,7 @@ Have these ready:
 - Node.js LTS
 - `bun`
 - a Clerk account
-- a Convex account
+- [a Convex account](https://convex.dev/referral/PARKER6190)
 - a Stripe account
 - a Vercel account for deployment later
 - a GitHub account if you plan to use the Build starter-template path later
@@ -36,12 +36,20 @@ bun install
 cp .env.local.example .env.local
 ```
 
+Then connect the repo to your hosted Convex dev deployment:
+
+```bash
+bun run dev:convex
+```
+
+That command runs `convex dev` and writes `NEXT_PUBLIC_CONVEX_URL` plus `CONVEX_DEPLOYMENT` into `.env.local` for your per-developer hosted Convex dev deployment.
+
 Then follow the provider wiring pages in this order:
 
 - [Clerk + Convex Auth](/docs/clerk-convex-auth)
 - [Stripe Checkout + Webhook](/docs/stripe-checkout-webhook)
 
-Once those values are in place, start the full local stack:
+Once those values are in place, start the local app:
 
 ```bash
 bun run dev
@@ -59,11 +67,11 @@ bun run dev:web
 bun run dev:convex
 ```
 
-- `bun run dev` starts the app and local Convex together
+- `bun run dev` starts the app locally and keeps your hosted Convex dev deployment synced
 - `bun run dev:web` starts only the Next.js side
-- `bun run dev:convex` starts only the local Convex side
+- `bun run dev:convex` connects or refreshes your hosted Convex dev deployment and keeps the backend synced
 
-If you intentionally want a hosted Convex dev deployment, use `bunx convex dev` manually and treat that as a different workflow.
+This repo does not support Convex's local backend mode as a separate development mode.
 
 ## The fastest way to confirm the setup
 
@@ -71,7 +79,7 @@ Once the app boots, validate the basics:
 
 ```bash
 bun run build
-bun run stripe:local:doctor
+bun run stripe:dev:doctor
 ```
 
 Then finish the real flow with [Local QA](/docs/local-qa).
@@ -83,7 +91,7 @@ You are ready for real customization when:
 - the marketing page loads locally
 - `/docs` loads locally
 - you can reach sign-in
-- Convex connects cleanly
+- Convex connects cleanly to your hosted dev deployment
 - Stripe listener setup does not report account or secret drift
 - the app can complete the local QA flow without fake shortcuts
 

@@ -13,6 +13,7 @@ const CONVEX_BIN_PATH = path.join(
 	"bin",
 	"main.js",
 );
+const LOCALHOST_HOSTS = new Set(["127.0.0.1", "0.0.0.0", "localhost"]);
 const ANSI_ESCAPE_PATTERN_SOURCE =
 	"\\u001B(?:[@-Z\\\\-_]|\\[[0-?]*[ -/]*[@-~])";
 const ANSI_ESCAPE_PATTERN = new RegExp(ANSI_ESCAPE_PATTERN_SOURCE, "g");
@@ -23,20 +24,44 @@ function stripAnsi(value) {
 
 function printUsage() {
 	console.log(`Usage:
-  node --env-file=.env.local scripts/local-stripe-webhook.mjs listen
-  node --env-file=.env.local scripts/local-stripe-webhook.mjs sync --secret whsec_...
+  bun run stripe:listen:dev
+  bun run stripe:webhook:sync -- --secret whsec_...
 
 Commands:
-  listen   Start stripe listen against STRIPE_SECRET_KEY, then sync the printed webhook secret plus Stripe secret into Convex env.
-  sync     Sync a provided webhook secret into .env.local and Convex env without starting a listener.`);
+  listen   Start stripe listen against STRIPE_SECRET_KEY, then sync the printed webhook secret plus Stripe secret into the active hosted Convex dev env.
+  sync     Sync a provided webhook secret into .env.local and the active hosted Convex dev env without starting a listener.`);
+}
+
+function isLocalhostUrl(urlString) {
+	return LOCALHOST_HOSTS.has(new URL(urlString).hostname);
+}
+
+function getHostedConvexDevContext() {
+	const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL?.trim();
+	if (!convexUrl) {
+		throw new Error(
+			"Missing NEXT_PUBLIC_CONVEX_URL in .env.local. Run `bun run dev:convex` to sync your hosted Convex dev deployment.",
+		);
+	}
+
+	if (isLocalhostUrl(convexUrl)) {
+		throw new Error(
+			"NEXT_PUBLIC_CONVEX_URL must point to your hosted Convex dev deployment, not localhost. Run `bun run dev:convex` to refresh .env.local.",
+		);
+	}
+
+	const deploymentName = process.env.CONVEX_DEPLOYMENT?.trim();
+	if (!deploymentName) {
+		throw new Error(
+			"Missing CONVEX_DEPLOYMENT in .env.local. Run `bun run dev:convex` to sync your hosted Convex dev deployment.",
+		);
+	}
+
+	return { convexUrl, deploymentName };
 }
 
 function getDefaultForwardUrl() {
-	const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL?.trim();
-	if (!convexUrl) {
-		throw new Error("Missing NEXT_PUBLIC_CONVEX_URL in .env.local.");
-	}
-
+	const { convexUrl } = getHostedConvexDevContext();
 	return `${convexUrl.replace(/\/$/, "")}/stripe/webhook`;
 }
 
@@ -188,9 +213,9 @@ async function syncWebhookSecret(secret) {
 
 	console.log(`Synced ${WEBHOOK_ENV_KEY}:`);
 	console.log(`- .env.local: ${envFileStatus}`);
-	console.log(`- Convex env (${WEBHOOK_ENV_KEY}): ${convexWebhookStatus}`);
+	console.log(`- Convex dev env (${WEBHOOK_ENV_KEY}): ${convexWebhookStatus}`);
 	console.log(
-		`- Convex env (${STRIPE_SECRET_ENV_KEY}): ${convexStripeSecretStatus}`,
+		`- Convex dev env (${STRIPE_SECRET_ENV_KEY}): ${convexStripeSecretStatus}`,
 	);
 	console.log(
 		"- Restart `bun run dev:web` if it was already running before the secret changed.",
@@ -202,15 +227,19 @@ async function runSyncMode(secret) {
 		throw new Error("Missing --secret for sync mode.");
 	}
 
+	const { deploymentName } = getHostedConvexDevContext();
 	const account = await getStripeAccountSummary();
 	console.log(`Stripe account: ${account.displayName} (${account.id})`);
+	console.log(`Convex dev deployment: ${deploymentName}`);
 	await syncWebhookSecret(secret);
 }
 
 async function runListenMode(forwardTo) {
+	const { deploymentName } = getHostedConvexDevContext();
 	await ensureStripeCliAvailable();
 	const account = await getStripeAccountSummary();
 	console.log(`Stripe account: ${account.displayName} (${account.id})`);
+	console.log(`Convex dev deployment: ${deploymentName}`);
 	console.log(`Forward target: ${forwardTo}`);
 
 	const child = spawn(
@@ -281,7 +310,6 @@ async function runListenMode(forwardTo) {
 }
 
 const { command, secret, forwardTo } = parseArgs(process.argv.slice(2));
-const resolvedForwardTo = forwardTo ?? getDefaultForwardUrl();
 
 if (command === "help") {
 	printUsage();
@@ -297,13 +325,19 @@ try {
 	if (command === "sync") {
 		await runSyncMode(secret);
 	} else {
+		const resolvedForwardTo = forwardTo ?? getDefaultForwardUrl();
+		if (isLocalhostUrl(resolvedForwardTo)) {
+			throw new Error(
+				"Stripe dev webhook forwarding must target your hosted Convex dev deployment, not localhost.",
+			);
+		}
 		await runListenMode(resolvedForwardTo);
 	}
 } catch (error) {
 	console.error(
 		error instanceof Error
 			? error.message
-			: "Stripe local webhook setup failed.",
+			: "Stripe dev webhook setup failed.",
 	);
 	process.exit(1);
 }

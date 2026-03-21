@@ -4,10 +4,9 @@
 
 ### Changed
 
-
+- Fixed the stage-unlock repair buttons so Design handoff call-to-actions now follow canonical lesson-key routes instead of stale numeric lesson URLs after the lesson identity migration.
 - Added public SEO infrastructure for the marketing and docs surface: root metadata defaults, canonical host resolution, generated `robots.txt` and `sitemap.xml`, Open Graph and Twitter image routes, homepage JSON-LD, and explicit `noindex` metadata on protected/auth/checkout/session-task flows.
 - Expanded the SEO pass with docs-specific canonical/OG/Twitter metadata defaults, FAQ schema on the homepage, docs `lastModified` sitemap hints, and regression coverage for rendered metadata, crawl endpoints, and non-indexable auth surfaces. Also hardened `/checkout/success` so missing-session recovery no longer triggers unnecessary authenticated access preloads.
-
 - Replaced the old lesson registry stack with a single curriculum kernel, so lesson order, canonical labels, stable lesson identity, route segments, and in-app video attachment now come from one typed source instead of being split across lesson files, rail logic, and video remaps.
 - Switched lesson routing and saved course progress from numeric lesson ids to stable lesson keys, while keeping numeric lesson labels as display-only UI and redirecting old numeric lesson URLs onto the new stable lesson routes.
 - Unified the student lesson labels across mission, lesson, artifact, and footer-rail surfaces so the UI now shows the same canonical lesson label instead of mixing numeric lesson ids with local rail-only step numbers.

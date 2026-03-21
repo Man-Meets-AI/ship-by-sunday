@@ -12,19 +12,23 @@ This folder owns the app data and product-state backend for `Ship by Sunday`.
 - artifact listing
 - upload URL generation
 
-## Local workflow
+## Development workflow
 
-Run the Convex dev server with:
+Connect the repo to your hosted Convex dev deployment with:
 
 ```bash
 bun run dev:convex
 ```
+
+That command runs `convex dev`, keeps the backend synced, and writes `NEXT_PUBLIC_CONVEX_URL` plus `CONVEX_DEPLOYMENT` into `.env.local`.
 
 Run the full app with:
 
 ```bash
 bun run dev
 ```
+
+This repo does not support Convex's local backend mode as a first-class workflow. Development means local Next.js plus a hosted Convex dev deployment.
 
 Deployment workflow: [docs/dev/convex-sop.md](../docs/dev/convex-sop.md)
 

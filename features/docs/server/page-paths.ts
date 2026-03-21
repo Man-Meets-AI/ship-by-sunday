@@ -1,8 +1,13 @@
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { generateStaticParamsFor } from "nextra/pages";
 
 const DOCS_ROOT_SEGMENT = "docs";
+const DOCS_CONTENT_ROOT = path.resolve(
+	path.dirname(fileURLToPath(import.meta.url)),
+	"../../../content/docs",
+);
 
 const generateAllStaticParams = generateStaticParamsFor("mdxPath");
 
@@ -23,7 +28,7 @@ export function getDocsSourcePath(mdxPath?: string[]) {
 		? "index.mdx"
 		: `${mdxPath.join("/")}.mdx`;
 
-	return path.join(process.cwd(), "content/docs", sourceFile);
+	return path.join(DOCS_CONTENT_ROOT, sourceFile);
 }
 
 export async function generateDocsStaticParams() {

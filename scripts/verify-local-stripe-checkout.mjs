@@ -5,6 +5,7 @@ const CONVEX_BIN_PATH = new URL(
 	"../node_modules/convex/bin/main.js",
 	import.meta.url,
 ).pathname;
+const LOCALHOST_HOSTS = new Set(["127.0.0.1", "0.0.0.0", "localhost"]);
 
 function parseArgs(argv) {
 	let sessionId = null;
@@ -64,6 +65,34 @@ function runCommand(command, args) {
 	});
 }
 
+function isLocalhostUrl(urlString) {
+	return LOCALHOST_HOSTS.has(new URL(urlString).hostname);
+}
+
+function getHostedConvexDevContext() {
+	const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL?.trim();
+	if (!convexUrl) {
+		throw new Error(
+			"Missing NEXT_PUBLIC_CONVEX_URL in .env.local. Run `bun run dev:convex` to sync your hosted Convex dev deployment.",
+		);
+	}
+
+	if (isLocalhostUrl(convexUrl)) {
+		throw new Error(
+			"NEXT_PUBLIC_CONVEX_URL must point to your hosted Convex dev deployment, not localhost. Run `bun run dev:convex` to refresh .env.local.",
+		);
+	}
+
+	const deploymentName = process.env.CONVEX_DEPLOYMENT?.trim();
+	if (!deploymentName) {
+		throw new Error(
+			"Missing CONVEX_DEPLOYMENT in .env.local. Run `bun run dev:convex` to sync your hosted Convex dev deployment.",
+		);
+	}
+
+	return { deploymentName };
+}
+
 async function getLatestCheckoutSessionId(stripe) {
 	const events = await stripe.events.list({
 		limit: 1,
@@ -82,7 +111,11 @@ async function getProductAccessDebug(sessionId) {
 	]);
 
 	if (result.code !== 0) {
-		throw new Error(result.stderr || result.stdout || "Convex query failed.");
+		throw new Error(
+			result.stderr ||
+				result.stdout ||
+				"Convex dev query failed. Make sure `bun run dev:convex` has synced your hosted deployment into .env.local.",
+		);
 	}
 
 	const output = result.stdout.trim();
@@ -96,6 +129,7 @@ function printCheck(label, passed, detail) {
 const { sessionId: requestedSessionId, timeoutMs } = parseArgs(
 	process.argv.slice(2),
 );
+const { deploymentName } = getHostedConvexDevContext();
 
 if (!process.env.STRIPE_SECRET_KEY) {
 	throw new Error("Missing STRIPE_SECRET_KEY in environment.");
@@ -130,6 +164,7 @@ while (Date.now() < deadline) {
 }
 
 console.log(`Checkout session: ${sessionId}`);
+printCheck("Convex dev deployment target", true, deploymentName);
 printCheck(
 	"Stripe session complete",
 	session.status === "complete" && session.payment_status === "paid",

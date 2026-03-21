@@ -5,7 +5,9 @@ description: Understand the tracked env contract in plain English so you know wh
 
 # Environment Variables
 
-Use `.env.local.example` as the tracked contract for local setup.
+Use `.env.local.example` as the tracked contract for the local web app.
+
+Run `bun run dev:convex` to connect the repo to your hosted Convex dev deployment. That command writes `NEXT_PUBLIC_CONVEX_URL` and `CONVEX_DEPLOYMENT` into `.env.local`.
 
 ## Core public runtime
 
@@ -13,15 +15,29 @@ Use `.env.local.example` as the tracked contract for local setup.
 - `NEXT_PUBLIC_CLERK_SIGN_IN_URL`: must stay `/sign-in` because the app uses a custom Clerk sign-in route
 - `NEXT_PUBLIC_CONVEX_URL`: lets the browser talk to Convex
 
+## Convex CLI target
+
+- `CONVEX_DEPLOYMENT`: written by `convex dev` into `.env.local` so repo scripts and `convex run` commands target your hosted Convex dev deployment explicitly
+
 ## Core server runtime
 
 - `APP_BASE_URL`: canonical app URL for checkout success and cancel redirects
+- `CLERK_AUTHORIZED_PARTIES`: optional comma-separated origin allowlist passed to Clerk middleware for subdomain cookie-leak protection
 - `CLERK_SECRET_KEY`: server-side Clerk access
 - `CLERK_FRONTEND_API_URL`: Clerk frontend API domain used by the auth chain
+- `OBSERVABILITY_INGEST_TOKEN`: shared random secret used by Next.js to authenticate error-ingest requests into Convex
 - `STRIPE_SECRET_KEY`: Stripe API access
 - `STRIPE_WEBHOOK_SECRET`: verifies the Stripe webhook
 - `STRIPE_PRICE_ID`: optional dashboard-managed price
 - `STRIPE_PRODUCT_ID`: optional product id emitted by the Stripe script
+
+## Telegram observability
+
+- `TELEGRAM_BOT_TOKEN`: Telegram bot token used for production alerts
+- `TELEGRAM_CHAT_ID`: chat or group id that receives alerts
+- `ENABLE_OBSERVABILITY_TEST_TRIGGER`: test-only switch for the Playwright protected-shell failure harness
+
+`OBSERVABILITY_INGEST_TOKEN` is not provided by Telegram, Clerk, Stripe, or Convex. It is just a high-entropy shared secret between the Next.js app and the Convex HTTP ingest route. Generate one with `openssl rand -hex 32` and set the same value in both runtimes.
 
 ## Optional video pipeline
 

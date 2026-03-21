@@ -1,6 +1,7 @@
 import { type ChildProcessWithoutNullStreams, spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdir } from "node:fs/promises";
+import { homedir } from "node:os";
 import path from "node:path";
 
 import { apiConfig, limitConfig, productConfig } from "@/config/product";
@@ -181,10 +182,15 @@ async function getCodexUserHome(clerkUserId: string) {
 		.update(clerkUserId)
 		.digest("hex")
 		.slice(0, limitConfig.codexUserStateHashLength);
-	const root =
-		process.env.CODEX_APP_SERVER_HOME_ROOT ??
-		path.join(process.cwd(), ".codex-user-state");
-	const dir = path.join(root, hash);
+	const configuredRoot = process.env.CODEX_APP_SERVER_HOME_ROOT;
+	const dir = configuredRoot
+		? path.join(configuredRoot, hash)
+		: path.join(
+				homedir(),
+				`.${productConfig.appId}`,
+				"codex-user-state",
+				hash,
+			);
 	await mkdir(dir, { recursive: true });
 	return dir;
 }
@@ -217,7 +223,7 @@ export class CodexAppServerClient {
 		const codexHome = await getCodexUserHome(this.options.clerkUserId);
 		const codexBinary = process.env.CODEX_BINARY?.trim() || "codex";
 
-		this.child = spawn(codexBinary, ["app-server"], {
+		this.child = spawn(/* turbopackIgnore: true */ codexBinary, ["app-server"], {
 			stdio: ["pipe", "pipe", "pipe"],
 			env: {
 				...process.env,

@@ -1,5 +1,15 @@
 # Ship by Sunday
 
+Why its awesome
+- Error pipeline to Telegram so you can paste it right to your bot
+- Stripe
+- SEO Best practices so u show up
+- Clerk, Sign in with google
+- Convex
+- Shadcn, TailwindV4
+- Bring your own AI integration (chatgpt)
+
+
 `Ship by Sunday` is the app behind a guided weekend sprint for builders who want to go from rough idea to shipped v1. This repo contains the public marketing site, Stripe checkout flow, protected student workspace, and the code-defined curriculum that powers the product.
 
 ## What Lives Here
@@ -27,7 +37,17 @@ Set `APP_BASE_URL` to the canonical host you want Stripe to use for checkout suc
 
 If you want Google Search Console HTML-tag verification through Next metadata, set `GOOGLE_SITE_VERIFICATION` to the token value from Search Console.
 
-3. Start the full local stack:
+3. Connect the repo to your hosted Convex dev deployment:
+
+```bash
+bun run dev:convex
+```
+
+Need a Convex account first? Create one here: [https://convex.dev/referral/PARKER6190](https://convex.dev/referral/PARKER6190)
+
+This writes `NEXT_PUBLIC_CONVEX_URL` and `CONVEX_DEPLOYMENT` into `.env.local` for your per-developer hosted Convex dev deployment.
+
+4. Start the normal local dev workflow:
 
 ```bash
 bun run dev
@@ -39,6 +59,11 @@ If you only need one side of the app:
 bun run dev:web
 bun run dev:convex
 ```
+
+- `bun run dev:web` runs the Next.js app locally
+- `bun run dev:convex` keeps your hosted Convex dev deployment synced and refreshes `.env.local` when you switch deployments
+
+This repo does not support Convex's local backend mode as a first-class development workflow.
 
 ## Codex Integration
 
@@ -55,6 +80,7 @@ bun run lint
 bun run test:unit
 bun run test:contracts
 bun run test:integration
+bun run test:coverage:critical
 bun run test:browser-smoke
 bun run build
 bun run check
@@ -62,16 +88,46 @@ bun run check
 
 The full testing runbook lives in [docs/dev/testing.md](docs/dev/testing.md).
 
-For local Stripe checkout testing, use:
+For Stripe checkout testing from your local machine against hosted Convex dev, use:
 
 ```bash
-bun run stripe:listen:local
-bun run stripe:local:doctor
-bun run stripe:local:verify
+bun run stripe:listen:dev
+bun run stripe:dev:doctor
+bun run stripe:dev:verify
 ```
 
 The purchase-to-access behavior contract lives in [docs/delivery-onboarding/stack-decision.md](docs/delivery-onboarding/stack-decision.md).
 
+## Telegram Observability
+
+The app now ships a self-hosted error pipeline:
+
+- Next.js server and client failures are normalized in `features/observability/`
+- unexpected API route failures are tagged with `x-request-id`
+- events are ingested into Convex through `/observability/events`
+- Convex deduplicates repeated incidents and sends alerts to Telegram
+
+Required env values:
+
+```bash
+OBSERVABILITY_INGEST_TOKEN=
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_CHAT_ID=
+```
+
+`OBSERVABILITY_INGEST_TOKEN` is not a vendor-issued key. It is just a strong random shared secret that must match in both the Next.js runtime and the Convex runtime. Generate one with:
+
+```bash
+openssl rand -hex 32
+```
+
+`TELEGRAM_BOT_TOKEN` comes from BotFather. `TELEGRAM_CHAT_ID` is the chat or group id the bot should post into. A simple way to fetch it is to message the bot once, then inspect:
+
+```bash
+curl "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/getUpdates"
+```
+
+Use `ENABLE_OBSERVABILITY_TEST_TRIGGER=1` only in automated browser-testing environments; it enables the protected-shell fault injection used by the Playwright auth harness.
 
 ## Public SEO Surface
 

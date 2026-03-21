@@ -47,7 +47,7 @@ bun run clerk:test-user:prepare:entitled
 
 Use this only in a safe local test environment.
 
-1. Start the app and local Convex.
+1. Start the app against your hosted Convex dev deployment.
 2. Start the Stripe listener.
 3. If the listener prints a fresh webhook secret, restart the web app.
 4. Sign in with the no-access account.
@@ -56,6 +56,8 @@ Use this only in a safe local test environment.
 7. Confirm Stripe returns to `/checkout/success?session_id=...`.
 8. Confirm the webhook grants access.
 9. Confirm the app redirects into `/mission`.
+
+On a new machine or after switching deployments, run `bun run dev:convex` first so `.env.local` contains the current `NEXT_PUBLIC_CONVEX_URL` and `CONVEX_DEPLOYMENT` values.
 
 ## Recommended flow checks
 

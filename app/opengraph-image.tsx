@@ -23,8 +23,6 @@ export default function Image() {
 					background:
 						"linear-gradient(135deg, #0f172a 0%, #1d4ed8 60%, #38bdf8 100%)",
 					color: "#f8fafc",
-					fontFamily:
-						"'Inter', 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
 				}}
 			>
 				<div

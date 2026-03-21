@@ -1,11 +1,11 @@
 import { auth } from "@clerk/nextjs/server";
 import { fetchMutation, fetchQuery } from "convex/nextjs";
-import { NextResponse } from "next/server";
 
 import { apiConfig, limitConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import type { CodexRateLimitsResponse } from "@/features/codex/server/app-server";
 import type { ProductAccess } from "@/features/product-access/lib/product-access";
+import { jsonWithRequestId } from "@/features/observability/server/request-id";
 import { serverEnv } from "@/platform/env/server";
 
 type ManagedChatGptAccount = {
@@ -82,21 +82,29 @@ export async function requireProductAccessApiSession(): Promise<ApiSession> {
 	return session;
 }
 
-export function getApiAuthErrorResponse(error: unknown, copy: AuthErrorCopy) {
+export function getApiAuthErrorResponse(
+	error: unknown,
+	copy: AuthErrorCopy,
+	requestId: string,
+) {
 	if (!(error instanceof Error)) {
 		return null;
 	}
 
 	if (error.message === API_UNAUTHORIZED_ERROR) {
-		return NextResponse.json({ error: copy.unauthorized }, { status: 401 });
+		return jsonWithRequestId({ error: copy.unauthorized }, { status: 401 }, requestId);
 	}
 
 	if (error.message === API_FORBIDDEN_ERROR) {
-		return NextResponse.json({ error: copy.forbidden }, { status: 403 });
+		return jsonWithRequestId({ error: copy.forbidden }, { status: 403 }, requestId);
 	}
 
 	if (error.message === "CODEX_APP_SERVER_DISABLED") {
-		return NextResponse.json({ error: copy.unavailable }, { status: 503 });
+		return jsonWithRequestId(
+			{ error: copy.unavailable, requestId },
+			{ status: 503 },
+			requestId,
+		);
 	}
 
 	return null;

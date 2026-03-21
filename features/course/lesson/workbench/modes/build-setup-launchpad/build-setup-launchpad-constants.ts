@@ -39,7 +39,11 @@ type BuildSetupProviderDashboard = {
 	name: string;
 	logoSrc: string;
 	description: string;
-	href: string;
+	links: readonly {
+		label: string;
+		href: string;
+		variant?: "ghost" | "outline";
+	}[];
 };
 
 /** Provider dashboard links for env setup (logos in `public/integrations/`). */
@@ -49,18 +53,40 @@ export const BUILD_SETUP_PROVIDER_DASHBOARDS: readonly BuildSetupProviderDashboa
 			name: "Convex",
 			logoSrc: "/integrations/convex.svg",
 			description: "Deployments, env vars, and project keys for your backend.",
-			href: buildSetup.convexDashboard,
+			links: [
+				{
+					label: "Create account",
+					href: buildSetup.convexReferral,
+					variant: "outline",
+				},
+				{
+					label: "Open dashboard",
+					href: buildSetup.convexDashboard,
+				},
+			],
 		},
 		{
 			name: "Clerk",
 			logoSrc: "/integrations/clerk.svg",
 			description: "API keys for authentication in your Next.js app.",
-			href: buildSetup.clerk,
+			links: [
+				{
+					label: "Open dashboard",
+					href: buildSetup.clerk,
+					variant: "ghost",
+				},
+			],
 		},
 		{
 			name: "Stripe",
 			logoSrc: "/integrations/stripe.svg",
 			description: "Secret and publishable keys for billing and webhooks.",
-			href: buildSetup.stripe,
+			links: [
+				{
+					label: "Open dashboard",
+					href: buildSetup.stripe,
+					variant: "ghost",
+				},
+			],
 		},
 	];

@@ -1,9 +1,12 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
+import { captureServerError } from "@/features/observability/server/capture-server-error";
+import { getClerkAuthorizedParties } from "@/platform/auth/clerk-authorized-parties";
 import { shouldBypassClerkProtection } from "@/platform/auth/clerk-middleware-bypass";
 
 const disableClerkMiddleware = shouldBypassClerkProtection();
+const clerkAuthorizedParties = getClerkAuthorizedParties();
 
 const isProtectedRoute = createRouteMatcher([
 	"/mission(.*)",
@@ -14,11 +17,32 @@ const isProtectedRoute = createRouteMatcher([
 
 export default disableClerkMiddleware
 	? () => NextResponse.next()
-	: clerkMiddleware(async (auth, request) => {
-			if (isProtectedRoute(request)) {
-				await auth.protect();
-			}
-		});
+	: clerkMiddleware(
+			async (auth, request) => {
+				try {
+					if (isProtectedRoute(request)) {
+						await auth.protect();
+					}
+				} catch (error) {
+					await captureServerError({
+						source: "clerk",
+						error,
+						pathname: request.nextUrl.pathname,
+						requestId: request.headers.get("x-request-id"),
+						code: "clerk_proxy_failed",
+						severity: "high",
+						details: {
+							method: request.method,
+						},
+					});
+					throw error;
+				}
+			},
+			() =>
+				clerkAuthorizedParties.length > 0
+					? { authorizedParties: clerkAuthorizedParties }
+					: {},
+		);
 
 export const config = {
 	matcher: [

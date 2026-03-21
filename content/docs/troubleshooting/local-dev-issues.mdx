@@ -9,13 +9,15 @@ When local development feels flaky, start with the environment before you assume
 
 ## Symptom: the page looks stale
 
-This usually means the local services or provider state are out of sync.
+This usually means the local app process or the hosted Convex dev deployment state are out of sync.
 
 Try this first:
 
 1. stop the running local services
 2. start them again with `bun run dev`
 3. reload the flow and retry the exact steps
+
+If the issue started after switching Convex deployments, rerun `bun run dev:convex` before you retry the browser flow.
 
 ## Symptom: env changes do not seem to apply
 
@@ -25,6 +27,7 @@ Check these in order:
 2. restart the app after the env change
 3. if Stripe rewrote the webhook secret, restart the app again
 4. confirm Convex and the app are using the same updated values
+5. confirm `NEXT_PUBLIC_CONVEX_URL` and `CONVEX_DEPLOYMENT` still point at the same hosted Convex dev deployment
 
 ## Symptom: local checkout behaves inconsistently
 
@@ -43,7 +46,7 @@ Run the built-in checks instead of guessing:
 
 ```bash
 bun run build
-bun run stripe:local:doctor
+bun run stripe:dev:doctor
 ```
 
 ## What success looks like

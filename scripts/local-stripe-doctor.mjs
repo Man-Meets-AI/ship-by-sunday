@@ -12,6 +12,7 @@ const CONVEX_BIN_PATH = path.join(
 	"bin",
 	"main.js",
 );
+const LOCALHOST_HOSTS = new Set(["127.0.0.1", "0.0.0.0", "localhost"]);
 
 function parseArgs(argv) {
 	let listenerSecret = null;
@@ -123,6 +124,34 @@ async function getStripeCliConfig() {
 	};
 }
 
+function isLocalhostUrl(urlString) {
+	return LOCALHOST_HOSTS.has(new URL(urlString).hostname);
+}
+
+function getHostedConvexDevContext() {
+	const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL?.trim();
+	if (!convexUrl) {
+		throw new Error(
+			"Missing NEXT_PUBLIC_CONVEX_URL in .env.local. Run `bun run dev:convex` to sync your hosted Convex dev deployment.",
+		);
+	}
+
+	if (isLocalhostUrl(convexUrl)) {
+		throw new Error(
+			"NEXT_PUBLIC_CONVEX_URL must point to your hosted Convex dev deployment, not localhost. Run `bun run dev:convex` to refresh .env.local.",
+		);
+	}
+
+	const deploymentName = process.env.CONVEX_DEPLOYMENT?.trim();
+	if (!deploymentName) {
+		throw new Error(
+			"Missing CONVEX_DEPLOYMENT in .env.local. Run `bun run dev:convex` to sync your hosted Convex dev deployment.",
+		);
+	}
+
+	return { convexUrl, deploymentName };
+}
+
 async function canConnect(urlString) {
 	const url = new URL(urlString);
 	const port =
@@ -161,12 +190,20 @@ if (!process.env.STRIPE_SECRET_KEY) {
 	process.exit(1);
 }
 
-if (!process.env.NEXT_PUBLIC_CONVEX_URL) {
-	console.error("Missing NEXT_PUBLIC_CONVEX_URL in environment.");
+await access(ENV_FILE_PATH);
+let convexDevContext;
+try {
+	convexDevContext = getHostedConvexDevContext();
+} catch (error) {
+	console.error(
+		error instanceof Error
+			? error.message
+			: "Missing hosted Convex dev deployment config.",
+	);
 	process.exit(1);
 }
 
-await access(ENV_FILE_PATH);
+const { convexUrl, deploymentName } = convexDevContext;
 
 const stripeAccount = await getStripeAccountSummary();
 const envWebhookSecret = await readEnvValue("STRIPE_WEBHOOK_SECRET");
@@ -176,7 +213,7 @@ const convexWebhookSecret = convexEnv.STRIPE_WEBHOOK_SECRET ?? null;
 const convexStripeSecretKey = convexEnv.STRIPE_SECRET_KEY ?? null;
 const stripeCliConfig = await getStripeCliConfig();
 const webReachable = await canConnect("http://localhost:3000");
-const convexReachable = await canConnect(process.env.NEXT_PUBLIC_CONVEX_URL);
+const convexReachable = await canConnect(convexUrl);
 
 const checks = [
 	formatCheck(
@@ -193,6 +230,7 @@ const checks = [
 			? `${stripeCliConfig.displayName ?? "Stripe CLI"} (${stripeCliConfig.accountId})`
 			: "not available",
 	),
+	formatCheck("Convex dev deployment target", true, deploymentName),
 	formatCheck(
 		".env.local webhook secret",
 		Boolean(envWebhookSecret),
@@ -226,11 +264,11 @@ const checks = [
 		webReachable ? "localhost:3000 reachable" : "localhost:3000 unreachable",
 	),
 	formatCheck(
-		"Convex local endpoint",
+		"Convex dev endpoint",
 		convexReachable,
 		convexReachable
-			? `${process.env.NEXT_PUBLIC_CONVEX_URL} reachable`
-			: `${process.env.NEXT_PUBLIC_CONVEX_URL} unreachable`,
+			? `${convexUrl} reachable`
+			: `${convexUrl} unreachable`,
 	),
 ];
 
@@ -248,7 +286,7 @@ if (listenerSecret) {
 	);
 }
 
-console.log("Local Stripe doctor");
+console.log("Stripe dev doctor");
 for (const check of checks) {
 	console.log(`- ${check}`);
 }

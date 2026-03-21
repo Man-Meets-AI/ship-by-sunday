@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DottedGlowBackground } from "@/components/ui/dotted-glow-background";
 import { Progress } from "@/components/ui/progress";
 import { MissionSectionLabel } from "@/features/course/mission/components/mission/mission-section-label";
 import type {
@@ -99,12 +100,28 @@ export function MissionHeroCard({ block }: { block: EnrichedBlock }) {
 	const ctaLesson = block.currentLesson ?? block.allLessons[0] ?? null;
 
 	return (
-		<Card className="ring-1 ring-primary/20">
-			{ctaLesson ? (
-				<HeroActive lesson={ctaLesson} block={block} />
-			) : (
-				<HeroDone block={block} />
-			)}
+		<Card className="relative overflow-hidden ring-1 ring-primary/20">
+			<DottedGlowBackground
+				className="pointer-events-none opacity-25 dark:opacity-100"
+				opacity={1}
+				gap={10}
+				radius={1.6}
+				colorLightVar="--color-neutral-400"
+				glowColorLightVar="--color-neutral-500"
+				colorDarkVar="--color-neutral-500"
+				glowColorDarkVar="--color-sky-800"
+				backgroundOpacity={0}
+				speedMin={0.3}
+				speedMax={1.2}
+				speedScale={0.8}
+			/>
+			<div className="relative z-10">
+				{ctaLesson ? (
+					<HeroActive lesson={ctaLesson} block={block} />
+				) : (
+					<HeroDone block={block} />
+				)}
+			</div>
 		</Card>
 	);
 }

@@ -46,6 +46,7 @@ describe("POST /api/stripe/checkout", () => {
 		const response = await POST(createRequest());
 
 		expect(response.status).toBe(401);
+		expect(response.headers.get("x-request-id")).toBeTruthy();
 		expect(await response.json()).toEqual({
 			error: "Sign in before starting checkout.",
 		});
@@ -86,6 +87,7 @@ describe("POST /api/stripe/checkout", () => {
 		const response = await POST(createRequest());
 
 		expect(response.status).toBe(200);
+		expect(response.headers.get("x-request-id")).toBeTruthy();
 		expect(await response.json()).toEqual({
 			url: "https://checkout.stripe.com/pay/cs_test_123",
 		});
@@ -145,8 +147,11 @@ describe("POST /api/stripe/checkout", () => {
 		const response = await POST(createRequest());
 
 		expect(response.status).toBe(500);
-		expect(await response.json()).toEqual({
+		expect(response.headers.get("x-request-id")).toBeTruthy();
+		const body = (await response.json()) as Record<string, unknown>;
+		expect(body).toMatchObject({
 			error: "Stripe did not return a checkout URL.",
 		});
+		expect(body.requestId).toBeTruthy();
 	});
 });

@@ -14,6 +14,8 @@ bun run dev:web
 bun run dev:convex
 ```
 
+Run `bun run dev:convex` first on a new machine or whenever you need to switch hosted Convex dev deployments.
+
 ## Verification
 
 ```bash
@@ -27,14 +29,14 @@ bun run test:browser-smoke
 bun run check
 ```
 
-## Stripe local QA
+## Stripe dev QA
 
 ```bash
 bun run stripe:create-product
-bun run stripe:listen:local
+bun run stripe:listen:dev
 bun run stripe:webhook:sync -- --secret whsec_...
-bun run stripe:local:doctor
-bun run stripe:local:verify
+bun run stripe:dev:doctor
+bun run stripe:dev:verify
 ```
 
 ## Clerk QA users

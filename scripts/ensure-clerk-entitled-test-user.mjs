@@ -7,12 +7,13 @@ import {
 
 const ENTITLED_SCOPE = "ship-by-sunday-clerk-entitled";
 const DEFAULT_COURSE_SLUG = "ship-by-sunday";
+const LOCALHOST_HOSTS = new Set(["127.0.0.1", "0.0.0.0", "localhost"]);
 
 function result(status, details = {}) {
 	return { status, ...details };
 }
 
-function runConvexGrant({ clerkUserId, courseSlug }) {
+function runConvexGrant({ clerkUserId, courseSlug, env }) {
 	return new Promise((resolve) => {
 		const args = [
 			"exec",
@@ -26,6 +27,7 @@ function runConvexGrant({ clerkUserId, courseSlug }) {
 			}),
 		];
 		const child = spawn("bunx", args, {
+			env,
 			stdio: ["ignore", "pipe", "pipe"],
 		});
 
@@ -47,6 +49,30 @@ function runConvexGrant({ clerkUserId, courseSlug }) {
 			});
 		});
 	});
+}
+
+function getHostedConvexDevContext(env) {
+	const convexUrl = env.NEXT_PUBLIC_CONVEX_URL?.trim();
+	if (!convexUrl) {
+		throw new Error(
+			"Missing NEXT_PUBLIC_CONVEX_URL in .env.local. Run `bun run dev:convex` to sync your hosted Convex dev deployment.",
+		);
+	}
+
+	if (LOCALHOST_HOSTS.has(new URL(convexUrl).hostname)) {
+		throw new Error(
+			"NEXT_PUBLIC_CONVEX_URL must point to your hosted Convex dev deployment, not localhost. Run `bun run dev:convex` to refresh .env.local.",
+		);
+	}
+
+	const deploymentName = env.CONVEX_DEPLOYMENT?.trim();
+	if (!deploymentName) {
+		throw new Error(
+			"Missing CONVEX_DEPLOYMENT in .env.local. Run `bun run dev:convex` to sync your hosted Convex dev deployment.",
+		);
+	}
+
+	return { deploymentName };
 }
 
 export async function runCli({
@@ -136,9 +162,25 @@ export async function runCli({
 		};
 	}
 
+	let convexDevContext;
+	try {
+		convexDevContext = getHostedConvexDevContext(env);
+	} catch (error) {
+		return {
+			exitCode: 1,
+			payload: result("error", {
+				message:
+					error instanceof Error
+						? error.message
+						: "Missing hosted Convex dev deployment config.",
+			}),
+		};
+	}
+
 	const grantResult = await runConvexGrant({
 		clerkUserId: ensureResult.clerkUserId,
 		courseSlug,
+		env,
 	});
 
 	if (grantResult.code !== 0) {
@@ -146,7 +188,7 @@ export async function runCli({
 			exitCode: 1,
 			payload: result("error", {
 				message:
-					"Convex product access grant failed. Make sure `bun run dev:convex` is running for local QA.",
+					"Convex product access grant failed. Make sure `bun run dev:convex` has synced your hosted Convex dev deployment and that `.env.local` still contains the matching NEXT_PUBLIC_CONVEX_URL and CONVEX_DEPLOYMENT values.",
 				clerkUserId: ensureResult.clerkUserId,
 				scope: account.scope,
 				courseSlug,
@@ -164,6 +206,7 @@ export async function runCli({
 			email: account.email,
 			courseSlug,
 			clerkUserId: ensureResult.clerkUserId,
+			convexDeployment: convexDevContext.deploymentName,
 			userStatus: ensureResult.status,
 			grantOutput: grantResult.stdout,
 		}),

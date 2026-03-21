@@ -2,6 +2,11 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { fieldValuesValidator } from "./course/validators";
 import { codexRateLimitSnapshotsByIdValidator } from "./codexValidators";
+import {
+	observabilityAlertStatusValidator,
+	observabilitySeverityValidator,
+	observabilitySourceValidator,
+} from "./observability/validators";
 
 export default defineSchema({
 	productAccessGrants: defineTable({
@@ -114,4 +119,26 @@ export default defineSchema({
 	})
 		.index("by_user_id", ["userId"])
 		.index("by_user_id_and_template_id", ["userId", "templateId"]),
+	errorEvents: defineTable({
+		fingerprint: v.string(),
+		fingerprintKey: v.string(),
+		source: observabilitySourceValidator,
+		severity: observabilitySeverityValidator,
+		message: v.string(),
+		code: v.optional(v.union(v.string(), v.null())),
+		requestId: v.optional(v.union(v.string(), v.null())),
+		pathname: v.optional(v.union(v.string(), v.null())),
+		userId: v.optional(v.union(v.string(), v.null())),
+		environment: v.string(),
+		stack: v.optional(v.union(v.string(), v.null())),
+		details: v.optional(v.union(v.string(), v.null())),
+		occurrenceCount: v.number(),
+		firstSeenAt: v.number(),
+		lastSeenAt: v.number(),
+		alertStatus: observabilityAlertStatusValidator,
+		alertCount: v.number(),
+		lastAlertAt: v.optional(v.number()),
+		telegramMessageId: v.optional(v.number()),
+		lastAlertError: v.optional(v.string()),
+	}).index("by_fingerprint_key", ["fingerprintKey"]),
 });

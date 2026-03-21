@@ -12,9 +12,9 @@ If checkout completes but access does not, assume configuration drift before you
 Start here:
 
 ```bash
-bun run stripe:listen:local
-bun run stripe:local:doctor
-bun run stripe:local:verify
+bun run stripe:listen:dev
+bun run stripe:dev:doctor
+bun run stripe:dev:verify
 ```
 
 These commands tell you more, faster, than hand-inspecting random env files.
@@ -36,7 +36,7 @@ These values must match in both places:
 - `.env.local`
 - the active Convex env
 
-The local helper syncs both values. If the listener rotated the webhook secret, restart the app.
+The dev helper syncs both values. If the listener rotated the webhook secret, restart the app.
 
 ### 4. Wrong Stripe account
 
@@ -61,11 +61,11 @@ If the Stripe event exists and the buyer still cannot reach `/mission`, check:
 Use this sequence:
 
 1. run the Stripe listener
-2. run `stripe:local:doctor`
+2. run `stripe:dev:doctor`
 3. confirm secret parity
 4. confirm Stripe account parity
 5. confirm Clerk `convex` template
-6. rerun a real local checkout
+6. rerun a real local checkout against your hosted Convex dev deployment
 
 ## What success looks like
 

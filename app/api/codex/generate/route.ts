@@ -1,11 +1,10 @@
-import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import {
 	getCodexAppServerUnavailableMessage,
 	withCodexAppServerClient,
 } from "@/features/codex/server/app-server";
-
+import { apiRouteConfig } from "@/config/product";
 import {
 	accountIsManagedChatGpt,
 	getApiAuthErrorResponse,
@@ -15,6 +14,12 @@ import {
 	requireProductAccessApiSession,
 	upsertViewerCodexConnection,
 } from "@/features/codex/server/route-helpers";
+import { captureServerError } from "@/features/observability/server/capture-server-error";
+import { getUnexpectedApiErrorResponse } from "@/features/observability/server/api-error-response";
+import {
+	getRequestIdFromRequest,
+	jsonWithRequestId,
+} from "@/features/observability/server/request-id";
 
 const generateRequestSchema = z.object({
 	templateId: z.enum([
@@ -30,6 +35,7 @@ const generateRequestSchema = z.object({
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
+	const requestId = getRequestIdFromRequest(request);
 	let parsedInput: z.infer<typeof generateRequestSchema> | null = null;
 	let session: {
 		userId: string;
@@ -43,9 +49,10 @@ export async function POST(request: Request) {
 		const body = (await request.json().catch(() => null)) as unknown;
 		const parsed = generateRequestSchema.safeParse(body);
 		if (!parsed.success) {
-			return NextResponse.json(
+			return jsonWithRequestId(
 				{ error: "Invalid generation payload." },
 				{ status: 400 },
+				requestId,
 			);
 		}
 		const requestInput = parsed.data;
@@ -107,12 +114,13 @@ export async function POST(request: Request) {
 				errorCode: "account_not_connected",
 			});
 
-			return NextResponse.json(
+			return jsonWithRequestId(
 				{
 					error: output.error,
 					code: "account_not_connected",
 				},
 				{ status: 409 },
+				requestId,
 			);
 		}
 
@@ -126,14 +134,16 @@ export async function POST(request: Request) {
 				errorCode: "generation_failed",
 			});
 
-			return NextResponse.json(
+			return jsonWithRequestId(
 				{
 					error:
 						output.generation.errorMessage ??
 						"Codex generation did not complete successfully.",
 					code: "generation_failed",
+					requestId,
 				},
 				{ status: 502 },
+				requestId,
 			);
 		}
 
@@ -144,18 +154,22 @@ export async function POST(request: Request) {
 			latencyMs: Date.now() - startedAt,
 		});
 
-		return NextResponse.json({
-			ok: true,
-			output: text,
-			account: output.account,
-			rateLimits: output.rateLimits,
-		});
+		return jsonWithRequestId(
+			{
+				ok: true,
+				output: text,
+				account: output.account,
+				rateLimits: output.rateLimits,
+			},
+			undefined,
+			requestId,
+		);
 	} catch (error) {
 		const authErrorResponse = getApiAuthErrorResponse(error, {
 			unauthorized: "Sign in before using Codex generation.",
 			forbidden: "Product access is required before using Codex generation.",
 			unavailable: getCodexAppServerUnavailableMessage(),
-		});
+		}, requestId);
 		if (authErrorResponse) {
 			return authErrorResponse;
 		}
@@ -170,18 +184,24 @@ export async function POST(request: Request) {
 					errorCode: "server_error",
 				});
 			} catch (persistError) {
-				console.error("codex run persistence error", persistError);
+				await captureServerError({
+					source: "codex",
+					error: persistError,
+					requestId,
+					pathname: apiRouteConfig.codexGenerate,
+					userId: session.userId,
+					code: "codex_run_persistence_error",
+				});
 			}
 		}
 
-		console.error("codex generate error", error);
-		return NextResponse.json(
-			{
-				error:
-					error instanceof Error ? error.message : "Codex generation failed.",
-				code: "server_error",
-			},
-			{ status: 500 },
-		);
+		return await getUnexpectedApiErrorResponse({
+			error,
+			requestId,
+			pathname: apiRouteConfig.codexGenerate,
+			source: "codex",
+			defaultMessage: "Codex generation failed.",
+			userId: session?.userId ?? null,
+		});
 	}
 }

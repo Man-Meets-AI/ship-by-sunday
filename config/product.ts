@@ -209,6 +209,7 @@ export const courseResourceConfig = {
   buildSetup: {
     clerk: "https://dashboard.clerk.com/",
     convex: "https://www.convex.dev/",
+    convexReferral: "https://convex.dev/referral/PARKER6190",
     /** Deployments, env vars, and project keys for the starter template. */
     convexDashboard: "https://dashboard.convex.dev/",
     stripe: "https://dashboard.stripe.com/register",

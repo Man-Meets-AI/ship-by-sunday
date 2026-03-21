@@ -20,6 +20,8 @@ import { serverEnv } from "@/platform/env/server";
 import { getMetadataBase } from "@/platform/next/metadata-base";
 import "./globals.css";
 
+void publicEnv.NEXT_PUBLIC_CLERK_SIGN_IN_URL;
+
 export const metadata: Metadata = {
 	metadataBase: getMetadataBase(),
 	title: {
@@ -66,12 +68,6 @@ export default function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	if (publicEnv.NEXT_PUBLIC_CLERK_SIGN_IN_URL !== "/sign-in") {
-		throw new Error(
-			"NEXT_PUBLIC_CLERK_SIGN_IN_URL must be set to /sign-in for the custom Clerk auth flow.",
-		);
-	}
-
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<body className={bebasNeue.variable}>

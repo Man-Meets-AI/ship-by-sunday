@@ -11,6 +11,24 @@ export default defineConfig({
 	},
 	test: {
 		globals: true,
+		coverage: {
+			provider: "v8",
+			include: [
+				"features/observability/**/*.{ts,tsx}",
+				"app/api/codex/**/*.ts",
+				"app/api/stripe/checkout/route.ts",
+				"features/codex/server/route-helpers.ts",
+				"features/product-access/server/product-access.ts",
+				"features/checkout/server/checkout-session.ts",
+			],
+			thresholds: {
+				perFile: true,
+				statements: 90,
+				functions: 90,
+				lines: 90,
+				branches: 80,
+			},
+		},
 		projects: [
 			defineProject({
 				resolve: {

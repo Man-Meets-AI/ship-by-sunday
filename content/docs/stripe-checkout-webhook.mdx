@@ -31,12 +31,12 @@ If you do not already have them, create the Stripe product and default price fro
 bun run stripe:create-product
 ```
 
-## Start local webhook forwarding
+## Start dev webhook forwarding
 
-Use this command for local buyer-flow QA:
+Use this command for local buyer-flow QA against your hosted Convex dev deployment:
 
 ```bash
-bun run stripe:listen:local
+bun run stripe:listen:dev
 ```
 
 That helper:
@@ -44,7 +44,9 @@ That helper:
 - starts Stripe CLI forwarding to `{NEXT_PUBLIC_CONVEX_URL}/stripe/webhook`
 - captures the current webhook signing secret
 - writes that secret into `.env.local`
-- syncs that secret and `STRIPE_SECRET_KEY` into the active Convex env
+- syncs that secret and `STRIPE_SECRET_KEY` into the active hosted Convex dev env
+
+It also expects `.env.local` to contain the `CONVEX_DEPLOYMENT` value that `bun run dev:convex` writes.
 
 If the listener writes a fresh secret while the app is already running, restart the app before testing checkout.
 
@@ -70,8 +72,8 @@ The starter uses this sequence:
 Use these commands before you debug by hand:
 
 ```bash
-bun run stripe:local:doctor
-bun run stripe:local:verify
+bun run stripe:dev:doctor
+bun run stripe:dev:verify
 ```
 
 ## What success looks like
