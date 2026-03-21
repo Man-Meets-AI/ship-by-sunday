@@ -31,11 +31,11 @@ The runtime splits into three clear surfaces:
 
 - public marketing surface on `/`
 - public docs surface on `/docs`
-- protected product surface on `/mission`, `/lesson/[lessonId]`, `/artifacts`, `/settings`, and `/access-required`
+- protected product surface on `/mission`, `/lesson/[lessonId]`, `/artifacts`, and `/settings`
 
 That split matters because checkout and access recovery live between those worlds.
 
-`app/(app)/layout.tsx` is the single server-side product-access gate for the protected app routes. Middleware only handles sign-in.
+`app/(workspace)/layout.tsx` is the single server-side product-access gate for the protected app routes. Middleware only handles sign-in.
 
 ## Purchase-to-access flow
 
@@ -46,7 +46,7 @@ That split matters because checkout and access recovery live between those world
 5. `POST {NEXT_PUBLIC_CONVEX_URL}/stripe/webhook` verifies the signature and handles completed checkout events.
 6. Convex upserts the active product-access grant.
 7. `/checkout/success` starts from a server-fetched product-access snapshot, then continues Clerk-gated live access polling before redirecting into `/mission`.
-8. `/access-required` checks the same product-access state and recovers automatically if access appears later.
+8. `/mission` and the other workspace routes check the same product-access state and recover inline if access appears later.
 9. Returning users with granted access who hit `/` are resumed into `/mission` or their most recently worked accessible lesson unless they explicitly force marketing mode.
 
 Protected app routes also start from server-fetched mission or access data before the client-side Convex subscriptions take over. That avoids a hydration-time auth race where the browser can briefly act signed out even though the server already proved access.

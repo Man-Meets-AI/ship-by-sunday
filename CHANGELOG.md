@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-03-21
+
+### Changed
+
+- Moved the protected workspace and auth entrypoints into dedicated route groups, so `/mission` now handles access recovery inline instead of bouncing through a separate recovery route.
+
 ## 2026-03-20
 
 ### Changed

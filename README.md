@@ -1,6 +1,7 @@
 # Ship by Sunday
 
 Why its awesome
+
 - Error pipeline to Telegram so you can paste it right to your bot
 - Stripe
 - SEO Best practices so u show up
@@ -9,13 +10,12 @@ Why its awesome
 - Shadcn, TailwindV4
 - Bring your own AI integration (chatgpt)
 
-
 `Ship by Sunday` is the app behind a guided weekend sprint for builders who want to go from rough idea to shipped v1. This repo contains the public marketing site, Stripe checkout flow, protected student workspace, and the code-defined curriculum that powers the product.
 
 ## What Lives Here
 
 - Public marketing and pricing pages in `app/`
-- Protected product routes at `/mission`, `/lesson/[lessonKey]`, `/artifacts`, `/settings`, and the recovery surface at `/access-required`
+- Protected product routes at `/mission`, `/lesson/[lessonKey]`, `/artifacts`, and `/settings`, with workspace recovery handled inline on those routes
 - Feature-first runtime code in `features/`, with the curriculum and lesson model centered under `features/course/lesson/`
 - Purchase-to-access handoff across Clerk, Stripe, and Convex product-access state
 
@@ -136,7 +136,7 @@ Use `ENABLE_OBSERVABILITY_TEST_TRIGGER=1` only in automated browser-testing envi
 - Social preview images are generated from `app/opengraph-image.tsx` and `app/twitter-image.tsx`.
 - Docs metadata defaults and per-page canonical/OG/Twitter fields are built through `features/docs/lib/docs-metadata.ts`.
 - Homepage structured data is injected from `app/page.tsx` via `features/marketing/lib/home-page-structured-data.ts`, including `Organization`, `Product`, and `FAQPage` schema.
-- Protected app routes and auth or recovery flows are intentionally marked `noindex` in `app/(app)/layout.tsx` and the individual utility route entrypoints.
+- Protected app routes and auth or recovery flows are intentionally marked `noindex` in `app/(workspace)/layout.tsx` and the individual utility route entrypoints.
 - Rendered SEO regressions are smoke-checked in `tests/browser-smoke/app-smoke.spec.ts`.
 
 ## Intentionally Customizable
@@ -144,7 +144,7 @@ Use `ENABLE_OBSERVABILITY_TEST_TRIGGER=1` only in automated browser-testing envi
 - Curriculum shape, stable lesson identity, canonical labels, and route mapping: `features/course/lesson/model/curriculum.ts`
 - Lesson copy, workbench fields, and lesson-specific page behavior: `features/course/lesson/model/lessons/*.ts` and `features/course/lesson/content/build.ts`
 - Landing-page copy, offer framing, and media: `features/marketing/components/home-page.tsx`, `features/marketing/components/faq-accordion.tsx`, and `public/`
-- Student workspace UI and shell behavior: `features/course/` plus the protected route group in `app/(app)/`
+- Student workspace UI and shell behavior: `features/course/` plus the protected route group in `app/(workspace)/`
 - Theme tokens and visual language: `app/globals.css`
 - Purchase, product-access, and access flow: `app/api/stripe/checkout`, `features/checkout/`, `features/product-access/`, `convex/access.ts`, `convex/http.ts`, and `convex/course/`
 - Optional starter-template and Codex-assisted build helpers: `.env.local.example`, `scripts/`, `app/api/codex/*`, and `features/codex/`

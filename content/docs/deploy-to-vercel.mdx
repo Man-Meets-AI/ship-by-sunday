@@ -43,7 +43,7 @@ Do not leave Convex pointed at:
 After deploy, confirm all of this with a real test flow:
 
 1. signed-out visitor hits a protected route and is pushed to sign-in
-2. signed-in user without access reaches `/access-required`
+2. signed-in user without access reaches `/mission` and sees inline recovery
 3. live checkout returns to `/checkout/success`
 4. webhook grants access
 5. newly granted user reaches `/mission`

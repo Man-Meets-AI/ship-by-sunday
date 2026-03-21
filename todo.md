@@ -2,6 +2,7 @@
 
 ## recent
 
+- **2026-03-21 12:18 EDT** — Route-group landing: moved protected pages into `app/(workspace)` and auth/session-task entrypoints into `app/(identity)`, and switched mission to render inline access recovery instead of bouncing through `/access-required`.
 - **2026-03-20 15:58 EDT** — SEO follow-up: added docs canonical/OG/Twitter metadata helpers, included FAQ schema and docs `lastModified` hints, added browser-smoke + unit regression coverage for rendered metadata/crawl routes, and hardened `/checkout/success` to skip authenticated access preloading when no checkout session is present.
 - **2026-03-20 15:56 EDT** — Lesson-key follow-through: repaired stage-unlock repair buttons so they route through canonical lesson keys instead of stale numeric lesson URLs, and refreshed mission-page regression coverage to use lesson-key mission fixtures.
 - **2026-03-20 15:51 EDT** — SEO hardening: added root metadata defaults, canonical host resolution, generated `robots.txt` and `sitemap.xml`, app-route social preview images, homepage JSON-LD, and explicit `noindex` coverage for protected/auth/recovery flows. Also fixed a small `components/ui/globe.tsx` typing issue so `bun run build` passes with the new metadata routes.

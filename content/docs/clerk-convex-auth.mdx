@@ -65,7 +65,7 @@ You are correctly wired when:
 - sign-in from a deep link returns the user to that exact page after auth or after any Clerk task
 - protected routes can read server-side state
 - protected pages do not throw `Unauthorized` during the first client hydration pass
-- `/access-required` can tell the difference between signed-out and signed-in users
+- the workspace gate can tell the difference between signed-out and signed-in users
 - product-access checks do not fail with a token or issuer mismatch
 
 ## Why the starter now seeds initial data on the server

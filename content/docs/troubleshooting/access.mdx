@@ -7,7 +7,7 @@ description: Fix the most common cases where sign-in works, payment completes, o
 
 Use this page when the app looks close to working, but users still cannot reach the protected product.
 
-## Symptom: sign-in works, but `/access-required` never clears
+## Symptom: sign-in works, but the workspace gate never clears
 
 Check these in order:
 
@@ -74,6 +74,6 @@ If the granted-access test user still cannot reach `/mission`, stop guessing and
 
 Access is healthy when:
 
-- users without access reach `/access-required`
+- users without access reach `/mission` and see inline recovery
 - users with granted access reach `/mission`
 - a newly paid user leaves `/checkout/success` and reaches the protected workspace without manual intervention

@@ -30,7 +30,7 @@ bun run check
 
 Use two real users:
 
-- no-access user for sign-in, `/access-required`, wrong-account, and pre-purchase checks
+- no-access user for sign-in, `/mission`, wrong-account, and pre-purchase checks
 - granted-access user for `/mission`, `/lesson/[lessonId]`, `/artifacts`, and `/settings` checks
 
 Commands:
@@ -75,7 +75,7 @@ bun run test:browser-smoke
 ### No-access flow
 
 1. Sign in with the no-access account.
-2. Visit `/access-required`.
+2. Visit `/mission`.
 3. Confirm the page explains that the account has no active access.
 
 ### Granted-access flow

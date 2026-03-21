@@ -16,7 +16,7 @@ description: See the main public, protected, and purchase-related routes in one 
 
 - `/checkout/success`: post-checkout validation, server-fetched initial product-access state, then live product-access polling
 - `/checkout/cancel`: checkout cancel return
-- `/access-required`: locked-state and delayed-access recovery
+- `/mission`: canonical workspace entry and recovery destination
 
 ## Protected product routes
 
@@ -25,7 +25,7 @@ description: See the main public, protected, and purchase-related routes in one 
 - `/artifacts`: saved student or product artifacts
 - `/settings`: protected account and product settings
 
-These protected routes render behind `app/(app)/layout.tsx`, starting from server-fetched access or mission data before the browser resumes live Convex subscriptions.
+These protected routes render behind `app/(workspace)/layout.tsx`, starting from server-fetched access or mission data before the browser resumes live Convex subscriptions.
 
 ## Why this matters
 
