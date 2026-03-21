@@ -63,6 +63,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - `reviewer` should focus on real bugs, regressions, missing tests, security issues, and incorrect assumptions, not style nitpicks.
 - `docs_researcher` should verify any framework, library, or platform API behavior the patch depends on before conclusions are finalized.
 
+For Convex, use the hosted dev workflow. Do not use Convex local mode in this repo.
 <!-- convex-ai-start -->
 This project uses [Convex](https://convex.dev) as its backend.
 
