@@ -23,10 +23,12 @@ vi.mock("next/link", () => ({
 }));
 
 vi.mock("next/navigation", () => ({
+	usePathname: () => "/mission",
 	useRouter: () => ({
 		replace: replaceMock,
 		refresh: refreshMock,
 	}),
+	useSearchParams: () => new URLSearchParams(""),
 }));
 
 vi.mock("convex/react", () => ({
@@ -49,7 +51,7 @@ describe("AccessRequiredPage interactions", () => {
 		vi.useRealTimers();
 	});
 
-	it("redirects into mission when access becomes ready", () => {
+	it("refreshes the current workspace route when access becomes ready", () => {
 		useQueryMock.mockReturnValue({
 			hasAccess: true,
 			status: "granted",
@@ -57,7 +59,44 @@ describe("AccessRequiredPage interactions", () => {
 
 		render(<AccessRequiredPage />);
 
-		expect(replaceMock).toHaveBeenCalledWith("/mission");
+		expect(refreshMock).toHaveBeenCalledTimes(1);
+	});
+
+	it("keeps retrying the workspace refresh while the gate is still mounted", async () => {
+		vi.useFakeTimers();
+		useQueryMock.mockReturnValue({
+			hasAccess: true,
+			status: "granted",
+		});
+
+		render(
+			<AccessRequiredPage
+				initialAccess={{
+					clerkUserId: "user_123",
+					hasAccess: false,
+					status: "no_access",
+				}}
+			/>,
+		);
+
+		await act(async () => {
+			await vi.advanceTimersByTimeAsync(1_200);
+		});
+
+		expect(refreshMock).toHaveBeenCalledTimes(2);
+	});
+
+	it("redirects signed-out viewers to sign-in with the current workspace path", () => {
+		useQueryMock.mockReturnValue({
+			hasAccess: false,
+			status: "signed_out",
+		});
+
+		render(<AccessRequiredPage />);
+
+		expect(replaceMock).toHaveBeenCalledWith(
+			"/sign-in?redirect_url=%2Fmission",
+		);
 	});
 
 	it("refreshes access on retry and clears the busy state after the timeout", async () => {

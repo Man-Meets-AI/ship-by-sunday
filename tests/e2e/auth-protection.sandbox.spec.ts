@@ -22,10 +22,9 @@ test.describe("protected routes", () => {
 	test.describe("non-entitled user", () => {
 		test.use({ storageState: nonEntitledStorageStatePath });
 
-		test("is redirected from mission to the access-required recovery screen", async ({
-			page,
-		}) => {
+		test("sees inline access recovery on mission", async ({ page }) => {
 			await page.goto("/mission");
+			await expect(page).toHaveURL(/\/mission/);
 			await expect(
 				page.getByRole("heading", {
 					name: "Access not attached to this account",

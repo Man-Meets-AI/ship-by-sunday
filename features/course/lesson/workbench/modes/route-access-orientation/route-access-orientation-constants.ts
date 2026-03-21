@@ -12,7 +12,6 @@ export const ROUTE_ACCESS_CODEX_PROMPT_DEFAULT =
 	"I'm exploring this code base for the first time and I don't know how pages get blocked whether or not the user has paid. Could you explain it to me in simple terms? Imagine I'm non-technical.";
 
 export const ROUTE_ACCESS_APP_ROUTE_FOLDERS = [
-	"access-required",
 	"artifacts",
 	"checkout",
 	"lesson",
@@ -34,7 +33,6 @@ export const ROUTE_ACCESS_PROTECTED_PAGE_LABELS = [
 	"lesson",
 	"artifacts",
 	"settings",
-	"access required",
 ] as const;
 
 export const ROUTE_ACCESS_INSPECTION_CHECKLIST_OPTIONS = [

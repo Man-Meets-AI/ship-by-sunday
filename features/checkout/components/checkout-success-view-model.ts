@@ -79,21 +79,21 @@ export function getCheckoutViewModel(
 				helpItems: isAccessReady
 					? [
 							"Use Open mission if the redirect has not fired yet.",
-							"Use Check access only if you want to force one more lookup.",
+							"Refresh this page if the redirect feels stalled.",
 							"Keep this tab if you want a clean post-purchase handoff.",
 						]
 					: [
 							"Keep this tab open for a few seconds while the access grant catches up.",
 							"If you signed in with a different email, fix that first before retrying.",
-							"Use Check access if the handoff feels stalled.",
+							"Use Open mission if you want to retry the workspace gate now.",
 						],
 				primaryActionLabel: "Open mission",
 				primaryActionHref: routeConfig.mission,
 				primaryActionBody: isAccessReady
 					? "Your access is ready. Open the workspace now if you do not want to wait for the redirect."
-					: "If the handoff already finished in the background, this will take you into Ship by Sunday. Otherwise you will land on the access check surface.",
+					: "If the handoff already finished in the background, this will take you into Ship by Sunday. Otherwise it will re-run the workspace gate.",
 				secondaryActionBody:
-					"Use this if the handoff feels stalled, or if you need to re-check access manually.",
+					"Use Open mission to retry the workspace gate if the handoff feels stalled.",
 			};
 		case "sign_in_required":
 			return {
@@ -135,7 +135,7 @@ export function getCheckoutViewModel(
 				primaryActionBody:
 					"Use the exact email from checkout so we can attach the purchase to the right account.",
 				secondaryActionBody:
-					"Use this if the handoff feels stalled, or if you need to re-check access manually.",
+					"After sign-in, come back here or open mission to retry the workspace gate.",
 			};
 		case "wrong_account":
 			return {
@@ -144,7 +144,7 @@ export function getCheckoutViewModel(
 					"This browser is signed into a different account than the one used at checkout.",
 				statusLabel: "Account mismatch",
 				heading: "Use the checkout account",
-				body: "The checkout session belongs to a different Clerk account. Sign in with the same email you used during payment, then retry this page or open access check.",
+				body: "The checkout session belongs to a different Clerk account. Sign in with the same email you used during payment, then retry this page or open mission.",
 				progressSteps: [
 					{
 						label: "Checkout found",
@@ -167,15 +167,15 @@ export function getCheckoutViewModel(
 					"The purchase exists, but it belongs to a different signed-in account than the one currently open here.",
 				helpItems: [
 					"Switch to the email used at checkout.",
-					"Then use Check access to retry the product access check.",
+					"Then use Open mission to retry the workspace gate.",
 					"Open mission only after the correct account is attached.",
 				],
 				primaryActionLabel: "Open mission",
 				primaryActionHref: routeConfig.mission,
 				primaryActionBody:
-					"If the handoff already finished in the background, this will take you into Ship by Sunday. Otherwise you will land on the access check surface.",
+					"If the handoff already finished in the background, this will take you into Ship by Sunday. Otherwise it will re-run the workspace gate.",
 				secondaryActionBody:
-					"Use this after switching accounts to retry the product access check.",
+					"Use Open mission after switching accounts to retry the workspace gate.",
 			};
 		case "payment_pending":
 			return {
@@ -213,9 +213,9 @@ export function getCheckoutViewModel(
 				primaryActionLabel: "Open mission",
 				primaryActionHref: routeConfig.mission,
 				primaryActionBody:
-					"If the handoff already finished in the background, this will take you into Ship by Sunday. Otherwise you will land on the access check surface.",
+					"If the handoff already finished in the background, this will take you into Ship by Sunday. Otherwise it will re-run the workspace gate.",
 				secondaryActionBody:
-					"Use this if the handoff feels stalled, or if you need to re-check access manually.",
+					"Use Open mission once payment settles to retry the workspace gate.",
 			};
 		case "invalid_session":
 			return {
@@ -224,7 +224,7 @@ export function getCheckoutViewModel(
 					"We could not verify the Stripe checkout session attached to this URL.",
 				statusLabel: "Session invalid",
 				heading: "Unable to confirm payment",
-				body: "This page needs a valid Stripe success URL to confirm payment. If you already bought access, open access check from the same account used at checkout.",
+				body: "This page needs a valid Stripe success URL to confirm payment. If you already bought access, open mission from the same account used at checkout.",
 				progressSteps: [
 					{
 						label: "Checkout found",
@@ -247,15 +247,15 @@ export function getCheckoutViewModel(
 					"This URL does not include a Stripe session we can trust for the access handoff.",
 				helpItems: [
 					"Return to checkout from the offer page if you still need to buy.",
-					"Use Check access if you already paid in this account.",
+					"Use Open mission if you already paid in this account.",
 					"Keep the success URL intact when testing the live handoff.",
 				],
 				primaryActionLabel: "Open mission",
 				primaryActionHref: routeConfig.mission,
 				primaryActionBody:
-					"If the handoff already finished in the background, this will take you into Ship by Sunday. Otherwise you will land on the access check surface.",
+					"If the handoff already finished in the background, this will take you into Ship by Sunday. Otherwise it will re-run the workspace gate.",
 				secondaryActionBody:
-					"Use this if the handoff feels stalled, or if you need to re-check access manually.",
+					"Use Open mission to retry the workspace gate if payment was already confirmed.",
 			};
 		case "missing_session_id":
 			return {
@@ -264,7 +264,7 @@ export function getCheckoutViewModel(
 					"This page works best when you arrive from Stripe with a checkout session attached.",
 				statusLabel: "Missing checkout session",
 				heading: "Verify access",
-				body: "If you already bought access, use access check from the same signed-in account. Otherwise, return home and start checkout again.",
+				body: "If you already bought access, open mission from the same signed-in account. Otherwise, return home and start checkout again.",
 				progressSteps: [
 					{
 						label: "Checkout found",
@@ -274,7 +274,7 @@ export function getCheckoutViewModel(
 					{
 						label: "Access handoff",
 						state: "pending",
-						detail: "Use access check if you already paid.",
+						detail: "Use mission if you already paid.",
 					},
 					{
 						label: "Open mission",
@@ -286,16 +286,16 @@ export function getCheckoutViewModel(
 				helpLeadCopy:
 					"This page works as a recovery surface, but it is strongest when it arrives directly from Stripe.",
 				helpItems: [
-					"Use Check access if you already completed purchase on this account.",
+					"Use Open mission if you already completed purchase on this account.",
 					"Return home if you still need to start checkout.",
 					"Keep the same browser session for the cleanest handoff.",
 				],
 				primaryActionLabel: "Open mission",
 				primaryActionHref: routeConfig.mission,
 				primaryActionBody:
-					"If the handoff already finished in the background, this will take you into Ship by Sunday. Otherwise you will land on the access check surface.",
+					"If the handoff already finished in the background, this will take you into Ship by Sunday. Otherwise it will re-run the workspace gate.",
 				secondaryActionBody:
-					"Use this if the handoff feels stalled, or if you need to re-check access manually.",
+					"Use Open mission to retry the workspace gate if access should already be live.",
 			};
 	}
 

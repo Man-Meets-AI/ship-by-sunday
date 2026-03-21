@@ -26,7 +26,7 @@ test("signed-in non-entitled users land on the access recovery surface", async (
 	page,
 }) => {
 	await signIn(page, nonEntitledEmail);
-	await page.goto("/access-required");
+	await page.goto("/mission");
 
 	await expect(
 		page.getByRole("heading", { name: "Access not attached to this account" }),

@@ -35,16 +35,16 @@ describe("product access server helpers", () => {
 		vi.resetModules();
 	});
 
-	it("keeps signed-out visitors on access-required instead of forcing a sign-in redirect", async () => {
+	it("returns signed_out when no Clerk session is present", async () => {
 		getConvexServerSessionMock.mockResolvedValue({
 			userId: null,
 			token: null,
 		});
 
-		const { redirectGrantedAccessRequiredVisitor } =
+		const { getServerProductAccess } =
 			await import("@/features/product-access/server/product-access");
 
-		const access = await redirectGrantedAccessRequiredVisitor();
+		const access = await getServerProductAccess();
 
 		expect(access).toMatchObject({
 			hasAccess: false,
@@ -70,7 +70,7 @@ describe("product access server helpers", () => {
 		});
 	});
 
-	it("still redirects granted visitors into mission", async () => {
+	it("returns granted access when Convex confirms the purchase", async () => {
 		getConvexServerSessionMock.mockResolvedValue({
 			userId: "user_123",
 			token: "token_123",
@@ -81,13 +81,16 @@ describe("product access server helpers", () => {
 			status: "granted",
 		});
 
-		const { redirectGrantedAccessRequiredVisitor } =
+		const { getServerProductAccess } =
 			await import("@/features/product-access/server/product-access");
 
-		await redirectGrantedAccessRequiredVisitor();
+		await expect(getServerProductAccess()).resolves.toEqual({
+			hasAccess: true,
+			clerkUserId: "user_123",
+			status: "granted",
+		});
 
 		expect(fetchQueryMock).toHaveBeenCalledTimes(1);
-		expect(redirectMock).toHaveBeenCalledWith("/mission");
 	});
 
 	it("redirects home visitors to their saved resume destination when allowed", async () => {
@@ -106,39 +109,17 @@ describe("product access server helpers", () => {
 				lessonKey: "1.2",
 			});
 
-		const { redirectGrantedHomeVisitor } = await import(
-			"@/features/product-access/server/product-access"
-		);
+		const { redirectGrantedHomeVisitor } =
+			await import("@/features/product-access/server/product-access");
 
 		await redirectGrantedHomeVisitor({ allowMarketing: false });
 
 		expect(redirectMock).toHaveBeenCalledWith("/lesson/1.2");
 	});
 
-	it("redirects protected pages to access-required when the viewer lacks access", async () => {
-		getConvexServerSessionMock.mockResolvedValue({
-			userId: "user_123",
-			token: "token_123",
-		});
-		fetchQueryMock.mockResolvedValue({
-			hasAccess: false,
-			clerkUserId: "user_123",
-			status: "no_access",
-		});
-
-		const { requireProductAccess } = await import(
-			"@/features/product-access/server/product-access"
-		);
-
-		await requireProductAccess();
-
-		expect(redirectMock).toHaveBeenCalledWith("/access-required");
-	});
-
 	it("does nothing when the home page explicitly allows marketing mode", async () => {
-		const { redirectGrantedHomeVisitor } = await import(
-			"@/features/product-access/server/product-access"
-		);
+		const { redirectGrantedHomeVisitor } =
+			await import("@/features/product-access/server/product-access");
 
 		await redirectGrantedHomeVisitor({ allowMarketing: true });
 
@@ -162,9 +143,8 @@ describe("product access server helpers", () => {
 			status: "granted",
 		});
 
-		const { getServerResumeDestination } = await import(
-			"@/features/product-access/server/product-access"
-		);
+		const { getServerResumeDestination } =
+			await import("@/features/product-access/server/product-access");
 
 		await expect(getServerResumeDestination()).resolves.toBeNull();
 	});

@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 import { Spinner } from "@/components/ui/spinner";
+import { reportClientError } from "@/features/observability/lib/client-error-report";
 import { AuthPageShell } from "@/features/auth/sign-in/auth-page-shell";
 import {
-	buildSessionTaskHref,
 	buildSignInHref,
 	getBlockedGoogleSignInHref,
+	getSessionTaskHref,
 	getSafeRedirectPath,
+	ssoCallbackPath,
 } from "@/features/auth/sign-in/sign-in-route-utils";
 
 type SsoCallbackPageProps = {
@@ -54,9 +56,32 @@ export function SsoCallbackPage({ redirectPath }: SsoCallbackPageProps) {
 			decorateUrl: (url: string) => string;
 			session?: { currentTask?: { key: string } | null } | null;
 		}) => {
-			const destination = session?.currentTask
-				? buildSessionTaskHref(session.currentTask.key, safeRedirectPath)
-				: safeRedirectPath;
+			const sessionTaskHref = session?.currentTask
+				? getSessionTaskHref(session.currentTask.key, safeRedirectPath)
+				: null;
+			if (session?.currentTask && !sessionTaskHref) {
+				const signInTaskFallbackHref = decorateUrl(
+					buildSignInHref({ redirectPath: safeRedirectPath }),
+				);
+				reportClientError({
+					error: new Error("Unknown Clerk session task."),
+					pathname: ssoCallbackPath,
+					code: "clerk_unknown_session_task",
+					severity: "high",
+					details: {
+						redirectPath: safeRedirectPath,
+						taskKey: session.currentTask.key,
+					},
+				});
+				try {
+					await clerk.signOut({ redirectUrl: signInTaskFallbackHref });
+					return;
+				} catch {}
+				await navigateWithRouter(router, signInTaskFallbackHref);
+				return;
+			}
+
+			const destination = sessionTaskHref ?? safeRedirectPath;
 
 			await navigateWithRouter(router, decorateUrl(destination));
 		};
@@ -69,7 +94,9 @@ export function SsoCallbackPage({ redirectPath }: SsoCallbackPageProps) {
 
 			if (signUp.isTransferable) {
 				await signIn.create({ transfer: true });
-				const nextSignInStatus = signIn.status as typeof signIn.status | "complete";
+				const nextSignInStatus = signIn.status as
+					| typeof signIn.status
+					| "complete";
 
 				if (nextSignInStatus === "complete") {
 					await signIn.finalize({ navigate: navigateAfterAuth });
@@ -108,7 +135,15 @@ export function SsoCallbackPage({ redirectPath }: SsoCallbackPageProps) {
 
 			await navigateWithRouter(router, blockedGoogleHref);
 		})();
-	}, [blockedGoogleHref, clerk, router, safeRedirectPath, signIn, signInHref, signUp]);
+	}, [
+		blockedGoogleHref,
+		clerk,
+		router,
+		safeRedirectPath,
+		signIn,
+		signInHref,
+		signUp,
+	]);
 
 	return (
 		<AuthPageShell

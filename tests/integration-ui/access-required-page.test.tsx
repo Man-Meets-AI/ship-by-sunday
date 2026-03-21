@@ -24,10 +24,12 @@ vi.mock("next/link", () => ({
 }));
 
 vi.mock("next/navigation", () => ({
+	usePathname: () => "/mission",
 	useRouter: () => ({
 		replace: replaceMock,
 		refresh: refreshMock,
 	}),
+	useSearchParams: () => new URLSearchParams(""),
 }));
 
 vi.mock("convex/react", () => ({

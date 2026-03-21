@@ -5,9 +5,7 @@ import type { SignInAuthError } from "@/features/auth/sign-in/types";
 export const ssoCallbackPath = "/sso-callback";
 
 export const sessionTaskUrls = {
-	"choose-organization": "/session-tasks/choose-organization",
 	"reset-password": "/session-tasks/reset-password",
-	"setup-mfa": "/session-tasks/setup-mfa",
 } as const;
 
 export type SessionTaskKey = keyof typeof sessionTaskUrls;
@@ -70,13 +68,13 @@ export function buildSsoCallbackHref(redirectPath?: string | null) {
 	return `${ssoCallbackPath}?${redirectUrlParam}=${encodeURIComponent(safeRedirectPath)}`;
 }
 
-export function buildSessionTaskHref(
+export function getSessionTaskHref(
 	taskKey: string,
 	redirectPath?: string | null,
 ) {
 	const taskHref = sessionTaskUrls[taskKey as SessionTaskKey];
 	if (!taskHref) {
-		return getTaskRedirectUrlComplete(redirectPath);
+		return null;
 	}
 
 	const safeRedirectPath = redirectPath
@@ -101,7 +99,9 @@ export function getTaskRedirectUrlComplete(redirectPath?: string | null) {
 	return getSafeRedirectPath(redirectPath);
 }
 
-export function getSignInAuthError(rawValue: string | null): SignInAuthError | null {
+export function getSignInAuthError(
+	rawValue: string | null,
+): SignInAuthError | null {
 	if (rawValue === "purchase_required") {
 		return rawValue;
 	}

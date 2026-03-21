@@ -1,16 +1,20 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
-const requireProductAccessMock = vi.fn();
+const getServerProductAccessMock = vi.fn();
 
 vi.mock("@/features/product-access/server/product-access", () => ({
-	requireProductAccess: requireProductAccessMock,
+	getServerProductAccess: getServerProductAccessMock,
+}));
+
+vi.mock("@/features/product-access/components/access-required-page", () => ({
+	AccessRequiredPage: () => <div>Access recovery</div>,
 }));
 
 describe("protected app layout", () => {
 	beforeEach(() => {
-		requireProductAccessMock.mockReset();
-		requireProductAccessMock.mockResolvedValue({
+		getServerProductAccessMock.mockReset();
+		getServerProductAccessMock.mockResolvedValue({
 			clerkUserId: "user_123",
 			hasAccess: true,
 			status: "granted",
@@ -18,7 +22,7 @@ describe("protected app layout", () => {
 	});
 
 	it("checks product access once before rendering protected children", async () => {
-		const { default: AppLayout } = await import("@/app/(app)/layout");
+		const { default: AppLayout } = await import("@/app/(workspace)/layout");
 
 		const markup = renderToStaticMarkup(
 			await AppLayout({
@@ -26,7 +30,7 @@ describe("protected app layout", () => {
 			}),
 		);
 
-		expect(requireProductAccessMock).toHaveBeenCalledTimes(1);
+		expect(getServerProductAccessMock).toHaveBeenCalledTimes(1);
 		expect(markup).toContain("Protected content");
 	});
 });

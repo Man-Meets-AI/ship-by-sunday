@@ -20,7 +20,7 @@ test("checkout success without a session renders the recovery surface", async ({
 	expect(response.ok()).toBe(true);
 	expect(html).toContain("Verify access");
 	expect(html).toContain("Missing checkout session");
-	expect(html).toContain("Check access");
+	expect(html).toContain("Open mission");
 });
 
 test("homepage renders structured SEO data", async ({ request }) => {
@@ -33,7 +33,9 @@ test("homepage renders structured SEO data", async ({ request }) => {
 	expect(html).toContain('"@type":"Product"');
 });
 
-test("public crawl endpoints expose the indexable surface", async ({ request }) => {
+test("public crawl endpoints expose the indexable surface", async ({
+	request,
+}) => {
 	const robotsResponse = await request.get("/robots.txt");
 	const robotsBody = await robotsResponse.text();
 	const sitemapResponse = await request.get("/sitemap.xml");

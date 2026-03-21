@@ -126,9 +126,6 @@ export function CheckoutSuccessMainPanel({
 						</Link>
 					</Button>
 					<Button asChild variant="outline" className="min-w-44 justify-center">
-						<Link href={routeConfig.accessRequired}>Check access</Link>
-					</Button>
-					<Button asChild variant="outline" className="min-w-44 justify-center">
 						<Link href={routeConfig.home}>Go home</Link>
 					</Button>
 				</div>

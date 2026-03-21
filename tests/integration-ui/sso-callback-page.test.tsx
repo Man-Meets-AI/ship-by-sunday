@@ -4,6 +4,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const pushMock = vi.fn();
 const setActiveMock = vi.fn();
+const signOutMock = vi.fn();
+const reportClientErrorMock = vi.fn();
 const useClerkMock = vi.fn();
 const useSignInMock = vi.fn();
 const useSignUpMock = vi.fn();
@@ -18,6 +20,10 @@ vi.mock("@clerk/nextjs", () => ({
 	useClerk: () => useClerkMock(),
 	useSignIn: () => useSignInMock(),
 	useSignUp: () => useSignUpMock(),
+}));
+
+vi.mock("@/features/observability/lib/client-error-report", () => ({
+	reportClientError: (...args: unknown[]) => reportClientErrorMock(...args),
 }));
 
 import { SsoCallbackPage } from "@/features/auth/sign-in/sso-callback-page";
@@ -46,12 +52,15 @@ describe("SsoCallbackPage", () => {
 	beforeEach(() => {
 		pushMock.mockReset();
 		setActiveMock.mockReset();
+		signOutMock.mockReset();
+		reportClientErrorMock.mockReset();
 		useClerkMock.mockReset();
 		useSignInMock.mockReset();
 		useSignUpMock.mockReset();
 		useClerkMock.mockReturnValue({
 			loaded: true,
 			setActive: setActiveMock,
+			signOut: signOutMock,
 		});
 	});
 
@@ -81,7 +90,7 @@ describe("SsoCallbackPage", () => {
 			finalize: vi.fn().mockImplementation(async ({ navigate }) => {
 				await navigate({
 					decorateUrl: (url: string) => url,
-					session: { currentTask: { key: "choose-organization" } },
+					session: { currentTask: { key: "reset-password" } },
 				});
 			}),
 			status: "complete",
@@ -93,7 +102,7 @@ describe("SsoCallbackPage", () => {
 
 		await waitFor(() => {
 			expect(pushMock).toHaveBeenCalledWith(
-				"/session-tasks/choose-organization?redirect_url=%2Fsettings",
+				"/session-tasks/reset-password?redirect_url=%2Fsettings",
 			);
 		});
 	});
@@ -106,12 +115,35 @@ describe("SsoCallbackPage", () => {
 		});
 		useSignUpMock.mockReturnValue({ signUp: createSignUpState() });
 
-		render(<SsoCallbackPage redirectPath="/access-required" />);
+		render(<SsoCallbackPage redirectPath="/mission" />);
 
 		await waitFor(() => {
 			expect(pushMock).toHaveBeenCalledWith(
-				"/sign-in?redirect_url=%2Faccess-required&auth_error=purchase_required",
+				"/sign-in?redirect_url=%2Fmission&auth_error=purchase_required",
 			);
+		});
+	});
+
+	it("signs out the pending session when Clerk returns an unknown task", async () => {
+		const signIn = createSignInState({
+			finalize: vi.fn().mockImplementation(async ({ navigate }) => {
+				await navigate({
+					decorateUrl: (url: string) => url,
+					session: { currentTask: { key: "choose-organization" } },
+				});
+			}),
+			status: "complete",
+		});
+		useSignInMock.mockReturnValue({ signIn });
+		useSignUpMock.mockReturnValue({ signUp: createSignUpState() });
+		signOutMock.mockResolvedValue(undefined);
+
+		render(<SsoCallbackPage redirectPath="/settings" />);
+
+		await waitFor(() => {
+			expect(signOutMock).toHaveBeenCalledWith({
+				redirectUrl: "/sign-in?redirect_url=%2Fsettings",
+			});
 		});
 	});
 });

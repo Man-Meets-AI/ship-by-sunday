@@ -3,7 +3,6 @@ import "server-only";
 import { fetchQuery } from "convex/nextjs";
 import { redirect } from "next/navigation";
 
-import { routeConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import type { ProductAccess } from "@/features/product-access/lib/product-access";
 import { getConvexServerSession } from "@/platform/auth/convex-auth";
@@ -69,22 +68,4 @@ export async function redirectGrantedHomeVisitor({
 	if (resumeDestination?.destination) {
 		redirect(resumeDestination.destination);
 	}
-}
-
-export async function requireProductAccess() {
-	const access = await getServerProductAccess();
-	if (!access.hasAccess) {
-		redirect(routeConfig.accessRequired);
-	}
-
-	return access;
-}
-
-export async function redirectGrantedAccessRequiredVisitor() {
-	const access = await getServerProductAccess();
-	if (access.hasAccess) {
-		redirect(routeConfig.mission);
-	}
-
-	return access;
 }

@@ -90,7 +90,6 @@ export const routeConfig = {
   home: "/",
   docs: "/docs",
   mission: "/mission",
-  accessRequired: "/access-required",
   artifacts: "/artifacts",
   settings: "/settings",
   signIn: "/sign-in",

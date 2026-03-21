@@ -3,8 +3,13 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import IdentityLayout from "@/app/(identity)/layout";
+
 const replaceMock = vi.fn();
 const pushMock = vi.fn();
+const signOutMock = vi.fn();
+const reportClientErrorMock = vi.fn();
+const useClerkMock = vi.fn();
 const useSearchParamsMock = vi.fn();
 const useSignInMock = vi.fn();
 
@@ -32,7 +37,12 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@clerk/nextjs", () => ({
+	useClerk: () => useClerkMock(),
 	useSignIn: () => useSignInMock(),
+}));
+
+vi.mock("@/features/observability/lib/client-error-report", () => ({
+	reportClientError: (...args: unknown[]) => reportClientErrorMock(...args),
 }));
 
 import { SignInPage } from "@/features/auth/sign-in/sign-in-page";
@@ -97,8 +107,14 @@ describe("SignInPage", () => {
 	beforeEach(() => {
 		pushMock.mockReset();
 		replaceMock.mockReset();
+		signOutMock.mockReset();
+		reportClientErrorMock.mockReset();
+		useClerkMock.mockReset();
 		useSearchParamsMock.mockReset();
 		useSignInMock.mockReset();
+		useClerkMock.mockReturnValue({
+			signOut: signOutMock,
+		});
 		useSearchParamsMock.mockReturnValue(new URLSearchParams(""));
 	});
 
@@ -110,12 +126,18 @@ describe("SignInPage", () => {
 			signIn: signInState.signIn,
 		});
 
-		render(<SignInPage />);
+		render(
+			<IdentityLayout>
+				<SignInPage />
+			</IdentityLayout>,
+		);
 
 		expect(screen.getByText("Ship by Sunday")).toBeTruthy();
 		expect(screen.getByRole("link", { name: "Home" })).toBeTruthy();
 		expect(
-			screen.getByText("Use the account attached to your purchase to continue."),
+			screen.getByText(
+				"Use the account attached to your purchase to continue.",
+			),
 		).toBeTruthy();
 		expect(screen.getByLabelText("Email")).toBeTruthy();
 		expect(screen.getByLabelText("Password")).toBeTruthy();
@@ -173,7 +195,9 @@ describe("SignInPage", () => {
 	});
 
 	it("redirects a completed password sign-in back to the preserved target", async () => {
-		useSearchParamsMock.mockReturnValue(new URLSearchParams("redirect_url=%2Fsettings"));
+		useSearchParamsMock.mockReturnValue(
+			new URLSearchParams("redirect_url=%2Fsettings"),
+		);
 		const signIn = {
 			create: vi.fn().mockResolvedValue({ error: null }),
 			finalize: vi.fn().mockImplementation(async ({ navigate }) => {
@@ -223,13 +247,15 @@ describe("SignInPage", () => {
 	});
 
 	it("routes a completed password sign-in into the pending Clerk task", async () => {
-		useSearchParamsMock.mockReturnValue(new URLSearchParams("redirect_url=%2Fsettings"));
+		useSearchParamsMock.mockReturnValue(
+			new URLSearchParams("redirect_url=%2Fsettings"),
+		);
 		const signIn = {
 			create: vi.fn().mockResolvedValue({ error: null }),
 			finalize: vi.fn().mockImplementation(async ({ navigate }) => {
 				await navigate({
 					decorateUrl: (url: string) => url,
-					session: { currentTask: { key: "setup-mfa" } },
+					session: { currentTask: { key: "reset-password" } },
 				});
 				return { error: null };
 			}),
@@ -270,13 +296,13 @@ describe("SignInPage", () => {
 		await user.click(screen.getByRole("button", { name: "Sign in" }));
 
 		expect(pushMock).toHaveBeenCalledWith(
-			"/session-tasks/setup-mfa?redirect_url=%2Fsettings",
+			"/session-tasks/reset-password?redirect_url=%2Fsettings",
 		);
 	});
 
 	it("starts Google sign-in with the preserved redirect target", async () => {
 		useSearchParamsMock.mockReturnValue(
-			new URLSearchParams("redirect_url=%2Faccess-required"),
+			new URLSearchParams("redirect_url=%2Fmission"),
 		);
 		const signIn = {
 			create: vi.fn().mockResolvedValue({ error: null }),
@@ -313,12 +339,69 @@ describe("SignInPage", () => {
 		const user = userEvent.setup();
 		render(<SignInPage />);
 
-		await user.click(screen.getByRole("button", { name: "Continue with Google" }));
+		await user.click(
+			screen.getByRole("button", { name: "Continue with Google" }),
+		);
 
 		expect(signIn.sso).toHaveBeenCalledWith({
-			redirectCallbackUrl: "/sso-callback?redirect_url=%2Faccess-required",
-			redirectUrl: "/access-required",
+			redirectCallbackUrl: "/sso-callback?redirect_url=%2Fmission",
+			redirectUrl: "/mission",
 			strategy: "oauth_google",
+		});
+	});
+
+	it("signs out the pending session when Clerk returns an unknown task", async () => {
+		useSearchParamsMock.mockReturnValue(
+			new URLSearchParams("redirect_url=%2Fsettings"),
+		);
+		const signIn = {
+			create: vi.fn().mockResolvedValue({ error: null }),
+			finalize: vi.fn().mockImplementation(async ({ navigate }) => {
+				await navigate({
+					decorateUrl: (url: string) => url,
+					session: { currentTask: { key: "setup-mfa" } },
+				});
+				return { error: null };
+			}),
+			mfa: {
+				sendEmailCode: vi.fn().mockResolvedValue({ error: null }),
+				sendPhoneCode: vi.fn().mockResolvedValue({ error: null }),
+				verifyBackupCode: vi.fn().mockResolvedValue({ error: null }),
+				verifyEmailCode: vi.fn().mockResolvedValue({ error: null }),
+				verifyPhoneCode: vi.fn().mockResolvedValue({ error: null }),
+				verifyTOTP: vi.fn().mockResolvedValue({ error: null }),
+			},
+			password: vi.fn().mockResolvedValue({ error: null }),
+			reset: vi.fn().mockResolvedValue({ error: null }),
+			resetPasswordEmailCode: {
+				sendCode: vi.fn().mockResolvedValue({ error: null }),
+				submitPassword: vi.fn().mockResolvedValue({ error: null }),
+				verifyCode: vi.fn().mockResolvedValue({ error: null }),
+			},
+			sso: vi.fn().mockResolvedValue({ error: null }),
+			status: "complete",
+			supportedSecondFactors: [],
+		};
+		useSignInMock.mockReturnValue({
+			errors: {
+				fields: { code: null, identifier: null, password: null },
+				global: null,
+				raw: null,
+			},
+			fetchStatus: "idle",
+			signIn,
+		});
+		signOutMock.mockResolvedValue(undefined);
+
+		const user = userEvent.setup();
+		render(<SignInPage />);
+
+		await user.type(screen.getByLabelText("Email"), "buyer@example.com");
+		await user.type(screen.getByLabelText("Password"), "supersecret");
+		await user.click(screen.getByRole("button", { name: "Sign in" }));
+
+		expect(signOutMock).toHaveBeenCalledWith({
+			redirectUrl: "/sign-in?redirect_url=%2Fsettings",
 		});
 	});
 
@@ -359,11 +442,15 @@ describe("SignInPage", () => {
 		render(<SignInPage />);
 
 		await user.type(screen.getByLabelText("Email"), "buyer@example.com");
-		await user.click(screen.getByRole("button", { name: "Forgot your password?" }));
+		await user.click(
+			screen.getByRole("button", { name: "Forgot your password?" }),
+		);
 		await user.click(screen.getByRole("button", { name: "Send reset code" }));
 
 		expect(signIn.reset).toHaveBeenCalledTimes(2);
-		expect(signIn.create).toHaveBeenCalledWith({ identifier: "buyer@example.com" });
+		expect(signIn.create).toHaveBeenCalledWith({
+			identifier: "buyer@example.com",
+		});
 		expect(signIn.resetPasswordEmailCode.sendCode).toHaveBeenCalledTimes(1);
 	});
 
@@ -383,8 +470,8 @@ describe("SignInPage", () => {
 		expect(
 			screen.getByText("Google sign-in is for purchased accounts."),
 		).toBeTruthy();
-		expect(screen.getByRole("link", { name: "See pricing" }).getAttribute("href")).toBe(
-			"/#pricing",
-		);
+		expect(
+			screen.getByRole("link", { name: "See pricing" }).getAttribute("href"),
+		).toBe("/#pricing");
 	});
 });

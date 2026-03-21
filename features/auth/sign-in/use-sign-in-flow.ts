@@ -1,16 +1,17 @@
 "use client";
 
-import { useSignIn } from "@clerk/nextjs";
+import { useClerk, useSignIn } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 
-import { authViewConfig } from "@/config/product";
+import { authViewConfig, routeConfig } from "@/config/product";
 import { assertNever } from "@/features/course/lesson/lib/assert";
+import { reportClientError } from "@/features/observability/lib/client-error-report";
 
 import {
 	buildSignInHref,
-	buildSessionTaskHref,
 	buildSsoCallbackHref,
+	getSessionTaskHref,
 	getPricingHref,
 	getSafeRedirectPath,
 	getSignInAuthError,
@@ -102,12 +103,15 @@ async function navigateWithRouter(
 	router.push(url);
 }
 
-type ResetStep = Extract<
-	SignInStep,
-	{ kind: "reset_request" | "reset_verify" | "reset_submit" }
->["kind"] | null;
+type ResetStep =
+	| Extract<
+			SignInStep,
+			{ kind: "reset_request" | "reset_verify" | "reset_submit" }
+	  >["kind"]
+	| null;
 
 export function useSignInFlow() {
+	const clerk = useClerk();
 	const { errors, fetchStatus, signIn } = useSignIn();
 	const router = useRouter();
 	const searchParams = useSearchParams();
@@ -142,7 +146,11 @@ export function useSignInFlow() {
 			return { kind: "reset_submit" };
 		}
 
-		if (signIn && isVerificationStatus(signIn.status) && activeVerificationMethod) {
+		if (
+			signIn &&
+			isVerificationStatus(signIn.status) &&
+			activeVerificationMethod
+		) {
 			return {
 				kind: "verification",
 				method: activeVerificationMethod,
@@ -156,7 +164,11 @@ export function useSignInFlow() {
 	const isBusy = fetchStatus === "fetching" || isStartingGoogle;
 
 	useEffect(() => {
-		if (!signIn || !isVerificationStatus(signIn.status) || !activeVerificationMethod) {
+		if (
+			!signIn ||
+			!isVerificationStatus(signIn.status) ||
+			!activeVerificationMethod
+		) {
 			sentVerificationMethodRef.current = null;
 			return;
 		}
@@ -204,14 +216,35 @@ export function useSignInFlow() {
 
 		await signIn.finalize({
 			navigate: async ({ decorateUrl, session }) => {
-				const destination = session?.currentTask
-					? buildSessionTaskHref(session.currentTask.key, redirectPath)
-					: redirectPath ?? authViewConfig.fallbackRedirectUrl;
+				const sessionTaskHref = session?.currentTask
+					? getSessionTaskHref(session.currentTask.key, redirectPath)
+					: null;
+				if (session?.currentTask && !sessionTaskHref) {
+					const signInTaskFallbackHref = decorateUrl(
+						buildSignInHref({ redirectPath }),
+					);
+					reportClientError({
+						error: new Error("Unknown Clerk session task."),
+						pathname: routeConfig.signIn,
+						code: "clerk_unknown_session_task",
+						severity: "high",
+						details: {
+							redirectPath,
+							taskKey: session.currentTask.key,
+						},
+					});
+					try {
+						await clerk.signOut({ redirectUrl: signInTaskFallbackHref });
+						return;
+					} catch {}
+					await navigateWithRouter(router, signInTaskFallbackHref);
+					return;
+				}
 
-				await navigateWithRouter(
-					router,
-					decorateUrl(destination),
-				);
+				const destination =
+					sessionTaskHref ?? redirectPath ?? authViewConfig.fallbackRedirectUrl;
+
+				await navigateWithRouter(router, decorateUrl(destination));
 			},
 		});
 	}
@@ -364,7 +397,9 @@ export function useSignInFlow() {
 
 		switch (activeVerificationMethod) {
 			case "backup_code":
-				response = await signIn.mfa.verifyBackupCode({ code: verificationCode });
+				response = await signIn.mfa.verifyBackupCode({
+					code: verificationCode,
+				});
 				break;
 			case "email_code":
 				response = await signIn.mfa.verifyEmailCode({ code: verificationCode });
@@ -376,7 +411,10 @@ export function useSignInFlow() {
 				response = await signIn.mfa.verifyTOTP({ code: verificationCode });
 				break;
 			default:
-				assertNever(activeVerificationMethod, "Unsupported verification method");
+				assertNever(
+					activeVerificationMethod,
+					"Unsupported verification method",
+				);
 		}
 
 		if (response.error) {

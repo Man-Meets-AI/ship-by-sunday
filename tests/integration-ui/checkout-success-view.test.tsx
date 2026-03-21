@@ -86,7 +86,6 @@ describe("CheckoutSuccessView", () => {
 		expect(markup).toContain("What happens next");
 		expect(markup).toContain("Open mission");
 		expect(markup).toContain('href="/mission"');
-		expect(markup).toContain('href="/access-required"');
 	});
 
 	it("shows the automatic redirect state once access is live", () => {
@@ -108,7 +107,6 @@ describe("CheckoutSuccessView", () => {
 		expect(markup).toContain("Redirect armed");
 		expect(markup).toContain("Access confirmed");
 		expect(markup).toContain('href="/mission"');
-		expect(markup).toContain('href="/access-required"');
 	});
 
 	it("renders the ready state from preloaded product access without the live query", () => {
@@ -202,7 +200,6 @@ describe("CheckoutSuccessView", () => {
 
 			expect(markup).toContain(expectedStatusLabel);
 			expect(markup).toContain("Open mission");
-			expect(markup).toContain("Check access");
 			expect(markup).toContain("Go home");
 		},
 	);

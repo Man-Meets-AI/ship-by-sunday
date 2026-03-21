@@ -38,7 +38,8 @@ export const REPO_MAP_ENTRIES: RepoMapEntry[] = [
 		id: "env",
 		path: ".env / .env.local",
 		badge: "required",
-		summary: "Secrets and API keys for local dev—never commit or paste into chat.",
+		summary:
+			"Secrets and API keys for local dev—never commit or paste into chat.",
 	},
 	{
 		id: "agents",
@@ -50,13 +51,17 @@ export const REPO_MAP_ENTRIES: RepoMapEntry[] = [
 		id: "package",
 		path: "package.json",
 		badge: "required",
-		summary: "Script names and dependencies—your control panel for Bun commands.",
+		summary:
+			"Script names and dependencies—your control panel for Bun commands.",
 	},
 ];
 
 export const REPO_ROUTE_EXAMPLES: { path: string; note: string }[] = [
-	{ path: routeConfig.accessRequired, note: "Example gated / access-required page." },
-	{ path: apiRouteConfig.stripeCheckout, note: "API route — server-side Stripe Checkout." },
+	{ path: routeConfig.mission, note: "Example gated workspace entry route." },
+	{
+		path: apiRouteConfig.stripeCheckout,
+		note: "API route — server-side Stripe Checkout.",
+	},
 	{ path: routeConfig.checkoutSuccess, note: "Post-checkout thank-you route." },
 ];
 

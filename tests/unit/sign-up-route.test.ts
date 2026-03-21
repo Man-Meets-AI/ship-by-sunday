@@ -6,7 +6,7 @@ vi.mock("next/navigation", () => ({
 	redirect: (href: string) => redirectMock(href),
 }));
 
-import Page from "@/app/sign-up/[[...sign-up]]/page";
+import Page from "@/app/(identity)/sign-up/[[...sign-up]]/page";
 
 describe("sign-up route", () => {
 	it("redirects direct visits to pricing", () => {
