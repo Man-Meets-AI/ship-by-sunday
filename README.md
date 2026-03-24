@@ -108,6 +108,7 @@ The public homepage now has its own starter-controlled shell:
 - `starterConfig.homePage.sections` controls the fixed top-level homepage sections: `hero`, `sprintPath`, `whatsInside`, `socialProof`, `faq`, `pricing`, and `footer`
 - `starterConfig.homePage.heroPrimaryCta` and `starterConfig.homePage.pricingPrimaryCta` control whether those surfaces route through checkout or a normal link target
 - `features/marketing/lib/home-page-render-model.ts` is the single place that translates starter config plus homepage content into the render contract used by `features/marketing/components/home-page.tsx`
+- `content/docs/configure-the-homepage.mdx` is the durable operating guide future builders and AI agents should read before changing homepage structure
 
 ## Common Commands
 

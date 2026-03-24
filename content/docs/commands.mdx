@@ -27,7 +27,7 @@ bun run lint
 bun run test:unit
 bun run test:contracts
 bun run test:integration
-bun run test:browser-smoke
+set -a; source .env.local; set +a; bun run test:browser-smoke
 bun run check
 ```
 

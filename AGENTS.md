@@ -114,6 +114,22 @@ bun run check
 - If a component grows too large, split it into smaller feature-local pieces automatically.
 - Preserve the existing visual system unless the task explicitly calls for redesign.
 
+## Homepage shell
+
+Before changing the public homepage, read `content/docs/configure-the-homepage.mdx`.
+
+The homepage contract is split deliberately:
+
+- `starterConfig.homePage` in `config/product.ts` is the control plane
+- `features/marketing/content/home.ts` owns copy and assets
+- `features/marketing/lib/home-page-render-model.ts` owns section and CTA behavior
+- `features/marketing/components/home-page/home-page-primary-cta.tsx` is the only CTA rendering boundary for hero and pricing
+- `features/marketing/lib/home-page-structured-data.ts` must stay truthful to visible sections
+
+Do not re-hardwire checkout into hero or pricing, do not scatter section gating across multiple components, and do not leave `FAQPage` or `Product` schema behind when the visible homepage no longer supports them.
+
+For homepage verification, run the narrow homepage tests first, then `bun run build`, then `set -a; source .env.local; set +a; bun run test:browser-smoke` when browser smoke is relevant.
+
 ## Convex rules
 
 - Use hosted Convex dev only.

@@ -1,0 +1,234 @@
+---
+title: Configure the Homepage
+description: Use the homepage control plane safely so section visibility, CTA behavior, social proof, and structured data stay aligned.
+---
+
+# Configure the Homepage
+
+The homepage is no longer one giant page contract. It now has a small control plane, a content layer, and a render-model layer so you can change the public shell without scattering behavior across unrelated files.
+
+This page is the source of truth for future builders and future AI agents who need to change the homepage.
+
+## Read these files in order
+
+When you need to change the homepage, inspect these files in this order:
+
+1. `config/product.ts`
+2. `features/marketing/content/home.ts`
+3. `features/marketing/lib/home-page-render-model.ts`
+4. `features/marketing/components/home-page.tsx`
+5. `features/marketing/components/home-page/home-page-primary-cta.tsx`
+6. `features/marketing/lib/home-page-structured-data.ts`
+7. `tests/unit/home-page-render-model.test.ts`
+8. `tests/unit/home-page-structured-data.test.ts`
+9. `tests/integration-ui/home-page-primary-cta.test.tsx`
+10. `tests/browser-smoke/app-smoke.spec.ts`
+
+If you skip that order, it is easy to update copy while missing the render model, or to change visible sections while leaving schema and smoke tests out of sync.
+
+## The three layers
+
+### 1. Starter control plane
+
+`config/product.ts` owns the durable homepage controls under `starterConfig.homePage`.
+
+That config currently controls:
+
+- `sections.hero`
+- `sections.sprintPath`
+- `sections.whatsInside`
+- `sections.socialProof`
+- `sections.faq`
+- `sections.pricing`
+- `sections.footer`
+- `heroPrimaryCta`
+- `pricingPrimaryCta`
+
+The homepage also has a fixed canonical order in `homePageSectionOrder`. This is intentional. The starter supports section visibility, not a drag-and-drop page builder.
+
+### 2. Content layer
+
+`features/marketing/content/home.ts` owns the default copy and assets.
+
+That file should answer:
+
+- what the homepage says
+- which image assets it uses
+- what FAQ items exist
+- what the default social-proof content contains
+
+That file should not decide whether a section renders.
+
+### 3. Render model
+
+`features/marketing/lib/home-page-render-model.ts` combines starter config plus homepage content into the render contract used by the page.
+
+This file is the behavioral seam. It decides:
+
+- which sections are enabled
+- which CTA target each section uses
+- which social-proof subtype is active
+- whether GitHub activity should be fetched
+
+If a future agent adds homepage behavior, add it here first instead of sprinkling conditional logic through multiple components.
+
+## Current section contract
+
+The homepage renders these top-level sections in this fixed order:
+
+1. `hero`
+2. `sprintPath`
+3. `whatsInside`
+4. `socialProof`
+5. `faq`
+6. `pricing`
+7. `footer`
+
+Two anchors are part of the public contract:
+
+- `id="system"` from the sprint-path section
+- `id="pricing"` from the pricing section
+
+Do not rename or remove those casually. Browser smoke checks them today.
+
+## CTA target contract
+
+Hero and pricing do not own checkout behavior directly anymore.
+
+They both consume the shared `HomePageCtaTarget` model from `config/product.ts` and render through `features/marketing/components/home-page/home-page-primary-cta.tsx`.
+
+Current target kinds:
+
+- `checkout`
+- `link`
+
+Safe rules:
+
+- if you need a normal link CTA, use `kind: "link"` with `href`
+- if you need checkout, use `kind: "checkout"`
+- do not import `CheckoutButton` straight into hero or pricing again
+- if you add a new CTA target kind, update the target union, the render model, the CTA renderer, and the tests together
+
+## Social proof contract
+
+The public conceptual section name is now `socialProof`.
+
+The default subtype is still founder-led proof. That means the default page can keep Parker-specific proof while the code speaks in reusable section language.
+
+Important rule:
+
+- GitHub activity fetches must remain conditional through the render model
+
+Today that seam is `socialProof.githubActivityUsername`. If the section is off, the fetch should not run.
+
+## Structured data contract
+
+Homepage schema must match what a visitor can actually see.
+
+Current rules:
+
+- `Organization` always stays
+- `FAQPage` only appears when the FAQ section is visible
+- `Product` only appears when the pricing section is visible and its CTA target still uses checkout
+
+If you change visible sections or pricing intent, update `features/marketing/lib/home-page-structured-data.ts` and the matching tests in the same slice.
+
+Truthful omission is the rule. If a section is gone, its schema should be gone too.
+
+## Safe change patterns
+
+### Change copy only
+
+Edit:
+
+- `features/marketing/content/home.ts`
+- `public/` if assets change
+
+Usually you should not need to touch the render model for pure copy work.
+
+### Turn a section on or off
+
+Edit:
+
+- `config/product.ts`
+- `features/marketing/lib/home-page-render-model.ts` only if the section has data-fetch side effects
+- `features/marketing/lib/home-page-structured-data.ts` if the section affects schema
+- tests if default public behavior changes
+
+### Change hero or pricing CTA behavior
+
+Edit:
+
+- `config/product.ts`
+- `features/marketing/lib/home-page-render-model.ts`
+- `features/marketing/components/home-page/home-page-primary-cta.tsx` only if the target model changes
+- `features/marketing/lib/home-page-structured-data.ts` if pricing is no longer a checkout path
+
+### Add or remove a top-level section
+
+Edit all of these together:
+
+- `config/product.ts`
+- `features/marketing/content/home.ts`
+- `features/marketing/lib/home-page-render-model.ts`
+- `features/marketing/components/home-page.tsx`
+- `features/marketing/lib/home-page-structured-data.ts`
+- smoke tests and unit tests
+- this doc
+
+If you do not update all of those in one slice, the homepage contract will drift.
+
+## Validation
+
+Run these checks after meaningful homepage changes:
+
+```bash
+bunx oxlint --deny-warnings config/product.ts features/marketing/components/home-page.tsx features/marketing/components/home-page/hero-sections.tsx features/marketing/components/home-page/pricing-footer-sections.tsx features/marketing/components/home-page/home-page-primary-cta.tsx features/marketing/content/home.ts features/marketing/lib/home-page-render-model.ts features/marketing/lib/home-page-structured-data.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/integration-ui/home-page-primary-cta.test.tsx
+
+bunx oxfmt --check config/product.ts features/marketing/components/home-page.tsx features/marketing/components/home-page/hero-sections.tsx features/marketing/components/home-page/pricing-footer-sections.tsx features/marketing/components/home-page/home-page-primary-cta.tsx features/marketing/content/home.ts features/marketing/lib/home-page-render-model.ts features/marketing/lib/home-page-structured-data.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/integration-ui/home-page-primary-cta.test.tsx
+
+bun run test:unit tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts
+
+bunx vitest run --project integration-ui tests/integration-ui/home-page-primary-cta.test.tsx
+
+bun run build
+```
+
+For browser smoke, load `.env.local` into the shell first:
+
+```bash
+set -a
+source .env.local
+set +a
+bun run test:browser-smoke
+```
+
+`test:browser-smoke` expects `NEXT_PUBLIC_CONVEX_URL` in the shell environment. Having the value only in `.env.local` is not enough unless you source it first.
+
+## What a future AI agent should preserve
+
+If you ask an agent to change the homepage, the prompt should say which of these is changing:
+
+- config
+- content
+- behavior
+- schema
+- tests
+
+The agent should preserve these invariants unless the task explicitly changes them:
+
+- fixed section order
+- truthful schema
+- conditional social-proof fetch behavior
+- shared CTA renderer
+- `system` and `pricing` anchors in the default path
+
+## What success looks like
+
+You changed the homepage correctly when:
+
+- the visible page matches the starter config
+- the CTA path is explicit
+- the schema matches the visible sections
+- the tests still prove the public contract
+- the next agent can understand the seam by reading this page plus the files listed above

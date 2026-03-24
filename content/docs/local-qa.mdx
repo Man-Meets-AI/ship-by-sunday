@@ -70,10 +70,13 @@ bun run dev:full
 For the deterministic browser lane that runs in PR CI:
 
 ```bash
+set -a
+source .env.local
+set +a
 bun run test:browser-smoke
 ```
 
-This requires `NEXT_PUBLIC_CONVEX_URL` from your hosted Convex dev deployment. Run `bun run dev:convex` first if the browser smoke lane refuses to start.
+This requires `NEXT_PUBLIC_CONVEX_URL` from your hosted Convex dev deployment to be present in the shell environment. Run `bun run dev:convex` first if `.env.local` is stale, then source `.env.local` before running the smoke lane.
 
 ### Signed-out protected-route smoke
 

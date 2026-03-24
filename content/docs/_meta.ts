@@ -37,6 +37,9 @@ export default {
 	"set-up-the-marketing-site": {
 		title: "Set Up the Marketing Site",
 	},
+	"configure-the-homepage": {
+		title: "Configure the Homepage",
+	},
 	"set-up-db-auth-and-payments": {
 		title: "Set Up DB, Auth, and Payments",
 	},
