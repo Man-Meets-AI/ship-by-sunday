@@ -10,7 +10,7 @@ const bonusName = productConfig.bonusName;
 export const homePageContent = {
 	assets: {
 		heroPreviewImage: productConfig.images.heroPreview,
-		proofImage: productConfig.images.founderProof,
+		socialProofImage: productConfig.images.founderProof,
 	},
 	hero: {
 		docsLabel: marketingDisplayConfig.docsLabel,
@@ -18,7 +18,7 @@ export const homePageContent = {
 		headlineLead: "Go from app idea",
 		headlineTailPrefix: "to live v1 ",
 		headlineTailHover: "by Sunday",
-		body: "One guided weekend sprint. Four blocks. One real outcome.",
+		body: `${productName} gives you one guided weekend sprint. Four blocks. One real outcome.`,
 		outcomesHeading: "You leave the weekend with",
 		outcomes: [
 			"A one-page product brief",
@@ -45,7 +45,7 @@ export const homePageContent = {
 		valueFrame:
 			"Think of it like a $2,500 product workshop, a build template, and a guided masterclass in product, design, and AI coding all in one.",
 	},
-	proofSection: {
+	socialProofSection: {
 		label: "Built by someone who ships",
 		intro:
 			"This is not theory from the sidelines. It is a system shaped by years of shipping products, tools, and MVPs in public.",

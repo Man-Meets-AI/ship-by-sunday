@@ -1,10 +1,11 @@
 import Image from "next/image";
 import { Check } from "lucide-react";
 
-import { CheckoutButton } from "@/features/checkout/components/checkout-button";
+import { type HomePageCtaTarget } from "@/config/product";
 import type { HomePageContent } from "@/features/marketing/content/home";
 
 import { HomeHeroHeadline } from "./home-hero-headline";
+import { HomePagePrimaryCta } from "./home-page-primary-cta";
 import { HomeHeroTopBar } from "./home-hero-top-bar";
 
 type Hero = HomePageContent["hero"];
@@ -12,9 +13,11 @@ type Hero = HomePageContent["hero"];
 export function HomeHeroSection({
 	hero,
 	heroPreviewImage,
+	primaryCtaTarget,
 }: {
 	hero: Hero;
 	heroPreviewImage: string;
+	primaryCtaTarget: HomePageCtaTarget;
 }) {
 	return (
 		<section className="relative mx-auto flex w-full max-w-7xl flex-col items-center justify-center overflow-hidden rounded-[32px] bg-background">
@@ -42,7 +45,8 @@ export function HomeHeroSection({
 					</div>
 				</div>
 				<div className="flex w-full max-w-3xl flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-start">
-					<CheckoutButton
+					<HomePagePrimaryCta
+						target={primaryCtaTarget}
 						label={hero.primaryCta}
 						className="h-11 min-w-full px-8 sm:min-w-72"
 					/>

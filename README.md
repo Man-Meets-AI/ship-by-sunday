@@ -103,6 +103,12 @@ Current behavior:
 
 These are code-level starter defaults, not a full in-app admin surface yet.
 
+The public homepage now has its own starter-controlled shell:
+
+- `starterConfig.homePage.sections` controls the fixed top-level homepage sections: `hero`, `sprintPath`, `whatsInside`, `socialProof`, `faq`, `pricing`, and `footer`
+- `starterConfig.homePage.heroPrimaryCta` and `starterConfig.homePage.pricingPrimaryCta` control whether those surfaces route through checkout or a normal link target
+- `features/marketing/lib/home-page-render-model.ts` is the single place that translates starter config plus homepage content into the render contract used by `features/marketing/components/home-page.tsx`
+
 ## Common Commands
 
 ```bash
@@ -142,6 +148,7 @@ The app now ships a self-hosted error pipeline:
 Required env values:
 
 ```bash
+CLERK_WEBHOOK_SIGNING_SECRET=
 OBSERVABILITY_INGEST_TOKEN=
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_CHAT_ID=
@@ -152,6 +159,8 @@ TELEGRAM_CHAT_ID=
 ```bash
 openssl rand -hex 32
 ```
+
+`CLERK_WEBHOOK_SIGNING_SECRET` comes from the Clerk webhook endpoint configuration for `/api/observability/clerk`.
 
 `TELEGRAM_BOT_TOKEN` comes from BotFather. `TELEGRAM_CHAT_ID` is the chat or group id the bot should post into. A simple way to fetch it is to message the bot once, then inspect:
 
@@ -167,7 +176,7 @@ Use `ENABLE_OBSERVABILITY_TEST_TRIGGER=1` only in automated browser-testing envi
 - Public crawl directives are generated from `app/robots.ts` and `app/sitemap.ts`, with docs-backed `lastModified` hints from `content/docs`.
 - Social preview images are generated from `app/opengraph-image.tsx` and `app/twitter-image.tsx`.
 - Docs metadata defaults and per-page canonical/OG/Twitter fields are built through `features/docs/lib/docs-metadata.ts`.
-- Homepage structured data is injected from `app/page.tsx` via `features/marketing/lib/home-page-structured-data.ts`, including `Organization`, `Product`, and `FAQPage` schema.
+- Homepage structured data is injected from `app/page.tsx` via `features/marketing/lib/home-page-structured-data.ts`; `Organization` always stays, while `Product` and `FAQPage` now follow the visible pricing and FAQ sections from the derived homepage render model.
 - Protected app routes and auth or recovery flows are intentionally marked `noindex` in `app/(workspace)/layout.tsx` and the individual utility route entrypoints.
 - Rendered SEO regressions are smoke-checked in `tests/browser-smoke/app-smoke.spec.ts`.
 
@@ -176,7 +185,7 @@ Use `ENABLE_OBSERVABILITY_TEST_TRIGGER=1` only in automated browser-testing envi
 - Starter contract, module flags, workspace labels, and starter-mode defaults: `config/product.ts` and `features/starter/lib/starter-selectors.ts`
 - Curriculum shape, stable lesson identity, canonical labels, and route mapping: `features/course/lesson/model/curriculum.ts`
 - Lesson copy, workbench fields, and lesson-specific page behavior: `features/course/lesson/model/lessons/*.ts` and `features/course/lesson/content/build.ts`
-- Landing-page copy, offer framing, and media: `features/marketing/components/home-page.tsx`, `features/marketing/components/faq-accordion.tsx`, and `public/`
+- Landing-page copy, offer framing, media, section defaults, and CTA targets: `config/product.ts`, `features/marketing/content/home.ts`, `features/marketing/lib/home-page-render-model.ts`, `features/marketing/components/home-page.tsx`, `features/marketing/components/faq-accordion.tsx`, and `public/`
 - Protected workspace UI and shell behavior: `features/course/`, `features/workspace-home/`, and the protected route group in `app/(workspace)/`
 - Theme tokens and visual language: `app/globals.css`
 - Purchase, product-access, and access flow: `app/api/stripe/checkout`, `features/checkout/`, `features/product-access/`, `convex/access.ts`, `convex/http.ts`, and `convex/course/`

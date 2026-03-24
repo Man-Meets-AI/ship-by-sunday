@@ -11,7 +11,7 @@ These are the intended extension points for the starter. Change these first inst
 
 | Area                   | What to change first                                                  | Verification    |
 | ---------------------- | --------------------------------------------------------------------- | --------------- |
-| Product config         | Name, promise, price, and brand-level defaults in `config/product.ts` | `bun run build` |
+| Product config         | Name, promise, price, brand defaults, and homepage section or CTA defaults in `config/product.ts` | `bun run build` |
 | Module flags           | `starterConfig.modules` plus the neutral workspace-home fallback      | `bun run build` |
 | Marketing site         | Hero copy, proof, FAQ, screenshots, and pricing sections              | `bun run build` |
 | Protected workspace    | Mission framing, lesson chrome, artifacts, and settings surfaces      | `bun run check` |
@@ -43,6 +43,7 @@ Those are the highest-risk parts of the starter.
 ## Guardrails
 
 - keep `config/product.ts` as the first place to change product identity and route constants
+- keep homepage shell controls in `starterConfig.homePage` and let `features/marketing/lib/home-page-render-model.ts` translate them into rendering decisions
 - use `starterConfig.modules` before inventing route-level hacks or manual hidden links
 - keep the landing-page offer work inside `features/marketing/**` and `public/`
 - keep the course runtime and lesson model inside `features/course/**`
@@ -65,3 +66,10 @@ That is the preferred way to move toward a non-course product. Do not start by r
 ## What success looks like
 
 You are customizing cleanly when the starter feels like your product before you have touched the fragile auth and billing path.
+
+For the homepage specifically, clean customization now means:
+
+- section visibility comes from `starterConfig.homePage.sections`
+- hero and pricing CTA behavior comes from `starterConfig.homePage.heroPrimaryCta` and `starterConfig.homePage.pricingPrimaryCta`
+- section copy and assets stay in `features/marketing/content/home.ts`
+- `features/marketing/lib/home-page-render-model.ts` remains the single place that combines config with content

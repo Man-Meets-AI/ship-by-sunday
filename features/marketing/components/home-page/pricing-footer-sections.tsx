@@ -1,10 +1,11 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { type HomePageCtaTarget } from "@/config/product";
 import { productWordmarkFontClassName } from "@/components/product-brand";
-import { CheckoutButton } from "@/features/checkout/components/checkout-button";
 import type { HomePageContent } from "@/features/marketing/content/home";
 
 import { MarketingThemeToggle } from "./home-hero-theme-toggle";
+import { HomePagePrimaryCta } from "./home-page-primary-cta";
 import { PricingIncludesList } from "./pricing-includes-list";
 
 type FooterWordmark = HomePageContent["footerWordmark"];
@@ -12,16 +13,17 @@ type PricingSection = HomePageContent["pricingSection"];
 
 export function PricingSectionBlock({
 	pricingSection,
+	primaryCtaTarget,
 }: {
 	pricingSection: PricingSection;
+	primaryCtaTarget: HomePageCtaTarget;
 }) {
 	return (
 		<div id="pricing" className="mx-auto max-w-lg py-10 sm:py-12">
 			<div className="mb-6 space-y-2 text-center">
 				<Badge variant="outline">{pricingSection.label}</Badge>
 				<h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
-					{pricingSection.titleLead}{" "}
-					{pricingSection.titleAccent}
+					{pricingSection.titleLead} {pricingSection.titleAccent}
 				</h2>
 				<p className="text-muted-foreground sm:text-lg">
 					{pricingSection.intro}
@@ -41,7 +43,8 @@ export function PricingSectionBlock({
 				<PricingIncludesList items={pricingSection.includes} />
 
 				<div className="flex flex-col gap-3">
-					<CheckoutButton
+					<HomePagePrimaryCta
+						target={primaryCtaTarget}
 						label={pricingSection.ctaTitle}
 						className="h-12 w-full text-base font-semibold"
 					/>

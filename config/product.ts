@@ -35,6 +35,51 @@ export const routeConfig = {
 	pricingHash: "#pricing",
 } as const;
 
+export const homePageSectionOrder = [
+	"hero",
+	"sprintPath",
+	"whatsInside",
+	"socialProof",
+	"faq",
+	"pricing",
+	"footer",
+] as const;
+
+export type HomePageSectionName = (typeof homePageSectionOrder)[number];
+
+export type HomePageCtaTarget =
+	| {
+			readonly kind: "checkout";
+	  }
+	| {
+			readonly kind: "link";
+			readonly href: string;
+	  };
+
+export type StarterHomePageConfig = {
+	readonly sections: Readonly<Record<HomePageSectionName, boolean>>;
+	readonly heroPrimaryCta: HomePageCtaTarget;
+	readonly pricingPrimaryCta: HomePageCtaTarget;
+};
+
+export const starterHomePageConfig = {
+	sections: {
+		hero: true,
+		sprintPath: true,
+		whatsInside: true,
+		socialProof: true,
+		faq: true,
+		pricing: true,
+		footer: true,
+	},
+	heroPrimaryCta: {
+		kind: "checkout",
+	},
+	pricingPrimaryCta: {
+		kind: "checkout",
+	},
+} as const satisfies StarterHomePageConfig;
+
 export const starterConfig = {
 	appId: PRODUCT_APP_ID,
 	courseSlug: PRODUCT_COURSE_SLUG,
@@ -86,6 +131,7 @@ export const starterConfig = {
 		observability: true,
 		codex: true,
 	},
+	homePage: starterHomePageConfig,
 	starterRepo: starterRepoConfig,
 } as const;
 
@@ -154,6 +200,7 @@ export const manifestConfig = {
 export const apiRouteConfig = {
 	stripeCheckout: "/api/stripe/checkout",
 	stripeWebhook: "/api/stripe/webhook",
+	observabilityClerk: "/api/observability/clerk",
 	codexGenerate: "/api/codex/generate",
 	codexAccountRead: "/api/codex/account/read",
 	codexAccountLoginStart: "/api/codex/account/login/start",

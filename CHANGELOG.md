@@ -4,6 +4,7 @@
 
 ### Changed
 
+- Modularized the public homepage so starter config now controls fixed top-level sections and CTA targets, while the landing page keeps the default checkout funnel, founder-led social proof, truthful FAQ/Product schema, and browser-smoke-verified anchors.
 - Added a backward-compatible starter contract in `config/product.ts`, so brand defaults, workspace labels, and optional modules now have a single code-defined control plane.
 - Added soft module gating for `docs`, `course`, and `starterRepo`, so the app now hides or disables those surfaces deliberately instead of leaving haunted leftovers.
 - Replaced the `course = false` protected-shell dead end with a real neutral starter workspace home on `/mission`, while leaving lesson and artifacts routes on explicit disabled states and keeping the purchase-to-access contract unchanged.

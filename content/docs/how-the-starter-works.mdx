@@ -61,6 +61,12 @@ Current behavior:
 
 These module gates sit above the existing auth, checkout, and access model. They do not replace it.
 
+The public homepage has a second layer of starter configuration inside the same file:
+
+- `starterConfig.homePage.sections` controls the fixed public section order: `hero`, `sprintPath`, `whatsInside`, `socialProof`, `faq`, `pricing`, and `footer`
+- `starterConfig.homePage.heroPrimaryCta` and `starterConfig.homePage.pricingPrimaryCta` decide whether those calls to action use checkout or a plain link target
+- `features/marketing/lib/home-page-render-model.ts` is the adapter that turns those starter defaults plus `features/marketing/content/home.ts` into the render contract that `features/marketing/components/home-page.tsx` uses
+
 ## Purchase-to-access flow
 
 1. A buyer starts from the public landing page.

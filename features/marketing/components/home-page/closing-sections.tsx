@@ -1,5 +1,5 @@
 export {
 	CommonQuestionsSection,
-	FounderProofSection,
-} from "./proof-faq-section";
+	SocialProofSection,
+} from "./social-proof-faq-sections";
 export { FooterSection, PricingSectionBlock } from "./pricing-footer-sections";

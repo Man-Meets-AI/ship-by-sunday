@@ -2,6 +2,7 @@
 
 ## recent
 
+- **2026-03-24 10:39 EDT** — Homepage modularization: added `starterConfig.homePage`, derived homepage render model, section gating, CTA target abstraction, `socialProof` naming, truthful homepage schema, homepage docs sync, and browser-smoke coverage for the public shell.
 - **2026-03-24 10:05 EDT** — ExecPlan workflow hardening: added root `PLANS.md` as the ExecPlan contract, rewrote `AGENTS.md` around OpenAI-style repo commands + verification + ExecPlan execution rules, and replaced the long-horizon prompt set with `execplan-writer`, `execplan-grill`, and `execplan-execution-loop` targeting `.codex/plans/`.
 - **2026-03-24 09:01 EDT** — Starter mode + docs sync: added the starter contract and module gates, replaced the `course = false` protected-shell dead end with a neutral workspace home on `/mission`, and updated `README.md`, public starter docs, changelog, and the execution plan to document how starter mode works.
 - **2026-03-21 13:15 EDT** — Dev workflow: added `bun run dev:full` for `web + hosted Convex dev + Stripe listener`, plus a `dev:stripe` helper that waits for hosted Convex env values before starting local Stripe forwarding.

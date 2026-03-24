@@ -13,25 +13,25 @@ import { GitHubActivityGraph } from "./github-activity-graph";
 import { GlobeCard } from "./global-reach-section";
 
 type FAQSection = HomePageContent["faqSection"];
-type ProofSection = HomePageContent["proofSection"];
+type SocialProofSectionContent = HomePageContent["socialProofSection"];
 
-export function FounderProofSection({
-	proofImage,
-	proofSection,
+export function SocialProofSection({
+	socialProofImage,
+	socialProofSection,
 	githubActivity,
 }: {
-	proofImage: HomePageContent["assets"]["proofImage"];
-	proofSection: ProofSection;
+	socialProofImage: HomePageContent["assets"]["socialProofImage"];
+	socialProofSection: SocialProofSectionContent;
 	githubActivity: GitHubActivity | null;
 }) {
 	return (
 		<section className="grid gap-10 border-t py-10 sm:gap-12 sm:py-12">
 			<div className="space-y-4">
 				<h2 className="max-w-2xl text-balance text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
-					{proofSection.label}
+					{socialProofSection.label}
 				</h2>
 				<p className="max-w-2xl text-pretty text-muted-foreground sm:text-lg">
-					{proofSection.intro}
+					{socialProofSection.intro}
 				</p>
 			</div>
 
@@ -39,20 +39,20 @@ export function FounderProofSection({
 				<Card className="gap-0 py-0">
 					<div className="relative aspect-4/3 w-full">
 						<Image
-							src={proofImage}
-							alt={proofSection.imageAlt}
+							src={socialProofImage}
+							alt={socialProofSection.imageAlt}
 							fill
 							className="rounded-t-xl object-cover"
 							sizes="(max-width: 1024px) 100vw, 55vw"
 						/>
 					</div>
 					<p className="px-4 py-3 text-xs text-muted-foreground sm:text-sm">
-						{proofSection.imageCaption}
+						{socialProofSection.imageCaption}
 					</p>
 				</Card>
 
 				<div className="grid grid-cols-2 gap-4">
-					{proofSection.stats.map((stat) => (
+					{socialProofSection.stats.map((stat) => (
 						<Card key={stat.value} className="justify-center">
 							<CardContent className="flex flex-col gap-1">
 								<EncryptedText
@@ -83,16 +83,16 @@ export function FounderProofSection({
 									{githubActivity.totalContributions.toLocaleString()}+
 								</span>
 								<span className="text-sm text-muted-foreground">
-									{proofSection.github.activityCaption}
+									{socialProofSection.github.activityCaption}
 								</span>
 							</div>
 							<Link
-								href={proofSection.github.profileUrl}
+								href={socialProofSection.github.profileUrl}
 								target="_blank"
 								rel="noopener noreferrer"
 								className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
 							>
-								@{proofSection.github.username}
+								@{socialProofSection.github.username}
 								<ExternalLink className="size-3.5" />
 							</Link>
 						</div>
@@ -105,7 +105,7 @@ export function FounderProofSection({
 
 			<div className="grid gap-4 lg:grid-cols-[1fr_1.2fr]">
 				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-1">
-					{proofSection.reachStats.map((stat) => (
+					{socialProofSection.reachStats.map((stat) => (
 						<Card key={stat.value} className="justify-center">
 							<CardContent className="flex flex-col gap-1">
 								<span className="text-3xl font-semibold tracking-tight sm:text-4xl">
