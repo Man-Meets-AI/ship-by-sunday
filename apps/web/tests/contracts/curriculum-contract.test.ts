@@ -1,6 +1,6 @@
 import { productConfig } from "@/config/product";
 import {
-  getLessonById,
+  getLessonByRouteSegment,
   getStudentFacingLessons,
   lessonRegistry,
 } from "@/features/course/lesson/model";
@@ -34,8 +34,14 @@ describe("curriculum contract", () => {
       legacyLessonRedirects,
     )) {
       expect(lessonId).toMatch(/^\d+\.\d+$/);
+      if (destination === "/mission") {
+        continue;
+      }
+
       expect(destination.startsWith("/lesson/")).toBe(true);
-      expect(getLessonById(destination.replace("/lesson/", ""))).toBeTruthy();
+      expect(
+        getLessonByRouteSegment(destination.replace("/lesson/", "")),
+      ).toBeTruthy();
     }
   });
 

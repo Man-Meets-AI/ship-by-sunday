@@ -1,7 +1,7 @@
 <!-- BEGIN:nextjs-agent-rules -->
 # This is NOT the Next.js you know
 
-This version has breaking changes. Read the relevant guide in `node_modules/next/dist/docs/` before writing or changing Next.js code. Heed deprecation notices.
+This version has breaking changes. Read the relevant guide in `apps/web/node_modules/next/dist/docs/` before writing or changing Next.js code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
 # Ship by Sunday Agent Guide
@@ -10,14 +10,15 @@ This repository uses Codex for planning, implementation, testing, and review. Re
 
 ## Repo layout
 
-- `app/`: Next.js route entrypoints and route-level wiring
-- `features/`: feature-owned runtime code; prefer working here before adding route-level logic
-- `convex/`: backend functions, schema, and hosted dev integration
-- `config/`: product and starter configuration
+- `apps/web/app/`: Next.js route entrypoints and route-level wiring
+- `apps/web/features/`: feature-owned runtime code; prefer working here before adding route-level logic
+- `apps/web/convex/`: backend functions, schema, and hosted dev integration
+- `apps/web/config/`: product and starter configuration
+- `apps/web/content/`: product docs and app-owned MDX content
+- `apps/web/tests/`: unit, contract, integration, integration-ui, and browser-smoke coverage
 - `docs/`: human-facing docs and reusable prompt assets
-- `.codex/plans/`: per-initiative ExecPlans
-- `PLANS.md`: repository contract for how ExecPlans must be written and maintained
-- `tests/`: unit, contract, integration, integration-ui, and browser-smoke coverage
+- `docs/codex/`: per-initiative ExecPlans and the ExecPlan contract
+- `packages/`: non-web package boundaries such as `packet-compiler`
 
 ## Core tools and stack
 
@@ -33,6 +34,8 @@ This repository uses Codex for planning, implementation, testing, and review. Re
 - Unit and integration tests: Vitest
 
 ## Dev commands
+
+The repository root is the workspace and command entrypoint. The web app itself lives under `apps/web/`.
 
 Install dependencies:
 
@@ -116,25 +119,25 @@ bun run check
 
 ## Homepage shell
 
-Before changing the public homepage, read `content/docs/configure-the-homepage.mdx`.
+Before changing the public homepage, read `apps/web/content/docs/configure-the-homepage.mdx`.
 
 The homepage contract is split deliberately:
 
-- `starterConfig.homePage` in `config/product.ts` is the control plane
-- `features/marketing/content/home.ts` owns copy and assets
-- `features/marketing/lib/home-page-render-model.ts` owns section and CTA behavior
-- `features/marketing/components/home-page/home-page-primary-cta.tsx` is the only CTA rendering boundary for hero and pricing
-- `features/marketing/lib/home-page-structured-data.ts` must stay truthful to visible sections
+- `starterConfig.homePage` in `apps/web/config/product.ts` is the control plane
+- `apps/web/features/marketing/content/home.ts` owns copy and assets
+- `apps/web/features/marketing/lib/home-page-render-model.ts` owns section and CTA behavior
+- `apps/web/features/marketing/components/home-page/home-page-primary-cta.tsx` is the only CTA rendering boundary for hero and pricing
+- `apps/web/features/marketing/lib/home-page-structured-data.ts` must stay truthful to visible sections
 
 Do not re-hardwire checkout into hero or pricing, do not scatter section gating across multiple components, and do not leave `FAQPage` or `Product` schema behind when the visible homepage no longer supports them.
 
-For homepage verification, run the narrow homepage tests first, then `bun run build`, then `set -a; source .env.local; set +a; bun run test:browser-smoke` when browser smoke is relevant.
+For homepage verification, run the narrow homepage tests first, then `bun run build`, then `set -a; source apps/web/.env.local; set +a; bun run test:browser-smoke` when browser smoke is relevant.
 
 ## Convex rules
 
 - Use hosted Convex dev only.
 - Do not use Convex local mode in this repo.
-- Before changing Convex code, read `convex/_generated/ai/guidelines.md`.
+- Before changing Convex code, read `apps/web/convex/_generated/ai/guidelines.md`.
 
 ## ExecPlans
 
@@ -142,9 +145,9 @@ For complex features, long-horizon work, migrations, risky integrations, or sign
 
 Rules:
 - Prefer plan mode first for complex or ambiguous work.
-- Store per-initiative ExecPlans in `.codex/plans/`.
-- Treat `PLANS.md` as the repository contract for all ExecPlans.
-- When authoring or updating an ExecPlan, read `PLANS.md` first and follow it to the letter.
+- Store per-initiative ExecPlans in `docs/codex/`.
+- Treat `docs/codex/PLANS.md` as the repository contract for all ExecPlans.
+- When authoring or updating an ExecPlan, read `docs/codex/PLANS.md` first and follow it to the letter.
 - When the request is underspecified, inspect the repo first and ask only the minimum clarifying questions that the repo cannot answer.
 - When implementing from an ExecPlan, read the target ExecPlan first, identify the active milestone, and make the smallest viable scoped change that advances it.
 - Validate immediately after each milestone or milestone slice.

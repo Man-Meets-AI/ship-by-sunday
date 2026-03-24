@@ -97,7 +97,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Install Playwright browsers
-        run: bunx playwright install --with-deps chromium
+        run: bun run --cwd apps/web playwright:install
 
       - name: Run browser smoke tests
         run: bun run test:browser-smoke
@@ -108,8 +108,8 @@ jobs:
         with:
           name: browser-smoke-artifacts
           path: |
-            playwright-report
-            test-results
+            apps/web/playwright-report
+            apps/web/test-results
           if-no-files-found: ignore
 
   e2e-sandbox:
@@ -141,7 +141,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Install Playwright browsers
-        run: bunx playwright install --with-deps chromium
+        run: bun run --cwd apps/web playwright:install
 
       - name: Run sandbox e2e tests
         run: bun run test:e2e:sandbox
@@ -152,6 +152,6 @@ jobs:
         with:
           name: e2e-sandbox-artifacts
           path: |
-            playwright-report
-            test-results
+            apps/web/playwright-report
+            apps/web/test-results
           if-no-files-found: ignore

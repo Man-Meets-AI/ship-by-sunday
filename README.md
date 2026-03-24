@@ -14,11 +14,11 @@ Why its awesome
 
 ## What Lives Here
 
-- Public marketing and pricing pages in `app/`
+- Public marketing and pricing pages in `apps/web/app/`
 - Protected product routes at `/mission`, `/lesson/[lessonKey]`, `/artifacts`, and `/settings`, with `/mission` acting as the canonical protected entry and starter-mode home
-- Feature-first runtime code in `features/`, with the curriculum and lesson model centered under `features/course/lesson/`
+- Feature-first runtime code in `apps/web/features/`, with the curriculum and lesson model centered under `apps/web/features/course/lesson/`
 - Purchase-to-access handoff across Clerk, Stripe, and Convex product-access state
-- Starter configuration and module flags in `config/product.ts`
+- Starter configuration and module flags in `apps/web/config/product.ts`
 
 ## Quick Start
 
@@ -31,7 +31,7 @@ bun install
 2. Copy the tracked env template:
 
 ```bash
-cp .env.local.example .env.local
+cp apps/web/.env.local.example apps/web/.env.local
 ```
 
 Set `APP_BASE_URL` to the canonical host you want Stripe to use for checkout success and cancel redirects. The same value is also used for SEO metadata, canonical URLs, `robots.txt`, and `sitemap.xml`. For local development, keep it on `http://localhost:3000`.
@@ -46,7 +46,7 @@ bun run dev:convex
 
 Need a Convex account first? Create one here: [https://convex.dev/referral/PARKER6190](https://convex.dev/referral/PARKER6190)
 
-This writes `NEXT_PUBLIC_CONVEX_URL` and `CONVEX_DEPLOYMENT` into `.env.local` for your per-developer hosted Convex dev deployment.
+This writes `NEXT_PUBLIC_CONVEX_URL` and `CONVEX_DEPLOYMENT` into `apps/web/.env.local` for your per-developer hosted Convex dev deployment.
 
 For observability and other Convex HTTP actions, the app can also use `NEXT_PUBLIC_CONVEX_SITE_URL` when the deployment exposes browser traffic on `.convex.cloud` and HTTP actions on `.convex.site`.
 
@@ -71,8 +71,8 @@ bun run dev:stripe
 ```
 
 - `bun run dev:web` runs the Next.js app locally
-- `bun run dev:convex` keeps your hosted Convex dev deployment synced and refreshes `.env.local` when you switch deployments
-- `bun run dev:stripe` waits for hosted Convex dev values in `.env.local`, then starts the Stripe listener
+- `bun run dev:convex` keeps your hosted Convex dev deployment synced and refreshes `apps/web/.env.local` when you switch deployments
+- `bun run dev:stripe` waits for hosted Convex dev values in `apps/web/.env.local`, then starts the Stripe listener
 - `bun run dev:full` runs `web + hosted Convex dev + Stripe listener` together for checkout QA
 
 This repo does not support Convex's local backend mode as a first-class development workflow.
@@ -86,7 +86,7 @@ The optional in-app Codex account and generation routes require a runtime that c
 
 ## Starter Mode and Module Flags
 
-The starter’s current control plane lives in `starterConfig` inside `config/product.ts`.
+The starter’s current control plane lives in `starterConfig` inside `apps/web/config/product.ts`.
 
 The `starterConfig.modules` flags currently control:
 
@@ -98,7 +98,7 @@ The `starterConfig.modules` flags currently control:
 
 Current behavior:
 
-- when `course` is `false`, `/mission` renders the neutral protected starter home from `features/workspace-home/` instead of the guided mission flow
+- when `course` is `false`, `/mission` renders the neutral protected starter home from `apps/web/features/workspace-home/` instead of the guided mission flow
 - when `course` is `false`, `/lesson/[lessonKey]` and `/artifacts` stay on deliberate disabled states
 - when `docs` is `false`, docs links hide and `/docs` renders a disabled-state surface instead of the docs shell
 - when `starterRepo` is `false`, starter-repo access cards disappear from the protected app
@@ -109,8 +109,8 @@ The public homepage now has its own starter-controlled shell:
 
 - `starterConfig.homePage.sections` controls the fixed top-level homepage sections: `hero`, `sprintPath`, `whatsInside`, `socialProof`, `faq`, `pricing`, and `footer`
 - `starterConfig.homePage.heroPrimaryCta` and `starterConfig.homePage.pricingPrimaryCta` control whether those surfaces route through checkout or a normal link target
-- `features/marketing/lib/home-page-render-model.ts` is the single place that translates starter config plus homepage content into the render contract used by `features/marketing/components/home-page.tsx`
-- `content/docs/configure-the-homepage.mdx` is the durable operating guide future builders and AI agents should read before changing homepage structure
+- `apps/web/features/marketing/lib/home-page-render-model.ts` is the single place that translates starter config plus homepage content into the render contract used by `apps/web/features/marketing/components/home-page.tsx`
+- `apps/web/content/docs/configure-the-homepage.mdx` is the durable operating guide future builders and AI agents should read before changing homepage structure
 
 ## Common Commands
 
@@ -143,7 +143,7 @@ The purchase-to-access behavior contract lives in [docs/delivery-onboarding/stac
 
 The app now ships a self-hosted error pipeline:
 
-- Next.js server and client failures are normalized in `features/observability/`
+- Next.js server and client failures are normalized in `apps/web/features/observability/`
 - high-signal Clerk `session.revoked` webhooks are verified at `/api/observability/clerk`
 - production Vercel deployment failures and cancellations are verified at `/api/observability/vercel`
 - maintainers can change live incident state through `/api/observability/incidents/[incidentId]/status`
@@ -201,30 +201,30 @@ The only remaining unproven live path is the authenticated Codex runtime route.
 
 ## Public SEO Surface
 
-- Root metadata defaults live in `app/layout.tsx` and resolve absolute canonical hosts through `platform/next/metadata-base.ts`.
-- Public crawl directives are generated from `app/robots.ts` and `app/sitemap.ts`, with docs-backed `lastModified` hints from `content/docs`.
-- Social preview images are generated from `app/opengraph-image.tsx` and `app/twitter-image.tsx`.
-- Docs metadata defaults and per-page canonical/OG/Twitter fields are built through `features/docs/lib/docs-metadata.ts`.
-- Homepage structured data is injected from `app/page.tsx` via `features/marketing/lib/home-page-structured-data.ts`; `Organization` always stays, while `Product` and `FAQPage` now follow the visible pricing and FAQ sections from the derived homepage render model.
-- Protected app routes and auth or recovery flows are intentionally marked `noindex` in `app/(workspace)/layout.tsx` and the individual utility route entrypoints.
-- Rendered SEO regressions are smoke-checked in `tests/browser-smoke/app-smoke.spec.ts`.
+- Root metadata defaults live in `apps/web/app/layout.tsx` and resolve absolute canonical hosts through `apps/web/platform/next/metadata-base.ts`.
+- Public crawl directives are generated from `apps/web/app/robots.ts` and `apps/web/app/sitemap.ts`, with docs-backed `lastModified` hints from `apps/web/content/docs`.
+- Social preview images are generated from `apps/web/app/opengraph-image.tsx` and `apps/web/app/twitter-image.tsx`.
+- Docs metadata defaults and per-page canonical/OG/Twitter fields are built through `apps/web/features/docs/lib/docs-metadata.ts`.
+- Homepage structured data is injected from `apps/web/app/page.tsx` via `apps/web/features/marketing/lib/home-page-structured-data.ts`; `Organization` always stays, while `Product` and `FAQPage` now follow the visible pricing and FAQ sections from the derived homepage render model.
+- Protected app routes and auth or recovery flows are intentionally marked `noindex` in `apps/web/app/(workspace)/layout.tsx` and the individual utility route entrypoints.
+- Rendered SEO regressions are smoke-checked in `apps/web/tests/browser-smoke/app-smoke.spec.ts`.
 
 ## Intentionally Customizable
 
-- Starter contract, module flags, workspace labels, and starter-mode defaults: `config/product.ts` and `features/starter/lib/starter-selectors.ts`
-- Curriculum shape, stable lesson identity, canonical labels, and route mapping: `features/course/lesson/model/curriculum.ts`
-- Lesson copy, workbench fields, and lesson-specific page behavior: `features/course/lesson/model/lessons/*.ts` and `features/course/lesson/content/build.ts`
-- Landing-page copy, offer framing, media, section defaults, and CTA targets: `config/product.ts`, `features/marketing/content/home.ts`, `features/marketing/lib/home-page-render-model.ts`, `features/marketing/components/home-page.tsx`, `features/marketing/components/faq-accordion.tsx`, and `public/`
-- Protected workspace UI and shell behavior: `features/course/`, `features/workspace-home/`, and the protected route group in `app/(workspace)/`
-- Theme tokens and visual language: `app/globals.css`
-- Purchase, product-access, and access flow: `app/api/stripe/checkout`, `features/checkout/`, `features/product-access/`, `convex/access.ts`, `convex/http.ts`, and `convex/course/`
-- Optional starter-template and Codex-assisted build helpers: `.env.local.example`, `scripts/`, `app/api/codex/*`, and `features/codex/`
+- Starter contract, module flags, workspace labels, and starter-mode defaults: `apps/web/config/product.ts` and `apps/web/features/starter/lib/starter-selectors.ts`
+- Curriculum shape, stable lesson identity, canonical labels, and route mapping: `apps/web/features/course/lesson/model/curriculum.ts`
+- Lesson copy, workbench fields, and lesson-specific page behavior: `apps/web/features/course/lesson/model/lessons/*.ts` and `apps/web/features/course/lesson/content/build.ts`
+- Landing-page copy, offer framing, media, section defaults, and CTA targets: `apps/web/config/product.ts`, `apps/web/features/marketing/content/home.ts`, `apps/web/features/marketing/lib/home-page-render-model.ts`, `apps/web/features/marketing/components/home-page.tsx`, `apps/web/features/marketing/components/faq-accordion.tsx`, and `apps/web/public/`
+- Protected workspace UI and shell behavior: `apps/web/features/course/`, `apps/web/features/workspace-home/`, and the protected route group in `apps/web/app/(workspace)/`
+- Theme tokens and visual language: `apps/web/app/globals.css`
+- Purchase, product-access, and access flow: `apps/web/app/api/stripe/checkout`, `apps/web/features/checkout/`, `apps/web/features/product-access/`, `apps/web/convex/access.ts`, `apps/web/convex/http.ts`, and `apps/web/convex/course/`
+- Optional starter-template and Codex-assisted build helpers: `apps/web/.env.local.example`, `apps/web/scripts/`, `apps/web/app/api/codex/*`, and `apps/web/features/codex/`
 
 More detail: [docs/dev/customization.md](docs/dev/customization.md)
 
 ## Curriculum Kernel
 
-The course runtime now uses one typed curriculum kernel in [features/course/lesson/model/curriculum.ts](/Users/parkerrex/Projects/manmeetsai-workspace/features/course/lesson/model/curriculum.ts).
+The course runtime now uses one typed curriculum kernel in [curriculum.ts](/Users/parkerrex/Projects/manmeetsai-workspace/apps/web/features/course/lesson/model/curriculum.ts).
 
 - `lessonKey` is the stable internal identity used for routing, navigation, and persisted progress.
 - `displayLabel` is the canonical student-facing label shown across mission, lesson, and rail surfaces.
@@ -240,4 +240,4 @@ Lesson modules still own lesson-specific content and workbench definitions, but 
 - Architecture: [docs/dev/architecture.md](docs/dev/architecture.md)
 - Internal launch operations: [docs/internal/README.md](docs/internal/README.md)
 
-If you are new to the repo, start with `README.md`, then `CONTRIBUTING.md`, then `docs/README.md`. The public builder docs live at `/docs` and are backed by `content/docs`, while `docs/internal/` stays focused on launch ops and internal workstreams.
+If you are new to the repo, start with `README.md`, then `CONTRIBUTING.md`, then `docs/README.md`. The public builder docs live at `/docs` and are backed by `apps/web/content/docs`, while `docs/internal/` stays focused on launch ops and internal workstreams.

@@ -1,5 +1,7 @@
 .next
 .next.stale*
+apps/web/.next
+apps/web/.next.stale*
 node_modules
 .DS_Store
 *.log
@@ -11,9 +13,13 @@ marketing-mobile-final.png
 .env.production
 .claude/settings.local.json
 *.tsbuildinfo
+apps/web/*.tsbuildinfo
 coverage
+apps/web/coverage
 playwright-report
+apps/web/playwright-report
 test-results
+apps/web/test-results
 .codex-user-state
 output/video-pipeline
 .venv-video
