@@ -16,12 +16,11 @@ describe("captureServerError", () => {
 	});
 
 	it("ignores Next.js control flow errors", async () => {
-		const { captureServerError } = await import(
-			"@/features/observability/server/capture-server-error"
-		);
+		const { captureServerError } =
+			await import("@/features/observability/server/capture-server-error");
 
 		await captureServerError({
-			source: "next_server",
+			source: "next_runtime",
 			error: new Error("NEXT_REDIRECT"),
 			pathname: "/mission",
 		});
@@ -30,9 +29,8 @@ describe("captureServerError", () => {
 	});
 
 	it("normalizes and forwards unexpected errors", async () => {
-		const { captureServerError } = await import(
-			"@/features/observability/server/capture-server-error"
-		);
+		const { captureServerError } =
+			await import("@/features/observability/server/capture-server-error");
 
 		await captureServerError({
 			source: "stripe",

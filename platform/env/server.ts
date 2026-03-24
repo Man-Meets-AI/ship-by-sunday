@@ -16,7 +16,10 @@ const serverEnvSchema = z.object({
 	CLERK_AUTHORIZED_PARTIES: z.string().min(1).optional(),
 	CLERK_SECRET_KEY: z.string().min(1).optional(),
 	CLERK_FRONTEND_API_URL: z.string().min(1).optional(),
+	CLERK_WEBHOOK_SIGNING_SECRET: z.string().min(1).optional(),
 	OBSERVABILITY_INGEST_TOKEN: z.string().min(1).optional(),
+	OBSERVABILITY_INCIDENT_CONTROL_TOKEN: z.string().min(1).optional(),
+	OBSERVABILITY_VERCEL_WEBHOOK_SECRET: z.string().min(1).optional(),
 	STRIPE_SECRET_KEY: z.string().min(1).optional(),
 	STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
 	STRIPE_PRICE_ID: z.string().min(1).optional(),
@@ -44,8 +47,17 @@ export function loadServerEnv() {
 		CLERK_FRONTEND_API_URL: normalizeEnvValue(
 			process.env.CLERK_FRONTEND_API_URL,
 		),
+		CLERK_WEBHOOK_SIGNING_SECRET: normalizeEnvValue(
+			process.env.CLERK_WEBHOOK_SIGNING_SECRET,
+		),
 		OBSERVABILITY_INGEST_TOKEN: normalizeEnvValue(
 			process.env.OBSERVABILITY_INGEST_TOKEN,
+		),
+		OBSERVABILITY_INCIDENT_CONTROL_TOKEN: normalizeEnvValue(
+			process.env.OBSERVABILITY_INCIDENT_CONTROL_TOKEN,
+		),
+		OBSERVABILITY_VERCEL_WEBHOOK_SECRET: normalizeEnvValue(
+			process.env.OBSERVABILITY_VERCEL_WEBHOOK_SECRET,
 		),
 		STRIPE_SECRET_KEY: normalizeEnvValue(process.env.STRIPE_SECRET_KEY),
 		STRIPE_WEBHOOK_SECRET: normalizeEnvValue(process.env.STRIPE_WEBHOOK_SECRET),

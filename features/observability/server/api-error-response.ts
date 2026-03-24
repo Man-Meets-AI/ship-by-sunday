@@ -1,7 +1,10 @@
 import { jsonWithRequestId } from "@/features/observability/server/request-id";
 
 import { captureServerError } from "./capture-server-error";
-import type { ObservabilitySeverity, ObservabilitySource } from "../lib/error-event";
+import type {
+	ObservabilitySeverity,
+	ObservabilitySource,
+} from "../lib/error-event";
 
 type UnexpectedApiErrorResponseOptions = {
 	error: unknown;
@@ -12,7 +15,11 @@ type UnexpectedApiErrorResponseOptions = {
 	code?: string;
 	userId?: string | null;
 	severity?: ObservabilitySeverity;
-	details?: Record<string, unknown>;
+	details?: Record<string, unknown> | null;
+	nativeUrl?: string | null;
+	logsUrl?: string | null;
+	nextAction?: string | null;
+	capture?: boolean;
 };
 
 export async function getUnexpectedApiErrorResponse({
@@ -25,17 +32,26 @@ export async function getUnexpectedApiErrorResponse({
 	userId = null,
 	severity,
 	details,
+	nativeUrl,
+	logsUrl,
+	nextAction,
+	capture = true,
 }: UnexpectedApiErrorResponseOptions) {
-	await captureServerError({
-		source,
-		error,
-		requestId,
-		pathname,
-		userId,
-		code,
-		severity,
-		details,
-	});
+	if (capture) {
+		await captureServerError({
+			source,
+			error,
+			requestId,
+			pathname,
+			userId,
+			code,
+			severity,
+			details,
+			nativeUrl,
+			logsUrl,
+			nextAction,
+		});
+	}
 
 	return jsonWithRequestId(
 		{

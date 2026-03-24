@@ -22,7 +22,6 @@ function runConvexGrant({ clerkUserId, courseSlug, env }) {
 			"access:grantProductAccess",
 			JSON.stringify({
 				clerkUserId,
-				courseSlug,
 				source: "manual",
 			}),
 		];

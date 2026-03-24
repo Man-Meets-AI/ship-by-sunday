@@ -5,6 +5,7 @@ import { homedir } from "node:os";
 import path from "node:path";
 
 import { apiConfig, limitConfig, productConfig } from "@/config/product";
+import { captureServerError } from "@/features/observability/server/capture-server-error";
 
 export const CODEX_APP_SERVER_DISABLED_ERROR = "CODEX_APP_SERVER_DISABLED";
 
@@ -136,8 +137,20 @@ export type CodexTurnResult = {
 
 type CodexAppServerClientOptions = {
 	clerkUserId: string;
+	requestId?: string | null;
+	pathname?: string | null;
 	timeoutMs?: number;
 };
+
+type CodexRuntimeIncidentCode =
+	| "codex_app_server_spawn_failed"
+	| "codex_app_server_process_error"
+	| "codex_app_server_exited"
+	| "codex_app_server_bad_stdout"
+	| "codex_app_server_request_timeout"
+	| "codex_app_server_stdin_write_failed"
+	| "codex_app_server_request_dropped"
+	| "codex_app_server_stderr";
 
 function toErrorMessage(error: unknown) {
 	if (error instanceof Error) {
@@ -159,6 +172,23 @@ function normalizeThreadTerminalStatus(
 	}
 
 	return "failed";
+}
+
+export class CodexAppServerRuntimeError extends Error {
+	constructor(
+		public readonly incidentCode: CodexRuntimeIncidentCode,
+		message: string,
+		public readonly incidentDetails: Record<string, unknown> | null = null,
+	) {
+		super(message);
+		this.name = incidentCode;
+	}
+}
+
+export function isCodexAppServerRuntimeError(
+	error: unknown,
+): error is CodexAppServerRuntimeError {
+	return error instanceof CodexAppServerRuntimeError;
 }
 
 function isCodexAppServerEnabled() {
@@ -185,12 +215,7 @@ async function getCodexUserHome(clerkUserId: string) {
 	const configuredRoot = process.env.CODEX_APP_SERVER_HOME_ROOT;
 	const dir = configuredRoot
 		? path.join(configuredRoot, hash)
-		: path.join(
-				homedir(),
-				`.${productConfig.appId}`,
-				"codex-user-state",
-				hash,
-			);
+		: path.join(homedir(), `.${productConfig.appId}`, "codex-user-state", hash);
 	await mkdir(dir, { recursive: true });
 	return dir;
 }
@@ -201,6 +226,7 @@ export class CodexAppServerClient {
 	private nextId = 1;
 	private closed = false;
 	private pending = new Map<number, PendingRequest>();
+	private reportedRuntimeKeys = new Set<string>();
 	private listeners = new Set<NotificationListener>();
 	private readonly requestTimeoutMs: number;
 
@@ -223,13 +249,30 @@ export class CodexAppServerClient {
 		const codexHome = await getCodexUserHome(this.options.clerkUserId);
 		const codexBinary = process.env.CODEX_BINARY?.trim() || "codex";
 
-		this.child = spawn(/* turbopackIgnore: true */ codexBinary, ["app-server"], {
-			stdio: ["pipe", "pipe", "pipe"],
-			env: {
-				...process.env,
-				CODEX_HOME: codexHome,
-			},
-		});
+		try {
+			this.child = spawn(
+				/* turbopackIgnore: true */ codexBinary,
+				["app-server"],
+				{
+					stdio: ["pipe", "pipe", "pipe"],
+					env: {
+						...process.env,
+						CODEX_HOME: codexHome,
+					},
+				},
+			);
+		} catch (error) {
+			const runtimeError = this.createRuntimeError(
+				"codex_app_server_spawn_failed",
+				"Unable to spawn the Codex app-server.",
+				{
+					binary: codexBinary,
+					originalMessage: toErrorMessage(error),
+				},
+			);
+			this.reportRuntimeIncident(runtimeError);
+			throw runtimeError;
+		}
 
 		this.child.stdout.setEncoding("utf8");
 		this.child.stdout.on("data", (chunk: string) => {
@@ -238,25 +281,66 @@ export class CodexAppServerClient {
 
 		this.child.stderr.setEncoding("utf8");
 		this.child.stderr.on("data", (chunk: string) => {
-			// Keep stderr visible in server logs for operational debugging.
-			console.warn("[codex-app-server]", chunk.trim());
+			const stderr = chunk.trim();
+			if (!stderr) {
+				return;
+			}
+
+			console.warn("[codex-app-server]", stderr);
+			if (shouldEscalateStderr(stderr)) {
+				this.reportRuntimeIncident(
+					this.createRuntimeError(
+						"codex_app_server_stderr",
+						"Codex app-server wrote an error to stderr.",
+						{
+							stderr,
+						},
+					),
+				);
+			}
 		});
 
 		this.child.on("error", (error) => {
 			this.closed = true;
+			const runtimeError = this.createRuntimeError(
+				"codex_app_server_process_error",
+				"Codex app-server process emitted an error event.",
+				{
+					originalMessage: toErrorMessage(error),
+				},
+			);
+			this.reportRuntimeIncident(runtimeError);
 			for (const pending of this.pending.values()) {
 				clearTimeout(pending.timeout);
-				pending.reject(error);
+				pending.reject(runtimeError);
 			}
 			this.pending.clear();
 		});
 
 		this.child.on("exit", (code, signal) => {
 			this.closed = true;
-			const reason = `Codex app-server exited (code=${code ?? "null"}, signal=${signal ?? "null"})`;
+			const runtimeError = this.createRuntimeError(
+				"codex_app_server_exited",
+				`Codex app-server exited (code=${code ?? "null"}, signal=${signal ?? "null"}).`,
+				{
+					code: code ?? null,
+					signal: signal ?? null,
+				},
+			);
+			this.reportRuntimeIncident(runtimeError);
 			for (const [id, pending] of this.pending.entries()) {
 				clearTimeout(pending.timeout);
-				pending.reject(new Error(`${reason}; pending request id=${id}`));
+				pending.reject(
+					this.createRuntimeError(
+						"codex_app_server_exited",
+						`${runtimeError.message} Pending request id=${id}.`,
+						{
+							code: code ?? null,
+							signal: signal ?? null,
+							pendingRequestId: id,
+						},
+					),
+				);
 			}
 			this.pending.clear();
 		});
@@ -289,6 +373,15 @@ export class CodexAppServerClient {
 				message = JSON.parse(line) as RpcMessage;
 			} catch {
 				console.warn("[codex-app-server] non-json line:", line);
+				this.reportRuntimeIncident(
+					this.createRuntimeError(
+						"codex_app_server_bad_stdout",
+						"Codex app-server emitted a non-JSON stdout line.",
+						{
+							line,
+						},
+					),
+				);
 				continue;
 			}
 
@@ -340,11 +433,15 @@ export class CodexAppServerClient {
 		return await new Promise<T>((resolve, reject) => {
 			const timeout = setTimeout(() => {
 				this.pending.delete(id);
-				reject(
-					new Error(
-						`Timed out waiting for codex app-server response (${method}).`,
-					),
+				const runtimeError = this.createRuntimeError(
+					"codex_app_server_request_timeout",
+					`Timed out waiting for codex app-server response (${method}).`,
+					{
+						method,
+					},
 				);
+				this.reportRuntimeIncident(runtimeError);
+				reject(runtimeError);
 			}, this.requestTimeoutMs);
 
 			this.pending.set(id, {
@@ -357,9 +454,15 @@ export class CodexAppServerClient {
 			if (!child) {
 				clearTimeout(timeout);
 				this.pending.delete(id);
-				reject(
-					new Error("Codex app-server exited before the request was sent."),
+				const runtimeError = this.createRuntimeError(
+					"codex_app_server_request_dropped",
+					"Codex app-server exited before the request was sent.",
+					{
+						method,
+					},
 				);
+				this.reportRuntimeIncident(runtimeError);
+				reject(runtimeError);
 				return;
 			}
 
@@ -370,7 +473,16 @@ export class CodexAppServerClient {
 
 				clearTimeout(timeout);
 				this.pending.delete(id);
-				reject(error);
+				const runtimeError = this.createRuntimeError(
+					"codex_app_server_stdin_write_failed",
+					`Failed to write request to the Codex app-server (${method}).`,
+					{
+						method,
+						originalMessage: toErrorMessage(error),
+					},
+				);
+				this.reportRuntimeIncident(runtimeError);
+				reject(runtimeError);
 			});
 		});
 	}
@@ -578,6 +690,42 @@ export class CodexAppServerClient {
 			}, 3_000);
 		});
 	}
+
+	private createRuntimeError(
+		incidentCode: CodexRuntimeIncidentCode,
+		message: string,
+		incidentDetails: Record<string, unknown> | null = null,
+	) {
+		return new CodexAppServerRuntimeError(
+			incidentCode,
+			message,
+			incidentDetails,
+		);
+	}
+
+	private reportRuntimeIncident(error: CodexAppServerRuntimeError) {
+		const incidentKey = JSON.stringify([
+			error.incidentCode,
+			error.message,
+			error.incidentDetails,
+		]);
+		if (this.reportedRuntimeKeys.has(incidentKey)) {
+			return;
+		}
+		this.reportedRuntimeKeys.add(incidentKey);
+
+		void captureServerError({
+			source: "codex",
+			error,
+			requestId: this.options.requestId,
+			pathname: this.options.pathname,
+			userId: this.options.clerkUserId,
+			code: error.incidentCode,
+			severity: "high",
+			surface: "runtime_error",
+			details: error.incidentDetails,
+		});
+	}
 }
 
 export async function withCodexAppServerClient<T>(
@@ -589,8 +737,16 @@ export async function withCodexAppServerClient<T>(
 		await client.initialize();
 		return await handler(client);
 	} catch (error) {
+		if (error instanceof Error) {
+			throw error;
+		}
+
 		throw new Error(toErrorMessage(error));
 	} finally {
 		await client.close();
 	}
+}
+
+function shouldEscalateStderr(stderr: string) {
+	return /\b(error|fatal|panic|exception|enoent)\b/i.test(stderr);
 }

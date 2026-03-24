@@ -1,53 +1,67 @@
 import { v } from "convex/values";
-import { internalAction, internalMutation, internalQuery } from "./_generated/server";
+
 import {
-	observedErrorDocumentValidator,
-	observedErrorWriteResultValidator,
-	recordObservedErrorArgs,
-} from "./observability/validators";
+	internalAction,
+	internalMutation,
+	internalQuery,
+} from "./_generated/server";
 import {
-	deliverObservedErrorAlertHandler,
-	getObservedErrorForAlertArgs,
-	getObservedErrorForAlertHandler,
-	markObservedErrorAlertDeliveredHandler,
-	markObservedErrorAlertFailedHandler,
-	recordObservedErrorHandler,
+	deliverIncidentNotificationHandler,
+	getIncidentForNotificationArgs,
+	getIncidentForNotificationHandler,
+	markIncidentNotificationDeliveredHandler,
+	markIncidentNotificationFailedHandler,
+	recordIncidentHandler,
+	updateIncidentStatusHandler,
 } from "./observability/model";
+import {
+	incidentDocumentValidator,
+	incidentWriteResultValidator,
+	recordIncidentArgs,
+	updateIncidentStatusArgs,
+} from "./observability/validators";
 
-export const recordObservedError = internalMutation({
-	args: recordObservedErrorArgs,
-	returns: observedErrorWriteResultValidator,
-	handler: recordObservedErrorHandler,
+export const recordIncident = internalMutation({
+	args: recordIncidentArgs,
+	returns: incidentWriteResultValidator,
+	handler: recordIncidentHandler,
 });
 
-export const getObservedErrorForAlert = internalQuery({
-	args: getObservedErrorForAlertArgs,
-	returns: v.union(observedErrorDocumentValidator, v.null()),
-	handler: getObservedErrorForAlertHandler,
+export const getIncidentForNotification = internalQuery({
+	args: getIncidentForNotificationArgs,
+	returns: v.union(incidentDocumentValidator, v.null()),
+	handler: getIncidentForNotificationHandler,
 });
 
-export const markObservedErrorAlertDelivered = internalMutation({
+export const markIncidentNotificationDelivered = internalMutation({
 	args: {
-		eventId: getObservedErrorForAlertArgs.eventId,
+		incidentId: getIncidentForNotificationArgs.incidentId,
 		telegramMessageId: v.number(),
+		telegramThreadId: v.optional(v.union(v.number(), v.null())),
 	},
 	returns: v.null(),
-	handler: markObservedErrorAlertDeliveredHandler,
+	handler: markIncidentNotificationDeliveredHandler,
 });
 
-export const markObservedErrorAlertFailed = internalMutation({
+export const markIncidentNotificationFailed = internalMutation({
 	args: {
-		eventId: getObservedErrorForAlertArgs.eventId,
-		message: recordObservedErrorArgs.message,
+		incidentId: getIncidentForNotificationArgs.incidentId,
+		message: recordIncidentArgs.title,
 	},
 	returns: v.null(),
-	handler: markObservedErrorAlertFailedHandler,
+	handler: markIncidentNotificationFailedHandler,
 });
 
-export const deliverObservedErrorAlert = internalAction({
+export const deliverIncidentNotification = internalAction({
 	args: {
-		eventId: getObservedErrorForAlertArgs.eventId,
+		incidentId: getIncidentForNotificationArgs.incidentId,
 	},
 	returns: v.null(),
-	handler: deliverObservedErrorAlertHandler,
+	handler: deliverIncidentNotificationHandler,
+});
+
+export const updateIncidentStatus = internalMutation({
+	args: updateIncidentStatusArgs,
+	returns: v.null(),
+	handler: updateIncidentStatusHandler,
 });

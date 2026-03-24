@@ -1,288 +1,482 @@
 import { v } from "convex/values";
-import type { Id } from "../_generated/dataModel";
 
-import type {
-	MutationCtx,
-	QueryCtx,
-	ActionCtx,
-} from "../_generated/server";
+import type { Doc, Id } from "../_generated/dataModel";
 import { internal } from "../_generated/api";
-import {
-	type ObservabilitySeverity,
-} from "../../features/observability/lib/error-event";
-import {
-} from "./validators";
+import type { ActionCtx, MutationCtx, QueryCtx } from "../_generated/server";
+import type {
+	NormalizedIncidentEvent,
+	IncidentEnvironment,
+	IncidentSeverity,
+	IncidentSource,
+	IncidentSurface,
+} from "../../features/observability/lib/incident";
+import { normalizeIncidentEvent as createNormalizedIncidentEvent } from "../../features/observability/lib/incident";
+import { renderIncidentMessage } from "../../features/observability/telegram/render-incident-message";
 import { requireConvexEnv } from "../env";
 
-const ALERT_COOLDOWN_MS = 5 * 60 * 1_000;
-const MEDIUM_ALERT_THRESHOLD = 3;
+const DELIVERY_COOLDOWN_MS = 5 * 60 * 1_000;
+const MEDIUM_DELIVERY_THRESHOLD = 3;
 
-type RecordObservedErrorArgs = {
+type RecordIncidentArgs = {
+	product: string;
+	environment: IncidentEnvironment;
 	fingerprint: string;
-	source: "next_server" | "next_client" | "convex" | "stripe" | "clerk" | "codex";
-	message: string;
-	stack?: string | null;
-	details?: string | null;
+	source: IncidentSource;
+	surface: IncidentSurface;
+	severity: IncidentSeverity;
+	title: string;
+	summary: string;
+	code?: string | null;
 	requestId?: string | null;
 	pathname?: string | null;
 	userId?: string | null;
-	code?: string | null;
-	severity: ObservabilitySeverity;
-	environment: string;
+	externalEventId?: string | null;
+	deploymentId?: string | null;
+	nativeUrl?: string | null;
+	logsUrl?: string | null;
+	nextAction?: string | null;
+	stack?: string | null;
+	details?: string | null;
 };
 
-export const getObservedErrorForAlertArgs = {
-	eventId: v.id("errorEvents"),
+export const getIncidentForNotificationArgs = {
+	incidentId: v.id("incidents"),
 };
 
-export async function recordObservedErrorHandler(
+export async function recordIncidentHandler(
 	ctx: MutationCtx,
-	args: RecordObservedErrorArgs,
+	args: RecordIncidentArgs,
 ) {
 	const now = Date.now();
-	const fingerprintKey = `${args.environment}:${args.fingerprint}`;
+	const fingerprintKey = `${args.product}:${args.environment}:${args.fingerprint}`;
 	const existing = await ctx.db
-		.query("errorEvents")
+		.query("incidents")
 		.withIndex("by_fingerprint_key", (queryBuilder) =>
 			queryBuilder.eq("fingerprintKey", fingerprintKey),
 		)
 		.unique();
 	const occurrenceCount = existing ? existing.occurrenceCount + 1 : 1;
-	const shouldAlert = getShouldAlert({
+	const status: Doc<"incidents">["status"] =
+		existing?.status === "resolved"
+			? "regressed"
+			: existing?.status === "muted"
+				? "muted"
+				: existing?.status === "acked"
+					? "acked"
+					: "firing";
+	const shouldNotify = getShouldNotify({
+		source: args.source,
 		severity: args.severity,
 		occurrenceCount,
-		lastAlertAt: existing?.lastAlertAt,
+		lastDeliveryAt: existing?.lastDeliveryAt,
+		status,
 	});
 
-	const nextDocument = {
+	const nextDocument: Omit<Doc<"incidents">, "_id" | "_creationTime"> = {
+		product: args.product,
 		fingerprint: args.fingerprint,
 		fingerprintKey,
 		source: args.source,
+		surface: args.surface,
 		severity: args.severity,
-		message: args.message,
+		status,
+		title: args.title,
+		summary: args.summary,
 		code: args.code,
 		requestId: args.requestId,
 		pathname: args.pathname,
 		userId: args.userId,
+		externalEventId: args.externalEventId,
+		deploymentId: args.deploymentId,
+		nativeUrl: args.nativeUrl,
+		logsUrl: args.logsUrl,
+		nextAction: args.nextAction,
 		environment: args.environment,
 		stack: args.stack,
 		details: args.details,
 		occurrenceCount,
 		firstSeenAt: existing?.firstSeenAt ?? now,
 		lastSeenAt: now,
-		alertStatus: shouldAlert ? "pending" : existing?.alertStatus ?? "suppressed",
-		alertCount: existing?.alertCount ?? 0,
-		lastAlertAt: existing?.lastAlertAt,
+		deliveryStatus: shouldNotify
+			? "pending"
+			: (existing?.deliveryStatus ?? "suppressed"),
+		deliveryCount: existing?.deliveryCount ?? 0,
+		lastDeliveryAt: existing?.lastDeliveryAt,
 		telegramMessageId: existing?.telegramMessageId,
-		lastAlertError: existing?.lastAlertError,
+		telegramThreadId: existing?.telegramThreadId,
+		lastDeliveryError: existing?.lastDeliveryError,
 	};
 
 	if (existing) {
 		await ctx.db.patch(existing._id, nextDocument);
 
 		return {
-			eventId: existing._id,
+			incidentId: existing._id,
 			occurrenceCount,
-			shouldAlert,
+			shouldNotify,
 		};
 	}
 
-	const eventId = await ctx.db.insert("errorEvents", nextDocument);
+	const incidentId = await ctx.db.insert("incidents", nextDocument);
 	return {
-		eventId,
+		incidentId,
 		occurrenceCount,
-		shouldAlert,
+		shouldNotify,
 	};
 }
 
-export async function getObservedErrorForAlertHandler(
+export async function getIncidentForNotificationHandler(
 	ctx: QueryCtx,
-	args: { eventId: Id<"errorEvents"> },
+	args: { incidentId: Id<"incidents"> },
 ) {
-	return await ctx.db.get(args.eventId);
+	return await ctx.db.get(args.incidentId);
 }
 
-export async function markObservedErrorAlertDeliveredHandler(
+export async function markIncidentNotificationDeliveredHandler(
 	ctx: MutationCtx,
 	args: {
-		eventId: Id<"errorEvents">;
+		incidentId: Id<"incidents">;
 		telegramMessageId: number;
+		telegramThreadId?: number | null;
 	},
 ) {
-	const existing = await ctx.db.get(args.eventId);
-	await ctx.db.patch(args.eventId, {
-		alertStatus: "delivered",
+	const existing = await ctx.db.get(args.incidentId);
+	await ctx.db.patch(args.incidentId, {
+		deliveryStatus: "delivered",
 		telegramMessageId: args.telegramMessageId,
-		lastAlertAt: Date.now(),
-		lastAlertError: undefined,
-		alertCount: (existing?.alertCount ?? 0) + 1,
+		telegramThreadId: args.telegramThreadId ?? undefined,
+		lastDeliveryAt: Date.now(),
+		lastDeliveryError: undefined,
+		deliveryCount: (existing?.deliveryCount ?? 0) + 1,
 	});
 	return null;
 }
 
-export async function markObservedErrorAlertFailedHandler(
+export async function markIncidentNotificationFailedHandler(
 	ctx: MutationCtx,
 	args: {
-		eventId: Id<"errorEvents">;
+		incidentId: Id<"incidents">;
 		message: string;
 	},
 ) {
-	await ctx.db.patch(args.eventId, {
-		alertStatus: "failed",
-		lastAlertError: args.message,
+	await ctx.db.patch(args.incidentId, {
+		deliveryStatus: "failed",
+		lastDeliveryError: args.message,
 	});
 	return null;
 }
 
-export async function deliverObservedErrorAlertHandler(
+export async function deliverIncidentNotificationHandler(
 	ctx: ActionCtx,
-	args: { eventId: Id<"errorEvents"> },
+	args: { incidentId: Id<"incidents"> },
 ) {
-	const event = await ctx.runQuery(internal.observability.getObservedErrorForAlert, {
-		eventId: args.eventId,
-	});
+	const incident = await ctx.runQuery(
+		internal.observability.getIncidentForNotification,
+		{
+			incidentId: args.incidentId,
+		},
+	);
 
-	if (!event) {
+	if (!incident) {
+		return null;
+	}
+
+	if (incident.source === "telegram_delivery") {
 		return null;
 	}
 
 	try {
-		const messageText = buildTelegramMessage(event);
-		const messageId = await sendTelegramMessage({
-			messageText,
-			existingMessageId: event.telegramMessageId ?? undefined,
+		const delivery = await sendTelegramMessage({
+			messageText: renderIncidentMessage(incident),
+			existingMessageId: incident.telegramMessageId ?? undefined,
+			existingThreadId: incident.telegramThreadId ?? undefined,
 		});
 
 		await ctx.runMutation(
-			internal.observability.markObservedErrorAlertDelivered,
+			internal.observability.markIncidentNotificationDelivered,
 			{
-				eventId: args.eventId,
-				telegramMessageId: messageId,
+				incidentId: args.incidentId,
+				telegramMessageId: delivery.messageId,
+				telegramThreadId: delivery.messageThreadId ?? null,
 			},
 		);
 	} catch (error) {
-		await ctx.runMutation(internal.observability.markObservedErrorAlertFailed, {
-			eventId: args.eventId,
-			message: error instanceof Error ? error.message : "Unknown Telegram error",
-		});
+		const deliveryErrorMessage =
+			error instanceof Error ? error.message : "Unknown Telegram error";
+		await ctx.runMutation(
+			internal.observability.markIncidentNotificationFailed,
+			{
+				incidentId: args.incidentId,
+				message: deliveryErrorMessage,
+			},
+		);
+
+		try {
+			await ctx.runMutation(
+				internal.observability.recordIncident,
+				buildTelegramDeliveryIncident({
+					sourceIncident: incident,
+					deliveryErrorMessage,
+				}),
+			);
+		} catch (recordError) {
+			console.error(
+				"telegram delivery failure incident recording failed",
+				recordError,
+			);
+		}
 	}
 
 	return null;
 }
 
-function getShouldAlert({
+function getShouldNotify({
+	source,
 	severity,
 	occurrenceCount,
-	lastAlertAt,
+	lastDeliveryAt,
+	status,
 }: {
-	severity: ObservabilitySeverity;
+	source: IncidentSource;
+	severity: IncidentSeverity;
 	occurrenceCount: number;
-	lastAlertAt?: number;
+	lastDeliveryAt?: number;
+	status: "firing" | "acked" | "muted" | "resolved" | "regressed";
 }) {
-	const threshold = severity === "medium" ? MEDIUM_ALERT_THRESHOLD : 1;
+	if (source === "telegram_delivery") {
+		return false;
+	}
+
+	if (status === "muted" || status === "acked") {
+		return false;
+	}
+
+	const threshold = severity === "medium" ? MEDIUM_DELIVERY_THRESHOLD : 1;
 	if (occurrenceCount < threshold) {
 		return false;
 	}
 
-	if (!lastAlertAt) {
+	if (!lastDeliveryAt) {
 		return true;
 	}
 
-	return Date.now() - lastAlertAt >= ALERT_COOLDOWN_MS;
-}
-
-function buildTelegramMessage(event: {
-	_id: Id<"errorEvents">;
-	fingerprint: string;
-	severity: ObservabilitySeverity;
-	source: string;
-	environment: string;
-	pathname?: string | null;
-	requestId?: string | null;
-	userId?: string | null;
-	code?: string | null;
-	message: string;
-	details?: string | null;
-	stack?: string | null;
-	occurrenceCount: number;
-	firstSeenAt: number;
-	lastSeenAt: number;
-}) {
-	const packet = [
-		"Investigate this production incident. Explain the most likely root cause, blast radius, and the smallest safe fix. If information is missing, say exactly what else you need.",
-		"",
-		"[packet]",
-		`event_id: ${event._id}`,
-		`fingerprint: ${event.fingerprint}`,
-		`severity: ${event.severity}`,
-		`source: ${event.source}`,
-		`environment: ${event.environment}`,
-		`path: ${event.pathname ?? "unknown"}`,
-		`request_id: ${event.requestId ?? "unknown"}`,
-		`user_id: ${event.userId ?? "anonymous"}`,
-		`code: ${event.code ?? "none"}`,
-		`occurrence_count: ${event.occurrenceCount}`,
-		`first_seen_at: ${new Date(event.firstSeenAt).toISOString()}`,
-		`last_seen_at: ${new Date(event.lastSeenAt).toISOString()}`,
-		"",
-		"message:",
-		event.message,
-		"",
-		"details:",
-		event.details ?? "none",
-		"",
-		"stack:",
-		event.stack ?? "No stack trace available.",
-	].join("\n");
-
-	return trimTelegramMessage(packet);
+	return Date.now() - lastDeliveryAt >= DELIVERY_COOLDOWN_MS;
 }
 
 async function sendTelegramMessage({
 	messageText,
 	existingMessageId,
+	existingThreadId,
 }: {
 	messageText: string;
 	existingMessageId?: number;
+	existingThreadId?: number;
 }) {
 	const botToken = requireConvexEnv("TELEGRAM_BOT_TOKEN");
 	const chatId = requireConvexEnv("TELEGRAM_CHAT_ID");
 	const baseUrl = `https://api.telegram.org/bot${botToken}`;
-	const endpoint = existingMessageId ? "editMessageText" : "sendMessage";
-	const payload = existingMessageId
-		? {
-				chat_id: chatId,
-				message_id: existingMessageId,
-				text: messageText,
-			}
-		: {
-				chat_id: chatId,
-				text: messageText,
+	const editResponse = existingMessageId
+		? await fetch(`${baseUrl}/editMessageText`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					chat_id: chatId,
+					message_id: existingMessageId,
+					text: messageText,
+				}),
+			})
+		: null;
+
+	if (editResponse) {
+		const editResult = await parseTelegramResponse(editResponse);
+		if (editResult.ok) {
+			return {
+				messageId: editResult.messageId ?? existingMessageId ?? 0,
+				messageThreadId: editResult.messageThreadId ?? existingThreadId ?? null,
 			};
-	const response = await fetch(`${baseUrl}/${endpoint}`, {
+		}
+
+		if (editResult.error.includes("message is not modified")) {
+			return {
+				messageId: existingMessageId ?? 0,
+				messageThreadId: existingThreadId ?? null,
+			};
+		}
+	}
+
+	const response = await fetch(`${baseUrl}/sendMessage`, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
 		},
-		body: JSON.stringify(payload),
+		body: JSON.stringify({
+			chat_id: chatId,
+			message_thread_id: existingThreadId,
+			text: messageText,
+		}),
 	});
-
-	if (!response.ok) {
-		throw new Error(`Telegram delivery failed with status ${response.status}.`);
+	const sendResult = await parseTelegramResponse(response);
+	if (!sendResult.ok) {
+		throw new Error(sendResult.error);
 	}
 
-	const body = (await response.json()) as {
-		result?: { message_id?: number };
+	return {
+		messageId: sendResult.messageId ?? existingMessageId ?? 0,
+		messageThreadId: sendResult.messageThreadId ?? existingThreadId ?? null,
 	};
-
-	return body.result?.message_id ?? existingMessageId ?? 0;
 }
 
-function trimTelegramMessage(message: string) {
-	const maxLength = 3_900;
-	if (message.length <= maxLength) {
-		return message;
+async function parseTelegramResponse(response: Response) {
+	const bodyText = await response.text();
+	let parsedBody: {
+		description?: string;
+		result?: { message_id?: number; message_thread_id?: number };
+	} | null = null;
+	try {
+		parsedBody = JSON.parse(bodyText) as {
+			description?: string;
+			result?: { message_id?: number; message_thread_id?: number };
+		};
+	} catch {
+		parsedBody = null;
 	}
 
-	return `${message.slice(0, maxLength - 17)}\n\n[TRUNCATED FOR TELEGRAM]`;
+	if (!response.ok) {
+		const description = parsedBody?.description ?? bodyText.trim();
+		return {
+			ok: false as const,
+			error: `Telegram delivery failed with status ${response.status}${description ? `: ${description}` : "."}`,
+		};
+	}
+
+	return {
+		ok: true as const,
+		messageId: parsedBody?.result?.message_id,
+		messageThreadId: parsedBody?.result?.message_thread_id,
+	};
+}
+
+function buildTelegramDeliveryIncident({
+	sourceIncident,
+	deliveryErrorMessage,
+}: {
+	sourceIncident: Doc<"incidents">;
+	deliveryErrorMessage: string;
+}): NormalizedIncidentEvent {
+	const classifiedFailure = classifyTelegramDeliveryFailure({
+		deliveryErrorMessage,
+		sourceIncidentId: sourceIncident._id,
+	});
+
+	const normalizedIncident = createNormalizedIncidentEvent({
+		source: "telegram_delivery",
+		error: new Error(classifiedFailure.title),
+		pathname: sourceIncident.pathname,
+		code: classifiedFailure.code,
+		severity: "critical",
+		surface: "delivery",
+		externalEventId: classifiedFailure.externalEventId,
+		nextAction: classifiedFailure.nextAction,
+		details: {
+			deliveryError: deliveryErrorMessage,
+			failureClass: classifiedFailure.failureClass,
+			sourceIncidentId: sourceIncident._id,
+			sourceIncidentFingerprint: sourceIncident.fingerprint,
+			sourceIncidentSource: sourceIncident.source,
+			sourceIncidentStatus: sourceIncident.status,
+			sourceIncidentPathname: sourceIncident.pathname,
+			telegramMessageId: sourceIncident.telegramMessageId,
+			telegramThreadId: sourceIncident.telegramThreadId,
+		},
+	});
+
+	return {
+		...normalizedIncident,
+		product: sourceIncident.product,
+		environment: sourceIncident.environment,
+	};
+}
+
+function classifyTelegramDeliveryFailure({
+	deliveryErrorMessage,
+	sourceIncidentId,
+}: {
+	deliveryErrorMessage: string;
+	sourceIncidentId: Id<"incidents">;
+}) {
+	const normalizedMessage = deliveryErrorMessage.toLowerCase();
+
+	if (
+		normalizedMessage.includes("status 429") ||
+		normalizedMessage.includes("too many requests") ||
+		normalizedMessage.includes("retry after")
+	) {
+		return {
+			code: "telegram_delivery_rate_limited",
+			externalEventId: "telegram_delivery_rate_limited",
+			failureClass: "rate_limited" as const,
+			nextAction:
+				"Wait for Telegram rate limits to reset, then confirm alerts can send again before relying on chat delivery.",
+			title: "Telegram delivery rate-limited.",
+		};
+	}
+
+	if (
+		normalizedMessage.includes("status 401") ||
+		normalizedMessage.includes("status 403") ||
+		normalizedMessage.includes("forbidden") ||
+		normalizedMessage.includes("unauthorized") ||
+		normalizedMessage.includes("chat not found") ||
+		normalizedMessage.includes("bot was blocked")
+	) {
+		return {
+			code: "telegram_delivery_authorization_failed",
+			externalEventId: "telegram_delivery_authorization_failed",
+			failureClass: "authorization_failed" as const,
+			nextAction:
+				"Restore the Telegram bot token, chat membership, and bot permissions before relying on alerts.",
+			title: "Telegram delivery authorization failed.",
+		};
+	}
+
+	if (
+		normalizedMessage.includes("message is too long") ||
+		normalizedMessage.includes("message text is empty") ||
+		normalizedMessage.includes("can't parse entities") ||
+		normalizedMessage.includes("message to edit not found")
+	) {
+		return {
+			code: "telegram_delivery_content_rejected",
+			externalEventId: `telegram_delivery_content_rejected:${sourceIncidentId}`,
+			failureClass: "content_rejected" as const,
+			nextAction:
+				"Inspect the source incident packet and trim or repair the Telegram message payload before retrying delivery.",
+			title: "Telegram delivery rejected incident content.",
+		};
+	}
+
+	return {
+		code: "telegram_delivery_failed",
+		externalEventId: `telegram_delivery_failed:${sourceIncidentId}`,
+		failureClass: "delivery_failed" as const,
+		nextAction:
+			"Inspect the source incident delivery metadata and the Telegram API error before retrying delivery.",
+		title: "Telegram delivery failed.",
+	};
+}
+
+export async function updateIncidentStatusHandler(
+	ctx: MutationCtx,
+	args: {
+		incidentId: Id<"incidents">;
+		status: Doc<"incidents">["status"];
+	},
+) {
+	await ctx.db.patch(args.incidentId, {
+		status: args.status,
+	});
+
+	return null;
 }

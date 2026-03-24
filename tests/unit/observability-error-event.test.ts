@@ -1,7 +1,7 @@
 import {
 	createErrorFingerprint,
-	formatStackSnippet,
 	formatErrorDetails,
+	formatStackSnippet,
 	getDefaultSeverity,
 	isNextControlFlowError,
 	normalizeErrorStack,
@@ -11,13 +11,13 @@ import {
 describe("observability error event helpers", () => {
 	it("normalizes ids in paths when building fingerprints", () => {
 		const first = createErrorFingerprint({
-			source: "next_server",
+			source: "next_runtime",
 			message: "Lesson load failed",
 			code: "next_request_error",
 			pathname: "/lesson/12345",
 		});
 		const second = createErrorFingerprint({
-			source: "next_server",
+			source: "next_runtime",
 			message: "Lesson load failed",
 			code: "next_request_error",
 			pathname: "/lesson/67890",
@@ -36,7 +36,14 @@ describe("observability error event helpers", () => {
 		).toBe("high");
 		expect(
 			getDefaultSeverity({
-				source: "next_server",
+				source: "vercel",
+				pathname: "/api/observability/vercel",
+				code: "vercel_deployment_failed",
+			}),
+		).toBe("high");
+		expect(
+			getDefaultSeverity({
+				source: "next_runtime",
 				pathname: "/mission",
 				code: "next_request_error",
 			}),
@@ -57,15 +64,16 @@ describe("observability error event helpers", () => {
 		});
 
 		expect(event).toMatchObject({
+			product: "ship-by-sunday",
 			source: "codex",
-			message: "Codex failed",
+			title: "Codex failed",
 			requestId: "request_123",
 			pathname: "/api/codex/generate",
 			userId: "user_123",
 			code: "server_error",
 			severity: "high",
 		});
-		expect(event.fingerprint).toMatch(/^err_/);
+		expect(event.fingerprint).toMatch(/^incident_/);
 		expect(event.details).toContain('"route":"generate"');
 	});
 
@@ -76,28 +84,29 @@ describe("observability error event helpers", () => {
 			pathname: "/mission",
 		});
 		const unknownEvent = normalizeObservabilityEvent({
-			source: "next_server",
+			source: "next_runtime",
 			error: { nope: true },
 			pathname: "/mission",
 		});
 
-		expect(stringEvent.message).toBe("Hydration failed");
-		expect(unknownEvent.message).toBe("Unexpected error");
+		expect(stringEvent.title).toBe("Hydration failed");
+		expect(unknownEvent.title).toBe("Unexpected error");
 	});
 
 	it("trims stack snippets to a compact Telegram-safe summary", () => {
-		const stack = Array.from({ length: 20 }, (_, index) => `line ${index + 1}`).join(
-			"\n",
-		);
+		const stack = Array.from(
+			{ length: 20 },
+			(_, index) => `line ${index + 1}`,
+		).join("\n");
 
 		expect(formatStackSnippet(stack).split("\n")).toHaveLength(6);
 	});
 
 	it("detects Next.js control flow errors and handles missing stack traces", () => {
 		expect(isNextControlFlowError(new Error("NEXT_REDIRECT"))).toBe(true);
-		expect(isNextControlFlowError(new Error("NEXT_HTTP_ERROR_FALLBACK;404"))).toBe(
-			true,
-		);
+		expect(
+			isNextControlFlowError(new Error("NEXT_HTTP_ERROR_FALLBACK;404")),
+		).toBe(true);
 		expect(isNextControlFlowError("plain")).toBe(false);
 		expect(normalizeErrorStack("plain")).toBeNull();
 		expect(formatStackSnippet(null)).toBe("No stack trace available.");

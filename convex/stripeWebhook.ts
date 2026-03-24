@@ -40,6 +40,17 @@ const stripeWebhookInvalidSignatureResultValidator = v.object({
 	message: v.string(),
 });
 
+const stripeWebhookGrantFailedResultValidator = v.object({
+	kind: v.literal("grant_failed"),
+	eventId: v.string(),
+	eventType: v.string(),
+	sessionId: v.string(),
+	clerkUserId: v.string(),
+	stripeCustomerId: v.union(v.string(), v.null()),
+	stripePaymentIntentId: v.union(v.string(), v.null()),
+	message: v.string(),
+});
+
 type StripeWebhookActionResult =
 	| {
 			kind: "ignored";
@@ -64,6 +75,16 @@ type StripeWebhookActionResult =
 	| {
 			kind: "invalid_signature";
 			message: string;
+	  }
+	| {
+			kind: "grant_failed";
+			eventId: string;
+			eventType: string;
+			sessionId: string;
+			clerkUserId: string;
+			stripeCustomerId: string | null;
+			stripePaymentIntentId: string | null;
+			message: string;
 	  };
 
 type StripeWebhookGrantResult = Extract<
@@ -87,6 +108,7 @@ export const processStripeWebhook = internalAction({
 		stripeWebhookGrantedResultValidator,
 		stripeWebhookMissingUserResultValidator,
 		stripeWebhookInvalidSignatureResultValidator,
+		stripeWebhookGrantFailedResultValidator,
 	),
 	handler: async (ctx, args): Promise<StripeWebhookActionResult> => {
 		let event: Stripe.Event;
@@ -126,19 +148,40 @@ export const processStripeWebhook = internalAction({
 			};
 		}
 
-		const grantResult = (await ctx.runMutation(
-			internal.access.grantProductAccessFromStripe,
-			{
+		let grantResult: StripeWebhookGrantResult;
+		try {
+			grantResult = (await ctx.runMutation(
+				internal.access.grantProductAccessFromStripe,
+				{
+					clerkUserId,
+					stripeCustomerId:
+						typeof session.customer === "string" ? session.customer : undefined,
+					stripeCheckoutSessionId: session.id,
+					stripePaymentIntentId:
+						typeof session.payment_intent === "string"
+							? session.payment_intent
+							: undefined,
+				},
+			)) as StripeWebhookGrantResult;
+		} catch (error) {
+			return {
+				kind: "grant_failed" as const,
+				eventId: event.id,
+				eventType: event.type,
+				sessionId: session.id,
 				clerkUserId,
 				stripeCustomerId:
-					typeof session.customer === "string" ? session.customer : undefined,
-				stripeCheckoutSessionId: session.id,
+					typeof session.customer === "string" ? session.customer : null,
 				stripePaymentIntentId:
 					typeof session.payment_intent === "string"
 						? session.payment_intent
-						: undefined,
-			},
-		)) as StripeWebhookGrantResult;
+						: null,
+				message:
+					error instanceof Error
+						? error.message
+						: "Unable to persist the Stripe webhook grant.",
+			};
+		}
 
 		return {
 			kind: "granted" as const,

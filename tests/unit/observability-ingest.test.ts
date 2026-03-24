@@ -2,6 +2,28 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { NormalizedObservabilityEvent } from "@/features/observability/lib/error-event";
 
+const incidentFixture = {
+	product: "ship-by-sunday",
+	environment: "prod",
+	fingerprint: "incident_1",
+	source: "next_runtime",
+	surface: "runtime_error",
+	title: "Mission failed",
+	summary: "code=next_request_error | path=/mission",
+	code: "next_request_error",
+	requestId: "request_1",
+	pathname: "/mission",
+	userId: null,
+	externalEventId: null,
+	deploymentId: null,
+	nativeUrl: null,
+	logsUrl: null,
+	nextAction: "Check the failing request path and recent server logs.",
+	stack: null,
+	details: null,
+	severity: "medium",
+} satisfies NormalizedObservabilityEvent;
+
 describe("ingestErrorEvent", () => {
 	const originalEnv = { ...process.env };
 
@@ -22,23 +44,10 @@ describe("ingestErrorEvent", () => {
 	it("posts normalized events to the Convex observability endpoint", async () => {
 		const fetchMock = vi.fn().mockResolvedValue({ ok: true });
 		vi.stubGlobal("fetch", fetchMock);
-		const { ingestErrorEvent } = await import(
-			"@/features/observability/server/ingest-error-event"
-		);
+		const { ingestErrorEvent } =
+			await import("@/features/observability/server/ingest-error-event");
 
-		await ingestErrorEvent({
-			fingerprint: "err_1",
-			source: "next_server",
-			message: "Mission failed",
-			stack: null,
-			details: null,
-			requestId: "request_1",
-			pathname: "/mission",
-			userId: null,
-			code: "next_request_error",
-			severity: "medium",
-			environment: "production",
-		} satisfies NormalizedObservabilityEvent);
+		await ingestErrorEvent(incidentFixture);
 
 		expect(fetchMock).toHaveBeenCalledWith(
 			"https://convex.example/observability/events",
@@ -58,23 +67,10 @@ describe("ingestErrorEvent", () => {
 		vi.resetModules();
 		const fetchMock = vi.fn();
 		vi.stubGlobal("fetch", fetchMock);
-		const { ingestErrorEvent } = await import(
-			"@/features/observability/server/ingest-error-event"
-		);
+		const { ingestErrorEvent } =
+			await import("@/features/observability/server/ingest-error-event");
 
-		await ingestErrorEvent({
-			fingerprint: "err_1",
-			source: "next_server",
-			message: "Mission failed",
-			stack: null,
-			details: null,
-			requestId: "request_1",
-			pathname: "/mission",
-			userId: null,
-			code: "next_request_error",
-			severity: "medium",
-			environment: "production",
-		} satisfies NormalizedObservabilityEvent);
+		await ingestErrorEvent(incidentFixture);
 
 		expect(fetchMock).not.toHaveBeenCalled();
 	});
@@ -85,23 +81,10 @@ describe("ingestErrorEvent", () => {
 			.mockImplementation(() => undefined);
 		const fetchMock = vi.fn().mockRejectedValue(new Error("network failed"));
 		vi.stubGlobal("fetch", fetchMock);
-		const { ingestErrorEvent } = await import(
-			"@/features/observability/server/ingest-error-event"
-		);
+		const { ingestErrorEvent } =
+			await import("@/features/observability/server/ingest-error-event");
 
-		await ingestErrorEvent({
-			fingerprint: "err_1",
-			source: "next_server",
-			message: "Mission failed",
-			stack: null,
-			details: null,
-			requestId: "request_1",
-			pathname: "/mission",
-			userId: null,
-			code: "next_request_error",
-			severity: "medium",
-			environment: "production",
-		} satisfies NormalizedObservabilityEvent);
+		await ingestErrorEvent(incidentFixture);
 
 		expect(consoleErrorMock).toHaveBeenCalledWith(
 			"observability ingest failed",

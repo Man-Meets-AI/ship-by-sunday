@@ -1,5 +1,6 @@
 import {
 	getCodexAppServerUnavailableMessage,
+	isCodexAppServerRuntimeError,
 	withCodexAppServerClient,
 } from "@/features/codex/server/app-server";
 import { apiRouteConfig } from "@/config/product";
@@ -24,7 +25,11 @@ export async function GET(request: Request) {
 		const session = await requireProductAccessApiSession();
 
 		const result = await withCodexAppServerClient(
-			{ clerkUserId: session.userId },
+			{
+				clerkUserId: session.userId,
+				requestId,
+				pathname: apiRouteConfig.codexAccountRead,
+			},
 			async (client) => {
 				const accountResult = await client.readAccount(false);
 				const account = accountResult.account ?? null;
@@ -48,11 +53,16 @@ export async function GET(request: Request) {
 
 		return jsonWithRequestId(result, undefined, requestId);
 	} catch (error) {
-		const authErrorResponse = getApiAuthErrorResponse(error, {
-			unauthorized: "Sign in before managing Codex connection.",
-			forbidden: "Product access is required before managing Codex connection.",
-			unavailable: getCodexAppServerUnavailableMessage(),
-		}, requestId);
+		const authErrorResponse = getApiAuthErrorResponse(
+			error,
+			{
+				unauthorized: "Sign in before managing Codex connection.",
+				forbidden:
+					"Product access is required before managing Codex connection.",
+				unavailable: getCodexAppServerUnavailableMessage(),
+			},
+			requestId,
+		);
 		if (authErrorResponse) {
 			return authErrorResponse;
 		}
@@ -63,6 +73,7 @@ export async function GET(request: Request) {
 			pathname: apiRouteConfig.codexAccountRead,
 			source: "codex",
 			defaultMessage: "Unable to read Codex account state.",
+			capture: !isCodexAppServerRuntimeError(error),
 		});
 	}
 }

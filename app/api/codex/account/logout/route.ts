@@ -1,5 +1,6 @@
 import {
 	getCodexAppServerUnavailableMessage,
+	isCodexAppServerRuntimeError,
 	withCodexAppServerClient,
 } from "@/features/codex/server/app-server";
 import { apiRouteConfig } from "@/config/product";
@@ -23,7 +24,11 @@ export async function POST(request: Request) {
 		const session = await requireProductAccessApiSession();
 
 		await withCodexAppServerClient(
-			{ clerkUserId: session.userId },
+			{
+				clerkUserId: session.userId,
+				requestId,
+				pathname: apiRouteConfig.codexAccountLogout,
+			},
 			async (client) => {
 				await client.logout();
 			},
@@ -44,11 +49,16 @@ export async function POST(request: Request) {
 			requestId,
 		);
 	} catch (error) {
-		const authErrorResponse = getApiAuthErrorResponse(error, {
-			unauthorized: "Sign in before managing Codex connection.",
-			forbidden: "Product access is required before managing Codex connection.",
-			unavailable: getCodexAppServerUnavailableMessage(),
-		}, requestId);
+		const authErrorResponse = getApiAuthErrorResponse(
+			error,
+			{
+				unauthorized: "Sign in before managing Codex connection.",
+				forbidden:
+					"Product access is required before managing Codex connection.",
+				unavailable: getCodexAppServerUnavailableMessage(),
+			},
+			requestId,
+		);
 		if (authErrorResponse) {
 			return authErrorResponse;
 		}
@@ -59,6 +69,7 @@ export async function POST(request: Request) {
 			pathname: apiRouteConfig.codexAccountLogout,
 			source: "codex",
 			defaultMessage: "Unable to disconnect Codex account.",
+			capture: !isCodexAppServerRuntimeError(error),
 		});
 	}
 }

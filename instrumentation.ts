@@ -11,7 +11,7 @@ export const onRequestError: Instrumentation.onRequestError = async (
 	errorContext,
 ) => {
 	await captureServerError({
-		source: "next_server",
+		source: "next_runtime",
 		error,
 		requestId: getRequestIdFromHeaderRecord(errorRequest.headers),
 		pathname: errorRequest.path,

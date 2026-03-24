@@ -190,14 +190,23 @@ describe("convex/stripeWebhook", () => {
 			.mockRejectedValue(new Error("convex unavailable"));
 		const { processStripeWebhook } = await import("@/convex/stripeWebhook");
 
-		await expect(
-			processStripeWebhook._handler(
-				{ runMutation } as never,
-				{
-					body: "raw-webhook-body",
-					signature: "t=1,v1=signature",
-				},
-			),
-		).rejects.toThrow("convex unavailable");
+		const result = await processStripeWebhook._handler(
+			{ runMutation } as never,
+			{
+				body: "raw-webhook-body",
+				signature: "t=1,v1=signature",
+			},
+		);
+
+		expect(result).toEqual({
+			kind: "grant_failed",
+			eventId: "evt_failure",
+			eventType: "checkout.session.completed",
+			sessionId: "cs_test_123",
+			clerkUserId: "user_123",
+			stripeCustomerId: null,
+			stripePaymentIntentId: null,
+			message: "convex unavailable",
+		});
 	});
 });

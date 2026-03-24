@@ -50,4 +50,55 @@ describe("getUnexpectedApiErrorResponse", () => {
 			requestId: "request_2",
 		});
 	});
+
+	it("can skip capture when the caller already emitted a more specific incident", async () => {
+		captureServerErrorMock.mockClear();
+
+		const response = await getUnexpectedApiErrorResponse({
+			error: new Error("Codex runtime failed."),
+			requestId: "request_3",
+			pathname: "/api/codex/generate",
+			source: "codex",
+			defaultMessage: "Codex failed.",
+			capture: false,
+		});
+
+		expect(captureServerErrorMock).not.toHaveBeenCalled();
+		expect(response.status).toBe(500);
+		expect(await response.json()).toEqual({
+			error: "Codex runtime failed.",
+			code: "server_error",
+			requestId: "request_3",
+		});
+	});
+
+	it("forwards optional Stripe dashboard context to captureServerError", async () => {
+		captureServerErrorMock.mockClear();
+
+		await getUnexpectedApiErrorResponse({
+			error: new Error("Stripe failed"),
+			requestId: "request_4",
+			pathname: "/api/stripe/checkout",
+			source: "stripe",
+			defaultMessage: "Stripe failed.",
+			code: "stripe_checkout_failed",
+			details: {
+				stripeMode: "live",
+			},
+			nativeUrl: "https://dashboard.stripe.com/products",
+			logsUrl: "https://dashboard.stripe.com/events",
+			nextAction: "Check Stripe.",
+		});
+
+		expect(captureServerErrorMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				details: {
+					stripeMode: "live",
+				},
+				nativeUrl: "https://dashboard.stripe.com/products",
+				logsUrl: "https://dashboard.stripe.com/events",
+				nextAction: "Check Stripe.",
+			}),
+		);
+	});
 });

@@ -18,27 +18,30 @@ describe("convex/observability", () => {
 		vi.restoreAllMocks();
 	});
 
-	it("deduplicates medium-severity incidents until the alert threshold is reached", async () => {
-		const insert = vi.fn().mockResolvedValue("error_1");
+	it("deduplicates medium-severity incidents until the delivery threshold is reached", async () => {
+		const insert = vi.fn().mockResolvedValue("incident_1");
 		const patch = vi.fn().mockResolvedValue(undefined);
 		const unique = vi
 			.fn()
 			.mockResolvedValueOnce(null)
 			.mockResolvedValueOnce({
-				_id: "error_1",
+				_id: "incident_1",
 				occurrenceCount: 1,
 				firstSeenAt: 10,
-				alertCount: 0,
-				alertStatus: "suppressed",
+				status: "firing",
+				deliveryCount: 0,
+				deliveryStatus: "suppressed",
 			})
 			.mockResolvedValueOnce({
-				_id: "error_1",
+				_id: "incident_1",
 				occurrenceCount: 2,
 				firstSeenAt: 10,
-				alertCount: 0,
-				alertStatus: "suppressed",
+				status: "firing",
+				deliveryCount: 0,
+				deliveryStatus: "suppressed",
 			});
-		const { recordObservedError } = await import("@/convex/observability");
+		const { recordIncidentHandler } =
+			await import("@/convex/observability/model");
 
 		const ctx = {
 			db: {
@@ -52,81 +55,205 @@ describe("convex/observability", () => {
 			},
 		};
 
-		const first = await recordObservedError._handler(ctx as never, {
-			fingerprint: "err_1",
-			source: "next_server",
-			message: "Mission failed",
-			stack: "stack",
-			details: null,
+		const incident = {
+			product: "ship-by-sunday",
+			environment: "prod" as const,
+			fingerprint: "incident_1",
+			source: "next_runtime" as const,
+			surface: "runtime_error" as const,
+			title: "Mission failed",
+			summary: "code=next_request_error | path=/mission",
+			code: "next_request_error",
 			requestId: "request_1",
 			pathname: "/mission",
 			userId: null,
-			code: "next_request_error",
-			severity: "medium",
-			environment: "production",
-		});
-		const second = await recordObservedError._handler(ctx as never, {
-			fingerprint: "err_1",
-			source: "next_server",
-			message: "Mission failed",
+			externalEventId: null,
+			deploymentId: null,
+			nativeUrl: null,
+			logsUrl: null,
+			nextAction: "Check the failing request path and recent server logs.",
 			stack: "stack",
 			details: null,
+			severity: "medium" as const,
+		};
+
+		const first = await recordIncidentHandler(ctx as never, incident);
+		const second = await recordIncidentHandler(ctx as never, {
+			...incident,
 			requestId: "request_2",
-			pathname: "/mission",
-			userId: null,
-			code: "next_request_error",
-			severity: "medium",
-			environment: "production",
 		});
-		const third = await recordObservedError._handler(ctx as never, {
-			fingerprint: "err_1",
-			source: "next_server",
-			message: "Mission failed",
-			stack: "stack",
-			details: null,
+		const third = await recordIncidentHandler(ctx as never, {
+			...incident,
 			requestId: "request_3",
-			pathname: "/mission",
-			userId: null,
-			code: "next_request_error",
-			severity: "medium",
-			environment: "production",
 		});
 
-		expect(first.shouldAlert).toBe(false);
-		expect(second.shouldAlert).toBe(false);
-		expect(third.shouldAlert).toBe(true);
+		expect(first.shouldNotify).toBe(false);
+		expect(second.shouldNotify).toBe(false);
+		expect(third.shouldNotify).toBe(true);
 		expect(insert).toHaveBeenCalledTimes(1);
 		expect(patch).toHaveBeenCalledTimes(2);
+	});
+
+	it("keeps acked incidents suppressed on repeat until resolved", async () => {
+		const patch = vi.fn().mockResolvedValue(undefined);
+		const { recordIncidentHandler, updateIncidentStatusHandler } =
+			await import("@/convex/observability/model");
+
+		await updateIncidentStatusHandler(
+			{
+				db: {
+					patch,
+				},
+			} as never,
+			{
+				incidentId: "incident_1" as never,
+				status: "resolved",
+			},
+		);
+
+		expect(patch).toHaveBeenCalledWith("incident_1", {
+			status: "resolved",
+		});
+
+		const result = await recordIncidentHandler(
+			{
+				db: {
+					query: vi.fn(() => ({
+						withIndex: vi.fn(() => ({
+							unique: vi.fn().mockResolvedValue({
+								_id: "incident_2",
+								occurrenceCount: 1,
+								firstSeenAt: 10,
+								status: "acked",
+								deliveryCount: 1,
+								deliveryStatus: "delivered",
+								lastDeliveryAt: Date.now(),
+							}),
+						})),
+					})),
+					patch: vi.fn().mockResolvedValue(undefined),
+				},
+			} as never,
+			{
+				product: "ship-by-sunday",
+				environment: "prod",
+				fingerprint: "incident_2",
+				source: "codex",
+				surface: "runtime_error",
+				title: "Codex failed",
+				summary: "code=codex_failed",
+				code: "codex_failed",
+				requestId: "request_1",
+				pathname: "/api/codex/generate",
+				userId: "user_123",
+				externalEventId: null,
+				deploymentId: null,
+				nativeUrl: null,
+				logsUrl: null,
+				nextAction:
+					"Check the Codex app-server process and the failing API route.",
+				stack: null,
+				details: null,
+				severity: "high",
+			},
+		);
+
+		expect(result.shouldNotify).toBe(false);
+	});
+
+	it("suppresses notification delivery for telegram_delivery incidents", async () => {
+		const insert = vi.fn().mockResolvedValue("incident_telegram");
+		const { recordIncidentHandler } =
+			await import("@/convex/observability/model");
+
+		const result = await recordIncidentHandler(
+			{
+				db: {
+					query: vi.fn(() => ({
+						withIndex: vi.fn(() => ({
+							unique: vi.fn().mockResolvedValue(null),
+						})),
+					})),
+					insert,
+					patch: vi.fn(),
+				},
+			} as never,
+			{
+				product: "ship-by-sunday",
+				environment: "prod",
+				fingerprint: "incident_telegram",
+				source: "telegram_delivery",
+				surface: "delivery",
+				title: "Telegram delivery failed.",
+				summary: "code=telegram_delivery_failed",
+				code: "telegram_delivery_failed",
+				requestId: null,
+				pathname: "/api/observability/vercel",
+				userId: null,
+				externalEventId: "telegram_delivery_failed:incident_1",
+				deploymentId: null,
+				nativeUrl: null,
+				logsUrl: null,
+				nextAction:
+					"Inspect the source incident delivery metadata and the Telegram API error before retrying delivery.",
+				stack: null,
+				details: '{"deliveryError":"Telegram delivery failed."}',
+				severity: "critical",
+			},
+		);
+
+		expect(result.shouldNotify).toBe(false);
+		expect(insert).toHaveBeenCalledWith(
+			"incidents",
+			expect.objectContaining({
+				source: "telegram_delivery",
+				deliveryStatus: "suppressed",
+			}),
+		);
 	});
 
 	it("formats and sends Telegram alerts through the delivery action", async () => {
 		const fetchMock = vi.fn().mockResolvedValue({
 			ok: true,
-			json: vi.fn().mockResolvedValue({
-				result: {
-					message_id: 99,
-				},
-			}),
+			text: vi.fn().mockResolvedValue(
+				JSON.stringify({
+					result: {
+						message_id: 99,
+					},
+				}),
+			),
 		});
 		vi.stubGlobal("fetch", fetchMock);
 
-		const { deliverObservedErrorAlert } = await import("@/convex/observability");
+		const { deliverIncidentNotificationHandler } =
+			await import("@/convex/observability/model");
 
 		const runMutation = vi.fn().mockResolvedValue(null);
-		await deliverObservedErrorAlert._handler(
+		await deliverIncidentNotificationHandler(
 			{
 				runQuery: vi.fn().mockResolvedValue({
-					_id: "error_1",
-					fingerprint: "err_1",
+					_id: "incident_1",
+					product: "ship-by-sunday",
+					fingerprint: "incident_1",
 					telegramMessageId: undefined,
+					telegramThreadId: undefined,
 					severity: "high",
 					source: "stripe",
-					environment: "production",
+					surface: "billing",
+					status: "firing",
+					environment: "prod",
 					pathname: "/api/stripe/checkout",
 					requestId: "request_123",
 					userId: "user_123",
+					externalEventId: null,
+					deploymentId: null,
+					nativeUrl: "https://dashboard.stripe.com/events",
+					logsUrl: null,
+					nextAction:
+						"Check the Stripe dashboard and the failing checkout or webhook path.",
 					code: "stripe_checkout_failed",
-					message: "Unable to start Stripe checkout.",
+					title: "Unable to start Stripe checkout.",
+					summary: "code=stripe_checkout_failed | path=/api/stripe/checkout",
 					details: '{"provider":"stripe"}',
 					stack: "stack line 1\nstack line 2",
 					occurrenceCount: 1,
@@ -136,7 +263,7 @@ describe("convex/observability", () => {
 				runMutation,
 			} as never,
 			{
-				eventId: "error_1" as never,
+				incidentId: "incident_1" as never,
 			},
 		);
 
@@ -144,7 +271,7 @@ describe("convex/observability", () => {
 			expect.stringContaining("/sendMessage"),
 			expect.objectContaining({
 				method: "POST",
-				body: expect.stringContaining("INCIDENT_PACKET"),
+				body: expect.stringContaining("[Ship by Sunday][PROD][Stripe][high]"),
 			}),
 		);
 		expect(runMutation).toHaveBeenCalledWith(
@@ -154,4 +281,81 @@ describe("convex/observability", () => {
 			}),
 		);
 	});
+
+	it("records a telegram_delivery incident when Telegram delivery fails", async () => {
+		const fetchMock = vi.fn().mockResolvedValue({
+			ok: false,
+			status: 403,
+			text: vi.fn().mockResolvedValue(
+				JSON.stringify({
+					description: "Forbidden: bot was blocked by the user",
+				}),
+			),
+		});
+		vi.stubGlobal("fetch", fetchMock);
+
+		const { deliverIncidentNotificationHandler } =
+			await import("@/convex/observability/model");
+		const runMutation = vi
+			.fn()
+			.mockResolvedValueOnce(null)
+			.mockResolvedValueOnce({
+				incidentId: "incident_telegram",
+				occurrenceCount: 1,
+				shouldNotify: false,
+			});
+
+		await deliverIncidentNotificationHandler(
+			{
+				runQuery: vi.fn().mockResolvedValue({
+					_id: "incident_1",
+					product: "ship-by-sunday",
+					fingerprint: "incident_1",
+					telegramMessageId: undefined,
+					telegramThreadId: undefined,
+					severity: "high",
+					source: "stripe",
+					surface: "billing",
+					status: "firing",
+					environment: "prod",
+					pathname: "/api/stripe/checkout",
+					requestId: "request_123",
+					userId: "user_123",
+					externalEventId: null,
+					deploymentId: null,
+					nativeUrl: "https://dashboard.stripe.com/events",
+					logsUrl: null,
+					nextAction:
+						"Check the Stripe dashboard and the failing checkout or webhook path.",
+					code: "stripe_checkout_failed",
+					title: "Unable to start Stripe checkout.",
+					summary: "code=stripe_checkout_failed | path=/api/stripe/checkout",
+					details: '{"provider":"stripe"}',
+					stack: "stack line 1\nstack line 2",
+					occurrenceCount: 1,
+					firstSeenAt: 1_700_000_000_000,
+					lastSeenAt: 1_700_000_000_000,
+				}),
+				runMutation,
+			} as never,
+			{
+				incidentId: "incident_1" as never,
+			},
+		);
+
+		expect(runMutation.mock.calls[0]?.[1]).toMatchObject({
+			incidentId: "incident_1",
+			message: expect.stringContaining(
+				"Telegram delivery failed with status 403",
+			),
+		});
+		expect(runMutation.mock.calls[1]?.[1]).toMatchObject({
+			source: "telegram_delivery",
+			code: "telegram_delivery_authorization_failed",
+			externalEventId: "telegram_delivery_authorization_failed",
+			environment: "prod",
+			product: "ship-by-sunday",
+		});
+	});
+
 });

@@ -6,7 +6,9 @@ import {
 
 const CLIENT_ERROR_ENDPOINT = "/api/observability/client-error";
 
-export function reportClientError(input: Omit<ObservabilityEventInput, "source">) {
+export function reportClientError(
+	input: Omit<ObservabilityEventInput, "source">,
+) {
 	if (isNextControlFlowError(input.error)) {
 		return;
 	}
@@ -16,7 +18,7 @@ export function reportClientError(input: Omit<ObservabilityEventInput, "source">
 		source: "next_client",
 	});
 	const requestBody = JSON.stringify({
-		message: payload.message,
+		message: payload.title,
 		stack: payload.stack,
 		details: payload.details,
 		requestId: payload.requestId,

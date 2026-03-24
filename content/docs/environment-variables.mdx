@@ -14,6 +14,7 @@ Run `bun run dev:convex` to connect the repo to your hosted Convex dev deploymen
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: lets the browser talk to Clerk
 - `NEXT_PUBLIC_CLERK_SIGN_IN_URL`: must stay `/sign-in` because the app uses a custom Clerk sign-in route
 - `NEXT_PUBLIC_CONVEX_URL`: lets the browser talk to Convex
+- `NEXT_PUBLIC_CONVEX_SITE_URL`: optional but important for Convex HTTP actions like observability ingest and incident status control when the deployment serves browser traffic on `.convex.cloud` and HTTP actions on `.convex.site`
 
 ## Convex CLI target
 
@@ -25,7 +26,10 @@ Run `bun run dev:convex` to connect the repo to your hosted Convex dev deploymen
 - `CLERK_AUTHORIZED_PARTIES`: optional comma-separated origin allowlist passed to Clerk middleware for subdomain cookie-leak protection
 - `CLERK_SECRET_KEY`: server-side Clerk access
 - `CLERK_FRONTEND_API_URL`: Clerk frontend API domain used by the auth chain
+- `CLERK_WEBHOOK_SIGNING_SECRET`: verifies Clerk webhook requests sent to `/api/observability/clerk`
 - `OBSERVABILITY_INGEST_TOKEN`: shared random secret used by Next.js to authenticate error-ingest requests into Convex
+- `OBSERVABILITY_INCIDENT_CONTROL_TOKEN`: separate bearer token for the maintainer-only incident status route at `/api/observability/incidents/[incidentId]/status`
+- `OBSERVABILITY_VERCEL_WEBHOOK_SECRET`: verifies Vercel deployment webhooks sent to `/api/observability/vercel`
 - `STRIPE_SECRET_KEY`: Stripe API access
 - `STRIPE_WEBHOOK_SECRET`: verifies the Stripe webhook
 - `STRIPE_PRICE_ID`: optional dashboard-managed price
@@ -38,6 +42,8 @@ Run `bun run dev:convex` to connect the repo to your hosted Convex dev deploymen
 - `ENABLE_OBSERVABILITY_TEST_TRIGGER`: test-only switch for the Playwright protected-shell failure harness
 
 `OBSERVABILITY_INGEST_TOKEN` is not provided by Telegram, Clerk, Stripe, or Convex. It is just a high-entropy shared secret between the Next.js app and the Convex HTTP ingest route. Generate one with `openssl rand -hex 32` and set the same value in both runtimes.
+
+In production, `NEXT_PUBLIC_CONVEX_URL` alone is not enough for the observability system if the deployment’s HTTP actions live on a separate `.convex.site` origin. Set `NEXT_PUBLIC_CONVEX_SITE_URL` to the matching `.convex.site` hostname so `/observability/events` and `/observability/incidents/status` reach the real backend.
 
 ## Optional video pipeline
 

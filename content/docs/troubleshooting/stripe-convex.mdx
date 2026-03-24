@@ -48,6 +48,8 @@ If those differ, you can see real Stripe events without the starter ever receivi
 
 If Stripe does not reach `POST {NEXT_PUBLIC_CONVEX_URL}/stripe/webhook`, checkout can finish while access grant never happens.
 
+If the app reaches Stripe and returns `202` or `200` but nothing shows up in Convex-side observability or access state, verify whether the app also needs `NEXT_PUBLIC_CONVEX_SITE_URL` for HTTP actions. In this repo, `.convex.cloud` is not enough for observability ingest or other Convex HTTP-action endpoints when the deployment serves those on `.convex.site`.
+
 ### 6. Payment succeeded but access still did not grant
 
 If the Stripe event exists and the buyer still cannot reach `/mission`, check:
@@ -65,7 +67,8 @@ Use this sequence:
 3. confirm secret parity
 4. confirm Stripe account parity
 5. confirm Clerk `convex` template
-6. rerun a real local checkout against your hosted Convex dev deployment
+6. confirm the app and Convex agree on both `NEXT_PUBLIC_CONVEX_URL` and `NEXT_PUBLIC_CONVEX_SITE_URL` when HTTP actions are involved
+7. rerun a real local checkout against your hosted Convex dev deployment
 
 ## What success looks like
 

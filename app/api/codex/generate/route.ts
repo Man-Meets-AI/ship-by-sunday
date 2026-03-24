@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import {
 	getCodexAppServerUnavailableMessage,
+	isCodexAppServerRuntimeError,
 	withCodexAppServerClient,
 } from "@/features/codex/server/app-server";
 import { apiRouteConfig } from "@/config/product";
@@ -59,7 +60,11 @@ export async function POST(request: Request) {
 		parsedInput = requestInput;
 
 		const output = await withCodexAppServerClient(
-			{ clerkUserId: productAccessSession.userId },
+			{
+				clerkUserId: productAccessSession.userId,
+				requestId,
+				pathname: apiRouteConfig.codexGenerate,
+			},
 			async (client) => {
 				const accountResult = await client.readAccount(false);
 				const account = accountResult.account ?? null;
@@ -165,11 +170,15 @@ export async function POST(request: Request) {
 			requestId,
 		);
 	} catch (error) {
-		const authErrorResponse = getApiAuthErrorResponse(error, {
-			unauthorized: "Sign in before using Codex generation.",
-			forbidden: "Product access is required before using Codex generation.",
-			unavailable: getCodexAppServerUnavailableMessage(),
-		}, requestId);
+		const authErrorResponse = getApiAuthErrorResponse(
+			error,
+			{
+				unauthorized: "Sign in before using Codex generation.",
+				forbidden: "Product access is required before using Codex generation.",
+				unavailable: getCodexAppServerUnavailableMessage(),
+			},
+			requestId,
+		);
 		if (authErrorResponse) {
 			return authErrorResponse;
 		}
@@ -202,6 +211,7 @@ export async function POST(request: Request) {
 			source: "codex",
 			defaultMessage: "Codex generation failed.",
 			userId: session?.userId ?? null,
+			capture: !isCodexAppServerRuntimeError(error),
 		});
 	}
 }

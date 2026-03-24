@@ -2,6 +2,7 @@
 
 ## recent
 
+- **2026-03-24 13:30 EDT** — Observability rollout + docs sync: shipped the Telegram incident bus to Vercel production, fixed Convex deploy/env parity so live Clerk and Vercel smoke incidents persist and deliver, proved the public incident status route suppresses repeats after `acked`, corrected the Convex env loader + entitled QA helper drift, and synced README plus deploy/env/QA troubleshooting docs to match the shipped behavior and the remaining Codex runtime live-gap.
 - **2026-03-24 10:39 EDT** — Homepage docs pass: added a dedicated docs-site guide for the homepage control plane, linked it from the starter docs, documented the shell-env requirement for browser smoke, and added agent-facing homepage rules to `AGENTS.md`.
 - **2026-03-24 10:39 EDT** — Homepage modularization: added `starterConfig.homePage`, derived homepage render model, section gating, CTA target abstraction, `socialProof` naming, truthful homepage schema, homepage docs sync, and browser-smoke coverage for the public shell.
 - **2026-03-24 10:05 EDT** — ExecPlan workflow hardening: added root `PLANS.md` as the ExecPlan contract, rewrote `AGENTS.md` around OpenAI-style repo commands + verification + ExecPlan execution rules, and replaced the long-horizon prompt set with `execplan-writer`, `execplan-grill`, and `execplan-execution-loop` targeting `.codex/plans/`.

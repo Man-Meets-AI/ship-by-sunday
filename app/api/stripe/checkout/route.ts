@@ -12,6 +12,7 @@ import {
 	getRequestIdFromRequest,
 	jsonWithRequestId,
 } from "@/features/observability/server/request-id";
+import { buildStripeCheckoutFailureContext } from "@/features/observability/server/source-adapters/stripe-failure";
 import { getStripe, getStripeLineItem } from "@/platform/billing/stripe";
 import { getAppBaseUrl } from "@/platform/next/app-url";
 
@@ -27,10 +28,15 @@ export async function POST(request: Request) {
 		);
 	}
 
+	const appBaseUrl = getAppBaseUrl(request);
+	const stripeFailureContext = buildStripeCheckoutFailureContext({
+		appBaseUrl,
+		userId,
+	});
+
 	try {
 		const stripe = getStripe();
 		const user = await currentUser();
-		const appBaseUrl = getAppBaseUrl(request);
 		const session = await stripe.checkout.sessions.create({
 			mode: "payment",
 			allow_promotion_codes: true,
@@ -61,6 +67,7 @@ export async function POST(request: Request) {
 				userId,
 				code: "stripe_checkout_missing_url",
 				severity: "high",
+				...stripeFailureContext,
 			});
 			return jsonWithRequestId(
 				{
@@ -83,6 +90,7 @@ export async function POST(request: Request) {
 			userId,
 			severity: "high",
 			code: "stripe_checkout_failed",
+			...stripeFailureContext,
 		});
 	}
 }

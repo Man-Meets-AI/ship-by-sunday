@@ -201,6 +201,8 @@ export const apiRouteConfig = {
 	stripeCheckout: "/api/stripe/checkout",
 	stripeWebhook: "/api/stripe/webhook",
 	observabilityClerk: "/api/observability/clerk",
+	observabilityVercel: "/api/observability/vercel",
+	observabilityIncidentStatus: "/api/observability/incidents/[incidentId]/status",
 	codexGenerate: "/api/codex/generate",
 	codexAccountRead: "/api/codex/account/read",
 	codexAccountLoginStart: "/api/codex/account/login/start",

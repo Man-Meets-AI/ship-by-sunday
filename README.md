@@ -48,6 +48,8 @@ Need a Convex account first? Create one here: [https://convex.dev/referral/PARKE
 
 This writes `NEXT_PUBLIC_CONVEX_URL` and `CONVEX_DEPLOYMENT` into `.env.local` for your per-developer hosted Convex dev deployment.
 
+For observability and other Convex HTTP actions, the app can also use `NEXT_PUBLIC_CONVEX_SITE_URL` when the deployment exposes browser traffic on `.convex.cloud` and HTTP actions on `.convex.site`.
+
 4. Start the normal local dev workflow:
 
 ```bash
@@ -142,17 +144,29 @@ The purchase-to-access behavior contract lives in [docs/delivery-onboarding/stac
 The app now ships a self-hosted error pipeline:
 
 - Next.js server and client failures are normalized in `features/observability/`
+- high-signal Clerk `session.revoked` webhooks are verified at `/api/observability/clerk`
+- production Vercel deployment failures and cancellations are verified at `/api/observability/vercel`
+- maintainers can change live incident state through `/api/observability/incidents/[incidentId]/status`
 - unexpected API route failures are tagged with `x-request-id`
 - events are ingested into Convex through `/observability/events`
-- Convex deduplicates repeated incidents and sends alerts to Telegram
+- Convex deduplicates repeated incidents and sends alerts to Telegram while suppressing recursive `telegram_delivery` incidents
 
 Required env values:
 
 ```bash
 CLERK_WEBHOOK_SIGNING_SECRET=
 OBSERVABILITY_INGEST_TOKEN=
+OBSERVABILITY_INCIDENT_CONTROL_TOKEN=
+OBSERVABILITY_VERCEL_WEBHOOK_SECRET=
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_CHAT_ID=
+```
+
+For production deploys, also set:
+
+```bash
+NEXT_PUBLIC_CONVEX_URL=
+NEXT_PUBLIC_CONVEX_SITE_URL=
 ```
 
 `OBSERVABILITY_INGEST_TOKEN` is not a vendor-issued key. It is just a strong random shared secret that must match in both the Next.js runtime and the Convex runtime. Generate one with:
@@ -163,6 +177,12 @@ openssl rand -hex 32
 
 `CLERK_WEBHOOK_SIGNING_SECRET` comes from the Clerk webhook endpoint configuration for `/api/observability/clerk`.
 
+`OBSERVABILITY_INCIDENT_CONTROL_TOKEN` is a separate bearer token for the maintainer-only status route at `/api/observability/incidents/[incidentId]/status`. Do not reuse `OBSERVABILITY_INGEST_TOKEN`; incident creation and incident lifecycle mutation intentionally use different secrets.
+
+`OBSERVABILITY_VERCEL_WEBHOOK_SECRET` comes from the Vercel webhook configuration for `/api/observability/vercel` and is used to verify the `x-vercel-signature` HMAC header on incoming deployment events.
+
+`NEXT_PUBLIC_CONVEX_SITE_URL` should point at the matching `.convex.site` origin for the same deployment used by `NEXT_PUBLIC_CONVEX_URL` whenever the app needs Convex HTTP actions such as observability ingest or the incident-control route. The browser client URL can stay on `.convex.cloud`.
+
 `TELEGRAM_BOT_TOKEN` comes from BotFather. `TELEGRAM_CHAT_ID` is the chat or group id the bot should post into. A simple way to fetch it is to message the bot once, then inspect:
 
 ```bash
@@ -170,6 +190,14 @@ curl "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/getUpdates"
 ```
 
 Use `ENABLE_OBSERVABILITY_TEST_TRIGGER=1` only in automated browser-testing environments; it enables the protected-shell fault injection used by the Playwright auth harness.
+
+The live production smoke now proves:
+
+- signed Clerk webhook incidents persist and deliver
+- signed Vercel webhook incidents persist and deliver
+- the public incident status route can `ack` a live incident and suppress repeat delivery
+
+The only remaining unproven live path is the authenticated Codex runtime route.
 
 ## Public SEO Surface
 

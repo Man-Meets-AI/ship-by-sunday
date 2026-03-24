@@ -6,6 +6,9 @@ const createSessionMock = vi.fn();
 const getAppBaseUrlMock = vi.fn();
 const getStripeLineItemMock = vi.fn();
 const getStripeMock = vi.fn();
+const getStripeModeLabelMock = vi.fn();
+const getStripeDashboardUrlMock = vi.fn();
+const getStripeProductDashboardUrlMock = vi.fn();
 
 vi.mock("@clerk/nextjs/server", () => ({
 	auth: authMock,
@@ -15,6 +18,9 @@ vi.mock("@clerk/nextjs/server", () => ({
 vi.mock("@/platform/billing/stripe", () => ({
 	getStripe: getStripeMock,
 	getStripeLineItem: getStripeLineItemMock,
+	getStripeModeLabel: getStripeModeLabelMock,
+	getStripeDashboardUrl: getStripeDashboardUrlMock,
+	getStripeProductDashboardUrl: getStripeProductDashboardUrlMock,
 }));
 
 vi.mock("@/platform/next/app-url", () => ({
@@ -35,6 +41,19 @@ describe("POST /api/stripe/checkout", () => {
 		getAppBaseUrlMock.mockReset();
 		getStripeLineItemMock.mockReset();
 		getStripeMock.mockReset();
+		getStripeModeLabelMock.mockReset();
+		getStripeDashboardUrlMock.mockReset();
+		getStripeProductDashboardUrlMock.mockReset();
+		getStripeModeLabelMock.mockReturnValue("test");
+		getStripeDashboardUrlMock.mockImplementation(
+			(path?: string) =>
+				path
+					? `https://dashboard.stripe.com/test/${path}`
+					: "https://dashboard.stripe.com/test",
+		);
+		getStripeProductDashboardUrlMock.mockReturnValue(
+			"https://dashboard.stripe.com/test/products",
+		);
 		vi.resetModules();
 	});
 

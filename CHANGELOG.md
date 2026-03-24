@@ -4,6 +4,9 @@
 
 ### Changed
 
+- Shipped the observability incident bus end to end: normalized `incidents` now drive Telegram delivery, production Clerk and Vercel webhooks land as first-class incidents, Telegram delivery failures become non-recursive `telegram_delivery` incidents, and maintainers can change live incident state through a token-protected status route.
+- Hardened the production deploy path for observability by splitting Convex browser traffic from Convex HTTP-action traffic (`NEXT_PUBLIC_CONVEX_URL` vs `NEXT_PUBLIC_CONVEX_SITE_URL`), fixing the Convex env loader so unrelated secrets no longer block backend deploys, and documenting the exact env parity required across Vercel and Convex.
+- Enriched Stripe failure incidents so checkout failures, webhook verification failures, missing `clerkUserId`, and grant-persistence failures now include stronger dashboard links and configuration context instead of generic billing errors.
 - Modularized the public homepage so starter config now controls fixed top-level sections and CTA targets, while the landing page keeps the default checkout funnel, founder-led social proof, truthful FAQ/Product schema, and browser-smoke-verified anchors.
 - Added a backward-compatible starter contract in `config/product.ts`, so brand defaults, workspace labels, and optional modules now have a single code-defined control plane.
 - Added soft module gating for `docs`, `course`, and `starterRepo`, so the app now hides or disables those surfaces deliberately instead of leaving haunted leftovers.

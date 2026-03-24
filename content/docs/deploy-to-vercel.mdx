@@ -15,10 +15,18 @@ Prepare production values in your hosting dashboards and provider dashboards. Mi
 
 - Clerk publishable and secret keys
 - Clerk frontend API URL
-- Convex public URL and any deployment values your Convex environment writes
+- Convex client URL (`NEXT_PUBLIC_CONVEX_URL`)
+- Convex HTTP-actions URL (`NEXT_PUBLIC_CONVEX_SITE_URL`) when the deployment serves HTTP actions on `.convex.site`
+- any deployment values your Convex environment writes
 - Stripe secret key, product id, price id
 - live `STRIPE_WEBHOOK_SECRET`
 - `APP_BASE_URL`
+- `OBSERVABILITY_INGEST_TOKEN`
+- `OBSERVABILITY_INCIDENT_CONTROL_TOKEN`
+- `CLERK_WEBHOOK_SIGNING_SECRET`
+- `OBSERVABILITY_VERCEL_WEBHOOK_SECRET`
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_CHAT_ID`
 
 ## Vercel checklist
 
@@ -26,6 +34,7 @@ Prepare production values in your hosting dashboards and provider dashboards. Mi
 - keep the package manager pinned to the repo version
 - use real production Clerk env values
 - use real production Stripe live keys
+- if the app uses observability or any other Convex HTTP actions, set `NEXT_PUBLIC_CONVEX_SITE_URL` to the matching `.convex.site` host
 
 ## Convex checklist
 
@@ -37,6 +46,7 @@ Do not leave Convex pointed at:
 - a dev Clerk instance
 - an outdated Stripe webhook secret
 - a mismatched Stripe secret key
+- a deployment that does not have the current `observability` functions pushed
 
 ## Post-deploy verification
 
@@ -47,9 +57,11 @@ After deploy, confirm all of this with a real test flow:
 3. live checkout returns to `/checkout/success`
 4. webhook grants access
 5. newly granted user reaches `/mission`
+6. signed Clerk and Vercel observability webhooks persist incidents and deliver Telegram packets
+7. the public incident status route can `ack` a live incident and keep repeat delivery suppressed
 
 ## What success looks like
 
-Production is healthy when payment, access, and route protection all agree on the same user and the same environment values.
+Production is healthy when payment, access, route protection, and observability all agree on the same user and the same environment values.
 
 If payment completes but access does not, debug env parity before you rewrite application code.
