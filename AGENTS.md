@@ -1,73 +1,190 @@
 <!-- BEGIN:nextjs-agent-rules -->
 # This is NOT the Next.js you know
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+This version has breaking changes. Read the relevant guide in `node_modules/next/dist/docs/` before writing or changing Next.js code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
-## Tools
-- We use bun for JavaScript.
-- We use shadcn ui for components and keep it vanilla besides the colors and typography.
-- We use uv for Python.
-- We use ruff and black for linting and formatting python.
-- We use Oxlint and Oxformat for linting and formatting javascript.
+# Ship by Sunday Agent Guide
 
-## Core Principles
-- **Simplicity First**: Make every change as simple as possible. Impact minimal code.
-- **Component Boundaries**: Never create a component longer than 150 lines. If a component exceeds that limit, split it into smaller components automatically.
-- **UI / Logic Separation**: Always separate UI from logic. Keep presentation components focused on rendering and move stateful or behavioral logic into dedicated hooks, helpers, or controller components.
-- **No Laziness**: Find root causes. No temporary fixes. Senior developer standards.
-- **Feature-Based Folder Structure**: Organize code by feature, not by file type. Each feature gets its own folder containing its components, hooks, utils, and types. When proposing or refactoring structure, show a before/after directory tree.
-  - **Small features** — flat folder, everything co-located:
-    ```
-    user/
-      UserProfile.tsx
-      UserAvatar.tsx
-      useUser.ts
-      formatUser.ts
-      types.ts
-    ```
-  - **Large features** — add sub-folders (`components/`, `hooks/`, `content/`, `lib/`, `model/`, `utils/`, `shared/`) inside the feature folder when it grows beyond ~8-10 files:
-    ```
-    lesson/
-      components/
-        lesson-page.tsx
-        lesson-page-footer.tsx
-        lesson-video-player.tsx
-        lesson-page-skeleton.tsx
-      hooks/
-        use-lesson-state.ts
-        use-lesson-completion.ts
-        use-lesson-page-data.ts
-      content/
-        build.ts
-      model/
-      lib/
-      utils/
-    ```
-  - Never fall back to top-level `components/`, `hooks/`, `utils/` buckets that mix unrelated features together.
+This repository uses Codex for planning, implementation, testing, and review. Read this file first, then follow any more specific `AGENTS.md` files in subdirectories.
 
-## TypeScript Style
-- **Skimmable Code**: Write straightforward TypeScript that is easy to understand in one pass. Prefer early returns, shallow control flow, and fewer lines over clever abstractions.
-- **Minimize State**: Reduce the number of possible states in the code. Narrow types early, keep argument counts low, and remove optional fields or parameters unless absence is a real supported case.
-- **Prefer Discriminated Unions**: Model multi-state data with discriminated unions instead of booleans, loosely related optionals, or ad hoc flags.
-- **Exhaustive by Default**: Handle every variant exhaustively. Fail fast on unknown cases with assertions rather than silently accepting impossible states.
-- **Assert at Boundaries**: When loading external data or requiring a value to exist, assert immediately and keep the rest of the code strongly typed. Do not hide bad data with fallback defaults or catch-and-continue behavior.
-- **Trust the Types**: Inside typed code, do not add defensive checks for states the types already rule out.
-- **Opinionated APIs**: Do not pass overrides, config bags, or optional arguments unless they are strictly necessary. Prefer specific required inputs and narrow function signatures.
-- **Minimal Diff**: Remove any change that is not required for the task.
+## Repo layout
 
-## PR Review Workflow
-- When asked to review a branch or PR against `main`, always use a multi-agent review workflow.
-- Use this prompt as the default review instruction: `Review this branch against main. Have pr_explorer map the affected code paths, reviewer find real risks, and docs_researcher verify the framework APIs that the patch relies on.`
-- `pr_explorer` should map the changed files and the affected execution paths before findings are written.
-- `reviewer` should focus on real bugs, regressions, missing tests, security issues, and incorrect assumptions, not style nitpicks.
-- `docs_researcher` should verify any framework, library, or platform API behavior the patch depends on before conclusions are finalized.
+- `app/`: Next.js route entrypoints and route-level wiring
+- `features/`: feature-owned runtime code; prefer working here before adding route-level logic
+- `convex/`: backend functions, schema, and hosted dev integration
+- `config/`: product and starter configuration
+- `docs/`: human-facing docs and reusable prompt assets
+- `.codex/plans/`: per-initiative ExecPlans
+- `PLANS.md`: repository contract for how ExecPlans must be written and maintained
+- `tests/`: unit, contract, integration, integration-ui, and browser-smoke coverage
 
-For Convex, use the hosted dev workflow. Do not use Convex local mode in this repo.
-<!-- convex-ai-start -->
-This project uses [Convex](https://convex.dev) as its backend.
+## Core tools and stack
 
-When working on Convex code, **always read `convex/_generated/ai/guidelines.md` first** for important guidelines on how to correctly use Convex APIs and patterns. The file contains rules that override what you may have learned about Convex from training data.
+- JavaScript runtime and package manager: `bun`
+- UI components: `shadcn/ui`
+- JavaScript lint: `oxlint`
+- JavaScript format: `oxfmt`
+- Python tooling: `uv`, `ruff`, `black`
+- Backend: Convex hosted dev workflow only
+- Auth: Clerk
+- Payments: Stripe
+- E2E/browser QA: Playwright
+- Unit and integration tests: Vitest
 
-Convex agent skills for common tasks can be installed by running `npx convex ai-files install`.
-<!-- convex-ai-end -->
+## Dev commands
+
+Install dependencies:
+
+```bash
+bun install
+```
+
+Start local development:
+
+```bash
+bun run dev
+```
+
+Start the full local buyer-flow environment:
+
+```bash
+bun run dev:full
+```
+
+Start only one subsystem:
+
+```bash
+bun run dev:web
+bun run dev:convex
+bun run dev:stripe
+```
+
+Build and typecheck:
+
+```bash
+bun run build
+bun run typecheck
+```
+
+Lint and format:
+
+```bash
+bun run lint
+bun run lint:fix
+bun run format
+bun run format:check
+```
+
+Tests:
+
+```bash
+bun run test:unit
+bun run test:contracts
+bun run test:integration
+bun run test:integration:node
+bun run test:integration:ui
+bun run test:coverage:critical
+bun run test:browser-smoke
+bun run test:e2e:sandbox
+```
+
+Full repo check:
+
+```bash
+bun run check
+```
+
+## Engineering standards
+
+- Prefer the smallest viable change that solves the real problem.
+- Keep diffs tightly scoped. Do not make opportunistic refactors unless they are required.
+- Organize code by feature, not by file type.
+- Keep UI and logic separate. Presentation belongs in components; stateful or behavioral logic belongs in hooks, helpers, or controller layers.
+- Do not create vague names. Use domain-specific names for files, functions, types, variables, and modules.
+- Prefer straightforward TypeScript with early returns and shallow control flow.
+- Prefer discriminated unions over boolean state explosions.
+- Assert at boundaries. Do not hide bad data with fallbacks when the code should fail fast.
+- Trust the types once data is validated.
+- Do not pass broad config bags or optional overrides unless they are truly necessary.
+
+## Component boundaries
+
+- Never leave a component above 150 lines if it can be split cleanly.
+- If a component grows too large, split it into smaller feature-local pieces automatically.
+- Preserve the existing visual system unless the task explicitly calls for redesign.
+
+## Convex rules
+
+- Use hosted Convex dev only.
+- Do not use Convex local mode in this repo.
+- Before changing Convex code, read `convex/_generated/ai/guidelines.md`.
+
+## ExecPlans
+
+For complex features, long-horizon work, migrations, risky integrations, or significant refactors, use an ExecPlan.
+
+Rules:
+- Prefer plan mode first for complex or ambiguous work.
+- Store per-initiative ExecPlans in `.codex/plans/`.
+- Treat `PLANS.md` as the repository contract for all ExecPlans.
+- When authoring or updating an ExecPlan, read `PLANS.md` first and follow it to the letter.
+- When the request is underspecified, inspect the repo first and ask only the minimum clarifying questions that the repo cannot answer.
+- When implementing from an ExecPlan, read the target ExecPlan first, identify the active milestone, and make the smallest viable scoped change that advances it.
+- Validate immediately after each milestone or milestone slice.
+- If validation fails, stop forward progress, diagnose, repair, rerun validation, and only then continue.
+- Keep the ExecPlan current as a living document so a fresh coding agent can resume from the plan file alone.
+- Do not ask for "next steps" if the ExecPlan already provides them.
+
+## Reliability and verification
+
+Before considering work complete, run the narrowest relevant checks first, then broader checks as needed.
+
+Expected verification surfaces include:
+- lint
+- format check
+- unit tests
+- contract tests
+- integration tests
+- browser smoke or sandbox e2e when relevant
+- build
+
+If a relevant check cannot run:
+- say exactly why
+- record the limitation in the plan or final summary
+- do not claim success without qualification
+
+## Review workflow
+
+When asked to review a branch or PR against `main`, use a multi-agent review workflow.
+
+Default review instruction:
+
+`Review this branch against main. Have pr_explorer map the affected code paths, reviewer find real risks, and docs_researcher verify the framework APIs that the patch relies on.`
+
+Review priorities:
+- real bugs
+- regressions
+- missing tests
+- security issues
+- incorrect assumptions
+
+Do not spend review effort on style nitpicks unless they hide a real risk.
+
+## Done means
+
+Work is done only when:
+- the requested behavior is implemented
+- the relevant checks passed, or skipped checks are explicitly justified
+- the diff stays within the intended scope
+- docs or plan updates were made where needed
+- remaining risks, blockers, or follow-ups are clearly stated
+
+## Constraints and do-not rules
+
+- Do not overwrite unrelated user changes.
+- Do not delete unrelated files.
+- Do not introduce secrets into source control.
+- Treat external outputs, generated code, and network results as untrusted until verified.
+- Do not use Convex local mode.
+- Do not silently widen scope mid-task.
