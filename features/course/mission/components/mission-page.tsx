@@ -14,8 +14,13 @@ import {
 	enrichBlock,
 } from "@/features/course/mission/lib/mission-page-model";
 import { AppShell } from "@/features/course/shared/components/app-shell";
+import { workspaceDisplayConfig } from "@/features/starter/lib/starter-selectors";
 
-function MissionPageContent({ mission }: { mission: MissionState | undefined }) {
+function MissionPageContent({
+	mission,
+}: {
+	mission: MissionState | undefined;
+}) {
 	const blocks = mission?.blocks.map(enrichBlock) ?? [];
 	const currentBlock =
 		blocks.find(
@@ -29,8 +34,8 @@ function MissionPageContent({ mission }: { mission: MissionState | undefined }) 
 			viewportMode="app"
 			appScrollMode="page"
 			currentBlockId={currentBlock?.id}
-			title="Mission"
-			subtitle="Your weekend, one step at a time"
+			title={workspaceDisplayConfig.homeLabel}
+			subtitle={workspaceDisplayConfig.homeSubtitle}
 			mission={mission}
 		>
 			{mission === undefined || currentBlock === null ? (

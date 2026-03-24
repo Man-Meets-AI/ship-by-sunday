@@ -9,13 +9,14 @@ These are the intended extension points for the starter. Change these first inst
 
 ## Best first changes
 
-| Area                   | What to change first                                                  | Verification     |
-| ---------------------- | --------------------------------------------------------------------- | ---------------- |
+| Area                   | What to change first                                                  | Verification    |
+| ---------------------- | --------------------------------------------------------------------- | --------------- |
 | Product config         | Name, promise, price, and brand-level defaults in `config/product.ts` | `bun run build` |
+| Module flags           | `starterConfig.modules` plus the neutral workspace-home fallback      | `bun run build` |
 | Marketing site         | Hero copy, proof, FAQ, screenshots, and pricing sections              | `bun run build` |
 | Protected workspace    | Mission framing, lesson chrome, artifacts, and settings surfaces      | `bun run check` |
 | Theme and styling      | Colors, typography, spacing, imagery, and motion defaults             | `bun run build` |
-| Optional build helpers | Starter-template CTA and Codex-assisted build helpers                 | targeted checks  |
+| Optional build helpers | Starter-template CTA and Codex-assisted build helpers                 | targeted checks |
 
 ## Good first milestone
 
@@ -25,6 +26,8 @@ A strong early milestone is:
 2. the protected workspace reflects your product language
 3. the first real protected user flow is visible
 4. the paid-access contract still works
+
+If you are not keeping the guided course, the first real protected user flow should now be the neutral starter-mode workspace home on `/mission`, not a dead-end disabled shell.
 
 ## Leave these alone until later
 
@@ -40,10 +43,24 @@ Those are the highest-risk parts of the starter.
 ## Guardrails
 
 - keep `config/product.ts` as the first place to change product identity and route constants
+- use `starterConfig.modules` before inventing route-level hacks or manual hidden links
 - keep the landing-page offer work inside `features/marketing/**` and `public/`
 - keep the course runtime and lesson model inside `features/course/**`
+- keep starter-mode protected home work inside `features/workspace-home/**`
 - keep the access layer as the source of truth for product access
 - keep the purchase-to-access behavior aligned with the verified checkout and webhook contract
+
+## Starter mode
+
+The starter now has a deliberate `course = false` mode.
+
+When `starterConfig.modules.course` is `false`:
+
+- `/mission` becomes the neutral protected starter home
+- `/lesson/[lessonKey]` and `/artifacts` stay on explicit disabled states
+- the paid-access and access-recovery contract stays unchanged
+
+That is the preferred way to move toward a non-course product. Do not start by renaming routes or rewriting the access stack.
 
 ## What success looks like
 

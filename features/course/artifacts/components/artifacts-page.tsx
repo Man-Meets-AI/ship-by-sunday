@@ -28,6 +28,7 @@ import {
 } from "@/features/course/artifacts/components/artifacts-page-states";
 import { groupArtifactsByBlock } from "@/features/course/artifacts/lib/group-artifacts-by-block";
 import type { ArtifactPreview } from "@/features/course/lesson/model/registry";
+import { workspaceDisplayConfig } from "@/features/starter/lib/starter-selectors";
 
 function ArtifactsPageContent({
 	artifacts,
@@ -45,7 +46,9 @@ function ArtifactsPageContent({
 					<BreadcrumbList>
 						<BreadcrumbItem>
 							<BreadcrumbLink asChild>
-								<Link href={routeConfig.mission}>Mission</Link>
+								<Link href={routeConfig.mission}>
+									{workspaceDisplayConfig.homeLabel}
+								</Link>
 							</BreadcrumbLink>
 						</BreadcrumbItem>
 						<BreadcrumbSeparator />

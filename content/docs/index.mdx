@@ -1,11 +1,11 @@
 ---
 title: Start Here
-description: Get the Ship by Sunday starter running, understand the real handoff, and choose the right next doc without guessing.
+description: Get the starter running, understand the real handoff, and choose the right next doc without guessing.
 ---
 
 # Start Here
 
-`Ship by Sunday Starter` is a tutorial-first starter for builders who want a public landing page, real paid access, and a protected workspace without stitching the whole stack together from scratch.
+`Ship by Sunday Starter` is a tutorial-first starter for builders who want a public landing page, real paid access, and a protected workspace without stitching the whole stack together from scratch. It now supports starter-mode module flags, including a neutral protected workspace home when the course module is off.
 
 If you are new to this stack, do not start by rewriting auth, payments, or access logic. Get the starter running cleanly, confirm the paid handoff works, and then change the obvious product surfaces first.
 
@@ -13,11 +13,12 @@ If you are new to this stack, do not start by rewriting auth, payments, or acces
 
 - a public marketing surface on `/`
 - a docs surface on `/docs`
-- a protected product surface on `/mission`, `/lesson/[lessonId]`, `/artifacts`, and `/settings`
+- a protected product surface on `/mission`, `/lesson/[lessonKey]`, `/artifacts`, and `/settings`
 - Clerk sign-in and sign-up
 - Stripe-hosted checkout plus success and cancel flows
 - Convex-backed product-access and resume state
-- a starter template path you can shape into your product
+- a starter contract and module flags in `config/product.ts`
+- a neutral protected workspace home on `/mission` when `starterConfig.modules.course` is `false`
 
 ## The fastest path
 
@@ -52,6 +53,7 @@ Those files matter, but they are the fragile part of the purchase-to-access cont
 - Need the architecture picture first? Read [How the Starter Works](/docs/how-the-starter-works).
 - Need the shortest setup path? Read [Local Setup](/docs/local-setup).
 - Need help shaping the starter into your product? Read [Build Your Product](/docs/build-your-product).
+- Need the starter seams first? Read [Customize the Starter](/docs/customize-the-starter).
 - Need help working with an AI coding agent? Read [IDE + Terminal Basics](/docs/ide-and-terminal-basics) and [The Build Loop](/docs/the-build-loop).
 - Need the fastest debug order? Start in [Troubleshooting Access](/docs/troubleshooting/access).
 

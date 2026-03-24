@@ -10,14 +10,15 @@ Why its awesome
 - Shadcn, TailwindV4
 - Bring your own AI integration (chatgpt)
 
-`Ship by Sunday` is the app behind a guided weekend sprint for builders who want to go from rough idea to shipped v1. This repo contains the public marketing site, Stripe checkout flow, protected student workspace, and the code-defined curriculum that powers the product.
+`Ship by Sunday` is the app behind a guided weekend sprint for builders who want to go from rough idea to shipped v1. This repo now doubles as the configurable starter base, with the public marketing site, Stripe checkout flow, protected workspace shell, optional course runtime, and the code-defined seams that let those surfaces be turned on or off without rewriting the purchase-to-access contract.
 
 ## What Lives Here
 
 - Public marketing and pricing pages in `app/`
-- Protected product routes at `/mission`, `/lesson/[lessonKey]`, `/artifacts`, and `/settings`, with workspace recovery handled inline on those routes
+- Protected product routes at `/mission`, `/lesson/[lessonKey]`, `/artifacts`, and `/settings`, with `/mission` acting as the canonical protected entry and starter-mode home
 - Feature-first runtime code in `features/`, with the curriculum and lesson model centered under `features/course/lesson/`
 - Purchase-to-access handoff across Clerk, Stripe, and Convex product-access state
+- Starter configuration and module flags in `config/product.ts`
 
 ## Quick Start
 
@@ -80,6 +81,27 @@ The optional in-app Codex account and generation routes require a runtime that c
 
 - Local development: enabled by default
 - Vercel: disabled by default unless you explicitly set `CODEX_APP_SERVER_ENABLED=true` on a compatible runtime
+
+## Starter Mode and Module Flags
+
+The starter’s current control plane lives in `starterConfig` inside `config/product.ts`.
+
+The `starterConfig.modules` flags currently control:
+
+- `docs`
+- `course`
+- `starterRepo`
+- `codex`
+- `observability`
+
+Current behavior:
+
+- when `course` is `false`, `/mission` renders the neutral protected starter home from `features/workspace-home/` instead of the guided mission flow
+- when `course` is `false`, `/lesson/[lessonKey]` and `/artifacts` stay on deliberate disabled states
+- when `docs` is `false`, docs links hide and `/docs` renders a disabled-state surface instead of the docs shell
+- when `starterRepo` is `false`, starter-repo access cards disappear from the protected app
+
+These are code-level starter defaults, not a full in-app admin surface yet.
 
 ## Common Commands
 
@@ -151,10 +173,11 @@ Use `ENABLE_OBSERVABILITY_TEST_TRIGGER=1` only in automated browser-testing envi
 
 ## Intentionally Customizable
 
+- Starter contract, module flags, workspace labels, and starter-mode defaults: `config/product.ts` and `features/starter/lib/starter-selectors.ts`
 - Curriculum shape, stable lesson identity, canonical labels, and route mapping: `features/course/lesson/model/curriculum.ts`
 - Lesson copy, workbench fields, and lesson-specific page behavior: `features/course/lesson/model/lessons/*.ts` and `features/course/lesson/content/build.ts`
 - Landing-page copy, offer framing, and media: `features/marketing/components/home-page.tsx`, `features/marketing/components/faq-accordion.tsx`, and `public/`
-- Student workspace UI and shell behavior: `features/course/` plus the protected route group in `app/(workspace)/`
+- Protected workspace UI and shell behavior: `features/course/`, `features/workspace-home/`, and the protected route group in `app/(workspace)/`
 - Theme tokens and visual language: `app/globals.css`
 - Purchase, product-access, and access flow: `app/api/stripe/checkout`, `features/checkout/`, `features/product-access/`, `convex/access.ts`, `convex/http.ts`, and `convex/course/`
 - Optional starter-template and Codex-assisted build helpers: `.env.local.example`, `scripts/`, `app/api/codex/*`, and `features/codex/`

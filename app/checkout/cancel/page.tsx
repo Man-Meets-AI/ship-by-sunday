@@ -9,7 +9,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { routeConfig } from "@/config/product";
+import { productConfig, routeConfig } from "@/config/product";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
@@ -36,8 +36,8 @@ export default function Page() {
 					<div className="rounded-lg border bg-muted/30 p-4">
 						<p className="text-sm font-medium">Next step</p>
 						<p className="mt-2 text-sm text-muted-foreground">
-							Go back to pricing if you still want Ship by Sunday, or return
-							home if you were just checking the offer.
+							Go back to pricing if you still want {productConfig.name}, or
+							return home if you were just checking the offer.
 						</p>
 					</div>
 				</CardContent>

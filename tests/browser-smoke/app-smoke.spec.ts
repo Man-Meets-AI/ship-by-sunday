@@ -20,7 +20,7 @@ test("checkout success without a session renders the recovery surface", async ({
 	expect(response.ok()).toBe(true);
 	expect(html).toContain("Verify access");
 	expect(html).toContain("Missing checkout session");
-	expect(html).toContain("Open mission");
+	expect(html).toContain("Open workspace");
 });
 
 test("homepage renders structured SEO data", async ({ request }) => {

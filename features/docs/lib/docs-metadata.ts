@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 
-import { productConfig } from "@/config/product";
 import { getDocsPagePath } from "@/features/docs/server/page-paths";
+import { docsDisplayConfig } from "@/features/starter/lib/starter-selectors";
 
-const docsSiteName = `${productConfig.name} Docs`;
-const docsDescription =
-	"Tutorial-first docs for getting the Ship by Sunday starter running, customized, and shipped.";
+const docsSiteName = docsDisplayConfig.siteName;
+const docsDescription = docsDisplayConfig.description;
 
 function resolveMetadataTitle(title: Metadata["title"], fallback: string) {
 	if (typeof title === "string") {

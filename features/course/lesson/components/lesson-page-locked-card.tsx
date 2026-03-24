@@ -10,6 +10,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { routeConfig } from "@/config/product";
+import { workspaceDisplayConfig } from "@/features/starter/lib/starter-selectors";
 
 type LessonPageLockedCardProps = {
 	lessonId: string;
@@ -32,7 +33,8 @@ export function LessonPageLockedCard({
 					{lessonId} {shortTitle}
 				</CardTitle>
 				<CardDescription className="text-pretty pt-2 text-base leading-relaxed">
-					This lesson is locked. Go back to the mission map and finish{" "}
+					This lesson is locked. Go back to the{" "}
+					{workspaceDisplayConfig.homeNoun} and finish{" "}
 					{prevLessonId ?? "the previous unlocked lesson"} first.
 				</CardDescription>
 			</CardHeader>
@@ -41,7 +43,9 @@ export function LessonPageLockedCard({
 					Go back
 				</Button>
 				<Button asChild variant="default">
-					<Link href={routeConfig.mission}>Open mission</Link>
+					<Link href={routeConfig.mission}>
+						{workspaceDisplayConfig.openHomeActionLabel}
+					</Link>
 				</Button>
 			</CardFooter>
 		</Card>

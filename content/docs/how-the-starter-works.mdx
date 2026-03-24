@@ -1,6 +1,6 @@
 ---
 title: How the Starter Works
-description: Understand the repo shape, the purchase-to-access handoff, and the protected workspace flow before you customize the starter.
+description: Understand the repo shape, starter module flags, the purchase-to-access handoff, and the protected workspace flow before you customize the starter.
 ---
 
 # How the Starter Works
@@ -19,6 +19,9 @@ This starter is opinionated in one specific way: it gives you the full public-to
 
 - `app/`: route entrypoints
 - `features/`: product code grouped by domain
+- `config/product.ts`: starter contract, branding defaults, route constants, and module flags
+- `features/starter/`: starter selectors plus disabled-state helpers
+- `features/workspace-home/`: neutral protected workspace home for starter mode
 - `shared/`: config, env helpers, shared providers
 - `platform/`: environment parsing and integration adapters
 - `convex/`: backend functions grouped by domain
@@ -30,12 +33,33 @@ This starter is opinionated in one specific way: it gives you the full public-to
 The runtime splits into three clear surfaces:
 
 - public marketing surface on `/`
-- public docs surface on `/docs`
-- protected product surface on `/mission`, `/lesson/[lessonId]`, `/artifacts`, and `/settings`
+- public docs surface on `/docs` when the docs module is enabled
+- protected product surface on `/mission`, `/lesson/[lessonKey]`, `/artifacts`, and `/settings`
 
 That split matters because checkout and access recovery live between those worlds.
 
 `app/(workspace)/layout.tsx` is the single server-side product-access gate for the protected app routes. Middleware only handles sign-in.
+
+## Starter config and module gating
+
+The starter control plane currently lives in `starterConfig` inside `config/product.ts`.
+
+Important module flags:
+
+- `docs`
+- `course`
+- `starterRepo`
+- `codex`
+- `observability`
+
+Current behavior:
+
+- if `docs` is off, docs links hide and `/docs` renders a disabled-state surface
+- if `course` is off, `/mission` renders the neutral protected starter home from `features/workspace-home/`
+- if `course` is off, `/lesson/[lessonKey]` and `/artifacts` stay on deliberate disabled states
+- if `starterRepo` is off, starter-repo cards disappear from the protected app
+
+These module gates sit above the existing auth, checkout, and access model. They do not replace it.
 
 ## Purchase-to-access flow
 
@@ -47,7 +71,8 @@ That split matters because checkout and access recovery live between those world
 6. Convex upserts the active product-access grant.
 7. `/checkout/success` starts from a server-fetched product-access snapshot, then continues Clerk-gated live access polling before redirecting into `/mission`.
 8. `/mission` and the other workspace routes check the same product-access state and recover inline if access appears later.
-9. Returning users with granted access who hit `/` are resumed into `/mission` or their most recently worked accessible lesson unless they explicitly force marketing mode.
+9. `/mission` renders either the guided mission flow or the neutral starter workspace home depending on `starterConfig.modules.course`.
+10. Returning users with granted access who hit `/` are resumed into `/mission` or their most recently worked accessible lesson unless they explicitly force marketing mode.
 
 Protected app routes also start from server-fetched mission or access data before the client-side Convex subscriptions take over. That avoids a hydration-time auth race where the browser can briefly act signed out even though the server already proved access.
 

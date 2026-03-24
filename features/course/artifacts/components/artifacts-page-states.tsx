@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { routeConfig } from "@/config/product";
+import { workspaceDisplayConfig } from "@/features/starter/lib/starter-selectors";
 
 export function ArtifactsLoadingState() {
 	return (
@@ -38,7 +39,9 @@ export function ArtifactsEmptyState() {
 			</CardHeader>
 			<CardContent>
 				<Button asChild>
-					<Link href={routeConfig.mission}>Go to mission</Link>
+					<Link href={routeConfig.mission}>
+						Go to {workspaceDisplayConfig.homeNoun}
+					</Link>
 				</Button>
 			</CardContent>
 		</Card>

@@ -3,6 +3,7 @@ import type {
 	ProductAccess,
 	ProductAccessStatus,
 } from "@/features/product-access/lib/product-access";
+import { workspaceDisplayConfig } from "@/features/starter/lib/starter-selectors";
 
 export type AccessActionModel =
 	| {
@@ -75,6 +76,7 @@ export function getAccessViewModel({
 	signInHref: string;
 	homeHref: string;
 }): AccessViewModel {
+	const openWorkspaceLabel = workspaceDisplayConfig.openHomeActionLabel;
 	const backHome = {
 		kind: "link" as const,
 		label: "Back home",
@@ -125,7 +127,7 @@ export function getAccessViewModel({
 					"If you just paid, keep this tab open while we finish the product access check.",
 				helpItems: [
 					"Stay on this page for a few seconds so the access check can finish.",
-					"Use Open mission if your product access was already granted.",
+					`Use ${openWorkspaceLabel} if your product access was already granted.`,
 					"Retry checkout only if this account still needs access.",
 				],
 				cards: [

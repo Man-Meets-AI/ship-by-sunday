@@ -1,5 +1,7 @@
 import { api } from "@/convex/_generated/api";
 import { MissionPage } from "@/features/course/mission/components/mission-page";
+import { isStarterModuleEnabled } from "@/features/starter/lib/starter-selectors";
+import { WorkspaceHomePage } from "@/features/workspace-home/components/workspace-home-page";
 import { serverEnv } from "@/platform/env/server";
 import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
 
@@ -14,6 +16,10 @@ export default async function Page({
 		params.__throwTestBoundary === "protected-shell"
 	) {
 		throw new Error("Protected shell test failure");
+	}
+
+	if (!isStarterModuleEnabled("course")) {
+		return <WorkspaceHomePage />;
 	}
 
 	return (

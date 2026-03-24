@@ -1,4 +1,5 @@
 import { routeConfig } from "@/config/product";
+import { workspaceDisplayConfig } from "@/features/starter/lib/starter-selectors";
 
 export function isPathPrefixActive(pathname: string, href: string) {
 	return pathname === href || pathname.startsWith(`${href}/`);
@@ -8,12 +9,12 @@ export function workspaceMenuLinks(pathname: string) {
 	return [
 		{
 			href: routeConfig.artifacts,
-			label: "Artifacts",
+			label: workspaceDisplayConfig.artifactsLabel,
 			active: isPathPrefixActive(pathname, routeConfig.artifacts),
 		},
 		{
 			href: routeConfig.settings,
-			label: "Settings",
+			label: workspaceDisplayConfig.settingsLabel,
 			active: isPathPrefixActive(pathname, routeConfig.settings),
 		},
 	] as const;

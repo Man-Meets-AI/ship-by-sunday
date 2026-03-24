@@ -93,13 +93,13 @@ describe("CheckoutSuccessView interactions", () => {
 		await act(async () => {
 			await vi.advanceTimersByTimeAsync(1_600);
 		});
-		expect(
-			screen.getByText("Unlocking your Ship by Sunday workspace."),
-		).toBeTruthy();
+		expect(screen.getByText("Unlocking your workspace.")).toBeTruthy();
 
 		await act(async () => {
 			await vi.advanceTimersByTimeAsync(1_600);
 		});
-		expect(screen.getByText("Preparing your first mission step.")).toBeTruthy();
+		expect(
+			screen.getByText("Preparing your first workspace step."),
+		).toBeTruthy();
 	});
 });

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-03-24
+
+### Changed
+
+- Added a backward-compatible starter contract in `config/product.ts`, so brand defaults, workspace labels, and optional modules now have a single code-defined control plane.
+- Added soft module gating for `docs`, `course`, and `starterRepo`, so the app now hides or disables those surfaces deliberately instead of leaving haunted leftovers.
+- Replaced the `course = false` protected-shell dead end with a real neutral starter workspace home on `/mission`, while leaving lesson and artifacts routes on explicit disabled states and keeping the purchase-to-access contract unchanged.
+- Synced the canonical starter docs so `README.md`, public builder docs, and the route/customization docs now describe starter mode, module flags, and the neutral protected workspace home.
+
 ## 2026-03-21
 
 ### Changed

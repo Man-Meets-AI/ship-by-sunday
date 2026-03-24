@@ -8,7 +8,7 @@ describe("app not-found route", () => {
 		const markup = renderToStaticMarkup(<NotFound />);
 
 		expect(markup).toContain("Page not found");
-		expect(markup).toContain("Open mission");
+		expect(markup).toContain("Open workspace");
 		expect(markup).toContain("Go home");
 	});
 });

@@ -73,6 +73,8 @@ For the deterministic browser lane that runs in PR CI:
 bun run test:browser-smoke
 ```
 
+This requires `NEXT_PUBLIC_CONVEX_URL` from your hosted Convex dev deployment. Run `bun run dev:convex` first if the browser smoke lane refuses to start.
+
 ### Signed-out protected-route smoke
 
 1. Visit `/mission` or `/settings` while signed out.

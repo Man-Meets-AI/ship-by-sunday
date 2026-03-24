@@ -10,6 +10,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { workspaceDisplayConfig } from "@/features/starter/lib/starter-selectors";
 
 export function NotFoundScreen() {
 	return (
@@ -27,7 +28,9 @@ export function NotFoundScreen() {
 					</CardContent>
 					<CardFooter className="gap-3">
 						<Button asChild>
-							<Link href={routeConfig.mission}>Open mission</Link>
+							<Link href={routeConfig.mission}>
+								{workspaceDisplayConfig.openHomeActionLabel}
+							</Link>
 						</Button>
 						<Button asChild variant="outline">
 							<Link href={routeConfig.home}>Go home</Link>

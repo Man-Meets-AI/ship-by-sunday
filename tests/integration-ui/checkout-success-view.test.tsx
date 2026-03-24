@@ -84,7 +84,7 @@ describe("CheckoutSuccessView", () => {
 		expect(markup).toContain("Polling access");
 		expect(markup).toContain("Confirming your product access.");
 		expect(markup).toContain("What happens next");
-		expect(markup).toContain("Open mission");
+		expect(markup).toContain("Open workspace");
 		expect(markup).toContain('href="/mission"');
 	});
 
@@ -102,7 +102,7 @@ describe("CheckoutSuccessView", () => {
 			sessionId: "cs_live_123",
 		});
 
-		expect(markup).toContain("Opening mission");
+		expect(markup).toContain("Opening workspace");
 		expect(markup).toContain("Access ready");
 		expect(markup).toContain("Redirect armed");
 		expect(markup).toContain("Access confirmed");
@@ -124,7 +124,7 @@ describe("CheckoutSuccessView", () => {
 			{ initialProductAccess: { hasAccess: true } },
 		);
 
-		expect(markup).toContain("Opening mission");
+		expect(markup).toContain("Opening workspace");
 		expect(markup).toContain("Access ready");
 	});
 
@@ -199,7 +199,7 @@ describe("CheckoutSuccessView", () => {
 			const markup = renderView(checkoutSessionState);
 
 			expect(markup).toContain(expectedStatusLabel);
-			expect(markup).toContain("Open mission");
+			expect(markup).toContain("Open workspace");
 			expect(markup).toContain("Go home");
 		},
 	);
