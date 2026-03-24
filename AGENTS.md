@@ -4,9 +4,11 @@
 This version has breaking changes. Read the relevant guide in `apps/web/node_modules/next/dist/docs/` before writing or changing Next.js code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
-# Ship by Sunday Agent Guide
-
-This repository uses Codex for planning, implementation, testing, and review. Read this file first, then follow any more specific `AGENTS.md` files in subdirectories.
+## Ship by Sunday routing
+- For work in `apps/web`, also follow `apps/web/AGENTS.md`.
+- For work in `packages/packet-compiler`, also follow `packages/packet-compiler/AGENTS.md`.
+- Canonical source docs for Ship by Sunday live in `docs/ship-by-sunday/source/`.
+- Truth order is documented in `docs/ship-by-sunday/truth-order.md`.
 
 ## Repo layout
 

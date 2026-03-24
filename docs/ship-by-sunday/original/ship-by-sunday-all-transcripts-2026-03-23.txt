@@ -1,0 +1,3146 @@
+Ship by Sunday Combined Transcripts
+Generated: 2026-03-23
+Transcript count: 32
+
+INDEX
+-----
+01. 1.0--ceo-overview
+02. 1.1--ceo-sprint
+03. 1.2--ceo-problem
+04. 1.3--ceo-select-user
+05. 1.4--ceo-outcome-statement
+06. 1.5--ceo-customer-flow
+07. 1.6--ceo-research
+08. 1.7--ceo-storyboard-and-scope
+09. 1.8--ceo-skills
+10. 2.0--design-references
+11. 2.1--design-wireframes
+12. 3.0--build-overview
+13. 3.2--build-vs-code-overview
+14. 3.3--build-codex
+15. 3.4--build-day-2-overview
+16. 3.5--how-clerk-works
+17. 3.6--plan-mode
+18. 3.7--branding-NEEDS-CUT!!
+19. 3.8--env-vars-provider-setup
+20. 3.9--github
+21. 3.10--build-skills-overview
+22. 3.11--build-day-2-clone-template
+23. 3.12--provider-setup
+24. 3.13--codex-marketing-site
+25. 3.14--build-setting-up-slices
+26. 3.15--build-core-ux-plan-flow
+27. 3.16--core-ux-build
+28. 3.17--core-ux-build3
+29. 3.18--wrapping
+30. 3.19--create-production-instance
+31. 4--product-review
+32. 4.2--testing-in-production
+
+================================================================================
+VIDEO 01 OF 32
+TRANSCRIPT_ID: 1.0--ceo-overview
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/1.0--ceo-overview/1.0--ceo-overview.txt
+================================================================================
+
+All right, I'm excited about this.
+I'm so pumped that I get to teach you
+how to ship by Sunday.
+We have one reason that we're here,
+is to ship by Sunday.
+And this was yesterday.
+I'm not saying happy birthday to you.
+This is my birthday, my lovely wife.
+Wrote this on here, not on my ring on,
+but I'm teaching, I'm moving.
+So first of all, we can say that it's a happy birthday
+to your app that you're about to build.
+Now, you are so lucky to be building right now
+because I was just explaining this to a friend.
+I, when I got started and I was learning how to develop,
+it was very, very different.
+Now this is the classic,
+like I had to walk through the snow and all that,
+but it just gives you an idea of where we were
+and where we are now.
+When I wanted to learn how to develop iOS apps,
+I paid $300 for a course.
+And it was six, I want to say six weeks long,
+maybe eight weeks long, tons of stuff.
+And it's all the theory and all the stuff
+about how every little piece of the language worked.
+And by the end of it, you ended with, get this,
+you ended with a solitaire phone app.
+Like what am I gonna do with that?
+Nothing.
+So, whereas now when you go on the internet,
+it's a little bit ridiculous.
+That's why I made this.
+It's because I want to actually help a lot of people.
+My goal is to help a lot of people
+to understand the power of AI.
+But when you go online, it's almost too extreme
+because it's like, oh, you don't even have to worry.
+You just snap your fingers and you make software.
+Now, that's partially true.
+You can make great prototypes.
+You can make your first thing.
+But the problem is you're missing out
+on a lot of other areas.
+So this is gonna be very fast paced,
+thorough.
+It's gonna cover only the stuff that you need to know.
+I'm gonna use this whiteboard
+to go through some of the stuff.
+I've got some markers here.
+But you have to keep in mind,
+I spent a lot of time putting this together
+so that you can make it almost impossible
+not to ship an app.
+That's what my goal was.
+So there's gonna be different pieces to this.
+And this is not your standard.
+I bought a course from a course, bro.
+I have 12 years of experience doing products,
+doing product design, so UX,
+and doing actual software development without AI.
+And I coach people.
+I've led teams, blah, blah, blah, blah, blah.
+But this is different because I'm gonna be guiding you.
+So we have three pieces to this ship by Sunday,
+which you're gonna do.
+Today's Saturday, you're gonna ship by Sunday.
+The three parts are,
+the first one is there's the obvious like lessons.
+So you will be going through different lessons,
+which you can hardly see.
+And they're broken apart in what I call the product Trinity.
+So most people miss it when they go
+and they learn from gurus online,
+when they wanna build apps, the lessons are just code.
+And for a long time, this made sense
+because you just needed to learn to code
+and I'm gonna use a different marker.
+But this doesn't make sense anymore.
+Why?
+Because coding is no longer the bottleneck.
+Coding is actually one of the easiest parts to do.
+Now, everybody who's a developer
+that's very afraid of the change that's happening
+is gonna tell you that that is wrong.
+Don't listen to them.
+Trust me, you can build whatever you want
+if you have the right product strategy
+and the right product design ahead of going to do that build
+and you have the right skills in place,
+which we'll cover in a later section to do it.
+But this is broken into three parts
+called the product Trinity.
+So we do have the code,
+but we also have the product strategy.
+And product strategy is so, so important.
+We actually start there.
+This could also be called in terms of a job, it's CEO.
+Then we have UX and then we have the coding, right?
+So I already covered this.
+We have building, which is coding.
+So I'll just write that again so you can see it.
+And there's these three points, right?
+And we're gonna live between all of those.
+Now, that's the big difference is we're gonna be jumping
+between these different areas
+in order to build the best thing.
+Now, I'm really excited for you to jump in.
+We have the lessons as part of this.
+The second part is there's actually software.
+So that's the thing that you're in right now.
+So I use this system to ship some custom software
+that would make it so easy that you could jump
+from the product to the design,
+to the build and ultimately to the ship.
+Because each one of these is a different block.
+And each one of these within the block
+has a handful of lessons.
+And each lesson you'll notice it's a little video of me
+talking like this and walking you through.
+So what I'm doing now actually is I'm gonna go through
+and build something that I need that's real.
+You're not building tic-tac-toe here.
+You're not building, I don't know,
+a fricking a new workout tracker.
+You're building something that you want,
+but also ideally something you could make money with.
+And I'm not guaranteeing anything there.
+I guarantee you that you'll build something.
+If you follow all the steps that I outlay, you will do it.
+And it's gonna be awesome.
+But I had to build this software in order to
+basically make it so that you could jump through.
+So that's the second part.
+The third part that you're gonna need to do,
+or the third part of this program is
+the tools and template.
+So there's gonna be some things that you need to get
+on the tool side.
+We are a Codex shop here.
+So everybody knows that everyone likes wasting time
+on battling over who's better between OpenAI's Chat GPT
+and their coding stuff and then Clod.
+We go with OpenAI.
+Now these oscillate, one's awesome for three months
+and the other one's not good for three months
+and they rotate.
+So it's gonna be through the lens of using OpenAI's tooling
+but you can use Clod just now that there's subtle differences
+as of March 14th, the day after my birthday.
+As of that date, OpenAI is the best right now.
+So with that said, I'm excited.
+It's gonna be awesome.
+And I kinda have an idea of what I wanna build
+based on a problem that I personally have
+and we're gonna jump into that next.
+
+
+================================================================================
+VIDEO 02 OF 32
+TRANSCRIPT_ID: 1.1--ceo-sprint
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/1.1--ceo-sprint/1.1--ceo-sprint.txt
+================================================================================
+
+Okay, we kind of covered this before right CEO design build ship. Here's all the lessons and
+They're really bite-size, right? So you're like, oh my gosh
+Look at all this stuff. I say look it's supposed to be digestible. Okay?
+That's the whole point is that you build momentum because if you have like a 60-hour thing
+You're just like I don't want to do this, but we got a ship by Sunday. So as you can see here, they're broken apart
+This is the you know, we're on the sprint. So we're already on CEO 2
+We're gonna jump into the problem space. We're gonna go through picking your user. We're gonna write an outcome statement, which is
+Awesome, then we'll do a little bit of light research. We're gonna do a user flow
+We're gonna try to figure out a scope of what?
+We're gonna actually build then we get into design
+You can see all these I don't need to read them to you. Just take a look and
+Don't jump into the next lesson
+
+
+================================================================================
+VIDEO 03 OF 32
+TRANSCRIPT_ID: 1.2--ceo-problem
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/1.2--ceo-problem/1.2--ceo-problem.txt
+================================================================================
+
+Okay, I don't want to go full Tony Robbins on you
+But just before we get into the problem space and the birthday balloon needs to go away
+Even though this this is the birthday
+You're about to have a nap when you go through shit by Sunday
+But you want to ask yourself before you get all
+Sad and think I can't ship a nap or I've run into these issues before I'm not technical enough
+Or I am so technical but I'm not good the market part
+Instead of thinking of all those things just take all self-doubt and delete it, right?
+So before we even get started self-doubt is your enemy
+And you're gonna say I've deleted it from my head. That's what you need to do
+This is also for me because it's something that everyone struggles with you write on a piece of paper crumpled up throw it out
+And the second thing is what's the best way to get this done?
+Just remind yourself that when you are running into something luckily you have me
+I'm your your app Sherpa
+Carrying you up the mountain to get this done with you
+But just that's what I wanted to cover real fast now the first and most important apart remember
+there are four parts of
+The system so we have the CEO
+Which is what we're in right now, and then we're gonna get into the design
+And then we're gonna get into the build
+and then we're gonna get into the ship and
+All of these are important, but this one there's a reason it's first
+So CEO if we wanted to list out job descriptions for what type of person this block would be doing well
+If it's a small startup like I've led before then it's actually the CEO working with a product manager
+If you're at a big organization, it's gonna be a product manager product strategist, but usually a PM
+So this is so important because you're doing the product management. You're figuring out. Okay. What is it that we're gonna build?
+You're doing all these things that if you looked at the job
+Description of someone who does PM work which I did for a long time
+This is it right and I don't want you to have to read this book right?
+I want you to just know what's the CEO stuff we need to do in here
+And it's starting with a problem. So that's what this covers
+We're doing the teasing out of a problem
+You probably searched for this and found this and was like hey, I already have an app that I want to build
+Well too bad you need to still go through and understand this problem space better because
+The more reps that you get and figuring out how do I start in the problem space the better and you'll know
+What to do next so you always start with oh, here's this problem and
+You probably have it the reason you came up with a solution
+That's actually secondary to the problem that you had right and so when you start the problem space
+I will be working on a problem that I personally have
+but you have this interface over here and
+There's gonna be three candidates where you can write down the different problems that you want to solve and you might be the one that has
+And I recommend you actually for ship by Sunday
+You you'll probably find a lot easier to actually ship by Sunday if it's your problem because you're gonna need to
+Understand that problem in a deep way so that when you go and you design
+Interfaces you come up with potential solutions that consult for that. You know the problem intimately now
+I've seen this time and time again
+Whether it was through coaching people and product management or training people or doing consulting work, whatever
+My own startups, it's like people mess this up so much and it cost them so much money
+It doesn't matter if you're a great designer doesn't matter if you're able to use the crap out of cloud code
+That's the biggest mistake in AI right now is people
+Think that they can just skip over all this stuff because it's so cheap to build guess what it's faster
+But it's jumping into the deep end of the pool
+Without the ability to swim like your product will sink and it will suck and you'll wonder why it says you didn't actually solve
+A problem. So that's what you're gonna do first. And the way that you think about this is
+How much of a problem is this?
+in my case my problem that I have is I know for a fact that I need to be posting on
+Instagram as a marketing channel, I don't do it
+I know that it's great for business whether it's in this business for man meets AI
+Which we will be doing is this case study or if it's for ship by Sunday
+but coming up with
+Content ideas that are on brand that need to be going out on a cadence or hiring someone or making it myself
+That's just not in the cards, but I know I need to be doing it. So how do I make it in the cards?
+How big of a problem is this that I need to be posting on it?
+Am I the only one that has that problem? Is it a big problem? Well for me it is for me
+It's a big problem because I've seen time and time again
+examples where people go and they start
+You know, they get to a six figure a year number off of the back of an Instagram page and I know exactly
+What that kind of looks like as the output
+I know the steps of doing that manually if I were to sit down because I have design chops or if I wanted to go
+Hire somebody but I'm thinking hey, this is a problem. I think I can solve this in a different way
+So that's my problem and we're gonna go through together
+Now when I write down stuff, you need to actually go and fill out the interface or pick up even better
+one of these
+Whether it's a molescan or just a piece of computer paper with a pen
+but when you're shipping
+This is kind of the best way to do it like a whiteboard and then some dotted paper because the dots are really really good for
+Sketching later, but and then you know these little Fuji pens are sick, too
+But the whole thing is you want to start in that problem space and you want to do this alongside me
+So I'm gonna now begin going through
+What problem am I trying to solve and for who am I solving it?
+I'm gonna come up with a few
+But I kind of alluded to the one that I want to be solving and as you do this right before you pause this video
+Because you need to pause this video in a second and go do it think to yourself. Is this a
+problem that is painful is this one where if I didn't have this would I
+Feel a lot of pain like so much pain that I pay a couple bucks to get it back because that is
+What they call a painkiller versus a vitamin a vitamin if I forget to take my vitamins. I didn't take my vitamins this morning
+Whoops, not that big of a deal. Now if I have a massive headache and I don't take an ibuprofen
+I'm feeling that right so think that through you're gonna go and you're gonna write out. I have the problem
+And then I write for who and
+I do this as workshops. I've done this in person
+That's why I use the whiteboard, but I tried to mimic that for the interface
+That is let's see if this videos is there the interface is but down left. I think it's there
+Yeah, so you're gonna write out the problem and then for who so pause the video and go do it
+You
+You
+So what I'm doing is I'm actually getting detailed with this so because I have this problem
+It's a little bit easier, but I'm gonna generalize it to people that are not me, right?
+So it's not just gonna write me when it comes to this
+But my problem is I need to spin up Instagram as an additional
+Channel, but I don't have budget to do so if I had budget I could hire someone let him do it also
+Just a pro tip when you do hire someone you want to have that strategy
+You're not gonna hire someone for your creative strategy. So I already have that in my head, right?
+but then the for who well, it's me right so
+that is
+More helpful to actually write well for the case of man meets AI getting this off the ground, right?
+It's a small to medium-sized business or an SMB. We'll just say it's really small extra small
+But it's also someone beyond that they have to be techie
+they have to know how to use some of these tools because I know in my head that I can
+Probably solve this with some software
+But I'm not gonna think of it as someone that's like a plumber if it's a plumber then I need to make it a utility
+It's a different type of buyer, right?
+And if it's someone that's a roofer
+It's someone that's an HVAC the software that you build for those types of folks is very different
+From somebody who is a knowledge worker, right? So I'm getting detailed in here and I'm saying it's for a techie
+Now, what does a techie mean? Well, they know how to
+use the
+apps in
+my dock
+Now that's really specific right and the reason I'm doing that is because then this starts to kind of I
+Like I know what apps are in my dock and then I know
+Within that like in my case, I'll just share them with you
+This is like Figma like I know that Figma is great for designing stuff
+I know that a lot of the things that I already do are in there. I know that you can programmatically control it
+These are just my use cases, right?
+But you want to be as specific as you possibly can in this step because again, this is gonna drive
+So much value as we go through each one of these steps because once you get that problem down
+the next thing we're gonna do is actually figure out well who's solving this right and
+That's kind of this next step. So I guess I'll just I'll wait a little bit but go through
+Take the time come up with three of them. Now you're saying I only need one
+Well, I actually put validation around it because you should go do this. It's gonna be so so helpful. Okay, go do it
+
+
+================================================================================
+VIDEO 04 OF 32
+TRANSCRIPT_ID: 1.3--ceo-select-user
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/1.3--ceo-select-user/1.3--ceo-select-user.txt
+================================================================================
+
+Okay, so you should have three right I have one, but you have three right good good
+So now you have three it's actually time to lock into that one you want to get those reps
+You just did product management you did product strategy a really good product manager
+They pick out again like the two things that would matter in this book right now. This says oh understand
+Hypothesize validate execute design engineer market and succeed
+We're gonna ship by Sunday, so we don't need all that, but we wanted to get a couple reps
+And now it's time to commit to one of them so you can select it
+And we're actually gonna think through when does that problem happen right so there's a couple boxes in there
+this is just more qualifiers around the problem that you selected and
+You'll see soon that
+Using the moment when that happens when you have that problem where that person has that problem
+What is it what's the trigger is it was super painful so go ahead fill out these boxes and let's move on
+
+
+================================================================================
+VIDEO 05 OF 32
+TRANSCRIPT_ID: 1.4--ceo-outcome-statement
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/1.4--ceo-outcome-statement/1.4--ceo-outcome-statement.txt
+================================================================================
+
+This next one, you're probably like,
+why am I doing more product stuff?
+Well, the reality is you're setting yourself up
+for some of the most important pieces, right?
+Strategy matters, but also outcome statements
+define your marketing.
+It defines how you're going to explain this idea
+to your wife, to your coworker, to your friend,
+anybody, to your cat.
+This is so cool because you actually start
+to see this thing that was just a small idea,
+this small seed of an idea, slowly starting to come to life.
+And the more stuff that you build,
+the better that you get at the different sort of
+like one-liners, two-liners.
+You have the 30-second elevator pitch,
+the 90-second elevator pitch, the five-minute walk,
+progressive discovery.
+If someone hears it, they don't ask a question,
+that means it's not that interesting.
+So an outcome statement kind of lines up
+this future marketing, this future basically ability
+to communicate what your idea is
+because you want this thing,
+if it legitimately solve a problem for people,
+besides money, you want this thing to get out there
+and the packaging of it matters.
+So you're taking that problem, that person,
+what does it do for them?
+What do they get out of this, right?
+So go ahead and write one.
+
+
+================================================================================
+VIDEO 06 OF 32
+TRANSCRIPT_ID: 1.5--ceo-customer-flow
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/1.5--ceo-customer-flow/1.5--ceo-customer-flow.txt
+================================================================================
+
+I'm not gonna lie, I've been very much looking forward
+to this section because I need to do it.
+That's the whole thing is I actually do the things
+that I teach.
+So this is gonna end up being an app
+that hopefully does really well,
+but we're building some sort of solution
+that lets these small to medium-sized business owners
+who know that they need Instagram as a channel,
+can't have the, they don't have the budget for it, right?
+We have that in mind.
+The outcome is that they can have awesome, creative,
+generated, that's on brand, that sounds smart,
+that can be human approved,
+because we don't want to look sloppy,
+but we can do that to the tune of one a day, right?
+And so that's our outcome statement,
+is those types of people with that problem
+have this outcome, and it's really inexpensive.
+So with all that in mind, and we looked at the research,
+and we saw that there's some confusing solutions out there,
+I need to now start thinking of what are the
+kind of actors in this story that we're telling.
+And there's us, the people that are building the software,
+and then there's the user, right?
+So we just want to figure out kind of
+how are they interacting with our software?
+This is an example of a core flow,
+I'm gonna walk you through.
+So on here, this is a company called Flatiron Health,
+and Flatiron Health is sold for a billion eight.
+This book is called Sprint by Jake Knapp
+from Google Ventures.
+And I did this system at delivery dudes,
+one of the startups that I was a part of,
+and it worked wonders.
+So this process, you essentially write down,
+on the left hand side, you write down
+the different players that are involved
+in this solution that you're making, right?
+And then you have simple arrows,
+and then just some words about stuff.
+So if you look at this example,
+you can see that on the left, they have the guest,
+they have someone at the front desk,
+they have a robot, and then they have somebody
+that is just watching, that has the surprise encounter.
+So it's really simple, but the whole purpose of this
+is that this actually gives you a better understanding
+of what this is gonna look like
+from everyone's perspective that's involved.
+And so let's say we have another one.
+Maybe you're doing a sales map,
+in this case, this is a sales map for Blue Bottle Coffee,
+but they had a new customer.
+Well, what happens when there's a new customer?
+Well, if they visit the cafe, they talk to the barista.
+After they talk to the barista, they have the coffee.
+And then if they have the coffee,
+maybe they'll go to the website.
+And then after they go to the website,
+maybe they'll buy some beans, and maybe they'll buy.
+Or if it's a new customer and they see a press story about it,
+I'm looking at the bottom now,
+well, they just go straight to the website,
+and then they can go that path.
+Or if they do a web search,
+they might compare some different options
+that are out there.
+So we're looking at this, and it's like,
+well, okay, well, we need to map out
+the basics of what happens
+when someone's looking for our service.
+So in my case, we have our actor is the techie,
+we're gonna call, we're gonna give them a name.
+So you need to name what your ideal customer profile is,
+like who's this person that has this pain, right?
+And so I'm gonna say that it is a techie,
+S&B, right?
+And that's the actor.
+And the goal for them is to solve their problem,
+to be able to get on the map with Instagram, right?
+That's their goal.
+So they need to do some steps.
+So they're probably first,
+they're doing some search.
+So they're on chat GPT or Google.
+That's most likely what they're doing.
+Or YouTube, one of the big three.
+This is the big three nowadays, by the way.
+If you're unaware, it goes Google, YouTube,
+in that order of most popular search platforms.
+And then chat GPT is in close third.
+So they're there and they're looking for it.
+Maybe they're typing in how to make Instagrams with AI,
+how to make Instagrams using Figma and AI, how to use.
+So I'm already starting to think
+about those search keywords, right?
+And so that's something that by just looking at this,
+and you should be doing this in a journal,
+or I know there's an interface for this,
+but frankly, I think it's best if you do have
+like a piece of paper and you're doing this.
+Because now as I'm walking through this,
+I can be scribbling down some keywords for,
+like in my head, like I want it to be an app that I use
+and I like Figma.
+So I'm rolling with that.
+And it's like, well, if I were looking for this,
+I'd type in how to make Instagrams with AI,
+or how to make Instagrams Figma AI, all right?
+Because that's kind of how people type.
+And so these would then be these like keywords
+that are on the side, it's not part of this map,
+but I've already thought of it.
+So this is on the side, right?
+And so what happens after I type that in?
+Then I'm kind of looking around
+and I'm going to imagine that my solution comes up, right?
+So I'm going to just going to name this.
+I'm going to name this on brand, or let's say like,
+we need some sort of placeholder name, branded content plugin,
+or branded content maker, or branded content something.
+But I know that that's the problem I'm trying to solve
+is that I want to have AI do this for me
+and have it be on brand.
+In the first version, I don't care if I have to go back
+and forth with AI a couple of times, but like end game,
+this is the future.
+This is something that is so obvious to me
+where the AI can go and it finds information about my niche.
+It comes back and says, hey Parker, what's going on there?
+Like, do you like these topics?
+Is it on brand with man meets AI?
+Is this something that you should tell your audience
+that they need to know right now?
+Yes, okay, cool, great, let's make some content about it.
+That's where I see this going, right?
+And so it's some sort of like, it's like an SMMA,
+a social media marketing agent instead of agency.
+So maybe it's like S-M-M-A,
+and that's going to be my working title, I'll call it.
+So SMMA is the social media marketing agent,
+and that's what I want to call it.
+So I'll erase this stuff, and then I'm going to call it
+I'll erase this stuff,
+and I'm just going to put in this now as SMMA, that is us.
+So you can have a working name, I recommend doing that.
+You can just put us if need be.
+But what happens next, right?
+So we're already on the board, they're on the board.
+What happens next?
+They search for us, maybe they find us on YouTube,
+there's a video, and then boom,
+they land on the site, they're on the SMMA.ai website.
+That's where they're going to learn about us,
+they're going to see these sorts of problems
+being kind of told to them on a marketing site, right?
+So, oh, how does it work?
+That sort of stuff, they're on the website,
+then they can maybe trial, but I don't like trials.
+So I'm going to say, we get first three free,
+you see that?
+And it's basically like boom,
+and then after first three, three, it goes back,
+and now they are a happy paying user.
+Something like this.
+So what you want to do is you're just,
+there's no perfect map, right?
+That's something that I noticed,
+and you're probably looking at this,
+and you're like, oh, that is not perfect.
+Look, I've spent eight minutes on it.
+You don't want to spend more than 10 minutes.
+All these exercises there to get you to start thinking
+in this direction of what is the language
+that person's going to be speaking,
+who are the players in it, we came up with a working name,
+what's that kind of flow going to look like?
+If they did a YouTube video,
+what kind of YouTube video would that be?
+Would it be me showing a workflow of that?
+Probably.
+If it's something where people comment on the Instagrams
+at a later date, and they're like, wow, these are cool.
+Would it be something we tell people in the comments?
+I don't know, but that is the mapping,
+and go take some time and do it.
+This is going to be so helpful.
+
+
+================================================================================
+VIDEO 07 OF 32
+TRANSCRIPT_ID: 1.6--ceo-research
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/1.6--ceo-research/1.6--ceo-research.txt
+================================================================================
+
+Whoa, whoa, whoa, you're cruising right along.
+What a good job you're doing.
+But now, not really butt moving this chair,
+we need to do a little bit of research
+on does anything like this exist.
+Now this does not mean you shouldn't build this.
+That's beginner's mistake.
+Because everyone's built some version of,
+well not everyone, let me take that back.
+It is actually a good thing
+when there are existing solutions out there
+because it shows that there's market demand, right?
+Now, if you don't find anything, that's cool too,
+but you'll find patterns of the problem
+that you're trying to solve.
+And so I put together a little prompt
+that helps me research things
+because it's gonna be really helpful.
+And you'll be able to just paste that
+and you can go and find some examples
+of different competitors.
+And then you can download what they're doing.
+You can see how they're doing it.
+That's the best case.
+So an example of this,
+if you're building food delivery system
+for high-end restaurants,
+you'd go and you'd download Uber Eats
+and DoorDash and Grubhub and all of them.
+And you'd see, what do I like?
+What do I not like?
+And that comes down to the pricing
+that comes down to the messaging
+that comes down to the actual product itself.
+But yeah, that's what this is.
+You're not gonna spend too much time on this.
+This is just to get directionally positive information.
+It'll save you a bunch of time basically.
+Someone else has spent their time and effort
+and maybe a lot of money
+on trying to figure this problem out.
+So you might as well take advantage of it.
+There's also the opportunity
+to actually connect your chat GPT account.
+So I should have mentioned this before,
+but in settings you can connect it
+and that can help you out.
+So go ahead and do some research on this.
+You might even know some off the top of your head.
+
+
+================================================================================
+VIDEO 08 OF 32
+TRANSCRIPT_ID: 1.7--ceo-storyboard-and-scope
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/1.7--ceo-storyboard-and-scope/1.7--ceo-storyboard-and-scope.txt
+================================================================================
+
+We're freaking moving along and that's the beauty of this. That's why I
+Personally like to keep the ball rolling because it's fresh, right? You should have just made a customer map
+Hold it loud and proud show it to your friends. It's something that you really will find helpful because
+It's a map and it teases things out. It gets you to think about the whole thing
+So now we're gonna do what's called a scope hammer. So there's some prompts here. It should be helpful
+but I
+Really recommend that you think through what is something that?
+Absolutely has to happen in this solution in order to solve the problem for our person
+so I
+Like to as an exercise. I like to keep the problem up top. So if you have a piece of paper, that's great
+All right. So the problem is those SMBs
+can't
+Afford a new
+Channel but need to be on it right something along those lines
+Then you need to actually start to look at that map that you had and think through
+What are the features that have to happen here, right?
+Like what's that actually gonna look like if someone needs to get this content made this is assuming that you already have some sort of brand guide
+Well, then it's like what's in and what is out
+These are the two lists that you're gonna make and
+We're gonna put actually we're gonna put this on the left side. We're gonna have it in and out
+We're gonna do what I call the actual storyboard. So we're gonna smash these two together. I
+Think it's gonna make more sense. I'll end up changing the software
+I have these separate before but it makes more sense to do this
+So in and out and then I'm actually gonna use a coding agent trick after the fact. So I'm gonna say change
+Storyboard
+To be part of
+Scope
+Cool so we have an in out
+Those are the list of features, right? So in the last one we did a map now
+We're gonna do a storyboard. Well, all we're gonna do is we're gonna draw out these blocks
+and if you've ever watched TV, then you know that
+it takes a lot of time for them to film these things and
+Plan them what they do before is they do storyboards. So if you ever watch stranger things they have storyboards or explains
+This is kind of what's gonna happen. This is kind of what it's gonna look like
+We use storyboards and product to figure out how people actually come across this problem
+What they're gonna go do to try to solve it how the thing actually solves it and then bonus points
+How we the person making the product become a habit so that a loop comes up
+So when something happens, they're like, oh, I immediately think of SMMA. I immediately think of to use this
+Solution that you've built right and so this is what we're gonna do. We're gonna actually go through
+I don't think you need more than like 12 of these things and
+You can just play around with it
+But what we're gonna do is we're actually gonna go from the beginning of the experience that you're trying to solve for
+We're gonna get creative were to come up with well, how's that person have that problem?
+When is it that happens?
+You should already kind of know that and then where do they go to solve the problem and then how did they?
+Read the page when they get there like what's on there that gets them to be like
+Oh, there's a line between the problem that I'm having and then the solution that is gonna solve that painful problem that I have
+I obviously want to take out my credit card and swipe that thing
+I obviously want to rave to my friends after the fact because Wow this crazy thing happened
+I uh, I saw a freaking balloon
+There was a balloon when I had my one-year anniversary with the product or whatever, right?
+So you're trying to think of all those things when it comes to doing the storyboard. Don't worry
+You don't have to be van gogh. You literally just scribble this stuff down. But one thing I'll note it
+I'll mention is we have in in the out list, right?
+That will be driven by these storyboards by going through and as a pro tip
+This is my to do for later
+But there's something that can help you if you're like wondering well
+How do I go from step to step like in the timeline?
+Well, there's this thing called a funnel and this is how people sell stuff, right?
+There's a way that you found out about my product, right? And there's basically different steps in it
+So there's that acquisition. So how do people get in there?
+and then
+As you go down in the funnel, it's basically like well, how do they find out about you? How do they get into your?
+Product, how did we retain them to get them to use the thing if you're charting a subscription?
+How do you get them to use the thing again? Like what in here?
+Answers these questions around different dynamics in the funnel. How do you get known?
+All right. How are you discovered all those things? So pause the video start to do this
+I'm gonna go do it and I'll be back when I'm done
+Should I pause it? No, I'm gonna gap while I do this cuz it's fun
+So, okay, if I am doing that, I'm let's see. I'm me. I luckily because it's me. I kind of know
+What this is where it's like?
+I'm sitting there and I'm like quite frankly, I'm kind of mad. I'm like, I know I
+know I
+can grow
+IG if I had the right
+agent
+Set up. I
+Just know it and so because of that and because of all this information. So then I go and I look
+for
+The solution. So now I'm on Google
+I'm looking around
+and I come across one that speaks to me because I'm techie because I
+You know use the apps I use apps like Figma
+And Chuck GPT
+Because I see that I actually
+Connect and I'm like, oh Figma
+Figma AI
+SMMA generator social media marketing, whatever so I kind of invite putting together these
+Pieces right and I'm like, okay
+This uses the same tools that I like to use that's awesome
+And then I go see that there's some sort of incentive. I maybe actually I probably want to see examples
+So I see examples and I feel good about it. I see maybe there's some proof
+Maybe I could see the person who created its account is on there. So there's
+basically like the trust is being built maybe there's a testimonial from a
+Customer that bought it before Mike. Wow, that's great
+And then I see that there's a bonus the bonus is that there's a like a free template or something
+So I'm seeing all this stuff then I buy it. I
+Don't get to try it. I get to buy it because I see all these things and then once I'm in there I get a video
+that explains I
+Also get a free one-on-one with the founder
+It's usually a thousand dollar thing or whatever you can kind of dress it up, right make it sound exciting
+But this right here
+That's a really good one to have because that makes them feel like they're getting more bang for their buck
+And then the person making it let me
+How did I say that Allah me
+It gets to get in front of the customer and say hey
+What is it that you want? What's missing that sort of stuff?
+So that and then now they're in they're using it and what else happens we see that
+You use it daily
+For two weeks and
+You get a new access to your or something
+I
+New access to your or like a bonus
+I'm just trying to think of all the different things that are involved that could like get them to
+At the bottom of the funnel once they've activated to be like, oh I need to continue using this because like I have this streak
+Going and maybe we could like tie in
+Their Instagram
+Frickin analytics into this tool, right?
+So this ultimately drives what the in and the out is now for me. I've kind of gone to the moon, right?
+I've figured out like what are all the things in the life cycle?
+But you need to then come back from the moon and say okay, that's good
+You should have a list of all the features of what this could be
+But we need to draw it all the way back and pull out the scope here
+So what is out in my case this like frickin analytics are out
+The
+Explorer is out to like see other people's posts that are doing and using this tool the
+Discovery is out discovery would be more so
+coming up with all the ideas
+Automatically and then presenting them to you via let's say like a text message or something like that's totally out
+but what is in is
+Because I have kind of thought about this
+I
+Think that it's necessary for it to obviously be able to be like some sort of plug-in that uses the existing tools
+We don't need to build something from scratch. We need to leverage the tools that are out there. So in my case
+It's an app called Figma. So plug-in is in so that's gonna be Figma
+Plug-in boom that's gonna save time other stuff is it needs to look on brand
+So some sort of like brand kit and all these things you're thinking yourself. Well, how am I gonna build this?
+That's in the next part, right? We're still in CEO zone. We're figuring this out the technicals
+Telling you it's so much easier and whatever questions you have you can just hit me up and I'll help you
+I want you to ship your app. I promise you this is for you to ship your app, but
+Brand kit what else what else could be having this that we need to have in order to solve this problem
+You need the plug-in you need the brand kit. You need to have a
+chat GPT chat GPT
+Integration I know that because this is gonna use AI it needs to have that right?
+So I need a brand kit support a plug-in chat GPT integration. What else?
+Template right we need to be it needs to be able to work with a template. Okay
+Boom so that was probably the best lesson so far mic drop, baby
+That's a hundred percent the best lesson so far. Why you ask well because
+You saw this problem in mind. You're still thinking about the problem that you're solving
+You are going through the actual storyboard
+That's aligned with the way that a real person on earth
+Would go and have this problem and then discover it and then figure out. Oh, I'm gonna go and
+Have this awesome experience. You're
+Hypothesizing all of this inside of someone's real experience, which is sick
+And then finally we go through and we think okay. Well now that we've gone to the moon
+That's awesome. But like what would be necessary in order to
+Solve that problem. So that's it. You crush it. You're done with block number one. Congratulations
+Design is actually a lot easier than you think
+We're gonna be using
+Figma very lightly because you need to
+just use a whiteboard or some note paper in a pen and you're just gonna be drawing some stuff and
+Then we have all these skills that are involved when it comes to the build block. That'll make it a lot easier
+
+
+================================================================================
+VIDEO 09 OF 32
+TRANSCRIPT_ID: 1.8--ceo-skills
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/1.8--ceo-skills/1.8--ceo-skills.txt
+================================================================================
+
+I thought that the previous video was my favorite.
+This one's my favorite.
+Don't forget it.
+So why is it my favorite?
+Well, we're covering the Codex app.
+The Codex app is one of those things
+that's going to blow your mind.
+So you've probably used it, maybe you haven't.
+But it essentially lets you do everything
+that you can do in chat GPT, but way more.
+It's way, way, way more powerful.
+So what you see here is a thread on the left-hand side.
+Maybe you've used it, maybe you haven't.
+But I actually built the first version
+of this in one thread, which is insane, absolutely insane.
+And it doesn't have the perfect design references,
+but that stuff can come after.
+We're just trying to get this core UX dialed in, right?
+And so in the Codex app, we'll go through the actual thread
+of it in a second.
+But you can have new threads, and then you
+have different folders.
+So I actually built this within a different project.
+If you're Mr. Code, then yeah, generate a new one.
+If you're using the template, add the folder
+by clicking on Add New Project or commando, whatever.
+But because I am thinking of agents and the tools
+as part of a team, I have it in this thing called Team Wiki.
+And so I want to talk a little bit about that
+and a little bit about skills, because I
+think people underestimate skills.
+I think that there's a lot of trash out there
+that's going to be confusing for you.
+But this is probably the most important thing
+you'd be learning, which is each one of these skills is a job.
+This is somebody's job today.
+So as somebody who's done a lot of different jobs,
+I've been a product manager.
+I've been a product designer.
+I've done UX.
+I've done consulting.
+I've done software.ev.
+I know how to do all these things.
+I know how to make videos, all these things, right?
+When you look at these skills, this is a job description.
+So every one of them on here is one of the two things.
+One is it's an official skill that was given by a company,
+meaning that is the official way to do something
+when using a product.
+I'll give an example.
+You see at the top that convex one.
+That's the database.
+That's the thing that lets you store information
+on behalf of people.
+They have skills, which are essentially
+job descriptions for how to do everything in their product.
+Now, a skill, you're going to get access to all the ones
+that I've made.
+But a skill makes it so you cannot mess up
+when you're going to do these things because it's
+trained on the best possible practices.
+Now, lucky you, because you're part of Ship by Sunday,
+because you're going to ship by Sunday,
+you have access to all of my skills that I've made.
+So the way I thought about it is on this screen,
+you can see a bunch of them.
+I think this is one thing OpenAI needs to do better,
+is the way they have these laid out
+is absolutely overwhelming.
+Maybe not that many people have as many.
+But in my case, I made a template that you have access to.
+And it shows you the different ways of thinking about skills.
+Now, pay attention.
+When you look at this, what is a work stream?
+Well, a work stream is you sit down at your office 9 AM
+and you go to do something.
+What is it that you're doing?
+It's probably a list of steps.
+Everything is a listicle.
+Everything is a list of steps that you're doing.
+And it's associated with knowledge that you have.
+If you're a knowledge worker and you're a designer,
+you're probably checking in on what came in over the weekend.
+You're going to go and message somebody.
+There's things that you're doing.
+And that is a work stream.
+So it's the sequence of things that you're
+going to do in order to accomplish a task.
+In this case, this will start to really click
+with you on what a skill is.
+Each one of these nodes, or each one of these blobs, rather,
+is part of going 0 to 1.
+Going from where we were before when we started all this,
+there was nothing on the whiteboard.
+We had no idea.
+Now we have a pretty good idea in a version 1.
+This happened in an hour.
+That was part of a 0 to 1 work stream, where we went through
+and we said, we're going to come up with a product strategy.
+We're going to act like the CEO of this thing.
+We're going to figure out what we need to build,
+why we need to build it, who we're building it for.
+What is the ideal customer profile?
+What is this pain that we're solving?
+All that stuff gets figured out.
+And then we go into the next step.
+So each one of these skills maps to the 0 to 1 product lifecycle.
+And the best part is they're trained like pros.
+So there's the product strategy one.
+And the way that they're used in practice,
+let's open up this Figma plugin.
+I will walk you through this.
+See that little purple thing?
+That little purple thing is a UX design crit.
+A design crit is a design critique.
+It's somebody that gets paid $200,000 a year
+to be really good at critiquing user interfaces.
+Now what I did is I took the 12 years of my experience
+in product management, and I took a bunch
+of YouTube videos of designers at Figma and Claude
+in places that are really good at design.
+And I distilled it down to one thing that I want done,
+which is I want from that job, I want their design critique.
+I want to be able to say, hey, I have this first version built.
+Go roast this thing.
+And it's not through the perspective of UI.
+UI, just so you know, user interface is how it looks.
+It's the shadows.
+It's the colors.
+It's the spacing, all that.
+That's not nearly as important as the UX,
+which is the user experience.
+We talked about this in a previous lesson,
+but that is more important.
+You'd rather have a chair that's really great to sit in but ugly
+than a chair that sucks to sit in and it's pretty.
+Now, ideally, you have both, right?
+The UX is the comfort and the usability of something,
+and it's practical.
+It solves the problem.
+The UI is the aesthetic of it and how it looks.
+So those things, those skills that I'm talking about,
+right, they're so, so important.
+And you'll need to download all of them.
+It's literally just a bunch of text files.
+And why I say it's a job is there's a file.
+It's called skill.
+You don't need to know this, but it just explains
+what the job is for the AI.
+And then it tells it, hey, when you're done with this one,
+go use that one.
+And hey, you have a UX critique at your disposal.
+So if your engineer who's really good at doing user interface
+needs a question answered about UX, it's not going to ask you.
+It's going to ask someone else on the team.
+And that job description also references other things.
+So I can take this whole book, which I did,
+took this whole book, and I put it into a skill
+so that if the person who's doing product strategy
+has a question about how to do this part,
+it knows how to do it.
+It's insane.
+So that's my rant on skills.
+I'm going to probably end up doing a whole program just
+on that because the amount that you can do with it is bananas.
+You literally take this UX design crit thing
+and have it go on an automation every single hour
+with a client list and give free design critiques to people
+that you want to do design for.
+You could do the same thing for sales,
+where it's go find my dream 100 clients every single day
+for all these different niches.
+Come back, line that up with a new skill on an automation,
+which is now that you have them, go find out information
+and come back with the email that you're going to send.
+You can just do a crazy amount of things with these.
+In our case, just building software,
+it's important that we have that zero to one workflow.
+You can see the skills in here, but you end up using them
+when you're building.
+So in the next video, I'm going to walk through the simple
+prompt that I entered to actually just get
+the first version of this.
+And it's funny because I've one-shotted this.
+This is what everyone talks about.
+I was only able to one-shot it because of this,
+because we did the work ahead of time.
+I know it's solving a real problem.
+I know that it's going to be helpful.
+So I'm excited to see you in the next video.
+
+
+================================================================================
+VIDEO 10 OF 32
+TRANSCRIPT_ID: 2.0--design-references
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/2.0--design-references/2.0--design-references.txt
+================================================================================
+
+I've got no references on the board,
+because why would I do that when I have this awesome map?
+Well, you want to find references now.
+There's a bunch of links like somewhere on this page.
+I think I put them there or there,
+but you want to go and find references.
+We did a little bit of light research before.
+You might know some off the top of your head.
+There's maybe 10 links there.
+Don't spend too much time on this.
+All you're trying to do is see
+what kind of patterns exist out there.
+Also, what kind of anti-patterns are out there?
+What don't you like?
+And you'll just collect them, put them on a Figma canvas,
+or put them on, if you don't have Figma,
+sorry, you should get it,
+but you could use xcalidraw.com or tldraw.com.
+They're free whiteboards.
+
+
+================================================================================
+VIDEO 11 OF 32
+TRANSCRIPT_ID: 2.1--design-wireframes
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/2.1--design-wireframes/2.1--design-wireframes.txt
+================================================================================
+
+So I hope you are starting to see how this all builds on one another so that it makes it a lot easier
+This is how it's done when you're on a traditional team
+You'd start with all this sort of CEO procte stuff because it just drives everything forward
+You're gonna love it. So now we're gonna do some sketching
+Sketching is just the fastest cheapest way to get both good and bad ideas out
+The way I like to do it is I would keep that notepad or I can throw it up on the screen
+But you want to know at all times
+What is the problem that you're solving that should be memorized in your head who you're solving it for?
+How is it going to change them? What is the outcome? They're going to have you probably need to have that map up
+That's all really helpful
+The final features that you think you need to have in there because now it's time to start drawing stuff
+So on a piece of paper what you're gonna do
+Is you will do an eight grid and you just split it down and you go bam bam bam
+Now you have eight it's called crazy eights. You can do this exercise a couple times
+I don't need to do it because I'm good at design
+But I recommend that you do this where you start a timer on your phone
+Because it's gonna force you to get ideas onto the paper
+So if you start a timer on a phone for two minutes and let it go and start designing
+Designing but start sketching things out that actually map to what it is that you're solving for right?
+so in my case, I know that I need to have a
+plugin that works with the tools that these techies are used to and it needs to handle some sort of like brand on
+Brand stuff. I know that it needs to be able to have a template that it uses
+I know it needs to be able to use chat GPT to be able to generate the actual words on the page that are in my
+Niche that have to do with the stuff that I want to market, right? Which is apps and that's a different thing
+But I know that those are the things involved. So what I'll do is
+I will think of what are the things on the screen that need to occur. There's different ways to do this
+I recommend doing this first
+So write them out you can focus in on one screen
+If it's a one-screen app that's doing most of it. Well, what would that look like, right?
+so you set the timer for two minutes you rip through it you do it and
+Pause the video and go do it
+Did you pause the video if you didn't pause the video?
+That's okay, too. No, it's not you should have paused the video because this is for your benefit
+But the next step is you might find one that you kind of liked
+I have an idea in my head that I want to get onto the paper
+So I'm gonna actually treat this as a sequence where it's going from left to right and then it sweeps around and this is in
+The order of operations of how things are gonna go. So I'm just gonna sketch some of the things out
+I like to think of if it's gonna be an affordance and affordance means it's affording you to do something
+Most people when they think of an affordance, it's a button
+So what are the affordances on the screen? They're gonna let me do the things that I need to do, right?
+And so in my head, I know that they need to be able to kind of
+Activate this thing from within their app. Now if they're doing design stuff themselves
+That's great because that means that all that branding questioning what stuff will look like already lives in the design tool
+So that was my thinking on the last section was how do I save the person time and get them activated?
+Well, if they're designing
+Software or they're designing social media assets
+Their brands gonna be in there. So that's why I did it now whether that's Figma or Canva
+This one would be Figma focused because I chose that one, but I'm thinking through the wire frames
+What are the things on the screen?
+So there's gonna be some sort of plug-in that will open up from within that cool
+So they'll right-click that and then once they open that up. I
+Don't want them to have to think that's kind of the biggest thing out there, right? I
+Don't want them to think so if they open this and there's a ton of stuff on there
+I don't want to use it if I don't want to use it. No one else is gonna want to use it. So it'd be really
+epic is if I had a file with all the like looks of
+My designs in it then it would be cool if it
+Recognize that and it just said building a profile, right? So maybe on this first one. There's some sort of like
+progress bar where it's like learning me and it's like
+starting to build up something so I don't have to leave and go and
+Figure out like well, what's your brand look like? Cuz what a bad one would look like for this like
+Building this tool would be like Oh step one ask them
+What kind of brand would you like to do and it's like priority?
+I already have my brand like I already know what I want to do and it's in this file. So
+This would be an option where basically, you know, it says it's learning
+Your brand
+Or it could do something where like recognizes like here's the typefaces use the colors that you use
+So the second they've opened it the first time user experience or FT UX f tux
+This is done because you want to get them to what's called an aha moment as soon as possible
+The aha moment for somebody is when it becomes clear to them that oh this solved my problem that I had
+This is awesome. So I wanted to immediately jump into that
+But I also know that if it's an empty file
+so what we can do is here is
+there should be some sort of like
+copy paste where they can mouse in and
+If they don't have a brand, right? So I'm gonna put this is
+f tux first time user experience
+It's either this or this where it's either gonna try to learn their brand or if they don't have that then what happens?
+Well in this case, I can give them a prompt
+I can go to chat GPT and say hey building this up. This is how it works
+They don't have a brand. We need to make a brand guide them through how to make a brand and
+At the end. Here's what we want, which is like a brand guideline, right?
+This same process what I just explained is called a meta prompt, but it's your ability to
+Ask the LOM ask chat GPT to make you a prompt and so that's what this would do
+Is it would be hey copy this?
+Prompt and then paste it here. So they copy that it goes
+They're gonna actually have to leave our app
+Which is why we want to do this if we can because the second they leave is a chance that they're not gonna come back
+so maybe on this page we say it takes
+two minutes and
+And
+makes
+Amazing brand
+All right, something to get them to feel good. You're doing user experience right now, right?
+So after that they go and they come back and
+They would paste
+So this is another or and then finally over here they would have
+Some sort of brand kit where it's like, oh, you know
+Here's a profile photo and then you have your font
+You have all those different fonts and you'd want to use a fat marker because you don't want to actually get into too much detail
+Here, but you're just getting those ideas out. So you'd have your fonts you'd have your colors
+You could list all those out. So boom. I've already nailed one of the big features, right?
+Now the next one that I need to figure out is okay
+Well, that's roughly what that set of feature one of three would look like
+Well, I know that they need to be able to use chat GPT
+Well, it looks like we try to do it here, but I didn't think about this
+I didn't think hang on. Maybe there's a way that I can get a two for here two for one where
+they don't have to leave my app and
+That plug-in can actually call out to chat GPT
+I wonder if we can do that. And so then while I'm doing this I would pause
+My process and I'd go and I type in on Gippity and say hey
+Is it possible to use chat GPT within my figma plug-in for XYZ?
+And it's gonna tell me because I know
+Hey, actually you can and this is how and it's gonna give you all this information and you'll use that thread in the build block
+When you want to do this, so we just found ourselves a two for one meaning we don't have to do this anymore
+We don't have to leave the app
+We can actually make it so that they can learn their brand would be one part
+But then connecting chat GPT would be the second which is just great
+Right. So now what I can do so you can grab a black marker and this is the process of design
+We didn't have to do anything on the computer. We're gonna look at this. We're gonna say
+Well, wait takes two minutes
+We don't even need that anymore because they're not gonna leave we can't let them leave but this would make one thing which is assume
+The user has chat GPT because we're not gonna support
+Anthropic, but if we're making AI stuff
+People love chat GPT, right? So what's gonna happen is on this first screen we can have two boxes
+So the first one is connect
+GPT the second is brand
+Profile
+We're not worried about the copywriting right now what this could be is better psychological profile writing meaning like brand profile
+That's good for us. The UX designers looking at it. That's fine, but it should say unlock brand. It makes it better
+Here's an example because anytime you ask someone to do something you want to give them a reason why you have to be answering that preemptively
+So there's frictionless. So once they do that they connect their chat GPT. That's awesome now
+It should be that there's just some ideas. So I have ideas
+For posts
+And
+Ideally, I just whenever I want to I could just open this app and it's like hey, here's a bunch of different ideas for posts
+It already knows about my brand
+That's the design. It probably needs to know some information about this, but it's connected to my chat GPT
+So it's also going to learn about that
+maybe if
+We had those ideas, but they're not generating good ideas
+There's probably got to be a screen that lets us mess with the brand
+settings
+So some sort of setting screen because the end of the day if it's not solving the problem for them where it's like generating AI
+Slop then we've lost and they're not gonna pay us and luckily since I have this problem
+I'm not gonna use it, which means it needs more work. So
+When I'm looking at this, I've kind of now understood how all this stuff works where it's like that's probably the biggest bottleneck
+I'm trying to get them to that ha ha moment where it learns their brand
+There's two parts to that of like not only like the design
+But like what does the brand do like what does the company do because you want to speak a message that makes sense
+If they don't have a message that'd be another maybe maybe we could bake in a prompt, right?
+So now I'm thinking they could bake in a prompt where if we don't know enough about the company
+Then we can have AI talk to them. So then we're building this agent out live, right?
+And I'm trying to think of anything else
+I guess the last one would be now we have this settings view. The last thing that we'd probably need is to generate it
+So we want to manually generate
+Generate and then it's gonna point at a template so template
+And figma language that means like you've made a post and you're like, okay, this is the font that I like this is
+overall the vibe and
+Make five of these right? So that is the sketching and
+Really that's the hardest part of figuring this out and I want to be clear
+This is not a perfection game. This is a
+Get it on the paper
+Have this off if you have a whiteboard. I know I made software for this so they can keep looking at it, but
+Tactile like things you could feel they're better for this kind of work
+So let's jump into the next one you have the option if you want to use figma you can there's a figma make is
+their AI it's
+basically text to UI and so you can
+Have it go and you could take photos of this right so I can take photos of this and then say hey go make this
+That's actually probably the easiest way. But if you want to you can go and drag and drop stuff
+There's plenty of templates out there, but I don't recommend doing that. I recommend just keeping it simple. So let's keep driving forward
+
+
+================================================================================
+VIDEO 12 OF 32
+TRANSCRIPT_ID: 3.0--build-overview
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/3.0--build-overview/3.0--build-overview.txt
+================================================================================
+
+Cool, you have your screens.
+You maybe did Figma, maybe you did Figma Make,
+maybe you did the photo upload from the wireframes,
+but now it's time, it's time to actually build.
+So there's a couple of things that you're gonna need.
+You're gonna need an IDE,
+so that's Visual Studio Code or Cursor.
+Honestly, that's just so that I can show you
+some of the lay of the land.
+You need to know enough to know what to say
+so that the AI doesn't fumble.
+The AI is really smart now,
+but trust me, if you know kind of where things are,
+let's say you have flashcards with like 12 things on them,
+knowing those 12 things or even having a ref,
+where it's like, this is what that means,
+it's gonna save you a lot of time.
+So you need that so you can browse around.
+We're using codecs, codecs to me is the best.
+That's what we're gonna use.
+And then you need a clerk account for authentication.
+You need a convex account for database.
+All the links are somewhere around here.
+And Stripe account.
+So yeah, that's it.
+Let's jump in.
+So I made a template and the template
+has all this stuff in there.
+But if you want to, I also made a 30 page guide
+that has every single detail.
+If you wanna do this manually,
+but I think that the template will probably save you
+more time and then I can just like kind of walk you through
+what it looks like.
+So let's do that.
+And yeah, it's gonna open up Visual Studio Code here.
+And there will be stuff that's not in your project.
+Yours will actually look better than this, which is funny.
+And let me see.
+
+
+================================================================================
+VIDEO 13 OF 32
+TRANSCRIPT_ID: 3.2--build-vs-code-overview
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/3.2--build-vs-code-overview/3.2--build-vs-code-overview.txt
+================================================================================
+
+Okay, so this is what my visual studio code looks like and
+you can think of it as the little file explorer and
+Code is just a bunch of files within the folders on your computer
+Now one other thing to note is you need a github account github is version control
+There's a video on the tool overview somewhere in this you should have already watched it
+But when it comes to the breakdown of the actual app, you're not gonna be opening and reading this code
+But it's just as nice to be able to know a couple things, right? So I'm making it real big
+but on the left side you can see I have app app is
+the
+folder that has all the different
+forward slash
+Pages, so like if you went to like craigslist comm forward slash Florida, then that's a route for a page
+All of these are that so we have forward slash access required forward slash API which allows us in
+The future codex can connect to other
+Services like codex or stripe. So that's what the API folder does again. You don't need to memorize this stuff
+It's just nice to know that if you want to connect to another service, then
+This is where
+codex is gonna write that it's funny
+I have it looking for the thread that I accidentally just hid about making this plug-in and beginning but
+Then these are just other routes, right? So a checkout page
+That's something that you'll need if you have a paid product in the case of man meets AI
+there's different lessons and missions, but that's kind of the lay of the land when it comes to a
+Web app is that sort of to look like and then you have this components folder components are reusable Lego blocks
+You're not gonna be writing any of them
+But if you wanted to know that that is how all the nav bars at the top of a website look the same
+wherever you go
+Then you have other things like the convex folder this one
+You don't really need to know either, but it's nice to know the name of it, but it's your back end
+It's the ability for you to actually have stuff happen in your database
+So like if you wanted to add something or remove something or change something all that will happen in there
+and the rest of these are less important you have a folder or sorry a file called dot env and
+This is where your passwords go for different services
+So in that guide with every single little step in it, you will see that
+You'll need a password for stripe a password for convex and a password for all the basically other services that we use
+So that's clerk as well for authentication
+And then you have agents dot MD. This is the directions for your
+Agents to read and then you have package dot JSON. This is just a big file
+Let me open it. This is a big file that has all these commands for how to start your app
+This is what the agents gonna read to know
+how to do stuff how to
+Create a new product if you want to create a new products how to test your payments
+How to start the app stop the app build the app push the app live
+this is kind of like the control hub, so I want to just record that real quick and
+Then we will cover the basics of codex next
+
+
+================================================================================
+VIDEO 14 OF 32
+TRANSCRIPT_ID: 3.3--build-codex
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/3.3--build-codex/3.3--build-codex.txt
+================================================================================
+
+Okay, this is literally it it is all that this took I accidentally recorded the wrong thing before
+But what we're gonna go through is just this simple
+Piece about how I did the beloved one-shot. This is literally it
+This is how I made the app and that's why it's so important
+The don't believe the grifters online that say that you don't need to like think or use your brain that you can just like
+Use this complex cloud workflow or whatever you don't need that
+Like if you remember in previous lessons from the whiteboarding session of UX
+We wrote out who's this thing that we're solving it for right and then we wrote what's the problem?
+How painful is it how frequent is it and then we said here's what's in here's what's out?
+We had this big breakthrough moment when we realized, okay, we need these three things
+We need them to be able to generate new assets that are on brand
+Need a little help them if they don't have a brand we need to be able to leverage their existing chat GPT
+You remember we did all that here and then that's all I wrote there
+It's literally it because we did the research before this step. I knew about these links
+So you don't need to speak Cantonese. You don't need to be a PhD to figure this out
+I literally said I'm trying to think of ways for us to be able to use Figma because we define that in the first block
+in a workflow to create content
+Example if I made a template then we could have codex generate new designs
+That'd be cool
+And then I gave it two links and I said maybe someone built something like this before
+So I added in a little research piece, too
+And so it goes and it writes all this stuff and you don't even have to read it
+I recommend you read it though because you'll get more technical and the more technical that you get
+You're not going to use that to go code. You're gonna use that to have better prompts
+The better your prompt is
+Like you could be super lazy, right? Like you want to be lazy
+You want AI to do as much as possible?
+But when you do say something you want it to slap you want it to be this is exactly it
+it's very sharp and you only get that by
+Thinking the things through doing the process that we did and then actually like knowing a little bit about it
+So I might read through this if I have questions
+I can open up Gippity chat GPT next to it and ask questions, but this looked good to me
+I'm like, huh, but there was one part and this is why I read it
+It didn't say anything about using the existing chat GPT. So that's when I was like, hang on a second
+Let's figure this out. Can't we leverage this? Can we do something here? And so it did that
+It did another pass it looked at it. I read some of it. I'm like this looks awesome. Go do it
+And then it did it like I went for a walk
+I was like, I'm out of here. Bye bye and it came back
+It's like hey, I need the thing and I'm like no frickin way tells me exactly what to do to get it to run
+I said, nope, I'm not doing this alone AI you need to do this
+So it said you need to go run the server
+I said no you go run the server
+And so the reason you want it to do anything that it can do is because it's gonna have
+Access to your computer like you want it to have access to the error messages
+like that's the big message to you guys is like if it can do it have it do it and
+Then it closes the loop. So that's the loop you're creating you ask it to do something with pointed messaging
+Based on the build step that we went through based on the design set that we went through and the research
+And you have a couple lines and it goes and does it if it ever mentions anything that you need to do
+You ask it if they can do it
+Turns out boom. There it is. That was the first version it gave me and I was mind-blowing
+I'm like, this is crazy
+It actually did the thing and I I just couldn't believe it but it was because it was so pointed now
+Could it be better? Of course, but that's where those skills come in. That's where I go. Hey design critic
+what do I do here and
+Things like that, but this is
+Amazing right? So it came in give me all these things
+I say well
+We might have some issues in here and now we're just doing that loop if it has issues in here
+I tell it to do stuff. There's a second one because I
+Ran out it got tired. I said hey, we want to add this template in here. It creates a new plan
+I took some screenshots. It's all I did. I took some screenshots and say hey, this thing kind of looks bad
+How do we make it look good to use and so I type in use the design crit
+Anytime you use a skill think of it as a job that is a $200,000 a year person
+You can just type that in now and so it comes back. I say all right
+Let's make action on all these go for another walk come back say, okay
+This thing looks awesome really usable could use some polish. Boom. I say use the polish now. We got an app
+It's almost too simple
+like you probably were like walking into this being like oh like I'm gonna have to
+Sit through another coding tutorial where the guy is low-energy
+Okay, guys, we're gonna
+Open up the folder now and do this. No, that's not the case anymore
+So you want to focus on this you want to get it dialed and then you literally just prompt your way
+Use the prompt template or the the simple that I gave you
+When we come back, I'm gonna walk through actually kind of polishing this stuff up
+We will get a little bit nerdier. We're actually gonna go open up the ID, but it's gonna be dark out then so
+Let's see you need to now you're actionable is actually go do the thing that I just showed you if you didn't get so eager
+And this is a five-minute video if at minute two you didn't pause and go and do this. What's going on?
+Go do it. Go do it. Okay pause this video go start prompting use your skills
+You have a team of twelve people that are just ready to get that idea out there. So I'm so excited for you
+
+
+================================================================================
+VIDEO 15 OF 32
+TRANSCRIPT_ID: 3.4--build-day-2-overview
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/3.4--build-day-2-overview/3.4--build-day-2-overview.txt
+================================================================================
+
+All right, it is Sunday, which means we've got a lot to get through.
+I'm going to give you guys a quick overview of what remains in the build block because
+you've really just seen some of the high levels of this is kind of what to look for.
+This is kind of what Codex is capable of doing, but now we're going to get into the nitty-gritty
+of actually going through and getting this plugin out into the market.
+So on the build block, yesterday I did a Codex overview and some of the stuff of getting
+into VS Code so you can get an idea of what all is in there.
+Next, I'm actually going to go through and iterate on the build itself and the marketing
+site.
+So there's going to be a dedicated video on that where we'll be going through how you
+kind of look at the marketing site as its own thing.
+You need a landing page that explains what your product does.
+It speaks to that person, that problem.
+It meets them there, right?
+So we did all those exercises before, was explaining how we're going to meet them right
+in that moment when they had the problem.
+We're going to use that same language on the marketing site.
+And so then we'll go through the actual code base of what you guys are watching this in
+right now because you're probably not building a plugin, you're building a web app.
+And so actually it's a lot easier than building this plugin, but I wanted to just show you
+the differences because there's something called protected pages, which means that people
+who paid for your app can see and use the app.
+People who don't pay, well, sorry, you need to pay.
+Then we're going to cover the Stripe setup, which is your payment processor.
+So I had mentioned that before that you needed the account, but I just want to get into the
+actual details of getting in there.
+I figured I need to do it.
+So let me show you.
+We're going to go through convex setup.
+So that's, you should have created an account already, but if you didn't, you just go to
+the convex.dev and that's it and you sign up, there's going to be a password for that.
+We're going to go through clerk, which is the thing that gets you accounts and lets
+you log into stuff.
+Then we're going to go through the docs and the tools.
+So these are really, really important.
+They sound boring, but they're not.
+It's just so that every time that you're, let's say getting this out into the market,
+you've shipped by Sunday and Monday comes around, you want to add something to it.
+Having your codex automatically document things that are going on makes it a lot easier and
+it also knows all the different tools that it has access to.
+So it's kind of like a Wiki, if you will, or an intranet if you're using the old school
+version, but it's a way for all the teammates agents to know what's going on at all times
+and be able to have kind of like a handbook.
+So that is what we'll do on the build side.
+And then we come over to here and this is the ship side.
+So what is out of scope?
+We're not doing iOS apps.
+We're not doing any sort of complex APIs.
+What does that even mean?
+That just means you don't need to worry about it.
+That's what it means.
+The ship will actually, I feel like I gave a better explanation.
+An API would just be a dedicated server that you would set up that handles all the logic
+of your app so that if you did have an iOS app and you did have a website and you had
+an app that runs in your car, play in your car, those are all three different clients
+and they would talk to that one server.
+So that's what an API would be.
+We're not doing that.
+We're building web app.
+And so then we're going to get into the ship block.
+This is where there's a couple of things that we may not have crossed by then, which is
+we need some sort of logo just so it looks decent and that will need to go into the marketing
+site and then there's other things called open graph.
+Open graph is if I share a link to my friend that has the app, well, it's going to look
+a lot better if there's an image.
+So think of iMessage when you send a message.
+It has an image in there.
+If you don't have this set up and you don't get the image and you look bad, SEO, search
+engine optimization.
+So this is going to be a one-liner that we get to our codecs.
+It's a way for the websites to be way easier for search engines to read because you don't
+know it.
+But like that's kind of how you get discovered.
+So we'll do that.
+Then we're going to finally push it to this service called Vercel.
+We'll need to get a domain at the same time.
+We're going to set up the email.
+So in case you have a problem and someone wants to reach out, we'll have email support.
+We're going to set up this thing called logs, which is a way for if something breaks in
+your app for somebody else, not you, but they run into an issue that you never had.
+Well, how are you going to know about that?
+They'll probably not reach out.
+They'll probably reach out later or they'll just close the app, forget about it.
+Maybe they'll just cancel.
+So logs are the things that log the error so that you can know about it, but more importantly,
+so your AI can know about it.
+Then we're going to send it to friends.
+Then we'll kind of wrap up.
+This would be an instantly campaign, which is like cold email, but I will touch on that.
+But that's kind of outside of the scope of ship by Sunday.
+So we're going to get this done.
+I'm so excited.
+Buckle in.
+
+
+================================================================================
+VIDEO 16 OF 32
+TRANSCRIPT_ID: 3.5--how-clerk-works
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/3.5--how-clerk-works/3.5--how-clerk-works.txt
+================================================================================
+
+Cool, let's talk about the marketing site and how it separates from
+Protected pages, so I'm gonna make this very simple for you because you have a template
+It's really not a whole lot you have to do here, but I just want to give you the option to
+Build a know a little bit more and if you don't like the original setup if you have a particular look that you're going for
+Or whatever the case is I just want to give you a little bit of knowledge on this so I
+Had said that the marketing site is separate from the product that you have
+Well, it's only separate because you have this thing that is called authentication and authorization
+So when you authenticate somebody to come in to the front door
+They now can use their key to get in the front door. That's an authentication layer
+Think of it like a passport now to get through the front door is one part
+But is that same person who's able to get through the front door authorized to go on the balcony?
+Maybe maybe not that's where authorization comes in so are they authorized to go and see?
+Another part of this so in the case of your application
+There might be pages that someone who didn't pay you can see
+right, so it might be the blog it might be the home page might be the payments page the
+Contact page all these pages. They're not behind what's called a paywall
+So they're not authenticated or authorized now
+That what it looks like in the code base
+You can just
+Use this template right and in this template
+You'll see a folder called app and the app folder is
+is
+Your entire web app. It's just literally that one folder. That's doing all the stuff all the heavy lifting of
+Sorry about that. It's doing all the heavy lifting of the routes
+So these are different routes a route is a page
+So you have a page that's called access required. You have a page
+It's called artifacts a page called checkout page called lesson page called mission page called settings, right page called sign in
+Page called sign up. So these are all different pages
+now when it comes to the
+Page that shows up for everybody the home page
+That's just on this thing called page. So the template that you have this is using a
+framework
+that basically makes it easy to make these routes and make these pages and it sets up a standard way of
+All the websites getting built now, what does that mean? That just means that you'll see this page dot TSX
+You don't even need to know this, but I want you to know it
+That is the actual page right? It makes sense, right? It's a page. It's called page. So this all this code in here
+Your AI agents gonna go and do all this. I didn't write any of this, right?
+But I just want you to know that if the page exists within the app folder
+That is the home page. Now if there is a page
+That existed for lesson then that page would exist within the lesson. Does that make sense?
+if you think about it, it does because you have a folder and that folder is the name of
+The page. So if I'm on the lesson
+on the website like www.man meets ai.com forward slash lesson then that's what this represents this folder and then the page within that
+That's what you'd see on the lesson page
+so
+Luckily, this is all so so easy for an ad or write that I didn't write any of this
+but it's nice to know and
+That's how it all works. So if we wanted to figure out now how to know which pages are
+Behind a paywall or not. Well, luckily
+what we can do here in
+code X is we can create a new thread and I'm just gonna ask it and I'm just gonna click down you can click to
+dictate or you can hold with
+Control M on the bottom right and I'm just gonna ask them say
+Hey, I'm exploring this code base for the first time and I don't know how
+pages get
+blocked
+Whether or not the user has paid or not, could you explain it to me in simple terms?
+Imagine I'm non-technical
+Cool. So what that's gonna do is it's gonna go and it's gonna search through everything. It's not gonna write any code
+I made sure that this let's build is selected to the project that I had added by adding this new project
+but
+All
+That you're gonna do is you just ask these questions, right?
+And so it's gonna so it's gonna kick off and it's gonna go and actually
+Set up a search. So it says I found the core pieces next time reading how this works and
+Now it's reading through some pages. You can see that it's now reading something called entitlements. So an entitlement means
+You're entitled to see that page or not. Okay, and
+The pattern is now clear
+There's one central. Do you have an active entitlement check and the product calls?
+I'll call it before rendering. I'm grabbing the last two files. Cool. So it's just explaining this and this is how
+again, if you ever run into issues, this is how you solve them is
+you
+When ever confused you have the ability to just ask and that's kind of the beauty of
+AI in general is
+They have
+Infinite patience and they're really really good teachers and you can ask them whatever you want and you can also say it
+Over and over again, like if I didn't understand what it comes back with then I can say wait
+I don't quite understand that and so then I'd read through it and I'd say okay. The pattern is clear
+I have the full path think of it as two locks on the product lock number one
+Are you signed in the app uses clerk for identity?
+Okay, that makes sense a small gate in this file protects these routes
+So I had mentioned before that if I open up the folder, I can see these folders, right?
+I can see within our project that mission lesson
+Artifacts settings and access required are all protected
+So all of these are protected and if I wanted to if I wanted to actually see
+what this thing looks like then I can just click on it and
+Now I'm looking exactly at what's protected which is really cool
+So now I can see I've answered a question that answers this question
+Which is what is a protected page look like because this will be
+something that you'll update when you make your own app, so you'll take this template and
+you'll be able to make all the changes that you'd like for your particular app based on your UX and
+the pages that are required for that and
+This will be how you change that right? And so I'm just trying to walk you through
+rather than
+The the typical way that I learned to code and I learned to build which is actually horrible because I wasted so much time
+was I had someone give me every little item that I needed to do and it was just the code instructions and
+Imagine I did that for you
+It's be like if I was trying to teach you how to make furniture and I gave you the IKEA instructions and
+you never really learned how to
+Construct it yourself you were given every little detail and you were so
+Maniacally focused on just this next one this next one this next one that you had no room for you to actually understand
+comprehend it and most importantly get better at using AI because no matter what these tools are not going away and what we just went through of
+using it as a way to understand the code base better is one of millions of examples of how to use AI and
+It's gonna get you the outcome that you want, which is your app shipped by Sunday. So you can see all this stuff in here
+You can go ahead and read that and then what you can do in codex what I like to do
+I'll make a little bit bigger for you is I like to rename these so I like to say how
+Let's
+Say how protected
+pages work
+And I can put that there and then I can leave it there
+And so if I ever want to come back and remind myself of how that works in this code base
+I can also pin that now that's at the top. Okay, does that make sense?
+so the next thing I'm gonna do is I'm gonna make a
+landing page a
+marketing site rather for
+My app the plugin and we're gonna get started on that you guys are using a template for
+the
+Well, I'll probably end up providing two templates
+But I just wanted you guys to sit, you know through this this nine minutes just to understand like
+This is how this stuff works, right? It should be simple and let's get started on the next one
+
+
+================================================================================
+VIDEO 17 OF 32
+TRANSCRIPT_ID: 3.6--plan-mode
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/3.6--plan-mode/3.6--plan-mode.txt
+================================================================================
+
+Cool, we're starting to build. I'm going to show you behind the scenes, right? So I had built this original project
+for you guys to benefit from by having the software that walks you through things and
+We've already spoken about that code base a little bit. I showed you some of the parts of it
+Now what I wanted to do was have a fresh template right the one that you're working on right now
+But in order to do that I needed to ask
+Codex to do a couple things for me. So what I did off-camera was I just
+Used the dictation I said we need to make a template for ship by Sunday students based on and then I listed out the
+Different pieces of the puzzle right we've spoken about convex and how it is the database. It's our back end
+We spoke about next.js how it's a framework that allows us to make these routes a lot easier
+And I listed these things off and so you can use plan mode
+but
+There might be a downside to it. Sometimes if you don't have any
+Input on the plan like you feel like you're not totally sure if you you know need it or not
+like sorry, brother if you're not totally sure if
+You have anything else to add to the plan then go ahead and use plan mode because it'll come back and it'll have this
+Awesome thing and it's really great for that. Now what I will say it's not as good as
+for the use case of
+having some back and forth before you go do it is actually just
+Doing a manual plan mode and so I'll show you how I did that
+I said this last line right here don't start coding yet, but just come up with a plan once we discuss
+If I like it
+We can
+move forward
+cool
+So that one will allow you to kind of go back and forth and I know it's a little bit cut off there so
+You can see it here, but I'll just kick that off and the different types of reasoning you can rotate
+Through them. So I use medium for fast stuff
+Iteration I use high most of the time and I'm gonna use extra high here because I know that I want it to be right and
+Then all I'll do is if I wanted to ever reference another code base, which is really helpful
+Because if you find a code base online in your research that happens to be something that does
+Something similar to what your app will soon do then you can actually download that and add it to your codex and
+Reference it. So I'm gonna do something similar to that where I'll just grab the path
+That means where it is on my computer and the way that I'm gonna do that is I'll right-click it
+I just want to make sure I'm still on the right screen. Yep. I will right-click this and
+I'm gonna grab the path by holding down option. Now when I click option, it immediately shows all these different options, right?
+so I'll just copy that as a path name and
+in here I will say
+So analyze that code base at the following path
+Great. Now
+What's funny is you're probably reading this and you're like this doesn't seem like the best prompt ever
+But you don't really need to worry about formatting it. It doesn't care
+So we're gonna kick that off and it's gonna come back with a plan that will outline things. So
+we'll get into the
+actual build-out of going through its step-by-step of
+How to set up all these services, but I just wanted to show you that distinction
+
+
+================================================================================
+VIDEO 18 OF 32
+TRANSCRIPT_ID: 3.7--branding-NEEDS-CUT!!
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/3.7--branding-NEEDS-CUT!!/3.7--branding-NEEDS-CUT!!.txt
+================================================================================
+
+So while that is going and the templates getting set up,
+I wanted to show you guys a little bit
+of the branding stuff.
+We're gonna scoot that ahead.
+So what you can do is you'll have two templates.
+One is the whiteboard in Figma,
+and one is the design file.
+So the design file will have these.
+So standard logos are, you grab a 500 by 500.
+Those are in pixels.
+But you can just change out
+whatever you wanna put in here, right?
+So you can command and click into the text,
+type in the name of your app,
+do the same thing for the letters.
+And then I have these guides in here
+that just make it so that it's got some spacing
+to the left and the right.
+And then you have a word mark.
+This might be something that you put
+at the top left of your website.
+But you'll do that.
+You can create these.
+You can change the letters.
+So what I'll do is I will actually make,
+like let's say your app is called the SMS,
+or the SMMA plugin, or whatever.
+You should definitely come up with a better name.
+But you can change the font size to be bigger.
+And then if you do Control C,
+you can change the color of it.
+So then I'd just be lining that up with the guides.
+And then if I change the letter spacing,
+that's the amount of space between them.
+So it tightens a little bit.
+I can make it a little bit bigger and a little bit tighter.
+But you play around with that.
+And then you just wanna have something
+that looks simple, right?
+And once you're finally done with that,
+you can grab the black icon by clicking on the name.
+And then when you click Export,
+you wanna have PNG selected,
+then you'll export it to the homepage.
+Now, what will you do with that?
+Well, in Stripe, which you'll have set up,
+you will go to the Settings page
+and then under Settings, Business, and then Branding.
+And under Branding, that's where you can upload
+your icon and your logo.
+I always just keep them the same.
+And then for the brand color, pick a color.
+So I like to keep them simple.
+I'm gonna switch this over to hex and black is 000,
+but I want it to be a little bit off black.
+So I'm gonna do 111.
+I'll do the same thing with this accent color, change that.
+And the accent color will be used in the buttons.
+So that's great.
+Now, if I look over here, that looks good to me.
+This same thing will be used in the branding.
+So what we need to do,
+it'll be using the branding on the website, right?
+So what I did was I saved that logo
+that I made to my desktop.
+And you can see it's shipped by Sunday, right?
+Now we need to make what are called favicons.
+So up top on the browser,
+you can see that I have these little icons, right?
+At the very top, that's a favicon.
+And what we need to do is we're gonna go
+to favicon generator.
+And when I search it up, it's this first one, right?
+favicon.io.
+And what we're gonna do is we're gonna upload this.
+We're gonna click,
+we're gonna grab the nice little logo that we made.
+We're gonna hit download.
+And what that does did,
+was it made all the different sizes
+that are required for your logo.
+So you have all these different ones.
+There's one for an Android phone.
+There's one for an Android phone at a bigger size,
+Apple touch, and then those small ones that we spoke about.
+So what we're gonna do is we just, oops,
+we're just getting ahead while other stuff's going on.
+And so I'm gonna go ahead
+and I'm gonna grab these out of my downloads folder.
+And I'm just gonna rename them to SBS logos.
+And I'm gonna throw them on my desktop for later.
+And let's throw them in here.
+
+And what you could do is just when you copy the template,
+you could drop all them in there, right?
+Because you'll wanna have these for later,
+whether you post them on social media or not.
+It's up to you.
+I recommend doing that.
+But now you have your branding figured out.
+If you wanna find a good website for different colors
+that work with one another,
+there's this website called coolers.co.
+And when you hit start the generator,
+if you have a color that you like already,
+you can type it in.
+So I like this off black,
+and then I typed in the name of that color.
+I can lock that.
+And then every time I hit the space bar,
+it's gonna show me other colors that I could use within that.
+So I'm building out a brand right now.
+That's what I'm doing.
+And I showed you how to do this with the ship by Sunday one,
+but I'm gonna do this now for SMMA,
+which is the social media marketing agent.
+And I need to come up with a better name,
+but what I do is I kind of like this electric sapphire color.
+I kind of like this lime cream.
+You don't really need that many accents,
+like this corn six kind of cool.
+So I'm just picking them and then hitting the space bar.
+And if I wanted different shades, I can do this.
+But what I then do is if I chose these colors,
+I could then take a screenshot with command shift two,
+and I can screenshot that and tell Codex,
+here's all the colors that I wanna use
+and update our project to only use these colors.
+Or I could take multiple screenshots.
+So I could save that one and I'd say,
+this is the dark palette.
+And I could say that I wanna have this
+and I'm gonna do the same exact thing.
+And those are all the blues that we're gonna have, right?
+So I'm just saving that one.
+I'm gonna say that's the blue palette.
+And what we're doing right now
+is we're actually building out a brand, right?
+So if I, honestly, I like the black and the blue.
+This yellow one's like, okay.
+But I don't know if I'd use more than two.
+So that's the third one and I'll say yellow palette.
+And then what I can do is I can drop that into here.
+So I'll have colors.
+And I'll drop them in there.
+And so we're just, we've built out a brand, right?
+And so what I showed you before was shipped by Sunday,
+but I'm actually gonna do the same thing
+off the top of my head.
+I'm gonna think of a name that is associated
+with generating content.
+So let's think of one.
+It's kind of fun because I learned this process
+from the guy who named Liquid Death.
+I was there when he named it.
+And it's called a naming exercise.
+But you try to think of,
+a lot of people, they just like grab sets of horses
+and they try to like think through words
+that have to do with the thing.
+So what I'm trying to do is I'm trying to automate
+some portion of the creativity of marketing.
+I think SMMA is like social media marketing agent
+is like too much, but it could be named after an agent
+where you'll see that where it's like,
+oh, this one's name is Lindy.
+But Liquid Death is the opposite where it's like,
+oh, we're naming a water and how do we so differ,
+so purple cow.
+I mean, you could name the app Purple Cow
+if you wanted to stand out and name it that.
+If it's named after Instagram, that's not gonna work.
+So I'm gonna have a working name of,
+I'm gonna pause and think of one.
+Okay, I came up with a name.
+So the way that I like doing naming, it took five minutes,
+but as I will write down a bunch of different
+potential words that have to do with
+what it is that I'm making.
+So I'm sharing stuff, right?
+And so I put agent, share, grow, market, megaphone,
+squad, team, story, blast, launch, post.
+And I wanted something to do with posts,
+post launch, launch something.
+But I ended up with this one, which I'm fine with.
+Story Blast AI, cool.
+So this was on cloudflare.com.
+You're gonna use this to buy your domain.
+There's other places you can get it,
+but this is the easiest one.
+So use cloudflare, we're gonna go ahead and buy that.
+And then from there, I'm gonna make some logos.
+So I'm gonna buy this real quick.
+Great, proud owner, $10, price of a couple coffees.
+So now we'll make some logos.
+What I'm gonna do is I'm gonna grab this from the template.
+I'm gonna hold down the option key.
+I'm gonna drag down.
+That's essentially a duplication, whoops.
+And once I have that in place,
+I'm gonna go ahead and I'm gonna choose to write out
+story, blast, SB.
+I could have just honestly used that over again,
+but I'm gonna make it a different look.
+Let's see, story, blast.
+I can just replace this.
+Honestly, I kind of like reusing the branding
+because this is part of a portfolio
+of apps that are building using this system.
+It kind of makes sense for me to keep them very similar.
+But for you, what you'll do
+is just make it look different, right?
+So grab a different font.
+That's the easiest thing to do.
+Now we have story, blast, that's looking pretty lined up.
+That's in a group.
+I'm gonna rename that to SB.
+And then we have the text itself.
+Let's grab everything by clicking on the group.
+And we're gonna click here
+and I wanna make sure I'm fudge.
+I wasn't recording this part.
+Dang it, let me show you the screen.
+All I did was I dragged down.
+Cool.
+So I grabbed that, I'm gonna center it
+and now I have this, cool.
+And I can reuse this for our application, great.
+So what we did in this was figure out some quick branding,
+the naming, we can have a color palette if we'd like
+and we purchased a domain.
+So we're doing all this stuff
+and then next we'll actually go and build it out, cool.
+
+
+================================================================================
+VIDEO 19 OF 32
+TRANSCRIPT_ID: 3.8--env-vars-provider-setup
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/3.8--env-vars-provider-setup/3.8--env-vars-provider-setup.txt
+================================================================================
+
+Now we're going to sign up for our providers and I'll walk you through just a couple of
+the steps so you don't have to worry too much about it if you want to go and do this on your
+own awesome also as you can see codex has been building you out an amazing template
+that has all of the instructions in it for what you'll need to do so if you didn't want to watch
+some of these videos or you forgot or you wanted to carry this over for a future project then
+it's all going to be in there but let's take a look so we have clerk clerks the first one what
+you do is you create an account and then you'll create an application so we're going to grab this
+application we're going to type in story blast on the right hand side you can see the preview
+what that's going to look like i always do email and google but i'm going to turn off google
+we're just going to have email and so we're going to hit create if you want to
+add google there's really good documentation about how to go do that but it does complicate
+things ever so slightly so the next thing you want to do is if you were not using a template
+then you would grab this and that's kind of the beauty of this is when it comes to
+ai building stuff for you these companies know that the easier it is for you to use their tooling
+the better and most of the stuff can be done by ai if not all of it so you'll notice that while
+we are not using a prompt like we don't need to go and set up clerk because it's already done in
+our template if i wanted to i would just click copy prompt and you can see at the top we have
+nextjs is auto selected that's why we're using nextjs is because it's one of the most popular
+things in ai really good at using it but if you were using something else you'll select something
+else but it's important to remember this pattern because if i'm not here with you and you want to
+add something to your project then you'll know now that this is on a lot of a lot of stuff
+so anyways we don't need to do that right and it says it's watching for new users
+the next thing we're going to do is we have different environments so an environment
+you can think of it like the play like if you went to see a play you have the actual play when
+it's live and people are there and they're they're ready to watch the show and they spend all this
+time behind the scenes doing rehearsals and practicing and all the bad stuff should get
+out during the practice right so that's kind of what i like to think of with environments
+when it comes to building your own software is you have these like three i guess i could draw
+behind me or basically you have the local environment which is what you're building on
+your computer and that's kind of the fastest way to go so you build in local local means it's not
+leaving your computer okay so whenever you're local that just means that it's
+whatever's on your machine that you're typing on or that your ai is typing on
+and then you have that's uh the first one the second one is the development environment
+and so that means that it can be shared among other team members and when you're working with
+clerk or working with stripe or working with your database provider like convex
+there's only going to be two but the development one is the one that you would use when you're
+building you're developing right because if you launch your product and when you launch your
+product when you ship by sunday you're inevitably going to want to add more stuff to it and so you
+wouldn't want to have a database and a payment processor and your user stuff in one environment
+that is for testing getting mixed up with real users right so that's kind of the difference and
+for our case what we'll do is we have the local environment and it's going to be connecting to
+the development environment on these providers so our computer is going to connect to the test one
+you can think of development as testing and so i'm happy to explain that because you'll see it
+everywhere so in the case of clerk you'll see this you have development of production
+all right so in our development environment what we're going to do is we're going to grab this
+we're going to go into configure and because i set email on these are all on now one part
+about this is we're going to turn on password so passwords on and we're going to turn off client
+trust and we're going to hit save now this is a small setting but it's pretty important
+because what that just did is it unlocks the ability for ai to go and do all the testing
+for you so before you had to go and like manually test all this stuff before or manually and like
+click around on it and like think of all the different edge cases and there's so many of
+them in an app but now because we just turned that off it lets you create a fake user that's
+test at test.com password is test 12345 and one of the skills that i gave you was a quality assurance
+ai and we'll cover that later but it allows you to let it go and it can create an account if it
+doesn't have an account already in clerk it'll create that and then it'll go and it'll actually
+test and so anytime that you add something instead of it just being you that goes and
+clicks around to make sure this thing works it can become part of that loop where every
+time that i make something new it can go and actually send off a user that is ai and it's
+going to open up the browser it's going to look like you're doing it it's crazy so what that just
+did it allowed that to happen now at a later date you may want to turn back on but for now i don't
+think it makes sense to to even worry about that so next up we've turned that off and then the
+thing called api keys so what this does is you're gonna find in the starter project that you'll
+have a couple different folders or sorry files that have a dot in front of them and then the
+three letters env okay and so i mentioned this before environments what are they there are
+different places where your app gets built you have the one on your computer you have a development
+one which is testing it connects with the providers and then you have production one
+which is the live one that's real so what this is is it's saying hey this is for your local
+environment here are some passwords and so api keys think of them as passwords this password
+says hey our app is connected to this clerk so clerk deals with your users if your app didn't
+know about clerk how's it gonna know when someone signs up to put it in their website well this is
+how this is its ability to actually know what's going on between your app and clerk so what you
+do is you click on this little copy button and then in your project there's a dot env dot local
+and all these are in the readme you can ask your ad to help you out with this it's just going to
+tell you to go and copy this but you will go ahead and you'll paste those into your project
+and then we're going to do the same thing inside of convex and inside of stripe so if we go over
+to convex and we log in we're gonna i can see that i used github before and you can create a
+new project so i'm going to create create a new project i'm just going to type it in what's cool
+actually is if you didn't want to do this if you didn't want to click around the projects you can
+just ask your agent to go and do it for you and just say hey look use the convex skill which is
+in your project and those skills know how to do all of this but i kind of wanted just to show you
+so do it either way but i just i think it's important to get you to kind of click for your
+brain to click that like instead of you going and and going to this website and typing in this stuff
+and creating the account like you still need an account for sure but if you had an account you
+wouldn't actually have to go and click create project and click and type right you could just
+say we need to start a new project so that would then get you the keys that you need so it's the
+same exact thing i'm going to type in story blast i'm going to create this and then when i click
+into here it's going to start up and you can see at the top we had spoken about those environments
+right so this is the same drop down there's three of them they can see that there's a development
+one and a production one if i asked my bot or my ai to start my convex which it knows how to do in
+the template then it would show a local one but once this gets done in settings api keys you're
+going to copy and paste those in there capiche that one's done um you can see that i have it
+done already so if i went into settings and then there's a bunch of stuff in here you can grab
+the environment variables um yeah so you don't really need to like know much about this stuff
+like what we just did you know we clicked a couple buttons i can see the name of it i can see
+a bunch of default stuff the reality is i'm mistaken you at this point you actually can just
+ask your ai agent to connect convex and then it'll be able to see this project to say connect it to
+my story blast project and then finally on the stripe one and all this is in that guide right
+because i want you to be able to refer to something but you would click on the account settings
+so down here developer api keys and you'll grab a restricted key i'm sorry you're gonna grab a
+standard key so create a secret key here and then it will let you copy in that and then you'll paste
+it and then publish a publishable key so i know that that seemed like a lot of stuff i just
+honestly you you could figure it out by just asking the ai but i wanted to kind of walk you
+through it so to show you in the project it would just literally there's going to be dot env
+folders and your ai will know exactly how to do it but yeah so that's how you set up all your
+environment variables and you can do that for both the development one and the production one
+so production one you don't necessarily need to have those passwords in the project because
+they exist on the platforms but it makes it a little bit easier okay so that's it there next
+up i'm going to walk you through the skills and then we're going to build out the marketing site
+
+
+================================================================================
+VIDEO 20 OF 32
+TRANSCRIPT_ID: 3.9--github
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/3.9--github/3.9--github.txt
+================================================================================
+
+GitHub, I spoke about this earlier, but I wanted to show you just something real fast
+on it because I'm doing it right now.
+So how to add Git to command line?
+Command line is this thing.
+When you hit command J inside of codecs, you'll see this.
+It's also called the terminal, but it's the easiest way for you to communicate with the
+computer.
+It's how the agent actually does all the stuff on your computer.
+You don't need to worry about it, but I just wanted to show you so you do know a little
+bit about it.
+So you know how to speak to the agent.
+So what I did was I just asked how to add it.
+Now, if you have it already, it should be on your machine.
+You can just type in Git dash dash version.
+Or you could just ask the agent, do I have Git?
+Right. And then after that, the way that you could do this when you're downloading the
+template, you can download it as a normal one, which is if you went to GitHub.com and
+you'll have this link soon, but any repository, you'll have the ship by Sunday template.
+You click the green code button and then you can either grab this right here and give that
+to your agent or you can even grab just the URL and literally just say copy or sorry,
+clone, or you can say copy, copy this repository and then just paste the link.
+Right. And you could do that inside of a new empty folder.
+And that's literally it.
+In my case, I didn't have a GitHub set up, so I'm just setting one up.
+But once you've cloned it down, what you can then do is you say to your agent, I need to
+start my own repository.
+This is a starter template and it will go and set it up for you.
+And then you can say, now I need to create a new repository.
+And what that will do is it basically gets rid of all the history of my stuff that I've done
+to make that template, which you don't really need.
+You don't need to see like these are all changes, right?
+So whenever I make a change or whenever you make a change or a codec makes a change that's called
+a commit, that's the unit of measurement when it comes to new code, you make a change, it's a
+commit. And so you can just say, hey, look, copy this thing down.
+Now it's on my machine.
+I want to start from scratch.
+This is my thing.
+Now it's a template and we need to make a repository.
+The repository is what allows you to then keep the version history.
+And this is what will connect to Vercel later, which is what we spoke about earlier.
+But that then makes it so when you do want a new version to go live, it's all connected.
+So it's really cool how that works.
+But that's just another one of those examples of when you have a question about it, go ask your AI.
+When you're not sure how to do it, go ask your AI.
+When you want to do something that requires the command line, don't do it manually.
+Ask the AI.
+
+But it's nice to have that understanding.
+
+
+================================================================================
+VIDEO 21 OF 32
+TRANSCRIPT_ID: 3.10--build-skills-overview
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/3.10--build-skills-overview/3.10--build-skills-overview.txt
+================================================================================
+
+Skills, you're gonna hear about this.
+They're gonna be mainstream soon.
+I want to walk you through how to use them.
+I mentioned them a little bit before,
+but it's important that you understand
+how they're getting used.
+You can go kind of bananas with this.
+Think of a job description.
+That's basically what a skill is.
+Now, you need to get,
+if you wanna start making them yourself,
+you need to get like super granular
+about each step that you want it to do
+because we wouldn't tell a human
+to do something that has a lot of detail.
+If they had no context,
+you'd give them context ahead of time.
+So we can't expect machines to be any different,
+but for the case of the agents that you got
+and the skills that you got for the starter,
+you have all these clerk ones.
+Cool, right?
+What this is doing is it's showing
+all the different best practices for using clerk.
+Right now I have VS Code open,
+but the same thing happens in your Codex app.
+So if you clicked on skills, you'd see all them in there.
+But inside of VS Code,
+I have all these clerk ones.
+And if you remember from before,
+I had this whiteboard where I explained the team members.
+Now, clerk, these are the specialists.
+So we have a bunch of clerk ones,
+and whenever we're doing something with authentication,
+this'll get called.
+And what a skill is,
+is it basically just has a file
+that explains exactly how to use the tool.
+So this is what I mean is like,
+if you know how to use skills,
+you don't need to know how to
+actually write any of this code,
+which is kind of wild.
+That happened very recently,
+and skills are getting more and more reliable and powerful.
+So we have a lot of them, right?
+So if you look in VS Code,
+we have all these clerk ones.
+There's the main clerk one,
+which is called the orchestrator,
+but that's the one that's like, hey, it's clerk.
+And then it's like, wait,
+do we need it for setting up organizations?
+Because that's what we need it,
+or we need it for setup.
+We need it for Swift, which is iOS.
+Do we need it for testing?
+Then you have convex.
+So these are all the experts for convex.
+So literally everything in here
+maps to how to use that product on the internet.
+So if I type in clerk docs,
+and went and read these,
+that's gonna be so boring.
+Well, guess what?
+This just does that.
+So when you have a question about anything,
+it's gonna be helpful to have these skills.
+So they're shipped alongside this.
+And when you open up your codecs,
+it's gonna be able to do that.
+So the way that I would call a skill
+is with the dollar sign.
+And then now I can see all these skills, right?
+Pretty amazing.
+And if I have a question about clerk,
+I just tag the skill.
+If I have a question about convex, I tag the skill.
+If I have a question about anything,
+I just tag the skill, right?
+So that's pretty nifty.
+And what else?
+We have those specialists,
+and then we have the ones that we use, right?
+Which are the engineering ones.
+So you have avoid feature creep.
+This one's gonna be really helpful for you.
+It's kind of like a,
+it's like not training wheels,
+but it's gonna help you stop
+trying to add more and more stuff.
+And even if it's not you,
+the AI sometimes is like,
+hey, here's 17 other great ideas.
+But it's like, dude, we already did this scoping on day one.
+We don't need any of that.
+So, yeah.
+And then you have all these other ones.
+Once we have, you know, let's say we have it working,
+then we want some polish or we want some motion,
+then you'd call those, right?
+And then this one right here, this QA browser,
+this is what I spoke about before,
+where we turned off the extra piece of security in Clerk
+so that we can have a test user go and open up a browser.
+And if that user doesn't exist, this will create it.
+So same thing goes with Stripe.
+But this really, if anything,
+this is like the most important thing
+in the whole freaking project.
+Because it literally just lets you do your thing.
+It lets you work on the project without,
+like frankly, I don't ever open VS code
+unless I'm typing in passwords.
+Like I need to type in some passwords.
+I'll do that because sometimes the agent
+doesn't let you do that.
+Besides that, it's good to go, right?
+So that's how skills work.
+And you can start making your own,
+but I would recommend just use the ones
+that are in there, right?
+So that's it.
+Cool.
+Let's move on.
+Let's make a marketing site.
+All right.
+
+
+================================================================================
+VIDEO 22 OF 32
+TRANSCRIPT_ID: 3.11--build-day-2-clone-template
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/3.11--build-day-2-clone-template/3.11--build-day-2-clone-template.txt
+================================================================================
+
+You are locked and loaded.
+You've never been more locked and loaded in your life.
+You have everything you need.
+Now, let's make the marketing site.
+We're just going to stand this thing up.
+We're just going to stand it up.
+It's going to be so easy because we've given you all the tools, right?
+So what you're going to do first is you will have a link to this.
+It is the ship by Sunday starter.
+The starter is a template.
+It allows you to have all the sauce, all the things,
+all the magical components and agent skills that I have.
+Right. And they're specialized just for you.
+So what you'll do is real easy.
+I mentioned this in a previous video, but you can grab this link.
+You're going to go into your codex and you can just tell it, hey,
+copy this thing down.
+You're probably going to want to make a folder for this.
+So I always go into the developer folder on Mac.
+If you didn't know, when you type in developer,
+then you automatically get this hammer, which is something to know.
+We can make a new folder, call it the name of your product.
+So in my case, I would name it, you know, story blast.
+And then I tell it to copy the repository down
+and we're going to start fresh.
+So what that'll do is it will grab that link.
+It'll pull down this code base and then it will initialize it,
+meaning it's going to not need this whole history of everything that I've done.
+And so that's what you're going to do.
+And then you're off with the races.
+So as you remember from a previous video, we have a setup in here
+that will let us basically do everything that we need.
+So you have this file called a proxy and in there it shows you
+what is protected and what is not protected.
+We have all these documents.
+You probably don't even need to open this, but
+that would be the right thing to do is actually to open it
+and you need to fill in these passwords.
+So we covered that before, but the
+env.local and the env.production are the two files
+where right now you're going to pause the video and you're going to go
+into env.local and you're going to open up your convex tab.
+You're going to open up your clerk tab and your stripe tab, those three tabs,
+and you'll go into those and grab the keys, paste them back in here,
+change the environment from development, because again, development is the one
+that is for working on it, testing and whatnot.
+And then you'll switch it to production.
+And when you go to production, then you'll paste it into here.
+Cool.
+Capiche?
+Great.
+In the next video, what we're going to go through is actually making the changes.
+To the marketing page itself.
+So we'll ask it to run it.
+The way that you can do that is you just say run the server and it just knows
+because everything's in there and it will start up your web app so you can see,
+this is what it looks like right now.
+It's called paid access starter, ship the gated app foundation once,
+customize the product.
+Whoa, cool.
+But you're going to want yours to look different and have stuff
+that explains what yours does.
+So in my case, we're going to talk about how the user saves all of this pain by
+being able to have a Figma plugin and we're going to speak to all of those
+things that we covered in the core flow and in the outcome statement, basically
+everything that you worked on in day one around the strategy and the customer
+profile and the pain and the frequency of the pain and all that is going to
+come to life on this page.
+Cool.
+So pull that stuff up and we'll jump into it in the next video.
+
+
+================================================================================
+VIDEO 23 OF 32
+TRANSCRIPT_ID: 3.12--provider-setup
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/3.12--provider-setup/3.12--provider-setup.txt
+================================================================================
+
+Next on the plate, we are going to ask
+codecs to do a little bit of a setup, right?
+So I had mentioned before how we're going to do it,
+how we're going to pull this thing down.
+You can see my exact message here, pretty simple.
+Clone down the URL to this folder.
+I made a new folder called Story Blast,
+and then I added this to the left side.
+Then I said, wipe the Git history and start a new one,
+and then rename the project.
+So it went and it did all that, and that's great.
+Immediately after that, I go into my Stripe account,
+and what Stripe does is it lets you create products.
+So for your case,
+you're probably going to do recurring pricing,
+meaning that you will have a subscription.
+So when the user starts, they pay a certain dollar amount,
+and then after 30 days, it renews.
+I'm doing a one-time price because I don't imagine
+people are going to buy, I don't have the appetite.
+I've never bought a Figma plugin,
+or would I ever think about buying a Figma plugin
+and pay for recurring,
+especially when it uses my AI subscription.
+So I'm doing one time, but it's your choice.
+And what you're going to get from here is the secret key.
+And so what I did was I created the Stripe account,
+and it pushes you into what's called a sandbox
+at the beginning, when you first sign up.
+And so what the sandbox does is the sandbox
+allows you to set everything up.
+It's similar to, that's like their developer environment.
+And you'll hear the word sandbox a lot.
+It basically just means it's a sandbox to play around in
+before you go and elevate to the big leagues, right?
+And so we're in this sandbox, and what it's going to do
+is you're going to get this thing called the secret key.
+And the secret key is the password.
+So we always have two different things.
+When we're working with a third-party provider,
+we'll have a client ID and a client secret.
+So those things basically exist everywhere.
+It might be a publishable key or a client key,
+and then secret key.
+The secret key is going to allow us to tell our AI agent,
+hey, we want to create a product.
+It's one time, and it's going to be called the premium
+or the pro version or whatever it is that you're going to call
+it, but that makes it so that you don't have to go
+into this tooling and mess around with this.
+And so that's what we're going to do with Stripe.
+You're going to tell it to do that.
+It's going to create the product.
+And because we have these skills that are with Stripe,
+it's going to do it right.
+So what I'll do next is I will just do this in front of you
+guys.
+I will tell it right now to do a new thread.
+And actually, before they do that,
+I want to make this new change go live in my new repository.
+So I have a new repository.
+What I'm going to do is I'm going to commit our changes
+and push it to our new repository,
+make the repository private, and then push it.
+So what that's doing is when you make a change,
+it's committing that change so that all those little green
+things, the green pluses were new code that was added.
+So if I open that up, you can see that something was added,
+and then something was deleted.
+And so I want to commit that change
+into my version control, which is GitHub.
+And I'll just fire that off.
+That's going to go.
+But we're going to make a new one.
+I'm going to say the following.
+Use the Stripe CLI tooling and the Stripe skill
+to create a new product called Storyblast Pro.
+It's a one-time payment, and it's $4.99.
+So what that's going to do is it knows under the hood
+that I can switch this to high, but I'm
+going to kick that off.
+And under the hood, it's going to go and use the Stripe skill
+that was in here.
+So if you scroll down, you'll see Stripe best practices.
+And it knows how to do everything, which is awesome.
+So it's going to go and create that for us.
+It's checking this all out.
+It might ask me a question.
+In fact, I know it's going to ask me
+any questions in a second, so I'll just tell you ahead of time.
+It needs to authorize my account with Stripe or your account.
+Basically, your computer needs to know that you're who you say
+you are.
+It's like that auth thing, right?
+So it's going to say, hey, you need to go to this website
+and then plug in these four words.
+And what that does is it just says, hey,
+any time that this computer, in my case a MacBook,
+talks to Stripe for this account, it's OK.
+So once that's done, you will have
+created your first product in Stripe,
+and that'll be how it allows you to make transactions
+or capture transactions, rather.
+So the next one we're going to do is Convex.
+So let me open up Convex and inside here.
+I already have this connected, but I'm just going to do this.
+So I'll make a new one.
+It looks like, boom, I already made this account.
+So cool.
+You can see it created that new product.
+I got a Stripe product ID.
+So what I can do is I can take these two things
+and I can add them into those passwords.
+So I'll grab these two and I'll go back into VS Code
+and I'll go into this env.local thing
+and I'm just going to paste them.
+So now I have these two.
+And now it actually knows, hey, when
+we go to sell this product, that's the product.
+Because you have multiple products in Stripe.
+So that one's done.
+That's usually, just so you guys know,
+that would usually take a developer, like maybe a year
+ago, this would have taken a week.
+So kind of crazy.
+Next up, we're going to set up the database.
+So I'm going to keep this one here.
+I'm going to rename this Stripe setup just so you can remember.
+I'm going to do a new one.
+I'm going to say, we need to use the Convex CLI and the Convex
+skills to connect our new Convex project.
+And so I need to remember what I needed.
+I needed Storyblast called Storyblast.
+And again, I mentioned this in a previous video.
+You could have just gone and created that in the interface
+and clicked around and stuff, kind of like I did.
+But I want to just do what I did.
+I basically already clicked in it on Convex.
+So now I'm just kind of connecting it.
+And it's going to go and do that same thing.
+And you guessed it, we're going to do that same thing for Clerk.
+So I'm going to go in, and I have Clerk here.
+I've already grabbed these passwords.
+And I'm going to go ahead and paste them over into here.
+And I'll hit Save.
+And I want to make sure that there's no duplicates.
+OK, cool.
+Those are removed.
+Great.
+There's a frontend API URL.
+So you can see that there's one here.
+I'm just going to paste that.
+Oops.
+And cool.
+So now we have everything there.
+And I'm going to tell it.
+Use the Clerk skills and the Clerk CLI to connect our Clerk
+and make sure that it is set up properly in the dev environment.
+Great.
+That's that.
+Now, all three of those are going to be up and running.
+There's one last step that we need
+to do before all of our providers are properly set up,
+which is we're going to go into the developers and save.
+One second.
+Sorry.
+We're going to go into Sessions.
+And then this thing says JWT templates.
+Now, you don't need to know what that means.
+But all this is is it's saying to this provider, who again,
+sets up your accounts, that it needs
+to be able to talk to your other provider, which
+sets up your database.
+So all I've done is I just clicked Convex.
+And it's saying, OK, you guys are friends now.
+Done.
+That's all you had to do.
+And now those two things, they're best pals.
+If you didn't do that, everything would be broken.
+So pretty important that you do that one.
+And let's see.
+In how many minutes?
+In nine minutes, you just set up three providers.
+And I can't explain enough how that is such a cool thing
+because I used to just take forever.
+Yeah, it's kind of insane.
+So it looks like Clerk doesn't have a CLI.
+I kind of forgot about that one.
+We're going to put this one on pause
+because Clerk's already good to go.
+It says it's already aligned.
+The gap is just that the AI is trying to figure out
+something that doesn't exist.
+So I told it the wrong thing.
+But that's all.
+In terms of the provider setup, you now
+will be able to get going on the next lesson, which
+is actually just changing the copy on the marketing page.
+After that, I'm going to go and show off
+how to actually make a couple of iterations,
+in our case, on the plugin.
+And in your case, it'll be on the protected pages.
+But it's just kind of doing this thing that we've been doing.
+We're going to look at the problem statement that we have.
+We're going to look at the couple of drawings
+that we did on the whiteboard earlier.
+We can take the references that we
+had stashed of what we want it to look like.
+And we're just going to talk to the AI just like we did there.
+We can upload screenshots.
+We can do all sorts of things.
+After that, once those are all good to go, we'll add some logging.
+We'll push this thing up, and it's good to go.
+
+
+================================================================================
+VIDEO 24 OF 32
+TRANSCRIPT_ID: 3.13--codex-marketing-site
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/3.13--codex-marketing-site/3.13--codex-marketing-site.txt
+================================================================================
+
+Okay, we have a marketing site kind of kind of crazy
+What happens when you have a really good template and some good AI?
+So what I did was I took everything that we covered in block one and block two and put it into a simple prompt
+I said we're making a figma plug-in that generates branded on
+Brand and on strategy social media content for Instagram as a plug-in
+It can use an existing
+Chat GPG description to come up with different ideas and also grok through existing blog articles to mine out interesting ideas
+For different text base on brand portrait instant posts can generate up to ten at a time
+So that's the background of it. So I gave it
+the paragraph the short elevator pitch around this which we've derived from all those lessons, right and so you kind of
+Start to get better at explaining what the offer is
+Now we're selling to people who are small to medium-sized businesses who are techie
+They use figma or canva but mainly figma and don't have time or budget to allocate towards Instagram
+So you can see all this stuff it outlines, right? So it has the problem it leans into the problem
+It leans into the pain of the problem
+It leans into the person who's having it how frequently they're having it why this matters to them and the outcome statement
+They'll be able to get their Instagram moving, right? And so
+What I didn't do was tell it to do plan mode
+Instead I said don't write the changes just come back with a pass and we'll work on the copy together
+because if you do plan then I mentioned this before but it's gonna do this long thing and
+It's not conversational. So what it does is it came back and it says
+Eyebrow so an eyebrow is a small little block of text above something you've seen it everywhere
+But it says for busy founders marketers and small teams turn one idea
+Into ten on brand Instagram posts in minutes. I would say in a click probably better
+Subheader story blast is a figma plug-in for techie SMBs who know they should be posting
+But they do not have time team or budget to keep Instagram moving
+Use your existing chat GPT subscription pull ideas from your blog and generate ready to post portrait content fast
+The primary call to action get the plug-in for five dollars secondary CTA see how it works
+Promise line stop letting Instagram sit idle because content creation keeps falling to the bottom of the list
+Then we have a highlight section generate up to ten branded Instagram posts at a time
+So I'm already starting to think oh, what could a cool demo of that look like so people can just see
+Another highlight is that they can use their existing subscription. So they get AI in the thing. I
+Can mine?
+Information from stuff that I've already put out so it has all this stuff
+Right pretty pretty great and I'll just read through it and I'm gonna go back and forth that already answered all the frequently asked questions
+One thing that I've already thought of is if you have a competitor
+For instance Figma connects to chat GPT
+But if you use it, you'll immediately be like wow, this is horrible
+This looks so bad
+so what I could do is I could make something that just says like here's theirs here's ours and
+That would be the comparison
+But it's that kind of stuff
+so it's up to you on how much you want to iterate on this stuff you can actually make a skill by
+telling it make a skill based on copywriting from Ogilvy or
+name your favorite copywriter, but
+Then all you're gonna say is okay good go do it and it will go do it
+so that's how you make the marketing site is you just
+Converse back and forth until you find something that you like if you want to make style changes
+you just upload a picture of a website that you like and tell it copy the fonts from this it will go to the
+website it will
+Look in the back end of what the websites actually getting to the browser to see what font it is
+Like you don't even have to think it's crazy
+You could tell it to go to Google and copy the font
+You could tell it to go to perplexity and copy the colors like it's just it's that easy and just keep conversing
+When you get done with your landing page updates, you just tell it commit your changes or push your changes up
+So that's the best way to do it is every once in a while once you've made a few changes
+Think of it like a save button, but it's gonna push it up
+That's it now we're gonna move on to the next lesson which is actually doing the core UX of your product
+Which is pretty much the same thing where you're gonna bring up your drawings
+So I hope you guys either drew it on a piece of paper or on a board like this
+But we need to actually go and implement those
+Core a couple of screens to solve the problem
+You
+
+
+================================================================================
+VIDEO 25 OF 32
+TRANSCRIPT_ID: 3.14--build-setting-up-slices
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/3.14--build-setting-up-slices/3.14--build-setting-up-slices.txt
+================================================================================
+
+So, I want to talk about the loop of actually putting the different core features together.
+And in AI building and using agents in general, you're going to hear the word loop a lot.
+And so, a loop will be the following, like we're going to use this as the use case.
+So for the build loop, and you'll have different types, like I said, you could have a build
+loop, you could have a debug loop.
+But for build loop, what we're going to do is we're going to take whatever the core UX is,
+which we discussed in previous videos.
+You have probably drawn this somewhere, but it's solving that problem, that painful problem
+for your ICP or your customer profile.
+And so, you're going to take that UX and you can go and basically just give it to the agent
+that has the planning skill.
+So, plan skill, and after that, and I'm going to show you guys in a second in a real project
+with our Figma plugin, but that plan skill is going to come back and it's going to provide
+you what are called slices.
+I'm going to move this microphone real quick, get down a little.
+So it's going to provide you with slices.
+And no, it's not pizza, but I'll draw a slice of pizza because I thought of it.
+And once you get those slices, what that is, it's going to look, and I'll just show you
+right now, it's going to look at the work that you've presented and it's going to provide
+you with a packet.
+And that packet includes these slices.
+So in traditional software development, you would look at all the work and you kind of
+want to break it apart into, you guessed it, slices because it makes it a lot easier
+for a system to build to, or well, before for a team of people to actually go and implement
+that slice of work.
+And so this loop looks like that, right?
+Where you have the design, which is UX, you have the plan skill and that's provided inside
+of the repository that you copied.
+Now, you can use the traditional planning mode if you'd like, or you can say explicitly
+that you do not want to use the skills and that way it just doesn't use it.
+But then the slice will be presented to you and you pick a slice, right?
+And then it will build it and then you go back into UX.
+So it's basically this same thing over and over and over again, where in those five steps
+you're presenting the user experience, you're calling out the type of plan that you want,
+whether it's going to be the slices, which is what I recommend.
+Then after that, you're getting the slices, you're reading through them, you're seeing
+what makes sense to you, right?
+And then after that, you're picking one and it's going to go build it and then you're
+back to the UX where you're going to go and play around with it and see, does this feel
+right?
+Does this not feel right?
+So in practice, what this would look like, I have an example here.
+So I wrote out a prompt that says, we need to figure out how to distribute this plugin.
+This is something niche that you won't deal with because you're not building a plugin,
+but you can see how I'm approaching it, right?
+So I'm approaching it with, I need to figure this out, so it's a little bit of research.
+I say that I think it makes sense for us to do it a certain way that I'm not totally sure.
+I didn't even provide a UX here because this is more like a research question, but I provided
+a link and it comes back with a recommendation.
+It's going to use that slice skill and as you can see here, it's going to provide a
+presentation that says, well, we should use this.
+We should do web checkout first and then have a plugin account link off and then bring your
+own AI as a separate thing.
+I think that's smart.
+Great.
+So then what I could do next is I would actually, if I don't have a core user experience for
+this, oops, wrong tab.
+If I didn't have a user experience done for this in Figma, which I wouldn't take the
+time to do, frankly, I would just go to my whiteboard and I draw out what that flow would
+look like.
+So this goes back to earlier in the build block where we were talking, or sorry, earlier
+in the CEO block.
+We were talking about different user stories, user flows, and we drew them out on the board.
+I would take this plan and I would go and think through like, what are the actual things
+that that person is going to do?
+So they land on the page, they buy the product on the website.
+After that, they go into the plugin and they see some sort of link that happens and then
+capiche.
+So I could then at least say it back to the AI and have it done for me.
+So that's the kind of loop that we're going to be going through.
+It's literally just this over and over and over again, and it works super well.
+So now we're actually going to go and take the core UX, do it.
+That was the one tricky one where it's like, I wanted to just show you an example where
+maybe there's an unknown, but that's fine.
+Again, if you ever don't know something, just ask the AI and it'll help you.
+Great.
+
+
+================================================================================
+VIDEO 26 OF 32
+TRANSCRIPT_ID: 3.15--build-core-ux-plan-flow
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/3.15--build-core-ux-plan-flow/3.15--build-core-ux-plan-flow.txt
+================================================================================
+
+Sometimes you might have some outstanding questions with what you're building, right?
+And you just don't totally know so what this is it's from the previous video. I had said, okay
+Well, I want to do option a I like that seems like a good way of doing it
+Cleared up some confusion, but let's still tighten it up and I want you to come up with a plan
+So then it actually did plan mode, right?
+And so this is what's called ask user clarifying question behind the scenes
+Codex is gonna ask questions about that plan in case there is anything that's missing now
+What's so cool about this is it's very similar to what would happen in real life
+like if I was a product manager and I met up with a chief architect somebody who works as a
+Engineer they would ask similar questions cuz they're like hey
+What about this you didn't think about that and as much as we try to do our best with user maps user stories
+Mapping things out on the board. Sometimes we miss things. That's totally fine. And that's where codex comes in clutch
+So it's gonna say how should the first public release be distributed?
+Well, is it gonna be a web-led install and it's gonna say it's sell on story blast and send users
+Send buyers to install the plug-in from a free listing or direct install keep Stripe canonical recommended
+And so when you scroll over these you're gonna see all the details of it
+So this is gonna be a web-led install and for v1 should the local codex bridge remain part of the ship to set up
+So in our case, this is what allows people to be y o a I which is bring your own AI
+We absolutely want to keep the bridge. It's gonna say what should the buyer facing AI promise be bring your own chat GPT
+That sounds awesome. I like that. It sounds good to me. So whenever those things come up
+Make sure you read through because you might find
+well, first of all
+You might find that the recommendation isn't always the best one because there could be another clarifying question with that little
+Tool tip in it that makes you kind of think of something that never came up before
+that's what I find so interesting with these tools is they kind of guide you in the right direction of
+Expanding your product thinking and thinking of it totally differently. So don't always just imagine that their recommendations are gonna be correct
+And so it looks like it's gonna say after someone buys on the website
+Where should you send them to install it in the community listing? Great now, you can actually trigger this
+So this will be triggered most of the time when you do shift and tab, which is their official planning mode
+but if you want it to you can just say can you ask me some clarifying questions about this and
+It sure does a great job. So as you can see here now, it's created this
+Plan I'm gonna expand it you're gonna see it's being written out
+And so this is a combination of using a plan skill, which was right here, right?
+the plan skill took the raw idea of a
+basic prompt that I put in with some research in it and it presented a bunch of different stuff in a
+Format that makes a lot of sense. It has the slices in there
+It has the areas of the code base that are gonna be affected it thinks about some of the risks and dependencies
+It might mess up and then once we get that we can pick a way to go and ask it to create that plan
+So you're kind of going through multiple steps
+But again, the whole reason behind this is because when you say go it just will build the right thing
+And so it's worth it going through a couple of those steps. So now comes back and as you can see here
+We have the plan we're gonna go ahead and read it
+We're gonna hit submit
+So you will do that with all the things that you build when it comes to actual screens
+you could literally if you if you were lazy, you could just take a photo on your iPhone of
+your whiteboard or of your drawings on piece of paper and upload it and just do this same process and
+You'll go through that same loop. All right. I'll see you in the next video
+
+
+================================================================================
+VIDEO 27 OF 32
+TRANSCRIPT_ID: 3.16--core-ux-build
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/3.16--core-ux-build/3.16--core-ux-build.txt
+================================================================================
+
+So, what we're doing now is we have all of the things that we remembered are in our scope,
+so we know that it needs to be on brand, on strategy, so on brand being a look, a feel.
+You'll have those references.
+You can take screenshots of others to actually build a brand.
+On strategy will be assuming that you have a chat GPT account that you've kind of figured
+out what the strategy behind this is, what you guys should talk about.
+If you don't have a strategy, then we'll cover that case as well.
+A template and the ability to use chat GPT.
+So, any time that someone's coming into an app, this first screen should make it
+so that you don't have to think.
+Now, that's really just a good heuristic in UX in general,
+but what we're doing here is we have an onboarding screen.
+And so, I'm going to go through each one of these panes, and it's like what we did earlier,
+but we're just trying to flush it out further because we have more information.
+So, I want them to connect their chat GPT.
+I want them to have it be on brand and on strategy.
+So, I'm going to give them a little bit of a checklist, and each one of these,
+for instance, this will probably say connect chat GPT, and then it'll kick them off
+to go do something else, and then they'll come back, and that will get checked.
+And then the same thing goes for strategy and the branding.
+So, we might ask them to upload a photo of its style of brand that they want,
+but what this does is it gives them one spot where they can't get past it
+until they do these things, because this will deliver them that aha moment.
+And so, it's giving you the best possible user experience
+by doing just literally three things that should take you less than two minutes.
+If you let somebody in to your app and don't give them the best chance
+or the best odds of winning, they're going to churn,
+and they're going to be like what was this thing all about?
+So, that's going to be the first one and really the bulk of what happens here.
+So, then if we want to click into what is on strategy look like,
+then we'll have a strategy sort of prompt,
+and they can just copy paste this thing by clicking it.
+They can go run it in their favorite thing, or rather, since we have chat GPT,
+we can just have it run and generate that.
+So, it'll open up a chat GPT instance,
+it will figure out what the prompt is, and then come back and check it off.
+And then the same thing goes for the brand, right?
+So, by the end of this, you will have had,
+you know, if you did chat GPT first,
+then it will do the other two steps, which is great.
+So, we're taking advantage of the fact
+that we are allowing them to do BYO AI, which is bring your own AI.
+So, after that, I want the ability to basically have it generate ideas for me on demand.
+So, I want to be able to have an image upload.
+I want to be able to do that,
+because there might be a post that I want to kind of mimic.
+I want to have image upload.
+I want to have a blog link upload,
+basically giving it source material for it to generate these posts.
+And then after that, I want it to be able to have the ideas shown to me.
+So, I'll see the ideas shown.
+And then after that, I want to be able to have it actually generate posts.
+Cool.
+So, here we have it.
+These are all the steps.
+What I can do now is I literally can take a photo of this.
+And each screen, if I just take a photo of it,
+and then upload it to codex and dictate what it is that I want done,
+then it will go and build it, and you have just accomplished that.
+So, what I'll do is I'm going to take one photo of this,
+of all five, and then I'm going to do a long voice dictation that explains everything.
+And then we're going to come up with a plan together on how to implement each screen.
+It'll prevent the slices, and we'll do that loop.
+So, that's what's next.
+
+
+================================================================================
+VIDEO 28 OF 32
+TRANSCRIPT_ID: 3.17--core-ux-build3
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/3.17--core-ux-build3/3.17--core-ux-build3.txt
+================================================================================
+
+So we got the two-shot all this work led to us being able to
+have two
+Conversations that made this thing happen as in a third one for the payments, which is crazy. So I built a prototype by
+Just talking through what I wanted passing at this stuff. We mentioned this earlier and then the second one was just
+making a couple of the feature changes and
+And actually running it. So when I asked it to run it, I went through I took some screenshots of it and
+ask the design crit to go and make changes and then I say make actions on all these and then I say use the
+UI polish and
+We got our app. So kind of ridiculous. The last pieces is just actually testing it. So
+we want the AI to go through the pain of testing it and
+Find any sort of obvious issues before we go and try and so there's instructions and the readme on how this is all set up
+but you have this QA agent that has a test account if it doesn't have a test account, it'll make a test account and
+We want it to go and do that. So instead of us doing it
+We're just gonna say, you know, I asked like how do we test this it knows?
+I don't want to test it myself. I want you to test it and
+use the
+QA skill and
+Have it go through the path of
+Buying an account and creating a new one. So
+That's gonna be different than using an already created account
+so we want to test that and
+You can use the standard
+stripe credit card for testing and
+use
+Playwright, let me know what issues occur if any
+Cool so that's gonna go through it's gonna launch a browser. It's gonna actually go to the website. It's gonna try to buy it and
+Yeah
+That's it
+We're also gonna say make sure everything is running so that real test payments get processed
+Cool
+And that's gonna kick off. It's gonna go do its thing and
+After a few minutes it will let me know if something occurred or not
+You can see that a little purple thing showed up that says that the QA browser is running and I will unpause this
+When I come back, it looks like let's see
+Local input does not respond. So I'm bringing up the environment first. Okay, cool. Yeah, so it's starting it awesome
+Cool. I thought there was an issue. There is not I'll be back as you can see it's stepping through it
+So when you ask it to start stuff, it just kind of does it right? So it started up the app
+It started up our website. It started up stripe, which is gonna allow it to
+actually
+Show that a payment occurred and boom now this browser opened we can see that we have different copy
+It's going to
+Actually try to buy that it's gonna say get it
+It says the entry state is good the call to action is live the new copy is live
+I'm stepping through the fresh account purchase path now
+So it's gonna actually click now it looks like it's showing a sign-up
+So we got to see how it's gonna handle this
+But pretty cool right it's literally like I'm my hands are here I haven't touched anything it's going and
+Testing it all itself. So cool. So this is the test loop, which is you have built the thing
+We've gone through it says it's good to go and you ask it to go and test it
+Looks like a count creation submitted cleanly. I'm waiting for clerk. So let's see. Oh
+It needs to get a code
+Interesting so you can create an account. I want to think about this makes sense to create an account. I
+Guess so. I think it account creation would probably make more sense after you bought it, but it's gonna try this and
+What we're gonna run into is it it should not have
+Sign up go straight to check out a detour to that
+So it's ending up figuring this out on our behalf, which is really really cool. It's gonna
+Open up clerk. I can tell it to use the clerk
+Skill
+So I'm gonna say I'm actually gonna interrupt this is called steering it
+You can use the clerk skill to figure this out and I don't think that that's the best user experience
+I think we want to let them buy it and then if we could we could use the email that they enter
+On the stripe checkout as the account that we create
+So I am passing that in I'm gonna hit steer which means it's gonna submit that message the next chance that it gets
+Which is after a tool call?
+So that's what that is there and it's gonna come back and let me know what it thinks about that. So let's see
+The exact problem you're describing yes forces the account creation fresh sign-up stalls on our verification
+reading that
+so what we can do while it's working on that is
+Actually make some changes while it's working which is really cool
+So I'm gonna let it know what I'm about to do. I'm gonna say while you work on that
+I'm gonna open up clerk and turn off verification so that you don't hit that wall again
+But regardless, I don't think it changes what problem there is where I think as a first-time user
+I should purchase the product and then the account gets created not the other way around
+So I hit that now
+It's gonna be put in a queue if I didn't hit steer then it would wait until the entire turns over
+But we actually want to cut it off. So I'm gonna go back into clerk and I'm gonna go into our
+Where is it configure and then under email verify it sign-off. We're gonna turn that off
+And that's disabled now. And then what that allows us to do is
+It lets the AI agent do all the testing for us, which is so so much better. So as you're seeing this is real-time
+Working with it as a teammate. We have multiple teammates
+We have a clerk expert that's working if I wanted to get some UX advice, I could do that as well. And so
+It's pretty cool. This is actually how you build stuff. So I also see this so we're gonna do what's called parallelized
+Agentic work, which basically just means that while that's going I'm gonna start something else
+I'm gonna take a screenshot of this and I'm gonna copy it and then I'm gonna open up codecs
+I'm gonna open up a new thread and I'm gonna say
+The contrast on this section is awful. We want the text to be the same text as the dark text on the landing page
+I'm gonna hit stop dictation. I'm gonna change this down to medium
+I know I'm going fast, but it's kind of making a point that you can just have a lot of stuff going, right?
+So it's immediately gonna go and use the UI polish because it knows that it's looking for a fix. Great. That's awesome
+I just changed the screen now I can see that it's opened up the
+The sandbox for this it looks like it's trying to buy the product
+But it's for $99. I think that that's the wrong price. So that's an issue
+So we would say to the bot would say like it looks like you're trying to buy this but it has oh it looks
+It already found it it found a stale price
+Which means that it's the wrong price cool. It's already found the issue great. I
+Hope you guys understand just how cool this is that you're kind of just monitoring it as it's going which is
+awesome, and so I'm gonna just keep doing this until all the different little edge cases are
+Finished and so once the payments are tested and that all works
+Then I can go and I'll do this same exact thing within my app, right?
+So you guys get the idea you have a conversation with code X you say start it up
+Let's start testing
+You have the QA browser go off and start running in the direction to actually go through your screens and then you map that to
+The things that we actually are showing on the UX, right?
+So this is probably the most exciting part is actually getting it all to work
+So if I wanted to I could also
+Like show you a screenshot. Let's see. I
+could say like these look awful for instance, so these are the first ones that it was generating and
+That's because I didn't give it very specific stuff
+So I ultimately ended up kind of talking to it and saying like hey
+We need the ability to add
+this copy prompt that gives you the strategy and then we got something that looked more in line with what we'd expect which is something like
+Let's see
+Where did I post them?
+Socials so I ended up generating these right so we've successfully built it. It's
+working
+If I right-click and I open it up I can run the plug-in I can use my own
+Chat GPT subscription it has a template
+There's things that I discussed on the whiteboard that I could make the product better
+But I'm more focused on just getting the payments all linked up so that this stuff is correct
+So I know I have a bug there, but I'll go fix that one and the next one
+We will cover is actually launching this so we're just gonna go to Vercel which is the hosting and we're going to
+Have it be connected to github so when we push stuff to the branch on github and we say hey
+I want to launch this new version. We just tell codex that and it actually pushes everything live
+So that's next is the Vercel
+The logs which are errors and then just making sure that all the environment variables
+So we had for our testing environment or set up in production and then boom you've completed the build block
+And you actually have a product live so so cool
+
+
+================================================================================
+VIDEO 29 OF 32
+TRANSCRIPT_ID: 3.18--wrapping
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/3.18--wrapping/3.18--wrapping.txt
+================================================================================
+
+All right, made a few iterations on the product, which you'll soon see in a demo,
+but I wanted to show you this next lesson is all about, oh, that's our community, by the way.
+I wanted to walk you through the actual deployment. So when you deploy something,
+what you're doing is you're taking everything off of your local computer and you're putting
+it onto the internet. And there's different services. We've talked a lot about clerk,
+we've talked about convex, and we've talked about Stripe. And then this thing called Vercel,
+oh, but what about this thing called CloudFlare, right? So there's a couple of things that we need
+to do. And this will be in the read me. So you have the copy paste instructions where
+you can just ask code X to go and read through this. But there's two things that you have to do
+in order to let this totally work without any sort of issue. So you basically just have to give
+the agent CloudFlare access so that it can make changes and look at the website that you bought
+and set it up. And so you don't have to do anything there. You just need to get a password,
+what they call a token. And then we need to get the Stripe secret key. And so this will all be
+in that document, like I said, but what this allows us to do is it kind of brings everything up
+together. And it sets up the Vercel project so that when you do make a change, and you want to
+go live, when you finish testing it on your machine, and you're like, Oh, this is cool. It's working.
+I want this to go live. It's going to know to use the Vercel skill to deploy it. And what's great
+is it knows and it's set up with the template to have your back end, which is that convex thing,
+your database to have that go live. And then all the different services just know exactly how to
+work. So let's open up CloudFlare. I have that open here. And what you can see is on your CloudFlare
+under manage account, there's going to be account API tokens. And you will just create a new one.
+So I'm going to hit get started, and I'm going to type in the name of the product.
+It's StoryBlast. But you can see that you need CLI access, right? That's that token. And it looks
+like you need DNS edit access. So we will open that back up. That's the wrong one. That's the
+testing Chrome. We're going to type in StoryBlast DNS. And then for the accounts, it's going to be
+under DNS, DNS firewall, DNS settings. We're going to do edit access. Cool. And that should
+do the job. Let's see if it's going to be an account, DNS settings.
+If you ever have a question, you just go like this and you say, does this look right?
+I'm setting up CloudFlare. And I want to make sure that I give the right permissions. Is this
+right one? Pretty sure it is. So while that goes and answers, I will grab so did that I need to go
+and grab a key from stripe. So I'm not going to show you my stripe secret key, because that's,
+that's a no no. But on stripe, then you will flip over to the production. And you will go to your
+keys and you can grab that key. And you can either paste it into codecs, or you can go into
+your UV production. I'm just going to paste it into codecs and say here it is, make sure that the
+price and the product is moved over from the developer environment, because you just want to
+make sure that they're in sync. So because all the information is already set up, and the testing one,
+your codecs knows about that. And it's the best thing ever, because it's just going to copy it
+over. So we're going to give it that. And we're going to give it this CloudFlare token. And the
+last one is the keys for clerk. And you can just go back into your clerk account and grab those. So
+that's pretty much it. You're just giving it all this information. And what that's going to let
+your team do, because that's what this is, it's gonna let you control stuff. So it looks like I
+need to use a token with zone DNS edit and zone zone read. Cool. So I'm going to go ahead and do
+that. And then I'm going to paste all those back in here. I'm going to say, okay, cool, go. And it
+will set it up and deploy it. So so cool. So we've officially deployed it. And yeah, amazing.
+
+
+================================================================================
+VIDEO 30 OF 32
+TRANSCRIPT_ID: 3.19--create-production-instance
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/3.19--create-production-instance/3.19--create-production-instance.txt
+================================================================================
+
+In case you didn't figure it out, when you go into your Stripe and Clerk, you're going
+to create a production instance.
+So there's a little thing in that dropdown we spoke about before, and it'll say Clone
+Development Instance, which is what you want to do.
+Same thing with Stripe, because it's going to copy over those products that you already
+had.
+It makes it a lot easier.
+
+
+================================================================================
+VIDEO 31 OF 32
+TRANSCRIPT_ID: 4--product-review
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/4--product-review/4--product-review.txt
+================================================================================
+
+So as we're coming to a wrap on this, I want to just show you the threads of the
+iterations that I went through of actually tweaking the product because I
+know the problem intimately.
+I'm able to actually go test it and you will be surprised at just how simple
+some of the problems are.
+A lot of your favorite YouTubers will tell you that it has to be really complex
+and you have to have these crazy things when really all I did was I took the
+user experience that I had described on the whiteboard from earlier and just
+said, Hey, look for this first view, this is the kind of stuff that we should
+see, and this is what I'm going to expect from a user experience perspective.
+And I went through, it kind of goes back and forth with me.
+We converse on whether or not that makes sense.
+We agree upon the changes that we want to have for the user interface.
+And then I asked it to go and make the changes and it does them.
+And we kind of play this ping pong where I want to see if I like the product or
+not, based on what happens.
+And then when I continue to test, if I get confused, I say, well, how do I test?
+That's one thing I want to remind you guys is that anytime you get confused,
+you just literally can ask a question and then you can ask it to go ahead and
+run the stack, run the server, run the products, it'll start running it.
+And then I will take some screenshots of it.
+So if I don't like the way that it's looking, I might ask it to change something.
+So there's all different screenshots.
+Here's an actual screenshot of an error.
+And then it says, Oh, I know exactly what's up.
+And I just keep going through and finding things that I may want to change a little
+bit until we get to a point where I like it.
+And you can do things like this where you say, how do we make it even easier?
+And so that is how I do it.
+If you have a bug, you can explain that with a screenshot.
+And if you have a new feature that you're thinking about, you can come in.
+I highly recommend the pattern of just discuss it back and forth before you
+have it make a plan because you can get a lot further there.
+So I have everything where I want it to be.
+I'm going to show you guys a little demo of how it works.
+So what I did was I made it so that when you set up, you can't do anything until
+you've actually gone through these first checkpoints of linking your account that
+you've paid for.
+So you purchased the product, then you link the product because this is separate
+from the website made a little bit trickier.
+Then I connected a chat GPT account, and then I copy pasted this into my chat GPT
+paste the response that created both a brand strategy and brand design set of
+instructions.
+And then from there, I can click on different starter ideas that it knows that it
+generates with my existing chat GPT subscription.
+And then ultimately, I just generated all these posts.
+So I in the future, I'm going to take this and modify it a little bit because I don't
+like the templates it's using, but I do think that that is an awesome version one.
+So that's it, guys.
+I'm so excited about this.
+My next step would be to make a demo kind of like what I just did, where you want to
+take the first line of your problem statement, who it's for all that.
+And you're just selling that sizzle.
+You're just saying, hey, look, you know, you need to be using Instagram.
+You know, you need to be making more content.
+I knew that too.
+So I made this plugin that allows you to generate content and you just sell that
+product as best as you can.
+You do a soft launch with it, which is what I'm going to do with this, where I'll send
+it to 10 people that are warm in my network.
+And if they buy it, that's awesome.
+If they don't buy it, I need to understand the objections and then you can iterate on
+it.
+Great.
+I hope you guys enjoyed a whole lot and I hope you got to ship by Sunday.
+I'm so excited and reach out to me if you guys have any messages.
+If you have any trouble getting this out, then please feel free to drop me an email
+and I'll get back to you.
+And if not, I'll see you in the next one.
+
+
+================================================================================
+VIDEO 32 OF 32
+TRANSCRIPT_ID: 4.2--testing-in-production
+SOURCE_PATH: /Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Transcripts/Processed/4.2--testing-in-production/4.2--testing-in-production.txt
+================================================================================
+
+So this came up in my testing, which is why it's important to test in production as well.
+And you need to make sure you have this one setting in Clerk. So the way that it works is that,
+yes, Clerk and Convex need their own handshapes. So Clerk is what signs the user in. Convex is where
+the app checks its access, saves your progress, blah, blah, blah. So in short, this one setting
+called a JWT template is what lets the database trust Clerk. And it'll seem like things are working
+until a point, which is why it's really confusing and I'm happy I caught this.
+But on your Clerk account, when you click into production and then configure,
+there is a JWT template and you'll click on that. And when you click on that, it'll ask you to add
+a new one. And then all you do is select Convex and hit save. That's all you need to do. And then
+you're off to the races. If you do this in dev, it should transfer over to production. So that's it,
+just that one setting. And then you're good to go. I caught this by doing additional testing in
+production. And I wanted to just show you how I did that. Was I just asked it to go test in
+production? Can you actually go test this? And then it caught that I had something not configured
+correctly. And the way it did test itself is it has access to Stripe. So it created a full coupon
+and then just was running payments that way. So that's it.
+
+
