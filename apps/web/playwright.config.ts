@@ -6,6 +6,7 @@ const baseURL =
 	process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${localPort}`;
 const shouldUseLocalServer = process.env.PLAYWRIGHT_USE_LOCAL_SERVER === "1";
 const localhostHosts = new Set(["127.0.0.1", "0.0.0.0", "localhost"]);
+const smokeTestConvexUrl = "https://smoke-test.convex.cloud";
 
 function getDefinedProcessEnv(): Record<string, string> {
 	return Object.fromEntries(
@@ -18,9 +19,7 @@ function getDefinedProcessEnv(): Record<string, string> {
 function getHostedConvexUrl() {
 	const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL?.trim();
 	if (!convexUrl) {
-		throw new Error(
-			"PLAYWRIGHT_USE_LOCAL_SERVER=1 requires NEXT_PUBLIC_CONVEX_URL for your hosted Convex dev deployment. Run `bun run dev:convex` first.",
-		);
+		return smokeTestConvexUrl;
 	}
 
 	const hostname = new URL(convexUrl).hostname;
