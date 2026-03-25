@@ -1,0 +1,39 @@
+scenario_id,proving_layer,proving_source,coverage_status,confidence_state,notes
+VIS-01,browser_smoke,apps/web/tests/browser-smoke/app-smoke.spec.ts,mapped_existing,high,Direct public-shell proof exists today.
+VIS-01,integration_ui,apps/web/tests/integration-ui/home-page-primary-cta.test.tsx,mapped_existing,medium,Useful component-level backstop for CTA behavior.
+VIS-02,browser_smoke,apps/web/tests/browser-smoke/app-smoke.spec.ts,mapped_existing,high,Robots sitemap and homepage schema are already asserted.
+DOCS-01,browser_smoke,apps/web/tests/browser-smoke/app-smoke.spec.ts,mapped_existing,high,Docs canonical metadata is already part of the smoke spec.
+AUTH-01,integration_ui,apps/web/tests/integration-ui/sign-in-page.test.tsx,mapped_existing,medium,UI and redirect behavior are covered without a live browser run.
+AUTH-01,unit,apps/web/tests/unit/sign-in-route-utils.test.ts,mapped_existing,medium,Redirect sanitization remains covered.
+AUTH-02,sandbox_e2e,apps/web/tests/e2e/auth-protection.sandbox.spec.ts,mapped_existing,medium,Tagged @default_ship and now asserts redirect behavior from /start.
+ACCESS-01,sandbox_e2e,apps/web/tests/e2e/auth-protection.sandbox.spec.ts,mapped_existing,medium,Tagged @default_ship and now checks the canonical access-recovery surface on /start.
+ACCESS-01,integration_ui,apps/web/tests/integration-ui/access-required-page.test.tsx,mapped_existing,medium,The recovery surface itself is still well covered.
+ACCESS-02,browser_smoke,apps/web/tests/browser-smoke/app-smoke.spec.ts,mapped_existing,high,Public recovery surface has direct coverage.
+ACCESS-02,integration_ui,apps/web/tests/integration-ui/checkout-success-view.test.tsx,mapped_existing,high,The view model and interactions are already tested.
+PACKET-01,sandbox_e2e,apps/web/tests/e2e/auth-protection.sandbox.spec.ts,mapped_existing,medium,Tagged @default_ship and now checks the canonical Start page.
+PACKET-01,unit,apps/web/tests/unit/workspace-home-page.test.tsx,mapped_existing,low,Indirect workspace proof remains a useful backstop.
+PACKET-02,sandbox_e2e,apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts,mapped_existing,medium,Tagged @default_ship and now opens /product directly.
+PACKET-02,unit,apps/web/tests/unit/course-access.test.ts,mapped_existing,low,Access helpers remain a low-level backstop for the Product stage.
+PACKET-03,sandbox_e2e,apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts,mapped_existing,medium,Tagged @default_ship and now opens /design directly.
+PACKET-03,unit,apps/web/tests/unit/stage-unlock.test.ts,mapped_existing,low,Unlock rules remain a low-level backstop for Design.
+PACKET-04,sandbox_e2e,apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts,mapped_existing,medium,Tagged @default_ship and now opens /marketing directly.
+PACKET-04,unit,apps/web/tests/unit/stage-unlock.test.ts,mapped_existing,low,Unlock rules remain a low-level backstop for Marketing.
+PACKET-05,sandbox_e2e,apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts,mapped_existing,medium,Tagged @default_ship and now opens /build-plan directly.
+PACKET-05,unit,apps/web/tests/unit/stage-unlock.test.ts,mapped_existing,low,Unlock rules remain a low-level backstop for Build Plan.
+PACKET-06,sandbox_e2e,apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts,mapped_existing,medium,Tagged @default_ship and now checks /review plus the full-repo download action.
+PACKET-06,integration,apps/web/tests/integration/packet-download-routes.test.ts,mapped_existing,medium,Download routes remain a direct backstop for Review.
+PACKET-07,sandbox_e2e,apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts,mapped_existing,medium,The current end-to-end proof now follows the canonical packet routes in the @default_ship pack.
+SETTINGS-01,unit,apps/web/tests/unit/settings-page.test.tsx,mapped_existing,medium,Core settings rendering is covered.
+SETTINGS-01,sandbox_e2e,apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts,mapped_existing,medium,Tagged @default_ship and now checks the canonical /settings surface.
+SETTINGS-02,unit,apps/web/tests/unit/starter-repo-access-card.test.tsx,mapped_existing,medium,Starter repo add-on coverage exists.
+SETTINGS-02,unit,apps/web/tests/unit/codex-route-helpers.test.ts,mapped_existing,medium,Codex settings-adjacent helpers are covered.
+FREEPAID-01,integration_ui,apps/web/tests/integration-ui/checkout-button.test.tsx,mapped_existing,medium,Checkout launch still has component-level proof.
+FREEPAID-01,integration,apps/web/tests/integration/stripe-checkout-route.test.ts,mapped_existing,medium,Stripe route behavior remains covered.
+FREEPAID-02,sandbox_e2e,apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts,mapped_existing,medium,Tagged @billing_integration and now waits for /start after checkout success.
+STARTER-01,integration_ui,apps/web/tests/integration-ui/starter-repo-access-form.test.tsx,mapped_existing,medium,Starter repo request path is covered.
+STARTER-01,unit,apps/web/tests/unit/starter-repo-script.test.ts,mapped_existing,medium,Repo access automation remains covered.
+CODEX-01,integration,apps/web/tests/integration/codex-route-handlers.test.ts,mapped_existing,medium,Codex route behavior is covered outside the packet funnel.
+OBS-01,integration,apps/web/tests/integration/observability-client-error-route.test.ts,mapped_existing,high,Observability ingestion still has broad route coverage.
+OBS-01,unit,apps/web/tests/unit/observability-source-adapters.test.ts,mapped_existing,high,Source adapters and helpers remain covered.
+CONTENT-01,contracts,apps/web/tests/contracts/curriculum-contract.test.ts,mapped_existing,high,Curriculum truth is covered in a contract test.
+CONTENT-01,unit,apps/web/tests/unit/course-registry.test.ts,mapped_existing,high,Registry integrity still has unit coverage.

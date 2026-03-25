@@ -24,3 +24,6 @@ apps/web/test-results
 output/video-pipeline
 .venv-video
 .vercel
+qa/personas.local.json
+qa/runs/local/
+apps/web/tests/e2e/.auth/

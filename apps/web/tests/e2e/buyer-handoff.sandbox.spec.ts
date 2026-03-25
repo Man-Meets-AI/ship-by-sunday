@@ -1,85 +1,94 @@
 import { expect, test, type Page } from "@playwright/test";
 
-const shouldRunSandbox =
-	process.env.E2E_RUN_SANDBOX === "1" &&
-	typeof process.env.PLAYWRIGHT_BASE_URL === "string" &&
-	process.env.PLAYWRIGHT_BASE_URL.length > 0;
-const nonEntitledEmail = process.env.E2E_NON_ENTITLED_EMAIL ?? "Test@test.com";
-const entitledEmail =
-	process.env.E2E_ENTITLED_EMAIL ?? "test-entitled@test.com";
-const password = process.env.E2E_SHARED_PASSWORD ?? "SBS_QA_Codex_8Yv2!mN4#rL7";
+import {
+	memberWithAccessStorageStatePath,
+	memberWithoutAccessStorageStatePath,
+	shouldRunSandboxAuth,
+} from "./auth-state";
 
 test.describe.configure({ mode: "serial" });
 test.skip(
-	!shouldRunSandbox,
+	!shouldRunSandboxAuth,
 	"Set E2E_RUN_SANDBOX=1 and the sandbox base URL to run the real browser handoff checks.",
 );
 
-async function signIn(page: Page, email: string) {
-	await page.goto("/sign-in");
-	await page.getByLabel(/email address/i).fill(email);
-	await page.getByLabel(/^password$/i).fill(password);
-	await page.getByRole("button", { name: /continue|sign in/i }).click();
+const packetStageRoutes = [
+	{ path: "/product", stageLabel: "Product" },
+	{ path: "/design", stageLabel: "Design" },
+	{ path: "/marketing", stageLabel: "Marketing" },
+	{ path: "/build-plan", stageLabel: "Build Plan" },
+] as const;
+
+async function expectPacketStage(
+	page: Page,
+	route: (typeof packetStageRoutes)[number],
+) {
+	await page.goto(route.path);
+	await expect(page).toHaveURL(new RegExp(`${route.path.replace("/", "\\/")}$`));
+	await expect(page.getByText(route.stageLabel).first()).toBeVisible();
+	await expect(page.getByText("Stage status")).toBeVisible();
+	await expect(page.getByRole("button", { name: "Save step" })).toBeVisible();
 }
 
-test("signed-in non-entitled users land on the access recovery surface", async ({
-	page,
-}) => {
-	await signIn(page, nonEntitledEmail);
-	await page.goto("/mission");
+test.describe("member with access", () => {
+	test.use({ storageState: memberWithAccessStorageStatePath });
 
-	await expect(
-		page.getByRole("heading", { name: "Access not attached to this account" }),
-	).toBeVisible();
-	await expect(
-		page.getByRole("button", { name: "Buy access now" }),
-	).toBeVisible();
+	test("@default_ship can open the canonical packet funnel and settings", async ({
+		page,
+	}) => {
+		await page.goto("/start");
+		await expect(page).toHaveURL(/\/start$/);
+		await expect(
+			page.getByRole("link", { name: "Open the packet flow" }),
+		).toBeVisible();
+
+		for (const route of packetStageRoutes) {
+			await expectPacketStage(page, route);
+		}
+
+		await page.goto("/review");
+		await expect(page).toHaveURL(/\/review$/);
+		await expect(page.getByText("Review").first()).toBeVisible();
+		await expect(
+			page.getByRole("link", { name: "Download full repo snapshot" }),
+		).toBeVisible();
+
+		await page.goto("/settings");
+		await expect(page).toHaveURL(/\/settings$/);
+		await expect(
+			page.getByRole("heading", { name: "Settings" }),
+		).toBeVisible();
+		await expect(page.getByText(/Manage your account/i)).toBeVisible();
+	});
 });
 
-test("entitled users can open the protected workspace surfaces", async ({
-	page,
-}) => {
-	await signIn(page, entitledEmail);
+test.describe("member without access", () => {
+	test.use({ storageState: memberWithoutAccessStorageStatePath });
 
-	await page.goto("/mission");
-	await expect(
-		page.getByRole("heading", { name: /Current step/i }),
-	).toBeVisible();
+	test("@billing_integration full paid handoff moves from checkout success into the packet entry", async ({
+		page,
+	}) => {
+		await page.goto("/");
 
-	await page.goto("/artifacts");
-	await expect(
-		page.getByRole("heading", { name: /Saved Work/i }),
-	).toBeVisible();
+		await page.getByRole("button", { name: "Get instant access" }).click();
+		await page.waitForURL(/checkout\.stripe\.com/);
 
-	await page.goto("/settings");
-	await expect(
-		page.getByRole("heading", { name: /Manage your account/i }),
-	).toBeVisible();
-});
+		await page.getByPlaceholder("1234 1234 1234 1234").fill("4242424242424242");
+		await page.getByPlaceholder("MM / YY").fill("12 / 34");
+		await page.getByPlaceholder("CVC").fill("123");
+		await page.getByPlaceholder("ZIP").fill("10001");
+		await page.getByRole("button", { name: /pay/i }).click();
 
-test("full paid handoff moves from checkout success into mission", async ({
-	page,
-}) => {
-	await signIn(page, nonEntitledEmail);
-	await page.goto("/");
+		await page.waitForURL(/\/checkout\/success\?session_id=/, {
+			timeout: 60_000,
+		});
+		await page.waitForURL(/\/start/, {
+			timeout: 60_000,
+		});
 
-	await page.getByRole("button", { name: "Get instant access" }).click();
-	await page.waitForURL(/checkout\.stripe\.com/);
-
-	await page.getByPlaceholder("1234 1234 1234 1234").fill("4242424242424242");
-	await page.getByPlaceholder("MM / YY").fill("12 / 34");
-	await page.getByPlaceholder("CVC").fill("123");
-	await page.getByPlaceholder("ZIP").fill("10001");
-	await page.getByRole("button", { name: /pay/i }).click();
-
-	await page.waitForURL(/\/checkout\/success\?session_id=/, {
-		timeout: 60_000,
+		await expect(page.getByText("How this works")).toBeVisible();
+		await expect(
+			page.getByRole("link", { name: "Open the packet flow" }),
+		).toBeVisible();
 	});
-	await page.waitForURL(/\/mission/, {
-		timeout: 60_000,
-	});
-
-	await expect(
-		page.getByRole("heading", { name: /Current step/i }),
-	).toBeVisible();
 });

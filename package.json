@@ -47,6 +47,12 @@
 		"clerk:test-user:create": "bun run --cwd apps/web clerk:test-user:create",
 		"clerk:test-user:check:entitled": "bun run --cwd apps/web clerk:test-user:check:entitled",
 		"clerk:test-user:create:entitled": "bun run --cwd apps/web clerk:test-user:create:entitled",
-		"clerk:test-user:prepare:entitled": "bun run --cwd apps/web clerk:test-user:prepare:entitled"
+		"clerk:test-user:prepare:entitled": "bun run --cwd apps/web clerk:test-user:prepare:entitled",
+		"qa:inventory:sync": "node qa/scripts/generate-test-inventory.mjs",
+		"qa:validate": "node qa/scripts/validate.mjs",
+		"qa:personas:prepare": "node --env-file=apps/web/.env.local qa/scripts/personas.mjs prepare",
+		"qa:personas:reset": "node qa/scripts/personas.mjs reset",
+		"qa:ship": "node qa/scripts/ship.mjs",
+		"qa:run-pack": "node --env-file=apps/web/.env.local qa/scripts/run-pack.mjs"
 	}
 }
