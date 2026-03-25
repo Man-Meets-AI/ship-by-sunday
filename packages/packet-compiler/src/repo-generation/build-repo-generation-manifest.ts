@@ -20,9 +20,11 @@ export function buildRepoGenerationManifest(
 	return {
 		excludedPathSegments: [
 			".next",
+			".vercel",
 			"coverage",
 			"node_modules",
 			"scripts/vendor",
+			"test-results",
 			"tests",
 		],
 		includedDirectories: ["apps/web", "packages/packet-compiler"],

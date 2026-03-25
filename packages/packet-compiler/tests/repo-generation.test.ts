@@ -12,6 +12,9 @@ describe("repo generation", () => {
 		);
 
 		expect(manifest.repoName).toBe("ship-by-sunday-os");
+		expect(manifest.excludedPathSegments).toEqual(
+			expect.arrayContaining([".next", ".vercel", "coverage", "test-results"]),
+		);
 		expect(manifest.includedDirectories).toEqual(
 			expect.arrayContaining(["apps/web", "packages/packet-compiler"]),
 		);
