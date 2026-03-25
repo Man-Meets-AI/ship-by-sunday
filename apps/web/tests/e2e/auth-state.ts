@@ -8,9 +8,9 @@ export const shouldRunSandboxAuth =
 export const sharedPassword =
 	process.env.E2E_SHARED_PASSWORD ?? "SBS_QA_Codex_8Yv2!mN4#rL7";
 export const memberWithoutAccessEmail =
-	process.env.E2E_NON_ENTITLED_EMAIL ?? "Test@test.com";
+	process.env.E2E_NON_ENTITLED_EMAIL ?? "member-no-access@example.test";
 export const memberWithAccessEmail =
-	process.env.E2E_ENTITLED_EMAIL ?? "test-entitled@test.com";
+	process.env.E2E_ENTITLED_EMAIL ?? "member-with-access@example.test";
 
 export const authStateDirectory = path.join(__dirname, ".auth");
 export const memberWithoutAccessStorageStatePath = path.join(

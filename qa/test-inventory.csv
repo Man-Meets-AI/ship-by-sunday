@@ -96,6 +96,7 @@ apps/web/tests/unit/stripe-observability.test.ts,unit,OBS-01,Observability adapt
 apps/web/tests/unit/stripe-webhook-action.test.ts,unit,CONTENT-01,General packet or support behavior.,keep,,Defaulted into the packet content bucket pending a more specific mapping.
 apps/web/tests/unit/uploads.test.ts,unit,PACKET-06,Review downloads and packet export behavior.,keep,,Useful proof for the Review stage.
 apps/web/tests/unit/use-lesson-state.test.tsx,unit,PACKET-07|CONTENT-01,Packet funnel lesson and curriculum behavior.,keep,,These are still useful but should roll up under packet scenarios.
+apps/web/tests/unit/vercel-output-tracing.test.ts,unit,PACKET-06,Deploy tracing for repo-download review surfaces.,keep,,This keeps the Vercel repo-download tracing guardrail in inventory so qa:validate stays in sync with the tests tree.
 apps/web/tests/unit/vercel-webhook-adapter.test.ts,unit,OBS-01,Observability adapter behavior.,keep,,Useful extended-pack proof.
 apps/web/tests/unit/video-pipeline-utils.test.ts,unit,CONTENT-01,General packet or support behavior.,keep,,Defaulted into the packet content bucket pending a more specific mapping.
 apps/web/tests/unit/watch-lesson-contract.test.ts,unit,PACKET-07|CONTENT-01,Packet funnel lesson and curriculum behavior.,keep,,These are still useful but should roll up under packet scenarios.
