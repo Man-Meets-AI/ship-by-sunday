@@ -15,11 +15,7 @@ export type RepoSnapshotFile = {
 };
 
 function repoRootPath() {
-	return path.resolve(
-		/* turbopackIgnore: true */ process.cwd(),
-		"..",
-		"..",
-	);
+	return path.resolve(/* turbopackIgnore: true */ process.cwd(), "..", "..");
 }
 
 function shouldExcludePath(
