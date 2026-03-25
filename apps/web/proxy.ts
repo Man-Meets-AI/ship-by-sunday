@@ -1,6 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
+import { routeConfig } from "@/config/product";
 import { captureServerError } from "@/features/observability/server/capture-server-error";
 import { getClerkAuthorizedParties } from "@/platform/auth/clerk-authorized-parties";
 import { shouldBypassClerkProtection } from "@/platform/auth/clerk-middleware-bypass";
@@ -8,11 +9,21 @@ import { shouldBypassClerkProtection } from "@/platform/auth/clerk-middleware-by
 const disableClerkMiddleware = shouldBypassClerkProtection();
 const clerkAuthorizedParties = getClerkAuthorizedParties();
 
+const canonicalWorkspaceRoutes = [
+	routeConfig.start,
+	routeConfig.product,
+	routeConfig.design,
+	routeConfig.marketing,
+	routeConfig.buildPlan,
+	routeConfig.review,
+] as const;
+
 const isProtectedRoute = createRouteMatcher([
-	"/mission(.*)",
+	...canonicalWorkspaceRoutes.map((route) => `${route}(.*)`),
+	`${routeConfig.mission}(.*)`,
 	"/lesson(.*)",
-	"/artifacts(.*)",
-	"/settings(.*)",
+	`${routeConfig.artifacts}(.*)`,
+	`${routeConfig.settings}(.*)`,
 ]);
 
 export default disableClerkMiddleware

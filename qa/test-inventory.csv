@@ -22,6 +22,7 @@ apps/web/tests/integration/observability-client-error-route.test.ts,integration,
 apps/web/tests/integration/observability-incident-status-route.test.ts,integration,OBS-01,Observability route behavior.,keep,,These tests still prove operational safety.
 apps/web/tests/integration/observability-vercel-route.test.ts,integration,OBS-01,Observability route behavior.,keep,,These tests still prove operational safety.
 apps/web/tests/integration/packet-download-routes.test.ts,integration,PACKET-06,Review downloads and packet export behavior.,keep,,Useful proof for the Review stage.
+apps/web/tests/integration-ui/packet-review-page.test.tsx,integration-ui,PACKET-06,Review and download page labels plus starter snapshot action.,keep,,This covers the canonical Review surface and its outward-facing download labels.
 apps/web/tests/integration/stripe-checkout-route.test.ts,integration,FREEPAID-01,Checkout launch behavior.,keep,,These tests still prove checkout launch without forcing a full billing run.
 apps/web/tests/script-modules.d.ts,support,,Test harness support for Vitest or Playwright.,keep,,Harness files are not direct journey assertions but still need inventory rows.
 apps/web/tests/setup/jsdom.ts,support,,Test harness support for Vitest or Playwright.,keep,,Harness files are not direct journey assertions but still need inventory rows.
@@ -55,6 +56,7 @@ apps/web/tests/unit/env.test.ts,unit,CONTENT-01,General packet or support behavi
 apps/web/tests/unit/github-username.test.ts,unit,STARTER-01|SETTINGS-02,Starter repo access and settings add-ons.,keep,,Starter repo still belongs in the extended support pack.
 apps/web/tests/unit/guided-form-lessons.test.tsx,unit,CONTENT-01,General packet or support behavior.,keep,,Defaulted into the packet content bucket pending a more specific mapping.
 apps/web/tests/unit/home-page-render-model.test.ts,unit,VIS-01|VIS-02,Homepage and public discovery behavior.,keep,,These tests still map to visitor-first scenarios.
+apps/web/tests/unit/home-page-content.test.ts,unit,VIS-01|VIS-02,Homepage promise and pricing copy contract.,keep,,This keeps the public marketing-story assertions in the QA inventory so validation stays aligned with the current homepage contract.
 apps/web/tests/unit/home-page-structured-data.test.ts,unit,VIS-01|VIS-02,Homepage and public discovery behavior.,keep,,These tests still map to visitor-first scenarios.
 apps/web/tests/unit/legacy-lesson-routes.test.ts,unit,PACKET-07,Legacy mission or route alias behavior.,rewrite,Canonical packet route coverage,These tests still talk about legacy aliases that should not anchor the QA model.
 apps/web/tests/unit/lesson-layout.test.ts,unit,PACKET-07|CONTENT-01,Packet funnel lesson and curriculum behavior.,keep,,These are still useful but should roll up under packet scenarios.
@@ -76,6 +78,7 @@ apps/web/tests/unit/observability-request-id.test.ts,unit,OBS-01,Observability h
 apps/web/tests/unit/observability-source-adapters.test.ts,unit,OBS-01,Observability helper and adapter behavior.,keep,,Useful extended-pack proof.
 apps/web/tests/unit/product-shell-navigation.test.ts,unit,PACKET-01|PACKET-07,Protected workspace and access behavior.,keep,,These still contribute to packet entry confidence.
 apps/web/tests/unit/product-shell.test.tsx,unit,PACKET-01|PACKET-07,Protected workspace and access behavior.,keep,,These still contribute to packet entry confidence.
+apps/web/tests/unit/proxy-protected-routes.test.ts,unit,AUTH-02|PACKET-01|SETTINGS-01,Protected packet workspace routes stay behind Clerk middleware.,keep,,This guards the canonical workspace route matcher so signed-out bounces do not depend on client-side recovery.
 apps/web/tests/unit/production-deploy-handoff-workbench.test.tsx,unit,CONTENT-01,Implementation-led lesson or workbench detail.,merge,PACKET-07 or CONTENT-01 coverage,These tests are useful authoring guardrails but too implementation-led to stand alone in ship reporting.
 apps/web/tests/unit/reference-gallery.test.ts,unit,CONTENT-01,General packet or support behavior.,keep,,Defaulted into the packet content bucket pending a more specific mapping.
 apps/web/tests/unit/repo-map-orientation-workbench.test.tsx,unit,CONTENT-01,Implementation-led lesson or workbench detail.,merge,PACKET-07 or CONTENT-01 coverage,These tests are useful authoring guardrails but too implementation-led to stand alone in ship reporting.
