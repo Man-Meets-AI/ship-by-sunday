@@ -21,7 +21,18 @@ function generateRandomCharacter(charset: string): string {
 	return charset.charAt(index);
 }
 
-function generateGibberishPreservingSpaces(
+function generateDeterministicCharacter(
+	original: string,
+	position: number,
+	charset: string,
+): string {
+	const characterCode = original.charCodeAt(position) || 0;
+	const charsetIndex =
+		(characterCode + original.length * 31 + position * 17) % charset.length;
+	return charset.charAt(charsetIndex);
+}
+
+function generateScrambleTextPreservingSpaces(
 	original: string,
 	charset: string,
 ): string {
@@ -29,7 +40,8 @@ function generateGibberishPreservingSpaces(
 	let result = "";
 	for (let i = 0; i < original.length; i += 1) {
 		const ch = original[i];
-		result += ch === " " ? " " : generateRandomCharacter(charset);
+		result +=
+			ch === " " ? " " : generateDeterministicCharacter(original, i, charset);
 	}
 	return result;
 }
@@ -51,14 +63,14 @@ export const EncryptedText: React.FC<EncryptedTextProps> = ({
 	const startTimeRef = useRef(0);
 	const lastFlipTimeRef = useRef(0);
 	const scrambleCharsRef = useRef<string[]>(
-		text ? generateGibberishPreservingSpaces(text, charset).split("") : [],
+		text ? generateScrambleTextPreservingSpaces(text, charset).split("") : [],
 	);
 
 	useEffect(() => {
 		if (!isInView) return;
 
 		const initial = text
-			? generateGibberishPreservingSpaces(text, charset)
+			? generateScrambleTextPreservingSpaces(text, charset)
 			: "";
 		scrambleCharsRef.current = initial.split("");
 		startTimeRef.current = performance.now();
