@@ -13,7 +13,7 @@ function result(status, details = {}) {
 	return { status, ...details };
 }
 
-function runConvexGrant({ clerkUserId, courseSlug, env }) {
+function runConvexGrant({ clerkUserId, env }) {
 	return new Promise((resolve) => {
 		const args = [
 			"exec",
@@ -178,7 +178,6 @@ export async function runCli({
 
 	const grantResult = await runConvexGrant({
 		clerkUserId: ensureResult.clerkUserId,
-		courseSlug,
 		env,
 	});
 

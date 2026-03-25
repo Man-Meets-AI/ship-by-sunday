@@ -1,10 +1,5 @@
 import type { PinnedArtifact } from "@/features/course/lesson/shells";
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	Item,
 	ItemContent,

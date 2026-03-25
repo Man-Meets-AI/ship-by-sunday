@@ -1,7 +1,9 @@
 # Recreate YouTube Thumbnails with Nick Saraev
 
 ## Goal
+
 Face-swap YouTube thumbnails to feature Nick Saraev using Nano Banana Pro (Gemini image model). The system:
+
 - Analyzes face direction (yaw/pitch) in the source thumbnail
 - Finds the best-matching reference photo of Nick by pose
 - Generates 3 variations by default
@@ -26,12 +28,14 @@ python execution/recreate_thumbnails.py --edit ".tmp/thumbnails/recreated_v3.png
 ### Step 1: Build Reference Photo Bank (One-time setup)
 
 Drop 30-40 photos of Nick in various face directions into the raw folder:
+
 ```bash
 mkdir -p .tmp/reference_photos/raw
 # Add photos here...
 ```
 
 Analyze and rename with face direction metadata:
+
 ```bash
 python execution/analyze_face_directions.py
 
@@ -40,11 +44,13 @@ python execution/analyze_face_directions.py --preview
 ```
 
 This creates files like:
+
 - `nick_yawL30_pitchU10.jpg` — looking 30° left, 10° up
 - `nick_yawR45_pitch0.jpg` — looking 45° right, level
 - `nick_yaw0_pitchD15.jpg` — straight ahead, 15° down
 
 **Current coverage gaps** (prioritize when adding photos):
+
 - Left-facing (yaw -15° to -45°)
 - Dead center (yaw ~0°)
 - Various pitch levels beyond ±45°
@@ -66,6 +72,7 @@ python execution/recreate_thumbnails.py --source "thumbnail.jpg" --no-match
 ```
 
 **What happens:**
+
 1. Downloads/loads source thumbnail
 2. Analyzes face direction using MediaPipe (yaw/pitch in degrees)
 3. Finds best-matching reference by Euclidean distance in pose space
@@ -91,6 +98,7 @@ python execution/recreate_thumbnails.py --edit ".tmp/thumbnails/edited_2.png" \
 ```
 
 **Edit pass tips:**
+
 - Be specific about what to change
 - Reference exact text strings when changing copy
 - Colors, text, graphs, backgrounds all work well
@@ -98,17 +106,18 @@ python execution/recreate_thumbnails.py --edit ".tmp/thumbnails/edited_2.png" \
 
 ## File Locations
 
-| Path | Purpose |
-|------|---------|
-| `.tmp/reference_photos/` | Direction-labeled reference photos (nick_yawR20_pitchD45.jpg) |
-| `.tmp/reference_photos/raw/` | Drop new photos here for analysis |
-| `.tmp/thumbnails/YYYYMMDD/` | Generated thumbnails organized by date |
-| `execution/recreate_thumbnails.py` | Main script |
-| `execution/analyze_face_directions.py` | Reference photo analyzer |
+| Path                                   | Purpose                                                       |
+| -------------------------------------- | ------------------------------------------------------------- |
+| `.tmp/reference_photos/`               | Direction-labeled reference photos (nick_yawR20_pitchD45.jpg) |
+| `.tmp/reference_photos/raw/`           | Drop new photos here for analysis                             |
+| `.tmp/thumbnails/YYYYMMDD/`            | Generated thumbnails organized by date                        |
+| `execution/recreate_thumbnails.py`     | Main script                                                   |
+| `execution/analyze_face_directions.py` | Reference photo analyzer                                      |
 
 ## Output Organization
 
 Thumbnails are stored in date-based folders:
+
 ```
 .tmp/thumbnails/
 ├── 20251205/              # December 5, 2025
@@ -129,25 +138,25 @@ Thumbnails are stored in date-based folders:
 
 ### recreate_thumbnails.py
 
-| Flag | Description |
-|------|-------------|
-| `--youtube`, `-y` | YouTube video URL |
-| `--source`, `-s` | Source thumbnail path or URL |
-| `--edit`, `-e` | Image to edit (enables edit mode) |
-| `--prompt`, `-p` | Additional instructions (required for edit mode) |
-| `--variations`, `-n` | Number of variations (default: 3) |
-| `--refs` | Number of reference photos (default: 2) |
-| `--output`, `-o` | Custom output filename |
-| `--no-match` | Skip face direction matching |
-| `--style` | Style description (rarely needed) |
+| Flag                 | Description                                      |
+| -------------------- | ------------------------------------------------ |
+| `--youtube`, `-y`    | YouTube video URL                                |
+| `--source`, `-s`     | Source thumbnail path or URL                     |
+| `--edit`, `-e`       | Image to edit (enables edit mode)                |
+| `--prompt`, `-p`     | Additional instructions (required for edit mode) |
+| `--variations`, `-n` | Number of variations (default: 3)                |
+| `--refs`             | Number of reference photos (default: 2)          |
+| `--output`, `-o`     | Custom output filename                           |
+| `--no-match`         | Skip face direction matching                     |
+| `--style`            | Style description (rarely needed)                |
 
 ### analyze_face_directions.py
 
-| Flag | Description |
-|------|-------------|
-| `--preview`, `-p` | Show analysis without renaming |
-| `--single`, `-s` | Analyze a single image |
-| `--find` | Find closest reference for yaw,pitch (e.g., `--find "-30,10"`) |
+| Flag              | Description                                                    |
+| ----------------- | -------------------------------------------------------------- |
+| `--preview`, `-p` | Show analysis without renaming                                 |
+| `--single`, `-s`  | Analyze a single image                                         |
+| `--find`          | Find closest reference for yaw,pitch (e.g., `--find "-30,10"`) |
 
 ## API Notes
 
@@ -160,19 +169,21 @@ Thumbnails are stored in date-based folders:
 ## Naming Convention
 
 Reference photos use this format:
+
 ```
 nick_yaw{L/R}{degrees}_pitch{U/D}{degrees}.jpg
 ```
 
-| Component | Meaning |
-|-----------|---------|
-| `yaw` | Left/right rotation |
-| `L`/`R` | Direction (L=left, R=right, omit for 0) |
-| `pitch` | Up/down tilt |
-| `U`/`D` | Direction (U=up, D=down, omit for 0) |
-| `_1`, `_2` | Suffix for duplicates at same angle |
+| Component  | Meaning                                 |
+| ---------- | --------------------------------------- |
+| `yaw`      | Left/right rotation                     |
+| `L`/`R`    | Direction (L=left, R=right, omit for 0) |
+| `pitch`    | Up/down tilt                            |
+| `U`/`D`    | Direction (U=up, D=down, omit for 0)    |
+| `_1`, `_2` | Suffix for duplicates at same angle     |
 
 Examples:
+
 - `nick_yawL30_pitchU10.jpg` — looking 30° left, 10° up
 - `nick_yawR45_pitch0.jpg` — looking 45° right, level
 - `nick_yaw0_pitch0.jpg` — dead center
@@ -192,11 +203,11 @@ Examples:
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| No face detected | Falls back to default references (alphabetical order) |
-| High distance match | Add more reference photos covering that angle |
-| API timeout | Try again; reduce image sizes if persistent |
-| Poor face blending | Lighting/angle mismatch; try different reference photos |
-| Text garbled | Be more explicit in edit prompt; try simpler wording |
-| Wrong aspect ratio | Model outputs ~1376x768; close enough for YouTube |
+| Issue               | Solution                                                |
+| ------------------- | ------------------------------------------------------- |
+| No face detected    | Falls back to default references (alphabetical order)   |
+| High distance match | Add more reference photos covering that angle           |
+| API timeout         | Try again; reduce image sizes if persistent             |
+| Poor face blending  | Lighting/angle mismatch; try different reference photos |
+| Text garbled        | Be more explicit in edit prompt; try simpler wording    |
+| Wrong aspect ratio  | Model outputs ~1376x768; close enough for YouTube       |

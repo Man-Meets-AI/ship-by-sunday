@@ -1,11 +1,11 @@
 import { routeConfig } from "@/config/product";
 import type {
-  BlockConfig,
-  BlockId,
-  CurriculumManifest,
-  LessonConfig,
-  LessonKey,
-  LessonLayoutMode,
+	BlockConfig,
+	BlockId,
+	CurriculumManifest,
+	LessonConfig,
+	LessonKey,
+	LessonLayoutMode,
 } from "./contracts";
 import { buildLessons } from "./lessons/build";
 import { ceoLessons } from "./lessons/ceo";
@@ -15,14 +15,16 @@ import { startHereLessons } from "./lessons/start-here";
 import { attachGeneratedLessonMedia } from "./video";
 
 const sourceLessons = [
-  ...startHereLessons.filter((lesson) => lesson.id !== "1.0"),
-  ...ceoLessons,
-  ...designLessons,
-  ...buildLessons,
-  ...shipLessons,
+	...startHereLessons.filter((lesson) => lesson.id !== "1.0"),
+	...ceoLessons,
+	...designLessons,
+	...buildLessons,
+	...shipLessons,
 ];
 
-const sourceLessonsById = new Map(sourceLessons.map((lesson) => [lesson.id, lesson]));
+const sourceLessonsById = new Map(
+	sourceLessons.map((lesson) => [lesson.id, lesson]),
+);
 
 const CURRICULUM_JSON = String.raw`{
   "version": 2,
@@ -311,35 +313,37 @@ const CURRICULUM_JSON = String.raw`{
 }`;
 
 function defineCurriculum(manifest: CurriculumManifest) {
-  const blockIds = new Set(manifest.blocks.map((block) => block.id));
-  const lessonKeys = new Set<LessonKey>();
-  const displayLabels = new Set<string>();
-  const routeSegments = new Set<string>();
+	const blockIds = new Set(manifest.blocks.map((block) => block.id));
+	const lessonKeys = new Set<LessonKey>();
+	const displayLabels = new Set<string>();
+	const routeSegments = new Set<string>();
 
-  for (const lesson of manifest.lessons) {
-    if (!blockIds.has(lesson.blockId)) {
-      throw new Error(`Unknown block ${lesson.blockId} for lesson ${lesson.lessonKey}.`);
-    }
-    if (lessonKeys.has(lesson.lessonKey)) {
-      throw new Error(`Duplicate lessonKey ${lesson.lessonKey}.`);
-    }
-    if (displayLabels.has(lesson.displayLabel)) {
-      throw new Error(`Duplicate displayLabel ${lesson.displayLabel}.`);
-    }
-    if (routeSegments.has(lesson.routeSegment)) {
-      throw new Error(`Duplicate routeSegment ${lesson.routeSegment}.`);
-    }
+	for (const lesson of manifest.lessons) {
+		if (!blockIds.has(lesson.blockId)) {
+			throw new Error(
+				`Unknown block ${lesson.blockId} for lesson ${lesson.lessonKey}.`,
+			);
+		}
+		if (lessonKeys.has(lesson.lessonKey)) {
+			throw new Error(`Duplicate lessonKey ${lesson.lessonKey}.`);
+		}
+		if (displayLabels.has(lesson.displayLabel)) {
+			throw new Error(`Duplicate displayLabel ${lesson.displayLabel}.`);
+		}
+		if (routeSegments.has(lesson.routeSegment)) {
+			throw new Error(`Duplicate routeSegment ${lesson.routeSegment}.`);
+		}
 
-    lessonKeys.add(lesson.lessonKey);
-    displayLabels.add(lesson.displayLabel);
-    routeSegments.add(lesson.routeSegment);
-  }
+		lessonKeys.add(lesson.lessonKey);
+		displayLabels.add(lesson.displayLabel);
+		routeSegments.add(lesson.routeSegment);
+	}
 
-  return manifest;
+	return manifest;
 }
 
 export const curriculumManifest = defineCurriculum(
-  JSON.parse(CURRICULUM_JSON) as CurriculumManifest,
+	JSON.parse(CURRICULUM_JSON) as CurriculumManifest,
 );
 
 export const CURRICULUM_VERSION = curriculumManifest.version;
@@ -347,188 +351,197 @@ export const CURRICULUM_VERSION = curriculumManifest.version;
 export const blocks: BlockConfig[] = [...curriculumManifest.blocks];
 
 const blockOrderIndex = new Map(
-  curriculumManifest.blocks.map((block) => [block.id, block.order]),
+	curriculumManifest.blocks.map((block) => [block.id, block.order]),
 );
 
 function buildUnlockTargets(
-  lesson: LessonConfig,
-  nextLesson: LessonConfig | undefined,
+	lesson: LessonConfig,
+	nextLesson: LessonConfig | undefined,
 ) {
-  if (!nextLesson) {
-    return undefined;
-  }
+	if (!nextLesson) {
+		return undefined;
+	}
 
-  return {
-    lessons: [nextLesson.displayLabel],
-    ...(lesson.block !== nextLesson.block ? { blocks: [nextLesson.block] } : {}),
-  };
+	return {
+		lessons: [nextLesson.displayLabel],
+		...(lesson.block !== nextLesson.block
+			? { blocks: [nextLesson.block] }
+			: {}),
+	};
 }
 
-const orderedLessonDefinitions = [...curriculumManifest.lessons].sort((left, right) => {
-  const blockDifference =
-    (blockOrderIndex.get(left.blockId) ?? 0) - (blockOrderIndex.get(right.blockId) ?? 0);
-  if (blockDifference !== 0) {
-    return blockDifference;
-  }
+const orderedLessonDefinitions = [...curriculumManifest.lessons].sort(
+	(left, right) => {
+		const blockDifference =
+			(blockOrderIndex.get(left.blockId) ?? 0) -
+			(blockOrderIndex.get(right.blockId) ?? 0);
+		if (blockDifference !== 0) {
+			return blockDifference;
+		}
 
-  return curriculumManifest.lessons.indexOf(left) - curriculumManifest.lessons.indexOf(right);
-});
+		return (
+			curriculumManifest.lessons.indexOf(left) -
+			curriculumManifest.lessons.indexOf(right)
+		);
+	},
+);
 
 const lessonRegistryBase = orderedLessonDefinitions.map((definition, index) => {
-  const sourceLesson = sourceLessonsById.get(definition.sourceId);
-  if (!sourceLesson) {
-    throw new Error(`Unknown source lesson ${definition.sourceId}.`);
-  }
+	const sourceLesson = sourceLessonsById.get(definition.sourceId);
+	if (!sourceLesson) {
+		throw new Error(`Unknown source lesson ${definition.sourceId}.`);
+	}
 
-  return {
-    ...sourceLesson,
-    id: definition.displayLabel,
-    lessonKey: definition.lessonKey,
-    displayLabel: definition.displayLabel,
-    routeSegment: definition.routeSegment,
-    videoAssetId: definition.videoAssetId ?? null,
-    block: definition.blockId,
-    order: index + 1,
-  } satisfies LessonConfig;
+	return {
+		...sourceLesson,
+		id: definition.displayLabel,
+		lessonKey: definition.lessonKey,
+		displayLabel: definition.displayLabel,
+		routeSegment: definition.routeSegment,
+		videoAssetId: definition.videoAssetId ?? null,
+		block: definition.blockId,
+		order: index + 1,
+	} satisfies LessonConfig;
 });
 
 export const lessonRegistry: LessonConfig[] = lessonRegistryBase
-  .map((lesson, index, lessons) => {
-    const previousLesson = lessons[index - 1];
-    const nextLesson = lessons[index + 1];
+	.map((lesson, index, lessons) => {
+		const previousLesson = lessons[index - 1];
+		const nextLesson = lessons[index + 1];
 
-    const lessonWithNeighbors = {
-      ...lesson,
-      prevLessonId: previousLesson?.displayLabel,
-      nextLessonId: nextLesson?.displayLabel,
-      prevLessonKey: previousLesson?.lessonKey,
-      nextLessonKey: nextLesson?.lessonKey,
-    } satisfies LessonConfig;
+		const lessonWithNeighbors = {
+			...lesson,
+			prevLessonId: previousLesson?.displayLabel,
+			nextLessonId: nextLesson?.displayLabel,
+			prevLessonKey: previousLesson?.lessonKey,
+			nextLessonKey: nextLesson?.lessonKey,
+		} satisfies LessonConfig;
 
-    return {
-      ...lessonWithNeighbors,
-      unlocks: buildUnlockTargets(lessonWithNeighbors, nextLesson),
-    } satisfies LessonConfig;
-  })
-  .map(attachGeneratedLessonMedia);
+		return {
+			...lessonWithNeighbors,
+			unlocks: buildUnlockTargets(lessonWithNeighbors, nextLesson),
+		} satisfies LessonConfig;
+	})
+	.map(attachGeneratedLessonMedia);
 
 export const lessonIndex = Object.fromEntries(
-  lessonRegistry.map((lesson) => [lesson.id, lesson]),
+	lessonRegistry.map((lesson) => [lesson.id, lesson]),
 ) as Record<string, LessonConfig>;
 
 export const lessonKeyIndex = Object.fromEntries(
-  lessonRegistry.map((lesson) => [lesson.lessonKey, lesson]),
+	lessonRegistry.map((lesson) => [lesson.lessonKey, lesson]),
 ) as Record<string, LessonConfig>;
 
 export const lessonRouteIndex = Object.fromEntries(
-  lessonRegistry.map((lesson) => [lesson.routeSegment, lesson]),
+	lessonRegistry.map((lesson) => [lesson.routeSegment, lesson]),
 ) as Record<string, LessonConfig>;
 
 export const legacyRouteAliases = {
-  "1.0": routeConfig.mission,
-  ...Object.fromEntries(
-    Object.entries(curriculumManifest.legacyRouteAliases ?? {}).map(([legacyId, routeSegment]) => [
-      legacyId,
-      `/lesson/${routeSegment}`,
-    ]),
-  ),
+	"1.0": routeConfig.mission,
+	...Object.fromEntries(
+		Object.entries(curriculumManifest.legacyRouteAliases ?? {}).map(
+			([legacyId, routeSegment]) => [legacyId, `/lesson/${routeSegment}`],
+		),
+	),
 } as Record<string, string>;
 
 export function getLessonById(displayLabel: string): LessonConfig | null {
-  return lessonIndex[displayLabel] ?? null;
+	return lessonIndex[displayLabel] ?? null;
 }
 
 export function getLessonByKey(lessonKey: LessonKey): LessonConfig | null {
-  return lessonKeyIndex[lessonKey] ?? null;
+	return lessonKeyIndex[lessonKey] ?? null;
 }
 
-export function getLessonByRouteSegment(routeSegment: string): LessonConfig | null {
-  return lessonRouteIndex[routeSegment] ?? null;
+export function getLessonByRouteSegment(
+	routeSegment: string,
+): LessonConfig | null {
+	return lessonRouteIndex[routeSegment] ?? null;
 }
 
 export function getLesson(identifier: string): LessonConfig | undefined {
-  return (
-    getLessonByKey(identifier) ??
-    getLessonByRouteSegment(identifier) ??
-    getLessonById(identifier) ??
-    undefined
-  );
+	return (
+		getLessonByKey(identifier) ??
+		getLessonByRouteSegment(identifier) ??
+		getLessonById(identifier) ??
+		undefined
+	);
 }
 
 export function getLessonDisplayLabel(identifier: string): string | null {
-  return getLesson(identifier)?.displayLabel ?? null;
+	return getLesson(identifier)?.displayLabel ?? null;
 }
 
 export function getLessonHref(identifier: string): string {
-  if (identifier === "1.0" || identifier === routeConfig.mission) {
-    return routeConfig.mission;
-  }
+	if (identifier === "1.0" || identifier === routeConfig.mission) {
+		return routeConfig.mission;
+	}
 
-  const lesson = getLesson(identifier);
-  return lesson ? `/lesson/${lesson.routeSegment}` : `/lesson/${identifier}`;
+	const lesson = getLesson(identifier);
+	return lesson ? `/lesson/${lesson.routeSegment}` : `/lesson/${identifier}`;
 }
 
 export function getPreviousLesson(identifier: string): LessonConfig | null {
-  const lesson = getLesson(identifier);
-  return lesson?.prevLessonKey ? getLessonByKey(lesson.prevLessonKey) : null;
+	const lesson = getLesson(identifier);
+	return lesson?.prevLessonKey ? getLessonByKey(lesson.prevLessonKey) : null;
 }
 
 export function getNextLesson(identifier: string): LessonConfig | null {
-  const lesson = getLesson(identifier);
-  return lesson?.nextLessonKey ? getLessonByKey(lesson.nextLessonKey) : null;
+	const lesson = getLesson(identifier);
+	return lesson?.nextLessonKey ? getLessonByKey(lesson.nextLessonKey) : null;
 }
 
 export function getBlockLessons(blockId: BlockId) {
-  return lessonRegistry.filter((lesson) => lesson.block === blockId);
+	return lessonRegistry.filter((lesson) => lesson.block === blockId);
 }
 
 const DEFAULT_LESSON_LAYOUT_MODES = [
-  "split",
-  "focus",
+	"split",
+	"focus",
 ] as const satisfies readonly LessonLayoutMode[];
 const WATCH_LESSON_LAYOUT_MODES = [
-  "focus",
+	"focus",
 ] as const satisfies readonly LessonLayoutMode[];
 
 export function getAvailableLayoutModesForLesson(
-  lesson: Pick<LessonConfig, "availableLayoutModes" | "shell">,
+	lesson: Pick<LessonConfig, "availableLayoutModes" | "shell">,
 ): LessonLayoutMode[] {
-  if (lesson.shell === "watch" && !lesson.availableLayoutModes?.length) {
-    return [...WATCH_LESSON_LAYOUT_MODES];
-  }
+	if (lesson.shell === "watch" && !lesson.availableLayoutModes?.length) {
+		return [...WATCH_LESSON_LAYOUT_MODES];
+	}
 
-  return lesson.availableLayoutModes?.length
-    ? [...lesson.availableLayoutModes]
-    : [...DEFAULT_LESSON_LAYOUT_MODES];
+	return lesson.availableLayoutModes?.length
+		? [...lesson.availableLayoutModes]
+		: [...DEFAULT_LESSON_LAYOUT_MODES];
 }
 
 export function getDefaultLayoutModeForLesson(
-  lesson: Pick<LessonConfig, "availableLayoutModes" | "shell">,
+	lesson: Pick<LessonConfig, "availableLayoutModes" | "shell">,
 ): LessonLayoutMode {
-  const availableLayoutModes = getAvailableLayoutModesForLesson(lesson);
-  const preferredLayoutMode =
-    lesson.shell === "focus" || lesson.shell === "watch" ? "focus" : "split";
+	const availableLayoutModes = getAvailableLayoutModesForLesson(lesson);
+	const preferredLayoutMode =
+		lesson.shell === "focus" || lesson.shell === "watch" ? "focus" : "split";
 
-  return availableLayoutModes.includes(preferredLayoutMode)
-    ? preferredLayoutMode
-    : (availableLayoutModes[0] ?? "split");
+	return availableLayoutModes.includes(preferredLayoutMode)
+		? preferredLayoutMode
+		: (availableLayoutModes[0] ?? "split");
 }
 
 export function normalizeLayoutModeForLesson(
-  lesson: Pick<LessonConfig, "availableLayoutModes" | "shell">,
-  layoutMode: unknown,
+	lesson: Pick<LessonConfig, "availableLayoutModes" | "shell">,
+	layoutMode: unknown,
 ): LessonLayoutMode {
-  if (layoutMode === "split" || layoutMode === "focus") {
-    return getAvailableLayoutModesForLesson(lesson).includes(layoutMode)
-      ? layoutMode
-      : getDefaultLayoutModeForLesson(lesson);
-  }
+	if (layoutMode === "split" || layoutMode === "focus") {
+		return getAvailableLayoutModesForLesson(lesson).includes(layoutMode)
+			? layoutMode
+			: getDefaultLayoutModeForLesson(lesson);
+	}
 
-  return getDefaultLayoutModeForLesson(lesson);
+	return getDefaultLayoutModeForLesson(lesson);
 }
 
 export function lessonSupportsLayoutToggle(
-  lesson: Pick<LessonConfig, "availableLayoutModes" | "shell">,
+	lesson: Pick<LessonConfig, "availableLayoutModes" | "shell">,
 ): boolean {
-  return getAvailableLayoutModesForLesson(lesson).length > 1;
+	return getAvailableLayoutModesForLesson(lesson).length > 1;
 }

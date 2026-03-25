@@ -11,7 +11,9 @@ export function getRequestIdFromRequest(
 	fallbackRequestId?: string | null,
 ) {
 	const requestId =
-		request?.headers.get(REQUEST_ID_HEADER) ?? fallbackRequestId ?? createRequestId();
+		request?.headers.get(REQUEST_ID_HEADER) ??
+		fallbackRequestId ??
+		createRequestId();
 
 	return requestId;
 }
@@ -42,7 +44,10 @@ export function jsonWithRequestId(
 	return response;
 }
 
-export function withRequestId<T extends Response>(response: T, requestId: string) {
+export function withRequestId<T extends Response>(
+	response: T,
+	requestId: string,
+) {
 	response.headers.set(REQUEST_ID_HEADER, requestId);
 	return response;
 }

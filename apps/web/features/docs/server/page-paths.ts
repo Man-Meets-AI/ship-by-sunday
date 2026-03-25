@@ -24,9 +24,8 @@ export function getDocsPagePath(mdxPath?: string[]) {
 }
 
 export function getDocsSourcePath(mdxPath?: string[]) {
-	const sourceFile = !mdxPath || mdxPath.length === 0
-		? "index.mdx"
-		: `${mdxPath.join("/")}.mdx`;
+	const sourceFile =
+		!mdxPath || mdxPath.length === 0 ? "index.mdx" : `${mdxPath.join("/")}.mdx`;
 
 	return path.join(DOCS_CONTENT_ROOT, sourceFile);
 }

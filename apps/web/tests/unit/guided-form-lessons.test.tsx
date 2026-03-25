@@ -140,9 +140,9 @@ describe("restored guided-form lessons", () => {
 				name: "Why is this painful enough to solve now?",
 			}),
 		).toBeTruthy();
-		expect(screen.getAllByText("Selected user problem brief").length).toBeGreaterThan(
-			0,
-		);
+		expect(
+			screen.getAllByText("Selected user problem brief").length,
+		).toBeGreaterThan(0);
 		expect(screen.getAllByRole("radio")).toHaveLength(3);
 	});
 

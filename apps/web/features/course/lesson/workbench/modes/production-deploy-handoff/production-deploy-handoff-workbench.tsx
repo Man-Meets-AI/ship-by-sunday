@@ -42,7 +42,9 @@ export function ProductionDeployHandoffWorkbench({
 	const productField = fields.find(
 		(field) => field.id === DEPLOY_PRODUCT_NAME_FIELD_ID,
 	);
-	const domainField = fields.find((field) => field.id === DEPLOY_DOMAIN_FIELD_ID);
+	const domainField = fields.find(
+		(field) => field.id === DEPLOY_DOMAIN_FIELD_ID,
+	);
 	const successField = fields.find(
 		(field) => field.id === DEPLOY_SUCCESS_FIELD_ID,
 	);

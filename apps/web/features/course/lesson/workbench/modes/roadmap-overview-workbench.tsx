@@ -1,12 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Play } from "lucide-react";
@@ -116,9 +111,7 @@ export function RoadmapOverviewWorkbench({
 						<Play className="size-3 opacity-90" aria-hidden />
 						Watch first
 					</Badge>
-					<span className="text-xs text-muted-foreground">
-						{VIDEO_HELPER}
-					</span>
+					<span className="text-xs text-muted-foreground">{VIDEO_HELPER}</span>
 				</div>
 			</CardHeader>
 			<CardContent className="p-4 sm:p-5 sm:pt-4">

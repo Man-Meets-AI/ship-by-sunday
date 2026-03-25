@@ -47,7 +47,9 @@ export async function POST(request: Request) {
 			pathname: parsed.data.pathname,
 			code: parsed.data.code,
 			severity: "medium",
-			details: parsed.data.details ? { clientDetails: parsed.data.details } : null,
+			details: parsed.data.details
+				? { clientDetails: parsed.data.details }
+				: null,
 		}),
 	);
 

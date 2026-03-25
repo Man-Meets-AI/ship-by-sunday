@@ -11,6 +11,8 @@ Shipping live is mostly an environment-parity problem plus a buyer-safety proble
 
 Make sure all of this is true:
 
+- the release candidate is already integrated on `dev`
+- the `dev -> main` release PR is the thing that changes production
 - the marketing page is clear enough to buy from
 - auth works in the real deployed environment
 - checkout returns to the deployed `/checkout/success`
@@ -20,18 +22,25 @@ Make sure all of this is true:
 
 ## Production checklist
 
-1. Set production env values in Vercel, Clerk, Convex, and Stripe.
-2. Register the live Stripe webhook endpoint.
-3. Run a safe real checkout pass in the deployed environment.
-4. Confirm product-access grant happens in the deployed environment, not just locally.
-5. Confirm the buyer reaches the protected product after payment.
+1. Land feature work into `dev` and make sure the release candidate is the code you want to ship.
+2. Run `bun run check` from the repo root before opening the release PR.
+3. Open a pull request from `dev` into `main`.
+4. Merge only after required GitHub checks pass.
+5. Confirm Vercel creates the production web deploy from `main`.
+6. Confirm GitHub Actions runs `Convex Production Deploy` for the same `main` merge.
+7. Register or verify the live Stripe webhook endpoint.
+8. Run a safe real checkout pass in the deployed environment.
+9. Confirm product-access grant happens in the deployed environment, not just locally.
+10. Confirm the buyer reaches the protected product after payment.
 
 ## Keep these in mind
 
 - This repo currently assumes the buyer completes checkout in the same signed-in browser context used to read access state.
 - If you change auth apps, webhook secrets, or Stripe accounts, re-verify the handoff instead of assuming it still works.
+- Hotfixes are allowed to merge into `main`, but they must come from a hotfix branch and be merged or cherry-picked back into `dev` immediately afterward.
+- Dedicated Convex-backed preview environments are not part of this release workflow yet. Non-`main` Vercel branches stay frontend previews only.
 - Do not promise a support or access path in public copy unless it actually exists.
 
 ## What success looks like
 
-Production is ready when a brand-new buyer can understand the offer, buy cleanly, get access without confusion, and start the product immediately.
+Production is ready when a brand-new buyer can understand the offer, buy cleanly, get access without confusion, and start the product immediately, and when the release can be traced cleanly back to the `main` merge that triggered both the Vercel production deploy and the Convex production deploy.

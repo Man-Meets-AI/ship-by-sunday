@@ -29,9 +29,8 @@ describe("POST /api/observability/incidents/[incidentId]/status", () => {
 	});
 
 	it("applies an allowed incident status change", async () => {
-		const { POST } = await import(
-			"@/app/api/observability/incidents/[incidentId]/status/route"
-		);
+		const { POST } =
+			await import("@/app/api/observability/incidents/[incidentId]/status/route");
 
 		const response = await POST(
 			new Request(
@@ -64,9 +63,8 @@ describe("POST /api/observability/incidents/[incidentId]/status", () => {
 	});
 
 	it("rejects unauthorized status changes", async () => {
-		const { POST } = await import(
-			"@/app/api/observability/incidents/[incidentId]/status/route"
-		);
+		const { POST } =
+			await import("@/app/api/observability/incidents/[incidentId]/status/route");
 
 		const response = await POST(
 			new Request(
@@ -94,9 +92,8 @@ describe("POST /api/observability/incidents/[incidentId]/status", () => {
 	});
 
 	it("rejects statuses outside the maintainer control subset", async () => {
-		const { POST } = await import(
-			"@/app/api/observability/incidents/[incidentId]/status/route"
-		);
+		const { POST } =
+			await import("@/app/api/observability/incidents/[incidentId]/status/route");
 
 		const response = await POST(
 			new Request(
@@ -125,9 +122,8 @@ describe("POST /api/observability/incidents/[incidentId]/status", () => {
 
 	it("captures missing control-token configuration", async () => {
 		serverEnv.OBSERVABILITY_INCIDENT_CONTROL_TOKEN = undefined as never;
-		const { POST } = await import(
-			"@/app/api/observability/incidents/[incidentId]/status/route"
-		);
+		const { POST } =
+			await import("@/app/api/observability/incidents/[incidentId]/status/route");
 
 		const response = await POST(
 			new Request(
@@ -155,9 +151,8 @@ describe("POST /api/observability/incidents/[incidentId]/status", () => {
 
 	it("captures missing ingest-token transport configuration", async () => {
 		serverEnv.OBSERVABILITY_INGEST_TOKEN = undefined as never;
-		const { POST } = await import(
-			"@/app/api/observability/incidents/[incidentId]/status/route"
-		);
+		const { POST } =
+			await import("@/app/api/observability/incidents/[incidentId]/status/route");
 
 		const response = await POST(
 			new Request(
@@ -192,9 +187,8 @@ describe("POST /api/observability/incidents/[incidentId]/status", () => {
 
 	it("captures backend update failures", async () => {
 		updateIncidentStatusMock.mockRejectedValue(new Error("backend failed"));
-		const { POST } = await import(
-			"@/app/api/observability/incidents/[incidentId]/status/route"
-		);
+		const { POST } =
+			await import("@/app/api/observability/incidents/[incidentId]/status/route");
 
 		const response = await POST(
 			new Request(

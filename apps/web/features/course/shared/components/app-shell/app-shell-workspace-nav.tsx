@@ -1,4 +1,7 @@
-import { ProductBrand, productWordmarkClassName } from "@/components/product-brand";
+import {
+	ProductBrand,
+	productWordmarkClassName,
+} from "@/components/product-brand";
 
 import { routeConfig } from "@/config/product";
 

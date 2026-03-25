@@ -73,9 +73,7 @@ export function RouteAccessStudentFields({
 								<Textarea
 									id={id}
 									value={
-										typeof fieldValues[id] === "string"
-											? fieldValues[id]
-											: ""
+										typeof fieldValues[id] === "string" ? fieldValues[id] : ""
 									}
 									onChange={(event) => onFieldChange(id, event.target.value)}
 									rows={field.rows ?? 5}

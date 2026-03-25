@@ -73,8 +73,8 @@ export function useLessonPageData(lessonKey: string) {
 		layoutMode: chromeState.layoutMode,
 		onLayoutModeChange:
 			!isWatchLesson && lessonSupportsLayoutToggle(lesson)
-			? (layoutMode: LessonLayoutMode) => setLayoutMode(layoutMode)
-					: undefined,
+				? (layoutMode: LessonLayoutMode) => setLayoutMode(layoutMode)
+				: undefined,
 		completionCue: null,
 	};
 

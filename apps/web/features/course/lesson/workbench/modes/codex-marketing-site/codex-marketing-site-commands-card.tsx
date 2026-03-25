@@ -31,8 +31,8 @@ export function CodexMarketingSiteCommandsCard() {
 			<CardHeader className="space-y-1">
 				<CardTitle className="text-base">Command snippets</CardTitle>
 				<CardDescription>
-					Reuse these phrases with your agent when you want a pass only, or
-					when you are ready to ship.
+					Reuse these phrases with your agent when you want a pass only, or when
+					you are ready to ship.
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-0">
@@ -51,7 +51,9 @@ export function CodexMarketingSiteCommandsCard() {
 								onClick={() => {
 									void writeClipboard(snippet.text).then((ok) => {
 										setFeedback(
-											ok ? "Copied to clipboard." : "Could not copy—try selecting the text.",
+											ok
+												? "Copied to clipboard."
+												: "Could not copy—try selecting the text.",
 										);
 									});
 								}}

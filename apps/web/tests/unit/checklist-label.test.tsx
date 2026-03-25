@@ -8,7 +8,9 @@ import { renderChecklistLabel } from "@/features/course/lesson/workbench/fields/
 
 describe("renderChecklistLabel", () => {
 	it("returns plain string when there are no backticks", () => {
-		const { container } = render(<div>{renderChecklistLabel("No code here")}</div>);
+		const { container } = render(
+			<div>{renderChecklistLabel("No code here")}</div>,
+		);
 		expect(container.textContent).toBe("No code here");
 		expect(container.querySelector("code")).toBeNull();
 	});

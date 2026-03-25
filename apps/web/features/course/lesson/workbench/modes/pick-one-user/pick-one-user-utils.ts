@@ -27,7 +27,7 @@ export function buildPreviewRows(
 			label: "User",
 			filled: Boolean(
 				getTextValue(fieldValues, "selected_problem_owner") ||
-					selectedProblem?.owner,
+				selectedProblem?.owner,
 			),
 			value:
 				getTextValue(fieldValues, "selected_problem_owner") ||
@@ -38,7 +38,7 @@ export function buildPreviewRows(
 			label: "Chosen problem",
 			filled: Boolean(
 				getTextValue(fieldValues, "selected_problem_statement") ||
-					selectedProblem?.statement,
+				selectedProblem?.statement,
 			),
 			value:
 				getTextValue(fieldValues, "selected_problem_statement") ||
@@ -69,9 +69,7 @@ export function buildPreviewRows(
 		{
 			label: "Pain level",
 			filled: Boolean(getTextValue(fieldValues, "pain_level")),
-			value:
-				getTextValue(fieldValues, "pain_level") ||
-				"Low, Medium, or High.",
+			value: getTextValue(fieldValues, "pain_level") || "Low, Medium, or High.",
 		},
 		{
 			label: "Why solve now",

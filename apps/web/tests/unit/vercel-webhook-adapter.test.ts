@@ -21,7 +21,8 @@ describe("vercel webhook adapter", () => {
 					id: "user_123",
 				},
 				links: {
-					deployment: "https://vercel.com/acme/ship-by-sunday/deployments/dpl_123",
+					deployment:
+						"https://vercel.com/acme/ship-by-sunday/deployments/dpl_123",
 					project: "https://vercel.com/acme/ship-by-sunday",
 				},
 			},
@@ -35,8 +36,7 @@ describe("vercel webhook adapter", () => {
 			externalEventId: "deployment.error:dpl_123",
 			deploymentId: "dpl_123",
 			nativeUrl: "https://vercel.com/acme/ship-by-sunday",
-			logsUrl:
-				"https://vercel.com/acme/ship-by-sunday/deployments/dpl_123",
+			logsUrl: "https://vercel.com/acme/ship-by-sunday/deployments/dpl_123",
 		});
 		expect(incident?.details).toMatchObject({
 			deploymentTarget: "production",

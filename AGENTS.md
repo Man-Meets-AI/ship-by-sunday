@@ -7,15 +7,15 @@ This version has breaking changes. Read the relevant guide in `apps/web/node_mod
 ## Ship by Sunday routing
 - For work in `apps/web`, also follow `apps/web/AGENTS.md`.
 - For work in `packages/packet-compiler`, also follow `packages/packet-compiler/AGENTS.md`.
-- Canonical source docs for Ship by Sunday live in `docs/ship-by-sunday/***`.
-- Truth order is:
+- Canonical source docs for Ship by Sunday live in `docs/ship-by-sunday/`.
 ## Canonical truth order
 Use this exact priority order when sources conflict:
-1. `ship_by_sunday_screen_spec_packet_first_2026-03-23.json`
-2. `ship_by_sunday_screen_spec_packet_first_2026-03-23.xlsx`
-3. `ship_by_sunday_lesson_outline_2026-03-23.csv`
-4. `ship_by_sunday_screen_spec_2026-03-23.csv`
-5. original transcripts and planning docs only to salvage useful teaching beats, examples, and voice
+1. `docs/ship-by-sunday/packet-contract-and-question-map-2026-03-23.md`
+2. `docs/ship-by-sunday/input-architecture-keep-kill-combine-2026-03-23.md`
+3. `docs/ship-by-sunday/curriculum-reset-funnel-2026-03-23.md`
+4. `docs/ship-by-sunday/repo-input-audit-2026-03-23.md`
+5. `docs/ship-by-sunday/openai-domain-contract-reconciliation-2026-03-23.md`
+6. `docs/ship-by-sunday/original/*` only to salvage useful teaching beats, examples, and voice
 
 
 ## Repo layout

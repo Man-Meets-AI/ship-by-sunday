@@ -9,7 +9,11 @@ export type GalleryGridItem = {
 	alt: string;
 };
 
-export function ArtifactPreviewGalleryGrid({ items }: { items: GalleryGridItem[] }) {
+export function ArtifactPreviewGalleryGrid({
+	items,
+}: {
+	items: GalleryGridItem[];
+}) {
 	return (
 		<div className="grid grid-cols-2 gap-2">
 			{items.map((item) => (

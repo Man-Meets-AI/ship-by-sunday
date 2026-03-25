@@ -47,7 +47,7 @@ export function hydrateLessonVideoContent(
 }
 
 export function getVideoAsset(assetId?: string | null) {
-	return assetId ? videoAssets[assetId] ?? null : null;
+	return assetId ? (videoAssets[assetId] ?? null) : null;
 }
 
 export function getLessonVideoAsset(

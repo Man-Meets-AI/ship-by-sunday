@@ -1,11 +1,7 @@
 {
 	"compilerOptions": {
 		"target": "ES2017",
-		"lib": [
-			"dom",
-			"dom.iterable",
-			"esnext"
-		],
+		"lib": ["dom", "dom.iterable", "esnext"],
 		"allowJs": false,
 		"skipLibCheck": true,
 		"strict": true,
@@ -23,12 +19,8 @@
 			}
 		],
 		"paths": {
-			"@/*": [
-				"./*"
-			],
-			"@packet-compiler": [
-				"../../packages/packet-compiler/src/index.ts"
-			],
+			"@/*": ["./*"],
+			"@packet-compiler": ["../../packages/packet-compiler/src/index.ts"],
 			"@packet-compiler/server": [
 				"../../packages/packet-compiler/src/server.ts"
 			]
@@ -41,8 +33,5 @@
 		".next/types/**/*.ts",
 		".next/dev/types/**/*.ts"
 	],
-	"exclude": [
-		"node_modules",
-		"scripts/vendor/for_youtube/**"
-	]
+	"exclude": ["node_modules", "scripts/vendor/for_youtube/**"]
 }

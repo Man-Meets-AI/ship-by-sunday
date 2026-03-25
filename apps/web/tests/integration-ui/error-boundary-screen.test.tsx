@@ -22,7 +22,9 @@ describe("ErrorBoundaryScreen", () => {
 		const user = userEvent.setup();
 		render(
 			<ErrorBoundaryScreen
-				error={Object.assign(new Error("Mission failed"), { digest: "digest_123" })}
+				error={Object.assign(new Error("Mission failed"), {
+					digest: "digest_123",
+				})}
 				reset={resetMock}
 				title="Protected workspace error"
 				description="The workspace failed while loading protected content."
@@ -48,7 +50,9 @@ describe("ErrorBoundaryScreen", () => {
 	it("marks global errors as critical in the client report payload", () => {
 		render(
 			<ErrorBoundaryScreen
-				error={Object.assign(new Error("Root failed"), { digest: "digest_999" })}
+				error={Object.assign(new Error("Root failed"), {
+					digest: "digest_999",
+				})}
 				reset={resetMock}
 				title="Workspace unavailable"
 				description="A root-level error interrupted the app."

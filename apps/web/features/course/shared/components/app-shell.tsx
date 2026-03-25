@@ -46,7 +46,8 @@ function ShellInner({
 	const activeBlock = mission?.blocks.find(
 		(block) => block.id === activeBlockId,
 	);
-	const lesson11Viewport = getLesson(currentLessonId ?? "")?.displayLabel === "1.1";
+	const lesson11Viewport =
+		getLesson(currentLessonId ?? "")?.displayLabel === "1.1";
 	const blockStatuses = mission
 		? new Map(
 				mission.blocks.map((block) => [

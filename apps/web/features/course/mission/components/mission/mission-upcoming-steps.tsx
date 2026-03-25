@@ -27,7 +27,9 @@ export function MissionUpcomingSteps({
 									{index === 0 ? "Next" : "Then"}
 								</Badge>
 								<p className="text-sm font-medium">
-									<span className="text-muted-foreground">{lesson.displayLabel}</span>{" "}
+									<span className="text-muted-foreground">
+										{lesson.displayLabel}
+									</span>{" "}
 									{lesson.shortTitle}
 								</p>
 							</div>

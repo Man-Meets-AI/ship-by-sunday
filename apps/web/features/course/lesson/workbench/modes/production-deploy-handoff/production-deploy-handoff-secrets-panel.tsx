@@ -61,7 +61,9 @@ export function ProductionDeployHandoffSecretsPanel({
 					clerkKeys,
 				}),
 			);
-			toast.success("Full handoff copied—paste only in a private agent session");
+			toast.success(
+				"Full handoff copied—paste only in a private agent session",
+			);
 		} catch {
 			toast.error("Could not copy");
 		}
@@ -70,10 +72,12 @@ export function ProductionDeployHandoffSecretsPanel({
 	return (
 		<Card>
 			<CardHeader className="space-y-1">
-				<CardTitle className="text-base">Gather credentials (not saved here)</CardTitle>
+				<CardTitle className="text-base">
+					Gather credentials (not saved here)
+				</CardTitle>
 				<CardDescription>
-					Values below stay in this browser session only—they are not stored on our
-					servers. Paste into your agent or hosting env when you are ready.
+					Values below stay in this browser session only—they are not stored on
+					our servers. Paste into your agent or hosting env when you are ready.
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-4">
@@ -115,7 +119,12 @@ export function ProductionDeployHandoffSecretsPanel({
 						placeholder="NEXT_PUBLIC_CLERK_… and CLERK_SECRET_KEY…"
 					/>
 				</div>
-				<Button type="button" variant="outline" size="sm" onClick={copyFullPacket}>
+				<Button
+					type="button"
+					variant="outline"
+					size="sm"
+					onClick={copyFullPacket}
+				>
 					Copy full handoff packet
 				</Button>
 			</CardContent>

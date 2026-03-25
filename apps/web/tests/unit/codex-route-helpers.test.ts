@@ -114,11 +114,15 @@ describe("codex route helpers", () => {
 		expect(unavailable?.status).toBe(503);
 		expect(unavailable?.headers.get("x-request-id")).toBe("request_3");
 		expect(
-			getApiAuthErrorResponse("nope", {
-				unauthorized: "Sign in first.",
-				forbidden: "No access.",
-				unavailable: "Unavailable.",
-			}, "request_4"),
+			getApiAuthErrorResponse(
+				"nope",
+				{
+					unauthorized: "Sign in first.",
+					forbidden: "No access.",
+					unavailable: "Unavailable.",
+				},
+				"request_4",
+			),
 		).toBeNull();
 	});
 

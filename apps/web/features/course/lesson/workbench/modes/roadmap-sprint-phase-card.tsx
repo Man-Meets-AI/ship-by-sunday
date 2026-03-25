@@ -48,9 +48,7 @@ export function RoadmapSprintPhaseCard({ lesson }: { lesson: LessonConfig }) {
 								</span>
 							) : null}
 							<Badge
-								variant={
-									block.id === lesson.block ? "default" : "secondary"
-								}
+								variant={block.id === lesson.block ? "default" : "secondary"}
 								className="text-xs font-semibold tracking-tight"
 							>
 								{block.label}

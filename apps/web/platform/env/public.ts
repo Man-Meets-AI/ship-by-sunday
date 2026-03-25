@@ -24,7 +24,9 @@ export function loadPublicEnv() {
 			process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
 		),
 		NEXT_PUBLIC_CLERK_SIGN_IN_URL: clerkSignInUrl,
-		NEXT_PUBLIC_CONVEX_URL: normalizeEnvValue(process.env.NEXT_PUBLIC_CONVEX_URL),
+		NEXT_PUBLIC_CONVEX_URL: normalizeEnvValue(
+			process.env.NEXT_PUBLIC_CONVEX_URL,
+		),
 	});
 }
 

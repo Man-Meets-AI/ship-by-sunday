@@ -266,9 +266,7 @@ const checks = [
 	formatCheck(
 		"Convex dev endpoint",
 		convexReachable,
-		convexReachable
-			? `${convexUrl} reachable`
-			: `${convexUrl} unreachable`,
+		convexReachable ? `${convexUrl} reachable` : `${convexUrl} unreachable`,
 	),
 ];
 

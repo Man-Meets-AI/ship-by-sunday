@@ -41,8 +41,10 @@ export function AccessRequiredPage({
 	const liveAccess = useQuery(api.access.viewerProductAccess) as
 		| ProductAccess
 		| undefined;
-	const [workspaceEntryRefreshAttemptCount, setWorkspaceEntryRefreshAttemptCount] =
-		useState(0);
+	const [
+		workspaceEntryRefreshAttemptCount,
+		setWorkspaceEntryRefreshAttemptCount,
+	] = useState(0);
 	const [isRetryingAccess, setIsRetryingAccess] = useState(false);
 	const [lastRefreshAt, setLastRefreshAt] = useState<number | null>(null);
 	const currentPath = getCurrentPath(pathname, searchParams);
@@ -50,10 +52,11 @@ export function AccessRequiredPage({
 	const access = liveAccess ?? initialAccess;
 	const shouldRetryWorkspaceEntry =
 		liveAccess?.hasAccess === true &&
-		workspaceEntryRefreshAttemptCount <
-			MAX_WORKSPACE_ENTRY_REFRESH_ATTEMPTS;
+		workspaceEntryRefreshAttemptCount < MAX_WORKSPACE_ENTRY_REFRESH_ATTEMPTS;
 	const viewAccess =
-		liveAccess?.hasAccess === true && !shouldRetryWorkspaceEntry && initialAccess
+		liveAccess?.hasAccess === true &&
+		!shouldRetryWorkspaceEntry &&
+		initialAccess
 			? initialAccess
 			: access;
 	const viewState = getAccessViewState(viewAccess);
@@ -106,10 +109,7 @@ export function AccessRequiredPage({
 	}, [access?.status]);
 
 	useEffect(() => {
-		if (
-			access?.status !== "signed_out" ||
-			hasRedirectedSignedOutRef.current
-		) {
+		if (access?.status !== "signed_out" || hasRedirectedSignedOutRef.current) {
 			return;
 		}
 

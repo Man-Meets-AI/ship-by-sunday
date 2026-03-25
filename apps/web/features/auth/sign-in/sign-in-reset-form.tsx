@@ -42,7 +42,8 @@ function getResetCopy(
 	switch (step) {
 		case "reset_request":
 			return {
-				description: "Enter the email address attached to your purchased account.",
+				description:
+					"Enter the email address attached to your purchased account.",
 				submitLabel: "Send reset code",
 			};
 		case "reset_submit":
@@ -105,7 +106,8 @@ export function SignInResetForm({
 					<AlertCircleIcon aria-hidden />
 					<AlertTitle>We couldn&apos;t continue the reset.</AlertTitle>
 					<AlertDescription>
-						{globalErrors[0]?.message ?? "Try again with the purchased account email."}
+						{globalErrors[0]?.message ??
+							"Try again with the purchased account email."}
 					</AlertDescription>
 				</Alert>
 			) : null}

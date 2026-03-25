@@ -40,7 +40,8 @@ export const saveProjectDefinitionFactsArgs = {
 	clearedFieldKeys: v.array(v.string()),
 	factsPatch: projectDefinitionFactsValidator,
 };
-export const saveProjectDefinitionFactsReturns = projectDefinitionPublicValidator;
+export const saveProjectDefinitionFactsReturns =
+	projectDefinitionPublicValidator;
 
 export async function getProjectDefinitionByClerkUserId(
 	ctx: PacketReadCtx,
