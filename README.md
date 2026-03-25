@@ -10,7 +10,7 @@ Why its awesome
 - Shadcn, TailwindV4
 - Bring your own AI integration (chatgpt)
 
-`Ship by Sunday` is the app behind a guided weekend sprint for builders who want to go from rough idea to shipped v1. This repo now doubles as the configurable starter base, with the public marketing site, Stripe checkout flow, protected workspace shell, optional course runtime, and the code-defined seams that let those surfaces be turned on or off without rewriting the purchase-to-access contract.
+`Ship by Sunday` is now positioned as an Agent-Ready Packs system for builders who want to turn one product idea into durable design, marketing, build, and prompt handoff packs. This repo doubles as the configurable starter base, with the public marketing site, Stripe checkout flow, protected workspace shell, optional course runtime, and the code-defined seams that let those surfaces be turned on or off without rewriting the purchase-to-access contract.
 
 ## What Lives Here
 
@@ -105,7 +105,7 @@ The `starterConfig.modules` flags currently control:
 
 - `docs`
 - `course`
-- `starterRepo`
+- `starterRepo` (legacy, off by default)
 - `codex`
 - `observability`
 
@@ -114,13 +114,13 @@ Current behavior:
 - the packet-first flow now starts at `/start` and uses `/product`, `/design`, `/marketing`, `/build-plan`, and `/review` as the protected runtime
 - `/mission`, `/lesson/[lessonKey]`, and `/artifacts` now redirect into the packet-first flow instead of acting as canonical product surfaces
 - when `docs` is `false`, docs links hide and `/docs` renders a disabled-state surface instead of the docs shell
-- when `starterRepo` is `false`, starter-repo access cards disappear from the protected app
+- when `starterRepo` is `false`, the legacy starter-repo path disappears from the visible protected app instead of showing as a disabled module
 
 These are code-level starter defaults, not a full in-app admin surface yet.
 
 The public homepage now has its own starter-controlled shell:
 
-- `starterConfig.homePage.sections` controls the fixed top-level homepage sections: `hero`, `sprintPath`, `whatsInside`, `socialProof`, `faq`, `pricing`, and `footer`
+- `starterConfig.homePage.sections` controls the fixed top-level homepage sections: `hero`, `sprintPath`, `whatsInside`, `durability`, `socialProof`, `faq`, `pricing`, and `footer`
 - `starterConfig.homePage.heroPrimaryCta` and `starterConfig.homePage.pricingPrimaryCta` control whether those surfaces route through checkout or a normal link target
 - `apps/web/features/marketing/lib/home-page-render-model.ts` is the single place that translates starter config plus homepage content into the render contract used by `apps/web/features/marketing/components/home-page.tsx`
 - `apps/web/content/docs/configure-the-homepage.mdx` is the durable operating guide future builders and AI agents should read before changing homepage structure
