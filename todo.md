@@ -2,6 +2,8 @@
 
 ## recent
 
+- **2026-03-25 15:33 EDT** — Public-story reframe: shipped the `Agent-Ready Packs` homepage rewrite, added the durability section and new pack-system SVGs, renamed protected review/download artifacts to `Design Pack` / `Marketing Pack` / `Build Pack` / `Prompt Pack` / `Starter Snapshot`, turned the legacy visible `starterRepo` path off by default, synced shipped docs plus root README/changelog, and re-ran root + package lint/format/test/build coverage. Only skipped lane: sandbox-auth E2E after the review CTA text update.
+
 - **2026-03-25 15:20 EDT** — Root deploy-fix follow-up: added `bunfig.toml` with `install.linker = "hoisted"` so GitHub Actions and Vercel stop using Bun's isolated symlink-heavy workspace layout during monorepo installs. This follows the earlier Vercel invalid-package failure after the repo-download trace shrink; next proof point is the rerun PR/preview on the existing deploy-fix branch.
 
 - **2026-03-25 15:03 EDT** — Deploy-debug pass: confirmed `main` was protected so local commits never reached a production branch directly, traced the stale custom domain to an old `man-meets-ai-simple` production alias, identified the failing `mma-shipbysunday` `main` deployment as a Vercel serverless-size rejection on `/api/download/repo`, trimmed the repo-download trace boundary to the files the snapshot generator actually reads, and opened PR `#3` to rerun CI plus Vercel through the protected release path. Local verification: focused tracing tests, packet-compiler repo-generation test, `bun run build`, and post-build trace audit showing the repo-download trace down to about `125.87 MB`.

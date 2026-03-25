@@ -7,6 +7,9 @@
 - Established the `dev -> main` production release workflow: `dev` now acts as the shared integration branch, `main` is the protected production branch, Vercel production tracks `main`, and the root/docs guidance now explains the real promotion path instead of a local-shell-first deploy habit.
 - Added `.github/workflows/convex-production-deploy.yml` so Convex production deploys are controlled from GitHub on `main`, with an explicit rollout guard, a manual dry-run path, and a repository variable switch (`CONVEX_PRODUCTION_DEPLOY_ENABLED`) that can pause or resume automatic production deploys.
 - Hardened CI to match the release workflow by giving the static job safe build-time placeholder env values, fixing Playwright browser smoke so it can boot without a real hosted Convex URL in CI, and adding focused observability coverage tests so `bun run check` now passes before release promotion.
+- Reframed the public product story around `Agent-Ready Packs`, added a new homepage `durability` section plus pack-system visuals, and removed the old guided-sprint / four-block / starter-template pitch from the visible homepage contract.
+- Renamed the protected review and download contract to the outward artifact set `Design Pack`, `Marketing Pack`, `Build Pack`, `Prompt Pack`, and `Starter Snapshot`, including the review UI, packet headings, and archive filenames.
+- Disabled the legacy visible `starterRepo` path by default, removed it from the visible protected workspace inventory, and aligned the shipped docs entry points with the new pack-first public story.
 
 ## 2026-03-24
 

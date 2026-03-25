@@ -1,4 +1,5 @@
 import { getPacketDownloadContext } from "@/features/packet-flow/server/downloads";
+import { getStarterSnapshotArchiveFileName } from "@packet-compiler";
 
 export const runtime = "nodejs";
 
@@ -13,7 +14,7 @@ export async function GET() {
 	}
 
 	if (!context.workspaceState.packetReadiness.review.isReady) {
-		return new Response("Repo snapshot is not ready yet", { status: 409 });
+		return new Response("Starter Snapshot is not ready yet", { status: 409 });
 	}
 
 	const packetCompilerServer = await importPacketCompilerServer();
@@ -25,7 +26,7 @@ export async function GET() {
 		status: 200,
 		headers: {
 			"content-type": "application/zip",
-			"content-disposition": 'attachment; filename="starter-repo.zip"',
+			"content-disposition": `attachment; filename="${getStarterSnapshotArchiveFileName()}"`,
 		},
 	});
 }

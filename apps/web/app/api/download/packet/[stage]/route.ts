@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getPacketDownloadContext } from "@/features/packet-flow/server/downloads";
+import { getPublicPacketArchiveFileName } from "@packet-compiler";
 
 export const runtime = "nodejs";
 
@@ -28,7 +29,7 @@ export async function GET(
 	const readinessKey =
 		stage === "build" ? "build" : (stage as "design" | "marketing");
 	if (!context.workspaceState.packetReadiness[readinessKey].isReady) {
-		return new Response("Packet is not ready yet", { status: 409 });
+		return new Response("Pack is not ready yet", { status: 409 });
 	}
 
 	const packetCompilerServer = await importPacketCompilerServer();
@@ -45,7 +46,7 @@ export async function GET(
 		status: 200,
 		headers: {
 			"content-type": "application/zip",
-			"content-disposition": `attachment; filename="${stage}-packet.zip"`,
+			"content-disposition": `attachment; filename="${getPublicPacketArchiveFileName(archiveStage)}"`,
 		},
 	});
 }
