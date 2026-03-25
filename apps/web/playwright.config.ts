@@ -4,7 +4,9 @@ import { defineConfig, devices } from "@playwright/test";
 const localPort = Number.parseInt(process.env.PLAYWRIGHT_PORT ?? "3100", 10);
 const baseURL =
 	process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${localPort}`;
+const localServerHost = new URL(baseURL).hostname;
 const shouldUseLocalServer = process.env.PLAYWRIGHT_USE_LOCAL_SERVER === "1";
+const shouldRunSandboxAuth = process.env.E2E_RUN_SANDBOX === "1";
 const localhostHosts = new Set(["127.0.0.1", "0.0.0.0", "localhost"]);
 const smokeTestConvexUrl = "https://smoke-test.convex.cloud";
 
@@ -67,14 +69,14 @@ export default defineConfig({
 	],
 	webServer: shouldUseLocalServer
 		? {
-				command: `bunx next build && bunx next start --hostname 127.0.0.1 --port ${localPort}`,
+				command: `bunx next build && bunx next start --hostname ${localServerHost} --port ${localPort}`,
 				url: baseURL,
 				reuseExistingServer: !process.env.CI,
 				timeout: 900_000,
 				env: {
 					...getDefinedProcessEnv(),
 					APP_BASE_URL: baseURL,
-					DISABLE_CLERK_MIDDLEWARE: "1",
+					DISABLE_CLERK_MIDDLEWARE: shouldRunSandboxAuth ? "0" : "1",
 					ENABLE_OBSERVABILITY_TEST_TRIGGER: "1",
 					NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
 						process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ??

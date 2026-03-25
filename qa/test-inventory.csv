@@ -1,0 +1,104 @@
+file_path,test_layer,scenario_ids,current_value,disposition,replacement_path,disposition_rationale
+apps/web/tests/browser-smoke/app-smoke.spec.ts,browser_smoke,VIS-01|VIS-02|DOCS-01|ACCESS-02,"Public homepage, crawl surface, docs metadata, and checkout-success recovery.",keep,,This file already proves release-critical public behavior in the current route model.
+apps/web/tests/contracts/curriculum-contract.test.ts,contracts,CONTENT-01,Packet curriculum contract.,keep,,Contracts still map cleanly to the packet model.
+apps/web/tests/e2e/auth-protection.sandbox.spec.ts,sandbox_e2e,AUTH-02|ACCESS-01|PACKET-01,"Signed-out redirect, no-access recovery, and canonical packet-start entry.",keep,,This sandbox spec now maps directly to the canonical packet entry routes and belongs in the default ship pack.
+apps/web/tests/e2e/auth-state.ts,support,,Test harness support for Vitest or Playwright.,keep,,Harness files are not direct journey assertions but still need inventory rows.
+apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts,sandbox_e2e,PACKET-01|PACKET-02|PACKET-03|PACKET-04|PACKET-05|PACKET-06|PACKET-07|SETTINGS-01|FREEPAID-02,"Canonical packet funnel, settings visibility, and paid handoff through the packet-first routes.",keep,,This sandbox spec now carries the canonical default-ship packet flow plus the billing-integration handoff.
+apps/web/tests/e2e/global-setup.ts,support,,Test harness support for Vitest or Playwright.,keep,,Harness files are not direct journey assertions but still need inventory rows.
+apps/web/tests/integration-ui/access-required-page.interactions.test.tsx,integration-ui,ACCESS-01,No-access recovery surface.,keep,,The recovery surface is still part of the default ship contract.
+apps/web/tests/integration-ui/access-required-page.test.tsx,integration-ui,ACCESS-01,No-access recovery surface.,keep,,The recovery surface is still part of the default ship contract.
+apps/web/tests/integration-ui/checkout-button.test.tsx,integration-ui,FREEPAID-01,Checkout launch behavior.,keep,,These tests still prove checkout launch without forcing a full billing run.
+apps/web/tests/integration-ui/checkout-success-view.interactions.test.tsx,integration-ui,ACCESS-02,Checkout-success recovery surface.,keep,,This is a release-critical recovery scenario.
+apps/web/tests/integration-ui/checkout-success-view.test.tsx,integration-ui,ACCESS-02,Checkout-success recovery surface.,keep,,This is a release-critical recovery scenario.
+apps/web/tests/integration-ui/copy-prompt-resource-card.test.tsx,integration-ui,CONTENT-01,General packet or support behavior.,keep,,Defaulted into the packet content bucket pending a more specific mapping.
+apps/web/tests/integration-ui/error-boundary-screen.test.tsx,integration-ui,CONTENT-01,General packet or support behavior.,keep,,Defaulted into the packet content bucket pending a more specific mapping.
+apps/web/tests/integration-ui/home-page-primary-cta.test.tsx,integration-ui,VIS-01|VIS-02,Homepage and public discovery behavior.,keep,,These tests still map to visitor-first scenarios.
+apps/web/tests/integration-ui/sign-in-page.test.tsx,integration-ui,AUTH-01,Sign-in and auth redirect behavior.,keep,,These tests still map cleanly to auth scenarios.
+apps/web/tests/integration-ui/sso-callback-page.test.tsx,integration-ui,AUTH-01,Sign-in and auth redirect behavior.,keep,,These tests still map cleanly to auth scenarios.
+apps/web/tests/integration-ui/starter-repo-access-form.test.tsx,integration-ui,STARTER-01|SETTINGS-02,Starter repo access and settings add-ons.,keep,,Starter repo still belongs in the extended support pack.
+apps/web/tests/integration/codex-route-handlers.test.ts,integration,CODEX-01,Codex routes or connection helpers.,keep,,Codex remains an extended support surface.
+apps/web/tests/integration/observability-clerk-route.test.ts,integration,OBS-01,Observability route behavior.,keep,,These tests still prove operational safety.
+apps/web/tests/integration/observability-client-error-route.test.ts,integration,OBS-01,Observability route behavior.,keep,,These tests still prove operational safety.
+apps/web/tests/integration/observability-incident-status-route.test.ts,integration,OBS-01,Observability route behavior.,keep,,These tests still prove operational safety.
+apps/web/tests/integration/observability-vercel-route.test.ts,integration,OBS-01,Observability route behavior.,keep,,These tests still prove operational safety.
+apps/web/tests/integration/packet-download-routes.test.ts,integration,PACKET-06,Review downloads and packet export behavior.,keep,,Useful proof for the Review stage.
+apps/web/tests/integration/stripe-checkout-route.test.ts,integration,FREEPAID-01,Checkout launch behavior.,keep,,These tests still prove checkout launch without forcing a full billing run.
+apps/web/tests/script-modules.d.ts,support,,Test harness support for Vitest or Playwright.,keep,,Harness files are not direct journey assertions but still need inventory rows.
+apps/web/tests/setup/jsdom.ts,support,,Test harness support for Vitest or Playwright.,keep,,Harness files are not direct journey assertions but still need inventory rows.
+apps/web/tests/unit/access-required-page.test.tsx,unit,ACCESS-01,No-access recovery surface.,keep,,The recovery surface is still part of the default ship contract.
+apps/web/tests/unit/app-protected-layout.test.tsx,unit,AUTH-02|ACCESS-01,Protected layout redirect and access gating behavior.,keep,,This helper-level proof still maps to the protected-route contract.
+apps/web/tests/unit/app-workspace-mission-page.test.tsx,unit,PACKET-07,Legacy mission or route alias behavior.,rewrite,Canonical packet route coverage,These tests still talk about legacy aliases that should not anchor the QA model.
+apps/web/tests/unit/bonus-course-card.test.tsx,unit,CONTENT-01,Bonus module card behavior.,merge,CONTENT-01 coverage,This is secondary product content rather than a ship-critical journey.
+apps/web/tests/unit/brand-kit-workbench.test.tsx,unit,CONTENT-01,Implementation-led lesson or workbench detail.,merge,PACKET-07 or CONTENT-01 coverage,These tests are useful authoring guardrails but too implementation-led to stand alone in ship reporting.
+apps/web/tests/unit/build-fresh-template-plan-prompt.test.ts,unit,CONTENT-01,General packet or support behavior.,keep,,Defaulted into the packet content bucket pending a more specific mapping.
+apps/web/tests/unit/build-product-iteration-workbench.test.tsx,unit,CONTENT-01,Implementation-led lesson or workbench detail.,merge,PACKET-07 or CONTENT-01 coverage,These tests are useful authoring guardrails but too implementation-led to stand alone in ship reporting.
+apps/web/tests/unit/checklist-label.test.tsx,unit,CONTENT-01,General packet or support behavior.,keep,,Defaulted into the packet content bucket pending a more specific mapping.
+apps/web/tests/unit/checkout-session.test.ts,unit,FREEPAID-01,Checkout launch behavior.,keep,,These tests still prove checkout launch without forcing a full billing run.
+apps/web/tests/unit/clerk-authorized-parties.test.ts,unit,AUTH-01,Sign-in and auth redirect behavior.,keep,,These tests still map cleanly to auth scenarios.
+apps/web/tests/unit/clerk-webhook-adapter.test.ts,unit,OBS-01,Observability adapter behavior.,keep,,Useful extended-pack proof.
+apps/web/tests/unit/codex-app-server-runtime.test.ts,unit,CODEX-01,Codex routes or connection helpers.,keep,,Codex remains an extended support surface.
+apps/web/tests/unit/codex-convex.test.ts,unit,CODEX-01,Codex routes or connection helpers.,keep,,Codex remains an extended support surface.
+apps/web/tests/unit/codex-marketing-site-workbench.test.tsx,unit,CODEX-01,Codex routes or connection helpers.,keep,,Codex remains an extended support surface.
+apps/web/tests/unit/codex-route-helpers.test.ts,unit,CODEX-01,Codex routes or connection helpers.,keep,,Codex remains an extended support surface.
+apps/web/tests/unit/competitor-research-light-workbench.test.tsx,unit,CONTENT-01,Implementation-led lesson or workbench detail.,merge,PACKET-07 or CONTENT-01 coverage,These tests are useful authoring guardrails but too implementation-led to stand alone in ship reporting.
+apps/web/tests/unit/convex-env.test.ts,unit,CONTENT-01,General packet or support behavior.,keep,,Defaulted into the packet content bucket pending a more specific mapping.
+apps/web/tests/unit/core-flow-sketch-workbench.test.tsx,unit,CONTENT-01,Implementation-led lesson or workbench detail.,merge,PACKET-07 or CONTENT-01 coverage,These tests are useful authoring guardrails but too implementation-led to stand alone in ship reporting.
+apps/web/tests/unit/core-ux-build-constants.test.ts,unit,CONTENT-01,Implementation-led lesson or workbench detail.,merge,PACKET-07 or CONTENT-01 coverage,These tests are useful authoring guardrails but too implementation-led to stand alone in ship reporting.
+apps/web/tests/unit/core-ux-plan-flow-workbench.test.tsx,unit,CONTENT-01,Implementation-led lesson or workbench detail.,merge,PACKET-07 or CONTENT-01 coverage,These tests are useful authoring guardrails but too implementation-led to stand alone in ship reporting.
+apps/web/tests/unit/course-access.test.ts,unit,PACKET-01|PACKET-07,Protected workspace and access behavior.,keep,,These still contribute to packet entry confidence.
+apps/web/tests/unit/course-entitlements.test.ts,unit,PACKET-01|PACKET-07,Protected workspace and access behavior.,keep,,These still contribute to packet entry confidence.
+apps/web/tests/unit/course-registry.test.ts,unit,PACKET-07|CONTENT-01,Packet funnel lesson and curriculum behavior.,keep,,These are still useful but should roll up under packet scenarios.
+apps/web/tests/unit/course-state-lifecycle.test.ts,unit,PACKET-07|CONTENT-01,Packet funnel lesson and curriculum behavior.,keep,,These are still useful but should roll up under packet scenarios.
+apps/web/tests/unit/docs-metadata.test.ts,unit,DOCS-01,Docs metadata integrity.,keep,,This is the canonical docs discovery proof.
+apps/web/tests/unit/ensure-clerk-test-user.test.ts,unit,CONTENT-01,General packet or support behavior.,keep,,Defaulted into the packet content bucket pending a more specific mapping.
+apps/web/tests/unit/env.test.ts,unit,CONTENT-01,General packet or support behavior.,keep,,Defaulted into the packet content bucket pending a more specific mapping.
+apps/web/tests/unit/github-username.test.ts,unit,STARTER-01|SETTINGS-02,Starter repo access and settings add-ons.,keep,,Starter repo still belongs in the extended support pack.
+apps/web/tests/unit/guided-form-lessons.test.tsx,unit,CONTENT-01,General packet or support behavior.,keep,,Defaulted into the packet content bucket pending a more specific mapping.
+apps/web/tests/unit/home-page-render-model.test.ts,unit,VIS-01|VIS-02,Homepage and public discovery behavior.,keep,,These tests still map to visitor-first scenarios.
+apps/web/tests/unit/home-page-structured-data.test.ts,unit,VIS-01|VIS-02,Homepage and public discovery behavior.,keep,,These tests still map to visitor-first scenarios.
+apps/web/tests/unit/legacy-lesson-routes.test.ts,unit,PACKET-07,Legacy mission or route alias behavior.,rewrite,Canonical packet route coverage,These tests still talk about legacy aliases that should not anchor the QA model.
+apps/web/tests/unit/lesson-layout.test.ts,unit,PACKET-07|CONTENT-01,Packet funnel lesson and curriculum behavior.,keep,,These are still useful but should roll up under packet scenarios.
+apps/web/tests/unit/lesson-shells.test.tsx,unit,PACKET-07|CONTENT-01,Packet funnel lesson and curriculum behavior.,keep,,These are still useful but should roll up under packet scenarios.
+apps/web/tests/unit/lesson-video-support.test.ts,unit,PACKET-07|CONTENT-01,Packet funnel lesson and curriculum behavior.,keep,,These are still useful but should roll up under packet scenarios.
+apps/web/tests/unit/lesson-workbench-helpers.test.ts,unit,PACKET-07|CONTENT-01,Packet funnel lesson and curriculum behavior.,keep,,These are still useful but should roll up under packet scenarios.
+apps/web/tests/unit/mission-page.test.tsx,unit,PACKET-07,Legacy mission or route alias behavior.,rewrite,Canonical packet route coverage,These tests still talk about legacy aliases that should not anchor the QA model.
+apps/web/tests/unit/next-lesson-handoff.test.ts,unit,PACKET-07|CONTENT-01,Packet funnel lesson and curriculum behavior.,keep,,These are still useful but should roll up under packet scenarios.
+apps/web/tests/unit/not-found-screen.test.tsx,unit,CONTENT-01,General packet or support behavior.,keep,,Defaulted into the packet content bucket pending a more specific mapping.
+apps/web/tests/unit/observability-api-error-response.test.ts,unit,OBS-01,Observability helper and adapter behavior.,keep,,Useful extended-pack proof.
+apps/web/tests/unit/observability-capture-server-error.test.ts,unit,OBS-01,Observability helper and adapter behavior.,keep,,Useful extended-pack proof.
+apps/web/tests/unit/observability-client-report.test.ts,unit,OBS-01,Observability helper and adapter behavior.,keep,,Useful extended-pack proof.
+apps/web/tests/unit/observability-convex.test.ts,unit,OBS-01,Observability helper and adapter behavior.,keep,,Useful extended-pack proof.
+apps/web/tests/unit/observability-error-event.test.ts,unit,OBS-01,Observability helper and adapter behavior.,keep,,Useful extended-pack proof.
+apps/web/tests/unit/observability-incident-helpers.test.ts,unit,OBS-01,Observability helper and adapter behavior.,keep,,Useful extended-pack proof.
+apps/web/tests/unit/observability-incident-status.test.ts,unit,OBS-01,Observability helper and adapter behavior.,keep,,Useful extended-pack proof.
+apps/web/tests/unit/observability-ingest.test.ts,unit,OBS-01,Observability helper and adapter behavior.,keep,,Useful extended-pack proof.
+apps/web/tests/unit/observability-request-id.test.ts,unit,OBS-01,Observability helper and adapter behavior.,keep,,Useful extended-pack proof.
+apps/web/tests/unit/observability-source-adapters.test.ts,unit,OBS-01,Observability helper and adapter behavior.,keep,,Useful extended-pack proof.
+apps/web/tests/unit/product-shell-navigation.test.ts,unit,PACKET-01|PACKET-07,Protected workspace and access behavior.,keep,,These still contribute to packet entry confidence.
+apps/web/tests/unit/product-shell.test.tsx,unit,PACKET-01|PACKET-07,Protected workspace and access behavior.,keep,,These still contribute to packet entry confidence.
+apps/web/tests/unit/production-deploy-handoff-workbench.test.tsx,unit,CONTENT-01,Implementation-led lesson or workbench detail.,merge,PACKET-07 or CONTENT-01 coverage,These tests are useful authoring guardrails but too implementation-led to stand alone in ship reporting.
+apps/web/tests/unit/reference-gallery.test.ts,unit,CONTENT-01,General packet or support behavior.,keep,,Defaulted into the packet content bucket pending a more specific mapping.
+apps/web/tests/unit/repo-map-orientation-workbench.test.tsx,unit,CONTENT-01,Implementation-led lesson or workbench detail.,merge,PACKET-07 or CONTENT-01 coverage,These tests are useful authoring guardrails but too implementation-led to stand alone in ship reporting.
+apps/web/tests/unit/research-prompt.test.ts,unit,CONTENT-01,Implementation-led lesson or workbench detail.,merge,PACKET-07 or CONTENT-01 coverage,These tests are useful authoring guardrails but too implementation-led to stand alone in ship reporting.
+apps/web/tests/unit/roadmap-sprint-overview.test.tsx,unit,CONTENT-01,General packet or support behavior.,keep,,Defaulted into the packet content bucket pending a more specific mapping.
+apps/web/tests/unit/route-access-orientation-workbench.test.tsx,unit,CONTENT-01,Implementation-led lesson or workbench detail.,merge,PACKET-07 or CONTENT-01 coverage,These tests are useful authoring guardrails but too implementation-led to stand alone in ship reporting.
+apps/web/tests/unit/settings-page.test.tsx,unit,SETTINGS-01|SETTINGS-02,Settings page surfaces.,keep,,Settings stays in the QA model.
+apps/web/tests/unit/sign-in-route-utils.test.ts,unit,AUTH-01,Sign-in and auth redirect behavior.,keep,,These tests still map cleanly to auth scenarios.
+apps/web/tests/unit/sign-up-route.test.ts,unit,AUTH-01,Sign-in and auth redirect behavior.,keep,,These tests still map cleanly to auth scenarios.
+apps/web/tests/unit/skill-rail-navigation.test.ts,unit,CONTENT-01,Implementation-led lesson or workbench detail.,merge,PACKET-07 or CONTENT-01 coverage,These tests are useful authoring guardrails but too implementation-led to stand alone in ship reporting.
+apps/web/tests/unit/skill-rail.test.tsx,unit,CONTENT-01,Implementation-led lesson or workbench detail.,merge,PACKET-07 or CONTENT-01 coverage,These tests are useful authoring guardrails but too implementation-led to stand alone in ship reporting.
+apps/web/tests/unit/stage-unlock.test.ts,unit,PACKET-07|CONTENT-01,Packet funnel lesson and curriculum behavior.,keep,,These are still useful but should roll up under packet scenarios.
+apps/web/tests/unit/starter-repo-access-card.test.tsx,unit,STARTER-01|SETTINGS-02,Starter repo access and settings add-ons.,keep,,Starter repo still belongs in the extended support pack.
+apps/web/tests/unit/starter-repo-access.test.ts,unit,STARTER-01|SETTINGS-02,Starter repo access and settings add-ons.,keep,,Starter repo still belongs in the extended support pack.
+apps/web/tests/unit/starter-repo-script.test.ts,unit,STARTER-01|SETTINGS-02,Starter repo access and settings add-ons.,keep,,Starter repo still belongs in the extended support pack.
+apps/web/tests/unit/starter-selectors.test.ts,unit,STARTER-01|SETTINGS-02,Starter repo access and settings add-ons.,keep,,Starter repo still belongs in the extended support pack.
+apps/web/tests/unit/stripe-observability.test.ts,unit,OBS-01,Observability adapter behavior.,keep,,Useful extended-pack proof.
+apps/web/tests/unit/stripe-webhook-action.test.ts,unit,CONTENT-01,General packet or support behavior.,keep,,Defaulted into the packet content bucket pending a more specific mapping.
+apps/web/tests/unit/uploads.test.ts,unit,PACKET-06,Review downloads and packet export behavior.,keep,,Useful proof for the Review stage.
+apps/web/tests/unit/use-lesson-state.test.tsx,unit,PACKET-07|CONTENT-01,Packet funnel lesson and curriculum behavior.,keep,,These are still useful but should roll up under packet scenarios.
+apps/web/tests/unit/vercel-webhook-adapter.test.ts,unit,OBS-01,Observability adapter behavior.,keep,,Useful extended-pack proof.
+apps/web/tests/unit/video-pipeline-utils.test.ts,unit,CONTENT-01,General packet or support behavior.,keep,,Defaulted into the packet content bucket pending a more specific mapping.
+apps/web/tests/unit/watch-lesson-contract.test.ts,unit,PACKET-07|CONTENT-01,Packet funnel lesson and curriculum behavior.,keep,,These are still useful but should roll up under packet scenarios.
+apps/web/tests/unit/workspace-home-model.test.ts,unit,PACKET-01|PACKET-07,Protected workspace and access behavior.,keep,,These still contribute to packet entry confidence.
+apps/web/tests/unit/workspace-home-page.test.tsx,unit,PACKET-01|PACKET-07,Protected workspace and access behavior.,keep,,These still contribute to packet entry confidence.
+apps/web/tests/vitest.d.ts,support,,Test harness support for Vitest or Playwright.,keep,,Harness files are not direct journey assertions but still need inventory rows.
