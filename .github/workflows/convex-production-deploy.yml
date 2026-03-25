@@ -51,6 +51,8 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.dry_run }}" == "true" ]]; then
             echo "label=dry-run" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.ref }}" != "refs/heads/main" ]]; then
+            echo "label=invalid-manual-deploy" >> "$GITHUB_OUTPUT"
           elif [[ "${{ github.event_name }}" == "push" && "${{ vars.CONVEX_PRODUCTION_DEPLOY_ENABLED }}" != "true" ]]; then
             echo "label=skip" >> "$GITHUB_OUTPUT"
           else
@@ -65,6 +67,12 @@ jobs:
         run: |
           echo "Skipping automatic Convex production deploy because CONVEX_PRODUCTION_DEPLOY_ENABLED is not set to true."
           echo "Run workflow_dispatch with dry_run=true on main first, then enable the repository variable when you are ready for automatic main deploys."
+
+      - name: Manual production deploys must target main
+        if: steps.deploy_mode.outputs.label == 'invalid-manual-deploy'
+        run: |
+          echo "workflow_dispatch with dry_run=false is only allowed from refs/heads/main." >&2
+          exit 1
 
       - name: Run Convex production dry-run
         if: steps.deploy_mode.outputs.label == 'dry-run'
