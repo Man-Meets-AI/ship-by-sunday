@@ -4,6 +4,7 @@ import {
 	renderSection,
 	renderTemplateAppendix,
 } from "./render-helpers";
+import { MARKETING_PACK_LABEL } from "../public-artifact-contract";
 import type { OpenAiPacketTemplates, RenderedPacketFile } from "./render-types";
 
 export function renderMarketingPacket(
@@ -11,7 +12,7 @@ export function renderMarketingPacket(
 	templates: OpenAiPacketTemplates,
 ): RenderedPacketFile[] {
 	const introduction = [
-		`# ${facts.product_name} Marketing Kit`,
+		`# ${facts.product_name} ${MARKETING_PACK_LABEL}`,
 		"",
 		`${facts.product_summary}`,
 		"",

@@ -4,6 +4,7 @@ import {
 	renderSection,
 	renderTemplateAppendix,
 } from "./render-helpers";
+import { DESIGN_PACK_LABEL } from "../public-artifact-contract";
 import type { OpenAiPacketTemplates, RenderedPacketFile } from "./render-types";
 
 export function renderDesignPacket(
@@ -11,7 +12,7 @@ export function renderDesignPacket(
 	templates: OpenAiPacketTemplates,
 ): RenderedPacketFile[] {
 	const summary = [
-		`# ${facts.product_name} Design Packet`,
+		`# ${facts.product_name} ${DESIGN_PACK_LABEL}`,
 		"",
 		renderSection("Surface", `Surface type: ${facts.surface_type}`),
 		"",

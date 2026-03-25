@@ -34,6 +34,10 @@ export type HomePageRenderModel = {
 		readonly isEnabled: boolean;
 		readonly section: HomePageContent["whatsInsideSection"];
 	};
+	readonly durability: {
+		readonly isEnabled: boolean;
+		readonly section: HomePageContent["durabilitySection"];
+	};
 	readonly socialProof: {
 		readonly isEnabled: boolean;
 		readonly githubActivityUsername: string | null;
@@ -89,6 +93,10 @@ export function createHomePageRenderModel({
 		whatsInside: {
 			isEnabled: homePageConfig.sections.whatsInside,
 			section: content.whatsInsideSection,
+		},
+		durability: {
+			isEnabled: homePageConfig.sections.durability,
+			section: content.durabilitySection,
 		},
 		socialProof: {
 			isEnabled: homePageConfig.sections.socialProof,

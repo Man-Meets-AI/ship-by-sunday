@@ -1,0 +1,34 @@
+<svg width="604" height="682" viewBox="0 0 604 682" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="604" height="682" rx="40" fill="#F7F3EC"/>
+  <rect x="40" y="34" width="524" height="614" rx="34" fill="#FFFCF7" stroke="#DCCDB8" stroke-width="2"/>
+  <rect x="122" y="72" width="360" height="118" rx="28" fill="#FFF3E2" stroke="#E4B879" stroke-width="2.5"/>
+  <text x="156" y="122" fill="#6D4617" font-family="ui-sans-serif, system-ui" font-size="17" font-weight="700">PRODUCT DEFINITION</text>
+  <text x="156" y="158" fill="#3F2A15" font-family="ui-sans-serif, system-ui" font-size="28" font-weight="700">One shared source of truth</text>
+  <text x="156" y="184" fill="#7A6047" font-family="ui-sans-serif, system-ui" font-size="16">User, problem, scope, outcome.</text>
+
+  <path d="M302 206V240" stroke="#BE7B34" stroke-width="8" stroke-linecap="round"/>
+  <path d="M278 230L302 254L326 230" fill="none" stroke="#BE7B34" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="74" y="278" width="214" height="100" rx="24" fill="#EEF6FF" stroke="#78A8E0" stroke-width="2.5"/>
+  <text x="102" y="320" fill="#1C3D62" font-family="ui-sans-serif, system-ui" font-size="15" font-weight="700">DESIGN PACK</text>
+  <text x="102" y="351" fill="#38597D" font-family="ui-sans-serif, system-ui" font-size="16">Direction and interface rules.</text>
+
+  <rect x="316" y="278" width="214" height="100" rx="24" fill="#EEFBEF" stroke="#82BF8A" stroke-width="2.5"/>
+  <text x="344" y="320" fill="#1C5422" font-family="ui-sans-serif, system-ui" font-size="15" font-weight="700">MARKETING PACK</text>
+  <text x="344" y="351" fill="#36643B" font-family="ui-sans-serif, system-ui" font-size="16">Claims, proof, and copy.</text>
+
+  <rect x="74" y="402" width="214" height="100" rx="24" fill="#FFF2F5" stroke="#DB88A0" stroke-width="2.5"/>
+  <text x="102" y="444" fill="#73293D" font-family="ui-sans-serif, system-ui" font-size="15" font-weight="700">BUILD PACK</text>
+  <text x="102" y="475" fill="#8A4155" font-family="ui-sans-serif, system-ui" font-size="16">Plans, validation, handoff.</text>
+
+  <rect x="316" y="402" width="214" height="100" rx="24" fill="#FFF8E8" stroke="#DDBB5E" stroke-width="2.5"/>
+  <text x="344" y="444" fill="#715616" font-family="ui-sans-serif, system-ui" font-size="15" font-weight="700">PROMPT PACK</text>
+  <text x="344" y="475" fill="#8D7336" font-family="ui-sans-serif, system-ui" font-size="16">Reuse across tools and tasks.</text>
+
+  <path d="M302 518V552" stroke="#4A3521" stroke-width="8" stroke-linecap="round"/>
+  <path d="M278 542L302 566L326 542" fill="none" stroke="#4A3521" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="136" y="576" width="332" height="96" rx="28" fill="#2E241C"/>
+  <text x="170" y="618" fill="#7FE0C6" font-family="ui-sans-serif, system-ui" font-size="15" font-weight="700">STARTER SNAPSHOT</text>
+  <text x="170" y="648" fill="#FFF8EE" font-family="ui-sans-serif, system-ui" font-size="18">One reviewable handoff before execution.</text>
+</svg>

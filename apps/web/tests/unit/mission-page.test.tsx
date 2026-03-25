@@ -311,7 +311,6 @@ vi.mock(
 	() => ({
 		MissionExtrasRow: () => (
 			<div data-extras-row="true">
-				<div data-starter-repo-card="mission">Starter Repo</div>
 				<div>Product Management for Beginners</div>
 			</div>
 		),
@@ -360,7 +359,7 @@ describe("MissionPage", () => {
 
 		expect(markup).toContain('data-viewport-mode="app"');
 		expect(markup).toContain('data-app-scroll-mode="page"');
-		expect(markup).toContain('data-starter-repo-card="mission"');
+		expect(markup).not.toContain('data-starter-repo-card="mission"');
 		expect(markup).toContain("Your weekend roadmap");
 		expect(markup).toContain("20 of 30 lessons complete");
 		expect(markup).toContain("Start 1.5");

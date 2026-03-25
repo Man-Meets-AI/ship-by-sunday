@@ -28,17 +28,15 @@ globalThis.React = React;
 import { SettingsPage } from "@/features/settings/components/settings-page";
 
 describe("SettingsPage", () => {
-	it("includes Codex, starter repo, and account cards in order", () => {
+	it("includes Codex and account cards without the legacy starter-repo card", () => {
 		const markup = renderToStaticMarkup(<SettingsPage />);
 
 		expect(markup).toContain("Manage your account");
 		const codex = markup.indexOf('data-codex-card="true"');
-		const starter = markup.indexOf('data-starter-repo-card="settings"');
 		const account = markup.indexOf('data-settings-account-card="true"');
 		expect(codex).toBeGreaterThan(-1);
-		expect(starter).toBeGreaterThan(-1);
 		expect(account).toBeGreaterThan(-1);
-		expect(codex).toBeLessThan(starter);
-		expect(starter).toBeLessThan(account);
+		expect(markup).not.toContain('data-starter-repo-card="settings"');
+		expect(codex).toBeLessThan(account);
 	});
 });

@@ -37,3 +37,16 @@ export {
 	type PacketStageStatus,
 } from "./readiness/derive-stage-status";
 export { createCompleteProjectDefinition } from "./fixtures/complete-project-definition";
+export {
+	AGENT_READY_PACKS_LABEL,
+	BUILD_PACK_LABEL,
+	DESIGN_PACK_LABEL,
+	MARKETING_PACK_LABEL,
+	PROMPT_PACK_LABEL,
+	STARTER_SNAPSHOT_LABEL,
+	getPublicPackLabelForStage,
+	getPublicPacketArchiveFileName,
+	getStarterSnapshotArchiveFileName,
+	type DownloadablePacketArchiveStage,
+	type PacketArtifactStage,
+} from "./public-artifact-contract";

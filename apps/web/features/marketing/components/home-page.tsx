@@ -8,6 +8,7 @@ import {
 	SocialProofSection,
 } from "./home-page/closing-sections";
 import { HomeHeroSection } from "./home-page/hero-sections";
+import { DurabilitySectionBlock } from "./home-page/durability-section";
 import { SprintPathUnifiedSection } from "./home-page/sprint-path-unified-section";
 import { WhatsInsideSection } from "./home-page/whats-inside-section";
 
@@ -37,6 +38,11 @@ export default async function HomePage() {
 				{homePageRenderModel.whatsInside.isEnabled ? (
 					<WhatsInsideSection
 						whatsInsideSection={homePageRenderModel.whatsInside.section}
+					/>
+				) : null}
+				{homePageRenderModel.durability.isEnabled ? (
+					<DurabilitySectionBlock
+						durabilitySection={homePageRenderModel.durability.section}
 					/>
 				) : null}
 				{homePageRenderModel.socialProof.isEnabled ? (

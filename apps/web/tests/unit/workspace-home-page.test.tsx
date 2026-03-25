@@ -58,7 +58,7 @@ describe("WorkspaceHomePage", () => {
 				model={buildWorkspaceHomeModel({
 					docs: true,
 					course: false,
-					starterRepo: true,
+					starterRepo: false,
 					codex: true,
 					observability: true,
 				})}
@@ -71,7 +71,7 @@ describe("WorkspaceHomePage", () => {
 		expect(markup).toContain("Next steps");
 		expect(markup).toContain("Review starter settings");
 		expect(markup).toContain('data-card="codex"');
-		expect(markup).toContain('data-card="starter-repo"');
+		expect(markup).not.toContain('data-card="starter-repo"');
 		expect(markup).toContain('data-card="account"');
 	});
 });

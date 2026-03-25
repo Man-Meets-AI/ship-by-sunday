@@ -13,11 +13,14 @@ describe("workspace home model", () => {
 		});
 
 		expect(model.enabledModuleCount).toBe(3);
-		expect(model.totalModuleCount).toBe(5);
-		expect(model.moduleCompletionPercent).toBe(60);
+		expect(model.totalModuleCount).toBe(4);
+		expect(model.moduleCompletionPercent).toBe(75);
 		expect(
 			model.modules.find((module) => module.id === "course")?.statusLabel,
 		).toBe("Starter mode");
+		expect(model.modules.some((module) => module.id === "starterRepo")).toBe(
+			false,
+		);
 		expect(model.quickActions.map((action) => action.label)).toEqual([
 			"Open settings",
 			"Open docs",

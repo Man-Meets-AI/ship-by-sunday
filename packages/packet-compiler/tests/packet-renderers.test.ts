@@ -18,5 +18,26 @@ describe("packet renderers", () => {
 				"packet/prompts/deploy.md",
 			]),
 		);
+
+		const readme = renderedFiles.find(
+			(file) => file.path === "packet/README.md",
+		);
+		const marketingReadme = renderedFiles.find(
+			(file) => file.path === "packet/marketing/README.md",
+		);
+		const buildPrompt = renderedFiles.find(
+			(file) => file.path === "packet/build/docs/prompt.md",
+		);
+		const deployPrompt = renderedFiles.find(
+			(file) => file.path === "packet/prompts/deploy.md",
+		);
+
+		expect(readme?.content).toContain("Agent-Ready Packs");
+		expect(readme?.content).toContain("Design Pack");
+		expect(readme?.content).toContain("Prompt Pack");
+		expect(marketingReadme?.content).toContain("Marketing Pack");
+		expect(buildPrompt?.content).toContain("Build Pack");
+		expect(deployPrompt?.content).toContain("Prompt Pack");
+		expect(deployPrompt?.content).toContain("## Deploy Prompt");
 	});
 });

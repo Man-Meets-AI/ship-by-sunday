@@ -1,4 +1,11 @@
 import type { CanonicalProjectFacts } from "../canonical-project-definition/project-definition";
+import {
+	AGENT_READY_PACKS_LABEL,
+	BUILD_PACK_LABEL,
+	DESIGN_PACK_LABEL,
+	MARKETING_PACK_LABEL,
+	PROMPT_PACK_LABEL,
+} from "../public-artifact-contract";
 import { renderBulletList, renderSection } from "./render-helpers";
 import type { RenderedPacketFile } from "./render-types";
 
@@ -8,7 +15,7 @@ export function renderPacketReadme(
 	return {
 		path: "packet/README.md",
 		content: [
-			`# ${facts.product_name} Packet`,
+			`# ${facts.product_name} ${AGENT_READY_PACKS_LABEL}`,
 			"",
 			`${facts.product_summary}`,
 			"",
@@ -26,10 +33,10 @@ export function renderPacketReadme(
 				"Included Files",
 				renderBulletList([
 					"facts/project-definition.json",
-					"design packet",
-					"marketing packet",
-					"build packet",
-					"prompt pack",
+					DESIGN_PACK_LABEL,
+					MARKETING_PACK_LABEL,
+					BUILD_PACK_LABEL,
+					PROMPT_PACK_LABEL,
 				]),
 			),
 			"",

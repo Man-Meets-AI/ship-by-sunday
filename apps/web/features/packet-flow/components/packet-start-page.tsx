@@ -4,7 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PacketStageNav } from "./packet-stage-nav";
 import type { PacketWorkspaceState } from "@/features/packet-flow/lib/packet-workspace-types";
-import { getPacketStageDefinition } from "@packet-compiler";
+import {
+	BUILD_PACK_LABEL,
+	DESIGN_PACK_LABEL,
+	MARKETING_PACK_LABEL,
+	STARTER_SNAPSHOT_LABEL,
+	getPacketStageDefinition,
+} from "@packet-compiler";
 
 export function PacketStartPage({
 	initialWorkspaceState,
@@ -18,7 +24,7 @@ export function PacketStartPage({
 			enableMissionQuery={false}
 			showSkillRail={false}
 			title="Start"
-			subtitle="This product is packet-first. Every stage fills real output files."
+			subtitle="This product is pack-first. Every stage fills real output files."
 		>
 			<div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 pb-10 pt-2">
 				<PacketStageNav
@@ -32,12 +38,13 @@ export function PacketStartPage({
 					<CardContent className="space-y-4 text-sm text-muted-foreground">
 						<p>
 							You are not filling out course worksheets. You are collecting the
-							canonical facts that change the generated packet and starter repo.
+							canonical facts that change the generated packs and final Starter
+							Snapshot.
 						</p>
 						<p>
-							You will unlock the design packet after Design, the marketing
-							packet after Marketing, the build packet after Build Plan, and the
-							full repo zip at Review.
+							You will unlock the {DESIGN_PACK_LABEL} after Design, the{" "}
+							{MARKETING_PACK_LABEL} after Marketing, the {BUILD_PACK_LABEL}{" "}
+							after Build Plan, and the {STARTER_SNAPSHOT_LABEL} at Review.
 						</p>
 						<Button asChild>
 							<Link

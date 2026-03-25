@@ -52,7 +52,7 @@ test.describe("member with access", () => {
 		await expect(page).toHaveURL(/\/review$/);
 		await expect(page.getByText("Review").first()).toBeVisible();
 		await expect(
-			page.getByRole("link", { name: "Download full repo snapshot" }),
+			page.getByRole("link", { name: "Download Starter Snapshot" }),
 		).toBeVisible();
 
 		await page.goto("/settings");

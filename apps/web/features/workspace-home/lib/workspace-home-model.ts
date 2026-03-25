@@ -84,14 +84,18 @@ export function buildWorkspaceHomeModel(
 			statusLabel: moduleFlags.course ? "Enabled" : "Starter mode",
 			...moduleCopy.course,
 		},
-		{
-			id: "starterRepo",
-			enabled: moduleFlags.starterRepo,
-			statusLabel: moduleFlags.starterRepo ? "Enabled" : "Disabled",
-			actionHref: moduleFlags.starterRepo ? routeConfig.settings : undefined,
-			actionLabel: moduleFlags.starterRepo ? "Open settings" : undefined,
-			...moduleCopy.starterRepo,
-		},
+		...(moduleFlags.starterRepo
+			? [
+					{
+						id: "starterRepo",
+						enabled: moduleFlags.starterRepo,
+						statusLabel: "Enabled",
+						actionHref: routeConfig.settings,
+						actionLabel: "Open settings",
+						...moduleCopy.starterRepo,
+					} satisfies WorkspaceHomeModuleState,
+				]
+			: []),
 		{
 			id: "codex",
 			enabled: moduleFlags.codex,
