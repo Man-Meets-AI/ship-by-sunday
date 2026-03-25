@@ -2,6 +2,10 @@
 
 ## recent
 
+- **2026-03-25 16:50 EDT** — Homepage hydration fix: moved homepage JSON-LD emission behind a feature-local markup wrapper so React no longer reconciles a literal `script` node, made `EncryptedText` server/client-stable by replacing the initial random scramble with a deterministic seed, added a unit regression for stable SSR markup, and rechecked homepage structured-data tests, app lint, and the live homepage console. No docs or changelog update needed for this internal bug fix.
+
+- **2026-03-25 16:48 EDT** — QA docs clarity pass: fixed the stale testing-doc link in `README.md`, clarified the QA control-plane docs plus agent runbook around `qa/personas.local.json` vs `QA_ENV_FILE` vs `PLAYWRIGHT_BASE_URL`, and added explicit hosted-production `qa:run-pack` examples to the local QA, deploy, and release workflow docs so post-deploy auth failures are diagnosed as env parity issues first.
+
 - **2026-03-25 15:33 EDT** — Public-story reframe: shipped the `Agent-Ready Packs` homepage rewrite, added the durability section and new pack-system SVGs, renamed protected review/download artifacts to `Design Pack` / `Marketing Pack` / `Build Pack` / `Prompt Pack` / `Starter Snapshot`, turned the legacy visible `starterRepo` path off by default, synced shipped docs plus root README/changelog, and re-ran root + package lint/format/test/build coverage. Only skipped lane: sandbox-auth E2E after the review CTA text update.
 
 - **2026-03-25 15:20 EDT** — Root deploy-fix follow-up: added `bunfig.toml` with `install.linker = "hoisted"` so GitHub Actions and Vercel stop using Bun's isolated symlink-heavy workspace layout during monorepo installs. This follows the earlier Vercel invalid-package failure after the repo-download trace shrink; next proof point is the rerun PR/preview on the existing deploy-fix branch.
