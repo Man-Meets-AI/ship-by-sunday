@@ -48,7 +48,6 @@ Important module flags:
 
 - `docs`
 - `course`
-- `starterRepo`
 - `codex`
 - `observability`
 
@@ -57,13 +56,13 @@ Current behavior:
 - if `docs` is off, docs links hide and `/docs` renders a disabled-state surface
 - the packet-first flow now uses `/start` as the first protected landing surface
 - `/mission`, `/lesson/[lessonKey]`, and `/artifacts` now act as compatibility redirects into the packet-first flow
-- if `starterRepo` is off, starter-repo cards disappear from the protected app
+- the legacy `starterRepo` module is now off by default, so starter-repo cards are hidden from the visible protected app unless someone explicitly re-enables that obsolete path
 
 These module gates sit above the existing auth, checkout, and access model. They do not replace it.
 
 The public homepage has a second layer of starter configuration inside the same file:
 
-- `starterConfig.homePage.sections` controls the fixed public section order: `hero`, `sprintPath`, `whatsInside`, `socialProof`, `faq`, `pricing`, and `footer`
+- `starterConfig.homePage.sections` controls the fixed public section order: `hero`, `sprintPath`, `whatsInside`, `durability`, `socialProof`, `faq`, `pricing`, and `footer`
 - `starterConfig.homePage.heroPrimaryCta` and `starterConfig.homePage.pricingPrimaryCta` decide whether those calls to action use checkout or a plain link target
 - `features/marketing/lib/home-page-render-model.ts` is the adapter that turns those starter defaults plus `features/marketing/content/home.ts` into the render contract that `features/marketing/components/home-page.tsx` uses
 

@@ -15,35 +15,40 @@ export const homePageContent = {
 	hero: {
 		docsLabel: marketingDisplayConfig.docsLabel,
 		loginLabel: marketingDisplayConfig.loginLabel,
-		headlineLead: "Go from app idea",
-		headlineTailPrefix: "to live v1 ",
-		headlineTailHover: "by Sunday",
-		body: `${productName} gives you one guided weekend sprint. Four blocks. One real outcome.`,
-		outcomesHeading: "You leave the weekend with",
+		headlineLead: "Turn one product idea",
+		headlineTailPrefix: "into ",
+		headlineTailHover: "Agent-Ready Packs",
+		body: `${productName} is an OpenAI-derived, OpenAI-aligned system that turns one product idea into Agent-Ready Packs for design, marketing, and build execution, then generates a Starter Snapshot.`,
+		outcomesHeading: "What you actually get",
 		outcomes: [
-			"A one-page product brief",
-			"A screen-by-screen build plan",
-			"A working first version",
-			"A live link you can share",
+			"A Design Pack for UI direction and constraints",
+			"A Marketing Pack for positioning and launch messaging",
+			"A Build Pack for milestones, validation, and handoff",
+			"A Prompt Pack for marketing, implementation, QA, and deploy",
+			"A Starter Snapshot review download",
 		],
 		primaryCta: marketingDisplayConfig.primaryCtaLabel,
 		eyebrow:
-			"One-time payment. Lifetime access. Start immediately after checkout.",
+			"One-time payment. Lifetime access. Start the product intake immediately after checkout.",
 		previewImageAlt: marketingDisplayConfig.previewImageAlt,
 	},
 	sprintPathSection: {
-		label: "Sprint Path",
-		titlePrefix: "Coding is not ",
-		titleHighlight: "the bottleneck.",
+		label: "System",
+		titlePrefix: "Agents need ",
+		titleHighlight: "durable context.",
 		intro:
-			"Most builders do not get stuck because they cannot code. They get stuck because product scope, design direction, execution order, and shipping decisions all break down at once.",
+			"Most builders do not stall because the model cannot code. They stall because product scope, design direction, marketing claims, and build decisions live in scattered tabs that go stale fast.",
 		supportingPoints: [
-			"We cover the full path: product thinking, design decisions, AI coding, and the final push to ship.",
-			"You get the starter template, exact agent instructions, and the subagents and skills to move faster without guessing.",
-			"Each block gives you a concrete output so you stop collecting ideas and start finishing the right version.",
+			"Ship by Sunday captures the core facts once, then compiles domain-specific packs for design, marketing, build execution, and prompting.",
+			"The packs are file-based and agent-readable, so you can reuse the same project context across tools instead of rewriting it every session.",
+			"The final Starter Snapshot gives you one review download to inspect before you hand the work to an agent or teammate.",
 		],
 		valueFrame:
-			"Think of it like a $2,500 product workshop, a build template, and a guided masterclass in product, design, and AI coding all in one.",
+			"This is a shipping system for builders using agents. The output is durable execution context, not more scattered notes and one-off prompts.",
+		imageLightSrc: "/agent-ready-packs-stack.svg",
+		imageDarkSrc: "/agent-ready-packs-stack-dark.svg",
+		imageAlt:
+			"Diagram showing a product definition turning into Design, Marketing, Build, and Prompt Packs plus a final Starter Snapshot",
 	},
 	socialProofSection: {
 		label: "Built by someone who ships",
@@ -88,8 +93,8 @@ export const homePageContent = {
 			},
 			{
 				value: "100s",
-				label: "Paid workshop members",
-				description: "Weekly sessions with builders worldwide",
+				label: "Builders coached",
+				description: "Across paid sessions and product work",
 			},
 		],
 	},
@@ -106,20 +111,20 @@ export const homePageContent = {
 			},
 			{
 				question: "What happens right after I pay?",
-				answer: `If you are not signed in yet, you will sign in first. After Stripe checkout, you will land on the success page while access finalizes. As soon as it is ready, you will be sent into the ${workspaceDisplayConfig.homeNoun} to start the sprint.`,
+				answer: `If you are not signed in yet, you will sign in first. After Stripe checkout, you will land on the success page while access finalizes. As soon as it is ready, you will be sent into the ${workspaceDisplayConfig.homeNoun} to start the product intake.`,
 			},
 			{
 				question: "Is this a coding course?",
-				answer: `It includes walkthroughs, but ${productName} is not just a video course. It is a guided workspace built to help you scope, design, build, and ship a real v1.`,
+				answer: `It includes walkthroughs, but ${productName} is not a course wrapper. It is a guided system that captures the right facts, compiles the packs, and helps you ship with better context.`,
 			},
 			{
 				question: "What if I already know a lot of this?",
-				answer: `Then the value is not more theory. The value is the structure. ${productName} gives you a clean sequence, concrete outputs, and a tighter path from idea to shipped version so you actually finish.`,
+				answer: `Then the value is not more theory. The value is reusable context. ${productName} gives you one durable source of truth, domain-specific packs, and a tighter path from idea to execution.`,
 			},
 			{
 				question: "What if I buy this and still do not finish?",
 				answer:
-					"The sprint is built around four blocks and concrete outputs so you keep moving. If you complete the CEO Block within 14 days and do not leave with a clear One-Page Product Brief and tighter MVP scope, email us and we will refund you.",
+					"The system is built to force clarity before code. If you complete the Product stage within 14 days and still do not leave with a clearer product definition and tighter v1 scope, email us and we will refund you.",
 			},
 			{
 				question: "What kind of app is a good fit for this?",
@@ -137,26 +142,31 @@ export const homePageContent = {
 			{
 				question: "Do I need to be good at design?",
 				answer:
-					"No. You need enough design direction to make a usable, coherent v1. This is not about becoming a professional designer in a weekend.",
+					"No. You need enough design direction to make a usable, coherent v1. The Design Pack is there to give you that direction without pretending you need to become a professional designer first.",
 			},
 			{
 				question: "Why does the workspace matter?",
-				answer: `Because scattered execution kills momentum. ${productName} keeps product thinking, design direction, and build execution in one place so you are not juggling random tabs and half-decisions.`,
+				answer: `Because scattered context kills momentum. ${productName} keeps product facts, pack generation, and review in one place so you are not juggling random tabs and half-decisions.`,
 			},
 			{
-				question: "What is the starter template?",
+				question: "What are Agent-Ready Packs?",
 				answer:
-					"It is a ready-to-use starting point inside the system that helps you skip blank-page paralysis and start moving immediately.",
+					"They are file-based packs for design, marketing, build execution, and prompting. Each pack gives an agent durable context in one domain instead of forcing you to restate the whole project every time.",
 			},
 			{
-				question: "What are the Codex instructions?",
+				question: "What is the Prompt Pack?",
 				answer:
-					"They are exact paste-ready instructions you can use to move through the design and build process faster without having to figure out every prompt from scratch.",
+					"It is the set of ready-to-run prompts for marketing, implementation, QA, and deploy. You can paste them directly into your agent workflow instead of building that prompt stack from scratch.",
+			},
+			{
+				question: "What is the Starter Snapshot?",
+				answer:
+					"It is the final review download. You get the compiled pack tree and the generated project snapshot in one bundle you can inspect, download, and hand off.",
 			},
 			{
 				question: "What do the walkthroughs actually show?",
 				answer:
-					"They show the full system in action on a real build, so you can see how the process works from start to finish instead of trying to piece it together yourself.",
+					"They show the full pack system in action on a real build, so you can see how the intake, pack generation, and execution flow work together from start to finish.",
 			},
 			{
 				question: "Do I have to use the same stack as the example build?",
@@ -167,65 +177,93 @@ export const homePageContent = {
 	},
 	whatsInsideSection: {
 		label: "What's inside",
-		title: "A workshop, a workspace, and a starter template.",
+		title: "One intake, four packs, and a final Starter Snapshot.",
 		intro:
-			"Three layers designed to get you from raw idea to live product without the usual scramble.",
+			"The system captures your product facts once, compiles the packs, and gives you a clean review download instead of another pile of disconnected notes.",
 		pillars: [
 			{
-				title: "29 guided lessons across 4 blocks",
-				highlightBefore: "Walk through ",
-				highlight: "29 guided lessons",
+				title: "One canonical product definition",
+				highlightBefore: "Capture ",
+				highlight: "the core facts once",
 				highlightAfter:
-					" organized into four progressive blocks: CEO, Design, Build, and Ship. Each block unlocks the next and ends with a concrete deliverable, not just another video to watch.",
+					" so your product summary, user, problem, scope, and outcome stop drifting across docs, prompts, and half-finished plans.",
 				supporting:
-					"Video walkthroughs, AI coach, checklists, and artifact capture at every step.",
+					"The packs compile from this shared source of truth instead of relying on scattered notes.",
 				imagePlaceholder: "/placeholder-workshop.svg",
-				imageAlt: "Workshop lesson interface",
+				imageAlt: "Product definition intake",
 			},
 			{
-				title: "Software-guided workspace with 30 modes",
-				highlightBefore: "Work inside a ",
-				highlight: "software-guided workspace",
+				title: "Four Agent-Ready Packs",
+				highlightBefore: "Compile ",
+				highlight: "Design, Marketing, Build, and Prompt Packs",
 				highlightAfter:
-					" with 30 interactive workbench modes: guided forms, scoring tables, collector boards, sketch uploads, brief assemblers, and deploy handoffs. Real-time progress tracking keeps you moving.",
+					" from the same product definition so each domain gets the context, constraints, and next actions it actually needs.",
 				supporting:
-					"Every deliverable is captured as an artifact. No more scattered docs and half-decisions.",
+					"Each pack is file-based, domain-specific, and ready to hand to an agent or teammate.",
 				imagePlaceholder: "/placeholder-workspace.svg",
-				imageAlt: "Workspace workbench interface",
+				imageAlt: "Agent-ready packs overview",
 			},
 			{
-				title: "Production-ready starter template",
-				highlightBefore: "Clone a ",
-				highlight: "production-ready template",
+				title: "Starter Snapshot review download",
+				highlightBefore: "Finish with a ",
+				highlight: "Starter Snapshot",
 				highlightAfter:
-					" wired with Next.js, Convex, Clerk, Stripe, and Vercel. Auth, database, payments, and deploy are already connected. Paste-ready Codex subagent instructions and skills handle the AI-assisted building.",
+					" that bundles the generated pack tree and project snapshot into one reviewable handoff you can inspect before execution.",
 				supporting:
-					"30+ pages of docs, GitHub starter repo with automated invite, and a 25-video PM bonus course included.",
+					"Walkthroughs and the PM bonus help you use the system well, but the deliverable is the compiled handoff itself.",
 				imagePlaceholder: "/placeholder-template.svg",
-				imageAlt: "Starter template code and stack",
+				imageAlt: "Starter Snapshot download preview",
 			},
 		],
 	},
+	durabilitySection: {
+		label: "Durability",
+		title: "Agents will change. Your packs still work.",
+		intro:
+			"The goal is not to win one prompt session. The goal is to keep the project context reusable as models, tools, and teammates change around you.",
+		items: [
+			{
+				title: "Stable facts first",
+				description:
+					"The system compiles from one shared product definition, so new tools inherit the same user, problem, scope, and outcome constraints instead of starting from a blank chat.",
+			},
+			{
+				title: "File-based by design",
+				description:
+					"Each pack is real documentation, checklists, plans, and prompts you can reopen, diff, and hand to another agent later. The value survives beyond one session.",
+			},
+			{
+				title: "One review handoff",
+				description:
+					"The Starter Snapshot gives you a final downloadable handoff that is easier to trust, review, and reuse than scattered prompt history.",
+			},
+		],
+		closing:
+			"When better models arrive, you rerun the system with better tools. You do not restart the project from zero.",
+	},
 	pricingSection: {
 		label: productName,
-		titleLead: "Go from idea to v1",
-		titleAccent: "this weekend",
-		intro: "A guided weekend sprint to scope, build, and ship your v1.",
+		titleLead: "Turn one idea into",
+		titleAccent: "Agent-Ready Packs",
+		intro:
+			"One payment for the intake, the compilation system, the walkthroughs, and the final Starter Snapshot.",
 		priceDisplay: productConfig.priceDisplay,
 		eyebrow: "One-time payment. Lifetime access. No subscription.",
 		ctaTitle: "Get instant access",
-		trustLine: `After checkout, your access finishes syncing and you go straight into the ${workspaceDisplayConfig.homeNoun} to start.`,
+		trustLine: `After checkout, your access finishes syncing and you go straight into the ${workspaceDisplayConfig.homeNoun} to start the intake and compile your packs.`,
 		includes: [
-			`${productName} guided workspace`,
-			"4-block guided sprint",
-			"Starter template",
-			"Exact paste-ready Codex instructions",
-			"30+ walkthroughs showing the full system in action",
+			"Guided intake and review workspace",
+			"Design Pack",
+			"Marketing Pack",
+			"Build Pack",
+			"Prompt Pack",
+			"Starter Snapshot download",
+			"Walkthroughs showing the full system in action",
 			`25-video ${bonusName} bonus`,
 			"Lifetime access",
 		],
 		guarantee:
-			"Complete the CEO Block within 14 days. If you do not leave with a clear One-Page Product Brief and a tighter MVP scope, email us and we will refund you.",
+			"Complete the Product stage within 14 days. If you do not leave with a clearer product definition and tighter v1 scope, email us and we will refund you.",
 	},
 	footerWordmark: productName,
 } as const;

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import {
+	getPublicPackLabelForStage,
 	getPacketStageDefinition,
 	type PacketStageStatus,
 } from "@packet-compiler";
@@ -18,6 +19,13 @@ export function PacketStageSidebar({
 	downloadHref?: string;
 	nextStageId?: "design" | "marketing" | "build-plan" | "review";
 }) {
+	const downloadLabel =
+		stageStatus.stageId === "design" ||
+		stageStatus.stageId === "marketing" ||
+		stageStatus.stageId === "build-plan"
+			? `Download ${getPublicPackLabelForStage(stageStatus.stageId)}`
+			: "Download pack";
+
 	return (
 		<div className="space-y-4">
 			<Card>
@@ -43,7 +51,7 @@ export function PacketStageSidebar({
 			</Card>
 			{downloadHref ? (
 				<Button asChild className="w-full">
-					<Link href={downloadHref}>Download packet</Link>
+					<Link href={downloadHref}>{downloadLabel}</Link>
 				</Button>
 			) : null}
 			{nextStageId ? (

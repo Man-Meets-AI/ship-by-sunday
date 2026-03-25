@@ -44,16 +44,16 @@ export function SprintPathUnifiedSection({
 			</div>
 			<div className="relative lg:justify-self-end">
 				<Image
-					src="/4-block-system.svg"
-					alt="The 4-Block System — CEO, Design, Build, Ship"
+					src={sprintPathSection.imageLightSrc}
+					alt={sprintPathSection.imageAlt}
 					width={604}
 					height={682}
 					sizes="(min-width: 1024px) 28rem, 100vw"
 					className="mx-auto block w-full max-w-md dark:hidden"
 				/>
 				<Image
-					src="/4-block-dark-mode.svg"
-					alt="The 4-Block System — CEO, Design, Build, Ship"
+					src={sprintPathSection.imageDarkSrc}
+					alt={sprintPathSection.imageAlt}
 					width={604}
 					height={682}
 					sizes="(min-width: 1024px) 28rem, 100vw"

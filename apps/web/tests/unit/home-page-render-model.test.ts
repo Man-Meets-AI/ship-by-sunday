@@ -15,6 +15,7 @@ describe("home page render model", () => {
 		expect(renderModel.sectionOrder).toEqual(homePageSectionOrder);
 		expect(renderModel.hero.isEnabled).toBe(true);
 		expect(renderModel.hero.primaryCtaTarget).toEqual({ kind: "checkout" });
+		expect(renderModel.durability.isEnabled).toBe(true);
 		expect(renderModel.socialProof.isEnabled).toBe(true);
 		expect(renderModel.socialProof.githubActivityUsername).toBe("ParkerRex");
 		expect(renderModel.socialProof.variant.kind).toBe("founder");
@@ -30,6 +31,7 @@ describe("home page render model", () => {
 			...starterConfig.homePage,
 			sections: {
 				...starterConfig.homePage.sections,
+				durability: false,
 				socialProof: false,
 			},
 			heroPrimaryCta: {
@@ -43,6 +45,7 @@ describe("home page render model", () => {
 		} satisfies StarterHomePageConfig;
 		const renderModel = createHomePageRenderModel({ homePageConfig });
 
+		expect(renderModel.durability.isEnabled).toBe(false);
 		expect(renderModel.socialProof.isEnabled).toBe(false);
 		expect(renderModel.socialProof.githubActivityUsername).toBeNull();
 		expect(renderModel.hero.primaryCtaTarget).toEqual({

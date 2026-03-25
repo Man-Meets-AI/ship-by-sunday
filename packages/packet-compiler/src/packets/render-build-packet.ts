@@ -4,6 +4,7 @@ import {
 	renderSection,
 	renderTemplateAppendix,
 } from "./render-helpers";
+import { BUILD_PACK_LABEL } from "../public-artifact-contract";
 import type { OpenAiPacketTemplates, RenderedPacketFile } from "./render-types";
 
 export function renderBuildPacket(
@@ -11,7 +12,7 @@ export function renderBuildPacket(
 	templates: OpenAiPacketTemplates,
 ): RenderedPacketFile[] {
 	const buildSummary = [
-		`# ${facts.product_name} Build Packet`,
+		`# ${facts.product_name} ${BUILD_PACK_LABEL}`,
 		"",
 		renderSection("Objective", facts.objective),
 		"",

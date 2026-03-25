@@ -5,7 +5,9 @@ test("landing page renders the main offer CTA", async ({ request }) => {
 	const html = await response.text();
 
 	expect(response.ok()).toBe(true);
-	expect(html).toContain("Go from app idea");
+	expect(html).toContain("Turn one product idea");
+	expect(html).toContain("Agent-Ready Packs");
+	expect(html).toContain("Agents will change. Your packs still work.");
 	expect(html).toContain("Get instant access");
 	expect(html).toContain('id="system"');
 	expect(html).toContain('id="pricing"');

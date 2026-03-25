@@ -9,7 +9,7 @@ export const assetPaths = {
 	androidChrome192: "/android-chrome-192x192.png",
 	androidChrome512: "/android-chrome-512x512.png",
 	founderProof: "/founder-proof.jpg",
-	heroPreview: "/4-block-system.svg",
+	heroPreview: "/agent-ready-packs-preview.svg",
 } as const;
 
 export const brandColorConfig = {
@@ -45,6 +45,7 @@ export const homePageSectionOrder = [
 	"hero",
 	"sprintPath",
 	"whatsInside",
+	"durability",
 	"socialProof",
 	"faq",
 	"pricing",
@@ -73,6 +74,7 @@ export const starterHomePageConfig = {
 		hero: true,
 		sprintPath: true,
 		whatsInside: true,
+		durability: true,
 		socialProof: true,
 		faq: true,
 		pricing: true,
@@ -92,9 +94,9 @@ export const starterConfig = {
 	brand: {
 		name: "Ship by Sunday",
 		shortMark: "MMAI",
-		promise: "Go from idea to v1 this weekend",
+		promise: "Turn one product idea into agent-ready packs",
 		metadataDescription:
-			"Go from idea to v1 this weekend with an action-first system for engineers who want to stop circling unfinished ideas.",
+			"Ship by Sunday is an OpenAI-derived system that turns one product idea into Agent-Ready Packs for design, marketing, and build execution, then generates a Starter Snapshot.",
 		images: {
 			founderProof: assetPaths.founderProof,
 			heroPreview: assetPaths.heroPreview,
@@ -114,7 +116,7 @@ export const starterConfig = {
 		docsLabel: "Docs",
 		loginLabel: "Log in",
 		primaryCtaLabel: "Get access",
-		previewImageAlt: "Starter preview",
+		previewImageAlt: "Ship by Sunday system preview",
 	},
 	workspace: {
 		homeLabel: "Workspace",
@@ -133,7 +135,7 @@ export const starterConfig = {
 	modules: {
 		docs: true,
 		course: true,
-		starterRepo: true,
+		starterRepo: false,
 		observability: true,
 		codex: true,
 	},
