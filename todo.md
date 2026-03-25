@@ -2,6 +2,8 @@
 
 ## recent
 
+- **2026-03-25 15:20 EDT** — Root deploy-fix follow-up: added `bunfig.toml` with `install.linker = "hoisted"` so GitHub Actions and Vercel stop using Bun's isolated symlink-heavy workspace layout during monorepo installs. This follows the earlier Vercel invalid-package failure after the repo-download trace shrink; next proof point is the rerun PR/preview on the existing deploy-fix branch.
+
 - **2026-03-25 15:03 EDT** — Deploy-debug pass: confirmed `main` was protected so local commits never reached a production branch directly, traced the stale custom domain to an old `man-meets-ai-simple` production alias, identified the failing `mma-shipbysunday` `main` deployment as a Vercel serverless-size rejection on `/api/download/repo`, trimmed the repo-download trace boundary to the files the snapshot generator actually reads, and opened PR `#3` to rerun CI plus Vercel through the protected release path. Local verification: focused tracing tests, packet-compiler repo-generation test, `bun run build`, and post-build trace audit showing the repo-download trace down to about `125.87 MB`.
 
 - **2026-03-25 11:32 EDT** — Docs sync for the shipped release workflow: updated `README.md`, `docs/release-workflow.md`, and `CHANGELOG.md` to match the live `dev -> main` branch model, the guarded Convex production workflow, the removal of the impossible `main` approval rule, and the now-live `CONVEX_PRODUCTION_DEPLOY_ENABLED` pause switch.
