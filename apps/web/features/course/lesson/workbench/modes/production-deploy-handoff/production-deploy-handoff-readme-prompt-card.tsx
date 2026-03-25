@@ -40,9 +40,9 @@ export function ProductionDeployHandoffReadmePromptCard({
 			<CardHeader className="space-y-1">
 				<CardTitle className="text-base">README deployment prompt</CardTitle>
 				<CardDescription>
-					Copy this into your agent so it reads the README deploy steps—then paste
-					credentials only in the right place (env / dashboard), not in public
-					channels.
+					Copy this into your agent so it reads the README deploy steps—then
+					paste credentials only in the right place (env / dashboard), not in
+					public channels.
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-3">

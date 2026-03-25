@@ -70,7 +70,9 @@ export default defineSchema({
 		productKey: v.string(),
 		schemaVersion: v.number(),
 		facts: v.record(v.string(), projectDefinitionFactValueValidator),
-		placeholdersInUse: v.array(v.union(v.literal("domain"), v.literal("support_email"))),
+		placeholdersInUse: v.array(
+			v.union(v.literal("domain"), v.literal("support_email")),
+		),
 		createdAt: v.number(),
 		updatedAt: v.number(),
 	}).index("by_clerk_user_id_and_product_key", ["clerkUserId", "productKey"]),

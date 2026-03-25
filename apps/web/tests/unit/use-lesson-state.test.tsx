@@ -114,10 +114,7 @@ describe("useLessonState", () => {
 		expect(result.current.fieldValuesReady).toBe(true);
 
 		act(() => {
-			result.current.setFieldValue(
-				"app_idea",
-				"Ship the onboarding flow",
-			);
+			result.current.setFieldValue("app_idea", "Ship the onboarding flow");
 		});
 
 		expect(result.current.saveStatus).toBe("idle");

@@ -35,17 +35,19 @@ export function PacketStartPage({
 							canonical facts that change the generated packet and starter repo.
 						</p>
 						<p>
-							You will unlock the design packet after Design, the marketing packet
-							after Marketing, the build packet after Build Plan, and the full repo
-							zip at Review.
+							You will unlock the design packet after Design, the marketing
+							packet after Marketing, the build packet after Build Plan, and the
+							full repo zip at Review.
 						</p>
 						<Button asChild>
 							<Link
-								href={getPacketStageDefinition(
-									initialWorkspaceState.projectDefinition
-										? initialWorkspaceState.firstIncompleteStageId
-										: "product",
-								).route}
+								href={
+									getPacketStageDefinition(
+										initialWorkspaceState.projectDefinition
+											? initialWorkspaceState.firstIncompleteStageId
+											: "product",
+									).route
+								}
 							>
 								Open the packet flow
 							</Link>

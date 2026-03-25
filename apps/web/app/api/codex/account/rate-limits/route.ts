@@ -14,7 +14,9 @@ import {
 export const runtime = "nodejs";
 
 async function importCodexAppServer() {
-	return import(/* turbopackIgnore: true */ "@/features/codex/server/app-server");
+	return import(
+		/* turbopackIgnore: true */ "@/features/codex/server/app-server"
+	);
 }
 
 export async function GET(request: Request) {

@@ -1,8 +1,4 @@
-import {
-	internalMutation,
-	internalQuery,
-	query,
-} from "./_generated/server";
+import { internalMutation, internalQuery, query } from "./_generated/server";
 import {
 	getProductAccessDebugArgs,
 	getProductAccessDebugHandler,

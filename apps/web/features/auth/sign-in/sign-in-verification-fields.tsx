@@ -36,7 +36,9 @@ export function SignInVerificationFields({
 	return (
 		<FieldGroup>
 			<Field data-invalid={Boolean(verificationError) || undefined}>
-				<FieldLabel htmlFor="sign-in-verification-code">{copy.label}</FieldLabel>
+				<FieldLabel htmlFor="sign-in-verification-code">
+					{copy.label}
+				</FieldLabel>
 				<FieldDescription>{copy.description}</FieldDescription>
 				{copy.usesOtp ? (
 					<InputOTP

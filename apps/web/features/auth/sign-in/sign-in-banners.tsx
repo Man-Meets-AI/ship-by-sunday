@@ -24,8 +24,8 @@ export function SignInBanners({
 					<AlertCircleIcon aria-hidden />
 					<AlertTitle>Google sign-in is for purchased accounts.</AlertTitle>
 					<AlertDescription>
-						Buy access first, then return here with the Google account tied to your
-						purchase. <a href={pricingHref}>See pricing</a>.
+						Buy access first, then return here with the Google account tied to
+						your purchase. <a href={pricingHref}>See pricing</a>.
 					</AlertDescription>
 				</Alert>
 			) : null}

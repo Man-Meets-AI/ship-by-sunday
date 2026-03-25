@@ -7,7 +7,8 @@ export const shouldRunSandboxAuth =
 
 export const sharedPassword =
 	process.env.E2E_SHARED_PASSWORD ?? "SBS_QA_Codex_8Yv2!mN4#rL7";
-export const nonEntitledEmail = process.env.E2E_NON_ENTITLED_EMAIL ?? "Test@test.com";
+export const nonEntitledEmail =
+	process.env.E2E_NON_ENTITLED_EMAIL ?? "Test@test.com";
 export const entitledEmail =
 	process.env.E2E_ENTITLED_EMAIL ?? "test-entitled@test.com";
 

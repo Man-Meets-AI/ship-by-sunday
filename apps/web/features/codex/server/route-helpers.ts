@@ -92,11 +92,19 @@ export function getApiAuthErrorResponse(
 	}
 
 	if (error.message === API_UNAUTHORIZED_ERROR) {
-		return jsonWithRequestId({ error: copy.unauthorized }, { status: 401 }, requestId);
+		return jsonWithRequestId(
+			{ error: copy.unauthorized },
+			{ status: 401 },
+			requestId,
+		);
 	}
 
 	if (error.message === API_FORBIDDEN_ERROR) {
-		return jsonWithRequestId({ error: copy.forbidden }, { status: 403 }, requestId);
+		return jsonWithRequestId(
+			{ error: copy.forbidden },
+			{ status: 403 },
+			requestId,
+		);
 	}
 
 	if (error.message === "CODEX_APP_SERVER_DISABLED") {

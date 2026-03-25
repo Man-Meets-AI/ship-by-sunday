@@ -200,8 +200,7 @@ export async function getRepoLessons(repoRoot = process.cwd()) {
 
 export function extractLessonMediaMap(source) {
 	const match =
-		source.match(/String\.raw`([\s\S]*)`;/) ??
-		source.match(/`([\s\S]*)`;/);
+		source.match(/String\.raw`([\s\S]*)`;/) ?? source.match(/`([\s\S]*)`;/);
 	if (!match) {
 		throw createError(
 			"Could not parse features/course/lesson/model/media.ts JSON payload.",

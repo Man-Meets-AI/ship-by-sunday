@@ -45,11 +45,10 @@ describe("POST /api/stripe/checkout", () => {
 		getStripeDashboardUrlMock.mockReset();
 		getStripeProductDashboardUrlMock.mockReset();
 		getStripeModeLabelMock.mockReturnValue("test");
-		getStripeDashboardUrlMock.mockImplementation(
-			(path?: string) =>
-				path
-					? `https://dashboard.stripe.com/test/${path}`
-					: "https://dashboard.stripe.com/test",
+		getStripeDashboardUrlMock.mockImplementation((path?: string) =>
+			path
+				? `https://dashboard.stripe.com/test/${path}`
+				: "https://dashboard.stripe.com/test",
 		);
 		getStripeProductDashboardUrlMock.mockReturnValue(
 			"https://dashboard.stripe.com/test/products",

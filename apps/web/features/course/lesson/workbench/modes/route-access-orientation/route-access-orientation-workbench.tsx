@@ -2,12 +2,7 @@
 
 import { useEffect, useMemo, useRef } from "react";
 
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
 

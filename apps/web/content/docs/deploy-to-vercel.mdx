@@ -31,10 +31,17 @@ Prepare production values in your hosting dashboards and provider dashboards. Mi
 ## Vercel checklist
 
 - deploy as a normal Next.js app
+- keep the project linked to `ParkerRex/mma-shipbysunday`
+- keep Vercel's production branch on `main`
+- let Preview continue to handle unassigned git branches such as `dev` and feature branches
 - keep the package manager pinned to the repo version
 - use real production Clerk env values
 - use real production Stripe live keys
 - if the app uses observability or any other Convex HTTP actions, set `NEXT_PUBLIC_CONVEX_SITE_URL` to the matching `.convex.site` host
+
+Do not make Vercel responsible for production Convex deploys in this repo. The frontend should build on Vercel, but Convex production promotion now happens from GitHub Actions on `main` through `.github/workflows/convex-production-deploy.yml`.
+
+`CONVEX_DEPLOY_KEY` belongs in GitHub repository secrets for that workflow, not in the Vercel project.
 
 ## Convex checklist
 
@@ -50,7 +57,7 @@ Do not leave Convex pointed at:
 
 ## Post-deploy verification
 
-After deploy, confirm all of this with a real test flow:
+After a release merge to `main`, confirm all of this with a real test flow:
 
 1. signed-out visitor hits a protected route and is pushed to sign-in
 2. signed-in user without access reaches `/start` and sees inline recovery
@@ -59,9 +66,11 @@ After deploy, confirm all of this with a real test flow:
 5. newly granted user reaches `/start`
 6. signed Clerk and Vercel observability webhooks persist incidents and deliver Telegram packets
 7. the public incident status route can `ack` a live incident and keep repeat delivery suppressed
+8. Vercel attributes the production web deploy to `main`
+9. GitHub Actions reports a matching `Convex Production Deploy` run for the same release
 
 ## What success looks like
 
-Production is healthy when payment, access, route protection, and observability all agree on the same user and the same environment values.
+Production is healthy when payment, access, route protection, observability, and deployment provenance all agree on the same release. In this repo that means the web app came from Vercel `main`, the backend came from the Convex production workflow on `main`, and both use the same production env values.
 
 If payment completes but access does not, debug env parity before you rewrite application code.

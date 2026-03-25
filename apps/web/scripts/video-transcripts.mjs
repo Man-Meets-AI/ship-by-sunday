@@ -1,11 +1,16 @@
-import { parseTranscriptArgs, runTranscriptBatch } from "./lib/video-transcript-pipeline.mjs";
+import {
+	parseTranscriptArgs,
+	runTranscriptBatch,
+} from "./lib/video-transcript-pipeline.mjs";
 
 async function main() {
 	const options = parseTranscriptArgs(process.argv.slice(2));
 	const result = await runTranscriptBatch(options);
 
 	if (result.items.length === 0) {
-		console.log(`No transcript candidate videos found in ${options.inputRoot}.`);
+		console.log(
+			`No transcript candidate videos found in ${options.inputRoot}.`,
+		);
 		console.log(`Manifest: ${result.manifestPath}`);
 		return;
 	}

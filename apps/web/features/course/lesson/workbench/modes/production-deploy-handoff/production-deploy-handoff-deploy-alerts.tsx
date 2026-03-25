@@ -19,8 +19,8 @@ export function ProductionDeployHandoffDeployAlerts() {
 			<Alert>
 				<AlertTitle>Stripe: product and price in production</AlertTitle>
 				<AlertDescription>
-					After switching Stripe to <strong>Production</strong>, confirm your live
-					product and price match the dev/sandbox setup before you rely on
+					After switching Stripe to <strong>Production</strong>, confirm your
+					live product and price match the dev/sandbox setup before you rely on
 					checkout or billing.
 				</AlertDescription>
 			</Alert>

@@ -1,4 +1,7 @@
-import { getLessonByKey, getLessonHref } from "../../features/course/lesson/model/manifest";
+import {
+	getLessonByKey,
+	getLessonHref,
+} from "../../features/course/lesson/model/manifest";
 import {
 	COURSE_SLUG,
 	getOrderedBlocks,
@@ -26,7 +29,9 @@ function getLessonStateTimestamp(state: LessonStateDoc) {
 export async function getMissionStateHandler(ctx: CourseQueryCtx) {
 	const viewerState = await loadViewerCourseState(ctx);
 	const lessons = getStudentFacingLessons().map((lesson) => {
-		const lessonState = viewerState.lessonStateByLessonKey.get(lesson.lessonKey);
+		const lessonState = viewerState.lessonStateByLessonKey.get(
+			lesson.lessonKey,
+		);
 		const lessonStateIsCompatible = isCompatibleLessonState(
 			lesson,
 			lessonState,
@@ -98,7 +103,9 @@ export async function getResumeDestinationHandler(ctx: CourseQueryCtx) {
 	const viewerState = await loadViewerCourseState(ctx);
 
 	const latestAccessibleLessonState = [...viewerState.lessonStates]
-		.filter((state) => Boolean(state.lessonKey && getLessonByKey(state.lessonKey)))
+		.filter((state) =>
+			Boolean(state.lessonKey && getLessonByKey(state.lessonKey)),
+		)
 		.filter(
 			(state): state is LessonStateDoc & { lessonKey: string } =>
 				typeof state.lessonKey === "string" &&

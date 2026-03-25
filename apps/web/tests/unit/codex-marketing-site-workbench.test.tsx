@@ -47,7 +47,9 @@ describe("codex marketing site workbench (lesson 3.5)", () => {
 		expect(screen.getByText(/skip plan mode for this lesson/i)).toBeTruthy();
 		expect(screen.getByRole("button", { name: /^copy prompt$/i })).toBeTruthy();
 		expect(screen.getByRole("tab", { name: /^eyebrow$/i })).toBeTruthy();
-		expect(screen.getByRole("tab", { name: /faq \/ comparison/i })).toBeTruthy();
+		expect(
+			screen.getByRole("tab", { name: /faq \/ comparison/i }),
+		).toBeTruthy();
 		expect(screen.getByText(/next lesson/i)).toBeTruthy();
 	});
 

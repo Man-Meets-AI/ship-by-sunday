@@ -5,7 +5,7 @@ import {
 	type LessonConfig,
 	type LessonHandoff,
 	lessonRegistry,
-  lessonKeyIndex,
+	lessonKeyIndex,
 	type ObjectiveMode,
 	type WorkbenchSection,
 } from "../manifest";

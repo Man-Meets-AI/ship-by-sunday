@@ -357,5 +357,4 @@ describe("convex/observability", () => {
 			product: "ship-by-sunday",
 		});
 	});
-
 });

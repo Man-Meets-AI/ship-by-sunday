@@ -46,21 +46,21 @@ python3 execution/jump_cut_vad.py input.mp4 output.mp4 \
 
 ## CLI Arguments
 
-| Argument | Default | Description |
-|----------|---------|-------------|
-| `input` | required | Input video file path |
-| `output` | required | Output video file path |
-| `--min-silence` | 0.5 | Minimum silence gap to cut (seconds) |
-| `--min-speech` | 0.25 | Minimum speech duration to keep (seconds) |
-| `--padding` | 100 | Padding around speech in milliseconds |
-| `--merge-gap` | 0.3 | Merge segments closer than this (seconds) |
-| `--keep-start` | true | Preserve intro (start from 0:00) |
-| `--no-keep-start` | - | Allow cutting silence at the beginning |
-| `--enhance-audio` | false | Apply audio enhancement chain |
-| `--detect-restarts` | false | Detect "cut cut" and remove mistakes |
-| `--restart-phrase` | "cut cut" | Custom restart trigger phrase |
-| `--whisper-model` | base | Whisper model for restart detection |
-| `--apply-lut` | none | Path to LUT file for color grading |
+| Argument            | Default   | Description                               |
+| ------------------- | --------- | ----------------------------------------- |
+| `input`             | required  | Input video file path                     |
+| `output`            | required  | Output video file path                    |
+| `--min-silence`     | 0.5       | Minimum silence gap to cut (seconds)      |
+| `--min-speech`      | 0.25      | Minimum speech duration to keep (seconds) |
+| `--padding`         | 100       | Padding around speech in milliseconds     |
+| `--merge-gap`       | 0.3       | Merge segments closer than this (seconds) |
+| `--keep-start`      | true      | Preserve intro (start from 0:00)          |
+| `--no-keep-start`   | -         | Allow cutting silence at the beginning    |
+| `--enhance-audio`   | false     | Apply audio enhancement chain             |
+| `--detect-restarts` | false     | Detect "cut cut" and remove mistakes      |
+| `--restart-phrase`  | "cut cut" | Custom restart trigger phrase             |
+| `--whisper-model`   | base      | Whisper model for restart detection       |
+| `--apply-lut`       | none      | Path to LUT file for color grading        |
 
 ---
 
@@ -70,16 +70,17 @@ python3 execution/jump_cut_vad.py input.mp4 output.mp4 \
 
 Uses a neural network trained specifically for voice detection. Much better than FFmpeg's volume-based silence detection:
 
-| Silero VAD | FFmpeg silencedetect |
-|------------|---------------------|
-| Detects actual speech | Detects volume drops |
-| Ignores breathing | Cuts on breathing pauses |
+| Silero VAD                  | FFmpeg silencedetect        |
+| --------------------------- | --------------------------- |
+| Detects actual speech       | Detects volume drops        |
+| Ignores breathing           | Cuts on breathing pauses    |
 | Works with background noise | Fails with background noise |
-| Handles quiet speech | Misses quiet speech |
+| Handles quiet speech        | Misses quiet speech         |
 
 ### 2. "Cut Cut" Restart Detection
 
 Say "cut cut" during recording to mark a mistake. The script will:
+
 1. Detect the phrase using Whisper transcription
 2. Remove the segment containing "cut cut"
 3. Remove the **previous** segment (where the mistake is)
@@ -130,20 +131,20 @@ python3 execution/jump_cut_vad.py input.mp4 output.mp4 \
 
 ### Silence Detection
 
-| Goal | Parameter | Value |
-|------|-----------|-------|
-| More aggressive cuts | `--min-silence` | 0.3-0.4 |
-| Preserve natural pauses | `--min-silence` | 0.8-1.0 |
-| Keep very short utterances | `--min-speech` | 0.1-0.2 |
-| Ignore brief sounds | `--min-speech` | 0.4-0.5 |
+| Goal                       | Parameter       | Value   |
+| -------------------------- | --------------- | ------- |
+| More aggressive cuts       | `--min-silence` | 0.3-0.4 |
+| Preserve natural pauses    | `--min-silence` | 0.8-1.0 |
+| Keep very short utterances | `--min-speech`  | 0.1-0.2 |
+| Ignore brief sounds        | `--min-speech`  | 0.4-0.5 |
 
 ### Padding
 
-| Goal | `--padding` value |
-|------|------------------|
-| Tight cuts | 50-80 |
-| Natural feel | 100-150 |
-| Extra breathing room | 200-300 |
+| Goal                 | `--padding` value |
+| -------------------- | ----------------- |
+| Tight cuts           | 50-80             |
+| Natural feel         | 100-150           |
+| Extra breathing room | 200-300           |
 
 ---
 
@@ -158,6 +159,7 @@ python3 execution/jump_cut_vad.py input.mp4 output.mp4 \
 5. Stop when done
 
 **The script automatically removes:**
+
 - The segment containing "cut cut"
 - The previous segment (your mistake)
 
@@ -221,15 +223,15 @@ Silero VAD is downloaded automatically from torch.hub on first run.
 
 ## vs. simple_video_edit.py
 
-| Feature | jump_cut_vad.py | simple_video_edit.py |
-|---------|-----------------|---------------------|
-| Silence detection | Neural VAD | FFmpeg volume-based |
-| Accuracy | High | Medium |
-| Restart detection | Yes ("cut cut") | No |
-| Audio enhancement | Full chain | Basic loudnorm |
-| LUT color grading | Yes | No |
-| Whisper transcription | Optional | Built-in |
-| YouTube upload | No | Yes (Auphonic) |
+| Feature               | jump_cut_vad.py | simple_video_edit.py |
+| --------------------- | --------------- | -------------------- |
+| Silence detection     | Neural VAD      | FFmpeg volume-based  |
+| Accuracy              | High            | Medium               |
+| Restart detection     | Yes ("cut cut") | No                   |
+| Audio enhancement     | Full chain      | Basic loudnorm       |
+| LUT color grading     | Yes             | No                   |
+| Whisper transcription | Optional        | Built-in             |
+| YouTube upload        | No              | Yes (Auphonic)       |
 
 **Use `jump_cut_vad.py` for:** Better silence detection, restart phrase support, audio enhancement, color grading.
 
@@ -240,24 +242,30 @@ Silero VAD is downloaded automatically from torch.hub on first run.
 ## Troubleshooting
 
 ### "No speech detected"
+
 - Check that audio track exists in the video
 - Try lowering `--min-speech` to 0.1
 
 ### Cuts feel too aggressive
+
 - Increase `--padding` (e.g., 150-200)
 - Increase `--min-silence` (e.g., 0.8)
 
 ### Breathing sounds being cut
+
 VAD should handle this automatically. If not:
+
 - Increase `--merge-gap` to 0.5
 - Increase `--padding` slightly
 
 ### Restart detection not finding "cut cut"
+
 - Ensure you speak the phrase clearly
 - Try `--whisper-model medium` for better accuracy
 - Check that Whisper is installed: `pip install whisper`
 
 ### LUT not applying
+
 - Check file path is correct
 - Ensure format is supported (.cube, .3dl, .dat, .m3d, .csp)
 - Check FFmpeg has lut3d filter: `ffmpeg -filters | grep lut3d`
@@ -270,16 +278,18 @@ VAD should handle this automatically. If not:
 
 The script automatically uses **hardware encoding** (`h264_videotoolbox`) on macOS when available:
 
-| Encoding | Speed | File Size | When Used |
-|----------|-------|-----------|-----------|
-| Hardware (h264_videotoolbox) | 5-10x faster | ~10-20% larger | macOS with Apple Silicon/Intel |
-| Software (libx264) | Baseline | Baseline | Fallback if hardware unavailable |
+| Encoding                     | Speed        | File Size      | When Used                        |
+| ---------------------------- | ------------ | -------------- | -------------------------------- |
+| Hardware (h264_videotoolbox) | 5-10x faster | ~10-20% larger | macOS with Apple Silicon/Intel   |
+| Software (libx264)           | Baseline     | Baseline       | Fallback if hardware unavailable |
 
 **Benchmark (90-minute 1080p video):**
+
 - Software encoding: ~20-25 minutes
 - Hardware encoding: ~2-4 minutes
 
 The script checks for hardware encoder availability at startup and caches the result. You'll see either:
+
 - `🚀 Hardware encoding enabled (h264_videotoolbox)`
 - `💻 Using software encoding (libx264)`
 

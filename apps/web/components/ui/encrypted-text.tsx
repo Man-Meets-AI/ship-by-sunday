@@ -131,9 +131,7 @@ export const EncryptedText: React.FC<EncryptedTextProps> = ({
 				return (
 					<span
 						key={`${index}-${isRevealed}`}
-						className={cn(
-							isRevealed ? revealedClassName : encryptedClassName,
-						)}
+						className={cn(isRevealed ? revealedClassName : encryptedClassName)}
 					>
 						{displayChar}
 					</span>

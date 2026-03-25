@@ -28,8 +28,8 @@ export function WelcomeOrientationTooling() {
 					<span className="font-medium text-foreground">
 						as of {WELCOME_RECOMMENDED_STACK_DATE_LABEL}
 					</span>
-					. When vendors ship breaking changes, we update the sprint materials—not
-					your discipline.
+					. When vendors ship breaking changes, we update the sprint
+					materials—not your discipline.
 				</AlertDescription>
 			</Alert>
 			<Accordion type="single" collapsible className="w-full">

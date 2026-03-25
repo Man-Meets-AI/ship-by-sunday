@@ -22,7 +22,10 @@ type IncidentStatusRouteContext = {
 	}>;
 };
 
-export async function POST(request: Request, context: IncidentStatusRouteContext) {
+export async function POST(
+	request: Request,
+	context: IncidentStatusRouteContext,
+) {
 	const requestId = getRequestIdFromRequest(request);
 
 	if (!serverEnv.OBSERVABILITY_INCIDENT_CONTROL_TOKEN) {

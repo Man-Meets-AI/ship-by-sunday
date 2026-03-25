@@ -7,11 +7,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-	Field,
-	FieldContent,
-	FieldLabel,
-} from "@/components/ui/field";
+import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
 import { assert } from "@/features/course/lesson/lib/assert";
 import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
 
@@ -35,10 +31,7 @@ export function RouteAccessInspectionChecklist({
 		return null;
 	}
 
-	assert(
-		field.options,
-		`Checklist field "${field.id}" is missing options.`,
-	);
+	assert(field.options, `Checklist field "${field.id}" is missing options.`);
 
 	const checklistOptions = field.options;
 	const checklistItems = normalizeChecklistValue(value, checklistOptions);

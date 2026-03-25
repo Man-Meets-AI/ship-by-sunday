@@ -27,11 +27,16 @@ export function PacketReviewPage({
 				/>
 				<div className="grid gap-6 xl:grid-cols-3">
 					{initialWorkspaceState.stageStatuses
-						.filter((stage) => stage.stageId !== "start" && stage.stageId !== "review")
+						.filter(
+							(stage) =>
+								stage.stageId !== "start" && stage.stageId !== "review",
+						)
 						.map((stage) => (
 							<Card key={stage.stageId}>
 								<CardHeader>
-									<CardTitle>{getPacketStageDefinition(stage.stageId).label}</CardTitle>
+									<CardTitle>
+										{getPacketStageDefinition(stage.stageId).label}
+									</CardTitle>
 								</CardHeader>
 								<CardContent className="space-y-3 text-sm text-muted-foreground">
 									<p>

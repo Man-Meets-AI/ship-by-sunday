@@ -68,12 +68,8 @@ describe("SkillRail", () => {
 		expect(markup).toContain(">Next<");
 		expect(markup).toContain("Carry forward");
 		expect(markup).toContain('aria-current="step"');
-		expect(markup).toContain(
-			'aria-label="Lesson 1.1. Start. Current lesson."',
-		);
-		expect(markup).toContain(
-			'aria-label="Lesson 1.2. Carry forward. Locked."',
-		);
+		expect(markup).toContain('aria-label="Lesson 1.1. Start. Current lesson."');
+		expect(markup).toContain('aria-label="Lesson 1.2. Carry forward. Locked."');
 	});
 
 	it("highlights completion on the final lesson without a next-unlock target", () => {
@@ -86,7 +82,12 @@ describe("SkillRail", () => {
 					nextLessonId: null,
 				}}
 				lessons={[
-					createRailLesson("product-review", "4.0", "Final wrap", "in_progress"),
+					createRailLesson(
+						"product-review",
+						"4.0",
+						"Final wrap",
+						"in_progress",
+					),
 				]}
 			/>,
 		);
@@ -260,12 +261,7 @@ describe("SkillRail", () => {
 						"Problem",
 						"in_progress",
 					),
-					createRailLesson(
-						"how-the-sprint-works",
-						"1.2",
-						"User",
-						"available",
-					),
+					createRailLesson("how-the-sprint-works", "1.2", "User", "available"),
 				]}
 			/>,
 		);
@@ -350,9 +346,7 @@ describe("SkillRail", () => {
 		expect(markup).toContain(
 			'aria-label="Lesson 1.1. Problem. Completed lesson."',
 		);
-		expect(markup).toContain(
-			'aria-label="Lesson 1.2. User. Current lesson."',
-		);
+		expect(markup).toContain('aria-label="Lesson 1.2. User. Current lesson."');
 		expect(markup).toContain(
 			'aria-label="Lesson 1.3. Outcome. Available lesson."',
 		);

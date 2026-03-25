@@ -57,7 +57,9 @@ export function BrandKitPreviewCard({
 			: `#${accent}`
 		: "—";
 	const iconSrc = previewSrc(fieldValues[BRAND_KIT_ICON_UPLOAD_FIELD_ID]);
-	const wordmarkSrc = previewSrc(fieldValues[BRAND_KIT_WORDMARK_UPLOAD_FIELD_ID]);
+	const wordmarkSrc = previewSrc(
+		fieldValues[BRAND_KIT_WORDMARK_UPLOAD_FIELD_ID],
+	);
 
 	return (
 		<Card className={className}>

@@ -41,22 +41,22 @@ The effect creates a subtle "floating card" look where the video appears to rota
 
 ## CLI Arguments
 
-| Argument | Default | Description |
-|----------|---------|-------------|
-| `input` | required | Input video file path |
-| `output` | required | Output video file path |
-| `--start` | 0 | Start time in source video (seconds) |
-| `--source-duration` | auto | Duration of source to use (auto = output-duration × speed) |
-| `--output-duration` | 1.0 | Final output duration (seconds) |
-| `--swivel-start` | 3.5 | Starting Y-axis rotation (degrees, positive = left side closer) |
-| `--swivel-end` | -3.5 | Ending Y-axis rotation (degrees, negative = right side closer) |
-| `--tilt-start` | 1.7 | Starting X-axis rotation (degrees, positive = top tilted back) |
-| `--tilt-end` | 1.7 | Ending X-axis rotation (constant = no tilt animation) |
-| `--perspective` | 1000 | 3D perspective depth (lower = more dramatic) |
-| `--speed` | 7 | Playback speed multiplier (7 = 700% speed) |
-| `--easing` | linear | Animation easing: `linear`, `easeOut`, `easeInOut`, `spring` |
-| `--bg-color` | #2d3436 | Background color (hex) when video edges are visible |
-| `--bg-image` | none | Background image path (overrides --bg-color) |
+| Argument            | Default  | Description                                                     |
+| ------------------- | -------- | --------------------------------------------------------------- |
+| `input`             | required | Input video file path                                           |
+| `output`            | required | Output video file path                                          |
+| `--start`           | 0        | Start time in source video (seconds)                            |
+| `--source-duration` | auto     | Duration of source to use (auto = output-duration × speed)      |
+| `--output-duration` | 1.0      | Final output duration (seconds)                                 |
+| `--swivel-start`    | 3.5      | Starting Y-axis rotation (degrees, positive = left side closer) |
+| `--swivel-end`      | -3.5     | Ending Y-axis rotation (degrees, negative = right side closer)  |
+| `--tilt-start`      | 1.7      | Starting X-axis rotation (degrees, positive = top tilted back)  |
+| `--tilt-end`        | 1.7      | Ending X-axis rotation (constant = no tilt animation)           |
+| `--perspective`     | 1000     | 3D perspective depth (lower = more dramatic)                    |
+| `--speed`           | 7        | Playback speed multiplier (7 = 700% speed)                      |
+| `--easing`          | linear   | Animation easing: `linear`, `easeOut`, `easeInOut`, `spring`    |
+| `--bg-color`        | #2d3436  | Background color (hex) when video edges are visible             |
+| `--bg-image`        | none     | Background image path (overrides --bg-color)                    |
 
 ---
 
@@ -74,27 +74,29 @@ EASING: linear           # Smooth, predictable motion
 
 ### Parameter Tuning Guide
 
-| Effect | Parameter | Range | Notes |
-|--------|-----------|-------|-------|
-| More dramatic rotation | `--swivel-start/end` | ±5-15° | Keep symmetric (e.g., 10 → -10) |
-| Subtle rotation | `--swivel-start/end` | ±2-4° | Current default is 3.5° |
-| Constant tilt | `--tilt-start` = `--tilt-end` | 1-3° | No tilt animation |
-| Tilt animation | Different start/end | 0-5° | Tilts during playback |
-| Faster preview | `--speed` | 10-15 | For longer source content |
-| Slower, readable | `--speed` | 3-5 | For shorter clips |
-| Bouncy feel | `--easing spring` | - | Overshoots then settles |
-| Smooth deceleration | `--easing easeOut` | - | Fast start, slow end |
+| Effect                 | Parameter                     | Range  | Notes                           |
+| ---------------------- | ----------------------------- | ------ | ------------------------------- |
+| More dramatic rotation | `--swivel-start/end`          | ±5-15° | Keep symmetric (e.g., 10 → -10) |
+| Subtle rotation        | `--swivel-start/end`          | ±2-4°  | Current default is 3.5°         |
+| Constant tilt          | `--tilt-start` = `--tilt-end` | 1-3°   | No tilt animation               |
+| Tilt animation         | Different start/end           | 0-5°   | Tilts during playback           |
+| Faster preview         | `--speed`                     | 10-15  | For longer source content       |
+| Slower, readable       | `--speed`                     | 3-5    | For shorter clips               |
+| Bouncy feel            | `--easing spring`             | -      | Overshoots then settles         |
+| Smooth deceleration    | `--easing easeOut`            | -      | Fast start, slow end            |
 
 ---
 
 ## Background Options
 
 ### Solid Color (default)
+
 ```bash
 python3 execution/pan_3d_transition.py input.mp4 output.mp4 --bg-color "#1a1a2e"
 ```
 
 ### Background Image
+
 ```bash
 python3 execution/pan_3d_transition.py input.mp4 output.mp4 --bg-image .tmp/bg.png
 ```
@@ -105,14 +107,15 @@ The background is visible at the edges when the video rotates in 3D space. Use a
 
 ## Performance
 
-| Resolution | Output Duration | Render Time |
-|------------|-----------------|-------------|
-| 4K 60fps | 1 second | ~15-20s |
-| 4K 60fps | 5 seconds | ~80s |
-| 1080p 30fps | 1 second | ~5-8s |
-| 1080p 30fps | 5 seconds | ~25-30s |
+| Resolution  | Output Duration | Render Time |
+| ----------- | --------------- | ----------- |
+| 4K 60fps    | 1 second        | ~15-20s     |
+| 4K 60fps    | 5 seconds       | ~80s        |
+| 1080p 30fps | 1 second        | ~5-8s       |
+| 1080p 30fps | 5 seconds       | ~25-30s     |
 
 **Bottlenecks:**
+
 1. FFmpeg frame extraction (disk I/O + decoding)
 2. Remotion rendering (3D transforms on each frame)
 
@@ -134,7 +137,7 @@ The background is visible at the edges when the video rotates in 3D space. Use a
 ### CSS Transform Order
 
 ```css
-transform: translateY(0%) rotateY(Xdeg) rotateX(Ydeg) scale(0.985)
+transform: translateY(0%) rotateY(Xdeg) rotateX(Ydeg) scale(0.985);
 ```
 
 - `translateY`: Vertical offset (currently 0)
@@ -144,23 +147,25 @@ transform: translateY(0%) rotateY(Xdeg) rotateX(Ydeg) scale(0.985)
 
 ### Easing Functions
 
-| Type | Behavior |
-|------|----------|
-| `linear` | Constant speed throughout |
-| `easeOut` | Fast start, gradual slowdown |
+| Type        | Behavior                          |
+| ----------- | --------------------------------- |
+| `linear`    | Constant speed throughout         |
+| `easeOut`   | Fast start, gradual slowdown      |
 | `easeInOut` | Slow start, fast middle, slow end |
-| `spring` | Overshoots target, bounces back |
+| `spring`    | Overshoots target, bounces back   |
 
 ---
 
 ## Dependencies
 
 ### System Requirements
+
 ```bash
 brew install ffmpeg node  # macOS
 ```
 
 ### Remotion Setup (one-time)
+
 ```bash
 cd execution/video_effects
 npm install
@@ -207,23 +212,29 @@ python3 execution/pan_3d_transition.py \
 ## Troubleshooting
 
 ### Remotion render fails
+
 ```
 Render error: Cannot find module 'remotion'
 ```
+
 **Fix:** Run `npm install` in `execution/video_effects/`
 
 ### Video looks too zoomed out
+
 The zoom is hardcoded at 1.5% (scale 0.985). To change, edit `pan_3d_transition.py` line ~196:
+
 ```python
 const scaleVal = 0.985; // Change this value
 ```
 
 ### Background image not showing
+
 - Ensure image path is correct and file exists
 - Supported formats: PNG, JPG, JPEG
 - Image is copied to Remotion's public folder during render
 
 ### Render is slow
+
 - Lower resolution source = faster render
 - Shorter output duration = fewer frames
 - The 4K 60fps source extracts 2100 frames for a 5s transition at 7x speed
@@ -258,21 +269,23 @@ python3 execution/insert_3d_transition.py input.mp4 output.mp4 \
 
 **CLI Arguments:**
 
-| Argument | Default | Description |
-|----------|---------|-------------|
-| `--insert-at` | 3.0 | Where to insert teaser in timeline (seconds) |
-| `--duration` | 5.0 | Teaser duration (seconds) |
-| `--teaser-start` | 60.0 | Where to start sourcing teaser content (seconds) |
-| `--bg-color` | #2d3436 | Background color (hex) |
-| `--bg-image` | none | Background image path |
+| Argument         | Default | Description                                      |
+| ---------------- | ------- | ------------------------------------------------ |
+| `--insert-at`    | 3.0     | Where to insert teaser in timeline (seconds)     |
+| `--duration`     | 5.0     | Teaser duration (seconds)                        |
+| `--teaser-start` | 60.0    | Where to start sourcing teaser content (seconds) |
+| `--bg-color`     | #2d3436 | Background color (hex)                           |
+| `--bg-image`     | none    | Background image path                            |
 
 **Timeline Result:**
+
 ```
 Video: [0-3s original] [3-8s swivel teaser] [8s+ original]
 Audio: [original audio plays continuously throughout]
 ```
 
 **Example:** For a 6-minute video:
+
 - Teaser content: 60s → 360s (300 seconds)
 - Teaser duration: 5 seconds
 - Playback speed: 60x (automatically calculated)

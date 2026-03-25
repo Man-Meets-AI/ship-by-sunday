@@ -29,7 +29,9 @@ describe("repo map orientation workbench (lesson 3.2)", () => {
 		expect(screen.getByRole("tab", { name: /project map/i })).toBeTruthy();
 		expect(screen.getByText(/Secrets stay private/i)).toBeTruthy();
 		expect(
-			screen.getByRole("link", { name: /tool overview video/i }).getAttribute("href"),
+			screen
+				.getByRole("link", { name: /tool overview video/i })
+				.getAttribute("href"),
 		).toContain("youtube.com");
 		expect(
 			screen

@@ -20,8 +20,6 @@ export function SkillRailShadcnStep({
 	isCompleting,
 	isUnlocking,
 	isCurrent,
-	stepNumber,
-	totalSteps,
 	onNavigate,
 }: {
 	lesson: SkillRailLesson;
@@ -29,8 +27,6 @@ export function SkillRailShadcnStep({
 	isCompleting: boolean;
 	isUnlocking: boolean;
 	isCurrent: boolean;
-	stepNumber: number;
-	totalSteps: number;
 	onNavigate: (href: string) => void;
 }) {
 	const label = getSkillRailStepAriaLabel(lesson, state);

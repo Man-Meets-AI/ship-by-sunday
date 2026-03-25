@@ -18,7 +18,8 @@ function getPageCopy(step: SignInStep) {
 			};
 		case "reset_request":
 			return {
-				description: "We’ll email a reset code so you can get back into your account.",
+				description:
+					"We’ll email a reset code so you can get back into your account.",
 				title: "Reset password",
 			};
 		case "reset_submit":

@@ -1,6 +1,4 @@
-import {
-	isReferenceGalleryValue,
-} from "@/features/course/lesson/model/reference-gallery";
+import { isReferenceGalleryValue } from "@/features/course/lesson/model/reference-gallery";
 import type { ArtifactPreview } from "@/features/course/lesson/model/registry";
 
 import { hasUploadGalleryValue } from "./artifact-format";

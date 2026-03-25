@@ -1,5 +1,12 @@
 import { spawn } from "node:child_process";
-import { access, mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
+import {
+	access,
+	mkdir,
+	readdir,
+	readFile,
+	stat,
+	writeFile,
+} from "node:fs/promises";
 import path from "node:path";
 
 import {
@@ -87,7 +94,9 @@ function tokenize(value) {
 }
 
 function parseDurationLabelSeconds(value) {
-	const source = String(value ?? "").trim().toLowerCase();
+	const source = String(value ?? "")
+		.trim()
+		.toLowerCase();
 	if (!source) {
 		return null;
 	}
@@ -129,7 +138,9 @@ function scoreTitleMatch(videoSlug, lessonTitle) {
 	}
 
 	const lessonTokenSet = new Set(lessonTokens);
-	const overlapCount = videoTokens.filter((token) => lessonTokenSet.has(token)).length;
+	const overlapCount = videoTokens.filter((token) =>
+		lessonTokenSet.has(token),
+	).length;
 	if (overlapCount === 0) {
 		return { score: 0, reasons: [] };
 	}
@@ -137,7 +148,9 @@ function scoreTitleMatch(videoSlug, lessonTitle) {
 	const precision = overlapCount / videoTokens.length;
 	const recall = overlapCount / lessonTokens.length;
 	const f1 =
-		precision + recall > 0 ? (2 * precision * recall) / (precision + recall) : 0;
+		precision + recall > 0
+			? (2 * precision * recall) / (precision + recall)
+			: 0;
 
 	let score = f1 + precision * 0.45;
 	const reasons = ["title_overlap"];
@@ -346,7 +359,10 @@ function normalizeLessonIds(value, lessonCatalog) {
 }
 
 function buildVideoMatch(video, lessonCatalog, remapConfig) {
-	const manualLessonIds = normalizeLessonIds(remapConfig[video.stem], lessonCatalog);
+	const manualLessonIds = normalizeLessonIds(
+		remapConfig[video.stem],
+		lessonCatalog,
+	);
 	if (manualLessonIds.length > 0) {
 		return {
 			lessonIds: manualLessonIds,
@@ -362,7 +378,10 @@ function buildVideoMatch(video, lessonCatalog, remapConfig) {
 	const candidates = lessonCatalog
 		.map((lesson) => scoreLessonCandidate(video, lesson))
 		.filter((candidate) => candidate.score > 0)
-		.sort((left, right) => right.score - left.score || compareLessonIds(left.id, right.id))
+		.sort(
+			(left, right) =>
+				right.score - left.score || compareLessonIds(left.id, right.id),
+		)
 		.slice(0, 5);
 
 	const [primary, secondary] = candidates;
@@ -614,7 +633,9 @@ export function parseTranscriptArgs(argv) {
 	return options;
 }
 
-export async function ensureTranscriptPythonReady(pythonBin = VIDEO_CUT_PYTHON_PATH) {
+export async function ensureTranscriptPythonReady(
+	pythonBin = VIDEO_CUT_PYTHON_PATH,
+) {
 	try {
 		await access(pythonBin);
 	} catch {
@@ -719,9 +740,7 @@ export async function runTranscriptBatch(rawOptions) {
 		outputRoot: normalizePath(
 			rawOptions.outputRoot ?? DEFAULT_TRANSCRIPTS_DIRECTORY,
 		),
-		remapFile: normalizePath(
-			rawOptions.remapFile ?? DEFAULT_REMAP_FILE_PATH,
-		),
+		remapFile: normalizePath(rawOptions.remapFile ?? DEFAULT_REMAP_FILE_PATH),
 		pythonBin: normalizePath(rawOptions.pythonBin ?? VIDEO_CUT_PYTHON_PATH),
 	};
 
@@ -763,69 +782,73 @@ export async function runTranscriptBatch(rawOptions) {
 	}
 
 	let cursor = 0;
-	const workers = Array.from({ length: Math.min(options.workers, videos.length) }, () =>
-		(async () => {
-			while (cursor < videos.length) {
-				const currentIndex = cursor;
-				cursor += 1;
-				const video = videos[currentIndex];
-				const startedAt = new Date().toISOString();
+	const workers = Array.from(
+		{ length: Math.min(options.workers, videos.length) },
+		() =>
+			(async () => {
+				while (cursor < videos.length) {
+					const currentIndex = cursor;
+					cursor += 1;
+					const video = videos[currentIndex];
+					const startedAt = new Date().toISOString();
 
-				try {
-					const transcriptResult = options.dryRun
-						? {
-							status: "planned",
-							outputDirectory: video.outputDirectory,
-							expectedFiles: video.expectedFiles,
-							logPath: path.join(video.outputDirectory, "whisper.log"),
-						}
-						: await transcribeVideo(video, {
-							...options,
-							pythonBin,
-						});
+					try {
+						const transcriptResult = options.dryRun
+							? {
+									status: "planned",
+									outputDirectory: video.outputDirectory,
+									expectedFiles: video.expectedFiles,
+									logPath: path.join(video.outputDirectory, "whisper.log"),
+								}
+							: await transcribeVideo(video, {
+									...options,
+									pythonBin,
+								});
 
-					const item = {
-						...video,
-						status: transcriptResult.status,
-						startedAt,
-						finishedAt: new Date().toISOString(),
-						files: transcriptResult.expectedFiles,
-						logPath: transcriptResult.logPath,
-					};
+						const item = {
+							...video,
+							status: transcriptResult.status,
+							startedAt,
+							finishedAt: new Date().toISOString(),
+							files: transcriptResult.expectedFiles,
+							logPath: transcriptResult.logPath,
+						};
 
-					results.push(item);
-					await writeVideoManifest(video.outputDirectory, item);
-					await writeManifest();
-				} catch (error) {
-					const item = {
-						...video,
-						status: "failed",
-						startedAt,
-						finishedAt: new Date().toISOString(),
-						files: video.expectedFiles,
-						error:
-							error instanceof Error
-								? {
-										message: error.message,
-										details: error.details ?? null,
-									}
-								: {
-										message: String(error),
-										details: null,
-									},
-					};
+						results.push(item);
+						await writeVideoManifest(video.outputDirectory, item);
+						await writeManifest();
+					} catch (error) {
+						const item = {
+							...video,
+							status: "failed",
+							startedAt,
+							finishedAt: new Date().toISOString(),
+							files: video.expectedFiles,
+							error:
+								error instanceof Error
+									? {
+											message: error.message,
+											details: error.details ?? null,
+										}
+									: {
+											message: String(error),
+											details: null,
+										},
+						};
 
-					results.push(item);
-					await writeVideoManifest(video.outputDirectory, item);
-					await writeManifest();
+						results.push(item);
+						await writeVideoManifest(video.outputDirectory, item);
+						await writeManifest();
+					}
 				}
-			}
-		})(),
+			})(),
 	);
 
 	await Promise.all(workers);
 
-	const completed = results.filter((item) => item.status === "completed").length;
+	const completed = results.filter(
+		(item) => item.status === "completed",
+	).length;
 	const skipped = results.filter((item) => item.status === "skipped").length;
 	const failed = results.filter((item) => item.status === "failed").length;
 	const planned = results.filter((item) => item.status === "planned").length;

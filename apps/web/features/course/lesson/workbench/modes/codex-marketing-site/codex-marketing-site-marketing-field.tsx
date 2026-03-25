@@ -74,10 +74,7 @@ export function CodexMarketingSiteMarketingField({
 	}
 
 	if (field.kind === "checklist") {
-		assert(
-			field.options,
-			`Checklist field "${field.id}" is missing options.`,
-		);
+		assert(field.options, `Checklist field "${field.id}" is missing options.`);
 		const checklistOptions = field.options;
 		const checklistItems = normalizeChecklistValue(value, checklistOptions);
 

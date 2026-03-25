@@ -48,7 +48,9 @@ describe("core UX plan flow workbench (lesson 3.10)", () => {
 		expect(screen.getByText("Commands used in this lesson")).toBeTruthy();
 		expect(screen.getByText(CORE_UX_PLAN_PLANNING_TRIGGER)).toBeTruthy();
 		expect(screen.getByText(CORE_UX_PLAN_FALLBACK_PROMPT)).toBeTruthy();
-		expect(screen.getByRole("tab", { name: /Instructor example/i })).toBeTruthy();
+		expect(
+			screen.getByRole("tab", { name: /Instructor example/i }),
+		).toBeTruthy();
 		expect(screen.getByRole("tab", { name: /Your version/i })).toBeTruthy();
 		expect(screen.getByText("Recommendations are a draft")).toBeTruthy();
 		expect(screen.getByText("What the plan should include")).toBeTruthy();

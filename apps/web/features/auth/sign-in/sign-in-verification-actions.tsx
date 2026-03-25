@@ -2,9 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 
-import {
-	getAlternateMethodLabel,
-} from "@/features/auth/sign-in/sign-in-verification-copy";
+import { getAlternateMethodLabel } from "@/features/auth/sign-in/sign-in-verification-copy";
 import type { VerificationMethod } from "@/features/auth/sign-in/types";
 
 type SignInVerificationActionsProps = {

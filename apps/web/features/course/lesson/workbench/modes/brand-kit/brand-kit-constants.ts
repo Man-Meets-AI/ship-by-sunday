@@ -7,7 +7,8 @@ export const BRAND_KIT_DOMAIN_FIELD_ID = "brand_kit_domain";
 export const BRAND_KIT_PRIMARY_HEX_FIELD_ID = "brand_kit_primary_hex";
 export const BRAND_KIT_ACCENT_HEX_FIELD_ID = "brand_kit_accent_hex";
 export const BRAND_KIT_NAMING_FIELD_ID = "brand_kit_naming_exercise";
-export const BRAND_KIT_ARTIFACT_CHECKLIST_FIELD_ID = "brand_kit_artifact_checklist";
+export const BRAND_KIT_ARTIFACT_CHECKLIST_FIELD_ID =
+	"brand_kit_artifact_checklist";
 export const BRAND_KIT_ICON_UPLOAD_FIELD_ID = "brand_kit_icon_upload";
 export const BRAND_KIT_WORDMARK_UPLOAD_FIELD_ID = "brand_kit_wordmark_upload";
 
