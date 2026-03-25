@@ -31,11 +31,11 @@ Then paste the prompt below and set the target plan path.
 ```text
 Read the repo root `AGENTS.md` first and follow it.
 
-Read `PLANS.md` next and use it as the contract for how ExecPlans are authored and maintained.
+Read `docs/codex/PLANS.md` next and use it as the contract for how ExecPlans are authored and maintained.
 
 Read this target ExecPlan carefully:
 <target_execplan_path>
-.codex/plans/example-initiative.md
+docs/codex/example-initiative.md
 </target_execplan_path>
 
 You are in execution mode. Implement the plan.

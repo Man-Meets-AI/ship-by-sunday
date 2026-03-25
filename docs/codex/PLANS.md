@@ -4,11 +4,11 @@ This file defines the repository contract for an execution plan, referred to her
 
 Treat the reader of an ExecPlan as a complete beginner to this repository. They have only the current working tree and the single ExecPlan file you provide. There is no memory of prior plans and no external context.
 
-In this repository, store per-initiative ExecPlans in `.codex/plans/`.
+In this repository, store per-initiative ExecPlans in `docs/codex/`.
 
 ## How to use ExecPlans and PLANS.md
 
-When authoring an ExecPlan, follow `PLANS.md` to the letter. If it is not in your context, refresh your memory by reading the entire file. Be thorough in reading and re-reading the relevant source material before freezing the plan. Start from the required structure and flesh it out as you do your research.
+When authoring an ExecPlan, follow `docs/codex/PLANS.md` to the letter. If it is not in your context, refresh your memory by reading the entire file. Be thorough in reading and re-reading the relevant source material before freezing the plan. Start from the required structure and flesh it out as you do your research.
 
 When implementing an ExecPlan, do not ask for "next steps" if the plan already defines them. Proceed to the next milestone or the next smallest validatable slice inside that milestone. Keep all living sections up to date at every stopping point so it is always possible to resume from the ExecPlan alone.
 
@@ -68,7 +68,7 @@ Each ExecPlan should follow this structure in order:
 
 1. `# <Short action-oriented title>`
 2. One short paragraph stating that the document is a living execution plan
-3. One sentence referencing `PLANS.md` from the repository root and stating that the ExecPlan must be maintained in accordance with it
+3. One sentence referencing `docs/codex/PLANS.md` and stating that the ExecPlan must be maintained in accordance with it
 4. `## Purpose / Big Picture`
 5. `## Progress`
 6. `## Surprises & Discoveries`
