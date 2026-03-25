@@ -2,6 +2,8 @@
 
 ## recent
 
+- **2026-03-25 15:03 EDT** — Deploy-debug pass: confirmed `main` was protected so local commits never reached a production branch directly, traced the stale custom domain to an old `man-meets-ai-simple` production alias, identified the failing `mma-shipbysunday` `main` deployment as a Vercel serverless-size rejection on `/api/download/repo`, trimmed the repo-download trace boundary to the files the snapshot generator actually reads, and opened PR `#3` to rerun CI plus Vercel through the protected release path. Local verification: focused tracing tests, packet-compiler repo-generation test, `bun run build`, and post-build trace audit showing the repo-download trace down to about `125.87 MB`.
+
 - **2026-03-25 11:32 EDT** — Docs sync for the shipped release workflow: updated `README.md`, `docs/release-workflow.md`, and `CHANGELOG.md` to match the live `dev -> main` branch model, the guarded Convex production workflow, the removal of the impossible `main` approval rule, and the now-live `CONVEX_PRODUCTION_DEPLOY_ENABLED` pause switch.
 
 - **2026-03-25 11:28 EDT** — Homepage dev-runtime fix: made `EncryptedText` deterministic across server/client to remove the social-proof hydration mismatch, bumped `apps/web` from Next `16.2.0` to `16.2.1`, and rechecked the homepage browser console plus `bun run build`. JSON-LD `<script>` stayed in place because the official Next JSON-LD guide still recommends a native script tag.
