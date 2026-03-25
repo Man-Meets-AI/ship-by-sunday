@@ -251,6 +251,6 @@ Lesson modules still own lesson-specific content and workbench definitions, but 
 - Contributor guide: [CONTRIBUTING.md](CONTRIBUTING.md)
 - Release workflow: [docs/release-workflow.md](docs/release-workflow.md)
 - Architecture: [docs/dev/architecture.md](docs/dev/architecture.md)
-- Internal launch operations: [docs/internal/README.md](docs/internal/README.md)
+- Changelog: [CHANGELOG.md](CHANGELOG.md)
 
-If you are new to the repo, start with `README.md`, then `CONTRIBUTING.md`, then `docs/README.md`. The public builder docs live at `/docs` and are backed by `apps/web/content/docs`, while `docs/internal/` stays focused on launch ops and internal workstreams.
+If you are new to the repo, start with `README.md`, then `CONTRIBUTING.md`, then `docs/release-workflow.md` if you are operating shared branches or production. The public builder docs live at `/docs` and are backed by `apps/web/content/docs`.

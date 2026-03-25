@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-03-25
+
+### Changed
+
+- Established the `dev -> main` production release workflow: `dev` now acts as the shared integration branch, `main` is the protected production branch, Vercel production tracks `main`, and the root/docs guidance now explains the real promotion path instead of a local-shell-first deploy habit.
+- Added `.github/workflows/convex-production-deploy.yml` so Convex production deploys are controlled from GitHub on `main`, with an explicit rollout guard, a manual dry-run path, and a repository variable switch (`CONVEX_PRODUCTION_DEPLOY_ENABLED`) that can pause or resume automatic production deploys.
+- Hardened CI to match the release workflow by giving the static job safe build-time placeholder env values, fixing Playwright browser smoke so it can boot without a real hosted Convex URL in CI, and adding focused observability coverage tests so `bun run check` now passes before release promotion.
+
 ## 2026-03-24
 
 ### Changed
