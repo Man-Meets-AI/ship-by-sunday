@@ -95,7 +95,7 @@ export function getCheckoutViewModel(
 							`Use ${workspaceOpenLabel} if you want to retry the ${workspaceNoun} gate now.`,
 						],
 				primaryActionLabel: workspaceOpenLabel,
-				primaryActionHref: routeConfig.mission,
+				primaryActionHref: routeConfig.start,
 				primaryActionBody: isAccessReady
 					? `Your access is ready. Open the ${workspaceNoun} now if you do not want to wait for the redirect.`
 					: `If the handoff already finished in the background, this will take you into the ${workspaceNoun}. Otherwise it will re-run the ${workspaceNoun} gate.`,
@@ -176,7 +176,7 @@ export function getCheckoutViewModel(
 					`${workspaceOpenLabel} only after the correct account is attached.`,
 				],
 				primaryActionLabel: workspaceOpenLabel,
-				primaryActionHref: routeConfig.mission,
+				primaryActionHref: routeConfig.start,
 				primaryActionBody: `If the handoff already finished in the background, this will take you into the ${workspaceNoun}. Otherwise it will re-run the ${workspaceNoun} gate.`,
 				secondaryActionBody: `Use ${workspaceOpenLabel} after switching accounts to retry the ${workspaceNoun} gate.`,
 			};
@@ -214,7 +214,7 @@ export function getCheckoutViewModel(
 					"Do not retry checkout unless Stripe shows the payment failed.",
 				],
 				primaryActionLabel: workspaceOpenLabel,
-				primaryActionHref: routeConfig.mission,
+				primaryActionHref: routeConfig.start,
 				primaryActionBody: `If the handoff already finished in the background, this will take you into the ${workspaceNoun}. Otherwise it will re-run the ${workspaceNoun} gate.`,
 				secondaryActionBody: `Use ${workspaceOpenLabel} once payment settles to retry the ${workspaceNoun} gate.`,
 			};
@@ -252,7 +252,7 @@ export function getCheckoutViewModel(
 					"Keep the success URL intact when testing the live handoff.",
 				],
 				primaryActionLabel: workspaceOpenLabel,
-				primaryActionHref: routeConfig.mission,
+				primaryActionHref: routeConfig.start,
 				primaryActionBody: `If the handoff already finished in the background, this will take you into the ${workspaceNoun}. Otherwise it will re-run the ${workspaceNoun} gate.`,
 				secondaryActionBody: `Use ${workspaceOpenLabel} to retry the ${workspaceNoun} gate if payment was already confirmed.`,
 			};
@@ -290,7 +290,7 @@ export function getCheckoutViewModel(
 					"Keep the same browser session for the cleanest handoff.",
 				],
 				primaryActionLabel: workspaceOpenLabel,
-				primaryActionHref: routeConfig.mission,
+				primaryActionHref: routeConfig.start,
 				primaryActionBody: `If the handoff already finished in the background, this will take you into the ${workspaceNoun}. Otherwise it will re-run the ${workspaceNoun} gate.`,
 				secondaryActionBody: `Use ${workspaceOpenLabel} to retry the ${workspaceNoun} gate if access should already be live.`,
 			};

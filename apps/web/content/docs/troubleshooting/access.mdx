@@ -51,7 +51,7 @@ Fix it by:
 
 Do not assume this is a Stripe bug first.
 
-## Symptom: a user with granted access still cannot reach `/mission`
+## Symptom: a user with granted access still cannot reach `/start`
 
 Check these in order:
 
@@ -68,12 +68,12 @@ For the local granted-access QA user:
 bun run clerk:test-user:prepare:entitled
 ```
 
-If the granted-access test user still cannot reach `/mission`, stop guessing and confirm the access row plus auth template path.
+If the granted-access test user still cannot reach `/start`, stop guessing and confirm the access row plus auth template path.
 
 ## What success looks like
 
 Access is healthy when:
 
-- users without access reach `/mission` and see inline recovery
-- users with granted access reach `/mission`
+- users without access reach `/start` and see inline recovery
+- users with granted access reach `/start`
 - a newly paid user leaves `/checkout/success` and reaches the protected workspace without manual intervention

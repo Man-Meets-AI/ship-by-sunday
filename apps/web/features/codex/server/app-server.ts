@@ -214,8 +214,13 @@ async function getCodexUserHome(clerkUserId: string) {
 		.slice(0, limitConfig.codexUserStateHashLength);
 	const configuredRoot = process.env.CODEX_APP_SERVER_HOME_ROOT;
 	const dir = configuredRoot
-		? path.join(configuredRoot, hash)
-		: path.join(homedir(), `.${productConfig.appId}`, "codex-user-state", hash);
+		? path.join(/* turbopackIgnore: true */ configuredRoot, hash)
+		: path.join(
+				/* turbopackIgnore: true */ homedir(),
+				`.${productConfig.appId}`,
+				"codex-user-state",
+				hash,
+			);
 	await mkdir(dir, { recursive: true });
 	return dir;
 }

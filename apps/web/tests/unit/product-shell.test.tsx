@@ -15,6 +15,8 @@ const missionState = {
 			lessons: [
 				{
 					id: "1.1",
+					lessonKey: "1.1",
+					displayLabel: "1.1",
 					title: "Start With the Problem",
 					shortTitle: "Problem",
 					status: "completed" as const,
@@ -23,6 +25,8 @@ const missionState = {
 				},
 				{
 					id: "1.2",
+					lessonKey: "1.2",
+					displayLabel: "1.2",
 					title: "Pick One User",
 					shortTitle: "User",
 					status: "completed" as const,
@@ -40,6 +44,8 @@ const missionState = {
 			lessons: [
 				{
 					id: "2.1",
+					lessonKey: "2.1",
+					displayLabel: "2.1",
 					title: "Find References First",
 					shortTitle: "References",
 					status: "completed" as const,
@@ -48,6 +54,8 @@ const missionState = {
 				},
 				{
 					id: "2.2",
+					lessonKey: "2.2",
+					displayLabel: "2.2",
 					title: "Sketch Before Software",
 					shortTitle: "Sketch",
 					status: "in_progress" as const,
@@ -56,6 +64,8 @@ const missionState = {
 				},
 				{
 					id: "2.3",
+					lessonKey: "2.3",
+					displayLabel: "2.3",
 					title: "Storyboard the Journey",
 					shortTitle: "Storyboard",
 					status: "available" as const,
@@ -73,6 +83,8 @@ const missionState = {
 			lessons: [
 				{
 					id: "3.1",
+					lessonKey: "3.1",
+					displayLabel: "3.1",
 					title: "Set Up the Repo",
 					shortTitle: "Repo",
 					status: "locked" as const,
@@ -81,6 +93,8 @@ const missionState = {
 				},
 				{
 					id: "3.2",
+					lessonKey: "3.2",
+					displayLabel: "3.2",
 					title: "Prepare Local Environment",
 					shortTitle: "Env",
 					status: "locked" as const,
@@ -171,15 +185,15 @@ describe("AppShell", () => {
 
 	it("renders unlocked header blocks as links and keeps locked blocks inert", () => {
 		const markup = renderAppShell(
-			<AppShell showSkillRail={false}>
+			<AppShell showSkillRail={false} enableMissionQuery>
 				<div>Body</div>
 			</AppShell>,
 		);
 
 		expect(markup).toContain('aria-label="Open CEO"');
-		expect(markup).toContain('href="/lesson/1.1"');
+		expect(markup).toContain('href="/lesson/welcome-to-ship-by-sunday"');
 		expect(markup).toContain('aria-label="Open DESIGN"');
-		expect(markup).toContain('href="/lesson/2.2"');
+		expect(markup).toContain('href="/lesson/find-references-first"');
 		expect(markup).toContain('aria-current="page"');
 		expect(markup).not.toContain('aria-label="Open BUILD"');
 		expect(markup).toContain('disabled=""');
@@ -187,14 +201,14 @@ describe("AppShell", () => {
 		expect(markup).toContain('data-slot="card"');
 	});
 
-	it("links the header brand to the mission page", () => {
+	it("links the header brand to the start page", () => {
 		const markup = renderAppShell(
-			<AppShell showSkillRail={false}>
+			<AppShell showSkillRail={false} enableMissionQuery>
 				<div>Body</div>
 			</AppShell>,
 		);
 
-		expect(markup).toContain('href="/mission"');
+		expect(markup).toContain('href="/start"');
 		expect(markup).toContain('aria-label="Ship by Sunday"');
 		expect(markup).toContain('aria-label="Open account menu"');
 	});
@@ -220,10 +234,7 @@ describe("AppShell", () => {
 			</AppShell>,
 		);
 
-		expect(useQueryMock).toHaveBeenCalled();
-		expect(useQueryMock.mock.calls.some((call) => call[1] === "skip")).toBe(
-			true,
-		);
+		expect(useQueryMock).not.toHaveBeenCalled();
 		expect(markup).toContain("--/--");
 		expect(markup).not.toContain('aria-label="Open CEO"');
 	});

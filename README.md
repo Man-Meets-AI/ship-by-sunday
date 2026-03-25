@@ -15,7 +15,7 @@ Why its awesome
 ## What Lives Here
 
 - Public marketing and pricing pages in `apps/web/app/`
-- Protected product routes at `/mission`, `/lesson/[lessonKey]`, `/artifacts`, and `/settings`, with `/mission` acting as the canonical protected entry and starter-mode home
+- Protected product routes at `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, `/review`, and `/settings`, with the old `/mission`, `/lesson/[lessonKey]`, and `/artifacts` routes retained only as compatibility redirects
 - Feature-first runtime code in `apps/web/features/`, with the curriculum and lesson model centered under `apps/web/features/course/lesson/`
 - Purchase-to-access handoff across Clerk, Stripe, and Convex product-access state
 - Starter configuration and module flags in `apps/web/config/product.ts`
@@ -98,8 +98,8 @@ The `starterConfig.modules` flags currently control:
 
 Current behavior:
 
-- when `course` is `false`, `/mission` renders the neutral protected starter home from `apps/web/features/workspace-home/` instead of the guided mission flow
-- when `course` is `false`, `/lesson/[lessonKey]` and `/artifacts` stay on deliberate disabled states
+- the packet-first flow now starts at `/start` and uses `/product`, `/design`, `/marketing`, `/build-plan`, and `/review` as the protected runtime
+- `/mission`, `/lesson/[lessonKey]`, and `/artifacts` now redirect into the packet-first flow instead of acting as canonical product surfaces
 - when `docs` is `false`, docs links hide and `/docs` renders a disabled-state surface instead of the docs shell
 - when `starterRepo` is `false`, starter-repo access cards disappear from the protected app
 

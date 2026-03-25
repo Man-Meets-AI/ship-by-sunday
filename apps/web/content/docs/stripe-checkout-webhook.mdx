@@ -71,7 +71,7 @@ The starter uses this sequence:
 3. Stripe returns to `/checkout/success`
 4. Stripe webhook hits Convex HTTP at `/stripe/webhook`
 5. Convex verifies the signature and upserts the active product-access grant
-6. `/checkout/success` waits for access, then redirects into `/mission`
+6. `/checkout/success` waits for access, then redirects into `/start`
 
 ## Health checks
 
@@ -90,7 +90,7 @@ The happy path is:
 2. Stripe forwards `checkout.session.completed`
 3. the webhook grants product access
 4. `/checkout/success` stops waiting
-5. the buyer reaches `/mission`
+5. the buyer reaches `/start`
 
 ## If this breaks
 

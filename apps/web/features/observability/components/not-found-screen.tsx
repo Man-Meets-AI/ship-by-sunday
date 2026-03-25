@@ -28,7 +28,7 @@ export function NotFoundScreen() {
 					</CardContent>
 					<CardFooter className="gap-3">
 						<Button asChild>
-							<Link href={routeConfig.mission}>
+							<Link href={routeConfig.start}>
 								{workspaceDisplayConfig.openHomeActionLabel}
 							</Link>
 						</Button>

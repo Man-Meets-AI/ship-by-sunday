@@ -9,11 +9,22 @@ import {
 	saveLessonDraft,
 } from "@/convex/course";
 import { COURSE_SLUG } from "@/features/course/lesson/model";
+import { CURRICULUM_VERSION } from "@/features/course/lesson/model/curriculum";
+import { getLessonById } from "@/features/course/lesson/model";
 
 const clerkUserId = "user_test_course_state";
 
+function getLessonKey(displayLabel: string) {
+	const lesson = getLessonById(displayLabel);
+	if (!lesson) {
+		throw new Error(`Expected lesson ${displayLabel}`);
+	}
+
+	return lesson.lessonKey;
+}
+
 function createLessonState(
-	lessonId: string,
+	lessonKey: string,
 	options: {
 		blockId?: "CEO" | "DESIGN" | "BUILD" | "SHIP";
 		artifactKey?: string;
@@ -27,14 +38,15 @@ function createLessonState(
 	} = {},
 ) {
 	return {
-		_id: `lesson_state_${lessonId}_${options.status ?? "not_started"}`,
+		_id: `lesson_state_${lessonKey}_${options.status ?? "not_started"}`,
 		_creationTime: 1,
 		clerkUserId,
 		courseSlug: COURSE_SLUG,
-		lessonId,
+		curriculumVersion: CURRICULUM_VERSION,
+		lessonKey,
 		blockId: options.blockId ?? "CEO",
 		status: options.status ?? "not_started",
-		artifactKey: options.artifactKey ?? `${lessonId}-artifact`,
+		artifactKey: options.artifactKey ?? `${lessonKey}-artifact`,
 		artifactType: options.artifactType ?? "video",
 		fieldValues: options.fieldValues ?? {},
 		startedAt: options.startedAt ?? 10,
@@ -113,35 +125,35 @@ const getMissionStateHandler = getMissionState as unknown as {
 const getResumeDestinationHandler = getResumeDestination as unknown as {
 	_handler: (ctx: CourseCtx) => Promise<{
 		destination: string;
-		lessonId: string | null;
+		lessonKey: string | null;
 	}>;
 };
 
 const completeLessonHandler = completeLesson as unknown as {
 	_handler: (
 		ctx: CourseCtx,
-		args: { lessonId: string; fieldValues: Record<string, unknown> },
-	) => Promise<{ completedAt: number; nextLessonId: string | null }>;
+		args: { lessonKey: string; fieldValues: Record<string, unknown> },
+	) => Promise<{ completedAt: number; nextLessonKey: string | null }>;
 };
 
 const saveLessonDraftHandler = saveLessonDraft as unknown as {
 	_handler: (
 		ctx: CourseCtx,
-		args: { lessonId: string; fieldValues: Record<string, unknown> },
+		args: { lessonKey: string; fieldValues: Record<string, unknown> },
 	) => Promise<{ savedAt: number }>;
 };
 
 const markLessonViewedHandler = markLessonViewed as unknown as {
 	_handler: (
 		ctx: CourseCtx,
-		args: { lessonId: string },
+		args: { lessonKey: string },
 	) => Promise<{ viewedAt: number; created: boolean }>;
 };
 
 const getLessonStateHandler = getLessonState as unknown as {
 	_handler: (
 		ctx: CourseCtx,
-		args: { lessonId: string },
+		args: { lessonKey: string },
 	) => Promise<{ accessStatus: string }>;
 };
 
@@ -187,7 +199,7 @@ describe("course state lifecycle", () => {
 
 		expect(resume).toEqual({
 			destination: "/mission",
-			lessonId: null,
+			lessonKey: null,
 		});
 	});
 
@@ -196,25 +208,25 @@ describe("course state lifecycle", () => {
 		const ctx = createCourseCtx({
 			insert,
 			lessonStates: [
-				createLessonState("1.1", {
+				createLessonState(getLessonKey("1.1"), {
 					blockId: "CEO",
 					artifactKey: "weekend_shipping_goal",
 					artifactType: "brief",
 					status: "completed",
 				}),
-				createLessonState("1.2", {
+				createLessonState(getLessonKey("1.2"), {
 					blockId: "CEO",
 					artifactKey: "sprint_setup_state",
 					artifactType: "checklist",
 					status: "completed",
 				}),
-				createLessonState("1.3", {
+				createLessonState(getLessonKey("1.3"), {
 					blockId: "CEO",
 					artifactKey: "candidate_problems",
 					artifactType: "mixed",
 					status: "completed",
 				}),
-				createLessonState("1.4", {
+				createLessonState(getLessonKey("1.4"), {
 					blockId: "CEO",
 					artifactKey: "user_statement",
 					artifactType: "mixed",
@@ -227,7 +239,7 @@ describe("course state lifecycle", () => {
 		vi.spyOn(Date, "now").mockReturnValue(fixedNow);
 
 		const result = await completeLessonHandler._handler(ctx, {
-			lessonId: "1.5",
+			lessonKey: getLessonKey("1.5"),
 			fieldValues: {
 				messaging_person: "Operators",
 				messaging_problem: "Action items get lost after meetings.",
@@ -242,12 +254,12 @@ describe("course state lifecycle", () => {
 
 		expect(result).toEqual({
 			completedAt: fixedNow,
-			nextLessonId: "1.6",
+			nextLessonKey: getLessonKey("1.6"),
 		});
 		expect(insert).toHaveBeenCalledWith(
 			"lessonStates",
 			expect.objectContaining({
-				lessonId: "1.5",
+				lessonKey: getLessonKey("1.5"),
 				artifactKey: "outcome_statement",
 				status: "completed",
 				completedAt: fixedNow,
@@ -259,7 +271,7 @@ describe("course state lifecycle", () => {
 		const ctx = createCourseCtx();
 
 		const lessonState = await getLessonStateHandler._handler(ctx, {
-			lessonId: "3.0",
+			lessonKey: getLessonKey("3.0"),
 		});
 
 		expect(lessonState).toEqual({
@@ -272,7 +284,7 @@ describe("course state lifecycle", () => {
 
 		await expect(
 			completeLessonHandler._handler(ctx, {
-				lessonId: "1.1",
+				lessonKey: getLessonKey("1.1"),
 				fieldValues: {},
 			}),
 		).rejects.toMatchObject({
@@ -293,7 +305,7 @@ describe("course state lifecycle", () => {
 		vi.spyOn(Date, "now").mockReturnValue(fixedNow);
 
 		const result = await saveLessonDraftHandler._handler(ctx, {
-			lessonId: "1.1",
+			lessonKey: getLessonKey("1.1"),
 			fieldValues: {},
 		});
 
@@ -305,7 +317,7 @@ describe("course state lifecycle", () => {
 			expect.objectContaining({
 				clerkUserId,
 				courseSlug: COURSE_SLUG,
-				lessonId: "1.1",
+				lessonKey: getLessonKey("1.1"),
 				status: "in_progress",
 				fieldValues: expect.objectContaining({
 					__fieldShapeVersion: 1,
@@ -321,7 +333,7 @@ describe("course state lifecycle", () => {
 		const patch = vi.fn().mockResolvedValue(undefined);
 		const ctx = createCourseCtx({
 			lessonStates: [
-				createLessonState("1.1", {
+				createLessonState(getLessonKey("1.1"), {
 					blockId: "CEO",
 					artifactKey: "weekend_shipping_goal",
 					artifactType: "brief",
@@ -335,7 +347,7 @@ describe("course state lifecycle", () => {
 		vi.spyOn(Date, "now").mockReturnValue(fixedNow);
 
 		const result = await markLessonViewedHandler._handler(ctx, {
-			lessonId: "1.1",
+			lessonKey: getLessonKey("1.1"),
 		});
 
 		expect(result).toEqual({
@@ -343,7 +355,7 @@ describe("course state lifecycle", () => {
 			created: false,
 		});
 		expect(patch).toHaveBeenCalledWith(
-			"lesson_state_1.1_in_progress",
+			`lesson_state_${getLessonKey("1.1")}_in_progress`,
 			expect.objectContaining({
 				lastViewedAt: fixedNow,
 				updatedAt: 20,

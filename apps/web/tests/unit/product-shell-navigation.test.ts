@@ -6,15 +6,18 @@ describe("product shell block navigation", () => {
 			id: "DESIGN",
 			lessons: [
 				{
-					id: "2.1",
+					lessonKey: "2.1",
+					displayLabel: "2.1",
 					status: "completed",
 				},
 				{
-					id: "2.2",
+					lessonKey: "2.2",
+					displayLabel: "2.2",
 					status: "in_progress",
 				},
 				{
-					id: "2.3",
+					lessonKey: "2.3",
+					displayLabel: "2.3",
 					status: "available",
 				},
 			],
@@ -22,8 +25,8 @@ describe("product shell block navigation", () => {
 
 		expect(target).toMatchObject({
 			blockId: "DESIGN",
-			lessonId: "2.2",
-			href: "/lesson/2.2",
+			lessonKey: "2.2",
+			href: "/lesson/find-references-first",
 			status: "in_progress",
 		});
 	});
@@ -33,11 +36,13 @@ describe("product shell block navigation", () => {
 			id: "CEO",
 			lessons: [
 				{
-					id: "1.1",
+					lessonKey: "1.1",
+					displayLabel: "1.1",
 					status: "completed",
 				},
 				{
-					id: "1.2",
+					lessonKey: "1.2",
+					displayLabel: "1.2",
 					status: "completed",
 				},
 			],
@@ -45,8 +50,8 @@ describe("product shell block navigation", () => {
 
 		expect(target).toMatchObject({
 			blockId: "CEO",
-			lessonId: "1.1",
-			href: "/lesson/1.1",
+			lessonKey: "1.1",
+			href: "/lesson/welcome-to-ship-by-sunday",
 			status: "completed",
 		});
 	});
@@ -56,11 +61,13 @@ describe("product shell block navigation", () => {
 			id: "BUILD",
 			lessons: [
 				{
-					id: "3.1",
+					lessonKey: "3.1",
+					displayLabel: "3.1",
 					status: "locked",
 				},
 				{
-					id: "3.2",
+					lessonKey: "3.2",
+					displayLabel: "3.2",
 					status: "locked",
 				},
 			],

@@ -34,7 +34,7 @@ The runtime splits into three clear surfaces:
 
 - public marketing surface on `/`
 - public docs surface on `/docs` when the docs module is enabled
-- protected product surface on `/mission`, `/lesson/[lessonKey]`, `/artifacts`, and `/settings`
+- protected product surface on `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, `/review`, and `/settings`
 
 That split matters because checkout and access recovery live between those worlds.
 
@@ -55,8 +55,8 @@ Important module flags:
 Current behavior:
 
 - if `docs` is off, docs links hide and `/docs` renders a disabled-state surface
-- if `course` is off, `/mission` renders the neutral protected starter home from `features/workspace-home/`
-- if `course` is off, `/lesson/[lessonKey]` and `/artifacts` stay on deliberate disabled states
+- the packet-first flow now uses `/start` as the first protected landing surface
+- `/mission`, `/lesson/[lessonKey]`, and `/artifacts` now act as compatibility redirects into the packet-first flow
 - if `starterRepo` is off, starter-repo cards disappear from the protected app
 
 These module gates sit above the existing auth, checkout, and access model. They do not replace it.
@@ -77,10 +77,10 @@ For the file-by-file operating guide, see [Configure the Homepage](/docs/configu
 4. Stripe hosts the payment flow and returns to `/checkout/success`.
 5. `POST {NEXT_PUBLIC_CONVEX_URL}/stripe/webhook` verifies the signature and handles completed checkout events.
 6. Convex upserts the active product-access grant.
-7. `/checkout/success` starts from a server-fetched product-access snapshot, then continues Clerk-gated live access polling before redirecting into `/mission`.
-8. `/mission` and the other workspace routes check the same product-access state and recover inline if access appears later.
-9. `/mission` renders either the guided mission flow or the neutral starter workspace home depending on `starterConfig.modules.course`.
-10. Returning users with granted access who hit `/` are resumed into `/mission` or their most recently worked accessible lesson unless they explicitly force marketing mode.
+7. `/checkout/success` starts from a server-fetched product-access snapshot, then continues Clerk-gated live access polling before redirecting into `/start`.
+8. `/start` and the other packet-first workspace routes check the same product-access state and recover inline if access appears later.
+9. `/mission`, `/lesson/[lessonKey]`, and `/artifacts` now forward into `/start` or `/review` instead of acting as canonical product surfaces.
+10. Returning users with granted access who hit `/` are resumed into the first incomplete packet-first stage unless they explicitly force marketing mode.
 
 Protected app routes also start from server-fetched mission or access data before the client-side Convex subscriptions take over. That avoids a hydration-time auth race where the browser can briefly act signed out even though the server already proved access.
 

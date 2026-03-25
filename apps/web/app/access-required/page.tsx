@@ -11,5 +11,5 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-	redirect(routeConfig.mission);
+	redirect(routeConfig.start);
 }

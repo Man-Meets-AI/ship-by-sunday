@@ -14,6 +14,12 @@ import {
 	observabilitySourceValidator,
 } from "./observability/validators";
 
+const projectDefinitionFactValueValidator = v.union(
+	v.string(),
+	v.number(),
+	v.array(v.string()),
+);
+
 export default defineSchema({
 	productAccessGrants: defineTable({
 		clerkUserId: v.string(),
@@ -59,6 +65,15 @@ export default defineSchema({
 		.index("by_clerk_user_id_and_course_slug", ["clerkUserId", "courseSlug"])
 		.index("by_status", ["status"])
 		.index("by_github_username_lower", ["githubUsernameLower"]),
+	projectDefinitions: defineTable({
+		clerkUserId: v.string(),
+		productKey: v.string(),
+		schemaVersion: v.number(),
+		facts: v.record(v.string(), projectDefinitionFactValueValidator),
+		placeholdersInUse: v.array(v.union(v.literal("domain"), v.literal("support_email"))),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	}).index("by_clerk_user_id_and_product_key", ["clerkUserId", "productKey"]),
 	lessonStates: defineTable({
 		clerkUserId: v.string(),
 		courseSlug: v.string(),

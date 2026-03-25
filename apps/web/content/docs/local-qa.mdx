@@ -30,8 +30,8 @@ bun run check
 
 Use two real users:
 
-- no-access user for sign-in, `/mission`, wrong-account, and pre-purchase checks
-- granted-access user for `/mission`, `/lesson/[lessonId]`, `/artifacts`, and `/settings` checks
+- no-access user for sign-in, `/start`, wrong-account, and pre-purchase checks
+- granted-access user for `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, `/review`, and `/settings` checks
 
 Commands:
 
@@ -57,7 +57,7 @@ Use this only in a safe local test environment.
 6. Complete payment with Stripe test card `4242 4242 4242 4242`, any future expiry, any CVC, ZIP `10001`.
 7. Confirm Stripe returns to `/checkout/success?session_id=...`.
 8. Confirm the webhook grants access.
-9. Confirm the app redirects into `/mission`.
+9. Confirm the app redirects into `/start`.
 
 On a new machine or after switching deployments, run `bun run dev:convex` first so `.env.local` contains the current `NEXT_PUBLIC_CONVEX_URL` and `CONVEX_DEPLOYMENT` values.
 
@@ -82,20 +82,20 @@ This requires `NEXT_PUBLIC_CONVEX_URL` from your hosted Convex dev deployment to
 
 ### Signed-out protected-route smoke
 
-1. Visit `/mission` or `/settings` while signed out.
+1. Visit `/start` or `/settings` while signed out.
 2. Confirm redirect into the access recovery surface.
 
 ### No-access flow
 
 1. Sign in with the no-access account.
-2. Visit `/mission`.
+2. Visit `/start`.
 3. Confirm the page explains that the account has no active access.
 
 ### Granted-access flow
 
 1. Run `bun run clerk:test-user:prepare:entitled`.
 2. Sign in with the granted-access account.
-3. Confirm `/mission`, one lesson route, `/artifacts`, and `/settings` load.
+3. Confirm `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, `/review`, and `/settings` load.
 
 ## Observability smoke
 

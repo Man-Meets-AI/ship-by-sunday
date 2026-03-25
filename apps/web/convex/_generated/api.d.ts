@@ -27,6 +27,11 @@ import type * as http from "../http.js";
 import type * as observability from "../observability.js";
 import type * as observability_model from "../observability/model.js";
 import type * as observability_validators from "../observability/validators.js";
+import type * as packet from "../packet.js";
+import type * as packet_projectDefinition from "../packet/projectDefinition.js";
+import type * as packet_stageReadiness from "../packet/stageReadiness.js";
+import type * as packet_types from "../packet/types.js";
+import type * as packet_validators from "../packet/validators.js";
 import type * as stripeWebhook from "../stripeWebhook.js";
 import type * as uploads from "../uploads.js";
 
@@ -56,6 +61,11 @@ declare const fullApi: ApiFromModules<{
   observability: typeof observability;
   "observability/model": typeof observability_model;
   "observability/validators": typeof observability_validators;
+  packet: typeof packet;
+  "packet/projectDefinition": typeof packet_projectDefinition;
+  "packet/stageReadiness": typeof packet_stageReadiness;
+  "packet/types": typeof packet_types;
+  "packet/validators": typeof packet_validators;
   stripeWebhook: typeof stripeWebhook;
   uploads: typeof uploads;
 }>;

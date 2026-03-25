@@ -43,7 +43,7 @@ describe("CheckoutSuccessView interactions", () => {
 		vi.useRealTimers();
 	});
 
-	it("arms the mission redirect once access is ready", async () => {
+	it("arms the start redirect once access is ready", async () => {
 		vi.useFakeTimers();
 		useConvexAuthMock.mockReturnValue({
 			isAuthenticated: true,
@@ -67,7 +67,7 @@ describe("CheckoutSuccessView interactions", () => {
 			await vi.advanceTimersByTimeAsync(700);
 		});
 
-		expect(replaceMock).toHaveBeenCalledWith("/mission");
+		expect(replaceMock).toHaveBeenCalledWith("/start");
 	});
 
 	it("rotates the validated status copy while access is still pending", async () => {

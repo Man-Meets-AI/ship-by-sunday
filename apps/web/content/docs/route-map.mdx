@@ -16,16 +16,22 @@ description: See the main public, protected, and purchase-related routes in one 
 
 - `/checkout/success`: post-checkout validation, server-fetched initial product-access state, then live product-access polling
 - `/checkout/cancel`: checkout cancel return
-- `/mission`: canonical workspace entry and recovery destination; guided mission when `course` is on, neutral starter home when `course` is off
+- `/start`: canonical first-time workspace landing after checkout
+- `/mission`: legacy compatibility route that now forwards into `/start`
 
 ## Protected product routes
 
-- `/mission`: main protected home and resume target
-- `/lesson/[lessonKey]`: protected lesson flow when `course` is enabled; deliberate disabled state when it is off
-- `/artifacts`: saved student or product artifacts when `course` is enabled; deliberate disabled state when it is off
+- `/start`: packet-first orientation and framing
+- `/product`: canonical product and scope intake
+- `/design`: design packet intake and design-packet download surface
+- `/marketing`: marketing packet intake and marketing-packet download surface
+- `/build-plan`: build packet intake and build-packet download surface
+- `/review`: final readiness and repo-download surface
 - `/settings`: protected account and product settings
+- `/lesson/[lessonKey]`: legacy compatibility route that now forwards into `/start`
+- `/artifacts`: legacy compatibility route that now forwards into `/review`
 
-These protected routes render behind `app/(workspace)/layout.tsx`, starting from server-fetched access or mission data before the browser resumes live Convex subscriptions.
+These protected routes render behind `app/(workspace)/layout.tsx`, starting from server-fetched access or packet-workspace data before the browser resumes live Convex subscriptions.
 
 ## Why this matters
 

@@ -16,7 +16,7 @@ export function AppShellWorkspaceNav({
 	return (
 		<div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 sm:gap-3">
 			<ProductBrand
-				href={routeConfig.mission}
+				href={routeConfig.start}
 				labelClassName={productWordmarkClassName}
 			/>
 

@@ -4,6 +4,12 @@
 
 ### Changed
 
+- Replaced the protected product contract with a packet-first runtime on `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, `/review`, backed by canonical `projectDefinitions` in Convex instead of `lessonStates` for the new product path.
+- Added a real `packages/packet-compiler` workspace package that owns canonical packet schemas, stage readiness, deterministic packet rendering, packet archive generation, repo snapshot materialization, and the final review-download zip.
+- Added protected packet download routes for design, marketing, build, and the final repo snapshot, with the generated repo embedding `packet/` at the root and overlaying starter seams such as `apps/web/config/product.ts` and `apps/web/features/marketing/content/home.ts`.
+- Changed checkout and protected-home recovery to land in `/start` and the first incomplete packet-first stage, while converting `/mission`, `/lesson/[lessonKey]`, and `/artifacts` into compatibility redirects instead of canonical product surfaces.
+- Updated the live starter docs and route map to describe the packet-first flow, and increased the local Playwright production-server timeout to match the real `next build` cost during browser smoke.
+- Removed the Turbopack NFT warning for filesystem-heavy packet and Codex server code by moving those imports behind Node-runtime dynamic boundaries instead of static route imports.
 - Shipped the observability incident bus end to end: normalized `incidents` now drive Telegram delivery, production Clerk and Vercel webhooks land as first-class incidents, Telegram delivery failures become non-recursive `telegram_delivery` incidents, and maintainers can change live incident state through a token-protected status route.
 - Hardened the production deploy path for observability by splitting Convex browser traffic from Convex HTTP-action traffic (`NEXT_PUBLIC_CONVEX_URL` vs `NEXT_PUBLIC_CONVEX_SITE_URL`), fixing the Convex env loader so unrelated secrets no longer block backend deploys, and documenting the exact env parity required across Vercel and Convex.
 - Enriched Stripe failure incidents so checkout failures, webhook verification failures, missing `clerkUserId`, and grant-persistence failures now include stronger dashboard links and configuration context instead of generic billing errors.

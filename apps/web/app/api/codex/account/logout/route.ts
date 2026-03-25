@@ -1,8 +1,3 @@
-import {
-	getCodexAppServerUnavailableMessage,
-	isCodexAppServerRuntimeError,
-	withCodexAppServerClient,
-} from "@/features/codex/server/app-server";
 import { apiRouteConfig } from "@/config/product";
 import {
 	getApiAuthErrorResponse,
@@ -17,13 +12,18 @@ import {
 
 export const runtime = "nodejs";
 
+async function importCodexAppServer() {
+	return import(/* turbopackIgnore: true */ "@/features/codex/server/app-server");
+}
+
 export async function POST(request: Request) {
 	const requestId = getRequestIdFromRequest(request);
+	const codexAppServer = await importCodexAppServer();
 
 	try {
 		const session = await requireProductAccessApiSession();
 
-		await withCodexAppServerClient(
+		await codexAppServer.withCodexAppServerClient(
 			{
 				clerkUserId: session.userId,
 				requestId,
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
 				unauthorized: "Sign in before managing Codex connection.",
 				forbidden:
 					"Product access is required before managing Codex connection.",
-				unavailable: getCodexAppServerUnavailableMessage(),
+				unavailable: codexAppServer.getCodexAppServerUnavailableMessage(),
 			},
 			requestId,
 		);
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
 			pathname: apiRouteConfig.codexAccountLogout,
 			source: "codex",
 			defaultMessage: "Unable to disconnect Codex account.",
-			capture: !isCodexAppServerRuntimeError(error),
+			capture: !codexAppServer.isCodexAppServerRuntimeError(error),
 		});
 	}
 }

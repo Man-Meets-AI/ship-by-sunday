@@ -12,8 +12,8 @@ Do not stop at component checks. Test the full buyer journey:
 3. checkout
 4. `/checkout/success`
 5. product-access grant
-6. `/mission`
-7. first protected lesson or product surface
+6. `/start`
+7. the first incomplete packet-first stage
 
 ## The four realities
 
@@ -34,12 +34,12 @@ Every pass should cover these states:
 ## What to confirm
 
 - signed-out users get pushed into sign-in
-- users without access land on `/mission` and see inline recovery
+- users without access land on `/start` and see inline recovery
 - checkout returns to `/checkout/success`
 - the webhook grants access
-- the app recovers automatically into `/mission`
+- the app recovers automatically into `/start`
 - the first protected page does not throw a client-side `Unauthorized` error during hydration
-- at least one protected lesson or core surface loads after access appears
+- the next packet-first stage loads after access appears
 
 ## What success looks like
 

@@ -1,0 +1,58 @@
+"use client";
+
+import Link from "next/link";
+import {
+	getPacketStageDefinition,
+	type PacketStageStatus,
+} from "@packet-compiler";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+export function PacketStageSidebar({
+	stageStatus,
+	downloadHref,
+	nextStageId,
+}: {
+	stageStatus: PacketStageStatus;
+	downloadHref?: string;
+	nextStageId?: "design" | "marketing" | "build-plan" | "review";
+}) {
+	return (
+		<div className="space-y-4">
+			<Card>
+				<CardHeader>
+					<CardTitle>Stage status</CardTitle>
+				</CardHeader>
+				<CardContent className="space-y-3">
+					<Badge variant={stageStatus.isComplete ? "secondary" : "outline"}>
+						{stageStatus.isComplete ? "Ready" : "In progress"}
+					</Badge>
+					{stageStatus.missingFactKeys.length ? (
+						<ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+							{stageStatus.missingFactKeys.map((fieldKey) => (
+								<li key={fieldKey}>{fieldKey}</li>
+							))}
+						</ul>
+					) : (
+						<p className="text-sm text-muted-foreground">
+							This stage has all required facts.
+						</p>
+					)}
+				</CardContent>
+			</Card>
+			{downloadHref ? (
+				<Button asChild className="w-full">
+					<Link href={downloadHref}>Download packet</Link>
+				</Button>
+			) : null}
+			{nextStageId ? (
+				<Button asChild variant="outline" className="w-full">
+					<Link href={getPacketStageDefinition(nextStageId).route}>
+						Continue to {getPacketStageDefinition(nextStageId).label}
+					</Link>
+				</Button>
+			) : null}
+		</div>
+	);
+}

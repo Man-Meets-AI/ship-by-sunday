@@ -53,10 +53,10 @@ Do not leave Convex pointed at:
 After deploy, confirm all of this with a real test flow:
 
 1. signed-out visitor hits a protected route and is pushed to sign-in
-2. signed-in user without access reaches `/mission` and sees inline recovery
+2. signed-in user without access reaches `/start` and sees inline recovery
 3. live checkout returns to `/checkout/success`
 4. webhook grants access
-5. newly granted user reaches `/mission`
+5. newly granted user reaches `/start`
 6. signed Clerk and Vercel observability webhooks persist incidents and deliver Telegram packets
 7. the public incident status route can `ack` a live incident and keep repeat delivery suppressed
 

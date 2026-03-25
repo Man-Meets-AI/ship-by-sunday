@@ -21,8 +21,8 @@ vi.mock("@/convex/_generated/api", () => ({
 		access: {
 			viewerProductAccess: "viewerProductAccess",
 		},
-		course: {
-			getResumeDestination: "getResumeDestination",
+		packet: {
+			getPacketResumeDestination: "getPacketResumeDestination",
 		},
 	},
 }));
@@ -105,8 +105,8 @@ describe("product access server helpers", () => {
 				status: "granted",
 			})
 			.mockResolvedValueOnce({
-				destination: "/lesson/1.2",
-				lessonKey: "1.2",
+				destination: "/design",
+				stageId: "design",
 			});
 
 		const { redirectGrantedHomeVisitor } =
@@ -114,7 +114,7 @@ describe("product access server helpers", () => {
 
 		await redirectGrantedHomeVisitor({ allowMarketing: false });
 
-		expect(redirectMock).toHaveBeenCalledWith("/lesson/1.2");
+		expect(redirectMock).toHaveBeenCalledWith("/design");
 	});
 
 	it("does nothing when the home page explicitly allows marketing mode", async () => {

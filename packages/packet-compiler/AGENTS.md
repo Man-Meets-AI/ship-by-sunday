@@ -1,6 +1,7 @@
 # packages/packet-compiler/AGENTS.md
 
 ## Ship by Sunday — compiler rules
+
 - Treat this as a packet compiler with repo-generation side effects.
 - Prefer derivation over recollection.
 - Only ask for information that changes output files.
@@ -10,6 +11,7 @@
 - Provider setup, env vars, QA runtime, deploy walkthroughs, and production fixes belong after packet generation.
 
 ## Required outputs
+
 - README
 - facts/project-definition.json
 - design packet
@@ -19,6 +21,7 @@
 - starter-ready repo config
 
 ## Planning behavior
+
 - For compiler changes, create an ExecPlan first.
 - Define blockers, placeholder-friendly defaults, and derivation rules explicitly.
 - Never re-ask downstream for data that should be derived upstream.

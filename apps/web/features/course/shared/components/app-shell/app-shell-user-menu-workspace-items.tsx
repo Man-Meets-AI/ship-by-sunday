@@ -1,4 +1,4 @@
-import { Package, Settings } from "lucide-react";
+import { Flag, Settings, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -11,7 +11,8 @@ import { cn } from "@/lib/utils";
 import { workspaceMenuLinks } from "./app-shell-user-menu-helpers";
 
 const workspaceLinkIcons = {
-	[routeConfig.artifacts]: Package,
+	[routeConfig.start]: Sparkles,
+	[routeConfig.review]: Flag,
 	[routeConfig.settings]: Settings,
 } as const;
 

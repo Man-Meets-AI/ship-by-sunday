@@ -64,8 +64,11 @@ describe("CompetitorResearchLightWorkbench", () => {
 			/>,
 		);
 
-		expect(screen.getByText("Lightweight")).toBeTruthy();
-		expect(screen.getByText("Directional")).toBeTruthy();
+		expect(
+			screen.getByText(
+				"Lightweight, directional pass — quick and usable, not exhaustive.",
+			),
+		).toBeTruthy();
 		const settingsLink = screen.getByRole("link", {
 			name: /Connect ChatGPT in settings/i,
 		});

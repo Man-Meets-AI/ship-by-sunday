@@ -8,9 +8,14 @@ export function isPathPrefixActive(pathname: string, href: string) {
 export function workspaceMenuLinks(pathname: string) {
 	return [
 		{
-			href: routeConfig.artifacts,
-			label: workspaceDisplayConfig.artifactsLabel,
-			active: isPathPrefixActive(pathname, routeConfig.artifacts),
+			href: routeConfig.start,
+			label: workspaceDisplayConfig.homeLabel,
+			active: isPathPrefixActive(pathname, routeConfig.start),
+		},
+		{
+			href: routeConfig.review,
+			label: "Review",
+			active: isPathPrefixActive(pathname, routeConfig.review),
 		},
 		{
 			href: routeConfig.settings,

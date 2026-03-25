@@ -5,7 +5,7 @@ description: Get the starter running, understand the real handoff, and choose th
 
 # Start Here
 
-`Ship by Sunday Starter` is a tutorial-first starter for builders who want a public landing page, real paid access, and a protected workspace without stitching the whole stack together from scratch. It now supports starter-mode module flags, including a neutral protected workspace home when the course module is off.
+`Ship by Sunday Starter` is a packet-first starter for builders who want a public landing page, real paid access, and a protected workspace without stitching the whole stack together from scratch. It now supports starter-mode module flags and a protected flow that collects facts, unlocks packets, and ends in a downloadable repo snapshot.
 
 If you are new to this stack, do not start by rewriting auth, payments, or access logic. Get the starter running cleanly, confirm the paid handoff works, and then change the obvious product surfaces first.
 
@@ -13,12 +13,12 @@ If you are new to this stack, do not start by rewriting auth, payments, or acces
 
 - a public marketing surface on `/`
 - a docs surface on `/docs`
-- a protected product surface on `/mission`, `/lesson/[lessonKey]`, `/artifacts`, and `/settings`
+- a protected product surface on `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, `/review`, and `/settings`
 - Clerk sign-in and sign-up
 - Stripe-hosted checkout plus success and cancel flows
 - Convex-backed product-access and resume state
 - a starter contract and module flags in `config/product.ts`
-- a neutral protected workspace home on `/mission` when `starterConfig.modules.course` is `false`
+- legacy compatibility redirects from `/mission`, `/lesson/[lessonKey]`, and `/artifacts` into the packet-first flow
 
 ## The fastest path
 
@@ -71,5 +71,5 @@ You are in a good place to customize once you can say all of this is true:
 - the app boots locally
 - you can sign in
 - a user without access sees the right locked state
-- a user with granted access reaches `/mission`
+- a user with granted access reaches `/start`
 - checkout and webhook wiring are understood, even if you have not changed them yet

@@ -9,7 +9,7 @@ import { getConvexServerSession } from "@/platform/auth/convex-auth";
 
 type ResumeDestination = {
 	destination: string;
-	lessonKey: string | null;
+	stageId: string;
 };
 
 export async function getServerProductAccess(): Promise<ProductAccess> {
@@ -49,7 +49,7 @@ export async function getServerResumeDestination() {
 	}
 
 	return (await fetchQuery(
-		api.course.getResumeDestination,
+		api.packet.getPacketResumeDestination,
 		{},
 		{ token: session.token },
 	)) as ResumeDestination;

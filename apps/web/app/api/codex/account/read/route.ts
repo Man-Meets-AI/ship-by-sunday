@@ -1,8 +1,3 @@
-import {
-	getCodexAppServerUnavailableMessage,
-	isCodexAppServerRuntimeError,
-	withCodexAppServerClient,
-} from "@/features/codex/server/app-server";
 import { apiRouteConfig } from "@/config/product";
 import {
 	accountIsManagedChatGpt,
@@ -18,13 +13,18 @@ import {
 
 export const runtime = "nodejs";
 
+async function importCodexAppServer() {
+	return import(/* turbopackIgnore: true */ "@/features/codex/server/app-server");
+}
+
 export async function GET(request: Request) {
 	const requestId = getRequestIdFromRequest(request);
+	const codexAppServer = await importCodexAppServer();
 
 	try {
 		const session = await requireProductAccessApiSession();
 
-		const result = await withCodexAppServerClient(
+		const result = await codexAppServer.withCodexAppServerClient(
 			{
 				clerkUserId: session.userId,
 				requestId,
@@ -59,7 +59,7 @@ export async function GET(request: Request) {
 				unauthorized: "Sign in before managing Codex connection.",
 				forbidden:
 					"Product access is required before managing Codex connection.",
-				unavailable: getCodexAppServerUnavailableMessage(),
+				unavailable: codexAppServer.getCodexAppServerUnavailableMessage(),
 			},
 			requestId,
 		);
@@ -73,7 +73,7 @@ export async function GET(request: Request) {
 			pathname: apiRouteConfig.codexAccountRead,
 			source: "codex",
 			defaultMessage: "Unable to read Codex account state.",
-			capture: !isCodexAppServerRuntimeError(error),
+			capture: !codexAppServer.isCodexAppServerRuntimeError(error),
 		});
 	}
 }
