@@ -22,11 +22,11 @@ Production is healthy only when all three systems agree on the same release cand
 ## Required standing configuration
 
 - GitHub branch protection is enabled on both `dev` and `main`.
-- `main` requires pull requests, one approval, last-push approval, and the `static`, `integration`, and `browser-smoke` checks.
+- `main` requires pull requests and the `static`, `integration`, and `browser-smoke` checks.
 - `dev` requires pull requests plus the same always-on checks, but not a formal approval.
 - Vercel project `mma-shipbysunday` is linked to `ParkerRex/mma-shipbysunday` and uses `main` as its production branch.
 - GitHub repository secret `CONVEX_DEPLOY_KEY` must exist before remote Convex dry-runs or production deploys can succeed.
-- GitHub repository variable `CONVEX_PRODUCTION_DEPLOY_ENABLED` should stay unset or `false` until the first manual dry-run on `main` succeeds.
+- GitHub repository variable `CONVEX_PRODUCTION_DEPLOY_ENABLED` is the live pause switch for automatic Convex production deploys. It is `true` after the first successful dry-run; set it back to `false` if you need to pause automatic `main` deploys.
 
 Create that secret from the Convex dashboard for the production deployment:
 
@@ -70,7 +70,7 @@ After that dry-run succeeds, enable automatic `main` deploys:
 gh variable set CONVEX_PRODUCTION_DEPLOY_ENABLED --repo ParkerRex/mma-shipbysunday --body true
 ```
 
-Until that variable is `true`, pushes to `main` will log a skip instead of deploying Convex production.
+When that variable is `false`, pushes to `main` log a skip instead of deploying Convex production. When it is `true`, future `main` merges deploy Convex production automatically.
 
 ## Hotfix path
 
