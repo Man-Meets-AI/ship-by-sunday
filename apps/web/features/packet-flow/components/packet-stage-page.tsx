@@ -39,7 +39,8 @@ function getPacketDownloadHref(
 		return undefined;
 	}
 
-	const stage = packetDownloadStageMap[stageId as keyof typeof packetDownloadStageMap];
+	const stage =
+		packetDownloadStageMap[stageId as keyof typeof packetDownloadStageMap];
 	return stage ? `/api/download/packet/${stage}` : undefined;
 }
 
@@ -66,7 +67,9 @@ export function PacketStagePage({
 	const currentStep = stage.steps[currentStepIndex];
 	const [draftValues, setDraftValues] = useState<Record<string, string>>({});
 	const [isPending, startTransition] = useTransition();
-	const saveProjectDefinitionFacts = useMutation(api.packet.saveProjectDefinitionFacts);
+	const saveProjectDefinitionFacts = useMutation(
+		api.packet.saveProjectDefinitionFacts,
+	);
 
 	useEffect(() => {
 		setCurrentStepIndex(stageStatus.currentStepIndex);
@@ -83,10 +86,12 @@ export function PacketStagePage({
 				currentStep,
 			),
 		);
-	}, [currentStep, workspaceState.projectDefinition?.updatedAt]);
+	}, [currentStep, workspaceState.projectDefinition?.facts]);
 
 	const downloadHref = getPacketDownloadHref(stageId, stageStatus.isComplete);
-	const nextStageId = stageStatus.isComplete ? nextStageMap[stageId] : undefined;
+	const nextStageId = stageStatus.isComplete
+		? nextStageMap[stageId]
+		: undefined;
 	const title = useMemo(() => stage.label, [stage.label]);
 
 	function handleFieldChange(
@@ -135,7 +140,9 @@ export function PacketStagePage({
 							totalSteps={stage.steps.length}
 							draftValues={draftValues}
 							isSaving={isPending}
-							onBack={() => setCurrentStepIndex((index) => Math.max(0, index - 1))}
+							onBack={() =>
+								setCurrentStepIndex((index) => Math.max(0, index - 1))
+							}
 							onChange={handleFieldChange}
 							onSave={handleSave}
 						/>

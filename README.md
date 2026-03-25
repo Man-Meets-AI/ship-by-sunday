@@ -77,6 +77,19 @@ bun run dev:stripe
 
 This repo does not support Convex's local backend mode as a first-class development workflow.
 
+## Production Release Workflow
+
+Production now ships through a two-branch workflow:
+
+- feature work lands in feature branches and merges into `dev`
+- `dev` is the shared integration branch
+- release pull requests promote `dev` into `main`
+- Vercel production deploys come from `main`
+- Convex production deploys come from `.github/workflows/convex-production-deploy.yml` on `main`
+- hotfixes branch from `main`, merge back into `main`, and then merge or cherry-pick back into `dev`
+
+The operator runbook lives in [docs/release-workflow.md](docs/release-workflow.md).
+
 ## Codex Integration
 
 The optional in-app Codex account and generation routes require a runtime that can spawn the `codex` binary and persist per-user app-server state.
@@ -236,7 +249,7 @@ Lesson modules still own lesson-specific content and workbench definitions, but 
 ## Docs
 
 - Contributor guide: [CONTRIBUTING.md](CONTRIBUTING.md)
-- Docs hub: [docs/README.md](docs/README.md)
+- Release workflow: [docs/release-workflow.md](docs/release-workflow.md)
 - Architecture: [docs/dev/architecture.md](docs/dev/architecture.md)
 - Internal launch operations: [docs/internal/README.md](docs/internal/README.md)
 

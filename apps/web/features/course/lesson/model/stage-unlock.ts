@@ -266,10 +266,6 @@ function buildCeoStageUnlockSummary(
 		coreFlowSketchArtifact,
 		"core_must_have_features",
 	);
-	const coreProblemLine = getFieldString(
-		coreFlowSketchArtifact,
-		"core_problem",
-	);
 
 	const screenFlowParts = coreNamedScreens
 		? coreNamedScreens

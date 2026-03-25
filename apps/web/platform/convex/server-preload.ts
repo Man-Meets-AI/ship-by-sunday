@@ -1,11 +1,7 @@
 import "server-only";
 
 import { fetchQuery } from "convex/nextjs";
-import type {
-	FunctionArgs,
-	FunctionReference,
-	FunctionReturnType,
-} from "convex/server";
+import type { FunctionArgs, FunctionReference } from "convex/server";
 
 import { getConvexServerSession } from "@/platform/auth/convex-auth";
 
