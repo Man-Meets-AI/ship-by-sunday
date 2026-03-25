@@ -66,7 +66,10 @@ export function BuildSettingUpSlicesGuide({
 						</ol>
 					</TabsContent>
 					<TabsContent value="planning">
-						<BuildSettingUpSlicesPlanningRadio value={value} onChange={onChange} />
+						<BuildSettingUpSlicesPlanningRadio
+							value={value}
+							onChange={onChange}
+						/>
 					</TabsContent>
 					<TabsContent value="example" className="space-y-4">
 						<p className="text-sm text-muted-foreground">

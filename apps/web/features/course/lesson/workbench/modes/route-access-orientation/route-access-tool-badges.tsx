@@ -7,12 +7,7 @@ import {
 } from "@/components/ui/card";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 
-const TOOL_BADGES = [
-	"Codex",
-	"Clerk",
-	"product access",
-	"page.tsx",
-] as const;
+const TOOL_BADGES = ["Codex", "Clerk", "product access", "page.tsx"] as const;
 
 export function RouteAccessToolBadges() {
 	return (

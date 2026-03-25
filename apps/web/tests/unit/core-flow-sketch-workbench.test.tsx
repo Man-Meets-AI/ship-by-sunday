@@ -70,7 +70,9 @@ describe("CoreFlowSketchWorkbench", () => {
 
 		await user.click(screen.getByRole("tab", { name: "Sketch" }));
 		expect(screen.getByText(/Crazy Eights template/i)).toBeTruthy();
-		expect(screen.getByText(/Pause here and sketch for 2 minutes/i)).toBeTruthy();
+		expect(
+			screen.getByText(/Pause here and sketch for 2 minutes/i),
+		).toBeTruthy();
 
 		await user.click(screen.getByRole("tab", { name: "Named screens" }));
 		expect(screen.getByText(/Ideas for Posts/i)).toBeTruthy();

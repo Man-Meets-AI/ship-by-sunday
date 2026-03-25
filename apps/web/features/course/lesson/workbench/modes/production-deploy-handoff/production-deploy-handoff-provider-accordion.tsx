@@ -39,8 +39,8 @@ export function ProductionDeployHandoffProviderAccordion() {
 					<p>
 						Switch to <strong className="text-foreground">Production</strong>,
 						then open <strong className="text-foreground">Developers</strong> →{" "}
-						<strong className="text-foreground">API keys</strong> (Keys) and copy
-						the <strong className="text-foreground">Secret key</strong>.
+						<strong className="text-foreground">API keys</strong> (Keys) and
+						copy the <strong className="text-foreground">Secret key</strong>.
 					</p>
 				</AccordionContent>
 			</AccordionItem>
@@ -51,8 +51,9 @@ export function ProductionDeployHandoffProviderAccordion() {
 				<AccordionContent className="text-sm text-muted-foreground">
 					<p>
 						Use your <strong className="text-foreground">production</strong>{" "}
-						Clerk instance. Copy the publishable and secret keys your README / env
-						template expects—do not reuse dev-only keys for production deploy.
+						Clerk instance. Copy the publishable and secret keys your README /
+						env template expects—do not reuse dev-only keys for production
+						deploy.
 					</p>
 				</AccordionContent>
 			</AccordionItem>

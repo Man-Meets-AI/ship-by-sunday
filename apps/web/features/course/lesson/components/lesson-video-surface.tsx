@@ -15,7 +15,8 @@ import { isLessonVideoReady } from "@/features/course/lesson/model/video";
 
 import { cn } from "@/lib/utils";
 
-const PLAYER_CLASS = "h-full w-full rounded-none border-0 bg-black object-cover";
+const PLAYER_CLASS =
+	"h-full w-full rounded-none border-0 bg-black object-cover";
 
 export function LessonVideoSurface({
 	coachContent,

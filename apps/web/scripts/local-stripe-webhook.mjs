@@ -335,9 +335,7 @@ try {
 	}
 } catch (error) {
 	console.error(
-		error instanceof Error
-			? error.message
-			: "Stripe dev webhook setup failed.",
+		error instanceof Error ? error.message : "Stripe dev webhook setup failed.",
 	);
 	process.exit(1);
 }

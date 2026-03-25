@@ -6,11 +6,14 @@ import {
 
 export const legacyLessonRedirects = {
 	...Object.fromEntries(
-		lessonRegistry.map((lesson) => [lesson.displayLabel, getLessonHref(lesson.lessonKey)]),
+		lessonRegistry.map((lesson) => [
+			lesson.displayLabel,
+			getLessonHref(lesson.lessonKey),
+		]),
 	),
 	...legacyRouteAliases,
 } as Record<string, string>;
 
 export function getLegacyLessonRedirect(lessonId: string) {
-  return legacyLessonRedirects[lessonId] ?? null;
+	return legacyLessonRedirects[lessonId] ?? null;
 }

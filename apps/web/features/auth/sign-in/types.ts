@@ -6,9 +6,7 @@ export type VerificationMethod =
 	| "totp"
 	| "backup_code";
 
-export type VerificationStatus =
-	| "needs_second_factor"
-	| "needs_client_trust";
+export type VerificationStatus = "needs_second_factor" | "needs_client_trust";
 
 export type SignInStep =
 	| { kind: "credentials" }

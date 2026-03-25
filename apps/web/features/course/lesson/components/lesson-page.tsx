@@ -70,7 +70,7 @@ function LessonPageInner({
 	const footer = <LessonPageFooter {...footerProps} />;
 	const workbench = isWatchLesson ? null : (
 		<WorkbenchRenderer
-				lesson={lesson}
+			lesson={lesson}
 			lessonContent={lessonContent}
 			fieldValues={fieldValues}
 			onFieldChange={setValue}

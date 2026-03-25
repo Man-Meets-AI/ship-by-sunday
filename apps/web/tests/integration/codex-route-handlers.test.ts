@@ -239,7 +239,9 @@ describe("codex route handlers", () => {
 	});
 
 	it("returns a mapped auth response when polling without access", async () => {
-		requireProductAccessApiSessionMock.mockRejectedValue(new Error("FORBIDDEN"));
+		requireProductAccessApiSessionMock.mockRejectedValue(
+			new Error("FORBIDDEN"),
+		);
 
 		const response = await getCodexLoginPoll(
 			createRequest("https://example.test/api/codex/account/login/poll"),
@@ -641,7 +643,9 @@ describe("codex route handlers", () => {
 	});
 
 	it("returns a mapped auth response when reading the account without access", async () => {
-		requireProductAccessApiSessionMock.mockRejectedValue(new Error("FORBIDDEN"));
+		requireProductAccessApiSessionMock.mockRejectedValue(
+			new Error("FORBIDDEN"),
+		);
 
 		const response = await getCodexAccountRead(
 			createRequest("https://example.test/api/codex/account/read"),
@@ -716,7 +720,9 @@ describe("codex route handlers", () => {
 	});
 
 	it("returns a mapped auth response when rate limits are forbidden", async () => {
-		requireProductAccessApiSessionMock.mockRejectedValue(new Error("FORBIDDEN"));
+		requireProductAccessApiSessionMock.mockRejectedValue(
+			new Error("FORBIDDEN"),
+		);
 
 		const response = await getCodexRateLimits(
 			createRequest("https://example.test/api/codex/account/rate-limits"),
@@ -813,7 +819,9 @@ describe("codex route handlers", () => {
 				text: " Output text ",
 				errorMessage: null,
 			}),
-			readRateLimits: vi.fn().mockRejectedValue(new Error("rate limits failed")),
+			readRateLimits: vi
+				.fn()
+				.mockRejectedValue(new Error("rate limits failed")),
 		});
 		upsertViewerCodexConnectionMock.mockResolvedValue({
 			connectionId: "connection_1",
@@ -841,7 +849,9 @@ describe("codex route handlers", () => {
 	});
 
 	it("returns a mapped auth response when generation access is missing", async () => {
-		requireProductAccessApiSessionMock.mockRejectedValue(new Error("FORBIDDEN"));
+		requireProductAccessApiSessionMock.mockRejectedValue(
+			new Error("FORBIDDEN"),
+		);
 
 		const response = await postCodexGenerate(
 			new Request("https://example.test/api/codex/generate", {

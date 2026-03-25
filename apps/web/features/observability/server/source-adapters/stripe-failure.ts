@@ -41,7 +41,10 @@ export function buildStripeCheckoutFailureContext({
 }: {
 	appBaseUrl: string;
 	userId: string;
-}): Pick<IncidentEventInput, "details" | "nativeUrl" | "logsUrl" | "nextAction"> {
+}): Pick<
+	IncidentEventInput,
+	"details" | "nativeUrl" | "logsUrl" | "nextAction"
+> {
 	return {
 		details: {
 			appBaseUrl,

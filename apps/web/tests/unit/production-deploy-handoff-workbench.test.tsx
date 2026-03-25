@@ -34,16 +34,18 @@ describe("production deploy handoff workbench (lesson 3.14)", () => {
 			screen.getByText(/Stripe: product and price in production/i),
 		).toBeTruthy();
 
-		expect(screen.getByRole("checkbox", { name: /^Open README$/ })).toBeTruthy();
 		expect(
-			screen.getByRole("checkbox", { name: /^Deploy$/ }),
+			screen.getByRole("checkbox", { name: /^Open README$/ }),
 		).toBeTruthy();
+		expect(screen.getByRole("checkbox", { name: /^Deploy$/ })).toBeTruthy();
 
 		expect(
 			screen.getByRole("button", { name: /Cloudflare — API token/i }),
 		).toBeTruthy();
 		expect(
-			screen.getByText(/Manage Account →\s*Account API Tokens → Create new token/),
+			screen.getByText(
+				/Manage Account →\s*Account API Tokens → Create new token/,
+			),
 		).toBeTruthy();
 		expect(screen.getByText("Zone DNS Edit")).toBeTruthy();
 		expect(screen.getByText("Zone Zone Read")).toBeTruthy();
@@ -58,12 +60,12 @@ describe("production deploy handoff workbench (lesson 3.14)", () => {
 		).toBeTruthy();
 
 		expect(screen.getByText("README deployment prompt")).toBeTruthy();
-		expect(
-			screen.getByRole("button", { name: /^Copy prompt$/ }),
-		).toBeTruthy();
+		expect(screen.getByRole("button", { name: /^Copy prompt$/ })).toBeTruthy();
 
 		expect(screen.getByLabelText(/Cloudflare API token/i)).toBeTruthy();
-		expect(screen.getByLabelText(/Stripe live secret key \(paste\)/i)).toBeTruthy();
+		expect(
+			screen.getByLabelText(/Stripe live secret key \(paste\)/i),
+		).toBeTruthy();
 
 		expect(screen.getByText("Success checks")).toBeTruthy();
 		expect(

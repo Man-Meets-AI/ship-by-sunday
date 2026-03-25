@@ -170,7 +170,9 @@ export async function upsertLessonState(
 	lesson: LessonConfig,
 	options: LessonStateUpsertOptions,
 ) {
-	const existingState = viewerState.lessonStateByLessonKey.get(lesson.lessonKey);
+	const existingState = viewerState.lessonStateByLessonKey.get(
+		lesson.lessonKey,
+	);
 	const now = Date.now();
 
 	if (options.mode === "view") {
@@ -183,14 +185,14 @@ export async function upsertLessonState(
 			return { created: false, timestamp: now };
 		}
 
-			await ctx.db.insert("lessonStates", {
-				clerkUserId: viewerState.clerkUserId,
-				courseSlug: COURSE_SLUG,
-				curriculumVersion: CURRICULUM_VERSION,
-				lessonKey: lesson.lessonKey,
-				lessonId: lesson.displayLabel,
-				blockId: lesson.block,
-				status: "not_started",
+		await ctx.db.insert("lessonStates", {
+			clerkUserId: viewerState.clerkUserId,
+			courseSlug: COURSE_SLUG,
+			curriculumVersion: CURRICULUM_VERSION,
+			lessonKey: lesson.lessonKey,
+			lessonId: lesson.displayLabel,
+			blockId: lesson.block,
+			status: "not_started",
 			artifactKey: lesson.artifact.key,
 			artifactType: lesson.artifact.type,
 			fieldValues: {},
@@ -264,14 +266,13 @@ export async function hydrateUploadUrls(
 		await Promise.all(
 			Object.entries(values).map(async ([fieldId, value]) => {
 				if (isReferenceGalleryValue(value)) {
-						return [
-							fieldId,
-							await hydrateReferenceGalleryValue(
-								value,
-								async (storageId) => ctx.storage.getUrl(storageId),
-							),
-						];
-					}
+					return [
+						fieldId,
+						await hydrateReferenceGalleryValue(value, async (storageId) =>
+							ctx.storage.getUrl(storageId),
+						),
+					];
+				}
 
 				if (isUploadFieldValueArray(value)) {
 					return [

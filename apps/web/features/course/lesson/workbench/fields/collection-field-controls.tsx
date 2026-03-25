@@ -42,8 +42,11 @@ export function renderCollectionFieldControl(
 								label={item.label}
 								checked={item.checked}
 								onChange={(checked) => {
-									const nextItems = checklistItems.map((current, currentIndex) =>
-										currentIndex === index ? { ...current, checked } : current,
+									const nextItems = checklistItems.map(
+										(current, currentIndex) =>
+											currentIndex === index
+												? { ...current, checked }
+												: current,
 									);
 									onChange(nextItems);
 								}}

@@ -26,6 +26,7 @@ Production is healthy only when all three systems agree on the same release cand
 - `dev` requires pull requests plus the same always-on checks, but not a formal approval.
 - Vercel project `mma-shipbysunday` is linked to `ParkerRex/mma-shipbysunday` and uses `main` as its production branch.
 - GitHub repository secret `CONVEX_DEPLOY_KEY` must exist before remote Convex dry-runs or production deploys can succeed.
+- GitHub repository variable `CONVEX_PRODUCTION_DEPLOY_ENABLED` should stay unset or `false` until the first manual dry-run on `main` succeeds.
 
 Create that secret from the Convex dashboard for the production deployment:
 
@@ -62,6 +63,14 @@ gh workflow run convex-production-deploy.yml --repo ParkerRex/mma-shipbysunday -
 ```
 
 That workflow defaults to dry-run when manually dispatched. A successful run proves the GitHub secret, checkout, Bun install, and `bunx convex deploy --dry-run -y` path are wired correctly.
+
+After that dry-run succeeds, enable automatic `main` deploys:
+
+```bash
+gh variable set CONVEX_PRODUCTION_DEPLOY_ENABLED --repo ParkerRex/mma-shipbysunday --body true
+```
+
+Until that variable is `true`, pushes to `main` will log a skip instead of deploying Convex production.
 
 ## Hotfix path
 

@@ -84,7 +84,9 @@ export function formatPacketFactValue(
 	fieldKey: CanonicalProjectFactKey,
 ) {
 	const value =
-		fieldKey === "surface_type" ? facts.surface_type ?? "web_app" : facts[fieldKey];
+		fieldKey === "surface_type"
+			? (facts.surface_type ?? "web_app")
+			: facts[fieldKey];
 
 	if (Array.isArray(value)) {
 		return value.join("\n");
@@ -100,7 +102,10 @@ export function buildStepDraftValues(
 	step: PacketStepDefinition,
 ) {
 	return Object.fromEntries(
-		step.fieldKeys.map((fieldKey) => [fieldKey, formatPacketFactValue(facts, fieldKey)]),
+		step.fieldKeys.map((fieldKey) => [
+			fieldKey,
+			formatPacketFactValue(facts, fieldKey),
+		]),
 	) as Record<CanonicalProjectFactKey, string>;
 }
 

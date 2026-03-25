@@ -1,6 +1,7 @@
 # apps/web/AGENTS.md
 
 ## Ship by Sunday — web app rules
+
 - This product is packet-first, not course-first.
 - Required funnel:
   Start -> Product -> Design -> Marketing -> Build Plan -> Review & Download
@@ -15,7 +16,9 @@
   - full repo zip at Review & Download
 
 ## Source reading order
+
 Before planning or implementation, read:
+
 1. `docs/ship-by-sunday/packet-contract-and-question-map-2026-03-23.md`
 2. `docs/ship-by-sunday/input-architecture-keep-kill-combine-2026-03-23.md`
 3. `docs/ship-by-sunday/curriculum-reset-funnel-2026-03-23.md`
@@ -25,6 +28,7 @@ Before planning or implementation, read:
 Use original transcripts and planning docs only to salvage useful teaching beats, examples, and voice.
 
 ## Planning behavior
+
 - For major IA, lesson, or funnel work, create an ExecPlan before coding.
 - Explicitly separate fact / workflow / derived / ephemeral.
 - Call out contradictions instead of papering over them.

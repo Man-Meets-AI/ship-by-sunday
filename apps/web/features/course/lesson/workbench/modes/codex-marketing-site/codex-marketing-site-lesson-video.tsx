@@ -94,9 +94,7 @@ function LessonVideoPlayer({
 			/>
 		);
 
-	return (
-		<Card className="gap-0 overflow-hidden p-0 py-0">{inner}</Card>
-	);
+	return <Card className="gap-0 overflow-hidden p-0 py-0">{inner}</Card>;
 }
 
 export function CodexMarketingSiteLessonVideo({

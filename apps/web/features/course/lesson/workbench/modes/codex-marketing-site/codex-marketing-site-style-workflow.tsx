@@ -43,7 +43,10 @@ export function CodexMarketingSiteStyleWorkflow({
 								fieldValues[CODEX_MARKETING_SITE_FIELD_IDS.styleReferenceUrl]
 							}
 							onChange={(v) =>
-								onFieldChange(CODEX_MARKETING_SITE_FIELD_IDS.styleReferenceUrl, v)
+								onFieldChange(
+									CODEX_MARKETING_SITE_FIELD_IDS.styleReferenceUrl,
+									v,
+								)
 							}
 							invalid={invalidFieldIds.has(styleField.id)}
 						/>

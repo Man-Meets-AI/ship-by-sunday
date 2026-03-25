@@ -52,9 +52,7 @@ export function ProductionDeployHandoffChecklistCard({
 		<Card>
 			<CardHeader className="space-y-1">
 				<CardTitle className="text-base">{title}</CardTitle>
-				{description ? (
-					<CardDescription>{description}</CardDescription>
-				) : null}
+				{description ? <CardDescription>{description}</CardDescription> : null}
 			</CardHeader>
 			<CardContent className="space-y-3">
 				<div className="divide-y divide-border overflow-hidden rounded-lg border border-border">

@@ -14,7 +14,9 @@ type PacketWorkspaceState = FunctionReturnType<
 >;
 
 export async function getPacketDownloadContext(): Promise<{
-	canonicalProjectDefinition: ReturnType<typeof createCanonicalProjectDefinition>;
+	canonicalProjectDefinition: ReturnType<
+		typeof createCanonicalProjectDefinition
+	>;
 	workspaceState: PacketWorkspaceState;
 } | null> {
 	const session = await getConvexServerSession();
@@ -25,7 +27,11 @@ export async function getPacketDownloadContext(): Promise<{
 	const [access, projectDefinition, workspaceState] = await Promise.all([
 		fetchQuery(api.access.viewerProductAccess, {}, { token: session.token }),
 		fetchQuery(api.packet.getProjectDefinition, {}, { token: session.token }),
-		fetchQuery(api.packet.getPacketWorkspaceState, {}, { token: session.token }),
+		fetchQuery(
+			api.packet.getPacketWorkspaceState,
+			{},
+			{ token: session.token },
+		),
 	]);
 
 	if (!access.hasAccess || !projectDefinition) {

@@ -51,12 +51,20 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.dry_run }}" == "true" ]]; then
             echo "label=dry-run" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ github.event_name }}" == "push" && "${{ vars.CONVEX_PRODUCTION_DEPLOY_ENABLED }}" != "true" ]]; then
+            echo "label=skip" >> "$GITHUB_OUTPUT"
           else
             echo "label=deploy" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
+
+      - name: Automatic deploys are paused
+        if: steps.deploy_mode.outputs.label == 'skip'
+        run: |
+          echo "Skipping automatic Convex production deploy because CONVEX_PRODUCTION_DEPLOY_ENABLED is not set to true."
+          echo "Run workflow_dispatch with dry_run=true on main first, then enable the repository variable when you are ready for automatic main deploys."
 
       - name: Run Convex production dry-run
         if: steps.deploy_mode.outputs.label == 'dry-run'

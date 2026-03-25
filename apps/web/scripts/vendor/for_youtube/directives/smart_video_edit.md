@@ -38,12 +38,13 @@ python3 execution/insert_3d_transition.py .tmp/edited.mp4 output.mp4 --bg-image 
 
 ### What This Produces
 
-| Step | Tool | Result |
-|------|------|--------|
-| 1 | `jump_cut_vad_parallel.py` | Silences removed via neural VAD, audio enhanced (EQ, compression, -16 LUFS) |
-| 2 | `insert_3d_transition.py` | 5-second swivel teaser inserted at 3s, previewing content from 1:00 onwards |
+| Step | Tool                       | Result                                                                      |
+| ---- | -------------------------- | --------------------------------------------------------------------------- |
+| 1    | `jump_cut_vad_parallel.py` | Silences removed via neural VAD, audio enhanced (EQ, compression, -16 LUFS) |
+| 2    | `insert_3d_transition.py`  | 5-second swivel teaser inserted at 3s, previewing content from 1:00 onwards |
 
 **Timeline:**
+
 ```
 [0-3s intro] [3-8s swivel teaser @ 60x] [8s onwards: edited content]
 Audio: Original audio plays continuously throughout
@@ -107,6 +108,7 @@ python3 execution/simple_video_edit.py \
 ```
 
 Output:
+
 - Edited video: `.tmp/{original_name}_edited.mp4`
 - Metadata file: `.tmp/{original_name}_metadata.txt`
 
@@ -125,16 +127,16 @@ Output:
 
 ## CLI Arguments
 
-| Argument | Default | Description |
-|----------|---------|-------------|
-| `--video` | required | Path to input video |
-| `--title` | required | YouTube title |
-| `--thumbnail` | none | Thumbnail image path |
-| `--no-upload` | false | Skip Auphonic, keep local file |
-| `--no-normalize` | false | Skip audio normalization |
-| `--keep-temp` | false | Don't delete edited video after upload |
-| `--silence-threshold` | -35 | dB threshold for silence detection |
-| `--silence-duration` | 3.0 | Minimum silence duration (seconds) |
+| Argument              | Default  | Description                            |
+| --------------------- | -------- | -------------------------------------- |
+| `--video`             | required | Path to input video                    |
+| `--title`             | required | YouTube title                          |
+| `--thumbnail`         | none     | Thumbnail image path                   |
+| `--no-upload`         | false    | Skip Auphonic, keep local file         |
+| `--no-normalize`      | false    | Skip audio normalization               |
+| `--keep-temp`         | false    | Don't delete edited video after upload |
+| `--silence-threshold` | -35      | dB threshold for silence detection     |
+| `--silence-duration`  | 3.0      | Minimum silence duration (seconds)     |
 
 ---
 
@@ -163,23 +165,26 @@ Timestamps are automatically adjusted for removed content.
 ## Technical Details
 
 ### Silence Detection
+
 - FFmpeg `silencedetect` filter
 - Default: -35dB threshold, 3s minimum duration (stricter to filter out breathing)
 - All detected silences are cut (no AI filtering)
 
 ### Audio Normalization
+
 ```
 highpass=f=80,loudnorm=I=-16:TP=-1.5:LRA=11
 ```
 
-| Parameter | Value | Purpose |
-|-----------|-------|---------|
-| `highpass=f=80` | 80Hz | Remove low-frequency rumble |
-| `I=-16` | -16 LUFS | YouTube loudness standard |
-| `TP=-1.5` | -1.5 dBTP | True peak limit |
-| `LRA=11` | 11 LU | Loudness range |
+| Parameter       | Value     | Purpose                     |
+| --------------- | --------- | --------------------------- |
+| `highpass=f=80` | 80Hz      | Remove low-frequency rumble |
+| `I=-16`         | -16 LUFS  | YouTube loudness standard   |
+| `TP=-1.5`       | -1.5 dBTP | True peak limit             |
+| `LRA=11`        | 11 LU     | Loudness range              |
 
 ### Video Encoding
+
 - macOS: Hardware encoding (h264_videotoolbox) at 8Mbps
 - Fallback: libx264 CRF 18
 - Audio: AAC 320kbps
@@ -252,18 +257,23 @@ Metadata at: .tmp/recording_metadata.txt
 ## Troubleshooting
 
 ### Audio too quiet
+
 Run without `--no-normalize` to apply EBU R128 normalization.
 
 ### Cuts feel abrupt
+
 Increase `--silence-duration` to only cut longer pauses (e.g., `--silence-duration 5`).
 
 ### Too much content being cut
+
 Raise threshold: `--silence-threshold -40` (more negative = quieter sounds needed to trigger).
 
 ### Breathing sounds kept as pauses
+
 The default -35dB should handle most breathing. If not, try `--silence-threshold -30` (less negative = louder sounds still count as silence).
 
 ### Hardware encoding fails
+
 Script automatically falls back to software encoding (libx264).
 
 ---
@@ -271,6 +281,7 @@ Script automatically falls back to software encoding (libx264).
 ## Related Tools
 
 ### Jump Cut Editor (VAD-based) - `execution/jump_cut_vad_parallel.py`
+
 More accurate silence removal using neural voice activity detection (Silero VAD). Better than FFmpeg for detecting actual speech vs. background noise. **Always use the parallel version for 5-10x faster processing.**
 
 ```bash
@@ -283,6 +294,7 @@ python3 execution/jump_cut_vad_parallel.py input.mp4 output.mp4 \
 ```
 
 ### 3D Pan Transition - `execution/pan_3d_transition.py`
+
 Create fast-forward "preview" transitions with 3D rotation effects. See `directives/pan_3d_transition.md`.
 
 ```bash

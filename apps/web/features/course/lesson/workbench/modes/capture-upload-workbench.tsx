@@ -63,9 +63,7 @@ export function CaptureUploadWorkbench({
 					{pinnedArtifacts.map((artifact) => (
 						<LessonWorkbenchLabeledCard
 							key={artifact.artifactKey}
-							label={
-								artifact.contextTitle ?? artifact.artifactLabel
-							}
+							label={artifact.contextTitle ?? artifact.artifactLabel}
 						>
 							{artifact.fields.length === 0 ? (
 								<Alert className="py-2">

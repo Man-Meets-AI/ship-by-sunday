@@ -19,11 +19,7 @@ export function SettingsPageShell({
 	}
 
 	return (
-		<AppShell
-			viewportMode="app"
-			showSkillRail={false}
-			mission={initialMission}
-		>
+		<AppShell viewportMode="app" showSkillRail={false} mission={initialMission}>
 			<SettingsPageContent />
 		</AppShell>
 	);

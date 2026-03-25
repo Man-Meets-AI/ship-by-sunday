@@ -7,9 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 
-import {
-	getVerificationCopy,
-} from "@/features/auth/sign-in/sign-in-verification-copy";
+import { getVerificationCopy } from "@/features/auth/sign-in/sign-in-verification-copy";
 import { SignInVerificationActions } from "@/features/auth/sign-in/sign-in-verification-actions";
 import { SignInVerificationFields } from "@/features/auth/sign-in/sign-in-verification-fields";
 import type {

@@ -26,9 +26,7 @@ export function CoachResourceLink({
 				rel={isExternal ? "noopener noreferrer" : undefined}
 			>
 				<ItemContent className="min-w-0">
-					<ItemDescription
-						className={cn(coachEyebrowClass, "line-clamp-none")}
-					>
+					<ItemDescription className={cn(coachEyebrowClass, "line-clamp-none")}>
 						{resource.kind}
 					</ItemDescription>
 					<ItemTitle className="line-clamp-none whitespace-normal text-base font-semibold leading-snug">

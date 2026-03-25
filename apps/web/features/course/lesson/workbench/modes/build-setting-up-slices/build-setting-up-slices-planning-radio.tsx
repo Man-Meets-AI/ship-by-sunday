@@ -34,13 +34,16 @@ export function BuildSettingUpSlicesPlanningRadio({
 	return (
 		<div className="space-y-4">
 			<p className="text-sm text-muted-foreground">
-				Use the plan skill in your copied repo, or normal planning mode in
-				your agent—both are valid.
+				Use the plan skill in your copied repo, or normal planning mode in your
+				agent—both are valid.
 			</p>
 			<RadioGroup value={selected} onValueChange={(next) => onChange(next)}>
 				<div className="flex items-center gap-2">
 					<RadioGroupItem value={BUILD_SLICES_PLAN_SKILL} id="bss-plan-skill" />
-					<Label htmlFor="bss-plan-skill" className="cursor-pointer font-normal">
+					<Label
+						htmlFor="bss-plan-skill"
+						className="cursor-pointer font-normal"
+					>
 						Plan skill
 					</Label>
 				</div>
@@ -49,7 +52,10 @@ export function BuildSettingUpSlicesPlanningRadio({
 						value={BUILD_SLICES_TRADITIONAL}
 						id="bss-traditional"
 					/>
-					<Label htmlFor="bss-traditional" className="cursor-pointer font-normal">
+					<Label
+						htmlFor="bss-traditional"
+						className="cursor-pointer font-normal"
+					>
 						Traditional planning
 					</Label>
 				</div>

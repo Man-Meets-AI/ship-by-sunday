@@ -63,9 +63,9 @@ export function buildVercelWebhookIncident(
 function isEscalatedVercelDeploymentEventType(
 	value: string,
 ): value is EscalatedVercelDeploymentEventType {
-	return (
-		escalatedVercelDeploymentEventTypes as readonly string[]
-	).includes(value);
+	return (escalatedVercelDeploymentEventTypes as readonly string[]).includes(
+		value,
+	);
 }
 
 function buildVercelIncidentTitle(
@@ -79,7 +79,9 @@ function buildVercelIncidentTitle(
 	return `Vercel production deployment failed for ${deploymentName}.`;
 }
 
-function buildVercelIncidentCode(eventType: EscalatedVercelDeploymentEventType) {
+function buildVercelIncidentCode(
+	eventType: EscalatedVercelDeploymentEventType,
+) {
 	if (eventType === "deployment.canceled") {
 		return "vercel_deployment_canceled";
 	}
@@ -87,9 +89,7 @@ function buildVercelIncidentCode(eventType: EscalatedVercelDeploymentEventType) 
 	return "vercel_deployment_failed";
 }
 
-function buildVercelNextAction(
-	eventType: EscalatedVercelDeploymentEventType,
-) {
+function buildVercelNextAction(eventType: EscalatedVercelDeploymentEventType) {
 	if (eventType === "deployment.canceled") {
 		return "Check the Vercel deployment activity and confirm whether the production rollout was intentionally canceled.";
 	}

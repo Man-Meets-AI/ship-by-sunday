@@ -5,8 +5,7 @@ import { productConfig } from "@/config/product";
 export const productWordmarkFontClassName =
 	"[font-family:var(--font-bebas-neue),ui-sans-serif,system-ui,sans-serif]";
 
-export const productWordmarkClassName =
-	`${productWordmarkFontClassName} text-2xl font-normal leading-none tracking-wide text-foreground sm:text-3xl`;
+export const productWordmarkClassName = `${productWordmarkFontClassName} text-2xl font-normal leading-none tracking-wide text-foreground sm:text-3xl`;
 
 type ProductBrandProps = {
 	href?: string;
@@ -28,7 +27,11 @@ export function ProductBrand({
 	);
 
 	if (!href) {
-		return <div className={`inline-flex items-center ${className}`.trim()}>{content}</div>;
+		return (
+			<div className={`inline-flex items-center ${className}`.trim()}>
+				{content}
+			</div>
+		);
 	}
 
 	return (
