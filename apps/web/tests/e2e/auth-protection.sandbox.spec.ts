@@ -45,9 +45,7 @@ test.describe("protected routes", () => {
 		}) => {
 			await page.goto("/start");
 			await expect(page).toHaveURL(/\/start/);
-			await expect(
-				page.getByText("How this works"),
-			).toBeVisible();
+			await expect(page.getByText("How this works")).toBeVisible();
 			await expect(
 				page.getByRole("link", { name: "Open the packet flow" }),
 			).toBeVisible();

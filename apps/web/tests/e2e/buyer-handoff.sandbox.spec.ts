@@ -24,7 +24,9 @@ async function expectPacketStage(
 	route: (typeof packetStageRoutes)[number],
 ) {
 	await page.goto(route.path);
-	await expect(page).toHaveURL(new RegExp(`${route.path.replace("/", "\\/")}$`));
+	await expect(page).toHaveURL(
+		new RegExp(`${route.path.replace("/", "\\/")}$`),
+	);
 	await expect(page.getByText(route.stageLabel).first()).toBeVisible();
 	await expect(page.getByText("Stage status")).toBeVisible();
 	await expect(page.getByRole("button", { name: "Save step" })).toBeVisible();
@@ -55,9 +57,7 @@ test.describe("member with access", () => {
 
 		await page.goto("/settings");
 		await expect(page).toHaveURL(/\/settings$/);
-		await expect(
-			page.getByRole("heading", { name: "Settings" }),
-		).toBeVisible();
+		await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
 		await expect(page.getByText(/Manage your account/i)).toBeVisible();
 	});
 });
