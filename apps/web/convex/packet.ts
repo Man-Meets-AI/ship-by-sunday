@@ -15,6 +15,11 @@ import {
 	getPacketWorkspaceStateHandler,
 	getPacketWorkspaceStateReturns,
 } from "./packet/stageReadiness";
+import {
+	unlockExecuteShipArgs,
+	unlockExecuteShipHandler,
+	unlockExecuteShipReturns,
+} from "./packet/workflowState";
 
 export const getProjectDefinition = query({
 	args: getProjectDefinitionArgs,
@@ -26,6 +31,12 @@ export const saveProjectDefinitionFacts = mutation({
 	args: saveProjectDefinitionFactsArgs,
 	returns: saveProjectDefinitionFactsReturns,
 	handler: saveProjectDefinitionFactsHandler,
+});
+
+export const unlockExecuteShip = mutation({
+	args: unlockExecuteShipArgs,
+	returns: unlockExecuteShipReturns,
+	handler: unlockExecuteShipHandler,
 });
 
 export const getPacketWorkspaceState = query({

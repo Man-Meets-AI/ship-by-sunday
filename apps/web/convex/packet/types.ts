@@ -6,3 +6,4 @@ export type PacketMutationCtx = MutationCtx;
 export type PacketReadCtx = QueryCtx | MutationCtx;
 
 export type ProjectDefinitionDoc = Doc<"projectDefinitions">;
+export type PacketWorkflowStateDoc = Doc<"packetWorkflowStates">;

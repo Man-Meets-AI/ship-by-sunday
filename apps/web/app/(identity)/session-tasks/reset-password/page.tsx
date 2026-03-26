@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { TaskResetPassword } from "@clerk/nextjs";
 
 import { AuthPageShell } from "@/features/auth/sign-in/auth-page-shell";
+import { resetPasswordSupportPanelContent } from "@/features/auth/sign-in/identity-route-panel-content";
 import { getTaskRedirectUrlComplete } from "@/features/auth/sign-in/sign-in-route-utils";
 
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ export default async function Page({
 		<AuthPageShell
 			title="Reset your password"
 			description="Finish the Clerk task so we can complete your sign-in."
+			supportPanel={resetPasswordSupportPanelContent}
 		>
 			<TaskResetPassword
 				redirectUrlComplete={getTaskRedirectUrlComplete(redirectUrl)}

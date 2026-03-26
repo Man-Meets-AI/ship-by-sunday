@@ -18,6 +18,11 @@ export const productAccessGrantOutcomeValidator = v.union(
 	v.literal("patched"),
 );
 
+export const productAccessResetOutcomeValidator = v.union(
+	v.literal("deleted"),
+	v.literal("noop"),
+);
+
 export const productAccessReturnValidator = v.object({
 	clerkUserId: v.union(v.string(), v.null()),
 	hasAccess: v.boolean(),
@@ -31,6 +36,10 @@ export const productAccessReturnValidator = v.object({
 
 export const productAccessGrantResultValidator = v.object({
 	granted: productAccessGrantOutcomeValidator,
+});
+
+export const productAccessResetResultValidator = v.object({
+	reset: productAccessResetOutcomeValidator,
 });
 
 export const productAccessGrantDocumentValidator = v.object({

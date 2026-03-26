@@ -32,6 +32,14 @@ export const projectDefinitionPublicValidator = v.object({
 	updatedAt: v.number(),
 });
 
+export const packetWorkflowStatePublicValidator = v.object({
+	clerkUserId: v.string(),
+	productKey: v.string(),
+	executeShipUnlockedAt: v.optional(v.number()),
+	createdAt: v.number(),
+	updatedAt: v.number(),
+});
+
 const packetReadinessValidator = v.object({
 	isReady: v.boolean(),
 	missingFactKeys: v.array(v.string()),
@@ -47,6 +55,7 @@ export const packetStageStatusValidator = v.object({
 
 export const packetWorkspaceStateValidator = v.object({
 	projectDefinition: v.union(projectDefinitionPublicValidator, v.null()),
+	workflowState: v.union(packetWorkflowStatePublicValidator, v.null()),
 	firstIncompleteStageId: packetStageIdValidator,
 	packetReadiness: v.object({
 		product: packetReadinessValidator,

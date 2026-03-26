@@ -1,8 +1,21 @@
+import React from "react";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+	createCanonicalProjectDefinitionDraft,
+	createCompleteProjectDefinition,
+	deriveStageStatus,
+} from "@packet-compiler";
 
 import type { PacketWorkspaceState } from "@/features/packet-flow/lib/packet-workspace-types";
+
+const unlockExecuteShipMock = vi.fn();
+const redirectMock = vi.fn((href: string) => {
+	throw new Error(`NEXT_REDIRECT:${href}`);
+});
+const pushMock = vi.fn();
 
 vi.mock("@/features/course/shared/components/app-shell", () => ({
 	AppShell: ({
@@ -22,36 +35,109 @@ vi.mock("@/features/course/shared/components/app-shell", () => ({
 	),
 }));
 
+vi.mock("next/link", () => ({
+	default: ({
+		children,
+		href,
+		...props
+	}: React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+		children: React.ReactNode;
+		href: string;
+	}) => (
+		<a href={href} {...props}>
+			{children}
+		</a>
+	),
+}));
+
 vi.mock("@/features/packet-flow/components/packet-stage-nav", () => ({
 	PacketStageNav: () => <div data-testid="packet-stage-nav" />,
 }));
 
+vi.mock("convex/react", () => ({
+	useMutation: () => unlockExecuteShipMock,
+}));
+
+vi.mock("next/navigation", () => ({
+	redirect: (href: string) => redirectMock(href),
+	useRouter: () => ({
+		push: pushMock,
+	}),
+}));
+
 import { PacketReviewPage } from "@/features/packet-flow/components/packet-review-page";
 
-const readyWorkspaceState = {
-	projectDefinition: null,
-	firstIncompleteStageId: "review",
-	packetReadiness: {
-		product: { isReady: true, missingFactKeys: [] },
-		design: { isReady: true, missingFactKeys: [] },
-		marketing: { isReady: true, missingFactKeys: [] },
-		build: { isReady: true, missingFactKeys: [] },
-		review: { isReady: true, missingFactKeys: [] },
-	},
-	stageStatuses: [],
-} as PacketWorkspaceState;
+function createWorkspaceState(
+	factOverrides: Record<string, unknown> = {},
+): PacketWorkspaceState {
+	const baseFacts = createCompleteProjectDefinition().facts;
+	const facts = Object.fromEntries(
+		Object.entries({
+			...baseFacts,
+			...factOverrides,
+		}).filter(([, value]) => value !== undefined),
+	);
+	const projectDefinition = createCanonicalProjectDefinitionDraft({
+		clerkUserId: "user_123",
+		productKey: "ship-by-sunday",
+		facts,
+	});
+	const stageStatus = deriveStageStatus(projectDefinition.facts);
+
+	return {
+		projectDefinition,
+		firstIncompleteStageId: stageStatus.firstIncompleteStageId,
+		packetReadiness: stageStatus.packetReadiness,
+		stageStatuses: stageStatus.stageStatuses,
+	} as PacketWorkspaceState;
+}
 
 describe("PacketReviewPage", () => {
-	it("renders outward-facing pack labels and starter snapshot download", () => {
+	beforeEach(() => {
+		redirectMock.mockClear();
+		unlockExecuteShipMock.mockReset();
+		pushMock.mockReset();
+	});
+
+	it("renders outward-facing pack labels, the starter snapshot download, and the execute preview", async () => {
+		const user = userEvent.setup();
+		const readyWorkspaceState = createWorkspaceState();
 		render(<PacketReviewPage initialWorkspaceState={readyWorkspaceState} />);
 
 		expect(
 			screen.getByRole("heading", { name: "Review & Download" }),
 		).toBeTruthy();
+		expect(screen.getByText("Checkpoint complete")).toBeTruthy();
 		expect(screen.getByText("Design Pack")).toBeTruthy();
 		expect(screen.getByText("Marketing Pack")).toBeTruthy();
 		expect(screen.getByText("Build Pack")).toBeTruthy();
 		expect(screen.getByText("Prompt Pack")).toBeTruthy();
+		expect(screen.getByText("Execute / Ship")).toBeTruthy();
+		expect(
+			screen
+				.getByRole("button", { name: "Download Starter Snapshot first" })
+				.hasAttribute("disabled"),
+		).toBe(true);
+
+		await user.click(
+			screen.getByRole("link", { name: "Download Starter Snapshot" }),
+		);
+
+		expect(
+			screen
+				.getByRole("button", { name: "Unlock Execute / Ship" })
+				.hasAttribute("disabled"),
+		).toBe(false);
+
+		unlockExecuteShipMock.mockResolvedValue({
+			executeShipUnlockedAt: 123,
+		});
+		await user.click(
+			screen.getByRole("button", { name: "Unlock Execute / Ship" }),
+		);
+
+		expect(unlockExecuteShipMock).toHaveBeenCalledWith({});
+		expect(pushMock).toHaveBeenCalledWith("/execute");
 
 		expect(
 			screen
@@ -73,5 +159,16 @@ describe("PacketReviewPage", () => {
 				.getByRole("link", { name: "Download Starter Snapshot" })
 				.getAttribute("href"),
 		).toBe("/api/download/repo");
+	});
+
+	it("redirects back to the first incomplete stage when review is still locked", () => {
+		const lockedWorkspaceState = createWorkspaceState({
+			objective: undefined,
+		});
+
+		expect(() =>
+			render(<PacketReviewPage initialWorkspaceState={lockedWorkspaceState} />),
+		).toThrowError("NEXT_REDIRECT:/build-plan");
+		expect(redirectMock).toHaveBeenCalledWith("/build-plan");
 	});
 });

@@ -7,6 +7,7 @@ import { useEffect, useRef } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { reportClientError } from "@/features/observability/lib/client-error-report";
 import { AuthPageShell } from "@/features/auth/sign-in/auth-page-shell";
+import { ssoCallbackSupportPanelContent } from "@/features/auth/sign-in/identity-route-panel-content";
 import {
 	buildSignInHref,
 	getBlockedGoogleSignInHref,
@@ -149,6 +150,7 @@ export function SsoCallbackPage({ redirectPath }: SsoCallbackPageProps) {
 		<AuthPageShell
 			title="Completing Google sign-in"
 			description="Hang tight while we finish the secure redirect."
+			supportPanel={ssoCallbackSupportPanelContent}
 		>
 			<div className="flex items-center gap-2 text-sm text-muted-foreground">
 				<Spinner />

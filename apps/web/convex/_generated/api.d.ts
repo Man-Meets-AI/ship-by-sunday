@@ -32,6 +32,7 @@ import type * as packet_projectDefinition from "../packet/projectDefinition.js";
 import type * as packet_stageReadiness from "../packet/stageReadiness.js";
 import type * as packet_types from "../packet/types.js";
 import type * as packet_validators from "../packet/validators.js";
+import type * as packet_workflowState from "../packet/workflowState.js";
 import type * as stripeWebhook from "../stripeWebhook.js";
 import type * as uploads from "../uploads.js";
 
@@ -66,6 +67,7 @@ declare const fullApi: ApiFromModules<{
   "packet/stageReadiness": typeof packet_stageReadiness;
   "packet/types": typeof packet_types;
   "packet/validators": typeof packet_validators;
+  "packet/workflowState": typeof packet_workflowState;
   stripeWebhook: typeof stripeWebhook;
   uploads: typeof uploads;
 }>;

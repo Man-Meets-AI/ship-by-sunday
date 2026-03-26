@@ -16,6 +16,7 @@ const canonicalWorkspaceRoutes = [
 	routeConfig.marketing,
 	routeConfig.buildPlan,
 	routeConfig.review,
+	routeConfig.execute,
 ] as const;
 
 const isProtectedRoute = createRouteMatcher([

@@ -76,6 +76,13 @@ export default defineSchema({
 		createdAt: v.number(),
 		updatedAt: v.number(),
 	}).index("by_clerk_user_id_and_product_key", ["clerkUserId", "productKey"]),
+	packetWorkflowStates: defineTable({
+		clerkUserId: v.string(),
+		productKey: v.string(),
+		executeShipUnlockedAt: v.optional(v.number()),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	}).index("by_clerk_user_id_and_product_key", ["clerkUserId", "productKey"]),
 	lessonStates: defineTable({
 		clerkUserId: v.string(),
 		courseSlug: v.string(),

@@ -80,6 +80,11 @@ describe("SsoCallbackPage", () => {
 		render(<SsoCallbackPage redirectPath="/settings" />);
 
 		expect(screen.getByText("Completing Google sign-in")).toBeTruthy();
+		expect(
+			screen.getByText(
+				"We are stitching the Google session back into your purchased account.",
+			),
+		).toBeTruthy();
 		await waitFor(() => {
 			expect(pushMock).toHaveBeenCalledWith("/settings");
 		});

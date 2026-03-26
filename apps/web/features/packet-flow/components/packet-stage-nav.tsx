@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { PacketStageStatus } from "@packet-compiler";
+import type { PacketStageId, PacketStageStatus } from "@packet-compiler";
 import {
 	getPacketStageDefinition,
 	packetStageDefinitions,
@@ -12,7 +12,7 @@ export function PacketStageNav({
 	currentStageId,
 	stageStatuses,
 }: {
-	currentStageId: string;
+	currentStageId: PacketStageId;
 	stageStatuses: PacketStageStatus[];
 }) {
 	return (
@@ -27,12 +27,27 @@ export function PacketStageNav({
 					: status?.isComplete
 						? "secondary"
 						: "outline";
+				const isStageOpen =
+					isCurrent || stage.id === "start" || Boolean(status?.isUnlocked);
+				const badge = (
+					<Badge
+						variant={tone}
+						className={
+							isStageOpen ? "cursor-pointer px-3 py-1" : "px-3 py-1 opacity-60"
+						}
+						aria-disabled={!isStageOpen}
+					>
+						{stage.label}
+					</Badge>
+				);
+
+				if (!isStageOpen) {
+					return <span key={stage.id}>{badge}</span>;
+				}
 
 				return (
 					<Link key={stage.id} href={getPacketStageDefinition(stage.id).route}>
-						<Badge variant={tone} className="cursor-pointer px-3 py-1">
-							{stage.label}
-						</Badge>
+						{badge}
 					</Link>
 				);
 			})}
