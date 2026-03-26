@@ -18,13 +18,14 @@ When you need to change the homepage, inspect these files in this order:
 3. `features/marketing/lib/home-page-render-model.ts`
 4. `features/marketing/components/home-page.tsx`
 5. `features/marketing/components/home-page/durability-section.tsx`
-6. `features/marketing/components/home-page/home-page-primary-cta.tsx`
-7. `features/marketing/lib/home-page-structured-data.ts`
-8. `tests/unit/home-page-content.test.ts`
-9. `tests/unit/home-page-render-model.test.ts`
-10. `tests/unit/home-page-structured-data.test.ts`
-11. `tests/integration-ui/home-page-primary-cta.test.tsx`
-12. `tests/browser-smoke/app-smoke.spec.ts`
+6. `features/marketing/components/home-page/starter-system-section.tsx`
+7. `features/marketing/components/home-page/home-page-primary-cta.tsx`
+8. `features/marketing/lib/home-page-structured-data.ts`
+9. `tests/unit/home-page-content.test.ts`
+10. `tests/unit/home-page-render-model.test.ts`
+11. `tests/unit/home-page-structured-data.test.ts`
+12. `tests/integration-ui/home-page-primary-cta.test.tsx`
+13. `tests/browser-smoke/app-smoke.spec.ts`
 
 If you skip that order, it is easy to update copy while missing the render model, or to change visible sections while leaving schema and smoke tests out of sync.
 
@@ -39,6 +40,7 @@ That config currently controls:
 - `sections.hero`
 - `sections.sprintPath`
 - `sections.whatsInside`
+- `sections.starterSystem`
 - `sections.durability`
 - `sections.socialProof`
 - `sections.faq`
@@ -82,11 +84,12 @@ The homepage renders these top-level sections in this fixed order:
 1. `hero`
 2. `sprintPath`
 3. `whatsInside`
-4. `durability`
-5. `socialProof`
-6. `faq`
-7. `pricing`
-8. `footer`
+4. `starterSystem`
+5. `durability`
+6. `socialProof`
+7. `faq`
+8. `pricing`
+9. `footer`
 
 Two anchors are part of the public contract:
 

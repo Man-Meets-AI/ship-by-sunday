@@ -5,9 +5,9 @@ description: Understand the tracked env contract in plain English so you know wh
 
 # Environment Variables
 
-Use `.env.local.example` as the tracked contract for the local web app.
+Use `apps/web/.env.local.example` as the tracked contract for the local web app.
 
-Run `bun run dev:convex` to connect the repo to your hosted Convex dev deployment. That command writes `NEXT_PUBLIC_CONVEX_URL` and `CONVEX_DEPLOYMENT` into `.env.local`.
+Run `bun run dev:convex` to connect the repo to your hosted Convex dev deployment. That command writes `NEXT_PUBLIC_CONVEX_URL` and `CONVEX_DEPLOYMENT` into `apps/web/.env.local`.
 
 ## Core public runtime
 
@@ -18,7 +18,7 @@ Run `bun run dev:convex` to connect the repo to your hosted Convex dev deploymen
 
 ## Convex CLI target
 
-- `CONVEX_DEPLOYMENT`: written by `convex dev` into `.env.local` so repo scripts and `convex run` commands target your hosted Convex dev deployment explicitly
+- `CONVEX_DEPLOYMENT`: written by `convex dev` into `apps/web/.env.local` so repo scripts and `convex run` commands target your hosted Convex dev deployment explicitly
 
 ## Core server runtime
 

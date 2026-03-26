@@ -23,7 +23,7 @@ bun run qa:run-pack -- --pack=default_ship --dry-run
 bun run qa:ship -- --pack=default_ship --slug=baseline
 ```
 
-`qa:validate` is the fast integrity check. `qa:inventory:sync` refreshes the full-suite inventory from the current `apps/web/tests/` tree. `qa:personas:prepare` provisions the committed personas against the Clerk and Convex environment currently loaded for QA. `qa:run-pack` is the explicit scenario-pack runner for `default_ship`, `extended`, and `billing_integration`. `qa:ship` scaffolds a dated run report for the selected scenario pack so the human runner can record what passed, failed, or remained blocked.
+`qa:validate` is the fast integrity check. `qa:inventory:sync` refreshes the full-suite inventory from the current `apps/web/tests/` tree. `qa:personas:prepare` provisions the committed personas against the Clerk and Convex environment currently loaded for QA. `qa:run-pack` is the explicit scenario-pack runner for `default_ship`, `extended`, and `billing_integration`. On local `billing_integration` targets it now records the pinned Stripe guardrail doctor as a warning-only preflight and runs `stripe:dev:verify` as the hard post-checkout proof. `qa:ship` scaffolds a dated run report for the selected scenario pack so the human runner can record what passed, failed, or remained blocked.
 
 `qa:personas:prepare` and `qa:run-pack` load `apps/web/.env.local` by default. Override that with `QA_ENV_FILE=<path>` when the hosted target uses a different Clerk instance than local. For hosted runs, also pass `PLAYWRIGHT_BASE_URL=<target>` so persona prep can refuse a mismatched Clerk environment before Playwright writes a bad auth state.
 
@@ -67,7 +67,7 @@ Rough old-world translation:
 - `extended`
   Broader secondary coverage. Useful for confidence and cleanup, but not the first thing to run on every change.
 - `billing_integration`
-  Payment-specific pack. Run this when checkout, Stripe, billing, or entitlement behavior changed and you need payment-path proof.
+  Payment-specific pack. Run this when checkout, Stripe, billing, or entitlement behavior changed and you need payment-path proof. On local targets, the pack now warns if the pinned Stripe CLI project `ship-by-sunday` drifted and then uses `stripe:dev:verify` to prove the real Stripe-to-Convex handoff after checkout.
 
 ## Browser Terms
 
@@ -87,7 +87,7 @@ Rough old-world translation:
 - If public pages, docs surface, or unauthenticated routes changed:
   Run `bun run qa:validate`, then `bun run test:browser-smoke`.
 - If checkout, Stripe, billing, or entitlements changed:
-  Run `bun run qa:validate`, then `bun run qa:run-pack -- --pack=default_ship`, then `bun run qa:run-pack -- --pack=billing_integration`.
+  Run `bun run qa:validate`, then `bun run qa:run-pack -- --pack=default_ship`, then `bun run qa:run-pack -- --pack=billing_integration`. On local targets, fix any `stripe:dev:doctor` warning about the pinned `ship-by-sunday` profile before assuming a billing failure is in app code.
 
 Best mental model:
 
@@ -137,7 +137,7 @@ PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.produ
 Every committed report under `qa/runs/` must say whether it came from `dev`, `prod`, or another explicitly named environment.
 
 Use local `dev` first for authenticated sandbox work. The current green baseline is `default_ship` on local dev. Use hosted or prod second once the local path is understood.
-For local Stripe billing reruns, make sure `.env.local` contains `NEXT_PUBLIC_CONVEX_SITE_URL` and that `bun run dev:stripe` is forwarding to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`.
+For local Stripe billing reruns, make sure `.env.local` contains `NEXT_PUBLIC_CONVEX_SITE_URL`, `bun run dev:stripe` is forwarding to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`, and the pinned Stripe CLI profile `ship-by-sunday` passes `bun run stripe:dev:doctor` or at least explains its warning clearly.
 
 ## Environment sources
 

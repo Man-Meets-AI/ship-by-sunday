@@ -72,7 +72,7 @@ bun run dev:stripe
 
 - `bun run dev:web` runs the Next.js app locally
 - `bun run dev:convex` keeps your hosted Convex dev deployment synced and refreshes `apps/web/.env.local` when you switch deployments
-- `bun run dev:stripe` waits for hosted Convex dev values in `apps/web/.env.local`, then starts the Stripe listener
+- `bun run dev:stripe` waits for hosted Convex dev values in `apps/web/.env.local`, checks the pinned Stripe CLI project `ship-by-sunday`, warns with the exact `stripe login --project-name ship-by-sunday` repair command if the CLI context drifted, then starts the listener with the app `STRIPE_SECRET_KEY`
 - `bun run dev:full` runs `web + hosted Convex dev + Stripe listener` together for checkout QA
 
 This repo does not support Convex's local backend mode as a first-class development workflow.
@@ -170,10 +170,14 @@ For Stripe checkout testing from your local machine against hosted Convex dev, u
 bun run dev:full
 bun run stripe:listen:dev
 bun run stripe:dev:doctor
+bun run clerk:test-user:prepare:entitled
 bun run stripe:dev:verify
+QA_ALLOW_BILLING_INTEGRATION=1 PLAYWRIGHT_USE_LOCAL_SERVER=0 PLAYWRIGHT_BASE_URL=http://localhost:3000 bun run qa:run-pack -- --pack=billing_integration
 ```
 
 In this repo, local Stripe forwarding must hit `NEXT_PUBLIC_CONVEX_SITE_URL` on `.convex.site` for `/stripe/webhook`; `NEXT_PUBLIC_CONVEX_URL` stays on the `.convex.cloud` browser client origin.
+
+`bun run stripe:dev:doctor` compares the app Stripe account from `.env.local` against the pinned Stripe CLI project `ship-by-sunday`. If the CLI project is missing or points at the wrong account, repair it with `stripe login --project-name ship-by-sunday`. `bun run clerk:test-user:prepare:entitled` is the fast single-user local helper. `bun run qa:personas:prepare -- --pack=billing_integration` remains the canonical multi-persona QA prep path.
 
 The purchase-to-access behavior contract lives in [docs/delivery-onboarding/stack-decision.md](docs/delivery-onboarding/stack-decision.md).
 

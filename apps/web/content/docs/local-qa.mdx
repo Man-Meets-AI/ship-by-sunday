@@ -31,7 +31,7 @@ bun run check
 Use two real users:
 
 - no-access user for sign-in, `/start`, wrong-account, and pre-purchase checks
-- granted-access user for `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, `/review`, and `/settings` checks
+- granted-access user for `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, `/review`, optional `/execute` after review unlock, and `/settings` checks
 
 Commands:
 
@@ -43,7 +43,11 @@ bun run clerk:test-user:create:entitled
 bun run clerk:test-user:prepare:entitled
 ```
 
-`bun run clerk:test-user:prepare:entitled` is the fastest path when your hosted Convex dev deployment is already synced into `.env.local`, because it creates the entitled Clerk QA user if needed and grants product access on the active hosted dev deployment.
+`bun run clerk:test-user:prepare:entitled` is the fastest path when your hosted Convex dev deployment is already synced into `apps/web/.env.local`, because it creates the entitled Clerk QA user if needed and grants product access on the active hosted dev deployment.
+
+Use `bun run qa:personas:prepare -- --pack=<pack>` when you need the canonical QA control-plane path instead of the one-user local shortcut. The fast helper is for a single entitled debug account. The QA command is the durable multi-persona setup path used by the packs.
+
+The Playwright sandbox bootstrap now normalizes product access as part of auth-state creation. The non-entitled persona is reset back to `no_access`, and the entitled persona is granted access again before storage state is written. If the no-access browser lane ever starts behaving like an entitled user, treat that as Convex deployment drift or bootstrap failure first, not as a UI bug.
 
 The canonical QA credentials live in ignored `qa/personas.local.json`. The root `qa:*` commands and the Playwright sandbox bootstrap both read that file for the no-access and entitled account emails and passwords.
 
@@ -61,7 +65,15 @@ Use this only in a safe local test environment.
 8. Confirm the webhook grants access.
 9. Confirm the app redirects into `/start`.
 
-On a new machine or after switching deployments, run `bun run dev:convex` first so `.env.local` contains the current `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_CONVEX_SITE_URL`, and `CONVEX_DEPLOYMENT` values. In this repo, the Stripe listener must forward to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`, not the `.convex.cloud` client origin.
+On a new machine or after switching deployments, run `bun run dev:convex` first so `apps/web/.env.local` contains the current `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_CONVEX_SITE_URL`, and `CONVEX_DEPLOYMENT` values. In this repo, the Stripe listener must forward to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`, not the `.convex.cloud` client origin.
+
+Before you trust a local billing run, check the pinned Stripe CLI guardrail once:
+
+```bash
+bun run stripe:dev:doctor
+```
+
+That command compares the app Stripe account from `apps/web/.env.local` against the repo-owned Stripe CLI project `ship-by-sunday`. If it tells you the profile is missing or mismatched, repair it with `stripe login --project-name ship-by-sunday`. The billing flow can still be env-correct while the CLI profile is noisy, but the repo now treats that as a warning you should resolve before blaming auth or webhooks.
 
 The easiest way to run the full buyer-flow stack after that is:
 
@@ -75,12 +87,14 @@ The current scripted proof for the paid handoff is:
 QA_ALLOW_BILLING_INTEGRATION=1 PLAYWRIGHT_USE_LOCAL_SERVER=0 PLAYWRIGHT_BASE_URL=http://localhost:3000 bun run qa:run-pack -- --pack=billing_integration
 ```
 
+For local targets, the billing pack now runs `bun run stripe:dev:doctor` as a warning-only preflight and `bun run stripe:dev:verify` as the hard post-checkout proof after the sandbox billing journey finishes.
+
 ## Hosted and production QA
 
 For any non-local target, keep these boundaries straight:
 
 - `qa/personas.local.json` holds the QA email and password pairs.
-- `.env.local` or `QA_ENV_FILE=<path>` selects the Clerk and Convex environment where those personas will be created or reused.
+- `apps/web/.env.local` or `QA_ENV_FILE=<path>` selects the Clerk and Convex environment where those personas will be created or reused.
 - `PLAYWRIGHT_BASE_URL=<target>` selects the site the browser tests will hit.
 
 Use the root QA control-plane commands for hosted runs instead of stitching Playwright calls together by hand.
@@ -99,35 +113,46 @@ For the deterministic browser lane that runs in PR CI:
 
 ```bash
 set -a
-source .env.local
+source apps/web/.env.local
 set +a
 bun run test:browser-smoke
 ```
 
-This requires `NEXT_PUBLIC_CONVEX_URL` from your hosted Convex dev deployment to be present in the shell environment. Run `bun run dev:convex` first if `.env.local` is stale, then source `.env.local` before running the smoke lane.
+This requires `NEXT_PUBLIC_CONVEX_URL` from your hosted Convex dev deployment to be present in the shell environment. Run `bun run dev:convex` first if `apps/web/.env.local` is stale, then source `apps/web/.env.local` before running the smoke lane.
+
+This smoke lane now proves the auth-route shell too: `/sign-in`, `/session-tasks/reset-password`, and `/sso-callback` must all render and emit `noindex`, not just the older `/sign-in` meta-tag check.
 
 ### Signed-out protected-route smoke
 
 1. Visit `/start` or `/settings` while signed out.
-2. Confirm redirect into the access recovery surface.
+2. Confirm redirect into `/sign-in` with the current protected path preserved in `redirect_url`.
+
+### Identity route smoke
+
+1. Open `/sign-in` with no query params and confirm the branded split shell renders with the quiet `See pricing` path.
+2. Open `/sign-in?redirect_url=%2Fsettings` and confirm the same shell renders but the pricing path is hidden because the route is in recovery mode.
+3. Open `/sign-in?auth_error=purchase_required` and confirm the Google purchase-required banner appears without reintroducing the pricing CTA.
+4. Open `/session-tasks/reset-password` and confirm the route keeps the same branded shell while leaving the Clerk reset form itself intact.
+5. Open `/sso-callback` and confirm the loading route uses the same shell language instead of a bare spinner page.
 
 ### No-access flow
 
 1. Sign in with the no-access account.
 2. Visit `/start`.
-3. Confirm the page explains that the account has no active access.
+3. Confirm the page explains that the account has no active access and shows which email is currently signed in before you treat it as a Stripe or Convex failure.
 
 ### Granted-access flow
 
 1. Run `bun run clerk:test-user:prepare:entitled`.
 2. Sign in with the granted-access account.
 3. Confirm `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, `/review`, and `/settings` load.
+4. On `/review`, click `Download Starter Snapshot`, trigger the separate `Unlock Execute / Ship` action, and confirm `/execute` loads.
 
 ## Observability smoke
 
 Use this when you need real incident packets instead of unit-test confidence.
 
-1. Confirm `.env.local` has `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_CONVEX_SITE_URL`, `OBSERVABILITY_INGEST_TOKEN`, `TELEGRAM_BOT_TOKEN`, and `TELEGRAM_CHAT_ID`.
+1. Confirm `apps/web/.env.local` has `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_CONVEX_SITE_URL`, `OBSERVABILITY_INGEST_TOKEN`, `TELEGRAM_BOT_TOKEN`, and `TELEGRAM_CHAT_ID`.
 2. Run the narrow observability validation first:
 
 ```bash

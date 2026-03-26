@@ -9,13 +9,15 @@ description: See the main public, protected, and purchase-related routes in one 
 
 - `/`: public marketing surface
 - `/docs`: public builder docs when the docs module is enabled; disabled-state surface when it is off
-- `/sign-in`: Clerk sign-in
-- `/sign-up`: Clerk sign-up
+- `/sign-in`: branded starter-owned Clerk sign-in surface
+- `/sign-up`: pricing redirect; account creation still starts from checkout
 
 ## Purchase and recovery routes
 
 - `/checkout/success`: post-checkout validation, server-fetched initial product-access state, then live product-access polling
 - `/checkout/cancel`: checkout cancel return
+- `/session-tasks/reset-password`: Clerk password-reset task inside the shared identity shell
+- `/sso-callback`: OAuth callback completion route inside the shared identity shell
 - `/start`: canonical first-time workspace landing after checkout
 - `/mission`: legacy compatibility route that now forwards into `/start`
 
@@ -27,6 +29,7 @@ description: See the main public, protected, and purchase-related routes in one 
 - `/marketing`: marketing packet intake and marketing-packet download surface
 - `/build-plan`: build packet intake and build-packet download surface
 - `/review`: final readiness and repo-download surface
+- `/execute`: optional post-review execution hub that unlocks from `/review`
 - `/settings`: protected account and product settings
 - `/lesson/[lessonKey]`: legacy compatibility route that now forwards into `/start`
 - `/artifacts`: legacy compatibility route that now forwards into `/review`

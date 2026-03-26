@@ -18,6 +18,8 @@ Check these in order:
 
 If you skip any of those, you can chase the wrong problem for an hour.
 
+The access-required page now shows the currently signed-in email for signed-in recovery states. Read that first. It is the fastest way to catch the common “wrong Clerk account” failure before you start debugging Stripe or Convex.
+
 ## Symptom: `/checkout/success` keeps waiting
 
 This usually means one of two things:
@@ -46,8 +48,8 @@ That state is usually telling the truth.
 Fix it by:
 
 1. signing out
-2. signing back in with the checkout account
-3. reopening the validated success URL
+2. signing back in with the email shown in checkout or the access-granted QA account
+3. reopening the validated success URL or retrying the access check from `/access-required`
 
 Do not assume this is a Stripe bug first.
 
@@ -68,7 +70,7 @@ For the local granted-access QA user:
 bun run clerk:test-user:prepare:entitled
 ```
 
-If the granted-access test user still cannot reach `/start`, stop guessing and confirm the access row plus auth template path.
+If the granted-access test user still cannot reach `/start`, stop guessing and confirm the signed-in email shown on `/access-required`, then confirm the access row plus auth template path.
 
 ## What success looks like
 

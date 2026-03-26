@@ -49,6 +49,17 @@ bun run build
 bun run stripe:dev:doctor
 ```
 
+`bun run stripe:dev:doctor` now compares the app Stripe account in `.env.local` with the pinned Stripe CLI project `ship-by-sunday`. If it reports a missing or mismatched CLI project, repair that exact profile with `stripe login --project-name ship-by-sunday` before assuming webhook code is broken.
+
+## Symptom: `/access-required` looks wrong even though you expected access
+
+Check these in order:
+
+1. read the signed-in email shown on the page
+2. if it is the wrong account, sign out and switch accounts before touching Stripe or Convex
+3. run `bun run clerk:test-user:prepare:entitled` if you are validating the known local entitled QA user
+4. run `bun run stripe:dev:doctor` if the page still looks wrong after the account is correct
+
 ## What success looks like
 
 Local dev is healthy when the app reflects current changes, provider values stay in sync, and the same flow behaves the same way after a clean restart.
