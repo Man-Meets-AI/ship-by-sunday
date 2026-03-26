@@ -19,6 +19,7 @@ After this change, a buyer still moves through the required packet-first funnel 
 - [x] 2026-03-26 00:25 EDT — Completed Milestone 3. Added `packetWorkflowStates`, exposed `workflowState` through `api.packet.getPacketWorkspaceState`, added the `api.packet.unlockExecuteShip` mutation, and guarded `/execute` behind the persisted top-level unlock without touching `projectDefinitions.facts`.
 - [x] 2026-03-26 00:25 EDT — Completed Milestone 4. Added the protected `/execute` route, a feature-local `execute-ship` hub with starter track cards, and lightweight detail views for `Build Now`, `Refine Design`, `Refine Marketing`, `QA & Debug`, and `Launch & Ship`.
 - [x] 2026-03-26 00:28 EDT — Completed Milestone 5. Added focused integration-ui coverage for review unlock and execute-route gating, updated the public route-model docs to include optional `/execute`, added the required `todo.md` recent-work entry, and ran the broader validation set plus browser smoke.
+- [x] 2026-03-26 15:43 EDT — Reworked the canonical `/start` entry to feel more like the original lesson flow by pairing the real Welcome Bunny video with the intro card, removed packet-flow and execute-shell header subtitles that were over-explaining the run, added focused `packet-start-page` coverage, and reran lint, the touched integration-ui specs, `bun run build`, and the sandbox auth-protection Playwright proof against `http://localhost:3000`.
 
 ## Surprises & Discoveries
 
@@ -37,6 +38,8 @@ Milestone 1 exposed a subtle browsing trap in the original packet-stage shell. `
 Milestone 2 exposed a second direct-access gap. `apps/web/features/packet-flow/components/packet-review-page.tsx` previously rendered Review even when `review` was still locked in the derived stage model. The nav badges could say Review was locked while a direct `/review` hit still opened the page. The review shell now has to enforce the same sequential gate as the stage pages before the `Execute / Ship` bridge can be truthful.
 
 The cleanest way to honor the “download first, unlock second” rule was to treat the Starter Snapshot click as a local review-side acknowledgement, not as proof that a browser download completed. `apps/web/features/packet-flow/components/review/packet-review-download-bridge.tsx` now records that local download moment in component state, then calls a separate `unlockExecuteShip` mutation only when the user explicitly asks to continue. That preserves pure GET download routes and still creates a truthful handoff.
+
+The intro video for this experience did not need a new media path. The original lesson system already had a real Welcome Bunny asset attached as video asset `0.1`, but the packet `/start` route was not reusing it. The fastest clean fix was to reuse that existing asset through the shared lesson video player instead of inventing a packet-specific embed configuration.
 
 Evidence from repo inspection:
 

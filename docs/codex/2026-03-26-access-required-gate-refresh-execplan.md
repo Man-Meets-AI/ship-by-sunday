@@ -27,6 +27,7 @@ After this work, a person who hits the canonical protected packet entry at `/sta
 - [x] 2026-03-26 10:56 ET: Added deterministic sandbox persona normalization by resetting product access for the non-entitled QA user, granting access for the entitled QA user, syncing the new Convex mutation with `bunx convex dev --once --env-file .env.local`, and rerunning `tests/e2e/auth-protection.sandbox.spec.ts` to a fully green result.
 - [x] 2026-03-26 10:03 ET: Ran the narrow validation slice from `apps/web` with `bunx vitest run --project unit tests/unit/access-required-page.test.tsx` and `bunx vitest run --project integration-ui tests/integration-ui/access-required-page.test.tsx tests/integration-ui/access-required-page.interactions.test.tsx`; both passed.
 - [x] 2026-03-26 10:59 ET: Added a durable note to `apps/web/content/docs/local-qa.mdx` explaining that sandbox bootstrap now normalizes the no-access and entitled personas through Convex, and tightened the access-required integration test to assert that the non-checkout fallback link targets `/#pricing`.
+- [x] 2026-03-26 15:48 ET: Ran a distill pass on the access-required shell by removing pill labels, badge-like chips, boxed sub-panels, and the remaining card framing, renaming the path card model plus component to `paths` and `AccessRequiredPathPanel`, and revalidating the feature with focused unit and integration-ui suites plus repo lint and build.
 
 ## Surprises & Discoveries
 
@@ -82,7 +83,7 @@ The ninth discovery during validation is that the sandbox auth bootstrap was ses
 
 ## Outcomes & Retrospective
 
-The implementation achieved the intended user-visible result: the gate now renders as a branded checkpoint with the Ship by Sunday wordmark in the header, a dedicated status panel, differentiated recovery-versus-purchase cards, and a quieter help rail instead of one stacked fallback card. The controller extraction materially improved maintainability because the page wrapper is now presentation-first and the retry, refresh, and redirect behavior lives in one hook.
+The implementation achieved the intended user-visible result: the gate now renders as a branded checkpoint with the Ship by Sunday wordmark in the header, a dedicated status section, differentiated recovery-versus-purchase paths, and a quieter help rail instead of one stacked fallback card. A follow-up distill pass removed the pill, badge, and nested-box framing so the screen now relies on spacing, type hierarchy, and dividers instead of generic cards. The controller extraction materially improved maintainability because the page wrapper is now presentation-first and the retry, refresh, and redirect behavior lives in one hook.
 
 The validation result is fully green for the touched surfaces. The targeted access-required unit and integration-ui suites passed, the new product-access reset unit coverage passed, lint passed, build passed, the signed-out live redirect was verified manually, and the opt-in sandbox auth-protection Playwright suite passed after making persona access-state setup deterministic.
 

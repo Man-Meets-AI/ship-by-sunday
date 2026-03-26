@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
 	DESIGN_PACK_LABEL,
 	MARKETING_PACK_LABEL,
@@ -13,6 +14,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { derivePacketStageProgressItems } from "@/features/packet-flow/lib/packet-stage-progress";
+import {
+	getPacketStageStepHref,
+	type RoutedPacketStageId,
+} from "@/features/packet-flow/lib/packet-stage-routes";
 
 const stageRewardCopy = {
 	product: {
@@ -37,20 +42,20 @@ const stageRewardCopy = {
 } as const;
 
 export function PacketStageProgressPanel({
+	stageId,
 	stage,
 	stageStatus,
-	activeStepIndex,
-	onSelectStep,
+	activeStepId,
 }: {
+	stageId: RoutedPacketStageId;
 	stage: PacketStageDefinition;
 	stageStatus: PacketStageStatus;
-	activeStepIndex: number;
-	onSelectStep: (stepIndex: number) => void;
+	activeStepId: string;
 }) {
 	const progressItems = derivePacketStageProgressItems(
 		stage,
 		stageStatus,
-		activeStepIndex,
+		activeStepId,
 	);
 	const currentObjective = stage.steps[stageStatus.currentStepIndex];
 	const reward = stageRewardCopy[stage.id as keyof typeof stageRewardCopy];
@@ -92,10 +97,11 @@ export function PacketStageProgressPanel({
 				</div>
 			</CardHeader>
 			<CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-				{progressItems.map((item, index) => (
+				{progressItems.map((item) => (
 					<Button
 						key={item.id}
 						type="button"
+						asChild
 						variant={
 							item.state === "active"
 								? "default"
@@ -108,23 +114,24 @@ export function PacketStageProgressPanel({
 							item.state === "open" && "border-dashed",
 						)}
 						aria-pressed={item.state === "active"}
-						onClick={() => onSelectStep(index)}
 					>
-						<div className="space-y-1">
-							<p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-								Step {item.stepNumber}
+						<Link href={getPacketStageStepHref(stageId, item.id)}>
+							<div className="space-y-1">
+								<p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+									Step {item.stepNumber}
+								</p>
+								<p className="text-sm font-semibold">{item.label}</p>
+							</div>
+							<p className="text-xs text-muted-foreground">
+								{item.isCurrentObjective
+									? "Current objective"
+									: item.state === "complete"
+										? "Required facts saved"
+										: item.missingRequiredFactKeys.length > 0
+											? `${item.missingRequiredFactKeys.length} required field${item.missingRequiredFactKeys.length === 1 ? "" : "s"} left`
+											: "Optional details available"}
 							</p>
-							<p className="text-sm font-semibold">{item.label}</p>
-						</div>
-						<p className="text-xs text-muted-foreground">
-							{item.isCurrentObjective
-								? "Current objective"
-								: item.state === "complete"
-									? "Required facts saved"
-									: item.missingRequiredFactKeys.length > 0
-										? `${item.missingRequiredFactKeys.length} required field${item.missingRequiredFactKeys.length === 1 ? "" : "s"} left`
-										: "Optional details available"}
-						</p>
+						</Link>
 					</Button>
 				))}
 			</CardContent>

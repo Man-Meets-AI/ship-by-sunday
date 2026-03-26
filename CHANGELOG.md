@@ -6,6 +6,7 @@
 
 - Reframed the public homepage around the Sunday promise, added the new starter-system section, removed the badge-and-card-heavy landing-page chrome, refreshed the Open Graph surface, and kept the homepage CTA and structured-data contracts green through targeted smoke coverage.
 - Turned the protected packet flow into a clearer progression with stage-level navigation, a stronger review-and-download checkpoint, and a new post-review `Execute / Ship` hub that unlocks only after the required review step.
+- Reframed the protected packet funnel around routed packet pages: `/product`, `/design`, `/marketing`, and `/build-plan` now redirect into semantic nested packet pages, complete saves advance by URL, Start and Review use the packet-local Bunny video system, and the Product problem page intentionally uses a non-video `L2` fallback until the missing recording exists.
 - Refreshed the identity auth surfaces so `/sign-in` now uses a branded Ship by Sunday shell with cold-visit versus recovery-state handling, while `/session-tasks/reset-password` and `/sso-callback` inherit the same premium identity frame instead of falling back to generic auth cards.
 
 ## 2026-03-25

@@ -1,0 +1,240 @@
+{
+	"runId": "2026-03-26T16-55-35-300Z",
+	"startedAt": "2026-03-26T16:55:35.304Z",
+	"readyDirectory": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Ready",
+	"onlyFileNames": [
+		"L1--name-the-thing.mp4",
+		"L10--choose-delivery-pricing-and-starter-config.mp4",
+		"L11--plan-the-work.mp4",
+		"L12--define-done-validation-and-rollback.mp4",
+		"L13--review-resolve-download.mp4",
+		"L3--lock-the-promise-and-the-proof.mp4",
+		"L4--kill-scope-early.mp4",
+		"L5--map-the-core-flow.mp4",
+		"L6--gather-references.mp4",
+		"L7--choose-the-visual-direction.mp4",
+		"L8--define-the-system-tokens-and-design-verification.mp4",
+		"L9--define-the-marketing-operating-system.mp4"
+	],
+	"readyFileNames": [
+		"L1--name-the-thing.mp4",
+		"L10--choose-delivery-pricing-and-starter-config.mp4",
+		"L11--plan-the-work.mp4",
+		"L12--define-done-validation-and-rollback.mp4",
+		"L13--review-resolve-download.mp4",
+		"L3--lock-the-promise-and-the-proof.mp4",
+		"L4--kill-scope-early.mp4",
+		"L5--map-the-core-flow.mp4",
+		"L6--gather-references.mp4",
+		"L7--choose-the-visual-direction.mp4",
+		"L8--define-the-system-tokens-and-design-verification.mp4",
+		"L9--define-the-marketing-operating-system.mp4"
+	],
+	"cutOptions": {
+		"skipCut": false,
+		"detectRestarts": false,
+		"minSilence": null,
+		"minSpeech": null,
+		"padding": null,
+		"mergeGap": null,
+		"keepStart": true,
+		"pythonBin": null
+	},
+	"successes": [
+		{
+			"fileName": "L1--name-the-thing.mp4",
+			"sourceKey": "L1",
+			"attachedToLesson": null,
+			"cutPath": "/Users/parkerrex/Projects/manmeetsai-workspace/apps/web/output/video-pipeline/tmp/2026-03-26T16-55-35-300Z/L1--name-the-thing.cut.mp4",
+			"cutStats": {
+				"rawDurationSeconds": 190.273417,
+				"cutDurationSeconds": 159.30775,
+				"secondsRemoved": 30.965666999999996,
+				"reductionPercent": 16.27
+			},
+			"auphonicProductionId": "DPaM9RhWsWfVJnhmAvfoER",
+			"auphonicOutputEnding": "mp4",
+			"colorCorrectionPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Color Correction/L1--name-the-thing.mp4",
+			"processedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Processed/L1--name-the-thing.mp4"
+		},
+		{
+			"fileName": "L10--choose-delivery-pricing-and-starter-config.mp4",
+			"sourceKey": "L10",
+			"attachedToLesson": null,
+			"cutPath": "/Users/parkerrex/Projects/manmeetsai-workspace/apps/web/output/video-pipeline/tmp/2026-03-26T16-55-35-300Z/L10--choose-delivery-pricing-and-starter-config.cut.mp4",
+			"cutStats": {
+				"rawDurationSeconds": 118.701917,
+				"cutDurationSeconds": 65.903042,
+				"secondsRemoved": 52.798874999999995,
+				"reductionPercent": 44.48
+			},
+			"auphonicProductionId": "LqjFL2TzYieSPZPGAzDEkj",
+			"auphonicOutputEnding": "mp4",
+			"colorCorrectionPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Color Correction/L10--choose-delivery-pricing-and-starter-config.mp4",
+			"processedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Processed/L10--choose-delivery-pricing-and-starter-config.mp4"
+		},
+		{
+			"fileName": "L11--plan-the-work.mp4",
+			"sourceKey": "L11",
+			"attachedToLesson": null,
+			"cutPath": "/Users/parkerrex/Projects/manmeetsai-workspace/apps/web/output/video-pipeline/tmp/2026-03-26T16-55-35-300Z/L11--plan-the-work.cut.mp4",
+			"cutStats": {
+				"rawDurationSeconds": 118.076292,
+				"cutDurationSeconds": 63.14875,
+				"secondsRemoved": 54.927541999999995,
+				"reductionPercent": 46.52
+			},
+			"auphonicProductionId": "RaFUxtHmcQSnYH8MntWzpK",
+			"auphonicOutputEnding": "mp4",
+			"colorCorrectionPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Color Correction/L11--plan-the-work.mp4",
+			"processedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Processed/L11--plan-the-work.mp4"
+		},
+		{
+			"fileName": "L12--define-done-validation-and-rollback.mp4",
+			"sourceKey": "L12",
+			"attachedToLesson": null,
+			"cutPath": "/Users/parkerrex/Projects/manmeetsai-workspace/apps/web/output/video-pipeline/tmp/2026-03-26T16-55-35-300Z/L12--define-done-validation-and-rollback.cut.mp4",
+			"cutStats": {
+				"rawDurationSeconds": 62.854458,
+				"cutDurationSeconds": 42.982333,
+				"secondsRemoved": 19.872125000000004,
+				"reductionPercent": 31.62
+			},
+			"auphonicProductionId": "TfKtdD8QpLoGRh7HVTjvYj",
+			"auphonicOutputEnding": "mp4",
+			"colorCorrectionPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Color Correction/L12--define-done-validation-and-rollback.mp4",
+			"processedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Processed/L12--define-done-validation-and-rollback.mp4"
+		},
+		{
+			"fileName": "L13--review-resolve-download.mp4",
+			"sourceKey": "L13",
+			"attachedToLesson": null,
+			"cutPath": "/Users/parkerrex/Projects/manmeetsai-workspace/apps/web/output/video-pipeline/tmp/2026-03-26T16-55-35-300Z/L13--review-resolve-download.cut.mp4",
+			"cutStats": {
+				"rawDurationSeconds": 95.5955,
+				"cutDurationSeconds": 79.394,
+				"secondsRemoved": 16.201499999999996,
+				"reductionPercent": 16.95
+			},
+			"auphonicProductionId": "t3wwP3dNN9mhEWLFg2rrPK",
+			"auphonicOutputEnding": "mp4",
+			"colorCorrectionPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Color Correction/L13--review-resolve-download.mp4",
+			"processedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Processed/L13--review-resolve-download.mp4"
+		},
+		{
+			"fileName": "L3--lock-the-promise-and-the-proof.mp4",
+			"sourceKey": "L3",
+			"attachedToLesson": null,
+			"cutPath": "/Users/parkerrex/Projects/manmeetsai-workspace/apps/web/output/video-pipeline/tmp/2026-03-26T16-55-35-300Z/L3--lock-the-promise-and-the-proof.cut.mp4",
+			"cutStats": {
+				"rawDurationSeconds": 189.61,
+				"cutDurationSeconds": 117.537583,
+				"secondsRemoved": 72.07241700000002,
+				"reductionPercent": 38.01
+			},
+			"auphonicProductionId": "ikp2jsvKYYmHbSCaSz3iRN",
+			"auphonicOutputEnding": "mp4",
+			"colorCorrectionPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Color Correction/L3--lock-the-promise-and-the-proof.mp4",
+			"processedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Processed/L3--lock-the-promise-and-the-proof.mp4"
+		},
+		{
+			"fileName": "L4--kill-scope-early.mp4",
+			"sourceKey": "L4",
+			"attachedToLesson": null,
+			"cutPath": "/Users/parkerrex/Projects/manmeetsai-workspace/apps/web/output/video-pipeline/tmp/2026-03-26T16-55-35-300Z/L4--kill-scope-early.cut.mp4",
+			"cutStats": {
+				"rawDurationSeconds": 137.512375,
+				"cutDurationSeconds": 91.114625,
+				"secondsRemoved": 46.39774999999999,
+				"reductionPercent": 33.74
+			},
+			"auphonicProductionId": "MpVMSPRXWttz7jePettahN",
+			"auphonicOutputEnding": "mp4",
+			"colorCorrectionPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Color Correction/L4--kill-scope-early.mp4",
+			"processedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Processed/L4--kill-scope-early.mp4"
+		},
+		{
+			"fileName": "L5--map-the-core-flow.mp4",
+			"sourceKey": "L5",
+			"attachedToLesson": null,
+			"cutPath": "/Users/parkerrex/Projects/manmeetsai-workspace/apps/web/output/video-pipeline/tmp/2026-03-26T16-55-35-300Z/L5--map-the-core-flow.cut.mp4",
+			"cutStats": {
+				"rawDurationSeconds": 134.425958,
+				"cutDurationSeconds": 72.867083,
+				"secondsRemoved": 61.558875000000015,
+				"reductionPercent": 45.79
+			},
+			"auphonicProductionId": "HFDbNsXhbcnPCAsctiepEi",
+			"auphonicOutputEnding": "mp4",
+			"colorCorrectionPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Color Correction/L5--map-the-core-flow.mp4",
+			"processedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Processed/L5--map-the-core-flow.mp4"
+		},
+		{
+			"fileName": "L6--gather-references.mp4",
+			"sourceKey": "L6",
+			"attachedToLesson": null,
+			"cutPath": "/Users/parkerrex/Projects/manmeetsai-workspace/apps/web/output/video-pipeline/tmp/2026-03-26T16-55-35-300Z/L6--gather-references.cut.mp4",
+			"cutStats": {
+				"rawDurationSeconds": 192.362,
+				"cutDurationSeconds": 132.096708,
+				"secondsRemoved": 60.26529199999999,
+				"reductionPercent": 31.33
+			},
+			"auphonicProductionId": "JJuxGzYjUK84UkB9sZcXt5",
+			"auphonicOutputEnding": "mp4",
+			"colorCorrectionPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Color Correction/L6--gather-references.mp4",
+			"processedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Processed/L6--gather-references.mp4"
+		},
+		{
+			"fileName": "L7--choose-the-visual-direction.mp4",
+			"sourceKey": "L7",
+			"attachedToLesson": null,
+			"cutPath": "/Users/parkerrex/Projects/manmeetsai-workspace/apps/web/output/video-pipeline/tmp/2026-03-26T16-55-35-300Z/L7--choose-the-visual-direction.cut.mp4",
+			"cutStats": {
+				"rawDurationSeconds": 232.315417,
+				"cutDurationSeconds": 130.781,
+				"secondsRemoved": 101.53441699999999,
+				"reductionPercent": 43.71
+			},
+			"auphonicProductionId": "gVMi2nqXp4gE8XNqjYhFy8",
+			"auphonicOutputEnding": "mp4",
+			"colorCorrectionPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Color Correction/L7--choose-the-visual-direction.mp4",
+			"processedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Processed/L7--choose-the-visual-direction.mp4"
+		},
+		{
+			"fileName": "L8--define-the-system-tokens-and-design-verification.mp4",
+			"sourceKey": "L8",
+			"attachedToLesson": null,
+			"cutPath": "/Users/parkerrex/Projects/manmeetsai-workspace/apps/web/output/video-pipeline/tmp/2026-03-26T16-55-35-300Z/L8--define-the-system-tokens-and-design-verification.cut.mp4",
+			"cutStats": {
+				"rawDurationSeconds": 84.266,
+				"cutDurationSeconds": 65.568125,
+				"secondsRemoved": 18.69787500000001,
+				"reductionPercent": 22.19
+			},
+			"auphonicProductionId": "EjQakHCNLjMD7qjkh7k8zW",
+			"auphonicOutputEnding": "mp4",
+			"colorCorrectionPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Color Correction/L8--define-the-system-tokens-and-design-verification.mp4",
+			"processedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Processed/L8--define-the-system-tokens-and-design-verification.mp4"
+		},
+		{
+			"fileName": "L9--define-the-marketing-operating-system.mp4",
+			"sourceKey": "L9",
+			"attachedToLesson": null,
+			"cutPath": "/Users/parkerrex/Projects/manmeetsai-workspace/apps/web/output/video-pipeline/tmp/2026-03-26T16-55-35-300Z/L9--define-the-marketing-operating-system.cut.mp4",
+			"cutStats": {
+				"rawDurationSeconds": 117.033583,
+				"cutDurationSeconds": 71.552875,
+				"secondsRemoved": 45.48070799999999,
+				"reductionPercent": 38.86
+			},
+			"auphonicProductionId": "jEd6KWoEm2jXUebcRu6ej3",
+			"auphonicOutputEnding": "mp4",
+			"colorCorrectionPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Color Correction/L9--define-the-marketing-operating-system.mp4",
+			"processedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Processed/L9--define-the-marketing-operating-system.mp4"
+		}
+	],
+	"failures": [],
+	"validationErrors": [],
+	"completedAt": "2026-03-26T17:18:13.151Z"
+}

@@ -18,7 +18,7 @@ export type PacketStageProgressItem = {
 export function derivePacketStageProgressItems(
 	stage: PacketStageDefinition,
 	stageStatus: PacketStageStatus,
-	activeStepIndex: number,
+	activeStepId: string,
 ) {
 	const missingFactKeys = new Set(stageStatus.missingFactKeys);
 
@@ -27,7 +27,7 @@ export function derivePacketStageProgressItems(
 		const missingRequiredFactKeys = requiredFieldKeys.filter((fieldKey) =>
 			missingFactKeys.has(fieldKey),
 		);
-		const isActive = index === activeStepIndex;
+		const isActive = step.id === activeStepId;
 		const isComplete = missingRequiredFactKeys.length === 0;
 
 		return {

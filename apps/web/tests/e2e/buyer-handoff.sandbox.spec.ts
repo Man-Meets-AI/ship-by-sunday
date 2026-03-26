@@ -84,7 +84,7 @@ async function expectPacketStage(
 ) {
 	await page.goto(route.path);
 	await expect(page).toHaveURL(
-		new RegExp(`${route.path.replace("/", "\\/")}$`),
+		new RegExp(`${route.path.replace("/", "\\/")}\\/[^/]+$`),
 	);
 	await expect(page.getByText(route.stageLabel).first()).toBeVisible();
 	await expect(page.getByText("Stage status")).toBeVisible();

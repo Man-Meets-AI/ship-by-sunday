@@ -15,7 +15,7 @@ Why its awesome
 ## What Lives Here
 
 - Public marketing and pricing pages in `apps/web/app/`
-- Protected product routes at `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, `/review`, and `/settings`, with the old `/mission`, `/lesson/[lessonKey]`, and `/artifacts` routes retained only as compatibility redirects
+- Protected product routes at `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, `/review`, and `/settings`, with `/product`, `/design`, `/marketing`, and `/build-plan` acting as stable stage-entry routes that redirect into canonical nested packet pages such as `/product/foundation` and `/build-plan/validation`, while the old `/mission`, `/lesson/[lessonKey]`, and `/artifacts` routes remain compatibility redirects
 - Feature-first runtime code in `apps/web/features/`, with the curriculum and lesson model centered under `apps/web/features/course/lesson/`
 - Purchase-to-access handoff across Clerk, Stripe, and Convex product-access state
 - Starter configuration and module flags in `apps/web/config/product.ts`
@@ -130,7 +130,7 @@ The `starterConfig.modules` flags currently control:
 
 Current behavior:
 
-- the packet-first flow now starts at `/start` and uses `/product`, `/design`, `/marketing`, `/build-plan`, and `/review` as the protected runtime
+- the packet-first flow now starts at `/start`, keeps `/product`, `/design`, `/marketing`, and `/build-plan` as stable stage-entry routes, and uses nested packet pages under those stage roots as the canonical protected runtime
 - `/mission`, `/lesson/[lessonKey]`, and `/artifacts` now redirect into the packet-first flow instead of acting as canonical product surfaces
 - when `docs` is `false`, docs links hide and `/docs` renders a disabled-state surface instead of the docs shell
 - when `starterRepo` is `false`, the legacy starter-repo path disappears from the visible protected app instead of showing as a disabled module
@@ -180,6 +180,27 @@ In this repo, local Stripe forwarding must hit `NEXT_PUBLIC_CONVEX_SITE_URL` on 
 `bun run stripe:dev:doctor` compares the app Stripe account from `.env.local` against the pinned Stripe CLI project `ship-by-sunday`. If the CLI project is missing or points at the wrong account, repair it with `stripe login --project-name ship-by-sunday`. `bun run clerk:test-user:prepare:entitled` is the fast single-user local helper. `bun run qa:personas:prepare -- --pack=billing_integration` remains the canonical multi-persona QA prep path.
 
 The purchase-to-access behavior contract lives in [docs/delivery-onboarding/stack-decision.md](docs/delivery-onboarding/stack-decision.md).
+
+## Optional Video Pipeline
+
+The repo now has a repeatable local video workflow for lesson exports:
+
+```bash
+bun run --cwd apps/web video:cut:setup
+bun run --cwd apps/web video:prepare:color
+bun run --cwd apps/web video:grade
+bun run --cwd apps/web video:upload:bunny
+bun run --cwd apps/web video:status
+```
+
+Use it in stages:
+
+- `video:prepare:color` cuts silence locally and runs the configured Auphonic preset, then writes handoff files into `Color Correction/`
+- `video:grade` applies the current default LUT look headlessly and writes publish-ready masters into `Color Graded/`
+- `video:upload:bunny` uploads only the graded masters to Bunny and writes both a JSON report and a Markdown link manifest into `apps/web/output/video-pipeline/`
+- if you need to supersede an older Bunny publish, upload the corrected set as a fresh run and then delete the old Bunny video IDs from the earlier report
+
+The durable operator guide lives in [apps/web/content/docs/video-pipeline.mdx](apps/web/content/docs/video-pipeline.mdx).
 
 ## Telegram Observability
 

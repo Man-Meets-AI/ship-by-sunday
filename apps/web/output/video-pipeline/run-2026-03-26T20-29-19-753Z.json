@@ -1,0 +1,94 @@
+{
+	"runId": "2026-03-26T20-29-19-753Z",
+	"startedAt": "2026-03-26T20:29:19.754Z",
+	"inputDirectory": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Color Graded",
+	"uploadedDirectory": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Bunny Uploaded",
+	"onlyFileNames": [],
+	"inputFileNames": [
+		"L0--build-the-folder-not-just-the-app.mp4",
+		"L1--name-the-thing.mp4",
+		"L10--choose-delivery-pricing-and-starter-config.mp4",
+		"L11--plan-the-work.mp4",
+		"L12--define-done-validation-and-rollback.mp4",
+		"L13--review-resolve-download.mp4",
+		"L3--lock-the-promise-and-the-proof.mp4",
+		"L4--kill-scope-early.mp4",
+		"L5--map-the-core-flow.mp4",
+		"L6--gather-references.mp4",
+		"L7--choose-the-visual-direction.mp4",
+		"L8--define-the-system-tokens-and-design-verification.mp4",
+		"L9--define-the-marketing-operating-system.mp4"
+	],
+	"bunnyLibraryId": 619172,
+	"replaceReportPath": "/Users/parkerrex/Projects/manmeetsai-workspace/apps/web/output/video-pipeline/run-2026-03-26T19-41-00-076Z.json",
+	"successes": [],
+	"failures": [
+		{
+			"fileName": "L0--build-the-folder-not-just-the-app.mp4",
+			"sourceKey": "L0",
+			"error": "Uploading L0--build-the-folder-not-just-the-app.mp4 to Bunny failed."
+		},
+		{
+			"fileName": "L1--name-the-thing.mp4",
+			"sourceKey": "L1",
+			"error": "Uploading L1--name-the-thing.mp4 to Bunny failed."
+		},
+		{
+			"fileName": "L10--choose-delivery-pricing-and-starter-config.mp4",
+			"sourceKey": "L10",
+			"error": "Uploading L10--choose-delivery-pricing-and-starter-config.mp4 to Bunny failed."
+		},
+		{
+			"fileName": "L11--plan-the-work.mp4",
+			"sourceKey": "L11",
+			"error": "Uploading L11--plan-the-work.mp4 to Bunny failed."
+		},
+		{
+			"fileName": "L12--define-done-validation-and-rollback.mp4",
+			"sourceKey": "L12",
+			"error": "Uploading L12--define-done-validation-and-rollback.mp4 to Bunny failed."
+		},
+		{
+			"fileName": "L13--review-resolve-download.mp4",
+			"sourceKey": "L13",
+			"error": "Uploading L13--review-resolve-download.mp4 to Bunny failed."
+		},
+		{
+			"fileName": "L3--lock-the-promise-and-the-proof.mp4",
+			"sourceKey": "L3",
+			"error": "Uploading L3--lock-the-promise-and-the-proof.mp4 to Bunny failed."
+		},
+		{
+			"fileName": "L4--kill-scope-early.mp4",
+			"sourceKey": "L4",
+			"error": "Uploading L4--kill-scope-early.mp4 to Bunny failed."
+		},
+		{
+			"fileName": "L5--map-the-core-flow.mp4",
+			"sourceKey": "L5",
+			"error": "Uploading L5--map-the-core-flow.mp4 to Bunny failed."
+		},
+		{
+			"fileName": "L6--gather-references.mp4",
+			"sourceKey": "L6",
+			"error": "Uploading L6--gather-references.mp4 to Bunny failed."
+		},
+		{
+			"fileName": "L7--choose-the-visual-direction.mp4",
+			"sourceKey": "L7",
+			"error": "Uploading L7--choose-the-visual-direction.mp4 to Bunny failed."
+		},
+		{
+			"fileName": "L8--define-the-system-tokens-and-design-verification.mp4",
+			"sourceKey": "L8",
+			"error": "Uploading L8--define-the-system-tokens-and-design-verification.mp4 to Bunny failed."
+		},
+		{
+			"fileName": "L9--define-the-marketing-operating-system.mp4",
+			"sourceKey": "L9",
+			"error": "Uploading L9--define-the-marketing-operating-system.mp4 to Bunny failed."
+		}
+	],
+	"validationErrors": [],
+	"completedAt": "2026-03-26T20:29:23.704Z"
+}

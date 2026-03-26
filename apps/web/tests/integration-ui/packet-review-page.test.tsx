@@ -24,12 +24,12 @@ vi.mock("@/features/course/shared/components/app-shell", () => ({
 		children,
 	}: {
 		title: string;
-		subtitle: string;
+		subtitle?: string;
 		children: ReactNode;
 	}) => (
 		<div>
 			<h1>{title}</h1>
-			<p>{subtitle}</p>
+			{subtitle ? <p>{subtitle}</p> : null}
 			{children}
 		</div>
 	),
@@ -52,6 +52,14 @@ vi.mock("next/link", () => ({
 
 vi.mock("@/features/packet-flow/components/packet-stage-nav", () => ({
 	PacketStageNav: () => <div data-testid="packet-stage-nav" />,
+}));
+
+vi.mock("@/features/course/lesson/components/lesson-video-player", () => ({
+	LessonVideoPlayer: ({ title }: { title?: string }) => (
+		<div data-testid="packet-review-video-player">
+			{title ?? "Lesson video"}
+		</div>
+	),
 }));
 
 vi.mock("convex/react", () => ({
@@ -107,12 +115,19 @@ describe("PacketReviewPage", () => {
 		expect(
 			screen.getByRole("heading", { name: "Review & Download" }),
 		).toBeTruthy();
+		const reviewVideo = screen.getByTestId("packet-review-video-player");
+		const checkpoint = screen.getByText("Checkpoint complete");
 		expect(screen.getByText("Checkpoint complete")).toBeTruthy();
 		expect(screen.getByText("Design Pack")).toBeTruthy();
 		expect(screen.getByText("Marketing Pack")).toBeTruthy();
 		expect(screen.getByText("Build Pack")).toBeTruthy();
 		expect(screen.getByText("Prompt Pack")).toBeTruthy();
 		expect(screen.getByText("Execute / Ship")).toBeTruthy();
+		expect(reviewVideo.textContent).toBe("Review Video");
+		expect(
+			reviewVideo.compareDocumentPosition(checkpoint) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
 		expect(
 			screen
 				.getByRole("button", { name: "Download Starter Snapshot first" })

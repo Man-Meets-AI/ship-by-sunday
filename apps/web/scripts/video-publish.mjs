@@ -3,26 +3,20 @@ import path from "node:path";
 import {
 	buildCutOptionsFromArgv,
 	buildLessonMediaEntry,
-	createAuphonicProduction,
 	createBunnyVideo,
 	createRunId,
-	createTempCutPath,
-	createTempDownloadPath,
-	downloadAuphonicVideoOutput,
 	ensureVideoCutPythonReady,
 	getRepoLessons,
 	getRequiredEnv,
-	getVideoOutputCandidate,
 	listReadyFileNames,
 	moveFileToProcessed,
 	parseOnlyFileNames,
 	parseReplaceLessonIds,
 	READY_DIRECTORY,
 	readExistingLessonMedia,
-	runVideoCutStage,
+	runCutAndAuphonicDownloadStage,
 	uploadBunnyVideo,
 	validateReadyVideoFiles,
-	waitForAuphonicProduction,
 	waitForBunnyVideoReady,
 	writeLessonMediaModule,
 	writeRunReport,
@@ -124,11 +118,6 @@ async function main() {
 
 	for (const item of readyItems) {
 		const sourcePath = path.join(READY_DIRECTORY, item.fileName);
-		let auphonicInputPath = sourcePath;
-		const bunnyTitle =
-			item.attachmentMode === "lesson"
-				? `${item.lessonId} — ${item.lessonTitle}`
-				: `${item.sourceKey} — ${item.slug}`;
 
 		console.log(
 			item.attachmentMode === "lesson"
@@ -137,52 +126,24 @@ async function main() {
 		);
 
 		try {
-			let cutResult = null;
-			let cutPath = null;
-			if (!cutOptions.skipCut) {
-				cutPath = await createTempCutPath(runId, item.fileName);
-				cutResult = await runVideoCutStage({
-					sourcePath,
-					cutPath,
-					options: cutOptions,
-				});
-				auphonicInputPath = cutPath;
-			}
-
-			const production = await createAuphonicProduction({
-				apiKey: auphonicApiKey,
-				presetId: auphonicPresetId,
-				filePath: auphonicInputPath,
-				title: bunnyTitle,
-			});
-			const completedProduction = await waitForAuphonicProduction({
-				apiKey: auphonicApiKey,
-				uuid: production.uuid,
-			});
-			const outputFile = getVideoOutputCandidate(
-				completedProduction.output_files ?? [],
-			);
-			const tempDownloadPath = await createTempDownloadPath(
+			const stageResult = await runCutAndAuphonicDownloadStage({
 				runId,
-				item.fileName,
-				outputFile,
-			);
-			const { outputFile: downloadedOutputFile } =
-				await downloadAuphonicVideoOutput({
-					apiKey: auphonicApiKey,
-					production: completedProduction,
-					destinationPath: tempDownloadPath,
-				});
+				item,
+				sourcePath,
+				cutOptions,
+				auphonicApiKey,
+				auphonicPresetId,
+			});
 			const bunnyVideo = await createBunnyVideo({
 				apiKey: bunnyApiKey,
 				libraryId: bunnyLibraryId,
-				title: bunnyTitle,
+				title: stageResult.title,
 			});
 			await uploadBunnyVideo({
 				apiKey: bunnyApiKey,
 				libraryId: bunnyLibraryId,
 				videoId: bunnyVideo.guid,
-				filePath: tempDownloadPath,
+				filePath: stageResult.downloadPath,
 			});
 			const readyBunnyVideo = await waitForBunnyVideoReady({
 				apiKey: bunnyApiKey,
@@ -206,10 +167,10 @@ async function main() {
 				sourceKey: item.sourceKey,
 				attachedToLesson:
 					item.attachmentMode === "lesson" ? item.lessonId : null,
-				cutPath,
-				cutStats: cutResult,
-				auphonicProductionId: completedProduction.uuid,
-				auphonicOutputEnding: downloadedOutputFile?.ending ?? null,
+				cutPath: stageResult.cutPath,
+				cutStats: stageResult.cutResult,
+				auphonicProductionId: stageResult.completedProduction.uuid,
+				auphonicOutputEnding: stageResult.downloadedOutputFile?.ending ?? null,
 				bunnyVideoId: bunnyVideo.guid,
 				processedPath,
 			});

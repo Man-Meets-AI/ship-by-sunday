@@ -2,6 +2,14 @@
 
 ## recent
 
+- **2026-03-26 17:18 EDT** — Packet video funnel closeout + docs sweep: renamed the completed ExecPlan to `docs/codex/2026-03-26-17-17-38-EDT-packet-video-page-funnel.md`, shipped the routed packet-page funnel with the packet-local video registry and `L2` orientation fallback, updated the dependent distillation plan plus the root/public route docs to describe stage-root redirects into nested packet pages, and logged the user-facing behavior in `CHANGELOG.md`.
+
+- **2026-03-26 16:44 EDT** — Video pipeline correction pass: changed the default headless LUT blend from `30%` to `15%`, rebuilt the full corrected `Color Graded` set, published the corrected Bunny batch, deleted the stale `30%` Bunny video IDs from the earlier upload report, and synced the operator docs so the durable rule is now explicit: publish a fresh corrected set, then remove the stale Bunny IDs instead of assuming in-place overwrite.
+
+- **2026-03-26 16:21 EDT** — Packet stage save feedback: added a shared packet-step save classifier plus inline copy model, moved the shared stage shell onto a feature-local hook for truthful blank/partial/complete/cleared-to-incomplete handling, added field-level invalid state with first-missing focus plus destructive save-failure feedback, made sidebar missing-fact labels human-readable, and proved the slice with packet-flow `oxlint`, `oxfmt --check`, unit coverage for the classifier, and integration-ui coverage for the page and sidebar. Remaining validation blocker: root `bun run build` currently fails outside this slice on `apps/web/content/docs/video-pipeline.mdx` frontmatter YAML parsing.
+
+- **2026-03-26 15:54 EDT** — Video pipeline docs sync: documented the shipped cut -> Auphonic -> LUT grade -> Bunny flow in `apps/web/content/docs/video-pipeline.mdx`, wired it into the docs index and nav, added the root `README.md` operator summary for the new commands, and captured the durable report/links-manifest locations plus the `Color Correction` / `Color Graded` / `Bunny Uploaded` folder contract so the lesson-media workflow can be rerun without reconstructing it from chat.
+
 - **2026-03-26 10:59 EDT** — Access gate + identity refresh: rebuilt `/access-required` into a branded recovery checkpoint with signed-in account hints, refreshed `/sign-in`, `/session-tasks/reset-password`, and `/sso-callback` into one premium identity shell, normalized sandbox access-state setup for the entitled and non-entitled personas, and re-ran auth-focused unit, integration-ui, browser-smoke, sandbox E2E, lint, and build proof.
 
 - **2026-03-26 10:19 EDT** — Homepage visual reset: replaced the homepage’s badge/card-heavy chrome with quieter section primitives, rebuilt the hero/system/by-Sunday/proof/pricing surfaces around the new visual language, refreshed the public SVG and Open Graph assets, and re-ran homepage unit, integration-ui, browser-smoke, Playwright, and build validation.

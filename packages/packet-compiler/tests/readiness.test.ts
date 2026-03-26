@@ -3,6 +3,7 @@ import {
 	createCompleteProjectDefinition,
 	deriveStageStatus,
 	evaluatePacketReadiness,
+	getPacketStageDefinition,
 } from "../src/index";
 
 describe("packet readiness", () => {
@@ -49,5 +50,26 @@ describe("packet readiness", () => {
 
 		expect(readiness.design.isReady).toBe(false);
 		expect(readiness.design.missingFactKeys).toContain("design_references");
+	});
+
+	it("exposes the packet page step ids for marketing and build plan", () => {
+		expect(
+			getPacketStageDefinition("marketing").steps.map((step) => step.id),
+		).toEqual(["operating-system"]);
+		expect(
+			getPacketStageDefinition("build-plan").steps.map((step) => step.id),
+		).toEqual(["delivery", "plan", "validation"]);
+	});
+
+	it("preserves optional domain and support email on the regrouped delivery page", () => {
+		const completeFacts = createCompleteProjectDefinition().facts;
+		const readiness = evaluatePacketReadiness({
+			...completeFacts,
+			domain: undefined,
+			support_email: undefined,
+		});
+
+		expect(readiness.build.isReady).toBe(true);
+		expect(readiness.review.isReady).toBe(true);
 	});
 });
