@@ -28,6 +28,21 @@ Run the full app with:
 bun run dev
 ```
 
+Local web startup now runs a Clerk/Convex auth guardrail before `next dev` starts. If local Clerk keys or `CLERK_FRONTEND_API_URL` drift away from the active hosted Convex dev deployment, the web process exits immediately instead of leaving you to debug `NoAuthProvider` or issuer mismatch failures later.
+
+Run the same check directly with:
+
+```bash
+bun run auth:dev:doctor
+```
+
+If it fails, update `apps/web/.env.local` so `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, and `CLERK_FRONTEND_API_URL` all come from the same Clerk instance, then push that exact issuer into the active hosted Convex dev deployment:
+
+```bash
+cd apps/web
+./node_modules/.bin/convex env set CLERK_FRONTEND_API_URL "$CLERK_FRONTEND_API_URL"
+```
+
 This repo does not support Convex's local backend mode as a first-class workflow. Development means local Next.js plus a hosted Convex dev deployment.
 
 Deployment workflow: [docs/release-workflow.md](../../../docs/release-workflow.md)

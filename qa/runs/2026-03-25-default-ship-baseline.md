@@ -1,6 +1,7 @@
 # QA Run Report
 
 Date: 2026-03-25
+Environment: prod-www.man-meets-ai.com
 Pack: default_ship
 Slug: baseline
 Prepared personas: signed_out, member_without_access, member_with_access

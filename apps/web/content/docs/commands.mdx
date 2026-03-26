@@ -14,9 +14,12 @@ bun run dev:full
 bun run dev:web
 bun run dev:convex
 bun run dev:stripe
+bun run auth:dev:doctor
 ```
 
 Run `bun run dev:convex` first on a new machine or whenever you need to switch hosted Convex dev deployments.
+
+`bun run dev` and `bun run dev:web` now run the same auth guardrail before `next dev` starts. If local Clerk env values and the active hosted Convex dev issuer disagree, startup stops with the exact `convex env set` command needed to realign them.
 
 ## Verification
 
@@ -50,6 +53,34 @@ bun run clerk:test-user:check:entitled
 bun run clerk:test-user:create:entitled
 bun run clerk:test-user:prepare:entitled
 ```
+
+For hosted browser QA against a non-local target, use the root QA commands with matching Clerk env values for that target. `qa/personas.local.json` still supplies the real QA account emails and passwords. `QA_ENV_FILE` only changes which Clerk and Convex environment those identities are provisioned against. It is optional and only needed if you keep a separate hosted or production env file:
+
+```bash
+PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run qa:personas:prepare -- --pack=default_ship
+PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run qa:run-pack -- --pack=default_ship
+```
+
+Prefer `qa:run-pack` for hosted verification. It runs persona prep, browser smoke, and the tagged authenticated browser pack with the same target assumptions.
+
+Use `dev` first, `prod` second:
+
+```bash
+bun run dev:full
+PLAYWRIGHT_USE_LOCAL_SERVER=0 PLAYWRIGHT_BASE_URL=http://localhost:3000 bun run --cwd apps/web test:e2e:sandbox:default-ship
+```
+
+When resuming local billing QA, start from the green rerun in `qa/runs/2026-03-25-dev-billing-integration-rerun.md`. If it regresses, check that `bun run dev:stripe` is forwarding to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook` before treating it as an app-auth failure.
+
+Current QA state:
+
+- `default_ship` is green on local `dev`.
+- `billing_integration` on `dev` has a green rerun.
+- `default_ship` on `prod` has a green rerun.
+- `billing_integration` on `prod` now has both the repair report and a fresh automatic rerun proving live webhook delivery.
+- Hosted `billing_integration` should still stay opt-in because it spends real live Checkout Sessions, even when the order total is reduced to zero.
+
+Only move to the hosted domain after the local auth/runtime path is understood.
 
 ## Optional lesson-media pipeline
 

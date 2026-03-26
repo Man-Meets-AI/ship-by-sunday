@@ -35,6 +35,22 @@ The user-visible outcome is a QA source of truth that speaks in product journeys
 - [x] 2026-03-25 15:46 EDT — Ran the first committed baseline sweep against `https://www.man-meets-ai.com` and wrote `qa/runs/2026-03-25-default-ship-baseline.md`.
 - [x] 2026-03-25 15:46 EDT — Recorded the first billing-integration sweep as explicitly blocked in `qa/runs/2026-03-25-billing-integration-blocked.md` because no safe test-payment environment could be confirmed.
 - [x] 2026-03-25 16:02 EDT — Retried the pack on current `main`. Local `browser-smoke` passed on both `127.0.0.1` and `localhost`, the public hosted sandbox rerun still failed on the mission-vs-packet contract mismatch, and authenticated local sandbox attempts remained blocked by the current Playwright auth-bootstrap approach.
+- [x] 2026-03-25 16:49 EDT — Reran the hosted baseline after the latest prod deploy. Hosted `browser-smoke` is now fully green, but the hosted authenticated QA personas still fail to establish a session, so `ACCESS-01`, `PACKET-01`, and `PACKET-07` remain blocked by prod persona setup rather than by public-shell routing.
+- [x] 2026-03-25 16:56 EDT — Confirmed the hosted prod rerun with `QA_ENV_FILE=apps/web/.env.production`. The old Clerk-environment mismatch is fixed; the remaining blocker is the actual live QA users, which still cannot establish a prod session.
+- [x] 2026-03-25 17:24 EDT — Fixed the local dev Clerk/Convex auth-provider mismatch by aligning the hosted Convex dev `CLERK_FRONTEND_API_URL` with the test Clerk instance, corrected the custom Clerk password flow so it activates the created session, and captured a green local `default_ship` report in `qa/runs/2026-03-25-dev-default-ship.md`.
+- [x] 2026-03-25 17:24 EDT — Pushed the local `billing_integration` pack as far as Stripe Checkout and captured the remaining blocker in `qa/runs/2026-03-25-dev-billing-integration.md`: Stripe’s newer Link verification plus embedded Checkout UI, not app auth.
+- [x] 2026-03-25 17:27 EDT — Refreshed the inventory on current `main`; `qa/test-inventory.csv` now contains 109 rows after the new mission extras test landed.
+- [x] 2026-03-25 21:00 EDT — Synced the QA handoff docs so fresh agents restart on `dev` first, use explicit environment labels in committed reports, and see the current blocker order without stale env-file examples or superseded blocker summaries.
+- [x] 2026-03-25 21:13 EDT — Reconciled the living plan and QA handoff docs with the current worktree: `qa/runs/2026-03-25-dev-billing-integration-rerun.md` shows local `billing_integration` is green, so hosted `default_ship` persona auth is now the next blocker.
+- [x] 2026-03-25 21:15 EDT — Revalidated the control plane after the latest worktree changes. `bun run qa:validate` now reports 110 inventory rows, so the plan should treat the earlier 109-row snapshot as historical rather than current.
+- [x] 2026-03-25 21:20 EDT — Reran hosted `default_ship` on `https://www.man-meets-ai.com`: `browser-smoke` passed 5/5, the hosted sandbox pack passed 4/4, and a direct auth smoke confirmed the non-entitled QA user can sign in and land on `/start`. Recorded the result in `qa/runs/2026-03-25-default-ship-prod-rerun.md`.
+- [x] 2026-03-25 21:20 EDT — Fixed `qa/scripts/ship.mjs` to use the machine-local calendar date for scaffolded report filenames after a late-evening local run tried to stamp a `2026-03-26` report on March 25 EDT.
+- [x] 2026-03-25 21:32 EDT — Locked the hosted billing-verification policy: for this repo, production billing proof should use a restricted live `100% off` promotion code rather than a real card charge, because the webhook grant path keys off `checkout.session.completed` and Stripe supports no-cost Checkout orders for one-time payments.
+- [x] 2026-03-25 21:53 EDT — Ran the production billing slice with a temporary live QA buyer. The first completed live no-cost Checkout Session exposed a real prod misconfiguration: Stripe posted to `https://www.man-meets-ai.com/api/stripe/webhook`, which returned `404`, and the production Convex deployment was also missing `STRIPE_SECRET_KEY`.
+- [x] 2026-03-25 21:53 EDT — Repaired the live billing handoff outside git by creating a new Stripe webhook endpoint at `https://helpful-meadowlark-297.convex.site/stripe/webhook`, disabling the stale app-origin endpoint, syncing the new `STRIPE_WEBHOOK_SECRET` into Convex prod, and adding the missing live `STRIPE_SECRET_KEY` to Convex prod.
+- [x] 2026-03-25 21:53 EDT — Replayed the real completed live Stripe event for session `cs_live_b10KmMaSxyPZPdHbjsTM1Nos11bfyT9FCle3y54ttoQbWdOqq0BbG1FeBU` through the corrected live Convex webhook. The webhook returned `200` with `grantResult.inserted`, production now has a `productAccessGrants` row with `source: "stripe_webhook"`, and `access:viewerProductAccess` returns `hasAccess: true` for the temporary buyer. Recorded the evidence in `qa/runs/2026-03-25-prod-billing-integration-webhook-fix.md`.
+- [x] 2026-03-25 22:05 EDT — Ran one fresh post-fix live no-cost order without replay. The hosted Checkout flow auto-forwarded back into `/start`, and production Convex patched the existing `stripe_webhook` grant row to session `cs_live_b10eiCJMyOmTZnkY2CvzYpurkwJUPVYqz3ImhFNKd4XIURLZBLUpgl5Fv2`. Recorded the result in `qa/runs/2026-03-25-prod-billing-integration-automatic-rerun.md`.
+- [x] 2026-03-25 22:10 EDT — Closed the docs loop by adding the team’s QA operating model and future sub-agent direction to `README.md`, updating the changelog, and confirming the ExecPlan can close with no remaining release-critical QA blockers.
 
 ## Surprises & Discoveries
 
@@ -63,6 +79,28 @@ The first real hosted baseline run exposed the main product risk immediately: th
 The recent `mma-shipbysunday` Vercel deployments were not a usable fallback during the run. The alias URL returned `DEPLOYMENT_NOT_FOUND`, while older ready preview URLs were protected behind Vercel login. The only usable public baseline environment was the custom domain.
 
 Retrying on fresh `main` changed one useful implementation detail but not the product finding. Local `browser-smoke` now passes cleanly on current `main`, which means the public shell and recovery surfaces are fine in the current code. The authenticated local sandbox lane is still blocked because Playwright `globalSetup` attempts to sign in before the local app is stably reachable. The hosted sandbox lane remains the trustworthy evidence source for protected-route behavior.
+
+After the latest prod deploy, the public-domain story narrowed further. Hosted `browser-smoke` is now fully green and the signed-out protected-route redirect is working, which means the public shell and signed-out packet entry are healthy. The remaining problem is hosted authenticated QA personas: the test accounts are still being redirected back to the accounts sign-in domain instead of staying authenticated on `/start`.
+
+The latest hosted rerun also proved that the Clerk-environment fix is real. With `QA_ENV_FILE=apps/web/.env.production`, persona preparation no longer aborts on a live-vs-test key mismatch. The remaining failure is now the live QA user state itself: the prod sign-in flow still refuses the stored QA account credentials.
+
+The dev-first rerun uncovered and fixed the actual local auth foundation. The original `NoAuthProvider` runtime error came from the hosted Convex dev deployment still trusting the live Clerk frontend URL while local dev was using the test Clerk instance. Once that provider was aligned, the remaining local auth issue turned out to be in the custom Clerk password flow itself: the password method was called with the wrong field name and the created session was not being activated reliably.
+
+After those fixes, local `default_ship` is green. The next billing rerun also proved the current Stripe sandbox can be automated again once the flow adapts to the newer Link verification prompt and hosted payment submission surface.
+
+That rerun narrowed the dev billing story further. The working path is: reach Stripe Checkout, complete the Link sandbox verification prompt with `000000` when it appears, submit the hosted pay action, and rely on Stripe forwarding to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook` rather than the `.convex.cloud` client origin. `bun run --cwd apps/web stripe:dev:doctor` still reports a Stripe CLI default-account mismatch, but the handoff itself now passes.
+
+The next hosted rerun overturned the earlier production-auth diagnosis. The prod QA users already existed in live Clerk, had verified email addresses, and had password auth enabled. A direct browser auth smoke on `https://www.man-meets-ai.com/sign-in?redirect_url=%2Fstart` signed the non-entitled QA user in successfully, and the hosted `@default_ship` sandbox pack then passed 4/4. The earlier prod blocker was therefore stale evidence or transient account state, not a currently reproducible auth defect.
+
+The report scaffold also had a subtle time-zone bug. `qa:ship` used `toISOString().slice(0, 10)`, which stamps dates in UTC. On late-evening Eastern runs that created next-day filenames in `qa/runs/local/` even though the committed report date should still match the operator’s local calendar day. The scaffold now uses the machine-local date instead.
+
+The remaining production billing question is narrower than "do real cards charge." This repo grants access from Stripe webhook handling for `checkout.session.completed` and `checkout.session.async_payment_succeeded`. Stripe’s no-cost Checkout documentation explicitly supports one-time payment sessions reduced to zero by a `100% off` coupon or promotion code, and it warns that free completed Checkout Sessions might not have a `PaymentIntent`. That means a restricted live no-cost order is the safest production proof for this app’s buyer-to-access handoff, while real-card authorization behavior remains a separate concern outside the default release proof.
+
+The production billing run immediately exposed stale runtime configuration instead of application logic. The only enabled live Stripe webhook endpoint pointed at `https://www.man-meets-ai.com/api/stripe/webhook`, but that route does not exist on the app origin and returned `404`. After that was repaired, the live Convex webhook still failed because the production Convex deployment had `STRIPE_WEBHOOK_SECRET` but was missing `STRIPE_SECRET_KEY`. A replay of the real completed event succeeded as soon as both values and the endpoint URL matched the actual Convex HTTP-actions route.
+
+One stale repository contract was helping hide that drift. `apps/web/config/product.ts` still declared `stripeWebhook: "/api/stripe/webhook"` even though the real handler is Convex `POST /stripe/webhook`. Even though the constant was not driving the live Stripe Dashboard configuration directly, it was incorrect enough to mislead future operators and needed to be brought back in sync.
+
+The final automatic rerun showed one small operational quirk that is worth preserving. Freshly created live Clerk QA users were sometimes flaky for immediate headless sign-in and could render client-side validation like `Email is missing` before they were stable enough for browser automation. Reusing the already-proven temporary QA buyer avoided that auth-timing noise and isolated the billing handoff itself.
 
 ## Decision Log
 
@@ -112,15 +150,41 @@ Retrying on fresh `main` changed one useful implementation detail but not the pr
 
 2026-03-25 — Decision: document authenticated local sandbox execution as a current tooling limitation rather than pretending it is a stable lane. Rationale: local `browser-smoke` is working, but `globalSetup`-driven auth bootstrap is not yet a reliable match for Playwright’s local web-server lifecycle.
 
+2026-03-25 — Decision: treat hosted authenticated QA persona setup as a separate production-readiness concern from public-shell smoke. Rationale: the latest rerun proved the homepage and signed-out entry are healthy, while the remaining failures are now concentrated around prod session establishment for the QA accounts.
+
+2026-03-25 — Decision: require `QA_ENV_FILE=apps/web/.env.production` for hosted prod QA runs in this repository until a better default exists. Rationale: prod is using live Clerk keys, and the root QA runner should not silently fall back to `.env.local` when the target is the public domain.
+
+2026-03-25 — Decision: dev-first QA is the canonical debug order for this repository. Rationale: the local stack revealed both the hosted Convex dev auth-provider mismatch and the stale Clerk password completion flow before another prod rerun was necessary.
+
+2026-03-25 — Decision: keep one auth bootstrap for dev and prod, but drive environment differences entirely through `QA_ENV_FILE`, `PLAYWRIGHT_BASE_URL`, and the run-report environment label. Rationale: the QA tests should stay shared, while environment choice belongs in configuration instead of duplicated spec files.
+
+2026-03-25 — Decision: keep the committed `qa/runs/` evidence historical, but require explicit environment labels and dev-first restart guidance in the surrounding handoff docs. Rationale: fresh agents need the current resume order and blocker state without rereading every older report as if it described the same environment.
+
+2026-03-25 — Decision: treat local `billing_integration` as green and move the active blocker to hosted `default_ship` persona auth. Rationale: the rerun proved the Stripe handoff completes on dev when webhook forwarding targets `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`, so the highest-value next slice is prod auth and QA-user-state diagnosis.
+
+2026-03-25 — Decision: treat hosted `default_ship` as green again and treat the earlier prod auth blocker as superseded evidence. Rationale: direct hosted sign-in plus the full hosted sandbox rerun now pass, so fresh agents should not keep debugging a non-reproducing prod auth failure.
+
+2026-03-25 — Decision: stamp `qa:ship` reports with the machine-local date instead of UTC. Rationale: report filenames should match the operator’s local release day and the existing committed `qa/runs/` naming convention.
+
+2026-03-25 — Decision: use a restricted live `100% off` promotion code as the preferred production billing proof. Rationale: this repo’s fulfillment path depends on `checkout.session.completed`, and Stripe supports no-cost one-time Checkout orders that still complete the Checkout Session and invoke the webhook handoff without requiring a real card charge.
+
+2026-03-25 — Decision: use a temporary live QA buyer instead of mutating the canonical no-access persona for the production billing proof. Rationale: the billing verification should not permanently consume or change the shared no-access QA account that the rest of the control plane relies on.
+
+2026-03-25 — Decision: the canonical live Stripe webhook target for this repository is the Convex production `.convex.site` HTTP-actions URL, not the app-origin `/api/stripe/webhook` path. Rationale: the real webhook handler is defined in `apps/web/convex/http.ts` at `POST /stripe/webhook`; the app-origin route was dead and caused real prod checkout sessions to finish without access grants.
+
+2026-03-25 — Decision: accept an automatic post-fix no-cost order on an already-proven temporary QA buyer as the final production billing confirmation. Rationale: the billing handoff question is whether live Stripe now delivers automatically into the corrected webhook path; patching the existing `stripe_webhook` grant row with a brand-new live Checkout Session proves that without depending on the timing of a freshly created Clerk identity.
+
 ## Outcomes & Retrospective
 
-The repository now has a real root-level QA control plane instead of a blank plan. A PM or coding agent can open `qa/` and see the glossary, 22 scenario rows, a coverage map with explicit `rewrite_required` and `gap` states, a 103-row inventory of the current automated suite, a committed persona protocol, a pack runner, and the first committed reports under `qa/runs/`.
+The repository now has a real root-level QA control plane instead of a blank plan. A PM or coding agent can open `qa/` and see the glossary, 22 scenario rows, a coverage map with explicit `rewrite_required` and `gap` states, a 110-row inventory of the current automated suite, a committed persona protocol, a pack runner, and the first committed reports under `qa/runs/`.
 
 The most important outcome is not that the pack went green. It is that the first baseline sweep made the current ship risk obvious: the public deployment is still serving `/mission` semantics while the repo and QA model now treat `/start -> /product -> /design -> /marketing -> /build-plan -> /review` as canonical. That is exactly the kind of product-readable mismatch this control plane was meant to surface.
 
-The main remaining gap is deployment parity plus safe billing execution. `default_ship` now has committed evidence. `billing_integration` is explicitly blocked until a test-only payment environment is confirmed. The next slice should focus on getting a packet-first deployment live and public, then rerunning `default_ship` and finally unblocking `billing_integration`.
+The main release-critical baselines are now green, and the production billing handoff is no longer a blind assumption. Local `default_ship`, local `billing_integration`, and hosted `default_ship` all have current passing evidence. Production `billing_integration` now has both the repair proof and the automatic post-fix proof: a fresh live no-cost order auto-forwarded into `/start` and patched the `stripe_webhook` grant row to the new live Checkout Session ID without replay. There is no remaining release-critical blocker in the QA control plane.
 
 Known future follow-up areas already visible at plan creation time are mobile-specific journey packs, richer CI isolation for personas, and deeper automation for diff-to-scenario selection. Those are out of scope for the first slice unless they become necessary to make the base system coherent.
+
+This ExecPlan can now close. The requested operating system exists, the release-critical journeys have current passing evidence, the production billing handoff has both repair and automatic-delivery proof, and the remaining ideas are optional future improvements rather than open blockers.
 
 ## Context and Orientation
 
@@ -222,7 +286,7 @@ Implemented in this slice with explicit `qa:run-pack` examples and billing gatin
 
 Finally, run the first real baseline sweep. Prepare the personas, run the fast validator, run the targeted automated lanes, run the critical browser scenarios, and write the dated reports. The first baseline sweep must cover the homepage, auth entry and redirect behavior, no-access recovery, the canonical packet funnel, review/download, settings, and checkout-success recovery. The free-to-paid handoff must also be captured in the system, but it should run as part of the billing-integration pack rather than the default every-ship pack.
 
-This milestone is now complete in the repository sense. `qa/runs/2026-03-25-default-ship-baseline.md` captures the hosted public-domain baseline, and `qa/runs/2026-03-25-billing-integration-blocked.md` captures the explicit payment-safety block. The next operator no longer has to guess what “done so far” means.
+This milestone is now complete in the repository sense. `qa/runs/2026-03-25-default-ship-baseline.md`, `qa/runs/2026-03-25-default-ship-post-prod-deploy.md`, `qa/runs/2026-03-25-dev-default-ship.md`, `qa/runs/2026-03-25-dev-billing-integration.md`, `qa/runs/2026-03-25-dev-billing-integration-rerun.md`, and `qa/runs/2026-03-25-default-ship-prod-rerun.md` now make the progression explicit: original prod mismatch, prod blocker report, green dev `default_ship`, the first local Stripe blocker report, the succeeding local billing rerun, and the final hosted `default_ship` rerun that closes the prod auth loop.
 
 ## Validation and Acceptance
 
@@ -240,13 +304,13 @@ Success means the repo lint and format checks still pass and the new QA validato
 Observed during implementation:
 
     bun run qa:inventory:sync
-    Synced qa/test-inventory.csv with 103 test files.
+    Synced qa/test-inventory.csv with 109 test files.
 
     bun run qa:validate
     QA control plane is internally consistent.
     Journeys: 22
     Coverage rows: 38
-    Inventory rows: 103
+    Inventory rows: 110
     Personas: 3
 
     cd apps/web
@@ -256,9 +320,18 @@ Observed during implementation:
     E2E_RUN_SANDBOX=1 PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com bun run --cwd apps/web test:e2e:sandbox:default-ship
     4 failed
 
+    PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com bunx playwright test --project=browser-smoke
+    5 passed (2.1s)
+
+    E2E_RUN_SANDBOX=1 PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com bun run --cwd apps/web test:e2e:sandbox:default-ship
+    3 failed, 1 passed
+
     cd apps/web
-    PLAYWRIGHT_USE_LOCAL_SERVER=1 PLAYWRIGHT_BASE_URL=http://localhost:3100 bun run test:browser-smoke
-    5 passed (53.3s)
+    PLAYWRIGHT_USE_LOCAL_SERVER=1 PLAYWRIGHT_BASE_URL=http://localhost:3000 bun run test:browser-smoke
+    5 passed
+
+    E2E_RUN_SANDBOX=1 PLAYWRIGHT_USE_LOCAL_SERVER=0 PLAYWRIGHT_BASE_URL=http://localhost:3000 bun run --cwd apps/web test:e2e:sandbox:default-ship
+    4 passed (17.7s)
 
     bun run qa:run-pack -- --pack=default_ship --dry-run
     {
@@ -286,6 +359,15 @@ Observed during implementation:
         "apps/web test:e2e:sandbox:billing-integration"
       ]
     }
+
+    E2E_RUN_SANDBOX=1 PLAYWRIGHT_USE_LOCAL_SERVER=0 PLAYWRIGHT_BASE_URL=http://localhost:3000 bun run --cwd apps/web test:e2e:sandbox:billing-integration
+    1 passed
+
+    PLAYWRIGHT_USE_LOCAL_SERVER=0 PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com bun run --cwd apps/web test:browser-smoke:hosted
+    5 passed (1.2s)
+
+    E2E_RUN_SANDBOX=1 PLAYWRIGHT_USE_LOCAL_SERVER=0 PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com bun run --cwd apps/web test:e2e:sandbox:default-ship
+    4 passed (16.3s)
 
 Then run the retained automated lanes that should remain valid for the first slice.
 
@@ -320,7 +402,7 @@ Observed during implementation:
       "message": "Missing qa/personas.local.json. Create it from qa/personas.local.example.json before preparing personas."
     }
 
-`qa:personas:prepare` was intentionally not completed in this slice because the ignored local credential file is machine-specific. That limitation is now explicit and operator-friendly instead of hidden.
+`qa:personas:prepare` was intentionally not completed in the earliest control-plane slice because the ignored local credential file is machine-specific. That limitation is now explicit and operator-friendly instead of hidden, and the later dev and prod reruns confirm the real browser lane works once local credentials and env parity are in place.
 
 Observed during implementation:
 
@@ -383,7 +465,7 @@ The release report template should stay equally simple. A short example section 
 
 The report policy should also be explicit. A committed baseline or ship report might live at:
 
-    qa/runs/2026-03-25-baseline.md
+    qa/runs/2026-03-25-dev-default-ship.md
 
 An ignored local dry run might live at:
 
@@ -450,9 +532,9 @@ The implementation must also preserve and adapt these repository dependencies:
 
 `apps/web/tests/e2e/auth-state.ts` and `apps/web/tests/e2e/global-setup.ts` now use the persona-aligned `member_without_access` and `member_with_access` vocabulary for storage states. The tagged sandbox specs in `apps/web/tests/e2e/auth-protection.sandbox.spec.ts` and `apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts` are now the canonical browser packs for `default_ship`, `extended`, and `billing_integration`.
 
-Authenticated local sandbox execution is still an implementation limitation. `apps/web/tests/e2e/global-setup.ts` can bootstrap auth against hosted environments, but it is not yet a stable match for the local Playwright web-server lifecycle.
+Authenticated local sandbox execution now works for the `default_ship` pack once the hosted Convex dev auth provider and the custom Clerk password flow are aligned to the same test Clerk instance. The remaining local automation limitation is specific to Stripe Checkout’s evolving Link / embedded payment UI inside `billing_integration`.
 
-`qa/runs/2026-03-25-default-ship-baseline.md` and `qa/runs/2026-03-25-billing-integration-blocked.md` are the first committed outputs of the operating system. They are now the durable evidence layer for this initiative.
+`qa/runs/2026-03-25-default-ship-baseline.md`, `qa/runs/2026-03-25-default-ship-post-prod-deploy.md`, `qa/runs/2026-03-25-dev-default-ship.md`, and `qa/runs/2026-03-25-dev-billing-integration.md` are now the durable evidence layer for this initiative. They make the environment and blocker progression explicit.
 
 The root `package.json` now exposes `qa:inventory:sync`, `qa:validate`, `qa:personas:prepare`, `qa:personas:reset`, and `qa:ship`. `apps/web/package.json` still exposes the underlying Playwright and browser-test commands that the QA control plane orchestrates.
 

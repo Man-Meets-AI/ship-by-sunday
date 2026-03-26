@@ -2,6 +2,8 @@
 
 ## recent
 
+- **2026-03-25 22:31 EDT** — QA operating system closeout: hardened the Clerk/Convex auth guardrails and Playwright auth bootstrap, fixed the sign-in completion typing/build regressions, synced the root/docs QA operating model, repaired the live Stripe webhook path and missing Convex prod Stripe secret, proved the prod billing handoff with both replay and fresh automatic no-cost orders, and closed the journey-first QA ExecPlan with durable `qa/runs/` evidence.
+
 - **2026-03-25 16:50 EDT** — Homepage hydration fix: moved homepage JSON-LD emission behind a feature-local markup wrapper so React no longer reconciles a literal `script` node, made `EncryptedText` server/client-stable by replacing the initial random scramble with a deterministic seed, added a unit regression for stable SSR markup, and rechecked homepage structured-data tests, app lint, and the live homepage console. No docs or changelog update needed for this internal bug fix.
 
 - **2026-03-25 16:48 EDT** — QA docs clarity pass: fixed the stale testing-doc link in `README.md`, clarified the QA control-plane docs plus agent runbook around `qa/personas.local.json` vs `QA_ENV_FILE` vs `PLAYWRIGHT_BASE_URL`, and added explicit hosted-production `qa:run-pack` examples to the local QA, deploy, and release workflow docs so post-deploy auth failures are diagnosed as env parity issues first.

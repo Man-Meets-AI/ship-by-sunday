@@ -57,6 +57,14 @@ bun run dev:convex
 
 That flow should give you the `NEXT_PUBLIC_CONVEX_URL` value the app expects and set `CONVEX_DEPLOYMENT` for CLI-driven QA helpers. This repo does not support Convex's local backend mode as a first-class workflow, so keep the Clerk app, frontend API domain, and token-template assumptions aligned with your hosted Convex dev deployment.
 
+Run the auth doctor any time you switch Clerk instances or Convex dev deployments:
+
+```bash
+bun run auth:dev:doctor
+```
+
+Local `bun run dev` startup now runs that same check automatically before `next dev` starts.
+
 ## What success looks like
 
 You are correctly wired when:
@@ -84,5 +92,13 @@ Check these in order:
 4. `CLERK_AUTHORIZED_PARTIES` still includes the current app origin
 5. `NEXT_PUBLIC_CONVEX_URL` and `CONVEX_DEPLOYMENT` are not still pointed at an old or different Convex dev deployment
 6. you restarted the app after changing auth env values
+
+If the app is using the right local Clerk keys but hosted Convex still trusts the wrong issuer, push the current local frontend API URL into the active hosted dev deployment and rerun the doctor:
+
+```bash
+cd apps/web
+./node_modules/.bin/convex env set CLERK_FRONTEND_API_URL "$CLERK_FRONTEND_API_URL"
+bun run auth:dev:doctor
+```
 
 If checkout succeeds but access still fails, go straight to [Troubleshooting Stripe and Convex](/docs/troubleshooting/stripe-convex).

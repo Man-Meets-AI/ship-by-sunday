@@ -1,6 +1,7 @@
 # QA Run Report
 
 Date: {{date}}
+Environment: {{environment}}
 Pack: {{pack}}
 Slug: {{slug}}
 Prepared personas: {{personas}}
