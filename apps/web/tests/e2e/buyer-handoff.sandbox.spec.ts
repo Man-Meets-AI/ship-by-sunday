@@ -19,6 +19,65 @@ const packetStageRoutes = [
 	{ path: "/build-plan", stageLabel: "Build Plan" },
 ] as const;
 
+function getStripePayButton(page: Page) {
+	return page
+		.getByTestId("hosted-payment-submit-button")
+		.or(page.getByRole("button", { name: /^pay$/i }));
+}
+
+async function completeStripeSandboxCheckout(page: Page) {
+	await page.waitForURL(/checkout\.stripe\.com/, {
+		timeout: 30_000,
+	});
+	const linkVerificationPrompt = page.getByText(/Enter 000000 to continue\./i);
+
+	await linkVerificationPrompt
+		.waitFor({ state: "visible", timeout: 5_000 })
+		.catch(() => null);
+
+	if (await linkVerificationPrompt.isVisible().catch(() => false)) {
+		const textboxes = page.getByRole("textbox");
+		const textboxCount = await textboxes.count();
+
+		for (
+			let index = Math.max(1, textboxCount - 6);
+			index < textboxCount;
+			index += 1
+		) {
+			await textboxes.nth(index).fill("0");
+		}
+
+		await linkVerificationPrompt
+			.waitFor({ state: "hidden", timeout: 15_000 })
+			.catch(() => null);
+	}
+
+	const payButton = getStripePayButton(page);
+
+	await payButton
+		.waitFor({ state: "visible", timeout: 10_000 })
+		.catch(() => null);
+
+	if (await payButton.isVisible().catch(() => false)) {
+		await payButton.click();
+		return;
+	}
+
+	if (
+		await page
+			.getByRole("button", { name: /pay without link/i })
+			.isVisible()
+			.catch(() => false)
+	) {
+		await page.getByRole("button", { name: /pay without link/i }).click();
+	}
+
+	await expect(payButton).toBeVisible({
+		timeout: 15_000,
+	});
+	await payButton.click();
+}
+
 async function expectPacketStage(
 	page: Page,
 	route: (typeof packetStageRoutes)[number],
@@ -68,16 +127,19 @@ test.describe("member without access", () => {
 	test("@billing_integration full paid handoff moves from checkout success into the packet entry", async ({
 		page,
 	}) => {
+		test.setTimeout(120_000);
+
 		await page.goto("/");
+		await page.waitForFunction(
+			() =>
+				Boolean(window.Clerk?.user?.id) && Boolean(window.Clerk?.session?.id),
+			{
+				timeout: 15_000,
+			},
+		);
 
 		await page.getByRole("button", { name: "Get instant access" }).click();
-		await page.waitForURL(/checkout\.stripe\.com/);
-
-		await page.getByPlaceholder("1234 1234 1234 1234").fill("4242424242424242");
-		await page.getByPlaceholder("MM / YY").fill("12 / 34");
-		await page.getByPlaceholder("CVC").fill("123");
-		await page.getByPlaceholder("ZIP").fill("10001");
-		await page.getByRole("button", { name: /pay/i }).click();
+		await completeStripeSandboxCheckout(page);
 
 		await page.waitForURL(/\/checkout\/success\?session_id=/, {
 			timeout: 60_000,

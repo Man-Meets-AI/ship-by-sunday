@@ -7,6 +7,7 @@ import IdentityLayout from "@/app/(identity)/layout";
 
 const replaceMock = vi.fn();
 const pushMock = vi.fn();
+const setActiveMock = vi.fn();
 const signOutMock = vi.fn();
 const reportClientErrorMock = vi.fn();
 const useClerkMock = vi.fn();
@@ -107,12 +108,19 @@ describe("SignInPage", () => {
 	beforeEach(() => {
 		pushMock.mockReset();
 		replaceMock.mockReset();
+		setActiveMock.mockReset();
 		signOutMock.mockReset();
 		reportClientErrorMock.mockReset();
 		useClerkMock.mockReset();
 		useSearchParamsMock.mockReset();
 		useSignInMock.mockReset();
 		useClerkMock.mockReturnValue({
+			setActive: setActiveMock.mockImplementation(async ({ navigate }) => {
+				await navigate({
+					decorateUrl: (url: string) => url,
+					session: null,
+				});
+			}),
 			signOut: signOutMock,
 		});
 		useSearchParamsMock.mockReturnValue(new URLSearchParams(""));
@@ -189,7 +197,7 @@ describe("SignInPage", () => {
 		await user.click(screen.getByRole("button", { name: "Sign in" }));
 
 		expect(signIn.password).toHaveBeenCalledWith({
-			emailAddress: "buyer@example.com",
+			identifier: "buyer@example.com",
 			password: "supersecret",
 		});
 	});
@@ -243,6 +251,61 @@ describe("SignInPage", () => {
 		await user.type(screen.getByLabelText("Password"), "supersecret");
 		await user.click(screen.getByRole("button", { name: "Sign in" }));
 
+		expect(pushMock).toHaveBeenCalledWith("/settings");
+	});
+
+	it("activates the created session when the password response completes before the hook state updates", async () => {
+		useSearchParamsMock.mockReturnValue(
+			new URLSearchParams("redirect_url=%2Fsettings"),
+		);
+		const signIn = {
+			create: vi.fn().mockResolvedValue({ error: null }),
+			finalize: vi.fn().mockResolvedValue({ error: null }),
+			mfa: {
+				sendEmailCode: vi.fn().mockResolvedValue({ error: null }),
+				sendPhoneCode: vi.fn().mockResolvedValue({ error: null }),
+				verifyBackupCode: vi.fn().mockResolvedValue({ error: null }),
+				verifyEmailCode: vi.fn().mockResolvedValue({ error: null }),
+				verifyPhoneCode: vi.fn().mockResolvedValue({ error: null }),
+				verifyTOTP: vi.fn().mockResolvedValue({ error: null }),
+			},
+			password: vi.fn().mockResolvedValue({
+				createdSessionId: "sess_123",
+				error: null,
+				status: "complete",
+			}),
+			reset: vi.fn().mockResolvedValue({ error: null }),
+			resetPasswordEmailCode: {
+				sendCode: vi.fn().mockResolvedValue({ error: null }),
+				submitPassword: vi.fn().mockResolvedValue({ error: null }),
+				verifyCode: vi.fn().mockResolvedValue({ error: null }),
+			},
+			sso: vi.fn().mockResolvedValue({ error: null }),
+			status: "needs_first_factor",
+			supportedSecondFactors: [],
+		};
+		useSignInMock.mockReturnValue({
+			errors: {
+				fields: { code: null, identifier: null, password: null },
+				global: null,
+				raw: null,
+			},
+			fetchStatus: "idle",
+			signIn,
+		});
+
+		const user = userEvent.setup();
+		render(<SignInPage />);
+
+		await user.type(screen.getByLabelText("Email"), "buyer@example.com");
+		await user.type(screen.getByLabelText("Password"), "supersecret");
+		await user.click(screen.getByRole("button", { name: "Sign in" }));
+
+		expect(setActiveMock).toHaveBeenCalledTimes(1);
+		expect(setActiveMock).toHaveBeenCalledWith({
+			navigate: expect.any(Function),
+			session: "sess_123",
+		});
 		expect(pushMock).toHaveBeenCalledWith("/settings");
 	});
 

@@ -13,6 +13,8 @@ import {
 	personaLocalPath,
 	repoRoot,
 } from "./lib/personas.mjs";
+import { assertClerkTargetMatchesQaEnv } from "./lib/clerk-target.mjs";
+import { loadQaEnv } from "./lib/qa-env.mjs";
 
 const ENTITLED_COURSE_SLUG = "ship-by-sunday";
 const authStateDirectory = path.join(repoRoot, "apps/web/tests/e2e/.auth");
@@ -35,6 +37,14 @@ function parseArgs(argv) {
 }
 
 async function preparePersonas(options) {
+	const loadedEnvFilePath = await loadQaEnv();
+	const targetBaseUrl = options["base-url"] ?? process.env.PLAYWRIGHT_BASE_URL;
+
+	await assertClerkTargetMatchesQaEnv({
+		baseUrl: targetBaseUrl,
+		loadedEnvFilePath,
+	});
+
 	const requestedPack = options.pack ?? "default_ship";
 	const requestedPersonaIds = options.persona
 		? [options.persona]

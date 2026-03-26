@@ -130,6 +130,8 @@ function isLocalhostUrl(urlString) {
 
 function getHostedConvexDevContext() {
 	const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL?.trim();
+	const convexSiteUrl =
+		process.env.NEXT_PUBLIC_CONVEX_SITE_URL?.trim() || convexUrl;
 	if (!convexUrl) {
 		throw new Error(
 			"Missing NEXT_PUBLIC_CONVEX_URL in .env.local. Run `bun run dev:convex` to sync your hosted Convex dev deployment.",
@@ -142,6 +144,18 @@ function getHostedConvexDevContext() {
 		);
 	}
 
+	if (!convexSiteUrl) {
+		throw new Error(
+			"Missing NEXT_PUBLIC_CONVEX_SITE_URL in .env.local. Set the Convex HTTP-actions origin before testing Stripe webhooks.",
+		);
+	}
+
+	if (isLocalhostUrl(convexSiteUrl)) {
+		throw new Error(
+			"NEXT_PUBLIC_CONVEX_SITE_URL must point to your hosted Convex HTTP-actions origin, not localhost.",
+		);
+	}
+
 	const deploymentName = process.env.CONVEX_DEPLOYMENT?.trim();
 	if (!deploymentName) {
 		throw new Error(
@@ -149,7 +163,7 @@ function getHostedConvexDevContext() {
 		);
 	}
 
-	return { convexUrl, deploymentName };
+	return { convexSiteUrl, deploymentName };
 }
 
 async function canConnect(urlString) {
@@ -203,7 +217,7 @@ try {
 	process.exit(1);
 }
 
-const { convexUrl, deploymentName } = convexDevContext;
+const { convexSiteUrl, deploymentName } = convexDevContext;
 
 const stripeAccount = await getStripeAccountSummary();
 const envWebhookSecret = await readEnvValue("STRIPE_WEBHOOK_SECRET");
@@ -213,7 +227,7 @@ const convexWebhookSecret = convexEnv.STRIPE_WEBHOOK_SECRET ?? null;
 const convexStripeSecretKey = convexEnv.STRIPE_SECRET_KEY ?? null;
 const stripeCliConfig = await getStripeCliConfig();
 const webReachable = await canConnect("http://localhost:3000");
-const convexReachable = await canConnect(convexUrl);
+const convexReachable = await canConnect(convexSiteUrl);
 
 const checks = [
 	formatCheck(
@@ -264,9 +278,11 @@ const checks = [
 		webReachable ? "localhost:3000 reachable" : "localhost:3000 unreachable",
 	),
 	formatCheck(
-		"Convex dev endpoint",
+		"Convex HTTP endpoint",
 		convexReachable,
-		convexReachable ? `${convexUrl} reachable` : `${convexUrl} unreachable`,
+		convexReachable
+			? `${convexSiteUrl} reachable`
+			: `${convexSiteUrl} unreachable`,
 	),
 ];
 

@@ -157,3 +157,46 @@ declare module "@/scripts/lib/starter-repo-access.mjs" {
 		status: number,
 	): "accepted" | "pending";
 }
+
+declare module "@/scripts/lib/clerk-convex-dev-auth-guardrail.mjs" {
+	export type ClerkConvexDevAuthCheck = {
+		label: string;
+		passed: boolean;
+		detail: string;
+	};
+
+	export function formatCheck(check: ClerkConvexDevAuthCheck): string;
+	export function parseEnvFile(fileContents: string): Record<string, string>;
+	export function getHostedConvexDevContext(
+		envEntries: Record<string, string | undefined>,
+	): {
+		convexUrl: string;
+		deploymentName: string;
+	} | null;
+	export function getClerkKeyMode(
+		key: string | null | undefined,
+	): "missing" | "test" | "live" | "unknown";
+	export function getClerkFrontendApiMode(
+		frontendApiUrl: string | null | undefined,
+	): "missing" | "test" | "live" | "invalid";
+	export function summarizeClerkKey(key: string | null | undefined): string;
+	export function buildClerkConvexDevAuthReport(args: {
+		convexUrl: string | null | undefined;
+		deploymentName: string | null | undefined;
+		hostedFrontendApiUrl: string | null | undefined;
+		localFrontendApiUrl: string | null | undefined;
+		localPublishableKey: string | null | undefined;
+		localSecretKey: string | null | undefined;
+	}): {
+		checks: ClerkConvexDevAuthCheck[];
+		hasFailure: boolean;
+	};
+	export function buildClerkConvexDevFixSteps(args: {
+		deploymentName?: string | null;
+	}): string[];
+	export function buildStartupSuccessMessage(args: {
+		deploymentName: string;
+		localFrontendApiUrl: string | null | undefined;
+		localPublishableKey: string | null | undefined;
+	}): string;
+}

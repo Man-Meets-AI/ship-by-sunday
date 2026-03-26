@@ -32,22 +32,28 @@ function parseEnvFile(fileContents) {
 
 function getHostedConvexDevContext(envEntries) {
 	const convexUrl = envEntries.NEXT_PUBLIC_CONVEX_URL?.trim();
+	const convexSiteUrl =
+		envEntries.NEXT_PUBLIC_CONVEX_SITE_URL?.trim() || convexUrl;
 	const deploymentName = envEntries.CONVEX_DEPLOYMENT?.trim();
 
-	if (!convexUrl || !deploymentName) {
+	if (!convexUrl || !convexSiteUrl || !deploymentName) {
 		return null;
 	}
 
 	try {
-		const hostname = new URL(convexUrl).hostname;
-		if (LOCALHOST_HOSTS.has(hostname)) {
+		const clientHostname = new URL(convexUrl).hostname;
+		const httpHostname = new URL(convexSiteUrl).hostname;
+		if (
+			LOCALHOST_HOSTS.has(clientHostname) ||
+			LOCALHOST_HOSTS.has(httpHostname)
+		) {
 			return null;
 		}
 	} catch {
 		return null;
 	}
 
-	return { convexUrl, deploymentName };
+	return { convexUrl, convexSiteUrl, deploymentName };
 }
 
 async function waitForHostedConvexDevContext() {
@@ -63,7 +69,7 @@ async function waitForHostedConvexDevContext() {
 
 			if (hostedConvexDevContext) {
 				process.stdout.write(
-					`[dev:stripe] Using ${hostedConvexDevContext.deploymentName} (${hostedConvexDevContext.convexUrl})\n`,
+					`[dev:stripe] Using ${hostedConvexDevContext.deploymentName} (client ${hostedConvexDevContext.convexUrl}, http ${hostedConvexDevContext.convexSiteUrl})\n`,
 				);
 				return;
 			}

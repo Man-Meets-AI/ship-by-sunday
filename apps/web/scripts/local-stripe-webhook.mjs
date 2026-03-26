@@ -38,6 +38,8 @@ function isLocalhostUrl(urlString) {
 
 function getHostedConvexDevContext() {
 	const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL?.trim();
+	const convexSiteUrl =
+		process.env.NEXT_PUBLIC_CONVEX_SITE_URL?.trim() || convexUrl;
 	if (!convexUrl) {
 		throw new Error(
 			"Missing NEXT_PUBLIC_CONVEX_URL in .env.local. Run `bun run dev:convex` to sync your hosted Convex dev deployment.",
@@ -50,6 +52,18 @@ function getHostedConvexDevContext() {
 		);
 	}
 
+	if (!convexSiteUrl) {
+		throw new Error(
+			"Missing NEXT_PUBLIC_CONVEX_SITE_URL in .env.local. Set the Convex HTTP-actions origin before running Stripe webhook forwarding.",
+		);
+	}
+
+	if (isLocalhostUrl(convexSiteUrl)) {
+		throw new Error(
+			"NEXT_PUBLIC_CONVEX_SITE_URL must point to your hosted Convex HTTP-actions origin, not localhost.",
+		);
+	}
+
 	const deploymentName = process.env.CONVEX_DEPLOYMENT?.trim();
 	if (!deploymentName) {
 		throw new Error(
@@ -57,12 +71,12 @@ function getHostedConvexDevContext() {
 		);
 	}
 
-	return { convexUrl, deploymentName };
+	return { convexSiteUrl, deploymentName };
 }
 
 function getDefaultForwardUrl() {
-	const { convexUrl } = getHostedConvexDevContext();
-	return `${convexUrl.replace(/\/$/, "")}/stripe/webhook`;
+	const { convexSiteUrl } = getHostedConvexDevContext();
+	return `${convexSiteUrl.replace(/\/$/, "")}/stripe/webhook`;
 }
 
 function parseArgs(argv) {

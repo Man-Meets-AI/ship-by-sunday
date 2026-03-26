@@ -125,6 +125,13 @@ export function useSignInFlow() {
 	const [isStartingGoogle, setIsStartingGoogle] = useState(false);
 	const sentVerificationMethodRef = useRef<VerificationMethod | null>(null);
 
+	type SignInCompletionCandidate = {
+		status?: string | null;
+		finalize?: typeof signIn.finalize;
+		createdSessionId?: string | null;
+		error?: unknown;
+	};
+
 	const redirectPath = getSafeRedirectPath(searchParams.get("redirect_url"));
 	const authError = getSignInAuthError(searchParams.get("auth_error"));
 	const pricingHref = getPricingHref();
@@ -209,43 +216,95 @@ export function useSignInFlow() {
 		});
 	}
 
-	async function finalizeSignIn() {
-		if (!signIn || signIn.status !== "complete") {
+	function getCompletionStatus(
+		candidate: SignInCompletionCandidate | null | undefined,
+	) {
+		return candidate?.status ?? signIn?.status ?? null;
+	}
+
+	function getFinalizeFunction(
+		candidate: SignInCompletionCandidate | null | undefined,
+	) {
+		return candidate?.finalize ?? signIn?.finalize ?? null;
+	}
+
+	function getCreatedSessionId(
+		candidate: SignInCompletionCandidate | null | undefined,
+	) {
+		return (
+			candidate?.createdSessionId ??
+			(signIn &&
+			"createdSessionId" in signIn &&
+			typeof signIn.createdSessionId === "string"
+				? signIn.createdSessionId
+				: null) ??
+			signIn?.existingSession?.sessionId ??
+			("client" in clerk &&
+				clerk.client?.sessions?.find((session) => session.status === "active")
+					?.id) ??
+			null
+		);
+	}
+
+	async function navigateAfterAuth({
+		decorateUrl,
+		session,
+	}: {
+		decorateUrl: (url: string) => string;
+		session?: { currentTask?: { key: string } | null } | null;
+	}) {
+		const sessionTaskHref = session?.currentTask
+			? getSessionTaskHref(session.currentTask.key, redirectPath)
+			: null;
+		if (session?.currentTask && !sessionTaskHref) {
+			const signInTaskFallbackHref = decorateUrl(
+				buildSignInHref({ redirectPath }),
+			);
+			reportClientError({
+				error: new Error("Unknown Clerk session task."),
+				pathname: routeConfig.signIn,
+				code: "clerk_unknown_session_task",
+				severity: "high",
+				details: {
+					redirectPath,
+					taskKey: session.currentTask.key,
+				},
+			});
+			try {
+				await clerk.signOut({ redirectUrl: signInTaskFallbackHref });
+				return;
+			} catch {}
+			await navigateWithRouter(router, signInTaskFallbackHref);
 			return;
 		}
 
-		await signIn.finalize({
-			navigate: async ({ decorateUrl, session }) => {
-				const sessionTaskHref = session?.currentTask
-					? getSessionTaskHref(session.currentTask.key, redirectPath)
-					: null;
-				if (session?.currentTask && !sessionTaskHref) {
-					const signInTaskFallbackHref = decorateUrl(
-						buildSignInHref({ redirectPath }),
-					);
-					reportClientError({
-						error: new Error("Unknown Clerk session task."),
-						pathname: routeConfig.signIn,
-						code: "clerk_unknown_session_task",
-						severity: "high",
-						details: {
-							redirectPath,
-							taskKey: session.currentTask.key,
-						},
-					});
-					try {
-						await clerk.signOut({ redirectUrl: signInTaskFallbackHref });
-						return;
-					} catch {}
-					await navigateWithRouter(router, signInTaskFallbackHref);
-					return;
-				}
+		const destination =
+			sessionTaskHref ?? redirectPath ?? authViewConfig.fallbackRedirectUrl;
 
-				const destination =
-					sessionTaskHref ?? redirectPath ?? authViewConfig.fallbackRedirectUrl;
+		await navigateWithRouter(router, decorateUrl(destination));
+	}
 
-				await navigateWithRouter(router, decorateUrl(destination));
-			},
+	async function finalizeSignIn(
+		candidate: SignInCompletionCandidate | null | undefined = signIn,
+	) {
+		const completionStatus = getCompletionStatus(candidate);
+		const finalize = getFinalizeFunction(candidate);
+		const createdSessionId = getCreatedSessionId(candidate);
+
+		if (createdSessionId) {
+			await clerk.setActive({
+				session: createdSessionId,
+				navigate: navigateAfterAuth,
+			});
+			return;
+		}
+
+		if (!finalize || completionStatus !== "complete") {
+			return;
+		}
+
+		await finalize({
+			navigate: navigateAfterAuth,
 		});
 	}
 
@@ -277,16 +336,27 @@ export function useSignInFlow() {
 		setResetStep(null);
 
 		const response = await signIn.password({
-			emailAddress,
+			identifier: emailAddress,
 			password,
 		});
+
+		if (process.env.NODE_ENV === "development") {
+			console.info("submitPassword response", {
+				keys: Object.keys(response),
+				createdSessionId:
+					"createdSessionId" in response ? response.createdSessionId : null,
+				error: response.error,
+				responseStatus: "status" in response ? response.status : null,
+				signInStatus: signIn.status,
+			});
+		}
 
 		if (response.error) {
 			return;
 		}
 
 		setPassword("");
-		await finalizeSignIn();
+		await finalizeSignIn(response);
 	}
 
 	async function startGoogleSignIn() {
@@ -385,7 +455,7 @@ export function useSignInFlow() {
 		}
 
 		setNewPassword("");
-		await finalizeSignIn();
+		await finalizeSignIn(response);
 	}
 
 	async function submitVerification() {
@@ -421,7 +491,7 @@ export function useSignInFlow() {
 			return;
 		}
 
-		await finalizeSignIn();
+		await finalizeSignIn(response);
 	}
 
 	async function resendVerificationCode() {
