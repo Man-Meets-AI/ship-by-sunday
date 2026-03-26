@@ -2,6 +2,14 @@ import { spawn } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
+import Stripe from "stripe";
+
+import {
+	buildStripeCliArgs,
+	buildStripeCliProjectCheck,
+	parseStripeCliConfigListOutput,
+	STRIPE_CLI_PROJECT_NAME,
+} from "./lib/stripe-cli-project.mjs";
 
 const ENV_FILE_PATH = path.join(process.cwd(), ".env.local");
 const LOCALHOST_HOSTS = new Set(["127.0.0.1", "0.0.0.0", "localhost"]);
@@ -56,6 +64,110 @@ function getHostedConvexDevContext(envEntries) {
 	return { convexUrl, convexSiteUrl, deploymentName };
 }
 
+function runCommand(command, args) {
+	return new Promise((resolve, reject) => {
+		const child = spawn(command, args, {
+			cwd: process.cwd(),
+			env: process.env,
+			stdio: ["ignore", "pipe", "pipe"],
+		});
+
+		let stdout = "";
+		let stderr = "";
+
+		child.stdout.on("data", (chunk) => {
+			stdout += String(chunk);
+		});
+
+		child.stderr.on("data", (chunk) => {
+			stderr += String(chunk);
+		});
+
+		child.on("error", reject);
+		child.on("close", (code) => {
+			resolve({
+				code: code ?? 1,
+				stdout,
+				stderr,
+			});
+		});
+	});
+}
+
+async function getStripeAccountSummary(stripeSecretKey) {
+	const stripe = new Stripe(stripeSecretKey, {
+		apiVersion: "2026-02-25.clover",
+	});
+	const account = await stripe.accounts.retrieve();
+	return {
+		id: account.id,
+		displayName:
+			account.settings?.dashboard?.display_name ??
+			account.business_profile?.name ??
+			"Unknown Stripe account",
+	};
+}
+
+async function getStripeCliProjectConfig() {
+	try {
+		const result = await runCommand(
+			"stripe",
+			buildStripeCliArgs(["config", "--list"]),
+		);
+		if (result.code !== 0) {
+			return { stripeCliAvailable: false, projectConfig: null };
+		}
+
+		return {
+			stripeCliAvailable: true,
+			projectConfig: parseStripeCliConfigListOutput(result.stdout),
+		};
+	} catch {
+		return { stripeCliAvailable: false, projectConfig: null };
+	}
+}
+
+async function warnAboutStripeCliProject(envEntries) {
+	const stripeSecretKey = envEntries.STRIPE_SECRET_KEY?.trim();
+	if (!stripeSecretKey) {
+		process.stderr.write(
+			"[dev:stripe] WARNING Missing STRIPE_SECRET_KEY in .env.local. The Stripe listener will fail until app secrets are synced.\n",
+		);
+		return;
+	}
+
+	try {
+		const stripeAccount = await getStripeAccountSummary(stripeSecretKey);
+		const { stripeCliAvailable, projectConfig } =
+			await getStripeCliProjectConfig();
+		const stripeCliProjectCheck = buildStripeCliProjectCheck({
+			projectConfig,
+			stripeAccount,
+			stripeCliAvailable,
+		});
+
+		if (stripeCliProjectCheck.passed) {
+			process.stdout.write(
+				`[dev:stripe] Stripe CLI project ${STRIPE_CLI_PROJECT_NAME} matches ${stripeAccount.displayName} (${stripeAccount.id})\n`,
+			);
+			return;
+		}
+
+		process.stderr.write(
+			`[dev:stripe] WARNING ${stripeCliProjectCheck.label}: ${stripeCliProjectCheck.detail}\n`,
+		);
+		if (stripeCliProjectCheck.guidance) {
+			process.stderr.write(
+				`[dev:stripe] WARNING ${stripeCliProjectCheck.guidance}\n`,
+			);
+		}
+	} catch (error) {
+		process.stderr.write(
+			`[dev:stripe] WARNING Skipping Stripe CLI project guardrail: ${error instanceof Error ? error.message : "Unknown Stripe account lookup failure."}\n`,
+		);
+	}
+}
+
 async function waitForHostedConvexDevContext() {
 	process.stdout.write(
 		"[dev:stripe] Waiting for hosted Convex dev deployment in .env.local...\n",
@@ -71,7 +183,7 @@ async function waitForHostedConvexDevContext() {
 				process.stdout.write(
 					`[dev:stripe] Using ${hostedConvexDevContext.deploymentName} (client ${hostedConvexDevContext.convexUrl}, http ${hostedConvexDevContext.convexSiteUrl})\n`,
 				);
-				return;
+				return envEntries;
 			}
 		} catch {}
 
@@ -79,7 +191,8 @@ async function waitForHostedConvexDevContext() {
 	}
 }
 
-await waitForHostedConvexDevContext();
+const envEntries = await waitForHostedConvexDevContext();
+await warnAboutStripeCliProject(envEntries);
 
 const stripeListener = spawn(
 	process.execPath,

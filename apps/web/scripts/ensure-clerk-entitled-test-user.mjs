@@ -1,9 +1,8 @@
-import { spawn } from "node:child_process";
-
 import {
 	ensureClerkTestUser,
 	loadConfiguredAccount,
 } from "./ensure-clerk-test-user.mjs";
+import { grantConvexProductAccess } from "./lib/convex-product-access-grant.mjs";
 
 const ENTITLED_SCOPE = "ship-by-sunday-clerk-entitled";
 const DEFAULT_COURSE_SLUG = "ship-by-sunday";
@@ -11,43 +10,6 @@ const LOCALHOST_HOSTS = new Set(["127.0.0.1", "0.0.0.0", "localhost"]);
 
 function result(status, details = {}) {
 	return { status, ...details };
-}
-
-function runConvexGrant({ clerkUserId, env }) {
-	return new Promise((resolve) => {
-		const args = [
-			"exec",
-			"convex",
-			"run",
-			"access:grantProductAccess",
-			JSON.stringify({
-				clerkUserId,
-				source: "manual",
-			}),
-		];
-		const child = spawn("bunx", args, {
-			env,
-			stdio: ["ignore", "pipe", "pipe"],
-		});
-
-		let stdout = "";
-		let stderr = "";
-
-		child.stdout.on("data", (chunk) => {
-			stdout += String(chunk);
-		});
-		child.stderr.on("data", (chunk) => {
-			stderr += String(chunk);
-		});
-
-		child.on("close", (code) => {
-			resolve({
-				code: code ?? 1,
-				stdout: stdout.trim(),
-				stderr: stderr.trim(),
-			});
-		});
-	});
 }
 
 function getHostedConvexDevContext(env) {
@@ -78,6 +40,7 @@ export async function runCli({
 	args = process.argv.slice(2),
 	env = process.env,
 	fetchImpl = fetch,
+	grantProductAccessImpl = grantConvexProductAccess,
 } = {}) {
 	let requestedScope = env.CLERK_TEST_USER_SCOPE ?? ENTITLED_SCOPE;
 	let courseSlug = env.QA_COURSE_SLUG ?? DEFAULT_COURSE_SLUG;
@@ -176,8 +139,9 @@ export async function runCli({
 		};
 	}
 
-	const grantResult = await runConvexGrant({
+	const grantResult = await grantProductAccessImpl({
 		clerkUserId: ensureResult.clerkUserId,
+		courseSlug,
 		env,
 	});
 
