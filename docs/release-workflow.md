@@ -45,7 +45,8 @@ Create that secret from the Convex dashboard for the production deployment:
 4. Merge only after GitHub checks are green.
 5. Watch Vercel create the production web deploy from `main`.
 6. Watch GitHub Actions run `Convex Production Deploy` for the same merge.
-7. Run one real buyer-flow check in production.
+7. Run the `default_ship` QA pack against production with matching production Clerk env values.
+8. When you need billing confidence on production, use the documented live no-cost Checkout proof instead of a real card charge.
 
 Useful verification commands:
 
@@ -54,7 +55,28 @@ gh run list --repo ParkerRex/mma-shipbysunday --workflow ci.yml --limit 10
 gh run list --repo ParkerRex/mma-shipbysunday --workflow convex-production-deploy.yml --limit 10
 vercel target list
 cd apps/web && bunx convex logs --prod --history 20
+PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run qa:run-pack -- --pack=default_ship
 ```
+
+For production billing verification in this repo:
+
+- prefer a restricted live `100% off` promotion code
+- verify Stripe points at the Convex `.convex.site` webhook URL, not the app origin
+- verify Convex production has both `STRIPE_WEBHOOK_SECRET` and `STRIPE_SECRET_KEY`
+- confirm the buyer auto-forwards from `/checkout/success` into `/start`
+
+For that production QA command:
+
+- `qa/personas.local.json` supplies the QA account emails and passwords
+- `QA_ENV_FILE` selects the production Clerk and Convex env values
+- `PLAYWRIGHT_BASE_URL` points the browser pack at production
+
+If persona prep fails on a Clerk publishable-key mismatch, fix env parity before spending time on packet-route debugging.
+
+The current production billing evidence is already captured in:
+
+- `qa/runs/2026-03-25-prod-billing-integration-webhook-fix.md`
+- `qa/runs/2026-03-25-prod-billing-integration-automatic-rerun.md`
 
 ## Manual Convex dry-run
 

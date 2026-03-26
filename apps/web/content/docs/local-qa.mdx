@@ -45,6 +45,8 @@ bun run clerk:test-user:prepare:entitled
 
 `bun run clerk:test-user:prepare:entitled` is the fastest path when your hosted Convex dev deployment is already synced into `.env.local`, because it creates the entitled Clerk QA user if needed and grants product access on the active hosted dev deployment.
 
+The canonical QA credentials live in ignored `qa/personas.local.json`. The root `qa:*` commands and the Playwright sandbox bootstrap both read that file for the no-access and entitled account emails and passwords.
+
 ## Full paid local handoff
 
 Use this only in a safe local test environment.
@@ -59,13 +61,37 @@ Use this only in a safe local test environment.
 8. Confirm the webhook grants access.
 9. Confirm the app redirects into `/start`.
 
-On a new machine or after switching deployments, run `bun run dev:convex` first so `.env.local` contains the current `NEXT_PUBLIC_CONVEX_URL` and `CONVEX_DEPLOYMENT` values.
+On a new machine or after switching deployments, run `bun run dev:convex` first so `.env.local` contains the current `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_CONVEX_SITE_URL`, and `CONVEX_DEPLOYMENT` values. In this repo, the Stripe listener must forward to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`, not the `.convex.cloud` client origin.
 
 The easiest way to run the full buyer-flow stack after that is:
 
 ```bash
 bun run dev:full
 ```
+
+The current scripted proof for the paid handoff is:
+
+```bash
+QA_ALLOW_BILLING_INTEGRATION=1 PLAYWRIGHT_USE_LOCAL_SERVER=0 PLAYWRIGHT_BASE_URL=http://localhost:3000 bun run qa:run-pack -- --pack=billing_integration
+```
+
+## Hosted and production QA
+
+For any non-local target, keep these boundaries straight:
+
+- `qa/personas.local.json` holds the QA email and password pairs.
+- `.env.local` or `QA_ENV_FILE=<path>` selects the Clerk and Convex environment where those personas will be created or reused.
+- `PLAYWRIGHT_BASE_URL=<target>` selects the site the browser tests will hit.
+
+Use the root QA control-plane commands for hosted runs instead of stitching Playwright calls together by hand.
+
+Hosted production example:
+
+```bash
+PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run qa:run-pack -- --pack=default_ship
+```
+
+If the loaded Clerk env does not match the hosted target, persona prep now fails immediately with a Clerk publishable-key mismatch. That is intentional. Fix the env selection before treating any authenticated browser failure as an app bug.
 
 ## Recommended flow checks
 

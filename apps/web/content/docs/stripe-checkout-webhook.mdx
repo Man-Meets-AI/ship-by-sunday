@@ -9,6 +9,12 @@ The Stripe setup has one job: turn a real paid checkout into a real product-acce
 
 The easiest way to break that path is secret drift between the app and Convex.
 
+For production in this repo, the live Stripe webhook should target the Convex HTTP-actions origin, not the app origin:
+
+`https://<your-convex-production-deployment>.convex.site/stripe/webhook`
+
+If Stripe is pointed at `https://<your-app-domain>/api/stripe/webhook` while the real handler lives in Convex, Checkout can complete and return to `/checkout/success` while access grant never happens.
+
 ## Required Stripe env values
 
 Add these to `.env.local`:
@@ -47,12 +53,13 @@ bun run dev:full
 
 That helper:
 
-- starts Stripe CLI forwarding to `{NEXT_PUBLIC_CONVEX_URL}/stripe/webhook`
+- starts Stripe CLI forwarding to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`
 - captures the current webhook signing secret
 - writes that secret into `.env.local`
 - syncs that secret and `STRIPE_SECRET_KEY` into the active hosted Convex dev env
 
 It also expects `.env.local` to contain the `CONVEX_DEPLOYMENT` value that `bun run dev:convex` writes.
+In this repo, that same `bun run dev:convex` sync also needs to leave `NEXT_PUBLIC_CONVEX_SITE_URL` in `.env.local`, because Stripe forwards into the Convex HTTP-actions origin instead of the `.convex.cloud` client origin.
 
 If the listener writes a fresh secret while the app is already running, restart the app before testing checkout.
 
@@ -69,7 +76,7 @@ The starter uses this sequence:
 1. signed-in buyer calls `POST /api/stripe/checkout`
 2. Stripe hosts checkout
 3. Stripe returns to `/checkout/success`
-4. Stripe webhook hits Convex HTTP at `/stripe/webhook`
+4. Stripe webhook hits Convex HTTP at `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`
 5. Convex verifies the signature and upserts the active product-access grant
 6. `/checkout/success` waits for access, then redirects into `/start`
 
@@ -98,6 +105,7 @@ The most common failures are:
 
 - the Stripe CLI is logged into a different Stripe account than `STRIPE_SECRET_KEY`
 - `.env.local` and Convex do not match on `STRIPE_WEBHOOK_SECRET` or `STRIPE_SECRET_KEY`
+- production Convex is missing `STRIPE_SECRET_KEY`, so the webhook cannot construct Stripe even after the signature verifies
 - you changed the webhook secret but did not restart the app
 - Clerk/Convex auth is broken, so the buyer cannot be matched to the right access state
 

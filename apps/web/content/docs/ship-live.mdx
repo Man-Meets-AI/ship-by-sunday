@@ -29,9 +29,37 @@ Make sure all of this is true:
 5. Confirm Vercel creates the production web deploy from `main`.
 6. Confirm GitHub Actions runs `Convex Production Deploy` for the same `main` merge.
 7. Register or verify the live Stripe webhook endpoint.
-8. Run a safe real checkout pass in the deployed environment.
+8. Run a safe billing-handoff pass in the deployed environment.
 9. Confirm product-access grant happens in the deployed environment, not just locally.
 10. Confirm the buyer reaches the protected product after payment.
+
+For this repo, the safest production billing proof is a live no-cost Checkout run using a restricted `100% off` promotion code:
+
+- single-use when possible
+- short expiry
+- restricted to the QA customer if possible
+
+That verifies the part we actually care about in production:
+
+- Checkout Session creation
+- hosted Checkout completion
+- redirect into `/checkout/success`
+- live Stripe webhook delivery
+- Convex product-access grant
+- redirect into `/start`
+
+It does **not** prove live card charging or decline behavior. Keep card-path confidence in sandbox or local Stripe testing.
+
+The live Stripe webhook must not point at the app origin unless that route really exists. In this repository, the real production webhook handler is the Convex HTTP-actions route:
+
+`https://<your-convex-production-deployment>.convex.site/stripe/webhook`
+
+Before trusting production billing, verify both of these are true on the production Convex deployment:
+
+- `STRIPE_WEBHOOK_SECRET`
+- `STRIPE_SECRET_KEY`
+
+After those are correct, run one fresh live no-cost order and verify it auto-forwards back into `/start` without replaying the Stripe event. The replay path is a valid repair tool, but the clean production proof is the automatic delivery path.
 
 ## Keep these in mind
 

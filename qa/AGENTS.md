@@ -17,6 +17,18 @@ Read these files in order before changing QA decisions:
 
 Then inspect only the app code and tests required for the selected scenarios.
 
+Before running a pack, declare the target environment in plain English: `dev`, `prod`, or a named test environment. Do not mix evidence from different environments in one report without saying so explicitly.
+
+## Current Resume State
+
+- Start with `dev`. `default_ship` is green there and is the canonical first debug baseline.
+- `billing_integration` on `dev` has a green rerun in `qa/runs/2026-03-25-dev-billing-integration-rerun.md`. Use that report as the local billing baseline.
+- Move to `prod` second. `default_ship` is now green there too; use `qa/runs/2026-03-25-default-ship-prod-rerun.md` as the current hosted baseline.
+- Hosted `billing_integration` now has both the repair report and the automatic post-fix rerun. Read `qa/runs/2026-03-25-prod-billing-integration-webhook-fix.md` first for the misconfig repair, then `qa/runs/2026-03-25-prod-billing-integration-automatic-rerun.md` for the fresh automatic delivery proof.
+- The key prod invariants are: Stripe posts to the Convex `.convex.site` webhook URL, production Convex has both `STRIPE_WEBHOOK_SECRET` and `STRIPE_SECRET_KEY`, and a fresh live completed no-cost order can patch or insert a `stripe_webhook` access grant without replay.
+- For this repo, prefer a live no-cost Checkout verification using a restricted `100% off` promotion code instead of a real card charge. That proves the webhook/access handoff without treating prod as a card-testing surface.
+- Use `qa/runs/` as the durable evidence set and read the latest relevant environment report before rerunning a pack.
+
 ## Five Agent Responsibilities
 
 ### Scenario Mapper
@@ -42,17 +54,26 @@ Use:
 
 ```bash
 bun run qa:run-pack -- --pack=default_ship --dry-run
-bun run qa:personas:prepare -- --pack=default_ship
+PLAYWRIGHT_BASE_URL=<safe_base_url> bun run qa:personas:prepare -- --pack=default_ship
 bun run test:browser-smoke
 E2E_RUN_SANDBOX=1 PLAYWRIGHT_BASE_URL=<safe_base_url> bun run --cwd apps/web test:e2e:sandbox:default-ship
 ```
+
+Environment ownership:
+
+- `qa/personas.local.json` supplies the real QA account emails and passwords.
+- `apps/web/.env.local` or `QA_ENV_FILE=<path>` supplies the Clerk and Convex environment for provisioning.
+- `PLAYWRIGHT_BASE_URL` supplies the browser target.
 
 Pack policy:
 
 - `default_ship`: run `qa:run-pack -- --pack=default_ship` once the environment is ready. This validates the catalog, prepares personas, scaffolds the report, runs browser smoke, and runs the tagged canonical packet-route sandbox spec.
 - `extended`: run only the scenarios touched by the diff unless the user asks for a full extended sweep.
-- `billing_integration`: run `qa:run-pack -- --pack=billing_integration` only when the environment is explicitly safe for test payments and `QA_ALLOW_BILLING_INTEGRATION=1` is set.
-- For authenticated sandbox packs, prefer a hosted environment over `PLAYWRIGHT_USE_LOCAL_SERVER=1` until the local auth bootstrap is redesigned. The current Playwright `globalSetup` can provision hosted personas reliably, but it is not stable enough against a just-started local web server.
+- `billing_integration`: run `qa:run-pack -- --pack=billing_integration` only when the environment is explicitly safe for test payments and `QA_ALLOW_BILLING_INTEGRATION=1` is set. The current local rerun is green; if it regresses, first verify that `bun run dev:stripe` is forwarding to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook` before treating it as an app-auth issue. For hosted prod verification, prefer a restricted live `100% off` promotion code so Checkout completes as a no-cost order while still producing `checkout.session.completed` for the webhook grant path.
+- Run authenticated sandbox work on local `dev` first. The current green local baseline is `default_ship`; use hosted or prod only after the local path is understood.
+- Hosted persona prep must use Clerk env values that match the hosted target. `qa:personas:prepare` and `qa:run-pack` load `apps/web/.env.local` by default; set `QA_ENV_FILE=<path>` or export matching Clerk env vars before targeting prod or any other non-local Clerk instance.
+- Workflow order is `dev` first, then `prod`. Use local dev to debug product/runtime issues before collecting hosted ship evidence. Only use `prod` once the local behavior is understood.
+- For production QA, prefer the single command `PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=<prod-env-file> bun run qa:run-pack -- --pack=default_ship` so persona prep and both browser lanes use the same target assumptions.
 
 ### Gap Reviewer
 
@@ -77,6 +98,8 @@ bun run qa:ship -- --pack=default_ship --slug=<short-name>
 ```
 
 That command scaffolds a local report under `qa/runs/local/`. Promote the final report into committed `qa/runs/` only after the evidence is worth keeping.
+
+Every report must include the environment label near the top. Good examples are `Environment: dev-local`, `Environment: prod-www.man-meets-ai.com`, or `Environment: staging-<name>`.
 
 ## Operating Rules
 

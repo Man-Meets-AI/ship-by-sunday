@@ -10,6 +10,8 @@
 - Reframed the public product story around `Agent-Ready Packs`, added a new homepage `durability` section plus pack-system visuals, and removed the old guided-sprint / four-block / starter-template pitch from the visible homepage contract.
 - Renamed the protected review and download contract to the outward artifact set `Design Pack`, `Marketing Pack`, `Build Pack`, `Prompt Pack`, and `Starter Snapshot`, including the review UI, packet headings, and archive filenames.
 - Disabled the legacy visible `starterRepo` path by default, removed it from the visible protected workspace inventory, and aligned the shipped docs entry points with the new pack-first public story.
+- Clarified the hosted and production QA runbooks so they now distinguish `qa/personas.local.json` account credentials from the selected Clerk and Convex env source, document `QA_ENV_FILE` plus `PLAYWRIGHT_BASE_URL` for non-local targets, and point operators at the single `qa:run-pack` command for post-deploy verification.
+- Closed the journey-first QA initiative by documenting the team’s shared QA operating model in the root README, capturing the role split in durable docs, and proving the repaired production billing handoff with both a webhook-fix report and a fresh automatic live no-cost rerun.
 
 ## 2026-03-24
 

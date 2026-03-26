@@ -90,6 +90,25 @@ Production now ships through a two-branch workflow:
 
 The operator runbook lives in [docs/release-workflow.md](docs/release-workflow.md).
 
+## How This Team Works
+
+This repository now treats QA as one shared operating system, not a scattered set of test files or one-off browser rituals.
+
+- The source of truth lives in [qa/README.md](qa/README.md), [qa/journeys.csv](qa/journeys.csv), [qa/coverage.csv](qa/coverage.csv), and the committed reports under [qa/runs/](qa/runs/).
+- The team runs `dev` first and `prod` second. Local `dev` is where auth, routing, and webhook bugs get isolated fast. Production evidence is collected only after the local path is understood.
+- `default_ship` is the release-critical pack. `billing_integration` is a separate billing handoff pack so ordinary releases do not need to re-run Stripe every time.
+- Production billing proof in this repo uses a restricted live `100% off` promotion code instead of a real card charge. That verifies the real webhook-to-access handoff without treating production as a card-testing surface.
+
+The current human-readable role split lives in [qa/AGENTS.md](qa/AGENTS.md):
+
+- `Scenario Mapper` maps diffs to scenario IDs and affected packs
+- `Test Auditor` keeps the inventory and coverage map honest
+- `Browser Runner` executes the actual journey checks
+- `Gap Reviewer` finds missing or stale release proof
+- `Release Summarizer` writes the final run report
+
+Today those roles are documented operating responsibilities. In the future, we want to turn more of them into first-class sub-agents so different jobs can be delegated cleanly without forking the QA model or creating separate dev/prod test suites.
+
 ## Codex Integration
 
 The optional in-app Codex account and generation routes require a runtime that can spawn the `codex` binary and persist per-user app-server state.
@@ -139,7 +158,11 @@ bun run build
 bun run check
 ```
 
-The full testing runbook lives in [docs/dev/testing.md](docs/dev/testing.md).
+The current QA docs are split by purpose:
+
+- local browser and checkout runbook: [apps/web/content/docs/local-qa.mdx](apps/web/content/docs/local-qa.mdx)
+- QA control plane and scenario packs: [qa/README.md](qa/README.md)
+- shared-branch and production release workflow: [docs/release-workflow.md](docs/release-workflow.md)
 
 For Stripe checkout testing from your local machine against hosted Convex dev, use:
 
@@ -149,6 +172,8 @@ bun run stripe:listen:dev
 bun run stripe:dev:doctor
 bun run stripe:dev:verify
 ```
+
+In this repo, local Stripe forwarding must hit `NEXT_PUBLIC_CONVEX_SITE_URL` on `.convex.site` for `/stripe/webhook`; `NEXT_PUBLIC_CONVEX_URL` stays on the `.convex.cloud` browser client origin.
 
 The purchase-to-access behavior contract lives in [docs/delivery-onboarding/stack-decision.md](docs/delivery-onboarding/stack-decision.md).
 
