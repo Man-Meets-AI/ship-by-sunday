@@ -9,6 +9,8 @@ The Stripe setup has one job: turn a real paid checkout into a real product-acce
 
 The easiest way to break that path is secret drift between the app and Convex.
 
+In local development, this repo also treats the Stripe CLI project name as a guardrail. The pinned local profile is `ship-by-sunday`, but the runtime source of truth is still `STRIPE_SECRET_KEY` from `apps/web/.env.local`.
+
 For production in this repo, the live Stripe webhook should target the Convex HTTP-actions origin, not the app origin:
 
 `https://<your-convex-production-deployment>.convex.site/stripe/webhook`
@@ -54,6 +56,7 @@ bun run dev:full
 That helper:
 
 - starts Stripe CLI forwarding to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`
+- checks the pinned Stripe CLI project `ship-by-sunday` and warns with `stripe login --project-name ship-by-sunday` if the CLI context drifted
 - captures the current webhook signing secret
 - writes that secret into `.env.local`
 - syncs that secret and `STRIPE_SECRET_KEY` into the active hosted Convex dev env
@@ -89,6 +92,8 @@ bun run stripe:dev:doctor
 bun run stripe:dev:verify
 ```
 
+`bun run stripe:dev:doctor` compares the app Stripe account from `apps/web/.env.local` against the pinned Stripe CLI project `ship-by-sunday`. The listener itself still runs from `STRIPE_SECRET_KEY`, so a CLI mismatch is a local guardrail problem, not a second billing authority.
+
 ## What success looks like
 
 The happy path is:
@@ -103,10 +108,16 @@ The happy path is:
 
 The most common failures are:
 
-- the Stripe CLI is logged into a different Stripe account than `STRIPE_SECRET_KEY`
+- the pinned Stripe CLI project `ship-by-sunday` is missing or logged into a different Stripe account than `STRIPE_SECRET_KEY`
 - `.env.local` and Convex do not match on `STRIPE_WEBHOOK_SECRET` or `STRIPE_SECRET_KEY`
 - production Convex is missing `STRIPE_SECRET_KEY`, so the webhook cannot construct Stripe even after the signature verifies
 - you changed the webhook secret but did not restart the app
 - Clerk/Convex auth is broken, so the buyer cannot be matched to the right access state
+
+If the doctor says the pinned CLI project is missing or mismatched, repair that exact profile with:
+
+```bash
+stripe login --project-name ship-by-sunday
+```
 
 If you are seeing a paid session without access, start with [Troubleshooting Stripe and Convex](/docs/troubleshooting/stripe-convex).

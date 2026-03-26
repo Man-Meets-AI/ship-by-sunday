@@ -34,11 +34,19 @@ The runtime splits into three clear surfaces:
 
 - public marketing surface on `/`
 - public docs surface on `/docs` when the docs module is enabled
-- protected product surface on `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, `/review`, and `/settings`
+- protected product surface on `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, `/review`, optional `/execute` after review unlock, and `/settings`
 
 That split matters because checkout and access recovery live between those worlds.
 
 `app/(workspace)/layout.tsx` is the single server-side product-access gate for the protected app routes. Middleware only handles sign-in.
+
+The auth bridge between public and protected surfaces uses three route-group screens:
+
+- `/sign-in` for the branded sign-in UI
+- `/session-tasks/reset-password` for the Clerk reset-password task inside the same shell
+- `/sso-callback` for OAuth completion
+
+`/sign-up` is not a visible auth product surface in this repo. It redirects to pricing so account creation still flows through checkout.
 
 ## Starter config and module gating
 
@@ -62,7 +70,7 @@ These module gates sit above the existing auth, checkout, and access model. They
 
 The public homepage has a second layer of starter configuration inside the same file:
 
-- `starterConfig.homePage.sections` controls the fixed public section order: `hero`, `sprintPath`, `whatsInside`, `durability`, `socialProof`, `faq`, `pricing`, and `footer`
+- `starterConfig.homePage.sections` controls the fixed public section order: `hero`, `sprintPath`, `whatsInside`, `starterSystem`, `durability`, `socialProof`, `faq`, `pricing`, and `footer`
 - `starterConfig.homePage.heroPrimaryCta` and `starterConfig.homePage.pricingPrimaryCta` decide whether those calls to action use checkout or a plain link target
 - `features/marketing/lib/home-page-render-model.ts` is the adapter that turns those starter defaults plus `features/marketing/content/home.ts` into the render contract that `features/marketing/components/home-page.tsx` uses
 

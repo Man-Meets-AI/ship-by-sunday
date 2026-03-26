@@ -12,11 +12,13 @@ After this change, a buyer still moves through the required packet-first funnel 
 
 - [x] 2026-03-25 23:44 EDT — Inspected `AGENTS.md`, `apps/web/AGENTS.md`, `docs/codex/PLANS.md`, `docs/prompts/execplan-writer.md`, the packet compiler stage model, the current packet-flow UI, the legacy mission shell, the download routes, and the relevant tests to freeze the planning slice.
 - [x] 2026-03-25 23:57 EDT — Grilled the ExecPlan against the repo and resolved the remaining must-have ambiguities: the unlock trigger is a separate explicit action after download, unlocked packet sections permit full open/edit/save freedom across internal steps, `/execute` ships first as a shell plus lightweight detail views, and the first slice stores only the top-level unlock with no per-track persistence.
-- [ ] 2026-03-25 23:44 EDT — Implement a game-like progression layer inside the existing packet stages without changing the required stage order or the canonical packet facts model.
-- [ ] 2026-03-25 23:44 EDT — Turn `Review & Download` into a checkpoint-complete screen that previews and then unlocks the optional `Execute / Ship` branch.
-- [ ] 2026-03-25 23:44 EDT — Add workflow-only persistence for the `Execute / Ship` unlock and guard a new `/execute` route from direct access before unlock.
-- [ ] 2026-03-25 23:44 EDT — Stand up the first version of the optional `Execute / Ship` hub using packet-first language and selective reuse of the old mission-shell mechanics.
-- [ ] 2026-03-25 23:44 EDT — Add or update focused tests, then run the narrow and broad validation commands called out in this plan.
+- [x] 2026-03-26 00:14 EDT — Completed Milestone 1. Added a feature-local packet progression panel with visible objective and reward copy, made in-stage step browsing persistent across step switches, locked future packet-stage nav links, and redirected direct hits to locked packet stages back to the first incomplete required stage.
+- [x] 2026-03-26 00:14 EDT — Ran focused Milestone 1 validation from `apps/web`: `bunx vitest run --project integration-ui tests/integration-ui/packet-stage-page.test.tsx tests/integration-ui/packet-review-page.test.tsx` passed.
+- [x] 2026-03-26 00:18 EDT — Landed the first Milestone 2 slice. `/review` now presents a checkpoint-complete card, keeps the existing outward-facing pack download labels and hrefs intact, previews `Execute / Ship` as an optional post-download branch, and redirects direct hits back to the first incomplete required stage when Review is still locked.
+- [x] 2026-03-26 00:25 EDT — Completed Milestone 2. `/review` now uses a client-side post-download bridge so `Download Starter Snapshot` stays the primary outcome, while a separate `Unlock Execute / Ship` action appears only after the review download moment and keeps the archive GET routes side-effect free.
+- [x] 2026-03-26 00:25 EDT — Completed Milestone 3. Added `packetWorkflowStates`, exposed `workflowState` through `api.packet.getPacketWorkspaceState`, added the `api.packet.unlockExecuteShip` mutation, and guarded `/execute` behind the persisted top-level unlock without touching `projectDefinitions.facts`.
+- [x] 2026-03-26 00:25 EDT — Completed Milestone 4. Added the protected `/execute` route, a feature-local `execute-ship` hub with starter track cards, and lightweight detail views for `Build Now`, `Refine Design`, `Refine Marketing`, `QA & Debug`, and `Launch & Ship`.
+- [x] 2026-03-26 00:28 EDT — Completed Milestone 5. Added focused integration-ui coverage for review unlock and execute-route gating, updated the public route-model docs to include optional `/execute`, added the required `todo.md` recent-work entry, and ran the broader validation set plus browser smoke.
 
 ## Surprises & Discoveries
 
@@ -29,6 +31,12 @@ The existing packet-stage UI is flatter than the user intent. `apps/web/features
 The old “game-like” system is still present in the codebase even though the routes now redirect away from it. `apps/web/features/course/mission/**`, `apps/web/features/course/shared/components/app-shell/app-shell-mission-rail-shadcn.tsx`, `apps/web/features/course/shared/components/skill-rail-shadcn.tsx`, and the completion-celebration logic in `apps/web/features/course/lesson/components/lesson-page-footer-standard-body.tsx` and `apps/web/features/course/lesson/hooks/use-lesson-completion.ts` still encode the strongest progression cues. `apps/web/app/(workspace)/mission/page.tsx` and `apps/web/app/(workspace)/lesson/[lessonKey]/page.tsx` now redirect to `/start`, so the old surfaces can be mined for mechanics and visual language but should not be restored as first-class packet routes.
 
 The review page outward-facing labels are locked by tests. `apps/web/tests/integration-ui/packet-review-page.test.tsx` currently asserts the presence of `Design Pack`, `Marketing Pack`, `Build Pack`, `Prompt Pack`, and `Download Starter Snapshot`. Any redesign of review must preserve those public labels and download destinations while allowing the page to become a stronger checkpoint and unlock moment.
+
+Milestone 1 exposed a subtle browsing trap in the original packet-stage shell. `apps/web/features/packet-flow/components/packet-stage-page.tsx` used to resync its active step directly from `stageStatus.currentStepIndex` every time the live workspace state changed. That behavior was fine when the stage only rendered one enforced next step, but it would have snapped the user back to the first incomplete step after every save and made out-of-order browsing inside one unlocked section feel broken. The progression refactor therefore had to separate the derived “current objective” from the locally selected step.
+
+Milestone 2 exposed a second direct-access gap. `apps/web/features/packet-flow/components/packet-review-page.tsx` previously rendered Review even when `review` was still locked in the derived stage model. The nav badges could say Review was locked while a direct `/review` hit still opened the page. The review shell now has to enforce the same sequential gate as the stage pages before the `Execute / Ship` bridge can be truthful.
+
+The cleanest way to honor the “download first, unlock second” rule was to treat the Starter Snapshot click as a local review-side acknowledgement, not as proof that a browser download completed. `apps/web/features/packet-flow/components/review/packet-review-download-bridge.tsx` now records that local download moment in component state, then calls a separate `unlockExecuteShip` mutation only when the user explicitly asks to continue. That preserves pure GET download routes and still creates a truthful handoff.
 
 Evidence from repo inspection:
 
@@ -76,9 +84,19 @@ Decision: The first `/execute` release stores only the top-level unlock and does
 Rationale: This keeps the new workflow state minimal and avoids accidentally rebuilding a second full lesson-state system before the optional branch has proven its shape. Per-track persistence can be added later if real usage justifies it.
 Date/Author: 2026-03-25 / Codex
 
+Decision: Keep the packet compiler’s `currentStepIndex` as the recommended objective, but store the user’s selected in-stage step locally in the stage page so flexible browsing does not collapse back to the first incomplete step after every save.
+Rationale: Milestone 1 requires out-of-order browsing inside one unlocked section. Reusing the derived `currentStepIndex` as the live selection would have undone that behavior as soon as the Convex query refreshed. Separating “recommended next required step” from “currently open step card” preserves the canonical readiness model while making the stage UI behave like a level map.
+Date/Author: 2026-03-26 / Codex
+
+Decision: Use a separate client-side acknowledgement after the Starter Snapshot click to reveal the unlock CTA, then persist the unlock only when the user explicitly asks to continue into `Execute / Ship`.
+Rationale: The browser can initiate a file download without giving the server a reliable “download completed” signal. Revealing the optional unlock only after the user clicks the Starter Snapshot CTA preserves the desired product pacing, while the follow-up mutation keeps the GET archive routes pure and the persisted workflow state minimal.
+Date/Author: 2026-03-26 / Codex
+
 ## Outcomes & Retrospective
 
-This section will be filled in as milestones complete. At plan creation time, the main known gap is content depth inside the future `/execute` hub. The plan below intentionally separates the unlock architecture and shell from any later deeper lesson remap so the team can ship the bridge first, learn from it, and then decide how much of the dormant lesson system deserves to return.
+This initiative is complete. The required packet flow still follows the canonical `Start -> Product -> Design -> Marketing -> Build Plan -> Review` order, but each required section now feels like a level with a visible objective, richer progression states, and browseable internal steps. `/review` now acts like a real checkpoint-complete screen instead of a flat download list, and it preserves the existing public pack labels and archive routes while adding a separate post-download bridge into the optional branch.
+
+The optional branch is also complete for the first slice. `packetWorkflowStates` stores only the top-level `Execute / Ship` unlock, `/execute` is protected by both product access and the new workflow gate, and the first hub release ships as a lightweight but real post-review shell with starter track detail views instead of teaser-only cards. The intentionally deferred gap is per-track progress persistence, which remains out of scope by design for this first release.
 
 ## Context and Orientation
 
@@ -248,6 +266,60 @@ The old mission-shell mechanics were not deleted. They were redirected away:
 
 As implementation proceeds, append short transcripts here showing the first successful packet-stage browsing test, the first successful unlock of `/execute`, and the final validation run.
 
+Milestone 1 focused validation:
+
+    $ cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web
+    $ bunx vitest run --project integration-ui tests/integration-ui/packet-stage-page.test.tsx tests/integration-ui/packet-review-page.test.tsx
+    Test Files  2 passed (2)
+    Tests  3 passed (3)
+
+Milestone 2 slice validation:
+
+    $ cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web
+    $ bunx vitest run --project integration-ui tests/integration-ui/packet-stage-page.test.tsx tests/integration-ui/packet-review-page.test.tsx
+    Test Files  2 passed (2)
+    Tests  4 passed (4)
+
+Milestone 3 and 4 focused validation:
+
+    $ cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web
+    $ bunx convex codegen
+    Uploading functions to Convex...
+    Generating TypeScript bindings...
+    Running TypeScript...
+
+    $ bunx vitest run --project integration-ui tests/integration-ui/packet-stage-page.test.tsx tests/integration-ui/packet-review-page.test.tsx tests/integration-ui/execute-ship-page.test.tsx
+    Test Files  3 passed (3)
+    Tests  6 passed (6)
+
+Broad validation and smoke:
+
+    $ cd /Users/parkerrex/Projects/manmeetsai-workspace
+    $ bun run test:integration:ui
+    Test Files  14 passed (14)
+    Tests  48 passed (48)
+
+    $ bun run test:unit
+    Test Files  82 passed (82)
+    Tests  309 passed (309)
+
+    $ bun run test:contracts
+    Test Files  1 passed (1)
+    Tests  4 passed (4)
+
+    $ bun run build
+    ✓ Compiled successfully
+    ✓ Generating static pages
+
+    $ bun run lint
+    Found 0 warnings and 0 errors.
+
+    $ bun run format:check
+    All matched files use the correct format.
+
+    $ set -a; source apps/web/.env.local; set +a; bun run test:browser-smoke
+    5 passed
+
 ## Interfaces and Dependencies
 
 The `PacketStageId` union in `packages/packet-compiler/src/stages/stage-definitions.ts` must remain `start`, `product`, `design`, `marketing`, `build-plan`, and `review`. This plan does not authorize adding `execute` to that union.
@@ -259,6 +331,10 @@ The `PacketStageId` union in `packages/packet-compiler/src/stages/stage-definiti
 `projectDefinitions` in `apps/web/convex/schema.ts` must remain the canonical store for packet facts only. Add a new workflow table, such as `packetWorkflowStates`, for optional progression and unlock state. Give it a precise index by `clerkUserId` and `productKey` so the packet feature can query it directly. In the first slice, this workflow state should store only the top-level `Execute / Ship` unlock and its timestamps, not per-track progress.
 
 `routeConfig` in `apps/web/config/product.ts` should gain a new protected route for `/execute`. The packet routes and review route must remain unchanged. The old `/mission` route should remain a legacy compatibility surface unless a later plan explicitly changes that contract.
+
+`api.packet.getPacketWorkspaceState` now depends on both `projectDefinitions` and `packetWorkflowStates`. The public validator in `apps/web/convex/packet/validators.ts` must therefore continue returning both `projectDefinition` and `workflowState` so `/review` and `/execute` can render from one server-fetched workspace object.
+
+`api.packet.unlockExecuteShip` is the only new persisted workflow mutation in this first release. It must keep the archive GET routes pure, patch only `packetWorkflowStates`, and remain idempotent when the unlock already exists.
 
 The new optional hub should live in a feature-local `apps/web/features/execute-ship/` area. Keep names domain-specific. Avoid vague names such as `hub`, `misc`, or `extra`. Prefer names like `execute-ship-page`, `execute-track-card`, `execute-ship-access-state`, and `build-execute-ship-model`.
 

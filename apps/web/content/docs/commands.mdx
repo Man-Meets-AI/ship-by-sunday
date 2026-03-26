@@ -21,6 +21,8 @@ Run `bun run dev:convex` first on a new machine or whenever you need to switch h
 
 `bun run dev` and `bun run dev:web` now run the same auth guardrail before `next dev` starts. If local Clerk env values and the active hosted Convex dev issuer disagree, startup stops with the exact `convex env set` command needed to realign them.
 
+`bun run dev:stripe` now prints the local Stripe guardrail state before it starts forwarding webhooks. The repo expects the pinned Stripe CLI project `ship-by-sunday`; repair it with `stripe login --project-name ship-by-sunday` if the CLI context drifted.
+
 ## Verification
 
 ```bash
@@ -44,6 +46,8 @@ bun run stripe:dev:doctor
 bun run stripe:dev:verify
 ```
 
+`bun run stripe:dev:doctor` compares the app Stripe account from `.env.local` against the pinned Stripe CLI project `ship-by-sunday`. The listener itself still runs from `STRIPE_SECRET_KEY`, so a CLI mismatch is a warning-worthy local guardrail problem, not a second billing authority.
+
 ## Clerk QA users
 
 ```bash
@@ -53,6 +57,8 @@ bun run clerk:test-user:check:entitled
 bun run clerk:test-user:create:entitled
 bun run clerk:test-user:prepare:entitled
 ```
+
+Use `bun run clerk:test-user:prepare:entitled` for the fastest single-user local debug path. Use `bun run qa:personas:prepare -- --pack=<pack>` when you need the canonical QA control-plane prep for every persona in a pack.
 
 For hosted browser QA against a non-local target, use the root QA commands with matching Clerk env values for that target. `qa/personas.local.json` still supplies the real QA account emails and passwords. `QA_ENV_FILE` only changes which Clerk and Convex environment those identities are provisioned against. It is optional and only needed if you keep a separate hosted or production env file:
 
@@ -71,6 +77,8 @@ PLAYWRIGHT_USE_LOCAL_SERVER=0 PLAYWRIGHT_BASE_URL=http://localhost:3000 bun run 
 ```
 
 When resuming local billing QA, start from the green rerun in `qa/runs/2026-03-25-dev-billing-integration-rerun.md`. If it regresses, check that `bun run dev:stripe` is forwarding to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook` before treating it as an app-auth failure.
+
+For local targets, `bun run qa:run-pack -- --pack=billing_integration` now adds a warning-only `stripe:dev:doctor` preflight and a hard `stripe:dev:verify` follow-through after the sandbox billing flow. A pinned-profile warning should not override a passing billing handoff, but the warning should still be fixed.
 
 Current QA state:
 

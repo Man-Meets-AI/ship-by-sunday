@@ -33,7 +33,7 @@ Install the repo and copy the local env template:
 
 ```bash
 bun install
-cp .env.local.example .env.local
+cp apps/web/.env.local.example apps/web/.env.local
 ```
 
 Then connect the repo to your hosted Convex dev deployment:
@@ -42,7 +42,7 @@ Then connect the repo to your hosted Convex dev deployment:
 bun run dev:convex
 ```
 
-That command runs `convex dev` and writes `NEXT_PUBLIC_CONVEX_URL` plus `CONVEX_DEPLOYMENT` into `.env.local` for your per-developer hosted Convex dev deployment.
+That command runs `convex dev` and writes `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_CONVEX_SITE_URL`, and `CONVEX_DEPLOYMENT` into `apps/web/.env.local` for your per-developer hosted Convex dev deployment.
 
 Then follow the provider wiring pages in this order:
 
@@ -79,7 +79,7 @@ bun run dev:stripe
 - `bun run dev:full` starts the app, hosted Convex dev sync, and Stripe webhook forwarding together
 - `bun run dev:web` starts only the Next.js side
 - `bun run dev:convex` connects or refreshes your hosted Convex dev deployment and keeps the backend synced
-- `bun run dev:stripe` waits for hosted Convex dev env values, then starts the Stripe listener
+- `bun run dev:stripe` waits for hosted Convex dev env values, checks the pinned Stripe CLI project `ship-by-sunday`, warns with `stripe login --project-name ship-by-sunday` if the local CLI context drifted, then starts the Stripe listener from the app `STRIPE_SECRET_KEY`
 
 This repo does not support Convex's local backend mode as a separate development mode.
 
@@ -90,6 +90,12 @@ Once the app boots, validate the basics:
 ```bash
 bun run build
 bun run stripe:dev:doctor
+```
+
+`bun run stripe:dev:doctor` compares the app Stripe account in `apps/web/.env.local` against the pinned Stripe CLI project `ship-by-sunday`. If that profile is missing or points at the wrong account, repair it with:
+
+```bash
+stripe login --project-name ship-by-sunday
 ```
 
 Then finish the real flow with [Local QA](/docs/local-qa).

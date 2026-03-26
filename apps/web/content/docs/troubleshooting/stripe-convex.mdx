@@ -14,6 +14,7 @@ Start here:
 ```bash
 bun run stripe:listen:dev
 bun run stripe:dev:doctor
+bun run clerk:test-user:prepare:entitled
 bun run stripe:dev:verify
 ```
 
@@ -38,9 +39,15 @@ These values must match in both places:
 
 The dev helper syncs both values. If the listener rotated the webhook secret, restart the app.
 
-### 4. Wrong Stripe account
+### 4. Wrong Stripe account or wrong pinned CLI profile
 
-The Stripe CLI must be logged into the same account as the app `STRIPE_SECRET_KEY`.
+The app `STRIPE_SECRET_KEY` is the runtime source of truth. The Stripe CLI profile is the local guardrail.
+
+In this repo, `bun run stripe:dev:doctor` compares the app account against the pinned Stripe CLI project `ship-by-sunday`. If the doctor says the pinned profile is missing or mismatched, repair it with:
+
+```bash
+stripe login --project-name ship-by-sunday
+```
 
 If those differ, you can see real Stripe events without the starter ever receiving a valid matching webhook.
 
@@ -64,11 +71,12 @@ Use this sequence:
 
 1. run the Stripe listener
 2. run `stripe:dev:doctor`
-3. confirm secret parity
-4. confirm Stripe account parity
-5. confirm Clerk `convex` template
-6. confirm the app and Convex agree on both `NEXT_PUBLIC_CONVEX_URL` and `NEXT_PUBLIC_CONVEX_SITE_URL` when HTTP actions are involved
-7. rerun a real local checkout against your hosted Convex dev deployment
+3. if `/access-required` is visible, read the signed-in email shown on that page before assuming the webhook failed
+4. confirm secret parity
+5. confirm the pinned Stripe CLI project `ship-by-sunday` matches the app account
+6. confirm Clerk `convex` template
+7. confirm the app and Convex agree on both `NEXT_PUBLIC_CONVEX_URL` and `NEXT_PUBLIC_CONVEX_SITE_URL` when HTTP actions are involved
+8. rerun a real local checkout against your hosted Convex dev deployment
 
 ## What success looks like
 

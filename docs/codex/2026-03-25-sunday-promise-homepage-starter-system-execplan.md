@@ -18,10 +18,11 @@ The homepage currently undersells the offer by flattening too much value into sm
 - [x] 2026-03-25 22:04 EDT: Locked the starter sub-advantage labels for the homepage: `Agent-Ready QA Team` and `Telegram Incident Alerts`.
 - [x] 2026-03-25 22:04 EDT: Locked the provider-skill layer label for the homepage: `Agent-Trained Provider Experts`.
 - [x] 2026-03-25 22:04 EDT: Locked the support-lane names for the starter section: `Fast Pass Walkthroughs`, `Guided Ship Path`, and `Product Sense Fundamentals`.
-- [ ] Update the homepage content model and render model to support the new story and the new top-level starter section.
-- [ ] Preserve the strongest existing React/UI treatments while adjusting only the copy slots and the minimal component structure required for the new flow.
-- [ ] Propagate the shared promise across metadata, Open Graph, Stripe description, and homepage tests.
-- [ ] Run the homepage-focused validation suite, then broader build and browser checks, and record any implementation discoveries back into this plan.
+- [x] 2026-03-26 00:11 EDT: Landed the homepage contract slice for `starterSystem` by updating `apps/web/config/product.ts`, `apps/web/features/marketing/lib/home-page-render-model.ts`, `apps/web/features/marketing/components/home-page.tsx`, `apps/web/features/marketing/components/home-page/starter-system-section.tsx`, `apps/web/features/marketing/content/home.ts`, and the homepage docs so the new top-level section is part of the fixed section order and render contract.
+- [x] 2026-03-26 00:21 EDT: Rewrote the homepage story in `apps/web/features/marketing/content/home.ts` so the hero, sprint path, what’s inside, starter system, durability, FAQ guarantee framing, and pricing copy now sell the Sunday promise first and the pack-plus-starter mechanism second.
+- [x] 2026-03-26 00:21 EDT: Preserved the existing visual shell while making only minimal UI changes: a feature-local `starter-system-section.tsx` component and a secondary hero CTA that points to `#system` without bypassing `HomePagePrimaryCta`.
+- [x] 2026-03-26 00:21 EDT: Propagated the shared promise across `apps/web/config/product.ts`, `apps/web/app/opengraph-image.tsx`, Stripe’s line-item description via `productConfig.promise`, and the homepage unit/browser-smoke tests.
+- [x] 2026-03-26 00:21 EDT: Ran the homepage-focused validation suite, targeted browser smoke, and `bun run build`, then recorded the command correction and the validation evidence in this plan.
 
 ## Surprises & Discoveries
 
@@ -34,6 +35,10 @@ The provider-expert and docs/config story is also real product substance, not ma
 The observability story is also real, but it must be framed carefully. `apps/web/features/observability/telegram/render-incident-message.ts`, the observability test suite under `apps/web/tests/unit/observability-*.test.ts` and `apps/web/tests/integration/observability-*.test.ts`, and the live-flow docs in `apps/web/content/docs/local-qa.mdx` and `apps/web/content/docs/deploy-to-vercel.mdx` confirm Telegram-backed incident delivery, Convex ingest endpoints, Clerk and Vercel webhook ingestion, and incident status controls. This is strong differentiator material for the starter section, but the homepage should describe it as part of the starter’s operational leverage rather than drown the page in implementation detail.
 
 The current homepage contract is more coupled than it first appears. The old promise surfaces are reused in app metadata, Open Graph, Stripe checkout description, homepage structured data descriptions, and smoke tests. Any copy rewrite that does not update `apps/web/config/product.ts`, `apps/web/app/opengraph-image.tsx`, `apps/web/platform/billing/stripe.ts`, and the homepage tests will leave public drift behind.
+
+The homepage contract also appears in more docs than the primary operating guide. While landing the `starterSystem` section boundary, `apps/web/content/docs/how-the-starter-works.mdx` still listed the old fixed section order. That means the section-order slice must update both `apps/web/content/docs/configure-the-homepage.mdx` and any other starter docs that enumerate the homepage contract, or the repo drifts immediately.
+
+The browser-smoke command in the original plan was stale for this repo. `bunx playwright test ...` resolved to a binary without the `test` subcommand in this workspace, while the checked-in app script still worked. The stable command here is `bun run --cwd apps/web test:browser-smoke -- --grep ...` after sourcing `apps/web/.env.local`.
 
 One guardrail is important: “first of its kind” is a strong public claim, but it is a proof claim. The plan should allow strong differentiator language, but should avoid unverifiable superlatives on the homepage unless there is explicit evidence added elsewhere on the site.
 
@@ -72,6 +77,10 @@ Date: 2026-03-25
 Decision: The hero may receive minimal structural changes to support a stronger promise line and a secondary discovery path, but the CTA contract remains centralized.
 Rationale: The approved story wants a big pushy promise, a large primary CTA, and a softer “see what you get” path. The current hero content shape likely needs a small extension, but `HomePagePrimaryCta` must remain the only primary checkout-rendering boundary.
 Date: 2026-03-25
+
+Decision: Add the `starterSystem` section boundary before rewriting the broader homepage message.
+Rationale: The new top-level section is a public contract change. Landing the fixed section order, render model property, feature-local component boundary, and starter-doc updates first keeps later work scoped to message changes, shared promise surfaces, and tests instead of repeatedly churning the contract layer.
+Date: 2026-03-26
 
 Decision: The homepage will sell the starter system strongly, but will avoid unverifiable superlatives unless supported.
 Rationale: The user wants “first of its kind” energy. The safer and still strong path is to emphasize the uniqueness of the combination of packs, generated starter, QA, and observability without making claims that require third-party proof.
@@ -129,15 +138,27 @@ Decision: Use `Fast Pass Walkthroughs`, `Guided Ship Path`, and `Product Sense F
 Rationale: These names are clearer and stronger than generic “videos,” “lessons,” or “bonus course” language. They make the learning stack feel like deliberate options inside the offer rather than leftover inventory.
 Date: 2026-03-25
 
+Decision: Keep the hero in the existing two-line headline treatment and move “durable” plus the mechanism explanation into the supporting copy and secondary CTA path.
+Rationale: The Sunday promise needed broader meaning than the old mechanism-first headline, but preserving the strongest visual shell mattered more than forcing a longer headline that would dilute impact or break the current treatment.
+Date: 2026-03-26
+
+Decision: Keep pricing short and let the starter section carry the detailed support-lane explanation.
+Rationale: The pricing card still needs to close cleanly. Naming the starter plus the key support lanes in pricing is enough once the new starter section already explains how those lanes differ and why they matter.
+Date: 2026-03-26
+
 ## Outcomes & Retrospective
 
-This section will be updated during implementation. The target outcome is a homepage that still feels like Ship by Sunday visually, but now sells the full offer stack clearly: the Sunday promise, the contract-first docs-pack mechanism, the generated starter-system advantage, the fast-pass and step-by-step learning paths, and the Monday durability payoff. The main future-facing follow-up to revisit after implementation is whether the new starter section should later expand into a dedicated `/starter` or docs-linked detail page once the homepage version is validated, but no new route is part of this execution slice.
+The homepage now keeps its original visual energy while selling a different argument. The hero leads with “Ship a real product by Sunday,” the next screen explains why prompt-first AI building drifts, the by-Sunday block focuses on concrete outcomes instead of pack inventory, and the new `starterSystem` section gives the starter its own space to sell configurability, QA, observability, provider expertise, and support lanes. The metadata, Open Graph image, Stripe description, unit tests, browser smoke, and build now all reflect that promise-first story.
+
+The most important implementation tradeoff was message density in the hero. The approved promise was broader than the existing two-line headline format, so the implementation kept the dramatic two-line headline, moved “durable” into the supporting body copy, and added a secondary CTA to `#system` instead of inflating the hero into a full explainer. The second important tradeoff was pricing density: the detailed learning-path explanation stayed in the starter section while pricing kept a short includes list that still names the starter and the key support lanes.
+
+The main future-facing follow-up remains whether the starter section should later expand into a dedicated `/starter` or docs-linked detail page once the homepage version is validated. No new route was needed for this slice.
 
 ## Context and Orientation
 
 The homepage is controlled by a fixed contract that lives across config, content, render model, components, and tests. `apps/web/config/product.ts` defines the global product identity, price, route constants, homepage section order, CTA target types, module flags, and the shared `productConfig.promise` and `productConfig.metadataDescription` values that are reused throughout the app. `apps/web/features/marketing/content/home.ts` owns the actual homepage copy and assets. `apps/web/features/marketing/lib/home-page-render-model.ts` adapts config plus content into the exact shape consumed by `apps/web/features/marketing/components/home-page.tsx`.
 
-The current public homepage renders these top-level sections in order: hero, sprint path, what’s inside, durability, social proof, FAQ, pricing, footer. That order is documented in `apps/web/content/docs/configure-the-homepage.mdx`, and that same document also defines the public anchor contract for `id="system"` and `id="pricing"`. Adding a top-level section is therefore a deliberate contract change. It requires synchronized updates to `apps/web/config/product.ts`, `apps/web/features/marketing/content/home.ts`, `apps/web/features/marketing/lib/home-page-render-model.ts`, `apps/web/features/marketing/components/home-page.tsx`, the relevant tests, and the homepage contract doc.
+The current public homepage renders these top-level sections in order: hero, sprint path, what’s inside, starter system, durability, social proof, FAQ, pricing, footer. That order is documented in `apps/web/content/docs/configure-the-homepage.mdx`, and that same document also defines the public anchor contract for `id="system"` and `id="pricing"`. Adding a top-level section is therefore a deliberate contract change. It requires synchronized updates to `apps/web/config/product.ts`, `apps/web/features/marketing/content/home.ts`, `apps/web/features/marketing/lib/home-page-render-model.ts`, `apps/web/features/marketing/components/home-page.tsx`, the relevant tests, and the homepage contract doc.
 
 The current components are already segmented cleanly. The hero lives in `apps/web/features/marketing/components/home-page/hero-sections.tsx` and `home-hero-headline.tsx`. The current “system” section lives in `apps/web/features/marketing/components/home-page/sprint-path-unified-section.tsx`. The three-card content block lives in `apps/web/features/marketing/components/home-page/whats-inside-section.tsx`. `apps/web/features/marketing/components/home-page/durability-section.tsx` holds the current Monday-durability block. Proof and FAQ are in `social-proof-faq-sections.tsx`, while pricing and footer are in `pricing-footer-sections.tsx`.
 
@@ -145,7 +166,7 @@ Several reusable UI atoms should be intentionally preserved. `apps/web/component
 
 The starter-system story is grounded in real product surfaces. `apps/web/content/docs/index.mdx` describes the starter as a packet-first starter with a public landing page, real paid access, and a protected workspace. `apps/web/content/docs/how-the-starter-works.mdx` describes the locked stack and module gating. `apps/web/features/workspace-home/lib/workspace-home-model.ts` shows configurable modules for docs, course, codex, and observability. `packages/packet-compiler/src/repo-generation/render-template-overrides.ts` and `build-repo-generation-manifest.ts` show that generated output can tailor `apps/web/config/product.ts` and `apps/web/features/marketing/content/home.ts` while producing a repo-shaped artifact. The observability flow is backed by real code and tests under `apps/web/features/observability/**` and `apps/web/tests/**`.
 
-The tests and metadata surfaces matter for this slice. `apps/web/tests/unit/home-page-content.test.ts` and `apps/web/tests/browser-smoke/app-smoke.spec.ts` currently assert the old mechanism-first language. `apps/web/features/marketing/lib/home-page-structured-data.ts`, `apps/web/app/layout.tsx`, `apps/web/app/manifest.ts`, `apps/web/app/opengraph-image.tsx`, and `apps/web/platform/billing/stripe.ts` all depend on the shared promise fields in `productConfig`. The implementation must keep those surfaces aligned.
+The tests and metadata surfaces matter for this slice. `apps/web/tests/unit/home-page-content.test.ts`, `apps/web/tests/unit/home-page-render-model.test.ts`, `apps/web/tests/unit/home-page-structured-data.test.ts`, `apps/web/tests/integration-ui/home-page-primary-cta.test.tsx`, and `apps/web/tests/browser-smoke/app-smoke.spec.ts` now prove the updated promise-first homepage contract. `apps/web/features/marketing/lib/home-page-structured-data.ts`, `apps/web/app/layout.tsx`, `apps/web/app/manifest.ts`, `apps/web/app/opengraph-image.tsx`, and `apps/web/platform/billing/stripe.ts` all depend on the shared promise fields in `productConfig`, so those surfaces were updated or revalidated together.
 
 ## Plan of Work
 
@@ -251,7 +272,7 @@ Then run the browser smoke and full build from the repository root.
     set -a
     source apps/web/.env.local
     set +a
-    PLAYWRIGHT_USE_LOCAL_SERVER=1 bunx playwright test --project=browser-smoke apps/web/tests/browser-smoke/app-smoke.spec.ts --grep "landing page renders the main offer CTA|homepage renders structured SEO data"
+    bun run --cwd apps/web test:browser-smoke -- --grep "landing page renders the main offer CTA|homepage renders structured SEO data"
 
     bun run build
 
@@ -330,6 +351,48 @@ The new starter section should carry these ideas explicitly, though the exact wo
     Guided Ship Path
     Product Sense Fundamentals
     skills versus sub-agents teaching as part of the support lane
+
+Observed validation transcript for the completed contract slice:
+
+    cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web
+    bunx oxfmt --check config/product.ts features/marketing/components/home-page.tsx features/marketing/components/home-page/starter-system-section.tsx features/marketing/content/home.ts features/marketing/lib/home-page-render-model.ts tests/unit/home-page-render-model.test.ts
+    All matched files use the correct format.
+
+    bunx oxlint --deny-warnings config/product.ts features/marketing/components/home-page.tsx features/marketing/components/home-page/starter-system-section.tsx features/marketing/content/home.ts features/marketing/lib/home-page-render-model.ts tests/unit/home-page-render-model.test.ts
+    Found 0 warnings and 0 errors.
+
+    bunx vitest --config vitest.config.ts run --project unit tests/unit/home-page-render-model.test.ts
+    Test Files  1 passed (1)
+    Tests       2 passed (2)
+
+Observed validation transcript for the completed homepage rewrite:
+
+    cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web
+    bunx oxlint --deny-warnings config/product.ts features/marketing/components/home-page.tsx features/marketing/components/home-page/durability-section.tsx features/marketing/components/home-page/hero-sections.tsx features/marketing/components/home-page/pricing-footer-sections.tsx features/marketing/components/home-page/home-page-primary-cta.tsx features/marketing/components/home-page/starter-system-section.tsx features/marketing/content/home.ts features/marketing/lib/home-page-render-model.ts features/marketing/lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/integration-ui/home-page-primary-cta.test.tsx
+    Found 0 warnings and 0 errors.
+
+    bunx oxfmt --check config/product.ts features/marketing/components/home-page.tsx features/marketing/components/home-page/durability-section.tsx features/marketing/components/home-page/hero-sections.tsx features/marketing/components/home-page/pricing-footer-sections.tsx features/marketing/components/home-page/home-page-primary-cta.tsx features/marketing/components/home-page/starter-system-section.tsx features/marketing/content/home.ts features/marketing/lib/home-page-render-model.ts features/marketing/lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/integration-ui/home-page-primary-cta.test.tsx
+    All matched files use the correct format.
+
+    bunx vitest --config vitest.config.ts run --project unit tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts
+    Test Files  3 passed (3)
+    Tests       7 passed (7)
+
+    bunx vitest --config vitest.config.ts run --project integration-ui tests/integration-ui/home-page-primary-cta.test.tsx
+    Test Files  1 passed (1)
+    Tests       2 passed (2)
+
+    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    set -a
+    source apps/web/.env.local
+    set +a
+    bun run --cwd apps/web test:browser-smoke -- --grep "landing page renders the main offer CTA|homepage renders structured SEO data"
+    2 passed
+
+    bun run build
+    ✓ Compiled successfully
+    ✓ Finished TypeScript
+    ✓ Generating static pages using 9 workers (64/64)
 
 Strong homepage differentiator language should stay defensible. Prefer lines such as:
 
