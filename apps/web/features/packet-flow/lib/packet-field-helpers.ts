@@ -1,6 +1,7 @@
 import type {
 	CanonicalProjectFactKey,
 	CanonicalProjectFactsDraft,
+	PacketStageDefinition,
 	PacketStepDefinition,
 } from "@manmeetsai/packet-compiler";
 
@@ -107,6 +108,15 @@ export function buildStepDraftValues(
 			formatPacketFactValue(facts, fieldKey),
 		]),
 	) as Record<CanonicalProjectFactKey, string>;
+}
+
+export function buildStageDraftValues(
+	facts: CanonicalProjectFactsDraft,
+	stage: PacketStageDefinition,
+) {
+	return Object.fromEntries(
+		stage.steps.map((step) => [step.id, buildStepDraftValues(facts, step)]),
+	) as Record<string, Record<CanonicalProjectFactKey, string>>;
 }
 
 export function buildSavePayload(

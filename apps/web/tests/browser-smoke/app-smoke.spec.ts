@@ -5,9 +5,12 @@ test("landing page renders the main offer CTA", async ({ request }) => {
 	const html = await response.text();
 
 	expect(response.ok()).toBe(true);
-	expect(html).toContain("Turn one product idea");
-	expect(html).toContain("Agent-Ready Packs");
-	expect(html).toContain("Agents will change. Your packs still work.");
+	expect(html).toContain("Ship a real product");
+	expect(html).toContain("by Sunday");
+	expect(html).toContain(
+		"More than a starter. More like an agent-ready operating system.",
+	);
+	expect(html).toContain("Ship on Sunday. Keep shipping on Monday.");
 	expect(html).toContain("Get instant access");
 	expect(html).toContain('id="system"');
 	expect(html).toContain('id="pricing"');
@@ -59,7 +62,16 @@ test("docs pages emit canonical tags and auth pages emit noindex", async ({
 	const docsResponse = await request.get("/docs/local-setup");
 	const docsHtml = await docsResponse.text();
 	const signInResponse = await request.get("/sign-in");
-	const signInHtml = (await signInResponse.text()).toLowerCase();
+	const signInHtml = await signInResponse.text();
+	const signInRobotsHtml = signInHtml.toLowerCase();
+	const resetPasswordResponse = await request.get(
+		"/session-tasks/reset-password",
+	);
+	const resetPasswordHtml = await resetPasswordResponse.text();
+	const resetPasswordRobotsHtml = resetPasswordHtml.toLowerCase();
+	const ssoCallbackResponse = await request.get("/sso-callback");
+	const ssoCallbackHtml = await ssoCallbackResponse.text();
+	const ssoCallbackRobotsHtml = ssoCallbackHtml.toLowerCase();
 
 	expect(docsResponse.ok()).toBe(true);
 	expect(docsHtml).toContain('rel="canonical"');
@@ -68,7 +80,27 @@ test("docs pages emit canonical tags and auth pages emit noindex", async ({
 	expect(docsHtml).toContain('content="article"');
 
 	expect(signInResponse.ok()).toBe(true);
-	expect(signInHtml).toContain('name="robots"');
-	expect(signInHtml).toContain("noindex");
-	expect(signInHtml).toContain("nofollow");
+	expect(signInHtml).toContain('aria-label="Ship by Sunday"');
+	expect(signInHtml).toContain(
+		"Reconnect the workspace tied to your checkout.",
+	);
+	expect(signInRobotsHtml).toContain('name="robots"');
+	expect(signInRobotsHtml).toContain("noindex");
+	expect(signInRobotsHtml).toContain("nofollow");
+
+	expect(resetPasswordResponse.ok()).toBe(true);
+	expect(resetPasswordHtml).toContain("Reset your password");
+	expect(resetPasswordHtml).toContain("Finish the required recovery step.");
+	expect(resetPasswordRobotsHtml).toContain('name="robots"');
+	expect(resetPasswordRobotsHtml).toContain("noindex");
+	expect(resetPasswordRobotsHtml).toContain("nofollow");
+
+	expect(ssoCallbackResponse.ok()).toBe(true);
+	expect(ssoCallbackHtml).toContain("Completing Google sign-in");
+	expect(ssoCallbackHtml).toContain(
+		"We are stitching the Google session back into your purchased account.",
+	);
+	expect(ssoCallbackRobotsHtml).toContain('name="robots"');
+	expect(ssoCallbackRobotsHtml).toContain("noindex");
+	expect(ssoCallbackRobotsHtml).toContain("nofollow");
 });

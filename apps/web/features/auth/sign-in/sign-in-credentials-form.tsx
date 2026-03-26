@@ -19,7 +19,6 @@ type SignInCredentialsFormProps = {
 	isLoaded: boolean;
 	password: string;
 	passwordError: { message?: string } | null;
-	pricingHref: string;
 	setEmailAddress: (value: string) => void;
 	setPassword: (value: string) => void;
 	startGoogleSignIn: () => Promise<void>;
@@ -36,7 +35,6 @@ export function SignInCredentialsForm({
 	isLoaded,
 	password,
 	passwordError,
-	pricingHref,
 	setEmailAddress,
 	setPassword,
 	startGoogleSignIn,
@@ -50,11 +48,7 @@ export function SignInCredentialsForm({
 
 	return (
 		<div className="flex flex-col gap-5">
-			<SignInBanners
-				authError={authError}
-				globalErrors={globalErrors}
-				pricingHref={pricingHref}
-			/>
+			<SignInBanners authError={authError} globalErrors={globalErrors} />
 			<form className="flex flex-col gap-5" onSubmit={handleSubmit}>
 				<SignInCredentialFields
 					emailAddress={emailAddress}

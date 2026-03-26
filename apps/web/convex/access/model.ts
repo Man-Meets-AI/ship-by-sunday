@@ -9,6 +9,7 @@ import type {
 import {
 	productAccessDebugReturnValidator,
 	productAccessGrantResultValidator,
+	productAccessResetResultValidator,
 	productAccessReturnValidator,
 	productAccessSourceValidator,
 } from "./validators";
@@ -167,6 +168,35 @@ export async function grantProductAccessFromStripeHandler(
 		stripeCheckoutSessionId: args.stripeCheckoutSessionId,
 		stripePaymentIntentId: args.stripePaymentIntentId,
 	});
+}
+
+export const resetProductAccessArgs = {
+	clerkUserId: v.string(),
+};
+export const resetProductAccessReturns = productAccessResetResultValidator;
+
+export async function resetProductAccessHandler(
+	ctx: AccessMutationCtx,
+	args: {
+		clerkUserId: string;
+	},
+) {
+	const existingGrant = await getProductAccessGrantByClerkUserId(
+		ctx,
+		args.clerkUserId,
+	);
+
+	if (!existingGrant) {
+		return {
+			reset: "noop" as const,
+		};
+	}
+
+	await ctx.db.delete(existingGrant._id);
+
+	return {
+		reset: "deleted" as const,
+	};
 }
 
 export const getProductAccessDebugArgs = {

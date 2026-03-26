@@ -21,10 +21,12 @@ function createProductAccessGrant(
 function createAccessCtx({
 	productAccessGrant = null,
 	patch = vi.fn().mockResolvedValue(undefined),
+	deleteMock = vi.fn().mockResolvedValue(undefined),
 	insert = vi.fn().mockResolvedValue("product_access_1"),
 }: {
 	productAccessGrant?: Record<string, unknown> | null;
 	patch?: ReturnType<typeof vi.fn>;
+	deleteMock?: ReturnType<typeof vi.fn>;
 	insert?: ReturnType<typeof vi.fn>;
 } = {}) {
 	return {
@@ -37,6 +39,7 @@ function createAccessCtx({
 					unique: vi.fn().mockResolvedValue(productAccessGrant),
 				})),
 			})),
+			delete: deleteMock,
 			patch,
 			insert,
 		},
@@ -199,5 +202,40 @@ describe("convex/access/model", () => {
 				updatedAt: 400,
 			}),
 		);
+	});
+
+	it("deletes an existing product-access grant when resetting access", async () => {
+		const deleteMock = vi.fn().mockResolvedValue(undefined);
+		const ctx = createAccessCtx({
+			productAccessGrant: createProductAccessGrant("granted", {
+				_id: "product_access_existing",
+			}),
+			deleteMock,
+		});
+
+		await expect(
+			moduleUnderTest.resetProductAccessHandler(ctx as never, {
+				clerkUserId,
+			}),
+		).resolves.toEqual({
+			reset: "deleted",
+		});
+		expect(deleteMock).toHaveBeenCalledWith("product_access_existing");
+	});
+
+	it("returns noop when resetting a viewer without an access grant", async () => {
+		const deleteMock = vi.fn().mockResolvedValue(undefined);
+		const ctx = createAccessCtx({
+			deleteMock,
+		});
+
+		await expect(
+			moduleUnderTest.resetProductAccessHandler(ctx as never, {
+				clerkUserId,
+			}),
+		).resolves.toEqual({
+			reset: "noop",
+		});
+		expect(deleteMock).not.toHaveBeenCalled();
 	});
 });

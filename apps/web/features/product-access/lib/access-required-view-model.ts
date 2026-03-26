@@ -13,6 +13,12 @@ export type AccessActionModel =
 			variant?: "default" | "secondary" | "outline";
 	  }
 	| {
+			kind: "reauthenticate";
+			label: string;
+			signInHref: string;
+			variant?: "default" | "secondary" | "outline";
+	  }
+	| {
 			kind: "checkout";
 			label: string;
 	  }
@@ -24,6 +30,7 @@ export type AccessActionModel =
 	  };
 
 export type AccessCardModel = {
+	tone: "recovery" | "purchase";
 	title: string;
 	description: string;
 	actions: readonly AccessActionModel[];
@@ -38,6 +45,7 @@ export type AccessViewModel = {
 	shellSubtitle: string;
 	helperCopy: string;
 	accessStateLabel: string;
+	signedInAccountHint?: string;
 	statusCalloutTitle?: string;
 	statusCalloutBody?: string;
 	helpLeadCopy: string;
@@ -71,10 +79,12 @@ export function getAccessViewModel({
 	viewState,
 	signInHref,
 	homeHref,
+	pricingHref,
 }: {
 	viewState: AccessViewState;
 	signInHref: string;
 	homeHref: string;
+	pricingHref: string;
 }): AccessViewModel {
 	const openWorkspaceLabel = workspaceDisplayConfig.openHomeActionLabel;
 	const backHome = {
@@ -85,8 +95,8 @@ export function getAccessViewModel({
 	};
 	const seeOffer = {
 		kind: "link" as const,
-		label: "See offer",
-		href: homeHref,
+		label: "Review pricing",
+		href: pricingHref,
 		variant: "outline" as const,
 	};
 	const signIn = {
@@ -94,10 +104,10 @@ export function getAccessViewModel({
 		label: "Sign in",
 		href: signInHref,
 	};
-	const signInAgain = {
-		kind: "link" as const,
-		label: "Sign in again",
-		href: signInHref,
+	const reauthenticate = {
+		kind: "reauthenticate" as const,
+		label: "Sign out and sign back in",
+		signInHref,
 	};
 	const retryAccessCheck = {
 		kind: "retry" as const,
@@ -132,12 +142,14 @@ export function getAccessViewModel({
 				],
 				cards: [
 					{
+						tone: "recovery",
 						title: "Already paid",
 						description:
 							"Use this path if you already bought access and just need the account check to catch up.",
 						actions: [retryAccessCheck, backHome],
 					},
 					{
+						tone: "purchase",
 						title: "Need to buy access",
 						description:
 							"If you already paid, wait for the access check first. Buy access only if this account still needs it.",
@@ -162,12 +174,14 @@ export function getAccessViewModel({
 				],
 				cards: [
 					{
+						tone: "recovery",
 						title: "Already paid",
 						description:
 							"Sign in with the same account used at checkout so we can reconnect product access.",
 						actions: [signIn, backHome],
 					},
 					{
+						tone: "purchase",
 						title: "Need to buy access",
 						description:
 							"If you have already purchased, sign in first. Only buy access if this account has not purchased yet.",
@@ -183,21 +197,25 @@ export function getAccessViewModel({
 				helperCopy:
 					"This usually means your signed-in browser session needs one more refresh before we can check product access.",
 				accessStateLabel: "Session refresh needed",
+				signedInAccountHint:
+					"If this is not the email you used at checkout, sign out and switch accounts before retrying access.",
 				helpLeadCopy:
-					"Start with a retry. If the account check still fails, sign in again to refresh the session token.",
+					"Start with a retry. If the account check still fails, sign out and sign back in to mint a fresh session token.",
 				helpItems: [
 					"Retry the access check first.",
-					"Sign in again if the session still does not refresh.",
+					"Sign out and sign back in if the session still does not refresh.",
 					"Do not buy access again until the account check succeeds.",
 				],
 				cards: [
 					{
+						tone: "recovery",
 						title: "Refresh account access",
 						description:
-							"Retry the access check now. If the session still looks stale, sign in again and come back here.",
-						actions: [retryAccessCheck, signInAgain, backHome],
+							"Retry the access check now. If the session still looks stale, sign out and sign back in, then come back here.",
+						actions: [retryAccessCheck, reauthenticate, backHome],
 					},
 					{
+						tone: "purchase",
 						title: "Hold off on buying again",
 						description:
 							"This looks like an account session problem, not a missing purchase. Refresh your session before starting a new checkout.",
@@ -213,6 +231,8 @@ export function getAccessViewModel({
 				helperCopy:
 					"We could not find active product access on this account. Most people here either just completed checkout and need a few more seconds, or they are signed into a different email than the one used at purchase.",
 				accessStateLabel: "No active product access found",
+				signedInAccountHint:
+					"If this is not the email you used at checkout, switch accounts before retrying or starting a new purchase.",
 				helpLeadCopy:
 					"If purchase happened on a different account, switch to that login first.",
 				helpItems: [
@@ -222,12 +242,14 @@ export function getAccessViewModel({
 				],
 				cards: [
 					{
+						tone: "recovery",
 						title: "Already paid",
 						description:
 							"Use this path if you already bought access and need the account lookup to catch up.",
 						actions: [retryAccessCheck, backHome],
 					},
 					{
+						tone: "purchase",
 						title: "Need to buy access",
 						description:
 							"If you completed checkout already, use retry access check first. Buy access only if this account has not purchased yet.",
@@ -243,6 +265,8 @@ export function getAccessViewModel({
 				helperCopy:
 					"Your purchase looks close, but product access is still waiting on a final update.",
 				accessStateLabel: "Product access pending",
+				signedInAccountHint:
+					"Stay on this account while the payment handoff finishes. If checkout used a different email, switch accounts before retrying.",
 				helpLeadCopy:
 					"Wait a moment, then retry the access check from the same account.",
 				helpItems: [
@@ -252,12 +276,14 @@ export function getAccessViewModel({
 				],
 				cards: [
 					{
+						tone: "recovery",
 						title: "Already paid",
 						description:
 							"Your purchase appears to be in flight. Retry the access check after a short wait.",
 						actions: [retryAccessCheck, backHome],
 					},
 					{
+						tone: "purchase",
 						title: "Need to buy access",
 						description:
 							"Hold off on a new checkout while the current product access record is still pending.",
@@ -273,6 +299,8 @@ export function getAccessViewModel({
 				helperCopy:
 					"We found a previous product access record for this account, but it is not currently active.",
 				accessStateLabel: "Product access revoked",
+				signedInAccountHint:
+					"Make sure this is the original purchase email before retrying access or starting a new checkout.",
 				helpLeadCopy:
 					"Start by confirming you are signed into the purchase account, then retry the access check.",
 				helpItems: [
@@ -282,12 +310,14 @@ export function getAccessViewModel({
 				],
 				cards: [
 					{
+						tone: "recovery",
 						title: "Already paid",
 						description:
 							"Retry the access check after confirming you are using the correct account.",
-						actions: [retrySecondary, signInAgain, backHome],
+						actions: [retrySecondary, reauthenticate, backHome],
 					},
 					{
+						tone: "purchase",
 						title: "Need to buy access",
 						description:
 							"Review the offer before buying again. This account already has a previous access record.",
@@ -302,6 +332,8 @@ export function getAccessViewModel({
 				helperCopy:
 					"We found a previous purchase on this account, but product access is no longer active.",
 				accessStateLabel: "Product access refunded",
+				signedInAccountHint:
+					"Confirm this is the purchase email before you retry access or decide to buy again.",
 				helpLeadCopy:
 					"Confirm you are using the correct account, then decide whether you need to buy access again.",
 				helpItems: [
@@ -311,12 +343,14 @@ export function getAccessViewModel({
 				],
 				cards: [
 					{
+						tone: "recovery",
 						title: "Already paid",
 						description:
 							"Use retry after confirming you are in the right account. This access record is no longer active.",
-						actions: [retrySecondary, signInAgain, backHome],
+						actions: [retrySecondary, reauthenticate, backHome],
 					},
 					{
+						tone: "purchase",
 						title: "Need to buy access",
 						description:
 							"If you still want access on this account, review the offer before starting a new checkout.",

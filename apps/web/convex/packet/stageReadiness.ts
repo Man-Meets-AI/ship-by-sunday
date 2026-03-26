@@ -10,6 +10,10 @@ import {
 	packetResumeDestinationValidator,
 	packetWorkspaceStateValidator,
 } from "./validators";
+import {
+	getPacketWorkflowStateByClerkUserId,
+	serializePacketWorkflowState,
+} from "./workflowState";
 import { requireGrantedProductAccess } from "../access/model";
 
 export const getPacketWorkspaceStateArgs = {};
@@ -21,10 +25,10 @@ export const getPacketResumeDestinationReturns =
 
 export async function getPacketWorkspaceStateHandler(ctx: PacketQueryCtx) {
 	const clerkUserId = await requireGrantedProductAccess(ctx);
-	const projectDefinition = await getProjectDefinitionByClerkUserId(
-		ctx,
-		clerkUserId,
-	);
+	const [projectDefinition, workflowState] = await Promise.all([
+		getProjectDefinitionByClerkUserId(ctx, clerkUserId),
+		getPacketWorkflowStateByClerkUserId(ctx, clerkUserId),
+	]);
 	const facts = parseCanonicalProjectFactsDraft(projectDefinition?.facts ?? {});
 	const stageStatus = deriveStageStatus(facts);
 
@@ -39,6 +43,9 @@ export async function getPacketWorkspaceStateHandler(ctx: PacketQueryCtx) {
 					createdAt: projectDefinition.createdAt,
 					updatedAt: projectDefinition.updatedAt,
 				}
+			: null,
+		workflowState: workflowState
+			? serializePacketWorkflowState(workflowState)
 			: null,
 		firstIncompleteStageId: projectDefinition
 			? stageStatus.firstIncompleteStageId

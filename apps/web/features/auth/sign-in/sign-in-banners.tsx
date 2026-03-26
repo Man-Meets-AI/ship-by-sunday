@@ -9,14 +9,9 @@ import type { SignInAuthError } from "@/features/auth/sign-in/types";
 type SignInBannerProps = {
 	authError: SignInAuthError | null;
 	globalErrors: Array<{ message?: string }> | null;
-	pricingHref: string;
 };
 
-export function SignInBanners({
-	authError,
-	globalErrors,
-	pricingHref,
-}: SignInBannerProps) {
+export function SignInBanners({ authError, globalErrors }: SignInBannerProps) {
 	return (
 		<>
 			{authError === "purchase_required" ? (
@@ -24,8 +19,8 @@ export function SignInBanners({
 					<AlertCircleIcon aria-hidden />
 					<AlertTitle>Google sign-in is for purchased accounts.</AlertTitle>
 					<AlertDescription>
-						Buy access first, then return here with the Google account tied to
-						your purchase. <a href={pricingHref}>See pricing</a>.
+						Use the email tied to checkout or recover that purchased account
+						before trying Google again.
 					</AlertDescription>
 				</Alert>
 			) : null}

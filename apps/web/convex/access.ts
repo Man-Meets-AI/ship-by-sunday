@@ -9,6 +9,9 @@ import {
 	grantProductAccessFromStripeReturns,
 	grantProductAccessHandler,
 	grantProductAccessReturns,
+	resetProductAccessArgs,
+	resetProductAccessHandler,
+	resetProductAccessReturns,
 	viewerProductAccessArgs,
 	viewerProductAccessHandler,
 	viewerProductAccessReturns,
@@ -30,6 +33,12 @@ export const grantProductAccessFromStripe = internalMutation({
 	args: grantProductAccessFromStripeArgs,
 	returns: grantProductAccessFromStripeReturns,
 	handler: grantProductAccessFromStripeHandler,
+});
+
+export const resetProductAccess = internalMutation({
+	args: resetProductAccessArgs,
+	returns: resetProductAccessReturns,
+	handler: resetProductAccessHandler,
 });
 
 export const getProductAccessDebug = internalQuery({

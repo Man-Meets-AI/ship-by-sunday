@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
+import { redirect } from "next/navigation";
 import { AppShell } from "@/features/course/shared/components/app-shell";
 import { api } from "@/convex/_generated/api";
 import {
-	buildStepDraftValues,
+	buildStageDraftValues,
 	buildSavePayload,
 } from "@/features/packet-flow/lib/packet-field-helpers";
 import type { PacketWorkspaceState } from "@/features/packet-flow/lib/packet-workspace-types";
@@ -14,6 +15,7 @@ import {
 	type CanonicalProjectFactKey,
 	type PacketStageId,
 } from "@packet-compiler";
+import { PacketStageProgressPanel } from "./progression/packet-stage-progress-panel";
 import { PacketStageNav } from "./packet-stage-nav";
 import { PacketStageSidebar } from "./packet-stage-sidebar";
 import { PacketStageStepCard } from "./packet-stage-step-card";
@@ -58,49 +60,62 @@ export function PacketStagePage({
 		isAuthenticated && !isLoading ? {} : "skip",
 	) as PacketWorkspaceState | undefined;
 	const workspaceState = liveWorkspaceState ?? initialWorkspaceState;
-	const stageStatus =
-		workspaceState.stageStatuses.find((item) => item.stageId === stageId) ??
-		workspaceState.stageStatuses[0];
-	const [currentStepIndex, setCurrentStepIndex] = useState(
+	const stageStatus = workspaceState.stageStatuses.find(
+		(item) => item.stageId === stageId,
+	);
+	if (!stageStatus) {
+		throw new Error(`Missing packet stage status for ${stageId}`);
+	}
+	if (!stageStatus.isUnlocked) {
+		redirect(
+			getPacketStageDefinition(workspaceState.firstIncompleteStageId).route,
+		);
+	}
+
+	const [activeStepIndex, setActiveStepIndex] = useState(
 		stageStatus.currentStepIndex,
 	);
-	const currentStep = stage.steps[currentStepIndex];
-	const [draftValues, setDraftValues] = useState<Record<string, string>>({});
+	const currentStep = stage.steps[activeStepIndex];
+	const [draftValuesByStepId, setDraftValuesByStepId] = useState(() =>
+		buildStageDraftValues(workspaceState.projectDefinition?.facts ?? {}, stage),
+	);
 	const [isPending, startTransition] = useTransition();
 	const saveProjectDefinitionFacts = useMutation(
 		api.packet.saveProjectDefinitionFacts,
 	);
 
 	useEffect(() => {
-		setCurrentStepIndex(stageStatus.currentStepIndex);
-	}, [stageStatus.currentStepIndex]);
-
-	useEffect(() => {
-		if (!currentStep) {
-			return;
-		}
-
-		setDraftValues(
-			buildStepDraftValues(
+		setDraftValuesByStepId(
+			buildStageDraftValues(
 				workspaceState.projectDefinition?.facts ?? {},
-				currentStep,
+				stage,
 			),
 		);
-	}, [currentStep, workspaceState.projectDefinition?.facts]);
+	}, [stage, workspaceState.projectDefinition?.facts]);
 
 	const downloadHref = getPacketDownloadHref(stageId, stageStatus.isComplete);
 	const nextStageId = stageStatus.isComplete
 		? nextStageMap[stageId]
 		: undefined;
 	const title = useMemo(() => stage.label, [stage.label]);
+	const currentDraftValues = currentStep
+		? (draftValuesByStepId[currentStep.id] ?? {})
+		: {};
 
 	function handleFieldChange(
 		fieldKey: CanonicalProjectFactKey,
 		nextValue: string,
 	) {
-		setDraftValues((current) => ({
+		if (!currentStep) {
+			return;
+		}
+
+		setDraftValuesByStepId((current) => ({
 			...current,
-			[fieldKey]: nextValue,
+			[currentStep.id]: {
+				...(current[currentStep.id] ?? {}),
+				[fieldKey]: nextValue,
+			},
 		}));
 	}
 
@@ -109,11 +124,11 @@ export function PacketStagePage({
 			return;
 		}
 
-		const payload = buildSavePayload(currentStep, draftValues);
+		const payload = buildSavePayload(currentStep, currentDraftValues);
 		startTransition(async () => {
 			await saveProjectDefinitionFacts({ stageId, ...payload });
-			if (currentStepIndex < stage.steps.length - 1) {
-				setCurrentStepIndex((index) => index + 1);
+			if (activeStepIndex < stage.steps.length - 1) {
+				setActiveStepIndex((index) => index + 1);
 			}
 		});
 	}
@@ -133,20 +148,28 @@ export function PacketStagePage({
 					stageStatuses={workspaceState.stageStatuses}
 				/>
 				<div className="grid gap-6 xl:grid-cols-[1.4fr_0.6fr]">
-					{currentStep ? (
-						<PacketStageStepCard
-							currentStep={currentStep}
-							currentStepIndex={currentStepIndex}
-							totalSteps={stage.steps.length}
-							draftValues={draftValues}
-							isSaving={isPending}
-							onBack={() =>
-								setCurrentStepIndex((index) => Math.max(0, index - 1))
-							}
-							onChange={handleFieldChange}
-							onSave={handleSave}
+					<div className="space-y-6">
+						<PacketStageProgressPanel
+							stage={stage}
+							stageStatus={stageStatus}
+							activeStepIndex={activeStepIndex}
+							onSelectStep={setActiveStepIndex}
 						/>
-					) : null}
+						{currentStep ? (
+							<PacketStageStepCard
+								currentStep={currentStep}
+								currentStepIndex={activeStepIndex}
+								totalSteps={stage.steps.length}
+								draftValues={currentDraftValues}
+								isSaving={isPending}
+								onBack={() =>
+									setActiveStepIndex((index) => Math.max(0, index - 1))
+								}
+								onChange={handleFieldChange}
+								onSave={handleSave}
+							/>
+						) : null}
+					</div>
 					<PacketStageSidebar
 						stageStatus={stageStatus}
 						downloadHref={downloadHref}

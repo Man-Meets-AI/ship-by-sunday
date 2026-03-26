@@ -12,7 +12,6 @@ import {
 	buildSignInHref,
 	buildSsoCallbackHref,
 	getSessionTaskHref,
-	getPricingHref,
 	getSafeRedirectPath,
 	getSignInAuthError,
 } from "@/features/auth/sign-in/sign-in-route-utils";
@@ -134,7 +133,7 @@ export function useSignInFlow() {
 
 	const redirectPath = getSafeRedirectPath(searchParams.get("redirect_url"));
 	const authError = getSignInAuthError(searchParams.get("auth_error"));
-	const pricingHref = getPricingHref();
+	const hasExplicitRedirect = searchParams.has("redirect_url");
 	const availableVerificationMethods = useMemo(
 		() => getAvailableVerificationMethods(signIn?.supportedSecondFactors),
 		[signIn?.supportedSecondFactors],
@@ -169,6 +168,8 @@ export function useSignInFlow() {
 	}, [activeVerificationMethod, resetStep, signIn]);
 
 	const isBusy = fetchStatus === "fetching" || isStartingGoogle;
+	const isColdDefaultVisit =
+		step.kind === "credentials" && !hasExplicitRedirect && !authError;
 
 	useEffect(() => {
 		if (
@@ -522,11 +523,11 @@ export function useSignInFlow() {
 		emailError: errors.fields.identifier,
 		globalErrors: getRenderableErrors(errors.global ?? errors.raw),
 		isBusy,
+		isColdDefaultVisit,
 		isLoaded: Boolean(signIn),
 		newPassword,
 		password,
 		passwordError: errors.fields.password,
-		pricingHref,
 		step,
 		verificationCode,
 		verificationError: errors.fields.code,

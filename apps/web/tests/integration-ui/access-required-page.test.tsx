@@ -3,6 +3,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 const useQueryMock = vi.fn();
+const useUserMock = vi.fn();
 const replaceMock = vi.fn();
 const refreshMock = vi.fn();
 
@@ -36,6 +37,13 @@ vi.mock("convex/react", () => ({
 	useQuery: (query: unknown) => useQueryMock(query),
 }));
 
+vi.mock("@clerk/nextjs", () => ({
+	useClerk: () => ({
+		signOut: vi.fn(),
+	}),
+	useUser: () => useUserMock(),
+}));
+
 vi.mock("@/features/checkout/components/checkout-button", () => ({
 	CheckoutButton: ({ label }: { label: string }) => (
 		<button data-testid="access-required-buy-access" type="button">
@@ -49,8 +57,17 @@ import { AccessRequiredPage } from "../../features/product-access/components/acc
 describe("AccessRequiredPage", () => {
 	beforeEach(() => {
 		useQueryMock.mockReset();
+		useUserMock.mockReset();
 		replaceMock.mockReset();
 		refreshMock.mockReset();
+		useUserMock.mockReturnValue({
+			isLoaded: true,
+			user: {
+				primaryEmailAddress: {
+					emailAddress: "test-entitled@test.com",
+				},
+			},
+		});
 	});
 
 	it("renders the loading state while the product-access check is still pending", () => {
@@ -58,8 +75,10 @@ describe("AccessRequiredPage", () => {
 
 		const markup = renderToStaticMarkup(<AccessRequiredPage />);
 
+		expect(markup).toContain("SHIP BY SUNDAY");
+		expect(markup).toContain("Access Required");
 		expect(markup).toContain("Checking product access");
-		expect(markup).toContain("Product access check");
+		expect(markup).toContain("Protected workspace");
 		expect(markup).toContain(
 			"Keep this page open while we verify whether product access is ready.",
 		);
@@ -92,9 +111,11 @@ describe("AccessRequiredPage", () => {
 		expect(markup).toContain("Retry access check");
 		expect(markup).toContain("Already paid");
 		expect(markup).toContain("Need to buy access");
+		expect(markup).toContain("Signed in as test-entitled@test.com");
 		expect(markup).toContain('data-testid="access-required-buy-access"');
 		expect(markup).toContain("Buy access now");
-		expect(markup).toContain("See offer");
+		expect(markup).toContain("Review pricing");
+		expect(markup).toContain('href="/#pricing"');
 	});
 
 	it("renders the token refresh state separately from signed out", () => {
@@ -107,7 +128,8 @@ describe("AccessRequiredPage", () => {
 
 		expect(markup).toContain("Refresh your account session");
 		expect(markup).toContain("Session refresh needed");
-		expect(markup).toContain("Sign in again");
+		expect(markup).toContain("Signed in as test-entitled@test.com");
+		expect(markup).toContain("Sign out and sign back in");
 		expect(markup).not.toContain('data-testid="access-required-buy-access"');
 	});
 });

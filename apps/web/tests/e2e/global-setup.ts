@@ -1,3 +1,5 @@
+import path from "node:path";
+import { spawn } from "node:child_process";
 import { mkdir } from "node:fs/promises";
 
 import { chromium, type FullConfig, type Page } from "@playwright/test";
@@ -12,6 +14,14 @@ import {
 	memberWithoutAccessStorageStatePath,
 	shouldRunSandboxAuth,
 } from "./auth-state";
+
+const DEFAULT_COURSE_SLUG = "ship-by-sunday";
+const localEnvPath = path.resolve(__dirname, "../../.env.local");
+const appsWebDirectory = path.resolve(__dirname, "../..");
+const convexBinPath = path.resolve(
+	appsWebDirectory,
+	"node_modules/convex/bin/main.js",
+);
 
 export default async function globalSetup(config: FullConfig) {
 	const baseURL = getSandboxBaseUrl(config);
@@ -28,17 +38,42 @@ export default async function globalSetup(config: FullConfig) {
 		return;
 	}
 
+	loadHostedConvexEnv();
 	await mkdir(authStateDirectory, { recursive: true });
 	await createStorageState(baseURL, {
 		email: memberWithoutAccessEmail,
 		password: memberWithoutAccessPassword,
 		storageStatePath: memberWithoutAccessStorageStatePath,
+		syncProductAccessAfterSignIn: async (clerkUserId) => {
+			await syncProductAccessState({
+				clerkUserId,
+				kind: "reset",
+			});
+		},
 	});
 	await createStorageState(baseURL, {
 		email: memberWithAccessEmail,
 		password: memberWithAccessPassword,
 		storageStatePath: memberWithAccessStorageStatePath,
+		syncProductAccessAfterSignIn: async (clerkUserId) => {
+			await syncProductAccessState({
+				clerkUserId,
+				kind: "grant",
+			});
+		},
 	});
+}
+
+function loadHostedConvexEnv() {
+	if (
+		process.env.NEXT_PUBLIC_CONVEX_URL &&
+		process.env.CONVEX_DEPLOYMENT &&
+		process.env.CLERK_SECRET_KEY
+	) {
+		return;
+	}
+
+	process.loadEnvFile(localEnvPath);
 }
 
 function getSandboxBaseUrl(config: FullConfig) {
@@ -62,17 +97,22 @@ async function createStorageState(
 		email,
 		password,
 		storageStatePath,
+		syncProductAccessAfterSignIn,
 	}: {
 		email: string;
 		password: string;
 		storageStatePath: string;
+		syncProductAccessAfterSignIn?: (clerkUserId: string) => Promise<void>;
 	},
 ) {
 	const browser = await chromium.launch();
 	const page = await browser.newPage({ baseURL });
 
 	try {
-		await signIn(page, { email, password });
+		const clerkUserId = await signIn(page, { email, password });
+		if (syncProductAccessAfterSignIn) {
+			await syncProductAccessAfterSignIn(clerkUserId);
+		}
 		await page.context().storageState({ path: storageStatePath });
 	} finally {
 		await browser.close();
@@ -149,9 +189,107 @@ async function signIn(
 		},
 	);
 	await page.waitForLoadState("networkidle");
+
+	const clerkUserId = await page.evaluate(() => {
+		const runtimeWindow = window as Window & {
+			Clerk?: {
+				user?: { id?: string | null };
+			};
+		};
+
+		return runtimeWindow.Clerk?.user?.id ?? null;
+	});
+
+	if (!clerkUserId) {
+		throw new Error(`Missing Clerk user id after sign-in for ${email}.`);
+	}
+
+	return clerkUserId;
 }
 
 function isSandboxProjectRequested() {
 	const argv = process.argv;
 	return argv.includes("--project=sandbox-e2e") || argv.includes("sandbox-e2e");
+}
+
+async function syncProductAccessState({
+	clerkUserId,
+	kind,
+}: {
+	clerkUserId: string;
+	kind: "grant" | "reset";
+}) {
+	const result =
+		kind === "grant"
+			? await runConvexAccessCommand({
+					functionName: "access:grantProductAccess",
+					args: {
+						clerkUserId,
+						source: "manual",
+					},
+					env: {
+						...process.env,
+						QA_COURSE_SLUG: DEFAULT_COURSE_SLUG,
+					},
+				})
+			: await runConvexAccessCommand({
+					functionName: "access:resetProductAccess",
+					args: {
+						clerkUserId,
+					},
+					env: process.env,
+				});
+
+	if (result.code === 0) {
+		return;
+	}
+
+	const actionLabel =
+		kind === "grant" ? "grant entitled access" : "reset access";
+	throw new Error(
+		`Failed to ${actionLabel} for ${clerkUserId}. ${result.stderr || result.stdout || "No command output."}`,
+	);
+}
+
+function runConvexAccessCommand({
+	functionName,
+	args,
+	env,
+}: {
+	functionName: string;
+	args: Record<string, string>;
+	env: NodeJS.ProcessEnv;
+}) {
+	return new Promise<{
+		code: number;
+		stdout: string;
+		stderr: string;
+	}>((resolve) => {
+		const child = spawn(
+			process.execPath,
+			[convexBinPath, "run", functionName, JSON.stringify(args)],
+			{
+				cwd: appsWebDirectory,
+				env,
+				stdio: ["ignore", "pipe", "pipe"],
+			},
+		);
+
+		let stdout = "";
+		let stderr = "";
+
+		child.stdout.on("data", (chunk) => {
+			stdout += String(chunk);
+		});
+		child.stderr.on("data", (chunk) => {
+			stderr += String(chunk);
+		});
+		child.on("close", (code) => {
+			resolve({
+				code: code ?? 1,
+				stdout: stdout.trim(),
+				stderr: stderr.trim(),
+			});
+		});
+	});
 }

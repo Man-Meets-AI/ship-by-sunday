@@ -140,20 +140,45 @@ describe("SignInPage", () => {
 			</IdentityLayout>,
 		);
 
-		expect(screen.getByText("Ship by Sunday")).toBeTruthy();
+		expect(screen.getByRole("link", { name: "Ship by Sunday" })).toBeTruthy();
 		expect(screen.getByRole("link", { name: "Home" })).toBeTruthy();
 		expect(
 			screen.getByText(
 				"Use the account attached to your purchase to continue.",
 			),
 		).toBeTruthy();
+		expect(
+			screen.getByText("Reconnect the workspace tied to your checkout."),
+		).toBeTruthy();
 		expect(screen.getByLabelText("Email")).toBeTruthy();
 		expect(screen.getByLabelText("Password")).toBeTruthy();
 		expect(
 			screen.getByRole("button", { name: "Continue with Google" }),
 		).toBeTruthy();
+		expect(
+			screen.getByRole("link", { name: "See pricing" }).getAttribute("href"),
+		).toBe("/#pricing");
 		expect(screen.queryByText(/create account/i)).toBeNull();
 		expect(screen.queryByText(/terms of service/i)).toBeNull();
+	});
+
+	it("hides the quiet pricing path when sign-in is recovering a protected route", () => {
+		useSearchParamsMock.mockReturnValue(
+			new URLSearchParams("redirect_url=%2Fsettings"),
+		);
+		const signInState = createSignInMock();
+		useSignInMock.mockReturnValue({
+			errors: signInState.errors,
+			fetchStatus: signInState.fetchStatus,
+			signIn: signInState.signIn,
+		});
+
+		render(<SignInPage />);
+
+		expect(
+			screen.getByText("Sign in, then continue where you left off."),
+		).toBeTruthy();
+		expect(screen.queryByRole("link", { name: "See pricing" })).toBeNull();
 	});
 
 	it("submits email and password through Clerk", async () => {
@@ -534,7 +559,8 @@ describe("SignInPage", () => {
 			screen.getByText("Google sign-in is for purchased accounts."),
 		).toBeTruthy();
 		expect(
-			screen.getByRole("link", { name: "See pricing" }).getAttribute("href"),
-		).toBe("/#pricing");
+			screen.getByText("Google did not match a paid account."),
+		).toBeTruthy();
+		expect(screen.queryByRole("link", { name: "See pricing" })).toBeNull();
 	});
 });

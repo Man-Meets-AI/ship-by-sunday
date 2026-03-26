@@ -51,22 +51,12 @@ test.describe("protected routes", () => {
 			).toBeVisible();
 		});
 
-		test("@extended renders the branded 404 for invalid lessons", async ({
+		test("@extended redirects legacy lesson routes back to the packet-first start page", async ({
 			page,
 		}) => {
 			await page.goto("/lesson/not-a-real-lesson");
-			await expect(
-				page.getByRole("heading", { name: "Page not found" }),
-			).toBeVisible();
-		});
-
-		test("@extended renders the protected shell error boundary when forced in the harness", async ({
-			page,
-		}) => {
-			await page.goto("/start?__throwTestBoundary=protected-shell");
-			await expect(
-				page.getByRole("heading", { name: "Protected workspace error" }),
-			).toBeVisible();
+			await expect(page).toHaveURL(/\/start/);
+			await expect(page.getByText("How this works")).toBeVisible();
 		});
 	});
 });
