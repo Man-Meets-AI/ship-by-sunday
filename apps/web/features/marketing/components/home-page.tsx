@@ -10,6 +10,7 @@ import {
 import { HomeHeroSection } from "./home-page/hero-sections";
 import { DurabilitySectionBlock } from "./home-page/durability-section";
 import { SprintPathUnifiedSection } from "./home-page/sprint-path-unified-section";
+import { StarterSystemSectionBlock } from "./home-page/starter-system-section";
 import { WhatsInsideSection } from "./home-page/whats-inside-section";
 
 export default async function HomePage() {
@@ -22,11 +23,10 @@ export default async function HomePage() {
 
 	return (
 		<main className="bg-background text-foreground">
-			<div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:gap-8 sm:px-6 sm:py-8">
+			<div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-6 sm:px-6 sm:py-8">
 				{homePageRenderModel.hero.isEnabled ? (
 					<HomeHeroSection
 						hero={homePageRenderModel.hero.section}
-						heroPreviewImage={homePageRenderModel.hero.previewImage}
 						primaryCtaTarget={homePageRenderModel.hero.primaryCtaTarget}
 					/>
 				) : null}
@@ -38,6 +38,11 @@ export default async function HomePage() {
 				{homePageRenderModel.whatsInside.isEnabled ? (
 					<WhatsInsideSection
 						whatsInsideSection={homePageRenderModel.whatsInside.section}
+					/>
+				) : null}
+				{homePageRenderModel.starterSystem.isEnabled ? (
+					<StarterSystemSectionBlock
+						starterSystemSection={homePageRenderModel.starterSystem.section}
 					/>
 				) : null}
 				{homePageRenderModel.durability.isEnabled ? (

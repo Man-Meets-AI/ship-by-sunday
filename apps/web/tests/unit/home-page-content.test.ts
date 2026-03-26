@@ -4,43 +4,51 @@ import { productConfig } from "@/config/product";
 import { homePageContent } from "@/features/marketing/content/home";
 
 describe("home page content", () => {
-	it("anchors the public story around agent-ready packs", () => {
+	it("anchors the public story around the Sunday promise and starter-system advantage", () => {
 		expect(productConfig.promise).toBe(
-			"Turn one product idea into agent-ready packs",
+			"Ship a real, durable product by Sunday",
 		);
-		expect(productConfig.metadataDescription).toContain("Agent-Ready Packs");
-		expect(productConfig.metadataDescription).toContain("Starter Snapshot");
+		expect(productConfig.metadataDescription).toContain(
+			"contract-first docs packs",
+		);
+		expect(productConfig.metadataDescription).toContain(
+			"Agent-Ready Starter System",
+		);
 
-		expect(homePageContent.hero.headlineLead).toBe("Turn one product idea");
-		expect(homePageContent.hero.headlineTailHover).toBe("Agent-Ready Packs");
-		expect(homePageContent.hero.body).toContain("Agent-Ready Packs");
-		expect(homePageContent.hero.body).toContain("Starter Snapshot");
+		expect(homePageContent.hero.headlineLead).toBe("Ship a real product");
+		expect(homePageContent.hero.headlineTailHover).toBe("by Sunday");
+		expect(homePageContent.hero.body).toContain(
+			"real, durable product by Sunday",
+		);
+		expect(homePageContent.hero.loginLabel).toBe("Sign in");
+		expect(homePageContent.hero.secondaryCta.href).toBe("#system");
 
 		expect(homePageContent.whatsInsideSection.title).toBe(
-			"One intake, four packs, and a final Starter Snapshot.",
+			"By Sunday, you leave with the product truth, the agent packs, and the starter path.",
 		);
 		expect(homePageContent.whatsInsideSection.pillars[1]?.title).toBe(
-			"Four Agent-Ready Packs",
+			"The packs",
 		);
 		expect(homePageContent.whatsInsideSection.pillars[2]?.title).toBe(
-			"Starter Snapshot review download",
+			"The starter path",
+		);
+		expect(homePageContent.starterSystemSection.title).toBe(
+			"More than a starter. More like an agent-ready operating system.",
 		);
 		expect(homePageContent.durabilitySection.title).toBe(
-			"Agents will change. Your packs still work.",
+			"Ship on Sunday. Keep shipping on Monday.",
 		);
 
 		expect(homePageContent.pricingSection.includes).toEqual(
 			expect.arrayContaining([
-				"Design Pack",
-				"Marketing Pack",
-				"Build Pack",
-				"Prompt Pack",
-				"Starter Snapshot download",
+				"Design, Marketing, Build, and Prompt Packs",
+				"Agent-Ready Starter System",
+				"Fast Pass Walkthroughs",
 			]),
 		);
 	});
 
-	it("drops the old guarantee language from the FAQ and pricing surfaces", () => {
+	it("keeps the guarantee framed around early clarity, not a shipping promise", () => {
 		const guaranteeCopy = [
 			homePageContent.pricingSection.guarantee,
 			...homePageContent.faqSection.items.map((item) => item.answer),
@@ -48,6 +56,7 @@ describe("home page content", () => {
 
 		expect(guaranteeCopy).not.toContain("CEO Block");
 		expect(guaranteeCopy).not.toContain("One-Page Product Brief");
+		expect(guaranteeCopy).toContain("The guarantee is about clarity");
 		expect(guaranteeCopy).toContain("Product stage");
 	});
 });

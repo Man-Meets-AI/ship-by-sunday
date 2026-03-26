@@ -22,7 +22,6 @@ export type HomePageRenderModel = {
 	readonly sectionOrder: readonly HomePageSectionName[];
 	readonly hero: {
 		readonly isEnabled: boolean;
-		readonly previewImage: HomePageContent["assets"]["heroPreviewImage"];
 		readonly section: HomePageContent["hero"];
 		readonly primaryCtaTarget: HomePageCtaTarget;
 	};
@@ -33,6 +32,10 @@ export type HomePageRenderModel = {
 	readonly whatsInside: {
 		readonly isEnabled: boolean;
 		readonly section: HomePageContent["whatsInsideSection"];
+	};
+	readonly starterSystem: {
+		readonly isEnabled: boolean;
+		readonly section: HomePageContent["starterSystemSection"];
 	};
 	readonly durability: {
 		readonly isEnabled: boolean;
@@ -82,7 +85,6 @@ export function createHomePageRenderModel({
 		sectionOrder: homePageSectionOrder,
 		hero: {
 			isEnabled: homePageConfig.sections.hero,
-			previewImage: content.assets.heroPreviewImage,
 			section: content.hero,
 			primaryCtaTarget: homePageConfig.heroPrimaryCta,
 		},
@@ -93,6 +95,10 @@ export function createHomePageRenderModel({
 		whatsInside: {
 			isEnabled: homePageConfig.sections.whatsInside,
 			section: content.whatsInsideSection,
+		},
+		starterSystem: {
+			isEnabled: homePageConfig.sections.starterSystem,
+			section: content.starterSystemSection,
 		},
 		durability: {
 			isEnabled: homePageConfig.sections.durability,

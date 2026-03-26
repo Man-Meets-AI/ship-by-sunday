@@ -1,71 +1,61 @@
-import Image from "next/image";
-import { Check } from "lucide-react";
-
 import { type HomePageCtaTarget } from "@/config/product";
 import type { HomePageContent } from "@/features/marketing/content/home";
 
 import { HomeHeroHeadline } from "./home-hero-headline";
-import { HomePagePrimaryCta } from "./home-page-primary-cta";
 import { HomeHeroTopBar } from "./home-hero-top-bar";
+import { HomePagePrimaryCta } from "./home-page-primary-cta";
+import {
+	HomePageSecondaryLink,
+	HomePageSectionOverline,
+	homePageQuietSurfaceClassName,
+} from "./home-page-primitives";
 
 type Hero = HomePageContent["hero"];
 
 export function HomeHeroSection({
 	hero,
-	heroPreviewImage,
 	primaryCtaTarget,
 }: {
 	hero: Hero;
-	heroPreviewImage: string;
 	primaryCtaTarget: HomePageCtaTarget;
 }) {
 	return (
-		<section className="relative mx-auto flex w-full max-w-7xl flex-col items-center justify-center overflow-hidden rounded-[32px] bg-background">
+		<section
+			className={`relative mx-auto flex w-full max-w-7xl flex-col overflow-hidden rounded-[36px] border border-border/70 ${homePageQuietSurfaceClassName}`}
+		>
 			<HomeHeroTopBar hero={hero} />
-			<div className="flex w-full flex-col items-start gap-8 px-4 py-10 text-left sm:py-16 lg:py-20">
-				<div className="flex w-full max-w-3xl flex-col items-start gap-8">
-					<HomeHeroHeadline hero={hero} />
-					<p className="max-w-2xl text-balance text-lg text-muted-foreground sm:text-xl">
-						{hero.body}
-					</p>
-				</div>
-				<div className="flex w-full max-w-3xl flex-col gap-3">
-					<p className="text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground">
-						{hero.outcomesHeading}
-					</p>
-					<div className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
-						{hero.outcomes.map((outcome) => (
-							<div key={outcome} className="flex items-start gap-2.5">
-								<Check className="mt-0.5 size-4 shrink-0 text-primary" />
-								<span className="text-sm font-medium sm:text-base">
-									{outcome}
-								</span>
-							</div>
-						))}
+			<div className="grid w-full gap-10 border-t border-border/60 px-4 py-10 text-left sm:px-6 sm:py-16 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,22rem)] lg:gap-14 lg:px-8 lg:py-20">
+				<div className="flex max-w-4xl flex-col gap-8">
+					<HomePageSectionOverline className="max-w-md">
+						Contract-first weekend sprint
+					</HomePageSectionOverline>
+					<div className="space-y-6">
+						<HomeHeroHeadline hero={hero} />
+						<p className="max-w-2xl text-balance text-lg text-muted-foreground sm:text-xl">
+							{hero.body}
+						</p>
+					</div>
+					<div className="flex w-full max-w-3xl flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-start">
+						<HomePagePrimaryCta
+							target={primaryCtaTarget}
+							label={hero.primaryCta}
+							className="h-11 min-w-full px-8 sm:min-w-72"
+						/>
+						<HomePageSecondaryLink
+							href={hero.secondaryCta.href}
+							label={hero.secondaryCta.label}
+							className="min-w-full sm:min-w-fit"
+						/>
 					</div>
 				</div>
-				<div className="flex w-full max-w-3xl flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-start">
-					<HomePagePrimaryCta
-						target={primaryCtaTarget}
-						label={hero.primaryCta}
-						className="h-11 min-w-full px-8 sm:min-w-72"
-					/>
-				</div>
-				<p className="max-w-2xl text-sm font-medium text-muted-foreground sm:text-base">
-					{hero.eyebrow}
-				</p>
-				<div className="relative mt-4 w-full rounded-[28px] border border-border/80 bg-muted/40 p-3 shadow-sm sm:p-4">
-					<div className="overflow-hidden rounded-[20px] border border-border/80 bg-background">
-						<Image
-							src={heroPreviewImage}
-							alt={hero.previewImageAlt}
-							width={1600}
-							height={900}
-							className="aspect-video h-auto w-full object-cover"
-							placeholder="empty"
-							sizes="(min-width: 1024px) 66vw, 100vw"
-							preload
-						/>
+				<div className="flex items-end">
+					<div className="w-full border-t border-border/60 pt-4 lg:max-w-sm">
+						<p className="font-mono text-[0.72rem] uppercase tracking-[0.24em] text-muted-foreground">
+							Access path
+						</p>
+						<p className="mt-3 text-sm leading-relaxed text-foreground/85 sm:text-base">
+							{hero.eyebrow}
+						</p>
 					</div>
 				</div>
 			</div>

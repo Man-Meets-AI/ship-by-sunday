@@ -1,11 +1,14 @@
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { type HomePageCtaTarget } from "@/config/product";
 import { productWordmarkFontClassName } from "@/components/product-brand";
+import { type HomePageCtaTarget } from "@/config/product";
 import type { HomePageContent } from "@/features/marketing/content/home";
 
 import { MarketingThemeToggle } from "./home-hero-theme-toggle";
 import { HomePagePrimaryCta } from "./home-page-primary-cta";
+import {
+	HomePageSectionOverline,
+	homePageQuietSurfaceClassName,
+	homePageSectionClassName,
+} from "./home-page-primitives";
 import { PricingIncludesList } from "./pricing-includes-list";
 
 type FooterWordmark = HomePageContent["footerWordmark"];
@@ -19,44 +22,66 @@ export function PricingSectionBlock({
 	primaryCtaTarget: HomePageCtaTarget;
 }) {
 	return (
-		<div id="pricing" className="mx-auto max-w-lg py-10 sm:py-12">
-			<div className="mb-6 space-y-2 text-center">
-				<Badge variant="outline">{pricingSection.label}</Badge>
-				<h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
-					{pricingSection.titleLead} {pricingSection.titleAccent}
-				</h2>
-				<p className="text-muted-foreground sm:text-lg">
-					{pricingSection.intro}
+		<section
+			id="pricing"
+			className={`grid gap-8 ${homePageSectionClassName} lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:gap-12`}
+		>
+			<div className="space-y-5">
+				<HomePageSectionOverline>
+					{pricingSection.label}
+				</HomePageSectionOverline>
+				<div className="space-y-4">
+					<h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
+						{pricingSection.titleLead} {pricingSection.titleAccent}
+					</h2>
+					<p className="max-w-2xl text-pretty text-muted-foreground sm:text-lg">
+						{pricingSection.intro}
+					</p>
+				</div>
+				<p className="max-w-xl border-t border-border/60 pt-4 text-sm leading-relaxed text-muted-foreground">
+					{pricingSection.guarantee}
 				</p>
 			</div>
-
-			<Card className="flex flex-col gap-6 p-5 sm:p-6">
-				<div className="space-y-1">
-					<p className="text-xs font-medium text-muted-foreground">
+			<div className={`space-y-6 p-5 sm:p-6 ${homePageQuietSurfaceClassName}`}>
+				<div className="border-t border-border/60 pt-4">
+					<p className="font-mono text-[0.72rem] uppercase tracking-[0.24em] text-muted-foreground">
 						{pricingSection.eyebrow}
 					</p>
-					<p className="text-5xl font-bold tracking-tight tabular-nums">
-						{pricingSection.priceDisplay}
-					</p>
-				</div>
-
-				<PricingIncludesList items={pricingSection.includes} />
-
-				<div className="flex flex-col gap-3">
-					<HomePagePrimaryCta
-						target={primaryCtaTarget}
-						label={pricingSection.ctaTitle}
-						className="h-12 w-full text-base font-semibold"
-					/>
-					<p className="text-center text-sm text-muted-foreground">
+					<div className="mt-4 flex flex-wrap items-end justify-between gap-5">
+						<p className="text-[clamp(4rem,9vw,6.5rem)] font-semibold tracking-tight tabular-nums">
+							{pricingSection.priceDisplay}
+						</p>
+						<HomePagePrimaryCta
+							target={primaryCtaTarget}
+							label={pricingSection.ctaTitle}
+							className="h-12 min-w-full px-6 text-base font-semibold sm:min-w-[16rem]"
+						/>
+					</div>
+					<p className="mt-4 max-w-lg text-sm leading-relaxed text-muted-foreground">
 						{pricingSection.trustLine}
 					</p>
-					<p className="text-center text-xs text-muted-foreground">
-						{pricingSection.guarantee}
-					</p>
 				</div>
-			</Card>
-		</div>
+				<div className="grid gap-6 border-t border-border/60 pt-4 lg:grid-cols-[minmax(0,1fr)_minmax(14rem,0.72fr)]">
+					<div className="space-y-4">
+						<p className="font-mono text-[0.72rem] uppercase tracking-[0.24em] text-muted-foreground">
+							Included
+						</p>
+						<PricingIncludesList items={pricingSection.includes} />
+					</div>
+					<div className="rounded-[24px] border border-border/70 bg-background/80 p-4">
+						<p className="font-mono text-[0.72rem] uppercase tracking-[0.24em] text-muted-foreground">
+							{pricingSection.bonus.label}
+						</p>
+						<p className="mt-2 text-lg font-semibold tracking-tight text-foreground">
+							{pricingSection.bonus.title}
+						</p>
+						<p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+							{pricingSection.bonus.description}
+						</p>
+					</div>
+				</div>
+			</div>
+		</section>
 	);
 }
 
@@ -66,16 +91,22 @@ export function FooterSection({
 	footerWordmark: FooterWordmark;
 }) {
 	return (
-		<footer className="border-t py-8 sm:py-10" aria-label="Site footer">
-			<div className="flex justify-center">
-				<div className="flex items-center gap-3 rounded-full border border-border/70 bg-background/80 px-4 py-2">
+		<footer
+			className="border-t border-border/60 py-8 sm:py-10"
+			aria-label="Site footer"
+		>
+			<div className="flex items-center justify-between gap-4">
+				<p className="font-mono text-[0.72rem] uppercase tracking-[0.24em] text-muted-foreground">
+					Light and dark stay first-class
+				</p>
+				<div className="inline-flex items-center gap-3 rounded-full border border-border/60 px-4 py-2">
 					<span className="text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground">
 						Theme
 					</span>
 					<MarketingThemeToggle />
 				</div>
 			</div>
-			<div className="flex justify-center px-2 pt-8 text-center sm:pt-10 md:pt-12">
+			<div className="flex justify-center px-2 pt-10 text-center sm:pt-12">
 				<p
 					className={`${productWordmarkFontClassName} text-balance text-[clamp(4.5rem,18vw,12rem)] font-normal uppercase leading-[0.82] tracking-[0.05em] text-foreground/90`}
 				>

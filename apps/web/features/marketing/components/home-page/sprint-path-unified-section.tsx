@@ -1,10 +1,14 @@
 "use client";
 
-import { Check } from "lucide-react";
-import Image from "next/image";
-
 import { PointerHighlight } from "@/components/ui/pointer-highlight";
 import type { HomePageContent } from "@/features/marketing/content/home";
+
+import {
+	HomePageSectionOverline,
+	homePageQuietSurfaceClassName,
+	homePageSectionClassName,
+} from "./home-page-primitives";
+import { SystemLoopPreview } from "./system-loop-preview";
 
 type SprintPathSection = HomePageContent["sprintPathSection"];
 
@@ -16,9 +20,12 @@ export function SprintPathUnifiedSection({
 	return (
 		<section
 			id="system"
-			className="grid items-center gap-10 py-8 sm:py-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-12"
+			className={`grid items-start gap-10 ${homePageSectionClassName} lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] lg:gap-14`}
 		>
 			<div className="space-y-6">
+				<HomePageSectionOverline>
+					{sprintPathSection.label}
+				</HomePageSectionOverline>
 				<div className="space-y-4">
 					<h2 className="max-w-2xl text-balance text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
 						{sprintPathSection.titlePrefix}
@@ -30,35 +37,37 @@ export function SprintPathUnifiedSection({
 						{sprintPathSection.intro}
 					</p>
 				</div>
-				<div className="grid gap-3">
-					{sprintPathSection.supportingPoints.map((point) => (
-						<div key={point} className="flex items-start gap-3">
-							<Check className="mt-1 size-4 shrink-0 text-primary" />
-							<p className="text-sm text-foreground/90 sm:text-base">{point}</p>
+				<div className="grid gap-0 border-t border-border/60">
+					{sprintPathSection.supportingPoints.map((point, index) => (
+						<div
+							key={point}
+							className="grid gap-3 border-b border-border/60 py-4 sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-4"
+						>
+							<p className="font-mono text-[0.72rem] uppercase tracking-[0.24em] text-muted-foreground">
+								0{index + 1}
+							</p>
+							<p className="text-sm leading-relaxed text-foreground/90 sm:text-base">
+								{point}
+							</p>
 						</div>
 					))}
 				</div>
-				<p className="max-w-2xl text-sm font-medium text-muted-foreground sm:text-base">
+				<p className="max-w-2xl text-sm font-medium text-foreground/75 sm:text-base">
 					{sprintPathSection.valueFrame}
 				</p>
 			</div>
-			<div className="relative lg:justify-self-end">
-				<Image
-					src={sprintPathSection.imageLightSrc}
-					alt={sprintPathSection.imageAlt}
-					width={604}
-					height={682}
-					sizes="(min-width: 1024px) 28rem, 100vw"
-					className="mx-auto block w-full max-w-md dark:hidden"
-				/>
-				<Image
-					src={sprintPathSection.imageDarkSrc}
-					alt={sprintPathSection.imageAlt}
-					width={604}
-					height={682}
-					sizes="(min-width: 1024px) 28rem, 100vw"
-					className="mx-auto hidden w-full max-w-md dark:block"
-				/>
+			<div
+				className={`relative overflow-hidden p-5 sm:p-6 lg:justify-self-end ${homePageQuietSurfaceClassName}`}
+			>
+				<div className="mb-5 flex items-center justify-between gap-4 border-b border-border/60 pb-3">
+					<p className="font-mono text-[0.72rem] uppercase tracking-[0.24em] text-muted-foreground">
+						Shared system
+					</p>
+					<p className="text-xs text-muted-foreground">
+						Files, not stale chats
+					</p>
+				</div>
+				<SystemLoopPreview className="mx-auto w-full max-w-[34rem]" />
 			</div>
 		</section>
 	);
