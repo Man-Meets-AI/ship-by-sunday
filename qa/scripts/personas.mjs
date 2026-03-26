@@ -1,10 +1,12 @@
 import path from "node:path";
-import { spawn } from "node:child_process";
 import { rm } from "node:fs/promises";
 
 import { ensureClerkTestUser } from "../../apps/web/scripts/ensure-clerk-test-user.mjs";
 import {
-	appsWebDirectory,
+	grantConvexProductAccess,
+	resetConvexProductAccess,
+} from "../../apps/web/scripts/lib/convex-product-access-grant.mjs";
+import {
 	getPersonaIdsForPack,
 	getPersonaRecord,
 	hasLocalCredentialPlaceholders,
@@ -62,7 +64,8 @@ async function preparePersonas(options) {
 			results.push({
 				personaId,
 				status: "ok",
-				message: "Signed-out persona uses a fresh browser context and needs no provisioning.",
+				message:
+					"Signed-out persona uses a fresh browser context and needs no provisioning.",
 			});
 			continue;
 		}
@@ -93,9 +96,13 @@ async function preparePersonas(options) {
 		}
 
 		if (persona.kind === "clerk_password_entitled") {
-			await grantEntitlement({
+			await grantConvexProductAccess({
 				clerkUserId: ensuredUser.clerkUserId,
 				courseSlug: ENTITLED_COURSE_SLUG,
+			});
+		} else if (persona.kind === "clerk_password") {
+			await resetConvexProductAccess({
+				clerkUserId: ensuredUser.clerkUserId,
 			});
 		}
 
@@ -110,7 +117,9 @@ async function preparePersonas(options) {
 		});
 	}
 
-	console.log(JSON.stringify({ pack: requestedPack, personas: results }, null, 2));
+	console.log(
+		JSON.stringify({ pack: requestedPack, personas: results }, null, 2),
+	);
 }
 
 async function resetPersonas() {
@@ -126,57 +135,6 @@ async function resetPersonas() {
 			2,
 		),
 	);
-}
-
-async function grantEntitlement({ clerkUserId, courseSlug }) {
-	const args = [
-		"convex",
-		"run",
-		"access:grantProductAccess",
-		JSON.stringify({
-			clerkUserId,
-			source: "manual",
-		}),
-	];
-
-	const result = await spawnCommand("bunx", args, {
-		cwd: appsWebDirectory,
-		env: {
-			...process.env,
-			QA_COURSE_SLUG: courseSlug,
-		},
-	});
-
-	if (result.code !== 0) {
-		throw new Error(
-			`Failed to grant entitlement via Convex.\nstdout: ${result.stdout}\nstderr: ${result.stderr}`,
-		);
-	}
-}
-
-function spawnCommand(command, args, options) {
-	return new Promise((resolve) => {
-		const child = spawn(command, args, {
-			...options,
-			stdio: ["ignore", "pipe", "pipe"],
-		});
-		let stdout = "";
-		let stderr = "";
-
-		child.stdout.on("data", (chunk) => {
-			stdout += String(chunk);
-		});
-		child.stderr.on("data", (chunk) => {
-			stderr += String(chunk);
-		});
-		child.on("close", (code) => {
-			resolve({
-				code: code ?? 1,
-				stdout: stdout.trim(),
-				stderr: stderr.trim(),
-			});
-		});
-	});
 }
 
 const { positional, options } = parseArgs(process.argv.slice(2));
@@ -198,7 +156,9 @@ try {
 			{
 				status: "error",
 				message:
-					error instanceof Error ? error.message : "Unknown persona command failure.",
+					error instanceof Error
+						? error.message
+						: "Unknown persona command failure.",
 			},
 			null,
 			2,

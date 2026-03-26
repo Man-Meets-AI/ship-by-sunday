@@ -4,6 +4,12 @@ import net from "node:net";
 import path from "node:path";
 import Stripe from "stripe";
 
+import {
+	buildStripeCliArgs,
+	buildStripeCliProjectCheck,
+	parseStripeCliConfigListOutput,
+} from "./lib/stripe-cli-project.mjs";
+
 const ENV_FILE_PATH = path.join(process.cwd(), ".env.local");
 const CONVEX_BIN_PATH = path.join(
 	process.cwd(),
@@ -102,26 +108,23 @@ async function getConvexEnvList() {
 		}, {});
 }
 
-async function getStripeCliConfig() {
-	const result = await runCommand("stripe", ["config", "--list"]);
-	if (result.code !== 0) {
-		return null;
+async function getStripeCliProjectConfig() {
+	try {
+		const result = await runCommand(
+			"stripe",
+			buildStripeCliArgs(["config", "--list"]),
+		);
+		if (result.code !== 0) {
+			return { stripeCliAvailable: false, projectConfig: null };
+		}
+
+		return {
+			stripeCliAvailable: true,
+			projectConfig: parseStripeCliConfigListOutput(result.stdout),
+		};
+	} catch {
+		return { stripeCliAvailable: false, projectConfig: null };
 	}
-
-	const values = result.stdout
-		.split("\n")
-		.map((line) => line.trim())
-		.filter(Boolean)
-		.reduce((acc, line) => {
-			const [key, ...rest] = line.split("=");
-			acc[key.trim()] = rest.join("=").trim().replace(/^'|'$/g, "");
-			return acc;
-		}, {});
-
-	return {
-		accountId: values.account_id ?? null,
-		displayName: values.display_name ?? null,
-	};
 }
 
 function isLocalhostUrl(urlString) {
@@ -225,7 +228,13 @@ const envStripeSecretKey = process.env.STRIPE_SECRET_KEY?.trim() ?? null;
 const convexEnv = await getConvexEnvList();
 const convexWebhookSecret = convexEnv.STRIPE_WEBHOOK_SECRET ?? null;
 const convexStripeSecretKey = convexEnv.STRIPE_SECRET_KEY ?? null;
-const stripeCliConfig = await getStripeCliConfig();
+const { stripeCliAvailable, projectConfig: stripeCliProjectConfig } =
+	await getStripeCliProjectConfig();
+const stripeCliProjectCheck = buildStripeCliProjectCheck({
+	projectConfig: stripeCliProjectConfig,
+	stripeAccount,
+	stripeCliAvailable,
+});
 const webReachable = await canConnect("http://localhost:3000");
 const convexReachable = await canConnect(convexSiteUrl);
 
@@ -236,13 +245,9 @@ const checks = [
 		`${stripeAccount.displayName} (${stripeAccount.id})`,
 	),
 	formatCheck(
-		"Stripe CLI default account",
-		!stripeCliConfig ||
-			!stripeCliConfig.accountId ||
-			stripeCliConfig.accountId === stripeAccount.id,
-		stripeCliConfig?.accountId
-			? `${stripeCliConfig.displayName ?? "Stripe CLI"} (${stripeCliConfig.accountId})`
-			: "not available",
+		stripeCliProjectCheck.label,
+		stripeCliProjectCheck.passed,
+		stripeCliProjectCheck.detail,
 	),
 	formatCheck("Convex dev deployment target", true, deploymentName),
 	formatCheck(
@@ -303,6 +308,12 @@ if (listenerSecret) {
 console.log("Stripe dev doctor");
 for (const check of checks) {
 	console.log(`- ${check}`);
+}
+
+if (stripeCliProjectCheck.guidance) {
+	console.log(
+		`- ACTION ${stripeCliProjectCheck.label}: ${stripeCliProjectCheck.guidance}`,
+	);
 }
 
 const failedCount = checks.filter((check) => check.startsWith("FAIL")).length;
