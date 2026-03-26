@@ -96,6 +96,15 @@ Only move to the hosted domain after the local auth/runtime path is understood.
 bun run video:lessons
 bun run video:cut:setup
 bun run video:cut -- --only <fileName>
+bun run video:prepare:color -- --only <fileName>
+bun run video:grade -- --only <fileName>
+bun run video:upload:bunny -- --only <fileName>
 bun run video:publish -- --only <fileName>
 bun run video:status
 ```
+
+Use `video:prepare:color` when you want the local cut plus Auphonic pass but need to stop before Bunny so you can touch up the downloaded handoff files in Final Cut Pro. That command writes the Auphonic outputs into `Color Correction/` under the Ship by Sunday raw-footage root and archives the original staged source into `Processed/`.
+
+Use `video:grade` when you want a headless LUT pass on the handoff files. It reads from `Color Correction/`, writes graded outputs into `Color Graded/`, and defaults to `Oliur 01.cube` at a 15% blend over the original image.
+
+Use `video:upload:bunny` when the graded exports are final and ready to publish. It reads from `Color Graded/`, uploads to Bunny without rerunning cut or Auphonic, writes the Bunny embed links into the run report, and archives the uploaded graded masters into `Bunny Uploaded/`. If you need to supersede an older Bunny set, publish the corrected set as a fresh run and delete the old Bunny video IDs from the earlier report.

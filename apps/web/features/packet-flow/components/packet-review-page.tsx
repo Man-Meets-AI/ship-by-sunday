@@ -3,6 +3,8 @@ import { AppShell } from "@/features/course/shared/components/app-shell";
 import { PacketStageNav } from "./packet-stage-nav";
 import type { PacketWorkspaceState } from "@/features/packet-flow/lib/packet-workspace-types";
 import { getPacketStageDefinition } from "@packet-compiler";
+import { PacketVideoCard } from "@/features/packet-flow/components/video/packet-video-card";
+import { getPacketReviewPageMedia } from "@/features/packet-flow/lib/packet-stage-videos";
 import { PacketReviewArtifactGrid } from "./review/packet-review-artifact-grid";
 import { PacketReviewDownloadBridge } from "./review/packet-review-download-bridge";
 
@@ -30,13 +32,13 @@ export function PacketReviewPage({
 			enableMissionQuery={false}
 			showSkillRail={false}
 			title="Review & Download"
-			subtitle="Finish the required packet run, download the Starter Snapshot, then optionally keep moving."
 		>
 			<div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 pb-10 pt-2">
 				<PacketStageNav
 					currentStageId="review"
 					stageStatuses={initialWorkspaceState.stageStatuses}
 				/>
+				<PacketVideoCard content={getPacketReviewPageMedia()} />
 				<PacketReviewDownloadBridge
 					isReviewReady={isReviewReady}
 					executeShipUnlockedAt={

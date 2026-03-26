@@ -1,0 +1,119 @@
+{
+	"runId": "2026-03-26T19-41-00-076Z",
+	"startedAt": "2026-03-26T19:41:00.077Z",
+	"inputDirectory": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Color Graded",
+	"uploadedDirectory": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Bunny Uploaded",
+	"onlyFileNames": [],
+	"inputFileNames": [
+		"L0--build-the-folder-not-just-the-app.mp4",
+		"L1--name-the-thing.mp4",
+		"L10--choose-delivery-pricing-and-starter-config.mp4",
+		"L11--plan-the-work.mp4",
+		"L12--define-done-validation-and-rollback.mp4",
+		"L13--review-resolve-download.mp4",
+		"L3--lock-the-promise-and-the-proof.mp4",
+		"L4--kill-scope-early.mp4",
+		"L5--map-the-core-flow.mp4",
+		"L6--gather-references.mp4",
+		"L7--choose-the-visual-direction.mp4",
+		"L8--define-the-system-tokens-and-design-verification.mp4",
+		"L9--define-the-marketing-operating-system.mp4"
+	],
+	"bunnyLibraryId": 619172,
+	"successes": [
+		{
+			"fileName": "L0--build-the-folder-not-just-the-app.mp4",
+			"sourceKey": "L0",
+			"bunnyVideoId": "12440a51-3802-4c77-870f-04b2667844f2",
+			"embedUrl": "https://player.mediadelivery.net/embed/619172/12440a51-3802-4c77-870f-04b2667844f2",
+			"uploadedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Bunny Uploaded/L0--build-the-folder-not-just-the-app.mp4"
+		},
+		{
+			"fileName": "L1--name-the-thing.mp4",
+			"sourceKey": "L1",
+			"bunnyVideoId": "53fea849-6eb8-45e2-b00b-290e76e428f3",
+			"embedUrl": "https://player.mediadelivery.net/embed/619172/53fea849-6eb8-45e2-b00b-290e76e428f3",
+			"uploadedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Bunny Uploaded/L1--name-the-thing.mp4"
+		},
+		{
+			"fileName": "L10--choose-delivery-pricing-and-starter-config.mp4",
+			"sourceKey": "L10",
+			"bunnyVideoId": "ce8c7f5a-5f42-421a-adbb-c16396f9b07a",
+			"embedUrl": "https://player.mediadelivery.net/embed/619172/ce8c7f5a-5f42-421a-adbb-c16396f9b07a",
+			"uploadedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Bunny Uploaded/L10--choose-delivery-pricing-and-starter-config.mp4"
+		},
+		{
+			"fileName": "L11--plan-the-work.mp4",
+			"sourceKey": "L11",
+			"bunnyVideoId": "ad8306b0-b783-48d0-a0b4-49bb9748a76c",
+			"embedUrl": "https://player.mediadelivery.net/embed/619172/ad8306b0-b783-48d0-a0b4-49bb9748a76c",
+			"uploadedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Bunny Uploaded/L11--plan-the-work.mp4"
+		},
+		{
+			"fileName": "L12--define-done-validation-and-rollback.mp4",
+			"sourceKey": "L12",
+			"bunnyVideoId": "8455fb73-7797-4e78-8b85-1b731044c886",
+			"embedUrl": "https://player.mediadelivery.net/embed/619172/8455fb73-7797-4e78-8b85-1b731044c886",
+			"uploadedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Bunny Uploaded/L12--define-done-validation-and-rollback.mp4"
+		},
+		{
+			"fileName": "L13--review-resolve-download.mp4",
+			"sourceKey": "L13",
+			"bunnyVideoId": "ba8f04e6-d2a6-4b9f-845a-076da59cc4a1",
+			"embedUrl": "https://player.mediadelivery.net/embed/619172/ba8f04e6-d2a6-4b9f-845a-076da59cc4a1",
+			"uploadedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Bunny Uploaded/L13--review-resolve-download.mp4"
+		},
+		{
+			"fileName": "L3--lock-the-promise-and-the-proof.mp4",
+			"sourceKey": "L3",
+			"bunnyVideoId": "140aa508-c31c-4ce6-b92d-921a52024c63",
+			"embedUrl": "https://player.mediadelivery.net/embed/619172/140aa508-c31c-4ce6-b92d-921a52024c63",
+			"uploadedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Bunny Uploaded/L3--lock-the-promise-and-the-proof.mp4"
+		},
+		{
+			"fileName": "L4--kill-scope-early.mp4",
+			"sourceKey": "L4",
+			"bunnyVideoId": "517add8c-a5f0-4ad1-85a6-1a22c071dd16",
+			"embedUrl": "https://player.mediadelivery.net/embed/619172/517add8c-a5f0-4ad1-85a6-1a22c071dd16",
+			"uploadedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Bunny Uploaded/L4--kill-scope-early.mp4"
+		},
+		{
+			"fileName": "L5--map-the-core-flow.mp4",
+			"sourceKey": "L5",
+			"bunnyVideoId": "2eaa14de-a999-4a61-bd7d-5acc5838a843",
+			"embedUrl": "https://player.mediadelivery.net/embed/619172/2eaa14de-a999-4a61-bd7d-5acc5838a843",
+			"uploadedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Bunny Uploaded/L5--map-the-core-flow.mp4"
+		},
+		{
+			"fileName": "L6--gather-references.mp4",
+			"sourceKey": "L6",
+			"bunnyVideoId": "3cb4f820-5b9a-48e3-80e9-90ce9a85a874",
+			"embedUrl": "https://player.mediadelivery.net/embed/619172/3cb4f820-5b9a-48e3-80e9-90ce9a85a874",
+			"uploadedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Bunny Uploaded/L6--gather-references.mp4"
+		},
+		{
+			"fileName": "L7--choose-the-visual-direction.mp4",
+			"sourceKey": "L7",
+			"bunnyVideoId": "f25d1222-e792-44c6-9a04-7ff084fa0360",
+			"embedUrl": "https://player.mediadelivery.net/embed/619172/f25d1222-e792-44c6-9a04-7ff084fa0360",
+			"uploadedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Bunny Uploaded/L7--choose-the-visual-direction.mp4"
+		},
+		{
+			"fileName": "L8--define-the-system-tokens-and-design-verification.mp4",
+			"sourceKey": "L8",
+			"bunnyVideoId": "779483e2-194b-4e7b-91dd-b6a948382627",
+			"embedUrl": "https://player.mediadelivery.net/embed/619172/779483e2-194b-4e7b-91dd-b6a948382627",
+			"uploadedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Bunny Uploaded/L8--define-the-system-tokens-and-design-verification.mp4"
+		},
+		{
+			"fileName": "L9--define-the-marketing-operating-system.mp4",
+			"sourceKey": "L9",
+			"bunnyVideoId": "10b25a44-dc8d-4f37-8b03-d06511ba1156",
+			"embedUrl": "https://player.mediadelivery.net/embed/619172/10b25a44-dc8d-4f37-8b03-d06511ba1156",
+			"uploadedPath": "/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage/Bunny Uploaded/L9--define-the-marketing-operating-system.mp4"
+		}
+	],
+	"failures": [],
+	"validationErrors": [],
+	"completedAt": "2026-03-26T19:51:10.281Z"
+}

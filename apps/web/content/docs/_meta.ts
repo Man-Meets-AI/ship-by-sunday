@@ -96,6 +96,9 @@ export default {
 	commands: {
 		title: "Commands",
 	},
+	"video-pipeline": {
+		title: "Video Pipeline",
+	},
 	glossary: {
 		title: "Glossary",
 	},

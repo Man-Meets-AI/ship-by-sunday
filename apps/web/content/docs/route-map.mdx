@@ -24,17 +24,21 @@ description: See the main public, protected, and purchase-related routes in one 
 ## Protected product routes
 
 - `/start`: packet-first orientation and framing
-- `/product`: canonical product and scope intake
-- `/design`: design packet intake and design-packet download surface
-- `/marketing`: marketing packet intake and marketing-packet download surface
-- `/build-plan`: build packet intake and build-packet download surface
+- `/product`: stable stage-entry route that redirects to the current Product packet page
+- `/product/[stepId]`: canonical Product packet pages such as `/product/foundation`, `/product/problem`, `/product/outcome`, and `/product/scope`
+- `/design`: stable stage-entry route that redirects to the current Design packet page
+- `/design/[stepId]`: canonical Design packet pages such as `/design/flow`, `/design/references`, `/design/direction`, and `/design/system`
+- `/marketing`: stable stage-entry route that redirects to the current Marketing packet page
+- `/marketing/[stepId]`: canonical Marketing packet pages such as `/marketing/operating-system`
+- `/build-plan`: stable stage-entry route that redirects to the current Build Plan packet page
+- `/build-plan/[stepId]`: canonical Build Plan packet pages such as `/build-plan/delivery`, `/build-plan/plan`, and `/build-plan/validation`
 - `/review`: final readiness and repo-download surface
 - `/execute`: optional post-review execution hub that unlocks from `/review`
 - `/settings`: protected account and product settings
 - `/lesson/[lessonKey]`: legacy compatibility route that now forwards into `/start`
 - `/artifacts`: legacy compatibility route that now forwards into `/review`
 
-These protected routes render behind `app/(workspace)/layout.tsx`, starting from server-fetched access or packet-workspace data before the browser resumes live Convex subscriptions.
+These protected routes render behind `app/(workspace)/layout.tsx`, starting from server-fetched access or packet-workspace data before the browser resumes live Convex subscriptions. The stage-root URLs remain the shared app contract, but the packet form itself now lives on the nested packet pages.
 
 ## Why this matters
 

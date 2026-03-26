@@ -9,6 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { packetFieldLabel } from "@/features/packet-flow/lib/packet-field-helpers";
 
 export function PacketStageSidebar({
 	stageStatus,
@@ -39,7 +40,7 @@ export function PacketStageSidebar({
 					{stageStatus.missingFactKeys.length ? (
 						<ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
 							{stageStatus.missingFactKeys.map((fieldKey) => (
-								<li key={fieldKey}>{fieldKey}</li>
+								<li key={fieldKey}>{packetFieldLabel(fieldKey)}</li>
 							))}
 						</ul>
 					) : (

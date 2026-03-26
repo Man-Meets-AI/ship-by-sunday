@@ -4,6 +4,8 @@ import path from "node:path";
 import { promisify } from "node:util";
 
 import {
+	COLOR_CORRECTION_DIRECTORY,
+	COLOR_GRADED_DIRECTORY,
 	getRepoLessons,
 	listReadyFileNames,
 	PROCESSED_DIRECTORY,
@@ -21,8 +23,20 @@ function printSection(title, lines) {
 }
 
 async function getProcessedFileNames() {
+	return listDirectoryFileNames(PROCESSED_DIRECTORY);
+}
+
+async function getColorCorrectionFileNames() {
+	return listDirectoryFileNames(COLOR_CORRECTION_DIRECTORY);
+}
+
+async function getColorGradedFileNames() {
+	return listDirectoryFileNames(COLOR_GRADED_DIRECTORY);
+}
+
+async function listDirectoryFileNames(targetDirectory) {
 	try {
-		const entries = await readdir(PROCESSED_DIRECTORY, { withFileTypes: true });
+		const entries = await readdir(targetDirectory, { withFileTypes: true });
 		return entries
 			.filter((entry) => entry.isFile() && !entry.name.startsWith("."))
 			.map((entry) => entry.name)
@@ -90,6 +104,8 @@ async function main() {
 	const lessons = await getRepoLessons();
 	const readyFileNames = await listReadyFileNames();
 	const processedFileNames = await getProcessedFileNames();
+	const colorCorrectionFileNames = await getColorCorrectionFileNames();
+	const colorGradedFileNames = await getColorGradedFileNames();
 	const existingMedia = await readExistingLessonMedia();
 	const { readyItems, errors } = validateReadyVideoFiles({
 		fileNames: readyFileNames,
@@ -110,6 +126,8 @@ async function main() {
 		`Ready unattached: ${
 			readyItems.filter((item) => item.attachmentMode === "unattached").length
 		}`,
+		`Color correction ready: ${colorCorrectionFileNames.length}`,
+		`Color graded: ${colorGradedFileNames.length}`,
 		`Ready validation errors: ${errors.length}`,
 	]);
 
@@ -118,6 +136,20 @@ async function main() {
 		processSnapshot.length > 0
 			? processSnapshot
 			: ["No active video publish/cut/upload process found."],
+	);
+
+	printSection(
+		"Color Correction",
+		colorCorrectionFileNames.length > 0
+			? colorCorrectionFileNames.slice(-8)
+			: [`No files in ${path.basename(COLOR_CORRECTION_DIRECTORY)} yet.`],
+	);
+
+	printSection(
+		"Color Graded",
+		colorGradedFileNames.length > 0
+			? colorGradedFileNames.slice(-8)
+			: [`No files in ${path.basename(COLOR_GRADED_DIRECTORY)} yet.`],
 	);
 
 	printSection(

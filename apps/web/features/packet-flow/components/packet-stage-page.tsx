@@ -1,24 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/features/course/shared/components/app-shell";
 import { api } from "@/convex/_generated/api";
-import {
-	buildStageDraftValues,
-	buildSavePayload,
-} from "@/features/packet-flow/lib/packet-field-helpers";
+import { usePacketStageStepState } from "@/features/packet-flow/hooks/use-packet-stage-step-state";
 import type { PacketWorkspaceState } from "@/features/packet-flow/lib/packet-workspace-types";
+import { getPacketStageDefinition, type PacketStageId } from "@packet-compiler";
 import {
-	getPacketStageDefinition,
-	type CanonicalProjectFactKey,
-	type PacketStageId,
-} from "@packet-compiler";
+	getAdjacentPacketPageHrefs,
+	getPacketStageStepIndex,
+	type RoutedPacketStageId,
+} from "@/features/packet-flow/lib/packet-stage-routes";
+import { getPacketStagePageMedia } from "@/features/packet-flow/lib/packet-stage-videos";
 import { PacketStageProgressPanel } from "./progression/packet-stage-progress-panel";
 import { PacketStageNav } from "./packet-stage-nav";
 import { PacketStageSidebar } from "./packet-stage-sidebar";
 import { PacketStageStepCard } from "./packet-stage-step-card";
+import { PacketVideoCard } from "./video/packet-video-card";
 
 const packetDownloadStageMap = {
 	design: "design",
@@ -48,9 +47,11 @@ function getPacketDownloadHref(
 
 export function PacketStagePage({
 	stageId,
+	stepId,
 	initialWorkspaceState,
 }: {
-	stageId: Exclude<PacketStageId, "start" | "review">;
+	stageId: RoutedPacketStageId;
+	stepId: string;
 	initialWorkspaceState: PacketWorkspaceState;
 }) {
 	const stage = getPacketStageDefinition(stageId);
@@ -71,67 +72,39 @@ export function PacketStagePage({
 			getPacketStageDefinition(workspaceState.firstIncompleteStageId).route,
 		);
 	}
+	const currentStepIndex = getPacketStageStepIndex(stageId, stepId);
+	const { previousHref, nextHref } = getAdjacentPacketPageHrefs(
+		stageId,
+		stepId,
+	);
+	const stagePageMedia = getPacketStagePageMedia(stageId, stepId);
 
-	const [activeStepIndex, setActiveStepIndex] = useState(
-		stageStatus.currentStepIndex,
-	);
-	const currentStep = stage.steps[activeStepIndex];
-	const [draftValuesByStepId, setDraftValuesByStepId] = useState(() =>
-		buildStageDraftValues(workspaceState.projectDefinition?.facts ?? {}, stage),
-	);
-	const [isPending, startTransition] = useTransition();
 	const saveProjectDefinitionFacts = useMutation(
 		api.packet.saveProjectDefinitionFacts,
 	);
-
-	useEffect(() => {
-		setDraftValuesByStepId(
-			buildStageDraftValues(
-				workspaceState.projectDefinition?.facts ?? {},
-				stage,
-			),
-		);
-	}, [stage, workspaceState.projectDefinition?.facts]);
-
+	const {
+		currentFeedback,
+		currentFieldErrors,
+		currentStep,
+		currentDraftValues,
+		goToPreviousStep,
+		handleFieldChange,
+		handleSave,
+		isSaving,
+	} = usePacketStageStepState({
+		stage,
+		stageId,
+		stageStatus,
+		stepId,
+		previousHref,
+		nextHref,
+		projectFacts: workspaceState.projectDefinition?.facts ?? {},
+		saveProjectDefinitionFacts,
+	});
 	const downloadHref = getPacketDownloadHref(stageId, stageStatus.isComplete);
 	const nextStageId = stageStatus.isComplete
 		? nextStageMap[stageId]
 		: undefined;
-	const title = useMemo(() => stage.label, [stage.label]);
-	const currentDraftValues = currentStep
-		? (draftValuesByStepId[currentStep.id] ?? {})
-		: {};
-
-	function handleFieldChange(
-		fieldKey: CanonicalProjectFactKey,
-		nextValue: string,
-	) {
-		if (!currentStep) {
-			return;
-		}
-
-		setDraftValuesByStepId((current) => ({
-			...current,
-			[currentStep.id]: {
-				...(current[currentStep.id] ?? {}),
-				[fieldKey]: nextValue,
-			},
-		}));
-	}
-
-	function handleSave() {
-		if (!currentStep) {
-			return;
-		}
-
-		const payload = buildSavePayload(currentStep, currentDraftValues);
-		startTransition(async () => {
-			await saveProjectDefinitionFacts({ stageId, ...payload });
-			if (activeStepIndex < stage.steps.length - 1) {
-				setActiveStepIndex((index) => index + 1);
-			}
-		});
-	}
 
 	return (
 		<AppShell
@@ -139,8 +112,7 @@ export function PacketStagePage({
 			appScrollMode="page"
 			enableMissionQuery={false}
 			showSkillRail={false}
-			title={title}
-			subtitle={stage.description}
+			title={stage.label}
 		>
 			<div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 pb-10 pt-2">
 				<PacketStageNav
@@ -148,33 +120,41 @@ export function PacketStagePage({
 					stageStatuses={workspaceState.stageStatuses}
 				/>
 				<div className="grid gap-6 xl:grid-cols-[1.4fr_0.6fr]">
-					<div className="space-y-6">
+					{stagePageMedia ? (
+						<div className="xl:col-start-2 xl:row-start-1">
+							<PacketVideoCard content={stagePageMedia} />
+						</div>
+					) : null}
+					<div className="space-y-6 xl:col-start-1 xl:row-span-2">
 						<PacketStageProgressPanel
+							stageId={stageId}
 							stage={stage}
 							stageStatus={stageStatus}
-							activeStepIndex={activeStepIndex}
-							onSelectStep={setActiveStepIndex}
+							activeStepId={stepId}
 						/>
 						{currentStep ? (
 							<PacketStageStepCard
 								currentStep={currentStep}
-								currentStepIndex={activeStepIndex}
+								currentStepIndex={currentStepIndex}
 								totalSteps={stage.steps.length}
+								canGoBack={Boolean(previousHref)}
 								draftValues={currentDraftValues}
-								isSaving={isPending}
-								onBack={() =>
-									setActiveStepIndex((index) => Math.max(0, index - 1))
-								}
+								fieldErrors={currentFieldErrors}
+								feedback={currentFeedback}
+								isSaving={isSaving}
+								onBack={goToPreviousStep}
 								onChange={handleFieldChange}
 								onSave={handleSave}
 							/>
 						) : null}
 					</div>
-					<PacketStageSidebar
-						stageStatus={stageStatus}
-						downloadHref={downloadHref}
-						nextStageId={nextStageId}
-					/>
+					<div className="space-y-6 xl:col-start-2 xl:row-start-2">
+						<PacketStageSidebar
+							stageStatus={stageStatus}
+							downloadHref={downloadHref}
+							nextStageId={nextStageId}
+						/>
+					</div>
 				</div>
 			</div>
 		</AppShell>

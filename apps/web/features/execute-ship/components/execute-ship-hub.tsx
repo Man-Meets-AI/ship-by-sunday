@@ -23,7 +23,6 @@ export function ExecuteShipHub({ productName }: { productName?: string }) {
 			enableMissionQuery={false}
 			showSkillRail={false}
 			title="Execute / Ship"
-			subtitle="Optional next path after your required packet download."
 		>
 			<div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 pb-10 pt-2">
 				<Card>

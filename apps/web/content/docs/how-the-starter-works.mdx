@@ -34,7 +34,7 @@ The runtime splits into three clear surfaces:
 
 - public marketing surface on `/`
 - public docs surface on `/docs` when the docs module is enabled
-- protected product surface on `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, `/review`, optional `/execute` after review unlock, and `/settings`
+- protected product surface on `/start`, the stage-entry routes `/product`, `/design`, `/marketing`, and `/build-plan`, the canonical nested packet pages under those stage roots, `/review`, optional `/execute` after review unlock, and `/settings`
 
 That split matters because checkout and access recovery live between those worlds.
 
@@ -62,7 +62,7 @@ Important module flags:
 Current behavior:
 
 - if `docs` is off, docs links hide and `/docs` renders a disabled-state surface
-- the packet-first flow now uses `/start` as the first protected landing surface
+- the packet-first flow now uses `/start` as the first protected landing surface and nested packet pages under `/product`, `/design`, `/marketing`, and `/build-plan` as the canonical form pages
 - `/mission`, `/lesson/[lessonKey]`, and `/artifacts` now act as compatibility redirects into the packet-first flow
 - the legacy `starterRepo` module is now off by default, so starter-repo cards are hidden from the visible protected app unless someone explicitly re-enables that obsolete path
 

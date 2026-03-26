@@ -461,6 +461,7 @@ async function transcribeVideo(video, options) {
 	}
 
 	const args = [
+		"-I",
 		"-m",
 		"whisper",
 		video.path,
@@ -645,7 +646,7 @@ export async function ensureTranscriptPythonReady(
 	}
 
 	try {
-		await runCommand(pythonBin, ["-c", "import whisper"]);
+		await runCommand(pythonBin, ["-I", "-c", "import whisper"]);
 	} catch {
 		throw createError(
 			`Whisper is not installed in ${pythonBin}. Run \`bun run video:transcripts:setup\` first.`,

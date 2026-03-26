@@ -80,6 +80,8 @@ describe("AccessRequiredPage", () => {
 		expect(markup).toContain("Access Required");
 		expect(markup).toContain("Checking product access");
 		expect(markup).toContain("Protected workspace");
+		expect(markup).toContain("What to do next");
+		expect(markup).not.toContain("Need help reconnecting access?");
 		expect(markup).not.toContain('data-testid="access-required-buy-access"');
 	});
 
@@ -108,7 +110,9 @@ describe("AccessRequiredPage", () => {
 		expect(markup).toContain("Access not attached to this account");
 		expect(markup).toContain("Signed in as test-entitled@test.com");
 		expect(markup).toContain("Retry access check");
+		expect(markup).toContain("What to do next");
 		expect(markup).toContain("Need to buy access");
+		expect(markup).not.toContain("Recover access");
 		expect(markup).toContain('data-testid="access-required-buy-access"');
 		expect(markup).toContain("Buy access now");
 		expect(markup).toContain("Review pricing");

@@ -1,10 +1,12 @@
 import { spawn } from "node:child_process";
 import { createWriteStream, openAsBlob } from "node:fs";
 import {
+	copyFile,
 	mkdir,
 	readdir,
 	readFile,
 	rename,
+	rm,
 	stat,
 	writeFile,
 } from "node:fs/promises";
@@ -15,6 +17,18 @@ import { pipeline } from "node:stream/promises";
 export const RAW_FOOTAGE_ROOT =
 	"/Volumes/2TB SSD Video/Movies/Ship by Sunday Raw Footage";
 export const READY_DIRECTORY = path.join(RAW_FOOTAGE_ROOT, "Ready");
+export const COLOR_CORRECTION_DIRECTORY = path.join(
+	RAW_FOOTAGE_ROOT,
+	"Color Correction",
+);
+export const COLOR_GRADED_DIRECTORY = path.join(
+	RAW_FOOTAGE_ROOT,
+	"Color Graded",
+);
+export const BUNNY_UPLOADED_DIRECTORY = path.join(
+	RAW_FOOTAGE_ROOT,
+	"Bunny Uploaded",
+);
 export const PROCESSED_DIRECTORY = path.join(RAW_FOOTAGE_ROOT, "Processed");
 export const REPORT_DIRECTORY = path.join(
 	process.cwd(),
@@ -416,6 +430,16 @@ export function buildCutOptionsFromArgv(argv) {
 	return options;
 }
 
+export function buildPipelineVideoTitle(item) {
+	return item.attachmentMode === "lesson"
+		? `${item.lessonId} — ${item.lessonTitle}`
+		: `${item.sourceKey} — ${item.slug}`;
+}
+
+export function buildBunnyEmbedUrl(libraryId, videoId) {
+	return `https://player.mediadelivery.net/embed/${libraryId}/${videoId}`;
+}
+
 export async function listReadyFileNames(readyDirectory = READY_DIRECTORY) {
 	const entries = await readdir(readyDirectory, { withFileTypes: true });
 
@@ -501,6 +525,64 @@ export async function runVideoCutStage({ sourcePath, cutPath, options }) {
 						).toFixed(2),
 					)
 				: 0,
+	};
+}
+
+export async function runCutAndAuphonicDownloadStage({
+	runId,
+	item,
+	sourcePath,
+	cutOptions,
+	auphonicApiKey,
+	auphonicPresetId,
+}) {
+	let auphonicInputPath = sourcePath;
+	let cutResult = null;
+	let cutPath = null;
+
+	if (!cutOptions.skipCut) {
+		cutPath = await createTempCutPath(runId, item.fileName);
+		cutResult = await runVideoCutStage({
+			sourcePath,
+			cutPath,
+			options: cutOptions,
+		});
+		auphonicInputPath = cutPath;
+	}
+
+	const title = buildPipelineVideoTitle(item);
+	const production = await createAuphonicProduction({
+		apiKey: auphonicApiKey,
+		presetId: auphonicPresetId,
+		filePath: auphonicInputPath,
+		title,
+	});
+	const completedProduction = await waitForAuphonicProduction({
+		apiKey: auphonicApiKey,
+		uuid: production.uuid,
+	});
+	const outputFile = getVideoOutputCandidate(
+		completedProduction.output_files ?? [],
+	);
+	const downloadPath = await createTempDownloadPath(
+		runId,
+		item.fileName,
+		outputFile,
+	);
+	const { outputFile: downloadedOutputFile } =
+		await downloadAuphonicVideoOutput({
+			apiKey: auphonicApiKey,
+			production: completedProduction,
+			destinationPath: downloadPath,
+		});
+
+	return {
+		title,
+		cutPath,
+		cutResult,
+		completedProduction,
+		downloadPath,
+		downloadedOutputFile,
 	};
 }
 
@@ -820,8 +902,12 @@ export async function moveFileToProcessed(fileName, runId) {
 	await mkdir(PROCESSED_DIRECTORY, { recursive: true });
 
 	const sourcePath = path.join(READY_DIRECTORY, fileName);
-	const uniqueTargetPath = await getAvailableProcessedPath(fileName, runId);
-	await rename(sourcePath, uniqueTargetPath);
+	const uniqueTargetPath = await getAvailableTargetPath(
+		PROCESSED_DIRECTORY,
+		fileName,
+		runId,
+	);
+	await moveFileAcrossVolumes(sourcePath, uniqueTargetPath);
 	return uniqueTargetPath;
 }
 
@@ -853,11 +939,64 @@ export async function createTempDownloadPath(runId, fileName, outputFile) {
 	);
 }
 
-async function getAvailableProcessedPath(fileName, runId) {
-	const directPath = path.join(PROCESSED_DIRECTORY, fileName);
+export async function moveDownloadedOutputToColorCorrection({
+	sourcePath,
+	fileName,
+	runId,
+	outputFile,
+}) {
+	await mkdir(COLOR_CORRECTION_DIRECTORY, { recursive: true });
+
+	const extension =
+		normalizeExtension(outputFile?.ending) ||
+		path.extname(String(outputFile?.download_url ?? fileName)) ||
+		path.extname(fileName) ||
+		".mp4";
+	const targetFileName = `${path.basename(fileName, path.extname(fileName))}${extension}`;
+	const targetPath = await getAvailableTargetPath(
+		COLOR_CORRECTION_DIRECTORY,
+		targetFileName,
+		runId,
+	);
+	await moveFileAcrossVolumes(sourcePath, targetPath);
+	return targetPath;
+}
+
+export async function moveColorGradedFileToBunnyUploaded(
+	fileName,
+	runId,
+	sourceDirectory = COLOR_GRADED_DIRECTORY,
+) {
+	await mkdir(BUNNY_UPLOADED_DIRECTORY, { recursive: true });
+
+	const sourcePath = path.join(sourceDirectory, fileName);
+	const targetPath = await getAvailableTargetPath(
+		BUNNY_UPLOADED_DIRECTORY,
+		fileName,
+		runId,
+	);
+	await moveFileAcrossVolumes(sourcePath, targetPath);
+	return targetPath;
+}
+
+async function moveFileAcrossVolumes(sourcePath, targetPath) {
+	try {
+		await rename(sourcePath, targetPath);
+	} catch (error) {
+		if (error?.code !== "EXDEV") {
+			throw error;
+		}
+
+		await copyFile(sourcePath, targetPath);
+		await rm(sourcePath, { force: true });
+	}
+}
+
+async function getAvailableTargetPath(targetDirectory, fileName, runId) {
+	const directPath = path.join(targetDirectory, fileName);
 
 	try {
-		await readFile(directPath);
+		await stat(directPath);
 	} catch (error) {
 		if (error?.code === "ENOENT") {
 			return directPath;
@@ -866,7 +1005,7 @@ async function getAvailableProcessedPath(fileName, runId) {
 		throw error;
 	}
 
-	return path.join(PROCESSED_DIRECTORY, `${runId}--${fileName}`);
+	return path.join(targetDirectory, `${runId}--${fileName}`);
 }
 
 async function runCurlUpload({ apiKey, libraryId, videoId, filePath }) {

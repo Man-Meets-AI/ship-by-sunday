@@ -22,6 +22,7 @@ test-results
 apps/web/test-results
 .codex-user-state
 output/video-pipeline
+apps/web/output/video-pipeline/tmp/
 .venv-video
 .vercel
 qa/personas.local.json

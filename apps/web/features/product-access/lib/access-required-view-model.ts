@@ -29,7 +29,7 @@ export type AccessActionModel =
 			variant?: "default" | "secondary" | "outline";
 	  };
 
-export type AccessCardModel = {
+export type AccessPathModel = {
 	tone: "recovery" | "purchase";
 	title: string;
 	description: string;
@@ -50,7 +50,7 @@ export type AccessViewModel = {
 	statusCalloutBody?: string;
 	helpLeadCopy: string;
 	helpItems: readonly string[];
-	cards: readonly AccessCardModel[];
+	paths: readonly AccessPathModel[];
 };
 
 export function formatRefreshTime(timestamp: number | null) {
@@ -140,7 +140,7 @@ export function getAccessViewModel({
 					`Use ${openWorkspaceLabel} if your product access was already granted.`,
 					"Retry checkout only if this account still needs access.",
 				],
-				cards: [
+				paths: [
 					{
 						tone: "recovery",
 						title: "Already paid",
@@ -172,7 +172,7 @@ export function getAccessViewModel({
 					"Return here after sign-in so we can check access again.",
 					"Use instant access only if this account has not purchased yet.",
 				],
-				cards: [
+				paths: [
 					{
 						tone: "recovery",
 						title: "Already paid",
@@ -206,7 +206,7 @@ export function getAccessViewModel({
 					"Sign out and sign back in if the session still does not refresh.",
 					"Do not buy access again until the account check succeeds.",
 				],
-				cards: [
+				paths: [
 					{
 						tone: "recovery",
 						title: "Refresh account access",
@@ -240,7 +240,7 @@ export function getAccessViewModel({
 					"Sign in with the same email used at checkout.",
 					"Use instant access if this account has not purchased yet.",
 				],
-				cards: [
+				paths: [
 					{
 						tone: "recovery",
 						title: "Already paid",
@@ -274,7 +274,7 @@ export function getAccessViewModel({
 					"Retry the access check from this account.",
 					"Do not start a second checkout while access is pending.",
 				],
-				cards: [
+				paths: [
 					{
 						tone: "recovery",
 						title: "Already paid",
@@ -308,7 +308,7 @@ export function getAccessViewModel({
 					"Retry the access check after switching accounts.",
 					"Review the offer before starting a new checkout.",
 				],
-				cards: [
+				paths: [
 					{
 						tone: "recovery",
 						title: "Already paid",
@@ -341,7 +341,7 @@ export function getAccessViewModel({
 					"Review the offer before starting a new checkout.",
 					"Do not buy again until you are sure this is the right account.",
 				],
-				cards: [
+				paths: [
 					{
 						tone: "recovery",
 						title: "Already paid",

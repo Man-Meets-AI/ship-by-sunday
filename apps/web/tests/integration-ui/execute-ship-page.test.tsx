@@ -40,12 +40,12 @@ vi.mock("@/features/course/shared/components/app-shell", () => ({
 		children,
 	}: {
 		title: string;
-		subtitle: string;
+		subtitle?: string;
 		children: React.ReactNode;
 	}) => (
 		<div>
 			<h1>{title}</h1>
-			<p>{subtitle}</p>
+			{subtitle ? <p>{subtitle}</p> : null}
 			{children}
 		</div>
 	),
