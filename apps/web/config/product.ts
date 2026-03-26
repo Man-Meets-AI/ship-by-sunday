@@ -207,7 +207,7 @@ export const manifestConfig = {
 
 export const apiRouteConfig = {
 	stripeCheckout: "/api/stripe/checkout",
-	stripeWebhook: "/api/stripe/webhook",
+	stripeWebhook: "/stripe/webhook",
 	observabilityClerk: "/api/observability/clerk",
 	observabilityVercel: "/api/observability/vercel",
 	observabilityIncidentStatus:

@@ -23,11 +23,24 @@ function parseArgs(argv) {
 	return options;
 }
 
+function formatLocalDateStamp(date) {
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, "0");
+	const day = String(date.getDate()).padStart(2, "0");
+	return `${year}-${month}-${day}`;
+}
+
 async function main() {
 	const options = parseArgs(process.argv.slice(2));
 	const pack = options.pack ?? "default_ship";
 	const slug = options.slug ?? "local-run";
-	const date = new Date().toISOString().slice(0, 10);
+	const date = formatLocalDateStamp(new Date());
+	const environment =
+		options.environment ??
+		process.env.QA_REPORT_ENVIRONMENT ??
+		(process.env.PLAYWRIGHT_BASE_URL
+			? `hosted-${new URL(process.env.PLAYWRIGHT_BASE_URL).host}`
+			: "dev-local");
 
 	const journeyCsv = await readFile(path.join(repoRoot, "qa/journeys.csv"), "utf8");
 	const template = await readFile(
@@ -41,6 +54,7 @@ async function main() {
 	const personas = getPersonaIdsForPack(personaProtocol, pack).join(", ");
 	const reportContents = template
 		.replace("{{date}}", date)
+		.replace("{{environment}}", environment)
 		.replace("{{pack}}", pack)
 		.replace("{{slug}}", slug)
 		.replace("{{personas}}", personas)
@@ -55,6 +69,7 @@ async function main() {
 		JSON.stringify(
 			{
 				status: "ok",
+				environment,
 				pack,
 				personas: getPersonaIdsForPack(personaProtocol, pack),
 				scenarioIds: selectedJourneys.map((record) => record.scenario_id),

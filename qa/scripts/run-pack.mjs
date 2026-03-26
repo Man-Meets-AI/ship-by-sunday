@@ -1,10 +1,18 @@
 import { spawn } from "node:child_process";
 
+import { loadQaEnv } from "./lib/qa-env.mjs";
+
 const packDefinitions = {
 	default_ship: {
 		requiresBillingApproval: false,
 		note: null,
-		steps: ({ slug, sandboxEnv, browserSmokeCommand, browserSmokeEnv }) => [
+		steps: ({
+			slug,
+			personaPrepareEnv,
+			sandboxEnv,
+			browserSmokeCommand,
+			browserSmokeEnv,
+		}) => [
 			{
 				label: "Validate the QA control plane",
 				command: ["bun", "run", "qa:validate"],
@@ -18,6 +26,7 @@ const packDefinitions = {
 					"--",
 					"--pack=default_ship",
 				],
+				env: personaPrepareEnv,
 			},
 			{
 				label: "Scaffold the default-ship report",
@@ -67,7 +76,7 @@ const packDefinitions = {
 	billing_integration: {
 		requiresBillingApproval: true,
 		note: null,
-		steps: ({ slug, sandboxEnv }) => [
+		steps: ({ slug, personaPrepareEnv, sandboxEnv }) => [
 			{
 				label: "Validate the QA control plane",
 				command: ["bun", "run", "qa:validate"],
@@ -81,6 +90,7 @@ const packDefinitions = {
 					"--",
 					"--pack=billing_integration",
 				],
+				env: personaPrepareEnv,
 			},
 			{
 				label: "Scaffold the billing-integration report",
@@ -200,6 +210,8 @@ function spawnCommand(command, args, stepEnv = {}) {
 }
 
 async function main() {
+	await loadQaEnv();
+
 	const options = parseArgs(process.argv.slice(2));
 	const pack = options.pack ?? "default_ship";
 	const slug = options.slug ?? `${pack}-run`;
@@ -216,6 +228,9 @@ async function main() {
 		PLAYWRIGHT_USE_LOCAL_SERVER: usesLocalServer ? "1" : "0",
 		PLAYWRIGHT_BASE_URL: sandboxBaseUrl,
 	};
+	const personaPrepareEnv = {
+		PLAYWRIGHT_BASE_URL: sandboxBaseUrl,
+	};
 	const browserSmokeCommand = usesLocalServer
 		? ["bun", "run", "test:browser-smoke"]
 		: ["bun", "run", "--cwd", "apps/web", "test:browser-smoke:hosted"];
@@ -230,6 +245,7 @@ async function main() {
 
 	for (const step of definition.steps({
 		slug,
+		personaPrepareEnv,
 		sandboxEnv,
 		browserSmokeCommand,
 		browserSmokeEnv,
