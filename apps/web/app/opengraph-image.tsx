@@ -65,8 +65,9 @@ export default function Image() {
 					<div
 						style={{
 							display: "flex",
-							fontSize: "18px",
+							fontSize: "16px",
 							opacity: 0.9,
+							maxWidth: "760px",
 						}}
 					>
 						{productConfig.metadataDescription}
@@ -83,7 +84,7 @@ export default function Image() {
 				<div
 					style={{
 						display: "flex",
-						fontSize: "58px",
+						fontSize: "54px",
 						lineHeight: 1.05,
 						fontWeight: "800",
 						maxWidth: "960px",
@@ -94,14 +95,14 @@ export default function Image() {
 				<div
 					style={{
 						display: "flex",
-						fontSize: "30px",
+						fontSize: "28px",
 						opacity: 0.95,
 						fontWeight: "500",
 						maxWidth: "900px",
 					}}
 				>
-					{productConfig.priceDisplay} one-time. Guided sprint to ship a live
-					v1.
+					{productConfig.priceDisplay} one-time. Contract-first packs plus
+					starter rails.
 				</div>
 			</div>
 		</div>,

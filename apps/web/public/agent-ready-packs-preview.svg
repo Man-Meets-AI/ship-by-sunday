@@ -1,61 +1,44 @@
 <svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="1600" height="900" fill="#F6F1E8"/>
-  <g opacity="0.45">
-    <path d="M0 120H1600" stroke="#E4D8C6"/>
-    <path d="M0 300H1600" stroke="#E4D8C6"/>
-    <path d="M0 480H1600" stroke="#E4D8C6"/>
-    <path d="M0 660H1600" stroke="#E4D8C6"/>
-    <path d="M220 0V900" stroke="#E4D8C6"/>
-    <path d="M620 0V900" stroke="#E4D8C6"/>
-    <path d="M980 0V900" stroke="#E4D8C6"/>
-    <path d="M1340 0V900" stroke="#E4D8C6"/>
-  </g>
-  <rect x="82" y="86" width="1436" height="728" rx="44" fill="#FFFDF8" stroke="#DCCDB8" stroke-width="3"/>
-  <text x="128" y="160" fill="#4A3521" font-family="ui-sans-serif, system-ui" font-size="28" font-weight="700">One product idea</text>
-  <text x="128" y="198" fill="#7A6047" font-family="ui-sans-serif, system-ui" font-size="22">compiled into durable Agent-Ready Packs</text>
+  <rect width="1600" height="900" fill="#F5F0E7"/>
+  <rect x="76" y="70" width="1448" height="760" rx="52" fill="#EDE5D8"/>
+  <rect x="116" y="108" width="1368" height="684" rx="40" fill="#FFFCF7" stroke="#DBCCB8" stroke-width="3"/>
 
-  <rect x="126" y="260" width="282" height="254" rx="30" fill="#FFF5E6" stroke="#E4B879" stroke-width="3"/>
-  <rect x="154" y="296" width="110" height="34" rx="17" fill="#FFD8A8"/>
-  <text x="177" y="319" fill="#6D4617" font-family="ui-sans-serif, system-ui" font-size="18" font-weight="700">INPUT</text>
-  <text x="154" y="378" fill="#3F2A15" font-family="ui-sans-serif, system-ui" font-size="34" font-weight="700">Product</text>
-  <text x="154" y="420" fill="#3F2A15" font-family="ui-sans-serif, system-ui" font-size="34" font-weight="700">Definition</text>
-  <text x="154" y="470" fill="#7A6047" font-family="ui-sans-serif, system-ui" font-size="20">User, problem, scope,</text>
-  <text x="154" y="500" fill="#7A6047" font-family="ui-sans-serif, system-ui" font-size="20">outcome, proof, constraints.</text>
-
-  <path d="M446 386H544" stroke="#D28743" stroke-width="10" stroke-linecap="round"/>
-  <path d="M532 352L582 386L532 420" fill="none" stroke="#D28743" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-
-  <g>
-    <rect x="588" y="220" width="264" height="132" rx="28" fill="#EEF6FF" stroke="#78A8E0" stroke-width="3"/>
-    <text x="626" y="272" fill="#1C3D62" font-family="ui-sans-serif, system-ui" font-size="18" font-weight="700">DESIGN PACK</text>
-    <text x="626" y="318" fill="#38597D" font-family="ui-sans-serif, system-ui" font-size="20">Direction, checklist, plans.</text>
-  </g>
-  <g>
-    <rect x="888" y="220" width="264" height="132" rx="28" fill="#EEFBEF" stroke="#82BF8A" stroke-width="3"/>
-    <text x="926" y="272" fill="#1C5422" font-family="ui-sans-serif, system-ui" font-size="18" font-weight="700">MARKETING PACK</text>
-    <text x="926" y="318" fill="#36643B" font-family="ui-sans-serif, system-ui" font-size="20">Claims, proof, launch copy.</text>
-  </g>
-  <g>
-    <rect x="588" y="386" width="264" height="132" rx="28" fill="#FFF2F5" stroke="#DB88A0" stroke-width="3"/>
-    <text x="626" y="438" fill="#73293D" font-family="ui-sans-serif, system-ui" font-size="18" font-weight="700">BUILD PACK</text>
-    <text x="626" y="484" fill="#8A4155" font-family="ui-sans-serif, system-ui" font-size="20">Milestones, validation, handoff.</text>
-  </g>
-  <g>
-    <rect x="888" y="386" width="264" height="132" rx="28" fill="#FFF8E8" stroke="#DDBB5E" stroke-width="3"/>
-    <text x="926" y="438" fill="#715616" font-family="ui-sans-serif, system-ui" font-size="18" font-weight="700">PROMPT PACK</text>
-    <text x="926" y="484" fill="#8D7336" font-family="ui-sans-serif, system-ui" font-size="20">Marketing, build, QA, deploy.</text>
+  <g opacity="0.34">
+    <path d="M116 232H1484" stroke="#E7DBCB"/>
+    <path d="M116 452H1484" stroke="#E7DBCB"/>
+    <path d="M116 672H1484" stroke="#E7DBCB"/>
   </g>
 
-  <path d="M1188 386H1282" stroke="#4A3521" stroke-width="10" stroke-linecap="round"/>
-  <path d="M1268 352L1318 386L1268 420" fill="none" stroke="#4A3521" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="180" y="168" width="1240" height="172" rx="42" fill="#FFF5E8" stroke="#E5BA7C" stroke-width="4"/>
+  <rect x="232" y="214" width="176" height="40" rx="20" fill="#FCE0B8"/>
+  <text x="274" y="240" fill="#74491C" font-family="ui-sans-serif, system-ui" font-size="18" font-weight="700">SOURCE</text>
+  <text x="232" y="300" fill="#3C2817" font-family="ui-sans-serif, system-ui" font-size="62" font-weight="700">Product Definition</text>
+  <text x="232" y="334" fill="#81664B" font-family="ui-sans-serif, system-ui" font-size="26">One shared source of truth for the whole build.</text>
 
-  <rect x="1328" y="258" width="190" height="256" rx="32" fill="#2E241C"/>
-  <rect x="1358" y="292" width="90" height="30" rx="15" fill="#7FE0C6"/>
-  <text x="1382" y="312" fill="#12362D" font-family="ui-sans-serif, system-ui" font-size="16" font-weight="700">FINAL</text>
-  <text x="1358" y="382" fill="#FFF8EE" font-family="ui-sans-serif, system-ui" font-size="30" font-weight="700">Starter</text>
-  <text x="1358" y="420" fill="#FFF8EE" font-family="ui-sans-serif, system-ui" font-size="30" font-weight="700">Snapshot</text>
-  <text x="1358" y="472" fill="#D6C8B7" font-family="ui-sans-serif, system-ui" font-size="18">Review download with</text>
-  <text x="1358" y="500" fill="#D6C8B7" font-family="ui-sans-serif, system-ui" font-size="18">packs and project context.</text>
+  <path d="M800 372V436" stroke="#C57C30" stroke-width="14" stroke-linecap="round"/>
+  <path d="M760 420L800 460L840 420" fill="none" stroke="#C57C30" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
 
-  <text x="128" y="670" fill="#6C533A" font-family="ui-sans-serif, system-ui" font-size="22">Stable facts in. Reusable packs out. One handoff to review before execution.</text>
+  <rect x="184" y="484" width="512" height="152" rx="34" fill="#EEF6FF" stroke="#7BA6DE" stroke-width="4"/>
+  <rect x="236" y="526" width="148" height="36" rx="18" fill="#D7E8FF"/>
+  <text x="272" y="550" fill="#26496F" font-family="ui-sans-serif, system-ui" font-size="16" font-weight="700">DESIGN PACK</text>
+  <text x="236" y="604" fill="#24476D" font-family="ui-sans-serif, system-ui" font-size="38" font-weight="700">Direction + interface rules</text>
+
+  <rect x="904" y="484" width="512" height="152" rx="34" fill="#EEFBEF" stroke="#85C18E" stroke-width="4"/>
+  <rect x="956" y="526" width="182" height="36" rx="18" fill="#D9F0DD"/>
+  <text x="994" y="550" fill="#2A6031" font-family="ui-sans-serif, system-ui" font-size="16" font-weight="700">MARKETING PACK</text>
+  <text x="956" y="604" fill="#2E6435" font-family="ui-sans-serif, system-ui" font-size="38" font-weight="700">Claims, proof, and copy</text>
+
+  <rect x="184" y="660" width="512" height="152" rx="34" fill="#FFF1F4" stroke="#DB8BA2" stroke-width="4"/>
+  <rect x="236" y="702" width="138" height="36" rx="18" fill="#F6D7E0"/>
+  <text x="270" y="726" fill="#7D3348" font-family="ui-sans-serif, system-ui" font-size="16" font-weight="700">BUILD PACK</text>
+  <text x="236" y="780" fill="#82384D" font-family="ui-sans-serif, system-ui" font-size="38" font-weight="700">Plan, validate, hand off</text>
+
+  <rect x="904" y="660" width="512" height="152" rx="34" fill="#FFF8E8" stroke="#DEBC63" stroke-width="4"/>
+  <rect x="956" y="702" width="150" height="36" rx="18" fill="#F8E8BC"/>
+  <text x="994" y="726" fill="#7B641E" font-family="ui-sans-serif, system-ui" font-size="16" font-weight="700">PROMPT PACK</text>
+  <text x="956" y="780" fill="#816A2A" font-family="ui-sans-serif, system-ui" font-size="38" font-weight="700">Reuse across every tool</text>
+
+  <rect x="526" y="842" width="548" height="92" rx="30" fill="#2C221B"/>
+  <text x="582" y="882" fill="#7FE0C6" font-family="ui-sans-serif, system-ui" font-size="22" font-weight="700">FINAL HANDOFF</text>
+  <text x="582" y="916" fill="#FFF7ED" font-family="ui-sans-serif, system-ui" font-size="28">Starter Snapshot before execution.</text>
 </svg>

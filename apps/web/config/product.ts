@@ -30,6 +30,7 @@ export const routeConfig = {
 	marketing: "/marketing",
 	buildPlan: "/build-plan",
 	review: "/review",
+	execute: "/execute",
 	docs: "/docs",
 	mission: "/mission",
 	artifacts: "/artifacts",
@@ -38,6 +39,7 @@ export const routeConfig = {
 	signUp: "/sign-up",
 	checkoutSuccess: "/checkout/success",
 	checkoutCancel: "/checkout/cancel",
+	systemHash: "#system",
 	pricingHash: "#pricing",
 } as const;
 
@@ -45,6 +47,7 @@ export const homePageSectionOrder = [
 	"hero",
 	"sprintPath",
 	"whatsInside",
+	"starterSystem",
 	"durability",
 	"socialProof",
 	"faq",
@@ -74,6 +77,7 @@ export const starterHomePageConfig = {
 		hero: true,
 		sprintPath: true,
 		whatsInside: true,
+		starterSystem: true,
 		durability: true,
 		socialProof: true,
 		faq: true,
@@ -94,9 +98,9 @@ export const starterConfig = {
 	brand: {
 		name: "Ship by Sunday",
 		shortMark: "MMAI",
-		promise: "Turn one product idea into agent-ready packs",
+		promise: "Ship a real, durable product by Sunday",
 		metadataDescription:
-			"Ship by Sunday is an OpenAI-derived system that turns one product idea into Agent-Ready Packs for design, marketing, and build execution, then generates a Starter Snapshot.",
+			"Ship by Sunday helps you ship a real, durable product by Sunday with contract-first docs packs, an Agent-Ready Starter System, and support built to keep shipping on Monday.",
 		images: {
 			founderProof: assetPaths.founderProof,
 			heroPreview: assetPaths.heroPreview,
@@ -114,7 +118,7 @@ export const starterConfig = {
 	},
 	marketing: {
 		docsLabel: "Docs",
-		loginLabel: "Log in",
+		loginLabel: "Sign in",
 		primaryCtaLabel: "Get access",
 		previewImageAlt: "Ship by Sunday system preview",
 	},

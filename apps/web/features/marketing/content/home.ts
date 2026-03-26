@@ -1,4 +1,4 @@
-import { productConfig } from "@/config/product";
+import { productConfig, routeConfig } from "@/config/product";
 import {
 	marketingDisplayConfig,
 	workspaceDisplayConfig,
@@ -9,44 +9,35 @@ const bonusName = productConfig.bonusName;
 
 export const homePageContent = {
 	assets: {
-		heroPreviewImage: productConfig.images.heroPreview,
 		socialProofImage: productConfig.images.founderProof,
 	},
 	hero: {
 		docsLabel: marketingDisplayConfig.docsLabel,
 		loginLabel: marketingDisplayConfig.loginLabel,
-		headlineLead: "Turn one product idea",
-		headlineTailPrefix: "into ",
-		headlineTailHover: "Agent-Ready Packs",
-		body: `${productName} is an OpenAI-derived, OpenAI-aligned system that turns one product idea into Agent-Ready Packs for design, marketing, and build execution, then generates a Starter Snapshot.`,
-		outcomesHeading: "What you actually get",
-		outcomes: [
-			"A Design Pack for UI direction and constraints",
-			"A Marketing Pack for positioning and launch messaging",
-			"A Build Pack for milestones, validation, and handoff",
-			"A Prompt Pack for marketing, implementation, QA, and deploy",
-			"A Starter Snapshot review download",
-		],
+		headlineLead: "Ship a real product",
+		headlineTailPrefix: "",
+		headlineTailHover: "by Sunday",
+		body: `${productName} gives you one serious system for locking the product truth, compiling contract-first docs packs, and shipping a real, durable product by Sunday without losing the repo on Monday.`,
 		primaryCta: marketingDisplayConfig.primaryCtaLabel,
+		secondaryCta: {
+			label: "See the system",
+			href: routeConfig.systemHash,
+		},
 		eyebrow:
-			"One-time payment. Lifetime access. Start the product intake immediately after checkout.",
-		previewImageAlt: marketingDisplayConfig.previewImageAlt,
+			"One-time payment. Lifetime access. Start the product intake immediately after checkout so the weekend starts with the real product constraints, not a blank chat.",
 	},
 	sprintPathSection: {
 		label: "System",
-		titlePrefix: "Agents need ",
-		titleHighlight: "durable context.",
+		titlePrefix: "Most AI builds ",
+		titleHighlight: "start with prompts.",
 		intro:
-			"Most builders do not stall because the model cannot code. They stall because product scope, design direction, marketing claims, and build decisions live in scattered tabs that go stale fast.",
+			"The model is not the part that breaks first. The context is. Weekend AI builds drift because the product truth, scope, design direction, and launch claims live in scattered chats that go stale fast.",
 		supportingPoints: [
-			"Ship by Sunday captures the core facts once, then compiles domain-specific packs for design, marketing, build execution, and prompting.",
-			"The packs are file-based and agent-readable, so you can reuse the same project context across tools instead of rewriting it every session.",
-			"The final Starter Snapshot gives you one review download to inspect before you hand the work to an agent or teammate.",
+			"Ship by Sunday captures the product truth first, then compiles contract-first docs packs for design, marketing, build execution, and prompting.",
+			"The packs are file-based and agent-readable, so each tool works from the same scope, constraints, and claims instead of a stale chat summary.",
+			"The same contract-first path feeds the starter system, so the repo, the docs, and the execution path stay aligned instead of drifting apart.",
 		],
-		valueFrame:
-			"This is a shipping system for builders using agents. The output is durable execution context, not more scattered notes and one-off prompts.",
-		imageLightSrc: "/agent-ready-packs-stack.svg",
-		imageDarkSrc: "/agent-ready-packs-stack-dark.svg",
+		valueFrame: "Most starters give you code. This gives you rails.",
 		imageAlt:
 			"Diagram showing a product definition turning into Design, Marketing, Build, and Prompt Packs plus a final Starter Snapshot",
 	},
@@ -65,11 +56,6 @@ export const homePageContent = {
 		},
 		stats: [
 			{
-				value: "10+",
-				label: "Years in product",
-				description: "From design to engineering",
-			},
-			{
 				value: "$73M",
 				label: "GMV scaled",
 				description: "Delivery Dudes to a $23M acquisition",
@@ -78,23 +64,6 @@ export const homePageContent = {
 				value: "100K",
 				label: "Users in week one",
 				description: "GPTs for Devs launch",
-			},
-			{
-				value: "110+",
-				label: "Students taught",
-				description: "Through Vibe with AI",
-			},
-		],
-		reachStats: [
-			{
-				value: "8+",
-				label: "Years on YouTube",
-				description: "Teaching product and AI building",
-			},
-			{
-				value: "100s",
-				label: "Builders coached",
-				description: "Across paid sessions and product work",
 			},
 		],
 	},
@@ -118,13 +87,9 @@ export const homePageContent = {
 				answer: `It includes walkthroughs, but ${productName} is not a course wrapper. It is a guided system that captures the right facts, compiles the packs, and helps you ship with better context.`,
 			},
 			{
-				question: "What if I already know a lot of this?",
-				answer: `Then the value is not more theory. The value is reusable context. ${productName} gives you one durable source of truth, domain-specific packs, and a tighter path from idea to execution.`,
-			},
-			{
 				question: "What if I buy this and still do not finish?",
 				answer:
-					"The system is built to force clarity before code. If you complete the Product stage within 14 days and still do not leave with a clearer product definition and tighter v1 scope, email us and we will refund you.",
+					"The guarantee is about clarity, not a promise that we ship the product for you. If you complete the Product stage within 14 days and still do not leave with a clearer product definition and tighter v1 scope, email us and we will refund you.",
 			},
 			{
 				question: "What kind of app is a good fit for this?",
@@ -132,95 +97,112 @@ export const homePageContent = {
 					"Scoped web apps, MVPs, narrow tools, and practical products are the best fit. It is not for giant multi-system startup ideas.",
 			},
 			{
-				question: "How long do I get access?",
-				answer: "Lifetime access. One payment, no subscription.",
-			},
-			{
 				question: "Do I need product experience?",
 				answer: `No. But if product judgment feels like your weak spot, ${bonusName} is included as a bonus.`,
-			},
-			{
-				question: "Do I need to be good at design?",
-				answer:
-					"No. You need enough design direction to make a usable, coherent v1. The Design Pack is there to give you that direction without pretending you need to become a professional designer first.",
-			},
-			{
-				question: "Why does the workspace matter?",
-				answer: `Because scattered context kills momentum. ${productName} keeps product facts, pack generation, and review in one place so you are not juggling random tabs and half-decisions.`,
 			},
 			{
 				question: "What are Agent-Ready Packs?",
 				answer:
 					"They are file-based packs for design, marketing, build execution, and prompting. Each pack gives an agent durable context in one domain instead of forcing you to restate the whole project every time.",
 			},
-			{
-				question: "What is the Prompt Pack?",
-				answer:
-					"It is the set of ready-to-run prompts for marketing, implementation, QA, and deploy. You can paste them directly into your agent workflow instead of building that prompt stack from scratch.",
-			},
-			{
-				question: "What is the Starter Snapshot?",
-				answer:
-					"It is the final review download. You get the compiled pack tree and the generated project snapshot in one bundle you can inspect, download, and hand off.",
-			},
-			{
-				question: "What do the walkthroughs actually show?",
-				answer:
-					"They show the full pack system in action on a real build, so you can see how the intake, pack generation, and execution flow work together from start to finish.",
-			},
-			{
-				question: "Do I have to use the same stack as the example build?",
-				answer:
-					"No. The example build shows the process in action. You can apply the same system to the stack that fits your app.",
-			},
 		],
 	},
 	whatsInsideSection: {
-		label: "What's inside",
-		title: "One intake, four packs, and a final Starter Snapshot.",
+		label: "By Sunday",
+		title:
+			"By Sunday, you leave with the product truth, the agent packs, and the starter path.",
 		intro:
-			"The system captures your product facts once, compiles the packs, and gives you a clean review download instead of another pile of disconnected notes.",
+			"Enough clarity to build. Enough structure to hand off. No vague prompts, no half-decisions.",
 		pillars: [
 			{
-				title: "One canonical product definition",
-				highlightBefore: "Capture ",
-				highlight: "the core facts once",
+				title: "The product truth",
+				highlightBefore: "Lock ",
+				highlight: "the right user, problem, scope, and promise",
 				highlightAfter:
-					" so your product summary, user, problem, scope, and outcome stop drifting across docs, prompts, and half-finished plans.",
+					" before code, so the build starts from something real.",
 				supporting:
-					"The packs compile from this shared source of truth instead of relying on scattered notes.",
-				imagePlaceholder: "/placeholder-workshop.svg",
-				imageAlt: "Product definition intake",
+					"This is the clarity layer the rest of the weekend depends on.",
 			},
 			{
-				title: "Four Agent-Ready Packs",
-				highlightBefore: "Compile ",
+				title: "The packs",
+				highlightBefore: "Leave with ",
 				highlight: "Design, Marketing, Build, and Prompt Packs",
 				highlightAfter:
-					" from the same product definition so each domain gets the context, constraints, and next actions it actually needs.",
+					" that turn the same product truth into usable instructions.",
 				supporting:
-					"Each pack is file-based, domain-specific, and ready to hand to an agent or teammate.",
-				imagePlaceholder: "/placeholder-workspace.svg",
-				imageAlt: "Agent-ready packs overview",
+					"Each pack carries the context, constraints, and next actions that domain needs.",
 			},
 			{
-				title: "Starter Snapshot review download",
-				highlightBefore: "Finish with a ",
-				highlight: "Starter Snapshot",
+				title: "The starter path",
+				highlightBefore: "Review the ",
+				highlight: "Starter Snapshot and starter system path",
 				highlightAfter:
-					" that bundles the generated pack tree and project snapshot into one reviewable handoff you can inspect before execution.",
+					" before execution, so you can verify the repo before handoff.",
 				supporting:
-					"Walkthroughs and the PM bonus help you use the system well, but the deliverable is the compiled handoff itself.",
-				imagePlaceholder: "/placeholder-template.svg",
-				imageAlt: "Starter Snapshot download preview",
+					"This is a concrete build system, not random prompts and a hope-based plan.",
 			},
 		],
 	},
+	starterSystemSection: {
+		label: "Agent-Ready Starter System",
+		title: "More than a starter. More like an agent-ready operating system.",
+		intro:
+			"The docs packs tell the agents what to do. The starter gives them the right place to do it. It is shaped around your packet output, wired for real product rails, and built to keep shipping after Sunday.",
+		cards: [
+			{
+				title: "Configurable product rails",
+				eyebrow: "Packet-aligned starter",
+				highlightBefore: "Start from a ",
+				highlight: "starter wired to your packet truth",
+				highlightAfter:
+					" instead of a dead template you have to reinterpret every session.",
+				description:
+					"Auth, billing, docs, protected workspace, and module controls are already part of the system, so the repo starts with real product shape instead of placeholder scaffolding.",
+			},
+			{
+				title: "Agent-Ready QA Team",
+				eyebrow: "Operational leverage",
+				highlightBefore: "Ship with ",
+				highlight: "QA prompts, smoke paths, and Telegram incident alerts",
+				highlightAfter:
+					" already living in the repo, not bolted on after something breaks.",
+				description:
+					"The starter helps you verify the buyer flow, protected routes, and production behavior before and after launch, so shipping Sunday does not mean guessing on Monday.",
+			},
+			{
+				title: "Agent-Trained Provider Experts",
+				eyebrow: "Safer agent changes",
+				highlightBefore: "Lean on ",
+				highlight:
+					"provider-specific guidance across Clerk, Convex, Stripe, Next.js, React, and Vercel",
+				highlightAfter:
+					" when the agents need to change the codebase under real product constraints.",
+				description:
+					"Clerk, Convex, Stripe, Next.js, React, and Vercel guidance already lives in the repo, alongside agent-readable docs and control seams that make changes safer than blind file surgery.",
+			},
+		],
+		supportLanesLabel: "Included support lanes",
+		supportLanesIntro:
+			"You also get the learning path that shows how to use the system well, without turning the offer into a pile of filler videos.",
+		supportLanes: [
+			"Fast Pass Walkthroughs",
+			"Guided Ship Path",
+			"Product Sense Fundamentals",
+		],
+		supportingProof:
+			"OpenAI-aligned best-practice research shows up inside the starter as supporting guidance, so the repo helps agents work with stronger defaults instead of replacing your product judgment.",
+		bonus: {
+			label: "Bonus included free",
+			title: bonusName,
+			description:
+				"If product judgment is the part you do not trust yet, the included bonus gives you the fundamentals without padding the core offer with filler.",
+		},
+	},
 	durabilitySection: {
 		label: "Durability",
-		title: "Agents will change. Your packs still work.",
+		title: "Ship on Sunday. Keep shipping on Monday.",
 		intro:
-			"The goal is not to win one prompt session. The goal is to keep the project context reusable as models, tools, and teammates change around you.",
+			"The goal is not a one-night demo. The goal is a product you can keep shaping as models, tools, and teammates change around you.",
 		items: [
 			{
 				title: "Stable facts first",
@@ -228,9 +210,9 @@ export const homePageContent = {
 					"The system compiles from one shared product definition, so new tools inherit the same user, problem, scope, and outcome constraints instead of starting from a blank chat.",
 			},
 			{
-				title: "File-based by design",
+				title: "Starter system, not dead template",
 				description:
-					"Each pack is real documentation, checklists, plans, and prompts you can reopen, diff, and hand to another agent later. The value survives beyond one session.",
+					"The repo stays configurable and aligned to the same contract, so the next change starts from product truth instead of random edits inside a stale starter.",
 			},
 			{
 				title: "One review handoff",
@@ -239,29 +221,31 @@ export const homePageContent = {
 			},
 		],
 		closing:
-			"When better models arrive, you rerun the system with better tools. You do not restart the project from zero.",
+			"When better models arrive next month, you move faster. You do not restart the project from zero.",
 	},
 	pricingSection: {
 		label: productName,
-		titleLead: "Turn one idea into",
-		titleAccent: "Agent-Ready Packs",
+		titleLead: "Ship a real product",
+		titleAccent: "by Sunday",
 		intro:
-			"One payment for the intake, the compilation system, the walkthroughs, and the final Starter Snapshot.",
+			"One payment for the contract-first sprint, the docs packs, the Agent-Ready Starter System, and the support that keeps you shipping after the weekend.",
 		priceDisplay: productConfig.priceDisplay,
-		eyebrow: "One-time payment. Lifetime access. No subscription.",
+		eyebrow: "One-time payment. Lifetime access.",
 		ctaTitle: "Get instant access",
 		trustLine: `After checkout, your access finishes syncing and you go straight into the ${workspaceDisplayConfig.homeNoun} to start the intake and compile your packs.`,
 		includes: [
-			"Guided intake and review workspace",
-			"Design Pack",
-			"Marketing Pack",
-			"Build Pack",
-			"Prompt Pack",
-			"Starter Snapshot download",
-			"Walkthroughs showing the full system in action",
-			`25-video ${bonusName} bonus`,
-			"Lifetime access",
+			"Guided product intake and review workspace",
+			"Design, Marketing, Build, and Prompt Packs",
+			"Agent-Ready Starter System",
+			"Fast Pass Walkthroughs",
+			"Guided Ship Path",
 		],
+		bonus: {
+			label: "Free bonus",
+			title: bonusName,
+			description:
+				"If product judgment is the weak spot, the bonus is included at no extra cost so you can tighten the product decisions underneath the build, not just the prompts around it.",
+		},
 		guarantee:
 			"Complete the Product stage within 14 days. If you do not leave with a clearer product definition and tighter v1 scope, email us and we will refund you.",
 	},
