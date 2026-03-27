@@ -16,15 +16,17 @@ export function PacketStartPage({
 			showSkillRail={false}
 			title="Start"
 		>
-			<div className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 pb-10 pt-4">
-				<PacketStartOverviewCard
-					nextStageId={
-						initialWorkspaceState.projectDefinition
-							? initialWorkspaceState.firstIncompleteStageId
-							: "product"
-					}
-				/>
-				<PacketStartWelcomeVideoCard />
+			<div className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-6 pb-20 pt-12">
+				<div className="space-y-16">
+					<PacketStartOverviewCard
+						nextStageId={
+							initialWorkspaceState.projectDefinition
+								? initialWorkspaceState.firstIncompleteStageId
+								: "product"
+						}
+					/>
+					<PacketStartWelcomeVideoCard />
+				</div>
 			</div>
 		</AppShell>
 	);

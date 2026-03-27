@@ -93,7 +93,6 @@ describe("PacketStartPage", () => {
 		expect(
 			screen.getByText("Build the folder before you build the app."),
 		).toBeTruthy();
-		expect(screen.getByText("Welcome video")).toBeTruthy();
 		expect(screen.getByTestId("packet-start-video-player").textContent).toBe(
 			"Welcome Video",
 		);

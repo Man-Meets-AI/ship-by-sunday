@@ -12,6 +12,8 @@ import {
 import type { PacketWorkspaceState } from "@/features/packet-flow/lib/packet-workspace-types";
 
 const unlockExecuteShipMock = vi.fn();
+const useConvexAuthMock = vi.fn();
+const useQueryMock = vi.fn();
 const redirectMock = vi.fn((href: string) => {
 	throw new Error(`NEXT_REDIRECT:${href}`);
 });
@@ -63,7 +65,9 @@ vi.mock("@/features/course/lesson/components/lesson-video-player", () => ({
 }));
 
 vi.mock("convex/react", () => ({
+	useConvexAuth: () => useConvexAuthMock(),
 	useMutation: () => unlockExecuteShipMock,
+	useQuery: (...args: unknown[]) => useQueryMock(...args),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -76,13 +80,16 @@ vi.mock("next/navigation", () => ({
 import { PacketReviewPage } from "@/features/packet-flow/components/packet-review-page";
 
 function createWorkspaceState(
-	factOverrides: Record<string, unknown> = {},
+	options: {
+		executeShipUnlockedAt?: number;
+		factOverrides?: Record<string, unknown>;
+	} = {},
 ): PacketWorkspaceState {
 	const baseFacts = createCompleteProjectDefinition().facts;
 	const facts = Object.fromEntries(
 		Object.entries({
 			...baseFacts,
-			...factOverrides,
+			...options.factOverrides,
 		}).filter(([, value]) => value !== undefined),
 	);
 	const projectDefinition = createCanonicalProjectDefinitionDraft({
@@ -94,6 +101,15 @@ function createWorkspaceState(
 
 	return {
 		projectDefinition,
+		workflowState: options.executeShipUnlockedAt
+			? {
+					clerkUserId: "user_123",
+					productKey: "ship-by-sunday",
+					executeShipUnlockedAt: options.executeShipUnlockedAt,
+					createdAt: options.executeShipUnlockedAt,
+					updatedAt: options.executeShipUnlockedAt,
+				}
+			: null,
 		firstIncompleteStageId: stageStatus.firstIncompleteStageId,
 		packetReadiness: stageStatus.packetReadiness,
 		stageStatuses: stageStatus.stageStatuses,
@@ -105,6 +121,13 @@ describe("PacketReviewPage", () => {
 		redirectMock.mockClear();
 		unlockExecuteShipMock.mockReset();
 		pushMock.mockReset();
+		useConvexAuthMock.mockReset();
+		useConvexAuthMock.mockReturnValue({
+			isAuthenticated: true,
+			isLoading: false,
+		});
+		useQueryMock.mockReset();
+		useQueryMock.mockReturnValue(undefined);
 	});
 
 	it("renders the starter snapshot as the primary outcome and expands execute after download", async () => {
@@ -116,7 +139,6 @@ describe("PacketReviewPage", () => {
 			screen.getByRole("heading", { name: "Review & Download" }),
 		).toBeTruthy();
 		const reviewVideo = screen.getByTestId("packet-review-video-player");
-		const checkpoint = screen.getByText("Starter Snapshot is ready.");
 		expect(screen.getByText("Starter Snapshot is ready.")).toBeTruthy();
 		expect(screen.getByText("Design Pack")).toBeTruthy();
 		expect(screen.getByText("Marketing Pack")).toBeTruthy();
@@ -128,17 +150,13 @@ describe("PacketReviewPage", () => {
 			),
 		).toBeTruthy();
 		expect(
-			screen.queryByRole("button", { name: "Unlock Execute / Ship" }),
-		).toBeNull();
+			screen
+				.getByRole("button", { name: "Download Snapshot to Unlock" })
+				.hasAttribute("disabled"),
+		).toBe(true);
 		expect(reviewVideo.textContent).toBe("Review Video");
-		expect(
-			reviewVideo.compareDocumentPosition(checkpoint) &
-				Node.DOCUMENT_POSITION_FOLLOWING,
-		).toBeTruthy();
 
-		await user.click(
-			screen.getByRole("link", { name: "Download Starter Snapshot" }),
-		);
+		await user.click(screen.getByRole("link", { name: "Download Snapshot" }));
 
 		expect(
 			screen
@@ -157,31 +175,54 @@ describe("PacketReviewPage", () => {
 		expect(unlockExecuteShipMock).toHaveBeenCalledWith({});
 		expect(pushMock).toHaveBeenCalledWith("/execute");
 
+		const downloadPackHrefs = screen
+			.getAllByRole("link", { name: "Download Pack" })
+			.map((link) => link.getAttribute("href"));
+		expect(downloadPackHrefs).toEqual(
+			expect.arrayContaining([
+				"/api/download/packet/design",
+				"/api/download/packet/marketing",
+				"/api/download/packet/build",
+			]),
+		);
 		expect(
 			screen
-				.getByRole("link", { name: "Download Design Pack" })
-				.getAttribute("href"),
-		).toBe("/api/download/packet/design");
-		expect(
-			screen
-				.getByRole("link", { name: "Download Marketing Pack" })
-				.getAttribute("href"),
-		).toBe("/api/download/packet/marketing");
-		expect(
-			screen
-				.getByRole("link", { name: "Download Build Pack" })
-				.getAttribute("href"),
-		).toBe("/api/download/packet/build");
-		expect(
-			screen
-				.getByRole("link", { name: "Download Starter Snapshot" })
+				.getByRole("link", { name: "Download Snapshot" })
 				.getAttribute("href"),
 		).toBe("/api/download/repo");
 	});
 
+	it("derives execute unlock from the live workspace query", () => {
+		useQueryMock.mockReturnValue(
+			createWorkspaceState({
+				executeShipUnlockedAt: 456,
+			}),
+		);
+		render(<PacketReviewPage initialWorkspaceState={createWorkspaceState()} />);
+
+		expect(
+			screen
+				.getByRole("link", { name: "Open Execute / Ship" })
+				.getAttribute("href"),
+		).toBe("/execute");
+		expect(
+			screen.queryByRole("button", { name: "Unlock Execute / Ship" }),
+		).toBeNull();
+		expect(
+			screen.getByText(
+				"Execute / Ship is unlocked as a separate optional next path.",
+			),
+		).toBeTruthy();
+		expect(
+			screen.getByText("You have full access to the post-download library."),
+		).toBeTruthy();
+	});
+
 	it("redirects back to the first incomplete stage when review is still locked", () => {
 		const lockedWorkspaceState = createWorkspaceState({
-			objective: undefined,
+			factOverrides: {
+				objective: undefined,
+			},
 		});
 
 		expect(() =>

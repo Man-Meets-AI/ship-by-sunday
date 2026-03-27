@@ -9,16 +9,6 @@ import {
 } from "@/features/packet-flow/lib/packet-stage-routes";
 import { cn } from "@/lib/utils";
 
-function getPacketStepTone(item: PacketStageProgressItem) {
-	if (item.state === "active") {
-		return "border-foreground bg-foreground text-background";
-	}
-	if (item.state === "complete") {
-		return "border-border/70 bg-muted/35 text-foreground";
-	}
-	return "border-border/60 bg-background text-muted-foreground hover:text-foreground";
-}
-
 export function PacketStageStepStrip({
 	stageId,
 	activeStepId,
@@ -31,7 +21,8 @@ export function PacketStageStepStrip({
 	const router = useRouter();
 
 	return (
-		<div className="space-y-4">
+		<div className="space-y-3">
+			{/* Mobile: native select */}
 			<div className="sm:hidden">
 				<label htmlFor={`${stageId}-packet-page-select`} className="sr-only">
 					Page
@@ -52,45 +43,45 @@ export function PacketStageStepStrip({
 				</select>
 			</div>
 
-			<div
-				className="hidden gap-2 sm:grid"
-				style={{
-					gridTemplateColumns: `repeat(${progressItems.length}, minmax(0, 1fr))`,
-				}}
-			>
-				{progressItems.map((item) => (
-					<Link
-						key={item.id}
-						href={getPacketStageStepHref(stageId, item.id)}
-						aria-current={item.state === "active" ? "page" : undefined}
-						className={cn(
-							"group relative min-w-0 rounded-2xl border px-4 py-4 transition-colors",
-							getPacketStepTone(item),
-						)}
-					>
-						<span
+			{/* Desktop: inline strip */}
+			<div className="hidden items-center gap-5 sm:flex">
+				{progressItems.map((item, index) => (
+					<div key={item.id} className="flex items-center gap-5">
+						<Link
+							href={getPacketStageStepHref(stageId, item.id)}
+							aria-current={item.state === "active" ? "page" : undefined}
 							className={cn(
-								"text-[0.72rem] tracking-[0.2em]",
+								"group flex items-center gap-2 text-[0.65rem] font-bold uppercase tracking-[0.15em] transition-all",
 								item.state === "active"
-									? "text-background/70"
-									: "text-muted-foreground",
+									? "text-foreground"
+									: "text-muted-foreground/40 hover:text-foreground/70",
 							)}
 						>
-							{String(item.stepNumber).padStart(2, "0")}
-						</span>
-						<p className="mt-2 text-base font-semibold leading-tight">
-							{item.label}
-						</p>
-						{item.stepNumber < progressItems.length ? (
 							<span
-								aria-hidden="true"
 								className={cn(
-									"absolute top-1/2 left-full hidden h-px w-2 -translate-y-1/2 sm:block",
-									item.state === "active" ? "bg-foreground" : "bg-border/60",
+									"flex size-5 items-center justify-center rounded-md border text-[0.6rem] transition-colors",
+									item.state === "active"
+										? "border-foreground bg-foreground text-background shadow-sm"
+										: item.state === "complete"
+											? "border-emerald-500/50 bg-emerald-500/10 text-emerald-600"
+											: "border-border bg-muted/30 text-muted-foreground/60 group-hover:border-foreground/30",
 								)}
-							/>
-						) : null}
-					</Link>
+							>
+								{item.state === "complete" ? "✓" : item.stepNumber}
+							</span>
+							<span
+								className={cn(
+									"underline-offset-4 group-hover:underline",
+									item.state === "active" ? "underline" : "",
+								)}
+							>
+								{item.label}
+							</span>
+						</Link>
+						{index < progressItems.length - 1 && (
+							<div className="h-px w-4 bg-border/40" />
+						)}
+					</div>
 				))}
 			</div>
 		</div>

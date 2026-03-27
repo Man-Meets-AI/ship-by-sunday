@@ -88,11 +88,9 @@ async function expectPacketStage(
 	);
 	await expect(page.getByText(route.stageLabel).first()).toBeVisible();
 	await expect(
-		page.getByText("Still to lock in").or(page.getByText("Section ready")),
+		page.getByText("Level XP").or(page.getByText("Mastery")),
 	).toBeVisible();
-	await expect(
-		page.getByRole("button", { name: "Save and continue" }),
-	).toBeVisible();
+	await expect(page.getByRole("button", { name: "Continue" })).toBeVisible();
 }
 
 test.describe("member with access", () => {
@@ -114,9 +112,7 @@ test.describe("member with access", () => {
 		await page.goto("/review");
 		await expect(page).toHaveURL(/\/review$/);
 		await expect(page.getByText("Review").first()).toBeVisible();
-		await expect(
-			page.getByRole("link", { name: "Download Starter Snapshot" }),
-		).toBeVisible();
+		await expect(page.getByRole("link", { name: "Download Snapshot" })).toBeVisible();
 
 		await page.goto("/settings");
 		await expect(page).toHaveURL(/\/settings$/);

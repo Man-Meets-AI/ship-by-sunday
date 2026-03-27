@@ -4,16 +4,20 @@ import Link from "next/link";
 import {
 	getPublicPackLabelForStage,
 	getPacketStageDefinition,
+	type PacketStageDefinition,
 	type PacketStageStatus,
 } from "@packet-compiler";
 import { Button } from "@/components/ui/button";
 import { packetFieldLabel } from "@/features/packet-flow/lib/packet-field-helpers";
+import { cn } from "@/lib/utils";
 
 export function PacketStageSidebar({
+	stage,
 	stageStatus,
 	downloadHref,
 	nextStageId,
 }: {
+	stage: PacketStageDefinition;
 	stageStatus: PacketStageStatus;
 	downloadHref?: string;
 	nextStageId?: "design" | "marketing" | "build-plan" | "review";
@@ -24,43 +28,116 @@ export function PacketStageSidebar({
 		stageStatus.stageId === "build-plan"
 			? `Download ${getPublicPackLabelForStage(stageStatus.stageId)}`
 			: "Download pack";
-	const stageLabel = getPacketStageDefinition(stageStatus.stageId).label;
-	const missingFieldLabels = stageStatus.missingFactKeys.map(packetFieldLabel);
+	const stageLabel = stage.label;
+	const missingKeys = new Set(stageStatus.missingFactKeys);
+
+	const totalFields = stage.steps.reduce(
+		(sum, step) => sum + (step.requiredFieldKeys ?? step.fieldKeys).length,
+		0,
+	);
+	const completedFields = totalFields - stageStatus.missingFactKeys.length;
+	const progressPercent =
+		totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0;
+	const missingByStep = stage.steps
+		.map((step) => ({
+			stepLabel: step.label,
+			missingLabels: (step.requiredFieldKeys ?? step.fieldKeys)
+				.filter((key) => missingKeys.has(key))
+				.map(packetFieldLabel),
+		}))
+		.filter((step) => step.missingLabels.length > 0);
 
 	return (
-		<aside className="space-y-4 border-t border-border/60 pt-5 xl:border-l xl:border-t-0 xl:pl-6 xl:pt-0">
+		<aside className="space-y-8">
+			{/* Progress HUD */}
 			<div className="space-y-2">
-				<p className="text-sm font-medium text-muted-foreground">
-					{stageStatus.isComplete ? "Section ready" : "Still to lock in"}
-				</p>
-				<h2 className="text-lg font-semibold tracking-tight">
+				<div className="flex items-center justify-between">
+					<p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">
+						{stageStatus.isComplete ? "Mastery" : "Level XP"}
+					</p>
+					<span className="tabular-nums text-[0.65rem] font-bold text-muted-foreground/80">
+						{completedFields} / {totalFields}
+					</span>
+				</div>
+				<div className="relative h-3 w-full overflow-hidden rounded-full bg-muted/40 ring-1 ring-border/50">
+					<div
+						className={cn(
+							"h-full transition-all duration-700 ease-out",
+							stageStatus.isComplete
+								? "bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.4)]"
+								: "bg-foreground shadow-[0_0_8px_rgba(0,0,0,0.1)]",
+						)}
+						style={{ width: `${progressPercent}%` }}
+					/>
+					{/* XP segments */}
+					<div className="absolute inset-0 flex justify-between px-0.5 opacity-20">
+						{Array.from({ length: Math.min(totalFields, 12) }).map((_, i) => (
+							<div key={i} className="h-full w-px bg-background" />
+						))}
+					</div>
+				</div>
+			</div>
+
+			{/* Status heading */}
+			<div className="space-y-1.5">
+				<h2 className="text-lg font-bold tracking-tight text-foreground">
 					{stageStatus.isComplete
-						? `${stageLabel} is ready.`
-						: `Close ${stageLabel}.`}
+						? `${stageLabel} Mastered.`
+						: `Current Quest: ${stageLabel}`}
 				</h2>
-				<p className="text-sm leading-6 text-muted-foreground">
+				<p className="text-xs leading-relaxed text-muted-foreground/80">
 					{stageStatus.isComplete
-						? "All required answers for this section are saved."
-						: `${missingFieldLabels.length} answer${missingFieldLabels.length === 1 ? "" : "s"} still need attention before this section is complete.`}
+						? "Achievement unlocked. You've captured all required artifacts for this stage."
+						: `Resolve ${stageStatus.missingFactKeys.length} objective${stageStatus.missingFactKeys.length === 1 ? "" : "s"} to claim your packet.`}
 				</p>
 			</div>
-			{missingFieldLabels.length ? (
-				<ul className="space-y-2 border-t border-border/60 pt-4 text-sm text-muted-foreground">
-					{missingFieldLabels.map((label) => (
-						<li key={label}>{label}</li>
-					))}
-				</ul>
+
+			{missingByStep.length > 0 ? (
+				<div className="space-y-5">
+					<p className="text-[0.6rem] font-bold uppercase tracking-[0.2em] text-muted-foreground/40">
+						Pending Objectives
+					</p>
+					<div className="space-y-4">
+						{missingByStep.map((step) => (
+							<div key={step.stepLabel} className="space-y-1.5">
+								<p className="text-[0.65rem] font-semibold text-foreground/70">
+									{step.stepLabel}
+								</p>
+								<ul className="space-y-1.5">
+									{step.missingLabels.map((label) => (
+										<li
+											key={label}
+											className="flex items-start gap-2 text-[0.7rem] leading-4 text-muted-foreground"
+										>
+											<span className="mt-1 size-1 shrink-0 rounded-full bg-primary/40" />
+											{label}
+										</li>
+									))}
+								</ul>
+							</div>
+						))}
+					</div>
+				</div>
 			) : null}
-			<div className="flex flex-col gap-3 border-t border-border/60 pt-4">
+
+			{/* Actions */}
+			<div className="flex flex-col gap-3 pt-4">
 				{downloadHref ? (
-					<Button asChild className="w-full">
+					<Button
+						asChild
+						className="h-11 w-full font-bold shadow-lg shadow-primary/10 transition-transform active:scale-[0.98]"
+					>
 						<Link href={downloadHref}>{downloadLabel}</Link>
 					</Button>
 				) : null}
 				{nextStageId ? (
-					<Button asChild variant="outline" className="w-full">
+					<Button
+						asChild
+						variant="outline"
+						className="h-11 w-full border-border/60 font-semibold transition-all hover:bg-muted/50"
+					>
 						<Link href={getPacketStageDefinition(nextStageId).route}>
-							Continue to {getPacketStageDefinition(nextStageId).label}
+							Enter Next Level: {getPacketStageDefinition(nextStageId).label}
 						</Link>
 					</Button>
 				) : null}

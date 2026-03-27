@@ -16,9 +16,9 @@ export function PacketStageNav({
 	stageStatuses: PacketStageStatus[];
 }) {
 	return (
-		<nav aria-label="Packet stages" className="border-b border-border/60 pb-2">
+		<nav aria-label="Packet stages">
 			<ol className="flex flex-wrap gap-x-6 gap-y-3">
-				{packetStageDefinitions.map((stage, index) => {
+				{packetStageDefinitions.map((stage) => {
 					const status = stageStatuses.find(
 						(stageStatus) => stageStatus.stageId === stage.id,
 					);
@@ -28,19 +28,16 @@ export function PacketStageNav({
 					const label = (
 						<span
 							className={cn(
-								"inline-flex items-baseline gap-3 border-b-2 pb-2 text-sm font-medium transition-colors",
+								"inline-flex items-baseline gap-2 border-b-2 pb-2 text-sm font-medium transition-colors",
 								isCurrent
 									? "border-foreground text-foreground"
 									: "border-transparent",
 								status?.isComplete && !isCurrent && "text-foreground/85",
 								!status?.isComplete && !isCurrent && "text-muted-foreground",
 								isStageOpen && !isCurrent && "hover:text-foreground",
-								!isStageOpen && "cursor-not-allowed text-muted-foreground/50",
+								!isStageOpen && "cursor-not-allowed text-muted-foreground/30",
 							)}
 						>
-							<span className="text-[0.68rem] tracking-[0.22em] text-muted-foreground">
-								{String(index + 1).padStart(2, "0")}
-							</span>
 							<span>{stage.label}</span>
 						</span>
 					);
