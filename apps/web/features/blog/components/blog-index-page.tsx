@@ -15,7 +15,7 @@ export function BlogIndexPage({ posts }: BlogIndexPageProps) {
 	const archivePosts = posts.filter((post) => post.href !== featuredPost?.href);
 
 	return (
-		<main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(222,214,200,0.32),transparent_46%),linear-gradient(180deg,rgba(255,255,255,1),rgba(246,244,239,0.82))] dark:bg-[radial-gradient(circle_at_top,rgba(120,120,120,0.16),transparent_44%),linear-gradient(180deg,rgba(12,12,14,1),rgba(10,10,11,0.94))]">
+		<main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(222,214,200,0.32),transparent_46%),linear-gradient(180deg,rgba(253,253,253,1),rgba(246,244,239,0.82))] dark:bg-[radial-gradient(circle_at_top,rgba(120,120,120,0.16),transparent_44%),linear-gradient(180deg,rgba(12,12,14,1),rgba(10,10,11,0.94))]">
 			<div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 				<div className="flex items-center justify-between gap-4">
 					<ProductBrand href={routeConfig.home} uppercase={false} />

@@ -28,7 +28,7 @@ export function BlogPostShell({
 	return (
 		<main
 			id="top"
-			className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(222,214,200,0.24),transparent_44%),linear-gradient(180deg,rgba(255,255,255,1),rgba(248,247,243,0.82))] dark:bg-[radial-gradient(circle_at_top,rgba(120,120,120,0.14),transparent_42%),linear-gradient(180deg,rgba(12,12,14,1),rgba(10,10,11,0.92))]"
+			className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(222,214,200,0.24),transparent_44%),linear-gradient(180deg,rgba(253,253,253,1),rgba(248,247,243,0.82))] dark:bg-[radial-gradient(circle_at_top,rgba(120,120,120,0.14),transparent_42%),linear-gradient(180deg,rgba(12,12,14,1),rgba(10,10,11,0.92))]"
 		>
 			<div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 				<div className="flex items-center justify-between gap-4">
