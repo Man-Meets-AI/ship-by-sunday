@@ -19,8 +19,6 @@ import {
 
 function ShellInner({
 	children,
-	title,
-	subtitle,
 	currentLessonId,
 	currentBlockId,
 	mission,
@@ -89,8 +87,6 @@ function ShellInner({
 						<Card className="gap-0 rounded-none border-x-0 border-t-0 py-0 shadow-none">
 							<AppShellHeader
 								viewportMode={viewportMode}
-								title={title}
-								subtitle={subtitle}
 								mission={mission}
 								blockStatuses={blockStatuses}
 								activeBlockId={activeBlockId}
@@ -111,8 +107,6 @@ function ShellInner({
 						<Card className="gap-0 overflow-hidden rounded-none py-0 shadow-sm">
 							<AppShellHeader
 								viewportMode={viewportMode}
-								title={title}
-								subtitle={subtitle}
 								mission={mission}
 								blockStatuses={blockStatuses}
 								activeBlockId={activeBlockId}

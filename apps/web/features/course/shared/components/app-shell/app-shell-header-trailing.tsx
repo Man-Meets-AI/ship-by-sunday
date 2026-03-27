@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import type { LessonLayoutMode } from "@/features/course/lesson/model/manifest";
 
 import { AppShellUserMenu } from "./app-shell-user-menu";
+import { AppShellThemeToggle } from "./app-shell-theme-toggle";
 import {
 	AppShellFocusViewIcon,
 	AppShellSplitViewIcon,
@@ -80,7 +81,8 @@ export function AppShellHeaderTrailing({
 				<span className="sr-only">Lessons completed: </span>
 				{mission ? `${mission.progressCount}/${mission.totalLessons}` : "--/--"}
 			</span>
-			<div className="pl-0.5">
+			<div className="flex items-center gap-0.5 pl-0.5 sm:gap-1">
+				<AppShellThemeToggle />
 				<AppShellUserMenu />
 			</div>
 		</div>

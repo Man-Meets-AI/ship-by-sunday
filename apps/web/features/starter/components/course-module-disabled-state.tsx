@@ -9,8 +9,6 @@ export function CourseModuleDisabledState() {
 			viewportMode="app"
 			showSkillRail={false}
 			enableMissionQuery={false}
-			title={workspaceDisplayConfig.homeLabel}
-			subtitle="Guided course module disabled"
 		>
 			<div className="mx-auto flex w-full max-w-3xl flex-1 items-center justify-center px-4 py-10">
 				<StarterModuleDisabledCard

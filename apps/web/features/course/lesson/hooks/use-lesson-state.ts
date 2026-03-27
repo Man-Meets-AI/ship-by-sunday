@@ -10,6 +10,7 @@ import type {
 	PersistedFieldValues,
 } from "@/features/course/lesson/model/registry";
 import type { PinnedArtifact } from "@/features/course/lesson/shells";
+import { useAutosave } from "@/features/shared/hooks/use-autosave";
 
 type UnlockedLessonState = {
 	accessStatus: "unlocked";
@@ -26,6 +27,38 @@ type LessonState = UnlockedLessonState | LockedLessonState | undefined;
 
 export type LessonSaveStatus = "idle" | "saved" | "saving" | "error";
 
+function fieldValueMatches(
+	left: PersistedFieldValue | undefined,
+	right: PersistedFieldValue | undefined,
+) {
+	return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function omitPendingFieldValue(
+	pendingFieldValues: PersistedFieldValues,
+	fieldId: string,
+) {
+	if (!(fieldId in pendingFieldValues)) {
+		return pendingFieldValues;
+	}
+
+	const { [fieldId]: _removedFieldValue, ...remainingPendingFieldValues } =
+		pendingFieldValues;
+	return remainingPendingFieldValues;
+}
+
+function acknowledgeSavedFieldValues(
+	pendingFieldValues: PersistedFieldValues,
+	savedFieldValues: PersistedFieldValues,
+) {
+	return Object.fromEntries(
+		Object.entries(pendingFieldValues).filter(
+			([fieldId, value]) =>
+				!fieldValueMatches(value, savedFieldValues[fieldId]),
+		),
+	) as PersistedFieldValues;
+}
+
 export function useLessonState({ lessonKey }: { lessonKey: string }) {
 	const { isAuthenticated, isLoading } = useConvexAuth();
 	const lessonState = useQuery(
@@ -35,76 +68,99 @@ export function useLessonState({ lessonKey }: { lessonKey: string }) {
 	const unlockedLessonState =
 		lessonState?.accessStatus === "unlocked" ? lessonState : null;
 	const markLessonViewed = useMutation(api.course.markLessonViewed);
-	const saveLessonDraft = useMutation(api.course.saveLessonDraft);
-	const [fieldValues, setFieldValues] = useState<PersistedFieldValues>({});
-	const [fieldValuesReady, setFieldValuesReady] = useState(false);
+	const saveLessonDraft = useMutation(
+		api.course.saveLessonDraft,
+	).withOptimisticUpdate((localStore, args) => {
+		const currentLessonState = localStore.getQuery(api.course.getLessonState, {
+			lessonKey: args.lessonKey,
+		});
+
+		if (!currentLessonState || currentLessonState.accessStatus !== "unlocked") {
+			return;
+		}
+
+		localStore.setQuery(
+			api.course.getLessonState,
+			{ lessonKey: args.lessonKey },
+			{
+				...currentLessonState,
+				fieldValues: args.fieldValues,
+				status:
+					currentLessonState.status === "completed"
+						? "completed"
+						: "in_progress",
+			},
+		);
+	});
+	const [pendingFieldValues, setPendingFieldValues] =
+		useState<PersistedFieldValues>({});
 	const [saveStatus, setSaveStatus] = useState<LessonSaveStatus>("idle");
-	const initializedForLessonKey = useRef<string | null>(null);
 	const lastMarkedLessonKey = useRef<string | null>(null);
-	const lastSavedSnapshot = useRef("");
+	const activeLessonKeyRef = useRef(lessonKey);
+	const pendingFieldValuesRef = useRef<PersistedFieldValues>({});
+
+	pendingFieldValuesRef.current = pendingFieldValues;
+
+	const persistedFieldValues = unlockedLessonState?.fieldValues ?? {};
+	const fieldValues = {
+		...persistedFieldValues,
+		...pendingFieldValues,
+	};
+	const fieldValuesReady = Boolean(unlockedLessonState);
 
 	useEffect(() => {
-		initializedForLessonKey.current = null;
-		lastSavedSnapshot.current = "";
-		setFieldValues({});
-		setFieldValuesReady(false);
+		activeLessonKeyRef.current = lessonKey;
+		setPendingFieldValues({});
 		setSaveStatus("idle");
 	}, [lessonKey]);
 
-	useEffect(() => {
-		if (!unlockedLessonState) {
-			setFieldValuesReady(false);
-			return;
-		}
+	const shouldAutosaveLessonDraft =
+		fieldValuesReady &&
+		Object.keys(pendingFieldValues).length > 0 &&
+		saveStatus === "idle";
 
-		if (initializedForLessonKey.current !== lessonKey) {
-			const nextValues = unlockedLessonState.fieldValues;
-			setFieldValues(nextValues);
-			initializedForLessonKey.current = lessonKey;
-			lastSavedSnapshot.current = JSON.stringify(nextValues);
-			setSaveStatus("idle");
-			setFieldValuesReady(true);
-			return;
-		}
+	useAutosave({
+		shouldAutosave: shouldAutosaveLessonDraft,
+		delayMs: timingConfig.lessonAutosaveDebounceMs,
+		onAutosave: () => {
+			if (!unlockedLessonState) {
+				return;
+			}
 
-		setFieldValuesReady(true);
-	}, [lessonKey, unlockedLessonState]);
+			const draftFieldValues = fieldValues;
+			const autosavedLessonKey = lessonKey;
 
-	useEffect(() => {
-		if (
-			!unlockedLessonState ||
-			!fieldValuesReady ||
-			initializedForLessonKey.current !== lessonKey
-		) {
-			return;
-		}
-
-		const snapshot = JSON.stringify(fieldValues);
-		if (snapshot === lastSavedSnapshot.current) {
-			return;
-		}
-
-		const timeout = window.setTimeout(() => {
 			setSaveStatus("saving");
-			void saveLessonDraft({ lessonKey, fieldValues }).then(
+			void saveLessonDraft({
+				lessonKey: autosavedLessonKey,
+				fieldValues: draftFieldValues,
+			}).then(
 				() => {
-					lastSavedSnapshot.current = JSON.stringify(fieldValues);
-					setSaveStatus("saved");
+					if (activeLessonKeyRef.current !== autosavedLessonKey) {
+						return;
+					}
+
+					const nextPendingFieldValues = acknowledgeSavedFieldValues(
+						pendingFieldValuesRef.current,
+						draftFieldValues,
+					);
+
+					pendingFieldValuesRef.current = nextPendingFieldValues;
+					setPendingFieldValues(nextPendingFieldValues);
+					setSaveStatus(
+						Object.keys(nextPendingFieldValues).length === 0 ? "saved" : "idle",
+					);
 				},
 				() => {
+					if (activeLessonKeyRef.current !== autosavedLessonKey) {
+						return;
+					}
+
 					setSaveStatus("error");
 				},
 			);
-		}, timingConfig.lessonAutosaveDebounceMs);
-
-		return () => window.clearTimeout(timeout);
-	}, [
-		fieldValues,
-		fieldValuesReady,
-		lessonKey,
-		unlockedLessonState,
-		saveLessonDraft,
-	]);
+		},
+	});
 
 	useEffect(() => {
 		if (!unlockedLessonState) {
@@ -125,10 +181,19 @@ export function useLessonState({ lessonKey }: { lessonKey: string }) {
 		fieldValuesReady,
 		saveStatus,
 		setFieldValue: (fieldId: string, value: unknown) => {
-			setFieldValues((current) => ({
-				...current,
-				[fieldId]: value as PersistedFieldValue,
-			}));
+			const nextFieldValue = value as PersistedFieldValue;
+
+			setPendingFieldValues((currentPendingFieldValues) =>
+				fieldValueMatches(persistedFieldValues[fieldId], nextFieldValue)
+					? omitPendingFieldValue(currentPendingFieldValues, fieldId)
+					: {
+							...currentPendingFieldValues,
+							[fieldId]: nextFieldValue,
+						},
+			);
+			setSaveStatus((currentSaveStatus) =>
+				currentSaveStatus === "saving" ? currentSaveStatus : "idle",
+			);
 		},
 		setSaveStatusError: () => {
 			setSaveStatus("error");
