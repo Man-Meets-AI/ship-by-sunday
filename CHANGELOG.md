@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-03-27
+
+### Changed
+
+- Reworked the protected packet workbench around optimistic autosave, a stronger step-progress strip, more explicit stage readiness feedback, and a cleaner Review checkpoint while fixing all four live download endpoints (`design`, `marketing`, `build`, and `starter snapshot`) back to healthy zip responses.
+- Moved lesson drafts onto the same Convex-backed pending-buffer autosave model, simplified the protected shell header chrome, and added an in-app theme toggle so the course and packet workspace now share the same lighter-weight shell behavior.
+- Refreshed the public visual system across the homepage, auth shell, blog frames, and recovery screens with the quieter neutral palette, cleaner spacing, and updated section layouts that now match the current Ship by Sunday presentation.
+
 ## 2026-03-26
 
 ### Changed
