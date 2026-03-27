@@ -32,3 +32,14 @@ Use original transcripts and planning docs only to salvage useful teaching beats
 - For major IA, lesson, or funnel work, create an ExecPlan before coding.
 - Explicitly separate fact / workflow / derived / ephemeral.
 - Call out contradictions instead of papering over them.
+
+## Convex-backed state
+
+- Convex-backed product state is the source of truth in `apps/web`.
+- Do not mirror `useQuery` results or server-loaded workspace state into React `useState` just to drive normal rendering.
+- Keep local React state only when the reason is clearly UX-only:
+  - editable draft buffer
+  - inline validation or save feedback
+  - optimistic mutation state
+  - client-only acknowledgement that Convex should not store
+- If local state would survive long enough to compete with Convex truth across refresh, route change, or save, remove it.

@@ -2,29 +2,41 @@ import { LessonVideoPlayer } from "@/features/course/lesson/components/lesson-vi
 import type { PacketPageMedia } from "@/features/packet-flow/lib/packet-stage-videos";
 
 export function PacketVideoCard({ content }: { content: PacketPageMedia }) {
+	if (content.kind === "video") {
+		return (
+			<section className="relative overflow-hidden rounded-2xl border border-border/40 shadow-xl ring-1 ring-black/5">
+				<div className="absolute right-4 top-4 z-10">
+					<span className="inline-flex items-center rounded-full bg-black/60 px-3 py-1 text-[0.6rem] font-bold tracking-[0.15em] text-white backdrop-blur-md ring-1 ring-white/20">
+						QUEST
+					</span>
+				</div>
+				<LessonVideoPlayer
+					video={content.video}
+					title={content.video.title ?? content.title}
+					className="aspect-video w-full border-0 bg-black"
+				/>
+			</section>
+		);
+	}
+
 	return (
-		<section className="space-y-4">
+		<section className="overflow-hidden rounded-2xl border border-border/40 bg-muted/20 p-6 shadow-lg ring-1 ring-black/5 space-y-5">
 			<div className="space-y-2">
-				<h2 className="max-w-xl text-xl font-semibold tracking-tight text-balance">
+				<p className="text-[0.6rem] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">
+					Mission Log
+				</p>
+				<h2 className="text-lg font-bold tracking-tight text-foreground">
 					{content.title}
 				</h2>
-				<p className="max-w-xl text-sm leading-6 text-muted-foreground">
+				<p className="text-[0.8rem] leading-6 text-muted-foreground/90">
 					{content.description}
 				</p>
 			</div>
-			<div>
-				{content.kind === "video" ? (
-					<LessonVideoPlayer
-						video={content.video}
-						title={content.video.title ?? content.title}
-						className="aspect-video w-full rounded-xl border-0 bg-black"
-					/>
-				) : (
-					<div className="flex min-h-40 items-center px-1 py-2 text-sm leading-6 text-muted-foreground">
-						{content.body}
-					</div>
-				)}
-			</div>
+			{content.body ? (
+				<div className="text-[0.75rem] italic leading-6 text-muted-foreground/70 border-t border-border/40 pt-4">
+					&ldquo;{content.body}&rdquo;
+				</div>
+			) : null}
 		</section>
 	);
 }

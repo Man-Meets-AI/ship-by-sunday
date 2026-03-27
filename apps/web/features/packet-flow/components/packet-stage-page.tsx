@@ -3,15 +3,16 @@
 import { useConvexAuth, useQuery } from "convex/react";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/features/course/shared/components/app-shell";
-import { api } from "@/convex/_generated/api";
 import type { PacketWorkspaceState } from "@/features/packet-flow/lib/packet-workspace-types";
+import { api } from "@/convex/_generated/api";
 import { getPacketStageDefinition, type PacketStageId } from "@packet-compiler";
 import type { RoutedPacketStageId } from "@/features/packet-flow/lib/packet-stage-routes";
 import { getPacketStagePageMedia } from "@/features/packet-flow/lib/packet-stage-videos";
-import { PacketStageProgressPanel } from "./progression/packet-stage-progress-panel";
+import { derivePacketStageProgressItems } from "@/features/packet-flow/lib/packet-stage-progress";
 import { PacketStageNav } from "./packet-stage-nav";
 import { PacketStageSidebar } from "./packet-stage-sidebar";
 import { PacketStageStepController } from "./packet-stage-step-controller";
+import { PacketStageStepStrip } from "./progression/packet-stage-step-strip";
 import { PacketVideoCard } from "./video/packet-video-card";
 
 const packetDownloadStageMap = {
@@ -68,6 +69,11 @@ export function PacketStagePage({
 		);
 	}
 	const stagePageMedia = getPacketStagePageMedia(stageId, stepId);
+	const progressItems = derivePacketStageProgressItems(
+		stage,
+		stageStatus,
+		stepId,
+	);
 	const downloadHref = getPacketDownloadHref(stageId, stageStatus.isComplete);
 	const nextStageId = stageStatus.isComplete
 		? nextStageMap[stageId]
@@ -79,26 +85,22 @@ export function PacketStagePage({
 			appScrollMode="page"
 			enableMissionQuery={false}
 			showSkillRail={false}
-			title={stage.label}
 		>
-			<div className="mx-auto flex w-full max-w-[1180px] flex-1 flex-col gap-6 px-4 pb-10 pt-2">
-				<PacketStageNav
-					currentStageId={stageId}
-					stageStatuses={workspaceState.stageStatuses}
-				/>
-				<div className="grid gap-x-8 gap-y-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
-					{stagePageMedia ? (
-						<div className="xl:col-start-2 xl:row-start-1">
-							<PacketVideoCard content={stagePageMedia} />
-						</div>
-					) : null}
-					<div className="space-y-8 xl:col-start-1 xl:row-span-2">
-						<PacketStageProgressPanel
-							stageId={stageId}
-							stage={stage}
-							stageStatus={stageStatus}
-							activeStepId={stepId}
-						/>
+			<div className="mx-auto flex w-full max-w-[1180px] flex-1 flex-col gap-6 px-4 pb-10 pt-4">
+				<div className="space-y-4">
+					<PacketStageNav
+						currentStageId={stageId}
+						stageStatuses={workspaceState.stageStatuses}
+					/>
+					<PacketStageStepStrip
+						stageId={stageId}
+						activeStepId={stepId}
+						progressItems={progressItems}
+					/>
+				</div>
+
+				<div className="grid gap-x-12 gap-y-8 xl:grid-cols-[minmax(0,1fr)_30rem] xl:gap-x-16">
+					<div className="space-y-6 pt-2">
 						<PacketStageStepController
 							stage={stage}
 							stageId={stageId}
@@ -107,13 +109,17 @@ export function PacketStagePage({
 							projectFacts={workspaceState.projectDefinition?.facts ?? {}}
 						/>
 					</div>
-					<div className="space-y-6 xl:col-start-2 xl:row-start-2">
+					<aside className="space-y-10">
+						{stagePageMedia ? (
+							<PacketVideoCard content={stagePageMedia} />
+						) : null}
 						<PacketStageSidebar
+							stage={stage}
 							stageStatus={stageStatus}
 							downloadHref={downloadHref}
 							nextStageId={nextStageId}
 						/>
-					</div>
+					</aside>
 				</div>
 			</div>
 		</AppShell>

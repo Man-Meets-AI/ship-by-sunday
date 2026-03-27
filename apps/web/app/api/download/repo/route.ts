@@ -4,7 +4,7 @@ import { getStarterSnapshotArchiveFileName } from "@packet-compiler";
 export const runtime = "nodejs";
 
 async function importPacketCompilerServer() {
-	return import(/* turbopackIgnore: true */ "@packet-compiler/server");
+	return import("@manmeetsai/packet-compiler/server");
 }
 
 export async function GET() {

@@ -10,7 +10,6 @@ import { api } from "@/convex/_generated/api";
 import { usePacketStageStepState } from "@/features/packet-flow/hooks/use-packet-stage-step-state";
 import {
 	getAdjacentPacketPageHrefs,
-	getPacketStageStepIndex,
 	type RoutedPacketStageId,
 } from "@/features/packet-flow/lib/packet-stage-routes";
 import { PacketStageStepCard } from "./packet-stage-step-card";
@@ -30,7 +29,6 @@ export function PacketStageStepController({
 	stepId,
 	projectFacts,
 }: PacketStageStepControllerProps) {
-	const currentStepIndex = getPacketStageStepIndex(stageId, stepId);
 	const { previousHref, nextHref } = getAdjacentPacketPageHrefs(
 		stageId,
 		stepId,
@@ -45,7 +43,6 @@ export function PacketStageStepController({
 		currentDraftValues,
 		goToPreviousStep,
 		handleSaveAndContinue,
-		handleSaveAndStay,
 		handleFieldChange,
 		isSaving,
 	} = usePacketStageStepState({
@@ -59,14 +56,12 @@ export function PacketStageStepController({
 		saveProjectDefinitionFacts,
 	});
 
-	if (!currentStep) {
-		return null;
-	}
-
 	return (
 		<PacketStageStepCard
 			currentStep={currentStep}
-			currentStepIndex={currentStepIndex}
+			currentStepIndex={stage.steps.findIndex(
+				(step) => step.id === currentStep.id,
+			)}
 			totalSteps={stage.steps.length}
 			canGoBack={Boolean(previousHref)}
 			draftValues={currentDraftValues}
@@ -76,7 +71,6 @@ export function PacketStageStepController({
 			onBack={goToPreviousStep}
 			onChange={handleFieldChange}
 			onSaveAndContinue={handleSaveAndContinue}
-			onSaveAndStay={handleSaveAndStay}
 		/>
 	);
 }

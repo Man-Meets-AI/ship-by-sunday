@@ -1,38 +1,12 @@
 import Link from "next/link";
 import {
-	BUILD_PACK_LABEL,
-	DESIGN_PACK_LABEL,
-	MARKETING_PACK_LABEL,
 	PROMPT_PACK_LABEL,
 	STARTER_SNAPSHOT_LABEL,
 	getPacketStageDefinition,
 	type PacketReadinessResult,
 } from "@packet-compiler";
 import { Button } from "@/components/ui/button";
-
-const reviewArtifacts = [
-	{
-		id: "design",
-		title: DESIGN_PACK_LABEL,
-		downloadHref: "/api/download/packet/design",
-		stageRoute: getPacketStageDefinition("design").route,
-		stageLabel: getPacketStageDefinition("design").label,
-	},
-	{
-		id: "marketing",
-		title: MARKETING_PACK_LABEL,
-		downloadHref: "/api/download/packet/marketing",
-		stageRoute: getPacketStageDefinition("marketing").route,
-		stageLabel: getPacketStageDefinition("marketing").label,
-	},
-	{
-		id: "build",
-		title: BUILD_PACK_LABEL,
-		downloadHref: "/api/download/packet/build",
-		stageRoute: getPacketStageDefinition("build-plan").route,
-		stageLabel: getPacketStageDefinition("build-plan").label,
-	},
-] as const;
+import { reviewArtifacts } from "../../lib/review-artifacts";
 
 export function PacketReviewArtifactGrid({
 	packetReadiness,
@@ -40,64 +14,76 @@ export function PacketReviewArtifactGrid({
 	packetReadiness: PacketReadinessResult;
 }) {
 	return (
-		<section className="space-y-4 border-t border-border/60 pt-6">
-			<div className="max-w-3xl space-y-2">
-				<p className="text-sm font-medium text-muted-foreground">
-					Supporting downloads
-				</p>
-				<h2 className="text-xl font-semibold tracking-tight">
-					Keep the pack links handy.
-				</h2>
-				<p className="text-sm leading-6 text-muted-foreground">
-					The Starter Snapshot is the primary outcome. These individual pack
-					links stay available when you need one on its own.
+		<section className="space-y-12">
+			<div className="max-w-2xl space-y-4">
+				<div className="space-y-1">
+					<p className="text-xs font-semibold tracking-wider uppercase text-muted-foreground/60">
+						Resources
+					</p>
+					<h2 className="text-2xl font-bold tracking-tight">
+						Supporting Downloads
+					</h2>
+				</div>
+				<p className="text-sm leading-relaxed text-muted-foreground">
+					The Starter Snapshot is the primary outcome, but individual pack links
+					stay available here for reference or standalone use.
 				</p>
 			</div>
-			<div className="space-y-4">
+
+			<div className="divide-y divide-border/40 border-t border-border/40">
 				{reviewArtifacts.map((artifact) => {
 					const readiness = packetReadiness[artifact.id];
 
 					return (
 						<div
 							key={artifact.id}
-							className="grid gap-4 border-t border-border/60 pt-4 lg:grid-cols-[minmax(0,1fr)_auto]"
+							className="group grid gap-6 py-8 lg:grid-cols-[1fr_auto] lg:items-center"
 						>
-							<div className="space-y-1">
-								<h3 className="text-base font-semibold">{artifact.title}</h3>
-								<p className="text-sm leading-6 text-muted-foreground">
+							<div className="space-y-2">
+								<h3 className="text-lg font-bold tracking-tight">
+									{artifact.title}
+								</h3>
+								<p className="max-w-md text-sm leading-relaxed text-muted-foreground">
 									{readiness.isReady
-										? "Ready to download."
-										: `${readiness.missingFactKeys.length} answer${readiness.missingFactKeys.length === 1 ? "" : "s"} still need to be locked before this pack is ready.`}
+										? "Full pack content is locked and ready for delivery."
+										: `${readiness.missingFactKeys.length} answer${readiness.missingFactKeys.length === 1 ? "" : "s"} still need attention in the ${artifact.stageLabel} stage.`}
 								</p>
 							</div>
-							<div className="flex flex-col gap-3 lg:min-w-56">
-								{readiness.isReady ? (
-									<Button asChild className="w-full">
-										<Link href={artifact.downloadHref}>
-											Download {artifact.title}
-										</Link>
+							<div className="flex flex-wrap gap-3 lg:min-w-[320px] lg:justify-end">
+								{readiness.isReady && (
+									<Button
+										asChild
+										variant="outline"
+										className="h-11 px-6 font-semibold"
+									>
+										<Link href={artifact.downloadHref}>Download Pack</Link>
 									</Button>
-								) : null}
-								<Button asChild variant="outline" className="w-full">
-									<Link href={artifact.stageRoute}>
-										Open {artifact.stageLabel}
-									</Link>
+								)}
+								<Button
+									asChild
+									variant="ghost"
+									className="h-11 px-6 font-semibold"
+								>
+									<Link href={artifact.stageRoute}>View Stage</Link>
 								</Button>
 							</div>
 						</div>
 					);
 				})}
-				<div className="grid gap-4 border-t border-border/60 pt-4 lg:grid-cols-[minmax(0,1fr)_auto]">
-					<div className="space-y-1">
-						<h3 className="text-base font-semibold">{PROMPT_PACK_LABEL}</h3>
-						<p className="text-sm leading-6 text-muted-foreground">
+
+				<div className="group grid gap-6 py-8 lg:grid-cols-[1fr_auto] lg:items-center">
+					<div className="space-y-2">
+						<h3 className="text-lg font-bold tracking-tight">
+							{PROMPT_PACK_LABEL}
+						</h3>
+						<p className="max-w-md text-sm leading-relaxed text-muted-foreground">
 							{packetReadiness.review.isReady
-								? `Included in the ${STARTER_SNAPSHOT_LABEL}.`
-								: `Included when the ${STARTER_SNAPSHOT_LABEL} is ready.`}
+								? `Included in your primary ${STARTER_SNAPSHOT_LABEL}.`
+								: `Will be generated once your ${STARTER_SNAPSHOT_LABEL} is ready.`}
 						</p>
 					</div>
-					<div className="flex flex-col gap-3 lg:min-w-56">
-						<Button asChild variant="outline" className="w-full">
+					<div className="flex flex-wrap gap-3 lg:min-w-[320px] lg:justify-end">
+						<Button asChild variant="ghost" className="h-11 px-6 font-semibold">
 							<Link href={getPacketStageDefinition("review").route}>
 								Open Review
 							</Link>
