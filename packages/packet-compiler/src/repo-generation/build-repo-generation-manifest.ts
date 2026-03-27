@@ -1,4 +1,12 @@
 import type { CanonicalProjectDefinition } from "../canonical-project-definition/project-definition";
+import {
+	customerSafeAppDirectoryPaths,
+	customerSafeAppFilePaths,
+	customerSafePacketCompilerDirectoryPaths,
+	customerSafePacketCompilerFilePaths,
+	customerSafeRepoExcludedPathSegments,
+	customerSafeRepoRootFilePaths,
+} from "./repo-download-source-contract";
 
 export type RepoGenerationManifest = {
 	excludedPathSegments: readonly string[];
@@ -18,22 +26,15 @@ export function buildRepoGenerationManifest(
 	projectDefinition: CanonicalProjectDefinition,
 ): RepoGenerationManifest {
 	return {
-		excludedPathSegments: [
-			".next",
-			".vercel",
-			"coverage",
-			"node_modules",
-			"scripts/vendor",
-			"test-results",
-			"tests",
+		excludedPathSegments: customerSafeRepoExcludedPathSegments,
+		includedDirectories: [
+			...customerSafeAppDirectoryPaths,
+			...customerSafePacketCompilerDirectoryPaths,
 		],
-		includedDirectories: ["apps/web", "packages/packet-compiler"],
 		includedFiles: [
-			".gitignore",
-			".oxfmtrc.json",
-			".oxlintrc.json",
-			"bun.lock",
-			"package.json",
+			...customerSafeRepoRootFilePaths,
+			...customerSafeAppFilePaths,
+			...customerSafePacketCompilerFilePaths,
 		],
 		repoName: slugify(projectDefinition.facts.product_name),
 	};

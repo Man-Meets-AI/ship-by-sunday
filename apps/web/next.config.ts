@@ -1,10 +1,7 @@
 import path from "node:path";
 import type { NextConfig } from "next";
 import nextra from "nextra";
-import {
-	packetDownloadTraceIncludes,
-	repoDownloadTraceIncludes,
-} from "./config/vercel-output-tracing";
+import { repoDownloadTraceIncludes } from "./config/vercel-output-tracing";
 
 const withNextra = nextra({
 	defaultShowCopyCode: true,
@@ -17,7 +14,6 @@ const nextConfig: NextConfig = {
 		"../../",
 	),
 	outputFileTracingIncludes: {
-		"/api/download/packet/[stage]": [...packetDownloadTraceIncludes],
 		"/api/download/repo": [...repoDownloadTraceIncludes],
 	},
 	turbopack: {

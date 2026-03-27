@@ -140,10 +140,19 @@ describe("PacketReviewPage", () => {
 		).toBeTruthy();
 		const reviewVideo = screen.getByTestId("packet-review-video-player");
 		expect(screen.getByText("Starter Snapshot is ready.")).toBeTruthy();
+		expect(
+			screen.getByRole("heading", {
+				name: "What's inside the Starter Snapshot",
+			}),
+		).toBeTruthy();
 		expect(screen.getByText("Design Pack")).toBeTruthy();
 		expect(screen.getByText("Marketing Pack")).toBeTruthy();
 		expect(screen.getByText("Build Pack")).toBeTruthy();
 		expect(screen.getByText("Prompt Pack")).toBeTruthy();
+		expect(screen.getByText("Included under docs/design/")).toBeTruthy();
+		expect(screen.getByText("Included under docs/marketing/")).toBeTruthy();
+		expect(screen.getByText("Included under docs/build/")).toBeTruthy();
+		expect(screen.getByText("Included under docs/prompts/")).toBeTruthy();
 		expect(
 			screen.getByText(
 				"Execute / Ship opens as a separate optional next path after this download.",
@@ -154,6 +163,7 @@ describe("PacketReviewPage", () => {
 				.getByRole("button", { name: "Download Snapshot to Unlock" })
 				.hasAttribute("disabled"),
 		).toBe(true);
+		expect(screen.queryByText("QUEST")).toBeNull();
 		expect(reviewVideo.textContent).toBe("Review Video");
 
 		await user.click(screen.getByRole("link", { name: "Download Snapshot" }));
@@ -175,16 +185,7 @@ describe("PacketReviewPage", () => {
 		expect(unlockExecuteShipMock).toHaveBeenCalledWith({});
 		expect(pushMock).toHaveBeenCalledWith("/execute");
 
-		const downloadPackHrefs = screen
-			.getAllByRole("link", { name: "Download Pack" })
-			.map((link) => link.getAttribute("href"));
-		expect(downloadPackHrefs).toEqual(
-			expect.arrayContaining([
-				"/api/download/packet/design",
-				"/api/download/packet/marketing",
-				"/api/download/packet/build",
-			]),
-		);
+		expect(screen.queryByRole("link", { name: "Download Pack" })).toBeNull();
 		expect(
 			screen
 				.getByRole("link", { name: "Download Snapshot" })

@@ -5,10 +5,29 @@ const localPort = Number.parseInt(process.env.PLAYWRIGHT_PORT ?? "3100", 10);
 const baseURL =
 	process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${localPort}`;
 const localServerHost = new URL(baseURL).hostname;
+const appsWebDirectory = __dirname;
 const shouldUseLocalServer = process.env.PLAYWRIGHT_USE_LOCAL_SERVER === "1";
 const shouldRunSandboxAuth = process.env.E2E_RUN_SANDBOX === "1";
 const localhostHosts = new Set(["127.0.0.1", "0.0.0.0", "localhost"]);
 const smokeTestConvexUrl = "https://smoke-test.convex.cloud";
+const localServerCommand = [
+	"bun",
+	"run",
+	"--cwd",
+	JSON.stringify(appsWebDirectory),
+	"build",
+	"&&",
+	"bun",
+	"run",
+	"--cwd",
+	JSON.stringify(appsWebDirectory),
+	"start",
+	"--",
+	"--hostname",
+	localServerHost,
+	"--port",
+	String(localPort),
+].join(" ");
 
 function getDefinedProcessEnv(): Record<string, string> {
 	return Object.fromEntries(
@@ -69,7 +88,7 @@ export default defineConfig({
 	],
 	webServer: shouldUseLocalServer
 		? {
-				command: `bunx next build && bunx next start --hostname ${localServerHost} --port ${localPort}`,
+				command: localServerCommand,
 				url: baseURL,
 				reuseExistingServer: !process.env.CI,
 				timeout: 900_000,

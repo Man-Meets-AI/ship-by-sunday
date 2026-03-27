@@ -133,9 +133,9 @@ export const starterConfig = {
 		settingsLabel: "Settings",
 	},
 	docs: {
-		badgeLabel: "Starter Docs",
+		badgeLabel: "Docs",
 		description:
-			"Customer-facing setup and troubleshooting docs for the starter, curated from the repo source docs and optimized for fast fixes.",
+			"Operational setup and troubleshooting docs for Ship by Sunday, covering local setup, auth, payments, the route map, and launch-critical recovery steps.",
 	},
 	blog: {
 		footerLabel: "Blog",
@@ -261,8 +261,6 @@ export const limitConfig = {
 
 export const courseResourceConfig = {
 	downloads: {
-		coreTemplatesPdf: "/downloads/ship-by-sunday-core-templates.pdf",
-		studentPacketPdf: "/downloads/ship-by-sunday-student-packet.pdf",
 		storyboardTemplatePdf: "/downloads/ship-by-sunday-storyboard-template.pdf",
 	},
 	figjam: {

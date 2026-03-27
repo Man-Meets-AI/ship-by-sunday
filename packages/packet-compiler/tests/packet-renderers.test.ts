@@ -10,26 +10,24 @@ describe("packet renderers", () => {
 
 		expect(renderedPaths).toEqual(
 			expect.arrayContaining([
-				"packet/README.md",
-				"packet/facts/project-definition.json",
-				"packet/design/AGENTS.md",
-				"packet/marketing/README.md",
-				"packet/build/docs/prompt.md",
-				"packet/prompts/deploy.md",
+				"docs/README.md",
+				"docs/facts/project-definition.json",
+				"docs/design/AGENTS.md",
+				"docs/marketing/README.md",
+				"docs/build/docs/prompt.md",
+				"docs/prompts/execplan-execution-loop.md",
 			]),
 		);
 
-		const readme = renderedFiles.find(
-			(file) => file.path === "packet/README.md",
-		);
+		const readme = renderedFiles.find((file) => file.path === "docs/README.md");
 		const marketingReadme = renderedFiles.find(
-			(file) => file.path === "packet/marketing/README.md",
+			(file) => file.path === "docs/marketing/README.md",
 		);
 		const buildPrompt = renderedFiles.find(
-			(file) => file.path === "packet/build/docs/prompt.md",
+			(file) => file.path === "docs/build/docs/prompt.md",
 		);
-		const deployPrompt = renderedFiles.find(
-			(file) => file.path === "packet/prompts/deploy.md",
+		const executionLoopPrompt = renderedFiles.find(
+			(file) => file.path === "docs/prompts/execplan-execution-loop.md",
 		);
 
 		expect(readme?.content).toContain("Agent-Ready Packs");
@@ -37,7 +35,6 @@ describe("packet renderers", () => {
 		expect(readme?.content).toContain("Prompt Pack");
 		expect(marketingReadme?.content).toContain("Marketing Pack");
 		expect(buildPrompt?.content).toContain("Build Pack");
-		expect(deployPrompt?.content).toContain("Prompt Pack");
-		expect(deployPrompt?.content).toContain("## Deploy Prompt");
+		expect(executionLoopPrompt?.content).toContain("# ExecPlan Execution Loop");
 	});
 });

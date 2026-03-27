@@ -206,6 +206,7 @@ describe("PacketStagePage", () => {
 			/>,
 		);
 
+		expect(screen.queryByText("QUEST")).toBeNull();
 		await user.selectOptions(screen.getByLabelText("Page"), "problem");
 
 		expect(pushMock).toHaveBeenCalledWith("/product/problem");

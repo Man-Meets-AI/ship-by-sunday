@@ -7,6 +7,8 @@ import {
 	buildRepoGenerationManifest,
 	type RepoGenerationManifest,
 } from "./build-repo-generation-manifest";
+import { renderGeneralizedStarterFiles } from "./render-generalized-starter-files";
+import { isExcludedSnapshotPath } from "./repo-download-source-contract";
 import { renderTemplateOverrides } from "./render-template-overrides";
 
 export type RepoSnapshotFile = {
@@ -16,18 +18,6 @@ export type RepoSnapshotFile = {
 
 function repoRootPath() {
 	return path.resolve(/* turbopackIgnore: true */ process.cwd(), "..", "..");
-}
-
-function shouldExcludePath(
-	relativePath: string,
-	manifest: RepoGenerationManifest,
-) {
-	return manifest.excludedPathSegments.some(
-		(segment) =>
-			relativePath === segment ||
-			relativePath.startsWith(`${segment}/`) ||
-			relativePath.includes(`/${segment}/`),
-	);
 }
 
 async function collectDirectoryFiles(
@@ -41,7 +31,10 @@ async function collectDirectoryFiles(
 			const absolutePath = path.join(directoryPath, entry.name);
 			const relativePath = path.relative(rootPath, absolutePath);
 
-			if (shouldExcludePath(relativePath, manifest)) {
+			if (
+				manifest.excludedPathSegments.length > 0 &&
+				isExcludedSnapshotPath(relativePath)
+			) {
 				return [];
 			}
 			// Repo snapshots should ignore local tooling symlinks instead of
@@ -85,7 +78,10 @@ export async function materializeRepoSnapshot(
 		),
 	);
 	const packetFiles = await renderFullPacketTree(projectDefinition);
-	const overrides = renderTemplateOverrides(projectDefinition);
+	const overrides = [
+		...renderTemplateOverrides(projectDefinition),
+		...renderGeneralizedStarterFiles(projectDefinition),
+	];
 	const overrideMap = new Map(overrides.map((file) => [file.path, file]));
 
 	return [

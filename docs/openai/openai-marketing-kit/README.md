@@ -1,6 +1,6 @@
 # OpenAI Marketing Repo Kit
 
-This folder turns official OpenAI guidance into a repo-ready operating system for marketing, growth, content, lifecycle, brand, performance, product marketing, and adjacent GTM work.
+This folder is the neutral baseline marketing pack derived from official OpenAI guidance for marketing, growth, content, lifecycle, brand, performance, product marketing, and adjacent GTM work.
 
 ## What is in here
 
@@ -18,7 +18,7 @@ This kit uses **official OpenAI sources only** and focuses on:
 3. GTM-adjacent OpenAI examples that marketing teams often need in the same repo (sales, inbound lead response, product Q&A, customer insights, internal research).
 4. Operational and governance guidance needed to turn prompts into repeatable team systems.
 
-This is a **practical best-effort inventory**, not a literal archive of every sentence on every OpenAI page. It is meant to be useful in a working repo.
+This is a **practical best-effort inventory**, not a literal archive of every sentence on every OpenAI page. It is the vanilla starting point, not the Ship by Sunday-specific marketing layer.
 
 ## Recommended repo structure
 
@@ -42,6 +42,7 @@ This is a **practical best-effort inventory**, not a literal archive of every se
 2. For any repeatable workflow, create an entry in `AGENTS.md` or split it into `/agents/*.md`.
 3. Use `PLANS.md` to prioritize by impact vs effort and define rollout and evaluation.
 4. For every production workflow, create a real implementation doc from `documentation.md`.
+5. For Ship by Sunday repo work, use `docs/ship-by-sunday/marketing-pack/` as the custom layer on top of this baseline.
 
 ## Source policy
 

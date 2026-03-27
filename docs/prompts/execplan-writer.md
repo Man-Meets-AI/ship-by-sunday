@@ -82,6 +82,11 @@ Set the repository-relative path for the plan file under `docs/codex/`, for exam
 ExecPlan requirements:
 - The plan must be fully self-contained. It must contain all knowledge and instructions needed for a novice to succeed.
 - The plan must be a living document. Seed it so it can be updated as implementation progresses.
+- The plan file must start with YAML front matter before the main `#` heading.
+- The YAML front matter must contain exactly these keys: `summary`, `read_when`, and `plan_status`.
+- `summary` must be one or two sentences summarizing the plan.
+- `read_when` must be one sentence telling an agent when to open the plan.
+- `plan_status` must be either `done` or `not_done`.
 - The plan must define every term of art in plain language or avoid the term.
 - The plan must optimize for a fresh coding agent that has no chat history and only the current working tree plus this single plan file.
 - The plan must produce demonstrably working behavior, not merely code changes.
@@ -102,6 +107,7 @@ ExecPlan requirements:
 - Keep the plan concrete, scoped, and free of filler.
 
 ExecPlan structure:
+- YAML front matter with `summary`, `read_when`, and `plan_status`
 - `# <Short action-oriented title>`
 - One short paragraph stating that this is a living execution plan.
 - One sentence referencing `docs/codex/PLANS.md` and stating that the ExecPlan must be maintained in accordance with it.
@@ -135,6 +141,7 @@ Section expectations:
 - `Interfaces and Dependencies`: be prescriptive about modules, services, libraries, interfaces, types, or signatures that must exist.
 
 Formatting rules:
+- When writing the ExecPlan directly to a Markdown file, include the YAML front matter at the very top before the first heading.
 - If you are returning the ExecPlan in chat, wrap the entire plan in one fenced `md` code block and do not nest other code fences inside it.
 - If you are writing the ExecPlan directly to a Markdown file, omit the outer triple backticks so the file contains only the plan.
 - Use standard Markdown headings with blank lines after headings.

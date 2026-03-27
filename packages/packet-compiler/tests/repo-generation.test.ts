@@ -1,4 +1,5 @@
 import { createCompleteProjectDefinition } from "../src";
+import { isExcludedSnapshotPath } from "../src/repo-generation/repo-download-source-contract";
 import {
 	buildRepoGenerationManifest,
 	materializeRepoSnapshot,
@@ -16,7 +17,19 @@ describe("repo generation", () => {
 			expect.arrayContaining([".next", ".vercel", "coverage", "test-results"]),
 		);
 		expect(manifest.includedDirectories).toEqual(
-			expect.arrayContaining(["apps/web", "packages/packet-compiler"]),
+			expect.arrayContaining([
+				"apps/web/app",
+				"apps/web/tests",
+				"packages/packet-compiler/src",
+				"packages/packet-compiler/tests",
+			]),
+		);
+		expect(manifest.includedFiles).toEqual(
+			expect.arrayContaining([
+				"bunfig.toml",
+				"docs/codex/PLANS.md",
+				"apps/web/.env.local.example",
+			]),
 		);
 	});
 
@@ -35,7 +48,7 @@ describe("repo generation", () => {
 		);
 	});
 
-	it("materializes a repo snapshot with packet files", async () => {
+	it("materializes a customer-safe repo snapshot", async () => {
 		const snapshotFiles = await materializeRepoSnapshot(
 			createCompleteProjectDefinition(),
 		);
@@ -45,9 +58,18 @@ describe("repo generation", () => {
 			expect.arrayContaining([
 				"apps/web/config/product.ts",
 				"apps/web/features/marketing/content/home.ts",
-				"packet/README.md",
-				"packet/build/docs/prompt.md",
+				"docs/README.md",
+				"docs/build/docs/prompt.md",
+				"docs/codex/PLANS.md",
+				"apps/web/.env.production.example",
+				"qa/README.md",
+				".agents/README.md",
+				".github/workflows/examples/basic-ci.example.yml",
 			]),
 		);
+		const forbiddenPaths = snapshotPaths.filter((path) =>
+			isExcludedSnapshotPath(path),
+		);
+		expect(forbiddenPaths).toEqual([]);
 	});
 });

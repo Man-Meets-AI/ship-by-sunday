@@ -44,9 +44,6 @@ export {
 	MARKETING_PACK_LABEL,
 	PROMPT_PACK_LABEL,
 	STARTER_SNAPSHOT_LABEL,
-	getPublicPackLabelForStage,
-	getPublicPacketArchiveFileName,
 	getStarterSnapshotArchiveFileName,
-	type DownloadablePacketArchiveStage,
 	type PacketArtifactStage,
 } from "./public-artifact-contract";
