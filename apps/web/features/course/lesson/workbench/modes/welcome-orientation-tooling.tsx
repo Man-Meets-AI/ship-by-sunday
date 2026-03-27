@@ -11,12 +11,9 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { courseResourceConfig, routeConfig } from "@/config/product";
+import { routeConfig } from "@/config/product";
 
 import { WELCOME_RECOMMENDED_STACK_DATE_LABEL } from "./welcome-orientation-constants";
-
-const CORE_TEMPLATES_HREF = courseResourceConfig.downloads.coreTemplatesPdf;
-const STUDENT_PACKET_HREF = courseResourceConfig.downloads.studentPacketPdf;
 
 export function WelcomeOrientationTooling() {
 	return (
@@ -48,16 +45,6 @@ export function WelcomeOrientationTooling() {
 			</Accordion>
 			<Separator />
 			<div className="flex flex-wrap gap-3">
-				<Button variant="secondary" size="sm" asChild>
-					<a href={CORE_TEMPLATES_HREF} download>
-						Core Templates
-					</a>
-				</Button>
-				<Button variant="secondary" size="sm" asChild>
-					<a href={STUDENT_PACKET_HREF} download>
-						Student Packet
-					</a>
-				</Button>
 				<Button variant="outline" size="sm" asChild>
 					<Link href={routeConfig.docs}>Setup docs</Link>
 				</Button>

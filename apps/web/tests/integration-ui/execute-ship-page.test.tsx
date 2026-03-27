@@ -1,5 +1,4 @@
 import React from "react";
-import userEvent from "@testing-library/user-event";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -8,6 +7,7 @@ import {
 	deriveStageStatus,
 } from "@packet-compiler";
 
+import { getLessonHref } from "@/features/course/lesson/model/manifest";
 import type { PacketWorkspaceState } from "@/features/packet-flow/lib/packet-workspace-types";
 
 const redirectMock = vi.fn((href: string) => {
@@ -34,19 +34,28 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/features/course/shared/components/app-shell", () => ({
-	AppShell: ({
-		title,
-		subtitle,
-		children,
+	AppShell: ({ children }: { children: React.ReactNode }) => (
+		<div>{children}</div>
+	),
+}));
+
+vi.mock("@/features/packet-flow/components/video/packet-video-card", () => ({
+	PacketVideoCard: ({
+		content,
 	}: {
-		title: string;
-		subtitle?: string;
-		children: React.ReactNode;
+		content:
+			| {
+					kind: "video";
+					description: string;
+					title: string;
+					video: { videoId: string };
+			  }
+			| { kind: "orientation"; description: string; title: string };
 	}) => (
 		<div>
-			<h1>{title}</h1>
-			{subtitle ? <p>{subtitle}</p> : null}
-			{children}
+			<p>{content.title}</p>
+			{content.kind === "video" ? <p>{content.video.videoId}</p> : null}
+			{content.kind === "orientation" ? <p>{content.description}</p> : null}
 		</div>
 	),
 }));
@@ -95,8 +104,7 @@ describe("ExecuteShipPage", () => {
 		redirectMock.mockClear();
 	});
 
-	it("renders the optional execute hub and starter track detail views after unlock", async () => {
-		const user = userEvent.setup();
+	it("renders the bonus bridge for a newly unlocked customer", () => {
 		render(
 			<ExecuteShipPage
 				initialWorkspaceState={createWorkspaceState({
@@ -106,24 +114,38 @@ describe("ExecuteShipPage", () => {
 		);
 
 		expect(
-			screen.getByText("Ship by Sunday OS is ready for execution."),
-		).toBeTruthy();
-		expect(screen.getByRole("tab", { name: /Build Now/i })).toBeTruthy();
-		expect(screen.getByRole("tab", { name: /Refine Design/i })).toBeTruthy();
-		expect(screen.getByRole("tab", { name: /QA & Debug/i })).toBeTruthy();
-		expect(
 			screen.getByText(
-				"Start with the smallest shippable slice from your build packet.",
+				"Ship by Sunday OS has its packet. Now ship the first slice.",
 			),
 		).toBeTruthy();
-
-		await user.click(screen.getByRole("tab", { name: /QA & Debug/i }));
-
 		expect(
 			screen.getByText(
-				"Find the highest-risk regression before it reaches launch day.",
+				"Review & Download finished the required funnel. Execute / Ship is the unlocked bonus library that helps you turn the packet into working software without reopening the intake workbench.",
 			),
 		).toBeTruthy();
+		expect(
+			screen.getByText(
+				"Watch this first so the Execute / Ship handoff stays anchored to the packet-first flow before you continue in BUILD.",
+			),
+		).toBeTruthy();
+		expect(
+			screen.getByText("3382315c-5cec-4d1c-aa37-611f8b52e6cf"),
+		).toBeTruthy();
+		expect(screen.getByText("Continue in BUILD")).toBeTruthy();
+		expect(screen.getByText("Re-anchor in Product")).toBeTruthy();
+		expect(
+			screen
+				.getByRole("link", { name: "Continue in Build" })
+				.getAttribute("href"),
+		).toBe(getLessonHref("3.1"));
+		expect(
+			screen
+				.getByRole("link", { name: "Start from the beginning" })
+				.getAttribute("href"),
+		).toBe(getLessonHref("1.1"));
+		expect(
+			screen.queryByRole("link", { name: "Browse the bonus library" }),
+		).toBeNull();
 	});
 
 	it("redirects back to review when the execute branch is still locked", () => {
@@ -133,5 +155,19 @@ describe("ExecuteShipPage", () => {
 			),
 		).toThrowError("NEXT_REDIRECT:/review");
 		expect(redirectMock).toHaveBeenCalledWith("/review");
+	});
+
+	it("redirects repeat visitors into mission after any bonus lesson has been opened", () => {
+		expect(() =>
+			render(
+				<ExecuteShipPage
+					initialWorkspaceState={createWorkspaceState({
+						executeShipUnlockedAt: 123,
+					})}
+					hasStartedBonusLesson
+				/>,
+			),
+		).toThrowError("NEXT_REDIRECT:/mission");
+		expect(redirectMock).toHaveBeenCalledWith("/mission");
 	});
 });

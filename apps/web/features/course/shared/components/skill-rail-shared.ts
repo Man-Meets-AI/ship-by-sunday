@@ -35,7 +35,7 @@ function lessonAriaBody(lesson: SkillRailLesson, state: SkillRailStepState) {
 	}
 
 	if (state === "done") {
-		return `${lesson.shortTitle}. Completed lesson.`;
+		return `${lesson.shortTitle}. Explored lesson.`;
 	}
 
 	if (state === "locked") {

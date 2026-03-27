@@ -2,7 +2,6 @@
 
 import { useCallback, useState } from "react";
 
-import { courseResourceConfig } from "@/config/product";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,8 +15,6 @@ import {
 import { copyLessonTextToClipboard } from "@/features/course/lesson/lib/copy-course-prompt";
 
 import { BUILD_SETUP_STARTER_DESCRIPTION } from "./build-setup-launchpad-constants";
-
-const { downloads } = courseResourceConfig;
 
 type BuildSetupLaunchpadStarterTemplateCardProps = {
 	templateRepoUrl: string | null;
@@ -71,15 +68,6 @@ export function BuildSetupLaunchpadStarterTemplateCard({
 					onClick={copyRepo}
 				>
 					{copied ? "Copied" : "Copy repo URL"}
-				</Button>
-				<Button variant="ghost" size="sm" className="w-full sm:w-auto" asChild>
-					<a
-						href={downloads.studentPacketPdf}
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						30-page guide (PDF, optional)
-					</a>
 				</Button>
 			</CardContent>
 		</Card>

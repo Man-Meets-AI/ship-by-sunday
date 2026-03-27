@@ -22,7 +22,8 @@ function ShellInner({
 	currentLessonId,
 	currentBlockId,
 	mission,
-	showSkillRail = true,
+	showMissionRail: explicitShowMissionRail,
+	showSkillRail: explicitShowSkillRail,
 	layoutMode,
 	onLayoutModeChange,
 	viewportMode = "document",
@@ -44,6 +45,8 @@ function ShellInner({
 	const activeBlock = mission?.blocks.find(
 		(block) => block.id === activeBlockId,
 	);
+	const showMissionRail = explicitShowMissionRail ?? Boolean(mission);
+	const showSkillRail = explicitShowSkillRail ?? Boolean(currentLessonId);
 	const lesson11Viewport =
 		getLesson(currentLessonId ?? "")?.displayLabel === "1.1";
 	const blockStatuses = mission
@@ -88,6 +91,7 @@ function ShellInner({
 							<AppShellHeader
 								viewportMode={viewportMode}
 								mission={mission}
+								showMissionRail={showMissionRail}
 								blockStatuses={blockStatuses}
 								activeBlockId={activeBlockId}
 								layoutMode={layoutMode}
@@ -108,6 +112,7 @@ function ShellInner({
 							<AppShellHeader
 								viewportMode={viewportMode}
 								mission={mission}
+								showMissionRail={showMissionRail}
 								blockStatuses={blockStatuses}
 								activeBlockId={activeBlockId}
 								layoutMode={layoutMode}

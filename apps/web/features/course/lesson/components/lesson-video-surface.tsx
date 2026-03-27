@@ -23,11 +23,13 @@ export function LessonVideoSurface({
 	variant = "panel",
 	emptyState,
 	playerFrame = "card",
+	className,
 }: {
 	coachContent: LessonContent["coach"];
 	variant?: "panel" | "watch-shell";
 	/** When the player sits inside a parent `Card`, use `bare` to avoid nested cards. */
 	playerFrame?: "card" | "bare";
+	className?: string;
 	emptyState?: {
 		eyebrow?: string;
 		title?: string;
@@ -88,6 +90,7 @@ export function LessonVideoSurface({
 					isWatchShell
 						? "mx-auto w-full max-w-[min(100%,58rem)] gap-3"
 						: "gap-1.5",
+					className,
 				)}
 			>
 				{playerBlock}

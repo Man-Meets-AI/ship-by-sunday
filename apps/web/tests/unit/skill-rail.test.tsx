@@ -344,7 +344,7 @@ describe("SkillRail", () => {
 		expect(markup).toContain(">1.3<");
 		expect(markup).toContain("lucide-check");
 		expect(markup).toContain(
-			'aria-label="Lesson 1.1. Problem. Completed lesson."',
+			'aria-label="Lesson 1.1. Problem. Explored lesson."',
 		);
 		expect(markup).toContain('aria-label="Lesson 1.2. User. Current lesson."');
 		expect(markup).toContain(

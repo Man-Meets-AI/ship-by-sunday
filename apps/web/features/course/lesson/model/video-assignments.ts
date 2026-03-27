@@ -1,5 +1,5 @@
-// Lesson ids can point at any key in lessonMedia, which lets us reorder
-// published videos without renaming source files or editing Bunny GUIDs.
+// Lesson ids are canonical. This sparse map only records cases where the Bunny
+// asset id differs from the lesson id.
 export const lessonVideoAssignments: Partial<Record<string, string>> = {
 	"1.1": "0.1",
 	"1.2": "0.2",
@@ -11,3 +11,7 @@ export const lessonVideoAssignments: Partial<Record<string, string>> = {
 	"1.8": "1.6",
 	"1.9": "1.7",
 };
+
+export function resolveLessonVideoAssetId(lessonId: string): string {
+	return lessonVideoAssignments[lessonId] ?? lessonId;
+}

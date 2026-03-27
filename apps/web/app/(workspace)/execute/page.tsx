@@ -1,16 +1,19 @@
-import { api } from "@/convex/_generated/api";
+import { redirect } from "next/navigation";
+import { routeConfig } from "@/config/product";
 import { ExecuteShipPage } from "@/features/execute-ship/components/execute-ship-page";
-import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
+import { loadBonusRouteAccess } from "@/features/execute-ship/server/load-bonus-route-access";
 
 export default async function Page() {
-	const initialWorkspaceState = await fetchAuthenticatedQuery(
-		api.packet.getPacketWorkspaceState,
-		{},
-	);
+	const bonusRouteAccess = await loadBonusRouteAccess();
 
-	if (!initialWorkspaceState) {
-		throw new Error("Packet workspace state missing");
+	if (!bonusRouteAccess.isUnlocked) {
+		redirect(routeConfig.review);
 	}
 
-	return <ExecuteShipPage initialWorkspaceState={initialWorkspaceState} />;
+	return (
+		<ExecuteShipPage
+			initialWorkspaceState={bonusRouteAccess.workspaceState}
+			hasStartedBonusLesson={bonusRouteAccess.hasStartedBonusLesson}
+		/>
+	);
 }

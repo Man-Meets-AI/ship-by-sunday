@@ -33,9 +33,10 @@ export function CopyPromptResourceCard({
 		<Card>
 			<CardHeader>
 				<CardTitle>{resource.label}</CardTitle>
-				{resource.body ? (
-					<CardDescription>{resource.body}</CardDescription>
-				) : null}
+				<CardDescription>
+					Copy this prompt and fill in the bracketed placeholders before pasting
+					it into your model.
+				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-4">
 				{disabledReason ? (
@@ -75,8 +76,7 @@ export function CopyPromptResourceCard({
 					</div>
 				) : (
 					<CardDescription>
-						The prompt will appear here once your chosen user and outcome are
-						saved.
+						The prompt will appear here once this lesson includes copy text.
 					</CardDescription>
 				)}
 			</CardContent>

@@ -89,7 +89,7 @@ describe("LessonShellWatch", () => {
 		);
 	});
 
-	it("renders transcript and resources when they exist", () => {
+	it("renders transcript, helpful links, and static prompt cards when they exist", () => {
 		const lesson = getLessonById("4.0");
 		expect(lesson).toBeTruthy();
 		if (!lesson) {
@@ -107,6 +107,13 @@ describe("LessonShellWatch", () => {
 					},
 					resources: [
 						{
+							id: "research-prompt",
+							label: "Static prompt",
+							body: "Use this static prompt and fill the placeholders yourself.",
+							kind: "copy_prompt",
+							promptTemplateId: "competitor_research",
+						},
+						{
 							id: "ship-doc",
 							label: "Ship notes",
 							href: "https://example.com/ship-notes",
@@ -121,7 +128,11 @@ describe("LessonShellWatch", () => {
 
 		expect(markup).toContain("Transcript");
 		expect(markup).toContain("Ship it, review it, and move on.");
-		expect(markup).toContain("Resources");
+		expect(markup).toContain("Helpful links");
+		expect(markup).toContain("Static prompt");
+		expect(markup).toContain(
+			"Use this static prompt and fill the placeholders yourself.",
+		);
 		expect(markup).toContain("Ship notes");
 		expect(markup).toContain('target="_blank"');
 	});

@@ -25,7 +25,8 @@ export const executeShipTracks: ExecuteShipTrack[] = [
 		id: "build-now",
 		label: "Build Now",
 		status: "now",
-		summary: "Turn the Build Pack into the first implementation pass.",
+		summary:
+			"Turn the Build docs inside the Starter Snapshot into the first implementation pass.",
 		objective:
 			"Start with the smallest shippable slice from your build packet.",
 		steps: [
@@ -43,7 +44,7 @@ export const executeShipTracks: ExecuteShipTrack[] = [
 		label: "Refine Design",
 		status: "ready",
 		summary:
-			"Use the Design Pack to tighten the product surface before coding deeper.",
+			"Use the Design docs inside the Starter Snapshot to tighten the product surface before coding deeper.",
 		objective:
 			"Convert the design packet into one clearer interface decision at a time.",
 		steps: [
@@ -53,7 +54,7 @@ export const executeShipTracks: ExecuteShipTrack[] = [
 		],
 		links: [
 			{ label: "Open Design Stage", href: routeConfig.design },
-			{ label: "Download Design Pack", href: "/api/download/packet/design" },
+			{ label: "Open Review", href: routeConfig.review },
 		],
 	},
 	{
@@ -61,7 +62,7 @@ export const executeShipTracks: ExecuteShipTrack[] = [
 		label: "Refine Marketing",
 		status: "ready",
 		summary:
-			"Use the Marketing Pack to sharpen the offer, proof, and launch copy.",
+			"Use the Marketing docs inside the Starter Snapshot to sharpen the offer, proof, and launch copy.",
 		objective:
 			"Ship one stronger conversion or messaging pass instead of rewriting everything.",
 		steps: [
@@ -71,10 +72,7 @@ export const executeShipTracks: ExecuteShipTrack[] = [
 		],
 		links: [
 			{ label: "Open Marketing Stage", href: routeConfig.marketing },
-			{
-				label: "Download Marketing Pack",
-				href: "/api/download/packet/marketing",
-			},
+			{ label: "Open Review", href: routeConfig.review },
 		],
 	},
 	{

@@ -28,9 +28,6 @@ export function ExecuteShipHub({ productName }: { productName?: string }) {
 					<CardHeader className="gap-4">
 						<div className="flex flex-wrap items-start justify-between gap-3">
 							<div className="space-y-1">
-								<p className="text-sm font-medium text-muted-foreground">
-									Continue the run
-								</p>
 								<CardTitle>
 									{productName
 										? `${productName} is ready for execution.`
@@ -52,7 +49,7 @@ export function ExecuteShipHub({ productName }: { productName?: string }) {
 								key={track.id}
 								className="rounded-xl border border-border/70 bg-muted/30 p-3 text-sm"
 							>
-								<p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+								<p className="text-sm font-medium text-muted-foreground">
 									{track.status}
 								</p>
 								<p className="mt-2 font-medium">{track.label}</p>
@@ -68,7 +65,7 @@ export function ExecuteShipHub({ productName }: { productName?: string }) {
 								value={track.id}
 								className="h-auto min-h-28 flex-col items-start justify-start gap-2 rounded-xl border border-border/70 bg-card px-4 py-3 text-left data-active:border-primary/35 data-active:bg-primary/5"
 							>
-								<p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+								<p className="text-sm font-medium text-muted-foreground">
 									{track.status}
 								</p>
 								<p className="font-medium">{track.label}</p>

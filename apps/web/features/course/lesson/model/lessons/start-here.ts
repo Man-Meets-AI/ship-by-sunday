@@ -171,9 +171,9 @@ export const startHereLessons = [
 			},
 			actionCard: {
 				jobNow:
-					"Grab Core Templates and the Student Packet; keep them one click away.",
+					"Keep the setup docs and starter repo one click away.",
 				timebox: "5 minutes",
-				comeBackWith: "Templates and packet ready in your workspace.",
+				comeBackWith: "Docs and repo ready in your workspace.",
 			},
 			coach: createPendingLessonCoach({
 				title: "Welcome",

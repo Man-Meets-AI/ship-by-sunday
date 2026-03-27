@@ -3,16 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { timingConfig } from "@/config/product";
 import { copyCoursePromptToClipboard } from "@/features/course/lesson/lib/copy-course-prompt";
 import type { LessonPromptResourceContent } from "@/features/course/lesson/model/contracts";
-import { getPromptTemplateState } from "@/features/course/lesson/model/research-prompt";
 
 import type { PinnedArtifact } from "./types";
-
-function getPromptResourceState(
-	resource: LessonPromptResourceContent,
-	pinnedArtifacts: PinnedArtifact[],
-) {
-	return getPromptTemplateState(resource.promptTemplateId, pinnedArtifacts);
-}
 
 function getCopySuccessMessage(resource: LessonPromptResourceContent) {
 	return (
@@ -23,16 +15,16 @@ function getCopySuccessMessage(resource: LessonPromptResourceContent) {
 
 export function useCopyPromptResourceCard(
 	resource: LessonPromptResourceContent,
-	pinnedArtifacts: PinnedArtifact[],
+	_pinnedArtifacts: PinnedArtifact[],
 ) {
 	const [copyState, setCopyState] = useState<"idle" | "copied" | "error">(
 		"idle",
 	);
 	const resetTimeoutRef = useRef<number | null>(null);
-	const { prompt, disabledReason } = getPromptResourceState(
-		resource,
-		pinnedArtifacts,
-	);
+	const prompt = resource.body?.trim() || null;
+	const disabledReason = prompt
+		? null
+		: "This prompt card does not have copy text yet.";
 
 	useEffect(() => {
 		return () => {
