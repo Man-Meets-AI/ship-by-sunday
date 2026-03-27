@@ -39,8 +39,8 @@ type PacketStagePageKey = `${RoutedPacketStageId}/${string}`;
 const packetStagePageMedia: Record<PacketStagePageKey, PacketPageMedia> = {
 	"product/foundation": {
 		kind: "video",
-		eyebrow: "Packet video",
-		badge: "L1",
+		eyebrow: "Watch first",
+		badge: "Product",
 		title: "Name the thing",
 		description:
 			"Lock the name, summary, user, and why-this-matters frame before the rest of Product.",
@@ -51,8 +51,8 @@ const packetStagePageMedia: Record<PacketStagePageKey, PacketPageMedia> = {
 	},
 	"product/problem": {
 		kind: "orientation",
-		eyebrow: "Packet page",
-		badge: "L2 pending",
+		eyebrow: "Read first",
+		badge: "Product",
 		title: "Problem checkpoint",
 		description:
 			"This page is intentionally text-first until the L2 recording is uploaded.",
@@ -60,8 +60,8 @@ const packetStagePageMedia: Record<PacketStagePageKey, PacketPageMedia> = {
 	},
 	"product/outcome": {
 		kind: "video",
-		eyebrow: "Packet video",
-		badge: "L3",
+		eyebrow: "Watch first",
+		badge: "Product",
 		title: "Lock the promise and the proof",
 		description:
 			"Use this page to sharpen the promised outcome and the evidence behind it.",
@@ -72,8 +72,8 @@ const packetStagePageMedia: Record<PacketStagePageKey, PacketPageMedia> = {
 	},
 	"product/scope": {
 		kind: "video",
-		eyebrow: "Packet video",
-		badge: "L4",
+		eyebrow: "Watch first",
+		badge: "Product",
 		title: "Kill scope early",
 		description:
 			"Trim the product to the v1 that still earns belief and momentum.",
@@ -84,8 +84,8 @@ const packetStagePageMedia: Record<PacketStagePageKey, PacketPageMedia> = {
 	},
 	"design/flow": {
 		kind: "video",
-		eyebrow: "Packet video",
-		badge: "L5",
+		eyebrow: "Watch first",
+		badge: "Design",
 		title: "Map the core flow",
 		description:
 			"Define the screen sequence and must-have capabilities before references or style decisions.",
@@ -96,8 +96,8 @@ const packetStagePageMedia: Record<PacketStagePageKey, PacketPageMedia> = {
 	},
 	"design/references": {
 		kind: "video",
-		eyebrow: "Packet video",
-		badge: "L6",
+		eyebrow: "Watch first",
+		badge: "Design",
 		title: "Gather references",
 		description:
 			"Collect the visual signals and brand assets that should shape the interface.",
@@ -108,8 +108,8 @@ const packetStagePageMedia: Record<PacketStagePageKey, PacketPageMedia> = {
 	},
 	"design/direction": {
 		kind: "video",
-		eyebrow: "Packet video",
-		badge: "L7",
+		eyebrow: "Watch first",
+		badge: "Design",
 		title: "Choose the visual direction",
 		description:
 			"Lock the visual thesis, content plan, and interaction tone before system work.",
@@ -120,8 +120,8 @@ const packetStagePageMedia: Record<PacketStagePageKey, PacketPageMedia> = {
 	},
 	"design/system": {
 		kind: "video",
-		eyebrow: "Packet video",
-		badge: "L8",
+		eyebrow: "Watch first",
+		badge: "Design",
 		title: "Define the system",
 		description:
 			"Finish the design packet by locking tokens, typography, imagery, and layout direction.",
@@ -132,8 +132,8 @@ const packetStagePageMedia: Record<PacketStagePageKey, PacketPageMedia> = {
 	},
 	"marketing/operating-system": {
 		kind: "video",
-		eyebrow: "Packet video",
-		badge: "L9",
+		eyebrow: "Watch first",
+		badge: "Marketing",
 		title: "Define the marketing operating system",
 		description:
 			"Use one page to lock goals, voice, proof, workflows, and research scope.",
@@ -144,8 +144,8 @@ const packetStagePageMedia: Record<PacketStagePageKey, PacketPageMedia> = {
 	},
 	"build-plan/delivery": {
 		kind: "video",
-		eyebrow: "Packet video",
-		badge: "L10",
+		eyebrow: "Watch first",
+		badge: "Build Plan",
 		title: "Choose delivery and pricing",
 		description:
 			"Lock the buyer-facing delivery model, pricing, and install destination before planning execution.",
@@ -156,8 +156,8 @@ const packetStagePageMedia: Record<PacketStagePageKey, PacketPageMedia> = {
 	},
 	"build-plan/plan": {
 		kind: "video",
-		eyebrow: "Packet video",
-		badge: "L11",
+		eyebrow: "Watch first",
+		badge: "Build Plan",
 		title: "Plan the work",
 		description:
 			"Use this page to lock constraints, deliverables, risks, dependencies, and the next slice.",
@@ -168,8 +168,8 @@ const packetStagePageMedia: Record<PacketStagePageKey, PacketPageMedia> = {
 	},
 	"build-plan/validation": {
 		kind: "video",
-		eyebrow: "Packet video",
-		badge: "L12",
+		eyebrow: "Watch first",
+		badge: "Build Plan",
 		title: "Define done and validation",
 		description:
 			"Finish the build plan by spelling out done-when, acceptance, and the demo flow.",
@@ -183,7 +183,7 @@ const packetStagePageMedia: Record<PacketStagePageKey, PacketPageMedia> = {
 const packetStartPageMedia: PacketPageMedia = {
 	kind: "video",
 	eyebrow: "Watch first",
-	badge: "L0",
+	badge: "Welcome",
 	title: "Welcome video",
 	description:
 		"Build the folder, not just the app, before you jump into Product.",
@@ -195,8 +195,8 @@ const packetStartPageMedia: PacketPageMedia = {
 
 const packetReviewPageMedia: PacketPageMedia = {
 	kind: "video",
-	eyebrow: "Final video",
-	badge: "L13",
+	eyebrow: "Final pass",
+	badge: "Review",
 	title: "Review video",
 	description:
 		"Resolve the last blockers, then download the packet and starter snapshot.",

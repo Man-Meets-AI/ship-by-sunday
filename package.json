@@ -29,6 +29,8 @@
 		"test:coverage:critical": "bun run --cwd apps/web test:coverage:critical",
 		"test:browser-smoke": "bun run --cwd apps/web test:browser-smoke",
 		"test:e2e:sandbox": "bun run --cwd apps/web test:e2e:sandbox",
+		"test:e2e:local-auth": "bun run --cwd apps/web test:e2e:local-auth",
+		"test:e2e:local-auth:default-ship": "bun run --cwd apps/web test:e2e:local-auth:default-ship",
 		"check": "bun run --cwd apps/web check",
 		"video:cut:setup": "bun run --cwd apps/web video:cut:setup",
 		"video:cut": "bun run --cwd apps/web video:cut",

@@ -3,6 +3,7 @@ import {
 	parseCanonicalProjectFactsDraft,
 	placeholderFriendlyFactKeys,
 } from "../../../../packages/packet-compiler/src/canonical-project-definition/project-definition";
+import { createCompleteProjectDefinition } from "../../../../packages/packet-compiler/src/fixtures/complete-project-definition";
 import { v } from "convex/values";
 
 import { PRODUCT_APP_ID } from "../../config/product";
@@ -42,6 +43,15 @@ export const saveProjectDefinitionFactsArgs = {
 };
 export const saveProjectDefinitionFactsReturns =
 	projectDefinitionPublicValidator;
+export const seedCompleteProjectDefinitionForQaArgs = {
+	clerkUserId: v.string(),
+};
+export const seedCompleteProjectDefinitionForQaReturns =
+	projectDefinitionPublicValidator;
+export const resetProjectDefinitionForQaArgs = {
+	clerkUserId: v.string(),
+};
+export const resetProjectDefinitionForQaReturns = v.null();
 
 export async function getProjectDefinitionByClerkUserId(
 	ctx: PacketReadCtx,
@@ -128,4 +138,46 @@ export async function saveProjectDefinitionFactsHandler(
 	}
 
 	return nextProjectDefinition;
+}
+
+export async function seedCompleteProjectDefinitionForQaHandler(
+	ctx: PacketMutationCtx,
+	args: { clerkUserId: string },
+) {
+	const seededProjectDefinition = createCompleteProjectDefinition({
+		clerkUserId: args.clerkUserId,
+		productKey: PRODUCT_APP_ID,
+	});
+	const existingProjectDefinition = await getProjectDefinitionByClerkUserId(
+		ctx,
+		args.clerkUserId,
+	);
+
+	if (existingProjectDefinition) {
+		await ctx.db.patch(existingProjectDefinition._id, {
+			facts: seededProjectDefinition.facts,
+			placeholdersInUse: seededProjectDefinition.placeholdersInUse,
+			updatedAt: seededProjectDefinition.updatedAt,
+		});
+		return seededProjectDefinition;
+	}
+
+	await ctx.db.insert("projectDefinitions", seededProjectDefinition);
+	return seededProjectDefinition;
+}
+
+export async function resetProjectDefinitionForQaHandler(
+	ctx: PacketMutationCtx,
+	args: { clerkUserId: string },
+) {
+	const existingProjectDefinition = await getProjectDefinitionByClerkUserId(
+		ctx,
+		args.clerkUserId,
+	);
+
+	if (existingProjectDefinition) {
+		await ctx.db.delete(existingProjectDefinition._id);
+	}
+
+	return null;
 }

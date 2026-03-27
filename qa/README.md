@@ -25,6 +25,10 @@ bun run qa:ship -- --pack=default_ship --slug=baseline
 
 `qa:validate` is the fast integrity check. `qa:inventory:sync` refreshes the full-suite inventory from the current `apps/web/tests/` tree. `qa:personas:prepare` provisions the committed personas against the Clerk and Convex environment currently loaded for QA. `qa:run-pack` is the explicit scenario-pack runner for `default_ship`, `extended`, and `billing_integration`. On local `billing_integration` targets it now records the pinned Stripe guardrail doctor as a warning-only preflight and runs `stripe:dev:verify` as the hard post-checkout proof. `qa:ship` scaffolds a dated run report for the selected scenario pack so the human runner can record what passed, failed, or remained blocked.
 
+For packet-funnel work, `default_ship` should not rely on browser lanes alone. The pack now needs the packet integration-ui proof suite for `/start`, the routed workbench, `/review`, and the blocker sidebar because those tests are first-class proof for the current packet UX contract.
+
+On local dev, the preferred authenticated browser proof is now the local-auth lane rather than the sandbox-only gate. Use `PLAYWRIGHT_BASE_URL=http://localhost:3000 bun run --cwd apps/web test:e2e:local-auth:default-ship` when you need the protected packet funnel on the running local stack.
+
 `qa:personas:prepare` and `qa:run-pack` load `apps/web/.env.local` by default. Override that with `QA_ENV_FILE=<path>` when the hosted target uses a different Clerk instance than local. For hosted runs, also pass `PLAYWRIGHT_BASE_URL=<target>` so persona prep can refuse a mismatched Clerk environment before Playwright writes a bad auth state.
 
 ## Plain-English QA Map
@@ -63,7 +67,7 @@ Rough old-world translation:
 ## Pack Meanings
 
 - `default_ship`
-  Core release pack. This is the main auth, access, and buyer journey. If you only run one serious QA pass before shipping, run this.
+  Core release pack. This is the main auth, access, and buyer journey. If you only run one serious QA pass before shipping, run this. It should include browser smoke, the packet integration-ui suite, and the tagged sandbox packet-route run.
 - `extended`
   Broader secondary coverage. Useful for confidence and cleanup, but not the first thing to run on every change.
 - `billing_integration`
@@ -97,9 +101,11 @@ Best mental model:
 - `default_ship` means “does the main customer journey look ship-safe?”
 - `billing_integration` means “does the paid path still work?”
 
+Important: a Playwright run that exits `0` with every test skipped is not browser evidence. Treat “all skipped” as missing proof and call that out explicitly in the report.
+
 ## Current resume state
 
-- Start on `dev` first. `qa/runs/2026-03-25-dev-default-ship.md` is the current green `default_ship` baseline.
+- Start on `dev` first. `qa/runs/2026-03-26-dev-default-ship-local-auth.md` is the current green `default_ship` baseline.
 - `billing_integration` on `dev` has a green rerun in `qa/runs/2026-03-25-dev-billing-integration-rerun.md`. Use that report as the local Stripe baseline.
 - Move to `prod` second for release evidence. `default_ship` is now green there as well; use `qa/runs/2026-03-25-default-ship-prod-rerun.md` as the current hosted baseline.
 - Hosted `billing_integration` now has both the repair report and the automatic post-fix rerun: `qa/runs/2026-03-25-prod-billing-integration-webhook-fix.md` plus `qa/runs/2026-03-25-prod-billing-integration-automatic-rerun.md`.
@@ -126,6 +132,7 @@ Typical dev-first restart:
 ```bash
 bun run dev:full
 PLAYWRIGHT_USE_LOCAL_SERVER=1 PLAYWRIGHT_BASE_URL=http://localhost:3000 bun run --cwd apps/web test:browser-smoke
+PLAYWRIGHT_BASE_URL=http://localhost:3000 bun run --cwd apps/web test:e2e:local-auth:default-ship
 ```
 
 Typical hosted evidence run:
@@ -138,6 +145,13 @@ Every committed report under `qa/runs/` must say whether it came from `dev`, `pr
 
 Use local `dev` first for authenticated sandbox work. The current green baseline is `default_ship` on local dev. Use hosted or prod second once the local path is understood.
 For local Stripe billing reruns, make sure `.env.local` contains `NEXT_PUBLIC_CONVEX_SITE_URL`, `bun run dev:stripe` is forwarding to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`, and the pinned Stripe CLI profile `ship-by-sunday` passes `bun run stripe:dev:doctor` or at least explains its warning clearly.
+
+For packet-focused QA on local dev, the concrete behaviors worth checking are:
+
+- `/start` is a stacked kickoff with one primary `Continue with ...` CTA
+- the routed packet workbench keeps the connected within-stage page strip intact
+- the workbench exposes both `Save and continue` and `Save and stay`
+- `/review` keeps the Starter Snapshot primary and delays the full `Execute / Ship` surface until after the download moment
 
 ## Environment sources
 

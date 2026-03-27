@@ -15,10 +15,15 @@ Ship by Sunday currently has a public homepage on `/` and a public docs surface 
 - [x] 2026-03-26 16:46 EDT: Confirmed from the installed Nextra package types that `getPageMap('/blog')` is a supported route pattern, so the blog can reuse the existing Nextra content pipeline instead of adding a second MDX compiler stack.
 - [x] 2026-03-26 16:46 EDT: Chose the v1 architecture: Nextra-powered MDX discovery and static params, but a custom feature-owned editorial shell for `/blog` instead of the docs theme wrapper.
 - [x] 2026-03-26 17:22 EDT: Grilled the plan against the repo and resolved the high-impact design branches: posts use `draft: true` gating, `/blog` is a programmatic React index instead of `content/blog/index.mdx`, the blog is built-in rather than toggleable, discoverability on the landing page is footer-only next to the Ship by Sunday wordmark, the only v1 docs mention lives in `apps/web/content/docs/customize-the-starter.mdx`, and each post gets one shared sponsor-style promo block near the top that defaults to the homepage hero headline and links to `/#pricing`.
-- [ ] Implement the `/blog` route, content helpers, and editorial components under a new `apps/web/features/blog/` feature folder.
-- [ ] Add the first real blog index and one real post in `apps/web/content/blog/` with OpenAI-inspired split text-media composition adapted to the Ship by Sunday visual system.
-- [ ] Integrate the footer-only homepage link, blog metadata, sitemap, robots, short docs mention, and browser smoke coverage.
-- [ ] Update the plan with implementation discoveries, validation evidence, and final outcomes as work proceeds.
+- [x] 2026-03-26 18:01 EDT: Implemented the new `apps/web/features/blog/` feature folder, route files under `apps/web/app/blog/`, strict `zod` frontmatter loading in `apps/web/features/blog/server/blog-posts.ts`, and local media assets under `apps/web/public/blog/`.
+- [x] 2026-03-26 18:01 EDT: Added the programmatic `/blog` index, the first post `the-operating-system-beats-the-prompt`, split hero and split section components, the shared sponsor-style promo block, and local SVG plus MP4 media. `cd apps/web && bun run build` succeeded and emitted static `/blog` plus `/blog/the-operating-system-beats-the-prompt`.
+- [x] 2026-03-26 18:06 EDT: Integrated the product control-plane seam in `apps/web/config/product.ts`, exposed the footer-only Blog link next to the Ship by Sunday wordmark, extended `apps/web/app/sitemap.ts` and `apps/web/app/robots.ts`, and added the short blog mentions in `apps/web/content/docs/route-map.mdx` and `apps/web/content/docs/customize-the-starter.mdx`.
+- [x] 2026-03-26 18:09 EDT: Added narrow unit coverage in `apps/web/tests/unit/blog-page-paths.test.ts` and `apps/web/tests/unit/blog-metadata.test.ts`, expanded `apps/web/tests/browser-smoke/app-smoke.spec.ts` for blog and crawl assertions, and passed `bun run lint`, `bun run format:check`, the targeted unit tests, browser smoke, and `bun run build`.
+- [x] 2026-03-26 18:09 EDT: Updated this ExecPlan with actual implementation decisions, discoveries, validation evidence, and the final shipped-state summary so a fresh agent can resume from this file alone.
+- [x] 2026-03-26 18:55 EDT: Added article and index JSON-LD, a sticky table-of-contents rail powered by Nextra `toc`, reading-time support in the post record, and a tighter OpenAI-style editorial title block plus mobile visual QA for `/blog/the-operating-system-beats-the-prompt`.
+- [x] 2026-03-26 18:55 EDT: Re-ran `bun run lint`, `bun run format:check`, targeted unit tests including `tests/unit/blog-structured-data.test.ts`, and browser smoke against the already-running dev server with `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 bunx playwright test --project=browser-smoke tests/browser-smoke/app-smoke.spec.ts`.
+- [x] 2026-03-26 18:55 EDT: Fixed the published-date timezone regression in `apps/web/features/blog/lib/blog-formatters.ts` after visual QA showed `2026-03-26` rendering as March 25 in US timezones, and added `apps/web/tests/unit/blog-formatters.test.ts`.
+- [ ] Re-run a clean whole-repo `cd apps/web && bun run build` after the unrelated packet-flow worktree changes are repaired. As of 2026-03-26 18:55 EDT, the repo build is blocked by non-blog type errors in `apps/web/features/packet-flow/components/packet-stage-page.tsx` and its in-flight companion files.
 
 ## Surprises & Discoveries
 
@@ -33,6 +38,16 @@ The homepage top bar is the cleanest existing public navigation seam. `apps/web/
 The existing design context is compatible with the requested direction. `.impeccable.md` says the brand should feel curious, bold, serious, premium, and operational. That aligns with an OpenAI-inspired editorial layout, but it does not support a literal OpenAI clone. The implementation should keep Ship by Sunday’s typography, token system, and high-contrast discipline while borrowing the structural pattern of restrained split text-media storytelling.
 
 The first draft of this plan over-reached in two places that the grill corrected. It assumed `content/blog/index.mdx` even though the better v1 contract is a programmatic index generated from post metadata, and it assumed the blog might become a module flag even though the product decision is now “built-in surface, not toggleable.” Those choices are now explicit below so implementation does not drift back toward them.
+
+The custom MDX seam ended up being simpler than expected. The first post compiles cleanly by importing feature-local React components directly inside the MDX file, so the blog does not currently need its own global `mdx-components.tsx` variant. The route shell can stay custom while Nextra still handles source discovery and compilation.
+
+Nextra emits a non-blocking warning for a brand-new, uncommitted post when it tries to look up Git-backed last-modified data. During the first build, it warned that it failed to get the timestamp for `apps/web/content/blog/the-operating-system-beats-the-prompt.mdx`, but the production build still completed and generated the blog routes correctly.
+
+The footer integration did not require a shared public-footer extraction. `apps/web/features/marketing/components/home-page/pricing-footer-sections.tsx` was already the right seam, so the blog link could be added there without widening scope into a new footer abstraction.
+
+The blog now has enough metadata and structure to support richer search ingestion. Adding JSON-LD was straightforward, but the more interesting discovery was that the most valuable SEO change was not another metadata field. It was letting the article surface expose a real table of contents and a cleaner editorial heading hierarchy so the public HTML communicates page structure more clearly.
+
+Validation on this pass had to route around unrelated dirty-worktree failures. The blog-specific browser smoke suite passed when pointed at the already-running dev server with `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000`, but a fresh local server bootstrap through the Playwright `webServer` hook failed because packet-flow files outside the blog work were mid-refactor. The blog implementation itself was not the blocking factor.
 
 Evidence snippets from repo inspection:
 
@@ -99,9 +114,35 @@ Decision: The default blog promo CTA points to `/#pricing`, and the promo headli
 Rationale: Blog readers are colder than homepage buyers, so the default should send them to the homepage close instead of forcing checkout immediately. Borrowing the homepage H1 keeps the message consistent without inventing a second public promise.
 Date: 2026-03-26
 
+Decision: Load published-post summaries with a cached `importPage(...)` pass in `apps/web/features/blog/server/blog-posts.ts` instead of introducing a separate page-map normalization helper.
+Rationale: The programmatic index needs strict frontmatter validation and `draft: true` filtering anyway. Reusing `importPage(...)` for summaries keeps the blog on the same Nextra-backed path as the route itself, avoids an unused normalization layer, and compiled successfully on the first production build.
+Date: 2026-03-26
+
+Decision: Author the first post with direct imports of `BlogSplitHero` and `BlogSplitSection` inside the MDX file instead of wiring a blog-specific global MDX component map.
+Rationale: The repo’s root `mdx-components.tsx` is docs-theme-oriented. Direct component imports kept the blog shell independent from docs chrome while still letting MDX prove the editorial component seams immediately.
+Date: 2026-03-26
+
+Decision: Put the promo CTA target and footer label into `apps/web/config/product.ts` and expose them through `apps/web/features/starter/lib/starter-selectors.ts`.
+Rationale: That keeps behavior in the control plane while leaving promo copy and editorial copy in the blog feature. It also let the homepage footer and article promo block share the same configuration without creating a cross-feature import tangle.
+Date: 2026-03-26
+
+Decision: Use Nextra’s built-in `toc` output for the article contents rail instead of inventing a second heading parser.
+Rationale: The MDX pipeline already emits normalized heading ids and values. Reusing that output keeps the table of contents consistent with the rendered article anchors and avoids a fragile post-processing step.
+Date: 2026-03-26
+
+Decision: Add JSON-LD for both the `/blog` index and each article route.
+Rationale: Canonical tags and Open Graph were already in place, but structured data closes the main SEO gap the user called out. The index now declares a `Blog` graph, and each article declares `BlogPosting` plus breadcrumbs.
+Date: 2026-03-26
+
 ## Outcomes & Retrospective
 
 At plan creation time, no implementation has happened yet. The expected outcome is a new public blog surface that fits the current marketing and docs ecosystem instead of sitting beside it as a one-off microsite. The biggest likely follow-up after v1 is authoring and editorial workflow: if the team wants non-engineers to publish frequently, a CMS or editorial tooling layer may become the next project. The plan deliberately leaves that out so the first milestone can prove the route, layout, and content model with minimal new infrastructure.
+
+Current outcome after the first implementation loop: Milestone 1 is complete and most of Milestone 2 is in place. The app now statically builds `/blog` and `/blog/the-operating-system-beats-the-prompt` from Nextra-managed content under `apps/web/content/blog/`, and the article renders through feature-owned components under `apps/web/features/blog/` instead of the docs theme wrapper.
+
+Final outcome: all four milestones are complete. The public surface now includes a real `/blog` index, a premium first article at `/blog/the-operating-system-beats-the-prompt`, footer-only discoverability on the homepage, blog entries in `robots.txt` and `sitemap.xml`, short docs mentions, narrow unit coverage, browser smoke coverage, and a passing production build. The main remaining follow-up is still editorial tooling: if publishing frequency increases, the next project should be a CMS or author workflow layer rather than more route work.
+
+Follow-up after the SEO pass: the blog now also emits JSON-LD, exposes a real table of contents rail, and uses a stronger editorial header that is materially closer to the OpenAI-style reference the user asked for. The only remaining execution gap is repository hygiene outside the blog feature: a clean whole-repo `bun run build` is currently blocked by unrelated packet-flow refactor changes already present in the worktree.
 
 When the work is complete, update this section with the actual shipped surface, the validation evidence, the final route list, and any residual gaps such as missing taxonomy or planned CMS migration.
 
@@ -227,8 +268,9 @@ The first implementation pass should produce these repository-relative files:
     content/blog/<first-post>.mdx
     features/blog/content/blog.ts
     features/blog/server/page-paths.ts
+    features/blog/server/blog-posts.ts
     features/blog/lib/blog-metadata.ts
-    features/blog/lib/blog-page-map.ts
+    features/blog/lib/blog-formatters.ts
     features/blog/components/blog-index-page.tsx
     features/blog/components/blog-post-page.tsx
     features/blog/components/blog-post-shell.tsx
@@ -274,6 +316,11 @@ Expected observation:
     ✓ blog page paths generate /blog and /blog/<slug> correctly
     ✓ blog metadata emits canonical and article social tags
 
+Observed on 2026-03-26 18:06 EDT:
+
+    Test Files  2 passed (2)
+         Tests  5 passed (5)
+
 Then run browser smoke once the route and crawl surface are wired:
 
     cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web
@@ -285,6 +332,20 @@ Expected observation:
     /blog returns 200 and lists the first post
     /blog/<slug> returns 200 and contains rel="canonical" plus content="article"
 
+Observed on 2026-03-26 18:08 EDT:
+
+    7 passed (42.1s)
+    /blog returns 200 and lists the first post
+    /blog/the-operating-system-beats-the-prompt returns 200 and emits article metadata
+    /sitemap.xml contains /blog and /blog/the-operating-system-beats-the-prompt
+
+Observed on 2026-03-26 18:54 EDT against the already-running local dev server:
+
+    PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 bunx playwright test --project=browser-smoke tests/browser-smoke/app-smoke.spec.ts
+    7 passed (3.5s)
+    /blog emits Blog JSON-LD
+    /blog/the-operating-system-beats-the-prompt emits BlogPosting JSON-LD and visible contents headings
+
 Finish with the broader production check:
 
     cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web
@@ -295,6 +356,27 @@ Expected observation:
     Route generation includes /blog
     Route generation includes /blog/<first-post>
     Build completes without MDX or metadata errors
+
+Observed on 2026-03-26 18:09 EDT:
+
+    ● /blog/[[...slug]]
+      ├ /blog
+      └ /blog/the-operating-system-beats-the-prompt
+
+Also observed on 2026-03-26 18:09 EDT:
+
+    bun run lint
+    Found 0 warnings and 0 errors.
+
+    bun run format:check
+    All matched files use the correct format.
+
+Current limitation observed on 2026-03-26 18:55 EDT:
+
+    bun run build
+    Fails in unrelated packet-flow code:
+    ./features/packet-flow/components/packet-stage-page.tsx:132
+    Property 'stage' does not exist on PacketStageProgressPanel props
 
 ## Validation and Acceptance
 
@@ -339,11 +421,14 @@ The blog should follow this architecture shape, which keeps content, runtime log
     features/blog/server/page-paths.ts
       Owns route segments, source-path translation, and static param generation.
 
-    features/blog/lib/blog-page-map.ts
-      Owns normalization from Nextra page-map output into published blog index entries.
+    features/blog/server/blog-posts.ts
+      Owns strict frontmatter validation, `draft: true` filtering, published index summaries, and published post lookup.
 
     features/blog/lib/blog-metadata.ts
       Owns canonical URL, social metadata, and any BlogPosting structured data helpers.
+
+    features/blog/lib/blog-formatters.ts
+      Owns shared date formatting so index cards and article shells stay consistent.
 
     features/blog/content/blog.ts
       Owns the programmatic index intro copy and the shared sponsor-style promo copy for article pages.
@@ -353,6 +438,9 @@ The blog should follow this architecture shape, which keeps content, runtime log
 
     content/blog/*
       Owns author-written MDX and `_meta.ts`.
+
+    public/blog/*
+      Owns the provisional but shippable local SVG and MP4 assets used by the first article.
 
 The first post should prove the exact pattern the user asked for: one side carries the editorial text, the other side carries the image or video. It is acceptable for the desktop layout to alternate between text-left and text-right blocks while mobile always stacks text first. The sponsor-style promo block should appear before the main article body, look like a tasteful native sponsorship unit, and use the homepage promise rather than a new offer line.
 
@@ -373,6 +461,9 @@ These interfaces should exist by the end of the work:
       authorRole: string
       featured?: boolean
       draft?: boolean
+      heroMediaKind: "image" | "video"
+      heroMediaSrc: string
+      heroPosterSrc?: string
     }
 
     type BlogPromoContent = {
@@ -383,10 +474,12 @@ These interfaces should exist by the end of the work:
 
     function getBlogPageSegments(slug?: string[]): string[]
     function getBlogPagePath(slug?: string[]): string
-    function getBlogSourcePath(slug?: string[]): string
+    function getBlogSourcePath(slug: string[]): string
     function generateBlogStaticParams(): Promise<{ slug: string[] }[]>
-    function buildBlogMetadata(args: { slug?: string[]; metadata?: Metadata }): Metadata
-    function listBlogPosts(): Promise<BlogIndexEntry[]>
+    function buildBlogIndexMetadata(): Metadata
+    function buildBlogPostMetadata(post: BlogPostSummary): Metadata
+    function getPublishedBlogPostSummaries(): Promise<BlogPostSummary[]>
+    function getPublishedBlogPostBySlug(slug: string[]): Promise<BlogPostRecord | null>
 
 The editorial component interfaces should remain narrow and explicit. Avoid config bags. A split section component should take only the props it needs: orientation, eyebrow if used, title, body content, media data, and optional caption or CTA. A media frame component should take a discriminated union for image versus video so invalid states fail early. The sponsor-style promo block should consume shared content plus a control-plane CTA target rather than per-post freeform promo fields.
 

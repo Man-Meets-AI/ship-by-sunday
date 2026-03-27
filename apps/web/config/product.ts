@@ -32,6 +32,7 @@ export const routeConfig = {
 	review: "/review",
 	execute: "/execute",
 	docs: "/docs",
+	blog: "/blog",
 	mission: "/mission",
 	artifacts: "/artifacts",
 	settings: "/settings",
@@ -135,6 +136,15 @@ export const starterConfig = {
 		badgeLabel: "Starter Docs",
 		description:
 			"Customer-facing setup and troubleshooting docs for the starter, curated from the repo source docs and optimized for fast fixes.",
+	},
+	blog: {
+		footerLabel: "Blog",
+		description:
+			"Public editorials from Ship by Sunday on durable product context, agent-ready packs, and shipping real software with AI without losing the thread.",
+		promoCtaTarget: {
+			kind: "link",
+			href: "/#pricing",
+		} satisfies HomePageCtaTarget,
 	},
 	modules: {
 		docs: true,

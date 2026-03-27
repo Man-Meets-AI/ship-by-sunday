@@ -107,7 +107,7 @@ describe("PacketReviewPage", () => {
 		pushMock.mockReset();
 	});
 
-	it("renders outward-facing pack labels, the starter snapshot download, and the execute preview", async () => {
+	it("renders the starter snapshot as the primary outcome and expands execute after download", async () => {
 		const user = userEvent.setup();
 		const readyWorkspaceState = createWorkspaceState();
 		render(<PacketReviewPage initialWorkspaceState={readyWorkspaceState} />);
@@ -116,23 +116,25 @@ describe("PacketReviewPage", () => {
 			screen.getByRole("heading", { name: "Review & Download" }),
 		).toBeTruthy();
 		const reviewVideo = screen.getByTestId("packet-review-video-player");
-		const checkpoint = screen.getByText("Checkpoint complete");
-		expect(screen.getByText("Checkpoint complete")).toBeTruthy();
+		const checkpoint = screen.getByText("Starter Snapshot is ready.");
+		expect(screen.getByText("Starter Snapshot is ready.")).toBeTruthy();
 		expect(screen.getByText("Design Pack")).toBeTruthy();
 		expect(screen.getByText("Marketing Pack")).toBeTruthy();
 		expect(screen.getByText("Build Pack")).toBeTruthy();
 		expect(screen.getByText("Prompt Pack")).toBeTruthy();
-		expect(screen.getByText("Execute / Ship")).toBeTruthy();
+		expect(
+			screen.getByText(
+				"Execute / Ship opens as a separate optional next path after this download.",
+			),
+		).toBeTruthy();
+		expect(
+			screen.queryByRole("button", { name: "Unlock Execute / Ship" }),
+		).toBeNull();
 		expect(reviewVideo.textContent).toBe("Review Video");
 		expect(
 			reviewVideo.compareDocumentPosition(checkpoint) &
 				Node.DOCUMENT_POSITION_FOLLOWING,
 		).toBeTruthy();
-		expect(
-			screen
-				.getByRole("button", { name: "Download Starter Snapshot first" })
-				.hasAttribute("disabled"),
-		).toBe(true);
 
 		await user.click(
 			screen.getByRole("link", { name: "Download Starter Snapshot" }),
@@ -143,6 +145,7 @@ describe("PacketReviewPage", () => {
 				.getByRole("button", { name: "Unlock Execute / Ship" })
 				.hasAttribute("disabled"),
 		).toBe(false);
+		expect(screen.getByText("Execute / Ship")).toBeTruthy();
 
 		unlockExecuteShipMock.mockResolvedValue({
 			executeShipUnlockedAt: 123,

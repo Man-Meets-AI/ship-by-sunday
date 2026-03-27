@@ -36,6 +36,7 @@ type SaveProjectDefinitionFactsMutation = (
 
 type StepStateRecord<T> = Record<string, T | undefined>;
 type DraftValuesByStepId = Record<string, PacketStepDraftValues>;
+type PacketStepSaveIntent = "continue" | "stay";
 
 function removeStepEntry<T>(record: StepStateRecord<T>, stepId: string) {
 	const nextRecord = { ...record };
@@ -52,6 +53,38 @@ function upsertStepEntry<T>(
 		...record,
 		[stepId]: value,
 	};
+}
+
+function arePacketStepDraftValuesEqual(
+	left: PacketStepDraftValues,
+	right: PacketStepDraftValues,
+) {
+	const leftKeys = Object.keys(left);
+	const rightKeys = Object.keys(right);
+	if (leftKeys.length !== rightKeys.length) {
+		return false;
+	}
+
+	return leftKeys.every(
+		(fieldKey) =>
+			left[fieldKey as CanonicalProjectFactKey] ===
+			right[fieldKey as CanonicalProjectFactKey],
+	);
+}
+
+function areDraftValuesByStepIdEqual(
+	left: DraftValuesByStepId,
+	right: DraftValuesByStepId,
+) {
+	const leftKeys = Object.keys(left);
+	const rightKeys = Object.keys(right);
+	if (leftKeys.length !== rightKeys.length) {
+		return false;
+	}
+
+	return leftKeys.every((stepKey) =>
+		arePacketStepDraftValuesEqual(left[stepKey] ?? {}, right[stepKey] ?? {}),
+	);
 }
 
 function focusFirstMissingField(
@@ -75,7 +108,7 @@ function buildFieldErrorByFieldKey(
 	return Object.fromEntries(
 		fieldKeys.map((fieldKey) => [
 			fieldKey,
-			"This field is required before this step can complete.",
+			"Add an answer here before this page can complete.",
 		]),
 	);
 }
@@ -119,7 +152,11 @@ export function usePacketStageStepState({
 	const [isSaving, setIsSaving] = useState(false);
 
 	useEffect(() => {
-		setDraftValuesByStepId(savedDraftValuesByStepId);
+		setDraftValuesByStepId((current) =>
+			areDraftValuesByStepIdEqual(current, savedDraftValuesByStepId)
+				? current
+				: savedDraftValuesByStepId,
+		);
 	}, [savedDraftValuesByStepId]);
 
 	useEffect(() => {
@@ -222,11 +259,15 @@ export function usePacketStageStepState({
 		);
 	}
 
-	function handleSave() {
-		void saveCurrentStep();
+	function handleSaveAndContinue() {
+		void saveCurrentStep("continue");
 	}
 
-	async function saveCurrentStep() {
+	function handleSaveAndStay() {
+		void saveCurrentStep("stay");
+	}
+
+	async function saveCurrentStep(saveIntent: PacketStepSaveIntent) {
 		if (!currentStep) {
 			return;
 		}
@@ -282,6 +323,7 @@ export function usePacketStageStepState({
 			);
 			setSuccessStepId(currentStep.id);
 			if (
+				saveIntent === "continue" &&
 				nextHref &&
 				(currentStep.id !== stage.steps.at(-1)?.id ||
 					doesCompletingStepCompleteStage(stageStatus, currentStep))
@@ -312,8 +354,9 @@ export function usePacketStageStepState({
 		currentFieldErrors,
 		currentStep,
 		currentDraftValues,
+		handleSaveAndContinue,
+		handleSaveAndStay,
 		handleFieldChange,
-		handleSave,
 		isSaving,
 		goToPreviousStep: () => {
 			if (previousHref) {

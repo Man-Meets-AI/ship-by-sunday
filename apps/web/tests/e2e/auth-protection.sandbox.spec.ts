@@ -1,14 +1,16 @@
 import { expect, test } from "@playwright/test";
 
 import {
+	memberWithAccessEmail,
+	memberWithAccessPassword,
 	memberWithAccessStorageStatePath,
 	memberWithoutAccessStorageStatePath,
-	shouldRunSandboxAuth,
+	shouldRunAuthenticatedE2E,
 } from "./auth-state";
 
 test.skip(
-	!shouldRunSandboxAuth,
-	"Set E2E_RUN_SANDBOX=1 and PLAYWRIGHT_BASE_URL to run auth protection checks.",
+	!shouldRunAuthenticatedE2E,
+	"Set E2E_RUN_SANDBOX=1 or E2E_RUN_LOCAL_AUTH=1 and PLAYWRIGHT_BASE_URL to run authenticated auth-protection checks.",
 );
 
 test.describe("protected routes", () => {
@@ -17,6 +19,18 @@ test.describe("protected routes", () => {
 	}) => {
 		await page.goto("/start");
 		await expect(page).toHaveURL(/\/sign-in/);
+	});
+
+	test("@default_ship preserves redirect intent when an entitled user signs in", async ({
+		page,
+	}) => {
+		await page.goto("/sign-in?redirect_url=%2Fproduct");
+		await page.getByLabel(/^email$/i).fill(memberWithAccessEmail);
+		await page.getByLabel(/^password$/i).fill(memberWithAccessPassword);
+		await page.getByRole("button", { name: /^sign in$/i }).click();
+
+		await expect(page).toHaveURL(/\/product\/[^/]+$/);
+		await expect(page.getByText("Product").first()).toBeVisible();
 	});
 
 	test.describe("member without access", () => {
@@ -45,9 +59,11 @@ test.describe("protected routes", () => {
 		}) => {
 			await page.goto("/start");
 			await expect(page).toHaveURL(/\/start/);
-			await expect(page.getByText("How this works")).toBeVisible();
 			await expect(
-				page.getByRole("link", { name: "Open the packet flow" }),
+				page.getByText("Build the folder before you build the app."),
+			).toBeVisible();
+			await expect(
+				page.getByRole("link", { name: /^Continue with /i }),
 			).toBeVisible();
 		});
 
@@ -56,7 +72,9 @@ test.describe("protected routes", () => {
 		}) => {
 			await page.goto("/lesson/not-a-real-lesson");
 			await expect(page).toHaveURL(/\/start/);
-			await expect(page.getByText("How this works")).toBeVisible();
+			await expect(
+				page.getByText("Build the folder before you build the app."),
+			).toBeVisible();
 		});
 	});
 });

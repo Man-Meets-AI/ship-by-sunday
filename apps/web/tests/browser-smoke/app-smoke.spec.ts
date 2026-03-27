@@ -14,6 +14,7 @@ test("landing page renders the main offer CTA", async ({ request }) => {
 	expect(html).toContain("Get instant access");
 	expect(html).toContain('id="system"');
 	expect(html).toContain('id="pricing"');
+	expect(html).toContain(">Blog<");
 });
 
 test("checkout success without a session renders the recovery surface", async ({
@@ -49,11 +50,53 @@ test("public crawl endpoints expose the indexable surface", async ({
 	expect(robotsResponse.ok()).toBe(true);
 	expect(robotsBody).toContain("Sitemap:");
 	expect(robotsBody).toContain("/sitemap.xml");
+	expect(robotsBody).toContain("Allow: /blog");
 	expect(robotsBody).toContain("Disallow: /sign-in");
 
 	expect(sitemapResponse.ok()).toBe(true);
 	expect(sitemapBody).toContain("<urlset");
+	expect(sitemapBody).toContain("/blog</loc>");
+	expect(sitemapBody).toContain(
+		"/blog/the-operating-system-beats-the-prompt</loc>",
+	);
 	expect(sitemapBody).toContain("/docs/local-setup</loc>");
+});
+
+test("blog index renders the published post and canonical tag", async ({
+	request,
+}) => {
+	const response = await request.get("/blog");
+	const html = await response.text();
+
+	expect(response.ok()).toBe(true);
+	expect(html).toContain("Build the operating system");
+	expect(html).toContain("The operating system beats the prompt");
+	expect(html).toContain('rel="canonical"');
+	expect(html).toContain('type="application/ld+json"');
+	expect(html).toContain('"@type":"Blog"');
+	expect(html).toContain("/blog");
+});
+
+test("blog article emits article metadata and shared promo content", async ({
+	request,
+}) => {
+	const response = await request.get(
+		"/blog/the-operating-system-beats-the-prompt",
+	);
+	const html = await response.text();
+
+	expect(response.ok()).toBe(true);
+	expect(html).toContain("The operating system beats the prompt");
+	expect(html).toContain('rel="canonical"');
+	expect(html).toContain("/blog/the-operating-system-beats-the-prompt");
+	expect(html).toContain('property="og:type"');
+	expect(html).toContain('content="article"');
+	expect(html).toContain('type="application/ld+json"');
+	expect(html).toContain('"@type":"BlogPosting"');
+	expect(html).toContain("Ship a real product by Sunday");
+	expect(html).toContain("Contents");
+	expect(html).toContain("The interface should prove the sequence");
+	expect(html).toContain("The build breaks when the facts stop being durable");
 });
 
 test("docs pages emit canonical tags and auth pages emit noindex", async ({

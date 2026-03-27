@@ -6,9 +6,7 @@ import {
 	getPacketStageDefinition,
 	type PacketStageStatus,
 } from "@packet-compiler";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { packetFieldLabel } from "@/features/packet-flow/lib/packet-field-helpers";
 
 export function PacketStageSidebar({
@@ -26,42 +24,47 @@ export function PacketStageSidebar({
 		stageStatus.stageId === "build-plan"
 			? `Download ${getPublicPackLabelForStage(stageStatus.stageId)}`
 			: "Download pack";
+	const stageLabel = getPacketStageDefinition(stageStatus.stageId).label;
+	const missingFieldLabels = stageStatus.missingFactKeys.map(packetFieldLabel);
 
 	return (
-		<div className="space-y-4">
-			<Card>
-				<CardHeader>
-					<CardTitle>Stage status</CardTitle>
-				</CardHeader>
-				<CardContent className="space-y-3">
-					<Badge variant={stageStatus.isComplete ? "secondary" : "outline"}>
-						{stageStatus.isComplete ? "Ready" : "In progress"}
-					</Badge>
-					{stageStatus.missingFactKeys.length ? (
-						<ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-							{stageStatus.missingFactKeys.map((fieldKey) => (
-								<li key={fieldKey}>{packetFieldLabel(fieldKey)}</li>
-							))}
-						</ul>
-					) : (
-						<p className="text-sm text-muted-foreground">
-							This stage has all required facts.
-						</p>
-					)}
-				</CardContent>
-			</Card>
-			{downloadHref ? (
-				<Button asChild className="w-full">
-					<Link href={downloadHref}>{downloadLabel}</Link>
-				</Button>
+		<aside className="space-y-4 border-t border-border/60 pt-5 xl:border-l xl:border-t-0 xl:pl-6 xl:pt-0">
+			<div className="space-y-2">
+				<p className="text-sm font-medium text-muted-foreground">
+					{stageStatus.isComplete ? "Section ready" : "Still to lock in"}
+				</p>
+				<h2 className="text-lg font-semibold tracking-tight">
+					{stageStatus.isComplete
+						? `${stageLabel} is ready.`
+						: `Close ${stageLabel}.`}
+				</h2>
+				<p className="text-sm leading-6 text-muted-foreground">
+					{stageStatus.isComplete
+						? "All required answers for this section are saved."
+						: `${missingFieldLabels.length} answer${missingFieldLabels.length === 1 ? "" : "s"} still need attention before this section is complete.`}
+				</p>
+			</div>
+			{missingFieldLabels.length ? (
+				<ul className="space-y-2 border-t border-border/60 pt-4 text-sm text-muted-foreground">
+					{missingFieldLabels.map((label) => (
+						<li key={label}>{label}</li>
+					))}
+				</ul>
 			) : null}
-			{nextStageId ? (
-				<Button asChild variant="outline" className="w-full">
-					<Link href={getPacketStageDefinition(nextStageId).route}>
-						Continue to {getPacketStageDefinition(nextStageId).label}
-					</Link>
-				</Button>
-			) : null}
-		</div>
+			<div className="flex flex-col gap-3 border-t border-border/60 pt-4">
+				{downloadHref ? (
+					<Button asChild className="w-full">
+						<Link href={downloadHref}>{downloadLabel}</Link>
+					</Button>
+				) : null}
+				{nextStageId ? (
+					<Button asChild variant="outline" className="w-full">
+						<Link href={getPacketStageDefinition(nextStageId).route}>
+							Continue to {getPacketStageDefinition(nextStageId).label}
+						</Link>
+					</Button>
+				) : null}
+			</div>
+		</aside>
 	);
 }

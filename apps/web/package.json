@@ -30,6 +30,8 @@
 		"test:e2e:sandbox": "playwright test --project=sandbox-e2e",
 		"test:e2e:sandbox:default-ship": "playwright test --project=sandbox-e2e --grep @default_ship",
 		"test:e2e:sandbox:billing-integration": "playwright test --project=sandbox-e2e --grep @billing_integration",
+		"test:e2e:local-auth": "E2E_RUN_LOCAL_AUTH=1 playwright test --project=sandbox-e2e",
+		"test:e2e:local-auth:default-ship": "E2E_RUN_LOCAL_AUTH=1 playwright test --project=sandbox-e2e --grep @default_ship",
 		"playwright:install": "playwright install --with-deps chromium",
 		"check": "bun run lint && bun run format:check && bun run test:unit && bun run test:contracts && bun run test:integration && bun run test:coverage:critical && bun run build",
 		"video:cut:setup": "node scripts/video-cut-setup.mjs",
