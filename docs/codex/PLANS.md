@@ -40,6 +40,12 @@ Do not point the implementer at external blogs or docs for required knowledge. I
 
 Write in plain prose. Prefer sentences over lists. Avoid checklists, tables, and long enumerations unless brevity would obscure meaning. Checklists are permitted only in the `Progress` section, where they are mandatory. Narrative sections must remain prose-first.
 
+Every ExecPlan file must start with YAML front matter before the main `#` heading. The front matter must contain exactly these keys:
+
+- `summary`: one or two sentences summarizing the plan
+- `read_when`: one sentence telling an agent when the plan is worth opening
+- `plan_status`: either `done` or `not_done`
+
 When returning an ExecPlan in chat, wrap the entire plan in one fenced `md` code block and do not nest additional fenced code blocks inside it. Present commands, expected transcripts, diffs, or code examples as indented blocks inside that single fence.
 
 When writing an ExecPlan directly to a Markdown file, omit the outer triple backticks so the file contains only the plan.
@@ -66,6 +72,7 @@ Capture evidence. When the steps produce terminal output, short diffs, or logs, 
 
 Each ExecPlan should follow this structure in order:
 
+0. YAML front matter with `summary`, `read_when`, and `plan_status`
 1. `# <Short action-oriented title>`
 2. One short paragraph stating that the document is a living execution plan
 3. One sentence referencing `docs/codex/PLANS.md` and stating that the ExecPlan must be maintained in accordance with it

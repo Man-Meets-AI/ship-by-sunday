@@ -1,3 +1,9 @@
+---
+summary: "ExecPlan for stripping the routed packet workspace down to a cleaner, more premium, lesson-like surface without changing the packet contract or saved outputs. It focuses on removing noisy chrome, tightening hierarchy, and keeping the packet flow functional across Start, core stages, Review, and the optional Execute branch."
+read_when: "Open this when you need to implement or understand the simplified packet workspace shell after the route-driven packet funnel lands."
+plan_status: "done"
+---
+
 # Distill Packet Workspace Surfaces
 
 This document is a living execution plan for stripping the packet workspace pages down to a simpler, more premium, lesson-like experience after the route-driven packet video funnel has landed, without changing the packet contract, route order, or saved outputs.

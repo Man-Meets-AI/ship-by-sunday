@@ -1,3 +1,9 @@
+---
+summary: "Contract design doc that turns the local OpenAI canon into structured shadcn/React affordances for marketing, design, and long-horizon execution workflows. It maps each domain to field schemas, editors, and implementation recommendations."
+read_when: "Open this when building structured editors or form contracts for OpenAI-related marketing, design, or long-horizon planning flows."
+plan_status: "done"
+---
+
 # OpenAI Domain UI Contracts
 
 ## Initiative

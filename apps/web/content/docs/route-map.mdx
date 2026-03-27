@@ -20,7 +20,7 @@ description: See the main public, protected, and purchase-related routes in one 
 - `/session-tasks/reset-password`: Clerk password-reset task inside the shared identity shell
 - `/sso-callback`: OAuth callback completion route inside the shared identity shell
 - `/start`: canonical first-time workspace landing after checkout
-- `/mission`: legacy compatibility route that now forwards into `/start`
+- `/mission`: restored post-review bonus-library home that stays locked until Execute / Ship is unlocked
 
 ## Protected product routes
 
@@ -34,10 +34,13 @@ description: See the main public, protected, and purchase-related routes in one 
 - `/build-plan`: stable stage-entry route that redirects to the current Build Plan packet page
 - `/build-plan/[stepId]`: canonical Build Plan packet pages such as `/build-plan/delivery`, `/build-plan/plan`, and `/build-plan/validation`
 - `/review`: final readiness and repo-download surface
-- `/execute`: optional post-review execution hub that unlocks from `/review`
+- `/execute`: optional post-review bonus bridge that unlocks from `/review`, offers `Continue in Build` to lesson `3.1`, offers `Start from the beginning` to lesson `1.1`, and redirects repeat bonus visitors to `/mission`
 - `/settings`: protected account and product settings
-- `/lesson/[lessonKey]`: legacy compatibility route that now forwards into `/start`
+- `/mission`: bonus-library home once the post-review bonus is unlocked; it defaults to Build but keeps the natural `Product -> Design -> Build -> Ship` block order in the top rail
+- `/lesson/[lessonKey]`: restored post-review bonus lesson route; renders locked messaging before unlock and video-first bonus lessons after unlock
 - `/artifacts`: legacy compatibility route that now forwards into `/review`
+
+Repeat-routing note: after a customer opens any restored bonus lesson, `/execute` stops acting like the first-entry bridge and sends them to `/mission` instead. QA should verify both the first unlocked bridge state and the repeat-visit redirect state.
 
 These protected routes render behind `app/(workspace)/layout.tsx`, starting from server-fetched access or packet-workspace data before the browser resumes live Convex subscriptions. The stage-root URLs remain the shared app contract, but the packet form itself now lives on the nested packet pages.
 

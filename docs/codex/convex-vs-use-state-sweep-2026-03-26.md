@@ -1,3 +1,9 @@
+---
+summary: "A sweep of `useState` usage in `apps/web` that classifies each instance as Convex-worthy, local UI state, or derivable state. The conclusion is that no obvious high-confidence Convex migrations remain after the lesson-state and packet-state work."
+read_when: "Open this when you want to check whether a new local state candidate belongs in Convex or should stay browser-local."
+plan_status: "done"
+---
+
 # Convex vs useState Sweep
 
 Date: 2026-03-26

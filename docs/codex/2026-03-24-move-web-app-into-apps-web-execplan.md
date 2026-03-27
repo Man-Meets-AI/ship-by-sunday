@@ -1,3 +1,9 @@
+---
+summary: "Execution plan for moving the web app into `apps/web`, adding an app-local package manifest, and making the repo root the workspace and orchestration layer. It captures the filesystem migration, root command delegation, Vercel root update, and residual follow-up checks."
+read_when: "Open this when working on repo layout, app/root boundaries, workspace scripts, or deployment-root migration."
+plan_status: "done"
+---
+
 # Move the Web Application Into `apps/web`
 
 This document is a living execution plan for relocating the current single-root Next.js application into `apps/web`, introducing an app-local `package.json`, and turning the repository root into the workspace and orchestration layer for package management, repo docs, deployment coordination, and top-level agent routing.

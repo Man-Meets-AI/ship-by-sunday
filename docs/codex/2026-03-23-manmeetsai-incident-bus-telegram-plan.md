@@ -1,3 +1,9 @@
+---
+summary: "Living execution plan for completing observability incident delivery to Telegram, including incident modeling, provider adapters, lifecycle control, and rollout evidence. It records completed work and the remaining Codex live-smoke gap."
+read_when: "Open this when working on observability incidents, Telegram delivery, lifecycle state, or the remaining live-smoke verification."
+plan_status: "done"
+---
+
 # Complete Observability Incident Delivery to Telegram
 
 This is a living execution plan for finishing the observability incident delivery work that has already been partially implemented in this repository. It must be updated whenever progress, discoveries, or scope decisions change so that a fresh coding agent can resume from this file alone.

@@ -1,3 +1,9 @@
+---
+summary: "ExecPlan for making packet stage saves truthful across all stages so blank, partial, and complete saves produce the right user-facing result. It adds inline feedback, field-level errors, and navigation behavior that matches what actually happened on save."
+read_when: "Open this when packet stage save behavior needs to distinguish blank, partial, cleared, and complete submissions correctly."
+plan_status: "done"
+---
+
 # Make Packet Step Saves Truthful Across All Stages
 
 This document is a living execution plan for making every packet stage tell the truth when a user tries to save a blank, partial, or complete step. It is written so a fresh coding agent can execute the work without prior chat context and must be updated as progress, discoveries, validation results, and scope decisions accumulate.

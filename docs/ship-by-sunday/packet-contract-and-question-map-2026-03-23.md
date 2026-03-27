@@ -27,10 +27,10 @@ This is the architecture:
 
 My recommendation is to keep the packet literal and file-shaped, not flatten it into one mega-doc.
 
-### Final packet tree
+### Final generated docs tree inside the starter snapshot
 
 ```text
-packet/
+docs/
   README.md
   facts/
     project-definition.json
@@ -54,31 +54,37 @@ packet/
       implement.md
       documentation.md
   prompts/
-    marketing.md
-    implementation.md
-    qa.md
-    deploy.md
+    execplan-execution-loop.md
+    execplan-grill.md
+    execplan-writer.md
 ```
+
+The earlier generated `prompts/marketing.md`, `prompts/implementation.md`, `prompts/qa.md`, and `prompts/deploy.md` pack is deprecated. The shipped starter repo now carries the static ExecPlan prompt assets under `docs/prompts/`.
 
 ### Source packet files
 
 These should be represented as literal customized files in the download:
 
-- [docs/openai/design-checklist/AGENTS.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/openai/design-checklist/AGENTS.md)
-- [docs/openai/design-checklist/CHECKLIST.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/openai/design-checklist/CHECKLIST.md)
-- [docs/openai/design-checklist/PLANS.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/openai/design-checklist/PLANS.md)
-- [docs/openai/design-checklist/documentation.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/openai/design-checklist/documentation.md)
-- [docs/openai/openai-marketing-kit/README.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/openai/openai-marketing-kit/README.md)
-- [docs/openai/openai-marketing-kit/AGENTS.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/openai/openai-marketing-kit/AGENTS.md)
-- [docs/openai/openai-marketing-kit/CHECKLIST.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/openai/openai-marketing-kit/CHECKLIST.md)
-- [docs/openai/openai-marketing-kit/PLANS.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/openai/openai-marketing-kit/PLANS.md)
-- [docs/openai/openai-marketing-kit/documentation.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/openai/openai-marketing-kit/documentation.md)
-- [docs/openai/codex_long_horizon_templates/AGENTS.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/openai/codex_long_horizon_templates/AGENTS.md)
-- [docs/openai/codex_long_horizon_templates/CHECKLIST.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/openai/codex_long_horizon_templates/CHECKLIST.md)
-- [docs/openai/codex_long_horizon_templates/docs/prompt.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/openai/codex_long_horizon_templates/docs/prompt.md)
-- [docs/openai/codex_long_horizon_templates/docs/plans.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/openai/codex_long_horizon_templates/docs/plans.md)
-- [docs/openai/codex_long_horizon_templates/docs/implement.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/openai/codex_long_horizon_templates/docs/implement.md)
-- [docs/openai/codex_long_horizon_templates/docs/documentation.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/openai/codex_long_horizon_templates/docs/documentation.md)
+- [docs/ship-by-sunday/design-pack/AGENTS.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/design-pack/AGENTS.md)
+- [docs/ship-by-sunday/design-pack/CHECKLIST.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/design-pack/CHECKLIST.md)
+- [docs/ship-by-sunday/design-pack/PLANS.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/design-pack/PLANS.md)
+- [docs/ship-by-sunday/design-pack/documentation.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/design-pack/documentation.md)
+- [docs/ship-by-sunday/marketing-pack/README.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/marketing-pack/README.md)
+- [docs/ship-by-sunday/marketing-pack/AGENTS.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/marketing-pack/AGENTS.md)
+- [docs/ship-by-sunday/marketing-pack/CHECKLIST.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/marketing-pack/CHECKLIST.md)
+- [docs/ship-by-sunday/marketing-pack/PLANS.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/marketing-pack/PLANS.md)
+- [docs/ship-by-sunday/marketing-pack/documentation.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/marketing-pack/documentation.md)
+- [docs/ship-by-sunday/build-pack/AGENTS.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/build-pack/AGENTS.md)
+- [docs/ship-by-sunday/build-pack/CHECKLIST.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/build-pack/CHECKLIST.md)
+- [docs/ship-by-sunday/build-pack/docs/prompt.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/build-pack/docs/prompt.md)
+- [docs/ship-by-sunday/build-pack/docs/plans.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/build-pack/docs/plans.md)
+- [docs/ship-by-sunday/build-pack/docs/implement.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/build-pack/docs/implement.md)
+- [docs/ship-by-sunday/build-pack/docs/documentation.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/build-pack/docs/documentation.md)
+- [docs/prompts/execplan-execution-loop.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/prompts/execplan-execution-loop.md)
+- [docs/prompts/execplan-grill.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/prompts/execplan-grill.md)
+- [docs/prompts/execplan-writer.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/prompts/execplan-writer.md)
+
+The OpenAI baseline packs still live under `docs/openai/` as source templates, but the generated customer packet should now be customized from the Ship by Sunday pack layers under `docs/ship-by-sunday/`.
 
 There is no reason to include `.DS_Store` files.
 
@@ -530,13 +536,13 @@ These are the major packet blockers:
 - explicit `rollback_plan`
 - `open_questions`
 
-These are directly implied by:
-- [docs/openai/design-checklist/PLANS.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/openai/design-checklist/PLANS.md)
-- [docs/openai/design-checklist/CHECKLIST.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/openai/design-checklist/CHECKLIST.md)
-- [docs/openai/openai-marketing-kit/PLANS.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/openai/openai-marketing-kit/PLANS.md)
-- [docs/openai/openai-marketing-kit/CHECKLIST.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/openai/openai-marketing-kit/CHECKLIST.md)
-- [docs/openai/codex_long_horizon_templates/docs/prompt.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/openai/codex_long_horizon_templates/docs/prompt.md)
-- [docs/openai/codex_long_horizon_templates/docs/plans.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/openai/codex_long_horizon_templates/docs/plans.md)
+These are directly implied by the Ship by Sunday custom pack layers built on top of the OpenAI baselines:
+- [docs/ship-by-sunday/design-pack/PLANS.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/design-pack/PLANS.md)
+- [docs/ship-by-sunday/design-pack/CHECKLIST.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/design-pack/CHECKLIST.md)
+- [docs/ship-by-sunday/marketing-pack/PLANS.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/marketing-pack/PLANS.md)
+- [docs/ship-by-sunday/marketing-pack/CHECKLIST.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/marketing-pack/CHECKLIST.md)
+- [docs/ship-by-sunday/build-pack/docs/prompt.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/build-pack/docs/prompt.md)
+- [docs/ship-by-sunday/build-pack/docs/plans.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/build-pack/docs/plans.md)
 
 ## Keep / Combine / Add / Demote
 

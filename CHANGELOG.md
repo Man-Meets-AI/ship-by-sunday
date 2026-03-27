@@ -4,9 +4,9 @@
 
 ### Changed
 
-- Reworked the protected packet workbench around optimistic autosave, a stronger step-progress strip, more explicit stage readiness feedback, and a cleaner Review checkpoint while fixing all four live download endpoints (`design`, `marketing`, `build`, and `starter snapshot`) back to healthy zip responses.
-- Moved lesson drafts onto the same Convex-backed pending-buffer autosave model, simplified the protected shell header chrome, and added an in-app theme toggle so the course and packet workspace now share the same lighter-weight shell behavior.
-- Refreshed the public visual system across the homepage, auth shell, blog frames, and recovery screens with the quieter neutral palette, cleaner spacing, and updated section layouts that now match the current Ship by Sunday presentation.
+- Collapsed Review & Download to one `Starter Snapshot` repo archive, retired the standalone Design/Marketing/Build zip endpoints, and moved the generated pack materials into the repo-root `docs/` tree inside that single download.
+- Restored the post-review bonus library so `/execute` now hands first-time users into the bonus bridge, `/mission` becomes the unlocked continuation library, and bonus lessons read from dedicated Convex route state instead of falling back to legacy redirects.
+- Refreshed the public homepage, docs shell, and auth surfaces with tighter copy, calmer docs chrome, a new tech-stack cloud, and a checkout flow that waits for the server auth response before redirecting signed-out visitors.
 
 ## 2026-03-26
 

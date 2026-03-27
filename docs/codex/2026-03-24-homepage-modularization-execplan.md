@@ -1,3 +1,9 @@
+---
+summary: "Living execution plan for modularizing the homepage into a starter-friendly marketing shell with explicit section controls, CTA targets, and truthful structured data. It documents the completed slices, validation history, and the remaining schema/doc alignment concerns."
+read_when: "Open this when changing homepage sections, CTA behavior, public schema, or starter marketing configuration."
+plan_status: "done"
+---
+
 # Generalize the homepage into a modular starter marketing shell
 
 This is a living execution plan for the next public-surface slice of the starter. It is written so a fresh coding agent can execute the work without prior chat context and must be updated as decisions, discoveries, validation results, and scope adjustments accumulate.

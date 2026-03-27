@@ -1,3 +1,9 @@
+---
+summary: "ExecPlan for a section-by-section visual reset of the public homepage to remove generic AI-landing-page patterns and make the page feel more expensive and deliberate. It keeps the existing homepage contract intact while rebuilding the visual language, hierarchy, and section primitives."
+read_when: "Open this when you need to redesign the public homepage without changing section order, CTA behavior, or SEO and pricing contracts."
+plan_status: "done"
+---
+
 # Reset The Homepage Visual Language And Remove Cheap UI Patterns
 
 This is a living execution plan for a section-by-section visual reset of the public homepage. It is written so a fresh coding agent can execute the redesign without prior chat context and without relying on the earlier implementation thread.

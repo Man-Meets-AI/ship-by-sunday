@@ -1,3 +1,9 @@
+---
+summary: "ExecPlan for adding a public `/blog` surface with programmatic index pages, MDX article routes, premium editorial components, and crawlable metadata. It uses the existing Nextra-backed content pipeline while keeping the blog feature-owned and distinct from the docs shell."
+read_when: "Open this when you need to add or modify the public blog routes, post model, or editorial rendering system."
+plan_status: "done"
+---
+
 # Add A Public Editorial Blog Surface
 
 This is a living execution plan for adding a public blog to the web app. It is written so a fresh coding agent can add the route, content model, editorial components, crawl surfaces, and first post without relying on prior chat context.

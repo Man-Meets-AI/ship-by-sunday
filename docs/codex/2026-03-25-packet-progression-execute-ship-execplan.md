@@ -1,3 +1,9 @@
+---
+summary: "Turns the packet-first funnel into a more game-like progression system with clearer objectives, rewards, and locked section flow. It also adds an optional Execute / Ship branch that unlocks only after review and download."
+read_when: "Open this when working on packet-stage UX, progression state, review checkpoint behavior, or the Execute / Ship unlock path."
+plan_status: "done"
+---
+
 # Gamify Packet Progression and Unlock Execute / Ship
 
 This document is a living execution plan for making the packet-first workspace feel more like a guided game run while preserving the packet contract, then unlocking an optional `Execute / Ship` path after the user reaches the review and download moment.

@@ -1,3 +1,9 @@
+---
+summary: "Redesigns the access-required gate into a branded, calm checkpoint that explains the user state and the next action more clearly. It keeps the underlying access behavior intact while replacing the generic fallback-card feel."
+read_when: "Open this when changing protected-route fallback UI, access-gate copy, or product-access shell/controller behavior."
+plan_status: "done"
+---
+
 # Refresh the Access-Required Gate Experience
 
 This document is a living execution plan for redesigning the Ship by Sunday access-required gate so it feels branded, calm, and trustworthy instead of like a generic fallback card. It must be updated as implementation progresses so a new coding agent can resume from this file alone.
