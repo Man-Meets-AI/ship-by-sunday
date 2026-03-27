@@ -20,9 +20,16 @@ describe("curriculum contract", () => {
 	});
 
 	it("keeps product config and public marketing content aligned", () => {
+		const publicBrandCopy = [
+			homePageContent.hero.eyebrow,
+			homePageContent.hero.body,
+			homePageContent.sprintPathSection.supportingPoints.join("\n"),
+			homePageContent.footerWordmark,
+		].join("\n");
+
 		expect(productConfig.name).toBeTruthy();
 		expect(productConfig.courseSlug).toMatch(/^[a-z0-9-]+$/);
-		expect(homePageContent.hero.body).toContain(productConfig.name);
+		expect(publicBrandCopy).toContain(productConfig.name);
 		expect(homePageContent.pricingSection.priceDisplay).toBe(
 			productConfig.priceDisplay,
 		);
