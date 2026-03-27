@@ -17,7 +17,7 @@ export const homePageContent = {
 		headlineLead: "Ship a real product",
 		headlineTailPrefix: "",
 		headlineTailHover: "by Sunday",
-		body: `${productName} gives you one serious system for locking the product truth, compiling contract-first docs packs, and shipping a real, durable product by Sunday without losing the repo on Monday.`,
+		body: `One serious system to lock your product truth, compile agent-ready packs, and ship a real v1 by Sunday—without losing the repo on Monday.`,
 		primaryCta: marketingDisplayConfig.primaryCtaLabel,
 		secondaryCta: {
 			label: "See the system",

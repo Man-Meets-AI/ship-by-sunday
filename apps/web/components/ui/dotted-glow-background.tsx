@@ -46,7 +46,7 @@ export const DottedGlowBackground = ({
 	className,
 	gap = 12,
 	radius = 2,
-	color = "rgba(0,0,0,0.7)",
+	color = "rgba(17,17,17,0.7)",
 	darkColor,
 	glowColor = "rgba(0, 170, 255, 0.85)",
 	darkGlowColor,
@@ -225,10 +225,10 @@ export const DottedGlowBackground = ({
 					height * 0.5,
 					Math.max(width, height) * 0.7,
 				);
-				grad.addColorStop(0, "rgba(0,0,0,0)");
+				grad.addColorStop(0, "rgba(17,17,17,0)");
 				grad.addColorStop(
 					1,
-					`rgba(0,0,0,${Math.min(Math.max(backgroundOpacity, 0), 1)})`,
+					`rgba(17,17,17,${Math.min(Math.max(backgroundOpacity, 0), 1)})`,
 				);
 				ctx.fillStyle = grad as unknown as CanvasGradient;
 				ctx.fillRect(0, 0, width, height);

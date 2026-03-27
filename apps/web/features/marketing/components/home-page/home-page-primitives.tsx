@@ -9,23 +9,6 @@ export const homePageSectionClassName =
 export const homePageQuietSurfaceClassName =
 	"rounded-[32px] border border-border/70 bg-muted/20";
 
-export function HomePageSectionOverline({
-	children,
-	className,
-}: {
-	readonly children: string;
-	readonly className?: string;
-}) {
-	return (
-		<div className={cn("flex items-center gap-3", className)}>
-			<span className="font-mono text-[0.72rem] uppercase tracking-[0.24em] text-muted-foreground">
-				{children}
-			</span>
-			<span className="h-px flex-1 bg-border/70" />
-		</div>
-	);
-}
-
 export function HomePageSecondaryLink({
 	href,
 	label,

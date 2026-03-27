@@ -33,7 +33,7 @@ function SystemPreviewNode({
 	return (
 		<div
 			className={cn(
-				"absolute flex min-h-[68px] items-center justify-center rounded-[18px] border border-border/70 bg-background/90 px-4 py-3 text-center font-mono text-[0.72rem] uppercase tracking-[0.18em] text-foreground/82 shadow-[0_1px_0_rgba(255,255,255,0.35)_inset]",
+				"absolute flex min-h-[64px] items-center justify-center rounded-2xl border border-border/40 bg-background/95 px-5 py-3 text-center text-xs font-bold tracking-wider text-foreground/70 uppercase shadow-md transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:text-foreground",
 				className,
 			)}
 		>
@@ -46,13 +46,13 @@ export function SystemLoopPreview({ className }: { className?: string }) {
 	return (
 		<div
 			className={cn(
-				"relative aspect-[11/10] overflow-hidden rounded-[28px] border border-border/70 bg-background p-5 shadow-[0_1px_0_rgba(255,255,255,0.35)_inset] sm:p-6",
+				"relative aspect-[11/10] overflow-hidden rounded-[32px] border border-border/40 bg-background/50 p-8 shadow-xl transition-all duration-700 sm:p-12",
 				className,
 			)}
 		>
-			<div className="absolute left-1/2 top-[18%] h-[49%] w-px -translate-x-1/2 bg-border/70" />
-			<div className="absolute left-[18%] top-1/2 h-px w-[64%] -translate-y-1/2 bg-border/70" />
-			<div className="absolute left-1/2 top-1/2 h-[36%] w-[36%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-border/60" />
+			<div className="absolute left-1/2 top-[15%] h-[70%] w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-border/40 to-transparent" />
+			<div className="absolute left-[15%] top-1/2 h-px w-[70%] -translate-y-1/2 bg-gradient-to-r from-transparent via-border/40 to-transparent" />
+			
 			{previewNodes.map((node) => (
 				<SystemPreviewNode
 					key={node.id}
@@ -60,16 +60,9 @@ export function SystemLoopPreview({ className }: { className?: string }) {
 					className={node.positionClassName}
 				/>
 			))}
-			<div className="absolute left-1/2 top-1/2 flex min-h-[84px] w-[34%] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[22px] border border-sky-300/70 bg-sky-100 px-4 py-4 text-center font-mono text-[0.72rem] uppercase tracking-[0.2em] text-slate-900 shadow-[0_1px_0_rgba(255,255,255,0.55)_inset] dark:border-sky-200/40 dark:bg-sky-200 dark:text-slate-950">
-				Product Truth
-			</div>
-			<div className="absolute left-5 top-5 font-mono text-[0.65rem] uppercase tracking-[0.24em] text-muted-foreground">
-				One source of truth
-			</div>
-			<div className="absolute bottom-5 right-5 text-right font-mono text-[0.65rem] uppercase tracking-[0.24em] text-muted-foreground">
-				Starter snapshot
-				<br />
-				before handoff
+			
+			<div className="absolute left-1/2 top-1/2 flex min-h-[90px] w-[40%] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[28px] border border-primary/20 bg-primary/5 px-6 py-6 text-center text-sm font-black tracking-[0.2em] text-primary transition-all duration-500 hover:bg-primary/10">
+				<span className="relative z-10 uppercase italic">Product Truth</span>
 			</div>
 		</div>
 	);

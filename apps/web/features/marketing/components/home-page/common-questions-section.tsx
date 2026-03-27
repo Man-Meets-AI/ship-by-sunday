@@ -1,10 +1,6 @@
 import type { HomePageContent } from "@/features/marketing/content/home";
 
 import FAQAccordion from "../faq-accordion";
-import {
-	HomePageSectionOverline,
-	homePageSectionClassName,
-} from "./home-page-primitives";
 
 type FAQSection = HomePageContent["faqSection"];
 
@@ -14,27 +10,26 @@ export function CommonQuestionsSection({
 	faqSection: FAQSection;
 }) {
 	return (
-		<section
-			className={`grid gap-8 ${homePageSectionClassName} lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:gap-12`}
-		>
-			<div className="space-y-5">
-				<HomePageSectionOverline>{faqSection.label}</HomePageSectionOverline>
-				<div className="space-y-4">
-					<h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
+		<section className="py-24 lg:py-40 border-t border-border/40">
+			<div className="grid gap-16 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-24">
+				<div className="space-y-8">
+					<p className="text-sm font-bold tracking-[0.2em] text-primary/80 uppercase">
+						{faqSection.label}
+					</p>
+					<h2 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl lg:text-7xl">
 						{faqSection.titleLead}
-						<span className="block">{faqSection.titleAccent}</span>
+						<span className="block text-primary/90">{faqSection.titleAccent}</span>
 					</h2>
 					{faqSection.lead ? (
-						<p className="max-w-2xl text-muted-foreground sm:text-lg">
+						<p className="max-w-xl text-pretty text-xl leading-relaxed text-muted-foreground">
 							{faqSection.lead}
 						</p>
 					) : null}
 				</div>
-				<p className="max-w-sm border-t border-border/60 pt-4 text-sm leading-relaxed text-muted-foreground">
-					{faqSection.items.length} buyer objections to clear before the close.
-				</p>
+				<div className="divide-y divide-border/40 border-y border-border/40">
+					<FAQAccordion items={faqSection.items} />
+				</div>
 			</div>
-			<FAQAccordion items={faqSection.items} />
 		</section>
 	);
 }
