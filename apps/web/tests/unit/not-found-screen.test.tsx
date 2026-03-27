@@ -7,8 +7,8 @@ describe("app not-found route", () => {
 	it("renders the branded workspace 404", () => {
 		const markup = renderToStaticMarkup(<NotFound />);
 
-		expect(markup).toContain("Page not found");
+		expect(markup).toContain("Path Not");
 		expect(markup).toContain("Open workspace");
-		expect(markup).toContain("Go home");
+		expect(markup).toContain("Exit to safety");
 	});
 });
