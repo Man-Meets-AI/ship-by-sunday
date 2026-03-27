@@ -10,7 +10,7 @@ import { DocsThemeToggle } from "@/features/docs/components/docs-theme-toggle";
 import { docsDisplayConfig } from "@/features/starter/lib/starter-selectors";
 
 const navLinkClassName =
-	"inline-flex h-8 items-center justify-center rounded-lg border bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground";
+	"inline-flex h-8 items-center justify-center rounded-full border border-product-border/60 bg-product-surface/60 px-3 text-sm font-medium text-product-muted transition-colors hover:border-product-border hover:bg-product-surface hover:text-product-text";
 
 export function DocsNavbar() {
 	return (
@@ -18,8 +18,8 @@ export function DocsNavbar() {
 			logo={
 				<div className="flex items-center gap-3">
 					<ProductBrand labelClassName={productWordmarkClassName} />
-					<span className="rounded-full border bg-muted px-2.5 py-1 text-[10px] font-medium text-muted-foreground sm:text-[11px]">
-						{docsDisplayConfig.badgeLabel}
+					<span className="hidden text-[0.68rem] uppercase tracking-[0.22em] text-product-muted sm:inline">
+						{docsDisplayConfig.siteName}
 					</span>
 				</div>
 			}

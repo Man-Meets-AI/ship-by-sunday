@@ -16,7 +16,7 @@ describe("home page render model", () => {
 		expect(renderModel.hero.isEnabled).toBe(true);
 		expect(renderModel.hero.primaryCtaTarget).toEqual({ kind: "checkout" });
 		expect(renderModel.starterSystem.isEnabled).toBe(true);
-		expect(renderModel.starterSystem.section.supportLanes).toEqual([
+		expect(renderModel.starterSystem.section.supportSection.items).toEqual([
 			"Fast Pass Walkthroughs",
 			"Guided Ship Path",
 			"Product Sense Fundamentals",

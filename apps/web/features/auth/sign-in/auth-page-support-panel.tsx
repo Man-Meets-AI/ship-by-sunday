@@ -9,7 +9,6 @@ export type AuthPageSupportPanelContent = {
 	action?: AuthPageSupportPanelAction;
 	bullets: readonly string[];
 	description: string;
-	eyebrow: string;
 	note?: string;
 	title: string;
 };
@@ -23,11 +22,8 @@ export function AuthPageSupportPanel({
 	content: AuthPageSupportPanelContent;
 }) {
 	return (
-		<aside className="relative flex min-w-0 flex-col gap-6 border-t border-border/70 bg-muted/35 p-6 sm:p-8 lg:border-l lg:border-t-0 lg:p-10">
+		<aside className="relative flex min-w-0 flex-col gap-6 border-t border-border/70 py-6 sm:py-8 lg:border-l lg:border-t-0 lg:pl-12 lg:py-10">
 			<div className="space-y-3">
-				<p className="text-[11px] font-semibold tracking-[0.28em] text-muted-foreground uppercase">
-					{content.eyebrow}
-				</p>
 				<h2 className="max-w-sm text-balance text-xl font-semibold tracking-tight sm:text-2xl">
 					{content.title}
 				</h2>

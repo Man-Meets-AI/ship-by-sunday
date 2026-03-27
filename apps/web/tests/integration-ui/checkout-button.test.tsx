@@ -5,7 +5,6 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const pushMock = vi.fn();
-const useAuthMock = vi.fn();
 const usePathnameMock = vi.fn();
 
 vi.mock("next/navigation", () => ({
@@ -15,33 +14,29 @@ vi.mock("next/navigation", () => ({
 	}),
 }));
 
-vi.mock("@clerk/nextjs", () => ({
-	useAuth: () => useAuthMock(),
-}));
-
 import { CheckoutButton } from "@/features/checkout/components/checkout-button";
 
 describe("CheckoutButton interactions", () => {
 	beforeEach(() => {
 		pushMock.mockReset();
-		useAuthMock.mockReset();
 		usePathnameMock.mockReset();
 		usePathnameMock.mockReturnValue("/");
 		vi.restoreAllMocks();
 	});
 
-	it("routes signed-out visitors to sign-in instead of calling checkout", async () => {
+	it("routes signed-out visitors to sign-in after the checkout route returns 401", async () => {
 		const fetchMock = vi
 			.spyOn(globalThis, "fetch")
-			.mockResolvedValue(new Response(null));
-		useAuthMock.mockReturnValue({ userId: null });
+			.mockResolvedValue(new Response(null, { status: 401 }));
 
 		const user = userEvent.setup();
 		render(<CheckoutButton label="Get instant access" />);
 
 		await user.click(screen.getByRole("button"));
 
-		expect(fetchMock).not.toHaveBeenCalled();
+		expect(fetchMock).toHaveBeenCalledWith("/api/stripe/checkout", {
+			method: "POST",
+		});
 		expect(pushMock).toHaveBeenCalledWith(
 			"/sign-in?redirect_url=%2F%23pricing",
 		);
@@ -59,7 +54,6 @@ describe("CheckoutButton interactions", () => {
 				},
 			),
 		);
-		useAuthMock.mockReturnValue({ userId: "user_123" });
 
 		const user = userEvent.setup();
 		render(<CheckoutButton label="Get instant access" />);
@@ -83,7 +77,6 @@ describe("CheckoutButton interactions", () => {
 				},
 			),
 		);
-		useAuthMock.mockReturnValue({ userId: "user_123" });
 
 		const user = userEvent.setup();
 		render(<CheckoutButton label="Get instant access" />);
@@ -117,7 +110,6 @@ describe("CheckoutButton interactions", () => {
 				},
 			),
 		);
-		useAuthMock.mockReturnValue({ userId: "user_123" });
 
 		const user = userEvent.setup();
 		render(<CheckoutButton label="Get instant access" />);

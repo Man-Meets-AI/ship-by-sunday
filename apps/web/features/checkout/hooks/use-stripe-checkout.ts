@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
@@ -12,7 +11,6 @@ import {
 import { assert } from "@/features/course/lesson/lib/assert";
 
 export function useStripeCheckout() {
-	const { userId } = useAuth();
 	const pathname = usePathname();
 	const router = useRouter();
 	const [isLoading, setIsLoading] = useState(false);
@@ -29,11 +27,6 @@ export function useStripeCheckout() {
 	const startCheckout = useCallback(async () => {
 		setError(null);
 
-		if (!userId) {
-			router.push(signInHref);
-			return;
-		}
-
 		setIsLoading(true);
 		const response = await fetch(apiRouteConfig.stripeCheckout, {
 			method: "POST",
@@ -41,21 +34,28 @@ export function useStripeCheckout() {
 
 		if (response.status === 401) {
 			router.push(signInHref);
+			setIsLoading(false);
 			return;
 		}
 
-		const data = (await response.json()) as { url: string } | { error: string };
-
 		if (!response.ok) {
+			const data = (await response
+				.json()
+				.catch(() => ({ error: "Unable to start Stripe checkout." }))) as
+				| { error: string }
+				| { url?: never };
+
 			assert("error" in data, "Missing checkout error message.");
 			setError(data.error);
 			setIsLoading(false);
 			return;
 		}
 
+		const data = (await response.json()) as { url: string };
+
 		assert("url" in data, "Missing checkout redirect URL.");
 		window.location.assign(data.url);
-	}, [router, signInHref, userId]);
+	}, [router, signInHref]);
 
 	return { startCheckout, isLoading, error, clearError };
 }

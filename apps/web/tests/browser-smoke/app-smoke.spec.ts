@@ -8,7 +8,7 @@ test("landing page renders the main offer CTA", async ({ request }) => {
 	expect(html).toContain("Ship a real product");
 	expect(html).toContain("by Sunday");
 	expect(html).toContain(
-		"More than a starter. More like an agent-ready operating system.",
+		"More than a starter. A system you can keep shipping from.",
 	);
 	expect(html).toContain("Ship on Sunday. Keep shipping on Monday.");
 	expect(html).toContain("Get instant access");

@@ -8,14 +8,14 @@ import {
 } from "@/features/starter/lib/starter-selectors";
 
 const footerLinkClassName =
-	"text-xs font-bold uppercase tracking-[0.14em] text-product-muted transition-colors hover:text-product-text";
+	"text-xs font-semibold uppercase tracking-[0.14em] text-product-muted transition-colors hover:text-product-text";
 
 export function DocsFooter() {
 	return (
-		<Footer className="border-t border-product-border/50 bg-product-surface/70">
+		<Footer className="border-t border-product-border/50 bg-product-surface/60">
 			<div className="flex w-full flex-col gap-4 text-sm text-product-muted sm:flex-row sm:items-center sm:justify-between">
 				<div>
-					<p className="font-display text-xl uppercase tracking-[0.08em] text-product-text">
+					<p className="font-[family:var(--font-bebas-neue),ui-sans-serif,system-ui,sans-serif] text-xl uppercase tracking-[0.08em] text-product-text">
 						{docsDisplayConfig.siteName}
 					</p>
 					<p className="mt-1 max-w-2xl text-sm leading-relaxed">

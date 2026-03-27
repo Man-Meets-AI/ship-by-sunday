@@ -23,7 +23,7 @@ export default async function HomePage() {
 
 	return (
 		<main className="bg-background text-foreground">
-			<div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 py-12 sm:px-12 sm:py-20">
+			<div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 pt-4 pb-12 sm:px-12 sm:pt-6 sm:pb-20 lg:pt-8">
 				{homePageRenderModel.hero.isEnabled ? (
 					<HomeHeroSection
 						hero={homePageRenderModel.hero.section}

@@ -21,29 +21,17 @@ export function AuthPageShell({
 	title,
 }: AuthPageShellProps) {
 	return (
-		<section className="relative w-full max-w-5xl overflow-hidden rounded-[2rem] border border-border/70 bg-card/95 shadow-[0_32px_90px_-48px_rgba(17,17,17,0.55)]">
-			<div
-				aria-hidden
-				className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent"
-			/>
-			<div
-				aria-hidden
-				className="absolute -left-12 top-0 h-44 w-44 rounded-full bg-primary/5 blur-3xl"
-			/>
-			<div
-				aria-hidden
-				className="absolute bottom-0 right-0 h-56 w-56 rounded-full bg-muted blur-3xl"
-			/>
+		<section className="relative w-full max-w-6xl">
 			<div
 				className={cn(
-					"relative grid",
+					"grid",
 					supportPanel
-						? "lg:grid-cols-[minmax(0,1.08fr)_minmax(20rem,0.92fr)]"
+						? "lg:grid-cols-[minmax(0,1.08fr)_minmax(18rem,0.92fr)] lg:items-start"
 						: "grid-cols-1",
 				)}
 			>
-				<div className="flex min-w-0 flex-col gap-8 p-6 sm:p-8 lg:p-10">
-					<div className="max-w-xl space-y-3">
+				<div className="flex min-w-0 flex-col gap-8 py-6 sm:py-8 lg:py-10 lg:pr-12">
+					<div className="max-w-xl space-y-4">
 						<h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
 							{title}
 						</h1>
@@ -55,7 +43,9 @@ export function AuthPageShell({
 					</div>
 					<div className="max-w-xl">{children}</div>
 				</div>
-				{supportPanel ? <AuthPageSupportPanel content={supportPanel} /> : null}
+				{supportPanel ? (
+					<AuthPageSupportPanel content={supportPanel} />
+				) : null}
 			</div>
 		</section>
 	);

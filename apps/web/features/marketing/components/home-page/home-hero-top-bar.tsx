@@ -16,7 +16,7 @@ export function HomeHeroTopBar({ hero }: { hero: Hero }) {
 	const docsEnabled = isStarterModuleEnabled("docs");
 
 	return (
-		<nav className="flex w-full items-center justify-between px-6 py-6 lg:px-12">
+		<nav className="flex w-full items-center justify-between px-6 py-4 lg:px-12">
 			<ProductBrand
 				href={routeConfig.home}
 				labelClassName={cn(productWordmarkClassName, "text-lg")}

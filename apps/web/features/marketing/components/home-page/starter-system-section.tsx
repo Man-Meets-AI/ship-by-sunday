@@ -1,43 +1,75 @@
 "use client";
 
-import { PointerHighlight } from "@/components/ui/pointer-highlight";
 import type { HomePageContent } from "@/features/marketing/content/home";
 
+import { ScrollReveal } from "./scroll-reveal";
+import { TechStackCloud } from "./tech-stack-cloud";
+
 type StarterSystemSection = HomePageContent["starterSystemSection"];
-type StarterSystemCard = StarterSystemSection["cards"][number];
+type StarterSystemCapability = StarterSystemSection["capabilities"][number];
+type StarterSystemSupportSection = StarterSystemSection["supportSection"];
 
-const starterSystemHighlightStyle = {
-	rectangle:
-		"border-neutral-300 bg-neutral-200 leading-loose dark:border-neutral-600 dark:bg-neutral-700",
-	pointer: "h-3 w-3 text-sky-500",
-} as const;
-
-function StarterSystemFeatureRow({ card }: { card: StarterSystemCard }) {
+function StarterSystemCapabilityRow({
+	capability,
+	index,
+}: {
+	capability: StarterSystemCapability;
+	index: number;
+}) {
 	return (
-		<article className="group space-y-4 border-t border-border/40 py-10 transition-colors hover:bg-muted/10">
-			<p className="text-sm font-bold tracking-wider text-primary/70 uppercase">
-				{card.eyebrow}
-			</p>
-			<h3 className="text-2xl font-bold tracking-tight text-foreground/90 transition-transform duration-300 group-hover:translate-x-1">
-				{card.title}
-			</h3>
-			<p className="max-w-2xl text-balance text-lg leading-snug text-foreground/80 sm:text-2xl">
-				{card.highlightBefore}
-				<PointerHighlight
-					rectangleClassName={starterSystemHighlightStyle.rectangle}
-					pointerClassName={starterSystemHighlightStyle.pointer}
-					containerClassName="inline-block"
-				>
-					<span className="relative z-10 px-1 font-semibold text-foreground underline decoration-primary/30 decoration-4 underline-offset-4">
-						{card.highlight}
-					</span>
-				</PointerHighlight>
-				{card.highlightAfter}
-			</p>
-			<p className="max-w-xl text-base leading-relaxed text-muted-foreground lg:text-lg">
-				{card.description}
-			</p>
-		</article>
+		<ScrollReveal delay={0.1 * index}>
+			<article className="grid gap-4 border-t border-border/40 py-8 md:grid-cols-[minmax(0,0.4fr)_minmax(0,0.6fr)] md:gap-10 lg:py-10">
+				<h3 className="max-w-[14ch] text-[1.4rem] font-semibold leading-[1.05] tracking-tight text-foreground sm:text-[1.65rem]">
+					{capability.title}
+				</h3>
+				<p className="max-w-[36ch] text-base leading-7 text-muted-foreground sm:text-lg">
+					{capability.description}
+				</p>
+			</article>
+		</ScrollReveal>
+	);
+}
+
+function StarterSystemSupportBlock({
+	supportSection,
+}: {
+	supportSection: StarterSystemSupportSection;
+}) {
+	return (
+		<div className="grid gap-10 border-t border-border/40 pt-12 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-24 lg:pt-16">
+			<ScrollReveal>
+				<div className="space-y-5">
+					<h3 className="max-w-[16ch] text-balance text-[clamp(2.25rem,4vw,3.5rem)] font-semibold leading-[0.98] tracking-tight text-foreground">
+						{supportSection.title}
+					</h3>
+					<p className="max-w-[38ch] text-base leading-7 text-muted-foreground sm:text-lg">
+						{supportSection.intro}
+					</p>
+				</div>
+			</ScrollReveal>
+			<ScrollReveal delay={0.1}>
+				<div className="space-y-8">
+					<ul className="space-y-0">
+						{supportSection.items.map((supportItem) => (
+							<li
+								key={supportItem}
+								className="border-t border-border/30 py-4 text-lg font-medium leading-7 tracking-tight text-foreground/90 first:border-t-0 first:pt-0 sm:text-xl"
+							>
+								{supportItem}
+							</li>
+						))}
+					</ul>
+					<div className="space-y-3 border-t border-border/30 pt-6">
+						<p className="text-xl font-semibold leading-tight tracking-tight text-foreground sm:text-2xl">
+							{supportSection.bonus.title}
+						</p>
+						<p className="max-w-[38ch] text-base leading-7 text-muted-foreground">
+							{supportSection.bonus.description}
+						</p>
+					</div>
+				</div>
+			</ScrollReveal>
+		</div>
 	);
 }
 
@@ -48,62 +80,46 @@ export function StarterSystemSectionBlock({
 }) {
 	return (
 		<section className="py-24 lg:py-40">
-			<div className="grid gap-16 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-24">
-				<div className="space-y-12 lg:sticky lg:top-24 lg:h-fit">
-					<div className="space-y-8">
-						<p className="text-sm font-bold tracking-[0.2em] text-primary/80 uppercase">
-							{starterSystemSection.label}
-						</p>
-						<h2 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl lg:text-7xl">
-							{starterSystemSection.title}
-						</h2>
-						<p className="max-w-xl text-pretty text-xl leading-relaxed text-muted-foreground">
-							{starterSystemSection.intro}
-						</p>
-					</div>
-
-					<div className="space-y-8">
-						<div className="space-y-4">
-							<p className="text-sm font-semibold uppercase tracking-widest text-foreground/40">
-								{starterSystemSection.supportLanesLabel}
-							</p>
-							<ul className="flex flex-wrap gap-3">
-								{starterSystemSection.supportLanes.map((supportLane) => (
-									<li
-										key={supportLane}
-										className="rounded-full border border-border/60 bg-muted/30 px-4 py-1.5 text-sm font-medium text-foreground/80 transition-colors hover:border-primary/30 hover:bg-primary/5"
+			<div className="space-y-12 lg:space-y-16">
+				<div className="grid gap-14 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:gap-24">
+					<ScrollReveal>
+						<div className="space-y-6 lg:sticky lg:top-24 lg:h-fit">
+							<h2
+								aria-label={starterSystemSection.title}
+								className="text-[clamp(2.8rem,10vw,6.5rem)] font-semibold leading-[0.9] tracking-tight text-foreground"
+							>
+								{starterSystemSection.titleLines.map((titleLine, index) => (
+									<span
+										key={titleLine}
+										className={index === 0 ? "block" : "mt-2 block sm:mt-3"}
 									>
-										{supportLane}
-									</li>
+										{titleLine}
+									</span>
 								))}
-							</ul>
+							</h2>
+							<p className="max-w-[42ch] text-base leading-7 text-muted-foreground sm:text-lg">
+								{starterSystemSection.intro}
+							</p>
 						</div>
-
-						<p className="max-w-sm text-sm leading-relaxed text-muted-foreground italic">
-							{starterSystemSection.supportingProof}
-						</p>
-
-						<div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-primary/5 p-8 shadow-sm">
-							<div className="absolute -right-8 -top-8 size-32 rounded-full bg-primary/10 blur-3xl" />
-							<div className="relative z-10 space-y-4">
-								<div className="inline-flex items-center gap-2 rounded-full bg-primary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary">
-									{starterSystemSection.bonus.label}
-								</div>
-								<p className="text-2xl font-bold tracking-tight text-foreground">
-									{starterSystemSection.bonus.title}
-								</p>
-								<p className="text-sm leading-relaxed text-muted-foreground">
-									{starterSystemSection.bonus.description}
-								</p>
-							</div>
-						</div>
+					</ScrollReveal>
+					<div className="border-b border-border/40">
+						{starterSystemSection.capabilities.map((capability, index) => (
+							<StarterSystemCapabilityRow
+								key={capability.title}
+								capability={capability}
+								index={index}
+							/>
+						))}
 					</div>
 				</div>
-				<div className="flex flex-col border-b border-border/40">
-					{starterSystemSection.cards.map((card) => (
-						<StarterSystemFeatureRow key={card.title} card={card} />
-					))}
-				</div>
+				<ScrollReveal>
+					<div className="border-t border-border/40 pt-12">
+						<TechStackCloud />
+					</div>
+				</ScrollReveal>
+				<StarterSystemSupportBlock
+					supportSection={starterSystemSection.supportSection}
+				/>
 			</div>
 		</section>
 	);
