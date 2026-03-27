@@ -31,7 +31,10 @@ describe("home page content", () => {
 			"The starter path",
 		);
 		expect(homePageContent.starterSystemSection.title).toBe(
-			"More than a starter. More like an agent-ready operating system.",
+			"More than a starter. A system you can keep shipping from.",
+		);
+		expect(homePageContent.starterSystemSection.capabilities[1]?.title).toBe(
+			"Built-in QA",
 		);
 		expect(homePageContent.durabilitySection.title).toBe(
 			"Ship on Sunday. Keep shipping on Monday.",

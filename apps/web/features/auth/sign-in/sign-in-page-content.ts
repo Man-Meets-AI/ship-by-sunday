@@ -30,7 +30,6 @@ function getCredentialsContent({
 				],
 				description:
 					"Google OAuth reached us, but the returned identity was not tied to a paid Ship by Sunday account.",
-				eyebrow: "Purchased Access",
 				title: "Google did not match a paid account.",
 			},
 			title: "Sign in",
@@ -52,7 +51,6 @@ function getCredentialsContent({
 				],
 				description:
 					"Use the same email or Google account you used when you bought Ship by Sunday.",
-				eyebrow: "Purchased Access",
 				note: "Need access first? Review the offer before you start a session.",
 				title: "Reconnect the workspace tied to your checkout.",
 			},
@@ -70,7 +68,6 @@ function getCredentialsContent({
 			],
 			description:
 				"You arrived here from a protected page, so a successful sign-in should hand the session back immediately.",
-			eyebrow: "Return Flow",
 			title: "Sign in, then continue where you left off.",
 		},
 		title: "Sign in",
@@ -101,7 +98,6 @@ export function getSignInPageContent({
 					],
 					description:
 						"Password recovery should feel deliberate and secure, not like a detached utility page.",
-					eyebrow: "Secure Recovery",
 					title: "Request a fresh reset code.",
 				},
 				title: "Reset password",
@@ -117,7 +113,6 @@ export function getSignInPageContent({
 					],
 					description:
 						"You already proved ownership. This step is only about replacing the old password cleanly.",
-					eyebrow: "Secure Recovery",
 					title: "Set the password that gets you back in.",
 				},
 				title: "Choose a new password",
@@ -133,7 +128,6 @@ export function getSignInPageContent({
 					],
 					description:
 						"This is the verification step that proves the email account can authorize the reset.",
-					eyebrow: "Secure Recovery",
 					title: "Verify the code from your inbox.",
 				},
 				title: "Verify reset code",
@@ -161,10 +155,6 @@ export function getSignInPageContent({
 						step.status === "needs_client_trust"
 							? "Clerk flagged this browser for an extra trust check before completing the purchased-account session."
 							: "The account needs one more verification factor before access can be restored.",
-					eyebrow:
-						step.status === "needs_client_trust"
-							? "Device Trust"
-							: "Extra Verification",
 					title:
 						step.status === "needs_client_trust"
 							? "Approve this browser and keep moving."

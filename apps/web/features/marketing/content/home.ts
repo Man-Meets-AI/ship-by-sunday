@@ -144,58 +144,45 @@ export const homePageContent = {
 		],
 	},
 	starterSystemSection: {
-		label: "Agent-Ready Starter System",
-		title: "More than a starter. More like an agent-ready operating system.",
+		title: "More than a starter. A system you can keep shipping from.",
+		titleLines: [
+			"More than a starter.",
+			"A system you can",
+			"keep shipping from.",
+		],
 		intro:
-			"The docs packs tell the agents what to do. The starter gives them the right place to do it. It is shaped around your packet output, wired for real product rails, and built to keep shipping after Sunday.",
-		cards: [
+			"The packet gives the agents the truth. The starter gives that truth a real product shape: auth, billing, docs, protected workspace, and the seams to keep changing the product without losing the plot.",
+		capabilities: [
 			{
-				title: "Configurable product rails",
-				eyebrow: "Packet-aligned starter",
-				highlightBefore: "Start from a ",
-				highlight: "starter wired to your packet truth",
-				highlightAfter:
-					" instead of a dead template you have to reinterpret every session.",
+				title: "Product rails",
 				description:
-					"Auth, billing, docs, protected workspace, and module controls are already part of the system, so the repo starts with real product shape instead of placeholder scaffolding.",
+					"Start from a repo already shaped around your product, not a dead template you have to reinterpret every session.",
 			},
 			{
-				title: "Agent-Ready QA Team",
-				eyebrow: "Operational leverage",
-				highlightBefore: "Ship with ",
-				highlight: "QA prompts, smoke paths, and Telegram incident alerts",
-				highlightAfter:
-					" already living in the repo, not bolted on after something breaks.",
+				title: "Built-in QA",
 				description:
-					"The starter helps you verify the buyer flow, protected routes, and production behavior before and after launch, so shipping Sunday does not mean guessing on Monday.",
+					"Smoke paths, QA prompts, and incident alerts are already in the repo, so shipping does not turn into guesswork the moment something breaks.",
 			},
 			{
-				title: "Agent-Trained Provider Experts",
-				eyebrow: "Safer agent changes",
-				highlightBefore: "Lean on ",
-				highlight:
-					"provider-specific guidance across Clerk, Convex, Stripe, Next.js, React, and Vercel",
-				highlightAfter:
-					" when the agents need to change the codebase under real product constraints.",
+				title: "Safer agent changes",
 				description:
-					"Clerk, Convex, Stripe, Next.js, React, and Vercel guidance already lives in the repo, alongside agent-readable docs and control seams that make changes safer than blind file surgery.",
+					"Guidance for Clerk, Convex, Stripe, Next.js, React, and Vercel helps agents make changes inside real constraints instead of blind file surgery.",
 			},
 		],
-		supportLanesLabel: "Included support lanes",
-		supportLanesIntro:
-			"You also get the learning path that shows how to use the system well, without turning the offer into a pile of filler videos.",
-		supportLanes: [
-			"Fast Pass Walkthroughs",
-			"Guided Ship Path",
-			"Product Sense Fundamentals",
-		],
-		supportingProof:
-			"OpenAI-aligned best-practice research shows up inside the starter as supporting guidance, so the repo helps agents work with stronger defaults instead of replacing your product judgment.",
-		bonus: {
-			label: "Bonus included free",
-			title: bonusName,
-			description:
-				"If product judgment is the part you do not trust yet, the included bonus gives you the fundamentals without padding the core offer with filler.",
+		supportSection: {
+			title: "The support around the system",
+			intro:
+				"The starter is the core. You also get the guidance that helps you use it well under real weekend pressure.",
+			items: [
+				"Fast Pass Walkthroughs",
+				"Guided Ship Path",
+				"Product Sense Fundamentals",
+			],
+			bonus: {
+				title: bonusName,
+				description:
+					"If product judgment is still the weak point, the included bonus strengthens the decisions behind the build without bloating the core offer.",
+			},
 		},
 	},
 	durabilitySection: {

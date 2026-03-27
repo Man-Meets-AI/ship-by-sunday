@@ -6,7 +6,7 @@ export function PricingIncludesList({ items }: { items: readonly string[] }) {
 			{items.map((item) => (
 				<li key={item} className="flex items-start gap-2.5">
 					<Check className="mt-0.5 size-4 shrink-0 text-primary" />
-					<span className="text-sm leading-relaxed">{item}</span>
+					<span className="text-sm leading-7">{item}</span>
 				</li>
 			))}
 		</ul>

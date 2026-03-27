@@ -8,7 +8,6 @@ export const resetPasswordSupportPanelContent = {
 	],
 	description:
 		"Clerk requires one more recovery step before the purchased-account session can open cleanly.",
-	eyebrow: "Session Task",
 	title: "Finish the required recovery step.",
 } as const satisfies AuthPageSupportPanelContent;
 
@@ -20,7 +19,6 @@ export const ssoCallbackSupportPanelContent = {
 	],
 	description:
 		"This route exists only long enough to finish the OAuth callback and restore the intended destination.",
-	eyebrow: "Secure Redirect",
 	title:
 		"We are stitching the Google session back into your purchased account.",
 } as const satisfies AuthPageSupportPanelContent;

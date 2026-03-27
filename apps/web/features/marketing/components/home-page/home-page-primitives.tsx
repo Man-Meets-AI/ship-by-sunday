@@ -6,9 +6,6 @@ import { cn } from "@/lib/utils";
 export const homePageSectionClassName =
 	"border-t border-border/60 py-10 sm:py-12";
 
-export const homePageQuietSurfaceClassName =
-	"rounded-[32px] border border-border/70 bg-muted/20";
-
 export function HomePageSecondaryLink({
 	href,
 	label,
