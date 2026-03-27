@@ -2,6 +2,8 @@
 
 ## recent
 
+- **2026-03-27 00:35 EDT** — Commit closeout + state sweep: split the dirty worktree onto `dev-local-closeout-2026-03-27` as focused QA-team, packet-flow, course-shell, and public-UI commits; documented the final `apps/web` Convex-vs-local-state sweep in `docs/codex/convex-vs-use-state-sweep-2026-03-26.md`; and rechecked `qa:validate`, the packet integration + integration-ui subset, packet/unit autosave coverage, entitled local-auth `@default_ship`, the lesson-state unit lane, and `bun run build`. `CHANGELOG.md` updated for the shipped user-facing packet/course/public UI changes.
+
 - **2026-03-26 22:47 EDT** — Packet step-controller refactor: extracted the packet step-form mutation + hook wiring out of `PacketStagePage` into a dedicated `PacketStageStepController` so the page shell no longer middlemans the step-card props. No doc or changelog update needed for this internal structure pass.
 
 - **2026-03-26 17:18 EDT** — Packet video funnel closeout + docs sweep: renamed the completed ExecPlan to `docs/codex/2026-03-26-17-17-38-EDT-packet-video-page-funnel.md`, shipped the routed packet-page funnel with the packet-local video registry and `L2` orientation fallback, updated the dependent distillation plan plus the root/public route docs to describe stage-root redirects into nested packet pages, and logged the user-facing behavior in `CHANGELOG.md`.
