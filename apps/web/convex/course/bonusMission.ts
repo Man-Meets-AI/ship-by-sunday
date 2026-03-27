@@ -7,7 +7,11 @@ import {
 import { getLessonByKey } from "../../features/course/lesson/model/manifest";
 import { getPacketWorkflowStateByClerkUserId } from "../packet/workflowState";
 import { upsertLessonState, loadViewerCourseState } from "./shared";
-import type { CourseMutationCtx, CourseQueryCtx, LessonStateDoc } from "./types";
+import type {
+	CourseMutationCtx,
+	CourseQueryCtx,
+	LessonStateDoc,
+} from "./types";
 import { bonusMissionStateReturnValidator } from "./validators";
 
 export const getBonusMissionStateArgs = {};
@@ -35,7 +39,9 @@ function getBonusLessonStatus(
 	return isBonusLessonExplored(state) ? "opened" : "available";
 }
 
-async function requireBonusViewerState(ctx: CourseQueryCtx | CourseMutationCtx) {
+async function requireBonusViewerState(
+	ctx: CourseQueryCtx | CourseMutationCtx,
+) {
 	const viewerState = await loadViewerCourseState(ctx);
 	const workflowState = await getPacketWorkflowStateByClerkUserId(
 		ctx,
@@ -52,7 +58,9 @@ async function requireBonusViewerState(ctx: CourseQueryCtx | CourseMutationCtx) 
 export async function getBonusMissionStateHandler(ctx: CourseQueryCtx) {
 	const viewerState = await requireBonusViewerState(ctx);
 	const lessons = getStudentFacingLessons().map((lesson) => {
-		const lessonState = viewerState.lessonStateByLessonKey.get(lesson.lessonKey);
+		const lessonState = viewerState.lessonStateByLessonKey.get(
+			lesson.lessonKey,
+		);
 
 		return {
 			lessonKey: lesson.lessonKey,
@@ -71,7 +79,8 @@ export async function getBonusMissionStateHandler(ctx: CourseQueryCtx) {
 	});
 
 	return {
-		exploredCount: lessons.filter((lesson) => lesson.status !== "available").length,
+		exploredCount: lessons.filter((lesson) => lesson.status !== "available")
+			.length,
 		totalLessons: lessons.length,
 		blocks: getOrderedBlocks().map((block) => ({
 			id: block.id,

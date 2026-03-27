@@ -43,9 +43,7 @@ export function AuthPageShell({
 					</div>
 					<div className="max-w-xl">{children}</div>
 				</div>
-				{supportPanel ? (
-					<AuthPageSupportPanel content={supportPanel} />
-				) : null}
+				{supportPanel ? <AuthPageSupportPanel content={supportPanel} /> : null}
 			</div>
 		</section>
 	);
