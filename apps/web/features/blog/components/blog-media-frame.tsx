@@ -22,7 +22,7 @@ export function BlogMediaFrame({
 	return (
 		<div
 			className={cn(
-				"relative overflow-hidden rounded-[32px] border border-border/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(245,245,245,0.8))] shadow-[0_28px_90px_-40px_rgba(15,23,42,0.45)] dark:bg-[linear-gradient(145deg,rgba(24,24,27,0.95),rgba(10,10,11,0.88))]",
+				"relative overflow-hidden rounded-[32px] border border-border/70 bg-[linear-gradient(145deg,rgba(253,253,253,0.96),rgba(245,245,245,0.8))] shadow-[0_28px_90px_-40px_rgba(15,23,42,0.45)] dark:bg-[linear-gradient(145deg,rgba(24,24,27,0.95),rgba(10,10,11,0.88))]",
 				className,
 			)}
 		>

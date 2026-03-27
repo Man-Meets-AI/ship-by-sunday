@@ -13,7 +13,7 @@ export const assetPaths = {
 } as const;
 
 export const brandColorConfig = {
-	whiteHex: "#ffffff",
+	whiteHex: "#FDFDFD",
 } as const;
 
 export const starterRepoConfig = {

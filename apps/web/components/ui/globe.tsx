@@ -67,12 +67,12 @@ export function Globe({ globeConfig, data }: WorldProps) {
 
 	const defaultProps = {
 		pointSize: 1,
-		atmosphereColor: "#ffffff",
+		atmosphereColor: "#FDFDFD",
 		showAtmosphere: true,
 		atmosphereAltitude: 0.1,
-		polygonColor: "rgba(255,255,255,0.7)",
+		polygonColor: "rgba(253,253,253,0.7)",
 		globeColor: "#1d072e",
-		emissive: "#000000",
+		emissive: "#111111",
 		emissiveIntensity: 0.1,
 		shininess: 0.9,
 		arcTime: 2000,
@@ -246,7 +246,7 @@ export function WebGLRendererConfig() {
 export function World(props: WorldProps) {
 	const { globeConfig } = props;
 	const scene = new Scene();
-	scene.fog = new Fog(0xffffff, 400, 2000);
+	scene.fog = new Fog(0xfdfdfd, 400, 2000);
 	return (
 		<Canvas scene={scene} camera={new PerspectiveCamera(50, aspect, 180, 1800)}>
 			<WebGLRendererConfig />

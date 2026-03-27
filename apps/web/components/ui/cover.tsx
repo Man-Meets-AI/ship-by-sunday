@@ -72,7 +72,7 @@ export const Cover = ({
 								maxSize={1}
 								particleDensity={500}
 								className="w-full h-full"
-								particleColor="#FFFFFF"
+								particleColor="#FDFDFD"
 							/>
 							<SparklesCore
 								background="transparent"
@@ -80,7 +80,7 @@ export const Cover = ({
 								maxSize={1}
 								particleDensity={500}
 								className="w-full h-full"
-								particleColor="#FFFFFF"
+								particleColor="#FDFDFD"
 							/>
 						</motion.div>
 					</motion.div>

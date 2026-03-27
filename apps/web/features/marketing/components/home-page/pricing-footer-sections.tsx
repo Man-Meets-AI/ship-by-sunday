@@ -7,11 +7,6 @@ import { blogDisplayConfig } from "@/features/starter/lib/starter-selectors";
 
 import { MarketingThemeToggle } from "./home-hero-theme-toggle";
 import { HomePagePrimaryCta } from "./home-page-primary-cta";
-import {
-	HomePageSectionOverline,
-	homePageQuietSurfaceClassName,
-	homePageSectionClassName,
-} from "./home-page-primitives";
 import { PricingIncludesList } from "./pricing-includes-list";
 
 type FooterWordmark = HomePageContent["footerWordmark"];
@@ -27,60 +22,74 @@ export function PricingSectionBlock({
 	return (
 		<section
 			id="pricing"
-			className={`grid gap-8 ${homePageSectionClassName} lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:gap-12`}
+			className="py-24 border-t border-border/40 lg:py-40"
 		>
-			<div className="space-y-5">
-				<HomePageSectionOverline>
-					{pricingSection.label}
-				</HomePageSectionOverline>
-				<div className="space-y-4">
-					<h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
-						{pricingSection.titleLead} {pricingSection.titleAccent}
-					</h2>
-					<p className="max-w-2xl text-pretty text-muted-foreground sm:text-lg">
-						{pricingSection.intro}
-					</p>
-				</div>
-				<p className="max-w-xl border-t border-border/60 pt-4 text-sm leading-relaxed text-muted-foreground">
-					{pricingSection.guarantee}
-				</p>
-			</div>
-			<div className={`space-y-6 p-5 sm:p-6 ${homePageQuietSurfaceClassName}`}>
-				<div className="border-t border-border/60 pt-4">
-					<p className="font-mono text-[0.72rem] uppercase tracking-[0.24em] text-muted-foreground">
-						{pricingSection.eyebrow}
-					</p>
-					<div className="mt-4 flex flex-wrap items-end justify-between gap-5">
-						<p className="text-[clamp(4rem,9vw,6.5rem)] font-semibold tracking-tight tabular-nums">
-							{pricingSection.priceDisplay}
+			<div className="grid gap-16 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-24">
+				<div className="space-y-12 lg:sticky lg:top-24 lg:h-fit">
+					<div className="space-y-8">
+						<p className="text-sm font-bold tracking-[0.2em] text-primary/80 uppercase">
+							{pricingSection.label}
 						</p>
-						<HomePagePrimaryCta
-							target={primaryCtaTarget}
-							label={pricingSection.ctaTitle}
-							className="h-12 min-w-full px-6 text-base font-semibold sm:min-w-[16rem]"
-						/>
+						<h2 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl lg:text-7xl">
+							{pricingSection.titleLead}
+							<span className="block text-primary/90">{pricingSection.titleAccent}</span>
+						</h2>
+						<p className="max-w-xl text-pretty text-xl leading-relaxed text-muted-foreground">
+							{pricingSection.intro}
+						</p>
 					</div>
-					<p className="mt-4 max-w-lg text-sm leading-relaxed text-muted-foreground">
-						{pricingSection.trustLine}
-					</p>
-				</div>
-				<div className="grid gap-6 border-t border-border/60 pt-4 lg:grid-cols-[minmax(0,1fr)_minmax(14rem,0.72fr)]">
-					<div className="space-y-4">
-						<p className="font-mono text-[0.72rem] uppercase tracking-[0.24em] text-muted-foreground">
-							Included
+					
+					<div className="rounded-3xl border border-border/40 bg-muted/20 p-8 shadow-sm">
+						<p className="text-sm font-medium leading-relaxed text-muted-foreground italic">
+							{pricingSection.guarantee}
 						</p>
-						<PricingIncludesList items={pricingSection.includes} />
 					</div>
-					<div className="rounded-[24px] border border-border/70 bg-background/80 p-4">
-						<p className="font-mono text-[0.72rem] uppercase tracking-[0.24em] text-muted-foreground">
-							{pricingSection.bonus.label}
-						</p>
-						<p className="mt-2 text-lg font-semibold tracking-tight text-foreground">
-							{pricingSection.bonus.title}
-						</p>
-						<p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-							{pricingSection.bonus.description}
-						</p>
+				</div>
+				<div className="flex flex-col gap-12">
+					<div className="relative overflow-hidden rounded-[48px] border border-border/50 bg-background p-10 shadow-2xl transition-all duration-700 hover:shadow-primary/5 sm:p-16">
+						<div className="absolute -right-20 -top-20 size-64 rounded-full bg-primary/5 blur-3xl transition-all duration-500 group-hover:bg-primary/10" />
+						<div className="relative z-10 flex flex-col gap-12">
+							<div className="space-y-2">
+								<p className="text-sm font-bold uppercase tracking-widest text-primary/80">
+									{pricingSection.eyebrow}
+								</p>
+								<div className="flex flex-wrap items-baseline gap-4">
+									<p className="font-marketing-display text-[clamp(5rem,15vw,10rem)] font-black tracking-tighter text-foreground leading-[0.8]">
+										{pricingSection.priceDisplay}
+									</p>
+									<span className="text-sm font-medium text-muted-foreground uppercase tracking-widest mb-4">USD One-Time</span>
+								</div>
+							</div>
+
+							<div className="space-y-6">
+								<HomePagePrimaryCta
+									target={primaryCtaTarget}
+									label={pricingSection.ctaTitle}
+									className="h-20 min-w-full rounded-[24px] bg-foreground text-xl font-black text-background transition-transform hover:scale-[1.02] active:scale-[0.98] shadow-2xl shadow-primary/10"
+								/>
+								<p className="text-center text-base font-medium leading-relaxed text-muted-foreground">
+									{pricingSection.trustLine}
+								</p>
+							</div>
+
+							<div className="grid gap-12 border-t border-border/40 pt-12 lg:grid-cols-2">
+								<div className="space-y-6">
+									<p className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/40">Included</p>
+									<PricingIncludesList items={pricingSection.includes} />
+								</div>
+								<div className="rounded-3xl border border-primary/20 bg-primary/5 p-8">
+									<p className="text-xs font-bold uppercase tracking-widest text-primary/70">
+										{pricingSection.bonus.label}
+									</p>
+									<p className="mt-4 text-2xl font-bold tracking-tight text-foreground">
+										{pricingSection.bonus.title}
+									</p>
+									<p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+										{pricingSection.bonus.description}
+									</p>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -95,34 +104,38 @@ export function FooterSection({
 }) {
 	return (
 		<footer
-			className="border-t border-border/60 py-8 sm:py-10"
+			className="py-20 lg:py-40 border-t border-border/40"
 			aria-label="Site footer"
 		>
-			<div className="flex items-center justify-between gap-4">
-				<p className="font-mono text-[0.72rem] uppercase tracking-[0.24em] text-muted-foreground">
-					Light and dark stay first-class
-				</p>
-				<div className="inline-flex items-center gap-3 rounded-full border border-border/60 px-4 py-2">
-					<span className="text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground">
-						Theme
-					</span>
-					<MarketingThemeToggle />
-				</div>
-			</div>
-			<div className="flex justify-center px-2 pt-10 text-center sm:pt-12">
-				<div className="flex flex-col items-center justify-center gap-4 sm:flex-row sm:items-end">
-					<p
-						className={`${productWordmarkFontClassName} text-balance text-[clamp(4.5rem,18vw,12rem)] font-normal uppercase leading-[0.82] tracking-[0.05em] text-foreground/90`}
-					>
-						{footerWordmark}
-					</p>
+			<div className="flex flex-col items-center gap-16">
+				<div className="flex w-full items-center justify-between border-b border-border/40 pb-16">
+					<div className="flex items-center gap-4">
+						<div className="inline-flex items-center gap-3 rounded-full border border-border/40 bg-muted/20 px-4 py-2">
+							<span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+								Display
+							</span>
+							<MarketingThemeToggle />
+						</div>
+					</div>
 					<Link
 						href={routeConfig.blog}
-						className="inline-flex h-10 items-center rounded-full border border-border/60 px-4 text-xs font-medium uppercase tracking-[0.24em] text-foreground/80 transition-colors hover:border-foreground/20 hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 sm:mb-4"
+						className="inline-flex h-12 items-center rounded-full border border-border/40 bg-background px-6 text-sm font-bold tracking-wide text-foreground/80 transition-all hover:border-foreground/30 hover:text-foreground hover:shadow-sm"
 					>
 						{blogDisplayConfig.footerLabel}
 					</Link>
 				</div>
+
+				<div className="w-full text-center">
+					<p
+						className={`${productWordmarkFontClassName} text-[clamp(4.5rem,18vw,14rem)] font-black uppercase leading-[0.8] tracking-tighter text-foreground/90 transition-all duration-700 hover:tracking-[-0.05em]`}
+					>
+						{footerWordmark}
+					</p>
+				</div>
+				
+				<p className="text-sm font-medium tracking-[0.3em] text-foreground/20 uppercase">
+					One serious system for serious builders.
+				</p>
 			</div>
 		</footer>
 	);

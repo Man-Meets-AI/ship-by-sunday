@@ -122,7 +122,7 @@ export const SparklesCore = (props: ParticlesProps) => {
 								},
 							},
 							color: {
-								value: particleColor || "#ffffff",
+								value: particleColor || "#FDFDFD",
 								animation: {
 									h: {
 										count: 0,
@@ -253,7 +253,7 @@ export const SparklesCore = (props: ParticlesProps) => {
 							shadow: {
 								blur: 0,
 								color: {
-									value: "#000",
+									value: "#111111",
 								},
 								enable: false,
 								offset: {
@@ -395,7 +395,7 @@ export const SparklesCore = (props: ParticlesProps) => {
 							links: {
 								blink: false,
 								color: {
-									value: "#fff",
+									value: "#FDFDFD",
 								},
 								consent: false,
 								distance: 100,
@@ -405,7 +405,7 @@ export const SparklesCore = (props: ParticlesProps) => {
 								shadow: {
 									blur: 5,
 									color: {
-										value: "#000",
+										value: "#111111",
 									},
 									enable: false,
 								},

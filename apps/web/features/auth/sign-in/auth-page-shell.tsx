@@ -21,7 +21,7 @@ export function AuthPageShell({
 	title,
 }: AuthPageShellProps) {
 	return (
-		<section className="relative w-full max-w-5xl overflow-hidden rounded-[2rem] border border-border/70 bg-card/95 shadow-[0_32px_90px_-48px_rgba(0,0,0,0.55)]">
+		<section className="relative w-full max-w-5xl overflow-hidden rounded-[2rem] border border-border/70 bg-card/95 shadow-[0_32px_90px_-48px_rgba(17,17,17,0.55)]">
 			<div
 				aria-hidden
 				className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent"

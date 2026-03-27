@@ -1,13 +1,8 @@
 "use client";
 
 import { PointerHighlight } from "@/components/ui/pointer-highlight";
+import { cn } from "@/lib/utils";
 import type { HomePageContent } from "@/features/marketing/content/home";
-
-import {
-	HomePageSectionOverline,
-	homePageQuietSurfaceClassName,
-	homePageSectionClassName,
-} from "./home-page-primitives";
 import { SystemLoopPreview } from "./system-loop-preview";
 
 type SprintPathSection = HomePageContent["sprintPathSection"];
@@ -20,54 +15,46 @@ export function SprintPathUnifiedSection({
 	return (
 		<section
 			id="system"
-			className={`grid items-start gap-10 ${homePageSectionClassName} lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] lg:gap-14`}
+			className="grid items-start gap-12 py-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-20 lg:py-32"
 		>
-			<div className="space-y-6">
-				<HomePageSectionOverline>
-					{sprintPathSection.label}
-				</HomePageSectionOverline>
-				<div className="space-y-4">
-					<h2 className="max-w-2xl text-balance text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
+			<div className="flex flex-col gap-10">
+				<div className="space-y-6">
+					<h2 className="max-w-2xl text-balance text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
 						{sprintPathSection.titlePrefix}
-						<PointerHighlight containerClassName="inline-block">
+						<PointerHighlight containerClassName="inline-block text-primary/90">
 							{sprintPathSection.titleHighlight}
 						</PointerHighlight>
 					</h2>
-					<p className="max-w-2xl text-pretty text-muted-foreground sm:text-lg">
+					<p className="max-w-xl text-pretty text-lg leading-relaxed text-muted-foreground sm:text-xl">
 						{sprintPathSection.intro}
 					</p>
 				</div>
-				<div className="grid gap-0 border-t border-border/60">
-					{sprintPathSection.supportingPoints.map((point, index) => (
+				<div className="grid gap-6">
+					{sprintPathSection.supportingPoints.map((point) => (
 						<div
 							key={point}
-							className="grid gap-3 border-b border-border/60 py-4 sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-4"
+							className="group relative flex gap-4 transition-all duration-300"
 						>
-							<p className="font-mono text-[0.72rem] uppercase tracking-[0.24em] text-muted-foreground">
-								0{index + 1}
-							</p>
-							<p className="text-sm leading-relaxed text-foreground/90 sm:text-base">
+							<div className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary/40 group-hover:bg-primary group-hover:scale-125 transition-transform" />
+							<p className="text-base leading-relaxed text-foreground/80 sm:text-lg">
 								{point}
 							</p>
 						</div>
 					))}
 				</div>
-				<p className="max-w-2xl text-sm font-medium text-foreground/75 sm:text-base">
-					{sprintPathSection.valueFrame}
-				</p>
-			</div>
-			<div
-				className={`relative overflow-hidden p-5 sm:p-6 lg:justify-self-end ${homePageQuietSurfaceClassName}`}
-			>
-				<div className="mb-5 flex items-center justify-between gap-4 border-b border-border/60 pb-3">
-					<p className="font-mono text-[0.72rem] uppercase tracking-[0.24em] text-muted-foreground">
-						Shared system
-					</p>
-					<p className="text-xs text-muted-foreground">
-						Files, not stale chats
+				<div className="inline-flex items-center gap-3 rounded-2xl border border-primary/10 bg-primary/5 px-6 py-4">
+					<div className="size-2 rounded-full bg-primary animate-pulse" />
+					<p className="text-sm font-semibold tracking-wide text-primary uppercase italic">
+						{sprintPathSection.valueFrame}
 					</p>
 				</div>
-				<SystemLoopPreview className="mx-auto w-full max-w-[34rem]" />
+			</div>
+			<div
+				className={cn(
+					"relative overflow-hidden rounded-[32px] border border-border/40 bg-muted/20 p-8 shadow-xl transition-all duration-700 hover:border-primary/20 lg:justify-self-end lg:p-12"
+				)}
+			>
+				<SystemLoopPreview className="relative z-10 mx-auto w-full max-w-[38rem]" />
 			</div>
 		</section>
 	);
