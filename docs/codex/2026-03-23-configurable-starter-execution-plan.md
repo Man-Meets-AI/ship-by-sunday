@@ -1,3 +1,9 @@
+---
+summary: "Living execution plan for turning the repo into a configurable starter, with the starter contract, implementation slices, validation loops, and retrospective notes. It tracks completed work through E5 and the remaining visibility, marketing, analytics, and hardening slices."
+read_when: "Open this when you need the current implementation roadmap, slice status, validation commands, or the remaining starter-generalization work."
+plan_status: "done"
+---
+
 # Configurable Starter Execution Plan
 
 This execution plan turns the strategy in [2026-03-23-configurable-starter-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/.codex/plans/2026-03-23-configurable-starter-plan.md) into a living implementation loop.

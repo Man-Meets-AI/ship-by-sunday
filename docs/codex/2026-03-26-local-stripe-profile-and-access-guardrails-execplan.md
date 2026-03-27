@@ -1,3 +1,9 @@
+---
+summary: "ExecPlan for pinning the local Stripe CLI context and hardening paid-access guardrails so local billing and protected-route QA are deterministic. It addresses profile drift, entitlement bootstrap reliability, and clearer signed-in account recovery messaging on access-required surfaces."
+read_when: "Open this when local Stripe, Clerk, or access guardrail behavior is ambiguous or developers are getting stuck on `/access-required`."
+plan_status: "done"
+---
+
 # Pin Local Stripe CLI Context and Harden Paid-Access Guardrails
 
 This document is a living execution plan for removing the local-development failure mode where Ship by Sunday silently uses the wrong Stripe CLI account or the wrong signed-in Clerk user, then leaves the developer staring at `/access-required` without enough context to know whether the problem is billing, auth, or entitlements.

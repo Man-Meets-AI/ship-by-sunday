@@ -1,3 +1,9 @@
+---
+summary: "Strategic plan for re-framing the repo as a reusable starter platform without losing the strongest existing infrastructure. It defines the core/optional/too-specific/remove/missing classification model and the milestone map for the generalization effort."
+read_when: "Open this when you need the boundary-setting audit, milestone framing, or the repository-level strategy for starter configuration."
+plan_status: "done"
+---
+
 # Configurable Starter Plan for `manmeetsai-workspace`
 
 ## Initiative

@@ -1,3 +1,9 @@
+---
+summary: "ExecPlan for redesigning the Ship by Sunday identity sign-in experience so it feels branded, premium, resilient, and fast across sign-in, password reset, and SSO callback routes. It records the route-shell decisions, brand reuse, and validation that brought the auth flow into a single system."
+read_when: "Open this when you need the design and route decisions behind the refreshed identity auth experience."
+plan_status: "done"
+---
+
 # Refresh the Identity Sign-In Experience
 
 This document is a living execution plan for redesigning the Ship by Sunday identity sign-in experience so it feels premium, branded, resilient, and fast instead of generic and unfinished. It must be updated as implementation progresses so a new coding agent can resume from this file alone.

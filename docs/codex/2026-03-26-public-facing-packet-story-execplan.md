@@ -1,3 +1,9 @@
+---
+summary: "ExecPlan for unifying public builder docs and adjacent public copy around one packet-first story. It treats legacy route names like mission, lesson, and artifacts as compatibility-only language unless the docs are explicitly explaining redirects or internal implementation details."
+read_when: "Open this when public docs or marketing copy still teach the wrong product model or expose obsolete route names as current."
+plan_status: "done"
+---
+
 # Unify the Public Packet-First Story
 
 This document is a living execution plan for collapsing the public-facing vocabulary around one packet-first story so builders and agents stop hearing two different product models at once. It is intentionally scoped to public builder docs, public route descriptions, and any public-facing labels or copy that still teach obsolete `mission`, `lesson`, or `artifacts` surfaces as if they were current product entry points.

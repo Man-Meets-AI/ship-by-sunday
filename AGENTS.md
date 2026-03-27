@@ -7,16 +7,8 @@ This version has breaking changes. Read the relevant guide in `apps/web/node_mod
 ## Ship by Sunday routing
 - For work in `apps/web`, also follow `apps/web/AGENTS.md`.
 - For work in `packages/packet-compiler`, also follow `packages/packet-compiler/AGENTS.md`.
-- Canonical source docs for Ship by Sunday live in `docs/ship-by-sunday/`.
-## Canonical truth order
-Use this exact priority order when sources conflict:
-1. `docs/ship-by-sunday/packet-contract-and-question-map-2026-03-23.md`
-2. `docs/ship-by-sunday/input-architecture-keep-kill-combine-2026-03-23.md`
-3. `docs/ship-by-sunday/curriculum-reset-funnel-2026-03-23.md`
-4. `docs/ship-by-sunday/repo-input-audit-2026-03-23.md`
-5. `docs/ship-by-sunday/openai-domain-contract-reconciliation-2026-03-23.md`
-6. `docs/ship-by-sunday/original/*` only to salvage useful teaching beats, examples, and voice
-
+- Ship by Sunday background docs live in `docs/ship-by-sunday/` when historical context is useful.
+- Do not treat those docs as a required reading order or a higher-priority contract than the local `AGENTS.md` files and the current runtime code.
 
 ## Repo layout
 
@@ -28,6 +20,7 @@ Use this exact priority order when sources conflict:
 - `apps/web/tests/`: unit, contract, integration, integration-ui, and browser-smoke coverage
 - `docs/`: human-facing docs and reusable prompt assets
 - `docs/codex/`: per-initiative ExecPlans and the ExecPlan contract
+- `docs/ship-by-sunday/design-pack/`: Ship by Sunday UI workflow pack for landing pages, app surfaces, dashboards, and other user-facing design tasks
 - `packages/`: non-web package boundaries such as `packet-compiler`
 
 ## Core tools and stack

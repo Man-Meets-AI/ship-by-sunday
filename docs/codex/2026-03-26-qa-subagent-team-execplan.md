@@ -1,3 +1,9 @@
+---
+summary: "ExecPlan for turning the existing QA control plane into a Codex-native QA team with a lead role, specialist support roles, and review artifacts. It keeps `qa/` as the source of truth while adding repo-scoped Codex roles, a shared QA-team skill, and structured verdict output."
+read_when: "Open this when you need to understand or extend the repository's QA-team workflow, role structure, or review artifact flow."
+plan_status: "done"
+---
+
 # Stand up a Codex-native QA subagent team
 
 This is a living execution plan for turning the existing journey-first QA control plane into a Codex-native QA team with explicit subagent roles, one user-facing entrypoint, and repeatable review artifacts. It is written so a fresh coding agent can execute the work without prior chat context and must be updated as decisions, discoveries, validation results, and scope adjustments accumulate.

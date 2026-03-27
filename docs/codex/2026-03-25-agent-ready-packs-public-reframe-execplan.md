@@ -1,3 +1,9 @@
+---
+summary: "Reframes the public product story around Agent-Ready Packs and a Starter Snapshot, replacing the retired course wrapper and private starter-repo narrative. It aligns homepage copy, protected-flow labels, docs, module flags, downloads, and tests to one coherent public contract."
+read_when: "Open this when changing public-facing offer language, homepage framing, review/download artifact names, or the visible starter-repo module."
+plan_status: "done"
+---
+
 # Reframe the public product around Agent-Ready Packs
 
 This is a living execution plan for rewriting the public product story so Ship by Sunday sells the current product truth instead of the retired four-block course wrapper and obsolete starter-repo delivery model. It is written so a fresh coding agent can implement the change end to end without prior chat context, and it must be updated as work proceeds.

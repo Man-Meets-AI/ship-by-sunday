@@ -1,3 +1,9 @@
+---
+summary: "Reworks the packet funnel into route-driven packet pages that map the recorded L0-L13 curriculum onto the product experience. It introduces nested packet routes, routed step selection, and packet-local video wiring."
+read_when: "Open this when changing packet-stage routing, curriculum/video mapping, or page-level packet flow behavior."
+plan_status: "done"
+---
+
 # Reframe The Packet Funnel Around L0-L13 Video Pages
 
 This is a living execution plan for reshaping the packet-first workspace so the recorded packet videos drive the page model instead of being bolted onto the current stage-only screens. It is written from current repository state and should be kept current as the implementation progresses.

@@ -1,3 +1,9 @@
+---
+summary: "Rewrites the homepage around the Sunday promise and gives the starter system dedicated space in the page architecture. The goal is to make the offer clearer without tearing down the existing visual shell."
+read_when: "Open this when editing homepage messaging, the starter-system section, or shared promise surfaces like metadata and checkout copy."
+plan_status: "done"
+---
+
 # Reframe The Homepage Around The Sunday Promise And The Starter-System Advantage
 
 This is a living execution plan for rewriting the public homepage so it sells the real promise first, then reveals the packet mechanism, then gives the starter system the dedicated space it deserves. It is written so a fresh coding agent can execute it without prior chat context.

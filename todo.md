@@ -2,6 +2,10 @@
 
 ## recent
 
+- **2026-03-27 15:41 EDT** — Launch closeout: split the dirty tree on `release/launch-2026-03-27` into `feat(review-download): ship starter snapshot archive`, `feat(execute-ship): restore post-review bonus library`, and `feat(ui): refresh homepage and docs surfaces`; fixed the stale output-tracing unit expectations plus app-local generated-output ignores; and rechecked `apps/web` lint, format, unit, integration, contracts, build, browser-smoke, `qa:validate`, and `packages/packet-compiler` lint, format, typecheck, and test. `CHANGELOG.md` updated for the user-facing review-download, bonus-library, and UI changes.
+
+- **2026-03-27 13:41 EDT** — Agent-doc cleanup: removed the mandatory Ship by Sunday source-doc reading order from the root and web `AGENTS.md` files, rewrote the packet-compiler guidance around the single generated repo output instead of stage-pack internals, and trimmed the SBS design-pack docs so UI work points at live app guidance instead of stale planning docs. No `CHANGELOG.md` update needed for this docs-only contract cleanup.
+
 - **2026-03-27 00:35 EDT** — Commit closeout + state sweep: split the dirty worktree onto `dev-local-closeout-2026-03-27` as focused QA-team, packet-flow, course-shell, and public-UI commits; documented the final `apps/web` Convex-vs-local-state sweep in `docs/codex/convex-vs-use-state-sweep-2026-03-26.md`; and rechecked `qa:validate`, the packet integration + integration-ui subset, packet/unit autosave coverage, entitled local-auth `@default_ship`, the lesson-state unit lane, and `bun run build`. `CHANGELOG.md` updated for the shipped user-facing packet/course/public UI changes.
 
 - **2026-03-26 22:47 EDT** — Packet step-controller refactor: extracted the packet step-form mutation + hook wiring out of `PacketStagePage` into a dedicated `PacketStageStepController` so the page shell no longer middlemans the step-card props. No doc or changelog update needed for this internal structure pass.

@@ -1,3 +1,9 @@
+---
+summary: "Builds a root-level QA operating system organized around product journeys, personas, scenario packs, and durable run reports. It replaces test-sprawl thinking with a repo-wide QA source of truth that is readable by both humans and agents."
+read_when: "Open this when changing test strategy, browser-smoke coverage, journey catalogs, or QA operating-model files under `qa/`."
+plan_status: "done"
+---
+
 # Build a journey-first QA operating system
 
 This is a living execution plan for replacing low-confidence, implementation-led test sprawl with a product-readable QA operating system. It is written so a fresh coding agent can execute the work without prior chat context and must be updated as decisions, discoveries, validation results, and scope adjustments accumulate.

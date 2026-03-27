@@ -32,8 +32,10 @@ PACKET-06,integration,apps/web/tests/integration/packet-download-routes.test.ts,
 PACKET-07,sandbox_e2e,apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts,mapped_existing,medium,The current end-to-end proof now follows the canonical packet routes in the @default_ship pack.
 PACKET-07,integration_ui,apps/web/tests/integration-ui/packet-stage-page.test.tsx,mapped_existing,high,Directly proves the routed workbench autosave-backed save feedback and the single Continue flow that now define the packet interaction contract.
 PACKET-07,integration_ui,apps/web/tests/integration-ui/packet-review-page.test.tsx,mapped_existing,medium,Review now proves the optional post-download branch stays subordinate to the required packet run.
-PACKET-08,unit,apps/web/tests/unit/legacy-lesson-routes.test.ts,rewrite_required,low,Legacy alias behavior still exists but the proving test is anchored to old naming and needs a modern rewrite.
-PACKET-08,unit,apps/web/tests/unit/mission-page.test.tsx,rewrite_required,low,Legacy mission coverage still exists but it is not yet expressed as a canonical compatibility proof.
+PACKET-08,unit,apps/web/tests/unit/app-workspace-mission-page.test.tsx,mapped_existing,medium,Directly proves locked `/mission` messaging before unlock and the restored bonus-library home after unlock.
+PACKET-08,unit,apps/web/tests/unit/app-workspace-lesson-page.test.tsx,mapped_existing,medium,Directly proves locked `/lesson/<lessonKey>` messaging before unlock and the restored view-only lesson route after unlock.
+PACKET-08,unit,apps/web/tests/unit/bonus-mission-page.test.tsx,mapped_existing,medium,Directly proves the restored library copy and natural block ordering for the post-review bonus home.
+PACKET-08,unit,apps/web/tests/unit/bonus-lesson-page.test.tsx,mapped_existing,medium,Directly proves the restored bonus lesson shell stays video-first and does not render the old workbench.
 PACKET-09,integration_ui,apps/web/tests/integration-ui/packet-stage-page.test.tsx,mapped_existing,high,Directly proves locked stage entry redirects back to the first incomplete packet stage.
 PACKET-09,integration_ui,apps/web/tests/integration-ui/packet-review-page.test.tsx,mapped_existing,high,Directly proves locked review entry redirects back to the first incomplete packet stage.
 SETTINGS-01,unit,apps/web/tests/unit/settings-page.test.tsx,mapped_existing,medium,Core settings rendering is covered.
@@ -42,6 +44,7 @@ SETTINGS-02,unit,apps/web/tests/unit/starter-repo-access-card.test.tsx,mapped_ex
 SETTINGS-02,unit,apps/web/tests/unit/codex-route-helpers.test.ts,mapped_existing,medium,Codex settings-adjacent helpers are covered.
 EXECUTE-01,integration_ui,apps/web/tests/integration-ui/packet-review-page.test.tsx,mapped_existing,medium,Review now proves the optional branch stays hidden until the Starter Snapshot download moment.
 EXECUTE-01,integration_ui,apps/web/tests/integration-ui/execute-ship-page.test.tsx,mapped_existing,medium,Execute / Ship has direct page-level proof once the optional route is opened.
+EXECUTE-01,unit,apps/web/tests/unit/app-workspace-execute-page.test.tsx,mapped_existing,medium,Directly proves the bridge renders the two CTA choices and repeat visits redirect into `/mission`.
 FREEPAID-01,integration_ui,apps/web/tests/integration-ui/checkout-button.test.tsx,mapped_existing,medium,Checkout launch still has component-level proof.
 FREEPAID-01,integration,apps/web/tests/integration/stripe-checkout-route.test.ts,mapped_existing,medium,Stripe route behavior remains covered.
 FREEPAID-02,sandbox_e2e,apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts,mapped_existing,medium,Tagged @billing_integration and now waits for /start after checkout success.
