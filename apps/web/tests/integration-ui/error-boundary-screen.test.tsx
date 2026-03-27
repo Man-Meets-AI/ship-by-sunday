@@ -35,7 +35,7 @@ describe("ErrorBoundaryScreen", () => {
 		expect(
 			screen.getByText("The workspace failed while loading protected content."),
 		).toBeTruthy();
-		expect(screen.getByText("Request path: /mission")).toBeTruthy();
+		expect(screen.getByText("Path: /mission")).toBeTruthy();
 		expect(reportClientErrorMock).toHaveBeenCalledWith(
 			expect.objectContaining({
 				code: "protected_app_error_boundary",
@@ -43,7 +43,7 @@ describe("ErrorBoundaryScreen", () => {
 			}),
 		);
 
-		await user.click(screen.getByRole("button", { name: "Try again" }));
+		await user.click(screen.getByRole("button", { name: "Try to recompile" }));
 		expect(resetMock).toHaveBeenCalledTimes(1);
 	});
 
@@ -80,7 +80,7 @@ describe("ErrorBoundaryScreen", () => {
 			/>,
 		);
 
-		expect(screen.getByText("Request path: unknown")).toBeTruthy();
-		expect(screen.getByText("Error digest: not available")).toBeTruthy();
+		expect(screen.getByText("Path: unknown")).toBeTruthy();
+		expect(screen.getByText("Digest: none")).toBeTruthy();
 	});
 });

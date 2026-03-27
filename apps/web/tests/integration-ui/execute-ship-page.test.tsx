@@ -106,7 +106,7 @@ describe("ExecuteShipPage", () => {
 		);
 
 		expect(
-			screen.getByRole("heading", { name: "Execute / Ship" }),
+			screen.getByText("Ship by Sunday OS is ready for execution."),
 		).toBeTruthy();
 		expect(screen.getByRole("tab", { name: /Build Now/i })).toBeTruthy();
 		expect(screen.getByRole("tab", { name: /Refine Design/i })).toBeTruthy();
