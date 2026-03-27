@@ -1,53 +1,71 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useMutation } from "convex/react";
+import { useState } from "react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { routeConfig } from "@/config/product";
+import type { PacketWorkspaceState } from "@/features/packet-flow/lib/packet-workspace-types";
 import { PacketReviewCheckpointCard } from "./packet-review-checkpoint-card";
 import { PacketReviewExecutePreview } from "./packet-review-execute-preview";
 
 export function PacketReviewDownloadBridge({
-	isReviewReady,
-	executeShipUnlockedAt,
+	initialWorkspaceState,
 }: {
-	isReviewReady: boolean;
-	executeShipUnlockedAt?: number;
+	initialWorkspaceState: PacketWorkspaceState;
 }) {
 	const router = useRouter();
-	const unlockExecuteShip = useMutation(api.packet.unlockExecuteShip);
-	const [hasTriggeredStarterDownload, setHasTriggeredStarterDownload] =
-		useState(Boolean(executeShipUnlockedAt));
-	const [isExecuteUnlocked, setIsExecuteUnlocked] = useState(
-		Boolean(executeShipUnlockedAt),
+	const { isAuthenticated, isLoading } = useConvexAuth();
+	const liveWorkspaceState = useQuery(
+		api.packet.getPacketWorkspaceState,
+		isAuthenticated && !isLoading ? {} : "skip",
+	) as PacketWorkspaceState | undefined;
+	const workspaceState = liveWorkspaceState ?? initialWorkspaceState;
+	const isReviewReady = workspaceState.packetReadiness.review.isReady;
+	const packetReadiness = workspaceState.packetReadiness;
+	const isExecuteUnlocked = Boolean(
+		workspaceState.workflowState?.executeShipUnlockedAt,
 	);
-	const [isPending, startTransition] = useTransition();
+	const unlockExecuteShip = useMutation(api.packet.unlockExecuteShip);
+	const [hasRequestedStarterDownload, setHasRequestedStarterDownload] =
+		useState(false);
+	const [isUnlockPending, setIsUnlockPending] = useState(false);
+	const hasTriggeredStarterDownload =
+		hasRequestedStarterDownload || isExecuteUnlocked;
 
 	function handleStarterDownload() {
 		if (!isReviewReady) {
 			return;
 		}
 
-		setHasTriggeredStarterDownload(true);
+		setHasRequestedStarterDownload(true);
 	}
 
-	function handleUnlockExecuteShip() {
-		if (!isReviewReady || !hasTriggeredStarterDownload || isExecuteUnlocked) {
+	async function handleUnlockExecuteShip() {
+		if (
+			!isReviewReady ||
+			!hasTriggeredStarterDownload ||
+			isExecuteUnlocked ||
+			isUnlockPending
+		) {
 			return;
 		}
 
-		startTransition(async () => {
+		setIsUnlockPending(true);
+		try {
 			await unlockExecuteShip({});
-			setIsExecuteUnlocked(true);
 			router.push(routeConfig.execute);
-		});
+		} catch (error) {
+			setIsUnlockPending(false);
+			throw error;
+		}
 	}
 
 	return (
-		<div className="space-y-6">
+		<div className="flex flex-col gap-6">
 			<PacketReviewCheckpointCard
 				isReviewReady={isReviewReady}
+				packetReadiness={packetReadiness}
 				isExecuteUnlocked={isExecuteUnlocked}
 				onStarterDownload={handleStarterDownload}
 			/>
@@ -55,7 +73,7 @@ export function PacketReviewDownloadBridge({
 				isReviewReady={isReviewReady}
 				hasTriggeredStarterDownload={hasTriggeredStarterDownload}
 				isExecuteUnlocked={isExecuteUnlocked}
-				isUnlockPending={isPending}
+				isUnlockPending={isUnlockPending}
 				onUnlockExecuteShip={handleUnlockExecuteShip}
 			/>
 		</div>

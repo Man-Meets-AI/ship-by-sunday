@@ -9,7 +9,7 @@ vi.mock("@/features/packet-flow/server/downloads", () => ({
 	getPacketDownloadContext: getPacketDownloadContextMock,
 }));
 
-vi.mock("@packet-compiler/server", () => ({
+vi.mock("@manmeetsai/packet-compiler/server", () => ({
 	buildBuildPacketArchive: vi.fn(),
 	buildDesignPacketArchive: buildDesignPacketArchiveMock,
 	buildMarketingPacketArchive: buildMarketingPacketArchiveMock,

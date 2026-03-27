@@ -5,6 +5,7 @@ import {
 	createCanonicalProjectDefinitionDraft,
 	createCompleteProjectDefinition,
 	deriveStageStatus,
+	getPacketStageDefinition,
 } from "@packet-compiler";
 import { PacketStageSidebar } from "@/features/packet-flow/components/packet-stage-sidebar";
 
@@ -45,7 +46,12 @@ describe("PacketStageSidebar", () => {
 			throw new Error("Missing product stage status");
 		}
 
-		render(<PacketStageSidebar stageStatus={stageStatus} />);
+		render(
+			<PacketStageSidebar
+				stage={getPacketStageDefinition("product")}
+				stageStatus={stageStatus}
+			/>,
+		);
 
 		expect(screen.getByText("Why This Matters")).toBeTruthy();
 		expect(screen.queryByText("why_this_matters")).toBeNull();
