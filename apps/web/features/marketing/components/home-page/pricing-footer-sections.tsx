@@ -1,6 +1,9 @@
+import Link from "next/link";
+
 import { productWordmarkFontClassName } from "@/components/product-brand";
-import { type HomePageCtaTarget } from "@/config/product";
+import { routeConfig, type HomePageCtaTarget } from "@/config/product";
 import type { HomePageContent } from "@/features/marketing/content/home";
+import { blogDisplayConfig } from "@/features/starter/lib/starter-selectors";
 
 import { MarketingThemeToggle } from "./home-hero-theme-toggle";
 import { HomePagePrimaryCta } from "./home-page-primary-cta";
@@ -107,11 +110,19 @@ export function FooterSection({
 				</div>
 			</div>
 			<div className="flex justify-center px-2 pt-10 text-center sm:pt-12">
-				<p
-					className={`${productWordmarkFontClassName} text-balance text-[clamp(4.5rem,18vw,12rem)] font-normal uppercase leading-[0.82] tracking-[0.05em] text-foreground/90`}
-				>
-					{footerWordmark}
-				</p>
+				<div className="flex flex-col items-center justify-center gap-4 sm:flex-row sm:items-end">
+					<p
+						className={`${productWordmarkFontClassName} text-balance text-[clamp(4.5rem,18vw,12rem)] font-normal uppercase leading-[0.82] tracking-[0.05em] text-foreground/90`}
+					>
+						{footerWordmark}
+					</p>
+					<Link
+						href={routeConfig.blog}
+						className="inline-flex h-10 items-center rounded-full border border-border/60 px-4 text-xs font-medium uppercase tracking-[0.24em] text-foreground/80 transition-colors hover:border-foreground/20 hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 sm:mb-4"
+					>
+						{blogDisplayConfig.footerLabel}
+					</Link>
+				</div>
 			</div>
 		</footer>
 	);

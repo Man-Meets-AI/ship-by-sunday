@@ -12,7 +12,7 @@ import {
 	memberWithoutAccessEmail,
 	memberWithoutAccessPassword,
 	memberWithoutAccessStorageStatePath,
-	shouldRunSandboxAuth,
+	shouldRunAuthenticatedE2E,
 } from "./auth-state";
 
 const DEFAULT_COURSE_SLUG = "ship-by-sunday";
@@ -31,7 +31,7 @@ export default async function globalSetup(config: FullConfig) {
 	const sandboxProjectRequested = isSandboxProjectRequested();
 
 	if (
-		!shouldRunSandboxAuth ||
+		!shouldRunAuthenticatedE2E ||
 		!includesSandboxE2EProject ||
 		!sandboxProjectRequested
 	) {
@@ -49,6 +49,10 @@ export default async function globalSetup(config: FullConfig) {
 				clerkUserId,
 				kind: "reset",
 			});
+			await syncPacketProgressState({
+				clerkUserId,
+				kind: "reset",
+			});
 		},
 	});
 	await createStorageState(baseURL, {
@@ -59,6 +63,10 @@ export default async function globalSetup(config: FullConfig) {
 			await syncProductAccessState({
 				clerkUserId,
 				kind: "grant",
+			});
+			await syncPacketProgressState({
+				clerkUserId,
+				kind: "seed_complete",
 			});
 		},
 	});
@@ -221,7 +229,7 @@ async function syncProductAccessState({
 }) {
 	const result =
 		kind === "grant"
-			? await runConvexAccessCommand({
+			? await runConvexInternalCommand({
 					functionName: "access:grantProductAccess",
 					args: {
 						clerkUserId,
@@ -232,7 +240,7 @@ async function syncProductAccessState({
 						QA_COURSE_SLUG: DEFAULT_COURSE_SLUG,
 					},
 				})
-			: await runConvexAccessCommand({
+			: await runConvexInternalCommand({
 					functionName: "access:resetProductAccess",
 					args: {
 						clerkUserId,
@@ -251,7 +259,44 @@ async function syncProductAccessState({
 	);
 }
 
-function runConvexAccessCommand({
+async function syncPacketProgressState({
+	clerkUserId,
+	kind,
+}: {
+	clerkUserId: string;
+	kind: "seed_complete" | "reset";
+}) {
+	const result =
+		kind === "seed_complete"
+			? await runConvexInternalCommand({
+					functionName: "packet:seedCompleteProjectDefinitionForQa",
+					args: {
+						clerkUserId,
+					},
+					env: process.env,
+				})
+			: await runConvexInternalCommand({
+					functionName: "packet:resetProjectDefinitionForQa",
+					args: {
+						clerkUserId,
+					},
+					env: process.env,
+				});
+
+	if (result.code === 0) {
+		return;
+	}
+
+	const actionLabel =
+		kind === "seed_complete"
+			? "seed complete packet progress"
+			: "reset packet progress";
+	throw new Error(
+		`Failed to ${actionLabel} for ${clerkUserId}. ${result.stderr || result.stdout || "No command output."}`,
+	);
+}
+
+function runConvexInternalCommand({
 	functionName,
 	args,
 	env,

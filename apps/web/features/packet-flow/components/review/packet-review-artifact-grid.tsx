@@ -9,7 +9,6 @@ import {
 	type PacketReadinessResult,
 } from "@packet-compiler";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const reviewArtifacts = [
 	{
@@ -41,54 +40,71 @@ export function PacketReviewArtifactGrid({
 	packetReadiness: PacketReadinessResult;
 }) {
 	return (
-		<div className="grid gap-6 xl:grid-cols-4">
-			{reviewArtifacts.map((artifact) => {
-				const readiness = packetReadiness[artifact.id];
+		<section className="space-y-4 border-t border-border/60 pt-6">
+			<div className="max-w-3xl space-y-2">
+				<p className="text-sm font-medium text-muted-foreground">
+					Supporting downloads
+				</p>
+				<h2 className="text-xl font-semibold tracking-tight">
+					Keep the pack links handy.
+				</h2>
+				<p className="text-sm leading-6 text-muted-foreground">
+					The Starter Snapshot is the primary outcome. These individual pack
+					links stay available when you need one on its own.
+				</p>
+			</div>
+			<div className="space-y-4">
+				{reviewArtifacts.map((artifact) => {
+					const readiness = packetReadiness[artifact.id];
 
-				return (
-					<Card key={artifact.id}>
-						<CardHeader>
-							<CardTitle>{artifact.title}</CardTitle>
-						</CardHeader>
-						<CardContent className="space-y-3 text-sm text-muted-foreground">
-							<p>
-								{readiness.isReady
-									? "Ready to download."
-									: `Missing ${readiness.missingFactKeys.length} required fact(s) before this pack is ready.`}
-							</p>
-							{readiness.isReady ? (
-								<Button asChild className="w-full">
-									<Link href={artifact.downloadHref}>
-										Download {artifact.title}
+					return (
+						<div
+							key={artifact.id}
+							className="grid gap-4 border-t border-border/60 pt-4 lg:grid-cols-[minmax(0,1fr)_auto]"
+						>
+							<div className="space-y-1">
+								<h3 className="text-base font-semibold">{artifact.title}</h3>
+								<p className="text-sm leading-6 text-muted-foreground">
+									{readiness.isReady
+										? "Ready to download."
+										: `${readiness.missingFactKeys.length} answer${readiness.missingFactKeys.length === 1 ? "" : "s"} still need to be locked before this pack is ready.`}
+								</p>
+							</div>
+							<div className="flex flex-col gap-3 lg:min-w-56">
+								{readiness.isReady ? (
+									<Button asChild className="w-full">
+										<Link href={artifact.downloadHref}>
+											Download {artifact.title}
+										</Link>
+									</Button>
+								) : null}
+								<Button asChild variant="outline" className="w-full">
+									<Link href={artifact.stageRoute}>
+										Open {artifact.stageLabel}
 									</Link>
 								</Button>
-							) : null}
-							<Button asChild variant="outline" className="w-full">
-								<Link href={artifact.stageRoute}>
-									Open {artifact.stageLabel}
-								</Link>
-							</Button>
-						</CardContent>
-					</Card>
-				);
-			})}
-			<Card>
-				<CardHeader>
-					<CardTitle>{PROMPT_PACK_LABEL}</CardTitle>
-				</CardHeader>
-				<CardContent className="space-y-3 text-sm text-muted-foreground">
-					<p>
-						{packetReadiness.review.isReady
-							? `Ready inside the ${STARTER_SNAPSHOT_LABEL}.`
-							: `Included when the ${STARTER_SNAPSHOT_LABEL} is ready.`}
-					</p>
-					<Button asChild variant="outline" className="w-full">
-						<Link href={getPacketStageDefinition("review").route}>
-							Open Review
-						</Link>
-					</Button>
-				</CardContent>
-			</Card>
-		</div>
+							</div>
+						</div>
+					);
+				})}
+				<div className="grid gap-4 border-t border-border/60 pt-4 lg:grid-cols-[minmax(0,1fr)_auto]">
+					<div className="space-y-1">
+						<h3 className="text-base font-semibold">{PROMPT_PACK_LABEL}</h3>
+						<p className="text-sm leading-6 text-muted-foreground">
+							{packetReadiness.review.isReady
+								? `Included in the ${STARTER_SNAPSHOT_LABEL}.`
+								: `Included when the ${STARTER_SNAPSHOT_LABEL} is ready.`}
+						</p>
+					</div>
+					<div className="flex flex-col gap-3 lg:min-w-56">
+						<Button asChild variant="outline" className="w-full">
+							<Link href={getPacketStageDefinition("review").route}>
+								Open Review
+							</Link>
+						</Button>
+					</div>
+				</div>
+			</div>
+		</section>
 	);
 }

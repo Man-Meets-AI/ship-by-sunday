@@ -62,4 +62,5 @@
 
 ## follow-ups
 
+- Execute `docs/codex/2026-03-26-distill-packet-workspace-surfaces-execplan.md` now that the routed packet-video baseline is in place; preserve the plan's explicit design guardrail that the packet run should not fall back to stock badge, pill, or card-heavy UI chrome.
 - Restore or reconcile deleted `assets/` + `public/course/build-guide-images` if unintended local cleanup.

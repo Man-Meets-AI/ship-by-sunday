@@ -11,6 +11,7 @@ import type { PacketWorkspaceState } from "@/features/packet-flow/lib/packet-wor
 
 const saveProjectDefinitionFactsMock = vi.fn();
 const useMutationMock = vi.fn(() => saveProjectDefinitionFactsMock);
+const useQueryMock = vi.fn(() => undefined);
 const redirectMock = vi.fn((href: string) => {
 	throw new Error(`NEXT_REDIRECT:${href}`);
 });
@@ -44,7 +45,7 @@ vi.mock("convex/react", () => ({
 		isLoading: false,
 	}),
 	useMutation: () => useMutationMock(),
-	useQuery: () => undefined,
+	useQuery: () => useQueryMock(),
 }));
 
 vi.mock("@/features/course/shared/components/app-shell", () => ({
@@ -102,8 +103,68 @@ describe("PacketStagePage", () => {
 	beforeEach(() => {
 		saveProjectDefinitionFactsMock.mockReset();
 		useMutationMock.mockClear();
+		useQueryMock.mockReset();
+		useQueryMock.mockReturnValue(undefined);
 		redirectMock.mockClear();
 		pushMock.mockReset();
+	});
+
+	it("does not loop when live workspace state arrives with new object identities", async () => {
+		const workspaceState = createWorkspaceState({
+			product_name: undefined,
+			product_summary: undefined,
+			primary_user: undefined,
+			why_this_matters: undefined,
+		});
+		useQueryMock.mockImplementation(() => structuredClone(workspaceState));
+		const consoleErrorSpy = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => undefined);
+
+		try {
+			render(
+				<PacketStagePage
+					stageId="product"
+					stepId="foundation"
+					initialWorkspaceState={workspaceState}
+				/>,
+			);
+
+			await screen.findByRole("heading", { name: "Foundation" });
+			await new Promise((resolve) => window.setTimeout(resolve, 50));
+
+			expect(
+				consoleErrorSpy.mock.calls.some((call) =>
+					call.some(
+						(entry) =>
+							typeof entry === "string" &&
+							entry.includes("Maximum update depth exceeded"),
+					),
+				),
+			).toBe(false);
+		} finally {
+			consoleErrorSpy.mockRestore();
+		}
+	});
+
+	it("lets users change packet pages from the within-stage navigation control", async () => {
+		const user = userEvent.setup();
+		const workspaceState = createWorkspaceState();
+
+		render(
+			<PacketStagePage
+				stageId="product"
+				stepId="foundation"
+				initialWorkspaceState={workspaceState}
+			/>,
+		);
+
+		await user.selectOptions(screen.getByLabelText("Page"), "problem");
+
+		expect(pushMock).toHaveBeenCalledWith("/product/problem");
+		expect(
+			screen.getByRole("link", { name: /02.*Problem/i }).getAttribute("href"),
+		).toBe("/product/problem");
 	});
 
 	it("blocks blank saves, saves partial drafts in place, and clears field errors as users fix them", async () => {
@@ -128,7 +189,7 @@ describe("PacketStagePage", () => {
 		const primaryUserField = screen.getByLabelText("Primary User");
 		const whyThisMattersField = screen.getByLabelText("Why This Matters");
 
-		await user.click(screen.getByRole("button", { name: "Save step" }));
+		await user.click(screen.getByRole("button", { name: "Save and continue" }));
 
 		expect(saveProjectDefinitionFactsMock).not.toHaveBeenCalled();
 		expect(screen.getByText("Foundation is still blank.")).toBeTruthy();
@@ -143,7 +204,7 @@ describe("PacketStagePage", () => {
 			productSummaryField,
 			"A packet-first builder for Sunday launches.",
 		);
-		await user.click(screen.getByRole("button", { name: "Save step" }));
+		await user.click(screen.getByRole("button", { name: "Save and continue" }));
 
 		await waitFor(() =>
 			expect(saveProjectDefinitionFactsMock).toHaveBeenCalledWith(
@@ -156,8 +217,8 @@ describe("PacketStagePage", () => {
 				}),
 			),
 		);
-		expect(screen.getByText("Draft saved.")).toBeTruthy();
-		expect(screen.getByText("Step 1 of 4: Foundation")).toBeTruthy();
+		expect(screen.getByText("Saved for now.")).toBeTruthy();
+		expect(screen.getByText("Page 1 of 4")).toBeTruthy();
 		expect(document.activeElement).toBe(primaryUserField);
 		expect(primaryUserField.getAttribute("aria-invalid")).toBe("true");
 		expect(whyThisMattersField.getAttribute("aria-invalid")).toBe("true");
@@ -169,6 +230,58 @@ describe("PacketStagePage", () => {
 
 		expect(primaryUserField.getAttribute("aria-invalid")).toBeNull();
 		expect(whyThisMattersField.getAttribute("aria-invalid")).toBe("true");
+	});
+
+	it("stays on the current page after a complete save when asked to stay", async () => {
+		const user = userEvent.setup();
+		const workspaceState = createWorkspaceState({
+			product_name: undefined,
+			product_summary: undefined,
+			primary_user: undefined,
+			why_this_matters: undefined,
+		});
+
+		render(
+			<PacketStagePage
+				stageId="product"
+				stepId="foundation"
+				initialWorkspaceState={workspaceState}
+			/>,
+		);
+
+		await user.type(screen.getByLabelText("Product Name"), "Ship by Sunday");
+		await user.type(
+			screen.getByLabelText("Product Summary"),
+			"A packet-first builder for Sunday launches.",
+		);
+		await user.type(
+			screen.getByLabelText("Primary User"),
+			"Indie founders shipping a paid product.",
+		);
+		await user.type(
+			screen.getByLabelText("Why This Matters"),
+			"Sunday-bound launches need sharper guidance than generic courses.",
+		);
+		await user.click(screen.getByRole("button", { name: "Save and stay" }));
+
+		await waitFor(() =>
+			expect(saveProjectDefinitionFactsMock).toHaveBeenCalledWith(
+				expect.objectContaining({
+					stageId: "product",
+					factsPatch: expect.objectContaining({
+						product_name: "Ship by Sunday",
+						product_summary: "A packet-first builder for Sunday launches.",
+						primary_user: "Indie founders shipping a paid product.",
+						why_this_matters:
+							"Sunday-bound launches need sharper guidance than generic courses.",
+					}),
+				}),
+			),
+		);
+		expect(pushMock).not.toHaveBeenCalled();
+		expect(screen.getByText("Saved.")).toBeTruthy();
+		expect(screen.getByText("Foundation is locked.")).toBeTruthy();
+		expect(screen.getByText("Page 1 of 4")).toBeTruthy();
 	});
 
 	it("advances after a complete save", async () => {
@@ -201,7 +314,7 @@ describe("PacketStagePage", () => {
 			screen.getByLabelText("Why This Matters"),
 			"Sunday-bound launches need sharper guidance than generic courses.",
 		);
-		await user.click(screen.getByRole("button", { name: "Save step" }));
+		await user.click(screen.getByRole("button", { name: "Save and continue" }));
 
 		await waitFor(() =>
 			expect(saveProjectDefinitionFactsMock).toHaveBeenCalledWith(
@@ -234,7 +347,7 @@ describe("PacketStagePage", () => {
 
 		const priceField = screen.getByLabelText("Price Usd Cents");
 		await user.clear(priceField);
-		await user.click(screen.getByRole("button", { name: "Save step" }));
+		await user.click(screen.getByRole("button", { name: "Save and continue" }));
 
 		await waitFor(() =>
 			expect(saveProjectDefinitionFactsMock).toHaveBeenCalledWith(
@@ -244,11 +357,13 @@ describe("PacketStagePage", () => {
 				}),
 			),
 		);
-		expect(screen.getByText("Step cleared.")).toBeTruthy();
 		expect(
-			screen.getByText(/This checkpoint is incomplete again\./i),
+			screen.getByText("This page needs a few more answers."),
 		).toBeTruthy();
-		expect(screen.getByText("Step 1 of 3: Delivery")).toBeTruthy();
+		expect(
+			screen.getByText(/before this page is complete again\./i),
+		).toBeTruthy();
+		expect(screen.getByText("Page 1 of 3")).toBeTruthy();
 		expect(document.activeElement).toBe(priceField);
 		expect(priceField.getAttribute("aria-invalid")).toBe("true");
 	});
@@ -275,15 +390,15 @@ describe("PacketStagePage", () => {
 
 		const productNameField = screen.getByLabelText("Product Name");
 		await user.type(productNameField, "Ship by Sunday");
-		await user.click(screen.getByRole("button", { name: "Save step" }));
+		await user.click(screen.getByRole("button", { name: "Save and continue" }));
 
 		await waitFor(() =>
 			expect(
-				screen.getByText("We could not save this step right now."),
+				screen.getByText("We could not save this page right now."),
 			).toBeTruthy(),
 		);
 		expect((productNameField as HTMLInputElement).value).toBe("Ship by Sunday");
-		expect(screen.getByText("Step 1 of 4: Foundation")).toBeTruthy();
+		expect(screen.getByText("Page 1 of 4")).toBeTruthy();
 		expect(
 			screen.getByLabelText("Primary User").getAttribute("aria-invalid"),
 		).toBeNull();

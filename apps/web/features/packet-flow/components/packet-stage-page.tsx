@@ -88,8 +88,9 @@ export function PacketStagePage({
 		currentStep,
 		currentDraftValues,
 		goToPreviousStep,
+		handleSaveAndContinue,
+		handleSaveAndStay,
 		handleFieldChange,
-		handleSave,
 		isSaving,
 	} = usePacketStageStepState({
 		stage,
@@ -114,18 +115,18 @@ export function PacketStagePage({
 			showSkillRail={false}
 			title={stage.label}
 		>
-			<div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 pb-10 pt-2">
+			<div className="mx-auto flex w-full max-w-[1180px] flex-1 flex-col gap-6 px-4 pb-10 pt-2">
 				<PacketStageNav
 					currentStageId={stageId}
 					stageStatuses={workspaceState.stageStatuses}
 				/>
-				<div className="grid gap-6 xl:grid-cols-[1.4fr_0.6fr]">
+				<div className="grid gap-x-8 gap-y-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
 					{stagePageMedia ? (
 						<div className="xl:col-start-2 xl:row-start-1">
 							<PacketVideoCard content={stagePageMedia} />
 						</div>
 					) : null}
-					<div className="space-y-6 xl:col-start-1 xl:row-span-2">
+					<div className="space-y-8 xl:col-start-1 xl:row-span-2">
 						<PacketStageProgressPanel
 							stageId={stageId}
 							stage={stage}
@@ -144,7 +145,8 @@ export function PacketStagePage({
 								isSaving={isSaving}
 								onBack={goToPreviousStep}
 								onChange={handleFieldChange}
-								onSave={handleSave}
+								onSaveAndContinue={handleSaveAndContinue}
+								onSaveAndStay={handleSaveAndStay}
 							/>
 						) : null}
 					</div>

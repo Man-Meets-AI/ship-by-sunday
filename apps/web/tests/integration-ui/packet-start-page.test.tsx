@@ -81,7 +81,7 @@ function createWorkspaceState(
 }
 
 describe("PacketStartPage", () => {
-	it("renders the welcome video beside the intro and removes the packet subtitle", () => {
+	it("renders a stacked start page with one primary packet CTA and no stage strip", () => {
 		const workspaceState = createWorkspaceState({
 			product_name: "Ship by Sunday",
 			objective: undefined,
@@ -90,11 +90,14 @@ describe("PacketStartPage", () => {
 		render(<PacketStartPage initialWorkspaceState={workspaceState} />);
 
 		expect(screen.getByRole("heading", { name: "Start" })).toBeTruthy();
-		expect(screen.getByText("How this works")).toBeTruthy();
+		expect(
+			screen.getByText("Build the folder before you build the app."),
+		).toBeTruthy();
 		expect(screen.getByText("Welcome video")).toBeTruthy();
 		expect(screen.getByTestId("packet-start-video-player").textContent).toBe(
 			"Welcome Video",
 		);
+		expect(screen.queryByTestId("packet-stage-nav")).toBeNull();
 		expect(
 			screen.queryByText(
 				"This product is pack-first. Every stage fills real output files.",
@@ -102,7 +105,9 @@ describe("PacketStartPage", () => {
 		).toBeNull();
 		expect(
 			screen
-				.getByRole("link", { name: "Open the packet flow" })
+				.getByRole("link", {
+					name: `Continue with ${getPacketStageDefinition(workspaceState.firstIncompleteStageId).label}`,
+				})
 				.getAttribute("href"),
 		).toBe(
 			getPacketStageDefinition(workspaceState.firstIncompleteStageId).route,

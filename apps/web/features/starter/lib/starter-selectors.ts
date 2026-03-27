@@ -33,3 +33,10 @@ export const docsDisplayConfig = {
 	description: starterConfig.docs.description,
 	pricingHref: `${routeConfig.home}${routeConfig.pricingHash}`,
 } as const;
+
+export const blogDisplayConfig = {
+	siteName: `${productConfig.name} Blog`,
+	footerLabel: starterConfig.blog.footerLabel,
+	description: starterConfig.blog.description,
+	promoCtaTarget: starterConfig.blog.promoCtaTarget,
+} as const;

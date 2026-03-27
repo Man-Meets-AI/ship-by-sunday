@@ -3,13 +3,13 @@ import { expect, test, type Page } from "@playwright/test";
 import {
 	memberWithAccessStorageStatePath,
 	memberWithoutAccessStorageStatePath,
-	shouldRunSandboxAuth,
+	shouldRunAuthenticatedE2E,
 } from "./auth-state";
 
 test.describe.configure({ mode: "serial" });
 test.skip(
-	!shouldRunSandboxAuth,
-	"Set E2E_RUN_SANDBOX=1 and the sandbox base URL to run the real browser handoff checks.",
+	!shouldRunAuthenticatedE2E,
+	"Set E2E_RUN_SANDBOX=1 or E2E_RUN_LOCAL_AUTH=1 plus PLAYWRIGHT_BASE_URL to run authenticated packet browser handoff checks.",
 );
 
 const packetStageRoutes = [
@@ -87,8 +87,12 @@ async function expectPacketStage(
 		new RegExp(`${route.path.replace("/", "\\/")}\\/[^/]+$`),
 	);
 	await expect(page.getByText(route.stageLabel).first()).toBeVisible();
-	await expect(page.getByText("Stage status")).toBeVisible();
-	await expect(page.getByRole("button", { name: "Save step" })).toBeVisible();
+	await expect(
+		page.getByText("Still to lock in").or(page.getByText("Section ready")),
+	).toBeVisible();
+	await expect(
+		page.getByRole("button", { name: "Save and continue" }),
+	).toBeVisible();
 }
 
 test.describe("member with access", () => {
@@ -100,7 +104,7 @@ test.describe("member with access", () => {
 		await page.goto("/start");
 		await expect(page).toHaveURL(/\/start$/);
 		await expect(
-			page.getByRole("link", { name: "Open the packet flow" }),
+			page.getByRole("link", { name: /^Continue with /i }),
 		).toBeVisible();
 
 		for (const route of packetStageRoutes) {
@@ -148,9 +152,11 @@ test.describe("member without access", () => {
 			timeout: 60_000,
 		});
 
-		await expect(page.getByText("How this works")).toBeVisible();
 		await expect(
-			page.getByRole("link", { name: "Open the packet flow" }),
+			page.getByText("Build the folder before you build the app."),
+		).toBeVisible();
+		await expect(
+			page.getByRole("link", { name: /^Continue with /i }),
 		).toBeVisible();
 	});
 });

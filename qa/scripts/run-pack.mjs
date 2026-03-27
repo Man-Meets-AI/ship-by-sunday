@@ -11,9 +11,10 @@ const packDefinitions = {
 		steps: ({
 			slug,
 			personaPrepareEnv,
-			sandboxEnv,
+			authenticatedBrowserEnv,
 			browserSmokeCommand,
 			browserSmokeEnv,
+			authenticatedDefaultShipCommand,
 		}) => [
 			{
 				label: "Validate the QA control plane",
@@ -47,15 +48,25 @@ const packDefinitions = {
 				env: browserSmokeEnv,
 			},
 			{
-				label: "Run the default-ship sandbox browser pack",
+				label: "Run the packet integration-ui proof suite",
 				command: [
 					"bun",
 					"run",
 					"--cwd",
 					"apps/web",
-					"test:e2e:sandbox:default-ship",
+					"test:integration:ui",
+					"--",
+					"tests/integration-ui/packet-start-page.test.tsx",
+					"tests/integration-ui/packet-stage-page.test.tsx",
+					"tests/integration-ui/packet-review-page.test.tsx",
+					"tests/integration-ui/packet-stage-sidebar.test.tsx",
 				],
-				env: sandboxEnv,
+			},
+			{
+				label: "Run the default-ship sandbox browser pack",
+				command: authenticatedDefaultShipCommand,
+				env: authenticatedBrowserEnv,
+				requireBrowserEvidence: true,
 			},
 		],
 	},
@@ -83,7 +94,12 @@ const packDefinitions = {
 	billing_integration: {
 		requiresBillingApproval: true,
 		note: null,
-		steps: ({ slug, personaPrepareEnv, sandboxEnv, isLocalBillingTarget }) => [
+		steps: ({
+			slug,
+			personaPrepareEnv,
+			authenticatedBrowserEnv,
+			isLocalBillingTarget,
+		}) => [
 			{
 				label: "Validate the QA control plane",
 				command: ["bun", "run", "qa:validate"],
@@ -129,7 +145,8 @@ const packDefinitions = {
 					"apps/web",
 					"test:e2e:sandbox:billing-integration",
 				],
-				env: sandboxEnv,
+				env: authenticatedBrowserEnv,
+				requireBrowserEvidence: true,
 			},
 			...(isLocalBillingTarget
 				? [
@@ -187,6 +204,10 @@ function isLocalTarget(urlString) {
 	}
 }
 
+function isOnlySkippedPlaywrightRun(output) {
+	return /\b\d+\s+skipped\b/.test(output) && !/\b\d+\s+passed\b/.test(output);
+}
+
 async function runStep(step, { dryRun }) {
 	if (dryRun) {
 		return {
@@ -202,6 +223,9 @@ async function runStep(step, { dryRun }) {
 		step.command.slice(1),
 		step.env,
 	);
+	const combinedOutput = [result.stdout, result.stderr]
+		.filter(Boolean)
+		.join("\n");
 	if (result.code !== 0) {
 		if (step.warningOnFailure) {
 			return {
@@ -216,6 +240,14 @@ async function runStep(step, { dryRun }) {
 
 		throw new Error(
 			`${step.label} failed.\nCommand: ${step.command.join(" ")}\nstdout: ${result.stdout}\nstderr: ${result.stderr}`,
+		);
+	}
+	if (
+		step.requireBrowserEvidence &&
+		isOnlySkippedPlaywrightRun(combinedOutput)
+	) {
+		throw new Error(
+			`${step.label} produced only skipped Playwright tests.\nCommand: ${step.command.join(" ")}\nstdout: ${result.stdout}\nstderr: ${result.stderr}\nThis is missing browser evidence, not a green pass.`,
 		);
 	}
 
@@ -270,10 +302,13 @@ async function main() {
 		process.env.PLAYWRIGHT_USE_LOCAL_SERVER === "1" ||
 		typeof process.env.PLAYWRIGHT_BASE_URL !== "string";
 	const sandboxBaseUrl = usesLocalServer
-		? (process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3100")
+		? (process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000")
 		: process.env.PLAYWRIGHT_BASE_URL;
-	const sandboxEnv = {
-		E2E_RUN_SANDBOX: "1",
+	const useLocalAuthenticatedLane =
+		isLocalTarget(sandboxBaseUrl) && process.env.E2E_RUN_SANDBOX !== "1";
+	const authenticatedBrowserEnv = {
+		E2E_RUN_SANDBOX: useLocalAuthenticatedLane ? "0" : "1",
+		E2E_RUN_LOCAL_AUTH: useLocalAuthenticatedLane ? "1" : "0",
 		PLAYWRIGHT_USE_LOCAL_SERVER: usesLocalServer ? "1" : "0",
 		PLAYWRIGHT_BASE_URL: sandboxBaseUrl,
 	};
@@ -290,15 +325,19 @@ async function main() {
 				PLAYWRIGHT_USE_LOCAL_SERVER: "0",
 				PLAYWRIGHT_BASE_URL: sandboxBaseUrl,
 			};
+	const authenticatedDefaultShipCommand = useLocalAuthenticatedLane
+		? ["bun", "run", "--cwd", "apps/web", "test:e2e:local-auth:default-ship"]
+		: ["bun", "run", "--cwd", "apps/web", "test:e2e:sandbox:default-ship"];
 	const isLocalBillingTarget = isLocalTarget(sandboxBaseUrl);
 	const results = [];
 
 	for (const step of definition.steps({
 		slug,
 		personaPrepareEnv,
-		sandboxEnv,
+		authenticatedBrowserEnv,
 		browserSmokeCommand,
 		browserSmokeEnv,
+		authenticatedDefaultShipCommand,
 		isLocalBillingTarget,
 	})) {
 		results.push(await runStep(step, { dryRun }));

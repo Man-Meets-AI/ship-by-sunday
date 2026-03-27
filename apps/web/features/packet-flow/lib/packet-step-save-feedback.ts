@@ -182,7 +182,7 @@ export function buildPacketStepSaveInlineFeedback(
 			return {
 				tone: "default",
 				title: `${stepLabel} is still blank.`,
-				description: "Add at least one answer before saving this step.",
+				description: "Add at least one answer before you save.",
 			};
 		case "partial": {
 			const missingFieldList = formatPacketFieldLabelList(
@@ -191,10 +191,10 @@ export function buildPacketStepSaveInlineFeedback(
 
 			return {
 				tone: "default",
-				title: "Draft saved.",
+				title: "Saved for now.",
 				description: missingFieldList
-					? `Finish ${missingFieldList} before this step can complete.`
-					: "This step still needs its required answers before it can complete.",
+					? `You still need ${missingFieldList} before this page is complete.`
+					: "This page still needs a few more answers before it is complete.",
 			};
 		}
 		case "cleared_to_incomplete": {
@@ -204,17 +204,17 @@ export function buildPacketStepSaveInlineFeedback(
 
 			return {
 				tone: "warning",
-				title: "Step cleared.",
+				title: "This page needs a few more answers.",
 				description: missingFieldList
-					? `This checkpoint is incomplete again. Finish ${missingFieldList} before it can complete.`
-					: "This checkpoint is incomplete again.",
+					? `Finish ${missingFieldList} before this page is complete again.`
+					: "Finish the missing answers before this page is complete again.",
 			};
 		}
 		case "complete":
 			return {
 				tone: "success",
-				title: "Step saved.",
-				description: `${stepLabel} is complete.`,
+				title: "Saved.",
+				description: `${stepLabel} is locked.`,
 			};
 		default:
 			return null;
@@ -224,7 +224,7 @@ export function buildPacketStepSaveInlineFeedback(
 export function buildPacketStepSaveErrorInlineFeedback(): PacketStepInlineFeedback {
 	return {
 		tone: "destructive",
-		title: "We could not save this step right now.",
+		title: "We could not save this page right now.",
 		description: "Your draft is still here, so try again.",
 	};
 }

@@ -43,10 +43,14 @@ const memberWithAccessAccount = readQaPersonaAccount(
 	"ship-by-sunday-clerk-entitled",
 );
 
-export const shouldRunSandboxAuth =
-	process.env.E2E_RUN_SANDBOX === "1" &&
+const hasPlaywrightBaseUrl =
 	typeof process.env.PLAYWRIGHT_BASE_URL === "string" &&
 	process.env.PLAYWRIGHT_BASE_URL.length > 0;
+
+export const shouldRunAuthenticatedE2E =
+	hasPlaywrightBaseUrl &&
+	(process.env.E2E_RUN_SANDBOX === "1" ||
+		process.env.E2E_RUN_LOCAL_AUTH === "1");
 
 export const sharedPassword =
 	process.env.E2E_SHARED_PASSWORD ??

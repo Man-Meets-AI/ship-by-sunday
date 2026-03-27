@@ -1,11 +1,17 @@
-import { mutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 import {
 	getProjectDefinitionArgs,
 	getProjectDefinitionHandler,
 	getProjectDefinitionReturns,
+	resetProjectDefinitionForQaArgs,
+	resetProjectDefinitionForQaHandler,
+	resetProjectDefinitionForQaReturns,
 	saveProjectDefinitionFactsArgs,
 	saveProjectDefinitionFactsHandler,
 	saveProjectDefinitionFactsReturns,
+	seedCompleteProjectDefinitionForQaArgs,
+	seedCompleteProjectDefinitionForQaHandler,
+	seedCompleteProjectDefinitionForQaReturns,
 } from "./packet/projectDefinition";
 import {
 	getPacketResumeDestinationArgs,
@@ -31,6 +37,18 @@ export const saveProjectDefinitionFacts = mutation({
 	args: saveProjectDefinitionFactsArgs,
 	returns: saveProjectDefinitionFactsReturns,
 	handler: saveProjectDefinitionFactsHandler,
+});
+
+export const seedCompleteProjectDefinitionForQa = internalMutation({
+	args: seedCompleteProjectDefinitionForQaArgs,
+	returns: seedCompleteProjectDefinitionForQaReturns,
+	handler: seedCompleteProjectDefinitionForQaHandler,
+});
+
+export const resetProjectDefinitionForQa = internalMutation({
+	args: resetProjectDefinitionForQaArgs,
+	returns: resetProjectDefinitionForQaReturns,
+	handler: resetProjectDefinitionForQaHandler,
 });
 
 export const unlockExecuteShip = mutation({

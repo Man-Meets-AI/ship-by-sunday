@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { STARTER_SNAPSHOT_LABEL } from "@packet-compiler";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function PacketReviewCheckpointCard({
 	isReviewReady,
@@ -14,41 +12,34 @@ export function PacketReviewCheckpointCard({
 	onStarterDownload: () => void;
 }) {
 	return (
-		<Card>
-			<CardHeader className="gap-4">
-				<div className="flex flex-wrap items-start justify-between gap-3">
-					<div className="space-y-1">
-						<p className="text-sm font-medium text-muted-foreground">
-							Required run checkpoint
-						</p>
-						<CardTitle>
-							{isReviewReady
-								? `${STARTER_SNAPSHOT_LABEL} ready.`
-								: "Finish the remaining blockers."}
-						</CardTitle>
-					</div>
-					<Badge variant={isReviewReady ? "secondary" : "outline"}>
-						{isReviewReady ? "Checkpoint complete" : "Final checkpoint"}
-					</Badge>
-				</div>
-				<p className="text-sm text-muted-foreground">
-					The required packet-first run ends here. Download the full Starter
-					Snapshot to capture the Design, Marketing, Build, and Prompt packs in
-					one place, then optionally continue into Execute / Ship.
+		<section className="space-y-5 rounded-[30px] border border-border/60 bg-muted/15 p-6 sm:p-8">
+			<div className="max-w-3xl space-y-2">
+				<p className="text-sm font-medium text-muted-foreground">
+					{isReviewReady ? "Ready to download" : "Finish the last blockers"}
 				</p>
-			</CardHeader>
-			<CardContent className="space-y-3">
+				<h2 className="text-2xl font-semibold tracking-tight text-balance sm:text-[2rem]">
+					{isReviewReady
+						? `${STARTER_SNAPSHOT_LABEL} is ready.`
+						: "Finish the remaining blockers."}
+				</h2>
+				<p className="text-sm leading-6 text-muted-foreground">
+					The required packet run ends here. Download the full Starter Snapshot
+					to capture the Design, Marketing, Build, and Prompt packs in one
+					place.
+				</p>
+			</div>
+			<div className="max-w-sm space-y-3">
 				<Button asChild className="w-full" disabled={!isReviewReady}>
 					<Link href="/api/download/repo" onClick={onStarterDownload}>
 						Download {STARTER_SNAPSHOT_LABEL}
 					</Link>
 				</Button>
-				<p className="text-sm text-muted-foreground">
+				<p className="text-sm leading-6 text-muted-foreground">
 					{isExecuteUnlocked
-						? "The Starter Snapshot stays the primary outcome, and Execute / Ship is now unlocked as a separate optional branch."
-						: "The Starter Snapshot is still the primary outcome. Execute / Ship is a separate optional branch after this download moment, not another required packet stage."}
+						? "Execute / Ship is unlocked as a separate optional next path."
+						: "Execute / Ship opens as a separate optional next path after this download."}
 				</p>
-			</CardContent>
-		</Card>
+			</div>
+		</section>
 	);
 }
