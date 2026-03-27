@@ -1,7 +1,7 @@
 import path from "node:path";
-import { readdir, writeFile } from "node:fs/promises";
+import { readFile, readdir, writeFile } from "node:fs/promises";
 
-import { stringifyCsv } from "./lib/csv.mjs";
+import { parseCsv, stringifyCsv } from "./lib/csv.mjs";
 import { repoRoot } from "./lib/personas.mjs";
 
 const testsDirectory = path.join(repoRoot, "apps/web/tests");
@@ -259,11 +259,40 @@ function inventoryRecord(
 	};
 }
 
+async function loadExistingRecords() {
+	try {
+		const raw = await readFile(outputPath, "utf8");
+		const { records } = parseCsv(raw);
+		return new Map(
+			records.map((record) => [
+				record.file_path,
+				Object.fromEntries(
+					headers.map((header) => [header, record[header] ?? ""]),
+				),
+			]),
+		);
+	} catch (error) {
+		if (
+			error instanceof Error &&
+			"code" in error &&
+			error.code === "ENOENT"
+		) {
+			return new Map();
+		}
+
+		throw error;
+	}
+}
+
 async function main() {
+	const existingRecords = await loadExistingRecords();
 	const filePaths = await listFiles(testsDirectory);
 	const records = filePaths
 		.filter((filePath) => filePath.endsWith(".ts") || filePath.endsWith(".tsx"))
-		.map(buildRecord)
+		.map((filePath) => {
+			const repoPath = toRepoPath(filePath);
+			return existingRecords.get(repoPath) ?? buildRecord(filePath);
+		})
 		.sort((left, right) => left.file_path.localeCompare(right.file_path));
 
 	const csv = stringifyCsv({ headers, rows: records });

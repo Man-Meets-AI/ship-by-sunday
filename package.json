@@ -59,6 +59,7 @@
 		"qa:personas:prepare": "node qa/scripts/personas.mjs prepare",
 		"qa:personas:reset": "node qa/scripts/personas.mjs reset",
 		"qa:ship": "node qa/scripts/ship.mjs",
+		"qa:team": "node qa/scripts/team.mjs",
 		"qa:run-pack": "node qa/scripts/run-pack.mjs"
 	}
 }
