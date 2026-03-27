@@ -34,11 +34,16 @@ export default async function Page({
 		);
 	}
 
-	const missionState = await fetchAuthenticatedQuery(api.course.getBonusMissionState, {});
+	const missionState = await fetchAuthenticatedQuery(
+		api.course.getBonusMissionState,
+		{},
+	);
 
 	if (!missionState) {
 		throw new Error("Bonus mission state missing");
 	}
 
-	return <BonusLessonPage lessonKey={lesson.lessonKey} missionState={missionState} />;
+	return (
+		<BonusLessonPage lessonKey={lesson.lessonKey} missionState={missionState} />
+	);
 }

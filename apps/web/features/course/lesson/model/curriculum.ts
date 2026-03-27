@@ -3,7 +3,6 @@ import type {
 	BlockConfig,
 	BlockId,
 	CurriculumManifest,
-	CurriculumLessonDefinition,
 	LessonConfig,
 	LessonKey,
 	LessonLayoutMode,
@@ -14,7 +13,6 @@ import { designLessons } from "./lessons/design";
 import { shipLessons } from "./lessons/ship";
 import { startHereLessons } from "./lessons/start-here";
 import { attachGeneratedLessonMedia } from "./video";
-import { resolveLessonVideoAssetId } from "./video-assignments";
 
 const sourceLessons = [
 	...startHereLessons.filter((lesson) => lesson.id !== "1.0"),
@@ -355,23 +353,6 @@ export const blocks: BlockConfig[] = [...curriculumManifest.blocks];
 const blockOrderIndex = new Map(
 	curriculumManifest.blocks.map((block) => [block.id, block.order]),
 );
-
-function getCanonicalVideoAssetId(
-	definition: CurriculumLessonDefinition,
-): string {
-	const resolvedVideoAssetId = resolveLessonVideoAssetId(definition.sourceId);
-
-	if (
-		definition.videoAssetId != null &&
-		definition.videoAssetId !== resolvedVideoAssetId
-	) {
-		throw new Error(
-			`Lesson ${definition.sourceId} videoAssetId ${definition.videoAssetId} does not match canonical assignment ${resolvedVideoAssetId}.`,
-		);
-	}
-
-	return resolvedVideoAssetId;
-}
 
 function buildUnlockTargets(
 	lesson: LessonConfig,

@@ -30,7 +30,9 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/features/course/shared/components/app-shell", () => ({
-	AppShell: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+	AppShell: ({ children }: { children: React.ReactNode }) => (
+		<div>{children}</div>
+	),
 }));
 
 vi.mock("@/features/execute-ship/components/bonus-lesson-view-tracker", () => ({

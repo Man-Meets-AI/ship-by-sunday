@@ -34,9 +34,8 @@ describe("getBonusRouteStateHandler", () => {
 			executeShipUnlockedAt: 200,
 		});
 
-		const { getBonusRouteStateHandler } = await import(
-			"@/convex/course/bonusRoute"
-		);
+		const { getBonusRouteStateHandler } =
+			await import("@/convex/course/bonusRoute");
 
 		await expect(getBonusRouteStateHandler({} as never)).resolves.toEqual({
 			hasStartedBonusLesson: false,
@@ -59,9 +58,8 @@ describe("getBonusRouteStateHandler", () => {
 			executeShipUnlockedAt: 200,
 		});
 
-		const { getBonusRouteStateHandler } = await import(
-			"@/convex/course/bonusRoute"
-		);
+		const { getBonusRouteStateHandler } =
+			await import("@/convex/course/bonusRoute");
 
 		await expect(getBonusRouteStateHandler({} as never)).resolves.toEqual({
 			hasStartedBonusLesson: true,
@@ -84,9 +82,8 @@ describe("getBonusRouteStateHandler", () => {
 			executeShipUnlockedAt: 200,
 		});
 
-		const { getBonusRouteStateHandler } = await import(
-			"@/convex/course/bonusRoute"
-		);
+		const { getBonusRouteStateHandler } =
+			await import("@/convex/course/bonusRoute");
 
 		await expect(getBonusRouteStateHandler({} as never)).resolves.toEqual({
 			hasStartedBonusLesson: false,

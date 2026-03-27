@@ -9,13 +9,11 @@ export const getBonusRouteStateReturns = v.object({
 	hasStartedBonusLesson: v.boolean(),
 });
 
-function getLessonStateTimestamp(
-	state: {
-		lastViewedAt?: number;
-		startedAt?: number;
-		updatedAt?: number;
-	},
-) {
+function getLessonStateTimestamp(state: {
+	lastViewedAt?: number;
+	startedAt?: number;
+	updatedAt?: number;
+}) {
 	return state.lastViewedAt ?? state.updatedAt ?? state.startedAt ?? 0;
 }
 
