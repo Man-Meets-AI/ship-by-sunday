@@ -15,31 +15,12 @@ import { PacketStageStepController } from "./packet-stage-step-controller";
 import { PacketStageStepStrip } from "./progression/packet-stage-step-strip";
 import { PacketVideoCard } from "./video/packet-video-card";
 
-const packetDownloadStageMap = {
-	design: "design",
-	marketing: "marketing",
-	"build-plan": "build",
-} as const;
-
 const nextStageMap = {
 	product: "design",
 	design: "marketing",
 	marketing: "build-plan",
 	"build-plan": "review",
 } as const satisfies Partial<Record<PacketStageId, PacketStageId>>;
-
-function getPacketDownloadHref(
-	stageId: Exclude<PacketStageId, "start" | "review">,
-	isComplete: boolean,
-) {
-	if (!isComplete) {
-		return undefined;
-	}
-
-	const stage =
-		packetDownloadStageMap[stageId as keyof typeof packetDownloadStageMap];
-	return stage ? `/api/download/packet/${stage}` : undefined;
-}
 
 export function PacketStagePage({
 	stageId,
@@ -74,7 +55,6 @@ export function PacketStagePage({
 		stageStatus,
 		stepId,
 	);
-	const downloadHref = getPacketDownloadHref(stageId, stageStatus.isComplete);
 	const nextStageId = stageStatus.isComplete
 		? nextStageMap[stageId]
 		: undefined;
@@ -116,7 +96,6 @@ export function PacketStagePage({
 						<PacketStageSidebar
 							stage={stage}
 							stageStatus={stageStatus}
-							downloadHref={downloadHref}
 							nextStageId={nextStageId}
 						/>
 					</aside>

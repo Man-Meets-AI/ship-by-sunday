@@ -1,10 +1,14 @@
 import type { CanonicalProjectFacts } from "../canonical-project-definition/project-definition";
+import { BUILD_PACK_LABEL } from "../public-artifact-contract";
+import {
+	getGeneratedBuildDetailDocPath,
+	getGeneratedBuildDocPath,
+} from "../generated-docs/generated-doc-paths";
 import {
 	renderBulletList,
 	renderSection,
 	renderTemplateAppendix,
 } from "./render-helpers";
-import { BUILD_PACK_LABEL } from "../public-artifact-contract";
 import type { OpenAiPacketTemplates, RenderedPacketFile } from "./render-types";
 
 export function renderBuildPacket(
@@ -28,7 +32,7 @@ export function renderBuildPacket(
 
 	return [
 		{
-			path: "packet/build/AGENTS.md",
+			path: getGeneratedBuildDocPath("AGENTS.md"),
 			content: [
 				...buildSummary,
 				"",
@@ -36,7 +40,7 @@ export function renderBuildPacket(
 			].join("\n"),
 		},
 		{
-			path: "packet/build/CHECKLIST.md",
+			path: getGeneratedBuildDocPath("CHECKLIST.md"),
 			content: [
 				...buildSummary,
 				"",
@@ -46,7 +50,7 @@ export function renderBuildPacket(
 			].join("\n"),
 		},
 		{
-			path: "packet/build/docs/prompt.md",
+			path: getGeneratedBuildDetailDocPath("prompt.md"),
 			content: [
 				...buildSummary,
 				"",
@@ -59,7 +63,7 @@ export function renderBuildPacket(
 			].join("\n"),
 		},
 		{
-			path: "packet/build/docs/plans.md",
+			path: getGeneratedBuildDetailDocPath("plans.md"),
 			content: [
 				...buildSummary,
 				"",
@@ -71,7 +75,7 @@ export function renderBuildPacket(
 			].join("\n"),
 		},
 		{
-			path: "packet/build/docs/implement.md",
+			path: getGeneratedBuildDetailDocPath("implement.md"),
 			content: [
 				...buildSummary,
 				"",
@@ -83,7 +87,7 @@ export function renderBuildPacket(
 			].join("\n"),
 		},
 		{
-			path: "packet/build/docs/documentation.md",
+			path: getGeneratedBuildDetailDocPath("documentation.md"),
 			content: [
 				...buildSummary,
 				"",

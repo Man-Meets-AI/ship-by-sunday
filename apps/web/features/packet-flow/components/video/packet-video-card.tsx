@@ -5,11 +5,6 @@ export function PacketVideoCard({ content }: { content: PacketPageMedia }) {
 	if (content.kind === "video") {
 		return (
 			<section className="relative overflow-hidden rounded-2xl border border-border/40 shadow-xl ring-1 ring-black/5">
-				<div className="absolute right-4 top-4 z-10">
-					<span className="inline-flex items-center rounded-full bg-black/60 px-3 py-1 text-[0.6rem] font-bold tracking-[0.15em] text-white backdrop-blur-md ring-1 ring-white/20">
-						QUEST
-					</span>
-				</div>
 				<LessonVideoPlayer
 					video={content.video}
 					title={content.video.title ?? content.title}
@@ -22,9 +17,6 @@ export function PacketVideoCard({ content }: { content: PacketPageMedia }) {
 	return (
 		<section className="overflow-hidden rounded-2xl border border-border/40 bg-muted/20 p-6 shadow-lg ring-1 ring-black/5 space-y-5">
 			<div className="space-y-2">
-				<p className="text-[0.6rem] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">
-					Mission Log
-				</p>
 				<h2 className="text-lg font-bold tracking-tight text-foreground">
 					{content.title}
 				</h2>

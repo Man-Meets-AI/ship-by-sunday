@@ -1,10 +1,11 @@
 import type { CanonicalProjectFacts } from "../canonical-project-definition/project-definition";
+import { MARKETING_PACK_LABEL } from "../public-artifact-contract";
+import { getGeneratedMarketingDocPath } from "../generated-docs/generated-doc-paths";
 import {
 	renderBulletList,
 	renderSection,
 	renderTemplateAppendix,
 } from "./render-helpers";
-import { MARKETING_PACK_LABEL } from "../public-artifact-contract";
 import type { OpenAiPacketTemplates, RenderedPacketFile } from "./render-types";
 
 export function renderMarketingPacket(
@@ -23,7 +24,7 @@ export function renderMarketingPacket(
 
 	return [
 		{
-			path: "packet/marketing/README.md",
+			path: getGeneratedMarketingDocPath("README.md"),
 			content: [
 				...introduction,
 				"",
@@ -33,7 +34,7 @@ export function renderMarketingPacket(
 			].join("\n"),
 		},
 		{
-			path: "packet/marketing/AGENTS.md",
+			path: getGeneratedMarketingDocPath("AGENTS.md"),
 			content: [
 				...introduction,
 				"",
@@ -48,7 +49,7 @@ export function renderMarketingPacket(
 			].join("\n"),
 		},
 		{
-			path: "packet/marketing/CHECKLIST.md",
+			path: getGeneratedMarketingDocPath("CHECKLIST.md"),
 			content: [
 				...introduction,
 				"",
@@ -60,7 +61,7 @@ export function renderMarketingPacket(
 			].join("\n"),
 		},
 		{
-			path: "packet/marketing/PLANS.md",
+			path: getGeneratedMarketingDocPath("PLANS.md"),
 			content: [
 				...introduction,
 				"",
@@ -75,7 +76,7 @@ export function renderMarketingPacket(
 			].join("\n"),
 		},
 		{
-			path: "packet/marketing/documentation.md",
+			path: getGeneratedMarketingDocPath("documentation.md"),
 			content: [
 				...introduction,
 				"",

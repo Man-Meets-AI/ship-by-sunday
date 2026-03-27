@@ -2,7 +2,9 @@
 
 ## Ship by Sunday — compiler rules
 
-- Treat this as a packet compiler with repo-generation side effects.
+- Treat this as the generator behind one customer-facing repo output.
+- The public contract is the generated repo snapshot delivered at Review & Download.
+- `src/public-artifact-contract.ts`, `src/packets/render-*.ts`, and starter-snapshot labels are internal implementation details, not separate product surfaces or planning inputs.
 - Prefer derivation over recollection.
 - Only ask for information that changes output files.
 - Do not store copied-prompt confirmations, env vars, QA runtime state, duplicate naming/domain fields, or free-text implementation briefs as canonical intake.
@@ -12,17 +14,15 @@
 - Provider setup, env vars, QA runtime, deploy walkthroughs, and production fixes belong after packet generation.
 - Repo snapshots must stay customer-safe and exclude machine-local junk, generated output, and unresolved symlinks.
 
-## Required outputs
+## Public output contract
 
+- one customer-safe generated repo snapshot
+- generated docs under repo-root `docs/`
 - repo-root `README.md` override
-- `packet/README.md`
-- `packet/facts/project-definition.json`
-- `packet/design/**`
-- `packet/marketing/**`
-- `packet/build/**`
-- `packet/prompts/**`
-- review-download repo zip with `packet/` at repo root
+- repo-root `docs/README.md`
+- repo-root `docs/facts/project-definition.json`
 - starter overrides for `apps/web/config/product.ts` and `apps/web/features/marketing/content/home.ts`
+- design, marketing, build, and prompt materials are generated inside that one repo output; do not treat them as separate public deliverables unless the live product changes first
 
 ## Planning behavior
 

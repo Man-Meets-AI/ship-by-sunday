@@ -9,21 +9,27 @@ export const reviewArtifacts = [
 	{
 		id: "design",
 		title: DESIGN_PACK_LABEL,
-		downloadHref: "/api/download/packet/design",
+		includedPath: "docs/design/",
+		summary:
+			"Agent guidance, checklist, plan, and documentation generated from the Design stage.",
 		stageRoute: getPacketStageDefinition("design").route,
 		stageLabel: getPacketStageDefinition("design").label,
 	},
 	{
 		id: "marketing",
 		title: MARKETING_PACK_LABEL,
-		downloadHref: "/api/download/packet/marketing",
+		includedPath: "docs/marketing/",
+		summary:
+			"Offer, claims, channel, and messaging docs generated from the Marketing stage.",
 		stageRoute: getPacketStageDefinition("marketing").route,
 		stageLabel: getPacketStageDefinition("marketing").label,
 	},
 	{
 		id: "build",
 		title: BUILD_PACK_LABEL,
-		downloadHref: "/api/download/packet/build",
+		includedPath: "docs/build/",
+		summary:
+			"Implementation guidance and long-horizon build docs generated from the Build Plan stage.",
 		stageRoute: getPacketStageDefinition("build-plan").route,
 		stageLabel: getPacketStageDefinition("build-plan").label,
 	},

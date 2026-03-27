@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import {
-	getPublicPackLabelForStage,
 	getPacketStageDefinition,
 	type PacketStageDefinition,
 	type PacketStageStatus,
@@ -14,20 +13,12 @@ import { cn } from "@/lib/utils";
 export function PacketStageSidebar({
 	stage,
 	stageStatus,
-	downloadHref,
 	nextStageId,
 }: {
 	stage: PacketStageDefinition;
 	stageStatus: PacketStageStatus;
-	downloadHref?: string;
 	nextStageId?: "design" | "marketing" | "build-plan" | "review";
 }) {
-	const downloadLabel =
-		stageStatus.stageId === "design" ||
-		stageStatus.stageId === "marketing" ||
-		stageStatus.stageId === "build-plan"
-			? `Download ${getPublicPackLabelForStage(stageStatus.stageId)}`
-			: "Download pack";
 	const stageLabel = stage.label;
 	const missingKeys = new Set(stageStatus.missingFactKeys);
 
@@ -87,8 +78,8 @@ export function PacketStageSidebar({
 				</h2>
 				<p className="text-xs leading-relaxed text-muted-foreground/80">
 					{stageStatus.isComplete
-						? "Achievement unlocked. You've captured all required artifacts for this stage."
-						: `Resolve ${stageStatus.missingFactKeys.length} objective${stageStatus.missingFactKeys.length === 1 ? "" : "s"} to claim your packet.`}
+						? "Achievement unlocked. You've captured all required answers for this stage."
+						: `Resolve ${stageStatus.missingFactKeys.length} objective${stageStatus.missingFactKeys.length === 1 ? "" : "s"} to complete this stage.`}
 				</p>
 			</div>
 
@@ -122,14 +113,6 @@ export function PacketStageSidebar({
 
 			{/* Actions */}
 			<div className="flex flex-col gap-3 pt-4">
-				{downloadHref ? (
-					<Button
-						asChild
-						className="h-11 w-full font-bold shadow-lg shadow-primary/10 transition-transform active:scale-[0.98]"
-					>
-						<Link href={downloadHref}>{downloadLabel}</Link>
-					</Button>
-				) : null}
 				{nextStageId ? (
 					<Button
 						asChild

@@ -20,6 +20,17 @@ Why its awesome
 - Purchase-to-access handoff across Clerk, Stripe, and Convex product-access state
 - Starter configuration and module flags in `apps/web/config/product.ts`
 
+## Review Download Contract
+
+The protected workspace ends at `/review`, and that route now exposes exactly one download artifact: `Starter Snapshot`.
+
+That download:
+
+- unpacks into a single repo folder named from the product slug
+- includes the generated Design, Marketing, Build, facts, and prompt materials under repo-root `docs/`
+- includes generalized starter-safe operator surfaces such as `.agents/`, `qa/`, workflow examples, and `apps/web/.env.production.example`
+- does not expose separate Design, Marketing, or Build zip downloads anymore
+
 ## Quick Start
 
 1. Install dependencies:

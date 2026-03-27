@@ -1,0 +1,33 @@
+import JSZip from "jszip";
+import { createCompleteProjectDefinition } from "../src";
+import { isExcludedSnapshotPath } from "../src/repo-generation/repo-download-source-contract";
+import { buildReviewDownloadZip } from "../src/server";
+
+describe("review download zip", () => {
+	it("wraps the snapshot in the repo slug and excludes forbidden files", async () => {
+		const buffer = await buildReviewDownloadZip(
+			createCompleteProjectDefinition(),
+		);
+		const zip = await JSZip.loadAsync(buffer);
+		const entries = Object.keys(zip.files).sort();
+		const forbiddenEntries = entries.filter((entry) => {
+			if (entry.endsWith("/")) {
+				return false;
+			}
+			const relativePath = entry.replace(/^ship-by-sunday-os\//, "");
+			return isExcludedSnapshotPath(relativePath);
+		});
+
+		expect(entries).toEqual(
+			expect.arrayContaining([
+				"ship-by-sunday-os/",
+				"ship-by-sunday-os/README.md",
+				"ship-by-sunday-os/docs/README.md",
+				"ship-by-sunday-os/docs/build/docs/prompt.md",
+				"ship-by-sunday-os/apps/web/.env.production.example",
+				"ship-by-sunday-os/qa/README.md",
+			]),
+		);
+		expect(forbiddenEntries).toEqual([]);
+	});
+});

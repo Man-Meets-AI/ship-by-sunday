@@ -1,0 +1,47 @@
+# Ship by Sunday Marketing Pack
+
+This folder is the Ship by Sunday-specific marketing pack layered on top of `docs/openai/openai-marketing-kit/`.
+
+It is the template for the customer-facing `docs/marketing/` packet that should be generated into the starter snapshot after the review route.
+
+## What this pack is for
+
+- Turn product facts into a usable marketing packet for prompts, workflows, and reviewable deliverables.
+- Make approved claims, channel scope, human review rules, and current-facts policy explicit before content generation starts.
+- Keep marketing work aligned to the same product truth used by design and build.
+
+## What is in scope
+
+- marketing goals and channel scope
+- brand voice summary
+- approved claims and do-not-say rules
+- research needs, content workflows, and analytics needs
+- workflow plans for launch assets, research, and review loops
+- documentation of live marketing workflows and governance
+
+## What is out of scope
+
+- unverified current facts presented as certainty
+- auto-publishing external content without human review
+- pricing, guarantees, or customer claims that were not approved in the facts layer
+- inventing target channels, audiences, or positioning not supported by the packet facts
+- product or design scope changes disguised as marketing work
+
+## Files in this pack
+
+- `README.md` - what the marketing packet is for
+- `AGENTS.md` - reusable marketing agent and workflow rules
+- `CHECKLIST.md` - marketing capability and governance checklist
+- `PLANS.md` - rollout plan for marketing workflows and deliverables
+- `documentation.md` - shipped workflow and governance documentation
+- `examples/launch-message-kit.md` - a concrete golden-example packet
+
+## Ship by Sunday source basis
+
+- `docs/openai/openai-marketing-kit/README.md`
+- `docs/openai/openai-marketing-kit/AGENTS.md`
+- `docs/openai/openai-marketing-kit/CHECKLIST.md`
+- `docs/openai/openai-marketing-kit/PLANS.md`
+- `docs/openai/openai-marketing-kit/documentation.md`
+- `docs/ship-by-sunday/packet-contract-and-question-map-2026-03-23.md`
+- `docs/ship-by-sunday/input-architecture-keep-kill-combine-2026-03-23.md`

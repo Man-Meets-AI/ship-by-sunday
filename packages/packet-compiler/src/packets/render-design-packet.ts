@@ -1,10 +1,11 @@
 import type { CanonicalProjectFacts } from "../canonical-project-definition/project-definition";
+import { DESIGN_PACK_LABEL } from "../public-artifact-contract";
+import { getGeneratedDesignDocPath } from "../generated-docs/generated-doc-paths";
 import {
 	renderBulletList,
 	renderSection,
 	renderTemplateAppendix,
 } from "./render-helpers";
-import { DESIGN_PACK_LABEL } from "../public-artifact-contract";
 import type { OpenAiPacketTemplates, RenderedPacketFile } from "./render-types";
 
 export function renderDesignPacket(
@@ -43,7 +44,7 @@ export function renderDesignPacket(
 
 	return [
 		{
-			path: "packet/design/AGENTS.md",
+			path: getGeneratedDesignDocPath("AGENTS.md"),
 			content: [
 				...summary,
 				"",
@@ -51,7 +52,7 @@ export function renderDesignPacket(
 			].join("\n"),
 		},
 		{
-			path: "packet/design/CHECKLIST.md",
+			path: getGeneratedDesignDocPath("CHECKLIST.md"),
 			content: [
 				...summary,
 				"",
@@ -61,7 +62,7 @@ export function renderDesignPacket(
 			].join("\n"),
 		},
 		{
-			path: "packet/design/PLANS.md",
+			path: getGeneratedDesignDocPath("PLANS.md"),
 			content: [
 				...summary,
 				"",
@@ -73,7 +74,7 @@ export function renderDesignPacket(
 			].join("\n"),
 		},
 		{
-			path: "packet/design/documentation.md",
+			path: getGeneratedDesignDocPath("documentation.md"),
 			content: [
 				...summary,
 				"",

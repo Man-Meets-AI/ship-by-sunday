@@ -1,4 +1,5 @@
 import type { CanonicalProjectDefinition } from "../canonical-project-definition/project-definition";
+import { GENERATED_DOCS_README_PATH } from "../generated-docs/generated-doc-paths";
 import type { RenderedPacketFile } from "../packets/render-types";
 
 export function renderTemplateOverrides(
@@ -9,7 +10,20 @@ export function renderTemplateOverrides(
 	return [
 		{
 			path: "README.md",
-			content: `# ${facts.product_name}\n\n${facts.product_summary}\n`,
+			content: [
+				`# ${facts.product_name}`,
+				"",
+				facts.product_summary,
+				"",
+				"## Start Here",
+				"",
+				`Open \`${GENERATED_DOCS_README_PATH}\` for the generated Design, Marketing, Build, and prompt materials that ship with this starter repo.`,
+				"",
+				"## Starter Overrides",
+				"",
+				"- `apps/web/config/product.ts` contains the generated starter product configuration.",
+				"- `apps/web/features/marketing/content/home.ts` contains the generated homepage starter content.",
+			].join("\n"),
 		},
 		{
 			path: "apps/web/config/product.ts",

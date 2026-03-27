@@ -6,6 +6,7 @@ import {
 	MARKETING_PACK_LABEL,
 	PROMPT_PACK_LABEL,
 } from "../public-artifact-contract";
+import { GENERATED_DOCS_README_PATH } from "../generated-docs/generated-doc-paths";
 import { renderBulletList, renderSection } from "./render-helpers";
 import type { RenderedPacketFile } from "./render-types";
 
@@ -13,7 +14,7 @@ export function renderPacketReadme(
 	facts: CanonicalProjectFacts,
 ): RenderedPacketFile {
 	return {
-		path: "packet/README.md",
+		path: GENERATED_DOCS_README_PATH,
 		content: [
 			`# ${facts.product_name} ${AGENT_READY_PACKS_LABEL}`,
 			"",

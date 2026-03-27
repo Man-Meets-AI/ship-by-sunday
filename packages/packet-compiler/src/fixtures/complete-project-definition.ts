@@ -113,7 +113,7 @@ const completeProjectFacts: CanonicalProjectFacts = {
 	done_when: "A buyer can download the full repo snapshot from Review.",
 	acceptance_criteria: [
 		"Packets unlock at the right stages",
-		"Repo zip contains packet/",
+		"Repo zip contains generated docs under docs/",
 	],
 	validation_plan: [
 		"Run package tests",
@@ -121,7 +121,7 @@ const completeProjectFacts: CanonicalProjectFacts = {
 		"Run packet-flow integration tests",
 	],
 	demo_flow:
-		"Complete the funnel, download the packet archives, then download the repo zip.",
+		"Complete the funnel, download the stage packs, then download the repo zip with docs/ at the root.",
 	risks: ["Schema drift", "Missing route tracing", "Legacy route confusion"],
 	dependencies: ["Next.js tracing config", "Convex schema", "Packet templates"],
 	open_questions: ["Which routes need archive downloads first?"],
