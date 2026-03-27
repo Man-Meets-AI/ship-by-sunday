@@ -15,22 +15,22 @@ PACKET-01,sandbox_e2e,apps/web/tests/e2e/auth-protection.sandbox.spec.ts,mapped_
 PACKET-01,integration_ui,apps/web/tests/integration-ui/packet-start-page.test.tsx,mapped_existing,high,Directly proves the stacked Start kickoff and the single primary CTA into the packet flow.
 PACKET-01,unit,apps/web/tests/unit/workspace-home-page.test.tsx,mapped_existing,low,Indirect workspace proof remains a useful backstop.
 PACKET-02,sandbox_e2e,apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts,mapped_existing,medium,Tagged @default_ship and now opens /product directly.
-PACKET-02,integration_ui,apps/web/tests/integration-ui/packet-stage-page.test.tsx,mapped_existing,high,Directly proves the routed workbench save semantics and explicit save-intent controls for the shared stage page.
+PACKET-02,integration_ui,apps/web/tests/integration-ui/packet-stage-page.test.tsx,mapped_existing,high,Directly proves the routed workbench Continue flow and autosave-backed save feedback for the shared stage page.
 PACKET-02,unit,apps/web/tests/unit/course-access.test.ts,mapped_existing,low,Access helpers remain a low-level backstop for the Product stage.
 PACKET-03,sandbox_e2e,apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts,mapped_existing,medium,Tagged @default_ship and now opens /design directly.
-PACKET-03,integration_ui,apps/web/tests/integration-ui/packet-stage-page.test.tsx,mapped_existing,high,The shared routed workbench proof applies directly to Design because the same stage shell and save controls render there.
+PACKET-03,integration_ui,apps/web/tests/integration-ui/packet-stage-page.test.tsx,mapped_existing,high,The shared routed workbench proof applies directly to Design because the same stage shell, autosave feedback, and Continue flow render there.
 PACKET-03,unit,apps/web/tests/unit/stage-unlock.test.ts,mapped_existing,low,Unlock rules remain a low-level backstop for Design.
 PACKET-04,sandbox_e2e,apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts,mapped_existing,medium,Tagged @default_ship and now opens /marketing directly.
-PACKET-04,integration_ui,apps/web/tests/integration-ui/packet-stage-page.test.tsx,mapped_existing,high,The shared routed workbench proof applies directly to Marketing because the same stage shell and save controls render there.
+PACKET-04,integration_ui,apps/web/tests/integration-ui/packet-stage-page.test.tsx,mapped_existing,high,The shared routed workbench proof applies directly to Marketing because the same stage shell, autosave feedback, and Continue flow render there.
 PACKET-04,unit,apps/web/tests/unit/stage-unlock.test.ts,mapped_existing,low,Unlock rules remain a low-level backstop for Marketing.
 PACKET-05,sandbox_e2e,apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts,mapped_existing,medium,Tagged @default_ship and now opens /build-plan directly.
-PACKET-05,integration_ui,apps/web/tests/integration-ui/packet-stage-page.test.tsx,mapped_existing,high,The shared routed workbench proof applies directly to Build Plan because the same stage shell and save controls render there.
+PACKET-05,integration_ui,apps/web/tests/integration-ui/packet-stage-page.test.tsx,mapped_existing,high,The shared routed workbench proof applies directly to Build Plan because the same stage shell, autosave feedback, and Continue flow render there.
 PACKET-05,unit,apps/web/tests/unit/stage-unlock.test.ts,mapped_existing,low,Unlock rules remain a low-level backstop for Build Plan.
 PACKET-06,sandbox_e2e,apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts,mapped_existing,medium,Tagged @default_ship and now checks /review plus the full-repo download action.
 PACKET-06,integration_ui,apps/web/tests/integration-ui/packet-review-page.test.tsx,mapped_existing,high,Directly proves the Review checkpoint hierarchy, primary Starter Snapshot action, and delayed Execute / Ship reveal.
 PACKET-06,integration,apps/web/tests/integration/packet-download-routes.test.ts,mapped_existing,medium,Download routes remain a direct backstop for Review.
 PACKET-07,sandbox_e2e,apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts,mapped_existing,medium,The current end-to-end proof now follows the canonical packet routes in the @default_ship pack.
-PACKET-07,integration_ui,apps/web/tests/integration-ui/packet-stage-page.test.tsx,mapped_existing,high,Directly proves the routed workbench save-and-stay versus save-and-continue behavior that now defines the packet flow interaction contract.
+PACKET-07,integration_ui,apps/web/tests/integration-ui/packet-stage-page.test.tsx,mapped_existing,high,Directly proves the routed workbench autosave-backed save feedback and the single Continue flow that now define the packet interaction contract.
 PACKET-07,integration_ui,apps/web/tests/integration-ui/packet-review-page.test.tsx,mapped_existing,medium,Review now proves the optional post-download branch stays subordinate to the required packet run.
 PACKET-08,unit,apps/web/tests/unit/legacy-lesson-routes.test.ts,rewrite_required,low,Legacy alias behavior still exists but the proving test is anchored to old naming and needs a modern rewrite.
 PACKET-08,unit,apps/web/tests/unit/mission-page.test.tsx,rewrite_required,low,Legacy mission coverage still exists but it is not yet expressed as a canonical compatibility proof.
