@@ -17,9 +17,7 @@ describe("home page content", () => {
 
 		expect(homePageContent.hero.headlineLead).toBe("Ship a real product");
 		expect(homePageContent.hero.headlineTailHover).toBe("by Sunday");
-		expect(homePageContent.hero.body).toContain(
-			"real, durable product by Sunday",
-		);
+		expect(homePageContent.hero.body).toContain("ship a real v1 by Sunday");
 		expect(homePageContent.hero.loginLabel).toBe("Sign in");
 		expect(homePageContent.hero.secondaryCta.href).toBe("#system");
 
