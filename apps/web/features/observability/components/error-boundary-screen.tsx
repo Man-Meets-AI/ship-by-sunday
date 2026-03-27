@@ -78,7 +78,7 @@ export function ErrorBoundaryScreen({
 						>
 							<p>Path: {pathname ?? "unknown"}</p>
 							<p>Digest: {error.digest ?? "none"}</p>
-							<p className="line-clamp-2">Trace: {error.message}</p>
+							<p>Trace: captured in telemetry</p>
 						</motion.div>
 					</div>
 

@@ -360,7 +360,8 @@ export function usePacketStageStepState({
 	]);
 
 	useAutosave({
-		shouldAutosave: hasUnsavedChanges && !isSaving,
+		shouldAutosave:
+			hasUnsavedChanges && !isSaving && !saveErrorByStepId[currentStep.id],
 		delayMs: 1000,
 		onAutosave: async () => {
 			await saveCurrentStep();
@@ -392,6 +393,12 @@ export function usePacketStageStepState({
 		fieldKey: CanonicalProjectFactKey,
 		nextValue: string,
 	) {
+		if (saveErrorByStepId[currentStep.id]) {
+			setSaveErrorByStepId((current) =>
+				removeStepEntry(current, currentStep.id),
+			);
+		}
+
 		const nextDraftValues: PacketStepDraftValues = {
 			...readCurrentDraftValues(),
 			[fieldKey]: nextValue,
@@ -401,10 +408,6 @@ export function usePacketStageStepState({
 			!arePacketStepDraftValuesEqual(nextDraftValues, currentSavedValues),
 		);
 		setSuccessStepId(null);
-
-		if (saveErrorByStepId[currentStep.id]) {
-			return;
-		}
 
 		const hadValidationFeedback =
 			Boolean(currentValidationState) || currentInvalidFieldKeys.length > 0;

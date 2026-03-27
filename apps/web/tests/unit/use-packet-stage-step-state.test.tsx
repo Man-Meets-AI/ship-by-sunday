@@ -113,6 +113,19 @@ function createSaveProjectDefinitionFactsMutation() {
 	return { saveProjectDefinitionFacts, saveProjectDefinitionFactsSpy };
 }
 
+function createSaveProjectDefinitionFactsMutationWithSpy(
+	saveProjectDefinitionFactsSpy: ReturnType<typeof vi.fn>,
+) {
+	const saveProjectDefinitionFacts = Object.assign(
+		(args: unknown) => saveProjectDefinitionFactsSpy(args),
+		{
+			withOptimisticUpdate: vi.fn(() => saveProjectDefinitionFacts),
+		},
+	) as SaveProjectDefinitionFactsMock;
+
+	return { saveProjectDefinitionFacts, saveProjectDefinitionFactsSpy };
+}
+
 function createPacketWorkspaceState(
 	projectFacts: ReturnType<typeof createProjectFacts> | null,
 ): PacketWorkspaceState {
@@ -389,5 +402,70 @@ describe("usePacketStageStepState", () => {
 				}),
 			}),
 		);
+	});
+
+	it("pauses autosave retries after a failed save until the user edits again", async () => {
+		const stage = getPacketStageDefinition("product");
+		const foundationStep = stage.steps[0]!;
+		const saveProjectDefinitionFactsSpy = vi
+			.fn()
+			.mockRejectedValueOnce(new Error("Save failed"))
+			.mockResolvedValue({});
+		const { saveProjectDefinitionFacts } =
+			createSaveProjectDefinitionFactsMutationWithSpy(
+				saveProjectDefinitionFactsSpy,
+			);
+		const { projectFacts, stageStatus } = getStageStatus("product", {
+			product_name: undefined,
+			product_summary: undefined,
+			primary_user: undefined,
+			why_this_matters: undefined,
+		});
+		mountStepInputs(foundationStep, projectFacts);
+		const { result } = renderHook(() =>
+			usePacketStageStepState({
+				stage,
+				stageId: "product",
+				stageStatus,
+				stepId: "foundation",
+				projectFacts,
+				saveProjectDefinitionFacts,
+			}),
+		);
+
+		await setCurrentFieldValue(
+			result,
+			foundationStep,
+			"product_name",
+			"Ship by Sunday",
+		);
+
+		await act(async () => {
+			vi.advanceTimersByTime(1000);
+			await Promise.resolve();
+		});
+
+		expect(saveProjectDefinitionFactsSpy).toHaveBeenCalledTimes(1);
+
+		await act(async () => {
+			vi.advanceTimersByTime(3000);
+			await Promise.resolve();
+		});
+
+		expect(saveProjectDefinitionFactsSpy).toHaveBeenCalledTimes(1);
+
+		await setCurrentFieldValue(
+			result,
+			foundationStep,
+			"product_name",
+			"Ship by Sunday OS",
+		);
+
+		await act(async () => {
+			vi.advanceTimersByTime(1000);
+			await Promise.resolve();
+		});
+
+		expect(saveProjectDefinitionFactsSpy).toHaveBeenCalledTimes(2);
 	});
 });
