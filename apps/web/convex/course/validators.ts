@@ -83,6 +83,11 @@ export const missionLessonStatusValidator = v.union(
 	v.literal("in_progress"),
 	v.literal("completed"),
 );
+export const bonusMissionLessonStatusValidator = v.union(
+	v.literal("available"),
+	v.literal("opened"),
+	v.literal("completed"),
+);
 export const starterRepoAccessProvisioningStatusValidator = v.union(
 	v.literal("requested"),
 	v.literal("invited"),
@@ -165,6 +170,33 @@ export const missionStateReturnValidator = v.object({
 	totalLessons: v.number(),
 	blocks: v.array(missionBlockValidator),
 	unlockedLessonKeys: v.array(v.string()),
+});
+
+export const bonusMissionLessonValidator = v.object({
+	lessonKey: v.string(),
+	routeSegment: v.string(),
+	id: v.string(),
+	displayLabel: v.string(),
+	title: v.string(),
+	shortTitle: v.string(),
+	block: blockIdValidator,
+	order: v.number(),
+	status: bonusMissionLessonStatusValidator,
+	isImplemented: v.boolean(),
+	artifactLabel: v.string(),
+	durationLabel: v.optional(v.string()),
+});
+
+export const bonusMissionBlockValidator = v.object({
+	id: blockIdValidator,
+	order: v.number(),
+	lessons: v.array(bonusMissionLessonValidator),
+});
+
+export const bonusMissionStateReturnValidator = v.object({
+	exploredCount: v.number(),
+	totalLessons: v.number(),
+	blocks: v.array(bonusMissionBlockValidator),
 });
 
 export const unlockedLessonStateValidator = v.object({

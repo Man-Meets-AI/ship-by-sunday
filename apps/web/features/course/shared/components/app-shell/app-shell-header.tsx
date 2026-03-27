@@ -12,12 +12,14 @@ import { AppShellWorkspaceNav } from "./app-shell-workspace-nav";
 type MissionState = {
 	progressCount: number;
 	totalLessons: number;
+	progressLabel?: string;
 	blocks: Array<AppShellBlock & { label: string }>;
 };
 
 type AppShellHeaderProps = {
 	viewportMode: "document" | "app";
 	mission: MissionState | undefined;
+	showMissionRail: boolean;
 	blockStatuses: Map<string, AppShellBlockStatus>;
 	activeBlockId: string | undefined;
 	layoutMode: LessonLayoutMode | undefined;
@@ -28,6 +30,7 @@ type AppShellHeaderProps = {
 export function AppShellHeader({
 	viewportMode,
 	mission,
+	showMissionRail,
 	blockStatuses,
 	activeBlockId,
 	layoutMode,
@@ -43,7 +46,7 @@ export function AppShellHeader({
 		<div className={chromeRowClass}>
 			<AppShellWorkspaceNav lesson11Viewport={lesson11Viewport} />
 
-			{mission ? (
+			{showMissionRail && mission ? (
 				lesson11Viewport ? (
 					<AppShellMissionRailShadcn
 						blocks={mission.blocks}

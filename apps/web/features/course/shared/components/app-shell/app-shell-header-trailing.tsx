@@ -17,6 +17,7 @@ import {
 type MissionProgress = {
 	progressCount: number;
 	totalLessons: number;
+	progressLabel?: string;
 };
 
 type AppShellHeaderTrailingProps = {
@@ -32,8 +33,9 @@ export function AppShellHeaderTrailing({
 	mission,
 	lesson11Viewport = false,
 }: AppShellHeaderTrailingProps) {
+	const progressVerb = mission?.progressLabel ?? "lessons completed";
 	const progressLabel = mission
-		? `${mission.progressCount} of ${mission.totalLessons} lessons completed`
+		? `${mission.progressCount} of ${mission.totalLessons} ${progressVerb}`
 		: "Progress unavailable";
 
 	return (
@@ -78,7 +80,7 @@ export function AppShellHeaderTrailing({
 				className="hidden tabular-nums text-xs font-medium text-muted-foreground sm:inline"
 				title={progressLabel}
 			>
-				<span className="sr-only">Lessons completed: </span>
+				<span className="sr-only">{progressVerb}: </span>
 				{mission ? `${mission.progressCount}/${mission.totalLessons}` : "--/--"}
 			</span>
 			<div className="flex items-center gap-0.5 pl-0.5 sm:gap-1">

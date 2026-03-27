@@ -16,6 +16,8 @@ import type * as codex from "../codex.js";
 import type * as codexValidators from "../codexValidators.js";
 import type * as course from "../course.js";
 import type * as course_artifacts from "../course/artifacts.js";
+import type * as course_bonusMission from "../course/bonusMission.js";
+import type * as course_bonusRoute from "../course/bonusRoute.js";
 import type * as course_lessonState from "../course/lessonState.js";
 import type * as course_mission from "../course/mission.js";
 import type * as course_shared from "../course/shared.js";
@@ -51,6 +53,8 @@ declare const fullApi: ApiFromModules<{
   codexValidators: typeof codexValidators;
   course: typeof course;
   "course/artifacts": typeof course_artifacts;
+  "course/bonusMission": typeof course_bonusMission;
+  "course/bonusRoute": typeof course_bonusRoute;
   "course/lessonState": typeof course_lessonState;
   "course/mission": typeof course_mission;
   "course/shared": typeof course_shared;

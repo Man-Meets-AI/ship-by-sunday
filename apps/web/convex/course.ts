@@ -10,6 +10,19 @@ import {
 	listArtifactsReturns,
 } from "./course/artifacts";
 import {
+	getBonusRouteStateArgs,
+	getBonusRouteStateHandler,
+	getBonusRouteStateReturns,
+} from "./course/bonusRoute";
+import {
+	getBonusMissionStateArgs,
+	getBonusMissionStateHandler,
+	getBonusMissionStateReturns,
+	markBonusLessonViewedArgs,
+	markBonusLessonViewedHandler,
+	markBonusLessonViewedReturns,
+} from "./course/bonusMission";
+import {
 	completeLessonArgs,
 	completeLessonHandler,
 	completeLessonReturns,
@@ -91,6 +104,18 @@ export const getMissionState = query({
 	handler: getMissionStateHandler,
 });
 
+export const getBonusRouteState = query({
+	args: getBonusRouteStateArgs,
+	returns: getBonusRouteStateReturns,
+	handler: getBonusRouteStateHandler,
+});
+
+export const getBonusMissionState = query({
+	args: getBonusMissionStateArgs,
+	returns: getBonusMissionStateReturns,
+	handler: getBonusMissionStateHandler,
+});
+
 export const getLessonState = query({
 	args: getLessonStateArgs,
 	returns: getLessonStateReturns,
@@ -107,6 +132,12 @@ export const markLessonViewed = mutation({
 	args: markLessonViewedArgs,
 	returns: markLessonViewedReturns,
 	handler: markLessonViewedHandler,
+});
+
+export const markBonusLessonViewed = mutation({
+	args: markBonusLessonViewedArgs,
+	returns: markBonusLessonViewedReturns,
+	handler: markBonusLessonViewedHandler,
 });
 
 export const completeLesson = mutation({

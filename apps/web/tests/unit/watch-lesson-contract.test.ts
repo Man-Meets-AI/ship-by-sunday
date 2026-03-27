@@ -208,9 +208,10 @@ describe("split lesson baseline (former watch cohort)", () => {
 		).toEqual([]);
 	});
 
-	it("keeps no student-facing watch shells", () => {
+	it("keeps the lesson manifest split-driven while bonus routes can add watch rendering separately", () => {
 		expect(
 			getStudentFacingLessons().filter((l) => l.shell === "watch"),
 		).toHaveLength(0);
+		expect(getLessonById("3.1")?.shell).toBe("split");
 	});
 });

@@ -6,6 +6,7 @@ import type { SkillRailCompletionCue } from "@/features/course/shared/components
 export type AppShellMissionState = {
 	progressCount: number;
 	totalLessons: number;
+	progressLabel?: string;
 	blocks: Array<{
 		id: string;
 		label: string;
@@ -37,6 +38,7 @@ export type AppShellProps = {
 	currentLessonId?: string;
 	currentBlockId?: string;
 	mission?: AppShellMissionState;
+	showMissionRail?: boolean;
 	showSkillRail?: boolean;
 	layoutMode?: LessonLayoutMode;
 	onLayoutModeChange?: (mode: LessonLayoutMode) => void;

@@ -1,4 +1,5 @@
 import {
+	attachGeneratedLessonMedia,
 	getLessonVideoAsset,
 	getBunnyEmbedUrl,
 	getVideoAsset,
@@ -6,6 +7,8 @@ import {
 	isLessonVideoReady,
 	resolveLessonVideoUrl,
 } from "@/features/course/lesson/model/video";
+import { getLessonById } from "@/features/course/lesson/model";
+import { resolveLessonVideoAssetId } from "@/features/course/lesson/model/video-assignments";
 
 describe("lesson video helpers", () => {
 	it("builds Bunny embed urls deterministically", () => {
@@ -42,13 +45,50 @@ describe("lesson video helpers", () => {
 		);
 	});
 
-	it("resolves video assets independently from lesson numbering", () => {
-		expect(getVideoAsset("0.1")?.title).toBe("Welcome Video");
-		expect(
-			getLessonVideoAsset({
-				videoAssetId: "1.7",
-			})?.title,
-		).toBe("CEO Skills");
-		expect(getLessonVideoAsset({ videoAssetId: null })).toBeNull();
+	it("resolves lesson ids to canonical Bunny asset ids", () => {
+		expect(resolveLessonVideoAssetId("1.1")).toBe("0.1");
+		expect(resolveLessonVideoAssetId("1.2")).toBe("0.2");
+		expect(resolveLessonVideoAssetId("1.3")).toBe("1.2");
+		expect(resolveLessonVideoAssetId("3.2")).toBe("3.2");
+
+		expect(getVideoAsset("0.1")?.videoId).toBe(
+			"0df1d1d2-098a-425b-b6eb-3c465f0a32e1",
+		);
+		expect(getLessonVideoAsset({ id: "1.9" })?.videoId).toBe(
+			"0ca98e98-f8c2-40d8-88f1-15a97d1b4c8d",
+		);
+		expect(getLessonVideoAsset({ id: "3.2" })?.videoId).toBe(
+			"374f9017-6573-426e-b2d4-270cbf1f747e",
+		);
+		expect(getLessonVideoAsset(null)).toBeNull();
+	});
+
+	it("falls back to the lesson title when Bunny metadata does not provide one", () => {
+		const lesson = getLessonById("1.3");
+		expect(lesson).toBeTruthy();
+		if (!lesson) {
+			throw new Error("Expected lesson 1.3 to exist.");
+		}
+
+		const hydratedLesson = attachGeneratedLessonMedia({
+			...lesson,
+			content: {
+				...lesson.content,
+				coach: {
+					...lesson.content.coach,
+					video: {
+						status: "ready",
+						provider: "bunny",
+						libraryId: 619172,
+						videoId: "b0173058-5cf9-4a93-b865-8bb6e48fd5f7",
+					},
+				},
+			},
+		});
+
+		expect(hydratedLesson.content.coach.video).toMatchObject({
+			title: "Start With the Problem",
+			videoId: "b0173058-5cf9-4a93-b865-8bb6e48fd5f7",
+		});
 	});
 });

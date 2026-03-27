@@ -2,6 +2,56 @@ import { createPendingLessonCoach } from "../content-helpers";
 import { splitPanelDefaults, type LessonSourceConfig } from "../contracts";
 import { createVideoLesson } from "../video-lesson-factory";
 
+const LIGHT_RESEARCH_PROMPT = [
+	"You are doing a fast competitor / adjacent-solution research pass for a product-building workflow.",
+	"",
+	"Use these notes:",
+	"- User: [paste the user]",
+	"- Problem to solve: [paste the problem]",
+	"- Desired outcome: [paste the outcome]",
+	"",
+	"Your job is to help a builder quickly understand what existing solutions already do for this situation so they can make better product decisions fast.",
+	"",
+	"This is not a full market landscape, analyst report, or strategy memo.",
+	"Prioritize decision-useful signal over completeness.",
+	"Be concrete, concise, and evidence-led.",
+	"",
+	"What to research:",
+	"- Find 2-3 relevant existing solutions that a user in this situation would realistically consider",
+	"- These may include direct competitors, adjacent substitutes, or current workaround solutions",
+	"- Prefer solutions with public evidence available",
+	"",
+	"Evidence standard:",
+	"- Prefer public, observable evidence such as product pages, pricing pages, onboarding flows, app store listings, G2, Capterra, Reddit, community discussions, review sites, and help docs",
+	"- Base claims on what is actually supported by the evidence",
+	"- If evidence is thin, mixed, or indirect, say so briefly instead of overstating certainty",
+	"- Do not invent user sentiment, product strengths, or weaknesses",
+	"",
+	"For each solution, capture:",
+	"1. solution name",
+	"2. what it does well",
+	"3. where it falls short",
+	"4. what users seem to care about most",
+	"5. what evidence you saw",
+	"",
+	"Research Table",
+	"- Output this section as raw pipe-delimited lines only",
+	"- Do not use markdown table syntax",
+	"- Do not add a header row",
+	"- Do not number the lines",
+	"- Do not add bullets",
+	"- Do not include citations or source lists",
+	"- Each line must follow this exact field order:",
+	"solution name | what it does well | where it falls short | what users care about most | what evidence you saw",
+	"",
+	"What this means for my v1",
+	"- After the Research Table, add this section label exactly: What this means for my v1",
+	"- Under it, write a short synthesis of the main pattern across the solutions and the product decision it should change",
+	"- Keep this synthesis brief, concrete, and decision-useful",
+	"- If the evidence is thin or mixed, say that clearly",
+	"- Do not add citations or source notes here either",
+].join("\n");
+
 export const ceoLessons = [
 	{
 		id: "1.3",
@@ -621,7 +671,7 @@ export const ceoLessons = [
 		actionComeBackWith:
 			"A snapshot you could explain in two sentences—what to emulate, avoid, or differentiate.",
 		workbenchPrompt:
-			"Optional: copy the research prompt into your AI tool. Either way, keep this pass fast and directional.",
+			"Optional: copy the prompt card into your AI tool and fill in the placeholders yourself. Either way, keep this pass fast and directional.",
 		workbenchEmptyState:
 			"Add competitors, skim the three buckets, check off the flow, write your takeaway.",
 		coachResources: [
@@ -630,7 +680,7 @@ export const ceoLessons = [
 				label: "Light research prompt",
 				kind: "copy_prompt",
 				promptTemplateId: "competitor_research",
-				body: "Copy this into your AI tool to scan alternatives fast—anchored to your chosen user and outcome, not a thesis.",
+				body: LIGHT_RESEARCH_PROMPT,
 				copySuccessToastMessage:
 					"Copied the research prompt. Go paste it in your favorite model.",
 			},
