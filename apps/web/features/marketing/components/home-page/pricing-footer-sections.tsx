@@ -20,10 +20,7 @@ export function PricingSectionBlock({
 	primaryCtaTarget: HomePageCtaTarget;
 }) {
 	return (
-		<section
-			id="pricing"
-			className="py-24 border-t border-border/40 lg:py-40"
-		>
+		<section id="pricing" className="py-24 border-t border-border/40 lg:py-40">
 			<div className="grid gap-16 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-24">
 				<div className="space-y-12 lg:sticky lg:top-24 lg:h-fit">
 					<div className="space-y-8">
@@ -32,13 +29,15 @@ export function PricingSectionBlock({
 						</p>
 						<h2 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl lg:text-7xl">
 							{pricingSection.titleLead}
-							<span className="block text-primary/90">{pricingSection.titleAccent}</span>
+							<span className="block text-primary/90">
+								{pricingSection.titleAccent}
+							</span>
 						</h2>
 						<p className="max-w-xl text-pretty text-xl leading-relaxed text-muted-foreground">
 							{pricingSection.intro}
 						</p>
 					</div>
-					
+
 					<div className="rounded-3xl border border-border/40 bg-muted/20 p-8 shadow-sm">
 						<p className="text-sm font-medium leading-relaxed text-muted-foreground italic">
 							{pricingSection.guarantee}
@@ -57,7 +56,9 @@ export function PricingSectionBlock({
 									<p className="font-marketing-display text-[clamp(5rem,15vw,10rem)] font-black tracking-tighter text-foreground leading-[0.8]">
 										{pricingSection.priceDisplay}
 									</p>
-									<span className="text-sm font-medium text-muted-foreground uppercase tracking-widest mb-4">USD One-Time</span>
+									<span className="text-sm font-medium text-muted-foreground uppercase tracking-widest mb-4">
+										USD One-Time
+									</span>
 								</div>
 							</div>
 
@@ -74,7 +75,9 @@ export function PricingSectionBlock({
 
 							<div className="grid gap-12 border-t border-border/40 pt-12 lg:grid-cols-2">
 								<div className="space-y-6">
-									<p className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/40">Included</p>
+									<p className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/40">
+										Included
+									</p>
 									<PricingIncludesList items={pricingSection.includes} />
 								</div>
 								<div className="rounded-3xl border border-primary/20 bg-primary/5 p-8">
@@ -132,7 +135,7 @@ export function FooterSection({
 						{footerWordmark}
 					</p>
 				</div>
-				
+
 				<p className="text-sm font-medium tracking-[0.3em] text-foreground/20 uppercase">
 					One serious system for serious builders.
 				</p>

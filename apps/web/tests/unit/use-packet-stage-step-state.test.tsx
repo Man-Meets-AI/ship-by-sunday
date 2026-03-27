@@ -339,7 +339,8 @@ describe("usePacketStageStepState", () => {
 	it("creates an optimistic project definition when the first packet save starts from null", async () => {
 		const stage = getPacketStageDefinition("product");
 		const foundationStep = stage.steps[0]!;
-		const { saveProjectDefinitionFacts } = createSaveProjectDefinitionFactsMutation();
+		const { saveProjectDefinitionFacts } =
+			createSaveProjectDefinitionFactsMutation();
 		const { projectFacts, stageStatus } = getStageStatus("product", {
 			product_name: undefined,
 			product_summary: undefined,
@@ -359,8 +360,8 @@ describe("usePacketStageStepState", () => {
 			}),
 		);
 
-		const optimisticUpdate = saveProjectDefinitionFacts.withOptimisticUpdate.mock
-			.calls[0]?.[0];
+		const optimisticUpdate =
+			saveProjectDefinitionFacts.withOptimisticUpdate.mock.calls[0]?.[0];
 		expect(typeof optimisticUpdate).toBe("function");
 
 		const localStore = {

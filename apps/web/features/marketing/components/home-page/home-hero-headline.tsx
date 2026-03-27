@@ -14,7 +14,9 @@ export function HomeHeroHeadline({ hero }: { hero: Hero }) {
 				<span className={headlineLineClass}>{hero.headlineLead}</span>
 				<span className={cn(headlineLineClass, "text-primary/90")}>
 					{hero.headlineTailPrefix}
-					<Cover className="bg-transparent px-0 py-0 dark:bg-transparent">{hero.headlineTailHover}</Cover>
+					<Cover className="bg-transparent px-0 py-0 dark:bg-transparent">
+						{hero.headlineTailHover}
+					</Cover>
 				</span>
 			</h1>
 		</div>

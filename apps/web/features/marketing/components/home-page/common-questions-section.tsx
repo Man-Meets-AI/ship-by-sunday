@@ -18,7 +18,9 @@ export function CommonQuestionsSection({
 					</p>
 					<h2 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl lg:text-7xl">
 						{faqSection.titleLead}
-						<span className="block text-primary/90">{faqSection.titleAccent}</span>
+						<span className="block text-primary/90">
+							{faqSection.titleAccent}
+						</span>
 					</h2>
 					{faqSection.lead ? (
 						<p className="max-w-xl text-pretty text-xl leading-relaxed text-muted-foreground">

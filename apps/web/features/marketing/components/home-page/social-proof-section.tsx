@@ -49,10 +49,7 @@ export function SocialProofSection({
 				<div className="flex flex-col gap-16">
 					<div className="grid gap-8 border-t border-border/40 sm:grid-cols-2">
 						{socialProofSection.stats.map((stat) => (
-							<article
-								key={stat.value}
-								className="space-y-4 py-10"
-							>
+							<article key={stat.value} className="space-y-4 py-10">
 								<EncryptedText
 									text={stat.value}
 									charset="SHIPBYUNDA"
@@ -88,7 +85,8 @@ export function SocialProofSection({
 									rel="noopener noreferrer"
 									className="inline-flex items-center gap-2 rounded-full border border-border/40 bg-background px-4 py-2 text-sm font-bold text-foreground/70 transition-all hover:border-foreground/30 hover:text-foreground hover:shadow-sm"
 								>
-									<span className="text-primary">@</span>{socialProofSection.github.username}
+									<span className="text-primary">@</span>
+									{socialProofSection.github.username}
 									<ExternalLink className="size-3.5" />
 								</Link>
 							</div>

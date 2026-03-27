@@ -7,4 +7,5 @@ node_modules
 coverage
 playwright-report
 test-results
+tests/e2e/.auth
 convex/_generated
