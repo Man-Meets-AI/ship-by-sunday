@@ -11,19 +11,40 @@ The control plane is organized around product journeys first and implementation 
 - `qa/personas.json` is the committed non-secret persona protocol. `qa/personas.local.json` is the ignored local credential file used for real browser runs.
 - `qa/AGENTS.md` tells agents how to select scenarios from a diff, how to prepare personas, how to run packs, and how to write reports.
 - `qa/templates/run-report.md` is the report template for baseline and ship evidence.
+- `qa/templates/team-review.md` is the template for material QA-team review artifacts.
+- `qa/reviews/README.md` explains local review artifacts under `qa/reviews/local/`.
 - `qa/runs/` stores committed ship evidence. `qa/runs/local/` is ignored scratch space for dry runs.
+- `.codex/config.toml` plus `.codex/agents/*.toml` define the repo-scoped lead-first QA role layer for Codex.
+- `.agents/skills/qa-team/SKILL.md` is the natural-language QA-team entrypoint. It orchestrates the lead-first workflow but does not replace `qa/` as the source of truth.
 
 Start with these commands from the repository root:
 
 ```bash
 bun run qa:validate
 bun run qa:inventory:sync
+bun run qa:team -- --slug=feature-name --base=main --dry-run
 bun run qa:personas:prepare
 bun run qa:run-pack -- --pack=default_ship --dry-run
 bun run qa:ship -- --pack=default_ship --slug=baseline
 ```
 
-`qa:validate` is the fast integrity check. `qa:inventory:sync` refreshes the full-suite inventory from the current `apps/web/tests/` tree. `qa:personas:prepare` provisions the committed personas against the Clerk and Convex environment currently loaded for QA. `qa:run-pack` is the explicit scenario-pack runner for `default_ship`, `extended`, and `billing_integration`. On local `billing_integration` targets it now records the pinned Stripe guardrail doctor as a warning-only preflight and runs `stripe:dev:verify` as the hard post-checkout proof. `qa:ship` scaffolds a dated run report for the selected scenario pack so the human runner can record what passed, failed, or remained blocked.
+`qa:validate` is the fast integrity check for the QA control plane and the checked-in QA-team assets. `qa:inventory:sync` refreshes the full-suite inventory from the current `apps/web/tests/` tree while preserving curated rows for unchanged files. `qa:team` scaffolds a local review artifact for a material feature review. `qa:personas:prepare` provisions the committed personas against the Clerk and Convex environment currently loaded for QA. `qa:run-pack` is the explicit scenario-pack runner for `default_ship`, `extended`, and `billing_integration`. On local `billing_integration` targets it now records the pinned Stripe guardrail doctor as a warning-only preflight and runs `stripe:dev:verify` as the hard post-checkout proof. `qa:ship` scaffolds a dated run report for the selected scenario pack so the human runner can record what passed, failed, or remained blocked.
+
+The QA team is lead-first and chat-first. The natural interaction is: “go talk to our QA team about this feature.” `qa_lead` is still the main QA mind, but material reviews now use a deterministic specialist pattern instead of ad hoc fan-out. For feature diff reviews and other substantial requests, the lead should pull in `journey_mapper`, `coverage_analyst`, and `gap_reviewer` before writing the final verdict. `bun run qa:team` is still a support scaffold for material reviews, not the main product experience.
+
+Default safe local auto-run budget for the lead:
+
+- `bun run qa:validate`
+- `bun run qa:run-pack -- --pack=<pack> --dry-run`
+- directly relevant focused `vitest` runs
+
+Canonical `qa/` truth writes such as `qa/coverage.csv` or `qa/test-inventory.csv` still require explicit confirmation before they are applied. Browser execution is still opt-in: the lead should use existing pack commands and only run them when the user explicitly asks for browser QA and the target environment is safe.
+
+Current delegation pattern:
+
+- Advisory material review: `journey_mapper` + `coverage_analyst` + `gap_reviewer`
+- Explicit safe browser execution: add `browser_runner`
+- Command-backed or report-worthy verdict: add `release_summarizer`
 
 For packet-funnel work, `default_ship` should not rely on browser lanes alone. The pack now needs the packet integration-ui proof suite for `/start`, the routed workbench, `/review`, and the blocker sidebar because those tests are first-class proof for the current packet UX contract.
 
@@ -52,9 +73,12 @@ Rough old-world translation:
 ## What The Commands Actually Do
 
 - `bun run qa:validate`
-  Checks the QA system itself. This validates the CSVs, persona protocol, and inventory wiring. It does not click through the app.
+  Checks the QA system itself. This validates the CSVs, persona protocol, inventory wiring, repo-scoped QA role files, and the shared QA-team skill. It does not click through the app.
 - `bun run qa:inventory:sync`
-  Rebuilds the inventory of every test file under `apps/web/tests/`. Use this when the test tree changes and the inventory needs to catch up.
+  Refreshes the inventory of every test file under `apps/web/tests/`. It preserves curated rows for unchanged files and only seeds new rows for newly discovered tests.
+- `bun run qa:team -- --slug=<feature-slug> --base=<ref>`
+  Scaffolds a local review artifact under `qa/reviews/local/` so a material QA-team review has a stable diff summary and note-taking surface.
+  Add `--review-mode=command-backed --environment=<env>` when the review already includes real command output and should expect `release_summarizer` to help with the final verdict.
 - `bun run qa:personas:prepare -- --pack=<pack>`
   Makes sure the right QA accounts exist in the current Clerk and Convex environment before browser runs start.
 - `bun run test:browser-smoke`
@@ -150,7 +174,7 @@ For packet-focused QA on local dev, the concrete behaviors worth checking are:
 
 - `/start` is a stacked kickoff with one primary `Continue with ...` CTA
 - the routed packet workbench keeps the connected within-stage page strip intact
-- the workbench exposes both `Save and continue` and `Save and stay`
+- the workbench uses autosave-backed feedback and one primary `Continue` action
 - `/review` keeps the Starter Snapshot primary and delays the full `Execute / Ship` surface until after the download moment
 
 ## Environment sources

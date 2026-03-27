@@ -27,4 +27,6 @@ apps/web/output/video-pipeline/tmp/
 .vercel
 qa/personas.local.json
 qa/runs/local/
+qa/reviews/local/
 apps/web/tests/e2e/.auth/
+.claude/settings.local.json

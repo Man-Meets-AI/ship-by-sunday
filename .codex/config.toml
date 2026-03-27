@@ -1,0 +1,37 @@
+[features]
+multi_agent = true
+skills = true
+
+[agents]
+max_threads = 6
+max_depth = 1
+
+[agents.qa_lead]
+description = "Lead QA agent for this repo. Reads the qa control plane first, returns one consolidated verdict, and delegates only when specialist help materially improves the review."
+config_file = "agents/qa-lead.toml"
+nickname_candidates = ["QA Lead", "Ship QA"]
+
+[agents.journey_mapper]
+description = "Maps a diff or feature slice to QA journey IDs and affected scenario packs in product language."
+config_file = "agents/journey-mapper.toml"
+nickname_candidates = ["Journey Mapper"]
+
+[agents.coverage_analyst]
+description = "Inspects qa/coverage.csv, qa/test-inventory.csv, and relevant tests to judge how strong the current proof really is."
+config_file = "agents/coverage-analyst.toml"
+nickname_candidates = ["Coverage Analyst"]
+
+[agents.gap_reviewer]
+description = "Finds release-critical proof gaps, stale evidence, and missing follow-up runs without drifting away from the qa/ control plane."
+config_file = "agents/gap-reviewer.toml"
+nickname_candidates = ["Gap Reviewer"]
+
+[agents.browser_runner]
+description = "Runs the smallest safe browser-facing QA surface when execution is explicitly requested and the environment is declared safe."
+config_file = "agents/browser-runner.toml"
+nickname_candidates = ["Browser Runner"]
+
+[agents.release_summarizer]
+description = "Turns QA evidence into a concise release verdict and report-ready findings without inventing proof that was not collected."
+config_file = "agents/release-summarizer.toml"
+nickname_candidates = ["Release Summary"]

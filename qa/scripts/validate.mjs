@@ -99,8 +99,19 @@ async function main() {
 	await assertFileExists("qa/glossary.md", "QA glossary");
 	await assertFileExists("qa/personas.example.json", "QA persona example");
 	await assertFileExists("qa/templates/run-report.md", "QA run report template");
+	await assertFileExists("qa/templates/team-review.md", "QA team review template");
 	await assertFileExists("qa/runs/README.md", "QA runs readme");
+	await assertFileExists("qa/reviews/README.md", "QA reviews readme");
 	await assertFileExists("qa/test-inventory.csv", "QA test inventory");
+	await assertFileExists("qa/scripts/team.mjs", "QA team scaffold script");
+	await assertFileExists(".agents/skills/qa-team/SKILL.md", "QA team skill");
+	await assertFileExists(".codex/config.toml", "QA Codex project config");
+	await assertFileExists(".codex/agents/qa-lead.toml", "QA lead agent config");
+	await assertFileExists(".codex/agents/journey-mapper.toml", "QA journey mapper agent config");
+	await assertFileExists(".codex/agents/coverage-analyst.toml", "QA coverage analyst agent config");
+	await assertFileExists(".codex/agents/gap-reviewer.toml", "QA gap reviewer agent config");
+	await assertFileExists(".codex/agents/browser-runner.toml", "QA browser runner agent config");
+	await assertFileExists(".codex/agents/release-summarizer.toml", "QA release summarizer agent config");
 
 	const personaProtocol = await loadPersonaProtocol();
 	await assertFileExists(path.relative(repoRoot, personaProtocolPath), "QA persona protocol");
