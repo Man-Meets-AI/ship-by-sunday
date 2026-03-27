@@ -1,22 +1,17 @@
 "use client";
 
-import { useConvexAuth, useMutation, useQuery } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/features/course/shared/components/app-shell";
 import { api } from "@/convex/_generated/api";
-import { usePacketStageStepState } from "@/features/packet-flow/hooks/use-packet-stage-step-state";
 import type { PacketWorkspaceState } from "@/features/packet-flow/lib/packet-workspace-types";
 import { getPacketStageDefinition, type PacketStageId } from "@packet-compiler";
-import {
-	getAdjacentPacketPageHrefs,
-	getPacketStageStepIndex,
-	type RoutedPacketStageId,
-} from "@/features/packet-flow/lib/packet-stage-routes";
+import type { RoutedPacketStageId } from "@/features/packet-flow/lib/packet-stage-routes";
 import { getPacketStagePageMedia } from "@/features/packet-flow/lib/packet-stage-videos";
 import { PacketStageProgressPanel } from "./progression/packet-stage-progress-panel";
 import { PacketStageNav } from "./packet-stage-nav";
 import { PacketStageSidebar } from "./packet-stage-sidebar";
-import { PacketStageStepCard } from "./packet-stage-step-card";
+import { PacketStageStepController } from "./packet-stage-step-controller";
 import { PacketVideoCard } from "./video/packet-video-card";
 
 const packetDownloadStageMap = {
@@ -72,36 +67,7 @@ export function PacketStagePage({
 			getPacketStageDefinition(workspaceState.firstIncompleteStageId).route,
 		);
 	}
-	const currentStepIndex = getPacketStageStepIndex(stageId, stepId);
-	const { previousHref, nextHref } = getAdjacentPacketPageHrefs(
-		stageId,
-		stepId,
-	);
 	const stagePageMedia = getPacketStagePageMedia(stageId, stepId);
-
-	const saveProjectDefinitionFacts = useMutation(
-		api.packet.saveProjectDefinitionFacts,
-	);
-	const {
-		currentFeedback,
-		currentFieldErrors,
-		currentStep,
-		currentDraftValues,
-		goToPreviousStep,
-		handleSaveAndContinue,
-		handleSaveAndStay,
-		handleFieldChange,
-		isSaving,
-	} = usePacketStageStepState({
-		stage,
-		stageId,
-		stageStatus,
-		stepId,
-		previousHref,
-		nextHref,
-		projectFacts: workspaceState.projectDefinition?.facts ?? {},
-		saveProjectDefinitionFacts,
-	});
 	const downloadHref = getPacketDownloadHref(stageId, stageStatus.isComplete);
 	const nextStageId = stageStatus.isComplete
 		? nextStageMap[stageId]
@@ -133,22 +99,13 @@ export function PacketStagePage({
 							stageStatus={stageStatus}
 							activeStepId={stepId}
 						/>
-						{currentStep ? (
-							<PacketStageStepCard
-								currentStep={currentStep}
-								currentStepIndex={currentStepIndex}
-								totalSteps={stage.steps.length}
-								canGoBack={Boolean(previousHref)}
-								draftValues={currentDraftValues}
-								fieldErrors={currentFieldErrors}
-								feedback={currentFeedback}
-								isSaving={isSaving}
-								onBack={goToPreviousStep}
-								onChange={handleFieldChange}
-								onSaveAndContinue={handleSaveAndContinue}
-								onSaveAndStay={handleSaveAndStay}
-							/>
-						) : null}
+						<PacketStageStepController
+							stage={stage}
+							stageId={stageId}
+							stageStatus={stageStatus}
+							stepId={stepId}
+							projectFacts={workspaceState.projectDefinition?.facts ?? {}}
+						/>
 					</div>
 					<div className="space-y-6 xl:col-start-2 xl:row-start-2">
 						<PacketStageSidebar

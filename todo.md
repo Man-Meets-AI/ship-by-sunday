@@ -2,6 +2,8 @@
 
 ## recent
 
+- **2026-03-26 22:47 EDT** — Packet step-controller refactor: extracted the packet step-form mutation + hook wiring out of `PacketStagePage` into a dedicated `PacketStageStepController` so the page shell no longer middlemans the step-card props. No doc or changelog update needed for this internal structure pass.
+
 - **2026-03-26 17:18 EDT** — Packet video funnel closeout + docs sweep: renamed the completed ExecPlan to `docs/codex/2026-03-26-17-17-38-EDT-packet-video-page-funnel.md`, shipped the routed packet-page funnel with the packet-local video registry and `L2` orientation fallback, updated the dependent distillation plan plus the root/public route docs to describe stage-root redirects into nested packet pages, and logged the user-facing behavior in `CHANGELOG.md`.
 
 - **2026-03-26 16:44 EDT** — Video pipeline correction pass: changed the default headless LUT blend from `30%` to `15%`, rebuilt the full corrected `Color Graded` set, published the corrected Bunny batch, deleted the stale `30%` Bunny video IDs from the earlier upload report, and synced the operator docs so the durable rule is now explicit: publish a fresh corrected set, then remove the stale Bunny IDs instead of assuming in-place overwrite.
