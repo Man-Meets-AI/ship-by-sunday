@@ -22,7 +22,6 @@ export function ExecuteShipHub({ productName }: { productName?: string }) {
 			appScrollMode="page"
 			enableMissionQuery={false}
 			showSkillRail={false}
-			title="Execute / Ship"
 		>
 			<div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 pb-10 pt-2">
 				<Card>

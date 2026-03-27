@@ -2,8 +2,6 @@
 
 import { useClerk, useUser } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -16,7 +14,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { AppShellUserMenuAccount } from "./app-shell-user-menu-account";
-import { AppShellUserMenuAppearance } from "./app-shell-user-menu-appearance";
 import { userMenuInitials } from "./app-shell-user-menu-helpers";
 import { AppShellUserMenuWorkspaceItems } from "./app-shell-user-menu-workspace-items";
 
@@ -24,15 +21,6 @@ export function AppShellUserMenu() {
 	const pathname = usePathname();
 	const { user, isLoaded } = useUser();
 	const clerk = useClerk();
-	const { resolvedTheme, setTheme } = useTheme();
-	const [themeMounted, setThemeMounted] = useState(false);
-
-	useEffect(() => {
-		setThemeMounted(true);
-	}, []);
-
-	const appearance: "light" | "dark" =
-		themeMounted && resolvedTheme === "dark" ? "dark" : "light";
 
 	return (
 		<DropdownMenu>
@@ -67,10 +55,6 @@ export function AppShellUserMenu() {
 				</DropdownMenuLabel>
 				<DropdownMenuSeparator />
 				<AppShellUserMenuWorkspaceItems pathname={pathname} />
-				<AppShellUserMenuAppearance
-					appearance={appearance}
-					setTheme={setTheme}
-				/>
 				<AppShellUserMenuAccount clerk={clerk} hasUser={Boolean(user)} />
 			</DropdownMenuContent>
 		</DropdownMenu>

@@ -14,7 +14,6 @@ import {
 	enrichBlock,
 } from "@/features/course/mission/lib/mission-page-model";
 import { AppShell } from "@/features/course/shared/components/app-shell";
-import { workspaceDisplayConfig } from "@/features/starter/lib/starter-selectors";
 
 function MissionPageContent({
 	mission,
@@ -34,8 +33,6 @@ function MissionPageContent({
 			viewportMode="app"
 			appScrollMode="page"
 			currentBlockId={currentBlock?.id}
-			title={workspaceDisplayConfig.homeLabel}
-			subtitle={workspaceDisplayConfig.homeSubtitle}
 			mission={mission}
 		>
 			{mission === undefined || currentBlock === null ? (

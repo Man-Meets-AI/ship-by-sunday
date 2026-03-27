@@ -17,8 +17,6 @@ type MissionState = {
 
 type AppShellHeaderProps = {
 	viewportMode: "document" | "app";
-	title?: string;
-	subtitle?: string;
 	mission: MissionState | undefined;
 	blockStatuses: Map<string, AppShellBlockStatus>;
 	activeBlockId: string | undefined;
@@ -29,8 +27,6 @@ type AppShellHeaderProps = {
 
 export function AppShellHeader({
 	viewportMode,
-	title,
-	subtitle,
 	mission,
 	blockStatuses,
 	activeBlockId,
@@ -45,11 +41,7 @@ export function AppShellHeader({
 
 	return (
 		<div className={chromeRowClass}>
-			<AppShellWorkspaceNav
-				title={title}
-				subtitle={subtitle}
-				lesson11Viewport={lesson11Viewport}
-			/>
+			<AppShellWorkspaceNav lesson11Viewport={lesson11Viewport} />
 
 			{mission ? (
 				lesson11Viewport ? (

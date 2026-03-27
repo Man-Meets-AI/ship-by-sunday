@@ -1,5 +1,4 @@
 import { AppShell } from "@/features/course/shared/components/app-shell";
-import { workspaceDisplayConfig } from "@/features/starter/lib/starter-selectors";
 import { WorkspaceHomeHero } from "@/features/workspace-home/components/workspace-home-hero";
 import { WorkspaceHomeModuleList } from "@/features/workspace-home/components/workspace-home-module-list";
 import { WorkspaceHomeNextSteps } from "@/features/workspace-home/components/workspace-home-next-steps";
@@ -20,8 +19,6 @@ export function WorkspaceHomePage({
 			appScrollMode="page"
 			showSkillRail={false}
 			enableMissionQuery={false}
-			title={workspaceDisplayConfig.homeLabel}
-			subtitle="Starter mode is active"
 		>
 			<div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 pb-10 pt-2">
 				<WorkspaceHomeHero model={model} />
