@@ -15,7 +15,9 @@ const pillarHighlightStyle = {
 function PillarRow({ pillar }: { pillar: Pillar }) {
 	return (
 		<li className="group space-y-4 border-t border-border/40 py-10 transition-colors hover:bg-muted/10">
-			<h3 className="text-2xl font-bold tracking-tight text-foreground/90 transition-transform duration-300 group-hover:translate-x-1">{pillar.title}</h3>
+			<h3 className="text-2xl font-bold tracking-tight text-foreground/90 transition-transform duration-300 group-hover:translate-x-1">
+				{pillar.title}
+			</h3>
 			<div className="space-y-6">
 				<p className="max-w-3xl text-balance text-lg leading-snug text-foreground/80 sm:text-2xl">
 					{pillar.highlightBefore}
@@ -24,7 +26,9 @@ function PillarRow({ pillar }: { pillar: Pillar }) {
 						pointerClassName={pillarHighlightStyle.pointer}
 						containerClassName="inline-block"
 					>
-						<span className="relative z-10 px-1 font-semibold text-foreground underline decoration-primary/30 decoration-4 underline-offset-4">{pillar.highlight}</span>
+						<span className="relative z-10 px-1 font-semibold text-foreground underline decoration-primary/30 decoration-4 underline-offset-4">
+							{pillar.highlight}
+						</span>
 					</PointerHighlight>
 					{pillar.highlightAfter}
 				</p>

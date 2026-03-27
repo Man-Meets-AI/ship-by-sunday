@@ -51,7 +51,7 @@ export function SprintPathUnifiedSection({
 			</div>
 			<div
 				className={cn(
-					"relative overflow-hidden rounded-[32px] border border-border/40 bg-muted/20 p-8 shadow-xl transition-all duration-700 hover:border-primary/20 lg:justify-self-end lg:p-12"
+					"relative overflow-hidden rounded-[32px] border border-border/40 bg-muted/20 p-8 shadow-xl transition-all duration-700 hover:border-primary/20 lg:justify-self-end lg:p-12",
 				)}
 			>
 				<SystemLoopPreview className="relative z-10 mx-auto w-full max-w-[38rem]" />

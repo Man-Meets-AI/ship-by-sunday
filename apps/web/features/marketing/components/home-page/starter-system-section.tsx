@@ -15,8 +15,12 @@ const starterSystemHighlightStyle = {
 function StarterSystemFeatureRow({ card }: { card: StarterSystemCard }) {
 	return (
 		<article className="group space-y-4 border-t border-border/40 py-10 transition-colors hover:bg-muted/10">
-			<p className="text-sm font-bold tracking-wider text-primary/70 uppercase">{card.eyebrow}</p>
-			<h3 className="text-2xl font-bold tracking-tight text-foreground/90 transition-transform duration-300 group-hover:translate-x-1">{card.title}</h3>
+			<p className="text-sm font-bold tracking-wider text-primary/70 uppercase">
+				{card.eyebrow}
+			</p>
+			<h3 className="text-2xl font-bold tracking-tight text-foreground/90 transition-transform duration-300 group-hover:translate-x-1">
+				{card.title}
+			</h3>
 			<p className="max-w-2xl text-balance text-lg leading-snug text-foreground/80 sm:text-2xl">
 				{card.highlightBefore}
 				<PointerHighlight
@@ -24,7 +28,9 @@ function StarterSystemFeatureRow({ card }: { card: StarterSystemCard }) {
 					pointerClassName={starterSystemHighlightStyle.pointer}
 					containerClassName="inline-block"
 				>
-					<span className="relative z-10 px-1 font-semibold text-foreground underline decoration-primary/30 decoration-4 underline-offset-4">{card.highlight}</span>
+					<span className="relative z-10 px-1 font-semibold text-foreground underline decoration-primary/30 decoration-4 underline-offset-4">
+						{card.highlight}
+					</span>
 				</PointerHighlight>
 				{card.highlightAfter}
 			</p>
@@ -55,7 +61,7 @@ export function StarterSystemSectionBlock({
 							{starterSystemSection.intro}
 						</p>
 					</div>
-					
+
 					<div className="space-y-8">
 						<div className="space-y-4">
 							<p className="text-sm font-semibold uppercase tracking-widest text-foreground/40">
@@ -72,7 +78,7 @@ export function StarterSystemSectionBlock({
 								))}
 							</ul>
 						</div>
-						
+
 						<p className="max-w-sm text-sm leading-relaxed text-muted-foreground italic">
 							{starterSystemSection.supportingProof}
 						</p>

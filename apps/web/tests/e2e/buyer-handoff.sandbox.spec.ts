@@ -112,7 +112,9 @@ test.describe("member with access", () => {
 		await page.goto("/review");
 		await expect(page).toHaveURL(/\/review$/);
 		await expect(page.getByText("Review").first()).toBeVisible();
-		await expect(page.getByRole("link", { name: "Download Snapshot" })).toBeVisible();
+		await expect(
+			page.getByRole("link", { name: "Download Snapshot" }),
+		).toBeVisible();
 
 		await page.goto("/settings");
 		await expect(page).toHaveURL(/\/settings$/);
