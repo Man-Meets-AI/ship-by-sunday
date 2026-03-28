@@ -129,9 +129,13 @@ Accepted mutation input shapes:
 
 ```json
 [
-  { "op": "set", "field": "product.product_name", "value": "Ship by Sunday CLI" },
-  { "op": "append", "field": "scope_in", "value": "Local CLI intake" },
-  { "op": "unset", "field": "build-plan.domain" }
+	{
+		"op": "set",
+		"field": "product.product_name",
+		"value": "Ship by Sunday CLI"
+	},
+	{ "op": "append", "field": "scope_in", "value": "Local CLI intake" },
+	{ "op": "unset", "field": "build-plan.domain" }
 ]
 ```
 
@@ -139,9 +143,13 @@ or:
 
 ```json
 {
-  "operations": [
-    { "op": "set", "field": "product.product_name", "value": "Ship by Sunday CLI" }
-  ]
+	"operations": [
+		{
+			"op": "set",
+			"field": "product.product_name",
+			"value": "Ship by Sunday CLI"
+		}
+	]
 }
 ```
 
@@ -151,9 +159,9 @@ When a command supports `--json`, stdout contains a stable success envelope:
 
 ```json
 {
-  "status": "ok",
-  "command": "next",
-  "version": "0.1.0"
+	"status": "ok",
+	"command": "next",
+	"version": "0.1.0"
 }
 ```
 
@@ -161,11 +169,11 @@ On failure, stderr contains a stable error envelope:
 
 ```json
 {
-  "status": "error",
-  "command": "generate",
-  "version": "0.1.0",
-  "error_code": "not_review_ready",
-  "message": "Draft is not review-ready."
+	"status": "error",
+	"command": "generate",
+	"version": "0.1.0",
+	"error_code": "not_review_ready",
+	"message": "Draft is not review-ready."
 }
 ```
 
