@@ -18,10 +18,7 @@ export function PacketStageStepStrip({
 	stageId: RoutedPacketStageId;
 	activeStepId: string;
 	progressItems: PacketStageProgressItem[];
-	onLinkNavigate: (
-		event: { preventDefault: () => void },
-		href: string,
-	) => void;
+	onLinkNavigate: (event: { preventDefault: () => void }, href: string) => void;
 	onNavigate: (href: string) => void;
 }) {
 	return (
