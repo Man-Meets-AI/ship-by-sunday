@@ -13,8 +13,8 @@ const completeProjectFacts: CanonicalProjectFacts = {
 	problem_context_when: "When a founder is moving from idea to build week.",
 	problem_context_where: "Inside their local app and planning workflow.",
 	problem_trigger: "They need a clear packet and repo handoff immediately.",
-	problem_severity: "High",
-	problem_urgency: "This week",
+	problem_severity: "8",
+	problem_urgency: "Needs attention soon",
 	outcome_statement: "Leave with a build-ready packet and starter repo.",
 	success_looks_like: "A founder downloads a working packet and repo zip.",
 	user_benefit:

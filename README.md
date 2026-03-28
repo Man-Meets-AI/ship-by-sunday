@@ -169,6 +169,48 @@ bun run build
 bun run check
 ```
 
+## CLI Packet Intake
+
+The repo now includes a local Ship by Sunday intake CLI that writes one draft under `.ship-by-sunday/`, reports readiness against the live packet stages, and generates the same starter snapshot shape as the protected `/review` flow.
+
+Common CLI commands:
+
+```bash
+bun run sbs init --fixture complete --json
+bun run sbs schema --json
+bun run sbs stages --json
+bun run sbs fields --stage design --json
+bun run sbs next --json
+bun run sbs validate --json
+bun run sbs set product.product_name "Ship by Sunday CLI" --json
+bun run sbs append scope_in "Packet intake" --json
+bun run sbs unset build-plan.domain --json
+bun run sbs mutate --file ./tmp/mutations.json --json
+bun run sbs --help
+bun run sbs resume
+bun run sbs stage design
+bun run sbs review --stage build-plan --missing-only --json
+bun run sbs export --out -
+bun run sbs export --out ./.ship-by-sunday/export.json
+bun run sbs import --file ./tmp/sbs-cli-complete.json --json
+cat ./tmp/build-plan-patch.json | bun run sbs apply --stage build-plan --file - --json
+bun run sbs generate --out ./tmp/sbs-cli-repo --json
+bun run sbs generate --out ./tmp/sbs-cli-repo.zip --zip --json
+```
+
+Notes:
+
+- `init --fixture complete --json` is the fastest seed path for agents, QA, and demos.
+- `schema`, `stages`, `fields`, `next`, and `validate` let agents inspect the packet contract and the next action directly from the CLI.
+- `set`, `unset`, `append`, and `remove` give agents field-level draft control without writing patch files.
+- `mutate --file <file|-> --json` applies a whole batch atomically from a file or stdin. If one operation is invalid, none of the batch is saved.
+- `resume` auto-creates a blank local draft if one does not exist yet.
+- `stage <product|design|marketing|build-plan>` revisits a specific packet stage without changing the canonical stage definitions.
+- `review --stage ... --missing-only --json` lets agents ask for a smaller readiness payload instead of the full envelope.
+- `export --out -`, `import --file -`, and `apply --file -` are pipe-friendly for stdin/stdout workflows.
+- `generate --json` returns structured machine-readable metadata about the artifact path and repo slug. `generate --dry-run --json` returns blockers without writing files.
+- `generate` requires a review-ready draft and an explicit `--out` path. Directory output creates a slugified repo folder inside the target path. `--zip` writes the same snapshot as a zip archive.
+
 The current QA docs are split by purpose:
 
 - local browser and checkout runbook: [apps/web/content/docs/local-qa.mdx](apps/web/content/docs/local-qa.mdx)

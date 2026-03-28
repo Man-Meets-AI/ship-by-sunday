@@ -1,0 +1,189 @@
+---
+title: Ship by Sunday CLI
+description: Run the packet intake, readiness review, and starter snapshot generation from the repository root without using the web app.
+---
+
+# Ship by Sunday CLI
+
+The Ship by Sunday CLI is the local-first version of the packet intake flow. It asks the same canonical pre-review questions that drive the web packet stages, stores one draft at the repository root, reports readiness with the same compiler logic as `/review`, and generates the same starter snapshot shape as the protected download route.
+
+Use it when:
+
+- you want to shape the packet from a terminal instead of the protected web UI
+- you want to import or patch facts from another tool or agent
+- you want a local starter snapshot without needing Clerk, Convex auth, or a browser session
+
+## Where it stores state
+
+The CLI keeps one active draft under:
+
+```text
+.ship-by-sunday/draft.json
+```
+
+This is a canonical project-definition draft envelope, not a separate CLI-only format.
+
+## Core commands
+
+```bash
+bun run sbs init --fixture complete --json
+bun run sbs schema --json
+bun run sbs stages --json
+bun run sbs fields --stage design --json
+bun run sbs next --json
+bun run sbs validate --json
+bun run sbs set product.product_name "Ship by Sunday CLI" --json
+bun run sbs append scope_in "Packet intake" --json
+bun run sbs unset build-plan.domain --json
+bun run sbs mutate --file ./tmp/mutations.json --json
+bun run sbs --help
+bun run sbs resume
+bun run sbs stage <product|design|marketing|build-plan>
+bun run sbs review [--stage build-plan] [--missing-only] [--json]
+bun run sbs export --out ./.ship-by-sunday/export.json
+bun run sbs export --out -
+bun run sbs import --file ./tmp/sbs-cli-complete.json
+cat ./tmp/build-plan-patch.json | bun run sbs apply --stage build-plan --file -
+bun run sbs generate --out ./tmp/sbs-cli-repo --json
+bun run sbs generate --out ./tmp/sbs-cli-repo.zip --zip --json
+```
+
+What each one does:
+
+- `init` creates a fresh local draft without entering the interactive prompt flow. Use `--fixture complete` when you want a seeded draft for QA, demos, or agent workflows. Use `--force` to replace an existing local draft.
+- `schema`, `stages`, and `fields` let an agent inspect the canonical packet contract instead of guessing from docs.
+- `next` returns the next stage, next step, missing required fields, and a suggested command.
+- `validate` returns the full readiness and stage-status envelope without changing anything.
+- `set`, `unset`, `append`, and `remove` let an agent mutate the draft field-by-field without constructing patch JSON files.
+- `mutate --file <file|-> --json` applies a whole batch of operations atomically. If any operation is invalid, the draft is left unchanged.
+- `resume` auto-initializes a blank draft when none exists, then continues from the first incomplete stage.
+- `stage <id>` revisits one explicit packet stage without changing the canonical stage order.
+- `review --json` prints machine-readable readiness and missing-fact output. `--stage` narrows the output to one stage. `--missing-only` suppresses already-ready stages in the human-readable view.
+- `export` writes the current local draft to a JSON file. `--out -` prints the raw draft JSON to stdout for piping.
+- `import` replaces the local draft with a canonical complete definition, canonical draft, or facts-only JSON file. `--file -` reads JSON from stdin.
+- `apply` merges a stage-scoped patch file into the draft and rejects keys that do not belong to that stage. `--file -` reads the patch from stdin.
+- `generate` requires a review-ready draft and an explicit `--out` path. Directory mode creates a slugified repo folder inside the target path. `--zip` writes the same snapshot as a zip archive. `--force` allows overwrite. `--json` returns structured machine-readable metadata about the generated artifact.
+
+## Path behavior
+
+Run the CLI from the repository root.
+
+User-supplied `--file` and `--out` paths are resolved relative to the repository root, not the CLI package directory. That means these work the way they look:
+
+```bash
+bun run sbs import --file ./tmp/sbs-cli-complete.json
+bun run sbs generate --out ./tmp/sbs-cli-repo
+```
+
+## Typical workflow
+
+If you want to work interactively:
+
+```bash
+bun run sbs resume
+bun run sbs review
+bun run sbs generate --out ./tmp/sbs-cli-repo
+```
+
+If you want to drive the flow from another tool:
+
+```bash
+bun run sbs init --fixture complete --json
+bun run sbs schema --json
+bun run sbs next --json
+bun run sbs review --json
+bun run sbs generate --out ./tmp/sbs-cli-repo.zip --zip --json
+```
+
+If you want to patch only one stage:
+
+```bash
+bun run sbs apply --stage marketing --file ./tmp/marketing-patch.json
+bun run sbs review
+```
+
+If you want stdin/stdout-friendly agent workflows:
+
+```bash
+bun run sbs export --out -
+cat ./tmp/build-plan-patch.json | bun run sbs apply --stage build-plan --file -
+cat ./tmp/complete-definition.json | bun run sbs import --file -
+```
+
+If you want field-level agent control without patch files:
+
+```bash
+bun run sbs set product.problem_statement "Founders need a local-first packet flow." --json
+bun run sbs append scope_in "Local CLI intake" --json
+bun run sbs remove scope_in "Local CLI intake" --json
+bun run sbs unset build-plan.domain --json
+```
+
+If you want one atomic batch instead of one command per field:
+
+```bash
+cat ./tmp/mutations.json | bun run sbs mutate --file - --json
+```
+
+Accepted mutation input shapes:
+
+```json
+[
+  { "op": "set", "field": "product.product_name", "value": "Ship by Sunday CLI" },
+  { "op": "append", "field": "scope_in", "value": "Local CLI intake" },
+  { "op": "unset", "field": "build-plan.domain" }
+]
+```
+
+or:
+
+```json
+{
+  "operations": [
+    { "op": "set", "field": "product.product_name", "value": "Ship by Sunday CLI" }
+  ]
+}
+```
+
+## JSON contract
+
+When a command supports `--json`, stdout contains a stable success envelope:
+
+```json
+{
+  "status": "ok",
+  "command": "next",
+  "version": "0.1.0"
+}
+```
+
+On failure, stderr contains a stable error envelope:
+
+```json
+{
+  "status": "error",
+  "command": "generate",
+  "version": "0.1.0",
+  "error_code": "not_review_ready",
+  "message": "Draft is not review-ready."
+}
+```
+
+The CLI uses more specific non-zero exit codes for common automation failures such as invalid arguments, missing drafts, overwrite protection, and non-ready generation.
+
+## What it shares with the web flow
+
+The CLI does not redefine the packet contract. It reuses:
+
+- the canonical facts schema in `packages/packet-compiler/src/canonical-project-definition/schema.ts`
+- the live stage grouping in `packages/packet-compiler/src/stages/stage-definitions.ts`
+- readiness evaluation in `packages/packet-compiler/src/readiness/`
+- repo generation in `packages/packet-compiler/src/server.ts`
+
+That shared boundary matters because the CLI and the protected `/review` route should agree about what is missing, what is ready, and what the starter snapshot contains.
+
+## Current limits
+
+- The CLI manages one local draft at a time.
+- It is intentionally pre-review only. It does not cover post-download execution inputs.
+- `domain` and `support_email` stay placeholder-friendly and do not block generation when the compiler contract leaves them optional.

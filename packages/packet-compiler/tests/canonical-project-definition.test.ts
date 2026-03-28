@@ -59,7 +59,7 @@ describe("canonical project definition schema", () => {
 		).toThrow();
 	});
 
-	it("rejects legacy GitHub invite intake in canonical facts", () => {
+	it("rejects legacy planning-only intake keys in canonical facts", () => {
 		const projectDefinition = createCompleteProjectDefinition();
 
 		expect(() =>
@@ -68,6 +68,9 @@ describe("canonical project definition schema", () => {
 				facts: {
 					...projectDefinition.facts,
 					starter_repo_github_username: "octocat",
+					verification_plan: ["Run a smoke test"],
+					validation_commands: ["bun run test"],
+					rollback_plan: "Revert the feature flag",
 				},
 			}),
 		).toThrow();

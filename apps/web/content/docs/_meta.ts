@@ -96,6 +96,9 @@ export default {
 	commands: {
 		title: "Commands",
 	},
+	"ship-by-sunday-cli": {
+		title: "Ship by Sunday CLI",
+	},
 	"video-pipeline": {
 		title: "Video Pipeline",
 	},

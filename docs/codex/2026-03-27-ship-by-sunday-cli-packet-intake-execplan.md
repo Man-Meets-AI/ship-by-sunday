@@ -1,7 +1,7 @@
 ---
-summary: "ExecPlan for turning Ship by Sunday into a Bun CLI that collects the canonical packet facts, reports readiness, and generates the same packet files and starter snapshot that the web Review flow produces. The plan starts by freezing the canonical fact contract so the CLI does not harden the current schema and documentation drift."
+summary: "ExecPlan for turning Ship by Sunday into a Bun CLI that collects the canonical pre-review packet facts, reports readiness, and generates the same starter snapshot that the web Review flow produces. The plan starts by freezing the live funnel contract so the CLI does not harden schema and documentation drift."
 read_when: "Open this when you need to plan or implement a CLI-first Ship by Sunday intake flow that can be used by humans now and by agents later."
-plan_status: "not_done"
+plan_status: "done"
 ---
 
 # Turn Ship by Sunday into a Bun CLI packet intake and repo generator
@@ -20,12 +20,13 @@ After this work, someone working from the repository root will be able to run a 
 - [x] 2026-03-27 13:28 EDT — Inspected the current canonical schema and stage grouping in `packages/packet-compiler/src/canonical-project-definition/schema.ts` and `packages/packet-compiler/src/stages/stage-definitions.ts`.
 - [x] 2026-03-27 13:28 EDT — Inspected the current web persistence and download path in `apps/web/convex/packet/projectDefinition.ts`, `apps/web/features/packet-flow/lib/packet-field-helpers.ts`, `apps/web/features/packet-flow/server/downloads.ts`, and `apps/web/features/packet-flow/components/packet-review-page.tsx`.
 - [x] 2026-03-27 13:28 EDT — Inspected the packet and repo generation entry points in `packages/packet-compiler/src/server/rendered-packet-tree.ts`, `packages/packet-compiler/src/bundle/build-review-download-zip.ts`, `packages/packet-compiler/src/repo-generation/materialize-repo-snapshot.ts`, and `packages/packet-compiler/src/server/template-loader.ts`.
-- [ ] Milestone 1 — Freeze the canonical CLI contract by resolving schema and documentation drift.
-- [ ] Milestone 2 — Make `@manmeetsai/packet-compiler` safe to call from a CLI by centralizing repo-root resolution and shared field-presentation helpers.
-- [ ] Milestone 3 — Add a new `packages/ship-by-sunday-cli/` workspace package and expose a root `bun run sbs` command.
-- [ ] Milestone 4 — Implement local draft storage plus interactive and non-interactive intake commands that reuse the canonical stage definitions.
-- [ ] Milestone 5 — Implement `review`, `export`, and `generate` commands that emit packet files and a starter snapshot from local facts.
-- [ ] Milestone 6 — Add focused tests, root documentation, and end-to-end validation transcripts for the CLI workflow.
+- [x] 2026-03-27 15:41 EDT — Completed the grill pass against `docs/prompts/execplan-grill.md` and locked the must-have CLI decisions: live funnel schema over stale docs, pre-review-only scope, repo-only generation, required `--out`, unpacked repo default with optional zip, `resume` as the auto-initializing primary command, explicit stage commands for revisits, terminal-native step prompts, one active full-envelope draft under `.ship-by-sunday/`, stage-aware `apply`, and `review --json`.
+- [x] 2026-03-27 17:27 EDT — Milestone 1 complete. Rewrote `docs/ship-by-sunday/packet-contract-and-question-map-2026-03-23.md` and `docs/ship-by-sunday/input-architecture-keep-kill-combine-2026-03-23.md` so they match the live canonical schema, stage groupings, and current `docs/prompts/execplan-*` asset contract.
+- [x] 2026-03-27 17:27 EDT — Milestone 2 complete. Added shared packet field helpers in `packages/packet-compiler/src/packet-field-helpers.ts`, added `packages/packet-compiler/src/repo-root.ts`, rewired template and repo snapshot loading to stop depending on package-local cwd, and collapsed the web packet-flow field helpers into thin re-exports from `@packet-compiler`.
+- [x] 2026-03-27 17:27 EDT — Milestone 3 complete. Added `packages/ship-by-sunday-cli/` with package-local scripts, test config, and a root `bun run sbs` script in `package.json`.
+- [x] 2026-03-27 17:27 EDT — Milestone 4 complete. Implemented file-backed draft storage under `.ship-by-sunday/draft.json`, `resume`, `stage`, `import`, `export`, and `apply`, plus interactive stage prompting that persists after each answered field.
+- [x] 2026-03-27 17:27 EDT — Milestone 5 complete. Implemented `review --json` and `generate` with review-readiness gating, unpacked repo output by default, `--zip` support, required `--out`, and `--force` overwrite protection.
+- [x] 2026-03-27 17:27 EDT — Milestone 6 complete. Added focused packet-compiler and CLI tests, updated `README.md` plus the docs surface with CLI usage notes, ran package checks, and captured end-to-end CLI transcripts from the repository root.
 
 ## Surprises & Discoveries
 
@@ -36,6 +37,10 @@ The current schema and the planning docs do not agree yet, and the CLI must not 
 The current packet compiler is not automatically CLI-safe because it assumes a specific working directory shape. `packages/packet-compiler/src/server/template-loader.ts` and `packages/packet-compiler/src/repo-generation/materialize-repo-snapshot.ts` both derive the repository root from `path.resolve(process.cwd(), "..", "..")`. That assumption works when code runs from the web app package or packet-compiler package, but it will resolve the wrong path if the future CLI is launched from the repository root, which is the correct user experience for `bun run sbs ...`. The plan must include a shared repo-root resolver or explicit root-path parameter before the CLI uses these compiler entry points.
 
 The web app currently owns the field-presentation helpers even though they are really packet-contract knowledge. `apps/web/features/packet-flow/lib/packet-field-helpers.ts` knows which fact keys are arrays, which are long text, how to label fields, and how to serialize step patches. A CLI that duplicates those rules would drift immediately. The plan therefore treats these helpers as shared compiler-adjacent concerns that must move out of the web feature boundary.
+
+The root `bun run sbs` script changes the package working directory before the CLI starts. That surfaced one extra integration requirement that was not obvious in the original plan: user-supplied `--file` and `--out` paths must be resolved relative to the repository root, not the CLI package directory, or normal root-level invocations fail with confusing `ENOENT` errors.
+
+The first shared-helper pass moved problem-severity normalization into the compiler formatter, but not into save-payload building. The packet-compiler test suite immediately caught that mismatch when the shared `buildSavePayload()` returned `"medium"` instead of the numeric scale value `"5"`. The final shared helper now normalizes severity on both load and save.
 
 Evidence from repo inspection:
 
@@ -54,6 +59,10 @@ Evidence from repo inspection:
     - docs mention: rollback_plan
     - live schema rejects: starter_repo_github_username
 
+    CLI path-resolution discovery
+    - `bun run sbs import --file ./tmp/sbs-cli-complete.json` initially resolved from `packages/ship-by-sunday-cli/`
+    - user-facing paths now resolve from the repo root before import, export, apply, or generate uses them
+
 ## Decision Log
 
 - Decision: The CLI is a first-class frontend to the existing packet compiler, not a new source of truth.
@@ -61,7 +70,7 @@ Evidence from repo inspection:
   Date/Author: 2026-03-27 / Codex
 
 - Decision: The first implementation milestone is contract cleanup, not prompt scaffolding.
-  Rationale: The planning docs and live schema currently disagree on several fact keys. A CLI would make that drift user-visible and harder to unwind if the contract is not frozen first.
+  Rationale: The planning docs and live schema currently disagree on several fact keys. The user explicitly chose the live funnel as the source of truth, so Milestone 1 must update the docs and tests down to the live contract rather than expanding the schema first.
   Date/Author: 2026-03-27 / Codex
 
 - Decision: The CLI v1 will be local-first and file-backed, with no Convex, Clerk, or network dependency.
@@ -88,9 +97,21 @@ Evidence from repo inspection:
   Rationale: Repo snapshots and rendered docs are user-facing artifacts. Defaulting to safe writes makes the CLI idempotent and prevents accidental deletion of prior generated outputs.
   Date/Author: 2026-03-27 / Codex
 
+- Decision: Keep one generic `stage <id>` command and also allow direct stage-id aliases to hit the same code path.
+  Rationale: This keeps stage routing driven by `packetStageDefinitions` instead of duplicating separate command handlers, while still honoring the plan’s requirement for explicit revisits.
+  Date/Author: 2026-03-27 / Codex
+
+- Decision: Resolve repo-root paths for CLI file arguments before reading or writing disk.
+  Rationale: The root script delegates into `packages/ship-by-sunday-cli/` with `bun run --cwd`, so naïve `path.resolve()` calls point at the package directory instead of the repository root. Explicit repo-root resolution preserves the user contract of running the CLI from the repo root.
+  Date/Author: 2026-03-27 / Codex
+
 ## Outcomes & Retrospective
 
-This section is future-facing because the plan is not implemented yet. The intended final outcome is a repository-root Bun CLI that can create or resume a local Ship by Sunday draft, gather the canonical packet facts, show what is still missing, and generate the same starter snapshot shape that the review download route produces today. The main known gap at plan time is contract cleanup: a future implementer must decide whether to align the planning docs down to the live schema, expand the schema to include the missing planning fields, or split the difference in a deliberate migration. If that decision stays fuzzy, the CLI work should stop after Milestone 1 rather than building the wrong intake surface.
+The repository-root Bun CLI now exists at `packages/ship-by-sunday-cli/` and is exposed through `bun run sbs`. It stores one local draft under `.ship-by-sunday/draft.json`, shares the live packet field contract from `@manmeetsai/packet-compiler`, reports readiness through the same stage logic as the web flow, and generates the same starter snapshot shape that `/review` produces today.
+
+The final result stayed inside the intended scope. The implementation did not widen into multi-draft management, post-review execution inputs, or alternate artifact families. The only extra work beyond the original plan was resolving root-relative user paths because the root script delegates into the package directory.
+
+Remaining gaps are minor rather than architectural. The interactive `resume` and `stage` flows are implemented and tested, but the manual transcript captured here uses the faster import path to prove readiness and generation without sitting through a live terminal interview. If we want richer operator docs later, the next follow-up is a short CLI walkthrough doc under `docs/` rather than more runtime changes.
 
 ## Context and Orientation
 
@@ -98,11 +119,11 @@ The current source of truth for packet facts is the canonical schema in `package
 
 The current question grouping is defined in `packages/packet-compiler/src/stages/stage-definitions.ts`. Each stage contains one or more steps, and each step names the fact keys it owns. The readiness boundary is computed in `packages/packet-compiler/src/readiness/evaluate-packet-readiness.ts`, which declares Product readiness from Product facts, Design readiness from Product plus Design facts, Marketing readiness from Design plus Marketing facts, Build readiness from Design plus Build Plan facts, and Review readiness from the union of Marketing and Build requirements. A CLI implementer should think of this as the stage contract, not as a loose suggestion.
 
-The current web intake persists fact drafts in Convex through `apps/web/convex/packet/projectDefinition.ts`. That code accepts a stage id, a set of cleared field keys, and a patch of fact values, then merges those values into the stored draft. The web app’s `apps/web/features/packet-flow/lib/packet-field-helpers.ts` file currently owns human-facing labels, input kinds, and step serialization behavior. That is a boundary problem for this initiative because the CLI will need the same knowledge without depending on the web feature tree.
+The current web intake persists fact drafts in Convex through `apps/web/convex/packet/projectDefinition.ts`. That code accepts a stage id, a set of cleared field keys, and a patch of fact values, then merges those values into the stored draft. The shared human-facing field metadata now lives in `packages/packet-compiler/src/packet-field-helpers.ts`, and `apps/web/features/packet-flow/lib/packet-field-helpers.ts` is only a thin re-export layer so the web app and CLI read the same contract.
 
 The generated output flow starts in `apps/web/features/packet-flow/server/downloads.ts`, which loads the authenticated project definition, parses it with `canonicalProjectFactsSchema`, and turns it into a full canonical definition. The actual generation happens inside `packages/packet-compiler`: `packages/packet-compiler/src/server/rendered-packet-tree.ts` renders the packet files under repo-root `docs/`, `packages/packet-compiler/src/bundle/build-review-download-zip.ts` builds the review zip, and `packages/packet-compiler/src/repo-generation/materialize-repo-snapshot.ts` assembles the starter repo tree. `packages/packet-compiler/src/server/template-loader.ts` loads the OpenAI packet templates and the shipped prompt assets from `docs/prompts/`.
 
-The CLI initiative touches both repository shape and runtime assumptions. The root `package.json` currently has no `sbs` script and only one workspace package under `packages/`, namely `packet-compiler`. A new CLI package must therefore be added under `packages/ship-by-sunday-cli/` and exposed through the root script surface. Because the compiler currently resolves repository paths relative to `process.cwd()`, the CLI work must either pass an explicit repo root into the compiler entry points or centralize root resolution in a helper that works from the repository root.
+The CLI initiative touched both repository shape and runtime assumptions. The root `package.json` now exposes `bun run sbs ...`, and the workspace now includes `packages/ship-by-sunday-cli/` alongside `packages/packet-compiler/`. The compiler also now resolves repository assets through `resolveRepoRootPath()` so the CLI can be launched from the repository root without threading explicit repo-root parameters through every entry point.
 
 For this plan, “interactive mode” means a terminal session where the CLI prompts the user field by field. “Non-interactive mode” means commands that read or write the draft definition from JSON files so another tool or agent can fill the same facts without using a TTY. “Starter snapshot” means the same customer-safe repo bundle already produced by `buildReviewDownloadZip()`, with generated files under repo-root `docs/`.
 
@@ -112,9 +133,9 @@ The work should begin by freezing the canonical fact contract. The implementer s
 
 Once the contract is frozen, the next step is to make `packet-compiler` reusable from a CLI context. This means moving field-presentation logic out of `apps/web/features/packet-flow/lib/packet-field-helpers.ts` into a shared module under `packages/packet-compiler/src/` or a sibling shared package, and it means replacing the current `process.cwd(), "..", ".."` root derivation with a repository-root resolver or explicit parameter that works when the user invokes `bun run sbs` from the repository root.
 
-After the compiler is CLI-safe, the implementer should add a new workspace package under `packages/ship-by-sunday-cli/`. That package should expose one executable entry point, store draft state under a local hidden directory such as `.ship-by-sunday/`, and provide a thin command parser around a small set of opinionated commands. The package should not know how to render packet files by itself. It should call `@manmeetsai/packet-compiler` for validation, stage grouping, readiness, packet rendering, and repo snapshot generation.
+After the compiler is CLI-safe, the implementer should add a new workspace package under `packages/ship-by-sunday-cli/`. That package should expose one executable entry point, store one active draft under `.ship-by-sunday/`, and provide a thin command parser around a small set of opinionated commands. The package should not know how to render packet files by itself. It should call `@manmeetsai/packet-compiler` for validation, stage grouping, readiness, packet rendering, and repo snapshot generation.
 
-With the package in place, the implementer should build the command surface in two passes. The first pass should create local storage, import/export, and review primitives so state can be inspected without prompts. The second pass should build interactive prompting that walks the stage contract, supports plain single-line values, one-item-per-line list values, and editor-backed multi-line values, and persists state after each field or step so interruptions are safe. Finally, the implementer should add focused tests, scripts, and documentation so a newcomer can run the CLI and verify that it generates a truthful starter snapshot end to end.
+With the package in place, the implementer should build the command surface in two passes. The first pass should create local storage, import/export, apply, and review primitives so state can be inspected or patched without prompts. The second pass should build interactive prompting that walks the live step contract, keeps users inside the terminal, prompts list fields one item at a time, prompts narrative textarea fields as multiline blocks terminated by an empty line, and persists changes after every answered field so interruptions are safe. Finally, the implementer should add focused tests, scripts, and documentation so a newcomer can run the CLI and verify that it generates a truthful starter snapshot end to end.
 
 ## Milestones
 
@@ -126,7 +147,7 @@ Milestone 3 scaffolds the CLI package and root command surface. At the end of th
 
 Milestone 4 implements local draft storage plus intake and review commands. At the end of this milestone, the CLI can initialize a draft definition, import or export the draft as JSON, resume the first incomplete stage, run an interactive stage prompt, and print a review summary showing which facts or stages are missing. The files touched will include the CLI command handlers, the local storage adapter, and any shared serialization helpers. Run the CLI manually from the root, fill a partial draft, interrupt it, rerun it, and confirm that readiness advances correctly. Success looks like a human being able to complete Product and Design in the terminal and see Design readiness become true without touching the web UI.
 
-Milestone 5 implements artifact generation. At the end of this milestone, the CLI can render packet files to a chosen output directory and generate the starter snapshot zip or unpacked repo directory using the same compiler entry points as the review flow. The files touched will include the generation command handlers and, if needed, compiler helper signatures that accept an explicit repo root path. Run the CLI with a complete fixture or imported draft and confirm that generated files appear under repo-root `docs/` inside the output tree, and that the repo zip unpacks into a slugified product folder. Success looks like the CLI producing the same user-facing artifact structure the web review download is expected to produce.
+Milestone 5 implements artifact generation. At the end of this milestone, the CLI can generate only the final starter snapshot artifact, writing an unpacked repo directory by default and a zip only when the caller passes `--zip`, using the same compiler entry points as the review flow. The command must reject incomplete drafts until review readiness is true, and it must require an explicit `--out` path rather than inventing a default artifact location. The files touched will include the generation command handlers and, if needed, compiler helper signatures that accept an explicit repo root path. Run the CLI with a complete fixture or imported draft and confirm that generated files appear under repo-root `docs/` inside the output tree, and that the optional repo zip unpacks into a slugified product folder. Success looks like the CLI producing the same user-facing artifact structure the web review download is expected to produce.
 
 Milestone 6 closes the loop with tests and documentation. At the end of this milestone, the repository includes focused packet-compiler tests, focused CLI tests, a root-level usage note for `bun run sbs`, and short transcripts proving successful end-to-end usage. The files touched will include the new package tests and the relevant docs or README sections. Run package-local tests, root lint and typecheck for the touched surfaces, and one manual CLI walkthrough. Success looks like a fresh coding agent or operator being able to follow the repo docs, run the CLI, and validate the output without guessing.
 
@@ -170,7 +191,7 @@ Expected observation: the command prints usage text that includes the root comma
 During Milestone 4, create a draft, export it, import it, and inspect readiness.
 
     cd /Users/parkerrex/Projects/manmeetsai-workspace
-    bun run sbs init
+    bun run sbs resume
     bun run sbs review
     bun run sbs export --out ./.ship-by-sunday/export.json
     bun run sbs import --file ./.ship-by-sunday/export.json
@@ -181,7 +202,7 @@ During Milestone 5, generate a repo snapshot from a complete definition. The fas
 
     cd /Users/parkerrex/Projects/manmeetsai-workspace
     bun run sbs generate repo --out ./tmp/sbs-cli-repo
-    bun run sbs generate packet --out ./tmp/sbs-cli-packet
+    bun run sbs generate --out ./tmp/sbs-cli-repo.zip --zip
 
 Expected observation: the repo output contains a slugified top-level folder with generated `docs/` content inside it, and the packet output contains the expected Design, Marketing, Build, facts, and prompt files.
 
@@ -198,7 +219,7 @@ Expected observation: all touched package tests and typechecks pass, and repo li
 
 ## Validation and Acceptance
 
-This initiative is complete only when a human can start from the repository root, run `bun run sbs init`, answer or import the canonical packet facts, run `bun run sbs review` to see accurate readiness, and run a generation command that produces the same packet and starter snapshot shape that the existing review flow expects. Acceptance is observable behavior, not internal structure. The CLI must prove that the Product, Design, Marketing, Build Plan, and Review progression is driven by `packetStageDefinitions` and `evaluatePacketReadiness()` rather than by a duplicate hand-maintained command list.
+This initiative is complete only when a human can start from the repository root, run `bun run sbs resume`, answer or import the canonical packet facts, run `bun run sbs review` to see accurate readiness, and run a generation command that produces the same starter snapshot shape that the existing review flow expects. Acceptance is observable behavior, not internal structure. The CLI must prove that the Product, Design, Marketing, Build Plan, and Review progression is driven by `packetStageDefinitions` and `evaluatePacketReadiness()` rather than by a duplicate hand-maintained command list.
 
 Validation must cover the contract, the CLI, and the generated artifacts. The packet-compiler tests must still pass after any schema, readiness, or repo-root changes. The CLI package must have focused tests for argument parsing, local storage, import/export, readiness reporting, and generation command behavior. One manual terminal walkthrough is mandatory because the user-visible value is the CLI experience itself. That walkthrough should show draft creation or import, partial readiness, completion, and artifact generation. If any repo-wide check is skipped because of unrelated failures, the plan must document the exact failing command and the unrelated files.
 
@@ -206,7 +227,7 @@ The output artifact acceptance bar is specific. A generated repo must unpack int
 
 ## Idempotence and Recovery
 
-All CLI state for v1 should live under a single local hidden directory such as `.ship-by-sunday/` at the repository root. Re-running `bun run sbs init` when a draft already exists should resume or confirm reuse rather than destroying work. Import operations should validate the input file before replacing the local draft. Export operations should be pure reads. Interactive stage commands should save after each field or after each step so a terminated terminal session only loses the current unsaved input, not the full draft.
+All CLI state for v1 should live under a single local hidden directory `.ship-by-sunday/` at the repository root. Re-running `bun run sbs resume` when no draft exists should auto-initialize a new one, and re-running it when a draft exists should continue from the first incomplete stage. Import operations should validate the input file before replacing the local draft. Export operations should be pure reads. `apply` operations should validate stage membership before merging a patch file, but they may patch a locked future stage because that command is an automation surface rather than a human navigation path. Interactive stage commands should save after each answered field so a terminated terminal session only loses at most the current in-progress prompt.
 
 Generation commands must be safe by default. If the target output path already exists, the command should refuse to overwrite it unless the caller passes `--force`. If a generation step fails midway, the CLI should either write to a temporary directory and rename on success or clean up the partial output and print the exact failure path. The compiler-facing repo-root helper should be deterministic and reusable so package-local and root-level invocations resolve the same template and snapshot paths.
 
@@ -214,7 +235,7 @@ If the implementer discovers that the live schema still needs new fields such as
 
 ## Artifacts and Notes
 
-Important evidence from inspection that should remain true or be deliberately changed during implementation:
+Important evidence from implementation that should remain true:
 
     Current shared compiler exports already suitable for CLI reuse
     - packetStageDefinitions
@@ -229,21 +250,49 @@ Important evidence from inspection that should remain true or be deliberately ch
     - packages/packet-compiler/src/bundle/build-review-download-zip.ts
     - packages/packet-compiler/src/repo-generation/materialize-repo-snapshot.ts
 
-    Current web-only helper that should be shared
-    - apps/web/features/packet-flow/lib/packet-field-helpers.ts
+    Shared packet field helper module
+    - packages/packet-compiler/src/packet-field-helpers.ts
+    - apps/web/features/packet-flow/lib/packet-field-helpers.ts re-exports the shared compiler helper
 
-    Current CLI-hostile repo-root assumption
-    - template-loader.ts uses path.resolve(process.cwd(), "..", "..")
-    - materialize-repo-snapshot.ts uses path.resolve(process.cwd(), "..", "..")
+    Repo-root resolution used by both template loading and repo snapshots
+    - packages/packet-compiler/src/repo-root.ts
 
-When the work is implemented, add short terminal transcripts here that prove:
+Observed transcripts:
 
-    bun run sbs --help
-    bun run sbs init
-    bun run sbs review
-    bun run sbs generate repo --out ./tmp/sbs-cli-repo
+    $ bun run sbs --help
+    Ship by Sunday CLI
+    Commands:
+      bun run sbs resume
+      bun run sbs stage <product|design|marketing|build-plan>
+      bun run sbs review [--json]
+      bun run sbs export --out <file>
+      bun run sbs import --file <file>
+      bun run sbs apply --stage <stage> --file <file>
+      bun run sbs generate [repo] --out <path> [--zip] [--force]
 
-The final transcript should show the generated output path and the slugified repo folder name.
+    $ bun run sbs import --file ./tmp/sbs-cli-complete.json
+    Imported draft from ./tmp/sbs-cli-complete.json
+
+    $ bun run sbs review --json
+    {
+      "firstIncompleteStageId": "review",
+      "packetReadiness": {
+        "product": { "isReady": true, "missingFactKeys": [] },
+        "design": { "isReady": true, "missingFactKeys": [] },
+        "marketing": { "isReady": true, "missingFactKeys": [] },
+        "build": { "isReady": true, "missingFactKeys": [] },
+        "review": { "isReady": true, "missingFactKeys": [] }
+      }
+    }
+
+    $ bun run sbs export --out ./.ship-by-sunday/export.json
+    Exported draft to /Users/parkerrex/Projects/manmeetsai-workspace/.ship-by-sunday/export.json
+
+    $ bun run sbs generate --out ./tmp/sbs-cli-repo --force
+    Generated repo directory at /Users/parkerrex/Projects/manmeetsai-workspace/tmp/sbs-cli-repo/ship-by-sunday-os
+
+    $ bun run sbs generate --out ./tmp/sbs-cli-repo.zip --zip --force
+    Generated repo zip at /Users/parkerrex/Projects/manmeetsai-workspace/tmp/sbs-cli-repo.zip
 
 ## Interfaces and Dependencies
 
