@@ -2,25 +2,18 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { PromptPackSourceFiles } from "../packets/render-prompt-pack";
 import type { OpenAiPacketTemplates } from "../packets/render-types";
+import { resolveRepoRootPath } from "../repo-root";
 
 let openAiPacketTemplatesPromise: Promise<OpenAiPacketTemplates> | undefined;
 let promptPackSourceFilesPromise: Promise<PromptPackSourceFiles> | undefined;
 
 function openAiTemplateUrl(relativePath: string) {
-	const repoRootPath = path.resolve(
-		/* turbopackIgnore: true */ process.cwd(),
-		"..",
-		"..",
-	);
+	const repoRootPath = resolveRepoRootPath();
 	return path.join(repoRootPath, "docs", "openai", relativePath);
 }
 
 function shippedPromptAssetUrl(fileName: string) {
-	const repoRootPath = path.resolve(
-		/* turbopackIgnore: true */ process.cwd(),
-		"..",
-		"..",
-	);
+	const repoRootPath = resolveRepoRootPath();
 	return path.join(repoRootPath, "docs", "prompts", fileName);
 }
 

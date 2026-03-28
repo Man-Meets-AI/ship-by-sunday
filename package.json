@@ -15,6 +15,7 @@
 		"dev:full": "bun run --cwd apps/web dev:full",
 		"build": "bun run --cwd apps/web build",
 		"start": "bun run --cwd apps/web start",
+		"sbs": "bun run --cwd packages/ship-by-sunday-cli sbs",
 		"typecheck": "bun run --cwd apps/web typecheck",
 		"lint": "bun run --cwd apps/web lint",
 		"lint:fix": "bun run --cwd apps/web lint:fix",

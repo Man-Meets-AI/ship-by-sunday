@@ -25,7 +25,7 @@ This is the architecture:
 
 ## Packet Contract
 
-My recommendation is to keep the packet literal and file-shaped, not flatten it into one mega-doc.
+The live packet contract is the canonical schema in `packages/packet-compiler/src/canonical-project-definition/schema.ts`, the stage grouping in `packages/packet-compiler/src/stages/stage-definitions.ts`, and the current renderers under `packages/packet-compiler/src/packets/`. Older planning variants that mentioned `starter_repo_github_username`, `implementation_plan`, `verification_plan`, `validation_commands`, `rollback_plan`, or custom prompt-pack files are historical notes, not active contract.
 
 ### Final generated docs tree inside the starter snapshot
 
@@ -94,7 +94,9 @@ There is no reason to include `.DS_Store` files.
 
 This is the canonical source of truth the rest of the packet compiles from.
 
-Required facts:
+The CLI v1 should collect these schema-backed facts.
+
+Product:
 - `product_name`
 - `product_summary`
 - `primary_user`
@@ -108,46 +110,83 @@ Required facts:
 - `success_looks_like`
 - `user_benefit`
 - `evidence_summary`
+- `why_this_matters`
 - `core_flow_summary`
-- `screen_sequence`
-- `must_have_capabilities`
 - `scope_in`
 - `scope_out`
 - `non_goals`
 - `v1_rationale`
+
+Design:
+- `screen_sequence`
+- `must_have_capabilities`
+- `surface_type`
+- `design_references`
 - `visual_thesis`
 - `content_plan`
 - `interaction_thesis`
-- `design_references`
 - `design_tokens`
 - `typography_direction`
 - `imagery_direction`
 - `layout_direction`
+- `brand_assets`
+- `existing_system_mode`
+- `hero_goal`
+- `primary_cta`
+- `proof_strategy`
+- `objections`
+- `section_narrative`
+- `copy_tone`
+
+Marketing:
 - `marketing_goals`
 - `channel_scope`
+- `campaign_types`
 - `brand_voice_summary`
 - `approved_claims`
 - `do_not_say_rules`
+- `workflow_map`
+- `research_scope`
+- `research_needs`
+- `content_workflows`
+- `analytics_needs`
+- `proof_sources`
+- `creative_spec`
+
+Build Plan:
+- `objective`
+- `user_visible_outcome`
 - `distribution_model`
 - `install_destination`
 - `buyer_ai_promise`
-- `implementation_plan`
+- `constraints`
+- `deliverables`
+- `done_when`
 - `acceptance_criteria`
 - `validation_plan`
 - `demo_flow`
 - `risks`
 - `dependencies`
+- `open_questions`
+- `selected_next_slice`
+- `pricing_model`
+- `price_usd_cents`
+- `price_display`
+- `currency`
+
+Placeholder-friendly optionals:
 - `domain`
 - `support_email`
-- `starter_repo_github_username`
+
+`surface_type` defaults to `web_app` when omitted. `domain` and `support_email` remain optional placeholders and must not block repo generation.
 
 ### `README.md`
 
 Purpose:
-- human-readable entry point for the packet
-- explain what the app is, what is included, what to do first
+- human-readable entry point for the generated repo
+- explain what the app is, what is included, and what to do first
 
-Required facts:
+Primary fact inputs:
 - `product_name`
 - `product_summary`
 - `primary_user`
@@ -155,85 +194,69 @@ Required facts:
 - `outcome_statement`
 - `distribution_model`
 - `install_destination`
-- `domain`
-- starter-template reference
-- packet file overview
 
 ### `design/AGENTS.md`
 
 Purpose:
 - project-specific UI rules for Codex on this app
 
-Required facts:
-- `surface_type`
-- `existing_system_mode`
+Primary fact inputs:
+- `surface_type` when explicitly set, otherwise the default `web_app`
+- `screen_sequence`
+- `must_have_capabilities`
 - `visual_thesis`
 - `interaction_thesis`
-- `design_tokens`
-- `typography_direction`
-- `imagery_direction`
-- `layout_direction`
+- `existing_system_mode`
 
 ### `design/CHECKLIST.md`
 
 Purpose:
 - design quality gate customized to the product
 
-Required facts:
-- `surface_type`
+Primary fact inputs:
+- `surface_type` when explicitly set, otherwise the default `web_app`
 - `visual_thesis`
 - `content_plan`
 - `interaction_thesis`
 - `design_references`
-- `design_tokens`
-- `layout_direction`
-- `imagery_direction`
-- `acceptance_criteria`
+- `proof_strategy`
 
 ### `design/PLANS.md`
 
 Purpose:
 - concrete design-task plan customized to the app
 
-Required facts:
-- `surface_type`
+Primary fact inputs:
 - `primary_user`
-- `job_to_be_done`
+- `screen_sequence`
+- `must_have_capabilities`
 - `visual_thesis`
-- `content_plan`
-- `interaction_thesis`
-- `design_tokens`
 - `design_references`
-- `acceptance_criteria`
-- `verification_plan`
+- `scope_in`
+- `non_goals`
 
 ### `design/documentation.md`
 
 Purpose:
 - completed or in-progress design rationale packet
 
-Required facts:
+Primary fact inputs:
 - `visual_thesis`
-- `content_plan`
-- `interaction_thesis`
 - `design_tokens`
+- `typography_direction`
 - `imagery_direction`
-- `acceptance_criteria`
-- `verification_plan`
-- `tradeoffs`
+- `layout_direction`
+- `copy_tone`
 
 ### `marketing/README.md`
 
 Purpose:
 - explain what the marketing packet is for
-- explain included workflows, prompts, and governance expectations
+- explain the included workflows and governance expectations
 
-Required facts:
+Primary fact inputs:
 - `product_name`
 - `product_summary`
-- `primary_user`
-- `problem_statement`
-- `outcome_statement`
 - `marketing_goals`
 - `channel_scope`
 - `brand_voice_summary`
@@ -243,425 +266,225 @@ Required facts:
 Purpose:
 - project-specific operating rules for reusable marketing GPTs, skills, and agent workflows
 
-Required facts:
-- `brand_voice_summary`
+Primary fact inputs:
 - `approved_claims`
 - `do_not_say_rules`
 - `channel_scope`
-- `human_review_rules`
-- `current_facts_policy`
 
 ### `marketing/CHECKLIST.md`
 
 Purpose:
 - marketing capability and workflow checklist tailored to the app
 
-Required facts:
-- `marketing_goals`
-- `channel_scope`
-- `campaign_types`
+Primary fact inputs:
+- `workflow_map`
 - `research_needs`
-- `content_workflows`
-- `analytics_needs`
-- `brand_risks`
-- `review_rules`
 
 ### `marketing/PLANS.md`
 
 Purpose:
-- rollout plan for marketing AI workflows, agents, and deliverables
+- rollout plan for marketing AI workflows and deliverables
 
-Required facts:
-- `marketing_goals`
-- `workflow_map`
-- `stable_knowledge`
-- `fresh_inputs`
-- `output_contract`
-- `approval_rules`
-- `evaluation_plan`
-- `impact_effort_priorities`
+Primary fact inputs:
+- `content_workflows`
+- `proof_sources`
 
 ### `marketing/documentation.md`
 
 Purpose:
 - document the shipped marketing workflows, prompts, and governance rules
 
-Required facts:
-- `marketing_workflow_inventory`
-- `stable_knowledge`
-- `fresh_inputs`
-- `output_contract`
-- `review_rules`
-- `metrics`
-- `risks`
-- `source_basis`
+Primary fact inputs:
+- `creative_spec`
+- `analytics_needs`
 
 ### `build/AGENTS.md`
 
 Purpose:
 - execution rules for long-horizon implementation on this exact product
 
-Required facts:
+Primary fact inputs:
 - `objective`
-- `scope_in`
-- `scope_out`
-- `non_goals`
-- `risks`
-- `dependencies`
-- `validation_plan`
-- `demo_flow`
+- `user_visible_outcome`
+- `deliverables`
+- `acceptance_criteria`
 
 ### `build/CHECKLIST.md`
 
 Purpose:
 - long-horizon readiness and operating checklist
 
-Required facts:
-- `objective`
-- `deliverables`
-- `done_when`
+Primary fact inputs:
 - `constraints`
-- `validation_plan`
-- `rollback_plan`
 
 ### `build/docs/prompt.md`
 
 Purpose:
 - canonical task spec
 
-Required facts:
-- `objective`
-- `why_this_matters`
-- `scope_in`
-- `scope_out`
-- `user_visible_outcome`
-- `constraints`
-- `deliverables`
-- `done_when`
+Primary fact inputs:
 - `validation_plan`
-- `demo_flow`
-- `risks`
-- `open_questions`
 
 ### `build/docs/plans.md`
 
 Purpose:
 - milestone plan
 
-Required facts:
-- `implementation_plan`
-- `milestones`
-- `acceptance_criteria`
-- `validation_commands`
-- `architecture_intent`
+Primary fact inputs:
 - `risks`
 - `dependencies`
-- `rollback_plan`
 
 ### `build/docs/implement.md`
 
 Purpose:
 - execution runbook
 
-Required facts:
-- `milestones`
-- `validation_commands`
-- `stop_and_fix_rule`
-- `documentation_expectations`
-
-Most of this is derived from plan + repo rules, not directly asked.
+Primary fact inputs:
+- `demo_flow`
+- `selected_next_slice`
 
 ### `build/docs/documentation.md`
 
 Purpose:
 - status log / live handoff doc
 
-Required facts:
-- `current_milestone`
-- `validation_log`
-- `known_issues`
-- `next_step`
-- `run_demo_instructions`
+Primary fact inputs:
+- `open_questions`
 
-Mostly derived. Minimal direct asking needed.
-
-### `prompts/marketing.md`
+### `prompts/execplan-execution-loop.md`
 
 Purpose:
-- generated prompt for marketing page / copy / style work
+- shipped execution-loop prompt asset copied into the generated repo
 
-Required facts:
+Input:
+- static file from `docs/prompts/execplan-execution-loop.md`
+
+### `prompts/execplan-grill.md`
+
+Purpose:
+- shipped grill prompt asset copied into the generated repo
+
+Input:
+- static file from `docs/prompts/execplan-grill.md`
+
+### `prompts/execplan-writer.md`
+
+Purpose:
+- shipped writer prompt asset copied into the generated repo
+
+Input:
+- static file from `docs/prompts/execplan-writer.md`
+
+The earlier generated `prompts/marketing.md`, `prompts/implementation.md`, `prompts/qa.md`, and `prompts/deploy.md` pack is not part of the live packet contract anymore.
+
+## Live Question Map
+
+The CLI should reuse the live stage definitions in `packages/packet-compiler/src/stages/stage-definitions.ts`.
+
+### Product
+
+Foundation:
 - `product_name`
 - `product_summary`
 - `primary_user`
+- `why_this_matters`
+
+Problem:
 - `problem_statement`
-- `problem_urgency`
-- `outcome_statement`
-- `user_benefit`
-- `visual_thesis`
-- `content_plan`
-- `imagery_direction`
-- `marketing_brief`
-- `design_references`
-
-### `prompts/implementation.md`
-
-Purpose:
-- generated build prompt for Codex
-
-Required facts:
-- canonical project facts
-- `implementation_plan`
-- `next_slice`
-- `acceptance_criteria`
-- `validation_plan`
-- `risks`
-- `dependencies`
-- starter-template context
-
-### `prompts/qa.md`
-
-Purpose:
-- generated QA prompt
-
-Required facts:
-- `demo_flow`
-- `success_criteria`
-- `validation_plan`
-- `distribution_model`
-- `install_destination`
-- `next_slice`
-
-### `prompts/deploy.md`
-
-Purpose:
-- generated deploy handoff prompt
-
-Required facts:
-- `product_name`
-- `domain`
-- `support_email`
-- `distribution_model`
-- `starter_repo_github_username` if relevant
-- deploy prerequisites
-
-## Current Coverage Map
-
-### Covered now
-
-These already have strong live sources in the curriculum:
-
-- `primary_user`
-  - best current source: `1.4`
-  - source fields: derived `selected_problem_owner`
-  - refs: [ceo.ts](/Users/parkerrex/Projects/manmeetsai-workspace/features/course/lesson/model/lessons/ceo.ts)
-- `problem_statement`
-  - best current source: `1.4`
-  - source fields: derived `selected_problem_statement`
-  - refs: [ceo.ts](/Users/parkerrex/Projects/manmeetsai-workspace/features/course/lesson/model/lessons/ceo.ts)
 - `problem_context_when`
 - `problem_context_where`
 - `problem_trigger`
 - `problem_severity`
 - `problem_urgency`
-  - best current source: `1.4`
-  - refs: [ceo.ts](/Users/parkerrex/Projects/manmeetsai-workspace/features/course/lesson/model/lessons/ceo.ts)
+
+Outcome:
 - `outcome_statement`
 - `success_looks_like`
 - `user_benefit`
-  - best current source: `1.5`
-  - refs: [ceo.ts](/Users/parkerrex/Projects/manmeetsai-workspace/features/course/lesson/model/lessons/ceo.ts)
-- `core_flow_summary`
-- `must_have_capabilities`
-  - best current source: `2.1`
-  - refs: [design.ts](/Users/parkerrex/Projects/manmeetsai-workspace/features/course/lesson/model/lessons/design.ts)
-- `distribution_model`
-- `install_destination`
-- `buyer_ai_promise`
-  - best current source: `3.10`
-  - refs: [build.ts](/Users/parkerrex/Projects/manmeetsai-workspace/features/course/lesson/content/build.ts)
-
-### Partial now
-
-- `product_name` / `product_summary`
-  - fragmented across `1.1`, `3.5`, `3.9`, `3.14`
-  - refs: [start-here.ts](/Users/parkerrex/Projects/manmeetsai-workspace/features/course/lesson/model/lessons/start-here.ts), [build.ts](/Users/parkerrex/Projects/manmeetsai-workspace/features/course/lesson/content/build.ts)
 - `evidence_summary`
-  - current source: `1.6`
-  - problem: too loose for packet use
-- `screen_sequence`
-  - current source: `2.1`
-  - problem: strong enough for sequence, weak for actual screen spec
-- `marketing_brief`
-  - current source: `3.4` and `3.5`
-  - problem: duplicated and recollected
-- `implementation_plan`
-  - current source: `3.7`, `3.8`, `3.10`
-  - problem: fragmented across prompt controls, packet, and plan brief
-- `acceptance_criteria` / `validation_plan` / `demo_flow`
-  - closest source: `3.12` QA fields and `3.14` deploy success checklist
-  - problem: execution evidence, not canonical planning facts
-- `implementation_brief`
-  - current source: `3.11`
-  - problem: free text, not composed from facts + plan
-- `domain`
-- `support_email`
-  - current source: `3.4`, `3.9`, `3.14`
-  - problem: duplicated
+- `core_flow_summary`
 
-### Missing now
-
-These are the major packet blockers:
-
+Scope:
 - `scope_in`
 - `scope_out`
 - `non_goals`
 - `v1_rationale`
+
+### Design
+
+Flow:
+- `screen_sequence`
+- `must_have_capabilities`
+- `surface_type`
+
+References:
+- `design_references`
+- `brand_assets`
+- `existing_system_mode`
+
+Direction:
 - `visual_thesis`
 - `content_plan`
 - `interaction_thesis`
-- `design_references` in the active Design block
+- `hero_goal`
+- `primary_cta`
+- `proof_strategy`
+- `objections`
+- `section_narrative`
+- `copy_tone`
+
+System:
 - `design_tokens`
 - `typography_direction`
 - `imagery_direction`
 - `layout_direction`
+
+### Marketing
+
+Operating System:
 - `marketing_goals`
 - `channel_scope`
+- `campaign_types`
 - `brand_voice_summary`
 - `approved_claims`
 - `do_not_say_rules`
-- explicit `deliverables`
-- explicit `done_when`
-- explicit `validation_commands`
-- explicit `rollback_plan`
+- `proof_sources`
+- `workflow_map`
+- `research_scope`
+- `research_needs`
+- `content_workflows`
+- `analytics_needs`
+- `creative_spec`
+
+### Build Plan
+
+Delivery:
+- `objective`
+- `user_visible_outcome`
+- `distribution_model`
+- `install_destination`
+- `buyer_ai_promise`
+- `pricing_model`
+- `price_usd_cents`
+- `price_display`
+- `currency`
+- `domain`
+- `support_email`
+
+Plan:
+- `constraints`
+- `deliverables`
+- `risks`
+- `dependencies`
 - `open_questions`
+- `selected_next_slice`
 
-These are directly implied by the Ship by Sunday custom pack layers built on top of the OpenAI baselines:
-- [docs/ship-by-sunday/design-pack/PLANS.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/design-pack/PLANS.md)
-- [docs/ship-by-sunday/design-pack/CHECKLIST.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/design-pack/CHECKLIST.md)
-- [docs/ship-by-sunday/marketing-pack/PLANS.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/marketing-pack/PLANS.md)
-- [docs/ship-by-sunday/marketing-pack/CHECKLIST.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/marketing-pack/CHECKLIST.md)
-- [docs/ship-by-sunday/build-pack/docs/prompt.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/build-pack/docs/prompt.md)
-- [docs/ship-by-sunday/build-pack/docs/plans.md](/Users/parkerrex/Projects/manmeetsai-workspace/docs/ship-by-sunday/build-pack/docs/plans.md)
+Validation:
+- `done_when`
+- `acceptance_criteria`
+- `validation_plan`
+- `demo_flow`
 
-## Keep / Combine / Add / Demote
+### Review
 
-### Keep as canonical facts
-
-- selected user/problem from `1.4`
-- problem context from `1.4`
-- outcome and payoff from `1.5`
-- core flow and screen sequence from `2.1`
-- evidence summary from `1.6`, after normalization
-- distribution / install / AI promise from `3.10`
-- risks / dependencies from `3.10`
-- starter-repo username from `starterRepoAccess`
-
-### Combine
-
-- `app_idea`
-- `codex_marketing_product`
-- `brand_kit_app_name`
-- `deploy_handoff_product_name`
-
-Combine into:
-- `product_name`
-- `product_summary`
-
-- `build_ship_roadmap_marketing_brief` and `codex_marketing_*`
-
-Combine into:
-- one `marketing_brief`
-
-- `fresh_template_plan_*`, `build_slices_*`, and `ux_plan_*`
-
-Combine into:
-- one `implementation_plan`
-
-- all duplicated domain fields
-
-Combine into:
-- one `domain`
-
-### Add
-
-Add as explicit new fact questions:
-
-- visual thesis
-- content plan
-- interaction thesis
-- design references
-- design-token plan
-- typography direction
-- imagery direction
-- scope in
-- scope out
-- non-goals
-- why this v1 is enough
-- deliverables
-- done-when
-- validation / demo flow
-- acceptance criteria
-- rollback / escape hatch
-
-### Demote out of the packet model
-
-Workflow-only:
-- lesson checklists
-- setup checklists
-- copied-prompt checklists
-- onboarding checklists
-- deploy steps checklists
-
-Ephemeral:
-- deploy secrets
-- QA current-step fields
-- browser-running toggle
-
-## Best Lesson Placement
-
-If the packet is supposed to become high-quality as early as possible, the clean lesson placement is:
-
-- `1.1`: canonical product name + summary
-- `1.4`: canonical user/problem
-- `1.5`: outcome + success + payoff
-- `1.6`: evidence summary
-- `2.1`: core flow + screen sequence + must-haves
-- `2.2`: scope boundary + design references + visual direction + design tokens
-- `3.10`: implementation plan + acceptance + validation + demo flow + rollback
-- `3.11`: optional refinement assets and implementation-brief polish
-
-That placement keeps:
-- design facts in Design
-- long-horizon planning facts in late Build
-- workflow state out of the packet
-
-## Unlock Recommendation
-
-Current repo:
-- earliest plausible draft packet unlock: after `3.11`
-
-Target repo:
-- design packet can unlock after `2.2`
-- full design + long-horizon + prompt packet can unlock after `3.10`
-- `3.11` becomes optional refinement, not the first moment the packet is even possible
-
-## Final Rule
-
-The packet should drive the question set.
-
-Not the other way around.
-
-If a question does not customize:
-- `README.md`
-- `facts/project-definition.json`
-- any file under `design/`
-- any file under `build/`
-- or a file under `prompts/`
-
-then it is not packet data.
-
-It is:
-- workflow scaffolding
-- ephemeral runtime
-- or waste."}}
+Review adds no new canonical facts. It derives readiness from the Product, Design, Marketing, and Build Plan answers through `evaluatePacketReadiness()`.

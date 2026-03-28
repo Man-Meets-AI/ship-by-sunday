@@ -2,6 +2,7 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import type { CanonicalProjectDefinition } from "../canonical-project-definition/project-definition";
 import type { RenderedPacketFile } from "../packets/render-types";
+import { resolveRepoRootPath } from "../repo-root";
 import { renderFullPacketTree } from "../server/rendered-packet-tree";
 import {
 	buildRepoGenerationManifest,
@@ -17,7 +18,7 @@ export type RepoSnapshotFile = {
 };
 
 function repoRootPath() {
-	return path.resolve(/* turbopackIgnore: true */ process.cwd(), "..", "..");
+	return resolveRepoRootPath();
 }
 
 async function collectDirectoryFiles(

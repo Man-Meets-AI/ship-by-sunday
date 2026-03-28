@@ -2,10 +2,7 @@
 
 Date: 2026-03-23
 Mode: Planning only
-Goal: reframe the current lesson-state system around a canonical project-definition model, then decide what to keep, kill, and combine based on the OpenAI-derived Design and Long Horizon packets in:
-
-- `docs/design-checklist/`
-- `docs/codex_long_horizon_templates/`
+Goal: reframe the current lesson-state system around the live canonical project-definition model, then decide what to keep, kill, and combine based on the packet compiler contract instead of older prompt-pack assumptions.
 
 ## Core Judgment
 
@@ -17,11 +14,12 @@ The product schema should be:
 - workflow state: teaching/process progress
 - ephemeral runtime: local-only volatile state
 
-That split matches both packet folders:
-- `docs/design-checklist/*` expects a design brief, design plan, and design documentation package.
-- `docs/codex_long_horizon_templates/*` expects a long-horizon spec/plan/runbook/status package.
+That split matches the current Ship by Sunday packet layers and the live packet compiler:
+- `packages/packet-compiler/src/canonical-project-definition/schema.ts`
+- `packages/packet-compiler/src/stages/stage-definitions.ts`
+- `packages/packet-compiler/src/packets/`
 
-Neither packet expects workflow checklists or browser toggles to be the canonical project definition.
+Neither packet expects workflow checklists, copied-prompt confirmations, browser toggles, or legacy starter-repo invite fields to be the canonical project definition.
 
 ## The Four Buckets
 
@@ -30,7 +28,7 @@ Neither packet expects workflow checklists or browser toggles to be the canonica
 Definition:
 - stable project-definition truths
 - should survive lesson order changes
-- should feed both design and build outputs
+- should feed design, marketing, build, and repo outputs
 - should usually be asked once, then reused
 
 These are the only inputs that should feel like the app’s real data model.
@@ -42,11 +40,12 @@ Definition:
 - can be regenerated repeatedly
 - should be the main product outputs for Codex handoff
 
-In this repo, the target derived docs are already implied by the packet folders:
-- design packet
-- long-horizon packet
-- implementation prompt pack
-- repo handoff package
+In this repo, the target derived docs are:
+- the generated design packet
+- the generated marketing packet
+- the generated build packet
+- the shipped ExecPlan prompt assets under `docs/prompts/`
+- the customer-safe starter snapshot
 
 ### 3. Workflow State
 
@@ -72,67 +71,101 @@ Examples:
 
 This should stay out of canonical persistence unless there is a separate secure operational need.
 
-## What The OpenAI Packets Actually Want
+## What The Live Packet Actually Wants
 
-### Design packet expectations
+The current packet compiler wants one pre-review fact contract grouped into Product, Design, Marketing, and Build Plan. Those stages already exist in `packages/packet-compiler/src/stages/stage-definitions.ts`.
 
-From `docs/design-checklist/PLANS.md`, `docs/design-checklist/CHECKLIST.md`, and `docs/design-checklist/documentation.md`, the useful inputs are:
-- surface type
-- goal
-- user / audience
-- job to be done
-- existing system vs new surface
-- references
-- constraints
-- visual thesis
-- content plan
-- interaction thesis
-- design-system plan
-- imagery plan
-- copy plan
-- implementation plan
-- verification plan
-- acceptance criteria
-- risks and follow-ups
+### Product inputs
 
-Those are facts plus derived-doc structure.
+The Product stage needs:
+- `product_name`
+- `product_summary`
+- `primary_user`
+- `problem_statement`
+- `problem_context_when`
+- `problem_context_where`
+- `problem_trigger`
+- `problem_severity`
+- `problem_urgency`
+- `outcome_statement`
+- `success_looks_like`
+- `user_benefit`
+- `evidence_summary`
+- `why_this_matters`
+- `core_flow_summary`
+- `scope_in`
+- `scope_out`
+- `non_goals`
+- `v1_rationale`
 
-What the packet does not want as canonical project data:
-- “copied prompt”
-- “opened README”
-- “reviewed the example”
-- “connected account”
+### Design inputs
 
-### Long-horizon packet expectations
+The Design stage needs:
+- `screen_sequence`
+- `must_have_capabilities`
+- `surface_type`
+- `design_references`
+- `visual_thesis`
+- `content_plan`
+- `interaction_thesis`
+- `design_tokens`
+- `typography_direction`
+- `imagery_direction`
+- `layout_direction`
+- `brand_assets`
+- `existing_system_mode`
+- `hero_goal`
+- `primary_cta`
+- `proof_strategy`
+- `objections`
+- `section_narrative`
+- `copy_tone`
 
-From `docs/codex_long_horizon_templates/docs/prompt.md`, `docs/codex_long_horizon_templates/docs/plans.md`, `docs/codex_long_horizon_templates/docs/implement.md`, and `docs/codex_long_horizon_templates/docs/documentation.md`, the useful inputs are:
-- objective
-- why this matters
-- in-scope / out-of-scope
-- user-visible outcome
-- constraints
-- relevant code paths / docs / examples
-- deliverables
-- done-when
-- validation / demo flow
-- risks / edge cases
-- open questions
+`surface_type` is schema-defaulted to `web_app`. It is part of the canonical shape, but it is not a required human-entered prompt when the default is fine.
 
-Then the derived planning layer adds:
-- milestones
-- acceptance criteria
-- validation commands
-- architecture intent
-- rollback
-- status log
+### Marketing inputs
 
-Again: facts plus derived-doc structure.
+The Marketing stage needs:
+- `marketing_goals`
+- `channel_scope`
+- `campaign_types`
+- `brand_voice_summary`
+- `approved_claims`
+- `do_not_say_rules`
+- `workflow_map`
+- `research_scope`
+- `research_needs`
+- `content_workflows`
+- `analytics_needs`
+- `proof_sources`
+- `creative_spec`
 
-What the packet does not want as canonical project data:
-- lesson completion checklists
-- “generated plan reviewed”
-- “browser running”
-- “copied the prompt”
+### Build Plan inputs
+
+The Build Plan stage needs:
+- `objective`
+- `user_visible_outcome`
+- `distribution_model`
+- `install_destination`
+- `buyer_ai_promise`
+- `constraints`
+- `deliverables`
+- `done_when`
+- `acceptance_criteria`
+- `validation_plan`
+- `demo_flow`
+- `risks`
+- `dependencies`
+- `open_questions`
+- `selected_next_slice`
+- `pricing_model`
+- `price_usd_cents`
+- `price_display`
+- `currency`
+- `domain`
+- `support_email`
+
+`domain` and `support_email` are placeholder-friendly optionals. They should stay in the canonical shape, but they must not block repo generation.
 
 ## Proposed Canonical Split
 
@@ -154,13 +187,19 @@ This is the model worth preserving across lessons.
 - `outcome_statement`
 - `success_looks_like`
 - `user_benefit`
+- `evidence_summary`
+- `why_this_matters`
+- `core_flow_summary`
+- `scope_in`
+- `scope_out`
+- `non_goals`
+- `v1_rationale`
 
 #### Design foundation
 
-- `surface_type`
-- `core_flow_summary`
 - `screen_sequence`
 - `must_have_capabilities`
+- `surface_type`
 - `design_references`
 - `visual_thesis`
 - `content_plan`
@@ -170,28 +209,55 @@ This is the model worth preserving across lessons.
 - `imagery_direction`
 - `layout_direction`
 - `brand_assets`
+- `existing_system_mode`
+- `hero_goal`
+- `primary_cta`
+- `proof_strategy`
+- `objections`
+- `section_narrative`
+- `copy_tone`
 
-#### Build / planning foundation
+#### Marketing foundation
 
-- `scope_in`
-- `scope_out`
-- `non_goals`
-- `v1_rationale`
+- `marketing_goals`
+- `channel_scope`
+- `campaign_types`
+- `brand_voice_summary`
+- `approved_claims`
+- `do_not_say_rules`
+- `workflow_map`
+- `research_scope`
+- `research_needs`
+- `content_workflows`
+- `analytics_needs`
+- `proof_sources`
+- `creative_spec`
+
+#### Build Plan foundation
+
+- `objective`
+- `user_visible_outcome`
 - `distribution_model`
 - `install_destination`
 - `buyer_ai_promise`
-- `risks`
-- `dependencies`
-- `success_criteria`
+- `constraints`
+- `deliverables`
+- `done_when`
+- `acceptance_criteria`
 - `validation_plan`
 - `demo_flow`
+- `risks`
+- `dependencies`
+- `open_questions`
 - `selected_next_slice`
-
-#### Operational foundation
-
-- `starter_repo_github_username`
+- `pricing_model`
+- `price_usd_cents`
+- `price_display`
+- `currency`
 - `domain`
 - `support_email`
+
+Do not keep `starter_repo_github_username` in canonical facts. The live compiler contract removed GitHub invite intake.
 
 ### B. Derived docs
 
@@ -200,40 +266,48 @@ These should be generated, not manually stored as first-class truth.
 #### Design packet
 
 Generate from facts plus repo context:
-- `design-brief.md`
-- `design-checklist/PLANS.md` task instance
-- `design-checklist/documentation.md` starter
-- optional `visualguide.md`
+- `docs/design/AGENTS.md`
+- `docs/design/CHECKLIST.md`
+- `docs/design/PLANS.md`
+- `docs/design/documentation.md`
 
-#### Long-horizon packet
+#### Marketing packet
 
-Generate from facts plus plan context:
-- `docs/prompt.md`
-- `docs/plans.md`
-- `docs/implement.md`
-- `docs/documentation.md`
-- task-level AGENTS addendum when useful
+Generate from facts plus repo context:
+- `docs/marketing/README.md`
+- `docs/marketing/AGENTS.md`
+- `docs/marketing/CHECKLIST.md`
+- `docs/marketing/PLANS.md`
+- `docs/marketing/documentation.md`
 
-#### Prompt pack
+#### Build packet
 
-Generate:
-- marketing build prompt
-- implementation prompt
-- QA prompt
-- deploy handoff prompt
+Generate from facts plus repo context:
+- `docs/build/AGENTS.md`
+- `docs/build/CHECKLIST.md`
+- `docs/build/docs/prompt.md`
+- `docs/build/docs/plans.md`
+- `docs/build/docs/implement.md`
+- `docs/build/docs/documentation.md`
+
+#### Prompt assets
+
+Ship the static ExecPlan assets:
+- `docs/prompts/execplan-execution-loop.md`
+- `docs/prompts/execplan-grill.md`
+- `docs/prompts/execplan-writer.md`
 
 #### Repo package
 
-Generate one package manifest that points to:
-- starter template access state
-- shared facts snapshot
-- design packet
-- long-horizon packet
-- prompt pack
+Generate one starter snapshot that includes:
+- the shared facts snapshot
+- the generated design, marketing, and build docs
+- the shipped ExecPlan prompt assets
+- starter repo overrides and customer-safe source files
 
 ### C. Workflow state
 
-Keep only for teaching/progress UX.
+Keep only for teaching and progress UX.
 
 Examples from the current repo that belong here:
 - `intro_readiness_checklist`
@@ -246,7 +320,6 @@ Examples from the current repo that belong here:
 - `build_ship_roadmap_ship_phase`
 - `build_ship_roadmap_service_accounts`
 - `build_ship_roadmap_scope`
-- `codex_marketing_workflow`
 - `route_access_inspection_checklist`
 - `build_slices_review_checklist`
 - `brand_kit_artifact_checklist`
@@ -278,43 +351,20 @@ These are correct as ephemeral or local-only.
 
 ### Keep
 
-Keep as canonical facts:
-
-- `selected_problem_owner`
-- `selected_problem_statement`
-- `problem_when`
-- `problem_where`
-- `problem_trigger`
-- `pain_level`
-- `pain_why_now`
-- `outcome_statement_body`
-- `messaging_what_it_does`
-- `messaging_benefit`
-- `core_problem`
-- `core_audience`
-- `core_transformation`
-- `core_desired_outcome`
-- `core_must_have_features`
-- `core_named_screens`
-- `core_brand_path`
-- `build_ship_roadmap_preferred_domain`
-- `build_ship_roadmap_support_email`
-- `ux_plan_release_distribution`
-- `ux_plan_local_codex_bridge`
-- `ux_plan_buyer_ai_promise`
-- `ux_plan_install_destination`
-- `ux_plan_plan_risks`
-- `ux_plan_plan_dependencies`
-- `starterRepoAccess.githubUsername`
+Keep as canonical facts when mapping existing lesson fields:
+- selected user/problem inputs that map to `primary_user` and `problem_statement`
+- problem context inputs that map to `problem_context_when`, `problem_context_where`, and `problem_trigger`
+- outcome inputs that map to `outcome_statement`, `success_looks_like`, and `user_benefit`
+- design-flow inputs that map to `core_flow_summary`, `screen_sequence`, and `must_have_capabilities`
+- build-plan inputs that map to `distribution_model`, `install_destination`, `buyer_ai_promise`, `risks`, and `dependencies`
+- domain/support inputs that map to `domain` and `support_email`
 
 Keep as workflow-only:
-
-- all lesson checklists
+- lesson checklists
 - completion toggles
 - progress gating items
 
 Keep as ephemeral runtime:
-
 - deploy secrets
 - live QA status fields
 
@@ -323,25 +373,17 @@ Keep as ephemeral runtime:
 Kill means “stop treating as canonical project-definition inputs.”
 
 Kill from the facts model:
+- `starter_repo_github_username`
+- `implementation_plan`
+- `implementation_brief`
+- `verification_plan`
+- `validation_commands`
+- `rollback_plan`
+- `next_slice`
+- `success_criteria`
+- prompt-pack-specific fields that only existed for the deprecated marketing/implementation/QA/deploy prompt family
 
-- `app_idea` as a separate canonical field if `product_summary` exists
-- `problem_to_solve` as a separate canonical field once `problem_statement` exists
-- `why_ship_now` as a separate canonical field if urgency/rationale is captured later in a stronger way
-- `codex_marketing_saved_prompt`
-- `fresh_template_plan_codex_output`
-- `route_access_codex_prompt`
-- `checkout_qa_prompt` as canonical truth
-- duplicated product/domain fields across later build lessons
-
-These can remain as lesson aids or editable working notes, but not as the source of truth.
-
-Kill as student-facing persisted state entirely if possible:
-
-- `checkout_qa_current_step`
-- `checkout_qa_last_issue`
-- `checkout_qa_browser_running`
-
-They are runtime telemetry for a session, not project definition.
+These can remain as migration notes or lesson aids, but not as the source of truth.
 
 ### Combine
 
@@ -358,77 +400,54 @@ Combine into:
 
 #### Combine into canonical user/problem
 
-- candidate-problem fields from `1.3`
-- chosen-problem fields from `1.4`
-- marketing problem/audience fields from `3.5`
+- candidate-problem fields from early lessons
+- chosen-problem fields from the decision lessons
+- marketing problem/audience fields that restate the same problem
 
 Combine into:
-- candidate problem exploration (workflow/lesson-local)
-- canonical selected user/problem (facts)
+- `primary_user`
+- `problem_statement`
+- `problem_context_when`
+- `problem_context_where`
+- `problem_trigger`
 
 #### Combine into canonical design direction
 
-- `core_brand_path`
-- `core_brand_guide_notes`
-- `build_product_iteration_brand_strategy`
-- `build_product_iteration_brand_design`
-- `brand_kit_primary_hex`
-- `brand_kit_accent_hex`
-- `core_ux_brand_references`
-- `core_ux_post_mimic_image`
-- `codex_marketing_style_reference_url`
+- brand-path and brand-guide notes
+- reference-gallery and mimic-image inputs
+- style-reference inputs
 
 Combine into:
 - `design_references`
 - `visual_thesis`
 - `typography_direction`
-- `color_direction`
 - `imagery_direction`
 - `brand_assets`
 
-#### Combine into canonical implementation plan
+#### Combine into canonical marketing direction
 
-- `fresh_template_plan_manual_prompt`
-- `fresh_template_plan_reasoning`
-- `fresh_template_plan_reference_path`
-- `build_slices_packet`
-- `build_slices_selected_slice`
-- `ux_plan_plan_slices`
-- `ux_plan_plan_affected_areas`
-- `ux_plan_plan_risks`
-- `ux_plan_plan_dependencies`
-- `core_ux_codex_brief`
+- repeated marketing problem, audience, pain, and outcome fields
+- one-off landing-page brief fields
 
 Combine into:
-- `implementation_plan`
-- `next_slice`
-- `implementation_brief`
-- generated long-horizon docs
+- `marketing_goals`
+- `channel_scope`
+- `campaign_types`
+- `brand_voice_summary`
+- `approved_claims`
+- `do_not_say_rules`
+- `proof_sources`
+- `creative_spec`
 
-#### Combine into canonical marketing brief
+#### Combine domain and support capture
 
-- `build_ship_roadmap_marketing_brief`
-- `codex_marketing_product`
-- `codex_marketing_audience`
-- `codex_marketing_problem`
-- `codex_marketing_pain`
-- `codex_marketing_frequency`
-- `codex_marketing_why_matters`
-- `codex_marketing_outcome`
-- `codex_marketing_capability`
-
-Combine into:
-- one `marketing_brief` fact set
-- derived landing-page prompt
-
-#### Combine domain capture
-
-- `build_ship_roadmap_preferred_domain`
-- `brand_kit_domain`
-- `deploy_handoff_domain`
+- preferred-domain inputs
+- deploy-domain inputs
+- support-email inputs
 
 Combine into:
 - `domain`
+- `support_email`
 
 ## Current Repo Mapping By Bucket
 
@@ -443,10 +462,11 @@ Strong:
 - key build constraints
 
 Weak but salvageable:
-- marketing brief
+- product name and summary
+- evidence summary
+- marketing direction
 - brand direction
-- implementation brief
-- QA report
+- pricing inputs
 
 ### Workflow state that should stop leaking into facts
 
@@ -457,24 +477,25 @@ The repo currently stores them in the same `lessonStates.fieldValues` blob as pr
 ### Derived docs that are missing as first-class outputs
 
 Missing live outputs:
-- design brief packet
-- long-horizon docs packet generated from facts
-- integrated implementation prompt pack
+- generated design packet
+- generated marketing packet
+- generated build packet
+- shipped ExecPlan prompt assets inside the starter repo
 - final repo package
 
 ### Runtime that is already mostly handled correctly
 
 Good current behavior:
-- deploy secrets stay local-only in `production-deploy-handoff-secrets-panel.tsx`
+- deploy secrets stay local-only in the deployment handoff flow
 
 Bad current behavior:
-- QA live-status fields are persisted like durable lesson state even though they are session-only.
+- QA live-status fields are persisted like durable lesson state even though they are session-only
 
 ## Packet-Aligned Keep / Kill / Combine Rules
 
 ### Rule 1
 
-If a field is needed to fill `docs/design-checklist/PLANS.md` or `docs/codex_long_horizon_templates/docs/prompt.md`, it is probably a fact.
+If a field is needed to fill the current packet compiler schema or any generated file under `docs/design/`, `docs/marketing/`, or `docs/build/`, it is probably a fact.
 
 ### Rule 2
 
@@ -490,27 +511,21 @@ If a value is secret, live, temporary, or session-bound, it is ephemeral runtime
 
 ## Recommended Next Planning Slice
 
-The next planning-only step should be a schema-first exercise:
+The next planning-only step should be a schema-first migration exercise:
 
-1. Define the canonical facts schema.
-2. Map every current field into one of the four buckets.
+1. Keep the live canonical facts schema as the source of truth.
+2. Map every current lesson field into one of the four buckets.
 3. Mark each field as:
    - keep as fact
    - keep as workflow
    - keep as ephemeral
    - combine into canonical field
    - deprecate
-4. Define the generated outputs:
-   - design packet
-   - long-horizon packet
-   - prompt pack
-   - repo package
+4. Define how each canonical field is collected in the Product, Design, Marketing, or Build Plan stage.
 
 That is the cleanest next move because it gives you the keep/kill/combine table before any implementation discussion.
 
 ## Final Recommendation
-
-The split you proposed is the right architecture.
 
 The repo should move from:
 - one generic lesson field blob that stores everything
@@ -518,17 +533,7 @@ The repo should move from:
 to:
 - canonical project facts
 - generated packet outputs
-- workflow scaffolding
+- workflow state
 - ephemeral runtime
 
-The important consequence is this:
-
-You do not need to preserve most current lesson fields as sacred data.
-
-You only need to preserve the facts.
-
-Everything else can be:
-- recomputed
-- regenerated
-- lesson-local
-- or deleted from the canonical model.
+The live packet compiler contract is already the right destination. The remaining work is migration discipline, not inventing another schema.
