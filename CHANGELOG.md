@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-03-28
+
+### Changed
+
+- Reworked the protected packet stage experience around step-local components, leave-guard behavior, and clearer scale-style inputs so stage progress, save feedback, and navigation stay tighter and more resilient while the packet path remains the same.
+- Added a local Ship by Sunday CLI with shared packet-compiler contract helpers, readiness review, import/export/apply/generate flows, agent-oriented introspection and mutation commands, batch mutation support, and docs that explain both the human and machine workflows.
+
 ## 2026-03-27
 
 ### Changed

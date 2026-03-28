@@ -36,7 +36,7 @@ export function AppShellHeaderTrailing({
 	const progressVerb = mission?.progressLabel ?? "lessons completed";
 	const progressLabel = mission
 		? `${mission.progressCount} of ${mission.totalLessons} ${progressVerb}`
-		: "Progress unavailable";
+		: null;
 
 	return (
 		<div className="flex shrink-0 items-center gap-1 border-l border-border/50 pl-2 sm:gap-1.5 sm:pl-3">
@@ -76,13 +76,15 @@ export function AppShellHeaderTrailing({
 					</Button>
 				</Card>
 			) : null}
-			<span
-				className="hidden tabular-nums text-xs font-medium text-muted-foreground sm:inline"
-				title={progressLabel}
-			>
-				<span className="sr-only">{progressVerb}: </span>
-				{mission ? `${mission.progressCount}/${mission.totalLessons}` : "--/--"}
-			</span>
+			{mission ? (
+				<span
+					className="hidden tabular-nums text-xs font-medium text-muted-foreground sm:inline"
+					title={progressLabel ?? undefined}
+				>
+					<span className="sr-only">{progressVerb}: </span>
+					{`${mission.progressCount}/${mission.totalLessons}`}
+				</span>
+			) : null}
 			<div className="flex items-center gap-0.5 pl-0.5 sm:gap-1">
 				<AppShellThemeToggle />
 				<AppShellUserMenu />

@@ -29,6 +29,8 @@ What this workflow does, for whom, and why it exists.
 - Outcome statement:
 - Marketing goals:
 - Channel scope:
+- Approved claims used:
+- Claims withheld:
 
 ## 3. Source basis
 - Stable knowledge used:
@@ -43,14 +45,17 @@ What this workflow does, for whom, and why it exists.
 - [ ] Research workflow
 - [ ] Content workflow
 - [ ] Analytics workflow
+- [ ] Direct-response / VSL workflow
 
 ## 5. Output contract
+- Asset type:
 - Primary output:
 - Required sections:
 - Brand rules:
 - Citation rules:
 - Confidence / caveat rules:
 - Human review note required? yes / no
+- Claim class used: evergreen / verify-first / customer-specific
 
 ## 6. Approval and publishing
 - Who reviews:
@@ -82,8 +87,10 @@ What this workflow does, for whom, and why it exists.
 - product context
 - stable knowledge
 - fresh inputs
+- asset type
 - output contract
 - review rule
+- approved claims used
 - source basis
 - success metric
 - last reviewed date

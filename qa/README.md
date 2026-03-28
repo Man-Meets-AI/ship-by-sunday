@@ -174,7 +174,7 @@ For packet-focused QA on local dev, the concrete behaviors worth checking are:
 
 - `/start` is a stacked kickoff with one primary `Continue with ...` CTA
 - the routed packet workbench keeps the connected within-stage page strip intact
-- the workbench uses autosave-backed feedback and one primary `Continue` action
+- the workbench uses Continue-only save feedback and one primary `Continue` action
 - `/review` keeps the Starter Snapshot primary and delays the full `Execute / Ship` surface until after the download moment
 
 ## Environment sources

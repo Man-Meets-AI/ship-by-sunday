@@ -1,34 +1,24 @@
 "use client";
 
-import type { ChangeEvent } from "react";
 import type {
 	CanonicalProjectFactKey,
+	CanonicalProjectFactsDraft,
 	PacketStepDefinition,
 } from "@packet-compiler";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-	Field,
-	FieldContent,
-	FieldError,
-	FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-	packetFieldInputKind,
-	packetFieldLabel,
-} from "@/features/packet-flow/lib/packet-field-helpers";
 import type { PacketStepInlineFeedback } from "@/features/packet-flow/lib/packet-step-save-feedback";
-import { getPacketStageFieldInputId } from "@/features/packet-flow/lib/packet-step-save-feedback";
 import { PacketStageSaveFeedback } from "./packet-stage-save-feedback";
+import { PacketStageStepField } from "./packet-stage-step-field";
 
 type PacketStageStepCardProps = {
 	currentStep: PacketStepDefinition;
+	stepHeading: string;
 	currentStepIndex: number;
 	totalSteps: number;
 	canGoBack: boolean;
 	draftValues: Record<string, string>;
+	facts: CanonicalProjectFactsDraft;
 	fieldErrors: Record<string, string>;
 	feedback: PacketStepInlineFeedback | null;
 	isSaving: boolean;
@@ -37,62 +27,14 @@ type PacketStageStepCardProps = {
 	onSaveAndContinue: () => void;
 };
 
-function PacketStageStepField({
-	fieldKey,
-	stepId,
-	initialValue,
-	errorMessage,
-	onChange,
-}: {
-	fieldKey: CanonicalProjectFactKey;
-	stepId: string;
-	initialValue: string;
-	errorMessage?: string;
-	onChange: (fieldKey: CanonicalProjectFactKey, nextValue: string) => void;
-}) {
-	const kind = packetFieldInputKind(fieldKey);
-	const inputId = getPacketStageFieldInputId(stepId, fieldKey);
-	const errorId = errorMessage ? `${inputId}-error` : undefined;
-	const handleChange = (
-		event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-	) => onChange(fieldKey, event.target.value);
-
-	return (
-		<Field data-invalid={errorMessage ? true : undefined}>
-			<FieldLabel htmlFor={inputId}>{packetFieldLabel(fieldKey)}</FieldLabel>
-			<FieldContent>
-				{kind === "textarea" ? (
-					<Textarea
-						key={`${stepId}:${fieldKey}:${initialValue}`}
-						id={inputId}
-						defaultValue={initialValue}
-						onChange={handleChange}
-						rows={fieldKey === "section_narrative" ? 6 : 4}
-						aria-describedby={errorId}
-						aria-invalid={errorMessage ? true : undefined}
-					/>
-				) : (
-					<Input
-						key={`${stepId}:${fieldKey}:${initialValue}`}
-						id={inputId}
-						type={kind === "number" ? "number" : "text"}
-						defaultValue={initialValue}
-						onChange={handleChange}
-						aria-describedby={errorId}
-						aria-invalid={errorMessage ? true : undefined}
-					/>
-				)}
-				<FieldError id={errorId}>{errorMessage}</FieldError>
-			</FieldContent>
-		</Field>
-	);
-}
 export function PacketStageStepCard({
 	currentStep,
+	stepHeading,
 	currentStepIndex,
 	totalSteps,
 	canGoBack,
 	draftValues,
+	facts,
 	fieldErrors,
 	feedback,
 	isSaving,
@@ -107,7 +49,7 @@ export function PacketStageStepCard({
 					Page {currentStepIndex + 1} of {totalSteps}
 				</p>
 				<h2 className="text-2xl font-semibold tracking-tight text-balance sm:text-[2rem]">
-					{currentStep.label}
+					{stepHeading}
 				</h2>
 			</div>
 			{feedback ? <PacketStageSaveFeedback feedback={feedback} /> : null}
@@ -116,9 +58,11 @@ export function PacketStageStepCard({
 					<PacketStageStepField
 						key={fieldKey}
 						fieldKey={fieldKey}
-						stepId={currentStep.id}
-						initialValue={draftValues[fieldKey] ?? ""}
+						facts={facts}
+						step={currentStep}
+						value={draftValues[fieldKey] ?? ""}
 						errorMessage={fieldErrors[fieldKey]}
+						isSaving={isSaving}
 						onChange={onChange}
 					/>
 				))}

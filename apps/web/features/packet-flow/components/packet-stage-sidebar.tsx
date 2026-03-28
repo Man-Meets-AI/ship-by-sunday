@@ -14,14 +14,17 @@ export function PacketStageSidebar({
 	stage,
 	stageStatus,
 	nextStageId,
+	onLinkNavigate,
+	onNavigate,
 }: {
 	stage: PacketStageDefinition;
 	stageStatus: PacketStageStatus;
 	nextStageId?: "design" | "marketing" | "build-plan" | "review";
+	onLinkNavigate: (event: { preventDefault: () => void }, href: string) => void;
+	onNavigate: (href: string) => void;
 }) {
 	const stageLabel = stage.label;
 	const missingKeys = new Set(stageStatus.missingFactKeys);
-
 	const totalFields = stage.steps.reduce(
 		(sum, step) => sum + (step.requiredFieldKeys ?? step.fieldKeys).length,
 		0,
@@ -34,13 +37,12 @@ export function PacketStageSidebar({
 			stepLabel: step.label,
 			missingLabels: (step.requiredFieldKeys ?? step.fieldKeys)
 				.filter((key) => missingKeys.has(key))
-				.map(packetFieldLabel),
+				.map((fieldKey) => packetFieldLabel(fieldKey)),
 		}))
 		.filter((step) => step.missingLabels.length > 0);
 
 	return (
 		<aside className="space-y-8">
-			{/* Progress HUD */}
 			<div className="space-y-2">
 				<div className="flex items-center justify-between">
 					<p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">
@@ -60,7 +62,6 @@ export function PacketStageSidebar({
 						)}
 						style={{ width: `${progressPercent}%` }}
 					/>
-					{/* XP segments */}
 					<div className="absolute inset-0 flex justify-between px-0.5 opacity-20">
 						{Array.from({ length: Math.min(totalFields, 12) }).map((_, i) => (
 							<div key={i} className="h-full w-px bg-background" />
@@ -69,7 +70,6 @@ export function PacketStageSidebar({
 				</div>
 			</div>
 
-			{/* Status heading */}
 			<div className="space-y-1.5">
 				<h2 className="text-lg font-bold tracking-tight text-foreground">
 					{stageStatus.isComplete
@@ -111,7 +111,6 @@ export function PacketStageSidebar({
 				</div>
 			) : null}
 
-			{/* Actions */}
 			<div className="flex flex-col gap-3 pt-4">
 				{nextStageId ? (
 					<Button
@@ -119,7 +118,23 @@ export function PacketStageSidebar({
 						variant="outline"
 						className="h-11 w-full border-border/60 font-semibold transition-all hover:bg-muted/50"
 					>
-						<Link href={getPacketStageDefinition(nextStageId).route}>
+						<Link
+							href={getPacketStageDefinition(nextStageId).route}
+							onNavigate={(event) =>
+								onLinkNavigate(
+									event,
+									getPacketStageDefinition(nextStageId).route,
+								)
+							}
+							onClick={(event) => {
+								if (event.defaultPrevented) {
+									return;
+								}
+
+								event.preventDefault();
+								onNavigate(getPacketStageDefinition(nextStageId).route);
+							}}
+						>
 							Enter Next Level: {getPacketStageDefinition(nextStageId).label}
 						</Link>
 					</Button>

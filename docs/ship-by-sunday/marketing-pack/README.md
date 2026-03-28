@@ -34,7 +34,15 @@ It is the template for the customer-facing `docs/marketing/` packet that should 
 - `CHECKLIST.md` - marketing capability and governance checklist
 - `PLANS.md` - rollout plan for marketing workflows and deliverables
 - `documentation.md` - shipped workflow and governance documentation
+- `claims.md` - approved claims, verify-first claims, and forbidden claim patterns
+- `review-matrix.md` - what can be drafted, what must be reviewed, and what must never auto-publish
+- `deliverables.md` - the actual marketing artifacts this packet is meant to support
 - `examples/launch-message-kit.md` - a concrete golden-example packet
+- `examples/homepage-message-hierarchy.md` - example homepage narrative output
+- `examples/launch-email-outline.md` - example launch email output
+- `examples/social-variants.md` - example social adaptation output
+- `examples/porch-close.md` - short close copy for direct-response video or verbal sales
+- `examples/vsl-script.md` - cold open, opener, and full VSL draft
 
 ## Ship by Sunday source basis
 

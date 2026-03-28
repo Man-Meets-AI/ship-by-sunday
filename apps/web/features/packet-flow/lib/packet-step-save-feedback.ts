@@ -60,6 +60,13 @@ export function getPacketStageFieldInputId(
 	return `packet-stage-field-${stepId}-${fieldKey}`;
 }
 
+export function getPacketStageFieldControlId(
+	stepId: string,
+	fieldKey: CanonicalProjectFactKey,
+) {
+	return `${getPacketStageFieldInputId(stepId, fieldKey)}-control`;
+}
+
 function isMissingPacketStepValue(
 	fieldKey: CanonicalProjectFactKey,
 	value: PacketStepValue,
