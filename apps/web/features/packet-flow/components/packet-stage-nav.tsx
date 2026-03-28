@@ -10,10 +10,17 @@ import { cn } from "@/lib/utils";
 
 export function PacketStageNav({
 	currentStageId,
+	onLinkNavigate,
 	stageStatuses,
+	onNavigate,
 }: {
 	currentStageId: PacketStageId;
+	onLinkNavigate?: (
+		event: { preventDefault: () => void },
+		href: string,
+	) => void;
 	stageStatuses: PacketStageStatus[];
+	onNavigate?: (href: string) => void;
 }) {
 	return (
 		<nav aria-label="Packet stages">
@@ -56,6 +63,15 @@ export function PacketStageNav({
 								href={stage.route}
 								aria-current={isCurrent ? "page" : undefined}
 								className="block"
+								onNavigate={(event) => onLinkNavigate?.(event, stage.route)}
+								onClick={(event) => {
+									if (event.defaultPrevented || !onNavigate) {
+										return;
+									}
+
+									event.preventDefault();
+									onNavigate(stage.route);
+								}}
 							>
 								{label}
 							</Link>

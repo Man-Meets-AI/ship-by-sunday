@@ -53,7 +53,7 @@ describe("PacketStageSidebar", () => {
 			/>,
 		);
 
-		expect(screen.getByText("Why This Matters")).toBeTruthy();
+		expect(screen.getByText("Why does this person want this?")).toBeTruthy();
 		expect(screen.queryByText("why_this_matters")).toBeNull();
 	});
 });

@@ -16,6 +16,8 @@ Use this file to define Ship by Sunday-generated marketing GPTs, skills, and rep
 - approved claims
 - do-not-say rules
 - channel scope
+- marketing goals
+- buyer AI promise
 - human review rules
 - current-facts policy
 
@@ -51,6 +53,12 @@ Every workflow should define:
 - confidence or caveat rules
 - review note for the human approver
 
+Use these files together:
+
+- `claims.md`
+- `review-matrix.md`
+- `deliverables.md`
+
 ## Suggested starter workflow types
 
 - launch page and email kit
@@ -58,3 +66,4 @@ Every workflow should define:
 - customer story or proof harvesting
 - social and channel adaptation
 - weekly performance digest
+- internal review brief for claims and channel fit

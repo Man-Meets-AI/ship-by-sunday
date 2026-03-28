@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertTriangleIcon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import type { PacketStepInlineFeedback } from "@/features/packet-flow/lib/packet-step-save-feedback";
@@ -23,6 +24,7 @@ export function PacketStageSaveFeedback({
 			variant={feedback.tone === "destructive" ? "destructive" : "default"}
 			className={cn(feedbackToneClassName[feedback.tone])}
 		>
+			{feedback.tone === "warning" ? <AlertTriangleIcon aria-hidden /> : null}
 			<AlertTitle>{feedback.title}</AlertTitle>
 			<AlertDescription>{feedback.description}</AlertDescription>
 		</Alert>

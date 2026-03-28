@@ -3,7 +3,6 @@
 import type { OptimisticLocalStore } from "convex/browser";
 import type { ReactMutation } from "convex/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import type {
 	CanonicalProjectFactKey,
 	CanonicalProjectFactsDraft,
@@ -21,22 +20,22 @@ import {
 import { PRODUCT_APP_ID } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import {
-	buildStageDraftValues,
+	buildStepDraftValues,
 	buildSavePayload,
 } from "@/features/packet-flow/lib/packet-field-helpers";
 import {
 	buildPacketStepSaveErrorInlineFeedback,
 	buildPacketStepSaveInlineFeedback,
 	classifyPacketStepSave,
+	getPacketStageFieldControlId,
 	getPacketStageFieldInputId,
 	type PacketStepDraftValues,
 	type PacketStepInlineFeedback,
+	type PacketStepSaveFeedback,
 	type PacketStepSavePayload,
-	type PacketStepSaveState,
 } from "@/features/packet-flow/lib/packet-step-save-feedback";
 import { doesCompletingStepCompleteStage } from "@/features/packet-flow/lib/packet-stage-routes";
 import type { PacketWorkspaceState } from "@/features/packet-flow/lib/packet-workspace-types";
-import { useAutosave } from "@/features/shared/hooks/use-autosave";
 
 type SaveProjectDefinitionFactsArgs = {
 	stageId: Exclude<PacketStageId, "start" | "review">;
@@ -46,29 +45,7 @@ type SaveProjectDefinitionFactsMutation = ReactMutation<
 	typeof api.packet.saveProjectDefinitionFacts
 >;
 
-type StepStateRecord<T> = Record<string, T | undefined>;
-type DraftValuesByStepId = Record<string, PacketStepDraftValues>;
-
-const EMPTY_PACKET_STEP_DRAFT_VALUES: PacketStepDraftValues = {};
-const EMPTY_INVALID_FIELD_KEYS: CanonicalProjectFactKey[] = [];
 const OPTIMISTIC_PACKET_CLERK_USER_ID = "optimistic-local-user";
-
-function removeStepEntry<T>(record: StepStateRecord<T>, stepId: string) {
-	const nextRecord = { ...record };
-	delete nextRecord[stepId];
-	return nextRecord;
-}
-
-function upsertStepEntry<T>(
-	record: StepStateRecord<T>,
-	stepId: string,
-	value: T,
-) {
-	return {
-		...record,
-		[stepId]: value,
-	};
-}
 
 function arePacketStepDraftValuesEqual(
 	left: PacketStepDraftValues,
@@ -91,21 +68,6 @@ function buildPlaceholdersInUse(facts: CanonicalProjectFactsDraft) {
 	return placeholderFriendlyFactKeys.filter(
 		(fieldKey) => facts[fieldKey] === undefined,
 	);
-}
-
-function readPacketStepDraftValuesFromDom(
-	step: PacketStepDefinition,
-	fallbackDraftValues: PacketStepDraftValues,
-) {
-	return Object.fromEntries(
-		step.fieldKeys.map((fieldKey) => {
-			const input = document.getElementById(
-				getPacketStageFieldInputId(step.id, fieldKey),
-			) as HTMLInputElement | HTMLTextAreaElement | null;
-
-			return [fieldKey, input?.value ?? fallbackDraftValues[fieldKey] ?? ""];
-		}),
-	) as PacketStepDraftValues;
 }
 
 function buildNextProjectFacts(
@@ -188,11 +150,18 @@ function focusFirstMissingField(
 		return;
 	}
 
-	const input = document.getElementById(
-		getPacketStageFieldInputId(step.id, fieldKey),
-	) as HTMLInputElement | HTMLTextAreaElement | null;
-	input?.scrollIntoView?.({ behavior: "smooth", block: "center" });
-	input?.focus();
+	window.setTimeout(() => {
+		const control = document.getElementById(
+			getPacketStageFieldControlId(step.id, fieldKey),
+		) as HTMLElement | null;
+		const input = document.getElementById(
+			getPacketStageFieldInputId(step.id, fieldKey),
+		) as HTMLInputElement | HTMLTextAreaElement | null;
+		const focusTarget = control ?? input;
+
+		focusTarget?.scrollIntoView?.({ behavior: "smooth", block: "center" });
+		focusTarget?.focus?.();
+	}, 0);
 }
 
 function buildFieldErrorByFieldKey(
@@ -220,6 +189,9 @@ function requirePacketStep(
 }
 
 export function usePacketStageStepState({
+	navigateToHref,
+	onDirtyChange,
+	requestNavigation,
 	stage,
 	stageId,
 	stageStatus,
@@ -229,6 +201,9 @@ export function usePacketStageStepState({
 	projectFacts,
 	saveProjectDefinitionFacts,
 }: {
+	navigateToHref: (href: string) => void;
+	onDirtyChange?: (hasUnsavedChanges: boolean) => void;
+	requestNavigation: (href: string) => void;
 	stage: PacketStageDefinition;
 	stageId: Exclude<PacketStageId, "start" | "review">;
 	stageStatus: PacketStageStatus;
@@ -238,10 +213,10 @@ export function usePacketStageStepState({
 	projectFacts: CanonicalProjectFactsDraft;
 	saveProjectDefinitionFacts: SaveProjectDefinitionFactsMutation;
 }) {
-	const router = useRouter();
-	const savedDraftValuesByStepId = useMemo<DraftValuesByStepId>(
-		() => buildStageDraftValues(projectFacts, stage),
-		[projectFacts, stage],
+	const currentStep = requirePacketStep(stage, stageId, stepId);
+	const liveSavedValues = useMemo(
+		() => buildStepDraftValues(projectFacts, currentStep),
+		[currentStep, projectFacts],
 	);
 	const saveProjectDefinitionFactsWithOptimism = useMemo(
 		() =>
@@ -250,226 +225,212 @@ export function usePacketStageStepState({
 			}),
 		[saveProjectDefinitionFacts],
 	);
-	const lastCommittedDraftValuesByStepIdRef = useRef<DraftValuesByStepId>(
-		savedDraftValuesByStepId,
-	);
-	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-	const [validationStateByStepId, setValidationStateByStepId] = useState<
-		StepStateRecord<PacketStepSaveState>
-	>({});
-	const [invalidFieldKeysByStepId, setInvalidFieldKeysByStepId] = useState<
-		StepStateRecord<CanonicalProjectFactKey[]>
-	>({});
-	const [saveErrorByStepId, setSaveErrorByStepId] = useState<
-		StepStateRecord<boolean>
-	>({});
-	const [successStepId, setSuccessStepId] = useState<string | null>(null);
+	const [savedBaselineValues, setSavedBaselineValues] =
+		useState<PacketStepDraftValues>(liveSavedValues);
+	const [currentDraftValues, setCurrentDraftValues] =
+		useState<PacketStepDraftValues>(liveSavedValues);
+	const [currentSaveFeedback, setCurrentSaveFeedback] =
+		useState<PacketStepSaveFeedback | null>(null);
+	const [validationRequested, setValidationRequested] = useState(false);
+	const [hasSaveError, setHasSaveError] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
-
-	useEffect(() => {
-		if (!hasUnsavedChanges) {
-			lastCommittedDraftValuesByStepIdRef.current = savedDraftValuesByStepId;
-		}
-	}, [hasUnsavedChanges, savedDraftValuesByStepId]);
-
-	useEffect(() => {
-		setHasUnsavedChanges(false);
-		setSuccessStepId(null);
-	}, [stepId]);
-
-	const currentStep = requirePacketStep(stage, stageId, stepId);
-
-	const committedDraftValuesByStepId = hasUnsavedChanges
-		? lastCommittedDraftValuesByStepIdRef.current
-		: savedDraftValuesByStepId;
-	const currentDraftValues =
-		committedDraftValuesByStepId[currentStep.id] ??
-		EMPTY_PACKET_STEP_DRAFT_VALUES;
-	const currentSavedValues =
-		savedDraftValuesByStepId[currentStep.id] ?? EMPTY_PACKET_STEP_DRAFT_VALUES;
-	const currentInvalidFieldKeys =
-		invalidFieldKeysByStepId[currentStep.id] ?? EMPTY_INVALID_FIELD_KEYS;
-	const currentValidationState = validationStateByStepId[currentStep.id];
-	const readCurrentDraftValues = useCallback(
-		() => readPacketStepDraftValuesFromDom(currentStep, currentDraftValues),
-		[currentDraftValues, currentStep],
+	const previousStepIdRef = useRef(stepId);
+	const previousLiveSavedValuesRef = useRef(liveSavedValues);
+	const currentDraftValuesRef = useRef(currentDraftValues);
+	const hasUnsavedChanges = useMemo(
+		() =>
+			!arePacketStepDraftValuesEqual(currentDraftValues, savedBaselineValues),
+		[currentDraftValues, savedBaselineValues],
 	);
+	const hasUnsavedChangesRef = useRef(hasUnsavedChanges);
 
-	const saveCurrentStep = useCallback(async (): Promise<boolean> => {
-		const submittedDraftValues = readCurrentDraftValues();
-		const savePayload = buildSavePayload(currentStep, submittedDraftValues);
+	useEffect(() => {
+		currentDraftValuesRef.current = currentDraftValues;
+	}, [currentDraftValues]);
 
-		setSuccessStepId(null);
-		setSaveErrorByStepId((current) => removeStepEntry(current, currentStep.id));
+	useEffect(() => {
+		hasUnsavedChangesRef.current = hasUnsavedChanges;
+		onDirtyChange?.(hasUnsavedChanges);
+	}, [hasUnsavedChanges, onDirtyChange]);
 
-		const saveClassification = classifyPacketStepSave(
-			currentStep,
-			submittedDraftValues,
-			currentSavedValues,
-			savePayload,
-		);
-
-		setIsSaving(true);
-		try {
-			await saveProjectDefinitionFactsWithOptimism({
-				stageId,
-				...savePayload,
-			});
-		} catch {
-			setSaveErrorByStepId((current) =>
-				upsertStepEntry(current, currentStep.id, true),
-			);
-			return false;
-		} finally {
-			setIsSaving(false);
+	useEffect(() => {
+		if (previousStepIdRef.current === stepId) {
+			return;
 		}
 
-		const latestDraftValues = readCurrentDraftValues();
-		setHasUnsavedChanges(
-			!arePacketStepDraftValuesEqual(latestDraftValues, submittedDraftValues),
-		);
+		previousStepIdRef.current = stepId;
+		previousLiveSavedValuesRef.current = liveSavedValues;
+		setSavedBaselineValues(liveSavedValues);
+		setCurrentDraftValues(liveSavedValues);
+		onDirtyChange?.(false);
+		setCurrentSaveFeedback(null);
+		setValidationRequested(false);
+		setHasSaveError(false);
+	}, [liveSavedValues, onDirtyChange, stepId]);
 
-		if (saveClassification.state === "complete") {
-			setValidationStateByStepId((current) =>
-				removeStepEntry(current, currentStep.id),
-			);
-			setInvalidFieldKeysByStepId((current) =>
-				removeStepEntry(current, currentStep.id),
-			);
-			setSuccessStepId(currentStep.id);
-		} else {
-			setValidationStateByStepId((current) =>
-				upsertStepEntry(current, currentStep.id, saveClassification.state),
-			);
-			setInvalidFieldKeysByStepId((current) =>
-				upsertStepEntry(
-					current,
-					currentStep.id,
-					saveClassification.missingRequiredFieldKeys,
-				),
-			);
+	useEffect(() => {
+		if (previousStepIdRef.current !== stepId) {
+			return;
+		}
+		if (
+			arePacketStepDraftValuesEqual(
+				previousLiveSavedValuesRef.current,
+				liveSavedValues,
+			)
+		) {
+			return;
 		}
 
-		return true;
-	}, [
-		currentSavedValues,
-		currentStep,
-		readCurrentDraftValues,
-		saveProjectDefinitionFactsWithOptimism,
-		stageId,
-	]);
+		const wasDirtyBeforeLiveUpdate = hasUnsavedChangesRef.current;
+		previousLiveSavedValuesRef.current = liveSavedValues;
+		setSavedBaselineValues(liveSavedValues);
+		if (!wasDirtyBeforeLiveUpdate) {
+			setCurrentDraftValues(liveSavedValues);
+		}
+	}, [liveSavedValues, stepId]);
 
-	useAutosave({
-		shouldAutosave:
-			hasUnsavedChanges && !isSaving && !saveErrorByStepId[currentStep.id],
-		delayMs: 1000,
-		onAutosave: async () => {
-			await saveCurrentStep();
+	const saveCurrentStep = useCallback(
+		async ({
+			saveClassification,
+			revealValidation,
+			showSuccess,
+		}: {
+			saveClassification?: PacketStepSaveFeedback;
+			revealValidation?: boolean;
+			showSuccess?: boolean;
+		} = {}): Promise<boolean> => {
+			const submittedDraftValues = currentDraftValuesRef.current;
+			const savePayload = buildSavePayload(currentStep, submittedDraftValues);
+			const nextSaveClassification =
+				saveClassification ??
+				classifyPacketStepSave(
+					currentStep,
+					submittedDraftValues,
+					savedBaselineValues,
+					savePayload,
+				);
+
+			setHasSaveError(false);
+			setIsSaving(true);
+			try {
+				await saveProjectDefinitionFactsWithOptimism({
+					stageId,
+					...savePayload,
+				});
+			} catch {
+				setHasSaveError(true);
+				return false;
+			} finally {
+				setIsSaving(false);
+			}
+
+			setSavedBaselineValues(submittedDraftValues);
+			onDirtyChange?.(false);
+			if (nextSaveClassification.state === "complete") {
+				setValidationRequested(false);
+				if (showSuccess) {
+					setCurrentSaveFeedback(nextSaveClassification);
+				} else {
+					setCurrentSaveFeedback(null);
+				}
+				return true;
+			}
+
+			if (revealValidation || validationRequested) {
+				setValidationRequested(true);
+				setCurrentSaveFeedback(nextSaveClassification);
+				return true;
+			}
+
+			setCurrentSaveFeedback(null);
+			return true;
 		},
-	});
+		[
+			currentStep,
+			onDirtyChange,
+			savedBaselineValues,
+			saveProjectDefinitionFactsWithOptimism,
+			stageId,
+			validationRequested,
+		],
+	);
 
 	const currentFeedback: PacketStepInlineFeedback | null = (() => {
-		if (saveErrorByStepId[currentStep.id]) {
+		if (hasSaveError) {
 			return buildPacketStepSaveErrorInlineFeedback();
 		}
-		if (successStepId === currentStep.id) {
-			return buildPacketStepSaveInlineFeedback(currentStep.label, {
-				state: "complete",
-				missingRequiredFieldKeys: [],
-			});
-		}
-		if (!currentValidationState) {
+		if (!currentSaveFeedback) {
 			return null;
 		}
 
-		return buildPacketStepSaveInlineFeedback(currentStep.label, {
-			state: currentValidationState,
-			missingRequiredFieldKeys: currentInvalidFieldKeys,
-		});
+		return buildPacketStepSaveInlineFeedback(
+			currentStep.label,
+			currentSaveFeedback,
+		);
 	})();
-	const currentFieldErrors = buildFieldErrorByFieldKey(currentInvalidFieldKeys);
+	const currentFieldErrors =
+		validationRequested && currentSaveFeedback
+			? buildFieldErrorByFieldKey(currentSaveFeedback.missingRequiredFieldKeys)
+			: {};
 
 	function handleFieldChange(
 		fieldKey: CanonicalProjectFactKey,
 		nextValue: string,
 	) {
-		if (saveErrorByStepId[currentStep.id]) {
-			setSaveErrorByStepId((current) =>
-				removeStepEntry(current, currentStep.id),
-			);
-		}
-
+		setHasSaveError(false);
 		const nextDraftValues: PacketStepDraftValues = {
-			...readCurrentDraftValues(),
+			...currentDraftValuesRef.current,
 			[fieldKey]: nextValue,
 		};
-
-		setHasUnsavedChanges(
-			!arePacketStepDraftValuesEqual(nextDraftValues, currentSavedValues),
+		const nextHasUnsavedChanges = !arePacketStepDraftValuesEqual(
+			nextDraftValues,
+			savedBaselineValues,
 		);
-		setSuccessStepId(null);
-
-		const hadValidationFeedback =
-			Boolean(currentValidationState) || currentInvalidFieldKeys.length > 0;
-		if (!hadValidationFeedback) {
+		setCurrentDraftValues(nextDraftValues);
+		onDirtyChange?.(nextHasUnsavedChanges);
+		if (!validationRequested) {
+			setCurrentSaveFeedback(null);
 			return;
 		}
 
 		const nextClassification = classifyPacketStepSave(
 			currentStep,
 			nextDraftValues,
-			currentSavedValues,
+			savedBaselineValues,
 			buildSavePayload(currentStep, nextDraftValues),
 		);
 		if (nextClassification.state === "complete") {
-			setValidationStateByStepId((current) =>
-				removeStepEntry(current, currentStep.id),
-			);
-			setInvalidFieldKeysByStepId((current) =>
-				removeStepEntry(current, currentStep.id),
-			);
+			setValidationRequested(false);
+			setCurrentSaveFeedback(null);
 			return;
 		}
 
-		setValidationStateByStepId((current) =>
-			upsertStepEntry(current, currentStep.id, nextClassification.state),
-		);
-		setInvalidFieldKeysByStepId((current) =>
-			upsertStepEntry(
-				current,
-				currentStep.id,
-				nextClassification.missingRequiredFieldKeys,
-			),
-		);
+		setCurrentSaveFeedback(nextClassification);
 	}
 
 	async function handleSaveAndContinue() {
-		const currentStepDraftValues = readCurrentDraftValues();
+		const submittedDraftValues = currentDraftValuesRef.current;
 		const saveClassification = classifyPacketStepSave(
 			currentStep,
-			currentStepDraftValues,
-			currentSavedValues,
-			buildSavePayload(currentStep, currentStepDraftValues),
+			submittedDraftValues,
+			savedBaselineValues,
+			buildSavePayload(currentStep, submittedDraftValues),
 		);
 
 		if (hasUnsavedChanges) {
-			const success = await saveCurrentStep();
+			const success = await saveCurrentStep({
+				saveClassification,
+				revealValidation: saveClassification.state !== "complete",
+				showSuccess: saveClassification.state === "complete",
+			});
 			if (!success) {
 				return;
 			}
 		}
 
 		if (saveClassification.state === "blank") {
-			setValidationStateByStepId((current) =>
-				upsertStepEntry(current, currentStep.id, saveClassification.state),
-			);
-			setInvalidFieldKeysByStepId((current) =>
-				upsertStepEntry(
-					current,
-					currentStep.id,
-					saveClassification.missingRequiredFieldKeys,
-				),
-			);
+			setValidationRequested(true);
+			setCurrentSaveFeedback(saveClassification);
 			focusFirstMissingField(
 				currentStep,
 				saveClassification.firstMissingRequiredFieldKey,
@@ -478,16 +439,8 @@ export function usePacketStageStepState({
 		}
 
 		if (saveClassification.state !== "complete") {
-			setValidationStateByStepId((current) =>
-				upsertStepEntry(current, currentStep.id, saveClassification.state),
-			);
-			setInvalidFieldKeysByStepId((current) =>
-				upsertStepEntry(
-					current,
-					currentStep.id,
-					saveClassification.missingRequiredFieldKeys,
-				),
-			);
+			setValidationRequested(true);
+			setCurrentSaveFeedback(saveClassification);
 			focusFirstMissingField(
 				currentStep,
 				saveClassification.firstMissingRequiredFieldKey,
@@ -500,8 +453,11 @@ export function usePacketStageStepState({
 			(currentStep.id !== stage.steps.at(-1)?.id ||
 				doesCompletingStepCompleteStage(stageStatus, currentStep))
 		) {
-			router.push(nextHref);
+			navigateToHref(nextHref);
+			return;
 		}
+
+		setCurrentSaveFeedback(saveClassification);
 	}
 
 	return {
@@ -511,10 +467,11 @@ export function usePacketStageStepState({
 		currentDraftValues,
 		handleSaveAndContinue,
 		handleFieldChange,
+		hasUnsavedChanges,
 		isSaving,
 		goToPreviousStep: () => {
 			if (previousHref) {
-				router.push(previousHref);
+				requestNavigation?.(previousHref);
 			}
 		},
 	};

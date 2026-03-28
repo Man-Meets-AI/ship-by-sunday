@@ -27,6 +27,7 @@ const redirectMock = vi.fn((href: string) => {
 	throw new Error(`NEXT_REDIRECT:${href}`);
 });
 const pushMock = vi.fn();
+const replaceMock = vi.fn();
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -47,6 +48,7 @@ vi.mock("next/navigation", () => ({
 	redirect: (href: string) => redirectMock(href),
 	useRouter: () => ({
 		push: pushMock,
+		replace: replaceMock,
 	}),
 }));
 
@@ -118,6 +120,7 @@ describe("PacketStagePage", () => {
 		useQueryMock.mockReturnValue(undefined);
 		redirectMock.mockClear();
 		pushMock.mockReset();
+		replaceMock.mockReset();
 	});
 
 	it("does not loop when live workspace state arrives with new object identities", async () => {
@@ -173,7 +176,7 @@ describe("PacketStagePage", () => {
 		);
 
 		expect(
-			(screen.getByLabelText("Product Name") as HTMLInputElement).value,
+			(screen.getByLabelText("What's the name?") as HTMLInputElement).value,
 		).toBe("Initial packet name");
 
 		liveWorkspaceState = createWorkspaceState({
@@ -189,8 +192,85 @@ describe("PacketStagePage", () => {
 
 		await waitFor(() =>
 			expect(
-				(screen.getByLabelText("Product Name") as HTMLInputElement).value,
+				(screen.getByLabelText("What's the name?") as HTMLInputElement).value,
 			).toBe("Live Convex packet name"),
+		);
+	});
+
+	it("preserves the dirty local draft across live Convex updates until the draft is clean again", async () => {
+		const user = userEvent.setup();
+		const initialWorkspaceState = createWorkspaceState({
+			product_name: "Initial packet name",
+		});
+		let liveWorkspaceState: PacketWorkspaceState | undefined = undefined;
+		useQueryMock.mockImplementation(() => liveWorkspaceState);
+		const { rerender } = render(
+			<PacketStagePage
+				stageId="product"
+				stepId="foundation"
+				initialWorkspaceState={initialWorkspaceState}
+			/>,
+		);
+
+		const productNameField = screen.getByLabelText("What's the name?");
+		await user.clear(productNameField);
+		await user.type(productNameField, "Local dirty packet name");
+
+		liveWorkspaceState = createWorkspaceState({
+			product_name: "Live Convex packet name",
+		});
+		rerender(
+			<PacketStagePage
+				stageId="product"
+				stepId="foundation"
+				initialWorkspaceState={initialWorkspaceState}
+			/>,
+		);
+
+		expect((productNameField as HTMLInputElement).value).toBe(
+			"Local dirty packet name",
+		);
+
+		await user.type(
+			screen.getByLabelText("What's the one-liner?"),
+			"A packet-first builder for Sunday launches.",
+		);
+		await user.type(
+			screen.getByLabelText("Who wants this? Who benefits from this?"),
+			"Indie founders shipping a paid product.",
+		);
+		await user.type(
+			screen.getByLabelText("Why does this person want this?"),
+			"Sunday-bound launches need sharper guidance than generic courses.",
+		);
+		await user.click(screen.getByRole("button", { name: "Continue" }));
+
+		await waitFor(() =>
+			expect(saveProjectDefinitionFactsMock).toHaveBeenCalledWith(
+				expect.objectContaining({
+					stageId: "product",
+					factsPatch: expect.objectContaining({
+						product_name: "Local dirty packet name",
+					}),
+				}),
+			),
+		);
+
+		liveWorkspaceState = createWorkspaceState({
+			product_name: "Fresh live packet name",
+		});
+		rerender(
+			<PacketStagePage
+				stageId="product"
+				stepId="foundation"
+				initialWorkspaceState={initialWorkspaceState}
+			/>,
+		);
+
+		await waitFor(() =>
+			expect(
+				(screen.getByLabelText("What's the name?") as HTMLInputElement).value,
+			).toBe("Fresh live packet name"),
 		);
 	});
 
@@ -215,6 +295,68 @@ describe("PacketStagePage", () => {
 		).toBe("/product/problem");
 	});
 
+	it("opens a leave warning for dirty packet links and keeps the draft on Stay", async () => {
+		const user = userEvent.setup();
+		const workspaceState = createWorkspaceState({
+			product_name: undefined,
+			product_summary: undefined,
+			primary_user: undefined,
+			why_this_matters: undefined,
+		});
+
+		render(
+			<PacketStagePage
+				stageId="product"
+				stepId="foundation"
+				initialWorkspaceState={workspaceState}
+			/>,
+		);
+
+		const productNameField = screen.getByLabelText("What's the name?");
+		await user.type(productNameField, "Ship by Sunday");
+		await user.click(screen.getByRole("link", { name: "Start" }));
+
+		expect(pushMock).not.toHaveBeenCalled();
+		expect(replaceMock).not.toHaveBeenCalled();
+		expect(screen.getByText("Leave this packet page?")).toBeTruthy();
+		await user.click(screen.getByRole("button", { name: "Stay" }));
+
+		expect(screen.queryByText("Leave this packet page?")).toBeNull();
+		expect((productNameField as HTMLInputElement).value).toBe("Ship by Sunday");
+	});
+
+	it("only leaves a dirty packet page after Leave without saving is confirmed", async () => {
+		const user = userEvent.setup();
+		const workspaceState = createWorkspaceState({
+			product_name: undefined,
+			product_summary: undefined,
+			primary_user: undefined,
+			why_this_matters: undefined,
+		});
+
+		render(
+			<PacketStagePage
+				stageId="product"
+				stepId="foundation"
+				initialWorkspaceState={workspaceState}
+			/>,
+		);
+
+		await user.type(
+			screen.getByLabelText("What's the name?"),
+			"Ship by Sunday",
+		);
+		await user.selectOptions(screen.getByLabelText("Page"), "problem");
+
+		expect(pushMock).not.toHaveBeenCalled();
+		expect(screen.getByText("Leave this packet page?")).toBeTruthy();
+		await user.click(
+			screen.getByRole("button", { name: "Leave without saving" }),
+		);
+
+		expect(replaceMock).toHaveBeenCalledWith("/product/problem");
+	});
+
 	it("blocks blank saves, saves partial drafts in place, and clears field errors as users fix them", async () => {
 		const user = userEvent.setup();
 		const workspaceState = createWorkspaceState({
@@ -232,16 +374,27 @@ describe("PacketStagePage", () => {
 			/>,
 		);
 
-		const productNameField = screen.getByLabelText("Product Name");
-		const productSummaryField = screen.getByLabelText("Product Summary");
-		const primaryUserField = screen.getByLabelText("Primary User");
-		const whyThisMattersField = screen.getByLabelText("Why This Matters");
+		const productNameField = screen.getByLabelText("What's the name?");
+		const productSummaryField = screen.getByLabelText("What's the one-liner?");
+		const primaryUserField = screen.getByLabelText(
+			"Who wants this? Who benefits from this?",
+		);
+		const whyThisMattersField = screen.getByLabelText(
+			"Why does this person want this?",
+		);
+
+		await user.type(productNameField, "Ship by Sunday");
+
+		expect(saveProjectDefinitionFactsMock).not.toHaveBeenCalled();
+		expect(screen.queryByText("Saved for now.")).toBeNull();
+
+		await user.clear(productNameField);
 
 		await user.click(screen.getByRole("button", { name: "Continue" }));
 
 		expect(saveProjectDefinitionFactsMock).not.toHaveBeenCalled();
 		expect(screen.getByText("Foundation is still blank.")).toBeTruthy();
-		expect(document.activeElement).toBe(productNameField);
+		await waitFor(() => expect(document.activeElement).toBe(productNameField));
 		expect(productNameField.getAttribute("aria-invalid")).toBe("true");
 		expect(productSummaryField.getAttribute("aria-invalid")).toBe("true");
 		expect(primaryUserField.getAttribute("aria-invalid")).toBe("true");
@@ -267,7 +420,7 @@ describe("PacketStagePage", () => {
 		);
 		expect(screen.getByText("Saved for now.")).toBeTruthy();
 		expect(screen.getByText(/Page 1 of 4/)).toBeTruthy();
-		expect(document.activeElement).toBe(primaryUserField);
+		await waitFor(() => expect(document.activeElement).toBe(primaryUserField));
 		expect(primaryUserField.getAttribute("aria-invalid")).toBe("true");
 		expect(whyThisMattersField.getAttribute("aria-invalid")).toBe("true");
 
@@ -297,17 +450,20 @@ describe("PacketStagePage", () => {
 			/>,
 		);
 
-		await user.type(screen.getByLabelText("Product Name"), "Ship by Sunday");
 		await user.type(
-			screen.getByLabelText("Product Summary"),
+			screen.getByLabelText("What's the name?"),
+			"Ship by Sunday",
+		);
+		await user.type(
+			screen.getByLabelText("What's the one-liner?"),
 			"A packet-first builder for Sunday launches.",
 		);
 		await user.type(
-			screen.getByLabelText("Primary User"),
+			screen.getByLabelText("Who wants this? Who benefits from this?"),
 			"Indie founders shipping a paid product.",
 		);
 		await user.type(
-			screen.getByLabelText("Why This Matters"),
+			screen.getByLabelText("Why does this person want this?"),
 			"Sunday-bound launches need sharper guidance than generic courses.",
 		);
 		await user.click(screen.getByRole("button", { name: "Continue" }));
@@ -326,7 +482,7 @@ describe("PacketStagePage", () => {
 				}),
 			),
 		);
-		expect(pushMock).toHaveBeenCalledWith("/product/problem");
+		expect(replaceMock).toHaveBeenCalledWith("/product/problem");
 	});
 
 	it("keeps a cleared step in place and explains that it became incomplete again", async () => {
@@ -341,7 +497,9 @@ describe("PacketStagePage", () => {
 			/>,
 		);
 
-		const priceField = screen.getByLabelText("Price Usd Cents");
+		const priceField = screen.getByLabelText(
+			"What is the actual numeric price?",
+		);
 		await user.clear(priceField);
 		await user.click(screen.getByRole("button", { name: "Continue" }));
 
@@ -360,8 +518,33 @@ describe("PacketStagePage", () => {
 			screen.getByText(/before this page is complete again\./i),
 		).toBeTruthy();
 		expect(screen.getByText(/Page 1 of 3/)).toBeTruthy();
-		expect(document.activeElement).toBe(priceField);
+		await waitFor(() => expect(document.activeElement).toBe(priceField));
 		expect(priceField.getAttribute("aria-invalid")).toBe("true");
+	});
+
+	it("renders the shared pain and urgency scales on the problem page", () => {
+		const workspaceState = createWorkspaceState();
+
+		render(
+			<PacketStagePage
+				stageId="product"
+				stepId="problem"
+				initialWorkspaceState={workspaceState}
+			/>,
+		);
+
+		expect(screen.getByText("Minor annoyance")).toBeTruthy();
+		expect(screen.getByText("Critical blocker")).toBeTruthy();
+		expect(screen.getByText("Can wait")).toBeTruthy();
+		expect(screen.getByText("Immediate")).toBeTruthy();
+		expect(
+			screen.getByRole("radio", { name: "Pain 7 out of 10" }),
+		).toBeTruthy();
+		expect(
+			screen.getByRole("radio", {
+				name: "Urgency needs attention soon",
+			}),
+		).toBeTruthy();
 	});
 
 	it("shows a save failure inline and preserves the current draft", async () => {
@@ -384,7 +567,7 @@ describe("PacketStagePage", () => {
 			/>,
 		);
 
-		const productNameField = screen.getByLabelText("Product Name");
+		const productNameField = screen.getByLabelText("What's the name?");
 		await user.type(productNameField, "Ship by Sunday");
 		await user.click(screen.getByRole("button", { name: "Continue" }));
 
@@ -396,8 +579,58 @@ describe("PacketStagePage", () => {
 		expect((productNameField as HTMLInputElement).value).toBe("Ship by Sunday");
 		expect(screen.getByText(/Page 1 of 4/)).toBeTruthy();
 		expect(
-			screen.getByLabelText("Primary User").getAttribute("aria-invalid"),
+			screen
+				.getByLabelText("Who wants this? Who benefits from this?")
+				.getAttribute("aria-invalid"),
 		).toBeNull();
+	});
+
+	it("adds native browser warnings for unload and browser history while the draft is dirty", async () => {
+		const user = userEvent.setup();
+		const workspaceState = createWorkspaceState({
+			product_name: undefined,
+			product_summary: undefined,
+			primary_user: undefined,
+			why_this_matters: undefined,
+		});
+		const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
+		const historyBackSpy = vi
+			.spyOn(window.history, "back")
+			.mockImplementation(() => undefined);
+		const pushStateSpy = vi
+			.spyOn(window.history, "pushState")
+			.mockImplementation(() => undefined);
+
+		render(
+			<PacketStagePage
+				stageId="product"
+				stepId="foundation"
+				initialWorkspaceState={workspaceState}
+			/>,
+		);
+
+		await user.type(
+			screen.getByLabelText("What's the name?"),
+			"Ship by Sunday",
+		);
+
+		const beforeUnloadEvent = new Event("beforeunload", {
+			cancelable: true,
+		}) as BeforeUnloadEvent;
+		Object.defineProperty(beforeUnloadEvent, "returnValue", {
+			value: undefined,
+			writable: true,
+		});
+
+		window.dispatchEvent(beforeUnloadEvent);
+		window.dispatchEvent(new PopStateEvent("popstate"));
+
+		expect(beforeUnloadEvent.defaultPrevented).toBe(true);
+		expect(confirmSpy).toHaveBeenCalledWith(
+			"You have unsaved changes. Leave without saving?",
+		);
+		expect(historyBackSpy).not.toHaveBeenCalled();
+		expect(pushStateSpy).toHaveBeenCalled();
 	});
 
 	it("redirects locked stage routes back to the first incomplete packet stage", () => {

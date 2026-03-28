@@ -7,24 +7,12 @@ import {
 	createCompleteProjectDefinition,
 	deriveStageStatus,
 	getPacketStageDefinition,
-	type PacketStepDefinition,
 } from "@packet-compiler";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { api } from "@/convex/_generated/api";
+import { describe, expect, it, vi } from "vitest";
 import { PRODUCT_APP_ID } from "@/config/product";
-import { buildStepDraftValues } from "@/features/packet-flow/lib/packet-field-helpers";
-import type { PacketWorkspaceState } from "@/features/packet-flow/lib/packet-workspace-types";
-import { getPacketStageFieldInputId } from "@/features/packet-flow/lib/packet-step-save-feedback";
-
-const pushMock = vi.fn();
-
-vi.mock("next/navigation", () => ({
-	useRouter: () => ({
-		push: pushMock,
-	}),
-}));
-
+import { api } from "@/convex/_generated/api";
 import { usePacketStageStepState } from "@/features/packet-flow/hooks/use-packet-stage-step-state";
+import type { PacketWorkspaceState } from "@/features/packet-flow/lib/packet-workspace-types";
 
 type SaveProjectDefinitionFactsMock = ReactMutation<
 	typeof api.packet.saveProjectDefinitionFacts
@@ -60,45 +48,6 @@ function getStageStatus(
 		projectFacts,
 		stageStatus,
 	};
-}
-
-async function setCurrentFieldValue(
-	result: {
-		current: ReturnType<typeof usePacketStageStepState>;
-	},
-	step: PacketStepDefinition,
-	fieldKey:
-		| "product_name"
-		| "done_when"
-		| "acceptance_criteria"
-		| "validation_plan"
-		| "demo_flow",
-	value: string,
-) {
-	const input = document.getElementById(
-		getPacketStageFieldInputId(step.id, fieldKey),
-	) as HTMLTextAreaElement | null;
-	if (!input) {
-		throw new Error(`Missing input for ${fieldKey}`);
-	}
-
-	input.value = value;
-	await act(async () => {
-		result.current.handleFieldChange(fieldKey, value);
-	});
-}
-
-function mountStepInputs(
-	step: PacketStepDefinition,
-	projectFacts: ReturnType<typeof createProjectFacts>,
-) {
-	const draftValues = buildStepDraftValues(projectFacts, step);
-	for (const fieldKey of step.fieldKeys) {
-		const input = document.createElement("textarea");
-		input.id = getPacketStageFieldInputId(step.id, fieldKey);
-		input.value = draftValues[fieldKey] ?? "";
-		document.body.appendChild(input);
-	}
 }
 
 function createSaveProjectDefinitionFactsMutation() {
@@ -145,23 +94,32 @@ function createPacketWorkspaceState(
 			: "start",
 		packetReadiness: stageStatus.packetReadiness,
 		stageStatuses: stageStatus.stageStatuses,
-	};
+	} as PacketWorkspaceState;
+}
+
+async function setCurrentFieldValue(
+	result: {
+		current: ReturnType<typeof usePacketStageStepState>;
+	},
+	fieldKey:
+		| "product_name"
+		| "product_summary"
+		| "primary_user"
+		| "why_this_matters"
+		| "done_when"
+		| "acceptance_criteria"
+		| "validation_plan"
+		| "demo_flow",
+	value: string,
+) {
+	await act(async () => {
+		result.current.handleFieldChange(fieldKey, value);
+	});
 }
 
 describe("usePacketStageStepState", () => {
-	beforeEach(() => {
-		vi.useFakeTimers();
-		pushMock.mockReset();
-	});
-
-	afterEach(() => {
-		vi.useRealTimers();
-		document.body.innerHTML = "";
-	});
-
-	it("autosaves the latest packet draft without navigating away from the current page", async () => {
+	it("keeps typing silent until Continue is pressed", async () => {
 		const stage = getPacketStageDefinition("product");
-		const foundationStep = stage.steps[0]!;
 		const { saveProjectDefinitionFacts, saveProjectDefinitionFactsSpy } =
 			createSaveProjectDefinitionFactsMutation();
 		const { projectFacts, stageStatus } = getStageStatus("product", {
@@ -170,9 +128,14 @@ describe("usePacketStageStepState", () => {
 			primary_user: undefined,
 			why_this_matters: undefined,
 		});
-		mountStepInputs(foundationStep, projectFacts);
+		const navigateToHref = vi.fn();
+		const onDirtyChange = vi.fn();
+		const requestNavigation = vi.fn();
 		const { result } = renderHook(() =>
 			usePacketStageStepState({
+				navigateToHref,
+				onDirtyChange,
+				requestNavigation,
 				stage,
 				stageId: "product",
 				stageStatus,
@@ -185,51 +148,98 @@ describe("usePacketStageStepState", () => {
 
 		await setCurrentFieldValue(
 			result,
-			foundationStep,
-			"product_name",
-			"Ship by Sunday",
-		);
-		expect(pushMock).not.toHaveBeenCalled();
-
-		await act(async () => {
-			vi.advanceTimersByTime(990);
-		});
-
-		await setCurrentFieldValue(
-			result,
-			foundationStep,
 			"product_name",
 			"Ship the packet-first launch system",
 		);
+
 		expect(saveProjectDefinitionFactsSpy).not.toHaveBeenCalled();
+		expect(result.current.currentFeedback).toBeNull();
+		expect(result.current.currentFieldErrors).toEqual({});
+		expect(navigateToHref).not.toHaveBeenCalled();
+		expect(requestNavigation).not.toHaveBeenCalled();
+		expect(onDirtyChange).toHaveBeenLastCalledWith(true);
+	});
+
+	it("reveals missing required fields only after Continue and clears them as answers arrive", async () => {
+		const stage = getPacketStageDefinition("product");
+		const { saveProjectDefinitionFacts, saveProjectDefinitionFactsSpy } =
+			createSaveProjectDefinitionFactsMutation();
+		const { projectFacts, stageStatus } = getStageStatus("product", {
+			product_name: undefined,
+			product_summary: undefined,
+			primary_user: undefined,
+			why_this_matters: undefined,
+		});
+		const { result } = renderHook(() =>
+			usePacketStageStepState({
+				navigateToHref: vi.fn(),
+				onDirtyChange: vi.fn(),
+				requestNavigation: vi.fn(),
+				stage,
+				stageId: "product",
+				stageStatus,
+				stepId: "foundation",
+				nextHref: "/product/problem",
+				projectFacts,
+				saveProjectDefinitionFacts,
+			}),
+		);
+
+		await setCurrentFieldValue(
+			result,
+			"product_name",
+			"Ship the packet-first launch system",
+		);
+
+		expect(saveProjectDefinitionFactsSpy).not.toHaveBeenCalled();
+		expect(result.current.currentFeedback).toBeNull();
+		expect(result.current.currentFieldErrors).toEqual({});
 
 		await act(async () => {
-			vi.advanceTimersByTime(10);
-			await Promise.resolve();
+			await result.current.handleSaveAndContinue();
 		});
 
 		expect(saveProjectDefinitionFactsSpy).toHaveBeenCalledTimes(1);
-		expect(saveProjectDefinitionFactsSpy).toHaveBeenCalledWith({
-			stageId: "product",
-			clearedFieldKeys: expect.arrayContaining([
-				"product_summary",
-				"primary_user",
-				"why_this_matters",
-			]),
-			factsPatch: {
-				product_name: "Ship the packet-first launch system",
-			},
-		});
 		expect(result.current.currentFeedback).toEqual(
 			expect.objectContaining({
 				title: "Saved for now.",
 			}),
 		);
-		expect(pushMock).not.toHaveBeenCalled();
+		expect(result.current.currentFieldErrors).toEqual({
+			product_summary: "Add an answer here before this page can complete.",
+			primary_user: "Add an answer here before this page can complete.",
+			why_this_matters: "Add an answer here before this page can complete.",
+		});
+
+		await setCurrentFieldValue(
+			result,
+			"product_summary",
+			"A guided packet flow that compiles product, design, marketing, and build inputs into one starter snapshot.",
+		);
+
+		expect(result.current.currentFieldErrors).toEqual({
+			primary_user: "Add an answer here before this page can complete.",
+			why_this_matters: "Add an answer here before this page can complete.",
+		});
+
+		await setCurrentFieldValue(
+			result,
+			"primary_user",
+			"A solo builder who needs to turn one idea into a launchable starter quickly.",
+		);
+		await setCurrentFieldValue(
+			result,
+			"why_this_matters",
+			"Without a tight packet, the builder keeps restarting and never gets to a shippable first version.",
+		);
+
+		expect(result.current.currentFieldErrors).toEqual({});
+		expect(result.current.currentFeedback).toBeNull();
 	});
 
 	it("keeps the last build-plan page in place when earlier blockers still exist", async () => {
 		const stage = getPacketStageDefinition("build-plan");
+		const navigateToHref = vi.fn();
 		const { saveProjectDefinitionFacts, saveProjectDefinitionFactsSpy } =
 			createSaveProjectDefinitionFactsMutation();
 		const { projectFacts, stageStatus } = getStageStatus("build-plan", {
@@ -239,9 +249,11 @@ describe("usePacketStageStepState", () => {
 			validation_plan: undefined,
 			demo_flow: undefined,
 		});
-		mountStepInputs(stage.steps.at(-1)!, projectFacts);
 		const { result } = renderHook(() =>
 			usePacketStageStepState({
+				navigateToHref,
+				onDirtyChange: vi.fn(),
+				requestNavigation: vi.fn(),
 				stage,
 				stageId: "build-plan",
 				stageStatus,
@@ -255,25 +267,21 @@ describe("usePacketStageStepState", () => {
 
 		await setCurrentFieldValue(
 			result,
-			stage.steps.at(-1)!,
 			"done_when",
 			"Buyers can answer the packet flow and download the starter snapshot.",
 		);
 		await setCurrentFieldValue(
 			result,
-			stage.steps.at(-1)!,
 			"acceptance_criteria",
 			"Complete all packet stages\nDownload starter snapshot",
 		);
 		await setCurrentFieldValue(
 			result,
-			stage.steps.at(-1)!,
 			"validation_plan",
 			"Run packet stage smoke tests\nCheck review download state",
 		);
 		await setCurrentFieldValue(
 			result,
-			stage.steps.at(-1)!,
 			"demo_flow",
 			"Product stage to review download in one sitting.",
 		);
@@ -283,7 +291,7 @@ describe("usePacketStageStepState", () => {
 		});
 
 		expect(saveProjectDefinitionFactsSpy).toHaveBeenCalledTimes(1);
-		expect(pushMock).not.toHaveBeenCalled();
+		expect(navigateToHref).not.toHaveBeenCalled();
 		expect(result.current.currentFeedback).toEqual(
 			expect.objectContaining({
 				title: "Saved.",
@@ -294,6 +302,7 @@ describe("usePacketStageStepState", () => {
 
 	it("routes to review when the final build-plan page resolves the last blocker", async () => {
 		const stage = getPacketStageDefinition("build-plan");
+		const navigateToHref = vi.fn();
 		const { saveProjectDefinitionFacts, saveProjectDefinitionFactsSpy } =
 			createSaveProjectDefinitionFactsMutation();
 		const { projectFacts, stageStatus } = getStageStatus("build-plan", {
@@ -302,9 +311,11 @@ describe("usePacketStageStepState", () => {
 			validation_plan: undefined,
 			demo_flow: undefined,
 		});
-		mountStepInputs(stage.steps.at(-1)!, projectFacts);
 		const { result } = renderHook(() =>
 			usePacketStageStepState({
+				navigateToHref,
+				onDirtyChange: vi.fn(),
+				requestNavigation: vi.fn(),
 				stage,
 				stageId: "build-plan",
 				stageStatus,
@@ -318,25 +329,21 @@ describe("usePacketStageStepState", () => {
 
 		await setCurrentFieldValue(
 			result,
-			stage.steps.at(-1)!,
 			"done_when",
 			"Buyers can answer the packet flow and download the starter snapshot.",
 		);
 		await setCurrentFieldValue(
 			result,
-			stage.steps.at(-1)!,
 			"acceptance_criteria",
 			"Complete all packet stages\nDownload starter snapshot",
 		);
 		await setCurrentFieldValue(
 			result,
-			stage.steps.at(-1)!,
 			"validation_plan",
 			"Run packet stage smoke tests\nCheck review download state",
 		);
 		await setCurrentFieldValue(
 			result,
-			stage.steps.at(-1)!,
 			"demo_flow",
 			"Product stage to review download in one sitting.",
 		);
@@ -346,12 +353,11 @@ describe("usePacketStageStepState", () => {
 		});
 
 		expect(saveProjectDefinitionFactsSpy).toHaveBeenCalledTimes(1);
-		expect(pushMock).toHaveBeenCalledWith("/review");
+		expect(navigateToHref).toHaveBeenCalledWith("/review");
 	});
 
 	it("creates an optimistic project definition when the first packet save starts from null", async () => {
 		const stage = getPacketStageDefinition("product");
-		const foundationStep = stage.steps[0]!;
 		const { saveProjectDefinitionFacts } =
 			createSaveProjectDefinitionFactsMutation();
 		const { projectFacts, stageStatus } = getStageStatus("product", {
@@ -360,10 +366,12 @@ describe("usePacketStageStepState", () => {
 			primary_user: undefined,
 			why_this_matters: undefined,
 		});
-		mountStepInputs(foundationStep, projectFacts);
 
 		renderHook(() =>
 			usePacketStageStepState({
+				navigateToHref: vi.fn(),
+				onDirtyChange: vi.fn(),
+				requestNavigation: vi.fn(),
 				stage,
 				stageId: "product",
 				stageStatus,
@@ -404,9 +412,8 @@ describe("usePacketStageStepState", () => {
 		);
 	});
 
-	it("pauses autosave retries after a failed save until the user edits again", async () => {
+	it("shows a save failure inline, preserves the draft, and does not retry on its own", async () => {
 		const stage = getPacketStageDefinition("product");
-		const foundationStep = stage.steps[0]!;
 		const saveProjectDefinitionFactsSpy = vi
 			.fn()
 			.mockRejectedValueOnce(new Error("Save failed"))
@@ -421,9 +428,11 @@ describe("usePacketStageStepState", () => {
 			primary_user: undefined,
 			why_this_matters: undefined,
 		});
-		mountStepInputs(foundationStep, projectFacts);
 		const { result } = renderHook(() =>
 			usePacketStageStepState({
+				navigateToHref: vi.fn(),
+				onDirtyChange: vi.fn(),
+				requestNavigation: vi.fn(),
 				stage,
 				stageId: "product",
 				stageStatus,
@@ -433,39 +442,26 @@ describe("usePacketStageStepState", () => {
 			}),
 		);
 
-		await setCurrentFieldValue(
-			result,
-			foundationStep,
-			"product_name",
+		await setCurrentFieldValue(result, "product_name", "Ship by Sunday");
+
+		await act(async () => {
+			await result.current.handleSaveAndContinue();
+		});
+
+		expect(saveProjectDefinitionFactsSpy).toHaveBeenCalledTimes(1);
+		expect(result.current.currentFeedback).toEqual(
+			expect.objectContaining({
+				title: "We could not save this page right now.",
+			}),
+		);
+		expect(result.current.currentDraftValues.product_name).toBe(
 			"Ship by Sunday",
 		);
 
 		await act(async () => {
-			vi.advanceTimersByTime(1000);
 			await Promise.resolve();
 		});
 
 		expect(saveProjectDefinitionFactsSpy).toHaveBeenCalledTimes(1);
-
-		await act(async () => {
-			vi.advanceTimersByTime(3000);
-			await Promise.resolve();
-		});
-
-		expect(saveProjectDefinitionFactsSpy).toHaveBeenCalledTimes(1);
-
-		await setCurrentFieldValue(
-			result,
-			foundationStep,
-			"product_name",
-			"Ship by Sunday OS",
-		);
-
-		await act(async () => {
-			vi.advanceTimersByTime(1000);
-			await Promise.resolve();
-		});
-
-		expect(saveProjectDefinitionFactsSpy).toHaveBeenCalledTimes(2);
 	});
 });

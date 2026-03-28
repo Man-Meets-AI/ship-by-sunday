@@ -227,7 +227,7 @@ describe("AppShell", () => {
 		expect(markup).not.toContain("xl:overflow-hidden");
 	});
 
-	it("skips mission queries when mission data is explicitly disabled", () => {
+	it("skips mission queries and hides progress when mission data is disabled", () => {
 		const markup = renderAppShell(
 			<AppShell showSkillRail={false} enableMissionQuery={false}>
 				<div>Body</div>
@@ -235,7 +235,7 @@ describe("AppShell", () => {
 		);
 
 		expect(useQueryMock).not.toHaveBeenCalled();
-		expect(markup).toContain("--/--");
+		expect(markup).not.toContain("--/--");
 		expect(markup).not.toContain('aria-label="Open CEO"');
 	});
 });

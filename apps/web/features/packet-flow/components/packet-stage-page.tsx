@@ -1,19 +1,27 @@
 "use client";
 
-import { useConvexAuth, useQuery } from "convex/react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { redirect } from "next/navigation";
-import { AppShell } from "@/features/course/shared/components/app-shell";
-import type { PacketWorkspaceState } from "@/features/packet-flow/lib/packet-workspace-types";
-import { api } from "@/convex/_generated/api";
+import { useState } from "react";
 import { getPacketStageDefinition, type PacketStageId } from "@packet-compiler";
-import type { RoutedPacketStageId } from "@/features/packet-flow/lib/packet-stage-routes";
-import { getPacketStagePageMedia } from "@/features/packet-flow/lib/packet-stage-videos";
+import { api } from "@/convex/_generated/api";
+import { AppShell } from "@/features/course/shared/components/app-shell";
+import { PacketStageLeaveDialog } from "@/features/packet-flow/components/packet-stage-leave-dialog";
+import { PacketStageNav } from "@/features/packet-flow/components/packet-stage-nav";
+import { PacketStageSidebar } from "@/features/packet-flow/components/packet-stage-sidebar";
+import { PacketStageStepCard } from "@/features/packet-flow/components/packet-stage-step-card";
+import { PacketStageStepStrip } from "@/features/packet-flow/components/progression/packet-stage-step-strip";
+import { PacketVideoCard } from "@/features/packet-flow/components/video/packet-video-card";
+import { usePacketStageLeaveGuard } from "@/features/packet-flow/hooks/use-packet-stage-leave-guard";
+import { usePacketStageStepState } from "@/features/packet-flow/hooks/use-packet-stage-step-state";
+import { getPacketStepLabel } from "@/features/packet-flow/lib/packet-field-helpers";
 import { derivePacketStageProgressItems } from "@/features/packet-flow/lib/packet-stage-progress";
-import { PacketStageNav } from "./packet-stage-nav";
-import { PacketStageSidebar } from "./packet-stage-sidebar";
-import { PacketStageStepController } from "./packet-stage-step-controller";
-import { PacketStageStepStrip } from "./progression/packet-stage-step-strip";
-import { PacketVideoCard } from "./video/packet-video-card";
+import {
+	getAdjacentPacketPageHrefs,
+	type RoutedPacketStageId,
+} from "@/features/packet-flow/lib/packet-stage-routes";
+import { getPacketStagePageMedia } from "@/features/packet-flow/lib/packet-stage-videos";
+import type { PacketWorkspaceState } from "@/features/packet-flow/lib/packet-workspace-types";
 
 const nextStageMap = {
 	product: "design",
@@ -49,6 +57,7 @@ export function PacketStagePage({
 			getPacketStageDefinition(workspaceState.firstIncompleteStageId).route,
 		);
 	}
+
 	const stagePageMedia = getPacketStagePageMedia(stageId, stepId);
 	const progressItems = derivePacketStageProgressItems(
 		stage,
@@ -58,6 +67,47 @@ export function PacketStagePage({
 	const nextStageId = stageStatus.isComplete
 		? nextStageMap[stageId]
 		: undefined;
+	const { previousHref, nextHref } = getAdjacentPacketPageHrefs(
+		stageId,
+		stepId,
+	);
+	const saveProjectDefinitionFacts = useMutation(
+		api.packet.saveProjectDefinitionFacts,
+	);
+	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+	const {
+		handleLinkNavigation,
+		isDialogOpen,
+		leaveWithoutSaving,
+		navigateToHref,
+		requestNavigation,
+		stayOnPage,
+	} = usePacketStageLeaveGuard({
+		hasUnsavedChanges,
+	});
+	const {
+		currentFeedback,
+		currentFieldErrors,
+		currentStep,
+		currentDraftValues,
+		goToPreviousStep,
+		handleFieldChange,
+		handleSaveAndContinue,
+		isSaving,
+	} = usePacketStageStepState({
+		navigateToHref,
+		onDirtyChange: setHasUnsavedChanges,
+		requestNavigation,
+		stage,
+		stageId,
+		stageStatus,
+		stepId,
+		previousHref,
+		nextHref,
+		projectFacts: workspaceState.projectDefinition?.facts ?? {},
+		saveProjectDefinitionFacts,
+	});
+	const stepHeading = getPacketStepLabel(stageId, stepId) ?? currentStep.label;
 
 	return (
 		<AppShell
@@ -71,22 +121,36 @@ export function PacketStagePage({
 					<PacketStageNav
 						currentStageId={stageId}
 						stageStatuses={workspaceState.stageStatuses}
+						onLinkNavigate={handleLinkNavigation}
+						onNavigate={requestNavigation}
 					/>
 					<PacketStageStepStrip
 						stageId={stageId}
 						activeStepId={stepId}
 						progressItems={progressItems}
+						onLinkNavigate={handleLinkNavigation}
+						onNavigate={requestNavigation}
 					/>
 				</div>
 
 				<div className="grid gap-x-12 gap-y-8 xl:grid-cols-[minmax(0,1fr)_30rem] xl:gap-x-16">
 					<div className="space-y-6 pt-2">
-						<PacketStageStepController
-							stage={stage}
-							stageId={stageId}
-							stageStatus={stageStatus}
-							stepId={stepId}
-							projectFacts={workspaceState.projectDefinition?.facts ?? {}}
+						<PacketStageStepCard
+							currentStep={currentStep}
+							stepHeading={stepHeading}
+							currentStepIndex={stage.steps.findIndex(
+								(packetStep) => packetStep.id === currentStep.id,
+							)}
+							totalSteps={stage.steps.length}
+							canGoBack={Boolean(previousHref)}
+							draftValues={currentDraftValues}
+							facts={workspaceState.projectDefinition?.facts ?? {}}
+							fieldErrors={currentFieldErrors}
+							feedback={currentFeedback}
+							isSaving={isSaving}
+							onBack={goToPreviousStep}
+							onChange={handleFieldChange}
+							onSaveAndContinue={handleSaveAndContinue}
 						/>
 					</div>
 					<aside className="space-y-10">
@@ -97,10 +161,17 @@ export function PacketStagePage({
 							stage={stage}
 							stageStatus={stageStatus}
 							nextStageId={nextStageId}
+							onLinkNavigate={handleLinkNavigation}
+							onNavigate={requestNavigation}
 						/>
 					</aside>
 				</div>
 			</div>
+			<PacketStageLeaveDialog
+				isOpen={isDialogOpen}
+				onLeaveWithoutSaving={leaveWithoutSaving}
+				onStay={stayOnPage}
+			/>
 		</AppShell>
 	);
 }
