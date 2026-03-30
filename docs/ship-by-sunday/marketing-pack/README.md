@@ -38,6 +38,7 @@ It is the template for the customer-facing `docs/marketing/` packet that should 
 - `review-matrix.md` - what can be drafted, what must be reviewed, and what must never auto-publish
 - `deliverables.md` - the actual marketing artifacts this packet is meant to support
 - `assets/` - lift-ready copy assets for VSL, short close, and other direct-response pieces
+- `assets/writing-pass.md` - hard rewrite gate for making copy sound owned instead of generic
 - `examples/launch-message-kit.md` - a concrete golden-example packet
 - `examples/homepage-message-hierarchy.md` - example homepage narrative output
 - `examples/launch-email-outline.md` - example launch email output
