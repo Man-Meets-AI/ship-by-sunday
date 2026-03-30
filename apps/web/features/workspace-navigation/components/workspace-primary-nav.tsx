@@ -67,7 +67,11 @@ function MenuEntry({
 				type="button"
 				disabled={item.state === "disabled"}
 				onClick={() => onAction?.(item.actionId)}
-				className={cn(menuEntryClassName, "text-left", getStateClassName(item.state))}
+				className={cn(
+					menuEntryClassName,
+					"text-left",
+					getStateClassName(item.state),
+				)}
 			>
 				{item.label}
 			</button>
@@ -75,7 +79,11 @@ function MenuEntry({
 	}
 
 	if (item.state === "disabled") {
-		return <span className={cn(menuEntryClassName, getStateClassName(item.state))}>{item.label}</span>;
+		return (
+			<span className={cn(menuEntryClassName, getStateClassName(item.state))}>
+				{item.label}
+			</span>
+		);
 	}
 
 	return (
@@ -110,13 +118,21 @@ export function WorkspacePrimaryNav({
 	onNavigate?: (href: string) => void;
 }) {
 	return (
-		<NavigationMenu viewport={false} className="w-full max-w-none justify-start">
+		<NavigationMenu
+			viewport={false}
+			className="w-full max-w-none justify-start"
+		>
 			<NavigationMenuList className="flex flex-wrap items-center justify-start gap-x-6 gap-y-3">
 				{items.map((item) =>
 					item.kind === "link" ? (
 						<NavigationMenuItem key={item.id}>
 							{item.state === "disabled" ? (
-								<span className={cn(topLevelClassName, getStateClassName(item.state))}>
+								<span
+									className={cn(
+										topLevelClassName,
+										getStateClassName(item.state),
+									)}
+								>
 									{item.label}
 								</span>
 							) : (
@@ -128,7 +144,10 @@ export function WorkspacePrimaryNav({
 										onClick={(event) =>
 											handleControlledNavigation(event, item.href, onNavigate)
 										}
-										className={cn(topLevelClassName, getStateClassName(item.state))}
+										className={cn(
+											topLevelClassName,
+											getStateClassName(item.state),
+										)}
 									>
 										{item.label}
 									</Link>

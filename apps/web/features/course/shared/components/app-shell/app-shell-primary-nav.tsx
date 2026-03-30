@@ -4,7 +4,11 @@ import { PacketStageNav } from "@/features/packet-flow/components/packet-stage-n
 import { WorkspacePrimaryNav } from "@/features/workspace-navigation/components/workspace-primary-nav";
 import type { AppShellPrimaryNav } from "./app-shell-props";
 
-export function AppShellPrimaryNav({ primaryNav }: { primaryNav: AppShellPrimaryNav }) {
+export function AppShellPrimaryNav({
+	primaryNav,
+}: {
+	primaryNav: AppShellPrimaryNav;
+}) {
 	if (primaryNav.kind === "packet") {
 		return (
 			<PacketStageNav

@@ -243,8 +243,7 @@ describe("PacketReviewPage", () => {
 						buildLessonsDestination: "/lesson/iterate-the-product-with-ai",
 						launchLessonsDestination: "/lesson/product-review",
 						lessonMapDestination: "/review?showLessonMap=1",
-						latestLessonDestination:
-							"/lesson/iterate-the-product-with-ai",
+						latestLessonDestination: "/lesson/iterate-the-product-with-ai",
 					},
 				};
 			}

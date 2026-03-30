@@ -34,7 +34,11 @@ export function LessonMapSurface({
 			<Accordion
 				type="single"
 				collapsible
-				defaultValue={orderedBlocks.some((block) => block.id === currentBlockId) ? currentBlockId : "BUILD"}
+				defaultValue={
+					orderedBlocks.some((block) => block.id === currentBlockId)
+						? currentBlockId
+						: "BUILD"
+				}
 			>
 				{orderedBlocks.map((block) => (
 					<BonusMissionBlockSection key={block.id} block={block} />

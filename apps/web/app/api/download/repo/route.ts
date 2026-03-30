@@ -23,7 +23,11 @@ export async function GET() {
 	const archive = await packetCompilerServer.buildReviewDownloadZip(
 		context.canonicalProjectDefinition,
 	);
-	await fetchMutation(api.packet.unlockExecuteShip, {}, { token: context.token });
+	await fetchMutation(
+		api.packet.unlockExecuteShip,
+		{},
+		{ token: context.token },
+	);
 
 	return new Response(new Uint8Array(archive), {
 		status: 200,

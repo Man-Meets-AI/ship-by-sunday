@@ -48,11 +48,12 @@ function getBonusBlockHref(
 	missionState: BonusMissionState,
 	blockId: "CEO" | "DESIGN",
 ) {
-	const block = missionState.blocks.find((candidate) => candidate.id === blockId);
+	const block = missionState.blocks.find(
+		(candidate) => candidate.id === blockId,
+	);
 	const preferredLesson =
 		block?.lessons.find(
-			(lesson) =>
-				lesson.status === "opened" || lesson.status === "available",
+			(lesson) => lesson.status === "opened" || lesson.status === "available",
 		) ?? block?.lessons[0];
 
 	return preferredLesson ? getLessonHref(preferredLesson.lessonKey) : null;

@@ -45,9 +45,7 @@ function ArtifactsPageContent({
 					<BreadcrumbList>
 						<BreadcrumbItem>
 							<BreadcrumbLink asChild>
-								<Link href={getLessonMapHref()}>
-									Lesson Map
-								</Link>
+								<Link href={getLessonMapHref()}>Lesson Map</Link>
 							</BreadcrumbLink>
 						</BreadcrumbItem>
 						<BreadcrumbSeparator />

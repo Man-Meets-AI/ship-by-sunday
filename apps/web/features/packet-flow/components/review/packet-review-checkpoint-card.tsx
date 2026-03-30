@@ -33,7 +33,9 @@ export function PacketReviewCheckpointCard({
 	isDownloadPending: boolean;
 	packetReadiness: PacketReadinessResult;
 	downloadError: string | null;
-	onStarterDownload: (event: { preventDefault: () => void }) => void | Promise<void>;
+	onStarterDownload: (event: {
+		preventDefault: () => void;
+	}) => void | Promise<void>;
 }) {
 	const incompleteArtifacts = reviewArtifacts.filter(
 		(artifact) => !packetReadiness[artifact.id].isReady,
@@ -87,7 +89,9 @@ export function PacketReviewCheckpointCard({
 							disabled={!isReviewReady || isDownloadPending}
 						>
 							<Link href="/api/download/repo" onClick={onStarterDownload}>
-								{isDownloadPending ? "Downloading Ship Kit..." : "Download Ship Kit"}
+								{isDownloadPending
+									? "Downloading Ship Kit..."
+									: "Download Ship Kit"}
 							</Link>
 						</Button>
 						<p className="px-1 text-xs leading-5 text-muted-foreground">

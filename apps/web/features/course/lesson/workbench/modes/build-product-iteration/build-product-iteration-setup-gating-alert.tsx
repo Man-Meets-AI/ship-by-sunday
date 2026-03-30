@@ -14,8 +14,8 @@ export function BuildProductIterationSetupGatingAlert() {
 			<AlertDescription className="mt-2 text-sm">
 				The paid product account (private starter / template on GitHub) is{" "}
 				<strong>separate</strong> from your website login. Until that access is
-				linked, template links stay locked—complete it from Settings,
-				then check the box when it is true.
+				linked, template links stay locked—complete it from Settings, then check
+				the box when it is true.
 			</AlertDescription>
 		</Alert>
 	);

@@ -62,9 +62,8 @@ vi.mock("convex/react", () => ({
 }));
 
 vi.mock("@/features/course/shared/components/app-shell", async () => {
-	const { PacketStageNav } = await import(
-		"@/features/packet-flow/components/packet-stage-nav"
-	);
+	const { PacketStageNav } =
+		await import("@/features/packet-flow/components/packet-stage-nav");
 
 	return {
 		AppShell: ({
@@ -78,7 +77,13 @@ vi.mock("@/features/course/shared/components/app-shell", async () => {
 			children: React.ReactNode;
 			primaryNav?: {
 				kind: "packet";
-				currentStageId: "start" | "product" | "design" | "marketing" | "build-plan" | "review";
+				currentStageId:
+					| "start"
+					| "product"
+					| "design"
+					| "marketing"
+					| "build-plan"
+					| "review";
 				activeStepId?: string;
 				stageStatuses: PacketWorkspaceState["stageStatuses"];
 				onLinkNavigate?: (

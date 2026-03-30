@@ -68,9 +68,7 @@ export function PacketReviewDownloadBridge({
 			setHasCompletedStarterDownload(true);
 		} catch (error) {
 			setDownloadError(
-				error instanceof Error
-					? error.message
-					: "Ship Kit download failed.",
+				error instanceof Error ? error.message : "Ship Kit download failed.",
 			);
 		} finally {
 			setIsDownloadPending(false);

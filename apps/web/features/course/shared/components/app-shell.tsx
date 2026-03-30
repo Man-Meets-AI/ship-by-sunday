@@ -63,7 +63,8 @@ function ShellInner({
 				completionCue={completionCue}
 			/>
 		) : null;
-	const resolvedProgressSummary = progressSummary ??
+	const resolvedProgressSummary =
+		progressSummary ??
 		(mission
 			? {
 					progressCount: mission.progressCount,
@@ -74,13 +75,13 @@ function ShellInner({
 
 	return (
 		<main className={shellClassName}>
-				{viewportMode === "app" ? (
-					<>
-						<header className="relative z-20 shrink-0 overflow-visible">
-							<Card className="gap-0 overflow-visible rounded-none border-0 py-0 shadow-none">
-								<AppShellHeader
-									viewportMode={viewportMode}
-									primaryNav={primaryNav}
+			{viewportMode === "app" ? (
+				<>
+					<header className="relative z-20 shrink-0 overflow-visible">
+						<Card className="gap-0 overflow-visible rounded-none border-0 py-0 shadow-none">
+							<AppShellHeader
+								viewportMode={viewportMode}
+								primaryNav={primaryNav}
 								progressSummary={resolvedProgressSummary}
 								layoutMode={layoutMode}
 								onLayoutModeChange={onLayoutModeChange}
@@ -93,13 +94,13 @@ function ShellInner({
 					</div>
 					{footerRail}
 				</>
-				) : (
-					<div className={shellInnerClassName}>
-						<header className="relative z-20 shrink-0 overflow-visible">
-							<Card className="gap-0 overflow-visible rounded-none border-0 py-0 shadow-sm">
-								<AppShellHeader
-									viewportMode={viewportMode}
-									primaryNav={primaryNav}
+			) : (
+				<div className={shellInnerClassName}>
+					<header className="relative z-20 shrink-0 overflow-visible">
+						<Card className="gap-0 overflow-visible rounded-none border-0 py-0 shadow-sm">
+							<AppShellHeader
+								viewportMode={viewportMode}
+								primaryNav={primaryNav}
 								progressSummary={resolvedProgressSummary}
 								layoutMode={layoutMode}
 								onLayoutModeChange={onLayoutModeChange}

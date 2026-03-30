@@ -14,11 +14,7 @@ export function WorkspaceHomePage({
 	model?: WorkspaceHomeModel;
 }) {
 	return (
-		<AppShell
-			viewportMode="app"
-			appScrollMode="page"
-			showSkillRail={false}
-		>
+		<AppShell viewportMode="app" appScrollMode="page" showSkillRail={false}>
 			<div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 pb-10 pt-2">
 				<WorkspaceHomeHero model={model} />
 				<div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">

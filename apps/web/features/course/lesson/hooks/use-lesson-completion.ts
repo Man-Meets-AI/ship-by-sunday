@@ -257,7 +257,9 @@ export function useLessonCompletion({
 		: "Lesson complete";
 
 	const navigateToNextStep = (nextLessonKey: string | null) => {
-		router.push(nextLessonKey ? getLessonHref(nextLessonKey) : getLessonMapHref());
+		router.push(
+			nextLessonKey ? getLessonHref(nextLessonKey) : getLessonMapHref(),
+		);
 	};
 
 	return {

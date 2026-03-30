@@ -15,7 +15,9 @@ export function PacketReviewExecutePreview({
 	hasUnlockedReviewFlow: boolean;
 	isDownloadPending: boolean;
 	onOpenLessonMap?: () => void;
-	onStarterDownload: (event: { preventDefault: () => void }) => void | Promise<void>;
+	onStarterDownload: (event: {
+		preventDefault: () => void;
+	}) => void | Promise<void>;
 	onContinue?: () => void;
 }) {
 	return (
