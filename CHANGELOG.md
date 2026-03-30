@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-03-30
+
+### Changed
+
+- Added a shared desktop left-rail navigation pattern across packet pages, unlocked review, and unlocked post-review lessons so buyers keep the same local wayfinding model as they move through the protected workspace.
+- Simplified packet-stage navigation by turning the header into stage-level wayfinding, moving the full packet map into the left rail, and adding clearer previous/next pager controls without changing the underlying packet route contract.
+- Moved review and post-review lesson navigation out of the desktop footer rail and into section-scoped local rails, while keeping the footer skill rail and compact selectors as the mobile fallback path.
+
 ## 2026-03-29
 
 ### Changed
