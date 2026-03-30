@@ -176,11 +176,17 @@ If a relevant check cannot run:
 - record the limitation in the plan or final summary
 - do not claim success without qualification
 
-## Review workflow
+## PR workflow
 
-When asked to review a branch or PR against `main`, use a multi-agent review workflow.
+This repository ships through short-lived pull request branches into `main`. Do not use a long-lived integration branch.
 
-Default review instruction:
+Before opening a PR:
+- branch from the current `main`
+- keep the diff scoped
+- split the work into logical conventional commits
+- run the narrowest relevant verification first, then broaden as needed
+
+Before merging any PR into `main`, run the default multi-agent review workflow:
 
 `Review this branch against main. Have pr_explorer map the affected code paths, reviewer find real risks, and docs_researcher verify the framework APIs that the patch relies on.`
 
@@ -192,6 +198,15 @@ Review priorities:
 - incorrect assumptions
 
 Do not spend review effort on style nitpicks unless they hide a real risk.
+
+PR merge checklist:
+- push the feature branch and open the PR into `main`
+- run the multi-agent review workflow against `main`
+- fix substantive review findings before merge
+- wait for `static`, `integration`, and `browser-smoke` to pass
+- merge with linear history intact
+- watch the `main` deploy through Vercel and the Convex production workflow
+- delete the local and remote branch after the release settles
 
 ## Done means
 
