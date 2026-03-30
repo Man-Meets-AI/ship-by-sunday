@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 const redirectMock = vi.fn();
 const fetchQueryMock = vi.fn();
 const getConvexServerSessionMock = vi.fn();
@@ -106,7 +108,9 @@ describe("product access server helpers", () => {
 			})
 			.mockResolvedValueOnce({
 				destination: "/design",
-				stageId: "design",
+				kind: "packet_stage",
+				packetStageId: "design",
+				postReviewTargets: null,
 			});
 
 		const { redirectGrantedHomeVisitor } =
@@ -147,5 +151,51 @@ describe("product access server helpers", () => {
 			await import("@/features/product-access/server/product-access");
 
 		await expect(getServerResumeDestination()).resolves.toBeNull();
+	});
+
+	it("relays the centralized post-review resume destination for granted viewers", async () => {
+		getConvexServerSessionMock
+			.mockResolvedValueOnce({
+				userId: "user_123",
+				token: "token_123",
+			})
+			.mockResolvedValueOnce({
+				userId: "user_123",
+				token: "token_123",
+			});
+		fetchQueryMock
+			.mockResolvedValueOnce({
+				hasAccess: true,
+				clerkUserId: "user_123",
+				status: "granted",
+			})
+			.mockResolvedValueOnce({
+				destination: "/lesson/product-review",
+				kind: "post_review",
+				packetStageId: null,
+				postReviewTargets: {
+					reviewDestination: "/review",
+					buildLessonsDestination: "/lesson/iterate-the-product-with-ai",
+					launchLessonsDestination: "/lesson/product-review",
+					lessonMapDestination: "/review?showLessonMap=1",
+					latestLessonDestination: "/lesson/product-review",
+				},
+			});
+
+		const { getServerResumeDestination } =
+			await import("@/features/product-access/server/product-access");
+
+		await expect(getServerResumeDestination()).resolves.toEqual({
+			destination: "/lesson/product-review",
+			kind: "post_review",
+			packetStageId: null,
+			postReviewTargets: {
+				reviewDestination: "/review",
+				buildLessonsDestination: "/lesson/iterate-the-product-with-ai",
+				launchLessonsDestination: "/lesson/product-review",
+				lessonMapDestination: "/review?showLessonMap=1",
+				latestLessonDestination: "/lesson/product-review",
+			},
+		});
 	});
 });

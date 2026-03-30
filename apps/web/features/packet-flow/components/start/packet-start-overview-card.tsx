@@ -1,8 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
+import { Kbd, KbdGroup } from "@/components/ui/kbd";
+import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
+import { HeroHighlight, Highlight } from "@/components/ui/hero-highlight";
 import { getPacketStageDefinition, type PacketStageId } from "@packet-compiler";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
@@ -12,40 +16,61 @@ export function PacketStartOverviewCard({
 }: {
 	nextStageId: PacketStageId;
 }) {
+	const router = useRouter();
 	const nextStage = getPacketStageDefinition(nextStageId);
 
+	useKeyboardShortcut(
+		"Enter",
+		() => {
+			router.push(nextStage.route);
+		},
+		{
+			ctrlOrMeta: true,
+		},
+	);
+
 	return (
-		<section className="flex flex-col items-center text-center space-y-10">
-			<div className="space-y-6">
+		<HeroHighlight
+			containerClassName="h-auto min-h-[18rem] bg-transparent px-6 py-12 md:min-h-[22rem] md:px-10"
+			className="w-full"
+		>
+			<section className="flex flex-col items-center gap-10 text-center">
 				<motion.h2
 					initial={{ opacity: 0, y: 16 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.6, ease }}
-					className="font-marketing-display text-7xl md:text-8xl lg:text-9xl leading-[0.9] tracking-tight uppercase"
+					className="font-marketing-display text-7xl leading-[0.82] tracking-tight uppercase md:text-8xl lg:text-9xl"
 				>
-					Build the folder before you build the app.
+					Build the BRIEF{" "}
+					<Highlight className="text-foreground dark:text-foreground">
+						before
+					</Highlight>{" "}
+					you build the app.
 				</motion.h2>
-				<motion.p
-					initial={{ opacity: 0, y: 10 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.08, duration: 0.55, ease }}
-					className="max-w-xl text-lg md:text-xl leading-relaxed text-muted-foreground mx-auto"
-				>
-					Watch the welcome video, then work the packet in order — Product,
-					Design, Marketing, Build Plan, and Review. Keep the answers sharp
-					enough to ship something real by Sunday.
-				</motion.p>
-			</div>
 
-			<motion.div
-				initial={{ opacity: 0, y: 8 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ delay: 0.16, duration: 0.5, ease }}
-			>
-				<Button asChild size="lg" className="h-14 px-8 text-lg rounded-full">
-					<Link href={nextStage.route}>Continue with {nextStage.label}</Link>
-				</Button>
-			</motion.div>
-		</section>
+				<motion.div
+					initial={{ opacity: 0, y: 8 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ delay: 0.16, duration: 0.5, ease }}
+				>
+					<Button asChild size="lg" className="h-14 rounded-full px-8 text-lg">
+						<Link
+							href={nextStage.route}
+							className="inline-flex items-center gap-2"
+						>
+							Continue with {nextStage.label}
+							<KbdGroup className="ml-1">
+								<Kbd className="bg-primary-foreground/10 text-primary-foreground">
+									⌘
+								</Kbd>
+								<Kbd className="bg-primary-foreground/10 text-primary-foreground">
+									↵
+								</Kbd>
+							</KbdGroup>
+						</Link>
+					</Button>
+				</motion.div>
+			</section>
+		</HeroHighlight>
 	);
 }

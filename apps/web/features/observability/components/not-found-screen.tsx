@@ -60,9 +60,8 @@ export function NotFoundScreen() {
 						</Button>
 						<Button
 							asChild
-							variant="outline"
 							size="lg"
-							className="h-14 px-8 text-lg rounded-full border-white/20 text-white hover:bg-white/10 hover:text-white"
+							className="h-14 rounded-full border-white/20 bg-white px-8 text-lg text-black hover:bg-white/90 hover:text-black"
 						>
 							<Link href={routeConfig.home}>Exit to safety</Link>
 						</Button>

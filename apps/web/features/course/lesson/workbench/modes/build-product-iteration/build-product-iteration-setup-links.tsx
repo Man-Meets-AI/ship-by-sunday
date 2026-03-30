@@ -27,7 +27,9 @@ export function BuildProductIterationSetupLinks({
 		<>
 			<div className="flex flex-wrap gap-2">
 				<Button variant="outline" size="sm" asChild>
-					<Link href={routeConfig.mission}>Open Mission (starter access)</Link>
+					<Link href={routeConfig.settings}>
+						Open settings (starter access)
+					</Link>
 				</Button>
 				<Button variant="outline" size="sm" asChild>
 					<Link href={`${routeConfig.settings}#codex-connection`}>

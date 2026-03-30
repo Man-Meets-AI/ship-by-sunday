@@ -19,7 +19,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { routeConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import { ArtifactsBlockSection } from "@/features/course/artifacts/components/artifacts-block-section";
 import {
@@ -28,7 +27,7 @@ import {
 } from "@/features/course/artifacts/components/artifacts-page-states";
 import { groupArtifactsByBlock } from "@/features/course/artifacts/lib/group-artifacts-by-block";
 import type { ArtifactPreview } from "@/features/course/lesson/model/registry";
-import { workspaceDisplayConfig } from "@/features/starter/lib/starter-selectors";
+import { getLessonMapHref } from "@/features/workspace-navigation/lib/lesson-map-href";
 
 function ArtifactsPageContent({
 	artifacts,
@@ -46,9 +45,7 @@ function ArtifactsPageContent({
 					<BreadcrumbList>
 						<BreadcrumbItem>
 							<BreadcrumbLink asChild>
-								<Link href={routeConfig.mission}>
-									{workspaceDisplayConfig.homeLabel}
-								</Link>
+								<Link href={getLessonMapHref()}>Lesson Map</Link>
 							</BreadcrumbLink>
 						</BreadcrumbItem>
 						<BreadcrumbSeparator />

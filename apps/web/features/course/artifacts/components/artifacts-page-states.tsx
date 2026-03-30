@@ -9,8 +9,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { routeConfig } from "@/config/product";
-import { workspaceDisplayConfig } from "@/features/starter/lib/starter-selectors";
+import { getLessonMapHref } from "@/features/workspace-navigation/lib/lesson-map-href";
 
 export function ArtifactsLoadingState() {
 	return (
@@ -39,9 +38,7 @@ export function ArtifactsEmptyState() {
 			</CardHeader>
 			<CardContent>
 				<Button asChild>
-					<Link href={routeConfig.mission}>
-						Go to {workspaceDisplayConfig.homeNoun}
-					</Link>
+					<Link href={getLessonMapHref()}>Open Lesson Map</Link>
 				</Button>
 			</CardContent>
 		</Card>

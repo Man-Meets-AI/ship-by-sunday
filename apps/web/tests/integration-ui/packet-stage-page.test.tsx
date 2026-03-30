@@ -61,23 +61,55 @@ vi.mock("convex/react", () => ({
 	useQuery: () => useQueryMock(),
 }));
 
-vi.mock("@/features/course/shared/components/app-shell", () => ({
-	AppShell: ({
-		title,
-		subtitle,
-		children,
-	}: {
-		title: string;
-		subtitle?: string;
-		children: React.ReactNode;
-	}) => (
-		<div>
-			<h1>{title}</h1>
-			{subtitle ? <p>{subtitle}</p> : null}
-			{children}
-		</div>
-	),
-}));
+vi.mock("@/features/course/shared/components/app-shell", async () => {
+	const { PacketStageNav } =
+		await import("@/features/packet-flow/components/packet-stage-nav");
+
+	return {
+		AppShell: ({
+			title,
+			subtitle,
+			children,
+			primaryNav,
+		}: {
+			title: string;
+			subtitle?: string;
+			children: React.ReactNode;
+			primaryNav?: {
+				kind: "packet";
+				currentStageId:
+					| "start"
+					| "product"
+					| "design"
+					| "marketing"
+					| "build-plan"
+					| "review";
+				activeStepId?: string;
+				stageStatuses: PacketWorkspaceState["stageStatuses"];
+				onLinkNavigate?: (
+					event: { preventDefault: () => void },
+					href: string,
+				) => void;
+				onNavigate?: (href: string) => void;
+			};
+		}) => (
+			<div>
+				<h1>{title}</h1>
+				{subtitle ? <p>{subtitle}</p> : null}
+				{primaryNav?.kind === "packet" ? (
+					<PacketStageNav
+						currentStageId={primaryNav.currentStageId}
+						activeStepId={primaryNav.activeStepId}
+						stageStatuses={primaryNav.stageStatuses}
+						onLinkNavigate={primaryNav.onLinkNavigate}
+						onNavigate={primaryNav.onNavigate}
+					/>
+				) : null}
+				{children}
+			</div>
+		),
+	};
+});
 
 vi.mock("@/features/course/lesson/components/lesson-video-player", () => ({
 	LessonVideoPlayer: ({ title }: { title?: string }) => (
@@ -243,7 +275,7 @@ describe("PacketStagePage", () => {
 			screen.getByLabelText("Why does this person want this?"),
 			"Sunday-bound launches need sharper guidance than generic courses.",
 		);
-		await user.click(screen.getByRole("button", { name: "Continue" }));
+		await user.click(screen.getByRole("button", { name: /^Continue/ }));
 
 		await waitFor(() =>
 			expect(saveProjectDefinitionFactsMock).toHaveBeenCalledWith(
@@ -290,9 +322,6 @@ describe("PacketStagePage", () => {
 		await user.selectOptions(screen.getByLabelText("Page"), "problem");
 
 		expect(pushMock).toHaveBeenCalledWith("/product/problem");
-		expect(
-			screen.getByRole("link", { name: /Problem/i }).getAttribute("href"),
-		).toBe("/product/problem");
 	});
 
 	it("opens a leave warning for dirty packet links and keeps the draft on Stay", async () => {
@@ -315,6 +344,37 @@ describe("PacketStagePage", () => {
 		const productNameField = screen.getByLabelText("What's the name?");
 		await user.type(productNameField, "Ship by Sunday");
 		await user.click(screen.getByRole("link", { name: "Start" }));
+
+		expect(pushMock).not.toHaveBeenCalled();
+		expect(replaceMock).not.toHaveBeenCalled();
+		expect(screen.getByText("Leave this packet page?")).toBeTruthy();
+		await user.click(screen.getByRole("button", { name: "Stay" }));
+
+		expect(screen.queryByText("Leave this packet page?")).toBeNull();
+		expect((productNameField as HTMLInputElement).value).toBe("Ship by Sunday");
+	});
+
+	it("opens a leave warning for dirty dropdown step links and keeps the draft on Stay", async () => {
+		const user = userEvent.setup();
+		const workspaceState = createWorkspaceState({
+			product_name: undefined,
+			product_summary: undefined,
+			primary_user: undefined,
+			why_this_matters: undefined,
+		});
+
+		render(
+			<PacketStagePage
+				stageId="product"
+				stepId="foundation"
+				initialWorkspaceState={workspaceState}
+			/>,
+		);
+
+		const productNameField = screen.getByLabelText("What's the name?");
+		await user.type(productNameField, "Ship by Sunday");
+		await user.click(screen.getByRole("button", { name: "Product" }));
+		await user.click(await screen.findByRole("link", { name: /Problem/i }));
 
 		expect(pushMock).not.toHaveBeenCalled();
 		expect(replaceMock).not.toHaveBeenCalled();
@@ -390,7 +450,7 @@ describe("PacketStagePage", () => {
 
 		await user.clear(productNameField);
 
-		await user.click(screen.getByRole("button", { name: "Continue" }));
+		await user.click(screen.getByRole("button", { name: /^Continue/ }));
 
 		expect(saveProjectDefinitionFactsMock).not.toHaveBeenCalled();
 		expect(screen.getByText("Foundation is still blank.")).toBeTruthy();
@@ -405,7 +465,7 @@ describe("PacketStagePage", () => {
 			productSummaryField,
 			"A packet-first builder for Sunday launches.",
 		);
-		await user.click(screen.getByRole("button", { name: "Continue" }));
+		await user.click(screen.getByRole("button", { name: /^Continue/ }));
 
 		await waitFor(() =>
 			expect(saveProjectDefinitionFactsMock).toHaveBeenCalledWith(
@@ -466,7 +526,7 @@ describe("PacketStagePage", () => {
 			screen.getByLabelText("Why does this person want this?"),
 			"Sunday-bound launches need sharper guidance than generic courses.",
 		);
-		await user.click(screen.getByRole("button", { name: "Continue" }));
+		await user.click(screen.getByRole("button", { name: /^Continue/ }));
 
 		await waitFor(() =>
 			expect(saveProjectDefinitionFactsMock).toHaveBeenCalledWith(
@@ -501,7 +561,7 @@ describe("PacketStagePage", () => {
 			"What is the actual numeric price?",
 		);
 		await user.clear(priceField);
-		await user.click(screen.getByRole("button", { name: "Continue" }));
+		await user.click(screen.getByRole("button", { name: /^Continue/ }));
 
 		await waitFor(() =>
 			expect(saveProjectDefinitionFactsMock).toHaveBeenCalledWith(
@@ -569,7 +629,7 @@ describe("PacketStagePage", () => {
 
 		const productNameField = screen.getByLabelText("What's the name?");
 		await user.type(productNameField, "Ship by Sunday");
-		await user.click(screen.getByRole("button", { name: "Continue" }));
+		await user.click(screen.getByRole("button", { name: /^Continue/ }));
 
 		await waitFor(() =>
 			expect(

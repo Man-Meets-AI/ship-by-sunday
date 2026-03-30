@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -107,32 +106,37 @@ export function LessonShellWatch({
 		helpfulLinks.length > 0;
 
 	return (
-		<Card className={cn(shellPanelCardClass, "xl:h-full")}>
-			<div className="min-w-0 px-4 py-4 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:px-6 xl:py-6">
-				<div className="flex w-full flex-col gap-5">
-					<div className="space-y-3 border-b border-border/60 pb-4">
-						<div className="flex flex-wrap items-center gap-2">
-							<Badge variant="secondary">{lesson.id}</Badge>
-							<Badge variant="outline">{lesson.artifact.label}</Badge>
+		<div className="flex h-full min-h-0 flex-col">
+			<div className="min-w-0 px-4 py-4 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:px-6 xl:py-8">
+				<div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
+					<div className="space-y-4">
+						<div className={cn(shellEyebrowClass, "flex items-center gap-2")}>
+							<span className="font-semibold text-foreground/80">
+								{lesson.id}
+							</span>
+							<span>•</span>
+							<span>{lesson.artifact.label}</span>
 							{lesson.content.lessonMeta.runtimeLabel ? (
-								<span className={shellEyebrowClass}>
-									{lesson.content.lessonMeta.runtimeLabel}
-								</span>
+								<>
+									<span>•</span>
+									<span>{lesson.content.lessonMeta.runtimeLabel}</span>
+								</>
 							) : null}
 						</div>
-						<div className="space-y-2">
-							<h1 className="max-w-4xl text-balance text-3xl font-semibold text-foreground sm:text-4xl">
+						<div className="space-y-3">
+							<h1 className="max-w-4xl text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
 								{lesson.title}
 							</h1>
-							<p className="max-w-[64ch] text-sm leading-7 text-muted-foreground sm:text-base">
+							<p className="max-w-[64ch] text-base leading-8 text-muted-foreground sm:text-lg">
 								{lesson.content.intro}
 							</p>
 						</div>
 					</div>
-					<div className="space-y-5">
+					<div className="space-y-8">
 						<LessonVideoSurface
 							coachContent={coachContent}
 							variant="watch-shell"
+							playerFrame="bare"
 							className="max-w-none"
 						/>
 						{hasWatchSecondaryContent ? (
@@ -190,10 +194,10 @@ export function LessonShellWatch({
 					</div>
 				</div>
 			</div>
-			<div className="shrink-0 border-t border-border/60 bg-muted/30 px-4 py-3 xl:px-6">
-				<div className="w-full">{footer}</div>
+			<div className="shrink-0 border-t border-border/60 bg-muted/20 px-4 py-4 xl:px-6">
+				<div className="mx-auto w-full max-w-5xl">{footer}</div>
 			</div>
-		</Card>
+		</div>
 	);
 }
 

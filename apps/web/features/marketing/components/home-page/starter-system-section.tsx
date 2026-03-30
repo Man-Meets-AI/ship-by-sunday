@@ -3,7 +3,6 @@
 import type { HomePageContent } from "@/features/marketing/content/home";
 
 import { ScrollReveal } from "./scroll-reveal";
-import { TechStackCloud } from "./tech-stack-cloud";
 
 type StarterSystemSection = HomePageContent["starterSystemSection"];
 type StarterSystemCapability = StarterSystemSection["capabilities"][number];
@@ -112,11 +111,6 @@ export function StarterSystemSectionBlock({
 						))}
 					</div>
 				</div>
-				<ScrollReveal>
-					<div className="border-t border-border/40 pt-12">
-						<TechStackCloud />
-					</div>
-				</ScrollReveal>
 				<StarterSystemSupportBlock
 					supportSection={starterSystemSection.supportSection}
 				/>

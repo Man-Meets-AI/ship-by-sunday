@@ -2,32 +2,35 @@ import {
 	getLessonHref,
 	type BlockId,
 } from "@/features/course/lesson/model/manifest";
+import { routeConfig } from "@/config/product";
 import type { AppShellMissionState } from "@/features/course/shared/components/app-shell/app-shell-props";
+import { getLessonMapHref } from "@/features/workspace-navigation/lib/lesson-map-href";
+import type { PostReviewNavigationTargets } from "@/features/workspace-navigation/lib/post-review-destination";
 import type { BonusMissionState } from "./bonus-mission-types";
 
 const blockPresentation = {
 	CEO: {
 		label: "Product",
 		summary:
-			"Revisit the product lessons whenever the packet needs sharper user, problem, or scope decisions.",
+			"Return here when the product truth needs to get tighter before you keep building.",
 		kind: "reference",
 	},
 	DESIGN: {
 		label: "Design",
 		summary:
-			"Use the design lessons as supporting references when you need better flows, references, or direction while building.",
+			"Use these lessons when flows, references, or UI direction drift away from the original brief.",
 		kind: "reference",
 	},
 	BUILD: {
 		label: "Build",
 		summary:
-			"This is the recommended continuation path. Use it to turn the packet into working software, one slice at a time.",
+			"This is the main continuation path. Turn the Ship Kit into working software, one slice at a time.",
 		kind: "featured",
 	},
 	SHIP: {
 		label: "Ship",
 		summary:
-			"Keep the ship lessons unlocked as references for deployment, QA, and launch readiness once Build is stable.",
+			"Use this section when the product is stable enough for QA, deploy handoff, and launch.",
 		kind: "reference",
 	},
 } as const satisfies Record<
@@ -60,6 +63,32 @@ export function getRecommendedBuildLessonHref(state: BonusMissionState) {
 	return preferredLesson
 		? getLessonHref(preferredLesson.lessonKey)
 		: "/execute";
+}
+
+export function getRecommendedLaunchLessonHref(state: BonusMissionState) {
+	const launchBlock = state.blocks.find((block) => block.id === "SHIP");
+	const preferredLesson =
+		launchBlock?.lessons.find(
+			(lesson) => lesson.status === "opened" || lesson.status === "available",
+		) ?? launchBlock?.lessons[0];
+
+	return preferredLesson
+		? getLessonHref(preferredLesson.lessonKey)
+		: getRecommendedBuildLessonHref(state);
+}
+
+export function buildFallbackPostReviewTargets(
+	state: BonusMissionState,
+): PostReviewNavigationTargets {
+	const buildLessonsDestination = getRecommendedBuildLessonHref(state);
+
+	return {
+		reviewDestination: routeConfig.review,
+		buildLessonsDestination,
+		launchLessonsDestination: getRecommendedLaunchLessonHref(state),
+		lessonMapDestination: getLessonMapHref(),
+		latestLessonDestination: buildLessonsDestination,
+	};
 }
 
 export function buildBonusShellMission(

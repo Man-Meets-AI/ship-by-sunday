@@ -1,14 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "motion/react";
 
-import { productWordmarkFontClassName } from "@/components/product-brand";
 import { routeConfig, type HomePageCtaTarget } from "@/config/product";
 import type { HomePageContent } from "@/features/marketing/content/home";
-import { blogDisplayConfig } from "@/features/starter/lib/starter-selectors";
 
-import { MarketingThemeToggle } from "./home-hero-theme-toggle";
 import { HomePagePrimaryCta } from "./home-page-primary-cta";
 import { PricingIncludesList } from "./pricing-includes-list";
 import { ScrollReveal } from "./scroll-reveal";
@@ -75,10 +71,10 @@ export function PricingSectionBlock({
 						</div>
 
 						<div className="border-t border-border/40 pt-8">
-							<p className="text-sm font-semibold text-foreground">
-								{pricingSection.bonus.title}
-							</p>
-							<p className="mt-2 text-sm leading-7 text-muted-foreground">
+							<p className="text-sm leading-7 text-muted-foreground">
+								<span className="font-medium text-foreground/80">
+									{pricingSection.bonus.title}
+								</span>{" "}
 								{pricingSection.bonus.description}
 							</p>
 						</div>
@@ -96,40 +92,23 @@ export function FooterSection({
 }) {
 	return (
 		<footer
-			className="border-t border-border/40 py-20 lg:py-40"
+			className="border-t border-border/40 py-10"
 			aria-label="Site footer"
 		>
-			<div className="flex flex-col items-center gap-16">
+			<div className="flex flex-col items-center gap-6">
 				<ScrollReveal className="w-full">
-					<div className="flex w-full items-center justify-between border-b border-border/40 pb-16">
-						<div className="flex items-center gap-4">
-							<MarketingThemeToggle />
-						</div>
+					<div className="flex w-full flex-col items-center justify-between gap-4 sm:flex-row">
+						<p className="font-marketing-display text-lg font-semibold tracking-tight text-foreground">
+							{footerWordmark}
+						</p>
 						<Link
-							href={routeConfig.blog}
-							className="inline-flex h-12 items-center rounded-full border border-border/40 bg-background px-6 text-sm font-bold text-foreground/80 transition-all hover:border-foreground/30 hover:text-foreground hover:shadow-sm"
+							href={routeConfig.signIn}
+							className="text-sm text-muted-foreground transition-colors hover:text-foreground"
 						>
-							{blogDisplayConfig.footerLabel}
+							Already bought?{" "}
+							<span className="ml-1 font-medium text-foreground">Sign in</span>
 						</Link>
 					</div>
-				</ScrollReveal>
-
-				<div className="w-full text-center overflow-x-hidden">
-					<motion.p
-						className={`${productWordmarkFontClassName} [word-spacing:0.02em] text-[clamp(4.5rem,18vw,14rem)] font-black uppercase leading-[0.8] text-foreground/90 transition-colors duration-700 hover:text-foreground`}
-						initial={{ opacity: 0, y: 12 }}
-						whileInView={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-						viewport={{ once: true, amount: 0.15 }}
-					>
-						{footerWordmark}
-					</motion.p>
-				</div>
-
-				<ScrollReveal delay={0.2}>
-					<p className="text-sm font-medium text-foreground/40">
-						One serious system for serious builders.
-					</p>
 				</ScrollReveal>
 			</div>
 		</footer>

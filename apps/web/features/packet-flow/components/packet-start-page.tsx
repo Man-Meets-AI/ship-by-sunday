@@ -12,9 +12,13 @@ export function PacketStartPage({
 		<AppShell
 			viewportMode="app"
 			appScrollMode="page"
-			enableMissionQuery={false}
 			showSkillRail={false}
 			title="Start"
+			primaryNav={{
+				kind: "packet",
+				currentStageId: "start",
+				stageStatuses: initialWorkspaceState.stageStatuses,
+			}}
 		>
 			<div className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-6 pb-20 pt-12">
 				<div className="space-y-16">

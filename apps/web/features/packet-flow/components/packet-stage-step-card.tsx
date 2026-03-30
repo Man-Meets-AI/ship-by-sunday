@@ -7,6 +7,8 @@ import type {
 } from "@packet-compiler";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Kbd, KbdGroup } from "@/components/ui/kbd";
+import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 import type { PacketStepInlineFeedback } from "@/features/packet-flow/lib/packet-step-save-feedback";
 import { PacketStageSaveFeedback } from "./packet-stage-save-feedback";
 import { PacketStageStepField } from "./packet-stage-step-field";
@@ -42,6 +44,11 @@ export function PacketStageStepCard({
 	onChange,
 	onSaveAndContinue,
 }: PacketStageStepCardProps) {
+	useKeyboardShortcut("Enter", onSaveAndContinue, {
+		ctrlOrMeta: true,
+		disabled: isSaving,
+	});
+
 	return (
 		<section className="space-y-6">
 			<div className="max-w-3xl space-y-2">
@@ -81,11 +88,21 @@ export function PacketStageStepCard({
 				<div className="flex flex-col gap-3 sm:flex-row">
 					<Button
 						type="button"
-						className="h-10 min-w-32"
+						className="h-10 min-w-40"
 						onClick={onSaveAndContinue}
 						disabled={isSaving}
 					>
 						{isSaving ? "Saving..." : "Continue"}
+						{!isSaving && (
+							<KbdGroup className="ml-2">
+								<Kbd className="bg-primary-foreground/10 text-primary-foreground">
+									⌘
+								</Kbd>
+								<Kbd className="bg-primary-foreground/10 text-primary-foreground">
+									↵
+								</Kbd>
+							</KbdGroup>
+						)}
 					</Button>
 				</div>
 			</div>

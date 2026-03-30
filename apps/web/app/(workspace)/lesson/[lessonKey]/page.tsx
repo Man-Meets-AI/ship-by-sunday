@@ -4,15 +4,19 @@ import { routeConfig } from "@/config/product";
 import { getLessonByRouteSegment } from "@/features/course/lesson/model/manifest";
 import { BonusLessonPage } from "@/features/execute-ship/components/bonus-lesson-page";
 import { BonusRouteStatePanel } from "@/features/execute-ship/components/bonus-route-state-panel";
+import { buildFallbackPostReviewTargets } from "@/features/execute-ship/lib/bonus-library-presentation";
 import { loadBonusRouteAccess } from "@/features/execute-ship/server/load-bonus-route-access";
 import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
 
 export default async function Page({
 	params,
+	searchParams,
 }: {
 	params: Promise<{ lessonKey: string }>;
+	searchParams: Promise<{ showLessonMap?: string }>;
 }) {
 	const { lessonKey: routeSegment } = await params;
+	const { showLessonMap } = await searchParams;
 	const lesson = getLessonByRouteSegment(routeSegment);
 
 	if (!lesson) {
@@ -38,12 +42,24 @@ export default async function Page({
 		api.course.getBonusMissionState,
 		{},
 	);
+	const resumeDestination = await fetchAuthenticatedQuery(
+		api.packet.getPacketResumeDestination,
+		{},
+	);
 
 	if (!missionState) {
 		throw new Error("Bonus mission state missing");
 	}
 
 	return (
-		<BonusLessonPage lessonKey={lesson.lessonKey} missionState={missionState} />
+		<BonusLessonPage
+			lessonKey={lesson.lessonKey}
+			missionState={missionState}
+			postReviewTargets={
+				resumeDestination?.postReviewTargets ??
+				buildFallbackPostReviewTargets(missionState)
+			}
+			initialShowLessonMap={showLessonMap === "1"}
+		/>
 	);
 }

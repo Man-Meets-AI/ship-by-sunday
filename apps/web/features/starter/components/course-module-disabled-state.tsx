@@ -5,11 +5,7 @@ import { workspaceDisplayConfig } from "@/features/starter/lib/starter-selectors
 
 export function CourseModuleDisabledState() {
 	return (
-		<AppShell
-			viewportMode="app"
-			showSkillRail={false}
-			enableMissionQuery={false}
-		>
+		<AppShell viewportMode="app" showSkillRail={false}>
 			<div className="mx-auto flex w-full max-w-3xl flex-1 items-center justify-center px-4 py-10">
 				<StarterModuleDisabledCard
 					eyebrow="Course module"

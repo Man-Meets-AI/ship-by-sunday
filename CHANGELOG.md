@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-03-29
+
+### Changed
+
+- Unified the protected workspace navigation so packet stages, unlocked review, and unlocked lessons now share one header model, with `Review`, `Build Lessons`, `Launch Lessons`, and `Bonus` replacing the old Mission and Execute / Ship vocabulary.
+- Made `Review & Download` the real unlock pivot: downloading the Ship Kit now unlocks post-review content directly, review advances into Build Lessons without a second unlock click, and the Lesson Map is reusable on review and lesson pages instead of living behind a separate Mission page.
+- Converted `/execute` and `/mission` into compatibility redirects, removed the dead execute bridge and mission-rail header paths, and cleaned the remaining artifacts, settings, and lesson fallbacks so the live runtime no longer depends on canonical `/mission` navigation.
+- Tightened the public homepage shell to match the current offer: simplified the top bar and footer, updated pricing/footer/supporting copy, refreshed the social-proof visual treatment, and aligned browser-smoke expectations with the shipped marketing surface.
+
 ## 2026-03-28
 
 ### Changed

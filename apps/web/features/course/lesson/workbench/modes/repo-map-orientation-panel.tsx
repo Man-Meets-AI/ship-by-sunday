@@ -14,7 +14,7 @@ import type {
 } from "@/features/course/lesson/model/manifest";
 
 import { RepoMapCommandsTab } from "./repo-map-commands-tab";
-import { REPO_MAP_COACH_LINK_IDS } from "./repo-map-constants";
+import { REPO_MAP_SETUP_GUIDE_LINK_ID } from "./repo-map-constants";
 import { RepoMapProjectMapTab } from "./repo-map-project-map-tab";
 
 function isLinkResource(
@@ -31,8 +31,7 @@ export function RepoMapOrientationPanel({
 	workbenchCompletionSlot?: ReactNode;
 }) {
 	const links = (lessonContent.coach.resources ?? []).filter(isLinkResource);
-	const toolVideo = links.find((r) => r.id === REPO_MAP_COACH_LINK_IDS.video);
-	const setupGuide = links.find((r) => r.id === REPO_MAP_COACH_LINK_IDS.guide);
+	const setupGuide = links.find((r) => r.id === REPO_MAP_SETUP_GUIDE_LINK_ID);
 
 	return (
 		<div className="space-y-4">
@@ -44,13 +43,6 @@ export function RepoMapOrientationPanel({
 				</AlertDescription>
 			</Alert>
 			<div className="flex flex-wrap gap-2">
-				{toolVideo ? (
-					<Button variant="default" size="sm" asChild>
-						<a href={toolVideo.href} target="_blank" rel="noopener noreferrer">
-							{toolVideo.label}
-						</a>
-					</Button>
-				) : null}
 				{setupGuide ? (
 					<Button variant="secondary" size="sm" asChild>
 						<Link

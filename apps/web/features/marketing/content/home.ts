@@ -17,10 +17,10 @@ export const homePageContent = {
 		headlineLead: "Ship a real product",
 		headlineTailPrefix: "",
 		headlineTailHover: "by Sunday",
-		body: `One serious system to lock your product truth, compile agent-ready packs, and ship a real v1 by Sunday—without losing the repo on Monday.`,
+		body: `The only system that teaches you how to ship a durable product from start to finish in one weekend. Oh, and it includes building you a ridiculous custom template from scratch based on what you want to build. We should charge more for this.`,
 		primaryCta: marketingDisplayConfig.primaryCtaLabel,
 		secondaryCta: {
-			label: "See the system",
+			label: "See how Ship Rails works",
 			href: routeConfig.systemHash,
 		},
 		eyebrow:
@@ -74,36 +74,38 @@ export const homePageContent = {
 		lead: "",
 		items: [
 			{
+				question: "Is this another course or another starter?",
+				answer:
+					"No. Ship by Sunday is a packet-first shipping system. The videos help you use it, and the starter repo is part of it, but the real product is the Ship Kit you leave with.",
+			},
+			{
+				question: "What do I actually get at the end?",
+				answer:
+					"You leave with your product truth, the Agent-Ready Packs, and the Ship Kit: your Agent-First Starter Repo plus the generated design, marketing, build, and prompt materials.",
+			},
+			{
+				question: "I already have a starter. Why would I need this?",
+				answer:
+					"Because a starter without aligned context is still just code. Ship by Sunday gives your repo the packs and product truth that make AI useful instead of chaotic.",
+			},
+			{
+				question: "Is this just more planning before coding?",
+				answer:
+					"No. It is the minimum brief required to stop re-explaining the product every time you touch AI. The point is to move faster on the right thing.",
+			},
+			{
 				question: "Who is this for?",
 				answer:
-					"Builders who can already prototype or get things working, but keep getting stuck before they ship a real v1.",
+					"Technical builders and founder-operators who can get things working, but keep getting stuck between idea, prompts, code, and launch.",
+			},
+			{
+				question: "Why not just use ChatGPT, Claude, or Codex directly?",
+				answer:
+					"You can. The problem is fragments. Ship Rails makes those tools work from one source of truth instead of stale chats and half-decisions.",
 			},
 			{
 				question: "What happens right after I pay?",
-				answer: `If you are not signed in yet, you will sign in first. After Stripe checkout, you will land on the success page while access finalizes. As soon as it is ready, you will be sent into the ${workspaceDisplayConfig.homeNoun} to start the product intake.`,
-			},
-			{
-				question: "Is this a coding course?",
-				answer: `It includes walkthroughs, but ${productName} is not a course wrapper. It is a guided system that captures the right facts, compiles the packs, and helps you ship with better context.`,
-			},
-			{
-				question: "What if I buy this and still do not finish?",
-				answer:
-					"The guarantee is about clarity, not a promise that we ship the product for you. If you complete the Product stage within 14 days and still do not leave with a clearer product definition and tighter v1 scope, email us and we will refund you.",
-			},
-			{
-				question: "What kind of app is a good fit for this?",
-				answer:
-					"Scoped web apps, MVPs, narrow tools, and practical products are the best fit. It is not for giant multi-system startup ideas.",
-			},
-			{
-				question: "Do I need product experience?",
-				answer: `No. But if product judgment feels like your weak spot, ${bonusName} is included as a bonus.`,
-			},
-			{
-				question: "What are Agent-Ready Packs?",
-				answer:
-					"They are file-based packs for design, marketing, build execution, and prompting. Each pack gives an agent durable context in one domain instead of forcing you to restate the whole project every time.",
+				answer: `You go straight into the ${workspaceDisplayConfig.homeNoun} to lock the truth, compile the packs, and build your Ship Kit.`,
 			},
 		],
 	},
@@ -187,9 +189,9 @@ export const homePageContent = {
 	},
 	durabilitySection: {
 		label: "Durability",
-		title: "Ship on Sunday. Keep shipping on Monday.",
+		title: "Ship by Sunday. Keep shipping on Monday.",
 		intro:
-			"The goal is not a one-night demo. The goal is a product you can keep shaping as models, tools, and teammates change around you.",
+			"The goal is not a one-night demo. The goal is a product you improve as models, tools, and agents change around you.",
 		items: [
 			{
 				title: "Stable facts first",
@@ -215,23 +217,23 @@ export const homePageContent = {
 		titleLead: "Ship a real product",
 		titleAccent: "by Sunday",
 		intro:
-			"One payment for the contract-first sprint, the docs packs, the Agent-Ready Starter System, and the support that keeps you shipping after the weekend.",
+			"One payment for Ship Rails: the guided packet-first run, the Agent-Ready Packs, the Agent-First Starter Repo, and the guidance that keeps you shipping after the first weekend.",
 		priceDisplay: productConfig.priceDisplay,
 		eyebrow: "One-time payment. Lifetime access.",
-		ctaTitle: "Get instant access",
-		trustLine: `After checkout, your access finishes syncing and you go straight into the ${workspaceDisplayConfig.homeNoun} to start the intake and compile your packs.`,
+		ctaTitle: "Get the system",
+		trustLine: `After checkout, you go straight into the ${workspaceDisplayConfig.homeNoun} to lock the truth, compile the packs, and build your Ship Kit.`,
 		includes: [
 			"Guided product intake and review workspace",
-			"Design, Marketing, Build, and Prompt Packs",
-			"Agent-Ready Starter System",
+			"Agent-Ready Packs",
+			"Agent-First Starter Repo",
 			"Fast Pass Walkthroughs",
 			"Guided Ship Path",
 		],
 		bonus: {
-			label: "Free bonus",
-			title: bonusName,
+			label: "Also included",
+			title: `Also included: ${bonusName}`,
 			description:
-				"If product judgment is the weak spot, the bonus is included at no extra cost so you can tighten the product decisions underneath the build, not just the prompts around it.",
+				"If product judgment is still the weak spot, this stays in the bundle without becoming the point of the offer.",
 		},
 		guarantee:
 			"Complete the Product stage within 14 days. If you do not leave with a clearer product definition and tighter v1 scope, email us and we will refund you.",

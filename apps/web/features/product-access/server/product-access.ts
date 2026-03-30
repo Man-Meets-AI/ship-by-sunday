@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { FunctionReturnType } from "convex/server";
 import { fetchQuery } from "convex/nextjs";
 import { redirect } from "next/navigation";
 
@@ -7,10 +8,9 @@ import { api } from "@/convex/_generated/api";
 import type { ProductAccess } from "@/features/product-access/lib/product-access";
 import { getConvexServerSession } from "@/platform/auth/convex-auth";
 
-type ResumeDestination = {
-	destination: string;
-	stageId: string;
-};
+type ResumeDestination = FunctionReturnType<
+	typeof api.packet.getPacketResumeDestination
+>;
 
 export async function getServerProductAccess(): Promise<ProductAccess> {
 	const session = await getConvexServerSession();

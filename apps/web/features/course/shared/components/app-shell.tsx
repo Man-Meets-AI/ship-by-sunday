@@ -1,28 +1,19 @@
 "use client";
 
-import { useConvexAuth, useQuery } from "convex/react";
-
 import { Card } from "@/components/ui/card";
-import { api } from "@/convex/_generated/api";
 import { getLesson } from "@/features/course/lesson/model/manifest";
 import { AppShellFooterRail } from "@/features/course/shared/components/app-shell/app-shell-footer-rail";
 import { AppShellHeader } from "@/features/course/shared/components/app-shell/app-shell-header";
-import {
-	type AppShellMissionState,
-	type AppShellProps,
-	type AppShellViewerAccessState,
-} from "@/features/course/shared/components/app-shell/app-shell-props";
-import {
-	getAppShellBlockStatus,
-	isBlockActive,
-} from "@/features/course/shared/components/app-shell/app-shell-block-status";
+import { type AppShellProps } from "@/features/course/shared/components/app-shell/app-shell-props";
+import { isBlockActive } from "@/features/course/shared/components/app-shell/app-shell-block-status";
 
 function ShellInner({
 	children,
 	currentLessonId,
 	currentBlockId,
 	mission,
-	showMissionRail: explicitShowMissionRail,
+	progressSummary,
+	primaryNav,
 	showSkillRail: explicitShowSkillRail,
 	layoutMode,
 	onLayoutModeChange,
@@ -45,18 +36,9 @@ function ShellInner({
 	const activeBlock = mission?.blocks.find(
 		(block) => block.id === activeBlockId,
 	);
-	const showMissionRail = explicitShowMissionRail ?? Boolean(mission);
 	const showSkillRail = explicitShowSkillRail ?? Boolean(currentLessonId);
 	const lesson11Viewport =
 		getLesson(currentLessonId ?? "")?.displayLabel === "1.1";
-	const blockStatuses = mission
-		? new Map(
-				mission.blocks.map((block) => [
-					block.id,
-					getAppShellBlockStatus(block, activeBlockId),
-				]),
-			)
-		: new Map();
 
 	const shellClassName =
 		viewportMode === "app"
@@ -81,19 +63,26 @@ function ShellInner({
 				completionCue={completionCue}
 			/>
 		) : null;
+	const resolvedProgressSummary =
+		progressSummary ??
+		(mission
+			? {
+					progressCount: mission.progressCount,
+					totalLessons: mission.totalLessons,
+					progressLabel: mission.progressLabel,
+				}
+			: undefined);
 
 	return (
 		<main className={shellClassName}>
 			{viewportMode === "app" ? (
 				<>
-					<header className="shrink-0">
-						<Card className="gap-0 rounded-none border-x-0 border-t-0 py-0 shadow-none">
+					<header className="relative z-20 shrink-0 overflow-visible">
+						<Card className="gap-0 overflow-visible rounded-none border-0 py-0 shadow-none">
 							<AppShellHeader
 								viewportMode={viewportMode}
-								mission={mission}
-								showMissionRail={showMissionRail}
-								blockStatuses={blockStatuses}
-								activeBlockId={activeBlockId}
+								primaryNav={primaryNav}
+								progressSummary={resolvedProgressSummary}
 								layoutMode={layoutMode}
 								onLayoutModeChange={onLayoutModeChange}
 								lesson11Viewport={lesson11Viewport}
@@ -107,14 +96,12 @@ function ShellInner({
 				</>
 			) : (
 				<div className={shellInnerClassName}>
-					<header className="shrink-0">
-						<Card className="gap-0 overflow-hidden rounded-none py-0 shadow-sm">
+					<header className="relative z-20 shrink-0 overflow-visible">
+						<Card className="gap-0 overflow-visible rounded-none border-0 py-0 shadow-sm">
 							<AppShellHeader
 								viewportMode={viewportMode}
-								mission={mission}
-								showMissionRail={showMissionRail}
-								blockStatuses={blockStatuses}
-								activeBlockId={activeBlockId}
+								primaryNav={primaryNav}
+								progressSummary={resolvedProgressSummary}
 								layoutMode={layoutMode}
 								onLayoutModeChange={onLayoutModeChange}
 								lesson11Viewport={lesson11Viewport}
@@ -129,24 +116,6 @@ function ShellInner({
 	);
 }
 
-function AppShellWithQuery(props: AppShellProps) {
-	const { isAuthenticated, isLoading } = useConvexAuth();
-	const viewerAccess = useQuery(
-		api.access.viewerProductAccess,
-		isAuthenticated && !isLoading ? {} : "skip",
-	) as AppShellViewerAccessState | undefined;
-	const mission = useQuery(
-		api.course.getMissionState,
-		props.enableMissionQuery && viewerAccess?.hasAccess ? {} : "skip",
-	) as AppShellMissionState | undefined;
-
-	return <ShellInner {...props} mission={mission} />;
-}
-
 export function AppShell(props: AppShellProps) {
-	if (props.mission || props.enableMissionQuery === false) {
-		return <ShellInner {...props} />;
-	}
-
-	return <AppShellWithQuery {...props} />;
+	return <ShellInner {...props} />;
 }

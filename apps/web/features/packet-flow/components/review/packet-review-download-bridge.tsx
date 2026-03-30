@@ -1,63 +1,77 @@
 "use client";
 
 import { useState } from "react";
-import { useConvexAuth, useMutation, useQuery } from "convex/react";
-import { useRouter } from "next/navigation";
-import { api } from "@/convex/_generated/api";
-import { routeConfig } from "@/config/product";
 import type { PacketWorkspaceState } from "@/features/packet-flow/lib/packet-workspace-types";
+import type { PostReviewNavigationTargets } from "@/features/workspace-navigation/lib/post-review-destination";
 import { PacketReviewCheckpointCard } from "./packet-review-checkpoint-card";
 import { PacketReviewExecutePreview } from "./packet-review-execute-preview";
 
+function getArchiveFileName(contentDisposition: string | null) {
+	const fileNameMatch = contentDisposition?.match(/filename="([^"]+)"/);
+	return fileNameMatch?.[1] ?? "ship-kit.zip";
+}
+
+async function downloadStarterArchive() {
+	const response = await fetch("/api/download/repo", {
+		method: "GET",
+		credentials: "same-origin",
+	});
+	if (!response.ok) {
+		const errorMessage = await response.text();
+		throw new Error(errorMessage || "Ship Kit download failed.");
+	}
+
+	const archive = await response.blob();
+	const downloadUrl = URL.createObjectURL(archive);
+	const downloadLink = document.createElement("a");
+	downloadLink.href = downloadUrl;
+	downloadLink.download = getArchiveFileName(
+		response.headers.get("content-disposition"),
+	);
+	document.body.append(downloadLink);
+	downloadLink.click();
+	downloadLink.remove();
+	URL.revokeObjectURL(downloadUrl);
+}
+
 export function PacketReviewDownloadBridge({
-	initialWorkspaceState,
+	onOpenLessonMap,
+	workspaceState,
+	postReviewTargets,
 }: {
-	initialWorkspaceState: PacketWorkspaceState;
+	onOpenLessonMap?: () => void;
+	workspaceState: PacketWorkspaceState;
+	postReviewTargets: PostReviewNavigationTargets | null;
 }) {
-	const router = useRouter();
-	const { isAuthenticated, isLoading } = useConvexAuth();
-	const liveWorkspaceState = useQuery(
-		api.packet.getPacketWorkspaceState,
-		isAuthenticated && !isLoading ? {} : "skip",
-	) as PacketWorkspaceState | undefined;
-	const workspaceState = liveWorkspaceState ?? initialWorkspaceState;
 	const isReviewReady = workspaceState.packetReadiness.review.isReady;
 	const packetReadiness = workspaceState.packetReadiness;
 	const isExecuteUnlocked = Boolean(
 		workspaceState.workflowState?.executeShipUnlockedAt,
 	);
-	const unlockExecuteShip = useMutation(api.packet.unlockExecuteShip);
-	const [hasRequestedStarterDownload, setHasRequestedStarterDownload] =
+	const [hasCompletedStarterDownload, setHasCompletedStarterDownload] =
 		useState(false);
-	const [isUnlockPending, setIsUnlockPending] = useState(false);
-	const hasTriggeredStarterDownload =
-		hasRequestedStarterDownload || isExecuteUnlocked;
+	const [isDownloadPending, setIsDownloadPending] = useState(false);
+	const [downloadError, setDownloadError] = useState<string | null>(null);
+	const hasUnlockedReviewFlow =
+		isExecuteUnlocked || hasCompletedStarterDownload;
 
-	function handleStarterDownload() {
-		if (!isReviewReady) {
+	async function handleStarterDownload(event: { preventDefault: () => void }) {
+		event.preventDefault();
+		if (!isReviewReady || isDownloadPending) {
 			return;
 		}
 
-		setHasRequestedStarterDownload(true);
-	}
-
-	async function handleUnlockExecuteShip() {
-		if (
-			!isReviewReady ||
-			!hasTriggeredStarterDownload ||
-			isExecuteUnlocked ||
-			isUnlockPending
-		) {
-			return;
-		}
-
-		setIsUnlockPending(true);
+		setIsDownloadPending(true);
+		setDownloadError(null);
 		try {
-			await unlockExecuteShip({});
-			router.push(routeConfig.execute);
+			await downloadStarterArchive();
+			setHasCompletedStarterDownload(true);
 		} catch (error) {
-			setIsUnlockPending(false);
-			throw error;
+			setDownloadError(
+				error instanceof Error ? error.message : "Ship Kit download failed.",
+			);
+		} finally {
+			setIsDownloadPending(false);
 		}
 	}
 
@@ -65,16 +79,18 @@ export function PacketReviewDownloadBridge({
 		<div className="flex flex-col gap-6">
 			<PacketReviewCheckpointCard
 				isReviewReady={isReviewReady}
+				isDownloadPending={isDownloadPending}
 				packetReadiness={packetReadiness}
-				isExecuteUnlocked={isExecuteUnlocked}
+				downloadError={downloadError}
 				onStarterDownload={handleStarterDownload}
 			/>
 			<PacketReviewExecutePreview
+				buildLessonsHref={postReviewTargets?.buildLessonsDestination ?? null}
 				isReviewReady={isReviewReady}
-				hasTriggeredStarterDownload={hasTriggeredStarterDownload}
-				isExecuteUnlocked={isExecuteUnlocked}
-				isUnlockPending={isUnlockPending}
-				onUnlockExecuteShip={handleUnlockExecuteShip}
+				hasUnlockedReviewFlow={hasUnlockedReviewFlow}
+				isDownloadPending={isDownloadPending}
+				onStarterDownload={handleStarterDownload}
+				onOpenLessonMap={onOpenLessonMap}
 			/>
 		</div>
 	);

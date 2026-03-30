@@ -1,4 +1,4 @@
-import { productConfig, routeConfig } from "@/config/product";
+import { routeConfig } from "@/config/product";
 import type { LessonSourceConfig } from "@/features/course/lesson/model/contracts";
 import { createVideoLesson } from "@/features/course/lesson/model/video-lesson-factory";
 import {
@@ -310,12 +310,6 @@ export const buildLessons = [
 		workbenchEmptyState:
 			"Open the Project map tab and mirror it in your file explorer.",
 		coachResources: [
-			{
-				id: "repo_map_tool_overview_video",
-				label: "Tool overview video",
-				href: productConfig.bonusPlaylistUrl,
-				kind: "external",
-			},
 			{
 				id: "repo_map_setup_guide",
 				label: "Step-by-step setup guide",

@@ -10,11 +10,11 @@ test("landing page renders the main offer CTA", async ({ request }) => {
 	expect(html).toContain(
 		"More than a starter. A system you can keep shipping from.",
 	);
-	expect(html).toContain("Ship on Sunday. Keep shipping on Monday.");
-	expect(html).toContain("Get instant access");
+	expect(html).toContain("Ship by Sunday. Keep shipping on Monday.");
+	expect(html).toContain("Get the system");
 	expect(html).toContain('id="system"');
 	expect(html).toContain('id="pricing"');
-	expect(html).toContain(">Blog<");
+	expect(html).toContain("Sign in");
 });
 
 test("checkout success without a session renders the recovery surface", async ({

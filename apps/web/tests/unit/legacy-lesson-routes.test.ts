@@ -2,6 +2,7 @@ import {
 	getLegacyLessonRedirect,
 	legacyLessonRedirects,
 } from "@/features/course/lesson/utils/legacy-routes";
+import { getLessonMapHref } from "@/features/workspace-navigation/lib/lesson-map-href";
 
 describe("legacy lesson routes", () => {
 	it("returns the supported compatibility redirects", () => {
@@ -11,7 +12,7 @@ describe("legacy lesson routes", () => {
 	});
 
 	it("redirects numeric current lesson labels and mission to stable routes", () => {
-		expect(getLegacyLessonRedirect("1.0")).toBe("/mission");
+		expect(getLegacyLessonRedirect("1.0")).toBe(getLessonMapHref());
 		expect(getLegacyLessonRedirect("1.8")).toBe("/lesson/ceo-wrap-up");
 		expect(getLegacyLessonRedirect("3.16")).toBe(
 			"/lesson/finalize-build-handoff-and-unlock-ship",

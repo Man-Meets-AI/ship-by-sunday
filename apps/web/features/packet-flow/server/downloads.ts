@@ -18,6 +18,7 @@ export async function getPacketDownloadContext(): Promise<{
 		typeof createCanonicalProjectDefinition
 	>;
 	workspaceState: PacketWorkspaceState;
+	token: string;
 } | null> {
 	const session = await getConvexServerSession();
 	if (!session.token) {
@@ -48,5 +49,6 @@ export async function getPacketDownloadContext(): Promise<{
 			updatedAt: projectDefinition.updatedAt,
 		}),
 		workspaceState,
+		token: session.token,
 	};
 }

@@ -120,7 +120,7 @@ export const starterConfig = {
 	marketing: {
 		docsLabel: "Docs",
 		loginLabel: "Sign in",
-		primaryCtaLabel: "Get access",
+		primaryCtaLabel: "Get the system",
 		previewImageAlt: "Ship by Sunday system preview",
 	},
 	workspace: {

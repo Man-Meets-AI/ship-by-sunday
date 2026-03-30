@@ -1,19 +1,17 @@
 import { redirect } from "next/navigation";
+import { api } from "@/convex/_generated/api";
 import { routeConfig } from "@/config/product";
-import { ExecuteShipPage } from "@/features/execute-ship/components/execute-ship-page";
-import { loadBonusRouteAccess } from "@/features/execute-ship/server/load-bonus-route-access";
+import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
 
 export default async function Page() {
-	const bonusRouteAccess = await loadBonusRouteAccess();
+	const resumeDestination = await fetchAuthenticatedQuery(
+		api.packet.getPacketResumeDestination,
+		{},
+	);
 
-	if (!bonusRouteAccess.isUnlocked) {
+	if (!resumeDestination?.postReviewTargets) {
 		redirect(routeConfig.review);
 	}
 
-	return (
-		<ExecuteShipPage
-			initialWorkspaceState={bonusRouteAccess.workspaceState}
-			hasStartedBonusLesson={bonusRouteAccess.hasStartedBonusLesson}
-		/>
-	);
+	redirect(resumeDestination.postReviewTargets.buildLessonsDestination);
 }

@@ -44,6 +44,7 @@ export function getCoachPanelSections({
 				<LessonVideoSurface
 					coachContent={coachContent}
 					emptyState={emptyVideoState}
+					playerFrame="bare"
 				/>
 			),
 		},

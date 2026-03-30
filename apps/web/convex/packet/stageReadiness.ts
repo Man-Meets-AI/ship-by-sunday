@@ -3,6 +3,7 @@ import {
 	getPacketStageDefinition,
 	parseCanonicalProjectFactsDraft,
 } from "../../../../packages/packet-compiler/src";
+import { resolveWorkspaceResumeDestination } from "../../features/workspace-navigation/lib/post-review-destination";
 
 import { getProjectDefinitionByClerkUserId } from "./projectDefinition";
 import type { PacketQueryCtx } from "./types";
@@ -15,6 +16,7 @@ import {
 	serializePacketWorkflowState,
 } from "./workflowState";
 import { requireGrantedProductAccess } from "../access/model";
+import { loadViewerCourseState } from "../course/shared";
 
 export const getPacketWorkspaceStateArgs = {};
 export const getPacketWorkspaceStateReturns = packetWorkspaceStateValidator;
@@ -57,10 +59,25 @@ export async function getPacketWorkspaceStateHandler(ctx: PacketQueryCtx) {
 
 export async function getPacketResumeDestinationHandler(ctx: PacketQueryCtx) {
 	const workspaceState = await getPacketWorkspaceStateHandler(ctx);
-	const stageId = workspaceState.firstIncompleteStageId;
+	const packetStageDestination = getPacketStageDefinition(
+		workspaceState.firstIncompleteStageId,
+	).route;
 
-	return {
-		destination: getPacketStageDefinition(stageId).route,
-		stageId,
-	};
+	if (!workspaceState.workflowState?.executeShipUnlockedAt) {
+		return resolveWorkspaceResumeDestination({
+			executeShipUnlockedAt: null,
+			firstIncompleteStageId: workspaceState.firstIncompleteStageId,
+			packetStageDestination,
+			postReviewLessonStates: [],
+		});
+	}
+
+	const viewerState = await loadViewerCourseState(ctx);
+
+	return resolveWorkspaceResumeDestination({
+		executeShipUnlockedAt: workspaceState.workflowState.executeShipUnlockedAt,
+		firstIncompleteStageId: workspaceState.firstIncompleteStageId,
+		packetStageDestination,
+		postReviewLessonStates: viewerState.lessonStates,
+	});
 }

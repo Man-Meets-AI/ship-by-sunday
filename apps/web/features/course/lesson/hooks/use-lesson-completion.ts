@@ -4,7 +4,7 @@ import { useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { routeConfig, timingConfig } from "@/config/product";
+import { timingConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import {
 	getLessonByKey,
@@ -19,6 +19,7 @@ import type {
 	CompletionIssue,
 	PersistedFieldValues,
 } from "@/features/course/lesson/model/registry";
+import { getLessonMapHref } from "@/features/workspace-navigation/lib/lesson-map-href";
 
 type CompletionErrorData = {
 	code: "INCOMPLETE_LESSON";
@@ -233,7 +234,7 @@ export function useLessonCompletion({
 			? `Next: ${lesson.nextStepLabel}`
 			: completionPayload?.nextLessonLabel
 				? `Next unlocked: ${completionPayload.nextLessonLabel}`
-				: "Mission updated";
+				: "Lesson Map updated";
 	const completionArtifactLine = stageUnlockConfig
 		? `${lesson.artifact.label} locked. Design has a real handoff now.`
 		: completionPayload
@@ -257,7 +258,7 @@ export function useLessonCompletion({
 
 	const navigateToNextStep = (nextLessonKey: string | null) => {
 		router.push(
-			nextLessonKey ? getLessonHref(nextLessonKey) : routeConfig.mission,
+			nextLessonKey ? getLessonHref(nextLessonKey) : getLessonMapHref(),
 		);
 	};
 

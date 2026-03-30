@@ -43,10 +43,33 @@ vi.mock("next/link", () => ({
 	),
 }));
 
+vi.mock("next/navigation", () => ({
+	useRouter: () => ({
+		push: vi.fn(),
+	}),
+}));
+
 vi.mock("@/features/course/lesson/components/lesson-video-player", () => ({
 	LessonVideoPlayer: ({ title }: { title?: string }) => (
 		<div data-testid="packet-start-video-player">{title ?? "Lesson video"}</div>
 	),
+}));
+
+vi.mock("@/components/ui/hero-highlight", () => ({
+	HeroHighlight: ({
+		children,
+		className,
+		containerClassName,
+	}: {
+		children: React.ReactNode;
+		className?: string;
+		containerClassName?: string;
+	}) => (
+		<div className={containerClassName}>
+			<div className={className}>{children}</div>
+		</div>
+	),
+	Highlight: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
 vi.mock("@/features/packet-flow/components/packet-stage-nav", () => ({
@@ -91,7 +114,9 @@ describe("PacketStartPage", () => {
 
 		expect(screen.getByRole("heading", { name: "Start" })).toBeTruthy();
 		expect(
-			screen.getByText("Build the folder before you build the app."),
+			screen.getByRole("heading", {
+				name: /Build the BRIEF before you build the app\./i,
+			}),
 		).toBeTruthy();
 		expect(screen.getByTestId("packet-start-video-player").textContent).toBe(
 			"Welcome Video",
@@ -105,7 +130,9 @@ describe("PacketStartPage", () => {
 		expect(
 			screen
 				.getByRole("link", {
-					name: `Continue with ${getPacketStageDefinition(workspaceState.firstIncompleteStageId).label}`,
+					name: new RegExp(
+						`Continue with ${getPacketStageDefinition(workspaceState.firstIncompleteStageId).label}`,
+					),
 				})
 				.getAttribute("href"),
 		).toBe(

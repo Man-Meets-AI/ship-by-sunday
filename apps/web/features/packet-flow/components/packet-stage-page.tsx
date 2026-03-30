@@ -7,7 +7,6 @@ import { getPacketStageDefinition, type PacketStageId } from "@packet-compiler";
 import { api } from "@/convex/_generated/api";
 import { AppShell } from "@/features/course/shared/components/app-shell";
 import { PacketStageLeaveDialog } from "@/features/packet-flow/components/packet-stage-leave-dialog";
-import { PacketStageNav } from "@/features/packet-flow/components/packet-stage-nav";
 import { PacketStageSidebar } from "@/features/packet-flow/components/packet-stage-sidebar";
 import { PacketStageStepCard } from "@/features/packet-flow/components/packet-stage-step-card";
 import { PacketStageStepStrip } from "@/features/packet-flow/components/progression/packet-stage-step-strip";
@@ -113,22 +112,22 @@ export function PacketStagePage({
 		<AppShell
 			viewportMode="app"
 			appScrollMode="page"
-			enableMissionQuery={false}
 			showSkillRail={false}
+			primaryNav={{
+				kind: "packet",
+				currentStageId: stageId,
+				activeStepId: stepId,
+				stageStatuses: workspaceState.stageStatuses,
+				onLinkNavigate: handleLinkNavigation,
+				onNavigate: requestNavigation,
+			}}
 		>
 			<div className="mx-auto flex w-full max-w-[1180px] flex-1 flex-col gap-6 px-4 pb-10 pt-4">
 				<div className="space-y-4">
-					<PacketStageNav
-						currentStageId={stageId}
-						stageStatuses={workspaceState.stageStatuses}
-						onLinkNavigate={handleLinkNavigation}
-						onNavigate={requestNavigation}
-					/>
 					<PacketStageStepStrip
 						stageId={stageId}
 						activeStepId={stepId}
 						progressItems={progressItems}
-						onLinkNavigate={handleLinkNavigation}
 						onNavigate={requestNavigation}
 					/>
 				</div>
@@ -153,7 +152,7 @@ export function PacketStagePage({
 							onSaveAndContinue={handleSaveAndContinue}
 						/>
 					</div>
-					<aside className="space-y-10">
+					<aside className="space-y-10 xl:sticky xl:top-0 xl:self-start">
 						{stagePageMedia ? (
 							<PacketVideoCard content={stagePageMedia} />
 						) : null}
