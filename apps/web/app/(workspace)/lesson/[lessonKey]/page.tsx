@@ -53,6 +53,7 @@ export default async function Page({
 
 	return (
 		<BonusLessonPage
+			initialStageStatuses={bonusRouteAccess.workspaceState.stageStatuses}
 			lessonKey={lesson.lessonKey}
 			missionState={missionState}
 			postReviewTargets={

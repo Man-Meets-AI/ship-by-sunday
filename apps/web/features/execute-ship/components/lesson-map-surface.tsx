@@ -8,16 +8,21 @@ import { BonusMissionBlockSection } from "./bonus-mission-block-card";
 import { BonusMissionHeroCard } from "./bonus-mission-hero-card";
 
 export function LessonMapSurface({
+	id,
 	currentBlockId = "BUILD",
 	missionState,
 }: {
+	id?: string;
 	currentBlockId?: string;
 	missionState: BonusMissionState;
 }) {
 	const orderedBlocks = getOrderedBonusBlocks(missionState);
 
 	return (
-		<section className="space-y-6 rounded-[28px] border border-border/60 bg-muted/15 p-6 sm:p-8">
+		<section
+			id={id}
+			className="space-y-6 rounded-[28px] border border-border/60 bg-muted/15 p-6 scroll-mt-24 sm:p-8"
+		>
 			<div className="space-y-2">
 				<p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground/60">
 					Lesson Map

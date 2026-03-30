@@ -9,6 +9,15 @@ const notFoundMock = vi.fn(() => {
 	throw new Error("NEXT_NOT_FOUND");
 });
 
+function getWorkspaceLocalNavMarkup(markup: string) {
+	const localNavStart =
+		'<div data-testid="local-nav" data-local-nav-kind="workspace">';
+
+	return (
+		markup.split(localNavStart)[1]?.split('</div><div class="mx-auto')[0] ?? ""
+	);
+}
+
 vi.mock("next/link", () => ({
 	default: ({
 		children,
@@ -30,8 +39,21 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/features/course/shared/components/app-shell", () => ({
-	AppShell: ({ children }: { children: React.ReactNode }) => (
-		<div>{children}</div>
+	AppShell: ({
+		children,
+		localNav,
+	}: {
+		children: React.ReactNode;
+		localNav?: { kind: string; desktop: React.ReactNode };
+	}) => (
+		<div>
+			{localNav ? (
+				<div data-testid="local-nav" data-local-nav-kind={localNav.kind}>
+					{localNav.desktop}
+				</div>
+			) : null}
+			{children}
+		</div>
 	),
 }));
 
@@ -210,12 +232,20 @@ describe("workspace lesson route", () => {
 			}),
 		);
 
+		const localNavMarkup = getWorkspaceLocalNavMarkup(markup);
+
 		expect(markup).toContain("Video-first bonus lesson");
 		expect(markup).toContain(
 			"Use the packet as the brief and keep BUILD as the default path.",
 		);
 		expect(markup).toContain("Build Kickoff");
 		expect(markup).toContain("Lesson Map");
+		expect(markup).toContain("Build Lessons");
+		expect(localNavMarkup).toContain("Build Lessons");
+		expect(localNavMarkup).toContain("Kickoff");
+		expect(localNavMarkup).toContain("Iterate");
+		expect(localNavMarkup).not.toContain("3.0");
+		expect(localNavMarkup).not.toContain("3.1");
 	});
 
 	it("falls back to local post-review targets when the resume destination is packet-first", async () => {
@@ -254,8 +284,15 @@ describe("workspace lesson route", () => {
 			}),
 		);
 
+		const localNavMarkup = getWorkspaceLocalNavMarkup(markup);
+
 		expect(markup).toContain("Build Kickoff");
 		expect(markup).toContain("Lesson Map");
+		expect(localNavMarkup).toContain("Build Lessons");
+		expect(localNavMarkup).toContain("Kickoff");
+		expect(localNavMarkup).toContain("Iterate");
+		expect(localNavMarkup).not.toContain("3.0");
+		expect(localNavMarkup).not.toContain("3.1");
 	});
 
 	it("returns not found for an unknown lesson route segment", async () => {

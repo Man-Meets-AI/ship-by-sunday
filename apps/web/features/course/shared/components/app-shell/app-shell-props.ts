@@ -37,27 +37,34 @@ export type AppShellProgressSummary = {
 	progressLabel?: string;
 };
 
-export type AppShellPrimaryNav =
+export type AppShellPrimaryNav = {
+	kind: "combined";
+	currentPacketStageId?: PacketStageId;
+	stageStatuses: PacketStageStatus[];
+	postReviewItems: WorkspacePrimaryNavItem[];
+	onLinkNavigate?: (
+		event: { preventDefault: () => void },
+		href: string,
+	) => void;
+	onNavigate?: (href: string) => void;
+	onAction?: (actionId: WorkspacePrimaryNavActionId) => void;
+};
+
+export type AppShellLocalNav =
 	| {
 			kind: "packet";
-			currentStageId: PacketStageId;
-			activeStepId?: string;
-			stageStatuses: PacketStageStatus[];
-			onLinkNavigate?: (
-				event: { preventDefault: () => void },
-				href: string,
-			) => void;
-			onNavigate?: (href: string) => void;
+			desktop: ReactNode;
+			compact?: ReactNode;
+	  }
+	| {
+			kind: "review";
+			desktop: ReactNode;
+			compact?: ReactNode;
 	  }
 	| {
 			kind: "workspace";
-			items: WorkspacePrimaryNavItem[];
-			onLinkNavigate?: (
-				event: { preventDefault: () => void },
-				href: string,
-			) => void;
-			onNavigate?: (href: string) => void;
-			onAction?: (actionId: WorkspacePrimaryNavActionId) => void;
+			desktop: ReactNode;
+			compact?: ReactNode;
 	  };
 
 export type AppShellProps = {
@@ -69,6 +76,7 @@ export type AppShellProps = {
 	mission?: AppShellMissionState;
 	progressSummary?: AppShellProgressSummary;
 	primaryNav?: AppShellPrimaryNav;
+	localNav?: AppShellLocalNav;
 	showSkillRail?: boolean;
 	layoutMode?: LessonLayoutMode;
 	onLayoutModeChange?: (mode: LessonLayoutMode) => void;

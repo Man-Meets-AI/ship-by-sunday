@@ -18,7 +18,7 @@ export function PacketStageStepStrip({
 	onNavigate: (href: string) => void;
 }) {
 	return (
-		<div className="sm:hidden">
+		<div className="xl:hidden">
 			<label htmlFor={`${stageId}-packet-page-select`} className="sr-only">
 				Page
 			</label>

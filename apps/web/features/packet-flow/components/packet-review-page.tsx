@@ -9,7 +9,17 @@ import { api } from "@/convex/_generated/api";
 import { AppShell } from "@/features/course/shared/components/app-shell";
 import { LessonMapSurface } from "@/features/execute-ship/components/lesson-map-surface";
 import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
-import { buildPostReviewPrimaryNav } from "@/features/workspace-navigation/lib/build-primary-nav-model";
+import {
+	buildLockedPostReviewPrimaryNav,
+	buildPostReviewPrimaryNav,
+} from "@/features/workspace-navigation/lib/build-primary-nav-model";
+import {
+	buildReviewLocalNavModel,
+	REVIEW_DOWNLOADS_ID,
+	REVIEW_LESSON_MAP_ID,
+	REVIEW_OVERVIEW_ID,
+} from "@/features/workspace-navigation/lib/build-secondary-nav-model";
+import { WorkspaceLocalNavRail } from "@/features/workspace-navigation/components/workspace-local-nav-rail";
 import type { PostReviewNavigationTargets } from "@/features/workspace-navigation/lib/post-review-destination";
 import { PacketVideoCard } from "@/features/packet-flow/components/video/packet-video-card";
 import { getPacketReviewPageMedia } from "@/features/packet-flow/lib/packet-stage-videos";
@@ -61,6 +71,20 @@ export function PacketReviewPage({
 	const postReviewTargets =
 		liveResumeDestination?.postReviewTargets ?? initialPostReviewTargets;
 	const bonusMissionState = liveBonusMissionState ?? initialBonusMissionState;
+	const localNav =
+		isUnlocked && postReviewTargets && bonusMissionState
+			? {
+					kind: "review" as const,
+					desktop: (
+						<WorkspaceLocalNavRail
+							model={buildReviewLocalNavModel({
+								isLessonMapVisible: showLessonMap,
+								postReviewTargets,
+							})}
+						/>
+					),
+				}
+			: undefined;
 
 	return (
 		<AppShell
@@ -68,31 +92,29 @@ export function PacketReviewPage({
 			appScrollMode="page"
 			showSkillRail={false}
 			title="Review & Download"
-			primaryNav={
-				isUnlocked && postReviewTargets && bonusMissionState
-					? {
-							kind: "workspace",
-							items: buildPostReviewPrimaryNav({
-								activeSection: "review",
+			localNav={localNav}
+			primaryNav={{
+				kind: "combined",
+				currentPacketStageId: "review",
+				stageStatuses: workspaceState.stageStatuses,
+				postReviewItems:
+					isUnlocked && postReviewTargets && bonusMissionState
+						? buildPostReviewPrimaryNav({
+								activeSection: null,
 								missionState: bonusMissionState,
 								postReviewTargets,
-							}),
-							onAction: (actionId) => {
-								if (actionId === "showLessonMap") {
-									setShowLessonMap(true);
-								}
-							},
-						}
-					: {
-							kind: "packet",
-							currentStageId: "review",
-							stageStatuses: workspaceState.stageStatuses,
-						}
-			}
+							})
+						: buildLockedPostReviewPrimaryNav(),
+				onAction: (actionId) => {
+					if (actionId === "showLessonMap") {
+						setShowLessonMap(true);
+					}
+				},
+			}}
 		>
 			<div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-12 px-4 pb-20 pt-2">
 				<div className="flex flex-col gap-12">
-					<section className="space-y-4">
+					<section id={REVIEW_OVERVIEW_ID} className="space-y-4 scroll-mt-24">
 						<div className="space-y-2">
 							<h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
 								What you&apos;re downloading and how to use it
@@ -105,15 +127,20 @@ export function PacketReviewPage({
 						<PacketVideoCard content={getPacketReviewPageMedia()} />
 					</section>
 
-					<PacketReviewDownloadBridge
-						workspaceState={workspaceState}
-						postReviewTargets={postReviewTargets}
-						onOpenLessonMap={
-							bonusMissionState ? () => setShowLessonMap(true) : undefined
-						}
-					/>
+					<div id={REVIEW_DOWNLOADS_ID} className="scroll-mt-24">
+						<PacketReviewDownloadBridge
+							workspaceState={workspaceState}
+							postReviewTargets={postReviewTargets}
+							onOpenLessonMap={
+								bonusMissionState ? () => setShowLessonMap(true) : undefined
+							}
+						/>
+					</div>
 					{showLessonMap && bonusMissionState ? (
-						<LessonMapSurface missionState={bonusMissionState} />
+						<LessonMapSurface
+							id={REVIEW_LESSON_MAP_ID}
+							missionState={bonusMissionState}
+						/>
 					) : null}
 				</div>
 			</div>

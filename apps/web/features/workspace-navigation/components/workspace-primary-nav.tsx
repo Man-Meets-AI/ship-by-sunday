@@ -120,9 +120,9 @@ export function WorkspacePrimaryNav({
 	return (
 		<NavigationMenu
 			viewport={false}
-			className="w-full max-w-none justify-start"
+			className="w-auto max-w-none shrink-0 justify-start"
 		>
-			<NavigationMenuList className="flex flex-wrap items-center justify-start gap-x-6 gap-y-3">
+			<NavigationMenuList className="flex items-center justify-start gap-x-3">
 				{items.map((item) =>
 					item.kind === "link" ? (
 						<NavigationMenuItem key={item.id}>
