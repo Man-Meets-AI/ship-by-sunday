@@ -4,6 +4,7 @@ import { routeConfig } from "@/config/product";
 import { getLessonByRouteSegment } from "@/features/course/lesson/model/manifest";
 import { BonusLessonPage } from "@/features/execute-ship/components/bonus-lesson-page";
 import { BonusRouteStatePanel } from "@/features/execute-ship/components/bonus-route-state-panel";
+import { buildFallbackPostReviewTargets } from "@/features/execute-ship/lib/bonus-library-presentation";
 import { loadBonusRouteAccess } from "@/features/execute-ship/server/load-bonus-route-access";
 import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
 
@@ -49,15 +50,15 @@ export default async function Page({
 	if (!missionState) {
 		throw new Error("Bonus mission state missing");
 	}
-	if (!resumeDestination?.postReviewTargets) {
-		throw new Error("Post-review navigation targets missing");
-	}
 
 	return (
 		<BonusLessonPage
 			lessonKey={lesson.lessonKey}
 			missionState={missionState}
-			postReviewTargets={resumeDestination.postReviewTargets}
+			postReviewTargets={
+				resumeDestination?.postReviewTargets ??
+				buildFallbackPostReviewTargets(missionState)
+			}
 			initialShowLessonMap={showLessonMap === "1"}
 		/>
 	);

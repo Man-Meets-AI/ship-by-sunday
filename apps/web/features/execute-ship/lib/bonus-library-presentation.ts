@@ -2,7 +2,10 @@ import {
 	getLessonHref,
 	type BlockId,
 } from "@/features/course/lesson/model/manifest";
+import { routeConfig } from "@/config/product";
 import type { AppShellMissionState } from "@/features/course/shared/components/app-shell/app-shell-props";
+import { getLessonMapHref } from "@/features/workspace-navigation/lib/lesson-map-href";
+import type { PostReviewNavigationTargets } from "@/features/workspace-navigation/lib/post-review-destination";
 import type { BonusMissionState } from "./bonus-mission-types";
 
 const blockPresentation = {
@@ -60,6 +63,32 @@ export function getRecommendedBuildLessonHref(state: BonusMissionState) {
 	return preferredLesson
 		? getLessonHref(preferredLesson.lessonKey)
 		: "/execute";
+}
+
+export function getRecommendedLaunchLessonHref(state: BonusMissionState) {
+	const launchBlock = state.blocks.find((block) => block.id === "SHIP");
+	const preferredLesson =
+		launchBlock?.lessons.find(
+			(lesson) => lesson.status === "opened" || lesson.status === "available",
+		) ?? launchBlock?.lessons[0];
+
+	return preferredLesson
+		? getLessonHref(preferredLesson.lessonKey)
+		: getRecommendedBuildLessonHref(state);
+}
+
+export function buildFallbackPostReviewTargets(
+	state: BonusMissionState,
+): PostReviewNavigationTargets {
+	const buildLessonsDestination = getRecommendedBuildLessonHref(state);
+
+	return {
+		reviewDestination: routeConfig.review,
+		buildLessonsDestination,
+		launchLessonsDestination: getRecommendedLaunchLessonHref(state),
+		lessonMapDestination: getLessonMapHref(),
+		latestLessonDestination: buildLessonsDestination,
+	};
 }
 
 export function buildBonusShellMission(

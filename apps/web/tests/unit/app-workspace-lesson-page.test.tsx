@@ -218,6 +218,46 @@ describe("workspace lesson route", () => {
 		expect(markup).toContain("Lesson Map");
 	});
 
+	it("falls back to local post-review targets when the resume destination is packet-first", async () => {
+		fetchAuthenticatedQueryMock.mockImplementation(async (query) => {
+			if (query === "getPacketWorkspaceState") {
+				return createWorkspaceState(123);
+			}
+
+			if (query === "getBonusRouteState") {
+				return { hasStartedBonusLesson: false };
+			}
+
+			if (query === "getBonusMissionState") {
+				return createBonusMissionState();
+			}
+
+			if (query === "getPacketResumeDestination") {
+				return {
+					destination: "/build-plan",
+					kind: "packet_stage",
+					packetStageId: "build-plan",
+					postReviewTargets: null,
+				};
+			}
+
+			throw new Error(`Unexpected query: ${String(query)}`);
+		});
+
+		const { default: LessonRoutePage } =
+			await import("@/app/(workspace)/lesson/[lessonKey]/page");
+
+		const markup = renderToStaticMarkup(
+			await LessonRoutePage({
+				params: Promise.resolve({ lessonKey: "build-kickoff" }),
+				searchParams: Promise.resolve({}),
+			}),
+		);
+
+		expect(markup).toContain("Build Kickoff");
+		expect(markup).toContain("Lesson Map");
+	});
+
 	it("returns not found for an unknown lesson route segment", async () => {
 		fetchAuthenticatedQueryMock.mockImplementation(async (query) => {
 			if (query === "getPacketWorkspaceState") {
