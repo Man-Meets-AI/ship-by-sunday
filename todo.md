@@ -2,6 +2,8 @@
 
 ## recent
 
+- **2026-03-30 11:09 EDT** — PR workflow + marketing-pack docs sweep: rewrote the root release docs around short-lived PR branches into `main`, promoted the multi-agent PR review pass to default merge hygiene in `AGENTS.md`, removed the stale `dev -> main` release guidance from the operator runbook, and added a hard rewrite gate plus reusable writing-pass asset to the Ship by Sunday marketing pack. No `CHANGELOG.md` update needed for this internal docs/process cleanup.
+
 - **2026-03-30 09:05 EDT** — Shared workspace left-rail navigation closeout: added one desktop local-nav shell for packet stages, unlocked review, and post-review lessons; moved packet progression and lesson sequences into the new left rail while keeping compact mobile fallbacks; demoted the footer skill rail to below-`xl` support; recorded the rollout in `docs/codex/2026-03-29-shared-workspace-left-rail-navigation-execplan.md`; and rechecked the app-local lint, format, unit, contract, integration-node, integration-ui, and build lanes. `CHANGELOG.md` updated for the user-facing workspace navigation change.
 
 - **2026-03-29 20:39 EDT** — Navigation + post-review closeout: unified packet and post-review header nav under one explicit shell model, made Review & Download the real unlock pivot, converted `/execute` and `/mission` to compatibility redirects, extracted a reusable Lesson Map surface for review and lesson pages, removed the dead mission-rail and execute-bridge paths, refreshed the remaining starter-access/artifacts/homepage shell copy to match the shipped IA, and rechecked focused unit, contract, integration-ui, build/typecheck, and browser-smoke lanes. `CHANGELOG.md` updated for the user-facing workspace and homepage changes.
