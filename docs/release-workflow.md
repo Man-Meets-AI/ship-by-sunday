@@ -1,6 +1,6 @@
 # Production Release Workflow
 
-This repository ships through a two-branch release model. Daily integration happens on `dev`. Production changes happen only when code is promoted from `dev` to `main`.
+This repository ships through short-lived pull request branches into `main`. There is no long-lived integration branch. Production changes happen when a reviewed feature branch merges into `main`.
 
 ## What owns production
 
@@ -12,18 +12,16 @@ Production is healthy only when all three systems agree on the same release cand
 
 ## Branch model
 
-- Feature work starts on short-lived branches and merges into `dev`.
-- `dev` is the shared integration branch.
-- `main` is the release branch and the GitHub default branch.
+- Feature work starts on short-lived branches created from the current `main`.
+- `main` is both the GitHub default branch and the production release branch.
 - Vercel production tracks `main`.
 - `.github/workflows/convex-production-deploy.yml` deploys Convex production from `main`.
-- Hotfixes branch from `main`, merge into `main`, and then merge or cherry-pick back into `dev`.
+- Hotfixes also branch from `main` and merge back into `main`.
 
 ## Required standing configuration
 
-- GitHub branch protection is enabled on both `dev` and `main`.
+- GitHub branch protection is enabled on `main`.
 - `main` requires pull requests and the `static`, `integration`, and `browser-smoke` checks.
-- `dev` requires pull requests plus the same always-on checks, but not a formal approval.
 - Vercel project `mma-shipbysunday` is linked to `ParkerRex/mma-shipbysunday` and uses `main` as its production branch.
 - Root `bunfig.toml` forces `install.linker = "hoisted"` so GitHub Actions and Vercel installs do not use Bun's isolated symlink-heavy workspace layout during builds and serverless packaging.
 - `apps/web/vercel.json` overrides the Vercel install step to remove cached `node_modules` trees before `bun install --frozen-lockfile`, because switching linkers alone does not rewrite a restored isolated-install cache.
@@ -39,14 +37,20 @@ Create that secret from the Convex dashboard for the production deployment:
 
 ## Standard release
 
-1. Merge feature work into `dev`.
-2. From the repository root, run `bun run check`.
-3. Open a release pull request from `dev` into `main`.
-4. Merge only after GitHub checks are green.
-5. Watch Vercel create the production web deploy from `main`.
-6. Watch GitHub Actions run `Convex Production Deploy` for the same merge.
-7. Run the `default_ship` QA pack against production with matching production Clerk env values.
-8. When you need billing confidence on production, use the documented live no-cost Checkout proof instead of a real card charge.
+1. Branch from the current `main`.
+2. Keep the diff scoped and split the work into logical conventional commits.
+3. From the repository root, run the narrowest relevant checks first, then broaden as needed. Use `bun run check` when the slice justifies a full pass.
+4. Open a pull request from the feature branch into `main`.
+5. Run the default multi-agent PR review against `main`:
+
+   `Review this branch against main. Have pr_explorer map the affected code paths, reviewer find real risks, and docs_researcher verify the framework APIs that the patch relies on.`
+
+6. Fix substantive findings and merge only after `static`, `integration`, and `browser-smoke` are green.
+7. Watch Vercel create the production web deploy from the merged `main` commit.
+8. Watch GitHub Actions run `Convex Production Deploy` for the same merged `main` commit.
+9. Run the `default_ship` QA pack against production with matching production Clerk env values when the change warrants post-deploy proof.
+10. When you need billing confidence on production, use the documented live no-cost Checkout proof instead of a real card charge.
+11. Delete the local and remote feature branch after the release settles.
 
 Useful verification commands:
 
@@ -102,10 +106,9 @@ Use the hotfix path only for production emergencies.
 
 1. Branch from `main`.
 2. Open a pull request into `main`.
-3. Merge after the required checks pass.
-4. Back-merge or cherry-pick the same fix into `dev` immediately.
-
-Do not leave `main` and `dev` drifting after a hotfix.
+3. Run the same multi-agent PR review used for ordinary releases.
+4. Merge after the required checks pass.
+5. Watch the production web and Convex deploys settle before deleting the branch.
 
 ## Explicit non-goal
 

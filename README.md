@@ -90,14 +90,17 @@ This repo does not support Convex's local backend mode as a first-class developm
 
 ## Production Release Workflow
 
-Production now ships through a two-branch workflow:
+Production now ships through short-lived pull request branches into `main`:
 
-- feature work lands in feature branches and merges into `dev`
-- `dev` is the shared integration branch
-- release pull requests promote `dev` into `main`
-- Vercel production deploys come from `main`
-- Convex production deploys come from `.github/workflows/convex-production-deploy.yml` on `main`
-- hotfixes branch from `main`, merge back into `main`, and then merge or cherry-pick back into `dev`
+- branch from the current `main`
+- split work into logical conventional commits
+- open a pull request into `main`
+- run the default multi-agent PR review before merge:
+  `Review this branch against main. Have pr_explorer map the affected code paths, reviewer find real risks, and docs_researcher verify the framework APIs that the patch relies on.`
+- resolve substantive review findings and wait for `static`, `integration`, and `browser-smoke`
+- merge into `main` with linear history intact
+- watch the Vercel and Convex production deploys from the merged `main` commit
+- delete the local and remote feature branch after the release settles
 
 The operator runbook lives in [docs/release-workflow.md](docs/release-workflow.md).
 
