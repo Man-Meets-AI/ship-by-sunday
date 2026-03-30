@@ -2,9 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const getPacketDownloadContextMock = vi.fn();
 const buildReviewDownloadZipMock = vi.fn();
+const fetchMutationMock = vi.fn();
 
 vi.mock("@/features/packet-flow/server/downloads", () => ({
 	getPacketDownloadContext: getPacketDownloadContextMock,
+}));
+
+vi.mock("convex/nextjs", () => ({
+	fetchMutation: fetchMutationMock,
 }));
 
 vi.mock("@manmeetsai/packet-compiler/server", () => ({
@@ -15,12 +20,15 @@ describe("packet download routes", () => {
 	beforeEach(() => {
 		getPacketDownloadContextMock.mockReset();
 		buildReviewDownloadZipMock.mockReset();
+		fetchMutationMock.mockReset();
+		fetchMutationMock.mockResolvedValue({});
 	});
 
 	it("returns the repo archive when review is ready", async () => {
 		buildReviewDownloadZipMock.mockResolvedValue(Buffer.from("zip"));
 		getPacketDownloadContextMock.mockResolvedValue({
 			canonicalProjectDefinition: { facts: {} },
+			token: "token_123",
 			workspaceState: {
 				packetReadiness: {
 					design: { isReady: true },
@@ -40,5 +48,6 @@ describe("packet download routes", () => {
 			"starter-snapshot.zip",
 		);
 		expect(new Uint8Array(await response.arrayBuffer())).toHaveLength(3);
+		expect(fetchMutationMock).toHaveBeenCalledTimes(1);
 	});
 });
