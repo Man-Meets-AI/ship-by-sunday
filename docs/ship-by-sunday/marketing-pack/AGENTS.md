@@ -58,6 +58,7 @@ Use these files together:
 - `claims.md`
 - `review-matrix.md`
 - `deliverables.md`
+- `assets/writing-pass.md`
 
 ## Suggested starter workflow types
 
@@ -67,3 +68,8 @@ Use these files together:
 - social and channel adaptation
 - weekly performance digest
 - internal review brief for claims and channel fit
+
+## Rewrite pass
+
+Before finalizing externally visible copy, run it through `assets/writing-pass.md`.
+Treat any banned phrase or fatal pattern in that file as a hard fail.
