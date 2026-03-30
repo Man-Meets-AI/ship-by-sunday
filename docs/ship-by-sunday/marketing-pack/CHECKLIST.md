@@ -29,6 +29,7 @@ Use this checklist to gate a customer-product marketing packet before it is trea
 - [ ] The pack says what requires human review.
 - [ ] The pack says what can be drafted without approval.
 - [ ] The pack says what must never be auto-published.
+- [ ] The pack requires the final external-facing copy pass through `assets/writing-pass.md`.
 - [ ] Current-fact verification is required wherever necessary.
 - [ ] Brand-risk and legal-risk areas are called out.
 - [ ] Claim classes are explicit: evergreen, verify-first, and forbidden.
@@ -42,3 +43,4 @@ Use this checklist to gate a customer-product marketing packet before it is trea
 - [ ] The workflows are tied to real deliverables, not generic marketing busywork.
 - [ ] The pack includes at least one concrete example for homepage, email, or social output.
 - [ ] The pack includes at least one concrete direct-response example when VSL or spoken-close work is in scope.
+- [ ] A reviewer can tell where the rewrite pass happens before anything external is treated as ready.
