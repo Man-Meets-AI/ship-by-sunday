@@ -33,3 +33,10 @@ This file defines what the marketing packet should usually help produce.
 The customer should leave with enough material to shape the public story and first launch assets without rereading the full intake history.
 
 For direct-response work, the packet should give them enough to record or script a short close, a cold open, and a fuller VSL without inventing new claims.
+
+## Asset paths
+
+- `assets/vsl-cold-open.md`
+- `assets/vsl-opener.md`
+- `assets/vsl-full.md`
+- `assets/porch-close.md`

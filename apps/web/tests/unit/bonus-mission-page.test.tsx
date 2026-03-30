@@ -118,7 +118,7 @@ describe("BonusMissionPage", () => {
 			<BonusMissionPage missionState={missionState} />,
 		);
 
-		expect(markup).toContain("Packet ready. BUILD is the continuation path.");
+		expect(markup).toContain("Your Ship Kit is ready. Build is next.");
 		expect(markup).toContain("Build");
 		expect(markup).toContain("Product");
 		expect(markup).toContain("Design");
@@ -126,7 +126,7 @@ describe("BonusMissionPage", () => {
 		expect(markup).toContain("Product, Design, Build, Ship");
 		expect(markup).toContain('href="/lesson/iterate-the-product-with-ai"');
 		expect(markup).toContain("Continue in Build");
-		expect(markup).toContain("Start from the beginning");
+		expect(markup).toContain("Review the full library");
 		expect(markup).not.toContain("Packet complete");
 		expect(markup).not.toContain("Completed earlier");
 		expect(markup).not.toContain(">CEO<");

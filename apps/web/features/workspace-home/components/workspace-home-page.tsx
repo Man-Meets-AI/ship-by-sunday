@@ -18,7 +18,6 @@ export function WorkspaceHomePage({
 			viewportMode="app"
 			appScrollMode="page"
 			showSkillRail={false}
-			enableMissionQuery={false}
 		>
 			<div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 pb-10 pt-2">
 				<WorkspaceHomeHero model={model} />

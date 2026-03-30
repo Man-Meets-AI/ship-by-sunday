@@ -5,8 +5,15 @@ import {
 	getNextLesson,
 	getPreviousLesson,
 } from "@/features/course/lesson/model/manifest";
+import { getLessonMapHref } from "@/features/workspace-navigation/lib/lesson-map-href";
 
-export function BonusLessonFooter({ lessonKey }: { lessonKey: string }) {
+export function BonusLessonFooter({
+	lessonKey,
+	onOpenLessonMap,
+}: {
+	lessonKey: string;
+	onOpenLessonMap?: () => void;
+}) {
 	const previousLesson = getPreviousLesson(lessonKey);
 	const nextLesson = getNextLesson(lessonKey);
 
@@ -16,9 +23,20 @@ export function BonusLessonFooter({ lessonKey }: { lessonKey: string }) {
 				Bonus progress updates when you open a lesson here.
 			</p>
 			<div className="flex flex-wrap gap-2 sm:justify-end">
-				<Button asChild variant="link" className="h-auto min-h-0 p-0 text-sm">
-					<Link href="/mission">Bonus library</Link>
-				</Button>
+				{onOpenLessonMap ? (
+					<Button
+						type="button"
+						variant="link"
+						className="h-auto min-h-0 p-0 text-sm"
+						onClick={onOpenLessonMap}
+					>
+						Lesson Map
+					</Button>
+				) : (
+					<Button asChild variant="link" className="h-auto min-h-0 p-0 text-sm">
+						<Link href={getLessonMapHref()}>Lesson Map</Link>
+					</Button>
+				)}
 				{previousLesson ? (
 					<Button asChild variant="link" className="h-auto min-h-0 p-0 text-sm">
 						<Link href={getLessonHref(previousLesson.lessonKey)}>

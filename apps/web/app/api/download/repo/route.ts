@@ -1,5 +1,7 @@
+import { fetchMutation } from "convex/nextjs";
 import { getPacketDownloadContext } from "@/features/packet-flow/server/downloads";
 import { getStarterSnapshotArchiveFileName } from "@packet-compiler";
+import { api } from "@/convex/_generated/api";
 
 export const runtime = "nodejs";
 
@@ -21,6 +23,7 @@ export async function GET() {
 	const archive = await packetCompilerServer.buildReviewDownloadZip(
 		context.canonicalProjectDefinition,
 	);
+	await fetchMutation(api.packet.unlockExecuteShip, {}, { token: context.token });
 
 	return new Response(new Uint8Array(archive), {
 		status: 200,

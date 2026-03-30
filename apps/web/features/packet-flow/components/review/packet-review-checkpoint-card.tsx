@@ -1,22 +1,39 @@
 import Link from "next/link";
-import {
-	STARTER_SNAPSHOT_LABEL,
-	type PacketReadinessResult,
-} from "@packet-compiler";
+import { type PacketReadinessResult } from "@packet-compiler";
 import { Button } from "@/components/ui/button";
 import { reviewArtifacts } from "../../lib/review-artifacts";
-import { ArrowRight, Lock, CheckCircle2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+
+const proofRows = [
+	{
+		title: "Agent-Ready Packs",
+		description:
+			"Design, Marketing, Build, and Prompt Packs generated from your answers",
+	},
+	{
+		title: "Agent-First Starter Repo",
+		description:
+			"A starter repo shaped for the AI age, with the docs, overrides, and handoff structure already in place",
+	},
+	{
+		title: "One bundle, one source of truth",
+		description:
+			"So design, marketing, code, and prompts all work from the same brief instead of drifting",
+	},
+];
 
 export function PacketReviewCheckpointCard({
 	isReviewReady,
+	isDownloadPending,
 	packetReadiness,
-	isExecuteUnlocked,
+	downloadError,
 	onStarterDownload,
 }: {
 	isReviewReady: boolean;
+	isDownloadPending: boolean;
 	packetReadiness: PacketReadinessResult;
-	isExecuteUnlocked: boolean;
-	onStarterDownload: () => void;
+	downloadError: string | null;
+	onStarterDownload: (event: { preventDefault: () => void }) => void | Promise<void>;
 }) {
 	const incompleteArtifacts = reviewArtifacts.filter(
 		(artifact) => !packetReadiness[artifact.id].isReady,
@@ -27,28 +44,18 @@ export function PacketReviewCheckpointCard({
 			{/* Background accent */}
 			<div className="absolute -right-24 -top-24 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
 
-			<div className="relative flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
-				<div className="max-w-2xl space-y-6">
+			<div className="relative space-y-10">
+				<div className="space-y-6">
 					<div className="space-y-3">
-						<div className="flex items-center gap-2">
-							{isReviewReady ? (
-								<CheckCircle2 className="h-5 w-5 text-green-500" />
-							) : (
-								<Lock className="h-4 w-4 text-muted-foreground/60" />
-							)}
-							<p className="text-sm font-semibold tracking-wide uppercase text-muted-foreground/80">
-								{isReviewReady ? "Milestone Reached" : "Required Milestone"}
-							</p>
-						</div>
 						<h2 className="text-3xl font-bold tracking-tight text-balance sm:text-5xl">
 							{isReviewReady
-								? `${STARTER_SNAPSHOT_LABEL} is ready.`
+								? "Your Ship Kit is ready."
 								: "Finish the remaining blockers."}
 						</h2>
 						<p className="text-lg leading-relaxed text-muted-foreground">
 							{isReviewReady
-								? "The required packet run is complete. Download the full Starter Snapshot to capture your Design, Marketing, and Build packs in one place."
-								: "The required packet run ends here, but you still have a few remaining questions to answer before your full snapshot is ready."}
+								? "This download gives you the two things that actually get the product out: the Agent-Ready Packs that keep AI on the rails, and the Agent-First Starter Repo that turns those packs into execution."
+								: "You still have a few remaining questions to answer before your Ship Kit is ready."}
 						</p>
 					</div>
 
@@ -71,24 +78,39 @@ export function PacketReviewCheckpointCard({
 							))}
 						</div>
 					)}
+
+					<div className="flex flex-col gap-4 sm:max-w-sm">
+						<Button
+							asChild
+							size="lg"
+							className="h-14 w-full text-lg font-bold"
+							disabled={!isReviewReady || isDownloadPending}
+						>
+							<Link href="/api/download/repo" onClick={onStarterDownload}>
+								{isDownloadPending ? "Downloading Ship Kit..." : "Download Ship Kit"}
+							</Link>
+						</Button>
+						<p className="px-1 text-xs leading-5 text-muted-foreground">
+							Download this first. Then continue to Build Lessons.
+						</p>
+						{downloadError ? (
+							<p className="px-1 text-xs leading-5 text-destructive">
+								{downloadError}
+							</p>
+						) : null}
+					</div>
 				</div>
 
-				<div className="flex shrink-0 flex-col gap-4 lg:w-80">
-					<Button
-						asChild
-						size="lg"
-						className="h-14 w-full text-lg font-bold"
-						disabled={!isReviewReady}
-					>
-						<Link href="/api/download/repo" onClick={onStarterDownload}>
-							Download Snapshot
-						</Link>
-					</Button>
-					<p className="px-1 text-center text-xs leading-5 text-muted-foreground lg:text-left">
-						{isExecuteUnlocked
-							? "Execute / Ship is unlocked as a separate optional next path."
-							: "Execute / Ship opens as a separate optional next path after this download."}
-					</p>
+				{/* Proof rows */}
+				<div className="divide-y divide-border/40 border-t border-border/40">
+					{proofRows.map((row) => (
+						<div key={row.title} className="py-5">
+							<p className="font-semibold tracking-tight">{row.title}</p>
+							<p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+								{row.description}
+							</p>
+						</div>
+					))}
 				</div>
 			</div>
 		</section>

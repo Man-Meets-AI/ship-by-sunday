@@ -1,70 +1,84 @@
 import Link from "next/link";
+import { Check } from "lucide-react";
+import {
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+	Item,
+	ItemActions,
+	ItemContent,
+	ItemDescription,
+	ItemGroup,
+	ItemTitle,
+} from "@/components/ui/item";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
 import { getBonusBlockPresentation } from "@/features/execute-ship/lib/bonus-library-presentation";
 
 type BonusMissionBlock = BonusMissionState["blocks"][number];
 
-function getLessonStatusLabel(status: "available" | "opened" | "completed") {
-	return status === "available" ? "Unopened" : "Explored";
-}
-
-export function BonusMissionBlockCard({ block }: { block: BonusMissionBlock }) {
+export function BonusMissionBlockSection({
+	block,
+}: {
+	block: BonusMissionBlock;
+}) {
 	const presentation = getBonusBlockPresentation(block.id);
 	const exploredCount = block.lessons.filter(
 		(lesson) => lesson.status !== "available",
 	).length;
+	const progressPercent =
+		block.lessons.length > 0
+			? Math.round((exploredCount / block.lessons.length) * 100)
+			: 0;
 
 	return (
-		<Card className="border-border/70">
-			<CardHeader className="gap-3">
-				<div className="flex flex-wrap items-center gap-2">
-					<Badge
-						variant={presentation.kind === "featured" ? "default" : "outline"}
-					>
-						{presentation.kind === "featured" ? "Recommended" : "Reference"}
-					</Badge>
-					<p className="text-sm font-medium text-muted-foreground">
-						{exploredCount}/{block.lessons.length} explored
-					</p>
+		<AccordionItem value={block.id}>
+			<AccordionTrigger className="px-1 py-4 hover:no-underline">
+				<div className="flex flex-1 flex-col gap-2 pr-2">
+					<div className="flex items-center gap-3">
+						<span className="text-lg font-semibold">{presentation.label}</span>
+						{presentation.kind === "featured" && (
+							<Badge variant="default" className="text-xs">
+								Recommended
+							</Badge>
+						)}
+						<span className="ml-auto text-sm text-muted-foreground">
+							{exploredCount}/{block.lessons.length}
+						</span>
+					</div>
+					<Progress value={progressPercent} />
 				</div>
-				<div className="space-y-1">
-					<CardTitle className="text-2xl">{presentation.label}</CardTitle>
-					<p className="text-sm leading-6 text-muted-foreground">
-						{presentation.summary}
-					</p>
-				</div>
-			</CardHeader>
-			<CardContent>
-				<div className="grid gap-3">
+			</AccordionTrigger>
+			<AccordionContent>
+				<p className="mb-3 px-1 text-sm text-muted-foreground">
+					{presentation.summary}
+				</p>
+				<ItemGroup>
 					{block.lessons.map((lesson) => (
-						<Link
-							key={lesson.lessonKey}
-							href={`/lesson/${lesson.routeSegment}`}
-							className="rounded-2xl border border-border/60 bg-muted/20 p-4 transition hover:bg-muted/35"
-						>
-							<div className="flex flex-wrap items-center justify-between gap-2">
-								<p className="text-sm font-semibold text-foreground">
-									{lesson.displayLabel} {lesson.shortTitle}
-								</p>
-								<Badge variant="secondary">
-									{getLessonStatusLabel(lesson.status)}
-								</Badge>
-							</div>
-							<p className="mt-2 text-sm leading-6 text-muted-foreground">
-								{lesson.title}
-							</p>
-							<div className="mt-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
-								<span>{lesson.artifactLabel}</span>
-								{lesson.durationLabel ? (
-									<span>{lesson.durationLabel}</span>
-								) : null}
-							</div>
-						</Link>
+						<Item key={lesson.lessonKey} asChild size="sm">
+							<Link href={`/lesson/${lesson.routeSegment}`}>
+								<ItemContent>
+									<ItemTitle>
+										{lesson.displayLabel} {lesson.shortTitle}
+									</ItemTitle>
+									<ItemDescription>
+										{lesson.title}
+										{lesson.durationLabel ? ` · ${lesson.durationLabel}` : ""}
+									</ItemDescription>
+								</ItemContent>
+								{lesson.status !== "available" && (
+									<ItemActions>
+										<Check className="size-4 text-emerald-500" />
+									</ItemActions>
+								)}
+							</Link>
+						</Item>
 					))}
-				</div>
-			</CardContent>
-		</Card>
+				</ItemGroup>
+			</AccordionContent>
+		</AccordionItem>
 	);
 }

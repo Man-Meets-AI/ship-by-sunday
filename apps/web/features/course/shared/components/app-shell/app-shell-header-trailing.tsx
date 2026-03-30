@@ -14,7 +14,7 @@ import {
 	AppShellSplitViewIcon,
 } from "./app-shell-header-icons";
 
-type MissionProgress = {
+type ProgressSummary = {
 	progressCount: number;
 	totalLessons: number;
 	progressLabel?: string;
@@ -23,19 +23,19 @@ type MissionProgress = {
 type AppShellHeaderTrailingProps = {
 	layoutMode: LessonLayoutMode | undefined;
 	onLayoutModeChange: ((mode: LessonLayoutMode) => void) | undefined;
-	mission: MissionProgress | undefined;
+	progress: ProgressSummary | undefined;
 	lesson11Viewport?: boolean;
 };
 
 export function AppShellHeaderTrailing({
 	layoutMode,
 	onLayoutModeChange,
-	mission,
+	progress,
 	lesson11Viewport = false,
 }: AppShellHeaderTrailingProps) {
-	const progressVerb = mission?.progressLabel ?? "lessons completed";
-	const progressLabel = mission
-		? `${mission.progressCount} of ${mission.totalLessons} ${progressVerb}`
+	const progressVerb = progress?.progressLabel ?? "lessons completed";
+	const progressLabel = progress
+		? `${progress.progressCount} of ${progress.totalLessons} ${progressVerb}`
 		: null;
 
 	return (
@@ -76,13 +76,13 @@ export function AppShellHeaderTrailing({
 					</Button>
 				</Card>
 			) : null}
-			{mission ? (
+			{progress ? (
 				<span
 					className="hidden tabular-nums text-xs font-medium text-muted-foreground sm:inline"
 					title={progressLabel ?? undefined}
 				>
 					<span className="sr-only">{progressVerb}: </span>
-					{`${mission.progressCount}/${mission.totalLessons}`}
+					{`${progress.progressCount}/${progress.totalLessons}`}
 				</span>
 			) : null}
 			<div className="flex items-center gap-0.5 pl-0.5 sm:gap-1">

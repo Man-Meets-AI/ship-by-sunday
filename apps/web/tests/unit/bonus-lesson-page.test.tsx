@@ -89,12 +89,25 @@ const missionState: BonusMissionState = {
 describe("BonusLessonPage", () => {
 	it("renders the watch shell without the old workbench", () => {
 		const markup = renderToStaticMarkup(
-			<BonusLessonPage lessonKey="build-kickoff" missionState={missionState} />,
+			<BonusLessonPage
+				lessonKey="build-kickoff"
+				missionState={missionState}
+				postReviewTargets={{
+					reviewDestination: "/review",
+					buildLessonsDestination: "/lesson/build-kickoff",
+					launchLessonsDestination: "/lesson/product-review",
+					lessonMapDestination: "/review?showLessonMap=1",
+					latestLessonDestination: "/lesson/build-kickoff",
+				}}
+			/>,
 		);
 
-		expect(markup).toContain("This bonus lesson is video-first.");
+		expect(markup).toContain("Video-first bonus lesson");
+		expect(markup).toContain(
+			"Use the packet as the brief and keep BUILD as the default path.",
+		);
 		expect(markup).toContain("Build Kickoff");
-		expect(markup).toContain("Bonus library");
+		expect(markup).toContain("Lesson Map");
 		expect(markup).not.toContain("Workbench");
 	});
 
@@ -103,7 +116,7 @@ describe("BonusLessonPage", () => {
 			<BonusLessonFooter lessonKey="iterate-the-product-with-ai" />,
 		);
 
-		expect(markup).toContain("Bonus library");
+		expect(markup).toContain("Lesson Map");
 		expect(markup).toContain("3.0");
 	});
 
@@ -112,6 +125,13 @@ describe("BonusLessonPage", () => {
 			<BonusLessonPage
 				lessonKey="light-research-not-a-thesis"
 				missionState={missionState}
+				postReviewTargets={{
+					reviewDestination: "/review",
+					buildLessonsDestination: "/lesson/build-kickoff",
+					launchLessonsDestination: "/lesson/product-review",
+					lessonMapDestination: "/review?showLessonMap=1",
+					latestLessonDestination: "/lesson/build-kickoff",
+				}}
 			/>,
 		);
 

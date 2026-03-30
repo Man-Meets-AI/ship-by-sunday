@@ -63,8 +63,8 @@ export function CoreUxBuildTemplateCard() {
 					</Button>
 				) : (
 					<Button size="sm" variant="outline" asChild>
-						<Link href={routeConfig.mission}>
-							Open Mission for starter access
+						<Link href={routeConfig.settings}>
+							Open settings for starter access
 						</Link>
 					</Button>
 				)}

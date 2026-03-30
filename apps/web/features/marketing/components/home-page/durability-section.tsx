@@ -26,10 +26,7 @@ export function DurabilitySectionBlock({
 				<div className="flex flex-col">
 					{durabilitySection.items.map((item, i) => (
 						<ScrollReveal key={item.title} delay={0.1 * i}>
-							<article className="grid gap-4 border-t border-border/40 py-8 md:grid-cols-[minmax(0,0.18fr)_minmax(0,0.82fr)] md:gap-8">
-								<p className="font-marketing-display text-2xl font-black leading-none text-foreground/70">
-									{String(i + 1).padStart(2, "0")}
-								</p>
+							<article className="border-t border-border/40 py-8">
 								<div className="space-y-2">
 									<p className="text-lg font-bold tracking-tight text-foreground/90">
 										{item.title}

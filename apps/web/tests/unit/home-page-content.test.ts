@@ -17,7 +17,9 @@ describe("home page content", () => {
 
 		expect(homePageContent.hero.headlineLead).toBe("Ship a real product");
 		expect(homePageContent.hero.headlineTailHover).toBe("by Sunday");
-		expect(homePageContent.hero.body).toContain("ship a real v1 by Sunday");
+		expect(homePageContent.hero.body).toContain(
+			"The only system that teaches you how to ship a durable product from start to finish in one weekend.",
+		);
 		expect(homePageContent.hero.loginLabel).toBe("Sign in");
 		expect(homePageContent.hero.secondaryCta.href).toBe("#system");
 
@@ -37,27 +39,51 @@ describe("home page content", () => {
 			"Built-in QA",
 		);
 		expect(homePageContent.durabilitySection.title).toBe(
-			"Ship on Sunday. Keep shipping on Monday.",
+			"Ship by Sunday. Keep shipping on Monday.",
 		);
+
+		expect(homePageContent.faqSection.items).toEqual([
+			expect.objectContaining({
+				question: "Is this another course or another starter?",
+			}),
+			expect.objectContaining({
+				question: "What do I actually get at the end?",
+			}),
+			expect.objectContaining({
+				question: "I already have a starter. Why would I need this?",
+			}),
+			expect.objectContaining({
+				question: "Is this just more planning before coding?",
+			}),
+			expect.objectContaining({
+				question: "Who is this for?",
+			}),
+			expect.objectContaining({
+				question: "Why not just use ChatGPT, Claude, or Codex directly?",
+			}),
+			expect.objectContaining({
+				question: "What happens right after I pay?",
+			}),
+		]);
 
 		expect(homePageContent.pricingSection.includes).toEqual(
 			expect.arrayContaining([
-				"Design, Marketing, Build, and Prompt Packs",
-				"Agent-Ready Starter System",
+				"Agent-Ready Packs",
+				"Agent-First Starter Repo",
 				"Fast Pass Walkthroughs",
 			]),
 		);
+		expect(homePageContent.pricingSection.ctaTitle).toBe("Get the system");
 	});
 
-	it("keeps the guarantee framed around early clarity, not a shipping promise", () => {
-		const guaranteeCopy = [
-			homePageContent.pricingSection.guarantee,
-			...homePageContent.faqSection.items.map((item) => item.answer),
-		].join("\n");
+	it("keeps the guarantee in pricing while the faq stays focused on the offer", () => {
+		const faqCopy = homePageContent.faqSection.items
+			.map((item) => item.answer)
+			.join("\n");
 
-		expect(guaranteeCopy).not.toContain("CEO Block");
-		expect(guaranteeCopy).not.toContain("One-Page Product Brief");
-		expect(guaranteeCopy).toContain("The guarantee is about clarity");
-		expect(guaranteeCopy).toContain("Product stage");
+		expect(homePageContent.pricingSection.guarantee).toContain("Product stage");
+		expect(faqCopy).not.toContain("The guarantee is about clarity");
+		expect(faqCopy).toContain("Ship Kit");
+		expect(faqCopy).toContain("Ship Rails");
 	});
 });

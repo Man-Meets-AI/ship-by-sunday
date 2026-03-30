@@ -37,12 +37,13 @@ It is the template for the customer-facing `docs/marketing/` packet that should 
 - `claims.md` - approved claims, verify-first claims, and forbidden claim patterns
 - `review-matrix.md` - what can be drafted, what must be reviewed, and what must never auto-publish
 - `deliverables.md` - the actual marketing artifacts this packet is meant to support
+- `assets/` - lift-ready copy assets for VSL, short close, and other direct-response pieces
 - `examples/launch-message-kit.md` - a concrete golden-example packet
 - `examples/homepage-message-hierarchy.md` - example homepage narrative output
 - `examples/launch-email-outline.md` - example launch email output
 - `examples/social-variants.md` - example social adaptation output
-- `examples/porch-close.md` - short close copy for direct-response video or verbal sales
-- `examples/vsl-script.md` - cold open, opener, and full VSL draft
+- `examples/porch-close.md` - short close copy shown as a worked example
+- `examples/vsl-script.md` - cold open, opener, and full VSL draft shown as a worked example
 
 ## Ship by Sunday source basis
 

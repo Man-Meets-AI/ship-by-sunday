@@ -25,10 +25,15 @@ export function SocialProofSection({
 		<section className="border-t border-border/40 py-24 lg:py-40">
 			<div className="grid gap-16 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-24">
 				<ScrollReveal>
-					<div className="space-y-6 lg:sticky lg:top-24 lg:h-fit">
-						<h2 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl lg:text-7xl">
-							{socialProofSection.intro}
-						</h2>
+					<div className="lg:sticky lg:top-24 lg:h-fit">
+						<Image
+							src="/landing-page/what-its-not.png"
+							alt="What Ship by Sunday is not — a list of crossed-out anti-patterns with the tagline: system shaped by years of shipping products"
+							width={960}
+							height={960}
+							className="w-full h-auto"
+							sizes="(max-width: 1024px) 100vw, 40vw"
+						/>
 					</div>
 				</ScrollReveal>
 

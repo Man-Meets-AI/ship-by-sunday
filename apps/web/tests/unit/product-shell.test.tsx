@@ -1,123 +1,7 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ThemeProvider } from "next-themes";
-
-const missionState = {
-	progressCount: 9,
-	totalLessons: 28,
-	blocks: [
-		{
-			id: "CEO",
-			label: "CEO",
-			order: 1,
-			completedCount: 2,
-			totalLessons: 2,
-			lessons: [
-				{
-					id: "1.1",
-					lessonKey: "1.1",
-					displayLabel: "1.1",
-					title: "Start With the Problem",
-					shortTitle: "Problem",
-					status: "completed" as const,
-					artifactLabel: "Problem set",
-					isImplemented: true,
-				},
-				{
-					id: "1.2",
-					lessonKey: "1.2",
-					displayLabel: "1.2",
-					title: "Pick One User",
-					shortTitle: "User",
-					status: "completed" as const,
-					artifactLabel: "User brief",
-					isImplemented: true,
-				},
-			],
-		},
-		{
-			id: "DESIGN",
-			label: "DESIGN",
-			order: 2,
-			completedCount: 1,
-			totalLessons: 3,
-			lessons: [
-				{
-					id: "2.1",
-					lessonKey: "2.1",
-					displayLabel: "2.1",
-					title: "Find References First",
-					shortTitle: "References",
-					status: "completed" as const,
-					artifactLabel: "Reference set",
-					isImplemented: true,
-				},
-				{
-					id: "2.2",
-					lessonKey: "2.2",
-					displayLabel: "2.2",
-					title: "Sketch Before Software",
-					shortTitle: "Sketch",
-					status: "in_progress" as const,
-					artifactLabel: "Sketches",
-					isImplemented: true,
-				},
-				{
-					id: "2.3",
-					lessonKey: "2.3",
-					displayLabel: "2.3",
-					title: "Storyboard the Journey",
-					shortTitle: "Storyboard",
-					status: "available" as const,
-					artifactLabel: "Storyboard",
-					isImplemented: true,
-				},
-			],
-		},
-		{
-			id: "BUILD",
-			label: "BUILD",
-			order: 3,
-			completedCount: 0,
-			totalLessons: 2,
-			lessons: [
-				{
-					id: "3.1",
-					lessonKey: "3.1",
-					displayLabel: "3.1",
-					title: "Set Up the Repo",
-					shortTitle: "Repo",
-					status: "locked" as const,
-					artifactLabel: "Repo setup",
-					isImplemented: true,
-				},
-				{
-					id: "3.2",
-					lessonKey: "3.2",
-					displayLabel: "3.2",
-					title: "Prepare Local Environment",
-					shortTitle: "Env",
-					status: "locked" as const,
-					artifactLabel: "Env setup",
-					isImplemented: true,
-				},
-			],
-		},
-	],
-};
-
-let nonSkipQueryCallCount = 0;
-
-const useQueryMock = vi.fn((_query: unknown, args: unknown) => {
-	if (args === "skip") {
-		return undefined;
-	}
-
-	nonSkipQueryCallCount += 1;
-	return nonSkipQueryCallCount === 1
-		? { hasAccess: true, status: "granted" }
-		: missionState;
-});
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -140,14 +24,6 @@ vi.mock("next/navigation", () => ({
 	usePathname: () => "/artifacts",
 }));
 
-vi.mock("convex/react", () => ({
-	useConvexAuth: () => ({
-		isAuthenticated: true,
-		isLoading: false,
-	}),
-	useQuery: (query: unknown, args: unknown) => useQueryMock(query, args),
-}));
-
 vi.mock("@clerk/nextjs", () => ({
 	useUser: () => ({
 		isLoaded: true,
@@ -168,6 +44,63 @@ vi.mock("@clerk/nextjs", () => ({
 globalThis.React = React;
 
 import { AppShell } from "@/features/course/shared/components/app-shell";
+import type { AppShellPrimaryNav } from "@/features/course/shared/components/app-shell/app-shell-props";
+
+const primaryNav: AppShellPrimaryNav = {
+	kind: "workspace",
+	items: [
+		{
+			kind: "link",
+			id: "review",
+			label: "Review",
+			href: "/review",
+			state: "available",
+		},
+		{
+			kind: "link",
+			id: "build",
+			label: "Build Lessons",
+			href: "/lesson/iterate-the-product-with-ai",
+			state: "active",
+		},
+		{
+			kind: "link",
+			id: "launch",
+			label: "Launch Lessons",
+			href: "/lesson/product-review",
+			state: "disabled",
+		},
+		{
+			kind: "menu",
+			id: "bonus",
+			label: "Bonus",
+			state: "available",
+			items: [
+				{
+					kind: "link",
+					id: "bonus-product",
+					label: "Product lessons",
+					href: "/lesson/welcome-to-ship-by-sunday",
+					state: "available",
+				},
+				{
+					kind: "link",
+					id: "bonus-design",
+					label: "Design lessons",
+					href: "/lesson/design-references",
+					state: "available",
+				},
+				{
+					kind: "link",
+					id: "bonus-lesson-map",
+					label: "Lesson Map",
+					href: "/review?showLessonMap=1",
+					state: "available",
+				},
+			],
+		},
+	],
+};
 
 function renderAppShell(element: React.ReactElement) {
 	return renderToStaticMarkup(
@@ -178,32 +111,28 @@ function renderAppShell(element: React.ReactElement) {
 }
 
 describe("AppShell", () => {
-	beforeEach(() => {
-		useQueryMock.mockClear();
-		nonSkipQueryCallCount = 0;
-	});
-
-	it("renders unlocked header blocks as links and keeps locked blocks inert", () => {
+	it("renders the explicit primary navigation instead of loading mission data implicitly", () => {
 		const markup = renderAppShell(
-			<AppShell showSkillRail={false} enableMissionQuery>
+			<AppShell
+				showSkillRail={false}
+				primaryNav={primaryNav}
+				progressSummary={{ progressCount: 9, totalLessons: 28 }}
+			>
 				<div>Body</div>
 			</AppShell>,
 		);
 
-		expect(markup).toContain('aria-label="Open CEO"');
-		expect(markup).toContain('href="/lesson/welcome-to-ship-by-sunday"');
-		expect(markup).toContain('aria-label="Open DESIGN"');
-		expect(markup).toContain('href="/lesson/find-references-first"');
-		expect(markup).toContain('aria-current="page"');
-		expect(markup).not.toContain('aria-label="Open BUILD"');
-		expect(markup).toContain('disabled=""');
-		expect(markup).toContain('data-slot="button"');
-		expect(markup).toContain('data-slot="card"');
+		expect(markup).toContain('href="/review"');
+		expect(markup).toContain('href="/lesson/iterate-the-product-with-ai"');
+		expect(markup).toContain("Launch Lessons");
+		expect(markup).toContain("Bonus");
+		expect(markup).toContain("9/28");
+		expect(markup).not.toContain("Open CEO");
 	});
 
-	it("links the header brand to the start page", () => {
+	it("links the header brand to the start page and keeps account chrome visible", () => {
 		const markup = renderAppShell(
-			<AppShell showSkillRail={false} enableMissionQuery>
+			<AppShell showSkillRail={false} primaryNav={primaryNav}>
 				<div>Body</div>
 			</AppShell>,
 		);
@@ -227,15 +156,14 @@ describe("AppShell", () => {
 		expect(markup).not.toContain("xl:overflow-hidden");
 	});
 
-	it("skips mission queries and hides progress when mission data is disabled", () => {
+	it("omits progress and primary navigation when pages do not provide them", () => {
 		const markup = renderAppShell(
-			<AppShell showSkillRail={false} enableMissionQuery={false}>
+			<AppShell showSkillRail={false}>
 				<div>Body</div>
 			</AppShell>,
 		);
 
-		expect(useQueryMock).not.toHaveBeenCalled();
-		expect(markup).not.toContain("--/--");
-		expect(markup).not.toContain('aria-label="Open CEO"');
+		expect(markup).not.toContain("9/28");
+		expect(markup).not.toContain("Build Lessons");
 	});
 });

@@ -9,10 +9,13 @@ import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
 
 export default async function Page({
 	params,
+	searchParams,
 }: {
 	params: Promise<{ lessonKey: string }>;
+	searchParams: Promise<{ showLessonMap?: string }>;
 }) {
 	const { lessonKey: routeSegment } = await params;
+	const { showLessonMap } = await searchParams;
 	const lesson = getLessonByRouteSegment(routeSegment);
 
 	if (!lesson) {
@@ -38,12 +41,24 @@ export default async function Page({
 		api.course.getBonusMissionState,
 		{},
 	);
+	const resumeDestination = await fetchAuthenticatedQuery(
+		api.packet.getPacketResumeDestination,
+		{},
+	);
 
 	if (!missionState) {
 		throw new Error("Bonus mission state missing");
 	}
+	if (!resumeDestination?.postReviewTargets) {
+		throw new Error("Post-review navigation targets missing");
+	}
 
 	return (
-		<BonusLessonPage lessonKey={lesson.lessonKey} missionState={missionState} />
+		<BonusLessonPage
+			lessonKey={lesson.lessonKey}
+			missionState={missionState}
+			postReviewTargets={resumeDestination.postReviewTargets}
+			initialShowLessonMap={showLessonMap === "1"}
+		/>
 	);
 }

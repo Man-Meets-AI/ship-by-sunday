@@ -69,5 +69,20 @@ export const packetWorkspaceStateValidator = v.object({
 
 export const packetResumeDestinationValidator = v.object({
 	destination: v.string(),
-	stageId: packetStageIdValidator,
+	kind: v.union(
+		v.literal("packet_stage"),
+		v.literal("review"),
+		v.literal("post_review"),
+	),
+	packetStageId: v.union(packetStageIdValidator, v.null()),
+	postReviewTargets: v.union(
+		v.object({
+			reviewDestination: v.string(),
+			buildLessonsDestination: v.string(),
+			launchLessonsDestination: v.string(),
+			lessonMapDestination: v.string(),
+			latestLessonDestination: v.string(),
+		}),
+		v.null(),
+	),
 });

@@ -2,6 +2,7 @@ import {
 	getLessonByKey,
 	getLessonHref,
 } from "../../features/course/lesson/model/manifest";
+import { getLessonMapHref } from "../../features/workspace-navigation/lib/lesson-map-href";
 import {
 	COURSE_SLUG,
 	getOrderedBlocks,
@@ -118,7 +119,7 @@ export async function getResumeDestinationHandler(ctx: CourseQueryCtx) {
 
 	if (!latestAccessibleLessonState) {
 		return {
-			destination: "/mission",
+			destination: getLessonMapHref(),
 			lessonKey: null,
 		};
 	}

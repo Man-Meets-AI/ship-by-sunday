@@ -2,7 +2,7 @@
 
 import { Check, Lock } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 import type { SkillRailStepState } from "./skill-rail-shared";
 
@@ -16,21 +16,21 @@ export function SkillRailShadcnStepBody({
 	state: SkillRailStepState;
 }) {
 	return (
-		<span className="flex min-w-0 max-w-full items-center gap-2">
-			<Badge
-				variant="outline"
-				className={
+		<span className="flex min-w-0 max-w-full items-center gap-1.5 sm:gap-2">
+			<span
+				className={cn(
+					"flex size-5 shrink-0 items-center justify-center rounded-full border font-mono text-[10px] font-bold tabular-nums sm:size-6 sm:text-[11px]",
 					state === "done"
-						? "size-6 shrink-0 justify-center rounded-full border-primary/35 bg-primary/8 px-0 py-0 tabular-nums text-foreground"
-						: "size-6 shrink-0 justify-center rounded-full border px-0 py-0 tabular-nums"
-				}
+						? "border-primary/35 bg-primary/8 text-foreground"
+						: "border-border text-muted-foreground",
+				)}
 			>
 				{displayLabel}
-			</Badge>
+			</span>
 			{state === "done" ? (
 				<Check
-					className="size-3.5 shrink-0 text-primary"
-					strokeWidth={2.5}
+					className="size-3 shrink-0 text-primary sm:size-3.5"
+					strokeWidth={3}
 					aria-hidden
 				/>
 			) : null}

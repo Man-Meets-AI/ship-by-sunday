@@ -47,6 +47,7 @@ vi.mock("@/convex/_generated/api", () => ({
 	api: {
 		packet: {
 			getPacketWorkspaceState: "getPacketWorkspaceState",
+			getPacketResumeDestination: "getPacketResumeDestination",
 		},
 		course: {
 			getBonusRouteState: "getBonusRouteState",
@@ -155,6 +156,7 @@ describe("workspace lesson route", () => {
 		const markup = renderToStaticMarkup(
 			await LessonRoutePage({
 				params: Promise.resolve({ lessonKey: "build-kickoff" }),
+				searchParams: Promise.resolve({}),
 			}),
 		);
 
@@ -180,6 +182,21 @@ describe("workspace lesson route", () => {
 				return createBonusMissionState();
 			}
 
+			if (query === "getPacketResumeDestination") {
+				return {
+					destination: "/lesson/build-kickoff",
+					kind: "post_review",
+					packetStageId: null,
+					postReviewTargets: {
+						reviewDestination: "/review",
+						buildLessonsDestination: "/lesson/build-kickoff",
+						launchLessonsDestination: "/lesson/product-review",
+						lessonMapDestination: "/review?showLessonMap=1",
+						latestLessonDestination: "/lesson/build-kickoff",
+					},
+				};
+			}
+
 			throw new Error(`Unexpected query: ${String(query)}`);
 		});
 
@@ -189,12 +206,16 @@ describe("workspace lesson route", () => {
 		const markup = renderToStaticMarkup(
 			await LessonRoutePage({
 				params: Promise.resolve({ lessonKey: "build-kickoff" }),
+				searchParams: Promise.resolve({}),
 			}),
 		);
 
-		expect(markup).toContain("This bonus lesson is video-first.");
+		expect(markup).toContain("Video-first bonus lesson");
+		expect(markup).toContain(
+			"Use the packet as the brief and keep BUILD as the default path.",
+		);
 		expect(markup).toContain("Build Kickoff");
-		expect(markup).toContain('href="/mission"');
+		expect(markup).toContain("Lesson Map");
 	});
 
 	it("returns not found for an unknown lesson route segment", async () => {
@@ -211,6 +232,21 @@ describe("workspace lesson route", () => {
 				return createBonusMissionState();
 			}
 
+			if (query === "getPacketResumeDestination") {
+				return {
+					destination: "/lesson/build-kickoff",
+					kind: "post_review",
+					packetStageId: null,
+					postReviewTargets: {
+						reviewDestination: "/review",
+						buildLessonsDestination: "/lesson/build-kickoff",
+						launchLessonsDestination: "/lesson/product-review",
+						lessonMapDestination: "/review?showLessonMap=1",
+						latestLessonDestination: "/lesson/build-kickoff",
+					},
+				};
+			}
+
 			throw new Error(`Unexpected query: ${String(query)}`);
 		});
 
@@ -220,6 +256,7 @@ describe("workspace lesson route", () => {
 		await expect(
 			LessonRoutePage({
 				params: Promise.resolve({ lessonKey: "not-a-real-lesson" }),
+				searchParams: Promise.resolve({}),
 			}),
 		).rejects.toThrowError("NEXT_NOT_FOUND");
 	});

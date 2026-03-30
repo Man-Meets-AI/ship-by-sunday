@@ -1,6 +1,5 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -11,7 +10,6 @@ import {
 
 import type { PacketWorkspaceState } from "@/features/packet-flow/lib/packet-workspace-types";
 
-const unlockExecuteShipMock = vi.fn();
 const useConvexAuthMock = vi.fn();
 const useQueryMock = vi.fn();
 const redirectMock = vi.fn((href: string) => {
@@ -52,6 +50,19 @@ vi.mock("next/link", () => ({
 	),
 }));
 
+vi.mock("@/convex/_generated/api", () => ({
+	api: {
+		packet: {
+			getPacketWorkspaceState: "getPacketWorkspaceState",
+			getPacketResumeDestination: "getPacketResumeDestination",
+		},
+		course: {
+			getBonusMissionState: "getBonusMissionState",
+		},
+	},
+}));
+
+// This test covers review-page behavior; nav rendering is mocked on purpose.
 vi.mock("@/features/packet-flow/components/packet-stage-nav", () => ({
 	PacketStageNav: () => <div data-testid="packet-stage-nav" />,
 }));
@@ -66,7 +77,6 @@ vi.mock("@/features/course/lesson/components/lesson-video-player", () => ({
 
 vi.mock("convex/react", () => ({
 	useConvexAuth: () => useConvexAuthMock(),
-	useMutation: () => unlockExecuteShipMock,
 	useQuery: (...args: unknown[]) => useQueryMock(...args),
 }));
 
@@ -116,10 +126,52 @@ function createWorkspaceState(
 	} as PacketWorkspaceState;
 }
 
+function createBonusMissionState() {
+	return {
+		exploredCount: 1,
+		totalLessons: 4,
+		blocks: [
+			{
+				id: "CEO" as const,
+				order: 1,
+				lessons: [],
+			},
+			{
+				id: "DESIGN" as const,
+				order: 2,
+				lessons: [],
+			},
+			{
+				id: "BUILD" as const,
+				order: 3,
+				lessons: [
+					{
+						lessonKey: "iterate-the-product-with-ai",
+						routeSegment: "iterate-the-product-with-ai",
+						id: "3.1",
+						displayLabel: "3.1",
+						title: "Iterate the product with AI",
+						shortTitle: "Iterate",
+						block: "BUILD" as const,
+						order: 1,
+						status: "opened" as const,
+						isImplemented: true,
+						artifactLabel: "Build notes",
+					},
+				],
+			},
+			{
+				id: "SHIP" as const,
+				order: 4,
+				lessons: [],
+			},
+		],
+	};
+}
+
 describe("PacketReviewPage", () => {
 	beforeEach(() => {
 		redirectMock.mockClear();
-		unlockExecuteShipMock.mockReset();
 		pushMock.mockReset();
 		useConvexAuthMock.mockReset();
 		useConvexAuthMock.mockReturnValue({
@@ -130,8 +182,7 @@ describe("PacketReviewPage", () => {
 		useQueryMock.mockReturnValue(undefined);
 	});
 
-	it("renders the starter snapshot as the primary outcome and expands execute after download", async () => {
-		const user = userEvent.setup();
+	it("renders the Ship Kit handoff and starter download CTA", () => {
 		const readyWorkspaceState = createWorkspaceState();
 		render(<PacketReviewPage initialWorkspaceState={readyWorkspaceState} />);
 
@@ -139,84 +190,76 @@ describe("PacketReviewPage", () => {
 			screen.getByRole("heading", { name: "Review & Download" }),
 		).toBeTruthy();
 		const reviewVideo = screen.getByTestId("packet-review-video-player");
-		expect(screen.getByText("Starter Snapshot is ready.")).toBeTruthy();
-		expect(
-			screen.getByRole("heading", {
-				name: "What's inside the Starter Snapshot",
-			}),
-		).toBeTruthy();
-		expect(screen.getByText("Design Pack")).toBeTruthy();
-		expect(screen.getByText("Marketing Pack")).toBeTruthy();
-		expect(screen.getByText("Build Pack")).toBeTruthy();
-		expect(screen.getByText("Prompt Pack")).toBeTruthy();
-		expect(screen.getByText("Included under docs/design/")).toBeTruthy();
-		expect(screen.getByText("Included under docs/marketing/")).toBeTruthy();
-		expect(screen.getByText("Included under docs/build/")).toBeTruthy();
-		expect(screen.getByText("Included under docs/prompts/")).toBeTruthy();
+		expect(screen.getByText("Your Ship Kit is ready.")).toBeTruthy();
+		expect(screen.getByText("Agent-Ready Packs")).toBeTruthy();
+		expect(screen.getByText("Agent-First Starter Repo")).toBeTruthy();
+		expect(screen.getByText("One bundle, one source of truth")).toBeTruthy();
 		expect(
 			screen.getByText(
-				"Execute / Ship opens as a separate optional next path after this download.",
+				"Design, Marketing, Build, and Prompt Packs generated from your answers",
+			),
+		).toBeTruthy();
+		expect(
+			screen.getByText(
+				"A starter repo shaped for the AI age, with the docs, overrides, and handoff structure already in place",
+			),
+		).toBeTruthy();
+		expect(
+			screen.getByText(
+				"So design, marketing, code, and prompts all work from the same brief instead of drifting",
 			),
 		).toBeTruthy();
 		expect(
 			screen
-				.getByRole("button", { name: "Download Snapshot to Unlock" })
-				.hasAttribute("disabled"),
-		).toBe(true);
-		expect(screen.queryByText("QUEST")).toBeNull();
-		expect(reviewVideo.textContent).toBe("Review Video");
-
-		await user.click(screen.getByRole("link", { name: "Download Snapshot" }));
-
-		expect(
-			screen
-				.getByRole("button", { name: "Unlock Execute / Ship" })
-				.hasAttribute("disabled"),
-		).toBe(false);
-		expect(screen.getByText("Execute / Ship")).toBeTruthy();
-
-		unlockExecuteShipMock.mockResolvedValue({
-			executeShipUnlockedAt: 123,
-		});
-		await user.click(
-			screen.getByRole("button", { name: "Unlock Execute / Ship" }),
-		);
-
-		expect(unlockExecuteShipMock).toHaveBeenCalledWith({});
-		expect(pushMock).toHaveBeenCalledWith("/execute");
-
-		expect(screen.queryByRole("link", { name: "Download Pack" })).toBeNull();
-		expect(
-			screen
-				.getByRole("link", { name: "Download Snapshot" })
+				.getByRole("link", { name: "Download Ship Kit" })
 				.getAttribute("href"),
 		).toBe("/api/download/repo");
+		expect(
+			screen
+				.getByRole("link", { name: "Download Ship Kit first" })
+				.getAttribute("href"),
+		).toBe("/api/download/repo");
+		expect(screen.queryByText("QUEST")).toBeNull();
+		expect(reviewVideo.textContent).toBe("Review Video");
 	});
 
-	it("derives execute unlock from the live workspace query", () => {
-		useQueryMock.mockReturnValue(
-			createWorkspaceState({
-				executeShipUnlockedAt: 456,
-			}),
-		);
+	it("switches the primary CTA to Build Lessons when the live unlock marker is present", () => {
+		useQueryMock.mockImplementation((query) => {
+			if (query === undefined || query === "skip") {
+				return undefined;
+			}
+			if (query === "getPacketWorkspaceState") {
+				return createWorkspaceState({
+					executeShipUnlockedAt: 456,
+				});
+			}
+			if (query === "getPacketResumeDestination") {
+				return {
+					destination: "/lesson/iterate-the-product-with-ai",
+					kind: "post_review",
+					packetStageId: null,
+					postReviewTargets: {
+						reviewDestination: "/review",
+						buildLessonsDestination: "/lesson/iterate-the-product-with-ai",
+						launchLessonsDestination: "/lesson/product-review",
+						lessonMapDestination: "/review?showLessonMap=1",
+						latestLessonDestination:
+							"/lesson/iterate-the-product-with-ai",
+					},
+				};
+			}
+			if (query === "getBonusMissionState") {
+				return createBonusMissionState();
+			}
+			return undefined;
+		});
 		render(<PacketReviewPage initialWorkspaceState={createWorkspaceState()} />);
 
 		expect(
 			screen
-				.getByRole("link", { name: "Open Execute / Ship" })
+				.getByRole("link", { name: "Continue to Build Lessons" })
 				.getAttribute("href"),
-		).toBe("/execute");
-		expect(
-			screen.queryByRole("button", { name: "Unlock Execute / Ship" }),
-		).toBeNull();
-		expect(
-			screen.getByText(
-				"Execute / Ship is unlocked as a separate optional next path.",
-			),
-		).toBeTruthy();
-		expect(
-			screen.getByText("You have full access to the post-download library."),
-		).toBeTruthy();
+		).toBe("/lesson/iterate-the-product-with-ai");
 	});
 
 	it("redirects back to the first incomplete stage when review is still locked", () => {

@@ -1,10 +1,11 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { PacketWorkspaceState } from "@/features/packet-flow/lib/packet-workspace-types";
-import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
 
 const fetchAuthenticatedQueryMock = vi.fn();
+const redirectMock = vi.fn((href: string) => {
+	throw new Error(`NEXT_REDIRECT:${href}`);
+});
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -32,92 +33,34 @@ vi.mock("@/platform/convex/server-preload", () => ({
 	fetchAuthenticatedQuery: fetchAuthenticatedQueryMock,
 }));
 
+vi.mock("next/navigation", () => ({
+	redirect: (href: string) => redirectMock(href),
+}));
+
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
 		packet: {
-			getPacketWorkspaceState: "getPacketWorkspaceState",
-		},
-		course: {
-			getBonusRouteState: "getBonusRouteState",
-			getBonusMissionState: "getBonusMissionState",
+			getPacketResumeDestination: "getPacketResumeDestination",
 		},
 	},
 }));
 
-function createWorkspaceState(
-	executeShipUnlockedAt?: number,
-): PacketWorkspaceState {
-	return {
-		projectDefinition: null,
-		workflowState: executeShipUnlockedAt
-			? {
-					clerkUserId: "user_123",
-					productKey: "ship-by-sunday",
-					executeShipUnlockedAt,
-					createdAt: executeShipUnlockedAt,
-					updatedAt: executeShipUnlockedAt,
-				}
-			: null,
-		firstIncompleteStageId: "review",
-		packetReadiness: {} as PacketWorkspaceState["packetReadiness"],
-		stageStatuses: [] as PacketWorkspaceState["stageStatuses"],
-	};
-}
-
-function createBonusMissionState(): BonusMissionState {
-	return {
-		exploredCount: 1,
-		totalLessons: 29,
-		blocks: [
-			{
-				id: "CEO",
-				order: 1,
-				lessons: [],
-			},
-			{
-				id: "DESIGN",
-				order: 2,
-				lessons: [],
-			},
-			{
-				id: "BUILD",
-				order: 3,
-				lessons: [
-					{
-						lessonKey: "iterate-the-product-with-ai",
-						routeSegment: "iterate-the-product-with-ai",
-						id: "3.1",
-						displayLabel: "3.1",
-						title: "Iterate the product with AI",
-						shortTitle: "Iterate",
-						block: "BUILD",
-						order: 1,
-						status: "opened",
-						isImplemented: true,
-						artifactLabel: "Build notes",
-						durationLabel: "3m 43s",
-					},
-				],
-			},
-			{
-				id: "SHIP",
-				order: 4,
-				lessons: [],
-			},
-		],
-	};
-}
-
 describe("workspace mission route", () => {
 	beforeEach(() => {
 		fetchAuthenticatedQueryMock.mockReset();
+		redirectMock.mockReset();
 		vi.resetModules();
 	});
 
 	it("renders explicit unlock messaging before the bonus is available", async () => {
 		fetchAuthenticatedQueryMock.mockImplementation(async (query) => {
-			if (query === "getPacketWorkspaceState") {
-				return createWorkspaceState();
+			if (query === "getPacketResumeDestination") {
+				return {
+					destination: "/review",
+					kind: "review",
+					packetStageId: "review",
+					postReviewTargets: null,
+				};
 			}
 
 			throw new Error(`Unexpected query: ${String(query)}`);
@@ -128,22 +71,25 @@ describe("workspace mission route", () => {
 
 		const markup = renderToStaticMarkup(await MissionRoutePage());
 
-		expect(markup).toContain("Mission unlocks after Review &amp; Download.");
+		expect(markup).toContain("Lesson Map opens after Review &amp; Download.");
 		expect(markup).toContain('href="/review"');
 	});
 
 	it("keeps the restored route reachable after unlock without redirecting to start", async () => {
 		fetchAuthenticatedQueryMock.mockImplementation(async (query) => {
-			if (query === "getPacketWorkspaceState") {
-				return createWorkspaceState(123);
-			}
-
-			if (query === "getBonusRouteState") {
-				return { hasStartedBonusLesson: false };
-			}
-
-			if (query === "getBonusMissionState") {
-				return createBonusMissionState();
+			if (query === "getPacketResumeDestination") {
+				return {
+					destination: "/lesson/iterate-the-product-with-ai",
+					kind: "post_review",
+					packetStageId: null,
+					postReviewTargets: {
+						reviewDestination: "/review",
+						buildLessonsDestination: "/lesson/iterate-the-product-with-ai",
+						launchLessonsDestination: "/lesson/product-review",
+						lessonMapDestination: "/review?showLessonMap=1",
+						latestLessonDestination: "/lesson/iterate-the-product-with-ai",
+					},
+				};
 			}
 
 			throw new Error(`Unexpected query: ${String(query)}`);
@@ -152,11 +98,9 @@ describe("workspace mission route", () => {
 		const { default: MissionRoutePage } =
 			await import("@/app/(workspace)/mission/page");
 
-		const markup = renderToStaticMarkup(await MissionRoutePage());
-
-		expect(markup).toContain("Packet ready. BUILD is the continuation path.");
-		expect(markup).toContain("Product, Design, Build, Ship");
-		expect(markup).toContain('href="/lesson/iterate-the-product-with-ai"');
-		expect(markup).not.toContain("Completed earlier");
+		await expect(MissionRoutePage()).rejects.toThrowError(
+			"NEXT_REDIRECT:/review?showLessonMap=1",
+		);
+		expect(redirectMock).toHaveBeenCalledWith("/review?showLessonMap=1");
 	});
 });

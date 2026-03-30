@@ -9,25 +9,25 @@ const blockPresentation = {
 	CEO: {
 		label: "Product",
 		summary:
-			"Revisit the product lessons whenever the packet needs sharper user, problem, or scope decisions.",
+			"Return here when the product truth needs to get tighter before you keep building.",
 		kind: "reference",
 	},
 	DESIGN: {
 		label: "Design",
 		summary:
-			"Use the design lessons as supporting references when you need better flows, references, or direction while building.",
+			"Use these lessons when flows, references, or UI direction drift away from the original brief.",
 		kind: "reference",
 	},
 	BUILD: {
 		label: "Build",
 		summary:
-			"This is the recommended continuation path. Use it to turn the packet into working software, one slice at a time.",
+			"This is the main continuation path. Turn the Ship Kit into working software, one slice at a time.",
 		kind: "featured",
 	},
 	SHIP: {
 		label: "Ship",
 		summary:
-			"Keep the ship lessons unlocked as references for deployment, QA, and launch readiness once Build is stable.",
+			"Use this section when the product is stable enough for QA, deploy handoff, and launch.",
 		kind: "reference",
 	},
 } as const satisfies Record<

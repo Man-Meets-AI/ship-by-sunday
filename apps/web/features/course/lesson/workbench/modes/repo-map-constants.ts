@@ -1,10 +1,8 @@
 import { apiRouteConfig, routeConfig } from "@/config/product";
+import { getLessonMapHref } from "@/features/workspace-navigation/lib/lesson-map-href";
 
 /** Coach resource ids — keep in sync with `coachResources` on lesson 3.2. */
-export const REPO_MAP_COACH_LINK_IDS = {
-	video: "repo_map_tool_overview_video",
-	guide: "repo_map_setup_guide",
-} as const;
+export const REPO_MAP_SETUP_GUIDE_LINK_ID = "repo_map_setup_guide" as const;
 
 export type RepoMapBadge = "required" | "nice" | "advanced";
 
@@ -57,7 +55,10 @@ export const REPO_MAP_ENTRIES: RepoMapEntry[] = [
 ];
 
 export const REPO_ROUTE_EXAMPLES: { path: string; note: string }[] = [
-	{ path: routeConfig.mission, note: "Example gated workspace entry route." },
+	{
+		path: getLessonMapHref(),
+		note: "Example post-review Lesson Map reveal route.",
+	},
 	{
 		path: apiRouteConfig.stripeCheckout,
 		note: "API route — server-side Stripe Checkout.",

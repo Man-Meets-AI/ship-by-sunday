@@ -74,14 +74,27 @@ export function LessonVideoSurface({
 					/>
 				</Card>
 			) : (
-				<>
+				<div className="flex flex-col gap-3">
 					{ratio}
 					<LessonVideoMetadata
 						durationLabel={video.durationLabel}
 						title={video.title}
 					/>
-				</>
+				</div>
 			);
+
+		if (playerFrame === "bare") {
+			return (
+				<div
+					className={cn(
+						isWatchShell ? "mx-auto w-full max-w-5xl" : "w-full",
+						className,
+					)}
+				>
+					{playerBlock}
+				</div>
+			);
+		}
 
 		return (
 			<Card
