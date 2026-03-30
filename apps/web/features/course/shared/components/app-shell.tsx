@@ -4,6 +4,8 @@ import { Card } from "@/components/ui/card";
 import { getLesson } from "@/features/course/lesson/model/manifest";
 import { AppShellFooterRail } from "@/features/course/shared/components/app-shell/app-shell-footer-rail";
 import { AppShellHeader } from "@/features/course/shared/components/app-shell/app-shell-header";
+import { AppShellLocalNavRail } from "@/features/course/shared/components/app-shell/app-shell-local-nav";
+import { cn } from "@/lib/utils";
 import { type AppShellProps } from "@/features/course/shared/components/app-shell/app-shell-props";
 import { isBlockActive } from "@/features/course/shared/components/app-shell/app-shell-block-status";
 
@@ -12,6 +14,7 @@ function ShellInner({
 	currentLessonId,
 	currentBlockId,
 	mission,
+	localNav,
 	progressSummary,
 	primaryNav,
 	showSkillRail: explicitShowSkillRail,
@@ -50,8 +53,10 @@ function ShellInner({
 	const shellInnerClassName =
 		"mx-auto flex min-h-screen max-w-[1920px] flex-col gap-3 px-2 py-2 sm:px-3 sm:py-3";
 
-	const appContentClassName =
-		"mx-auto flex w-full max-w-[1920px] min-h-0 flex-1 flex-col px-2 py-2 sm:px-3 sm:py-3";
+	const appContentClassName = cn(
+		"mx-auto flex w-full max-w-[1920px] min-h-0 flex-1 flex-col px-2 py-2 sm:px-3 sm:py-3",
+		localNav ? "gap-4 xl:grid xl:grid-cols-[17rem_minmax(0,1fr)] xl:gap-6" : "",
+	);
 
 	const footerRail =
 		showSkillRail && activeBlock ? (
@@ -90,6 +95,7 @@ function ShellInner({
 						</Card>
 					</header>
 					<div className={appContentClassName}>
+						{localNav ? <AppShellLocalNavRail localNav={localNav} /> : null}
 						<div className="flex min-h-0 flex-1 flex-col">{children}</div>
 					</div>
 					{footerRail}
@@ -108,7 +114,10 @@ function ShellInner({
 							/>
 						</Card>
 					</header>
-					<div className="flex min-h-0 flex-1 flex-col">{children}</div>
+					<div className={appContentClassName}>
+						{localNav ? <AppShellLocalNavRail localNav={localNav} /> : null}
+						<div className="flex min-h-0 flex-1 flex-col">{children}</div>
+					</div>
 					{footerRail}
 				</div>
 			)}

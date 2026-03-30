@@ -42,7 +42,55 @@ export type WorkspacePrimaryNavItem =
 			items: WorkspacePrimaryNavMenuEntry[];
 	  };
 
-type PostReviewActiveSection = "review" | "build" | "launch" | "bonus";
+export type PostReviewActiveSection = "build" | "launch" | "bonus";
+
+export function buildLockedPostReviewPrimaryNav(): WorkspacePrimaryNavItem[] {
+	return [
+		{
+			kind: "link",
+			id: "build",
+			label: "Build Lessons",
+			href: "#",
+			state: "disabled",
+		},
+		{
+			kind: "link",
+			id: "launch",
+			label: "Launch Lessons",
+			href: "#",
+			state: "disabled",
+		},
+		{
+			kind: "menu",
+			id: "bonus",
+			label: "Bonus",
+			state: "disabled",
+			items: [
+				{
+					kind: "link",
+					id: "bonus-product",
+					label: "Product lessons",
+					href: "#",
+					state: "disabled",
+				},
+				{
+					kind: "link",
+					id: "bonus-design",
+					label: "Design lessons",
+					href: "#",
+					state: "disabled",
+				},
+				{
+					kind: "action",
+					id: "bonus-lesson-map",
+					label: "Lesson Map",
+					actionId: "showLessonMap",
+					state: "disabled",
+				},
+			],
+		},
+	];
+}
 
 function getBonusBlockHref(
 	missionState: BonusMissionState,
@@ -62,7 +110,7 @@ function getBonusBlockHref(
 function getBonusBlockState(
 	missionState: BonusMissionState,
 	blockId: "CEO" | "DESIGN",
-	activeSection: PostReviewActiveSection,
+	activeSection: PostReviewActiveSection | null | undefined,
 	activeBonusBlockId: "CEO" | "DESIGN" | null,
 ): WorkspacePrimaryNavState {
 	if (activeSection === "bonus" && activeBonusBlockId === blockId) {
@@ -78,7 +126,7 @@ export function buildPostReviewPrimaryNav({
 	missionState,
 	postReviewTargets,
 }: {
-	activeSection: PostReviewActiveSection;
+	activeSection?: PostReviewActiveSection | null;
 	activeBonusBlockId?: "CEO" | "DESIGN" | null;
 	missionState: BonusMissionState;
 	postReviewTargets: PostReviewNavigationTargets;
@@ -87,13 +135,6 @@ export function buildPostReviewPrimaryNav({
 	const designHref = getBonusBlockHref(missionState, "DESIGN");
 
 	return [
-		{
-			kind: "link",
-			id: "review",
-			label: "Review",
-			href: postReviewTargets.reviewDestination,
-			state: activeSection === "review" ? "active" : "available",
-		},
 		{
 			kind: "link",
 			id: "build",

@@ -9,24 +9,20 @@ export function AppShellPrimaryNav({
 }: {
 	primaryNav: AppShellPrimaryNav;
 }) {
-	if (primaryNav.kind === "packet") {
-		return (
+	return (
+		<div className="flex min-w-max items-center gap-x-3">
 			<PacketStageNav
-				currentStageId={primaryNav.currentStageId}
-				activeStepId={primaryNav.activeStepId}
+				currentStageId={primaryNav.currentPacketStageId}
 				stageStatuses={primaryNav.stageStatuses}
 				onLinkNavigate={primaryNav.onLinkNavigate}
 				onNavigate={primaryNav.onNavigate}
 			/>
-		);
-	}
-
-	return (
-		<WorkspacePrimaryNav
-			items={primaryNav.items}
-			onLinkNavigate={primaryNav.onLinkNavigate}
-			onNavigate={primaryNav.onNavigate}
-			onAction={primaryNav.onAction}
-		/>
+			<WorkspacePrimaryNav
+				items={primaryNav.postReviewItems}
+				onLinkNavigate={primaryNav.onLinkNavigate}
+				onNavigate={primaryNav.onNavigate}
+				onAction={primaryNav.onAction}
+			/>
+		</div>
 	);
 }

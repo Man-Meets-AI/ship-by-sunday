@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { buildPostReviewPrimaryNav } from "@/features/workspace-navigation/lib/build-primary-nav-model";
+import {
+	buildLockedPostReviewPrimaryNav,
+	buildPostReviewPrimaryNav,
+} from "@/features/workspace-navigation/lib/build-primary-nav-model";
 
 const missionState = {
 	exploredCount: 2,
@@ -57,7 +60,7 @@ const missionState = {
 };
 
 describe("buildPostReviewPrimaryNav", () => {
-	it("maps review, build, launch, and bonus entries from centralized targets", () => {
+	it("maps build, launch, and bonus entries from centralized targets", () => {
 		expect(
 			buildPostReviewPrimaryNav({
 				activeSection: "bonus",
@@ -72,13 +75,6 @@ describe("buildPostReviewPrimaryNav", () => {
 				},
 			}),
 		).toEqual([
-			{
-				kind: "link",
-				id: "review",
-				label: "Review",
-				href: "/review",
-				state: "available",
-			},
 			{
 				kind: "link",
 				id: "build",
@@ -119,6 +115,54 @@ describe("buildPostReviewPrimaryNav", () => {
 						label: "Lesson Map",
 						actionId: "showLessonMap",
 						state: "active",
+					},
+				],
+			},
+		]);
+	});
+
+	it("exposes disabled post-review items before unlock", () => {
+		expect(buildLockedPostReviewPrimaryNav()).toEqual([
+			{
+				kind: "link",
+				id: "build",
+				label: "Build Lessons",
+				href: "#",
+				state: "disabled",
+			},
+			{
+				kind: "link",
+				id: "launch",
+				label: "Launch Lessons",
+				href: "#",
+				state: "disabled",
+			},
+			{
+				kind: "menu",
+				id: "bonus",
+				label: "Bonus",
+				state: "disabled",
+				items: [
+					{
+						kind: "link",
+						id: "bonus-product",
+						label: "Product lessons",
+						href: "#",
+						state: "disabled",
+					},
+					{
+						kind: "link",
+						id: "bonus-design",
+						label: "Design lessons",
+						href: "#",
+						state: "disabled",
+					},
+					{
+						kind: "action",
+						id: "bonus-lesson-map",
+						label: "Lesson Map",
+						actionId: "showLessonMap",
+						state: "disabled",
 					},
 				],
 			},

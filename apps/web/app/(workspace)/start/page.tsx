@@ -12,5 +12,21 @@ export default async function Page() {
 		throw new Error("Packet workspace state missing");
 	}
 
-	return <PacketStartPage initialWorkspaceState={initialWorkspaceState} />;
+	const isPostReviewUnlocked = Boolean(
+		initialWorkspaceState.workflowState?.executeShipUnlockedAt,
+	);
+	const resumeDestination = isPostReviewUnlocked
+		? await fetchAuthenticatedQuery(api.packet.getPacketResumeDestination, {})
+		: null;
+	const bonusMissionState = isPostReviewUnlocked
+		? await fetchAuthenticatedQuery(api.course.getBonusMissionState, {})
+		: null;
+
+	return (
+		<PacketStartPage
+			initialWorkspaceState={initialWorkspaceState}
+			initialPostReviewTargets={resumeDestination?.postReviewTargets ?? null}
+			initialBonusMissionState={bonusMissionState ?? null}
+		/>
+	);
 }

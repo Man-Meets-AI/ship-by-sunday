@@ -6,7 +6,6 @@ import {
 	createCanonicalProjectDefinitionDraft,
 	createCompleteProjectDefinition,
 	deriveStageStatus,
-	getPacketStageDefinition,
 } from "@packet-compiler";
 import type { PacketWorkspaceState } from "@/features/packet-flow/lib/packet-workspace-types";
 
@@ -57,15 +56,14 @@ describe("PacketStageNav", () => {
 		vi.restoreAllMocks();
 	});
 
-	it("renders plain start and review links while Product opens its step dropdown", async () => {
+	it("renders stage-level packet links without step dropdown buttons", async () => {
 		const user = userEvent.setup();
 		const workspaceState = createWorkspaceState();
 		const onNavigate = vi.fn();
 
-		const { container } = render(
+		render(
 			<PacketStageNav
 				currentStageId="product"
-				activeStepId="outcome"
 				stageStatuses={workspaceState.stageStatuses}
 				onNavigate={onNavigate}
 			/>,
@@ -73,45 +71,30 @@ describe("PacketStageNav", () => {
 
 		expect(screen.getByRole("link", { name: "Start" })).toBeTruthy();
 		expect(screen.getByRole("link", { name: "Review" })).toBeTruthy();
-		expect(screen.getByRole("button", { name: "Product" })).toBeTruthy();
-		expect(screen.getByRole("button", { name: "Design" })).toBeTruthy();
-		expect(screen.getByRole("button", { name: "Marketing" })).toBeTruthy();
-		expect(screen.getByRole("button", { name: "Build Plan" })).toBeTruthy();
 		expect(
-			container.querySelector('[data-slot="navigation-menu-viewport"]'),
-		).toBeNull();
+			screen
+				.getByRole("link", { name: "Product" })
+				.getAttribute("aria-current"),
+		).toBe("page");
+		expect(screen.queryByRole("button", { name: "Product" })).toBeNull();
+		expect(screen.queryByRole("button", { name: "Design" })).toBeNull();
+		expect(screen.queryByRole("button", { name: "Marketing" })).toBeNull();
+		expect(screen.queryByRole("button", { name: "Build Plan" })).toBeNull();
 
-		await user.click(screen.getByRole("button", { name: "Product" }));
-
-		const productStage = getPacketStageDefinition("product");
-		const foundationLink = screen.getByRole("link", {
-			name: /Completed Foundation|Foundation/,
-		});
-		const problemLink = screen.getByRole("link", {
-			name: /Completed Problem|Problem/,
-		});
-		const outcomeLink = screen.getByRole("link", {
-			name: new RegExp(productStage.steps[2]?.label ?? "Outcome"),
-		});
-
-		expect(foundationLink).toBeTruthy();
-		expect(problemLink).toBeTruthy();
-		expect(outcomeLink.getAttribute("aria-current")).toBe("page");
-		expect(outcomeLink.getAttribute("data-active")).toBe("true");
-
-		await user.click(foundationLink);
-
-		expect(onNavigate).toHaveBeenCalledWith("/product/foundation");
+		await user.click(screen.getByRole("link", { name: "Design" }));
+		expect(onNavigate).toHaveBeenCalledWith("/design");
 	});
 
-	it("keeps review as a plain link while still exposing routed stage dropdowns", async () => {
+	it("keeps review as a plain active stage link", async () => {
 		const user = userEvent.setup();
 		const workspaceState = createWorkspaceState();
+		const onNavigate = vi.fn();
 
 		render(
 			<PacketStageNav
 				currentStageId="review"
 				stageStatuses={workspaceState.stageStatuses}
+				onNavigate={onNavigate}
 			/>,
 		);
 
@@ -119,14 +102,10 @@ describe("PacketStageNav", () => {
 			screen.getByRole("link", { name: "Review" }).getAttribute("aria-current"),
 		).toBe("page");
 		expect(screen.getByRole("link", { name: "Start" })).toBeTruthy();
-		expect(screen.getByRole("button", { name: "Product" })).toBeTruthy();
-		expect(screen.getByRole("button", { name: "Design" })).toBeTruthy();
+		expect(screen.queryByRole("button", { name: "Product" })).toBeNull();
+		expect(screen.queryByRole("button", { name: "Design" })).toBeNull();
 
-		await user.click(screen.getByRole("button", { name: "Build Plan" }));
-
-		const buildPlanStage = getPacketStageDefinition("build-plan");
-		for (const step of buildPlanStage.steps) {
-			expect(screen.getByText(step.label)).toBeTruthy();
-		}
+		await user.click(screen.getByRole("link", { name: "Start" }));
+		expect(onNavigate).toHaveBeenCalledWith("/start");
 	});
 });

@@ -28,15 +28,15 @@ export function AppShellHeader({
 }: AppShellHeaderProps) {
 	const chromeRowClass =
 		viewportMode === "app"
-			? "mx-auto flex min-h-10 w-full max-w-[1920px] flex-wrap items-center gap-x-3 gap-y-2 px-2 py-2 sm:min-h-11 sm:px-3 lg:px-4"
-			: "flex min-h-10 flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2 sm:min-h-11 lg:px-4";
+			? "mx-auto flex min-h-10 w-full max-w-[1920px] items-center gap-x-3 px-2 py-2 sm:min-h-11 sm:px-3 lg:px-4"
+			: "flex min-h-10 items-center gap-x-3 px-3 py-2 sm:min-h-11 lg:px-4";
 
 	return (
 		<div className={chromeRowClass}>
-			<div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-2">
+			<div className="flex min-w-0 flex-1 items-center gap-x-3">
 				<AppShellWorkspaceNav lesson11Viewport={lesson11Viewport} />
 				{primaryNav ? (
-					<div className="min-w-0 flex-1">
+					<div className="min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
 						<AppShellHeaderPrimaryNav primaryNav={primaryNav} />
 					</div>
 				) : null}

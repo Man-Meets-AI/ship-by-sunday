@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { AlertCircleIcon } from "lucide-react";
+import type { PacketStageStatus } from "@packet-compiler";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LessonShellWatch } from "@/features/course/lesson/shells";
 import { getLessonByKey } from "@/features/course/lesson/model/manifest";
@@ -13,6 +14,8 @@ import {
 } from "@/features/execute-ship/lib/bonus-library-presentation";
 import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
 import { buildPostReviewPrimaryNav } from "@/features/workspace-navigation/lib/build-primary-nav-model";
+import { buildWorkspaceLessonLocalNavModel } from "@/features/workspace-navigation/lib/build-secondary-nav-model";
+import { WorkspaceLocalNavRail } from "@/features/workspace-navigation/components/workspace-local-nav-rail";
 import type { PostReviewNavigationTargets } from "@/features/workspace-navigation/lib/post-review-destination";
 import { BonusLessonFooter } from "./bonus-lesson-footer";
 import { LessonMapSurface } from "./lesson-map-surface";
@@ -20,11 +23,13 @@ import { BonusLessonViewTracker } from "./bonus-lesson-view-tracker";
 
 export function BonusLessonPage({
 	initialShowLessonMap = false,
+	initialStageStatuses,
 	lessonKey,
 	missionState,
 	postReviewTargets,
 }: {
 	initialShowLessonMap?: boolean;
+	initialStageStatuses: PacketStageStatus[];
 	lessonKey: string;
 	missionState: BonusMissionState;
 	postReviewTargets: PostReviewNavigationTargets;
@@ -42,6 +47,17 @@ export function BonusLessonPage({
 			: lesson.block === "SHIP"
 				? "launch"
 				: "bonus";
+	const localNav = {
+		kind: "workspace" as const,
+		desktop: (
+			<WorkspaceLocalNavRail
+				model={buildWorkspaceLessonLocalNavModel({
+					currentLesson: lesson,
+					missionState,
+				})}
+			/>
+		),
+	};
 
 	return (
 		<>
@@ -50,11 +66,13 @@ export function BonusLessonPage({
 				viewportMode="app"
 				appScrollMode="page"
 				mission={buildBonusShellMission(missionState)}
+				localNav={localNav}
 				showSkillRail
 				currentLessonId={lessonKey}
 				primaryNav={{
-					kind: "workspace",
-					items: buildPostReviewPrimaryNav({
+					kind: "combined",
+					stageStatuses: initialStageStatuses,
+					postReviewItems: buildPostReviewPrimaryNav({
 						activeSection,
 						activeBonusBlockId:
 							lesson.block === "CEO" || lesson.block === "DESIGN"

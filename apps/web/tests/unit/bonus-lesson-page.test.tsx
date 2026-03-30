@@ -1,6 +1,10 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
+import {
+	createCompleteProjectDefinition,
+	deriveStageStatus,
+} from "@packet-compiler";
 import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
 
 vi.mock("next/link", () => ({
@@ -19,9 +23,28 @@ vi.mock("next/link", () => ({
 	),
 }));
 
+vi.mock("next/navigation", () => ({
+	useRouter: () => ({
+		push: vi.fn(),
+	}),
+}));
+
 vi.mock("@/features/course/shared/components/app-shell", () => ({
-	AppShell: ({ children }: { children: React.ReactNode }) => (
-		<div>{children}</div>
+	AppShell: ({
+		children,
+		localNav,
+	}: {
+		children: React.ReactNode;
+		localNav?: { kind: string; desktop: React.ReactNode };
+	}) => (
+		<div>
+			{localNav ? (
+				<div data-testid="local-nav" data-local-nav-kind={localNav.kind}>
+					{localNav.desktop}
+				</div>
+			) : null}
+			{children}
+		</div>
 	),
 }));
 
@@ -32,6 +55,20 @@ vi.mock("@/features/execute-ship/components/bonus-lesson-view-tracker", () => ({
 import { BonusLessonPage } from "@/features/execute-ship/components/bonus-lesson-page";
 import { BonusLessonFooter } from "@/features/execute-ship/components/bonus-lesson-footer";
 
+const packetStageStatuses = deriveStageStatus(
+	createCompleteProjectDefinition().facts,
+).stageStatuses;
+import { AppShellFooterRail } from "@/features/course/shared/components/app-shell/app-shell-footer-rail";
+
+function getWorkspaceLocalNavMarkup(markup: string) {
+	const localNavStart =
+		'<div data-testid="local-nav" data-local-nav-kind="workspace">';
+
+	return (
+		markup.split(localNavStart)[1]?.split('</div><div class="mx-auto')[0] ?? ""
+	);
+}
+
 const missionState: BonusMissionState = {
 	exploredCount: 1,
 	totalLessons: 29,
@@ -39,12 +76,40 @@ const missionState: BonusMissionState = {
 		{
 			id: "CEO",
 			order: 1,
-			lessons: [],
+			lessons: [
+				{
+					lessonKey: "start-with-the-problem",
+					routeSegment: "start-with-the-problem",
+					id: "1.1",
+					displayLabel: "1.1",
+					title: "Start With the Problem",
+					shortTitle: "Problem",
+					block: "CEO",
+					order: 1,
+					status: "opened",
+					isImplemented: true,
+					artifactLabel: "Problem set",
+				},
+			],
 		},
 		{
 			id: "DESIGN",
 			order: 2,
-			lessons: [],
+			lessons: [
+				{
+					lessonKey: "find-references-first",
+					routeSegment: "find-references-first",
+					id: "2.2",
+					displayLabel: "2.2",
+					title: "Find References First",
+					shortTitle: "References",
+					block: "DESIGN",
+					order: 1,
+					status: "available",
+					isImplemented: true,
+					artifactLabel: "Reference set",
+				},
+			],
 		},
 		{
 			id: "BUILD",
@@ -81,7 +146,21 @@ const missionState: BonusMissionState = {
 		{
 			id: "SHIP",
 			order: 4,
-			lessons: [],
+			lessons: [
+				{
+					lessonKey: "product-review",
+					routeSegment: "product-review",
+					id: "4.0",
+					displayLabel: "4.0",
+					title: "Product Review",
+					shortTitle: "Review",
+					block: "SHIP",
+					order: 1,
+					status: "available",
+					isImplemented: true,
+					artifactLabel: "Launch review",
+				},
+			],
 		},
 	],
 };
@@ -90,6 +169,7 @@ describe("BonusLessonPage", () => {
 	it("renders the watch shell without the old workbench", () => {
 		const markup = renderToStaticMarkup(
 			<BonusLessonPage
+				initialStageStatuses={packetStageStatuses}
 				lessonKey="build-kickoff"
 				missionState={missionState}
 				postReviewTargets={{
@@ -108,6 +188,16 @@ describe("BonusLessonPage", () => {
 		);
 		expect(markup).toContain("Build Kickoff");
 		expect(markup).toContain("Lesson Map");
+		expect(markup).toContain('data-local-nav-kind="workspace"');
+		expect(markup).toContain("Build Lessons");
+		expect(markup).toContain("3.0");
+		expect(markup).toContain("Iterate");
+		const localNavMarkup = getWorkspaceLocalNavMarkup(markup);
+		expect(localNavMarkup).toContain("Build Lessons");
+		expect(localNavMarkup).toContain("Kickoff");
+		expect(localNavMarkup).toContain("Iterate");
+		expect(localNavMarkup).not.toContain("3.0");
+		expect(localNavMarkup).not.toContain("3.1");
 		expect(markup).not.toContain("Workbench");
 	});
 
@@ -123,6 +213,7 @@ describe("BonusLessonPage", () => {
 	it("keeps static prompt cards on the bonus lesson surface", () => {
 		const markup = renderToStaticMarkup(
 			<BonusLessonPage
+				initialStageStatuses={packetStageStatuses}
 				lessonKey="light-research-not-a-thesis"
 				missionState={missionState}
 				postReviewTargets={{
@@ -138,5 +229,36 @@ describe("BonusLessonPage", () => {
 		expect(markup).toContain("Light Research, Not a Thesis");
 		expect(markup).toContain("Light research prompt");
 		expect(markup).toContain("Copy prompt");
+		expect(markup).toContain("Product");
+		expect(markup).toContain("Design");
+		const localNavMarkup = getWorkspaceLocalNavMarkup(markup);
+		expect(localNavMarkup).toContain("Product");
+		expect(localNavMarkup).toContain("Design");
+		expect(localNavMarkup).toContain("Problem");
+		expect(localNavMarkup).toContain("References");
+		expect(localNavMarkup).not.toContain("1.1");
+		expect(localNavMarkup).not.toContain("2.2");
+	});
+
+	it("hides the footer skill rail on desktop while keeping the mobile fallback markup", () => {
+		const markup = renderToStaticMarkup(
+			<AppShellFooterRail
+				viewportMode="app"
+				activeBlock={{
+					label: "Launch Lessons",
+					lessons: missionState.blocks[3].lessons,
+				}}
+				navigationLessons={missionState.blocks.flatMap(
+					(block) => block.lessons,
+				)}
+				currentLessonId="product-review"
+				completionCue={null}
+			/>,
+		);
+
+		expect(markup).toContain("Launch Lessons");
+		expect(markup).toContain(
+			'class="sticky bottom-0 z-10 shrink-0 border-t bg-background/95 backdrop-blur xl:hidden"',
+		);
 	});
 });

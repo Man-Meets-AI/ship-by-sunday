@@ -2,6 +2,10 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ThemeProvider } from "next-themes";
 import { describe, expect, it, vi } from "vitest";
+import {
+	createCompleteProjectDefinition,
+	deriveStageStatus,
+} from "@packet-compiler";
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -44,18 +48,19 @@ vi.mock("@clerk/nextjs", () => ({
 globalThis.React = React;
 
 import { AppShell } from "@/features/course/shared/components/app-shell";
-import type { AppShellPrimaryNav } from "@/features/course/shared/components/app-shell/app-shell-props";
+import type {
+	AppShellLocalNav,
+	AppShellPrimaryNav,
+} from "@/features/course/shared/components/app-shell/app-shell-props";
+
+const packetStageStatuses = deriveStageStatus(
+	createCompleteProjectDefinition().facts,
+).stageStatuses;
 
 const primaryNav: AppShellPrimaryNav = {
-	kind: "workspace",
-	items: [
-		{
-			kind: "link",
-			id: "review",
-			label: "Review",
-			href: "/review",
-			state: "available",
-		},
+	kind: "combined",
+	stageStatuses: packetStageStatuses,
+	postReviewItems: [
 		{
 			kind: "link",
 			id: "build",
@@ -102,6 +107,12 @@ const primaryNav: AppShellPrimaryNav = {
 	],
 };
 
+const localNav: AppShellLocalNav = {
+	kind: "packet",
+	compact: <div>Compact packet rail</div>,
+	desktop: <div>Desktop packet rail</div>,
+};
+
 function renderAppShell(element: React.ReactElement) {
 	return renderToStaticMarkup(
 		<ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
@@ -116,6 +127,7 @@ describe("AppShell", () => {
 			<AppShell
 				showSkillRail={false}
 				primaryNav={primaryNav}
+				localNav={localNav}
 				progressSummary={{ progressCount: 9, totalLessons: 28 }}
 			>
 				<div>Body</div>
@@ -127,6 +139,15 @@ describe("AppShell", () => {
 		expect(markup).toContain("Launch Lessons");
 		expect(markup).toContain("Bonus");
 		expect(markup).toContain("9/28");
+		expect(markup).toContain('data-shell-local-nav-kind="packet"');
+		expect(markup).toContain("Compact packet rail");
+		expect(markup).toContain("Desktop packet rail");
+		expect(markup).toContain(
+			"hidden min-h-0 min-w-0 xl:sticky xl:top-3 xl:block xl:self-start xl:border-r xl:border-border/60 xl:pr-6",
+		);
+		expect(markup).not.toContain("xl:rounded-xl");
+		expect(markup).not.toContain("xl:bg-background");
+		expect(markup).not.toContain("xl:p-4");
 		expect(markup).not.toContain("Open CEO");
 	});
 
@@ -165,5 +186,6 @@ describe("AppShell", () => {
 
 		expect(markup).not.toContain("9/28");
 		expect(markup).not.toContain("Build Lessons");
+		expect(markup).not.toContain("Desktop packet rail");
 	});
 });

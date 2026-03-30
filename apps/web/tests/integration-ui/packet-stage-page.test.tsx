@@ -64,6 +64,8 @@ vi.mock("convex/react", () => ({
 vi.mock("@/features/course/shared/components/app-shell", async () => {
 	const { PacketStageNav } =
 		await import("@/features/packet-flow/components/packet-stage-nav");
+	const { WorkspacePrimaryNav } =
+		await import("@/features/workspace-navigation/components/workspace-primary-nav");
 
 	return {
 		AppShell: ({
@@ -71,40 +73,52 @@ vi.mock("@/features/course/shared/components/app-shell", async () => {
 			subtitle,
 			children,
 			primaryNav,
+			localNav,
 		}: {
 			title: string;
 			subtitle?: string;
 			children: React.ReactNode;
 			primaryNav?: {
-				kind: "packet";
-				currentStageId:
+				kind: "combined";
+				currentPacketStageId?:
 					| "start"
 					| "product"
 					| "design"
 					| "marketing"
 					| "build-plan"
 					| "review";
-				activeStepId?: string;
 				stageStatuses: PacketWorkspaceState["stageStatuses"];
+				postReviewItems: Parameters<typeof WorkspacePrimaryNav>[0]["items"];
 				onLinkNavigate?: (
 					event: { preventDefault: () => void },
 					href: string,
 				) => void;
 				onNavigate?: (href: string) => void;
 			};
+			localNav?: {
+				kind: "packet" | "review" | "workspace";
+				compact?: React.ReactNode;
+				desktop?: React.ReactNode;
+			};
 		}) => (
 			<div>
 				<h1>{title}</h1>
 				{subtitle ? <p>{subtitle}</p> : null}
-				{primaryNav?.kind === "packet" ? (
-					<PacketStageNav
-						currentStageId={primaryNav.currentStageId}
-						activeStepId={primaryNav.activeStepId}
-						stageStatuses={primaryNav.stageStatuses}
-						onLinkNavigate={primaryNav.onLinkNavigate}
-						onNavigate={primaryNav.onNavigate}
-					/>
+				{primaryNav ? (
+					<div>
+						<PacketStageNav
+							currentStageId={primaryNav.currentPacketStageId}
+							stageStatuses={primaryNav.stageStatuses}
+							onLinkNavigate={primaryNav.onLinkNavigate}
+							onNavigate={primaryNav.onNavigate}
+						/>
+						<WorkspacePrimaryNav items={primaryNav.postReviewItems} />
+					</div>
 				) : null}
+				<div data-testid="packet-local-nav-compact">{localNav?.compact}</div>
+				<div data-testid="packet-local-nav-desktop" hidden>
+					{localNav?.desktop}
+				</div>
 				{children}
 			</div>
 		),
@@ -306,7 +320,7 @@ describe("PacketStagePage", () => {
 		);
 	});
 
-	it("lets users change packet pages from the within-stage navigation control", async () => {
+	it("places the packet rail into the shell localNav slot and keeps the compact selector available", async () => {
 		const user = userEvent.setup();
 		const workspaceState = createWorkspaceState();
 
@@ -318,6 +332,9 @@ describe("PacketStagePage", () => {
 			/>,
 		);
 
+		expect(screen.getByTestId("packet-local-nav-compact")).toBeTruthy();
+		expect(screen.getByTestId("packet-local-nav-desktop")).toBeTruthy();
+		expect(screen.getByLabelText("Page")).toBeTruthy();
 		expect(screen.queryByText("QUEST")).toBeNull();
 		await user.selectOptions(screen.getByLabelText("Page"), "problem");
 
@@ -354,7 +371,7 @@ describe("PacketStagePage", () => {
 		expect((productNameField as HTMLInputElement).value).toBe("Ship by Sunday");
 	});
 
-	it("opens a leave warning for dirty dropdown step links and keeps the draft on Stay", async () => {
+	it("opens a leave warning for dirty packet pager links and keeps the draft on Stay", async () => {
 		const user = userEvent.setup();
 		const workspaceState = createWorkspaceState({
 			product_name: undefined,
@@ -373,8 +390,7 @@ describe("PacketStagePage", () => {
 
 		const productNameField = screen.getByLabelText("What's the name?");
 		await user.type(productNameField, "Ship by Sunday");
-		await user.click(screen.getByRole("button", { name: "Product" }));
-		await user.click(await screen.findByRole("link", { name: /Problem/i }));
+		await user.click(screen.getByRole("link", { name: "Next packet page" }));
 
 		expect(pushMock).not.toHaveBeenCalled();
 		expect(replaceMock).not.toHaveBeenCalled();
@@ -406,7 +422,7 @@ describe("PacketStagePage", () => {
 			screen.getByLabelText("What's the name?"),
 			"Ship by Sunday",
 		);
-		await user.selectOptions(screen.getByLabelText("Page"), "problem");
+		await user.click(screen.getByRole("link", { name: "Next packet page" }));
 
 		expect(pushMock).not.toHaveBeenCalled();
 		expect(screen.getByText("Leave this packet page?")).toBeTruthy();

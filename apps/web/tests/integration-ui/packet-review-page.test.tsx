@@ -22,14 +22,21 @@ vi.mock("@/features/course/shared/components/app-shell", () => ({
 		title,
 		subtitle,
 		children,
+		localNav,
 	}: {
 		title: string;
 		subtitle?: string;
 		children: ReactNode;
+		localNav?: { kind: string; desktop: ReactNode };
 	}) => (
 		<div>
 			<h1>{title}</h1>
 			{subtitle ? <p>{subtitle}</p> : null}
+			{localNav ? (
+				<div data-testid="local-nav" data-local-nav-kind={localNav.kind}>
+					{localNav.desktop}
+				</div>
+			) : null}
 			{children}
 		</div>
 	),
@@ -189,6 +196,7 @@ describe("PacketReviewPage", () => {
 		expect(
 			screen.getByRole("heading", { name: "Review & Download" }),
 		).toBeTruthy();
+		expect(screen.queryByTestId("local-nav")).toBeNull();
 		const reviewVideo = screen.getByTestId("packet-review-video-player");
 		expect(screen.getByText("Your Ship Kit is ready.")).toBeTruthy();
 		expect(screen.getByText("Agent-Ready Packs")).toBeTruthy();
@@ -253,6 +261,24 @@ describe("PacketReviewPage", () => {
 			return undefined;
 		});
 		render(<PacketReviewPage initialWorkspaceState={createWorkspaceState()} />);
+
+		const localNav = screen.getByTestId("local-nav");
+		expect(localNav.getAttribute("data-local-nav-kind")).toBe("review");
+		expect(
+			screen.getByRole("link", { name: "Overview" }).getAttribute("href"),
+		).toBe("#review-overview");
+		expect(
+			screen.getByRole("link", { name: "Downloads" }).getAttribute("href"),
+		).toBe("#review-downloads");
+		expect(
+			screen.getByRole("link", { name: "Lesson Map" }).getAttribute("href"),
+		).toBe("/review?showLessonMap=1#review-lesson-map");
+		expect(
+			screen.getByRole("link", { name: "Build Lessons" }).getAttribute("href"),
+		).toBe("/lesson/iterate-the-product-with-ai");
+		expect(
+			screen.getByRole("link", { name: "Launch Lessons" }).getAttribute("href"),
+		).toBe("/lesson/product-review");
 
 		expect(
 			screen
