@@ -59,6 +59,7 @@ Break the workflow into discrete steps and tag each one with the OpenAI primitiv
 - Asset type:
 - Primary deliverable:
 - Required format:
+- Writing pass required: yes / no
 - Required citations:
 - Required human review:
 - Publication path:
@@ -67,6 +68,7 @@ Break the workflow into discrete steps and tag each one with the OpenAI primitiv
 ## 6. Approval and guardrails
 
 - Human review rule:
+- Rewrite-pass rule:
 - Current-facts verification rule:
 - Brand risk:
 - Legal / policy risk:

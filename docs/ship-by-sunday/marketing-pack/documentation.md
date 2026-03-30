@@ -52,6 +52,7 @@ What this workflow does, for whom, and why it exists.
 - Primary output:
 - Required sections:
 - Brand rules:
+- Writing pass required? yes / no
 - Citation rules:
 - Confidence / caveat rules:
 - Human review note required? yes / no
@@ -59,6 +60,7 @@ What this workflow does, for whom, and why it exists.
 
 ## 6. Approval and publishing
 - Who reviews:
+- Writing-pass location:
 - What requires review:
 - What is allowed without review:
 - Publish path:
@@ -90,6 +92,7 @@ What this workflow does, for whom, and why it exists.
 - asset type
 - output contract
 - review rule
+- writing-pass rule
 - approved claims used
 - source basis
 - success metric
