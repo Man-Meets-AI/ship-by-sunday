@@ -1,5 +1,6 @@
 "use client";
 
+import { LessonVideoPlayer } from "@/features/course/lesson/components/lesson-video-player";
 import {
 	Card,
 	CardContent,
@@ -7,13 +8,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import type { LessonContent } from "@/features/course/lesson/model/manifest";
-import {
-	isLessonVideoReady,
-	resolveLessonVideoUrl,
-} from "@/features/course/lesson/model/video";
-
-const BUNNY_IFRAME_ALLOW =
-	"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+import { isLessonVideoReady } from "@/features/course/lesson/model/video";
 
 const videoPlayerClass =
 	"aspect-video w-full rounded-none border-0 bg-black object-cover";
@@ -28,31 +23,13 @@ export function RoadmapInlineVideoCard({
 	const emptyBody = "The lesson video will appear here when it is attached.";
 
 	if (video && isLessonVideoReady(video)) {
-		const src = resolveLessonVideoUrl(video);
-		if (!src) {
-			return null;
-		}
-
 		return (
 			<Card className="gap-0 overflow-hidden p-0 py-0">
-				{video.provider === "bunny" ? (
-					<iframe
-						src={src}
-						title={video.title ?? "Lesson video"}
-						className={videoPlayerClass}
-						allow={BUNNY_IFRAME_ALLOW}
-						allowFullScreen
-						loading="lazy"
-						referrerPolicy="strict-origin-when-cross-origin"
-					/>
-				) : (
-					<video
-						controls
-						poster={video.posterUrl}
-						className={videoPlayerClass}
-						src={src}
-					/>
-				)}
+				<LessonVideoPlayer
+					video={video}
+					title={video.title}
+					className={videoPlayerClass}
+				/>
 			</Card>
 		);
 	}

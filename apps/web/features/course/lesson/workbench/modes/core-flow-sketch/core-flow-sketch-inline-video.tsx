@@ -12,10 +12,7 @@ import {
 } from "@/components/ui/card";
 import { LessonVideoPlayer } from "@/features/course/lesson/components/lesson-video-player";
 import type { LessonContent } from "@/features/course/lesson/model/manifest";
-import {
-	isLessonVideoReady,
-	resolveLessonVideoUrl,
-} from "@/features/course/lesson/model/video";
+import { isLessonVideoReady } from "@/features/course/lesson/model/video";
 
 const DEFAULT_HELPER =
 	"Play the lesson video, then work through the steps below.";
@@ -36,11 +33,8 @@ export function CoreFlowSketchInlineVideo({
 	const emptyTitle = "Video isn’t attached yet";
 	const emptyBody = "The lesson video will appear here when it is attached.";
 
-	const src =
-		video && isLessonVideoReady(video) ? resolveLessonVideoUrl(video) : null;
-
 	const inner =
-		video && isLessonVideoReady(video) && src ? (
+		video && isLessonVideoReady(video) ? (
 			<Card className="gap-0 overflow-hidden p-0 py-0">
 				<LessonVideoPlayer
 					video={video}

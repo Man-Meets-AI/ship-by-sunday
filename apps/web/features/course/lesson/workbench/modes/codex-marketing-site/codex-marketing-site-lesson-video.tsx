@@ -2,11 +2,8 @@
 
 import { Play } from "lucide-react";
 
+import { LessonVideoPlayer } from "@/features/course/lesson/components/lesson-video-player";
 import type { LessonContent } from "@/features/course/lesson/model/manifest";
-import {
-	isLessonVideoReady,
-	resolveLessonVideoUrl,
-} from "@/features/course/lesson/model/video";
 import { Badge } from "@/components/ui/badge";
 import {
 	Card,
@@ -15,9 +12,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-
-const BUNNY_IFRAME_ALLOW =
-	"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+import { isLessonVideoReady } from "@/features/course/lesson/model/video";
 
 const videoPlayerClass =
 	"aspect-video w-full rounded-none border-0 bg-black object-cover";
@@ -30,7 +25,7 @@ type CodexMarketingSiteLessonVideoProps = {
 	helperText?: string;
 };
 
-function LessonVideoPlayer({
+function MarketingSiteLessonVideoSurface({
 	coachContent,
 }: {
 	coachContent: LessonContent["coach"];
@@ -56,45 +51,15 @@ function LessonVideoPlayer({
 		);
 	}
 
-	const src = resolveLessonVideoUrl(video);
-	if (!src) {
-		return (
-			<Card className="gap-0 border border-dashed border-border bg-muted/30 py-0 ring-0">
-				<CardContent className="flex aspect-video min-h-[320px] flex-col items-center justify-center px-6 py-8 text-center">
-					<div className="max-w-md space-y-2">
-						<CardTitle className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
-							{emptyTitle}
-						</CardTitle>
-						<CardDescription className="text-sm leading-relaxed">
-							{emptyBody}
-						</CardDescription>
-					</div>
-				</CardContent>
-			</Card>
-		);
-	}
-
-	const inner =
-		video.provider === "bunny" ? (
-			<iframe
-				src={src}
-				title={video.title ?? "Lesson video"}
+	return (
+		<Card className="gap-0 overflow-hidden p-0 py-0">
+			<LessonVideoPlayer
+				video={video}
+				title={video.title}
 				className={videoPlayerClass}
-				allow={BUNNY_IFRAME_ALLOW}
-				allowFullScreen
-				loading="lazy"
-				referrerPolicy="strict-origin-when-cross-origin"
 			/>
-		) : (
-			<video
-				controls
-				poster={video.posterUrl}
-				className={videoPlayerClass}
-				src={src}
-			/>
-		);
-
-	return <Card className="gap-0 overflow-hidden p-0 py-0">{inner}</Card>;
+		</Card>
+	);
 }
 
 export function CodexMarketingSiteLessonVideo({
@@ -116,7 +81,7 @@ export function CodexMarketingSiteLessonVideo({
 				</div>
 			</CardHeader>
 			<CardContent className="p-4 sm:p-5 sm:pt-4">
-				<LessonVideoPlayer coachContent={coachContent} />
+				<MarketingSiteLessonVideoSurface coachContent={coachContent} />
 			</CardContent>
 		</Card>
 	);
