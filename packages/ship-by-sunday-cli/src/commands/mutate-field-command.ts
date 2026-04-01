@@ -12,14 +12,14 @@ import type { CliIo } from "../run-cli";
 
 export async function handleFieldMutationCommand({
 	io,
-	repoRootPath,
+	projectRootPath,
 	command,
 	selector,
 	value,
 	json,
 }: {
 	io: CliIo;
-	repoRootPath: string;
+	projectRootPath: string;
 	command: "set" | "unset" | "append" | "remove";
 	selector: string;
 	value?: string;
@@ -39,17 +39,17 @@ export async function handleFieldMutationCommand({
 
 	const nextDraft =
 		command === "set"
-			? await setDraftFieldValue(repoRootPath, field.fieldKey, value ?? "")
+			? await setDraftFieldValue(projectRootPath, field.fieldKey, value ?? "")
 			: command === "unset"
-				? await unsetDraftFieldValue(repoRootPath, field.fieldKey)
+				? await unsetDraftFieldValue(projectRootPath, field.fieldKey)
 				: command === "append"
 					? await appendDraftFieldValue(
-							repoRootPath,
+							projectRootPath,
 							field.fieldKey,
 							value ?? "",
 						)
 					: await removeDraftFieldValue(
-							repoRootPath,
+							projectRootPath,
 							field.fieldKey,
 							value ?? "",
 						);

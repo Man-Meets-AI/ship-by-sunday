@@ -5,9 +5,9 @@ import { createCliIo, createTemporaryRepoRoot } from "./test-helpers";
 
 describe("review command", () => {
 	it("prints human-readable readiness details and stable json output", async () => {
-		const repoRootPath = await createTemporaryRepoRoot();
+		const projectRootPath = await createTemporaryRepoRoot();
 		await saveLocalDraft(
-			repoRootPath,
+			projectRootPath,
 			createCanonicalProjectDefinitionDraft({
 				clerkUserId: "local-cli-user",
 				productKey: "ship-by-sunday",
@@ -21,7 +21,7 @@ describe("review command", () => {
 		const humanExitCode = await runCli({
 			argv: ["review"],
 			io: humanIo.io,
-			repoRootPath,
+			projectRootPath,
 		});
 		expect(humanExitCode).toBe(0);
 		expect(humanIo.stdout.join("\n")).toContain(
@@ -33,7 +33,7 @@ describe("review command", () => {
 		const jsonExitCode = await runCli({
 			argv: ["review", "--json"],
 			io: jsonIo.io,
-			repoRootPath,
+			projectRootPath,
 		});
 		expect(jsonExitCode).toBe(0);
 		expect(JSON.parse(jsonIo.stdout.join("\n"))).toMatchObject({

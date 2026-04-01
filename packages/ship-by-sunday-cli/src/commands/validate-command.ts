@@ -1,18 +1,18 @@
 import { deriveStageStatus } from "@manmeetsai/packet-compiler";
-import { ensureLocalDraft } from "../draft/draft-store";
+import { requireLocalDraft } from "../draft/draft-store";
 import type { CliIo } from "../run-cli";
 import { writeJsonResult } from "../cli-json";
 
 export async function handleValidateCommand({
 	io,
-	repoRootPath,
+	projectRootPath,
 	json,
 }: {
 	io: CliIo;
-	repoRootPath: string;
+	projectRootPath: string;
 	json: boolean;
 }) {
-	const draft = await ensureLocalDraft(repoRootPath);
+	const draft = await requireLocalDraft(projectRootPath);
 	const stageStatus = deriveStageStatus(draft.facts);
 	const result = {
 		reviewReady: stageStatus.packetReadiness.review.isReady,

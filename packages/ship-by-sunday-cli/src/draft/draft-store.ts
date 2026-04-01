@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, open, readFile, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import {
 	createCompleteProjectDefinition,
@@ -20,9 +20,21 @@ import {
 	SHIP_BY_SUNDAY_PRODUCT_KEY,
 	getDraftDirectoryPath,
 	getDraftFilePath,
+	getDraftTempFilePath,
 } from "./draft-paths";
+import { resolveProjectPath } from "../cli-paths";
 import type { CliFixtureName } from "../parse-cli-command";
 import { createCliError } from "../cli-errors";
+
+const LOCAL_DRAFT_MISSING_MESSAGE =
+	"No local Ship by Sunday draft exists yet. Run init, import, or resume first.";
+
+const DRAFT_PATH_ERROR_CODES = new Set([
+	"EACCES",
+	"EPERM",
+	"EISDIR",
+	"ENOTDIR",
+]);
 
 export type DraftMutation =
 	| {
@@ -45,18 +57,12 @@ export type DraftMutation =
 			value: string;
 	  };
 
-function resolveCliPath(repoRootPath: string, targetPath: string) {
-	return path.isAbsolute(targetPath)
-		? targetPath
-		: path.resolve(repoRootPath, targetPath);
-}
-
 async function readTextInputSource(
 	repoRootPath: string,
 	inputPath: string,
 ): Promise<string> {
 	if (inputPath !== "-") {
-		return readFile(resolveCliPath(repoRootPath, inputPath), "utf8");
+		return readFile(resolveProjectPath(repoRootPath, inputPath), "utf8");
 	}
 
 	let source = "";
@@ -89,10 +95,17 @@ export async function loadLocalDraft(
 	const draftFilePath = getDraftFilePath(repoRootPath);
 
 	try {
-		const draftSource = await readFile(draftFilePath, "utf8");
-		return parseCanonicalProjectDefinitionDraft(JSON.parse(draftSource));
+		return await readDraftFile(draftFilePath);
 	} catch (error) {
 		if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+			const recoveryDraftFilePath = getDraftTempFilePath(repoRootPath);
+			const recoveryDraft = await readRecoveredDraft(
+				recoveryDraftFilePath,
+				draftFilePath,
+			);
+			if (recoveryDraft) {
+				return recoveryDraft;
+			}
 			return null;
 		}
 
@@ -100,27 +113,126 @@ export async function loadLocalDraft(
 	}
 }
 
+async function readDraftFile(filePath: string) {
+	try {
+		const draftSource = await readFile(filePath, "utf8");
+		return parseDraftSource(filePath, draftSource);
+	} catch (error) {
+		if (isDraftPathError(error)) {
+			throw createDraftPathCliError(
+				`Could not read draft file ${filePath}. Remove the blocking path and try init or import again.`,
+			);
+		}
+
+		throw error;
+	}
+}
+
+function parseDraftSource(filePath: string, draftSource: string) {
+	try {
+		return parseCanonicalProjectDefinitionDraft(JSON.parse(draftSource));
+	} catch (error) {
+		if (error instanceof SyntaxError) {
+			throw createCliError(
+				"invalid_state",
+				`Draft file ${filePath} is invalid. Remove it and re-run init or import.`,
+				1,
+			);
+		}
+
+		throw createCliError(
+			"invalid_state",
+			`Draft file ${filePath} is invalid. Remove it and re-run init or import.`,
+			1,
+		);
+	}
+}
+
+async function readRecoveredDraft(
+	recoveryDraftFilePath: string,
+	draftFilePath: string,
+) {
+	try {
+		const draftSource = await readFile(recoveryDraftFilePath, "utf8");
+		const draft = parseDraftSource(recoveryDraftFilePath, draftSource);
+		await rename(recoveryDraftFilePath, draftFilePath);
+		return draft;
+	} catch (error) {
+		if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+			return null;
+		}
+
+		if (isDraftPathError(error)) {
+			throw createDraftPathCliError(
+				`Could not recover draft from ${recoveryDraftFilePath} into ${draftFilePath}. Remove the recovery file and try init or import again.`,
+			);
+		}
+
+		throw error;
+	}
+}
+
+export async function requireLocalDraft(repoRootPath: string) {
+	const draft = await loadLocalDraft(repoRootPath);
+	if (!draft) {
+		throw createCliError("missing_draft", LOCAL_DRAFT_MISSING_MESSAGE, 4);
+	}
+
+	return draft;
+}
+
 export async function saveLocalDraft(
 	repoRootPath: string,
 	draft: CanonicalProjectDefinitionDraft,
 ) {
-	await mkdir(getDraftDirectoryPath(repoRootPath), { recursive: true });
-	await writeFile(
-		getDraftFilePath(repoRootPath),
-		JSON.stringify(draft, null, 2),
+	const draftFilePath = getDraftFilePath(repoRootPath);
+	const temporaryDraftFilePath = getDraftTempFilePath(repoRootPath);
+	let fileHandle: Awaited<ReturnType<typeof open>> | null = null;
+	try {
+		await mkdir(getDraftDirectoryPath(repoRootPath), { recursive: true });
+		fileHandle = await open(temporaryDraftFilePath, "w");
+		await fileHandle.writeFile(JSON.stringify(draft, null, 2));
+		await fileHandle.sync();
+		await fileHandle.close();
+		await rename(temporaryDraftFilePath, draftFilePath);
+	} catch (error) {
+		if (fileHandle) {
+			await fileHandle.close().catch(() => {});
+		}
+		await rm(temporaryDraftFilePath, { force: true });
+		if (isDraftPathError(error)) {
+			throw createDraftPathCliError(
+				`Could not write draft file ${draftFilePath}. Remove the blocking path and try init or import again.`,
+			);
+		}
+		throw error;
+	}
+}
+
+function isDraftPathError(error: unknown) {
+	if (!(error instanceof Error) || !("code" in error)) {
+		return false;
+	}
+
+	return (
+		typeof error.code === "string" && DRAFT_PATH_ERROR_CODES.has(error.code)
 	);
 }
 
+function createDraftPathCliError(message: string) {
+	return createCliError("invalid_state", message, 1);
+}
+
 export async function initializeLocalDraft({
-	repoRootPath,
+	projectRootPath,
 	fixture,
 	force,
 }: {
-	repoRootPath: string;
+	projectRootPath: string;
 	fixture: CliFixtureName;
 	force: boolean;
 }) {
-	const existingDraft = await loadLocalDraft(repoRootPath);
+	const existingDraft = await loadLocalDraft(projectRootPath);
 	if (existingDraft && !force) {
 		throw createCliError(
 			"already_exists",
@@ -137,7 +249,7 @@ export async function initializeLocalDraft({
 					facts: createCompleteProjectDefinition().facts,
 				})
 			: createLocalDraftDefinition();
-	await saveLocalDraft(repoRootPath, nextDraft);
+	await saveLocalDraft(projectRootPath, nextDraft);
 	return nextDraft;
 }
 
@@ -329,21 +441,14 @@ export async function importDraftFromFile(
 }
 
 export async function readLocalDraftSource(repoRootPath: string) {
-	const draft = await loadLocalDraft(repoRootPath);
-	if (!draft) {
-		throw createCliError(
-			"missing_draft",
-			"No local Ship by Sunday draft exists yet.",
-			4,
-		);
-	}
+	const draft = await requireLocalDraft(repoRootPath);
 
 	return JSON.stringify(draft, null, 2);
 }
 
 export async function exportDraftToFile(repoRootPath: string, outPath: string) {
 	const draftSource = await readLocalDraftSource(repoRootPath);
-	const absoluteOutPath = resolveCliPath(repoRootPath, outPath);
+	const absoluteOutPath = resolveProjectPath(repoRootPath, outPath);
 	await mkdir(path.dirname(absoluteOutPath), { recursive: true });
 	await writeFile(absoluteOutPath, draftSource, {
 		flag: "wx",

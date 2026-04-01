@@ -3,20 +3,21 @@ import {
 	getPacketStageDefinition,
 } from "@manmeetsai/packet-compiler";
 import { getFieldDescriptor } from "../field-contract";
-import { ensureLocalDraft } from "../draft/draft-store";
+import { requireLocalDraft } from "../draft/draft-store";
 import type { CliIo } from "../run-cli";
 import { writeJsonResult } from "../cli-json";
+import { formatWorkspaceCommand } from "../command-surface";
 
 export async function handleNextCommand({
 	io,
-	repoRootPath,
+	projectRootPath,
 	json,
 }: {
 	io: CliIo;
-	repoRootPath: string;
+	projectRootPath: string;
 	json: boolean;
 }) {
-	const draft = await ensureLocalDraft(repoRootPath);
+	const draft = await requireLocalDraft(projectRootPath);
 	const stageStatus = deriveStageStatus(draft.facts);
 
 	if (stageStatus.firstIncompleteStageId === "review") {
@@ -24,7 +25,9 @@ export async function handleNextCommand({
 			nextStageId: "review",
 			nextStepId: null,
 			missingFields: [],
-			suggestedCommand: "bun run sbs generate --out ./tmp/sbs-cli-repo --json",
+			suggestedCommand: formatWorkspaceCommand(
+				"generate --out ./tmp/sbs-cli-repo --json",
+			),
 		};
 
 		if (json) {
@@ -64,7 +67,7 @@ export async function handleNextCommand({
 		nextStepId: nextStep?.id ?? null,
 		nextStepLabel: nextStep?.label ?? null,
 		missingFields: missingFieldDescriptors,
-		suggestedCommand: `bun run sbs stage ${nextStage.id}`,
+		suggestedCommand: formatWorkspaceCommand(`stage ${nextStage.id}`),
 	};
 
 	if (json) {

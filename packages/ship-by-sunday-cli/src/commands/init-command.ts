@@ -6,23 +6,23 @@ import type { CliIo } from "../run-cli";
 
 export async function handleInitCommand({
 	io,
-	repoRootPath,
+	projectRootPath,
 	fixture,
 	force,
 	json,
 }: {
 	io: CliIo;
-	repoRootPath: string;
+	projectRootPath: string;
 	fixture: CliFixtureName;
 	force: boolean;
 	json: boolean;
 }) {
 	const draft = await initializeLocalDraft({
-		repoRootPath,
+		projectRootPath,
 		fixture,
 		force,
 	});
-	const draftFilePath = getDraftFilePath(repoRootPath);
+	const draftFilePath = getDraftFilePath(projectRootPath);
 
 	if (json) {
 		writeJsonResult(io, "init", {

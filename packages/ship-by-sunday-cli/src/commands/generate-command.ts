@@ -10,25 +10,13 @@ import {
 	buildReviewDownloadZip,
 	materializeRepoSnapshot,
 } from "@manmeetsai/packet-compiler/server";
-import {
-	access,
-	mkdir,
-	mkdtemp,
-	rename,
-	rm,
-	writeFile,
-} from "node:fs/promises";
+import { mkdir, mkdtemp, rename, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createCliError } from "../cli-errors";
 import { writeJsonResult } from "../cli-json";
 import { loadLocalDraft } from "../draft/draft-store";
 import type { CliIo } from "../run-cli";
-
-function resolveCliPath(repoRootPath: string, targetPath: string) {
-	return path.isAbsolute(targetPath)
-		? targetPath
-		: path.resolve(repoRootPath, targetPath);
-}
+import { resolveProjectPath } from "../cli-paths";
 
 function assertReviewReady(draft: CanonicalProjectDefinitionDraft) {
 	const stageStatus = deriveStageStatus(draft.facts);
@@ -52,43 +40,48 @@ function toCompleteDefinition(draft: CanonicalProjectDefinitionDraft) {
 	});
 }
 
+type OutputPathKind = "missing" | "file" | "directory";
+
+async function getPathKind(filePath: string): Promise<OutputPathKind> {
+	try {
+		return (await stat(filePath)).isDirectory() ? "directory" : "file";
+	} catch (error) {
+		if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+			return "missing";
+		}
+
+		throw error;
+	}
+}
+
 async function writeRepoDirectory({
-	outPath,
+	outputContainerPath,
 	repoName,
 	files,
 }: {
-	outPath: string;
+	outputContainerPath: string;
 	repoName: string;
 	files: Awaited<ReturnType<typeof materializeRepoSnapshot>>;
 }) {
-	const absoluteOutPath = path.resolve(outPath);
-	await mkdir(path.dirname(absoluteOutPath), { recursive: true });
-	const temporaryOutPath = await mkdtemp(
-		path.join(path.dirname(absoluteOutPath), "ship-by-sunday-cli-"),
+	const finalRepoDirectoryPath = path.join(outputContainerPath, repoName);
+	await mkdir(outputContainerPath, { recursive: true });
+	const temporaryRepoDirectoryPath = await mkdtemp(
+		path.join(outputContainerPath, "ship-by-sunday-cli-"),
 	);
 
 	try {
 		for (const file of files) {
-			const targetFilePath = path.join(temporaryOutPath, repoName, file.path);
+			const targetFilePath = path.join(temporaryRepoDirectoryPath, file.path);
 			await mkdir(path.dirname(targetFilePath), { recursive: true });
 			await writeFile(targetFilePath, file.content);
 		}
-		await rename(temporaryOutPath, absoluteOutPath);
+		await rename(temporaryRepoDirectoryPath, finalRepoDirectoryPath);
 	} catch (error) {
-		await rm(temporaryOutPath, { recursive: true, force: true });
+		await rm(temporaryRepoDirectoryPath, { recursive: true, force: true });
 		throw error;
 	}
 
-	return absoluteOutPath;
-}
-
-async function outputPathExists(outPath: string) {
-	try {
-		await access(outPath);
-		return true;
-	} catch {
-		return false;
-	}
+	return finalRepoDirectoryPath;
 }
 
 function buildDryRunResult({
@@ -109,7 +102,7 @@ function buildDryRunResult({
 		mode: zip ? "zip" : "directory",
 		outputPath: zip
 			? absoluteOutPath
-			: `${absoluteOutPath}/${repoManifest.repoName}`,
+			: path.join(absoluteOutPath, repoManifest.repoName),
 		repoName: repoManifest.repoName,
 		force,
 	};
@@ -117,7 +110,7 @@ function buildDryRunResult({
 
 export async function handleGenerateCommand({
 	io,
-	repoRootPath,
+	projectRootPath,
 	outPath,
 	zip,
 	force,
@@ -125,15 +118,15 @@ export async function handleGenerateCommand({
 	dryRun,
 }: {
 	io: CliIo;
-	repoRootPath: string;
+	projectRootPath: string;
 	outPath: string;
 	zip: boolean;
 	force: boolean;
 	json: boolean;
 	dryRun: boolean;
 }) {
-	const absoluteOutPath = resolveCliPath(repoRootPath, outPath);
-	const draft = await loadLocalDraft(repoRootPath);
+	const absoluteOutPath = resolveProjectPath(projectRootPath, outPath);
+	const draft = await loadLocalDraft(projectRootPath);
 	if (!draft) {
 		if (dryRun) {
 			const dryRunNoDraftResult = {
@@ -213,13 +206,53 @@ export async function handleGenerateCommand({
 
 	assertReviewReady(draft);
 	const projectDefinition = toCompleteDefinition(draft);
+	const repoManifest = buildRepoGenerationManifest(projectDefinition);
+	const finalDirectoryPath = path.join(absoluteOutPath, repoManifest.repoName);
 
-	if (!force && (await outputPathExists(absoluteOutPath))) {
-		throw createCliError(
-			"already_exists",
-			`Output path ${absoluteOutPath} already exists. Re-run with --force to overwrite it.`,
-			3,
-		);
+	if (!zip) {
+		const containerKind = await getPathKind(absoluteOutPath);
+		if (containerKind === "file") {
+			throw createCliError(
+				"invalid_state",
+				`Output path ${absoluteOutPath} is a file. Use a directory path for directory generation.`,
+				1,
+			);
+		}
+	}
+
+	const targetPath = zip ? absoluteOutPath : finalDirectoryPath;
+	const targetPathKind = await getPathKind(targetPath);
+
+	if (zip) {
+		if (targetPathKind === "directory") {
+			throw createCliError(
+				"invalid_state",
+				`Output path ${targetPath} is a directory. Use a file path for zip generation.`,
+				1,
+			);
+		}
+		if (targetPathKind === "file" && !force) {
+			throw createCliError(
+				"already_exists",
+				`Output path ${targetPath} already exists. Re-run with --force to overwrite it.`,
+				3,
+			);
+		}
+	} else {
+		if (targetPathKind === "file") {
+			throw createCliError(
+				"invalid_state",
+				`Output path ${targetPath} is a file. Use a directory path for directory generation.`,
+				1,
+			);
+		}
+		if (targetPathKind === "directory" && !force) {
+			throw createCliError(
+				"already_exists",
+				`Output path ${targetPath} already exists. Re-run with --force to overwrite it.`,
+				3,
+			);
+		}
 	}
 
 	if (zip) {
@@ -232,7 +265,7 @@ export async function handleGenerateCommand({
 			writeJsonResult(io, "generate", {
 				mode: "zip",
 				outputPath: absoluteOutPath,
-				repoName: buildRepoGenerationManifest(projectDefinition).repoName,
+				repoName: repoManifest.repoName,
 			});
 			return 0;
 		}
@@ -240,24 +273,24 @@ export async function handleGenerateCommand({
 		return 0;
 	}
 
-	await rm(absoluteOutPath, { recursive: true, force: true });
+	if (targetPathKind === "directory") {
+		await rm(finalDirectoryPath, { recursive: true, force: true });
+	}
+
 	const repoFiles = await materializeRepoSnapshot(projectDefinition);
-	const repoManifest = buildRepoGenerationManifest(projectDefinition);
 	const outputDirectoryPath = await writeRepoDirectory({
-		outPath: absoluteOutPath,
+		outputContainerPath: absoluteOutPath,
 		repoName: repoManifest.repoName,
 		files: repoFiles,
 	});
 	if (json) {
 		writeJsonResult(io, "generate", {
 			mode: "directory",
-			outputPath: `${outputDirectoryPath}/${repoManifest.repoName}`,
+			outputPath: outputDirectoryPath,
 			repoName: repoManifest.repoName,
 		});
 		return 0;
 	}
-	io.write(
-		`Generated repo directory at ${outputDirectoryPath}/${repoManifest.repoName}`,
-	);
+	io.write(`Generated repo directory at ${outputDirectoryPath}`);
 	return 0;
 }

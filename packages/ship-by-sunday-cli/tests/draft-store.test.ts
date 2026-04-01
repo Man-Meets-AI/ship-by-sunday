@@ -1,4 +1,4 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import {
 	createCompleteProjectDefinition,
@@ -10,7 +10,11 @@ import {
 	saveLocalDraft,
 	loadLocalDraft,
 } from "../src/draft/draft-store";
-import { getDraftFilePath } from "../src/draft/draft-paths";
+import {
+	getDraftFilePath,
+	getDraftDirectoryPath,
+	getDraftTempFilePath,
+} from "../src/draft/draft-paths";
 import { createTemporaryRepoRoot } from "./test-helpers";
 
 describe("draft store", () => {
@@ -79,5 +83,76 @@ describe("draft store", () => {
 			"Existing draft",
 		);
 		expect(getDraftFilePath(repoRootPath)).toContain(".ship-by-sunday");
+	});
+
+	it("recovers a valid temp draft when no final draft exists", async () => {
+		const repoRootPath = await createTemporaryRepoRoot();
+		await mkdir(getDraftDirectoryPath(repoRootPath), { recursive: true });
+		const draft = createCanonicalProjectDefinitionDraft({
+			clerkUserId: "local-cli-user",
+			productKey: "ship-by-sunday",
+			facts: {
+				product_name: "Recovered from temp",
+			},
+		});
+		await writeFile(
+			getDraftTempFilePath(repoRootPath),
+			JSON.stringify(draft, null, 2),
+		);
+
+		const loadedDraft = await loadLocalDraft(repoRootPath);
+
+		expect(loadedDraft?.facts.product_name).toBe("Recovered from temp");
+		await expect(
+			readFile(getDraftFilePath(repoRootPath), "utf8"),
+		).resolves.toContain("Recovered from temp");
+	});
+
+	it("prefers the final draft when both final and temp files exist", async () => {
+		const repoRootPath = await createTemporaryRepoRoot();
+		await mkdir(getDraftDirectoryPath(repoRootPath), { recursive: true });
+		const finalDraft = createCanonicalProjectDefinitionDraft({
+			clerkUserId: "local-cli-user",
+			productKey: "ship-by-sunday",
+			facts: {
+				product_name: "Final draft wins",
+			},
+		});
+		const tempDraft = createCanonicalProjectDefinitionDraft({
+			clerkUserId: "local-cli-user",
+			productKey: "ship-by-sunday",
+			facts: {
+				product_name: "Temporary draft loses",
+			},
+		});
+
+		await writeFile(
+			getDraftFilePath(repoRootPath),
+			JSON.stringify(finalDraft, null, 2),
+		);
+		await writeFile(
+			getDraftTempFilePath(repoRootPath),
+			JSON.stringify(tempDraft, null, 2),
+		);
+
+		const loadedDraft = await loadLocalDraft(repoRootPath);
+
+		expect(loadedDraft?.facts.product_name).toBe("Final draft wins");
+		expect(
+			JSON.parse(await readFile(getDraftFilePath(repoRootPath), "utf8")).facts
+				.product_name,
+		).toBe("Final draft wins");
+	});
+
+	it("fails with a stable invalid_state when a leftover temp draft is corrupt", async () => {
+		const repoRootPath = await createTemporaryRepoRoot();
+		await mkdir(getDraftDirectoryPath(repoRootPath), { recursive: true });
+		const tempFilePath = getDraftTempFilePath(repoRootPath);
+		await writeFile(tempFilePath, "{ not valid json");
+
+		await expect(loadLocalDraft(repoRootPath)).rejects.toMatchObject({
+			code: "invalid_state",
+			message: expect.stringContaining(tempFilePath),
+		});
 	});
 });

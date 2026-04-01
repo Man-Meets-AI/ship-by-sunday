@@ -4,16 +4,16 @@ import type { CliIo } from "../run-cli";
 
 export async function handleImportCommand({
 	io,
-	repoRootPath,
+	projectRootPath,
 	filePath,
 	json,
 }: {
 	io: CliIo;
-	repoRootPath: string;
+	projectRootPath: string;
 	filePath: string;
 	json: boolean;
 }) {
-	const draft = await importDraftFromFile(repoRootPath, filePath);
+	const draft = await importDraftFromFile(projectRootPath, filePath);
 	if (json) {
 		writeJsonResult(io, "import", {
 			filePath,
