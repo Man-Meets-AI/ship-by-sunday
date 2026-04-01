@@ -325,20 +325,22 @@ function runConvexInternalCommand({
 	args: Record<string, string>;
 	env: NodeJS.ProcessEnv;
 }) {
+	const commandArgs = [convexBinPath, "run"];
+	if (shouldUseProductionConvexRun(env)) {
+		commandArgs.push("--prod");
+	}
+	commandArgs.push(functionName, JSON.stringify(args));
+
 	return new Promise<{
 		code: number;
 		stdout: string;
 		stderr: string;
 	}>((resolve) => {
-		const child = spawn(
-			process.execPath,
-			[convexBinPath, "run", functionName, JSON.stringify(args)],
-			{
-				cwd: appsWebDirectory,
-				env,
-				stdio: ["ignore", "pipe", "pipe"],
-			},
-		);
+		const child = spawn(process.execPath, commandArgs, {
+			cwd: appsWebDirectory,
+			env,
+			stdio: ["ignore", "pipe", "pipe"],
+		});
 
 		let stdout = "";
 		let stderr = "";
@@ -357,4 +359,16 @@ function runConvexInternalCommand({
 			});
 		});
 	});
+}
+
+function shouldUseProductionConvexRun(env: NodeJS.ProcessEnv) {
+	if (env.CONVEX_DEPLOYMENT) {
+		return false;
+	}
+
+	if (env.QA_ENV_FILE?.endsWith(".env.production")) {
+		return true;
+	}
+
+	return env.PLAYWRIGHT_BASE_URL === "https://www.man-meets-ai.com";
 }
