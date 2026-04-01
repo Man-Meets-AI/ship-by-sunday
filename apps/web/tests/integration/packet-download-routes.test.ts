@@ -44,8 +44,8 @@ describe("packet download routes", () => {
 
 		expect(response.status).toBe(200);
 		expect(response.headers.get("content-type")).toBe("application/zip");
-		expect(response.headers.get("content-disposition")).toContain(
-			"starter-snapshot.zip",
+		expect(response.headers.get("content-disposition")).toBe(
+			'attachment; filename="starter-snapshot.zip"',
 		);
 		expect(new Uint8Array(await response.arrayBuffer())).toHaveLength(3);
 		expect(fetchMutationMock).toHaveBeenCalledTimes(1);
