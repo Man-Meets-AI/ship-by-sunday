@@ -193,33 +193,28 @@ export const processStripeWebhook = internalAction({
 				};
 			}
 
-			let saveResult: StripeWebhookPendingClaimSaveResult;
-			try {
-				saveResult = (await ctx.runMutation(
-					internal.checkoutClaims.upsertPendingCheckoutClaimFromStripe,
-					{
-						stripeCheckoutSessionId: session.id,
-						checkoutEmail,
-						courseSlug: sessionCourseSlug,
-						paymentStatus:
-							session.payment_status === "no_payment_required"
-								? "no_payment_required"
-								: "paid",
-						stripeCustomerId:
-							typeof session.customer === "string"
-								? session.customer
-								: undefined,
-						stripePaymentIntentId:
-							typeof session.payment_intent === "string"
-								? session.payment_intent
-								: undefined,
-						stripeEventId: event.id,
-						stripeEventType: event.type,
-					},
-				)) as StripeWebhookPendingClaimSaveResult;
-			} catch (error) {
-				throw error;
-			}
+			const saveResult = (await ctx.runMutation(
+				internal.checkoutClaims.upsertPendingCheckoutClaimFromStripe,
+				{
+					stripeCheckoutSessionId: session.id,
+					checkoutEmail,
+					courseSlug: sessionCourseSlug,
+					paymentStatus:
+						session.payment_status === "no_payment_required"
+							? "no_payment_required"
+							: "paid",
+					stripeCustomerId:
+						typeof session.customer === "string"
+							? session.customer
+							: undefined,
+					stripePaymentIntentId:
+						typeof session.payment_intent === "string"
+							? session.payment_intent
+							: undefined,
+					stripeEventId: event.id,
+					stripeEventType: event.type,
+				},
+			)) as StripeWebhookPendingClaimSaveResult;
 
 			return {
 				kind: "pending_claim_saved" as const,
