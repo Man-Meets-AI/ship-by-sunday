@@ -13,6 +13,7 @@ Make sure all of this is true:
 
 - the release candidate is already integrated on `dev`
 - the `dev -> main` release PR is the thing that changes production
+- feature branches have already proven code correctness in preview-only checks
 - the marketing page is clear enough to buy from
 - auth works in the real deployed environment
 - checkout returns to the deployed `/checkout/success`
@@ -29,17 +30,17 @@ Make sure all of this is true:
 5. Confirm Vercel creates the production web deploy from `main`.
 6. Confirm GitHub Actions runs `Convex Production Deploy` for the same `main` merge.
 7. Register or verify the live Stripe webhook endpoint.
-8. Run a safe billing-handoff pass in the deployed environment.
+8. Run a safe billing-handoff pass in the deployed staging `dev` or production environment.
 9. Confirm product-access grant happens in the deployed environment, not just locally.
 10. Confirm the buyer reaches the protected product after payment.
 
-For this repo, the safest production billing proof is a live no-cost Checkout run using a restricted `100% off` promotion code:
+For this repo, the safest staging or production billing proof is a live no-cost Checkout run using a restricted `100% off` promotion code:
 
 - single-use when possible
 - short expiry
 - restricted to the QA customer if possible
 
-That verifies the part we actually care about in production:
+That verifies the part we actually care about in staging or production:
 
 - Checkout Session creation
 - hosted Checkout completion
@@ -66,7 +67,7 @@ After those are correct, run one fresh live no-cost order and verify it auto-for
 - This repo currently assumes the buyer completes checkout in the same signed-in browser context used to read access state.
 - If you change auth apps, webhook secrets, or Stripe accounts, re-verify the handoff instead of assuming it still works.
 - Hotfixes are allowed to merge into `main`, but they must come from a hotfix branch and be merged or cherry-picked back into `dev` immediately afterward.
-- Dedicated Convex-backed preview environments are not part of this release workflow yet. Non-`main` Vercel branches stay frontend previews only.
+- Dedicated Convex-backed preview environments are not part of this release workflow yet. Non-`dev` and non-`main` Vercel branches stay frontend previews only.
 - Do not promise a support or access path in public copy unless it actually exists.
 
 ## What success looks like

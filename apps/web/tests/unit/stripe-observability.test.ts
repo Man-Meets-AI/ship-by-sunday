@@ -68,8 +68,8 @@ describe("stripe observability helpers", () => {
 		const { buildStripeWebhookResultIncident } =
 			await import("@/features/observability/server/source-adapters/stripe-failure");
 
-		const missingUserIncident = buildStripeWebhookResultIncident({
-			kind: "missing_clerk_user",
+		const missingCheckoutEmailIncident = buildStripeWebhookResultIncident({
+			kind: "missing_checkout_email",
 			eventId: "evt_123",
 			eventType: "checkout.session.completed",
 			sessionId: "cs_123",
@@ -85,8 +85,8 @@ describe("stripe observability helpers", () => {
 			message: "convex unavailable",
 		});
 
-		expect(missingUserIncident).toMatchObject({
-			code: "stripe_webhook_missing_clerk_user",
+		expect(missingCheckoutEmailIncident).toMatchObject({
+			code: "stripe_webhook_missing_checkout_email",
 			externalEventId: "evt_123",
 			nativeUrl: "https://dashboard.stripe.com/test/events/evt_123",
 		});

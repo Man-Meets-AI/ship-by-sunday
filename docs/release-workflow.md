@@ -1,6 +1,6 @@
 # Production Release Workflow
 
-This repository ships through short-lived pull request branches into `main`. There is no long-lived integration branch. Production changes happen when a reviewed feature branch merges into `main`.
+This repository ships through short-lived feature branches into `dev`, then promotes the reviewed `dev` release candidate into `main`. `dev` is the integrated staging branch, `main` is production only, and feature branches are preview-only until they merge into `dev`.
 
 ## What owns production
 
@@ -8,20 +8,23 @@ This repository ships through short-lived pull request branches into `main`. The
 - Vercel owns production web deploys for project `mma-shipbysunday`.
 - Convex owns production backend state for deployment `helpful-meadowlark-297`.
 
-Production is healthy only when all three systems agree on the same release candidate from `main`.
+Production is healthy only when all three systems agree on the same release candidate from `main`, and staging is healthy when `dev` is the integrated proof point for auth, Convex, and Stripe test-mode billing.
 
 ## Branch model
 
-- Feature work starts on short-lived branches created from the current `main`.
-- `main` is both the GitHub default branch and the production release branch.
+- Feature work starts on short-lived branches created from the current `dev`.
+- Feature branches are preview-only until they merge into `dev`.
+- `dev` is the integrated staging branch and the normal merge target for feature work.
+- `main` is the production release branch.
 - Vercel production tracks `main`.
 - `.github/workflows/convex-production-deploy.yml` deploys Convex production from `main`.
-- Hotfixes also branch from `main` and merge back into `main`.
+- Hotfixes branch from `main`, merge into `main` for the emergency release, and then merge or cherry-pick back into `dev`.
 
 ## Required standing configuration
 
-- GitHub branch protection is enabled on `main`.
-- `main` requires pull requests and the `static`, `integration`, and `browser-smoke` checks.
+- GitHub branch protection is enabled on `dev` and `main`.
+- `dev` requires pull requests, the code-centric CI checks, and the `Dev Staging Proof` workflow on pushes to `dev`.
+- `main` requires pull requests and the `static`, `integration`, `browser-smoke`, and `cli` checks.
 - Vercel project `mma-shipbysunday` is linked to `ParkerRex/mma-shipbysunday` and uses `main` as its production branch.
 - Root `bunfig.toml` forces `install.linker = "hoisted"` so GitHub Actions and Vercel installs do not use Bun's isolated symlink-heavy workspace layout during builds and serverless packaging.
 - `apps/web/vercel.json` overrides the Vercel install step to remove cached `node_modules` trees before `bun install --frozen-lockfile`, because switching linkers alone does not rewrite a restored isolated-install cache.
@@ -37,20 +40,26 @@ Create that secret from the Convex dashboard for the production deployment:
 
 ## Standard release
 
-1. Branch from the current `main`.
+1. Branch from the current `dev`.
 2. Keep the diff scoped and split the work into logical conventional commits.
 3. From the repository root, run the narrowest relevant checks first, then broaden as needed. Use `bun run check` when the slice justifies a full pass.
-4. Open a pull request from the feature branch into `main`.
-5. Run the default multi-agent PR review against `main`:
+4. Open a pull request from the feature branch into `dev`.
+5. Run the default multi-agent PR review against `dev`:
+
+   `Review this branch against dev. Have pr_explorer map the affected code paths, reviewer find real risks, and docs_researcher verify the framework APIs that the patch relies on.`
+
+6. Merge the feature branch into `dev` only after the required checks for the staging candidate are green.
+7. Treat `dev` as the release candidate branch. When the integrated staging candidate is ready, open the `dev -> main` release pull request.
+8. Run the default multi-agent PR review against `main` for the release pull request:
 
    `Review this branch against main. Have pr_explorer map the affected code paths, reviewer find real risks, and docs_researcher verify the framework APIs that the patch relies on.`
 
-6. Fix substantive findings and merge only after `static`, `integration`, and `browser-smoke` are green.
-7. Watch Vercel create the production web deploy from the merged `main` commit.
-8. Watch GitHub Actions run `Convex Production Deploy` for the same merged `main` commit.
-9. Run the `default_ship` QA pack against production with matching production Clerk env values when the change warrants post-deploy proof.
-10. When you need billing confidence on production, use the documented live no-cost Checkout proof instead of a real card charge.
-11. Delete the local and remote feature branch after the release settles.
+9. Fix substantive findings and merge the `dev -> main` release PR only after `static`, `integration`, `browser-smoke`, and `cli` are green.
+10. Watch Vercel create the production web deploy from the merged `main` commit.
+11. Watch GitHub Actions run `Convex Production Deploy` for the same merged `main` commit.
+12. Run the `default_ship` QA pack against production with matching production Clerk env values when the change warrants post-deploy proof.
+13. When you need billing confidence on production, use the documented live no-cost Checkout proof instead of a real card charge.
+14. Delete the local and remote feature branch after the release settles.
 
 Useful verification commands:
 
@@ -62,18 +71,18 @@ cd apps/web && bunx convex logs --prod --history 20
 PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run qa:run-pack -- --pack=default_ship
 ```
 
-For production billing verification in this repo:
+For staging or production billing verification in this repo:
 
 - prefer a restricted live `100% off` promotion code
 - verify Stripe points at the Convex `.convex.site` webhook URL, not the app origin
-- verify Convex production has both `STRIPE_WEBHOOK_SECRET` and `STRIPE_SECRET_KEY`
+- verify the target Convex deployment has both `STRIPE_WEBHOOK_SECRET` and `STRIPE_SECRET_KEY`
 - confirm the buyer auto-forwards from `/checkout/success` into `/start`
 
-For that production QA command:
+For the matching QA command:
 
 - `qa/personas.local.json` supplies the QA account emails and passwords
-- `QA_ENV_FILE` selects the production Clerk and Convex env values
-- `PLAYWRIGHT_BASE_URL` points the browser pack at production
+- `QA_ENV_FILE` selects the Clerk and Convex env values for the target environment
+- `PLAYWRIGHT_BASE_URL` points the browser pack at the target environment
 
 If persona prep fails on a Clerk publishable-key mismatch, fix env parity before spending time on packet-route debugging.
 
@@ -108,8 +117,9 @@ Use the hotfix path only for production emergencies.
 2. Open a pull request into `main`.
 3. Run the same multi-agent PR review used for ordinary releases.
 4. Merge after the required checks pass.
-5. Watch the production web and Convex deploys settle before deleting the branch.
+5. Merge or cherry-pick the hotfix back into `dev` immediately after release.
+6. Watch the production web and Convex deploys settle before deleting the branch.
 
 ## Explicit non-goal
 
-This workflow does not set up dedicated Convex-backed preview environments for non-`main` Vercel branches. Preview web deployments can still exist, but backend preview isolation is a separate initiative.
+This workflow does not set up dedicated Convex-backed preview environments for feature branches. Preview web deployments can still exist, but backend preview isolation is a separate initiative.

@@ -1,7 +1,7 @@
 ---
 summary: Move the repository to a deliberate branch-and-environment model where feature branches are preview-only, `dev` is the integrated staging environment with real auth, Convex, and Stripe test-mode proof, and `main` remains the production release branch.
 read_when: Open this when changing branch strategy, GitHub Actions, release workflow, QA pack ownership, or pre-commit / local quality gates for Ship by Sunday.
-plan_status: not_done
+plan_status: done
 ---
 
 # Make Dev The Full Integration Staging Branch
@@ -17,11 +17,11 @@ This repository currently mixes two conflicting operating models. Some docs say 
 ## Progress
 
 - [x] 2026-03-31 20:40 EDT: Reviewed the current CI, release docs, ship-live docs, and QA control-plane files. Confirmed the repo is internally inconsistent today: `docs/release-workflow.md` says there is no long-lived integration branch, while `apps/web/content/docs/ship-live.mdx` already assumes `dev` is the integrated release candidate branch.
-- [ ] Resolve the branch-and-environment source of truth in docs and decision log.
-- [ ] Define the pre-commit scope explicitly so Husky or any local hook remains fast and side-effect free.
-- [ ] Define the CI and environment-gated workflow changes needed to treat `dev` as staging and `main` as production.
-- [ ] Define the QA pack expectations for feature branches, `dev`, and `main`.
-- [ ] Capture the final rollout sequence and migration plan for moving the team to the new model.
+- [x] 2026-03-31 21:18 EDT: Resolved the branch-and-environment source of truth across `docs/release-workflow.md`, `apps/web/content/docs/ship-live.mdx`, and the root `README.md`. The repo-facing docs now agree that feature branches start from `dev`, `dev` is integrated staging, `main` is production only, and hotfixes merge or cherry-pick back into `dev`.
+- [x] 2026-03-31 21:24 EDT: Defined the fast local pre-commit boundary in `package.json` with `bun run check:fast` and `bun run precommit`. The implemented scope is `lint`, `format:check`, and `qa:validate`; no environment-backed QA was added to local hooks.
+- [x] 2026-03-31 21:31 EDT: Defined the CI and environment-gated workflow split. `.github/workflows/ci.yml` no longer treats `dev` pushes as generic CI, and `.github/workflows/dev-staging-proof.yml` now owns the integrated staging proof path: `default_ship` on `dev` pushes and manual `billing_integration` behind the `dev-staging-billing-integration` environment gate.
+- [x] 2026-03-31 21:34 EDT: Updated `qa/README.md` and `qa/AGENTS.md` so feature branches are preview-only, `dev` is the first integrated proof point, and `billing_integration` is limited to `dev` or production release verification.
+- [x] 2026-03-31 21:39 EDT: Ran local validation for the changed slices. `bun run qa:validate`, workflow YAML parsing, `package.json` parsing, and `git diff --check` all passed. End-to-end GitHub execution of the new staging workflow still requires real repository secrets and environment approvals outside the local workspace.
 
 ## Surprises & Discoveries
 
@@ -30,6 +30,10 @@ The repository already contains the beginnings of the staging-branch model, but 
 The second discovery is that the current CI setup is intentionally code-centric, not environment-centric. `.github/workflows/ci.yml` runs static checks, integration tests, browser smoke, and scheduled or manual sandbox e2e. It does not run a real `billing_integration` pack, and that is not an accident. The QA control plane in `qa/README.md` and `qa/AGENTS.md` treats `billing_integration` as an environment-gated proof lane because it touches real Stripe Checkout, Clerk personas, webhook delivery, and Convex writes.
 
 The third discovery is that there is no Husky or pre-commit setup in the repository today. That means the plan can define pre-commit from first principles instead of having to preserve an existing workflow.
+
+The fourth discovery is that the root `README.md` also taught the old branch model even though the ExecPlan originally called out only `docs/release-workflow.md` and `apps/web/content/docs/ship-live.mdx`. Leaving `README.md` unchanged would have preserved the contradiction for a fresh operator starting from the repository root.
+
+The fifth discovery came from validating the new staging workflow shape. `qa:run-pack` cannot succeed in GitHub Actions unless the workflow both installs Playwright browsers and materializes `qa/personas.local.json` from a secret, because persona prep requires checked-in protocol data plus local credential overrides. That requirement is now encoded in `.github/workflows/dev-staging-proof.yml`.
 
 ## Decision Log
 
@@ -57,17 +61,29 @@ Decision: `default_ship` should auto-run against the integrated `dev` environmen
 Rationale: `default_ship` is broad, mostly non-destructive, and useful as continuous staging proof. `billing_integration` has real side effects and should stay explicit even if `dev` is tightly isolated.  
 Date: 2026-03-31
 
-Decision: pre-commit should be limited to fast local code-quality gates such as lint, format, secret scanning, and `qa:validate`, and must never run real browser or payment-path verification.  
-Rationale: local hooks should catch cheap mistakes quickly. They are the wrong place for Playwright, Stripe, Clerk, or Convex integration proof.  
+Decision: implement the local pre-commit surface as `bun run precommit`, which currently delegates to `bun run check:fast` and runs only `lint`, `format:check`, and `qa:validate`.
+Rationale: the repo does not have a committed secret-scanning tool today, so the honest fast hook scope is the code-quality surface the workspace can actually execute everywhere. It still preserves the important rule that Playwright, Stripe, Clerk, and Convex integration proof do not belong in local hooks.
+Date: 2026-03-31
+
+Decision: separate generic CI from integrated staging proof by removing `dev` pushes from `.github/workflows/ci.yml` and adding `.github/workflows/dev-staging-proof.yml` for staging-specific QA.
+Rationale: the CI workflow should stay code-centric for pull requests and `main`, while `dev` needs a distinct workflow that makes the staging contract explicit instead of overloading generic CI with environment-backed proof.
+Date: 2026-03-31
+
+Decision: keep the staging workflow dependent on repository secrets prefixed with `DEV_STAGING_...` and gate only the billing lane with the `dev-staging-billing-integration` GitHub environment.
+Rationale: this is the smallest tracked change that expresses the staging policy now. The default `dev` proof stays automatic, while billing proof still requires an explicit protected environment because it can perform real Stripe test-mode side effects.
 Date: 2026-03-31
 
 ## Outcomes & Retrospective
 
-This section is incomplete because the workflow change is not implemented yet. At completion it must compare the old ambiguous release model against the final explicit branch-and-environment model, list the exact docs and workflow files changed, and note whether any temporary transitional rules remained in place.
+The old state taught two incompatible release systems at once. After this execution, the tracked repo contract is explicit: feature branches start from `dev`, stay preview-only, merge into `dev`, and only reach production through `dev -> main`. `dev` is now the integrated staging proof point in the docs, QA control plane, and workflow layout. `main` remains the production deploy branch for Vercel and Convex.
+
+The concrete files changed for this plan were `docs/release-workflow.md`, `apps/web/content/docs/ship-live.mdx`, `README.md`, `qa/README.md`, `qa/AGENTS.md`, `package.json`, `.github/workflows/ci.yml`, and `.github/workflows/dev-staging-proof.yml`.
+
+The remaining gap is rollout outside git-tracked files. A repository admin still needs to configure or confirm the `DEV_STAGING_*` secrets, make `dev-staging-billing-integration` require the right approvals, and update branch protection in GitHub so the intended `dev` and `main` required checks match the new tracked workflow split. That limitation is documented here rather than hidden.
 
 ## Context and Orientation
 
-The current branch and release truth is split across a small number of files. `.github/workflows/ci.yml` defines the standing code-level checks. `docs/release-workflow.md` defines the GitHub, Vercel, and Convex production release flow. `apps/web/content/docs/ship-live.mdx` defines the product-facing “how we ship” story. `qa/README.md` and `qa/AGENTS.md` define how scenario packs such as `default_ship` and `billing_integration` are supposed to run and which environments they belong to.
+The current branch and release truth is split across a small number of files. `.github/workflows/ci.yml` defines the standing code-level checks. `.github/workflows/dev-staging-proof.yml` defines the integrated staging proof path on `dev`. `docs/release-workflow.md` defines the GitHub, Vercel, and Convex production release flow. `apps/web/content/docs/ship-live.mdx` defines the product-facing “how we ship” story. `README.md` is still the first operator-facing repo entrypoint, so it also has to agree. `qa/README.md` and `qa/AGENTS.md` define how scenario packs such as `default_ship` and `billing_integration` are supposed to run and which environments they belong to.
 
 Today those files do not fully agree. `docs/release-workflow.md` still describes feature branches merging directly into `main` and explicitly says there is no long-lived integration branch. `apps/web/content/docs/ship-live.mdx` already assumes the opposite: feature work lands in `dev`, and `dev -> main` is the release pull request. The QA control plane already thinks in environment terms: it says start with `dev` first, use `billing_integration` there, and use production second as release evidence.
 
@@ -80,7 +96,11 @@ The main workflow concepts in this repository are:
 - `default_ship` is the majority-coverage QA pack for the main user journey.
 - `billing_integration` is the environment-gated QA pack for the payment path and access handoff.
 
-The plan should make those concepts explicit and remove the current contradictions so a fresh operator knows exactly what has to pass on a feature branch, on `dev`, and on `main`.
+The plan should make those concepts explicit and remove the current contradictions so a fresh operator knows exactly what has to pass on a feature branch, on `dev`, and on `main`. The final tracked answer is now:
+
+- feature branches run preview-safe proof only: PR CI, focused tests, and `default_ship --dry-run` when useful
+- `dev` runs the integrated staging proof through the `Dev Staging Proof` workflow plus any manual `billing_integration` approval when the commercial path changed
+- `main` runs production deploys only after the `dev -> main` promotion is reviewed and the production checks pass
 
 The intended end-state workflow is:
 
@@ -93,13 +113,13 @@ The intended end-state workflow is:
 
 Start by making the source-of-truth branch model explicit in this plan and then in the repository docs. The first edits should be `docs/release-workflow.md` and `apps/web/content/docs/ship-live.mdx`, because those are the current conflicting public contracts. The final wording must say whether feature branches branch from `dev`, whether `dev` is the required integration stage, whether `main` is production only, and how hotfixes fit that model.
 
-Then define the local pre-commit boundary. This should likely live in root `package.json` and, if adopted, a new `.husky/` directory. The plan should keep pre-commit to fast local checks such as lint, format, secret scanning, and possibly `qa:validate`, but explicitly forbid any real Stripe or browser-pack execution there.
+Then define the local pre-commit boundary. In the implemented version this lives in root `package.json` as `bun run check:fast` and `bun run precommit`. The scope is intentionally limited to `lint`, `format:check`, and `qa:validate`, and it explicitly forbids any real Stripe or browser-pack execution.
 
 After that, define the GitHub Actions and branch-protection strategy. `.github/workflows/ci.yml` should remain the place for code-level checks. If the team wants `dev` to be the full integration gate, the plan must say exactly which proof runs there and which proof stays environment-gated. The recommended split for this repository is:
 
 - PR CI: `static`, `integration`, `browser-smoke`, and `cli`
-- Push to `dev`: deploy staging and auto-run `default_ship`
-- Environment-protected workflow against `dev`: run `billing_integration` when checkout, auth, entitlement, or webhook behavior changed
+- Push to `dev`: run `.github/workflows/dev-staging-proof.yml` and auto-run `default_ship`
+- Environment-protected workflow against `dev`: run `billing_integration` through the `dev-staging-billing-integration` job when checkout, auth, entitlement, or webhook behavior changed
 - Release to `main`: require a green `dev`, production deploy, and explicit production billing verification when the commercial path changed
 
 The plan should also define which checks must be required on `dev` and which checks must remain required on `main`.
@@ -131,11 +151,11 @@ Work from the repository root.
 
 2. Write the branch-and-environment decisions directly into this ExecPlan first if anything changes materially during implementation. Do not change workflows or docs until the plan itself is explicit.
 
-3. Update `docs/release-workflow.md` and `apps/web/content/docs/ship-live.mdx` so they agree on one branch model.
+3. Update `docs/release-workflow.md`, `apps/web/content/docs/ship-live.mdx`, and `README.md` so they agree on one branch model.
 
-4. If adopting Husky, create only the minimal hook surface and keep it code-only. The likely files are root `package.json` and a new `.husky/pre-commit`.
+4. Define the minimal code-only pre-commit surface in root `package.json`. Do not add Husky unless the team later decides the extra dependency is worth it.
 
-5. Update `.github/workflows/ci.yml` or add a new environment-gated workflow so `dev` has an explicit integration-proof path for the billing pack.
+5. Update `.github/workflows/ci.yml` and add `.github/workflows/dev-staging-proof.yml` so `dev` has an explicit integration-proof path for `default_ship` plus a manual protected path for the billing pack.
 
 6. Update `qa/README.md` and `qa/AGENTS.md` so they describe the same `feature branch -> dev -> main` lifecycle as the release docs.
 
@@ -153,6 +173,9 @@ Run the narrowest relevant checks after workflow/doc changes:
 
    cd /Users/parkerrex/Projects/manmeetsai-workspace
    bun run qa:validate
+   ruby -e 'require "yaml"; YAML.load_file(".github/workflows/ci.yml"); YAML.load_file(".github/workflows/dev-staging-proof.yml")'
+   node -e 'JSON.parse(require("fs").readFileSync("package.json","utf8"))'
+   git diff --check -- README.md docs/release-workflow.md apps/web/content/docs/ship-live.mdx qa/README.md qa/AGENTS.md package.json .github/workflows/ci.yml .github/workflows/dev-staging-proof.yml docs/codex/2026-03-31-dev-staging-and-release-gates.md'
 
 If GitHub workflow files are changed, also validate that the YAML is syntactically sane by inspecting the file carefully and, where available, using the repo’s normal CI as the next proof surface.
 
@@ -167,31 +190,47 @@ Acceptance requires these explicit repository truths:
 
 ## Idempotence and Recovery
 
-This plan should prefer doc and workflow alignment before hard branch-protection changes. If the implementation changes docs first and workflow later, that is acceptable only if the plan records the temporary mismatch and the next step to close it.
+This plan should prefer doc and workflow alignment before hard branch-protection changes. That is what the implementation did: tracked files now express the new model, but branch protection and environment approvals still need repository-admin rollout in GitHub.
 
 If workflow changes are staged but not yet active in GitHub or Vercel, record that as an incomplete rollout rather than pretending the policy is live. External branch protection or deployment settings must be called out separately from git-tracked files.
 
-If Husky or local hooks are added and they create developer friction, the safe rollback is to disable the hook and keep the documented policy in place until the hook can be narrowed. Do not widen pre-commit to environment-backed proof just because a code-only hook feels too weak.
+If the `precommit` script creates developer friction, the safe rollback is to stop calling it from local tooling while keeping the documented policy in place until the fast command set can be narrowed. Do not widen pre-commit to environment-backed proof just because a code-only hook feels too weak.
 
 ## Artifacts and Notes
 
-Useful evidence already captured:
+Useful evidence captured during implementation:
 
-   Current repo contradiction:
-   - `docs/release-workflow.md`: says feature branches merge into `main` and there is no long-lived integration branch
-   - `apps/web/content/docs/ship-live.mdx`: says the release candidate is integrated on `dev` and the release PR is `dev -> main`
+   Validation transcript:
+   - `bun run qa:validate`
+     `QA control plane is internally consistent.`
+     `Journeys: 25`
+     `Coverage rows: 61`
+     `Inventory rows: 140`
+     `Personas: 3`
 
-   Current CI truth:
-   - `.github/workflows/ci.yml` runs `static`, `integration`, `browser-smoke`, and scheduled/manual `e2e-sandbox`
-   - it does not run a real `billing_integration` pack today
+   Workflow syntax transcript:
+   - `ruby -e 'require "yaml"; YAML.load_file(".github/workflows/ci.yml"); YAML.load_file(".github/workflows/dev-staging-proof.yml"); puts "workflow yaml ok"'`
+     `workflow yaml ok`
 
-   Current QA truth:
-   - `qa/README.md` and `qa/AGENTS.md` already treat `billing_integration` as environment-gated proof and tell operators to start on `dev` first
+   Package transcript:
+   - `node -e 'JSON.parse(require("fs").readFileSync("package.json","utf8")); console.log("package json ok")'`
+     `package json ok`
+
+   Diff hygiene transcript:
+   - `git diff --check -- ...`
+     no output
+
+   Remaining external rollout work:
+   - set the `DEV_STAGING_*` GitHub secrets referenced by `.github/workflows/dev-staging-proof.yml`
+   - configure the `dev-staging-billing-integration` environment approval gate
+   - update GitHub branch protection so `dev` and `main` require the intended checks
 
 ## Interfaces and Dependencies
 
-The primary interfaces in this plan are GitHub Actions workflows under `.github/workflows/`, release docs under `docs/` and `apps/web/content/docs/`, and the QA control plane under `qa/`.
+The primary interfaces in this plan are GitHub Actions workflows under `.github/workflows/`, release docs under `docs/` and `apps/web/content/docs/`, the root `README.md`, and the QA control plane under `qa/`.
 
 The plan depends on the existing `default_ship` and `billing_integration` pack model defined in `qa/scripts/run-pack.mjs` and documented in `qa/README.md` and `qa/AGENTS.md`.
 
-If local hooks are added, they should depend only on fast local commands such as lint, format, secret scanning, and `qa:validate`. They must not depend on Stripe, Clerk, Convex remote state, Playwright browser packs, or any real payment-path command.
+The new workflow dependency introduced by this execution is `.github/workflows/dev-staging-proof.yml`, which expects `DEV_STAGING_APP_BASE_URL`, `DEV_STAGING_CLERK_FRONTEND_API_URL`, `DEV_STAGING_CLERK_SECRET_KEY`, `DEV_STAGING_NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `DEV_STAGING_NEXT_PUBLIC_CONVEX_SITE_URL`, `DEV_STAGING_NEXT_PUBLIC_CONVEX_URL`, `DEV_STAGING_PLAYWRIGHT_BASE_URL`, and `DEV_STAGING_QA_PERSONAS_LOCAL_JSON`, with `DEV_STAGING_STRIPE_SECRET_KEY` and `DEV_STAGING_STRIPE_WEBHOOK_SECRET` additionally required for the billing job.
+
+The new local hook dependency introduced by this execution is `bun run precommit`, which delegates to `bun run check:fast`. It must stay limited to fast local commands and must not depend on Stripe, Clerk, Convex remote state, Playwright browser packs, or any real payment-path command.

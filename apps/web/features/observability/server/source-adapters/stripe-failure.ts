@@ -19,7 +19,7 @@ export type StripeWebhookIncidentResult =
 			message: string;
 	  }
 	| {
-			kind: "missing_clerk_user";
+			kind: "missing_checkout_email";
 			eventId: string;
 			eventType: string;
 			sessionId: string;
@@ -84,11 +84,11 @@ export function buildStripeWebhookResultIncident(
 				nextAction:
 					"Check the Stripe webhook signing secret and recent webhook deliveries before replaying the event.",
 			};
-		case "missing_clerk_user":
+		case "missing_checkout_email":
 			return {
 				source: "stripe",
-				error: new Error("Stripe webhook payload was missing clerkUserId."),
-				code: "stripe_webhook_missing_clerk_user",
+				error: new Error("Stripe webhook payload was missing checkout email."),
+				code: "stripe_webhook_missing_checkout_email",
 				severity: "high",
 				surface: "webhook",
 				externalEventId: result.eventId,
@@ -102,7 +102,7 @@ export function buildStripeWebhookResultIncident(
 				nativeUrl: getStripeEventDashboardUrl(result.eventId),
 				logsUrl: getStripeEventDashboardUrl(result.eventId),
 				nextAction:
-					"Open the Stripe event and ensure checkout metadata includes clerkUserId before replaying the webhook.",
+					"Open the Stripe event and confirm the Checkout Session collected a buyer email before retrying the webhook flow.",
 			};
 		case "grant_failed":
 			return {
