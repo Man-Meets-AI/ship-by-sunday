@@ -34,6 +34,12 @@ export type PacketPageMedia =
 			body: string;
 	  };
 
+type PacketVideoInventoryEntry = {
+	key: string;
+	title: string;
+	video: LessonVideoContent;
+};
+
 type PacketStagePageKey = `${RoutedPacketStageId}/${string}`;
 
 const packetStagePageMedia: Record<PacketStagePageKey, PacketPageMedia> = {
@@ -219,4 +225,44 @@ export function getPacketStartPageMedia() {
 
 export function getPacketReviewPageMedia() {
 	return packetReviewPageMedia;
+}
+
+export function getPacketVideoInventory() {
+	const stageEntries = Object.entries(packetStagePageMedia).flatMap(
+		([pageKey, media]) => {
+			if (media.kind !== "video") {
+				return [];
+			}
+
+			return [
+				{
+					key: pageKey,
+					title: media.title,
+					video: media.video,
+				},
+			];
+		},
+	);
+
+	const startEntry: PacketVideoInventoryEntry | null =
+		packetStartPageMedia.kind === "video"
+			? {
+					key: "start",
+					title: packetStartPageMedia.title,
+					video: packetStartPageMedia.video,
+				}
+			: null;
+
+	const reviewEntry: PacketVideoInventoryEntry | null =
+		packetReviewPageMedia.kind === "video"
+			? {
+					key: "review",
+					title: packetReviewPageMedia.title,
+					video: packetReviewPageMedia.video,
+				}
+			: null;
+
+	return [startEntry, ...stageEntries, reviewEntry].filter(
+		(entry): entry is PacketVideoInventoryEntry => entry !== null,
+	);
 }

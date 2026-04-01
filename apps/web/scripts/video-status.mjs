@@ -82,14 +82,30 @@ async function getAuphonicSnapshot() {
 }
 
 async function getBunnySnapshot() {
+	const bunnyLibraryId = Number.parseInt(
+		process.env.BUNNY_STREAM_LIBRARY_ID ?? "",
+		10,
+	);
+
+	if (!Number.isFinite(bunnyLibraryId)) {
+		throw new Error("BUNNY_STREAM_LIBRARY_ID must be a number.");
+	}
+
 	const response = await fetch(
-		"https://video.bunnycdn.com/library/619172/videos?page=1&itemsPerPage=10",
+		`https://video.bunnycdn.com/library/${bunnyLibraryId}/videos?page=1&itemsPerPage=10`,
 		{
 			headers: {
 				AccessKey: process.env.BUNNY_STREAM_API_KEY,
 			},
 		},
 	);
+
+	if (!response.ok) {
+		throw new Error(
+			`Bunny status request failed with ${response.status} ${response.statusText}.`,
+		);
+	}
+
 	const payload = await response.json();
 	return (payload.items ?? []).slice(0, 10).map((item) => ({
 		guid: item.guid,
