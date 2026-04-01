@@ -5,19 +5,13 @@ export function PacketReviewExecutePreview({
 	buildLessonsHref,
 	isReviewReady,
 	hasUnlockedReviewFlow,
-	isDownloadPending,
 	onOpenLessonMap,
-	onStarterDownload,
 	onContinue,
 }: {
 	buildLessonsHref: string | null;
 	isReviewReady: boolean;
 	hasUnlockedReviewFlow: boolean;
-	isDownloadPending: boolean;
 	onOpenLessonMap?: () => void;
-	onStarterDownload: (event: {
-		preventDefault: () => void;
-	}) => void | Promise<void>;
 	onContinue?: () => void;
 }) {
 	return (
@@ -67,17 +61,26 @@ export function PacketReviewExecutePreview({
 								</Button>
 							) : null}
 						</>
-					) : (
+					) : isReviewReady ? (
 						<Button
 							asChild
 							size="lg"
 							variant="outline"
 							className="h-14 w-full text-lg font-bold"
-							disabled={!isReviewReady || isDownloadPending}
 						>
-							<Link href="/api/download/repo" onClick={onStarterDownload}>
+							<a download href="/api/download/repo">
 								Download Ship Kit first
-							</Link>
+							</a>
+						</Button>
+					) : (
+						<Button
+							type="button"
+							size="lg"
+							variant="outline"
+							className="h-14 w-full text-lg font-bold"
+							disabled
+						>
+							Download Ship Kit first
 						</Button>
 					)}
 					<p className="px-1 text-center text-xs leading-5 text-muted-foreground lg:text-left">
