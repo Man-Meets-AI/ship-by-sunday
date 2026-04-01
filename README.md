@@ -94,6 +94,7 @@ Production now ships through short-lived pull request branches into `dev`, then 
 
 - branch from the current `dev`
 - split work into logical conventional commits
+- run the local fast gate with `bun run precommit`; this repo does not use Husky for that check
 - open a pull request into `dev`
 - run the default multi-agent PR review before merge:
   `Review this branch against dev. Have pr_explorer map the affected code paths, reviewer find real risks, and docs_researcher verify the framework APIs that the patch relies on.`
