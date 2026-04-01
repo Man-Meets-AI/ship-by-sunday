@@ -27,13 +27,11 @@ jobs:
       name: dev-staging
     env:
       APP_BASE_URL: https://dev.man-meets-ai.com
-      CLERK_FRONTEND_API_URL: ${{ secrets.DEV_STAGING_CLERK_FRONTEND_API_URL }}
-      CLERK_SECRET_KEY: ${{ secrets.DEV_STAGING_CLERK_SECRET_KEY }}
       DEV_STAGING_QA_PERSONAS_LOCAL_JSON: ${{ secrets.DEV_STAGING_QA_PERSONAS_LOCAL_JSON }}
+      DEV_STAGING_WEB_ENV_LOCAL: ${{ secrets.DEV_STAGING_WEB_ENV_LOCAL }}
       NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
-      NEXT_PUBLIC_CONVEX_SITE_URL: ${{ secrets.DEV_STAGING_NEXT_PUBLIC_CONVEX_SITE_URL }}
-      NEXT_PUBLIC_CONVEX_URL: ${{ secrets.DEV_STAGING_NEXT_PUBLIC_CONVEX_URL }}
       PLAYWRIGHT_BASE_URL: https://dev.man-meets-ai.com
+      QA_ENV_FILE: apps/web/.env.local
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
@@ -61,6 +59,14 @@ jobs:
             exit 1
           fi
           printf '%s\n' "$DEV_STAGING_QA_PERSONAS_LOCAL_JSON" > qa/personas.local.json
+
+      - name: Write staging app env file
+        run: |
+          if [[ -z "$DEV_STAGING_WEB_ENV_LOCAL" ]]; then
+            echo "DEV_STAGING_WEB_ENV_LOCAL is not configured." >&2
+            exit 1
+          fi
+          printf '%s\n' "$DEV_STAGING_WEB_ENV_LOCAL" > apps/web/.env.local
 
       - name: Debug hosted QA env surface
         run: |
@@ -100,13 +106,11 @@ jobs:
       name: dev-staging-billing-integration
     env:
       APP_BASE_URL: https://dev.man-meets-ai.com
-      CLERK_FRONTEND_API_URL: ${{ secrets.DEV_STAGING_CLERK_FRONTEND_API_URL }}
-      CLERK_SECRET_KEY: ${{ secrets.DEV_STAGING_CLERK_SECRET_KEY }}
       DEV_STAGING_QA_PERSONAS_LOCAL_JSON: ${{ secrets.DEV_STAGING_QA_PERSONAS_LOCAL_JSON }}
+      DEV_STAGING_WEB_ENV_LOCAL: ${{ secrets.DEV_STAGING_WEB_ENV_LOCAL }}
       NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
-      NEXT_PUBLIC_CONVEX_SITE_URL: ${{ secrets.DEV_STAGING_NEXT_PUBLIC_CONVEX_SITE_URL }}
-      NEXT_PUBLIC_CONVEX_URL: ${{ secrets.DEV_STAGING_NEXT_PUBLIC_CONVEX_URL }}
       PLAYWRIGHT_BASE_URL: https://dev.man-meets-ai.com
+      QA_ENV_FILE: apps/web/.env.local
       QA_ALLOW_BILLING_INTEGRATION: "1"
       STRIPE_SECRET_KEY: ${{ secrets.DEV_STAGING_STRIPE_SECRET_KEY }}
       STRIPE_WEBHOOK_SECRET: ${{ secrets.DEV_STAGING_STRIPE_WEBHOOK_SECRET }}
@@ -137,6 +141,14 @@ jobs:
             exit 1
           fi
           printf '%s\n' "$DEV_STAGING_QA_PERSONAS_LOCAL_JSON" > qa/personas.local.json
+
+      - name: Write staging app env file
+        run: |
+          if [[ -z "$DEV_STAGING_WEB_ENV_LOCAL" ]]; then
+            echo "DEV_STAGING_WEB_ENV_LOCAL is not configured." >&2
+            exit 1
+          fi
+          printf '%s\n' "$DEV_STAGING_WEB_ENV_LOCAL" > apps/web/.env.local
 
       - name: Run billing integration gate on dev
         run: bun run qa:run-pack -- --pack=billing_integration --slug=dev-billing-${{ github.run_id }}
