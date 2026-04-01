@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+repo_root_path="$(cd "${script_dir}/.." && pwd)"
+
+cd "$repo_root_path"
+exec bun packages/ship-by-sunday-cli/src/cli.ts "$@"

@@ -67,7 +67,26 @@ function formatCliLine(line: string, options: CliRenderOptions) {
 		return paint(line, "heading", options);
 	}
 
-	if (line.startsWith("  bun run sbs ")) {
+	if (
+		line === "Start or resume" ||
+		line === "Inspect the draft" ||
+		line === "Edit facts" ||
+		line === "Move data in and out" ||
+		line === "Recommended next commands"
+	) {
+		return paint(line, "heading", options);
+	}
+
+	if (line.startsWith("Ship by Sunday CLI v")) {
+		return paint(line, "heading", options);
+	}
+
+	if (
+		line.startsWith("  bun run sbs ") ||
+		line.startsWith("  ./bin/sbs ") ||
+		line.startsWith("bun run sbs ") ||
+		line.startsWith("./bin/sbs ")
+	) {
 		return paint(line, "active", options);
 	}
 
