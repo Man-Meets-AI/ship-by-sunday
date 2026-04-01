@@ -20,6 +20,12 @@ Production is healthy only when all three systems agree on the same release cand
 - `.github/workflows/convex-production-deploy.yml` deploys Convex production from `main`.
 - Hotfixes branch from `main`, merge into `main` for the emergency release, and then merge or cherry-pick back into `dev`.
 
+## Versioning and release notes
+
+- `v0.1.0` is the first GitHub Release and the first tag cut from `main`.
+- While the repo is pre-1.0, the minor digit marks the next ordinary release cut from `main`, and the patch digit is reserved for hotfixes and backports. `1.0.0` stays off the table until the product contract is intentionally stabilized.
+- Every GitHub Release must be created from the merged `main` tag and backed by the matching `CHANGELOG.md` entry. Do not publish the release until the changelog section exists.
+
 ## Required standing configuration
 
 - GitHub branch protection is enabled on `dev` and `main`.
@@ -55,11 +61,12 @@ Create that secret from the Convex dashboard for the production deployment:
    `Review this branch against main. Have pr_explorer map the affected code paths, reviewer find real risks, and docs_researcher verify the framework APIs that the patch relies on.`
 
 9. Fix substantive findings and merge the `dev -> main` release PR only after `static`, `integration`, `browser-smoke`, and `cli` are green.
-10. Watch Vercel create the production web deploy from the merged `main` commit.
-11. Watch GitHub Actions run `Convex Production Deploy` for the same merged `main` commit.
-12. Run the `default_ship` QA pack against production with matching production Clerk env values when the change warrants post-deploy proof.
-13. When you need billing confidence on production, use the documented live no-cost Checkout proof instead of a real card charge.
-14. Delete the local and remote feature branch after the release settles.
+10. Tag the merged `main` commit with the next pre-1.0 version and publish the matching GitHub Release from that tag. Copy or summarize the notes from the corresponding `CHANGELOG.md` section before publishing.
+11. Watch Vercel create the production web deploy from the merged `main` commit.
+12. Watch GitHub Actions run `Convex Production Deploy` for the same merged `main` commit.
+13. Run the `default_ship` QA pack against production with matching production Clerk env values when the change warrants post-deploy proof.
+14. When the release touched checkout, Stripe, entitlement, webhook, or access-handoff behavior, run a fresh production billing proof using the documented live no-cost Checkout method. Skip this extra proof for unrelated docs or presentation changes.
+15. Delete the local and remote feature branch after the release settles.
 
 Useful verification commands:
 
@@ -117,8 +124,9 @@ Use the hotfix path only for production emergencies.
 2. Open a pull request into `main`.
 3. Run the same multi-agent PR review used for ordinary releases.
 4. Merge after the required checks pass.
-5. Merge or cherry-pick the hotfix back into `dev` immediately after release.
-6. Watch the production web and Convex deploys settle before deleting the branch.
+5. Tag the merged `main` commit with the next patch version and publish the matching changelog-backed GitHub Release.
+6. Merge or cherry-pick the hotfix back into `dev` immediately after release.
+7. Watch the production web and Convex deploys settle before deleting the branch.
 
 ## Explicit non-goal
 
