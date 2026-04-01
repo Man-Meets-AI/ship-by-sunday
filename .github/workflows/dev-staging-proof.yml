@@ -78,22 +78,6 @@ jobs:
           mkdir -p "$HOME/.convex"
           printf '%s\n' "$DEV_STAGING_CONVEX_CONFIG_JSON" > "$HOME/.convex/config.json"
 
-      - name: Debug hosted QA env surface
-        run: |
-          node - <<'NODE'
-          const secretKey = (process.env.CLERK_SECRET_KEY ?? '').trim();
-          const mode = secretKey.startsWith('sk_test_')
-            ? 'test'
-            : secretKey.startsWith('sk_live_')
-              ? 'live'
-              : secretKey.length === 0
-                ? 'missing'
-                : 'unknown';
-          console.log(`clerk_secret_key_mode=${mode}`);
-          console.log(`clerk_secret_key_length=${secretKey.length}`);
-          console.log(`playwright_base_url=${(process.env.PLAYWRIGHT_BASE_URL ?? '').trim()}`);
-          NODE
-
       - name: Run default ship pack on dev
         run: bun run qa:run-pack -- --pack=default_ship --slug=dev-staging-${{ github.run_id }}
 
