@@ -17,8 +17,8 @@ import {
 } from "./auth-state";
 
 const DEFAULT_COURSE_SLUG = "ship-by-sunday";
-const localEnvPath = path.resolve(__dirname, "../../.env.local");
 const appsWebDirectory = path.resolve(__dirname, "../..");
+const workspaceRootDirectory = path.resolve(appsWebDirectory, "../..");
 const convexBinPath = resolveConvexBinPath();
 
 export default async function globalSetup(config: FullConfig) {
@@ -79,7 +79,20 @@ function loadHostedConvexEnv() {
 		return;
 	}
 
-	process.loadEnvFile(localEnvPath);
+	process.loadEnvFile(resolveHostedEnvPath());
+}
+
+function resolveHostedEnvPath() {
+	const configuredEnvFile = process.env.QA_ENV_FILE?.trim();
+	if (!configuredEnvFile) {
+		return path.resolve(appsWebDirectory, ".env.local");
+	}
+
+	if (path.isAbsolute(configuredEnvFile)) {
+		return configuredEnvFile;
+	}
+
+	return path.resolve(workspaceRootDirectory, configuredEnvFile);
 }
 
 function getSandboxBaseUrl(config: FullConfig) {
