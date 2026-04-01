@@ -325,6 +325,8 @@ function runConvexInternalCommand({
 	args: Record<string, string>;
 	env: NodeJS.ProcessEnv;
 }) {
+	const convexEnv = withConvexDeploymentEnv(env);
+
 	return new Promise<{
 		code: number;
 		stdout: string;
@@ -333,13 +335,13 @@ function runConvexInternalCommand({
 		const convexCommandArguments = [
 			convexBinPath,
 			"run",
-			...(isProductionQaTarget() ? ["--prod"] : []),
+			...(isProductionQaTarget(convexEnv) ? ["--prod"] : []),
 			functionName,
 			JSON.stringify(args),
 		];
 		const child = spawn(process.execPath, convexCommandArguments, {
 			cwd: appsWebDirectory,
-			env,
+			env: convexEnv,
 			stdio: ["ignore", "pipe", "pipe"],
 		});
 
@@ -362,9 +364,32 @@ function runConvexInternalCommand({
 	});
 }
 
-function isProductionQaTarget() {
+function isProductionQaTarget(env: NodeJS.ProcessEnv = process.env) {
 	return (
-		process.env.QA_ENV_FILE?.endsWith(".env.production") === true ||
-		process.env.PLAYWRIGHT_BASE_URL === "https://www.man-meets-ai.com"
+		env.QA_ENV_FILE?.endsWith(".env.production") === true ||
+		env.PLAYWRIGHT_BASE_URL === "https://www.man-meets-ai.com"
 	);
+}
+
+function withConvexDeploymentEnv(env: NodeJS.ProcessEnv) {
+	if (env.CONVEX_DEPLOYMENT || !isProductionQaTarget(env)) {
+		return env;
+	}
+
+	const convexUrl = env.NEXT_PUBLIC_CONVEX_URL?.trim();
+	if (!convexUrl) {
+		return env;
+	}
+
+	const deploymentName = new URL(convexUrl).hostname.split(".")[0];
+	if (!deploymentName) {
+		return env;
+	}
+
+	return {
+		...env,
+		CONVEX_DEPLOYMENT: deploymentName.startsWith("prod:")
+			? deploymentName
+			: `prod:${deploymentName}`,
+	};
 }
