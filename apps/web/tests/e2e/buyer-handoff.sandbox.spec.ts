@@ -141,7 +141,9 @@ test.describe("member without access", () => {
 			},
 		);
 
-		await page.getByRole("button", { name: "Get instant access" }).click();
+		await page
+			.getByRole("button", { name: /Get (instant access|the system)/i })
+			.click();
 		await completeStripeSandboxCheckout(page);
 
 		await page.waitForURL(/\/checkout\/success\?session_id=/, {
