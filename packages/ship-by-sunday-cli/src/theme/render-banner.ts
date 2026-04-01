@@ -127,8 +127,12 @@ export function renderStartupBanner(options: CliRenderOptions) {
 	});
 
 	const subtitle = [
-		paint("packet intake + starter snapshot", "focus", options),
-		paint("using the live Ship by Sunday funnel contract", "muted", options),
+		paint("Ship by Sunday CLI", "focus", options),
+		paint(
+			"local packet intake and starter snapshot generation",
+			"muted",
+			options,
+		),
 	].join(` ${paint("•", "frame", options)} `);
 
 	return `${logoSection.join("\n")}\n${subtitle}`;

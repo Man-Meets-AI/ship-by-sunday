@@ -1,12 +1,18 @@
 import type { PacketStageId } from "@manmeetsai/packet-compiler";
 import { createCliError } from "./cli-errors";
+import {
+	formatUnsupportedCompletionShellMessage,
+	isSupportedCompletionShellName,
+	type SupportedCompletionShellName,
+} from "./command-surface";
 
 export type EditablePacketStageId = Exclude<PacketStageId, "start" | "review">;
 export type ReviewablePacketStageId = Exclude<PacketStageId, "start">;
 export type CliFixtureName = "blank" | "complete";
 
 export type CliCommand =
-	| { kind: "help" }
+	| { kind: "help"; topic?: string }
+	| { kind: "version"; json: boolean }
 	| { kind: "init"; fixture: CliFixtureName; force: boolean; json: boolean }
 	| { kind: "schema"; json: boolean }
 	| { kind: "stages"; json: boolean }
@@ -41,6 +47,10 @@ export type CliCommand =
 			force: boolean;
 			json: boolean;
 			dryRun: boolean;
+	  }
+	| {
+			kind: "completion";
+			shellName: SupportedCompletionShellName;
 	  };
 
 const editableStageIds = [
@@ -80,13 +90,27 @@ function stripJsonFlag(args: string[]) {
 export function parseCliCommand(argv: string[]): CliCommand {
 	const [commandName, ...rest] = argv;
 
+	if (argv.includes("--version") || argv.includes("-v")) {
+		return { kind: "version", json: argv.includes("--json") };
+	}
+
 	if (
 		commandName === undefined ||
 		commandName === "help" ||
 		commandName === "--help" ||
 		commandName === "-h"
 	) {
-		return { kind: "help" };
+		const topic =
+			commandName === "help"
+				? rest.find(
+						(arg) => arg !== "--json" && arg !== "--help" && arg !== "-h",
+					)
+				: undefined;
+		return { kind: "help", topic };
+	}
+
+	if (rest.includes("--help") || rest.includes("-h")) {
+		return { kind: "help", topic: commandName };
 	}
 
 	if (commandName === "init") {
@@ -96,8 +120,10 @@ export function parseCliCommand(argv: string[]): CliCommand {
 				? "blank"
 				: requireOptionValue(rest, fixtureIndex, "--fixture");
 		if (fixture !== "blank" && fixture !== "complete") {
-			throw new Error(
+			throw createCliError(
+				"invalid_args",
 				`Unknown fixture "${fixture}". Expected one of blank, complete.`,
+				2,
 			);
 		}
 		return {
@@ -110,6 +136,10 @@ export function parseCliCommand(argv: string[]): CliCommand {
 
 	if (commandName === "schema") {
 		return { kind: "schema", json: rest.includes("--json") };
+	}
+
+	if (commandName === "version") {
+		return { kind: "version", json: rest.includes("--json") };
 	}
 
 	if (commandName === "stages") {
@@ -347,6 +377,30 @@ export function parseCliCommand(argv: string[]): CliCommand {
 			force: generateArgs.includes("--force"),
 			json: generateArgs.includes("--json"),
 			dryRun: generateArgs.includes("--dry-run"),
+		};
+	}
+
+	if (commandName === "completion") {
+		const shellName = rest[0];
+		if (!shellName) {
+			throw createCliError(
+				"invalid_args",
+				`Missing shell name for completion. Expected one of bash, zsh.`,
+				2,
+			);
+		}
+
+		if (!isSupportedCompletionShellName(shellName)) {
+			throw createCliError(
+				"invalid_args",
+				formatUnsupportedCompletionShellMessage(shellName),
+				2,
+			);
+		}
+
+		return {
+			kind: "completion",
+			shellName,
 		};
 	}
 

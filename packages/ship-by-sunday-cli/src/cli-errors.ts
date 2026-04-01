@@ -1,5 +1,6 @@
 export type CliErrorCode =
 	| "already_exists"
+	| "cancelled"
 	| "invalid_args"
 	| "invalid_input"
 	| "invalid_patch"
@@ -43,6 +44,20 @@ export function normalizeCliError(error: unknown) {
 
 	if (error instanceof SyntaxError) {
 		return createCliError("invalid_input", error.message, 2);
+	}
+
+	if (
+		error instanceof Error &&
+		(error.name === "AbortError" ||
+			("code" in error &&
+				typeof error.code === "string" &&
+				error.code === "ABORT_ERR"))
+	) {
+		return createCliError(
+			"cancelled",
+			"Cancelled. Previous answers remain saved.",
+			130,
+		);
 	}
 
 	if (error instanceof Error) {
