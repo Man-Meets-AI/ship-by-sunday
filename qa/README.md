@@ -36,6 +36,8 @@ bun run qa:ship -- --pack=default_ship --slug=baseline
 
 `qa:validate` is the fast integrity check for the QA control plane and the checked-in QA-team assets. `qa:inventory:sync` refreshes the full-suite inventory from the current `apps/web/tests/` tree while preserving curated rows for unchanged files. `qa:team` scaffolds a local review artifact for a material feature review. `qa:personas:prepare` provisions the committed personas against the Clerk and Convex environment currently loaded for QA. `qa:run-pack` is the explicit scenario-pack runner for `default_ship`, `extended`, and `billing_integration`. On local `billing_integration` targets it now records the pinned Stripe guardrail doctor as a warning-only preflight and runs `stripe:dev:verify` as the hard post-checkout proof. `qa:ship` scaffolds a dated run report for the selected scenario pack so the human runner can record what passed, failed, or remained blocked.
 
+If you want the fast local developer gate before handing a branch to QA, use `bun run precommit`. That is a separate repo-level check, not a Husky hook and not a QA pack.
+
 Pack placement by branch:
 
 - `default_ship` is the release-critical pack. On feature branches, run it only as `--dry-run` or through focused supporting tests. On `dev`, it is the standard integrated staging proof. On `main` or production, it is the release-evidence pack that should already be green before or after the merge depending on the change.

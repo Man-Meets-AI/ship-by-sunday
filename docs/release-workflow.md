@@ -42,7 +42,7 @@ Create that secret from the Convex dashboard for the production deployment:
 
 1. Branch from the current `dev`.
 2. Keep the diff scoped and split the work into logical conventional commits.
-3. From the repository root, run the narrowest relevant checks first, then broaden as needed. Use `bun run check` when the slice justifies a full pass.
+3. From the repository root, run the narrowest relevant checks first, then broaden as needed. The fast local pre-commit gate is `bun run precommit`, not Husky. Use `bun run check` when the slice justifies a full pass.
 4. Open a pull request from the feature branch into `dev`.
 5. Run the default multi-agent PR review against `dev`:
 
