@@ -31,8 +31,7 @@ describe("LessonShellWatch", () => {
 		);
 
 		expect(markup).toContain("Watch first");
-		expect(markup).toContain("Checking video availability");
-		expect(markup).toContain("Loading the lesson player.");
+		expect(markup).toContain("<iframe");
 	});
 
 	it("renders Light Research inline video", () => {
@@ -47,8 +46,7 @@ describe("LessonShellWatch", () => {
 		);
 
 		expect(markup).toContain("Watch first");
-		expect(markup).toContain("Checking video availability");
-		expect(markup).toContain("Loading the lesson player.");
+		expect(markup).toContain("<iframe");
 	});
 
 	it("preserves lesson-specific titles when a lesson borrows a media slot", () => {
