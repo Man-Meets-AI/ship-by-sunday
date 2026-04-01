@@ -24,15 +24,17 @@ Make sure all of this is true:
 ## Production checklist
 
 1. Land feature work into `dev` and make sure the release candidate is the code you want to ship.
-2. Run `bun run check` from the repo root before opening the release PR.
+2. Run `bun run check` from the repo root before opening the release PR. On contributor machines, install the committed git hooks once with `bun run hooks:install` so `git commit` and `git push` enforce the fast local gate and the code-proof gate automatically.
 3. Open a pull request from `dev` into `main`.
 4. Merge only after required GitHub checks pass.
 5. Confirm Vercel creates the production web deploy from `main`.
 6. Confirm GitHub Actions runs `Convex Production Deploy` for the same `main` merge.
-7. Register or verify the live Stripe webhook endpoint.
-8. Run a safe billing-handoff pass in the deployed staging `dev` or production environment.
+7. Let GitHub Actions run `Production Release Proof` against the exact Vercel production deployment for the merged commit and then against the public site after the release lands.
+8. Register or verify the live Stripe webhook endpoint.
 9. Confirm product-access grant happens in the deployed environment, not just locally.
 10. Confirm the buyer reaches the protected product after payment.
+
+`Production Release Proof` should always run the hosted `default_ship` pass against `https://www.man-meets-ai.com`. When the merged release changed checkout, Stripe, entitlement, webhook, or access handoff behavior, that workflow should also run the hosted `billing_integration` pass automatically instead of waiting for someone to remember an opt-in rerun.
 
 For this repo, the safest staging or production billing proof is a live no-cost Checkout run using a restricted `100% off` promotion code:
 
@@ -60,7 +62,7 @@ Before trusting production billing, verify both of these are true on the product
 - `STRIPE_WEBHOOK_SECRET`
 - `STRIPE_SECRET_KEY`
 
-After those are correct, run one fresh live no-cost order and verify it auto-forwards back into `/start` without replaying the Stripe event. The replay path is a valid repair tool, but the clean production proof is the automatic delivery path.
+After those are correct, let the hosted `billing_integration` run prove one fresh live no-cost order and verify it auto-forwards back into `/start` without replaying the Stripe event. The replay path is a valid repair tool, but the clean production proof is the automatic delivery path.
 
 ## Keep these in mind
 

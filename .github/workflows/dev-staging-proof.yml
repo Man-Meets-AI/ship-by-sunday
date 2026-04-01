@@ -6,8 +6,8 @@ on:
       - dev
   workflow_dispatch:
     inputs:
-      billing_integration:
-        description: Run the billing integration gate after the default ship pack
+      force_billing:
+        description: Force the billing integration gate even when there is no useful diff to inspect
         required: false
         type: boolean
         default: false
@@ -20,7 +20,58 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  release_scope:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      base_sha: ${{ steps.refs.outputs.base_sha }}
+      billing_sensitive: ${{ steps.scope.outputs.billing_sensitive }}
+      head_sha: ${{ steps.refs.outputs.head_sha }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.12.0
+
+      - name: Resolve release scope refs
+        id: refs
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            head_sha="$(git rev-parse HEAD)"
+            if git rev-parse "${head_sha}^" >/dev/null 2>&1; then
+              base_sha="$(git rev-parse "${head_sha}^")"
+            else
+              base_sha="$head_sha"
+            fi
+          else
+            base_sha="${{ github.event.before }}"
+            head_sha="${{ github.sha }}"
+          fi
+
+          echo "base_sha=$base_sha" >> "$GITHUB_OUTPUT"
+          echo "head_sha=$head_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Detect release scope
+        id: scope
+        env:
+          FORCE_BILLING: ${{ github.event_name == 'workflow_dispatch' && inputs.force_billing }}
+          RELEASE_BASE_SHA: ${{ steps.refs.outputs.base_sha }}
+          RELEASE_HEAD_SHA: ${{ steps.refs.outputs.head_sha }}
+        run: |
+          if [[ "$FORCE_BILLING" == "true" ]]; then
+            echo "billing_sensitive=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          node qa/scripts/detect-release-scope.mjs --base="$RELEASE_BASE_SHA" --head="$RELEASE_HEAD_SHA"
+
   default_ship:
+    needs: release_scope
     runs-on: ubuntu-latest
     timeout-minutes: 40
     environment:
@@ -92,8 +143,10 @@ jobs:
           if-no-files-found: ignore
 
   billing_integration:
-    if: github.event_name == 'workflow_dispatch' && inputs.billing_integration
-    needs: default_ship
+    if: needs.release_scope.outputs.billing_sensitive == 'true'
+    needs:
+      - release_scope
+      - default_ship
     runs-on: ubuntu-latest
     timeout-minutes: 50
     environment:
@@ -166,3 +219,30 @@ jobs:
             apps/web/playwright-report
             apps/web/test-results
           if-no-files-found: ignore
+
+  release_gate:
+    if: always()
+    needs:
+      - release_scope
+      - default_ship
+      - billing_integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Enforce dev staging release gate
+        env:
+          BILLING_SENSITIVE: ${{ needs.release_scope.outputs.billing_sensitive }}
+          BILLING_RESULT: ${{ needs.billing_integration.result }}
+          DEFAULT_SHIP_RESULT: ${{ needs.default_ship.result }}
+        run: |
+          if [[ "$DEFAULT_SHIP_RESULT" != "success" ]]; then
+            echo "default_ship must succeed for dev staging proof." >&2
+            exit 1
+          fi
+
+          if [[ "$BILLING_SENSITIVE" == "true" && "$BILLING_RESULT" != "success" ]]; then
+            echo "billing_integration was required and did not succeed." >&2
+            exit 1
+          fi
+
+          echo "Dev staging release gate passed."
