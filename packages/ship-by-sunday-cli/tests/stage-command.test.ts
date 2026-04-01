@@ -3,14 +3,14 @@ import { createCliIo, createTemporaryRepoRoot } from "./test-helpers";
 
 describe("stage selection", () => {
 	it("resume targets the first incomplete stage", async () => {
-		const repoRootPath = await createTemporaryRepoRoot();
+		const projectRootPath = await createTemporaryRepoRoot();
 		const { io } = createCliIo();
-		const promptStage = vi.fn(async () => {});
+		const promptStage = vi.fn(async () => ({ kind: "completed" as const }));
 
 		const exitCode = await runCli({
 			argv: ["resume"],
 			io,
-			repoRootPath,
+			projectRootPath,
 			promptStage,
 		});
 
@@ -23,14 +23,14 @@ describe("stage selection", () => {
 	});
 
 	it("stage routes to the explicit requested stage", async () => {
-		const repoRootPath = await createTemporaryRepoRoot();
+		const projectRootPath = await createTemporaryRepoRoot();
 		const { io } = createCliIo();
-		const promptStage = vi.fn(async () => {});
+		const promptStage = vi.fn(async () => ({ kind: "completed" as const }));
 
 		const exitCode = await runCli({
 			argv: ["stage", "design"],
 			io,
-			repoRootPath,
+			projectRootPath,
 			promptStage,
 		});
 

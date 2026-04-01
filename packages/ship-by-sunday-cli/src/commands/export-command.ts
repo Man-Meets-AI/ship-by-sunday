@@ -4,21 +4,21 @@ import type { CliIo } from "../run-cli";
 
 export async function handleExportCommand({
 	io,
-	repoRootPath,
+	projectRootPath,
 	outPath,
 	json,
 }: {
 	io: CliIo;
-	repoRootPath: string;
+	projectRootPath: string;
 	outPath: string;
 	json: boolean;
 }) {
 	if (outPath === "-") {
-		io.write(await readLocalDraftSource(repoRootPath));
+		io.write(await readLocalDraftSource(projectRootPath));
 		return 0;
 	}
 
-	const exportedPath = await exportDraftToFile(repoRootPath, outPath);
+	const exportedPath = await exportDraftToFile(projectRootPath, outPath);
 	if (json) {
 		writeJsonResult(io, "export", {
 			outPath: exportedPath,

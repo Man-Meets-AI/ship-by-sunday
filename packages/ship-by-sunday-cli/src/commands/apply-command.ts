@@ -6,19 +6,19 @@ import type { CliIo } from "../run-cli";
 
 export async function handleApplyCommand({
 	io,
-	repoRootPath,
+	projectRootPath,
 	stageId,
 	filePath,
 	json,
 }: {
 	io: CliIo;
-	repoRootPath: string;
+	projectRootPath: string;
 	stageId: EditablePacketStageId;
 	filePath: string;
 	json: boolean;
 }) {
 	const stage = getPacketStageDefinition(stageId);
-	const draft = await applyDraftPatchFromFile(repoRootPath, stage, filePath);
+	const draft = await applyDraftPatchFromFile(projectRootPath, stage, filePath);
 	if (json) {
 		writeJsonResult(io, "apply", {
 			stageId,

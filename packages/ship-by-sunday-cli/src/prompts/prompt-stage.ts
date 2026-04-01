@@ -1,84 +1,43 @@
 import {
-	buildStepDraftValues,
 	createCanonicalProjectDefinitionDraft,
-	getPacketFieldScaleDefinition,
-	getPacketStepLabel,
-	getPacketStageDefinition,
 	isPacketArrayField,
 	isPacketNumericField,
 	normalizeProblemUrgencyValue,
 	normalizeProblemSeverityValue,
 	parseCanonicalProjectFactsDraft,
-	packetFieldHelperText,
-	packetFieldLabel,
-	packetFieldPromptKind,
 	type CanonicalProjectDefinitionDraft,
 	type CanonicalProjectFactKey,
 } from "@manmeetsai/packet-compiler";
-import { createInterface } from "node:readline/promises";
-import { stdin as input, stdout as output } from "node:process";
+import { createCliError } from "../cli-errors";
+import { workspaceLauncherCommand } from "../command-surface";
 import { ensureLocalDraft, loadLocalDraft } from "../draft/draft-store";
 import type { EditablePacketStageId } from "../parse-cli-command";
 import type { CliIo } from "../run-cli";
+import {
+	createReadlineStageSession,
+	type ReadlineStageAnswer,
+} from "./readline-stage-session";
+import {
+	createStagePromptSession,
+	type StagePromptOutcome,
+} from "./stage-prompt-session";
 
 type DraftSaver = (draft: CanonicalProjectDefinitionDraft) => Promise<void>;
 
-async function promptText({
-	question,
-	currentValue,
-	rl,
-}: {
-	question: string;
-	currentValue: string;
-	rl: ReturnType<typeof createInterface>;
-}) {
-	const suffix = currentValue ? ` [current: ${currentValue}]` : "";
-	const answer = await rl.question(`${question}${suffix}\n> `);
-
-	if (!answer.trim()) {
-		return currentValue;
-	}
-	if (answer.trim() === "!clear") {
-		return "";
-	}
-	return answer.trim();
+function createInvalidPromptStateError(stageId: EditablePacketStageId) {
+	return createCliError(
+		"invalid_state",
+		`Interactive prompts require a real terminal. Re-run ${workspaceLauncherCommand} stage ${stageId} in a TTY, or use ${workspaceLauncherCommand} set/import/mutate with --json for automation.`,
+		2,
+	);
 }
 
-async function promptMultiline({
-	question,
-	currentValue,
-	rl,
-}: {
-	question: string;
-	currentValue: string;
-	rl: ReturnType<typeof createInterface>;
-}) {
-	output.write(`${question}\n`);
-	if (currentValue) {
-		output.write(`Current value:\n${currentValue}\n`);
-	}
-	output.write(
-		'Enter one or more lines. Submit an empty line to finish, or type "!clear" to remove it.\n',
+function createClosedPromptError(stageId: EditablePacketStageId) {
+	return createCliError(
+		"invalid_state",
+		`The terminal closed before the current answer was completed. Re-run ${workspaceLauncherCommand} stage ${stageId} in a real terminal, or use ${workspaceLauncherCommand} set/import/mutate with --json for automation.`,
+		2,
 	);
-
-	const firstLine = await rl.question("> ");
-	if (!firstLine.trim()) {
-		return currentValue;
-	}
-	if (firstLine.trim() === "!clear") {
-		return "";
-	}
-
-	const lines = [firstLine];
-	while (true) {
-		const nextLine = await rl.question("> ");
-		if (!nextLine.trim()) {
-			break;
-		}
-		lines.push(nextLine);
-	}
-
-	return lines.join("\n");
 }
 
 function applyFieldValue(
@@ -117,61 +76,129 @@ function applyFieldValue(
 	});
 }
 
+async function readFieldLines({
+	readlineSession,
+	prompt,
+	mode,
+}: {
+	readlineSession: ReturnType<typeof createReadlineStageSession>;
+	prompt: string;
+	mode: "single-line" | "multiline";
+}): Promise<ReadlineStageAnswer | { kind: "answer"; lines: string[] }> {
+	const firstAnswer = await readlineSession.ask(prompt);
+	if (firstAnswer.kind !== "answer") {
+		return firstAnswer;
+	}
+
+	if (mode === "single-line") {
+		return { kind: "answer", lines: [firstAnswer.value] };
+	}
+
+	const firstLine = firstAnswer.value;
+	if (!firstLine.trim()) {
+		return { kind: "answer", lines: [firstLine] };
+	}
+
+	if (firstLine.trim() === ":clear" || firstLine.trim() === ":quit") {
+		return { kind: "answer", lines: [firstLine] };
+	}
+
+	const lines = [firstLine];
+	while (true) {
+		const nextLine = await readlineSession.ask("> ");
+		if (nextLine.kind !== "answer") {
+			return nextLine;
+		}
+		if (!nextLine.value.trim()) {
+			break;
+		}
+		lines.push(nextLine.value);
+	}
+
+	return { kind: "answer", lines };
+}
+
 export async function promptStage({
-	repoRootPath,
+	projectRootPath,
 	stageId,
 	io,
 	saveDraft,
 }: {
-	repoRootPath: string;
+	projectRootPath: string;
 	stageId: EditablePacketStageId;
 	io: CliIo;
 	saveDraft: DraftSaver;
-}) {
-	const stage = getPacketStageDefinition(stageId);
+}): Promise<StagePromptOutcome> {
+	if (!process.stdin.isTTY || !process.stdout.isTTY) {
+		throw createInvalidPromptStateError(stageId);
+	}
+
+	const stageSession = createStagePromptSession({ stageId });
 	let draft =
-		(await loadLocalDraft(repoRootPath)) ??
-		(await ensureLocalDraft(repoRootPath));
-	const rl = createInterface({ input, output });
+		(await loadLocalDraft(projectRootPath)) ??
+		(await ensureLocalDraft(projectRootPath));
+	const readlineSession = createReadlineStageSession();
 
 	try {
-		io.write(`${stage.label}\n${stage.description}`);
+		io.write(stageSession.formatIntroLines().join("\n"));
 
-		for (const step of stage.steps) {
+		for (const [stepIndex, step] of stageSession.stage.steps.entries()) {
 			io.write(
-				`\n${stage.label} / ${getPacketStepLabel(stageId, step.id) ?? step.label}`,
+				`\n${stageSession.formatStepHeader(stepIndex, step.fieldKeys.length)}`,
 			);
-			const draftValues = buildStepDraftValues(draft.facts, step);
 
-			for (const fieldKey of step.fieldKeys) {
-				const currentValue = draftValues[fieldKey] ?? "";
-				const label = packetFieldLabel(fieldKey, draft.facts);
-				const helperText = packetFieldHelperText(fieldKey, draft.facts);
-				const promptKind = packetFieldPromptKind(fieldKey);
-				const scaleDefinition = getPacketFieldScaleDefinition(fieldKey);
-				const nextValue =
-					promptKind === "list" || promptKind === "long_text"
-						? await promptMultiline({
-								question: helperText ? `${label}\n${helperText}` : label,
-								currentValue,
-								rl,
-							})
-						: await promptText({
-								question:
-									promptKind === "scale" && scaleDefinition
-										? `${helperText ? `${label}\n${helperText}` : label} (${scaleDefinition.options.map((option) => option.label).join(" / ")})`
-										: helperText
-											? `${label}\n${helperText}`
-											: label,
-								currentValue,
-								rl,
-							});
+			for (const [fieldIndex, fieldKey] of step.fieldKeys.entries()) {
+				const fieldPrompt = stageSession.formatFieldPrompt({
+					draft,
+					fieldKey,
+					stepIndex,
+					fieldIndex,
+					fieldCount: step.fieldKeys.length,
+				});
+				const answer = await readFieldLines({
+					readlineSession,
+					prompt: fieldPrompt.prompt,
+					mode: fieldPrompt.mode,
+				});
 
+				if (answer.kind === "cancelled") {
+					return {
+						kind: "interrupted",
+						message: stageSession.formatExitMessage("cancelled"),
+						reason: "cancelled",
+					};
+				}
+
+				if (answer.kind === "closed") {
+					throw createClosedPromptError(stageId);
+				}
+
+				const answerLines = "lines" in answer ? answer.lines : [answer.value];
+				const action = stageSession.resolveFieldAction({
+					answerLines,
+					fieldKey,
+				});
+
+				if (action.kind === "quit") {
+					return {
+						kind: "interrupted",
+						message: stageSession.formatExitMessage("quit"),
+						reason: "quit",
+					};
+				}
+
+				if (action.kind === "keep") {
+					continue;
+				}
+
+				const nextValue = action.kind === "clear" ? "" : action.value;
 				draft = applyFieldValue(draft, fieldKey, nextValue);
 				await saveDraft(draft);
 			}
 		}
+
+		return { kind: "completed" };
 	} finally {
-		rl.close();
+		readlineSession.close();
 	}
 }

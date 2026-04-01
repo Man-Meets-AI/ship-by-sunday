@@ -1,24 +1,27 @@
-import { writeJsonError } from "./cli-json";
-import { normalizeCliError } from "./cli-errors";
-import { resolveRepoRootPath } from "@manmeetsai/packet-compiler/server";
-import { handleInitCommand } from "./commands/init-command";
 import { handleApplyCommand } from "./commands/apply-command";
-import { handleFieldsCommand } from "./commands/fields-command";
 import { handleExportCommand } from "./commands/export-command";
+import { handleFieldMutationCommand } from "./commands/mutate-field-command";
+import { handleFieldsCommand } from "./commands/fields-command";
 import { handleGenerateCommand } from "./commands/generate-command";
 import { handleImportCommand } from "./commands/import-command";
-import { handleFieldMutationCommand } from "./commands/mutate-field-command";
+import { handleInitCommand } from "./commands/init-command";
+import { handleCompletionCommand } from "./commands/completion-command";
 import { handleMutateCommand } from "./commands/mutate-command";
 import { handleNextCommand } from "./commands/next-command";
 import { handleResumeCommand } from "./commands/resume-command";
 import { handleReviewCommand } from "./commands/review-command";
 import { handleSchemaCommand } from "./commands/schema-command";
+import { handleVersionCommand } from "./commands/version-command";
 import {
 	handleStageCommand,
 	type StagePrompter,
 } from "./commands/stage-command";
 import { handleStagesCommand } from "./commands/stages-command";
 import { handleValidateCommand } from "./commands/validate-command";
+import { resolveProjectRootPath } from "./cli-paths";
+import { createCliError, normalizeCliError } from "./cli-errors";
+import { writeJsonError } from "./cli-json";
+import { renderCommandHelp, renderTopLevelHelp } from "./help/render-help";
 import { parseCliCommand } from "./parse-cli-command";
 
 export type CliIo = {
@@ -30,42 +33,14 @@ export type RunCliOptions = {
 	argv: string[];
 	io: CliIo;
 	promptStage?: StagePrompter;
-	repoRootPath?: string;
+	projectRootPath?: string;
 };
-
-function printHelp(io: CliIo) {
-	io.write(
-		[
-			"Ship by Sunday CLI",
-			"",
-			"Commands:",
-			"  bun run sbs init [--fixture blank|complete] [--force] [--json]",
-			"  bun run sbs schema [--json]",
-			"  bun run sbs stages [--json]",
-			"  bun run sbs fields [--stage <stage>] [--json]",
-			"  bun run sbs next [--json]",
-			"  bun run sbs validate [--json]",
-			'  bun run sbs set <fieldKey|stage.fieldKey> "<value>" [--json]',
-			"  bun run sbs unset <fieldKey|stage.fieldKey> [--json]",
-			'  bun run sbs append <fieldKey|stage.fieldKey> "<value>" [--json]',
-			'  bun run sbs remove <fieldKey|stage.fieldKey> "<value>" [--json]',
-			"  bun run sbs mutate --file <file|-> [--json]",
-			"  bun run sbs resume",
-			"  bun run sbs stage <product|design|marketing|build-plan>",
-			"  bun run sbs review [--stage <stage>] [--missing-only] [--json]",
-			"  bun run sbs export --out <file|-> [--json]",
-			"  bun run sbs import --file <file|-> [--json]",
-			"  bun run sbs apply --stage <stage> --file <file|-> [--json]",
-			"  bun run sbs generate [repo] --out <path> [--zip] [--force] [--json]",
-		].join("\n"),
-	);
-}
 
 export async function runCli({
 	argv,
 	io,
 	promptStage,
-	repoRootPath,
+	projectRootPath,
 }: RunCliOptions) {
 	const jsonRequested = argv.includes("--json");
 	let commandName = argv[0] ?? "help";
@@ -73,16 +48,41 @@ export async function runCli({
 	try {
 		const command = parseCliCommand(argv);
 		commandName = command.kind;
-		const resolvedRepoRootPath = repoRootPath ?? resolveRepoRootPath();
+		const resolvedProjectRootPath = projectRootPath ?? resolveProjectRootPath();
 
 		switch (command.kind) {
-			case "help":
-				printHelp(io);
+			case "help": {
+				if (!command.topic) {
+					io.write(renderTopLevelHelp());
+					return 0;
+				}
+
+				const helpText = renderCommandHelp(command.topic);
+				if (!helpText) {
+					throw createCliError(
+						"invalid_args",
+						`Unknown command "${command.topic}".`,
+						2,
+					);
+				}
+
+				io.write(helpText);
 				return 0;
+			}
+			case "version":
+				return await handleVersionCommand({
+					io,
+					json: command.json,
+				});
+			case "completion":
+				return await handleCompletionCommand({
+					io,
+					shellName: command.shellName,
+				});
 			case "init":
 				return await handleInitCommand({
 					io,
-					repoRootPath: resolvedRepoRootPath,
+					projectRootPath: resolvedProjectRootPath,
 					fixture: command.fixture,
 					force: command.force,
 					json: command.json,
@@ -106,19 +106,19 @@ export async function runCli({
 			case "next":
 				return await handleNextCommand({
 					io,
-					repoRootPath: resolvedRepoRootPath,
+					projectRootPath: resolvedProjectRootPath,
 					json: command.json,
 				});
 			case "validate":
 				return await handleValidateCommand({
 					io,
-					repoRootPath: resolvedRepoRootPath,
+					projectRootPath: resolvedProjectRootPath,
 					json: command.json,
 				});
 			case "set":
 				return await handleFieldMutationCommand({
 					io,
-					repoRootPath: resolvedRepoRootPath,
+					projectRootPath: resolvedProjectRootPath,
 					command: "set",
 					selector: command.selector,
 					value: command.value,
@@ -127,7 +127,7 @@ export async function runCli({
 			case "unset":
 				return await handleFieldMutationCommand({
 					io,
-					repoRootPath: resolvedRepoRootPath,
+					projectRootPath: resolvedProjectRootPath,
 					command: "unset",
 					selector: command.selector,
 					json: command.json,
@@ -135,7 +135,7 @@ export async function runCli({
 			case "append":
 				return await handleFieldMutationCommand({
 					io,
-					repoRootPath: resolvedRepoRootPath,
+					projectRootPath: resolvedProjectRootPath,
 					command: "append",
 					selector: command.selector,
 					value: command.value,
@@ -144,7 +144,7 @@ export async function runCli({
 			case "remove":
 				return await handleFieldMutationCommand({
 					io,
-					repoRootPath: resolvedRepoRootPath,
+					projectRootPath: resolvedProjectRootPath,
 					command: "remove",
 					selector: command.selector,
 					value: command.value,
@@ -153,27 +153,27 @@ export async function runCli({
 			case "mutate":
 				return await handleMutateCommand({
 					io,
-					repoRootPath: resolvedRepoRootPath,
+					projectRootPath: resolvedProjectRootPath,
 					filePath: command.filePath,
 					json: command.json,
 				});
 			case "resume":
 				return await handleResumeCommand({
 					io,
-					repoRootPath: resolvedRepoRootPath,
+					projectRootPath: resolvedProjectRootPath,
 					promptStage,
 				});
 			case "stage":
 				return await handleStageCommand({
 					io,
-					repoRootPath: resolvedRepoRootPath,
+					projectRootPath: resolvedProjectRootPath,
 					stageId: command.stageId,
 					promptStage,
 				});
 			case "review":
 				return await handleReviewCommand({
 					io,
-					repoRootPath: resolvedRepoRootPath,
+					projectRootPath: resolvedProjectRootPath,
 					json: command.json,
 					missingOnly: command.missingOnly,
 					stageId: command.stageId,
@@ -181,21 +181,21 @@ export async function runCli({
 			case "export":
 				return await handleExportCommand({
 					io,
-					repoRootPath: resolvedRepoRootPath,
+					projectRootPath: resolvedProjectRootPath,
 					outPath: command.outPath,
 					json: command.json,
 				});
 			case "import":
 				return await handleImportCommand({
 					io,
-					repoRootPath: resolvedRepoRootPath,
+					projectRootPath: resolvedProjectRootPath,
 					filePath: command.filePath,
 					json: command.json,
 				});
 			case "apply":
 				return await handleApplyCommand({
 					io,
-					repoRootPath: resolvedRepoRootPath,
+					projectRootPath: resolvedProjectRootPath,
 					stageId: command.stageId,
 					filePath: command.filePath,
 					json: command.json,
@@ -203,7 +203,7 @@ export async function runCli({
 			case "generate":
 				return await handleGenerateCommand({
 					io,
-					repoRootPath: resolvedRepoRootPath,
+					projectRootPath: resolvedProjectRootPath,
 					outPath: command.outPath,
 					zip: command.zip,
 					force: command.force,

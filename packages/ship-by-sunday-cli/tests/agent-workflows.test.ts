@@ -16,7 +16,7 @@ describe("agent workflows", () => {
 		const exitCode = await runCli({
 			argv: ["init", "--fixture", "complete", "--json"],
 			io,
-			repoRootPath,
+			projectRootPath: repoRootPath,
 		});
 
 		expect(exitCode).toBe(0);
@@ -28,14 +28,40 @@ describe("agent workflows", () => {
 		});
 	});
 
+	it("returns a stable invalid_args payload for an unknown init fixture", async () => {
+		const repoRootPath = await createTemporaryRepoRoot();
+		const { io, stderr } = createCliIo();
+
+		const exitCode = await runCli({
+			argv: ["init", "--fixture", "nope", "--json"],
+			io,
+			projectRootPath: repoRootPath,
+		});
+
+		expect(exitCode).toBe(2);
+		expect(JSON.parse(stderr.join("\n"))).toMatchObject({
+			status: "error",
+			command: "init",
+			error_code: "invalid_args",
+		});
+	});
+
 	it("returns schema and next-step introspection for agents", async () => {
 		const repoRootPath = await createTemporaryRepoRoot();
+		await saveLocalDraft(
+			repoRootPath,
+			createCanonicalProjectDefinitionDraft({
+				clerkUserId: "local-cli-user",
+				productKey: "ship-by-sunday",
+				facts: {},
+			}),
+		);
 
 		const schemaIo = createCliIo();
 		const schemaExitCode = await runCli({
 			argv: ["schema", "--json"],
 			io: schemaIo.io,
-			repoRootPath,
+			projectRootPath: repoRootPath,
 		});
 		expect(schemaExitCode).toBe(0);
 		expect(JSON.parse(schemaIo.stdout.join("\n"))).toMatchObject({
@@ -48,7 +74,7 @@ describe("agent workflows", () => {
 		const nextExitCode = await runCli({
 			argv: ["next", "--json"],
 			io: nextIo.io,
-			repoRootPath,
+			projectRootPath: repoRootPath,
 		});
 		expect(nextExitCode).toBe(0);
 		expect(JSON.parse(nextIo.stdout.join("\n"))).toMatchObject({
@@ -67,7 +93,7 @@ describe("agent workflows", () => {
 			await runCli({
 				argv: ["set", "product.product_name", "Ship by Sunday CLI", "--json"],
 				io: setIo.io,
-				repoRootPath,
+				projectRootPath: repoRootPath,
 			}),
 		).toBe(0);
 		expect(JSON.parse(setIo.stdout.join("\n"))).toMatchObject({
@@ -82,7 +108,7 @@ describe("agent workflows", () => {
 			await runCli({
 				argv: ["append", "scope_in", "Packet intake", "--json"],
 				io: appendIo.io,
-				repoRootPath,
+				projectRootPath: repoRootPath,
 			}),
 		).toBe(0);
 		expect(JSON.parse(appendIo.stdout.join("\n"))).toMatchObject({
@@ -96,7 +122,7 @@ describe("agent workflows", () => {
 			await runCli({
 				argv: ["remove", "scope_in", "Packet intake", "--json"],
 				io: removeIo.io,
-				repoRootPath,
+				projectRootPath: repoRootPath,
 			}),
 		).toBe(0);
 		expect(JSON.parse(removeIo.stdout.join("\n"))).toMatchObject({
@@ -110,7 +136,7 @@ describe("agent workflows", () => {
 			await runCli({
 				argv: ["unset", "product_name", "--json"],
 				io: unsetIo.io,
-				repoRootPath,
+				projectRootPath: repoRootPath,
 			}),
 		).toBe(0);
 		expect(JSON.parse(unsetIo.stdout.join("\n"))).toMatchObject({
@@ -149,7 +175,7 @@ describe("agent workflows", () => {
 		const exitCode = await runCli({
 			argv: ["mutate", "--file", operationsFilePath, "--json"],
 			io,
-			repoRootPath,
+			projectRootPath: repoRootPath,
 		});
 
 		expect(exitCode).toBe(0);
@@ -192,7 +218,7 @@ describe("agent workflows", () => {
 		const exitCode = await runCli({
 			argv: ["mutate", "--file", operationsFilePath, "--json"],
 			io,
-			repoRootPath,
+			projectRootPath: repoRootPath,
 		});
 
 		expect(exitCode).toBe(2);
@@ -213,14 +239,14 @@ describe("agent workflows", () => {
 		await runCli({
 			argv: ["import", "--file", seedFilePath],
 			io: createCliIo().io,
-			repoRootPath,
+			projectRootPath: repoRootPath,
 		});
 
 		const { io, stdout } = createCliIo();
 		const exitCode = await runCli({
 			argv: ["export", "--out", "-"],
 			io,
-			repoRootPath,
+			projectRootPath: repoRootPath,
 		});
 
 		expect(exitCode).toBe(0);
@@ -268,7 +294,7 @@ describe("agent workflows", () => {
 		const exitCode = await runCli({
 			argv: ["review", "--stage", "build-plan", "--missing-only", "--json"],
 			io,
-			repoRootPath,
+			projectRootPath: repoRootPath,
 		});
 
 		expect(exitCode).toBe(0);
@@ -295,7 +321,7 @@ describe("agent workflows", () => {
 		await runCli({
 			argv: ["import", "--file", seedFilePath],
 			io: createCliIo().io,
-			repoRootPath,
+			projectRootPath: repoRootPath,
 		});
 
 		const { io, stdout } = createCliIo();
@@ -307,7 +333,7 @@ describe("agent workflows", () => {
 				"--json",
 			],
 			io,
-			repoRootPath,
+			projectRootPath: repoRootPath,
 		});
 
 		expect(exitCode).toBe(0);
@@ -332,7 +358,7 @@ describe("agent workflows", () => {
 				"--json",
 			],
 			io,
-			repoRootPath,
+			projectRootPath: repoRootPath,
 		});
 
 		expect(exitCode).toBe(0);

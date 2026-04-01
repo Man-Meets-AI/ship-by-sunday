@@ -5,14 +5,14 @@ import { handleStageCommand, type StagePrompter } from "./stage-command";
 
 export async function handleResumeCommand({
 	io,
-	repoRootPath,
+	projectRootPath,
 	promptStage,
 }: {
 	io: CliIo;
-	repoRootPath: string;
+	projectRootPath: string;
 	promptStage?: StagePrompter;
 }) {
-	const draft = await ensureLocalDraft(repoRootPath);
+	const draft = await ensureLocalDraft(projectRootPath);
 	const stageStatus = deriveStageStatus(draft.facts);
 
 	if (stageStatus.firstIncompleteStageId === "review") {
@@ -25,7 +25,7 @@ export async function handleResumeCommand({
 
 	return handleStageCommand({
 		io,
-		repoRootPath,
+		projectRootPath,
 		stageId: stageStatus.firstIncompleteStageId,
 		promptStage,
 	});

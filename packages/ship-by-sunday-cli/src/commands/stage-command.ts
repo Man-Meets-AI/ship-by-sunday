@@ -5,43 +5,49 @@ import {
 import { ensureLocalDraft, saveLocalDraft } from "../draft/draft-store";
 import type { EditablePacketStageId } from "../parse-cli-command";
 import type { CliIo } from "../run-cli";
+import type { StagePromptOutcome } from "../prompts/stage-prompt-session";
 
 export type StagePrompter = (args: {
-	repoRootPath: string;
+	projectRootPath: string;
 	stageId: EditablePacketStageId;
 	io: CliIo;
 	saveDraft: ReturnType<typeof createDraftSaver>;
-}) => Promise<void>;
+}) => Promise<StagePromptOutcome>;
 
-function createDraftSaver(repoRootPath: string) {
+function createDraftSaver(projectRootPath: string) {
 	return async (draft: Awaited<ReturnType<typeof ensureLocalDraft>>) =>
-		saveLocalDraft(repoRootPath, draft);
+		saveLocalDraft(projectRootPath, draft);
 }
 
 export async function handleStageCommand({
 	io,
-	repoRootPath,
+	projectRootPath,
 	stageId,
 	promptStage,
 }: {
 	io: CliIo;
-	repoRootPath: string;
+	projectRootPath: string;
 	stageId: EditablePacketStageId;
 	promptStage?: StagePrompter;
 }) {
-	await ensureLocalDraft(repoRootPath);
+	await ensureLocalDraft(projectRootPath);
 	if (!promptStage) {
 		io.write(`Stage ${getPacketStageDefinition(stageId).label} is available.`);
 		return 0;
 	}
 
-	await promptStage({
-		repoRootPath,
+	const outcome = await promptStage({
+		projectRootPath,
 		stageId,
 		io,
-		saveDraft: createDraftSaver(repoRootPath),
+		saveDraft: createDraftSaver(projectRootPath),
 	});
-	const nextDraft = await ensureLocalDraft(repoRootPath);
+	if (outcome.kind === "interrupted") {
+		io.write(outcome.message);
+		return 0;
+	}
+
+	const nextDraft = await ensureLocalDraft(projectRootPath);
 	const stageStatus = deriveStageStatus(nextDraft.facts);
 	io.write(
 		`${getPacketStageDefinition(stageId).label} saved. First incomplete stage: ${stageStatus.firstIncompleteStageId}`,

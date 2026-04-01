@@ -3,7 +3,7 @@ import {
 	packetFieldLabel,
 } from "@manmeetsai/packet-compiler";
 import { writeJsonResult } from "../cli-json";
-import { loadLocalDraft } from "../draft/draft-store";
+import { requireLocalDraft } from "../draft/draft-store";
 import type { ReviewablePacketStageId } from "../parse-cli-command";
 import type { CliIo } from "../run-cli";
 
@@ -13,21 +13,18 @@ function formatMissingFieldList(fieldKeys: string[]) {
 
 export async function handleReviewCommand({
 	io,
-	repoRootPath,
+	projectRootPath,
 	json,
 	missingOnly,
 	stageId,
 }: {
 	io: CliIo;
-	repoRootPath: string;
+	projectRootPath: string;
 	json: boolean;
 	missingOnly: boolean;
 	stageId?: ReviewablePacketStageId;
 }) {
-	const draft = await loadLocalDraft(repoRootPath);
-	if (!draft) {
-		throw new Error("No local Ship by Sunday draft exists yet.");
-	}
+	const draft = await requireLocalDraft(projectRootPath);
 
 	const stageStatus = deriveStageStatus(draft.facts);
 	const visibleStageStatuses = stageStatus.stageStatuses.filter((stage) => {

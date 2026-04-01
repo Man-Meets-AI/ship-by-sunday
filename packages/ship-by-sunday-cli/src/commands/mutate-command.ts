@@ -82,16 +82,16 @@ function normalizeDraftMutation(
 
 export async function handleMutateCommand({
 	io,
-	repoRootPath,
+	projectRootPath,
 	filePath,
 	json,
 }: {
 	io: CliIo;
-	repoRootPath: string;
+	projectRootPath: string;
 	filePath: string;
 	json: boolean;
 }) {
-	const mutationSource = await readDraftInputSource(repoRootPath, filePath);
+	const mutationSource = await readDraftInputSource(projectRootPath, filePath);
 	let parsedInput: unknown;
 	try {
 		parsedInput = JSON.parse(mutationSource);
@@ -105,7 +105,7 @@ export async function handleMutateCommand({
 
 	const rawOperations = parseRawMutationOperations(parsedInput);
 	const mutations = rawOperations.map(normalizeDraftMutation);
-	const nextDraft = await applyDraftMutations(repoRootPath, mutations);
+	const nextDraft = await applyDraftMutations(projectRootPath, mutations);
 
 	if (json) {
 		writeJsonResult(io, "mutate", {
