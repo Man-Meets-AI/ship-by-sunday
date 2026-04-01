@@ -29,12 +29,13 @@ Production is healthy only when all three systems agree on the same release cand
 ## Required standing configuration
 
 - GitHub branch protection is enabled on `dev` and `main`.
-- `dev` requires pull requests, the code-centric CI checks, and the `Dev Staging Proof` workflow on pushes to `dev`.
+- `dev` requires pull requests and the code-centric CI checks. After each merge into `dev`, the resulting branch tip must also pass `Dev Staging Proof` before that `dev` commit is treated as a release candidate for `main`.
 - `main` requires pull requests and the `static`, `integration`, `browser-smoke`, and `cli` checks.
 - Vercel project `mma-shipbysunday` is linked to `ParkerRex/mma-shipbysunday` and uses `main` as its production branch.
 - Root `bunfig.toml` forces `install.linker = "hoisted"` so GitHub Actions and Vercel installs do not use Bun's isolated symlink-heavy workspace layout during builds and serverless packaging.
 - `apps/web/vercel.json` overrides the Vercel install step to remove cached `node_modules` trees before `bun install --frozen-lockfile`, because switching linkers alone does not rewrite a restored isolated-install cache.
 - GitHub repository secret `CONVEX_DEPLOY_KEY` must exist before remote Convex dry-runs or production deploys can succeed.
+- GitHub repository secret `VERCEL_TOKEN` must exist before `Production Release Proof` can wait for the exact Vercel production deployment for the merged `main` commit.
 - GitHub repository variable `CONVEX_PRODUCTION_DEPLOY_ENABLED` is the live pause switch for automatic Convex production deploys. It is `true` after the first successful dry-run; set it back to `false` if you need to pause automatic `main` deploys.
 
 Create that secret from the Convex dashboard for the production deployment:
@@ -48,14 +49,14 @@ Create that secret from the Convex dashboard for the production deployment:
 
 1. Branch from the current `dev`.
 2. Keep the diff scoped and split the work into logical conventional commits.
-3. From the repository root, run the narrowest relevant checks first, then broaden as needed. The fast local pre-commit gate is `bun run precommit`, not Husky. Use `bun run check` when the slice justifies a full pass.
+3. From the repository root, run the narrowest relevant checks first, then broaden as needed. Install the committed local hooks once with `bun run hooks:install`. After that, `git commit` runs `bun run precommit` and `git push` runs `bun run prepush`. Use `bun run check` when the slice justifies a fuller local pass.
 4. Open a pull request from the feature branch into `dev`.
 5. Run the default multi-agent PR review against `dev`:
 
    `Review this branch against dev. Have pr_explorer map the affected code paths, reviewer find real risks, and docs_researcher verify the framework APIs that the patch relies on.`
 
-6. Merge the feature branch into `dev` only after the required checks for the staging candidate are green.
-7. Treat `dev` as the release candidate branch. When the integrated staging candidate is ready, open the `dev -> main` release pull request.
+6. Merge the feature branch into `dev` only after the code-centric checks for the staging candidate are green.
+7. Treat `dev` as the release candidate branch. After the merge, wait for the aggregate `release_gate` job from `Dev Staging Proof` on the resulting `dev` commit. That job is the integrated staging proof and must be green before you open the `dev -> main` release pull request.
 8. Run the default multi-agent PR review against `main` for the release pull request:
 
    `Review this branch against main. Have pr_explorer map the affected code paths, reviewer find real risks, and docs_researcher verify the framework APIs that the patch relies on.`
@@ -64,8 +65,8 @@ Create that secret from the Convex dashboard for the production deployment:
 10. Tag the merged `main` commit with the next pre-1.0 version and publish the matching GitHub Release from that tag. Copy or summarize the notes from the corresponding `CHANGELOG.md` section before publishing.
 11. Watch Vercel create the production web deploy from the merged `main` commit.
 12. Watch GitHub Actions run `Convex Production Deploy` for the same merged `main` commit.
-13. Run the `default_ship` QA pack against production with matching production Clerk env values when the change warrants post-deploy proof.
-14. When the release touched checkout, Stripe, entitlement, webhook, or access-handoff behavior, run a fresh production billing proof using the documented live no-cost Checkout method. Skip this extra proof for unrelated docs or presentation changes.
+13. Let the `Production Release Proof` workflow wait for the exact Vercel production deployment for the merged commit, then run the hosted post-deploy verification against `https://www.man-meets-ai.com`.
+14. When the release touched checkout, Stripe, entitlement, webhook, or access-handoff behavior, `Production Release Proof` should also run hosted `billing_integration` automatically. Skip this extra proof only for unrelated docs or presentation changes.
 15. Delete the local and remote feature branch after the release settles.
 
 Useful verification commands:
@@ -73,6 +74,7 @@ Useful verification commands:
 ```bash
 gh run list --repo ParkerRex/mma-shipbysunday --workflow ci.yml --limit 10
 gh run list --repo ParkerRex/mma-shipbysunday --workflow convex-production-deploy.yml --limit 10
+gh run list --repo ParkerRex/mma-shipbysunday --workflow production-release-proof.yml --limit 10
 vercel target list
 cd apps/web && bunx convex logs --prod --history 20
 PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run qa:run-pack -- --pack=default_ship

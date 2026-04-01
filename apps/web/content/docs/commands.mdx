@@ -122,7 +122,7 @@ Current QA state:
 - `billing_integration` on `dev` has a green rerun.
 - `default_ship` on `prod` has a green rerun.
 - `billing_integration` on `prod` now has both the repair report and a fresh automatic rerun proving live webhook delivery.
-- Hosted `billing_integration` should still stay opt-in because it spends real live Checkout Sessions, even when the order total is reduced to zero.
+- Hosted `billing_integration` should be automatic for billing-sensitive `dev` and `main` releases, even though it spends a real live no-cost Checkout Session. It should stay skipped for unrelated docs, copy, or presentation-only changes.
 
 Only move to the hosted domain after the local auth/runtime path is understood.
 
