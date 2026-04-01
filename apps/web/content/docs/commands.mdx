@@ -38,6 +38,8 @@ bun run check
 
 ## Ship by Sunday CLI
 
+Use the repository-local launcher from the repo root with either `bun run sbs` or `./bin/sbs`. For the longer operating guide, read [Ship by Sunday CLI](/docs/ship-by-sunday-cli).
+
 ```bash
 bun run sbs init --fixture complete --json
 bun run sbs schema --json
@@ -50,6 +52,9 @@ bun run sbs append scope_in "Packet intake" --json
 bun run sbs unset build-plan.domain --json
 bun run sbs mutate --file ./tmp/mutations.json --json
 bun run sbs --help
+bun run sbs --version
+bun run sbs version --json
+bun run sbs completion zsh
 bun run sbs resume
 bun run sbs stage design
 bun run sbs review --stage build-plan --missing-only --json
@@ -60,6 +65,9 @@ cat ./tmp/build-plan-patch.json | bun run sbs apply --stage build-plan --file -
 bun run sbs generate --out ./tmp/sbs-cli-repo --json
 bun run sbs generate --out ./tmp/sbs-cli-repo.zip --zip --json
 bun run sbs generate --out ./tmp/sbs-cli-repo --dry-run --json
+./bin/sbs --help
+./bin/sbs --version
+./bin/sbs completion bash
 ```
 
 Use the CLI when you want the packet intake and starter snapshot flow without going through the protected web UI. For the actual draft model, command behavior, and generation notes, read [Ship by Sunday CLI](/docs/ship-by-sunday-cli).

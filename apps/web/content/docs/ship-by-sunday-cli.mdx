@@ -7,11 +7,14 @@ description: Run the packet intake, readiness review, and starter snapshot gener
 
 The Ship by Sunday CLI is the local-first version of the packet intake flow. It asks the same canonical pre-review questions that drive the web packet stages, stores one draft at the repository root, reports readiness with the same compiler logic as `/review`, and generates the same starter snapshot shape as the protected download route.
 
+Clone the repository, run `bun install`, then launch the CLI from the repository root with either `bun run sbs` or the checked-in repo-local wrapper at `./bin/sbs`. Both entrypoints share the same command parser, version source, and JSON envelopes. When you run `bun run sbs` in a real terminal, the CLI opens a bannered entry surface for the current repository instead of dumping raw help. The startup surface points you at `resume`, `next --json`, and `review --json`, while `bun run sbs --help`, `bun run sbs help review`, `bun run sbs review --help`, `bun run sbs stage --help`, `bun run sbs --version`, `./bin/sbs --version`, and `./bin/sbs completion zsh` stay clean and side-effect free. Interactive stage prompts also make `:clear` and `:quit` explicit so you can back out safely and resume later.
+
 Use it when:
 
 - you want to shape the packet from a terminal instead of the protected web UI
 - you want to import or patch facts from another tool or agent
 - you want a local starter snapshot without needing Clerk, Convex auth, or a browser session
+- you want a repo-local launcher that does not depend on a registry install or package-manager shim
 
 ## Where it stores state
 
@@ -37,6 +40,10 @@ bun run sbs append scope_in "Packet intake" --json
 bun run sbs unset build-plan.domain --json
 bun run sbs mutate --file ./tmp/mutations.json --json
 bun run sbs --help
+bun run sbs --version
+bun run sbs version --json
+bun run sbs completion zsh
+bun run sbs completion bash
 bun run sbs resume
 bun run sbs stage <product|design|marketing|build-plan>
 bun run sbs review [--stage build-plan] [--missing-only] [--json]
@@ -46,6 +53,10 @@ bun run sbs import --file ./tmp/sbs-cli-complete.json
 cat ./tmp/build-plan-patch.json | bun run sbs apply --stage build-plan --file -
 bun run sbs generate --out ./tmp/sbs-cli-repo --json
 bun run sbs generate --out ./tmp/sbs-cli-repo.zip --zip --json
+./bin/sbs --help
+./bin/sbs --version
+./bin/sbs completion zsh
+./bin/sbs completion bash
 ```
 
 What each one does:
@@ -63,6 +74,21 @@ What each one does:
 - `import` replaces the local draft with a canonical complete definition, canonical draft, or facts-only JSON file. `--file -` reads JSON from stdin.
 - `apply` merges a stage-scoped patch file into the draft and rejects keys that do not belong to that stage. `--file -` reads the patch from stdin.
 - `generate` requires a review-ready draft and an explicit `--out` path. Directory mode creates a slugified repo folder inside the target path. `--zip` writes the same snapshot as a zip archive. `--force` allows overwrite. `--json` returns structured machine-readable metadata about the generated artifact.
+
+## Install and Update
+
+The supported install path is still the repository itself. Clone it, run `bun install`, and use either `bun run sbs` or `./bin/sbs` from the repo root. The repo-local wrapper is the supported direct launcher; it is not a public-package shim and it does not require `bunx`, Homebrew, or a global install.
+
+`bun run sbs --version`, `./bin/sbs --version`, and `bun run sbs version --json` all report the same version field. `./bin/sbs completion bash` and `./bin/sbs completion zsh` print shell scripts to stdout so you can source them manually.
+
+When you need an update, pull the repository and rerun `bun install`. Self-update is intentionally out of scope for this slice.
+
+## Unsupported For Now
+
+- public registry distribution
+- `bunx`-based invocation
+- Homebrew packaging
+- self-update or remote update commands
 
 ## Path behavior
 
