@@ -79,13 +79,14 @@ For the file-by-file operating guide, see [Configure the Homepage](/docs/configu
 ## Purchase-to-access flow
 
 1. A buyer starts from the public landing page.
-2. Signed-out buyers are sent to Clerk sign-in first and then returned to pricing.
-3. Signed-in buyers call `POST /api/stripe/checkout`.
+2. The buyer calls `POST /api/stripe/checkout` from the public CTA, whether they are already signed in or not.
+3. The app stores the pending Stripe Checkout Session ID in a first-party cookie so the handoff can recover if the Stripe return tab is lost.
 4. Stripe hosts the payment flow and returns to `/checkout/success`.
 5. `POST {NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook` verifies the signature and handles completed checkout events.
-6. Convex upserts the active product-access grant.
-7. `/checkout/success` starts from a server-fetched product-access snapshot, then continues Clerk-gated live access polling before redirecting into `/start`.
-8. `/start` and the other packet-first workspace routes check the same product-access state and recover inline if access appears later.
+6. If the checkout already belonged to a signed-in Clerk account, Convex can grant access directly. Otherwise the webhook stores a durable pending paid checkout keyed by the Stripe session.
+7. `/checkout/success` becomes the canonical post-payment handoff. If the buyer is not signed in yet, they can sign in or create the account tied to the checkout email there.
+8. Once the signed-in account’s verified primary email matches the Stripe checkout email, the app claims the purchase and grants product access.
+9. `/start` and the other packet-first workspace routes use the same access state and can perform a guarded fallback claim when the browser still holds the pending checkout session cookie.
 9. `/mission` and `/lesson/[lessonKey]` now act as the optional post-review bonus library after review unlock, while `/artifacts` still forwards into `/review`.
 10. Returning users with granted access who hit `/` are resumed into the first incomplete packet-first stage unless they explicitly force marketing mode.
 

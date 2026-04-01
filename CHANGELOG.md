@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-03-31
+
+### Changed
+
+- Hardened the Ship by Sunday CLI so local drafts and relative paths resolve from the caller project, read-only inspection commands no longer create draft state, draft persistence is atomic, and `generate --force` only replaces the generated target instead of wiping the whole container path.
+- Reworked the human-facing CLI surface with a real no-arg terminal entry screen, grouped workflow-oriented help, working `help <command>` and `<command> --help` routes, stable `version` / `--version`, and a clearer interactive stage prompt with explicit `:clear` / `:quit` controls and better non-interactive failure handling.
+- Added a supported repo-local launcher at `./bin/sbs`, bash and zsh completion output, a dedicated `sbs:check` validation gate, a `cli` GitHub Actions job, and release/docs updates that now treat `cli` as a required merge check alongside `static`, `integration`, and `browser-smoke`.
+
 ## 2026-03-30
 
 ### Changed

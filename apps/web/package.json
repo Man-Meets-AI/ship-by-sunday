@@ -42,6 +42,7 @@
 		"video:transcripts:setup": "bun run video:cut:setup",
 		"video:transcripts": "node scripts/video-transcripts.mjs",
 		"video:lessons": "node scripts/video-lessons.mjs",
+		"video:verify": "bun scripts/video-verify.ts",
 		"video:status": "node --env-file=.env.local scripts/video-status.mjs",
 		"video:publish": "node --env-file=.env.local scripts/video-publish.mjs",
 		"stripe:create-product": "node --env-file=.env.local scripts/create-stripe-product.mjs",

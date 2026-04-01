@@ -21,10 +21,17 @@ Read these files in order before changing QA decisions:
 
 Then inspect only the app code and tests required for the selected scenarios.
 
-Before running a pack, declare the target environment in plain English: `dev`, `prod`, or a named test environment. Do not mix evidence from different environments in one report without saying so explicitly.
+Before running a pack, declare the target environment in plain English: `feature branch`, `dev`, `prod`, `main`, or a named test environment. Do not mix evidence from different environments in one report without saying so explicitly.
+
+Branch lifecycle is part of the QA contract:
+
+- feature branches are preview-only and should stay on dry-run QA or focused proof
+- `dev` is the integrated staging branch where the full buyer flow is first proven
+- `main` is production, so release evidence must match the `dev -> main` promotion path
 
 ## Current Resume State
 
+- Feature branches get only preview-safe QA. Use dry-run `default_ship` or focused tests, never real billing proof.
 - Start with `dev`. `qa/runs/2026-03-26-dev-default-ship-local-auth.md` is the current green `default_ship` baseline and is the canonical first debug baseline.
 - `billing_integration` on `dev` has a green rerun in `qa/runs/2026-03-25-dev-billing-integration-rerun.md`. Use that report as the local billing baseline.
 - Move to `prod` second. `default_ship` is now green there too; use `qa/runs/2026-03-25-default-ship-prod-rerun.md` as the current hosted baseline.
@@ -113,11 +120,11 @@ Environment ownership:
 
 Pack policy:
 
-- `default_ship`: run `qa:run-pack -- --pack=default_ship` once the environment is ready. This validates the catalog, prepares personas, scaffolds the report, runs browser smoke, runs the packet integration-ui suite, and runs the tagged canonical packet-route sandbox spec.
+- `default_ship`: run `qa:run-pack -- --pack=default_ship` once the environment is ready on `dev` or production release verification. On feature branches, use only `--dry-run` plus focused tests. This validates the catalog, prepares personas, scaffolds the report, runs browser smoke, runs the packet integration-ui suite, and runs the tagged canonical packet-route sandbox spec.
 - For packet-funnel diffs, the packet integration-ui suite is required because it directly proves the stacked Start page, the routed workbench, the Continue-only save and validation flow, and the Review unlock hierarchy.
 - On local dev, prefer the local-auth default-ship lane when sandbox auth is not active. It reuses the same prepared personas and storage-state bootstrap but does not depend on the sandbox gate.
 - `extended`: run only the scenarios touched by the diff unless the user asks for a full extended sweep.
-- `billing_integration`: run `qa:run-pack -- --pack=billing_integration` only when the environment is explicitly safe for test payments and `QA_ALLOW_BILLING_INTEGRATION=1` is set. On local targets, the pack now records `bun run stripe:dev:doctor` as a warning-only preflight and then runs `bun run stripe:dev:verify` after the sandbox billing flow as the hard Stripe-to-Convex proof. A warning about the pinned Stripe CLI project `ship-by-sunday` should be fixed, but it should not override a passing billing handoff by itself. If the pack still regresses, first verify that `bun run dev:stripe` is forwarding to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook` before treating it as an app-auth issue. For hosted prod verification, prefer a restricted live `100% off` promotion code so Checkout completes as a no-cost order while still producing `checkout.session.completed` for the webhook grant path.
+- `billing_integration`: run `qa:run-pack -- --pack=billing_integration` only on `dev` or production release verification when the environment is explicitly safe for test payments and `QA_ALLOW_BILLING_INTEGRATION=1` is set. Do not run it on ordinary feature branches. On local targets, the pack now records `bun run stripe:dev:doctor` as a warning-only preflight and then runs `bun run stripe:dev:verify` after the sandbox billing flow as the hard Stripe-to-Convex proof. A warning about the pinned Stripe CLI project `ship-by-sunday` should be fixed, but it should not override a passing billing handoff by itself. If the pack still regresses, first verify that `bun run dev:stripe` is forwarding to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook` before treating it as an app-auth issue. For hosted prod verification, prefer a restricted live `100% off` promotion code so Checkout completes as a no-cost order while still producing `checkout.session.completed` for the webhook grant path.
 - Run authenticated sandbox work on local `dev` first. The current green local baseline is `default_ship`; use hosted or prod only after the local path is understood.
 - If the sandbox Playwright lane exits with all tests skipped, treat that as missing browser evidence, not as a green pass. Record the skipped state explicitly in the report and call out why the auth environment was inactive.
 - Hosted persona prep must use Clerk env values that match the hosted target. `qa:personas:prepare` and `qa:run-pack` load `apps/web/.env.local` by default; set `QA_ENV_FILE=<path>` or export matching Clerk env vars before targeting prod or any other non-local Clerk instance.

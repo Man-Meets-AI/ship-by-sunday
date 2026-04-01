@@ -90,17 +90,21 @@ This repo does not support Convex's local backend mode as a first-class developm
 
 ## Production Release Workflow
 
-Production now ships through short-lived pull request branches into `main`:
+Production now ships through short-lived pull request branches into `dev`, then promotes the integrated `dev` candidate into `main`:
 
-- branch from the current `main`
+- branch from the current `dev`
 - split work into logical conventional commits
-- open a pull request into `main`
+- open a pull request into `dev`
 - run the default multi-agent PR review before merge:
-  `Review this branch against main. Have pr_explorer map the affected code paths, reviewer find real risks, and docs_researcher verify the framework APIs that the patch relies on.`
-- resolve substantive review findings and wait for `static`, `integration`, and `browser-smoke`
-- merge into `main` with linear history intact
+  `Review this branch against dev. Have pr_explorer map the affected code paths, reviewer find real risks, and docs_researcher verify the framework APIs that the patch relies on.`
+- resolve substantive review findings and wait for the `dev` staging checks
+- merge into `dev` with linear history intact
+- once the integrated release candidate is ready, open the `dev -> main` release PR
+- run the same default multi-agent PR review against `main` on the `dev -> main` release PR
 - watch the Vercel and Convex production deploys from the merged `main` commit
 - delete the local and remote feature branch after the release settles
+
+Feature branches are preview-only until they merge into `dev`, and billing proof belongs on `dev` or production rather than on feature branches.
 
 The operator runbook lives in [docs/release-workflow.md](docs/release-workflow.md).
 
@@ -174,7 +178,13 @@ bun run check
 
 ## CLI Packet Intake
 
-The repo now includes a local Ship by Sunday intake CLI that writes one draft under `.ship-by-sunday/`, reports readiness against the live packet stages, and generates the same starter snapshot shape as the protected `/review` flow.
+The repo now includes a local Ship by Sunday intake CLI that writes one draft under `.ship-by-sunday/` in the current project root, reports readiness against the live packet stages, and generates the same starter snapshot shape as the protected `/review` flow.
+
+The supported install story is simple: clone the repo, run `bun install`, then launch the CLI from the repository root with either `bun run sbs` or the checked-in repo-local wrapper at `./bin/sbs`. Both routes share the same parser, version source, and JSON envelope shape. `./bin/sbs --version` prints the raw version string, and `./bin/sbs completion bash` or `./bin/sbs completion zsh` prints a completion script to stdout for manual sourcing.
+
+This slice does not support `bunx`, `npm install -g`, Homebrew, or self-update. The honest update story is still “pull the repo and rerun `bun install`.”
+
+If you open it in a real terminal with `bun run sbs`, the CLI shows a bannered entry surface for this repository plus the three best next moves: `bun run sbs resume`, `bun run sbs next --json`, and `bun run sbs review --json`. `bun run sbs --help`, `bun run sbs help review`, `bun run sbs review --help`, `bun run sbs stage --help`, `bun run sbs --version`, and `./bin/sbs --version` are all safe reference commands, while JSON and file-based commands stay banner-free for automation.
 
 Common CLI commands:
 
@@ -190,7 +200,15 @@ bun run sbs append scope_in "Packet intake" --json
 bun run sbs unset build-plan.domain --json
 bun run sbs mutate --file ./tmp/mutations.json --json
 bun run sbs --help
+bun run sbs version --json
+bun run sbs completion zsh
+bun run sbs completion bash
+bun run sbs --version
 bun run sbs resume
+./bin/sbs --help
+./bin/sbs --version
+./bin/sbs completion zsh
+./bin/sbs completion bash
 bun run sbs stage design
 bun run sbs review --stage build-plan --missing-only --json
 bun run sbs export --out -
@@ -204,15 +222,16 @@ bun run sbs generate --out ./tmp/sbs-cli-repo.zip --zip --json
 Notes:
 
 - `init --fixture complete --json` is the fastest seed path for agents, QA, and demos.
-- `schema`, `stages`, `fields`, `next`, and `validate` let agents inspect the packet contract and the next action directly from the CLI.
+- `schema`, `stages`, `fields`, `next`, `validate`, and `review` let agents inspect the packet contract and the next action directly from the CLI. `next`, `validate`, and `review` do not create draft state when none exists.
 - `set`, `unset`, `append`, and `remove` give agents field-level draft control without writing patch files.
 - `mutate --file <file|-> --json` applies a whole batch atomically from a file or stdin. If one operation is invalid, none of the batch is saved.
+- Draft saves are atomic. If a write is interrupted, the CLI keeps or recovers the previous `draft.json` instead of leaving a half-written final file behind.
 - `resume` auto-creates a blank local draft if one does not exist yet.
 - `stage <product|design|marketing|build-plan>` revisits a specific packet stage without changing the canonical stage definitions.
 - `review --stage ... --missing-only --json` lets agents ask for a smaller readiness payload instead of the full envelope.
 - `export --out -`, `import --file -`, and `apply --file -` are pipe-friendly for stdin/stdout workflows.
 - `generate --json` returns structured machine-readable metadata about the artifact path and repo slug. `generate --dry-run --json` returns blockers without writing files.
-- `generate` requires a review-ready draft and an explicit `--out` path. Directory output creates a slugified repo folder inside the target path. `--zip` writes the same snapshot as a zip archive.
+- `generate` requires a review-ready draft and an explicit `--out` path. Directory output creates a slugified repo folder inside the target path, and `--force` only replaces that slug or the exact zip file instead of deleting the whole container directory. `--zip` writes the same snapshot as a zip archive.
 
 The current QA docs are split by purpose:
 
