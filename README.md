@@ -90,7 +90,7 @@ This repo does not support Convex's local backend mode as a first-class developm
 
 ## Production Release Workflow
 
-Production now ships through short-lived pull request branches into `dev`, then promotes the integrated `dev` candidate into `main`:
+Production now ships through short-lived pull request branches into `dev`, then promotes the integrated `dev` candidate into `main`. Releases are cut from `main` only, the first tag is `v0.1.0`, and the repo stays on pre-1.0 semver rules (`v0.y.z`) until the contract is explicitly stabilized. Patch versions are for hotfixes and backports; ordinary releases are tagged from the merged `main` commit and published as changelog-backed GitHub Releases:
 
 - branch from the current `dev`
 - split work into logical conventional commits
@@ -102,7 +102,9 @@ Production now ships through short-lived pull request branches into `dev`, then 
 - merge into `dev` with linear history intact
 - once the integrated release candidate is ready, open the `dev -> main` release PR
 - run the same default multi-agent PR review against `main` on the `dev -> main` release PR
+- tag the merged `main` commit, then publish the matching GitHub Release with notes derived from the relevant `CHANGELOG.md` entry
 - watch the Vercel and Convex production deploys from the merged `main` commit
+- run fresh production billing proof only when the release touched checkout, Stripe, entitlement, webhook, or access-handoff behavior
 - delete the local and remote feature branch after the release settles
 
 Feature branches are preview-only until they merge into `dev`, and billing proof belongs on `dev` or production rather than on feature branches.

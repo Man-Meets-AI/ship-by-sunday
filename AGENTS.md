@@ -178,15 +178,15 @@ If a relevant check cannot run:
 
 ## PR workflow
 
-This repository ships through short-lived pull request branches into `main`. Do not use a long-lived integration branch.
+This repository ships through short-lived feature branches into `dev`, then promotes the reviewed `dev` release candidate into `main`. Do not use a long-lived integration branch.
 
 Before opening a PR:
-- branch from the current `main`
+- branch from the current `dev`
 - keep the diff scoped
 - split the work into logical conventional commits
 - run the narrowest relevant verification first, then broaden as needed
 
-Before merging any PR into `main`, run the default multi-agent review workflow:
+Before merging the `dev -> main` release PR, run the default multi-agent review workflow:
 
 `Review this branch against main. Have pr_explorer map the affected code paths, reviewer find real risks, and docs_researcher verify the framework APIs that the patch relies on.`
 
@@ -200,8 +200,8 @@ Review priorities:
 Do not spend review effort on style nitpicks unless they hide a real risk.
 
 PR merge checklist:
-- push the feature branch and open the PR into `main`
-- run the multi-agent review workflow against `main`
+- push the feature branch and open the PR into `dev`
+- run the multi-agent review workflow against `main` for the `dev -> main` release PR
 - fix substantive review findings before merge
 - wait for `static`, `integration`, and `browser-smoke` to pass
 - merge with linear history intact

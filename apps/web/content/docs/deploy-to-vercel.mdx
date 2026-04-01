@@ -57,7 +57,7 @@ Do not leave Convex pointed at:
 
 ## Post-deploy verification
 
-After a release merge to `main`, confirm all of this with a real test flow:
+After a release merge to `main`, `Production Release Proof` should confirm all of this with a real test flow. That workflow should wait for the exact Vercel production deployment for the merged commit before it starts browser verification, not just wait for `https://www.man-meets-ai.com` to return `200`.
 
 1. signed-out visitor hits a protected route and is pushed to sign-in
 2. signed-in user without access reaches `/start` and sees inline recovery
@@ -69,7 +69,7 @@ After a release merge to `main`, confirm all of this with a real test flow:
 8. Vercel attributes the production web deploy to `main`
 9. GitHub Actions reports a matching `Convex Production Deploy` run for the same release
 
-Use the QA control-plane command for the authenticated production pass:
+The workflow should use the same QA control-plane command for the authenticated production pass:
 
 ```bash
 PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run qa:run-pack -- --pack=default_ship
@@ -80,8 +80,17 @@ That command assumes:
 - `qa/personas.local.json` contains the real QA account emails and passwords
 - the file referenced by `QA_ENV_FILE` contains the production Clerk and Convex env values
 - the production Clerk instance matches the target site
+- GitHub repository secret `VERCEL_TOKEN` can read production deployment metadata so the workflow can wait for the exact release commit before running Playwright
 
 If persona prep fails with a Clerk publishable-key mismatch, stop there. That means the loaded env file does not match the production site, so any later authenticated browser result would be invalid.
+
+For billing-sensitive releases, the same workflow should also run:
+
+```bash
+PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run qa:run-pack -- --pack=billing_integration
+```
+
+Only billing-sensitive releases should spend that extra live no-cost Checkout proof.
 
 ## What success looks like
 
