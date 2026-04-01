@@ -2,6 +2,7 @@ import path from "node:path";
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
 import { mkdir } from "node:fs/promises";
+import { existsSync } from "node:fs";
 
 import { chromium, type FullConfig, type Page } from "@playwright/test";
 
@@ -17,7 +18,7 @@ import {
 } from "./auth-state";
 
 const DEFAULT_COURSE_SLUG = "ship-by-sunday";
-const localEnvPath = path.resolve(__dirname, "../../.env.local");
+const defaultEnvPath = path.resolve(__dirname, "../../.env.local");
 const appsWebDirectory = path.resolve(__dirname, "../..");
 const convexBinPath = resolveConvexBinPath();
 
@@ -79,7 +80,37 @@ function loadHostedConvexEnv() {
 		return;
 	}
 
-	process.loadEnvFile(localEnvPath);
+	process.loadEnvFile(resolveHostedEnvFilePath());
+}
+
+export function resolveHostedEnvFilePath(
+	configuredEnvFile = process.env.QA_ENV_FILE,
+	currentWorkingDirectory = process.cwd(),
+) {
+	if (!configuredEnvFile) {
+		return defaultEnvPath;
+	}
+
+	if (path.isAbsolute(configuredEnvFile)) {
+		return configuredEnvFile;
+	}
+
+	if (configuredEnvFile.startsWith("apps/web/")) {
+		return path.resolve(
+			appsWebDirectory,
+			configuredEnvFile.slice("apps/web/".length),
+		);
+	}
+
+	const candidatePaths = [
+		path.resolve(currentWorkingDirectory, configuredEnvFile),
+		path.resolve(appsWebDirectory, configuredEnvFile),
+	];
+
+	return (
+		candidatePaths.find((candidatePath) => existsSync(candidatePath)) ??
+		path.resolve(currentWorkingDirectory, configuredEnvFile)
+	);
 }
 
 function getSandboxBaseUrl(config: FullConfig) {
