@@ -87,8 +87,8 @@ For the file-by-file operating guide, see [Configure the Homepage](/docs/configu
 7. `/checkout/success` becomes the canonical post-payment handoff. If the buyer is not signed in yet, they can sign in or create the account tied to the checkout email there.
 8. Once the signed-in account’s verified primary email matches the Stripe checkout email, the app claims the purchase and grants product access.
 9. `/start` and the other packet-first workspace routes use the same access state and can perform a guarded fallback claim when the browser still holds the pending checkout session cookie.
-9. `/mission` and `/lesson/[lessonKey]` now act as the optional post-review bonus library after review unlock, while `/artifacts` still forwards into `/review`.
-10. Returning users with granted access who hit `/` are resumed into the first incomplete packet-first stage unless they explicitly force marketing mode.
+10. `/mission` and `/lesson/[lessonKey]` now act as the optional post-review bonus library after review unlock, while `/artifacts` still forwards into `/review`.
+11. Returning users with granted access who hit `/` are resumed into the first incomplete packet-first stage unless they explicitly force marketing mode.
 
 Protected app routes also start from server-fetched mission or access data before the client-side Convex subscriptions take over. That avoids a hydration-time auth race where the browser can briefly act signed out even though the server already proved access.
 
