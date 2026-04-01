@@ -24,18 +24,10 @@ const proofRows = [
 
 export function PacketReviewCheckpointCard({
 	isReviewReady,
-	isDownloadPending,
 	packetReadiness,
-	downloadError,
-	onStarterDownload,
 }: {
 	isReviewReady: boolean;
-	isDownloadPending: boolean;
 	packetReadiness: PacketReadinessResult;
-	downloadError: string | null;
-	onStarterDownload: (event: {
-		preventDefault: () => void;
-	}) => void | Promise<void>;
 }) {
 	const incompleteArtifacts = reviewArtifacts.filter(
 		(artifact) => !packetReadiness[artifact.id].isReady,
@@ -82,26 +74,29 @@ export function PacketReviewCheckpointCard({
 					)}
 
 					<div className="flex flex-col gap-4 sm:max-w-sm">
-						<Button
-							asChild
-							size="lg"
-							className="h-14 w-full text-lg font-bold"
-							disabled={!isReviewReady || isDownloadPending}
-						>
-							<Link href="/api/download/repo" onClick={onStarterDownload}>
-								{isDownloadPending
-									? "Downloading Ship Kit..."
-									: "Download Ship Kit"}
-							</Link>
-						</Button>
+						{isReviewReady ? (
+							<Button
+								asChild
+								size="lg"
+								className="h-14 w-full text-lg font-bold"
+							>
+								<a download href="/api/download/repo">
+									Download Ship Kit
+								</a>
+							</Button>
+						) : (
+							<Button
+								type="button"
+								size="lg"
+								className="h-14 w-full text-lg font-bold"
+								disabled
+							>
+								Download Ship Kit
+							</Button>
+						)}
 						<p className="px-1 text-xs leading-5 text-muted-foreground">
 							Download this first. Then continue to Build Lessons.
 						</p>
-						{downloadError ? (
-							<p className="px-1 text-xs leading-5 text-destructive">
-								{downloadError}
-							</p>
-						) : null}
 					</div>
 				</div>
 
