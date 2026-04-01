@@ -1,21 +1,33 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useMutation } from "convex/react";
+import { useConvexAuth, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
 export function BonusLessonViewTracker({ lessonKey }: { lessonKey: string }) {
+	const { isAuthenticated, isLoading } = useConvexAuth();
 	const markBonusLessonViewed = useMutation(api.course.markBonusLessonViewed);
-	const hasMarkedLessonRef = useRef(false);
+	const markAttemptStateRef = useRef<"idle" | "pending" | "done">("idle");
 
 	useEffect(() => {
-		if (hasMarkedLessonRef.current) {
+		if (isLoading || !isAuthenticated) {
 			return;
 		}
 
-		hasMarkedLessonRef.current = true;
-		void markBonusLessonViewed({ lessonKey });
-	}, [lessonKey, markBonusLessonViewed]);
+		if (markAttemptStateRef.current !== "idle") {
+			return;
+		}
+
+		markAttemptStateRef.current = "pending";
+		void markBonusLessonViewed({ lessonKey }).then(
+			() => {
+				markAttemptStateRef.current = "done";
+			},
+			() => {
+				markAttemptStateRef.current = "idle";
+			},
+		);
+	}, [isAuthenticated, isLoading, lessonKey, markBonusLessonViewed]);
 
 	return null;
 }
