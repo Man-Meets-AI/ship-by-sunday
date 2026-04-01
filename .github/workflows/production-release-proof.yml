@@ -85,6 +85,8 @@ jobs:
       PRODUCTION_WEB_ENV_LOCAL: ${{ secrets.PRODUCTION_WEB_ENV_LOCAL }}
       QA_ENV_FILE: apps/web/.env.production
       RELEASE_COMMIT_SHA: ${{ needs.release_scope.outputs.head_sha }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+      VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
       - name: Check out repository
@@ -107,7 +109,9 @@ jobs:
         run: bun run --cwd apps/web playwright:install
 
       - name: Wait for matching Vercel production deployment
-        run: node qa/scripts/wait-for-vercel-production-deployment.mjs --commit_sha="$RELEASE_COMMIT_SHA"
+        run: |
+          node qa/scripts/wait-for-vercel-production-deployment.mjs \
+            --commit_sha="$RELEASE_COMMIT_SHA"
 
       - name: Wait for public release
         run: node qa/scripts/wait-for-host.mjs --url="$PLAYWRIGHT_BASE_URL" --path=/ --path=/checkout/success
@@ -173,6 +177,8 @@ jobs:
       RELEASE_COMMIT_SHA: ${{ needs.release_scope.outputs.head_sha }}
       STRIPE_SECRET_KEY: ${{ secrets.PRODUCTION_STRIPE_SECRET_KEY }}
       STRIPE_WEBHOOK_SECRET: ${{ secrets.PRODUCTION_STRIPE_WEBHOOK_SECRET }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+      VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
       - name: Check out repository
@@ -195,7 +201,9 @@ jobs:
         run: bun run --cwd apps/web playwright:install
 
       - name: Wait for matching Vercel production deployment
-        run: node qa/scripts/wait-for-vercel-production-deployment.mjs --commit_sha="$RELEASE_COMMIT_SHA"
+        run: |
+          node qa/scripts/wait-for-vercel-production-deployment.mjs \
+            --commit_sha="$RELEASE_COMMIT_SHA"
 
       - name: Wait for public release
         run: node qa/scripts/wait-for-host.mjs --url="$PLAYWRIGHT_BASE_URL" --path=/ --path=/checkout/success
