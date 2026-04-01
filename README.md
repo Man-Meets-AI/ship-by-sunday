@@ -94,17 +94,18 @@ Production now ships through short-lived pull request branches into `dev`, then 
 
 - branch from the current `dev`
 - split work into logical conventional commits
-- run the local fast gate with `bun run precommit`; this repo does not use Husky for that check
+- install the committed hooks once with `bun run hooks:install`, then let `git commit` run `bun run precommit` and `git push` run `bun run prepush`
 - open a pull request into `dev`
 - run the default multi-agent PR review before merge:
   `Review this branch against dev. Have pr_explorer map the affected code paths, reviewer find real risks, and docs_researcher verify the framework APIs that the patch relies on.`
-- resolve substantive review findings and wait for the `dev` staging checks
+- resolve substantive review findings and wait for the integrated `Dev Staging Proof` gate on the resulting `dev` tip
 - merge into `dev` with linear history intact
 - once the integrated release candidate is ready, open the `dev -> main` release PR
 - run the same default multi-agent PR review against `main` on the `dev -> main` release PR
 - tag the merged `main` commit, then publish the matching GitHub Release with notes derived from the relevant `CHANGELOG.md` entry
-- watch the Vercel and Convex production deploys from the merged `main` commit
-- run fresh production billing proof only when the release touched checkout, Stripe, entitlement, webhook, or access-handoff behavior
+- watch the post-merge automation on `main`: `CI`, `Convex Production Deploy`, and `Production Release Proof`
+- let `Production Release Proof` run the hosted `default_ship` proof automatically, and let it add hosted `billing_integration` automatically only when the release is billing-sensitive
+- if you ship a production hotfix directly to `main`, cherry-pick or merge that hotfix back into `dev` immediately after production settles
 - delete the local and remote feature branch after the release settles
 
 Feature branches are preview-only until they merge into `dev`, and billing proof belongs on `dev` or production rather than on feature branches.
