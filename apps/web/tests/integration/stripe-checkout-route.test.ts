@@ -56,21 +56,57 @@ describe("POST /api/stripe/checkout", () => {
 		vi.resetModules();
 	});
 
-	it("returns 401 before touching Stripe when the viewer is signed out", async () => {
+	it("creates a guest checkout session when the viewer is signed out", async () => {
 		authMock.mockResolvedValue({ userId: null });
+		getAppBaseUrlMock.mockReturnValue("https://app.example.com");
+		getStripeLineItemMock.mockReturnValue({
+			price_data: {
+				currency: "usd",
+				product_data: { name: "Ship by Sunday" },
+				unit_amount: 50000,
+			},
+			quantity: 1,
+		});
+		getStripeMock.mockReturnValue({
+			checkout: {
+				sessions: {
+					create: createSessionMock,
+				},
+			},
+		});
+		createSessionMock.mockResolvedValue({
+			id: "cs_guest_123",
+			url: "https://checkout.stripe.com/pay/cs_guest_123",
+		});
 
 		const { POST } = await import("../../app/api/stripe/checkout/route");
 
 		const response = await POST(createRequest());
 
-		expect(response.status).toBe(401);
+		expect(response.status).toBe(200);
 		expect(response.headers.get("x-request-id")).toBeTruthy();
 		expect(await response.json()).toEqual({
-			error: "Sign in before starting checkout.",
+			sessionId: "cs_guest_123",
+			url: "https://checkout.stripe.com/pay/cs_guest_123",
 		});
 		expect(currentUserMock).not.toHaveBeenCalled();
-		expect(getStripeMock).not.toHaveBeenCalled();
-		expect(createSessionMock).not.toHaveBeenCalled();
+		expect(createSessionMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				client_reference_id: undefined,
+				customer_email: undefined,
+				metadata: {
+					courseSlug: "ship-by-sunday",
+				},
+				payment_intent_data: {
+					metadata: {
+						courseSlug: "ship-by-sunday",
+					},
+				},
+			}),
+		);
+		expect(response.headers.get("set-cookie")).toContain(
+			"sbs_pending_checkout_session=cs_guest_123",
+		);
 	});
 
 	it("creates a checkout session with the buyer/access handoff metadata", async () => {
@@ -97,6 +133,7 @@ describe("POST /api/stripe/checkout", () => {
 			},
 		});
 		createSessionMock.mockResolvedValue({
+			id: "cs_test_123",
 			url: "https://checkout.stripe.com/pay/cs_test_123",
 		});
 
@@ -107,6 +144,7 @@ describe("POST /api/stripe/checkout", () => {
 		expect(response.status).toBe(200);
 		expect(response.headers.get("x-request-id")).toBeTruthy();
 		expect(await response.json()).toEqual({
+			sessionId: "cs_test_123",
 			url: "https://checkout.stripe.com/pay/cs_test_123",
 		});
 		expect(getStripeLineItemMock).toHaveBeenCalledTimes(1);

@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 
 const authMock = vi.fn();
+const claimCheckoutSessionForViewerMock = vi.fn();
 const retrieveSessionMock = vi.fn();
 
 vi.mock("server-only", () => ({}));
@@ -18,6 +19,18 @@ vi.mock("@/platform/billing/stripe", () => ({
 		},
 	}),
 }));
+
+vi.mock("@/features/checkout/server/checkout-session-recovery", async () => {
+	const actual = await vi.importActual<
+		typeof import("@/features/checkout/server/checkout-session-recovery")
+	>("@/features/checkout/server/checkout-session-recovery");
+
+	return {
+		...actual,
+		claimCheckoutSessionForViewer: (...args: unknown[]) =>
+			claimCheckoutSessionForViewerMock(...args),
+	};
+});
 
 function createCheckoutSession(
 	overrides: Partial<Stripe.Checkout.Session> = {},
@@ -49,6 +62,7 @@ function createStripeInvalidRequestError() {
 describe("getCheckoutSessionState", () => {
 	beforeEach(() => {
 		authMock.mockReset();
+		claimCheckoutSessionForViewerMock.mockReset();
 		retrieveSessionMock.mockReset();
 		vi.resetModules();
 	});
@@ -107,6 +121,84 @@ describe("getCheckoutSessionState", () => {
 		await expect(getCheckoutSessionState("cs_signed_out")).resolves.toEqual({
 			kind: "sign_in_required",
 			sessionId: "cs_signed_out",
+		});
+	});
+
+	it("treats a valid guest checkout as sign_in_required instead of invalid_session", async () => {
+		retrieveSessionMock.mockResolvedValue(
+			createCheckoutSession({
+				metadata: {
+					courseSlug: "ship-by-sunday",
+				},
+				client_reference_id: null,
+			}),
+		);
+		authMock.mockResolvedValue({ userId: null });
+
+		const { getCheckoutSessionState } =
+			await import("@/features/checkout/server/checkout-session");
+
+		await expect(
+			getCheckoutSessionState("cs_guest_signed_out"),
+		).resolves.toEqual({
+			kind: "sign_in_required",
+			sessionId: "cs_guest_signed_out",
+		});
+	});
+
+	it("returns validated when the guest checkout claim succeeds for the signed-in viewer", async () => {
+		retrieveSessionMock.mockResolvedValue(
+			createCheckoutSession({
+				metadata: {
+					courseSlug: "ship-by-sunday",
+				},
+				client_reference_id: null,
+			}),
+		);
+		authMock.mockResolvedValue({ userId: "user_123" });
+		claimCheckoutSessionForViewerMock.mockResolvedValue({
+			kind: "validated",
+			sessionId: "cs_guest_claimed",
+			claimResult: {
+				claim: "claimed",
+				grantResult: {
+					granted: "inserted",
+				},
+			},
+		});
+
+		const { getCheckoutSessionState } =
+			await import("@/features/checkout/server/checkout-session");
+
+		await expect(getCheckoutSessionState("cs_guest_claimed")).resolves.toEqual({
+			kind: "validated",
+			sessionId: "cs_guest_claimed",
+		});
+	});
+
+	it("returns wrong_account when the guest checkout claim refuses the signed-in viewer", async () => {
+		retrieveSessionMock.mockResolvedValue(
+			createCheckoutSession({
+				metadata: {
+					courseSlug: "ship-by-sunday",
+				},
+				client_reference_id: null,
+			}),
+		);
+		authMock.mockResolvedValue({ userId: "user_other" });
+		claimCheckoutSessionForViewerMock.mockResolvedValue({
+			kind: "wrong_account",
+			sessionId: "cs_guest_wrong_account",
+		});
+
+		const { getCheckoutSessionState } =
+			await import("@/features/checkout/server/checkout-session");
+
+		await expect(
+			getCheckoutSessionState("cs_guest_wrong_account"),
+		).resolves.toEqual({
+			kind: "wrong_account",
+			sessionId: "cs_guest_wrong_account",
 		});
 	});
 

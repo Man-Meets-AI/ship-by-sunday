@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const redirectMock = vi.fn();
+const claimCheckoutSessionForViewerMock = vi.fn();
 const fetchQueryMock = vi.fn();
 const getConvexServerSessionMock = vi.fn();
+const getPendingCheckoutSessionIdFromCookieMock = vi.fn();
 
 vi.mock("server-only", () => ({}));
 
@@ -16,6 +18,13 @@ vi.mock("convex/nextjs", () => ({
 
 vi.mock("@/platform/auth/convex-auth", () => ({
 	getConvexServerSession: getConvexServerSessionMock,
+}));
+
+vi.mock("@/features/checkout/server/checkout-session-recovery", () => ({
+	claimCheckoutSessionForViewer: (...args: unknown[]) =>
+		claimCheckoutSessionForViewerMock(...args),
+	getPendingCheckoutSessionIdFromCookie: (...args: unknown[]) =>
+		getPendingCheckoutSessionIdFromCookieMock(...args),
 }));
 
 vi.mock("@/convex/_generated/api", () => ({
@@ -32,8 +41,11 @@ vi.mock("@/convex/_generated/api", () => ({
 describe("product access server helpers", () => {
 	beforeEach(() => {
 		redirectMock.mockReset();
+		claimCheckoutSessionForViewerMock.mockReset();
 		fetchQueryMock.mockReset();
 		getConvexServerSessionMock.mockReset();
+		getPendingCheckoutSessionIdFromCookieMock.mockReset();
+		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(null);
 		vi.resetModules();
 	});
 
@@ -93,6 +105,48 @@ describe("product access server helpers", () => {
 		});
 
 		expect(fetchQueryMock).toHaveBeenCalledTimes(1);
+	});
+
+	it("claims a pending checkout from the fallback cookie before rendering the no-access shell", async () => {
+		getConvexServerSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(
+			"cs_pending_123",
+		);
+		fetchQueryMock
+			.mockResolvedValueOnce({
+				hasAccess: false,
+				clerkUserId: "user_123",
+				status: "no_access",
+			})
+			.mockResolvedValueOnce({
+				hasAccess: true,
+				clerkUserId: "user_123",
+				status: "granted",
+			});
+		claimCheckoutSessionForViewerMock.mockResolvedValue({
+			kind: "validated",
+			sessionId: "cs_pending_123",
+			claimResult: {
+				claim: "claimed",
+				grantResult: { granted: "inserted" },
+			},
+		});
+
+		const { getServerProductAccess } =
+			await import("@/features/product-access/server/product-access");
+
+		await expect(getServerProductAccess()).resolves.toEqual({
+			hasAccess: true,
+			clerkUserId: "user_123",
+			status: "granted",
+		});
+		expect(claimCheckoutSessionForViewerMock).toHaveBeenCalledWith(
+			"cs_pending_123",
+		);
+		expect(fetchQueryMock).toHaveBeenCalledTimes(2);
 	});
 
 	it("redirects home visitors to their saved resume destination when allowed", async () => {
