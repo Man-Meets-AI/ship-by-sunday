@@ -142,6 +142,7 @@ test.describe("member without access", () => {
 		);
 
 		await page
+			.locator("#pricing")
 			.getByRole("button", { name: /Get (instant access|the system)/i })
 			.click();
 		await completeStripeSandboxCheckout(page);
