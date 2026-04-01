@@ -207,7 +207,6 @@ async function signIn(
 			timeout: 15_000,
 		},
 	);
-	await page.waitForLoadState("networkidle");
 
 	const clerkUserId = await page.evaluate(() => {
 		const runtimeWindow = window as Window & {
