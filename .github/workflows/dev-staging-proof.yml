@@ -26,7 +26,7 @@ jobs:
     environment:
       name: dev-staging
     env:
-      APP_BASE_URL: ${{ secrets.DEV_STAGING_APP_BASE_URL }}
+      APP_BASE_URL: https://dev.man-meets-ai.com
       CLERK_FRONTEND_API_URL: ${{ secrets.DEV_STAGING_CLERK_FRONTEND_API_URL }}
       CLERK_SECRET_KEY: ${{ secrets.DEV_STAGING_CLERK_SECRET_KEY }}
       DEV_STAGING_QA_PERSONAS_LOCAL_JSON: ${{ secrets.DEV_STAGING_QA_PERSONAS_LOCAL_JSON }}
@@ -34,7 +34,7 @@ jobs:
       NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
       NEXT_PUBLIC_CONVEX_SITE_URL: ${{ secrets.DEV_STAGING_NEXT_PUBLIC_CONVEX_SITE_URL }}
       NEXT_PUBLIC_CONVEX_URL: ${{ secrets.DEV_STAGING_NEXT_PUBLIC_CONVEX_URL }}
-      PLAYWRIGHT_BASE_URL: ${{ secrets.DEV_STAGING_PLAYWRIGHT_BASE_URL }}
+      PLAYWRIGHT_BASE_URL: https://dev.man-meets-ai.com
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
@@ -84,7 +84,7 @@ jobs:
     environment:
       name: dev-staging-billing-integration
     env:
-      APP_BASE_URL: ${{ secrets.DEV_STAGING_APP_BASE_URL }}
+      APP_BASE_URL: https://dev.man-meets-ai.com
       CLERK_FRONTEND_API_URL: ${{ secrets.DEV_STAGING_CLERK_FRONTEND_API_URL }}
       CLERK_SECRET_KEY: ${{ secrets.DEV_STAGING_CLERK_SECRET_KEY }}
       DEV_STAGING_QA_PERSONAS_LOCAL_JSON: ${{ secrets.DEV_STAGING_QA_PERSONAS_LOCAL_JSON }}
@@ -92,7 +92,7 @@ jobs:
       NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
       NEXT_PUBLIC_CONVEX_SITE_URL: ${{ secrets.DEV_STAGING_NEXT_PUBLIC_CONVEX_SITE_URL }}
       NEXT_PUBLIC_CONVEX_URL: ${{ secrets.DEV_STAGING_NEXT_PUBLIC_CONVEX_URL }}
-      PLAYWRIGHT_BASE_URL: ${{ secrets.DEV_STAGING_PLAYWRIGHT_BASE_URL }}
+      PLAYWRIGHT_BASE_URL: https://dev.man-meets-ai.com
       QA_ALLOW_BILLING_INTEGRATION: "1"
       STRIPE_SECRET_KEY: ${{ secrets.DEV_STAGING_STRIPE_SECRET_KEY }}
       STRIPE_WEBHOOK_SECRET: ${{ secrets.DEV_STAGING_STRIPE_WEBHOOK_SECRET }}
