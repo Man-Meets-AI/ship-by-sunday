@@ -35,7 +35,7 @@ Production is healthy only when all three systems agree on the same release cand
 - Root `bunfig.toml` forces `install.linker = "hoisted"` so GitHub Actions and Vercel installs do not use Bun's isolated symlink-heavy workspace layout during builds and serverless packaging.
 - `apps/web/vercel.json` overrides the Vercel install step to remove cached `node_modules` trees before `bun install --frozen-lockfile`, because switching linkers alone does not rewrite a restored isolated-install cache.
 - GitHub repository secret `CONVEX_DEPLOY_KEY` must exist before remote Convex dry-runs or production deploys can succeed.
-- GitHub repository secret `VERCEL_TOKEN` must exist before `Production Release Proof` can wait for the exact Vercel production deployment for the merged `main` commit.
+- GitHub repository secret `VERCEL_TOKEN` plus repository variables `VERCEL_PROJECT_ID` and `VERCEL_TEAM_ID` must exist before the release proofs can wait for the exact Vercel deployment for either the staged `dev` commit or the merged `main` commit.
 - GitHub repository variable `CONVEX_PRODUCTION_DEPLOY_ENABLED` is the live pause switch for automatic Convex production deploys. It is `true` after the first successful dry-run; set it back to `false` if you need to pause automatic `main` deploys.
 
 Create that secret from the Convex dashboard for the production deployment:
