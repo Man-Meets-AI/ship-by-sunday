@@ -1,19 +1,17 @@
 import { spawn } from "node:child_process";
-import { existsSync } from "node:fs";
+import { createRequire } from "node:module";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const APPS_WEB_DIRECTORY = fileURLToPath(
 	new URL("../..", import.meta.url),
 );
-const repoRootConvexBinPath = fileURLToPath(
-	new URL("../../../node_modules/convex/bin/main.js", import.meta.url),
+const requireFromAppsWeb = createRequire(new URL("../../package.json", import.meta.url));
+const convexPackageJsonPath = requireFromAppsWeb.resolve("convex/package.json");
+export const CONVEX_BIN_PATH = path.join(
+	path.dirname(convexPackageJsonPath),
+	"bin/main.js",
 );
-const appsWebConvexBinPath = fileURLToPath(
-	new URL("../../node_modules/convex/bin/main.js", import.meta.url),
-);
-export const CONVEX_BIN_PATH = existsSync(appsWebConvexBinPath)
-	? appsWebConvexBinPath
-	: repoRootConvexBinPath;
 export const MANUAL_PRODUCT_ACCESS_SOURCE = "manual";
 
 function spawnCommand(command, args, options) {

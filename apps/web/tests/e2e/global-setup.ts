@@ -1,6 +1,6 @@
 import path from "node:path";
 import { spawn } from "node:child_process";
-import { existsSync } from "node:fs";
+import { createRequire } from "node:module";
 import { mkdir } from "node:fs/promises";
 
 import { chromium, type FullConfig, type Page } from "@playwright/test";
@@ -219,15 +219,11 @@ function isSandboxProjectRequested() {
 }
 
 function resolveConvexBinPath() {
-	const appsWebConvexBinPath = path.resolve(
-		appsWebDirectory,
-		"node_modules/convex/bin/main.js",
+	const requireFromAppsWeb = createRequire(
+		path.resolve(appsWebDirectory, "package.json"),
 	);
-	if (existsSync(appsWebConvexBinPath)) {
-		return appsWebConvexBinPath;
-	}
-
-	return path.resolve(process.cwd(), "node_modules/convex/bin/main.js");
+	const convexPackageJsonPath = requireFromAppsWeb.resolve("convex/package.json");
+	return path.join(path.dirname(convexPackageJsonPath), "bin/main.js");
 }
 
 async function syncProductAccessState({
