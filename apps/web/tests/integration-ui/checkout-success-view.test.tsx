@@ -147,6 +147,9 @@ describe("CheckoutSuccessView", () => {
 		expect(markup).toContain(
 			'href="/sign-in?redirect_url=%2Fcheckout%2Fsuccess%3Fsession_id%3Dcs_sign_in"',
 		);
+		expect(markup).toContain(
+			'href="/sign-up?session_id=cs_sign_in&amp;redirect_url=%2Fcheckout%2Fsuccess%3Fsession_id%3Dcs_sign_in"',
+		);
 	});
 
 	it("renders the account-mismatch recovery copy", () => {

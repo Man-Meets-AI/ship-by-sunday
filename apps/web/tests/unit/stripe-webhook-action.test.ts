@@ -83,9 +83,59 @@ describe("convex/stripeWebhook", () => {
 		expect(runMutation).not.toHaveBeenCalled();
 	});
 
-	it("returns missing_clerk_user when checkout metadata is incomplete", async () => {
+	it("saves a pending claim when checkout metadata is incomplete but the buyer email exists", async () => {
 		constructEventMock.mockReturnValue({
-			id: "evt_no_user",
+			id: "evt_pending_claim",
+			type: "checkout.session.completed",
+			data: {
+				object: {
+					id: "cs_test_123",
+					client_reference_id: null,
+					metadata: {},
+					customer_details: {
+						email: "buyer@example.com",
+					},
+					payment_status: "paid",
+				},
+			},
+		});
+		const runMutation = vi.fn().mockResolvedValue({ saved: "inserted" });
+		const { processStripeWebhook } = await import("@/convex/stripeWebhook");
+
+		const result = await processStripeWebhook._handler(
+			{ runMutation } as never,
+			{
+				body: "raw-webhook-body",
+				signature: "t=1,v1=signature",
+			},
+		);
+
+		expect(result).toEqual({
+			kind: "pending_claim_saved",
+			eventId: "evt_pending_claim",
+			eventType: "checkout.session.completed",
+			sessionId: "cs_test_123",
+			checkoutEmail: "buyer@example.com",
+			saveResult: {
+				saved: "inserted",
+			},
+		});
+		expect(runMutation).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({
+				stripeCheckoutSessionId: "cs_test_123",
+				checkoutEmail: "buyer@example.com",
+				courseSlug: "ship-by-sunday",
+				paymentStatus: "paid",
+				stripeEventId: "evt_pending_claim",
+				stripeEventType: "checkout.session.completed",
+			}),
+		);
+	});
+
+	it("returns missing_checkout_email when a guest checkout session has no recoverable buyer email", async () => {
+		constructEventMock.mockReturnValue({
+			id: "evt_missing_email",
 			type: "checkout.session.completed",
 			data: {
 				object: {
@@ -107,8 +157,8 @@ describe("convex/stripeWebhook", () => {
 		);
 
 		expect(result).toEqual({
-			kind: "missing_clerk_user",
-			eventId: "evt_no_user",
+			kind: "missing_checkout_email",
+			eventId: "evt_missing_email",
 			eventType: "checkout.session.completed",
 			sessionId: "cs_test_123",
 		});

@@ -181,6 +181,25 @@ describe("SignInPage", () => {
 		expect(screen.queryByRole("link", { name: "See pricing" })).toBeNull();
 	});
 
+	it("shows the post-checkout create-account path when recovery includes a paid checkout", () => {
+		const signInState = createSignInMock();
+		useSignInMock.mockReturnValue({
+			errors: signInState.errors,
+			fetchStatus: signInState.fetchStatus,
+			signIn: signInState.signIn,
+		});
+
+		render(
+			<SignInPage postCheckoutSignUpHref="/sign-up?session_id=cs_test_123&redirect_url=%2Fstart" />,
+		);
+
+		expect(
+			screen
+				.getByRole("link", { name: "Create the account for this checkout" })
+				.getAttribute("href"),
+		).toBe("/sign-up?session_id=cs_test_123&redirect_url=%2Fstart");
+	});
+
 	it("submits email and password through Clerk", async () => {
 		const signIn = {
 			create: vi.fn().mockResolvedValue({ error: null }),
