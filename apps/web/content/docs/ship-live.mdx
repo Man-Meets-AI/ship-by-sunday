@@ -34,7 +34,9 @@ Make sure all of this is true:
 9. Confirm product-access grant happens in the deployed environment, not just locally.
 10. Confirm the buyer reaches the protected product after payment.
 
-`Production Release Proof` should always run the hosted `default_ship` pass against `https://www.man-meets-ai.com`. When the merged release changed checkout, Stripe, entitlement, webhook, or access handoff behavior, that workflow should also run the hosted `billing_integration` pass automatically instead of waiting for someone to remember an opt-in rerun.
+`Production Release Proof` is the primary post-merge browser gate for this repo. It should always run the hosted `default_ship` pass against `https://www.man-meets-ai.com`, loading production auth and Convex values from `QA_ENV_FILE=apps/web/.env.production`. When the merged release changed checkout, Stripe, entitlement, webhook, or access handoff behavior, that workflow should also run the hosted `billing_integration` pass automatically instead of waiting for someone to remember an opt-in rerun.
+
+The production proof bootstrap does not require a separate `CONVEX_DEPLOYMENT` line in `apps/web/.env.production`. It derives the production deployment target from `NEXT_PUBLIC_CONVEX_URL` when needed, so the important thing is keeping the production env file truthful to the live Clerk and Convex environment.
 
 For this repo, the safest staging or production billing proof is a live no-cost Checkout run using a restricted `100% off` promotion code:
 
@@ -69,6 +71,7 @@ After those are correct, let the hosted `billing_integration` run prove one fres
 - This repo currently assumes the buyer completes checkout in the same signed-in browser context used to read access state.
 - If you change auth apps, webhook secrets, or Stripe accounts, re-verify the handoff instead of assuming it still works.
 - Hotfixes are allowed to merge into `main`, but they must come from a hotfix branch and be merged or cherry-picked back into `dev` immediately afterward.
+- If a hotfix changes proof/bootstrap behavior, wait for the new `Production Release Proof` run on the hotfix commit instead of trusting the failed run on the previous `main` head.
 - Dedicated Convex-backed preview environments are not part of this release workflow yet. Non-`dev` and non-`main` Vercel branches stay frontend previews only.
 - Do not promise a support or access path in public copy unless it actually exists.
 

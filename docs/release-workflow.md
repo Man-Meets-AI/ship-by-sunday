@@ -32,6 +32,7 @@ Production is healthy only when all three systems agree on the same release cand
 - `dev` requires pull requests and the code-centric CI checks. After each merge into `dev`, the resulting branch tip must also pass `Dev Staging Proof` before that `dev` commit is treated as a release candidate for `main`.
 - `main` requires pull requests and the `static`, `integration`, `browser-smoke`, and `cli` checks.
 - Vercel project `mma-shipbysunday` is linked to `ParkerRex/mma-shipbysunday` and uses `main` as its production branch.
+- The staging host `https://dev.man-meets-ai.com` must stay aliased to the current `dev` preview deployment. If that alias drifts to an older preview, `Dev Staging Proof` can wait on or verify the wrong deployment.
 - Root `bunfig.toml` forces `install.linker = "hoisted"` so GitHub Actions and Vercel installs do not use Bun's isolated symlink-heavy workspace layout during builds and serverless packaging.
 - `apps/web/vercel.json` overrides the Vercel install step to remove cached `node_modules` trees before `bun install --frozen-lockfile`, because switching linkers alone does not rewrite a restored isolated-install cache.
 - GitHub repository secret `CONVEX_DEPLOY_KEY` must exist before remote Convex dry-runs or production deploys can succeed.
@@ -57,6 +58,7 @@ Create that secret from the Convex dashboard for the production deployment:
 
 6. Merge the feature branch into `dev` only after the code-centric checks for the staging candidate are green.
 7. Treat `dev` as the release candidate branch. After the merge, wait for the aggregate `release_gate` job from `Dev Staging Proof` on the resulting `dev` commit. That job is the integrated staging proof and must be green before you open the `dev -> main` release pull request.
+   If a staging run crashes because a new public Convex function or action is missing, sync the hosted Convex dev deployment before trusting the result. A green Vercel preview alone is not enough when the staged frontend has outrun hosted Convex dev.
 8. Run the default multi-agent PR review against `main` for the release pull request:
 
    `Review this branch against main. Have pr_explorer map the affected code paths, reviewer find real risks, and docs_researcher verify the framework APIs that the patch relies on.`
@@ -90,12 +92,17 @@ For staging or production billing verification in this repo:
 For the matching QA command:
 
 - `qa/personas.local.json` supplies the QA account emails and passwords
-- `QA_ENV_FILE` selects the Clerk and Convex env values for the target environment
+- `QA_ENV_FILE` selects the Clerk and Convex env values for the target environment and is resolved from the repository root in CI, for example `apps/web/.env.production`
 - `PLAYWRIGHT_BASE_URL` points the browser pack at the target environment
+- production bootstrap can derive `CONVEX_DEPLOYMENT` from `NEXT_PUBLIC_CONVEX_URL`, so the production env file does not have to carry a separate `CONVEX_DEPLOYMENT` entry
 
 If persona prep fails on a Clerk publishable-key mismatch, fix env parity before spending time on packet-route debugging.
 
-The current production billing evidence is already captured in:
+The current durable release-proof evidence is captured in:
+
+- `qa/runs/2026-04-01-release-proof-final-green.md`
+
+Historical production billing repair evidence remains in:
 
 - `qa/runs/2026-03-25-prod-billing-integration-webhook-fix.md`
 - `qa/runs/2026-03-25-prod-billing-integration-automatic-rerun.md`
