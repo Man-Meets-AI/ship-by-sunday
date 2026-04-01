@@ -59,6 +59,7 @@ export function PricingSectionBlock({
 							<HomePagePrimaryCta
 								target={primaryCtaTarget}
 								label={pricingSection.ctaTitle}
+								testId="pricing-primary-cta"
 								className="h-20 min-w-full rounded-2xl bg-foreground text-xl font-black text-background transition-transform hover:scale-[1.02] active:scale-[0.98]"
 							/>
 							<p className="text-center text-sm leading-7 text-muted-foreground">
