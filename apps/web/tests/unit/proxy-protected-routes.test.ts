@@ -48,4 +48,15 @@ describe("proxy protected routes", () => {
 			]),
 		);
 	});
+
+	it("pins protected-route auth redirects to the app-owned auth pages", async () => {
+		await import("@/proxy");
+
+		const optionsResolver = clerkMiddlewareMock.mock.calls[0]?.[1];
+		expect(typeof optionsResolver).toBe("function");
+		expect(optionsResolver()).toEqual({
+			signInUrl: "/sign-in",
+			signUpUrl: "/sign-up",
+		});
+	});
 });
