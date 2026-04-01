@@ -21,6 +21,7 @@ type SignInCredentialsFormProps = {
 	passwordError: { message?: string } | null;
 	setEmailAddress: (value: string) => void;
 	setPassword: (value: string) => void;
+	signUpHref?: string | null;
 	startGoogleSignIn: () => Promise<void>;
 	startPasswordReset: () => Promise<void>;
 	submitPassword: () => Promise<void>;
@@ -37,6 +38,7 @@ export function SignInCredentialsForm({
 	passwordError,
 	setEmailAddress,
 	setPassword,
+	signUpHref,
 	startGoogleSignIn,
 	startPasswordReset,
 	submitPassword,
@@ -68,6 +70,7 @@ export function SignInCredentialsForm({
 			<SignInSecondaryActions
 				isBusy={isBusy}
 				isLoaded={isLoaded}
+				signUpHref={signUpHref}
 				startGoogleSignIn={startGoogleSignIn}
 				startPasswordReset={startPasswordReset}
 			/>

@@ -3,6 +3,7 @@ import {
 	getSignInRedirectHref,
 	routeConfig,
 } from "@/config/product";
+import { buildSignUpHref } from "@/features/auth/sign-in/sign-in-route-utils";
 import { assertNever } from "@/features/course/lesson/lib/assert";
 import type { CheckoutSessionState } from "@/features/checkout/server/checkout-session";
 import { workspaceDisplayConfig } from "@/features/starter/lib/starter-selectors";
@@ -27,6 +28,8 @@ export type CheckoutViewModel = {
 	helpItems: readonly string[];
 	primaryActionLabel: string;
 	primaryActionHref: string;
+	alternateActionLabel?: string;
+	alternateActionHref?: string;
 	primaryActionBody: string;
 	secondaryActionBody: string;
 };
@@ -131,6 +134,7 @@ export function getCheckoutViewModel(
 					"This browser is not signed in, so we cannot attach the completed checkout to an account yet.",
 				helpItems: [
 					"Sign in with the same email you used during payment.",
+					"If you paid before creating an account, use Create account instead.",
 					"Return to this tab after sign-in so the access handoff can finish.",
 					"Do not start a second checkout unless payment actually failed.",
 				],
@@ -138,6 +142,11 @@ export function getCheckoutViewModel(
 				primaryActionHref: getSignInRedirectHref(
 					getCheckoutSuccessHref(checkoutSessionState.sessionId),
 				),
+				alternateActionLabel: "Create account",
+				alternateActionHref: buildSignUpHref({
+					redirectPath: getCheckoutSuccessHref(checkoutSessionState.sessionId),
+					sessionId: checkoutSessionState.sessionId,
+				}),
 				primaryActionBody:
 					"Use the exact email from checkout so we can attach the purchase to the right account.",
 				secondaryActionBody: `After sign-in, come back here or use ${workspaceOpenLabel} to retry the ${workspaceNoun} gate.`,

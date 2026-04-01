@@ -10,6 +10,7 @@ import { GoogleIcon } from "@/features/auth/sign-in/google-icon";
 type SignInSecondaryActionsProps = {
 	isBusy: boolean;
 	isLoaded: boolean;
+	signUpHref?: string | null;
 	startGoogleSignIn: () => Promise<void>;
 	startPasswordReset: () => Promise<void>;
 };
@@ -17,6 +18,7 @@ type SignInSecondaryActionsProps = {
 export function SignInSecondaryActions({
 	isBusy,
 	isLoaded,
+	signUpHref,
 	startGoogleSignIn,
 	startPasswordReset,
 }: SignInSecondaryActionsProps) {
@@ -56,6 +58,17 @@ export function SignInSecondaryActions({
 					New accounts are created only after checkout. Use Google only if it is
 					already tied to your purchased access.
 				</FieldDescription>
+				{signUpHref ? (
+					<Button
+						asChild
+						type="button"
+						variant="link"
+						size="sm"
+						className="h-auto justify-start px-0"
+					>
+						<a href={signUpHref}>Create the account for this checkout</a>
+					</Button>
+				) : null}
 			</div>
 		</>
 	);

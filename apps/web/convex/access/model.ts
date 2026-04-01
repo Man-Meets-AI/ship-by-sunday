@@ -58,7 +58,7 @@ export async function requireGrantedProductAccess(ctx: AccessReadCtx) {
 	return clerkUserId;
 }
 
-async function upsertProductAccessGrant(
+export async function upsertProductAccessGrant(
 	ctx: AccessMutationCtx,
 	input: ProductAccessGrantUpsertInput,
 ) {

@@ -116,7 +116,7 @@ http.route({
 						{ error: "Invalid signature.", message: result.message },
 						{ status: 400 },
 					);
-				case "missing_clerk_user":
+				case "missing_checkout_email":
 					await recordIncidentAndMaybeNotify(
 						ctx,
 						normalizeIncidentEvent({
@@ -125,9 +125,15 @@ http.route({
 						}),
 					);
 					return jsonResponse(
-						{ error: "Missing clerk user reference." },
+						{ error: "Missing Stripe checkout email." },
 						{ status: 400 },
 					);
+				case "pending_claim_saved":
+					return jsonResponse({
+						received: true,
+						pendingClaimSaved: true,
+						saveResult: result.saveResult,
+					});
 				case "grant_failed":
 					await recordIncidentAndMaybeNotify(
 						ctx,

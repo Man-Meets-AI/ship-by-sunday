@@ -13,6 +13,7 @@ import {
 	jsonWithRequestId,
 } from "@/features/observability/server/request-id";
 import { buildStripeCheckoutFailureContext } from "@/features/observability/server/source-adapters/stripe-failure";
+import { createPendingCheckoutSessionCookieOptions } from "@/features/checkout/lib/pending-checkout-session-cookie";
 import { getStripe, getStripeLineItem } from "@/platform/billing/stripe";
 import { getAppBaseUrl } from "@/platform/next/app-url";
 
@@ -20,39 +21,31 @@ export async function POST(request: Request) {
 	const requestId = getRequestIdFromRequest(request);
 	const { userId } = await auth();
 
-	if (!userId) {
-		return jsonWithRequestId(
-			{ error: "Sign in before starting checkout." },
-			{ status: 401 },
-			requestId,
-		);
-	}
-
 	const appBaseUrl = getAppBaseUrl(request);
 	const stripeFailureContext = buildStripeCheckoutFailureContext({
 		appBaseUrl,
-		userId,
+		userId: userId ?? "signed_out_checkout",
 	});
 
 	try {
 		const stripe = getStripe();
-		const user = await currentUser();
+		const user = userId ? await currentUser() : null;
 		const session = await stripe.checkout.sessions.create({
 			mode: "payment",
 			allow_promotion_codes: true,
 			billing_address_collection: "auto",
 			cancel_url: `${appBaseUrl}${routeConfig.checkoutCancel}`,
 			success_url: `${appBaseUrl}${getCheckoutSuccessHref("{CHECKOUT_SESSION_ID}")}`,
-			client_reference_id: userId,
-			customer_email: user?.primaryEmailAddress?.emailAddress,
+			client_reference_id: userId ?? undefined,
+			customer_email: user?.primaryEmailAddress?.emailAddress ?? undefined,
 			line_items: [getStripeLineItem()],
 			metadata: {
-				clerkUserId: userId,
+				...(userId ? { clerkUserId: userId } : {}),
 				courseSlug: productConfig.courseSlug,
 			},
 			payment_intent_data: {
 				metadata: {
-					clerkUserId: userId,
+					...(userId ? { clerkUserId: userId } : {}),
 					courseSlug: productConfig.courseSlug,
 				},
 			},
@@ -79,7 +72,19 @@ export async function POST(request: Request) {
 			);
 		}
 
-		return jsonWithRequestId({ url: session.url }, undefined, requestId);
+		const response = jsonWithRequestId(
+			{ url: session.url, sessionId: session.id },
+			undefined,
+			requestId,
+		);
+		response.cookies.set(
+			"sbs_pending_checkout_session",
+			session.id,
+			createPendingCheckoutSessionCookieOptions({
+				isSecure: appBaseUrl.startsWith("https://"),
+			}),
+		);
+		return response;
 	} catch (error) {
 		return await getUnexpectedApiErrorResponse({
 			error,

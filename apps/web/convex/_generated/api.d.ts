@@ -12,6 +12,8 @@ import type * as access from "../access.js";
 import type * as access_model from "../access/model.js";
 import type * as access_types from "../access/types.js";
 import type * as access_validators from "../access/validators.js";
+import type * as checkoutClaims from "../checkoutClaims.js";
+import type * as checkoutClaimsActions from "../checkoutClaimsActions.js";
 import type * as codex from "../codex.js";
 import type * as codexValidators from "../codexValidators.js";
 import type * as course from "../course.js";
@@ -49,6 +51,8 @@ declare const fullApi: ApiFromModules<{
   "access/model": typeof access_model;
   "access/types": typeof access_types;
   "access/validators": typeof access_validators;
+  checkoutClaims: typeof checkoutClaims;
+  checkoutClaimsActions: typeof checkoutClaimsActions;
   codex: typeof codex;
   codexValidators: typeof codexValidators;
   course: typeof course;

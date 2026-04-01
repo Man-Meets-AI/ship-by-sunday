@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { api } from "@/convex/_generated/api";
 import { CheckoutSuccessView } from "@/features/checkout/components/checkout-success-view";
 import { getCheckoutSessionState } from "@/features/checkout/server/checkout-session";
+import { getPendingCheckoutSessionIdFromCookie } from "@/features/checkout/server/checkout-session-recovery";
 import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
 
 export const metadata: Metadata = {
@@ -16,7 +17,11 @@ export default async function Page({
 }: {
 	searchParams: Promise<{ session_id?: string }>;
 }) {
-	const { session_id: sessionId } = await searchParams;
+	const { session_id: searchSessionId } = await searchParams;
+	const sessionId =
+		searchSessionId ??
+		(await getPendingCheckoutSessionIdFromCookie()) ??
+		undefined;
 	const checkoutSessionState = await getCheckoutSessionState(sessionId);
 	const initialProductAccess =
 		checkoutSessionState.kind === "validated"

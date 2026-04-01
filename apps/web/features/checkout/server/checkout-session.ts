@@ -1,10 +1,15 @@
 import "server-only";
 
 import { auth } from "@clerk/nextjs/server";
-import Stripe from "stripe";
+import type Stripe from "stripe";
 
-import { COURSE_SLUG } from "@/features/course/lesson/model/registry";
-import { getStripe } from "@/platform/billing/stripe";
+import {
+	claimCheckoutSessionForViewer,
+	clearPendingCheckoutSessionCookie,
+	getCheckoutSessionForRecovery,
+	isStripeCheckoutSessionForCourse,
+	isStripeCheckoutSessionPaid,
+} from "@/features/checkout/server/checkout-session-recovery";
 
 export type CheckoutSessionState =
 	| {
@@ -39,31 +44,74 @@ export async function getCheckoutSessionState(
 		return { kind: "missing_session_id" };
 	}
 
-	let session: Stripe.Checkout.Session;
-	try {
-		session = await getStripe().checkout.sessions.retrieve(sessionId);
-	} catch (error) {
-		if (
-			error instanceof Stripe.errors.StripeError &&
-			error.type === "StripeInvalidRequestError"
-		) {
-			return {
-				kind: "invalid_session",
-				sessionId,
-			};
-		}
-
-		throw error;
-	}
-
-	const sessionCourseSlug = session.metadata?.courseSlug ?? COURSE_SLUG;
-	const clerkUserId =
-		session.metadata?.clerkUserId ?? session.client_reference_id ?? null;
-	if (!clerkUserId || sessionCourseSlug !== COURSE_SLUG) {
+	const session = await getCheckoutSessionForRecovery(sessionId);
+	if (!session) {
+		await clearPendingCheckoutSessionCookie();
 		return {
 			kind: "invalid_session",
 			sessionId,
 		};
+	}
+
+	const clerkUserId =
+		session.metadata?.clerkUserId ?? session.client_reference_id ?? null;
+	if (!isStripeCheckoutSessionForCourse(session)) {
+		await clearPendingCheckoutSessionCookie();
+		return {
+			kind: "invalid_session",
+			sessionId,
+		};
+	}
+
+	if (!clerkUserId) {
+		if (!isStripeCheckoutSessionPaid(session)) {
+			return {
+				kind: "payment_pending",
+				sessionId,
+				paymentStatus: session.payment_status,
+			};
+		}
+
+		const authState = await auth();
+		if (!authState.userId) {
+			return {
+				kind: "sign_in_required",
+				sessionId,
+			};
+		}
+
+		const claimResult = await claimCheckoutSessionForViewer(sessionId);
+		switch (claimResult.kind) {
+			case "validated":
+				return {
+					kind: "validated",
+					sessionId,
+				};
+			case "wrong_account":
+				return {
+					kind: "wrong_account",
+					sessionId,
+				};
+			case "payment_pending":
+				return {
+					kind: "payment_pending",
+					sessionId,
+					paymentStatus: claimResult.paymentStatus,
+				};
+			case "sign_in_required":
+				return {
+					kind: "sign_in_required",
+					sessionId,
+				};
+			case "invalid_session":
+			case "missing_checkout_email":
+				return {
+					kind: "invalid_session",
+					sessionId,
+				};
+			default:
+				return claimResult satisfies never;
+		}
 	}
 
 	const authState = await auth();
@@ -81,10 +129,8 @@ export async function getCheckoutSessionState(
 		};
 	}
 
-	if (
-		session.payment_status === "paid" ||
-		session.payment_status === "no_payment_required"
-	) {
+	if (isStripeCheckoutSessionPaid(session)) {
+		await clearPendingCheckoutSessionCookie();
 		return {
 			kind: "validated",
 			sessionId,
