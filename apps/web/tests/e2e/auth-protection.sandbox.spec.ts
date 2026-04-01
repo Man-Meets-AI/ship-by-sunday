@@ -60,7 +60,7 @@ test.describe("protected routes", () => {
 			await page.goto("/start");
 			await expect(page).toHaveURL(/\/start/);
 			await expect(
-				page.getByText("Build the folder before you build the app."),
+				page.getByText("Build the BRIEF before you build the app."),
 			).toBeVisible();
 			await expect(
 				page.getByRole("link", { name: /^Continue with /i }),
@@ -73,7 +73,7 @@ test.describe("protected routes", () => {
 			await page.goto("/lesson/not-a-real-lesson");
 			await expect(page).toHaveURL(/\/start/);
 			await expect(
-				page.getByText("Build the folder before you build the app."),
+				page.getByText("Build the BRIEF before you build the app."),
 			).toBeVisible();
 		});
 	});

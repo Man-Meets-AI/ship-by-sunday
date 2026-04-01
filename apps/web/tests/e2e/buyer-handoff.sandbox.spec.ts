@@ -87,8 +87,9 @@ async function expectPacketStage(
 		new RegExp(`${route.path.replace("/", "\\/")}\\/[^/]+$`),
 	);
 	await expect(page.getByText(route.stageLabel).first()).toBeVisible();
+	await expect(page.getByText("Stage progress")).toBeVisible();
 	await expect(
-		page.getByText("Level XP").or(page.getByText("Mastery")),
+		page.getByText(/All required answers are in place for this stage\./i),
 	).toBeVisible();
 	await expect(page.getByRole("button", { name: "Continue" })).toBeVisible();
 }
@@ -113,7 +114,7 @@ test.describe("member with access", () => {
 		await expect(page).toHaveURL(/\/review$/);
 		await expect(page.getByText("Review").first()).toBeVisible();
 		await expect(
-			page.getByRole("link", { name: "Download Snapshot" }),
+			page.getByRole("link", { name: "Download Ship Kit" }),
 		).toBeVisible();
 
 		await page.goto("/settings");
@@ -151,7 +152,7 @@ test.describe("member without access", () => {
 		});
 
 		await expect(
-			page.getByText("Build the folder before you build the app."),
+			page.getByText("Build the BRIEF before you build the app."),
 		).toBeVisible();
 		await expect(
 			page.getByRole("link", { name: /^Continue with /i }),
