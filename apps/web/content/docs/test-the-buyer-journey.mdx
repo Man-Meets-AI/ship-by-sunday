@@ -8,10 +8,10 @@ description: Run the real path from marketing page to protected product so you c
 Do not stop at component checks. Test the full buyer journey:
 
 1. landing page
-2. sign-in
-3. checkout
-4. `/checkout/success`
-5. product-access grant
+2. checkout
+3. `/checkout/success`
+4. sign-in or post-payment account creation when needed
+5. product-access claim and grant
 6. `/start`
 7. the first incomplete packet-first stage
 
@@ -33,9 +33,10 @@ Every pass should cover these states:
 
 ## What to confirm
 
-- signed-out users get pushed into sign-in
+- signed-out users can start checkout directly from the primary CTA
 - users without access land on `/start` and see inline recovery
 - checkout returns to `/checkout/success`
+- `/checkout/success` offers sign-in or account creation when payment happened before auth
 - the webhook grants access
 - the app recovers automatically into `/start`
 - the first protected page does not throw a client-side `Unauthorized` error during hydration

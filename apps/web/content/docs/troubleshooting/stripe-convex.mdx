@@ -63,7 +63,8 @@ If the Stripe event exists and the buyer still cannot reach `/start`, check:
 
 - whether the webhook used the current signing secret
 - whether Convex accepted the same webhook secret and Stripe secret key
-- whether the buyer finished checkout in the same signed-in browser context used to read `viewerProductAccess`
+- whether the browser still has the pending checkout session cookie if the buyer recovered from a lost Stripe return tab
+- whether the signed-in account's verified primary email matches the Stripe checkout email before the claim step runs
 
 ## Fast debug order
 
