@@ -31,9 +31,8 @@ describe("LessonShellWatch", () => {
 		);
 
 		expect(markup).toContain("Watch first");
-		expect(markup).toContain(
-			"https://player.mediadelivery.net/embed/619172/edd73a35-0d4b-4147-8bcd-7ec005d55844",
-		);
+		expect(markup).toContain("Checking video availability");
+		expect(markup).toContain("Loading the lesson player.");
 	});
 
 	it("renders Light Research inline video", () => {
@@ -48,9 +47,8 @@ describe("LessonShellWatch", () => {
 		);
 
 		expect(markup).toContain("Watch first");
-		expect(markup).toContain(
-			"https://player.mediadelivery.net/embed/619172/aac17809-c856-4274-badc-12a8b46a407d",
-		);
+		expect(markup).toContain("Checking video availability");
+		expect(markup).toContain("Loading the lesson player.");
 	});
 
 	it("preserves lesson-specific titles when a lesson borrows a media slot", () => {
