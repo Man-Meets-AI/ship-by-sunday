@@ -6,7 +6,9 @@ import { fileURLToPath } from "node:url";
 export const APPS_WEB_DIRECTORY = fileURLToPath(
 	new URL("../..", import.meta.url),
 );
-const requireFromAppsWeb = createRequire(new URL("../../package.json", import.meta.url));
+const requireFromAppsWeb = createRequire(
+	new URL("../../package.json", import.meta.url),
+);
 const convexPackageJsonPath = requireFromAppsWeb.resolve("convex/package.json");
 export const CONVEX_BIN_PATH = path.join(
 	path.dirname(convexPackageJsonPath),

@@ -222,7 +222,9 @@ function resolveConvexBinPath() {
 	const requireFromAppsWeb = createRequire(
 		path.resolve(appsWebDirectory, "package.json"),
 	);
-	const convexPackageJsonPath = requireFromAppsWeb.resolve("convex/package.json");
+	const convexPackageJsonPath = requireFromAppsWeb.resolve(
+		"convex/package.json",
+	);
 	return path.join(path.dirname(convexPackageJsonPath), "bin/main.js");
 }
 

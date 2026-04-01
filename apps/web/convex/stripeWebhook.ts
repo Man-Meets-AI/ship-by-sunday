@@ -204,9 +204,7 @@ export const processStripeWebhook = internalAction({
 							? "no_payment_required"
 							: "paid",
 					stripeCustomerId:
-						typeof session.customer === "string"
-							? session.customer
-							: undefined,
+						typeof session.customer === "string" ? session.customer : undefined,
 					stripePaymentIntentId:
 						typeof session.payment_intent === "string"
 							? session.payment_intent
