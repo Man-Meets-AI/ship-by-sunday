@@ -1,5 +1,6 @@
 import path from "node:path";
 import { spawn } from "node:child_process";
+import { existsSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 
 import { chromium, type FullConfig, type Page } from "@playwright/test";
@@ -18,10 +19,7 @@ import {
 const DEFAULT_COURSE_SLUG = "ship-by-sunday";
 const localEnvPath = path.resolve(__dirname, "../../.env.local");
 const appsWebDirectory = path.resolve(__dirname, "../..");
-const convexBinPath = path.resolve(
-	appsWebDirectory,
-	"node_modules/convex/bin/main.js",
-);
+const convexBinPath = resolveConvexBinPath();
 
 export default async function globalSetup(config: FullConfig) {
 	const baseURL = getSandboxBaseUrl(config);
@@ -218,6 +216,18 @@ async function signIn(
 function isSandboxProjectRequested() {
 	const argv = process.argv;
 	return argv.includes("--project=sandbox-e2e") || argv.includes("sandbox-e2e");
+}
+
+function resolveConvexBinPath() {
+	const appsWebConvexBinPath = path.resolve(
+		appsWebDirectory,
+		"node_modules/convex/bin/main.js",
+	);
+	if (existsSync(appsWebConvexBinPath)) {
+		return appsWebConvexBinPath;
+	}
+
+	return path.resolve(process.cwd(), "node_modules/convex/bin/main.js");
 }
 
 async function syncProductAccessState({
