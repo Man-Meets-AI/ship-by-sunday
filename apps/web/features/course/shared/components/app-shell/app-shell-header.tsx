@@ -36,7 +36,7 @@ export function AppShellHeader({
 			<div className="flex min-w-0 flex-1 items-center gap-x-3">
 				<AppShellWorkspaceNav lesson11Viewport={lesson11Viewport} />
 				{primaryNav ? (
-					<div className="min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+					<div className="min-w-0 flex-1 overflow-x-auto lg:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
 						<AppShellHeaderPrimaryNav primaryNav={primaryNav} />
 					</div>
 				) : null}

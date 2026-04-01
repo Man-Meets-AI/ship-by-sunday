@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { createEvent, fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -229,6 +229,26 @@ describe("PacketReviewPage", () => {
 		).toBe("/api/download/repo");
 		expect(screen.queryByText("QUEST")).toBeNull();
 		expect(reviewVideo.textContent).toBe("Review Video");
+	});
+
+	it("lets the browser handle the Ship Kit download links directly", () => {
+		render(<PacketReviewPage initialWorkspaceState={createWorkspaceState()} />);
+
+		const primaryDownloadLink = screen.getByRole("link", {
+			name: "Download Ship Kit",
+		});
+		expect(primaryDownloadLink.getAttribute("download")).toBe("");
+		const primaryClick = createEvent.click(primaryDownloadLink);
+		fireEvent(primaryDownloadLink, primaryClick);
+		expect(primaryClick.defaultPrevented).toBe(false);
+
+		const secondaryDownloadLink = screen.getByRole("link", {
+			name: "Download Ship Kit first",
+		});
+		expect(secondaryDownloadLink.getAttribute("download")).toBe("");
+		const secondaryClick = createEvent.click(secondaryDownloadLink);
+		fireEvent(secondaryDownloadLink, secondaryClick);
+		expect(secondaryClick.defaultPrevented).toBe(false);
 	});
 
 	it("switches the primary CTA to Build Lessons when the live unlock marker is present", () => {

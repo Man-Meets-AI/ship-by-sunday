@@ -4,8 +4,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const markBonusLessonViewedMock = vi.fn();
 const useMutationMock = vi.fn(() => markBonusLessonViewedMock);
+const useConvexAuthMock = vi.fn();
 
 vi.mock("convex/react", () => ({
+	useConvexAuth: () => useConvexAuthMock(),
 	useMutation: (...args: unknown[]) => useMutationMock(...args),
 }));
 
@@ -23,6 +25,11 @@ describe("BonusLessonViewTracker", () => {
 	beforeEach(() => {
 		markBonusLessonViewedMock.mockReset();
 		useMutationMock.mockClear();
+		useConvexAuthMock.mockReset();
+		useConvexAuthMock.mockReturnValue({
+			isAuthenticated: true,
+			isLoading: false,
+		});
 		markBonusLessonViewedMock.mockResolvedValue({
 			viewedAt: 123,
 			created: true,
@@ -34,6 +41,34 @@ describe("BonusLessonViewTracker", () => {
 
 		await waitFor(() => {
 			expect(useMutationMock).toHaveBeenCalledWith("markBonusLessonViewed");
+			expect(markBonusLessonViewedMock).toHaveBeenCalledWith({
+				lessonKey: "iterate-the-product-with-ai",
+			});
+		});
+	});
+
+	it("waits for Convex auth readiness before marking the lesson as viewed", async () => {
+		useConvexAuthMock.mockReturnValue({
+			isAuthenticated: false,
+			isLoading: true,
+		});
+
+		const { rerender } = render(
+			<BonusLessonViewTracker lessonKey="iterate-the-product-with-ai" />,
+		);
+
+		expect(markBonusLessonViewedMock).not.toHaveBeenCalled();
+
+		useConvexAuthMock.mockReturnValue({
+			isAuthenticated: true,
+			isLoading: false,
+		});
+
+		rerender(
+			<BonusLessonViewTracker lessonKey="iterate-the-product-with-ai" />,
+		);
+
+		await waitFor(() => {
 			expect(markBonusLessonViewedMock).toHaveBeenCalledWith({
 				lessonKey: "iterate-the-product-with-ai",
 			});
