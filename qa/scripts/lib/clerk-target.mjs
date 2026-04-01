@@ -1,5 +1,14 @@
 const localhostHosts = new Set(["127.0.0.1", "0.0.0.0", "localhost"]);
 
+function normalizeBaseUrl(baseUrl) {
+	if (typeof baseUrl !== "string") {
+		return null;
+	}
+
+	const normalized = baseUrl.trim();
+	return normalized.length > 0 ? normalized : null;
+}
+
 function extractClerkPublishableKey(html) {
 	const keyMatch = html.match(/pk_(live|test)_[A-Za-z0-9_$-]+/);
 	return keyMatch?.[0] ?? null;
@@ -26,11 +35,12 @@ function summarizeClerkKey(key) {
 }
 
 export function shouldValidateHostedClerkTarget(baseUrl) {
-	if (!baseUrl) {
+	const normalizedBaseUrl = normalizeBaseUrl(baseUrl);
+	if (!normalizedBaseUrl) {
 		return false;
 	}
 
-	return !localhostHosts.has(new URL(baseUrl).hostname);
+	return !localhostHosts.has(new URL(normalizedBaseUrl).hostname);
 }
 
 export async function assertClerkTargetMatchesQaEnv({
@@ -38,7 +48,8 @@ export async function assertClerkTargetMatchesQaEnv({
 	loadedEnvFilePath,
 	fetchImpl = fetch,
 }) {
-	if (!shouldValidateHostedClerkTarget(baseUrl)) {
+	const normalizedBaseUrl = normalizeBaseUrl(baseUrl);
+	if (!shouldValidateHostedClerkTarget(normalizedBaseUrl)) {
 		return;
 	}
 
@@ -50,7 +61,7 @@ export async function assertClerkTargetMatchesQaEnv({
 		return;
 	}
 
-	const signInUrl = new URL("/sign-in", baseUrl);
+	const signInUrl = new URL("/sign-in", normalizedBaseUrl);
 	const response = await fetchImpl(signInUrl, {
 		headers: {
 			"user-agent": "manmeetsai-qa-auth-check/1.0",
