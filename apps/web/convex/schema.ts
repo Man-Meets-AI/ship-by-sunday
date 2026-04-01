@@ -44,6 +44,22 @@ export default defineSchema({
 		.index("by_clerk_user_id", ["clerkUserId"])
 		.index("by_stripe_customer_id", ["stripeCustomerId"])
 		.index("by_stripe_checkout_session_id", ["stripeCheckoutSessionId"]),
+	pendingCheckoutClaims: defineTable({
+		stripeCheckoutSessionId: v.string(),
+		checkoutEmail: v.string(),
+		checkoutEmailNormalized: v.string(),
+		courseSlug: v.string(),
+		paymentStatus: v.union(v.literal("paid"), v.literal("no_payment_required")),
+		stripeCustomerId: v.optional(v.string()),
+		stripePaymentIntentId: v.optional(v.string()),
+		stripeEventId: v.string(),
+		stripeEventType: v.string(),
+		status: v.union(v.literal("pending"), v.literal("claimed")),
+		claimedByClerkUserId: v.optional(v.string()),
+		claimedAt: v.optional(v.number()),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	}).index("by_stripe_checkout_session_id", ["stripeCheckoutSessionId"]),
 	starterRepoAccess: defineTable({
 		clerkUserId: v.string(),
 		courseSlug: v.string(),

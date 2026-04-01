@@ -56,6 +56,33 @@ export function buildSignInHref({
 	return `${routeConfig.signIn}?${params.toString()}`;
 }
 
+export function buildSignUpHref({
+	redirectPath,
+	sessionId,
+}: {
+	redirectPath?: string | null;
+	sessionId?: string | null;
+} = {}) {
+	const params = new URLSearchParams();
+	const safeRedirectPath = redirectPath
+		? getSafeRedirectPath(redirectPath)
+		: null;
+
+	if (sessionId) {
+		params.set("session_id", sessionId);
+	}
+
+	if (safeRedirectPath) {
+		params.set(redirectUrlParam, safeRedirectPath);
+	}
+
+	if (!params.size) {
+		return routeConfig.signUp;
+	}
+
+	return `${routeConfig.signUp}?${params.toString()}`;
+}
+
 export function buildSsoCallbackHref(redirectPath?: string | null) {
 	const safeRedirectPath = redirectPath
 		? getSafeRedirectPath(redirectPath)

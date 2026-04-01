@@ -125,6 +125,17 @@ export function CheckoutSuccessMainPanel({
 							{viewModel.primaryActionLabel}
 						</Link>
 					</Button>
+					{viewModel.alternateActionHref && viewModel.alternateActionLabel ? (
+						<Button
+							asChild
+							variant="secondary"
+							className="min-w-44 justify-center"
+						>
+							<Link href={viewModel.alternateActionHref}>
+								{viewModel.alternateActionLabel}
+							</Link>
+						</Button>
+					) : null}
 					<Button asChild variant="outline" className="min-w-44 justify-center">
 						<Link href={routeConfig.home}>Go home</Link>
 					</Button>

@@ -7,7 +7,11 @@ import { SignInResetForm } from "@/features/auth/sign-in/sign-in-reset-form";
 import { SignInVerificationForm } from "@/features/auth/sign-in/sign-in-verification-form";
 import { useSignInFlow } from "@/features/auth/sign-in/use-sign-in-flow";
 
-export function SignInPage() {
+export function SignInPage({
+	postCheckoutSignUpHref = null,
+}: {
+	postCheckoutSignUpHref?: string | null;
+}) {
 	const flow = useSignInFlow();
 	const content = getSignInPageContent({
 		authError: flow.authError,
@@ -33,6 +37,7 @@ export function SignInPage() {
 					passwordError={flow.passwordError}
 					setEmailAddress={flow.setEmailAddress}
 					setPassword={flow.setPassword}
+					signUpHref={postCheckoutSignUpHref}
 					startGoogleSignIn={flow.startGoogleSignIn}
 					startPasswordReset={flow.startPasswordReset}
 					submitPassword={flow.submitPassword}

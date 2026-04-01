@@ -3,7 +3,11 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { SignInPage } from "@/features/auth/sign-in/sign-in-page";
-import { getSafeRedirectPath } from "@/features/auth/sign-in/sign-in-route-utils";
+import {
+	buildSignUpHref,
+	getSafeRedirectPath,
+} from "@/features/auth/sign-in/sign-in-route-utils";
+import { getPendingCheckoutSessionIdFromCookie } from "@/features/checkout/server/checkout-session-recovery";
 import { shouldBypassClerkProtection } from "@/platform/auth/clerk-middleware-bypass";
 
 export const metadata: Metadata = {
@@ -20,10 +24,19 @@ export default async function Page({
 }) {
 	const { redirect_url: redirectUrl } = await searchParams;
 	const disableClerkAuthLookup = shouldBypassClerkProtection();
+	const safeRedirectPath = getSafeRedirectPath(redirectUrl);
+	const pendingCheckoutSessionId =
+		await getPendingCheckoutSessionIdFromCookie();
+	const postCheckoutSignUpHref = pendingCheckoutSessionId
+		? buildSignUpHref({
+				redirectPath: safeRedirectPath,
+				sessionId: pendingCheckoutSessionId,
+			})
+		: null;
 
 	if (!disableClerkAuthLookup && (await auth()).isAuthenticated) {
-		redirect(getSafeRedirectPath(redirectUrl));
+		redirect(safeRedirectPath);
 	}
 
-	return <SignInPage />;
+	return <SignInPage postCheckoutSignUpHref={postCheckoutSignUpHref} />;
 }
