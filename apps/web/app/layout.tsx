@@ -11,7 +11,7 @@ const bebasNeue = Bebas_Neue({
 });
 
 import { Toaster } from "@/components/ui/sonner";
-import { manifestConfig, productConfig } from "@/config/product";
+import { manifestConfig, productConfig, routeConfig } from "@/config/product";
 import { sessionTaskUrls } from "@/features/auth/sign-in/sign-in-route-utils";
 import { clerkProviderAppearance } from "@/lib/clerk-auth-appearance";
 import { ConvexClientProvider } from "@/platform/convex/convex-client-provider";
@@ -73,6 +73,8 @@ export default function RootLayout({
 			<body className={bebasNeue.variable}>
 				<ClerkProvider
 					appearance={clerkProviderAppearance}
+					signInUrl={routeConfig.signIn}
+					signUpUrl={routeConfig.signUp}
 					taskUrls={sessionTaskUrls}
 				>
 					<ThemeProvider

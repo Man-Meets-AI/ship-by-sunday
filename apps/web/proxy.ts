@@ -52,8 +52,15 @@ export default disableClerkMiddleware
 			},
 			() =>
 				clerkAuthorizedParties.length > 0
-					? { authorizedParties: clerkAuthorizedParties }
-					: {},
+					? {
+							authorizedParties: clerkAuthorizedParties,
+							signInUrl: routeConfig.signIn,
+							signUpUrl: routeConfig.signUp,
+						}
+					: {
+							signInUrl: routeConfig.signIn,
+							signUpUrl: routeConfig.signUp,
+						},
 		);
 
 export const config = {
