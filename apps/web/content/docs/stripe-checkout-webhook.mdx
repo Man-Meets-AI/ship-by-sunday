@@ -76,12 +76,13 @@ Start in a safe sandbox or test-mode environment, get the full handoff working t
 
 The starter uses this sequence:
 
-1. signed-in buyer calls `POST /api/stripe/checkout`
+1. buyer calls `POST /api/stripe/checkout` from the public CTA, whether they are signed in or signed out
 2. Stripe hosts checkout
 3. Stripe returns to `/checkout/success`
 4. Stripe webhook hits Convex HTTP at `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`
-5. Convex verifies the signature and upserts the active product-access grant
-6. `/checkout/success` waits for access, then redirects into `/start`
+5. Convex verifies the signature and either grants access directly for a signed-in checkout or stores a durable pending paid checkout keyed by the Stripe session
+6. `/checkout/success` signs the buyer in or creates the account if needed, then claims the purchase when the verified primary email matches the Stripe checkout email
+7. the app redirects into `/start`
 
 ## Health checks
 
