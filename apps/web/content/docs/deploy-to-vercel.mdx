@@ -80,7 +80,9 @@ That command assumes:
 - `qa/personas.local.json` contains the real QA account emails and passwords
 - the file referenced by `QA_ENV_FILE` contains the production Clerk and Convex env values
 - the production Clerk instance matches the target site
-- GitHub repository secret `VERCEL_TOKEN` can read production deployment metadata so the workflow can wait for the exact release commit before running Playwright
+- GitHub repository secret `VERCEL_TOKEN` plus repository variables `VERCEL_PROJECT_ID` and `VERCEL_TEAM_ID` can read production deployment metadata so the workflow can wait for the exact release commit before running Playwright
+- `QA_ENV_FILE=apps/web/.env.production` is resolved from the repository root in CI, not from `apps/web/`
+- the production proof bootstrap can derive `CONVEX_DEPLOYMENT` from `NEXT_PUBLIC_CONVEX_URL`, so the env file does not need a separate production deployment name
 
 If persona prep fails with a Clerk publishable-key mismatch, stop there. That means the loaded env file does not match the production site, so any later authenticated browser result would be invalid.
 

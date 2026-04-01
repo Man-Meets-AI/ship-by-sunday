@@ -64,6 +64,8 @@ For packet-funnel work, `default_ship` should not rely on browser lanes alone. T
 On local dev, the preferred authenticated browser proof is now the local-auth lane rather than the sandbox-only gate. Use `PLAYWRIGHT_BASE_URL=http://localhost:3000 bun run --cwd apps/web test:e2e:local-auth:default-ship` when you need the protected packet funnel on the running local stack.
 
 `qa:personas:prepare` and `qa:run-pack` load `apps/web/.env.local` by default. Override that with `QA_ENV_FILE=<path>` when the hosted target uses a different Clerk instance than local. For hosted runs, also pass `PLAYWRIGHT_BASE_URL=<target>` so persona prep can refuse a mismatched Clerk environment before Playwright writes a bad auth state.
+In CI and repo-root commands, `QA_ENV_FILE` is resolved from the repository root. Production runs should use `QA_ENV_FILE=apps/web/.env.production`, not a path relative to `apps/web/`.
+Production bootstrap can derive `CONVEX_DEPLOYMENT` from `NEXT_PUBLIC_CONVEX_URL` when the env file omits it, so hosted production env files do not need a separate deployment name just to let Playwright seed or reset QA state.
 
 ## Plain-English QA Map
 
@@ -144,12 +146,11 @@ Important: a Playwright run that exits `0` with every test skipped is not browse
 
 ## Current resume state
 
-- Start on `dev` first. `qa/runs/2026-03-26-dev-default-ship-local-auth.md` is the current green `default_ship` baseline.
-- `billing_integration` on `dev` has a green rerun in `qa/runs/2026-03-25-dev-billing-integration-rerun.md`. Use that report as the local Stripe baseline.
-- Move to `prod` second for release evidence. `default_ship` is now green there as well; use `qa/runs/2026-03-25-default-ship-prod-rerun.md` as the current hosted baseline.
-- Hosted `billing_integration` now has both the repair report and the automatic post-fix rerun: `qa/runs/2026-03-25-prod-billing-integration-webhook-fix.md` plus `qa/runs/2026-03-25-prod-billing-integration-automatic-rerun.md`.
+- Start on `dev` first. The latest green integrated staging proof is GitHub Actions run `23865552478` on commit `2b5eccf85141ad90ef2b8af4b85bda4804491189`, and it passed `release_scope`, `default_ship`, forced `billing_integration`, and `release_gate`.
+- Move to `prod` second for release evidence. The latest green production proof is GitHub Actions run `23867770574` on commit `92da71a5218440030828d2b36bfab76a41993b79`, and the matching green Convex production deploy is `23867770585`.
+- `qa/runs/2026-04-01-release-proof-final-green.md` is the durable report for that final April 1 release state.
 - In this repo, the preferred production proof remains a live no-cost Checkout run using a restricted `100% off` promotion code, because that exercises `checkout.session.completed`, the webhook grant, `/checkout/success`, and `/start` without requiring a real charge.
-- Treat `qa/runs/` as the durable evidence set and read the latest relevant report for the target environment before rerunning a pack.
+- Treat `qa/runs/` plus the latest GitHub Actions run IDs as the durable evidence set and read the latest relevant report for the target environment before rerunning a pack.
 
 ## Fresh-Agent Restart
 
