@@ -138,6 +138,7 @@ describe("AppShell", () => {
 		expect(markup).toContain('href="/lesson/iterate-the-product-with-ai"');
 		expect(markup).toContain("Launch Lessons");
 		expect(markup).toContain("Bonus");
+		expect(markup).toContain("overflow-x-auto lg:overflow-visible");
 		expect(markup).toContain("9/28");
 		expect(markup).toContain('data-shell-local-nav-kind="packet"');
 		expect(markup).toContain("Compact packet rail");

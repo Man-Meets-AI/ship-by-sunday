@@ -24,6 +24,7 @@ apps/web/tests/integration-ui/reset-password-page.test.tsx,integration-ui,CONTEN
 apps/web/tests/integration-ui/sign-in-page.test.tsx,integration-ui,AUTH-01,Sign-in and auth redirect behavior.,keep,,These tests still map cleanly to auth scenarios.
 apps/web/tests/integration-ui/sso-callback-page.test.tsx,integration-ui,AUTH-01,Sign-in and auth redirect behavior.,keep,,These tests still map cleanly to auth scenarios.
 apps/web/tests/integration-ui/starter-repo-access-form.test.tsx,integration-ui,STARTER-01|SETTINGS-02,Starter repo access and settings add-ons.,keep,,Starter repo still belongs in the extended support pack.
+apps/web/tests/integration-ui/workspace-primary-nav.test.tsx,integration-ui,CONTENT-01,General packet or support behavior.,keep,,Defaulted into the packet content bucket pending a more specific mapping.
 apps/web/tests/integration/codex-route-handlers.test.ts,integration,CODEX-01,Codex routes or connection helpers.,keep,,Codex remains an extended support surface.
 apps/web/tests/integration/observability-clerk-route.test.ts,integration,OBS-01,Observability route behavior.,keep,,These tests still prove operational safety.
 apps/web/tests/integration/observability-client-error-route.test.ts,integration,OBS-01,Observability route behavior.,keep,,These tests still prove operational safety.
