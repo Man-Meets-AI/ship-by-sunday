@@ -234,7 +234,7 @@ describe("getCheckoutSessionState", () => {
 	});
 
 	it.each(["paid", "no_payment_required"] as const)(
-		"returns validated when Stripe reports %s",
+		"claims access and returns validated when Stripe reports %s",
 		async (paymentStatus) => {
 			retrieveSessionMock.mockResolvedValue(
 				createCheckoutSession({
@@ -242,6 +242,13 @@ describe("getCheckoutSessionState", () => {
 				}),
 			);
 			authMock.mockResolvedValue({ userId: "user_123" });
+			claimCheckoutSessionForViewerMock.mockResolvedValue({
+				kind: "validated",
+				sessionId: `cs_${paymentStatus}`,
+				claimResult: {
+					granted: "patched",
+				},
+			});
 
 			const { getCheckoutSessionState } =
 				await import("@/features/checkout/server/checkout-session");
@@ -252,6 +259,9 @@ describe("getCheckoutSessionState", () => {
 				kind: "validated",
 				sessionId: `cs_${paymentStatus}`,
 			});
+			expect(claimCheckoutSessionForViewerMock).toHaveBeenCalledWith(
+				`cs_${paymentStatus}`,
+			);
 		},
 	);
 });

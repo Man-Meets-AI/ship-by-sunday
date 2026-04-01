@@ -141,7 +141,7 @@ test.describe("member without access", () => {
 			},
 		);
 
-		await page.getByRole("button", { name: "Get instant access" }).click();
+		await page.getByTestId("pricing-primary-cta").click();
 		await completeStripeSandboxCheckout(page);
 
 		await page.waitForURL(/\/checkout\/success\?session_id=/, {

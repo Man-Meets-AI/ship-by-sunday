@@ -1,0 +1,274 @@
+name: Production Release Proof
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      force_billing:
+        description: Force the billing integration gate for a manual rerun
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-release-proof-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release_scope:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      base_sha: ${{ steps.refs.outputs.base_sha }}
+      billing_sensitive: ${{ steps.scope.outputs.billing_sensitive }}
+      head_sha: ${{ steps.refs.outputs.head_sha }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.12.0
+
+      - name: Resolve release scope refs
+        id: refs
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            head_sha="$(git rev-parse HEAD)"
+            if git rev-parse "${head_sha}^" >/dev/null 2>&1; then
+              base_sha="$(git rev-parse "${head_sha}^")"
+            else
+              base_sha="$head_sha"
+            fi
+          else
+            base_sha="${{ github.event.before }}"
+            head_sha="${{ github.sha }}"
+          fi
+
+          echo "base_sha=$base_sha" >> "$GITHUB_OUTPUT"
+          echo "head_sha=$head_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Detect release scope
+        id: scope
+        env:
+          FORCE_BILLING: ${{ github.event_name == 'workflow_dispatch' && inputs.force_billing }}
+          RELEASE_BASE_SHA: ${{ steps.refs.outputs.base_sha }}
+          RELEASE_HEAD_SHA: ${{ steps.refs.outputs.head_sha }}
+        run: |
+          if [[ "$FORCE_BILLING" == "true" ]]; then
+            echo "billing_sensitive=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          node qa/scripts/detect-release-scope.mjs --base="$RELEASE_BASE_SHA" --head="$RELEASE_HEAD_SHA"
+
+  default_ship:
+    needs: release_scope
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    environment:
+      name: production-release-proof
+    env:
+      APP_BASE_URL: https://www.man-meets-ai.com
+      NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
+      PLAYWRIGHT_BASE_URL: https://www.man-meets-ai.com
+      PRODUCTION_CONVEX_CONFIG_JSON: ${{ secrets.PRODUCTION_CONVEX_CONFIG_JSON }}
+      PRODUCTION_QA_PERSONAS_LOCAL_JSON: ${{ secrets.PRODUCTION_QA_PERSONAS_LOCAL_JSON }}
+      PRODUCTION_WEB_ENV_LOCAL: ${{ secrets.PRODUCTION_WEB_ENV_LOCAL }}
+      QA_ENV_FILE: apps/web/.env.production
+      RELEASE_COMMIT_SHA: ${{ needs.release_scope.outputs.head_sha }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+      VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.12.0
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.5
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: bun run --cwd apps/web playwright:install
+
+      - name: Wait for matching Vercel production deployment
+        run: |
+          node qa/scripts/wait-for-vercel-production-deployment.mjs \
+            --commit_sha="$RELEASE_COMMIT_SHA"
+
+      - name: Wait for public release
+        run: node qa/scripts/wait-for-host.mjs --url="$PLAYWRIGHT_BASE_URL" --path=/ --path=/checkout/success
+
+      - name: Write QA persona credentials
+        run: |
+          if [[ -z "$PRODUCTION_QA_PERSONAS_LOCAL_JSON" ]]; then
+            echo "PRODUCTION_QA_PERSONAS_LOCAL_JSON is not configured." >&2
+            exit 1
+          fi
+          printf '%s\n' "$PRODUCTION_QA_PERSONAS_LOCAL_JSON" > qa/personas.local.json
+
+      - name: Write production app env file
+        run: |
+          if [[ -z "$PRODUCTION_WEB_ENV_LOCAL" ]]; then
+            echo "PRODUCTION_WEB_ENV_LOCAL is not configured." >&2
+            exit 1
+          fi
+          printf '%s\n' "$PRODUCTION_WEB_ENV_LOCAL" > apps/web/.env.production
+
+      - name: Write Convex CLI auth config
+        run: |
+          if [[ -z "$PRODUCTION_CONVEX_CONFIG_JSON" ]]; then
+            echo "PRODUCTION_CONVEX_CONFIG_JSON is not configured." >&2
+            exit 1
+          fi
+          mkdir -p "$HOME/.convex"
+          printf '%s\n' "$PRODUCTION_CONVEX_CONFIG_JSON" > "$HOME/.convex/config.json"
+
+      - name: Run production default ship pack
+        run: bun run qa:run-pack -- --pack=default_ship --slug=prod-default-${{ github.run_id }}
+
+      - name: Upload Playwright artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-default-ship-artifacts
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+          if-no-files-found: ignore
+
+  billing_integration:
+    if: needs.release_scope.outputs.billing_sensitive == 'true'
+    needs:
+      - release_scope
+      - default_ship
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment:
+      name: production-billing-integration
+    env:
+      APP_BASE_URL: https://www.man-meets-ai.com
+      NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
+      PLAYWRIGHT_BASE_URL: https://www.man-meets-ai.com
+      PRODUCTION_CONVEX_CONFIG_JSON: ${{ secrets.PRODUCTION_CONVEX_CONFIG_JSON }}
+      PRODUCTION_QA_PERSONAS_LOCAL_JSON: ${{ secrets.PRODUCTION_QA_PERSONAS_LOCAL_JSON }}
+      PRODUCTION_STRIPE_SECRET_KEY: ${{ secrets.PRODUCTION_STRIPE_SECRET_KEY }}
+      PRODUCTION_STRIPE_WEBHOOK_SECRET: ${{ secrets.PRODUCTION_STRIPE_WEBHOOK_SECRET }}
+      PRODUCTION_WEB_ENV_LOCAL: ${{ secrets.PRODUCTION_WEB_ENV_LOCAL }}
+      QA_ALLOW_BILLING_INTEGRATION: "1"
+      QA_ENV_FILE: apps/web/.env.production
+      RELEASE_COMMIT_SHA: ${{ needs.release_scope.outputs.head_sha }}
+      STRIPE_SECRET_KEY: ${{ secrets.PRODUCTION_STRIPE_SECRET_KEY }}
+      STRIPE_WEBHOOK_SECRET: ${{ secrets.PRODUCTION_STRIPE_WEBHOOK_SECRET }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+      VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.12.0
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.5
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: bun run --cwd apps/web playwright:install
+
+      - name: Wait for matching Vercel production deployment
+        run: |
+          node qa/scripts/wait-for-vercel-production-deployment.mjs \
+            --commit_sha="$RELEASE_COMMIT_SHA"
+
+      - name: Wait for public release
+        run: node qa/scripts/wait-for-host.mjs --url="$PLAYWRIGHT_BASE_URL" --path=/ --path=/checkout/success
+
+      - name: Write QA persona credentials
+        run: |
+          if [[ -z "$PRODUCTION_QA_PERSONAS_LOCAL_JSON" ]]; then
+            echo "PRODUCTION_QA_PERSONAS_LOCAL_JSON is not configured." >&2
+            exit 1
+          fi
+          printf '%s\n' "$PRODUCTION_QA_PERSONAS_LOCAL_JSON" > qa/personas.local.json
+
+      - name: Write production app env file
+        run: |
+          if [[ -z "$PRODUCTION_WEB_ENV_LOCAL" ]]; then
+            echo "PRODUCTION_WEB_ENV_LOCAL is not configured." >&2
+            exit 1
+          fi
+          printf '%s\n' "$PRODUCTION_WEB_ENV_LOCAL" > apps/web/.env.production
+
+      - name: Write Convex CLI auth config
+        run: |
+          if [[ -z "$PRODUCTION_CONVEX_CONFIG_JSON" ]]; then
+            echo "PRODUCTION_CONVEX_CONFIG_JSON is not configured." >&2
+            exit 1
+          fi
+          mkdir -p "$HOME/.convex"
+          printf '%s\n' "$PRODUCTION_CONVEX_CONFIG_JSON" > "$HOME/.convex/config.json"
+
+      - name: Run production billing integration pack
+        run: bun run qa:run-pack -- --pack=billing_integration --slug=prod-billing-${{ github.run_id }}
+
+      - name: Upload Playwright artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-billing-integration-artifacts
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+          if-no-files-found: ignore
+
+  release_gate:
+    if: always()
+    needs:
+      - release_scope
+      - default_ship
+      - billing_integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Summarize production release proof
+        env:
+          BILLING_SENSITIVE: ${{ needs.release_scope.outputs.billing_sensitive }}
+          BILLING_RESULT: ${{ needs.billing_integration.result }}
+          DEFAULT_SHIP_RESULT: ${{ needs.default_ship.result }}
+        run: |
+          if [[ "$DEFAULT_SHIP_RESULT" != "success" ]]; then
+            echo "default_ship failed in production release proof." >&2
+            exit 1
+          fi
+
+          if [[ "$BILLING_SENSITIVE" == "true" && "$BILLING_RESULT" != "success" ]]; then
+            echo "billing_integration was required and did not succeed in production release proof." >&2
+            exit 1
+          fi
+
+          echo "Production release proof passed."

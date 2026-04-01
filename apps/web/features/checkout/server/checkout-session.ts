@@ -37,6 +37,43 @@ export type CheckoutSessionState =
 			sessionId: string;
 	  };
 
+function getCheckoutStateFromClaimResult(
+	claimResult: Awaited<ReturnType<typeof claimCheckoutSessionForViewer>>,
+	sessionId: string,
+): CheckoutSessionState {
+	switch (claimResult.kind) {
+		case "validated":
+			return {
+				kind: "validated",
+				sessionId,
+			};
+		case "wrong_account":
+			return {
+				kind: "wrong_account",
+				sessionId,
+			};
+		case "payment_pending":
+			return {
+				kind: "payment_pending",
+				sessionId,
+				paymentStatus: claimResult.paymentStatus,
+			};
+		case "sign_in_required":
+			return {
+				kind: "sign_in_required",
+				sessionId,
+			};
+		case "invalid_session":
+		case "missing_checkout_email":
+			return {
+				kind: "invalid_session",
+				sessionId,
+			};
+		default:
+			return claimResult satisfies never;
+	}
+}
+
 export async function getCheckoutSessionState(
 	sessionId: string | undefined,
 ): Promise<CheckoutSessionState> {
@@ -81,37 +118,7 @@ export async function getCheckoutSessionState(
 		}
 
 		const claimResult = await claimCheckoutSessionForViewer(sessionId);
-		switch (claimResult.kind) {
-			case "validated":
-				return {
-					kind: "validated",
-					sessionId,
-				};
-			case "wrong_account":
-				return {
-					kind: "wrong_account",
-					sessionId,
-				};
-			case "payment_pending":
-				return {
-					kind: "payment_pending",
-					sessionId,
-					paymentStatus: claimResult.paymentStatus,
-				};
-			case "sign_in_required":
-				return {
-					kind: "sign_in_required",
-					sessionId,
-				};
-			case "invalid_session":
-			case "missing_checkout_email":
-				return {
-					kind: "invalid_session",
-					sessionId,
-				};
-			default:
-				return claimResult satisfies never;
-		}
+		return getCheckoutStateFromClaimResult(claimResult, sessionId);
 	}
 
 	const authState = await auth();
@@ -130,11 +137,8 @@ export async function getCheckoutSessionState(
 	}
 
 	if (isStripeCheckoutSessionPaid(session)) {
-		await clearPendingCheckoutSessionCookie();
-		return {
-			kind: "validated",
-			sessionId,
-		};
+		const claimResult = await claimCheckoutSessionForViewer(sessionId);
+		return getCheckoutStateFromClaimResult(claimResult, sessionId);
 	}
 
 	return {
