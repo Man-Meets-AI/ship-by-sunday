@@ -19,16 +19,17 @@ If the task is not user-facing UI work, follow the repo's normal instructions in
 
 ## Required workflow
 
-1. Start from `docs/openai/design-pack/` for the vanilla baseline.
-2. Identify the surface type first: landing page, marketing page, packet workspace, or dashboard.
-3. Read `CHECKLIST.md` and the matching surface doc under `surfaces/`.
-4. Create or update a task plan from `PLANS.md` before broad UI work.
-5. Preserve the existing product and design system when one already exists.
-6. Keep the product packet-first, not course-first.
-7. Use real copy, real product context, or tightly scoped placeholder copy.
-8. Verify the result on both desktop and mobile before calling the task complete.
-9. Update `documentation.md` when the work changes the user-facing experience in a meaningful way.
-10. Use current `apps/web` routes, features, config, and local `AGENTS.md` files as the live product contract; use older `docs/ship-by-sunday/*.md` planning docs only for background context.
+1. Read root `DESIGN.md` first. It is the canonical visual source of truth for this repo.
+2. Start from `docs/openai/design-pack/` for the vanilla baseline.
+3. Identify the surface type first: landing page, marketing page, blueprint workspace, or dashboard.
+4. Read `CHECKLIST.md` and the matching surface doc under `surfaces/`.
+5. Create or update a task plan from `PLANS.md` before broad UI work.
+6. Preserve the existing product and design system when one already exists.
+7. Keep the product blueprint-first, not course-first.
+8. Use real copy, real product context, or tightly scoped placeholder copy.
+9. Verify the result on both desktop and mobile before calling the task complete.
+10. Update `documentation.md` when the work changes the user-facing experience in a meaningful way.
+11. Use current `apps/web` routes, features, config, and local `AGENTS.md` files as the live product contract; use older `docs/ship-by-sunday/*.md` planning docs only for background context.
 
 ## How to think about the work
 
@@ -37,7 +38,7 @@ If the task is not user-facing UI work, follow the repo's normal instructions in
 - Prioritize restraint, hierarchy, and clarity over quantity of components.
 - Use spacing, scale, alignment, contrast, and imagery before adding chrome.
 - When the repo already has strong patterns, preserve them instead of imposing generic defaults.
-- Do not let visual work reintroduce old CEO / Design / Build / Ship framing when it conflicts with the packet-first flow.
+- Do not let visual work reintroduce old CEO / Design / Build / Ship framing when it conflicts with the blueprint-first flow.
 
 ## Hard rules for branded and landing-page work
 
@@ -62,7 +63,7 @@ If the task is not user-facing UI work, follow the repo's normal instructions in
 - Do not introduce a hero section on product UI unless explicitly requested.
 - If a panel can become plain layout without losing meaning, remove the card treatment.
 - If a section does not help someone operate, monitor, or decide, remove it.
-- Prefer packet-stage and workspace-first composition over course-shell or promo-shell composition.
+- Prefer blueprint-stage and workspace-first composition over course-shell or promo-shell composition.
 
 ## Verification
 
@@ -85,6 +86,7 @@ A complete frontend task should usually leave behind:
 
 ## Files to consult
 
+- `DESIGN.md`
 - `docs/ship-by-sunday/design-pack/AGENTS.md`
 - `docs/openai/design-pack/AGENTS.md`
 - `docs/openai/design-pack/CHECKLIST.md`

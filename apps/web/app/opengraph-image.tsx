@@ -102,7 +102,7 @@ export default function Image() {
 					}}
 				>
 					{productConfig.priceDisplay} one-time. Contract-first packs plus
-					starter rails.
+					starter blueprint.
 				</div>
 			</div>
 		</div>,

@@ -9,14 +9,14 @@ describe("vercel output tracing", () => {
 				"./features/**/*",
 				"./public/**/*",
 				"./scripts/**/*",
-				"../../packages/packet-compiler/src/**/*",
-				"../../packages/packet-compiler/tests/**/*",
+				"../../packages/blueprint-compiler/src/**/*",
+				"../../packages/blueprint-compiler/tests/**/*",
 				"../../docs/openai/**/*",
 				"../../docs/prompts/**/*",
 			]),
 		);
 		expect(repoDownloadTraceIncludes).not.toContain(
-			"../../packages/packet-compiler/**/*",
+			"../../packages/blueprint-compiler/**/*",
 		);
 		expect(repoDownloadTraceIncludes).not.toContain("./node_modules/**/*");
 		expect(repoDownloadTraceIncludes).not.toContain("./.next/**/*");

@@ -18,7 +18,7 @@ export function renderTopLevelHelp() {
 	const lines = [
 		"Ship by Sunday CLI",
 		"",
-		"Run the packet intake flow, inspect readiness, and generate the starter snapshot from this repository root.",
+		"Run the blueprint intake flow, inspect readiness, and generate the starter snapshot from this repository root.",
 		"",
 		"Usage:",
 		`  ${workspaceLauncherCommand} [command]`,

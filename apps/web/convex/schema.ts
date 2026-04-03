@@ -92,7 +92,7 @@ export default defineSchema({
 		createdAt: v.number(),
 		updatedAt: v.number(),
 	}).index("by_clerk_user_id_and_product_key", ["clerkUserId", "productKey"]),
-	packetWorkflowStates: defineTable({
+	blueprintWorkflowStates: defineTable({
 		clerkUserId: v.string(),
 		productKey: v.string(),
 		executeShipUnlockedAt: v.optional(v.number()),

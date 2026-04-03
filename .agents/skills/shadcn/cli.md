@@ -2,9 +2,9 @@
 
 Configuration is read from `components.json`.
 
-> **IMPORTANT:** Always run commands using the project's package runner: `npx shadcn@latest`, `pnpm dlx shadcn@latest`, or `bunx --bun shadcn@latest`. Check `packageManager` from project context to choose the right one. Examples below use `npx shadcn@latest` but substitute the correct runner for the project.
+> **IMPORTANT:** Always run commands using the project's dependency runner: `npx shadcn@latest`, `pnpm dlx shadcn@latest`, or `bunx --bun shadcn@latest`. Check `packageManager` from project context to choose the right one. Examples below use `npx shadcn@latest` but substitute the correct runner for the project.
 
-> **IMPORTANT:** Only use the flags documented below. Do not invent or guess flags — if a flag isn't listed here, it doesn't exist. The CLI auto-detects the package manager from the project's lockfile; there is no `--package-manager` flag.
+> **IMPORTANT:** Only use the flags documented below. Do not invent or guess flags — if a flag isn't listed here, it doesn't exist. The CLI auto-detects the dependency tool from the project's lockfile; there is no `--dependency-tool` flag.
 
 ## Contents
 
@@ -181,7 +181,7 @@ Displays project info and `components.json` configuration. Run this first to dis
 | `tailwindConfigFile` | `string`  | Path to the Tailwind config file                                   |
 | `tailwindCssFile`    | `string`  | Path to the global CSS file                                        |
 | `aliasPrefix`        | `string`  | Import alias prefix (e.g. `@`, `~`, `@/`)                          |
-| `packageManager`     | `string`  | Detected package manager (`npm`, `pnpm`, `yarn`, `bun`)            |
+| `packageManager`     | `string`  | Detected dependency tool (`npm`, `pnpm`, `yarn`, `bun`)            |
 
 **Components.json fields:**
 
@@ -193,7 +193,7 @@ Displays project info and `components.json` configuration. Run this first to dis
 | `tsx`                | `boolean` | TypeScript flag                                                                            |
 | `tailwind.config`    | `string`  | Tailwind config path                                                                       |
 | `tailwind.css`       | `string`  | Global CSS path — this is where custom CSS variables go                                    |
-| `iconLibrary`        | `string`  | Icon library — determines icon import package (e.g. `lucide-react`, `@tabler/icons-react`) |
+| `iconLibrary`        | `string`  | Icon library — determines icon import module (e.g. `lucide-react`, `@tabler/icons-react`) |
 | `aliases.components` | `string`  | Component import alias (e.g. `@/components`)                                               |
 | `aliases.utils`      | `string`  | Utils import alias (e.g. `@/lib/utils`)                                                    |
 | `aliases.ui`         | `string`  | UI component alias (e.g. `@/components/ui`)                                                |

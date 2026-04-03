@@ -92,7 +92,7 @@ Inside `Sharpened Positioning Lines`, include only bounded rewrite-ready assets:
 - one bonus-positioning line
 - 3-5 message angles
 
-## Guardrails
+## Guardblueprint
 
 - Do not use creator transcripts as proof for Man Meets AI sales claims.
 - Do not invent proof, testimonials, stats, or outcomes.

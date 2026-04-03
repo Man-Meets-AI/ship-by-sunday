@@ -1,15 +1,15 @@
 import {
 	deriveStageStatus,
-	getPacketStageDefinition,
-} from "@manmeetsai/packet-compiler";
+	getBlueprintStageDefinition,
+} from "@manmeetsai/blueprint-compiler";
 import { ensureLocalDraft, saveLocalDraft } from "../draft/draft-store";
-import type { EditablePacketStageId } from "../parse-cli-command";
+import type { EditableBlueprintStageId } from "../parse-cli-command";
 import type { CliIo } from "../run-cli";
 import type { StagePromptOutcome } from "../prompts/stage-prompt-session";
 
 export type StagePrompter = (args: {
 	projectRootPath: string;
-	stageId: EditablePacketStageId;
+	stageId: EditableBlueprintStageId;
 	io: CliIo;
 	saveDraft: ReturnType<typeof createDraftSaver>;
 }) => Promise<StagePromptOutcome>;
@@ -27,12 +27,14 @@ export async function handleStageCommand({
 }: {
 	io: CliIo;
 	projectRootPath: string;
-	stageId: EditablePacketStageId;
+	stageId: EditableBlueprintStageId;
 	promptStage?: StagePrompter;
 }) {
 	await ensureLocalDraft(projectRootPath);
 	if (!promptStage) {
-		io.write(`Stage ${getPacketStageDefinition(stageId).label} is available.`);
+		io.write(
+			`Stage ${getBlueprintStageDefinition(stageId).label} is available.`,
+		);
 		return 0;
 	}
 
@@ -50,7 +52,7 @@ export async function handleStageCommand({
 	const nextDraft = await ensureLocalDraft(projectRootPath);
 	const stageStatus = deriveStageStatus(nextDraft.facts);
 	io.write(
-		`${getPacketStageDefinition(stageId).label} saved. First incomplete stage: ${stageStatus.firstIncompleteStageId}`,
+		`${getBlueprintStageDefinition(stageId).label} saved. First incomplete stage: ${stageStatus.firstIncompleteStageId}`,
 	);
 	return 0;
 }

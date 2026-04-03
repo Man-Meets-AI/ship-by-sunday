@@ -1,23 +1,23 @@
 import {
 	canonicalProjectFactKeys,
-	getPacketStageDefinition,
-	packetFieldPromptKind,
-	packetStageDefinitions,
+	getBlueprintStageDefinition,
+	blueprintFieldPromptKind,
+	blueprintStageDefinitions,
 	placeholderFriendlyFactKeys,
 	type CanonicalProjectFactKey,
-} from "@manmeetsai/packet-compiler";
-import { packetFieldLabel } from "@shipbysunday/packet-presentation";
+} from "@manmeetsai/blueprint-compiler";
+import { blueprintFieldLabel } from "@shipbysunday/blueprint-presentation";
 import type {
-	EditablePacketStageId,
-	ReviewablePacketStageId,
+	EditableBlueprintStageId,
+	ReviewableBlueprintStageId,
 } from "./parse-cli-command";
 import { createCliError } from "./cli-errors";
 
 export type FieldDescriptor = {
 	fieldKey: CanonicalProjectFactKey;
 	label: string;
-	promptKind: ReturnType<typeof packetFieldPromptKind>;
-	stageId: EditablePacketStageId;
+	promptKind: ReturnType<typeof blueprintFieldPromptKind>;
+	stageId: EditableBlueprintStageId;
 	stageLabel: string;
 	stepId: string;
 	stepLabel: string;
@@ -25,11 +25,11 @@ export type FieldDescriptor = {
 	placeholderFriendly: boolean;
 };
 
-const editableStageDefinitions = packetStageDefinitions.filter(
+const editableStageDefinitions = blueprintStageDefinitions.filter(
 	(
 		stage,
-	): stage is (typeof packetStageDefinitions)[number] & {
-		id: EditablePacketStageId;
+	): stage is (typeof blueprintStageDefinitions)[number] & {
+		id: EditableBlueprintStageId;
 	} => stage.id !== "start" && stage.id !== "review",
 );
 const placeholderFriendlyFieldKeySet = new Set<CanonicalProjectFactKey>(
@@ -48,8 +48,8 @@ const fieldDescriptors = editableStageDefinitions.flatMap((stage) =>
 	stage.steps.flatMap((step) =>
 		step.fieldKeys.map((fieldKey) => ({
 			fieldKey,
-			label: packetFieldLabel(fieldKey),
-			promptKind: packetFieldPromptKind(fieldKey),
+			label: blueprintFieldLabel(fieldKey),
+			promptKind: blueprintFieldPromptKind(fieldKey),
 			stageId: stage.id,
 			stageLabel: stage.label,
 			stepId: step.id,
@@ -64,7 +64,7 @@ const fieldDescriptorByKey = new Map(
 	fieldDescriptors.map((descriptor) => [descriptor.fieldKey, descriptor]),
 );
 
-function isEditableStageId(value: string): value is EditablePacketStageId {
+function isEditableStageId(value: string): value is EditableBlueprintStageId {
 	return editableStageDefinitions.some((stage) => stage.id === value);
 }
 
@@ -76,7 +76,7 @@ export function getFieldDescriptor(fieldKey: CanonicalProjectFactKey) {
 	return descriptor;
 }
 
-export function listFieldDescriptors(stageId?: EditablePacketStageId) {
+export function listFieldDescriptors(stageId?: EditableBlueprintStageId) {
 	if (!stageId) {
 		return fieldDescriptors;
 	}
@@ -86,12 +86,12 @@ export function listFieldDescriptors(stageId?: EditablePacketStageId) {
 }
 
 export function listStageDescriptors() {
-	return packetStageDefinitions
+	return blueprintStageDefinitions
 		.filter(
 			(
 				stage,
-			): stage is (typeof packetStageDefinitions)[number] & {
-				id: ReviewablePacketStageId;
+			): stage is (typeof blueprintStageDefinitions)[number] & {
+				id: ReviewableBlueprintStageId;
 			} => stage.id !== "start",
 		)
 		.map((stage) => ({
@@ -125,7 +125,7 @@ export function parseFieldSelector(selector: string) {
 		if (descriptor.stageId !== maybeStageId) {
 			throw createCliError(
 				"invalid_stage",
-				`Field "${fieldKey}" belongs to ${descriptor.stageLabel}, not ${getPacketStageDefinition(maybeStageId).label}.`,
+				`Field "${fieldKey}" belongs to ${descriptor.stageLabel}, not ${getBlueprintStageDefinition(maybeStageId).label}.`,
 				2,
 			);
 		}

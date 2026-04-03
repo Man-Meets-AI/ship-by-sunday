@@ -3,7 +3,7 @@ import path from "node:path";
 import {
 	createCanonicalProjectDefinitionDraft,
 	createCompleteProjectDefinition,
-} from "@manmeetsai/packet-compiler";
+} from "@manmeetsai/blueprint-compiler";
 import { runCli } from "../src/run-cli";
 import { loadLocalDraft, saveLocalDraft } from "../src/draft/draft-store";
 import { createCliIo, createTemporaryRepoRoot } from "./test-helpers";
@@ -106,7 +106,7 @@ describe("agent workflows", () => {
 		const appendIo = createCliIo();
 		expect(
 			await runCli({
-				argv: ["append", "scope_in", "Packet intake", "--json"],
+				argv: ["append", "scope_in", "Blueprint intake", "--json"],
 				io: appendIo.io,
 				projectRootPath: repoRootPath,
 			}),
@@ -114,13 +114,13 @@ describe("agent workflows", () => {
 		expect(JSON.parse(appendIo.stdout.join("\n"))).toMatchObject({
 			command: "append",
 			fieldKey: "scope_in",
-			value: ["Packet intake"],
+			value: ["Blueprint intake"],
 		});
 
 		const removeIo = createCliIo();
 		expect(
 			await runCli({
-				argv: ["remove", "scope_in", "Packet intake", "--json"],
+				argv: ["remove", "scope_in", "Blueprint intake", "--json"],
 				io: removeIo.io,
 				projectRootPath: repoRootPath,
 			}),
@@ -266,9 +266,9 @@ describe("agent workflows", () => {
 				productKey: "ship-by-sunday",
 				facts: {
 					product_name: "Ship by Sunday OS",
-					product_summary: "A packet-first CLI for starter repo generation.",
+					product_summary: "A blueprint-first CLI for starter repo generation.",
 					primary_user: "Solo founder",
-					why_this_matters: "The packet should exist outside the web app.",
+					why_this_matters: "The blueprint should exist outside the web app.",
 					problem_statement:
 						"Planning is vague without a stable intake contract.",
 					problem_context_when: "During founder planning",
@@ -282,10 +282,10 @@ describe("agent workflows", () => {
 					evidence_summary: "Internal repo testing proves the flow is useful.",
 					core_flow_summary:
 						"Capture facts, review readiness, generate output.",
-					scope_in: ["Packet intake"],
+					scope_in: ["Blueprint intake"],
 					scope_out: ["No mobile app"],
 					non_goals: ["No billing wizard"],
-					v1_rationale: "Packet-first scope keeps the CLI small.",
+					v1_rationale: "Blueprint-first scope keeps the CLI small.",
 				},
 			}),
 		);

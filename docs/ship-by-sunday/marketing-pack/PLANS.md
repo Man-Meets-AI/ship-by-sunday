@@ -65,7 +65,7 @@ Break the workflow into discrete steps and tag each one with the OpenAI primitiv
 - Publication path:
 - Claim class used: evergreen / verify-first / customer-specific
 
-## 6. Approval and guardrails
+## 6. Approval and safeguards
 
 - Human review rule:
 - Rewrite-pass rule:

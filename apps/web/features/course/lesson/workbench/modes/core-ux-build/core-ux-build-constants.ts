@@ -32,7 +32,7 @@ Keep it under 200 words. I will paste this into my build notes and ChatGPT syste
 export const CORE_UX_BUILD_STRATEGY_FALLBACK_PROMPT = `I do not have a full strategy yet. Draft a minimal v1 strategy skeleton I can refine later:
 - Audience: (guess from my product name if needed)
 - Core loop: sign in → capture idea → generate post → publish
-- v1 guardrails: ship one workflow end-to-end; defer analytics and multi-tenant
+- v1 safeguard: ship one workflow end-to-end; defer analytics and multi-tenant
 - Tone: clear, direct, no hype
 
 I will replace placeholders after the next CEO lesson.`;

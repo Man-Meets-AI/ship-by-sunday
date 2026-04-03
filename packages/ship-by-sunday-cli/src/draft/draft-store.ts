@@ -3,8 +3,8 @@ import path from "node:path";
 import {
 	createCompleteProjectDefinition,
 	createCanonicalProjectDefinitionDraft,
-	isPacketArrayField,
-	isPacketNumericField,
+	isBlueprintArrayField,
+	isBlueprintNumericField,
 	normalizeProblemUrgencyValue,
 	normalizeProblemSeverityValue,
 	parseCanonicalProjectDefinition,
@@ -13,8 +13,8 @@ import {
 	type CanonicalProjectDefinitionDraft,
 	type CanonicalProjectFactKey,
 	type CanonicalProjectFactsDraft,
-	type PacketStageDefinition,
-} from "@manmeetsai/packet-compiler";
+	type BlueprintStageDefinition,
+} from "@manmeetsai/blueprint-compiler";
 import {
 	SHIP_BY_SUNDAY_LOCAL_CLERK_USER_ID,
 	SHIP_BY_SUNDAY_PRODUCT_KEY,
@@ -289,7 +289,7 @@ function applyMutationToFacts(
 	}
 
 	if (mutation.op === "append") {
-		if (!isPacketArrayField(mutation.fieldKey)) {
+		if (!isBlueprintArrayField(mutation.fieldKey)) {
 			throw createCliError(
 				"invalid_args",
 				`Field "${mutation.fieldKey}" does not support append.`,
@@ -309,7 +309,7 @@ function applyMutationToFacts(
 		});
 	}
 
-	if (!isPacketArrayField(mutation.fieldKey)) {
+	if (!isBlueprintArrayField(mutation.fieldKey)) {
 		throw createCliError(
 			"invalid_args",
 			`Field "${mutation.fieldKey}" does not support remove.`,
@@ -348,10 +348,10 @@ function normalizeFieldValue(
 	if (fieldKey === "problem_urgency") {
 		return normalizeProblemUrgencyValue(trimmedValue);
 	}
-	if (isPacketNumericField(fieldKey)) {
+	if (isBlueprintNumericField(fieldKey)) {
 		return Number(trimmedValue);
 	}
-	if (isPacketArrayField(fieldKey)) {
+	if (isBlueprintArrayField(fieldKey)) {
 		if (trimmedValue.startsWith("[") && trimmedValue.endsWith("]")) {
 			const parsedValue = JSON.parse(trimmedValue);
 			if (!Array.isArray(parsedValue)) {
@@ -457,7 +457,7 @@ export async function exportDraftToFile(repoRootPath: string, outPath: string) {
 }
 
 function assertStagePatchKeys(
-	stage: PacketStageDefinition,
+	stage: BlueprintStageDefinition,
 	patch: Record<string, unknown>,
 ) {
 	const allowedFieldKeys = new Set(
@@ -494,7 +494,7 @@ function splitPatchEntries(
 
 export async function applyDraftPatchFromFile(
 	repoRootPath: string,
-	stage: PacketStageDefinition,
+	stage: BlueprintStageDefinition,
 	filePath: string,
 ) {
 	const draft = await ensureLocalDraft(repoRootPath);

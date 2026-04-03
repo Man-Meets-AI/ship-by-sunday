@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
 	createCompleteProjectDefinition,
 	deriveStageStatus,
-} from "@packet-compiler";
+} from "@blueprint-compiler";
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -53,13 +53,13 @@ import type {
 	AppShellPrimaryNav,
 } from "@/features/course/shared/components/app-shell/app-shell-props";
 
-const packetStageStatuses = deriveStageStatus(
+const blueprintStageStatuses = deriveStageStatus(
 	createCompleteProjectDefinition().facts,
 ).stageStatuses;
 
 const primaryNav: AppShellPrimaryNav = {
 	kind: "combined",
-	stageStatuses: packetStageStatuses,
+	stageStatuses: blueprintStageStatuses,
 	postReviewItems: [
 		{
 			kind: "link",
@@ -108,9 +108,9 @@ const primaryNav: AppShellPrimaryNav = {
 };
 
 const localNav: AppShellLocalNav = {
-	kind: "packet",
-	compact: <div>Compact packet rail</div>,
-	desktop: <div>Desktop packet rail</div>,
+	kind: "blueprint",
+	compact: <div>Compact blueprint rail</div>,
+	desktop: <div>Desktop blueprint rail</div>,
 };
 
 function renderAppShell(element: React.ReactElement) {
@@ -140,9 +140,9 @@ describe("AppShell", () => {
 		expect(markup).toContain("Bonus");
 		expect(markup).toContain("overflow-x-auto lg:overflow-visible");
 		expect(markup).toContain("9/28");
-		expect(markup).toContain('data-shell-local-nav-kind="packet"');
-		expect(markup).toContain("Compact packet rail");
-		expect(markup).toContain("Desktop packet rail");
+		expect(markup).toContain('data-shell-local-nav-kind="blueprint"');
+		expect(markup).toContain("Compact blueprint rail");
+		expect(markup).toContain("Desktop blueprint rail");
 		expect(markup).toContain(
 			"hidden min-h-0 min-w-0 xl:sticky xl:top-3 xl:block xl:self-start xl:border-r xl:border-border/60 xl:pr-6",
 		);
@@ -187,6 +187,6 @@ describe("AppShell", () => {
 
 		expect(markup).not.toContain("9/28");
 		expect(markup).not.toContain("Build Lessons");
-		expect(markup).not.toContain("Desktop packet rail");
+		expect(markup).not.toContain("Desktop blueprint rail");
 	});
 });

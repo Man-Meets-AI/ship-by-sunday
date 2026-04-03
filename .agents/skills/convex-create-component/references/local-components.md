@@ -1,6 +1,6 @@
 # Local Convex Components
 
-Read this file when the component should live inside the current app and does not need to be published as an npm package.
+Read this file when the component should live inside the current app and does not need to be published as an npm module.
 
 ## When to Choose This
 

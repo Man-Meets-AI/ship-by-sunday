@@ -38,7 +38,7 @@ Use this as the source-of-truth reading list for the repo.
 | Introducing company knowledge | OpenAI product blog | Organization-specific answers with citations across connected sources | https://openai.com/index/introducing-company-knowledge/ |
 | Company knowledge in ChatGPT Business / Enterprise / Edu | Help Center | Workspace knowledge, eligibility, app requirements | https://help.openai.com/en/articles/12628342-company-knowledge-in-chatgpt-business-enterprise-and-edu |
 | Add files from connected apps in ChatGPT | Help Center | Pull files from SharePoint / Google Drive into workflows | https://help.openai.com/en/articles/9309188-add-files-from-connected-apps-in-chatgpt |
-| Custom GPTs | Academy guide | Practical way to package repeatable marketing behavior | https://academy.openai.com/public/clubs/work-users-ynjqu/resources/custom-gpts |
+| Custom GPTs | Academy guide | Practical way to blueprint repeatable marketing behavior | https://academy.openai.com/public/clubs/work-users-ynjqu/resources/custom-gpts |
 | Creating and editing GPTs | Help Center | Instruction writing, knowledge usage, tool selection, testing | https://help.openai.com/en/articles/8554397 |
 | Skills | Academy guide | Reusable workflow examples like brand voice polish and weekly performance digest | https://academy.openai.com/public/clubs/work-users-ynjqu/resources/skills |
 | Customizing ChatGPT | Academy guide | Brand voice, style mirroring, instructions, memory, project context | https://academy.openai.com/public/clubs/work-users-ynjqu/resources/customizing-chatgpt |
@@ -302,7 +302,7 @@ Connectors in ChatGPT; Introducing company knowledge; Company knowledge in ChatG
 
 ### 3.9 GPTs, skills, and reusable workflow packaging
 
-- [ ] Package repeatable workflows as GPTs, skills, or documented agent specs.
+- [ ] Blueprint repeatable workflows as GPTs, skills, or documented agent specs.
 - [ ] Give each GPT a clear name, description, and conversation starters.
 - [ ] Put rules in instructions; put stable source material in Knowledge.
 - [ ] Prefer text-heavy, well-structured reference files for Knowledge.

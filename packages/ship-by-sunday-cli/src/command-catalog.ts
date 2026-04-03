@@ -81,8 +81,8 @@ export const cliCommandCatalog: Record<
 	},
 	schema: {
 		name: "schema",
-		title: "Ship by Sunday canonical packet schema",
-		summary: "Inspect the packet schema the CLI uses to validate the draft.",
+		title: "Ship by Sunday canonical blueprint schema",
+		summary: "Inspect the blueprint schema the CLI uses to validate the draft.",
 		usage: formatWorkspaceCommand("schema [--json]"),
 		details: [
 			"Use `--json` when another tool needs a stable machine-readable envelope.",
@@ -90,8 +90,8 @@ export const cliCommandCatalog: Record<
 	},
 	stages: {
 		name: "stages",
-		title: "Ship by Sunday packet stages",
-		summary: "List the live packet stages and their step structure.",
+		title: "Ship by Sunday blueprint stages",
+		summary: "List the live blueprint stages and their step structure.",
 		usage: formatWorkspaceCommand("stages [--json]"),
 		details: [
 			"Use this when you want the stage names and the order they run in.",
@@ -99,8 +99,9 @@ export const cliCommandCatalog: Record<
 	},
 	fields: {
 		name: "fields",
-		title: "Ship by Sunday packet fields",
-		summary: "Inspect the fields available in the current packet stage group.",
+		title: "Ship by Sunday blueprint fields",
+		summary:
+			"Inspect the fields available in the current blueprint stage group.",
 		usage: formatWorkspaceCommand("fields [--stage <stage>] [--json]"),
 		details: ["Pass `--stage` to narrow the list to a single editable stage."],
 	},
@@ -265,7 +266,7 @@ export const cliHelpSections: CliHelpSection[] = [
 	{
 		title: "Inspect the draft",
 		description:
-			"Read the packet structure and readiness state without changing anything.",
+			"Read the blueprint structure and readiness state without changing anything.",
 		commandNames: ["schema", "stages", "fields", "next", "validate", "review"],
 	},
 	{
@@ -281,7 +282,7 @@ export const cliHelpSections: CliHelpSection[] = [
 	},
 	{
 		title: "Move data in and out",
-		description: "Import, export, patch, or generate the packet snapshot.",
+		description: "Import, export, patch, or generate the blueprint snapshot.",
 		commandNames: ["export", "import", "apply", "generate"],
 	},
 ];

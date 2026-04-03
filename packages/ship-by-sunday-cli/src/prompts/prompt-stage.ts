@@ -1,17 +1,17 @@
 import {
 	createCanonicalProjectDefinitionDraft,
-	isPacketArrayField,
-	isPacketNumericField,
+	isBlueprintArrayField,
+	isBlueprintNumericField,
 	normalizeProblemUrgencyValue,
 	normalizeProblemSeverityValue,
 	parseCanonicalProjectFactsDraft,
 	type CanonicalProjectDefinitionDraft,
 	type CanonicalProjectFactKey,
-} from "@manmeetsai/packet-compiler";
+} from "@manmeetsai/blueprint-compiler";
 import { createCliError } from "../cli-errors";
 import { workspaceLauncherCommand } from "../command-surface";
 import { ensureLocalDraft, loadLocalDraft } from "../draft/draft-store";
-import type { EditablePacketStageId } from "../parse-cli-command";
+import type { EditableBlueprintStageId } from "../parse-cli-command";
 import type { CliIo } from "../run-cli";
 import {
 	createReadlineStageSession,
@@ -24,7 +24,7 @@ import {
 
 type DraftSaver = (draft: CanonicalProjectDefinitionDraft) => Promise<void>;
 
-function createInvalidPromptStateError(stageId: EditablePacketStageId) {
+function createInvalidPromptStateError(stageId: EditableBlueprintStageId) {
 	return createCliError(
 		"invalid_state",
 		`Interactive prompts require a real terminal. Re-run ${workspaceLauncherCommand} stage ${stageId} in a TTY, or use ${workspaceLauncherCommand} set/import/mutate with --json for automation.`,
@@ -32,7 +32,7 @@ function createInvalidPromptStateError(stageId: EditablePacketStageId) {
 	);
 }
 
-function createClosedPromptError(stageId: EditablePacketStageId) {
+function createClosedPromptError(stageId: EditableBlueprintStageId) {
 	return createCliError(
 		"invalid_state",
 		`The terminal closed before the current answer was completed. Re-run ${workspaceLauncherCommand} stage ${stageId} in a real terminal, or use ${workspaceLauncherCommand} set/import/mutate with --json for automation.`,
@@ -53,9 +53,9 @@ function applyFieldValue(
 		nextFactsSource[fieldKey] = normalizeProblemSeverityValue(value);
 	} else if (fieldKey === "problem_urgency") {
 		nextFactsSource[fieldKey] = normalizeProblemUrgencyValue(value);
-	} else if (isPacketNumericField(fieldKey)) {
+	} else if (isBlueprintNumericField(fieldKey)) {
 		nextFactsSource[fieldKey] = Number(value.trim());
-	} else if (isPacketArrayField(fieldKey)) {
+	} else if (isBlueprintArrayField(fieldKey)) {
 		nextFactsSource[fieldKey] = value
 			.split("\n")
 			.map((line) => line.trim())
@@ -125,7 +125,7 @@ export async function promptStage({
 	saveDraft,
 }: {
 	projectRootPath: string;
-	stageId: EditablePacketStageId;
+	stageId: EditableBlueprintStageId;
 	io: CliIo;
 	saveDraft: DraftSaver;
 }): Promise<StagePromptOutcome> {

@@ -1,15 +1,15 @@
 # Architecture
 
-Ship by Sunday is a packet-first SaaS starter. The public product is not a course player or a collection of separate downloads. The main contract is one guided protected workspace that ends in one generated starter snapshot.
+Ship by Sunday is a blueprint-first SaaS starter. The public product is not a course player or a collection of separate downloads. The main contract is one guided protected workspace that ends in one generated starter snapshot.
 
 ## Main system slices
 
-- `apps/web`: the main Next.js 16 app. It owns public marketing pages, the protected packet workspace, docs pages, checkout success and access routes, and optional Codex runtime surfaces.
-- Convex: the backend source of truth for product access, packet state, course runtime data, observability events, and webhook-backed workflows.
+- `apps/web`: the main Next.js 16 app. It owns public marketing pages, the protected blueprint workspace, docs pages, checkout success and access routes, and optional Codex runtime surfaces.
+- Convex: the backend source of truth for product access, blueprint state, course runtime data, observability events, and webhook-backed workflows.
 - Stripe: checkout, webhook, and entitlement handoff into Convex-backed access state.
 - Clerk: identity, auth state, and protected-route gating.
-- `packages/packet-compiler`: turns canonical packet facts into the customer-safe starter snapshot and generated docs.
-- `packages/ship-by-sunday-cli`: local packet-intake and snapshot-generation path that mirrors the protected `/review` contract.
+- `packages/blueprint-compiler`: turns canonical blueprint facts into the customer-safe starter snapshot and generated docs.
+- `packages/ship-by-sunday-cli`: local blueprint-intake and snapshot-generation path that mirrors the protected `/review` contract.
 - `qa/`: release-proof operating system for packs, personas, run reports, and evidence.
 
 ## Product surface model

@@ -24,8 +24,8 @@ const nextConfig: NextConfig = {
 		],
 	},
 	transpilePackages: [
-		"@manmeetsai/packet-compiler",
-		"@shipbysunday/packet-presentation",
+		"@manmeetsai/blueprint-compiler",
+		"@shipbysunday/blueprint-presentation",
 	],
 	images: {
 		remotePatterns: [

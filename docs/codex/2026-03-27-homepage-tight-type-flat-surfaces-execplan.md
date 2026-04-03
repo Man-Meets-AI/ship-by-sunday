@@ -129,7 +129,7 @@ If any one surface still reads like leftover card chrome, record it in `Surprise
 
 Start from the repository root and refresh the homepage contract, design context, and the exact files involved in this pass.
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     sed -n '1,220p' .impeccable.md
     sed -n '1,240p' apps/web/content/docs/configure-the-homepage.mdx
     sed -n '1,220p' apps/web/features/marketing/components/home-page/hero-sections.tsx
@@ -147,33 +147,33 @@ Start from the repository root and refresh the homepage contract, design context
 
 Run a before-state grep so the implementer can see exactly what is being removed.
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     rg -n "uppercase|tracking-\\[|tracking-wide|tracking-widest|leading-relaxed|leading-snug|leading-7|leading-8|leading-loose|rounded-2xl|bg-muted/|bg-primary/|hover:bg-" apps/web/features/marketing/components/home-page apps/web/features/marketing/content/home.ts
 
 Implement Milestone 1 and Milestone 2 in the homepage files. Keep the first slice limited to homepage presentation and any required copy folding in `apps/web/features/marketing/content/home.ts`. Do not touch `apps/web/features/marketing/lib/home-page-render-model.ts` or `apps/web/features/marketing/lib/home-page-structured-data.ts` unless a touched test proves they unexpectedly depend on a visual detail.
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web
+    cd /Users/parkerrex/Projects/ship-by-sunday/apps/web
     bunx oxlint --deny-warnings features/marketing/components/home-page.tsx features/marketing/components/home-page/hero-sections.tsx features/marketing/components/home-page/home-hero-top-bar.tsx features/marketing/components/home-page/social-proof-section.tsx features/marketing/components/home-page/whats-inside-section.tsx features/marketing/components/home-page/durability-section.tsx features/marketing/components/home-page/common-questions-section.tsx features/marketing/components/home-page/starter-system-section.tsx features/marketing/components/home-page/sprint-path-unified-section.tsx features/marketing/components/home-page/pricing-footer-sections.tsx features/marketing/components/home-page/pricing-includes-list.tsx features/marketing/components/home-page/home-page-primitives.tsx features/marketing/content/home.ts
     bunx oxfmt --check app/globals.css features/marketing/components/home-page.tsx features/marketing/components/home-page/hero-sections.tsx features/marketing/components/home-page/home-hero-top-bar.tsx features/marketing/components/home-page/social-proof-section.tsx features/marketing/components/home-page/whats-inside-section.tsx features/marketing/components/home-page/durability-section.tsx features/marketing/components/home-page/common-questions-section.tsx features/marketing/components/home-page/starter-system-section.tsx features/marketing/components/home-page/sprint-path-unified-section.tsx features/marketing/components/home-page/pricing-footer-sections.tsx features/marketing/components/home-page/pricing-includes-list.tsx features/marketing/components/home-page/home-page-primitives.tsx features/marketing/content/home.ts
     bunx vitest --config vitest.config.ts run --project unit tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts
 
 Implement Milestone 3 and then rerun the grep audit. The expected observation is that the homepage files no longer contain the badge-era classes or passive rounded card wrappers except in functional controls or the preserved hero display surface.
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     rg -n "uppercase|tracking-\\[|tracking-wide|tracking-widest|leading-relaxed|leading-snug|leading-7|leading-8|leading-loose|rounded-2xl|bg-muted/|bg-primary/|hover:bg-" apps/web/features/marketing/components/home-page apps/web/features/marketing/content/home.ts
 
 Run the CTA integration-ui test, the targeted browser-smoke checks, and the production build.
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web
+    cd /Users/parkerrex/Projects/ship-by-sunday/apps/web
     bunx vitest --config vitest.config.ts run --project integration-ui tests/integration-ui/home-page-primary-cta.test.tsx
     PLAYWRIGHT_USE_LOCAL_SERVER=1 bunx playwright test --project=browser-smoke tests/browser-smoke/app-smoke.spec.ts --grep "landing page renders the main offer CTA|homepage renders structured SEO data"
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     bun run build
 
 Finish with manual QA in a local browser. Use `localhost`, not `127.0.0.1`, to avoid a misleading Next.js dev WebSocket warning during local review.
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     bun run dev
 
 Open `http://localhost:3000/?marketing=1` and verify the page in light mode and dark mode. Confirm that there are no standalone label rows above sections, the hero and top-bar buttons still feel strong, the footer no longer starts with a pill wrapper, durability reads as a flat list instead of cards, and the page no longer feels airy or over-tracked.

@@ -3,17 +3,17 @@ import { defineConfig, defineProject } from "vitest/config";
 
 const alias = [
 	{
-		find: "@packet-compiler/server",
+		find: "@blueprint-compiler/server",
 		replacement: path.resolve(
 			__dirname,
-			"../../packages/packet-compiler/src/server.ts",
+			"../../packages/blueprint-compiler/src/server.ts",
 		),
 	},
 	{
-		find: "@packet-compiler",
+		find: "@blueprint-compiler",
 		replacement: path.resolve(
 			__dirname,
-			"../../packages/packet-compiler/src/index.ts",
+			"../../packages/blueprint-compiler/src/index.ts",
 		),
 	},
 	{

@@ -115,7 +115,7 @@ Paste the production prompt, system instruction, or workflow rules here.
 - Adoption metric:
 - Business metric:
 
-## 12. Risks and guardrails
+## 12. Risks and safeguards
 - Current-facts risk:
 - Brand risk:
 - Data/privacy risk:

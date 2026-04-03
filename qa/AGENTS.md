@@ -80,7 +80,7 @@ Material review specialist pattern:
 
 ### Scenario Mapper
 
-Read the diff, map the changed files to scenario IDs, and state which packs are affected. Prefer product language over file names. Example: a change in `apps/web/features/product-access/` affects `AUTH-02`, `ACCESS-01`, and `PACKET-01`, not “the access-required component.”
+Read the diff, map the changed files to scenario IDs, and state which packs are affected. Prefer product language over file names. Example: a change in `apps/web/features/product-access/` affects `AUTH-02`, `ACCESS-01`, and `BLUEPRINT-01`, not “the access-required component.”
 
 ### Coverage Analyst
 
@@ -107,7 +107,7 @@ Use:
 bun run qa:run-pack -- --pack=default_ship --dry-run
 PLAYWRIGHT_BASE_URL=<safe_base_url> bun run qa:personas:prepare -- --pack=default_ship
 bun run test:browser-smoke
-bunx vitest run --project integration-ui tests/integration-ui/packet-start-page.test.tsx tests/integration-ui/packet-stage-page.test.tsx tests/integration-ui/packet-review-page.test.tsx tests/integration-ui/packet-stage-sidebar.test.tsx
+bunx vitest run --project integration-ui tests/integration-ui/blueprint-start-page.test.tsx tests/integration-ui/blueprint-stage-page.test.tsx tests/integration-ui/blueprint-review-page.test.tsx tests/integration-ui/blueprint-stage-sidebar.test.tsx
 E2E_RUN_SANDBOX=1 PLAYWRIGHT_BASE_URL=<safe_base_url> bun run --cwd apps/web test:e2e:sandbox:default-ship
 PLAYWRIGHT_BASE_URL=<safe_base_url> bun run --cwd apps/web test:e2e:local-auth:default-ship
 ```
@@ -120,8 +120,8 @@ Environment ownership:
 
 Pack policy:
 
-- `default_ship`: run `qa:run-pack -- --pack=default_ship` once the environment is ready on `dev` or production release verification. On feature branches, use only `--dry-run` plus focused tests. This validates the catalog, prepares personas, scaffolds the report, runs browser smoke, runs the packet integration-ui suite, and runs the tagged canonical packet-route sandbox spec.
-- For packet-funnel diffs, the packet integration-ui suite is required because it directly proves the stacked Start page, the routed workbench, the Continue-only save and validation flow, and the Review unlock hierarchy.
+- `default_ship`: run `qa:run-pack -- --pack=default_ship` once the environment is ready on `dev` or production release verification. On feature branches, use only `--dry-run` plus focused tests. This validates the catalog, prepares personas, scaffolds the report, runs browser smoke, runs the blueprint integration-ui suite, and runs the tagged canonical blueprint-route sandbox spec.
+- For blueprint-funnel diffs, the blueprint integration-ui suite is required because it directly proves the stacked Start page, the routed workbench, the Continue-only save and validation flow, and the Review unlock hierarchy.
 - On local dev, prefer the local-auth default-ship lane when sandbox auth is not active. It reuses the same prepared personas and storage-state bootstrap but does not depend on the sandbox gate.
 - `extended`: run only the scenarios touched by the diff unless the user asks for a full extended sweep.
 - `billing_integration`: run `qa:run-pack -- --pack=billing_integration` only on `dev` or production release verification when the environment is explicitly safe for test payments and `QA_ALLOW_BILLING_INTEGRATION=1` is set. Do not run it on ordinary feature branches. On local targets, the pack now records `bun run stripe:dev:doctor` as a warning-only preflight and then runs `bun run stripe:dev:verify` after the sandbox billing flow as the hard Stripe-to-Convex proof. A warning about the pinned Stripe CLI project `ship-by-sunday` should be fixed, but it should not override a passing billing handoff by itself. If the pack still regresses, first verify that `bun run dev:stripe` is forwarding to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook` before treating it as an app-auth issue. For hosted prod verification, prefer a restricted live `100% off` promotion code so Checkout completes as a no-cost order while still producing `checkout.session.completed` for the webhook grant path.

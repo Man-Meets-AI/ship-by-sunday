@@ -98,7 +98,7 @@ Better than good error messages is a design that prevents problems in the first 
 **Scoring**:
 | Score | Criteria |
 |-------|----------|
-| 0 | Errors easy to make — no guardrails anywhere |
+| 0 | Errors easy to make — no guardblueprint anywhere |
 | 1 | Few safeguards — some inputs validated, most aren't |
 | 2 | Partial prevention — common errors caught, edge cases slip |
 | 3 | Good prevention — most error paths blocked proactively |

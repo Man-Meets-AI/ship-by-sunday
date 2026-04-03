@@ -13,10 +13,10 @@
         "@clerk/backend": "^3.2.2",
         "@clerk/nextjs": "^7.0.4",
         "@clerk/ui": "^1.2.3",
-        "@manmeetsai/packet-compiler": "workspace:*",
+        "@manmeetsai/blueprint-compiler": "workspace:*",
         "@react-three/drei": "^10.7.7",
         "@react-three/fiber": "^10.0.0-alpha.2",
-        "@shipbysunday/packet-presentation": "workspace:*",
+        "@shipbysunday/blueprint-presentation": "workspace:*",
         "@tabler/icons-react": "^3.40.0",
         "@tanstack/react-form": "^1.28.5",
         "@tsparticles/engine": "^3.9.1",
@@ -77,8 +77,8 @@
         "vitest": "^4.1.0",
       },
     },
-    "packages/packet-compiler": {
-      "name": "@manmeetsai/packet-compiler",
+    "packages/blueprint-compiler": {
+      "name": "@manmeetsai/blueprint-compiler",
       "version": "0.1.0",
       "dependencies": {
         "jszip": "^3.10.1",
@@ -92,11 +92,11 @@
         "vitest": "^4.1.0",
       },
     },
-    "packages/packet-presentation": {
-      "name": "@shipbysunday/packet-presentation",
+    "packages/blueprint-presentation": {
+      "name": "@shipbysunday/blueprint-presentation",
       "version": "0.1.0",
       "dependencies": {
-        "@manmeetsai/packet-compiler": "workspace:*",
+        "@manmeetsai/blueprint-compiler": "workspace:*",
       },
       "devDependencies": {
         "@types/node": "25.5.0",
@@ -113,8 +113,8 @@
         "sbs": "./src/cli.ts",
       },
       "dependencies": {
-        "@manmeetsai/packet-compiler": "workspace:*",
-        "@shipbysunday/packet-presentation": "workspace:*",
+        "@manmeetsai/blueprint-compiler": "workspace:*",
+        "@shipbysunday/blueprint-presentation": "workspace:*",
       },
       "devDependencies": {
         "@types/node": "25.5.0",
@@ -466,7 +466,7 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "3.1.2", "@jridgewell/sourcemap-codec": "1.5.5" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
 
-    "@manmeetsai/packet-compiler": ["@manmeetsai/packet-compiler@workspace:packages/packet-compiler"],
+    "@manmeetsai/blueprint-compiler": ["@manmeetsai/blueprint-compiler@workspace:packages/blueprint-compiler"],
 
     "@manmeetsai/ship-by-sunday-cli": ["@manmeetsai/ship-by-sunday-cli@workspace:packages/ship-by-sunday-cli"],
 
@@ -856,7 +856,7 @@
 
     "@shikijs/vscode-textmate": ["@shikijs/vscode-textmate@10.0.2", "", {}, "sha512-83yeghZ2xxin3Nj8z1NMd/NCuca+gsYXswywDy5bHvwlWL8tpTQmzGeUuHd9FC3E/SBEMvzJRwWEOz5gGes9Qg=="],
 
-    "@shipbysunday/packet-presentation": ["@shipbysunday/packet-presentation@workspace:packages/packet-presentation"],
+    "@shipbysunday/blueprint-presentation": ["@shipbysunday/blueprint-presentation@workspace:packages/blueprint-presentation"],
 
     "@sinclair/typebox": ["@sinclair/typebox@0.27.10", "", {}, "sha512-MTBk/3jGLNB2tVxv6uLlFh1iu64iYOQ2PbdOSK3NW8JZsmlaOh2q6sdtKowBhfw8QFLmYNzTW4/oK4uATIi6ZA=="],
 

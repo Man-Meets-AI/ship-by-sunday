@@ -64,7 +64,7 @@ Use this when the app already uses Clerk or the user wants Clerk's hosted auth f
 4. Open `https://dashboard.clerk.com/apps/setup/convex`
 5. Activate the Convex integration in Clerk if it is not already active
 6. Copy the Clerk Frontend API URL shown there
-7. Install the Clerk package for the app's framework
+7. Install the Clerk dependency for the app's framework
 8. Create or update `convex/auth.config.ts` so Convex validates Clerk tokens
 9. Set the publishable key in the frontend environment
 10. Set the issuer domain or Frontend API URL so Convex can validate the JWT

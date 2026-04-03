@@ -1,4 +1,4 @@
-import type { PacketStageId } from "@manmeetsai/packet-compiler";
+import type { BlueprintStageId } from "@manmeetsai/blueprint-compiler";
 import { createCliError } from "./cli-errors";
 import {
 	formatUnsupportedCompletionShellMessage,
@@ -6,8 +6,11 @@ import {
 	type SupportedCompletionShellName,
 } from "./command-surface";
 
-export type EditablePacketStageId = Exclude<PacketStageId, "start" | "review">;
-export type ReviewablePacketStageId = Exclude<PacketStageId, "start">;
+export type EditableBlueprintStageId = Exclude<
+	BlueprintStageId,
+	"start" | "review"
+>;
+export type ReviewableBlueprintStageId = Exclude<BlueprintStageId, "start">;
 export type CliFixtureName = "blank" | "complete";
 
 export type CliCommand =
@@ -16,7 +19,7 @@ export type CliCommand =
 	| { kind: "init"; fixture: CliFixtureName; force: boolean; json: boolean }
 	| { kind: "schema"; json: boolean }
 	| { kind: "stages"; json: boolean }
-	| { kind: "fields"; json: boolean; stageId?: EditablePacketStageId }
+	| { kind: "fields"; json: boolean; stageId?: EditableBlueprintStageId }
 	| { kind: "next"; json: boolean }
 	| { kind: "validate"; json: boolean }
 	| { kind: "set"; selector: string; value: string; json: boolean }
@@ -25,18 +28,18 @@ export type CliCommand =
 	| { kind: "remove"; selector: string; value: string; json: boolean }
 	| { kind: "mutate"; filePath: string; json: boolean }
 	| { kind: "resume" }
-	| { kind: "stage"; stageId: EditablePacketStageId }
+	| { kind: "stage"; stageId: EditableBlueprintStageId }
 	| {
 			kind: "review";
 			json: boolean;
 			missingOnly: boolean;
-			stageId?: ReviewablePacketStageId;
+			stageId?: ReviewableBlueprintStageId;
 	  }
 	| { kind: "export"; outPath: string; json: boolean }
 	| { kind: "import"; filePath: string; json: boolean }
 	| {
 			kind: "apply";
-			stageId: EditablePacketStageId;
+			stageId: EditableBlueprintStageId;
 			filePath: string;
 			json: boolean;
 	  }
@@ -58,21 +61,23 @@ const editableStageIds = [
 	"design",
 	"marketing",
 	"build-plan",
-] as const satisfies readonly EditablePacketStageId[];
+] as const satisfies readonly EditableBlueprintStageId[];
 const reviewableStageIds = [
 	"product",
 	"design",
 	"marketing",
 	"build-plan",
 	"review",
-] as const satisfies readonly ReviewablePacketStageId[];
+] as const satisfies readonly ReviewableBlueprintStageId[];
 
-function isEditableStageId(value: string): value is EditablePacketStageId {
-	return editableStageIds.includes(value as EditablePacketStageId);
+function isEditableStageId(value: string): value is EditableBlueprintStageId {
+	return editableStageIds.includes(value as EditableBlueprintStageId);
 }
 
-function isReviewableStageId(value: string): value is ReviewablePacketStageId {
-	return reviewableStageIds.includes(value as ReviewablePacketStageId);
+function isReviewableStageId(
+	value: string,
+): value is ReviewableBlueprintStageId {
+	return reviewableStageIds.includes(value as ReviewableBlueprintStageId);
 }
 
 function requireOptionValue(args: string[], index: number, optionName: string) {
@@ -162,7 +167,7 @@ export function parseCliCommand(argv: string[]): CliCommand {
 		return {
 			kind: "fields",
 			json: rest.includes("--json"),
-			stageId: stageId as EditablePacketStageId | undefined,
+			stageId: stageId as EditableBlueprintStageId | undefined,
 		};
 	}
 
@@ -291,7 +296,7 @@ export function parseCliCommand(argv: string[]): CliCommand {
 			kind: "review",
 			json: rest.includes("--json"),
 			missingOnly: rest.includes("--missing-only"),
-			stageId: stageId as ReviewablePacketStageId | undefined,
+			stageId: stageId as ReviewableBlueprintStageId | undefined,
 		};
 	}
 

@@ -2,7 +2,7 @@ export const BUILD_SLICES_FIELD_IDS = {
 	planningPath: "build_slices_planning_path",
 	coreUxOrPrompt: "build_slices_core_ux_or_prompt",
 	referenceLink: "build_slices_reference_link",
-	packet: "build_slices_packet",
+	blueprint: "build_slices_blueprint",
 	selectedSlice: "build_slices_selected_slice",
 	reviewChecklist: "build_slices_review_checklist",
 	userFlowSketch: "build_slices_user_flow_sketch",

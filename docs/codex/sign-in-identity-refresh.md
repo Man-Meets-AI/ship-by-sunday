@@ -172,10 +172,10 @@ At the end of this milestone, the refreshed identity routes will be resilient un
 
 ## Concrete Steps
 
-Work from the repository root at `/Users/parkerrex/Projects/manmeetsai-workspace`. Begin by re-reading the current header, shell, sibling identity routes, shared-system files, and browser-smoke spec so the redesign is anchored in actual code instead of memory.
+Work from the repository root at `/Users/parkerrex/Projects/ship-by-sunday`. Begin by re-reading the current header, shell, sibling identity routes, shared-system files, and browser-smoke spec so the redesign is anchored in actual code instead of memory.
 
     pwd
-    /Users/parkerrex/Projects/manmeetsai-workspace
+    /Users/parkerrex/Projects/ship-by-sunday
 
     sed -n '1,220p' apps/web/app/'(identity)'/layout.tsx
     sed -n '1,220p' apps/web/app/'(identity)'/session-tasks/reset-password/page.tsx

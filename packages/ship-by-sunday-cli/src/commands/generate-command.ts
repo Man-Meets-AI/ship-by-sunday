@@ -4,12 +4,12 @@ import {
 	deriveStageStatus,
 	type CanonicalProjectDefinition,
 	type CanonicalProjectDefinitionDraft,
-} from "@manmeetsai/packet-compiler";
+} from "@manmeetsai/blueprint-compiler";
 import {
 	buildRepoGenerationManifest,
 	buildReviewDownloadZip,
 	materializeRepoSnapshot,
-} from "@manmeetsai/packet-compiler/server";
+} from "@manmeetsai/blueprint-compiler/server";
 import { mkdir, mkdtemp, rename, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createCliError } from "../cli-errors";
@@ -20,10 +20,10 @@ import { resolveProjectPath } from "../cli-paths";
 
 function assertReviewReady(draft: CanonicalProjectDefinitionDraft) {
 	const stageStatus = deriveStageStatus(draft.facts);
-	if (!stageStatus.packetReadiness.review.isReady) {
+	if (!stageStatus.blueprintReadiness.review.isReady) {
 		throw createCliError(
 			"not_review_ready",
-			`Draft is not review-ready. Missing: ${stageStatus.packetReadiness.review.missingFactKeys.join(", ")}`,
+			`Draft is not review-ready. Missing: ${stageStatus.blueprintReadiness.review.missingFactKeys.join(", ")}`,
 			5,
 		);
 	}
@@ -159,12 +159,12 @@ export async function handleGenerateCommand({
 
 	const stageStatus = deriveStageStatus(draft.facts);
 	if (dryRun) {
-		if (!stageStatus.packetReadiness.review.isReady) {
+		if (!stageStatus.blueprintReadiness.review.isReady) {
 			const dryRunBlockedResult = {
 				reviewReady: false,
 				mode: zip ? "zip" : "directory",
 				outputPath: absoluteOutPath,
-				blockers: stageStatus.packetReadiness.review.missingFactKeys,
+				blockers: stageStatus.blueprintReadiness.review.missingFactKeys,
 			};
 			if (json) {
 				writeJsonResult(io, "generate", dryRunBlockedResult);
@@ -175,7 +175,7 @@ export async function handleGenerateCommand({
 					"Generate dry run",
 					"",
 					"Draft is not review-ready.",
-					`Blockers: ${stageStatus.packetReadiness.review.missingFactKeys.join(", ")}`,
+					`Blockers: ${stageStatus.blueprintReadiness.review.missingFactKeys.join(", ")}`,
 				].join("\n"),
 			);
 			return 0;

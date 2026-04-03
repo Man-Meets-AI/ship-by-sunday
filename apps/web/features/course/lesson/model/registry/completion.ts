@@ -294,7 +294,7 @@ function getLessonSpecificCompletionMessage(
 			return "Fill the Codex implementation brief (dictated or typed).";
 		}
 		if (fieldId === CORE_UX_BUILD_FIELD_IDS.handoffChecklist) {
-			return "Check the photo and brief lines when the handoff package is real.";
+			return "Check the photo and brief lines when the handoff blueprint is real.";
 		}
 	}
 

@@ -21,7 +21,7 @@ export function BonusMissionHeroCard({
 					</CardTitle>
 				</div>
 				<p className="max-w-3xl text-sm leading-7 text-muted-foreground sm:text-base">
-					You have finished the core Ship Rails run. Use Build to turn your
+					You have finished the core Ship Blueprint run. Use Build to turn your
 					product truth, Agent-Ready Packs, and Agent-First Starter Repo into a
 					working product. Product, Design, and Ship stay here as reference when
 					you need to tighten decisions or finish the launch.

@@ -1,7 +1,7 @@
 import {
 	deriveStageStatus,
-	getPacketStageDefinition,
-} from "@manmeetsai/packet-compiler";
+	getBlueprintStageDefinition,
+} from "@manmeetsai/blueprint-compiler";
 import { getFieldDescriptor } from "../field-contract";
 import { requireLocalDraft } from "../draft/draft-store";
 import type { CliIo } from "../run-cli";
@@ -46,7 +46,7 @@ export async function handleNextCommand({
 		return 0;
 	}
 
-	const nextStage = getPacketStageDefinition(
+	const nextStage = getBlueprintStageDefinition(
 		stageStatus.firstIncompleteStageId,
 	);
 	const nextStageState = stageStatus.stageStatuses.find(

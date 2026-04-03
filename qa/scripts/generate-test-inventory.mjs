@@ -78,12 +78,12 @@ function buildRecord(filePath) {
 		return {
 			file_path: repoPath,
 			test_layer: "sandbox_e2e",
-			scenario_ids: "AUTH-02|ACCESS-01|PACKET-01",
-			current_value: "Signed-out redirect, no-access recovery, and canonical packet-start entry.",
+			scenario_ids: "AUTH-02|ACCESS-01|BLUEPRINT-01",
+			current_value: "Signed-out redirect, no-access recovery, and canonical blueprint-start entry.",
 			disposition: "keep",
 			replacement_path: "",
 			disposition_rationale:
-				"This sandbox spec now maps directly to the canonical packet entry routes and belongs in the default ship pack.",
+				"This sandbox spec now maps directly to the canonical blueprint entry routes and belongs in the default ship pack.",
 		};
 	}
 
@@ -92,18 +92,18 @@ function buildRecord(filePath) {
 			file_path: repoPath,
 			test_layer: "sandbox_e2e",
 			scenario_ids:
-				"PACKET-01|PACKET-02|PACKET-03|PACKET-04|PACKET-05|PACKET-06|PACKET-07|SETTINGS-01|FREEPAID-02",
+				"BLUEPRINT-01|BLUEPRINT-02|BLUEPRINT-03|BLUEPRINT-04|BLUEPRINT-05|BLUEPRINT-06|BLUEPRINT-07|SETTINGS-01|FREEPAID-02",
 			current_value:
-				"Canonical packet funnel, settings visibility, and paid handoff through the packet-first routes.",
+				"Canonical blueprint funnel, settings visibility, and paid handoff through the blueprint-first routes.",
 			disposition: "keep",
 			replacement_path: "",
 			disposition_rationale:
-				"This sandbox spec now carries the canonical default-ship packet flow plus the billing-integration handoff.",
+				"This sandbox spec now carries the canonical default-ship blueprint flow plus the billing-integration handoff.",
 		};
 	}
 
 	if (repoPath.includes("/tests/contracts/")) {
-		return inventoryRecord(repoPath, testLayer, "CONTENT-01", "Packet curriculum contract.", "keep", "", "Contracts still map cleanly to the packet model.");
+		return inventoryRecord(repoPath, testLayer, "CONTENT-01", "Blueprint curriculum contract.", "keep", "", "Contracts still map cleanly to the blueprint model.");
 	}
 
 	if (repoPath.includes("/tests/integration/observability-")) {
@@ -167,8 +167,8 @@ function buildRecord(filePath) {
 		return inventoryRecord(repoPath, testLayer, "FREEPAID-01", "Checkout launch behavior.", "keep", "", "These tests still prove checkout launch without forcing a full billing run.");
 	}
 
-	if (repoPath.includes("packet-download-routes") || repoPath.includes("uploads")) {
-		return inventoryRecord(repoPath, testLayer, "PACKET-06", "Review downloads and packet export behavior.", "keep", "", "Useful proof for the Review stage.");
+	if (repoPath.includes("blueprint-download-routes") || repoPath.includes("uploads")) {
+		return inventoryRecord(repoPath, testLayer, "BLUEPRINT-06", "Review downloads and blueprint export behavior.", "keep", "", "Useful proof for the Review stage.");
 	}
 
 	if (
@@ -177,7 +177,7 @@ function buildRecord(filePath) {
 		repoPath.includes("course-entitlements") ||
 		repoPath.includes("product-shell")
 	) {
-		return inventoryRecord(repoPath, testLayer, "PACKET-01|PACKET-07", "Protected workspace and access behavior.", "keep", "", "These still contribute to packet entry confidence.");
+		return inventoryRecord(repoPath, testLayer, "BLUEPRINT-01|BLUEPRINT-07", "Protected workspace and access behavior.", "keep", "", "These still contribute to blueprint entry confidence.");
 	}
 
 	if (repoPath.includes("home-page") || repoPath.includes("robots") || repoPath.includes("manifest")) {
@@ -193,7 +193,7 @@ function buildRecord(filePath) {
 		repoPath.includes("app-workspace-mission-page") ||
 		repoPath.includes("legacy-lesson-routes")
 	) {
-		return inventoryRecord(repoPath, testLayer, "PACKET-07", "Legacy mission or route alias behavior.", "rewrite", "Canonical packet route coverage", "These tests still talk about legacy aliases that should not anchor the QA model.");
+		return inventoryRecord(repoPath, testLayer, "BLUEPRINT-07", "Legacy mission or route alias behavior.", "rewrite", "Canonical blueprint route coverage", "These tests still talk about legacy aliases that should not anchor the QA model.");
 	}
 
 	if (
@@ -204,7 +204,7 @@ function buildRecord(filePath) {
 		repoPath.includes("watch-lesson") ||
 		repoPath.includes("next-lesson-handoff")
 	) {
-		return inventoryRecord(repoPath, testLayer, "PACKET-07|CONTENT-01", "Packet funnel lesson and curriculum behavior.", "keep", "", "These are still useful but should roll up under packet scenarios.");
+		return inventoryRecord(repoPath, testLayer, "BLUEPRINT-07|CONTENT-01", "Blueprint funnel lesson and curriculum behavior.", "keep", "", "These are still useful but should roll up under blueprint scenarios.");
 	}
 
 	if (
@@ -219,7 +219,7 @@ function buildRecord(filePath) {
 		repoPath.includes("production-deploy-handoff") ||
 		repoPath.includes("repo-map")
 	) {
-		return inventoryRecord(repoPath, testLayer, "CONTENT-01", "Implementation-led lesson or workbench detail.", "merge", "PACKET-07 or CONTENT-01 coverage", "These tests are useful authoring guardrails but too implementation-led to stand alone in ship reporting.");
+			return inventoryRecord(repoPath, testLayer, "CONTENT-01", "Implementation-led lesson or workbench detail.", "merge", "BLUEPRINT-07 or CONTENT-01 coverage", "These tests are useful authoring safeguards but too implementation-led to stand alone in ship reporting.");
 	}
 
 	if (
@@ -232,10 +232,10 @@ function buildRecord(filePath) {
 		repoPath,
 		testLayer,
 		"CONTENT-01",
-		"General packet or support behavior.",
+		"General blueprint or support behavior.",
 		"keep",
 		"",
-		"Defaulted into the packet content bucket pending a more specific mapping.",
+		"Defaulted into the blueprint content bucket pending a more specific mapping.",
 	);
 }
 

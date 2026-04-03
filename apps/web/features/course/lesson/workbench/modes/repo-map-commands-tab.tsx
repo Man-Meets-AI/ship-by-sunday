@@ -23,8 +23,7 @@ export function RepoMapCommandsTab() {
 	return (
 		<div className="space-y-4">
 			<p className="text-sm leading-relaxed text-muted-foreground">
-				These are the jobs the walkthrough calls out—no full{" "}
-				<span className="font-mono text-foreground">package.json</span> dump.
+				These are the jobs the walkthrough calls out—no full manifest dump.
 			</p>
 			<div className="space-y-3">
 				{REPO_CURATED_COMMANDS.map((row, index) =>

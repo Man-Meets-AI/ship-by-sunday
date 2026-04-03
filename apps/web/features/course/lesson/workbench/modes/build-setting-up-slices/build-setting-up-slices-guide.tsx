@@ -106,11 +106,11 @@ export function BuildSettingUpSlicesGuide({
 						<Accordion type="multiple" className="border-t border-border pt-4">
 							<AccordionItem value="slice">
 								<AccordionTrigger className="text-sm font-medium">
-									What is a slice? What is the packet?
+									What is a slice? What is the blueprint?
 								</AccordionTrigger>
 								<AccordionContent className="text-sm leading-relaxed text-muted-foreground">
 									{BUILD_SLICES_SLICE_HELP} The planner returns a{" "}
-									<strong className="text-foreground">packet</strong> of
+									<strong className="text-foreground">blueprint</strong> of
 									candidate slices; you pick one, implement it, then test
 									against your core UX.
 								</AccordionContent>

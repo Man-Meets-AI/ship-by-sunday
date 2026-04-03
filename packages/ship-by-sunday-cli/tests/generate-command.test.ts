@@ -1,6 +1,6 @@
 import { access, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { createCompleteProjectDefinition } from "@manmeetsai/packet-compiler";
+import { createCompleteProjectDefinition } from "@manmeetsai/blueprint-compiler";
 import {
 	importDraftFromFile,
 	saveLocalDraft,

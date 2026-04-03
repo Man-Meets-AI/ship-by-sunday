@@ -47,7 +47,7 @@ export default async function globalSetup(config: FullConfig) {
 				clerkUserId,
 				kind: "reset",
 			});
-			await syncPacketProgressState({
+			await syncBlueprintProgressState({
 				clerkUserId,
 				kind: "reset",
 			});
@@ -62,7 +62,7 @@ export default async function globalSetup(config: FullConfig) {
 				clerkUserId,
 				kind: "grant",
 			});
-			await syncPacketProgressState({
+			await syncBlueprintProgressState({
 				clerkUserId,
 				kind: "seed_complete",
 			});
@@ -279,7 +279,7 @@ async function syncProductAccessState({
 	);
 }
 
-async function syncPacketProgressState({
+async function syncBlueprintProgressState({
 	clerkUserId,
 	kind,
 }: {
@@ -289,14 +289,14 @@ async function syncPacketProgressState({
 	const result =
 		kind === "seed_complete"
 			? await runConvexInternalCommand({
-					functionName: "packet:seedCompleteProjectDefinitionForQa",
+					functionName: "blueprint:seedCompleteProjectDefinitionForQa",
 					args: {
 						clerkUserId,
 					},
 					env: process.env,
 				})
 			: await runConvexInternalCommand({
-					functionName: "packet:resetProjectDefinitionForQa",
+					functionName: "blueprint:resetProjectDefinitionForQa",
 					args: {
 						clerkUserId,
 					},
@@ -309,8 +309,8 @@ async function syncPacketProgressState({
 
 	const actionLabel =
 		kind === "seed_complete"
-			? "seed complete packet progress"
-			: "reset packet progress";
+			? "seed complete blueprint progress"
+			: "reset blueprint progress";
 	throw new Error(
 		`Failed to ${actionLabel} for ${clerkUserId}. ${result.stderr || result.stdout || "No command output."}`,
 	);

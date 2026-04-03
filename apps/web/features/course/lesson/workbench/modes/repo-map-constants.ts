@@ -46,7 +46,7 @@ export const REPO_MAP_ENTRIES: RepoMapEntry[] = [
 		summary: "Instructions for AI assistants working in this repo.",
 	},
 	{
-		id: "package",
+		id: "manifest",
 		path: "package.json",
 		badge: "required",
 		summary:

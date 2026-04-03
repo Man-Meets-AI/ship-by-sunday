@@ -9,7 +9,7 @@ This document contains foundational mandates for Gemini CLI in this workspace. T
 
 ## Canonical Truth & Source Order
 Use this exact priority order when sources conflict:
-1. `docs/ship-by-sunday/packet-contract-and-question-map-2026-03-23.md`
+1. `docs/ship-by-sunday/blueprint-contract-and-question-map-2026-03-23.md`
 2. `docs/ship-by-sunday/input-architecture-keep-kill-combine-2026-03-23.md`
 3. `docs/ship-by-sunday/curriculum-reset-funnel-2026-03-23.md`
 4. `docs/ship-by-sunday/repo-input-audit-2026-03-23.md`
@@ -41,20 +41,20 @@ Use this exact priority order when sources conflict:
 ## Subsystem Rules
 
 ### Web App (`apps/web`)
-- **Packet-First:** This product is packet-first, not course-first.
+- **Blueprint-First:** This product is blueprint-first, not course-first.
 - **Funnel:** `Start -> Product -> Design -> Marketing -> Build Plan -> Review & Download`.
-- **Unlock Logic:** Ensure `design packet`, `marketing packet`, `build packet`, and `repo zip` unlock exactly as defined in `apps/web/AGENTS.md`.
+- **Unlock Logic:** Ensure `design blueprint`, `marketing blueprint`, `build blueprint`, and `repo zip` unlock exactly as defined in `apps/web/AGENTS.md`.
 - **Homepage:** Changes to `/` must follow `starterConfig.homePage` in `apps/web/config/product.ts` and related files. Read `apps/web/content/docs/configure-the-homepage.mdx` first.
 
-### Packet Compiler (`packages/packet-compiler`)
-- **Compiler First:** Treat as a packet compiler with repo-generation side effects.
+### Blueprint Compiler (`packages/blueprint-compiler`)
+- **Compiler First:** Treat as a blueprint compiler with repo-generation side effects.
 - **Derivation:** Prefer derivation over recollection. Do not re-ask downstream for upstream data.
 - **Pricing:** Belongs in `Build Plan`.
 - **Customer-Safe:** Repo snapshots must exclude machine-local junk, generated output, and unresolved symlinks.
 
 ## Convex & ExecPlans
 - **Convex:** Hosted dev workflow only. No local mode. Read `apps/web/convex/_generated/ai/guidelines.md` before editing.
-- **ExecPlans:** Mandatory for complex features, migrations, or refactors. Store in `docs/codex/`. Follow `docs/codex/PLANS.md` exactly.
+- **ExecPlans:** Mandatory for complex features, migrations, or refactors. Store in `.plans/`. Follow `.plans/PLANS.md` exactly. Treat `docs/codex/` as legacy archive only.
 - **Validation:** Validate immediately after each milestone. Stop and repair if validation fails.
 
 ## Definition of "Done"

@@ -4,9 +4,9 @@ This is the short repo glossary for agents and operators.
 
 ## Terms
 
-### Packet
+### Blueprint
 
-One stage-specific slice of the guided product-building flow. The product is packet-first, so packet stages are the main planning and UX unit.
+One stage-specific slice of the guided product-building flow. The product is blueprint-first, so blueprint stages are the main planning and UX unit.
 
 ### Stage-entry route
 
@@ -22,7 +22,7 @@ The terminal protected stage where the user verifies the generated materials and
 
 ### Canonical fact
 
-A durable, user-meaningful input that should survive across generation and downstream rendering. Canonical facts belong in the packet model, not in ad hoc workflow notes.
+A durable, user-meaningful input that should survive across generation and downstream rendering. Canonical facts belong in the blueprint model, not in ad hoc workflow notes.
 
 ### Derived output
 

@@ -1,6 +1,6 @@
 # Launch Message Kit Example
 
-- **Doc type:** custom marketing-packet example
+- **Doc type:** custom marketing-blueprint example
 - **Workflow:** homepage and launch-message support
 - **Status:** example
 - **Baseline source:** `docs/openai/openai-marketing-kit/`
@@ -40,7 +40,7 @@ Turn stable product facts into a reviewable launch message kit for the homepage,
 
 - unverified claims about customer results
 - auto-publishing external content
-- adding new positioning not supported by packet facts
+- adding new positioning not supported by blueprint facts
 - changing product scope through messaging
 
 ## Output contract

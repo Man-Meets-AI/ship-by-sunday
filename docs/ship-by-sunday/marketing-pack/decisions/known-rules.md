@@ -6,7 +6,7 @@
 - Treat current facts as fresh inputs, not durable knowledge.
 - Never invent proof, customer outcomes, or live performance numbers.
 - All external-facing outputs require human review.
-- Keep the public story aligned with the packet-first product.
+- Keep the public story aligned with the blueprint-first product.
 
 ## Exception policy
 
@@ -16,4 +16,4 @@
 
 ## Dated decisions
 
-- **2026-03-27:** The Ship by Sunday marketing pack extends the vanilla OpenAI marketing kit and is the custom packet for this repo.
+- **2026-03-27:** The Ship by Sunday marketing pack extends the vanilla OpenAI marketing kit and is the custom blueprint for this repo.

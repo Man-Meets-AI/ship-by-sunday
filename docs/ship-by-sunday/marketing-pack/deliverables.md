@@ -1,6 +1,6 @@
 # Ship by Sunday Marketing Deliverables
 
-This file defines what the marketing packet should usually help produce.
+This file defines what the marketing blueprint should usually help produce.
 
 ## Core deliverables
 
@@ -26,13 +26,13 @@ This file defines what the marketing packet should usually help produce.
 - fully automated publishing workflows
 - paid-media execution playbooks with live performance assumptions
 - customer proof packages that invent or infer testimonials
-- broad content calendars unrelated to the packet facts
+- broad content calendars unrelated to the blueprint facts
 
-## Packet standard
+## Blueprint standard
 
 The customer should leave with enough material to shape the public story and first launch assets without rereading the full intake history.
 
-For direct-response work, the packet should give them enough to record or script a short close, a cold open, and a fuller VSL without inventing new claims.
+For direct-response work, the blueprint should give them enough to record or script a short close, a cold open, and a fuller VSL without inventing new claims.
 
 ## Asset paths
 

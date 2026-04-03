@@ -5,7 +5,7 @@ Environment: prod-www.man-meets-ai.com
 Pack: default_ship
 Slug: prod-rerun
 Prepared personas: signed_out, member_without_access, member_with_access
-Scenario IDs: VIS-01, AUTH-01, AUTH-02, ACCESS-01, ACCESS-02, PACKET-01, PACKET-02, PACKET-03, PACKET-04, PACKET-05, PACKET-06, PACKET-07, SETTINGS-01
+Scenario IDs: VIS-01, AUTH-01, AUTH-02, ACCESS-01, ACCESS-02, BLUEPRINT-01, BLUEPRINT-02, BLUEPRINT-03, BLUEPRINT-04, BLUEPRINT-05, BLUEPRINT-06, BLUEPRINT-07, SETTINGS-01
 
 ## Scope Tested
 
@@ -19,9 +19,9 @@ Commands run against the public production domain:
 
 - `VIS-01` and `ACCESS-02` still pass on prod through `browser-smoke`.
 - `AUTH-01` manual auth smoke accepted the non-entitled QA credentials and preserved the redirect into `/start`.
-- `AUTH-02` direct signed-out entry to the protected packet workspace still redirects safely.
+- `AUTH-02` direct signed-out entry to the protected blueprint workspace still redirects safely.
 - `ACCESS-01` now passes on prod: the signed-in no-access persona reaches `/start` and sees the inline recovery state.
-- `PACKET-01` through `PACKET-07` now pass on prod for the entitled QA persona, including the full packet funnel and `/settings`.
+- `BLUEPRINT-01` through `BLUEPRINT-07` now pass on prod for the entitled QA persona, including the full blueprint funnel and `/settings`.
 
 ## Findings
 

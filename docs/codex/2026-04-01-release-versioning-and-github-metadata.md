@@ -99,7 +99,7 @@ The main authoritative files and surfaces this plan must touch are:
 - GitHub repository About metadata
 - Git tags and GitHub Releases
 
-The current release candidate on `main` is the merge commit `71034dee51ff38b91c7ab2759149f861c4d64268`. There are no tags yet, and the repo-level package versions already report `0.1.0`, so the first release tag can be created directly from the current `main` tip as `v0.1.0` once the release policy docs and fresh production billing proof are complete.
+The current release candidate on `main` is the merge commit `71034dee51ff38b91c7ab2759149f861c4d64268`. There are no tags yet, and the repo-level blueprint versions already report `0.1.0`, so the first release tag can be created directly from the current `main` tip as `v0.1.0` once the release policy docs and fresh production billing proof are complete.
 
 ## Plan of Work
 
@@ -129,7 +129,7 @@ Work from the repository root unless noted otherwise.
 
 1. Audit the current authoritative release surfaces and contradictions:
 
-   cd /Users/parkerrex/Projects/manmeetsai-workspace
+   cd /Users/parkerrex/Projects/ship-by-sunday
    sed -n '1,220p' README.md
    sed -n '1,240p' docs/release-workflow.md
    sed -n '1,220p' qa/README.md
@@ -161,7 +161,7 @@ Work from the repository root unless noted otherwise.
 
 4. Collect current production health and billing evidence:
 
-   cd /Users/parkerrex/Projects/manmeetsai-workspace
+   cd /Users/parkerrex/Projects/ship-by-sunday
    gh run list --repo ParkerRex/mma-shipbysunday --branch main --limit 5
    gh run list --repo ParkerRex/mma-shipbysunday --workflow convex-production-deploy.yml --limit 5
    curl -I https://www.man-meets-ai.com/
@@ -180,7 +180,7 @@ Work from the repository root unless noted otherwise.
 
 5. Cut the first release from `main`:
 
-   cd /Users/parkerrex/Projects/manmeetsai-workspace
+   cd /Users/parkerrex/Projects/ship-by-sunday
    git fetch origin --prune
    git rev-parse origin/main
    git tag -a v0.1.0 origin/main -m "Ship by Sunday v0.1.0"
@@ -214,7 +214,7 @@ This plan is complete only when a fresh operator can answer all of the following
 
 Run these validation commands from the repository root after the docs and release work are done:
 
-   cd /Users/parkerrex/Projects/manmeetsai-workspace
+   cd /Users/parkerrex/Projects/ship-by-sunday
    git diff --check
    gh repo view ParkerRex/mma-shipbysunday --json description,homepageUrl,repositoryTopics,url
    gh release list --repo ParkerRex/mma-shipbysunday

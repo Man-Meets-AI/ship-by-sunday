@@ -298,7 +298,7 @@ export const buildLessons = [
 			runtimeLabel: "~5 min + skim",
 			goal: "See how the starter is organized before you wire providers in the next lessons.",
 			purpose:
-				"In-product cheat sheet for app/, components/, convex/, env files, AGENTS.md, and package scripts—lightweight reference, not a build step.",
+				"In-product cheat sheet for app/, components/, convex/, env files, AGENTS.md, and workspace scripts—lightweight reference, not a build step.",
 		},
 		actionJobNow:
 			"Watch the walkthrough and skim the Project map and Commands tabs.",
@@ -1025,34 +1025,34 @@ export const buildLessons = [
 		},
 		objectiveTitle: "Build 3.8 — Slice planning loop",
 		winCondition:
-			"Video watched, planning path chosen, prompt or UX captured, slice packet saved, next slice chosen, and review checklist complete.",
+			"Video watched, planning path chosen, prompt or UX captured, slice blueprint saved, next slice chosen, and review checklist complete.",
 		helperText:
 			"Use the loop card as your map. Paste what you send to planning and what comes back, then lock one slice before you code.",
 		checklist: [
 			"Watch the lesson",
 			"Capture your planning prompt or core UX",
-			"Paste the returned packet and choose your next slice",
+			"Paste the returned blueprint and choose your next slice",
 		],
 		intro:
-			"Practice the repeatable build loop: anchor on core UX (or a research question), run planning—plan skill in your copied repo or traditional planning mode—review the slice packet, pick one slice, then test in the UX.",
+			"Practice the repeatable build loop: anchor on core UX (or a research question), run planning—plan skill in your copied repo or traditional planning mode—review the slice blueprint, pick one slice, then test in the UX.",
 		lessonMeta: {
 			runtimeLabel: "Video + slice planning panel",
-			goal: "Leave with a planning prompt, a returned slice packet, one explicit next slice, and clarity on which planning path you used.",
+			goal: "Leave with a planning prompt, a returned slice blueprint, one explicit next slice, and clarity on which planning path you used.",
 			purpose:
 				"Bridge transcript concepts to concrete artifacts so you know what to paste in, what comes back, and what you ship next.",
 		},
 		teachingPoints: [
 			"Start from the UX you already described or from a tight research question when the answer is unknown.",
-			"Expect a packet of slices back—pick the smallest useful one that matches the UX.",
+			"Expect a blueprint of slices back—pick the smallest useful one that matches the UX.",
 			"If you have no design file yet, sketch the user flow first and restate it in plain language.",
 		],
 		actionJobNow:
-			"Choose planning mode, paste core UX or your planning prompt (with an optional reference link), run planning, paste the packet back, check the review lines, and name the slice you will build next.",
+			"Choose planning mode, paste core UX or your planning prompt (with an optional reference link), run planning, paste the blueprint back, check the review lines, and name the slice you will build next.",
 		actionTimebox: "15–25 minutes",
 		actionComeBackWith:
-			"Saved planning path, prompt/UX text, optional link, slice packet, checked review list, and your chosen next slice.",
+			"Saved planning path, prompt/UX text, optional link, slice blueprint, checked review list, and your chosen next slice.",
 		workbenchPrompt:
-			"Work top to bottom: planning mode, then inputs, then packet and slice selection.",
+			"Work top to bottom: planning mode, then inputs, then blueprint and slice selection.",
 		workbenchEmptyState:
 			"Pick plan skill or traditional planning, then fill the core UX or prompt box.",
 		workbenchFields: [
@@ -1085,14 +1085,14 @@ export const buildLessons = [
 				artifactPreviewLabel: "Reference link",
 			},
 			{
-				id: BUILD_SLICES_FIELD_IDS.packet,
-				label: "Slices packet (planner output)",
+				id: BUILD_SLICES_FIELD_IDS.blueprint,
+				label: "Slices blueprint (planner output)",
 				kind: "textarea",
 				required: true,
 				rows: 8,
 				inputWidth: "wide",
 				placeholder: "Paste the slice list or plan output your agent returned.",
-				artifactPreviewLabel: "Slice packet",
+				artifactPreviewLabel: "Slice blueprint",
 			},
 			{
 				id: BUILD_SLICES_FIELD_IDS.selectedSlice,
@@ -1381,7 +1381,7 @@ export const buildLessons = [
 			"Work onboarding first, then Strategy → Brand → Source tabs. Finish with the Codex handoff checklist. This lesson ends with setup artifacts, not finished posts.",
 		lessonMeta: {
 			runtimeLabel: "Video + onboarding workbench",
-			goal: "Onboarding checklist done, strategy prompt saved, brand + source inputs captured, Codex handoff package ready.",
+			goal: "Onboarding checklist done, strategy prompt saved, brand + source inputs captured, Codex handoff blueprint ready.",
 			purpose:
 				"Surface the same path the video names: connect ChatGPT, capture strategy and brand, add source material, preview what unlocks next, and ship the photo + brief artifact.",
 		},
@@ -1436,7 +1436,7 @@ export const buildLessons = [
 					CORE_UX_BUILD_FIELD_IDS.codexBrief,
 					CORE_UX_BUILD_FIELD_IDS.handoffChecklist,
 				],
-				completionLabel: "Handoff package ready",
+				completionLabel: "Handoff blueprint ready",
 			},
 		],
 		workbenchFields: [
@@ -1494,7 +1494,7 @@ export const buildLessons = [
 			},
 			{
 				id: CORE_UX_BUILD_FIELD_IDS.handoffChecklist,
-				label: "Handoff package",
+				label: "Handoff blueprint",
 				kind: "checklist",
 				required: true,
 				taskLabel: "Codex handoff complete",
@@ -1660,7 +1660,7 @@ export const buildLessons = [
 			"Clerk production keys are separate from dev—collect publishable and secret for prod.",
 		],
 		actionJobNow:
-			"Complete the checklist, add product name and domain, gather secrets locally, and copy the handoff packet for your agent.",
+			"Complete the checklist, add product name and domain, gather secrets locally, and copy the handoff blueprint for your agent.",
 		actionTimebox: "30–60 minutes",
 		actionComeBackWith:
 			"Deploy steps checked off, prod credentials ready for env vars, and success checks verified.",

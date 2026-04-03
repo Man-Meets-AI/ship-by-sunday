@@ -9,9 +9,9 @@ export const APPS_WEB_DIRECTORY = fileURLToPath(
 const requireFromAppsWeb = createRequire(
 	new URL("../../package.json", import.meta.url),
 );
-const convexPackageJsonPath = requireFromAppsWeb.resolve("convex/package.json");
+const convexManifestPath = requireFromAppsWeb.resolve("convex/package.json");
 export const CONVEX_BIN_PATH = path.join(
-	path.dirname(convexPackageJsonPath),
+	path.dirname(convexManifestPath),
 	"bin/main.js",
 );
 export const MANUAL_PRODUCT_ACCESS_SOURCE = "manual";

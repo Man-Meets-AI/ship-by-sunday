@@ -7,7 +7,7 @@ This version has breaking changes. Read the relevant guide in `apps/web/node_mod
 ## Ship by Sunday routing
 
 - For work in `apps/web`, also follow `apps/web/AGENTS.md`.
-- For work in `packages/packet-compiler`, also follow `packages/packet-compiler/AGENTS.md`.
+- For work in `packages/blueprint-compiler`, also follow `packages/blueprint-compiler/AGENTS.md`.
 - For route, auth, checkout, entitlement, browser QA, or ship-readiness work, also follow `qa/AGENTS.md`.
 - Root [`DESIGN.md`](/Users/parkerrex/Projects/ship-by-sunday/DESIGN.md) is the canonical visual source of truth for user-facing UI.
 - For any task that changes layout, styling, theming, motion, docs chrome, or marketing presentation, read `DESIGN.md` before editing code or design docs.
