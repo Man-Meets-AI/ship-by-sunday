@@ -17,12 +17,12 @@ export function BonusMissionHeroCard({
 			<CardHeader className="gap-4">
 				<div className="space-y-1">
 					<CardTitle className="max-w-3xl text-3xl leading-tight sm:text-4xl">
-						Your Ship Kit is ready. Build is next.
+						Your Blueprint is ready. Build is next.
 					</CardTitle>
 				</div>
 				<p className="max-w-3xl text-sm leading-7 text-muted-foreground sm:text-base">
 					You have finished the core Ship Blueprint run. Use Build to turn your
-					product truth, Agent-Ready Packs, and Agent-First Starter Repo into a
+					product truth, Agent-Ready Packs, and Ship by Sunday Blueprint into a
 					working product. Product, Design, and Ship stay here as reference when
 					you need to tighten decisions or finish the launch.
 				</p>

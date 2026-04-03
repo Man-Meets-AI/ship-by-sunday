@@ -17,7 +17,7 @@ describe("stage selection", () => {
 		expect(exitCode).toBe(0);
 		expect(promptStage).toHaveBeenCalledWith(
 			expect.objectContaining({
-				stageId: "product",
+				stageId: "blueprint",
 			}),
 		);
 	});
@@ -28,7 +28,7 @@ describe("stage selection", () => {
 		const promptStage = vi.fn(async () => ({ kind: "completed" as const }));
 
 		const exitCode = await runCli({
-			argv: ["stage", "design"],
+			argv: ["stage", "blueprint"],
 			io,
 			projectRootPath,
 			promptStage,
@@ -37,22 +37,28 @@ describe("stage selection", () => {
 		expect(exitCode).toBe(0);
 		expect(promptStage).toHaveBeenCalledWith(
 			expect.objectContaining({
-				stageId: "design",
+				stageId: "blueprint",
 			}),
 		);
 	});
 
-	it("rejects marketing as an interactive stage", async () => {
+	it("maps legacy interactive stage aliases to blueprint", async () => {
 		const projectRootPath = await createTemporaryRepoRoot();
-		const { io, stderr } = createCliIo();
+		const { io } = createCliIo();
+		const promptStage = vi.fn(async () => ({ kind: "completed" as const }));
 
 		const exitCode = await runCli({
 			argv: ["stage", "marketing"],
 			io,
 			projectRootPath,
+			promptStage,
 		});
 
-		expect(exitCode).toBe(2);
-		expect(stderr.join("\n")).toContain('Unknown stage "marketing".');
+		expect(exitCode).toBe(0);
+		expect(promptStage).toHaveBeenCalledWith(
+			expect.objectContaining({
+				stageId: "blueprint",
+			}),
+		);
 	});
 });

@@ -9,10 +9,7 @@ import {
 	type BlueprintStepDraftValues,
 } from "@/features/blueprint-flow/lib/blueprint-step-save-feedback";
 
-function getStep(
-	stageId: Exclude<BlueprintStageId, "start" | "review">,
-	stepId: string,
-) {
+function getStep(stageId: Exclude<BlueprintStageId, "review">, stepId: string) {
 	const stage = getBlueprintStageDefinition(stageId);
 	const step = stage.steps.find((candidate) => candidate.id === stepId);
 	if (!step) {
@@ -23,7 +20,7 @@ function getStep(
 }
 
 function classifyStepSave(
-	stageId: Exclude<BlueprintStageId, "start" | "review">,
+	stageId: Exclude<BlueprintStageId, "review">,
 	stepId: string,
 	draftValues: BlueprintStepDraftValues,
 	existingSavedValues: BlueprintStepDraftValues = {},
@@ -39,8 +36,8 @@ function classifyStepSave(
 }
 
 describe("classifyBlueprintStepSave", () => {
-	it("treats an untouched product step as blank and preserves required-field order", () => {
-		const feedback = classifyStepSave("product", "foundation", {
+	it("treats an untouched blueprint section as blank and preserves required-field order", () => {
+		const feedback = classifyStepSave("blueprint", "foundation", {
 			product_name: "   ",
 			product_summary: "",
 			primary_user: "\n",
@@ -55,8 +52,8 @@ describe("classifyBlueprintStepSave", () => {
 		expect(feedback.firstMissingRequiredFieldKey).toBe("product_name");
 	});
 
-	it("treats a partially filled product step as partial when required fields are still missing", () => {
-		const feedback = classifyStepSave("product", "foundation", {
+	it("treats a partially filled blueprint section as partial when required fields are still missing", () => {
+		const feedback = classifyStepSave("blueprint", "foundation", {
 			product_name: "Ship by Sunday",
 			product_summary: "",
 			primary_user: "",
@@ -71,8 +68,9 @@ describe("classifyBlueprintStepSave", () => {
 	});
 
 	it("treats a step as complete when its required fields are present and optional fields stay blank", () => {
-		const feedback = classifyStepSave("design", "direction", {
+		const feedback = classifyStepSave("blueprint", "design", {
 			theme_hex: "",
+			design_references: "",
 		});
 
 		expect(feedback.state).toBe("complete");
@@ -85,8 +83,8 @@ describe("classifyBlueprintStepSave", () => {
 			pricing: "99",
 		};
 		const feedback = classifyStepSave(
-			"build-plan",
-			"delivery",
+			"blueprint",
+			"pricing",
 			{
 				...existingSavedValues,
 				pricing: "",

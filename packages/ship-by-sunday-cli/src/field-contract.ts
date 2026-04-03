@@ -1,22 +1,13 @@
 import { createCliError } from "./cli-errors";
 
-export type CliBlueprintStageId =
-	| "start"
-	| "product"
-	| "design"
-	| "marketing"
-	| "build-plan"
-	| "review";
+export type CliBlueprintStageId = "blueprint" | "review";
 
-export type EditableCliBlueprintStageId = Exclude<
+export type EditableCliBlueprintStageId = Extract<
 	CliBlueprintStageId,
-	"start" | "review" | "marketing"
+	"blueprint"
 >;
 
-export type ReviewableCliBlueprintStageId = Exclude<
-	CliBlueprintStageId,
-	"start"
->;
+export type ReviewableCliBlueprintStageId = CliBlueprintStageId;
 
 export type CliBlueprintFactKey =
 	| "product_name"
@@ -73,17 +64,10 @@ export const DEFAULT_THEME_HEX = "#26496f";
 
 const cliBlueprintStageDefinitions = [
 	{
-		id: "start",
-		label: "Start",
-		description: "Orientation and reduced-blueprint framing.",
-		route: "/start",
-		steps: [],
-	},
-	{
-		id: "product",
-		label: "Product",
-		description: "Lock the product, problem, and flow.",
-		route: "/product",
+		id: "blueprint",
+		label: "Blueprint",
+		description: "Lock the full reduced blueprint on one page.",
+		route: "/blueprint",
 		steps: [
 			{
 				id: "foundation",
@@ -101,50 +85,27 @@ const cliBlueprintStageDefinitions = [
 				fieldKeys: ["success_looks_like", "core_flow"],
 			},
 			{
+				id: "design",
+				label: "Design",
+				fieldKeys: ["theme_hex", "design_references"],
+				requiredFieldKeys: [],
+			},
+			{
 				id: "pricing",
 				label: "Pricing",
 				fieldKeys: ["pricing"],
 				requiredFieldKeys: ["pricing"],
 			},
-		],
-	},
-	{
-		id: "design",
-		label: "Design",
-		description: "Set the visual anchor and any references.",
-		route: "/design",
-		steps: [
-			{
-				id: "direction",
-				label: "Direction",
-				fieldKeys: ["theme_hex"],
-				requiredFieldKeys: [],
-			},
-			{
-				id: "references",
-				label: "References",
-				fieldKeys: ["design_references"],
-				requiredFieldKeys: [],
-			},
-		],
-	},
-	{
-		id: "marketing",
-		label: "Marketing",
-		description: "Generated preview only. No manual intake.",
-		route: "/marketing",
-		steps: [],
-	},
-	{
-		id: "build-plan",
-		label: "Build Plan",
-		description: "Capture optional rollout details and launch metadata.",
-		route: "/build-plan",
-		steps: [
 			{
 				id: "setup",
 				label: "Setup",
 				fieldKeys: ["scope_in", "scope_out", "domain", "contact_email"],
+				requiredFieldKeys: [],
+			},
+			{
+				id: "generated-preview",
+				label: "Generated preview",
+				fieldKeys: [],
 				requiredFieldKeys: [],
 			},
 		],
@@ -152,7 +113,7 @@ const cliBlueprintStageDefinitions = [
 	{
 		id: "review",
 		label: "Review",
-		description: "Review readiness and download the starter snapshot.",
+		description: "Review readiness and download the blueprint.",
 		route: "/review",
 		steps: [],
 	},
@@ -184,11 +145,21 @@ const listFieldKeys = new Set<CliBlueprintFactKey>([
 	"scope_in",
 	"scope_out",
 ]);
+const cliStageAliasMap = {
+	product: "blueprint",
+	design: "blueprint",
+	marketing: "blueprint",
+	"build-plan": "blueprint",
+} as const;
 
 function isEditableStageId(
 	value: string,
 ): value is EditableCliBlueprintStageId {
-	return value === "product" || value === "design" || value === "build-plan";
+	return value === "blueprint";
+}
+
+function normalizeEditableStageId(value: string) {
+	return cliStageAliasMap[value as keyof typeof cliStageAliasMap] ?? value;
 }
 
 function isCliBlueprintArrayField(fieldKey: CliBlueprintFactKey) {
@@ -528,28 +499,19 @@ export function listFieldDescriptors(stageId?: EditableCliBlueprintStageId) {
 }
 
 export function listStageDescriptors() {
-	return cliBlueprintStageDefinitions
-		.filter(
-			(
-				stage,
-			): stage is Extract<
-				(typeof cliBlueprintStageDefinitions)[number],
-				{ id: ReviewableCliBlueprintStageId }
-			> => stage.id !== "start",
-		)
-		.map((stage) => ({
-			stageId: stage.id,
-			label: stage.label,
-			description: stage.description,
-			route: stage.route,
-			stepCount: stage.steps.length,
-			steps: stage.steps.map((step) => ({
-				stepId: step.id,
-				label: step.label,
-				fieldKeys: [...step.fieldKeys],
-				requiredFieldKeys: [...getRequiredFieldKeys(step)],
-			})),
-		}));
+	return cliBlueprintStageDefinitions.map((stage) => ({
+		stageId: stage.id,
+		label: stage.label,
+		description: stage.description,
+		route: stage.route,
+		stepCount: stage.steps.length,
+		steps: stage.steps.map((step) => ({
+			stepId: step.id,
+			label: step.label,
+			fieldKeys: [...step.fieldKeys],
+			requiredFieldKeys: [...getRequiredFieldKeys(step)],
+		})),
+	}));
 }
 
 export function listSchemaDescriptor() {
@@ -571,13 +533,14 @@ export function parseFieldSelector(selector: string) {
 		);
 	}
 
-	if (maybeFieldKey && isEditableStageId(maybeStageId)) {
+	const normalizedStageId = normalizeEditableStageId(maybeStageId);
+	if (maybeFieldKey && isEditableStageId(normalizedStageId)) {
 		const fieldKey = maybeFieldKey as CliBlueprintFactKey;
 		const descriptor = getFieldDescriptor(fieldKey);
-		if (descriptor.stageId !== maybeStageId) {
+		if (descriptor.stageId !== normalizedStageId) {
 			throw createCliError(
 				"invalid_stage",
-				`Field "${fieldKey}" belongs to ${descriptor.stageLabel}, not ${getBlueprintStageDefinition(maybeStageId).label}.`,
+				`Field "${fieldKey}" belongs to ${descriptor.stageLabel}, not ${getBlueprintStageDefinition(normalizedStageId).label}.`,
 				2,
 			);
 		}
@@ -621,43 +584,54 @@ function createStageStatusForStep(
 }
 
 export function deriveCliStageStatus(facts: CliBlueprintFactsDraft) {
-	const stageStatuses = listStageDescriptors().map((stage) => {
-		const stageDefinition = getBlueprintStageDefinition(stage.stageId);
-		const stepStatuses = stageDefinition.steps.map((step) =>
-			createStageStatusForStep(stage.stageId, step, facts),
-		);
-		const firstIncompleteStepIndex = stepStatuses.findIndex(
-			(stepStatus) => !stepStatus.isComplete,
-		);
-		const currentStepIndex =
-			firstIncompleteStepIndex === -1
-				? Math.max(stageDefinition.steps.length - 1, 0)
-				: firstIncompleteStepIndex;
-		const missingFactKeys =
-			firstIncompleteStepIndex === -1
-				? []
-				: [...stepStatuses[firstIncompleteStepIndex]!.missingFactKeys];
-
-		return {
-			stageId: stage.stageId,
-			stageLabel: stage.label,
-			currentStepIndex,
-			isComplete: missingFactKeys.length === 0,
-			missingFactKeys,
-			stepStatuses,
-		};
-	});
-
-	const firstIncompleteStage = stageStatuses.find((stage) => !stage.isComplete);
+	const blueprintStageDefinition = getBlueprintStageDefinition("blueprint");
+	const blueprintStepStatuses = blueprintStageDefinition.steps.map((step) =>
+		createStageStatusForStep("blueprint", step, facts),
+	);
+	const blueprintFirstIncompleteStepIndex = blueprintStepStatuses.findIndex(
+		(stepStatus) => !stepStatus.isComplete,
+	);
+	const blueprintCurrentStepIndex =
+		blueprintFirstIncompleteStepIndex === -1
+			? Math.max(blueprintStageDefinition.steps.length - 1, 0)
+			: blueprintFirstIncompleteStepIndex;
+	const blueprintMissingFactKeys = Array.from(
+		new Set(
+			blueprintStepStatuses.flatMap((stepStatus) => stepStatus.missingFactKeys),
+		),
+	);
+	const blueprintStageStatus = {
+		stageId: "blueprint" as const,
+		stageLabel: blueprintStageDefinition.label,
+		currentStepIndex: blueprintCurrentStepIndex,
+		isComplete: blueprintMissingFactKeys.length === 0,
+		missingFactKeys: blueprintMissingFactKeys,
+		stepStatuses: blueprintStepStatuses,
+	};
+	const reviewStageDefinition = getBlueprintStageDefinition("review");
+	const reviewStageStatus = {
+		stageId: "review" as const,
+		stageLabel: reviewStageDefinition.label,
+		currentStepIndex: 0,
+		isComplete: blueprintStageStatus.isComplete,
+		missingFactKeys: blueprintStageStatus.missingFactKeys,
+		stepStatuses: [],
+	};
+	const stageStatuses = [blueprintStageStatus, reviewStageStatus];
 
 	return {
-		firstIncompleteStageId:
-			firstIncompleteStage?.stageId ?? ("review" as const),
+		firstIncompleteStageId: blueprintStageStatus.isComplete
+			? ("review" as const)
+			: ("blueprint" as const),
 		stageStatuses,
 		blueprintReadiness: {
+			blueprint: {
+				isReady: blueprintStageStatus.isComplete,
+				missingFactKeys: blueprintStageStatus.missingFactKeys,
+			},
 			review: {
-				isReady: firstIncompleteStage === undefined,
-				missingFactKeys: firstIncompleteStage?.missingFactKeys ?? [],
+				isReady: blueprintStageStatus.isComplete,
+				missingFactKeys: blueprintStageStatus.missingFactKeys,
 			},
 		},
 	};

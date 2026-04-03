@@ -1,15 +1,19 @@
-import {
-	PROMPT_PACK_LABEL,
-	STARTER_SNAPSHOT_LABEL,
-	type BlueprintReadinessResult,
-} from "@blueprint-compiler";
+import { PROMPT_PACK_LABEL, STARTER_SNAPSHOT_LABEL } from "@blueprint-compiler";
+import type { BlueprintPageSectionStatus } from "@/features/blueprint-flow/hooks/use-blueprint-page-state";
 import { reviewArtifacts } from "../../lib/review-artifacts";
 
 export function BlueprintReviewArtifactGrid({
-	blueprintReadiness,
+	sectionStatuses,
 }: {
-	blueprintReadiness: BlueprintReadinessResult;
+	sectionStatuses: BlueprintPageSectionStatus[];
 }) {
+	const sectionStatusById = new Map(
+		sectionStatuses.map((sectionStatus) => [
+			sectionStatus.sectionId,
+			sectionStatus,
+		]),
+	);
+
 	return (
 		<section className="space-y-12">
 			<div className="max-w-2xl space-y-4">
@@ -30,7 +34,11 @@ export function BlueprintReviewArtifactGrid({
 
 			<div className="divide-y divide-border/40 border-t border-border/40">
 				{reviewArtifacts.map((artifact) => {
-					const readiness = blueprintReadiness[artifact.id];
+					const pendingFactKeys = artifact.sectionIds.flatMap((sectionId) => {
+						const sectionStatus = sectionStatusById.get(sectionId);
+						return sectionStatus?.missingFactKeys ?? [];
+					});
+					const isReady = pendingFactKeys.length === 0;
 
 					return (
 						<div
@@ -42,11 +50,11 @@ export function BlueprintReviewArtifactGrid({
 									{artifact.title}
 								</h3>
 								<p className="max-w-md text-sm leading-relaxed text-muted-foreground">
-									{readiness.isReady
+									{isReady
 										? artifact.summary
-										: `${readiness.missingFactKeys.length} answer${readiness.missingFactKeys.length === 1 ? "" : "s"} still need attention in the ${artifact.stageLabel} stage.`}
+										: `${pendingFactKeys.length} answer${pendingFactKeys.length === 1 ? "" : "s"} still need attention in ${artifact.sectionLabel.toLowerCase()}.`}
 								</p>
-								{readiness.isReady ? (
+								{isReady ? (
 									<p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground/60">
 										Included under {artifact.includedPath}
 									</p>
@@ -62,11 +70,15 @@ export function BlueprintReviewArtifactGrid({
 							{PROMPT_PACK_LABEL}
 						</h3>
 						<p className="max-w-md text-sm leading-relaxed text-muted-foreground">
-							{blueprintReadiness.review.isReady
+							{sectionStatuses.every(
+								(sectionStatus) => sectionStatus.isComplete,
+							)
 								? `The shipped ExecPlan prompts land under docs/prompts/ inside your ${STARTER_SNAPSHOT_LABEL}.`
 								: `Will be generated once your ${STARTER_SNAPSHOT_LABEL} is ready.`}
 						</p>
-						{blueprintReadiness.review.isReady ? (
+						{sectionStatuses.every(
+							(sectionStatus) => sectionStatus.isComplete,
+						) ? (
 							<p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground/60">
 								Included under docs/prompts/
 							</p>

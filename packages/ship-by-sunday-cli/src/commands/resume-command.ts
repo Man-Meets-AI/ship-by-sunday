@@ -19,11 +19,7 @@ export async function handleResumeCommand({
 		case "review":
 			io.write("Draft is already review-ready.");
 			return 0;
-		case "marketing":
-			throw new Error("Unexpected marketing-stage resume target.");
-		case "product":
-		case "design":
-		case "build-plan":
+		case "blueprint":
 			return handleStageCommand({
 				io,
 				projectRootPath,

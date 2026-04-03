@@ -56,18 +56,17 @@ export type CliCommand =
 			shellName: SupportedCompletionShellName;
 	  };
 
-const editableStageIds: EditableCliBlueprintStageId[] = [
-	"product",
-	"design",
-	"build-plan",
-] as const;
+const editableStageIds: EditableCliBlueprintStageId[] = ["blueprint"] as const;
 const reviewableStageIds: ReviewableCliBlueprintStageId[] = [
-	"product",
-	"design",
-	"marketing",
-	"build-plan",
+	"blueprint",
 	"review",
 ];
+const deprecatedStageAliasMap = {
+	product: "blueprint",
+	design: "blueprint",
+	marketing: "blueprint",
+	"build-plan": "blueprint",
+} as const;
 
 function isEditableStageId(
 	value: string,
@@ -79,6 +78,13 @@ function isReviewableStageId(
 	value: string,
 ): value is ReviewableCliBlueprintStageId {
 	return reviewableStageIds.includes(value as ReviewableCliBlueprintStageId);
+}
+
+function normalizeStageId(value: string) {
+	return (
+		deprecatedStageAliasMap[value as keyof typeof deprecatedStageAliasMap] ??
+		value
+	);
 }
 
 function requireOptionValue(args: string[], index: number, optionName: string) {
@@ -157,7 +163,7 @@ export function parseCliCommand(argv: string[]): CliCommand {
 		const stageId =
 			stageIndex === -1
 				? undefined
-				: requireOptionValue(rest, stageIndex, "--stage");
+				: normalizeStageId(requireOptionValue(rest, stageIndex, "--stage"));
 		if (stageId && !isEditableStageId(stageId)) {
 			throw createCliError(
 				"invalid_stage",
@@ -264,12 +270,13 @@ export function parseCliCommand(argv: string[]): CliCommand {
 		return { kind: "resume" };
 	}
 
-	if (isEditableStageId(commandName)) {
-		return { kind: "stage", stageId: commandName };
+	const normalizedCommandStageId = normalizeStageId(commandName);
+	if (isEditableStageId(normalizedCommandStageId)) {
+		return { kind: "stage", stageId: normalizedCommandStageId };
 	}
 
 	if (commandName === "stage") {
-		const stageId = rest[0];
+		const stageId = normalizeStageId(rest[0] ?? "");
 		if (!stageId || !isEditableStageId(stageId)) {
 			throw createCliError(
 				"invalid_stage",
@@ -285,7 +292,7 @@ export function parseCliCommand(argv: string[]): CliCommand {
 		const stageId =
 			stageIndex === -1
 				? undefined
-				: requireOptionValue(rest, stageIndex, "--stage");
+				: normalizeStageId(requireOptionValue(rest, stageIndex, "--stage"));
 		if (stageId && !isReviewableStageId(stageId)) {
 			throw createCliError(
 				"invalid_stage",
@@ -350,7 +357,9 @@ export function parseCliCommand(argv: string[]): CliCommand {
 				2,
 			);
 		}
-		const stageId = requireOptionValue(rest, stageIndex, "--stage");
+		const stageId = normalizeStageId(
+			requireOptionValue(rest, stageIndex, "--stage"),
+		);
 		if (!isEditableStageId(stageId)) {
 			throw createCliError(
 				"invalid_stage",

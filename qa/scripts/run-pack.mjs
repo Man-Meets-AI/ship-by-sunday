@@ -56,10 +56,9 @@ const packDefinitions = {
 					"apps/web",
 					"test:integration:ui",
 					"--",
-					"tests/integration-ui/blueprint-start-page.test.tsx",
-					"tests/integration-ui/blueprint-stage-page.test.tsx",
+					"tests/integration-ui/blueprint-page.test.tsx",
 					"tests/integration-ui/blueprint-review-page.test.tsx",
-					"tests/integration-ui/blueprint-stage-sidebar.test.tsx",
+					"tests/integration-ui/legacy-blueprint-route-redirects.test.tsx",
 				],
 			},
 			{

@@ -2,7 +2,7 @@
 
 This folder is the Ship by Sunday custom build-pack layer that sits on top of the vanilla long-horizon baseline in `docs/openai/codex_long_horizon_templates/`.
 
-It is the template for the customer-facing `docs/build/` blueprint that should be generated into the starter snapshot after the review route.
+It is the template for the customer-facing `docs/build/` blueprint that should be generated into the blueprint after the review route.
 
 ## What this pack is for
 

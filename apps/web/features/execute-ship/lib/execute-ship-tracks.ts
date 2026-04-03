@@ -26,17 +26,20 @@ export const executeShipTracks: ExecuteShipTrack[] = [
 		label: "Build Now",
 		status: "now",
 		summary:
-			"Turn the Build docs inside the Starter Snapshot into the first implementation pass.",
+			"Turn the Build docs inside the Ship by Sunday Blueprint into the first implementation pass.",
 		objective:
 			"Start with the smallest shippable slice from your build blueprint.",
 		steps: [
-			"Open the Starter Snapshot and pull the first slice from the Build Pack.",
+			"Open the Ship by Sunday Blueprint and pull the first slice from the Build Pack.",
 			"Implement the slice without widening scope beyond the blueprint contract.",
 			"Run the narrowest checks first, then widen validation only after the slice is green.",
 		],
 		links: [
-			{ label: "Review Build Plan", href: routeConfig.buildPlan },
-			{ label: "Download Starter Snapshot", href: "/api/download/repo" },
+			{ label: "Review Pricing", href: "/blueprint#pricing" },
+			{
+				label: "Download Ship by Sunday Blueprint",
+				href: "/api/download/repo",
+			},
 		],
 	},
 	{
@@ -44,7 +47,7 @@ export const executeShipTracks: ExecuteShipTrack[] = [
 		label: "Refine Design",
 		status: "ready",
 		summary:
-			"Use the Design docs inside the Starter Snapshot to tighten the product surface before coding deeper.",
+			"Use the Design docs inside the Ship by Sunday Blueprint to tighten the product surface before coding deeper.",
 		objective:
 			"Convert the design blueprint into one clearer interface decision at a time.",
 		steps: [
@@ -53,7 +56,7 @@ export const executeShipTracks: ExecuteShipTrack[] = [
 			"Capture proof with screenshots or focused UI tests before moving on.",
 		],
 		links: [
-			{ label: "Open Design Stage", href: routeConfig.design },
+			{ label: "Open Blueprint Design", href: "/blueprint#design" },
 			{ label: "Open Review", href: routeConfig.review },
 		],
 	},
@@ -62,7 +65,7 @@ export const executeShipTracks: ExecuteShipTrack[] = [
 		label: "Refine Marketing",
 		status: "ready",
 		summary:
-			"Use the Marketing docs inside the Starter Snapshot to sharpen the offer, proof, and launch copy.",
+			"Use the Marketing docs inside the Ship by Sunday Blueprint to sharpen the offer, proof, and launch copy.",
 		objective:
 			"Ship one stronger conversion or messaging pass instead of rewriting everything.",
 		steps: [
@@ -71,7 +74,7 @@ export const executeShipTracks: ExecuteShipTrack[] = [
 			"Check that the visible promise still matches the blueprint and the real product state.",
 		],
 		links: [
-			{ label: "Open Marketing Stage", href: routeConfig.marketing },
+			{ label: "Open Generated Preview", href: "/blueprint#generated-preview" },
 			{ label: "Open Review", href: routeConfig.review },
 		],
 	},
@@ -89,7 +92,10 @@ export const executeShipTracks: ExecuteShipTrack[] = [
 		],
 		links: [
 			{ label: "Review Stage", href: routeConfig.review },
-			{ label: "Download Starter Snapshot", href: "/api/download/repo" },
+			{
+				label: "Download Ship by Sunday Blueprint",
+				href: "/api/download/repo",
+			},
 		],
 	},
 	{
@@ -106,7 +112,7 @@ export const executeShipTracks: ExecuteShipTrack[] = [
 			"Write the release handoff in plain language so the next operator knows what changed and what still needs watching.",
 		],
 		links: [
-			{ label: "Open Build Plan", href: routeConfig.buildPlan },
+			{ label: "Open Blueprint Setup", href: "/blueprint#setup" },
 			{ label: "Open Review", href: routeConfig.review },
 		],
 	},

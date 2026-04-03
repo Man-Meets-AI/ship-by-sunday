@@ -4,7 +4,7 @@ import { createLocalDraftDefinition } from "../src/draft/draft-store";
 
 describe("stage prompt session", () => {
 	it("describes stage progress and control commands", () => {
-		const session = createStagePromptSession({ stageId: "product" });
+		const session = createStagePromptSession({ stageId: "blueprint" });
 		const firstStep = session.stage.steps[0];
 		const firstFieldKey = firstStep.fieldKeys[0]!;
 		const draft = createLocalDraftDefinition({
@@ -34,7 +34,7 @@ describe("stage prompt session", () => {
 	});
 
 	it("handles clear, quit, and value answers", () => {
-		const session = createStagePromptSession({ stageId: "product" });
+		const session = createStagePromptSession({ stageId: "blueprint" });
 		const fieldKey = session.stage.steps[0]!.fieldKeys[0]!;
 
 		expect(
@@ -67,7 +67,7 @@ describe("stage prompt session", () => {
 	});
 
 	it("formats safe exit guidance for quit and interrupt", () => {
-		const session = createStagePromptSession({ stageId: "product" });
+		const session = createStagePromptSession({ stageId: "blueprint" });
 
 		expect(session.formatExitMessage("quit")).toContain(
 			"Resume with bun run sbs resume.",
@@ -76,18 +76,18 @@ describe("stage prompt session", () => {
 	});
 
 	it("shows the reduced design default and generated scope suggestions", () => {
-		const designSession = createStagePromptSession({ stageId: "design" });
+		const designSession = createStagePromptSession({ stageId: "blueprint" });
 		const themePrompt = designSession.formatFieldPrompt({
 			draft: { facts: {} },
 			fieldKey: "theme_hex",
 			stepIndex: 0,
 			fieldIndex: 0,
-			fieldCount: 1,
+			fieldCount: 2,
 		});
 		expect(themePrompt.prompt).toContain(DEFAULT_THEME_HEX);
 
 		const buildPlanSession = createStagePromptSession({
-			stageId: "build-plan",
+			stageId: "blueprint",
 		});
 		const scopePrompt = buildPlanSession.formatFieldPrompt({
 			draft: {
@@ -96,19 +96,19 @@ describe("stage prompt session", () => {
 				},
 			},
 			fieldKey: "scope_in",
-			stepIndex: 0,
+			stepIndex: 5,
 			fieldIndex: 0,
 			fieldCount: 4,
 		});
 		expect(scopePrompt.prompt).toContain("Build Capture facts");
 	});
 
-	it("prompts for pricing in the product stage", () => {
-		const session = createStagePromptSession({ stageId: "product" });
+	it("prompts for pricing in the blueprint stage", () => {
+		const session = createStagePromptSession({ stageId: "blueprint" });
 		const pricingPrompt = session.formatFieldPrompt({
 			draft: { facts: {} },
 			fieldKey: "pricing",
-			stepIndex: 3,
+			stepIndex: 4,
 			fieldIndex: 0,
 			fieldCount: 1,
 		});

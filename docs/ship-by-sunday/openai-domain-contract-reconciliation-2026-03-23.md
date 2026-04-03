@@ -93,7 +93,7 @@ Each row from the domain-contract doc gets mapped to:
 | `scopeBoundary` | `build/docs/prompt.md`, `build/docs/plans.md` | `fact` | weak proxies in `3.4`, `3.8`, `3.10` | Missing | `add` | Needs explicit in/out/non-goals. |
 | `durableMemorySetup` | `build/AGENTS.md`, `build/CHECKLIST.md` | `derived` | templates exist only | Partial | `add` | Do not ask students; generate from blueprint compiler. |
 | `constraints` | `build/docs/prompt.md` | `fact` | stack hints in `3.7`, `3.10`, `3.14` | Partial | `combine` | Needs explicit grouped constraints. |
-| `contextPack` | `build/docs/prompt.md` | `split` | refs/screenshots/route notes scattered | Partial | `combine` | Some context is fact, some is generated repo context. |
+| `contextPack` | `build/docs/prompt.md` | `split` | refs/screenshots/route notes scattered | Partial | `combine` | Some context is fact, some is Blueprint context. |
 | `deliverables` | `build/docs/prompt.md` | `fact` | implied, not explicit | Missing | `add` | Need direct question. |
 | `successCriteria` | `build/docs/prompt.md`, `build/docs/plans.md` | `fact` | weak proxies in QA/deploy checklists | Missing | `add` | Major long-horizon blocker. |
 | `demoPlan` | `build/docs/prompt.md`, `build/docs/documentation.md` | `fact` | QA report and deploy checks only | Missing | `add` | Should be explicit. |

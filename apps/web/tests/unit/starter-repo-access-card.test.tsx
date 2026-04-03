@@ -55,9 +55,7 @@ describe("StarterRepoAccessCard", () => {
 		expect(markup).toContain("Not requested");
 		expect(markup).toContain('data-slot="input"');
 		expect(markup).toContain('data-slot="button"');
-		expect(markup).toContain(
-			"Unlock the Agent-First Starter Repo before Build",
-		);
+		expect(markup).toContain("Unlock SBS Blueprint access before Build");
 		expect(markup).toContain("Save GitHub username");
 	});
 
@@ -74,7 +72,7 @@ describe("StarterRepoAccessCard", () => {
 		);
 
 		expect(markup).toContain('data-slot="badge"');
-		expect(markup).toContain("Agent-First Starter Repo request saved");
+		expect(markup).toContain("SBS Blueprint request saved");
 		expect(markup).toContain("@ShipBySunday");
 		expect(markup).toContain("Edit username");
 	});
@@ -94,7 +92,7 @@ describe("StarterRepoAccessCard", () => {
 
 		expect(markup).toContain('data-slot="badge"');
 		expect(markup).toContain('data-slot="button"');
-		expect(markup).toContain("Accept your Agent-First Starter Repo invite");
+		expect(markup).toContain("Accept your SBS Blueprint invite");
 		expect(markup).toContain("Open starter repo");
 	});
 
@@ -113,7 +111,7 @@ describe("StarterRepoAccessCard", () => {
 		);
 
 		expect(markup).toContain('data-slot="badge"');
-		expect(markup).toContain("Agent-First Starter Repo access confirmed");
+		expect(markup).toContain("SBS Blueprint access confirmed");
 		expect(markup).toContain("Open starter repo");
 	});
 
@@ -132,7 +130,7 @@ describe("StarterRepoAccessCard", () => {
 
 		expect(markup).toContain('data-slot="badge"');
 		expect(markup).toContain('data-slot="alert"');
-		expect(markup).toContain("Agent-First Starter Repo access needs attention");
+		expect(markup).toContain("SBS Blueprint access needs attention");
 		expect(markup).toContain("Last error: GitHub user BadName was not found.");
 		expect(markup).toContain("Save GitHub username");
 	});

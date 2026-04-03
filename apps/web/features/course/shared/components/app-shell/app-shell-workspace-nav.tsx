@@ -15,7 +15,7 @@ export function AppShellWorkspaceNav({
 	return (
 		<div className="flex shrink-0 items-center">
 			<ProductBrand
-				href={routeConfig.start}
+				href={routeConfig.blueprint}
 				labelClassName={productWordmarkClassName}
 			/>
 		</div>

@@ -37,7 +37,7 @@ describe("interactive stage prompts", () => {
 			() =>
 				promptStage({
 					projectRootPath,
-					stageId: "product",
+					stageId: "blueprint",
 					io,
 					saveDraft,
 				}),
@@ -66,7 +66,7 @@ describe("interactive stage prompts", () => {
 			() =>
 				promptStage({
 					projectRootPath,
-					stageId: "product",
+					stageId: "blueprint",
 					io,
 					saveDraft,
 				}),
@@ -91,7 +91,7 @@ describe("interactive stage prompts", () => {
 			withMockedTerminalState({ stdinIsTTY: true, stdoutIsTTY: true }, () =>
 				promptStage({
 					projectRootPath,
-					stageId: "product",
+					stageId: "blueprint",
 					io,
 					saveDraft,
 				}),
@@ -111,7 +111,7 @@ describe("interactive stage prompts", () => {
 		await expect(
 			promptStage({
 				projectRootPath,
-				stageId: "product",
+				stageId: "blueprint",
 				io,
 				saveDraft,
 			}),

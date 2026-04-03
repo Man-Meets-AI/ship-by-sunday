@@ -1,5 +1,6 @@
-import { redirectToBlueprintStageEntry } from "@/features/blueprint-flow/server/blueprint-stage-route-data";
+import { redirect } from "next/navigation";
+import { getLegacyBlueprintRedirectHref } from "@/features/blueprint-flow/lib/legacy-blueprint-route-redirects";
 
 export default async function Page() {
-	await redirectToBlueprintStageEntry("marketing");
+	redirect(getLegacyBlueprintRedirectHref("marketing"));
 }

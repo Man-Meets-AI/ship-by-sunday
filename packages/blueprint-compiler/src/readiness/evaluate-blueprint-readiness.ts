@@ -14,10 +14,7 @@ export type BlueprintReadiness = {
 };
 
 export type BlueprintReadinessResult = {
-	product: BlueprintReadiness;
-	design: BlueprintReadiness;
-	marketing: BlueprintReadiness;
-	build: BlueprintReadiness;
+	blueprint: BlueprintReadiness;
 	review: BlueprintReadiness;
 };
 
@@ -73,61 +70,19 @@ function uniqueFactKeys(fieldKeys: CanonicalProjectFactKey[]) {
 export function evaluateBlueprintReadiness(
 	facts: CanonicalProjectFactsDraft,
 ): BlueprintReadinessResult {
-	const productRequiredFieldKeys = getStageRequiredFieldKeys("product");
-	const designRequiredFieldKeys = uniqueFactKeys([
-		...productRequiredFieldKeys,
-		...getStageRequiredFieldKeys("design"),
-	]);
-	const marketingRequiredFieldKeys = uniqueFactKeys([
-		...designRequiredFieldKeys,
-		...getStageRequiredFieldKeys("marketing"),
-	]);
-	const buildRequiredFieldKeys = uniqueFactKeys([
-		...designRequiredFieldKeys,
-		...getStageRequiredFieldKeys("build-plan"),
-	]);
-	const reviewRequiredFieldKeys = uniqueFactKeys([
-		...marketingRequiredFieldKeys,
-		...buildRequiredFieldKeys,
-	]);
-
-	const productMissingFactKeys = getMissingFactKeys(
-		facts,
-		productRequiredFieldKeys,
-	);
-	const designMissingFactKeys = getMissingFactKeys(
-		facts,
-		designRequiredFieldKeys,
-	);
-	const marketingMissingFactKeys = getMissingFactKeys(
-		facts,
-		marketingRequiredFieldKeys,
-	);
-	const buildMissingFactKeys = getMissingFactKeys(
-		facts,
-		buildRequiredFieldKeys,
+	const blueprintRequiredFieldKeys = uniqueFactKeys(
+		getStageRequiredFieldKeys("blueprint"),
 	);
 	const reviewMissingFactKeys = getMissingFactKeys(
 		facts,
-		reviewRequiredFieldKeys,
+		blueprintRequiredFieldKeys,
 	);
+	const blueprintMissingFactKeys = reviewMissingFactKeys;
 
 	return {
-		product: {
-			isReady: productMissingFactKeys.length === 0,
-			missingFactKeys: productMissingFactKeys,
-		},
-		design: {
-			isReady: designMissingFactKeys.length === 0,
-			missingFactKeys: designMissingFactKeys,
-		},
-		marketing: {
-			isReady: marketingMissingFactKeys.length === 0,
-			missingFactKeys: marketingMissingFactKeys,
-		},
-		build: {
-			isReady: buildMissingFactKeys.length === 0,
-			missingFactKeys: buildMissingFactKeys,
+		blueprint: {
+			isReady: blueprintMissingFactKeys.length === 0,
+			missingFactKeys: blueprintMissingFactKeys,
 		},
 		review: {
 			isReady: reviewMissingFactKeys.length === 0,

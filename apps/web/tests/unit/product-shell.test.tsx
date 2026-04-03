@@ -152,14 +152,14 @@ describe("AppShell", () => {
 		expect(markup).not.toContain("Open CEO");
 	});
 
-	it("links the header brand to the start page and keeps account chrome visible", () => {
+	it("links the header brand to the blueprint page and keeps account chrome visible", () => {
 		const markup = renderAppShell(
 			<AppShell showSkillRail={false} primaryNav={primaryNav}>
 				<div>Body</div>
 			</AppShell>,
 		);
 
-		expect(markup).toContain('href="/start"');
+		expect(markup).toContain('href="/blueprint"');
 		expect(markup).toContain('aria-label="Ship by Sunday"');
 		expect(markup).toContain('aria-label="Open account menu"');
 	});

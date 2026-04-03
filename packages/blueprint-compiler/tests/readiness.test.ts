@@ -7,7 +7,7 @@ import {
 } from "../src/index";
 
 describe("blueprint readiness", () => {
-	it("marks all blueprints ready for a reduced intake once aliases are derived", () => {
+	it("marks the combined blueprint and review ready for a complete intake", () => {
 		const projectDefinition = createCanonicalProjectDefinition({
 			clerkUserId: "user_123",
 			productKey: "ship-by-sunday",
@@ -35,10 +35,7 @@ describe("blueprint readiness", () => {
 		const readiness = evaluateBlueprintReadiness(projectDefinition.facts);
 		const stageStatus = deriveStageStatus(projectDefinition.facts);
 
-		expect(readiness.product.isReady).toBe(true);
-		expect(readiness.design.isReady).toBe(true);
-		expect(readiness.marketing.isReady).toBe(true);
-		expect(readiness.build.isReady).toBe(true);
+		expect(readiness.blueprint.isReady).toBe(true);
 		expect(readiness.review.isReady).toBe(true);
 		expect(stageStatus.firstIncompleteStageId).toBe("review");
 	});
@@ -55,9 +52,9 @@ describe("blueprint readiness", () => {
 		});
 		const stageStatus = deriveStageStatus(projectDefinition.facts);
 
-		expect(stageStatus.firstIncompleteStageId).toBe("product");
+		expect(stageStatus.firstIncompleteStageId).toBe("blueprint");
 		expect(
-			stageStatus.stageStatuses.find((stage) => stage.stageId === "design"),
+			stageStatus.stageStatuses.find((stage) => stage.stageId === "review"),
 		).toMatchObject({
 			isUnlocked: false,
 			currentStepIndex: 0,
@@ -95,20 +92,27 @@ describe("blueprint readiness", () => {
 			design_references: [],
 		});
 
-		expect(readiness.design.isReady).toBe(true);
-		expect(readiness.design.missingFactKeys).not.toContain("design_references");
+		expect(readiness.blueprint.isReady).toBe(true);
+		expect(readiness.blueprint.missingFactKeys).not.toContain(
+			"design_references",
+		);
 	});
 
-	it("exposes the blueprint page step ids for marketing and build plan", () => {
+	it("exposes the combined blueprint page section ids", () => {
 		expect(
-			getBlueprintStageDefinition("marketing").steps.map((step) => step.id),
-		).toEqual(["preview"]);
-		expect(
-			getBlueprintStageDefinition("build-plan").steps.map((step) => step.id),
-		).toEqual(["delivery", "setup"]);
+			getBlueprintStageDefinition("blueprint").steps.map((step) => step.id),
+		).toEqual([
+			"foundation",
+			"problem",
+			"outcome",
+			"design",
+			"pricing",
+			"setup",
+			"generated-preview",
+		]);
 	});
 
-	it("preserves optional domain and support email on the regrouped delivery page", () => {
+	it("preserves optional domain and support email on the combined setup section", () => {
 		const completeFacts = createCanonicalProjectDefinition({
 			clerkUserId: "user_123",
 			productKey: "ship-by-sunday",
@@ -141,7 +145,7 @@ describe("blueprint readiness", () => {
 			support_email: undefined,
 		});
 
-		expect(readiness.build.isReady).toBe(true);
+		expect(readiness.blueprint.isReady).toBe(true);
 		expect(readiness.review.isReady).toBe(true);
 	});
 });
