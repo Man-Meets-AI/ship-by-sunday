@@ -1,4 +1,4 @@
-import { createCanonicalProjectDefinitionDraft } from "@manmeetsai/packet-compiler";
+import { createCanonicalProjectDefinitionDraft } from "@manmeetsai/blueprint-compiler";
 import { createStagePromptSession } from "../src/prompts/stage-prompt-session";
 
 describe("stage prompt session", () => {

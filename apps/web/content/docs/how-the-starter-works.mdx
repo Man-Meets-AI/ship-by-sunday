@@ -34,7 +34,7 @@ The runtime splits into three clear surfaces:
 
 - public marketing surface on `/`
 - public docs surface on `/docs` when the docs module is enabled
-- protected product surface on `/start`, the stage-entry routes `/product`, `/design`, `/marketing`, and `/build-plan`, the canonical nested packet pages under those stage roots, `/review`, optional `/execute` after review unlock, and `/settings`
+- protected product surface on `/start`, the stage-entry routes `/product`, `/design`, `/marketing`, and `/build-plan`, the canonical nested blueprint pages under those stage roots, `/review`, optional `/execute` after review unlock, and `/settings`
 
 That split matters because checkout and access recovery live between those worlds.
 
@@ -62,7 +62,7 @@ Important module flags:
 Current behavior:
 
 - if `docs` is off, docs links hide and `/docs` renders a disabled-state surface
-- the packet-first flow now uses `/start` as the first protected landing surface and nested packet pages under `/product`, `/design`, `/marketing`, and `/build-plan` as the canonical form pages
+- the blueprint-first flow now uses `/start` as the first protected landing surface and nested blueprint pages under `/product`, `/design`, `/marketing`, and `/build-plan` as the canonical form pages
 - `/mission` and `/lesson/[lessonKey]` now act as the optional post-review bonus library after the Execute / Ship unlock, while `/artifacts` still forwards into `/review`
 - the legacy `starterRepo` module is now off by default, so starter-repo cards are hidden from the visible protected app unless someone explicitly re-enables that obsolete path
 
@@ -86,15 +86,15 @@ For the file-by-file operating guide, see [Configure the Homepage](/docs/configu
 6. If the checkout already belonged to a signed-in Clerk account, Convex can grant access directly. Otherwise the webhook stores a durable pending paid checkout keyed by the Stripe session.
 7. `/checkout/success` becomes the canonical post-payment handoff. If the buyer is not signed in yet, they can sign in or create the account tied to the checkout email there.
 8. Once the signed-in account’s verified primary email matches the Stripe checkout email, the app claims the purchase and grants product access.
-9. `/start` and the other packet-first workspace routes use the same access state and can perform a guarded fallback claim when the browser still holds the pending checkout session cookie.
+9. `/start` and the other blueprint-first workspace routes use the same access state and can perform a guarded fallback claim when the browser still holds the pending checkout session cookie.
 10. `/mission` and `/lesson/[lessonKey]` now act as the optional post-review bonus library after review unlock, while `/artifacts` still forwards into `/review`.
-11. Returning users with granted access who hit `/` are resumed into the first incomplete packet-first stage unless they explicitly force marketing mode.
+11. Returning users with granted access who hit `/` are resumed into the first incomplete blueprint-first stage unless they explicitly force marketing mode.
 
 Protected app routes also start from server-fetched mission or access data before the client-side Convex subscriptions take over. That avoids a hydration-time auth race where the browser can briefly act signed out even though the server already proved access.
 
 ## Review output contract
 
-`/review` is now the single download moment for the packet-first flow.
+`/review` is now the single download moment for the blueprint-first flow.
 
 What the buyer gets:
 

@@ -18,21 +18,21 @@ This matters because the CLI already exists and its current surface looks trustw
 
 ## Progress
 
-- [x] 2026-03-31 11:03 EDT — Read `/Users/parkerrex/.agents/docs/prompts/exec-plan-writer.md`, `/Users/parkerrex/Projects/manmeetsai-workspace/AGENTS.md`, `/Users/parkerrex/Projects/manmeetsai-workspace/docs/codex/PLANS.md`, and the `long-horizon` skill instructions, then inspected the real CLI entrypoint, draft store, generate path, error normalization, root package script, README notes, and existing tests before freezing this plan.
+- [x] 2026-03-31 11:03 EDT — Read `/Users/parkerrex/.agents/docs/prompts/exec-plan-writer.md`, `/Users/parkerrex/Projects/ship-by-sunday/AGENTS.md`, `/Users/parkerrex/Projects/ship-by-sunday/docs/codex/PLANS.md`, and the `long-horizon` skill instructions, then inspected the real CLI entrypoint, draft store, generate path, error normalization, root blueprint script, README notes, and existing tests before freezing this plan.
 - [x] 2026-03-31 11:03 EDT — Ran safe baseline checks against the current surface: `bun run sbs --help`, `bun run sbs review --json`, `bun run sbs init --fixture nope --json`, an immediate `Ctrl+C` probe on `bun run sbs resume`, and `bun run --cwd packages/ship-by-sunday-cli test`.
 - [x] 2026-03-31 11:07 EDT — Grilled the plan against the live CLI code, reran `bun run sbs --help` and `cd packages/ship-by-sunday-cli && bun run test`, and locally verified that `bun run --cwd ...` leaves `process.env.INIT_CWD` unset in this Bun version. Updated the plan in place to remove that bad assumption and to make the root-script fix explicit.
-- [x] 2026-03-31 11:52 EDT — Milestone 1: split caller project root from source install root and rename the ambiguous CLI `repoRootPath` plumbing. The root `sbs` script now executes `packages/ship-by-sunday-cli/src/cli.ts` directly, the CLI defaults to `process.cwd()` for local project state, and the package suite plus a temporary-project real-entrypoint walkthrough both proved the draft and dry-run output anchor to the caller’s directory.
-- [x] 2026-03-31 11:54 EDT — Milestone 2: make read-only draft inspection truly read-only and give missing-draft cases one stable contract. `next`, `validate`, and `review` now fail with the same `missing_draft` contract in an empty temp project without creating `.ship-by-sunday/`, and the package suite plus direct CLI smoke both confirmed that behavior.
-- [x] 2026-03-31 11:56 EDT — Milestone 3: make draft persistence atomic, same-directory, and recoverable after interrupted writes. `saveLocalDraft()` now writes through `draft.json.tmp`, `loadLocalDraft()` promotes a valid temp file when the final draft is missing, and the package suite proves temp-only recovery, final-file precedence, and corrupt-temp failure.
-- [x] 2026-03-31 11:58 EDT — Milestone 4: harden directory and zip generation so `--force` only replaces the intended artifact target. Directory generation now targets `path.join(outPath, repoName)` instead of deleting the whole container, zip generation rejects directory targets with `invalid_state`, and the package suite covers sibling-file preservation plus wrong-type failures.
+- [x] 2026-03-31 11:52 EDT — Milestone 1: split caller project root from source install root and rename the ambiguous CLI `repoRootPath` plumbing. The root `sbs` script now executes `packages/ship-by-sunday-cli/src/cli.ts` directly, the CLI defaults to `process.cwd()` for local project state, and the blueprint suite plus a temporary-project real-entrypoint walkthrough both proved the draft and dry-run output anchor to the caller’s directory.
+- [x] 2026-03-31 11:54 EDT — Milestone 2: make read-only draft inspection truly read-only and give missing-draft cases one stable contract. `next`, `validate`, and `review` now fail with the same `missing_draft` contract in an empty temp project without creating `.ship-by-sunday/`, and the blueprint suite plus direct CLI smoke both confirmed that behavior.
+- [x] 2026-03-31 11:56 EDT — Milestone 3: make draft persistence atomic, same-directory, and recoverable after interrupted writes. `saveLocalDraft()` now writes through `draft.json.tmp`, `loadLocalDraft()` promotes a valid temp file when the final draft is missing, and the blueprint suite proves temp-only recovery, final-file precedence, and corrupt-temp failure.
+- [x] 2026-03-31 11:58 EDT — Milestone 4: harden directory and zip generation so `--force` only replaces the intended artifact target. Directory generation now targets `path.join(outPath, repoName)` instead of deleting the whole container, zip generation rejects directory targets with `invalid_state`, and the blueprint suite covers sibling-file preservation plus wrong-type failures.
 - [ ] 2026-03-31 11:03 EDT — Milestone 5: normalize expected CLI failures and interactive cancellation into stable human and JSON errors.
-- [ ] 2026-03-31 11:03 EDT — Milestone 6: add targeted package-local and real-entrypoint tests, then update the minimal README safety notes.
+- [ ] 2026-03-31 11:03 EDT — Milestone 6: add targeted blueprint-local and real-entrypoint tests, then update the minimal README safety notes.
 
 ## Surprises & Discoveries
 
-The CLI currently has one overloaded root concept where it really needs two. `packages/ship-by-sunday-cli/src/run-cli.ts` defaults its `repoRootPath` to `resolveRepoRootPath()` from `@manmeetsai/packet-compiler/server`, and the root `package.json` script runs the CLI through `bun run --cwd packages/ship-by-sunday-cli sbs`. That means the CLI source tree, the packet-compiler asset tree, and the caller's intended project root are all being conflated into the same value. The code works for this monorepo's happy path, but it is the wrong abstraction for local draft files and user-supplied relative paths.
+The CLI currently has one overloaded root concept where it really needs two. `packages/ship-by-sunday-cli/src/run-cli.ts` defaults its `repoRootPath` to `resolveRepoRootPath()` from `@manmeetsai/blueprint-compiler/server`, and the root `package.json` script runs the CLI through `bun run --cwd packages/ship-by-sunday-cli sbs`. That means the CLI source tree, the blueprint-compiler asset tree, and the caller's intended project root are all being conflated into the same value. The code works for this monorepo's happy path, but it is the wrong abstraction for local draft files and user-supplied relative paths.
 
-One root-path assumption from the first draft of this plan is now explicitly ruled out by local evidence. A temporary package run on 2026-03-31 showed that `bun run --cwd ...` leaves `process.env.INIT_CWD` as `null` in this environment, so the CLI cannot rely on Bun to preserve the caller's original directory through the existing root script. The implementation plan therefore needs to change the root `package.json` `sbs` wrapper so it stops changing cwd, then let the CLI derive `projectRootPath` from plain `process.cwd()` while continuing to resolve packet-compiler assets from the source install root.
+One root-path assumption from the first draft of this plan is now explicitly ruled out by local evidence. A temporary blueprint run on 2026-03-31 showed that `bun run --cwd ...` leaves `process.env.INIT_CWD` as `null` in this environment, so the CLI cannot rely on Bun to preserve the caller's original directory through the existing root script. The implementation plan therefore needs to change the root `package.json` `sbs` wrapper so it stops changing cwd, then let the CLI derive `projectRootPath` from plain `process.cwd()` while continuing to resolve blueprint-compiler assets from the source install root.
 
 The current read-only story is inconsistent. `packages/ship-by-sunday-cli/src/commands/next-command.ts` and `packages/ship-by-sunday-cli/src/commands/validate-command.ts` both call `ensureLocalDraft()`, so they create `.ship-by-sunday/draft.json` as a side effect. `packages/ship-by-sunday-cli/src/commands/review-command.ts` does not auto-create, but it throws a raw `Error` when no draft exists. `export` reads the existing draft without auto-init, but its behavior is not described as part of a single safety model.
 
@@ -48,15 +48,15 @@ That destructive boundary is now narrower. Directory generation only removes the
 
 The current error contract already leaks two user-visible instability signals. `parseCliCommand()` throws a raw `Error` for an unknown `init --fixture` value, so `bun run sbs init --fixture nope --json` currently returns `error_code: "unknown"` instead of `invalid_args`. An immediate `Ctrl+C` during `bun run sbs resume` exits with a bare `^C` and no structured CLI message. Both behaviors were confirmed from the real `bun run sbs` entrypoint rather than from direct `runCli()` calls.
 
-Milestone 1 also surfaced one extra mismatch that mattered at runtime: after the command-layer rename, `handleInitCommand()` and `handleGenerateCommand()` still had object properties named `repoRootPath`, so the first direct temp-directory proof returned `undefined` path errors until those property names were aligned with `projectRootPath`. The package suite caught that quickly, which is why the renamed boundary is now covered by a real-entrypoint smoke as well as direct command tests.
+Milestone 1 also surfaced one extra mismatch that mattered at runtime: after the command-layer rename, `handleInitCommand()` and `handleGenerateCommand()` still had object properties named `repoRootPath`, so the first direct temp-directory proof returned `undefined` path errors until those property names were aligned with `projectRootPath`. The blueprint suite caught that quickly, which is why the renamed boundary is now covered by a real-entrypoint smoke as well as direct command tests.
 
-The existing package tests are useful but not yet aimed at these trust boundaries. `packages/ship-by-sunday-cli/tests/*.test.ts` currently drive `runCli()` directly with injected roots, and the package suite passes with 20 tests. There is no spawned real-entrypoint test that proves caller-root anchoring, missing-draft read-only behavior, or stable cancellation from the actual CLI process.
+The existing blueprint tests are useful but not yet aimed at these trust boundaries. `packages/ship-by-sunday-cli/tests/*.test.ts` currently drive `runCli()` directly with injected roots, and the blueprint suite passes with 20 tests. There is no spawned real-entrypoint test that proves caller-root anchoring, missing-draft read-only behavior, or stable cancellation from the actual CLI process.
 
 ## Decision Log
 
-Decision: introduce two explicit roots in the CLI layer, `projectRootPath` and `sourceInstallRootPath`, and stop using one ambiguous `repoRootPath` name for both jobs. Rationale: the packet compiler still needs a source-install root so it can read starter files and prompt assets from this repository, but the CLI's local draft and relative `--file` and `--out` paths must anchor to the caller's intended project root. Date/Author: 2026-03-31 / Codex
+Decision: introduce two explicit roots in the CLI layer, `projectRootPath` and `sourceInstallRootPath`, and stop using one ambiguous `repoRootPath` name for both jobs. Rationale: the blueprint compiler still needs a source-install root so it can read starter files and prompt assets from this repository, but the CLI's local draft and relative `--file` and `--out` paths must anchor to the caller's intended project root. Date/Author: 2026-03-31 / Codex
 
-Decision: derive `projectRootPath` from plain `process.cwd()` inside the CLI, and change the repository-root `package.json` `sbs` script from `bun run --cwd packages/ship-by-sunday-cli sbs` to direct file execution such as `bun packages/ship-by-sunday-cli/src/cli.ts`. Rationale: local verification on 2026-03-31 showed that `bun run --cwd ...` does not populate `INIT_CWD` here, so the only grounded way to preserve the caller's project root through the documented root wrapper is to stop changing cwd in that wrapper. `resolveRepoRootPath()` remains the source-install-root mechanism for packet-compiler assets. Date/Author: 2026-03-31 / Codex
+Decision: derive `projectRootPath` from plain `process.cwd()` inside the CLI, and change the repository-root `package.json` `sbs` script from `bun run --cwd packages/ship-by-sunday-cli sbs` to direct file execution such as `bun packages/ship-by-sunday-cli/src/cli.ts`. Rationale: local verification on 2026-03-31 showed that `bun run --cwd ...` does not populate `INIT_CWD` here, so the only grounded way to preserve the caller's project root through the documented root wrapper is to stop changing cwd in that wrapper. `resolveRepoRootPath()` remains the source-install-root mechanism for blueprint-compiler assets. Date/Author: 2026-03-31 / Codex
 
 Decision: preserve the existing command surface and the current JSON envelope shape instead of adding new commands, new config flags, or a second draft format. Rationale: the slice is about correctness and trust, not widening the product surface. The user explicitly asked to preserve the existing agent-friendly JSON command model. Date/Author: 2026-03-31 / Codex
 
@@ -88,13 +88,13 @@ The main known implementation risk is the root-wrapper cwd handoff. The grill re
 
 The user-facing entrypoint begins at the repository root `package.json`, where the `sbs` script is currently `bun run --cwd packages/ship-by-sunday-cli sbs`. That wrapper hands off to `packages/ship-by-sunday-cli/src/cli.ts`, which prints the banner and delegates to `packages/ship-by-sunday-cli/src/run-cli.ts`. `run-cli.ts` parses argv, dispatches command handlers, and normalizes errors before choosing the final exit code. Because local verification showed Bun does not provide `INIT_CWD` through this wrapper in the current environment, Milestone 1 must change the root `sbs` script to direct file execution from the repo root so `process.cwd()` can become the trustworthy caller-project-root signal.
 
-Inside the CLI package, `packages/ship-by-sunday-cli/src/draft/draft-paths.ts` defines the `.ship-by-sunday/` directory and `draft.json` file names. `packages/ship-by-sunday-cli/src/draft/draft-store.ts` is the real persistence boundary. It resolves relative input and output paths, reads stdin for `-`, loads and saves the draft, imports and exports JSON, and applies field or patch mutations. If this slice leaves duplicated write logic outside this file, it will be easier to regress again.
+Inside the CLI blueprint, `packages/ship-by-sunday-cli/src/draft/draft-paths.ts` defines the `.ship-by-sunday/` directory and `draft.json` file names. `packages/ship-by-sunday-cli/src/draft/draft-store.ts` is the real persistence boundary. It resolves relative input and output paths, reads stdin for `-`, loads and saves the draft, imports and exports JSON, and applies field or patch mutations. If this slice leaves duplicated write logic outside this file, it will be easier to regress again.
 
-The current command surfaces split cleanly into read and write categories. `schema`, `stages`, and `fields` are pure packet-contract introspection. `next` and `validate` are intended as read-only packet-state introspection but currently call `ensureLocalDraft()`. `review` already loads without auto-init, but its missing-draft case is not normalized. `resume`, `stage`, `init`, `import`, `apply`, `mutate`, and the field mutation commands are explicit write paths. `generate` is read-only with respect to the draft, but it is destructive with respect to the chosen artifact output path.
+The current command surfaces split cleanly into read and write categories. `schema`, `stages`, and `fields` are pure blueprint-contract introspection. `next` and `validate` are intended as read-only blueprint-state introspection but currently call `ensureLocalDraft()`. `review` already loads without auto-init, but its missing-draft case is not normalized. `resume`, `stage`, `init`, `import`, `apply`, `mutate`, and the field mutation commands are explicit write paths. `generate` is read-only with respect to the draft, but it is destructive with respect to the chosen artifact output path.
 
-`packages/ship-by-sunday-cli/src/commands/generate-command.ts` is the only path that crosses from CLI-local state into generated starter artifacts. It loads the draft, checks review readiness through `deriveStageStatus()`, converts the draft into a canonical project definition, and then calls `buildReviewDownloadZip()`, `buildRepoGenerationManifest()`, and `materializeRepoSnapshot()` from `@manmeetsai/packet-compiler/server`. The generated repo directory is written to a temporary directory first, but the destructive preflight still removes the entire `--out` container path.
+`packages/ship-by-sunday-cli/src/commands/generate-command.ts` is the only path that crosses from CLI-local state into generated starter artifacts. It loads the draft, checks review readiness through `deriveStageStatus()`, converts the draft into a canonical project definition, and then calls `buildReviewDownloadZip()`, `buildRepoGenerationManifest()`, and `materializeRepoSnapshot()` from `@manmeetsai/blueprint-compiler/server`. The generated repo directory is written to a temporary directory first, but the destructive preflight still removes the entire `--out` container path.
 
-The packet compiler already has its own legitimate root semantics, and this slice must not break them. `packages/packet-compiler/src/repo-root.ts` exports `resolveRepoRootPath()`, which walks upward from the compiler source tree until it finds the repository markers needed to load starter files and prompt assets. `packages/packet-compiler/tests/repo-root.test.ts` already proves that template loading and repo snapshot generation still work even when `process.cwd()` is somewhere else. That behavior should remain source-install-root behavior, not be repurposed into caller-project-root behavior.
+The blueprint compiler already has its own legitimate root semantics, and this slice must not break them. `packages/blueprint-compiler/src/repo-root.ts` exports `resolveRepoRootPath()`, which walks upward from the compiler source tree until it finds the repository markers needed to load starter files and prompt assets. `packages/blueprint-compiler/tests/repo-root.test.ts` already proves that template loading and repo snapshot generation still work even when `process.cwd()` is somewhere else. That behavior should remain source-install-root behavior, not be repurposed into caller-project-root behavior.
 
 The current error model lives in `packages/ship-by-sunday-cli/src/cli-errors.ts`. `CliErrorCode` currently includes `already_exists`, `invalid_args`, `invalid_input`, `invalid_patch`, `invalid_stage`, `invalid_state`, `missing_draft`, `not_review_ready`, and `unknown`. `normalizeCliError()` only special-cases existing `CliError` objects and raw `SyntaxError`, so any expected failure that still throws `new Error(...)` collapses into `unknown`. The new hardening work should stay inside this model rather than inventing a separate error protocol. In this plan, that means adding `cancelled`, removing raw `Error` throws from predictable branches, and introducing one tiny helper for known `NodeJS.ErrnoException` cases so draft and output-path boundary failures become stable CLI messages that name the path involved.
 
@@ -104,7 +104,7 @@ In this plan, “caller project root” means the directory the user expects the
 
 ## Plan of Work
 
-Start by fixing naming and root semantics, because every other safeguard depends on that distinction. Change the repository-root `package.json` `sbs` script so it executes `packages/ship-by-sunday-cli/src/cli.ts` without `--cwd`, then introduce one explicit CLI helper that derives `projectRootPath` from `process.cwd()`, thread that value through `runCli()` and the command handlers, and rename the current `repoRootPath` plumbing anywhere it actually means caller project root. Keep `packages/packet-compiler/src/repo-root.ts` as the source-install-root behavior for starter assets and prompt files; the CLI still needs that distinction, but it should no longer use the packet-compiler root to decide where `.ship-by-sunday/` lives.
+Start by fixing naming and root semantics, because every other safeguard depends on that distinction. Change the repository-root `package.json` `sbs` script so it executes `packages/ship-by-sunday-cli/src/cli.ts` without `--cwd`, then introduce one explicit CLI helper that derives `projectRootPath` from `process.cwd()`, thread that value through `runCli()` and the command handlers, and rename the current `repoRootPath` plumbing anywhere it actually means caller project root. Keep `packages/blueprint-compiler/src/repo-root.ts` as the source-install-root behavior for starter assets and prompt files; the CLI still needs that distinction, but it should no longer use the blueprint-compiler root to decide where `.ship-by-sunday/` lives.
 
 Once the roots are separated, make the CLI honest about when it writes local draft state. Replace `ensureLocalDraft()` in `next` and `validate` with a load-only path, normalize the missing-draft experience for `review` so it stops throwing a raw `Error`, and keep the explicit write behaviors limited to `resume`, `stage`, `init`, `import`, `apply`, `mutate`, and the field mutation commands. This is the place to make the no-draft messages point users at `init`, `import`, or `resume` without widening the command set.
 
@@ -114,27 +114,27 @@ Only then harden destructive generation. Keep the existing repo generation contr
 
 With mutation and deletion boundaries fixed, normalize the remaining user-facing failures. Remove raw `throw new Error(...)` from predictable parse or command-state branches, add `cancelled` to the CLI error union, wrap the interactive prompt so `Ctrl+C` returns a stable human message and JSON error instead of a bare `^C`, and classify representative local filesystem errors like `EISDIR`, `ENOTDIR`, `EACCES`, and `EPERM` into path-specific `invalid_state` messages at the draft and generate boundaries. Keep unexpected programmer faults under `unknown`; the goal of this slice is to eliminate expected operational ambiguity, not to hide every possible bug.
 
-Finish by adding tests at the right two levels. Keep the existing package-local `runCli()` tests for narrow behavior, add targeted storage and generate tests where that logic is easiest to isolate, and add at least one spawned real-entrypoint test that runs the actual CLI process from a temporary project directory. Update the root `README.md` only as much as needed to explain the new safety model around project-root anchoring, missing-draft read-only behavior, atomic draft writes, and scoped `--force`.
+Finish by adding tests at the right two levels. Keep the existing blueprint-local `runCli()` tests for narrow behavior, add targeted storage and generate tests where that logic is easiest to isolate, and add at least one spawned real-entrypoint test that runs the actual CLI process from a temporary project directory. Update the root `README.md` only as much as needed to explain the new safety model around project-root anchoring, missing-draft read-only behavior, atomic draft writes, and scoped `--force`.
 
 ## Milestones
 
 ### Milestone 1: Separate caller project root from source install root
 
-At the end of this milestone, the CLI has one explicit `projectRootPath` for local draft state and user-relative paths, packet-compiler retains its own `sourceInstallRootPath` behavior for starter assets and prompt files, and the repository-root `sbs` wrapper no longer changes cwd before calling the CLI. The files touched should include the repository-root `package.json`, `packages/ship-by-sunday-cli/src/run-cli.ts`, the command handler signatures under `packages/ship-by-sunday-cli/src/commands/`, `packages/ship-by-sunday-cli/src/draft/draft-paths.ts`, `packages/ship-by-sunday-cli/src/draft/draft-store.ts`, and one small new helper module under `packages/ship-by-sunday-cli/src/` if the root-derivation logic needs a home of its own.
+At the end of this milestone, the CLI has one explicit `projectRootPath` for local draft state and user-relative paths, blueprint-compiler retains its own `sourceInstallRootPath` behavior for starter assets and prompt files, and the repository-root `sbs` wrapper no longer changes cwd before calling the CLI. The files touched should include the repository-root `package.json`, `packages/ship-by-sunday-cli/src/run-cli.ts`, the command handler signatures under `packages/ship-by-sunday-cli/src/commands/`, `packages/ship-by-sunday-cli/src/draft/draft-paths.ts`, `packages/ship-by-sunday-cli/src/draft/draft-store.ts`, and one small new helper module under `packages/ship-by-sunday-cli/src/` if the root-derivation logic needs a home of its own.
 
-Run the package tests after the rename, then prove the caller-root behavior from a temporary project directory by executing the real CLI entrypoint with an absolute path to `packages/ship-by-sunday-cli/src/cli.ts`. Also prove the wrapper fix statically by showing the root `package.json` `sbs` script no longer contains `--cwd packages/ship-by-sunday-cli`. Success looks like `init --fixture complete --json` returning a `draftFilePath` under the temporary project directory, `generate --dry-run --json` reporting an output path under that same directory, and packet-compiler still resolving its own templates and starter files correctly from the source repository.
+Run the blueprint tests after the rename, then prove the caller-root behavior from a temporary project directory by executing the real CLI entrypoint with an absolute path to `packages/ship-by-sunday-cli/src/cli.ts`. Also prove the wrapper fix statically by showing the root `package.json` `sbs` script no longer contains `--cwd packages/ship-by-sunday-cli`. Success looks like `init --fixture complete --json` returning a `draftFilePath` under the temporary project directory, `generate --dry-run --json` reporting an output path under that same directory, and blueprint-compiler still resolving its own templates and starter files correctly from the source repository.
 
 ### Milestone 2: Make read-only inspection truly read-only
 
 At the end of this milestone, `next`, `validate`, `review`, and draft-export reads do not create `.ship-by-sunday/draft.json`. When no draft exists, they return the existing `missing_draft` code with one stable human message and one stable JSON message. `resume`, `stage`, and the explicit mutation paths keep their current authority to initialize or update the draft.
 
-The main files here are `packages/ship-by-sunday-cli/src/commands/next-command.ts`, `packages/ship-by-sunday-cli/src/commands/validate-command.ts`, `packages/ship-by-sunday-cli/src/commands/review-command.ts`, and the load helpers in `packages/ship-by-sunday-cli/src/draft/draft-store.ts`. Run the package tests plus a temporary-project real-entrypoint exercise where `next --json` and `validate --json` are invoked before any draft exists. Success looks like exit code `4`, `error_code: "missing_draft"`, and no `.ship-by-sunday/` directory left behind.
+The main files here are `packages/ship-by-sunday-cli/src/commands/next-command.ts`, `packages/ship-by-sunday-cli/src/commands/validate-command.ts`, `packages/ship-by-sunday-cli/src/commands/review-command.ts`, and the load helpers in `packages/ship-by-sunday-cli/src/draft/draft-store.ts`. Run the blueprint tests plus a temporary-project real-entrypoint exercise where `next --json` and `validate --json` are invoked before any draft exists. Success looks like exit code `4`, `error_code: "missing_draft"`, and no `.ship-by-sunday/` directory left behind.
 
 ### Milestone 3: Make draft persistence atomic and recoverable
 
 At the end of this milestone, every draft mutation path uses the same atomic write helper, and an interrupted write no longer leaves a half-written final `draft.json`. The new persistence behavior should stay small and boring: same-directory temp file, flush, close, rename, and then intentional load-time handling if a temp file is left behind.
 
-The main files are `packages/ship-by-sunday-cli/src/draft/draft-paths.ts`, `packages/ship-by-sunday-cli/src/draft/draft-store.ts`, and the tests that simulate interrupted writes under `packages/ship-by-sunday-cli/tests/`. Run package-local tests that cover temp-only recovery, stale-temp-with-final precedence, and invalid temp-file behavior. Success looks like a valid temp file being recoverable when no final file exists, a valid final file winning when both exist, and a corrupt leftover temp file producing a stable `invalid_state` message instead of a raw JSON parse failure.
+The main files are `packages/ship-by-sunday-cli/src/draft/draft-paths.ts`, `packages/ship-by-sunday-cli/src/draft/draft-store.ts`, and the tests that simulate interrupted writes under `packages/ship-by-sunday-cli/tests/`. Run blueprint-local tests that cover temp-only recovery, stale-temp-with-final precedence, and invalid temp-file behavior. Success looks like a valid temp file being recoverable when no final file exists, a valid final file winning when both exist, and a corrupt leftover temp file producing a stable `invalid_state` message instead of a raw JSON parse failure.
 
 ### Milestone 4: Scope destructive generate behavior to the real artifact target
 
@@ -150,9 +150,9 @@ The main files are `packages/ship-by-sunday-cli/src/cli-errors.ts`, `packages/sh
 
 ### Milestone 6: Defend the new safety model with tests and minimal docs
 
-At the end of this milestone, the hardening behavior is locked in by package-local tests and one real-entrypoint test path, and the root `README.md` explains only the safety model changes that a user needs to know. The docs update should stay small: where the draft lives, which commands remain read-only, what happens during interrupted saves, and what `generate --force` is allowed to replace.
+At the end of this milestone, the hardening behavior is locked in by blueprint-local tests and one real-entrypoint test path, and the root `README.md` explains only the safety model changes that a user needs to know. The docs update should stay small: where the draft lives, which commands remain read-only, what happens during interrupted saves, and what `generate --force` is allowed to replace.
 
-The files touched should include whichever test files are extended under `packages/ship-by-sunday-cli/tests/`, one new spawned-entrypoint test file if needed, and the CLI section of `README.md`. Run `bun run test`, `bun run typecheck`, `bun run lint`, and `bun run format:check` from `packages/ship-by-sunday-cli`, then run `bun run sbs --help` from the repository root and one temporary-project real-entrypoint walkthrough. Success looks like both the narrow package checks and the real-entrypoint proof passing without widening the command surface.
+The files touched should include whichever test files are extended under `packages/ship-by-sunday-cli/tests/`, one new spawned-entrypoint test file if needed, and the CLI section of `README.md`. Run `bun run test`, `bun run typecheck`, `bun run lint`, and `bun run format:check` from `packages/ship-by-sunday-cli`, then run `bun run sbs --help` from the repository root and one temporary-project real-entrypoint walkthrough. Success looks like both the narrow blueprint checks and the real-entrypoint proof passing without widening the command surface.
 
 ## Concrete Steps
 
@@ -160,21 +160,21 @@ Work from the repository root unless a step says otherwise.
 
 Begin by re-confirming the current trust-boundary hotspots before editing:
 
-    $ cd /Users/parkerrex/Projects/manmeetsai-workspace
-    $ rg -n "resolveRepoRootPath|ensureLocalDraft|throw new Error|rm\\(|\"sbs\"" package.json packages/ship-by-sunday-cli/src packages/packet-compiler/src
+    $ cd /Users/parkerrex/Projects/ship-by-sunday
+    $ rg -n "resolveRepoRootPath|ensureLocalDraft|throw new Error|rm\\(|\"sbs\"" package.json packages/ship-by-sunday-cli/src packages/blueprint-compiler/src
 
 The expected observation is that `run-cli.ts` defaults to `resolveRepoRootPath()`, `next-command.ts` and `validate-command.ts` call `ensureLocalDraft()`, `review-command.ts` and `parse-cli-command.ts` still throw raw `Error` objects in some cases, and `generate-command.ts` still removes the whole `absoluteOutPath`.
 
-Run the package baseline from the CLI package before changing behavior:
+Run the blueprint baseline from the CLI blueprint before changing behavior:
 
-    $ cd /Users/parkerrex/Projects/manmeetsai-workspace/packages/ship-by-sunday-cli
+    $ cd /Users/parkerrex/Projects/ship-by-sunday/packages/ship-by-sunday-cli
     $ bun run test
 
 The expected observation is the current green baseline. During plan creation this suite passed with 6 test files and 20 tests; the exact counts can grow as hardening tests are added, but the suite should stay green at each milestone boundary.
 
 After Milestone 1 lands, prove caller-project-root anchoring from a temporary directory by invoking the real CLI entrypoint file rather than `runCli()` directly, then confirm that the root wrapper no longer changes cwd:
 
-    $ repo_root=/Users/parkerrex/Projects/manmeetsai-workspace
+    $ repo_root=/Users/parkerrex/Projects/ship-by-sunday
     $ temp_project="$(mktemp -d /tmp/sbs-cli-project-XXXXXX)"
     $ cd "$temp_project"
     $ bun "$repo_root/packages/ship-by-sunday-cli/src/cli.ts" init --fixture complete --json
@@ -186,7 +186,7 @@ The expected observation is that the JSON `draftFilePath` points at `$temp_proje
 
 After Milestone 2 lands, verify that read-only inspection does not create state:
 
-    $ repo_root=/Users/parkerrex/Projects/manmeetsai-workspace
+    $ repo_root=/Users/parkerrex/Projects/ship-by-sunday
     $ temp_project="$(mktemp -d /tmp/sbs-cli-readonly-XXXXXX)"
     $ cd "$temp_project"
     $ set +e
@@ -198,16 +198,16 @@ After Milestone 2 lands, verify that read-only inspection does not create state:
 
 The expected observation is exit code `4`, a JSON error payload with `error_code: "missing_draft"` in `/tmp/sbs-next.stderr`, and no draft file created under the temporary project directory.
 
-After Milestone 3 lands, simulate interrupted-write recovery at the package test level rather than by trying to crash a real save mid-stream. Create or update focused tests that write a valid temp draft file without a final file, write both final and temp files, and write an invalid temp file. The commands remain the package-local suite:
+After Milestone 3 lands, simulate interrupted-write recovery at the blueprint test level rather than by trying to crash a real save mid-stream. Create or update focused tests that write a valid temp draft file without a final file, write both final and temp files, and write an invalid temp file. The commands remain the blueprint-local suite:
 
-    $ cd /Users/parkerrex/Projects/manmeetsai-workspace/packages/ship-by-sunday-cli
+    $ cd /Users/parkerrex/Projects/ship-by-sunday/packages/ship-by-sunday-cli
     $ bun run test
 
 The expected observation is that the test suite proves the new recovery rules without leaving residue in the repository working tree.
 
 After Milestone 4 lands, prove that forced directory generation only replaces the generated repo slug:
 
-    $ repo_root=/Users/parkerrex/Projects/manmeetsai-workspace
+    $ repo_root=/Users/parkerrex/Projects/ship-by-sunday
     $ temp_project="$(mktemp -d /tmp/sbs-cli-generate-XXXXXX)"
     $ cd "$temp_project"
     $ mkdir -p generated
@@ -222,28 +222,28 @@ Also add one targeted automated test for wrong-type targets instead of relying o
 
 After Milestone 5 lands, verify interactive cancellation from the real entrypoint:
 
-    $ repo_root=/Users/parkerrex/Projects/manmeetsai-workspace
+    $ repo_root=/Users/parkerrex/Projects/ship-by-sunday
     $ temp_project="$(mktemp -d /tmp/sbs-cli-cancel-XXXXXX)"
     $ cd "$temp_project"
     $ bun "$repo_root/packages/ship-by-sunday-cli/src/cli.ts" resume
 
 At the first prompt, press `Ctrl+C`. The expected observation is a deliberate cancellation message, exit code `130`, and any previously answered fields still preserved in `$temp_project/.ship-by-sunday/draft.json`. There should be no raw stack trace and no bare `^C` as the only visible output.
 
-Finish with the narrow package checks and the documented root-script smoke:
+Finish with the narrow blueprint checks and the documented root-script smoke:
 
-    $ cd /Users/parkerrex/Projects/manmeetsai-workspace/packages/ship-by-sunday-cli
+    $ cd /Users/parkerrex/Projects/ship-by-sunday/packages/ship-by-sunday-cli
     $ bun run test
     $ bun run typecheck
     $ bun run lint
     $ bun run format:check
-    $ cd /Users/parkerrex/Projects/manmeetsai-workspace
+    $ cd /Users/parkerrex/Projects/ship-by-sunday
     $ bun run sbs --help
 
-The expected observation is that the CLI package checks pass and the root `bun run sbs --help` surface still prints the existing command list.
+The expected observation is that the CLI blueprint checks pass and the root `bun run sbs --help` surface still prints the existing command list.
 
 ## Validation and Acceptance
 
-This slice is complete only when the CLI's trust boundaries are demonstrably tighter from the real entrypoint, not just from direct `runCli()` tests. Acceptance starts with package-local proof: `packages/ship-by-sunday-cli` must pass `bun run test`, `bun run typecheck`, `bun run lint`, and `bun run format:check`. Those checks are the minimum because this slice changes runtime behavior, type names, and local docs in the same package. Acceptance for Milestone 1 also requires the repository-root `package.json` `sbs` script to stop using `--cwd packages/ship-by-sunday-cli`; otherwise the project-root fix is still resting on an assumption Bun did not satisfy during the grill.
+This slice is complete only when the CLI's trust boundaries are demonstrably tighter from the real entrypoint, not just from direct `runCli()` tests. Acceptance starts with blueprint-local proof: `packages/ship-by-sunday-cli` must pass `bun run test`, `bun run typecheck`, `bun run lint`, and `bun run format:check`. Those checks are the minimum because this slice changes runtime behavior, type names, and local docs in the same blueprint. Acceptance for Milestone 1 also requires the repository-root `package.json` `sbs` script to stop using `--cwd packages/ship-by-sunday-cli`; otherwise the project-root fix is still resting on an assumption Bun did not satisfy during the grill.
 
 Acceptance also requires one spawned or manual real-entrypoint walkthrough from a temporary project directory that uses the actual `packages/ship-by-sunday-cli/src/cli.ts` process. That walkthrough must prove three behaviors together. `init --fixture complete --json` or an equivalent complete import must create `.ship-by-sunday/draft.json` under the temporary project root. `generate --out ./generated --dry-run --json` must report an output path under that same temporary project root. `next --json` or `validate --json` in a fresh temporary project directory with no draft must return exit `4`, `error_code: "missing_draft"`, and leave no draft state behind.
 
@@ -251,7 +251,7 @@ Destructive-generate acceptance is specific. In directory mode, `--force` may re
 
 Failure-contract acceptance is equally specific. Invalid `init --fixture` input must return `invalid_args`, not `unknown`. A corrupt draft or unrecoverable temp draft must return `invalid_state` with a message that names the affected path. Representative wrong-type output targets in both directory and zip generation must also return stable path-specific `invalid_state` messages instead of raw `EISDIR`, `ENOTDIR`, or similar Node failures. Interrupting `resume` or `stage` with `Ctrl+C` must return `cancelled` and exit `130`, with a human message that tells the user prior answers remain saved. Expected failures should never print raw stack traces or collapse into generic `unknown` errors unless the underlying problem is genuinely unexpected.
 
-If any broader repository check is attempted and fails for unrelated reasons, record the exact command and unrelated files in `Progress` and `Outcomes & Retrospective`. Do not claim the slice is complete unless the package-local checks and the real-entrypoint proof path both pass.
+If any broader repository check is attempted and fails for unrelated reasons, record the exact command and unrelated files in `Progress` and `Outcomes & Retrospective`. Do not claim the slice is complete unless the blueprint-local checks and the real-entrypoint proof path both pass.
 
 ## Idempotence and Recovery
 
@@ -263,13 +263,13 @@ The validation steps above intentionally create temporary project directories un
 
     $ rm -rf /tmp/sbs-cli-project-* /tmp/sbs-cli-readonly-* /tmp/sbs-cli-generate-* /tmp/sbs-cli-cancel-*
 
-No schema migration or external service rollback is involved in this slice. The rollback path is code rollback plus removal of any temporary project directories created for validation. If a milestone introduces flaky behavior, stop at that milestone, revert the touched CLI-package files, and rerun the package-local suite before continuing.
+No schema migration or external service rollback is involved in this slice. The rollback path is code rollback plus removal of any temporary project directories created for validation. If a milestone introduces flaky behavior, stop at that milestone, revert the touched CLI-blueprint files, and rerun the blueprint-local suite before continuing.
 
 ## Artifacts and Notes
 
 These current code snippets and transcripts are the evidence that motivated the plan and should be rechecked during implementation:
 
-    Root package script today
+    Root blueprint script today
     "sbs": "bun run --cwd packages/ship-by-sunday-cli sbs"
 
     Local Bun verification during the grill
@@ -307,7 +307,7 @@ These current code snippets and transcripts are the evidence that motivated the 
     ...
     > ^C
 
-    Current package-local test baseline during plan creation
+    Current blueprint-local test baseline during plan creation
     Test Files  6 passed (6)
     Tests       20 passed (20)
 
@@ -319,10 +319,10 @@ The repository-root `package.json` is part of this plan because the current `sbs
 
 `packages/ship-by-sunday-cli/src/draft/draft-store.ts` and `packages/ship-by-sunday-cli/src/draft/draft-paths.ts` are the local-state boundary. They define `.ship-by-sunday/`, `draft.json`, stdin and file-path handling, and every save path used by `init`, `resume`, `stage`, `import`, `apply`, `mutate`, and the field mutation commands. If a new temp file is introduced, keep it alongside `draft.json` in this same boundary rather than inventing a second state directory.
 
-`packages/ship-by-sunday-cli/src/commands/generate-command.ts` depends on `buildReviewDownloadZip()`, `buildRepoGenerationManifest()`, and `materializeRepoSnapshot()` from `@manmeetsai/packet-compiler/server`. Those packet-compiler functions still depend on `packages/packet-compiler/src/repo-root.ts` to find starter files in the source repository. This hardening slice should preserve that source-install-root behavior while making the CLI's own path handling project-root aware.
+`packages/ship-by-sunday-cli/src/commands/generate-command.ts` depends on `buildReviewDownloadZip()`, `buildRepoGenerationManifest()`, and `materializeRepoSnapshot()` from `@manmeetsai/blueprint-compiler/server`. Those blueprint-compiler functions still depend on `packages/blueprint-compiler/src/repo-root.ts` to find starter files in the source repository. This hardening slice should preserve that source-install-root behavior while making the CLI's own path handling project-root aware.
 
 `packages/ship-by-sunday-cli/src/cli-errors.ts` and `packages/ship-by-sunday-cli/src/cli-json.ts` define the stable error protocol for both human and JSON modes. Adding `cancelled` to `CliErrorCode` is acceptable in this slice because it preserves the current envelope shape and makes interactive cancellation intentional. A small helper for known `NodeJS.ErrnoException` cases is also acceptable here so draft and output-path filesystem failures become stable `invalid_state` messages with the affected path attached. No new output format should be introduced.
 
 The root `README.md` is the only documentation surface that should change here, and only to explain the safety model that a user or agent must understand: where the draft lives, which commands are read-only, how interrupted writes recover, and what `generate --force` is allowed to replace. Do not widen into install, completion, or distribution docs in this slice.
 
-No new external dependency is justified for this plan. The existing Node and Bun primitives already in use are enough: `node:fs/promises` for directory and file operations, same-directory rename for atomic replacement, `node:readline/promises` for interactive prompts, and Vitest for both narrow package tests and spawned real-entrypoint tests.
+No new external dependency is justified for this plan. The existing Node and Bun primitives already in use are enough: `node:fs/promises` for directory and file operations, same-directory rename for atomic replacement, `node:readline/promises` for interactive prompts, and Vitest for both narrow blueprint tests and spawned real-entrypoint tests.

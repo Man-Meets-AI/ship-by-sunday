@@ -44,7 +44,7 @@ Use the narrowest relevant test surface first. Browser packs and billing checks 
 ## CLI and generator
 
 - `bun run sbs` launches the local Ship by Sunday intake CLI.
-- `bun run sbs:check` validates the CLI plus packet-compiler slice end-to-end.
+- `bun run sbs:check` validates the CLI plus blueprint-compiler slice end-to-end.
 - `./bin/sbs --help` and `./bin/sbs --version` are safe reference commands.
 
 ## QA control plane

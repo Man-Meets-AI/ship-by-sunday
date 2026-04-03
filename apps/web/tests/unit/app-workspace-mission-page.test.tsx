@@ -39,8 +39,8 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
-		packet: {
-			getPacketResumeDestination: "getPacketResumeDestination",
+		blueprint: {
+			getBlueprintResumeDestination: "getBlueprintResumeDestination",
 		},
 	},
 }));
@@ -54,11 +54,11 @@ describe("workspace mission route", () => {
 
 	it("renders explicit unlock messaging before the bonus is available", async () => {
 		fetchAuthenticatedQueryMock.mockImplementation(async (query) => {
-			if (query === "getPacketResumeDestination") {
+			if (query === "getBlueprintResumeDestination") {
 				return {
 					destination: "/review",
 					kind: "review",
-					packetStageId: "review",
+					blueprintStageId: "review",
 					postReviewTargets: null,
 				};
 			}
@@ -77,11 +77,11 @@ describe("workspace mission route", () => {
 
 	it("keeps the restored route reachable after unlock without redirecting to start", async () => {
 		fetchAuthenticatedQueryMock.mockImplementation(async (query) => {
-			if (query === "getPacketResumeDestination") {
+			if (query === "getBlueprintResumeDestination") {
 				return {
 					destination: "/lesson/iterate-the-product-with-ai",
 					kind: "post_review",
-					packetStageId: null,
+					blueprintStageId: null,
 					postReviewTargets: {
 						reviewDestination: "/review",
 						buildLessonsDestination: "/lesson/iterate-the-product-with-ai",

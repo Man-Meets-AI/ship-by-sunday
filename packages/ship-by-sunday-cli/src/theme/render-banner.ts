@@ -129,7 +129,7 @@ export function renderStartupBanner(options: CliRenderOptions) {
 	const subtitle = [
 		paint("Ship by Sunday CLI", "focus", options),
 		paint(
-			"local packet intake and starter snapshot generation",
+			"local blueprint intake and starter snapshot generation",
 			"muted",
 			options,
 		),

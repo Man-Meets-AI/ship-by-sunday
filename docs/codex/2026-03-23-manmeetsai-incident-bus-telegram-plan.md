@@ -14,13 +14,13 @@ This ExecPlan follows the repository root `PLANS.md` contract and must be mainta
 
 The user-visible goal is simple: when the product is failing, Telegram should tell the maintainer exactly what is broken, which system produced the incident, whether it is a repeat, and what to check next. That already works for the current app-side paths, Clerk webhook verification and `session.revoked`, and Codex app-server runtime failures. The remaining work is to finish the provider-native coverage and rollout path so observability incident delivery is operationally complete rather than merely technically interesting.
 
-After the remaining work in this plan is complete, a maintainer should be able to trigger or receive incidents from the supported sources, see compact Telegram packets that dedupe correctly, change the incident lifecycle state intentionally, and trust a documented dev-to-prod rollout path. The easiest proof will be a live smoke flow that exercises the app-side path, the Clerk webhook path, the Codex runtime path, and the next provider-native adapter added after this plan update.
+After the remaining work in this plan is complete, a maintainer should be able to trigger or receive incidents from the supported sources, see compact Telegram blueprints that dedupe correctly, change the incident lifecycle state intentionally, and trust a documented dev-to-prod rollout path. The easiest proof will be a live smoke flow that exercises the app-side path, the Clerk webhook path, the Codex runtime path, and the next provider-native adapter added after this plan update.
 
 ## Progress
 
 - [x] 2026-03-23 ET: Read project-level instructions, planning templates, and the original incident-bus outline.
 - [x] 2026-03-24 09:16 ET: Replace the narrow `errorEvents -> Telegram` path with a first-class `incidents` model in `features/observability/lib/incident.ts`, `convex/schema.ts`, `convex/observability/model.ts`, `convex/observability.ts`, and `convex/http.ts`.
-- [x] 2026-03-24 09:16 ET: Move Telegram packet rendering into `features/observability/telegram/render-incident-message.ts` and keep edit-in-place behavior with `telegramMessageId`.
+- [x] 2026-03-24 09:16 ET: Move Telegram blueprint rendering into `features/observability/telegram/render-incident-message.ts` and keep edit-in-place behavior with `telegramMessageId`.
 - [x] 2026-03-24 09:16 ET: Extend app-side capture so `instrumentation.ts`, `instrumentation-client.ts`, `proxy.ts`, Stripe checkout, Stripe webhook failures, and Codex route failures all enter the new incident path.
 - [x] 2026-03-24 09:16 ET: Add Codex app-server runtime incidents in `features/codex/server/app-server.ts` and suppress duplicate generic route capture when a typed runtime incident already exists.
 - [x] 2026-03-24 09:16 ET: Add Clerk webhook ingress at `app/api/observability/clerk/route.ts`, with `CLERK_WEBHOOK_SIGNING_SECRET` and a narrow high-signal adapter in `features/observability/server/source-adapters/clerk-webhook.ts`.
@@ -40,7 +40,7 @@ After the remaining work in this plan is complete, a maintainer should be able t
 
 The original plan is stale in one important way: the repository no longer uses `errorEvents` as the active incident path. The canonical path now starts in `features/observability/lib/incident.ts`, crosses `features/observability/server/ingest-error-event.ts`, lands in `convex/http.ts` at `POST /observability/events`, and persists into the `incidents` table in `convex/schema.ts`. The old `errorEvents` table still exists in the schema as legacy baggage, but the active path is incident-shaped now.
 
-The product identity in code is still `ship-by-sunday`, not `manmeetsai`. `config/product.ts` drives the `product` field stored on incidents and the product name shown in Telegram packets, so the plan must describe the repository as it exists today rather than the older naming used in the first draft.
+The product identity in code is still `ship-by-sunday`, not `manmeetsai`. `config/product.ts` drives the `product` field stored on incidents and the product name shown in Telegram blueprints, so the plan must describe the repository as it exists today rather than the older naming used in the first draft.
 
 The build now succeeds, but Turbopack still emits a non-blocking NFT tracing warning through `features/codex/server/app-server.ts` because that file uses filesystem and child-process APIs from a route path. This is not a build blocker right now, but it is a real operational note for future packaging work.
 
@@ -117,7 +117,7 @@ Evidence from the current validation run is concise and worth preserving here:
 
 2026-03-24 — Preserve `errorEvents` in the schema for now even though the active path no longer uses it. The rationale was to avoid mixing historical data cleanup with current incident-bus completion work.
 
-2026-03-24 — Use `features/observability/telegram/render-incident-message.ts` as the single Telegram packet renderer. The rationale was to keep delivery formatting isolated from Convex persistence logic.
+2026-03-24 — Use `features/observability/telegram/render-incident-message.ts` as the single Telegram blueprint renderer. The rationale was to keep delivery formatting isolated from Convex persistence logic.
 
 2026-03-24 — Preserve `acked` and `muted` on repeat incidents and only convert `resolved` incidents back to `regressed`. The rationale was that an acknowledged or muted incident should remain intentionally suppressed until a human changes it, while a resolved incident should reopen if it reappears.
 
@@ -135,7 +135,7 @@ Evidence from the current validation run is concise and worth preserving here:
 
 2026-03-24 — `telegram_delivery` incidents will be stored but never auto-delivered back through Telegram, and any replay or resend control is explicitly deferred beyond this ExecPlan. The rationale was to avoid recursive delivery loops and keep the incident control surface smaller in this phase.
 
-2026-03-24 — `telegram_delivery` incidents will dedupe globally by failure class for outage-style failures such as rate limits or authorization loss, but dedupe per source incident for content-specific failures such as malformed edits or overlong messages. The rationale was to collapse true channel outages without losing source-specific packet-debugging detail.
+2026-03-24 — `telegram_delivery` incidents will dedupe globally by failure class for outage-style failures such as rate limits or authorization loss, but dedupe per source incident for content-specific failures such as malformed edits or overlong messages. The rationale was to collapse true channel outages without losing source-specific blueprint-debugging detail.
 
 2026-03-24 — The first Vercel adapter will use signed deployment webhooks only, scoped to production deployment failures or cancellations. Preview deployments are ignored and later successful deployments do not auto-resolve incidents in this phase. The rationale was to keep the first Vercel slice narrow, high-signal, and free of premature lifecycle automation.
 
@@ -173,7 +173,7 @@ An incident in this repository is the normalized record stored in the `incidents
 
 The active app-side ingress path is spread across a few files. `instrumentation.ts`, `instrumentation-client.ts`, `proxy.ts`, `app/api/stripe/checkout/route.ts`, and the Codex route handlers produce incidents through `features/observability/server/capture-server-error.ts` or `features/observability/server/ingest-error-event.ts`. Those normalized payloads are posted to `POST /observability/events` in `convex/http.ts`, which calls `internal.observability.recordIncident` and, when thresholds allow, `internal.observability.deliverIncidentNotification`.
 
-Convex is the durable incident coordinator. `convex/observability/model.ts` owns dedupe, lifecycle persistence, delivery state, status transitions, and Telegram delivery. `convex/observability.ts` exposes the internal mutation and action entrypoints. `features/observability/telegram/render-incident-message.ts` produces the compact packet text consumed by the delivery action.
+Convex is the durable incident coordinator. `convex/observability/model.ts` owns dedupe, lifecycle persistence, delivery state, status transitions, and Telegram delivery. `convex/observability.ts` exposes the internal mutation and action entrypoints. `features/observability/telegram/render-incident-message.ts` produces the compact blueprint text consumed by the delivery action.
 
 Codex runtime coverage is separate from normal route-level capture. `features/codex/server/app-server.ts` defines `CodexAppServerRuntimeError`, reports process-level failures through the incident path, and preserves that typed runtime error back to the route boundary. The Codex routes under `app/api/codex/` now pass request context into the app-server client and suppress generic duplicate capture when the runtime layer already emitted the more specific incident.
 
@@ -217,13 +217,13 @@ The implemented incident control surface is the narrow Next.js route `POST /api/
 
 This milestone proves the system outside unit and integration tests. At the end of it, this plan should contain concise evidence showing a successful `dev` smoke run for the app-side path, the Clerk webhook path, the Codex runtime path, and the next provider-native adapter added after this rewrite. Production rollout should also be documented, but it is follow-through guidance rather than the hard completion bar for the implementation work itself.
 
-Success is not “tests still pass.” Success is a real incident reaching Telegram with the right packet shape, dedupe behavior, and lifecycle semantics, plus a short record in this plan of what was triggered, what was observed, and which environment variables were required.
+Success is not “tests still pass.” Success is a real incident reaching Telegram with the right blueprint shape, dedupe behavior, and lifecycle semantics, plus a short record in this plan of what was triggered, what was observed, and which environment variables were required.
 
 ## Concrete Steps
 
 Start every future implementation session from the repository root.
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
 
 Before editing anything, confirm the current baseline still holds.
 
@@ -264,7 +264,7 @@ Use the following validation commands from the repository root as the baseline g
     bunx vitest run tests/unit/observability-*.test.ts tests/unit/clerk-webhook-adapter.test.ts tests/unit/vercel-webhook-adapter.test.ts tests/unit/codex-route-helpers.test.ts tests/unit/codex-app-server-runtime.test.ts tests/integration/observability-client-error-route.test.ts tests/integration/observability-clerk-route.test.ts tests/integration/observability-vercel-route.test.ts tests/integration/observability-incident-status-route.test.ts tests/integration/stripe-checkout-route.test.ts tests/integration/codex-route-handlers.test.ts
     bun run build
 
-Acceptance for the live smoke is behavioral. The maintainer should be able to point at one Telegram packet and say which source produced it, why it is there, what the next action is, whether it is a repeat, and whether the lifecycle state was preserved or changed as intended. `Dev` live smoke is the completion gate for this ExecPlan. Production rollout evidence should be documented in this file, but it is not a mandatory blocker for calling the implementation work complete.
+Acceptance for the live smoke is behavioral. The maintainer should be able to point at one Telegram blueprint and say which source produced it, why it is there, what the next action is, whether it is a repeat, and whether the lifecycle state was preserved or changed as intended. `Dev` live smoke is the completion gate for this ExecPlan. Production rollout evidence should be documented in this file, but it is not a mandatory blocker for calling the implementation work complete.
 
 ## Idempotence and Recovery
 
@@ -272,7 +272,7 @@ This work is deliberately additive and should stay that way. New provider-native
 
 If a new adapter becomes noisy, disable the route or its verification secret, leave the already-stored incidents alone, and revert only that adapter path. Do not roll back the `incidents` model or the Telegram renderer to solve adapter noise. For the first Vercel slice, remember that preview deployments are intentionally ignored; if preview noise shows up, the adapter is wrong and should be narrowed, not tuned.
 
-If Telegram delivery fails during future work, do not silently swallow it. The recovery path should be to persist a Telegram delivery incident, keep the source incident intact, and retry only after the underlying bot or chat problem is understood. Outage-style failures such as bot authorization loss or rate limiting should collapse into one globally deduped `telegram_delivery` incident per environment and failure class. Packet-content failures such as malformed edits or overlong messages should stay tied to the source incident that produced them.
+If Telegram delivery fails during future work, do not silently swallow it. The recovery path should be to persist a Telegram delivery incident, keep the source incident intact, and retry only after the underlying bot or chat problem is understood. Outage-style failures such as bot authorization loss or rate limiting should collapse into one globally deduped `telegram_delivery` incident per environment and failure class. Blueprint-content failures such as malformed edits or overlong messages should stay tied to the source incident that produced them.
 
 If a partially completed rollout leaves lifecycle state changes exposed through a route that is not safely protected, remove that route entirely and keep using the internal mutation until a proper incident control boundary is ready. Internal state control is safer than a rushed public control surface. Reusing `OBSERVABILITY_INGEST_TOKEN` is not an acceptable fallback; if `OBSERVABILITY_INCIDENT_CONTROL_TOKEN` is not ready, the public incident control route should not ship.
 

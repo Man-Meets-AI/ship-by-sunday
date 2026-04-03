@@ -31,7 +31,7 @@ describe("proxy protected routes", () => {
 		vi.resetModules();
 	});
 
-	it("protects the canonical packet workspace routes", async () => {
+	it("protects the canonical blueprint workspace routes", async () => {
 		await import("@/proxy");
 
 		expect(createRouteMatcherMock).toHaveBeenCalledWith(

@@ -34,7 +34,7 @@ Prepare production values in your hosting dashboards and provider dashboards. Mi
 - keep the project linked to `ParkerRex/mma-shipbysunday`
 - keep Vercel's production branch on `main`
 - let Preview continue to handle unassigned git branches such as `dev` and feature branches
-- keep the package manager pinned to the repo version
+- keep Bun pinned to the repo version
 - use real production Clerk env values
 - use real production Stripe live keys
 - if the app uses observability or any other Convex HTTP actions, set `NEXT_PUBLIC_CONVEX_SITE_URL` to the matching `.convex.site` host
@@ -64,7 +64,7 @@ After a release merge to `main`, `Production Release Proof` should confirm all o
 3. live checkout returns to `/checkout/success`
 4. webhook grants access
 5. newly granted user reaches `/start`
-6. signed Clerk and Vercel observability webhooks persist incidents and deliver Telegram packets
+6. signed Clerk and Vercel observability webhooks persist incidents and deliver Telegram blueprints
 7. the public incident status route can `ack` a live incident and keep repeat delivery suppressed
 8. Vercel attributes the production web deploy to `main`
 9. GitHub Actions reports a matching `Convex Production Deploy` run for the same release

@@ -9,10 +9,10 @@ import {
 test.describe.configure({ mode: "serial" });
 test.skip(
 	!shouldRunAuthenticatedE2E,
-	"Set E2E_RUN_SANDBOX=1 or E2E_RUN_LOCAL_AUTH=1 plus PLAYWRIGHT_BASE_URL to run authenticated packet browser handoff checks.",
+	"Set E2E_RUN_SANDBOX=1 or E2E_RUN_LOCAL_AUTH=1 plus PLAYWRIGHT_BASE_URL to run authenticated blueprint browser handoff checks.",
 );
 
-const packetStageRoutes = [
+const blueprintStageRoutes = [
 	{ path: "/product", stageLabel: "Product" },
 	{ path: "/design", stageLabel: "Design" },
 	{ path: "/marketing", stageLabel: "Marketing" },
@@ -78,9 +78,9 @@ async function completeStripeSandboxCheckout(page: Page) {
 	await payButton.click();
 }
 
-async function expectPacketStage(
+async function expectBlueprintStage(
 	page: Page,
-	route: (typeof packetStageRoutes)[number],
+	route: (typeof blueprintStageRoutes)[number],
 ) {
 	await page.goto(route.path);
 	await expect(page).toHaveURL(
@@ -97,7 +97,7 @@ async function expectPacketStage(
 test.describe("member with access", () => {
 	test.use({ storageState: memberWithAccessStorageStatePath });
 
-	test("@default_ship can open the canonical packet funnel and settings", async ({
+	test("@default_ship can open the canonical blueprint funnel and settings", async ({
 		page,
 	}) => {
 		await page.goto("/start");
@@ -106,8 +106,8 @@ test.describe("member with access", () => {
 			page.getByRole("link", { name: /^Continue with /i }),
 		).toBeVisible();
 
-		for (const route of packetStageRoutes) {
-			await expectPacketStage(page, route);
+		for (const route of blueprintStageRoutes) {
+			await expectBlueprintStage(page, route);
 		}
 
 		await page.goto("/review");
@@ -127,7 +127,7 @@ test.describe("member with access", () => {
 test.describe("member without access", () => {
 	test.use({ storageState: memberWithoutAccessStorageStatePath });
 
-	test("@billing_integration full paid handoff moves from checkout success into the packet entry", async ({
+	test("@billing_integration full paid handoff moves from checkout success into the blueprint entry", async ({
 		page,
 	}) => {
 		test.setTimeout(120_000);

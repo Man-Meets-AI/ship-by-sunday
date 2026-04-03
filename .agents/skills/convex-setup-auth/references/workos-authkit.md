@@ -34,7 +34,7 @@ Use this when the app already uses WorkOS or the user wants AuthKit specifically
 
 ## Key Setup Areas
 
-- package installation for the app's framework
+- dependency installation for the app's framework
 - `convex.json` with the `authKit` section for dev, and preview or prod if needed
 - environment variables such as `WORKOS_CLIENT_ID`, `WORKOS_API_KEY`, and redirect configuration
 - `convex/auth.config.ts` wiring for WorkOS-issued JWTs

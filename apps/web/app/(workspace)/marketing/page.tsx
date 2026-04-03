@@ -1,5 +1,5 @@
-import { redirectToPacketStageEntry } from "@/features/packet-flow/server/packet-stage-route-data";
+import { redirectToBlueprintStageEntry } from "@/features/blueprint-flow/server/blueprint-stage-route-data";
 
 export default async function Page() {
-	await redirectToPacketStageEntry("marketing");
+	await redirectToBlueprintStageEntry("marketing");
 }

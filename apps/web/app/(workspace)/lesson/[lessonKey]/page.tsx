@@ -43,7 +43,7 @@ export default async function Page({
 		{},
 	);
 	const resumeDestination = await fetchAuthenticatedQuery(
-		api.packet.getPacketResumeDestination,
+		api.blueprint.getBlueprintResumeDestination,
 		{},
 	);
 

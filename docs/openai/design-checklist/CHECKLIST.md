@@ -25,7 +25,7 @@ Use this file together with:
 - [ ] I identified whether I am preserving an existing design system or creating/extending one.
 - [ ] I collected the key repo files, components, tokens, and routes relevant to the task.
 - [ ] I gathered real content, product context, or a concrete project goal.
-- [ ] I attached screenshots, references, or a mood board when visual guardrails matter.
+- [ ] I attached screenshots, references, or a mood board when visual safeguards matter.
 - [ ] I noted whether Playwright, screenshots, Figma, or other verification tools are available.
 
 ---

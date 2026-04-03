@@ -12,9 +12,9 @@ This file is the long-lived memory for Ship by Sunday design defaults and except
 - Verify desktop and mobile before a UI task is considered complete.
 - Update documentation after meaningful user-facing changes.
 - Preserve existing product and design-system patterns when they are already strong.
-- Keep the product packet-first, not course-first.
+- Keep the product blueprint-first, not course-first.
 - Preserve the homepage contract when touching public marketing surfaces.
-- Keep workspace and packet UI operational, not promotional.
+- Keep workspace and blueprint UI operational, not promotional.
 - Avoid wispy all-caps eyebrow labels and micro-headings on app surfaces; use sentence-case labels that read like real operational copy.
 
 ## Exception policy

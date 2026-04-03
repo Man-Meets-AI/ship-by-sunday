@@ -1,5 +1,5 @@
-import { PacketStagePage } from "@/features/packet-flow/components/packet-stage-page";
-import { loadPacketStageRouteData } from "@/features/packet-flow/server/packet-stage-route-data";
+import { BlueprintStagePage } from "@/features/blueprint-flow/components/blueprint-stage-page";
+import { loadBlueprintStageRouteData } from "@/features/blueprint-flow/server/blueprint-stage-route-data";
 
 export default async function Page({
 	params,
@@ -7,7 +7,7 @@ export default async function Page({
 	params: Promise<{ stepId: string }>;
 }) {
 	const { stepId } = await params;
-	const routeData = await loadPacketStageRouteData("marketing", stepId);
+	const routeData = await loadBlueprintStageRouteData("marketing", stepId);
 
-	return <PacketStagePage stageId="marketing" {...routeData} />;
+	return <BlueprintStagePage stageId="marketing" {...routeData} />;
 }

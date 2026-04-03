@@ -2,7 +2,7 @@
 
 This build pack is designed for long-horizon Codex runs on a customer product defined through Ship by Sunday.
 
-Read this file before doing any build work from the generated packet.
+Read this file before doing any build work from the generated blueprint.
 
 ## Core operating rules
 
@@ -21,7 +21,7 @@ Read this file before doing any build work from the generated packet.
 - Build from stable facts, not workflow state.
 - Respect `scope_in`, `scope_out`, and `non_goals` exactly.
 - Treat the starter snapshot as the execution substrate, not as a suggestion list.
-- Do not invent extra product requirements that are not present in the packet facts.
+- Do not invent extra product requirements that are not present in the blueprint facts.
 - If the requested work would materially change the v1, record the change before coding.
 - Prefer the smallest viable slice that advances the current milestone.
 

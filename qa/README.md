@@ -59,9 +59,9 @@ Current delegation pattern:
 - Explicit safe browser execution: add `browser_runner`
 - Command-backed or report-worthy verdict: add `release_summarizer`
 
-For packet-funnel work, `default_ship` should not rely on browser lanes alone. The pack now needs the packet integration-ui proof suite for `/start`, the routed workbench, `/review`, and the blocker sidebar because those tests are first-class proof for the current packet UX contract.
+For blueprint-funnel work, `default_ship` should not rely on browser lanes alone. The pack now needs the blueprint integration-ui proof suite for `/start`, the routed workbench, `/review`, and the blocker sidebar because those tests are first-class proof for the current blueprint UX contract.
 
-On local dev, the preferred authenticated browser proof is now the local-auth lane rather than the sandbox-only gate. Use `PLAYWRIGHT_BASE_URL=http://localhost:3000 bun run --cwd apps/web test:e2e:local-auth:default-ship` when you need the protected packet funnel on the running local stack.
+On local dev, the preferred authenticated browser proof is now the local-auth lane rather than the sandbox-only gate. Use `PLAYWRIGHT_BASE_URL=http://localhost:3000 bun run --cwd apps/web test:e2e:local-auth:default-ship` when you need the protected blueprint funnel on the running local stack.
 
 `qa:personas:prepare` and `qa:run-pack` load `apps/web/.env.local` by default. Override that with `QA_ENV_FILE=<path>` when the hosted target uses a different Clerk instance than local. For hosted runs, also pass `PLAYWRIGHT_BASE_URL=<target>` so persona prep can refuse a mismatched Clerk environment before Playwright writes a bad auth state.
 In CI and repo-root commands, `QA_ENV_FILE` is resolved from the repository root. Production runs should use `QA_ENV_FILE=apps/web/.env.production`, not a path relative to `apps/web/`.
@@ -106,7 +106,7 @@ Rough old-world translation:
 ## Pack Meanings
 
 - `default_ship`
-  Core release pack. This is the main auth, access, and buyer journey. If you only run one serious QA pass before shipping, run this. It should include browser smoke, the packet integration-ui suite, and the tagged sandbox packet-route run.
+  Core release pack. This is the main auth, access, and buyer journey. If you only run one serious QA pass before shipping, run this. It should include browser smoke, the blueprint integration-ui suite, and the tagged sandbox blueprint-route run.
 - `extended`
   Broader secondary coverage. Useful for confidence and cleanup, but not the first thing to run on every change.
 - `billing_integration`
@@ -186,10 +186,10 @@ Every committed report under `qa/runs/` must say whether it came from `dev`, `pr
 Use local `dev` first for authenticated sandbox work. The current green baseline is `default_ship` on local dev. Use hosted or prod second once the local path is understood.
 For local Stripe billing reruns, make sure `.env.local` contains `NEXT_PUBLIC_CONVEX_SITE_URL`, `bun run dev:stripe` is forwarding to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`, and the pinned Stripe CLI profile `ship-by-sunday` passes `bun run stripe:dev:doctor` or at least explains its warning clearly.
 
-For packet-focused QA on local dev, the concrete behaviors worth checking are:
+For blueprint-focused QA on local dev, the concrete behaviors worth checking are:
 
 - `/start` is a stacked kickoff with one primary `Continue with ...` CTA
-- the routed packet workbench keeps the connected within-stage page strip intact
+- the routed blueprint workbench keeps the connected within-stage page strip intact
 - the workbench uses Continue-only save feedback and one primary `Continue` action
 - `/review` keeps the Starter Snapshot primary and delays the full `Execute / Ship` surface until after the download moment
 

@@ -1,4 +1,4 @@
-import { createCanonicalProjectDefinitionDraft } from "@manmeetsai/packet-compiler";
+import { createCanonicalProjectDefinitionDraft } from "@manmeetsai/blueprint-compiler";
 import { saveLocalDraft } from "../src/draft/draft-store";
 import { runCli } from "../src/run-cli";
 import { createCliIo, createTemporaryRepoRoot } from "./test-helpers";

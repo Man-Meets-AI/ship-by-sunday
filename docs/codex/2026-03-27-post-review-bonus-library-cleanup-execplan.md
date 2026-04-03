@@ -10,8 +10,8 @@ After this change, a customer who reaches review, downloads the Starter Snapshot
 
 ## Progress
 
-- [x] 2026-03-27 12:25 EDT — Read the repo root `AGENTS.md`, `apps/web/AGENTS.md`, `docs/codex/PLANS.md`, `docs/prompts/execplan-writer.md`, `docs/prompts/execplan-grill.md`, the packet contract docs, and the recent execute-ship ExecPlans to freeze the planning slice.
-- [x] 2026-03-27 12:25 EDT — Inspected the live post-review bonus route, the execute bridge, the bonus mission query, the shared lesson registry, the workbench runtime, the shell rails, the media map, the lesson-video remap data, and the current unit and integration tests.
+- [x] 2026-03-27 12:25 EDT — Read the repo root `AGENTS.md`, `apps/web/AGENTS.md`, `docs/codex/PLANS.md`, `docs/prompts/execplan-writer.md`, `docs/prompts/execplan-grill.md`, the blueprint contract docs, and the recent execute-ship ExecPlans to freeze the planning slice.
+- [x] 2026-03-27 12:25 EDT — Inspected the live post-review bonus route, the execute bridge, the bonus mission query, the shared lesson registry, the workbench runtime, the shell blueprint, the media map, the lesson-video remap data, and the current unit and integration tests.
 - [x] 2026-03-27 12:25 EDT — Confirmed that the live `/lesson/[lessonKey]` route already renders `BonusLessonPage` and `LessonShellWatch`, while the older interactive `LessonPage` runtime is no longer reached by the current route tree.
 - [x] 2026-03-27 12:25 EDT — Confirmed that the shared lesson model still carries old workbench semantics: all 29 student-facing lessons still have a `workbench` value, 21 still carry `workbenchFields`, and 14 still carry `workbenchSections`, even though the unlocked bonus route no longer renders them.
 - [x] 2026-03-27 12:25 EDT — Confirmed that runtime video attachment still comes from `videoAssetId` in `apps/web/features/course/lesson/model/curriculum.ts` plus `apps/web/features/course/lesson/model/media.ts`, while `apps/web/features/course/lesson/model/video-assignments.ts` is unused by runtime and `apps/web/scripts/data/lesson-video-remap.json` is only part of the transcript pipeline.
@@ -41,7 +41,7 @@ There are real media mismatches in the current repo, so the plan needs a dedicat
 
 The product owner explicitly said to ignore the Bunny title metadata where it conflicts and repair the mapping by judgment, then perform a human QA pass afterward. That means lesson identity in the shared catalog is the canonical source, while Bunny titles are treated as unreliable metadata.
 
-The shell behavior is more coupled than it looks. Passing a `mission` object into `AppShell` currently gives bonus pages both the top block rail and the bottom lesson rail. The grilled product contract requires a split: `/execute` should show no rails, `/mission` should show only the top block rail, and `/lesson/*` should show both the top block rail and the bottom video-game lesson rail. The plan therefore needs a specific shell seam, not just copy updates.
+The shell behavior is more coupled than it looks. Passing a `mission` object into `AppShell` currently gives bonus pages both the top block rail and the bottom lesson rail. The grilled product contract requires a split: `/execute` should show no blueprint, `/mission` should show only the top block rail, and `/lesson/*` should show both the top block rail and the bottom video-game lesson rail. The plan therefore needs a specific shell seam, not just copy updates.
 
 Dynamic copy-prompt cards are incompatible with the current bonus route as written. `BonusLessonPage` passes `pinnedArtifacts={[]}` into `LessonShellWatch`, and `use-copy-prompt-resource-card.ts` resolves prompts through `getPromptTemplateState()`, which depends on pinned artifacts for some templates. At least one current lesson resource, the competitor research prompt in `apps/web/features/course/lesson/model/lessons/ceo.ts`, needs prior saved artifact context. The grilled contract therefore now allows only static copyable prompt and reference cards on bonus lessons. Dynamic cards must be removed or rewritten before they appear on the bonus route.
 
@@ -149,13 +149,13 @@ The main remaining gap is verification, not architecture. Targeted bonus tests, 
 
 ## Context and Orientation
 
-The required paid product is the packet-first funnel documented in `apps/web/AGENTS.md` and the packet docs under `docs/ship-by-sunday/`. The canonical customer path is `Start -> Product -> Design -> Marketing -> Build Plan -> Review & Download`. The packet docs say that durable product data lives in canonical packet facts, while post-download guidance is workflow state or optional execution support. This matters because the post-review bonus library is no longer allowed to act like the place where the app collects or stores real project-definition inputs.
+The required paid product is the blueprint-first funnel documented in `apps/web/AGENTS.md` and the blueprint docs under `docs/ship-by-sunday/`. The canonical customer path is `Start -> Product -> Design -> Marketing -> Build Plan -> Review & Download`. The blueprint docs say that durable product data lives in canonical blueprint facts, while post-download guidance is workflow state or optional execution support. This matters because the post-review bonus library is no longer allowed to act like the place where the app collects or stores real project-definition inputs.
 
-The current post-review bonus surfaces live under `apps/web/features/execute-ship/`. The route entrypoints are `apps/web/app/(workspace)/execute/page.tsx`, `apps/web/app/(workspace)/mission/page.tsx`, and `apps/web/app/(workspace)/lesson/[lessonKey]/page.tsx`. The execute and mission pages already load bonus unlock state through `apps/web/features/execute-ship/server/load-bonus-route-access.ts`. The lesson route checks the same unlock and renders `apps/web/features/execute-ship/components/bonus-lesson-page.tsx`, which uses `LessonShellWatch` from the old lesson shell package.
+The current post-review bonus surfaces live under `apps/web/features/execute-ship/`. The route entrypoints are `apps/web/app/(workspace)/execute/page.tsx`, `apps/web/app/(workspace)/mission/page.tsx`, and `apps/web/app/(workspace)/lesson/[lessonKey]/page.tsx`. The execute and mission pages already load bonus unlock state through `apps/web/features/execute-ship/server/load-bonus-route-access.ts`. The lesson route checks the same unlock and renders `apps/web/features/execute-ship/components/bonus-lesson-page.tsx`, which uses `LessonShellWatch` from the old lesson shell blueprint.
 
 The current bonus mission state comes from `apps/web/convex/course/bonusMission.ts`. That file uses the shared lesson registry from `apps/web/features/course/lesson/model/registry.ts`. The registry is assembled by `apps/web/features/course/lesson/model/curriculum.ts` out of lesson seeds from `apps/web/features/course/lesson/model/lessons/start-here.ts`, `apps/web/features/course/lesson/model/lessons/ceo.ts`, `apps/web/features/course/lesson/model/lessons/design.ts`, `apps/web/features/course/lesson/content/build.ts`, and `apps/web/features/course/lesson/model/lessons/ship.ts`. The grilled contract keeps that shared registry as the source of lesson identity and order, but the live bonus flow must stop behaving like an interactive lesson-workbench system.
 
-The shell has two separate navigation systems. The top block rail is rendered by `apps/web/features/course/shared/components/app-shell/app-shell-header.tsx` through `AppShellMissionRail` or `AppShellMissionRailShadcn`. The bottom lesson rail is rendered by `apps/web/features/course/shared/components/app-shell/app-shell-footer-rail.tsx` through `SkillRailShadcn`. Today passing a mission into `AppShell` is enough to render both rails. The grilled contract requires a specific split: `/execute` no rails, `/mission` top rail only, `/lesson/*` top rail plus bottom rail.
+The shell has two separate navigation systems. The top block rail is rendered by `apps/web/features/course/shared/components/app-shell/app-shell-header.tsx` through `AppShellMissionRail` or `AppShellMissionRailShadcn`. The bottom lesson rail is rendered by `apps/web/features/course/shared/components/app-shell/app-shell-footer-rail.tsx` through `SkillRailShadcn`. Today passing a mission into `AppShell` is enough to render both blueprint. The grilled contract requires a specific split: `/execute` no blueprint, `/mission` top rail only, `/lesson/*` top rail plus bottom rail.
 
 The media layer is split across several files. `apps/web/features/course/lesson/model/media.ts` contains the Bunny assets keyed by asset id. `apps/web/features/course/lesson/model/video-assignments.ts` is now the single runtime lesson-to-video resolver. `apps/web/features/course/lesson/model/curriculum.ts` validates its manifest `videoAssetId` fields against that resolver but no longer emits a second runtime `videoAssetId` copy onto the lesson registry. `apps/web/features/course/lesson/model/video.ts` attaches assets by calling the same resolver. `apps/web/scripts/data/lesson-video-remap.json` is still used by the transcript pipeline and does not drive customer-facing routing.
 
@@ -179,7 +179,7 @@ Fifth, update docs and run end-to-end validation. The plan must leave behind a r
 
 ### Milestone 1: Align the execute bridge and shell behavior to the grilled post-review contract
 
-At the end of this milestone, the live bonus routes and shell will match the product decisions made during the grill. `/execute` will be a clean bridge page with no top or bottom rails. It will keep the bonus-context video and expose exactly two CTAs: the primary CTA jumps to lesson `3.1`, and the secondary CTA jumps to lesson `1.1`. `/execute` will remain directly protected by the existing post-review unlock and will continue to redirect repeat visitors who have already opened any bonus lesson to `/mission`.
+At the end of this milestone, the live bonus routes and shell will match the product decisions made during the grill. `/execute` will be a clean bridge page with no top or bottom blueprint. It will keep the bonus-context video and expose exactly two CTAs: the primary CTA jumps to lesson `3.1`, and the secondary CTA jumps to lesson `1.1`. `/execute` will remain directly protected by the existing post-review unlock and will continue to redirect repeat visitors who have already opened any bonus lesson to `/mission`.
 
 `/mission` will be the library home after unlock. It will remain directly bookmarkable. It will show the top block rail only, using natural block order and the labels `Product`, `Design`, `Build`, and `Ship`. The library home will still default to the Build block as the active section, because Build remains the recommended continuation path. `/lesson/*` will remain directly bookmarkable after unlock and will show both the top block rail and the bottom skill rail, with the current lesson reflected in the bottom rail for its block.
 
@@ -207,30 +207,30 @@ The test suite must be updated in the same phase. `apps/web/tests/unit/watch-les
 
 At the end of this milestone, the route model, shell behavior, and media ownership story will be documented in the repo and validated in tests and a real browser session. The implementer should update any docs that still describe `/execute`, `/mission`, or `/lesson/*` incorrectly, then run focused bonus tests, the relevant unit and contract checks, a production build, and a browser proof with an unlocked account.
 
-Success for this milestone means a human can go from `/review` to the explicit post-download continue CTA, land on `/execute`, choose either `Continue` or `Start from the beginning`, navigate through `/mission` and `/lesson/*`, and see coherent rails, coherent bonus-language status badges, static teaching aids only, and the intended video content.
+Success for this milestone means a human can go from `/review` to the explicit post-download continue CTA, land on `/execute`, choose either `Continue` or `Start from the beginning`, navigate through `/mission` and `/lesson/*`, and see coherent blueprint, coherent bonus-language status badges, static teaching aids only, and the intended video content.
 
 ## Concrete Steps
 
-Work from `/Users/parkerrex/Projects/manmeetsai-workspace` unless a step says otherwise.
+Work from `/Users/parkerrex/Projects/ship-by-sunday` unless a step says otherwise.
 
 Start by re-generating the current inventory and current mapping evidence before editing any files:
 
-    $ cd /Users/parkerrex/Projects/manmeetsai-workspace
+    $ cd /Users/parkerrex/Projects/ship-by-sunday
     $ bun -e 'import { getStudentFacingLessons } from "./apps/web/features/course/lesson/model/registry"; const lessons = getStudentFacingLessons(); for (const lesson of lessons) console.log(`${lesson.id}\t${lesson.block}\t${lesson.lessonKey}\t${lesson.workbench ?? "none"}\t${lesson.workbenchFields?.length ?? 0}\t${lesson.videoAssetId ?? "none"}`);'
     $ bun -e 'import { getStudentFacingLessons } from "./apps/web/features/course/lesson/model/registry"; import { getLessonVideoAsset } from "./apps/web/features/course/lesson/model/video"; const lessons = getStudentFacingLessons(); for (const lesson of lessons) { const asset = getLessonVideoAsset(lesson); const lessonTitle = lesson.title.trim(); const assetTitle = asset?.title?.trim() ?? ""; if (assetTitle && assetTitle.toLowerCase() !== lessonTitle.toLowerCase()) console.log(`${lesson.id}\t${lesson.lessonKey}\tLESSON=${lessonTitle}\tVIDEO=${assetTitle}`); }'
 
 The expected observation is a 29-line lesson inventory showing old workbench semantics still attached, followed by a short list of title or mapping mismatches that need to be reconciled.
 
-Next, inspect the bonus route, the shell rails, and the current review-side unlock sequence:
+Next, inspect the bonus route, the shell blueprint, and the current review-side unlock sequence:
 
-    $ cd /Users/parkerrex/Projects/manmeetsai-workspace
+    $ cd /Users/parkerrex/Projects/ship-by-sunday
     $ sed -n '1,220p' apps/web/features/execute-ship/components/execute-ship-page.tsx
     $ sed -n '1,260p' apps/web/features/execute-ship/components/execute-bonus-bridge-page.tsx
     $ sed -n '1,240p' apps/web/features/execute-ship/components/bonus-mission-page.tsx
     $ sed -n '1,260p' apps/web/features/execute-ship/components/bonus-lesson-page.tsx
     $ sed -n '1,260p' apps/web/features/course/shared/components/app-shell/app-shell-header.tsx
     $ sed -n '1,260p' apps/web/features/course/shared/components/app-shell/app-shell-footer-rail.tsx
-    $ sed -n '1,260p' apps/web/features/packet-flow/components/review/packet-review-download-bridge.tsx
+    $ sed -n '1,260p' apps/web/features/blueprint-flow/components/review/blueprint-review-download-bridge.tsx
 
 The expected observation is that the current bonus flow is close to the product goal but still has wrong CTA shape, wrong block ordering, wrong rail visibility, and wrong state labels.
 
@@ -242,16 +242,16 @@ When Milestone 3 starts, choose one runtime mapping source and migrate to it. If
 
 When Milestone 4 starts, run a reachability audit before deleting modules:
 
-    $ cd /Users/parkerrex/Projects/manmeetsai-workspace
+    $ cd /Users/parkerrex/Projects/ship-by-sunday
     $ rg -n "LessonPage|useLessonPage|useLessonState|WorkbenchRenderer" apps/web -g '!**/node_modules/**'
 
 The expected observation before deletion is that the remaining hits are definitions, tests, or imports inside dead lesson-runtime files rather than live route entrypoints. Remove obsolete tests in the same phase that the dead runtime is deleted so the suite stops asserting the old guided-form contract.
 
 Before closing the work, run the focused checks from `apps/web`, then the broader validation from the repository root:
 
-    $ cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web
+    $ cd /Users/parkerrex/Projects/ship-by-sunday/apps/web
     $ bunx vitest run --project unit tests/unit/app-workspace-mission-page.test.tsx tests/unit/app-workspace-lesson-page.test.tsx tests/unit/bonus-mission-page.test.tsx tests/unit/bonus-lesson-page.test.tsx
-    $ cd /Users/parkerrex/Projects/manmeetsai-workspace
+    $ cd /Users/parkerrex/Projects/ship-by-sunday
     $ bun run test:unit
     $ bun run test:contracts
     $ bun run build
@@ -266,7 +266,7 @@ The first acceptance criterion is that the post-review bonus library keeps all 2
 
 The second acceptance criterion is that `/execute` behaves exactly as agreed. It must remain locked until the user reaches `/review`, clicks `Download Starter Snapshot`, and then explicitly chooses the continue CTA. Once unlocked, `/execute` must show a video bridge with exactly two choices: `Continue` goes to lesson `3.1`, and `Start from the beginning` goes to lesson `1.1`. If the user has already opened any bonus lesson, repeat visits to `/execute` must redirect to `/mission`.
 
-The third acceptance criterion is that rails behave exactly as agreed. `/execute` shows no rails. `/mission` shows only the top block rail in natural order with labels `Product`, `Design`, `Build`, and `Ship`, while defaulting the active block to Build. `/lesson/*` shows the top block rail and the bottom skill rail for the current block. The library home must not show the bottom lesson rail.
+The third acceptance criterion is that blueprint behave exactly as agreed. `/execute` shows no blueprint. `/mission` shows only the top block rail in natural order with labels `Product`, `Design`, `Build`, and `Ship`, while defaulting the active block to Build. `/lesson/*` shows the top block rail and the bottom skill rail for the current block. The library home must not show the bottom lesson rail.
 
 The fourth acceptance criterion is that the bonus lesson surface is truly view-only. After unlock, opening `/lesson/*` must never render old input forms, workbench panels, field validation messages, or manual completion checklists. The only allowed lesson content is video, transcript, helpful resource links, and static copyable prompt or reference cards that work without pinned artifacts.
 
@@ -282,7 +282,7 @@ The eighth acceptance criterion is that the unlocked customer path works end to 
 
 This cleanup should be performed in an additive-first, subtractive-second order. First align the shell, route, and content rules for the current live bonus path. Only after the bonus route is stable should the implementation delete the old interactive lesson runtime and obsolete tests.
 
-Do not change the post-review unlock contract unless a real migration blocker forces it. Keeping `packetWorkflowStates.executeShipUnlockedAt` and the current review-side “download requested, then explicit continue” sequence avoids unnecessary schema churn and keeps the browser proof straightforward.
+Do not change the post-review unlock contract unless a real migration blocker forces it. Keeping `blueprintWorkflowStates.executeShipUnlockedAt` and the current review-side “download requested, then explicit continue” sequence avoids unnecessary schema churn and keeps the browser proof straightforward.
 
 Do not solve static versus dynamic prompt-card problems by wiring pinned artifacts back into the bonus route. If a card depends on saved lesson-state context, remove it from the bonus surface or rewrite it as a static teaching aid. Reintroducing dynamic artifact plumbing would undermine the whole cleanup.
 
@@ -310,7 +310,7 @@ The most important repo evidence for this initiative is:
     apps/web/features/execute-ship/lib/bonus-library-presentation.ts
 
     Current review-side unlock bridge:
-    apps/web/features/packet-flow/components/review/packet-review-download-bridge.tsx
+    apps/web/features/blueprint-flow/components/review/blueprint-review-download-bridge.tsx
 
     Shared lesson registry and media attachment:
     apps/web/features/course/lesson/model/curriculum.ts
@@ -350,13 +350,13 @@ Current mapping-mismatch proof from repo inspection:
 
 ## Interfaces and Dependencies
 
-The post-review gate depends on `apps/web/convex/packet/workflowState.ts` and the `workflowState.executeShipUnlockedAt` field returned through `api.packet.getPacketWorkspaceState`. This plan assumes that unlock contract stays in place and that `/execute`, `/mission`, and `/lesson/*` remain downstream of it.
+The post-review gate depends on `apps/web/convex/blueprint/workflowState.ts` and the `workflowState.executeShipUnlockedAt` field returned through `api.blueprint.getBlueprintWorkspaceState`. This plan assumes that unlock contract stays in place and that `/execute`, `/mission`, and `/lesson/*` remain downstream of it.
 
 The current viewed-progress model depends on `apps/web/convex/course/bonusMission.ts`, `apps/web/convex/course/bonusRoute.ts`, `apps/web/features/execute-ship/components/bonus-lesson-view-tracker.tsx`, and `api.course.markBonusLessonViewed`. This plan assumes those interfaces remain the bonus progress store, but the presentation layer must collapse all non-available states to explored rather than exposing old completion semantics.
 
 The shared lesson catalog in `apps/web/features/course/lesson/model/curriculum.ts` remains the source of lesson identity, lesson keys, route segments, display labels, and natural ordering. The cleanup must not introduce a second lesson manifest for the same 29 lessons. Instead, the post-review routes should layer bonus-specific shell and presentation rules on top of the shared catalog.
 
-The shell needs an explicit new interface boundary. `AppShell` currently couples top mission rail visibility and bottom skill rail visibility through whether a `mission` object is present. The cleaned-up bonus system likely needs separate controls so `/execute`, `/mission`, and `/lesson/*` can each render the correct combination of rails without forking the entire shell.
+The shell needs an explicit new interface boundary. `AppShell` currently couples top mission rail visibility and bottom skill rail visibility through whether a `mission` object is present. The cleaned-up bonus system likely needs separate controls so `/execute`, `/mission`, and `/lesson/*` can each render the correct combination of blueprint without forking the entire shell.
 
 The current media interfaces are `lessonVideoAssignments` and `resolveLessonVideoAssetId()` in `apps/web/features/course/lesson/model/video-assignments.ts`, `videoAssets` in `apps/web/features/course/lesson/model/media.ts`, and `attachGeneratedLessonMedia()` in `apps/web/features/course/lesson/model/video.ts`. The intended runtime ownership after this cleanup is that a contributor changes `video-assignments.ts` when a lesson should point at a different Bunny asset, and the rest of the runtime follows that canonical resolver.
 

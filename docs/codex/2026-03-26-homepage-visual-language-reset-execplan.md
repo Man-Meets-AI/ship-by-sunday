@@ -210,7 +210,7 @@ Validate this milestone with the homepage browser-smoke checks and `bun run buil
 
 Start by refreshing the current homepage sections and the design context before making any design decisions.
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     sed -n '1,220p' .impeccable.md
     sed -n '1,240p' apps/web/content/docs/configure-the-homepage.mdx
     sed -n '1,220p' apps/web/features/marketing/components/home-page/hero-sections.tsx
@@ -244,7 +244,7 @@ Write down the normalization and hardening rules before editing code:
 
 Then establish replacement primitives in the homepage feature folder. Prefer feature-local utilities or small component helpers over global abstractions.
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web
+    cd /Users/parkerrex/Projects/ship-by-sunday/apps/web
     sed -n '1,260p' features/marketing/components/home-page/hero-sections.tsx
     sed -n '1,260p' features/marketing/components/home-page/system-loop-preview.tsx
     sed -n '1,220p' components/ui/badge.tsx
@@ -252,24 +252,24 @@ Then establish replacement primitives in the homepage feature folder. Prefer fea
 
 After the primitives are settled, rebuild the top of page first, then the middle sections, then the lower sections. Keep each milestone scoped tightly enough that the relevant checks can be run immediately:
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web
+    cd /Users/parkerrex/Projects/ship-by-sunday/apps/web
     bunx oxlint --deny-warnings features/marketing/components/home-page.tsx features/marketing/components/home-page/hero-sections.tsx features/marketing/components/home-page/sprint-path-unified-section.tsx features/marketing/components/home-page/system-loop-preview.tsx
     bunx oxfmt --check features/marketing/components/home-page.tsx features/marketing/components/home-page/hero-sections.tsx features/marketing/components/home-page/sprint-path-unified-section.tsx features/marketing/components/home-page/system-loop-preview.tsx
 
 When the middle sections are changed, include the content test and render-model test:
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web
+    cd /Users/parkerrex/Projects/ship-by-sunday/apps/web
     bunx vitest --config vitest.config.ts run --project unit tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts
 
 When the lower sections are changed, run the broader homepage checks:
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web
+    cd /Users/parkerrex/Projects/ship-by-sunday/apps/web
     bunx vitest --config vitest.config.ts run --project unit tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts
     bunx vitest --config vitest.config.ts run --project integration-ui tests/integration-ui/home-page-primary-cta.test.tsx
 
 For browser proof, use the repo’s working smoke command rather than `bunx playwright test` directly:
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     set -a
     source apps/web/.env.local
     set +a
@@ -277,7 +277,7 @@ For browser proof, use the repo’s working smoke command rather than `bunx play
 
 Finish with a full production build:
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     bun run build
 
 Expected transcript when the final homepage checks pass:

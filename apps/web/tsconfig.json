@@ -20,9 +20,9 @@
 		],
 		"paths": {
 			"@/*": ["./*"],
-			"@packet-compiler": ["../../packages/packet-compiler/src/index.ts"],
-			"@packet-compiler/server": [
-				"../../packages/packet-compiler/src/server.ts"
+			"@blueprint-compiler": ["../../packages/blueprint-compiler/src/index.ts"],
+			"@blueprint-compiler/server": [
+				"../../packages/blueprint-compiler/src/server.ts"
 			]
 		}
 	},

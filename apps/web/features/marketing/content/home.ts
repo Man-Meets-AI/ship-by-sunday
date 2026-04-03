@@ -20,7 +20,7 @@ export const homePageContent = {
 		body: `The only system that teaches you how to ship a durable product from start to finish in one weekend. Oh, and it includes building you a ridiculous custom template from scratch based on what you want to build. We should charge more for this.`,
 		primaryCta: marketingDisplayConfig.primaryCtaLabel,
 		secondaryCta: {
-			label: "See how Ship Rails works",
+			label: "See how Ship Blueprint works",
 			href: routeConfig.systemHash,
 		},
 		eyebrow:
@@ -37,7 +37,7 @@ export const homePageContent = {
 			"The packs are file-based and agent-readable, so each tool works from the same scope, constraints, and claims instead of a stale chat summary.",
 			"The same contract-first path feeds the starter system, so the repo, the docs, and the execution path stay aligned instead of drifting apart.",
 		],
-		valueFrame: "Most starters give you code. This gives you rails.",
+		valueFrame: "Most starters give you code. This gives you blueprint.",
 		imageAlt:
 			"Diagram showing a product definition turning into Design, Marketing, Build, and Prompt Packs plus a final Starter Snapshot",
 	},
@@ -76,7 +76,7 @@ export const homePageContent = {
 			{
 				question: "Is this another course or another starter?",
 				answer:
-					"No. Ship by Sunday is a packet-first shipping system. The videos help you use it, and the starter repo is part of it, but the real product is the Ship Kit you leave with.",
+					"No. Ship by Sunday is a blueprint-first shipping system. The videos help you use it, and the starter repo is part of it, but the real product is the Ship Kit you leave with.",
 			},
 			{
 				question: "What do I actually get at the end?",
@@ -101,7 +101,7 @@ export const homePageContent = {
 			{
 				question: "Why not just use ChatGPT, Claude, or Codex directly?",
 				answer:
-					"You can. The problem is fragments. Ship Rails makes those tools work from one source of truth instead of stale chats and half-decisions.",
+					"You can. The problem is fragments. Ship Blueprint makes those tools work from one source of truth instead of stale chats and half-decisions.",
 			},
 			{
 				question: "What happens right after I pay?",
@@ -153,10 +153,10 @@ export const homePageContent = {
 			"keep shipping from.",
 		],
 		intro:
-			"The packet gives the agents the truth. The starter gives that truth a real product shape: auth, billing, docs, protected workspace, and the seams to keep changing the product without losing the plot.",
+			"The blueprint gives the agents the truth. The starter gives that truth a real product shape: auth, billing, docs, protected workspace, and the seams to keep changing the product without losing the plot.",
 		capabilities: [
 			{
-				title: "Product rails",
+				title: "Product blueprint",
 				description:
 					"Start from a repo already shaped around your product, not a dead template you have to reinterpret every session.",
 			},
@@ -217,7 +217,7 @@ export const homePageContent = {
 		titleLead: "Ship a real product",
 		titleAccent: "by Sunday",
 		intro:
-			"One payment for Ship Rails: the guided packet-first run, the Agent-Ready Packs, the Agent-First Starter Repo, and the guidance that keeps you shipping after the first weekend.",
+			"One payment for Ship Blueprint: the guided blueprint-first run, the Agent-Ready Packs, the Agent-First Starter Repo, and the guidance that keeps you shipping after the first weekend.",
 		priceDisplay: productConfig.priceDisplay,
 		eyebrow: "One-time payment. Lifetime access.",
 		ctaTitle: "Get the system",

@@ -1,12 +1,12 @@
-import { deriveStageStatus } from "@manmeetsai/packet-compiler";
-import { packetFieldLabel } from "@shipbysunday/packet-presentation";
+import { deriveStageStatus } from "@manmeetsai/blueprint-compiler";
+import { blueprintFieldLabel } from "@shipbysunday/blueprint-presentation";
 import { writeJsonResult } from "../cli-json";
 import { requireLocalDraft } from "../draft/draft-store";
-import type { ReviewablePacketStageId } from "../parse-cli-command";
+import type { ReviewableBlueprintStageId } from "../parse-cli-command";
 import type { CliIo } from "../run-cli";
 
 function formatMissingFieldList(fieldKeys: string[]) {
-	return fieldKeys.map((fieldKey) => packetFieldLabel(fieldKey)).join(", ");
+	return fieldKeys.map((fieldKey) => blueprintFieldLabel(fieldKey)).join(", ");
 }
 
 export async function handleReviewCommand({
@@ -20,7 +20,7 @@ export async function handleReviewCommand({
 	projectRootPath: string;
 	json: boolean;
 	missingOnly: boolean;
-	stageId?: ReviewablePacketStageId;
+	stageId?: ReviewableBlueprintStageId;
 }) {
 	const draft = await requireLocalDraft(projectRootPath);
 
@@ -40,7 +40,7 @@ export async function handleReviewCommand({
 	if (json) {
 		writeJsonResult(io, "review", {
 			firstIncompleteStageId: stageStatus.firstIncompleteStageId,
-			packetReadiness: stageStatus.packetReadiness,
+			blueprintReadiness: stageStatus.blueprintReadiness,
 			stageStatuses: visibleStageStatuses,
 			stageId: stageId ?? null,
 			missingOnly,
@@ -59,7 +59,7 @@ export async function handleReviewCommand({
 		const stageLabel =
 			stage.stageId === "build-plan"
 				? "Build Plan"
-				: packetFieldLabel(stage.stageId);
+				: blueprintFieldLabel(stage.stageId);
 		lines.push(
 			`${stageLabel}: ${stage.isComplete ? "ready" : "missing facts"}`,
 		);

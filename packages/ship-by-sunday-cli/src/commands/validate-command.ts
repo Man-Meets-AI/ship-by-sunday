@@ -1,4 +1,4 @@
-import { deriveStageStatus } from "@manmeetsai/packet-compiler";
+import { deriveStageStatus } from "@manmeetsai/blueprint-compiler";
 import { requireLocalDraft } from "../draft/draft-store";
 import type { CliIo } from "../run-cli";
 import { writeJsonResult } from "../cli-json";
@@ -15,10 +15,10 @@ export async function handleValidateCommand({
 	const draft = await requireLocalDraft(projectRootPath);
 	const stageStatus = deriveStageStatus(draft.facts);
 	const result = {
-		reviewReady: stageStatus.packetReadiness.review.isReady,
+		reviewReady: stageStatus.blueprintReadiness.review.isReady,
 		firstIncompleteStageId: stageStatus.firstIncompleteStageId,
 		stageStatuses: stageStatus.stageStatuses,
-		packetReadiness: stageStatus.packetReadiness,
+		blueprintReadiness: stageStatus.blueprintReadiness,
 	};
 
 	if (json) {

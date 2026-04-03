@@ -96,7 +96,7 @@ For the matching QA command:
 - `PLAYWRIGHT_BASE_URL` points the browser pack at the target environment
 - production bootstrap can derive `CONVEX_DEPLOYMENT` from `NEXT_PUBLIC_CONVEX_URL`, so the production env file does not have to carry a separate `CONVEX_DEPLOYMENT` entry
 
-If persona prep fails on a Clerk publishable-key mismatch, fix env parity before spending time on packet-route debugging.
+If persona prep fails on a Clerk publishable-key mismatch, fix env parity before spending time on blueprint-route debugging.
 
 The current durable release-proof evidence is captured in:
 

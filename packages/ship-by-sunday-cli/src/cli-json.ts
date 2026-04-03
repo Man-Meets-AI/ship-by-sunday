@@ -1,4 +1,4 @@
-import packageJson from "../package.json";
+import manifestJson from "../package.json";
 import type { CliIo } from "./run-cli";
 import type { CliErrorCode } from "./cli-errors";
 
@@ -15,7 +15,7 @@ export function writeJsonResult(
 			{
 				status: "ok",
 				command,
-				version: packageJson.version,
+				version: manifestJson.version,
 				...payload,
 			},
 			null,
@@ -35,7 +35,7 @@ export function writeJsonError(
 			{
 				status: "error",
 				command,
-				version: packageJson.version,
+				version: manifestJson.version,
 				error_code: errorCode,
 				message,
 			},
