@@ -2,6 +2,8 @@
 
 ## recent
 
+- **2026-04-03 11:50 EDT** — ExecPlan workflow cutover: added the repo-owned `docs/prompts/execplan-outline-from-session.md` prompt, extended the packet-compiler Prompt Pack to ship the full `execplan-*` set, wrote and closed the migration ExecPlan under `.plans/`, and aligned the shared `~/.agents` workflow/tests with the repo’s `.plans` path and prompt filenames. No `CHANGELOG.md` update because this was internal planning/runtime tooling rather than a shipped user-facing behavior change.
+
 - **2026-04-03 11:17 EDT** — Docs-layer refactor: split the root agent and human docs into a thin root `AGENTS.md`, a smaller `README.md`, and a new hidden `.docs/` reference pack for workspace layout, scripts, architecture, product contract, integrations, testing/release, and glossary context; replaced `CLAUDE.md` with a symlink to `AGENTS.md`; and left unrelated dirty worktree changes alone. No `CHANGELOG.md` update because this was internal docs/agent-surface cleanup rather than a user-facing shipped behavior change.
 
 - **2026-04-01 16:01 EDT** — Post-release cleanup: backported the April 1 production-proof hotfix chain from `main` into the `dev` cleanup branch, updated the release/ship/QA runbooks to document the final staging and production proof behavior, added the final April 1 release-proof report under `qa/runs/`, and queued local repo hygiene around the temporary release worktrees and branches. No `CHANGELOG.md` update yet because this slice is repo-operations cleanup rather than a new shipped user-facing feature.
