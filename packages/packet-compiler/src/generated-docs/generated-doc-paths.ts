@@ -32,6 +32,7 @@ export type GeneratedBuildDetailDocFileName =
 	| "documentation.md";
 
 export type ShippedPromptAssetFileName =
+	| "execplan-outline-from-session.md"
 	| "execplan-execution-loop.md"
 	| "execplan-grill.md"
 	| "execplan-writer.md";

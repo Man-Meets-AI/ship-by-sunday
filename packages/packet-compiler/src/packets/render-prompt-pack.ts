@@ -11,6 +11,10 @@ export function renderPromptPack(
 ): RenderedPacketFile[] {
 	return [
 		{
+			path: getShippedPromptAssetPath("execplan-outline-from-session.md"),
+			content: promptAssets["execplan-outline-from-session.md"],
+		},
+		{
 			path: getShippedPromptAssetPath("execplan-execution-loop.md"),
 			content: promptAssets["execplan-execution-loop.md"],
 		},
