@@ -96,10 +96,12 @@ export async function loadOpenAiPacketTemplates(): Promise<OpenAiPacketTemplates
 
 export async function loadPromptPackSourceFiles(): Promise<PromptPackSourceFiles> {
 	promptPackSourceFilesPromise ??= Promise.all([
+		readFile(shippedPromptAssetUrl("execplan-outline-from-session.md"), "utf8"),
 		readFile(shippedPromptAssetUrl("execplan-execution-loop.md"), "utf8"),
 		readFile(shippedPromptAssetUrl("execplan-grill.md"), "utf8"),
 		readFile(shippedPromptAssetUrl("execplan-writer.md"), "utf8"),
-	]).then(([executionLoop, grill, writer]) => ({
+	]).then(([outlineFromSession, executionLoop, grill, writer]) => ({
+		"execplan-outline-from-session.md": outlineFromSession,
 		"execplan-execution-loop.md": executionLoop,
 		"execplan-grill.md": grill,
 		"execplan-writer.md": writer,
