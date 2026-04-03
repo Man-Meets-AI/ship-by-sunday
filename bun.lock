@@ -14,9 +14,9 @@
         "@clerk/nextjs": "^7.0.4",
         "@clerk/ui": "^1.2.3",
         "@manmeetsai/packet-compiler": "workspace:*",
-        "@manmeetsai/packet-presentation": "workspace:*",
         "@react-three/drei": "^10.7.7",
         "@react-three/fiber": "^10.0.0-alpha.2",
+        "@shipbysunday/packet-presentation": "workspace:*",
         "@tabler/icons-react": "^3.40.0",
         "@tanstack/react-form": "^1.28.5",
         "@tsparticles/engine": "^3.9.1",
@@ -93,7 +93,7 @@
       },
     },
     "packages/packet-presentation": {
-      "name": "@manmeetsai/packet-presentation",
+      "name": "@shipbysunday/packet-presentation",
       "version": "0.1.0",
       "dependencies": {
         "@manmeetsai/packet-compiler": "workspace:*",
@@ -114,7 +114,7 @@
       },
       "dependencies": {
         "@manmeetsai/packet-compiler": "workspace:*",
-        "@manmeetsai/packet-presentation": "workspace:*",
+        "@shipbysunday/packet-presentation": "workspace:*",
       },
       "devDependencies": {
         "@types/node": "25.5.0",
@@ -467,8 +467,6 @@
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "3.1.2", "@jridgewell/sourcemap-codec": "1.5.5" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
 
     "@manmeetsai/packet-compiler": ["@manmeetsai/packet-compiler@workspace:packages/packet-compiler"],
-
-    "@manmeetsai/packet-presentation": ["@manmeetsai/packet-presentation@workspace:packages/packet-presentation"],
 
     "@manmeetsai/ship-by-sunday-cli": ["@manmeetsai/ship-by-sunday-cli@workspace:packages/ship-by-sunday-cli"],
 
@@ -857,6 +855,8 @@
     "@shikijs/types": ["@shikijs/types@3.23.0", "", { "dependencies": { "@shikijs/vscode-textmate": "^10.0.2", "@types/hast": "^3.0.4" } }, "sha512-3JZ5HXOZfYjsYSk0yPwBrkupyYSLpAE26Qc0HLghhZNGTZg/SKxXIIgoxOpmmeQP0RRSDJTk1/vPfw9tbw+jSQ=="],
 
     "@shikijs/vscode-textmate": ["@shikijs/vscode-textmate@10.0.2", "", {}, "sha512-83yeghZ2xxin3Nj8z1NMd/NCuca+gsYXswywDy5bHvwlWL8tpTQmzGeUuHd9FC3E/SBEMvzJRwWEOz5gGes9Qg=="],
+
+    "@shipbysunday/packet-presentation": ["@shipbysunday/packet-presentation@workspace:packages/packet-presentation"],
 
     "@sinclair/typebox": ["@sinclair/typebox@0.27.10", "", {}, "sha512-MTBk/3jGLNB2tVxv6uLlFh1iu64iYOQ2PbdOSK3NW8JZsmlaOh2q6sdtKowBhfw8QFLmYNzTW4/oK4uATIi6ZA=="],
 
