@@ -10,4 +10,4 @@ export {
 	packetFieldHelperText,
 	packetFieldInputKind,
 	packetFieldLabel,
-} from "@manmeetsai/packet-presentation";
+} from "@shipbysunday/packet-presentation";

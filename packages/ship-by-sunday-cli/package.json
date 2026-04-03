@@ -17,7 +17,7 @@
 	},
 	"dependencies": {
 		"@manmeetsai/packet-compiler": "workspace:*",
-		"@manmeetsai/packet-presentation": "workspace:*"
+		"@shipbysunday/packet-presentation": "workspace:*"
 	},
 	"devDependencies": {
 		"@types/node": "25.5.0",
