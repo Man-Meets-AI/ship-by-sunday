@@ -23,7 +23,7 @@ export async function handleFieldsCommand({
 	}
 
 	const lines = [
-		stageId ? `Fields for ${stageId}` : "Canonical blueprint fields",
+		stageId ? `Fields for ${stageId}` : "Reduced blueprint fields",
 		"",
 	];
 

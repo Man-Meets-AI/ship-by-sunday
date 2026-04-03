@@ -1,11 +1,14 @@
-import { deriveStageStatus } from "@manmeetsai/blueprint-compiler";
-import { blueprintFieldLabel } from "@shipbysunday/blueprint-presentation";
+import {
+	blueprintFieldLabel,
+	deriveLocalDraftStatus,
+	type CliBlueprintFactKey,
+} from "../field-contract";
 import { writeJsonResult } from "../cli-json";
 import { requireLocalDraft } from "../draft/draft-store";
 import type { ReviewableBlueprintStageId } from "../parse-cli-command";
 import type { CliIo } from "../run-cli";
 
-function formatMissingFieldList(fieldKeys: string[]) {
+function formatMissingFieldList(fieldKeys: readonly CliBlueprintFactKey[]) {
 	return fieldKeys.map((fieldKey) => blueprintFieldLabel(fieldKey)).join(", ");
 }
 
@@ -24,11 +27,8 @@ export async function handleReviewCommand({
 }) {
 	const draft = await requireLocalDraft(projectRootPath);
 
-	const stageStatus = deriveStageStatus(draft.facts);
+	const stageStatus = deriveLocalDraftStatus(draft.facts);
 	const visibleStageStatuses = stageStatus.stageStatuses.filter((stage) => {
-		if (stage.stageId === "start") {
-			return false;
-		}
 		if (stageId) {
 			return stage.stageId === stageId;
 		}
@@ -56,12 +56,8 @@ export async function handleReviewCommand({
 	];
 
 	for (const stage of visibleStageStatuses) {
-		const stageLabel =
-			stage.stageId === "build-plan"
-				? "Build Plan"
-				: blueprintFieldLabel(stage.stageId);
 		lines.push(
-			`${stageLabel}: ${stage.isComplete ? "ready" : "missing facts"}`,
+			`${stage.stageLabel}: ${stage.isComplete ? "ready" : "missing facts"}`,
 		);
 		if (stage.missingFactKeys.length > 0) {
 			lines.push(`  Missing: ${formatMissingFieldList(stage.missingFactKeys)}`);

@@ -5,6 +5,7 @@ import type {
 	CanonicalProjectFactsDraft,
 	BlueprintStepDefinition,
 } from "@blueprint-compiler";
+import { deriveBlueprintFacts } from "@blueprint-compiler";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
@@ -63,19 +64,24 @@ export function BlueprintStageStepCard({
 			<div aria-live="polite" className={feedback ? undefined : "min-h-12"}>
 				{feedback ? <BlueprintStageSaveFeedback feedback={feedback} /> : null}
 			</div>
-			<FieldGroup className="gap-6">
-				{currentStep.fieldKeys.map((fieldKey) => (
-					<BlueprintStageStepField
-						key={fieldKey}
-						fieldKey={fieldKey}
-						facts={facts}
-						step={currentStep}
-						value={draftValues[fieldKey] ?? ""}
-						errorMessage={fieldErrors[fieldKey]}
-						onChange={onChange}
-					/>
-				))}
-			</FieldGroup>
+			{currentStep.fieldKeys.length === 0 ? (
+				<GeneratedPreviewCard facts={facts} />
+			) : (
+				<FieldGroup className="gap-6">
+					{currentStep.fieldKeys.map((fieldKey) => (
+						<BlueprintStageStepField
+							key={fieldKey}
+							fieldKey={fieldKey}
+							facts={facts}
+							draftValues={draftValues}
+							step={currentStep}
+							value={draftValues[fieldKey] ?? ""}
+							errorMessage={fieldErrors[fieldKey]}
+							onChange={onChange}
+						/>
+					))}
+				</FieldGroup>
+			)}
 			<div className="flex flex-col gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
 				<Button
 					type="button"
@@ -109,5 +115,58 @@ export function BlueprintStageStepCard({
 				</div>
 			</div>
 		</section>
+	);
+}
+
+function GeneratedPreviewCard({
+	facts,
+}: {
+	facts: CanonicalProjectFactsDraft;
+}) {
+	const derivedFacts = deriveBlueprintFacts(facts);
+
+	return (
+		<div className="space-y-4 rounded-2xl border border-border/60 bg-muted/30 p-5">
+			<div className="space-y-1">
+				<h3 className="text-base font-semibold">Generated preview</h3>
+				<p className="text-sm leading-6 text-muted-foreground">
+					This page is compiler-owned. We derive the marketing defaults from
+					your blueprint so you do not have to fill another form.
+				</p>
+			</div>
+			<div className="grid gap-4 sm:grid-cols-3">
+				<PreviewList
+					title="Marketing goals"
+					items={derivedFacts.marketing_goals ?? []}
+				/>
+				<PreviewList
+					title="Channels"
+					items={derivedFacts.channel_scope ?? []}
+				/>
+				<PreviewList
+					title="Do not say"
+					items={derivedFacts.do_not_say_rules ?? []}
+				/>
+			</div>
+		</div>
+	);
+}
+
+function PreviewList({
+	title,
+	items,
+}: {
+	title: string;
+	items: readonly string[];
+}) {
+	return (
+		<div className="space-y-2">
+			<p className="text-sm font-medium">{title}</p>
+			<ul className="space-y-1 text-sm leading-6 text-muted-foreground">
+				{items.map((item) => (
+					<li key={item}>{item}</li>
+				))}
+			</ul>
+		</div>
 	);
 }

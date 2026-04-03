@@ -41,4 +41,18 @@ describe("stage selection", () => {
 			}),
 		);
 	});
+
+	it("rejects marketing as an interactive stage", async () => {
+		const projectRootPath = await createTemporaryRepoRoot();
+		const { io, stderr } = createCliIo();
+
+		const exitCode = await runCli({
+			argv: ["stage", "marketing"],
+			io,
+			projectRootPath,
+		});
+
+		expect(exitCode).toBe(2);
+		expect(stderr.join("\n")).toContain('Unknown stage "marketing".');
+	});
 });

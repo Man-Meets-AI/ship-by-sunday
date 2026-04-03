@@ -96,10 +96,6 @@ const blueprintFieldPresentations: Partial<
 		label: "Who wants this? Who benefits from this?",
 		helperText: "Identify the person who most wants the outcome.",
 	},
-	why_this_matters: {
-		label: "Why does this person want this?",
-		helperText: "Explain why this outcome matters to that person.",
-	},
 	problem_statement: {
 		label: (facts) =>
 			facts.product_name?.trim()
@@ -107,225 +103,60 @@ const blueprintFieldPresentations: Partial<
 				: "What does this solve?",
 		helperText: "Describe the problem in plain, specific language.",
 	},
-	problem_context_when: {
-		label: "When does this problem show up?",
-	},
-	problem_context_where: {
-		label: "Where does this problem show up?",
-		helperText: "Describe the environment, workflow, or context.",
-	},
 	problem_trigger: {
-		label: "What is happening when this problem hits?",
+		label: "When does this problem hit?",
 		helperText:
-			"Describe what is happening immediately before the problem appears.",
+			"Describe the moment the pain shows up. Include what they are trying to do, where they are, and what causes the friction.",
 	},
 	problem_severity: {
-		label: "How bad is this problem?",
-	},
-	problem_urgency: {
-		label: "How urgent is this problem?",
-	},
-	outcome_statement: {
-		label: "What is the ideal outcome for the person buying this?",
+		label: "How painful is this problem?",
 	},
 	success_looks_like: {
-		label: "What does winning look like for the person who wants your thing?",
+		label: "What does success look like?",
 	},
-	user_benefit: {
-		label: "What's the biggest benefit of someone buying your thing?",
-	},
-	evidence_summary: {
-		label: "What would people point to to say your thing helped them win?",
-	},
-	core_flow_summary: {
-		label: "What are the steps they take with your thing to win?",
-		helperText: "List the steps in order, one per line.",
+	core_flow: {
+		label: "What happens, step by step?",
+		helperText:
+			"Use a numbered list. Write one step per line in the order the user moves through the flow.",
 	},
 	scope_in: {
 		label: "What absolutely has to get built?",
-		helperText: "List the capabilities required for a useful v1. One per line.",
+		helperText:
+			"Optional. Leave blank to use the generated default from your core flow.",
 	},
 	scope_out: {
 		label: "What can we cut if we had to?",
 		helperText:
-			"List what can wait until later without breaking the core outcome. One per line.",
-	},
-	non_goals: {
-		label: "What are we explicitly not building?",
-	},
-	v1_rationale: {
-		label: "Why is this enough for the user to win?",
-	},
-	screen_sequence: {
-		label: "What screens would people see, in order?",
-		helperText: "List the screens in order, one per line.",
-	},
-	must_have_capabilities: {
-		label: "What capabilities have to exist on those screens?",
-		helperText: "List the essential capabilities, one per line.",
-	},
-	surface_type: {
-		label: "What are you building on?",
+			"Optional. Leave blank to use the generated default from your core flow.",
 	},
 	design_references: {
 		label: "What should this feel like?",
-		helperText: "Add links or references, one per line.",
+		helperText: "Add links only, one per line.",
 	},
-	brand_assets: {
-		label: "What brand assets do you already have?",
-		helperText: "List the files, links, or brand assets to use.",
+	theme_hex: {
+		label: "What theme color should anchor the UI?",
+		helperText:
+			"Use the default if it already feels right, or paste a hex from a shadcn preset.",
 	},
-	existing_system_mode: {
-		label: "Are we starting fresh or extending something?",
-	},
-	visual_thesis: {
-		label: "What should this look and feel like?",
-	},
-	content_plan: {
-		label: "What content needs to show up?",
-	},
-	interaction_thesis: {
-		label: "How should it behave?",
-	},
-	hero_goal: {
-		label: "What should the hero do?",
-	},
-	primary_cta: {
-		label: "What is the primary CTA?",
-	},
-	proof_strategy: {
-		label: "How will we prove this is real?",
-	},
-	objections: {
-		label: "What objections do we need to answer?",
-		helperText: "List the buyer objections to address, one per line.",
-	},
-	section_narrative: {
-		label: "What story should the page tell, section by section?",
-	},
-	copy_tone: {
-		label: "What tone should the copy have?",
-	},
-	design_tokens: {
-		label: "What visual rules should guide the UI?",
-	},
-	typography_direction: {
-		label: "What should the type feel like?",
-	},
-	imagery_direction: {
-		label: "What should the imagery feel like?",
-	},
-	layout_direction: {
-		label: "How should the layout feel?",
-	},
-	marketing_goals: {
-		label: "What does marketing need to achieve?",
-	},
-	channel_scope: {
-		label: "Which channels matter right now?",
-	},
-	campaign_types: {
-		label: "What kinds of campaigns are we running?",
-	},
-	brand_voice_summary: {
-		label: "How should this sound?",
-	},
-	approved_claims: {
-		label: "What are we allowed to say?",
-	},
-	do_not_say_rules: {
-		label: "What should we never say?",
-	},
-	proof_sources: {
-		label: "What proof can we use?",
-	},
-	workflow_map: {
-		label: "What recurring marketing workflows do we need?",
-	},
-	research_scope: {
-		label: "What do we need to research?",
-	},
-	research_needs: {
-		label: "What inputs do we need for that research?",
-	},
-	content_workflows: {
-		label: "What content workflows need to exist?",
-	},
-	analytics_needs: {
-		label: "What do we need to measure?",
-	},
-	creative_spec: {
-		label: "What should the creative include?",
-	},
-	objective: {
-		label: "What are we actually building?",
-	},
-	user_visible_outcome: {
-		label: "What outcome will the user see?",
-	},
-	distribution_model: {
-		label: "How is this delivered?",
-	},
-	install_destination: {
-		label: "Where does it get installed or used?",
-	},
-	buyer_ai_promise: {
-		label: "What AI promise are we making to the buyer?",
-	},
-	pricing_model: {
-		label: "How are we pricing this?",
-	},
-	price_usd_cents: {
-		label: "What is the actual numeric price?",
-	},
-	price_display: {
-		label: "How should the price appear to the buyer?",
-	},
-	currency: {
-		label: "What currency is this in?",
+	pricing: {
+		label: "What's the one-time price in USD?",
+		helperText: "Enter just the numeric dollar amount, like 29 or 99.",
 	},
 	domain: {
 		label: "What domain should this live on?",
 	},
-	support_email: {
-		label: "What support email should people use?",
-	},
-	constraints: {
-		label: "What constraints do we have to work within?",
-	},
-	deliverables: {
-		label: "What needs to ship?",
-	},
-	risks: {
-		label: "What could go wrong?",
-	},
-	dependencies: {
-		label: "What do we depend on?",
-	},
-	open_questions: {
-		label: "What don't we know yet?",
-	},
-	selected_next_slice: {
-		label: "What's the next slice to build?",
-	},
-	done_when: {
-		label: "When is this done?",
-	},
-	acceptance_criteria: {
-		label: "What has to be true for this to count as done?",
-	},
-	validation_plan: {
-		label: "How will we validate it?",
-	},
-	demo_flow: {
-		label: "What demo flow proves it works?",
+	contact_email: {
+		label: "What email should people use if they need help?",
+		helperText:
+			"Optional. On web this starts with your signed-in email, and you can change it.",
 	},
 };
 
 const blueprintStepLabelOverrides: Partial<
 	Record<`${BlueprintStageId}/${string}`, string>
 > = {
-	"product/scope": "What absolutely has to get built",
+	"product/outcome": "What success looks like",
+	"build-plan/setup": "Optional setup details",
 };
 
 function resolveBlueprintPresentationCopy(
@@ -346,7 +177,10 @@ export function getBlueprintFieldScaleDefinition(
 	return blueprintFieldScaleDefinitions[fieldKey] ?? null;
 }
 
-export function getBlueprintStepLabel(stageId: BlueprintStageId, stepId: string) {
+export function getBlueprintStepLabel(
+	stageId: BlueprintStageId,
+	stepId: string,
+) {
 	return blueprintStepLabelOverrides[`${stageId}/${stepId}`] ?? null;
 }
 

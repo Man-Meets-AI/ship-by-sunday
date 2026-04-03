@@ -81,8 +81,9 @@ export const cliCommandCatalog: Record<
 	},
 	schema: {
 		name: "schema",
-		title: "Ship by Sunday canonical blueprint schema",
-		summary: "Inspect the blueprint schema the CLI uses to validate the draft.",
+		title: "Ship by Sunday reduced blueprint schema",
+		summary:
+			"Inspect the reduced blueprint schema the CLI uses to validate the draft.",
 		usage: formatWorkspaceCommand("schema [--json]"),
 		details: [
 			"Use `--json` when another tool needs a stable machine-readable envelope.",
@@ -90,8 +91,8 @@ export const cliCommandCatalog: Record<
 	},
 	stages: {
 		name: "stages",
-		title: "Ship by Sunday blueprint stages",
-		summary: "List the live blueprint stages and their step structure.",
+		title: "Ship by Sunday reduced blueprint stages",
+		summary: "List the live reduced blueprint stages and their step structure.",
 		usage: formatWorkspaceCommand("stages [--json]"),
 		details: [
 			"Use this when you want the stage names and the order they run in.",
@@ -99,11 +100,14 @@ export const cliCommandCatalog: Record<
 	},
 	fields: {
 		name: "fields",
-		title: "Ship by Sunday blueprint fields",
+		title: "Ship by Sunday reduced blueprint fields",
 		summary:
-			"Inspect the fields available in the current blueprint stage group.",
+			"Inspect the fields available in the current reduced blueprint stage group.",
 		usage: formatWorkspaceCommand("fields [--stage <stage>] [--json]"),
-		details: ["Pass `--stage` to narrow the list to a single editable stage."],
+		details: [
+			"Pass `--stage` to narrow the list to a single editable stage.",
+			"Marketing is generated preview only and has no manual fields.",
+		],
 	},
 	next: {
 		name: "next",
@@ -117,10 +121,10 @@ export const cliCommandCatalog: Record<
 	validate: {
 		name: "validate",
 		title: "Ship by Sunday draft validation",
-		summary: "Check draft readiness without changing anything.",
+		summary: "Check reduced blueprint readiness without changing anything.",
 		usage: formatWorkspaceCommand("validate [--json]"),
 		details: [
-			"This returns the same readiness logic the web review flow uses.",
+			"This returns the same reduced readiness logic the CLI review flow uses.",
 		],
 	},
 	set: {
@@ -140,7 +144,7 @@ export const cliCommandCatalog: Record<
 		summary: "Remove a single field value from the draft.",
 		usage: formatWorkspaceCommand("unset <fieldKey|stage.fieldKey> [--json]"),
 		details: [
-			"Use this when you want the compiler to recompute readiness after a field is cleared.",
+			"Use this when you want the reduced readiness state to recompute after a field is cleared.",
 		],
 	},
 	append: {
@@ -173,7 +177,8 @@ export const cliCommandCatalog: Record<
 	resume: {
 		name: "resume",
 		title: "Ship by Sunday resume",
-		summary: "Continue from the first incomplete stage in the local draft.",
+		summary:
+			"Continue from the first incomplete reduced stage in the local draft.",
 		usage: formatWorkspaceCommand("resume"),
 		details: [
 			"This is the fastest interactive entry point for a human operator.",
@@ -182,16 +187,14 @@ export const cliCommandCatalog: Record<
 	stage: {
 		name: "stage",
 		title: "Ship by Sunday stage editor",
-		summary: "Open one explicit stage in the interactive prompt flow.",
-		usage: formatWorkspaceCommand(
-			"stage <product|design|marketing|build-plan>",
-		),
+		summary: "Open one explicit stage in the reduced interactive prompt flow.",
+		usage: formatWorkspaceCommand("stage <product|design|build-plan>"),
 		details: ["Use this when you want to revisit a specific stage by name."],
 	},
 	review: {
 		name: "review",
 		title: "Ship by Sunday draft review",
-		summary: "Print readiness and missing facts for the draft.",
+		summary: "Print reduced readiness and missing facts for the draft.",
 		usage: formatWorkspaceCommand(
 			"review [--stage <stage>] [--missing-only] [--json]",
 		),
@@ -210,7 +213,7 @@ export const cliCommandCatalog: Record<
 		name: "import",
 		title: "Ship by Sunday draft import",
 		summary:
-			"Replace the current draft with canonical JSON from a file or stdin.",
+			"Replace the current draft with reduced or legacy JSON from a file or stdin.",
 		usage: formatWorkspaceCommand("import --file <file|-> [--json]"),
 		details: ["Use `--file -` when another tool is piping JSON into the CLI."],
 	},
@@ -249,7 +252,7 @@ export const cliCommandCatalog: Record<
 		name: "generate",
 		title: "Ship by Sunday starter snapshot generation",
 		summary:
-			"Generate the starter snapshot repository from a review-ready draft.",
+			"Generate the starter snapshot repository from a reduced review-ready draft.",
 		usage: formatWorkspaceCommand(
 			"generate [repo] --out <path> [--zip] [--force] [--json]",
 		),

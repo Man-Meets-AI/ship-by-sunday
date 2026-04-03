@@ -4,6 +4,8 @@
 
 ### Changed
 
+- Reduced the founder-facing blueprint flow to a smaller core contract, replaced the old marketing questionnaire with generated preview defaults, defaulted the design color anchor, aligned the local CLI to the same reduced model, and kept review/download plus starter snapshot generation working through compiler-derived compatibility facts.
+- Added the first inline Codex-powered `problem_statement` optimizer, including an in-flow connect sheet for managed ChatGPT/Codex login instead of kicking the user out to Settings.
 - Finished the repo-wide vocabulary migration to `blueprint` across the live app, CLI, generated docs, QA records, and repository docs, while preserving only technically required manifest/tooling literals such as `package.json`, `packageManager`, workspace `packages/`, and third-party lockfile dependency names.
 - Cleaned the remaining user-facing and operator-facing terminology drift in the protected workspace, public docs, starter guidance, and internal skill/reference content so the product contract no longer mixes old language with the shipped blueprint model.
 - Restored the full root validation gate by adding focused unit coverage for checkout-session and product-access server branches, bringing `bun run check` back to green after the terminology pass.

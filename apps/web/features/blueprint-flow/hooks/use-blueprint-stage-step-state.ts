@@ -1,5 +1,6 @@
 "use client";
 
+import { useUser } from "@clerk/nextjs";
 import type { OptimisticLocalStore } from "convex/browser";
 import type { ReactMutation } from "convex/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -83,6 +84,53 @@ function buildNextProjectFacts(
 		...nextFactsSource,
 		...args.factsPatch,
 	});
+}
+
+function stripUntouchedGeneratedScopeFields({
+	projectFacts,
+	savedBaselineValues,
+	step,
+	submittedDraftValues,
+	savePayload,
+}: {
+	projectFacts: CanonicalProjectFactsDraft;
+	savedBaselineValues: BlueprintStepDraftValues;
+	step: BlueprintStepDefinition;
+	submittedDraftValues: BlueprintStepDraftValues;
+	savePayload: BlueprintStepSavePayload;
+}) {
+	if (
+		!step.fieldKeys.includes("scope_in") &&
+		!step.fieldKeys.includes("scope_out")
+	) {
+		return savePayload;
+	}
+
+	const nextFactsPatch = { ...savePayload.factsPatch };
+	const nextClearedFieldKeys = [...savePayload.clearedFieldKeys];
+
+	for (const fieldKey of ["scope_in", "scope_out"] as const) {
+		if (!step.fieldKeys.includes(fieldKey)) {
+			continue;
+		}
+		if (projectFacts[fieldKey] !== undefined) {
+			continue;
+		}
+		if (submittedDraftValues[fieldKey] !== savedBaselineValues[fieldKey]) {
+			continue;
+		}
+
+		delete nextFactsPatch[fieldKey];
+		const clearedIndex = nextClearedFieldKeys.indexOf(fieldKey);
+		if (clearedIndex >= 0) {
+			nextClearedFieldKeys.splice(clearedIndex, 1);
+		}
+	}
+
+	return {
+		clearedFieldKeys: nextClearedFieldKeys,
+		factsPatch: nextFactsPatch,
+	} satisfies BlueprintStepSavePayload;
 }
 
 function buildOptimisticBlueprintWorkspaceState(
@@ -214,10 +262,25 @@ export function useBlueprintStageStepState({
 	saveProjectDefinitionFacts: SaveProjectDefinitionFactsMutation;
 }) {
 	const currentStep = requireBlueprintStep(stage, stageId, stepId);
-	const liveSavedValues = useMemo(
-		() => buildStepDraftValues(projectFacts, currentStep),
-		[currentStep, projectFacts],
-	);
+	const { isLoaded: isUserLoaded, user } = useUser();
+	const liveSavedValues = useMemo(() => {
+		const nextDraftValues = buildStepDraftValues(projectFacts, currentStep);
+		if (
+			currentStep.fieldKeys.includes("contact_email") &&
+			!nextDraftValues.contact_email &&
+			isUserLoaded
+		) {
+			nextDraftValues.contact_email =
+				user?.primaryEmailAddress?.emailAddress ?? "";
+		}
+
+		return nextDraftValues;
+	}, [
+		currentStep,
+		isUserLoaded,
+		projectFacts,
+		user?.primaryEmailAddress?.emailAddress,
+	]);
 	const saveProjectDefinitionFactsWithOptimism = useMemo(
 		() =>
 			saveProjectDefinitionFacts.withOptimisticUpdate((localStore, args) => {
@@ -305,7 +368,13 @@ export function useBlueprintStageStepState({
 			showSuccess?: boolean;
 		} = {}): Promise<boolean> => {
 			const submittedDraftValues = currentDraftValuesRef.current;
-			const savePayload = buildSavePayload(currentStep, submittedDraftValues);
+			const savePayload = stripUntouchedGeneratedScopeFields({
+				projectFacts,
+				savedBaselineValues,
+				step: currentStep,
+				submittedDraftValues,
+				savePayload: buildSavePayload(currentStep, submittedDraftValues),
+			});
 			const nextSaveClassification =
 				saveClassification ??
 				classifyBlueprintStepSave(
@@ -352,6 +421,7 @@ export function useBlueprintStageStepState({
 		},
 		[
 			currentStep,
+			projectFacts,
 			onDirtyChange,
 			savedBaselineValues,
 			saveProjectDefinitionFactsWithOptimism,

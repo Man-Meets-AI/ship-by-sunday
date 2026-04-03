@@ -1,5 +1,6 @@
 import type { CanonicalProjectFactKey } from "./canonical-project-definition/project-definition";
 import type { CanonicalProjectFactsDraft } from "./canonical-project-definition/project-definition";
+import { deriveBlueprintFacts } from "./canonical-project-definition/derived-blueprint-facts";
 import type {
 	BlueprintStageDefinition,
 	BlueprintStepDefinition,
@@ -18,6 +19,7 @@ const problemUrgencyValues = [
 ] as const;
 
 const arrayFieldKeys = new Set<CanonicalProjectFactKey>([
+	"core_flow",
 	"screen_sequence",
 	"must_have_capabilities",
 	"scope_in",
@@ -69,7 +71,10 @@ const longTextFieldKeys = new Set<CanonicalProjectFactKey>([
 	"selected_next_slice",
 ]);
 
-const numberFieldKeys = new Set<CanonicalProjectFactKey>(["price_usd_cents"]);
+const numberFieldKeys = new Set<CanonicalProjectFactKey>([
+	"price_usd_cents",
+	"pricing",
+]);
 
 export const problemSeverityScaleValues = [
 	"1",
@@ -221,10 +226,11 @@ export function formatBlueprintFactValue(
 	facts: CanonicalProjectFactsDraft,
 	fieldKey: CanonicalProjectFactKey,
 ) {
+	const normalizedFacts = deriveBlueprintFacts(facts);
 	const value =
 		fieldKey === "surface_type"
-			? (facts.surface_type ?? "web_app")
-			: facts[fieldKey];
+			? (normalizedFacts.surface_type ?? "web_app")
+			: normalizedFacts[fieldKey];
 
 	if (Array.isArray(value)) {
 		return value.join("\n");

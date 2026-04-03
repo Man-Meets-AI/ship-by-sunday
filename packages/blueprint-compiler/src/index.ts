@@ -9,6 +9,7 @@ export {
 	canonicalProjectDefinitionSchema,
 	canonicalProjectFactsDraftSchema,
 	canonicalProjectFactsSchema,
+	deriveBlueprintFacts,
 	type CanonicalPlaceholderField,
 	type CanonicalProjectDefinition,
 	type CanonicalProjectDefinitionDraft,

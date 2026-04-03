@@ -2,6 +2,8 @@
 
 ## recent
 
+- **2026-04-03 15:40 EDT** — Reduced blueprint intake closeout: cut the founder-facing blueprint contract to the smaller core field set, moved marketing to generated preview, made `theme_hex` defaulted/non-blocking and `contact_email` web-prefilled, added compiler-side derived blueprint facts so review/download and starter overrides still render fully, shipped the first web-only `problem_statement` Codex optimizer with inline connect sheet, kept the local CLI aligned with the reduced contract, and closed the blueprint-intake ExecPlan. `CHANGELOG.md` updated for the user-facing blueprint-flow change.
+
 - **2026-04-03 14:04 EDT** — Blueprint terminology closeout: finished the repo-wide `blueprint` vocabulary migration across the live app, CLI, compiler, QA records, plans, docs, and skill references; preserved only unavoidable manifest/toolchain literals such as `package.json`, `packageManager`, `packages/`, and lockfile dependency names; added focused unit coverage for checkout-session and product-access so the restored root `bun run check` gate now passes; and closed the final ExecPlan in `.plans/2026-04-03-blueprint-repo-wide-rename.md`. `CHANGELOG.md` updated for the shipped language cleanup and validation follow-through.
 
 - **2026-04-03 11:50 EDT** — ExecPlan workflow cutover: added the repo-owned `docs/prompts/execplan-outline-from-session.md` prompt, extended the blueprint-compiler Prompt Pack to ship the full `execplan-*` set, wrote and closed the migration ExecPlan under `.plans/`, and aligned the shared `~/.agents` workflow/tests with the repo’s `.plans` path and prompt filenames. No `CHANGELOG.md` update because this was internal planning/runtime tooling rather than a shipped user-facing behavior change.

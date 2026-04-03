@@ -1,4 +1,4 @@
-import { deriveStageStatus } from "@manmeetsai/blueprint-compiler";
+import { deriveLocalDraftStatus } from "../field-contract";
 import { requireLocalDraft } from "../draft/draft-store";
 import type { CliIo } from "../run-cli";
 import { writeJsonResult } from "../cli-json";
@@ -13,7 +13,7 @@ export async function handleValidateCommand({
 	json: boolean;
 }) {
 	const draft = await requireLocalDraft(projectRootPath);
-	const stageStatus = deriveStageStatus(draft.facts);
+	const stageStatus = deriveLocalDraftStatus(draft.facts);
 	const result = {
 		reviewReady: stageStatus.blueprintReadiness.review.isReady,
 		firstIncompleteStageId: stageStatus.firstIncompleteStageId,

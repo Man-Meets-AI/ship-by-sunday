@@ -26,7 +26,11 @@ export const projectDefinitionPublicValidator = v.object({
 	schemaVersion: v.number(),
 	facts: projectDefinitionFactsValidator,
 	placeholdersInUse: v.array(
-		v.union(v.literal("domain"), v.literal("support_email")),
+		v.union(
+			v.literal("domain"),
+			v.literal("contact_email"),
+			v.literal("support_email"),
+		),
 	),
 	createdAt: v.number(),
 	updatedAt: v.number(),

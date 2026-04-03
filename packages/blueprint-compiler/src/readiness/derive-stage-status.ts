@@ -2,6 +2,7 @@ import type {
 	CanonicalProjectFactKey,
 	CanonicalProjectFactsDraft,
 } from "../canonical-project-definition/project-definition";
+import { deriveBlueprintFacts } from "../canonical-project-definition/derived-blueprint-facts";
 import {
 	getBlueprintStageDefinition,
 	blueprintStageDefinitions,
@@ -30,10 +31,8 @@ function isMissingValue(
 	facts: CanonicalProjectFactsDraft,
 	fieldKey: CanonicalProjectFactKey,
 ) {
-	const value =
-		fieldKey === "surface_type"
-			? (facts.surface_type ?? "web_app")
-			: facts[fieldKey];
+	const normalizedFacts = deriveBlueprintFacts(facts);
+	const value = normalizedFacts[fieldKey];
 
 	if (typeof value === "string") {
 		return value.trim().length === 0;

@@ -31,7 +31,7 @@ function createProductStageStatus() {
 		productKey: "ship-by-sunday",
 		facts: {
 			...baseFacts,
-			why_this_matters: undefined,
+			product_summary: undefined,
 		},
 	});
 	return deriveStageStatus(projectDefinition.facts).stageStatuses.find(
@@ -53,7 +53,7 @@ describe("BlueprintStageSidebar", () => {
 			/>,
 		);
 
-		expect(screen.getByText("Why does this person want this?")).toBeTruthy();
-		expect(screen.queryByText("why_this_matters")).toBeNull();
+		expect(screen.getByText("What's the one-liner?")).toBeTruthy();
+		expect(screen.queryByText("product_summary")).toBeNull();
 	});
 });

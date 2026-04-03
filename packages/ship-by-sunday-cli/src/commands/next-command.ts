@@ -1,8 +1,8 @@
 import {
-	deriveStageStatus,
+	deriveLocalDraftStatus,
 	getBlueprintStageDefinition,
-} from "@manmeetsai/blueprint-compiler";
-import { getFieldDescriptor } from "../field-contract";
+	getFieldDescriptor,
+} from "../field-contract";
 import { requireLocalDraft } from "../draft/draft-store";
 import type { CliIo } from "../run-cli";
 import { writeJsonResult } from "../cli-json";
@@ -18,7 +18,7 @@ export async function handleNextCommand({
 	json: boolean;
 }) {
 	const draft = await requireLocalDraft(projectRootPath);
-	const stageStatus = deriveStageStatus(draft.facts);
+	const stageStatus = deriveLocalDraftStatus(draft.facts);
 
 	if (stageStatus.firstIncompleteStageId === "review") {
 		const result = {

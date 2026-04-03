@@ -5,6 +5,7 @@ const requiredTextList = z.array(requiredText).min(1);
 
 export const canonicalPlaceholderFieldSchema = z.enum([
 	"domain",
+	"contact_email",
 	"support_email",
 ]);
 
@@ -15,6 +16,9 @@ export const canonicalProjectFactsShape = {
 	product_summary: requiredText,
 	primary_user: requiredText,
 	problem_statement: requiredText,
+	core_flow: requiredTextList,
+	pricing: z.number().int().nonnegative(),
+	theme_hex: requiredText,
 	problem_context_when: requiredText,
 	problem_context_where: requiredText,
 	problem_trigger: requiredText,
@@ -82,6 +86,7 @@ export const canonicalProjectFactsShape = {
 	price_display: requiredText,
 	currency: requiredText,
 	domain: requiredText.optional(),
+	contact_email: requiredText.optional(),
 	support_email: requiredText.optional(),
 } satisfies Record<string, z.ZodTypeAny>;
 
@@ -89,9 +94,19 @@ export const canonicalProjectFactsSchema = z
 	.object(canonicalProjectFactsShape)
 	.strict();
 
-export const canonicalProjectFactsDraftSchema = z
+export const canonicalProjectFactsDraftShape = z
 	.object(canonicalProjectFactsShape)
 	.partial()
+	.extend({
+		core_flow: requiredTextList.optional(),
+		pricing: z.number().int().nonnegative().optional(),
+		theme_hex: requiredText.optional(),
+		contact_email: requiredText.optional(),
+	})
+	.strict();
+
+export const canonicalProjectFactsDraftSchema = z
+	.object(canonicalProjectFactsDraftShape.shape)
 	.strict();
 
 export const canonicalProjectDefinitionSchema = z
@@ -139,5 +154,6 @@ export const canonicalProjectFactKeys = Object.keys(
 
 export const placeholderFriendlyFactKeys = [
 	"domain",
+	"contact_email",
 	"support_email",
 ] as const satisfies readonly CanonicalPlaceholderField[];

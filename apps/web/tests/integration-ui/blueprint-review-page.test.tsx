@@ -314,7 +314,8 @@ describe("BlueprintReviewPage", () => {
 	it("redirects back to the first incomplete stage when review is still locked", () => {
 		const lockedWorkspaceState = createWorkspaceState({
 			factOverrides: {
-				objective: undefined,
+				pricing: undefined,
+				price_usd_cents: undefined,
 			},
 		});
 
