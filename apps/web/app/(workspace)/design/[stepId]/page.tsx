@@ -1,5 +1,5 @@
-import { BlueprintStagePage } from "@/features/blueprint-flow/components/blueprint-stage-page";
-import { loadBlueprintStageRouteData } from "@/features/blueprint-flow/server/blueprint-stage-route-data";
+import { redirect } from "next/navigation";
+import { getLegacyBlueprintRedirectHref } from "@/features/blueprint-flow/lib/legacy-blueprint-route-redirects";
 
 export default async function Page({
 	params,
@@ -7,7 +7,5 @@ export default async function Page({
 	params: Promise<{ stepId: string }>;
 }) {
 	const { stepId } = await params;
-	const routeData = await loadBlueprintStageRouteData("design", stepId);
-
-	return <BlueprintStagePage stageId="design" {...routeData} />;
+	redirect(getLegacyBlueprintRedirectHref("design", stepId));
 }

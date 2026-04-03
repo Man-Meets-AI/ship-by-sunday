@@ -20,7 +20,7 @@ The homepage currently undersells the offer by flattening too much value into sm
 - [x] 2026-03-25 22:04 EDT: Inspected the homepage control plane, content layer, render model, section components, UI atoms, tests, metadata surfaces, blueprint compiler outputs, starter docs, and observability paths.
 - [x] 2026-03-25 22:04 EDT: Chose the message hierarchy: promise first, enemy second, mechanism third, by-Sunday outcomes fourth, starter-system advantage fifth, then durability, proof, objections, and close.
 - [x] 2026-03-25 22:04 EDT: Chose the structural scope: keep the existing homepage shell but add one new top-level starter section because the current sections cannot adequately sell the starter system without compressing it into filler.
-- [x] 2026-03-25 22:04 EDT: Grilled the plan and locked the must-have product decisions: homepage-only scope, hero secondary CTA to `#system`, early-clarity guarantee framing, learning-path detail inside the starter section, OpenAI best-practice provenance as a supporting point, and `Agent-Ready Starter System` as the homepage marketing label while `Starter Snapshot` remains the literal download label.
+- [x] 2026-03-25 22:04 EDT: Grilled the plan and locked the must-have product decisions: homepage-only scope, hero secondary CTA to `#system`, early-clarity guarantee framing, learning-path detail inside the starter section, OpenAI best-practice provenance as a supporting point, and `Agent-Ready Starter System` as the homepage marketing label while `Blueprint` remains the literal download label.
 - [x] 2026-03-25 22:04 EDT: Locked the starter sub-advantage labels for the homepage: `Agent-Ready QA Team` and `Telegram Incident Alerts`.
 - [x] 2026-03-25 22:04 EDT: Locked the provider-skill layer label for the homepage: `Agent-Trained Provider Experts`.
 - [x] 2026-03-25 22:04 EDT: Locked the support-lane names for the starter section: `Fast Pass Walkthroughs`, `Guided Ship Path`, and `Product Sense Fundamentals`.
@@ -34,7 +34,7 @@ The homepage currently undersells the offer by flattening too much value into sm
 
 The starter-system story is grounded in the repo more strongly than the current homepage suggests. The shipped docs in `apps/web/content/docs/index.mdx`, `apps/web/content/docs/how-the-starter-works.mdx`, and `apps/web/content/docs/customize-the-starter.mdx` already describe a public marketing surface, a docs surface, a protected blueprint-first workspace, module flags, and an opinionated public-to-paid-to-protected path across Next.js, Vercel, Stripe, Clerk, and Convex. That means the homepage can speak more boldly about the starter because the product already has concrete starter behavior and docs, not just aspirational copy.
 
-The blueprint compiler also supports the starter story directly. `packages/blueprint-compiler/src/public-artifact-contract.ts` exposes public labels for Design Pack, Marketing Pack, Build Pack, Prompt Pack, and Starter Snapshot. `packages/blueprint-compiler/src/repo-generation/render-template-overrides.ts` shows that generated output already targets `apps/web/config/product.ts` and `apps/web/features/marketing/content/home.ts`, and `packages/blueprint-compiler/src/repo-generation/build-repo-generation-manifest.ts` shows the generated repo includes `apps/web` and `packages/blueprint-compiler` while excluding build/test clutter. The homepage can therefore truthfully position the starter as generated around the product definition rather than as a static generic starter.
+The blueprint compiler also supports the starter story directly. `packages/blueprint-compiler/src/public-artifact-contract.ts` exposes public labels for Design Pack, Marketing Pack, Build Pack, Prompt Pack, and Blueprint. `packages/blueprint-compiler/src/repo-generation/render-template-overrides.ts` shows that generated output already targets `apps/web/config/product.ts` and `apps/web/features/marketing/content/home.ts`, and `packages/blueprint-compiler/src/repo-generation/build-repo-generation-manifest.ts` shows the Blueprint includes `apps/web` and `packages/blueprint-compiler` while excluding build/test clutter. The homepage can therefore truthfully position the starter as generated around the product definition rather than as a static generic starter.
 
 The provider-expert and docs/config story is also real product substance, not marketing garnish. `apps/web/features/course/lesson/workbench/modes/skills-quickstart/skills-quickstart-skills-data.ts` and `apps/web/content/docs/mcps-and-skills.mdx` already present provider-specific guidance for Clerk, Convex, Stripe, Next.js, React, QA, and related workflows. `apps/web/content/docs/customize-the-starter.mdx` and `apps/web/content/docs/configure-the-homepage.mdx` show that the starter already exposes meaningful config seams, module flags, and control points rather than forcing manual repo surgery. The homepage can therefore position the starter as change-friendly for agents because the repo ships with agent-readable docs and deliberate config levers, not because “config files” are inherently exciting.
 
@@ -60,7 +60,7 @@ Evidence from the repo that supports the revised offer framing:
     - Marketing Pack
     - Build Pack
     - Prompt Pack
-    - Starter Snapshot
+    - Blueprint
 
     apps/web/content/docs/local-qa.mdx:
     - observability smoke with Convex + Telegram
@@ -116,8 +116,8 @@ Decision: The homepage should mention the OpenAI best-practice provenance only a
 Rationale: The research and template provenance are real differentiators, but they should support the starter-system story rather than replace the outcome-first sales argument.
 Date: 2026-03-25
 
-Decision: Use `Agent-Ready Starter System` as the homepage marketing label for the generated codebase layer, while keeping `Starter Snapshot` as the literal product download label.
-Rationale: `Agent-Ready Starter System` is stronger buyer language for the homepage. `Starter Snapshot` is already the truthful public artifact name in the review/download flow and does not need to be renamed in this slice.
+Decision: Use `Agent-Ready Starter System` as the homepage marketing label for the generated codebase layer, while keeping `Blueprint` as the literal product download label.
+Rationale: `Agent-Ready Starter System` is stronger buyer language for the homepage. `Blueprint` is already the truthful public artifact name in the review/download flow and does not need to be renamed in this slice.
 Date: 2026-03-25
 
 Decision: Use `Agent-Ready QA Team` and `Telegram Incident Alerts` as branded sub-advantages inside the starter section.
@@ -319,7 +319,7 @@ The homepage should use these naming rules consistently:
 
     mechanism layer -> docs packs / Agent-Ready Packs
     generated codebase marketing label -> Agent-Ready Starter System
-    literal download label -> Starter Snapshot
+    literal download label -> Blueprint
 
 The new homepage contract should move from this:
 

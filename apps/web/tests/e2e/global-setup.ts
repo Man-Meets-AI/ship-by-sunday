@@ -148,7 +148,7 @@ async function signIn(
 		password: string;
 	},
 ) {
-	await page.goto("/sign-in?redirect_url=%2Fstart", {
+	await page.goto("/sign-in?redirect_url=%2Fblueprint", {
 		waitUntil: "networkidle",
 	});
 	await page.waitForFunction(
@@ -171,7 +171,7 @@ async function signIn(
 	await page.getByLabel(/^password$/i).fill(password);
 	await page.getByRole("button", { name: /^sign in$/i }).click();
 	try {
-		await page.waitForURL((url) => url.pathname === "/start", {
+		await page.waitForURL((url) => url.pathname === "/blueprint", {
 			timeout: 15_000,
 		});
 	} catch {
@@ -186,7 +186,7 @@ async function signIn(
 				.filter(Boolean)
 				.join(" | ") || "No alert text rendered.";
 		throw new Error(
-			`Failed to establish a QA session for ${email}. Expected /start after sign-in, got ${page.url()}. ${alertText}`,
+			`Failed to establish a QA session for ${email}. Expected /blueprint after sign-in, got ${page.url()}. ${alertText}`,
 		);
 	}
 	await page.waitForFunction(

@@ -39,7 +39,7 @@ export const homePageContent = {
 		],
 		valueFrame: "Most starters give you code. This gives you blueprint.",
 		imageAlt:
-			"Diagram showing a product definition turning into Design, Marketing, Build, and Prompt Packs plus a final Starter Snapshot",
+			"Diagram showing a product definition turning into Design, Marketing, Build, and Prompt Packs plus a final Blueprint",
 	},
 	socialProofSection: {
 		label: "Built by someone who ships",
@@ -76,12 +76,12 @@ export const homePageContent = {
 			{
 				question: "Is this another course or another starter?",
 				answer:
-					"No. Ship by Sunday is a blueprint-first shipping system. The videos help you use it, and the starter repo is part of it, but the real product is the Ship Kit you leave with.",
+					"No. Ship by Sunday is a blueprint-first shipping system. The videos help you use it, and the repo is part of it, but the real product is the Ship by Sunday Blueprint you leave with.",
 			},
 			{
 				question: "What do I actually get at the end?",
 				answer:
-					"You leave with your product truth, the Agent-Ready Packs, and the Ship Kit: your Agent-First Starter Repo plus the generated design, marketing, build, and prompt materials.",
+					"You leave with your product truth, the Agent-Ready Packs, and the Ship by Sunday Blueprint.",
 			},
 			{
 				question: "I already have a starter. Why would I need this?",
@@ -105,7 +105,7 @@ export const homePageContent = {
 			},
 			{
 				question: "What happens right after I pay?",
-				answer: `You go straight into the ${workspaceDisplayConfig.homeNoun} to lock the truth, compile the packs, and build your Ship Kit.`,
+				answer: `You go straight into the ${workspaceDisplayConfig.homeNoun} to lock the truth, compile the packs, and shape your Blueprint.`,
 			},
 		],
 	},
@@ -137,7 +137,7 @@ export const homePageContent = {
 			{
 				title: "The starter path",
 				highlightBefore: "Review the ",
-				highlight: "Starter Snapshot and starter system path",
+				highlight: "Ship by Sunday Blueprint path",
 				highlightAfter:
 					" before execution, so you can verify the repo before handoff.",
 				supporting:
@@ -206,7 +206,7 @@ export const homePageContent = {
 			{
 				title: "One review handoff",
 				description:
-					"The Starter Snapshot gives you a final downloadable handoff that is easier to trust, review, and reuse than scattered prompt history.",
+					"The Ship by Sunday Blueprint gives you one final downloadable handoff that is easier to trust, review, and reuse than scattered prompt history.",
 			},
 		],
 		closing:
@@ -217,15 +217,15 @@ export const homePageContent = {
 		titleLead: "Ship a real product",
 		titleAccent: "by Sunday",
 		intro:
-			"One payment for Ship Blueprint: the guided blueprint-first run, the Agent-Ready Packs, the Agent-First Starter Repo, and the guidance that keeps you shipping after the first weekend.",
+			"One payment for Ship Blueprint: the guided blueprint-first run, the Agent-Ready Packs, the Ship by Sunday Blueprint, and the guidance that keeps you shipping after the first weekend.",
 		priceDisplay: productConfig.priceDisplay,
 		eyebrow: "One-time payment. Lifetime access.",
 		ctaTitle: "Get the system",
-		trustLine: `After checkout, you go straight into the ${workspaceDisplayConfig.homeNoun} to lock the truth, compile the packs, and build your Ship Kit.`,
+		trustLine: `After checkout, you go straight into the ${workspaceDisplayConfig.homeNoun} to lock the truth, compile the packs, and shape your Blueprint.`,
 		includes: [
 			"Guided product intake and review workspace",
 			"Agent-Ready Packs",
-			"Agent-First Starter Repo",
+			"Ship by Sunday Blueprint",
 			"Fast Pass Walkthroughs",
 			"Guided Ship Path",
 		],

@@ -26,18 +26,11 @@ export const getProjectDefinitionReturns = v.union(
 );
 
 type SaveProjectDefinitionFactsArgs = {
-	stageId: "product" | "design" | "marketing" | "build-plan";
 	clearedFieldKeys: string[];
 	factsPatch: Record<string, string | number | string[]>;
 };
 
 export const saveProjectDefinitionFactsArgs = {
-	stageId: v.union(
-		v.literal("product"),
-		v.literal("design"),
-		v.literal("marketing"),
-		v.literal("build-plan"),
-	),
 	clearedFieldKeys: v.array(v.string()),
 	factsPatch: projectDefinitionFactsValidator,
 };

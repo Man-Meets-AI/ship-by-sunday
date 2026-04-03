@@ -189,7 +189,7 @@ describe("BlueprintReviewPage", () => {
 		useQueryMock.mockReturnValue(undefined);
 	});
 
-	it("renders the Ship Kit handoff and starter download CTA", () => {
+	it("renders the Ship by Sunday Blueprint handoff and download CTA", () => {
 		const readyWorkspaceState = createWorkspaceState();
 		render(<BlueprintReviewPage initialWorkspaceState={readyWorkspaceState} />);
 
@@ -198,9 +198,11 @@ describe("BlueprintReviewPage", () => {
 		).toBeTruthy();
 		expect(screen.queryByTestId("local-nav")).toBeNull();
 		const reviewVideo = screen.getByTestId("blueprint-review-video-player");
-		expect(screen.getByText("Your Ship Kit is ready.")).toBeTruthy();
+		expect(
+			screen.getByText("Your Ship by Sunday Blueprint is ready."),
+		).toBeTruthy();
 		expect(screen.getByText("Agent-Ready Packs")).toBeTruthy();
-		expect(screen.getByText("Agent-First Starter Repo")).toBeTruthy();
+		expect(screen.getByText("SBS Blueprint")).toBeTruthy();
 		expect(screen.getByText("One bundle, one source of truth")).toBeTruthy();
 		expect(
 			screen.getByText(
@@ -209,35 +211,35 @@ describe("BlueprintReviewPage", () => {
 		).toBeTruthy();
 		expect(
 			screen.getByText(
-				"A starter repo shaped for the AI age, with the docs, overrides, and handoff structure already in place",
+				"A downloadable Ship by Sunday Blueprint with the docs, overrides, and handoff structure already in place",
 			),
 		).toBeTruthy();
 		expect(
 			screen.getByText(
-				"So design, marketing, code, and prompts all work from the same brief instead of drifting",
+				"So design, marketing, code, and prompts all work from the same blueprint instead of drifting",
 			),
 		).toBeTruthy();
 		expect(
 			screen
-				.getByRole("link", { name: "Download Ship Kit" })
+				.getByRole("link", { name: "Download Ship by Sunday Blueprint" })
 				.getAttribute("href"),
 		).toBe("/api/download/repo");
 		expect(
 			screen
-				.getByRole("link", { name: "Download Ship Kit first" })
+				.getByRole("link", { name: "Download Blueprint first" })
 				.getAttribute("href"),
 		).toBe("/api/download/repo");
 		expect(screen.queryByText("QUEST")).toBeNull();
 		expect(reviewVideo.textContent).toBe("Review Video");
 	});
 
-	it("lets the browser handle the Ship Kit download links directly", () => {
+	it("lets the browser handle the Ship by Sunday Blueprint download links directly", () => {
 		render(
 			<BlueprintReviewPage initialWorkspaceState={createWorkspaceState()} />,
 		);
 
 		const primaryDownloadLink = screen.getByRole("link", {
-			name: "Download Ship Kit",
+			name: "Download Ship by Sunday Blueprint",
 		});
 		expect(primaryDownloadLink.getAttribute("download")).toBe("");
 		const primaryClick = createEvent.click(primaryDownloadLink);
@@ -245,7 +247,7 @@ describe("BlueprintReviewPage", () => {
 		expect(primaryClick.defaultPrevented).toBe(false);
 
 		const secondaryDownloadLink = screen.getByRole("link", {
-			name: "Download Ship Kit first",
+			name: "Download Blueprint first",
 		});
 		expect(secondaryDownloadLink.getAttribute("download")).toBe("");
 		const secondaryClick = createEvent.click(secondaryDownloadLink);
@@ -323,7 +325,7 @@ describe("BlueprintReviewPage", () => {
 			render(
 				<BlueprintReviewPage initialWorkspaceState={lockedWorkspaceState} />,
 			),
-		).toThrowError("NEXT_REDIRECT:/build-plan");
-		expect(redirectMock).toHaveBeenCalledWith("/build-plan");
+		).toThrowError("NEXT_REDIRECT:/blueprint");
+		expect(redirectMock).toHaveBeenCalledWith("/blueprint");
 	});
 });

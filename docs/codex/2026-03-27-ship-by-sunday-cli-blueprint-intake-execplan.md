@@ -1,18 +1,18 @@
 ---
-summary: "ExecPlan for turning Ship by Sunday into a Bun CLI that collects the canonical pre-review blueprint facts, reports readiness, and generates the same starter snapshot that the web Review flow produces. The plan starts by freezing the live funnel contract so the CLI does not harden schema and documentation drift."
+summary: "ExecPlan for turning Ship by Sunday into a Bun CLI that collects the canonical pre-review blueprint facts, reports readiness, and generates the same blueprint that the web Review flow produces. The plan starts by freezing the live funnel contract so the CLI does not harden schema and documentation drift."
 read_when: "Open this when you need to plan or implement a CLI-first Ship by Sunday intake flow that can be used by humans now and by agents later."
 plan_status: "done"
 ---
 
 # Turn Ship by Sunday into a Bun CLI blueprint intake and repo generator
 
-This is a living execution plan for introducing a Bun CLI that asks the same blueprint-shaping questions as the current Ship by Sunday funnel, stores the answers locally, shows blueprint readiness, and generates the downloadable docs and starter snapshot without going through the web app. It is written so a fresh coding agent can implement the change end to end without prior chat context, and it must be updated as work proceeds.
+This is a living execution plan for introducing a Bun CLI that asks the same blueprint-shaping questions as the current Ship by Sunday funnel, stores the answers locally, shows blueprint readiness, and generates the downloadable docs and blueprint without going through the web app. It is written so a fresh coding agent can implement the change end to end without prior chat context, and it must be updated as work proceeds.
 
 This ExecPlan must be maintained in accordance with `docs/codex/PLANS.md`.
 
 ## Purpose / Big Picture
 
-After this work, someone working from the repository root will be able to run a Bun command, answer the canonical Ship by Sunday intake questions in the terminal, and produce the same design pack, marketing pack, build pack, and starter snapshot repo that the web `/review` flow is meant to produce. This matters because the product is already blueprint-first in principle, but the current intake only exists as a web funnel backed by Convex and Clerk. A CLI makes the blueprint compiler usable without the teaching shell, gives operators and internal agents a direct path to generate customer-safe output, and forces the repository to treat the canonical fact contract as the real product. A human should be able to verify the change by running the CLI from the repo root, filling or importing facts, seeing readiness advance through Product, Design, Marketing, Build Plan, and Review, then generating a repo zip or directory whose contents match the existing review-download contract.
+After this work, someone working from the repository root will be able to run a Bun command, answer the canonical Ship by Sunday intake questions in the terminal, and produce the same design pack, marketing pack, build pack, and blueprint repo that the web `/review` flow is meant to produce. This matters because the product is already blueprint-first in principle, but the current intake only exists as a web funnel backed by Convex and Clerk. A CLI makes the blueprint compiler usable without the teaching shell, gives operators and internal agents a direct path to generate customer-safe output, and forces the repository to treat the canonical fact contract as the real product. A human should be able to verify the change by running the CLI from the repo root, filling or importing facts, seeing readiness advance through Product, Design, Marketing, Build Plan, and Review, then generating a repo zip or directory whose contents match the existing review-download contract.
 
 ## Progress
 
@@ -66,7 +66,7 @@ Evidence from repo inspection:
 ## Decision Log
 
 - Decision: The CLI is a first-class frontend to the existing blueprint compiler, not a new source of truth.
-  Rationale: `packages/blueprint-compiler` already owns the canonical fact schema, stage definitions, readiness evaluation, blueprint rendering, and starter snapshot generation. Reusing those surfaces keeps the web funnel and the CLI aligned.
+  Rationale: `packages/blueprint-compiler` already owns the canonical fact schema, stage definitions, readiness evaluation, blueprint rendering, and blueprint generation. Reusing those surfaces keeps the web funnel and the CLI aligned.
   Date/Author: 2026-03-27 / Codex
 
 - Decision: The first implementation milestone is contract cleanup, not prompt scaffolding.
@@ -107,7 +107,7 @@ Evidence from repo inspection:
 
 ## Outcomes & Retrospective
 
-The repository-root Bun CLI now exists at `packages/ship-by-sunday-cli/` and is exposed through `bun run sbs`. It stores one local draft under `.ship-by-sunday/draft.json`, shares the live blueprint field contract from `@manmeetsai/blueprint-compiler`, reports readiness through the same stage logic as the web flow, and generates the same starter snapshot shape that `/review` produces today.
+The repository-root Bun CLI now exists at `packages/ship-by-sunday-cli/` and is exposed through `bun run sbs`. It stores one local draft under `.ship-by-sunday/draft.json`, shares the live blueprint field contract from `@manmeetsai/blueprint-compiler`, reports readiness through the same stage logic as the web flow, and generates the same blueprint shape that `/review` produces today.
 
 The final result stayed inside the intended scope. The implementation did not widen into multi-draft management, post-review execution inputs, or alternate artifact families. The only extra work beyond the original plan was resolving root-relative user paths because the root script delegates into the blueprint directory.
 
@@ -125,7 +125,7 @@ The generated output flow starts in `apps/web/features/blueprint-flow/server/dow
 
 The CLI initiative touched both repository shape and runtime assumptions. The root `package.json` now exposes `bun run sbs ...`, and the workspace now includes `packages/ship-by-sunday-cli/` alongside `packages/blueprint-compiler/`. The compiler also now resolves repository assets through `resolveRepoRootPath()` so the CLI can be launched from the repository root without threading explicit repo-root parameters through every entry point.
 
-For this plan, “interactive mode” means a terminal session where the CLI prompts the user field by field. “Non-interactive mode” means commands that read or write the draft definition from JSON files so another tool or agent can fill the same facts without using a TTY. “Starter snapshot” means the same customer-safe repo bundle already produced by `buildReviewDownloadZip()`, with generated files under repo-root `docs/`.
+For this plan, “interactive mode” means a terminal session where the CLI prompts the user field by field. “Non-interactive mode” means commands that read or write the draft definition from JSON files so another tool or agent can fill the same facts without using a TTY. “Blueprint” means the same customer-safe repo bundle already produced by `buildReviewDownloadZip()`, with generated files under repo-root `docs/`.
 
 ## Plan of Work
 
@@ -135,7 +135,7 @@ Once the contract is frozen, the next step is to make `blueprint-compiler` reusa
 
 After the compiler is CLI-safe, the implementer should add a new workspace blueprint under `packages/ship-by-sunday-cli/`. That blueprint should expose one executable entry point, store one active draft under `.ship-by-sunday/`, and provide a thin command parser around a small set of opinionated commands. The blueprint should not know how to render blueprint files by itself. It should call `@manmeetsai/blueprint-compiler` for validation, stage grouping, readiness, blueprint rendering, and repo snapshot generation.
 
-With the blueprint in place, the implementer should build the command surface in two passes. The first pass should create local storage, import/export, apply, and review primitives so state can be inspected or patched without prompts. The second pass should build interactive prompting that walks the live step contract, keeps users inside the terminal, prompts list fields one item at a time, prompts narrative textarea fields as multiline blocks terminated by an empty line, and persists changes after every answered field so interruptions are safe. Finally, the implementer should add focused tests, scripts, and documentation so a newcomer can run the CLI and verify that it generates a truthful starter snapshot end to end.
+With the blueprint in place, the implementer should build the command surface in two passes. The first pass should create local storage, import/export, apply, and review primitives so state can be inspected or patched without prompts. The second pass should build interactive prompting that walks the live step contract, keeps users inside the terminal, prompts list fields one item at a time, prompts narrative textarea fields as multiline blocks terminated by an empty line, and persists changes after every answered field so interruptions are safe. Finally, the implementer should add focused tests, scripts, and documentation so a newcomer can run the CLI and verify that it generates a truthful blueprint end to end.
 
 ## Milestones
 
@@ -147,7 +147,7 @@ Milestone 3 scaffolds the CLI blueprint and root command surface. At the end of 
 
 Milestone 4 implements local draft storage plus intake and review commands. At the end of this milestone, the CLI can initialize a draft definition, import or export the draft as JSON, resume the first incomplete stage, run an interactive stage prompt, and print a review summary showing which facts or stages are missing. The files touched will include the CLI command handlers, the local storage adapter, and any shared serialization helpers. Run the CLI manually from the root, fill a partial draft, interrupt it, rerun it, and confirm that readiness advances correctly. Success looks like a human being able to complete Product and Design in the terminal and see Design readiness become true without touching the web UI.
 
-Milestone 5 implements artifact generation. At the end of this milestone, the CLI can generate only the final starter snapshot artifact, writing an unpacked repo directory by default and a zip only when the caller passes `--zip`, using the same compiler entry points as the review flow. The command must reject incomplete drafts until review readiness is true, and it must require an explicit `--out` path rather than inventing a default artifact location. The files touched will include the generation command handlers and, if needed, compiler helper signatures that accept an explicit repo root path. Run the CLI with a complete fixture or imported draft and confirm that generated files appear under repo-root `docs/` inside the output tree, and that the optional repo zip unpacks into a slugified product folder. Success looks like the CLI producing the same user-facing artifact structure the web review download is expected to produce.
+Milestone 5 implements artifact generation. At the end of this milestone, the CLI can generate only the final blueprint artifact, writing an unpacked repo directory by default and a zip only when the caller passes `--zip`, using the same compiler entry points as the review flow. The command must reject incomplete drafts until review readiness is true, and it must require an explicit `--out` path rather than inventing a default artifact location. The files touched will include the generation command handlers and, if needed, compiler helper signatures that accept an explicit repo root path. Run the CLI with a complete fixture or imported draft and confirm that generated files appear under repo-root `docs/` inside the output tree, and that the optional repo zip unpacks into a slugified product folder. Success looks like the CLI producing the same user-facing artifact structure the web review download is expected to produce.
 
 Milestone 6 closes the loop with tests and documentation. At the end of this milestone, the repository includes focused blueprint-compiler tests, focused CLI tests, a root-level usage note for `bun run sbs`, and short transcripts proving successful end-to-end usage. The files touched will include the new blueprint tests and the relevant docs or README sections. Run blueprint-local tests, root lint and typecheck for the touched surfaces, and one manual CLI walkthrough. Success looks like a fresh coding agent or operator being able to follow the repo docs, run the CLI, and validate the output without guessing.
 
@@ -219,11 +219,11 @@ Expected observation: all touched blueprint tests and typechecks pass, and repo 
 
 ## Validation and Acceptance
 
-This initiative is complete only when a human can start from the repository root, run `bun run sbs resume`, answer or import the canonical blueprint facts, run `bun run sbs review` to see accurate readiness, and run a generation command that produces the same starter snapshot shape that the existing review flow expects. Acceptance is observable behavior, not internal structure. The CLI must prove that the Product, Design, Marketing, Build Plan, and Review progression is driven by `blueprintStageDefinitions` and `evaluateBlueprintReadiness()` rather than by a duplicate hand-maintained command list.
+This initiative is complete only when a human can start from the repository root, run `bun run sbs resume`, answer or import the canonical blueprint facts, run `bun run sbs review` to see accurate readiness, and run a generation command that produces the same blueprint shape that the existing review flow expects. Acceptance is observable behavior, not internal structure. The CLI must prove that the Product, Design, Marketing, Build Plan, and Review progression is driven by `blueprintStageDefinitions` and `evaluateBlueprintReadiness()` rather than by a duplicate hand-maintained command list.
 
 Validation must cover the contract, the CLI, and the generated artifacts. The blueprint-compiler tests must still pass after any schema, readiness, or repo-root changes. The CLI blueprint must have focused tests for argument parsing, local storage, import/export, readiness reporting, and generation command behavior. One manual terminal walkthrough is mandatory because the user-visible value is the CLI experience itself. That walkthrough should show draft creation or import, partial readiness, completion, and artifact generation. If any repo-wide check is skipped because of unrelated failures, the plan must document the exact failing command and the unrelated files.
 
-The output artifact acceptance bar is specific. A generated repo must unpack into a slugified product folder and contain generated files under repo-root `docs/` rather than in an ad hoc folder. The CLI must not require Clerk, Convex, or web sessions to generate the output. Placeholder-friendly fields such as `domain` and `support_email` must remain optional if the compiler contract still treats them that way. Existing web output behavior must continue to pass its focused tests, because the CLI is an additional frontend to the same compiler, not a fork.
+The output artifact acceptance bar is specific. A Blueprint must unpack into a slugified product folder and contain generated files under repo-root `docs/` rather than in an ad hoc folder. The CLI must not require Clerk, Convex, or web sessions to generate the output. Placeholder-friendly fields such as `domain` and `support_email` must remain optional if the compiler contract still treats them that way. Existing web output behavior must continue to pass its focused tests, because the CLI is an additional frontend to the same compiler, not a fork.
 
 ## Idempotence and Recovery
 
@@ -289,10 +289,10 @@ Observed transcripts:
     Exported draft to /Users/parkerrex/Projects/ship-by-sunday/.ship-by-sunday/export.json
 
     $ bun run sbs generate --out ./tmp/sbs-cli-repo --force
-    Generated repo directory at /Users/parkerrex/Projects/ship-by-sunday/tmp/sbs-cli-repo/ship-by-sunday-os
+    Generated Blueprint directory at /Users/parkerrex/Projects/ship-by-sunday/tmp/sbs-cli-repo/ship-by-sunday-os
 
     $ bun run sbs generate --out ./tmp/sbs-cli-repo.zip --zip --force
-    Generated repo zip at /Users/parkerrex/Projects/ship-by-sunday/tmp/sbs-cli-repo.zip
+    Generated Blueprint zip at /Users/parkerrex/Projects/ship-by-sunday/tmp/sbs-cli-repo.zip
 
 ## Interfaces and Dependencies
 

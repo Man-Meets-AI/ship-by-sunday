@@ -108,30 +108,33 @@ describe("blueprint field helpers", () => {
 			createdAt: 1,
 			updatedAt: 1,
 		});
-		const stage = getBlueprintStageDefinition("build-plan");
+		const stage = getBlueprintStageDefinition("blueprint");
 		const stageDraftValues = buildStageDraftValues(
 			projectDefinition.facts,
 			stage,
 		);
-		const deliveryStep = stage.steps[0];
-		const deliveryDraftValues = buildStepDraftValues(
-			projectDefinition.facts,
-			deliveryStep,
-		);
+		const pricingStep = stage.steps.find((step) => step.id === "pricing");
+		if (!pricingStep) {
+			throw new Error("Missing blueprint pricing step");
+		}
+		const setupStep = stage.steps.find((step) => step.id === "setup");
+		if (!setupStep) {
+			throw new Error("Missing blueprint setup step");
+		}
 		const pricingDraftValues = buildStepDraftValues(
 			projectDefinition.facts,
-			reducedPricingStep,
+			pricingStep,
 		);
 
-		expect(Object.keys(stageDraftValues)).toEqual(["delivery", "setup"]);
-		expect(deliveryDraftValues.pricing).toBe("29");
+		expect(Object.keys(stageDraftValues)).toContain("pricing");
+		expect(Object.keys(stageDraftValues)).toContain("setup");
+		expect(pricingDraftValues.pricing).toBe("29");
 		expect(stageDraftValues.setup.scope_in).toBe(
 			"Capture product facts\nUnlock blueprints\nDownload repo",
 		);
-		expect(pricingDraftValues.pricing).toBe("29");
-		expect(pricingDraftValues.core_flow).toBe(
-			"Capture product facts\nUnlock blueprints\nDownload repo",
-		);
+		expect(
+			buildStepDraftValues(projectDefinition.facts, setupStep).scope_in,
+		).toBe("Capture product facts\nUnlock blueprints\nDownload repo");
 	});
 
 	it("builds a save payload that trims, splits, and normalizes values", () => {
@@ -159,14 +162,24 @@ describe("blueprint field helpers", () => {
 			createdAt: 1,
 			updatedAt: 1,
 		});
-		const step = getBlueprintStageDefinition("design").steps[0];
+		const blueprintStage = getBlueprintStageDefinition("blueprint");
+		const step = blueprintStage.steps.find(
+			(candidate) => candidate.id === "design",
+		);
+		if (!step) {
+			throw new Error("Missing blueprint design step");
+		}
 		const draftValues = {
 			...buildStepDraftValues(projectDefinition.facts, step),
 			theme_hex: " #123456 ",
 		};
 		const savePayload = buildSavePayload(step, draftValues);
-		const buildPlanDeliveryStep =
-			getBlueprintStageDefinition("build-plan").steps[0];
+		const buildPlanDeliveryStep = blueprintStage.steps.find(
+			(candidate) => candidate.id === "pricing",
+		);
+		if (!buildPlanDeliveryStep) {
+			throw new Error("Missing blueprint pricing step");
+		}
 		const buildPlanDeliveryDraftValues = {
 			...buildStepDraftValues(projectDefinition.facts, buildPlanDeliveryStep),
 			pricing: " 29 ",
@@ -175,13 +188,22 @@ describe("blueprint field helpers", () => {
 			buildPlanDeliveryStep,
 			buildPlanDeliveryDraftValues,
 		);
-		const buildPlanSetupStep =
-			getBlueprintStageDefinition("build-plan").steps[1];
+		const buildPlanSetupStep = blueprintStage.steps.find(
+			(candidate) => candidate.id === "setup",
+		);
+		if (!buildPlanSetupStep) {
+			throw new Error("Missing blueprint setup step");
+		}
 		const buildPlanSetupPayload = buildSavePayload(buildPlanSetupStep, {
 			...buildStepDraftValues(projectDefinition.facts, buildPlanSetupStep),
 			domain: " ",
 		});
-		const problemStep = getBlueprintStageDefinition("product").steps[1];
+		const problemStep = blueprintStage.steps.find(
+			(candidate) => candidate.id === "problem",
+		);
+		if (!problemStep) {
+			throw new Error("Missing blueprint problem step");
+		}
 		const problemDraftValues = {
 			...buildStepDraftValues(projectDefinition.facts, problemStep),
 			problem_severity: "medium",

@@ -1,6 +1,6 @@
 # Ship by Sunday Build Checklist
 
-Use this before, during, and after any substantial build run from a Ship by Sunday starter snapshot.
+Use this before, during, and after any substantial build run from a Ship by Sunday blueprint.
 
 ## 1. Task definition
 

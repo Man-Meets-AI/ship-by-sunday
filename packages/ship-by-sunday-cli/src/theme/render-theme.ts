@@ -107,7 +107,7 @@ function formatCliLine(line: string, options: CliRenderOptions) {
 		line.startsWith("Imported draft") ||
 		line.startsWith("Exported draft") ||
 		line.startsWith("Applied ") ||
-		line.startsWith("Generated repo")
+		line.startsWith("Generated Blueprint")
 	) {
 		return paint(line, "value", options);
 	}

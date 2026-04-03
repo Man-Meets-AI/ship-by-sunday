@@ -277,7 +277,7 @@ export async function handleGenerateCommand({
 			});
 			return 0;
 		}
-		io.write(`Generated repo zip at ${absoluteOutPath}`);
+		io.write(`Generated Blueprint zip at ${absoluteOutPath}`);
 		return 0;
 	}
 
@@ -299,6 +299,6 @@ export async function handleGenerateCommand({
 		});
 		return 0;
 	}
-	io.write(`Generated repo directory at ${outputDirectoryPath}`);
+	io.write(`Generated Blueprint directory at ${outputDirectoryPath}`);
 	return 0;
 }

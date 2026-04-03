@@ -59,7 +59,7 @@ Current delegation pattern:
 - Explicit safe browser execution: add `browser_runner`
 - Command-backed or report-worthy verdict: add `release_summarizer`
 
-For blueprint-funnel work, `default_ship` should not rely on browser lanes alone. The pack now needs the blueprint integration-ui proof suite for `/start`, the routed workbench, `/review`, and the blocker sidebar because those tests are first-class proof for the current blueprint UX contract.
+For blueprint-funnel work, `default_ship` should not rely on browser lanes alone. The pack now needs the blueprint integration-ui proof suite for `/blueprint`, `/review`, and the legacy redirect map because those tests are first-class proof for the current canonical workspace contract.
 
 On local dev, the preferred authenticated browser proof is now the local-auth lane rather than the sandbox-only gate. Use `PLAYWRIGHT_BASE_URL=http://localhost:3000 bun run --cwd apps/web test:e2e:local-auth:default-ship` when you need the protected blueprint funnel on the running local stack.
 
@@ -149,7 +149,7 @@ Important: a Playwright run that exits `0` with every test skipped is not browse
 - Start on `dev` first. The latest green integrated staging proof is GitHub Actions run `23865552478` on commit `2b5eccf85141ad90ef2b8af4b85bda4804491189`, and it passed `release_scope`, `default_ship`, forced `billing_integration`, and `release_gate`.
 - Move to `prod` second for release evidence. The latest green production proof is GitHub Actions run `23867770574` on commit `92da71a5218440030828d2b36bfab76a41993b79`, and the matching green Convex production deploy is `23867770585`.
 - `qa/runs/2026-04-01-release-proof-final-green.md` is the durable report for that final April 1 release state.
-- In this repo, the preferred production proof remains a live no-cost Checkout run using a restricted `100% off` promotion code, because that exercises `checkout.session.completed`, the webhook grant, `/checkout/success`, and `/start` without requiring a real charge.
+- In this repo, the preferred production proof remains a live no-cost Checkout run using a restricted `100% off` promotion code, because that exercises `checkout.session.completed`, the webhook grant, `/checkout/success`, and `/blueprint` without requiring a real charge.
 - Treat `qa/runs/` plus the latest GitHub Actions run IDs as the durable evidence set and read the latest relevant report for the target environment before rerunning a pack.
 
 ## Fresh-Agent Restart
@@ -188,10 +188,10 @@ For local Stripe billing reruns, make sure `.env.local` contains `NEXT_PUBLIC_CO
 
 For blueprint-focused QA on local dev, the concrete behaviors worth checking are:
 
-- `/start` is a stacked kickoff with one primary `Continue with ...` CTA
-- the routed blueprint workbench keeps the connected within-stage page strip intact
-- the workbench uses Continue-only save feedback and one primary `Continue` action
-- `/review` keeps the Starter Snapshot primary and delays the full `Execute / Ship` surface until after the download moment
+- `/blueprint` is the canonical protected entry and shows the combined intake plus overview/video block
+- the one-page blueprint uses Continue-only save feedback and one primary `Continue to Review` action
+- legacy `/start`, `/product/*`, `/design/*`, `/marketing/*`, and `/build-plan/*` URLs redirect into `/blueprint` anchors
+- `/review` keeps the Blueprint primary and delays the full `Execute / Ship` surface until after the download moment
 
 ## Environment sources
 

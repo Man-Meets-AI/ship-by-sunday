@@ -54,7 +54,7 @@ export async function getBlueprintWorkspaceStateHandler(
 			: null,
 		firstIncompleteStageId: projectDefinition
 			? stageStatus.firstIncompleteStageId
-			: "start",
+			: "blueprint",
 		blueprintReadiness: stageStatus.blueprintReadiness,
 		stageStatuses: stageStatus.stageStatuses,
 	};

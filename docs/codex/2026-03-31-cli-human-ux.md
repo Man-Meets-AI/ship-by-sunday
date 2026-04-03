@@ -246,7 +246,7 @@ If a manual prompt test is interrupted, recovery should be simple. Re-run `bun r
 These are the post-implementation proof points gathered from live repository runs on 2026-03-31:
 
     $ script -q /dev/null bun run sbs
-    Ship by Sunday CLI • local blueprint intake and starter snapshot generation
+    Ship by Sunday CLI • local blueprint intake and blueprint generation
     Repository: ship-by-sunday
     Working root: /Users/parkerrex/Projects/ship-by-sunday
     Recommended next commands

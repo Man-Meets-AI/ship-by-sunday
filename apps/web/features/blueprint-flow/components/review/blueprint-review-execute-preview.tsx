@@ -22,8 +22,8 @@ export function BlueprintReviewExecutePreview({
 						Keep going
 					</h2>
 					<p className="text-lg leading-relaxed text-muted-foreground">
-						Once you&apos;ve downloaded the Ship Kit, continue into Build
-						Lessons while the blueprint context is still hot.
+						Once you&apos;ve downloaded the Ship by Sunday Blueprint, continue
+						into Build Lessons while the blueprint context is still hot.
 					</p>
 				</div>
 
@@ -69,7 +69,7 @@ export function BlueprintReviewExecutePreview({
 							className="h-14 w-full text-lg font-bold"
 						>
 							<a download href="/api/download/repo">
-								Download Ship Kit first
+								Download Blueprint first
 							</a>
 						</Button>
 					) : (
@@ -80,7 +80,7 @@ export function BlueprintReviewExecutePreview({
 							className="h-14 w-full text-lg font-bold"
 							disabled
 						>
-							Download Ship Kit first
+							Download Blueprint first
 						</Button>
 					)}
 					<p className="px-1 text-center text-xs leading-5 text-muted-foreground lg:text-left">

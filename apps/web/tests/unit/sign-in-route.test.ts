@@ -55,7 +55,7 @@ describe("sign-in route", () => {
 		expect(redirectMock).toHaveBeenCalledWith("/settings");
 	});
 
-	it("redirects authenticated visits without a target to the workspace start", async () => {
+	it("redirects authenticated visits without a target to the blueprint page", async () => {
 		authMock.mockResolvedValue({
 			isAuthenticated: true,
 		});
@@ -64,7 +64,7 @@ describe("sign-in route", () => {
 			searchParams: Promise.resolve({}),
 		});
 
-		expect(redirectMock).toHaveBeenCalledWith("/start");
+		expect(redirectMock).toHaveBeenCalledWith("/blueprint");
 	});
 
 	it("renders the sign-in page for signed-out visits", async () => {
@@ -87,14 +87,14 @@ describe("sign-in route", () => {
 		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue("cs_test_123");
 
 		const result = await Page({
-			searchParams: Promise.resolve({ redirect_url: "/start" }),
+			searchParams: Promise.resolve({ redirect_url: "/blueprint" }),
 		});
 
 		expect(redirectMock).not.toHaveBeenCalled();
 		expect(result).toMatchObject({
 			props: {
 				postCheckoutSignUpHref:
-					"/sign-up?session_id=cs_test_123&redirect_url=%2Fstart",
+					"/sign-up?session_id=cs_test_123&redirect_url=%2Fblueprint",
 			},
 		});
 	});

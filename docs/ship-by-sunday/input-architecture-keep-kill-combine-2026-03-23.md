@@ -45,7 +45,7 @@ In this repo, the target derived docs are:
 - the generated marketing blueprint
 - the generated build blueprint
 - the shipped ExecPlan prompt assets under `docs/prompts/`
-- the customer-safe starter snapshot
+- the customer-safe blueprint
 
 ### 3. Workflow State
 
@@ -299,7 +299,7 @@ Ship the static ExecPlan assets:
 
 #### Repo blueprint
 
-Generate one starter snapshot that includes:
+Generate one blueprint that includes:
 - the shared facts snapshot
 - the generated design, marketing, and build docs
 - the shipped ExecPlan prompt assets

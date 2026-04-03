@@ -1,5 +1,5 @@
 ---
-summary: "Reframes the public product story around Agent-Ready Packs and a Starter Snapshot, replacing the retired course wrapper and private starter-repo narrative. It aligns homepage copy, protected-flow labels, docs, module flags, downloads, and tests to one coherent public contract."
+summary: "Reframes the public product story around Agent-Ready Packs and a Blueprint, replacing the retired course wrapper and private starter-repo narrative. It aligns homepage copy, protected-flow labels, docs, module flags, downloads, and tests to one coherent public contract."
 read_when: "Open this when changing public-facing offer language, homepage framing, review/download artifact names, or the visible starter-repo module."
 plan_status: "done"
 ---
@@ -12,7 +12,7 @@ This ExecPlan must be maintained in accordance with `docs/codex/PLANS.md`.
 
 ## Purpose / Big Picture
 
-After this work, a visitor landing on `/`, moving into the protected flow, opening review/download, or reading the shipped docs under `apps/web/content/docs/` should encounter one coherent public story. That story is that Ship by Sunday is an OpenAI-derived, OpenAI-aligned system that turns one product idea into Agent-Ready Packs for design, marketing, and build execution, then generates a final Starter Snapshot. The page and supporting customer-visible surfaces should stop selling a guided sprint, a workshop, a masterclass, a four-block course, or a private starter repo as the core delivery. A human should be able to verify the change by loading the homepage, seeing the new category language, seeing the new durability section, seeing pack-first artifact names on the review/download surfaces, seeing the obsolete starter-repo module disappear from visible product surfaces, and seeing the public docs read consistently with that new story.
+After this work, a visitor landing on `/`, moving into the protected flow, opening review/download, or reading the shipped docs under `apps/web/content/docs/` should encounter one coherent public story. That story is that Ship by Sunday is an OpenAI-derived, OpenAI-aligned system that turns one product idea into Agent-Ready Packs for design, marketing, and build execution, then generates a final Blueprint. The page and supporting customer-visible surfaces should stop selling a guided sprint, a workshop, a masterclass, a four-block course, or a private starter repo as the core delivery. A human should be able to verify the change by loading the homepage, seeing the new category language, seeing the new durability section, seeing pack-first artifact names on the review/download surfaces, seeing the obsolete starter-repo module disappear from visible product surfaces, and seeing the public docs read consistently with that new story.
 
 ## Progress
 
@@ -20,7 +20,7 @@ After this work, a visitor landing on `/`, moving into the protected flow, openi
 - [x] 2026-03-25 EDT — Inspected the current homepage contract in `apps/web/config/product.ts`, `apps/web/features/marketing/content/home.ts`, `apps/web/features/marketing/lib/home-page-render-model.ts`, `apps/web/features/marketing/components/home-page.tsx`, and the section components under `apps/web/features/marketing/components/home-page/`.
 - [x] 2026-03-25 EDT — Inspected the blueprint compiler and review/download flow in `packages/blueprint-compiler/src/stages/stage-definitions.ts`, `packages/blueprint-compiler/src/server/template-loader.ts`, `packages/blueprint-compiler/src/server/rendered-blueprint-tree.ts`, `packages/blueprint-compiler/src/repo-generation/materialize-repo-snapshot.ts`, `apps/web/features/blueprint-flow/components/blueprint-start-page.tsx`, `apps/web/features/blueprint-flow/components/blueprint-review-page.tsx`, and the download routes under `apps/web/app/api/download/`.
 - [x] 2026-03-25 EDT — Grilled the draft plan in chat and resolved the major scope branches: full customer-visible naming pass, hybrid public terminology rule, standardized artifact names, broad shipped-docs alignment, guarantee rewrite without policy change, and disabling the visible `starterRepo` module.
-- [x] 2026-03-25 EDT — Completed Milestone 1. Rewrote `apps/web/config/product.ts` and `apps/web/features/marketing/content/home.ts` around `Agent-Ready Packs` and `Starter Snapshot`, added `apps/web/tests/unit/home-page-content.test.ts`, and updated `apps/web/tests/browser-smoke/app-smoke.spec.ts` to assert the new homepage wording.
+- [x] 2026-03-25 EDT — Completed Milestone 1. Rewrote `apps/web/config/product.ts` and `apps/web/features/marketing/content/home.ts` around `Agent-Ready Packs` and `Blueprint`, added `apps/web/tests/unit/home-page-content.test.ts`, and updated `apps/web/tests/browser-smoke/app-smoke.spec.ts` to assert the new homepage wording.
 - [x] 2026-03-25 EDT — Completed Milestone 2. Added the `durability` section through `apps/web/config/product.ts`, `apps/web/features/marketing/content/home.ts`, `apps/web/features/marketing/lib/home-page-render-model.ts`, `apps/web/features/marketing/components/home-page.tsx`, and `apps/web/features/marketing/components/home-page/durability-section.tsx`; replaced the four-block homepage art with new pack-system SVGs under `apps/web/public/`; and updated `apps/web/content/docs/configure-the-homepage.mdx` plus homepage tests to match the new contract.
 - [x] 2026-03-25 EDT — Completed Milestone 3. Added a shared outward-facing artifact contract in `packages/blueprint-compiler/src/public-artifact-contract.ts`, updated review/start/sidebar copy in `apps/web/features/blueprint-flow/components/`, changed download filenames in `apps/web/app/api/download/`, rewrote visible blueprint headings in `packages/blueprint-compiler/src/blueprints/`, and added focused integration and renderer tests for the new naming.
 - [x] 2026-03-25 EDT — Completed Milestone 4. Disabled `starterConfig.modules.starterRepo` by default in `apps/web/config/product.ts`, removed the legacy starter-repo module from the visible workspace-home inventory in `apps/web/features/workspace-home/lib/workspace-home-model.ts`, confirmed settings and mission no longer expose the obsolete card path by default, and updated the directly coupled docs entry points plus unit tests to match.
@@ -56,7 +56,7 @@ The final cross-workspace format pass exposed one unrelated-but-real hygiene iss
 
 2026-03-25 — Decision: use the hybrid terminology rule. Rationale: homepage offer copy, artifact labels, and download naming should use `Agent-Ready Packs`, but internal and route-adjacent `blueprint` terminology can remain where it names the real protected flow or output tree.
 
-2026-03-25 — Decision: the outward-facing artifact names are `Design Pack`, `Marketing Pack`, `Build Pack`, `Prompt Pack`, and `Starter Snapshot`. Rationale: the artifact stack needs one noun family, and `Starter Snapshot` is a clearer public name for the generated review download than `repo snapshot` or `starter repo`.
+2026-03-25 — Decision: the outward-facing artifact names are `Design Pack`, `Marketing Pack`, `Build Pack`, `Prompt Pack`, and `Blueprint`. Rationale: the artifact stack needs one noun family, and `Blueprint` is a clearer public name for the generated review download than `repo snapshot` or `starter repo`.
 
 2026-03-25 — Decision: preserve the guarantee policy and rewrite only the language. Rationale: the current FAQ and pricing copy make a real business promise; the plan should modernize the wording without inventing a new policy.
 
@@ -72,7 +72,7 @@ The final cross-workspace format pass exposed one unrelated-but-real hygiene iss
 
 2026-03-25 — Decision: centralize outward-facing artifact labels and filenames in `packages/blueprint-compiler/src/public-artifact-contract.ts`. Rationale: Review UI, stage sidebar download buttons, archive filenames, and generated pack headings all need the same customer-facing contract, and a shared source prevents them from drifting again.
 
-2026-03-25 — Decision: present the `Prompt Pack` on Review as part of the final `Starter Snapshot` instead of inventing a new standalone download route in this slice. Rationale: the current product only exposes separate archive routes for design, marketing, and build. Showing Prompt Pack as included in the final snapshot keeps the visible artifact set truthful without silently expanding API scope.
+2026-03-25 — Decision: present the `Prompt Pack` on Review as part of the final `Blueprint` instead of inventing a new standalone download route in this slice. Rationale: the current product only exposes separate archive routes for design, marketing, and build. Showing Prompt Pack as included in the final snapshot keeps the visible artifact set truthful without silently expanding API scope.
 
 2026-03-25 — Decision: when `starterRepo` is disabled, remove it from the visible workspace-home module inventory entirely instead of showing it as a disabled module. Rationale: leaving a disabled row still advertises the obsolete delivery path, which conflicts with the goal of removing it from the default customer-visible contract.
 
@@ -80,15 +80,15 @@ The final cross-workspace format pass exposed one unrelated-but-real hygiene iss
 
 ## Outcomes & Retrospective
 
-2026-03-25 milestone note: the homepage copy and config layer now lead with `Agent-Ready Packs`, `Prompt Pack`, and `Starter Snapshot` instead of the old guided-sprint framing. The hero, system explanation, FAQ, and pricing include list now describe the pack system truthfully, and a focused homepage content test plus targeted browser smoke assertions lock that wording in place. The main remaining homepage contradiction is visual: the shell still shows the old four-block artwork until Milestone 2 replaces it.
+2026-03-25 milestone note: the homepage copy and config layer now lead with `Agent-Ready Packs`, `Prompt Pack`, and `Blueprint` instead of the old guided-sprint framing. The hero, system explanation, FAQ, and pricing include list now describe the pack system truthfully, and a focused homepage content test plus targeted browser smoke assertions lock that wording in place. The main remaining homepage contradiction is visual: the shell still shows the old four-block artwork until Milestone 2 replaces it.
 
 2026-03-25 milestone note: the homepage shell now contains the new `durability` section in the intended order, and the old four-block art has been replaced by pack-system SVGs in both the hero preview and the system explainer. The next remaining public-story gap is downstream naming: Review, download filenames, and generated pack headings still need the outward-facing artifact names from Milestone 3.
 
-2026-03-25 milestone note: the protected review/download surfaces now use `Design Pack`, `Marketing Pack`, `Build Pack`, `Prompt Pack`, and `Starter Snapshot`, and the generated pack headings plus zip filenames match those outward labels. The remaining work is now mostly subtractive: removing the obsolete starter-repo module from visible surfaces and sweeping the shipped docs for stale language.
+2026-03-25 milestone note: the protected review/download surfaces now use `Design Pack`, `Marketing Pack`, `Build Pack`, `Prompt Pack`, and `Blueprint`, and the generated pack headings plus zip filenames match those outward labels. The remaining work is now mostly subtractive: removing the obsolete starter-repo module from visible surfaces and sweeping the shipped docs for stale language.
 
 2026-03-25 milestone note: the obsolete starter-repo delivery path is now off by default and hidden from the visible settings, workspace-home, and mission-adjacent contract. The remaining work is copy cleanup: the shipped docs still need a broader stale-language sweep so a buyer or operator does not hit old repo-snapshot or starter-template framing after leaving the homepage.
 
-2026-03-25 final outcome: the public homepage, the protected review/download flow, the visible module inventory, the docs entry points, and the shipped homepage contract doc now tell one coherent story. The product leads with `Agent-Ready Packs`, includes the `durability` explanation, exposes `Starter Snapshot` as the final handoff, and no longer advertises the obsolete private starter-repo path in the default customer-visible surfaces. The remaining deliberate gap is technical debt only: the deeper `features/starter-repo/` implementation and old starter-repo helper code still exist behind the now-disabled path, which is acceptable for this initiative because the plan explicitly scoped deletion out.
+2026-03-25 final outcome: the public homepage, the protected review/download flow, the visible module inventory, the docs entry points, and the shipped homepage contract doc now tell one coherent story. The product leads with `Agent-Ready Packs`, includes the `durability` explanation, exposes `Blueprint` as the final handoff, and no longer advertises the obsolete private starter-repo path in the default customer-visible surfaces. The remaining deliberate gap is technical debt only: the deeper `features/starter-repo/` implementation and old starter-repo helper code still exist behind the now-disabled path, which is acceptable for this initiative because the plan explicitly scoped deletion out.
 
 Known likely follow-up at plan creation time: once the visible delivery path is truthful again, a later cleanup slice may fully remove the dormant `starterRepo` module code, tests, and course-era build surfaces that still assume the private repo path. That deletion is intentionally out of scope for this initiative.
 
@@ -102,7 +102,7 @@ The source of truth for the new public message is not limited to the homepage fi
 
 For this plan, “Agent-Ready Pack” means a file-based operating pack that gives an agent durable context in one domain. In this repository, those packs are not vague notes. They are generated files such as `AGENTS.md`, `CHECKLIST.md`, `PLANS.md`, `documentation.md`, and domain prompts under `blueprint/prompts/*`.
 
-For this plan, “Starter Snapshot” means the generated review download bundle returned by `apps/web/app/api/download/repo/route.ts`, currently built by `buildReviewDownloadZip()` and shipped with `content-disposition: starter-repo.zip`. It does not mean the separate old private GitHub starter-repo access workflow. That workflow is now obsolete for this product and must be disabled in visible surfaces.
+For this plan, “Blueprint” means the generated review download bundle returned by `apps/web/app/api/download/repo/route.ts`, currently built by `buildReviewDownloadZip()` and shipped with `content-disposition: starter-repo.zip`. It does not mean the separate old private GitHub starter-repo access workflow. That workflow is now obsolete for this product and must be disabled in visible surfaces.
 
 For this plan, the hybrid terminology rule means this: use `Agent-Ready Packs` and the standardized artifact names in homepage offer copy, review/download labels, shipped docs, and other buyer-facing artifact language. Keep `blueprint` where it names the actual protected flow, output tree, blueprint, or technical contract.
 
@@ -114,7 +114,7 @@ Once the content model is stable, add the new `durability` top-level homepage se
 
 After the new section exists, replace the old four-block visuals and any stale alt text with a pack-system visual. Add new asset files under `apps/web/public/`, point the content layer at them, and update `hero-sections.tsx` and `sprint-path-unified-section.tsx` so the visible art no longer contradicts the copy.
 
-Then align the public artifact names beyond the homepage. Update `apps/web/features/blueprint-flow/components/blueprint-review-page.tsx` so Review describes the new artifact stack and the final Starter Snapshot clearly. Update `apps/web/app/api/download/repo/route.ts` and `apps/web/app/api/download/blueprint/[stage]/route.ts` so customer-visible zip filenames reflect the new outward artifact names. Update the blueprint renderer titles in `packages/blueprint-compiler/src/blueprints/render-design-blueprint.ts`, `render-marketing-blueprint.ts`, `render-build-blueprint.ts`, `render-prompt-pack.ts`, and `render-blueprint-readme.ts` wherever the generated artifact headings are visible to customers.
+Then align the public artifact names beyond the homepage. Update `apps/web/features/blueprint-flow/components/blueprint-review-page.tsx` so Review describes the new artifact stack and the final Blueprint clearly. Update `apps/web/app/api/download/repo/route.ts` and `apps/web/app/api/download/blueprint/[stage]/route.ts` so customer-visible zip filenames reflect the new outward artifact names. Update the blueprint renderer titles in `packages/blueprint-compiler/src/blueprints/render-design-blueprint.ts`, `render-marketing-blueprint.ts`, `render-build-blueprint.ts`, `render-prompt-pack.ts`, and `render-blueprint-readme.ts` wherever the generated artifact headings are visible to customers.
 
 Next, disable and hide the obsolete `starterRepo` module in visible product surfaces. Set the default module flag off in `apps/web/config/product.ts`. Update `apps/web/features/settings/components/settings-page.tsx`, `apps/web/features/workspace-home/lib/workspace-home-model.ts`, `apps/web/features/workspace-home/components/workspace-home-setup-cards.tsx`, and `apps/web/features/course/mission/components/mission/mission-extras-row.tsx` so the stale module stops appearing. Remove or rewrite homepage and docs copy that still describes private starter-repo delivery as part of the offer. Do not delete the underlying `features/starter-repo/` implementation yet.
 
@@ -132,7 +132,7 @@ At the end of this milestone, the homepage will contain a new top-level section 
 
 ### Milestone 3 — Align visible artifact names across protected review/download and generated pack headings
 
-At the end of this milestone, the review page, pack download route filenames, repo download route filename, and generated customer-visible pack titles will all use the outward artifact set: `Design Pack`, `Marketing Pack`, `Build Pack`, `Prompt Pack`, and `Starter Snapshot`. Technical `blueprint` terms may remain where they name the internal flow or output structure. Success is proven by loading `/review`, observing the new labels, and verifying the download responses use the intended visible filenames.
+At the end of this milestone, the review page, pack download route filenames, repo download route filename, and generated customer-visible pack titles will all use the outward artifact set: `Design Pack`, `Marketing Pack`, `Build Pack`, `Prompt Pack`, and `Blueprint`. Technical `blueprint` terms may remain where they name the internal flow or output structure. Success is proven by loading `/review`, observing the new labels, and verifying the download responses use the intended visible filenames.
 
 ### Milestone 4 — Disable the obsolete visible starter-repo delivery path
 
@@ -224,7 +224,7 @@ Expected observation: the public homepage still loads, the `system` and `pricing
 
 The change is accepted only when a human can move through the public homepage, the public docs, and the protected start/review surfaces without hitting contradictory language. The homepage must clearly sell the Agent-Ready Pack System and the new outward artifact names. The old four-block, course, workshop, CEO-block, and private starter-repo delivery language must be gone from visible product surfaces.
 
-The homepage must now visibly communicate one canonical intake, Design / Marketing / Build / Prompt packs, the new durability story, and the final Starter Snapshot. The `system` and `pricing` anchors must still exist, and the shared CTA behavior must still route through checkout unless the plan is later revised.
+The homepage must now visibly communicate one canonical intake, Design / Marketing / Build / Prompt packs, the new durability story, and the final Blueprint. The `system` and `pricing` anchors must still exist, and the shared CTA behavior must still route through checkout unless the plan is later revised.
 
 For Milestone 1 specifically, the focused acceptance lane is the app-local homepage suite recorded in `Concrete Steps`: the content contract test, the homepage render-model and structured-data tests, the CTA integration test, and the targeted browser smoke checks for `/` and the JSON-LD block.
 
@@ -250,7 +250,7 @@ Useful success evidence will look like this:
 
     Homepage hero now says “Agent-Ready Packs” and no longer references a guided sprint or four-block system.
     The section after “What’s inside” explains that the packs remain useful as tools change.
-    Review now says “Starter Snapshot” and exposes the renamed pack downloads.
+    Review now says “Blueprint” and exposes the renamed pack downloads.
     Settings and workspace-home no longer expose the old starter-repo access workflow.
     Browser smoke still reaches the `#system` and `#pricing` anchors.
     Build completes without homepage-, download-, or module-visibility regressions.

@@ -1,12 +1,6 @@
 import type { CanonicalProjectFactKey } from "../canonical-project-definition/project-definition";
 
-export type BlueprintStageId =
-	| "start"
-	| "product"
-	| "design"
-	| "marketing"
-	| "build-plan"
-	| "review";
+export type BlueprintStageId = "blueprint" | "review";
 
 export type BlueprintStepDefinition = {
 	id: string;
@@ -23,7 +17,7 @@ export type BlueprintStageDefinition = {
 	steps: readonly BlueprintStepDefinition[];
 };
 
-const productStageSteps = [
+const blueprintStageSteps = [
 	{
 		id: "foundation",
 		label: "Foundation",
@@ -39,36 +33,15 @@ const productStageSteps = [
 		label: "Outcome",
 		fieldKeys: ["success_looks_like", "core_flow"],
 	},
-] as const satisfies readonly BlueprintStepDefinition[];
-
-const designStageSteps = [
 	{
-		id: "direction",
-		label: "Direction",
-		fieldKeys: ["theme_hex"],
+		id: "design",
+		label: "Design",
+		fieldKeys: ["theme_hex", "design_references"],
 		requiredFieldKeys: [],
 	},
 	{
-		id: "references",
-		label: "References",
-		fieldKeys: ["design_references"],
-		requiredFieldKeys: [],
-	},
-] as const satisfies readonly BlueprintStepDefinition[];
-
-const marketingStageSteps = [
-	{
-		id: "preview",
-		label: "Generated preview",
-		fieldKeys: [],
-		requiredFieldKeys: [],
-	},
-] as const satisfies readonly BlueprintStepDefinition[];
-
-const buildPlanStageSteps = [
-	{
-		id: "delivery",
-		label: "Delivery",
+		id: "pricing",
+		label: "Pricing",
 		fieldKeys: ["pricing"],
 		requiredFieldKeys: ["pricing"],
 	},
@@ -78,44 +51,22 @@ const buildPlanStageSteps = [
 		fieldKeys: ["scope_in", "scope_out", "domain", "contact_email"],
 		requiredFieldKeys: [],
 	},
+	{
+		id: "generated-preview",
+		label: "Generated preview",
+		fieldKeys: [],
+		requiredFieldKeys: [],
+	},
 ] as const satisfies readonly BlueprintStepDefinition[];
 
 export const blueprintStageDefinitions = [
 	{
-		id: "start",
-		label: "Start",
-		description: "Orientation and blueprint-first framing.",
-		route: "/start",
-		steps: [],
-	},
-	{
-		id: "product",
-		label: "Product",
-		description: "Lock the product, problem, and core flow.",
-		route: "/product",
-		steps: productStageSteps,
-	},
-	{
-		id: "design",
-		label: "Design",
-		description: "Set the visual anchor and any references.",
-		route: "/design",
-		steps: designStageSteps,
-	},
-	{
-		id: "marketing",
-		label: "Marketing",
+		id: "blueprint",
+		label: "Blueprint",
 		description:
-			"Review generated defaults instead of filling a marketing form.",
-		route: "/marketing",
-		steps: marketingStageSteps,
-	},
-	{
-		id: "build-plan",
-		label: "Build Plan",
-		description: "Capture pricing and optional rollout details.",
-		route: "/build-plan",
-		steps: buildPlanStageSteps,
+			"Lock the full reduced blueprint on one page before review and download.",
+		route: "/blueprint",
+		steps: blueprintStageSteps,
 	},
 	{
 		id: "review",

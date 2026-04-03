@@ -69,7 +69,7 @@ describe("home page content", () => {
 		expect(homePageContent.pricingSection.includes).toEqual(
 			expect.arrayContaining([
 				"Agent-Ready Packs",
-				"Agent-First Starter Repo",
+				"Ship by Sunday Blueprint",
 				"Fast Pass Walkthroughs",
 			]),
 		);
@@ -83,7 +83,7 @@ describe("home page content", () => {
 
 		expect(homePageContent.pricingSection.guarantee).toContain("Product stage");
 		expect(faqCopy).not.toContain("The guarantee is about clarity");
-		expect(faqCopy).toContain("Ship Kit");
+		expect(faqCopy).toContain("Blueprint");
 		expect(faqCopy).toContain("Ship Blueprint");
 	});
 });

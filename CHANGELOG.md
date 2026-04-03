@@ -4,7 +4,9 @@
 
 ### Changed
 
-- Reduced the founder-facing blueprint flow to a smaller core contract, replaced the old marketing questionnaire with generated preview defaults, defaulted the design color anchor, aligned the local CLI to the same reduced model, and kept review/download plus starter snapshot generation working through compiler-derived compatibility facts.
+- Collapsed the protected founder workflow to one canonical `/blueprint` page plus `/review`, converted the old staged routes into compatibility redirects, preserved the reduced blueprint fact contract and `problem_statement` optimizer, and aligned the local CLI, route docs, and QA control plane with the single-page product model.
+- Finished the remaining live terminology cleanup so product-facing surfaces now use the Blueprint noun family instead of `Ship Kit`, `Starter Snapshot`, or `generated repo`, while preserving only historical wording in archival docs and past release evidence where needed.
+- Reduced the founder-facing blueprint flow to a smaller core contract, replaced the old marketing questionnaire with generated preview defaults, defaulted the design color anchor, aligned the local CLI to the same reduced model, and kept review/download plus blueprint generation working through compiler-derived compatibility facts.
 - Added the first inline Codex-powered `problem_statement` optimizer, including an in-flow connect sheet for managed ChatGPT/Codex login instead of kicking the user out to Settings.
 - Finished the repo-wide vocabulary migration to `blueprint` across the live app, CLI, generated docs, QA records, and repository docs, while preserving only technically required manifest/tooling literals such as `package.json`, `packageManager`, workspace `packages/`, and third-party lockfile dependency names.
 - Cleaned the remaining user-facing and operator-facing terminology drift in the protected workspace, public docs, starter guidance, and internal skill/reference content so the product contract no longer mixes old language with the shipped blueprint model.
@@ -31,7 +33,7 @@
 ### Changed
 
 - Unified the protected workspace navigation so blueprint stages, unlocked review, and unlocked lessons now share one header model, with `Review`, `Build Lessons`, `Launch Lessons`, and `Bonus` replacing the old Mission and Execute / Ship vocabulary.
-- Made `Review & Download` the real unlock pivot: downloading the Ship Kit now unlocks post-review content directly, review advances into Build Lessons without a second unlock click, and the Lesson Map is reusable on review and lesson pages instead of living behind a separate Mission page.
+- Made `Review & Download` the real unlock pivot: downloading the Blueprint now unlocks post-review content directly, review advances into Build Lessons without a second unlock click, and the Lesson Map is reusable on review and lesson pages instead of living behind a separate Mission page.
 - Converted `/execute` and `/mission` into compatibility redirects, removed the dead execute bridge and mission-rail header paths, and cleaned the remaining artifacts, settings, and lesson fallbacks so the live runtime no longer depends on canonical `/mission` navigation.
 - Tightened the public homepage shell to match the current offer: simplified the top bar and footer, updated pricing/footer/supporting copy, refreshed the social-proof visual treatment, and aligned browser-smoke expectations with the shipped marketing surface.
 
@@ -46,7 +48,7 @@
 
 ### Changed
 
-- Collapsed Review & Download to one `Starter Snapshot` repo archive, retired the standalone Design/Marketing/Build zip endpoints, and moved the generated pack materials into the repo-root `docs/` tree inside that single download.
+- Collapsed Review & Download to one `Blueprint` repo archive, retired the standalone Design/Marketing/Build zip endpoints, and moved the generated pack materials into the repo-root `docs/` tree inside that single download.
 - Restored the post-review bonus library so `/execute` now hands first-time users into the bonus bridge, `/mission` becomes the unlocked continuation library, and bonus lessons read from dedicated Convex route state instead of falling back to legacy redirects.
 - Refreshed the public homepage, docs shell, and auth surfaces with tighter copy, calmer docs chrome, a new tech-stack cloud, and a checkout flow that waits for the server auth response before redirecting signed-out visitors.
 
@@ -67,7 +69,7 @@
 - Added `.github/workflows/convex-production-deploy.yml` so Convex production deploys are controlled from GitHub on `main`, with an explicit rollout guard, a manual dry-run path, and a repository variable switch (`CONVEX_PRODUCTION_DEPLOY_ENABLED`) that can pause or resume automatic production deploys.
 - Hardened CI to match the release workflow by giving the static job safe build-time placeholder env values, fixing Playwright browser smoke so it can boot without a real hosted Convex URL in CI, and adding focused observability coverage tests so `bun run check` now passes before release promotion.
 - Reframed the public product story around `Agent-Ready Packs`, added a new homepage `durability` section plus pack-system visuals, and removed the old guided-sprint / four-block / starter-template pitch from the visible homepage contract.
-- Renamed the protected review and download contract to the outward artifact set `Design Pack`, `Marketing Pack`, `Build Pack`, `Prompt Pack`, and `Starter Snapshot`, including the review UI, blueprint headings, and archive filenames.
+- Renamed the protected review and download contract to the outward artifact set `Design Pack`, `Marketing Pack`, `Build Pack`, `Prompt Pack`, and `Blueprint`, including the review UI, blueprint headings, and archive filenames.
 - Disabled the legacy visible `starterRepo` path by default, removed it from the visible protected workspace inventory, and aligned the shipped docs entry points with the new pack-first public story.
 - Clarified the hosted and production QA runbooks so they now distinguish `qa/personas.local.json` account credentials from the selected Clerk and Convex env source, document `QA_ENV_FILE` plus `PLAYWRIGHT_BASE_URL` for non-local targets, and point operators at the single `qa:run-pack` command for post-deploy verification.
 - Closed the journey-first QA initiative by documenting the team’s shared QA operating model in the root README, capturing the role split in durable docs, and proving the repaired production billing handoff with both a webhook-fix report and a fresh automatic live no-cost rerun.
@@ -78,7 +80,7 @@
 
 - Replaced the protected product contract with a blueprint-first runtime on `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, `/review`, backed by canonical `projectDefinitions` in Convex instead of `lessonStates` for the new product path.
 - Added a real `packages/blueprint-compiler` workspace blueprint that owns canonical blueprint schemas, stage readiness, deterministic blueprint rendering, blueprint archive generation, repo snapshot materialization, and the final review-download zip.
-- Added protected blueprint download routes for design, marketing, build, and the final repo snapshot, with the generated repo embedding `blueprint/` at the root and overlaying starter seams such as `apps/web/config/product.ts` and `apps/web/features/marketing/content/home.ts`.
+- Added protected blueprint download routes for design, marketing, build, and the final repo snapshot, with the Blueprint embedding `blueprint/` at the root and overlaying starter seams such as `apps/web/config/product.ts` and `apps/web/features/marketing/content/home.ts`.
 - Changed checkout and protected-home recovery to land in `/start` and the first incomplete blueprint-first stage, while converting `/mission`, `/lesson/[lessonKey]`, and `/artifacts` into compatibility redirects instead of canonical product surfaces.
 - Updated the live starter docs and route map to describe the blueprint-first flow, and increased the local Playwright production-server timeout to match the real `next build` cost during browser smoke.
 - Removed the Turbopack NFT warning for filesystem-heavy blueprint and Codex server code by moving those imports behind Node-runtime dynamic boundaries instead of static route imports.

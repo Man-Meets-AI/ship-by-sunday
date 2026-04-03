@@ -11,7 +11,7 @@ import { BlueprintStageStepField } from "@/features/blueprint-flow/components/bl
 
 describe("BlueprintStageStepField", () => {
 	it("shows the optimizer button only for the problem statement field", () => {
-		const stage = getBlueprintStageDefinition("product");
+		const stage = getBlueprintStageDefinition("blueprint");
 		const problemStep = stage.steps.find(
 			(candidate) => candidate.id === "problem",
 		);
@@ -20,7 +20,7 @@ describe("BlueprintStageStepField", () => {
 		);
 
 		if (!problemStep || !foundationStep) {
-			throw new Error("Missing blueprint product steps.");
+			throw new Error("Missing blueprint steps.");
 		}
 
 		const facts = createCompleteProjectDefinition().facts;

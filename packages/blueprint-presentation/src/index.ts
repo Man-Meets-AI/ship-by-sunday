@@ -155,8 +155,8 @@ const blueprintFieldPresentations: Partial<
 const blueprintStepLabelOverrides: Partial<
 	Record<`${BlueprintStageId}/${string}`, string>
 > = {
-	"product/outcome": "What success looks like",
-	"build-plan/setup": "Optional setup details",
+	"blueprint/outcome": "What success looks like",
+	"blueprint/setup": "Optional setup details",
 };
 
 function resolveBlueprintPresentationCopy(

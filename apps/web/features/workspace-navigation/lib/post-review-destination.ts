@@ -9,13 +9,7 @@ import { getLessonMapHref } from "./lesson-map-href";
 const POST_REVIEW_DEFAULT_BUILD_LESSON_ID = "3.1";
 const studentFacingLessons = getStudentFacingLessons();
 
-export type BlueprintResumeStageId =
-	| "start"
-	| "product"
-	| "design"
-	| "marketing"
-	| "build-plan"
-	| "review";
+export type BlueprintResumeStageId = "blueprint" | "review";
 
 export type PostReviewLessonState = {
 	lessonKey?: string | null;

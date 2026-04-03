@@ -24,11 +24,7 @@ export const starterRepoConfig = {
 
 export const routeConfig = {
 	home: "/",
-	start: "/start",
-	product: "/product",
-	design: "/design",
-	marketing: "/marketing",
-	buildPlan: "/build-plan",
+	blueprint: "/blueprint",
 	review: "/review",
 	execute: "/execute",
 	docs: "/docs",
@@ -42,6 +38,14 @@ export const routeConfig = {
 	checkoutCancel: "/checkout/cancel",
 	systemHash: "#system",
 	pricingHash: "#pricing",
+} as const;
+
+export const legacyRouteConfig = {
+	start: "/start",
+	product: "/product",
+	design: "/design",
+	marketing: "/marketing",
+	buildPlan: "/build-plan",
 } as const;
 
 export const homePageSectionOrder = [
@@ -340,7 +344,7 @@ export const courseResourceConfig = {
 } as const;
 
 export const authViewConfig = {
-	fallbackRedirectUrl: routeConfig.start,
+	fallbackRedirectUrl: routeConfig.blueprint,
 } as const;
 
 export function getSignInRedirectHref(redirectPath: string) {

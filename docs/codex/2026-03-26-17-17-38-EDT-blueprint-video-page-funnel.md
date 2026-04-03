@@ -106,7 +106,7 @@ Rationale: The blueprint compiler currently treats these facts as required bluep
 Date: 2026-03-26
 
 Decision: Treat “starter config” in `L10` as instructional framing only for this slice. Do not add new blueprint schema fields or repo-generation behavior for starter configuration choice.  
-Rationale: The compiler has no starter-config fact today, and generated repo overrides currently hard-code starter modules. Adding starter-config persistence would widen scope into schema, repo generation, review, and acceptance criteria.  
+Rationale: The compiler has no starter-config fact today, and Blueprint overrides currently hard-code starter modules. Adding starter-config persistence would widen scope into schema, repo generation, review, and acceptance criteria.  
 Date: 2026-03-26
 
 Decision: Stage-page video placement should be responsive: desktop sidebar, mobile top.  

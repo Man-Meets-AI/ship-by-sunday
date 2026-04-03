@@ -1,7 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-import { routeConfig } from "@/config/product";
+import { legacyRouteConfig, routeConfig } from "@/config/product";
 import { captureServerError } from "@/features/observability/server/capture-server-error";
 import { getClerkAuthorizedParties } from "@/platform/auth/clerk-authorized-parties";
 import { shouldBypassClerkProtection } from "@/platform/auth/clerk-middleware-bypass";
@@ -10,17 +10,23 @@ const disableClerkMiddleware = shouldBypassClerkProtection();
 const clerkAuthorizedParties = getClerkAuthorizedParties();
 
 const canonicalWorkspaceRoutes = [
-	routeConfig.start,
-	routeConfig.product,
-	routeConfig.design,
-	routeConfig.marketing,
-	routeConfig.buildPlan,
+	routeConfig.blueprint,
 	routeConfig.review,
 	routeConfig.execute,
 ] as const;
 
+const compatibilityWorkspaceRoutes = [
+	legacyRouteConfig.start,
+	legacyRouteConfig.product,
+	legacyRouteConfig.design,
+	legacyRouteConfig.marketing,
+	legacyRouteConfig.buildPlan,
+] as const;
+
 const isProtectedRoute = createRouteMatcher([
-	...canonicalWorkspaceRoutes.map((route) => `${route}(.*)`),
+	...[...canonicalWorkspaceRoutes, ...compatibilityWorkspaceRoutes].map(
+		(route) => `${route}(.*)`,
+	),
 	`${routeConfig.mission}(.*)`,
 	"/lesson(.*)",
 	`${routeConfig.artifacts}(.*)`,

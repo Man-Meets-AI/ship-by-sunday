@@ -54,7 +54,7 @@ export function NotFoundScreen() {
 							size="lg"
 							className="h-14 px-8 text-lg rounded-full bg-white text-black hover:bg-white/90"
 						>
-							<Link href={routeConfig.start}>
+							<Link href={routeConfig.blueprint}>
 								{workspaceDisplayConfig.openHomeActionLabel}
 							</Link>
 						</Button>

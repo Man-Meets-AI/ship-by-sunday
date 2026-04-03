@@ -15,7 +15,7 @@ export default async function Page() {
 			<BonusRouteStatePanel
 				eyebrow="Continuation library"
 				title="Lesson Map opens after Review & Download."
-				description="Finish the core Ship Blueprint run first. Once your product truth is locked and your Ship Kit is generated, the post-review Lesson Map opens as the continuation surface for building, launch prep, and revisiting the work."
+				description="Finish the core Ship Blueprint run first. Once your product truth is locked and your Ship by Sunday Blueprint is ready, the post-review Lesson Map opens as the continuation surface for building, launch prep, and revisiting the work."
 				actionHref={routeConfig.review}
 				actionLabel="Go to Review & Download"
 			/>

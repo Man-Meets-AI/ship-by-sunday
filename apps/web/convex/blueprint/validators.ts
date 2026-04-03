@@ -7,11 +7,7 @@ const projectDefinitionFactValueValidator = v.union(
 );
 
 export const blueprintStageIdValidator = v.union(
-	v.literal("start"),
-	v.literal("product"),
-	v.literal("design"),
-	v.literal("marketing"),
-	v.literal("build-plan"),
+	v.literal("blueprint"),
 	v.literal("review"),
 );
 
@@ -62,10 +58,7 @@ export const blueprintWorkspaceStateValidator = v.object({
 	workflowState: v.union(blueprintWorkflowStatePublicValidator, v.null()),
 	firstIncompleteStageId: blueprintStageIdValidator,
 	blueprintReadiness: v.object({
-		product: blueprintReadinessValidator,
-		design: blueprintReadinessValidator,
-		marketing: blueprintReadinessValidator,
-		build: blueprintReadinessValidator,
+		blueprint: blueprintReadinessValidator,
 		review: blueprintReadinessValidator,
 	}),
 	stageStatuses: v.array(blueprintStageStatusValidator),
