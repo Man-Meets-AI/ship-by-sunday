@@ -1,11 +1,11 @@
 ---
 title: Ship by Sunday CLI
-description: Run the blueprint intake, readiness review, and starter snapshot generation from the repository root without using the web app.
+description: Run the blueprint intake, readiness review, and blueprint generation from the repository root without using the web app.
 ---
 
 # Ship by Sunday CLI
 
-The Ship by Sunday CLI is the local-first version of the blueprint intake flow. It asks the same canonical pre-review questions that drive the web blueprint stages, stores one draft at the repository root, reports readiness with the same compiler logic as `/review`, and generates the same starter snapshot shape as the protected download route.
+The Ship by Sunday CLI is the local-first version of the blueprint intake flow. It asks the same canonical pre-review questions that drive the web `/blueprint` page, stores one draft at the repository root, reports readiness with the same compiler logic as `/review`, and generates the same blueprint shape as the protected download route.
 
 Clone the repository, run `bun install`, then launch the CLI from the repository root with either `bun run sbs` or the checked-in repo-local wrapper at `./bin/sbs`. Both entrypoints share the same command parser, version source, and JSON envelopes. When you run `bun run sbs` in a real terminal, the CLI opens a bannered entry surface for the current repository instead of dumping raw help. The startup surface points you at `resume`, `next --json`, and `review --json`, while `bun run sbs --help`, `bun run sbs help review`, `bun run sbs review --help`, `bun run sbs stage --help`, `bun run sbs --version`, `./bin/sbs --version`, and `./bin/sbs completion zsh` stay clean and side-effect free. Interactive stage prompts also make `:clear` and `:quit` explicit so you can back out safely and resume later.
 
@@ -13,7 +13,7 @@ Use it when:
 
 - you want to shape the blueprint from a terminal instead of the protected web UI
 - you want to import or patch facts from another tool or agent
-- you want a local starter snapshot without needing Clerk, Convex auth, or a browser session
+- you want a local blueprint without needing Clerk, Convex auth, or a browser session
 - you want a repo-local launcher that does not depend on a registry install or a Bun-specific shim
 
 ## Where it stores state
@@ -32,12 +32,12 @@ This is a canonical project-definition draft envelope, not a separate CLI-only f
 bun run sbs init --fixture complete --json
 bun run sbs schema --json
 bun run sbs stages --json
-bun run sbs fields --stage design --json
+bun run sbs fields --stage blueprint --json
 bun run sbs next --json
 bun run sbs validate --json
-bun run sbs set product.product_name "Ship by Sunday CLI" --json
+bun run sbs set blueprint.product_name "Ship by Sunday CLI" --json
 bun run sbs append scope_in "Blueprint intake" --json
-bun run sbs unset build-plan.domain --json
+bun run sbs unset blueprint.domain --json
 bun run sbs mutate --file ./tmp/mutations.json --json
 bun run sbs --help
 bun run sbs --version
@@ -45,12 +45,12 @@ bun run sbs version --json
 bun run sbs completion zsh
 bun run sbs completion bash
 bun run sbs resume
-bun run sbs stage <product|design|marketing|build-plan>
-bun run sbs review [--stage build-plan] [--missing-only] [--json]
+bun run sbs stage <blueprint>
+bun run sbs review [--stage blueprint] [--missing-only] [--json]
 bun run sbs export --out ./.ship-by-sunday/export.json
 bun run sbs export --out -
 bun run sbs import --file ./tmp/sbs-cli-complete.json
-cat ./tmp/build-plan-patch.json | bun run sbs apply --stage build-plan --file -
+cat ./tmp/blueprint-patch.json | bun run sbs apply --stage blueprint --file -
 bun run sbs generate --out ./tmp/sbs-cli-repo --json
 bun run sbs generate --out ./tmp/sbs-cli-repo.zip --zip --json
 ./bin/sbs --help
@@ -67,8 +67,8 @@ What each one does:
 - `validate` returns the full readiness and stage-status envelope without changing anything.
 - `set`, `unset`, `append`, and `remove` let an agent mutate the draft field-by-field without constructing patch JSON files.
 - `mutate --file <file|-> --json` applies a whole batch of operations atomically. If any operation is invalid, the draft is left unchanged.
-- `resume` auto-initializes a blank draft when none exists, then continues from the first incomplete stage.
-- `stage <id>` revisits one explicit blueprint stage without changing the canonical stage order.
+- `resume` auto-initializes a blank draft when none exists, then continues from the first incomplete canonical stage.
+- `stage <id>` revisits the canonical blueprint intake without changing the canonical stage order.
 - `review --json` prints machine-readable readiness and missing-fact output. `--stage` narrows the output to one stage. `--missing-only` suppresses already-ready stages in the human-readable view.
 - `export` writes the current local draft to a JSON file. `--out -` prints the raw draft JSON to stdout for piping.
 - `import` replaces the local draft with a canonical complete definition, canonical draft, or facts-only JSON file. `--file -` reads JSON from stdin.
@@ -121,10 +121,10 @@ bun run sbs review --json
 bun run sbs generate --out ./tmp/sbs-cli-repo.zip --zip --json
 ```
 
-If you want to patch only one stage:
+If you want to patch the canonical blueprint stage:
 
 ```bash
-bun run sbs apply --stage marketing --file ./tmp/marketing-patch.json
+bun run sbs apply --stage blueprint --file ./tmp/blueprint-patch.json
 bun run sbs review
 ```
 
@@ -132,17 +132,17 @@ If you want stdin/stdout-friendly agent workflows:
 
 ```bash
 bun run sbs export --out -
-cat ./tmp/build-plan-patch.json | bun run sbs apply --stage build-plan --file -
+cat ./tmp/blueprint-patch.json | bun run sbs apply --stage blueprint --file -
 cat ./tmp/complete-definition.json | bun run sbs import --file -
 ```
 
 If you want field-level agent control without patch files:
 
 ```bash
-bun run sbs set product.problem_statement "Founders need a local-first blueprint flow." --json
+bun run sbs set blueprint.problem_statement "Founders need a local-first blueprint flow." --json
 bun run sbs append scope_in "Local CLI intake" --json
 bun run sbs remove scope_in "Local CLI intake" --json
-bun run sbs unset build-plan.domain --json
+bun run sbs unset blueprint.domain --json
 ```
 
 If you want one atomic batch instead of one command per field:
@@ -157,11 +157,11 @@ Accepted mutation input shapes:
 [
 	{
 		"op": "set",
-		"field": "product.product_name",
+		"field": "blueprint.product_name",
 		"value": "Ship by Sunday CLI"
 	},
 	{ "op": "append", "field": "scope_in", "value": "Local CLI intake" },
-	{ "op": "unset", "field": "build-plan.domain" }
+	{ "op": "unset", "field": "blueprint.domain" }
 ]
 ```
 
@@ -172,7 +172,7 @@ or:
 	"operations": [
 		{
 			"op": "set",
-			"field": "product.product_name",
+			"field": "blueprint.product_name",
 			"value": "Ship by Sunday CLI"
 		}
 	]
@@ -214,7 +214,7 @@ The CLI does not redefine the blueprint contract. It reuses:
 - readiness evaluation in `packages/blueprint-compiler/src/readiness/`
 - repo generation in `packages/blueprint-compiler/src/server.ts`
 
-That shared boundary matters because the CLI and the protected `/review` route should agree about what is missing, what is ready, and what the starter snapshot contains.
+That shared boundary matters because the CLI and the protected `/review` route should agree about what is missing, what is ready, and what the blueprint contains.
 
 ## Current limits
 

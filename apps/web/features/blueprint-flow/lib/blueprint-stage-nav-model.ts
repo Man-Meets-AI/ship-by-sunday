@@ -33,7 +33,7 @@ export function buildBlueprintStageNavItems({
 		const state =
 			stage.id === currentStageId
 				? "active"
-				: !stageStatus.isUnlocked && stage.id !== "start"
+				: !stageStatus.isUnlocked
 					? "locked"
 					: stageStatus.isComplete
 						? "complete"

@@ -11,7 +11,7 @@
   Execute / Ship
 - Do not preserve old CEO / Design / Build / Ship framing if it conflicts with blueprint-first logic.
 - Do not turn workflow or ephemeral state into canonical intake.
-- The public outcome is one generated repo delivered at Review & Download.
+- The public outcome is one Blueprint delivered at Review & Download.
 - Do not reintroduce separate pre-review download artifacts or stage-pack contracts into the UI unless the live product changes first.
 - For user-facing UI work, also follow `docs/ship-by-sunday/design-pack/` as the repo-specific frontend design workflow pack.
 

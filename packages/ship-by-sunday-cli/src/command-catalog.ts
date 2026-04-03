@@ -101,12 +101,11 @@ export const cliCommandCatalog: Record<
 	fields: {
 		name: "fields",
 		title: "Ship by Sunday reduced blueprint fields",
-		summary:
-			"Inspect the fields available in the current reduced blueprint stage group.",
+		summary: "Inspect the fields available in the canonical blueprint intake.",
 		usage: formatWorkspaceCommand("fields [--stage <stage>] [--json]"),
 		details: [
-			"Pass `--stage` to narrow the list to a single editable stage.",
-			"Marketing is generated preview only and has no manual fields.",
+			"Pass `--stage blueprint` to be explicit about the canonical editable stage.",
+			"The generated preview section is compiler-owned and has no manual fields.",
 		],
 	},
 	next: {
@@ -178,7 +177,7 @@ export const cliCommandCatalog: Record<
 		name: "resume",
 		title: "Ship by Sunday resume",
 		summary:
-			"Continue from the first incomplete reduced stage in the local draft.",
+			"Continue from the first incomplete canonical stage in the local draft.",
 		usage: formatWorkspaceCommand("resume"),
 		details: [
 			"This is the fastest interactive entry point for a human operator.",
@@ -187,9 +186,11 @@ export const cliCommandCatalog: Record<
 	stage: {
 		name: "stage",
 		title: "Ship by Sunday stage editor",
-		summary: "Open one explicit stage in the reduced interactive prompt flow.",
-		usage: formatWorkspaceCommand("stage <product|design|build-plan>"),
-		details: ["Use this when you want to revisit a specific stage by name."],
+		summary: "Open the canonical blueprint prompt flow.",
+		usage: formatWorkspaceCommand("stage <blueprint>"),
+		details: [
+			"Use this when you want to revisit the full blueprint intake in order.",
+		],
 	},
 	review: {
 		name: "review",
@@ -250,9 +251,9 @@ export const cliCommandCatalog: Record<
 	},
 	generate: {
 		name: "generate",
-		title: "Ship by Sunday starter snapshot generation",
+		title: "Ship by Sunday blueprint generation",
 		summary:
-			"Generate the starter snapshot repository from a reduced review-ready draft.",
+			"Generate the blueprint repository from a reduced review-ready draft.",
 		usage: formatWorkspaceCommand(
 			"generate [repo] --out <path> [--zip] [--force] [--json]",
 		),

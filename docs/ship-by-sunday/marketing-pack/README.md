@@ -2,7 +2,7 @@
 
 This folder is the Ship by Sunday-specific marketing pack layered on top of `docs/openai/openai-marketing-kit/`.
 
-It is the template for the customer-facing `docs/marketing/` blueprint that should be generated into the starter snapshot after the review route.
+It is the template for the customer-facing `docs/marketing/` blueprint that should be generated into the blueprint after the review route.
 
 ## What this pack is for
 

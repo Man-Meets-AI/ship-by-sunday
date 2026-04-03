@@ -16,7 +16,7 @@ export async function GET() {
 	}
 
 	if (!context.workspaceState.blueprintReadiness.review.isReady) {
-		return new Response("Starter Snapshot is not ready yet", { status: 409 });
+		return new Response("Blueprint is not ready yet", { status: 409 });
 	}
 
 	const blueprintCompilerServer = await importBlueprintCompilerServer();

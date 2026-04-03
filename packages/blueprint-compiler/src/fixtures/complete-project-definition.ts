@@ -18,7 +18,7 @@ const completeProjectFacts: CanonicalProjectFacts = {
 	problem_trigger: "They need a clear blueprint and repo handoff immediately.",
 	problem_severity: "8",
 	problem_urgency: "Needs attention soon",
-	outcome_statement: "Leave with a build-ready blueprint and starter repo.",
+	outcome_statement: "Leave with a build-ready Ship by Sunday Blueprint.",
 	success_looks_like: "A founder downloads a working blueprint and repo zip.",
 	user_benefit:
 		"They can move directly into implementation without re-briefing.",
@@ -51,9 +51,9 @@ const completeProjectFacts: CanonicalProjectFacts = {
 	v1_rationale: "A narrow blueprint-first flow creates a truthful v1 quickly.",
 	distribution_model: "Protected web app with downloads",
 	install_destination:
-		"Customer clones and configures the generated repo locally.",
+		"Customer clones and configures the Blueprint locally.",
 	buyer_ai_promise:
-		"AI helps generate the blueprint and starter repo structure.",
+		"AI helps generate the Ship by Sunday Blueprint structure.",
 	surface_type: "web_app",
 	design_references: [
 		"https://example.com/reference-1",
@@ -88,7 +88,7 @@ const completeProjectFacts: CanonicalProjectFacts = {
 	channel_scope: ["Homepage", "Checkout follow-up", "Email handoff"],
 	campaign_types: ["Launch page", "Lifecycle email"],
 	brand_voice_summary: "Confident, specific, and non-hype.",
-	approved_claims: ["Blueprint-first delivery", "Downloadable starter repo"],
+	approved_claims: ["Blueprint-first delivery", "Downloadable Blueprint"],
 	do_not_say_rules: [
 		"Do not promise zero setup",
 		"Do not imply GitHub invite delivery",

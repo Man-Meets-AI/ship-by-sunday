@@ -14,7 +14,7 @@ Maintain this ExecPlan in accordance with `docs/codex/PLANS.md`.
 
 Ship by Sunday is already blueprint-first in the required funnel, but the runtime still changes vocabulary and route semantics the moment a buyer leaves Review. Today the review screen still teaches `Execute / Ship`, `/execute` still renders a one-time bridge, `/mission` still behaves like a stable browse page, lesson pages still send people back to Mission, and the header shell still thinks in mission blocks. After this change, the required run will still end at `Review & Download`, but the unlocked experience will use one header language and one continuation model: `Review | Build Lessons | Launch Lessons | Bonus`. `Build Lessons` becomes the default next move after download, `Launch Lessons` becomes the user-facing label for the old SHIP block, `Bonus` becomes a dropdown instead of a route target, and the Lesson Map becomes an optional reusable surface that appears only after download instead of acting like the primary home.
 
-A human should be able to prove the result by buying access, finishing the blueprint, reaching `Review & Download`, downloading the Ship Kit, seeing the unlocked header switch to `Review | Build Lessons | Launch Lessons | Bonus`, clicking `Continue to Build Lessons` into lesson `3.1`, opening the optional Lesson Map from the unlocked review or lesson UI, and confirming that old `/execute` and `/mission` links still land on the canonical post-review experience without teaching `Mission` or `Execute / Ship` as the main wayfinding model.
+A human should be able to prove the result by buying access, finishing the blueprint, reaching `Review & Download`, downloading the Blueprint, seeing the unlocked header switch to `Review | Build Lessons | Launch Lessons | Bonus`, clicking `Continue to Build Lessons` into lesson `3.1`, opening the optional Lesson Map from the unlocked review or lesson UI, and confirming that old `/execute` and `/mission` links still land on the canonical post-review experience without teaching `Mission` or `Execute / Ship` as the main wayfinding model.
 
 ## Progress
 
@@ -43,7 +43,7 @@ Validation already encodes the old IA. `apps/web/tests/integration-ui/blueprint-
 
 Moving blueprint-stage navigation into the shell header changed the integration-test seam, not the blueprint behavior. `apps/web/tests/integration-ui/blueprint-stage-page.test.tsx` had to update its `AppShell` mock to render the explicit `primaryNav` prop; otherwise the blueprint-stage navigation disappeared from the test DOM even though the real runtime was behaving correctly.
 
-Unlocking from inside the download route turned out to be the safest low-scope handoff. `apps/web/app/api/download/repo/route.ts` can call `api.blueprint.unlockExecuteShip` only after the archive has been built successfully, which preserves a no-JavaScript fallback and keeps the unlock state aligned with the actual Ship Kit response instead of a separate client-only click.
+Unlocking from inside the download route turned out to be the safest low-scope handoff. `apps/web/app/api/download/repo/route.ts` can call `api.blueprint.unlockExecuteShip` only after the archive has been built successfully, which preserves a no-JavaScript fallback and keeps the unlock state aligned with the actual Blueprint response instead of a separate client-only click.
 
 Browser smoke surfaced two stale homepage assertions that were unrelated to the navigation rewrite but blocked the final proof lane. The live homepage CTA copy is `Get the system`, and the current top bar no longer renders a `Blog` link, so `apps/web/tests/browser-smoke/app-smoke.spec.ts` had to be updated to assert the actual shipped marketing shell before the browser-smoke lane would pass.
 
@@ -61,7 +61,7 @@ Decision — `Review & Download` is the pivot surface. Before unlock it uses the
 Rationale — The header transition needs to happen where the funnel actually ends. Leaving review on the old nav after unlock would preserve the split mental model.
 Date — 2026-03-29.
 
-Decision — A successful Ship Kit download is the canonical unlock event for post-review content.
+Decision — A successful Blueprint download is the canonical unlock event for post-review content.
 Rationale — The approved direction says the required run ends at `Review & Download`. The extra unlock-only click exists only to preserve the old Execute concept and should be removed.
 Date — 2026-03-29.
 
@@ -109,7 +109,7 @@ Decision — The shared shell keeps `mission` data only as a progress plus foote
 Rationale — This removes the hidden header query and mission-shaped routing contract immediately without forcing the footer rail, bonus lesson progress, and current-block detection into the same refactor. The remaining `mission` prop is now a scoped presentation input rather than the source of header navigation truth.
 Date — 2026-03-29.
 
-Decision — Successful Ship Kit responses from `/api/download/repo` now call `api.blueprint.unlockExecuteShip` on the server before the archive is returned.
+Decision — Successful Blueprint responses from `/api/download/repo` now call `api.blueprint.unlockExecuteShip` on the server before the archive is returned.
 Rationale — The download response is the canonical proof that the handoff actually happened. Unlocking in the route handler removes the second post-download click, keeps no-JavaScript behavior intact, and reuses the existing idempotent mutation instead of inventing a parallel unlock path.
 Date — 2026-03-29.
 
@@ -127,7 +127,7 @@ Milestone 1 outcome — The resume contract is now centralized and testable. Gra
 
 Milestone 2 outcome — The shell header now consumes explicit navigation props instead of querying mission state for itself. Blueprint pages render their stage navigation from the header, and unlocked review plus lesson pages render the shared `Review | Build Lessons | Launch Lessons | Bonus` header model with the Bonus dropdown.
 
-Milestone 3 outcome — Review is now the real unlock pivot. Downloading the Ship Kit is the idempotent unlock event, the review CTA now advances directly to Build Lessons instead of a second Execute step, and the shared Lesson Map surface opens on review and lesson pages without routing through a separate Mission page.
+Milestone 3 outcome — Review is now the real unlock pivot. Downloading the Blueprint is the idempotent unlock event, the review CTA now advances directly to Build Lessons instead of a second Execute step, and the shared Lesson Map surface opens on review and lesson pages without routing through a separate Mission page.
 
 Milestone 4 outcome — The post-review lessons no longer send users to `/mission`. The lesson footer, alert copy, Bonus dropdown, and review handoff all converge on the shared `LessonMapSurface`, while Product and Design references stay inside the Bonus menu instead of competing as top-level siblings.
 
@@ -299,7 +299,7 @@ Success looks like no primary runtime code teaching Mission or Execute / Ship, c
         - the Lesson Map is unavailable before unlock and optional after unlock
 
     Expected observation after this step:
-        The review page becomes the truthful handoff point. A buyer downloads the Ship Kit, sees the unlocked header, and can go straight into Build Lessons without ever learning a separate Execute route.
+        The review page becomes the truthful handoff point. A buyer downloads the Blueprint, sees the unlocked header, and can go straight into Build Lessons without ever learning a separate Execute route.
 
 4. Extract the reusable Lesson Map surface and wire the Bonus dropdown plus lesson affordances around it.
 
@@ -368,7 +368,7 @@ Success looks like no primary runtime code teaching Mission or Execute / Ship, c
 
 ## Validation and Acceptance
 
-Acceptance is behavioral. An entitled user who has not finished the blueprint must still be redirected into the first incomplete blueprint stage and must still see blueprint-stage navigation, including on `/review` before download. Once the Ship Kit is downloaded or the existing unlock marker is present, the review page must switch to the unlocked header with `Review` active and must show `Build Lessons`, `Launch Lessons`, and `Bonus` instead of any Mission or Execute / Ship language.
+Acceptance is behavioral. An entitled user who has not finished the blueprint must still be redirected into the first incomplete blueprint stage and must still see blueprint-stage navigation, including on `/review` before download. Once the Blueprint is downloaded or the existing unlock marker is present, the review page must switch to the unlocked header with `Review` active and must show `Build Lessons`, `Launch Lessons`, and `Bonus` instead of any Mission or Execute / Ship language.
 
 Acceptance also requires `Build Lessons` to be the default continuation after `Review & Download`. A newly unlocked user should land on lesson `3.1` when they continue. A returning unlocked user should resume into the right BUILD or SHIP lesson through centralized target logic, not through page-local conditionals. `Launch Lessons` is the user-facing label even if the underlying block id stays `SHIP`.
 

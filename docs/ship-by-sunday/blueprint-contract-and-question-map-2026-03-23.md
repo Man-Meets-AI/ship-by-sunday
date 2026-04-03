@@ -27,7 +27,7 @@ This is the architecture:
 
 The live blueprint contract is the canonical schema in `packages/blueprint-compiler/src/canonical-project-definition/schema.ts`, the stage grouping in `packages/blueprint-compiler/src/stages/stage-definitions.ts`, and the current renderers under `packages/blueprint-compiler/src/blueprints/`. Older planning variants that mentioned `starter_repo_github_username`, `implementation_plan`, `verification_plan`, `validation_commands`, `rollback_plan`, or custom prompt-pack files are historical notes, not active contract.
 
-### Final generated docs tree inside the starter snapshot
+### Final generated docs tree inside the blueprint
 
 ```text
 docs/
@@ -183,7 +183,7 @@ Placeholder-friendly optionals:
 ### `README.md`
 
 Purpose:
-- human-readable entry point for the generated repo
+- human-readable entry point for the Blueprint
 - explain what the app is, what is included, and what to do first
 
 Primary fact inputs:
@@ -354,7 +354,7 @@ Primary fact inputs:
 ### `prompts/execplan-execution-loop.md`
 
 Purpose:
-- shipped execution-loop prompt asset copied into the generated repo
+- shipped execution-loop prompt asset copied into the Blueprint
 
 Input:
 - static file from `docs/prompts/execplan-execution-loop.md`
@@ -362,7 +362,7 @@ Input:
 ### `prompts/execplan-grill.md`
 
 Purpose:
-- shipped grill prompt asset copied into the generated repo
+- shipped grill prompt asset copied into the Blueprint
 
 Input:
 - static file from `docs/prompts/execplan-grill.md`
@@ -370,7 +370,7 @@ Input:
 ### `prompts/execplan-writer.md`
 
 Purpose:
-- shipped writer prompt asset copied into the generated repo
+- shipped writer prompt asset copied into the Blueprint
 
 Input:
 - static file from `docs/prompts/execplan-writer.md`

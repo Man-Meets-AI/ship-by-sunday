@@ -3,7 +3,7 @@
 ## Ship by Sunday — compiler rules
 
 - Treat this as the generator behind one customer-facing repo output.
-- The public contract is the generated repo snapshot delivered at Review & Download.
+- The public contract is the Blueprint snapshot delivered at Review & Download.
 - `src/public-artifact-contract.ts`, `src/blueprints/render-*.ts`, and starter-snapshot labels are internal implementation details, not separate product surfaces or planning inputs.
 - Prefer derivation over recollection.
 - Only ask for information that changes output files.
@@ -16,7 +16,7 @@
 
 ## Public output contract
 
-- one customer-safe generated repo snapshot
+- one customer-safe Blueprint snapshot
 - generated docs under repo-root `docs/`
 - repo-root `README.md` override
 - repo-root `docs/README.md`

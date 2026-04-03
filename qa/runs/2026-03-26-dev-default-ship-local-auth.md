@@ -29,7 +29,7 @@ This run uses the new local-auth browser lane instead of the sandbox-only gate. 
 - `ACCESS-01` — Local-auth Playwright confirmed the no-access persona still sees inline recovery on `/start`.
 - `BLUEPRINT-01` — Local-auth Playwright confirmed the entitled persona reaches the stacked Start kickoff and sees the primary `Continue with ...` CTA.
 - `BLUEPRINT-02`, `BLUEPRINT-03`, `BLUEPRINT-04`, `BLUEPRINT-05` — Local-auth Playwright confirmed the entitled persona can traverse the canonical blueprint stage-entry routes for Product, Design, Marketing, and Build Plan.
-- `BLUEPRINT-06` — Local-auth Playwright confirmed the entitled persona can reach Review and see the Starter Snapshot download surface.
+- `BLUEPRINT-06` — Local-auth Playwright confirmed the entitled persona can reach Review and see the Blueprint download surface.
 - `BLUEPRINT-07` — The blueprint integration-ui suite plus the local-auth browser lane kept the full blueprint funnel contract green.
 - `BLUEPRINT-09` — The blueprint integration-ui suite kept the locked direct-entry redirect behavior green for both stage pages and Review.
 - `SETTINGS-01` — Local-auth Playwright confirmed `/settings` still loads from the protected workspace.

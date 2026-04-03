@@ -74,13 +74,13 @@ describe("agent workflows", () => {
 		expect(JSON.parse(nextIo.stdout.join("\n"))).toMatchObject({
 			status: "ok",
 			command: "next",
-			nextStageId: "product",
+			nextStageId: "blueprint",
 			nextStepId: "foundation",
 		});
 
 		const fieldsIo = createCliIo();
 		const fieldsExitCode = await runCli({
-			argv: ["fields", "--stage", "design", "--json"],
+			argv: ["fields", "--stage", "blueprint", "--json"],
 			io: fieldsIo.io,
 			projectRootPath: repoRootPath,
 		});
@@ -96,31 +96,12 @@ describe("agent workflows", () => {
 			fieldsResult.fields.map((field: { fieldKey: string }) => field.fieldKey),
 		).not.toContain("surface_type");
 
-		const productFieldsIo = createCliIo();
-		const productFieldsExitCode = await runCli({
-			argv: ["fields", "--stage", "product", "--json"],
-			io: productFieldsIo.io,
-			projectRootPath: repoRootPath,
-		});
-		expect(productFieldsExitCode).toBe(0);
 		expect(
-			JSON.parse(productFieldsIo.stdout.join("\n")).fields.map(
-				(field: { fieldKey: string }) => field.fieldKey,
-			),
+			fieldsResult.fields.map((field: { fieldKey: string }) => field.fieldKey),
 		).toContain("pricing");
-
-		const buildPlanFieldsIo = createCliIo();
-		const buildPlanFieldsExitCode = await runCli({
-			argv: ["fields", "--stage", "build-plan", "--json"],
-			io: buildPlanFieldsIo.io,
-			projectRootPath: repoRootPath,
-		});
-		expect(buildPlanFieldsExitCode).toBe(0);
-		const buildPlanFieldKeys = JSON.parse(
-			buildPlanFieldsIo.stdout.join("\n"),
-		).fields.map((field: { fieldKey: string }) => field.fieldKey);
-		expect(buildPlanFieldKeys).toContain("contact_email");
-		expect(buildPlanFieldKeys).not.toContain("pricing");
+		expect(
+			fieldsResult.fields.map((field: { fieldKey: string }) => field.fieldKey),
+		).toContain("contact_email");
 	});
 
 	it("supports field-level set, append, remove, and unset mutations", async () => {
@@ -129,7 +110,7 @@ describe("agent workflows", () => {
 		const setIo = createCliIo();
 		expect(
 			await runCli({
-				argv: ["set", "product.product_name", "Ship by Sunday CLI", "--json"],
+				argv: ["set", "blueprint.product_name", "Ship by Sunday CLI", "--json"],
 				io: setIo.io,
 				projectRootPath: repoRootPath,
 			}),
@@ -194,7 +175,7 @@ describe("agent workflows", () => {
 					operations: [
 						{
 							op: "set",
-							field: "product.product_name",
+							field: "blueprint.product_name",
 							value: "Bulk Agent CLI",
 						},
 						{
@@ -238,7 +219,7 @@ describe("agent workflows", () => {
 				[
 					{
 						op: "set",
-						field: "product.product_name",
+						field: "blueprint.product_name",
 						value: "Should not persist",
 					},
 					{
@@ -314,7 +295,7 @@ describe("agent workflows", () => {
 		const { io, stdout } = createCliIo();
 
 		const exitCode = await runCli({
-			argv: ["review", "--stage", "product", "--missing-only", "--json"],
+			argv: ["review", "--stage", "blueprint", "--missing-only", "--json"],
 			io,
 			projectRootPath: repoRootPath,
 		});
@@ -322,10 +303,10 @@ describe("agent workflows", () => {
 		expect(exitCode).toBe(0);
 		expect(JSON.parse(stdout.join("\n"))).toMatchObject({
 			status: "ok",
-			firstIncompleteStageId: "product",
+			firstIncompleteStageId: "blueprint",
 			stageStatuses: [
 				{
-					stageId: "product",
+					stageId: "blueprint",
 					isComplete: false,
 					missingFactKeys: ["pricing"],
 				},

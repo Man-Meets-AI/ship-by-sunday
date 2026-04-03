@@ -11,7 +11,7 @@ Turn a completed review route into a reliable starter-snapshot handoff with the 
 
 ## Why this matters
 
-The downloadable blueprint is the product output. If the review route does not hand off a coherent build blueprint and starter snapshot, the customer leaves with scattered context instead of an executable next step.
+The downloadable blueprint is the product output. If the review route does not hand off a coherent build blueprint and blueprint, the customer leaves with scattered context instead of an executable next step.
 
 ## In scope
 
@@ -28,7 +28,7 @@ The downloadable blueprint is the product output. If the review route does not h
 
 ## User-visible outcome
 
-After reaching Review & Download, the customer can download a starter snapshot that includes a coherent build blueprint and enough validation/run instructions to continue implementation without rebuilding context from scratch.
+After reaching Review & Download, the customer can download a blueprint that includes a coherent build blueprint and enough validation/run instructions to continue implementation without rebuilding context from scratch.
 
 ## Required facts
 
@@ -51,6 +51,6 @@ After reaching Review & Download, the customer can download a starter snapshot t
 ## Done when
 
 - the review route still works
-- the starter snapshot includes the expected build docs
+- the blueprint includes the expected build docs
 - the validation and demo flow are documented
 - the handoff is understandable to a fresh reader

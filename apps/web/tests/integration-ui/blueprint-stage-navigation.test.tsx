@@ -13,10 +13,12 @@ vi.mock("next/link", () => ({
 	default: ({
 		children,
 		href,
+		onNavigate: _onNavigate,
 		...props
 	}: React.AnchorHTMLAttributes<HTMLAnchorElement> & {
 		children: React.ReactNode;
 		href: string;
+		onNavigate?: unknown;
 	}) => (
 		<a href={href} {...props}>
 			{children}
@@ -63,26 +65,24 @@ describe("BlueprintStageNav", () => {
 
 		render(
 			<BlueprintStageNav
-				currentStageId="product"
+				currentStageId="blueprint"
 				stageStatuses={workspaceState.stageStatuses}
 				onNavigate={onNavigate}
 			/>,
 		);
 
-		expect(screen.getByRole("link", { name: "Start" })).toBeTruthy();
+		expect(screen.getByRole("link", { name: "Blueprint" })).toBeTruthy();
 		expect(screen.getByRole("link", { name: "Review" })).toBeTruthy();
 		expect(
 			screen
-				.getByRole("link", { name: "Product" })
+				.getByRole("link", { name: "Blueprint" })
 				.getAttribute("aria-current"),
 		).toBe("page");
-		expect(screen.queryByRole("button", { name: "Product" })).toBeNull();
-		expect(screen.queryByRole("button", { name: "Design" })).toBeNull();
-		expect(screen.queryByRole("button", { name: "Marketing" })).toBeNull();
-		expect(screen.queryByRole("button", { name: "Build Plan" })).toBeNull();
+		expect(screen.queryByRole("button", { name: "Blueprint" })).toBeNull();
+		expect(screen.queryByRole("button", { name: "Review" })).toBeNull();
 
-		await user.click(screen.getByRole("link", { name: "Design" }));
-		expect(onNavigate).toHaveBeenCalledWith("/design");
+		await user.click(screen.getByRole("link", { name: "Review" }));
+		expect(onNavigate).toHaveBeenCalledWith("/review");
 	});
 
 	it("keeps review as a plain active stage link", async () => {
@@ -101,11 +101,10 @@ describe("BlueprintStageNav", () => {
 		expect(
 			screen.getByRole("link", { name: "Review" }).getAttribute("aria-current"),
 		).toBe("page");
-		expect(screen.getByRole("link", { name: "Start" })).toBeTruthy();
-		expect(screen.queryByRole("button", { name: "Product" })).toBeNull();
-		expect(screen.queryByRole("button", { name: "Design" })).toBeNull();
+		expect(screen.getByRole("link", { name: "Blueprint" })).toBeTruthy();
+		expect(screen.queryByRole("button", { name: "Blueprint" })).toBeNull();
 
-		await user.click(screen.getByRole("link", { name: "Start" }));
-		expect(onNavigate).toHaveBeenCalledWith("/start");
+		await user.click(screen.getByRole("link", { name: "Blueprint" }));
+		expect(onNavigate).toHaveBeenCalledWith("/blueprint");
 	});
 });

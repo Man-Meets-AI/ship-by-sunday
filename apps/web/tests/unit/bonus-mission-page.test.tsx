@@ -118,7 +118,7 @@ describe("BonusMissionPage", () => {
 			<BonusMissionPage missionState={missionState} />,
 		);
 
-		expect(markup).toContain("Your Ship Kit is ready. Build is next.");
+		expect(markup).toContain("Your Blueprint is ready. Build is next.");
 		expect(markup).toContain("Build");
 		expect(markup).toContain("Product");
 		expect(markup).toContain("Design");

@@ -82,19 +82,10 @@ export function deriveStageStatus(
 	let firstIncompleteStageId: BlueprintStageId | null = null;
 
 	const stageStatuses = blueprintStageDefinitions.map((stage) => {
-		if (stage.id === "start") {
-			return {
-				stageId: stage.id,
-				isUnlocked: true,
-				isComplete: true,
-				currentStepIndex: 0,
-				missingFactKeys: [],
-			} satisfies BlueprintStageStatus;
-		}
-
-		const missingFactKeys = Array.from(
-			new Set(stageCompletionMissingFactKeys(facts, stage.id)),
-		);
+		const missingFactKeys =
+			stage.id === "review"
+				? blueprintReadiness.review.missingFactKeys
+				: Array.from(new Set(stageCompletionMissingFactKeys(facts, stage.id)));
 		const isComplete = missingFactKeys.length === 0;
 
 		if (firstIncompleteStageId === null && !isComplete) {
@@ -113,13 +104,7 @@ export function deriveStageStatus(
 	});
 
 	return {
-		firstIncompleteStageId:
-			firstIncompleteStageId ??
-			(stageStatuses.every(
-				(stage) => stage.stageId === "start" || stage.isComplete,
-			)
-				? "review"
-				: "product"),
+		firstIncompleteStageId: firstIncompleteStageId ?? "review",
 		blueprintReadiness,
 		stageStatuses,
 	};

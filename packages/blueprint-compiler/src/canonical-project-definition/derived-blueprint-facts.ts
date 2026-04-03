@@ -32,7 +32,7 @@ const DEFAULT_CAMPAIGN_TYPES = ["Launch page", "Lifecycle email"];
 const DEFAULT_BRAND_VOICE_SUMMARY = "Confident, specific, and non-hype.";
 const DEFAULT_APPROVED_CLAIMS = [
 	"Blueprint-first delivery",
-	"Downloadable starter repo",
+	"Downloadable Blueprint",
 ];
 const DEFAULT_DO_NOT_SAY_RULES = [
 	"Do not promise zero setup",
@@ -341,11 +341,11 @@ export function deriveBlueprintFacts(
 			"Generated docs and repo outputs make the plan concrete.",
 		why_this_matters:
 			trimText(facts.why_this_matters) ||
-			"The blueprint should replace vague planning with a usable starter repo.",
+			"The blueprint should replace vague planning with a usable Ship by Sunday Blueprint.",
 		core_flow_summary:
 			trimText(facts.core_flow_summary) ||
 			coreFlow.join(", ") ||
-			"Capture the blueprint, generate the repo, and review the starter snapshot.",
+			"Capture the blueprint, generate the repo, and review the blueprint.",
 		screen_sequence: listOrFallback(facts.screen_sequence, coreFlow),
 		must_have_capabilities: listOrFallback(
 			facts.must_have_capabilities,
@@ -361,10 +361,10 @@ export function deriveBlueprintFacts(
 			trimText(facts.distribution_model) || "Protected web app with downloads",
 		install_destination:
 			trimText(facts.install_destination) ||
-			"Customer clones and configures the generated repo locally.",
+			"Customer clones and configures the Blueprint locally.",
 		buyer_ai_promise:
 			trimText(facts.buyer_ai_promise) ||
-			"AI helps generate the blueprint and starter repo structure.",
+			"AI helps generate the Ship by Sunday Blueprint structure.",
 		surface_type: (trimText(facts.surface_type) || "web_app") as "web_app",
 		design_references: listOrFallback(
 			deriveDesignReferences(facts),

@@ -14,7 +14,7 @@ This ExecPlan must be maintained in accordance with `docs/codex/PLANS.md`.
 
 After this slice, someone using the Ship by Sunday CLI should be able to trust five things that are not reliable enough today. First, local draft files and relative output paths should resolve from the caller's intended project root rather than from the repository that happens to contain the CLI source. Second, read-only inspection commands such as `next` and `validate` should not silently create draft state. Third, interrupted or crashed writes should not leave a half-written `draft.json` behind. Fourth, `generate --force` should only replace the generated artifact it is responsible for, not an entire parent directory. Fifth, parse failures, missing draft state, user cancellation, and predictable file-system problems should surface as stable CLI errors instead of raw internal messages.
 
-This matters because the CLI already exists and its current surface looks trustworthy, but several code paths can still create state, delete too much, or report ambiguous failures under normal use. A human should be able to prove the hardening by running the real CLI entrypoint from a temporary project directory, seeing `.ship-by-sunday/draft.json` land in that temporary directory, seeing `next --json` fail with a stable `missing_draft` error instead of creating state, interrupting `resume` with `Ctrl+C` and getting a deliberate cancellation message, and forcing `generate` without losing unrelated files beside the generated repo folder.
+This matters because the CLI already exists and its current surface looks trustworthy, but several code paths can still create state, delete too much, or report ambiguous failures under normal use. A human should be able to prove the hardening by running the real CLI entrypoint from a temporary project directory, seeing `.ship-by-sunday/draft.json` land in that temporary directory, seeing `next --json` fail with a stable `missing_draft` error instead of creating state, interrupting `resume` with `Ctrl+C` and getting a deliberate cancellation message, and forcing `generate` without losing unrelated files beside the Blueprint folder.
 
 ## Progress
 
@@ -42,7 +42,7 @@ All draft mutations flow through one persistence boundary, which is good for lev
 
 That safety gap is now closed with a small temp-file convention. The store writes to `draft.json.tmp` in the same directory, then renames it into `draft.json` only after the file is flushed and closed. If a final draft is missing and a valid temp draft is present, the loader now promotes it into place instead of failing or starting over.
 
-The destructive generate path is narrower than it first looks, but it is still too broad. In directory mode, `packages/ship-by-sunday-cli/src/commands/generate-command.ts` writes the generated repo inside `outPath/<repoName>`, yet `--force` currently deletes `outPath` itself with `rm(absoluteOutPath, { recursive: true, force: true })`. That can wipe unrelated files sitting beside the generated repo slug. Zip mode only targets the exact file path, but its type and overwrite failures still bubble through generic error handling.
+The destructive generate path is narrower than it first looks, but it is still too broad. In directory mode, `packages/ship-by-sunday-cli/src/commands/generate-command.ts` writes the Blueprint inside `outPath/<repoName>`, yet `--force` currently deletes `outPath` itself with `rm(absoluteOutPath, { recursive: true, force: true })`. That can wipe unrelated files sitting beside the Blueprint slug. Zip mode only targets the exact file path, but its type and overwrite failures still bubble through generic error handling.
 
 That destructive boundary is now narrower. Directory generation only removes the repo slug at `path.join(outPath, repoName)` when `--force` is present, so sibling files in the container path survive. Zip generation now treats a directory target as an invalid state instead of trying to force-write through it.
 
@@ -80,7 +80,7 @@ Decision: keep this slice repository-native and additive instead of copying Mole
 
 ## Outcomes & Retrospective
 
-This plan is not implemented yet. When it is complete, the diff should stay concentrated in `packages/ship-by-sunday-cli/`, the repository root `package.json`, and a minimal `README.md` update that explains the new safety model. Success is not “the tests still pass”; success is a temporary project directory proving that the real CLI entrypoint writes its draft and dry-run output metadata into the caller's project root, that read-only commands leave no draft behind, and that `generate --force` only replaces the generated repo slug or the target zip file.
+This plan is not implemented yet. When it is complete, the diff should stay concentrated in `packages/ship-by-sunday-cli/`, the repository root `package.json`, and a minimal `README.md` update that explains the new safety model. Success is not “the tests still pass”; success is a temporary project directory proving that the real CLI entrypoint writes its draft and dry-run output metadata into the caller's project root, that read-only commands leave no draft behind, and that `generate --force` only replaces the Blueprint slug or the target zip file.
 
 The main known implementation risk is the root-wrapper cwd handoff. The grill resolved one false branch already: Bun is not supplying `INIT_CWD` here. The plan now resolves the remaining risk by changing the root `sbs` wrapper so it no longer mutates cwd, keeping `projectRootPath` equal to `process.cwd()` inside the CLI, and still requiring a real-entrypoint proof path in validation. If the direct-entrypoint proof or the root-wrapper smoke do not pass, the slice is not complete even if injected `runCli()` tests do.
 
@@ -92,7 +92,7 @@ Inside the CLI blueprint, `packages/ship-by-sunday-cli/src/draft/draft-paths.ts`
 
 The current command surfaces split cleanly into read and write categories. `schema`, `stages`, and `fields` are pure blueprint-contract introspection. `next` and `validate` are intended as read-only blueprint-state introspection but currently call `ensureLocalDraft()`. `review` already loads without auto-init, but its missing-draft case is not normalized. `resume`, `stage`, `init`, `import`, `apply`, `mutate`, and the field mutation commands are explicit write paths. `generate` is read-only with respect to the draft, but it is destructive with respect to the chosen artifact output path.
 
-`packages/ship-by-sunday-cli/src/commands/generate-command.ts` is the only path that crosses from CLI-local state into generated starter artifacts. It loads the draft, checks review readiness through `deriveStageStatus()`, converts the draft into a canonical project definition, and then calls `buildReviewDownloadZip()`, `buildRepoGenerationManifest()`, and `materializeRepoSnapshot()` from `@manmeetsai/blueprint-compiler/server`. The generated repo directory is written to a temporary directory first, but the destructive preflight still removes the entire `--out` container path.
+`packages/ship-by-sunday-cli/src/commands/generate-command.ts` is the only path that crosses from CLI-local state into generated starter artifacts. It loads the draft, checks review readiness through `deriveStageStatus()`, converts the draft into a canonical project definition, and then calls `buildReviewDownloadZip()`, `buildRepoGenerationManifest()`, and `materializeRepoSnapshot()` from `@manmeetsai/blueprint-compiler/server`. The Blueprint directory is written to a temporary directory first, but the destructive preflight still removes the entire `--out` container path.
 
 The blueprint compiler already has its own legitimate root semantics, and this slice must not break them. `packages/blueprint-compiler/src/repo-root.ts` exports `resolveRepoRootPath()`, which walks upward from the compiler source tree until it finds the repository markers needed to load starter files and prompt assets. `packages/blueprint-compiler/tests/repo-root.test.ts` already proves that template loading and repo snapshot generation still work even when `process.cwd()` is somewhere else. That behavior should remain source-install-root behavior, not be repurposed into caller-project-root behavior.
 
@@ -138,9 +138,9 @@ The main files are `packages/ship-by-sunday-cli/src/draft/draft-paths.ts`, `pack
 
 ### Milestone 4: Scope destructive generate behavior to the real artifact target
 
-At the end of this milestone, directory generation treats `--out` as a container directory and only replaces `path.join(outPath, repoName)` when `--force` is present. It must never recursively delete the whole container path just to replace the generated repo slug. The concrete write shape should be: compute `repoName`, ensure the container directory exists, stage a temporary repo directory beside the final slug target, then rename that temporary repo directory into the slug target. Zip generation should only replace the exact file path when `--force` is present and should produce intentional messages when the existing target is the wrong file type.
+At the end of this milestone, directory generation treats `--out` as a container directory and only replaces `path.join(outPath, repoName)` when `--force` is present. It must never recursively delete the whole container path just to replace the Blueprint slug. The concrete write shape should be: compute `repoName`, ensure the container directory exists, stage a temporary repo directory beside the final slug target, then rename that temporary repo directory into the slug target. Zip generation should only replace the exact file path when `--force` is present and should produce intentional messages when the existing target is the wrong file type.
 
-The main file is `packages/ship-by-sunday-cli/src/commands/generate-command.ts`, with supporting test updates in `packages/ship-by-sunday-cli/tests/generate-command.test.ts`. Run the generate test file plus a temporary-project real-entrypoint dry run and one actual directory generation where an unrelated sibling file sits next to the generated slug directory. Success looks like the sibling file surviving `generate --force` while the generated repo slug is replaced cleanly.
+The main file is `packages/ship-by-sunday-cli/src/commands/generate-command.ts`, with supporting test updates in `packages/ship-by-sunday-cli/tests/generate-command.test.ts`. Run the generate test file plus a temporary-project real-entrypoint dry run and one actual directory generation where an unrelated sibling file sits next to the generated slug directory. Success looks like the sibling file surviving `generate --force` while the Blueprint slug is replaced cleanly.
 
 ### Milestone 5: Normalize user-facing failures and cancellation
 
@@ -205,7 +205,7 @@ After Milestone 3 lands, simulate interrupted-write recovery at the blueprint te
 
 The expected observation is that the test suite proves the new recovery rules without leaving residue in the repository working tree.
 
-After Milestone 4 lands, prove that forced directory generation only replaces the generated repo slug:
+After Milestone 4 lands, prove that forced directory generation only replaces the Blueprint slug:
 
     $ repo_root=/Users/parkerrex/Projects/ship-by-sunday
     $ temp_project="$(mktemp -d /tmp/sbs-cli-generate-XXXXXX)"

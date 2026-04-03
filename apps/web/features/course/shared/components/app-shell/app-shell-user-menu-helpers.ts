@@ -8,9 +8,9 @@ export function isPathPrefixActive(pathname: string, href: string) {
 export function workspaceMenuLinks(pathname: string) {
 	return [
 		{
-			href: routeConfig.start,
+			href: routeConfig.blueprint,
 			label: workspaceDisplayConfig.homeLabel,
-			active: isPathPrefixActive(pathname, routeConfig.start),
+			active: isPathPrefixActive(pathname, routeConfig.blueprint),
 		},
 		{
 			href: routeConfig.review,

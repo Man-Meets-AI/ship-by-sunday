@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
-	"description": "Repo-local Ship by Sunday CLI for blueprint intake and starter snapshot generation.",
+	"description": "Repo-local Ship by Sunday CLI for blueprint intake and blueprint generation.",
 	"bin": {
 		"sbs": "./src/cli.ts"
 	},

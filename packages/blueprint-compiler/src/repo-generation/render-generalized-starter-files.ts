@@ -139,7 +139,7 @@ export function renderGeneralizedStarterFiles(
 			content: [
 				"# QA AGENTS",
 				"",
-				"- Start with the journeys that reach the generated docs and the final starter snapshot.",
+				"- Start with the journeys that reach the generated docs and the final blueprint.",
 				"- Keep findings concrete, reproducible, and tied to an observable user outcome.",
 				"- Update `coverage.csv` and `test-inventory.csv` whenever a new lane or gap appears.",
 			].join("\n"),
@@ -149,7 +149,7 @@ export function renderGeneralizedStarterFiles(
 			content: [
 				"# QA Glossary",
 				"",
-				"- Journey: a user-facing path such as reaching Review and downloading the starter snapshot.",
+				"- Journey: a user-facing path such as reaching Review and downloading the blueprint.",
 				"- Coverage: the current proof that a journey or feature still works.",
 				"- Run report: a dated summary of what was tested, what failed, and what still needs verification.",
 			].join("\n"),
@@ -188,7 +188,7 @@ export function renderGeneralizedStarterFiles(
 			path: "qa/journeys.csv",
 			content: [
 				"journey_id,journey_name,persona,goal,entry_point,success_signal",
-				`review-download,Review and download starter snapshot,Founder Operator,Download the ${facts.product_name} starter snapshot,/review,Starter Snapshot downloads and unzips cleanly`,
+				`review-download,Review and download blueprint,Founder Operator,Download the ${facts.product_name} blueprint,/review,Blueprint downloads and unzips cleanly`,
 				"design-refinement,Review generated design docs,Design Partner,Use the generated design guidance to improve the UI,docs/design/AGENTS.md,Design changes are scoped and validated",
 				"build-first-slice,Implement the first build slice,Implementation Partner,Turn docs/build/docs/prompt.md into code,docs/build/docs/prompt.md,The first user-visible outcome works locally",
 			].join("\n"),
@@ -197,7 +197,7 @@ export function renderGeneralizedStarterFiles(
 			path: "qa/coverage.csv",
 			content: [
 				"area,scenario,status,notes",
-				"review-download,Starter Snapshot contents preview,not-started,Verify the final zip structure and generated docs tree",
+				"review-download,Blueprint contents preview,not-started,Verify the final zip structure and generated docs tree",
 				"starter-setup,Environment template handoff,not-started,Verify .env.local.example and .env.production.example guidance",
 				"first-build-slice,Build doc to implementation handoff,not-started,Validate the first slice from docs/build/docs/prompt.md",
 			].join("\n"),
@@ -206,7 +206,7 @@ export function renderGeneralizedStarterFiles(
 			path: "qa/test-inventory.csv",
 			content: [
 				"test_id,layer,area,scenario,status",
-				"repo-download-zip,integration,review-download,Starter Snapshot route returns a zip,pending",
+				"repo-download-zip,integration,review-download,Blueprint route returns a zip,pending",
 				"review-page-copy,integration-ui,review-download,Review page explains the snapshot contents,pending",
 				"build-doc-handoff,manual,first-build-slice,Engineer follows docs/build/docs/prompt.md,pending",
 			].join("\n"),
