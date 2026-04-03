@@ -1,16 +1,15 @@
 import {
-	createCanonicalProjectDefinitionDraft,
 	isBlueprintArrayField,
-	isBlueprintNumericField,
-	normalizeProblemUrgencyValue,
-	normalizeProblemSeverityValue,
-	parseCanonicalProjectFactsDraft,
-	type CanonicalProjectDefinitionDraft,
-	type CanonicalProjectFactKey,
-} from "@manmeetsai/blueprint-compiler";
+	normalizeCliFactValue,
+	type CliBlueprintFactKey,
+} from "../field-contract";
 import { createCliError } from "../cli-errors";
 import { workspaceLauncherCommand } from "../command-surface";
-import { ensureLocalDraft, loadLocalDraft } from "../draft/draft-store";
+import {
+	ensureLocalDraft,
+	loadLocalDraft,
+	type LocalDraftEnvelope,
+} from "../draft/draft-store";
 import type { EditableBlueprintStageId } from "../parse-cli-command";
 import type { CliIo } from "../run-cli";
 import {
@@ -22,7 +21,7 @@ import {
 	type StagePromptOutcome,
 } from "./stage-prompt-session";
 
-type DraftSaver = (draft: CanonicalProjectDefinitionDraft) => Promise<void>;
+type DraftSaver = (draft: LocalDraftEnvelope) => Promise<void>;
 
 function createInvalidPromptStateError(stageId: EditableBlueprintStageId) {
 	return createCliError(
@@ -41,39 +40,39 @@ function createClosedPromptError(stageId: EditableBlueprintStageId) {
 }
 
 function applyFieldValue(
-	draft: CanonicalProjectDefinitionDraft,
-	fieldKey: CanonicalProjectFactKey,
+	draft: LocalDraftEnvelope,
+	fieldKey: CliBlueprintFactKey,
 	value: string,
 ) {
 	const nextFactsSource: Record<string, unknown> = { ...draft.facts };
 
 	if (!value.trim()) {
-		delete nextFactsSource[fieldKey];
-	} else if (fieldKey === "problem_severity") {
-		nextFactsSource[fieldKey] = normalizeProblemSeverityValue(value);
-	} else if (fieldKey === "problem_urgency") {
-		nextFactsSource[fieldKey] = normalizeProblemUrgencyValue(value);
-	} else if (isBlueprintNumericField(fieldKey)) {
-		nextFactsSource[fieldKey] = Number(value.trim());
+		if (fieldKey === "scope_in" || fieldKey === "scope_out") {
+			nextFactsSource[fieldKey] = [];
+		} else {
+			delete nextFactsSource[fieldKey];
+		}
 	} else if (isBlueprintArrayField(fieldKey)) {
-		nextFactsSource[fieldKey] = value
-			.split("\n")
-			.map((line) => line.trim())
-			.filter(Boolean);
+		const normalizedValue = normalizeCliFactValue(fieldKey, value.split("\n"));
+		if (normalizedValue === undefined) {
+			delete nextFactsSource[fieldKey];
+		} else {
+			nextFactsSource[fieldKey] = normalizedValue;
+		}
 	} else {
-		nextFactsSource[fieldKey] = value.trim();
+		const normalizedValue = normalizeCliFactValue(fieldKey, value);
+		if (normalizedValue === undefined) {
+			delete nextFactsSource[fieldKey];
+		} else {
+			nextFactsSource[fieldKey] = normalizedValue;
+		}
 	}
 
-	const nextFacts = parseCanonicalProjectFactsDraft(nextFactsSource);
-
-	return createCanonicalProjectDefinitionDraft({
-		clerkUserId: draft.clerkUserId,
-		productKey: draft.productKey,
-		facts: nextFacts,
-		placeholdersInUse: draft.placeholdersInUse,
-		createdAt: draft.createdAt,
+	return {
+		...draft,
+		facts: nextFactsSource,
 		updatedAt: Date.now(),
-	});
+	};
 }
 
 async function readFieldLines({

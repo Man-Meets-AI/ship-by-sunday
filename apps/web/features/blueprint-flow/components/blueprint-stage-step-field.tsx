@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { BlueprintProblemStatementOptimizer } from "@/features/blueprint-flow/components/blueprint-problem-statement-optimizer";
 import {
 	getBlueprintFieldScaleDefinition,
 	blueprintFieldHelperText,
@@ -27,6 +28,7 @@ import { BlueprintStageScaleField } from "./blueprint-stage-scale-field";
 type BlueprintStageStepFieldProps = {
 	fieldKey: CanonicalProjectFactKey;
 	facts: CanonicalProjectFactsDraft;
+	draftValues: Record<string, string>;
 	step: BlueprintStepDefinition;
 	value: string;
 	errorMessage?: string;
@@ -36,6 +38,7 @@ type BlueprintStageStepFieldProps = {
 function BlueprintStageStepFieldComponent({
 	fieldKey,
 	facts,
+	draftValues,
 	step,
 	value,
 	errorMessage,
@@ -63,9 +66,21 @@ function BlueprintStageStepFieldComponent({
 
 	return (
 		<Field className="gap-2" data-invalid={errorMessage ? true : undefined}>
-			<FieldLabel htmlFor={inputId}>
-				{blueprintFieldLabel(fieldKey, facts)}
-			</FieldLabel>
+			<div className="flex flex-wrap items-start justify-between gap-3">
+				<FieldLabel htmlFor={inputId}>
+					{blueprintFieldLabel(fieldKey, facts)}
+				</FieldLabel>
+				{fieldKey === "problem_statement" ? (
+					<BlueprintProblemStatementOptimizer
+						stepId={step.id}
+						facts={facts}
+						draftValues={draftValues}
+						onApplyOptimizedValue={(nextValue) => {
+							onChange(fieldKey, nextValue);
+						}}
+					/>
+				) : null}
+			</div>
 			<FieldContent>
 				{blueprintFieldInputKind(fieldKey) === "textarea" ? (
 					<Textarea
@@ -102,6 +117,7 @@ export const BlueprintStageStepField = memo(
 		previousProps.step.id === nextProps.step.id &&
 		previousProps.value === nextProps.value &&
 		previousProps.errorMessage === nextProps.errorMessage &&
+		previousProps.draftValues === nextProps.draftValues &&
 		blueprintFieldLabel(previousProps.fieldKey, previousProps.facts) ===
 			blueprintFieldLabel(nextProps.fieldKey, nextProps.facts) &&
 		blueprintFieldHelperText(previousProps.fieldKey, previousProps.facts) ===

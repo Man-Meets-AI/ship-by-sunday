@@ -42,4 +42,37 @@ describe("blueprint renderers", () => {
 		expect(outlinePrompt?.content).toContain("# ExecPlan Outline From Session");
 		expect(executionLoopPrompt?.content).toContain("# ExecPlan Execution Loop");
 	});
+
+	it("renders a reduced intake into the same repo output tree", async () => {
+		const renderedFiles = await renderFullBlueprintTree(
+			createCompleteProjectDefinition({
+				facts: {
+					product_name: "Ship by Sunday OS",
+					product_summary: "Blueprint-first runtime",
+					primary_user: "Founders",
+					problem_statement: "Planning stays vague",
+					problem_trigger:
+						"They need a clear blueprint and repo handoff immediately.",
+					problem_severity: "8",
+					success_looks_like:
+						"A founder downloads a working blueprint and repo zip.",
+					core_flow: [
+						"Capture product facts",
+						"Unlock blueprints",
+						"Download repo",
+					],
+					pricing: 29,
+				},
+			}),
+		);
+		const factsJson = renderedFiles.find(
+			(file) => file.path === "docs/facts/project-definition.json",
+		);
+		const readme = renderedFiles.find((file) => file.path === "docs/README.md");
+
+		expect(factsJson?.content).toContain('"theme_hex": "#0f766e"');
+		expect(factsJson?.content).toContain('"price_usd_cents": 2900');
+		expect(readme?.content).toContain("Agent-Ready Packs");
+		expect(readme?.content).toContain("repo zip");
+	});
 });

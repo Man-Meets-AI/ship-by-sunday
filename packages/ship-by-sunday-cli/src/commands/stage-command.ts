@@ -1,8 +1,9 @@
+import { getBlueprintStageDefinition } from "../field-contract";
 import {
-	deriveStageStatus,
-	getBlueprintStageDefinition,
-} from "@manmeetsai/blueprint-compiler";
-import { ensureLocalDraft, saveLocalDraft } from "../draft/draft-store";
+	deriveLocalDraftStatus,
+	ensureLocalDraft,
+	saveLocalDraft,
+} from "../draft/draft-store";
 import type { EditableBlueprintStageId } from "../parse-cli-command";
 import type { CliIo } from "../run-cli";
 import type { StagePromptOutcome } from "../prompts/stage-prompt-session";
@@ -50,7 +51,7 @@ export async function handleStageCommand({
 	}
 
 	const nextDraft = await ensureLocalDraft(projectRootPath);
-	const stageStatus = deriveStageStatus(nextDraft.facts);
+	const stageStatus = deriveLocalDraftStatus(nextDraft.facts);
 	io.write(
 		`${getBlueprintStageDefinition(stageId).label} saved. First incomplete stage: ${stageStatus.firstIncompleteStageId}`,
 	);

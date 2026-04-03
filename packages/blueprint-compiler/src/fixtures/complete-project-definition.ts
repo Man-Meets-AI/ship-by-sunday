@@ -10,6 +10,9 @@ const completeProjectFacts: CanonicalProjectFacts = {
 	primary_user: "Solo founders shipping a web product in one weekend.",
 	problem_statement:
 		"Founders lose momentum when product planning stays vague.",
+	core_flow: ["Capture product facts", "Unlock blueprints", "Download repo"],
+	pricing: 29,
+	theme_hex: "#0f766e",
 	problem_context_when: "When a founder is moving from idea to build week.",
 	problem_context_where: "Inside their local app and planning workflow.",
 	problem_trigger: "They need a clear blueprint and repo handoff immediately.",
@@ -136,6 +139,7 @@ const completeProjectFacts: CanonicalProjectFacts = {
 	price_display: "$29",
 	currency: "USD",
 	domain: "example.com",
+	contact_email: "support@example.com",
 	support_email: "support@example.com",
 };
 

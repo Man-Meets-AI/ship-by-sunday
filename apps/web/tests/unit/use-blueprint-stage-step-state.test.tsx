@@ -9,6 +9,12 @@ import {
 	getBlueprintStageDefinition,
 } from "@blueprint-compiler";
 import { describe, expect, it, vi } from "vitest";
+vi.mock("@clerk/nextjs", () => ({
+	useUser: () => ({
+		isLoaded: true,
+		user: null,
+	}),
+}));
 import { PRODUCT_APP_ID } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import { useBlueprintStageStepState } from "@/features/blueprint-flow/hooks/use-blueprint-stage-step-state";
@@ -101,15 +107,7 @@ async function setCurrentFieldValue(
 	result: {
 		current: ReturnType<typeof useBlueprintStageStepState>;
 	},
-	fieldKey:
-		| "product_name"
-		| "product_summary"
-		| "primary_user"
-		| "why_this_matters"
-		| "done_when"
-		| "acceptance_criteria"
-		| "validation_plan"
-		| "demo_flow",
+	fieldKey: "product_name" | "product_summary" | "primary_user" | "pricing",
 	value: string,
 ) {
 	await act(async () => {
@@ -126,7 +124,6 @@ describe("useBlueprintStageStepState", () => {
 			product_name: undefined,
 			product_summary: undefined,
 			primary_user: undefined,
-			why_this_matters: undefined,
 		});
 		const navigateToHref = vi.fn();
 		const onDirtyChange = vi.fn();
@@ -168,7 +165,6 @@ describe("useBlueprintStageStepState", () => {
 			product_name: undefined,
 			product_summary: undefined,
 			primary_user: undefined,
-			why_this_matters: undefined,
 		});
 		const { result } = renderHook(() =>
 			useBlueprintStageStepState({
@@ -208,7 +204,6 @@ describe("useBlueprintStageStepState", () => {
 		expect(result.current.currentFieldErrors).toEqual({
 			product_summary: "Add an answer here before this page can complete.",
 			primary_user: "Add an answer here before this page can complete.",
-			why_this_matters: "Add an answer here before this page can complete.",
 		});
 
 		await setCurrentFieldValue(
@@ -219,7 +214,6 @@ describe("useBlueprintStageStepState", () => {
 
 		expect(result.current.currentFieldErrors).toEqual({
 			primary_user: "Add an answer here before this page can complete.",
-			why_this_matters: "Add an answer here before this page can complete.",
 		});
 
 		await setCurrentFieldValue(
@@ -227,27 +221,19 @@ describe("useBlueprintStageStepState", () => {
 			"primary_user",
 			"A solo builder who needs to turn one idea into a launchable starter quickly.",
 		);
-		await setCurrentFieldValue(
-			result,
-			"why_this_matters",
-			"Without a tight blueprint, the builder keeps restarting and never gets to a shippable first version.",
-		);
 
 		expect(result.current.currentFieldErrors).toEqual({});
 		expect(result.current.currentFeedback).toBeNull();
 	});
 
-	it("keeps the last build-plan page in place when earlier blockers still exist", async () => {
+	it("keeps the final build-plan page in place when earlier blockers still exist", async () => {
 		const stage = getBlueprintStageDefinition("build-plan");
 		const navigateToHref = vi.fn();
 		const { saveProjectDefinitionFacts, saveProjectDefinitionFactsSpy } =
 			createSaveProjectDefinitionFactsMutation();
 		const { projectFacts, stageStatus } = getStageStatus("build-plan", {
-			objective: undefined,
-			done_when: undefined,
-			acceptance_criteria: undefined,
-			validation_plan: undefined,
-			demo_flow: undefined,
+			pricing: undefined,
+			price_usd_cents: undefined,
 		});
 		const { result } = renderHook(() =>
 			useBlueprintStageStepState({
@@ -257,60 +243,34 @@ describe("useBlueprintStageStepState", () => {
 				stage,
 				stageId: "build-plan",
 				stageStatus,
-				stepId: "validation",
-				previousHref: "/build-plan/plan",
+				stepId: "setup",
+				previousHref: "/build-plan/delivery",
 				nextHref: "/review",
 				projectFacts,
 				saveProjectDefinitionFacts,
 			}),
 		);
 
-		await setCurrentFieldValue(
-			result,
-			"done_when",
-			"Buyers can answer the blueprint flow and download the starter snapshot.",
-		);
-		await setCurrentFieldValue(
-			result,
-			"acceptance_criteria",
-			"Complete all blueprint stages\nDownload starter snapshot",
-		);
-		await setCurrentFieldValue(
-			result,
-			"validation_plan",
-			"Run blueprint stage smoke tests\nCheck review download state",
-		);
-		await setCurrentFieldValue(
-			result,
-			"demo_flow",
-			"Product stage to review download in one sitting.",
-		);
-
 		await act(async () => {
 			await result.current.handleSaveAndContinue();
 		});
 
-		expect(saveProjectDefinitionFactsSpy).toHaveBeenCalledTimes(1);
+		expect(saveProjectDefinitionFactsSpy).not.toHaveBeenCalled();
 		expect(navigateToHref).not.toHaveBeenCalled();
 		expect(result.current.currentFeedback).toEqual(
 			expect.objectContaining({
 				title: "Saved and complete.",
-				description: "Validation is ready to continue.",
+				description: "Setup is ready to continue.",
 			}),
 		);
 	});
 
-	it("routes to review when the final build-plan page resolves the last blocker", async () => {
+	it("routes to review when the final build-plan page has no remaining blockers", async () => {
 		const stage = getBlueprintStageDefinition("build-plan");
 		const navigateToHref = vi.fn();
 		const { saveProjectDefinitionFacts, saveProjectDefinitionFactsSpy } =
 			createSaveProjectDefinitionFactsMutation();
-		const { projectFacts, stageStatus } = getStageStatus("build-plan", {
-			done_when: undefined,
-			acceptance_criteria: undefined,
-			validation_plan: undefined,
-			demo_flow: undefined,
-		});
+		const { projectFacts, stageStatus } = getStageStatus("build-plan");
 		const { result } = renderHook(() =>
 			useBlueprintStageStepState({
 				navigateToHref,
@@ -319,40 +279,19 @@ describe("useBlueprintStageStepState", () => {
 				stage,
 				stageId: "build-plan",
 				stageStatus,
-				stepId: "validation",
-				previousHref: "/build-plan/plan",
+				stepId: "setup",
+				previousHref: "/build-plan/delivery",
 				nextHref: "/review",
 				projectFacts,
 				saveProjectDefinitionFacts,
 			}),
 		);
 
-		await setCurrentFieldValue(
-			result,
-			"done_when",
-			"Buyers can answer the blueprint flow and download the starter snapshot.",
-		);
-		await setCurrentFieldValue(
-			result,
-			"acceptance_criteria",
-			"Complete all blueprint stages\nDownload starter snapshot",
-		);
-		await setCurrentFieldValue(
-			result,
-			"validation_plan",
-			"Run blueprint stage smoke tests\nCheck review download state",
-		);
-		await setCurrentFieldValue(
-			result,
-			"demo_flow",
-			"Product stage to review download in one sitting.",
-		);
-
 		await act(async () => {
 			await result.current.handleSaveAndContinue();
 		});
 
-		expect(saveProjectDefinitionFactsSpy).toHaveBeenCalledTimes(1);
+		expect(saveProjectDefinitionFactsSpy).not.toHaveBeenCalled();
 		expect(navigateToHref).toHaveBeenCalledWith("/review");
 	});
 
@@ -364,7 +303,6 @@ describe("useBlueprintStageStepState", () => {
 			product_name: undefined,
 			product_summary: undefined,
 			primary_user: undefined,
-			why_this_matters: undefined,
 		});
 
 		renderHook(() =>
@@ -426,7 +364,6 @@ describe("useBlueprintStageStepState", () => {
 			product_name: undefined,
 			product_summary: undefined,
 			primary_user: undefined,
-			why_this_matters: undefined,
 		});
 		const { result } = renderHook(() =>
 			useBlueprintStageStepState({

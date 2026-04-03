@@ -40,44 +40,39 @@ function classifyStepSave(
 
 describe("classifyBlueprintStepSave", () => {
 	it("treats an untouched product step as blank and preserves required-field order", () => {
-		const feedback = classifyStepSave("product", "scope", {
-			scope_in: "   ",
-			scope_out: "",
-			non_goals: "\n",
-			v1_rationale: "",
+		const feedback = classifyStepSave("product", "foundation", {
+			product_name: "   ",
+			product_summary: "",
+			primary_user: "\n",
 		});
 
 		expect(feedback.state).toBe("blank");
 		expect(feedback.missingRequiredFieldKeys).toEqual([
-			"scope_in",
-			"scope_out",
-			"non_goals",
-			"v1_rationale",
+			"product_name",
+			"product_summary",
+			"primary_user",
 		]);
-		expect(feedback.firstMissingRequiredFieldKey).toBe("scope_in");
+		expect(feedback.firstMissingRequiredFieldKey).toBe("product_name");
 	});
 
 	it("treats a partially filled product step as partial when required fields are still missing", () => {
-		const feedback = classifyStepSave("product", "scope", {
-			scope_in: "Keep the first checkout flow only",
-			scope_out: "",
-			non_goals: "",
-			v1_rationale: "Ship the smallest buyer path first.",
+		const feedback = classifyStepSave("product", "foundation", {
+			product_name: "Ship by Sunday",
+			product_summary: "",
+			primary_user: "",
 		});
 
 		expect(feedback.state).toBe("partial");
 		expect(feedback.missingRequiredFieldKeys).toEqual([
-			"scope_out",
-			"non_goals",
+			"product_summary",
+			"primary_user",
 		]);
-		expect(feedback.firstMissingRequiredFieldKey).toBe("scope_out");
+		expect(feedback.firstMissingRequiredFieldKey).toBe("product_summary");
 	});
 
 	it("treats a step as complete when its required fields are present and optional fields stay blank", () => {
-		const feedback = classifyStepSave("design", "flow", {
-			screen_sequence: "Hero\nCheckout\nConfirmation",
-			must_have_capabilities: "Collect payment\nDeliver blueprint",
-			surface_type: "",
+		const feedback = classifyStepSave("design", "direction", {
+			theme_hex: "",
 		});
 
 		expect(feedback.state).toBe("complete");
@@ -87,32 +82,21 @@ describe("classifyBlueprintStepSave", () => {
 
 	it("treats clearing a previously complete required field as cleared_to_incomplete", () => {
 		const existingSavedValues: BlueprintStepDraftValues = {
-			objective: "Ship the blueprint funnel.",
-			user_visible_outcome:
-				"Buyers reach review with a complete blueprint and starter snapshot.",
-			distribution_model: "Protected web app with downloads",
-			install_destination: "Vercel",
-			buyer_ai_promise: "AI helps compile the blueprint and starter repo.",
-			pricing_model: "One-time payment",
-			price_usd_cents: "9900",
-			price_display: "$99",
-			currency: "USD",
-			domain: "shipbysunday.dev",
-			support_email: "support@shipbysunday.dev",
+			pricing: "99",
 		};
 		const feedback = classifyStepSave(
 			"build-plan",
 			"delivery",
 			{
 				...existingSavedValues,
-				price_usd_cents: "",
+				pricing: "",
 			},
 			existingSavedValues,
 		);
 
 		expect(feedback.state).toBe("cleared_to_incomplete");
-		expect(feedback.clearedSavedFieldKeys).toEqual(["price_usd_cents"]);
-		expect(feedback.missingRequiredFieldKeys).toEqual(["price_usd_cents"]);
-		expect(feedback.firstMissingRequiredFieldKey).toBe("price_usd_cents");
+		expect(feedback.clearedSavedFieldKeys).toEqual(["pricing"]);
+		expect(feedback.missingRequiredFieldKeys).toEqual(["pricing"]);
+		expect(feedback.firstMissingRequiredFieldKey).toBe("pricing");
 	});
 });

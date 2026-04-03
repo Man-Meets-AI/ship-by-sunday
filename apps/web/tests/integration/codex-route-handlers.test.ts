@@ -546,6 +546,73 @@ describe("codex route handlers", () => {
 		);
 	});
 
+	it("accepts the blueprint problem-statement template and records the run", async () => {
+		requireProductAccessApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		mockClient({
+			readAccount: vi.fn().mockResolvedValue({
+				account: {
+					type: "chatgpt",
+					email: "builder@example.com",
+					planType: "plus",
+				},
+			}),
+			generateText: vi.fn().mockResolvedValue({
+				status: "completed",
+				text: "  The user keeps restarting the launch plan.  ",
+				errorMessage: null,
+			}),
+			readRateLimits: vi.fn().mockResolvedValue({
+				rateLimits: {
+					limitId: "main",
+					limitName: "Main",
+					primary: null,
+					secondary: null,
+					credits: null,
+					planType: null,
+				},
+				rateLimitsByLimitId: null,
+			}),
+		});
+		upsertViewerCodexConnectionMock.mockResolvedValue({
+			connectionId: "connection_1",
+			mode: "patched",
+		});
+		recordCodexRunMock.mockResolvedValue({
+			runId: "run_1",
+			createdAt: 100,
+		});
+
+		const response = await postCodexGenerate(
+			new Request("https://example.test/api/codex/generate", {
+				method: "POST",
+				headers: {
+					"content-type": "application/json",
+				},
+				body: JSON.stringify({
+					templateId: "blueprint_problem_statement",
+					prompt: "Rewrite the problem statement with more focus.",
+				}),
+			}),
+		);
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(200);
+		expect(body).toMatchObject({
+			ok: true,
+			output: "The user keeps restarting the launch plan.",
+		});
+		expect(recordCodexRunMock).toHaveBeenCalledWith(
+			{ userId: "user_123", token: "token_123" },
+			expect.objectContaining({
+				templateId: "blueprint_problem_statement",
+				status: "success",
+			}),
+		);
+	});
+
 	it("returns a request-tagged 500 when polling fails unexpectedly", async () => {
 		requireProductAccessApiSessionMock.mockResolvedValue({
 			userId: "user_123",
