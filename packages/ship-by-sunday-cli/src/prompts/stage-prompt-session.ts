@@ -10,7 +10,7 @@ import {
 	getPacketStepLabel,
 	packetFieldHelperText,
 	packetFieldLabel,
-} from "@manmeetsai/packet-presentation";
+} from "@shipbysunday/packet-presentation";
 import type { EditablePacketStageId } from "../parse-cli-command";
 
 export type StagePromptOutcome =

@@ -6,7 +6,7 @@ import {
 	placeholderFriendlyFactKeys,
 	type CanonicalProjectFactKey,
 } from "@manmeetsai/packet-compiler";
-import { packetFieldLabel } from "@manmeetsai/packet-presentation";
+import { packetFieldLabel } from "@shipbysunday/packet-presentation";
 import type {
 	EditablePacketStageId,
 	ReviewablePacketStageId,
