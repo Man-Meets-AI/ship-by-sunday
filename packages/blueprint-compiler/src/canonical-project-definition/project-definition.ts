@@ -7,13 +7,14 @@ import {
 	type CanonicalProjectFacts,
 	type CanonicalProjectFactsDraft,
 } from "./schema";
+import { deriveBlueprintFacts } from "./derived-blueprint-facts";
 
 export const CANONICAL_PROJECT_DEFINITION_SCHEMA_VERSION = 1;
 
 type CreateCanonicalProjectDefinitionArgs = {
 	clerkUserId: string;
 	productKey: string;
-	facts: CanonicalProjectFacts;
+	facts: CanonicalProjectFactsDraft;
 	placeholdersInUse?: CanonicalProjectDefinition["placeholdersInUse"];
 	createdAt?: number;
 	updatedAt?: number;
@@ -31,7 +32,11 @@ type CreateCanonicalProjectDefinitionDraftArgs = {
 export function parseCanonicalProjectDefinition(
 	input: unknown,
 ): CanonicalProjectDefinition {
-	return canonicalProjectDefinitionSchema.parse(input);
+	const parsedInput = canonicalProjectDefinitionDraftSchema.parse(input);
+	return canonicalProjectDefinitionSchema.parse({
+		...parsedInput,
+		facts: deriveBlueprintFacts(parsedInput.facts),
+	});
 }
 
 export function parseCanonicalProjectFactsDraft(
@@ -51,12 +56,13 @@ export function createCanonicalProjectDefinition(
 ): CanonicalProjectDefinition {
 	const createdAt = args.createdAt ?? Date.now();
 	const updatedAt = args.updatedAt ?? createdAt;
+	const facts = deriveBlueprintFacts(args.facts);
 
 	return parseCanonicalProjectDefinition({
 		clerkUserId: args.clerkUserId,
 		productKey: args.productKey,
 		schemaVersion: CANONICAL_PROJECT_DEFINITION_SCHEMA_VERSION,
-		facts: args.facts,
+		facts,
 		placeholdersInUse: args.placeholdersInUse ?? [],
 		createdAt,
 		updatedAt,
@@ -94,3 +100,4 @@ export {
 	canonicalProjectFactKeys,
 	placeholderFriendlyFactKeys,
 } from "./schema";
+export { deriveBlueprintFacts } from "./derived-blueprint-facts";

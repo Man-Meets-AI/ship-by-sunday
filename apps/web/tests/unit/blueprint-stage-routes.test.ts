@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+	createCanonicalProjectDefinitionDraft,
 	createCompleteProjectDefinition,
 	deriveStageStatus,
 	getBlueprintStageDefinition,
@@ -13,13 +14,21 @@ import {
 describe("blueprint stage routes", () => {
 	it("resolves stage-entry routes from the current objective or first complete page", () => {
 		const completeFacts = createCompleteProjectDefinition().facts;
-		const incompleteProductStatus = deriveStageStatus({
-			...completeFacts,
-			scope_in: undefined,
-			scope_out: undefined,
-			non_goals: undefined,
-			v1_rationale: undefined,
-		}).stageStatuses.find((stageStatus) => stageStatus.stageId === "product");
+		const incompleteProductFacts = createCanonicalProjectDefinitionDraft({
+			clerkUserId: "user_123",
+			productKey: "ship-by-sunday",
+			facts: {
+				product_name: completeFacts.product_name,
+				product_summary: completeFacts.product_summary,
+				primary_user: completeFacts.primary_user,
+				problem_statement: completeFacts.problem_statement,
+				problem_trigger: completeFacts.problem_trigger,
+				problem_severity: completeFacts.problem_severity,
+			},
+		}).facts;
+		const incompleteProductStatus = deriveStageStatus(
+			incompleteProductFacts,
+		).stageStatuses.find((stageStatus) => stageStatus.stageId === "product");
 		const completeBuildPlanStatus = deriveStageStatus(
 			completeFacts,
 		).stageStatuses.find((stageStatus) => stageStatus.stageId === "build-plan");
@@ -28,7 +37,7 @@ describe("blueprint stage routes", () => {
 		expect(completeBuildPlanStatus).toBeTruthy();
 		expect(
 			getBlueprintStageEntryHref("product", incompleteProductStatus!),
-		).toBe("/product/scope");
+		).toBe("/product/outcome");
 		expect(
 			getBlueprintStageEntryHref("build-plan", completeBuildPlanStatus!),
 		).toBe("/build-plan/delivery");
@@ -39,32 +48,34 @@ describe("blueprint stage routes", () => {
 			previousHref: "/start",
 			nextHref: "/product/problem",
 		});
-		expect(getAdjacentBlueprintPageHrefs("build-plan", "validation")).toEqual({
-			previousHref: "/build-plan/plan",
+		expect(getAdjacentBlueprintPageHrefs("build-plan", "setup")).toEqual({
+			previousHref: "/build-plan/delivery",
 			nextHref: "/review",
 		});
 	});
 
-	it("only treats the last build-plan page as stage-completing when it clears the remaining blockers", () => {
+	it("treats delivery as the required build-plan step and setup as the final optional page", () => {
 		const completeFacts = createCompleteProjectDefinition().facts;
 		const stageStatus = deriveStageStatus({
 			...completeFacts,
-			done_when: undefined,
+			pricing: undefined,
+			price_usd_cents: undefined,
 		}).stageStatuses.find((item) => item.stageId === "build-plan");
-		const validationStep = getBlueprintStageDefinition("build-plan").steps.find(
-			(step) => step.id === "validation",
+		const deliveryStep = getBlueprintStageDefinition("build-plan").steps.find(
+			(step) => step.id === "delivery",
+		);
+		const setupStep = getBlueprintStageDefinition("build-plan").steps.find(
+			(step) => step.id === "setup",
 		);
 
 		expect(stageStatus).toBeTruthy();
-		expect(validationStep).toBeTruthy();
-		expect(doesCompletingStepCompleteStage(stageStatus!, validationStep!)).toBe(
+		expect(deliveryStep).toBeTruthy();
+		expect(setupStep).toBeTruthy();
+		expect(doesCompletingStepCompleteStage(stageStatus!, deliveryStep!)).toBe(
 			true,
 		);
-		expect(
-			doesCompletingStepCompleteStage(
-				stageStatus!,
-				getBlueprintStageDefinition("build-plan").steps[0]!,
-			),
-		).toBe(false);
+		expect(doesCompletingStepCompleteStage(stageStatus!, setupStep!)).toBe(
+			false,
+		);
 	});
 });

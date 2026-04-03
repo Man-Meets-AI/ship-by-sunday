@@ -63,6 +63,13 @@ vi.mock("convex/react", () => ({
 	useQuery: () => useQueryMock(),
 }));
 
+vi.mock("@clerk/nextjs", () => ({
+	useUser: () => ({
+		isLoaded: true,
+		user: null,
+	}),
+}));
+
 vi.mock("@/features/course/shared/components/app-shell", async () => {
 	const { BlueprintStageNav } =
 		await import("@/features/blueprint-flow/components/blueprint-stage-nav");
@@ -178,7 +185,6 @@ describe("BlueprintStagePage", () => {
 			product_name: undefined,
 			product_summary: undefined,
 			primary_user: undefined,
-			why_this_matters: undefined,
 		});
 		useQueryMock.mockImplementation(() => structuredClone(workspaceState));
 		const consoleErrorSpy = vi
@@ -289,10 +295,6 @@ describe("BlueprintStagePage", () => {
 			screen.getByLabelText("Who wants this? Who benefits from this?"),
 			"Indie founders shipping a paid product.",
 		);
-		await user.type(
-			screen.getByLabelText("Why does this person want this?"),
-			"Sunday-bound launches need sharper guidance than generic courses.",
-		);
 		await user.click(screen.getByRole("button", { name: /^Continue/ }));
 
 		await waitFor(() =>
@@ -351,7 +353,6 @@ describe("BlueprintStagePage", () => {
 			product_name: undefined,
 			product_summary: undefined,
 			primary_user: undefined,
-			why_this_matters: undefined,
 		});
 
 		render(
@@ -381,7 +382,6 @@ describe("BlueprintStagePage", () => {
 			product_name: undefined,
 			product_summary: undefined,
 			primary_user: undefined,
-			why_this_matters: undefined,
 		});
 
 		render(
@@ -411,7 +411,6 @@ describe("BlueprintStagePage", () => {
 			product_name: undefined,
 			product_summary: undefined,
 			primary_user: undefined,
-			why_this_matters: undefined,
 		});
 
 		render(
@@ -443,7 +442,6 @@ describe("BlueprintStagePage", () => {
 			product_name: undefined,
 			product_summary: undefined,
 			primary_user: undefined,
-			why_this_matters: undefined,
 		});
 
 		render(
@@ -459,10 +457,6 @@ describe("BlueprintStagePage", () => {
 		const primaryUserField = screen.getByLabelText(
 			"Who wants this? Who benefits from this?",
 		);
-		const whyThisMattersField = screen.getByLabelText(
-			"Why does this person want this?",
-		);
-
 		await user.type(productNameField, "Ship by Sunday");
 
 		expect(saveProjectDefinitionFactsMock).not.toHaveBeenCalled();
@@ -478,7 +472,6 @@ describe("BlueprintStagePage", () => {
 		expect(productNameField.getAttribute("aria-invalid")).toBe("true");
 		expect(productSummaryField.getAttribute("aria-invalid")).toBe("true");
 		expect(primaryUserField.getAttribute("aria-invalid")).toBe("true");
-		expect(whyThisMattersField.getAttribute("aria-invalid")).toBe("true");
 
 		await user.type(productNameField, "Ship by Sunday");
 		await user.type(
@@ -499,10 +492,9 @@ describe("BlueprintStagePage", () => {
 			),
 		);
 		expect(screen.getByText("Draft saved.")).toBeTruthy();
-		expect(screen.getByText(/Page 1 of 4/)).toBeTruthy();
+		expect(screen.getByText(/Page 1 of 3/)).toBeTruthy();
 		await waitFor(() => expect(document.activeElement).toBe(primaryUserField));
 		expect(primaryUserField.getAttribute("aria-invalid")).toBe("true");
-		expect(whyThisMattersField.getAttribute("aria-invalid")).toBe("true");
 
 		await user.type(
 			primaryUserField,
@@ -510,7 +502,6 @@ describe("BlueprintStagePage", () => {
 		);
 
 		expect(primaryUserField.getAttribute("aria-invalid")).toBeNull();
-		expect(whyThisMattersField.getAttribute("aria-invalid")).toBe("true");
 	});
 
 	it("advances after a complete save", async () => {
@@ -519,7 +510,6 @@ describe("BlueprintStagePage", () => {
 			product_name: undefined,
 			product_summary: undefined,
 			primary_user: undefined,
-			why_this_matters: undefined,
 		});
 
 		render(
@@ -542,10 +532,6 @@ describe("BlueprintStagePage", () => {
 			screen.getByLabelText("Who wants this? Who benefits from this?"),
 			"Indie founders shipping a paid product.",
 		);
-		await user.type(
-			screen.getByLabelText("Why does this person want this?"),
-			"Sunday-bound launches need sharper guidance than generic courses.",
-		);
 		await user.click(screen.getByRole("button", { name: /^Continue/ }));
 
 		await waitFor(() =>
@@ -556,8 +542,6 @@ describe("BlueprintStagePage", () => {
 						product_name: "Ship by Sunday",
 						product_summary: "A blueprint-first builder for Sunday launches.",
 						primary_user: "Indie founders shipping a paid product.",
-						why_this_matters:
-							"Sunday-bound launches need sharper guidance than generic courses.",
 					}),
 				}),
 			),
@@ -578,7 +562,7 @@ describe("BlueprintStagePage", () => {
 		);
 
 		const priceField = screen.getByLabelText(
-			"What is the actual numeric price?",
+			"What's the one-time price in USD?",
 		);
 		await user.clear(priceField);
 		await user.click(screen.getByRole("button", { name: /^Continue/ }));
@@ -587,7 +571,7 @@ describe("BlueprintStagePage", () => {
 			expect(saveProjectDefinitionFactsMock).toHaveBeenCalledWith(
 				expect.objectContaining({
 					stageId: "build-plan",
-					clearedFieldKeys: expect.arrayContaining(["price_usd_cents"]),
+					clearedFieldKeys: expect.arrayContaining(["pricing"]),
 				}),
 			),
 		);
@@ -595,7 +579,7 @@ describe("BlueprintStagePage", () => {
 		expect(
 			screen.getByText(/restore completion for this page\./i),
 		).toBeTruthy();
-		expect(screen.getByText(/Page 1 of 3/)).toBeTruthy();
+		expect(screen.getByText(/Page 1 of 2/)).toBeTruthy();
 		await waitFor(() => expect(document.activeElement).toBe(priceField));
 		expect(priceField.getAttribute("aria-invalid")).toBe("true");
 	});
@@ -613,15 +597,8 @@ describe("BlueprintStagePage", () => {
 
 		expect(screen.getByText("Minor annoyance")).toBeTruthy();
 		expect(screen.getByText("Critical blocker")).toBeTruthy();
-		expect(screen.getByText("Can wait")).toBeTruthy();
-		expect(screen.getByText("Immediate")).toBeTruthy();
 		expect(
 			screen.getByRole("radio", { name: "Pain 7 out of 10" }),
-		).toBeTruthy();
-		expect(
-			screen.getByRole("radio", {
-				name: "Urgency needs attention soon",
-			}),
 		).toBeTruthy();
 	});
 
@@ -631,7 +608,6 @@ describe("BlueprintStagePage", () => {
 			product_name: undefined,
 			product_summary: undefined,
 			primary_user: undefined,
-			why_this_matters: undefined,
 		});
 		saveProjectDefinitionFactsMock.mockRejectedValueOnce(
 			new Error("network unavailable"),
@@ -655,7 +631,7 @@ describe("BlueprintStagePage", () => {
 			).toBeTruthy(),
 		);
 		expect((productNameField as HTMLInputElement).value).toBe("Ship by Sunday");
-		expect(screen.getByText(/Page 1 of 4/)).toBeTruthy();
+		expect(screen.getByText(/Page 1 of 3/)).toBeTruthy();
 		expect(
 			screen
 				.getByLabelText("Who wants this? Who benefits from this?")
@@ -669,7 +645,6 @@ describe("BlueprintStagePage", () => {
 			product_name: undefined,
 			product_summary: undefined,
 			primary_user: undefined,
-			why_this_matters: undefined,
 		});
 		const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
 		const historyBackSpy = vi
@@ -713,20 +688,19 @@ describe("BlueprintStagePage", () => {
 
 	it("redirects locked stage routes back to the first incomplete blueprint stage", () => {
 		const workspaceState = createWorkspaceState({
-			screen_sequence: undefined,
-			must_have_capabilities: undefined,
+			product_name: undefined,
 		});
 
 		expect(() =>
 			render(
 				<BlueprintStagePage
-					stageId="marketing"
-					stepId="operating-system"
+					stageId="design"
+					stepId="direction"
 					initialWorkspaceState={workspaceState}
 				/>,
 			),
-		).toThrowError("NEXT_REDIRECT:/design");
-		expect(redirectMock).toHaveBeenCalledWith("/design");
+		).toThrowError("NEXT_REDIRECT:/product");
+		expect(redirectMock).toHaveBeenCalledWith("/product");
 	});
 
 	it("renders the mapped blueprint video and the L2 orientation fallback", () => {

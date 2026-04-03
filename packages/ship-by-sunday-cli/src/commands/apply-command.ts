@@ -1,4 +1,4 @@
-import { getBlueprintStageDefinition } from "@manmeetsai/blueprint-compiler";
+import { getBlueprintStageDefinition } from "../field-contract";
 import { writeJsonResult } from "../cli-json";
 import { applyDraftPatchFromFile } from "../draft/draft-store";
 import type { EditableBlueprintStageId } from "../parse-cli-command";

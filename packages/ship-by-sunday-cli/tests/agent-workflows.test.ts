@@ -1,11 +1,12 @@
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
-import {
-	createCanonicalProjectDefinitionDraft,
-	createCompleteProjectDefinition,
-} from "@manmeetsai/blueprint-compiler";
+import { createCompleteProjectDefinition } from "@manmeetsai/blueprint-compiler";
 import { runCli } from "../src/run-cli";
-import { loadLocalDraft, saveLocalDraft } from "../src/draft/draft-store";
+import {
+	createLocalDraftDefinition,
+	loadLocalDraft,
+	saveLocalDraft,
+} from "../src/draft/draft-store";
 import { createCliIo, createTemporaryRepoRoot } from "./test-helpers";
 
 describe("agent workflows", () => {
@@ -48,14 +49,7 @@ describe("agent workflows", () => {
 
 	it("returns schema and next-step introspection for agents", async () => {
 		const repoRootPath = await createTemporaryRepoRoot();
-		await saveLocalDraft(
-			repoRootPath,
-			createCanonicalProjectDefinitionDraft({
-				clerkUserId: "local-cli-user",
-				productKey: "ship-by-sunday",
-				facts: {},
-			}),
-		);
+		await saveLocalDraft(repoRootPath, createLocalDraftDefinition());
 
 		const schemaIo = createCliIo();
 		const schemaExitCode = await runCli({
@@ -83,6 +77,50 @@ describe("agent workflows", () => {
 			nextStageId: "product",
 			nextStepId: "foundation",
 		});
+
+		const fieldsIo = createCliIo();
+		const fieldsExitCode = await runCli({
+			argv: ["fields", "--stage", "design", "--json"],
+			io: fieldsIo.io,
+			projectRootPath: repoRootPath,
+		});
+		expect(fieldsExitCode).toBe(0);
+		const fieldsResult = JSON.parse(fieldsIo.stdout.join("\n"));
+		expect(
+			fieldsResult.fields.map((field: { fieldKey: string }) => field.fieldKey),
+		).toContain("theme_hex");
+		expect(
+			fieldsResult.fields.map((field: { fieldKey: string }) => field.fieldKey),
+		).toContain("design_references");
+		expect(
+			fieldsResult.fields.map((field: { fieldKey: string }) => field.fieldKey),
+		).not.toContain("surface_type");
+
+		const productFieldsIo = createCliIo();
+		const productFieldsExitCode = await runCli({
+			argv: ["fields", "--stage", "product", "--json"],
+			io: productFieldsIo.io,
+			projectRootPath: repoRootPath,
+		});
+		expect(productFieldsExitCode).toBe(0);
+		expect(
+			JSON.parse(productFieldsIo.stdout.join("\n")).fields.map(
+				(field: { fieldKey: string }) => field.fieldKey,
+			),
+		).toContain("pricing");
+
+		const buildPlanFieldsIo = createCliIo();
+		const buildPlanFieldsExitCode = await runCli({
+			argv: ["fields", "--stage", "build-plan", "--json"],
+			io: buildPlanFieldsIo.io,
+			projectRootPath: repoRootPath,
+		});
+		expect(buildPlanFieldsExitCode).toBe(0);
+		const buildPlanFieldKeys = JSON.parse(
+			buildPlanFieldsIo.stdout.join("\n"),
+		).fields.map((field: { fieldKey: string }) => field.fieldKey);
+		expect(buildPlanFieldKeys).toContain("contact_email");
+		expect(buildPlanFieldKeys).not.toContain("pricing");
 	});
 
 	it("supports field-level set, append, remove, and unset mutations", async () => {
@@ -128,7 +166,7 @@ describe("agent workflows", () => {
 		expect(JSON.parse(removeIo.stdout.join("\n"))).toMatchObject({
 			command: "remove",
 			fieldKey: "scope_in",
-			value: null,
+			value: [],
 		});
 
 		const unsetIo = createCliIo();
@@ -261,38 +299,22 @@ describe("agent workflows", () => {
 		const repoRootPath = await createTemporaryRepoRoot();
 		await saveLocalDraft(
 			repoRootPath,
-			createCanonicalProjectDefinitionDraft({
-				clerkUserId: "local-cli-user",
-				productKey: "ship-by-sunday",
-				facts: {
-					product_name: "Ship by Sunday OS",
-					product_summary: "A blueprint-first CLI for starter repo generation.",
-					primary_user: "Solo founder",
-					why_this_matters: "The blueprint should exist outside the web app.",
-					problem_statement:
-						"Planning is vague without a stable intake contract.",
-					problem_context_when: "During founder planning",
-					problem_context_where: "Inside the repo root",
-					problem_trigger: "Need a build-ready snapshot",
-					problem_severity: "8",
-					problem_urgency: "This week",
-					outcome_statement: "Ship a starter snapshot from the CLI.",
-					success_looks_like: "A founder gets a repo directory and zip.",
-					user_benefit: "They can move directly into implementation.",
-					evidence_summary: "Internal repo testing proves the flow is useful.",
-					core_flow_summary:
-						"Capture facts, review readiness, generate output.",
-					scope_in: ["Blueprint intake"],
-					scope_out: ["No mobile app"],
-					non_goals: ["No billing wizard"],
-					v1_rationale: "Blueprint-first scope keeps the CLI small.",
-				},
+			createLocalDraftDefinition({
+				product_name: "Ship by Sunday OS",
+				product_summary: "A blueprint-first CLI for starter repo generation.",
+				primary_user: "Solo founder",
+				problem_statement:
+					"Planning is vague without a stable intake contract.",
+				problem_trigger: "During founder planning",
+				problem_severity: "8",
+				success_looks_like: "A founder gets a repo directory and zip.",
+				core_flow: ["Capture facts", "Review readiness", "Generate output"],
 			}),
 		);
 		const { io, stdout } = createCliIo();
 
 		const exitCode = await runCli({
-			argv: ["review", "--stage", "build-plan", "--missing-only", "--json"],
+			argv: ["review", "--stage", "product", "--missing-only", "--json"],
 			io,
 			projectRootPath: repoRootPath,
 		});
@@ -300,11 +322,12 @@ describe("agent workflows", () => {
 		expect(exitCode).toBe(0);
 		expect(JSON.parse(stdout.join("\n"))).toMatchObject({
 			status: "ok",
-			firstIncompleteStageId: "design",
+			firstIncompleteStageId: "product",
 			stageStatuses: [
 				{
-					stageId: "build-plan",
+					stageId: "product",
 					isComplete: false,
+					missingFactKeys: ["pricing"],
 				},
 			],
 		});

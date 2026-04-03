@@ -2,6 +2,7 @@ import type {
 	CanonicalProjectFactKey,
 	CanonicalProjectFactsDraft,
 } from "../canonical-project-definition/project-definition";
+import { deriveBlueprintFacts } from "../canonical-project-definition/derived-blueprint-facts";
 import {
 	getBlueprintStageDefinition,
 	type BlueprintStageId,
@@ -46,11 +47,7 @@ function getEffectiveFactValue(
 	facts: CanonicalProjectFactsDraft,
 	fieldKey: CanonicalProjectFactKey,
 ) {
-	if (fieldKey === "surface_type") {
-		return facts.surface_type ?? "web_app";
-	}
-
-	return facts[fieldKey];
+	return deriveBlueprintFacts(facts)[fieldKey];
 }
 
 function getMissingFactKeys(

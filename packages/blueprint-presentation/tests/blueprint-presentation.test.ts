@@ -12,26 +12,26 @@ describe("blueprint presentation", () => {
 		expect(blueprintFieldLabel("primary_user")).toBe(
 			"Who wants this? Who benefits from this?",
 		);
-		expect(blueprintFieldLabel("price_usd_cents")).toBe(
-			"What is the actual numeric price?",
+		expect(blueprintFieldLabel("pricing")).toBe(
+			"What's the one-time price in USD?",
 		);
 		expect(blueprintFieldHelperText("product_name")).toBe(
 			"Enter the public-facing product name.",
 		);
 		expect(blueprintFieldInputKind("product_name")).toBe("input");
-		expect(blueprintFieldInputKind("price_usd_cents")).toBe("number");
-		expect(blueprintFieldInputKind("screen_sequence")).toBe("textarea");
+		expect(blueprintFieldInputKind("pricing")).toBe("number");
+		expect(blueprintFieldInputKind("core_flow")).toBe("textarea");
 	});
 
 	it("provides scale metadata and step label overrides", () => {
-		expect(getBlueprintFieldScaleDefinition("problem_urgency")).toEqual(
+		expect(getBlueprintFieldScaleDefinition("problem_severity")).toEqual(
 			expect.objectContaining({
-				leftLabel: "Can wait",
-				rightLabel: "Immediate",
+				leftLabel: "Minor annoyance",
+				rightLabel: "Critical blocker",
 			}),
 		);
-		expect(getBlueprintStepLabel("product", "scope")).toBe(
-			"What absolutely has to get built",
+		expect(getBlueprintStepLabel("build-plan", "setup")).toBe(
+			"Optional setup details",
 		);
 	});
 });

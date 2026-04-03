@@ -18,7 +18,7 @@ export async function handleSchemaCommand({
 
 	io.write(
 		[
-			"Canonical blueprint schema",
+			"Reduced blueprint schema",
 			"",
 			`Schema version: ${schema.schemaVersion}`,
 			`Field count: ${schema.fieldCount}`,

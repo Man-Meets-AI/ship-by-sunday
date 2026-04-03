@@ -2,15 +2,12 @@ import {
 	getBlueprintStageDefinition,
 	isBlueprintArrayField,
 	blueprintFieldPromptKind,
-	type CanonicalProjectDefinitionDraft,
-	type CanonicalProjectFactKey,
-} from "@manmeetsai/blueprint-compiler";
-import {
-	getBlueprintFieldScaleDefinition,
-	getBlueprintStepLabel,
 	blueprintFieldHelperText,
 	blueprintFieldLabel,
-} from "@shipbysunday/blueprint-presentation";
+	formatCliFactValue,
+	type CliBlueprintFactsDraft,
+	type CliBlueprintFactKey,
+} from "../field-contract";
 import type { EditableBlueprintStageId } from "../parse-cli-command";
 
 export type StagePromptOutcome =
@@ -47,7 +44,7 @@ export function createStagePromptSession({
 
 	function formatStepHeader(stepIndex: number, fieldCount: number) {
 		const step = stage.steps[stepIndex];
-		const stepLabel = getBlueprintStepLabel(stageId, step.id) ?? step.label;
+		const stepLabel = step.label;
 		return `${stage.label} / ${stepLabel} • Step ${stepIndex + 1} of ${stage.steps.length} • ${fieldCount} fields`;
 	}
 
@@ -58,34 +55,30 @@ export function createStagePromptSession({
 		fieldIndex,
 		fieldCount,
 	}: {
-		draft: CanonicalProjectDefinitionDraft;
-		fieldKey: CanonicalProjectFactKey;
+		draft: { facts: CliBlueprintFactsDraft };
+		fieldKey: CliBlueprintFactKey;
 		stepIndex: number;
 		fieldIndex: number;
 		fieldCount: number;
 	}) {
-		const label = blueprintFieldLabel(fieldKey, draft.facts);
-		const helperText = blueprintFieldHelperText(fieldKey, draft.facts);
+		const label = blueprintFieldLabel(fieldKey);
+		const helperText = blueprintFieldHelperText(fieldKey);
 		const promptKind = blueprintFieldPromptKind(fieldKey);
-		const scaleDefinition = getBlueprintFieldScaleDefinition(fieldKey);
 		const currentValue = draft.facts[fieldKey];
 		const currentValueIsEmpty =
 			currentValue === undefined ||
 			currentValue === null ||
 			currentValue === "" ||
 			(Array.isArray(currentValue) && currentValue.length === 0);
+		const formattedCurrentValue = formatCliFactValue(draft.facts, fieldKey);
 		const currentValueText = currentValueIsEmpty
-			? "Current value: empty"
+			? `Current value: ${formattedCurrentValue || "empty"}`
 			: isBlueprintArrayField(fieldKey)
-				? `Current value:\n${Array.isArray(currentValue) ? currentValue.join("\n") : String(currentValue)}`
-				: `Current value: ${String(currentValue)}`;
-		const promptLabel =
-			promptKind === "scale" && scaleDefinition
-				? `${label} (${scaleDefinition.options.map((option) => option.label).join(" / ")})`
-				: label;
+				? `Current value:\n${formattedCurrentValue}`
+				: `Current value: ${formattedCurrentValue}`;
 		const lines = [
 			`Step ${stepIndex + 1} of ${stage.steps.length} • Field ${fieldIndex + 1} of ${fieldCount}`,
-			promptLabel,
+			label,
 		];
 
 		if (helperText) {
@@ -112,7 +105,7 @@ export function createStagePromptSession({
 		fieldKey,
 	}: {
 		answerLines: string[];
-		fieldKey: CanonicalProjectFactKey;
+		fieldKey: CliBlueprintFactKey;
 	}): StageFieldAction {
 		const firstLine = answerLines[0] ?? "";
 		const trimmedFirstLine = firstLine.trim();

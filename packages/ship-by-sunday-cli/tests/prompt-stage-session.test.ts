@@ -1,17 +1,14 @@
-import { createCanonicalProjectDefinitionDraft } from "@manmeetsai/blueprint-compiler";
 import { createStagePromptSession } from "../src/prompts/stage-prompt-session";
+import { DEFAULT_THEME_HEX } from "../src/field-contract";
+import { createLocalDraftDefinition } from "../src/draft/draft-store";
 
 describe("stage prompt session", () => {
 	it("describes stage progress and control commands", () => {
 		const session = createStagePromptSession({ stageId: "product" });
 		const firstStep = session.stage.steps[0];
 		const firstFieldKey = firstStep.fieldKeys[0]!;
-		const draft = createCanonicalProjectDefinitionDraft({
-			clerkUserId: "local-cli-user",
-			productKey: "ship-by-sunday",
-			facts: {
-				product_name: "Ship by Sunday OS",
-			},
+		const draft = createLocalDraftDefinition({
+			product_name: "Ship by Sunday OS",
 		});
 
 		expect(session.formatIntroLines().join("\n")).toContain("Controls:");
@@ -76,5 +73,46 @@ describe("stage prompt session", () => {
 			"Resume with bun run sbs resume.",
 		);
 		expect(session.formatExitMessage("cancelled")).toContain("Interrupted.");
+	});
+
+	it("shows the reduced design default and generated scope suggestions", () => {
+		const designSession = createStagePromptSession({ stageId: "design" });
+		const themePrompt = designSession.formatFieldPrompt({
+			draft: { facts: {} },
+			fieldKey: "theme_hex",
+			stepIndex: 0,
+			fieldIndex: 0,
+			fieldCount: 1,
+		});
+		expect(themePrompt.prompt).toContain(DEFAULT_THEME_HEX);
+
+		const buildPlanSession = createStagePromptSession({
+			stageId: "build-plan",
+		});
+		const scopePrompt = buildPlanSession.formatFieldPrompt({
+			draft: {
+				facts: {
+					core_flow: ["Capture facts", "Review readiness"],
+				},
+			},
+			fieldKey: "scope_in",
+			stepIndex: 0,
+			fieldIndex: 0,
+			fieldCount: 4,
+		});
+		expect(scopePrompt.prompt).toContain("Build Capture facts");
+	});
+
+	it("prompts for pricing in the product stage", () => {
+		const session = createStagePromptSession({ stageId: "product" });
+		const pricingPrompt = session.formatFieldPrompt({
+			draft: { facts: {} },
+			fieldKey: "pricing",
+			stepIndex: 3,
+			fieldIndex: 0,
+			fieldCount: 1,
+		});
+
+		expect(pricingPrompt.prompt).toContain("Enter the one-time USD amount.");
 	});
 });
