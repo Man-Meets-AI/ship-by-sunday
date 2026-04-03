@@ -202,7 +202,7 @@ describe("usePacketStageStepState", () => {
 		expect(saveProjectDefinitionFactsSpy).toHaveBeenCalledTimes(1);
 		expect(result.current.currentFeedback).toEqual(
 			expect.objectContaining({
-				title: "Saved for now.",
+				title: "Draft saved.",
 			}),
 		);
 		expect(result.current.currentFieldErrors).toEqual({
@@ -294,8 +294,8 @@ describe("usePacketStageStepState", () => {
 		expect(navigateToHref).not.toHaveBeenCalled();
 		expect(result.current.currentFeedback).toEqual(
 			expect.objectContaining({
-				title: "Saved.",
-				description: "Validation is locked.",
+				title: "Saved and complete.",
+				description: "Validation is ready to continue.",
 			}),
 		);
 	});

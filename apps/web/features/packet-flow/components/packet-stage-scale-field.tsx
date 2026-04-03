@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { memo, useId } from "react";
 import type {
 	CanonicalProjectFactKey,
 	CanonicalProjectFactsDraft,
@@ -29,17 +29,15 @@ type PacketStageScaleFieldProps = {
 	stepId: string;
 	value: string;
 	errorMessage?: string;
-	isSaving: boolean;
 	onChange: (fieldKey: CanonicalProjectFactKey, nextValue: string) => void;
 };
 
-export function PacketStageScaleField({
+function PacketStageScaleFieldComponent({
 	fieldKey,
 	facts,
 	stepId,
 	value,
 	errorMessage,
-	isSaving,
 	onChange,
 }: PacketStageScaleFieldProps) {
 	const scaleDefinition = getPacketFieldScaleDefinition(fieldKey);
@@ -54,12 +52,11 @@ export function PacketStageScaleField({
 	const helperText = packetFieldHelperText(fieldKey, facts);
 
 	return (
-		<Field data-invalid={errorMessage ? true : undefined}>
+		<Field className="gap-2" data-invalid={errorMessage ? true : undefined}>
 			<FieldContent>
 				<FieldTitle id={titleId}>
 					{packetFieldLabel(fieldKey, facts)}
 				</FieldTitle>
-				{helperText ? <FieldDescription>{helperText}</FieldDescription> : null}
 				<div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2 text-xs text-muted-foreground">
 					<span>{scaleDefinition.leftLabel}</span>
 					<span className="text-center">{scaleDefinition.centerLabel}</span>
@@ -75,7 +72,6 @@ export function PacketStageScaleField({
 					onValueChange={(nextValue) => {
 						onChange(fieldKey, nextValue);
 					}}
-					disabled={isSaving}
 					aria-labelledby={titleId}
 					aria-describedby={errorId}
 					aria-invalid={errorMessage ? true : undefined}
@@ -99,8 +95,22 @@ export function PacketStageScaleField({
 					readOnly
 					aria-hidden="true"
 				/>
+				{helperText ? <FieldDescription>{helperText}</FieldDescription> : null}
 				<FieldError id={errorId}>{errorMessage}</FieldError>
 			</FieldContent>
 		</Field>
 	);
 }
+
+export const PacketStageScaleField = memo(
+	PacketStageScaleFieldComponent,
+	(previousProps, nextProps) =>
+		previousProps.fieldKey === nextProps.fieldKey &&
+		previousProps.stepId === nextProps.stepId &&
+		previousProps.value === nextProps.value &&
+		previousProps.errorMessage === nextProps.errorMessage &&
+		packetFieldLabel(previousProps.fieldKey, previousProps.facts) ===
+			packetFieldLabel(nextProps.fieldKey, nextProps.facts) &&
+		packetFieldHelperText(previousProps.fieldKey, previousProps.facts) ===
+			packetFieldHelperText(nextProps.fieldKey, nextProps.facts),
+);

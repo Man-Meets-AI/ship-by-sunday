@@ -16,7 +16,8 @@
 		"test": "vitest run --config vitest.config.ts"
 	},
 	"dependencies": {
-		"@manmeetsai/packet-compiler": "workspace:*"
+		"@manmeetsai/packet-compiler": "workspace:*",
+		"@manmeetsai/packet-presentation": "workspace:*"
 	},
 	"devDependencies": {
 		"@types/node": "25.5.0",

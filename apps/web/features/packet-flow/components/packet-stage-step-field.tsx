@@ -1,6 +1,6 @@
 "use client";
 
-import type { ChangeEvent } from "react";
+import { memo, type ChangeEvent } from "react";
 import type {
 	CanonicalProjectFactKey,
 	CanonicalProjectFactsDraft,
@@ -30,17 +30,15 @@ type PacketStageStepFieldProps = {
 	step: PacketStepDefinition;
 	value: string;
 	errorMessage?: string;
-	isSaving: boolean;
 	onChange: (fieldKey: CanonicalProjectFactKey, nextValue: string) => void;
 };
 
-export function PacketStageStepField({
+function PacketStageStepFieldComponent({
 	fieldKey,
 	facts,
 	step,
 	value,
 	errorMessage,
-	isSaving,
 	onChange,
 }: PacketStageStepFieldProps) {
 	if (getPacketFieldScaleDefinition(fieldKey)) {
@@ -51,7 +49,6 @@ export function PacketStageStepField({
 				stepId={step.id}
 				value={value}
 				errorMessage={errorMessage}
-				isSaving={isSaving}
 				onChange={onChange}
 			/>
 		);
@@ -65,18 +62,16 @@ export function PacketStageStepField({
 	) => onChange(fieldKey, event.target.value);
 
 	return (
-		<Field data-invalid={errorMessage ? true : undefined}>
+		<Field className="gap-2" data-invalid={errorMessage ? true : undefined}>
 			<FieldLabel htmlFor={inputId}>
 				{packetFieldLabel(fieldKey, facts)}
 			</FieldLabel>
 			<FieldContent>
-				{helperText ? <FieldDescription>{helperText}</FieldDescription> : null}
 				{packetFieldInputKind(fieldKey) === "textarea" ? (
 					<Textarea
 						id={inputId}
 						value={value}
 						onChange={handleChange}
-						disabled={isSaving}
 						rows={fieldKey === "section_narrative" ? 6 : 4}
 						aria-describedby={errorId}
 						aria-invalid={errorMessage ? true : undefined}
@@ -89,13 +84,26 @@ export function PacketStageStepField({
 						}
 						value={value}
 						onChange={handleChange}
-						disabled={isSaving}
 						aria-describedby={errorId}
 						aria-invalid={errorMessage ? true : undefined}
 					/>
 				)}
+				{helperText ? <FieldDescription>{helperText}</FieldDescription> : null}
 				<FieldError id={errorId}>{errorMessage}</FieldError>
 			</FieldContent>
 		</Field>
 	);
 }
+
+export const PacketStageStepField = memo(
+	PacketStageStepFieldComponent,
+	(previousProps, nextProps) =>
+		previousProps.fieldKey === nextProps.fieldKey &&
+		previousProps.step.id === nextProps.step.id &&
+		previousProps.value === nextProps.value &&
+		previousProps.errorMessage === nextProps.errorMessage &&
+		packetFieldLabel(previousProps.fieldKey, previousProps.facts) ===
+			packetFieldLabel(nextProps.fieldKey, nextProps.facts) &&
+		packetFieldHelperText(previousProps.fieldKey, previousProps.facts) ===
+			packetFieldHelperText(nextProps.fieldKey, nextProps.facts),
+);

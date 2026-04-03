@@ -1,7 +1,5 @@
-import {
-	deriveStageStatus,
-	packetFieldLabel,
-} from "@manmeetsai/packet-compiler";
+import { deriveStageStatus } from "@manmeetsai/packet-compiler";
+import { packetFieldLabel } from "@manmeetsai/packet-presentation";
 import { writeJsonResult } from "../cli-json";
 import { requireLocalDraft } from "../draft/draft-store";
 import type { ReviewablePacketStageId } from "../parse-cli-command";

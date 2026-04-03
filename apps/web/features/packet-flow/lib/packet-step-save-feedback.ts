@@ -189,7 +189,7 @@ export function buildPacketStepSaveInlineFeedback(
 			return {
 				tone: "default",
 				title: `${stepLabel} is still blank.`,
-				description: "Add at least one answer before you save.",
+				description: "Add at least one response before continuing.",
 			};
 		case "partial": {
 			const missingFieldList = formatPacketFieldLabelList(
@@ -198,10 +198,10 @@ export function buildPacketStepSaveInlineFeedback(
 
 			return {
 				tone: "default",
-				title: "Saved for now.",
+				title: "Draft saved.",
 				description: missingFieldList
-					? `You still need ${missingFieldList} before this page is complete.`
-					: "This page still needs a few more answers before it is complete.",
+					? `Complete ${missingFieldList} before this page can be marked complete.`
+					: "Complete the remaining required responses before this page can be marked complete.",
 			};
 		}
 		case "cleared_to_incomplete": {
@@ -211,17 +211,17 @@ export function buildPacketStepSaveInlineFeedback(
 
 			return {
 				tone: "warning",
-				title: "This page needs a few more answers.",
+				title: "This page is incomplete.",
 				description: missingFieldList
-					? `Finish ${missingFieldList} before this page is complete again.`
-					: "Finish the missing answers before this page is complete again.",
+					? `Complete ${missingFieldList} to restore completion for this page.`
+					: "Complete the missing required responses to restore completion for this page.",
 			};
 		}
 		case "complete":
 			return {
 				tone: "success",
-				title: "Saved.",
-				description: `${stepLabel} is locked.`,
+				title: "Saved and complete.",
+				description: `${stepLabel} is ready to continue.`,
 			};
 		default:
 			return null;
@@ -232,6 +232,6 @@ export function buildPacketStepSaveErrorInlineFeedback(): PacketStepInlineFeedba
 	return {
 		tone: "destructive",
 		title: "We could not save this page right now.",
-		description: "Your draft is still here, so try again.",
+		description: "Your draft is still here. Please try again.",
 	};
 }
