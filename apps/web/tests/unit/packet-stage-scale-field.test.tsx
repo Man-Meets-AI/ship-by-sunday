@@ -16,7 +16,6 @@ describe("PacketStageScaleField", () => {
 				facts={{}}
 				stepId="problem"
 				value=""
-				isSaving={false}
 				onChange={handleChange}
 			/>,
 		);
@@ -40,7 +39,6 @@ describe("PacketStageScaleField", () => {
 				facts={{}}
 				stepId="problem"
 				value=""
-				isSaving={false}
 				onChange={handleChange}
 			/>,
 		);

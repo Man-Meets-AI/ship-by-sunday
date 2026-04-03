@@ -5,29 +5,20 @@ import {
 	buildStageDraftValues,
 	buildStepDraftValues,
 	formatPacketFactValue,
-	getPacketFieldScaleDefinition,
 	normalizeProblemUrgencyValue,
 	normalizeProblemSeverityValue,
-	packetFieldInputKind,
-	packetFieldLabel,
 	packetFieldPromptKind,
 	problemSeverityScaleValues,
 } from "../src/index";
 
 describe("packet field helpers", () => {
-	it("labels fields, classifies inputs, and formats values for editing", () => {
+	it("classifies prompt kinds and formats values for editing", () => {
 		const projectDefinition = createCompleteProjectDefinition();
 		const facts = projectDefinition.facts;
 
-		expect(packetFieldLabel("primary_user")).toBe(
-			"Who wants this? Who benefits from this?",
-		);
-		expect(packetFieldLabel("price_usd_cents")).toBe(
-			"What is the actual numeric price?",
-		);
-		expect(packetFieldInputKind("product_name")).toBe("input");
-		expect(packetFieldInputKind("price_usd_cents")).toBe("number");
-		expect(packetFieldInputKind("screen_sequence")).toBe("textarea");
+		expect(packetFieldPromptKind("product_name")).toBe("text");
+		expect(packetFieldPromptKind("price_usd_cents")).toBe("number");
+		expect(packetFieldPromptKind("screen_sequence")).toBe("list");
 		expect(packetFieldPromptKind("problem_severity")).toBe("scale");
 		expect(packetFieldPromptKind("problem_urgency")).toBe("scale");
 		expect(problemSeverityScaleValues).toEqual([
@@ -49,12 +40,6 @@ describe("packet field helpers", () => {
 		);
 		expect(normalizeProblemUrgencyValue("urgent")).toBe("Needs action now");
 		expect(normalizeProblemUrgencyValue("can wait")).toBe("Can schedule");
-		expect(getPacketFieldScaleDefinition("problem_urgency")).toEqual(
-			expect.objectContaining({
-				leftLabel: "Can wait",
-				rightLabel: "Immediate",
-			}),
-		);
 		expect(formatPacketFactValue(facts, "screen_sequence")).toBe(
 			facts.screen_sequence.join("\n"),
 		);

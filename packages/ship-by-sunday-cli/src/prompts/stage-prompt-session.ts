@@ -1,14 +1,16 @@
 import {
-	getPacketFieldScaleDefinition,
-	getPacketStepLabel,
 	getPacketStageDefinition,
 	isPacketArrayField,
-	packetFieldHelperText,
-	packetFieldLabel,
 	packetFieldPromptKind,
 	type CanonicalProjectDefinitionDraft,
 	type CanonicalProjectFactKey,
 } from "@manmeetsai/packet-compiler";
+import {
+	getPacketFieldScaleDefinition,
+	getPacketStepLabel,
+	packetFieldHelperText,
+	packetFieldLabel,
+} from "@manmeetsai/packet-presentation";
 import type { EditablePacketStageId } from "../parse-cli-command";
 
 export type StagePromptOutcome =
