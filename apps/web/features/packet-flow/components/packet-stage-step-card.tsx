@@ -7,6 +7,7 @@ import type {
 } from "@packet-compiler";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { FieldGroup } from "@/components/ui/field";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 import type { PacketStepInlineFeedback } from "@/features/packet-flow/lib/packet-step-save-feedback";
@@ -59,8 +60,10 @@ export function PacketStageStepCard({
 					{stepHeading}
 				</h2>
 			</div>
-			{feedback ? <PacketStageSaveFeedback feedback={feedback} /> : null}
-			<div className="space-y-6">
+			<div aria-live="polite" className={feedback ? undefined : "min-h-12"}>
+				{feedback ? <PacketStageSaveFeedback feedback={feedback} /> : null}
+			</div>
+			<FieldGroup className="gap-6">
 				{currentStep.fieldKeys.map((fieldKey) => (
 					<PacketStageStepField
 						key={fieldKey}
@@ -69,11 +72,10 @@ export function PacketStageStepCard({
 						step={currentStep}
 						value={draftValues[fieldKey] ?? ""}
 						errorMessage={fieldErrors[fieldKey]}
-						isSaving={isSaving}
 						onChange={onChange}
 					/>
 				))}
-			</div>
+			</FieldGroup>
 			<div className="flex flex-col gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
 				<Button
 					type="button"

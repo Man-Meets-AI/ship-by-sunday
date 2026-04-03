@@ -1,17 +1,17 @@
 "use client";
 
 import { AlertTriangleIcon } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import type { PacketStepInlineFeedback } from "@/features/packet-flow/lib/packet-step-save-feedback";
 
 const feedbackToneClassName = {
-	default: "",
+	default: "border-border/60 bg-muted/30 text-muted-foreground",
 	warning:
-		"border-amber-500/40 bg-amber-50/70 text-amber-950 dark:bg-amber-500/10 dark:text-amber-100",
+		"border-amber-500/30 bg-amber-50/70 text-amber-950 dark:bg-amber-500/10 dark:text-amber-100",
 	success:
-		"border-emerald-500/40 bg-emerald-50/70 text-emerald-950 dark:bg-emerald-500/10 dark:text-emerald-100",
-	destructive: "",
+		"border-emerald-500/30 bg-emerald-50/70 text-emerald-950 dark:bg-emerald-500/10 dark:text-emerald-100",
+	destructive:
+		"border-destructive/30 bg-destructive/6 text-destructive dark:bg-destructive/12",
 } as const satisfies Record<PacketStepInlineFeedback["tone"], string>;
 
 export function PacketStageSaveFeedback({
@@ -20,13 +20,20 @@ export function PacketStageSaveFeedback({
 	feedback: PacketStepInlineFeedback;
 }) {
 	return (
-		<Alert
-			variant={feedback.tone === "destructive" ? "destructive" : "default"}
+		<div
+			role={feedback.tone === "destructive" ? "alert" : "status"}
 			className={cn(feedbackToneClassName[feedback.tone])}
+			data-slot="packet-stage-save-feedback"
 		>
-			{feedback.tone === "warning" ? <AlertTriangleIcon aria-hidden /> : null}
-			<AlertTitle>{feedback.title}</AlertTitle>
-			<AlertDescription>{feedback.description}</AlertDescription>
-		</Alert>
+			<div className="flex min-h-12 items-start gap-2 rounded-lg border px-3 py-2.5 text-sm leading-6">
+				{feedback.tone === "warning" || feedback.tone === "destructive" ? (
+					<AlertTriangleIcon aria-hidden className="mt-0.5 size-4 shrink-0" />
+				) : null}
+				<div className="min-w-0">
+					<p className="font-medium text-foreground">{feedback.title}</p>
+					<p className="text-current/85">{feedback.description}</p>
+				</div>
+			</div>
+		</div>
 	);
 }

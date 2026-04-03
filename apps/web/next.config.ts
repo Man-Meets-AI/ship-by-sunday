@@ -23,7 +23,10 @@ const nextConfig: NextConfig = {
 			},
 		],
 	},
-	transpilePackages: ["@manmeetsai/packet-compiler"],
+	transpilePackages: [
+		"@manmeetsai/packet-compiler",
+		"@manmeetsai/packet-presentation",
+	],
 	images: {
 		remotePatterns: [
 			{

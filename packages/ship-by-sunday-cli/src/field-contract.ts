@@ -1,12 +1,12 @@
 import {
 	canonicalProjectFactKeys,
 	getPacketStageDefinition,
-	packetFieldLabel,
 	packetFieldPromptKind,
 	packetStageDefinitions,
 	placeholderFriendlyFactKeys,
 	type CanonicalProjectFactKey,
 } from "@manmeetsai/packet-compiler";
+import { packetFieldLabel } from "@manmeetsai/packet-presentation";
 import type {
 	EditablePacketStageId,
 	ReviewablePacketStageId,
