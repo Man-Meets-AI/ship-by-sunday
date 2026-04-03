@@ -1,20 +1,21 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const loadViewerCourseStateMock = vi.fn();
-const getPacketWorkflowStateByClerkUserIdMock = vi.fn();
+const getBlueprintWorkflowStateByClerkUserIdMock = vi.fn();
 
 vi.mock("@/convex/course/shared", () => ({
 	loadViewerCourseState: loadViewerCourseStateMock,
 }));
 
-vi.mock("@/convex/packet/workflowState", () => ({
-	getPacketWorkflowStateByClerkUserId: getPacketWorkflowStateByClerkUserIdMock,
+vi.mock("@/convex/blueprint/workflowState", () => ({
+	getBlueprintWorkflowStateByClerkUserId:
+		getBlueprintWorkflowStateByClerkUserIdMock,
 }));
 
 describe("getBonusRouteStateHandler", () => {
 	beforeEach(() => {
 		loadViewerCourseStateMock.mockReset();
-		getPacketWorkflowStateByClerkUserIdMock.mockReset();
+		getBlueprintWorkflowStateByClerkUserIdMock.mockReset();
 		vi.resetModules();
 	});
 
@@ -30,7 +31,7 @@ describe("getBonusRouteStateHandler", () => {
 				},
 			],
 		});
-		getPacketWorkflowStateByClerkUserIdMock.mockResolvedValue({
+		getBlueprintWorkflowStateByClerkUserIdMock.mockResolvedValue({
 			executeShipUnlockedAt: 200,
 		});
 
@@ -54,7 +55,7 @@ describe("getBonusRouteStateHandler", () => {
 				},
 			],
 		});
-		getPacketWorkflowStateByClerkUserIdMock.mockResolvedValue({
+		getBlueprintWorkflowStateByClerkUserIdMock.mockResolvedValue({
 			executeShipUnlockedAt: 200,
 		});
 
@@ -78,7 +79,7 @@ describe("getBonusRouteStateHandler", () => {
 				},
 			],
 		});
-		getPacketWorkflowStateByClerkUserIdMock.mockResolvedValue({
+		getBlueprintWorkflowStateByClerkUserIdMock.mockResolvedValue({
 			executeShipUnlockedAt: 200,
 		});
 

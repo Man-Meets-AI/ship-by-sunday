@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { AlertCircleIcon } from "lucide-react";
-import type { PacketStageStatus } from "@packet-compiler";
+import type { BlueprintStageStatus } from "@blueprint-compiler";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LessonShellWatch } from "@/features/course/lesson/shells";
 import { getLessonByKey } from "@/features/course/lesson/model/manifest";
@@ -29,7 +29,7 @@ export function BonusLessonPage({
 	postReviewTargets,
 }: {
 	initialShowLessonMap?: boolean;
-	initialStageStatuses: PacketStageStatus[];
+	initialStageStatuses: BlueprintStageStatus[];
 	lessonKey: string;
 	missionState: BonusMissionState;
 	postReviewTargets: PostReviewNavigationTargets;
@@ -93,7 +93,7 @@ export function BonusLessonPage({
 						<AlertCircleIcon aria-hidden />
 						<AlertTitle>Video-first bonus lesson</AlertTitle>
 						<AlertDescription>
-							Use the packet as the brief and keep BUILD as the default path.
+							Use the blueprint as the brief and keep BUILD as the default path.
 							Browse bonus lessons from{" "}
 							<button
 								type="button"

@@ -48,7 +48,7 @@ bun run sbs fields --stage design --json
 bun run sbs next --json
 bun run sbs validate --json
 bun run sbs set product.product_name "Ship by Sunday CLI" --json
-bun run sbs append scope_in "Packet intake" --json
+bun run sbs append scope_in "Blueprint intake" --json
 bun run sbs unset build-plan.domain --json
 bun run sbs mutate --file ./tmp/mutations.json --json
 bun run sbs --help
@@ -70,7 +70,7 @@ bun run sbs generate --out ./tmp/sbs-cli-repo --dry-run --json
 ./bin/sbs completion bash
 ```
 
-Use the CLI when you want the packet intake and starter snapshot flow without going through the protected web UI. For the actual draft model, command behavior, and generation notes, read [Ship by Sunday CLI](/docs/ship-by-sunday-cli).
+Use the CLI when you want the blueprint intake and starter snapshot flow without going through the protected web UI. For the actual draft model, command behavior, and generation notes, read [Ship by Sunday CLI](/docs/ship-by-sunday-cli).
 
 ## Stripe dev QA
 

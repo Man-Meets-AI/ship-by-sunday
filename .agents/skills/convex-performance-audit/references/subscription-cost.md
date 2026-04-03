@@ -173,7 +173,7 @@ For an even further optimization, if you only need a coarse online/offline boole
 
 ### 5. Use the aggregate component for counts and sums
 
-Reactive global counts (`SELECT COUNT(*)` equivalent) invalidate on every insert or delete to the table. The [`@convex-dev/aggregate`](https://www.npmjs.com/package/@convex-dev/aggregate) component maintains denormalized COUNT, SUM, and MAX values efficiently so you do not need a reactive query scanning the full table.
+Reactive global counts (`SELECT COUNT(*)` equivalent) invalidate on every insert or delete to the table. The `@convex-dev/aggregate` component maintains denormalized COUNT, SUM, and MAX values efficiently so you do not need a reactive query scanning the full table.
 
 Use it for leaderboards, totals, "X items" badges, or any stat that would otherwise require scanning many rows reactively.
 

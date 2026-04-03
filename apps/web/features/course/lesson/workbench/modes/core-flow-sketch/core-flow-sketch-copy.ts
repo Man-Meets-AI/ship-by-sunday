@@ -21,7 +21,7 @@ export const CORE_FLOW_SCREEN_REFERENCE = [
 	},
 	{
 		label: "Brand Settings",
-		hint: "Adjust voice, guardrails, or visuals.",
+		hint: "Adjust voice, safeguards, or visuals.",
 	},
 	{
 		label: "Generate from Template",

@@ -12,12 +12,12 @@ This ExecPlan must be maintained in accordance with `docs/codex/PLANS.md`.
 
 ## Purpose / Big Picture
 
-After this work, a person who hits the canonical protected packet entry at `/start` without access will land on a branded Ship by Sunday checkpoint instead of a stock card with stacked alerts. The screen will show the Ship by Sunday wordmark in the header, explain the account state with stronger hierarchy, and make the two real next steps obvious: recover an existing purchase or buy access now. This matters because the gate is not a throwaway utility screen. It appears at the exact moment a buyer is trying to regain trust, recover access, or decide whether to purchase. The work is successful when a human can open `/start` without access, immediately recognize the product, understand why they are blocked, and take the right next action on mobile and desktop in both light and dark themes.
+After this work, a person who hits the canonical protected blueprint entry at `/start` without access will land on a branded Ship by Sunday checkpoint instead of a stock card with stacked alerts. The screen will show the Ship by Sunday wordmark in the header, explain the account state with stronger hierarchy, and make the two real next steps obvious: recover an existing purchase or buy access now. This matters because the gate is not a throwaway utility screen. It appears at the exact moment a buyer is trying to regain trust, recover access, or decide whether to purchase. The work is successful when a human can open `/start` without access, immediately recognize the product, understand why they are blocked, and take the right next action on mobile and desktop in both light and dark themes.
 
 ## Progress
 
 - [x] 2026-03-26 09:21 ET: Read `AGENTS.md`, `apps/web/AGENTS.md`, `docs/codex/PLANS.md`, and `docs/prompts/execplan-writer.md` before planning.
-- [x] 2026-03-26 09:21 ET: Read the packet-first source docs listed by `apps/web/AGENTS.md` to confirm that protected workspace entry remains part of the packet-first funnel and that unlock logic must stay intact.
+- [x] 2026-03-26 09:21 ET: Read the blueprint-first source docs listed by `apps/web/AGENTS.md` to confirm that protected workspace entry remains part of the blueprint-first funnel and that unlock logic must stay intact.
 - [x] 2026-03-26 09:21 ET: Confirmed design context from `.impeccable.md` and locked the quality bar to premium, serious, and operational rather than playful or generic.
 - [x] 2026-03-26 09:21 ET: Inspected the current gate entrypoints and presentation files in `apps/web/app/(workspace)/layout.tsx`, `apps/web/features/product-access/components/access-required-page.tsx`, `apps/web/features/product-access/components/access-required-content.tsx`, `apps/web/features/product-access/components/access-required-actions.tsx`, and `apps/web/features/product-access/lib/access-required-view-model.ts`.
 - [x] 2026-03-26 09:21 ET: Confirmed the current surface is one generic `Card` with nested `Alert`, `Badge`, and `Separator` blocks, with no branded header and very little visual hierarchy.
@@ -77,7 +77,7 @@ The ninth discovery during validation is that the sandbox auth bootstrap was ses
 
 2026-03-26 ET — Decision: keep the help area informational only. Rationale: no canonical runtime support destination is wired into the live app, so a real support CTA would require new product configuration outside this UI refresh.
 
-2026-03-26 ET — Decision: treat `/start` as the canonical validation route for this plan. Rationale: current auth-protection E2E already uses `/start`, and it is the repo’s current packet-first entry route.
+2026-03-26 ET — Decision: treat `/start` as the canonical validation route for this plan. Rationale: current auth-protection E2E already uses `/start`, and it is the repo’s current blueprint-first entry route.
 
 2026-03-26 ET — Decision: preserve the text “Access Required” somewhere on the screen, but not necessarily as the main heading. Rationale: this keeps continuity with current tests and route orientation while allowing stronger state-specific headlines in the new shell.
 
@@ -178,12 +178,12 @@ At the end of this milestone, the targeted unit and integration UI tests will be
 
 ## Concrete Steps
 
-Work from the repository root at `/Users/parkerrex/Projects/manmeetsai-workspace`.
+Work from the repository root at `/Users/parkerrex/Projects/ship-by-sunday`.
 
 Begin by re-reading the current gate contract and the shared brand surfaces so implementation stays anchored in the actual code.
 
     pwd
-    /Users/parkerrex/Projects/manmeetsai-workspace
+    /Users/parkerrex/Projects/ship-by-sunday
 
     sed -n '1,220p' apps/web/app/'(workspace)'/layout.tsx
     sed -n '1,220p' apps/web/features/product-access/server/product-access.ts
@@ -211,7 +211,7 @@ Expected success signal: the access-required test files pass, including any upda
 
 Run the broader repo checks from the repository root after the targeted tests are green.
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     bun run lint
     bun run build
 
@@ -230,7 +230,7 @@ If the local auth environment is available, also run the existing sandbox auth-p
 
 Expected success signal: the signed-out protected-route redirect still lands on sign-in, and the member-without-access flow still shows inline access recovery on `/start`.
 
-Observed on 2026-03-26 10:56 ET: the rerun passed after the sandbox bootstrap began resetting the non-entitled persona’s product-access row, granting the entitled persona deterministically, and updating the stale legacy-lesson assertion to the current packet-first redirect contract.
+Observed on 2026-03-26 10:56 ET: the rerun passed after the sandbox bootstrap began resetting the non-entitled persona’s product-access row, granting the entitled persona deterministically, and updating the stale legacy-lesson assertion to the current blueprint-first redirect contract.
 
 If the local auth environment is not available, document that limitation in this plan and treat the targeted unit and integration UI tests plus `bun run build` as the minimum acceptable proof before handoff.
 
@@ -282,7 +282,7 @@ Current evidence from implementation and validation:
     - signed-out users are redirected away from protected `/start`
     - non-entitled signed-in users see the inline access-required gate on `/start`
     - entitled users can still render `/start`
-    - legacy lesson routes redirect back to the packet-first start page
+    - legacy lesson routes redirect back to the blueprint-first start page
 
     apps/web/components/product-brand.tsx currently exports:
     - ProductBrand
@@ -323,7 +323,7 @@ Validation transcripts:
     bunx vitest run --project integration-ui tests/integration-ui/access-required-page.test.tsx tests/integration-ui/access-required-page.interactions.test.tsx
     # 2 files passed, 10 tests passed
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     bun run lint
     # oxlint finished with 0 warnings and 0 errors
 
@@ -331,7 +331,7 @@ Validation transcripts:
     bunx convex dev --once --env-file .env.local
     # Convex functions ready
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     bun run build
     # next build completed successfully
 

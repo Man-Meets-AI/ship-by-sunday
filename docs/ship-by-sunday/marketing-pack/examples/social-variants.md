@@ -18,7 +18,7 @@ Ship by Sunday is built to lock the facts first.
 ## Variant 3
 
 The starter is not the product.
-The packet is the product.
+The blueprint is the product.
 The starter just gives that truth a real place to keep shipping from.
 
 ## Guardrail

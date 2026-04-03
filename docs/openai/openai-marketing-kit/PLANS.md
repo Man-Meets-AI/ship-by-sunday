@@ -116,7 +116,7 @@ Break the workflow into discrete steps and tag each one with the OpenAI primitiv
 - Why:
 - Decision: pursue / defer / self-service / escalate
 
-## 10. Risks and guardrails
+## 10. Risks and safeguards
 - Current-facts risk:
 - Brand risk:
 - Privacy risk:

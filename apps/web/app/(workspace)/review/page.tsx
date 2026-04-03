@@ -1,5 +1,5 @@
 import { api } from "@/convex/_generated/api";
-import { PacketReviewPage } from "@/features/packet-flow/components/packet-review-page";
+import { BlueprintReviewPage } from "@/features/blueprint-flow/components/blueprint-review-page";
 import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
 
 export default async function Page({
@@ -8,20 +8,23 @@ export default async function Page({
 	searchParams: Promise<{ showLessonMap?: string }>;
 }) {
 	const initialWorkspaceState = await fetchAuthenticatedQuery(
-		api.packet.getPacketWorkspaceState,
+		api.blueprint.getBlueprintWorkspaceState,
 		{},
 	);
 	const { showLessonMap } = await searchParams;
 
 	if (!initialWorkspaceState) {
-		throw new Error("Packet workspace state missing");
+		throw new Error("Blueprint workspace state missing");
 	}
 
 	const isUnlocked = Boolean(
 		initialWorkspaceState.workflowState?.executeShipUnlockedAt,
 	);
 	const initialResumeDestination = isUnlocked
-		? await fetchAuthenticatedQuery(api.packet.getPacketResumeDestination, {})
+		? await fetchAuthenticatedQuery(
+				api.blueprint.getBlueprintResumeDestination,
+				{},
+			)
 		: null;
 	const initialBonusMissionState =
 		isUnlocked && initialResumeDestination?.postReviewTargets
@@ -29,7 +32,7 @@ export default async function Page({
 			: null;
 
 	return (
-		<PacketReviewPage
+		<BlueprintReviewPage
 			initialWorkspaceState={initialWorkspaceState}
 			initialPostReviewTargets={
 				initialResumeDestination?.postReviewTargets ?? null

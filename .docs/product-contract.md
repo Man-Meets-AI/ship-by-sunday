@@ -1,6 +1,6 @@
 # Product contract
 
-Ship by Sunday is packet-first, not course-first.
+Ship by Sunday is blueprint-first, not course-first.
 
 ## Canonical protected flow
 
@@ -22,7 +22,7 @@ Current stage-entry routes:
 - `/review`
 - `/settings`
 
-`/product`, `/design`, `/marketing`, and `/build-plan` are stable stage-entry routes that redirect into nested packet pages such as `/product/foundation` and `/build-plan/validation`.
+`/product`, `/design`, `/marketing`, and `/build-plan` are stable stage-entry routes that redirect into nested blueprint pages such as `/product/foundation` and `/build-plan/validation`.
 
 Older routes such as `/mission`, `/lesson/[lessonKey]`, and `/artifacts` are compatibility redirects, not canonical product surfaces.
 

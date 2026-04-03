@@ -28,7 +28,7 @@ A strong early milestone is:
 3. the first real protected user flow is visible
 4. the paid-access contract still works
 
-If you are not keeping the guided course, the first real protected user flow should now be the packet-first workspace on `/start`, not a dead-end disabled shell.
+If you are not keeping the guided course, the first real protected user flow should now be the blueprint-first workspace on `/start`, not a dead-end disabled shell.
 
 ## Leave these alone until later
 
@@ -41,7 +41,7 @@ Do not start by rewriting:
 
 Those are the highest-risk parts of the starter.
 
-## Guardrails
+## Safeguards
 
 - keep `config/product.ts` as the first place to change product identity and route constants
 - keep homepage shell controls in `starterConfig.homePage` and let `features/marketing/lib/home-page-render-model.ts` translate them into rendering decisions
@@ -60,7 +60,7 @@ The starter now has a deliberate `course = false` mode.
 When `starterConfig.modules.course` is `false`:
 
 - `/start` becomes the first protected workspace surface
-- `/product`, `/design`, `/marketing`, and `/build-plan` stay as stable stage-entry routes but redirect into nested packet pages
+- `/product`, `/design`, `/marketing`, and `/build-plan` stay as stable stage-entry routes but redirect into nested blueprint pages
 - `/mission` and `/lesson/[lessonKey]` become the optional post-review bonus library after unlock, while `/artifacts` remains a compatibility forward into `/review`
 - the paid-access and access-recovery contract stays unchanged
 

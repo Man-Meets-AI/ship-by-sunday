@@ -68,7 +68,7 @@ Use local `bunx convex deploy --dry-run -y` for validation while preparing relea
 - `uploads.ts`: upload URL generation for lesson media fields
 - `auth.config.ts`: Convex auth provider configuration
 
-## Guardrails
+## Safeguards
 
 - Treat product access and lesson progress as production state.
 - Prefer adding tests around pure domain helpers in `features/course/lesson/model/` before refactoring Convex behavior.

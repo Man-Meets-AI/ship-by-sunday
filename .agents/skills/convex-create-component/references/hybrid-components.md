@@ -8,7 +8,7 @@ A hybrid component combines a local Convex component with shared library code.
 
 This can help when:
 
-- the user wants a local install but also shared package logic
+- the user wants a local install but also shared module logic
 - the component needs extension points or override hooks
 - some logic should live in normal TypeScript code outside the component boundary
 
@@ -19,7 +19,7 @@ Treat hybrid as an advanced option, not the default.
 Before choosing it, ask:
 
 - Why is a plain local component not enough?
-- Why is a packaged component not enough?
+- Why is a published-library component not enough?
 - What exactly needs to stay overridable or shared?
 
 If the answer is vague, fall back to local or packaged.
@@ -33,5 +33,5 @@ If the answer is vague, fall back to local or packaged.
 ## Checklist
 
 - [ ] User explicitly needs hybrid behavior
-- [ ] Local-only and packaged-only options were considered first
+- [ ] Local-only and published-library-only options were considered first
 - [ ] The extension points are clearly defined before coding

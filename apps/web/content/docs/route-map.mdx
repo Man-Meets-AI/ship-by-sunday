@@ -24,15 +24,15 @@ description: See the main public, protected, and purchase-related routes in one 
 
 ## Protected product routes
 
-- `/start`: packet-first orientation and framing
-- `/product`: stable stage-entry route that redirects to the current Product packet page
-- `/product/[stepId]`: canonical Product packet pages such as `/product/foundation`, `/product/problem`, `/product/outcome`, and `/product/scope`
-- `/design`: stable stage-entry route that redirects to the current Design packet page
-- `/design/[stepId]`: canonical Design packet pages such as `/design/flow`, `/design/references`, `/design/direction`, and `/design/system`
-- `/marketing`: stable stage-entry route that redirects to the current Marketing packet page
-- `/marketing/[stepId]`: canonical Marketing packet pages such as `/marketing/operating-system`
-- `/build-plan`: stable stage-entry route that redirects to the current Build Plan packet page
-- `/build-plan/[stepId]`: canonical Build Plan packet pages such as `/build-plan/delivery`, `/build-plan/plan`, and `/build-plan/validation`
+- `/start`: blueprint-first orientation and framing
+- `/product`: stable stage-entry route that redirects to the current Product blueprint page
+- `/product/[stepId]`: canonical Product blueprint pages such as `/product/foundation`, `/product/problem`, `/product/outcome`, and `/product/scope`
+- `/design`: stable stage-entry route that redirects to the current Design blueprint page
+- `/design/[stepId]`: canonical Design blueprint pages such as `/design/flow`, `/design/references`, `/design/direction`, and `/design/system`
+- `/marketing`: stable stage-entry route that redirects to the current Marketing blueprint page
+- `/marketing/[stepId]`: canonical Marketing blueprint pages such as `/marketing/operating-system`
+- `/build-plan`: stable stage-entry route that redirects to the current Build Plan blueprint page
+- `/build-plan/[stepId]`: canonical Build Plan blueprint pages such as `/build-plan/delivery`, `/build-plan/plan`, and `/build-plan/validation`
 - `/review`: final readiness and repo-download surface
 - `/execute`: optional post-review bonus bridge that unlocks from `/review`, offers `Continue in Build` to lesson `3.1`, offers `Start from the beginning` to lesson `1.1`, and redirects repeat bonus visitors to `/mission`
 - `/settings`: protected account and product settings
@@ -42,7 +42,7 @@ description: See the main public, protected, and purchase-related routes in one 
 
 Repeat-routing note: after a customer opens any restored bonus lesson, `/execute` stops acting like the first-entry bridge and sends them to `/mission` instead. QA should verify both the first unlocked bridge state and the repeat-visit redirect state.
 
-These protected routes render behind `app/(workspace)/layout.tsx`, starting from server-fetched access or packet-workspace data before the browser resumes live Convex subscriptions. The stage-root URLs remain the shared app contract, but the packet form itself now lives on the nested packet pages.
+These protected routes render behind `app/(workspace)/layout.tsx`, starting from server-fetched access or blueprint-workspace data before the browser resumes live Convex subscriptions. The stage-root URLs remain the shared app contract, but the blueprint form itself now lives on the nested blueprint pages.
 
 ## Why this matters
 

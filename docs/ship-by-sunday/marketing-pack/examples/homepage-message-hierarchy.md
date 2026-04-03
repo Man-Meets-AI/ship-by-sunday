@@ -2,7 +2,7 @@
 
 ## Goal
 
-Turn the product facts into a homepage narrative that matches the packet-first product and the current public promise.
+Turn the product facts into a homepage narrative that matches the blueprint-first product and the current public promise.
 
 ## Audience
 

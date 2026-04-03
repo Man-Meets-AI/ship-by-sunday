@@ -14,7 +14,7 @@ test.skip(
 );
 
 test.describe("protected routes", () => {
-	test("@default_ship signed-out users are redirected away from the protected packet workspace", async ({
+	test("@default_ship signed-out users are redirected away from the protected blueprint workspace", async ({
 		page,
 	}) => {
 		await page.goto("/start");
@@ -36,7 +36,7 @@ test.describe("protected routes", () => {
 	test.describe("member without access", () => {
 		test.use({ storageState: memberWithoutAccessStorageStatePath });
 
-		test("@default_ship sees inline access recovery on the canonical packet entry", async ({
+		test("@default_ship sees inline access recovery on the canonical blueprint entry", async ({
 			page,
 		}) => {
 			await page.goto("/start");
@@ -54,7 +54,7 @@ test.describe("protected routes", () => {
 	test.describe("member with access", () => {
 		test.use({ storageState: memberWithAccessStorageStatePath });
 
-		test("@default_ship can render the canonical packet start page", async ({
+		test("@default_ship can render the canonical blueprint start page", async ({
 			page,
 		}) => {
 			await page.goto("/start");
@@ -67,7 +67,7 @@ test.describe("protected routes", () => {
 			).toBeVisible();
 		});
 
-		test("@extended redirects legacy lesson routes back to the packet-first start page", async ({
+		test("@extended redirects legacy lesson routes back to the blueprint-first start page", async ({
 			page,
 		}) => {
 			await page.goto("/lesson/not-a-real-lesson");

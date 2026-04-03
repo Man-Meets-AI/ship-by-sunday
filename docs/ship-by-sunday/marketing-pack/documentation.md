@@ -72,7 +72,7 @@ What this workflow does, for whom, and why it exists.
 - Adoption metric:
 - Business metric:
 
-## 8. Risks and guardrails
+## 8. Risks and safeguards
 - Current-facts risk:
 - Brand risk:
 - Legal / policy risk:

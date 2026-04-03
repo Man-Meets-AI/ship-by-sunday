@@ -23,7 +23,7 @@ Diagnose and fix performance problems in Convex applications, one problem class 
 - Pure schema migrations with no performance goal
 - One-off micro-optimizations without a user-visible or deployment-visible problem
 
-## Guardrails
+## Guardblueprint
 
 - Prefer simpler code when scale is small, traffic is modest, or the available signals are weak
 - Do not recommend digest tables, document splitting, fetch-strategy changes, or migration-heavy rollouts unless there is a measured signal, a clearly unbounded path, or a known hot read/write path
@@ -37,7 +37,7 @@ Start with the strongest signal available:
 2. If CLI insights are available, run `npx convex insights --details`. Use `--prod`, `--preview-name`, or `--deployment-name` when needed.
    - If the local repo's Convex CLI is too old to support `insights`, try `npx -y convex@latest insights --details` before giving up.
 3. If the repo already uses `convex-doctor`, you may treat its findings as hints. Do not require it, and do not treat it as the source of truth.
-4. If runtime signals are unavailable, audit from code anyway, but keep the guardrails above in mind. Lack of insights is not proof of health, but it is also not proof that a large refactor is warranted.
+4. If runtime signals are unavailable, audit from code anyway, but keep the guardblueprint above in mind. Lack of insights is not proof of health, but it is also not proof that a large refactor is warranted.
 
 ## Signal Routing
 

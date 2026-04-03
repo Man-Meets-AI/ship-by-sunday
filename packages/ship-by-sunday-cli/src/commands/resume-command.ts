@@ -1,4 +1,4 @@
-import { deriveStageStatus } from "@manmeetsai/packet-compiler";
+import { deriveStageStatus } from "@manmeetsai/blueprint-compiler";
 import { ensureLocalDraft } from "../draft/draft-store";
 import type { CliIo } from "../run-cli";
 import { handleStageCommand, type StagePrompter } from "./stage-command";

@@ -1,12 +1,12 @@
 # @manmeetsai/ship-by-sunday-cli
 
-Repo-local Ship by Sunday CLI for packet intake and starter snapshot generation.
+Repo-local Ship by Sunday CLI for blueprint intake and starter snapshot generation.
 
 ## Supported Use
 
 Clone the repository, run `bun install`, then launch from the repo root with either `bun run sbs` or `./bin/sbs`.
 
-The CLI reports version information from the package manifest:
+The CLI reports version information from the manifest:
 
 ```bash
 bun run sbs --version
@@ -28,7 +28,7 @@ Shell completion is printed to stdout for manual sourcing:
 - Homebrew
 - self-update or remote update commands
 
-## Package Commands
+## Workspace Commands
 
 ```bash
 bun run --cwd packages/ship-by-sunday-cli lint

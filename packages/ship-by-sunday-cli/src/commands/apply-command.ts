@@ -1,7 +1,7 @@
-import { getPacketStageDefinition } from "@manmeetsai/packet-compiler";
+import { getBlueprintStageDefinition } from "@manmeetsai/blueprint-compiler";
 import { writeJsonResult } from "../cli-json";
 import { applyDraftPatchFromFile } from "../draft/draft-store";
-import type { EditablePacketStageId } from "../parse-cli-command";
+import type { EditableBlueprintStageId } from "../parse-cli-command";
 import type { CliIo } from "../run-cli";
 
 export async function handleApplyCommand({
@@ -13,11 +13,11 @@ export async function handleApplyCommand({
 }: {
 	io: CliIo;
 	projectRootPath: string;
-	stageId: EditablePacketStageId;
+	stageId: EditableBlueprintStageId;
 	filePath: string;
 	json: boolean;
 }) {
-	const stage = getPacketStageDefinition(stageId);
+	const stage = getBlueprintStageDefinition(stageId);
 	const draft = await applyDraftPatchFromFile(projectRootPath, stage, filePath);
 	if (json) {
 		writeJsonResult(io, "apply", {

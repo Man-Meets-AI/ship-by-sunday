@@ -9,7 +9,7 @@ Scenario IDs: FREEPAID-01, FREEPAID-02
 
 ## Scope Tested
 
-Commands run from `/Users/parkerrex/Projects/manmeetsai-workspace`:
+Commands run from `/Users/parkerrex/Projects/ship-by-sunday`:
 
 - `bun run qa:validate`
 - `bun run qa:personas:prepare -- --pack=billing_integration`
@@ -27,8 +27,8 @@ No Stripe checkout confirmation was executed in this slice.
 ## Blocked
 
 - `FREEPAID-01` blocked: the public domain was not explicitly confirmed as a Stripe test-only environment, so starting a real checkout would have been unsafe.
-- `FREEPAID-02` blocked: the packet-first preview deployments for `mma-shipbysunday` were unavailable, and the public domain appears to be serving the older mission-based workspace contract.
-- The local packet-first sandbox was not stable enough to use for payment confirmation during this slice because the focus was on proving the QA control plane and capturing public-domain evidence without risking a live charge.
+- `FREEPAID-02` blocked: the blueprint-first preview deployments for `mma-shipbysunday` were unavailable, and the public domain appears to be serving the older mission-based workspace contract.
+- The local blueprint-first sandbox was not stable enough to use for payment confirmation during this slice because the focus was on proving the QA control plane and capturing public-domain evidence without risking a live charge.
 
 ## Notes
 

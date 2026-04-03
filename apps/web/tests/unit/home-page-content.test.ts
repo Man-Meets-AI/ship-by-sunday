@@ -84,6 +84,6 @@ describe("home page content", () => {
 		expect(homePageContent.pricingSection.guarantee).toContain("Product stage");
 		expect(faqCopy).not.toContain("The guarantee is about clarity");
 		expect(faqCopy).toContain("Ship Kit");
-		expect(faqCopy).toContain("Ship Rails");
+		expect(faqCopy).toContain("Ship Blueprint");
 	});
 });

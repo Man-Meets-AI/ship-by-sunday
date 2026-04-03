@@ -1,5 +1,5 @@
-import type { PacketWorkspaceState } from "@/features/packet-flow/lib/packet-workspace-types";
+import type { BlueprintWorkspaceState } from "@/features/blueprint-flow/lib/blueprint-workspace-types";
 
-export function isExecuteShipUnlocked(workspaceState: PacketWorkspaceState) {
+export function isExecuteShipUnlocked(workspaceState: BlueprintWorkspaceState) {
 	return Boolean(workspaceState.workflowState?.executeShipUnlockedAt);
 }

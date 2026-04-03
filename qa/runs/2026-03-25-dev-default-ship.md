@@ -5,7 +5,7 @@ Environment: dev-local
 Pack: default_ship
 Slug: dev-local
 Prepared personas: signed_out, member_without_access, member_with_access
-Scenario IDs: VIS-01, AUTH-01, AUTH-02, ACCESS-01, ACCESS-02, PACKET-01, PACKET-02, PACKET-03, PACKET-04, PACKET-05, PACKET-06, PACKET-07, SETTINGS-01
+Scenario IDs: VIS-01, AUTH-01, AUTH-02, ACCESS-01, ACCESS-02, BLUEPRINT-01, BLUEPRINT-02, BLUEPRINT-03, BLUEPRINT-04, BLUEPRINT-05, BLUEPRINT-06, BLUEPRINT-07, SETTINGS-01
 
 ## Scope Tested
 
@@ -19,9 +19,9 @@ Commands run on local dev after fixing the Convex dev auth provider:
 
 ## Passed
 
-- Local signed-out packet entry redirects correctly.
+- Local signed-out blueprint entry redirects correctly.
 - Local no-access recovery renders correctly on `/start`.
-- Local entitled-member packet entry renders and the packet funnel plus settings route can be exercised.
+- Local entitled-member blueprint entry renders and the blueprint funnel plus settings route can be exercised.
 - Local browser-smoke remains green.
 
 ## Findings

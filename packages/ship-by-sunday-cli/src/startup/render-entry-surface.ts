@@ -17,7 +17,7 @@ export function renderEntrySurface({
 		paint(`Repository: ${repositoryName}`, "heading", options),
 		dim(`Working root: ${projectRootPath}`, options),
 		paint(
-			"Guided packet intake, readiness checks, and starter snapshot generation for this repository.",
+			"Guided blueprint intake, readiness checks, and starter snapshot generation for this repository.",
 			"focus",
 			options,
 		),

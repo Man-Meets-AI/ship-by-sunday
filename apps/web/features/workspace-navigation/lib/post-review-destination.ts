@@ -9,7 +9,7 @@ import { getLessonMapHref } from "./lesson-map-href";
 const POST_REVIEW_DEFAULT_BUILD_LESSON_ID = "3.1";
 const studentFacingLessons = getStudentFacingLessons();
 
-export type PacketResumeStageId =
+export type BlueprintResumeStageId =
 	| "start"
 	| "product"
 	| "design"
@@ -35,20 +35,20 @@ export type PostReviewNavigationTargets = {
 export type WorkspaceResumeDestination =
 	| {
 			destination: string;
-			kind: "packet_stage";
-			packetStageId: PacketResumeStageId;
+			kind: "blueprint_stage";
+			blueprintStageId: BlueprintResumeStageId;
 			postReviewTargets: null;
 	  }
 	| {
 			destination: string;
 			kind: "review";
-			packetStageId: "review";
+			blueprintStageId: "review";
 			postReviewTargets: null;
 	  }
 	| {
 			destination: string;
 			kind: "post_review";
-			packetStageId: null;
+			blueprintStageId: null;
 			postReviewTargets: PostReviewNavigationTargets;
 	  };
 
@@ -141,19 +141,19 @@ export function getPostReviewNavigationTargets(
 export function resolveWorkspaceResumeDestination({
 	executeShipUnlockedAt,
 	firstIncompleteStageId,
-	packetStageDestination,
+	blueprintStageDestination,
 	postReviewLessonStates,
 }: {
 	executeShipUnlockedAt: number | null;
-	firstIncompleteStageId: PacketResumeStageId;
-	packetStageDestination: string;
+	firstIncompleteStageId: BlueprintResumeStageId;
+	blueprintStageDestination: string;
 	postReviewLessonStates: readonly PostReviewLessonState[];
 }): WorkspaceResumeDestination {
 	if (firstIncompleteStageId !== "review") {
 		return {
-			destination: packetStageDestination,
-			kind: "packet_stage",
-			packetStageId: firstIncompleteStageId,
+			destination: blueprintStageDestination,
+			kind: "blueprint_stage",
+			blueprintStageId: firstIncompleteStageId,
 			postReviewTargets: null,
 		};
 	}
@@ -162,7 +162,7 @@ export function resolveWorkspaceResumeDestination({
 		return {
 			destination: routeConfig.review,
 			kind: "review",
-			packetStageId: "review",
+			blueprintStageId: "review",
 			postReviewTargets: null,
 		};
 	}
@@ -175,7 +175,7 @@ export function resolveWorkspaceResumeDestination({
 	return {
 		destination: postReviewTargets.latestLessonDestination,
 		kind: "post_review",
-		packetStageId: null,
+		blueprintStageId: null,
 		postReviewTargets,
 	};
 }

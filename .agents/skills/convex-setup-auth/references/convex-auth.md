@@ -131,7 +131,7 @@ If `npx convex dev` or deployment setup requires human input:
 - [ ] Run `npx convex dev` first if needed
 - [ ] Run `npx @convex-dev/auth`
 - [ ] Confirm `convex/auth.config.ts`, `convex/auth.ts`, and `convex/http.ts` were created
-- [ ] Follow the setup guide for package install and wiring
+- [ ] Follow the setup guide for dependency install and wiring
 - [ ] Add `authTables` to `convex/schema.ts`
 - [ ] Replace `ConvexProvider` with `ConvexAuthProvider`
 - [ ] Configure at least one auth method in `convex/auth.ts`

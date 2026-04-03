@@ -108,6 +108,6 @@ export const CONCEPT_ACCORDION_ITEMS = [
 	{
 		value: "logs",
 		title: "Logs",
-		body: "Runtime output and error trails (hosting dashboard, server logs, or a logging product) so you can see what broke after deploy—without guessing.",
+		body: "Runtime output and error tblueprint (hosting dashboard, server logs, or a logging product) so you can see what broke after deploy—without guessing.",
 	},
 ] as const;

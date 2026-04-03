@@ -1,4 +1,4 @@
-import type { CanonicalProjectFactKey } from "@manmeetsai/packet-compiler";
+import type { CanonicalProjectFactKey } from "@manmeetsai/blueprint-compiler";
 import { writeJsonResult } from "../cli-json";
 import { createCliError } from "../cli-errors";
 import { parseFieldSelector } from "../field-contract";

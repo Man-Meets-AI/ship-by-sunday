@@ -48,7 +48,7 @@ const packDefinitions = {
 				env: browserSmokeEnv,
 			},
 			{
-				label: "Run the packet integration-ui proof suite",
+				label: "Run the blueprint integration-ui proof suite",
 				command: [
 					"bun",
 					"run",
@@ -56,10 +56,10 @@ const packDefinitions = {
 					"apps/web",
 					"test:integration:ui",
 					"--",
-					"tests/integration-ui/packet-start-page.test.tsx",
-					"tests/integration-ui/packet-stage-page.test.tsx",
-					"tests/integration-ui/packet-review-page.test.tsx",
-					"tests/integration-ui/packet-stage-sidebar.test.tsx",
+					"tests/integration-ui/blueprint-start-page.test.tsx",
+					"tests/integration-ui/blueprint-stage-page.test.tsx",
+					"tests/integration-ui/blueprint-review-page.test.tsx",
+					"tests/integration-ui/blueprint-stage-sidebar.test.tsx",
 				],
 			},
 			{

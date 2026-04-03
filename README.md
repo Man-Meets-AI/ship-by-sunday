@@ -1,6 +1,6 @@
 # Ship by Sunday
 
-Ship by Sunday is an agent-ready, packet-first SaaS starter for turning one product idea into durable design, marketing, build, and prompt handoff packs. The repo includes the public marketing site, protected packet workspace, Stripe checkout flow, Clerk auth, Convex backend, packet compiler, intake CLI, and QA operating system that support that contract.
+Ship by Sunday is an agent-ready, blueprint-first SaaS starter for turning one product idea into durable design, marketing, build, and prompt handoff packs. The repo includes the public marketing site, protected blueprint workspace, Stripe checkout flow, Clerk auth, Convex backend, blueprint compiler, intake CLI, and QA operating system that support that contract.
 
 ## Design system
 
@@ -11,13 +11,13 @@ Use it before changing any user-facing UI. It documents the shared neutral app t
 ## What lives here
 
 - `apps/web/`: the main Next.js product, docs, protected workspace, checkout, and optional Codex runtime.
-- `packages/packet-compiler/`: the generator behind the customer-facing starter snapshot.
-- `packages/ship-by-sunday-cli/`: local packet-intake and snapshot-generation CLI.
+- `packages/blueprint-compiler/`: the generator behind the customer-facing starter snapshot.
+- `packages/ship-by-sunday-cli/`: local blueprint-intake and snapshot-generation CLI.
 - `qa/`: QA control plane, scenario packs, personas, and run evidence.
 - `docs/`: long-form runbooks, ExecPlans, prompts, and historical product context.
 - `.docs/`: short hidden reference docs for agents and operators.
 
-The protected journey is packet-first:
+The protected journey is blueprint-first:
 
 `Start -> Product -> Design -> Marketing -> Build Plan -> Review & Download`
 
