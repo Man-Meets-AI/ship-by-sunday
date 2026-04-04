@@ -1,9 +1,9 @@
-import { type CanonicalProjectDefinition } from "@manmeetsai/blueprint-compiler";
+import { type CanonicalProjectDefinition } from "@shipbysunday/blueprint-compiler";
 import {
 	buildRepoGenerationManifest,
 	buildReviewDownloadZip,
 	materializeRepoSnapshot,
-} from "@manmeetsai/blueprint-compiler/server";
+} from "@shipbysunday/blueprint-compiler/server";
 import { mkdir, mkdtemp, rename, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { buildCanonicalProjectDefinitionFromCliFacts } from "../blueprint-derivation";

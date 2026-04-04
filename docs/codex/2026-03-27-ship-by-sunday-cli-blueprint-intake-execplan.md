@@ -107,7 +107,7 @@ Evidence from repo inspection:
 
 ## Outcomes & Retrospective
 
-The repository-root Bun CLI now exists at `packages/ship-by-sunday-cli/` and is exposed through `bun run sbs`. It stores one local draft under `.ship-by-sunday/draft.json`, shares the live blueprint field contract from `@manmeetsai/blueprint-compiler`, reports readiness through the same stage logic as the web flow, and generates the same blueprint shape that `/review` produces today.
+The repository-root Bun CLI now exists at `packages/ship-by-sunday-cli/` and is exposed through `bun run sbs`. It stores one local draft under `.ship-by-sunday/draft.json`, shares the live blueprint field contract from `@shipbysunday/blueprint-compiler`, reports readiness through the same stage logic as the web flow, and generates the same blueprint shape that `/review` produces today.
 
 The final result stayed inside the intended scope. The implementation did not widen into multi-draft management, post-review execution inputs, or alternate artifact families. The only extra work beyond the original plan was resolving root-relative user paths because the root script delegates into the blueprint directory.
 
@@ -133,7 +133,7 @@ The work should begin by freezing the canonical fact contract. The implementer s
 
 Once the contract is frozen, the next step is to make `blueprint-compiler` reusable from a CLI context. This means moving field-presentation logic out of `apps/web/features/blueprint-flow/lib/blueprint-field-helpers.ts` into a shared module under `packages/blueprint-compiler/src/` or a sibling shared blueprint, and it means replacing the current `process.cwd(), "..", ".."` root derivation with a repository-root resolver or explicit parameter that works when the user invokes `bun run sbs` from the repository root.
 
-After the compiler is CLI-safe, the implementer should add a new workspace blueprint under `packages/ship-by-sunday-cli/`. That blueprint should expose one executable entry point, store one active draft under `.ship-by-sunday/`, and provide a thin command parser around a small set of opinionated commands. The blueprint should not know how to render blueprint files by itself. It should call `@manmeetsai/blueprint-compiler` for validation, stage grouping, readiness, blueprint rendering, and repo snapshot generation.
+After the compiler is CLI-safe, the implementer should add a new workspace blueprint under `packages/ship-by-sunday-cli/`. That blueprint should expose one executable entry point, store one active draft under `.ship-by-sunday/`, and provide a thin command parser around a small set of opinionated commands. The blueprint should not know how to render blueprint files by itself. It should call `@shipbysunday/blueprint-compiler` for validation, stage grouping, readiness, blueprint rendering, and repo snapshot generation.
 
 With the blueprint in place, the implementer should build the command surface in two passes. The first pass should create local storage, import/export, apply, and review primitives so state can be inspected or patched without prompts. The second pass should build interactive prompting that walks the live step contract, keeps users inside the terminal, prompts list fields one item at a time, prompts narrative textarea fields as multiline blocks terminated by an empty line, and persists changes after every answered field so interruptions are safe. Finally, the implementer should add focused tests, scripts, and documentation so a newcomer can run the CLI and verify that it generates a truthful blueprint end to end.
 
@@ -296,7 +296,7 @@ Observed transcripts:
 
 ## Interfaces and Dependencies
 
-The CLI must depend on `@manmeetsai/blueprint-compiler` for the canonical project definition types, the stage definitions, readiness evaluation, and blueprint and repo generation entry points. The implementer should not re-declare `CanonicalProjectFactKey`, `BlueprintStageDefinition`, or readiness rules inside the CLI blueprint. If the CLI needs field labels or input kinds, those should come from a shared helper module moved into `packages/blueprint-compiler/src/` or into a new shared blueprint under `packages/`.
+The CLI must depend on `@shipbysunday/blueprint-compiler` for the canonical project definition types, the stage definitions, readiness evaluation, and blueprint and repo generation entry points. The implementer should not re-declare `CanonicalProjectFactKey`, `BlueprintStageDefinition`, or readiness rules inside the CLI blueprint. If the CLI needs field labels or input kinds, those should come from a shared helper module moved into `packages/blueprint-compiler/src/` or into a new shared blueprint under `packages/`.
 
 The new blueprint should live at `packages/ship-by-sunday-cli/` and should follow the same tooling pattern as the other TypeScript blueprint in this repo: Bun for execution, TypeScript for types, Oxlint and Oxformat for lint and formatting, and Vitest for focused tests. The root `package.json` should expose a simple `sbs` script so the user runs the CLI from the repository root with `bun run sbs ...`.
 

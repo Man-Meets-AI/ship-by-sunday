@@ -320,7 +320,7 @@ Sandbox verification note:
 
 ## Interfaces and Dependencies
 
-The compiler-facing interface remains the canonical facts draft and blueprint readiness flow exposed by `@manmeetsai/blueprint-compiler`. This slice should not widen `packages/blueprint-compiler/src/canonical-project-definition/schema.ts` unless explicitly approved later. The allowed compiler changes are step regrouping metadata and any route-safe step identifiers needed for nested blueprint pages.
+The compiler-facing interface remains the canonical facts draft and blueprint readiness flow exposed by `@shipbysunday/blueprint-compiler`. This slice should not widen `packages/blueprint-compiler/src/canonical-project-definition/schema.ts` unless explicitly approved later. The allowed compiler changes are step regrouping metadata and any route-safe step identifiers needed for nested blueprint pages.
 
 The web-facing interface should add a blueprint-flow-local route helper and a blueprint-flow-local video registry. The route helper must resolve stage root routes, semantic nested blueprint page routes, previous and next blueprint page routes, and default stage entry routes from one source of truth. The route helper must preserve stage-root URLs as the shared external contract while making nested blueprint pages the internal page model. The blueprint video registry must map blueprint pages to Bunny video content or to an explicit non-video orientation fallback in a way that lets Start, stage pages, and Review all reuse the same rendering component family.
 

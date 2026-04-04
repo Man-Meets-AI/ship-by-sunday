@@ -82,7 +82,7 @@ The new pack runner is useful even before live credentials are present, because 
 
 The first real hosted baseline run exposed the main product risk immediately: the public domain `https://www.man-meets-ai.com` still serves the old mission-based workspace contract. On that domain, `/start` renders `Page not found` and offers an `Open workspace` link that points to `/mission`. That means the repo’s blueprint-first route contract is ahead of what the public deployment is currently serving.
 
-The recent `mma-shipbysunday` Vercel deployments were not a usable fallback during the run. The alias URL returned `DEPLOYMENT_NOT_FOUND`, while older ready preview URLs were protected behind Vercel login. The only usable public baseline environment was the custom domain.
+The recent preview deployment aliases were not a usable fallback during the run. The alias URL returned `DEPLOYMENT_NOT_FOUND`, while older ready preview URLs were protected behind Vercel login. The only usable public baseline environment was the custom domain.
 
 Retrying on fresh `main` changed one useful implementation detail but not the product finding. Local `browser-smoke` now passes cleanly on current `main`, which means the public shell and recovery surfaces are fine in the current code. The authenticated local sandbox lane is still blocked because Playwright `globalSetup` attempts to sign in before the local app is stably reachable. The hosted sandbox lane remains the trustworthy evidence source for protected-route behavior.
 

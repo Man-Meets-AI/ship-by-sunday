@@ -4,7 +4,7 @@ import {
 	type CanonicalProjectDefinition,
 	type CanonicalProjectDefinitionDraft,
 	type CanonicalProjectFacts,
-} from "@manmeetsai/blueprint-compiler";
+} from "@shipbysunday/blueprint-compiler";
 import {
 	DEFAULT_THEME_HEX,
 	createScopeFromCoreFlow,
