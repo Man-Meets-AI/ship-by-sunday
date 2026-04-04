@@ -51,10 +51,12 @@ bun run dev:convex
 bun run dev
 ```
 
-For the full buyer-flow local environment, including Stripe forwarding:
+`bun run dev` now means the full local buyer-flow environment: web, hosted Convex dev sync, and Stripe forwarding.
+
+If you want the older lighter web-plus-Convex flow without Stripe, use:
 
 ```bash
-bun run dev:full
+bun run dev:core
 ```
 
 If you only need one subsystem:
@@ -63,6 +65,7 @@ If you only need one subsystem:
 bun run dev:web
 bun run dev:convex
 bun run dev:stripe
+bun run dev:full
 ```
 
 This repo does not support Convex local mode as a first-class workflow.
