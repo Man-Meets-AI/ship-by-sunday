@@ -82,12 +82,7 @@ cd apps/web && bunx convex logs --prod --history 20
 PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run qa:run-pack -- --pack=default_ship
 ```
 
-For staging or production billing verification in this repo:
-
-- prefer a restricted live `100% off` promotion code
-- verify Stripe points at the Convex `.convex.site` webhook URL, not the app origin
-- verify the target Convex deployment has both `STRIPE_WEBHOOK_SECRET` and `STRIPE_SECRET_KEY`
-- confirm the buyer auto-forwards from `/checkout/success` into `/start`
+For staging or production billing verification in this repo, prefer a restricted live `100% off` promotion code and confirm the buyer auto-forwards from `/checkout/success` into `/start`. Use [docs/internal/observability.md](./internal/observability.md) for the incident-control and webhook-origin drill.
 
 For the matching QA command:
 

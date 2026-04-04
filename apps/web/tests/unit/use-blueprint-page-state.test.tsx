@@ -2,7 +2,7 @@
 
 import { act, renderHook } from "@testing-library/react";
 import type { ReactMutation } from "convex/react";
-import { createCompleteProjectDefinition } from "@blueprint-compiler";
+import { createCompleteProjectDefinition } from "@shipbysunday/blueprint-compiler";
 import { describe, expect, it, vi } from "vitest";
 vi.mock("@clerk/nextjs", () => ({
 	useUser: () => ({

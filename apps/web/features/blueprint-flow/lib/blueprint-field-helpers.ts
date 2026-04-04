@@ -3,7 +3,7 @@ export {
 	buildStageDraftValues,
 	buildStepDraftValues,
 	formatBlueprintFactValue,
-} from "@blueprint-compiler";
+} from "@shipbysunday/blueprint-compiler";
 export {
 	getBlueprintFieldScaleDefinition,
 	getBlueprintStepLabel,

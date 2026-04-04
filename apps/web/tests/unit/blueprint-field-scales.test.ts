@@ -1,7 +1,7 @@
 import {
 	normalizeProblemUrgencyValue,
 	normalizeProblemSeverityValue,
-} from "@blueprint-compiler";
+} from "@shipbysunday/blueprint-compiler";
 import { getBlueprintFieldScaleDefinition } from "@shipbysunday/blueprint-presentation";
 import { describe, expect, it } from "vitest";
 

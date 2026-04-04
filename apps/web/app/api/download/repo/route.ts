@@ -1,5 +1,5 @@
 import { getBlueprintDownloadContext } from "@/features/blueprint-flow/server/downloads";
-import { getStarterSnapshotArchiveFileName } from "@blueprint-compiler";
+import { getStarterSnapshotArchiveFileName } from "@shipbysunday/blueprint-compiler";
 
 export const runtime = "nodejs";
 

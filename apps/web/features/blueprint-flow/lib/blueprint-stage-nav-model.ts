@@ -2,7 +2,7 @@ import {
 	blueprintStageDefinitions,
 	type BlueprintStageId,
 	type BlueprintStageStatus,
-} from "@blueprint-compiler";
+} from "@shipbysunday/blueprint-compiler";
 
 export type BlueprintStageNavState =
 	| "active"

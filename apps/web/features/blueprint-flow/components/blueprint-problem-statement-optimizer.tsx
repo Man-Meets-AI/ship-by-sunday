@@ -1,6 +1,6 @@
 "use client";
 
-import type { CanonicalProjectFactsDraft } from "@blueprint-compiler";
+import type { CanonicalProjectFactsDraft } from "@shipbysunday/blueprint-compiler";
 import { SparklesIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {

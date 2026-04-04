@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
 	CanonicalProjectFactKey,
 	CanonicalProjectFactsDraft,
-} from "@blueprint-compiler";
+} from "@shipbysunday/blueprint-compiler";
 import {
 	createCanonicalProjectDefinitionDraft,
 	deriveBlueprintFacts,
@@ -15,7 +15,7 @@ import {
 	getBlueprintStageDefinition,
 	parseCanonicalProjectFactsDraft,
 	placeholderFriendlyFactKeys,
-} from "@blueprint-compiler";
+} from "@shipbysunday/blueprint-compiler";
 import { PRODUCT_APP_ID } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import { getReviewAutoDownloadHref } from "@/features/blueprint-flow/lib/review-download-handoff";

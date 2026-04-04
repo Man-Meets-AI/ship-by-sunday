@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { CanonicalProjectFactsDraft } from "@blueprint-compiler";
+import type { CanonicalProjectFactsDraft } from "@shipbysunday/blueprint-compiler";
 import { apiRouteConfig } from "@/config/product";
 import { getBlueprintStageFieldInputId } from "@/features/blueprint-flow/lib/blueprint-step-save-feedback";
 import type { BlueprintStepDraftValues } from "@/features/blueprint-flow/lib/blueprint-step-save-feedback";

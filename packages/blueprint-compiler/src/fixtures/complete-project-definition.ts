@@ -50,10 +50,8 @@ const completeProjectFacts: CanonicalProjectFacts = {
 	non_goals: ["Persist archive history", "Support non-web surfaces"],
 	v1_rationale: "A narrow blueprint-first flow creates a truthful v1 quickly.",
 	distribution_model: "Protected web app with downloads",
-	install_destination:
-		"Customer clones and configures the Blueprint locally.",
-	buyer_ai_promise:
-		"AI helps generate the Ship by Sunday Blueprint structure.",
+	install_destination: "Customer clones and configures the Blueprint locally.",
+	buyer_ai_promise: "AI helps generate the Ship by Sunday Blueprint structure.",
 	surface_type: "web_app",
 	design_references: [
 		"https://example.com/reference-1",

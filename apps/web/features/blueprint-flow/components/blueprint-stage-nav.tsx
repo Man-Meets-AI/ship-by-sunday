@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { BlueprintStageId } from "@blueprint-compiler";
+import type { BlueprintStageId } from "@shipbysunday/blueprint-compiler";
 import {
 	buildBlueprintStageNavItems,
 	type BlueprintStageNavItem,

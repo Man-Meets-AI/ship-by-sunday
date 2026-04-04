@@ -2,7 +2,7 @@ import {
 	BUILD_PACK_LABEL,
 	DESIGN_PACK_LABEL,
 	MARKETING_PACK_LABEL,
-} from "@blueprint-compiler";
+} from "@shipbysunday/blueprint-compiler";
 import {
 	getBlueprintPageSectionHref,
 	type BlueprintPageSectionId,

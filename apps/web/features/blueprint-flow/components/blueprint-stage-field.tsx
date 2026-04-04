@@ -1,7 +1,7 @@
 "use client";
 
 import type { ChangeEvent } from "react";
-import type { CanonicalProjectFactKey } from "@blueprint-compiler";
+import type { CanonicalProjectFactKey } from "@shipbysunday/blueprint-compiler";
 import {
 	Field,
 	FieldContent,

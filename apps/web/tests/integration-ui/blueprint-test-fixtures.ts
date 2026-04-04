@@ -2,7 +2,7 @@ import {
 	createCanonicalProjectDefinitionDraft,
 	createCompleteProjectDefinition,
 	deriveStageStatus,
-} from "@blueprint-compiler";
+} from "@shipbysunday/blueprint-compiler";
 
 import type { BlueprintWorkspaceState } from "@/features/blueprint-flow/lib/blueprint-workspace-types";
 import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
