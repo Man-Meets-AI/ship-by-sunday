@@ -40,14 +40,6 @@ export const routeConfig = {
 	pricingHash: "#pricing",
 } as const;
 
-export const legacyRouteConfig = {
-	start: "/start",
-	product: "/product",
-	design: "/design",
-	marketing: "/marketing",
-	buildPlan: "/build-plan",
-} as const;
-
 export const homePageSectionOrder = [
 	"hero",
 	"sprintPath",
