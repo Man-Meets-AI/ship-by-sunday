@@ -15,13 +15,17 @@ import {
 } from "@/features/workspace-navigation/lib/build-primary-nav-model";
 import {
 	buildReviewLocalNavModel,
-	REVIEW_DOWNLOADS_ID,
+	REVIEW_HANDOFF_ID,
 	REVIEW_LESSON_MAP_ID,
 	REVIEW_OVERVIEW_ID,
 } from "@/features/workspace-navigation/lib/build-secondary-nav-model";
 import { WorkspaceLocalNavRail } from "@/features/workspace-navigation/components/workspace-local-nav-rail";
-import type { PostReviewNavigationTargets } from "@/features/workspace-navigation/lib/post-review-destination";
+import {
+	getDefaultBuildLessonsDestination,
+	type PostReviewNavigationTargets,
+} from "@/features/workspace-navigation/lib/post-review-destination";
 import { BlueprintVideoCard } from "@/features/blueprint-flow/components/video/blueprint-video-card";
+import { REVIEW_SURFACE_TITLE } from "@/features/blueprint-flow/lib/review-download-handoff";
 import { getBlueprintReviewPageMedia } from "@/features/blueprint-flow/lib/blueprint-stage-videos";
 import type { BlueprintWorkspaceState } from "@/features/blueprint-flow/lib/blueprint-workspace-types";
 import { BlueprintReviewDownloadBridge } from "./review/blueprint-review-download-bridge";
@@ -34,11 +38,13 @@ export function BlueprintReviewPage({
 	initialWorkspaceState,
 	initialPostReviewTargets = null,
 	initialBonusMissionState = null,
+	initialAutoDownload = false,
 	initialShowLessonMap = false,
 }: {
 	initialWorkspaceState: BlueprintWorkspaceState;
 	initialPostReviewTargets?: PostReviewNavigationTargets | null;
 	initialBonusMissionState?: BonusMissionState | null;
+	initialAutoDownload?: boolean;
 	initialShowLessonMap?: boolean;
 }) {
 	const { isAuthenticated, isLoading } = useConvexAuth();
@@ -71,6 +77,7 @@ export function BlueprintReviewPage({
 	const postReviewTargets =
 		liveResumeDestination?.postReviewTargets ?? initialPostReviewTargets;
 	const bonusMissionState = liveBonusMissionState ?? initialBonusMissionState;
+	const buildLessonsFallbackHref = getDefaultBuildLessonsDestination();
 	const localNav =
 		isUnlocked && postReviewTargets && bonusMissionState
 			? {
@@ -91,7 +98,7 @@ export function BlueprintReviewPage({
 			viewportMode="app"
 			appScrollMode="page"
 			showSkillRail={false}
-			title="Review & Download"
+			title={REVIEW_SURFACE_TITLE}
 			localNav={localNav}
 			primaryNav={{
 				kind: "combined",
@@ -117,23 +124,21 @@ export function BlueprintReviewPage({
 					<section id={REVIEW_OVERVIEW_ID} className="space-y-4 scroll-mt-24">
 						<div className="space-y-2">
 							<h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
-								What you&apos;re downloading and how to use it
+								What you just got and where to go next
 							</h2>
 							<p className="text-base leading-relaxed text-muted-foreground">
-								This is the handoff. Watch this first, then download your Ship
-								Kit and keep moving while the context is still hot.
+								This is the handoff. Watch this first, then move straight into
+								Build Lessons while the blueprint context is still hot.
 							</p>
 						</div>
 						<BlueprintVideoCard content={getBlueprintReviewPageMedia()} />
 					</section>
 
-					<div id={REVIEW_DOWNLOADS_ID} className="scroll-mt-24">
+					<div id={REVIEW_HANDOFF_ID} className="scroll-mt-24">
 						<BlueprintReviewDownloadBridge
-							workspaceState={workspaceState}
+							autoDownloadEnabled={initialAutoDownload}
+							buildLessonsFallbackHref={buildLessonsFallbackHref}
 							postReviewTargets={postReviewTargets}
-							onOpenLessonMap={
-								bonusMissionState ? () => setShowLessonMap(true) : undefined
-							}
 						/>
 					</div>
 					{showLessonMap && bonusMissionState ? (

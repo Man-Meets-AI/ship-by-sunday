@@ -71,7 +71,7 @@ describe("workspace mission route", () => {
 
 		const markup = renderToStaticMarkup(await MissionRoutePage());
 
-		expect(markup).toContain("Lesson Map opens after Review &amp; Download.");
+		expect(markup).toContain("Lesson Map opens after Review.");
 		expect(markup).toContain('href="/review"');
 	});
 

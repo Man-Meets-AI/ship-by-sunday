@@ -85,3 +85,63 @@ export const memberWithAccessStorageStatePath = path.join(
 	authStateDirectory,
 	"member-with-access.json",
 );
+
+function hasConfiguredCredential(value: string | undefined) {
+	return typeof value === "string" && value.trim().length > 0;
+}
+
+export function getAuthenticatedE2EPrereqProblems() {
+	const problems: string[] = [];
+
+	if (!hasPlaywrightBaseUrl) {
+		problems.push(
+			"Missing PLAYWRIGHT_BASE_URL. Set it to the target app origin before running authenticated browser tests.",
+		);
+	}
+
+	if (
+		!hasConfiguredCredential(process.env.E2E_NON_ENTITLED_EMAIL) &&
+		!memberWithoutAccessAccount?.email
+	) {
+		problems.push(
+			"Missing non-entitled QA account email. Add `ship-by-sunday-clerk-instance` to qa/personas.local.json or set E2E_NON_ENTITLED_EMAIL.",
+		);
+	}
+
+	if (
+		!hasConfiguredCredential(process.env.E2E_NON_ENTITLED_PASSWORD) &&
+		!hasConfiguredCredential(process.env.E2E_SHARED_PASSWORD) &&
+		!memberWithoutAccessAccount?.password
+	) {
+		problems.push(
+			"Missing non-entitled QA account password. Add `ship-by-sunday-clerk-instance` to qa/personas.local.json or set E2E_NON_ENTITLED_PASSWORD / E2E_SHARED_PASSWORD.",
+		);
+	}
+
+	if (
+		!hasConfiguredCredential(process.env.E2E_ENTITLED_EMAIL) &&
+		!memberWithAccessAccount?.email
+	) {
+		problems.push(
+			"Missing entitled QA account email. Add `ship-by-sunday-clerk-entitled` to qa/personas.local.json or set E2E_ENTITLED_EMAIL.",
+		);
+	}
+
+	if (
+		!hasConfiguredCredential(process.env.E2E_ENTITLED_PASSWORD) &&
+		!hasConfiguredCredential(process.env.E2E_SHARED_PASSWORD) &&
+		!memberWithAccessAccount?.password
+	) {
+		problems.push(
+			"Missing entitled QA account password. Add `ship-by-sunday-clerk-entitled` to qa/personas.local.json or set E2E_ENTITLED_PASSWORD / E2E_SHARED_PASSWORD.",
+		);
+	}
+
+	if (process.env.E2E_RUN_LOCAL_AUTH === "1") {
+		problems.push(
+			"Local-auth browser mode is enabled. Treat it as a convenience lane, not the canonical proof path; prefer sandbox browser proof when available.",
+		);
+	}
+
+	return problems;
+}

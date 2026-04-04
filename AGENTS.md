@@ -1,8 +1,14 @@
 <!-- BEGIN:nextjs-agent-rules -->
+
 # This is NOT the Next.js you know
 
 This version has breaking changes. Read the relevant guide in `apps/web/node_modules/next/dist/docs/` before writing or changing Next.js code. Heed deprecation notices.
+
 <!-- END:nextjs-agent-rules -->
+
+## Task Completion Requirements
+
+- All of `bun run format`, `bun lint`, and `bun typecheck` must pass before considering tasks completed.
 
 ## Ship by Sunday routing
 

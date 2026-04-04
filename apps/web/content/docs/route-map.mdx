@@ -25,7 +25,7 @@ description: See the main public, protected, and purchase-related routes in one 
 ## Protected product routes
 
 - `/blueprint`: canonical combined blueprint workspace with the overview block plus the `foundation`, `problem`, `outcome`, `design`, `pricing`, `setup`, and `generated-preview` sections
-- `/review`: final readiness and repo-download surface
+- `/review`: customer-facing `Review` handoff; it makes one auto-download attempt for the Ship by Sunday Blueprint, then keeps the fallback download link visible if the browser blocks the download
 - `/execute`: optional post-review bonus bridge that unlocks from `/review`, offers `Continue in Build` to lesson `3.1`, offers `Start from the beginning` to lesson `1.1`, and redirects repeat bonus visitors to `/mission`
 - `/settings`: protected account and product settings
 - `/mission`: bonus-library home once the post-review bonus is unlocked; it defaults to Build but keeps the natural `Product -> Design -> Build -> Ship` block order in the top rail
@@ -36,7 +36,7 @@ description: See the main public, protected, and purchase-related routes in one 
 
 Repeat-routing note: after a customer opens any restored bonus lesson, `/execute` stops acting like the first-entry bridge and sends them to `/mission` instead. QA should verify both the first unlocked bridge state and the repeat-visit redirect state.
 
-These protected routes render behind `app/(workspace)/layout.tsx`, starting from server-fetched access or blueprint-workspace data before the browser resumes live Convex subscriptions. The canonical intake is now one `/blueprint` page plus `/review`; the old staged URLs survive only as compatibility redirects.
+These protected routes render behind `app/(workspace)/layout.tsx`, starting from server-fetched access or blueprint-workspace data before the browser resumes live Convex subscriptions. The canonical intake is now one `/blueprint` page plus customer-facing `Review`; the old staged URLs survive only as compatibility redirects.
 
 ## Why this matters
 
