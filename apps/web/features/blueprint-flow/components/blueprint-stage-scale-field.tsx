@@ -4,7 +4,7 @@ import { memo, useId } from "react";
 import type {
 	CanonicalProjectFactKey,
 	CanonicalProjectFactsDraft,
-} from "@blueprint-compiler";
+} from "@shipbysunday/blueprint-compiler";
 import {
 	Field,
 	FieldContent,

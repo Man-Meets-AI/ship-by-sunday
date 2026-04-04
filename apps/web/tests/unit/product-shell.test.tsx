@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
 	createCompleteProjectDefinition,
 	deriveStageStatus,
-} from "@blueprint-compiler";
+} from "@shipbysunday/blueprint-compiler";
 
 vi.mock("next/link", () => ({
 	default: ({

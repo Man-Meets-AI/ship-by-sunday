@@ -1,4 +1,4 @@
-import type { CanonicalProjectFactsDraft } from "@blueprint-compiler";
+import type { CanonicalProjectFactsDraft } from "@shipbysunday/blueprint-compiler";
 
 export const blueprintFieldOptimizationTemplateIds = {
 	problem_statement: "blueprint_problem_statement",

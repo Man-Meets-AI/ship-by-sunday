@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
 	createCompleteProjectDefinition,
 	getBlueprintStageDefinition,
-} from "@blueprint-compiler";
+} from "@shipbysunday/blueprint-compiler";
 
 import { BlueprintStageStepField } from "@/features/blueprint-flow/components/blueprint-stage-step-field";
 

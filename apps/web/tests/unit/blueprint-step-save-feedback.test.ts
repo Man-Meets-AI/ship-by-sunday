@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	getBlueprintStageDefinition,
 	type BlueprintStageId,
-} from "@blueprint-compiler";
+} from "@shipbysunday/blueprint-compiler";
 import { buildSavePayload } from "@/features/blueprint-flow/lib/blueprint-field-helpers";
 import {
 	classifyBlueprintStepSave,

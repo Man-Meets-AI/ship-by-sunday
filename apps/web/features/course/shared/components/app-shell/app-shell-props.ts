@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import type {
 	BlueprintStageId,
 	BlueprintStageStatus,
-} from "@blueprint-compiler";
+} from "@shipbysunday/blueprint-compiler";
 
 import type { LessonLayoutMode } from "@/features/course/lesson/model/manifest";
 import type { SkillRailCompletionCue } from "@/features/course/shared/components/skill-rail";

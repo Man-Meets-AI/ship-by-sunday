@@ -6,7 +6,7 @@ import {
 	createCanonicalProjectDefinitionDraft,
 	createCompleteProjectDefinition,
 	deriveStageStatus,
-} from "@blueprint-compiler";
+} from "@shipbysunday/blueprint-compiler";
 import type { BlueprintWorkspaceState } from "@/features/blueprint-flow/lib/blueprint-workspace-types";
 
 vi.mock("next/link", () => ({

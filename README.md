@@ -86,6 +86,7 @@ For the full command map, use [`.docs/scripts.md`](./.docs/scripts.md).
 
 ## Operations
 
+- Observability runbook: [docs/internal/observability.md](./docs/internal/observability.md)
 - Release workflow runbook: [docs/release-workflow.md](./docs/release-workflow.md)
 - QA control plane: [qa/README.md](./qa/README.md)
 - Homepage contract: [apps/web/content/docs/configure-the-homepage.mdx](./apps/web/content/docs/configure-the-homepage.mdx)

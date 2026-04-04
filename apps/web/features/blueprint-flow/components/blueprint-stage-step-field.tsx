@@ -5,7 +5,7 @@ import type {
 	CanonicalProjectFactKey,
 	CanonicalProjectFactsDraft,
 	BlueprintStepDefinition,
-} from "@blueprint-compiler";
+} from "@shipbysunday/blueprint-compiler";
 import {
 	Field,
 	FieldContent,

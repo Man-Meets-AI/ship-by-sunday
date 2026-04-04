@@ -41,9 +41,7 @@ Run `bun run dev:convex` to connect the repo to your hosted Convex dev deploymen
 - `TELEGRAM_CHAT_ID`: chat or group id that receives alerts
 - `ENABLE_OBSERVABILITY_TEST_TRIGGER`: test-only switch for the Playwright protected-shell failure harness
 
-`OBSERVABILITY_INGEST_TOKEN` is not provided by Telegram, Clerk, Stripe, or Convex. It is just a high-entropy shared secret between the Next.js app and the Convex HTTP ingest route. Generate one with `openssl rand -hex 32` and set the same value in both runtimes.
-
-In production, `NEXT_PUBLIC_CONVEX_URL` alone is not enough for the observability system if the deployment’s HTTP actions live on a separate `.convex.site` origin. Set `NEXT_PUBLIC_CONVEX_SITE_URL` to the matching `.convex.site` hostname so `/observability/events` and `/observability/incidents/status` reach the real backend.
+`OBSERVABILITY_INGEST_TOKEN` is a high-entropy shared secret between the Next.js app and Convex. In production, keep `NEXT_PUBLIC_CONVEX_SITE_URL` aligned with the live Convex HTTP-actions host so observability and other HTTP-action traffic do not fall back to the browser-only client origin.
 
 ## Optional video pipeline
 
