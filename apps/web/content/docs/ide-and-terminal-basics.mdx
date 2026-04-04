@@ -15,6 +15,7 @@ You do not need to become a shell expert to use this starter well. You need a sh
 bun install
 bun run dev
 bun run dev:full
+bun run dev:core
 bun run dev:web
 bun run dev:convex
 bun run build
@@ -24,8 +25,9 @@ bun run check
 ## What each one does
 
 - `bun install` installs dependencies
-- `bun run dev` starts the app locally and keeps your hosted Convex dev deployment synced
-- `bun run dev:full` starts the app, hosted Convex dev sync, and Stripe forwarding together
+- `bun run dev` starts the full local buyer-flow stack: app, hosted Convex dev sync, and Stripe forwarding
+- `bun run dev:full` is the compatibility alias for that same full stack
+- `bun run dev:core` starts the app and hosted Convex dev sync without Stripe
 - `bun run dev:web` starts only the Next.js side
 - `bun run dev:convex` connects or refreshes your hosted Convex dev deployment
 - `bun run build` proves the app still compiles

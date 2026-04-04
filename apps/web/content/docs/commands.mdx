@@ -11,6 +11,7 @@ description: Keep the short list of repo commands nearby so you can run the app,
 bun install
 bun run dev
 bun run dev:full
+bun run dev:core
 bun run dev:web
 bun run dev:convex
 bun run dev:stripe
@@ -19,7 +20,7 @@ bun run auth:dev:doctor
 
 Run `bun run dev:convex` first on a new machine or whenever you need to switch hosted Convex dev deployments.
 
-`bun run dev` and `bun run dev:web` now run the same auth guardrail before `next dev` starts. If local Clerk env values and the active hosted Convex dev issuer disagree, startup stops with the exact `convex env set` command needed to realign them.
+`bun run dev`, `bun run dev:full`, and `bun run dev:web` all pass through the same auth guardrail before `next dev` starts. If local Clerk env values and the active hosted Convex dev issuer disagree, startup stops with the exact `convex env set` command needed to realign them.
 
 `bun run dev:stripe` now prints the local Stripe guardrail state before it starts forwarding webhooks. The repo expects the pinned Stripe CLI project `ship-by-sunday`; repair it with `stripe login --project-name ship-by-sunday` if the CLI context drifted.
 
@@ -108,7 +109,7 @@ Prefer `qa:run-pack` for hosted verification. It runs persona prep, browser smok
 Use `dev` first, `prod` second:
 
 ```bash
-bun run dev:full
+bun run dev
 PLAYWRIGHT_USE_LOCAL_SERVER=0 PLAYWRIGHT_BASE_URL=http://localhost:3000 bun run --cwd apps/web test:e2e:sandbox:default-ship
 ```
 
