@@ -1,6 +1,6 @@
 # @manmeetsai/ship-by-sunday-cli
 
-Repo-local Ship by Sunday CLI for blueprint intake and blueprint generation.
+Repo-local Ship by Sunday CLI for blueprint intake and Ship by Sunday Blueprint generation.
 
 ## Supported Use
 

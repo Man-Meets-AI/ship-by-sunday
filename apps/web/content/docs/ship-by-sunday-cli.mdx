@@ -1,11 +1,11 @@
 ---
 title: Ship by Sunday CLI
-description: Run the blueprint intake, readiness review, and blueprint generation from the repository root without using the web app.
+description: Run the blueprint intake, readiness review, and Ship by Sunday Blueprint generation from the repository root without using the web app.
 ---
 
 # Ship by Sunday CLI
 
-The Ship by Sunday CLI is the local-first version of the blueprint intake flow. It asks the same canonical pre-review questions that drive the web `/blueprint` page, stores one draft at the repository root, reports readiness with the same compiler logic as `/review`, and generates the same blueprint shape as the protected download route.
+The Ship by Sunday CLI is the local-first version of the blueprint intake flow. It asks the same canonical pre-review questions that drive the web `/blueprint` page, stores one draft at the repository root, reports readiness with the same compiler logic as `/review`, and generates the same Ship by Sunday Blueprint shape as the protected download route.
 
 Clone the repository, run `bun install`, then launch the CLI from the repository root with either `bun run sbs` or the checked-in repo-local wrapper at `./bin/sbs`. Both entrypoints share the same command parser, version source, and JSON envelopes. When you run `bun run sbs` in a real terminal, the CLI opens a bannered entry surface for the current repository instead of dumping raw help. The startup surface points you at `resume`, `next --json`, and `review --json`, while `bun run sbs --help`, `bun run sbs help review`, `bun run sbs review --help`, `bun run sbs stage --help`, `bun run sbs --version`, `./bin/sbs --version`, and `./bin/sbs completion zsh` stay clean and side-effect free. Interactive stage prompts also make `:clear` and `:quit` explicit so you can back out safely and resume later.
 
@@ -13,7 +13,7 @@ Use it when:
 
 - you want to shape the blueprint from a terminal instead of the protected web UI
 - you want to import or patch facts from another tool or agent
-- you want a local blueprint without needing Clerk, Convex auth, or a browser session
+- you want a local Ship by Sunday Blueprint without needing Clerk, Convex auth, or a browser session
 - you want a repo-local launcher that does not depend on a registry install or a Bun-specific shim
 
 ## Where it stores state
@@ -214,7 +214,7 @@ The CLI does not redefine the blueprint contract. It reuses:
 - readiness evaluation in `packages/blueprint-compiler/src/readiness/`
 - repo generation in `packages/blueprint-compiler/src/server.ts`
 
-That shared boundary matters because the CLI and the protected `/review` route should agree about what is missing, what is ready, and what the blueprint contains.
+That shared boundary matters because the CLI and the protected `/review` route should agree about what is missing, what is ready, and what the Ship by Sunday Blueprint contains.
 
 ## Current limits
 

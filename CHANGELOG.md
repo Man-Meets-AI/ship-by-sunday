@@ -5,7 +5,7 @@
 ### Changed
 
 - Collapsed the protected founder workflow to one canonical `/blueprint` page plus `/review`, converted the old staged routes into compatibility redirects, preserved the reduced blueprint fact contract and `problem_statement` optimizer, and aligned the local CLI, route docs, and QA control plane with the single-page product model.
-- Finished the remaining live terminology cleanup so product-facing surfaces now use the Blueprint noun family instead of `Ship Kit`, `Starter Snapshot`, or `generated repo`, while preserving only historical wording in archival docs and past release evidence where needed.
+- Finished the remaining live terminology cleanup so product-facing surfaces now use the Blueprint noun family instead of the old artifact-language variants, while preserving only historical wording in archival docs and past release evidence where needed.
 - Reduced the founder-facing blueprint flow to a smaller core contract, replaced the old marketing questionnaire with generated preview defaults, defaulted the design color anchor, aligned the local CLI to the same reduced model, and kept review/download plus blueprint generation working through compiler-derived compatibility facts.
 - Added the first inline Codex-powered `problem_statement` optimizer, including an in-flow connect sheet for managed ChatGPT/Codex login instead of kicking the user out to Settings.
 - Finished the repo-wide vocabulary migration to `blueprint` across the live app, CLI, generated docs, QA records, and repository docs, while preserving only technically required manifest/tooling literals such as `package.json`, `packageManager`, workspace `packages/`, and third-party lockfile dependency names.

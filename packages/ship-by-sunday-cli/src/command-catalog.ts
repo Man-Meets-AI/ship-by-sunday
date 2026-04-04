@@ -251,9 +251,9 @@ export const cliCommandCatalog: Record<
 	},
 	generate: {
 		name: "generate",
-		title: "Ship by Sunday blueprint generation",
+		title: "Ship by Sunday Blueprint generation",
 		summary:
-			"Generate the blueprint repository from a reduced review-ready draft.",
+			"Generate the Ship by Sunday Blueprint from a reduced review-ready draft.",
 		usage: formatWorkspaceCommand(
 			"generate [repo] --out <path> [--zip] [--force] [--json]",
 		),
