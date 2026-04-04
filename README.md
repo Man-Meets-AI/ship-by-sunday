@@ -11,7 +11,7 @@ Use it before changing any user-facing UI. It documents the shared neutral app t
 ## What lives here
 
 - `apps/web/`: the main Next.js product, docs, protected workspace, checkout, and optional Codex runtime.
-- `packages/blueprint-compiler/`: the generator behind the customer-facing blueprint.
+- `packages/blueprint-compiler/`: the generator behind the customer-facing Ship by Sunday Blueprint.
 - `packages/ship-by-sunday-cli/`: local blueprint-intake and snapshot-generation CLI.
 - `qa/`: QA control plane, scenario packs, personas, and run evidence.
 - `docs/`: long-form runbooks, ExecPlans, prompts, and historical product context.
@@ -21,7 +21,7 @@ The protected journey is blueprint-first:
 
 `Start -> Product -> Design -> Marketing -> Build Plan -> Review & Download`
 
-The `/review` contract exposes one download artifact, `Blueprint`, not separate design, marketing, or build downloads.
+The `/review` contract exposes one download artifact, the `Ship by Sunday Blueprint`, not separate design, marketing, or build downloads.
 
 ## Quick start
 
@@ -102,7 +102,7 @@ Relevant hidden reference docs:
 
 ## CLI
 
-The repo includes a local Ship by Sunday intake CLI that writes one draft under `.ship-by-sunday/` and generates the same blueprint shape as the protected `/review` flow.
+The repo includes a local Ship by Sunday intake CLI that writes one draft under `.ship-by-sunday/` and generates the same Ship by Sunday Blueprint shape as the protected `/review` flow.
 
 Common entrypoints:
 
