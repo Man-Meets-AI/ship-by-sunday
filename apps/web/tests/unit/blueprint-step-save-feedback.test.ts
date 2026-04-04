@@ -69,7 +69,7 @@ describe("classifyBlueprintStepSave", () => {
 
 	it("treats a step as complete when its required fields are present and optional fields stay blank", () => {
 		const feedback = classifyStepSave("blueprint", "design", {
-			theme_hex: "",
+			theme_preset: "",
 			design_references: "",
 		});
 
@@ -80,6 +80,7 @@ describe("classifyBlueprintStepSave", () => {
 
 	it("treats clearing a previously complete required field as cleared_to_incomplete", () => {
 		const existingSavedValues: BlueprintStepDraftValues = {
+			pricing_model: "one_time",
 			pricing: "99",
 		};
 		const feedback = classifyStepSave(

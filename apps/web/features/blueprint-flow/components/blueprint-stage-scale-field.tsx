@@ -57,11 +57,13 @@ function BlueprintStageScaleFieldComponent({
 				<FieldTitle id={titleId}>
 					{blueprintFieldLabel(fieldKey, facts)}
 				</FieldTitle>
-				<div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2 text-xs text-muted-foreground">
-					<span>{scaleDefinition.leftLabel}</span>
-					<span className="text-center">{scaleDefinition.centerLabel}</span>
-					<span className="text-right">{scaleDefinition.rightLabel}</span>
-				</div>
+				{scaleDefinition.leftLabel || scaleDefinition.rightLabel ? (
+					<div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2 text-xs text-muted-foreground">
+						<span>{scaleDefinition.leftLabel}</span>
+						<span className="text-center">{scaleDefinition.centerLabel}</span>
+						<span className="text-right">{scaleDefinition.rightLabel}</span>
+					</div>
+				) : null}
 				<ToggleGroup
 					id={controlId}
 					type="single"

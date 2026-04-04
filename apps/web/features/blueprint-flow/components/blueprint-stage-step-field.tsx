@@ -6,6 +6,7 @@ import type {
 	CanonicalProjectFactsDraft,
 	BlueprintStepDefinition,
 } from "@shipbysunday/blueprint-compiler";
+import { isBlueprintArrayField } from "@shipbysunday/blueprint-compiler";
 import {
 	Field,
 	FieldContent,
@@ -21,9 +22,13 @@ import {
 	blueprintFieldHelperText,
 	blueprintFieldInputKind,
 	blueprintFieldLabel,
+	blueprintFieldPlaceholder,
 } from "@/features/blueprint-flow/lib/blueprint-field-helpers";
 import { getBlueprintStageFieldInputId } from "@/features/blueprint-flow/lib/blueprint-step-save-feedback";
+import { BlueprintStageListField } from "./blueprint-stage-list-field";
+import { BlueprintStageLinkListField } from "./blueprint-stage-link-list-field";
 import { BlueprintStageScaleField } from "./blueprint-stage-scale-field";
+import { BlueprintThemeConfigurator } from "./blueprint-theme-configurator";
 
 type BlueprintStageStepFieldProps = {
 	fieldKey: CanonicalProjectFactKey;
@@ -44,6 +49,21 @@ function BlueprintStageStepFieldComponent({
 	errorMessage,
 	onChange,
 }: BlueprintStageStepFieldProps) {
+	if (fieldKey === "theme_preset") {
+		return (
+			<Field className="gap-2.5" data-invalid={errorMessage ? true : undefined}>
+				<FieldLabel>{blueprintFieldLabel(fieldKey, facts)}</FieldLabel>
+				<FieldContent>
+					<BlueprintThemeConfigurator
+						value={value}
+						onChange={(nextValue) => onChange(fieldKey, nextValue)}
+					/>
+					<FieldError>{errorMessage}</FieldError>
+				</FieldContent>
+			</Field>
+		);
+	}
+
 	if (getBlueprintFieldScaleDefinition(fieldKey)) {
 		return (
 			<BlueprintStageScaleField
@@ -60,14 +80,71 @@ function BlueprintStageStepFieldComponent({
 	const inputId = getBlueprintStageFieldInputId(step.id, fieldKey);
 	const errorId = errorMessage ? `${inputId}-error` : undefined;
 	const helperText = blueprintFieldHelperText(fieldKey, facts);
+	const placeholder = blueprintFieldPlaceholder(fieldKey, facts) ?? undefined;
 	const inputKind = blueprintFieldInputKind(fieldKey);
-	const isShortField = fieldKey === "pricing" || fieldKey === "theme_hex";
+	const isArrayField = isBlueprintArrayField(fieldKey);
+	const isShortField = fieldKey === "pricing";
 	const handleChange = (
 		event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
 	) => onChange(fieldKey, event.target.value);
 
+	const isLinkListField = fieldKey === "design_references";
+
+	const renderControl = () => {
+		if (isLinkListField) {
+			return (
+				<BlueprintStageLinkListField
+					fieldKey={fieldKey}
+					inputId={inputId}
+					value={value}
+					onChange={onChange}
+					errorId={errorId}
+					errorMessage={errorMessage}
+				/>
+			);
+		}
+		if (isArrayField) {
+			return (
+				<BlueprintStageListField
+					fieldKey={fieldKey}
+					inputIdPrefix={inputId}
+					value={value}
+					onChange={onChange}
+					errorId={errorId}
+					errorMessage={errorMessage}
+				/>
+			);
+		}
+		if (inputKind === "textarea") {
+			return (
+				<Textarea
+					id={inputId}
+					className="min-h-24 py-2.5 text-sm leading-relaxed"
+					value={value}
+					placeholder={placeholder}
+					onChange={handleChange}
+					rows={fieldKey === "section_narrative" ? 6 : 4}
+					aria-describedby={errorId}
+					aria-invalid={errorMessage ? true : undefined}
+				/>
+			);
+		}
+		return (
+			<Input
+				id={inputId}
+				type={inputKind === "number" ? "number" : "text"}
+				className={isShortField ? "h-10 max-w-48" : "h-10"}
+				value={value}
+				placeholder={placeholder}
+				onChange={handleChange}
+				aria-describedby={errorId}
+				aria-invalid={errorMessage ? true : undefined}
+			/>
+		);
+	};
+
 	return (
-		<Field className="gap-2" data-invalid={errorMessage ? true : undefined}>
+		<Field className="gap-2.5" data-invalid={errorMessage ? true : undefined}>
 			<div className="flex flex-wrap items-start justify-between gap-3">
 				<FieldLabel htmlFor={inputId}>
 					{blueprintFieldLabel(fieldKey, facts)}
@@ -84,26 +161,7 @@ function BlueprintStageStepFieldComponent({
 				) : null}
 			</div>
 			<FieldContent>
-				{inputKind === "textarea" ? (
-					<Textarea
-						id={inputId}
-						value={value}
-						onChange={handleChange}
-						rows={fieldKey === "section_narrative" ? 6 : 4}
-						aria-describedby={errorId}
-						aria-invalid={errorMessage ? true : undefined}
-					/>
-				) : (
-					<Input
-						id={inputId}
-						type={inputKind === "number" ? "number" : "text"}
-						className={isShortField ? "max-w-48" : undefined}
-						value={value}
-						onChange={handleChange}
-						aria-describedby={errorId}
-						aria-invalid={errorMessage ? true : undefined}
-					/>
-				)}
+				{renderControl()}
 				{helperText ? <FieldDescription>{helperText}</FieldDescription> : null}
 				<FieldError id={errorId}>{errorMessage}</FieldError>
 			</FieldContent>

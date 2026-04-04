@@ -129,14 +129,10 @@ describe("BlueprintPage", () => {
 			2,
 		);
 		expect(
-			screen.getByText(
-				"Fill in each section below, then continue to review when you are ready.",
-			),
+			screen.getByText("All sections complete. Continue to review when ready."),
 		).toBeTruthy();
 		expect(
-			screen.getByRole("heading", {
-				name: "Name the product clearly and anchor who it is for.",
-			}),
+			screen.getByText("Name the product clearly and anchor who it is for."),
 		).toBeTruthy();
 		expect(
 			screen.getByRole("button", { name: "Continue to Review" }),
