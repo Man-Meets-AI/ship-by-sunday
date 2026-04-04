@@ -226,7 +226,9 @@ describe("BlueprintReviewPage", () => {
 		).toBe("/api/download/repo");
 		expect(
 			screen
-				.getByRole("link", { name: "Download Blueprint first" })
+				.getByRole("link", {
+					name: "Download Ship by Sunday Blueprint first",
+				})
 				.getAttribute("href"),
 		).toBe("/api/download/repo");
 		expect(screen.queryByText("QUEST")).toBeNull();
@@ -247,7 +249,7 @@ describe("BlueprintReviewPage", () => {
 		expect(primaryClick.defaultPrevented).toBe(false);
 
 		const secondaryDownloadLink = screen.getByRole("link", {
-			name: "Download Blueprint first",
+			name: "Download Ship by Sunday Blueprint first",
 		});
 		expect(secondaryDownloadLink.getAttribute("download")).toBe("");
 		const secondaryClick = createEvent.click(secondaryDownloadLink);

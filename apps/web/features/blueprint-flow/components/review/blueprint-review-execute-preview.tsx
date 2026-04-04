@@ -69,7 +69,7 @@ export function BlueprintReviewExecutePreview({
 							className="h-14 w-full text-lg font-bold"
 						>
 							<a download href="/api/download/repo">
-								Download Blueprint first
+								Download Ship by Sunday Blueprint first
 							</a>
 						</Button>
 					) : (
@@ -80,7 +80,7 @@ export function BlueprintReviewExecutePreview({
 							className="h-14 w-full text-lg font-bold"
 							disabled
 						>
-							Download Blueprint first
+							Download Ship by Sunday Blueprint first
 						</Button>
 					)}
 					<p className="px-1 text-center text-xs leading-5 text-muted-foreground lg:text-left">

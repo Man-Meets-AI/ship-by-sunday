@@ -17,7 +17,7 @@ export function BonusMissionHeroCard({
 			<CardHeader className="gap-4">
 				<div className="space-y-1">
 					<CardTitle className="max-w-3xl text-3xl leading-tight sm:text-4xl">
-						Your Blueprint is ready. Build is next.
+						Your Ship by Sunday Blueprint is ready. Build is next.
 					</CardTitle>
 				</div>
 				<p className="max-w-3xl text-sm leading-7 text-muted-foreground sm:text-base">
