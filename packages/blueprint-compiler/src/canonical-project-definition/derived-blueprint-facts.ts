@@ -1,6 +1,6 @@
 import type { CanonicalProjectFactsDraft } from "./schema";
 
-const DEFAULT_THEME_HEX = "#0f766e";
+const DEFAULT_THEME_PRESET = "a0";
 const DEFAULT_SCOPE_OUT = ["Provider setup wizard", "GitHub invite flow"];
 const DEFAULT_DESIGN_REFERENCES = ["https://ui.shadcn.com/"];
 const DEFAULT_BRAND_ASSETS = ["wordmark.svg"];
@@ -101,6 +101,19 @@ const DEFAULT_DEPENDENCIES = [
 const DEFAULT_OPEN_QUESTIONS = ["Which routes need archive downloads first?"];
 const DEFAULT_SELECTED_NEXT_SLICE =
 	"Bootstrap the compiler and canonical schema.";
+
+function deriveThemePreset(facts: CanonicalProjectFactsDraft) {
+	const preset = trimText(
+		facts.theme_preset ?? (facts as Record<string, unknown>).theme_hex as string | undefined,
+	);
+	if (!preset) {
+		return DEFAULT_THEME_PRESET;
+	}
+	if (preset.startsWith("#")) {
+		return DEFAULT_THEME_PRESET;
+	}
+	return preset;
+}
 
 function trimText(value: string | undefined) {
 	return value?.trim() ?? "";
@@ -324,7 +337,7 @@ export function deriveBlueprintFacts(
 		...facts,
 		core_flow: coreFlow,
 		pricing,
-		theme_hex: trimText(facts.theme_hex) || DEFAULT_THEME_HEX,
+		theme_preset: deriveThemePreset(facts),
 		problem_context_when: deriveProblemContextWhen(facts),
 		problem_context_where: deriveProblemContextWhere(facts),
 		problem_trigger: deriveProblemTrigger(facts),

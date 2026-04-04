@@ -559,6 +559,7 @@ export function useBlueprintPageState({
 
 	return {
 		currentDraftValues,
+		currentFacts,
 		currentFieldErrors,
 		currentSectionStatuses,
 		feedback: visibleFeedback,

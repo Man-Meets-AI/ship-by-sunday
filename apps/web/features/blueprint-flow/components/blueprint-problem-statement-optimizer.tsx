@@ -70,37 +70,37 @@ export function BlueprintProblemStatementOptimizer({
 					}
 				}}
 			>
-			<DialogContent className="sm:max-w-md">
-				<DialogHeader>
-					<DialogTitle>Optimize problem statement</DialogTitle>
-					<DialogDescription>
-						AI will sharpen this into a clearer, more specific problem
-						statement and update the field for you.
-					</DialogDescription>
-				</DialogHeader>
-				{message ? (
-					<p className="text-sm leading-6 text-muted-foreground">{message}</p>
-				) : null}
-				{status === "polling_login" ? (
-					<p className="text-sm leading-6 text-muted-foreground">
-						Waiting for account connection...
-					</p>
-				) : null}
-				<DialogFooter>
-					<Button type="button" variant="outline" onClick={closeDialog}>
-						Close
-					</Button>
-					{status === "needs_login" ? (
-						<Button type="button" onClick={() => void startManagedLogin()}>
-							Connect account
-						</Button>
-					) : status === "error" ? (
-						<Button type="button" onClick={() => void requestOptimization()}>
-							Try again
-						</Button>
+				<DialogContent className="sm:max-w-md">
+					<DialogHeader>
+						<DialogTitle>Optimize problem statement</DialogTitle>
+						<DialogDescription>
+							AI will sharpen this into a clearer, more specific problem
+							statement and update the field for you.
+						</DialogDescription>
+					</DialogHeader>
+					{message ? (
+						<p className="text-sm leading-6 text-muted-foreground">{message}</p>
 					) : null}
-				</DialogFooter>
-			</DialogContent>
+					{status === "polling_login" ? (
+						<p className="text-sm leading-6 text-muted-foreground">
+							Waiting for account connection...
+						</p>
+					) : null}
+					<DialogFooter>
+						<Button type="button" variant="outline" onClick={closeDialog}>
+							Close
+						</Button>
+						{status === "needs_login" ? (
+							<Button type="button" onClick={() => void startManagedLogin()}>
+								Connect account
+							</Button>
+						) : status === "error" ? (
+							<Button type="button" onClick={() => void requestOptimization()}>
+								Try again
+							</Button>
+						) : null}
+					</DialogFooter>
+				</DialogContent>
 			</Dialog>
 		</>
 	);

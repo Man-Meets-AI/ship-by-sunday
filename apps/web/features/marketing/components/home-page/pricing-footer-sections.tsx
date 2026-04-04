@@ -104,10 +104,9 @@ export function FooterSection({
 						</p>
 						<Link
 							href={routeConfig.signIn}
-							className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+							className="text-sm text-primary underline-offset-4 transition-colors hover:underline"
 						>
-							Already bought?{" "}
-							<span className="ml-1 font-medium text-foreground">Sign in</span>
+							Already bought? <span className="ml-1 font-medium">Sign in</span>
 						</Link>
 					</div>
 				</ScrollReveal>

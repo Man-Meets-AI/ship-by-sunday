@@ -12,7 +12,7 @@ const completeProjectFacts: CanonicalProjectFacts = {
 		"Founders lose momentum when product planning stays vague.",
 	core_flow: ["Capture product facts", "Unlock blueprints", "Download repo"],
 	pricing: 29,
-	theme_hex: "#0f766e",
+	theme_preset: "a0",
 	problem_context_when: "When a founder is moving from idea to build week.",
 	problem_context_where: "Inside their local app and planning workflow.",
 	problem_trigger: "They need a clear blueprint and repo handoff immediately.",

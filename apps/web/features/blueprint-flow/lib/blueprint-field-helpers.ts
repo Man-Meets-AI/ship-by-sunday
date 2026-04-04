@@ -10,4 +10,6 @@ export {
 	blueprintFieldHelperText,
 	blueprintFieldInputKind,
 	blueprintFieldLabel,
+	blueprintFieldPlaceholder,
+	blueprintListFieldItemPlaceholders,
 } from "@shipbysunday/blueprint-presentation";
