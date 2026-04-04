@@ -70,41 +70,37 @@ export function BlueprintProblemStatementOptimizer({
 					}
 				}}
 			>
-				<DialogContent className="sm:max-w-md">
-					<DialogHeader>
-						<DialogTitle>Optimize this problem statement</DialogTitle>
-						<DialogDescription>
-							Use your managed ChatGPT/Codex account to rewrite this field in
-							place.
-						</DialogDescription>
-					</DialogHeader>
-					<div className="space-y-2 text-sm leading-6 text-muted-foreground">
-						<p>
-							{message ??
-								"We will keep the current field open and update it as soon as the optimized version is ready."}
-						</p>
-						{status === "polling_login" ? (
-							<p>Login is still pending while we check the managed account.</p>
-						) : null}
-						<p className="text-foreground/80">
-							The optimized text will replace the current field value directly.
-						</p>
-					</div>
-					<DialogFooter>
-						<Button type="button" variant="outline" onClick={closeDialog}>
-							Close
+			<DialogContent className="sm:max-w-md">
+				<DialogHeader>
+					<DialogTitle>Optimize problem statement</DialogTitle>
+					<DialogDescription>
+						AI will sharpen this into a clearer, more specific problem
+						statement and update the field for you.
+					</DialogDescription>
+				</DialogHeader>
+				{message ? (
+					<p className="text-sm leading-6 text-muted-foreground">{message}</p>
+				) : null}
+				{status === "polling_login" ? (
+					<p className="text-sm leading-6 text-muted-foreground">
+						Waiting for account connection...
+					</p>
+				) : null}
+				<DialogFooter>
+					<Button type="button" variant="outline" onClick={closeDialog}>
+						Close
+					</Button>
+					{status === "needs_login" ? (
+						<Button type="button" onClick={() => void startManagedLogin()}>
+							Connect account
 						</Button>
-						{status === "needs_login" ? (
-							<Button type="button" onClick={() => void startManagedLogin()}>
-								Connect Codex account
-							</Button>
-						) : status === "error" ? (
-							<Button type="button" onClick={() => void requestOptimization()}>
-								Try again
-							</Button>
-						) : null}
-					</DialogFooter>
-				</DialogContent>
+					) : status === "error" ? (
+						<Button type="button" onClick={() => void requestOptimization()}>
+							Try again
+						</Button>
+					) : null}
+				</DialogFooter>
+			</DialogContent>
 			</Dialog>
 		</>
 	);

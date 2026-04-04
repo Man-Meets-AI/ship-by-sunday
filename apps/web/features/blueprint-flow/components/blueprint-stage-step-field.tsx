@@ -60,6 +60,8 @@ function BlueprintStageStepFieldComponent({
 	const inputId = getBlueprintStageFieldInputId(step.id, fieldKey);
 	const errorId = errorMessage ? `${inputId}-error` : undefined;
 	const helperText = blueprintFieldHelperText(fieldKey, facts);
+	const inputKind = blueprintFieldInputKind(fieldKey);
+	const isShortField = fieldKey === "pricing" || fieldKey === "theme_hex";
 	const handleChange = (
 		event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
 	) => onChange(fieldKey, event.target.value);
@@ -82,7 +84,7 @@ function BlueprintStageStepFieldComponent({
 				) : null}
 			</div>
 			<FieldContent>
-				{blueprintFieldInputKind(fieldKey) === "textarea" ? (
+				{inputKind === "textarea" ? (
 					<Textarea
 						id={inputId}
 						value={value}
@@ -94,9 +96,8 @@ function BlueprintStageStepFieldComponent({
 				) : (
 					<Input
 						id={inputId}
-						type={
-							blueprintFieldInputKind(fieldKey) === "number" ? "number" : "text"
-						}
+						type={inputKind === "number" ? "number" : "text"}
+						className={isShortField ? "max-w-48" : undefined}
 						value={value}
 						onChange={handleChange}
 						aria-describedby={errorId}

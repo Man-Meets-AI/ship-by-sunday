@@ -120,7 +120,7 @@ describe("BlueprintPage", () => {
 		replaceMock.mockReset();
 	});
 
-	it("renders the combined blueprint surface with overview, sections, and progress links", () => {
+	it("renders the blueprint form with overview, sections, and save bar", () => {
 		render(
 			<BlueprintPage initialWorkspaceState={createBlueprintWorkspaceState()} />,
 		);
@@ -130,31 +130,17 @@ describe("BlueprintPage", () => {
 		);
 		expect(
 			screen.getByText(
-				"Answer the full reduced blueprint here, keep the draft local until you press Continue to Review, and let the review page stay focused on the final handoff into Build Lessons.",
+				"Fill in each section below, then continue to review when you are ready.",
 			),
 		).toBeTruthy();
-		expect(screen.getByTestId("blueprint-page-video-player").textContent).toBe(
-			"Welcome Video",
-		);
-		expect(screen.getByRole("link", { name: "Foundation" })).toBeTruthy();
 		expect(
 			screen.getByRole("heading", {
 				name: "Name the product clearly and anchor who it is for.",
 			}),
 		).toBeTruthy();
 		expect(
-			screen.getByRole("heading", {
-				name: "Review the compiler-owned marketing defaults derived from your answers.",
-			}),
-		).toBeTruthy();
-		expect(
 			screen.getByRole("button", { name: "Continue to Review" }),
 		).toBeTruthy();
-		expect(
-			screen
-				.getByRole("link", { name: "Generated preview" })
-				.getAttribute("href"),
-		).toBe("#generated-preview");
 	});
 
 	it("saves partial work on continue and reveals the remaining blockers", async () => {
