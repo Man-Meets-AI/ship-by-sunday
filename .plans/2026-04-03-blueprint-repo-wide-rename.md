@@ -26,7 +26,7 @@ Ship by Sunday already partially moved to `blueprint`, but the migration is inco
 
 ## Surprises & Discoveries
 
-The original repo-wide inventory that motivated this work is no longer the current truth of the tree. The live app and workspace configuration are already on blueprint names. `apps/web/package.json`, `apps/web/next.config.ts`, `apps/web/tsconfig.json`, `apps/web/vitest.config.ts`, and the root `package.json` already reference `@manmeetsai/blueprint-compiler`, `@shipbysunday/blueprint-presentation`, and `@blueprint-compiler`. The feature directory on disk is `apps/web/features/blueprint-flow`, and the active Convex module on disk is `apps/web/convex/blueprint.ts`.
+The original repo-wide inventory that motivated this work is no longer the current truth of the tree. The live app and workspace configuration are already on blueprint names. `apps/web/package.json`, `apps/web/next.config.ts`, `apps/web/tsconfig.json`, `apps/web/vitest.config.ts`, and the root `package.json` already reference `@shipbysunday/blueprint-compiler`, `@shipbysunday/blueprint-presentation`, and `@blueprint-compiler`. The feature directory on disk is `apps/web/features/blueprint-flow`, and the active Convex module on disk is `apps/web/convex/blueprint.ts`.
 
 Git still remembers the pre-blueprint world because the rename is only partially reconciled. `git status --short` currently shows many tracked old-path files as deleted while matching blueprint files appear as untracked additions. That means `git ls-files` is not a trustworthy representation of the current filesystem until the rename pairs are reconciled. Any plan that tells the implementer to recreate old paths from scratch is factually wrong in this worktree and risks clobbering real in-flight work.
 

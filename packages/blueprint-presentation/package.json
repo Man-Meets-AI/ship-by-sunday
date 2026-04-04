@@ -14,7 +14,7 @@
 		"test": "vitest run --config vitest.config.ts"
 	},
 	"dependencies": {
-		"@manmeetsai/blueprint-compiler": "workspace:*"
+		"@shipbysunday/blueprint-compiler": "workspace:*"
 	},
 	"devDependencies": {
 		"@types/node": "25.5.0",

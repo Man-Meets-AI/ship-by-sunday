@@ -4,7 +4,7 @@ import {
 	createCompleteProjectDefinition,
 	parseCanonicalProjectDefinition,
 	parseCanonicalProjectDefinitionDraft,
-} from "@manmeetsai/blueprint-compiler";
+} from "@shipbysunday/blueprint-compiler";
 import {
 	SHIP_BY_SUNDAY_LOCAL_CLERK_USER_ID,
 	SHIP_BY_SUNDAY_PRODUCT_KEY,

@@ -1,6 +1,6 @@
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
-import { createCompleteProjectDefinition } from "@manmeetsai/blueprint-compiler";
+import { createCompleteProjectDefinition } from "@shipbysunday/blueprint-compiler";
 import { runCli } from "../src/run-cli";
 import {
 	createLocalDraftDefinition,

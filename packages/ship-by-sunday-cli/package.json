@@ -1,5 +1,5 @@
 {
-	"name": "@manmeetsai/ship-by-sunday-cli",
+	"name": "@shipbysunday/ship-by-sunday-cli",
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
@@ -16,7 +16,7 @@
 		"test": "vitest run --config vitest.config.ts"
 	},
 	"dependencies": {
-		"@manmeetsai/blueprint-compiler": "workspace:*",
+		"@shipbysunday/blueprint-compiler": "workspace:*",
 		"@shipbysunday/blueprint-presentation": "workspace:*"
 	},
 	"devDependencies": {

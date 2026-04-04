@@ -1,5 +1,5 @@
 {
-	"name": "@manmeetsai/blueprint-compiler",
+	"name": "@shipbysunday/blueprint-compiler",
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",

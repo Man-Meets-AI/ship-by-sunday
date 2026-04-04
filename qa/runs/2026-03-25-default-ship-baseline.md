@@ -38,5 +38,5 @@ The public browser-smoke lane passed on `https://www.man-meets-ai.com`. The host
 
 ## Notes
 
-- Public evidence came from `https://www.man-meets-ai.com`, because the recent `mma-shipbysunday` Vercel deployment aliases were unavailable during the run.
+- Public evidence came from `https://www.man-meets-ai.com`, because the recent preview deployment aliases were unavailable during the run.
 - Local blueprint-first sandbox attempts uncovered useful runner issues and auth-bootstrap bugs, but they were not treated as release evidence once the public-domain run was available.
