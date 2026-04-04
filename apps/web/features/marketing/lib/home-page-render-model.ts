@@ -12,7 +12,6 @@ import {
 
 export type HomePageSocialProofVariant = {
 	readonly kind: "founder";
-	readonly image: HomePageContent["assets"]["socialProofImage"];
 	readonly section: HomePageContent["socialProofSection"];
 	readonly githubUsername: string;
 	readonly requiresGitHubActivity: true;
@@ -28,6 +27,10 @@ export type HomePageRenderModel = {
 	readonly sprintPath: {
 		readonly isEnabled: boolean;
 		readonly section: HomePageContent["sprintPathSection"];
+	};
+	readonly mechanism: {
+		readonly isEnabled: boolean;
+		readonly section: HomePageContent["mechanismSection"];
 	};
 	readonly whatsInside: {
 		readonly isEnabled: boolean;
@@ -72,7 +75,6 @@ export function createHomePageRenderModel({
 }: CreateHomePageRenderModelArgs = {}): HomePageRenderModel {
 	const socialProofVariant = {
 		kind: "founder",
-		image: content.assets.socialProofImage,
 		section: content.socialProofSection,
 		githubUsername: content.socialProofSection.github.username,
 		requiresGitHubActivity: true,
@@ -91,6 +93,10 @@ export function createHomePageRenderModel({
 		sprintPath: {
 			isEnabled: homePageConfig.sections.sprintPath,
 			section: content.sprintPathSection,
+		},
+		mechanism: {
+			isEnabled: homePageConfig.sections.mechanism,
+			section: content.mechanismSection,
 		},
 		whatsInside: {
 			isEnabled: homePageConfig.sections.whatsInside,

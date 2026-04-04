@@ -9,6 +9,7 @@ import {
 } from "./home-page/closing-sections";
 import { HomeHeroSection } from "./home-page/hero-sections";
 import { DurabilitySectionBlock } from "./home-page/durability-section";
+import { MechanismStripSection } from "./home-page/mechanism-strip-section";
 import { SprintPathUnifiedSection } from "./home-page/sprint-path-unified-section";
 import { StarterSystemSectionBlock } from "./home-page/starter-system-section";
 import { WhatsInsideSection } from "./home-page/whats-inside-section";
@@ -35,6 +36,11 @@ export default async function HomePage() {
 						sprintPathSection={homePageRenderModel.sprintPath.section}
 					/>
 				) : null}
+				{homePageRenderModel.mechanism.isEnabled ? (
+					<MechanismStripSection
+						mechanismSection={homePageRenderModel.mechanism.section}
+					/>
+				) : null}
 				{homePageRenderModel.whatsInside.isEnabled ? (
 					<WhatsInsideSection
 						whatsInsideSection={homePageRenderModel.whatsInside.section}
@@ -52,7 +58,6 @@ export default async function HomePage() {
 				) : null}
 				{homePageRenderModel.socialProof.isEnabled ? (
 					<SocialProofSection
-						socialProofImage={homePageRenderModel.socialProof.variant.image}
 						socialProofSection={homePageRenderModel.socialProof.variant.section}
 						githubActivity={githubActivity}
 					/>

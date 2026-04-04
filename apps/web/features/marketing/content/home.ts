@@ -1,4 +1,4 @@
-import { productConfig, routeConfig } from "@/config/product";
+import { productConfig } from "@/config/product";
 import {
 	marketingDisplayConfig,
 	workspaceDisplayConfig,
@@ -17,55 +17,63 @@ export const homePageContent = {
 		headlineLead: "Ship a real product",
 		headlineTailPrefix: "",
 		headlineTailHover: "by Sunday",
-		body: `The only system that teaches you how to ship a durable product from start to finish in one weekend. Oh, and it includes building you a ridiculous custom template from scratch based on what you want to build. We should charge more for this.`,
+		body: "Stop building from stale chats, prompts, and half-decisions. Ship by Sunday helps you lock the blueprint first so product, design, prompts, and code stay aligned while you build.",
 		primaryCta: marketingDisplayConfig.primaryCtaLabel,
 		secondaryCta: {
-			label: "See how Ship Blueprint works",
-			href: routeConfig.systemHash,
+			label: "See what you leave with",
+			href: "#deliverables",
 		},
 		eyebrow:
-			"One-time payment. Lifetime access. Start the product intake immediately after checkout so the weekend starts with the real product constraints, not a blank chat.",
+			"For people who\u2019ve tried building a web app with AI and ended up with something messy or unusable.",
 	},
 	sprintPathSection: {
 		label: "System",
 		titlePrefix: "Most AI builds ",
-		titleHighlight: "start with prompts.",
+		titleHighlight: "start with prompts. That is why they drift.",
 		intro:
-			"The model is not the part that breaks first. The context is. Weekend AI builds drift because the product truth, scope, design direction, and launch claims live in scattered chats that go stale fast.",
+			"When prompts lead, the product keeps changing. UI, code, and build logic stop matching. Then auth, payments, database, and environments show up, and the whole thing turns fragile.",
 		supportingPoints: [
-			"Ship by Sunday captures the product truth first, then compiles contract-first docs packs for design, marketing, build execution, and prompting.",
-			"The packs are file-based and agent-readable, so each tool works from the same scope, constraints, and claims instead of a stale chat summary.",
-			"The same contract-first path feeds the starter system, so the repo, the docs, and the execution path stay aligned instead of drifting apart.",
+			"The product definition keeps moving.",
+			"Prompts, UI, and code stop matching.",
+			"Real product requirements break the build.",
 		],
-		valueFrame: "Most starters give you code. This gives you blueprint.",
+		valueFrame:
+			"This is not a code-generation problem. It is a blueprint problem.",
 		imageAlt:
 			"Diagram showing a product definition turning into Design, Marketing, Build, and Prompt Packs plus a final Blueprint",
 	},
+	mechanismSection: {
+		steps: [
+			"Lock the Product Truth",
+			"Generate the Agent-Ready Packs",
+			"Build from the Ship by Sunday Blueprint",
+		],
+		tagline: "One source of truth. No drift.",
+	},
 	socialProofSection: {
 		label: "Built by someone who ships",
-		intro:
-			"This is not theory from the sidelines. It is a system shaped by years of shipping products, tools, and MVPs in public.",
-		imageAlt: "Founder proof visual",
-		imageCaption:
-			"Built by someone who has moved from design to engineering to product and knows what it takes to turn rough ideas into shippable products.",
+		headline: "Built by someone who has actually shipped products.",
+		body: "Worked across UX, product, design, and engineering. Helped scale a startup to $73M/year. Stayed through acquisition. Ship by Sunday is new. The operating experience behind it is not.",
+		screenshots: [
+			{
+				src: "/screenshots/product-truth.png",
+				alt: "Product Truth screenshot showing locked buyer, problem, scope, and constraints",
+			},
+			{
+				src: "/screenshots/agent-ready-packs.png",
+				alt: "Agent-Ready Packs screenshot showing design, marketing, build, and prompt packs",
+			},
+			{
+				src: "/screenshots/blueprint.png",
+				alt: "Ship by Sunday Blueprint screenshot showing the source of truth the repo builds from",
+			},
+		],
 		github: {
 			username: "ParkerRex",
 			profileUrl: "https://github.com/ParkerRex",
 			activityCaption:
 				"commits this year. This system is built by someone who ships every day.",
 		},
-		stats: [
-			{
-				value: "$73M",
-				label: "GMV scaled",
-				description: "Delivery Dudes to a $23M acquisition",
-			},
-			{
-				value: "100K",
-				label: "Users in week one",
-				description: "GPTs for Devs launch",
-			},
-		],
 	},
 	faqSection: {
 		label: "FAQ",
@@ -76,32 +84,32 @@ export const homePageContent = {
 			{
 				question: "Is this another course or another starter?",
 				answer:
-					"No. Ship by Sunday is a blueprint-first shipping system. The videos help you use it, and the repo is part of it, but the real product is the Ship by Sunday Blueprint you leave with.",
-			},
-			{
-				question: "What do I actually get at the end?",
-				answer:
-					"You leave with your product truth, the Agent-Ready Packs, and the Ship by Sunday Blueprint.",
-			},
-			{
-				question: "I already have a starter. Why would I need this?",
-				answer:
-					"Because a starter without aligned context is still just code. Ship by Sunday gives your repo the packs and product truth that make AI useful instead of chaotic.",
-			},
-			{
-				question: "Is this just more planning before coding?",
-				answer:
-					"No. It is the minimum brief required to stop re-explaining the product every time you touch AI. The point is to move faster on the right thing.",
+					"No. Ship by Sunday is a blueprint-first shipping system. The videos help you use it, and the repo is part of it, but the real product is the Blueprint you leave with.",
 			},
 			{
 				question: "Who is this for?",
 				answer:
-					"Technical builders and founder-operators who can get things working, but keep getting stuck between idea, prompts, code, and launch.",
+					"Technical builders and founder-operators who have already tried building web apps with AI, can get code out of the tools, but keep ending up with messy or unusable results.",
+			},
+			{
+				question: "What do I actually get at the end?",
+				answer:
+					"You leave with the Product Truth, the Agent-Ready Packs, and the Ship by Sunday Blueprint.",
+			},
+			{
+				question: "I already have a starter. Why would I need this?",
+				answer:
+					"Because a starter without aligned context is still just code. The Blueprint gives your repo the packs and product truth that make AI useful instead of chaotic.",
+			},
+			{
+				question: "Is this just more planning before coding?",
+				answer:
+					"No. The Blueprint is the minimum brief required to stop re-explaining the product every time you touch AI. The point is to move faster on the right thing.",
 			},
 			{
 				question: "Why not just use ChatGPT, Claude, or Codex directly?",
 				answer:
-					"You can. The problem is fragments. Ship Blueprint makes those tools work from one source of truth instead of stale chats and half-decisions.",
+					"You can. The problem is fragments. The Blueprint makes those tools work from one source of truth instead of stale chats and half-decisions.",
 			},
 			{
 				question: "What happens right after I pay?",
@@ -112,36 +120,32 @@ export const homePageContent = {
 	whatsInsideSection: {
 		label: "By Sunday",
 		title:
-			"By Sunday, you leave with the product truth, the agent packs, and the starter path.",
+			"By Sunday, you leave with the Product Truth, the Agent-Ready Packs, and the Ship by Sunday Blueprint.",
 		intro:
 			"Enough clarity to build. Enough structure to hand off. No vague prompts, no half-decisions.",
 		pillars: [
 			{
-				title: "The product truth",
-				highlightBefore: "Lock ",
-				highlight: "the right user, problem, scope, and promise",
-				highlightAfter:
-					" before code, so the build starts from something real.",
+				title: "Product Truth",
+				highlightBefore: "",
+				highlight: "The buyer, problem, scope, and constraints",
+				highlightAfter: " locked before the build drifts.",
 				supporting:
 					"This is the clarity layer the rest of the weekend depends on.",
 			},
 			{
-				title: "The packs",
-				highlightBefore: "Leave with ",
-				highlight: "Design, Marketing, Build, and Prompt Packs",
-				highlightAfter:
-					" that turn the same product truth into usable instructions.",
+				title: "Agent-Ready Packs",
+				highlightBefore: "",
+				highlight: "The design, build, marketing, and prompt context",
+				highlightAfter: " that make AI useful instead of chaotic.",
 				supporting:
 					"Each pack carries the context, constraints, and next actions that domain needs.",
 			},
 			{
-				title: "The starter path",
-				highlightBefore: "Review the ",
-				highlight: "Ship by Sunday Blueprint path",
-				highlightAfter:
-					" before execution, so you can verify the repo before handoff.",
-				supporting:
-					"This is a concrete build system, not random prompts and a hope-based plan.",
+				title: "Ship by Sunday Blueprint",
+				highlightBefore: "",
+				highlight: "The source of truth",
+				highlightAfter: " the repo can actually build from.",
+				supporting: "One deliverable that ties everything together.",
 			},
 		],
 	},
@@ -157,24 +161,21 @@ export const homePageContent = {
 		capabilities: [
 			{
 				title: "Product blueprint",
-				description:
-					"Start from a repo already shaped around your product, not a dead template you have to reinterpret every session.",
+				description: "So the build does not drift.",
 			},
 			{
 				title: "Built-in QA",
-				description:
-					"Smoke paths, QA prompts, and incident alerts are already in the repo, so shipping does not turn into guesswork the moment something breaks.",
+				description: "So the app still works when the pieces connect.",
 			},
 			{
-				title: "Safer agent changes",
-				description:
-					"Guidance for Clerk, Convex, Stripe, Next.js, React, and Vercel helps agents make changes inside real constraints instead of blind file surgery.",
+				title: "Saved agent changes",
+				description: "So new prompts do not quietly rewrite the product.",
 			},
 		],
 		supportSection: {
-			title: "The support around the system",
+			title: "Support around the system",
 			intro:
-				"The starter is the core. You also get the guidance that helps you use it well under real weekend pressure.",
+				"You also get workshops, a clear path to ask questions, and beginner-safe product management guidance when scope decisions get messy.",
 			items: [
 				"Fast Pass Walkthroughs",
 				"Guided Ship Path",
@@ -183,7 +184,7 @@ export const homePageContent = {
 			bonus: {
 				title: bonusName,
 				description:
-					"If product judgment is still the weak point, the included bonus strengthens the decisions behind the build without bloating the core offer.",
+					"If product judgment is still the weak spot, this stays in the bundle without becoming the point of the offer.",
 			},
 		},
 	},
@@ -191,37 +192,36 @@ export const homePageContent = {
 		label: "Durability",
 		title: "Ship by Sunday. Keep shipping on Monday.",
 		intro:
-			"The goal is not a one-night demo. The goal is a product you improve as models, tools, and agents change around you.",
+			"This is not a binge-and-forget course. Once you have the Product Truth, the Packs, and the Blueprint, you can reuse the system for the next feature, next product, or next workflow problem.",
 		items: [
 			{
-				title: "Stable facts first",
+				title: "Reuse the blueprint",
 				description:
-					"The system compiles from one shared product definition, so new tools inherit the same user, problem, scope, and outcome constraints instead of starting from a blank chat.",
+					"The same product definition feeds the next feature without starting from a blank chat.",
 			},
 			{
-				title: "Starter system, not dead template",
+				title: "Extend without starting over",
 				description:
-					"The repo stays configurable and aligned to the same contract, so the next change starts from product truth instead of random edits inside a stale starter.",
+					"The repo stays aligned to the same contract, so changes build on product truth instead of scattered edits.",
 			},
 			{
-				title: "One review handoff",
+				title: "Keep one source of truth",
 				description:
-					"The Ship by Sunday Blueprint gives you one final downloadable handoff that is easier to trust, review, and reuse than scattered prompt history.",
+					"When better models arrive next month, you move faster. You do not restart the project from zero.",
 			},
 		],
-		closing:
-			"When better models arrive next month, you move faster. You do not restart the project from zero.",
+		closing: "",
 	},
 	pricingSection: {
 		label: productName,
-		titleLead: "Ship a real product",
-		titleAccent: "by Sunday",
+		titleLead: "Ship a clean, coherent",
+		titleAccent: "web app v1 by Sunday",
 		intro:
-			"One payment for Ship Blueprint: the guided blueprint-first run, the Agent-Ready Packs, the Ship by Sunday Blueprint, and the guidance that keeps you shipping after the first weekend.",
+			"Get the system that helps you lock the Product Truth, generate the Agent-Ready Packs, and build from one Blueprint instead of stale prompts and half-decisions.",
 		priceDisplay: productConfig.priceDisplay,
 		eyebrow: "One-time payment. Lifetime access.",
-		ctaTitle: "Get the system",
-		trustLine: `After checkout, you go straight into the ${workspaceDisplayConfig.homeNoun} to lock the truth, compile the packs, and shape your Blueprint.`,
+		ctaTitle: "Get Ship by Sunday",
+		trustLine: "Go straight into the workspace.",
 		includes: [
 			"Guided product intake and review workspace",
 			"Agent-Ready Packs",

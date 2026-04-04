@@ -15,6 +15,7 @@ describe("home page render model", () => {
 		expect(renderModel.sectionOrder).toEqual(homePageSectionOrder);
 		expect(renderModel.hero.isEnabled).toBe(true);
 		expect(renderModel.hero.primaryCtaTarget).toEqual({ kind: "checkout" });
+		expect(renderModel.mechanism.isEnabled).toBe(true);
 		expect(renderModel.starterSystem.isEnabled).toBe(true);
 		expect(renderModel.starterSystem.section.supportSection.items).toEqual([
 			"Fast Pass Walkthroughs",

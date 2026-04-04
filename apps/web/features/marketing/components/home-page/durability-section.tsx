@@ -40,13 +40,15 @@ export function DurabilitySectionBlock({
 					))}
 				</div>
 			</div>
-			<ScrollReveal delay={0.3}>
-				<div className="mt-12 border-t border-border/40 pt-8">
-					<p className="max-w-3xl text-balance text-base leading-7 text-muted-foreground">
-						{durabilitySection.closing}
-					</p>
-				</div>
-			</ScrollReveal>
+			{durabilitySection.closing ? (
+				<ScrollReveal delay={0.3}>
+					<div className="mt-12 border-t border-border/40 pt-8">
+						<p className="max-w-3xl text-balance text-base leading-7 text-muted-foreground">
+							{durabilitySection.closing}
+						</p>
+					</div>
+				</ScrollReveal>
+			) : null}
 		</section>
 	);
 }

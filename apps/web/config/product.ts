@@ -43,6 +43,7 @@ export const routeConfig = {
 export const homePageSectionOrder = [
 	"hero",
 	"sprintPath",
+	"mechanism",
 	"whatsInside",
 	"starterSystem",
 	"durability",
@@ -73,6 +74,7 @@ export const starterHomePageConfig = {
 	sections: {
 		hero: true,
 		sprintPath: true,
+		mechanism: true,
 		whatsInside: true,
 		starterSystem: true,
 		durability: true,
@@ -116,7 +118,7 @@ export const starterConfig = {
 	marketing: {
 		docsLabel: "Docs",
 		loginLabel: "Sign in",
-		primaryCtaLabel: "Get the system",
+		primaryCtaLabel: "Get Ship by Sunday",
 		previewImageAlt: "Ship by Sunday system preview",
 	},
 	workspace: {

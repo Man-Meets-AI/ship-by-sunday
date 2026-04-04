@@ -28,6 +28,9 @@ export function HomeHeroSection({
 			<div className="relative z-10 mt-10 flex w-full max-w-4xl flex-col items-center gap-12 sm:mt-14 lg:mt-20">
 				<ScrollReveal delay={0.15}>
 					<div className="flex flex-col items-center gap-8">
+						<p className="max-w-lg text-balance text-sm leading-6 text-muted-foreground sm:text-base">
+							{hero.eyebrow}
+						</p>
 						<HomeHeroHeadline hero={hero} />
 						<p className="max-w-2xl text-balance text-lg leading-7 text-muted-foreground sm:text-xl lg:text-2xl">
 							{hero.body}

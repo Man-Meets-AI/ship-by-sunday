@@ -17,20 +17,22 @@ describe("home page content", () => {
 
 		expect(homePageContent.hero.headlineLead).toBe("Ship a real product");
 		expect(homePageContent.hero.headlineTailHover).toBe("by Sunday");
-		expect(homePageContent.hero.body).toContain(
-			"The only system that teaches you how to ship a durable product from start to finish in one weekend.",
-		);
+		expect(homePageContent.hero.body).toContain("lock the blueprint first");
+		expect(homePageContent.hero.eyebrow).toContain("messy or unusable");
 		expect(homePageContent.hero.loginLabel).toBe("Sign in");
-		expect(homePageContent.hero.secondaryCta.href).toBe("#system");
+		expect(homePageContent.hero.secondaryCta.href).toBe("#deliverables");
 
-		expect(homePageContent.whatsInsideSection.title).toBe(
-			"By Sunday, you leave with the product truth, the agent packs, and the starter path.",
+		expect(homePageContent.mechanismSection.steps).toHaveLength(3);
+		expect(homePageContent.mechanismSection.tagline).toBe(
+			"One source of truth. No drift.",
 		);
+
+		expect(homePageContent.whatsInsideSection.title).toContain("Product Truth");
 		expect(homePageContent.whatsInsideSection.pillars[1]?.title).toBe(
-			"The packs",
+			"Agent-Ready Packs",
 		);
 		expect(homePageContent.whatsInsideSection.pillars[2]?.title).toBe(
-			"The starter path",
+			"Ship by Sunday Blueprint",
 		);
 		expect(homePageContent.starterSystemSection.title).toBe(
 			"More than a starter. A system you can keep shipping from.",
@@ -47,6 +49,9 @@ describe("home page content", () => {
 				question: "Is this another course or another starter?",
 			}),
 			expect.objectContaining({
+				question: "Who is this for?",
+			}),
+			expect.objectContaining({
 				question: "What do I actually get at the end?",
 			}),
 			expect.objectContaining({
@@ -54,9 +59,6 @@ describe("home page content", () => {
 			}),
 			expect.objectContaining({
 				question: "Is this just more planning before coding?",
-			}),
-			expect.objectContaining({
-				question: "Who is this for?",
 			}),
 			expect.objectContaining({
 				question: "Why not just use ChatGPT, Claude, or Codex directly?",
@@ -73,7 +75,7 @@ describe("home page content", () => {
 				"Fast Pass Walkthroughs",
 			]),
 		);
-		expect(homePageContent.pricingSection.ctaTitle).toBe("Get the system");
+		expect(homePageContent.pricingSection.ctaTitle).toBe("Get Ship by Sunday");
 	});
 
 	it("keeps the guarantee in pricing while the faq stays focused on the offer", () => {
@@ -84,6 +86,5 @@ describe("home page content", () => {
 		expect(homePageContent.pricingSection.guarantee).toContain("Product stage");
 		expect(faqCopy).not.toContain("The guarantee is about clarity");
 		expect(faqCopy).toContain("Blueprint");
-		expect(faqCopy).toContain("Ship Blueprint");
 	});
 });

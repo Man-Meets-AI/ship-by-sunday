@@ -85,7 +85,7 @@ export function StarterSystemSectionBlock({
 						<div className="space-y-6 lg:sticky lg:top-24 lg:h-fit">
 							<h2
 								aria-label={starterSystemSection.title}
-								className="text-[clamp(2.8rem,10vw,6.5rem)] font-semibold leading-[0.9] tracking-tight text-foreground"
+								className="text-[clamp(2rem,5vw,3.75rem)] font-semibold leading-[0.95] tracking-tight text-foreground"
 							>
 								{starterSystemSection.titleLines.map((titleLine, index) => (
 									<span

@@ -49,11 +49,11 @@ export function WhatsInsideSection({
 	whatsInsideSection: WhatsInsideSection;
 }) {
 	return (
-		<section className="py-24 lg:py-40">
+		<section id="deliverables" className="py-24 lg:py-40">
 			<div className="grid gap-16 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-24">
 				<ScrollReveal>
 					<div className="space-y-8 lg:sticky lg:top-24 lg:h-fit">
-						<h2 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl lg:text-7xl">
+						<h2 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl lg:text-4xl">
 							{whatsInsideSection.title}
 						</h2>
 						<p className="max-w-xl text-pretty text-xl leading-7 text-muted-foreground">
