@@ -18,7 +18,7 @@ export const canonicalProjectFactsShape = {
 	problem_statement: requiredText,
 	core_flow: requiredTextList,
 	pricing: z.number().int().nonnegative(),
-	theme_hex: requiredText,
+	theme_preset: requiredText,
 	problem_context_when: requiredText,
 	problem_context_where: requiredText,
 	problem_trigger: requiredText,
@@ -100,7 +100,7 @@ export const canonicalProjectFactsDraftShape = z
 	.extend({
 		core_flow: requiredTextList.optional(),
 		pricing: z.number().int().nonnegative().optional(),
-		theme_hex: requiredText.optional(),
+		theme_preset: requiredText.optional(),
 		contact_email: requiredText.optional(),
 	})
 	.strict();

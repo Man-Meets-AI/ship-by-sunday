@@ -24,12 +24,11 @@ function getCredentialsContent({
 			description: "Use the account attached to your purchase to continue.",
 			supportPanel: {
 				bullets: [
-					"Use the checkout email address or the Google account already attached to that purchase.",
-					"Password reset stays inside this same shell if the purchased account needs recovery.",
-					"Once the account matches, we hand access back without extra navigation.",
+					"Use the email or Google account from checkout.",
+					"Password reset stays in this route if you need recovery.",
 				],
 				description:
-					"Google OAuth reached us, but the returned identity was not tied to a paid Ship by Sunday account.",
+					"The Google account that signed in is not tied to a paid account.",
 				title: "Google did not match a paid account.",
 			},
 			title: "Sign in",
@@ -45,13 +44,11 @@ function getCredentialsContent({
 					label: "See pricing",
 				},
 				bullets: [
-					"We send you straight into the product as soon as the session is confirmed.",
-					"Google works only when it already matches the account from checkout.",
-					"Password reset stays in this route, so recovery does not bounce you around.",
+					"Google works only when it matches the account from checkout.",
+					"Password reset stays in this route — no bouncing around.",
 				],
 				description:
-					"Use the same email or Google account you used when you bought Ship by Sunday.",
-				note: "Need access first? Review the offer before you start a session.",
+					"Sign in with the same email or Google account you used at checkout.",
 				title: "Reconnect the workspace tied to your checkout.",
 			},
 			title: "Sign in",
@@ -62,12 +59,11 @@ function getCredentialsContent({
 		description: "Use the account attached to your purchase to continue.",
 		supportPanel: {
 			bullets: [
-				"We preserve the original target so the route can send you straight back.",
-				"Use the purchased account first, then switch recovery tools only if needed.",
-				"This screen stays intentionally quiet so access recovery does not turn into a sales page.",
+				"We preserve your original destination after sign-in.",
+				"Use the purchased account first, then recovery tools if needed.",
 			],
 			description:
-				"You arrived here from a protected page, so a successful sign-in should hand the session back immediately.",
+				"You came from a protected page — sign in to pick up where you left off.",
 			title: "Sign in, then continue where you left off.",
 		},
 		title: "Sign in",
@@ -92,12 +88,10 @@ export function getSignInPageContent({
 					"We’ll email a reset code so you can get back into your account.",
 				supportPanel: {
 					bullets: [
-						"We send the code to the purchased account before any password change happens.",
-						"The rest of the recovery flow stays in this same shell, so context does not jump around.",
-						"Once the reset is complete, we finish sign-in and hand the session back.",
+						"The code goes to the purchased email before any password change.",
+						"Once verified, we finish sign-in automatically.",
 					],
-					description:
-						"Password recovery should feel deliberate and secure, not like a detached utility page.",
+					description: "Recovery stays in this same route the whole way.",
 					title: "Request a fresh reset code.",
 				},
 				title: "Reset password",
@@ -107,12 +101,10 @@ export function getSignInPageContent({
 				description: "Set a new password, then we’ll sign you back in.",
 				supportPanel: {
 					bullets: [
-						"Choose the password that gets this purchased account back into a working state.",
-						"As soon as the password is accepted, we finish the sign-in flow automatically.",
-						"The original redirect target stays intact while you complete this step.",
+						"We finish sign-in automatically after the password is set.",
+						"Your original destination stays intact.",
 					],
-					description:
-						"You already proved ownership. This step is only about replacing the old password cleanly.",
+					description: "You proved ownership — just set the new password.",
 					title: "Set the password that gets you back in.",
 				},
 				title: "Choose a new password",
@@ -122,12 +114,10 @@ export function getSignInPageContent({
 				description: "Enter the reset code from your inbox to keep going.",
 				supportPanel: {
 					bullets: [
-						"The code keeps recovery tied to the purchased inbox before any password change happens.",
-						"You stay inside the same recovery shell while Clerk verifies ownership.",
-						"If the inbox is delayed, the flow can resend without leaving this route.",
+						"The code proves email ownership before any password change.",
+						"You can resend without leaving this route.",
 					],
-					description:
-						"This is the verification step that proves the email account can authorize the reset.",
+					description: "Check your inbox for the verification code.",
 					title: "Verify the code from your inbox.",
 				},
 				title: "Verify reset code",
@@ -142,19 +132,17 @@ export function getSignInPageContent({
 					bullets:
 						step.status === "needs_client_trust"
 							? [
-									"This browser needs one explicit approval before we return access.",
-									"The extra trust check protects the purchased account without changing your destination.",
-									"Once approved, we continue the same sign-in flow instead of restarting it.",
+									"This browser needs approval before we return access.",
+									"Once approved, sign-in continues without restarting.",
 								]
 							: [
-									"This account requires one more factor before we hand the session back.",
-									"The verification method stays scoped to this sign-in attempt and original redirect target.",
-									"If a factor is unavailable, start over and recover the purchased account instead of guessing.",
+									"One more factor is required before access is restored.",
+									"If a factor is unavailable, start over from the sign-in screen.",
 								],
 					description:
 						step.status === "needs_client_trust"
-							? "Clerk flagged this browser for an extra trust check before completing the purchased-account session."
-							: "The account needs one more verification factor before access can be restored.",
+							? "An extra trust check was triggered for this browser."
+							: "One more verification factor is needed.",
 					title:
 						step.status === "needs_client_trust"
 							? "Approve this browser and keep moving."

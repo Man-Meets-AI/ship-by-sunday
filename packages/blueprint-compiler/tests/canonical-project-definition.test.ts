@@ -17,7 +17,7 @@ describe("canonical project definition schema", () => {
 			"Download repo",
 		]);
 		expect(projectDefinition.facts.pricing).toBe(29);
-		expect(projectDefinition.facts.theme_hex).toBe("#0f766e");
+		expect(projectDefinition.facts.theme_preset).toBe("a0");
 		expect(projectDefinition.facts.contact_email).toBe("support@example.com");
 	});
 

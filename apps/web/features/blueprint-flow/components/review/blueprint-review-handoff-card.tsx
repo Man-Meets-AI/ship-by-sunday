@@ -54,7 +54,7 @@ export function BlueprintReviewHandoffCard({
 					<a
 						download
 						href={downloadHref}
-						className="text-sm leading-6 text-muted-foreground underline-offset-4 transition hover:text-foreground hover:underline"
+						className="text-sm leading-6 text-primary underline-offset-4 transition-colors hover:underline"
 					>
 						{fallbackLinkLabel}
 					</a>

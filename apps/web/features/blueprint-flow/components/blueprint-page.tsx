@@ -7,6 +7,7 @@ import { AppShell } from "@/features/course/shared/components/app-shell";
 import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
 import { BlueprintStageLeaveDialog } from "@/features/blueprint-flow/components/blueprint-stage-leave-dialog";
 import { BlueprintPageOverview } from "@/features/blueprint-flow/components/blueprint-page-overview";
+import { BlueprintPageProgressSidebar } from "@/features/blueprint-flow/components/blueprint-page-progress-sidebar";
 import { BlueprintPageSaveBar } from "@/features/blueprint-flow/components/blueprint-page-save-bar";
 import { BlueprintPageSectionCard } from "@/features/blueprint-flow/components/blueprint-page-section-card";
 import { useBlueprintPageState } from "@/features/blueprint-flow/hooks/use-blueprint-page-state";
@@ -62,6 +63,7 @@ export function BlueprintPage({
 	});
 	const {
 		currentDraftValues,
+		currentFacts,
 		currentFieldErrors,
 		currentSectionStatuses,
 		feedback,
@@ -101,36 +103,47 @@ export function BlueprintPage({
 				onNavigate: requestNavigation,
 			}}
 		>
-			<div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 pb-20 pt-4">
-				<BlueprintPageOverview
-					completedSectionCount={completedSectionCount}
-					totalSectionCount={currentSectionStatuses.length}
-				/>
-				{blueprintPageSections.map((section) => {
-					const sectionStatus = sectionStatusById.get(section.id);
-					if (!sectionStatus) {
-						throw new Error(
-							`Missing blueprint page section status for ${section.id}`,
-						);
-					}
-
-					return (
-						<BlueprintPageSectionCard
-							key={section.id}
-							draftValues={currentDraftValues}
-							facts={workspaceState.projectDefinition?.facts ?? {}}
-							fieldErrors={currentFieldErrors}
-							onChange={handleFieldChange}
-							section={section}
+			<div className="mx-auto flex w-full max-w-4xl flex-1 gap-10 px-4 pb-20 pt-4">
+				<div className="hidden w-48 shrink-0 xl:block">
+					<div className="sticky top-20">
+						<BlueprintPageProgressSidebar
+							sectionStatuses={currentSectionStatuses}
 						/>
-					);
-				})}
-				<BlueprintPageSaveBar
-					feedback={feedback}
-					isReviewReady={isReviewReady}
-					isSaving={isSaving}
-					onSaveAndContinue={handleSaveAndContinue}
-				/>
+					</div>
+				</div>
+				<div className="flex w-full min-w-0 max-w-2xl flex-1 flex-col">
+					<BlueprintPageOverview
+						completedSectionCount={completedSectionCount}
+						totalSectionCount={currentSectionStatuses.length}
+					/>
+					{blueprintPageSections.map((section, index) => {
+						const sectionStatus = sectionStatusById.get(section.id);
+						if (!sectionStatus) {
+							throw new Error(
+								`Missing blueprint page section status for ${section.id}`,
+							);
+						}
+
+						return (
+							<BlueprintPageSectionCard
+								key={section.id}
+								draftValues={currentDraftValues}
+								facts={currentFacts}
+								fieldErrors={currentFieldErrors}
+								isComplete={sectionStatus.isComplete}
+								onChange={handleFieldChange}
+								section={section}
+								sectionNumber={index + 1}
+							/>
+						);
+					})}
+					<BlueprintPageSaveBar
+						feedback={feedback}
+						isReviewReady={isReviewReady}
+						isSaving={isSaving}
+						onSaveAndContinue={handleSaveAndContinue}
+					/>
+				</div>
 			</div>
 			<BlueprintStageLeaveDialog
 				isOpen={isDialogOpen}

@@ -14,7 +14,7 @@ import {
 const reducedPricingStep = {
 	id: "pricing",
 	label: "Pricing",
-	fieldKeys: ["pricing", "core_flow", "theme_hex", "contact_email"],
+	fieldKeys: ["pricing", "core_flow", "theme_preset", "contact_email"],
 } as const;
 
 describe("blueprint field helpers", () => {
@@ -38,7 +38,7 @@ describe("blueprint field helpers", () => {
 					"Download repo",
 				],
 				pricing: 29,
-				theme_hex: "#0f766e",
+				theme_preset: "a0",
 			},
 			placeholdersInUse: [],
 			createdAt: 1,
@@ -171,7 +171,7 @@ describe("blueprint field helpers", () => {
 		}
 		const draftValues = {
 			...buildStepDraftValues(projectDefinition.facts, step),
-			theme_hex: " #123456 ",
+			theme_preset: " a1PzeK ",
 		};
 		const savePayload = buildSavePayload(step, draftValues);
 		const buildPlanDeliveryStep = blueprintStage.steps.find(
@@ -212,12 +212,12 @@ describe("blueprint field helpers", () => {
 		const reducedPricingSavePayload = buildSavePayload(reducedPricingStep, {
 			pricing: " 29 ",
 			core_flow: "Capture product facts\nUnlock blueprints",
-			theme_hex: " #0f766e ",
+			theme_preset: " a0 ",
 			contact_email: " founder@example.com ",
 		});
 
 		expect(savePayload.clearedFieldKeys).toEqual([]);
-		expect(savePayload.factsPatch.theme_hex).toBe("#123456");
+		expect(savePayload.factsPatch.theme_preset).toBe("a1PzeK");
 		expect(buildPlanDeliveryPayload.factsPatch.pricing).toBe(29);
 		expect(buildPlanSetupPayload.clearedFieldKeys).toContain("domain");
 		expect(problemPayload.factsPatch.problem_severity).toBe("5");
@@ -226,7 +226,7 @@ describe("blueprint field helpers", () => {
 			"Capture product facts",
 			"Unlock blueprints",
 		]);
-		expect(reducedPricingSavePayload.factsPatch.theme_hex).toBe("#0f766e");
+		expect(reducedPricingSavePayload.factsPatch.theme_preset).toBe("a0");
 		expect(reducedPricingSavePayload.factsPatch.contact_email).toBe(
 			"founder@example.com",
 		);

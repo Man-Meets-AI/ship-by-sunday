@@ -1,5 +1,5 @@
 import { createStagePromptSession } from "../src/prompts/stage-prompt-session";
-import { DEFAULT_THEME_HEX } from "../src/field-contract";
+import { DEFAULT_THEME_PRESET } from "../src/field-contract";
 import { createLocalDraftDefinition } from "../src/draft/draft-store";
 
 describe("stage prompt session", () => {
@@ -79,12 +79,12 @@ describe("stage prompt session", () => {
 		const designSession = createStagePromptSession({ stageId: "blueprint" });
 		const themePrompt = designSession.formatFieldPrompt({
 			draft: { facts: {} },
-			fieldKey: "theme_hex",
+			fieldKey: "theme_preset",
 			stepIndex: 0,
 			fieldIndex: 0,
 			fieldCount: 2,
 		});
-		expect(themePrompt.prompt).toContain(DEFAULT_THEME_HEX);
+		expect(themePrompt.prompt).toContain(DEFAULT_THEME_PRESET);
 
 		const buildPlanSession = createStagePromptSession({
 			stageId: "blueprint",

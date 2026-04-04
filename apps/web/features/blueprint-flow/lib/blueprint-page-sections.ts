@@ -20,7 +20,8 @@ const sectionDescriptionById = {
 		"Define what success looks like and the concrete flow the user follows.",
 	design:
 		"Set the visual anchor and collect any references worth carrying forward.",
-	pricing: "Capture the one-time price that shapes the generated starter.",
+	pricing:
+		"Choose a pricing model and set the price for the generated starter.",
 	setup:
 		"Refine optional scope and handoff details only where you want to steer the output.",
 } as const satisfies Record<BlueprintPageSectionId, string>;
