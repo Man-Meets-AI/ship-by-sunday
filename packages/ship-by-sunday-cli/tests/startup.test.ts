@@ -40,7 +40,7 @@ describe("CLI startup surface", () => {
 		expect(surface).toContain("Repository: ship-by-sunday");
 		expect(surface).toContain("Working root: /tmp/ship-by-sunday");
 		expect(surface).toContain(
-			"Guided blueprint intake, readiness checks, and blueprint generation for this repository.",
+			"Guided blueprint intake, readiness checks, and Ship by Sunday Blueprint generation for this repository.",
 		);
 		expect(surface).toContain("bun run sbs resume");
 		expect(surface).toContain("bun run sbs next --json");
