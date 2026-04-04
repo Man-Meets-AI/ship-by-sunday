@@ -107,15 +107,6 @@ const blueprintSectionMedia: Record<
 			"Review the generated scope defaults, then add domain or contact details only if they matter right now.",
 		body: "The generator can infer a first pass from the core flow. Only touch these fields if you want to steer the output.",
 	},
-	"generated-preview": {
-		kind: "orientation",
-		eyebrow: "Generated",
-		badge: "Marketing",
-		title: "Review the generated defaults",
-		description:
-			"This page is generated from your blueprint so you do not have to fill another marketing form.",
-		body: "Use it as a preview of what the compiler inferred from your product, problem, success state, and flow.",
-	},
 };
 
 const blueprintStartPageMedia: BlueprintPageMedia = {

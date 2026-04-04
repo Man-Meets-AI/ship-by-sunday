@@ -7,7 +7,6 @@ import { AppShell } from "@/features/course/shared/components/app-shell";
 import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
 import { BlueprintStageLeaveDialog } from "@/features/blueprint-flow/components/blueprint-stage-leave-dialog";
 import { BlueprintPageOverview } from "@/features/blueprint-flow/components/blueprint-page-overview";
-import { BlueprintPageProgressSidebar } from "@/features/blueprint-flow/components/blueprint-page-progress-sidebar";
 import { BlueprintPageSaveBar } from "@/features/blueprint-flow/components/blueprint-page-save-bar";
 import { BlueprintPageSectionCard } from "@/features/blueprint-flow/components/blueprint-page-section-card";
 import { useBlueprintPageState } from "@/features/blueprint-flow/hooks/use-blueprint-page-state";
@@ -77,10 +76,9 @@ export function BlueprintPage({
 		saveProjectDefinitionFacts,
 		unlockExecuteShip,
 	});
-	const missingRequiredCount = currentSectionStatuses.reduce(
-		(sum, sectionStatus) => sum + sectionStatus.missingFactKeys.length,
-		0,
-	);
+	const completedSectionCount = currentSectionStatuses.filter(
+		(s) => s.isComplete,
+	).length;
 	const sectionStatusById = new Map(
 		currentSectionStatuses.map((sectionStatus) => [
 			sectionStatus.sectionId,
@@ -102,65 +100,37 @@ export function BlueprintPage({
 				onLinkNavigate: handleLinkNavigation,
 				onNavigate: requestNavigation,
 			}}
-			localNav={{
-				kind: "blueprint",
-				compact: (
-					<nav
-						aria-label="Blueprint section shortcuts"
-						className="flex gap-2 overflow-x-auto pb-1"
-					>
-						{blueprintPageSections.map((section) => (
-							<a
-								key={section.id}
-								href={`#${section.id}`}
-								className="shrink-0 rounded-full border border-border/60 px-3 py-1.5 text-xs font-medium text-muted-foreground"
-							>
-								{section.label}
-							</a>
-						))}
-					</nav>
-				),
-				desktop: (
-					<BlueprintPageProgressSidebar
-						sectionStatuses={currentSectionStatuses}
-					/>
-				),
-			}}
 		>
-			<div className="mx-auto flex w-full max-w-[1440px] flex-1 flex-col gap-6 px-4 pb-12 pt-4">
-				<div className="space-y-6 pt-2">
-					<BlueprintPageOverview
-						isReviewReady={isReviewReady}
-						missingRequiredCount={missingRequiredCount}
-					/>
-					{blueprintPageSections.map((section) => {
-						const sectionStatus = sectionStatusById.get(section.id);
-						if (!sectionStatus) {
-							throw new Error(
-								`Missing blueprint page section status for ${section.id}`,
-							);
-						}
-
-						return (
-							<BlueprintPageSectionCard
-								key={section.id}
-								draftValues={currentDraftValues}
-								facts={workspaceState.projectDefinition?.facts ?? {}}
-								fieldErrors={currentFieldErrors}
-								isComplete={sectionStatus.isComplete}
-								missingCount={sectionStatus.missingFactKeys.length}
-								onChange={handleFieldChange}
-								section={section}
-							/>
+			<div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 pb-20 pt-4">
+				<BlueprintPageOverview
+					completedSectionCount={completedSectionCount}
+					totalSectionCount={currentSectionStatuses.length}
+				/>
+				{blueprintPageSections.map((section) => {
+					const sectionStatus = sectionStatusById.get(section.id);
+					if (!sectionStatus) {
+						throw new Error(
+							`Missing blueprint page section status for ${section.id}`,
 						);
-					})}
-					<BlueprintPageSaveBar
-						feedback={feedback}
-						isReviewReady={isReviewReady}
-						isSaving={isSaving}
-						onSaveAndContinue={handleSaveAndContinue}
-					/>
-				</div>
+					}
+
+					return (
+						<BlueprintPageSectionCard
+							key={section.id}
+							draftValues={currentDraftValues}
+							facts={workspaceState.projectDefinition?.facts ?? {}}
+							fieldErrors={currentFieldErrors}
+							onChange={handleFieldChange}
+							section={section}
+						/>
+					);
+				})}
+				<BlueprintPageSaveBar
+					feedback={feedback}
+					isReviewReady={isReviewReady}
+					isSaving={isSaving}
+					onSaveAndContinue={handleSaveAndContinue}
+				/>
 			</div>
 			<BlueprintStageLeaveDialog
 				isOpen={isDialogOpen}

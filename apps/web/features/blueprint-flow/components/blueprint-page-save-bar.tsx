@@ -14,15 +14,17 @@ export function BlueprintPageSaveBar({
 	onSaveAndContinue: () => void | Promise<void>;
 }) {
 	return (
-		<section className="space-y-4 rounded-[24px] border border-border/60 bg-background p-6 shadow-sm">
-			<div aria-live="polite" className={feedback ? undefined : "min-h-12"}>
-				{feedback ? <BlueprintStageSaveFeedback feedback={feedback} /> : null}
-			</div>
+		<section className="border-t border-border/40 pt-8 pb-4">
+			{feedback ? (
+				<div aria-live="polite" className="mb-4">
+					<BlueprintStageSaveFeedback feedback={feedback} />
+				</div>
+			) : null}
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<p className="text-sm leading-6 text-muted-foreground">
 					{isReviewReady
-						? "The blueprint is complete. Continue to Review to start the final handoff."
-						: "Continue saves the current draft, reveals any remaining blockers, and moves to Review only when the blueprint is complete."}
+						? "Everything looks good. Continue to review your blueprint."
+						: "Save your progress and continue when all sections are complete."}
 				</p>
 				<Button
 					type="button"
