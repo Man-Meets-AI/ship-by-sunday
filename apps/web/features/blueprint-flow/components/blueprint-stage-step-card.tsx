@@ -4,8 +4,8 @@ import type {
 	CanonicalProjectFactKey,
 	CanonicalProjectFactsDraft,
 	BlueprintStepDefinition,
-} from "@blueprint-compiler";
-import { deriveBlueprintFacts } from "@blueprint-compiler";
+} from "@shipbysunday/blueprint-compiler";
+import { deriveBlueprintFacts } from "@shipbysunday/blueprint-compiler";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";

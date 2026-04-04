@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
 	createCompleteProjectDefinition,
 	deriveStageStatus,
-} from "@blueprint-compiler";
+} from "@shipbysunday/blueprint-compiler";
 import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
 
 vi.mock("next/link", () => ({

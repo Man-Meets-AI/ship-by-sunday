@@ -4,7 +4,7 @@ import { fetchQuery } from "convex/nextjs";
 import {
 	canonicalProjectFactsSchema,
 	createCanonicalProjectDefinition,
-} from "@blueprint-compiler";
+} from "@shipbysunday/blueprint-compiler";
 import type { FunctionReturnType } from "convex/server";
 import { api } from "@/convex/_generated/api";
 import { getConvexServerSession } from "@/platform/auth/convex-auth";

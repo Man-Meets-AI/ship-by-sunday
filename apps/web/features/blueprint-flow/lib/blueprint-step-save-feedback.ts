@@ -1,7 +1,7 @@
 import type {
 	CanonicalProjectFactKey,
 	BlueprintStepDefinition,
-} from "@blueprint-compiler";
+} from "@shipbysunday/blueprint-compiler";
 import { blueprintFieldLabel } from "./blueprint-field-helpers";
 
 type BlueprintStepValue = string | number | string[] | undefined;

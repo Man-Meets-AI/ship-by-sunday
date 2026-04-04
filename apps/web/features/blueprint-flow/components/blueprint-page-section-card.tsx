@@ -3,8 +3,8 @@
 import type {
 	CanonicalProjectFactKey,
 	CanonicalProjectFactsDraft,
-} from "@blueprint-compiler";
-import { deriveBlueprintFacts } from "@blueprint-compiler";
+} from "@shipbysunday/blueprint-compiler";
+import { deriveBlueprintFacts } from "@shipbysunday/blueprint-compiler";
 import { FieldGroup } from "@/components/ui/field";
 import { BlueprintStageStepField } from "@/features/blueprint-flow/components/blueprint-stage-step-field";
 import type { BlueprintPageSectionId } from "@/features/blueprint-flow/lib/blueprint-page-sections";

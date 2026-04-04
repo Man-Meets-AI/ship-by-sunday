@@ -19,11 +19,7 @@
 			}
 		],
 		"paths": {
-			"@/*": ["./*"],
-			"@blueprint-compiler": ["../../packages/blueprint-compiler/src/index.ts"],
-			"@blueprint-compiler/server": [
-				"../../packages/blueprint-compiler/src/server.ts"
-			]
+			"@/*": ["./*"]
 		}
 	},
 	"include": [

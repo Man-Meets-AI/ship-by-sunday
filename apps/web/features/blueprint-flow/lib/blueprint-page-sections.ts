@@ -1,4 +1,4 @@
-import { getBlueprintStageDefinition } from "@blueprint-compiler";
+import { getBlueprintStageDefinition } from "@shipbysunday/blueprint-compiler";
 
 export const BLUEPRINT_OVERVIEW_ID = "overview" as const;
 

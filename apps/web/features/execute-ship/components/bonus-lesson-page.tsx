@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { AlertCircleIcon } from "lucide-react";
-import type { BlueprintStageStatus } from "@blueprint-compiler";
+import type { BlueprintStageStatus } from "@shipbysunday/blueprint-compiler";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LessonShellWatch } from "@/features/course/lesson/shells";
 import { getLessonByKey } from "@/features/course/lesson/model/manifest";

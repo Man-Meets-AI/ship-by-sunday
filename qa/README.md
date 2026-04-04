@@ -2,6 +2,8 @@
 
 This folder is the product-readable source of truth for Ship by Sunday QA. Read this folder before reading `apps/web/tests/` if you need to answer what journeys matter, which personas are required, what should run before ship, and which existing tests are still worth trusting.
 
+For incident capture, webhook verification, and manual status control, use [docs/internal/observability.md](../docs/internal/observability.md) as the operational drill instead of duplicating that flow here.
+
 The control plane is organized around product journeys first and implementation files second.
 
 - `qa/glossary.md` defines the shared language for journeys, personas, scenario packs, confidence states, and release reports.

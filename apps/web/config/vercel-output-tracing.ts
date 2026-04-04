@@ -1,3 +1,3 @@
-import { buildRepoDownloadTraceIncludes } from "../../../packages/blueprint-compiler/src/repo-generation/repo-download-source-contract";
+import { buildRepoDownloadTraceIncludes } from "@shipbysunday/blueprint-compiler/server";
 
 export const repoDownloadTraceIncludes = buildRepoDownloadTraceIncludes();

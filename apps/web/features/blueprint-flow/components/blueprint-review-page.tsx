@@ -1,7 +1,7 @@
 "use client";
 
 import { useConvexAuth, useQuery } from "convex/react";
-import { getBlueprintStageDefinition } from "@blueprint-compiler";
+import { getBlueprintStageDefinition } from "@shipbysunday/blueprint-compiler";
 import type { FunctionReturnType } from "convex/server";
 import { redirect } from "next/navigation";
 import { useState } from "react";

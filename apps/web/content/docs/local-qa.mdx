@@ -169,20 +169,7 @@ This smoke lane now proves the auth-route shell too: `/sign-in`, `/session-tasks
 
 ## Observability smoke
 
-Use this when you need real incident blueprints instead of unit-test confidence.
-
-1. Confirm `apps/web/.env.local` has `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_CONVEX_SITE_URL`, `OBSERVABILITY_INGEST_TOKEN`, `TELEGRAM_BOT_TOKEN`, and `TELEGRAM_CHAT_ID`.
-2. Run the narrow observability validation first:
-
-```bash
-bunx vitest run tests/unit/observability-*.test.ts tests/unit/clerk-webhook-adapter.test.ts tests/unit/vercel-webhook-adapter.test.ts tests/unit/stripe-observability.test.ts tests/unit/stripe-webhook-action.test.ts tests/integration/observability-client-error-route.test.ts tests/integration/observability-clerk-route.test.ts tests/integration/observability-vercel-route.test.ts tests/integration/observability-incident-status-route.test.ts tests/integration/stripe-checkout-route.test.ts
-```
-
-3. Use signed Clerk and Vercel smoke requests plus one client-error request.
-4. Inspect the target Convex deployment with `bunx convex data incidents --format jsonLines`.
-5. Use the public incident status route to set a live incident to `acked`, replay the same event, and confirm `occurrenceCount` increases while `deliveryCount` stays fixed.
-
-The currently proven live path is Clerk + Vercel + client-error ingress plus live incident status control. The only remaining unproven live path is the authenticated Codex runtime route.
+Use this only for maintainer-level incident work. The full webhook, incident-control, and Telegram-delivery drill now lives in the internal observability runbook, so this page stays focused on local QA flows instead of repeating that same path.
 
 ## What success looks like
 

@@ -30,7 +30,7 @@ describe("blueprint presentation", () => {
 				rightLabel: "Critical blocker",
 			}),
 		);
-		expect(getBlueprintStepLabel("build-plan", "setup")).toBe(
+		expect(getBlueprintStepLabel("blueprint", "setup")).toBe(
 			"Optional setup details",
 		);
 	});

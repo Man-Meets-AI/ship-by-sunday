@@ -17,6 +17,8 @@ For production in this repo, the live Stripe webhook should target the Convex HT
 
 If Stripe is pointed at `https://<your-app-domain>/api/stripe/webhook` while the real handler lives in Convex, Checkout can complete and return to `/checkout/success` while access grant never happens.
 
+For incident-control, webhook-alert, and Telegram-delivery drills, use the internal observability runbook instead of rebuilding that flow from this page.
+
 ## Required Stripe env values
 
 Add these to `.env.local`:

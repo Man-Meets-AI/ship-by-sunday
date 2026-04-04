@@ -2,8 +2,8 @@ import {
 	createCanonicalProjectDefinitionDraft,
 	parseCanonicalProjectFactsDraft,
 	placeholderFriendlyFactKeys,
-} from "../../../../packages/blueprint-compiler/src/canonical-project-definition/project-definition";
-import { createCompleteProjectDefinition } from "../../../../packages/blueprint-compiler/src/fixtures/complete-project-definition";
+} from "@shipbysunday/blueprint-compiler";
+import { createCompleteProjectDefinition } from "@shipbysunday/blueprint-compiler";
 import { v } from "convex/values";
 
 import { PRODUCT_APP_ID } from "../../config/product";
