@@ -349,7 +349,7 @@ Evidence gathered during planning and execution:
 
   There is no root `convex.json`; the location of the `convex/` directory is part of the active Convex command contract.
 
-  The existing Vercel project `man-meets-ai-simple` now reports `Root Directory apps/web` and a preview deployment succeeded at `https://man-meets-ai-simple-ls4j3790y-rexorg.vercel.app`.
+  The existing Vercel project now reports `Root Directory apps/web`, and a matching preview deployment succeeded.
 
 ## Interfaces and Dependencies
 

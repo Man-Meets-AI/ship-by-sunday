@@ -40,7 +40,7 @@ After the remaining work in this plan is complete, a maintainer should be able t
 
 The original plan is stale in one important way: the repository no longer uses `errorEvents` as the active incident path. The canonical path now starts in `features/observability/lib/incident.ts`, crosses `features/observability/server/ingest-error-event.ts`, lands in `convex/http.ts` at `POST /observability/events`, and persists into the `incidents` table in `convex/schema.ts`. The old `errorEvents` table still exists in the schema as legacy baggage, but the active path is incident-shaped now.
 
-The product identity in code is still `ship-by-sunday`, not `manmeetsai`. `config/product.ts` drives the `product` field stored on incidents and the product name shown in Telegram blueprints, so the plan must describe the repository as it exists today rather than the older naming used in the first draft.
+The product identity in code is still `ship-by-sunday`, not the older naming used in the first draft. `config/product.ts` drives the `product` field stored on incidents and the product name shown in Telegram blueprints, so the plan must describe the repository as it exists today rather than that earlier draft vocabulary.
 
 The build now succeeds, but Turbopack still emits a non-blocking NFT tracing warning through `features/codex/server/app-server.ts` because that file uses filesystem and child-process APIs from a route path. This is not a build blocker right now, but it is a real operational note for future packaging work.
 

@@ -64,7 +64,7 @@ export async function assertClerkTargetMatchesQaEnv({
 	const signInUrl = new URL("/sign-in", normalizedBaseUrl);
 	const response = await fetchImpl(signInUrl, {
 		headers: {
-			"user-agent": "manmeetsai-qa-auth-check/1.0",
+			"user-agent": "shipbysunday-qa-auth-check/1.0",
 		},
 		redirect: "follow",
 	});

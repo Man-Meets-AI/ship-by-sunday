@@ -3,7 +3,7 @@ import {
 	type CanonicalProjectFactsDraft,
 	type CanonicalProjectFactKey,
 	type BlueprintStageId,
-} from "@manmeetsai/blueprint-compiler";
+} from "@shipbysunday/blueprint-compiler";
 
 export type BlueprintFieldScaleOption = {
 	value: string;
