@@ -16,6 +16,9 @@ import { useBlueprintPageState } from "@/features/blueprint-flow/hooks/use-bluep
 type SaveProjectDefinitionFactsMock = ReactMutation<
 	typeof api.blueprint.saveProjectDefinitionFacts
 >;
+type UnlockExecuteShipMock = ReactMutation<
+	typeof api.blueprint.unlockExecuteShip
+>;
 
 function createProjectFacts(factOverrides: Record<string, unknown> = {}) {
 	return {
@@ -26,20 +29,36 @@ function createProjectFacts(factOverrides: Record<string, unknown> = {}) {
 
 function createMutationMock() {
 	const saveProjectDefinitionFactsSpy = vi.fn().mockResolvedValue({});
+	const unlockExecuteShipSpy = vi.fn().mockResolvedValue({});
 	const saveProjectDefinitionFacts = Object.assign(
 		(args: unknown) => saveProjectDefinitionFactsSpy(args),
 		{
 			withOptimisticUpdate: vi.fn(() => saveProjectDefinitionFacts),
 		},
 	) as SaveProjectDefinitionFactsMock;
+	const unlockExecuteShip = Object.assign(
+		(args: unknown) => unlockExecuteShipSpy(args),
+		{
+			withOptimisticUpdate: vi.fn(() => unlockExecuteShip),
+		},
+	) as UnlockExecuteShipMock;
 
-	return { saveProjectDefinitionFacts, saveProjectDefinitionFactsSpy };
+	return {
+		saveProjectDefinitionFacts,
+		saveProjectDefinitionFactsSpy,
+		unlockExecuteShip,
+		unlockExecuteShipSpy,
+	};
 }
 
 describe("useBlueprintPageState", () => {
 	it("keeps typing local until Continue is pressed, then reveals missing required answers", async () => {
-		const { saveProjectDefinitionFacts, saveProjectDefinitionFactsSpy } =
-			createMutationMock();
+		const {
+			saveProjectDefinitionFacts,
+			saveProjectDefinitionFactsSpy,
+			unlockExecuteShip,
+			unlockExecuteShipSpy,
+		} = createMutationMock();
 		const navigateToHref = vi.fn();
 		const { result } = renderHook(() =>
 			useBlueprintPageState({
@@ -51,6 +70,7 @@ describe("useBlueprintPageState", () => {
 					pricing: undefined,
 				}),
 				saveProjectDefinitionFacts,
+				unlockExecuteShip,
 			}),
 		);
 
@@ -80,12 +100,16 @@ describe("useBlueprintPageState", () => {
 		expect(result.current.currentFieldErrors.primary_user).toBe(
 			"Add an answer here before Review can unlock.",
 		);
+		expect(unlockExecuteShipSpy).not.toHaveBeenCalled();
 		expect(navigateToHref).not.toHaveBeenCalled();
 	});
 
 	it("omits untouched generated scope fields from the save payload", async () => {
-		const { saveProjectDefinitionFacts, saveProjectDefinitionFactsSpy } =
-			createMutationMock();
+		const {
+			saveProjectDefinitionFacts,
+			saveProjectDefinitionFactsSpy,
+			unlockExecuteShip,
+		} = createMutationMock();
 		const { result } = renderHook(() =>
 			useBlueprintPageState({
 				navigateToHref: vi.fn(),
@@ -94,6 +118,7 @@ describe("useBlueprintPageState", () => {
 					scope_out: undefined,
 				}),
 				saveProjectDefinitionFacts,
+				unlockExecuteShip,
 			}),
 		);
 
@@ -120,13 +145,18 @@ describe("useBlueprintPageState", () => {
 	});
 
 	it("navigates to review once the blueprint is complete", async () => {
-		const { saveProjectDefinitionFacts } = createMutationMock();
+		const {
+			saveProjectDefinitionFacts,
+			unlockExecuteShip,
+			unlockExecuteShipSpy,
+		} = createMutationMock();
 		const navigateToHref = vi.fn();
 		const { result } = renderHook(() =>
 			useBlueprintPageState({
 				navigateToHref,
 				projectFacts: createProjectFacts(),
 				saveProjectDefinitionFacts,
+				unlockExecuteShip,
 			}),
 		);
 
@@ -141,6 +171,7 @@ describe("useBlueprintPageState", () => {
 			await result.current.handleSaveAndContinue();
 		});
 
-		expect(navigateToHref).toHaveBeenCalledWith("/review");
+		expect(unlockExecuteShipSpy).toHaveBeenCalledWith({});
+		expect(navigateToHref).toHaveBeenCalledWith("/review?download=1");
 	});
 });

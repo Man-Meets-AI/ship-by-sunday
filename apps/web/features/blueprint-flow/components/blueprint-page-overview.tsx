@@ -26,7 +26,7 @@ export function BlueprintPageOverview({
 					<p className="max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
 						Answer the full reduced blueprint here, keep the draft local until
 						you press Continue to Review, and let the review page stay focused
-						on readiness plus the Ship by Sunday Blueprint download.
+						on the final handoff into Build Lessons.
 					</p>
 				</div>
 				<div className="flex flex-wrap gap-3">

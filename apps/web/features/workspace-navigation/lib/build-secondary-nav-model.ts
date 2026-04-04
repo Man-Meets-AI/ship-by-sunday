@@ -11,7 +11,7 @@ import type { PostReviewNavigationTargets } from "./post-review-destination";
 import type { WorkspacePrimaryNavState } from "./build-primary-nav-model";
 
 export const REVIEW_OVERVIEW_ID = "review-overview";
-export const REVIEW_DOWNLOADS_ID = "review-downloads";
+export const REVIEW_HANDOFF_ID = "review-handoff";
 export const REVIEW_LESSON_MAP_ID = "review-lesson-map";
 
 export type WorkspaceLocalNavItem = {
@@ -104,7 +104,7 @@ export function buildReviewLocalNavModel({
 			{
 				id: "review-orientation",
 				label: "Review",
-				description: "Handoff, downloads, and the lesson map.",
+				description: "Overview, handoff, and the lesson map.",
 				items: [
 					{
 						id: "overview",
@@ -113,9 +113,9 @@ export function buildReviewLocalNavModel({
 						state: isLessonMapVisible ? "available" : "active",
 					},
 					{
-						id: "downloads",
-						label: "Downloads",
-						href: `#${REVIEW_DOWNLOADS_ID}`,
+						id: "handoff",
+						label: "Handoff",
+						href: `#${REVIEW_HANDOFF_ID}`,
 						state: "available",
 					},
 					{

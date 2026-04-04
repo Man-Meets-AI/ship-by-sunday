@@ -49,6 +49,7 @@ export function BlueprintPage({
 	const saveProjectDefinitionFacts = useMutation(
 		api.blueprint.saveProjectDefinitionFacts,
 	);
+	const unlockExecuteShip = useMutation(api.blueprint.unlockExecuteShip);
 	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 	const {
 		handleLinkNavigation,
@@ -74,6 +75,7 @@ export function BlueprintPage({
 		onDirtyChange: setHasUnsavedChanges,
 		projectFacts: workspaceState.projectDefinition?.facts ?? {},
 		saveProjectDefinitionFacts,
+		unlockExecuteShip,
 	});
 	const missingRequiredCount = currentSectionStatuses.reduce(
 		(sum, sectionStatus) => sum + sectionStatus.missingFactKeys.length,

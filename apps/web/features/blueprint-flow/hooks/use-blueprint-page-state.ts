@@ -16,8 +16,9 @@ import {
 	parseCanonicalProjectFactsDraft,
 	placeholderFriendlyFactKeys,
 } from "@blueprint-compiler";
-import { PRODUCT_APP_ID, routeConfig } from "@/config/product";
+import { PRODUCT_APP_ID } from "@/config/product";
 import { api } from "@/convex/_generated/api";
+import { getReviewAutoDownloadHref } from "@/features/blueprint-flow/lib/review-download-handoff";
 import {
 	blueprintPageSections,
 	type BlueprintPageSectionId,
@@ -40,6 +41,9 @@ type SaveProjectDefinitionFactsArgs = {
 
 type SaveProjectDefinitionFactsMutation = ReactMutation<
 	typeof api.blueprint.saveProjectDefinitionFacts
+>;
+type UnlockExecuteShipMutation = ReactMutation<
+	typeof api.blueprint.unlockExecuteShip
 >;
 
 type BlueprintPageDraftValues = Partial<
@@ -343,11 +347,13 @@ export function useBlueprintPageState({
 	onDirtyChange,
 	projectFacts,
 	saveProjectDefinitionFacts,
+	unlockExecuteShip,
 }: {
 	navigateToHref: (href: string) => void;
 	onDirtyChange?: (hasUnsavedChanges: boolean) => void;
 	projectFacts: CanonicalProjectFactsDraft;
 	saveProjectDefinitionFacts: SaveProjectDefinitionFactsMutation;
+	unlockExecuteShip: UnlockExecuteShipMutation;
 }) {
 	const { isLoaded: isUserLoaded, user } = useUser();
 	const contactEmail = isUserLoaded
@@ -372,7 +378,7 @@ export function useBlueprintPageState({
 	const [feedback, setFeedback] = useState<BlueprintStepInlineFeedback | null>(
 		null,
 	);
-	const [hasSaveError, setHasSaveError] = useState(false);
+	const [hasSubmitError, setHasSubmitError] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
 	const previousLiveSavedValuesRef = useRef(liveSavedValues);
 	const currentDraftValuesRef = useRef(currentDraftValues);
@@ -435,17 +441,18 @@ export function useBlueprintPageState({
 	const currentFieldErrors = validationRequested
 		? buildFieldErrors(currentSectionStatuses)
 		: {};
-	const visibleFeedback = hasSaveError
+	const visibleFeedback = hasSubmitError
 		? {
 				tone: "destructive" as const,
-				title: "We could not save this blueprint right now.",
-				description: "Your draft is still here. Please try again.",
+				title: "We could not open review right now.",
+				description:
+					"Your latest blueprint draft is still here. Please try again.",
 			}
 		: feedback;
 
 	const handleFieldChange = useCallback(
 		(fieldKey: CanonicalProjectFactKey, nextValue: string) => {
-			setHasSaveError(false);
+			setHasSubmitError(false);
 			const nextDraftValues = {
 				...currentDraftValuesRef.current,
 				[fieldKey]: nextValue,
@@ -504,31 +511,41 @@ export function useBlueprintPageState({
 			missingFactKeys: nextMissingFactKeys,
 		});
 
+		setHasSubmitError(false);
+		setIsSaving(true);
+
 		if (hasUnsavedChanges) {
-			setHasSaveError(false);
-			setIsSaving(true);
 			try {
 				await saveProjectDefinitionFactsWithOptimism(savePayload);
 			} catch {
-				setHasSaveError(true);
+				setHasSubmitError(true);
 				setIsSaving(false);
 				return;
 			}
-			setIsSaving(false);
 			setSavedBaselineValues(submittedDraftValues);
 			onDirtyChange?.(false);
 		}
 
 		if (nextMissingFactKeys.length > 0) {
+			setIsSaving(false);
 			setValidationRequested(true);
 			setFeedback(nextFeedback);
 			focusFirstMissingField(nextSectionStatuses);
 			return;
 		}
 
+		try {
+			await unlockExecuteShip({});
+		} catch {
+			setHasSubmitError(true);
+			setIsSaving(false);
+			return;
+		}
+
+		setIsSaving(false);
 		setValidationRequested(false);
 		setFeedback(nextFeedback);
-		navigateToHref(routeConfig.review);
+		navigateToHref(getReviewAutoDownloadHref());
 	}, [
 		baselineSectionStatuses,
 		hasUnsavedChanges,
@@ -537,6 +554,7 @@ export function useBlueprintPageState({
 		projectFacts,
 		saveProjectDefinitionFactsWithOptimism,
 		savedBaselineValues,
+		unlockExecuteShip,
 	]);
 
 	return {

@@ -30,8 +30,8 @@ bun run check
 
 Use two real users:
 
-- no-access user for sign-in, `/start`, wrong-account, and pre-purchase checks
-- granted-access user for `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, `/review`, `/settings`, and the optional `/execute`, `/mission`, and `/lesson/*` bonus-route checks after review unlock
+- no-access user for sign-in, `/blueprint`, wrong-account, and pre-purchase checks
+- granted-access user for `/blueprint`, `/review`, `/settings`, and the optional `/execute`, `/mission`, and `/lesson/*` bonus-route checks after review unlock
 
 Commands:
 
@@ -47,7 +47,7 @@ bun run clerk:test-user:prepare:entitled
 
 Use `bun run qa:personas:prepare -- --pack=<pack>` when you need the canonical QA control-plane path instead of the one-user local shortcut. The fast helper is for a single entitled debug account. The QA command is the durable multi-persona setup path used by the packs.
 
-The Playwright sandbox bootstrap now normalizes product access as part of auth-state creation. The non-entitled persona is reset back to `no_access`, and the entitled persona is granted access again before storage state is written. If the no-access browser lane ever starts behaving like an entitled user, treat that as Convex deployment drift or bootstrap failure first, not as a UI bug.
+The Playwright sandbox bootstrap is a local test convenience, not a stable auth path. It seeds browser storage state for deterministic personas, but local auth still depends on Clerk syncing into the browser runtime. If the no-access browser lane ever starts behaving like an entitled user, or a signed-in lane flashes `Unauthorized` during hydration, treat that as Convex deployment drift or bootstrap failure first, not as a product-state bug.
 
 The canonical QA credentials live in ignored `qa/personas.local.json`. The root `qa:*` commands and the Playwright sandbox bootstrap both read that file for the no-access and entitled account emails and passwords.
 
@@ -63,7 +63,7 @@ Use this only in a safe local test environment.
 6. Complete payment with Stripe test card `4242 4242 4242 4242`, any future expiry, any CVC, ZIP `10001`.
 7. Confirm Stripe returns to `/checkout/success?session_id=...`.
 8. Confirm the webhook grants access.
-9. Confirm the app redirects into `/start`.
+9. Confirm the app redirects into `/blueprint`.
 
 On a new machine or after switching deployments, run `bun run dev:convex` first so `apps/web/.env.local` contains the current `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_CONVEX_SITE_URL`, and `CONVEX_DEPLOYMENT` values. In this repo, the Stripe listener must forward to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`, not the `.convex.cloud` client origin.
 
@@ -122,10 +122,12 @@ This requires `NEXT_PUBLIC_CONVEX_URL` from your hosted Convex dev deployment to
 
 This smoke lane now proves the auth-route shell too: `/sign-in`, `/session-tasks/reset-password`, and `/sso-callback` must all render and emit `noindex`, not just the older `/sign-in` meta-tag check.
 
-### Signed-out protected-route smoke
+### Canonical protected-route smoke
 
-1. Visit `/start` or `/settings` while signed out.
-2. Confirm redirect into `/sign-in` with the current protected path preserved in `redirect_url`.
+1. Visit `/blueprint` while signed out.
+2. Confirm redirect into `/sign-in` with `/blueprint` preserved in `redirect_url`.
+3. Visit `/review` while signed out.
+4. Confirm redirect into `/sign-in` with `/review` preserved in `redirect_url`.
 
 ### Identity route smoke
 
@@ -138,20 +140,32 @@ This smoke lane now proves the auth-route shell too: `/sign-in`, `/session-tasks
 ### No-access flow
 
 1. Sign in with the no-access account.
-2. Visit `/start`.
+2. Visit `/blueprint`.
 3. Confirm the page explains that the account has no active access and shows which email is currently signed in before you treat it as a Stripe or Convex failure.
 
 ### Granted-access flow
 
+1. Run `bun run review:handoff:doctor` before the browser checks so the route and handoff contract are green before you spend time on auth or playback issues.
+2. If you intend to use the local-auth browser lane, treat it as a convenience path only. The stable shared proof remains the sandbox browser path.
+3. Run `bun run clerk:test-user:prepare:entitled`.
+4. Sign in with the granted-access account.
+5. Confirm `/blueprint`, `/review`, and `/settings` load.
+6. On `/review`, confirm the page makes one automatic Ship by Sunday Blueprint download attempt, keeps the fallback download link visible if the browser blocks it, and does not present a manual download dashboard.
+7. On `/review`, confirm the fallback link text is `Need the Ship by Sunday Blueprint again? Download it here.` on a normal revisit, and that direct `/review` visits do not auto-start another download.
+8. From `/review`, confirm the primary CTA opens lesson `3.1`.
+9. Before unlocking Execute / Ship, confirm direct `/mission` and `/lesson/<route-segment>` visits show explicit locked-bonus messaging instead of forwarding into `/blueprint`.
+10. Confirm `/mission` loads as the bonus library with the top block rail in natural `Product -> Design -> Build -> Ship` order, defaulting the active block to Build.
+11. Confirm direct `/lesson/<route-segment>` visits render the restored video-first bonus lesson path with the top block rail plus the bottom lesson skill rail, and without workbench inputs.
+
+### Legacy redirect QA
+
 1. Run `bun run clerk:test-user:prepare:entitled`.
-2. Sign in with the granted-access account.
-3. Confirm `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, `/review`, and `/settings` load.
-4. Before unlocking Execute / Ship, confirm direct `/mission` and `/lesson/<route-segment>` visits show explicit locked-bonus messaging instead of forwarding into `/start`.
-5. On `/review`, confirm the page shows the non-clickable `What’s inside the Ship by Sunday Blueprint` preview, click `Download Ship by Sunday Blueprint`, trigger the separate `Unlock Execute / Ship` action, and confirm `/execute` loads as the bridge page.
-6. From `/execute`, confirm the primary CTA opens lesson `3.1` and the secondary CTA opens lesson `1.1`.
-7. Return to `/execute` after a bonus lesson has been opened and confirm repeat visits now redirect into `/mission`.
-8. Confirm `/mission` loads as the bonus library with the top block rail in natural `Product -> Design -> Build -> Ship` order, defaulting the active block to Build.
-9. Confirm direct `/lesson/<route-segment>` visits render the restored video-first bonus lesson path with the top block rail plus the bottom lesson skill rail, and without workbench inputs.
+2. Visit `/start`.
+3. Confirm it forwards to `/blueprint`.
+4. Visit `/product`, `/design`, `/marketing`, and `/build-plan`.
+5. Confirm each route forwards to the matching `/blueprint#<section>` anchor.
+6. Visit `/artifacts`.
+7. Confirm it forwards to `/review`.
 
 ## Observability smoke
 
