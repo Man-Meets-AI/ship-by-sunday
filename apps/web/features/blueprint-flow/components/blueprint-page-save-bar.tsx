@@ -21,7 +21,7 @@ export function BlueprintPageSaveBar({
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<p className="text-sm leading-6 text-muted-foreground">
 					{isReviewReady
-						? "The blueprint is complete. Continue to Review for the final handoff."
+						? "The blueprint is complete. Continue to Review to start the final handoff."
 						: "Continue saves the current draft, reveals any remaining blockers, and moves to Review only when the blueprint is complete."}
 				</p>
 				<Button

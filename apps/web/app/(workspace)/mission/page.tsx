@@ -14,10 +14,10 @@ export default async function Page() {
 		return (
 			<BonusRouteStatePanel
 				eyebrow="Continuation library"
-				title="Lesson Map opens after Review & Download."
+				title="Lesson Map opens after Review."
 				description="Finish the core Ship Blueprint run first. Once your product truth is locked and your Ship by Sunday Blueprint is ready, the post-review Lesson Map opens as the continuation surface for building, launch prep, and revisiting the work."
 				actionHref={routeConfig.review}
-				actionLabel="Go to Review & Download"
+				actionLabel="Go to Review"
 			/>
 		);
 	}

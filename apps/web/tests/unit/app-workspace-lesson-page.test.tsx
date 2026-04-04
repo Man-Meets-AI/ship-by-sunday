@@ -182,9 +182,7 @@ describe("workspace lesson route", () => {
 			}),
 		);
 
-		expect(markup).toContain(
-			"Bonus lessons unlock after Review &amp; Download.",
-		);
+		expect(markup).toContain("Bonus lessons unlock after Review.");
 		expect(markup).toContain(
 			"&quot;3.0 Build Kickoff&quot; will open after the bonus unlock is active.",
 		);

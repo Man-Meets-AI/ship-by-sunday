@@ -2,14 +2,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const getBlueprintDownloadContextMock = vi.fn();
 const buildReviewDownloadZipMock = vi.fn();
-const fetchMutationMock = vi.fn();
 
 vi.mock("@/features/blueprint-flow/server/downloads", () => ({
 	getBlueprintDownloadContext: getBlueprintDownloadContextMock,
-}));
-
-vi.mock("convex/nextjs", () => ({
-	fetchMutation: fetchMutationMock,
 }));
 
 vi.mock("@blueprint-compiler/server", () => ({
@@ -20,8 +15,6 @@ describe("blueprint download routes", () => {
 	beforeEach(() => {
 		getBlueprintDownloadContextMock.mockReset();
 		buildReviewDownloadZipMock.mockReset();
-		fetchMutationMock.mockReset();
-		fetchMutationMock.mockResolvedValue({});
 	});
 
 	it("returns the repo archive when review is ready", async () => {
@@ -45,9 +38,8 @@ describe("blueprint download routes", () => {
 		expect(response.status).toBe(200);
 		expect(response.headers.get("content-type")).toBe("application/zip");
 		expect(response.headers.get("content-disposition")).toBe(
-			'attachment; filename="starter-snapshot.zip"',
+			'attachment; filename="ship-by-sunday-blueprint.zip"',
 		);
 		expect(new Uint8Array(await response.arrayBuffer())).toHaveLength(3);
-		expect(fetchMutationMock).toHaveBeenCalledTimes(1);
 	});
 });

@@ -1,7 +1,5 @@
-import { fetchMutation } from "convex/nextjs";
 import { getBlueprintDownloadContext } from "@/features/blueprint-flow/server/downloads";
 import { getStarterSnapshotArchiveFileName } from "@blueprint-compiler";
-import { api } from "@/convex/_generated/api";
 
 export const runtime = "nodejs";
 
@@ -22,11 +20,6 @@ export async function GET() {
 	const blueprintCompilerServer = await importBlueprintCompilerServer();
 	const archive = await blueprintCompilerServer.buildReviewDownloadZip(
 		context.canonicalProjectDefinition,
-	);
-	await fetchMutation(
-		api.blueprint.unlockExecuteShip,
-		{},
-		{ token: context.token },
 	);
 
 	return new Response(new Uint8Array(archive), {

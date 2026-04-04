@@ -1,4 +1,8 @@
 import { routeConfig } from "@/config/product";
+import {
+	REVIEW_DOWNLOAD_HREF,
+	REVIEW_REDOWNLOAD_LINK_LABEL,
+} from "@/features/blueprint-flow/lib/review-download-handoff";
 
 export type ExecuteShipTrackId =
 	| "build-now"
@@ -37,8 +41,8 @@ export const executeShipTracks: ExecuteShipTrack[] = [
 		links: [
 			{ label: "Review Pricing", href: "/blueprint#pricing" },
 			{
-				label: "Download Ship by Sunday Blueprint",
-				href: "/api/download/repo",
+				label: REVIEW_REDOWNLOAD_LINK_LABEL,
+				href: REVIEW_DOWNLOAD_HREF,
 			},
 		],
 	},
@@ -93,8 +97,8 @@ export const executeShipTracks: ExecuteShipTrack[] = [
 		links: [
 			{ label: "Review Stage", href: routeConfig.review },
 			{
-				label: "Download Ship by Sunday Blueprint",
-				href: "/api/download/repo",
+				label: REVIEW_REDOWNLOAD_LINK_LABEL,
+				href: REVIEW_DOWNLOAD_HREF,
 			},
 		],
 	},

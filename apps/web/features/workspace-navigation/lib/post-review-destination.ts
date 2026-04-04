@@ -57,6 +57,13 @@ function findLessonHrefByDisplayLabel(displayLabel: string) {
 	return lesson ? getLessonHref(lesson.lessonKey) : null;
 }
 
+export function getDefaultBuildLessonsDestination() {
+	return (
+		findLessonHrefByDisplayLabel(POST_REVIEW_DEFAULT_BUILD_LESSON_ID) ??
+		getFirstBlockLessonHref("BUILD")
+	);
+}
+
 function getFirstBlockLessonHref(blockId: BlockId) {
 	const lesson = studentFacingLessons.find(
 		(candidate) => candidate.block === blockId,
@@ -109,9 +116,7 @@ export function getPostReviewNavigationTargets(
 	lessonStates: readonly PostReviewLessonState[],
 	executeShipUnlockedAt: number,
 ): PostReviewNavigationTargets {
-	const buildLessonsFallback =
-		findLessonHrefByDisplayLabel(POST_REVIEW_DEFAULT_BUILD_LESSON_ID) ??
-		getFirstBlockLessonHref("BUILD");
+	const buildLessonsFallback = getDefaultBuildLessonsDestination();
 	const launchLessonsFallback = getFirstBlockLessonHref("SHIP");
 	const buildLessonsDestination =
 		findLatestLessonHref(lessonStates, executeShipUnlockedAt, "BUILD") ??

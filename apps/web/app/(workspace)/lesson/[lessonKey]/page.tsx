@@ -29,10 +29,10 @@ export default async function Page({
 		return (
 			<BonusRouteStatePanel
 				eyebrow="Bonus lesson"
-				title="Bonus lessons unlock after Review & Download."
-				description="The restored continuation lessons stay locked until you reach Review & Download and unlock the post-review bonus."
+				title="Bonus lessons unlock after Review."
+				description="The restored continuation lessons stay locked until you reach Review and unlock the post-review bonus."
 				actionHref={routeConfig.review}
-				actionLabel="Go to Review & Download"
+				actionLabel="Go to Review"
 				detail={`"${lesson.displayLabel} ${lesson.title}" will open after the bonus unlock is active.`}
 			/>
 		);

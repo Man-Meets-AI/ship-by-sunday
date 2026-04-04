@@ -1,14 +1,18 @@
 import React from "react";
-import { createEvent, fireEvent, render, screen } from "@testing-library/react";
+import {
+	createEvent,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-	createCanonicalProjectDefinitionDraft,
-	createCompleteProjectDefinition,
-	deriveStageStatus,
-} from "@blueprint-compiler";
-
-import type { BlueprintWorkspaceState } from "@/features/blueprint-flow/lib/blueprint-workspace-types";
+	createBlueprintBonusMissionState,
+	createBlueprintPostReviewTargets,
+	createBlueprintWorkspaceState,
+} from "./blueprint-test-fixtures";
 
 const useConvexAuthMock = vi.fn();
 const useQueryMock = vi.fn();
@@ -69,11 +73,6 @@ vi.mock("@/convex/_generated/api", () => ({
 	},
 }));
 
-// This test covers review-page behavior; nav rendering is mocked on purpose.
-vi.mock("@/features/blueprint-flow/components/blueprint-stage-nav", () => ({
-	BlueprintStageNav: () => <div data-testid="blueprint-stage-nav" />,
-}));
-
 vi.mock("@/features/course/lesson/components/lesson-video-player", () => ({
 	LessonVideoPlayer: ({ title }: { title?: string }) => (
 		<div data-testid="blueprint-review-video-player">
@@ -96,86 +95,6 @@ vi.mock("next/navigation", () => ({
 
 import { BlueprintReviewPage } from "@/features/blueprint-flow/components/blueprint-review-page";
 
-function createWorkspaceState(
-	options: {
-		executeShipUnlockedAt?: number;
-		factOverrides?: Record<string, unknown>;
-	} = {},
-): BlueprintWorkspaceState {
-	const baseFacts = createCompleteProjectDefinition().facts;
-	const facts = Object.fromEntries(
-		Object.entries({
-			...baseFacts,
-			...options.factOverrides,
-		}).filter(([, value]) => value !== undefined),
-	);
-	const projectDefinition = createCanonicalProjectDefinitionDraft({
-		clerkUserId: "user_123",
-		productKey: "ship-by-sunday",
-		facts,
-	});
-	const stageStatus = deriveStageStatus(projectDefinition.facts);
-
-	return {
-		projectDefinition,
-		workflowState: options.executeShipUnlockedAt
-			? {
-					clerkUserId: "user_123",
-					productKey: "ship-by-sunday",
-					executeShipUnlockedAt: options.executeShipUnlockedAt,
-					createdAt: options.executeShipUnlockedAt,
-					updatedAt: options.executeShipUnlockedAt,
-				}
-			: null,
-		firstIncompleteStageId: stageStatus.firstIncompleteStageId,
-		blueprintReadiness: stageStatus.blueprintReadiness,
-		stageStatuses: stageStatus.stageStatuses,
-	} as BlueprintWorkspaceState;
-}
-
-function createBonusMissionState() {
-	return {
-		exploredCount: 1,
-		totalLessons: 4,
-		blocks: [
-			{
-				id: "CEO" as const,
-				order: 1,
-				lessons: [],
-			},
-			{
-				id: "DESIGN" as const,
-				order: 2,
-				lessons: [],
-			},
-			{
-				id: "BUILD" as const,
-				order: 3,
-				lessons: [
-					{
-						lessonKey: "iterate-the-product-with-ai",
-						routeSegment: "iterate-the-product-with-ai",
-						id: "3.1",
-						displayLabel: "3.1",
-						title: "Iterate the product with AI",
-						shortTitle: "Iterate",
-						block: "BUILD" as const,
-						order: 1,
-						status: "opened" as const,
-						isImplemented: true,
-						artifactLabel: "Build notes",
-					},
-				],
-			},
-			{
-				id: "SHIP" as const,
-				order: 4,
-				lessons: [],
-			},
-		],
-	};
-}
-
 describe("BlueprintReviewPage", () => {
 	beforeEach(() => {
 		redirectMock.mockClear();
@@ -189,105 +108,108 @@ describe("BlueprintReviewPage", () => {
 		useQueryMock.mockReturnValue(undefined);
 	});
 
-	it("renders the Ship by Sunday Blueprint handoff and download CTA", () => {
-		const readyWorkspaceState = createWorkspaceState();
-		render(<BlueprintReviewPage initialWorkspaceState={readyWorkspaceState} />);
+	it("renders the lighter review handoff with the fallback download link", () => {
+		render(
+			<BlueprintReviewPage
+				initialBonusMissionState={createBlueprintBonusMissionState()}
+				initialPostReviewTargets={createBlueprintPostReviewTargets()}
+				initialWorkspaceState={createBlueprintWorkspaceState({
+					executeShipUnlockedAt: 456,
+				})}
+			/>,
+		);
 
+		expect(screen.getByRole("heading", { name: "Review" })).toBeTruthy();
 		expect(
-			screen.getByRole("heading", { name: "Review & Download" }),
+			screen.getByText("What you just got and where to go next"),
 		).toBeTruthy();
-		expect(screen.queryByTestId("local-nav")).toBeNull();
-		const reviewVideo = screen.getByTestId("blueprint-review-video-player");
 		expect(
 			screen.getByText("Your Ship by Sunday Blueprint is ready."),
 		).toBeTruthy();
-		expect(screen.getByText("Agent-Ready Packs")).toBeTruthy();
-		expect(screen.getByText("SBS Blueprint")).toBeTruthy();
-		expect(screen.getByText("One bundle, one source of truth")).toBeTruthy();
 		expect(
 			screen.getByText(
-				"Design, Marketing, Build, and Prompt Packs generated from your answers",
+				"You now have the blueprint itself plus the generated Design, Marketing, Build, and Prompt Packs, so the work can keep moving from one source of truth instead of drifting between tools.",
 			),
 		).toBeTruthy();
 		expect(
 			screen.getByText(
-				"A downloadable Ship by Sunday Blueprint with the docs, overrides, and handoff structure already in place",
-			),
-		).toBeTruthy();
-		expect(
-			screen.getByText(
-				"So design, marketing, code, and prompts all work from the same blueprint instead of drifting",
+				"Keep this handoff close while you move into Build Lessons. It is the fastest path from the blueprint into execution.",
 			),
 		).toBeTruthy();
 		expect(
 			screen
-				.getByRole("link", { name: "Download Ship by Sunday Blueprint" })
+				.getByRole("link", { name: "Continue to Build Lessons" })
 				.getAttribute("href"),
-		).toBe("/api/download/repo");
+		).toBe("/lesson/iterate-the-product-with-ai");
 		expect(
 			screen
 				.getByRole("link", {
-					name: "Download Ship by Sunday Blueprint first",
+					name: "Need the Ship by Sunday Blueprint again? Download it here.",
 				})
 				.getAttribute("href"),
 		).toBe("/api/download/repo");
+		expect(screen.queryByText("Keep going")).toBeNull();
+		expect(
+			screen.queryByRole("link", { name: "Download Ship by Sunday Blueprint" }),
+		).toBeNull();
 		expect(screen.queryByText("QUEST")).toBeNull();
-		expect(reviewVideo.textContent).toBe("Review Video");
+		expect(
+			screen.getByTestId("blueprint-review-video-player").textContent,
+		).toBe("Review Video");
 	});
 
-	it("lets the browser handle the Ship by Sunday Blueprint download links directly", () => {
+	it("lets the browser handle the fallback download link directly", () => {
 		render(
-			<BlueprintReviewPage initialWorkspaceState={createWorkspaceState()} />,
+			<BlueprintReviewPage
+				initialBonusMissionState={createBlueprintBonusMissionState()}
+				initialPostReviewTargets={createBlueprintPostReviewTargets()}
+				initialWorkspaceState={createBlueprintWorkspaceState({
+					executeShipUnlockedAt: 456,
+				})}
+			/>,
 		);
 
-		const primaryDownloadLink = screen.getByRole("link", {
-			name: "Download Ship by Sunday Blueprint",
+		const fallbackDownloadLink = screen.getByRole("link", {
+			name: "Need the Ship by Sunday Blueprint again? Download it here.",
 		});
-		expect(primaryDownloadLink.getAttribute("download")).toBe("");
-		const primaryClick = createEvent.click(primaryDownloadLink);
-		fireEvent(primaryDownloadLink, primaryClick);
-		expect(primaryClick.defaultPrevented).toBe(false);
-
-		const secondaryDownloadLink = screen.getByRole("link", {
-			name: "Download Ship by Sunday Blueprint first",
-		});
-		expect(secondaryDownloadLink.getAttribute("download")).toBe("");
-		const secondaryClick = createEvent.click(secondaryDownloadLink);
-		fireEvent(secondaryDownloadLink, secondaryClick);
-		expect(secondaryClick.defaultPrevented).toBe(false);
+		expect(fallbackDownloadLink.getAttribute("download")).toBe("");
+		const fallbackClick = createEvent.click(fallbackDownloadLink);
+		fireEvent(fallbackDownloadLink, fallbackClick);
+		expect(fallbackClick.defaultPrevented).toBe(false);
 	});
 
-	it("switches the primary CTA to Build Lessons when the live unlock marker is present", () => {
-		useQueryMock.mockImplementation((query) => {
-			if (query === undefined || query === "skip") {
-				return undefined;
-			}
-			if (query === "getBlueprintWorkspaceState") {
-				return createWorkspaceState({
-					executeShipUnlockedAt: 456,
-				});
-			}
-			if (query === "getBlueprintResumeDestination") {
-				return {
-					destination: "/lesson/iterate-the-product-with-ai",
-					kind: "post_review",
-					blueprintStageId: null,
-					postReviewTargets: {
-						reviewDestination: "/review",
-						buildLessonsDestination: "/lesson/iterate-the-product-with-ai",
-						launchLessonsDestination: "/lesson/product-review",
-						lessonMapDestination: "/review?showLessonMap=1",
-						latestLessonDestination: "/lesson/iterate-the-product-with-ai",
-					},
-				};
-			}
-			if (query === "getBonusMissionState") {
-				return createBonusMissionState();
-			}
-			return undefined;
-		});
+	it("attempts the one-time auto-download handoff only when requested", async () => {
+		const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, "click");
+
+		try {
+			render(
+				<BlueprintReviewPage
+					initialAutoDownload
+					initialBonusMissionState={createBlueprintBonusMissionState()}
+					initialPostReviewTargets={createBlueprintPostReviewTargets()}
+					initialWorkspaceState={createBlueprintWorkspaceState({
+						executeShipUnlockedAt: 456,
+					})}
+				/>,
+			);
+
+			await waitFor(() => {
+				expect(clickSpy).toHaveBeenCalledTimes(1);
+			});
+		} finally {
+			clickSpy.mockRestore();
+		}
+	});
+
+	it("shows the handoff nav and Build Lessons CTA when post-review is unlocked", () => {
 		render(
-			<BlueprintReviewPage initialWorkspaceState={createWorkspaceState()} />,
+			<BlueprintReviewPage
+				initialBonusMissionState={createBlueprintBonusMissionState()}
+				initialPostReviewTargets={createBlueprintPostReviewTargets()}
+				initialWorkspaceState={createBlueprintWorkspaceState({
+					executeShipUnlockedAt: 456,
+				})}
+			/>,
 		);
 
 		const localNav = screen.getByTestId("local-nav");
@@ -296,8 +218,8 @@ describe("BlueprintReviewPage", () => {
 			screen.getByRole("link", { name: "Overview" }).getAttribute("href"),
 		).toBe("#review-overview");
 		expect(
-			screen.getByRole("link", { name: "Downloads" }).getAttribute("href"),
-		).toBe("#review-downloads");
+			screen.getByRole("link", { name: "Handoff" }).getAttribute("href"),
+		).toBe("#review-handoff");
 		expect(
 			screen.getByRole("link", { name: "Lesson Map" }).getAttribute("href"),
 		).toBe("/review?showLessonMap=1#review-lesson-map");
@@ -307,7 +229,6 @@ describe("BlueprintReviewPage", () => {
 		expect(
 			screen.getByRole("link", { name: "Launch Lessons" }).getAttribute("href"),
 		).toBe("/lesson/product-review");
-
 		expect(
 			screen
 				.getByRole("link", { name: "Continue to Build Lessons" })
@@ -316,7 +237,7 @@ describe("BlueprintReviewPage", () => {
 	});
 
 	it("redirects back to the first incomplete stage when review is still locked", () => {
-		const lockedWorkspaceState = createWorkspaceState({
+		const lockedWorkspaceState = createBlueprintWorkspaceState({
 			factOverrides: {
 				pricing: undefined,
 				price_usd_cents: undefined,

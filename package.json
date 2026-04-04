@@ -57,6 +57,8 @@
 		"starter-repo:sync": "bun run --cwd apps/web starter-repo:sync",
 		"starter-repo:reset": "bun run --cwd apps/web starter-repo:reset",
 		"auth:dev:doctor": "bun run --cwd apps/web auth:dev:doctor",
+		"qa:review-handoff": "bun run --cwd apps/web qa:review-handoff",
+		"review:handoff:doctor": "bun run --cwd apps/web review:handoff:doctor",
 		"clerk:test-user:check": "bun run --cwd apps/web clerk:test-user:check",
 		"clerk:test-user:create": "bun run --cwd apps/web clerk:test-user:create",
 		"clerk:test-user:check:entitled": "bun run --cwd apps/web clerk:test-user:check:entitled",
