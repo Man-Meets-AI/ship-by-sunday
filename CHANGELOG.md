@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-04-04
+
+### Changed
+
+- Simplified the public homepage so the system story is tighter: the mechanism now lives inside the sprint-path section, the starter-system section is leaner, the old GitHub contribution block is gone, and the social proof is easier to scan.
+- Polished shared UI affordances with better pointer-highlight sizing, a clearer destructive leave-without-saving action, and a cleaner safe-exit button on the error screen.
+
 ## 2026-03-31
 
 ### Changed
