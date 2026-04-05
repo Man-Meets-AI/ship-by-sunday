@@ -4,7 +4,7 @@ import { getStarterSnapshotArchiveFileName } from "@shipbysunday/blueprint-compi
 export const runtime = "nodejs";
 
 async function importBlueprintCompilerServer() {
-	return import("@blueprint-compiler/server");
+	return import("@shipbysunday/blueprint-compiler/server");
 }
 
 export async function GET() {

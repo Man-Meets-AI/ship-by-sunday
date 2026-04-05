@@ -104,7 +104,8 @@ const DEFAULT_SELECTED_NEXT_SLICE =
 
 function deriveThemePreset(facts: CanonicalProjectFactsDraft) {
 	const preset = trimText(
-		facts.theme_preset ?? (facts as Record<string, unknown>).theme_hex as string | undefined,
+		facts.theme_preset ??
+			((facts as Record<string, unknown>).theme_hex as string | undefined),
 	);
 	if (!preset) {
 		return DEFAULT_THEME_PRESET;

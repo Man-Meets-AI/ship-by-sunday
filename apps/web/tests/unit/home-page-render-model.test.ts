@@ -23,7 +23,7 @@ describe("home page render model", () => {
 		expect(
 			renderModel.starterSystem.section.capabilities.map((item) => item.title),
 		).toEqual([
-			"Product rails",
+			"Product blueprint",
 			"Built-in QA",
 			"Safer agent changes",
 			"Reuse the product truth",

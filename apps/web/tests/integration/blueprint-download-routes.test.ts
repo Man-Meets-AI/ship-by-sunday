@@ -7,7 +7,7 @@ vi.mock("@/features/blueprint-flow/server/downloads", () => ({
 	getBlueprintDownloadContext: getBlueprintDownloadContextMock,
 }));
 
-vi.mock("@blueprint-compiler/server", () => ({
+vi.mock("@shipbysunday/blueprint-compiler/server", () => ({
 	buildReviewDownloadZip: buildReviewDownloadZipMock,
 }));
 
