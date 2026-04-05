@@ -144,7 +144,7 @@ describe("BlueprintReviewPage", () => {
 		expect(
 			screen
 				.getByRole("link", {
-					name: "Need the Ship by Sunday Blueprint again? Download it here.",
+					name: "Redownload Blueprint",
 				})
 				.getAttribute("href"),
 		).toBe("/api/download/repo");
@@ -170,7 +170,7 @@ describe("BlueprintReviewPage", () => {
 		);
 
 		const fallbackDownloadLink = screen.getByRole("link", {
-			name: "Need the Ship by Sunday Blueprint again? Download it here.",
+			name: "Redownload Blueprint",
 		});
 		expect(fallbackDownloadLink.getAttribute("download")).toBe("");
 		const fallbackClick = createEvent.click(fallbackDownloadLink);

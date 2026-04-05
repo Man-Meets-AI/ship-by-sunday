@@ -13,8 +13,6 @@ import {
 export type HomePageSocialProofVariant = {
 	readonly kind: "founder";
 	readonly section: HomePageContent["socialProofSection"];
-	readonly githubUsername: string;
-	readonly requiresGitHubActivity: true;
 };
 
 export type HomePageRenderModel = {
@@ -46,7 +44,6 @@ export type HomePageRenderModel = {
 	};
 	readonly socialProof: {
 		readonly isEnabled: boolean;
-		readonly githubActivityUsername: string | null;
 		readonly variant: HomePageSocialProofVariant;
 	};
 	readonly faq: {
@@ -76,12 +73,7 @@ export function createHomePageRenderModel({
 	const socialProofVariant = {
 		kind: "founder",
 		section: content.socialProofSection,
-		githubUsername: content.socialProofSection.github.username,
-		requiresGitHubActivity: true,
 	} as const satisfies HomePageSocialProofVariant;
-	const shouldFetchSocialProofGitHubActivity =
-		homePageConfig.sections.socialProof &&
-		socialProofVariant.requiresGitHubActivity;
 
 	return {
 		sectionOrder: homePageSectionOrder,
@@ -112,9 +104,6 @@ export function createHomePageRenderModel({
 		},
 		socialProof: {
 			isEnabled: homePageConfig.sections.socialProof,
-			githubActivityUsername: shouldFetchSocialProofGitHubActivity
-				? socialProofVariant.githubUsername
-				: null,
 			variant: socialProofVariant,
 		},
 		faq: {

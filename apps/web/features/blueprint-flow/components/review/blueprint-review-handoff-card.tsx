@@ -35,29 +35,27 @@ export function BlueprintReviewHandoffCard({
 					) : null}
 				</div>
 
-				<div className="flex max-w-sm flex-col gap-4">
+				<div className="flex flex-wrap items-center gap-3">
 					{buildLessonsHref ? (
-						<Button asChild size="lg" className="h-14 w-full text-lg font-bold">
+						<Button asChild size="lg" className="h-14 text-lg font-bold">
 							<Link href={buildLessonsHref}>Continue to Build Lessons</Link>
 						</Button>
 					) : (
 						<Button
 							type="button"
 							size="lg"
-							className="h-14 w-full text-lg font-bold"
+							className="h-14 text-lg font-bold"
 							disabled
 						>
 							Continue to Build Lessons
 						</Button>
 					)}
 
-					<a
-						download
-						href={downloadHref}
-						className="text-sm leading-6 text-primary underline-offset-4 transition-colors hover:underline"
-					>
-						{fallbackLinkLabel}
-					</a>
+					<Button asChild variant="outline" size="lg" className="h-14">
+						<a download href={downloadHref}>
+							{fallbackLinkLabel}
+						</a>
+					</Button>
 				</div>
 			</div>
 		</section>

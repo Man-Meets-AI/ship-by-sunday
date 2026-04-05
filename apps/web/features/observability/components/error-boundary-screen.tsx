@@ -99,7 +99,7 @@ export function ErrorBoundaryScreen({
 							asChild
 							variant="outline"
 							size="lg"
-							className="h-14 px-8 text-lg rounded-full border-white/20 text-white hover:bg-white/10 hover:text-white"
+							className="h-14 px-8 text-lg rounded-full bg-transparent border-white/20 text-white hover:bg-white/10 hover:text-white"
 						>
 							<Link href={routeConfig.home}>Safe exit</Link>
 						</Button>

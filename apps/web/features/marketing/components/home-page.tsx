@@ -1,4 +1,3 @@
-import { fetchGitHubContributions } from "@/features/marketing/lib/github";
 import { getHomePageRenderModel } from "@/features/marketing/lib/home-page-render-model";
 
 import {
@@ -16,11 +15,6 @@ import { WhatsInsideSection } from "./home-page/whats-inside-section";
 
 export default async function HomePage() {
 	const homePageRenderModel = getHomePageRenderModel();
-	const githubActivity = homePageRenderModel.socialProof.githubActivityUsername
-		? await fetchGitHubContributions(
-				homePageRenderModel.socialProof.githubActivityUsername,
-			)
-		: null;
 
 	return (
 		<main className="bg-background text-foreground">
@@ -34,6 +28,7 @@ export default async function HomePage() {
 				{homePageRenderModel.sprintPath.isEnabled ? (
 					<SprintPathUnifiedSection
 						sprintPathSection={homePageRenderModel.sprintPath.section}
+						mechanismSection={homePageRenderModel.mechanism.section}
 					/>
 				) : null}
 				{homePageRenderModel.mechanism.isEnabled ? (
@@ -59,7 +54,6 @@ export default async function HomePage() {
 				{homePageRenderModel.socialProof.isEnabled ? (
 					<SocialProofSection
 						socialProofSection={homePageRenderModel.socialProof.variant.section}
-						githubActivity={githubActivity}
 					/>
 				) : null}
 				{homePageRenderModel.faq.isEnabled ? (

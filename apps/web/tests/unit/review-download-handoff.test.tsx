@@ -39,9 +39,7 @@ describe("review download handoff", () => {
 		);
 
 		expect(result.current.downloadHref).toBe("/api/download/repo");
-		expect(result.current.fallbackLinkLabel).toBe(
-			"Need the Ship by Sunday Blueprint again? Download it here.",
-		);
+		expect(result.current.fallbackLinkLabel).toBe("Redownload Blueprint");
 	});
 
 	it("clicks the hidden download link once and clears the auto-download query param", async () => {
@@ -65,9 +63,7 @@ describe("review download handoff", () => {
 		);
 
 		await waitFor(() => expect(clickSpy).toHaveBeenCalledTimes(1));
-		expect(result.current.fallbackLinkLabel).toBe(
-			"Download didn’t start? Click here.",
-		);
+		expect(result.current.fallbackLinkLabel).toBe("Redownload Blueprint");
 		expect(result.current.downloadHref).toBe("/api/download/repo");
 		expect(
 			window.location.pathname + window.location.search + window.location.hash,

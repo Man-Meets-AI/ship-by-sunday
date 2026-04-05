@@ -151,7 +151,7 @@ This smoke lane now proves the auth-route shell too: `/sign-in`, `/session-tasks
 4. Sign in with the granted-access account.
 5. Confirm `/blueprint`, `/review`, and `/settings` load.
 6. On `/review`, confirm the page makes one automatic Ship by Sunday Blueprint download attempt, keeps the fallback download link visible if the browser blocks it, and does not present a manual download dashboard.
-7. On `/review`, confirm the fallback link text is `Need the Ship by Sunday Blueprint again? Download it here.` on a normal revisit, and that direct `/review` visits do not auto-start another download.
+7. On `/review`, confirm the secondary "Redownload Blueprint" button appears to the right of the primary CTA on a normal revisit, and that direct `/review` visits do not auto-start another download.
 8. From `/review`, confirm the primary CTA opens lesson `3.1`.
 9. Before unlocking Execute / Ship, confirm direct `/mission` and `/lesson/<route-segment>` visits show explicit locked-bonus messaging instead of forwarding into `/blueprint`.
 10. Confirm `/mission` loads as the bonus library with the top block rail in natural `Product -> Design -> Build -> Ship` order, defaulting the active block to Build.

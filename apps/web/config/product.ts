@@ -74,10 +74,10 @@ export const starterHomePageConfig = {
 	sections: {
 		hero: true,
 		sprintPath: true,
-		mechanism: true,
+		mechanism: false,
 		whatsInside: true,
 		starterSystem: true,
-		durability: true,
+		durability: false,
 		socialProof: true,
 		faq: true,
 		pricing: true,

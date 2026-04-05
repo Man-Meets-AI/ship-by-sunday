@@ -5,11 +5,9 @@ export const REVIEW_SURFACE_TITLE = "Review";
 export const REVIEW_ARTIFACT_LABEL = "Ship by Sunday Blueprint";
 export const REVIEW_AUTO_DOWNLOAD_STATUS =
 	"Your blueprint download should already be starting. If the browser blocks it, use the link below.";
-export const REVIEW_FALLBACK_LINK_LABEL_AUTO =
-	"Download didn’t start? Click here.";
-export const REVIEW_FALLBACK_LINK_LABEL_PASSIVE =
-	"Need the Ship by Sunday Blueprint again? Download it here.";
-export const REVIEW_REDOWNLOAD_LINK_LABEL = "Download Blueprint Again";
+export const REVIEW_FALLBACK_LINK_LABEL_AUTO = "Redownload Blueprint";
+export const REVIEW_FALLBACK_LINK_LABEL_PASSIVE = "Redownload Blueprint";
+export const REVIEW_REDOWNLOAD_LINK_LABEL = "Redownload Blueprint";
 export const REVIEW_DOWNLOAD_HREF = "/api/download/repo";
 export const REVIEW_AUTO_DOWNLOAD_QUERY_PARAM = "download";
 const REVIEW_AUTO_DOWNLOAD_QUERY_VALUE = "1";

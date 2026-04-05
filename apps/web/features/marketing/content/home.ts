@@ -68,12 +68,6 @@ export const homePageContent = {
 				alt: "Ship by Sunday Blueprint screenshot showing the source of truth the repo builds from",
 			},
 		],
-		github: {
-			username: "ParkerRex",
-			profileUrl: "https://github.com/ParkerRex",
-			activityCaption:
-				"commits this year. This system is built by someone who ships every day.",
-		},
 	},
 	faqSection: {
 		label: "FAQ",
@@ -171,22 +165,22 @@ export const homePageContent = {
 				title: "Saved agent changes",
 				description: "So new prompts do not quietly rewrite the product.",
 			},
-		],
-		supportSection: {
-			title: "Support around the system",
-			intro:
-				"You also get workshops, a clear path to ask questions, and beginner-safe product management guidance when scope decisions get messy.",
-			items: [
-				"Fast Pass Walkthroughs",
-				"Guided Ship Path",
-				"Product Sense Fundamentals",
-			],
-			bonus: {
-				title: bonusName,
+			{
+				title: "Reuse the blueprint",
 				description:
-					"If product judgment is still the weak spot, this stays in the bundle without becoming the point of the offer.",
+					"The same product definition feeds the next feature without starting from a blank chat.",
 			},
-		},
+			{
+				title: "Extend without starting over",
+				description:
+					"The repo stays aligned to the same contract, so changes build on product truth instead of scattered edits.",
+			},
+			{
+				title: "Keep one source of truth",
+				description:
+					"When better models arrive next month, you move faster. You do not restart the project from zero.",
+			},
+		],
 	},
 	durabilitySection: {
 		label: "Durability",
@@ -228,6 +222,7 @@ export const homePageContent = {
 			"Ship by Sunday Blueprint",
 			"Fast Pass Walkthroughs",
 			"Guided Ship Path",
+			"Product Sense Fundamentals",
 		],
 		bonus: {
 			label: "Also included",
