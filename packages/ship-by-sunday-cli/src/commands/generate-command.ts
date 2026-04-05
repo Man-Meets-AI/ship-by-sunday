@@ -46,20 +46,6 @@ async function getPathKind(filePath: string): Promise<OutputPathKind> {
 	}
 }
 
-type OutputPathKind = "missing" | "file" | "directory";
-
-async function getPathKind(filePath: string): Promise<OutputPathKind> {
-	try {
-		return (await stat(filePath)).isDirectory() ? "directory" : "file";
-	} catch (error) {
-		if (error instanceof Error && "code" in error && error.code === "ENOENT") {
-			return "missing";
-		}
-
-		throw error;
-	}
-}
-
 async function writeRepoDirectory({
 	outputContainerPath,
 	repoName,

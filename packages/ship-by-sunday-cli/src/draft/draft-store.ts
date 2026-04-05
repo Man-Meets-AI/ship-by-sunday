@@ -58,16 +58,6 @@ export type LocalDraftEnvelope = {
 	updatedAt: number;
 };
 
-const LOCAL_DRAFT_MISSING_MESSAGE =
-	"No local Ship by Sunday draft exists yet. Run init, import, or resume first.";
-
-const DRAFT_PATH_ERROR_CODES = new Set([
-	"EACCES",
-	"EPERM",
-	"EISDIR",
-	"ENOTDIR",
-]);
-
 export type DraftMutation =
 	| {
 			op: "set";

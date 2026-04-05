@@ -117,48 +117,6 @@ async function readFieldLines({
 	return { kind: "answer", lines };
 }
 
-async function readFieldLines({
-	readlineSession,
-	prompt,
-	mode,
-}: {
-	readlineSession: ReturnType<typeof createReadlineStageSession>;
-	prompt: string;
-	mode: "single-line" | "multiline";
-}): Promise<ReadlineStageAnswer | { kind: "answer"; lines: string[] }> {
-	const firstAnswer = await readlineSession.ask(prompt);
-	if (firstAnswer.kind !== "answer") {
-		return firstAnswer;
-	}
-
-	if (mode === "single-line") {
-		return { kind: "answer", lines: [firstAnswer.value] };
-	}
-
-	const firstLine = firstAnswer.value;
-	if (!firstLine.trim()) {
-		return { kind: "answer", lines: [firstLine] };
-	}
-
-	if (firstLine.trim() === ":clear" || firstLine.trim() === ":quit") {
-		return { kind: "answer", lines: [firstLine] };
-	}
-
-	const lines = [firstLine];
-	while (true) {
-		const nextLine = await readlineSession.ask("> ");
-		if (nextLine.kind !== "answer") {
-			return nextLine;
-		}
-		if (!nextLine.value.trim()) {
-			break;
-		}
-		lines.push(nextLine.value);
-	}
-
-	return { kind: "answer", lines };
-}
-
 export async function promptStage({
 	projectRootPath,
 	stageId,
