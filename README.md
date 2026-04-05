@@ -112,6 +112,10 @@ Common entrypoints:
 
 ```bash
 bun run sbs --help
+bun run sbs version --json
+bun run sbs completion zsh
+bun run sbs completion bash
+bun run sbs --version
 bun run sbs resume
 bun run sbs next --json
 bun run sbs review --json
