@@ -1,5 +1,8 @@
 import type { ReactNode } from "react";
-import type { PacketStageId, PacketStageStatus } from "@packet-compiler";
+import type {
+	BlueprintStageId,
+	BlueprintStageStatus,
+} from "@shipbysunday/blueprint-compiler";
 
 import type { LessonLayoutMode } from "@/features/course/lesson/model/manifest";
 import type { SkillRailCompletionCue } from "@/features/course/shared/components/skill-rail";
@@ -39,8 +42,8 @@ export type AppShellProgressSummary = {
 
 export type AppShellPrimaryNav = {
 	kind: "combined";
-	currentPacketStageId?: PacketStageId;
-	stageStatuses: PacketStageStatus[];
+	currentBlueprintStageId?: BlueprintStageId;
+	stageStatuses: BlueprintStageStatus[];
 	postReviewItems: WorkspacePrimaryNavItem[];
 	onLinkNavigate?: (
 		event: { preventDefault: () => void },
@@ -52,7 +55,7 @@ export type AppShellPrimaryNav = {
 
 export type AppShellLocalNav =
 	| {
-			kind: "packet";
+			kind: "blueprint";
 			desktop: ReactNode;
 			compact?: ReactNode;
 	  }

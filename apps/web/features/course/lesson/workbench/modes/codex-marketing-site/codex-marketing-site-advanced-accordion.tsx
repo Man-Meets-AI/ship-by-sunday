@@ -25,7 +25,7 @@ export function CodexMarketingSiteAdvancedAccordion() {
 							Custom copywriting skill
 						</p>
 						<p className="mt-1 leading-relaxed">
-							Later you can package your voice rules as a Codex skill (e.g.
+							Later you can codify your voice rules as a Codex skill (e.g.
 							Ogilvy-style constraints). Skip while you are still shipping v1
 							copy.
 						</p>

@@ -5,8 +5,8 @@ import type { AppShellLocalNav } from "./app-shell-props";
 
 function getLocalNavLabel(kind: AppShellLocalNav["kind"]) {
 	switch (kind) {
-		case "packet":
-			return "Packet local navigation";
+		case "blueprint":
+			return "Blueprint local navigation";
 		case "review":
 			return "Review local navigation";
 		case "workspace":

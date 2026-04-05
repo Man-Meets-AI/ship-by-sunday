@@ -24,11 +24,7 @@ export const starterRepoConfig = {
 
 export const routeConfig = {
 	home: "/",
-	start: "/start",
-	product: "/product",
-	design: "/design",
-	marketing: "/marketing",
-	buildPlan: "/build-plan",
+	blueprint: "/blueprint",
 	review: "/review",
 	execute: "/execute",
 	docs: "/docs",
@@ -47,6 +43,7 @@ export const routeConfig = {
 export const homePageSectionOrder = [
 	"hero",
 	"sprintPath",
+	"mechanism",
 	"whatsInside",
 	"starterSystem",
 	"durability",
@@ -77,9 +74,10 @@ export const starterHomePageConfig = {
 	sections: {
 		hero: true,
 		sprintPath: true,
+		mechanism: false,
 		whatsInside: true,
 		starterSystem: true,
-		durability: true,
+		durability: false,
 		socialProof: true,
 		faq: true,
 		pricing: true,
@@ -340,7 +338,7 @@ export const courseResourceConfig = {
 } as const;
 
 export const authViewConfig = {
-	fallbackRedirectUrl: routeConfig.start,
+	fallbackRedirectUrl: routeConfig.blueprint,
 } as const;
 
 export function getSignInRedirectHref(redirectPath: string) {

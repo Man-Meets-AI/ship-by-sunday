@@ -1,27 +1,27 @@
 import { api } from "@/convex/_generated/api";
-import type { PacketWorkspaceState } from "@/features/packet-flow/lib/packet-workspace-types";
+import type { BlueprintWorkspaceState } from "@/features/blueprint-flow/lib/blueprint-workspace-types";
 import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
 import { isExecuteShipUnlocked } from "@/features/execute-ship/lib/bonus-route-access";
 
 export type BonusRouteAccess = {
-	workspaceState: PacketWorkspaceState;
+	workspaceState: BlueprintWorkspaceState;
 	isUnlocked: boolean;
 	hasStartedBonusLesson: boolean;
 };
 
-function requirePacketWorkspaceState(
-	workspaceState: PacketWorkspaceState | null,
-): PacketWorkspaceState {
+function requireBlueprintWorkspaceState(
+	workspaceState: BlueprintWorkspaceState | null,
+): BlueprintWorkspaceState {
 	if (!workspaceState) {
-		throw new Error("Packet workspace state missing");
+		throw new Error("Blueprint workspace state missing");
 	}
 
 	return workspaceState;
 }
 
 export async function loadBonusRouteAccess(): Promise<BonusRouteAccess> {
-	const workspaceState = requirePacketWorkspaceState(
-		await fetchAuthenticatedQuery(api.packet.getPacketWorkspaceState, {}),
+	const workspaceState = requireBlueprintWorkspaceState(
+		await fetchAuthenticatedQuery(api.blueprint.getBlueprintWorkspaceState, {}),
 	);
 	const isUnlocked = isExecuteShipUnlocked(workspaceState);
 

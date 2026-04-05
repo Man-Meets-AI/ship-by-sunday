@@ -33,5 +33,5 @@
 
   <rect x="126" y="604" width="352" height="64" rx="22" fill="#F4E8D8"/>
   <text x="158" y="632" fill="#4E3B2B" font-family="ui-sans-serif, system-ui" font-size="13" font-weight="700">FINAL HANDOFF</text>
-  <text x="158" y="656" fill="#1E1712" font-family="ui-sans-serif, system-ui" font-size="17">Starter Snapshot before execution.</text>
+  <text x="158" y="656" fill="#1E1712" font-family="ui-sans-serif, system-ui" font-size="17">Blueprint before execution.</text>
 </svg>

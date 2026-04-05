@@ -1,43 +1,49 @@
-import {
-	canonicalProjectFactsSchema,
-	createCanonicalProjectDefinition,
-	deriveStageStatus,
-	type CanonicalProjectDefinition,
-	type CanonicalProjectDefinitionDraft,
-} from "@manmeetsai/packet-compiler";
+import { type CanonicalProjectDefinition } from "@shipbysunday/blueprint-compiler";
 import {
 	buildRepoGenerationManifest,
 	buildReviewDownloadZip,
 	materializeRepoSnapshot,
-} from "@manmeetsai/packet-compiler/server";
+} from "@shipbysunday/blueprint-compiler/server";
 import { mkdir, mkdtemp, rename, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { buildCanonicalProjectDefinitionFromCliFacts } from "../blueprint-derivation";
 import { createCliError } from "../cli-errors";
 import { writeJsonResult } from "../cli-json";
-import { loadLocalDraft } from "../draft/draft-store";
+import { deriveLocalDraftStatus, loadLocalDraft } from "../draft/draft-store";
 import type { CliIo } from "../run-cli";
 import { resolveProjectPath } from "../cli-paths";
 
-function assertReviewReady(draft: CanonicalProjectDefinitionDraft) {
-	const stageStatus = deriveStageStatus(draft.facts);
-	if (!stageStatus.packetReadiness.review.isReady) {
+function assertReviewReady(draft: Awaited<ReturnType<typeof loadLocalDraft>>) {
+	if (!draft) {
+		throw createCliError(
+			"missing_draft",
+			"No local Ship by Sunday draft exists yet.",
+			4,
+		);
+	}
+
+	const stageStatus = deriveLocalDraftStatus(draft.facts);
+	if (!stageStatus.blueprintReadiness.review.isReady) {
 		throw createCliError(
 			"not_review_ready",
-			`Draft is not review-ready. Missing: ${stageStatus.packetReadiness.review.missingFactKeys.join(", ")}`,
+			`Draft is not review-ready. Missing: ${stageStatus.blueprintReadiness.review.missingFactKeys.join(", ")}`,
 			5,
 		);
 	}
 }
 
-function toCompleteDefinition(draft: CanonicalProjectDefinitionDraft) {
-	return createCanonicalProjectDefinition({
-		clerkUserId: draft.clerkUserId,
-		productKey: draft.productKey,
-		facts: canonicalProjectFactsSchema.parse(draft.facts),
-		placeholdersInUse: draft.placeholdersInUse,
-		createdAt: draft.createdAt,
-		updatedAt: draft.updatedAt,
-	});
+type OutputPathKind = "missing" | "file" | "directory";
+
+async function getPathKind(filePath: string): Promise<OutputPathKind> {
+	try {
+		return (await stat(filePath)).isDirectory() ? "directory" : "file";
+	} catch (error) {
+		if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+			return "missing";
+		}
+
+		throw error;
+	}
 }
 
 type OutputPathKind = "missing" | "file" | "directory";
@@ -157,14 +163,14 @@ export async function handleGenerateCommand({
 		);
 	}
 
-	const stageStatus = deriveStageStatus(draft.facts);
+	const stageStatus = deriveLocalDraftStatus(draft.facts);
 	if (dryRun) {
-		if (!stageStatus.packetReadiness.review.isReady) {
+		if (!stageStatus.blueprintReadiness.review.isReady) {
 			const dryRunBlockedResult = {
 				reviewReady: false,
 				mode: zip ? "zip" : "directory",
 				outputPath: absoluteOutPath,
-				blockers: stageStatus.packetReadiness.review.missingFactKeys,
+				blockers: stageStatus.blueprintReadiness.review.missingFactKeys,
 			};
 			if (json) {
 				writeJsonResult(io, "generate", dryRunBlockedResult);
@@ -175,13 +181,21 @@ export async function handleGenerateCommand({
 					"Generate dry run",
 					"",
 					"Draft is not review-ready.",
-					`Blockers: ${stageStatus.packetReadiness.review.missingFactKeys.join(", ")}`,
+					`Blockers: ${stageStatus.blueprintReadiness.review.missingFactKeys.join(", ")}`,
 				].join("\n"),
 			);
 			return 0;
 		}
 
-		const projectDefinition = toCompleteDefinition(draft);
+		const projectDefinition = buildCanonicalProjectDefinitionFromCliFacts({
+			clerkUserId: draft.clerkUserId,
+			productKey: draft.productKey,
+			facts: draft.facts,
+			createdAt: draft.createdAt,
+			updatedAt: draft.updatedAt,
+			placeholdersInUse:
+				draft.placeholdersInUse as CanonicalProjectDefinition["placeholdersInUse"],
+		});
 		const dryRunResult = buildDryRunResult({
 			projectDefinition,
 			absoluteOutPath,
@@ -205,7 +219,15 @@ export async function handleGenerateCommand({
 	}
 
 	assertReviewReady(draft);
-	const projectDefinition = toCompleteDefinition(draft);
+	const projectDefinition = buildCanonicalProjectDefinitionFromCliFacts({
+		clerkUserId: draft.clerkUserId,
+		productKey: draft.productKey,
+		facts: draft.facts,
+		createdAt: draft.createdAt,
+		updatedAt: draft.updatedAt,
+		placeholdersInUse:
+			draft.placeholdersInUse as CanonicalProjectDefinition["placeholdersInUse"],
+	});
 	const repoManifest = buildRepoGenerationManifest(projectDefinition);
 	const finalDirectoryPath = path.join(absoluteOutPath, repoManifest.repoName);
 
@@ -269,7 +291,7 @@ export async function handleGenerateCommand({
 			});
 			return 0;
 		}
-		io.write(`Generated repo zip at ${absoluteOutPath}`);
+		io.write(`Generated Blueprint zip at ${absoluteOutPath}`);
 		return 0;
 	}
 
@@ -291,6 +313,6 @@ export async function handleGenerateCommand({
 		});
 		return 0;
 	}
-	io.write(`Generated repo directory at ${outputDirectoryPath}`);
+	io.write(`Generated Blueprint directory at ${outputDirectoryPath}`);
 	return 0;
 }

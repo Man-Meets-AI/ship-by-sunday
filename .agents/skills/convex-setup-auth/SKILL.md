@@ -51,7 +51,7 @@ The local reference files contain the concrete workflow, expected files and env 
 
 Use those sources for:
 
-- package installation
+- dependency installation
 - client provider wiring
 - environment variables
 - `convex/auth.config.ts` setup

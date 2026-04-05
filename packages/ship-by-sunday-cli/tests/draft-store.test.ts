@@ -3,7 +3,7 @@ import path from "node:path";
 import {
 	createCompleteProjectDefinition,
 	createCanonicalProjectDefinitionDraft,
-} from "@manmeetsai/packet-compiler";
+} from "@shipbysunday/blueprint-compiler";
 import {
 	exportDraftToFile,
 	importDraftFromFile,

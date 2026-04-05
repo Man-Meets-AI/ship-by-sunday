@@ -1,105 +1,33 @@
 <!-- BEGIN:nextjs-agent-rules -->
+
 # This is NOT the Next.js you know
 
 This version has breaking changes. Read the relevant guide in `apps/web/node_modules/next/dist/docs/` before writing or changing Next.js code. Heed deprecation notices.
+
 <!-- END:nextjs-agent-rules -->
 
+## Task Completion Requirements
+
+- All of `bun run format`, `bun lint`, and `bun typecheck` must pass before considering tasks completed.
+
 ## Ship by Sunday routing
+
 - For work in `apps/web`, also follow `apps/web/AGENTS.md`.
-- For work in `packages/packet-compiler`, also follow `packages/packet-compiler/AGENTS.md`.
+- For work in `packages/blueprint-compiler`, also follow `packages/blueprint-compiler/AGENTS.md`.
+- For route, auth, checkout, entitlement, browser QA, or ship-readiness work, also follow `qa/AGENTS.md`.
+- Root [`DESIGN.md`](/Users/parkerrex/Projects/ship-by-sunday/DESIGN.md) is the canonical visual source of truth for user-facing UI.
+- For any task that changes layout, styling, theming, motion, docs chrome, or marketing presentation, read `DESIGN.md` before editing code or design docs.
+- Before changing the public homepage, read `apps/web/content/docs/configure-the-homepage.mdx`.
+- Hidden repo-reference docs live in `.docs/`. Read only the file relevant to the task:
+  - `.docs/workspace-layout.md`
+  - `.docs/scripts.md`
+  - `.docs/architecture.md`
+  - `.docs/product-contract.md`
+  - `.docs/integrations.md`
+  - `.docs/testing-and-release.md`
+  - `.docs/encyclopedia.md`
 - Ship by Sunday background docs live in `docs/ship-by-sunday/` when historical context is useful.
-- Do not treat those docs as a required reading order or a higher-priority contract than the local `AGENTS.md` files and the current runtime code.
-
-## Repo layout
-
-- `apps/web/app/`: Next.js route entrypoints and route-level wiring
-- `apps/web/features/`: feature-owned runtime code; prefer working here before adding route-level logic
-- `apps/web/convex/`: backend functions, schema, and hosted dev integration
-- `apps/web/config/`: product and starter configuration
-- `apps/web/content/`: product docs and app-owned MDX content
-- `apps/web/tests/`: unit, contract, integration, integration-ui, and browser-smoke coverage
-- `docs/`: human-facing docs and reusable prompt assets
-- `docs/codex/`: per-initiative ExecPlans and the ExecPlan contract
-- `docs/ship-by-sunday/design-pack/`: Ship by Sunday UI workflow pack for landing pages, app surfaces, dashboards, and other user-facing design tasks
-- `packages/`: non-web package boundaries such as `packet-compiler`
-
-## Core tools and stack
-
-- JavaScript runtime and package manager: `bun`
-- UI components: `shadcn/ui`
-- JavaScript lint: `oxlint`
-- JavaScript format: `oxfmt`
-- Python tooling: `uv`, `ruff`, `black`
-- Backend: Convex hosted dev workflow only
-- Auth: Clerk
-- Payments: Stripe
-- E2E/browser QA: Playwright
-- Unit and integration tests: Vitest
-
-## Dev commands
-
-The repository root is the workspace and command entrypoint. The web app itself lives under `apps/web/`.
-
-Install dependencies:
-
-```bash
-bun install
-```
-
-Start local development:
-
-```bash
-bun run dev
-```
-
-Start the full local buyer-flow environment:
-
-```bash
-bun run dev:full
-```
-
-Start only one subsystem:
-
-```bash
-bun run dev:web
-bun run dev:convex
-bun run dev:stripe
-```
-
-Build and typecheck:
-
-```bash
-bun run build
-bun run typecheck
-```
-
-Lint and format:
-
-```bash
-bun run lint
-bun run lint:fix
-bun run format
-bun run format:check
-```
-
-Tests:
-
-```bash
-bun run test:unit
-bun run test:contracts
-bun run test:integration
-bun run test:integration:node
-bun run test:integration:ui
-bun run test:coverage:critical
-bun run test:browser-smoke
-bun run test:e2e:sandbox
-```
-
-Full repo check:
-
-```bash
-bun run check
-```
+- Do not treat `docs/ship-by-sunday/` or `.docs/` as higher-priority contracts than the local `AGENTS.md` files, `DESIGN.md`, and the current runtime code.
 
 ## Engineering standards
 
@@ -122,19 +50,15 @@ bun run check
 
 ## Homepage shell
 
-Before changing the public homepage, read `apps/web/content/docs/configure-the-homepage.mdx`.
-
 The homepage contract is split deliberately:
 
-- `starterConfig.homePage` in `apps/web/config/product.ts` is the control plane
-- `apps/web/features/marketing/content/home.ts` owns copy and assets
-- `apps/web/features/marketing/lib/home-page-render-model.ts` owns section and CTA behavior
-- `apps/web/features/marketing/components/home-page/home-page-primary-cta.tsx` is the only CTA rendering boundary for hero and pricing
-- `apps/web/features/marketing/lib/home-page-structured-data.ts` must stay truthful to visible sections
+- `starterConfig.homePage` in `apps/web/config/product.ts` is the control plane.
+- `apps/web/features/marketing/content/home.ts` owns copy and assets.
+- `apps/web/features/marketing/lib/home-page-render-model.ts` owns section and CTA behavior.
+- `apps/web/features/marketing/components/home-page/home-page-primary-cta.tsx` is the only CTA rendering boundary for hero and pricing.
+- `apps/web/features/marketing/lib/home-page-structured-data.ts` must stay truthful to visible sections.
 
 Do not re-hardwire checkout into hero or pricing, do not scatter section gating across multiple components, and do not leave `FAQPage` or `Product` schema behind when the visible homepage no longer supports them.
-
-For homepage verification, run the narrow homepage tests first, then `bun run build`, then `set -a; source apps/web/.env.local; set +a; bun run test:browser-smoke` when browser smoke is relevant.
 
 ## Convex rules
 
@@ -147,10 +71,12 @@ For homepage verification, run the narrow homepage tests first, then `bun run bu
 For complex features, long-horizon work, migrations, risky integrations, or significant refactors, use an ExecPlan.
 
 Rules:
+
 - Prefer plan mode first for complex or ambiguous work.
-- Store per-initiative ExecPlans in `docs/codex/`.
-- Treat `docs/codex/PLANS.md` as the repository contract for all ExecPlans.
-- When authoring or updating an ExecPlan, read `docs/codex/PLANS.md` first and follow it to the letter.
+- Store per-initiative ExecPlans in `.plans/`.
+- Treat `.plans/PLANS.md` as the repository contract for all ExecPlans.
+- When authoring or updating an ExecPlan, read `.plans/PLANS.md` first and follow it to the letter.
+- Treat `docs/codex/` as a legacy archive of historical plan records, not as the live write target for new ExecPlans.
 - When the request is underspecified, inspect the repo first and ask only the minimum clarifying questions that the repo cannot answer.
 - When implementing from an ExecPlan, read the target ExecPlan first, identify the active milestone, and make the smallest viable scoped change that advances it.
 - Validate immediately after each milestone or milestone slice.
@@ -160,9 +86,10 @@ Rules:
 
 ## Reliability and verification
 
-Before considering work complete, run the narrowest relevant checks first, then broader checks as needed.
+Before considering work complete, run the narrowest relevant checks first, then broaden as needed. Use `.docs/scripts.md` for the command map.
 
 Expected verification surfaces include:
+
 - lint
 - format check
 - unit tests
@@ -172,6 +99,7 @@ Expected verification surfaces include:
 - build
 
 If a relevant check cannot run:
+
 - say exactly why
 - record the limitation in the plan or final summary
 - do not claim success without qualification
@@ -181,6 +109,7 @@ If a relevant check cannot run:
 This repository ships through short-lived feature branches into `dev`, then promotes the reviewed `dev` release candidate into `main`. Do not use a long-lived integration branch.
 
 Before opening a PR:
+
 - branch from the current `dev`
 - keep the diff scoped
 - split the work into logical conventional commits
@@ -191,6 +120,7 @@ Before merging the `dev -> main` release PR, run the default multi-agent review 
 `Review this branch against main. Have pr_explorer map the affected code paths, reviewer find real risks, and docs_researcher verify the framework APIs that the patch relies on.`
 
 Review priorities:
+
 - real bugs
 - regressions
 - missing tests
@@ -199,18 +129,10 @@ Review priorities:
 
 Do not spend review effort on style nitpicks unless they hide a real risk.
 
-PR merge checklist:
-- push the feature branch and open the PR into `dev`
-- run the multi-agent review workflow against `main` for the `dev -> main` release PR
-- fix substantive review findings before merge
-- wait for `static`, `integration`, and `browser-smoke` to pass
-- merge with linear history intact
-- watch the `main` deploy through Vercel and the Convex production workflow
-- delete the local and remote branch after the release settles
-
 ## Done means
 
 Work is done only when:
+
 - the requested behavior is implemented
 - the relevant checks passed, or skipped checks are explicitly justified
 - the diff stays within the intended scope

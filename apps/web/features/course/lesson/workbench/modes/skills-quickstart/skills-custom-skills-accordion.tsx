@@ -21,7 +21,7 @@ export function SkillsCustomSkillsAccordion() {
 							<p className="pb-2 text-sm leading-relaxed text-muted-foreground">
 								Start from a small, repeatable workflow you have actually run
 								more than once. Name the skill, write steps in order, list files
-								or APIs the tool should assume, and add guardrails (what not to
+								or APIs the tool should assume, and add safeguards (what not to
 								change). Install it next to your other skill files so Codex or
 								Cursor can discover it the same way as shipped skills.
 							</p>

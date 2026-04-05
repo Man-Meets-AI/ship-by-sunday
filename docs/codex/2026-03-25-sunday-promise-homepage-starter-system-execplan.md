@@ -6,21 +6,21 @@ plan_status: "done"
 
 # Reframe The Homepage Around The Sunday Promise And The Starter-System Advantage
 
-This is a living execution plan for rewriting the public homepage so it sells the real promise first, then reveals the packet mechanism, then gives the starter system the dedicated space it deserves. It is written so a fresh coding agent can execute it without prior chat context.
+This is a living execution plan for rewriting the public homepage so it sells the real promise first, then reveals the blueprint mechanism, then gives the starter system the dedicated space it deserves. It is written so a fresh coding agent can execute it without prior chat context.
 
 This ExecPlan must be maintained in accordance with `docs/codex/PLANS.md`.
 
 ## Purpose / Big Picture
 
-The homepage currently undersells the offer by flattening too much value into small checklist language. After this work, a cold visitor who lands on `/?marketing=1` should immediately understand that Ship by Sunday helps them ship a real, durable product by Sunday, that normal AI building fails because it starts with prompts instead of product truth, that the OpenAI-aligned documentation packs are the mechanism that keeps agents on the rails, and that the generated starter system is not “just a template” but a configurable, agent-ready codebase with codified operational leverage. The page should still feel like the existing site. The strongest UI elements stay: the dramatic hero headline, animated highlights, preview image, proof cards, GitHub graph, pricing card, and footer wordmark. The work is a message and section-architecture rewrite, not a visual teardown.
+The homepage currently undersells the offer by flattening too much value into small checklist language. After this work, a cold visitor who lands on `/?marketing=1` should immediately understand that Ship by Sunday helps them ship a real, durable product by Sunday, that normal AI building fails because it starts with prompts instead of product truth, that the OpenAI-aligned documentation packs are the mechanism that keeps agents on the blueprint, and that the generated starter system is not “just a template” but a configurable, agent-ready codebase with codified operational leverage. The page should still feel like the existing site. The strongest UI elements stay: the dramatic hero headline, animated highlights, preview image, proof cards, GitHub graph, pricing card, and footer wordmark. The work is a message and section-architecture rewrite, not a visual teardown.
 
 ## Progress
 
 - [x] 2026-03-25 22:04 EDT: Read `AGENTS.md`, `apps/web/AGENTS.md`, `docs/codex/PLANS.md`, and `docs/prompts/execplan-writer.md` before freezing the planning slice.
-- [x] 2026-03-25 22:04 EDT: Inspected the homepage control plane, content layer, render model, section components, UI atoms, tests, metadata surfaces, packet compiler outputs, starter docs, and observability paths.
+- [x] 2026-03-25 22:04 EDT: Inspected the homepage control plane, content layer, render model, section components, UI atoms, tests, metadata surfaces, blueprint compiler outputs, starter docs, and observability paths.
 - [x] 2026-03-25 22:04 EDT: Chose the message hierarchy: promise first, enemy second, mechanism third, by-Sunday outcomes fourth, starter-system advantage fifth, then durability, proof, objections, and close.
 - [x] 2026-03-25 22:04 EDT: Chose the structural scope: keep the existing homepage shell but add one new top-level starter section because the current sections cannot adequately sell the starter system without compressing it into filler.
-- [x] 2026-03-25 22:04 EDT: Grilled the plan and locked the must-have product decisions: homepage-only scope, hero secondary CTA to `#system`, early-clarity guarantee framing, learning-path detail inside the starter section, OpenAI best-practice provenance as a supporting point, and `Agent-Ready Starter System` as the homepage marketing label while `Starter Snapshot` remains the literal download label.
+- [x] 2026-03-25 22:04 EDT: Grilled the plan and locked the must-have product decisions: homepage-only scope, hero secondary CTA to `#system`, early-clarity guarantee framing, learning-path detail inside the starter section, OpenAI best-practice provenance as a supporting point, and `Agent-Ready Starter System` as the homepage marketing label while `Blueprint` remains the literal download label.
 - [x] 2026-03-25 22:04 EDT: Locked the starter sub-advantage labels for the homepage: `Agent-Ready QA Team` and `Telegram Incident Alerts`.
 - [x] 2026-03-25 22:04 EDT: Locked the provider-skill layer label for the homepage: `Agent-Trained Provider Experts`.
 - [x] 2026-03-25 22:04 EDT: Locked the support-lane names for the starter section: `Fast Pass Walkthroughs`, `Guided Ship Path`, and `Product Sense Fundamentals`.
@@ -32,9 +32,9 @@ The homepage currently undersells the offer by flattening too much value into sm
 
 ## Surprises & Discoveries
 
-The starter-system story is grounded in the repo more strongly than the current homepage suggests. The shipped docs in `apps/web/content/docs/index.mdx`, `apps/web/content/docs/how-the-starter-works.mdx`, and `apps/web/content/docs/customize-the-starter.mdx` already describe a public marketing surface, a docs surface, a protected packet-first workspace, module flags, and an opinionated public-to-paid-to-protected path across Next.js, Vercel, Stripe, Clerk, and Convex. That means the homepage can speak more boldly about the starter because the product already has concrete starter behavior and docs, not just aspirational copy.
+The starter-system story is grounded in the repo more strongly than the current homepage suggests. The shipped docs in `apps/web/content/docs/index.mdx`, `apps/web/content/docs/how-the-starter-works.mdx`, and `apps/web/content/docs/customize-the-starter.mdx` already describe a public marketing surface, a docs surface, a protected blueprint-first workspace, module flags, and an opinionated public-to-paid-to-protected path across Next.js, Vercel, Stripe, Clerk, and Convex. That means the homepage can speak more boldly about the starter because the product already has concrete starter behavior and docs, not just aspirational copy.
 
-The packet compiler also supports the starter story directly. `packages/packet-compiler/src/public-artifact-contract.ts` exposes public labels for Design Pack, Marketing Pack, Build Pack, Prompt Pack, and Starter Snapshot. `packages/packet-compiler/src/repo-generation/render-template-overrides.ts` shows that generated output already targets `apps/web/config/product.ts` and `apps/web/features/marketing/content/home.ts`, and `packages/packet-compiler/src/repo-generation/build-repo-generation-manifest.ts` shows the generated repo includes `apps/web` and `packages/packet-compiler` while excluding build/test clutter. The homepage can therefore truthfully position the starter as generated around the product definition rather than as a static generic starter.
+The blueprint compiler also supports the starter story directly. `packages/blueprint-compiler/src/public-artifact-contract.ts` exposes public labels for Design Pack, Marketing Pack, Build Pack, Prompt Pack, and Blueprint. `packages/blueprint-compiler/src/repo-generation/render-template-overrides.ts` shows that generated output already targets `apps/web/config/product.ts` and `apps/web/features/marketing/content/home.ts`, and `packages/blueprint-compiler/src/repo-generation/build-repo-generation-manifest.ts` shows the Blueprint includes `apps/web` and `packages/blueprint-compiler` while excluding build/test clutter. The homepage can therefore truthfully position the starter as generated around the product definition rather than as a static generic starter.
 
 The provider-expert and docs/config story is also real product substance, not marketing garnish. `apps/web/features/course/lesson/workbench/modes/skills-quickstart/skills-quickstart-skills-data.ts` and `apps/web/content/docs/mcps-and-skills.mdx` already present provider-specific guidance for Clerk, Convex, Stripe, Next.js, React, QA, and related workflows. `apps/web/content/docs/customize-the-starter.mdx` and `apps/web/content/docs/configure-the-homepage.mdx` show that the starter already exposes meaningful config seams, module flags, and control points rather than forcing manual repo surgery. The homepage can therefore position the starter as change-friendly for agents because the repo ships with agent-readable docs and deliberate config levers, not because “config files” are inherently exciting.
 
@@ -52,15 +52,15 @@ Evidence from the repo that supports the revised offer framing:
 
     apps/web/content/docs/index.mdx:
     - public marketing surface on `/`
-    - protected packet-first workspace
+    - protected blueprint-first workspace
     - starter contract and module flags
 
-    packages/packet-compiler/src/public-artifact-contract.ts:
+    packages/blueprint-compiler/src/public-artifact-contract.ts:
     - Design Pack
     - Marketing Pack
     - Build Pack
     - Prompt Pack
-    - Starter Snapshot
+    - Blueprint
 
     apps/web/content/docs/local-qa.mdx:
     - observability smoke with Convex + Telegram
@@ -73,7 +73,7 @@ Rationale: The current section set can sell the promise and the mechanism, but i
 Date: 2026-03-25
 
 Decision: The copy hierarchy is promise first, enemy second, mechanism third, by-Sunday outcomes fourth, starter-system advantage fifth.
-Rationale: The user explicitly clarified that “ship a real, durable product by Sunday” is the promise, and that the packet system is the mechanism that keeps agents on the rails. The homepage must reflect that hierarchy.
+Rationale: The user explicitly clarified that “ship a real, durable product by Sunday” is the promise, and that the blueprint system is the mechanism that keeps agents on the blueprint. The homepage must reflect that hierarchy.
 Date: 2026-03-25
 
 Decision: The page will preserve the strongest visual and interactive elements instead of flattening into plain landing-page copy blocks.
@@ -116,8 +116,8 @@ Decision: The homepage should mention the OpenAI best-practice provenance only a
 Rationale: The research and template provenance are real differentiators, but they should support the starter-system story rather than replace the outcome-first sales argument.
 Date: 2026-03-25
 
-Decision: Use `Agent-Ready Starter System` as the homepage marketing label for the generated codebase layer, while keeping `Starter Snapshot` as the literal product download label.
-Rationale: `Agent-Ready Starter System` is stronger buyer language for the homepage. `Starter Snapshot` is already the truthful public artifact name in the review/download flow and does not need to be renamed in this slice.
+Decision: Use `Agent-Ready Starter System` as the homepage marketing label for the generated codebase layer, while keeping `Blueprint` as the literal product download label.
+Rationale: `Agent-Ready Starter System` is stronger buyer language for the homepage. `Blueprint` is already the truthful public artifact name in the review/download flow and does not need to be renamed in this slice.
 Date: 2026-03-25
 
 Decision: Use `Agent-Ready QA Team` and `Telegram Incident Alerts` as branded sub-advantages inside the starter section.
@@ -170,7 +170,7 @@ The current components are already segmented cleanly. The hero lives in `apps/we
 
 Several reusable UI atoms should be intentionally preserved. `apps/web/components/ui/cover.tsx` gives the hero headline its dramatic animated emphasis. `apps/web/components/ui/pointer-highlight.tsx` gives the system and card sections a “progressively discovered” feel. `apps/web/components/ui/encrypted-text.tsx` energizes the proof stats. The globe card and GitHub graph add motion and legitimacy to the proof section. These are not just decoration; they are part of the current page’s perceived value and should be made to serve the new argument.
 
-The starter-system story is grounded in real product surfaces. `apps/web/content/docs/index.mdx` describes the starter as a packet-first starter with a public landing page, real paid access, and a protected workspace. `apps/web/content/docs/how-the-starter-works.mdx` describes the locked stack and module gating. `apps/web/features/workspace-home/lib/workspace-home-model.ts` shows configurable modules for docs, course, codex, and observability. `packages/packet-compiler/src/repo-generation/render-template-overrides.ts` and `build-repo-generation-manifest.ts` show that generated output can tailor `apps/web/config/product.ts` and `apps/web/features/marketing/content/home.ts` while producing a repo-shaped artifact. The observability flow is backed by real code and tests under `apps/web/features/observability/**` and `apps/web/tests/**`.
+The starter-system story is grounded in real product surfaces. `apps/web/content/docs/index.mdx` describes the starter as a blueprint-first starter with a public landing page, real paid access, and a protected workspace. `apps/web/content/docs/how-the-starter-works.mdx` describes the locked stack and module gating. `apps/web/features/workspace-home/lib/workspace-home-model.ts` shows configurable modules for docs, course, codex, and observability. `packages/blueprint-compiler/src/repo-generation/render-template-overrides.ts` and `build-repo-generation-manifest.ts` show that generated output can tailor `apps/web/config/product.ts` and `apps/web/features/marketing/content/home.ts` while producing a repo-shaped artifact. The observability flow is backed by real code and tests under `apps/web/features/observability/**` and `apps/web/tests/**`.
 
 The tests and metadata surfaces matter for this slice. `apps/web/tests/unit/home-page-content.test.ts`, `apps/web/tests/unit/home-page-render-model.test.ts`, `apps/web/tests/unit/home-page-structured-data.test.ts`, `apps/web/tests/integration-ui/home-page-primary-cta.test.tsx`, and `apps/web/tests/browser-smoke/app-smoke.spec.ts` now prove the updated promise-first homepage contract. `apps/web/features/marketing/lib/home-page-structured-data.ts`, `apps/web/app/layout.tsx`, `apps/web/app/manifest.ts`, `apps/web/app/opengraph-image.tsx`, and `apps/web/platform/billing/stripe.ts` all depend on the shared promise fields in `productConfig`, so those surfaces were updated or revalidated together.
 
@@ -198,7 +198,7 @@ At the end of this milestone, the homepage can render the new story with current
 
 This milestone will touch `apps/web/features/marketing/content/home.ts` heavily. It will likely touch `apps/web/features/marketing/components/home-page/hero-sections.tsx` and `home-hero-headline.tsx` to support a stronger promise line and optional secondary CTA that points to `#system`. It will add a new feature-local component such as `apps/web/features/marketing/components/home-page/starter-system-section.tsx` for the starter section. If that component shares card or highlight patterns with `whats-inside-section.tsx`, either reuse the existing primitives in place or extract a small feature-local shared card component inside the same `home-page/` folder. Do not create global abstractions for a one-page landing need.
 
-The new starter section should not read like a generic feature dump. It should explain that the `Agent-Ready Starter System` is configurable, aligned to the packet output, pre-wired with real product infrastructure, and shipped with agent-readable docs and change-friendly control seams. It should surface the OpenAI best-practice provenance as a supporting point, not the headline. It should also surface included learning paths without making the videos feel like the main product. A likely content structure is a strong headline and intro, followed by three or four cards for the differentiators, and then a smaller secondary strip or subcopy that clarifies `Fast Pass Walkthroughs`, `Guided Ship Path`, `Product Sense Fundamentals`, and how to use skills versus sub-agents as included support lanes. The pricing card should stay short and should not carry the detailed learning-path explanation. Preferred starter-section card nouns now include `Agent-Ready QA Team`, `Telegram Incident Alerts`, and `Agent-Trained Provider Experts`.
+The new starter section should not read like a generic feature dump. It should explain that the `Agent-Ready Starter System` is configurable, aligned to the blueprint output, pre-wired with real product infrastructure, and shipped with agent-readable docs and change-friendly control seams. It should surface the OpenAI best-practice provenance as a supporting point, not the headline. It should also surface included learning paths without making the videos feel like the main product. A likely content structure is a strong headline and intro, followed by three or four cards for the differentiators, and then a smaller secondary strip or subcopy that clarifies `Fast Pass Walkthroughs`, `Guided Ship Path`, `Product Sense Fundamentals`, and how to use skills versus sub-agents as included support lanes. The pricing card should stay short and should not carry the detailed learning-path explanation. Preferred starter-section card nouns now include `Agent-Ready QA Team`, `Telegram Incident Alerts`, and `Agent-Trained Provider Experts`.
 
 ### Milestone 3: Align the shared promise surfaces and connected tests
 
@@ -216,7 +216,7 @@ The likely tradeoffs are hero-line length, whether the globe card still helps th
 
 Start from the repository root and refresh the exact homepage contract plus the starter-system evidence before touching code.
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     sed -n '1,220p' apps/web/content/docs/configure-the-homepage.mdx
     sed -n '1,260p' apps/web/features/marketing/content/home.ts
     sed -n '1,260p' apps/web/config/product.ts
@@ -224,9 +224,9 @@ Start from the repository root and refresh the exact homepage contract plus the 
     sed -n '1,260p' apps/web/content/docs/how-the-starter-works.mdx
     sed -n '1,260p' apps/web/content/docs/customize-the-starter.mdx
     sed -n '1,260p' apps/web/content/docs/local-qa.mdx
-    sed -n '1,260p' packages/packet-compiler/src/public-artifact-contract.ts
-    sed -n '1,260p' packages/packet-compiler/src/repo-generation/render-template-overrides.ts
-    sed -n '1,260p' packages/packet-compiler/src/repo-generation/build-repo-generation-manifest.ts
+    sed -n '1,260p' packages/blueprint-compiler/src/public-artifact-contract.ts
+    sed -n '1,260p' packages/blueprint-compiler/src/repo-generation/render-template-overrides.ts
+    sed -n '1,260p' packages/blueprint-compiler/src/repo-generation/build-repo-generation-manifest.ts
 
 Write down the new section map and keep it stable during the implementation:
 
@@ -241,8 +241,8 @@ Write down the new section map and keep it stable during the implementation:
 
 Then update `apps/web/config/product.ts` to add the new `starterSystem` section key to the homepage section order and the default section toggles. Update `apps/web/features/marketing/lib/home-page-render-model.ts` to include the new section in the render model. Update `apps/web/features/marketing/components/home-page.tsx` to render the new section in the correct place.
 
-Next, update `apps/web/features/marketing/content/home.ts` to hold the new copy structure. The hero content should become promise-first. If a secondary CTA is added, it should link to `#system`. The hero checklist should shrink to high-value outcome reinforcement rather than try to explain the entire offer. The current sprint-path content should become the “why prompt-first fails / why the rails matter” section. The current what’s-inside content should become by-Sunday deliverables. Add a new `starterSystemSection` content object that explains the `Agent-Ready Starter System`, the operational leverage, the OpenAI-aligned best-practice provenance as a supporting point, and the learning-path stack.
-Next, update `apps/web/features/marketing/content/home.ts` to hold the new copy structure. The hero content should become promise-first. If a secondary CTA is added, it should link to `#system`. The hero checklist should shrink to high-value outcome reinforcement rather than try to explain the entire offer. The current sprint-path content should become the “why prompt-first fails / why the rails matter” section. The current what’s-inside content should become by-Sunday deliverables. Add a new `starterSystemSection` content object that explains the `Agent-Ready Starter System`, the operational leverage, the agent-readable docs and easy config/toggle seams, the OpenAI-aligned best-practice provenance as a supporting point, and the support-lane stack named `Fast Pass Walkthroughs`, `Guided Ship Path`, and `Product Sense Fundamentals`.
+Next, update `apps/web/features/marketing/content/home.ts` to hold the new copy structure. The hero content should become promise-first. If a secondary CTA is added, it should link to `#system`. The hero checklist should shrink to high-value outcome reinforcement rather than try to explain the entire offer. The current sprint-path content should become the “why prompt-first fails / why the blueprint matter” section. The current what’s-inside content should become by-Sunday deliverables. Add a new `starterSystemSection` content object that explains the `Agent-Ready Starter System`, the operational leverage, the OpenAI-aligned best-practice provenance as a supporting point, and the learning-path stack.
+Next, update `apps/web/features/marketing/content/home.ts` to hold the new copy structure. The hero content should become promise-first. If a secondary CTA is added, it should link to `#system`. The hero checklist should shrink to high-value outcome reinforcement rather than try to explain the entire offer. The current sprint-path content should become the “why prompt-first fails / why the blueprint matter” section. The current what’s-inside content should become by-Sunday deliverables. Add a new `starterSystemSection` content object that explains the `Agent-Ready Starter System`, the operational leverage, the agent-readable docs and easy config/toggle seams, the OpenAI-aligned best-practice provenance as a supporting point, and the support-lane stack named `Fast Pass Walkthroughs`, `Guided Ship Path`, and `Product Sense Fundamentals`.
 
 If needed, extend the hero component shape minimally. Keep `HomePagePrimaryCta` as the only primary CTA renderer. If a secondary hero CTA is added, make it a normal link button or anchor that points to `#system`.
 
@@ -250,7 +250,7 @@ Create the new feature-local starter section component under `apps/web/features/
 
 After the page-level content and rendering work is done, align the shared promise and metadata surfaces.
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     sed -n '1,180p' apps/web/app/opengraph-image.tsx
     sed -n '1,160p' apps/web/platform/billing/stripe.ts
     sed -n '1,260p' apps/web/features/marketing/lib/home-page-structured-data.ts
@@ -263,7 +263,7 @@ Update the tests to assert the new story and new section order while preserving 
 
 Run the narrow homepage validation suite from `apps/web/content/docs/configure-the-homepage.mdx`.
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web
+    cd /Users/parkerrex/Projects/ship-by-sunday/apps/web
     bunx oxlint --deny-warnings config/product.ts features/marketing/components/home-page.tsx features/marketing/components/home-page/durability-section.tsx features/marketing/components/home-page/hero-sections.tsx features/marketing/components/home-page/pricing-footer-sections.tsx features/marketing/components/home-page/home-page-primary-cta.tsx features/marketing/content/home.ts features/marketing/lib/home-page-render-model.ts features/marketing/lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/integration-ui/home-page-primary-cta.test.tsx
 
     bunx oxfmt --check config/product.ts features/marketing/components/home-page.tsx features/marketing/components/home-page/durability-section.tsx features/marketing/components/home-page/hero-sections.tsx features/marketing/components/home-page/pricing-footer-sections.tsx features/marketing/components/home-page/home-page-primary-cta.tsx features/marketing/content/home.ts features/marketing/lib/home-page-render-model.ts features/marketing/lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/integration-ui/home-page-primary-cta.test.tsx
@@ -274,7 +274,7 @@ Run the narrow homepage validation suite from `apps/web/content/docs/configure-t
 
 Then run the browser smoke and full build from the repository root.
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     set -a
     source apps/web/.env.local
     set +a
@@ -288,7 +288,7 @@ If any validation fails, stop, record the failure in `Surprises & Discoveries`, 
 
 The work is accepted only when a human can open `/?marketing=1` and immediately understand the offer without decoding internal jargon. The hero must communicate that Ship by Sunday helps the visitor ship a real, durable product by Sunday. The primary CTA must remain large and checkout-driven. If there is a secondary CTA, it must guide discovery without competing with purchase.
 
-The next screenful must make the enemy and the mechanism obvious. A cold visitor should understand why prompt-first AI building drifts and why the contract-first docs-pack path keeps agents on the rails. The by-Sunday outcomes section must make the deliverables concrete. The new starter-system section must clearly explain that the buyer is not just getting videos and a generic starter, but an `Agent-Ready Starter System` with a generated, configurable codebase, operational leverage, included learning paths, and OpenAI-aligned best-practice support as a supporting proof point. The durability section must make the Monday payoff explicit. The proof, FAQ, pricing, and footer must still render and feel intentional.
+The next screenful must make the enemy and the mechanism obvious. A cold visitor should understand why prompt-first AI building drifts and why the contract-first docs-pack path keeps agents on the blueprint. The by-Sunday outcomes section must make the deliverables concrete. The new starter-system section must clearly explain that the buyer is not just getting videos and a generic starter, but an `Agent-Ready Starter System` with a generated, configurable codebase, operational leverage, included learning paths, and OpenAI-aligned best-practice support as a supporting proof point. The durability section must make the Monday payoff explicit. The proof, FAQ, pricing, and footer must still render and feel intentional.
 
 The homepage contract must still hold. `id="system"` and `id="pricing"` must remain present. The CTA behavior must still flow through the shared homepage CTA boundary. If a secondary hero CTA is added, it must point to `#system`. The homepage structured data must still emit `Organization`, `Product` when pricing is still checkout-backed, and `FAQPage` when FAQ is visible. The narrow homepage validation commands must pass. The browser-smoke tests must pass. `bun run build` must pass.
 
@@ -312,14 +312,14 @@ The homepage should now sell four offer layers in order:
 
     1. Ship a real product by Sunday.
     2. Most AI builds fail because they start with prompts instead of product truth.
-    3. The docs packs keep the agents on the rails.
+    3. The docs packs keep the agents on the blueprint.
     4. The generated starter gives those agents the right place to work.
 
 The homepage should use these naming rules consistently:
 
     mechanism layer -> docs packs / Agent-Ready Packs
     generated codebase marketing label -> Agent-Ready Starter System
-    literal download label -> Starter Snapshot
+    literal download label -> Blueprint
 
 The new homepage contract should move from this:
 
@@ -360,7 +360,7 @@ The new starter section should carry these ideas explicitly, though the exact wo
 
 Observed validation transcript for the completed contract slice:
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web
+    cd /Users/parkerrex/Projects/ship-by-sunday/apps/web
     bunx oxfmt --check config/product.ts features/marketing/components/home-page.tsx features/marketing/components/home-page/starter-system-section.tsx features/marketing/content/home.ts features/marketing/lib/home-page-render-model.ts tests/unit/home-page-render-model.test.ts
     All matched files use the correct format.
 
@@ -373,7 +373,7 @@ Observed validation transcript for the completed contract slice:
 
 Observed validation transcript for the completed homepage rewrite:
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web
+    cd /Users/parkerrex/Projects/ship-by-sunday/apps/web
     bunx oxlint --deny-warnings config/product.ts features/marketing/components/home-page.tsx features/marketing/components/home-page/durability-section.tsx features/marketing/components/home-page/hero-sections.tsx features/marketing/components/home-page/pricing-footer-sections.tsx features/marketing/components/home-page/home-page-primary-cta.tsx features/marketing/components/home-page/starter-system-section.tsx features/marketing/content/home.ts features/marketing/lib/home-page-render-model.ts features/marketing/lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/integration-ui/home-page-primary-cta.test.tsx
     Found 0 warnings and 0 errors.
 
@@ -388,7 +388,7 @@ Observed validation transcript for the completed homepage rewrite:
     Test Files  1 passed (1)
     Tests       2 passed (2)
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     set -a
     source apps/web/.env.local
     set +a
@@ -404,7 +404,7 @@ Strong homepage differentiator language should stay defensible. Prefer lines suc
 
     More than a starter. More like an agent-ready operating system.
     The docs packs tell the agents what to do. The starter gives them the right place to do it.
-    Most starters give you code. This gives you rails.
+    Most starters give you code. This gives you blueprint.
 
 Avoid unqualified lines such as “first of its kind” unless the site later adds explicit supporting proof.
 

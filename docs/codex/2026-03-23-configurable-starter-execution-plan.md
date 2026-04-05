@@ -6,7 +6,7 @@ plan_status: "done"
 
 # Configurable Starter Execution Plan
 
-This execution plan turns the strategy in [2026-03-23-configurable-starter-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/.codex/plans/2026-03-23-configurable-starter-plan.md) into a living implementation loop.
+This execution plan turns the strategy in [2026-03-23-configurable-starter-plan.md](/Users/parkerrex/Projects/ship-by-sunday/.codex/plans/2026-03-23-configurable-starter-plan.md) into a living implementation loop.
 
 Use this document to:
 
@@ -20,7 +20,7 @@ Do not skip the validation or status-update step.
 
 ## Purpose / Big Picture
 
-Turn `manmeetsai-workspace` into a configurable starter without weakening the good parts that already work:
+Turn `ship-by-sunday` into a configurable starter without weakening the good parts that already work:
 
 - Clerk auth
 - hosted Convex dev workflow
@@ -41,8 +41,8 @@ This execution plan assumes:
 ## Progress
 
 - [x] E0. Create the strategic starter plan and boundaries doc.
-- [x] E1. Introduce a starter contract in [config/product.ts](/Users/parkerrex/Projects/manmeetsai-workspace/config/product.ts) with backward-compatible `productConfig`.
-- [x] E2. Add starter selector helpers in [features/starter/lib/starter-selectors.ts](/Users/parkerrex/Projects/manmeetsai-workspace/features/starter/lib/starter-selectors.ts).
+- [x] E1. Introduce a starter contract in [config/product.ts](/Users/parkerrex/Projects/ship-by-sunday/config/product.ts) with backward-compatible `productConfig`.
+- [x] E2. Add starter selector helpers in [features/starter/lib/starter-selectors.ts](/Users/parkerrex/Projects/ship-by-sunday/features/starter/lib/starter-selectors.ts).
 - [x] E3. Rewire visible identity surfaces to starter-driven labels and copy.
 - [x] E4. Add soft module gating for `docs`, `course`, and `starterRepo`.
 - [x] E5. Replace the course-disabled protected shell with a real neutral workspace home.
@@ -63,7 +63,7 @@ This execution plan assumes:
 ## Decision Log
 
 - 2026-03-23: Do not start with route renames. Keep `/mission`, `/lesson/[lessonKey]`, and `/artifacts` stable until the starter-mode protected experience is real.
-- 2026-03-23: Use a compatibility layer in [config/product.ts](/Users/parkerrex/Projects/manmeetsai-workspace/config/product.ts) instead of forcing a repo-wide switch to a new config API in one pass.
+- 2026-03-23: Use a compatibility layer in [config/product.ts](/Users/parkerrex/Projects/ship-by-sunday/config/product.ts) instead of forcing a repo-wide switch to a new config API in one pass.
 - 2026-03-23: Treat docs, course, and starter-repo as optional modules exposed through starter config.
 - 2026-03-23: Prefer route-level blank states over half-rendered disabled module surfaces.
 - 2026-03-23: The next meaningful product slice is a neutral protected workspace home, not route aliasing.
@@ -81,16 +81,16 @@ This execution plan assumes:
 
 ### Important strategic document
 
-- [2026-03-23-configurable-starter-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/.codex/plans/2026-03-23-configurable-starter-plan.md)
+- [2026-03-23-configurable-starter-plan.md](/Users/parkerrex/Projects/ship-by-sunday/.codex/plans/2026-03-23-configurable-starter-plan.md)
 
 ### Current implementation seams
 
-- Starter contract: [config/product.ts](/Users/parkerrex/Projects/manmeetsai-workspace/config/product.ts)
-- Starter selectors: [features/starter/lib/starter-selectors.ts](/Users/parkerrex/Projects/manmeetsai-workspace/features/starter/lib/starter-selectors.ts)
-- Public marketing copy: [features/marketing/content/home.ts](/Users/parkerrex/Projects/manmeetsai-workspace/features/marketing/content/home.ts)
-- Protected entry routes: [app/(workspace)/mission/page.tsx](/Users/parkerrex/Projects/manmeetsai-workspace/app/(workspace)/mission/page.tsx), [app/(workspace)/artifacts/page.tsx](/Users/parkerrex/Projects/manmeetsai-workspace/app/(workspace)/artifacts/page.tsx), [app/(workspace)/lesson/[lessonKey]/page.tsx](/Users/parkerrex/Projects/manmeetsai-workspace/app/(workspace)/lesson/[lessonKey]/page.tsx), [app/(workspace)/settings/page.tsx](/Users/parkerrex/Projects/manmeetsai-workspace/app/(workspace)/settings/page.tsx)
-- Docs route shell: [app/docs/layout.tsx](/Users/parkerrex/Projects/manmeetsai-workspace/app/docs/layout.tsx), [app/docs/[[...mdxPath]]/page.tsx](/Users/parkerrex/Projects/manmeetsai-workspace/app/docs/[[...mdxPath]]/page.tsx)
-- Protected shell: [features/course/shared/components/app-shell.tsx](/Users/parkerrex/Projects/manmeetsai-workspace/features/course/shared/components/app-shell.tsx)
+- Starter contract: [config/product.ts](/Users/parkerrex/Projects/ship-by-sunday/config/product.ts)
+- Starter selectors: [features/starter/lib/starter-selectors.ts](/Users/parkerrex/Projects/ship-by-sunday/features/starter/lib/starter-selectors.ts)
+- Public marketing copy: [features/marketing/content/home.ts](/Users/parkerrex/Projects/ship-by-sunday/features/marketing/content/home.ts)
+- Protected entry routes: [app/(workspace)/mission/page.tsx](/Users/parkerrex/Projects/ship-by-sunday/app/(workspace)/mission/page.tsx), [app/(workspace)/artifacts/page.tsx](/Users/parkerrex/Projects/ship-by-sunday/app/(workspace)/artifacts/page.tsx), [app/(workspace)/lesson/[lessonKey]/page.tsx](/Users/parkerrex/Projects/ship-by-sunday/app/(workspace)/lesson/[lessonKey]/page.tsx), [app/(workspace)/settings/page.tsx](/Users/parkerrex/Projects/ship-by-sunday/app/(workspace)/settings/page.tsx)
+- Docs route shell: [app/docs/layout.tsx](/Users/parkerrex/Projects/ship-by-sunday/app/docs/layout.tsx), [app/docs/[[...mdxPath]]/page.tsx](/Users/parkerrex/Projects/ship-by-sunday/app/docs/[[...mdxPath]]/page.tsx)
+- Protected shell: [features/course/shared/components/app-shell.tsx](/Users/parkerrex/Projects/ship-by-sunday/features/course/shared/components/app-shell.tsx)
 
 ### High-risk areas
 
@@ -143,7 +143,7 @@ Replace the current course-disabled protected blank state with a real starter-mo
 - [x] E5.1 Add `features/workspace-home/` with a read-only model layer.
 - [x] E5.2 Build a neutral protected dashboard UI that does not import lesson/workbench internals.
 - [x] E5.3 Reuse existing cards where useful: Codex connection, starter repo access when enabled, account/settings links.
-- [x] E5.4 Render `WorkspaceHomePage` from [app/(workspace)/mission/page.tsx](/Users/parkerrex/Projects/manmeetsai-workspace/app/(workspace)/mission/page.tsx) when `course` is off.
+- [x] E5.4 Render `WorkspaceHomePage` from [app/(workspace)/mission/page.tsx](/Users/parkerrex/Projects/ship-by-sunday/app/(workspace)/mission/page.tsx) when `course` is off.
 - [x] E5.5 Keep lesson and artifacts routes on explicit disabled states for now.
 - [x] E5.6 Add tests for the `course off` branch and the workspace-home model.
 
@@ -151,10 +151,10 @@ Replace the current course-disabled protected blank state with a real starter-mo
 
 - new `features/workspace-home/components/*`
 - new `features/workspace-home/lib/workspace-home-model.ts`
-- [app/(workspace)/mission/page.tsx](/Users/parkerrex/Projects/manmeetsai-workspace/app/(workspace)/mission/page.tsx)
-- possibly [features/settings/components/settings-page.tsx](/Users/parkerrex/Projects/manmeetsai-workspace/features/settings/components/settings-page.tsx)
-- possibly [features/codex/components/codex-connection-card.tsx](/Users/parkerrex/Projects/manmeetsai-workspace/features/codex/components/codex-connection-card.tsx)
-- [tests/integration-ui/*](/Users/parkerrex/Projects/manmeetsai-workspace/tests/integration-ui)
+- [app/(workspace)/mission/page.tsx](/Users/parkerrex/Projects/ship-by-sunday/app/(workspace)/mission/page.tsx)
+- possibly [features/settings/components/settings-page.tsx](/Users/parkerrex/Projects/ship-by-sunday/features/settings/components/settings-page.tsx)
+- possibly [features/codex/components/codex-connection-card.tsx](/Users/parkerrex/Projects/ship-by-sunday/features/codex/components/codex-connection-card.tsx)
+- [tests/integration-ui/*](/Users/parkerrex/Projects/ship-by-sunday/tests/integration-ui)
 
 **Acceptance**
 
@@ -167,7 +167,7 @@ Replace the current course-disabled protected blank state with a real starter-mo
 **Validation**
 
 ```bash
-cd /Users/parkerrex/Projects/manmeetsai-workspace
+cd /Users/parkerrex/Projects/ship-by-sunday
 bunx oxlint --deny-warnings <touched files>
 bunx oxfmt --check <touched files>
 bun run test:unit <new or touched unit tests>
@@ -204,7 +204,7 @@ Make the starter’s current configuration legible. A user should not need to in
 
 - new `features/starter/components/starter-visibility-*`
 - new `features/starter/lib/starter-visibility-model.ts`
-- [features/settings/components/settings-page.tsx](/Users/parkerrex/Projects/manmeetsai-workspace/features/settings/components/settings-page.tsx) or the new workspace home
+- [features/settings/components/settings-page.tsx](/Users/parkerrex/Projects/ship-by-sunday/features/settings/components/settings-page.tsx) or the new workspace home
 
 **Acceptance**
 
@@ -215,7 +215,7 @@ Make the starter’s current configuration legible. A user should not need to in
 **Validation**
 
 ```bash
-cd /Users/parkerrex/Projects/manmeetsai-workspace
+cd /Users/parkerrex/Projects/ship-by-sunday
 bunx oxlint --deny-warnings <touched files>
 bunx oxfmt --check <touched files>
 bun run test:unit <new or touched unit tests>
@@ -241,10 +241,10 @@ Move the public site from “renamed Ship by Sunday page” to “starter homepa
 
 **Primary files**
 
-- [features/marketing/content/home.ts](/Users/parkerrex/Projects/manmeetsai-workspace/features/marketing/content/home.ts)
+- [features/marketing/content/home.ts](/Users/parkerrex/Projects/ship-by-sunday/features/marketing/content/home.ts)
 - `features/marketing/components/home-page/*`
-- [features/marketing/lib/home-page-structured-data.ts](/Users/parkerrex/Projects/manmeetsai-workspace/features/marketing/lib/home-page-structured-data.ts)
-- [tests/browser-smoke/app-smoke.spec.ts](/Users/parkerrex/Projects/manmeetsai-workspace/tests/browser-smoke/app-smoke.spec.ts)
+- [features/marketing/lib/home-page-structured-data.ts](/Users/parkerrex/Projects/ship-by-sunday/features/marketing/lib/home-page-structured-data.ts)
+- [tests/browser-smoke/app-smoke.spec.ts](/Users/parkerrex/Projects/ship-by-sunday/tests/browser-smoke/app-smoke.spec.ts)
 
 **Acceptance**
 
@@ -255,7 +255,7 @@ Move the public site from “renamed Ship by Sunday page” to “starter homepa
 **Validation**
 
 ```bash
-cd /Users/parkerrex/Projects/manmeetsai-workspace
+cd /Users/parkerrex/Projects/ship-by-sunday
 bunx oxlint --deny-warnings <touched files>
 bunx oxfmt --check <touched files>
 bun run test:unit <touched tests>
@@ -298,7 +298,7 @@ Add a starter-safe analytics seam without coupling the repo to a specific provid
 **Validation**
 
 ```bash
-cd /Users/parkerrex/Projects/manmeetsai-workspace
+cd /Users/parkerrex/Projects/ship-by-sunday
 bunx oxlint --deny-warnings <touched files>
 bunx oxfmt --check <touched files>
 bun run test:unit <new or touched unit tests>
@@ -324,8 +324,8 @@ Document the starter path, tighten tests, and make the repo safe to hand off as 
 
 **Primary files**
 
-- [README.md](/Users/parkerrex/Projects/manmeetsai-workspace/README.md)
-- [content/docs/customize-the-starter.mdx](/Users/parkerrex/Projects/manmeetsai-workspace/content/docs/customize-the-starter.mdx)
+- [README.md](/Users/parkerrex/Projects/ship-by-sunday/README.md)
+- [content/docs/customize-the-starter.mdx](/Users/parkerrex/Projects/ship-by-sunday/content/docs/customize-the-starter.mdx)
 - other docs as needed
 - browser and integration tests
 
@@ -338,7 +338,7 @@ Document the starter path, tighten tests, and make the repo safe to hand off as 
 **Validation**
 
 ```bash
-cd /Users/parkerrex/Projects/manmeetsai-workspace
+cd /Users/parkerrex/Projects/ship-by-sunday
 bun run build
 bun run test:unit
 bun run test:integration
@@ -367,7 +367,7 @@ Use this checklist for every slice:
 ### Minimum validation for every slice
 
 ```bash
-cd /Users/parkerrex/Projects/manmeetsai-workspace
+cd /Users/parkerrex/Projects/ship-by-sunday
 bunx oxlint --deny-warnings <touched files>
 bunx oxfmt --check <touched files>
 bun run build

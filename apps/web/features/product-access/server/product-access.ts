@@ -13,7 +13,7 @@ import type { ProductAccess } from "@/features/product-access/lib/product-access
 import { getConvexServerSession } from "@/platform/auth/convex-auth";
 
 type ResumeDestination = FunctionReturnType<
-	typeof api.packet.getPacketResumeDestination
+	typeof api.blueprint.getBlueprintResumeDestination
 >;
 
 export async function getServerProductAccess(): Promise<ProductAccess> {
@@ -78,7 +78,7 @@ export async function getServerResumeDestination() {
 	}
 
 	return (await fetchQuery(
-		api.packet.getPacketResumeDestination,
+		api.blueprint.getBlueprintResumeDestination,
 		{},
 		{ token: session.token },
 	)) as ResumeDestination;

@@ -9,11 +9,11 @@ If we restarted the curriculum from zero, we would not design “a course with l
 
 We would design:
 - one canonical facts intake
-- three packet compilers
+- three blueprint compilers
 - one download moment
 - one optional execution track after download
 
-The curriculum would be an input funnel around these packet families:
+The curriculum would be an input funnel around these blueprint families:
 - `docs/openai/design-checklist/`
 - `docs/openai/openai-marketing-kit/`
 - `docs/openai/codex_long_horizon_templates/`
@@ -24,7 +24,7 @@ The product is:
 - a guided intake experience
 - that collects the exact facts required
 - to generate a custom folder
-- that gives the student a design packet, marketing packet, build packet, and prompt pack
+- that gives the student a design blueprint, marketing blueprint, build blueprint, and prompt pack
 
 Everything else is secondary.
 
@@ -74,9 +74,9 @@ Examples:
 Generated on demand from canonical facts plus repo context.
 
 Outputs:
-- design packet
-- marketing packet
-- long-horizon build packet
+- design blueprint
+- marketing blueprint
+- long-horizon build blueprint
 - prompt pack
 - root README
 - `project-definition.json`
@@ -105,7 +105,7 @@ Examples:
 The app needs one compiler service that:
 - reads canonical facts
 - reads repo context
-- renders packet files
+- renders blueprint files
 - zips the folder
 - makes it downloadable
 
@@ -114,7 +114,7 @@ The app needs one compiler service that:
 The download moment should be explicit.
 
 Recommended:
-- show packet readiness score
+- show blueprint readiness score
 - show missing facts blocking generation
 - preview file list
 - allow re-generate after edits
@@ -125,7 +125,7 @@ Recommended:
 
 Purpose:
 - explain the outcome
-- explain the packets
+- explain the blueprints
 - explain that students are answering questions to generate their operating system
 
 Ask:
@@ -202,7 +202,7 @@ Output:
 
 This module does not exist cleanly in the current curriculum. It should.
 
-## Stage 2. Design packet intake
+## Stage 2. Design blueprint intake
 
 This should be the actual Design block.
 
@@ -264,9 +264,9 @@ Ask:
 Output:
 - marketing surface block
 
-At the end of Stage 2, the product should be able to generate the full design packet.
+At the end of Stage 2, the product should be able to generate the full design blueprint.
 
-## Stage 3. Marketing packet intake
+## Stage 3. Marketing blueprint intake
 
 This is not “write some copy.”
 This is “define the GTM operating system.”
@@ -305,9 +305,9 @@ Ask:
 Output:
 - workflow map for the marketing kit
 
-At the end of Stage 3, the product should be able to generate the marketing packet.
+At the end of Stage 3, the product should be able to generate the marketing blueprint.
 
-## Stage 4. Build packet intake
+## Stage 4. Build blueprint intake
 
 This is the long-horizon Codex handoff.
 
@@ -360,9 +360,9 @@ Ask:
 Output:
 - execution-quality block
 
-At the end of Stage 4, the product should be able to generate the long-horizon build packet.
+At the end of Stage 4, the product should be able to generate the long-horizon build blueprint.
 
-## Stage 5. Packet review and download
+## Stage 5. Blueprint review and download
 
 This is where the magic folder becomes the product moment.
 
@@ -370,7 +370,7 @@ This is where the magic folder becomes the product moment.
 
 Show:
 - missing facts
-- packet previews
+- blueprint previews
 - readiness status for:
   - design
   - marketing
@@ -381,9 +381,9 @@ Show:
 Deliver:
 - root README
 - `facts/project-definition.json`
-- design packet
-- marketing packet
-- build packet
+- design blueprint
+- marketing blueprint
+- build blueprint
 - prompt pack
 
 ### Module 20. Optional next-step routing
@@ -395,7 +395,7 @@ After download:
 - run QA
 - prepare deploy
 
-But these are post-packet modules, not packet-definition modules.
+But these are post-blueprint modules, not blueprint-definition modules.
 
 ## What I Would Remove Or Demote In A Rebuild
 
@@ -423,17 +423,17 @@ But these are post-packet modules, not packet-definition modules.
 
 ## Recommended New Unlock Points
 
-### Design packet
+### Design blueprint
 
 Unlock after:
 - Stage 2
 
-### Marketing packet
+### Marketing blueprint
 
 Unlock after:
 - Stage 3
 
-### Build packet
+### Build blueprint
 
 Unlock after:
 - Stage 4
@@ -443,21 +443,21 @@ Unlock after:
 Unlock after:
 - Stage 4
 
-Everything after that is execution support, not packet definition.
+Everything after that is execution support, not blueprint definition.
 
 ## Why This Funnel Is Better
 
 - It asks only for information that changes the output.
 - It stops mixing teaching state with project definition.
-- It makes the download packet the center of gravity.
-- It aligns directly with OpenAI’s packet expectations.
+- It makes the download blueprint the center of gravity.
+- It aligns directly with OpenAI’s blueprint expectations.
 - It makes re-recording viable because each video has one clear input job.
 
 ## Recommended Rebuild Principle
 
 If we re-recorded from scratch, every lesson should answer one question:
 
-What packet fact am I collecting right now?
+What blueprint fact am I collecting right now?
 
 If the answer is:
 - none
@@ -465,6 +465,6 @@ If the answer is:
 then the lesson is either:
 - orientation
 - workflow scaffolding
-- or unnecessary in the packet funnel.
+- or unnecessary in the blueprint funnel.
 
 That is the cleanest way to make the curriculum “literally perfect for the best practices.”

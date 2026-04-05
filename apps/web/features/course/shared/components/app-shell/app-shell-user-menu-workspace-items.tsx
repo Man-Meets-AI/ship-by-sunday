@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { workspaceMenuLinks } from "./app-shell-user-menu-helpers";
 
 const workspaceLinkIcons = {
-	[routeConfig.start]: House,
+	[routeConfig.blueprint]: House,
 	[routeConfig.review]: Flag,
 	[routeConfig.settings]: Settings,
 } as const;

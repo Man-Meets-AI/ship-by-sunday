@@ -23,7 +23,7 @@ After this work, Bunny lesson videos will render immediately instead of blocking
 - [x] 2026-04-01 16:33 EDT: Patched `apps/web/proxy.ts`, `apps/web/app/layout.tsx`, and `apps/web/tests/unit/proxy-protected-routes.test.ts` so Clerk middleware and the provider both pin auth entrypoints to `/sign-in` and `/sign-up`.
 - [x] 2026-04-01 16:33 EDT: Passed targeted lesson-player and proxy unit validation with `bun run --cwd apps/web test:unit -- tests/unit/lesson-shells.test.tsx tests/unit/proxy-protected-routes.test.ts`.
 - [x] 2026-04-01 16:34 EDT: Passed `bun run --cwd apps/web lint` and `bun run --cwd apps/web format:check`.
-- [x] 2026-04-01 16:35 EDT: Passed `set -a; source /Users/parkerrex/Projects/manmeetsai-workspace/apps/web/.env.local; set +a; bun run --cwd apps/web typecheck`.
+- [x] 2026-04-01 16:35 EDT: Passed `set -a; source /Users/parkerrex/Projects/ship-by-sunday/apps/web/.env.local; set +a; bun run --cwd apps/web typecheck`.
 - [ ] Push branch, open PR into `dev`, merge, and verify `dev`.
 - [ ] Promote `dev` to `main` and verify production.
 

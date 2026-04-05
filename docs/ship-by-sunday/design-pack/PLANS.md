@@ -13,7 +13,7 @@ Use this file to plan meaningful Ship by Sunday frontend design work before broa
 - **References:** {{screenshots, Figma links, examples, mood board, none}}
 - **Reasoning level:** {{low | medium | high}} and why
 - **Definition of done:** {{what must be true before this is complete}}
-- **Funnel or packet stage affected:** {{public marketing | product | design | marketing | build plan | review & download | execute / ship}}
+- **Funnel or blueprint stage affected:** {{public marketing | product | design | marketing | build plan | review & download | execute / ship}}
 
 ## 2. Constraints
 
@@ -29,7 +29,7 @@ Fill in the constraints you are choosing for this task.
   - {{constraint 2}}
   - {{constraint 3}}
 - **Ship by Sunday invariants:**
-  - {{packet-first rule or unlock rule}}
+  - {{blueprint-first rule or unlock rule}}
   - {{homepage contract or workspace constraint}}
   - {{structured-data or CTA contract if relevant}}
 
@@ -74,7 +74,7 @@ List 2-3 motions or interaction ideas that materially improve the feel of the pa
 - **Secondary context:** {{inspector, detail pane, filters, status, etc.}}
 - **Utility-copy principle:** {{how headings and labels will stay operational}}
 - **Card policy:** {{where cards are truly necessary, if anywhere}}
-- **Packet/workbench principle:** {{how the surface stays packet-first and work-focused}}
+- **Blueprint/workbench principle:** {{how the surface stays blueprint-first and work-focused}}
 
 ## 7. Design system plan
 
@@ -149,7 +149,7 @@ List the concrete implementation steps.
 - [ ] The screen can be understood quickly.
 - [ ] The design system remains coherent.
 - [ ] The implementation fits the repo's architecture.
-- [ ] Packet-first product rules still hold.
+- [ ] Blueprint-first product rules still hold.
 - [ ] Known tradeoffs are documented.
 
 ## 13. Risks, unknowns, and follow-ups

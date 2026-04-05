@@ -1,17 +1,16 @@
 import {
-	createCanonicalProjectDefinitionDraft,
-	isPacketArrayField,
-	isPacketNumericField,
-	normalizeProblemUrgencyValue,
-	normalizeProblemSeverityValue,
-	parseCanonicalProjectFactsDraft,
-	type CanonicalProjectDefinitionDraft,
-	type CanonicalProjectFactKey,
-} from "@manmeetsai/packet-compiler";
+	isBlueprintArrayField,
+	normalizeCliFactValue,
+	type CliBlueprintFactKey,
+} from "../field-contract";
 import { createCliError } from "../cli-errors";
 import { workspaceLauncherCommand } from "../command-surface";
-import { ensureLocalDraft, loadLocalDraft } from "../draft/draft-store";
-import type { EditablePacketStageId } from "../parse-cli-command";
+import {
+	ensureLocalDraft,
+	loadLocalDraft,
+	type LocalDraftEnvelope,
+} from "../draft/draft-store";
+import type { EditableBlueprintStageId } from "../parse-cli-command";
 import type { CliIo } from "../run-cli";
 import {
 	createReadlineStageSession,
@@ -22,9 +21,9 @@ import {
 	type StagePromptOutcome,
 } from "./stage-prompt-session";
 
-type DraftSaver = (draft: CanonicalProjectDefinitionDraft) => Promise<void>;
+type DraftSaver = (draft: LocalDraftEnvelope) => Promise<void>;
 
-function createInvalidPromptStateError(stageId: EditablePacketStageId) {
+function createInvalidPromptStateError(stageId: EditableBlueprintStageId) {
 	return createCliError(
 		"invalid_state",
 		`Interactive prompts require a real terminal. Re-run ${workspaceLauncherCommand} stage ${stageId} in a TTY, or use ${workspaceLauncherCommand} set/import/mutate with --json for automation.`,
@@ -32,7 +31,7 @@ function createInvalidPromptStateError(stageId: EditablePacketStageId) {
 	);
 }
 
-function createClosedPromptError(stageId: EditablePacketStageId) {
+function createClosedPromptError(stageId: EditableBlueprintStageId) {
 	return createCliError(
 		"invalid_state",
 		`The terminal closed before the current answer was completed. Re-run ${workspaceLauncherCommand} stage ${stageId} in a real terminal, or use ${workspaceLauncherCommand} set/import/mutate with --json for automation.`,
@@ -41,39 +40,81 @@ function createClosedPromptError(stageId: EditablePacketStageId) {
 }
 
 function applyFieldValue(
-	draft: CanonicalProjectDefinitionDraft,
-	fieldKey: CanonicalProjectFactKey,
+	draft: LocalDraftEnvelope,
+	fieldKey: CliBlueprintFactKey,
 	value: string,
 ) {
 	const nextFactsSource: Record<string, unknown> = { ...draft.facts };
 
 	if (!value.trim()) {
-		delete nextFactsSource[fieldKey];
-	} else if (fieldKey === "problem_severity") {
-		nextFactsSource[fieldKey] = normalizeProblemSeverityValue(value);
-	} else if (fieldKey === "problem_urgency") {
-		nextFactsSource[fieldKey] = normalizeProblemUrgencyValue(value);
-	} else if (isPacketNumericField(fieldKey)) {
-		nextFactsSource[fieldKey] = Number(value.trim());
-	} else if (isPacketArrayField(fieldKey)) {
-		nextFactsSource[fieldKey] = value
-			.split("\n")
-			.map((line) => line.trim())
-			.filter(Boolean);
+		if (fieldKey === "scope_in" || fieldKey === "scope_out") {
+			nextFactsSource[fieldKey] = [];
+		} else {
+			delete nextFactsSource[fieldKey];
+		}
+	} else if (isBlueprintArrayField(fieldKey)) {
+		const normalizedValue = normalizeCliFactValue(fieldKey, value.split("\n"));
+		if (normalizedValue === undefined) {
+			delete nextFactsSource[fieldKey];
+		} else {
+			nextFactsSource[fieldKey] = normalizedValue;
+		}
 	} else {
-		nextFactsSource[fieldKey] = value.trim();
+		const normalizedValue = normalizeCliFactValue(fieldKey, value);
+		if (normalizedValue === undefined) {
+			delete nextFactsSource[fieldKey];
+		} else {
+			nextFactsSource[fieldKey] = normalizedValue;
+		}
 	}
 
-	const nextFacts = parseCanonicalProjectFactsDraft(nextFactsSource);
-
-	return createCanonicalProjectDefinitionDraft({
-		clerkUserId: draft.clerkUserId,
-		productKey: draft.productKey,
-		facts: nextFacts,
-		placeholdersInUse: draft.placeholdersInUse,
-		createdAt: draft.createdAt,
+	return {
+		...draft,
+		facts: nextFactsSource,
 		updatedAt: Date.now(),
-	});
+	};
+}
+
+async function readFieldLines({
+	readlineSession,
+	prompt,
+	mode,
+}: {
+	readlineSession: ReturnType<typeof createReadlineStageSession>;
+	prompt: string;
+	mode: "single-line" | "multiline";
+}): Promise<ReadlineStageAnswer | { kind: "answer"; lines: string[] }> {
+	const firstAnswer = await readlineSession.ask(prompt);
+	if (firstAnswer.kind !== "answer") {
+		return firstAnswer;
+	}
+
+	if (mode === "single-line") {
+		return { kind: "answer", lines: [firstAnswer.value] };
+	}
+
+	const firstLine = firstAnswer.value;
+	if (!firstLine.trim()) {
+		return { kind: "answer", lines: [firstLine] };
+	}
+
+	if (firstLine.trim() === ":clear" || firstLine.trim() === ":quit") {
+		return { kind: "answer", lines: [firstLine] };
+	}
+
+	const lines = [firstLine];
+	while (true) {
+		const nextLine = await readlineSession.ask("> ");
+		if (nextLine.kind !== "answer") {
+			return nextLine;
+		}
+		if (!nextLine.value.trim()) {
+			break;
+		}
+		lines.push(nextLine.value);
+	}
+
+	return { kind: "answer", lines };
 }
 
 async function readFieldLines({
@@ -125,7 +166,7 @@ export async function promptStage({
 	saveDraft,
 }: {
 	projectRootPath: string;
-	stageId: EditablePacketStageId;
+	stageId: EditableBlueprintStageId;
 	io: CliIo;
 	saveDraft: DraftSaver;
 }): Promise<StagePromptOutcome> {

@@ -1,4 +1,4 @@
-import { createCanonicalProjectDefinitionDraft } from "@manmeetsai/packet-compiler";
+import { createCanonicalProjectDefinitionDraft } from "@shipbysunday/blueprint-compiler";
 import { saveLocalDraft } from "../src/draft/draft-store";
 import { runCli } from "../src/run-cli";
 import { createCliIo, createTemporaryRepoRoot } from "./test-helpers";
@@ -25,7 +25,7 @@ describe("review command", () => {
 		});
 		expect(humanExitCode).toBe(0);
 		expect(humanIo.stdout.join("\n")).toContain(
-			"First incomplete stage: product",
+			"First incomplete stage: blueprint",
 		);
 		expect(humanIo.stdout.join("\n")).toContain("Missing:");
 
@@ -37,7 +37,7 @@ describe("review command", () => {
 		});
 		expect(jsonExitCode).toBe(0);
 		expect(JSON.parse(jsonIo.stdout.join("\n"))).toMatchObject({
-			firstIncompleteStageId: "product",
+			firstIncompleteStageId: "blueprint",
 		});
 	});
 });

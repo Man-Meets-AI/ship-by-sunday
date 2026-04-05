@@ -16,17 +16,13 @@ Prepare production values in your hosting dashboards and provider dashboards. Mi
 - Clerk publishable and secret keys
 - Clerk frontend API URL
 - Convex client URL (`NEXT_PUBLIC_CONVEX_URL`)
-- Convex HTTP-actions URL (`NEXT_PUBLIC_CONVEX_SITE_URL`) when the deployment serves HTTP actions on `.convex.site`
+- Convex HTTP-actions URL (`NEXT_PUBLIC_CONVEX_SITE_URL`) when the deployment uses Convex HTTP actions
 - any deployment values your Convex environment writes
 - Stripe secret key, product id, price id
 - live `STRIPE_WEBHOOK_SECRET`
 - `APP_BASE_URL`
-- `OBSERVABILITY_INGEST_TOKEN`
-- `OBSERVABILITY_INCIDENT_CONTROL_TOKEN`
-- `CLERK_WEBHOOK_SIGNING_SECRET`
-- `OBSERVABILITY_VERCEL_WEBHOOK_SECRET`
-- `TELEGRAM_BOT_TOKEN`
-- `TELEGRAM_CHAT_ID`
+
+The observability-specific signing secrets, ingest token, incident-control token, and Telegram alerting values are documented in the internal observability runbook.
 
 ## Vercel checklist
 
@@ -34,7 +30,7 @@ Prepare production values in your hosting dashboards and provider dashboards. Mi
 - keep the project linked to `ParkerRex/mma-shipbysunday`
 - keep Vercel's production branch on `main`
 - let Preview continue to handle unassigned git branches such as `dev` and feature branches
-- keep the package manager pinned to the repo version
+- keep Bun pinned to the repo version
 - use real production Clerk env values
 - use real production Stripe live keys
 - if the app uses observability or any other Convex HTTP actions, set `NEXT_PUBLIC_CONVEX_SITE_URL` to the matching `.convex.site` host
@@ -64,10 +60,8 @@ After a release merge to `main`, `Production Release Proof` should confirm all o
 3. live checkout returns to `/checkout/success`
 4. webhook grants access
 5. newly granted user reaches `/start`
-6. signed Clerk and Vercel observability webhooks persist incidents and deliver Telegram packets
-7. the public incident status route can `ack` a live incident and keep repeat delivery suppressed
-8. Vercel attributes the production web deploy to `main`
-9. GitHub Actions reports a matching `Convex Production Deploy` run for the same release
+6. Vercel attributes the production web deploy to `main`
+7. GitHub Actions reports a matching `Convex Production Deploy` run for the same release
 
 The workflow should use the same QA control-plane command for the authenticated production pass:
 

@@ -4,19 +4,19 @@ read_when: "Open this when you need the boundary-setting audit, milestone framin
 plan_status: "done"
 ---
 
-# Configurable Starter Plan for `manmeetsai-workspace`
+# Configurable Starter Plan for `ship-by-sunday`
 
 ## Initiative
 
-Turn `manmeetsai-workspace` from a product-shaped repo into a configurable starter platform without losing the stronger infrastructure already present in the repo.
+Turn `ship-by-sunday` from a product-shaped repo into a configurable starter platform without losing the stronger infrastructure already present in the repo.
 
 ## Execution companion
 
-Implementation progress, slice sequencing, and the build-test-update loop now live in [2026-03-23-configurable-starter-execution-plan.md](/Users/parkerrex/Projects/manmeetsai-workspace/.codex/plans/2026-03-23-configurable-starter-execution-plan.md).
+Implementation progress, slice sequencing, and the build-test-update loop now live in [2026-03-23-configurable-starter-execution-plan.md](/Users/parkerrex/Projects/ship-by-sunday/.codex/plans/2026-03-23-configurable-starter-execution-plan.md).
 
 ## Goal
 
-Use `manmeetsai-workspace` as the base starter instead of `ship-by-sunday-starter`, then make it safe to reuse for new user builds by separating reusable platform capabilities from Ship by Sunday specific product assumptions. The finished starter should preserve the strongest parts of the current repo — Clerk auth, hosted Convex workflow, Stripe checkout primitives, Telegram observability, SEO foundations, Codex-assisted flows, and the existing workspace shell — while making branding, product framing, onboarding shape, public marketing surface, blank-state behavior, starter operations, and future analytics instrumentation configurable.
+Use `ship-by-sunday` as the base starter instead of `ship-by-sunday-starter`, then make it safe to reuse for new user builds by separating reusable platform capabilities from Ship by Sunday specific product assumptions. The finished starter should preserve the strongest parts of the current repo — Clerk auth, hosted Convex workflow, Stripe checkout primitives, Telegram observability, SEO foundations, Codex-assisted flows, and the existing workspace shell — while making branding, product framing, onboarding shape, public marketing surface, blank-state behavior, starter operations, and future analytics instrumentation configurable.
 
 ## Non-goals
 
@@ -151,7 +151,7 @@ Build the source-of-truth inventory for what this repo already has, what should 
 **Validation commands**
 
 ```bash
-cd /Users/parkerrex/Projects/manmeetsai-workspace
+cd /Users/parkerrex/Projects/ship-by-sunday
 ls
 find app -maxdepth 2 -type d
 find features -maxdepth 2 -type d
@@ -207,7 +207,7 @@ Decide how a future project changes this repo without rewriting internals, and d
 **Validation commands**
 
 ```bash
-cd /Users/parkerrex/Projects/manmeetsai-workspace
+cd /Users/parkerrex/Projects/ship-by-sunday
 rg -n "Ship by Sunday|ship-by-sunday|student|lesson|mission|artifacts|workspace" app features content docs convex
 rg -n "telegram|observability|starter repo|checkout|pricing|brand|theme|settings" app features docs README.md
 ```
@@ -261,7 +261,7 @@ Create a concrete path to turn the existing public marketing/checkout/docs surfa
 **Validation commands**
 
 ```bash
-cd /Users/parkerrex/Projects/manmeetsai-workspace
+cd /Users/parkerrex/Projects/ship-by-sunday
 find features/marketing -maxdepth 3 -type f
 find app -maxdepth 2 -type f | rg "page|layout|checkout|docs|opengraph|twitter|robots|sitemap"
 ```
@@ -305,7 +305,7 @@ Make the signed-in app reusable by separating platform shell from current produc
 **Validation commands**
 
 ```bash
-cd /Users/parkerrex/Projects/manmeetsai-workspace
+cd /Users/parkerrex/Projects/ship-by-sunday
 find app/\(workspace\) -maxdepth 3 -type f
 find features/course -maxdepth 4 -type f
 find features/settings -maxdepth 3 -type f
@@ -359,7 +359,7 @@ Introduce a minimal product analytics baseline while preserving the stronger Tel
 **Validation commands**
 
 ```bash
-cd /Users/parkerrex/Projects/manmeetsai-workspace
+cd /Users/parkerrex/Projects/ship-by-sunday
 find features/observability -maxdepth 3 -type f
 find app/api/observability -maxdepth 3 -type f
 rg -n "track|analytics|event|telemetry|observability" app features lib platform convex
@@ -401,7 +401,7 @@ Make the generalized repo safe to evolve and safe to hand off as a starter.
 **Validation commands**
 
 ```bash
-cd /Users/parkerrex/Projects/manmeetsai-workspace
+cd /Users/parkerrex/Projects/ship-by-sunday
 bun run lint
 bun run format:check
 bun run test:unit

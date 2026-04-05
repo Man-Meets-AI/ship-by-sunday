@@ -136,7 +136,7 @@ Lock the truth.
 Get the briefs.
 And finally work on the right thing.
 
-## Guardrails
+## Safeguards
 
 - Keep the pain centered on noise, drift, and restarting.
 - Keep the mechanism centered on product truth and shared briefs.

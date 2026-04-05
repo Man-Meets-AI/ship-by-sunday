@@ -1,14 +1,15 @@
 import {
-	deriveStageStatus,
-	packetFieldLabel,
-} from "@manmeetsai/packet-compiler";
+	blueprintFieldLabel,
+	deriveLocalDraftStatus,
+	type CliBlueprintFactKey,
+} from "../field-contract";
 import { writeJsonResult } from "../cli-json";
 import { requireLocalDraft } from "../draft/draft-store";
-import type { ReviewablePacketStageId } from "../parse-cli-command";
+import type { ReviewableBlueprintStageId } from "../parse-cli-command";
 import type { CliIo } from "../run-cli";
 
-function formatMissingFieldList(fieldKeys: string[]) {
-	return fieldKeys.map((fieldKey) => packetFieldLabel(fieldKey)).join(", ");
+function formatMissingFieldList(fieldKeys: readonly CliBlueprintFactKey[]) {
+	return fieldKeys.map((fieldKey) => blueprintFieldLabel(fieldKey)).join(", ");
 }
 
 export async function handleReviewCommand({
@@ -22,15 +23,12 @@ export async function handleReviewCommand({
 	projectRootPath: string;
 	json: boolean;
 	missingOnly: boolean;
-	stageId?: ReviewablePacketStageId;
+	stageId?: ReviewableBlueprintStageId;
 }) {
 	const draft = await requireLocalDraft(projectRootPath);
 
-	const stageStatus = deriveStageStatus(draft.facts);
+	const stageStatus = deriveLocalDraftStatus(draft.facts);
 	const visibleStageStatuses = stageStatus.stageStatuses.filter((stage) => {
-		if (stage.stageId === "start") {
-			return false;
-		}
 		if (stageId) {
 			return stage.stageId === stageId;
 		}
@@ -42,7 +40,7 @@ export async function handleReviewCommand({
 	if (json) {
 		writeJsonResult(io, "review", {
 			firstIncompleteStageId: stageStatus.firstIncompleteStageId,
-			packetReadiness: stageStatus.packetReadiness,
+			blueprintReadiness: stageStatus.blueprintReadiness,
 			stageStatuses: visibleStageStatuses,
 			stageId: stageId ?? null,
 			missingOnly,
@@ -58,12 +56,8 @@ export async function handleReviewCommand({
 	];
 
 	for (const stage of visibleStageStatuses) {
-		const stageLabel =
-			stage.stageId === "build-plan"
-				? "Build Plan"
-				: packetFieldLabel(stage.stageId);
 		lines.push(
-			`${stageLabel}: ${stage.isComplete ? "ready" : "missing facts"}`,
+			`${stage.stageLabel}: ${stage.isComplete ? "ready" : "missing facts"}`,
 		);
 		if (stage.missingFactKeys.length > 0) {
 			lines.push(`  Missing: ${formatMissingFieldList(stage.missingFactKeys)}`);

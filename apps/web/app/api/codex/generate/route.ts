@@ -19,6 +19,7 @@ import {
 
 const generateRequestSchema = z.object({
 	templateId: z.enum([
+		"blueprint_problem_statement",
 		"competitor_research",
 		"scope_boundary",
 		"visual_direction_guide",

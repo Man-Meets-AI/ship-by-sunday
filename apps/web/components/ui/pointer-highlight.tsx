@@ -1,7 +1,21 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
+
+function measureTightTextWidth(node: HTMLElement): number {
+	const range = document.createRange();
+	range.selectNodeContents(node);
+	const rects = range.getClientRects();
+	if (rects.length <= 1) return node.getBoundingClientRect().width;
+
+	const containerLeft = node.getBoundingClientRect().left;
+	let maxRight = 0;
+	for (const rect of rects) {
+		maxRight = Math.max(maxRight, rect.right - containerLeft);
+	}
+	return maxRight;
+}
 
 export function PointerHighlight({
 	children,
@@ -17,31 +31,25 @@ export function PointerHighlight({
 	const containerRef = useRef<HTMLSpanElement>(null);
 	const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
+	const measure = useCallback(() => {
+		const node = containerRef.current;
+		if (!node) return;
+		const width = measureTightTextWidth(node);
+		const { height } = node.getBoundingClientRect();
+		setDimensions({ width, height });
+	}, []);
+
 	useEffect(() => {
 		const observedNode = containerRef.current;
+		if (!observedNode) return;
 
-		if (observedNode) {
-			const { width, height } = observedNode.getBoundingClientRect();
-			setDimensions({ width, height });
-		}
+		measure();
 
-		const resizeObserver = new ResizeObserver((entries) => {
-			for (const entry of entries) {
-				const { width, height } = entry.contentRect;
-				setDimensions({ width, height });
-			}
-		});
+		const resizeObserver = new ResizeObserver(() => measure());
+		resizeObserver.observe(observedNode);
 
-		if (observedNode) {
-			resizeObserver.observe(observedNode);
-		}
-
-		return () => {
-			if (observedNode) {
-				resizeObserver.unobserve(observedNode);
-			}
-		};
-	}, []);
+		return () => resizeObserver.unobserve(observedNode);
+	}, [measure]);
 
 	return (
 		<span

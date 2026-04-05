@@ -14,34 +14,34 @@ This ExecPlan must be maintained in accordance with `docs/codex/PLANS.md`.
 
 The product has many tests, but there is no single place where a product manager can answer basic questions such as what journeys matter, which user type a test is proving, which tests are stale after route changes, and what browser flows were actually exercised before ship. After this change, a human should be able to open a root-level `qa/` folder and understand the product in plain English by journey bucket, starting persona, scenario pack, and current confidence state. A coding agent should then be able to use that same `qa/` folder to decide which tests to keep, which to delete, which browser flows to run, and which ship risks remain.
 
-The user-visible outcome is a QA source of truth that speaks in product journeys instead of test filenames. For this repository, the first important realities are the signed-out visitor, the signed-in member without access, the signed-in member with access, and the real free-to-paid handoff. The protected product is packet-first, so the first ship-critical protected journeys also include `Start -> Product -> Design -> Marketing -> Build Plan -> Review`, plus settings and access recovery. Someone should be able to see the system working by opening the `qa/` folder, reading the glossary and journey catalog, preparing the required personas, running the matching browser flows, and then reading a short run report that says what passed, what failed, and what remained unverified.
+The user-visible outcome is a QA source of truth that speaks in product journeys instead of test filenames. For this repository, the first important realities are the signed-out visitor, the signed-in member without access, the signed-in member with access, and the real free-to-paid handoff. The protected product is blueprint-first, so the first ship-critical protected journeys also include `Start -> Product -> Design -> Marketing -> Build Plan -> Review`, plus settings and access recovery. Someone should be able to see the system working by opening the `qa/` folder, reading the glossary and journey catalog, preparing the required personas, running the matching browser flows, and then reading a short run report that says what passed, what failed, and what remained unverified.
 
 ## Progress
 
 - [x] 2026-03-25 10:05 EDT — Read `docs/codex/PLANS.md`, `docs/prompts/execplan-writer.md`, `docs/prompts/execplan-grill.md`, `AGENTS.md`, `apps/web/AGENTS.md`, and the real route and test surfaces under `apps/web/`.
 - [x] 2026-03-25 10:05 EDT — Locked the planning stance with the user: do not preserve the current project QA practice as the design baseline; treat existing tests and docs as audit input only.
 - [x] 2026-03-25 10:14 EDT — Grill decision: removed legacy route aliases such as `/mission` and `/artifacts` from the customer-facing QA model because those routes are effectively gone and there are no live users requiring compatibility coverage.
-- [x] 2026-03-25 10:18 EDT — Grill decision: v1 must include the canonical packet-first protected funnel, not only buyer/auth/access perimeter checks.
+- [x] 2026-03-25 10:18 EDT — Grill decision: v1 must include the canonical blueprint-first protected funnel, not only buyer/auth/access perimeter checks.
 - [x] 2026-03-25 10:22 EDT — Grill decision: real `free -> paid` checkout remains in the QA system as a separate billing-integration pack, not a mandatory every-ship gate.
 - [x] 2026-03-25 10:26 EDT — Grill decision: keep personas and journey buckets as separate fields in the data model, but present them together in the PM-facing sheet.
-- [x] 2026-03-25 10:32 EDT — Grill decision: default ship coverage means majority coverage, specifically the homepage, auth entry and redirect, no-access recovery, the canonical packet funnel, review/download, settings, and checkout-success recovery. Docs, starter-repo access, and Codex connection move to an extended pack.
+- [x] 2026-03-25 10:32 EDT — Grill decision: default ship coverage means majority coverage, specifically the homepage, auth entry and redirect, no-access recovery, the canonical blueprint funnel, review/download, settings, and checkout-success recovery. Docs, starter-repo access, and Codex connection move to an extended pack.
 - [x] 2026-03-25 10:36 EDT — Grill decision: the outdated-test sweep must inventory the full current `apps/web/tests/` suite. At plan creation time this suite contains 101 files, including 74 unit tests.
 - [x] 2026-03-25 10:37 EDT — Grill decision: restored the deleted plan into the canonical `docs/codex/` location after the untracked `.codex/` copy was accidentally removed.
 - [x] 2026-03-25 10:41 EDT — Grill decision: the root `qa/` folder must fully own persona protocol and account-definition rules, with no dependency on legacy skill-local config.
 - [x] 2026-03-25 10:45 EDT — Grill decision: committed `qa/` files define only the non-secret persona protocol and required fields; actual credentials remain local-only in ignored files inside the `qa/` zone.
 - [x] 2026-03-25 10:49 EDT — Grill decision: baseline and ship reports are committed durable evidence, while ad hoc local dry-run reports are ignored.
 - [x] 2026-03-25 13:42 EDT — Created the root `qa/` operating layer with `qa/README.md`, `qa/glossary.md`, `qa/AGENTS.md`, `qa/journeys.csv`, `qa/coverage.csv`, `qa/test-inventory.csv`, `qa/personas.json`, `qa/personas.example.json`, `qa/personas.local.example.json`, `qa/templates/run-report.md`, and `qa/runs/README.md`.
-- [x] 2026-03-25 13:42 EDT — Defined the initial journey taxonomy with 22 scenario IDs covering visitor entry, docs, auth, access recovery, the packet funnel, settings, starter repo, Codex, observability, and billing integration.
+- [x] 2026-03-25 13:42 EDT — Defined the initial journey taxonomy with 22 scenario IDs covering visitor entry, docs, auth, access recovery, the blueprint funnel, settings, starter repo, Codex, observability, and billing integration.
 - [x] 2026-03-25 13:42 EDT — Inventoried the full current `apps/web/tests/` tree into `qa/test-inventory.csv` with 103 rows and explicit keep, rewrite, merge, or replace dispositions.
 - [x] 2026-03-25 13:42 EDT — Replaced the operator-facing persona protocol with `qa/`-owned files plus ignored `qa/personas.local.json`, and added root commands for `qa:personas:prepare` and `qa:personas:reset`.
 - [x] 2026-03-25 13:42 EDT — Added subagent instructions, fast validation, and scenario-pack report scaffolding through `qa/AGENTS.md`, `qa/scripts/validate.mjs`, `qa/scripts/generate-test-inventory.mjs`, and `qa/scripts/ship.mjs`.
 - [x] 2026-03-25 14:18 EDT — Added `Gap Reviewer` as a first-class QA role in the operating model so unmapped or stale release-critical scenarios are reviewed explicitly instead of only being implied by CSV rows.
-- [x] 2026-03-25 14:34 EDT — Rewrote the sandbox browser specs to use canonical packet routes and scenario-pack tags, replacing `/mission` and `/artifacts` assertions with `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, `/review`, and `/settings`.
+- [x] 2026-03-25 14:34 EDT — Rewrote the sandbox browser specs to use canonical blueprint routes and scenario-pack tags, replacing `/mission` and `/artifacts` assertions with `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, `/review`, and `/settings`.
 - [x] 2026-03-25 14:34 EDT — Added an explicit `qa:run-pack` command plus tagged Playwright scripts for `default_ship` and `billing_integration`, so a fresh operator can see the exact pack ritual without guessing.
 - [x] 2026-03-25 15:46 EDT — Ran the first committed baseline sweep against `https://www.man-meets-ai.com` and wrote `qa/runs/2026-03-25-default-ship-baseline.md`.
 - [x] 2026-03-25 15:46 EDT — Recorded the first billing-integration sweep as explicitly blocked in `qa/runs/2026-03-25-billing-integration-blocked.md` because no safe test-payment environment could be confirmed.
-- [x] 2026-03-25 16:02 EDT — Retried the pack on current `main`. Local `browser-smoke` passed on both `127.0.0.1` and `localhost`, the public hosted sandbox rerun still failed on the mission-vs-packet contract mismatch, and authenticated local sandbox attempts remained blocked by the current Playwright auth-bootstrap approach.
-- [x] 2026-03-25 16:49 EDT — Reran the hosted baseline after the latest prod deploy. Hosted `browser-smoke` is now fully green, but the hosted authenticated QA personas still fail to establish a session, so `ACCESS-01`, `PACKET-01`, and `PACKET-07` remain blocked by prod persona setup rather than by public-shell routing.
+- [x] 2026-03-25 16:02 EDT — Retried the pack on current `main`. Local `browser-smoke` passed on both `127.0.0.1` and `localhost`, the public hosted sandbox rerun still failed on the mission-vs-blueprint contract mismatch, and authenticated local sandbox attempts remained blocked by the current Playwright auth-bootstrap approach.
+- [x] 2026-03-25 16:49 EDT — Reran the hosted baseline after the latest prod deploy. Hosted `browser-smoke` is now fully green, but the hosted authenticated QA personas still fail to establish a session, so `ACCESS-01`, `BLUEPRINT-01`, and `BLUEPRINT-07` remain blocked by prod persona setup rather than by public-shell routing.
 - [x] 2026-03-25 16:56 EDT — Confirmed the hosted prod rerun with `QA_ENV_FILE=apps/web/.env.production`. The old Clerk-environment mismatch is fixed; the remaining blocker is the actual live QA users, which still cannot establish a prod session.
 - [x] 2026-03-25 17:24 EDT — Fixed the local dev Clerk/Convex auth-provider mismatch by aligning the hosted Convex dev `CLERK_FRONTEND_API_URL` with the test Clerk instance, corrected the custom Clerk password flow so it activates the created session, and captured a green local `default_ship` report in `qa/runs/2026-03-25-dev-default-ship.md`.
 - [x] 2026-03-25 17:24 EDT — Pushed the local `billing_integration` pack as far as Stripe Checkout and captured the remaining blocker in `qa/runs/2026-03-25-dev-billing-integration.md`: Stripe’s newer Link verification plus embedded Checkout UI, not app auth.
@@ -62,7 +62,7 @@ The user-visible outcome is a QA source of truth that speaks in product journeys
 
 The repository already has multiple testing layers, but they describe implementation slices rather than the product model. `apps/web/tests/browser-smoke/app-smoke.spec.ts` proves the public shell and checkout-success recovery surface. `apps/web/tests/e2e/auth-protection.sandbox.spec.ts` and `apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts` prove richer auth and entitlement behavior, but their meaning is trapped inside spec files instead of a PM-readable catalog.
 
-The route tree has moved further than some old labels suggest. `apps/web/app/(workspace)/mission/page.tsx` now redirects to `routeConfig.start`, and `apps/web/app/(workspace)/artifacts/page.tsx` redirects to `routeConfig.review`. The canonical protected flow is now packet-first and lives at `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, `/review`, with `/settings` as a supporting protected surface. The plan must therefore treat those canonical routes as first-class and not inflate removed aliases into customer-facing scenarios.
+The route tree has moved further than some old labels suggest. `apps/web/app/(workspace)/mission/page.tsx` now redirects to `routeConfig.start`, and `apps/web/app/(workspace)/artifacts/page.tsx` redirects to `routeConfig.review`. The canonical protected flow is now blueprint-first and lives at `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, `/review`, with `/settings` as a supporting protected surface. The plan must therefore treat those canonical routes as first-class and not inflate removed aliases into customer-facing scenarios.
 
 The current real checkout handoff is still valuable, but it should not be forced into every ship gate. The repository already supports deterministic direct access grant through `apps/web/scripts/ensure-clerk-entitled-test-user.mjs`, which means access-granted flows can be verified without running Stripe every time. That allows the QA system to separate default ship coverage from billing-sensitive coverage.
 
@@ -76,17 +76,17 @@ The first attempt at `qa:personas:prepare` failed with a raw `ENOENT` when `qa/p
 
 The first control-plane draft described four subagent roles, but the data model already needed a fifth role in practice. `qa/coverage.csv` can mark gaps and stale browser proof, yet without an explicit `Gap Reviewer` responsibility those issues are easy to leave as passive spreadsheet facts. The operating model now promotes gap review into a named task.
 
-The route rewrite revealed that the middle packet stages are not standalone marketing pages with unique layout chrome. `/product`, `/design`, `/marketing`, and `/build-plan` all render through the shared `PacketStagePage` shell. Stable browser assertions therefore need to combine the canonical URL with shared packet markers such as the visible stage label, `Stage status`, and `Save step`, rather than searching for bespoke page headings that do not exist.
+The route rewrite revealed that the middle blueprint stages are not standalone marketing pages with unique layout chrome. `/product`, `/design`, `/marketing`, and `/build-plan` all render through the shared `BlueprintStagePage` shell. Stable browser assertions therefore need to combine the canonical URL with shared blueprint markers such as the visible stage label, `Stage status`, and `Save step`, rather than searching for bespoke page headings that do not exist.
 
 The new pack runner is useful even before live credentials are present, because dry-run output is itself a validation surface. `qa:run-pack -- --pack=default_ship --dry-run` and the billing equivalent now print the exact command plan, which means a PM or operator can review the ritual before touching Clerk or Stripe.
 
-The first real hosted baseline run exposed the main product risk immediately: the public domain `https://www.man-meets-ai.com` still serves the old mission-based workspace contract. On that domain, `/start` renders `Page not found` and offers an `Open workspace` link that points to `/mission`. That means the repo’s packet-first route contract is ahead of what the public deployment is currently serving.
+The first real hosted baseline run exposed the main product risk immediately: the public domain `https://www.man-meets-ai.com` still serves the old mission-based workspace contract. On that domain, `/start` renders `Page not found` and offers an `Open workspace` link that points to `/mission`. That means the repo’s blueprint-first route contract is ahead of what the public deployment is currently serving.
 
-The recent `mma-shipbysunday` Vercel deployments were not a usable fallback during the run. The alias URL returned `DEPLOYMENT_NOT_FOUND`, while older ready preview URLs were protected behind Vercel login. The only usable public baseline environment was the custom domain.
+The recent preview deployment aliases were not a usable fallback during the run. The alias URL returned `DEPLOYMENT_NOT_FOUND`, while older ready preview URLs were protected behind Vercel login. The only usable public baseline environment was the custom domain.
 
 Retrying on fresh `main` changed one useful implementation detail but not the product finding. Local `browser-smoke` now passes cleanly on current `main`, which means the public shell and recovery surfaces are fine in the current code. The authenticated local sandbox lane is still blocked because Playwright `globalSetup` attempts to sign in before the local app is stably reachable. The hosted sandbox lane remains the trustworthy evidence source for protected-route behavior.
 
-After the latest prod deploy, the public-domain story narrowed further. Hosted `browser-smoke` is now fully green and the signed-out protected-route redirect is working, which means the public shell and signed-out packet entry are healthy. The remaining problem is hosted authenticated QA personas: the test accounts are still being redirected back to the accounts sign-in domain instead of staying authenticated on `/start`.
+After the latest prod deploy, the public-domain story narrowed further. Hosted `browser-smoke` is now fully green and the signed-out protected-route redirect is working, which means the public shell and signed-out blueprint entry are healthy. The remaining problem is hosted authenticated QA personas: the test accounts are still being redirected back to the accounts sign-in domain instead of staying authenticated on `/start`.
 
 The latest hosted rerun also proved that the Clerk-environment fix is real. With `QA_ENV_FILE=apps/web/.env.production`, persona preparation no longer aborts on a live-vs-test key mismatch. The remaining failure is now the live QA user state itself: the prod sign-in flow still refuses the stored QA account credentials.
 
@@ -118,17 +118,17 @@ The final automatic rerun showed one small operational quirk that is worth prese
 
 2026-03-25 — Decision: removed legacy route aliases such as `/mission` and `/artifacts` from the customer-facing QA model. Rationale: the user confirmed those routes are effectively removed and there are no live users whose behavior requires compatibility coverage.
 
-2026-03-25 — Decision: v1 must cover the canonical packet-first protected funnel, not only auth and access perimeter checks. Rationale: the real product contract in `apps/web/AGENTS.md` and `apps/web/app/(workspace)/` is `Start -> Product -> Design -> Marketing -> Build Plan -> Review`, so the QA system would be misleading if it modeled only sign-in and access handoff.
+2026-03-25 — Decision: v1 must cover the canonical blueprint-first protected funnel, not only auth and access perimeter checks. Rationale: the real product contract in `apps/web/AGENTS.md` and `apps/web/app/(workspace)/` is `Start -> Product -> Design -> Marketing -> Build Plan -> Review`, so the QA system would be misleading if it modeled only sign-in and access handoff.
 
 2026-03-25 — Decision: real checkout and access handoff remain in the QA system as a separate `billing_integration` pack rather than a default every-ship gate. Rationale: this preserves real billing confidence without forcing expensive or noisy Stripe browser runs on every ordinary change.
 
 2026-03-25 — Decision: keep personas separate from journey buckets in the data model, but present them together in the PM-facing catalog. Rationale: journey buckets such as `Visitor FTUX`, `No-Access FTUX`, `Has-Access EUX`, and `Free -> Paid` are the easiest way to understand the product, while a separate persona field keeps browser execution and preparation precise and reusable.
 
-2026-03-25 — Decision: "majority coverage" for the default ship pack means homepage, auth entry and redirect behavior, no-access recovery, the canonical packet funnel, review/download, settings, and checkout-success recovery. Rationale: this covers the main customer path and its critical support surfaces without bloating every ship with secondary modules.
+2026-03-25 — Decision: "majority coverage" for the default ship pack means homepage, auth entry and redirect behavior, no-access recovery, the canonical blueprint funnel, review/download, settings, and checkout-success recovery. Rationale: this covers the main customer path and its critical support surfaces without bloating every ship with secondary modules.
 
-2026-03-25 — Decision: docs, starter-repo access, and Codex connection belong to an `extended` pack in v1, not the default every-ship pack. Rationale: these are important surfaces, but they are secondary to the main buyer-to-workspace path and packet funnel.
+2026-03-25 — Decision: docs, starter-repo access, and Codex connection belong to an `extended` pack in v1, not the default every-ship pack. Rationale: these are important surfaces, but they are secondary to the main buyer-to-workspace path and blueprint funnel.
 
-2026-03-25 — Decision: model the packet funnel as one scenario per major stage boundary plus one umbrella end-to-end scenario. Rationale: this is specific enough to localize breakage while avoiding row explosion.
+2026-03-25 — Decision: model the blueprint funnel as one scenario per major stage boundary plus one umbrella end-to-end scenario. Rationale: this is specific enough to localize breakage while avoiding row explosion.
 
 2026-03-25 — Decision: the audit must inventory the full current test suite, not only browser or ship-critical files. Rationale: the user’s confidence problem is about the meaning of the whole test tree, so a partial inventory would leave the main problem unsolved.
 
@@ -142,7 +142,7 @@ The final automatic rerun showed one small operational quirk that is worth prese
 
 2026-03-25 — Decision: keep the existing sandbox browser specs in the inventory as `rewrite` targets instead of rewriting them in the same slice as the control plane. Rationale: the first slice needed a stable product-readable model and safe command surface before changing browser assertions tied to legacy `/mission` and `/artifacts` aliases.
 
-2026-03-25 — Decision: the first `qa:ship` implementation scaffolds a dated local report and selected scenario list instead of auto-running the full browser pack. Rationale: this gives the repository one obvious reporting ritual immediately while deferring environment-sensitive execution logic until the canonical packet-route sweeps are rewritten.
+2026-03-25 — Decision: the first `qa:ship` implementation scaffolds a dated local report and selected scenario list instead of auto-running the full browser pack. Rationale: this gives the repository one obvious reporting ritual immediately while deferring environment-sensitive execution logic until the canonical blueprint-route sweeps are rewritten.
 
 2026-03-25 — Decision: add `Gap Reviewer` as a first-class QA role instead of treating gap review as an implicit side effect of `qa/coverage.csv`. Rationale: release-critical missing coverage needs an explicit owner or it will be noticed too late.
 
@@ -150,7 +150,7 @@ The final automatic rerun showed one small operational quirk that is worth prese
 
 2026-03-25 — Decision: add `qa:run-pack` as the explicit pack orchestrator and require `QA_ALLOW_BILLING_INTEGRATION=1` for live billing runs. Rationale: the repository needs one obvious command for each pack, and billing must stay opt-in so a local typo cannot trigger a payment flow accidentally.
 
-2026-03-25 — Decision: treat the public custom domain as the default baseline evidence source until a packet-first preview deployment is both healthy and publicly reachable. Rationale: local sandbox attempts were useful for fixing the runner, but the custom domain was the only environment that produced trustworthy customer-facing evidence.
+2026-03-25 — Decision: treat the public custom domain as the default baseline evidence source until a blueprint-first preview deployment is both healthy and publicly reachable. Rationale: local sandbox attempts were useful for fixing the runner, but the custom domain was the only environment that produced trustworthy customer-facing evidence.
 
 2026-03-25 — Decision: block the first billing-integration sweep instead of guessing. Rationale: the reachable public domain was not explicitly confirmed as Stripe test-only, and payment confirmation is too risky to run on assumption.
 
@@ -196,9 +196,9 @@ This ExecPlan can now close. The requested operating system exists, the release-
 
 This repository’s web application lives in `apps/web/`. Routes are defined in `apps/web/app/`, feature logic lives in `apps/web/features/`, and automated tests live in `apps/web/tests/`. The current test tree has several layers: `unit`, `contracts`, `integration`, `integration-ui`, `browser-smoke`, and `e2e`. These layers are useful inputs for the audit, but they are not the new model. The new model starts with product journeys and only then maps code-level tests onto those journeys.
 
-The important current route surfaces, as seen in the real routes and tests, are the public landing page at `/`, the sign-in route at `/sign-in`, the checkout-success recovery route at `/checkout/success`, and the canonical packet-first protected routes at `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, `/review`, and `/settings`. `apps/web/app/(workspace)/mission/page.tsx` and `apps/web/app/(workspace)/artifacts/page.tsx` now redirect into canonical routes and should be treated as implementation leftovers rather than customer-facing journey anchors.
+The important current route surfaces, as seen in the real routes and tests, are the public landing page at `/`, the sign-in route at `/sign-in`, the checkout-success recovery route at `/checkout/success`, and the canonical blueprint-first protected routes at `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, `/review`, and `/settings`. `apps/web/app/(workspace)/mission/page.tsx` and `apps/web/app/(workspace)/artifacts/page.tsx` now redirect into canonical routes and should be treated as implementation leftovers rather than customer-facing journey anchors.
 
-This plan uses a few plain-English terms that must remain stable. A "journey" is a meaningful product workstream that a human can describe, such as "member with access completes the packet stages." A "scenario ID" is the short stable identifier for one journey row, such as `CONV-01`. A "journey bucket" is the PM-facing grouping label, such as `Visitor FTUX`, `No-Access FTUX`, `Has-Access EUX`, or `Free -> Paid`. A "persona" is the named QA starting state needed to run a scenario, such as `signed_out`, `member_without_access`, or `member_with_access`. A "scenario pack" is the operational grouping used to decide when a scenario should run, such as `default_ship`, `extended`, or `billing_integration`. "FTUX" means first-time user experience. "EUX" means existing user experience. A "transition flow" means a movement between two states, such as signed-out visitor to signed-in member or free member to paid member. A "browser sweep" means a bounded run of browser checks against specific scenario IDs with a written pass/fail report.
+This plan uses a few plain-English terms that must remain stable. A "journey" is a meaningful product workstream that a human can describe, such as "member with access completes the blueprint stages." A "scenario ID" is the short stable identifier for one journey row, such as `CONV-01`. A "journey bucket" is the PM-facing grouping label, such as `Visitor FTUX`, `No-Access FTUX`, `Has-Access EUX`, or `Free -> Paid`. A "persona" is the named QA starting state needed to run a scenario, such as `signed_out`, `member_without_access`, or `member_with_access`. A "scenario pack" is the operational grouping used to decide when a scenario should run, such as `default_ship`, `extended`, or `billing_integration`. "FTUX" means first-time user experience. "EUX" means existing user experience. A "transition flow" means a movement between two states, such as signed-out visitor to signed-in member or free member to paid member. A "browser sweep" means a bounded run of browser checks against specific scenario IDs with a written pass/fail report.
 
 The new root `qa/` folder is intentionally outside `apps/web/` because it is not only test code. It is the operating layer for shipping. The implementation should create `qa/AGENTS.md` to tell subagents how to update the catalog, how to pick scenarios from a diff, how to run browser sweeps, and how to write reports. The root `AGENTS.md` should then defer to `qa/AGENTS.md` for any task that changes user journeys, routes, auth behavior, checkout behavior, or release-critical browser coverage.
 
@@ -208,7 +208,7 @@ The implementation should preserve and adapt the existing useful infrastructure 
 
 First, create the root `qa/` folder and make it the official source of truth. This includes `qa/AGENTS.md`, a glossary that defines the taxonomy in plain English, a journey catalog CSV, a coverage CSV, a full-suite test-inventory CSV, a run-report template folder, and committed non-secret persona protocol files. The folder should be understandable on its own without requiring anyone to inspect the old test suite first.
 
-Second, define the initial scenario taxonomy from the product outward. Start with the four product realities already confirmed in the repo and user discussion: signed out, signed in without access, signed in with access, and free-to-paid conversion. Expand these into journey buckets such as visitor FTUX, no-access FTUX, access-granted EUX, and free-to-paid transition. The access-granted bucket must include the canonical packet-first funnel at `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, and `/review`, and it should be modeled as one scenario per major stage boundary plus one end-to-end umbrella scenario.
+Second, define the initial scenario taxonomy from the product outward. Start with the four product realities already confirmed in the repo and user discussion: signed out, signed in without access, signed in with access, and free-to-paid conversion. Expand these into journey buckets such as visitor FTUX, no-access FTUX, access-granted EUX, and free-to-paid transition. The access-granted bucket must include the canonical blueprint-first funnel at `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, and `/review`, and it should be modeled as one scenario per major stage boundary plus one end-to-end umbrella scenario.
 
 Third, audit the existing tests against the new catalog. For every existing test file under `apps/web/tests/`, decide whether it stays as-is, should be renamed and remapped, should be rewritten, should be replaced with a scenario-driven browser sweep, or should be deleted. This audit must cover the full current suite, not just the browser and ship-critical subset.
 
@@ -216,7 +216,7 @@ Fourth, formalize deterministic QA personas. Replace the hidden assumption of "s
 
 Fifth, add the subagent operating model and release workflow. `qa/AGENTS.md` should define at least five responsibilities: a scenario mapper that reads diffs and selects affected scenario IDs, a test auditor that checks the catalog against the current test tree, a browser runner that exercises scenario flows, a gap reviewer that finds release-critical scenarios with no trustworthy proof or no recent browser evidence, and a release summarizer that writes the run report. The workflow must distinguish between the `default_ship`, `extended`, and `billing_integration` packs so agents do not run Stripe unnecessarily or omit majority-coverage surfaces.
 
-Finally, wire the new model into repository practice. The root `AGENTS.md` should defer to `qa/AGENTS.md` for route, auth, entitlement, checkout, or release-surface work. A fast validation command should check the integrity of the QA catalog before commit or push. A broader browser sweep command should run before ship or as a targeted PR gate. Old QA docs should either point at the new system or be retired so there is only one operating model. The first implementation slice completed the handoff, validator, inventory sync, persona commands, and report scaffolder. This slice completed the canonical packet-route browser rewrite plus pack runner wiring, so the next implementation work should focus on live environment execution and committed run evidence.
+Finally, wire the new model into repository practice. The root `AGENTS.md` should defer to `qa/AGENTS.md` for route, auth, entitlement, checkout, or release-surface work. A fast validation command should check the integrity of the QA catalog before commit or push. A broader browser sweep command should run before ship or as a targeted PR gate. Old QA docs should either point at the new system or be retired so there is only one operating model. The first implementation slice completed the handoff, validator, inventory sync, persona commands, and report scaffolder. This slice completed the canonical blueprint-route browser rewrite plus pack runner wiring, so the next implementation work should focus on live environment execution and committed run evidence.
 
 ## Milestones
 
@@ -228,7 +228,7 @@ Success means `rg --files qa` lists a coherent operating layer instead of nothin
 
 ### Milestone 2 — Define the first real journey catalog and coverage map
 
-At the end of this milestone, `qa/journeys.csv` contains the first production-ready set of journey rows for the current app. The first slice must cover visitor landing and CTA behavior, sign-in and redirect behavior, no-access recovery, access-granted packet start, one scenario per major packet stage boundary, review/download, settings, checkout-success recovery, and free-to-paid handoff. Each row must declare its journey bucket, starting persona, ending persona, and scenario pack. `qa/coverage.csv` then maps each scenario ID to its proving mechanism and current confidence state.
+At the end of this milestone, `qa/journeys.csv` contains the first production-ready set of journey rows for the current app. The first slice must cover visitor landing and CTA behavior, sign-in and redirect behavior, no-access recovery, access-granted blueprint start, one scenario per major blueprint stage boundary, review/download, settings, checkout-success recovery, and free-to-paid handoff. Each row must declare its journey bucket, starting persona, ending persona, and scenario pack. `qa/coverage.csv` then maps each scenario ID to its proving mechanism and current confidence state.
 
 Success means a product manager can answer "what matters before ship" by reading the catalog rather than by opening Playwright specs, and every release-critical path exists as an explicit row.
 
@@ -240,7 +240,7 @@ Success means the project no longer measures confidence by raw test count. Inste
 
 ### Milestone 4 — Introduce deterministic QA personas and scenario-pack execution
 
-At the end of this milestone, the repo has a clear persona model and preparation commands for the browser lane. The implementation may adapt the existing Clerk and entitlement scripts, but it must expose them through deliberate persona names, `qa/`-owned protocol files, and documented prepare/reset behavior. The default ship pack should exercise non-billing personas and the packet-first funnel. The real checkout browser flow should live in the separate `billing_integration` pack.
+At the end of this milestone, the repo has a clear persona model and preparation commands for the browser lane. The implementation may adapt the existing Clerk and entitlement scripts, but it must expose them through deliberate persona names, `qa/`-owned protocol files, and documented prepare/reset behavior. The default ship pack should exercise non-billing personas and the blueprint-first funnel. The real checkout browser flow should live in the separate `billing_integration` pack.
 
 Success means a fresh agent can prepare the right persona, run a selected scenario pack, and write the result into a run report without guessing which account state is required.
 
@@ -252,9 +252,9 @@ Success means "ship" now has a repeatable ritual: read the changed scenarios, pr
 
 ## Concrete Steps
 
-Begin in `/Users/parkerrex/Projects/manmeetsai-workspace` by inspecting the exact files that currently define routes, tests, browser projects, and persona preparation. This verifies the real starting point before any folder or protocol design begins.
+Begin in `/Users/parkerrex/Projects/ship-by-sunday` by inspecting the exact files that currently define routes, tests, browser projects, and persona preparation. This verifies the real starting point before any folder or protocol design begins.
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     sed -n '1,260p' AGENTS.md
     sed -n '1,260p' apps/web/AGENTS.md
     sed -n '1,260p' apps/web/package.json
@@ -274,7 +274,7 @@ Then create the root `qa/` folder with the first committed source-of-truth files
 
 After the folder exists, write the glossary before the CSV files. Define the journey buckets, persona vocabulary, scenario-pack vocabulary, severity terms, and what counts as release-critical for this repository. The glossary must define terms like FTUX, EUX, transition flow, scenario ID, persona, browser sweep, default ship pack, extended pack, billing-integration pack, and release report in plain English.
 
-Once the glossary is stable, seed the first version of `qa/journeys.csv` with the current product realities visible in the repo. Use the existing route and browser surfaces to derive the first rows, but do not mirror old test names. The row labels must read like product workstreams. A good first slice is likely to include landing-to-CTA, sign-in with redirect, signed-out protected-route redirect, no-access protected recovery, packet start, one row each for Product, Design, Marketing, Build Plan, Review/Download, one umbrella packet-flow row, settings access, checkout-success recovery, and free-to-paid access handoff. Mark each row with its scenario pack so the default ship pack, extended pack, and billing-integration pack are operationally explicit.
+Once the glossary is stable, seed the first version of `qa/journeys.csv` with the current product realities visible in the repo. Use the existing route and browser surfaces to derive the first rows, but do not mirror old test names. The row labels must read like product workstreams. A good first slice is likely to include landing-to-CTA, sign-in with redirect, signed-out protected-route redirect, no-access protected recovery, blueprint start, one row each for Product, Design, Marketing, Build Plan, Review/Download, one umbrella blueprint-flow row, settings access, checkout-success recovery, and free-to-paid access handoff. Mark each row with its scenario pack so the default ship pack, extended pack, and billing-integration pack are operationally explicit.
 
 After the journey catalog exists, create `qa/coverage.csv` and `qa/test-inventory.csv`. The coverage file should map scenario IDs to the proving mechanism, while the inventory file should list each current test file and its disposition. The inventory must include at least the file path, scenario IDs proved, current value, replacement path if any, and disposition rationale, and it must cover every current test file under `apps/web/tests/`.
 
@@ -290,7 +290,7 @@ Then author `qa/AGENTS.md` so subagents know how to work. It must tell a scenari
 
 Implemented in this slice with explicit `qa:run-pack` examples and billing gating language. The browser-runner section now points at the tagged pack scripts and the gap-reviewer section points at `qa/coverage.csv` plus the latest report.
 
-Finally, run the first real baseline sweep. Prepare the personas, run the fast validator, run the targeted automated lanes, run the critical browser scenarios, and write the dated reports. The first baseline sweep must cover the homepage, auth entry and redirect behavior, no-access recovery, the canonical packet funnel, review/download, settings, and checkout-success recovery. The free-to-paid handoff must also be captured in the system, but it should run as part of the billing-integration pack rather than the default every-ship pack.
+Finally, run the first real baseline sweep. Prepare the personas, run the fast validator, run the targeted automated lanes, run the critical browser scenarios, and write the dated reports. The first baseline sweep must cover the homepage, auth entry and redirect behavior, no-access recovery, the canonical blueprint funnel, review/download, settings, and checkout-success recovery. The free-to-paid handoff must also be captured in the system, but it should run as part of the billing-integration pack rather than the default every-ship pack.
 
 This milestone is now complete in the repository sense. `qa/runs/2026-03-25-default-ship-baseline.md`, `qa/runs/2026-03-25-default-ship-post-prod-deploy.md`, `qa/runs/2026-03-25-dev-default-ship.md`, `qa/runs/2026-03-25-dev-billing-integration.md`, `qa/runs/2026-03-25-dev-billing-integration-rerun.md`, and `qa/runs/2026-03-25-default-ship-prod-rerun.md` now make the progression explicit: original prod mismatch, prod blocker report, green dev `default_ship`, the first local Stripe blocker report, the succeeding local billing rerun, and the final hosted `default_ship` rerun that closes the prod auth loop.
 
@@ -298,9 +298,9 @@ This milestone is now complete in the repository sense. `qa/runs/2026-03-25-defa
 
 The work is not complete when files merely exist. It is complete when the new QA operating system can be demonstrated end to end.
 
-Start with static and structural validation from `/Users/parkerrex/Projects/manmeetsai-workspace`.
+Start with static and structural validation from `/Users/parkerrex/Projects/ship-by-sunday`.
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     bun run lint
     bun run format:check
     bun run qa:validate
@@ -388,11 +388,11 @@ Success means the retained automated lanes still pass after the catalog and inve
 
 Then prepare the browser personas and run the ship pack against a safe environment. If a hosted or sandbox environment is needed, set the required base URL and enable the sandbox lane explicitly.
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     bun run qa:personas:prepare
     E2E_RUN_SANDBOX=1 PLAYWRIGHT_BASE_URL=<safe_base_url> bun run test:e2e:sandbox
 
-Success means the browser lane can exercise no-access and access-granted personas, packet-funnel scenarios, settings, and recovery scenarios against a safe environment. The free-to-paid handoff belongs to the billing-integration pack and should run only when the environment is safe for payment confirmation. If the environment is not safe for payment confirmation, the report must mark the paid handoff as blocked rather than pretending it was covered.
+Success means the browser lane can exercise no-access and access-granted personas, blueprint-funnel scenarios, settings, and recovery scenarios against a safe environment. The free-to-paid handoff belongs to the billing-integration pack and should run only when the environment is safe for payment confirmation. If the environment is not safe for payment confirmation, the report must mark the paid handoff as blocked rather than pretending it was covered.
 
 Observed during implementation:
 
@@ -450,18 +450,18 @@ Test deletion must be conservative. Do not delete a current test file until its 
 The first version of the journey catalog should be visibly simple. A short example row shape is:
 
     scenario_id,journey_bucket,start_persona,end_persona,lifecycle_stage,journey_name,preconditions,entry_point,plain_english_steps,expected_outcome,priority,scenario_pack,automation_status,manual_status,linked_tests,notes
-    CONV-01,Free -> Paid,member_without_access,member_with_access,transition,Free to paid handoff,"Signed in without entitlement","/","User starts checkout, completes safe test payment, lands on checkout success, receives access, and enters the protected packet flow","User reaches the protected workspace without confusion",critical,billing_integration,planned,not_run,"apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts","Route names may change; scenario meaning should not"
+    CONV-01,Free -> Paid,member_without_access,member_with_access,transition,Free to paid handoff,"Signed in without entitlement","/","User starts checkout, completes safe test payment, lands on checkout success, receives access, and enters the protected blueprint flow","User reaches the protected workspace without confusion",critical,billing_integration,planned,not_run,"apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts","Route names may change; scenario meaning should not"
 
 The release report template should stay equally simple. A short example section shape is:
 
     Scope tested
     Pack: default_ship
     Personas used: signed_out, member_without_access, member_with_access
-    Scenario IDs: VIS-01, AUTH-02, ACCESS-03, PACKET-04
+    Scenario IDs: VIS-01, AUTH-02, ACCESS-03, BLUEPRINT-04
 
     Passed
     VIS-01 landing CTA
-    PACKET-04 product stage opens
+    BLUEPRINT-04 product stage opens
 
     Findings
     high — REVIEW-01 download button disabled despite complete stage data
@@ -475,7 +475,7 @@ The report policy should also be explicit. A committed baseline or ship report m
 
 An ignored local dry run might live at:
 
-    qa/runs/local/2026-03-25-packet-funnel-dry-run.md
+    qa/runs/local/2026-03-25-blueprint-funnel-dry-run.md
 
 Observed during implementation:
 
@@ -484,7 +484,7 @@ Observed during implementation:
       "status": "ok",
       "pack": "default_ship",
       "personas": ["signed_out", "member_without_access", "member_with_access"],
-      "scenarioIds": ["VIS-01", "AUTH-01", "AUTH-02", "ACCESS-01", "ACCESS-02", "PACKET-01", "PACKET-02", "PACKET-03", "PACKET-04", "PACKET-05", "PACKET-06", "PACKET-07", "SETTINGS-01"],
+      "scenarioIds": ["VIS-01", "AUTH-01", "AUTH-02", "ACCESS-01", "ACCESS-02", "BLUEPRINT-01", "BLUEPRINT-02", "BLUEPRINT-03", "BLUEPRINT-04", "BLUEPRINT-05", "BLUEPRINT-06", "BLUEPRINT-07", "SETTINGS-01"],
       "reportPath": "qa/runs/local/2026-03-25-baseline-default_ship.md"
     }
 
@@ -500,7 +500,7 @@ The existing repo already proves where the highest-value first scenarios live. E
     apps/web/tests/browser-smoke/app-smoke.spec.ts proves landing CTA, checkout-success recovery, SEO data, crawl endpoints, and sign-in noindex behavior.
     apps/web/tests/e2e/auth-protection.sandbox.spec.ts proves signed-out redirect, no-access recovery, access-granted entry, invalid-lesson 404 behavior, and protected-shell error handling.
     apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts proves no-access recovery, access-granted workspace entry, and the full paid handoff path.
-    apps/web/features/packet-flow/components/packet-stage-page.tsx proves that each packet stage has save and progression behavior, which justifies stage-boundary scenarios instead of one coarse funnel row.
+    apps/web/features/blueprint-flow/components/blueprint-stage-page.tsx proves that each blueprint stage has save and progression behavior, which justifies stage-boundary scenarios instead of one coarse funnel row.
 
 ## Interfaces and Dependencies
 

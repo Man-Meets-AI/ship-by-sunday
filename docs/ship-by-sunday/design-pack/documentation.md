@@ -111,7 +111,7 @@ List the meaningful motion or interaction work that shipped.
 - **Automated checks:** {{lint, tests, typecheck, build, Playwright, screenshot compare, etc.}}
 - **Reference comparison:** {{Figma, screenshot, existing product patterns, none}}
 - **Checklist status:** {{which sections of CHECKLIST.md were most relevant and whether they passed}}
-- **Packet-first status:** {{what packet, funnel, or homepage invariants were preserved}}
+- **Blueprint-first status:** {{what blueprint, funnel, or homepage invariants were preserved}}
 
 ## 11. Tradeoffs and deviations
 

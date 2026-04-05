@@ -4,11 +4,11 @@ This glossary defines the plain-English vocabulary for the Ship by Sunday QA ope
 
 ## Journey
 
-A journey is a meaningful product outcome that a human can describe without naming code files. Example: an entitled member opens the packet funnel and reaches Review.
+A journey is a meaningful product outcome that a human can describe without naming code files. Example: an entitled member opens the blueprint funnel and reaches Review.
 
 ## Scenario ID
 
-A scenario ID is the short stable identifier for one journey row in `qa/journeys.csv`. Example: `PACKET-04` means the Marketing stage opens after the Design stage.
+A scenario ID is the short stable identifier for one journey row in `qa/journeys.csv`. Example: `BLUEPRINT-04` means the Marketing stage opens after the Design stage.
 
 ## Journey Bucket
 
@@ -16,7 +16,7 @@ A journey bucket is the PM-facing grouping for related scenarios. The v1 buckets
 
 - `Visitor FTUX`: signed-out acquisition and discovery.
 - `No-Access FTUX`: signed-in members who do not yet have product access.
-- `Has-Access EUX`: entitled members inside the packet-first workspace.
+- `Has-Access EUX`: entitled members inside the blueprint-first workspace.
 - `Free -> Paid`: the paid transition from no access to access granted.
 
 ## Persona
@@ -33,7 +33,7 @@ The non-secret protocol for these personas lives in `qa/personas.json`. Real loc
 
 A scenario pack is the operational grouping used to decide what to run.
 
-- `default_ship`: the majority-coverage pack for ordinary shipping. This includes homepage, auth, no-access recovery, packet funnel, review/download, settings, and checkout-success recovery.
+- `default_ship`: the majority-coverage pack for ordinary shipping. This includes homepage, auth, no-access recovery, blueprint funnel, review/download, settings, and checkout-success recovery.
 - `extended`: important but non-default surfaces such as docs, starter repo, Codex connection, observability, and curriculum contracts.
 - `billing_integration`: real free-to-paid coverage that touches checkout and paid access handoff. Run this only in a safe test environment.
 
@@ -68,7 +68,7 @@ A release-critical scenario is one that belongs to `default_ship` and should be 
 - the public homepage offer and CTA
 - sign-in and redirect behavior
 - no-access recovery
-- the packet-first funnel from Start through Review
+- the blueprint-first funnel from Start through Review
 - settings
 - checkout-success recovery
 

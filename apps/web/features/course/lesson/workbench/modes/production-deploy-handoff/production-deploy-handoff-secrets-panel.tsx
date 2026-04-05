@@ -17,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { README_DEPLOY_PROMPT } from "./production-deploy-handoff-constants";
 
-function buildFullPacket(args: {
+function buildFullBlueprint(args: {
 	productName: string;
 	domain: string;
 	cloudflareToken: string;
@@ -50,10 +50,10 @@ export function ProductionDeployHandoffSecretsPanel({
 	const [stripeSecret, setStripeSecret] = useState("");
 	const [clerkKeys, setClerkKeys] = useState("");
 
-	async function copyFullPacket() {
+	async function copyFullBlueprint() {
 		try {
 			await navigator.clipboard.writeText(
-				buildFullPacket({
+				buildFullBlueprint({
 					productName,
 					domain,
 					cloudflareToken,
@@ -123,9 +123,9 @@ export function ProductionDeployHandoffSecretsPanel({
 					type="button"
 					variant="outline"
 					size="sm"
-					onClick={copyFullPacket}
+					onClick={copyFullBlueprint}
 				>
-					Copy full handoff packet
+					Copy full handoff blueprint
 				</Button>
 			</CardContent>
 		</Card>

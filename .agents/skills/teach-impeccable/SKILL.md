@@ -11,7 +11,7 @@ Gather design context for this project, then persist it for all future sessions.
 Before asking questions, thoroughly scan the project to discover what you can:
 
 - **README and docs**: Project purpose, target audience, any stated goals
-- **Package.json / config files**: Tech stack, dependencies, existing design libraries
+- **Manifest/config files**: Tech stack, dependencies, existing design libraries
 - **Existing components**: Current design patterns, spacing, typography in use
 - **Brand assets**: Logos, favicons, color values already defined
 - **Design tokens / CSS variables**: Existing color palettes, font stacks, spacing scales

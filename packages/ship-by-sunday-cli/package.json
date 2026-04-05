@@ -1,9 +1,9 @@
 {
-	"name": "@manmeetsai/ship-by-sunday-cli",
+	"name": "@shipbysunday/ship-by-sunday-cli",
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
-	"description": "Repo-local Ship by Sunday CLI for packet intake and starter snapshot generation.",
+	"description": "Repo-local Ship by Sunday CLI for blueprint intake and Ship by Sunday Blueprint generation.",
 	"bin": {
 		"sbs": "./src/cli.ts"
 	},
@@ -16,7 +16,8 @@
 		"test": "vitest run --config vitest.config.ts"
 	},
 	"dependencies": {
-		"@manmeetsai/packet-compiler": "workspace:*"
+		"@shipbysunday/blueprint-compiler": "workspace:*",
+		"@shipbysunday/blueprint-presentation": "workspace:*"
 	},
 	"devDependencies": {
 		"@types/node": "25.5.0",

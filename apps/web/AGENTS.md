@@ -2,14 +2,16 @@
 
 ## Ship by Sunday — web app rules
 
-- This product is packet-first, not course-first.
+- This product is blueprint-first, not course-first.
+- Root `DESIGN.md` is the canonical visual source of truth for user-facing UI in this repo.
+- Before changing layout, styling, theming, motion, docs chrome, or marketing presentation in `apps/web`, read root `DESIGN.md` and preserve that system unless the task explicitly changes it.
 - Required funnel:
   Start -> Product -> Design -> Marketing -> Build Plan -> Review & Download
 - Optional post-download library:
   Execute / Ship
-- Do not preserve old CEO / Design / Build / Ship framing if it conflicts with packet-first logic.
+- Do not preserve old CEO / Design / Build / Ship framing if it conflicts with blueprint-first logic.
 - Do not turn workflow or ephemeral state into canonical intake.
-- The public outcome is one generated repo delivered at Review & Download.
+- The public outcome is one Blueprint delivered at Review & Download.
 - Do not reintroduce separate pre-review download artifacts or stage-pack contracts into the UI unless the live product changes first.
 - For user-facing UI work, also follow `docs/ship-by-sunday/design-pack/` as the repo-specific frontend design workflow pack.
 

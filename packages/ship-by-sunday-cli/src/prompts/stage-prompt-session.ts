@@ -1,15 +1,14 @@
 import {
-	getPacketFieldScaleDefinition,
-	getPacketStepLabel,
-	getPacketStageDefinition,
-	isPacketArrayField,
-	packetFieldHelperText,
-	packetFieldLabel,
-	packetFieldPromptKind,
-	type CanonicalProjectDefinitionDraft,
-	type CanonicalProjectFactKey,
-} from "@manmeetsai/packet-compiler";
-import type { EditablePacketStageId } from "../parse-cli-command";
+	getBlueprintStageDefinition,
+	isBlueprintArrayField,
+	blueprintFieldPromptKind,
+	blueprintFieldHelperText,
+	blueprintFieldLabel,
+	formatCliFactValue,
+	type CliBlueprintFactsDraft,
+	type CliBlueprintFactKey,
+} from "../field-contract";
+import type { EditableBlueprintStageId } from "../parse-cli-command";
 
 export type StagePromptOutcome =
 	| { kind: "completed" }
@@ -30,9 +29,9 @@ export type StageFieldAction =
 export function createStagePromptSession({
 	stageId,
 }: {
-	stageId: EditablePacketStageId;
+	stageId: EditableBlueprintStageId;
 }) {
-	const stage = getPacketStageDefinition(stageId);
+	const stage = getBlueprintStageDefinition(stageId);
 
 	function formatIntroLines() {
 		return [
@@ -45,7 +44,7 @@ export function createStagePromptSession({
 
 	function formatStepHeader(stepIndex: number, fieldCount: number) {
 		const step = stage.steps[stepIndex];
-		const stepLabel = getPacketStepLabel(stageId, step.id) ?? step.label;
+		const stepLabel = step.label;
 		return `${stage.label} / ${stepLabel} • Step ${stepIndex + 1} of ${stage.steps.length} • ${fieldCount} fields`;
 	}
 
@@ -56,34 +55,30 @@ export function createStagePromptSession({
 		fieldIndex,
 		fieldCount,
 	}: {
-		draft: CanonicalProjectDefinitionDraft;
-		fieldKey: CanonicalProjectFactKey;
+		draft: { facts: CliBlueprintFactsDraft };
+		fieldKey: CliBlueprintFactKey;
 		stepIndex: number;
 		fieldIndex: number;
 		fieldCount: number;
 	}) {
-		const label = packetFieldLabel(fieldKey, draft.facts);
-		const helperText = packetFieldHelperText(fieldKey, draft.facts);
-		const promptKind = packetFieldPromptKind(fieldKey);
-		const scaleDefinition = getPacketFieldScaleDefinition(fieldKey);
+		const label = blueprintFieldLabel(fieldKey);
+		const helperText = blueprintFieldHelperText(fieldKey);
+		const promptKind = blueprintFieldPromptKind(fieldKey);
 		const currentValue = draft.facts[fieldKey];
 		const currentValueIsEmpty =
 			currentValue === undefined ||
 			currentValue === null ||
 			currentValue === "" ||
 			(Array.isArray(currentValue) && currentValue.length === 0);
+		const formattedCurrentValue = formatCliFactValue(draft.facts, fieldKey);
 		const currentValueText = currentValueIsEmpty
-			? "Current value: empty"
-			: isPacketArrayField(fieldKey)
-				? `Current value:\n${Array.isArray(currentValue) ? currentValue.join("\n") : String(currentValue)}`
-				: `Current value: ${String(currentValue)}`;
-		const promptLabel =
-			promptKind === "scale" && scaleDefinition
-				? `${label} (${scaleDefinition.options.map((option) => option.label).join(" / ")})`
-				: label;
+			? `Current value: ${formattedCurrentValue || "empty"}`
+			: isBlueprintArrayField(fieldKey)
+				? `Current value:\n${formattedCurrentValue}`
+				: `Current value: ${formattedCurrentValue}`;
 		const lines = [
 			`Step ${stepIndex + 1} of ${stage.steps.length} • Field ${fieldIndex + 1} of ${fieldCount}`,
-			promptLabel,
+			label,
 		];
 
 		if (helperText) {
@@ -110,7 +105,7 @@ export function createStagePromptSession({
 		fieldKey,
 	}: {
 		answerLines: string[];
-		fieldKey: CanonicalProjectFactKey;
+		fieldKey: CliBlueprintFactKey;
 	}): StageFieldAction {
 		const firstLine = answerLines[0] ?? "";
 		const trimmedFirstLine = firstLine.trim();
@@ -127,7 +122,7 @@ export function createStagePromptSession({
 			return { kind: "clear" };
 		}
 
-		if (answerLines.length === 1 || !isPacketArrayField(fieldKey)) {
+		if (answerLines.length === 1 || !isBlueprintArrayField(fieldKey)) {
 			return { kind: "value", value: trimmedFirstLine };
 		}
 

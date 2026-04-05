@@ -32,8 +32,8 @@ vi.mock("@/convex/_generated/api", () => ({
 		access: {
 			viewerProductAccess: "viewerProductAccess",
 		},
-		packet: {
-			getPacketResumeDestination: "getPacketResumeDestination",
+		blueprint: {
+			getBlueprintResumeDestination: "getBlueprintResumeDestination",
 		},
 	},
 }));
@@ -149,6 +149,59 @@ describe("product access server helpers", () => {
 		expect(fetchQueryMock).toHaveBeenCalledTimes(2);
 	});
 
+	it("keeps the original no-access response when there is no pending checkout cookie", async () => {
+		getConvexServerSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		fetchQueryMock.mockResolvedValue({
+			hasAccess: false,
+			clerkUserId: "user_123",
+			status: "no_access",
+		});
+		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(null);
+
+		const { getServerProductAccess } =
+			await import("@/features/product-access/server/product-access");
+
+		await expect(getServerProductAccess()).resolves.toEqual({
+			hasAccess: false,
+			clerkUserId: "user_123",
+			status: "no_access",
+		});
+		expect(claimCheckoutSessionForViewerMock).not.toHaveBeenCalled();
+		expect(fetchQueryMock).toHaveBeenCalledTimes(1);
+	});
+
+	it("keeps the original no-access response when the fallback checkout claim is not validated", async () => {
+		getConvexServerSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		fetchQueryMock.mockResolvedValue({
+			hasAccess: false,
+			clerkUserId: "user_123",
+			status: "no_access",
+		});
+		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(
+			"cs_pending_123",
+		);
+		claimCheckoutSessionForViewerMock.mockResolvedValue({
+			kind: "wrong_account",
+			sessionId: "cs_pending_123",
+		});
+
+		const { getServerProductAccess } =
+			await import("@/features/product-access/server/product-access");
+
+		await expect(getServerProductAccess()).resolves.toEqual({
+			hasAccess: false,
+			clerkUserId: "user_123",
+			status: "no_access",
+		});
+		expect(fetchQueryMock).toHaveBeenCalledTimes(1);
+	});
+
 	it("redirects home visitors to their saved resume destination when allowed", async () => {
 		getConvexServerSessionMock.mockResolvedValue({
 			userId: "user_123",
@@ -162,8 +215,8 @@ describe("product access server helpers", () => {
 			})
 			.mockResolvedValueOnce({
 				destination: "/design",
-				kind: "packet_stage",
-				packetStageId: "design",
+				kind: "blueprint_stage",
+				blueprintStageId: "design",
 				postReviewTargets: null,
 			});
 
@@ -207,6 +260,24 @@ describe("product access server helpers", () => {
 		await expect(getServerResumeDestination()).resolves.toBeNull();
 	});
 
+	it("returns null when the viewer still does not have access", async () => {
+		getConvexServerSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		fetchQueryMock.mockResolvedValue({
+			hasAccess: false,
+			clerkUserId: "user_123",
+			status: "no_access",
+		});
+
+		const { getServerResumeDestination } =
+			await import("@/features/product-access/server/product-access");
+
+		await expect(getServerResumeDestination()).resolves.toBeNull();
+		expect(fetchQueryMock).toHaveBeenCalledTimes(1);
+	});
+
 	it("relays the centralized post-review resume destination for granted viewers", async () => {
 		getConvexServerSessionMock
 			.mockResolvedValueOnce({
@@ -226,7 +297,7 @@ describe("product access server helpers", () => {
 			.mockResolvedValueOnce({
 				destination: "/lesson/product-review",
 				kind: "post_review",
-				packetStageId: null,
+				blueprintStageId: null,
 				postReviewTargets: {
 					reviewDestination: "/review",
 					buildLessonsDestination: "/lesson/iterate-the-product-with-ai",
@@ -242,7 +313,7 @@ describe("product access server helpers", () => {
 		await expect(getServerResumeDestination()).resolves.toEqual({
 			destination: "/lesson/product-review",
 			kind: "post_review",
-			packetStageId: null,
+			blueprintStageId: null,
 			postReviewTargets: {
 				reviewDestination: "/review",
 				buildLessonsDestination: "/lesson/iterate-the-product-with-ai",

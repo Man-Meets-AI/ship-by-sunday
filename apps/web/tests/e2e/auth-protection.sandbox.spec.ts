@@ -14,33 +14,35 @@ test.skip(
 );
 
 test.describe("protected routes", () => {
-	test("@default_ship signed-out users are redirected away from the protected packet workspace", async ({
+	test("@default_ship signed-out users are redirected away from the protected blueprint workspace", async ({
 		page,
 	}) => {
-		await page.goto("/start");
+		await page.goto("/blueprint");
 		await expect(page).toHaveURL(/\/sign-in/);
 	});
 
 	test("@default_ship preserves redirect intent when an entitled user signs in", async ({
 		page,
 	}) => {
-		await page.goto("/sign-in?redirect_url=%2Fproduct");
+		await page.goto("/sign-in?redirect_url=%2Fblueprint");
 		await page.getByLabel(/^email$/i).fill(memberWithAccessEmail);
 		await page.getByLabel(/^password$/i).fill(memberWithAccessPassword);
 		await page.getByRole("button", { name: /^sign in$/i }).click();
 
-		await expect(page).toHaveURL(/\/product\/[^/]+$/);
-		await expect(page.getByText("Product").first()).toBeVisible();
+		await expect(page).toHaveURL(/\/blueprint$/);
+		await expect(
+			page.getByRole("heading", { name: "Blueprint" }),
+		).toBeVisible();
 	});
 
 	test.describe("member without access", () => {
 		test.use({ storageState: memberWithoutAccessStorageStatePath });
 
-		test("@default_ship sees inline access recovery on the canonical packet entry", async ({
+		test("@default_ship sees inline access recovery on the canonical blueprint entry", async ({
 			page,
 		}) => {
-			await page.goto("/start");
-			await expect(page).toHaveURL(/\/start/);
+			await page.goto("/blueprint");
+			await expect(page).toHaveURL(/\/blueprint/);
 			await expect(page.getByText("Access Required")).toBeVisible();
 			await expect(
 				page.getByText("Access not attached to this account"),
@@ -54,26 +56,26 @@ test.describe("protected routes", () => {
 	test.describe("member with access", () => {
 		test.use({ storageState: memberWithAccessStorageStatePath });
 
-		test("@default_ship can render the canonical packet start page", async ({
+		test("@default_ship can render the canonical blueprint page", async ({
 			page,
 		}) => {
-			await page.goto("/start");
-			await expect(page).toHaveURL(/\/start/);
+			await page.goto("/blueprint");
+			await expect(page).toHaveURL(/\/blueprint/);
 			await expect(
-				page.getByText("Build the BRIEF before you build the app."),
+				page.getByRole("heading", { name: "Blueprint" }),
 			).toBeVisible();
 			await expect(
-				page.getByRole("link", { name: /^Continue with /i }),
+				page.getByRole("button", { name: "Continue to Review" }),
 			).toBeVisible();
 		});
 
-		test("@extended redirects legacy lesson routes back to the packet-first start page", async ({
+		test("@extended redirects legacy lesson routes back to the blueprint page", async ({
 			page,
 		}) => {
 			await page.goto("/lesson/not-a-real-lesson");
-			await expect(page).toHaveURL(/\/start/);
+			await expect(page).toHaveURL(/\/blueprint/);
 			await expect(
-				page.getByText("Build the BRIEF before you build the app."),
+				page.getByRole("heading", { name: "Blueprint" }),
 			).toBeVisible();
 		});
 	});

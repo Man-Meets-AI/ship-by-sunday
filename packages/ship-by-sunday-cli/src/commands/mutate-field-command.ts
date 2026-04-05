@@ -1,7 +1,6 @@
-import { isPacketArrayField } from "@manmeetsai/packet-compiler";
 import { writeJsonResult } from "../cli-json";
 import { createCliError } from "../cli-errors";
-import { parseFieldSelector } from "../field-contract";
+import { isBlueprintArrayField, parseFieldSelector } from "../field-contract";
 import {
 	appendDraftFieldValue,
 	removeDraftFieldValue,
@@ -28,7 +27,7 @@ export async function handleFieldMutationCommand({
 	const field = parseFieldSelector(selector);
 	if (
 		(command === "append" || command === "remove") &&
-		!isPacketArrayField(field.fieldKey)
+		!isBlueprintArrayField(field.fieldKey)
 	) {
 		throw createCliError(
 			"invalid_args",

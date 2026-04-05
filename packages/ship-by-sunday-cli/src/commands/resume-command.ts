@@ -1,4 +1,4 @@
-import { deriveStageStatus } from "@manmeetsai/packet-compiler";
+import { deriveLocalDraftStatus } from "../field-contract";
 import { ensureLocalDraft } from "../draft/draft-store";
 import type { CliIo } from "../run-cli";
 import { handleStageCommand, type StagePrompter } from "./stage-command";
@@ -13,20 +13,18 @@ export async function handleResumeCommand({
 	promptStage?: StagePrompter;
 }) {
 	const draft = await ensureLocalDraft(projectRootPath);
-	const stageStatus = deriveStageStatus(draft.facts);
+	const stageStatus = deriveLocalDraftStatus(draft.facts);
 
-	if (stageStatus.firstIncompleteStageId === "review") {
-		io.write("Draft is already review-ready.");
-		return 0;
+	switch (stageStatus.firstIncompleteStageId) {
+		case "review":
+			io.write("Draft is already review-ready.");
+			return 0;
+		case "blueprint":
+			return handleStageCommand({
+				io,
+				projectRootPath,
+				stageId: stageStatus.firstIncompleteStageId,
+				promptStage,
+			});
 	}
-	if (stageStatus.firstIncompleteStageId === "start") {
-		throw new Error("Unexpected start-stage resume target.");
-	}
-
-	return handleStageCommand({
-		io,
-		projectRootPath,
-		stageId: stageStatus.firstIncompleteStageId,
-		promptStage,
-	});
 }

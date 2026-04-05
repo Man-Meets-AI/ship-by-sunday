@@ -6,18 +6,18 @@ import {
 } from "@/features/workspace-navigation/lib/post-review-destination";
 
 describe("post-review destination helpers", () => {
-	it("keeps incomplete packet visitors on the packet flow", () => {
+	it("keeps incomplete blueprint visitors on the blueprint flow", () => {
 		expect(
 			resolveWorkspaceResumeDestination({
 				executeShipUnlockedAt: null,
 				firstIncompleteStageId: "design",
-				packetStageDestination: "/design",
+				blueprintStageDestination: "/design",
 				postReviewLessonStates: [],
 			}),
 		).toEqual({
 			destination: "/design",
-			kind: "packet_stage",
-			packetStageId: "design",
+			kind: "blueprint_stage",
+			blueprintStageId: "design",
 			postReviewTargets: null,
 		});
 	});
@@ -27,13 +27,13 @@ describe("post-review destination helpers", () => {
 			resolveWorkspaceResumeDestination({
 				executeShipUnlockedAt: 500,
 				firstIncompleteStageId: "review",
-				packetStageDestination: "/review",
+				blueprintStageDestination: "/review",
 				postReviewLessonStates: [],
 			}),
 		).toEqual({
 			destination: getLessonHref("iterate-the-product-with-ai"),
 			kind: "post_review",
-			packetStageId: null,
+			blueprintStageId: null,
 			postReviewTargets: {
 				reviewDestination: "/review",
 				buildLessonsDestination: getLessonHref("iterate-the-product-with-ai"),

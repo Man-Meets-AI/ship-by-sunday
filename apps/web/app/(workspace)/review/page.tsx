@@ -1,27 +1,31 @@
 import { api } from "@/convex/_generated/api";
-import { PacketReviewPage } from "@/features/packet-flow/components/packet-review-page";
+import { isReviewAutoDownloadEnabled } from "@/features/blueprint-flow/lib/review-download-handoff";
+import { BlueprintReviewPage } from "@/features/blueprint-flow/components/blueprint-review-page";
 import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
 
 export default async function Page({
 	searchParams,
 }: {
-	searchParams: Promise<{ showLessonMap?: string }>;
+	searchParams: Promise<{ download?: string; showLessonMap?: string }>;
 }) {
 	const initialWorkspaceState = await fetchAuthenticatedQuery(
-		api.packet.getPacketWorkspaceState,
+		api.blueprint.getBlueprintWorkspaceState,
 		{},
 	);
-	const { showLessonMap } = await searchParams;
+	const { download, showLessonMap } = await searchParams;
 
 	if (!initialWorkspaceState) {
-		throw new Error("Packet workspace state missing");
+		throw new Error("Blueprint workspace state missing");
 	}
 
 	const isUnlocked = Boolean(
 		initialWorkspaceState.workflowState?.executeShipUnlockedAt,
 	);
 	const initialResumeDestination = isUnlocked
-		? await fetchAuthenticatedQuery(api.packet.getPacketResumeDestination, {})
+		? await fetchAuthenticatedQuery(
+				api.blueprint.getBlueprintResumeDestination,
+				{},
+			)
 		: null;
 	const initialBonusMissionState =
 		isUnlocked && initialResumeDestination?.postReviewTargets
@@ -29,12 +33,13 @@ export default async function Page({
 			: null;
 
 	return (
-		<PacketReviewPage
+		<BlueprintReviewPage
 			initialWorkspaceState={initialWorkspaceState}
 			initialPostReviewTargets={
 				initialResumeDestination?.postReviewTargets ?? null
 			}
 			initialBonusMissionState={initialBonusMissionState ?? null}
+			initialAutoDownload={isReviewAutoDownloadEnabled(download)}
 			initialShowLessonMap={showLessonMap === "1"}
 		/>
 	);

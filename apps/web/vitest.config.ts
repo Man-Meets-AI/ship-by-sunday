@@ -3,20 +3,6 @@ import { defineConfig, defineProject } from "vitest/config";
 
 const alias = [
 	{
-		find: "@packet-compiler/server",
-		replacement: path.resolve(
-			__dirname,
-			"../../packages/packet-compiler/src/server.ts",
-		),
-	},
-	{
-		find: "@packet-compiler",
-		replacement: path.resolve(
-			__dirname,
-			"../../packages/packet-compiler/src/index.ts",
-		),
-	},
-	{
 		find: "@",
 		replacement: path.resolve(__dirname, "."),
 	},

@@ -23,7 +23,7 @@ The repository already has a good skeleton for code-centric CI and a separate `d
 - [x] 2026-04-01 09:34 EDT: Grilled the ExecPlan, resolved the hook mechanism, the advisory sandbox-lane strategy, the production verification strategy, and the post-merge semantics for production proof.
 - [x] 2026-04-01 10:03 EDT: Implemented the repo-side hardening slice. Added committed `.githooks/`, a root hook installer, a shared release-scope detector, a hosted wait-for-host helper, a Vercel deployment wait helper, automatic billing detection in `Dev Staging Proof`, a dedicated `Production Release Proof` workflow, and a dedicated `Sandbox E2E Nightly` workflow so generic CI no longer contains the advisory deep lane.
 - [x] 2026-04-01 10:20 EDT: Tightened the first implementation after review. Expanded the detector to cover workflow and QA-pack enforcement surfaces plus `apps/web/app/access-required/`, made manual workflow reruns classify the checked-out release automatically instead of defaulting billing proof to `false`, and made `Production Release Proof` wait for the exact Vercel production deployment for the release commit before it begins public-site QA.
-- [x] 2026-04-01 10:16 EDT: Ran local validation for the repo-side changes. `bun run hooks:install`, `bun run precommit`, `bun run prepush`, `node qa/scripts/detect-release-scope.mjs --base=HEAD^ --head=HEAD`, `node qa/scripts/wait-for-host.mjs --url=http://example.com --path=/ --timeout_ms=10000 --interval_ms=1000`, `node --check qa/scripts/wait-for-vercel-production-deployment.mjs`, workflow YAML parsing, package JSON parsing, and `git diff --check` all passed.
+- [x] 2026-04-01 10:16 EDT: Ran local validation for the repo-side changes. `bun run hooks:install`, `bun run precommit`, `bun run prepush`, `node qa/scripts/detect-release-scope.mjs --base=HEAD^ --head=HEAD`, `node qa/scripts/wait-for-host.mjs --url=http://example.com --path=/ --timeout_ms=10000 --interval_ms=1000`, `node --check qa/scripts/wait-for-vercel-production-deployment.mjs`, workflow YAML parsing, blueprint JSON parsing, and `git diff --check` all passed.
 - [x] 2026-04-01 10:41 EDT: Verified the canonical production QA persona prep path against `apps/web/.env.production` with `PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run qa:personas:prepare -- --pack=default_ship`. Both the no-access and entitled prod QA accounts already existed and the entitlement prep path completed cleanly.
 - [x] 2026-04-01 10:43 EDT: Created the GitHub deployment environments `production-release-proof` and `production-billing-integration` via `gh api`.
 - [x] 2026-04-01 10:45 EDT: Wrote the production rollout secrets via `gh`: environment secrets `PRODUCTION_QA_PERSONAS_LOCAL_JSON`, `PRODUCTION_WEB_ENV_LOCAL`, `PRODUCTION_CONVEX_CONFIG_JSON`, and `VERCEL_TOKEN` on both `production-release-proof` and `production-billing-integration`, plus `PRODUCTION_STRIPE_SECRET_KEY` and `PRODUCTION_STRIPE_WEBHOOK_SECRET` on `production-billing-integration`.
@@ -57,7 +57,7 @@ Rationale: the repo currently has no committed hook configuration. If the goal i
 Date: 2026-04-01
 
 Decision: implement the local hook system with committed `.githooks/` files and a root install command that sets `git config core.hooksPath .githooks`, rather than adding Husky.  
-Rationale: this is the smallest enforcement mechanism that keeps the repo self-contained, avoids a new package dependency, and makes the hook path explicit to a novice.  
+Rationale: this is the smallest enforcement mechanism that keeps the repo self-contained, avoids a new blueprint dependency, and makes the hook path explicit to a novice.  
 Date: 2026-04-01
 
 Decision: treat billing proof as mandatory for billing-sensitive releases, not literally for every change in the repository.  
@@ -112,7 +112,7 @@ The code-centric CI workflow lives at `.github/workflows/ci.yml`. It now contain
 
 The integrated staging proof workflow lives at `.github/workflows/dev-staging-proof.yml`. It writes `qa/personas.local.json` from a secret, writes `apps/web/.env.local` from a secret, configures Convex CLI auth, runs `bun run qa:run-pack -- --pack=default_ship`, and uses `qa/scripts/detect-release-scope.mjs` to decide whether `billing_integration` must also run. The aggregate `release_gate` job makes that conditional behavior legible because it always reports one pass or fail result for the staging candidate after the merge to `dev`.
 
-The QA pack model lives in `qa/scripts/run-pack.mjs` and the docs in `qa/README.md`. `default_ship` already runs the QA control-plane validation, persona preparation, browser smoke, a packet integration-ui subset, and an authenticated browser pack. `billing_integration` already runs persona preparation plus `apps/web`'s `test:e2e:sandbox:billing-integration`, and on local targets it also runs `stripe:dev:doctor` and `stripe:dev:verify`. These packs are good building blocks; they only need to be wired into the right release stages.
+The QA pack model lives in `qa/scripts/run-pack.mjs` and the docs in `qa/README.md`. `default_ship` already runs the QA control-plane validation, persona preparation, browser smoke, a blueprint integration-ui subset, and an authenticated browser pack. `billing_integration` already runs persona preparation plus `apps/web`'s `test:e2e:sandbox:billing-integration`, and on local targets it also runs `stripe:dev:doctor` and `stripe:dev:verify`. These packs are good building blocks; they only need to be wired into the right release stages.
 
 The browser runner configuration for local and hosted Playwright flows lives in `apps/web/playwright.config.ts`. The `browser-smoke` project covers shallow browser proof, while `sandbox-e2e` is the deeper authenticated browser project. Hosted runs are controlled by `PLAYWRIGHT_BASE_URL`, and local-server runs are controlled by `PLAYWRIGHT_USE_LOCAL_SERVER=1`.
 
@@ -156,7 +156,7 @@ Work from the repository root unless a command says otherwise.
 
 1. Reconfirm the current weak spots before changing code:
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     sed -n '1,120p' package.json
     sed -n '1,220p' .github/workflows/ci.yml
     sed -n '1,220p' .github/workflows/dev-staging-proof.yml
@@ -233,7 +233,7 @@ The work is only complete when the repository can prove each of the following wi
 
 First, local enforcement must be real. A contributor must be able to install the hooks and then run the hook targets directly from the repository root. The commands below must pass locally before the hook wiring is considered safe:
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     bun run precommit
     bun run prepush
 
@@ -241,27 +241,27 @@ First, local enforcement must be real. A contributor must be able to install the
 
 Second, the release-scope detector must be demonstrably stable. Add at least one local validation command that compares two refs and shows whether a sample billing-sensitive diff is detected correctly. A likely shape is:
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     node qa/scripts/<detector>.mjs --base=main --head=HEAD
 
    Expected observation: the script prints machine-readable output, exits successfully, and clearly states whether billing proof is required.
 
 Third, workflow files must be syntactically and structurally valid. After editing workflows, run:
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     ruby -e 'require "yaml"; Dir[".github/workflows/*.yml"].each { |file| YAML.load_file(file) }; puts "workflow yaml ok"'
 
    Expected observation: `workflow yaml ok`
 
-Fourth, repository docs and package manifests must stay parseable and clean:
+Fourth, repository docs and dependency manifests must stay parseable and clean:
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
-    node -e 'JSON.parse(require("fs").readFileSync("package.json","utf8")); console.log("root package json ok")'
-    node -e 'JSON.parse(require("fs").readFileSync("apps/web/package.json","utf8")); console.log("apps/web package json ok")'
+    cd /Users/parkerrex/Projects/ship-by-sunday
+    node -e 'JSON.parse(require("fs").readFileSync("package.json","utf8")); console.log("root blueprint json ok")'
+    node -e 'JSON.parse(require("fs").readFileSync("apps/web/package.json","utf8")); console.log("apps/web blueprint json ok")'
     bun run qa:validate
     git diff --check
 
-   Expected observation: both package files parse, `qa:validate` remains green, and `git diff --check` prints nothing.
+   Expected observation: both blueprint files parse, `qa:validate` remains green, and `git diff --check` prints nothing.
 
 Fifth, acceptance must be observable from the repo contract itself. A novice reading the final repository state must be able to answer these questions without chat history:
 
@@ -294,7 +294,7 @@ Useful evidence gathered during implementation:
 
     Hook installation transcript:
     - `bun run hooks:install`
-      `Configured git hooks: /Users/parkerrex/Projects/manmeetsai-workspace/.githooks`
+      `Configured git hooks: /Users/parkerrex/Projects/ship-by-sunday/.githooks`
 
     Fast local gate transcript:
     - `bun run precommit`
@@ -320,9 +320,9 @@ Useful evidence gathered during implementation:
     - Re-ran workflow YAML parsing
     - Re-ran `git diff --check`
 
-    Package parsing transcript:
-    - `root package json ok`
-    - `apps/web package json ok`
+    Blueprint parsing transcript:
+    - `root blueprint json ok`
+    - `apps/web blueprint json ok`
 
     Full local code-proof transcript:
     - `bun run prepush`

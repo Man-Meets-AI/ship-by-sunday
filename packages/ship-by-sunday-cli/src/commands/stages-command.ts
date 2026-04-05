@@ -16,7 +16,7 @@ export async function handleStagesCommand({
 		return 0;
 	}
 
-	const lines = ["Packet stages", ""];
+	const lines = ["Reduced blueprint stages", ""];
 
 	for (const stage of stages) {
 		lines.push(`${stage.label} (${stage.stageId})`);

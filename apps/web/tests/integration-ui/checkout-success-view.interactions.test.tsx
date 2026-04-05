@@ -43,7 +43,7 @@ describe("CheckoutSuccessView interactions", () => {
 		vi.useRealTimers();
 	});
 
-	it("arms the start redirect once access is ready", async () => {
+	it("arms the blueprint redirect once access is ready", async () => {
 		vi.useFakeTimers();
 		useConvexAuthMock.mockReturnValue({
 			isAuthenticated: true,
@@ -67,7 +67,7 @@ describe("CheckoutSuccessView interactions", () => {
 			await vi.advanceTimersByTimeAsync(700);
 		});
 
-		expect(replaceMock).toHaveBeenCalledWith("/start");
+		expect(replaceMock).toHaveBeenCalledWith("/blueprint");
 	});
 
 	it("rotates the validated status copy while access is still pending", async () => {

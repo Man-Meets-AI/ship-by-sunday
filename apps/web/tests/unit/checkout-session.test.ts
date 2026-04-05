@@ -202,6 +202,85 @@ describe("getCheckoutSessionState", () => {
 		});
 	});
 
+	it("returns payment_pending when the guest checkout claim reports a pending payment", async () => {
+		retrieveSessionMock.mockResolvedValue(
+			createCheckoutSession({
+				metadata: {
+					courseSlug: "ship-by-sunday",
+				},
+				client_reference_id: null,
+			}),
+		);
+		authMock.mockResolvedValue({ userId: "user_other" });
+		claimCheckoutSessionForViewerMock.mockResolvedValue({
+			kind: "payment_pending",
+			sessionId: "cs_guest_pending",
+			paymentStatus: "unpaid",
+		});
+
+		const { getCheckoutSessionState } =
+			await import("@/features/checkout/server/checkout-session");
+
+		await expect(getCheckoutSessionState("cs_guest_pending")).resolves.toEqual({
+			kind: "payment_pending",
+			sessionId: "cs_guest_pending",
+			paymentStatus: "unpaid",
+		});
+	});
+
+	it("returns sign_in_required when the guest checkout claim says another sign-in is needed", async () => {
+		retrieveSessionMock.mockResolvedValue(
+			createCheckoutSession({
+				metadata: {
+					courseSlug: "ship-by-sunday",
+				},
+				client_reference_id: null,
+			}),
+		);
+		authMock.mockResolvedValue({ userId: "user_other" });
+		claimCheckoutSessionForViewerMock.mockResolvedValue({
+			kind: "sign_in_required",
+			sessionId: "cs_guest_reauth",
+		});
+
+		const { getCheckoutSessionState } =
+			await import("@/features/checkout/server/checkout-session");
+
+		await expect(getCheckoutSessionState("cs_guest_reauth")).resolves.toEqual({
+			kind: "sign_in_required",
+			sessionId: "cs_guest_reauth",
+		});
+	});
+
+	it.each(["invalid_session", "missing_checkout_email"] as const)(
+		"returns invalid_session when the guest checkout claim reports %s",
+		async (claimKind) => {
+			retrieveSessionMock.mockResolvedValue(
+				createCheckoutSession({
+					metadata: {
+						courseSlug: "ship-by-sunday",
+					},
+					client_reference_id: null,
+				}),
+			);
+			authMock.mockResolvedValue({ userId: "user_other" });
+			claimCheckoutSessionForViewerMock.mockResolvedValue({
+				kind: claimKind,
+				sessionId: `cs_${claimKind}`,
+			});
+
+			const { getCheckoutSessionState } =
+				await import("@/features/checkout/server/checkout-session");
+
+			await expect(getCheckoutSessionState(`cs_${claimKind}`)).resolves.toEqual(
+				{
+					kind: "invalid_session",
+					sessionId: `cs_${claimKind}`,
+				},
+			);
+		},
+	);
+
 	it("returns wrong_account when the signed-in user does not own the checkout", async () => {
 		retrieveSessionMock.mockResolvedValue(createCheckoutSession());
 		authMock.mockResolvedValue({ userId: "user_other" });

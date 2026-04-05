@@ -87,12 +87,16 @@ export default defineSchema({
 		schemaVersion: v.number(),
 		facts: v.record(v.string(), projectDefinitionFactValueValidator),
 		placeholdersInUse: v.array(
-			v.union(v.literal("domain"), v.literal("support_email")),
+			v.union(
+				v.literal("domain"),
+				v.literal("contact_email"),
+				v.literal("support_email"),
+			),
 		),
 		createdAt: v.number(),
 		updatedAt: v.number(),
 	}).index("by_clerk_user_id_and_product_key", ["clerkUserId", "productKey"]),
-	packetWorkflowStates: defineTable({
+	blueprintWorkflowStates: defineTable({
 		clerkUserId: v.string(),
 		productKey: v.string(),
 		executeShipUnlockedAt: v.optional(v.number()),

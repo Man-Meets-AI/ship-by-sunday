@@ -1,17 +1,17 @@
 # ExecPlan Writer
 
-Use this when feature work is already scoped enough to formalize and you want the most OpenAI-aligned planning workflow in this repo: `docs/codex/PLANS.md` as the contract, plus one self-contained ExecPlan file under `docs/codex/` that a fresh coding agent can run without chat history.
+Use this when feature work is already scoped enough to formalize and you want the most OpenAI-aligned planning workflow in this repo: `.plans/PLANS.md` as the contract, plus one self-contained ExecPlan file under `.plans/` that a fresh coding agent can run without chat history.
 
 ## Recommended repo pattern
 
 The OpenAI cookbook pattern is:
 
-1. Keep reusable planning rules in `docs/codex/PLANS.md`.
+1. Keep reusable planning rules in `.plans/PLANS.md`.
 2. Tell the agent in `AGENTS.md` when to use an ExecPlan.
 3. For each substantial initiative, author one self-contained ExecPlan markdown file.
 4. During implementation, keep that ExecPlan updated as a living document.
 
-In this repository, the per-initiative ExecPlan files live in `docs/codex/`.
+In this repository, the per-initiative ExecPlan files live in `.plans/`.
 
 ## Preferred usage
 
@@ -20,11 +20,11 @@ Use this in plan mode. Once `AGENTS.md` and `PLANS.md` are in place, prefer a sh
 ```text
 /plan Write an ExecPlan for the approved work below.
 
-Read `AGENTS.md` and `docs/codex/PLANS.md` first. Inspect the real code paths before planning. If critical ambiguity remains after repo inspection, ask only the minimum must-have questions needed to unblock the plan.
+Read `AGENTS.md` and `.plans/PLANS.md` first. Inspect the real code paths before planning. If critical ambiguity remains after repo inspection, ask only the minimum must-have questions needed to unblock the plan.
 
 Write the plan to:
 <target_execplan_path>
-docs/codex/example-initiative.md
+.plans/example-initiative.md
 </target_execplan_path>
 
 Use this planning source:
@@ -43,7 +43,7 @@ Add rollout, migration, timeline, compatibility, safety, or stakeholder constrai
 ```text
 Read the repo root `AGENTS.md` first and follow it.
 
-Read `docs/codex/PLANS.md` next and follow it to the letter while authoring the plan.
+Read `.plans/PLANS.md` next and follow it to the letter while authoring the plan.
 
 You are in planning mode. Do not implement product code. Your job is to author or update a single OpenAI-style ExecPlan: a self-contained, living Markdown execution plan that a complete newcomer to this repository can use to implement the work end to end without prior chat context.
 
@@ -76,7 +76,7 @@ Paste any rollout, migration, timeline, safety, performance, compatibility, or s
 
 Write the ExecPlan to this file:
 <target_execplan_path>
-Set the repository-relative path for the plan file under `docs/codex/`, for example `docs/codex/checkout-recovery.md`.
+Set the repository-relative path for the plan file under `.plans/`, for example `.plans/checkout-recovery.md`.
 </target_execplan_path>
 
 ExecPlan requirements:
@@ -110,7 +110,7 @@ ExecPlan structure:
 - YAML front matter with `summary`, `read_when`, and `plan_status`
 - `# <Short action-oriented title>`
 - One short paragraph stating that this is a living execution plan.
-- One sentence referencing `docs/codex/PLANS.md` and stating that the ExecPlan must be maintained in accordance with it.
+- One sentence referencing `.plans/PLANS.md` and stating that the ExecPlan must be maintained in accordance with it.
 - `## Purpose / Big Picture`
 - `## Progress`
 - `## Surprises & Discoveries`
