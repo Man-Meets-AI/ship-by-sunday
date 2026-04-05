@@ -10,8 +10,8 @@ test("landing page renders the main offer CTA", async ({ request }) => {
 	expect(html).toContain(
 		"More than a starter. A system you can keep shipping from.",
 	);
-	expect(html).toContain("Ship by Sunday. Keep shipping on Monday.");
-	expect(html).toContain("Get the system");
+	expect(html).toContain("One source of truth. No drift.");
+	expect(html).toContain("Get Ship by Sunday");
 	expect(html).toContain('id="system"');
 	expect(html).toContain('id="pricing"');
 	expect(html).toContain("Sign in");

@@ -158,9 +158,7 @@ describe("blueprint field optimization", () => {
 		await user.click(screen.getByRole("button", { name: "Optimize" }));
 		await screen.findByRole("dialog");
 
-		await user.click(
-			screen.getByRole("button", { name: "Connect Codex account" }),
-		);
+		await user.click(screen.getByRole("button", { name: "Connect account" }));
 
 		await waitFor(() =>
 			expect(openMock).toHaveBeenCalledWith(

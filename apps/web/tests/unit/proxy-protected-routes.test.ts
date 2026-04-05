@@ -36,13 +36,11 @@ describe("proxy protected routes", () => {
 
 		expect(createRouteMatcherMock).toHaveBeenCalledWith(
 			expect.arrayContaining([
-				"/start(.*)",
-				"/product(.*)",
-				"/design(.*)",
-				"/marketing(.*)",
-				"/build-plan(.*)",
+				"/blueprint(.*)",
 				"/review(.*)",
+				"/execute(.*)",
 				"/mission(.*)",
+				"/lesson(.*)",
 				"/artifacts(.*)",
 				"/settings(.*)",
 			]),
