@@ -6,7 +6,7 @@ import { api } from "@/convex/_generated/api";
 export const runtime = "nodejs";
 
 async function importPacketCompilerServer() {
-	return import("@manmeetsai/packet-compiler/server");
+	return import("@packet-compiler/server");
 }
 
 export async function GET() {

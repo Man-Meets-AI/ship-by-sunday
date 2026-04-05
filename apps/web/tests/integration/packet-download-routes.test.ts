@@ -12,7 +12,7 @@ vi.mock("convex/nextjs", () => ({
 	fetchMutation: fetchMutationMock,
 }));
 
-vi.mock("@manmeetsai/packet-compiler/server", () => ({
+vi.mock("@packet-compiler/server", () => ({
 	buildReviewDownloadZip: buildReviewDownloadZipMock,
 }));
 
