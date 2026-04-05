@@ -47,6 +47,7 @@ export const routeConfig = {
 export const homePageSectionOrder = [
 	"hero",
 	"sprintPath",
+	"mechanism",
 	"whatsInside",
 	"starterSystem",
 	"durability",
@@ -77,9 +78,10 @@ export const starterHomePageConfig = {
 	sections: {
 		hero: true,
 		sprintPath: true,
+		mechanism: false,
 		whatsInside: true,
 		starterSystem: true,
-		durability: true,
+		durability: false,
 		socialProof: true,
 		faq: true,
 		pricing: true,

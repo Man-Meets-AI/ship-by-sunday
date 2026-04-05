@@ -18,7 +18,7 @@ export function HomeHeroTopBar({ hero }: { hero: Hero }) {
 				href={routeConfig.home}
 				labelClassName={cn(productWordmarkClassName, "text-lg")}
 			/>
-			<div className="flex items-center gap-2">
+			<div className="flex items-center gap-4">
 				<Link
 					href={routeConfig.signIn}
 					className="inline-flex h-10 items-center rounded-full px-4 text-sm font-medium text-muted-foreground transition-all hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
@@ -27,7 +27,7 @@ export function HomeHeroTopBar({ hero }: { hero: Hero }) {
 				</Link>
 				<Button
 					asChild
-					className="ml-2 h-10 rounded-full bg-foreground px-6 text-sm font-semibold text-background transition-transform hover:scale-105 active:scale-95"
+					className="h-10 rounded-full bg-foreground px-6 text-sm font-semibold text-background transition-transform hover:scale-105 active:scale-95"
 				>
 					<Link href={routeConfig.pricingHash}>{hero.primaryCta}</Link>
 				</Button>
