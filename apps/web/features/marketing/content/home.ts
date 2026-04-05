@@ -41,29 +41,30 @@ export const homePageContent = {
 		imageAlt:
 			"Diagram showing a product definition turning into Design, Marketing, Build, and Prompt Packs plus a final Starter Snapshot",
 	},
+	mechanismSection: {
+		steps: [
+			"Lock the Product Truth",
+			"Generate the Agent-Ready Packs",
+			"Build from the Ship Kit",
+		],
+		tagline: "One source of truth. No drift.",
+	},
 	socialProofSection: {
 		label: "Built by someone who ships",
-		intro:
-			"This is not theory from the sidelines. It is a system shaped by years of shipping products, tools, and MVPs in public.",
-		imageAlt: "Founder proof visual",
-		imageCaption:
-			"Built by someone who has moved from design to engineering to product and knows what it takes to turn rough ideas into shippable products.",
-		github: {
-			username: "ParkerRex",
-			profileUrl: "https://github.com/ParkerRex",
-			activityCaption:
-				"commits this year. This system is built by someone who ships every day.",
-		},
-		stats: [
+		headline: "Built by someone who has actually shipped products.",
+		body: "Worked across UX, product, design, and engineering. Helped scale a startup to $73M/year. Stayed through acquisition. Ship by Sunday is new. The operating experience behind it is not.",
+		screenshots: [
 			{
-				value: "$73M",
-				label: "GMV scaled",
-				description: "Delivery Dudes to a $23M acquisition",
+				src: "/screenshots/product-truth.png",
+				alt: "Product Truth screenshot showing locked buyer, problem, scope, and constraints",
 			},
 			{
-				value: "100K",
-				label: "Users in week one",
-				description: "GPTs for Devs launch",
+				src: "/screenshots/agent-ready-packs.png",
+				alt: "Agent-Ready Packs screenshot showing design, marketing, build, and prompt packs",
+			},
+			{
+				src: "/screenshots/blueprint.png",
+				alt: "Ship Kit screenshot showing the source of truth the repo builds from",
 			},
 		],
 	},
@@ -170,22 +171,22 @@ export const homePageContent = {
 				description:
 					"Guidance for Clerk, Convex, Stripe, Next.js, React, and Vercel helps agents make changes inside real constraints instead of blind file surgery.",
 			},
-		],
-		supportSection: {
-			title: "The support around the system",
-			intro:
-				"The starter is the core. You also get the guidance that helps you use it well under real weekend pressure.",
-			items: [
-				"Fast Pass Walkthroughs",
-				"Guided Ship Path",
-				"Product Sense Fundamentals",
-			],
-			bonus: {
-				title: bonusName,
+			{
+				title: "Reuse the product truth",
 				description:
-					"If product judgment is still the weak point, the included bonus strengthens the decisions behind the build without bloating the core offer.",
+					"The same product definition feeds the next feature without starting from a blank chat.",
 			},
-		},
+			{
+				title: "Extend without starting over",
+				description:
+					"The repo stays aligned to the same contract, so changes build on product truth instead of scattered edits.",
+			},
+			{
+				title: "Keep one source of truth",
+				description:
+					"When better models arrive next month, you move faster. You do not restart the project from zero.",
+			},
+		],
 	},
 	durabilitySection: {
 		label: "Durability",
@@ -228,6 +229,7 @@ export const homePageContent = {
 			"Agent-First Starter Repo",
 			"Fast Pass Walkthroughs",
 			"Guided Ship Path",
+			"Product Sense Fundamentals",
 		],
 		bonus: {
 			label: "Also included",
