@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-04-04
+
+### Changed
+
+- Simplified the public homepage so the system story is tighter: the mechanism now lives inside the sprint-path section, the starter-system section is leaner, the old GitHub contribution panel is gone, and the visible copy stays focused on one blueprint-first source of truth.
+- Tightened the protected review handoff by replacing the old text fallback link with a clearer `Redownload Blueprint` secondary action beside the main continuation CTA, while keeping the automatic download handoff and local QA coverage aligned with the shipped flow.
+
 ## 2026-04-03
 
 ### Changed
