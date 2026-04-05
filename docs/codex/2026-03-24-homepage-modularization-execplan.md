@@ -160,9 +160,9 @@ Success for this milestone means the default page still has `id="system"` and `i
 
 ## Concrete Steps
 
-Begin in `/Users/parkerrex/Projects/manmeetsai-workspace` by re-reading the exact homepage files, tests, and config surfaces before editing.
+Begin in `/Users/parkerrex/Projects/ship-by-sunday` by re-reading the exact homepage files, tests, and config surfaces before editing.
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     sed -n '1,260p' config/product.ts
     sed -n '1,260p' features/marketing/content/home.ts
     sed -n '1,220p' features/marketing/components/home-page.tsx
@@ -189,7 +189,7 @@ When the render path is stable, update `features/marketing/lib/home-page-structu
 
 Validation starts with scoped static checks on touched files:
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     bunx oxlint --deny-warnings <touched homepage/config/docs files and touched tests>
     bunx oxfmt --check <touched homepage/config/docs files and touched tests>
 

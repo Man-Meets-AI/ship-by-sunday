@@ -1,4 +1,8 @@
 import { routeConfig } from "@/config/product";
+import {
+	REVIEW_DOWNLOAD_HREF,
+	REVIEW_REDOWNLOAD_LINK_LABEL,
+} from "@/features/blueprint-flow/lib/review-download-handoff";
 
 export type ExecuteShipTrackId =
 	| "build-now"
@@ -26,17 +30,20 @@ export const executeShipTracks: ExecuteShipTrack[] = [
 		label: "Build Now",
 		status: "now",
 		summary:
-			"Turn the Build docs inside the Starter Snapshot into the first implementation pass.",
+			"Turn the Build docs inside the Ship by Sunday Blueprint into the first implementation pass.",
 		objective:
-			"Start with the smallest shippable slice from your build packet.",
+			"Start with the smallest shippable slice from your build blueprint.",
 		steps: [
-			"Open the Starter Snapshot and pull the first slice from the Build Pack.",
-			"Implement the slice without widening scope beyond the packet contract.",
+			"Open the Ship by Sunday Blueprint and pull the first slice from the Build Pack.",
+			"Implement the slice without widening scope beyond the blueprint contract.",
 			"Run the narrowest checks first, then widen validation only after the slice is green.",
 		],
 		links: [
-			{ label: "Review Build Plan", href: routeConfig.buildPlan },
-			{ label: "Download Starter Snapshot", href: "/api/download/repo" },
+			{ label: "Review Pricing", href: "/blueprint#pricing" },
+			{
+				label: REVIEW_REDOWNLOAD_LINK_LABEL,
+				href: REVIEW_DOWNLOAD_HREF,
+			},
 		],
 	},
 	{
@@ -44,16 +51,16 @@ export const executeShipTracks: ExecuteShipTrack[] = [
 		label: "Refine Design",
 		status: "ready",
 		summary:
-			"Use the Design docs inside the Starter Snapshot to tighten the product surface before coding deeper.",
+			"Use the Design docs inside the Ship by Sunday Blueprint to tighten the product surface before coding deeper.",
 		objective:
-			"Convert the design packet into one clearer interface decision at a time.",
+			"Convert the design blueprint into one clearer interface decision at a time.",
 		steps: [
 			"Re-read the visual thesis, content plan, and interaction thesis before editing UI.",
 			"Choose one surface that needs polish instead of reopening the whole design pass.",
 			"Capture proof with screenshots or focused UI tests before moving on.",
 		],
 		links: [
-			{ label: "Open Design Stage", href: routeConfig.design },
+			{ label: "Open Blueprint Design", href: "/blueprint#design" },
 			{ label: "Open Review", href: routeConfig.review },
 		],
 	},
@@ -62,16 +69,16 @@ export const executeShipTracks: ExecuteShipTrack[] = [
 		label: "Refine Marketing",
 		status: "ready",
 		summary:
-			"Use the Marketing docs inside the Starter Snapshot to sharpen the offer, proof, and launch copy.",
+			"Use the Marketing docs inside the Ship by Sunday Blueprint to sharpen the offer, proof, and launch copy.",
 		objective:
 			"Ship one stronger conversion or messaging pass instead of rewriting everything.",
 		steps: [
 			"Start with the highest-value surface: homepage, launch page, or lifecycle email.",
 			"Keep the approved claims and do-not-say rules visible while editing copy.",
-			"Check that the visible promise still matches the packet and the real product state.",
+			"Check that the visible promise still matches the blueprint and the real product state.",
 		],
 		links: [
-			{ label: "Open Marketing Stage", href: routeConfig.marketing },
+			{ label: "Open Generated Preview", href: "/blueprint#generated-preview" },
 			{ label: "Open Review", href: routeConfig.review },
 		],
 	},
@@ -80,7 +87,7 @@ export const executeShipTracks: ExecuteShipTrack[] = [
 		label: "QA & Debug",
 		status: "ready",
 		summary:
-			"Use the packet and repo snapshot to run the next verification loop.",
+			"Use the blueprint and repo snapshot to run the next verification loop.",
 		objective: "Find the highest-risk regression before it reaches launch day.",
 		steps: [
 			"Walk the demo flow from the Build Pack before inventing extra scenarios.",
@@ -89,7 +96,10 @@ export const executeShipTracks: ExecuteShipTrack[] = [
 		],
 		links: [
 			{ label: "Review Stage", href: routeConfig.review },
-			{ label: "Download Starter Snapshot", href: "/api/download/repo" },
+			{
+				label: REVIEW_REDOWNLOAD_LINK_LABEL,
+				href: REVIEW_DOWNLOAD_HREF,
+			},
 		],
 	},
 	{
@@ -97,16 +107,16 @@ export const executeShipTracks: ExecuteShipTrack[] = [
 		label: "Launch & Ship",
 		status: "ready",
 		summary:
-			"Package the build, the validation proof, and the release story into a ship pass.",
+			"Bundle the build, the validation proof, and the release story into a ship pass.",
 		objective:
 			"Move from working build to a release candidate with a clean handoff.",
 		steps: [
 			"Confirm the domain, support, and pricing details still match the build and marketing surfaces.",
-			"Run the final validation pass from the packet instead of inventing a new checklist.",
+			"Run the final validation pass from the blueprint instead of inventing a new checklist.",
 			"Write the release handoff in plain language so the next operator knows what changed and what still needs watching.",
 		],
 		links: [
-			{ label: "Open Build Plan", href: routeConfig.buildPlan },
+			{ label: "Open Blueprint Setup", href: "/blueprint#setup" },
 			{ label: "Open Review", href: routeConfig.review },
 		],
 	},

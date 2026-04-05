@@ -1,0 +1,26 @@
+{
+	"name": "@shipbysunday/blueprint-presentation",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"lint": "oxlint -c ../../.oxlintrc.json --deny-warnings src tests vitest.config.ts",
+		"format": "oxfmt -c ../../.oxfmtrc.json --ignore-path ../../.gitignore .",
+		"format:check": "oxfmt -c ../../.oxfmtrc.json --ignore-path ../../.gitignore --check .",
+		"typecheck": "tsc --noEmit -p tsconfig.json",
+		"test": "vitest run --config vitest.config.ts"
+	},
+	"dependencies": {
+		"@shipbysunday/blueprint-compiler": "workspace:*"
+	},
+	"devDependencies": {
+		"@types/node": "25.5.0",
+		"oxfmt": "^0.41.0",
+		"oxlint": "^1.56.0",
+		"typescript": "5.9.3",
+		"vitest": "^4.1.0"
+	}
+}

@@ -12,8 +12,10 @@ describe("sign-in route utils", () => {
 	});
 
 	it("falls back for invalid redirect paths", () => {
-		expect(getSafeRedirectPath("https://example.com/settings")).toBe("/start");
-		expect(getSafeRedirectPath("//example.com/settings")).toBe("/start");
+		expect(getSafeRedirectPath("https://example.com/settings")).toBe(
+			"/blueprint",
+		);
+		expect(getSafeRedirectPath("//example.com/settings")).toBe("/blueprint");
 	});
 
 	it("builds task routes that preserve the redirect target", () => {
@@ -29,7 +31,7 @@ describe("sign-in route utils", () => {
 	it("uses the sanitized redirect target for task completion", () => {
 		expect(getTaskRedirectUrlComplete("/settings")).toBe("/settings");
 		expect(getTaskRedirectUrlComplete("https://example.com/settings")).toBe(
-			"/start",
+			"/blueprint",
 		);
 	});
 });

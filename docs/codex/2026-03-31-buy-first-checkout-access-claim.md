@@ -150,8 +150,8 @@ These scenario IDs are affected by this plan and must have their proof refreshed
 - `ACCESS-02`: checkout success recovery remains truthful when the buyer is signed out or the session is not yet claimable.
 - `AUTH-01`: post-payment sign-in or sign-up preserves the intended destination and same-email claim path.
 - `ACCESS-01`: the protected access gate can recover a lost paid session without opening a new escalation path.
-- `PACKET-01`: a claimed buyer lands in `/start` with access.
-- `PACKET-07`: the end-to-end packet journey still begins cleanly after access is granted.
+- `BLUEPRINT-01`: a claimed buyer lands in `/start` with access.
+- `BLUEPRINT-07`: the end-to-end blueprint journey still begins cleanly after access is granted.
 
 Before a milestone can close, update the matching rows in `qa/journeys.csv` and `qa/coverage.csv` if the proof meaning or journey wording changed, then record the run report path in `Artifacts and Notes`.
 
@@ -161,8 +161,8 @@ Milestone 1 creates the pending-purchase foundation and the webhook split.
 
 - Affected QA scenarios: `FREEPAID-02`, `ACCESS-02`
 - Commands to run:
-  - `cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web && bunx vitest run --project unit tests/unit/stripe-webhook-action.test.ts tests/unit/pending-checkout-claims.test.ts`
-  - `cd /Users/parkerrex/Projects/manmeetsai-workspace && bun run qa:validate`
+  - `cd /Users/parkerrex/Projects/ship-by-sunday/apps/web && bunx vitest run --project unit tests/unit/stripe-webhook-action.test.ts tests/unit/pending-checkout-claims.test.ts`
+  - `cd /Users/parkerrex/Projects/ship-by-sunday && bun run qa:validate`
 - Evidence snippets to capture:
   - `Webhook result: pending_claim_saved session_id=cs_test_... email=buyer@example.com payment_status=paid`
   - `qa/journeys.csv snippet: FREEPAID-02 expected_outcome now names the pending-claim handoff truthfully`
@@ -173,36 +173,36 @@ At the end of this milestone, Stripe webhook deliveries for guest checkout no lo
 
 Milestone 2 adds the claim action and rewires `/checkout/success` plus the post-payment identity shell to use it.
 
-- Affected QA scenarios: `FREEPAID-02`, `AUTH-01`, `ACCESS-02`, `PACKET-01`
+- Affected QA scenarios: `FREEPAID-02`, `AUTH-01`, `ACCESS-02`, `BLUEPRINT-01`
 - Commands to run:
-  - `cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web && bunx vitest run --project integration tests/integration/stripe-checkout-route.test.ts`
-  - `cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web && bunx vitest run --project unit tests/unit/checkout-session.test.ts tests/unit/course-entitlements.test.ts`
-  - `cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web && bunx vitest run --project integration-ui tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/sign-in-page.test.tsx`
-  - `cd /Users/parkerrex/Projects/manmeetsai-workspace && bun run qa:validate`
+  - `cd /Users/parkerrex/Projects/ship-by-sunday/apps/web && bunx vitest run --project integration tests/integration/stripe-checkout-route.test.ts`
+  - `cd /Users/parkerrex/Projects/ship-by-sunday/apps/web && bunx vitest run --project unit tests/unit/checkout-session.test.ts tests/unit/course-entitlements.test.ts`
+  - `cd /Users/parkerrex/Projects/ship-by-sunday/apps/web && bunx vitest run --project integration-ui tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/sign-in-page.test.tsx`
+  - `cd /Users/parkerrex/Projects/ship-by-sunday && bun run qa:validate`
 - Evidence snippets to capture:
   - `Checkout success state: validated session_id=cs_test_... matched_email=buyer@example.com access_granted=true`
   - `Checkout success state: wrong_account session_id=cs_test_... checkout_email=buyer@example.com signed_in_email=other@example.com`
   - `Post-payment sign-up: email locked to buyer@example.com and claim succeeds after account creation`
-  - `qa/journeys.csv snippet: AUTH-01 and PACKET-01 now describe the post-payment claim path and validated funnel handoff`
+  - `qa/journeys.csv snippet: AUTH-01 and BLUEPRINT-01 now describe the post-payment claim path and validated funnel handoff`
   - `qa/coverage.csv snippet: AUTH-01 proof source now points to checkout-session and sign-in-page tests for the claim path`
-  - `Run report: Environment=dev-local; Scenario IDs=FREEPAID-02, AUTH-01, ACCESS-02, PACKET-01; Commands=...`
+  - `Run report: Environment=dev-local; Scenario IDs=FREEPAID-02, AUTH-01, ACCESS-02, BLUEPRINT-01; Commands=...`
 
 At the end of this milestone, a signed-out buyer can complete Stripe checkout, return to `/checkout/success`, sign in or create the account with the locked checkout email, and have access granted without manual support. Success looks like the success-page state machine reaching `validated` after an email-matched claim.
 
 Milestone 3 aligns the homepage CTA path, the protected access gate fallback claim, tests, and docs with the new contract.
 
-- Affected QA scenarios: `FREEPAID-01`, `ACCESS-01`, `FREEPAID-02`, `PACKET-07`
+- Affected QA scenarios: `FREEPAID-01`, `ACCESS-01`, `FREEPAID-02`, `BLUEPRINT-07`
 - Commands to run:
-  - `cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web && bunx vitest run --project integration-ui tests/integration-ui/checkout-button.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx tests/integration-ui/access-required-page.test.tsx`
-  - `cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web && bun run typecheck`
-  - `cd /Users/parkerrex/Projects/manmeetsai-workspace && bun run qa:run-pack -- --pack=default_ship --dry-run`
-  - `cd /Users/parkerrex/Projects/manmeetsai-workspace && bun run qa:run-pack -- --pack=billing_integration --dry-run`
+  - `cd /Users/parkerrex/Projects/ship-by-sunday/apps/web && bunx vitest run --project integration-ui tests/integration-ui/checkout-button.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx tests/integration-ui/access-required-page.test.tsx`
+  - `cd /Users/parkerrex/Projects/ship-by-sunday/apps/web && bun run typecheck`
+  - `cd /Users/parkerrex/Projects/ship-by-sunday && bun run qa:run-pack -- --pack=default_ship --dry-run`
+  - `cd /Users/parkerrex/Projects/ship-by-sunday && bun run qa:run-pack -- --pack=billing_integration --dry-run`
 - Evidence snippets to capture:
   - `Homepage CTA: signed-out click now starts checkout instead of redirecting to sign-in`
   - `Access gate fallback: cookie-carried checkout session matched on verified primary email and restored access at /start`
   - `qa/journeys.csv snippet: FREEPAID-01 and ACCESS-01 now describe the buy-first CTA and guarded fallback claim`
   - `qa/coverage.csv snippet: FREEPAID-01 and ACCESS-01 proof source now points to the CTA and access-gate browser evidence`
-  - `Run report: Environment=dev-local or prod-www.man-meets-ai.com; Scenario IDs=FREEPAID-01, ACCESS-01, FREEPAID-02, PACKET-07; Commands=...`
+  - `Run report: Environment=dev-local or prod-www.man-meets-ai.com; Scenario IDs=FREEPAID-01, ACCESS-01, FREEPAID-02, BLUEPRINT-07; Commands=...`
 
 At the end of this milestone, the homepage CTA starts buy-first checkout, `/start` can recover a lost success-tab state through the guarded fallback claim, the tests assert the new buyer path, and the docs no longer describe a sign-in-first purchase flow. Success looks like a coherent contract across code, tests, docs, and QA proof.
 
@@ -212,7 +212,7 @@ Work from the repository root unless a step says otherwise.
 
 1. Inspect the current affected files again before editing:
 
-   cd /Users/parkerrex/Projects/manmeetsai-workspace
+   cd /Users/parkerrex/Projects/ship-by-sunday
    sed -n '1,220p' apps/web/app/api/stripe/checkout/route.ts
    sed -n '1,260p' apps/web/convex/stripeWebhook.ts
    sed -n '1,260p' apps/web/features/checkout/server/checkout-session.ts
@@ -237,19 +237,19 @@ Work from the repository root unless a step says otherwise.
 Run the milestone commands in order, starting with the narrowest proof and widening only when the previous slice passes:
 
 1. Milestone 1:
-   - `cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web && bunx vitest run --project unit tests/unit/stripe-webhook-action.test.ts tests/unit/pending-checkout-claims.test.ts`
-   - `cd /Users/parkerrex/Projects/manmeetsai-workspace && bun run qa:validate`
+   - `cd /Users/parkerrex/Projects/ship-by-sunday/apps/web && bunx vitest run --project unit tests/unit/stripe-webhook-action.test.ts tests/unit/pending-checkout-claims.test.ts`
+   - `cd /Users/parkerrex/Projects/ship-by-sunday && bun run qa:validate`
 2. Milestone 2:
-   - `cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web && bunx vitest run --project integration tests/integration/stripe-checkout-route.test.ts`
-   - `cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web && bunx vitest run --project unit tests/unit/checkout-session.test.ts tests/unit/course-entitlements.test.ts`
-   - `cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web && bunx vitest run --project integration-ui tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/sign-in-page.test.tsx`
-   - `cd /Users/parkerrex/Projects/manmeetsai-workspace && bun run qa:validate`
+   - `cd /Users/parkerrex/Projects/ship-by-sunday/apps/web && bunx vitest run --project integration tests/integration/stripe-checkout-route.test.ts`
+   - `cd /Users/parkerrex/Projects/ship-by-sunday/apps/web && bunx vitest run --project unit tests/unit/checkout-session.test.ts tests/unit/course-entitlements.test.ts`
+   - `cd /Users/parkerrex/Projects/ship-by-sunday/apps/web && bunx vitest run --project integration-ui tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/sign-in-page.test.tsx`
+   - `cd /Users/parkerrex/Projects/ship-by-sunday && bun run qa:validate`
 3. Milestone 3:
-   - `cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web && bunx vitest run --project integration-ui tests/integration-ui/checkout-button.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx tests/integration-ui/access-required-page.test.tsx`
-   - `cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web && bun run typecheck`
-   - `cd /Users/parkerrex/Projects/manmeetsai-workspace && bun run qa:run-pack -- --pack=default_ship --dry-run`
-   - `cd /Users/parkerrex/Projects/manmeetsai-workspace && bun run qa:run-pack -- --pack=billing_integration --dry-run`
-   - `cd /Users/parkerrex/Projects/manmeetsai-workspace && QA_ALLOW_BILLING_INTEGRATION=1 PLAYWRIGHT_BASE_URL=<safe_base_url> QA_ENV_FILE=<safe_env_file> bun run qa:run-pack -- --pack=billing_integration`
+   - `cd /Users/parkerrex/Projects/ship-by-sunday/apps/web && bunx vitest run --project integration-ui tests/integration-ui/checkout-button.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx tests/integration-ui/access-required-page.test.tsx`
+   - `cd /Users/parkerrex/Projects/ship-by-sunday/apps/web && bun run typecheck`
+   - `cd /Users/parkerrex/Projects/ship-by-sunday && bun run qa:run-pack -- --pack=default_ship --dry-run`
+   - `cd /Users/parkerrex/Projects/ship-by-sunday && bun run qa:run-pack -- --pack=billing_integration --dry-run`
+   - `cd /Users/parkerrex/Projects/ship-by-sunday && QA_ALLOW_BILLING_INTEGRATION=1 PLAYWRIGHT_BASE_URL=<safe_base_url> QA_ENV_FILE=<safe_env_file> bun run qa:run-pack -- --pack=billing_integration`
    - If a safe billing environment is available, rerun the billing pack for real and include the resulting `qa/runs/YYYY-MM-DD-<slug>.md` report path in this plan.
 
 Acceptance requires all of the following observable behaviors:
@@ -327,8 +327,8 @@ Example run-report snippets the executor should preserve:
 
 - `Environment: dev-local`
 - `Scenario IDs: FREEPAID-02, ACCESS-02`
-- `Scenario IDs: FREEPAID-02, AUTH-01, ACCESS-02, PACKET-01`
-- `Scenario IDs: FREEPAID-01, ACCESS-01, FREEPAID-02, PACKET-07`
+- `Scenario IDs: FREEPAID-02, AUTH-01, ACCESS-02, BLUEPRINT-01`
+- `Scenario IDs: FREEPAID-01, ACCESS-01, FREEPAID-02, BLUEPRINT-07`
 - `Webhook result: pending_claim_saved session_id=cs_test_... email=buyer@example.com payment_status=paid`
 - `Checkout success state: validated session_id=cs_test_... matched_email=buyer@example.com access_granted=true`
 - `Checkout success state: wrong_account session_id=cs_test_... checkout_email=buyer@example.com signed_in_email=other@example.com`

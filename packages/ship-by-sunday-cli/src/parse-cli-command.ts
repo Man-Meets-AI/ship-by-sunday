@@ -1,14 +1,17 @@
-import type { PacketStageId } from "@manmeetsai/packet-compiler";
 import { createCliError } from "./cli-errors";
 import {
 	formatUnsupportedCompletionShellMessage,
 	isSupportedCompletionShellName,
 	type SupportedCompletionShellName,
 } from "./command-surface";
+import type {
+	EditableCliBlueprintStageId,
+	ReviewableCliBlueprintStageId,
+} from "./field-contract";
 
-export type EditablePacketStageId = Exclude<PacketStageId, "start" | "review">;
-export type ReviewablePacketStageId = Exclude<PacketStageId, "start">;
 export type CliFixtureName = "blank" | "complete";
+export type EditableBlueprintStageId = EditableCliBlueprintStageId;
+export type ReviewableBlueprintStageId = ReviewableCliBlueprintStageId;
 
 export type CliCommand =
 	| { kind: "help"; topic?: string }
@@ -16,7 +19,7 @@ export type CliCommand =
 	| { kind: "init"; fixture: CliFixtureName; force: boolean; json: boolean }
 	| { kind: "schema"; json: boolean }
 	| { kind: "stages"; json: boolean }
-	| { kind: "fields"; json: boolean; stageId?: EditablePacketStageId }
+	| { kind: "fields"; json: boolean; stageId?: EditableCliBlueprintStageId }
 	| { kind: "next"; json: boolean }
 	| { kind: "validate"; json: boolean }
 	| { kind: "set"; selector: string; value: string; json: boolean }
@@ -25,18 +28,18 @@ export type CliCommand =
 	| { kind: "remove"; selector: string; value: string; json: boolean }
 	| { kind: "mutate"; filePath: string; json: boolean }
 	| { kind: "resume" }
-	| { kind: "stage"; stageId: EditablePacketStageId }
+	| { kind: "stage"; stageId: EditableCliBlueprintStageId }
 	| {
 			kind: "review";
 			json: boolean;
 			missingOnly: boolean;
-			stageId?: ReviewablePacketStageId;
+			stageId?: ReviewableCliBlueprintStageId;
 	  }
 	| { kind: "export"; outPath: string; json: boolean }
 	| { kind: "import"; filePath: string; json: boolean }
 	| {
 			kind: "apply";
-			stageId: EditablePacketStageId;
+			stageId: EditableCliBlueprintStageId;
 			filePath: string;
 			json: boolean;
 	  }
@@ -53,26 +56,35 @@ export type CliCommand =
 			shellName: SupportedCompletionShellName;
 	  };
 
-const editableStageIds = [
-	"product",
-	"design",
-	"marketing",
-	"build-plan",
-] as const satisfies readonly EditablePacketStageId[];
-const reviewableStageIds = [
-	"product",
-	"design",
-	"marketing",
-	"build-plan",
+const editableStageIds: EditableCliBlueprintStageId[] = ["blueprint"] as const;
+const reviewableStageIds: ReviewableCliBlueprintStageId[] = [
+	"blueprint",
 	"review",
-] as const satisfies readonly ReviewablePacketStageId[];
+];
+const deprecatedStageAliasMap = {
+	product: "blueprint",
+	design: "blueprint",
+	marketing: "blueprint",
+	"build-plan": "blueprint",
+} as const;
 
-function isEditableStageId(value: string): value is EditablePacketStageId {
-	return editableStageIds.includes(value as EditablePacketStageId);
+function isEditableStageId(
+	value: string,
+): value is EditableCliBlueprintStageId {
+	return editableStageIds.includes(value as EditableCliBlueprintStageId);
 }
 
-function isReviewableStageId(value: string): value is ReviewablePacketStageId {
-	return reviewableStageIds.includes(value as ReviewablePacketStageId);
+function isReviewableStageId(
+	value: string,
+): value is ReviewableCliBlueprintStageId {
+	return reviewableStageIds.includes(value as ReviewableCliBlueprintStageId);
+}
+
+function normalizeStageId(value: string) {
+	return (
+		deprecatedStageAliasMap[value as keyof typeof deprecatedStageAliasMap] ??
+		value
+	);
 }
 
 function requireOptionValue(args: string[], index: number, optionName: string) {
@@ -151,7 +163,7 @@ export function parseCliCommand(argv: string[]): CliCommand {
 		const stageId =
 			stageIndex === -1
 				? undefined
-				: requireOptionValue(rest, stageIndex, "--stage");
+				: normalizeStageId(requireOptionValue(rest, stageIndex, "--stage"));
 		if (stageId && !isEditableStageId(stageId)) {
 			throw createCliError(
 				"invalid_stage",
@@ -162,7 +174,7 @@ export function parseCliCommand(argv: string[]): CliCommand {
 		return {
 			kind: "fields",
 			json: rest.includes("--json"),
-			stageId: stageId as EditablePacketStageId | undefined,
+			stageId: stageId as EditableCliBlueprintStageId | undefined,
 		};
 	}
 
@@ -258,12 +270,13 @@ export function parseCliCommand(argv: string[]): CliCommand {
 		return { kind: "resume" };
 	}
 
-	if (isEditableStageId(commandName)) {
-		return { kind: "stage", stageId: commandName };
+	const normalizedCommandStageId = normalizeStageId(commandName);
+	if (isEditableStageId(normalizedCommandStageId)) {
+		return { kind: "stage", stageId: normalizedCommandStageId };
 	}
 
 	if (commandName === "stage") {
-		const stageId = rest[0];
+		const stageId = normalizeStageId(rest[0] ?? "");
 		if (!stageId || !isEditableStageId(stageId)) {
 			throw createCliError(
 				"invalid_stage",
@@ -279,7 +292,7 @@ export function parseCliCommand(argv: string[]): CliCommand {
 		const stageId =
 			stageIndex === -1
 				? undefined
-				: requireOptionValue(rest, stageIndex, "--stage");
+				: normalizeStageId(requireOptionValue(rest, stageIndex, "--stage"));
 		if (stageId && !isReviewableStageId(stageId)) {
 			throw createCliError(
 				"invalid_stage",
@@ -291,7 +304,7 @@ export function parseCliCommand(argv: string[]): CliCommand {
 			kind: "review",
 			json: rest.includes("--json"),
 			missingOnly: rest.includes("--missing-only"),
-			stageId: stageId as ReviewablePacketStageId | undefined,
+			stageId: stageId as ReviewableCliBlueprintStageId | undefined,
 		};
 	}
 
@@ -344,7 +357,9 @@ export function parseCliCommand(argv: string[]): CliCommand {
 				2,
 			);
 		}
-		const stageId = requireOptionValue(rest, stageIndex, "--stage");
+		const stageId = normalizeStageId(
+			requireOptionValue(rest, stageIndex, "--stage"),
+		);
 		if (!isEditableStageId(stageId)) {
 			throw createCliError(
 				"invalid_stage",

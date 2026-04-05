@@ -40,7 +40,7 @@ export function NotFoundScreen() {
 						className="max-w-md mx-auto text-lg text-white/60 leading-relaxed"
 					>
 						The coordinates you requested do not exist in this workspace. The
-						packet may have been moved or the logic was never compiled.
+						blueprint may have been moved or the logic was never compiled.
 					</motion.p>
 
 					<motion.div
@@ -54,7 +54,7 @@ export function NotFoundScreen() {
 							size="lg"
 							className="h-14 px-8 text-lg rounded-full bg-white text-black hover:bg-white/90"
 						>
-							<Link href={routeConfig.start}>
+							<Link href={routeConfig.blueprint}>
 								{workspaceDisplayConfig.openHomeActionLabel}
 							</Link>
 						</Button>

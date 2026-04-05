@@ -17,13 +17,13 @@ The public docs at `/docs` currently work, but they do not look like Ship by Sun
 ## Progress
 
 - [x] 2026-03-27 11:32 EDT: Read `AGENTS.md`, `apps/web/AGENTS.md`, `docs/codex/PLANS.md`, and `docs/prompts/execplan-writer.md` before writing this plan.
-- [x] 2026-03-27 11:32 EDT: Read the required `apps/web` planning source docs in `docs/ship-by-sunday/packet-contract-and-question-map-2026-03-23.md`, `docs/ship-by-sunday/input-architecture-keep-kill-combine-2026-03-23.md`, `docs/ship-by-sunday/curriculum-reset-funnel-2026-03-23.md`, `docs/ship-by-sunday/repo-input-audit-2026-03-23.md`, and `docs/ship-by-sunday/openai-domain-contract-reconciliation-2026-03-23.md`.
+- [x] 2026-03-27 11:32 EDT: Read the required `apps/web` planning source docs in `docs/ship-by-sunday/blueprint-contract-and-question-map-2026-03-23.md`, `docs/ship-by-sunday/input-architecture-keep-kill-combine-2026-03-23.md`, `docs/ship-by-sunday/curriculum-reset-funnel-2026-03-23.md`, `docs/ship-by-sunday/repo-input-audit-2026-03-23.md`, and `docs/ship-by-sunday/openai-domain-contract-reconciliation-2026-03-23.md`.
 - [x] 2026-03-27 11:32 EDT: Inspected the current docs route and shell in `apps/web/app/docs/layout.tsx`, `apps/web/app/docs/[[...mdxPath]]/page.tsx`, `apps/web/features/docs/styles/docs-theme.css`, `apps/web/features/docs/components/docs-navbar.tsx`, `apps/web/features/docs/components/docs-footer.tsx`, `apps/web/features/docs/components/docs-theme-toggle.tsx`, `apps/web/features/docs/lib/docs-metadata.ts`, and `apps/web/content/docs/index.mdx`.
 - [x] 2026-03-27 11:32 EDT: Inspected the editorial reference surfaces in `apps/web/app/blog/[[...slug]]/page.tsx`, `apps/web/features/blog/components/blog-index-page.tsx`, `apps/web/features/blog/components/blog-post-shell.tsx`, `apps/web/features/blog/components/blog-rich-text.tsx`, and the global typography tokens in `apps/web/app/globals.css` plus `.impeccable.md`.
 - [x] 2026-03-27 11:32 EDT: Confirmed the approved scope from chat: keep Nextra, avoid a full custom docs app, and focus on local docs theming and chrome so the route stops feeling beige and detached from the rest of the brand.
 - [x] 2026-03-27 12:04 EDT: Grilled the plan against the repo and resolved the highest-impact design branches. `/docs` stays on the standard Nextra page structure, the chrome keeps its existing destinations but drops the visible badge treatment, the docs route aligns to `defaultTheme: "system"`, `h1` and `h2` get the strongest editorial typography while `h3` and below remain conventional, the docs identity becomes `Ship by Sunday Docs`, and the supporting docs description stays functional and direct while dropping the starter-template framing.
 - [x] 2026-03-27 12:04 EDT: Confirmed from repo inspection that the current docs corpus includes Markdown tables and blockquotes, so the styling and acceptance scope must explicitly cover them in addition to prose, code blocks, sidebar, and TOC.
-- [x] 2026-03-27 12:04 EDT: Re-ran `cd apps/web && bun run build` during the grill pass. The build succeeded. The only warnings were the existing Nextra shallow-clone last-modified warning and the existing Turbopack NFT trace warnings for packet download routes.
+- [x] 2026-03-27 12:04 EDT: Re-ran `cd apps/web && bun run build` during the grill pass. The build succeeded. The only warnings were the existing Nextra shallow-clone last-modified warning and the existing Turbopack NFT trace warnings for blueprint download routes.
 - [x] 2026-03-27 11:58 EDT: Reset the docs shell styling in `apps/web/features/docs/styles/docs-theme.css` and `apps/web/app/docs/layout.tsx` so the page background, panels, borders, and shadows now use a neutral product shell instead of the old warm-paper defaults.
 - [x] 2026-03-27 11:58 EDT: Validated the shell reset with `bunx oxlint --deny-warnings` and `bunx oxfmt --check` on the changed docs files, then verified in Playwright that a clean browser session respects `prefers-color-scheme: light` and writes `docs-theme=light` when the docs route loads with the system default.
 - [x] 2026-03-27 12:04 EDT: Aligned docs typography, spacing rhythm, code blocks, callouts, TOC, tables, blockquotes, and sidebar behavior to the same premium system without breaking technical readability or mobile usability.
@@ -180,7 +180,7 @@ Success looks like passing the narrow automated checks that already exist for do
 
 Start by refreshing the exact docs-shell files that define the current behavior:
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     sed -n '1,220p' apps/web/app/docs/layout.tsx
     sed -n '1,260p' apps/web/app/docs/[[...mdxPath]]/page.tsx
     sed -n '1,320p' apps/web/features/docs/styles/docs-theme.css
@@ -193,7 +193,7 @@ Start by refreshing the exact docs-shell files that define the current behavior:
 
 Refresh the in-repo design benchmark before making styling decisions:
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace
+    cd /Users/parkerrex/Projects/ship-by-sunday
     sed -n '1,220p' .impeccable.md
     sed -n '1,220p' apps/web/app/globals.css
     sed -n '1,240p' apps/web/features/blog/components/blog-index-page.tsx
@@ -204,24 +204,24 @@ The first implementation pass should stay in the docs CSS override file. Remove 
 
 After the shell reset and theme-default change land, run narrow formatting and lint checks on the touched docs files:
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web
+    cd /Users/parkerrex/Projects/ship-by-sunday/apps/web
     bunx oxlint --deny-warnings app/docs/layout.tsx config/product.ts features/starter/lib/starter-selectors.ts features/docs/components/docs-navbar.tsx features/docs/components/docs-footer.tsx features/docs/components/docs-theme-toggle.tsx features/docs/styles/docs-theme.css
     bunx oxfmt --check app/docs/layout.tsx config/product.ts features/starter/lib/starter-selectors.ts features/docs/components/docs-navbar.tsx features/docs/components/docs-footer.tsx features/docs/components/docs-theme-toggle.tsx
 
 If `apps/web/content/docs/index.mdx` changes, include that file in the format check and verify the docs route still compiles:
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web
+    cd /Users/parkerrex/Projects/ship-by-sunday/apps/web
     bunx oxfmt --check content/docs/index.mdx
 
 Run the narrow automated docs checks that already exist in the repo:
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web
+    cd /Users/parkerrex/Projects/ship-by-sunday/apps/web
     bunx vitest --config vitest.config.ts run --project unit tests/unit/docs-metadata.test.ts
     PLAYWRIGHT_USE_LOCAL_SERVER=1 bunx playwright test --project=browser-smoke tests/browser-smoke/app-smoke.spec.ts --grep "docs pages emit canonical tags and auth pages emit noindex"
 
 Then do manual QA against the actual rendered docs surface. Use desktop and mobile widths, and check both light and dark themes:
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web
+    cd /Users/parkerrex/Projects/ship-by-sunday/apps/web
     bun run dev:web
 
 Open `http://localhost:3000/docs` and `http://localhost:3000/docs/local-setup`. Check these concrete points while updating this plan:
@@ -240,7 +240,7 @@ Open `http://localhost:3000/docs` and `http://localhost:3000/docs/local-setup`. 
 
 If the repo is stable enough for the broader proof step, run the build from `apps/web`:
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web
+    cd /Users/parkerrex/Projects/ship-by-sunday/apps/web
     bun run build
 
 If `bun run build` fails for an unrelated reason, capture the actual failing file and message in `## Surprises & Discoveries`, mark the relevant progress item as blocked, and do not widen this docs plan into an unrelated repair without updating the plan first.
@@ -259,7 +259,7 @@ The visible and metadata-facing docs identity must also be updated consistently.
 
 The ideal final automated stack for the completed refresh is:
 
-    cd /Users/parkerrex/Projects/manmeetsai-workspace/apps/web
+    cd /Users/parkerrex/Projects/ship-by-sunday/apps/web
     bun run lint
     bun run format:check
     bunx vitest --config vitest.config.ts run --project unit tests/unit/docs-metadata.test.ts

@@ -85,7 +85,7 @@ The homepage was tightened to feel more editorial and less assembled. Standalone
 - **Automated checks:** lint, format check, unit tests, CTA integration-ui, targeted browser smoke, build
 - **Reference comparison:** existing product patterns and the repo's homepage contract
 - **Checklist status:** landing-page rules, restraint rules, and verification rules passed
-- **Packet-first status:** homepage anchors, CTA contract, section order, and truthful structured data were preserved
+- **Blueprint-first status:** homepage anchors, CTA contract, section order, and truthful structured data were preserved
 
 ## 11. Tradeoffs and deviations
 

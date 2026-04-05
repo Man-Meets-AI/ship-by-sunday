@@ -1,5 +1,5 @@
 {
-	"name": "manmeetsai-workspace",
+	"name": "ship-by-sunday",
 	"version": "0.1.0",
 	"private": true,
 	"packageManager": "bun@1.3.5",
@@ -9,6 +9,7 @@
 	],
 	"scripts": {
 		"dev": "bun run --cwd apps/web dev",
+		"dev:core": "bun run --cwd apps/web dev:core",
 		"dev:web": "bun run --cwd apps/web dev:web",
 		"dev:convex": "bun run --cwd apps/web dev:convex",
 		"dev:stripe": "bun run --cwd apps/web dev:stripe",
@@ -16,7 +17,7 @@
 		"build": "bun run --cwd apps/web build",
 		"start": "bun run --cwd apps/web start",
 		"sbs": "bun packages/ship-by-sunday-cli/src/cli.ts",
-		"sbs:check": "draft_backup_root=\"$(mktemp -d)\"; cleanup(){ rm -rf .ship-by-sunday tmp/sbs-cli-check; if [ -d \"$draft_backup_root/original\" ]; then mv \"$draft_backup_root/original\" .ship-by-sunday; fi; rm -rf \"$draft_backup_root\"; }; if [ -d .ship-by-sunday ]; then mv .ship-by-sunday \"$draft_backup_root/original\"; fi; trap cleanup EXIT; bun run --cwd packages/ship-by-sunday-cli lint && bun run --cwd packages/ship-by-sunday-cli format:check && bun run --cwd packages/ship-by-sunday-cli typecheck && bun run --cwd packages/ship-by-sunday-cli test && bun run --cwd packages/packet-compiler lint && bun run --cwd packages/packet-compiler format:check && bun run --cwd packages/packet-compiler typecheck && bun run --cwd packages/packet-compiler test && ./bin/sbs --help >/dev/null && ./bin/sbs --version >/dev/null && ./bin/sbs completion zsh >/dev/null && ./bin/sbs init --fixture complete --force --json >/dev/null && ./bin/sbs generate --out ./tmp/sbs-cli-check --force --dry-run --json >/dev/null",
+		"sbs:check": "draft_backup_root=\"$(mktemp -d)\"; cleanup(){ rm -rf .ship-by-sunday tmp/sbs-cli-check; if [ -d \"$draft_backup_root/original\" ]; then mv \"$draft_backup_root/original\" .ship-by-sunday; fi; rm -rf \"$draft_backup_root\"; }; if [ -d .ship-by-sunday ]; then mv .ship-by-sunday \"$draft_backup_root/original\"; fi; trap cleanup EXIT; bun run --cwd packages/ship-by-sunday-cli lint && bun run --cwd packages/ship-by-sunday-cli format:check && bun run --cwd packages/ship-by-sunday-cli typecheck && bun run --cwd packages/ship-by-sunday-cli test && bun run --cwd packages/blueprint-compiler lint && bun run --cwd packages/blueprint-compiler format:check && bun run --cwd packages/blueprint-compiler typecheck && bun run --cwd packages/blueprint-compiler test && ./bin/sbs --help >/dev/null && ./bin/sbs --version >/dev/null && ./bin/sbs completion zsh >/dev/null && ./bin/sbs init --fixture complete --force --json >/dev/null && ./bin/sbs generate --out ./tmp/sbs-cli-check --force --dry-run --json >/dev/null",
 		"typecheck": "bun run --cwd apps/web typecheck",
 		"lint": "bun run --cwd apps/web lint",
 		"lint:fix": "bun run --cwd apps/web lint:fix",
@@ -57,6 +58,8 @@
 		"starter-repo:sync": "bun run --cwd apps/web starter-repo:sync",
 		"starter-repo:reset": "bun run --cwd apps/web starter-repo:reset",
 		"auth:dev:doctor": "bun run --cwd apps/web auth:dev:doctor",
+		"qa:review-handoff": "bun run --cwd apps/web qa:review-handoff",
+		"review:handoff:doctor": "bun run --cwd apps/web review:handoff:doctor",
 		"clerk:test-user:check": "bun run --cwd apps/web clerk:test-user:check",
 		"clerk:test-user:create": "bun run --cwd apps/web clerk:test-user:create",
 		"clerk:test-user:check:entitled": "bun run --cwd apps/web clerk:test-user:check:entitled",

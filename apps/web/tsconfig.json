@@ -19,11 +19,7 @@
 			}
 		],
 		"paths": {
-			"@/*": ["./*"],
-			"@packet-compiler": ["../../packages/packet-compiler/src/index.ts"],
-			"@packet-compiler/server": [
-				"../../packages/packet-compiler/src/server.ts"
-			]
+			"@/*": ["./*"]
 		}
 	},
 	"include": [

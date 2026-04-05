@@ -1,5 +1,5 @@
 import { listFieldDescriptors } from "../field-contract";
-import type { EditablePacketStageId } from "../parse-cli-command";
+import type { EditableBlueprintStageId } from "../parse-cli-command";
 import type { CliIo } from "../run-cli";
 import { writeJsonResult } from "../cli-json";
 
@@ -9,7 +9,7 @@ export async function handleFieldsCommand({
 	json,
 }: {
 	io: CliIo;
-	stageId?: EditablePacketStageId;
+	stageId?: EditableBlueprintStageId;
 	json: boolean;
 }) {
 	const fields = listFieldDescriptors(stageId);
@@ -23,7 +23,7 @@ export async function handleFieldsCommand({
 	}
 
 	const lines = [
-		stageId ? `Fields for ${stageId}` : "Canonical packet fields",
+		stageId ? `Fields for ${stageId}` : "Reduced blueprint fields",
 		"",
 	];
 

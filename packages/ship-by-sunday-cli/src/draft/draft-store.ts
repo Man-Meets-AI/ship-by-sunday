@@ -2,19 +2,9 @@ import { mkdir, open, readFile, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import {
 	createCompleteProjectDefinition,
-	createCanonicalProjectDefinitionDraft,
-	isPacketArrayField,
-	isPacketNumericField,
-	normalizeProblemUrgencyValue,
-	normalizeProblemSeverityValue,
 	parseCanonicalProjectDefinition,
 	parseCanonicalProjectDefinitionDraft,
-	parseCanonicalProjectFactsDraft,
-	type CanonicalProjectDefinitionDraft,
-	type CanonicalProjectFactKey,
-	type CanonicalProjectFactsDraft,
-	type PacketStageDefinition,
-} from "@manmeetsai/packet-compiler";
+} from "@shipbysunday/blueprint-compiler";
 import {
 	SHIP_BY_SUNDAY_LOCAL_CLERK_USER_ID,
 	SHIP_BY_SUNDAY_PRODUCT_KEY,
@@ -25,6 +15,17 @@ import {
 import { resolveProjectPath } from "../cli-paths";
 import type { CliFixtureName } from "../parse-cli-command";
 import { createCliError } from "../cli-errors";
+import {
+	deriveCliStageStatus,
+	cliBlueprintFactKeys,
+	isBlueprintArrayField,
+	normalizeCliFactValue,
+	normalizeCliFactsDraft,
+	type CliBlueprintFactKey,
+	type CliBlueprintFactsDraft,
+	type CliBlueprintStageDefinition,
+} from "../field-contract";
+import { extractCliFactsFromLegacyFacts } from "../blueprint-derivation";
 
 const LOCAL_DRAFT_MISSING_MESSAGE =
 	"No local Ship by Sunday draft exists yet. Run init, import, or resume first.";
@@ -36,26 +37,55 @@ const DRAFT_PATH_ERROR_CODES = new Set([
 	"ENOTDIR",
 ]);
 
+const recognizedDraftSourceKeys = new Set([
+	...cliBlueprintFactKeys,
+	"screen_sequence",
+	"price_usd_cents",
+	"support_email",
+	"outcome_statement",
+	"pricing_model",
+	"surface_type",
+	"marketing_goals",
+]);
+
+export type LocalDraftEnvelope = {
+	clerkUserId: string;
+	productKey: string;
+	schemaVersion: 1;
+	facts: CliBlueprintFactsDraft;
+	placeholdersInUse: string[];
+	createdAt: number;
+	updatedAt: number;
+};
+
 export type DraftMutation =
 	| {
 			op: "set";
-			fieldKey: CanonicalProjectFactKey;
+			fieldKey: CliBlueprintFactKey;
 			value: string;
 	  }
 	| {
 			op: "unset";
-			fieldKey: CanonicalProjectFactKey;
+			fieldKey: CliBlueprintFactKey;
 	  }
 	| {
 			op: "append";
-			fieldKey: CanonicalProjectFactKey;
+			fieldKey: CliBlueprintFactKey;
 			value: string;
 	  }
 	| {
 			op: "remove";
-			fieldKey: CanonicalProjectFactKey;
+			fieldKey: CliBlueprintFactKey;
 			value: string;
 	  };
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+	return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function hasRecognizedDraftSourceKey(input: Record<string, unknown>) {
+	return Object.keys(input).some((key) => recognizedDraftSourceKeys.has(key));
+}
 
 async function readTextInputSource(
 	repoRootPath: string,
@@ -79,19 +109,170 @@ export async function readDraftInputSource(
 	return readTextInputSource(repoRootPath, inputPath);
 }
 
-export function createLocalDraftDefinition(
-	facts: CanonicalProjectFactsDraft = {},
-) {
-	return createCanonicalProjectDefinitionDraft({
+function createLocalDraftEnvelope(args: {
+	clerkUserId: string;
+	productKey: string;
+	facts?: CliBlueprintFactsDraft;
+	placeholdersInUse?: string[];
+	createdAt?: number;
+	updatedAt?: number;
+}): LocalDraftEnvelope {
+	const createdAt = args.createdAt ?? Date.now();
+	const updatedAt = args.updatedAt ?? createdAt;
+
+	return {
+		clerkUserId: args.clerkUserId,
+		productKey: args.productKey,
+		schemaVersion: 1,
+		facts: normalizeCliFactsDraft(args.facts ?? {}),
+		placeholdersInUse: args.placeholdersInUse ?? [],
+		createdAt,
+		updatedAt,
+	};
+}
+
+export function createLocalDraftDefinition(facts: CliBlueprintFactsDraft = {}) {
+	return createLocalDraftEnvelope({
 		clerkUserId: SHIP_BY_SUNDAY_LOCAL_CLERK_USER_ID,
 		productKey: SHIP_BY_SUNDAY_PRODUCT_KEY,
 		facts,
 	});
 }
 
+function fromLegacyProjectDefinition(input: unknown) {
+	const parsed = parseCanonicalProjectDefinition(input);
+	return createLocalDraftEnvelope({
+		clerkUserId: parsed.clerkUserId,
+		productKey: parsed.productKey,
+		facts: extractCliFactsFromLegacyFacts(parsed.facts),
+		placeholdersInUse: parsed.placeholdersInUse,
+		createdAt: parsed.createdAt,
+		updatedAt: parsed.updatedAt,
+	});
+}
+
+function fromLegacyProjectDefinitionDraft(input: unknown) {
+	const parsed = parseCanonicalProjectDefinitionDraft(input);
+	return createLocalDraftEnvelope({
+		clerkUserId: parsed.clerkUserId,
+		productKey: parsed.productKey,
+		facts: extractCliFactsFromLegacyFacts(parsed.facts),
+		placeholdersInUse: parsed.placeholdersInUse,
+		createdAt: parsed.createdAt,
+		updatedAt: parsed.updatedAt,
+	});
+}
+
+function normalizeLocalDraftEnvelope(input: unknown): LocalDraftEnvelope {
+	if (!isPlainObject(input)) {
+		throw createCliError(
+			"invalid_state",
+			"Draft file is invalid. Remove it and re-run init or import.",
+			1,
+		);
+	}
+
+	const clerkUserId = input.clerkUserId;
+	const productKey = input.productKey;
+	const facts = input.facts;
+
+	if (typeof clerkUserId !== "string" || typeof productKey !== "string") {
+		throw createCliError(
+			"invalid_state",
+			"Draft file is invalid. Remove it and re-run init or import.",
+			1,
+		);
+	}
+
+	return createLocalDraftEnvelope({
+		clerkUserId,
+		productKey,
+		facts: isPlainObject(facts) ? (facts as CliBlueprintFactsDraft) : {},
+		placeholdersInUse: Array.isArray(input.placeholdersInUse)
+			? input.placeholdersInUse.map((entry) => String(entry))
+			: [],
+		createdAt:
+			typeof input.createdAt === "number" ? input.createdAt : undefined,
+		updatedAt:
+			typeof input.updatedAt === "number" ? input.updatedAt : undefined,
+	});
+}
+
+function toLocalDraftEnvelope(input: unknown): LocalDraftEnvelope {
+	if (isPlainObject(input) && "schemaVersion" in input && "facts" in input) {
+		if (
+			isPlainObject(input.facts) &&
+			("screen_sequence" in input.facts ||
+				"price_usd_cents" in input.facts ||
+				"marketing_goals" in input.facts ||
+				"pricing_model" in input.facts ||
+				"surface_type" in input.facts)
+		) {
+			try {
+				return fromLegacyProjectDefinition(input);
+			} catch {
+				return fromLegacyProjectDefinitionDraft(input);
+			}
+		}
+
+		if (isPlainObject(input.facts)) {
+			return normalizeLocalDraftEnvelope(input);
+		}
+	}
+
+	if (isPlainObject(input) && input.facts && isPlainObject(input.facts)) {
+		if (!hasRecognizedDraftSourceKey(input.facts)) {
+			throw createCliError(
+				"invalid_input",
+				"Draft file is invalid. Remove it and re-run init or import.",
+				2,
+			);
+		}
+		return createLocalDraftDefinition(
+			extractCliFactsFromLegacyFacts(input.facts as Record<string, unknown>),
+		);
+	}
+
+	if (
+		isPlainObject(input) &&
+		input.clerkUserId &&
+		input.productKey &&
+		input.facts
+	) {
+		return normalizeLocalDraftEnvelope(input);
+	}
+
+	if (isPlainObject(input) && "schemaVersion" in input && !("facts" in input)) {
+		try {
+			return fromLegacyProjectDefinition(input);
+		} catch {
+			return fromLegacyProjectDefinitionDraft(input);
+		}
+	}
+
+	if (isPlainObject(input)) {
+		if (!hasRecognizedDraftSourceKey(input)) {
+			throw createCliError(
+				"invalid_input",
+				"Draft file is invalid. Remove it and re-run init or import.",
+				2,
+			);
+		}
+		return createLocalDraftDefinition(
+			extractCliFactsFromLegacyFacts(input as Record<string, unknown>),
+		);
+	}
+
+	throw createCliError(
+		"invalid_state",
+		"Draft file is invalid. Remove it and re-run init or import.",
+		1,
+	);
+}
+
 export async function loadLocalDraft(
 	repoRootPath: string,
-): Promise<CanonicalProjectDefinitionDraft | null> {
+): Promise<LocalDraftEnvelope | null> {
 	const draftFilePath = getDraftFilePath(repoRootPath);
 
 	try {
@@ -130,16 +311,8 @@ async function readDraftFile(filePath: string) {
 
 function parseDraftSource(filePath: string, draftSource: string) {
 	try {
-		return parseCanonicalProjectDefinitionDraft(JSON.parse(draftSource));
-	} catch (error) {
-		if (error instanceof SyntaxError) {
-			throw createCliError(
-				"invalid_state",
-				`Draft file ${filePath} is invalid. Remove it and re-run init or import.`,
-				1,
-			);
-		}
-
+		return toLocalDraftEnvelope(JSON.parse(draftSource));
+	} catch {
 		throw createCliError(
 			"invalid_state",
 			`Draft file ${filePath} is invalid. Remove it and re-run init or import.`,
@@ -181,17 +354,15 @@ export async function requireLocalDraft(repoRootPath: string) {
 	return draft;
 }
 
-export async function saveLocalDraft(
-	repoRootPath: string,
-	draft: CanonicalProjectDefinitionDraft,
-) {
+export async function saveLocalDraft(repoRootPath: string, draft: unknown) {
+	const normalizedDraft = toLocalDraftEnvelope(draft);
 	const draftFilePath = getDraftFilePath(repoRootPath);
 	const temporaryDraftFilePath = getDraftTempFilePath(repoRootPath);
 	let fileHandle: Awaited<ReturnType<typeof open>> | null = null;
 	try {
 		await mkdir(getDraftDirectoryPath(repoRootPath), { recursive: true });
 		fileHandle = await open(temporaryDraftFilePath, "w");
-		await fileHandle.writeFile(JSON.stringify(draft, null, 2));
+		await fileHandle.writeFile(JSON.stringify(normalizedDraft, null, 2));
 		await fileHandle.sync();
 		await fileHandle.close();
 		await rename(temporaryDraftFilePath, draftFilePath);
@@ -243,21 +414,96 @@ export async function initializeLocalDraft({
 
 	const nextDraft =
 		fixture === "complete"
-			? createCanonicalProjectDefinitionDraft({
-					clerkUserId: SHIP_BY_SUNDAY_LOCAL_CLERK_USER_ID,
-					productKey: SHIP_BY_SUNDAY_PRODUCT_KEY,
-					facts: createCompleteProjectDefinition().facts,
-				})
+			? createLocalDraftDefinition(
+					extractCliFactsFromLegacyFacts(
+						createCompleteProjectDefinition().facts as Record<string, unknown>,
+					),
+				)
 			: createLocalDraftDefinition();
 	await saveLocalDraft(projectRootPath, nextDraft);
 	return nextDraft;
 }
 
-function saveDraftWithMergedFacts(
-	draft: CanonicalProjectDefinitionDraft,
-	nextFacts: CanonicalProjectFactsDraft,
+function applyMutationToFacts(
+	facts: CliBlueprintFactsDraft,
+	mutation: DraftMutation,
 ) {
-	return createCanonicalProjectDefinitionDraft({
+	if (mutation.op === "set") {
+		const normalizedValue = normalizeCliFactValue(
+			mutation.fieldKey,
+			mutation.value,
+		);
+		if (normalizedValue === undefined) {
+			return {
+				...facts,
+				[mutation.fieldKey]:
+					mutation.fieldKey === "scope_in" || mutation.fieldKey === "scope_out"
+						? []
+						: undefined,
+			};
+		}
+		return {
+			...facts,
+			[mutation.fieldKey]: normalizedValue,
+		};
+	}
+
+	const nextFacts: CliBlueprintFactsDraft = { ...facts };
+
+	if (mutation.op === "unset") {
+		if (mutation.fieldKey === "scope_in" || mutation.fieldKey === "scope_out") {
+			nextFacts[mutation.fieldKey] = [];
+		} else {
+			delete nextFacts[mutation.fieldKey];
+		}
+		return normalizeCliFactsDraft(nextFacts);
+	}
+
+	if (!isBlueprintArrayField(mutation.fieldKey)) {
+		throw createCliError(
+			"invalid_args",
+			`Field "${mutation.fieldKey}" does not support ${mutation.op}.`,
+			2,
+		);
+	}
+
+	const currentValue = facts[mutation.fieldKey];
+	const currentValues = Array.isArray(currentValue) ? [...currentValue] : [];
+	const nextValue = normalizeCliFactValue(mutation.fieldKey, [
+		...currentValues,
+		mutation.value,
+	]);
+
+	if (mutation.op === "append") {
+		return {
+			...facts,
+			[mutation.fieldKey]: nextValue,
+		};
+	}
+
+	const filteredValues = currentValues.filter(
+		(entry) => entry !== mutation.value.trim(),
+	);
+	if (filteredValues.length === 0) {
+		if (mutation.fieldKey === "scope_in" || mutation.fieldKey === "scope_out") {
+			nextFacts[mutation.fieldKey] = [];
+		} else {
+			delete nextFacts[mutation.fieldKey];
+		}
+		return normalizeCliFactsDraft(nextFacts);
+	}
+
+	return {
+		...facts,
+		[mutation.fieldKey]: filteredValues,
+	};
+}
+
+function saveDraftWithMergedFacts(
+	draft: LocalDraftEnvelope,
+	nextFacts: CliBlueprintFactsDraft,
+) {
+	return createLocalDraftEnvelope({
 		clerkUserId: draft.clerkUserId,
 		productKey: draft.productKey,
 		facts: nextFacts,
@@ -265,159 +511,6 @@ function saveDraftWithMergedFacts(
 		createdAt: draft.createdAt,
 		updatedAt: Date.now(),
 	});
-}
-
-function applyMutationToFacts(
-	facts: CanonicalProjectFactsDraft,
-	mutation: DraftMutation,
-) {
-	if (mutation.op === "set") {
-		return parseCanonicalProjectFactsDraft({
-			...facts,
-			[mutation.fieldKey]: normalizeFieldValue(
-				mutation.fieldKey,
-				mutation.value,
-			),
-		});
-	}
-
-	const nextFactsSource: Record<string, unknown> = { ...facts };
-
-	if (mutation.op === "unset") {
-		delete nextFactsSource[mutation.fieldKey];
-		return parseCanonicalProjectFactsDraft(nextFactsSource);
-	}
-
-	if (mutation.op === "append") {
-		if (!isPacketArrayField(mutation.fieldKey)) {
-			throw createCliError(
-				"invalid_args",
-				`Field "${mutation.fieldKey}" does not support append.`,
-				2,
-			);
-		}
-
-		const rawCurrentValue = facts[mutation.fieldKey];
-		const currentValues: string[] = Array.isArray(rawCurrentValue)
-			? [...rawCurrentValue]
-			: [];
-		return parseCanonicalProjectFactsDraft({
-			...facts,
-			[mutation.fieldKey]: [...currentValues, mutation.value.trim()].filter(
-				Boolean,
-			),
-		});
-	}
-
-	if (!isPacketArrayField(mutation.fieldKey)) {
-		throw createCliError(
-			"invalid_args",
-			`Field "${mutation.fieldKey}" does not support remove.`,
-			2,
-		);
-	}
-
-	const rawCurrentValue = facts[mutation.fieldKey];
-	const currentValues: string[] = Array.isArray(rawCurrentValue)
-		? [...rawCurrentValue]
-		: [];
-	const nextValues = currentValues.filter(
-		(entry) => entry !== mutation.value.trim(),
-	);
-
-	if (nextValues.length === 0) {
-		delete nextFactsSource[mutation.fieldKey];
-		return parseCanonicalProjectFactsDraft(nextFactsSource);
-	}
-
-	return parseCanonicalProjectFactsDraft({
-		...facts,
-		[mutation.fieldKey]: nextValues,
-	});
-}
-
-function normalizeFieldValue(
-	fieldKey: CanonicalProjectFactKey,
-	value: string,
-): string | number | string[] {
-	const trimmedValue = value.trim();
-
-	if (fieldKey === "problem_severity") {
-		return normalizeProblemSeverityValue(trimmedValue);
-	}
-	if (fieldKey === "problem_urgency") {
-		return normalizeProblemUrgencyValue(trimmedValue);
-	}
-	if (isPacketNumericField(fieldKey)) {
-		return Number(trimmedValue);
-	}
-	if (isPacketArrayField(fieldKey)) {
-		if (trimmedValue.startsWith("[") && trimmedValue.endsWith("]")) {
-			const parsedValue = JSON.parse(trimmedValue);
-			if (!Array.isArray(parsedValue)) {
-				throw createCliError(
-					"invalid_input",
-					`Expected a JSON array for ${fieldKey}.`,
-					2,
-				);
-			}
-			return parsedValue.map((item) => String(item).trim()).filter(Boolean);
-		}
-
-		if (trimmedValue.includes("\n")) {
-			return trimmedValue
-				.split("\n")
-				.map((line) => line.trim())
-				.filter(Boolean);
-		}
-
-		return [trimmedValue];
-	}
-
-	return trimmedValue;
-}
-
-export async function ensureLocalDraft(repoRootPath: string) {
-	const existingDraft = await loadLocalDraft(repoRootPath);
-	if (existingDraft) {
-		return existingDraft;
-	}
-
-	const draft = createLocalDraftDefinition();
-	await saveLocalDraft(repoRootPath, draft);
-	return draft;
-}
-
-function toDraftDefinition(input: unknown) {
-	try {
-		return parseCanonicalProjectDefinitionDraft(input);
-	} catch {
-		if (
-			input &&
-			typeof input === "object" &&
-			"facts" in input &&
-			input.facts &&
-			typeof input.facts === "object"
-		) {
-			const facts = parseCanonicalProjectFactsDraft(input.facts);
-			return createLocalDraftDefinition(facts);
-		}
-
-		try {
-			const canonicalProjectDefinition = parseCanonicalProjectDefinition(input);
-			return createCanonicalProjectDefinitionDraft({
-				clerkUserId: canonicalProjectDefinition.clerkUserId,
-				productKey: canonicalProjectDefinition.productKey,
-				facts: canonicalProjectDefinition.facts,
-				placeholdersInUse: canonicalProjectDefinition.placeholdersInUse,
-				createdAt: canonicalProjectDefinition.createdAt,
-				updatedAt: canonicalProjectDefinition.updatedAt,
-			});
-		} catch {
-			const facts = parseCanonicalProjectFactsDraft(input);
-			return createLocalDraftDefinition(facts);
-		}
-	}
 }
 
 export async function importDraftFromFile(
@@ -435,7 +528,7 @@ export async function importDraftFromFile(
 			2,
 		);
 	}
-	const nextDraft = toDraftDefinition(parsedInput);
+	const nextDraft = toLocalDraftEnvelope(parsedInput);
 	await saveLocalDraft(repoRootPath, nextDraft);
 	return nextDraft;
 }
@@ -457,7 +550,7 @@ export async function exportDraftToFile(repoRootPath: string, outPath: string) {
 }
 
 function assertStagePatchKeys(
-	stage: PacketStageDefinition,
+	stage: CliBlueprintStageDefinition,
 	patch: Record<string, unknown>,
 ) {
 	const allowedFieldKeys = new Set(
@@ -465,7 +558,7 @@ function assertStagePatchKeys(
 	);
 
 	for (const fieldKey of Object.keys(patch)) {
-		if (!allowedFieldKeys.has(fieldKey as CanonicalProjectFactKey)) {
+		if (!allowedFieldKeys.has(fieldKey as CliBlueprintFactKey)) {
 			throw createCliError(
 				"invalid_patch",
 				`Field "${fieldKey}" does not belong to the ${stage.label} stage.`,
@@ -477,13 +570,13 @@ function assertStagePatchKeys(
 
 function splitPatchEntries(
 	patch: Record<string, unknown>,
-): [Record<string, unknown>, CanonicalProjectFactKey[]] {
+): [Record<string, unknown>, CliBlueprintFactKey[]] {
 	const nextFactsPatch: Record<string, unknown> = {};
-	const clearedFieldKeys: CanonicalProjectFactKey[] = [];
+	const clearedFieldKeys: CliBlueprintFactKey[] = [];
 
 	for (const [fieldKey, value] of Object.entries(patch)) {
 		if (value === null) {
-			clearedFieldKeys.push(fieldKey as CanonicalProjectFactKey);
+			clearedFieldKeys.push(fieldKey as CliBlueprintFactKey);
 			continue;
 		}
 		nextFactsPatch[fieldKey] = value;
@@ -494,7 +587,7 @@ function splitPatchEntries(
 
 export async function applyDraftPatchFromFile(
 	repoRootPath: string,
-	stage: PacketStageDefinition,
+	stage: CliBlueprintStageDefinition,
 	filePath: string,
 ) {
 	const draft = await ensureLocalDraft(repoRootPath);
@@ -510,38 +603,45 @@ export async function applyDraftPatchFromFile(
 		);
 	}
 	const rawPatch =
-		parsedPatch &&
-		typeof parsedPatch === "object" &&
+		isPlainObject(parsedPatch) &&
 		"facts" in parsedPatch &&
 		parsedPatch.facts &&
-		typeof parsedPatch.facts === "object"
+		isPlainObject(parsedPatch.facts)
 			? (parsedPatch.facts as Record<string, unknown>)
 			: (parsedPatch as Record<string, unknown>);
 
 	assertStagePatchKeys(stage, rawPatch);
 	const [nextFactsPatch, clearedFieldKeys] = splitPatchEntries(rawPatch);
-	const validFactsPatch = parseCanonicalProjectFactsDraft(nextFactsPatch);
-	const mergedFacts = { ...draft.facts, ...validFactsPatch };
+	const normalizedFactsPatch: CliBlueprintFactsDraft = {};
 
-	for (const fieldKey of clearedFieldKeys) {
-		delete mergedFacts[fieldKey];
+	for (const [fieldKey, value] of Object.entries(nextFactsPatch)) {
+		const normalizedValue = normalizeCliFactValue(
+			fieldKey as CliBlueprintFactKey,
+			value,
+		);
+		if (normalizedValue !== undefined) {
+			normalizedFactsPatch[fieldKey as CliBlueprintFactKey] = normalizedValue;
+		}
 	}
 
-	const nextDraft = createCanonicalProjectDefinitionDraft({
-		clerkUserId: draft.clerkUserId,
-		productKey: draft.productKey,
-		facts: mergedFacts,
-		placeholdersInUse: draft.placeholdersInUse,
-		createdAt: draft.createdAt,
-		updatedAt: Date.now(),
-	});
+	const mergedFacts = { ...draft.facts, ...normalizedFactsPatch };
+
+	for (const fieldKey of clearedFieldKeys) {
+		if (fieldKey === "scope_in" || fieldKey === "scope_out") {
+			mergedFacts[fieldKey] = [];
+		} else {
+			delete mergedFacts[fieldKey];
+		}
+	}
+
+	const nextDraft = saveDraftWithMergedFacts(draft, mergedFacts);
 	await saveLocalDraft(repoRootPath, nextDraft);
 	return nextDraft;
 }
 
 export async function setDraftFieldValue(
 	repoRootPath: string,
-	fieldKey: CanonicalProjectFactKey,
+	fieldKey: CliBlueprintFactKey,
 	value: string,
 ) {
 	const draft = await ensureLocalDraft(repoRootPath);
@@ -557,7 +657,7 @@ export async function setDraftFieldValue(
 
 export async function unsetDraftFieldValue(
 	repoRootPath: string,
-	fieldKey: CanonicalProjectFactKey,
+	fieldKey: CliBlueprintFactKey,
 ) {
 	const draft = await ensureLocalDraft(repoRootPath);
 	const nextFacts = applyMutationToFacts(draft.facts, {
@@ -571,7 +671,7 @@ export async function unsetDraftFieldValue(
 
 export async function appendDraftFieldValue(
 	repoRootPath: string,
-	fieldKey: CanonicalProjectFactKey,
+	fieldKey: CliBlueprintFactKey,
 	value: string,
 ) {
 	const draft = await ensureLocalDraft(repoRootPath);
@@ -587,7 +687,7 @@ export async function appendDraftFieldValue(
 
 export async function removeDraftFieldValue(
 	repoRootPath: string,
-	fieldKey: CanonicalProjectFactKey,
+	fieldKey: CliBlueprintFactKey,
 	value: string,
 ) {
 	const draft = await ensureLocalDraft(repoRootPath);
@@ -615,4 +715,19 @@ export async function applyDraftMutations(
 	const nextDraft = saveDraftWithMergedFacts(draft, nextFacts);
 	await saveLocalDraft(repoRootPath, nextDraft);
 	return nextDraft;
+}
+
+export async function ensureLocalDraft(repoRootPath: string) {
+	const existingDraft = await loadLocalDraft(repoRootPath);
+	if (existingDraft) {
+		return existingDraft;
+	}
+
+	const draft = createLocalDraftDefinition();
+	await saveLocalDraft(repoRootPath, draft);
+	return draft;
+}
+
+export function deriveLocalDraftStatus(facts: CliBlueprintFactsDraft) {
+	return deriveCliStageStatus(facts);
 }

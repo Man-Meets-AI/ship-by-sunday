@@ -30,17 +30,17 @@ describe("CLI startup surface", () => {
 
 	it("renders the repository identity and recommended next commands", () => {
 		const surface = renderEntrySurface({
-			projectRootPath: "/tmp/manmeetsai-workspace",
+			projectRootPath: "/tmp/ship-by-sunday",
 			options: {
 				colorEnabled: false,
 				terminalWidth: 120,
 			},
 		});
 
-		expect(surface).toContain("Repository: manmeetsai-workspace");
-		expect(surface).toContain("Working root: /tmp/manmeetsai-workspace");
+		expect(surface).toContain("Repository: ship-by-sunday");
+		expect(surface).toContain("Working root: /tmp/ship-by-sunday");
 		expect(surface).toContain(
-			"Guided packet intake, readiness checks, and starter snapshot generation for this repository.",
+			"Guided blueprint intake, readiness checks, and Ship by Sunday Blueprint generation for this repository.",
 		);
 		expect(surface).toContain("bun run sbs resume");
 		expect(surface).toContain("bun run sbs next --json");

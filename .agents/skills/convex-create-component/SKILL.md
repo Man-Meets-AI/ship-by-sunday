@@ -53,7 +53,7 @@ Read exactly one reference file before proceeding.
 
 ## Default Approach
 
-Unless the user explicitly wants an npm package, default to a local component:
+Unless the user explicitly wants an npm module, default to a local component:
 
 - Put it under `convex/components/<componentName>/`
 - Define it with `defineComponent(...)` in its own `convex.config.ts`
@@ -403,7 +403,7 @@ Official docs: [Authoring Components](https://docs.convex.dev/components/authori
 - [ ] Read the matching reference file
 - [ ] Confirmed a component is the right abstraction
 - [ ] Planned tables, public API, boundaries, and app wrappers
-- [ ] Component lives under `convex/components/<name>/` (or package layout if publishing)
+- [ ] Component lives under `convex/components/<name>/` (or module layout if publishing)
 - [ ] Component imports from its own `./_generated/server`
 - [ ] Auth, env access, and HTTP routes stay in the app
 - [ ] Parent app IDs cross the boundary as `v.string()`

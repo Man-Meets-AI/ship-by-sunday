@@ -1,17 +1,14 @@
-import { createCanonicalProjectDefinitionDraft } from "@manmeetsai/packet-compiler";
 import { createStagePromptSession } from "../src/prompts/stage-prompt-session";
+import { DEFAULT_THEME_PRESET } from "../src/field-contract";
+import { createLocalDraftDefinition } from "../src/draft/draft-store";
 
 describe("stage prompt session", () => {
 	it("describes stage progress and control commands", () => {
-		const session = createStagePromptSession({ stageId: "product" });
+		const session = createStagePromptSession({ stageId: "blueprint" });
 		const firstStep = session.stage.steps[0];
 		const firstFieldKey = firstStep.fieldKeys[0]!;
-		const draft = createCanonicalProjectDefinitionDraft({
-			clerkUserId: "local-cli-user",
-			productKey: "ship-by-sunday",
-			facts: {
-				product_name: "Ship by Sunday OS",
-			},
+		const draft = createLocalDraftDefinition({
+			product_name: "Ship by Sunday OS",
 		});
 
 		expect(session.formatIntroLines().join("\n")).toContain("Controls:");
@@ -37,7 +34,7 @@ describe("stage prompt session", () => {
 	});
 
 	it("handles clear, quit, and value answers", () => {
-		const session = createStagePromptSession({ stageId: "product" });
+		const session = createStagePromptSession({ stageId: "blueprint" });
 		const fieldKey = session.stage.steps[0]!.fieldKeys[0]!;
 
 		expect(
@@ -70,11 +67,52 @@ describe("stage prompt session", () => {
 	});
 
 	it("formats safe exit guidance for quit and interrupt", () => {
-		const session = createStagePromptSession({ stageId: "product" });
+		const session = createStagePromptSession({ stageId: "blueprint" });
 
 		expect(session.formatExitMessage("quit")).toContain(
 			"Resume with bun run sbs resume.",
 		);
 		expect(session.formatExitMessage("cancelled")).toContain("Interrupted.");
+	});
+
+	it("shows the reduced design default and generated scope suggestions", () => {
+		const designSession = createStagePromptSession({ stageId: "blueprint" });
+		const themePrompt = designSession.formatFieldPrompt({
+			draft: { facts: {} },
+			fieldKey: "theme_preset",
+			stepIndex: 0,
+			fieldIndex: 0,
+			fieldCount: 2,
+		});
+		expect(themePrompt.prompt).toContain(DEFAULT_THEME_PRESET);
+
+		const buildPlanSession = createStagePromptSession({
+			stageId: "blueprint",
+		});
+		const scopePrompt = buildPlanSession.formatFieldPrompt({
+			draft: {
+				facts: {
+					core_flow: ["Capture facts", "Review readiness"],
+				},
+			},
+			fieldKey: "scope_in",
+			stepIndex: 5,
+			fieldIndex: 0,
+			fieldCount: 4,
+		});
+		expect(scopePrompt.prompt).toContain("Build Capture facts");
+	});
+
+	it("prompts for pricing in the blueprint stage", () => {
+		const session = createStagePromptSession({ stageId: "blueprint" });
+		const pricingPrompt = session.formatFieldPrompt({
+			draft: { facts: {} },
+			fieldKey: "pricing",
+			stepIndex: 4,
+			fieldIndex: 0,
+			fieldCount: 1,
+		});
+
+		expect(pricingPrompt.prompt).toContain("Enter the one-time USD amount.");
 	});
 });

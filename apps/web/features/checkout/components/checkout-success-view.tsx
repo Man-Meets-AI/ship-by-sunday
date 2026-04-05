@@ -38,7 +38,7 @@ function CheckoutSuccessViewContent({
 		}
 
 		const timeout = window.setTimeout(() => {
-			router.replace(routeConfig.start);
+			router.replace(routeConfig.blueprint);
 		}, timingConfig.checkoutAutoRedirectMs);
 
 		return () => window.clearTimeout(timeout);

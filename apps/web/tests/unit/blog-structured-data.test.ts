@@ -22,7 +22,7 @@ const blogPostFixture = {
 	href: "/blog/the-operating-system-beats-the-prompt",
 	slug: ["the-operating-system-beats-the-prompt"],
 	sourcePath:
-		"/Users/parkerrex/Projects/manmeetsai-workspace/apps/web/content/blog/the-operating-system-beats-the-prompt.mdx",
+		"/Users/parkerrex/Projects/ship-by-sunday/apps/web/content/blog/the-operating-system-beats-the-prompt.mdx",
 	readingTimeText: "3 min read",
 };
 

@@ -1,6 +1,6 @@
 # Ship by Sunday Build Checklist
 
-Use this before, during, and after any substantial build run from a Ship by Sunday starter snapshot.
+Use this before, during, and after any substantial build run from a Ship by Sunday blueprint.
 
 ## 1. Task definition
 
@@ -20,11 +20,11 @@ Use this before, during, and after any substantial build run from a Ship by Sund
 - [ ] The task is grounded in stable project facts, not lesson progress.
 - [ ] Workflow state is not being treated as product truth.
 - [ ] Ephemeral runtime state is not being written into the spec or plan.
-- [ ] Scope changes are reflected in the packet facts before implementation.
+- [ ] Scope changes are reflected in the blueprint facts before implementation.
 
 ## 3. Durable memory setup
 
-- [ ] `AGENTS.md` exists in the build packet.
+- [ ] `AGENTS.md` exists in the build blueprint.
 - [ ] `docs/prompt.md` exists for the current initiative.
 - [ ] `docs/plans.md` exists for milestone sequencing.
 - [ ] `docs/implement.md` exists for runbook and execution rules.

@@ -9,15 +9,8 @@ import {
 test.describe.configure({ mode: "serial" });
 test.skip(
 	!shouldRunAuthenticatedE2E,
-	"Set E2E_RUN_SANDBOX=1 or E2E_RUN_LOCAL_AUTH=1 plus PLAYWRIGHT_BASE_URL to run authenticated packet browser handoff checks.",
+	"Set E2E_RUN_SANDBOX=1 or E2E_RUN_LOCAL_AUTH=1 plus PLAYWRIGHT_BASE_URL to run authenticated blueprint browser handoff checks.",
 );
-
-const packetStageRoutes = [
-	{ path: "/product", stageLabel: "Product" },
-	{ path: "/design", stageLabel: "Design" },
-	{ path: "/marketing", stageLabel: "Marketing" },
-	{ path: "/build-plan", stageLabel: "Build Plan" },
-] as const;
 
 function getStripePayButton(page: Page) {
 	return page
@@ -78,43 +71,32 @@ async function completeStripeSandboxCheckout(page: Page) {
 	await payButton.click();
 }
 
-async function expectPacketStage(
-	page: Page,
-	route: (typeof packetStageRoutes)[number],
-) {
-	await page.goto(route.path);
-	await expect(page).toHaveURL(
-		new RegExp(`${route.path.replace("/", "\\/")}\\/[^/]+$`),
-	);
-	await expect(page.getByText(route.stageLabel).first()).toBeVisible();
-	await expect(page.getByText("Stage progress")).toBeVisible();
-	await expect(
-		page.getByText(/All required answers are in place for this stage\./i),
-	).toBeVisible();
-	await expect(page.getByRole("button", { name: "Continue" })).toBeVisible();
-}
-
 test.describe("member with access", () => {
 	test.use({ storageState: memberWithAccessStorageStatePath });
 
-	test("@default_ship can open the canonical packet funnel and settings", async ({
+	test("@default_ship can open the canonical blueprint flow and settings", async ({
 		page,
 	}) => {
-		await page.goto("/start");
-		await expect(page).toHaveURL(/\/start$/);
+		await page.goto("/blueprint");
+		await expect(page).toHaveURL(/\/blueprint$/);
 		await expect(
-			page.getByRole("link", { name: /^Continue with /i }),
+			page.getByRole("button", { name: "Continue to Review" }),
 		).toBeVisible();
-
-		for (const route of packetStageRoutes) {
-			await expectPacketStage(page, route);
-		}
+		await expect(page.getByRole("link", { name: "Design" })).toBeVisible();
+		await expect(
+			page.getByRole("link", { name: "Generated preview" }),
+		).toBeVisible();
 
 		await page.goto("/review");
 		await expect(page).toHaveURL(/\/review$/);
 		await expect(page.getByText("Review").first()).toBeVisible();
 		await expect(
-			page.getByRole("link", { name: "Download Ship Kit" }),
+			page.getByRole("link", { name: "Continue to Build Lessons" }),
+		).toBeVisible();
+		await expect(
+			page.getByRole("link", {
+				name: "Need the Ship by Sunday Blueprint again? Download it here.",
+			}),
 		).toBeVisible();
 
 		await page.goto("/settings");
@@ -127,7 +109,7 @@ test.describe("member with access", () => {
 test.describe("member without access", () => {
 	test.use({ storageState: memberWithoutAccessStorageStatePath });
 
-	test("@billing_integration full paid handoff moves from checkout success into the packet entry", async ({
+	test("@billing_integration full paid handoff moves from checkout success into the blueprint entry", async ({
 		page,
 	}) => {
 		test.setTimeout(120_000);
@@ -147,15 +129,15 @@ test.describe("member without access", () => {
 		await page.waitForURL(/\/checkout\/success\?session_id=/, {
 			timeout: 60_000,
 		});
-		await page.waitForURL(/\/start/, {
+		await page.waitForURL(/\/blueprint/, {
 			timeout: 60_000,
 		});
 
 		await expect(
-			page.getByText("Build the BRIEF before you build the app."),
+			page.getByRole("heading", { name: "Blueprint" }),
 		).toBeVisible();
 		await expect(
-			page.getByRole("link", { name: /^Continue with /i }),
+			page.getByRole("button", { name: "Continue to Review" }),
 		).toBeVisible();
 	});
 });

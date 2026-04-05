@@ -12,10 +12,7 @@ import {
 
 export type HomePageSocialProofVariant = {
 	readonly kind: "founder";
-	readonly image: HomePageContent["assets"]["socialProofImage"];
 	readonly section: HomePageContent["socialProofSection"];
-	readonly githubUsername: string;
-	readonly requiresGitHubActivity: true;
 };
 
 export type HomePageRenderModel = {
@@ -28,6 +25,10 @@ export type HomePageRenderModel = {
 	readonly sprintPath: {
 		readonly isEnabled: boolean;
 		readonly section: HomePageContent["sprintPathSection"];
+	};
+	readonly mechanism: {
+		readonly isEnabled: boolean;
+		readonly section: HomePageContent["mechanismSection"];
 	};
 	readonly whatsInside: {
 		readonly isEnabled: boolean;
@@ -43,7 +44,6 @@ export type HomePageRenderModel = {
 	};
 	readonly socialProof: {
 		readonly isEnabled: boolean;
-		readonly githubActivityUsername: string | null;
 		readonly variant: HomePageSocialProofVariant;
 	};
 	readonly faq: {
@@ -72,14 +72,8 @@ export function createHomePageRenderModel({
 }: CreateHomePageRenderModelArgs = {}): HomePageRenderModel {
 	const socialProofVariant = {
 		kind: "founder",
-		image: content.assets.socialProofImage,
 		section: content.socialProofSection,
-		githubUsername: content.socialProofSection.github.username,
-		requiresGitHubActivity: true,
 	} as const satisfies HomePageSocialProofVariant;
-	const shouldFetchSocialProofGitHubActivity =
-		homePageConfig.sections.socialProof &&
-		socialProofVariant.requiresGitHubActivity;
 
 	return {
 		sectionOrder: homePageSectionOrder,
@@ -91,6 +85,10 @@ export function createHomePageRenderModel({
 		sprintPath: {
 			isEnabled: homePageConfig.sections.sprintPath,
 			section: content.sprintPathSection,
+		},
+		mechanism: {
+			isEnabled: homePageConfig.sections.mechanism,
+			section: content.mechanismSection,
 		},
 		whatsInside: {
 			isEnabled: homePageConfig.sections.whatsInside,
@@ -106,9 +104,6 @@ export function createHomePageRenderModel({
 		},
 		socialProof: {
 			isEnabled: homePageConfig.sections.socialProof,
-			githubActivityUsername: shouldFetchSocialProofGitHubActivity
-				? socialProofVariant.githubUsername
-				: null,
 			variant: socialProofVariant,
 		},
 		faq: {

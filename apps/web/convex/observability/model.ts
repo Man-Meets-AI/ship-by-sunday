@@ -452,7 +452,7 @@ function classifyTelegramDeliveryFailure({
 			externalEventId: `telegram_delivery_content_rejected:${sourceIncidentId}`,
 			failureClass: "content_rejected" as const,
 			nextAction:
-				"Inspect the source incident packet and trim or repair the Telegram message payload before retrying delivery.",
+				"Inspect the source incident blueprint and trim or repair the Telegram message payload before retrying delivery.",
 			title: "Telegram delivery rejected incident content.",
 		};
 	}

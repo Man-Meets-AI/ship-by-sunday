@@ -20,7 +20,7 @@ export const homePageContent = {
 		body: `The only system that teaches you how to ship a durable product from start to finish in one weekend. Oh, and it includes building you a ridiculous custom template from scratch based on what you want to build. We should charge more for this.`,
 		primaryCta: marketingDisplayConfig.primaryCtaLabel,
 		secondaryCta: {
-			label: "See how Ship Rails works",
+			label: "See how Ship Blueprint works",
 			href: routeConfig.systemHash,
 		},
 		eyebrow:
@@ -37,33 +37,34 @@ export const homePageContent = {
 			"The packs are file-based and agent-readable, so each tool works from the same scope, constraints, and claims instead of a stale chat summary.",
 			"The same contract-first path feeds the starter system, so the repo, the docs, and the execution path stay aligned instead of drifting apart.",
 		],
-		valueFrame: "Most starters give you code. This gives you rails.",
+		valueFrame: "Most starters give you code. This gives you blueprint.",
 		imageAlt:
-			"Diagram showing a product definition turning into Design, Marketing, Build, and Prompt Packs plus a final Starter Snapshot",
+			"Diagram showing a product definition turning into Design, Marketing, Build, and Prompt Packs plus a final Blueprint",
+	},
+	mechanismSection: {
+		steps: [
+			"Lock the Product Truth",
+			"Generate the Agent-Ready Packs",
+			"Build from the Ship Kit",
+		],
+		tagline: "One source of truth. No drift.",
 	},
 	socialProofSection: {
 		label: "Built by someone who ships",
-		intro:
-			"This is not theory from the sidelines. It is a system shaped by years of shipping products, tools, and MVPs in public.",
-		imageAlt: "Founder proof visual",
-		imageCaption:
-			"Built by someone who has moved from design to engineering to product and knows what it takes to turn rough ideas into shippable products.",
-		github: {
-			username: "ParkerRex",
-			profileUrl: "https://github.com/ParkerRex",
-			activityCaption:
-				"commits this year. This system is built by someone who ships every day.",
-		},
-		stats: [
+		headline: "Built by someone who has actually shipped products.",
+		body: "Worked across UX, product, design, and engineering. Helped scale a startup to $73M/year. Stayed through acquisition. Ship by Sunday is new. The operating experience behind it is not.",
+		screenshots: [
 			{
-				value: "$73M",
-				label: "GMV scaled",
-				description: "Delivery Dudes to a $23M acquisition",
+				src: "/screenshots/product-truth.png",
+				alt: "Product Truth screenshot showing locked buyer, problem, scope, and constraints",
 			},
 			{
-				value: "100K",
-				label: "Users in week one",
-				description: "GPTs for Devs launch",
+				src: "/screenshots/agent-ready-packs.png",
+				alt: "Agent-Ready Packs screenshot showing design, marketing, build, and prompt packs",
+			},
+			{
+				src: "/screenshots/blueprint.png",
+				alt: "Ship Kit screenshot showing the source of truth the repo builds from",
 			},
 		],
 	},
@@ -76,12 +77,12 @@ export const homePageContent = {
 			{
 				question: "Is this another course or another starter?",
 				answer:
-					"No. Ship by Sunday is a packet-first shipping system. The videos help you use it, and the starter repo is part of it, but the real product is the Ship Kit you leave with.",
+					"No. Ship by Sunday is a blueprint-first shipping system. The videos help you use it, and the repo is part of it, but the real product is the Ship by Sunday Blueprint you leave with.",
 			},
 			{
 				question: "What do I actually get at the end?",
 				answer:
-					"You leave with your product truth, the Agent-Ready Packs, and the Ship Kit: your Agent-First Starter Repo plus the generated design, marketing, build, and prompt materials.",
+					"You leave with your product truth, the Agent-Ready Packs, and the Ship by Sunday Blueprint.",
 			},
 			{
 				question: "I already have a starter. Why would I need this?",
@@ -101,11 +102,11 @@ export const homePageContent = {
 			{
 				question: "Why not just use ChatGPT, Claude, or Codex directly?",
 				answer:
-					"You can. The problem is fragments. Ship Rails makes those tools work from one source of truth instead of stale chats and half-decisions.",
+					"You can. The problem is fragments. Ship Blueprint makes those tools work from one source of truth instead of stale chats and half-decisions.",
 			},
 			{
 				question: "What happens right after I pay?",
-				answer: `You go straight into the ${workspaceDisplayConfig.homeNoun} to lock the truth, compile the packs, and build your Ship Kit.`,
+				answer: `You go straight into the ${workspaceDisplayConfig.homeNoun} to lock the truth, compile the packs, and shape your Blueprint.`,
 			},
 		],
 	},
@@ -137,7 +138,7 @@ export const homePageContent = {
 			{
 				title: "The starter path",
 				highlightBefore: "Review the ",
-				highlight: "Starter Snapshot and starter system path",
+				highlight: "Ship by Sunday Blueprint path",
 				highlightAfter:
 					" before execution, so you can verify the repo before handoff.",
 				supporting:
@@ -153,10 +154,10 @@ export const homePageContent = {
 			"keep shipping from.",
 		],
 		intro:
-			"The packet gives the agents the truth. The starter gives that truth a real product shape: auth, billing, docs, protected workspace, and the seams to keep changing the product without losing the plot.",
+			"The blueprint gives the agents the truth. The starter gives that truth a real product shape: auth, billing, docs, protected workspace, and the seams to keep changing the product without losing the plot.",
 		capabilities: [
 			{
-				title: "Product rails",
+				title: "Product blueprint",
 				description:
 					"Start from a repo already shaped around your product, not a dead template you have to reinterpret every session.",
 			},
@@ -170,22 +171,22 @@ export const homePageContent = {
 				description:
 					"Guidance for Clerk, Convex, Stripe, Next.js, React, and Vercel helps agents make changes inside real constraints instead of blind file surgery.",
 			},
-		],
-		supportSection: {
-			title: "The support around the system",
-			intro:
-				"The starter is the core. You also get the guidance that helps you use it well under real weekend pressure.",
-			items: [
-				"Fast Pass Walkthroughs",
-				"Guided Ship Path",
-				"Product Sense Fundamentals",
-			],
-			bonus: {
-				title: bonusName,
+			{
+				title: "Reuse the product truth",
 				description:
-					"If product judgment is still the weak point, the included bonus strengthens the decisions behind the build without bloating the core offer.",
+					"The same product definition feeds the next feature without starting from a blank chat.",
 			},
-		},
+			{
+				title: "Extend without starting over",
+				description:
+					"The repo stays aligned to the same contract, so changes build on product truth instead of scattered edits.",
+			},
+			{
+				title: "Keep one source of truth",
+				description:
+					"When better models arrive next month, you move faster. You do not restart the project from zero.",
+			},
+		],
 	},
 	durabilitySection: {
 		label: "Durability",
@@ -206,7 +207,7 @@ export const homePageContent = {
 			{
 				title: "One review handoff",
 				description:
-					"The Starter Snapshot gives you a final downloadable handoff that is easier to trust, review, and reuse than scattered prompt history.",
+					"The Ship by Sunday Blueprint gives you one final downloadable handoff that is easier to trust, review, and reuse than scattered prompt history.",
 			},
 		],
 		closing:
@@ -217,17 +218,18 @@ export const homePageContent = {
 		titleLead: "Ship a real product",
 		titleAccent: "by Sunday",
 		intro:
-			"One payment for Ship Rails: the guided packet-first run, the Agent-Ready Packs, the Agent-First Starter Repo, and the guidance that keeps you shipping after the first weekend.",
+			"One payment for Ship Blueprint: the guided blueprint-first run, the Agent-Ready Packs, the Ship by Sunday Blueprint, and the guidance that keeps you shipping after the first weekend.",
 		priceDisplay: productConfig.priceDisplay,
 		eyebrow: "One-time payment. Lifetime access.",
 		ctaTitle: "Get the system",
-		trustLine: `After checkout, you go straight into the ${workspaceDisplayConfig.homeNoun} to lock the truth, compile the packs, and build your Ship Kit.`,
+		trustLine: `After checkout, you go straight into the ${workspaceDisplayConfig.homeNoun} to lock the truth, compile the packs, and shape your Blueprint.`,
 		includes: [
 			"Guided product intake and review workspace",
 			"Agent-Ready Packs",
-			"Agent-First Starter Repo",
+			"Ship by Sunday Blueprint",
 			"Fast Pass Walkthroughs",
 			"Guided Ship Path",
+			"Product Sense Fundamentals",
 		],
 		bonus: {
 			label: "Also included",

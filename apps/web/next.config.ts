@@ -23,7 +23,10 @@ const nextConfig: NextConfig = {
 			},
 		],
 	},
-	transpilePackages: ["@manmeetsai/packet-compiler"],
+	transpilePackages: [
+		"@shipbysunday/blueprint-compiler",
+		"@shipbysunday/blueprint-presentation",
+	],
 	images: {
 		remotePatterns: [
 			{

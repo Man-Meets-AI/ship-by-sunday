@@ -140,7 +140,7 @@ Work from the repository root.
 
 1. Re-read the current conflicting source-of-truth files:
 
-   cd /Users/parkerrex/Projects/manmeetsai-workspace
+   cd /Users/parkerrex/Projects/ship-by-sunday
    sed -n '1,220p' docs/release-workflow.md
    sed -n '1,220p' apps/web/content/docs/ship-live.mdx
    sed -n '1,260p' .github/workflows/ci.yml
@@ -171,7 +171,7 @@ At minimum, the implementation of this plan must let a novice answer all of the 
 
 Run the narrowest relevant checks after workflow/doc changes:
 
-   cd /Users/parkerrex/Projects/manmeetsai-workspace
+   cd /Users/parkerrex/Projects/ship-by-sunday
    bun run qa:validate
    ruby -e 'require "yaml"; YAML.load_file(".github/workflows/ci.yml"); YAML.load_file(".github/workflows/dev-staging-proof.yml")'
    node -e 'JSON.parse(require("fs").readFileSync("package.json","utf8"))'
@@ -212,9 +212,9 @@ Useful evidence captured during implementation:
    - `ruby -e 'require "yaml"; YAML.load_file(".github/workflows/ci.yml"); YAML.load_file(".github/workflows/dev-staging-proof.yml"); puts "workflow yaml ok"'`
      `workflow yaml ok`
 
-   Package transcript:
-   - `node -e 'JSON.parse(require("fs").readFileSync("package.json","utf8")); console.log("package json ok")'`
-     `package json ok`
+   Blueprint transcript:
+   - `node -e 'JSON.parse(require("fs").readFileSync("package.json","utf8")); console.log("blueprint json ok")'`
+     `blueprint json ok`
 
    Diff hygiene transcript:
    - `git diff --check -- ...`

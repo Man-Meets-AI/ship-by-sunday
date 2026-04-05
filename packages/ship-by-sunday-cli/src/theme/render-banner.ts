@@ -128,11 +128,7 @@ export function renderStartupBanner(options: CliRenderOptions) {
 
 	const subtitle = [
 		paint("Ship by Sunday CLI", "focus", options),
-		paint(
-			"local packet intake and starter snapshot generation",
-			"muted",
-			options,
-		),
+		paint("local blueprint intake and blueprint generation", "muted", options),
 	].join(` ${paint("•", "frame", options)} `);
 
 	return `${logoSection.join("\n")}\n${subtitle}`;

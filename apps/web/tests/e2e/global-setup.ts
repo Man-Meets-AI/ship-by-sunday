@@ -1,12 +1,13 @@
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
-import { mkdir } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 
 import { chromium, type FullConfig, type Page } from "@playwright/test";
 
 import {
 	authStateDirectory,
+	getAuthenticatedE2EPrereqProblems,
 	memberWithAccessEmail,
 	memberWithAccessPassword,
 	memberWithAccessStorageStatePath,
@@ -36,6 +37,15 @@ export default async function globalSetup(config: FullConfig) {
 		return;
 	}
 
+	const prereqProblems = getAuthenticatedE2EPrereqProblems();
+	if (prereqProblems.length > 0) {
+		throw new Error(
+			`Authenticated Playwright bootstrap is not configured correctly.\n${prereqProblems
+				.map((problem, index) => `${index + 1}. ${problem}`)
+				.join("\n")}`,
+		);
+	}
+
 	loadHostedConvexEnv();
 	await mkdir(authStateDirectory, { recursive: true });
 	await createStorageState(baseURL, {
@@ -47,7 +57,7 @@ export default async function globalSetup(config: FullConfig) {
 				clerkUserId,
 				kind: "reset",
 			});
-			await syncPacketProgressState({
+			await syncBlueprintProgressState({
 				clerkUserId,
 				kind: "reset",
 			});
@@ -62,7 +72,7 @@ export default async function globalSetup(config: FullConfig) {
 				clerkUserId,
 				kind: "grant",
 			});
-			await syncPacketProgressState({
+			await syncBlueprintProgressState({
 				clerkUserId,
 				kind: "seed_complete",
 			});
@@ -124,15 +134,38 @@ async function createStorageState(
 		syncProductAccessAfterSignIn?: (clerkUserId: string) => Promise<void>;
 	},
 ) {
+	const consoleMessages: string[] = [];
+	const pageErrors: string[] = [];
 	const browser = await chromium.launch();
 	const page = await browser.newPage({ baseURL });
+	page.on("console", (message) => {
+		consoleMessages.push(`[${message.type()}] ${message.text().trim()}`.trim());
+	});
+	page.on("pageerror", (error) => {
+		pageErrors.push(error.message);
+	});
 
 	try {
-		const clerkUserId = await signIn(page, { email, password });
+		const clerkUserId = await signIn(
+			page,
+			{ email, password },
+			{ consoleMessages, pageErrors },
+		);
 		if (syncProductAccessAfterSignIn) {
 			await syncProductAccessAfterSignIn(clerkUserId);
 		}
 		await page.context().storageState({ path: storageStatePath });
+	} catch (error) {
+		const artifactSummary = await captureAuthBootstrapArtifacts(page, email);
+		throw new Error(
+			`Failed to create Playwright auth storage state for ${email} at ${baseURL} (${storageStatePath}). ${await describeAuthBootstrapPage(
+				page,
+				{
+					consoleMessages,
+					pageErrors,
+				},
+			)}. ${artifactSummary}. ${formatAuthBootstrapError(error)}`,
+		);
 	} finally {
 		await browser.close();
 	}
@@ -147,66 +180,73 @@ async function signIn(
 		email: string;
 		password: string;
 	},
+	diagnostics: {
+		consoleMessages: string[];
+		pageErrors: string[];
+	},
 ) {
-	await page.goto("/sign-in?redirect_url=%2Fstart", {
+	const signInPath = "/sign-in?redirect_url=%2Fblueprint";
+	await page.goto(signInPath, {
 		waitUntil: "networkidle",
 	});
-	await page.waitForFunction(
-		() => {
-			const runtimeWindow = window as Window & {
-				Clerk?: {
-					loaded?: boolean;
-					user?: { id?: string | null };
-					session?: { id?: string | null };
+	try {
+		await page.waitForFunction(
+			() => {
+				const runtimeWindow = window as Window & {
+					Clerk?: {
+						loaded?: boolean;
+						user?: { id?: string | null };
+						session?: { id?: string | null };
+					};
 				};
-			};
 
-			return runtimeWindow.Clerk?.loaded === true;
-		},
-		{
-			timeout: 15_000,
-		},
-	);
+				return runtimeWindow.Clerk?.loaded === true;
+			},
+			{
+				timeout: 15_000,
+			},
+		);
+	} catch (error) {
+		throw new Error(
+			`Clerk did not finish loading while bootstrapping Playwright auth for ${email} at ${page.url()}. Expected ${signInPath}. ${await describeAuthBootstrapPage(page, diagnostics)}. ${formatAuthBootstrapError(error)}`,
+		);
+	}
 	await page.getByLabel(/^email$/i).fill(email);
 	await page.getByLabel(/^password$/i).fill(password);
 	await page.getByRole("button", { name: /^sign in$/i }).click();
 	try {
-		await page.waitForURL((url) => url.pathname === "/start", {
+		await page.waitForURL((url) => url.pathname === "/blueprint", {
 			timeout: 15_000,
 		});
-	} catch {
-		const alertText =
-			(
-				await page
-					.getByRole("alert")
-					.allTextContents()
-					.catch(() => [])
-			)
-				.map((text) => text.trim())
-				.filter(Boolean)
-				.join(" | ") || "No alert text rendered.";
+	} catch (error) {
 		throw new Error(
-			`Failed to establish a QA session for ${email}. Expected /start after sign-in, got ${page.url()}. ${alertText}`,
+			`Playwright auth bootstrap reached the sign-in form for ${email} but never returned to /blueprint. ${await describeAuthBootstrapPage(page, diagnostics)}. ${formatAuthBootstrapError(error)}`,
 		);
 	}
-	await page.waitForFunction(
-		() => {
-			const runtimeWindow = window as Window & {
-				Clerk?: {
-					user?: { id?: string | null };
-					session?: { id?: string | null };
+	try {
+		await page.waitForFunction(
+			() => {
+				const runtimeWindow = window as Window & {
+					Clerk?: {
+						user?: { id?: string | null };
+						session?: { id?: string | null };
+					};
 				};
-			};
 
-			return (
-				Boolean(runtimeWindow.Clerk?.user?.id) &&
-				Boolean(runtimeWindow.Clerk?.session?.id)
-			);
-		},
-		{
-			timeout: 15_000,
-		},
-	);
+				return (
+					Boolean(runtimeWindow.Clerk?.user?.id) &&
+					Boolean(runtimeWindow.Clerk?.session?.id)
+				);
+			},
+			{
+				timeout: 15_000,
+			},
+		);
+	} catch (error) {
+		throw new Error(
+			`Playwright auth bootstrap reached /blueprint for ${email}, but Clerk never exposed a user/session pair. ${await describeAuthBootstrapPage(page, diagnostics)}. ${formatAuthBootstrapError(error)}`,
+		);
+	}
 
 	const clerkUserId = await page.evaluate(() => {
 		const runtimeWindow = window as Window & {
@@ -223,6 +263,84 @@ async function signIn(
 	}
 
 	return clerkUserId;
+}
+
+async function describeAuthBootstrapPage(
+	page: Page,
+	diagnostics: {
+		consoleMessages: string[];
+		pageErrors: string[];
+	},
+) {
+	const [title, alertText, clerkState] = await Promise.all([
+		page.title().catch(() => ""),
+		page
+			.getByRole("alert")
+			.allTextContents()
+			.catch(() => []),
+		page
+			.evaluate(() => {
+				const runtimeWindow = window as Window & {
+					Clerk?: {
+						loaded?: boolean;
+						user?: { id?: string | null };
+						session?: { id?: string | null };
+					};
+				};
+
+				return {
+					loaded: runtimeWindow.Clerk?.loaded ?? null,
+					userId: runtimeWindow.Clerk?.user?.id ?? null,
+					sessionId: runtimeWindow.Clerk?.session?.id ?? null,
+				};
+			})
+			.catch(() => ({
+				loaded: null,
+				userId: null,
+				sessionId: null,
+			})),
+	]);
+
+	const normalizedAlertText =
+		alertText
+			.map((text) => text.trim())
+			.filter(Boolean)
+			.join(" | ") || "No alert text rendered.";
+
+	const recentConsoleMessages =
+		diagnostics.consoleMessages.slice(-5).join(" | ") ||
+		"No console messages captured.";
+	const recentPageErrors =
+		diagnostics.pageErrors.slice(-3).join(" | ") || "No page errors captured.";
+
+	return `page=${page.url()}, title=${title || "Unknown title"}, alert=${normalizedAlertText}, clerkLoaded=${String(clerkState.loaded)}, clerkUser=${clerkState.userId ?? "null"}, clerkSession=${clerkState.sessionId ?? "null"}, console=${recentConsoleMessages}, pageErrors=${recentPageErrors}`;
+}
+
+function formatAuthBootstrapError(error: unknown) {
+	if (error instanceof Error) {
+		return error.message;
+	}
+
+	return String(error);
+}
+
+async function captureAuthBootstrapArtifacts(page: Page, email: string) {
+	const safeEmail = email.replaceAll(/[^a-z0-9]+/gi, "-").toLowerCase();
+	const artifactDirectory = path.join(authStateDirectory, "bootstrap-failures");
+	await mkdir(artifactDirectory, { recursive: true });
+
+	const screenshotPath = path.join(artifactDirectory, `${safeEmail}.png`);
+	const htmlPath = path.join(artifactDirectory, `${safeEmail}.html`);
+
+	await page
+		.screenshot({ path: screenshotPath, fullPage: true })
+		.catch(() => {});
+	const content = await page.content().catch(() => null);
+	if (content) {
+		await writeFile(htmlPath, content, "utf8").catch(() => {});
+	}
+
+	return `Artifacts: screenshot=${screenshotPath}, html=${htmlPath}`;
 }
 
 function isSandboxProjectRequested() {
@@ -279,7 +397,7 @@ async function syncProductAccessState({
 	);
 }
 
-async function syncPacketProgressState({
+async function syncBlueprintProgressState({
 	clerkUserId,
 	kind,
 }: {
@@ -289,14 +407,14 @@ async function syncPacketProgressState({
 	const result =
 		kind === "seed_complete"
 			? await runConvexInternalCommand({
-					functionName: "packet:seedCompleteProjectDefinitionForQa",
+					functionName: "blueprint:seedCompleteProjectDefinitionForQa",
 					args: {
 						clerkUserId,
 					},
 					env: process.env,
 				})
 			: await runConvexInternalCommand({
-					functionName: "packet:resetProjectDefinitionForQa",
+					functionName: "blueprint:resetProjectDefinitionForQa",
 					args: {
 						clerkUserId,
 					},
@@ -309,8 +427,8 @@ async function syncPacketProgressState({
 
 	const actionLabel =
 		kind === "seed_complete"
-			? "seed complete packet progress"
-			: "reset packet progress";
+			? "seed complete blueprint progress"
+			: "reset blueprint progress";
 	throw new Error(
 		`Failed to ${actionLabel} for ${clerkUserId}. ${result.stderr || result.stdout || "No command output."}`,
 	);

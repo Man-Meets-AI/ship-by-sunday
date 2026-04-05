@@ -9,8 +9,8 @@ const redirectMock = vi.fn((href: string) => {
 
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
-		packet: {
-			getPacketResumeDestination: "getPacketResumeDestination",
+		blueprint: {
+			getBlueprintResumeDestination: "getBlueprintResumeDestination",
 		},
 	},
 }));
@@ -48,11 +48,11 @@ describe("workspace execute route", () => {
 
 	it("redirects locked visitors back to review", async () => {
 		fetchAuthenticatedQueryMock.mockImplementation(async (query) => {
-			if (query === "getPacketResumeDestination") {
+			if (query === "getBlueprintResumeDestination") {
 				return {
 					destination: "/review",
 					kind: "review",
-					packetStageId: "review",
+					blueprintStageId: "review",
 					postReviewTargets: null,
 				};
 			}
@@ -71,11 +71,11 @@ describe("workspace execute route", () => {
 
 	it("redirects unlocked visitors into the canonical build lessons target", async () => {
 		fetchAuthenticatedQueryMock.mockImplementation(async (query) => {
-			if (query === "getPacketResumeDestination") {
+			if (query === "getBlueprintResumeDestination") {
 				return {
 					destination: getLessonHref("iterate-the-product-with-ai"),
 					kind: "post_review",
-					packetStageId: null,
+					blueprintStageId: null,
 					postReviewTargets: {
 						reviewDestination: "/review",
 						buildLessonsDestination: getLessonHref(

@@ -8,7 +8,7 @@ import { SettingsAccountCard } from "./settings-account-card";
 export function SettingsPageContent() {
 	const starterRepoEnabled = isStarterModuleEnabled("starterRepo");
 	const settingsDescription = starterRepoEnabled
-		? `Manage your account, Codex connection, and starter repository for ${productConfig.name}.`
+		? `Manage your account, Codex connection, and Blueprint access for ${productConfig.name}.`
 		: `Manage your account and Codex connection for ${productConfig.name}.`;
 
 	return (

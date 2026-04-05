@@ -1,7 +1,9 @@
-import type { CanonicalProjectFactKey } from "@manmeetsai/packet-compiler";
 import { writeJsonResult } from "../cli-json";
 import { createCliError } from "../cli-errors";
-import { parseFieldSelector } from "../field-contract";
+import {
+	parseFieldSelector,
+	type CanonicalProjectFactKey,
+} from "../field-contract";
 import {
 	applyDraftMutations,
 	readDraftInputSource,
