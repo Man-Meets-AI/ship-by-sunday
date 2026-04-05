@@ -18,7 +18,6 @@ apps/web/tests/integration-ui/checkout-success-view.test.tsx,integration-ui,ACCE
 apps/web/tests/integration-ui/copy-prompt-resource-card.test.tsx,integration-ui,CONTENT-01,General blueprint or support behavior.,keep,,Defaulted into the blueprint content bucket pending a more specific mapping.
 apps/web/tests/integration-ui/error-boundary-screen.test.tsx,integration-ui,CONTENT-01,General blueprint or support behavior.,keep,,Defaulted into the blueprint content bucket pending a more specific mapping.
 apps/web/tests/integration-ui/home-page-primary-cta.test.tsx,integration-ui,VIS-01|VIS-02,Homepage and public discovery behavior.,keep,,These tests still map to visitor-first scenarios.
-apps/web/tests/integration-ui/legacy-blueprint-route-redirects.test.tsx,integration-ui,BLUEPRINT-07|BLUEPRINT-09,Legacy blueprint route redirects and compatibility anchors.,keep,,This file now proves the compatibility redirect contract into `/blueprint`.
 apps/web/tests/integration-ui/post-checkout-sign-up-page.test.tsx,integration-ui,AUTH-01,Sign-in and auth redirect behavior.,keep,,These tests still map cleanly to auth scenarios.
 apps/web/tests/integration-ui/reset-password-page.test.tsx,integration-ui,CONTENT-01,General blueprint or support behavior.,keep,,Defaulted into the blueprint content bucket pending a more specific mapping.
 apps/web/tests/integration-ui/sign-in-page.test.tsx,integration-ui,AUTH-01,Sign-in and auth redirect behavior.,keep,,These tests still map cleanly to auth scenarios.
@@ -49,6 +48,7 @@ apps/web/tests/unit/blueprint-stage-save-feedback.test.tsx,unit,BLUEPRINT-02|BLU
 apps/web/tests/unit/blueprint-stage-scale-field.test.tsx,unit,CONTENT-01,General blueprint or support behavior.,keep,,Defaulted into the blueprint content bucket pending a more specific mapping.
 apps/web/tests/unit/blueprint-stage-step-field.test.tsx,unit,CONTENT-01,General blueprint or support behavior.,keep,,Defaulted into the blueprint content bucket pending a more specific mapping.
 apps/web/tests/unit/blueprint-step-save-feedback.test.ts,unit,BLUEPRINT-02|BLUEPRINT-07,Blueprint step save classification and message helpers.,merge,BLUEPRINT-07 coverage,Useful implementation backstop for Continue-only save feedback and completeness classification.
+apps/web/tests/unit/blueprint-theme-tokens.test.ts,unit,CONTENT-01,General blueprint or support behavior.,keep,,Defaulted into the blueprint content bucket pending a more specific mapping.
 apps/web/tests/unit/bonus-course-card.test.tsx,unit,CONTENT-01,Bonus module card behavior.,merge,CONTENT-01 coverage,This is secondary product content rather than a ship-critical journey.
 apps/web/tests/unit/bonus-lesson-page.test.tsx,unit,BLUEPRINT-08,View-only bonus lesson shell behavior.,keep,,This file directly proves the restored bonus lesson page stays video-first and uses the static prompt-card contract.
 apps/web/tests/unit/bonus-mission-page.test.tsx,unit,BLUEPRINT-08,View-only bonus library home behavior.,keep,,This file directly proves the restored bonus library labels
@@ -88,7 +88,6 @@ apps/web/tests/unit/guided-form-lessons.test.tsx,unit,CONTENT-01,General bluepri
 apps/web/tests/unit/home-page-content.test.ts,unit,VIS-01|VIS-02,Homepage and public discovery behavior.,keep,,These tests still map to visitor-first scenarios.
 apps/web/tests/unit/home-page-render-model.test.ts,unit,VIS-01|VIS-02,Homepage and public discovery behavior.,keep,,These tests still map to visitor-first scenarios.
 apps/web/tests/unit/home-page-structured-data.test.ts,unit,VIS-01|VIS-02,Homepage and public discovery behavior.,keep,,These tests still map to visitor-first scenarios.
-apps/web/tests/unit/legacy-blueprint-route-redirects.test.ts,unit,BLUEPRINT-09,Legacy blueprint route redirects and compatibility anchors.,keep,,This file now proves the centralized redirect map directly.
 apps/web/tests/unit/legacy-lesson-routes.test.ts,unit,BLUEPRINT-08,Legacy lesson alias behavior.,rewrite,Canonical compatibility route coverage,These tests still talk about legacy aliases and should be rewritten around the explicit compatibility scenario.
 apps/web/tests/unit/lesson-layout.test.ts,unit,BLUEPRINT-07|CONTENT-01,Blueprint funnel lesson and curriculum behavior.,keep,,These are still useful but should roll up under blueprint scenarios.
 apps/web/tests/unit/lesson-shells.test.tsx,unit,BLUEPRINT-07|CONTENT-01,Blueprint funnel lesson and curriculum behavior.,keep,,These are still useful but should roll up under blueprint scenarios.

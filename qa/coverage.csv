@@ -41,7 +41,6 @@ BLUEPRINT-08,unit,apps/web/tests/unit/app-workspace-mission-page.test.tsx,mapped
 BLUEPRINT-08,unit,apps/web/tests/unit/app-workspace-lesson-page.test.tsx,mapped_existing,medium,Directly proves locked `/lesson/<lessonKey>` messaging before unlock and the restored view-only lesson route after unlock.
 BLUEPRINT-08,unit,apps/web/tests/unit/bonus-mission-page.test.tsx,mapped_existing,medium,Directly proves the restored library copy and natural block ordering for the post-review bonus home.
 BLUEPRINT-08,unit,apps/web/tests/unit/bonus-lesson-page.test.tsx,mapped_existing,medium,Directly proves the restored bonus lesson shell stays video-first and does not render the old workbench.
-BLUEPRINT-09,integration_ui,apps/web/tests/integration-ui/legacy-blueprint-route-redirects.test.tsx,mapped_existing,high,Directly proves legacy stage entry redirects back to the canonical blueprint anchors.
 BLUEPRINT-09,integration_ui,apps/web/tests/integration-ui/blueprint-review-page.test.tsx,mapped_existing,high,Directly proves locked review entry redirects back to the first incomplete blueprint stage.
 SETTINGS-01,unit,apps/web/tests/unit/settings-page.test.tsx,mapped_existing,medium,Core settings rendering is covered.
 SETTINGS-01,sandbox_e2e,apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts,mapped_existing,medium,Tagged @default_ship and now checks the canonical /settings surface.
