@@ -21,7 +21,6 @@ describe("repo generation", () => {
 				"apps/web/app",
 				"apps/web/tests",
 				"packages/blueprint-compiler/src",
-				"packages/blueprint-compiler/tests",
 			]),
 		);
 		expect(manifest.includedFiles).toEqual(
@@ -56,10 +55,13 @@ describe("repo generation", () => {
 
 		expect(snapshotPaths).toEqual(
 			expect.arrayContaining([
+				"DESIGN.md",
 				"apps/web/config/product.ts",
+				"apps/web/config/generated-design-system.ts",
 				"apps/web/features/marketing/content/home.ts",
 				"docs/README.md",
 				"docs/build/docs/prompt.md",
+				"docs/facts/design-system.json",
 				".plans/PLANS.md",
 				"apps/web/.env.production.example",
 				"qa/README.md",

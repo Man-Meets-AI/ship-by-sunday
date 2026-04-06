@@ -11,7 +11,7 @@ Use it before changing any user-facing UI. It documents the shared neutral app t
 ## What lives here
 
 - `apps/web/`: the main Next.js product, docs, protected workspace, checkout, and optional Codex runtime.
-- `packages/blueprint-compiler/`: the generator behind the customer-facing Ship by Sunday Blueprint.
+- `packages/blueprint-compiler/`: the generator behind the customer-facing Ship by Sunday Blueprint, including the downloaded repo’s generated root `DESIGN.md`, machine-readable design snapshot, and starter-runtime design config.
 - `packages/ship-by-sunday-cli/`: local blueprint-intake and snapshot-generation CLI.
 - `qa/`: QA control plane, scenario packs, personas, and run evidence.
 - `docs/`: long-form runbooks, ExecPlans, prompts, and historical product context.

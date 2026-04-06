@@ -1,4 +1,5 @@
 import type { CanonicalProjectFactsDraft } from "./schema";
+import { buildGeneratedDesignSystem } from "../design-system/generated-design-system";
 
 const DEFAULT_THEME_PRESET = "a0";
 const DEFAULT_SCOPE_OUT = ["Provider setup wizard", "GitHub invite flow"];
@@ -333,6 +334,7 @@ export function deriveBlueprintFacts(
 	const pricing = derivePricing(priceUsdCents, facts.pricing);
 	const outcomeStatement = deriveOutcomeStatement(facts);
 	const successLooksLike = deriveSuccessLooksLike(facts);
+	const generatedDesignSystem = buildGeneratedDesignSystem(facts);
 
 	return {
 		...facts,
@@ -386,27 +388,29 @@ export function deriveBlueprintFacts(
 		),
 		visual_thesis:
 			trimText(facts.visual_thesis) ||
-			"Editorial product OS with strong hierarchy and practical polish.",
+			generatedDesignSystem.derivedFacts.visualThesis,
 		content_plan:
 			trimText(facts.content_plan) ||
-			"Lead with the blueprint outcome, then explain each unlock.",
+			generatedDesignSystem.derivedFacts.contentPlan,
 		interaction_thesis:
 			trimText(facts.interaction_thesis) ||
-			"Guided multi-step intake with explicit continue actions.",
+			generatedDesignSystem.derivedFacts.interactionThesis,
 		design_tokens:
 			trimText(facts.design_tokens) ||
-			"Neutral surfaces with a high-contrast action color.",
+			generatedDesignSystem.derivedFacts.designTokens,
 		typography_direction:
 			trimText(facts.typography_direction) ||
-			"Readable grotesk headline with sober body copy.",
+			generatedDesignSystem.derivedFacts.typographyDirection,
 		imagery_direction:
 			trimText(facts.imagery_direction) ||
-			"Product-first diagrams instead of lifestyle photography.",
+			generatedDesignSystem.derivedFacts.imageryDirection,
 		layout_direction:
 			trimText(facts.layout_direction) ||
-			"Two-panel workbench shell with clear blueprint previews.",
+			generatedDesignSystem.derivedFacts.layoutDirection,
 		brand_assets: listOrFallback(facts.brand_assets, DEFAULT_BRAND_ASSETS),
-		existing_system_mode: trimText(facts.existing_system_mode) || "net_new",
+		existing_system_mode:
+			trimText(facts.existing_system_mode) ||
+			generatedDesignSystem.derivedFacts.existingSystemMode,
 		hero_goal:
 			trimText(facts.hero_goal) ||
 			"Explain the blueprint-first promise clearly.",
@@ -419,7 +423,7 @@ export function deriveBlueprintFacts(
 			trimText(facts.section_narrative) ||
 			"Problem, blueprint promise, unlock flow, proof, call to action.",
 		copy_tone:
-			trimText(facts.copy_tone) || "Direct, practical, and outcome-led.",
+			trimText(facts.copy_tone) || generatedDesignSystem.derivedFacts.copyTone,
 		marketing_goals: listOrFallback(
 			facts.marketing_goals,
 			DEFAULT_MARKETING_GOALS,

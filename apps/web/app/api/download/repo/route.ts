@@ -1,5 +1,8 @@
 import { getBlueprintDownloadContext } from "@/features/blueprint-flow/server/downloads";
-import { getStarterSnapshotArchiveFileName } from "@shipbysunday/blueprint-compiler";
+import {
+	buildRepoGenerationManifest,
+	getStarterSnapshotArchiveFileName,
+} from "@shipbysunday/blueprint-compiler";
 
 export const runtime = "nodejs";
 
@@ -21,12 +24,15 @@ export async function GET() {
 	const archive = await blueprintCompilerServer.buildReviewDownloadZip(
 		context.canonicalProjectDefinition,
 	);
+	const manifest = buildRepoGenerationManifest(
+		context.canonicalProjectDefinition,
+	);
 
 	return new Response(new Uint8Array(archive), {
 		status: 200,
 		headers: {
 			"content-type": "application/zip",
-			"content-disposition": `attachment; filename="${getStarterSnapshotArchiveFileName()}"`,
+			"content-disposition": `attachment; filename="${getStarterSnapshotArchiveFileName(manifest.repoName)}"`,
 		},
 	});
 }

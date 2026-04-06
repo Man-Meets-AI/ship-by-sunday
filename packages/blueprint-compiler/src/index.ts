@@ -33,6 +33,10 @@ export {
 	type BlueprintReadinessResult,
 } from "./readiness/evaluate-blueprint-readiness";
 export {
+	buildRepoGenerationManifest,
+	type RepoGenerationManifest,
+} from "./repo-generation/build-repo-generation-manifest";
+export {
 	deriveStageStatus,
 	type DerivedStageStatus,
 	type BlueprintStageStatus,
@@ -64,3 +68,21 @@ export {
 	type BlueprintFieldPromptKind,
 	type BlueprintFieldSavePayload,
 } from "./blueprint-field-helpers";
+export {
+	buildGeneratedDesignSystem,
+	renderGeneratedDesignMarkdown,
+	type GeneratedDesignSystem,
+} from "./design-system/generated-design-system";
+export {
+	buildPresetPreviewCssVars,
+	decodePresetSafe,
+	getPresetFontFamily,
+	getPresetFontLabel,
+	getPresetGoogleFontsUrl,
+	getPresetStyleMeta,
+	getPresetThemeHex,
+	resolvePresetDesignSystem,
+	type DesignTokenMap,
+	type PresetStyleMeta,
+	type ResolvedPresetDesignSystem,
+} from "./design-system/preset-design-system";
