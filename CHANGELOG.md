@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-06
+
+### Changed
+
+- Compiled the blueprint theme preset into a shared design-system derivation inside `@shipbysunday/blueprint-compiler`, so preset-driven colors, typography, geometry, sidebar treatment, and anti-pattern guidance now come from one source of truth instead of duplicated app-only preview logic.
+- Added generated starter-repo design artifacts: snapshots now ship a root `DESIGN.md`, `docs/facts/design-system.json`, and `apps/web/config/generated-design-system.ts`, and the generated starter guidance now points future contributors and coding agents at `DESIGN.md` before UI changes.
+- Wired the tracked app shell to consume the generated design system through the layout, global CSS token bridge, and manifest theme color so the starter runtime actually uses the compiled design system rather than merely documenting it.
+
 ## 2026-04-04
 
 ### Changed

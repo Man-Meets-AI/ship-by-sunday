@@ -54,15 +54,11 @@ export const customerSafeAppDirectoryPaths = [
 ] as const;
 
 export const customerSafeBlueprintCompilerFilePaths = [
-	"packages/blueprint-compiler/AGENTS.md",
 	"packages/blueprint-compiler/package.json",
-	"packages/blueprint-compiler/tsconfig.json",
-	"packages/blueprint-compiler/vitest.config.ts",
 ] as const;
 
 export const customerSafeBlueprintCompilerDirectoryPaths = [
 	"packages/blueprint-compiler/src",
-	"packages/blueprint-compiler/tests",
 ] as const;
 
 export const blueprintCompilerTemplateSourceTracePaths = [
@@ -71,6 +67,7 @@ export const blueprintCompilerTemplateSourceTracePaths = [
 ] as const;
 
 const excludedSnapshotFileSuffixes = [
+	".DS_Store",
 	".env.local",
 	".env.production",
 	".mp4",

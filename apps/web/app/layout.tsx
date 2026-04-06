@@ -11,6 +11,7 @@ const bebasNeue = Bebas_Neue({
 });
 
 import { Toaster } from "@/components/ui/sonner";
+import { generatedDesignSystem } from "@/config/generated-design-system";
 import { manifestConfig, productConfig, routeConfig } from "@/config/product";
 import { sessionTaskUrls } from "@/features/auth/sign-in/sign-in-route-utils";
 import { clerkProviderAppearance } from "@/lib/clerk-auth-appearance";
@@ -18,9 +19,13 @@ import { ConvexClientProvider } from "@/platform/convex/convex-client-provider";
 import { publicEnv } from "@/platform/env/public";
 import { serverEnv } from "@/platform/env/server";
 import { getMetadataBase } from "@/platform/next/metadata-base";
+import { buildGeneratedDesignSystemCss } from "@/lib/generated-design-system-css";
 import "./globals.css";
 
 void publicEnv.NEXT_PUBLIC_CLERK_SIGN_IN_URL;
+const generatedDesignSystemCss = buildGeneratedDesignSystemCss(
+	generatedDesignSystem,
+);
 
 export const metadata: Metadata = {
 	metadataBase: getMetadataBase(),
@@ -70,6 +75,15 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en" suppressHydrationWarning>
+			<head>
+				{generatedDesignSystem.preset.font.googleFontsUrl ? (
+					<link
+						rel="stylesheet"
+						href={generatedDesignSystem.preset.font.googleFontsUrl}
+					/>
+				) : null}
+				<style id="generated-design-system">{generatedDesignSystemCss}</style>
+			</head>
 			<body className={bebasNeue.variable}>
 				<ClerkProvider
 					appearance={clerkProviderAppearance}

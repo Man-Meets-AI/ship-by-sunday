@@ -8,6 +8,7 @@ import {
 	buildRepoGenerationManifest,
 	type RepoGenerationManifest,
 } from "./build-repo-generation-manifest";
+import { renderGeneratedDesignSystemFiles } from "./render-generated-design-system-files";
 import { renderGeneralizedStarterFiles } from "./render-generalized-starter-files";
 import { isExcludedSnapshotPath } from "./repo-download-source-contract";
 import { renderTemplateOverrides } from "./render-template-overrides";
@@ -81,6 +82,7 @@ export async function materializeRepoSnapshot(
 	const blueprintFiles = await renderFullBlueprintTree(projectDefinition);
 	const overrides = [
 		...renderTemplateOverrides(projectDefinition),
+		...renderGeneratedDesignSystemFiles(projectDefinition),
 		...renderGeneralizedStarterFiles(projectDefinition),
 	];
 	const overrideMap = new Map(overrides.map((file) => [file.path, file]));

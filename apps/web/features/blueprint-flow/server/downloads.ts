@@ -1,10 +1,7 @@
 import "server-only";
 
 import { fetchQuery } from "convex/nextjs";
-import {
-	canonicalProjectFactsSchema,
-	createCanonicalProjectDefinition,
-} from "@shipbysunday/blueprint-compiler";
+import { createCanonicalProjectDefinition } from "@shipbysunday/blueprint-compiler";
 import type { FunctionReturnType } from "convex/server";
 import { api } from "@/convex/_generated/api";
 import { getConvexServerSession } from "@/platform/auth/convex-auth";
@@ -47,7 +44,7 @@ export async function getBlueprintDownloadContext(): Promise<{
 		canonicalProjectDefinition: createCanonicalProjectDefinition({
 			clerkUserId: projectDefinition.clerkUserId,
 			productKey: projectDefinition.productKey,
-			facts: canonicalProjectFactsSchema.parse(projectDefinition.facts),
+			facts: projectDefinition.facts,
 			placeholdersInUse: projectDefinition.placeholdersInUse,
 			createdAt: projectDefinition.createdAt,
 			updatedAt: projectDefinition.updatedAt,

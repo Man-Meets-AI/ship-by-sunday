@@ -6,6 +6,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+	--font-sans: var(--design-font-sans, ui-sans-serif, system-ui, sans-serif);
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--color-card: var(--card);
@@ -128,7 +129,7 @@
 	}
 
 	body {
-		@apply bg-background text-foreground transition-colors duration-300;
+		@apply bg-background text-foreground font-sans transition-colors duration-300;
 	}
 
 	::selection {

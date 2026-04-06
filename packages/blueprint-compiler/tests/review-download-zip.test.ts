@@ -21,9 +21,12 @@ describe("review download zip", () => {
 		expect(entries).toEqual(
 			expect.arrayContaining([
 				"ship-by-sunday-os/",
+				"ship-by-sunday-os/DESIGN.md",
 				"ship-by-sunday-os/README.md",
+				"ship-by-sunday-os/apps/web/config/generated-design-system.ts",
 				"ship-by-sunday-os/docs/README.md",
 				"ship-by-sunday-os/docs/build/docs/prompt.md",
+				"ship-by-sunday-os/docs/facts/design-system.json",
 				"ship-by-sunday-os/apps/web/.env.production.example",
 				"ship-by-sunday-os/qa/README.md",
 			]),
