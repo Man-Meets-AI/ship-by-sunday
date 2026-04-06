@@ -17,11 +17,14 @@
 ## Public output contract
 
 - one customer-safe Blueprint snapshot
+- repo-root `DESIGN.md`
 - generated docs under repo-root `docs/`
 - repo-root `README.md` override
 - repo-root `docs/README.md`
 - repo-root `docs/facts/project-definition.json`
+- repo-root `docs/facts/design-system.json`
 - starter overrides for `apps/web/config/product.ts` and `apps/web/features/marketing/content/home.ts`
+- starter override for `apps/web/config/generated-design-system.ts`
 - design, marketing, build, and prompt materials are generated inside that one repo output; do not treat them as separate public deliverables unless the live product changes first
 
 ## Planning behavior

@@ -17,10 +17,36 @@ function renderAssistantGuide(
 			"",
 			"## Start Here",
 			"",
-			"- Read `README.md`, then open `docs/README.md` and `docs/facts/project-definition.json`.",
+			"- Read `README.md`, then open `DESIGN.md`, `docs/README.md`, and `docs/facts/project-definition.json`.",
+			"- Treat `DESIGN.md` as the visual source of truth before changing layout, styling, theming, motion, or component presentation.",
+			"- When using an AI coding or design tool, explicitly tell it to follow `DESIGN.md` and the generated design snapshot before it proposes UI changes.",
 			"- Use `bun` for JavaScript work and `uv` for Python utilities.",
 			"- Keep diffs scoped, rename vague identifiers, and separate UI rendering from stateful logic.",
 			"- Treat `qa/` as the starter home for journey coverage and test notes.",
+		].join("\n"),
+	};
+}
+
+function renderAppAssistantGuide(
+	productName: string,
+	productSummary: string,
+): RenderedBlueprintFile {
+	return {
+		path: "apps/web/AGENTS.md",
+		content: [
+			"# apps/web/AGENTS.md",
+			"",
+			`This app for ${productName} ships with a generated root \`DESIGN.md\` plus generated planning material under \`docs/\`.`,
+			"",
+			productSummary,
+			"",
+			"## Start Here",
+			"",
+			"- Read root `DESIGN.md` before changing layout, styling, theming, motion, docs chrome, or component presentation.",
+			"- Use `docs/facts/design-system.json` and `apps/web/config/generated-design-system.ts` as the machine-readable design snapshot.",
+			"- Preserve semantic tokens such as `background`, `foreground`, `primary`, `border`, and `sidebar-*` instead of hard-coding colors.",
+			"- Keep the app UI aligned with the generated design system unless the user explicitly changes it.",
+			"- When prompting an AI tool, name the screen goal and tell it to follow `DESIGN.md` rather than inventing a fresh visual style.",
 		].join("\n"),
 	};
 }
@@ -71,6 +97,7 @@ export function renderGeneralizedStarterFiles(
 			facts.product_name,
 			facts.product_summary,
 		),
+		renderAppAssistantGuide(facts.product_name, facts.product_summary),
 		{
 			path: ".agents/README.md",
 			content: [

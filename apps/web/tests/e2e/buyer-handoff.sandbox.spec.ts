@@ -82,14 +82,15 @@ test.describe("member with access", () => {
 		await expect(
 			page.getByRole("button", { name: "Continue to Review" }),
 		).toBeVisible();
-		await expect(page.getByRole("link", { name: "Design" })).toBeVisible();
-		await expect(
-			page.getByRole("link", { name: "Generated preview" }),
-		).toBeVisible();
+		await expect(page.getByRole("heading", { name: "Design" })).toBeVisible();
 
 		await page.goto("/review");
 		await expect(page).toHaveURL(/\/review$/);
-		await expect(page.getByText("Review").first()).toBeVisible();
+		await expect(
+			page.getByRole("heading", {
+				name: "What you just got and where to go next",
+			}),
+		).toBeVisible();
 		await expect(
 			page.getByRole("link", { name: "Continue to Build Lessons" }),
 		).toBeVisible();

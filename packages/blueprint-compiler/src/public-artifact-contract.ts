@@ -7,6 +7,6 @@ export const STARTER_SNAPSHOT_LABEL = "Ship by Sunday Blueprint";
 
 export type BlueprintArtifactStage = "design" | "marketing" | "build";
 
-export function getStarterSnapshotArchiveFileName(): string {
-	return "ship-by-sunday-blueprint.zip";
+export function getStarterSnapshotArchiveFileName(repoName: string): string {
+	return `${repoName}.zip`;
 }
