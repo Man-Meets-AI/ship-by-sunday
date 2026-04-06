@@ -96,7 +96,7 @@ test.describe("member with access", () => {
 		).toBeVisible();
 		await expect(
 			page.getByRole("link", {
-				name: "Download didn’t start? Click here.",
+				name: "Need the Ship by Sunday Blueprint again? Download it here.",
 			}),
 		).toBeVisible();
 
