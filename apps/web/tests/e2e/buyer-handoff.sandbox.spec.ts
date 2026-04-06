@@ -82,9 +82,7 @@ test.describe("member with access", () => {
 		await expect(
 			page.getByRole("button", { name: "Continue to Review" }),
 		).toBeVisible();
-		await expect(
-			page.getByRole("heading", { name: "Design" }),
-		).toBeVisible();
+		await expect(page.getByRole("heading", { name: "Design" })).toBeVisible();
 
 		await page.goto("/review");
 		await expect(page).toHaveURL(/\/review$/);
