@@ -45,6 +45,13 @@ describe("repo generation", () => {
 				"apps/web/features/marketing/content/home.ts",
 			]),
 		);
+
+		const readmeOverride = overrides.find((file) => file.path === "README.md");
+		expect(readmeOverride?.content).toContain("## First-Pass Checklist");
+		expect(readmeOverride?.content).toContain("Open `DESIGN.md` first");
+		expect(readmeOverride?.content).toContain(
+			"`apps/web/config/generated-design-system.ts` contains the generated runtime design system.",
+		);
 	});
 
 	it("materializes a customer-safe repo snapshot", async () => {
