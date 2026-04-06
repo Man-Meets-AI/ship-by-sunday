@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
 
-import { generatedDesignSystem } from "@/config/generated-design-system";
 import { manifestConfig, productConfig } from "@/config/product";
 
 export default function manifest(): MetadataRoute.Manifest {
@@ -11,7 +10,7 @@ export default function manifest(): MetadataRoute.Manifest {
 		start_url: manifestConfig.startUrl,
 		display: manifestConfig.display,
 		background_color: manifestConfig.backgroundColorHex,
-		theme_color: generatedDesignSystem.preset.themeHex,
+		theme_color: manifestConfig.themeColorHex,
 		icons: [...manifestConfig.icons],
 	};
 }
