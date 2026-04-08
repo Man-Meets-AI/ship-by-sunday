@@ -7,6 +7,25 @@ import {
 const productName = productConfig.name;
 const bonusName = productConfig.bonusName;
 
+export type HomePageHeroMedia =
+	| {
+			kind: "preview";
+			previewImageSrc: string;
+			previewImageAlt: string;
+	  }
+	| {
+			kind: "embed";
+			embedUrl: string;
+			title: string;
+	  };
+
+const heroMedia: HomePageHeroMedia = {
+	kind: "preview",
+	previewImageSrc: productConfig.images.heroPreview,
+	previewImageAlt:
+		"Preview of the Ship by Sunday system showing the blueprint and agent-ready packs.",
+};
+
 export const homePageContent = {
 	assets: {
 		socialProofImage: productConfig.images.founderProof,
@@ -17,12 +36,13 @@ export const homePageContent = {
 		headlineLead: "Ship a real product",
 		headlineTailPrefix: "",
 		headlineTailHover: "by Sunday",
-		body: `The only system that teaches you how to ship a durable product from start to finish in one weekend. Oh, and it includes building you a ridiculous custom template from scratch based on what you want to build. We should charge more for this.`,
+		body: "Lock the product truth, generate the agent-ready packs, and start from a durable system instead of a blank chat.",
 		primaryCta: marketingDisplayConfig.primaryCtaLabel,
 		secondaryCta: {
 			label: "See how Ship Blueprint works",
 			href: routeConfig.systemHash,
 		},
+		media: heroMedia,
 		eyebrow:
 			"One-time payment. Lifetime access. Start the product intake immediately after checkout so the weekend starts with the real product constraints, not a blank chat.",
 	},
