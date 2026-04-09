@@ -51,13 +51,16 @@ export function BlueprintReviewHandoffCard({
 						</Button>
 					)}
 
-					<a
-						download
-						href={downloadHref}
-						className="text-sm leading-6 text-primary underline-offset-4 transition-colors hover:underline"
+					<Button
+						asChild
+						variant="link"
+						size="sm"
+						className="h-auto justify-start px-0 text-sm leading-6"
 					>
-						{fallbackLinkLabel}
-					</a>
+						<a download href={downloadHref}>
+							{fallbackLinkLabel}
+						</a>
+					</Button>
 				</div>
 			</div>
 		</section>
