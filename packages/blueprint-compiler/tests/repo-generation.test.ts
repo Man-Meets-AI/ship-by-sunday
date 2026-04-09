@@ -62,6 +62,9 @@ describe("repo generation", () => {
 		const onboardingOverride = overrides.find(
 			(file) => file.path === "START-HERE.md",
 		);
+		const bootstrapOverride = overrides.find(
+			(file) => file.path === "bootstrap.sh",
+		);
 		const skillsManifestOverride = overrides.find(
 			(file) => file.path === ".agents/skills/external-skills.json",
 		);
@@ -86,6 +89,9 @@ describe("repo generation", () => {
 		expect(onboardingOverride?.content).toContain("Run core setup");
 		expect(onboardingOverride?.content).toContain("Run auth setup");
 		expect(onboardingOverride?.content).toContain("Run billing setup");
+		expect(bootstrapOverride?.content).toContain(
+			'Follow START-HERE.md in order: \\$starter-core-setup, then \\$starter-auth-setup, then \\$starter-billing-setup.',
+		);
 		expect(packageJson.scripts.bootstrap).toBe("bash ./bootstrap.sh");
 		expect(packageJson.scripts["codex:skills:install"]).toBe(
 			"bash ./scripts/install-codex-skills.sh",
