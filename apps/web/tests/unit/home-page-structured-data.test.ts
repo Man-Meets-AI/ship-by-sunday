@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 import {
+	productConfig,
 	routeConfig,
 	starterConfig,
 	type StarterHomePageConfig,
@@ -31,6 +32,10 @@ describe("home page structured data", () => {
 		expect(organization?.url).toMatch(/^https?:\/\//);
 		expect(organization?.logo).toMatch(/^https?:\/\//);
 		expect(product?.offers?.url).toContain("#pricing");
+		expect(product?.offers?.price).toBe(
+			(productConfig.priceUsdCents / 100).toString(),
+		);
+		expect(product?.offers?.priceCurrency).toBe(productConfig.currency);
 		expect(faqPage?.mainEntity).toHaveLength(
 			homePageContent.faqSection.items.length,
 		);

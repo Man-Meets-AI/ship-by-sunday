@@ -106,8 +106,8 @@ export const starterConfig = {
 		},
 	},
 	pricing: {
-		priceUsdCents: 50000,
-		priceDisplay: "$500",
+		priceUsdCents: 25000,
+		priceDisplay: "$250",
 		currency: "usd",
 	},
 	bonus: {
