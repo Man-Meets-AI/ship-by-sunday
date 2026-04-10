@@ -1,4 +1,6 @@
 import {
+	DEFAULT_DESIGN_PRESET_ID,
+	buildDesignPresetFactSeed,
 	canonicalProjectDefinitionSchema,
 	createCanonicalProjectDefinition,
 	createCompleteProjectDefinition,
@@ -11,13 +13,18 @@ describe("canonical project definition schema", () => {
 
 		expect(projectDefinition.schemaVersion).toBe(1);
 		expect(projectDefinition.facts.product_name).toBe("Ship by Sunday OS");
+		expect(projectDefinition.facts.design_preset_id).toBe(
+			DEFAULT_DESIGN_PRESET_ID,
+		);
 		expect(projectDefinition.facts.core_flow).toEqual([
 			"Capture product facts",
 			"Unlock blueprints",
 			"Download repo",
 		]);
 		expect(projectDefinition.facts.pricing).toBe(29);
-		expect(projectDefinition.facts.theme_preset).toBe("a0");
+		expect(projectDefinition.facts.theme_preset).toBe(
+			buildDesignPresetFactSeed(DEFAULT_DESIGN_PRESET_ID).theme_preset,
+		);
 		expect(projectDefinition.facts.contact_email).toBe("support@example.com");
 	});
 
@@ -104,7 +111,7 @@ describe("canonical project definition schema", () => {
 		);
 
 		expect(parsedProjectDefinition.facts.design_references).toEqual([
-			"https://ui.shadcn.com/",
+			"https://getdesign.md/vercel/design-md",
 		]);
 	});
 

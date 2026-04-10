@@ -1,6 +1,9 @@
-import { access, mkdir, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { createCompleteProjectDefinition } from "@shipbysunday/blueprint-compiler";
+import {
+	buildDesignPresetFactSeed,
+	createCompleteProjectDefinition,
+} from "@shipbysunday/blueprint-compiler";
 import {
 	importDraftFromFile,
 	saveLocalDraft,
@@ -53,7 +56,7 @@ describe("generate command", () => {
 		expect(firstExitCode).toBe(0);
 		await expect(
 			access(path.join(outputPath, "ship-by-sunday-os", "docs", "README.md")),
-		).resolves.toBeUndefined();
+		).resolves.toBeNull();
 
 		const secondAttemptIo = createCliIo();
 		const secondExitCode = await runCli({
@@ -95,7 +98,7 @@ describe("generate command", () => {
 			access(
 				path.join(nestedOutputPath, "ship-by-sunday-os", "docs", "README.md"),
 			),
-		).resolves.toBeUndefined();
+		).resolves.toBeNull();
 	});
 
 	it("keeps sibling files when forcing directory generation", async () => {
@@ -132,12 +135,10 @@ describe("generate command", () => {
 			}),
 		).toBe(0);
 
-		await expect(
-			access(path.join(outputPath, "keep.txt")),
-		).resolves.toBeUndefined();
+		await expect(access(path.join(outputPath, "keep.txt"))).resolves.toBeNull();
 		await expect(
 			access(path.join(outputPath, "ship-by-sunday-os", "docs", "README.md")),
-		).resolves.toBeUndefined();
+		).resolves.toBeNull();
 	});
 
 	it("returns an invalid_state error when directory output points at a file", async () => {
@@ -192,5 +193,55 @@ describe("generate command", () => {
 		expect(exitCode).toBe(1);
 		expect(stderr.join("")).toContain('"error_code": "invalid_state"');
 		expect(stderr.join("")).toContain(outputPath);
+	});
+
+	it("generates canonical design output from the selected design preset", async () => {
+		const projectRootPath = await createTemporaryRepoRoot();
+		await saveLocalDraft(
+			projectRootPath,
+			createLocalDraftDefinition({
+				product_name: "Preset Test",
+				product_summary: "Preset-aware CLI generation",
+				primary_user: "Developers",
+				problem_statement: "They need a trustworthy design starting point.",
+				problem_trigger:
+					"When the UI still feels generic after the first build.",
+				problem_severity: "8",
+				success_looks_like:
+					"The repo ships with the intended design direction.",
+				core_flow: ["Choose preset", "Generate repo"],
+				pricing: 99,
+				design_preset_id: "notion",
+			}),
+		);
+
+		const { io } = createCliIo();
+		const outputPath = path.join(projectRootPath, "generated");
+		const exitCode = await runCli({
+			argv: ["generate", "--out", outputPath, "--force"],
+			io,
+			projectRootPath,
+		});
+
+		expect(exitCode).toBe(0);
+		const generatedProjectDefinition = JSON.parse(
+			await readFile(
+				path.join(
+					outputPath,
+					"preset-test",
+					"docs",
+					"facts",
+					"project-definition.json",
+				),
+				"utf8",
+			),
+		);
+		expect(generatedProjectDefinition.facts.design_preset_id).toBe("notion");
+		expect(generatedProjectDefinition.facts.theme_preset).toBe(
+			buildDesignPresetFactSeed("notion").theme_preset,
+		);
+		expect(generatedProjectDefinition.facts.design_references).toEqual([
+			"https://getdesign.md/notion/design-md",
+		]);
 	});
 });

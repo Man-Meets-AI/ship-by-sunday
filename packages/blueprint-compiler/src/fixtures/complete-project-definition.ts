@@ -3,6 +3,14 @@ import {
 	type CanonicalProjectDefinition,
 	type CanonicalProjectFacts,
 } from "../canonical-project-definition/project-definition";
+import {
+	DEFAULT_DESIGN_PRESET_ID,
+	buildDesignPresetFactSeed,
+} from "../design-system/design-preset-catalog";
+
+const defaultDesignPresetSeed = buildDesignPresetFactSeed(
+	DEFAULT_DESIGN_PRESET_ID,
+);
 
 const completeProjectFacts: CanonicalProjectFacts = {
 	product_name: "Ship by Sunday OS",
@@ -12,7 +20,8 @@ const completeProjectFacts: CanonicalProjectFacts = {
 		"Founders lose momentum when product planning stays vague.",
 	core_flow: ["Capture product facts", "Unlock blueprints", "Download repo"],
 	pricing: 29,
-	theme_preset: "a0",
+	design_preset_id: DEFAULT_DESIGN_PRESET_ID,
+	theme_preset: defaultDesignPresetSeed.theme_preset,
 	problem_context_when: "When a founder is moving from idea to build week.",
 	problem_context_where: "Inside their local app and planning workflow.",
 	problem_trigger: "They need a clear blueprint and repo handoff immediately.",

@@ -15,8 +15,14 @@ describe("blueprint presentation", () => {
 		expect(blueprintFieldLabel("pricing")).toBe(
 			"What's the one-time price in USD?",
 		);
+		expect(blueprintFieldLabel("design_preset_id")).toBe(
+			"Choose a design direction",
+		);
 		expect(blueprintFieldHelperText("product_name")).toBe(
 			"Enter the public-facing product name.",
+		);
+		expect(blueprintFieldHelperText("theme_preset")).toContain(
+			"Adjust the starter theme",
 		);
 		expect(blueprintFieldInputKind("product_name")).toBe("input");
 		expect(blueprintFieldInputKind("pricing")).toBe("number");

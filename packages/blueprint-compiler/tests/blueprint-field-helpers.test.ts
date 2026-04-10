@@ -1,4 +1,6 @@
 import {
+	DEFAULT_DESIGN_PRESET_ID,
+	buildDesignPresetFactSeed,
 	buildSavePayload,
 	buildStageDraftValues,
 	buildStepDraftValues,
@@ -38,7 +40,9 @@ describe("blueprint field helpers", () => {
 					"Download repo",
 				],
 				pricing: 29,
-				theme_preset: "a0",
+				design_preset_id: DEFAULT_DESIGN_PRESET_ID,
+				theme_preset: buildDesignPresetFactSeed(DEFAULT_DESIGN_PRESET_ID)
+					.theme_preset,
 			},
 			placeholdersInUse: [],
 			createdAt: 1,
@@ -77,6 +81,9 @@ describe("blueprint field helpers", () => {
 		);
 		expect(formatBlueprintFactValue(facts, "screen_sequence")).toBe(
 			facts.screen_sequence.join("\n"),
+		);
+		expect(formatBlueprintFactValue(facts, "design_preset_id")).toBe(
+			DEFAULT_DESIGN_PRESET_ID,
 		);
 		expect(formatBlueprintFactValue(facts, "price_usd_cents")).toBe("2900");
 		expect(formatBlueprintFactValue(facts, "pricing")).toBe("29");
@@ -212,11 +219,11 @@ describe("blueprint field helpers", () => {
 		const reducedPricingSavePayload = buildSavePayload(reducedPricingStep, {
 			pricing: " 29 ",
 			core_flow: "Capture product facts\nUnlock blueprints",
-			theme_preset: " a0 ",
+			theme_preset: ` ${buildDesignPresetFactSeed(DEFAULT_DESIGN_PRESET_ID).theme_preset} `,
 			contact_email: " founder@example.com ",
 		});
 
-		expect(savePayload.clearedFieldKeys).toEqual([]);
+		expect(savePayload.clearedFieldKeys).toEqual(["design_preset_id"]);
 		expect(savePayload.factsPatch.theme_preset).toBe("a1PzeK");
 		expect(buildPlanDeliveryPayload.factsPatch.pricing).toBe(29);
 		expect(buildPlanSetupPayload.clearedFieldKeys).toContain("domain");
@@ -226,7 +233,9 @@ describe("blueprint field helpers", () => {
 			"Capture product facts",
 			"Unlock blueprints",
 		]);
-		expect(reducedPricingSavePayload.factsPatch.theme_preset).toBe("a0");
+		expect(reducedPricingSavePayload.factsPatch.theme_preset).toBe(
+			buildDesignPresetFactSeed(DEFAULT_DESIGN_PRESET_ID).theme_preset,
+		);
 		expect(reducedPricingSavePayload.factsPatch.contact_email).toBe(
 			"founder@example.com",
 		);

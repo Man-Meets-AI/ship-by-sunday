@@ -2,7 +2,12 @@
 
 import { act, renderHook } from "@testing-library/react";
 import type { ReactMutation } from "convex/react";
-import { createCompleteProjectDefinition } from "@shipbysunday/blueprint-compiler";
+import {
+	buildDesignPresetFactSeed,
+	createCanonicalProjectDefinition,
+	createCompleteProjectDefinition,
+	designPresetDerivedFactKeys,
+} from "@shipbysunday/blueprint-compiler";
 import { describe, expect, it, vi } from "vitest";
 vi.mock("@clerk/nextjs", () => ({
 	useUser: () => ({
@@ -173,5 +178,120 @@ describe("useBlueprintPageState", () => {
 
 		expect(unlockExecuteShipSpy).toHaveBeenCalledWith({});
 		expect(navigateToHref).toHaveBeenCalledWith("/review?download=1");
+	});
+
+	it("clears stale derived design facts when the preset changes", async () => {
+		const {
+			saveProjectDefinitionFacts,
+			saveProjectDefinitionFactsSpy,
+			unlockExecuteShip,
+		} = createMutationMock();
+		const derivedProjectFacts = createCanonicalProjectDefinition({
+			clerkUserId: "user_123",
+			productKey: "ship-by-sunday",
+			facts: {
+				product_name: "Ship by Sunday OS",
+				product_summary: "Blueprint-first runtime",
+				primary_user: "Founders",
+				problem_statement: "Planning stays vague",
+				problem_trigger:
+					"They need a clear blueprint and repo handoff immediately.",
+				problem_severity: "8",
+				success_looks_like:
+					"A founder downloads a working blueprint and repo zip.",
+				core_flow: [
+					"Capture product facts",
+					"Unlock blueprints",
+					"Download repo",
+				],
+				pricing: 29,
+				design_preset_id: "vercel",
+				theme_preset: buildDesignPresetFactSeed("vercel").theme_preset,
+				design_references: ["https://getdesign.md/vercel/design-md"],
+			},
+			placeholdersInUse: [],
+			createdAt: 1,
+			updatedAt: 1,
+		}).facts;
+		const { result } = renderHook(() =>
+			useBlueprintPageState({
+				navigateToHref: vi.fn(),
+				projectFacts: derivedProjectFacts,
+				saveProjectDefinitionFacts,
+				unlockExecuteShip,
+			}),
+		);
+
+		await act(async () => {
+			result.current.handleFieldChange("design_preset_id", "notion");
+			result.current.handleFieldChange(
+				"theme_preset",
+				buildDesignPresetFactSeed("notion").theme_preset,
+			);
+			result.current.handleFieldChange(
+				"design_references",
+				"https://getdesign.md/notion/design-md",
+			);
+		});
+
+		await act(async () => {
+			await result.current.handleSaveAndContinue();
+		});
+
+		expect(saveProjectDefinitionFactsSpy).toHaveBeenCalledWith(
+			expect.objectContaining({
+				clearedFieldKeys: expect.arrayContaining([
+					...designPresetDerivedFactKeys,
+				]),
+				factsPatch: expect.objectContaining({
+					design_preset_id: "notion",
+					theme_preset: buildDesignPresetFactSeed("notion").theme_preset,
+				}),
+			}),
+		);
+	});
+
+	it("preserves authored design copy when the preset changes", async () => {
+		const {
+			saveProjectDefinitionFacts,
+			saveProjectDefinitionFactsSpy,
+			unlockExecuteShip,
+		} = createMutationMock();
+		const { result } = renderHook(() =>
+			useBlueprintPageState({
+				navigateToHref: vi.fn(),
+				projectFacts: createProjectFacts({
+					visual_thesis: "Hand-authored visual thesis",
+					copy_tone: "Hand-authored copy tone",
+				}),
+				saveProjectDefinitionFacts,
+				unlockExecuteShip,
+			}),
+		);
+
+		await act(async () => {
+			result.current.handleFieldChange("design_preset_id", "notion");
+			result.current.handleFieldChange(
+				"theme_preset",
+				buildDesignPresetFactSeed("notion").theme_preset,
+			);
+			result.current.handleFieldChange(
+				"design_references",
+				"https://getdesign.md/notion/design-md",
+			);
+		});
+
+		await act(async () => {
+			await result.current.handleSaveAndContinue();
+		});
+
+		expect(saveProjectDefinitionFactsSpy).toHaveBeenCalledWith(
+			expect.objectContaining({
+				clearedFieldKeys: expect.not.arrayContaining([
+					"visual_thesis",
+					"copy_tone",
+				]),
+			}),
+		);
 	});
 });

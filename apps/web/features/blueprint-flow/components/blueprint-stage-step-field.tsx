@@ -28,6 +28,7 @@ import { getBlueprintStageFieldInputId } from "@/features/blueprint-flow/lib/blu
 import { BlueprintStageListField } from "./blueprint-stage-list-field";
 import { BlueprintStageLinkListField } from "./blueprint-stage-link-list-field";
 import { BlueprintStageScaleField } from "./blueprint-stage-scale-field";
+import { BlueprintDesignPresetField } from "./blueprint-design-preset-field";
 import { BlueprintThemeConfigurator } from "./blueprint-theme-configurator";
 
 type BlueprintStageStepFieldProps = {
@@ -49,7 +50,34 @@ function BlueprintStageStepFieldComponent({
 	errorMessage,
 	onChange,
 }: BlueprintStageStepFieldProps) {
+	if (fieldKey === "design_preset_id") {
+		const inputId = getBlueprintStageFieldInputId(step.id, fieldKey);
+		const errorId = errorMessage ? `${inputId}-error` : undefined;
+		const label = blueprintFieldLabel(fieldKey, facts);
+		const helperText = blueprintFieldHelperText(fieldKey, facts);
+
+		return (
+			<Field className="gap-2.5" data-invalid={errorMessage ? true : undefined}>
+				<FieldLabel htmlFor={inputId}>{label}</FieldLabel>
+				<FieldContent>
+					<BlueprintDesignPresetField
+						currentThemePreset={draftValues.theme_preset ?? ""}
+						description={helperText}
+						errorId={errorId}
+						inputId={inputId}
+						label={label}
+						onChange={onChange}
+						value={value}
+					/>
+					<FieldError id={errorId}>{errorMessage}</FieldError>
+				</FieldContent>
+			</Field>
+		);
+	}
+
 	if (fieldKey === "theme_preset") {
+		const helperText = blueprintFieldHelperText(fieldKey, facts);
+
 		return (
 			<Field className="gap-2.5" data-invalid={errorMessage ? true : undefined}>
 				<FieldLabel>{blueprintFieldLabel(fieldKey, facts)}</FieldLabel>
@@ -58,6 +86,9 @@ function BlueprintStageStepFieldComponent({
 						value={value}
 						onChange={(nextValue) => onChange(fieldKey, nextValue)}
 					/>
+					{helperText ? (
+						<FieldDescription>{helperText}</FieldDescription>
+					) : null}
 					<FieldError>{errorMessage}</FieldError>
 				</FieldContent>
 			</Field>

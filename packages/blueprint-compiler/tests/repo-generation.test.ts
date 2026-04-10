@@ -90,7 +90,7 @@ describe("repo generation", () => {
 		expect(onboardingOverride?.content).toContain("Run auth setup");
 		expect(onboardingOverride?.content).toContain("Run billing setup");
 		expect(bootstrapOverride?.content).toContain(
-			'Follow START-HERE.md in order: \\$starter-core-setup, then \\$starter-auth-setup, then \\$starter-billing-setup.',
+			"Follow START-HERE.md in order: \\$starter-core-setup, then \\$starter-auth-setup, then \\$starter-billing-setup.",
 		);
 		expect(packageJson.scripts.bootstrap).toBe("bash ./bootstrap.sh");
 		expect(packageJson.scripts["codex:skills:install"]).toBe(

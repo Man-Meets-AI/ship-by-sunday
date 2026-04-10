@@ -10,6 +10,7 @@ import type {
 } from "@shipbysunday/blueprint-compiler";
 import {
 	createCanonicalProjectDefinitionDraft,
+	designPresetDerivedFactKeys,
 	deriveBlueprintFacts,
 	deriveStageStatus,
 	getBlueprintStageDefinition,
@@ -167,6 +168,59 @@ function stripUntouchedGeneratedScopeFields({
 	return {
 		clearedFieldKeys: nextClearedFieldKeys,
 		factsPatch: nextFactsPatch,
+	} satisfies SaveProjectDefinitionFactsArgs;
+}
+
+function clearStaleDerivedDesignFields({
+	projectFacts,
+	savePayload,
+	savedBaselineValues,
+	submittedDraftValues,
+}: {
+	projectFacts: CanonicalProjectFactsDraft;
+	savePayload: SaveProjectDefinitionFactsArgs;
+	savedBaselineValues: BlueprintPageDraftValues;
+	submittedDraftValues: BlueprintPageDraftValues;
+}) {
+	const designInputKeys: readonly CanonicalProjectFactKey[] = [
+		"design_preset_id",
+		"theme_preset",
+		"design_references",
+	];
+	const designInputsChanged = designInputKeys.some(
+		(fieldKey) =>
+			(submittedDraftValues[fieldKey] ?? "") !==
+			(savedBaselineValues[fieldKey] ?? ""),
+	);
+	if (!designInputsChanged) {
+		return savePayload;
+	}
+
+	const savedFactsWithoutDerivedDesignFields = { ...projectFacts };
+	for (const fieldKey of designPresetDerivedFactKeys) {
+		delete savedFactsWithoutDerivedDesignFields[fieldKey];
+	}
+	const previouslyDerivedDesignFacts = deriveBlueprintFacts(
+		savedFactsWithoutDerivedDesignFields,
+	);
+	const staleDerivedFieldKeys = designPresetDerivedFactKeys.filter(
+		(fieldKey) => {
+			const currentSavedValue = projectFacts[fieldKey];
+			const previousDerivedValue = previouslyDerivedDesignFacts[fieldKey];
+			if (typeof currentSavedValue !== "string") {
+				return false;
+			}
+
+			return currentSavedValue === previousDerivedValue;
+		},
+	);
+	const clearedFieldKeys = Array.from(
+		new Set([...savePayload.clearedFieldKeys, ...staleDerivedFieldKeys]),
+	);
+
+	return {
+		...savePayload,
+		clearedFieldKeys,
 	} satisfies SaveProjectDefinitionFactsArgs;
 }
 
@@ -492,10 +546,15 @@ export function useBlueprintPageState({
 
 	const handleSaveAndContinue = useCallback(async () => {
 		const submittedDraftValues = currentDraftValuesRef.current;
-		const savePayload = stripUntouchedGeneratedScopeFields({
+		const savePayload = clearStaleDerivedDesignFields({
 			projectFacts,
 			savedBaselineValues,
-			savePayload: buildSavePayloadForBlueprint(submittedDraftValues),
+			submittedDraftValues,
+			savePayload: stripUntouchedGeneratedScopeFields({
+				projectFacts,
+				savedBaselineValues,
+				savePayload: buildSavePayloadForBlueprint(submittedDraftValues),
+			}),
 		});
 		const nextFacts = buildNextProjectFacts(projectFacts, savePayload);
 		const nextSectionStatuses = buildSectionStatuses(nextFacts);

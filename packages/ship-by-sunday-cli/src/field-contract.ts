@@ -1,4 +1,8 @@
 import { createCliError } from "./cli-errors";
+import {
+	DEFAULT_DESIGN_PRESET_ID,
+	buildDesignPresetFactSeed,
+} from "@shipbysunday/blueprint-compiler";
 
 export type CliBlueprintStageId = "blueprint" | "review";
 
@@ -19,6 +23,7 @@ export type CliBlueprintFactKey =
 	| "success_looks_like"
 	| "core_flow"
 	| "pricing"
+	| "design_preset_id"
 	| "theme_preset"
 	| "design_references"
 	| "scope_in"
@@ -60,7 +65,45 @@ export type CliFieldDescriptor = {
 	placeholderFriendly: boolean;
 };
 
-export const DEFAULT_THEME_PRESET = "a0";
+export const DEFAULT_THEME_PRESET = buildDesignPresetFactSeed(
+	DEFAULT_DESIGN_PRESET_ID,
+).theme_preset;
+
+type CliDesignPresetFieldKey = Extract<
+	CliBlueprintFactKey,
+	"design_preset_id" | "theme_preset" | "design_references"
+>;
+
+function normalizeDesignPresetId(value: string | undefined) {
+	const trimmedValue = value?.trim();
+	return trimmedValue && trimmedValue.length > 0
+		? trimmedValue
+		: DEFAULT_DESIGN_PRESET_ID;
+}
+
+export function buildCliDesignPresetSeed(
+	presetId: string | undefined,
+): Record<CliDesignPresetFieldKey, string | string[]> {
+	const presetSeed = buildDesignPresetFactSeed(
+		normalizeDesignPresetId(presetId),
+	);
+
+	return {
+		design_preset_id: presetSeed.design_preset_id,
+		theme_preset: presetSeed.theme_preset,
+		design_references: [...presetSeed.design_references],
+	};
+}
+
+export function applyCliDesignPresetSelection(
+	facts: CliBlueprintFactsDraft,
+	presetId: string | undefined,
+): CliBlueprintFactsDraft {
+	return {
+		...facts,
+		...buildCliDesignPresetSeed(presetId),
+	};
+}
 
 const cliBlueprintStageDefinitions = [
 	{
@@ -87,7 +130,7 @@ const cliBlueprintStageDefinitions = [
 			{
 				id: "design",
 				label: "Design",
-				fieldKeys: ["theme_preset", "design_references"],
+				fieldKeys: ["design_preset_id", "theme_preset", "design_references"],
 				requiredFieldKeys: [],
 			},
 			{
@@ -255,6 +298,8 @@ export function blueprintFieldLabel(fieldKey: CliBlueprintFactKey) {
 			return "Core flow";
 		case "pricing":
 			return "Pricing";
+		case "design_preset_id":
+			return "Design preset";
 		case "theme_preset":
 			return "Theme preset";
 		case "design_references":
@@ -288,6 +333,8 @@ export function blueprintFieldHelperText(fieldKey: CliBlueprintFactKey) {
 			return "Enter one numbered step per line.";
 		case "pricing":
 			return "Enter the one-time USD amount.";
+		case "design_preset_id":
+			return "Optional. Pick the curated starting point for the generated design system.";
 		case "theme_preset":
 			return `Optional. The default preset is already prefilled. Use shadcn init --preset <code> to apply it.`;
 		case "design_references":
@@ -390,8 +437,26 @@ export function normalizeCliFactsDraft(
 		}
 	}
 
-	if (facts.theme_preset === undefined) {
-		facts.theme_preset = DEFAULT_THEME_PRESET;
+	const normalizedPresetId =
+		typeof facts.design_preset_id === "string"
+			? facts.design_preset_id
+			: undefined;
+	const presetSeed = buildCliDesignPresetSeed(normalizedPresetId);
+
+	facts.design_preset_id = presetSeed.design_preset_id;
+	if (
+		facts.theme_preset === undefined ||
+		typeof facts.theme_preset !== "string" ||
+		facts.theme_preset.trim().length === 0
+	) {
+		facts.theme_preset = presetSeed.theme_preset;
+	}
+	if (
+		facts.design_references === undefined ||
+		(Array.isArray(facts.design_references) &&
+			facts.design_references.length === 0)
+	) {
+		facts.design_references = [...presetSeed.design_references];
 	}
 
 	return facts;
@@ -424,7 +489,9 @@ export function formatCliFactValue(
 	const value =
 		fieldKey === "theme_preset"
 			? (facts.theme_preset ?? DEFAULT_THEME_PRESET)
-			: facts[fieldKey];
+			: fieldKey === "design_preset_id"
+				? (facts.design_preset_id ?? DEFAULT_DESIGN_PRESET_ID)
+				: facts[fieldKey];
 
 	if (Array.isArray(value)) {
 		if (fieldKey === "core_flow") {
@@ -649,6 +716,7 @@ export const cliBlueprintFactKeys = [
 	"success_looks_like",
 	"core_flow",
 	"pricing",
+	"design_preset_id",
 	"theme_preset",
 	"design_references",
 	"scope_in",

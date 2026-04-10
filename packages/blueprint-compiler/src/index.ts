@@ -86,3 +86,13 @@ export {
 	type PresetStyleMeta,
 	type ResolvedPresetDesignSystem,
 } from "./design-system/preset-design-system";
+export {
+	DEFAULT_DESIGN_PRESET_ID,
+	buildDesignPresetFactSeed,
+	designPresetDefinitions,
+	designPresetDerivedFactKeys,
+	getDesignPresetDefinition,
+	resolveDesignPresetDefinition,
+	type DesignPresetDefinition,
+	type DesignPresetId,
+} from "./design-system/design-preset-catalog";
