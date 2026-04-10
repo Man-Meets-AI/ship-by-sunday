@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-04-10
+
+### Changed
+
+- Added curated blueprint design-direction selection with repo-owned preview assets, preset provenance in generated design output, and matching local CLI + compiler support so buyers can choose a named inspiration like Vercel or Notion before fine-tuning the starter theme.
+- Reduced the public Ship by Sunday price from `$500` to `$250`, aligned checkout and helper-script billing defaults with the canonical config, and added guards plus tests so managed Stripe prices cannot silently drift from the advertised amount.
+
 ## 2026-04-08
 
 ### Changed
