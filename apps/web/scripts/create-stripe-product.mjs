@@ -18,7 +18,7 @@ const product = await stripe.products.create({
 	},
 	default_price_data: {
 		currency: "usd",
-		unit_amount: 50000,
+		unit_amount: 25000,
 	},
 });
 
