@@ -1,12 +1,12 @@
 import {
+	buildDesignPresetFactSeed,
 	createCanonicalProjectDefinition,
-	createCompleteProjectDefinition,
+	DEFAULT_DESIGN_PRESET_ID,
 	type CanonicalProjectDefinition,
 	type CanonicalProjectDefinitionDraft,
-	type CanonicalProjectFacts,
+	type CanonicalProjectFactsDraft,
 } from "@shipbysunday/blueprint-compiler";
 import {
-	DEFAULT_THEME_PRESET,
 	createScopeFromCoreFlow,
 	type CliBlueprintFactsDraft,
 } from "./field-contract";
@@ -71,7 +71,7 @@ function deriveLegacyThemePreset(legacyFacts: Record<string, unknown>) {
 	if (hex && !hex.startsWith("#")) {
 		return hex;
 	}
-	return DEFAULT_THEME_PRESET;
+	return undefined;
 }
 
 function deriveLegacyProblemContext(problemTrigger?: string) {
@@ -151,6 +151,10 @@ export function extractCliFactsFromLegacyFacts(
 					: undefined,
 		core_flow: coreFlow.length > 0 ? coreFlow : undefined,
 		pricing,
+		design_preset_id:
+			typeof legacyFacts.design_preset_id === "string"
+				? legacyFacts.design_preset_id.trim()
+				: undefined,
 		theme_preset: deriveLegacyThemePreset(legacyFacts),
 		design_references:
 			designReferences.length > 0 ? designReferences : undefined,
@@ -171,8 +175,12 @@ export function extractCliFactsFromLegacyFacts(
 
 export function buildCanonicalProjectFactsFromCliFacts(
 	facts: CliBlueprintFactsDraft,
-): CanonicalProjectFacts {
-	const baselineFacts = createCompleteProjectDefinition().facts;
+): CanonicalProjectFactsDraft {
+	const normalizedDesignPresetId =
+		typeof facts.design_preset_id === "string"
+			? facts.design_preset_id
+			: DEFAULT_DESIGN_PRESET_ID;
+	const presetSeed = buildDesignPresetFactSeed(normalizedDesignPresetId);
 	const coreFlow =
 		facts.core_flow === undefined
 			? []
@@ -207,137 +215,97 @@ export function buildCanonicalProjectFactsFromCliFacts(
 		scopeOut === undefined || scopeOut.length === 0
 			? generatedScope.scopeOut
 			: scopeOut;
-	const priceUsdCents = Math.max(0, Math.round(pricing * 100));
-
 	return {
-		...baselineFacts,
 		product_name:
-			typeof facts.product_name === "string"
-				? facts.product_name
-				: baselineFacts.product_name,
+			typeof facts.product_name === "string" ? facts.product_name : undefined,
 		product_summary:
 			typeof facts.product_summary === "string"
 				? facts.product_summary
-				: baselineFacts.product_summary,
+				: undefined,
 		primary_user:
-			typeof facts.primary_user === "string"
-				? facts.primary_user
-				: baselineFacts.primary_user,
+			typeof facts.primary_user === "string" ? facts.primary_user : undefined,
 		problem_statement:
 			typeof facts.problem_statement === "string"
 				? facts.problem_statement
-				: baselineFacts.problem_statement,
+				: undefined,
 		problem_context_when: when,
 		problem_context_where: where,
 		problem_trigger:
 			typeof facts.problem_trigger === "string"
 				? facts.problem_trigger
-				: baselineFacts.problem_trigger,
+				: undefined,
 		problem_severity:
 			typeof facts.problem_severity === "string"
 				? facts.problem_severity
-				: baselineFacts.problem_severity,
+				: undefined,
 		problem_urgency: deriveProblemUrgency(
 			typeof facts.problem_severity === "string"
 				? facts.problem_severity
-				: baselineFacts.problem_severity,
+				: undefined,
 		),
 		outcome_statement:
 			typeof facts.success_looks_like === "string"
 				? facts.success_looks_like
-				: baselineFacts.outcome_statement,
+				: undefined,
 		success_looks_like:
 			typeof facts.success_looks_like === "string"
 				? facts.success_looks_like
-				: baselineFacts.success_looks_like,
+				: undefined,
 		user_benefit:
 			typeof facts.success_looks_like === "string"
 				? facts.success_looks_like
-				: baselineFacts.user_benefit,
+				: undefined,
 		evidence_summary:
 			typeof facts.problem_statement === "string"
 				? `The founder reports: ${facts.problem_statement}`
-				: baselineFacts.evidence_summary,
+				: undefined,
 		why_this_matters:
 			typeof facts.product_summary === "string"
 				? facts.product_summary
-				: baselineFacts.why_this_matters,
+				: undefined,
 		core_flow_summary:
-			facts.core_flow === undefined
-				? baselineFacts.core_flow_summary
-				: coreFlow.join(" -> "),
-		screen_sequence:
-			facts.core_flow === undefined
-				? baselineFacts.screen_sequence
-				: screenSequence,
+			facts.core_flow === undefined ? undefined : coreFlow.join(" -> "),
+		screen_sequence: facts.core_flow === undefined ? undefined : screenSequence,
 		must_have_capabilities:
-			facts.core_flow === undefined
-				? baselineFacts.must_have_capabilities
-				: capabilities,
+			facts.core_flow === undefined ? undefined : capabilities,
 		scope_in: normalizedScopeIn,
 		scope_out: normalizedScopeOut,
-		non_goals:
-			scopeOut === undefined ? baselineFacts.non_goals : normalizedScopeOut,
+		non_goals: scopeOut === undefined ? undefined : normalizedScopeOut,
 		v1_rationale:
 			facts.core_flow === undefined
-				? baselineFacts.v1_rationale
+				? undefined
 				: coreFlow.length > 0
 					? `Start with ${coreFlow[0]} and keep the first release focused.`
 					: "",
-		surface_type: "web_app",
 		design_references:
 			facts.design_references === undefined ||
 			(Array.isArray(facts.design_references) &&
 				facts.design_references.length === 0)
-				? baselineFacts.design_references
+				? [...presetSeed.design_references]
 				: Array.isArray(facts.design_references)
 					? facts.design_references
-					: baselineFacts.design_references,
-		visual_thesis: baselineFacts.visual_thesis,
-		content_plan: baselineFacts.content_plan,
-		interaction_thesis: baselineFacts.interaction_thesis,
-		design_tokens: baselineFacts.design_tokens,
-		typography_direction: baselineFacts.typography_direction,
-		imagery_direction: baselineFacts.imagery_direction,
-		layout_direction: baselineFacts.layout_direction,
-		brand_assets: baselineFacts.brand_assets,
-		existing_system_mode: baselineFacts.existing_system_mode,
-		hero_goal: baselineFacts.hero_goal,
-		primary_cta: baselineFacts.primary_cta,
-		proof_strategy: baselineFacts.proof_strategy,
-		objections: baselineFacts.objections,
-		section_narrative: baselineFacts.section_narrative,
-		copy_tone: baselineFacts.copy_tone,
-		marketing_goals: baselineFacts.marketing_goals,
-		channel_scope: baselineFacts.channel_scope,
-		campaign_types: baselineFacts.campaign_types,
-		brand_voice_summary: baselineFacts.brand_voice_summary,
-		approved_claims: baselineFacts.approved_claims,
-		do_not_say_rules: baselineFacts.do_not_say_rules,
-		workflow_map: baselineFacts.workflow_map,
-		research_scope: baselineFacts.research_scope,
-		research_needs: baselineFacts.research_needs,
-		content_workflows: baselineFacts.content_workflows,
-		analytics_needs: baselineFacts.analytics_needs,
-		proof_sources: baselineFacts.proof_sources,
-		creative_spec: baselineFacts.creative_spec,
-		objective: baselineFacts.objective,
-		user_visible_outcome: baselineFacts.user_visible_outcome,
-		constraints: baselineFacts.constraints,
-		deliverables: baselineFacts.deliverables,
-		done_when: baselineFacts.done_when,
-		acceptance_criteria: baselineFacts.acceptance_criteria,
-		validation_plan: baselineFacts.validation_plan,
-		demo_flow: baselineFacts.demo_flow,
-		risks: baselineFacts.risks,
-		dependencies: baselineFacts.dependencies,
-		open_questions: baselineFacts.open_questions,
-		selected_next_slice: baselineFacts.selected_next_slice,
-		pricing_model: baselineFacts.pricing_model,
-		price_usd_cents: priceUsdCents,
-		price_display: formatPriceDisplay(pricing),
-		currency: "USD",
+					: [...presetSeed.design_references],
+		visual_thesis: presetSeed.visual_thesis,
+		content_plan: presetSeed.content_plan,
+		interaction_thesis: presetSeed.interaction_thesis,
+		design_tokens: presetSeed.design_tokens,
+		typography_direction: presetSeed.typography_direction,
+		imagery_direction: presetSeed.imagery_direction,
+		layout_direction: presetSeed.layout_direction,
+		existing_system_mode: presetSeed.existing_system_mode,
+		copy_tone: presetSeed.copy_tone,
+		pricing_model: "one_time",
+		design_preset_id: normalizedDesignPresetId,
+		theme_preset:
+			typeof facts.theme_preset === "string"
+				? facts.theme_preset
+				: presetSeed.theme_preset,
+		price_usd_cents: Math.max(0, Math.round(pricing * 100)),
+		price_display: pricing > 0 ? formatPriceDisplay(pricing) : undefined,
+		currency: pricing > 0 ? "USD" : undefined,
 		domain: typeof facts.domain === "string" ? facts.domain : undefined,
+		contact_email:
+			typeof facts.contact_email === "string" ? facts.contact_email : undefined,
 		support_email:
 			typeof facts.contact_email === "string" ? facts.contact_email : undefined,
 	};

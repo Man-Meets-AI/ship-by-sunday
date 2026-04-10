@@ -41,8 +41,18 @@ describe("home page content", () => {
 		expect(homePageContent.starterSystemSection.title).toBe(
 			"More than a starter. A system you can keep shipping from.",
 		);
+		expect(homePageContent.starterSystemSection.intro).toContain(
+			"curated design direction",
+		);
 		expect(homePageContent.starterSystemSection.capabilities[1]?.title).toBe(
 			"Built-in QA",
+		);
+		expect(homePageContent.starterSystemSection.capabilities).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					title: "Curated design direction",
+				}),
+			]),
 		);
 		expect(homePageContent.durabilitySection.title).toBe(
 			"Ship by Sunday. Keep shipping on Monday.",

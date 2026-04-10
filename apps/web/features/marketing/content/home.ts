@@ -174,7 +174,7 @@ export const homePageContent = {
 			"keep shipping from.",
 		],
 		intro:
-			"The blueprint gives the agents the truth. The starter gives that truth a real product shape: auth, billing, docs, protected workspace, and the seams to keep changing the product without losing the plot.",
+			"The blueprint gives the agents the truth. The starter gives that truth a real product shape: curated design direction, auth, billing, docs, protected workspace, and the seams to keep changing the product without losing the plot.",
 		capabilities: [
 			{
 				title: "Product blueprint",
@@ -205,6 +205,11 @@ export const homePageContent = {
 				title: "Keep one source of truth",
 				description:
 					"When better models arrive next month, you move faster. You do not restart the project from zero.",
+			},
+			{
+				title: "Curated design direction",
+				description:
+					"Choose a design direction like Vercel, Linear, or Notion inside the blueprint flow, preview it, then customize the starter theme before generation.",
 			},
 		],
 	},

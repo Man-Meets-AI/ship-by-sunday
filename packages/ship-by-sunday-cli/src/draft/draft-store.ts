@@ -16,6 +16,7 @@ import { resolveProjectPath } from "../cli-paths";
 import type { CliFixtureName } from "../parse-cli-command";
 import { createCliError } from "../cli-errors";
 import {
+	applyCliDesignPresetSelection,
 	deriveCliStageStatus,
 	cliBlueprintFactKeys,
 	isBlueprintArrayField,
@@ -442,10 +443,16 @@ function applyMutationToFacts(
 						: undefined,
 			};
 		}
-		return {
+		const nextFacts = {
 			...facts,
 			[mutation.fieldKey]: normalizedValue,
 		};
+		return mutation.fieldKey === "design_preset_id"
+			? applyCliDesignPresetSelection(
+					nextFacts,
+					typeof normalizedValue === "string" ? normalizedValue : undefined,
+				)
+			: nextFacts;
 	}
 
 	const nextFacts: CliBlueprintFactsDraft = { ...facts };
@@ -455,6 +462,9 @@ function applyMutationToFacts(
 			nextFacts[mutation.fieldKey] = [];
 		} else {
 			delete nextFacts[mutation.fieldKey];
+		}
+		if (mutation.fieldKey === "design_preset_id") {
+			return applyCliDesignPresetSelection(nextFacts, undefined);
 		}
 		return normalizeCliFactsDraft(nextFacts);
 	}
@@ -633,8 +643,20 @@ export async function applyDraftPatchFromFile(
 			delete mergedFacts[fieldKey];
 		}
 	}
+	const patchTouchedDesignPreset = "design_preset_id" in rawPatch;
+	const patchTouchedCoupledDesignFields =
+		"theme_preset" in rawPatch || "design_references" in rawPatch;
+	const nextMergedFacts =
+		patchTouchedDesignPreset && !patchTouchedCoupledDesignFields
+			? applyCliDesignPresetSelection(
+					mergedFacts,
+					typeof mergedFacts.design_preset_id === "string"
+						? mergedFacts.design_preset_id
+						: undefined,
+				)
+			: mergedFacts;
 
-	const nextDraft = saveDraftWithMergedFacts(draft, mergedFacts);
+	const nextDraft = saveDraftWithMergedFacts(draft, nextMergedFacts);
 	await saveLocalDraft(repoRootPath, nextDraft);
 	return nextDraft;
 }

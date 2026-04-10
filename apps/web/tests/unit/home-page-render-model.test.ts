@@ -29,6 +29,7 @@ describe("home page render model", () => {
 			"Reuse the product truth",
 			"Extend without starting over",
 			"Keep one source of truth",
+			"Curated design direction",
 		]);
 		expect(renderModel.durability.isEnabled).toBe(false);
 		expect(renderModel.socialProof.isEnabled).toBe(true);

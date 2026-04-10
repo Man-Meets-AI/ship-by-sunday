@@ -1,6 +1,9 @@
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
-import { createCompleteProjectDefinition } from "@shipbysunday/blueprint-compiler";
+import {
+	buildDesignPresetFactSeed,
+	createCompleteProjectDefinition,
+} from "@shipbysunday/blueprint-compiler";
 import { runCli } from "../src/run-cli";
 import {
 	createLocalDraftDefinition,
@@ -91,6 +94,9 @@ describe("agent workflows", () => {
 		).toContain("theme_preset");
 		expect(
 			fieldsResult.fields.map((field: { fieldKey: string }) => field.fieldKey),
+		).toContain("design_preset_id");
+		expect(
+			fieldsResult.fields.map((field: { fieldKey: string }) => field.fieldKey),
 		).toContain("design_references");
 		expect(
 			fieldsResult.fields.map((field: { fieldKey: string }) => field.fieldKey),
@@ -163,6 +169,33 @@ describe("agent workflows", () => {
 			fieldKey: "product_name",
 			value: null,
 		});
+	});
+
+	it("re-seeds coupled design fields when setting design_preset_id", async () => {
+		const repoRootPath = await createTemporaryRepoRoot();
+		const { io, stdout } = createCliIo();
+
+		const exitCode = await runCli({
+			argv: ["set", "blueprint.design_preset_id", "notion", "--json"],
+			io,
+			projectRootPath: repoRootPath,
+		});
+
+		expect(exitCode).toBe(0);
+		expect(JSON.parse(stdout.join("\n"))).toMatchObject({
+			command: "set",
+			fieldKey: "design_preset_id",
+			value: "notion",
+		});
+
+		const savedDraft = await loadLocalDraft(repoRootPath);
+		expect(savedDraft?.facts.design_preset_id).toBe("notion");
+		expect(savedDraft?.facts.theme_preset).toBe(
+			buildDesignPresetFactSeed("notion").theme_preset,
+		);
+		expect(savedDraft?.facts.design_references).toEqual([
+			"https://getdesign.md/notion/design-md",
+		]);
 	});
 
 	it("supports atomic bulk mutation from a file", async () => {

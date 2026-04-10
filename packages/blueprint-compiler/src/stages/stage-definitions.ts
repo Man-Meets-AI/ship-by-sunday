@@ -36,7 +36,7 @@ const blueprintStageSteps = [
 	{
 		id: "design",
 		label: "Design",
-		fieldKeys: ["theme_preset", "design_references"],
+		fieldKeys: ["design_preset_id", "theme_preset", "design_references"],
 		requiredFieldKeys: [],
 	},
 	{
