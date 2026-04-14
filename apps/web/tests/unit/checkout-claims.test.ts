@@ -38,10 +38,22 @@ function createCheckoutClaimsCtx({
 						.fn()
 						.mockResolvedValue(
 							tableName === "pendingCheckoutClaims" &&
-								indexName === "by_checkout_email_normalized"
+								indexName ===
+									"by_checkout_email_normalized_and_status_and_updated_at"
 								? pendingCheckoutClaimsByEmail
 								: [],
 						),
+					order: vi.fn(() => ({
+						take: vi
+							.fn()
+							.mockResolvedValue(
+								tableName === "pendingCheckoutClaims" &&
+									indexName ===
+										"by_checkout_email_normalized_and_status_and_updated_at"
+									? [...pendingCheckoutClaimsByEmail].reverse()
+									: [],
+							),
+					})),
 				})),
 			})),
 			insert,
@@ -169,9 +181,9 @@ describe("convex/checkoutClaims", () => {
 					updatedAt: 100,
 				},
 				{
-					_id: "pending_checkout_claim_new",
+					_id: "pending_checkout_claim_latest_pending",
 					checkoutEmailNormalized: "buyer@example.com",
-					status: "claimed",
+					status: "pending",
 					updatedAt: 300,
 				},
 			],
@@ -182,7 +194,7 @@ describe("convex/checkoutClaims", () => {
 				checkoutEmailNormalized: "buyer@example.com",
 			}),
 		).resolves.toMatchObject({
-			_id: "pending_checkout_claim_new",
+			_id: "pending_checkout_claim_latest_pending",
 			updatedAt: 300,
 		});
 	});

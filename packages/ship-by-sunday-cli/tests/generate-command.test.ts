@@ -56,7 +56,7 @@ describe("generate command", () => {
 		expect(firstExitCode).toBe(0);
 		await expect(
 			access(path.join(outputPath, "ship-by-sunday-os", "docs", "README.md")),
-		).resolves.toBeNull();
+		).resolves.toBeUndefined();
 
 		const secondAttemptIo = createCliIo();
 		const secondExitCode = await runCli({
@@ -98,7 +98,7 @@ describe("generate command", () => {
 			access(
 				path.join(nestedOutputPath, "ship-by-sunday-os", "docs", "README.md"),
 			),
-		).resolves.toBeNull();
+		).resolves.toBeUndefined();
 	});
 
 	it("keeps sibling files when forcing directory generation", async () => {
@@ -135,10 +135,12 @@ describe("generate command", () => {
 			}),
 		).toBe(0);
 
-		await expect(access(path.join(outputPath, "keep.txt"))).resolves.toBeNull();
+		await expect(
+			access(path.join(outputPath, "keep.txt")),
+		).resolves.toBeUndefined();
 		await expect(
 			access(path.join(outputPath, "ship-by-sunday-os", "docs", "README.md")),
-		).resolves.toBeNull();
+		).resolves.toBeUndefined();
 	});
 
 	it("returns an invalid_state error when directory output points at a file", async () => {

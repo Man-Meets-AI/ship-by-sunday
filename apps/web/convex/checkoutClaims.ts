@@ -103,23 +103,17 @@ async function getLatestCheckoutClaimByEmailRecord(
 ) {
 	const matchingClaims = await ctx.db
 		.query("pendingCheckoutClaims")
-		.withIndex("by_checkout_email_normalized", (queryBuilder) =>
-			queryBuilder.eq("checkoutEmailNormalized", checkoutEmailNormalized),
+		.withIndex(
+			"by_checkout_email_normalized_and_status_and_updated_at",
+			(queryBuilder) =>
+				queryBuilder
+					.eq("checkoutEmailNormalized", checkoutEmailNormalized)
+					.eq("status", "pending"),
 		)
-		.collect();
+		.order("desc")
+		.take(1);
 
-	return matchingClaims.reduce<(typeof matchingClaims)[number] | null>(
-		(latestClaim, currentClaim) => {
-			if (!latestClaim) {
-				return currentClaim;
-			}
-
-			return currentClaim.updatedAt > latestClaim.updatedAt
-				? currentClaim
-				: latestClaim;
-		},
-		null,
-	);
+	return matchingClaims[0] ?? null;
 }
 
 export const getPendingCheckoutClaimBySessionId = internalQuery({
