@@ -5,7 +5,7 @@ import type { HomePageContent } from "@/features/marketing/content/home";
 type Hero = HomePageContent["hero"];
 
 const headlineLineClass =
-	"font-marketing-display tracking-marketing-section block whitespace-nowrap text-[clamp(2.2rem,8vw,7.1rem)] font-normal uppercase leading-[0.95] text-foreground transition-all duration-500 hover:tracking-tighter";
+	"font-marketing-display tracking-marketing-section block text-balance text-[clamp(3.5rem,10vw,8.5rem)] font-normal uppercase leading-[0.95] text-foreground transition-all duration-500 hover:tracking-tighter";
 
 export function HomeHeroHeadline({ hero }: { hero: Hero }) {
 	return (

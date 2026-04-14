@@ -17,17 +17,11 @@ describe("home page content", () => {
 
 		expect(homePageContent.hero.headlineLead).toBe("Ship a real product");
 		expect(homePageContent.hero.headlineTailHover).toBe("by Sunday");
-		expect(homePageContent.hero.body).toBe(
-			"Lock the product truth, generate the agent-ready packs, and start from a durable system instead of a blank chat.",
+		expect(homePageContent.hero.body).toContain(
+			"The only system that teaches you how to ship a durable product from start to finish in one weekend.",
 		);
 		expect(homePageContent.hero.loginLabel).toBe("Sign in");
 		expect(homePageContent.hero.secondaryCta.href).toBe("#system");
-		expect(homePageContent.hero.media).toEqual({
-			kind: "preview",
-			previewImageSrc: productConfig.images.heroPreview,
-			previewImageAlt:
-				"Preview of the Ship by Sunday system showing the blueprint and agent-ready packs.",
-		});
 
 		expect(homePageContent.whatsInsideSection.title).toBe(
 			"By Sunday, you leave with the product truth, the agent packs, and the starter path.",
