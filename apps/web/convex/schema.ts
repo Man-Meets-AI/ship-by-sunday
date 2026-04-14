@@ -61,7 +61,12 @@ export default defineSchema({
 		updatedAt: v.number(),
 	})
 		.index("by_stripe_checkout_session_id", ["stripeCheckoutSessionId"])
-		.index("by_checkout_email_normalized", ["checkoutEmailNormalized"]),
+		.index("by_checkout_email_normalized", ["checkoutEmailNormalized"])
+		.index("by_checkout_email_normalized_and_status_and_updated_at", [
+			"checkoutEmailNormalized",
+			"status",
+			"updatedAt",
+		]),
 	starterRepoAccess: defineTable({
 		clerkUserId: v.string(),
 		courseSlug: v.string(),

@@ -69,7 +69,8 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 		title: "Install the recommended Codex skills",
 		internalPhase: "core",
 		customerAction: [
-			"Run `bun run codex:skills:install`.",
+			"If Node.js and `npx` are installed, run `bun run codex:skills:install`.",
+			"If that command says Node.js or `npx` is missing, skip it for now and come back after installing Node.js tooling.",
 			"Restart Codex if the new skills do not appear right away.",
 			"Use the local wrapper skills first. Use the external skills when you need deeper domain help.",
 		],
@@ -289,7 +290,7 @@ function renderSharedIntro(productName: string) {
 		"",
 		"This is the recommended order for every buyer. Follow it once before you start reshaping the product:",
 		"- `bun run bootstrap`",
-		"- `bun run codex:skills:install`",
+		"- `bun run codex:skills:install` if Node.js and `npx` are available",
 		"- restart Codex if the new skills do not appear",
 		"- `$starter-core-setup`",
 		"- `$starter-auth-setup`",

@@ -146,12 +146,8 @@ function PresetDropdownRow({
 			/>
 			<span className="flex min-w-0 flex-col gap-0.5">
 				<span className="flex items-baseline gap-2">
-					<span className="text-sm font-semibold text-foreground">
-						{label}
-					</span>
-					<span className="text-[11px] text-muted-foreground">
-						{category}
-					</span>
+					<span className="text-sm font-semibold text-foreground">{label}</span>
+					<span className="text-[11px] text-muted-foreground">{category}</span>
 				</span>
 				<span className="text-xs leading-snug text-muted-foreground">
 					{summary}
