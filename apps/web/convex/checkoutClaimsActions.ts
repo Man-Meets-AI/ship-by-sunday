@@ -7,6 +7,7 @@ import { apiConfig, PRODUCT_COURSE_SLUG } from "../config/product";
 import { internal } from "./_generated/api";
 import { action } from "./_generated/server";
 import { productAccessGrantResultValidator } from "./access/validators";
+import { normalizeCheckoutEmail } from "./checkoutClaims";
 import { requireConvexEnv } from "./env";
 
 const checkoutClaimActionResultValidator = v.union(
@@ -73,16 +74,69 @@ type CheckoutClaimActionResult =
 	| {
 			kind: "validated";
 			sessionId: string;
-			claimResult:
-				| {
-						granted: "inserted" | "patched";
-				  }
-				| {
-						claim: "claimed" | "already_claimed";
-						grantResult: {
-							granted: "inserted" | "patched";
-						};
-				  };
+			claimResult: SuccessfulCheckoutClaimResult;
+	  };
+
+type SuccessfulCheckoutClaimResult =
+	| {
+			granted: "inserted" | "patched";
+	  }
+	| {
+			claim: "claimed" | "already_claimed";
+			grantResult: {
+				granted: "inserted" | "patched";
+			};
+	  };
+
+const checkoutEmailClaimActionResultValidator = v.union(
+	v.object({
+		kind: v.literal("sign_in_required"),
+	}),
+	v.object({
+		kind: v.literal("no_pending_claim"),
+	}),
+	v.object({
+		kind: v.literal("email_not_verified"),
+	}),
+	v.object({
+		kind: v.literal("wrong_account"),
+		sessionId: v.string(),
+	}),
+	v.object({
+		kind: v.literal("validated"),
+		sessionId: v.string(),
+		claimResult: v.union(
+			productAccessGrantResultValidator,
+			v.object({
+				claim: v.literal("claimed"),
+				grantResult: productAccessGrantResultValidator,
+			}),
+			v.object({
+				claim: v.literal("already_claimed"),
+				grantResult: productAccessGrantResultValidator,
+			}),
+		),
+	}),
+);
+
+type CheckoutEmailClaimActionResult =
+	| {
+			kind: "sign_in_required";
+	  }
+	| {
+			kind: "no_pending_claim";
+	  }
+	| {
+			kind: "email_not_verified";
+	  }
+	| {
+			kind: "wrong_account";
+			sessionId: string;
+	  }
+	| {
+			kind: "validated";
+			sessionId: string;
+			claimResult: SuccessfulCheckoutClaimResult;
 	  };
 
 function getStripeClient() {
@@ -96,6 +150,50 @@ function getCheckoutEmail(session: Stripe.Checkout.Session) {
 	return typeof checkoutEmail === "string" && checkoutEmail.length > 0
 		? checkoutEmail
 		: null;
+}
+
+function mapPendingClaimResult({
+	sessionId,
+	claimResult,
+}: {
+	sessionId: string;
+	claimResult:
+		| {
+				claim: "claimed" | "already_claimed";
+				grantResult: {
+					granted: "inserted" | "patched";
+				};
+		  }
+		| {
+				claim:
+					| "claimed_by_other_user"
+					| "email_mismatch"
+					| "email_not_verified"
+					| "missing_claim";
+		  };
+}): CheckoutEmailClaimActionResult {
+	switch (claimResult.claim) {
+		case "claimed":
+		case "already_claimed":
+			return {
+				kind: "validated" as const,
+				sessionId,
+				claimResult,
+			};
+		case "claimed_by_other_user":
+		case "email_mismatch":
+		case "email_not_verified":
+			return {
+				kind: "wrong_account" as const,
+				sessionId,
+			};
+		case "missing_claim":
+			return {
+				kind: "no_pending_claim" as const,
+			};
+		default:
+			return claimResult satisfies never;
+	}
 }
 
 export const claimCheckoutSessionForViewer = action({
@@ -250,5 +348,61 @@ export const claimCheckoutSessionForViewer = action({
 			default:
 				return claimResult satisfies never;
 		}
+	},
+});
+
+export const claimLatestPendingCheckoutForViewer = action({
+	args: {},
+	returns: checkoutEmailClaimActionResultValidator,
+	handler: async (ctx): Promise<CheckoutEmailClaimActionResult> => {
+		const identity = await ctx.auth.getUserIdentity();
+		if (!identity) {
+			return {
+				kind: "sign_in_required" as const,
+			};
+		}
+
+		if (!identity.email || !identity.emailVerified) {
+			return {
+				kind: "email_not_verified" as const,
+			};
+		}
+
+		const latestClaim = await ctx.runQuery(
+			internal.checkoutClaims.getLatestCheckoutClaimByEmail,
+			{
+				checkoutEmailNormalized: normalizeCheckoutEmail(identity.email),
+			},
+		);
+		if (!latestClaim) {
+			return {
+				kind: "no_pending_claim" as const,
+			};
+		}
+
+		const claimResult:
+			| {
+					claim: "claimed" | "already_claimed";
+					grantResult: {
+						granted: "inserted" | "patched";
+					};
+			  }
+			| {
+					claim:
+						| "claimed_by_other_user"
+						| "email_mismatch"
+						| "email_not_verified"
+						| "missing_claim";
+			  } = await ctx.runMutation(
+			internal.checkoutClaims.claimPendingCheckoutClaim,
+			{
+				stripeCheckoutSessionId: latestClaim.stripeCheckoutSessionId,
+			},
+		);
+
+		return mapPendingClaimResult({
+			sessionId: latestClaim.stripeCheckoutSessionId,
+			claimResult,
+		});
 	},
 });

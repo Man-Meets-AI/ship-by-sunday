@@ -11,7 +11,6 @@
 
 ### Changed
 
-- Rebuilt the homepage hero around a centered media plane so the upcoming sales-video slot reads as part of one calm first-screen composition, tightened the hero headline and top-bar behavior for small screens, and added focused unit plus integration-ui coverage for the new hero media boundary.
 - Expanded the compiled starter repo contract with a buyer-facing `START-HERE.md`, a mirrored `/docs` onboarding path, starter-local Codex wrapper skills, and a one-command external skill installer for the vetted Convex, Clerk, and Stripe skills so buyers land with an obvious setup path instead of assembling it from scattered docs.
 
 ## 2026-04-06

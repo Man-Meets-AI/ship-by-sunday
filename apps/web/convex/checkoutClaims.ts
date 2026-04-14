@@ -97,6 +97,31 @@ async function getPendingCheckoutClaimBySessionIdRecord(
 		.unique();
 }
 
+async function getLatestCheckoutClaimByEmailRecord(
+	ctx: MutationCtx | QueryCtx,
+	checkoutEmailNormalized: string,
+) {
+	const matchingClaims = await ctx.db
+		.query("pendingCheckoutClaims")
+		.withIndex("by_checkout_email_normalized", (queryBuilder) =>
+			queryBuilder.eq("checkoutEmailNormalized", checkoutEmailNormalized),
+		)
+		.collect();
+
+	return matchingClaims.reduce<(typeof matchingClaims)[number] | null>(
+		(latestClaim, currentClaim) => {
+			if (!latestClaim) {
+				return currentClaim;
+			}
+
+			return currentClaim.updatedAt > latestClaim.updatedAt
+				? currentClaim
+				: latestClaim;
+		},
+		null,
+	);
+}
+
 export const getPendingCheckoutClaimBySessionId = internalQuery({
 	args: {
 		stripeCheckoutSessionId: v.string(),
@@ -106,6 +131,18 @@ export const getPendingCheckoutClaimBySessionId = internalQuery({
 		await getPendingCheckoutClaimBySessionIdRecord(
 			ctx,
 			args.stripeCheckoutSessionId,
+		),
+});
+
+export const getLatestCheckoutClaimByEmail = internalQuery({
+	args: {
+		checkoutEmailNormalized: v.string(),
+	},
+	returns: pendingCheckoutClaimReturnValidator,
+	handler: async (ctx, args) =>
+		await getLatestCheckoutClaimByEmailRecord(
+			ctx,
+			args.checkoutEmailNormalized,
 		),
 });
 

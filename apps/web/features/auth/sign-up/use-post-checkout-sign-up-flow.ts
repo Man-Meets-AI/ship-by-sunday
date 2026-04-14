@@ -1,6 +1,6 @@
 "use client";
 
-import { useClerk, useSignUp } from "@clerk/nextjs";
+import { useClerk, useSignIn, useSignUp } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
@@ -46,6 +46,7 @@ export function usePostCheckoutSignUpFlow({
 	redirectPath: string;
 }) {
 	const clerk = useClerk();
+	const { signIn } = useSignIn();
 	const { errors, fetchStatus, signUp } = useSignUp();
 	const router = useRouter();
 	const [password, setPassword] = useState("");
@@ -102,16 +103,65 @@ export function usePostCheckoutSignUpFlow({
 		);
 	}
 
-	async function submitSignUp() {
-		const response = await signUp.password({
-			emailAddress: lockedEmailAddress,
-			password,
-		});
+	async function transferToSignIn() {
+		const response = await signIn.create({ transfer: true });
 		if (response.error) {
 			return;
 		}
 
-		await signUp.verifications.sendEmailCode();
+		if (signIn.status === "complete") {
+			await signIn.finalize({
+				navigate: navigateAfterAuth,
+			});
+			return;
+		}
+
+		await navigateWithRouter(
+			router,
+			buildSignInHref({ redirectPath: safeRedirectPath }),
+		);
+	}
+
+	async function submitSignUp() {
+		const createResponse = await signUp.create({
+			emailAddress: lockedEmailAddress,
+		});
+		if (createResponse.error) {
+			if (signUp.isTransferable) {
+				await transferToSignIn();
+			}
+			return;
+		}
+
+		const passwordResponse = await signUp.password({
+			emailAddress: lockedEmailAddress,
+			password,
+		});
+		if (passwordResponse.error) {
+			if (signUp.isTransferable) {
+				await transferToSignIn();
+			}
+			return;
+		}
+
+		if (signUp.isTransferable) {
+			await transferToSignIn();
+			return;
+		}
+
+		if (signUp.status === "complete") {
+			await signUp.finalize({
+				navigate: navigateAfterAuth,
+			});
+			return;
+		}
+
+		if (
+			signUp.status === "missing_requirements" &&
+			signUp.unverifiedFields.includes("email_address")
+		) {
+			await signUp.verifications.sendEmailCode();
+		}
 	}
 
 	async function submitVerification() {

@@ -38,6 +38,26 @@ export type CheckoutSessionClaimResult =
 			claimResult: unknown;
 	  };
 
+export type CheckoutEmailClaimResult =
+	| {
+			kind: "sign_in_required";
+	  }
+	| {
+			kind: "no_pending_claim";
+	  }
+	| {
+			kind: "email_not_verified";
+	  }
+	| {
+			kind: "wrong_account";
+			sessionId: string;
+	  }
+	| {
+			kind: "validated";
+			sessionId: string;
+			claimResult: unknown;
+	  };
+
 export function getStripeCheckoutSessionEmail(
 	session: Stripe.Checkout.Session,
 ): string | null {
@@ -115,6 +135,21 @@ export async function claimCheckoutSessionForViewer(
 	}
 
 	return result;
+}
+
+export async function claimLatestPendingCheckoutForViewer(): Promise<CheckoutEmailClaimResult> {
+	const session = await getConvexServerSession();
+	if (!session.token) {
+		return {
+			kind: "sign_in_required",
+		};
+	}
+
+	return (await fetchAction(
+		api.checkoutClaimsActions.claimLatestPendingCheckoutForViewer,
+		{},
+		{ token: session.token },
+	)) as CheckoutEmailClaimResult;
 }
 
 export async function fetchViewerProductAccess() {
