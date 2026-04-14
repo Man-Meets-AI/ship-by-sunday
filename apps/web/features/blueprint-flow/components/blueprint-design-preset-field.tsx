@@ -62,11 +62,15 @@ export function BlueprintDesignPresetField({
 						summary={selectedPreset.summary}
 					/>
 				</SelectTrigger>
-				<SelectContent className="w-[min(32rem,var(--radix-select-trigger-width))]">
+				<SelectContent className="w-[min(36rem,var(--radix-select-trigger-width))]">
 					<SelectGroup>
 						{designPresetDefinitions.map((preset) => (
-							<SelectItem key={preset.id} value={preset.id}>
-								<PresetOptionRow
+							<SelectItem
+								key={preset.id}
+								value={preset.id}
+								className="py-2.5 pl-2.5"
+							>
+								<PresetDropdownRow
 									category={preset.category}
 									label={preset.label}
 									logoPath={preset.logoPath}
@@ -115,6 +119,42 @@ function PresetOptionRow({
 				<span className="text-sm font-medium text-foreground">{label}</span>
 				<span className="truncate text-xs text-muted-foreground">
 					{category} · {summary}
+				</span>
+			</span>
+		</span>
+	);
+}
+
+function PresetDropdownRow({
+	category,
+	label,
+	logoPath,
+	summary,
+}: {
+	category: string;
+	label: string;
+	logoPath: string;
+	summary: string;
+}) {
+	return (
+		<span className="flex items-center gap-3">
+			<img
+				src={logoPath}
+				alt=""
+				aria-hidden="true"
+				className="size-8 shrink-0 rounded-lg border border-border/50 bg-background p-1.5"
+			/>
+			<span className="flex min-w-0 flex-col gap-0.5">
+				<span className="flex items-baseline gap-2">
+					<span className="text-sm font-semibold text-foreground">
+						{label}
+					</span>
+					<span className="text-[11px] text-muted-foreground">
+						{category}
+					</span>
+				</span>
+				<span className="text-xs leading-snug text-muted-foreground">
+					{summary}
 				</span>
 			</span>
 		</span>
