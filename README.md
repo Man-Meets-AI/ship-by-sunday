@@ -93,7 +93,7 @@ For the full command map, use [docs/design-docs/scripts.md](./docs/design-docs/s
 - Docs index: [docs/index.md](./docs/index.md)
 - Observability runbook: [docs/references/observability.md](./docs/references/observability.md)
 - Release workflow runbook: [docs/release-workflow.md](./docs/release-workflow.md)
-- App-local QA guide: [Local QA](./apps/web/content/docs/local-qa.mdx)
+- App-local verification guide: [Local QA](./apps/web/content/docs/local-qa.mdx)
 - Homepage contract: [apps/web/content/docs/configure-the-homepage.mdx](./apps/web/content/docs/configure-the-homepage.mdx)
 - Public docs index: [apps/web/content/docs/index.mdx](./apps/web/content/docs/index.mdx)
 

@@ -1,49 +1,45 @@
 ---
-title: 'Reliability'
-summary: 'Repo-wide validation loop, review expectations, and worktree/local-environment guidance for this workspace.'
-docType: 'guide'
-status: 'active'
+title: "Reliability"
+summary: "Repo-wide validation loop, review expectations, and local-environment guidance for Ship by Sunday."
+docType: "guide"
+status: "active"
 read_when:
-  - 'You are deciding how to validate a change in this repo.'
-  - 'You need the current worktree or local-environment assumptions.'
-  - 'You want the repo-wide review loop before shipping a risky change.'
+  - "You are deciding how to validate a change in this repo."
+  - "You need the current worktree or local-environment assumptions."
+  - "You want the repo-wide review loop before shipping a risky change."
 ---
 
 # Reliability
 
-This file owns the repo-wide proof loop and the operational facts that let agents validate changes honestly instead of by inspection or folklore.
+This file owns the repo-wide proof loop and the operational facts that let contributors validate changes honestly instead of by inspection or folklore.
 
 ## Owns
 
 - the default validation loop for repo work
 - review expectations for risky or multi-step changes
-- the current worktree and local-environment assumptions that affect proof
+- the current local-environment assumptions that affect proof
 
 ## Does Not Own
 
-- runtime boot implementation details that belong in `apps/runtime/`
 - the canonical ExecPlan contract, which lives in `docs/exec-plans/PLANS.md`
-- live runtime logs or state under `.runtime/assistant/`
+- app-specific setup details that belong in `apps/web/content/docs/*`
+- live machine-local state
 
 ## Proof Loop
 
 Start with the narrowest relevant proof for the slice you changed. For repo-wide or shared-surface work, finish with the root quality surface:
 
 ```bash
+bun run format
 bun run lint
-bun run fmt:check
 bun run typecheck
+bun run test
+bun run test:contracts
+bun run build
+bun run test:e2e
 ```
 
-For docs or planning changes, also use the docs-focused surfaces:
-
-```bash
-bun run plans:lint -- --plan <repo-relative-plan-path>
-bun run markdown:lint -- --paths <touched-doc-paths>
-bun run docs:validate
-```
-
-When a relevant command fails because of an unrelated pre-existing repo issue, document the exact failure in the active ExecPlan or handoff instead of hiding it.
+For docs-only or planning-only changes, there is no dedicated docs linter in this repository today. Use the narrowest relevant code checks, targeted grep or diff review, and `git diff --check` when structure or links changed.
 
 ## Review Expectations
 
@@ -51,12 +47,20 @@ Multi-step, risky, or cross-cutting work should use the checked-in ExecPlan loop
 
 ## Worktrees And Local Environments
 
-A worktree is a separate checkout. Git cannot check out the same branch in both Local and Worktree at the same time. Thread handoff moves Git-visible state, not ignored files, so `.gitignore` content and untracked local setup do not automatically follow.
+A worktree is a separate checkout. Git cannot check out the same branch in both locations at the same time. Thread handoff moves Git-visible state, not ignored files, so `.gitignore` content and untracked local setup do not automatically follow.
 
-Official Codex guidance expects setup scripts or project-scoped config to make fresh worktrees bootable. This repo now has a checked-in runtime harness for that purpose under [apps/runtime/QUICKSTART.md](/Users/parkerrex/Developer/worker/apps/runtime/QUICKSTART.md) plus the V1 runtime legibility command surface in [apps/runtime/README.md](/Users/parkerrex/Developer/worker/apps/runtime/README.md). Fresh worktrees should use the repo-owned `runtime:bootstrap`, `runtime:up`, `runtime:health`, `runtime:legibility`, `runtime:proof:worker-dashboard`, and `runtime:down` commands instead of relying on shell folklore.
+Fresh checkouts should use the repo-owned boot path instead of reconstructing setup from memory:
+
+```bash
+bun install
+cp apps/web/.env.local.example apps/web/.env.local
+bun run dev:core
+```
+
+Use `bun run dev` only when you need the full local buyer-flow stack, including Stripe forwarding.
 
 ## Next
 
-- Use [apps/runtime/README.md](/Users/parkerrex/Developer/worker/apps/runtime/README.md) for runtime command and operator details.
-- Use [apps/runtime/QUICKSTART.md](/Users/parkerrex/Developer/worker/apps/runtime/QUICKSTART.md) for the checked-in worktree boot path.
-- Use [docs/exec-plans/PLANS.md](/Users/parkerrex/Developer/worker/docs/exec-plans/PLANS.md) for the canonical ExecPlan contract.
+- Use [docs/design-docs/scripts.md](/Users/parkerrex/Developer/ship-by-sunday/docs/design-docs/scripts.md) for the current command map.
+- Use [apps/web/content/docs/local-qa.mdx](/Users/parkerrex/Developer/ship-by-sunday/apps/web/content/docs/local-qa.mdx) for the app-local verification runbook.
+- Use [docs/exec-plans/PLANS.md](/Users/parkerrex/Developer/ship-by-sunday/docs/exec-plans/PLANS.md) for the canonical ExecPlan contract.

@@ -62,7 +62,7 @@ const STARTER_WRAPPER_SKILLS: StarterWrapperSkill[] = [
 		steps: [
 			"Read `START-HERE.md` and confirm core setup, auth setup, billing setup, and verification are done first.",
 			"Start by updating `apps/web/config/product.ts` and `apps/web/features/marketing/content/home.ts`.",
-			"Prefer `$copywriting`, `$frontend-design`, `$docs`, and `$qa-team` as the first follow-on skills.",
+			"Prefer `$copywriting`, `$design-ux-to-ui`, `$docs`, and `$testing-practices` as the first follow-on skills.",
 			"Keep auth and billing contracts stable until the product already feels like the buyer's product.",
 		],
 	},

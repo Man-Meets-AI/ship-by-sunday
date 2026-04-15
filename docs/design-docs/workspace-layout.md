@@ -18,4 +18,4 @@ Read order for common work:
 
 - UI or product-surface work: `DESIGN.md`, then `apps/web/AGENTS.md`, then the relevant feature folder.
 - Compiler or snapshot work: `packages/blueprint-compiler/AGENTS.md`, then `packages/blueprint-compiler/src`.
-- Release or QA work: `docs/release-workflow.md`, then `apps/web/content/docs/local-qa.mdx`.
+- Release or verification work: `docs/release-workflow.md`, then `apps/web/content/docs/local-qa.mdx`.

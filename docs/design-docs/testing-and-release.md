@@ -59,8 +59,8 @@ Canonical long-form runbook: `docs/release-workflow.md`.
 
 Checkout and entitlement are now protected by:
 
-- direct route and integration tests in `apps/web/tests/integration`
-- offline Convex contract coverage in `apps/web/tests/contracts/convex`
+- direct route and integration tests in domain folders such as `apps/web/tests/checkout/`
+- offline Convex contract coverage in domain files such as `apps/web/tests/checkout/*.convex-contract.test.ts`
 - deployment smoke that can hit the real checkout-session creation endpoint when the deployed environment is ready
 
 Do not rebuild a separate billing pack on top of those layers.
