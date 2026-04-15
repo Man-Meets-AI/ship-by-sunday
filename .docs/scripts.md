@@ -52,7 +52,9 @@ Use the narrowest relevant test surface first. Browser packs and billing checks 
 
 - `bun run qa:validate`
 - `bun run qa:inventory:sync`
+- `bun run qa:inventory:check`
 - `bun run qa:personas:prepare`
+- `bun run qa:convex:sync-hosted-dev`
 - `bun run qa:ship`
 - `bun run qa:team`
 - `bun run qa:run-pack`
@@ -64,6 +66,8 @@ See `.docs/testing-and-release.md` and `qa/README.md` for when each QA path shou
 - `bun run hooks:install` installs the committed git hooks.
 - `bun run stripe:dev:doctor` checks the local Stripe CLI profile.
 - `bun run stripe:dev:verify` proves the local Stripe-to-Convex handoff.
+- `cd apps/web && bun --env-file=.env.local scripts/verify-managed-stripe-env.ts --expected-mode=test --app-base-url=https://dev.man-meets-ai.com` verifies a hosted preview Stripe env and checkout route before billing proof.
+- `cd apps/web && bun --env-file=.env.production scripts/verify-managed-stripe-env.ts --expected-mode=live --app-base-url=https://www.man-meets-ai.com` verifies the live Stripe env and checkout route before production billing proof.
 - `bun run auth:dev:doctor` checks the auth development setup.
 - `bun run clerk:test-user:prepare:entitled` prepares the fast local entitled test account.
 - `bun run video:*` commands operate the optional lesson-video pipeline.

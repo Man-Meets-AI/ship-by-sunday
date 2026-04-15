@@ -36,7 +36,7 @@ bun run qa:run-pack -- --pack=default_ship --dry-run
 bun run qa:ship -- --pack=default_ship --slug=baseline
 ```
 
-`qa:validate` is the fast integrity check for the QA control plane and the checked-in QA-team assets. `qa:inventory:sync` refreshes the full-suite inventory from the current `apps/web/tests/` tree while preserving curated rows for unchanged files. `qa:team` scaffolds a local review artifact for a material feature review. `qa:personas:prepare` provisions the committed personas against the Clerk and Convex environment currently loaded for QA. `qa:run-pack` is the explicit scenario-pack runner for `default_ship`, `extended`, and `billing_integration`. On local `billing_integration` targets it now records the pinned Stripe guardrail doctor as a warning-only preflight and runs `stripe:dev:verify` as the hard post-checkout proof. `qa:ship` scaffolds a dated run report for the selected scenario pack so the human runner can record what passed, failed, or remained blocked.
+`qa:validate` is the fast integrity check for the QA control plane and the checked-in QA-team assets. `qa:inventory:sync` refreshes the full-suite inventory from the current `apps/web/tests/` tree while preserving curated rows for unchanged files. `qa:inventory:check` is the CI-facing guard that reruns inventory sync and fails if `qa/test-inventory.csv` would change. `qa:team` scaffolds a local review artifact for a material feature review. `qa:personas:prepare` provisions the committed personas against the Clerk and Convex environment currently loaded for QA. `qa:run-pack` is the explicit scenario-pack runner for `default_ship`, `extended`, and `billing_integration`. On local `billing_integration` targets it now records the pinned Stripe guardrail doctor as a warning-only preflight and runs `stripe:dev:verify` as the hard post-checkout proof. On `www.man-meets-ai.com`, the billing pack switches to the dedicated hosted verifier instead of the sandbox browser lane. `qa:ship` scaffolds a dated run report for the selected scenario pack so the human runner can record what passed, failed, or remained blocked.
 
 If you want the fast local developer gate before handing a branch to QA, use `bun run hooks:install` once, then rely on `git commit` to run `bun run precommit` and `git push` to run `bun run prepush`. Those are separate repo-level checks, not QA packs.
 
@@ -93,6 +93,8 @@ Rough old-world translation:
   Checks the QA system itself. This validates the CSVs, persona protocol, inventory wiring, repo-scoped QA role files, and the shared QA-team skill. It does not click through the app.
 - `bun run qa:inventory:sync`
   Refreshes the inventory of every test file under `apps/web/tests/`. It preserves curated rows for unchanged files and only seeds new rows for newly discovered tests.
+- `bun run qa:inventory:check`
+  Re-runs inventory sync and fails if `qa/test-inventory.csv` would change. CI should use this so inventory drift fails on a pull request before it blocks a release workflow.
 - `bun run qa:team -- --slug=<feature-slug> --base=<ref>`
   Scaffolds a local review artifact under `qa/reviews/local/` so a material QA-team review has a stable diff summary and note-taking surface.
   Add `--review-mode=command-backed --environment=<env>` when the review already includes real command output and should expect `release_summarizer` to help with the final verdict.
@@ -130,7 +132,7 @@ Rough old-world translation:
 - Feature branches:
   Run `bun run qa:validate`, then `bun run qa:run-pack -- --pack=default_ship --dry-run`, plus the smallest focused tests needed for the diff.
 - `dev`:
-  Run `bun run qa:validate`, then `bun run qa:personas:prepare -- --pack=default_ship`, then `bun run qa:run-pack -- --pack=default_ship`. Add `billing_integration` when checkout, Stripe, billing, entitlement, or webhook behavior changed. In GitHub Actions on `dev`, that billing decision should come from the release-scope detector automatically.
+  Run `bun run qa:validate`, then `bun run qa:personas:prepare -- --pack=default_ship`, then `bun run qa:run-pack -- --pack=default_ship`. Add `billing_integration` when checkout, Stripe, billing, entitlement, or webhook behavior changed. In GitHub Actions on `dev`, that billing decision should come from the release-scope detector automatically, the workflow should auto-bind `dev.man-meets-ai.com` to the exact ready preview deployment, and hosted Convex dev should sync automatically when the release touched `apps/web/convex/`.
 - `main` or production:
   Use the same `default_ship` evidence, then add `billing_integration` or the live no-cost Checkout proof when the release changed the commercial path. In GitHub Actions on `main`, `Production Release Proof` should run the same logic automatically after the deploy settles.
 - If public pages, docs surface, or unauthenticated routes changed:
@@ -151,7 +153,9 @@ Important: a Playwright run that exits `0` with every test skipped is not browse
 - Start on `dev` first. The latest green integrated staging proof is GitHub Actions run `23865552478` on commit `2b5eccf85141ad90ef2b8af4b85bda4804491189`, and it passed `release_scope`, `default_ship`, forced `billing_integration`, and `release_gate`.
 - Move to `prod` second for release evidence. The latest green production proof is GitHub Actions run `23867770574` on commit `92da71a5218440030828d2b36bfab76a41993b79`, and the matching green Convex production deploy is `23867770585`.
 - `qa/runs/2026-04-01-release-proof-final-green.md` is the durable report for that final April 1 release state.
-- In this repo, the preferred production proof remains a live no-cost Checkout run using a restricted `100% off` promotion code, because that exercises `checkout.session.completed`, the webhook grant, `/checkout/success`, and `/blueprint` without requiring a real charge.
+- In this repo, the preferred production proof remains a live no-cost Checkout run using a restricted `100% off` discount, because that exercises `checkout.session.completed`, the webhook grant, `/checkout/success`, and `/blueprint` without requiring a real charge.
+- On `https://www.man-meets-ai.com`, `qa:run-pack -- --pack=billing_integration` should use the dedicated hosted verifier that creates the live Checkout Session directly with a fresh one-time 100%-off coupon already attached. Do not make the production gate depend on typing a promotion code into Stripe’s hosted UI.
+- Before hosted billing proof starts on `dev` or `main`, verify the managed Stripe env and the deployed `/api/stripe/checkout` route against the target host so stale price or product IDs fail fast.
 - Treat `qa/runs/` plus the latest GitHub Actions run IDs as the durable evidence set and read the latest relevant report for the target environment before rerunning a pack.
 
 ## Fresh-Agent Restart

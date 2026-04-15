@@ -2,6 +2,14 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
+import {
+	buildDeploymentAliasAssignmentUrl,
+	buildDeploymentAliasesUrl,
+	buildDeploymentListUrl,
+	extractInlineDeploymentAliases,
+	findMatchingDeployments,
+} from "./lib/vercel-deployments.mjs";
+
 function parseArgs(argv) {
 	const options = {};
 
@@ -41,22 +49,8 @@ async function readLinkedProject() {
 	}
 }
 
-function buildApiUrl({ projectId, teamId, target }) {
-	const apiUrl = new URL("https://api.vercel.com/v6/deployments");
-	apiUrl.searchParams.set("projectId", projectId);
-	apiUrl.searchParams.set("state", "BUILDING,READY");
-	apiUrl.searchParams.set("limit", "20");
-	if (target && target !== "preview") {
-		apiUrl.searchParams.set("target", target);
-	}
-	if (teamId) {
-		apiUrl.searchParams.set("teamId", teamId);
-	}
-	return apiUrl;
-}
-
 async function fetchDeployments({ projectId, teamId, token, target }) {
-	const response = await fetch(buildApiUrl({ projectId, teamId, target }), {
+	const response = await fetch(buildDeploymentListUrl({ projectId, teamId, target }), {
 		headers: {
 			authorization: `Bearer ${token}`,
 			"user-agent": "ship-by-sunday-release-proof",
@@ -74,14 +68,7 @@ async function fetchDeployments({ projectId, teamId, token, target }) {
 }
 
 async function fetchDeploymentAliases({ deploymentId, teamId, token }) {
-	const apiUrl = new URL(
-		`https://api.vercel.com/v2/deployments/${deploymentId}/aliases`,
-	);
-	if (teamId) {
-		apiUrl.searchParams.set("teamId", teamId);
-	}
-
-	const response = await fetch(apiUrl, {
+	const response = await fetch(buildDeploymentAliasesUrl({ deploymentId, teamId }), {
 		headers: {
 			authorization: `Bearer ${token}`,
 			"user-agent": "ship-by-sunday-release-proof",
@@ -100,14 +87,6 @@ async function fetchDeploymentAliases({ deploymentId, teamId, token }) {
 		.filter(Boolean);
 }
 
-function deploymentMatchesTarget({ deployment, target }) {
-	if (target === "preview") {
-		return deployment.target == null;
-	}
-
-	return deployment.target === target;
-}
-
 async function deploymentHasExpectedAlias({
 	deployment,
 	expectedAlias,
@@ -118,32 +97,46 @@ async function deploymentHasExpectedAlias({
 		return true;
 	}
 
-	const deploymentAliases = Array.isArray(deployment.alias)
-		? deployment.alias.filter((alias) => typeof alias === "string")
-		: await fetchDeploymentAliases({
-				deploymentId: deployment.uid ?? deployment.id,
-				teamId,
-				token,
-			});
+	const inlineAliases = extractInlineDeploymentAliases(deployment);
+	const deploymentAliases =
+		inlineAliases.length > 0
+			? inlineAliases
+			: await fetchDeploymentAliases({
+					deploymentId: deployment.uid ?? deployment.id,
+					teamId,
+					token,
+				});
 
 	return deploymentAliases.includes(expectedAlias);
 }
 
-function findMatchingDeployments({ commitSha, deployments, target }) {
-	return deployments.filter((deployment) => {
-		const commitMatches = deployment.meta?.githubCommitSha === commitSha;
-		if (!commitMatches) {
-			return false;
-		}
+async function assignDeploymentAlias({
+	deploymentId,
+	expectedAlias,
+	teamId,
+	token,
+}) {
+	const response = await fetch(
+		buildDeploymentAliasAssignmentUrl({ deploymentId, teamId }),
+		{
+			method: "POST",
+			headers: {
+				authorization: `Bearer ${token}`,
+				"content-type": "application/json",
+				"user-agent": "ship-by-sunday-release-proof",
+			},
+			body: JSON.stringify({
+				alias: expectedAlias,
+			}),
+		},
+	);
 
-		const ready =
-			deployment.state === "READY" || deployment.readyState === "READY";
-		if (!ready || !deploymentMatchesTarget({ deployment, target })) {
-			return false;
-		}
-
-		return true;
-	});
+	if (!response.ok) {
+		const body = await response.text();
+		throw new Error(
+			`Vercel alias assignment failed for ${expectedAlias} on deployment ${deploymentId} with ${response.status} ${response.statusText}. Body: ${body}`,
+		);
+	}
 }
 
 async function main() {
@@ -153,6 +146,8 @@ async function main() {
 	const target = options.target?.trim() || "production";
 	const expectedAlias =
 		options.alias_domain?.trim() || process.env.VERCEL_EXPECTED_ALIAS?.trim();
+	const assignAliasIfMissing =
+		(options.assign_alias_if_missing?.trim() ?? "").toLowerCase() === "true";
 
 	if (!commitSha) {
 		throw new Error(
@@ -208,6 +203,24 @@ async function main() {
 					token,
 				});
 				if (!aliasMatches) {
+					if (assignAliasIfMissing && expectedAlias) {
+						await assignDeploymentAlias({
+							deploymentId: deployment.uid ?? deployment.id,
+							expectedAlias,
+							teamId,
+							token,
+						});
+						lastObservation = JSON.stringify(
+							{
+								action: "assigned_alias",
+								expectedAlias,
+								deploymentId: deployment.uid ?? deployment.id ?? null,
+								url: deployment.url ?? null,
+							},
+							null,
+							2,
+						);
+					}
 					continue;
 				}
 
