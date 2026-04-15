@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+	buildHostedProofAccessDebugArgs,
 	buildHostedProofCheckoutSessionParams,
 	buildHostedProofCouponParams,
 	buildHostedProofSignInPath,
@@ -59,5 +60,17 @@ describe("hosted Stripe checkout proof helpers", () => {
 		expect(buildHostedProofSignInPath({})).toBe(
 			"/sign-in?redirect_url=%2Fblueprint",
 		);
+	});
+
+	it("keeps the checkout session id in the hosted proof access debug query", () => {
+		expect(
+			buildHostedProofAccessDebugArgs({
+				clerkUserId: "user_123",
+				sessionId: "cs_live_123",
+			}),
+		).toEqual({
+			clerkUserId: "user_123",
+			stripeCheckoutSessionId: "cs_live_123",
+		});
 	});
 });

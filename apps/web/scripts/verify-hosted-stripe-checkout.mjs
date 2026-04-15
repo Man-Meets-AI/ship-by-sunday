@@ -7,6 +7,7 @@ import { chromium } from "@playwright/test";
 import Stripe from "stripe";
 
 import {
+	buildHostedProofAccessDebugArgs,
 	buildHostedProofCheckoutSessionParams,
 	buildHostedProofCouponParams,
 	buildHostedProofSignInPath,
@@ -129,10 +130,12 @@ async function getProductAccessDebug({ clerkUserId, sessionId }) {
 			convexBinPath,
 			"run",
 			"access:getProductAccessDebug",
-			JSON.stringify({
-				...(clerkUserId ? { clerkUserId } : {}),
-				...(sessionId ? { stripeCheckoutSessionId: sessionId } : {}),
-			}),
+			JSON.stringify(
+				buildHostedProofAccessDebugArgs({
+					clerkUserId,
+					sessionId,
+				}),
+			),
 		],
 		{
 			timeoutMs: 15_000,
@@ -250,7 +253,7 @@ async function waitForAccessGrant({
 		try {
 			productAccess = await getProductAccessDebug({
 				clerkUserId,
-				sessionId: clerkUserId ? undefined : sessionId,
+				sessionId,
 			});
 		} catch (error) {
 			if (!requireConvexDebug) {
