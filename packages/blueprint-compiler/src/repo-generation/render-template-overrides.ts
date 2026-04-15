@@ -2,6 +2,9 @@ import type { CanonicalProjectDefinition } from "../canonical-project-definition
 import { GENERATED_DOCS_README_PATH } from "../generated-docs/generated-doc-paths";
 import type { RenderedBlueprintFile } from "../blueprints/render-types";
 import { buildRepoGenerationManifest } from "./build-repo-generation-manifest";
+import { renderStarterBootstrapFile } from "./render-starter-bootstrap";
+import { renderStarterProjectOnboardingFiles } from "./render-starter-project-onboarding";
+import { renderStarterSkillFiles } from "./render-starter-skills";
 
 function buildStarterRootPackageJson(
 	projectDefinition: CanonicalProjectDefinition,
@@ -15,6 +18,8 @@ function buildStarterRootPackageJson(
 		packageManager: "bun@1.3.5",
 		workspaces: ["apps/web", "packages/*"],
 		scripts: {
+			bootstrap: "bash ./bootstrap.sh",
+			"codex:skills:install": "bash ./scripts/install-codex-skills.sh",
 			dev: "bun run --cwd apps/web dev",
 			"dev:core": "bun run --cwd apps/web dev:core",
 			"dev:web": "bun run --cwd apps/web dev:web",
@@ -43,6 +48,9 @@ export function renderTemplateOverrides(
 	const { facts } = projectDefinition;
 
 	return [
+		renderStarterBootstrapFile(projectDefinition),
+		...renderStarterProjectOnboardingFiles(projectDefinition),
+		...renderStarterSkillFiles(),
 		{
 			path: "README.md",
 			content: [
@@ -52,9 +60,11 @@ export function renderTemplateOverrides(
 				"",
 				"## Start Here",
 				"",
-				"Open `DESIGN.md` first. It is the generated design system and the visual source of truth for this starter.",
+				"Open `START-HERE.md` first. It is the buyer-facing path from downloaded starter to real product work.",
 				"",
-				`Open \`${GENERATED_DOCS_README_PATH}\` next for the generated Design, Marketing, Build, and prompt materials that ship with this starter repo.`,
+				"Read `DESIGN.md` next. It is the generated design system and the visual source of truth for this starter.",
+				"",
+				`Open \`${GENERATED_DOCS_README_PATH}\` for the generated Design, Marketing, Build, and prompt materials that ship with this starter repo.`,
 				"",
 				"## What This Repo Contains",
 				"",
@@ -80,9 +90,14 @@ export function renderTemplateOverrides(
 				"",
 				"## Quick Start",
 				"",
-				"1. Run `bun install`.",
-				"2. Copy `apps/web/.env.local.example` to `apps/web/.env.local` and fill in your real values.",
-				"3. Run `bun run dev` from the repo root.",
+				"1. Run `bun run bootstrap` from the repo root.",
+				"2. Run `bun run codex:skills:install` to install the vetted external Codex skills for Convex, Clerk, and Stripe.",
+				"3. Restart Codex if the new skills do not appear.",
+				"4. Follow `START-HERE.md` in order: `$starter-core-setup`, then `$starter-auth-setup`, then `$starter-billing-setup`.",
+				"5. Run `bun run dev` from the repo root once setup is stable.",
+				"",
+				"`bootstrap.sh` installs dependencies, prepares `apps/web/.env.local`, opens the official provider setup pages, and can apply the generated shadcn preset in `apps/web`.",
+				"The repo also ships starter-local Codex wrapper skills under `.agents/skills/` plus a one-command external skill installer.",
 			].join("\n"),
 		},
 		{

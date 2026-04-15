@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 function createCheckoutClaimsCtx({
 	pendingCheckoutClaim = null,
+	pendingCheckoutClaimsByEmail = [],
 	productAccessGrant = null,
 	identity = {
 		subject: "user_123",
@@ -12,6 +13,7 @@ function createCheckoutClaimsCtx({
 	patch = vi.fn().mockResolvedValue(undefined),
 }: {
 	pendingCheckoutClaim?: Record<string, unknown> | null;
+	pendingCheckoutClaimsByEmail?: Array<Record<string, unknown>>;
 	productAccessGrant?: Record<string, unknown> | null;
 	identity?: Record<string, unknown> | null;
 	insert?: ReturnType<typeof vi.fn>;
@@ -23,14 +25,35 @@ function createCheckoutClaimsCtx({
 		},
 		db: {
 			query: vi.fn((tableName: string) => ({
-				withIndex: vi.fn(() => ({
+				withIndex: vi.fn((indexName: string) => ({
 					unique: vi
 						.fn()
 						.mockResolvedValue(
-							tableName === "pendingCheckoutClaims"
+							tableName === "pendingCheckoutClaims" &&
+								indexName === "by_stripe_checkout_session_id"
 								? pendingCheckoutClaim
 								: productAccessGrant,
 						),
+					collect: vi
+						.fn()
+						.mockResolvedValue(
+							tableName === "pendingCheckoutClaims" &&
+								indexName ===
+									"by_checkout_email_normalized_and_status_and_updated_at"
+								? pendingCheckoutClaimsByEmail
+								: [],
+						),
+					order: vi.fn(() => ({
+						take: vi
+							.fn()
+							.mockResolvedValue(
+								tableName === "pendingCheckoutClaims" &&
+									indexName ===
+										"by_checkout_email_normalized_and_status_and_updated_at"
+									? [...pendingCheckoutClaimsByEmail].reverse()
+									: [],
+							),
+					})),
 				})),
 			})),
 			insert,
@@ -146,6 +169,34 @@ describe("convex/checkoutClaims", () => {
 				updatedAt: 300,
 			}),
 		);
+	});
+
+	it("returns the latest checkout claim for an email", async () => {
+		const ctx = createCheckoutClaimsCtx({
+			pendingCheckoutClaimsByEmail: [
+				{
+					_id: "pending_checkout_claim_old",
+					checkoutEmailNormalized: "buyer@example.com",
+					status: "pending",
+					updatedAt: 100,
+				},
+				{
+					_id: "pending_checkout_claim_latest_pending",
+					checkoutEmailNormalized: "buyer@example.com",
+					status: "pending",
+					updatedAt: 300,
+				},
+			],
+		});
+
+		await expect(
+			moduleUnderTest.getLatestCheckoutClaimByEmail._handler(ctx as never, {
+				checkoutEmailNormalized: "buyer@example.com",
+			}),
+		).resolves.toMatchObject({
+			_id: "pending_checkout_claim_latest_pending",
+			updatedAt: 300,
+		});
 	});
 
 	it("claims a pending checkout for the same Clerk user and grants access", async () => {

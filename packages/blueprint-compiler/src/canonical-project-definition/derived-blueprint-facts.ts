@@ -1,7 +1,7 @@
 import type { CanonicalProjectFactsDraft } from "./schema";
 import { buildGeneratedDesignSystem } from "../design-system/generated-design-system";
+import { buildDesignPresetFactSeed } from "../design-system/design-preset-catalog";
 
-const DEFAULT_THEME_PRESET = "a0";
 const DEFAULT_SCOPE_OUT = ["Provider setup wizard", "GitHub invite flow"];
 const DEFAULT_DESIGN_REFERENCES = ["https://ui.shadcn.com/"];
 const DEFAULT_BRAND_ASSETS = ["wordmark.svg"];
@@ -109,12 +109,16 @@ function deriveThemePreset(facts: CanonicalProjectFactsDraft) {
 			((facts as Record<string, unknown>).theme_hex as string | undefined),
 	);
 	if (!preset) {
-		return DEFAULT_THEME_PRESET;
+		return buildDesignPresetFactSeed(facts.design_preset_id).theme_preset;
 	}
 	if (preset.startsWith("#")) {
-		return DEFAULT_THEME_PRESET;
+		return buildDesignPresetFactSeed(facts.design_preset_id).theme_preset;
 	}
 	return preset;
+}
+
+function deriveDesignPresetId(facts: CanonicalProjectFactsDraft) {
+	return trimText(facts.design_preset_id) || undefined;
 }
 
 function trimText(value: string | undefined) {
@@ -249,7 +253,17 @@ function deriveScopeOut(facts: CanonicalProjectFactsDraft) {
 }
 
 function deriveDesignReferences(facts: CanonicalProjectFactsDraft) {
-	return normalizeTextList(facts.design_references);
+	const normalizedDesignReferences = normalizeTextList(facts.design_references);
+	if (normalizedDesignReferences.length > 0) {
+		return normalizedDesignReferences;
+	}
+	if (!trimText(facts.design_preset_id) && trimText(facts.theme_preset)) {
+		return [];
+	}
+
+	return [
+		...buildDesignPresetFactSeed(facts.design_preset_id).design_references,
+	];
 }
 
 function deriveSupportEmail(facts: CanonicalProjectFactsDraft) {
@@ -329,6 +343,8 @@ function deriveProblemTrigger(facts: CanonicalProjectFactsDraft) {
 export function deriveBlueprintFacts(
 	facts: CanonicalProjectFactsDraft,
 ): CanonicalProjectFactsDraft {
+	const designPresetId = deriveDesignPresetId(facts);
+	const designPresetSeed = buildDesignPresetFactSeed(designPresetId);
 	const coreFlow = deriveCoreFlow(facts);
 	const priceUsdCents = derivePriceUsdCents(facts, facts.price_usd_cents);
 	const pricing = derivePricing(priceUsdCents, facts.pricing);
@@ -340,6 +356,7 @@ export function deriveBlueprintFacts(
 		...facts,
 		core_flow: coreFlow,
 		pricing,
+		design_preset_id: designPresetId,
 		theme_preset: deriveThemePreset(facts),
 		problem_context_when: deriveProblemContextWhen(facts),
 		problem_context_where: deriveProblemContextWhere(facts),
@@ -388,28 +405,36 @@ export function deriveBlueprintFacts(
 		),
 		visual_thesis:
 			trimText(facts.visual_thesis) ||
+			trimText(designPresetSeed.visual_thesis) ||
 			generatedDesignSystem.derivedFacts.visualThesis,
 		content_plan:
 			trimText(facts.content_plan) ||
+			trimText(designPresetSeed.content_plan) ||
 			generatedDesignSystem.derivedFacts.contentPlan,
 		interaction_thesis:
 			trimText(facts.interaction_thesis) ||
+			trimText(designPresetSeed.interaction_thesis) ||
 			generatedDesignSystem.derivedFacts.interactionThesis,
 		design_tokens:
 			trimText(facts.design_tokens) ||
+			trimText(designPresetSeed.design_tokens) ||
 			generatedDesignSystem.derivedFacts.designTokens,
 		typography_direction:
 			trimText(facts.typography_direction) ||
+			trimText(designPresetSeed.typography_direction) ||
 			generatedDesignSystem.derivedFacts.typographyDirection,
 		imagery_direction:
 			trimText(facts.imagery_direction) ||
+			trimText(designPresetSeed.imagery_direction) ||
 			generatedDesignSystem.derivedFacts.imageryDirection,
 		layout_direction:
 			trimText(facts.layout_direction) ||
+			trimText(designPresetSeed.layout_direction) ||
 			generatedDesignSystem.derivedFacts.layoutDirection,
 		brand_assets: listOrFallback(facts.brand_assets, DEFAULT_BRAND_ASSETS),
 		existing_system_mode:
 			trimText(facts.existing_system_mode) ||
+			trimText(designPresetSeed.existing_system_mode) ||
 			generatedDesignSystem.derivedFacts.existingSystemMode,
 		hero_goal:
 			trimText(facts.hero_goal) ||
@@ -423,7 +448,9 @@ export function deriveBlueprintFacts(
 			trimText(facts.section_narrative) ||
 			"Problem, blueprint promise, unlock flow, proof, call to action.",
 		copy_tone:
-			trimText(facts.copy_tone) || generatedDesignSystem.derivedFacts.copyTone,
+			trimText(facts.copy_tone) ||
+			trimText(designPresetSeed.copy_tone) ||
+			generatedDesignSystem.derivedFacts.copyTone,
 		marketing_goals: listOrFallback(
 			facts.marketing_goals,
 			DEFAULT_MARKETING_GOALS,

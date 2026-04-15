@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const redirectMock = vi.fn();
 const claimCheckoutSessionForViewerMock = vi.fn();
+const claimLatestPendingCheckoutForViewerMock = vi.fn();
 const fetchQueryMock = vi.fn();
 const getConvexServerSessionMock = vi.fn();
 const getPendingCheckoutSessionIdFromCookieMock = vi.fn();
@@ -23,6 +24,8 @@ vi.mock("@/platform/auth/convex-auth", () => ({
 vi.mock("@/features/checkout/server/checkout-session-recovery", () => ({
 	claimCheckoutSessionForViewer: (...args: unknown[]) =>
 		claimCheckoutSessionForViewerMock(...args),
+	claimLatestPendingCheckoutForViewer: (...args: unknown[]) =>
+		claimLatestPendingCheckoutForViewerMock(...args),
 	getPendingCheckoutSessionIdFromCookie: (...args: unknown[]) =>
 		getPendingCheckoutSessionIdFromCookieMock(...args),
 }));
@@ -42,10 +45,14 @@ describe("product access server helpers", () => {
 	beforeEach(() => {
 		redirectMock.mockReset();
 		claimCheckoutSessionForViewerMock.mockReset();
+		claimLatestPendingCheckoutForViewerMock.mockReset();
 		fetchQueryMock.mockReset();
 		getConvexServerSessionMock.mockReset();
 		getPendingCheckoutSessionIdFromCookieMock.mockReset();
 		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(null);
+		claimLatestPendingCheckoutForViewerMock.mockResolvedValue({
+			kind: "no_pending_claim",
+		});
 		vi.resetModules();
 	});
 
@@ -170,7 +177,46 @@ describe("product access server helpers", () => {
 			status: "no_access",
 		});
 		expect(claimCheckoutSessionForViewerMock).not.toHaveBeenCalled();
+		expect(claimLatestPendingCheckoutForViewerMock).toHaveBeenCalledTimes(1);
 		expect(fetchQueryMock).toHaveBeenCalledTimes(1);
+	});
+
+	it("claims a matching pending checkout by verified email when the cookie is gone", async () => {
+		getConvexServerSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		fetchQueryMock
+			.mockResolvedValueOnce({
+				hasAccess: false,
+				clerkUserId: "user_123",
+				status: "no_access",
+			})
+			.mockResolvedValueOnce({
+				hasAccess: true,
+				clerkUserId: "user_123",
+				status: "granted",
+			});
+		claimLatestPendingCheckoutForViewerMock.mockResolvedValue({
+			kind: "validated",
+			sessionId: "cs_email_pending_123",
+			claimResult: {
+				claim: "claimed",
+				grantResult: { granted: "inserted" },
+			},
+		});
+
+		const { getServerProductAccess } =
+			await import("@/features/product-access/server/product-access");
+
+		await expect(getServerProductAccess()).resolves.toEqual({
+			hasAccess: true,
+			clerkUserId: "user_123",
+			status: "granted",
+		});
+		expect(claimCheckoutSessionForViewerMock).not.toHaveBeenCalled();
+		expect(claimLatestPendingCheckoutForViewerMock).toHaveBeenCalledTimes(1);
+		expect(fetchQueryMock).toHaveBeenCalledTimes(2);
 	});
 
 	it("keeps the original no-access response when the fallback checkout claim is not validated", async () => {
@@ -199,6 +245,7 @@ describe("product access server helpers", () => {
 			clerkUserId: "user_123",
 			status: "no_access",
 		});
+		expect(claimLatestPendingCheckoutForViewerMock).toHaveBeenCalledTimes(1);
 		expect(fetchQueryMock).toHaveBeenCalledTimes(1);
 	});
 

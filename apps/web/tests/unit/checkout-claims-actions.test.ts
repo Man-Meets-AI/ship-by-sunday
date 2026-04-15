@@ -26,15 +26,18 @@ function createActionCtx({
 		emailVerified: true,
 	},
 	runMutation = vi.fn(),
+	runQuery = vi.fn(),
 }: {
 	identity?: Record<string, unknown> | null;
 	runMutation?: ReturnType<typeof vi.fn>;
+	runQuery?: ReturnType<typeof vi.fn>;
 } = {}) {
 	return {
 		auth: {
 			getUserIdentity: vi.fn().mockResolvedValue(identity),
 		},
 		runMutation,
+		runQuery,
 	};
 }
 
@@ -201,6 +204,41 @@ describe("convex/checkoutClaimsActions", () => {
 		expect(result).toEqual({
 			kind: "wrong_account",
 			sessionId: "cs_guest_wrong",
+		});
+	});
+
+	it("claims the latest pending checkout for the verified viewer email", async () => {
+		const runQuery = vi.fn().mockResolvedValue({
+			stripeCheckoutSessionId: "cs_email_pending_123",
+		});
+		const runMutation = vi.fn().mockResolvedValue({
+			claim: "claimed",
+			grantResult: {
+				granted: "inserted",
+			},
+		});
+		const { claimLatestPendingCheckoutForViewer } =
+			await import("@/convex/checkoutClaimsActions");
+
+		const result = await claimLatestPendingCheckoutForViewer._handler(
+			createActionCtx({ runMutation, runQuery }) as never,
+		);
+
+		expect(result).toEqual({
+			kind: "validated",
+			sessionId: "cs_email_pending_123",
+			claimResult: {
+				claim: "claimed",
+				grantResult: {
+					granted: "inserted",
+				},
+			},
+		});
+		expect(runQuery).toHaveBeenCalledWith(expect.anything(), {
+			checkoutEmailNormalized: "buyer@example.com",
+		});
+		expect(runMutation).toHaveBeenCalledWith(expect.anything(), {
+			stripeCheckoutSessionId: "cs_email_pending_123",
 		});
 	});
 });

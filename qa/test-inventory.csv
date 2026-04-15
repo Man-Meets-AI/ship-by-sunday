@@ -107,6 +107,7 @@ apps/web/tests/unit/observability-incident-status.test.ts,unit,OBS-01,Observabil
 apps/web/tests/unit/observability-ingest.test.ts,unit,OBS-01,Observability helper and adapter behavior.,keep,,Useful extended-pack proof.
 apps/web/tests/unit/observability-request-id.test.ts,unit,OBS-01,Observability helper and adapter behavior.,keep,,Useful extended-pack proof.
 apps/web/tests/unit/observability-source-adapters.test.ts,unit,OBS-01,Observability helper and adapter behavior.,keep,,Useful extended-pack proof.
+apps/web/tests/unit/opengraph-image.test.tsx,unit,CONTENT-01,General blueprint or support behavior.,keep,,Defaulted into the blueprint content bucket pending a more specific mapping.
 apps/web/tests/unit/post-review-destination.test.ts,unit,CONTENT-01,General blueprint or support behavior.,keep,,Defaulted into the blueprint content bucket pending a more specific mapping.
 apps/web/tests/unit/product-shell.test.tsx,unit,BLUEPRINT-01|BLUEPRINT-07,Protected workspace and access behavior.,keep,,These still contribute to blueprint entry confidence.
 apps/web/tests/unit/production-deploy-handoff-workbench.test.tsx,unit,CONTENT-01,Implementation-led lesson or workbench detail.,merge,BLUEPRINT-07 or CONTENT-01 coverage,These tests are useful authoring safeguards but too implementation-led to stand alone in ship reporting.
@@ -129,6 +130,7 @@ apps/web/tests/unit/starter-repo-access.test.ts,unit,STARTER-01|SETTINGS-02,Star
 apps/web/tests/unit/starter-repo-script.test.ts,unit,STARTER-01|SETTINGS-02,Starter repo access and settings add-ons.,keep,,Starter repo still belongs in the extended support pack.
 apps/web/tests/unit/starter-selectors.test.ts,unit,STARTER-01|SETTINGS-02,Starter repo access and settings add-ons.,keep,,Starter repo still belongs in the extended support pack.
 apps/web/tests/unit/stripe-cli-project.test.ts,unit,CONTENT-01,General blueprint or support behavior.,keep,,Defaulted into the blueprint content bucket pending a more specific mapping.
+apps/web/tests/unit/stripe-line-item.test.ts,unit,CONTENT-01,General blueprint or support behavior.,keep,,Defaulted into the blueprint content bucket pending a more specific mapping.
 apps/web/tests/unit/stripe-observability.test.ts,unit,OBS-01,Observability adapter behavior.,keep,,Useful extended-pack proof.
 apps/web/tests/unit/stripe-webhook-action.test.ts,unit,CONTENT-01,General blueprint or support behavior.,keep,,Defaulted into the blueprint content bucket pending a more specific mapping.
 apps/web/tests/unit/uploads.test.ts,unit,BLUEPRINT-06,Review downloads and blueprint export behavior.,keep,,Useful proof for the Review stage.

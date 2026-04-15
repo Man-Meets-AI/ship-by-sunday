@@ -14,7 +14,11 @@ import {
 } from "@/features/observability/server/request-id";
 import { buildStripeCheckoutFailureContext } from "@/features/observability/server/source-adapters/stripe-failure";
 import { createPendingCheckoutSessionCookieOptions } from "@/features/checkout/lib/pending-checkout-session-cookie";
-import { getStripe, getStripeLineItem } from "@/platform/billing/stripe";
+import {
+	assertManagedStripePriceMatchesProductConfig,
+	getStripe,
+	getStripeLineItem,
+} from "@/platform/billing/stripe";
 import { getAppBaseUrl } from "@/platform/next/app-url";
 
 export async function POST(request: Request) {
@@ -29,7 +33,9 @@ export async function POST(request: Request) {
 
 	try {
 		const stripe = getStripe();
+		await assertManagedStripePriceMatchesProductConfig(stripe);
 		const user = userId ? await currentUser() : null;
+		const lineItem = getStripeLineItem();
 		const session = await stripe.checkout.sessions.create({
 			mode: "payment",
 			allow_promotion_codes: true,
@@ -38,7 +44,7 @@ export async function POST(request: Request) {
 			success_url: `${appBaseUrl}${getCheckoutSuccessHref("{CHECKOUT_SESSION_ID}")}`,
 			client_reference_id: userId ?? undefined,
 			customer_email: user?.primaryEmailAddress?.emailAddress ?? undefined,
-			line_items: [getStripeLineItem()],
+			line_items: [lineItem],
 			metadata: {
 				...(userId ? { clerkUserId: userId } : {}),
 				courseSlug: productConfig.courseSlug,

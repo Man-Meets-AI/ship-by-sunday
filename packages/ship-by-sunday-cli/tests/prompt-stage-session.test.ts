@@ -1,5 +1,6 @@
 import { createStagePromptSession } from "../src/prompts/stage-prompt-session";
 import { DEFAULT_THEME_PRESET } from "../src/field-contract";
+import { DEFAULT_DESIGN_PRESET_ID } from "@shipbysunday/blueprint-compiler";
 import { createLocalDraftDefinition } from "../src/draft/draft-store";
 
 describe("stage prompt session", () => {
@@ -77,12 +78,21 @@ describe("stage prompt session", () => {
 
 	it("shows the reduced design default and generated scope suggestions", () => {
 		const designSession = createStagePromptSession({ stageId: "blueprint" });
+		const designPresetPrompt = designSession.formatFieldPrompt({
+			draft: { facts: {} },
+			fieldKey: "design_preset_id",
+			stepIndex: 0,
+			fieldIndex: 0,
+			fieldCount: 3,
+		});
+		expect(designPresetPrompt.prompt).toContain(DEFAULT_DESIGN_PRESET_ID);
+
 		const themePrompt = designSession.formatFieldPrompt({
 			draft: { facts: {} },
 			fieldKey: "theme_preset",
 			stepIndex: 0,
-			fieldIndex: 0,
-			fieldCount: 2,
+			fieldIndex: 1,
+			fieldCount: 3,
 		});
 		expect(themePrompt.prompt).toContain(DEFAULT_THEME_PRESET);
 

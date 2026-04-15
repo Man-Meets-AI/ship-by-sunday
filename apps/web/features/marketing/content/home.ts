@@ -17,7 +17,7 @@ export const homePageContent = {
 		headlineLead: "Ship a real product",
 		headlineTailPrefix: "",
 		headlineTailHover: "by Sunday",
-		body: `The only system that teaches you how to ship a durable product from start to finish in one weekend. Oh, and it includes building you a ridiculous custom template from scratch based on what you want to build. We should charge more for this.`,
+		body: "The only system that teaches you how to ship a durable product from start to finish in one weekend. Oh, and it includes building you a ridiculous custom template from scratch based on what you want to build. We should charge more for this.",
 		primaryCta: marketingDisplayConfig.primaryCtaLabel,
 		secondaryCta: {
 			label: "See how Ship Blueprint works",
@@ -154,7 +154,7 @@ export const homePageContent = {
 			"keep shipping from.",
 		],
 		intro:
-			"The blueprint gives the agents the truth. The starter gives that truth a real product shape: auth, billing, docs, protected workspace, and the seams to keep changing the product without losing the plot.",
+			"The blueprint gives the agents the truth. The starter gives that truth a real product shape: curated design direction, auth, billing, docs, protected workspace, and the seams to keep changing the product without losing the plot.",
 		capabilities: [
 			{
 				title: "Product blueprint",
@@ -185,6 +185,11 @@ export const homePageContent = {
 				title: "Keep one source of truth",
 				description:
 					"When better models arrive next month, you move faster. You do not restart the project from zero.",
+			},
+			{
+				title: "Curated design direction",
+				description:
+					"Choose a design direction like Vercel, Linear, or Notion inside the blueprint flow, preview it, then customize the starter theme before generation.",
 			},
 		],
 	},

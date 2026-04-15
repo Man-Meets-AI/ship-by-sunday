@@ -37,6 +37,10 @@ export const pendingCheckoutClaimWriteResultValidator = v.object({
 	saved: v.union(v.literal("inserted"), v.literal("patched")),
 });
 
+export const pendingCheckoutClaimResetResultValidator = v.object({
+	reset: v.union(v.literal("deleted"), v.literal("noop")),
+});
+
 const pendingCheckoutClaimClaimResultValidator = v.union(
 	v.object({
 		claim: v.literal("claimed"),
@@ -97,6 +101,25 @@ async function getPendingCheckoutClaimBySessionIdRecord(
 		.unique();
 }
 
+async function getLatestCheckoutClaimByEmailRecord(
+	ctx: MutationCtx | QueryCtx,
+	checkoutEmailNormalized: string,
+) {
+	const matchingClaims = await ctx.db
+		.query("pendingCheckoutClaims")
+		.withIndex(
+			"by_checkout_email_normalized_and_status_and_updated_at",
+			(queryBuilder) =>
+				queryBuilder
+					.eq("checkoutEmailNormalized", checkoutEmailNormalized)
+					.eq("status", "pending"),
+		)
+		.order("desc")
+		.take(1);
+
+	return matchingClaims[0] ?? null;
+}
+
 export const getPendingCheckoutClaimBySessionId = internalQuery({
 	args: {
 		stripeCheckoutSessionId: v.string(),
@@ -106,6 +129,18 @@ export const getPendingCheckoutClaimBySessionId = internalQuery({
 		await getPendingCheckoutClaimBySessionIdRecord(
 			ctx,
 			args.stripeCheckoutSessionId,
+		),
+});
+
+export const getLatestCheckoutClaimByEmail = internalQuery({
+	args: {
+		checkoutEmailNormalized: v.string(),
+	},
+	returns: pendingCheckoutClaimReturnValidator,
+	handler: async (ctx, args) =>
+		await getLatestCheckoutClaimByEmailRecord(
+			ctx,
+			args.checkoutEmailNormalized,
 		),
 });
 
@@ -239,5 +274,40 @@ export const claimPendingCheckoutClaim = internalMutation({
 			claim: "claimed" as const,
 			grantResult,
 		};
+	},
+});
+
+export const resetPendingCheckoutClaimsForEmail = internalMutation({
+	args: {
+		checkoutEmail: v.string(),
+	},
+	returns: pendingCheckoutClaimResetResultValidator,
+	handler: async (ctx, args) => {
+		const checkoutEmailNormalized = normalizeCheckoutEmail(args.checkoutEmail);
+		let deletedAny = false;
+
+		while (true) {
+			const claimsToDelete = await ctx.db
+				.query("pendingCheckoutClaims")
+				.withIndex(
+					"by_checkout_email_normalized_and_status_and_updated_at",
+					(queryBuilder) =>
+						queryBuilder
+							.eq("checkoutEmailNormalized", checkoutEmailNormalized)
+							.eq("status", "pending"),
+				)
+				.take(50);
+
+			if (claimsToDelete.length === 0) {
+				return {
+					reset: deletedAny ? ("deleted" as const) : ("noop" as const),
+				};
+			}
+
+			deletedAny = true;
+			for (const claim of claimsToDelete) {
+				await ctx.db.delete(claim._id);
+			}
+		}
 	},
 });
