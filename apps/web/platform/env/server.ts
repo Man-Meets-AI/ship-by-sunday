@@ -5,7 +5,7 @@ function normalizeEnvValue(value: string | undefined) {
 		return value;
 	}
 
-	const normalized = value.trim();
+	const normalized = value.trim().replace(/\\n+$/g, "").replace(/\n+$/g, "");
 	return normalized.length > 0 ? normalized : undefined;
 }
 

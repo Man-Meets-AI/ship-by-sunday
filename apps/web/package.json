@@ -54,6 +54,8 @@
 		"stripe:webhook:sync": "node --env-file=.env.local scripts/local-stripe-webhook.mjs sync",
 		"stripe:dev:doctor": "node --env-file=.env.local scripts/local-stripe-doctor.mjs",
 		"stripe:dev:verify": "node --env-file=.env.local scripts/verify-local-stripe-checkout.mjs",
+		"stripe:env:verify": "bun scripts/verify-managed-stripe-env.ts",
+		"stripe:hosted:verify": "node --env-file=.env.production scripts/verify-hosted-stripe-checkout.mjs",
 		"starter-repo:pending": "node --env-file=.env.local scripts/starter-repo-access.mjs pending",
 		"starter-repo:invite": "node --env-file=.env.local scripts/starter-repo-access.mjs invite",
 		"starter-repo:sync": "node --env-file=.env.local scripts/starter-repo-access.mjs sync",
