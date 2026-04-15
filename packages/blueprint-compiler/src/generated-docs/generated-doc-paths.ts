@@ -33,10 +33,11 @@ export type GeneratedBuildDetailDocFileName =
 	| "documentation.md";
 
 export type ShippedPromptAssetFileName =
-	| "execplan-outline-from-session.md"
-	| "execplan-execution-loop.md"
-	| "execplan-grill.md"
-	| "execplan-writer.md";
+	| "exec-plan-outline-from-session.md"
+	| "exec-plan-execute.md"
+	| "exec-plan-grill.md"
+	| "exec-plan-validate.md"
+	| "exec-plan-writer.md";
 
 export function getGeneratedDesignDocPath(
 	fileName: GeneratedDesignDocFileName,

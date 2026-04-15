@@ -11,7 +11,13 @@ let promptPackSourceFilesPromise: Promise<PromptPackSourceFiles> | undefined;
 
 function openAiTemplateUrl(relativePath: string) {
 	const repoRootPath = resolveRepoRootPath();
-	return path.join(repoRootPath, "docs", "openai", relativePath);
+	return path.join(
+		repoRootPath,
+		"docs",
+		"generated",
+		"openai-blueprint",
+		relativePath,
+	);
 }
 
 function shippedPromptAssetUrl(fileName: string) {
@@ -98,15 +104,20 @@ export async function loadOpenAiBlueprintTemplates(): Promise<OpenAiBlueprintTem
 
 export async function loadPromptPackSourceFiles(): Promise<PromptPackSourceFiles> {
 	promptPackSourceFilesPromise ??= Promise.all([
-		readFile(shippedPromptAssetUrl("execplan-outline-from-session.md"), "utf8"),
-		readFile(shippedPromptAssetUrl("execplan-execution-loop.md"), "utf8"),
-		readFile(shippedPromptAssetUrl("execplan-grill.md"), "utf8"),
-		readFile(shippedPromptAssetUrl("execplan-writer.md"), "utf8"),
-	]).then(([outlineFromSession, executionLoop, grill, writer]) => ({
-		"execplan-outline-from-session.md": outlineFromSession,
-		"execplan-execution-loop.md": executionLoop,
-		"execplan-grill.md": grill,
-		"execplan-writer.md": writer,
+		readFile(
+			shippedPromptAssetUrl("exec-plan-outline-from-session.md"),
+			"utf8",
+		),
+		readFile(shippedPromptAssetUrl("exec-plan-execute.md"), "utf8"),
+		readFile(shippedPromptAssetUrl("exec-plan-grill.md"), "utf8"),
+		readFile(shippedPromptAssetUrl("exec-plan-validate.md"), "utf8"),
+		readFile(shippedPromptAssetUrl("exec-plan-writer.md"), "utf8"),
+	]).then(([outlineFromSession, execute, grill, validate, writer]) => ({
+		"exec-plan-outline-from-session.md": outlineFromSession,
+		"exec-plan-execute.md": execute,
+		"exec-plan-grill.md": grill,
+		"exec-plan-validate.md": validate,
+		"exec-plan-writer.md": writer,
 	}));
 
 	return promptPackSourceFilesPromise;

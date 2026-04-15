@@ -33,11 +33,12 @@ function buildStarterRootPackageJson(
 			"lint:fix": "bun run --cwd apps/web lint:fix",
 			format: "bun run --cwd apps/web format",
 			"format:check": "bun run --cwd apps/web format:check",
-			"test:unit": "bun run --cwd apps/web test:unit",
+			test: "bun run --cwd apps/web test",
 			"test:contracts": "bun run --cwd apps/web test:contracts",
-			"test:integration": "bun run --cwd apps/web test:integration",
-			"test:browser-smoke": "bun run --cwd apps/web test:browser-smoke",
-			check: "bun run --cwd apps/web check",
+			"test:e2e":
+				"PLAYWRIGHT_USE_LOCAL_SERVER=${PLAYWRIGHT_USE_LOCAL_SERVER:-1} bun run --cwd apps/web test:e2e",
+			check:
+				"bun run format && bun run lint && bun run typecheck && bun run test && bun run test:contracts && bun run build && bun run test:e2e",
 		},
 	};
 }

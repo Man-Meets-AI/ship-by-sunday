@@ -34,7 +34,9 @@ describe("review download zip", () => {
 				"ship-by-sunday-os/docs/build/docs/prompt.md",
 				"ship-by-sunday-os/docs/facts/design-system.json",
 				"ship-by-sunday-os/apps/web/.env.production.example",
-				"ship-by-sunday-os/qa/README.md",
+				"ship-by-sunday-os/apps/web/tests/README.md",
+				"ship-by-sunday-os/apps/web/tests/utils/README.md",
+				"ship-by-sunday-os/apps/web/playwright/README.md",
 			]),
 		);
 		expect(forbiddenEntries).toEqual([]);

@@ -1,0 +1,25 @@
+{
+	"defaultScope": "ship-by-sunday-clerk-instance",
+	"accounts": {
+		"ship-by-sunday-clerk-instance": {
+			"scope": "ship-by-sunday-clerk-instance",
+			"provider": "clerk",
+			"authMode": "password",
+			"softwareName": "Ship by Sunday",
+			"email": "test-buyer@test.com",
+			"password": "SBS_QA_Codex_8Yv2!mN4#rL7",
+			"firstName": "Test",
+			"lastName": "Buyer"
+		},
+		"ship-by-sunday-clerk-entitled": {
+			"scope": "ship-by-sunday-clerk-entitled",
+			"provider": "clerk",
+			"authMode": "password",
+			"softwareName": "Ship by Sunday",
+			"email": "test-entitled@test.com",
+			"password": "SBS_QA_Codex_8Yv2!mN4#rL7",
+			"firstName": "Test",
+			"lastName": "Entitled"
+		}
+	}
+}

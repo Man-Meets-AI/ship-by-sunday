@@ -22,7 +22,7 @@ function renderAssistantGuide(
 			"- When using an AI coding or design tool, explicitly tell it to follow `DESIGN.md` and the generated design snapshot before it proposes UI changes.",
 			"- Use `bun` for JavaScript work and `uv` for Python utilities.",
 			"- Keep diffs scoped, rename vague identifiers, and separate UI rendering from stateful logic.",
-			"- Treat `qa/` as the starter home for journey coverage and test notes.",
+			"- Keep browser smoke under `apps/web/playwright/` and app-local Vitest helpers under `apps/web/tests/`.",
 		].join("\n"),
 	};
 }
@@ -51,35 +51,10 @@ function renderAppAssistantGuide(
 	};
 }
 
-function renderQaPersonas(productName: string) {
-	return JSON.stringify(
-		[
-			{
-				id: "founder-operator",
-				name: "Founder Operator",
-				goal: `Turn ${productName} into a usable starter repo quickly.`,
-			},
-			{
-				id: "design-partner",
-				name: "Design Partner",
-				goal: "Review the generated design docs and refine the product surface.",
-			},
-			{
-				id: "implementation-partner",
-				name: "Implementation Partner",
-				goal: "Take the first build slice from docs/build/docs/prompt.md to production code.",
-			},
-		],
-		null,
-		2,
-	);
-}
-
 export function renderGeneralizedStarterFiles(
 	projectDefinition: CanonicalProjectDefinition,
 ): RenderedBlueprintFile[] {
 	const { facts } = projectDefinition;
-	const qaPersonas = renderQaPersonas(facts.product_name);
 
 	return [
 		renderAssistantGuide(
@@ -149,93 +124,37 @@ export function renderGeneralizedStarterFiles(
 			].join("\n"),
 		},
 		{
-			path: "qa/README.md",
+			path: "apps/web/tests/README.md",
 			content: [
-				"# QA Starter Kit",
+				"# App Tests",
 				"",
-				"Use this folder to track the journeys, coverage, and test evidence that matter for your starter repo.",
+				"Keep tests close to the app code and grouped by runtime surface instead of maintaining a root release-proof sidecar.",
 				"",
-				"- `journeys.csv` is the high-level user-path inventory.",
-				"- `coverage.csv` is the current test and proof map.",
-				"- `test-inventory.csv` is the concrete automated and manual test list.",
-				"- `templates/run-report.md` is the report format for each QA pass.",
+				"- `tests/contracts/` is for contract and backend-facing behavior.",
+				"- `tests/integration/` is for route and server integration.",
+				"- `tests/integration-ui/` is for jsdom UI flows.",
+				"- `tests/unit/` is for focused unit behavior.",
+				"- `tests/setupTests.ts` is the shared jsdom setup entrypoint.",
+				"- `tests/utils/` is where shared test harness helpers should live.",
 			].join("\n"),
 		},
 		{
-			path: "qa/AGENTS.md",
+			path: "apps/web/tests/utils/README.md",
 			content: [
-				"# QA AGENTS",
+				"# Test Utils",
 				"",
-				"- Start with the journeys that reach the generated docs and the final blueprint.",
-				"- Keep findings concrete, reproducible, and tied to an observable user outcome.",
-				"- Update `coverage.csv` and `test-inventory.csv` whenever a new lane or gap appears.",
+				"Put shared Vitest helpers here when more than one domain-level test needs them.",
 			].join("\n"),
 		},
 		{
-			path: "qa/glossary.md",
+			path: "apps/web/playwright/README.md",
 			content: [
-				"# QA Glossary",
+				"# Playwright",
 				"",
-				"- Journey: a user-facing path such as reaching Review and downloading the blueprint.",
-				"- Coverage: the current proof that a journey or feature still works.",
-				"- Run report: a dated summary of what was tested, what failed, and what still needs verification.",
-			].join("\n"),
-		},
-		{
-			path: "qa/personas.example.json",
-			content: qaPersonas,
-		},
-		{
-			path: "qa/personas.json",
-			content: qaPersonas,
-		},
-		{
-			path: "qa/templates/run-report.md",
-			content: [
-				"# QA Run Report",
+				"Keep browser smoke and browser-specific setup here, next to the web app.",
 				"",
-				"## Scope",
-				"",
-				"- What changed",
-				"- What user journeys were exercised",
-				"",
-				"## Evidence",
-				"",
-				"- Commands run",
-				"- Screenshots or logs collected",
-				"",
-				"## Findings",
-				"",
-				"- Severity",
-				"- Reproduction steps",
-				"- Owner or follow-up",
-			].join("\n"),
-		},
-		{
-			path: "qa/journeys.csv",
-			content: [
-				"journey_id,journey_name,persona,goal,entry_point,success_signal",
-				`review-download,Review and download blueprint,Founder Operator,Download the ${facts.product_name} blueprint,/review,Blueprint downloads and unzips cleanly`,
-				"design-refinement,Review generated design docs,Design Partner,Use the generated design guidance to improve the UI,docs/design/AGENTS.md,Design changes are scoped and validated",
-				"build-first-slice,Implement the first build slice,Implementation Partner,Turn docs/build/docs/prompt.md into code,docs/build/docs/prompt.md,The first user-visible outcome works locally",
-			].join("\n"),
-		},
-		{
-			path: "qa/coverage.csv",
-			content: [
-				"area,scenario,status,notes",
-				"review-download,Blueprint contents preview,not-started,Verify the final zip structure and generated docs tree",
-				"starter-setup,Environment template handoff,not-started,Verify .env.local.example and .env.production.example guidance",
-				"first-build-slice,Build doc to implementation handoff,not-started,Validate the first slice from docs/build/docs/prompt.md",
-			].join("\n"),
-		},
-		{
-			path: "qa/test-inventory.csv",
-			content: [
-				"test_id,layer,area,scenario,status",
-				"repo-download-zip,integration,review-download,Blueprint route returns a zip,pending",
-				"review-page-copy,integration-ui,review-download,Review page explains the snapshot contents,pending",
-				"build-doc-handoff,manual,first-build-slice,Engineer follows docs/build/docs/prompt.md,pending",
+				"- Prefer one deterministic smoke suite that can run locally and against a deployed URL.",
+				"- Keep checkout-route smoke optional through env flags instead of building a second QA runtime.",
 			].join("\n"),
 		},
 		{

@@ -80,8 +80,8 @@ export const REPO_CURATED_COMMANDS: CuratedCommandRow[] = [
 	{ kind: "command", label: "Build app", command: "bun run build" },
 	{
 		kind: "command",
-		label: "Test payments (dev)",
-		command: "bun run stripe:dev:verify",
+		label: "Run contract tests",
+		command: "bun run test:contracts",
 	},
 ];
 

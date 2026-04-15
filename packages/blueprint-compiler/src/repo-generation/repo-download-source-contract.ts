@@ -16,7 +16,7 @@ export const customerSafeRepoRootFilePaths = [
 	"bun.lock",
 	"bunfig.toml",
 	"package.json",
-	".plans/PLANS.md",
+	"docs/exec-plans/PLANS.md",
 ] as const;
 
 export const customerSafeAppFilePaths = [
@@ -48,6 +48,7 @@ export const customerSafeAppDirectoryPaths = [
 	"apps/web/hooks",
 	"apps/web/lib",
 	"apps/web/platform",
+	"apps/web/playwright",
 	"apps/web/public",
 	"apps/web/scripts",
 	"apps/web/tests",
@@ -62,7 +63,7 @@ export const customerSafeBlueprintCompilerDirectoryPaths = [
 ] as const;
 
 export const blueprintCompilerTemplateSourceTracePaths = [
-	"../../docs/openai/**/*",
+	"../../docs/generated/openai-blueprint/**/*",
 	"../../docs/prompts/**/*",
 ] as const;
 
@@ -78,7 +79,7 @@ const excludedSnapshotPathFragments = [
 	"/.codex/",
 	"/.venv/",
 	"/coverage/",
-	"/docs/openai/",
+	"/docs/generated/openai-blueprint/",
 	"/docs/ship-by-sunday/",
 	"/output/",
 	"/test-results/",

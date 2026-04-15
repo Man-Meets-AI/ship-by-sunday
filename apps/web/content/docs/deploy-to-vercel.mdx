@@ -1,13 +1,11 @@
 ---
 title: Deploy to Vercel
-description: Move the starter to production without breaking auth, webhook verification, or protected access.
+description: Move the starter to production without breaking auth, checkout, or deployment verification.
 ---
 
 # Deploy to Vercel
 
 Production is mostly an env-parity problem.
-
-The most common mistake is getting Vercel, Clerk, Convex, and Stripe individually “working” while the cross-system values still drift.
 
 ## Before the first deploy
 
@@ -17,79 +15,31 @@ Prepare production values in your hosting dashboards and provider dashboards. Mi
 - Clerk frontend API URL
 - Convex client URL (`NEXT_PUBLIC_CONVEX_URL`)
 - Convex HTTP-actions URL (`NEXT_PUBLIC_CONVEX_SITE_URL`) when the deployment uses Convex HTTP actions
-- any deployment values your Convex environment writes
-- Stripe secret key, product id, price id
+- Stripe secret key, product id, and price id
 - live `STRIPE_WEBHOOK_SECRET`
 - `APP_BASE_URL`
-
-The observability-specific signing secrets, ingest token, incident-control token, and Telegram alerting values are documented in the internal observability runbook.
 
 ## Vercel checklist
 
 - deploy as a normal Next.js app
 - keep the project linked to `ParkerRex/mma-shipbysunday`
 - keep Vercel's production branch on `main`
-- let Preview continue to handle unassigned git branches such as `dev` and feature branches
 - keep Bun pinned to the repo version
 - use real production Clerk env values
 - use real production Stripe live keys
-- if the app uses observability or any other Convex HTTP actions, set `NEXT_PUBLIC_CONVEX_SITE_URL` to the matching `.convex.site` host
+- set `NEXT_PUBLIC_CONVEX_SITE_URL` when the deployment uses Convex HTTP actions
 
-Do not make Vercel responsible for production Convex deploys in this repo. The frontend should build on Vercel, but Convex production promotion now happens from GitHub Actions on `main` through `.github/workflows/convex-production-deploy.yml`.
-
-`CONVEX_DEPLOY_KEY` belongs in GitHub repository secrets for that workflow, not in the Vercel project.
-
-## Convex checklist
-
-Convex production must match the same production auth and Stripe values used by the app.
-
-Do not leave Convex pointed at:
-
-- an old Clerk instance
-- a dev Clerk instance
-- an outdated Stripe webhook secret
-- a mismatched Stripe secret key
-- a deployment that does not have the current `observability` functions pushed
+Do not make Vercel responsible for production Convex deploys in this repo. The frontend should build on Vercel, but Convex production promotion still happens from GitHub Actions through `.github/workflows/convex-production-deploy.yml`.
 
 ## Post-deploy verification
 
-After a release merge to `main`, `Production Release Proof` should confirm all of this with a real test flow. That workflow should wait for the exact Vercel production deployment for the merged commit before it starts browser verification, not just wait for `https://www.man-meets-ai.com` to return `200`.
+After a release merge to `main`, the deployed proof is the deployment smoke workflow, not a separate QA pack.
 
-1. signed-out visitor hits a protected route and is pushed to sign-in
-2. signed-in user without access reaches `/start` and sees inline recovery
-3. live checkout returns to `/checkout/success`
-4. webhook grants access
-5. newly granted user reaches `/start`
-6. Vercel attributes the production web deploy to `main`
-7. GitHub Actions reports a matching `Convex Production Deploy` run for the same release
+The live path is:
 
-The workflow should use the same QA control-plane command for the authenticated production pass:
+1. Vercel deploys the merged `main` commit.
+2. GitHub receives the successful `deployment_status`.
+3. `.github/workflows/deployment-smoke.yml` runs against the exact deployed URL.
+4. That smoke suite verifies the public pages and, when `PLAYWRIGHT_CHECKOUT_SMOKE=1`, the real checkout-session creation route.
 
-```bash
-PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run qa:run-pack -- --pack=default_ship
-```
-
-That command assumes:
-
-- `qa/personas.local.json` contains the real QA account emails and passwords
-- the file referenced by `QA_ENV_FILE` contains the production Clerk and Convex env values
-- the production Clerk instance matches the target site
-- GitHub repository secret `VERCEL_TOKEN` plus repository variables `VERCEL_PROJECT_ID` and `VERCEL_TEAM_ID` can read production deployment metadata so the workflow can wait for the exact release commit before running Playwright
-- `QA_ENV_FILE=apps/web/.env.production` is resolved from the repository root in CI, not from `apps/web/`
-- the production proof bootstrap can derive `CONVEX_DEPLOYMENT` from `NEXT_PUBLIC_CONVEX_URL`, so the env file does not need a separate production deployment name
-
-If persona prep fails with a Clerk publishable-key mismatch, stop there. That means the loaded env file does not match the production site, so any later authenticated browser result would be invalid.
-
-For billing-sensitive releases, the same workflow should also run:
-
-```bash
-PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run qa:run-pack -- --pack=billing_integration
-```
-
-Only billing-sensitive releases should spend that extra live no-cost Checkout proof.
-
-## What success looks like
-
-Production is healthy when payment, access, route protection, observability, and deployment provenance all agree on the same release. In this repo that means the web app came from Vercel `main`, the backend came from the Convex production workflow on `main`, and both use the same production env values.
-
-If payment completes but access does not, debug env parity before you rewrite application code.
+If the deployed checkout smoke fails, debug environment drift first. The goal is to fail at the real deployed boundary, not to recover that information through a second orchestration layer.

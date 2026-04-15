@@ -1,4 +1,3 @@
-import path from "node:path";
 import { defineConfig, devices } from "@playwright/test";
 
 const localPort = Number.parseInt(process.env.PLAYWRIGHT_PORT ?? "3100", 10);
@@ -7,7 +6,6 @@ const baseURL =
 const localServerHost = new URL(baseURL).hostname;
 const appsWebDirectory = __dirname;
 const shouldUseLocalServer = process.env.PLAYWRIGHT_USE_LOCAL_SERVER === "1";
-const shouldRunSandboxAuth = process.env.E2E_RUN_SANDBOX === "1";
 const localhostHosts = new Set(["127.0.0.1", "0.0.0.0", "localhost"]);
 const smokeTestConvexUrl = "https://smoke-test.convex.cloud";
 const localServerCommand = [
@@ -15,13 +13,7 @@ const localServerCommand = [
 	"run",
 	"--cwd",
 	JSON.stringify(appsWebDirectory),
-	"build",
-	"&&",
-	"bun",
-	"run",
-	"--cwd",
-	JSON.stringify(appsWebDirectory),
-	"start",
+	"dev:web:raw",
 	"--",
 	"--hostname",
 	localServerHost,
@@ -54,8 +46,7 @@ function getHostedConvexUrl() {
 }
 
 export default defineConfig({
-	testDir: path.join(__dirname, "tests"),
-	globalSetup: path.join(__dirname, "tests/e2e/global-setup.ts"),
+	testDir: __dirname,
 	timeout: 30_000,
 	expect: {
 		timeout: 10_000,
@@ -73,14 +64,7 @@ export default defineConfig({
 	projects: [
 		{
 			name: "browser-smoke",
-			testMatch: ["browser-smoke/**/*.spec.ts"],
-			use: {
-				...devices["Desktop Chrome"],
-			},
-		},
-		{
-			name: "sandbox-e2e",
-			testMatch: ["e2e/**/*.spec.ts"],
+			testMatch: ["playwright/**/*.spec.ts"],
 			use: {
 				...devices["Desktop Chrome"],
 			},
@@ -95,7 +79,7 @@ export default defineConfig({
 				env: {
 					...getDefinedProcessEnv(),
 					APP_BASE_URL: baseURL,
-					DISABLE_CLERK_MIDDLEWARE: shouldRunSandboxAuth ? "0" : "1",
+					DISABLE_CLERK_MIDDLEWARE: "1",
 					ENABLE_OBSERVABILITY_TEST_TRIGGER: "1",
 					NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
 						process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ??

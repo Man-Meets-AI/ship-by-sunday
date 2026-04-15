@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-15
+
+### Changed
+
+- Replaced the old QA control plane, release-scope routing, and release-proof workflow maze with a thinner CI/CD path: one PR workflow, one deployment-smoke workflow, one minimal Convex production deploy workflow, and a smaller root validation surface (`test`, `test:contracts`, `test:e2e`, `build`, `lint`, `typecheck`).
+- Deleted the authenticated sandbox Playwright lane plus the hosted/local Stripe proof scripts, and moved checkout/access protection into direct integration tests, offline `convex-test` coverage, and deployed checkout-session smoke.
+- Removed the root `qa/` folder entirely and moved the surviving test harness shape into app-local paths that match Dub more closely: `apps/web/playwright/` for browser smoke and `apps/web/tests/` for setup and shared helpers.
+
 ## 2026-04-10
 
 ### Changed

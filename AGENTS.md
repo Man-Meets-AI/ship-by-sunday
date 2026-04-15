@@ -14,20 +14,20 @@ This version has breaking changes. Read the relevant guide in `apps/web/node_mod
 
 - For work in `apps/web`, also follow `apps/web/AGENTS.md`.
 - For work in `packages/blueprint-compiler`, also follow `packages/blueprint-compiler/AGENTS.md`.
-- For route, auth, checkout, entitlement, browser QA, or ship-readiness work, also follow `qa/AGENTS.md`.
 - Root [`DESIGN.md`](/Users/parkerrex/Projects/ship-by-sunday/DESIGN.md) is the canonical visual source of truth for user-facing UI.
 - For any task that changes layout, styling, theming, motion, docs chrome, or marketing presentation, read `DESIGN.md` before editing code or design docs.
 - Before changing the public homepage, read `apps/web/content/docs/configure-the-homepage.mdx`.
-- Hidden repo-reference docs live in `.docs/`. Read only the file relevant to the task:
-  - `.docs/workspace-layout.md`
-  - `.docs/scripts.md`
-  - `.docs/architecture.md`
-  - `.docs/product-contract.md`
-  - `.docs/integrations.md`
-  - `.docs/testing-and-release.md`
-  - `.docs/encyclopedia.md`
+- Canonical repo-reference docs live in `docs/`. Start with `docs/index.md`, then read only the file relevant to the task:
+  - `docs/ARCHITECTURE.md`
+  - `docs/RELIABILITY.md`
+  - `docs/SECURITY.md`
+  - `docs/FRONTEND.md`
+  - `docs/DESIGN.md`
+  - `docs/PRODUCT_SENSE.md`
+  - `docs/QUALITY_SCORE.md`
+  - `docs/design-docs/index.md`
 - Ship by Sunday background docs live in `docs/ship-by-sunday/` when historical context is useful.
-- Do not treat `docs/ship-by-sunday/` or `.docs/` as higher-priority contracts than the local `AGENTS.md` files, `DESIGN.md`, and the current runtime code.
+- Do not treat `docs/ship-by-sunday/` or `docs/generated/` as higher-priority contracts than the local `AGENTS.md` files, `DESIGN.md`, and the current runtime code.
 
 ## Engineering standards
 
@@ -73,9 +73,9 @@ For complex features, long-horizon work, migrations, risky integrations, or sign
 Rules:
 
 - Prefer plan mode first for complex or ambiguous work.
-- Store per-initiative ExecPlans in `.plans/`.
-- Treat `.plans/PLANS.md` as the repository contract for all ExecPlans.
-- When authoring or updating an ExecPlan, read `.plans/PLANS.md` first and follow it to the letter.
+- Store per-initiative ExecPlans in `docs/exec-plans/active/`.
+- Treat `docs/exec-plans/PLANS.md` as the repository contract for all ExecPlans.
+- When authoring or updating an ExecPlan, read `docs/exec-plans/PLANS.md` first and follow it to the letter.
 - Treat `docs/codex/` as a legacy archive of historical plan records, not as the live write target for new ExecPlans.
 - When the request is underspecified, inspect the repo first and ask only the minimum clarifying questions that the repo cannot answer.
 - When implementing from an ExecPlan, read the target ExecPlan first, identify the active milestone, and make the smallest viable scoped change that advances it.
@@ -86,7 +86,7 @@ Rules:
 
 ## Reliability and verification
 
-Before considering work complete, run the narrowest relevant checks first, then broaden as needed. Use `.docs/scripts.md` for the command map.
+Before considering work complete, run the narrowest relevant checks first, then broaden as needed. Use `docs/design-docs/scripts.md` for the command map.
 
 Expected verification surfaces include:
 

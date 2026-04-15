@@ -1,6 +1,6 @@
-export type SkillTabId = "clerk" | "convex" | "engineering" | "qa";
+export type SkillTabId = "clerk" | "convex" | "engineering" | "browser";
 
-export type SkillRole = "auth" | "data" | "scope" | "qa" | "eng";
+export type SkillRole = "auth" | "data" | "scope" | "browser" | "eng";
 
 export type SkillEntry = {
 	slug: string;
@@ -13,7 +13,7 @@ export const SKILL_ROLE_LABEL: Record<SkillRole, string> = {
 	auth: "auth",
 	data: "data",
 	scope: "scope",
-	qa: "qa",
+	browser: "browser",
 	eng: "eng",
 };
 
@@ -21,7 +21,7 @@ export const SKILL_TABS: { id: SkillTabId; label: string }[] = [
 	{ id: "clerk", label: "Clerk" },
 	{ id: "convex", label: "Convex" },
 	{ id: "engineering", label: "Engineering" },
-	{ id: "qa", label: "QA" },
+	{ id: "browser", label: "Browser" },
 ];
 
 /** Representative skills this course expects you to recognize; your install may differ. */
@@ -121,11 +121,11 @@ export const SKILLS_BY_TAB: Record<SkillTabId, SkillEntry[]> = {
 				"Reduce complexity without changing the user-visible outcome.",
 		},
 	],
-	qa: [
+	browser: [
 		{
 			slug: "qa-browser",
 			title: "QA Browser",
-			role: "qa",
+			role: "browser",
 			description: "Drive a real browser against your deployed or local URL.",
 		},
 	],

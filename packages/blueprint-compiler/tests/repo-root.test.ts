@@ -44,7 +44,7 @@ describe("repo root resolution", () => {
 				expect.arrayContaining([
 					"docs/README.md",
 					"docs/build/docs/prompt.md",
-					"docs/prompts/execplan-execution-loop.md",
+					"docs/prompts/exec-plan-execute.md",
 					"apps/web/config/product.ts",
 				]),
 			);

@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 
 const DEFAULT_API_BASE_URL = "https://api.clerk.com";
 export const DEFAULT_CONFIG_URL = new URL(
-	"../../../.agents/skills/QA-Browser/references/internal-test-accounts.json",
+	"./data/clerk-test-accounts.json",
 	import.meta.url,
 );
 
