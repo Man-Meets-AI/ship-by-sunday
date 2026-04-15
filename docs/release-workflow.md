@@ -29,10 +29,11 @@ Production is healthy only when all three systems agree on the same release cand
 ## Required standing configuration
 
 - GitHub branch protection is enabled on `dev` and `main`.
+- `.github/workflows/ci.yml` should fail early on QA control-plane drift by running `qa:validate` and checking that `qa:inventory:sync` leaves `qa/test-inventory.csv` unchanged.
 - `dev` requires pull requests and the code-centric CI checks. After each merge into `dev`, the resulting branch tip must also pass `Dev Staging Proof` before that `dev` commit is treated as a release candidate for `main`.
 - `main` requires pull requests and the `static`, `integration`, `browser-smoke`, and `cli` checks.
 - Vercel project `mma-shipbysunday` is linked to `ParkerRex/mma-shipbysunday` and uses `main` as its production branch.
-- The staging host `https://dev.man-meets-ai.com` must stay aliased to the current `dev` preview deployment. If that alias drifts to an older preview, `Dev Staging Proof` can wait on or verify the wrong deployment.
+- The staging host `https://dev.man-meets-ai.com` must stay aliased to the current `dev` preview deployment. `Dev Staging Proof` should bind that alias automatically to the exact ready preview deployment for the current `dev` commit; manual `vercel alias set` is now a recovery tool, not the normal path.
 - Root `bunfig.toml` forces `install.linker = "hoisted"` so GitHub Actions and Vercel installs do not use Bun's isolated symlink-heavy workspace layout during builds and serverless packaging.
 - `apps/web/vercel.json` overrides the Vercel install step to remove cached `node_modules` trees before `bun install --frozen-lockfile`, because switching linkers alone does not rewrite a restored isolated-install cache.
 - GitHub repository secret `CONVEX_DEPLOY_KEY` must exist before remote Convex dry-runs or production deploys can succeed.
@@ -58,7 +59,7 @@ Create that secret from the Convex dashboard for the production deployment:
 
 6. Merge the feature branch into `dev` only after the code-centric checks for the staging candidate are green.
 7. Treat `dev` as the release candidate branch. After the merge, wait for the aggregate `release_gate` job from `Dev Staging Proof` on the resulting `dev` commit. That job is the integrated staging proof and must be green before you open the `dev -> main` release pull request.
-   If a staging run crashes because a new public Convex function or action is missing, sync the hosted Convex dev deployment before trusting the result. A green Vercel preview alone is not enough when the staged frontend has outrun hosted Convex dev.
+   If the release touched `apps/web/convex/`, `Dev Staging Proof` should sync hosted Convex dev automatically before browser proof. A green Vercel preview alone is not enough when the staged frontend has outrun hosted Convex dev.
 8. Run the default multi-agent PR review against `main` for the release pull request:
 
    `Review this branch against main. Have pr_explorer map the affected code paths, reviewer find real risks, and docs_researcher verify the framework APIs that the patch relies on.`
@@ -69,7 +70,8 @@ Create that secret from the Convex dashboard for the production deployment:
 12. Watch GitHub Actions run `Convex Production Deploy` for the same merged `main` commit.
 13. Let the `Production Release Proof` workflow wait for the exact Vercel production deployment for the merged commit, then run the hosted post-deploy verification against `https://www.man-meets-ai.com`.
 14. When the release touched checkout, Stripe, entitlement, webhook, or access-handoff behavior, `Production Release Proof` should also run hosted `billing_integration` automatically. Skip this extra proof only for unrelated docs or presentation changes.
-15. Delete the local and remote feature branch after the release settles.
+15. Before hosted billing proof starts on `dev` or `main`, verify the managed Stripe env and the deployed `/api/stripe/checkout` route against the target host so stale `STRIPE_PRICE_ID` or `STRIPE_PRODUCT_ID` values fail fast.
+16. Delete the local and remote feature branch after the release settles.
 
 Useful verification commands:
 
@@ -80,9 +82,11 @@ gh run list --repo ParkerRex/mma-shipbysunday --workflow production-release-proo
 vercel target list
 cd apps/web && bunx convex logs --prod --history 20
 PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run qa:run-pack -- --pack=default_ship
+cd apps/web && bun --env-file=.env.local scripts/verify-managed-stripe-env.ts --expected-mode=test --app-base-url=https://dev.man-meets-ai.com
+cd apps/web && bun --env-file=.env.production scripts/verify-managed-stripe-env.ts --expected-mode=live --app-base-url=https://www.man-meets-ai.com
 ```
 
-For staging or production billing verification in this repo, prefer a restricted live `100% off` promotion code and confirm the buyer auto-forwards from `/checkout/success` into `/start`. Use [docs/internal/observability.md](./internal/observability.md) for the incident-control and webhook-origin drill.
+For staging or production billing verification in this repo, prefer a restricted live `100% off` discount and confirm the buyer auto-forwards from `/checkout/success` into `/start`. On production, the canonical automation should create the Checkout Session directly with the discount already attached instead of relying on promotion-code entry in Stripe’s hosted UI. Use [docs/internal/observability.md](./internal/observability.md) for the incident-control and webhook-origin drill.
 
 For the matching QA command:
 

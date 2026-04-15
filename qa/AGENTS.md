@@ -37,7 +37,8 @@ Branch lifecycle is part of the QA contract:
 - Move to `prod` second. `default_ship` is now green there too; use `qa/runs/2026-03-25-default-ship-prod-rerun.md` as the current hosted baseline.
 - Hosted `billing_integration` now has both the repair report and the automatic post-fix rerun. Read `qa/runs/2026-03-25-prod-billing-integration-webhook-fix.md` first for the misconfig repair, then `qa/runs/2026-03-25-prod-billing-integration-automatic-rerun.md` for the fresh automatic delivery proof.
 - The key prod invariants are: Stripe posts to the Convex `.convex.site` webhook URL, production Convex has both `STRIPE_WEBHOOK_SECRET` and `STRIPE_SECRET_KEY`, and a fresh live completed no-cost order can patch or insert a `stripe_webhook` access grant without replay.
-- For this repo, prefer a live no-cost Checkout verification using a restricted `100% off` promotion code instead of a real card charge. That proves the webhook/access handoff without treating prod as a card-testing surface.
+- For this repo, prefer a live no-cost Checkout verification using a restricted `100% off` discount instead of a real card charge. That proves the webhook/access handoff without treating prod as a card-testing surface.
+- On production, the canonical `billing_integration` automation should create the Checkout Session directly with that discount already attached. Do not make the production gate depend on manual promotion-code entry in Stripe’s hosted UI.
 - Use `qa/runs/` as the durable evidence set and read the latest relevant environment report before rerunning a pack.
 
 ## QA Lead
@@ -90,10 +91,12 @@ Use:
 
 ```bash
 bun run qa:inventory:sync
+bun run qa:inventory:check
 bun run qa:validate
 ```
 
 `qa:inventory:sync` preserves curated rows for unchanged files and only uses filename heuristics to seed genuinely new files. If a meaningful mapping still degrades after sync, stop and repair the control plane before concluding the review.
+`qa:inventory:check` is the CI-facing fast fail that reruns inventory sync and then fails if `qa/test-inventory.csv` would change.
 
 Do not silently apply canonical inventory or coverage edits during an ordinary QA-team review. Prepare the exact change and ask for confirmation first.
 
@@ -124,7 +127,8 @@ Pack policy:
 - For blueprint-funnel diffs, the blueprint integration-ui suite is required because it directly proves the stacked Start page, the routed workbench, the Continue-only save and validation flow, and the Review unlock hierarchy.
 - On local dev, prefer the local-auth default-ship lane when sandbox auth is not active. It reuses the same prepared personas and storage-state bootstrap but does not depend on the sandbox gate.
 - `extended`: run only the scenarios touched by the diff unless the user asks for a full extended sweep.
-- `billing_integration`: run `qa:run-pack -- --pack=billing_integration` only on `dev` or production release verification when the environment is explicitly safe for test payments and `QA_ALLOW_BILLING_INTEGRATION=1` is set. Do not run it on ordinary feature branches. On local targets, the pack now records `bun run stripe:dev:doctor` as a warning-only preflight and then runs `bun run stripe:dev:verify` after the sandbox billing flow as the hard Stripe-to-Convex proof. A warning about the pinned Stripe CLI project `ship-by-sunday` should be fixed, but it should not override a passing billing handoff by itself. If the pack still regresses, first verify that `bun run dev:stripe` is forwarding to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook` before treating it as an app-auth issue. For hosted prod verification, prefer a restricted live `100% off` promotion code so Checkout completes as a no-cost order while still producing `checkout.session.completed` for the webhook grant path.
+- `billing_integration`: run `qa:run-pack -- --pack=billing_integration` only on `dev` or production release verification when the environment is explicitly safe for test payments and `QA_ALLOW_BILLING_INTEGRATION=1` is set. Do not run it on ordinary feature branches. On local targets, the pack now records `bun run stripe:dev:doctor` as a warning-only preflight and then runs `bun run stripe:dev:verify` after the sandbox billing flow as the hard Stripe-to-Convex proof. A warning about the pinned Stripe CLI project `ship-by-sunday` should be fixed, but it should not override a passing billing handoff by itself. If the pack still regresses, first verify that `bun run dev:stripe` is forwarding to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook` before treating it as an app-auth issue. On `www.man-meets-ai.com`, the pack should switch to the hosted verifier that creates a fresh live zero-cost Checkout Session directly with a one-time 100%-off coupon already attached, then proves the real `/checkout/success` -> `/start` access handoff.
+- Hosted release workflows should fail early on drift. `Dev Staging Proof` should auto-bind `dev.man-meets-ai.com` to the exact ready preview deployment for the tested `dev` commit, sync hosted Convex dev automatically when the release touched `apps/web/convex/`, and verify the managed Stripe env plus the hosted checkout route before the billing pack runs.
 - Run authenticated sandbox work on local `dev` first. The current green local baseline is `default_ship`; use hosted or prod only after the local path is understood.
 - If the sandbox Playwright lane exits with all tests skipped, treat that as missing browser evidence, not as a green pass. Record the skipped state explicitly in the report and call out why the auth environment was inactive.
 - Hosted persona prep must use Clerk env values that match the hosted target. `qa:personas:prepare` and `qa:run-pack` load `apps/web/.env.local` by default; set `QA_ENV_FILE=<path>` or export matching Clerk env vars before targeting prod or any other non-local Clerk instance.

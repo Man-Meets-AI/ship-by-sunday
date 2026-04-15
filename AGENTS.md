@@ -108,6 +108,8 @@ If a relevant check cannot run:
 
 This repository ships through short-lived feature branches into `dev`, then promotes the reviewed `dev` release candidate into `main`. Do not use a long-lived integration branch.
 
+For P0 or P1 production incidents, use the hotfix path from `main` instead of forcing the fix to ride unrelated `dev` work. After the hotfix lands on `main`, merge or cherry-pick it back into `dev` immediately so the branches do not drift.
+
 Before opening a PR:
 
 - branch from the current `dev`

@@ -13,6 +13,8 @@ Source-of-truth surfaces:
 
 The main release-critical pack is `default_ship`. `billing_integration` is the separate commercial-path proof pack.
 
+Ordinary CI should fail on QA control-plane drift before release workflows do. `qa:validate` plus an inventory-sync diff check belong in the standing CI path, not just in staging or production proof.
+
 Use `dev` first for integrated staging proof and `prod` second for release evidence.
 
 ## Common verification surfaces
@@ -51,6 +53,8 @@ Standard release path:
 9. Tag the merged `main` commit and publish the matching GitHub Release.
 10. Watch the Vercel web deploy and Convex production deploy settle.
 
+On `dev`, the release workflow should self-heal the staging alias by binding `dev.man-meets-ai.com` to the exact ready preview deployment for the current `dev` commit. When the release changed `apps/web/convex/`, the workflow should also sync hosted Convex dev automatically before browser proof starts.
+
 Canonical long-form runbook: `docs/release-workflow.md`.
 
 ## Billing proof rule
@@ -63,4 +67,4 @@ Only run fresh billing proof when the release touched:
 - webhooks
 - purchase-to-access handoff
 
-Use the production no-cost promotion-code path instead of a real card charge when collecting live release evidence.
+Use the production no-cost direct discounted Checkout path instead of a real card charge when collecting live release evidence.

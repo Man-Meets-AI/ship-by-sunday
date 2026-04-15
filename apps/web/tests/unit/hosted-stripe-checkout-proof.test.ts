@@ -1,0 +1,63 @@
+import { describe, expect, it } from "vitest";
+
+import {
+	buildHostedProofCheckoutSessionParams,
+	buildHostedProofCouponParams,
+	buildHostedProofSignInPath,
+} from "../../scripts/lib/hosted-stripe-checkout-proof.mjs";
+
+describe("hosted Stripe checkout proof helpers", () => {
+	it("builds a one-time zero-cost coupon", () => {
+		const coupon = buildHostedProofCouponParams({
+			now: 1_700_000_000_000,
+			runLabel: "prod-123",
+		});
+
+		expect(coupon).toMatchObject({
+			duration: "once",
+			max_redemptions: 1,
+			metadata: {
+				qaBillingProof: "hosted_direct_checkout",
+				runLabel: "prod-123",
+			},
+			name: "QA proof prod-123",
+			percent_off: 100,
+			redeem_by: 1_700_000_900,
+		});
+	});
+
+	it("builds the direct discounted checkout session for the hosted proof", () => {
+		const session = buildHostedProofCheckoutSessionParams({
+			appBaseUrl: "https://www.man-meets-ai.com/",
+			checkoutEmail: "buyer@example.com",
+			couponId: "coupon_123",
+			courseSlug: "ship-by-sunday",
+			priceId: "price_123",
+		});
+
+		expect(session).toEqual({
+			billing_address_collection: "auto",
+			cancel_url: "https://www.man-meets-ai.com/checkout/cancel",
+			customer_email: "buyer@example.com",
+			discounts: [{ coupon: "coupon_123" }],
+			line_items: [{ price: "price_123", quantity: 1 }],
+			metadata: {
+				courseSlug: "ship-by-sunday",
+			},
+			mode: "payment",
+			payment_intent_data: {
+				metadata: {
+					courseSlug: "ship-by-sunday",
+				},
+			},
+			success_url:
+				"https://www.man-meets-ai.com/checkout/success?session_id={CHECKOUT_SESSION_ID}",
+		});
+	});
+
+	it("builds the hosted proof sign-in path", () => {
+		expect(buildHostedProofSignInPath({})).toBe(
+			"/sign-in?redirect_url=%2Fblueprint",
+		);
+	});
+});
