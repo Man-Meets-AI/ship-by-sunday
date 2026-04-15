@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { buildDesignPresetFactSeed } from "@shipbysunday/blueprint-compiler";
 import { createBlueprintWorkspaceState } from "./blueprint-test-fixtures";
 
 const saveProjectDefinitionFactsMock = vi.fn();
@@ -118,6 +119,9 @@ describe("BlueprintPage", () => {
 		useQueryMock.mockReset();
 		pushMock.mockReset();
 		replaceMock.mockReset();
+		Element.prototype.hasPointerCapture ??= () => false;
+		Element.prototype.setPointerCapture ??= () => {};
+		Element.prototype.releasePointerCapture ??= () => {};
 	});
 
 	it("renders the blueprint form with overview, sections, and save bar", () => {
@@ -190,5 +194,34 @@ describe("BlueprintPage", () => {
 		});
 		expect(pushMock).toHaveBeenCalledWith("/review?download=1");
 		expect(replaceMock).not.toHaveBeenCalled();
+	});
+
+	it("re-seeds the design fields when a curated preset is selected", async () => {
+		const user = userEvent.setup();
+		render(
+			<BlueprintPage initialWorkspaceState={createBlueprintWorkspaceState()} />,
+		);
+
+		await user.click(
+			screen.getByRole("combobox", { name: "Choose a design direction" }),
+		);
+		await user.click(screen.getByRole("option", { name: /Notion/i }));
+		await user.click(
+			screen.getByRole("button", { name: "Continue to Review" }),
+		);
+
+		await waitFor(() => {
+			expect(saveProjectDefinitionFactsMock).toHaveBeenCalledTimes(1);
+		});
+		expect(screen.getAllByText("Notion").length).toBeGreaterThan(0);
+		expect(saveProjectDefinitionFactsMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				factsPatch: expect.objectContaining({
+					design_preset_id: "notion",
+					theme_preset: buildDesignPresetFactSeed("notion").theme_preset,
+					design_references: ["https://getdesign.md/notion/design-md"],
+				}),
+			}),
+		);
 	});
 });

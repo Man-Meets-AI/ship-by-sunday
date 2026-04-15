@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const pushMock = vi.fn();
 const signOutMock = vi.fn();
 const useClerkMock = vi.fn();
+const useSignInMock = vi.fn();
 const useSignUpMock = vi.fn();
 const reportClientErrorMock = vi.fn();
 
@@ -32,6 +33,7 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@clerk/nextjs", () => ({
 	useClerk: () => useClerkMock(),
+	useSignIn: () => useSignInMock(),
 	useSignUp: () => useSignUpMock(),
 }));
 
@@ -42,6 +44,28 @@ vi.mock("@/features/observability/lib/client-error-report", () => ({
 import { PostCheckoutSignUpPage } from "@/features/auth/sign-up/post-checkout-sign-up-page";
 
 function createSignUpState(overrides?: Partial<Record<string, unknown>>) {
+	const signUp = {
+		create: vi.fn().mockImplementation(async () => {
+			return { error: null };
+		}),
+		password: vi.fn().mockImplementation(async () => {
+			signUp.status = "missing_requirements";
+			signUp.unverifiedFields = ["email_address"];
+			signUp.missingFields = [];
+			return { error: null };
+		}),
+		verifications: {
+			sendEmailCode: vi.fn().mockResolvedValue({ error: null }),
+			verifyEmailCode: vi.fn().mockResolvedValue({ error: null }),
+		},
+		finalize: vi.fn().mockResolvedValue({ error: null }),
+		status: "missing_requirements",
+		unverifiedFields: [] as string[],
+		missingFields: ["email_address", "password"] as string[],
+		isTransferable: false,
+		...overrides,
+	};
+
 	return {
 		errors: {
 			fields: {
@@ -53,18 +77,7 @@ function createSignUpState(overrides?: Partial<Record<string, unknown>>) {
 			raw: null,
 		},
 		fetchStatus: "idle",
-		signUp: {
-			password: vi.fn().mockResolvedValue({ error: null }),
-			verifications: {
-				sendEmailCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyEmailCode: vi.fn().mockResolvedValue({ error: null }),
-			},
-			finalize: vi.fn().mockResolvedValue({ error: null }),
-			status: "missing_requirements",
-			unverifiedFields: [],
-			missingFields: ["email_address", "password"],
-			...overrides,
-		},
+		signUp,
 	};
 }
 
@@ -74,13 +87,21 @@ describe("PostCheckoutSignUpPage", () => {
 		signOutMock.mockReset();
 		reportClientErrorMock.mockReset();
 		useClerkMock.mockReset();
+		useSignInMock.mockReset();
 		useSignUpMock.mockReset();
 		useClerkMock.mockReturnValue({
 			signOut: signOutMock,
 		});
+		useSignInMock.mockReturnValue({
+			signIn: {
+				create: vi.fn().mockResolvedValue({ error: null }),
+				finalize: vi.fn().mockResolvedValue({ error: null }),
+				status: "needs_first_factor",
+			},
+		});
 	});
 
-	it("renders a locked checkout email and creates the account with that email", async () => {
+	it("renders a locked checkout email and creates the Clerk sign-up attempt", async () => {
 		const signUpState = createSignUpState();
 		useSignUpMock.mockReturnValue(signUpState);
 
@@ -101,11 +122,82 @@ describe("PostCheckoutSignUpPage", () => {
 		await user.type(screen.getByLabelText("Create password"), "supersecret");
 		await user.click(screen.getByRole("button", { name: "Create account" }));
 
+		expect(signUpState.signUp.create).toHaveBeenCalledWith({
+			emailAddress: "buyer@example.com",
+		});
 		expect(signUpState.signUp.password).toHaveBeenCalledWith({
 			emailAddress: "buyer@example.com",
 			password: "supersecret",
 		});
 		expect(signUpState.signUp.verifications.sendEmailCode).toHaveBeenCalled();
+	});
+
+	it("redirects buyers with an existing Clerk account to sign in", async () => {
+		const signInCreateMock = vi.fn().mockResolvedValue({ error: null });
+		useSignInMock.mockReturnValue({
+			signIn: {
+				create: signInCreateMock,
+				finalize: vi.fn().mockResolvedValue({ error: null }),
+				status: "needs_first_factor",
+			},
+		});
+		const signUpState = createSignUpState({
+			password: vi.fn().mockImplementation(async () => {
+				signUpState.signUp.isTransferable = true;
+				return { error: null };
+			}),
+		});
+		useSignUpMock.mockReturnValue(signUpState);
+
+		const user = userEvent.setup();
+		render(
+			<PostCheckoutSignUpPage
+				checkoutEmail="buyer@example.com"
+				redirectPath="/checkout/success?session_id=cs_test_123"
+			/>,
+		);
+
+		await user.type(screen.getByLabelText("Create password"), "supersecret");
+		await user.click(screen.getByRole("button", { name: "Create account" }));
+
+		expect(signInCreateMock).toHaveBeenCalledWith({ transfer: true });
+		expect(pushMock).toHaveBeenCalledWith(
+			"/sign-in?redirect_url=%2Fcheckout%2Fsuccess%3Fsession_id%3Dcs_test_123",
+		);
+	});
+
+	it("falls back to sign in when Clerk marks the checkout email as transferable during sign up", async () => {
+		const signInCreateMock = vi.fn().mockResolvedValue({ error: null });
+		useSignInMock.mockReturnValue({
+			signIn: {
+				create: signInCreateMock,
+				finalize: vi.fn().mockResolvedValue({ error: null }),
+				status: "needs_first_factor",
+			},
+		});
+		const signUpState = createSignUpState({
+			password: vi.fn().mockImplementation(async () => {
+				signUpState.signUp.isTransferable = true;
+				return { error: { errors: [] } };
+			}),
+		});
+		useSignUpMock.mockReturnValue(signUpState);
+
+		const user = userEvent.setup();
+		render(
+			<PostCheckoutSignUpPage
+				checkoutEmail="buyer@example.com"
+				redirectPath="/checkout/success?session_id=cs_test_123"
+			/>,
+		);
+
+		await user.type(screen.getByLabelText("Create password"), "supersecret");
+		await user.click(screen.getByRole("button", { name: "Create account" }));
+
+		expect(signInCreateMock).toHaveBeenCalledWith({ transfer: true });
+		expect(pushMock).toHaveBeenCalledWith(
+			"/sign-in?redirect_url=%2Fcheckout%2Fsuccess%3Fsession_id%3Dcs_test_123",
+		);
 	});
 
 	it("switches into verification mode when only email verification remains", () => {

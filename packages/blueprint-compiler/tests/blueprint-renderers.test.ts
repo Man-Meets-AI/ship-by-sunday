@@ -1,4 +1,8 @@
-import { createCompleteProjectDefinition } from "../src";
+import {
+	DEFAULT_DESIGN_PRESET_ID,
+	buildDesignPresetFactSeed,
+	createCompleteProjectDefinition,
+} from "../src";
 import { renderFullBlueprintTree } from "../src/server";
 
 describe("blueprint renderers", () => {
@@ -70,7 +74,12 @@ describe("blueprint renderers", () => {
 		);
 		const readme = renderedFiles.find((file) => file.path === "docs/README.md");
 
-		expect(factsJson?.content).toContain('"theme_preset": "a0"');
+		expect(factsJson?.content).toContain(
+			`"design_preset_id": "${DEFAULT_DESIGN_PRESET_ID}"`,
+		);
+		expect(factsJson?.content).toContain(
+			`"theme_preset": "${buildDesignPresetFactSeed(DEFAULT_DESIGN_PRESET_ID).theme_preset}"`,
+		);
 		expect(factsJson?.content).toContain('"price_usd_cents": 2900');
 		expect(readme?.content).toContain("Agent-Ready Packs");
 		expect(readme?.content).toContain("repo zip");

@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-04-10
+
+### Changed
+
+- Added curated blueprint design-direction selection with repo-owned preview assets, preset provenance in generated design output, and matching local CLI + compiler support so buyers can choose a named inspiration like Vercel or Notion before fine-tuning the starter theme.
+- Reduced the public Ship by Sunday price from `$500` to `$250`, aligned checkout and helper-script billing defaults with the canonical config, and added guards plus tests so managed Stripe prices cannot silently drift from the advertised amount.
+
+## 2026-04-08
+
+### Changed
+
+- Expanded the compiled starter repo contract with a buyer-facing `START-HERE.md`, a mirrored `/docs` onboarding path, starter-local Codex wrapper skills, and a one-command external skill installer for the vetted Convex, Clerk, and Stripe skills so buyers land with an obvious setup path instead of assembling it from scattered docs.
+
 ## 2026-04-06
 
 ### Changed

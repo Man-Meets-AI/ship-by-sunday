@@ -1,10 +1,12 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import {
+	buildDesignPresetFactSeed,
 	createCompleteProjectDefinition,
 	createCanonicalProjectDefinitionDraft,
 } from "@shipbysunday/blueprint-compiler";
 import {
+	applyDraftPatchFromFile,
 	exportDraftToFile,
 	importDraftFromFile,
 	saveLocalDraft,
@@ -15,6 +17,7 @@ import {
 	getDraftDirectoryPath,
 	getDraftTempFilePath,
 } from "../src/draft/draft-paths";
+import { getBlueprintStageDefinition } from "../src/field-contract";
 import { createTemporaryRepoRoot } from "./test-helpers";
 
 describe("draft store", () => {
@@ -57,6 +60,39 @@ describe("draft store", () => {
 		);
 
 		expect(importedDraft.facts.product_name).toBe("Envelope import");
+	});
+
+	it("re-seeds coupled design fields when importing legacy facts with only design_preset_id", async () => {
+		const repoRootPath = await createTemporaryRepoRoot();
+		const importFilePath = path.join(repoRootPath, "legacy-design-preset.json");
+		await writeFile(
+			importFilePath,
+			JSON.stringify({
+				schemaVersion: 1,
+				clerkUserId: "local-cli-user",
+				productKey: "ship-by-sunday",
+				facts: {
+					product_name: "Legacy import",
+					design_preset_id: "notion",
+				},
+				placeholdersInUse: [],
+				createdAt: 1,
+				updatedAt: 1,
+			}),
+		);
+
+		const importedDraft = await importDraftFromFile(
+			repoRootPath,
+			importFilePath,
+		);
+
+		expect(importedDraft.facts.design_preset_id).toBe("notion");
+		expect(importedDraft.facts.theme_preset).toBe(
+			buildDesignPresetFactSeed("notion").theme_preset,
+		);
+		expect(importedDraft.facts.design_references).toEqual([
+			"https://getdesign.md/notion/design-md",
+		]);
 	});
 
 	it("rejects an invalid import without replacing the existing draft", async () => {
@@ -154,5 +190,38 @@ describe("draft store", () => {
 			code: "invalid_state",
 			message: expect.stringContaining(tempFilePath),
 		});
+	});
+
+	it("re-seeds coupled design fields when applying a stage patch with only design_preset_id", async () => {
+		const repoRootPath = await createTemporaryRepoRoot();
+		await saveLocalDraft(
+			repoRootPath,
+			createCanonicalProjectDefinitionDraft({
+				clerkUserId: "local-cli-user",
+				productKey: "ship-by-sunday",
+				facts: {},
+			}),
+		);
+		const patchFilePath = path.join(repoRootPath, "design-patch.json");
+		await writeFile(
+			patchFilePath,
+			JSON.stringify({
+				design_preset_id: "notion",
+			}),
+		);
+
+		const nextDraft = await applyDraftPatchFromFile(
+			repoRootPath,
+			getBlueprintStageDefinition("blueprint"),
+			patchFilePath,
+		);
+
+		expect(nextDraft.facts.design_preset_id).toBe("notion");
+		expect(nextDraft.facts.theme_preset).toBe(
+			buildDesignPresetFactSeed("notion").theme_preset,
+		);
+		expect(nextDraft.facts.design_references).toEqual([
+			"https://getdesign.md/notion/design-md",
+		]);
 	});
 });

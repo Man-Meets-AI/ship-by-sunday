@@ -18,6 +18,12 @@ export function getStripe() {
 	return stripeClient;
 }
 
+function getStripePriceProductId(
+	priceProduct: string | Stripe.Product | Stripe.DeletedProduct,
+) {
+	return typeof priceProduct === "string" ? priceProduct : priceProduct.id;
+}
+
 export function getStripeLineItem() {
 	if (serverEnv.STRIPE_PRICE_ID) {
 		return {
@@ -40,6 +46,40 @@ export function getStripeLineItem() {
 		},
 		quantity: 1,
 	};
+}
+
+export async function assertManagedStripePriceMatchesProductConfig(
+	stripe: Stripe,
+) {
+	if (!serverEnv.STRIPE_PRICE_ID) {
+		return;
+	}
+
+	const configuredPrice = await stripe.prices.retrieve(
+		serverEnv.STRIPE_PRICE_ID,
+	);
+	const configuredProductId = getStripePriceProductId(configuredPrice.product);
+
+	if (configuredPrice.unit_amount !== productConfig.priceUsdCents) {
+		throw new Error(
+			`Configured Stripe price ${serverEnv.STRIPE_PRICE_ID} charges ${configuredPrice.unit_amount} cents, expected ${productConfig.priceUsdCents}.`,
+		);
+	}
+
+	if (configuredPrice.currency !== productConfig.currency) {
+		throw new Error(
+			`Configured Stripe price ${serverEnv.STRIPE_PRICE_ID} uses ${configuredPrice.currency}, expected ${productConfig.currency}.`,
+		);
+	}
+
+	if (
+		serverEnv.STRIPE_PRODUCT_ID &&
+		configuredProductId !== serverEnv.STRIPE_PRODUCT_ID
+	) {
+		throw new Error(
+			`Configured Stripe price ${serverEnv.STRIPE_PRICE_ID} belongs to ${configuredProductId}, expected ${serverEnv.STRIPE_PRODUCT_ID}.`,
+		);
+	}
 }
 
 export function getStripeModeLabel() {

@@ -3,9 +3,23 @@ import {
 	resolvePresetDesignSystem,
 	type ResolvedPresetDesignSystem,
 } from "./preset-design-system";
+import {
+	buildDesignPresetFactSeed,
+	DEFAULT_DESIGN_PRESET_ID,
+	designPresetDerivedFactKeys,
+	getDesignPresetDefinition,
+	resolveDesignPresetDefinition,
+} from "./design-preset-catalog";
 
 export type GeneratedDesignSystem = {
 	productName: string;
+	selection: {
+		presetId?: string;
+		presetLabel?: string;
+		source: "catalog" | "customized_catalog" | "custom_code";
+		previewPageUrl?: string;
+		rawDesignMdUrl?: string;
+	};
 	preset: ResolvedPresetDesignSystem;
 	overview: string;
 	users: string;
@@ -321,11 +335,56 @@ function deriveExistingSystemMode(facts: CanonicalProjectFactsDraft) {
 		: "preset-driven";
 }
 
+function buildDesignPresetSelection(facts: CanonicalProjectFactsDraft) {
+	const rawPresetId = trimText(facts.design_preset_id);
+	const rawThemePreset = trimText(facts.theme_preset);
+	const rawDesignReferences = normalizeTextList(facts.design_references);
+	if (!rawPresetId) {
+		if (rawThemePreset.length > 0 || rawDesignReferences.length > 0) {
+			return {
+				source: "custom_code" as const,
+			} satisfies GeneratedDesignSystem["selection"];
+		}
+		const defaultPreset = resolveDesignPresetDefinition(
+			DEFAULT_DESIGN_PRESET_ID,
+		);
+		return {
+			presetId: defaultPreset.id,
+			presetLabel: defaultPreset.label,
+			source: "catalog" as const,
+			previewPageUrl: defaultPreset.previewPageUrl,
+			rawDesignMdUrl: defaultPreset.rawDesignMdUrl,
+		} satisfies GeneratedDesignSystem["selection"];
+	}
+	const presetDefinition = resolveDesignPresetDefinition(rawPresetId);
+	const presetSeed = buildDesignPresetFactSeed(presetDefinition.id);
+	const hasSeedDifferences =
+		(rawThemePreset.length > 0 && rawThemePreset !== presetSeed.theme_preset) ||
+		(rawDesignReferences.length > 0 &&
+			rawDesignReferences.join("\n") !==
+				presetSeed.design_references.join("\n")) ||
+		designPresetDerivedFactKeys.some((fieldKey) => {
+			const rawValue = trimText(facts[fieldKey]);
+			const seededValue = trimText(presetSeed[fieldKey]);
+			return rawValue.length > 0 && rawValue !== seededValue;
+		});
+
+	return {
+		presetId: presetDefinition.id,
+		presetLabel: presetDefinition.label,
+		source: hasSeedDifferences ? "customized_catalog" : "catalog",
+		previewPageUrl: presetDefinition.previewPageUrl,
+		rawDesignMdUrl: presetDefinition.rawDesignMdUrl,
+	} satisfies GeneratedDesignSystem["selection"];
+}
+
 export function buildGeneratedDesignSystem(
 	facts: CanonicalProjectFactsDraft,
 ): GeneratedDesignSystem {
+	const selection = buildDesignPresetSelection(facts);
+	const presetDefinition = getDesignPresetDefinition(selection.presetId);
 	const preset = resolvePresetDesignSystem(
-		trimText(facts.theme_preset) || "a0",
+		trimText(facts.theme_preset) || presetDefinition?.presetCode || "a0",
 	);
 	const copyTone = trimText(facts.copy_tone) || deriveCopyTone(preset.style.id);
 	const overview = buildOverview(facts);
@@ -341,6 +400,7 @@ export function buildGeneratedDesignSystem(
 
 	const generatedDesignSystem: GeneratedDesignSystem = {
 		productName: trimText(facts.product_name) || "Generated Product",
+		selection,
 		preset,
 		overview,
 		users,
@@ -372,7 +432,14 @@ export function buildGeneratedDesignSystem(
 				trimText(facts.existing_system_mode) || deriveExistingSystemMode(facts),
 			copyTone,
 		},
-		designReferences: normalizeDesignReferences(facts.design_references),
+		designReferences: Array.from(
+			new Set([
+				...normalizeDesignReferences(facts.design_references),
+				...(selection.source !== "custom_code" && presetDefinition
+					? [presetDefinition.previewPageUrl]
+					: []),
+			]),
+		),
 	};
 
 	generatedDesignSystem.agentPromptGuide = buildAgentPromptGuide(
@@ -432,6 +499,17 @@ export function renderGeneratedDesignMarkdown(
 		"## Overview",
 		"",
 		designSystem.overview,
+		"",
+		"## Preset Inspiration",
+		"",
+		`- **Selected preset**: ${designSystem.selection.presetLabel ?? "Custom theme code"}`,
+		`- **Selection source**: ${designSystem.selection.source}`,
+		...(designSystem.selection.previewPageUrl
+			? [`- **Preview**: ${designSystem.selection.previewPageUrl}`]
+			: []),
+		...(designSystem.selection.rawDesignMdUrl
+			? [`- **Source DESIGN.md**: ${designSystem.selection.rawDesignMdUrl}`]
+			: []),
 		"",
 		"## Users",
 		"",

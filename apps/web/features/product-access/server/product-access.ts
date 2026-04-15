@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import {
 	claimCheckoutSessionForViewer,
+	claimLatestPendingCheckoutForViewer,
 	getPendingCheckoutSessionIdFromCookie,
 } from "@/features/checkout/server/checkout-session-recovery";
 import type { ProductAccess } from "@/features/product-access/lib/product-access";
@@ -15,6 +16,14 @@ import { getConvexServerSession } from "@/platform/auth/convex-auth";
 type ResumeDestination = FunctionReturnType<
 	typeof api.blueprint.getBlueprintResumeDestination
 >;
+
+async function refreshViewerProductAccess(token: string) {
+	return (await fetchQuery(
+		api.access.viewerProductAccess,
+		{},
+		{ token },
+	)) as ProductAccess;
+}
 
 export async function getServerProductAccess(): Promise<ProductAccess> {
 	const session = await getConvexServerSession();
@@ -34,11 +43,7 @@ export async function getServerProductAccess(): Promise<ProductAccess> {
 		};
 	}
 
-	const access = (await fetchQuery(
-		api.access.viewerProductAccess,
-		{},
-		{ token: session.token },
-	)) as ProductAccess;
+	const access = await refreshViewerProductAccess(session.token);
 
 	if (access.hasAccess) {
 		return access;
@@ -46,24 +51,21 @@ export async function getServerProductAccess(): Promise<ProductAccess> {
 
 	const pendingCheckoutSessionId =
 		await getPendingCheckoutSessionIdFromCookie();
-	if (!pendingCheckoutSessionId) {
+	if (pendingCheckoutSessionId) {
+		const claimResult = await claimCheckoutSessionForViewer(
+			pendingCheckoutSessionId,
+		);
+		if (claimResult.kind === "validated") {
+			return await refreshViewerProductAccess(session.token);
+		}
+	}
+
+	const emailClaimResult = await claimLatestPendingCheckoutForViewer();
+	if (emailClaimResult.kind !== "validated") {
 		return access;
 	}
 
-	const claimResult = await claimCheckoutSessionForViewer(
-		pendingCheckoutSessionId,
-	);
-	if (claimResult.kind !== "validated") {
-		return access;
-	}
-
-	return (await fetchQuery(
-		api.access.viewerProductAccess,
-		{},
-		{
-			token: session.token,
-		},
-	)) as ProductAccess;
+	return await refreshViewerProductAccess(session.token);
 }
 
 export async function getServerResumeDestination() {
