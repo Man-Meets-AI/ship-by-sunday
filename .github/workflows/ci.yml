@@ -17,6 +17,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  qa_control_plane:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.12.0
+
+      - name: Validate QA control plane
+        run: node qa/scripts/validate.mjs
+
+      - name: Verify QA inventory is current
+        run: node qa/scripts/generate-test-inventory.mjs && git diff --exit-code -- qa/test-inventory.csv
+
   static:
     runs-on: ubuntu-latest
     timeout-minutes: 20

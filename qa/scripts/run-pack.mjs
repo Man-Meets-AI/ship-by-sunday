@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 
+import { buildBillingIntegrationSteps } from "./lib/billing-integration-step-planner.mjs";
 import { loadQaEnv } from "./lib/qa-env.mjs";
 
 const LOCALHOST_HOSTS = new Set(["127.0.0.1", "0.0.0.0", "localhost"]);
@@ -93,69 +94,14 @@ const packDefinitions = {
 	billing_integration: {
 		requiresBillingApproval: true,
 		note: null,
-		steps: ({
-			slug,
-			personaPrepareEnv,
-			authenticatedBrowserEnv,
-			isLocalBillingTarget,
-		}) => [
-			{
-				label: "Validate the QA control plane",
-				command: ["bun", "run", "qa:validate"],
-			},
-			...(isLocalBillingTarget
-				? [
-						{
-							label: "Run the local Stripe guardrail doctor",
-							command: ["bun", "run", "stripe:dev:doctor"],
-							warningOnFailure:
-								"Local Stripe guardrail drift detected. Review the pinned `ship-by-sunday` Stripe profile and doctor output before treating billing failures as app bugs.",
-						},
-					]
-				: []),
-			{
-				label: "Prepare billing-integration personas",
-				command: [
-					"bun",
-					"run",
-					"qa:personas:prepare",
-					"--",
-					"--pack=billing_integration",
-				],
-				env: personaPrepareEnv,
-			},
-			{
-				label: "Scaffold the billing-integration report",
-				command: [
-					"bun",
-					"run",
-					"qa:ship",
-					"--",
-					"--pack=billing_integration",
-					`--slug=${slug}`,
-				],
-			},
-			{
-				label: "Run the billing-integration sandbox browser pack",
-				command: [
-					"bun",
-					"run",
-					"--cwd",
-					"apps/web",
-					"test:e2e:sandbox:billing-integration",
-				],
-				env: authenticatedBrowserEnv,
-				requireBrowserEvidence: true,
-			},
-			...(isLocalBillingTarget
-				? [
-						{
-							label: "Verify the local Stripe-to-Convex handoff",
-							command: ["bun", "run", "stripe:dev:verify"],
-						},
-					]
-				: []),
-		],
+		steps: (options) =>
+			buildBillingIntegrationSteps({
+				authenticatedBrowserEnv: options.authenticatedBrowserEnv,
+				isLocalBillingTarget: options.isLocalBillingTarget,
+				personaPrepareEnv: options.personaPrepareEnv,
+				slug: options.slug,
+				targetUrl: options.sandboxBaseUrl,
+			}),
 	},
 };
 

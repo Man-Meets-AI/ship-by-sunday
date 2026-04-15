@@ -104,8 +104,9 @@ Release PR into `main`:
    - If the `dev` proof skipped billing for a clearly billing-sensitive release candidate, rerun `Dev Staging Proof` with `force_billing=true` instead of hand-waving the gap away.
 
 9. Decide whether production promotion is safe.
-   - Reuse an existing `dev -> main` PR only if its delta matches the intended release candidate.
-   - If `dev` now contains unrelated work that should not ship, stop and escalate instead of silently promoting it.
+    - Reuse an existing `dev -> main` PR only if its delta matches the intended release candidate.
+    - If `dev` now contains unrelated work that should not ship, stop and escalate instead of silently promoting it.
+    - If the intended `dev -> main` PR is `DIRTY`, do not fight the merge in the PR UI. Create a release snapshot branch from `main` using `bun run release:snapshot -- --source-ref origin/dev --base-ref origin/main --push`, then open the release PR from that snapshot branch to `main`.
 
 10. Open or refresh the release PR.
     - Base is `main`, head is `dev`.

@@ -30,6 +30,17 @@ describe("getStripeLineItem", () => {
 		});
 	});
 
+	it("normalizes trailing newline escapes on managed Stripe ids", async () => {
+		process.env.STRIPE_PRICE_ID = "price_250_managed\\n";
+
+		const { getStripeLineItem } = await import("@/platform/billing/stripe");
+
+		expect(getStripeLineItem()).toEqual({
+			price: "price_250_managed",
+			quantity: 1,
+		});
+	});
+
 	it("returns inline price data using the canonical product price when STRIPE_PRICE_ID is absent", async () => {
 		delete process.env.STRIPE_PRICE_ID;
 
@@ -128,5 +139,64 @@ describe("getStripeLineItem", () => {
 		).rejects.toThrow(
 			"Configured Stripe price price_wrong_product belongs to prod_other, expected prod_expected.",
 		);
+	});
+
+	it("requires a managed price and product id for hosted release proof", async () => {
+		delete process.env.STRIPE_PRICE_ID;
+		delete process.env.STRIPE_PRODUCT_ID;
+
+		const { assertManagedStripeEnvConfiguredForRelease } =
+			await import("@/platform/billing/stripe");
+
+		expect(() => assertManagedStripeEnvConfiguredForRelease()).toThrow(
+			"Missing STRIPE_PRICE_ID. Hosted preview and production release proof require a managed Stripe price.",
+		);
+	});
+
+	it("rejects the wrong stripe mode for hosted release proof", async () => {
+		process.env.STRIPE_SECRET_KEY = "sk_live_123";
+
+		const { assertStripeModeMatchesExpected } =
+			await import("@/platform/billing/stripe");
+
+		expect(() => assertStripeModeMatchesExpected("test")).toThrow(
+			"Configured Stripe secret key is in live mode, expected test.",
+		);
+	});
+
+	it("accepts a fully configured hosted release stripe environment", async () => {
+		process.env.STRIPE_SECRET_KEY = "sk_test_123";
+		process.env.STRIPE_PRICE_ID = "price_correct";
+		process.env.STRIPE_PRODUCT_ID = "prod_correct";
+
+		const { assertManagedStripeEnvReadyForRelease } =
+			await import("@/platform/billing/stripe");
+		const stripe = {
+			prices: {
+				retrieve: vi.fn().mockResolvedValue({
+					id: "price_correct",
+					unit_amount: productConfig.priceUsdCents,
+					currency: productConfig.currency,
+					product: "prod_correct",
+				} satisfies Pick<
+					Stripe.Price,
+					"id" | "unit_amount" | "currency" | "product"
+				>),
+			},
+		} as unknown as Stripe;
+
+		await expect(
+			assertManagedStripeEnvReadyForRelease(stripe, { expectedMode: "test" }),
+		).resolves.toBeUndefined();
+	});
+
+	it("normalizes newline-polluted stripe keys before mode detection", async () => {
+		process.env.STRIPE_SECRET_KEY = "sk_test_123\\n";
+
+		const { getNormalizedStripeSecretKey, getStripeModeLabel } =
+			await import("@/platform/billing/stripe");
+
+		expect(getNormalizedStripeSecretKey()).toBe("sk_test_123");
+		expect(getStripeModeLabel()).toBe("test");
 	});
 });

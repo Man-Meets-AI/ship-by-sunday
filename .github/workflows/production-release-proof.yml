@@ -82,9 +82,9 @@ jobs:
       PLAYWRIGHT_BASE_URL: https://www.man-meets-ai.com
       PRODUCTION_CONVEX_CONFIG_JSON: ${{ secrets.PRODUCTION_CONVEX_CONFIG_JSON }}
       PRODUCTION_QA_PERSONAS_LOCAL_JSON: ${{ secrets.PRODUCTION_QA_PERSONAS_LOCAL_JSON }}
-      PRODUCTION_WEB_ENV_LOCAL: ${{ secrets.PRODUCTION_WEB_ENV_LOCAL }}
       QA_ENV_FILE: apps/web/.env.production
       RELEASE_COMMIT_SHA: ${{ needs.release_scope.outputs.head_sha }}
+      VERCEL_ORG_ID: ${{ vars.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
       VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -124,13 +124,26 @@ jobs:
           fi
           printf '%s\n' "$PRODUCTION_QA_PERSONAS_LOCAL_JSON" > qa/personas.local.json
 
-      - name: Write production app env file
+      - name: Pull production app env from Vercel production
         run: |
-          if [[ -z "$PRODUCTION_WEB_ENV_LOCAL" ]]; then
-            echo "PRODUCTION_WEB_ENV_LOCAL is not configured." >&2
-            exit 1
-          fi
-          printf '%s\n' "$PRODUCTION_WEB_ENV_LOCAL" > apps/web/.env.production
+          cd apps/web
+          bunx vercel env pull .env.production --environment production --yes --token "$VERCEL_TOKEN" --scope "$VERCEL_TEAM_ID"
+          python - <<'PY'
+          from pathlib import Path
+
+          env_path = Path(".env.production")
+          lines = env_path.read_text().splitlines()
+          filtered = [
+              line
+              for line in lines
+              if not (
+                  line.startswith("VERCEL")
+                  or line.startswith("TURBO_")
+                  or line.startswith("NX_DAEMON=")
+              )
+          ]
+          env_path.write_text("\n".join(filtered) + "\n")
+          PY
 
       - name: Write Convex CLI auth config
         run: |
@@ -171,12 +184,13 @@ jobs:
       PRODUCTION_QA_PERSONAS_LOCAL_JSON: ${{ secrets.PRODUCTION_QA_PERSONAS_LOCAL_JSON }}
       PRODUCTION_STRIPE_SECRET_KEY: ${{ secrets.PRODUCTION_STRIPE_SECRET_KEY }}
       PRODUCTION_STRIPE_WEBHOOK_SECRET: ${{ secrets.PRODUCTION_STRIPE_WEBHOOK_SECRET }}
-      PRODUCTION_WEB_ENV_LOCAL: ${{ secrets.PRODUCTION_WEB_ENV_LOCAL }}
       QA_ALLOW_BILLING_INTEGRATION: "1"
       QA_ENV_FILE: apps/web/.env.production
+      QA_REQUIRE_CONVEX_DEBUG: "1"
       RELEASE_COMMIT_SHA: ${{ needs.release_scope.outputs.head_sha }}
       STRIPE_SECRET_KEY: ${{ secrets.PRODUCTION_STRIPE_SECRET_KEY }}
       STRIPE_WEBHOOK_SECRET: ${{ secrets.PRODUCTION_STRIPE_WEBHOOK_SECRET }}
+      VERCEL_ORG_ID: ${{ vars.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
       VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -216,13 +230,26 @@ jobs:
           fi
           printf '%s\n' "$PRODUCTION_QA_PERSONAS_LOCAL_JSON" > qa/personas.local.json
 
-      - name: Write production app env file
+      - name: Pull production app env from Vercel production
         run: |
-          if [[ -z "$PRODUCTION_WEB_ENV_LOCAL" ]]; then
-            echo "PRODUCTION_WEB_ENV_LOCAL is not configured." >&2
-            exit 1
-          fi
-          printf '%s\n' "$PRODUCTION_WEB_ENV_LOCAL" > apps/web/.env.production
+          cd apps/web
+          bunx vercel env pull .env.production --environment production --yes --token "$VERCEL_TOKEN" --scope "$VERCEL_TEAM_ID"
+          python - <<'PY'
+          from pathlib import Path
+
+          env_path = Path(".env.production")
+          lines = env_path.read_text().splitlines()
+          filtered = [
+              line
+              for line in lines
+              if not (
+                  line.startswith("VERCEL")
+                  or line.startswith("TURBO_")
+                  or line.startswith("NX_DAEMON=")
+              )
+          ]
+          env_path.write_text("\n".join(filtered) + "\n")
+          PY
 
       - name: Write Convex CLI auth config
         run: |
@@ -232,6 +259,13 @@ jobs:
           fi
           mkdir -p "$HOME/.convex"
           printf '%s\n' "$PRODUCTION_CONVEX_CONFIG_JSON" > "$HOME/.convex/config.json"
+
+      - name: Verify production Stripe environment and checkout route
+        run: |
+          cd apps/web
+          bun --env-file=.env.production scripts/verify-managed-stripe-env.ts \
+            --expected-mode=live \
+            --app-base-url=https://www.man-meets-ai.com
 
       - name: Run production billing integration pack
         run: bun run qa:run-pack -- --pack=billing_integration --slug=prod-billing-${{ github.run_id }}

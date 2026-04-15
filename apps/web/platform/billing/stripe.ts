@@ -5,12 +5,21 @@ import { COURSE_SLUG } from "@/features/course/lesson/model/registry";
 import { requireServerEnv, serverEnv } from "@/platform/env/server";
 
 export const STRIPE_API_VERSION = apiConfig.stripeApiVersion;
+export type StripeModeLabel = "test" | "live";
 
 let stripeClient: Stripe | null = null;
 
+export function normalizeStripeSecretKey(secretKey: string) {
+	return secretKey.replaceAll("\\n", "").replaceAll("\n", "").trim();
+}
+
+export function getNormalizedStripeSecretKey() {
+	return normalizeStripeSecretKey(requireServerEnv("STRIPE_SECRET_KEY"));
+}
+
 export function getStripe() {
 	if (!stripeClient) {
-		stripeClient = new Stripe(requireServerEnv("STRIPE_SECRET_KEY"), {
+		stripeClient = new Stripe(getNormalizedStripeSecretKey(), {
 			apiVersion: STRIPE_API_VERSION,
 		});
 	}
@@ -83,9 +92,47 @@ export async function assertManagedStripePriceMatchesProductConfig(
 }
 
 export function getStripeModeLabel() {
-	return requireServerEnv("STRIPE_SECRET_KEY").startsWith("sk_test_")
+	return getNormalizedStripeSecretKey().startsWith("sk_test_")
 		? "test"
 		: "live";
+}
+
+export function assertManagedStripeEnvConfiguredForRelease() {
+	if (!serverEnv.STRIPE_PRICE_ID) {
+		throw new Error(
+			"Missing STRIPE_PRICE_ID. Hosted preview and production release proof require a managed Stripe price.",
+		);
+	}
+
+	if (!serverEnv.STRIPE_PRODUCT_ID) {
+		throw new Error(
+			"Missing STRIPE_PRODUCT_ID. Hosted preview and production release proof require a managed Stripe product.",
+		);
+	}
+}
+
+export function assertStripeModeMatchesExpected(expectedMode: StripeModeLabel) {
+	const actualMode = getStripeModeLabel();
+	if (actualMode !== expectedMode) {
+		throw new Error(
+			`Configured Stripe secret key is in ${actualMode} mode, expected ${expectedMode}.`,
+		);
+	}
+
+	return actualMode;
+}
+
+export async function assertManagedStripeEnvReadyForRelease(
+	stripe: Stripe,
+	{ expectedMode }: { expectedMode?: StripeModeLabel } = {},
+) {
+	assertManagedStripeEnvConfiguredForRelease();
+
+	if (expectedMode) {
+		assertStripeModeMatchesExpected(expectedMode);
+	}
+
+	await assertManagedStripePriceMatchesProductConfig(stripe);
 }
 
 export function getStripeDashboardUrl(path?: string | null) {
