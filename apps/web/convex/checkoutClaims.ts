@@ -37,6 +37,10 @@ export const pendingCheckoutClaimWriteResultValidator = v.object({
 	saved: v.union(v.literal("inserted"), v.literal("patched")),
 });
 
+export const pendingCheckoutClaimResetResultValidator = v.object({
+	reset: v.union(v.literal("deleted"), v.literal("noop")),
+});
+
 const pendingCheckoutClaimClaimResultValidator = v.union(
 	v.object({
 		claim: v.literal("claimed"),
@@ -270,5 +274,40 @@ export const claimPendingCheckoutClaim = internalMutation({
 			claim: "claimed" as const,
 			grantResult,
 		};
+	},
+});
+
+export const resetPendingCheckoutClaimsForEmail = internalMutation({
+	args: {
+		checkoutEmail: v.string(),
+	},
+	returns: pendingCheckoutClaimResetResultValidator,
+	handler: async (ctx, args) => {
+		const checkoutEmailNormalized = normalizeCheckoutEmail(args.checkoutEmail);
+		let deletedAny = false;
+
+		while (true) {
+			const claimsToDelete = await ctx.db
+				.query("pendingCheckoutClaims")
+				.withIndex(
+					"by_checkout_email_normalized_and_status_and_updated_at",
+					(queryBuilder) =>
+						queryBuilder
+							.eq("checkoutEmailNormalized", checkoutEmailNormalized)
+							.eq("status", "pending"),
+				)
+				.take(50);
+
+			if (claimsToDelete.length === 0) {
+				return {
+					reset: deletedAny ? ("deleted" as const) : ("noop" as const),
+				};
+			}
+
+			deletedAny = true;
+			for (const claim of claimsToDelete) {
+				await ctx.db.delete(claim._id);
+			}
+		}
 	},
 });

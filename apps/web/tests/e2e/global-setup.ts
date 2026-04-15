@@ -55,6 +55,7 @@ export default async function globalSetup(config: FullConfig) {
 		syncProductAccessAfterSignIn: async (clerkUserId) => {
 			await syncProductAccessState({
 				clerkUserId,
+				email: memberWithoutAccessEmail,
 				kind: "reset",
 			});
 			await syncBlueprintProgressState({
@@ -70,6 +71,7 @@ export default async function globalSetup(config: FullConfig) {
 		syncProductAccessAfterSignIn: async (clerkUserId) => {
 			await syncProductAccessState({
 				clerkUserId,
+				email: memberWithAccessEmail,
 				kind: "grant",
 			});
 			await syncBlueprintProgressState({
@@ -360,11 +362,29 @@ function resolveConvexBinPath() {
 
 async function syncProductAccessState({
 	clerkUserId,
+	email,
 	kind,
 }: {
 	clerkUserId: string;
+	email: string;
 	kind: "grant" | "reset";
 }) {
+	if (kind === "reset") {
+		const pendingClaimResetResult = await runConvexInternalCommand({
+			functionName: "checkoutClaims:resetPendingCheckoutClaimsForEmail",
+			args: {
+				checkoutEmail: email,
+			},
+			env: process.env,
+		});
+
+		if (pendingClaimResetResult.code !== 0) {
+			throw new Error(
+				`Failed to reset pending checkout claims for ${email}. ${pendingClaimResetResult.stderr || pendingClaimResetResult.stdout || "No command output."}`,
+			);
+		}
+	}
+
 	const result =
 		kind === "grant"
 			? await runConvexInternalCommand({
