@@ -133,6 +133,22 @@ jobs:
         run: |
           cd apps/web
           bunx vercel env pull .env.local --environment preview --yes --token "$VERCEL_TOKEN" --scope "$VERCEL_TEAM_ID"
+          python - <<'PY'
+          from pathlib import Path
+
+          env_path = Path(".env.local")
+          lines = env_path.read_text().splitlines()
+          filtered = [
+              line
+              for line in lines
+              if not (
+                  line.startswith("VERCEL")
+                  or line.startswith("TURBO_")
+                  or line.startswith("NX_DAEMON=")
+              )
+          ]
+          env_path.write_text("\n".join(filtered) + "\n")
+          PY
 
       - name: Write Convex CLI auth config
         run: |
@@ -229,6 +245,22 @@ jobs:
         run: |
           cd apps/web
           bunx vercel env pull .env.local --environment preview --yes --token "$VERCEL_TOKEN" --scope "$VERCEL_TEAM_ID"
+          python - <<'PY'
+          from pathlib import Path
+
+          env_path = Path(".env.local")
+          lines = env_path.read_text().splitlines()
+          filtered = [
+              line
+              for line in lines
+              if not (
+                  line.startswith("VERCEL")
+                  or line.startswith("TURBO_")
+                  or line.startswith("NX_DAEMON=")
+              )
+          ]
+          env_path.write_text("\n".join(filtered) + "\n")
+          PY
 
       - name: Write Convex CLI auth config
         run: |
