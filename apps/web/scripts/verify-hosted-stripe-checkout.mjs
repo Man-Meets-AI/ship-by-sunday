@@ -319,6 +319,59 @@ async function waitForHostedCheckoutReturn(page) {
 	console.log(`Reached protected workspace at ${page.url()}`);
 }
 
+async function isAccessRequiredScreenVisible(page) {
+	return await page
+		.getByText(/Access Required/i)
+		.isVisible()
+		.catch(() => false);
+}
+
+async function verifyAuthorizedWorkspace(page, { baseUrl, timeoutMs }) {
+	const verificationPage = await page.context().newPage({
+		baseURL: baseUrl,
+	});
+
+	try {
+		const deadline = Date.now() + timeoutMs;
+
+		while (Date.now() < deadline) {
+			await verificationPage.goto(`${baseUrl}/blueprint`, {
+				waitUntil: "networkidle",
+			});
+
+			const accessRequiredVisible =
+				await isAccessRequiredScreenVisible(verificationPage);
+			const headingVisible = await verificationPage
+				.getByRole("heading", { name: "Blueprint" })
+				.isVisible()
+				.catch(() => false);
+			const reviewButtonVisible = await verificationPage
+				.getByRole("button", { name: /Continue to Review/i })
+				.isVisible()
+				.catch(() => false);
+
+			if (!accessRequiredVisible && (headingVisible || reviewButtonVisible)) {
+				return {
+					accessRequiredVisible,
+					authorized: true,
+					url: verificationPage.url(),
+				};
+			}
+
+			await new Promise((resolve) => setTimeout(resolve, 1_500));
+		}
+
+		return {
+			accessRequiredVisible:
+				await isAccessRequiredScreenVisible(verificationPage),
+			authorized: false,
+			url: verificationPage.url(),
+		};
+	} finally {
+		await verificationPage.close();
+	}
+}
+
 function printCheck(label, passed, detail) {
 	console.log(`- ${passed ? "PASS" : "FAIL"} ${label}: ${detail}`);
 }
@@ -409,15 +462,10 @@ try {
 		sessionId: checkoutSession.id,
 		timeoutMs: requireConvexDebug ? timeoutMs : 15_000,
 	});
-	const headingVisible =
-		(await page
-			.getByRole("heading", { name: "Blueprint" })
-			.isVisible()
-			.catch(() => false)) ||
-		(await page
-			.getByRole("button", { name: /Continue to Review/i })
-			.isVisible()
-			.catch(() => false));
+	const workspaceVerification = await verifyAuthorizedWorkspace(page, {
+		baseUrl,
+		timeoutMs,
+	});
 
 	console.log(`Checkout session: ${checkoutSession.id}`);
 	printCheck(
@@ -440,7 +488,13 @@ try {
 			/\/(start|blueprint)/.test(page.url()),
 		page.url(),
 	);
-	printCheck("Workspace reached", headingVisible, page.url());
+	printCheck(
+		"Workspace reached",
+		workspaceVerification.authorized,
+		workspaceVerification.accessRequiredVisible
+			? `access required at ${workspaceVerification.url}`
+			: workspaceVerification.url,
+	);
 	if (productAccess) {
 		printCheck(
 			"Convex product access granted",
@@ -477,6 +531,7 @@ try {
 				appCheckoutSession,
 				clerkUserId,
 				productAccess,
+				workspaceVerification,
 				sessionStatus: finalSession.status,
 				paymentStatus: finalSession.payment_status,
 			},
@@ -492,7 +547,7 @@ try {
 		!appCheckoutSession.ok ||
 		!appCheckoutSession.sessionId ||
 		!appCheckoutSession.url ||
-		!headingVisible ||
+		!workspaceVerification.authorized ||
 		(requireConvexDebug &&
 			(!productAccess ||
 				productAccess.status !== "granted" ||
