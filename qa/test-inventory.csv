@@ -86,6 +86,7 @@ apps/web/tests/unit/ensure-clerk-entitled-test-user.test.ts,unit,CONTENT-01,Gene
 apps/web/tests/unit/ensure-clerk-test-user.test.ts,unit,CONTENT-01,General blueprint or support behavior.,keep,,Defaulted into the blueprint content bucket pending a more specific mapping.
 apps/web/tests/unit/env.test.ts,unit,CONTENT-01,General blueprint or support behavior.,keep,,Defaulted into the blueprint content bucket pending a more specific mapping.
 apps/web/tests/unit/github-username.test.ts,unit,STARTER-01|SETTINGS-02,Starter repo access and settings add-ons.,keep,,Starter repo still belongs in the extended support pack.
+apps/web/tests/unit/global-setup-convex-env.test.ts,unit,FREEPAID-01|FREEPAID-02,Hosted QA bootstrap Convex deployment derivation.,keep,,Proves Playwright bootstrap can derive CONVEX_DEPLOYMENT from NEXT_PUBLIC_CONVEX_URL for hosted staging and production targets without requiring a duplicated deployment name in the pulled env file.
 apps/web/tests/unit/guided-form-lessons.test.tsx,unit,CONTENT-01,General blueprint or support behavior.,keep,,Defaulted into the blueprint content bucket pending a more specific mapping.
 apps/web/tests/unit/home-page-content.test.ts,unit,VIS-01|VIS-02,Homepage and public discovery behavior.,keep,,These tests still map to visitor-first scenarios.
 apps/web/tests/unit/home-page-render-model.test.ts,unit,VIS-01|VIS-02,Homepage and public discovery behavior.,keep,,These tests still map to visitor-first scenarios.
