@@ -46,13 +46,19 @@ export function PricingSectionBlock({
 					<div className="flex flex-col gap-10">
 						<div className="space-y-3">
 							<div className="flex items-baseline gap-3">
+								<p className="text-2xl font-semibold text-muted-foreground line-through">
+									{pricingSection.originalPriceDisplay}
+								</p>
 								<p className="font-marketing-display text-[clamp(5rem,15vw,10rem)] font-black leading-[0.85] tracking-tighter text-foreground">
-									{pricingSection.priceDisplay}
+									{pricingSection.offerPriceDisplay}
 								</p>
 								<span className="text-sm font-medium text-muted-foreground">
 									USD one-time
 								</span>
 							</div>
+							<p className="text-sm font-semibold tracking-wide text-primary uppercase">
+								{pricingSection.offerLabel}
+							</p>
 						</div>
 
 						<div className="space-y-4">
@@ -71,11 +77,14 @@ export function PricingSectionBlock({
 							<PricingIncludesList items={pricingSection.includes} />
 						</div>
 
-						<div className="border-t border-border/40 pt-8">
-							<p className="text-sm leading-7 text-muted-foreground">
-								<span className="font-medium text-foreground/80">
-									{pricingSection.bonus.title}
-								</span>{" "}
+						<div className="rounded-3xl border border-primary/20 bg-primary/5 p-6">
+							<p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">
+								{pricingSection.bonus.label}
+							</p>
+							<p className="mt-3 text-xl font-semibold tracking-tight text-foreground">
+								{pricingSection.bonus.title}
+							</p>
+							<p className="mt-2 text-sm leading-7 text-muted-foreground">
 								{pricingSection.bonus.description}
 							</p>
 						</div>

@@ -13,25 +13,37 @@ type Hero = HomePageContent["hero"];
 
 export function HomeHeroTopBar({ hero }: { hero: Hero }) {
 	return (
-		<nav className="flex w-full items-center justify-between px-6 py-4 lg:px-12">
-			<ProductBrand
-				href={routeConfig.home}
-				labelClassName={cn(productWordmarkClassName, "text-lg")}
-			/>
-			<div className="flex items-center gap-4">
-				<Link
-					href={routeConfig.signIn}
-					className="inline-flex h-10 items-center rounded-full px-4 text-sm font-medium text-muted-foreground transition-all hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-				>
-					{hero.loginLabel}
-				</Link>
-				<Button
-					asChild
-					className="h-10 rounded-full bg-foreground px-6 text-sm font-semibold text-background transition-transform hover:scale-105 active:scale-95"
-				>
-					<Link href={routeConfig.pricingHash}>{hero.primaryCta}</Link>
-				</Button>
+		<div className="w-full">
+			<div className="border-y border-border/60 bg-secondary/65">
+				<div className="flex min-h-11 items-center justify-center px-4 text-center sm:px-6 lg:px-12">
+					<p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] font-medium tracking-[0.14em] text-foreground/90 uppercase sm:text-xs">
+						<span className="rounded-full bg-foreground px-2.5 py-1 text-[10px] font-semibold tracking-[0.18em] text-background sm:text-[11px]">
+							April Offer
+						</span>
+						<span>{hero.promoBanner}</span>
+					</p>
+				</div>
 			</div>
-		</nav>
+			<nav className="flex w-full items-center justify-between px-6 py-4 lg:px-12">
+				<ProductBrand
+					href={routeConfig.home}
+					labelClassName={cn(productWordmarkClassName, "text-lg")}
+				/>
+				<div className="flex items-center gap-4">
+					<Link
+						href={routeConfig.signIn}
+						className="inline-flex h-10 items-center rounded-full px-4 text-sm font-medium text-muted-foreground transition-all hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+					>
+						{hero.loginLabel}
+					</Link>
+					<Button
+						asChild
+						className="h-10 rounded-full bg-foreground px-6 text-sm font-semibold text-background transition-transform hover:scale-105 active:scale-95"
+					>
+						<Link href={routeConfig.pricingHash}>{hero.primaryCta}</Link>
+					</Button>
+				</div>
+			</nav>
+		</div>
 	);
 }

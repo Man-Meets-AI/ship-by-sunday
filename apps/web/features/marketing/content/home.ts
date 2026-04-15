@@ -5,7 +5,6 @@ import {
 } from "@/features/starter/lib/starter-selectors";
 
 const productName = productConfig.name;
-const bonusName = productConfig.bonusName;
 
 export const homePageContent = {
 	assets: {
@@ -14,6 +13,8 @@ export const homePageContent = {
 	hero: {
 		docsLabel: marketingDisplayConfig.docsLabel,
 		loginLabel: marketingDisplayConfig.loginLabel,
+		promoBanner:
+			"April offer: get Ship by Sunday for $250 instead of $500, plus FULL TURBO free.",
 		headlineLead: "Ship a real product",
 		headlineTailPrefix: "",
 		headlineTailHover: "by Sunday",
@@ -225,6 +226,9 @@ export const homePageContent = {
 		intro:
 			"One payment for Ship Blueprint: the guided blueprint-first run, the Agent-Ready Packs, the Ship by Sunday Blueprint, and the guidance that keeps you shipping after the first weekend.",
 		priceDisplay: productConfig.priceDisplay,
+		originalPriceDisplay: "$500",
+		offerPriceDisplay: "$250",
+		offerLabel: "April offer: 50% off",
 		eyebrow: "One-time payment. Lifetime access.",
 		ctaTitle: "Get the system",
 		trustLine: `After checkout, you go straight into the ${workspaceDisplayConfig.homeNoun} to lock the truth, compile the packs, and shape your Blueprint.`,
@@ -237,10 +241,10 @@ export const homePageContent = {
 			"Product Sense Fundamentals",
 		],
 		bonus: {
-			label: "Also included",
-			title: `Also included: ${bonusName}`,
+			label: "Additional bonus",
+			title: "FREE BONUS: FULL TURBO",
 			description:
-				"If product judgment is still the weak spot, this stays in the bundle without becoming the point of the offer.",
+				"Get FULL TURBO free with your purchase: a 30-video AI course that gives you the practical workflows, prompting patterns, and build reps to move faster after the weekend sprint.",
 		},
 		guarantee:
 			"Complete the Product stage within 14 days. If you do not leave with a clearer product definition and tighter v1 scope, email us and we will refund you.",
