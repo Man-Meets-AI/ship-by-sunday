@@ -196,8 +196,6 @@ jobs:
       QA_ENV_FILE: apps/web/.env.local
       QA_ALLOW_BILLING_INTEGRATION: "1"
       RELEASE_COMMIT_SHA: ${{ needs.release_scope.outputs.head_sha }}
-      STRIPE_SECRET_KEY: ${{ secrets.DEV_STAGING_STRIPE_SECRET_KEY }}
-      STRIPE_WEBHOOK_SECRET: ${{ secrets.DEV_STAGING_STRIPE_WEBHOOK_SECRET }}
       VERCEL_ORG_ID: ${{ vars.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
       VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
@@ -259,30 +257,6 @@ jobs:
                   or line.startswith("NX_DAEMON=")
               )
           ]
-          env_path.write_text("\n".join(filtered) + "\n")
-          PY
-
-      - name: Pin staging billing Stripe secrets to the test account
-        run: |
-          cd apps/web
-          python - <<'PY'
-          import os
-          from pathlib import Path
-
-          env_path = Path(".env.local")
-          lines = env_path.read_text().splitlines()
-          filtered = [
-              line
-              for line in lines
-              if not (
-                  line.startswith("STRIPE_SECRET_KEY=")
-                  or line.startswith("STRIPE_WEBHOOK_SECRET=")
-              )
-          ]
-          filtered.append(f"STRIPE_SECRET_KEY={os.environ['STRIPE_SECRET_KEY']}")
-          filtered.append(
-              f"STRIPE_WEBHOOK_SECRET={os.environ['STRIPE_WEBHOOK_SECRET']}"
-          )
           env_path.write_text("\n".join(filtered) + "\n")
           PY
 
