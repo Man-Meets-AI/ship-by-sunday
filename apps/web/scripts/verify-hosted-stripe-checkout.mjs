@@ -130,6 +130,7 @@ async function getProductAccessDebug({ clerkUserId, sessionId }) {
 		[
 			convexBinPath,
 			"run",
+			"--prod",
 			"access:getProductAccessDebug",
 			JSON.stringify(
 				buildHostedProofAccessDebugArgs({
