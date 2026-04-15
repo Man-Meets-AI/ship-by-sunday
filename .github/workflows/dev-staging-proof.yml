@@ -262,6 +262,30 @@ jobs:
           env_path.write_text("\n".join(filtered) + "\n")
           PY
 
+      - name: Pin staging billing Stripe secrets to the test account
+        run: |
+          cd apps/web
+          python - <<'PY'
+          import os
+          from pathlib import Path
+
+          env_path = Path(".env.local")
+          lines = env_path.read_text().splitlines()
+          filtered = [
+              line
+              for line in lines
+              if not (
+                  line.startswith("STRIPE_SECRET_KEY=")
+                  or line.startswith("STRIPE_WEBHOOK_SECRET=")
+              )
+          ]
+          filtered.append(f"STRIPE_SECRET_KEY={os.environ['STRIPE_SECRET_KEY']}")
+          filtered.append(
+              f"STRIPE_WEBHOOK_SECRET={os.environ['STRIPE_WEBHOOK_SECRET']}"
+          )
+          env_path.write_text("\n".join(filtered) + "\n")
+          PY
+
       - name: Write Convex CLI auth config
         run: |
           if [[ -z "$DEV_STAGING_CONVEX_CONFIG_JSON" ]]; then
