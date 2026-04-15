@@ -12,7 +12,7 @@ import {
 	createBlueprintBonusMissionState,
 	createBlueprintPostReviewTargets,
 	createBlueprintWorkspaceState,
-} from "./blueprint-test-fixtures";
+} from "../utils/blueprint-flow-fixtures";
 
 const useConvexAuthMock = vi.fn();
 const useQueryMock = vi.fn();

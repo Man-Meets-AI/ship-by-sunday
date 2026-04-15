@@ -1,8 +1,8 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import IdentityLayout from "@/app/(identity)/layout";
+import { renderInIdentityLayout } from "../utils/render-in-identity-layout";
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -40,7 +40,7 @@ describe("reset-password route", () => {
 			searchParams: Promise.resolve({ redirect_url: "/settings" }),
 		});
 
-		render(<IdentityLayout>{page}</IdentityLayout>);
+		renderInIdentityLayout(page);
 
 		expect(screen.getByRole("link", { name: "Ship by Sunday" })).toBeTruthy();
 		expect(screen.getByRole("link", { name: "Home" })).toBeTruthy();
