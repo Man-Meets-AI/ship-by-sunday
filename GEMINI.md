@@ -34,9 +34,8 @@ Use this exact priority order when sources conflict:
 
 ## Critical Dev Commands (Root Entrypoint)
 - `bun run dev:full` — Start web + hosted Convex dev + Stripe listener.
-- `bun run build` / `bun run typecheck` — Build and verify.
-- `bun run check` — Full repo check (lint, format, test, build).
-- `bun run test:unit` / `test:contracts` / `test:integration:ui` / `test:browser-smoke` / `test:e2e:sandbox` — Comprehensive test suite.
+- `bun run format` / `bun run lint` / `bun run typecheck` — Core repo quality gates.
+- `bun run test` / `bun run test:contracts` / `bun run build` / `bun run test:e2e` — Thin validation surface.
 
 ## Subsystem Rules
 
