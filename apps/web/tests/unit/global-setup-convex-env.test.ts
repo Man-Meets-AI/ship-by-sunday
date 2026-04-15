@@ -12,6 +12,16 @@ describe("withConvexDeploymentEnv", () => {
 		expect(env.CONVEX_DEPLOYMENT).toBe("prod:helpful-meadowlark-297");
 	});
 
+	it("derives the production deployment name for production QA targets", () => {
+		const env = withConvexDeploymentEnv({
+			NEXT_PUBLIC_CONVEX_URL: "https://helpful-meadowlark-297.convex.cloud",
+			PLAYWRIGHT_BASE_URL: "https://www.man-meets-ai.com",
+			QA_ENV_FILE: "apps/web/.env.production",
+		});
+
+		expect(env.CONVEX_DEPLOYMENT).toBe("helpful-meadowlark-297");
+	});
+
 	it("keeps local QA targets unchanged", () => {
 		const env = withConvexDeploymentEnv({
 			NEXT_PUBLIC_CONVEX_URL: "https://helpful-meadowlark-297.convex.cloud",

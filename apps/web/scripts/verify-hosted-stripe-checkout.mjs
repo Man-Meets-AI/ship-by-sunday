@@ -12,6 +12,7 @@ import {
 	buildHostedProofSignInPath,
 	DEFAULT_PROOF_COURSE_SLUG,
 } from "./lib/hosted-stripe-checkout-proof.mjs";
+import { withConvexDeploymentEnv } from "./lib/convex-deployment-env.mjs";
 
 const requireFromAppsWeb = createRequire(import.meta.url);
 const convexManifestPath = requireFromAppsWeb.resolve("convex/package.json");
@@ -301,6 +302,13 @@ function printCheck(label, passed, detail) {
 }
 
 const { baseUrl, timeoutMs } = parseArgs(process.argv.slice(2));
+Object.assign(
+	process.env,
+	withConvexDeploymentEnv({
+		...process.env,
+		PLAYWRIGHT_BASE_URL: baseUrl,
+	}),
+);
 const requireConvexDebug = process.env.QA_REQUIRE_CONVEX_DEBUG === "1";
 
 if (!baseUrl) {
