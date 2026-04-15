@@ -13,6 +13,7 @@ import {
 	buildHostedProofSignInPath,
 	DEFAULT_PROOF_COURSE_SLUG,
 } from "./lib/hosted-stripe-checkout-proof.mjs";
+import { buildResetProductAccessCommand } from "./lib/convex-product-access-grant.mjs";
 import { withConvexDeploymentEnv } from "./lib/convex-deployment-env.mjs";
 
 const requireFromAppsWeb = createRequire(import.meta.url);
@@ -151,6 +152,21 @@ async function getProductAccessDebug({ clerkUserId, sessionId }) {
 	}
 
 	return result.stdout ? JSON.parse(result.stdout) : null;
+}
+
+async function resetHostedProofProductAccess(clerkUserId) {
+	const { command, args } = buildResetProductAccessCommand({ clerkUserId });
+	const result = await spawnCommand(command, args, {
+		timeoutMs: 15_000,
+	});
+
+	if (result.code !== 0) {
+		throw new Error(
+			result.stderr ||
+				result.stdout ||
+				"Convex product-access reset failed before hosted billing proof.",
+		);
+	}
 }
 
 function getHostedCheckoutSubmitButton(page) {
@@ -353,6 +369,8 @@ try {
 	});
 	console.log(`Signed in QA buyer ${buyerCredentials.email}`);
 	console.log(`Authenticated Clerk user ${clerkUserId ?? "missing"}`);
+	await resetHostedProofProductAccess(clerkUserId);
+	console.log(`Reset product access for ${clerkUserId}`);
 	const checkoutSession = await stripe.checkout.sessions.create(
 		buildHostedProofCheckoutSessionParams({
 			appBaseUrl: baseUrl,
