@@ -25,7 +25,7 @@ Right now, a real bug fix can be correct in code and still take hours to reach p
 - [x] 2026-04-15 23:33 EDT — Added Stripe price and product environment drift checks for preview and production billing-sensitive proof runs using `apps/web/scripts/verify-managed-stripe-env.ts`.
 - [x] 2026-04-15 23:33 EDT — The no-access QA persona reset requirement was already satisfied by the earlier access-fix work that clears both access grants and pending checkout claims during Playwright bootstrap.
 - [x] 2026-04-15 23:38 EDT — Removed the stale `.env` snapshot dependency from release proof. `dev-staging-proof.yml` and `production-release-proof.yml` now pull the current app env directly from Vercel instead of trusting frozen GitHub secret copies.
-- [ ] Re-run the full staging and production proof path on a controlled test release and document the measured reduction in manual operator steps.
+- [ ] 2026-04-15 23:45 EDT — The hardening branch is committed as `a76cbd1` and pushed to `origin/codex/release-hardening-ci-cd`. Local proof is complete, and GitHub Actions run `24435229856` is exercising the new `qa_control_plane` job successfully on the branch. The remaining unchecked item is the shared-environment `dev`/`main` release-proof exercise, which should happen when this branch is intentionally promoted rather than by repointing shared staging during local implementation.
 
 ## Surprises & Discoveries
 
@@ -41,6 +41,8 @@ Evidence from the live release shepherding on 2026-04-15:
 As of 2026-04-15 23:33 EDT, two additional discoveries matter. First, the production browser proof was already strong enough to prove the live handoff without the local Convex debug query: the buyer reached `/checkout/success` and then `/blueprint`, which is the user-visible truth. The strict Convex row check still belongs in CI, but local reruns need a softer mode because operator laptops may not carry the same Convex CLI auth material as GitHub Actions. Second, `qa:validate` immediately caught the missing inventory rows for the new release-hardening helper tests. That is confirmation that moving QA inventory enforcement earlier into `ci.yml` solves a real class of release surprises instead of adding ceremony.
 
 As of 2026-04-15 23:38 EDT, the staging and production workflow env snapshots were still one more hidden drift source. A local run of `scripts/verify-managed-stripe-env.ts` against the copied production `.env.production` file failed with the old live `$500` price ID even though Vercel production had already been corrected to the `$250` price. That proved `PRODUCTION_WEB_ENV_LOCAL` and `DEV_STAGING_WEB_ENV_LOCAL` style secrets were fundamentally the wrong source of truth for release proof. The workflows now pull the current app env straight from Vercel with `vercel env pull`.
+
+As of 2026-04-15 23:44 EDT, the new env-pull path is proven locally from this worktree. Pulling `apps/web/.env.production` and `apps/web/.env.local` through `vercel env pull` succeeded once the worktree carried `.vercel/project.json`, and both preview and production passed `scripts/verify-managed-stripe-env.ts`. The production hosted billing verifier also succeeded on the correct branch after the env normalization fix for trailing `\n` escapes in Stripe ids and secret keys.
 
 ## Decision Log
 
