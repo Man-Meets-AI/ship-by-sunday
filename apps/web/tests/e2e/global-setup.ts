@@ -509,8 +509,22 @@ function isProductionQaTarget(env: NodeJS.ProcessEnv = process.env) {
 	);
 }
 
-function withConvexDeploymentEnv(env: NodeJS.ProcessEnv) {
-	if (env.CONVEX_DEPLOYMENT || !isProductionQaTarget(env)) {
+function isHostedQaTarget(env: NodeJS.ProcessEnv = process.env) {
+	const baseUrl = env.PLAYWRIGHT_BASE_URL?.trim();
+	if (!baseUrl) {
+		return false;
+	}
+
+	try {
+		const hostname = new URL(baseUrl).hostname;
+		return hostname !== "localhost" && hostname !== "127.0.0.1";
+	} catch {
+		return false;
+	}
+}
+
+export function withConvexDeploymentEnv(env: NodeJS.ProcessEnv) {
+	if (env.CONVEX_DEPLOYMENT || !isHostedQaTarget(env)) {
 		return env;
 	}
 
@@ -526,8 +540,9 @@ function withConvexDeploymentEnv(env: NodeJS.ProcessEnv) {
 
 	return {
 		...env,
-		CONVEX_DEPLOYMENT: deploymentName.startsWith("prod:")
-			? deploymentName
-			: `prod:${deploymentName}`,
+		CONVEX_DEPLOYMENT:
+			isProductionQaTarget(env) || deploymentName.startsWith("prod:")
+				? deploymentName
+				: `prod:${deploymentName}`,
 	};
 }
