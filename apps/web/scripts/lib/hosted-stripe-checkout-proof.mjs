@@ -55,3 +55,10 @@ export function buildHostedProofCheckoutSessionParams({
 export function buildHostedProofSignInPath({ redirectPath = "/blueprint" }) {
 	return `/sign-in?redirect_url=${encodeURIComponent(redirectPath)}`;
 }
+
+export function buildHostedProofAccessDebugArgs({ clerkUserId, sessionId }) {
+	return {
+		...(clerkUserId ? { clerkUserId } : {}),
+		...(sessionId ? { stripeCheckoutSessionId: sessionId } : {}),
+	};
+}
