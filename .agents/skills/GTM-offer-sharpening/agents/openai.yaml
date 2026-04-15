@@ -1,4 +1,0 @@
-interface:
-  display_name: "GTM-Offer Sharpening"
-  short_description: "Sharpen offer positioning before rewriting copy."
-  default_prompt: "Use $GTM-offer-sharpening to diagnose this offer, identify the real buyer, recommend the strongest mechanism, map limiting beliefs and counters, and return bounded rewrite-ready positioning."
