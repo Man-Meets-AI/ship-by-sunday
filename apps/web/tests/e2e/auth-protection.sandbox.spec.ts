@@ -43,9 +43,13 @@ test.describe("protected routes", () => {
 		}) => {
 			await page.goto("/blueprint");
 			await expect(page).toHaveURL(/\/blueprint/);
-			await expect(page.getByText("Access Required")).toBeVisible();
 			await expect(
 				page.getByText("Access not attached to this account"),
+			).toBeVisible();
+			await expect(
+				page.getByText(
+					"This signed-in account does not have product access yet.",
+				),
 			).toBeVisible();
 			await expect(
 				page.getByRole("button", { name: "Buy access now" }),

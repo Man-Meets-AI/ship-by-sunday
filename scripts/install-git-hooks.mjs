@@ -25,7 +25,7 @@ if (rootResult.status !== 0) {
 }
 
 const repoRoot = rootResult.stdout;
-const hooksPath = path.join(repoRoot, ".githooks");
+const hooksPath = ".githooks";
 const configResult = runGitCommand(["config", "core.hooksPath", hooksPath]);
 
 if (configResult.status !== 0) {
@@ -35,4 +35,4 @@ if (configResult.status !== 0) {
 	process.exit(configResult.status);
 }
 
-console.log(`Configured git hooks: ${hooksPath}`);
+console.log(`Configured git hooks for ${repoRoot}: ${path.join(repoRoot, hooksPath)}`);
