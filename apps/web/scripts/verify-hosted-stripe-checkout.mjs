@@ -216,9 +216,12 @@ async function submitHostedCheckout(page) {
 }
 
 async function signInBuyer(page, { baseUrl, email, password }) {
-	await page.goto(`${baseUrl}${buildHostedProofSignInPath({})}`, {
-		waitUntil: "networkidle",
-	});
+	await page.goto(
+		`${baseUrl}${buildHostedProofSignInPath({ redirectPath: "/" })}`,
+		{
+			waitUntil: "networkidle",
+		},
+	);
 	await page.waitForFunction(
 		() => {
 			const runtimeWindow = window;
@@ -229,7 +232,7 @@ async function signInBuyer(page, { baseUrl, email, password }) {
 	await page.getByLabel(/^email$/i).fill(email);
 	await page.getByLabel(/^password$/i).fill(password);
 	await page.getByRole("button", { name: /^sign in$/i }).click();
-	await page.waitForURL((url) => url.pathname === "/blueprint", {
+	await page.waitForURL((url) => url.pathname === "/", {
 		timeout: 20_000,
 	});
 	await page.waitForFunction(
