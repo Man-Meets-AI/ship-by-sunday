@@ -327,9 +327,7 @@ async function isAccessRequiredScreenVisible(page) {
 }
 
 async function verifyAuthorizedWorkspace(page, { baseUrl, timeoutMs }) {
-	const verificationPage = await page.context().newPage({
-		baseURL: baseUrl,
-	});
+	const verificationPage = await page.context().newPage();
 
 	try {
 		const deadline = Date.now() + timeoutMs;
@@ -413,9 +411,10 @@ const coupon = await stripe.coupons.create(
 );
 
 const browser = await chromium.launch();
-const page = await browser.newPage({
+const context = await browser.newContext({
 	baseURL: baseUrl,
 });
+const page = await context.newPage();
 
 try {
 	const clerkUserId = await signInBuyer(page, {
