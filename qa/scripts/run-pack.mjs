@@ -284,6 +284,7 @@ async function main() {
 		browserSmokeEnv,
 		authenticatedDefaultShipCommand,
 		isLocalBillingTarget,
+		sandboxBaseUrl,
 	})) {
 		results.push(await runStep(step, { dryRun }));
 	}
