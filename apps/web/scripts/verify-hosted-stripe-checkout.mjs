@@ -339,20 +339,6 @@ const coupon = await stripe.coupons.create(
 		runLabel: proofRunLabel,
 	}),
 );
-const checkoutSession = await stripe.checkout.sessions.create(
-	buildHostedProofCheckoutSessionParams({
-		appBaseUrl: baseUrl,
-		checkoutEmail: buyerCredentials.email,
-		couponId: coupon.id,
-		courseSlug: process.env.QA_COURSE_SLUG ?? DEFAULT_PROOF_COURSE_SLUG,
-		priceId: stripePriceId,
-	}),
-);
-
-if (!checkoutSession.url) {
-	throw new Error("Stripe did not return a hosted checkout URL.");
-}
-console.log(`Created zero-cost Checkout Session ${checkoutSession.id}`);
 
 const browser = await chromium.launch();
 const page = await browser.newPage({
@@ -367,6 +353,20 @@ try {
 	});
 	console.log(`Signed in QA buyer ${buyerCredentials.email}`);
 	console.log(`Authenticated Clerk user ${clerkUserId ?? "missing"}`);
+	const checkoutSession = await stripe.checkout.sessions.create(
+		buildHostedProofCheckoutSessionParams({
+			appBaseUrl: baseUrl,
+			checkoutEmail: buyerCredentials.email,
+			clerkUserId,
+			couponId: coupon.id,
+			courseSlug: process.env.QA_COURSE_SLUG ?? DEFAULT_PROOF_COURSE_SLUG,
+			priceId: stripePriceId,
+		}),
+	);
+	if (!checkoutSession.url) {
+		throw new Error("Stripe did not return a hosted checkout URL.");
+	}
+	console.log(`Created zero-cost Checkout Session ${checkoutSession.id}`);
 	const appCheckoutSession = await createAppCheckoutSession(page);
 	console.log(
 		`App checkout route smoke: ok=${appCheckoutSession.ok} session=${appCheckoutSession.sessionId ?? "missing"}`,
