@@ -84,6 +84,12 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 				"Exclude the tracked production env file and replace it with a safe example template.",
 		},
 		{
+			pathPattern: ".plans/**",
+			shippingMode: "exclude",
+			reason:
+				"Exclude legacy archived ExecPlans and compatibility shims from the shipped starter repo.",
+		},
+		{
 			pathPattern: "docs/codex/**",
 			shippingMode: "exclude",
 			reason:

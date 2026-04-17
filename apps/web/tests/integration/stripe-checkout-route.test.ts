@@ -150,7 +150,7 @@ describe("POST /api/stripe/checkout", () => {
 			price_data: {
 				currency: "usd",
 				product_data: { name: "Ship by Sunday" },
-				unit_amount: 50000,
+				unit_amount: 25000,
 			},
 			quantity: 1,
 		});
@@ -228,7 +228,7 @@ describe("POST /api/stripe/checkout", () => {
 			price_data: {
 				currency: "usd",
 				product_data: { name: "Ship by Sunday" },
-				unit_amount: 50000,
+				unit_amount: 25000,
 			},
 			quantity: 1,
 		});
