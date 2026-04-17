@@ -6,9 +6,7 @@
 
 - Replaced the old QA control plane, release-scope routing, and release-proof workflow maze with a thinner CI/CD path: one PR workflow, one deployment-smoke workflow, one minimal Convex production deploy workflow, and a smaller root validation surface (`test`, `test:contracts`, `test:e2e`, `build`, `lint`, `typecheck`).
 - Deleted the authenticated sandbox Playwright lane plus the hosted/local Stripe proof scripts, and moved checkout/access protection into direct integration tests, offline `convex-test` coverage, and deployed checkout-session smoke.
-- Removed the root `qa/` folder entirely and moved the surviving test harness shape into app-local paths that match Dub more closely: `apps/web/playwright/` for browser smoke and a domain-first `apps/web/tests/` tree for app-local setup, helpers, unit coverage, route integration, and jsdom UI proof.
-- Removed the leftover app-level layer scripts (`test:unit`, `test:integration`, `test:integration:node`, `test:integration:ui`) so the live command surface no longer advertises the pre-migration test taxonomy.
-- Rewrote the stale root docs spine so canonical files like `docs/index.md`, `docs/ARCHITECTURE.md`, `docs/RELIABILITY.md`, and `docs/QUALITY_SCORE.md` now describe Ship by Sunday’s real surfaces instead of an unrelated worker-runtime model, and updated the generated starter guidance to point at real current skills.
+- Removed the root `qa/` folder entirely and moved the surviving test harness shape into app-local paths that match Dub more closely: `apps/web/playwright/` for browser smoke and `apps/web/tests/` for setup and shared helpers.
 
 ## 2026-04-10
 

@@ -66,7 +66,7 @@ That means the verification signal you care about is not only whether a row exis
 When you need the narrow observability check from the repo docs, run:
 
 ```bash
-bunx vitest run tests/observability/observability-*.test.ts tests/auth/clerk-webhook-adapter.test.ts tests/platform/vercel-webhook-adapter.test.ts tests/checkout/stripe-observability.test.ts tests/checkout/stripe-webhook-action.test.ts tests/observability/observability-client-error-route.integration.test.ts tests/observability/observability-clerk-route.integration.test.ts tests/observability/observability-vercel-route.integration.test.ts tests/observability/observability-incident-status-route.integration.test.ts tests/checkout/stripe-checkout-route.integration.test.ts
+bunx vitest run tests/unit/observability-*.test.ts tests/unit/clerk-webhook-adapter.test.ts tests/unit/vercel-webhook-adapter.test.ts tests/unit/stripe-observability.test.ts tests/unit/stripe-webhook-action.test.ts tests/integration/observability-client-error-route.test.ts tests/integration/observability-clerk-route.test.ts tests/integration/observability-vercel-route.test.ts tests/integration/observability-incident-status-route.test.ts tests/integration/stripe-checkout-route.test.ts
 ```
 
 Use that command when you want fast confidence that the core observability routes, adapters, and Stripe incident path still behave as expected.

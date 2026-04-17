@@ -21,10 +21,10 @@ When you need to change the homepage, inspect these files in this order:
 6. `features/marketing/components/home-page/starter-system-section.tsx`
 7. `features/marketing/components/home-page/home-page-primary-cta.tsx`
 8. `features/marketing/lib/home-page-structured-data.ts`
-9. `tests/marketing/home-page-content.test.ts`
-10. `tests/marketing/home-page-render-model.test.ts`
-11. `tests/marketing/home-page-structured-data.test.ts`
-12. `tests/marketing/home-page-primary-cta.ui.test.tsx`
+9. `tests/unit/home-page-content.test.ts`
+10. `tests/unit/home-page-render-model.test.ts`
+11. `tests/unit/home-page-structured-data.test.ts`
+12. `tests/integration-ui/home-page-primary-cta.test.tsx`
 13. `tests/browser-smoke/app-smoke.spec.ts`
 
 If you skip that order, it is easy to update copy while missing the render model, or to change visible sections while leaving schema and smoke tests out of sync.
@@ -190,13 +190,13 @@ If you do not update all of those in one slice, the homepage contract will drift
 Run these checks after meaningful homepage changes:
 
 ```bash
-bunx oxlint --deny-warnings config/product.ts features/marketing/components/home-page.tsx features/marketing/components/home-page/durability-section.tsx features/marketing/components/home-page/hero-sections.tsx features/marketing/components/home-page/pricing-footer-sections.tsx features/marketing/components/home-page/home-page-primary-cta.tsx features/marketing/content/home.ts features/marketing/lib/home-page-render-model.ts features/marketing/lib/home-page-structured-data.ts tests/marketing/home-page-content.test.ts tests/marketing/home-page-render-model.test.ts tests/marketing/home-page-structured-data.test.ts tests/marketing/home-page-primary-cta.ui.test.tsx
+bunx oxlint --deny-warnings config/product.ts features/marketing/components/home-page.tsx features/marketing/components/home-page/durability-section.tsx features/marketing/components/home-page/hero-sections.tsx features/marketing/components/home-page/pricing-footer-sections.tsx features/marketing/components/home-page/home-page-primary-cta.tsx features/marketing/content/home.ts features/marketing/lib/home-page-render-model.ts features/marketing/lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/integration-ui/home-page-primary-cta.test.tsx
 
-bunx oxfmt --check config/product.ts features/marketing/components/home-page.tsx features/marketing/components/home-page/durability-section.tsx features/marketing/components/home-page/hero-sections.tsx features/marketing/components/home-page/pricing-footer-sections.tsx features/marketing/components/home-page/home-page-primary-cta.tsx features/marketing/content/home.ts features/marketing/lib/home-page-render-model.ts features/marketing/lib/home-page-structured-data.ts tests/marketing/home-page-content.test.ts tests/marketing/home-page-render-model.test.ts tests/marketing/home-page-structured-data.test.ts tests/marketing/home-page-primary-cta.ui.test.tsx
+bunx oxfmt --check config/product.ts features/marketing/components/home-page.tsx features/marketing/components/home-page/durability-section.tsx features/marketing/components/home-page/hero-sections.tsx features/marketing/components/home-page/pricing-footer-sections.tsx features/marketing/components/home-page/home-page-primary-cta.tsx features/marketing/content/home.ts features/marketing/lib/home-page-render-model.ts features/marketing/lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/integration-ui/home-page-primary-cta.test.tsx
 
-bunx vitest --config vitest.config.ts run --project unit tests/marketing/home-page-content.test.ts tests/marketing/home-page-render-model.test.ts tests/marketing/home-page-structured-data.test.ts
+bunx vitest --config vitest.config.ts run --project unit tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts
 
-bunx vitest --config vitest.config.ts run --project integration-ui tests/marketing/home-page-primary-cta.ui.test.tsx
+bunx vitest --config vitest.config.ts run --project integration-ui tests/integration-ui/home-page-primary-cta.test.tsx
 
 bun run test:e2e -- --grep "landing page renders the main offer CTA|homepage renders structured SEO data"
 
