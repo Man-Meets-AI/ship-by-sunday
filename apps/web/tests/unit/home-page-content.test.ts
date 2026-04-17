@@ -98,12 +98,11 @@ describe("home page content", () => {
 		expect(homePageContent.pricingSection.ctaTitle).toBe("Get the system");
 	});
 
-	it("keeps the guarantee in pricing while the faq stays focused on the offer", () => {
+	it("keeps the faq focused on the offer", () => {
 		const faqCopy = homePageContent.faqSection.items
 			.map((item) => item.answer)
 			.join("\n");
 
-		expect(homePageContent.pricingSection.guarantee).toContain("Product stage");
 		expect(faqCopy).not.toContain("The guarantee is about clarity");
 		expect(faqCopy).toContain("Blueprint");
 		expect(faqCopy).toContain("Ship Blueprint");

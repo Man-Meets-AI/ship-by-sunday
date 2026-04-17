@@ -66,20 +66,6 @@ export const homePageContent = {
 		label: "Built by someone who ships",
 		headline: "Built by someone who has actually shipped products.",
 		body: "Worked across UX, product, design, and engineering. Helped scale a startup to $73M/year. Stayed through acquisition. Ship by Sunday is new. The operating experience behind it is not.",
-		screenshots: [
-			{
-				src: "/screenshots/product-truth.png",
-				alt: "Product Truth screenshot showing locked buyer, problem, scope, and constraints",
-			},
-			{
-				src: "/screenshots/agent-ready-packs.png",
-				alt: "Agent-Ready Packs screenshot showing design, marketing, build, and prompt packs",
-			},
-			{
-				src: "/screenshots/blueprint.png",
-				alt: "Ship Kit screenshot showing the source of truth the repo builds from",
-			},
-		],
 	},
 	faqSection: {
 		label: "FAQ",
@@ -261,8 +247,6 @@ export const homePageContent = {
 			description:
 				"Get FULL TURBO free with your purchase: a 30-video AI course that gives you the practical workflows, prompting patterns, and build reps to move faster after the weekend sprint.",
 		},
-		guarantee:
-			"Complete the Product stage within 14 days. If you do not leave with a clearer product definition and tighter v1 scope, email us and we will refund you.",
 	},
 	footerWordmark: productName,
 } as const;

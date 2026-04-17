@@ -36,10 +36,6 @@ export function PricingSectionBlock({
 								{pricingSection.intro}
 							</p>
 						</div>
-
-						<p className="max-w-md text-sm leading-7 text-muted-foreground/60 italic">
-							{pricingSection.guarantee}
-						</p>
 					</div>
 				</ScrollReveal>
 
