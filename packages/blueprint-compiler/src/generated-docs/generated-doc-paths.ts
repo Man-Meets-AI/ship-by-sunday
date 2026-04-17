@@ -1,5 +1,5 @@
 export const GENERATED_DOCS_ROOT = "docs";
-export const GENERATED_DOCS_README_PATH = `${GENERATED_DOCS_ROOT}/README.md`;
+export const GENERATED_DOCS_README_PATH = `${GENERATED_DOCS_ROOT}/index.md`;
 
 export const GENERATED_FACTS_ROOT = `${GENERATED_DOCS_ROOT}/facts`;
 export const GENERATED_PROJECT_DEFINITION_PATH = `${GENERATED_FACTS_ROOT}/project-definition.json`;

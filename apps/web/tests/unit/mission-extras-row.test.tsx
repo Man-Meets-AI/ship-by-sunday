@@ -7,10 +7,10 @@ globalThis.React = React;
 import { MissionExtrasRow } from "@/features/course/mission/components/mission/mission-extras-row";
 
 describe("MissionExtrasRow", () => {
-	it("keeps the bonus playlist visible while hiding the legacy starter-repo card by default", () => {
+	it("keeps the FULL TURBO bonus visible while hiding the legacy starter-repo card by default", () => {
 		const markup = renderToStaticMarkup(<MissionExtrasRow />);
 
-		expect(markup).toContain("Product Management for Beginners");
+		expect(markup).toContain("FULL TURBO");
 		expect(markup).not.toContain("Starter Repo");
 		expect(markup).not.toContain("starter repo");
 	});

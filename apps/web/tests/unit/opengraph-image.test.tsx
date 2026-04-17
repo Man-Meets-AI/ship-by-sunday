@@ -42,7 +42,7 @@ function collectText(node: unknown): string[] {
 }
 
 describe("opengraph image", () => {
-	it("renders the canonical price display into the social preview content", async () => {
+	it("renders the live offer pricing into the social preview content", async () => {
 		const { default: Image, size } = await import("@/app/opengraph-image");
 		const imageResponse = Image() as {
 			element: unknown;
@@ -52,7 +52,9 @@ describe("opengraph image", () => {
 
 		expect(flattenedText).toContain(productConfig.name);
 		expect(flattenedText).toContain(productConfig.promise);
+		expect(flattenedText).toContain(productConfig.checkoutPriceDisplay);
 		expect(flattenedText).toContain(productConfig.priceDisplay);
+		expect(flattenedText).toContain("early-member pricing");
 		expect(imageResponse.options).toEqual(size);
 	});
 });

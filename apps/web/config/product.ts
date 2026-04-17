@@ -70,6 +70,11 @@ export type StarterHomePageConfig = {
 	readonly pricingPrimaryCta: HomePageCtaTarget;
 };
 
+export type StarterPricingOfferConfig = {
+	readonly label: string;
+	readonly percentOff: number;
+};
+
 export const starterHomePageConfig = {
 	sections: {
 		hero: true,
@@ -91,6 +96,21 @@ export const starterHomePageConfig = {
 	},
 } as const satisfies StarterHomePageConfig;
 
+function formatUsdPrice(amountUsdCents: number) {
+	return new Intl.NumberFormat("en-US", {
+		style: "currency",
+		currency: "USD",
+		maximumFractionDigits: 0,
+	}).format(amountUsdCents / 100);
+}
+
+function getDiscountedPriceUsdCents(
+	basePriceUsdCents: number,
+	percentOff: number,
+) {
+	return Math.round(basePriceUsdCents * ((100 - percentOff) / 100));
+}
+
 export const starterConfig = {
 	appId: PRODUCT_APP_ID,
 	courseSlug: PRODUCT_COURSE_SLUG,
@@ -106,12 +126,15 @@ export const starterConfig = {
 		},
 	},
 	pricing: {
-		priceUsdCents: 25000,
-		priceDisplay: "$250",
+		basePriceUsdCents: 50000,
 		currency: "usd",
+		activeOffer: {
+			label: "Early member",
+			percentOff: 50,
+		} as const satisfies StarterPricingOfferConfig,
 	},
 	bonus: {
-		name: "Product Management for Beginners",
+		name: "FULL TURBO",
 		playlistUrl:
 			"https://www.youtube.com/playlist?list=PLO6IqfGPRUN1Bof9pACmGc955t4d0J6cM",
 	},
@@ -155,6 +178,22 @@ export const starterConfig = {
 	starterRepo: starterRepoConfig,
 } as const;
 
+const activePricingOffer = starterConfig.pricing.activeOffer
+	? {
+			...starterConfig.pricing.activeOffer,
+			discountedPriceUsdCents: getDiscountedPriceUsdCents(
+				starterConfig.pricing.basePriceUsdCents,
+				starterConfig.pricing.activeOffer.percentOff,
+			),
+			discountedPriceDisplay: formatUsdPrice(
+				getDiscountedPriceUsdCents(
+					starterConfig.pricing.basePriceUsdCents,
+					starterConfig.pricing.activeOffer.percentOff,
+				),
+			),
+		}
+	: null;
+
 export const productConfig = {
 	appId: starterConfig.appId,
 	courseSlug: starterConfig.courseSlug,
@@ -162,9 +201,16 @@ export const productConfig = {
 	shortMark: starterConfig.brand.shortMark,
 	promise: starterConfig.brand.promise,
 	metadataDescription: starterConfig.brand.metadataDescription,
-	priceUsdCents: starterConfig.pricing.priceUsdCents,
-	priceDisplay: starterConfig.pricing.priceDisplay,
+	priceUsdCents: starterConfig.pricing.basePriceUsdCents,
+	priceDisplay: formatUsdPrice(starterConfig.pricing.basePriceUsdCents),
+	checkoutPriceUsdCents:
+		activePricingOffer?.discountedPriceUsdCents ??
+		starterConfig.pricing.basePriceUsdCents,
+	checkoutPriceDisplay:
+		activePricingOffer?.discountedPriceDisplay ??
+		formatUsdPrice(starterConfig.pricing.basePriceUsdCents),
 	currency: starterConfig.pricing.currency,
+	activeOffer: activePricingOffer,
 	bonusName: starterConfig.bonus.name,
 	bonusPlaylistUrl: starterConfig.bonus.playlistUrl,
 	images: {

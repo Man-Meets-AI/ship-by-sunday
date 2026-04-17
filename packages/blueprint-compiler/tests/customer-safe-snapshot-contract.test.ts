@@ -18,11 +18,11 @@ describe("customer-safe snapshot contract", () => {
 					shippingMode: "ship-unchanged",
 				}),
 				expect.objectContaining({
-					pathPattern: ".plans/PLANS.md",
-					shippingMode: "ship-unchanged",
+					pathPattern: "docs/PLANS.md",
+					shippingMode: "exclude",
 				}),
 				expect.objectContaining({
-					pathPattern: ".plans/**",
+					pathPattern: "docs/exec-plans/**",
 					shippingMode: "exclude",
 				}),
 				expect.objectContaining({
@@ -68,12 +68,17 @@ describe("customer-safe snapshot contract", () => {
 	it("keeps the shared trace contract aligned with the shipped source files", () => {
 		expect(buildRepoDownloadTraceIncludes()).toEqual(
 			expect.arrayContaining([
-				"../../.plans/PLANS.md",
 				"../../docs/prompts/**/*",
 				"./.env.local.example",
 				"./tests/**/*",
 			]),
 		);
 		expect(buildRepoDownloadTraceIncludes()).not.toContain("./.env.production");
+		expect(buildRepoDownloadTraceIncludes()).not.toContain(
+			"../../docs/PLANS.md",
+		);
+		expect(buildRepoDownloadTraceIncludes()).not.toContain(
+			"../../docs/exec-plans/PLANS.md",
+		);
 	});
 });

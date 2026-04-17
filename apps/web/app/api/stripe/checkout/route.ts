@@ -16,6 +16,7 @@ import { buildStripeCheckoutFailureContext } from "@/features/observability/serv
 import { createPendingCheckoutSessionCookieOptions } from "@/features/checkout/lib/pending-checkout-session-cookie";
 import {
 	assertManagedStripePriceMatchesProductConfig,
+	getStripeCheckoutDiscounts,
 	getStripe,
 	getStripeLineItem,
 } from "@/platform/billing/stripe";
@@ -36,14 +37,16 @@ export async function POST(request: Request) {
 		await assertManagedStripePriceMatchesProductConfig(stripe);
 		const user = userId ? await currentUser() : null;
 		const lineItem = getStripeLineItem();
+		const checkoutDiscounts = getStripeCheckoutDiscounts();
 		const session = await stripe.checkout.sessions.create({
 			mode: "payment",
-			allow_promotion_codes: true,
+			allow_promotion_codes: checkoutDiscounts ? false : true,
 			billing_address_collection: "auto",
 			cancel_url: `${appBaseUrl}${routeConfig.checkoutCancel}`,
 			success_url: `${appBaseUrl}${getCheckoutSuccessHref("{CHECKOUT_SESSION_ID}")}`,
 			client_reference_id: userId ?? undefined,
 			customer_email: user?.primaryEmailAddress?.emailAddress ?? undefined,
+			...(checkoutDiscounts ? { discounts: checkoutDiscounts } : {}),
 			line_items: [lineItem],
 			metadata: {
 				...(userId ? { clerkUserId: userId } : {}),
