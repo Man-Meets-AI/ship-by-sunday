@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { renderInIdentityLayout } from "../utils/render-in-identity-layout";
+import IdentityLayout from "@/app/(identity)/layout";
 
 const replaceMock = vi.fn();
 const pushMock = vi.fn();
@@ -125,10 +125,6 @@ function createSignInMock(overrides?: Partial<Record<string, unknown>>) {
 	};
 }
 
-function renderSignInPage() {
-	return renderInIdentityLayout(<SignInPage />);
-}
-
 describe("SignInPage", () => {
 	beforeEach(() => {
 		pushMock.mockReset();
@@ -159,7 +155,11 @@ describe("SignInPage", () => {
 			signIn: signInState.signIn,
 		});
 
-		renderSignInPage();
+		render(
+			<IdentityLayout>
+				<SignInPage />
+			</IdentityLayout>,
+		);
 
 		expect(screen.getByRole("link", { name: "Ship by Sunday" })).toBeTruthy();
 		expect(screen.getByRole("link", { name: "Home" })).toBeTruthy();

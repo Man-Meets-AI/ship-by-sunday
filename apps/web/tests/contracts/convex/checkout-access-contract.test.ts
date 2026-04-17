@@ -3,7 +3,7 @@ import { convexTest } from "convex-test";
 import { internal } from "@/convex/_generated/api";
 import schema from "@/convex/schema";
 
-const convexModules = import.meta.glob("../../convex/**/*.*s");
+const convexModules = import.meta.glob("../../../convex/**/*.*s");
 
 describe("checkout access contract", () => {
 	it("claims a pending Stripe checkout for the verified buyer and grants access", async () => {

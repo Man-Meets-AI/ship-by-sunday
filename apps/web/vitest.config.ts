@@ -41,13 +41,7 @@ export default defineConfig({
 					name: "unit",
 					globals: true,
 					environment: "node",
-					include: ["tests/**/*.test.{ts,tsx}"],
-					exclude: [
-						"tests/**/*.contract.test.{ts,tsx}",
-						"tests/**/*.convex-contract.test.{ts,tsx}",
-						"tests/**/*.integration.test.{ts,tsx}",
-						"tests/**/*.ui.test.{ts,tsx}",
-					],
+					include: ["tests/unit/**/*.test.{ts,tsx}"],
 				},
 			}),
 			defineProject({
@@ -58,7 +52,8 @@ export default defineConfig({
 					name: "contracts",
 					globals: true,
 					environment: "node",
-					include: ["tests/**/*.contract.test.{ts,tsx}"],
+					include: ["tests/contracts/**/*.test.{ts,tsx}"],
+					exclude: ["tests/contracts/convex/**/*.test.{ts,tsx}"],
 				},
 			}),
 			defineProject({
@@ -69,7 +64,7 @@ export default defineConfig({
 					name: "convex-contracts",
 					globals: true,
 					environment: "edge-runtime",
-					include: ["tests/**/*.convex-contract.test.{ts,tsx}"],
+					include: ["tests/contracts/convex/**/*.test.{ts,tsx}"],
 				},
 			}),
 			defineProject({
@@ -80,7 +75,7 @@ export default defineConfig({
 					name: "integration",
 					globals: true,
 					environment: "node",
-					include: ["tests/**/*.integration.test.{ts,tsx}"],
+					include: ["tests/integration/**/*.test.{ts,tsx}"],
 				},
 			}),
 			defineProject({
@@ -91,7 +86,7 @@ export default defineConfig({
 					name: "integration-ui",
 					globals: true,
 					environment: "jsdom",
-					include: ["tests/**/*.ui.test.{ts,tsx}"],
+					include: ["tests/integration-ui/**/*.test.{ts,tsx}"],
 					setupFiles: ["./tests/setupTests.ts"],
 				},
 			}),

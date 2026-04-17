@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { buildDesignPresetFactSeed } from "@shipbysunday/blueprint-compiler";
-import { createBlueprintWorkspaceState } from "../utils/blueprint-flow-fixtures";
+import { createBlueprintWorkspaceState } from "./blueprint-test-fixtures";
 
 const saveProjectDefinitionFactsMock = vi.fn();
 const unlockExecuteShipMock = vi.fn();
