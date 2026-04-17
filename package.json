@@ -26,7 +26,7 @@
 		"test": "bun run --cwd apps/web test && bun run --cwd packages/blueprint-compiler test && bun run --cwd packages/blueprint-presentation test && bun run --cwd packages/ship-by-sunday-cli test",
 		"test:contracts": "bun run --cwd apps/web test:contracts",
 		"test:e2e": "PLAYWRIGHT_USE_LOCAL_SERVER=${PLAYWRIGHT_USE_LOCAL_SERVER:-1} bun run --cwd apps/web test:e2e",
-		"check": "bun run format && bun run lint && bun run typecheck && bun run test && bun run test:contracts && bun run build && bun run test:e2e",
+		"check": "bun run format && bun run lint && bun run typecheck && bun run test && bun run test:contracts && bun run build && PLAYWRIGHT_SKIP_BUILD=1 bun run test:e2e",
 		"video:cut:setup": "bun run --cwd apps/web video:cut:setup",
 		"video:cut": "bun run --cwd apps/web video:cut",
 		"video:transcripts:setup": "bun run --cwd apps/web video:transcripts:setup",

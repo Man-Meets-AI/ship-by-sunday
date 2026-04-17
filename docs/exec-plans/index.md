@@ -16,7 +16,8 @@ Use [PLANS.md](/Users/parkerrex/Developer/ship-by-sunday/docs/exec-plans/PLANS.m
 
 ## Active Work
 
-- Current active plan: [2026-04-15-dub-style-ci-cd-test-harness-reset.md](/Users/parkerrex/Developer/ship-by-sunday/docs/exec-plans/active/2026-04-15-dub-style-ci-cd-test-harness-reset.md)
+- [2026-04-15-dub-style-ci-cd-test-harness-reset.md](/Users/parkerrex/Developer/ship-by-sunday/docs/exec-plans/active/2026-04-15-dub-style-ci-cd-test-harness-reset.md)
+- [2026-04-15-dub-style-repo-shape-reset.md](/Users/parkerrex/Developer/ship-by-sunday/docs/exec-plans/active/2026-04-15-dub-style-repo-shape-reset.md)
 
 ## Completed Plans
 
