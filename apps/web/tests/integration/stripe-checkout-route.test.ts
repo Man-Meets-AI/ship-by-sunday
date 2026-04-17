@@ -182,7 +182,6 @@ describe("POST /api/stripe/checkout", () => {
 		expect(getStripeLineItemMock).toHaveBeenCalledTimes(1);
 		expect(createSessionMock).toHaveBeenCalledWith(
 			expect.objectContaining({
-				allow_promotion_codes: false,
 				billing_address_collection: "auto",
 				cancel_url: "https://app.example.com/checkout/cancel",
 				client_reference_id: "user_123",
@@ -212,6 +211,9 @@ describe("POST /api/stripe/checkout", () => {
 				success_url:
 					"https://app.example.com/checkout/success?session_id={CHECKOUT_SESSION_ID}",
 			}),
+		);
+		expect(createSessionMock.mock.calls[0]?.[0]).not.toHaveProperty(
+			"allow_promotion_codes",
 		);
 		expect(
 			assertManagedStripePriceMatchesProductConfigMock,
