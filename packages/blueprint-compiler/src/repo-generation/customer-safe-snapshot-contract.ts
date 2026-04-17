@@ -36,17 +36,6 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 				"Ship the ExecPlan prompt assets unchanged under repo-root docs/prompts.",
 		},
 		{
-			pathPattern: "docs/PLANS.md",
-			shippingMode: "ship-unchanged",
-			reason:
-				"Keep the top-level planning route aligned with the repo docs spine.",
-		},
-		{
-			pathPattern: "docs/exec-plans/PLANS.md",
-			shippingMode: "ship-unchanged",
-			reason: "Keep the canonical ExecPlan contract in the starter repo.",
-		},
-		{
 			pathPattern: ".agents/**",
 			shippingMode: "ship-generalized",
 			reason:
@@ -105,6 +94,18 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 			shippingMode: "exclude",
 			reason:
 				"Exclude internal source templates from the shipped starter repo.",
+		},
+		{
+			pathPattern: "docs/PLANS.md",
+			shippingMode: "exclude",
+			reason:
+				"Do not ship the repo's ExecPlan routing docs inside a customer blueprint snapshot.",
+		},
+		{
+			pathPattern: "docs/exec-plans/**",
+			shippingMode: "exclude",
+			reason:
+				"Do not ship the repo's ExecPlan contracts or active/completed plans inside a customer blueprint snapshot.",
 		},
 		{
 			pathPattern: "docs/ship-by-sunday/**",
