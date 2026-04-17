@@ -89,8 +89,12 @@ export function buildBillingIntegrationSteps({
 					{
 						label: "Run the hosted dev billing proof",
 						command: [
-							"node",
-							"apps/web/scripts/verify-hosted-stripe-checkout.mjs",
+							"bun",
+							"run",
+							"--cwd",
+							"apps/web",
+							"stripe:hosted:verify:dev",
+							"--",
 							`--base-url=${targetUrl}`,
 						],
 						env: authenticatedBrowserEnv,
