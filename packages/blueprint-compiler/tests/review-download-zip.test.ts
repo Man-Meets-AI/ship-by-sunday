@@ -26,8 +26,6 @@ describe("review download zip", () => {
 				"ship-by-sunday-os/START-HERE.md",
 				"ship-by-sunday-os/bootstrap.sh",
 				"ship-by-sunday-os/scripts/install-codex-skills.sh",
-				"ship-by-sunday-os/.agents/skills/shared/exec-plan-writer/SKILL.md",
-				"ship-by-sunday-os/.agents/skills/shared/land/SKILL.md",
 				"ship-by-sunday-os/.agents/skills/starter-auth-setup/SKILL.md",
 				"ship-by-sunday-os/.agents/skills/external-skills.json",
 				"ship-by-sunday-os/apps/web/content/docs/index.mdx",

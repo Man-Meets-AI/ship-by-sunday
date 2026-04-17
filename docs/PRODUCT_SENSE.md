@@ -29,9 +29,9 @@ This file owns the durable product-judgment rules that help agents keep scope ti
 - Prefer the smallest slice that solves the real user problem.
 - Put stable behavior and requirement truth in product specs, not in chat or transient notes.
 - Put execution sequencing and proof loops in ExecPlans, not in product specs.
-- Keep human-facing operating context in `workspace/`, not in runtime state or `.codex/`.
+- Keep durable repo-facing judgment in `docs/` and app-local product behavior in `apps/web/`, not in runtime state or `.codex/`.
 
 ## Next
 
-- Use [docs/product-specs/index.md](/Users/parkerrex/Developer/worker/docs/product-specs/index.md) for stable product-spec routing.
-- Use [workspace/README.md](/Users/parkerrex/Developer/worker/workspace/README.md) for the human-facing operating surface.
+- Use [docs/product-specs/index.md](/Users/parkerrex/Developer/ship-by-sunday/docs/product-specs/index.md) for stable product-spec routing.
+- Use [apps/web/content/docs/index.mdx](/Users/parkerrex/Developer/ship-by-sunday/apps/web/content/docs/index.mdx) for the customer-facing docs surface.
