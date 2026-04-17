@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+	buildHostedProofAccessDebugArgs,
 	buildHostedProofCheckoutSessionParams,
 	buildHostedProofCouponParams,
 	buildHostedProofSignInPath,
@@ -30,6 +31,7 @@ describe("hosted Stripe checkout proof helpers", () => {
 		const session = buildHostedProofCheckoutSessionParams({
 			appBaseUrl: "https://www.man-meets-ai.com/",
 			checkoutEmail: "buyer@example.com",
+			clerkUserId: "user_123",
 			couponId: "coupon_123",
 			courseSlug: "ship-by-sunday",
 			priceId: "price_123",
@@ -38,15 +40,18 @@ describe("hosted Stripe checkout proof helpers", () => {
 		expect(session).toEqual({
 			billing_address_collection: "auto",
 			cancel_url: "https://www.man-meets-ai.com/checkout/cancel",
+			client_reference_id: "user_123",
 			customer_email: "buyer@example.com",
 			discounts: [{ coupon: "coupon_123" }],
 			line_items: [{ price: "price_123", quantity: 1 }],
 			metadata: {
+				clerkUserId: "user_123",
 				courseSlug: "ship-by-sunday",
 			},
 			mode: "payment",
 			payment_intent_data: {
 				metadata: {
+					clerkUserId: "user_123",
 					courseSlug: "ship-by-sunday",
 				},
 			},
@@ -59,5 +64,17 @@ describe("hosted Stripe checkout proof helpers", () => {
 		expect(buildHostedProofSignInPath({})).toBe(
 			"/sign-in?redirect_url=%2Fblueprint",
 		);
+	});
+
+	it("keeps the checkout session id in the hosted proof access debug query", () => {
+		expect(
+			buildHostedProofAccessDebugArgs({
+				clerkUserId: "user_123",
+				sessionId: "cs_live_123",
+			}),
+		).toEqual({
+			clerkUserId: "user_123",
+			stripeCheckoutSessionId: "cs_live_123",
+		});
 	});
 });

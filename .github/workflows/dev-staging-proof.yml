@@ -196,8 +196,6 @@ jobs:
       QA_ENV_FILE: apps/web/.env.local
       QA_ALLOW_BILLING_INTEGRATION: "1"
       RELEASE_COMMIT_SHA: ${{ needs.release_scope.outputs.head_sha }}
-      STRIPE_SECRET_KEY: ${{ secrets.DEV_STAGING_STRIPE_SECRET_KEY }}
-      STRIPE_WEBHOOK_SECRET: ${{ secrets.DEV_STAGING_STRIPE_WEBHOOK_SECRET }}
       VERCEL_ORG_ID: ${{ vars.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
       VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}

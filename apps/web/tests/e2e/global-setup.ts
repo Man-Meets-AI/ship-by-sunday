@@ -501,7 +501,6 @@ function runConvexInternalCommand({
 		});
 	});
 }
-
 function isProductionQaTarget(env: NodeJS.ProcessEnv = process.env) {
 	return (
 		env.QA_ENV_FILE?.endsWith(".env.production") === true ||

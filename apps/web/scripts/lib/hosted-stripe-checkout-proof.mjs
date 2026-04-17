@@ -27,6 +27,7 @@ export function buildHostedProofCouponParams({ runLabel, now = Date.now() }) {
 export function buildHostedProofCheckoutSessionParams({
 	appBaseUrl,
 	checkoutEmail,
+	clerkUserId,
 	couponId,
 	courseSlug = DEFAULT_PROOF_COURSE_SLUG,
 	priceId,
@@ -36,15 +37,18 @@ export function buildHostedProofCheckoutSessionParams({
 	return {
 		billing_address_collection: "auto",
 		cancel_url: `${normalizedAppBaseUrl}/checkout/cancel`,
+		client_reference_id: clerkUserId,
 		customer_email: checkoutEmail,
 		discounts: [{ coupon: couponId }],
 		line_items: [{ price: priceId, quantity: 1 }],
 		metadata: {
+			...(clerkUserId ? { clerkUserId } : {}),
 			courseSlug,
 		},
 		mode: "payment",
 		payment_intent_data: {
 			metadata: {
+				...(clerkUserId ? { clerkUserId } : {}),
 				courseSlug,
 			},
 		},
@@ -54,4 +58,11 @@ export function buildHostedProofCheckoutSessionParams({
 
 export function buildHostedProofSignInPath({ redirectPath = "/blueprint" }) {
 	return `/sign-in?redirect_url=${encodeURIComponent(redirectPath)}`;
+}
+
+export function buildHostedProofAccessDebugArgs({ clerkUserId, sessionId }) {
+	return {
+		...(clerkUserId ? { clerkUserId } : {}),
+		...(sessionId ? { stripeCheckoutSessionId: sessionId } : {}),
+	};
 }
