@@ -11,24 +11,20 @@ export function renderPromptPack(
 ): RenderedBlueprintFile[] {
 	return [
 		{
-			path: getShippedPromptAssetPath("exec-plan-outline-from-session.md"),
-			content: promptAssets["exec-plan-outline-from-session.md"],
+			path: getShippedPromptAssetPath("execplan-outline-from-session.md"),
+			content: promptAssets["execplan-outline-from-session.md"],
 		},
 		{
-			path: getShippedPromptAssetPath("exec-plan-execute.md"),
-			content: promptAssets["exec-plan-execute.md"],
+			path: getShippedPromptAssetPath("execplan-execution-loop.md"),
+			content: promptAssets["execplan-execution-loop.md"],
 		},
 		{
-			path: getShippedPromptAssetPath("exec-plan-grill.md"),
-			content: promptAssets["exec-plan-grill.md"],
+			path: getShippedPromptAssetPath("execplan-grill.md"),
+			content: promptAssets["execplan-grill.md"],
 		},
 		{
-			path: getShippedPromptAssetPath("exec-plan-validate.md"),
-			content: promptAssets["exec-plan-validate.md"],
-		},
-		{
-			path: getShippedPromptAssetPath("exec-plan-writer.md"),
-			content: promptAssets["exec-plan-writer.md"],
+			path: getShippedPromptAssetPath("execplan-writer.md"),
+			content: promptAssets["execplan-writer.md"],
 		},
 	];
 }

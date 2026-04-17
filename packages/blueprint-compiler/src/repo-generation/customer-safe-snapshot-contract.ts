@@ -36,7 +36,7 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 				"Ship the ExecPlan prompt assets unchanged under repo-root docs/prompts.",
 		},
 		{
-			pathPattern: "docs/exec-plans/PLANS.md",
+			pathPattern: ".plans/PLANS.md",
 			shippingMode: "ship-unchanged",
 			reason: "Keep the canonical ExecPlan contract in the starter repo.",
 		},
@@ -65,6 +65,12 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 				"Ship generalized starter guidance instead of repo-specific operator rules.",
 		},
 		{
+			pathPattern: "qa/**",
+			shippingMode: "ship-generalized",
+			reason:
+				"Ship a generalized starter QA kit with project-shaped starter CSVs.",
+		},
+		{
 			pathPattern: ".github/workflows/**",
 			shippingMode: "ship-generalized",
 			reason:
@@ -83,16 +89,10 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 				"Exclude the tracked production env file and replace it with a safe example template.",
 		},
 		{
-			pathPattern: "docs/exec-plans/active/**",
+			pathPattern: ".plans/**",
 			shippingMode: "exclude",
 			reason:
-				"Exclude active internal planning history from the shipped starter repo.",
-		},
-		{
-			pathPattern: "docs/exec-plans/completed/**",
-			shippingMode: "exclude",
-			reason:
-				"Exclude completed internal planning history from the shipped starter repo.",
+				"Exclude internal planning history except for the canonical PLANS contract.",
 		},
 		{
 			pathPattern: "docs/codex/**",
@@ -101,7 +101,7 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 				"Exclude legacy archived ExecPlans and compatibility shims from the shipped starter repo.",
 		},
 		{
-			pathPattern: "docs/generated/openai-blueprint/**",
+			pathPattern: "docs/openai/**",
 			shippingMode: "exclude",
 			reason:
 				"Exclude internal source templates from the shipped starter repo.",

@@ -6,7 +6,7 @@ const repoRootMarkers = [
 	["package.json"],
 	["apps", "web", "package.json"],
 	["packages", "blueprint-compiler", "package.json"],
-	["docs", "prompts", "exec-plan-execute.md"],
+	["docs", "prompts", "execplan-execution-loop.md"],
 ] as const;
 
 function isRepoRoot(candidatePath: string) {

@@ -26,7 +26,7 @@ describe("repo generation", () => {
 		expect(manifest.includedFiles).toEqual(
 			expect.arrayContaining([
 				"bunfig.toml",
-				"docs/exec-plans/PLANS.md",
+				".plans/PLANS.md",
 				"apps/web/.env.local.example",
 			]),
 		);
@@ -135,11 +135,9 @@ describe("repo generation", () => {
 				"docs/README.md",
 				"docs/build/docs/prompt.md",
 				"docs/facts/design-system.json",
-				"docs/exec-plans/PLANS.md",
+				".plans/PLANS.md",
 				"apps/web/.env.production.example",
-				"apps/web/tests/README.md",
-				"apps/web/tests/utils/README.md",
-				"apps/web/playwright/README.md",
+				"qa/README.md",
 				".agents/README.md",
 				".github/workflows/examples/basic-ci.example.yml",
 			]),

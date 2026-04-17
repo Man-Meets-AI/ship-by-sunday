@@ -198,10 +198,21 @@ bunx vitest --config vitest.config.ts run --project unit tests/unit/home-page-co
 
 bunx vitest --config vitest.config.ts run --project integration-ui tests/integration-ui/home-page-primary-cta.test.tsx
 
-bun run test:e2e -- --grep "landing page renders the main offer CTA|homepage renders structured SEO data"
+PLAYWRIGHT_USE_LOCAL_SERVER=1 bunx playwright test --project=browser-smoke tests/browser-smoke/app-smoke.spec.ts --grep "landing page renders the main offer CTA|homepage renders structured SEO data"
 
 bun run build
 ```
+
+For browser smoke, load `.env.local` into the shell first:
+
+```bash
+set -a
+source .env.local
+set +a
+bun run test:browser-smoke
+```
+
+`test:browser-smoke` expects `NEXT_PUBLIC_CONVEX_URL` in the shell environment. Having the value only in `.env.local` is not enough unless you source it first.
 
 ## What a future AI agent should preserve
 

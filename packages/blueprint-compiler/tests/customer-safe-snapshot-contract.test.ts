@@ -18,15 +18,11 @@ describe("customer-safe snapshot contract", () => {
 					shippingMode: "ship-unchanged",
 				}),
 				expect.objectContaining({
-					pathPattern: "docs/exec-plans/PLANS.md",
+					pathPattern: ".plans/PLANS.md",
 					shippingMode: "ship-unchanged",
 				}),
 				expect.objectContaining({
-					pathPattern: "docs/exec-plans/active/**",
-					shippingMode: "exclude",
-				}),
-				expect.objectContaining({
-					pathPattern: "docs/exec-plans/completed/**",
+					pathPattern: ".plans/**",
 					shippingMode: "exclude",
 				}),
 				expect.objectContaining({
@@ -34,11 +30,15 @@ describe("customer-safe snapshot contract", () => {
 					shippingMode: "ship-generalized",
 				}),
 				expect.objectContaining({
+					pathPattern: "qa/**",
+					shippingMode: "ship-generalized",
+				}),
+				expect.objectContaining({
 					pathPattern: ".github/workflows/**",
 					shippingMode: "ship-generalized",
 				}),
 				expect.objectContaining({
-					pathPattern: "docs/generated/openai-blueprint/**",
+					pathPattern: "docs/openai/**",
 					shippingMode: "exclude",
 				}),
 				expect.objectContaining({
@@ -68,10 +68,9 @@ describe("customer-safe snapshot contract", () => {
 	it("keeps the shared trace contract aligned with the shipped source files", () => {
 		expect(buildRepoDownloadTraceIncludes()).toEqual(
 			expect.arrayContaining([
-				"../../docs/exec-plans/PLANS.md",
+				"../../.plans/PLANS.md",
 				"../../docs/prompts/**/*",
 				"./.env.local.example",
-				"./playwright/**/*",
 				"./tests/**/*",
 			]),
 		);
