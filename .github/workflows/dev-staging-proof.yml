@@ -163,6 +163,9 @@ jobs:
         if: needs.release_scope.outputs.convex_sensitive == 'true'
         run: |
           cd apps/web
+          set -a
+          source .env.local
+          set +a
           bunx convex dev --once --typecheck disable
 
       - name: Run default ship pack on dev
@@ -273,6 +276,9 @@ jobs:
         if: needs.release_scope.outputs.convex_sensitive == 'true'
         run: |
           cd apps/web
+          set -a
+          source .env.local
+          set +a
           bunx convex dev --once --typecheck disable
 
       - name: Verify staging Stripe environment and checkout route
