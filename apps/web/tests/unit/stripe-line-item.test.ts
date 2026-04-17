@@ -168,12 +168,26 @@ describe("getStripeLineItem", () => {
 	it("requires a managed price and product id for hosted release proof", async () => {
 		delete process.env.STRIPE_PRICE_ID;
 		delete process.env.STRIPE_PRODUCT_ID;
+		delete process.env.STRIPE_PROMOTION_CODE_ID;
 
 		const { assertManagedStripeEnvConfiguredForRelease } =
 			await import("@/platform/billing/stripe");
 
 		expect(() => assertManagedStripeEnvConfiguredForRelease()).toThrow(
 			"Missing STRIPE_PRICE_ID. Hosted preview and production release proof require a managed Stripe price.",
+		);
+	});
+
+	it("requires the active promotion code for hosted release proof when the offer is enabled", async () => {
+		process.env.STRIPE_PRICE_ID = "price_correct";
+		process.env.STRIPE_PRODUCT_ID = "prod_correct";
+		delete process.env.STRIPE_PROMOTION_CODE_ID;
+
+		const { assertManagedStripeEnvConfiguredForRelease } =
+			await import("@/platform/billing/stripe");
+
+		expect(() => assertManagedStripeEnvConfiguredForRelease()).toThrow(
+			"Missing STRIPE_PROMOTION_CODE_ID. Hosted preview and production release proof require the active Stripe promotion code.",
 		);
 	});
 
@@ -192,6 +206,7 @@ describe("getStripeLineItem", () => {
 		process.env.STRIPE_SECRET_KEY = "sk_test_123";
 		process.env.STRIPE_PRICE_ID = "price_correct";
 		process.env.STRIPE_PRODUCT_ID = "prod_correct";
+		process.env.STRIPE_PROMOTION_CODE_ID = "promo_50_off";
 
 		const { assertManagedStripeEnvReadyForRelease } =
 			await import("@/platform/billing/stripe");

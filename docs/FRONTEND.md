@@ -30,10 +30,10 @@ This file owns the repo-wide frontend implementation rules for browser-facing su
 - Prefer feature-based folders over global `components/`, `hooks/`, or `utils/` buckets that mix unrelated work.
 - Avoid oversized components. Split browser-facing components before they become hard to scan.
 - Preserve the repo’s current shadcn-style component usage as vanilla building blocks instead of adding another UI framework layer.
-- Treat the Worker Dashboard as the main existing browser surface unless a task clearly belongs somewhere else.
+- Treat `apps/web` as the main browser surface unless a task clearly belongs to generated output or package-local tooling.
 
 ## Next
 
-- Use [docs/DESIGN.md](/Users/parkerrex/Developer/worker/docs/DESIGN.md) for visual and interaction doctrine.
-- Use [docs/design-docs/index.md](/Users/parkerrex/Developer/worker/docs/design-docs/index.md) for durable design notes.
-- Use [apps/runtime/src/worker-dashboard/README.md](/Users/parkerrex/Developer/worker/apps/runtime/src/worker-dashboard/README.md) for the current frontend-owning app surface.
+- Use [docs/DESIGN.md](/Users/parkerrex/Developer/ship-by-sunday/docs/DESIGN.md) for visual and interaction doctrine.
+- Use [docs/design-docs/index.md](/Users/parkerrex/Developer/ship-by-sunday/docs/design-docs/index.md) for durable design notes.
+- Use [apps/web/AGENTS.md](/Users/parkerrex/Developer/ship-by-sunday/apps/web/AGENTS.md) for the current frontend-owning app surface.

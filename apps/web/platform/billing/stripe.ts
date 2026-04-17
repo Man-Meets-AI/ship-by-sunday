@@ -127,6 +127,12 @@ export function assertManagedStripeEnvConfiguredForRelease() {
 			"Missing STRIPE_PRODUCT_ID. Hosted preview and production release proof require a managed Stripe product.",
 		);
 	}
+
+	if (productConfig.activeOffer && !serverEnv.STRIPE_PROMOTION_CODE_ID) {
+		throw new Error(
+			"Missing STRIPE_PROMOTION_CODE_ID. Hosted preview and production release proof require the active Stripe promotion code.",
+		);
+	}
 }
 
 export function assertStripeModeMatchesExpected(expectedMode: StripeModeLabel) {

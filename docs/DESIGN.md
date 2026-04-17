@@ -33,5 +33,5 @@ This file owns the cross-cutting visual and interaction doctrine for the repo. I
 
 ## Next
 
-- Use [docs/design-docs/index.md](/Users/parkerrex/Developer/worker/docs/design-docs/index.md) for the current catalog of durable design notes.
-- Use [docs/FRONTEND.md](/Users/parkerrex/Developer/worker/docs/FRONTEND.md) for frontend implementation rules.
+- Use [docs/design-docs/index.md](/Users/parkerrex/Developer/ship-by-sunday/docs/design-docs/index.md) for the current catalog of durable design notes.
+- Use [docs/FRONTEND.md](/Users/parkerrex/Developer/ship-by-sunday/docs/FRONTEND.md) for frontend implementation rules.

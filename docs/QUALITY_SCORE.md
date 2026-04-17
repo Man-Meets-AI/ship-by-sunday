@@ -106,5 +106,5 @@ Tracked evidence from the highest-priority reviewed surfaces:
 
 ## Next
 
-- Use [docs/exec-plans/tech-debt-tracker.md](/Users/parkerrex/Developer/worker/docs/exec-plans/tech-debt-tracker.md) for the durable repo-quality debt ledger.
-- Use [docs/exec-plans/active/2026-04-13-add-quality-score-tech-debt-and-doc-gardening.md](/Users/parkerrex/Developer/worker/docs/exec-plans/active/2026-04-13-add-quality-score-tech-debt-and-doc-gardening.md) for the active automation and scoring implementation plan.
+- Use [docs/exec-plans/tech-debt-tracker.md](/Users/parkerrex/Developer/ship-by-sunday/docs/exec-plans/tech-debt-tracker.md) for the durable repo-quality debt ledger.
+- Track any follow-up implementation plan under [docs/exec-plans/active/](/Users/parkerrex/Developer/ship-by-sunday/docs/exec-plans/index.md).

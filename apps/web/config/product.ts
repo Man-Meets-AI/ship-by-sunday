@@ -134,7 +134,7 @@ export const starterConfig = {
 		} as const satisfies StarterPricingOfferConfig,
 	},
 	bonus: {
-		name: "Product Management for Beginners",
+		name: "FULL TURBO",
 		playlistUrl:
 			"https://www.youtube.com/playlist?list=PLO6IqfGPRUN1Bof9pACmGc955t4d0J6cM",
 	},

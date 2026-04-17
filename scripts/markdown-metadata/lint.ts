@@ -148,6 +148,24 @@ function validateMetadataForFamily(
 	}
 }
 
+function validateRepoDocBody(
+	repoPath: string,
+	text: string,
+	issues: string[],
+): void {
+	if (text.includes("/Users/parkerrex/Developer/worker/")) {
+		issues.push(
+			"Doc body still points at the old worker repository path. Update links to this repo's canonical paths.",
+		);
+	}
+
+	if (text.includes(".docs/")) {
+		issues.push(
+			"Doc body still references the removed .docs/ surface. Route through docs/ instead.",
+		);
+	}
+}
+
 export async function lintMarkdownMetadataFile(params: {
 	repoPath: string;
 	repoRootDir: string;
@@ -208,6 +226,10 @@ export async function lintMarkdownMetadataFile(params: {
 	}
 
 	validateMetadataForFamily(family, metadata, issues);
+
+	if (family === "repo_doc") {
+		validateRepoDocBody(params.repoPath, text, issues);
+	}
 
 	if (rule.requireH1TitleMatch) {
 		const h1 = extractMarkdownH1(parsed.body);
