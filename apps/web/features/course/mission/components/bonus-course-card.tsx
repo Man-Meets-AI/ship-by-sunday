@@ -47,8 +47,8 @@ export function BonusCourseCard() {
 									ship.
 								</p>
 								<p>
-									Do not pause the sprint to binge it. Ship the core flow
-									first, then use FULL TURBO as the deeper practice layer.
+									Do not pause the sprint to binge it. Ship the core flow first,
+									then use FULL TURBO as the deeper practice layer.
 								</p>
 							</div>
 						</ItemContent>
