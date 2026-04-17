@@ -61,7 +61,7 @@ describe("billing integration step planner", () => {
 			steps.some(
 				(step) =>
 					step.command.join(" ") ===
-					"node apps/web/scripts/verify-hosted-stripe-checkout.mjs --base-url=https://dev.man-meets-ai.com",
+					"bun run --cwd apps/web stripe:hosted:verify:dev -- --base-url=https://dev.man-meets-ai.com",
 			),
 		).toBe(true);
 		expect(
