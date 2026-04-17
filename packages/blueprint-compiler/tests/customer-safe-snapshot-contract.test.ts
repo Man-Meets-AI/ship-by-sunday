@@ -74,7 +74,9 @@ describe("customer-safe snapshot contract", () => {
 			]),
 		);
 		expect(buildRepoDownloadTraceIncludes()).not.toContain("./.env.production");
-		expect(buildRepoDownloadTraceIncludes()).not.toContain("../../docs/PLANS.md");
+		expect(buildRepoDownloadTraceIncludes()).not.toContain(
+			"../../docs/PLANS.md",
+		);
 		expect(buildRepoDownloadTraceIncludes()).not.toContain(
 			"../../docs/exec-plans/PLANS.md",
 		);

@@ -24,10 +24,7 @@ describe("repo generation", () => {
 			]),
 		);
 		expect(manifest.includedFiles).toEqual(
-			expect.arrayContaining([
-				"bunfig.toml",
-				"apps/web/.env.local.example",
-			]),
+			expect.arrayContaining(["bunfig.toml", "apps/web/.env.local.example"]),
 		);
 	});
 
