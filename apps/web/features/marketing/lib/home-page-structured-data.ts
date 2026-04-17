@@ -33,7 +33,7 @@ function createStructuredData(renderModel: HomePageRenderModel) {
 			description: productConfig.metadataDescription,
 			offers: {
 				"@type": "Offer",
-				price: (productConfig.priceUsdCents / 100).toString(),
+				price: (productConfig.checkoutPriceUsdCents / 100).toString(),
 				priceCurrency: productConfig.currency,
 				availability: "https://schema.org/InStock",
 				url: getAbsoluteUrl(`${routeConfig.home}${routeConfig.pricingHash}`),

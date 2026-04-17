@@ -57,6 +57,24 @@ export function getStripeLineItem() {
 	};
 }
 
+export function getStripeCheckoutDiscounts() {
+	if (!productConfig.activeOffer) {
+		return undefined;
+	}
+
+	if (!serverEnv.STRIPE_PROMOTION_CODE_ID) {
+		throw new Error(
+			"Missing STRIPE_PROMOTION_CODE_ID. The active pricing offer requires an auto-applied Stripe promotion code.",
+		);
+	}
+
+	return [
+		{
+			promotion_code: serverEnv.STRIPE_PROMOTION_CODE_ID,
+		},
+	];
+}
+
 export async function assertManagedStripePriceMatchesProductConfig(
 	stripe: Stripe,
 ) {

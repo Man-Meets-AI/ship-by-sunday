@@ -101,8 +101,10 @@ export default function Image() {
 						maxWidth: "900px",
 					}}
 				>
-					{productConfig.priceDisplay} one-time. Contract-first packs plus
-					starter blueprint.
+					{productConfig.activeOffer
+						? `${productConfig.checkoutPriceDisplay} today with early-member pricing, regularly ${productConfig.priceDisplay}.`
+						: `${productConfig.priceDisplay} one-time.`}{" "}
+					Contract-first packs plus starter blueprint.
 				</div>
 			</div>
 		</div>,

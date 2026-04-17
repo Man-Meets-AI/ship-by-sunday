@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { routeConfig, type HomePageCtaTarget } from "@/config/product";
+import { PromoBanner } from "@/features/marketing/components/promo-banner";
 import type { HomePageContent } from "@/features/marketing/content/home";
 
 import { HomePagePrimaryCta } from "./home-page-primary-cta";
@@ -44,11 +45,23 @@ export function PricingSectionBlock({
 
 				<ScrollReveal delay={0.15}>
 					<div className="flex flex-col gap-10">
-						<div className="space-y-3">
+						<div className="space-y-6">
+							{pricingSection.offerBanner ? (
+								<PromoBanner
+									label={pricingSection.offerBanner.label}
+									message={pricingSection.offerBanner.message}
+									className="rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3"
+									contentClassName="justify-start text-left tracking-[0.12em]"
+									labelClassName="bg-primary text-primary-foreground"
+									messageClassName="text-sm tracking-normal text-foreground/80 normal-case"
+								/>
+							) : null}
 							<div className="flex items-baseline gap-3">
-								<p className="text-2xl font-semibold text-muted-foreground line-through">
-									{pricingSection.originalPriceDisplay}
-								</p>
+								{pricingSection.originalPriceDisplay ? (
+									<p className="text-2xl font-semibold text-muted-foreground line-through">
+										{pricingSection.originalPriceDisplay}
+									</p>
+								) : null}
 								<p className="font-marketing-display text-[clamp(5rem,15vw,10rem)] font-black leading-[0.85] tracking-tighter text-foreground">
 									{pricingSection.offerPriceDisplay}
 								</p>
@@ -56,9 +69,6 @@ export function PricingSectionBlock({
 									USD one-time
 								</span>
 							</div>
-							<p className="text-sm font-semibold tracking-wide text-primary uppercase">
-								{pricingSection.offerLabel}
-							</p>
 						</div>
 
 						<div className="space-y-4">

@@ -32,7 +32,7 @@ describe("curriculum contract", () => {
 		expect(productConfig.courseSlug).toMatch(/^[a-z0-9-]+$/);
 		expect(publicBrandCopy).toContain(productConfig.name);
 		expect(homePageContent.pricingSection.priceDisplay).toBe(
-			productConfig.priceDisplay,
+			productConfig.checkoutPriceDisplay,
 		);
 		expect(homePageContent.footerWordmark).toBe(productConfig.name);
 	});

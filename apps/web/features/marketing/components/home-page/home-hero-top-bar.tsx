@@ -7,6 +7,7 @@ import {
 } from "@/components/product-brand";
 import { Button } from "@/components/ui/button";
 import { routeConfig } from "@/config/product";
+import { PromoBanner } from "@/features/marketing/components/promo-banner";
 import type { HomePageContent } from "@/features/marketing/content/home";
 
 type Hero = HomePageContent["hero"];
@@ -14,16 +15,15 @@ type Hero = HomePageContent["hero"];
 export function HomeHeroTopBar({ hero }: { hero: Hero }) {
 	return (
 		<div className="w-full">
-			<div className="border-y border-border/60 bg-secondary/65">
-				<div className="flex min-h-11 items-center justify-center px-4 text-center sm:px-6 lg:px-12">
-					<p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] font-medium tracking-[0.14em] text-foreground/90 uppercase sm:text-xs">
-						<span className="rounded-full bg-foreground px-2.5 py-1 text-[10px] font-semibold tracking-[0.18em] text-background sm:text-[11px]">
-							April Offer
-						</span>
-						<span>{hero.promoBanner}</span>
-					</p>
+			{hero.promoBanner ? (
+				<div className="border-y border-border/60 bg-secondary/65">
+					<PromoBanner
+						label={hero.promoBanner.label}
+						message={hero.promoBanner.message}
+						className="flex min-h-11 items-center justify-center px-4 text-center sm:px-6 lg:px-12"
+					/>
 				</div>
-			</div>
+			) : null}
 			<nav className="flex w-full items-center justify-between px-6 py-4 lg:px-12">
 				<ProductBrand
 					href={routeConfig.home}

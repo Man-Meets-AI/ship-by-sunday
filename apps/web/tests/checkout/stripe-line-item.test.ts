@@ -62,6 +62,30 @@ describe("getStripeLineItem", () => {
 		});
 	});
 
+	it("returns the active checkout discount when STRIPE_PROMOTION_CODE_ID is configured", async () => {
+		process.env.STRIPE_PROMOTION_CODE_ID = "promo_50_off";
+
+		const { getStripeCheckoutDiscounts } =
+			await import("@/platform/billing/stripe");
+
+		expect(getStripeCheckoutDiscounts()).toEqual([
+			{
+				promotion_code: "promo_50_off",
+			},
+		]);
+	});
+
+	it("requires a promotion code when the public pricing offer is active", async () => {
+		delete process.env.STRIPE_PROMOTION_CODE_ID;
+
+		const { getStripeCheckoutDiscounts } =
+			await import("@/platform/billing/stripe");
+
+		expect(() => getStripeCheckoutDiscounts()).toThrow(
+			"Missing STRIPE_PROMOTION_CODE_ID. The active pricing offer requires an auto-applied Stripe promotion code.",
+		);
+	});
+
 	it("rejects a managed Stripe price when its amount drifts from the canonical product config", async () => {
 		process.env.STRIPE_PRICE_ID = "price_wrong_amount";
 		process.env.STRIPE_PRODUCT_ID = "prod_correct";
@@ -72,7 +96,7 @@ describe("getStripeLineItem", () => {
 			prices: {
 				retrieve: vi.fn().mockResolvedValue({
 					id: "price_wrong_amount",
-					unit_amount: 50000,
+					unit_amount: 25000,
 					currency: productConfig.currency,
 					product: "prod_correct",
 				} satisfies Pick<
@@ -85,7 +109,7 @@ describe("getStripeLineItem", () => {
 		await expect(
 			assertManagedStripePriceMatchesProductConfig(stripe),
 		).rejects.toThrow(
-			`Configured Stripe price price_wrong_amount charges 50000 cents, expected ${productConfig.priceUsdCents}.`,
+			`Configured Stripe price price_wrong_amount charges 25000 cents, expected ${productConfig.priceUsdCents}.`,
 		);
 	});
 

@@ -5,6 +5,19 @@ import {
 } from "@/features/starter/lib/starter-selectors";
 
 const productName = productConfig.name;
+const activePricingOffer = productConfig.activeOffer;
+const promoBanner = activePricingOffer
+	? {
+			label: activePricingOffer.label,
+			message: `Get ${productName} for ${productConfig.checkoutPriceDisplay} instead of ${productConfig.priceDisplay}. ${activePricingOffer.percentOff}% off auto-applied at checkout, plus FULL TURBO free.`,
+		}
+	: null;
+const pricingOfferBanner = activePricingOffer
+	? {
+			label: activePricingOffer.label,
+			message: `${activePricingOffer.percentOff}% off the ${productConfig.priceDisplay} list price. Auto-applied at checkout.`,
+		}
+	: null;
 
 export const homePageContent = {
 	assets: {
@@ -13,12 +26,11 @@ export const homePageContent = {
 	hero: {
 		docsLabel: marketingDisplayConfig.docsLabel,
 		loginLabel: marketingDisplayConfig.loginLabel,
-		promoBanner:
-			"April offer: get Ship by Sunday for $250 instead of $500, plus FULL TURBO free.",
+		promoBanner,
 		headlineLead: "Ship a real product",
 		headlineTailPrefix: "",
 		headlineTailHover: "by Sunday",
-		body: "The only system that teaches you how to ship a durable product from start to finish in one weekend. Oh, and it includes building you a ridiculous custom template from scratch based on what you want to build. We should charge more for this.",
+		body: "Ship a durable product in one weekend with a blueprint-first system and a custom starter shaped around what you're building.",
 		primaryCta: marketingDisplayConfig.primaryCtaLabel,
 		secondaryCta: {
 			label: "See how Ship Blueprint works",
@@ -113,8 +125,7 @@ export const homePageContent = {
 	},
 	whatsInsideSection: {
 		label: "By Sunday",
-		title:
-			"By Sunday, you leave with the product truth, the agent packs, and the starter path.",
+		title: "Get it Done.",
 		intro:
 			"Enough clarity to build. Enough structure to hand off. No vague prompts, no half-decisions.",
 		pillars: [
@@ -225,10 +236,14 @@ export const homePageContent = {
 		titleAccent: "by Sunday",
 		intro:
 			"One payment for Ship Blueprint: the guided blueprint-first run, the Agent-Ready Packs, the Ship by Sunday Blueprint, and the guidance that keeps you shipping after the first weekend.",
-		priceDisplay: productConfig.priceDisplay,
-		originalPriceDisplay: "$500",
-		offerPriceDisplay: "$250",
-		offerLabel: "April offer: 50% off",
+		priceDisplay: productConfig.checkoutPriceDisplay,
+		originalPriceDisplay: activePricingOffer
+			? productConfig.priceDisplay
+			: null,
+		offerPriceDisplay:
+			activePricingOffer?.discountedPriceDisplay ??
+			productConfig.checkoutPriceDisplay,
+		offerBanner: pricingOfferBanner,
 		eyebrow: "One-time payment. Lifetime access.",
 		ctaTitle: "Get the system",
 		trustLine: `After checkout, you go straight into the ${workspaceDisplayConfig.homeNoun} to lock the truth, compile the packs, and shape your Blueprint.`,
