@@ -11,13 +11,6 @@ import {
 } from "./lib/stripe-cli-project.mjs";
 
 const ENV_FILE_PATH = path.join(process.cwd(), ".env.local");
-const CONVEX_BIN_PATH = path.join(
-	process.cwd(),
-	"node_modules",
-	"convex",
-	"bin",
-	"main.js",
-);
 const LOCALHOST_HOSTS = new Set(["127.0.0.1", "0.0.0.0", "localhost"]);
 
 function parseArgs(argv) {
@@ -86,11 +79,7 @@ async function getStripeAccountSummary() {
 }
 
 async function getConvexEnvList() {
-	const result = await runCommand(process.execPath, [
-		CONVEX_BIN_PATH,
-		"env",
-		"list",
-	]);
+	const result = await runCommand("bunx", ["convex", "env", "list"]);
 	if (result.code !== 0) {
 		throw new Error(
 			result.stderr || result.stdout || "Failed to read Convex env.",

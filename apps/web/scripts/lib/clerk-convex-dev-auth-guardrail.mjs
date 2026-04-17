@@ -3,12 +3,6 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 export const ENV_FILE_PATH = path.join(process.cwd(), ".env.local");
-const CONVEX_BIN_PATH = path.join(
-	process.cwd(),
-	"node_modules",
-	".bin",
-	process.platform === "win32" ? "convex.cmd" : "convex",
-);
 const LOCALHOST_HOSTS = new Set(["127.0.0.1", "0.0.0.0", "localhost"]);
 const CLERK_DEV_HOST_SUFFIX = ".clerk.accounts.dev";
 
@@ -269,7 +263,7 @@ export function buildClerkConvexDevAuthReport({
 export function buildClerkConvexDevFixSteps({ deploymentName }) {
 	return [
 		"Use the same Clerk instance for NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY, CLERK_SECRET_KEY, and CLERK_FRONTEND_API_URL in apps/web/.env.local.",
-		`Push that same issuer into ${deploymentName ?? "the active hosted Convex dev deployment"} with: cd apps/web && ./node_modules/.bin/convex env set CLERK_FRONTEND_API_URL "$CLERK_FRONTEND_API_URL"`,
+		`Push that same issuer into ${deploymentName ?? "the active hosted Convex dev deployment"} with: cd apps/web && bunx convex env set CLERK_FRONTEND_API_URL "$CLERK_FRONTEND_API_URL"`,
 		"Restart `bun run dev` after changing auth env values so the web server and Convex watcher both pick up the new issuer.",
 		"Re-run `bun run auth:dev:doctor` until every check passes.",
 	];
@@ -311,7 +305,7 @@ export function runCommand(command, args, options = {}) {
 }
 
 export async function getConvexEnvEntries() {
-	const result = await runCommand(CONVEX_BIN_PATH, ["env", "list"]);
+	const result = await runCommand("bunx", ["convex", "env", "list"]);
 	if (result.code !== 0) {
 		throw new Error(
 			result.stderr || result.stdout || "Failed to read Convex env values.",
