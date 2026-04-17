@@ -40,7 +40,7 @@ export async function POST(request: Request) {
 		const checkoutDiscounts = getStripeCheckoutDiscounts();
 		const session = await stripe.checkout.sessions.create({
 			mode: "payment",
-			allow_promotion_codes: checkoutDiscounts ? false : true,
+			...(checkoutDiscounts ? {} : { allow_promotion_codes: true }),
 			billing_address_collection: "auto",
 			cancel_url: `${appBaseUrl}${routeConfig.checkoutCancel}`,
 			success_url: `${appBaseUrl}${getCheckoutSuccessHref("{CHECKOUT_SESSION_ID}")}`,
