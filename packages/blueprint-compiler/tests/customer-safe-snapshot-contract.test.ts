@@ -26,6 +26,10 @@ describe("customer-safe snapshot contract", () => {
 					shippingMode: "exclude",
 				}),
 				expect.objectContaining({
+					pathPattern: ".plans/**",
+					shippingMode: "exclude",
+				}),
+				expect.objectContaining({
 					pathPattern: ".agents/**",
 					shippingMode: "ship-generalized",
 				}),
