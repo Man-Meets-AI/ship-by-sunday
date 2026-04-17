@@ -1,7 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
 
-import { shouldSkipLocalBuild } from "./playwright/env";
-
 const localPort = Number.parseInt(process.env.PLAYWRIGHT_PORT ?? "3100", 10);
 const baseURL =
 	process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${localPort}`;
@@ -10,37 +8,18 @@ const appsWebDirectory = __dirname;
 const shouldUseLocalServer = process.env.PLAYWRIGHT_USE_LOCAL_SERVER === "1";
 const localhostHosts = new Set(["127.0.0.1", "0.0.0.0", "localhost"]);
 const smokeTestConvexUrl = "https://smoke-test.convex.cloud";
-const localServerCommand = shouldSkipLocalBuild
-	? [
-			"bun",
-			"run",
-			"--cwd",
-			JSON.stringify(appsWebDirectory),
-			"start:web:raw",
-			"--",
-			"--hostname",
-			localServerHost,
-			"--port",
-			String(localPort),
-		].join(" ")
-	: [
-			"bun",
-			"run",
-			"--cwd",
-			JSON.stringify(appsWebDirectory),
-			"build",
-			"&&",
-			"bun",
-			"run",
-			"--cwd",
-			JSON.stringify(appsWebDirectory),
-			"start:web:raw",
-			"--",
-			"--hostname",
-			localServerHost,
-			"--port",
-			String(localPort),
-		].join(" ");
+const localServerCommand = [
+	"bun",
+	"run",
+	"--cwd",
+	JSON.stringify(appsWebDirectory),
+	"dev:web:raw",
+	"--",
+	"--hostname",
+	localServerHost,
+	"--port",
+	String(localPort),
+].join(" ");
 
 function getDefinedProcessEnv(): Record<string, string> {
 	return Object.fromEntries(
@@ -84,7 +63,7 @@ export default defineConfig({
 	},
 	projects: [
 		{
-			name: "browser-e2e",
+			name: "browser-smoke",
 			testMatch: ["playwright/**/*.spec.ts"],
 			use: {
 				...devices["Desktop Chrome"],
@@ -95,7 +74,7 @@ export default defineConfig({
 		? {
 				command: localServerCommand,
 				url: baseURL,
-				reuseExistingServer: false,
+				reuseExistingServer: !process.env.CI,
 				timeout: 900_000,
 				env: {
 					...getDefinedProcessEnv(),

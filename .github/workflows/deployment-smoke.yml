@@ -41,11 +41,3 @@ jobs:
           PLAYWRIGHT_USE_LOCAL_SERVER: "0"
           PLAYWRIGHT_CHECKOUT_SMOKE: "1"
         run: bun run test:e2e
-
-      - name: Upload Playwright report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: deployment-playwright-report
-          path: apps/web/playwright-report
-          if-no-files-found: ignore

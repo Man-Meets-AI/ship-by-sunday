@@ -62,8 +62,8 @@ jobs:
       - name: Build
         run: bun run build
 
-  browser-e2e:
-    name: browser-e2e
+  browser-smoke:
+    name: browser-smoke
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -97,18 +97,5 @@ jobs:
       - name: Install Playwright Chromium
         run: bun run --cwd apps/web playwright:install
 
-      - name: Build application
-        run: bun run build
-
-      - name: Browser E2E
-        env:
-          PLAYWRIGHT_SKIP_BUILD: "1"
+      - name: Browser smoke
         run: bun run test:e2e
-
-      - name: Upload Playwright report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: apps/web/playwright-report
-          if-no-files-found: ignore
