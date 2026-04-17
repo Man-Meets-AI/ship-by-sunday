@@ -1,4 +1,7 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import type { RenderedBlueprintFile } from "../blueprints/render-types";
+import { resolveRepoRootPath } from "../repo-root";
 
 type StarterWrapperSkill = {
 	description: string;
@@ -113,6 +116,14 @@ const EXTERNAL_SKILLS: ExternalSkillInstall[] = [
 	},
 ];
 
+const BUNDLED_SHARED_SKILL_PATHS = [
+	".agents/skills/shared/exec-plan-execute/SKILL.md",
+	".agents/skills/shared/exec-plan-griller/SKILL.md",
+	".agents/skills/shared/exec-plan-validate/SKILL.md",
+	".agents/skills/shared/exec-plan-writer/SKILL.md",
+	".agents/skills/shared/land/SKILL.md",
+] as const;
+
 function renderWrapperSkillContent(skill: StarterWrapperSkill) {
 	return [
 		"---",
@@ -163,8 +174,21 @@ function renderInstallScriptContent() {
 	].join("\n");
 }
 
+function renderBundledSharedSkillFiles(): RenderedBlueprintFile[] {
+	const repoRoot = resolveRepoRootPath();
+
+	return BUNDLED_SHARED_SKILL_PATHS.map((relativePath) => ({
+		path: relativePath,
+		content: readFileSync(
+			path.join(/* turbopackIgnore: true */ repoRoot, relativePath),
+			"utf8",
+		),
+	}));
+}
+
 export function renderStarterSkillFiles(): RenderedBlueprintFile[] {
 	return [
+		...renderBundledSharedSkillFiles(),
 		...STARTER_WRAPPER_SKILLS.map((skill) => ({
 			path: skill.path,
 			content: renderWrapperSkillContent(skill),

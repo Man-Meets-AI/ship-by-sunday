@@ -20,15 +20,15 @@ In this repository, store per-initiative ExecPlans in `docs/exec-plans/active/` 
 
 In this repo, every new ExecPlan file must use a dated filename in the form `YYYY-MM-DD-<slug>.md`. Use the local repo date on the day the plan is first created. If the slug already exists for that date, append a numeric suffix such as `-2` or `-3` after the slug. Existing older undated plan files are legacy files and do not need to be renamed unless a separate task explicitly asks for that migration.
 
-In this repo, `bun run plans:lint -- --plan <repo-relative-plan-path>` is the strict validator for any active plan or any completed plan you explicitly touch. Broad `bun run markdown:lint -- --paths docs ...` sweeps intentionally skip archived files under `docs/exec-plans/completed/` unless that completed lane is targeted explicitly, so untouched historical archives do not block unrelated docs work.
+This repo now ships a dedicated ExecPlan linter and markdown linter. When you touch a plan, validate it with `bun run plans:lint -- --plan <path>`, the repo’s normal quality surface where relevant, `bun run markdown:lint -- --paths <path-or-dir>`, `git diff --check`, and a direct read-through against this contract. Untouched historical archives under `docs/exec-plans/completed/` should not block unrelated docs work unless you target them explicitly.
 
 In this repo, every new or revised ExecPlan must start with YAML front matter that includes `title`, `status`, `created_at`, `completed_at`, `summary`, `post_build_recap`, and `read_when`.
 
-Before authoring or revising an ExecPlan here, read `AGENTS.md` first. Then inspect the real code, docs, and runtime surfaces the plan touches before deciding what the plan should say. Read `system/DECISIONS.md` when the plan changes durable architecture or repo policy. Read `system/SOUL.md`, `system/MEMORY.md`, `system/GOALS.md`, or `system/HEARTBEAT.md` only when the work directly touches the runtime self-improvement or agent-meta layer under `system/`.
+Before authoring or revising an ExecPlan here, read `AGENTS.md` first. Then inspect the real code, docs, and runtime surfaces the plan touches before deciding what the plan should say.
 
-When a plan needs validation guidance, default to the repo's standard quality surface: `bun run lint`, `bun run fmt:check`, and `bun run typecheck`, plus any narrower workflow-specific checks that prove the feature actually works.
+When a plan needs validation guidance, default to the repo's standard quality surface: `bun run format`, `bun run lint`, `bun run typecheck`, plus any narrower workflow-specific checks that prove the feature actually works.
 
-When a plan changes durable repo behavior, the plan should name the writeback surfaces that must be updated at the end of implementation, such as `README.md`, `AGENTS.md`, `system/DECISIONS.md`, `system/directory/workflows.md`, or a workflow-local `README.md` under `apps/runtime/src/`.
+When a plan changes durable repo behavior, the plan should name the writeback surfaces that must be updated at the end of implementation, such as `README.md`, `AGENTS.md`, `docs/*`, `.github/workflows/*`, `apps/web/content/docs/*`, or generator-owned docs under `packages/blueprint-compiler/src/repo-generation/`.
 
 ## How to use ExecPlans and PLANS.md
 

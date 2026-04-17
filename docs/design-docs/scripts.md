@@ -1,0 +1,65 @@
+# Scripts
+
+All commands run from the repository root.
+
+## Everyday development
+
+- `bun install` installs the workspace.
+- `bun run dev` starts the full local workflow: web, hosted Convex dev sync, and Stripe forwarding.
+- `bun run dev:core` runs the lighter web plus hosted Convex dev sync path without Stripe forwarding.
+- `bun run dev:web` is a compatibility alias to the same full-stack startup as `bun run dev`.
+- `bun run dev:convex` syncs the hosted Convex dev deployment and refreshes `apps/web/.env.local`.
+- `bun run dev:stripe` starts the local Stripe listener against the pinned Stripe CLI project.
+- `bun run dev:full` is the compatibility alias for the same full buyer-flow stack as `bun run dev`.
+- `bun run --cwd apps/web dev:web:only` is the explicit escape hatch for a plain web-only Next.js dev server.
+
+## Build and quality gates
+
+- `bun run format`
+- `bun run format:check`
+- `bun run lint`
+- `bun run lint:fix`
+- `bun run markdown:lint -- --paths <repo-path-or-dir>`
+- `bun run plans:lint -- --plan <docs/exec-plans/active/...>`
+- `bun run typecheck`
+- `bun run build`
+
+The normal root validation surface on this branch still follows the current Ship by Sunday harness:
+
+- `bun run test:unit`
+- `bun run test:contracts`
+- `bun run test:integration`
+- `bun run test:browser-smoke`
+- `bun run build`
+
+Use the narrowest relevant command first, then broaden to the full set when the slice is stable.
+
+For frontmatter-driven docs and plans:
+
+- `bun run markdown:lint` validates the repo-owned markdown families that currently have checked-in metadata contracts: the canonical frontmatter-backed docs spine files under `docs/`, ExecPlans under `docs/exec-plans/`, docs MDX pages under `apps/web/content/docs/`, and blog post MDX files under `apps/web/content/blog/`.
+- `bun run plans:lint` applies the stricter ExecPlan body and frontmatter contract from `docs/exec-plans/PLANS.md`.
+- Both commands accept path-scoped arguments so docs-only work can be proved without widening into unrelated files.
+
+## CLI and generator
+
+- `bun run sbs` launches the local Ship by Sunday intake CLI.
+- `bun run sbs:check` validates the CLI plus blueprint-compiler slice end-to-end.
+- `./bin/sbs --help` and `./bin/sbs --version` are safe reference commands.
+
+## Operations helpers
+
+- `bun run stripe:create-product`
+- `bun run stripe:listen:dev`
+- `bun run stripe:webhook:sync`
+- `bun run stripe:dev:doctor`
+- `bun run auth:dev:doctor`
+- `bun run clerk:test-user:check`
+- `bun run clerk:test-user:create`
+- `bun run clerk:test-user:check:entitled`
+- `bun run clerk:test-user:create:entitled`
+- `bun run clerk:test-user:prepare:entitled`
+- `bun run video:*` commands operate the optional lesson-video pipeline.
+
+## Current note
+
+The branch keeps the existing `qa:*` command family and app-local test harness from `dev/main`. The new additions here are the docs-spine and markdown/plan linting surfaces, not a full test-system replacement.

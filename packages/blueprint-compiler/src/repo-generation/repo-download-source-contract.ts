@@ -16,7 +16,8 @@ export const customerSafeRepoRootFilePaths = [
 	"bun.lock",
 	"bunfig.toml",
 	"package.json",
-	".plans/PLANS.md",
+	"docs/PLANS.md",
+	"docs/exec-plans/PLANS.md",
 ] as const;
 
 export const customerSafeAppFilePaths = [

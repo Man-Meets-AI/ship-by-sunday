@@ -1,33 +1,25 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+	buildRepoGenerationManifest,
+	createCompleteProjectDefinition,
+	getStarterSnapshotArchiveFileName,
+} from "@shipbysunday/blueprint-compiler";
 
 const getBlueprintDownloadContextMock = vi.fn();
-const buildReviewDownloadZipMock = vi.fn();
 
 vi.mock("@/features/blueprint-flow/server/downloads", () => ({
 	getBlueprintDownloadContext: getBlueprintDownloadContextMock,
 }));
 
-vi.mock("@shipbysunday/blueprint-compiler", () => ({
-	buildRepoGenerationManifest: () => ({
-		repoName: "ship-by-sunday-os",
-	}),
-	getStarterSnapshotArchiveFileName: (repoName: string) => `${repoName}.zip`,
-}));
-
-vi.mock("@shipbysunday/blueprint-compiler/server", () => ({
-	buildReviewDownloadZip: buildReviewDownloadZipMock,
-}));
-
 describe("blueprint download routes", () => {
 	beforeEach(() => {
 		getBlueprintDownloadContextMock.mockReset();
-		buildReviewDownloadZipMock.mockReset();
 	});
 
-	it("returns the repo archive when review is ready", async () => {
-		buildReviewDownloadZipMock.mockResolvedValue(Buffer.from("zip"));
+	it("returns the real repo archive when review is ready", async () => {
+		const canonicalProjectDefinition = createCompleteProjectDefinition();
 		getBlueprintDownloadContextMock.mockResolvedValue({
-			canonicalProjectDefinition: { facts: {} },
+			canonicalProjectDefinition,
 			token: "token_123",
 			workspaceState: {
 				blueprintReadiness: {
@@ -41,12 +33,15 @@ describe("blueprint download routes", () => {
 
 		const { GET } = await import("@/app/api/download/repo/route");
 		const response = await GET();
+		const archiveBytes = new Uint8Array(await response.arrayBuffer());
+		const manifest = buildRepoGenerationManifest(canonicalProjectDefinition);
 
 		expect(response.status).toBe(200);
 		expect(response.headers.get("content-type")).toBe("application/zip");
 		expect(response.headers.get("content-disposition")).toBe(
-			'attachment; filename="ship-by-sunday-os.zip"',
+			`attachment; filename="${getStarterSnapshotArchiveFileName(manifest.repoName)}"`,
 		);
-		expect(new Uint8Array(await response.arrayBuffer())).toHaveLength(3);
+		expect(archiveBytes.length).toBeGreaterThan(100);
+		expect(Array.from(archiveBytes.slice(0, 2))).toEqual([80, 75]);
 	});
 });

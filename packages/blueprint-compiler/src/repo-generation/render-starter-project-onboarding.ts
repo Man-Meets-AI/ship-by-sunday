@@ -39,7 +39,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 		customerAction: [
 			"Read `README.md` for the repo overview.",
 			"Read `DESIGN.md` for the generated visual system and product feel.",
-			"Skim `docs/README.md` so you know what packs and setup docs are already included.",
+			"Skim `docs/index.md` so you know what packs and setup docs are already included.",
 		],
 		agentPrompt:
 			"Summarize this starter repo before changing code. Tell me what is product-specific, what is starter scaffolding, and what I should leave alone until setup is stable.",
@@ -47,7 +47,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 		references: [
 			{ label: "README.md", path: "README.md" },
 			{ label: "DESIGN.md", path: "DESIGN.md" },
-			{ label: "docs/README.md", path: "docs/README.md" },
+			{ label: "docs/index.md", path: "docs/index.md" },
 		],
 	},
 	{

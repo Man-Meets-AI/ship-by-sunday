@@ -36,7 +36,13 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 				"Ship the ExecPlan prompt assets unchanged under repo-root docs/prompts.",
 		},
 		{
-			pathPattern: ".plans/PLANS.md",
+			pathPattern: "docs/PLANS.md",
+			shippingMode: "ship-unchanged",
+			reason:
+				"Keep the top-level planning route aligned with the repo docs spine.",
+		},
+		{
+			pathPattern: "docs/exec-plans/PLANS.md",
 			shippingMode: "ship-unchanged",
 			reason: "Keep the canonical ExecPlan contract in the starter repo.",
 		},
@@ -87,12 +93,6 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 			shippingMode: "exclude",
 			reason:
 				"Exclude the tracked production env file and replace it with a safe example template.",
-		},
-		{
-			pathPattern: ".plans/**",
-			shippingMode: "exclude",
-			reason:
-				"Exclude internal planning history except for the canonical PLANS contract.",
 		},
 		{
 			pathPattern: "docs/codex/**",

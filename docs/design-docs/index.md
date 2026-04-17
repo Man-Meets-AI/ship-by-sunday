@@ -13,10 +13,6 @@ read_when:
 
 ## Current Notes
 
-- [architecture.md](./architecture.md)
-- [workspace-layout.md](./workspace-layout.md)
-- [product-contract.md](./product-contract.md)
 - [integrations.md](./integrations.md)
-- [testing-and-release.md](./testing-and-release.md)
 - [scripts.md](./scripts.md)
 - [encyclopedia.md](./encyclopedia.md)

@@ -1,6 +1,6 @@
 # Ship by Sunday
 
-Ship by Sunday is an agent-ready, blueprint-first SaaS starter for turning one product idea into durable design, marketing, build, and prompt handoff packs. The repo includes the public marketing site, protected blueprint workspace, Stripe checkout flow, Clerk auth, Convex backend, blueprint compiler, intake CLI, and QA operating system that support that contract.
+Ship by Sunday is an agent-ready, blueprint-first SaaS starter for turning one product idea into durable design, marketing, build, and prompt handoff packs. The repo includes the public marketing site, protected blueprint workspace, Stripe checkout flow, Clerk auth, Convex backend, blueprint compiler, intake CLI, and the docs/runbook surfaces that support that contract.
 
 ## Design system
 
@@ -13,9 +13,8 @@ Use it before changing any user-facing UI. It documents the shared neutral app t
 - `apps/web/`: the main Next.js product, docs, protected workspace, checkout, and optional Codex runtime.
 - `packages/blueprint-compiler/`: the generator behind the customer-facing Ship by Sunday Blueprint, including the downloaded repo’s generated root `DESIGN.md`, machine-readable design snapshot, and starter-runtime design config.
 - `packages/ship-by-sunday-cli/`: local blueprint-intake and snapshot-generation CLI.
-- `qa/`: QA control plane, scenario packs, personas, and run evidence.
-- `docs/`: long-form runbooks, ExecPlans, prompts, and historical product context.
-- `.docs/`: short hidden reference docs for agents and operators.
+- `qa/`: the current QA control plane, scenario packs, personas, and run evidence.
+- `docs/`: the canonical contributor and agent-facing docs spine, plus ExecPlans, prompts, references, and generated analyses.
 
 The protected journey is blueprint-first:
 
@@ -75,36 +74,41 @@ This repo does not support Convex local mode as a first-class workflow.
 ## Common commands
 
 ```bash
+bun run format
 bun run typecheck
 bun run lint
 bun run format:check
 bun run test:unit
 bun run test:contracts
 bun run test:integration
-bun run test:coverage:critical
 bun run test:browser-smoke
 bun run build
+bun run markdown:lint -- --paths <repo-path-or-dir>
+bun run plans:lint -- --plan docs/exec-plans/active/<plan-file>.md
 bun run check
 ```
 
-For the full command map, use [`.docs/scripts.md`](./.docs/scripts.md).
+For the full command map, use [docs/design-docs/scripts.md](./docs/design-docs/scripts.md).
 
 ## Operations
 
+- Docs index: [docs/index.md](./docs/index.md)
 - Observability runbook: [docs/internal/observability.md](./docs/internal/observability.md)
 - Release workflow runbook: [docs/release-workflow.md](./docs/release-workflow.md)
 - QA control plane: [qa/README.md](./qa/README.md)
 - Homepage contract: [apps/web/content/docs/configure-the-homepage.mdx](./apps/web/content/docs/configure-the-homepage.mdx)
 - Public docs index: [apps/web/content/docs/index.mdx](./apps/web/content/docs/index.mdx)
 
-Relevant hidden reference docs:
+Relevant deeper reference docs:
 
-- [`.docs/workspace-layout.md`](./.docs/workspace-layout.md)
-- [`.docs/architecture.md`](./.docs/architecture.md)
-- [`.docs/product-contract.md`](./.docs/product-contract.md)
-- [`.docs/integrations.md`](./.docs/integrations.md)
-- [`.docs/testing-and-release.md`](./.docs/testing-and-release.md)
-- [`.docs/encyclopedia.md`](./.docs/encyclopedia.md)
+- [docs/design-docs/index.md](./docs/design-docs/index.md)
+- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
+- [docs/RELIABILITY.md](./docs/RELIABILITY.md)
+- [docs/SECURITY.md](./docs/SECURITY.md)
+- [docs/FRONTEND.md](./docs/FRONTEND.md)
+- [docs/DESIGN.md](./docs/DESIGN.md)
+- [docs/PRODUCT_SENSE.md](./docs/PRODUCT_SENSE.md)
+- [docs/QUALITY_SCORE.md](./docs/QUALITY_SCORE.md)
 
 ## CLI
 
@@ -129,4 +133,4 @@ The install story is intentionally simple: clone the repo, run `bun install`, an
 - Changelog: [CHANGELOG.md](./CHANGELOG.md)
 - Root agent instructions: [AGENTS.md](./AGENTS.md)
 
-If you are new to the repo, start with `README.md`, then `AGENTS.md`, then `DESIGN.md`, then `qa/README.md` or `docs/release-workflow.md` depending on whether you are building or operating.
+If you are new to the repo, start with `README.md`, then `AGENTS.md`, then `docs/index.md`, then `DESIGN.md`, then `docs/release-workflow.md` or `apps/web/content/docs/local-qa.mdx` depending on whether you are shipping or debugging app-local tests.
