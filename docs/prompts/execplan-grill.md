@@ -8,7 +8,7 @@ The OpenAI-aligned workflow is:
 
 1. Use plan mode for difficult work.
 2. Ask Codex to interview you when ambiguity remains.
-3. Use `.plans/PLANS.md` plus a self-contained ExecPlan for long-horizon work.
+3. Use `docs/exec-plans/PLANS.md` plus a self-contained ExecPlan for long-horizon work.
 
 This prompt combines those ideas for a specific plan review pass.
 
@@ -27,11 +27,11 @@ Then paste a prompt like the one below.
 ```text
 Read the repo root `AGENTS.md` first and follow it.
 
-Read `.plans/PLANS.md` next and use it as the contract for what a good ExecPlan must contain.
+Read `docs/exec-plans/PLANS.md` next and use it as the contract for what a good ExecPlan must contain.
 
 Read this target ExecPlan carefully:
 <target_execplan_path>
-.plans/example-initiative.md
+docs/exec-plans/active/example-initiative.md
 </target_execplan_path>
 
 You are in planning mode. Do not implement product code.
@@ -94,7 +94,7 @@ Review standard:
 - Prefer narrowing and concretizing the plan over generating more options.
 - Challenge assumptions directly when they seem weak.
 - If the plan claims behavior that is not grounded in the repo, call that out explicitly.
-- If the plan is missing the explicit `.plans/PLANS.md` reference sentence near the top, call that out.
+- If the plan is missing the explicit `docs/exec-plans/PLANS.md` reference sentence near the top, call that out.
 - If the plan is missing `Artifacts and Notes` or `Interfaces and Dependencies`, call that out.
 - If a section of the ExecPlan is underspecified, cite the section heading and describe what is missing.
 - If the plan is already solid in an area, say so and move on.

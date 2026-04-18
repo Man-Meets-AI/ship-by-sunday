@@ -6,13 +6,6 @@ import Stripe from "stripe";
 const WEBHOOK_ENV_KEY = "STRIPE_WEBHOOK_SECRET";
 const STRIPE_SECRET_ENV_KEY = "STRIPE_SECRET_KEY";
 const ENV_FILE_PATH = path.join(process.cwd(), ".env.local");
-const CONVEX_BIN_PATH = path.join(
-	process.cwd(),
-	"node_modules",
-	"convex",
-	"bin",
-	"main.js",
-);
 const LOCALHOST_HOSTS = new Set(["127.0.0.1", "0.0.0.0", "localhost"]);
 const ANSI_ESCAPE_PATTERN_SOURCE =
 	"\\u001B(?:[@-Z\\\\-_]|\\[[0-?]*[ -/]*[@-~])";
@@ -196,13 +189,7 @@ async function updateEnvFile(secret) {
 }
 
 async function syncConvexEnv(key, value) {
-	const result = await runCommand(process.execPath, [
-		CONVEX_BIN_PATH,
-		"env",
-		"set",
-		key,
-		value,
-	]);
+	const result = await runCommand("bunx", ["convex", "env", "set", key, value]);
 
 	if (result.code !== 0) {
 		throw new Error(
@@ -232,7 +219,7 @@ async function syncWebhookSecret(secret) {
 		`- Convex dev env (${STRIPE_SECRET_ENV_KEY}): ${convexStripeSecretStatus}`,
 	);
 	console.log(
-		"- Restart `bun run dev:web` if it was already running before the secret changed.",
+		"- Restart `bun run dev` if it was already running before the secret changed.",
 	);
 }
 

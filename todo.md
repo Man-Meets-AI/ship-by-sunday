@@ -1,5 +1,17 @@
 # todo
 
+## today
+
+- Review Matt Pocock's workflow for pulling the day's issues and decide which parts of that flow should become the repo's daily operating pattern.
+- Update pricing back to `$500` and add an auto-applied `50%` discount path that stays truthful across checkout, homepage copy, and any visible billing surfaces.
+- Add a reusable banner surface for promo messaging so we can display different discounts without hard-wiring one-off homepage copy each time.
+- Add email support with the smallest viable product boundary first, then wire docs and runtime expectations around the chosen path.
+- Update the docs spine so the canonical root/docs entry points teach the live workflow and pricing/support surfaces.
+- Update the ExecPlan spine so active planning docs, indexes, and prompts point at the live repo contract instead of stale paths or legacy planning surfaces.
+- Update the skills so the built-in repo guidance matches the current product, release, pricing, and support workflow.
+- Pull in whatever can be reused directly from `fix-tests`, especially CI, Playwright, and test-harness improvements that reduce rework on this branch.
+- Reach goal: simplify the test harness further once the core pricing, banner, email, docs, ExecPlan, and skills changes are landed.
+
 ## recent
 
 - **2026-04-10 14:05 EDT** — Blueprint design-preset closeout on `feat/landing-page-video`: shipped the curated design-direction catalog with repo-owned preview assets, wired `design_preset_id` through the blueprint web flow, compiler, presentation layer, and local CLI, added preset provenance to generated design output, and updated the homepage starter-system story to mention curated design-direction selection with preview. Rechecked focused `apps/web` Vitest slices, `packages/blueprint-compiler` tests, `packages/blueprint-presentation` test, `packages/ship-by-sunday-cli` tests, package-local format/lint/typecheck for the changed workspaces, and the required root `bun run format`, `bun run lint`, and `bun run typecheck`. `CHANGELOG.md` updated for the shipped buyer-facing capability.

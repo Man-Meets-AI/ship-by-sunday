@@ -24,11 +24,7 @@ describe("repo generation", () => {
 			]),
 		);
 		expect(manifest.includedFiles).toEqual(
-			expect.arrayContaining([
-				"bunfig.toml",
-				".plans/PLANS.md",
-				"apps/web/.env.local.example",
-			]),
+			expect.arrayContaining(["bunfig.toml", "apps/web/.env.local.example"]),
 		);
 	});
 
@@ -132,15 +128,17 @@ describe("repo generation", () => {
 				"apps/web/config/product.ts",
 				"apps/web/config/generated-design-system.ts",
 				"apps/web/features/marketing/content/home.ts",
-				"docs/README.md",
+				"docs/index.md",
 				"docs/build/docs/prompt.md",
 				"docs/facts/design-system.json",
-				".plans/PLANS.md",
 				"apps/web/.env.production.example",
 				"qa/README.md",
 				".agents/README.md",
 				".github/workflows/examples/basic-ci.example.yml",
 			]),
+		);
+		expect(snapshotPaths).not.toEqual(
+			expect.arrayContaining(["docs/PLANS.md", "docs/exec-plans/PLANS.md"]),
 		);
 		const forbiddenPaths = snapshotPaths.filter((path) =>
 			isExcludedSnapshotPath(path),

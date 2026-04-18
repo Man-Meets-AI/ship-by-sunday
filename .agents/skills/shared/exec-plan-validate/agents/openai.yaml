@@ -1,0 +1,6 @@
+interface:
+  display_name: "ExecPlan Validate"
+  short_description: "Prove approved ExecPlans against the real stack"
+  default_prompt: "Use $exec-plan-validate to boot repo-owned proof surfaces, self-observe the live system, and validate an approved ExecPlan end to end."
+policy:
+  allow_implicit_invocation: false

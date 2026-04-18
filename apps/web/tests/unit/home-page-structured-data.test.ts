@@ -33,7 +33,7 @@ describe("home page structured data", () => {
 		expect(organization?.logo).toMatch(/^https?:\/\//);
 		expect(product?.offers?.url).toContain("#pricing");
 		expect(product?.offers?.price).toBe(
-			(productConfig.priceUsdCents / 100).toString(),
+			(productConfig.checkoutPriceUsdCents / 100).toString(),
 		);
 		expect(product?.offers?.priceCurrency).toBe(productConfig.currency);
 		expect(faqPage?.mainEntity).toHaveLength(

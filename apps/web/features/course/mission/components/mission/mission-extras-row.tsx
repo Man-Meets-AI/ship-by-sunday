@@ -44,8 +44,8 @@ function BonusPlaylistItem() {
 						{productConfig.bonusName}
 					</ItemTitle>
 					<ItemDescription className="line-clamp-none">
-						Optional playlist for product judgment — scope, prioritization, v1
-						decisions.
+						Optional AI course for practical workflows, prompting patterns, and
+						build reps after the first sprint.
 					</ItemDescription>
 				</ItemContent>
 				<Button asChild variant="ghost" size="sm" className="shrink-0">

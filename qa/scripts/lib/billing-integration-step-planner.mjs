@@ -52,7 +52,22 @@ export function buildBillingIntegrationSteps({
 				`--slug=${slug}`,
 			],
 		},
-		...(isProductionBillingTarget(targetUrl)
+		...(isLocalBillingTarget
+			? [
+					{
+						label: "Run the billing-integration sandbox browser pack",
+						command: [
+							"bun",
+							"run",
+							"--cwd",
+							"apps/web",
+							"test:e2e:sandbox:billing-integration",
+						],
+						env: authenticatedBrowserEnv,
+						requireBrowserEvidence: true,
+					},
+				]
+			: isProductionBillingTarget(targetUrl)
 			? [
 					{
 						label: "Run the hosted production billing proof",
@@ -72,13 +87,15 @@ export function buildBillingIntegrationSteps({
 				]
 			: [
 					{
-						label: "Run the billing-integration sandbox browser pack",
+						label: "Run the hosted dev billing proof",
 						command: [
 							"bun",
 							"run",
 							"--cwd",
 							"apps/web",
-							"test:e2e:sandbox:billing-integration",
+							"stripe:hosted:verify:dev",
+							"--",
+							`--base-url=${targetUrl}`,
 						],
 						env: authenticatedBrowserEnv,
 						requireBrowserEvidence: true,

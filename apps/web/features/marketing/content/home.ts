@@ -5,7 +5,19 @@ import {
 } from "@/features/starter/lib/starter-selectors";
 
 const productName = productConfig.name;
-const bonusName = productConfig.bonusName;
+const activePricingOffer = productConfig.activeOffer;
+const promoBanner = activePricingOffer
+	? {
+			label: activePricingOffer.label,
+			message: `Get ${productName} for ${productConfig.checkoutPriceDisplay} instead of ${productConfig.priceDisplay}. ${activePricingOffer.percentOff}% off auto-applied at checkout, plus FULL TURBO free.`,
+		}
+	: null;
+const pricingOfferBanner = activePricingOffer
+	? {
+			label: activePricingOffer.label,
+			message: `${activePricingOffer.percentOff}% off the ${productConfig.priceDisplay} list price. Auto-applied at checkout.`,
+		}
+	: null;
 
 export const homePageContent = {
 	assets: {
@@ -14,10 +26,11 @@ export const homePageContent = {
 	hero: {
 		docsLabel: marketingDisplayConfig.docsLabel,
 		loginLabel: marketingDisplayConfig.loginLabel,
+		promoBanner,
 		headlineLead: "Ship a real product",
 		headlineTailPrefix: "",
 		headlineTailHover: "by Sunday",
-		body: "The only system that teaches you how to ship a durable product from start to finish in one weekend. Oh, and it includes building you a ridiculous custom template from scratch based on what you want to build. We should charge more for this.",
+		body: "Ship a durable product in one weekend with a blueprint-first system and a custom starter shaped around what you're building.",
 		primaryCta: marketingDisplayConfig.primaryCtaLabel,
 		secondaryCta: {
 			label: "See how Ship Blueprint works",
@@ -53,20 +66,6 @@ export const homePageContent = {
 		label: "Built by someone who ships",
 		headline: "Built by someone who has actually shipped products.",
 		body: "Worked across UX, product, design, and engineering. Helped scale a startup to $73M/year. Stayed through acquisition. Ship by Sunday is new. The operating experience behind it is not.",
-		screenshots: [
-			{
-				src: "/screenshots/product-truth.png",
-				alt: "Product Truth screenshot showing locked buyer, problem, scope, and constraints",
-			},
-			{
-				src: "/screenshots/agent-ready-packs.png",
-				alt: "Agent-Ready Packs screenshot showing design, marketing, build, and prompt packs",
-			},
-			{
-				src: "/screenshots/blueprint.png",
-				alt: "Ship Kit screenshot showing the source of truth the repo builds from",
-			},
-		],
 	},
 	faqSection: {
 		label: "FAQ",
@@ -112,8 +111,7 @@ export const homePageContent = {
 	},
 	whatsInsideSection: {
 		label: "By Sunday",
-		title:
-			"By Sunday, you leave with the product truth, the agent packs, and the starter path.",
+		title: "Get it Done.",
 		intro:
 			"Enough clarity to build. Enough structure to hand off. No vague prompts, no half-decisions.",
 		pillars: [
@@ -224,7 +222,14 @@ export const homePageContent = {
 		titleAccent: "by Sunday",
 		intro:
 			"One payment for Ship Blueprint: the guided blueprint-first run, the Agent-Ready Packs, the Ship by Sunday Blueprint, and the guidance that keeps you shipping after the first weekend.",
-		priceDisplay: productConfig.priceDisplay,
+		priceDisplay: productConfig.checkoutPriceDisplay,
+		originalPriceDisplay: activePricingOffer
+			? productConfig.priceDisplay
+			: null,
+		offerPriceDisplay:
+			activePricingOffer?.discountedPriceDisplay ??
+			productConfig.checkoutPriceDisplay,
+		offerBanner: pricingOfferBanner,
 		eyebrow: "One-time payment. Lifetime access.",
 		ctaTitle: "Get the system",
 		trustLine: `After checkout, you go straight into the ${workspaceDisplayConfig.homeNoun} to lock the truth, compile the packs, and shape your Blueprint.`,
@@ -237,13 +242,11 @@ export const homePageContent = {
 			"Product Sense Fundamentals",
 		],
 		bonus: {
-			label: "Also included",
-			title: `Also included: ${bonusName}`,
+			label: "Additional bonus",
+			title: "FREE BONUS: FULL TURBO",
 			description:
-				"If product judgment is still the weak spot, this stays in the bundle without becoming the point of the offer.",
+				"Get FULL TURBO free with your purchase: a 30-video AI course that gives you the practical workflows, prompting patterns, and build reps to move faster after the weekend sprint.",
 		},
-		guarantee:
-			"Complete the Product stage within 14 days. If you do not leave with a clearer product definition and tighter v1 scope, email us and we will refund you.",
 	},
 	footerWordmark: productName,
 } as const;

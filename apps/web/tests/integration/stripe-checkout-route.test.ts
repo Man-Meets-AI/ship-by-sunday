@@ -5,6 +5,7 @@ const currentUserMock = vi.fn();
 const createSessionMock = vi.fn();
 const getAppBaseUrlMock = vi.fn();
 const getStripeLineItemMock = vi.fn();
+const getStripeCheckoutDiscountsMock = vi.fn();
 const assertManagedStripePriceMatchesProductConfigMock = vi.fn();
 const getStripeMock = vi.fn();
 const getStripeModeLabelMock = vi.fn();
@@ -19,6 +20,7 @@ vi.mock("@clerk/nextjs/server", () => ({
 vi.mock("@/platform/billing/stripe", () => ({
 	getStripe: getStripeMock,
 	getStripeLineItem: getStripeLineItemMock,
+	getStripeCheckoutDiscounts: getStripeCheckoutDiscountsMock,
 	assertManagedStripePriceMatchesProductConfig:
 		assertManagedStripePriceMatchesProductConfigMock,
 	getStripeModeLabel: getStripeModeLabelMock,
@@ -43,6 +45,7 @@ describe("POST /api/stripe/checkout", () => {
 		createSessionMock.mockReset();
 		getAppBaseUrlMock.mockReset();
 		getStripeLineItemMock.mockReset();
+		getStripeCheckoutDiscountsMock.mockReset();
 		assertManagedStripePriceMatchesProductConfigMock.mockReset();
 		getStripeMock.mockReset();
 		getStripeModeLabelMock.mockReset();
@@ -57,6 +60,11 @@ describe("POST /api/stripe/checkout", () => {
 		getStripeProductDashboardUrlMock.mockReturnValue(
 			"https://dashboard.stripe.com/test/products",
 		);
+		getStripeCheckoutDiscountsMock.mockReturnValue([
+			{
+				promotion_code: "promo_50_off",
+			},
+		]);
 		vi.resetModules();
 	});
 
@@ -67,7 +75,7 @@ describe("POST /api/stripe/checkout", () => {
 			price_data: {
 				currency: "usd",
 				product_data: { name: "Ship by Sunday" },
-				unit_amount: 25000,
+				unit_amount: 50000,
 			},
 			quantity: 1,
 		});
@@ -109,11 +117,12 @@ describe("POST /api/stripe/checkout", () => {
 						price_data: {
 							currency: "usd",
 							product_data: { name: "Ship by Sunday" },
-							unit_amount: 25000,
+							unit_amount: 50000,
 						},
 						quantity: 1,
 					},
 				],
+				discounts: [{ promotion_code: "promo_50_off" }],
 				payment_intent_data: {
 					metadata: {
 						courseSlug: "ship-by-sunday",
@@ -141,7 +150,7 @@ describe("POST /api/stripe/checkout", () => {
 			price_data: {
 				currency: "usd",
 				product_data: { name: "Ship by Sunday" },
-				unit_amount: 25000,
+				unit_amount: 50000,
 			},
 			quantity: 1,
 		});
@@ -173,17 +182,17 @@ describe("POST /api/stripe/checkout", () => {
 		expect(getStripeLineItemMock).toHaveBeenCalledTimes(1);
 		expect(createSessionMock).toHaveBeenCalledWith(
 			expect.objectContaining({
-				allow_promotion_codes: true,
 				billing_address_collection: "auto",
 				cancel_url: "https://app.example.com/checkout/cancel",
 				client_reference_id: "user_123",
 				customer_email: "buyer@example.com",
+				discounts: [{ promotion_code: "promo_50_off" }],
 				line_items: [
 					{
 						price_data: {
 							currency: "usd",
 							product_data: { name: "Ship by Sunday" },
-							unit_amount: 25000,
+							unit_amount: 50000,
 						},
 						quantity: 1,
 					},
@@ -203,6 +212,9 @@ describe("POST /api/stripe/checkout", () => {
 					"https://app.example.com/checkout/success?session_id={CHECKOUT_SESSION_ID}",
 			}),
 		);
+		expect(createSessionMock.mock.calls[0]?.[0]).not.toHaveProperty(
+			"allow_promotion_codes",
+		);
 		expect(
 			assertManagedStripePriceMatchesProductConfigMock,
 		).toHaveBeenCalledWith(expect.anything());
@@ -216,7 +228,7 @@ describe("POST /api/stripe/checkout", () => {
 			price_data: {
 				currency: "usd",
 				product_data: { name: "Ship by Sunday" },
-				unit_amount: 25000,
+				unit_amount: 50000,
 			},
 			quantity: 1,
 		});
@@ -269,7 +281,7 @@ describe("POST /api/stripe/checkout", () => {
 		});
 		assertManagedStripePriceMatchesProductConfigMock.mockRejectedValue(
 			new Error(
-				"Configured Stripe price price_wrong_amount charges 50000 cents, expected 25000.",
+				"Configured Stripe price price_wrong_amount charges 25000 cents, expected 50000.",
 			),
 		);
 
@@ -281,7 +293,7 @@ describe("POST /api/stripe/checkout", () => {
 		expect(createSessionMock).not.toHaveBeenCalled();
 		const body = (await response.json()) as Record<string, unknown>;
 		expect(body.error).toBe(
-			"Configured Stripe price price_wrong_amount charges 50000 cents, expected 25000.",
+			"Configured Stripe price price_wrong_amount charges 25000 cents, expected 50000.",
 		);
 		expect(
 			assertManagedStripePriceMatchesProductConfigMock,

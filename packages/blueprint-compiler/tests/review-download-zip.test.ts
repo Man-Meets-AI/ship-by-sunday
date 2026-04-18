@@ -30,11 +30,17 @@ describe("review download zip", () => {
 				"ship-by-sunday-os/.agents/skills/external-skills.json",
 				"ship-by-sunday-os/apps/web/content/docs/index.mdx",
 				"ship-by-sunday-os/apps/web/config/generated-design-system.ts",
-				"ship-by-sunday-os/docs/README.md",
+				"ship-by-sunday-os/docs/index.md",
 				"ship-by-sunday-os/docs/build/docs/prompt.md",
 				"ship-by-sunday-os/docs/facts/design-system.json",
 				"ship-by-sunday-os/apps/web/.env.production.example",
 				"ship-by-sunday-os/qa/README.md",
+			]),
+		);
+		expect(entries).not.toEqual(
+			expect.arrayContaining([
+				"ship-by-sunday-os/docs/PLANS.md",
+				"ship-by-sunday-os/docs/exec-plans/PLANS.md",
 			]),
 		);
 		expect(forbiddenEntries).toEqual([]);

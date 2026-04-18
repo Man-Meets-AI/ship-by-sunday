@@ -1,0 +1,6 @@
+interface:
+  display_name: "ExecPlan Griller"
+  short_description: "Review and harden ExecPlans"
+  default_prompt: "Use $exec-plan-griller to review an ExecPlan against docs/exec-plans/PLANS.md, find missing rigor, and repair the plan in place."
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,6 @@
+interface:
+  display_name: "ExecPlan Execute"
+  short_description: "Implement approved ExecPlans"
+  default_prompt: "Use $exec-plan-execute to implement an approved ExecPlan in a tight build-validate-update loop."
+policy:
+  allow_implicit_invocation: false

@@ -1,1 +1,1 @@
-/var/folders/hw/mg2gqq6j5cd8v3gd13cgdbhh0000gn/T/ship-by-sunday-release-snapshot-eKlH1n/source/AGENTS.md
+AGENTS.md
