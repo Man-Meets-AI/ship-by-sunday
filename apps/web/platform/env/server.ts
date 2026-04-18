@@ -24,6 +24,7 @@ const serverEnvSchema = z.object({
 	STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
 	STRIPE_PRICE_ID: z.string().min(1).optional(),
 	STRIPE_PRODUCT_ID: z.string().min(1).optional(),
+	STRIPE_PROMOTION_CODE_ID: z.string().min(1).optional(),
 	CODEX_BINARY: z.string().min(1).optional(),
 	CODEX_APP_SERVER_ENABLED: z.string().min(1).optional(),
 	CODEX_APP_SERVER_HOME_ROOT: z.string().min(1).optional(),
@@ -63,6 +64,9 @@ export function loadServerEnv() {
 		STRIPE_WEBHOOK_SECRET: normalizeEnvValue(process.env.STRIPE_WEBHOOK_SECRET),
 		STRIPE_PRICE_ID: normalizeEnvValue(process.env.STRIPE_PRICE_ID),
 		STRIPE_PRODUCT_ID: normalizeEnvValue(process.env.STRIPE_PRODUCT_ID),
+		STRIPE_PROMOTION_CODE_ID: normalizeEnvValue(
+			process.env.STRIPE_PROMOTION_CODE_ID,
+		),
 		CODEX_BINARY: normalizeEnvValue(process.env.CODEX_BINARY),
 		CODEX_APP_SERVER_ENABLED: normalizeEnvValue(
 			process.env.CODEX_APP_SERVER_ENABLED,

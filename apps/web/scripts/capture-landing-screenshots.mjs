@@ -1,7 +1,7 @@
 /**
  * Full-page PNGs of the marketing home page for decks / clients.
  *
- * Run from `apps/web` with the dev server up (`bun run dev:web` or `bun run dev:web:raw`):
+ * Run from `apps/web` with the dev server up (`bun run dev`, `bun run dev:web:only`, or `bun run dev:web:raw`):
  *   node scripts/capture-landing-screenshots.mjs
  *
  * Headless Chromium often never completes Framer Motion `whileInView` reveals, so

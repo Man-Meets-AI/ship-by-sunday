@@ -18,6 +18,49 @@ function getStripePayButton(page: Page) {
 		.or(page.getByRole("button", { name: /^pay$/i }));
 }
 
+async function fillStripeSandboxCardDetails(page: Page) {
+	const cardNumberInput = page.getByRole("textbox", { name: /card number/i });
+	await cardNumberInput
+		.waitFor({ state: "visible", timeout: 5_000 })
+		.catch(() => null);
+
+	if (!(await cardNumberInput.isVisible().catch(() => false))) {
+		return;
+	}
+
+	await cardNumberInput.fill("4242 4242 4242 4242");
+	await page.getByRole("textbox", { name: /expiration/i }).fill("12 / 34");
+	await page.getByRole("textbox", { name: /^cvc$/i }).fill("123");
+	await page
+		.getByRole("textbox", { name: /cardholder name/i })
+		.fill("Ship by Sunday QA");
+	await page.getByRole("textbox", { name: /^zip$/i }).fill("10001");
+}
+
+async function selectStripeSandboxCardPaymentMethod(page: Page) {
+	const payWithCardButton = page.getByRole("button", {
+		name: /pay with card/i,
+	});
+
+	await payWithCardButton
+		.waitFor({ state: "visible", timeout: 5_000 })
+		.catch(() => null);
+
+	if (await payWithCardButton.isVisible().catch(() => false)) {
+		await payWithCardButton.click();
+		return;
+	}
+
+	const cardRadio = page.getByRole("radio", { name: /^card$/i });
+	await cardRadio
+		.waitFor({ state: "visible", timeout: 5_000 })
+		.catch(() => null);
+
+	if (await cardRadio.isVisible().catch(() => false)) {
+		await cardRadio.check({ force: true });
+	}
+}
+
 async function completeStripeSandboxCheckout(page: Page) {
 	await page.waitForURL(/checkout\.stripe\.com/, {
 		timeout: 30_000,
@@ -44,6 +87,9 @@ async function completeStripeSandboxCheckout(page: Page) {
 			.waitFor({ state: "hidden", timeout: 15_000 })
 			.catch(() => null);
 	}
+
+	await selectStripeSandboxCardPaymentMethod(page);
+	await fillStripeSandboxCardDetails(page);
 
 	const payButton = getStripePayButton(page);
 

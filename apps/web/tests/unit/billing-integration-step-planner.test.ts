@@ -44,7 +44,7 @@ describe("billing integration step planner", () => {
 		).toBe(false);
 	});
 
-	it("keeps the sandbox browser pack on non-production hosted targets", () => {
+	it("uses the hosted verifier on non-production hosted targets", () => {
 		const steps = buildBillingIntegrationSteps({
 			authenticatedBrowserEnv: {
 				PLAYWRIGHT_BASE_URL: "https://dev.man-meets-ai.com",
@@ -61,8 +61,15 @@ describe("billing integration step planner", () => {
 			steps.some(
 				(step) =>
 					step.command.join(" ") ===
-					"bun run --cwd apps/web test:e2e:sandbox:billing-integration",
+					"bun run --cwd apps/web stripe:hosted:verify:dev -- --base-url=https://dev.man-meets-ai.com",
 			),
 		).toBe(true);
+		expect(
+			steps.some(
+				(step) =>
+					step.command.join(" ") ===
+					"bun run --cwd apps/web test:e2e:sandbox:billing-integration",
+			),
+		).toBe(false);
 	});
 });

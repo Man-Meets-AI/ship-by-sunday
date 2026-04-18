@@ -55,7 +55,7 @@ describe("generate command", () => {
 		});
 		expect(firstExitCode).toBe(0);
 		await expect(
-			access(path.join(outputPath, "ship-by-sunday-os", "docs", "README.md")),
+			access(path.join(outputPath, "ship-by-sunday-os", "docs", "index.md")),
 		).resolves.toBeUndefined();
 
 		const secondAttemptIo = createCliIo();
@@ -96,7 +96,7 @@ describe("generate command", () => {
 		expect(exitCode).toBe(0);
 		await expect(
 			access(
-				path.join(nestedOutputPath, "ship-by-sunday-os", "docs", "README.md"),
+				path.join(nestedOutputPath, "ship-by-sunday-os", "docs", "index.md"),
 			),
 		).resolves.toBeUndefined();
 	});
@@ -139,7 +139,7 @@ describe("generate command", () => {
 			access(path.join(outputPath, "keep.txt")),
 		).resolves.toBeUndefined();
 		await expect(
-			access(path.join(outputPath, "ship-by-sunday-os", "docs", "README.md")),
+			access(path.join(outputPath, "ship-by-sunday-os", "docs", "index.md")),
 		).resolves.toBeUndefined();
 	});
 

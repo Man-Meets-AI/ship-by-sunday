@@ -1,0 +1,6 @@
+interface:
+  display_name: "Land"
+  short_description: "Land a PR through review and CI"
+  default_prompt: "Use $land to commit the workspace, push the PR, handle review and CI, and keep it moving until the change reaches main."
+policy:
+  allow_implicit_invocation: false

@@ -57,6 +57,24 @@ export function getStripeLineItem() {
 	};
 }
 
+export function getStripeCheckoutDiscounts() {
+	if (!productConfig.activeOffer) {
+		return undefined;
+	}
+
+	if (!serverEnv.STRIPE_PROMOTION_CODE_ID) {
+		throw new Error(
+			"Missing STRIPE_PROMOTION_CODE_ID. The active pricing offer requires an auto-applied Stripe promotion code.",
+		);
+	}
+
+	return [
+		{
+			promotion_code: serverEnv.STRIPE_PROMOTION_CODE_ID,
+		},
+	];
+}
+
 export async function assertManagedStripePriceMatchesProductConfig(
 	stripe: Stripe,
 ) {
@@ -107,6 +125,12 @@ export function assertManagedStripeEnvConfiguredForRelease() {
 	if (!serverEnv.STRIPE_PRODUCT_ID) {
 		throw new Error(
 			"Missing STRIPE_PRODUCT_ID. Hosted preview and production release proof require a managed Stripe product.",
+		);
+	}
+
+	if (productConfig.activeOffer && !serverEnv.STRIPE_PROMOTION_CODE_ID) {
+		throw new Error(
+			"Missing STRIPE_PROMOTION_CODE_ID. Hosted preview and production release proof require the active Stripe promotion code.",
 		);
 	}
 }

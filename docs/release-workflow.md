@@ -65,7 +65,6 @@ Create that secret from the Convex dashboard for the production deployment:
    `Review this branch against main. Have pr_explorer map the affected code paths, reviewer find real risks, and docs_researcher verify the framework APIs that the patch relies on.`
 
 9. Fix substantive findings and merge the `dev -> main` release PR only after `static`, `integration`, `browser-smoke`, and `cli` are green.
-   If the `dev -> main` PR is `DIRTY`, do not hand-resolve the release in the PR UI. Create a clean release snapshot branch from `main` whose working tree exactly matches the intended `dev` head, then open the production PR from that snapshot branch instead.
 10. Tag the merged `main` commit with the next pre-1.0 version and publish the matching GitHub Release from that tag. Copy or summarize the notes from the corresponding `CHANGELOG.md` section before publishing.
 11. Watch Vercel create the production web deploy from the merged `main` commit.
 12. Watch GitHub Actions run `Convex Production Deploy` for the same merged `main` commit.
@@ -85,12 +84,9 @@ cd apps/web && bunx convex logs --prod --history 20
 PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run qa:run-pack -- --pack=default_ship
 cd apps/web && bun --env-file=.env.local scripts/verify-managed-stripe-env.ts --expected-mode=test --app-base-url=https://dev.man-meets-ai.com
 cd apps/web && bun --env-file=.env.production scripts/verify-managed-stripe-env.ts --expected-mode=live --app-base-url=https://www.man-meets-ai.com
-bun run release:snapshot -- --source-ref origin/dev --base-ref origin/main --push
 ```
 
 For staging or production billing verification in this repo, prefer a restricted live `100% off` discount and confirm the buyer auto-forwards from `/checkout/success` into `/start`. On production, the canonical automation should create the Checkout Session directly with the discount already attached instead of relying on promotion-code entry in Stripe’s hosted UI. Use [docs/internal/observability.md](./internal/observability.md) for the incident-control and webhook-origin drill.
-
-The snapshot helper is the standard fallback when the release candidate is good but the branch histories make `dev -> main` non-mergeable. It creates a temporary branch on top of the current `main`, copies the exact tracked tree from `dev`, commits that snapshot, and optionally pushes it. The important invariant is that the snapshot branch’s tree matches `dev`, while its parent commit stays on `main`, so GitHub can review and merge it cleanly.
 
 For the matching QA command:
 

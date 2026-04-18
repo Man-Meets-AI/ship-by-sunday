@@ -17,7 +17,7 @@ function renderAssistantGuide(
 			"",
 			"## Start Here",
 			"",
-			"- Read `README.md`, then open `DESIGN.md`, `docs/README.md`, and `docs/facts/project-definition.json`.",
+			"- Read `README.md`, then open `DESIGN.md`, `docs/index.md`, and `docs/facts/project-definition.json`.",
 			"- Treat `DESIGN.md` as the visual source of truth before changing layout, styling, theming, motion, or component presentation.",
 			"- When using an AI coding or design tool, explicitly tell it to follow `DESIGN.md` and the generated design snapshot before it proposes UI changes.",
 			"- Use `bun` for JavaScript work and `uv` for Python utilities.",

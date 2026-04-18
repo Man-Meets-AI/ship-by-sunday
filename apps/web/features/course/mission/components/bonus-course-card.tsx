@@ -23,9 +23,9 @@ export function BonusCourseCard() {
 							{productConfig.bonusName}
 						</CardTitle>
 						<CardDescription className="text-base leading-relaxed text-foreground">
-							Use this optional playlist when product judgment feels shaky: what
-							to build first, what to cut, and how to keep the v1 small enough
-							to ship.
+							Use this optional course when you want more reps on practical AI
+							workflows, prompting patterns, and how to keep momentum after the
+							first weekend.
 						</CardDescription>
 					</div>
 					<Badge variant="secondary" className="shrink-0">
@@ -42,12 +42,13 @@ export function BonusCourseCard() {
 							</ItemTitle>
 							<div className="space-y-2 text-sm leading-relaxed text-foreground">
 								<p>
-									Open it if you are second-guessing scope, user,
-									prioritization, or how to decide what the real v1 should be.
+									Open it if you want a faster path through prompting,
+									iteration, and the build loops that come after your first
+									ship.
 								</p>
 								<p>
-									Do not pause the sprint to binge it. Start Here still comes
-									first.
+									Do not pause the sprint to binge it. Ship the core flow first,
+									then use FULL TURBO as the deeper practice layer.
 								</p>
 							</div>
 						</ItemContent>
@@ -64,8 +65,8 @@ export function BonusCourseCard() {
 						</a>
 					</Button>
 					<p className="text-sm leading-relaxed text-foreground/85">
-						Keep moving through the sprint. This is here when you need clearer
-						product judgment.
+						Keep moving through the sprint. This is here when you want more AI
+						build reps after the core setup is stable.
 					</p>
 				</div>
 			</CardContent>

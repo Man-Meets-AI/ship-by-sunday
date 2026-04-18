@@ -14,7 +14,7 @@ describe("blueprint renderers", () => {
 
 		expect(renderedPaths).toEqual(
 			expect.arrayContaining([
-				"docs/README.md",
+				"docs/index.md",
 				"docs/facts/project-definition.json",
 				"docs/design/AGENTS.md",
 				"docs/marketing/README.md",
@@ -24,7 +24,7 @@ describe("blueprint renderers", () => {
 			]),
 		);
 
-		const readme = renderedFiles.find((file) => file.path === "docs/README.md");
+		const readme = renderedFiles.find((file) => file.path === "docs/index.md");
 		const marketingReadme = renderedFiles.find(
 			(file) => file.path === "docs/marketing/README.md",
 		);
@@ -72,7 +72,7 @@ describe("blueprint renderers", () => {
 		const factsJson = renderedFiles.find(
 			(file) => file.path === "docs/facts/project-definition.json",
 		);
-		const readme = renderedFiles.find((file) => file.path === "docs/README.md");
+		const readme = renderedFiles.find((file) => file.path === "docs/index.md");
 
 		expect(factsJson?.content).toContain(
 			`"design_preset_id": "${DEFAULT_DESIGN_PRESET_ID}"`,

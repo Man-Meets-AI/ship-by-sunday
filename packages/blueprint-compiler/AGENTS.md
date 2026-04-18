@@ -20,7 +20,7 @@
 - repo-root `DESIGN.md`
 - generated docs under repo-root `docs/`
 - repo-root `README.md` override
-- repo-root `docs/README.md`
+- repo-root `docs/index.md`
 - repo-root `docs/facts/project-definition.json`
 - repo-root `docs/facts/design-system.json`
 - starter overrides for `apps/web/config/product.ts` and `apps/web/features/marketing/content/home.ts`

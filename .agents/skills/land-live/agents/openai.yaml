@@ -1,4 +1,0 @@
-interface:
-  display_name: "Land Live"
-  short_description: "Ship through dev and main safely."
-  default_prompt: "Use $land-live to shepherd this change through dev, then release it to main with the repo's real QA and production gates."
