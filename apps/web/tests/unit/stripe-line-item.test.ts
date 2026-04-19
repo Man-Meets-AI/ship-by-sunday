@@ -211,6 +211,15 @@ describe("getStripeLineItem", () => {
 		const { assertManagedStripeEnvReadyForRelease } =
 			await import("@/platform/billing/stripe");
 		const stripe = {
+			coupons: {
+				retrieve: vi.fn().mockResolvedValue({
+					applies_to: {
+						products: ["prod_correct"],
+					},
+					id: "coupon_50_off",
+					valid: true,
+				} satisfies Pick<Stripe.Coupon, "applies_to" | "id" | "valid">),
+			},
 			prices: {
 				retrieve: vi.fn().mockResolvedValue({
 					id: "price_correct",
@@ -222,11 +231,141 @@ describe("getStripeLineItem", () => {
 					"id" | "unit_amount" | "currency" | "product"
 				>),
 			},
+			promotionCodes: {
+				retrieve: vi.fn().mockResolvedValue({
+					active: true,
+					id: "promo_50_off",
+					promotion: {
+						coupon: "coupon_50_off",
+						type: "coupon",
+					},
+					restrictions: {
+						first_time_transaction: false,
+						minimum_amount: null,
+						minimum_amount_currency: null,
+					},
+				} satisfies Pick<
+					Stripe.PromotionCode,
+					"active" | "id" | "promotion" | "restrictions"
+				>),
+			},
 		} as unknown as Stripe;
 
 		await expect(
 			assertManagedStripeEnvReadyForRelease(stripe, { expectedMode: "test" }),
 		).resolves.toBeUndefined();
+	});
+
+	it("rejects a managed promotion code when it does not apply to the configured product", async () => {
+		process.env.STRIPE_SECRET_KEY = "sk_test_123";
+		process.env.STRIPE_PRICE_ID = "price_correct";
+		process.env.STRIPE_PRODUCT_ID = "prod_correct";
+		process.env.STRIPE_PROMOTION_CODE_ID = "promo_wrong_product";
+
+		const { assertManagedStripeEnvReadyForRelease } =
+			await import("@/platform/billing/stripe");
+		const stripe = {
+			coupons: {
+				retrieve: vi.fn().mockResolvedValue({
+					applies_to: {
+						products: ["prod_other"],
+					},
+					id: "coupon_wrong_product",
+					valid: true,
+				} satisfies Pick<Stripe.Coupon, "applies_to" | "id" | "valid">),
+			},
+			prices: {
+				retrieve: vi.fn().mockResolvedValue({
+					id: "price_correct",
+					unit_amount: productConfig.priceUsdCents,
+					currency: productConfig.currency,
+					product: "prod_correct",
+				} satisfies Pick<
+					Stripe.Price,
+					"id" | "unit_amount" | "currency" | "product"
+				>),
+			},
+			promotionCodes: {
+				retrieve: vi.fn().mockResolvedValue({
+					active: true,
+					id: "promo_wrong_product",
+					promotion: {
+						coupon: "coupon_wrong_product",
+						type: "coupon",
+					},
+					restrictions: {
+						first_time_transaction: false,
+						minimum_amount: null,
+						minimum_amount_currency: null,
+					},
+				} satisfies Pick<
+					Stripe.PromotionCode,
+					"active" | "id" | "promotion" | "restrictions"
+				>),
+			},
+		} as unknown as Stripe;
+
+		await expect(
+			assertManagedStripeEnvReadyForRelease(stripe, { expectedMode: "test" }),
+		).rejects.toThrow(
+			"Configured Stripe promotion code promo_wrong_product does not apply to product prod_correct.",
+		);
+	});
+
+	it("rejects a managed promotion code when its minimum order amount exceeds the configured price", async () => {
+		process.env.STRIPE_SECRET_KEY = "sk_test_123";
+		process.env.STRIPE_PRICE_ID = "price_correct";
+		process.env.STRIPE_PRODUCT_ID = "prod_correct";
+		process.env.STRIPE_PROMOTION_CODE_ID = "promo_high_minimum";
+
+		const { assertManagedStripeEnvReadyForRelease } =
+			await import("@/platform/billing/stripe");
+		const stripe = {
+			coupons: {
+				retrieve: vi.fn().mockResolvedValue({
+					applies_to: {
+						products: ["prod_correct"],
+					},
+					id: "coupon_high_minimum",
+					valid: true,
+				} satisfies Pick<Stripe.Coupon, "applies_to" | "id" | "valid">),
+			},
+			prices: {
+				retrieve: vi.fn().mockResolvedValue({
+					id: "price_correct",
+					unit_amount: productConfig.priceUsdCents,
+					currency: productConfig.currency,
+					product: "prod_correct",
+				} satisfies Pick<
+					Stripe.Price,
+					"id" | "unit_amount" | "currency" | "product"
+				>),
+			},
+			promotionCodes: {
+				retrieve: vi.fn().mockResolvedValue({
+					active: true,
+					id: "promo_high_minimum",
+					promotion: {
+						coupon: "coupon_high_minimum",
+						type: "coupon",
+					},
+					restrictions: {
+						first_time_transaction: false,
+						minimum_amount: productConfig.priceUsdCents + 100,
+						minimum_amount_currency: productConfig.currency,
+					},
+				} satisfies Pick<
+					Stripe.PromotionCode,
+					"active" | "id" | "promotion" | "restrictions"
+				>),
+			},
+		} as unknown as Stripe;
+
+		await expect(
+			assertManagedStripeEnvReadyForRelease(stripe, { expectedMode: "test" }),
+		).rejects.toThrow(
+			`Configured Stripe promotion code promo_high_minimum requires at least ${productConfig.priceUsdCents + 100} ${productConfig.currency} cents, but the current order is ${productConfig.priceUsdCents}.`,
+		);
 	});
 
 	it("normalizes newline-polluted stripe keys before mode detection", async () => {
