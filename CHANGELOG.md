@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-04-19
+
+### Changed
+
+- Hardened the production release workflow with repo-owned release triage, a root-safe billing doctor, a guarded snapshot fallback, and aligned release plus QA runbooks so promotions from `dev` to `main` fail earlier on metadata or billing drift instead of breaking mid-ship.
+
 ## 2026-04-10
 
 ### Changed
