@@ -31,5 +31,5 @@ The command prints structured JSON. Treat these fields as the release contract:
 
 - If `releasePath.state` is `blocked_metadata`, stop and fix the missing GitHub or Vercel source of truth before shipping.
 - If `releasePath.state` is `blocked_unrelated_dev_scope`, stop and reconcile the release PR so it matches `origin/dev`.
-- If `releasePath.state` is `snapshot_required`, do not improvise. Switch to the documented release-snapshot fallback once that surface is implemented.
+- If `releasePath.state` is `snapshot_required`, do not improvise. Switch to the documented `release-snapshot` fallback immediately.
 - If `readiness.ready` is `false`, use `readiness.blockers` as the exact repair list.

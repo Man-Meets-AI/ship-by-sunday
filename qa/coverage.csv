@@ -15,9 +15,9 @@ ACCESS-01,integration_ui,apps/web/tests/integration-ui/access-required-page.test
 ACCESS-01,unit,apps/web/tests/unit/course-access.test.ts,mapped_existing,medium,Server-side fallback claim now has direct proof before the no-access shell renders.
 ACCESS-02,browser_smoke,apps/web/tests/browser-smoke/app-smoke.spec.ts,mapped_existing,high,Public recovery surface has direct coverage.
 ACCESS-02,integration_ui,apps/web/tests/integration-ui/checkout-success-view.test.tsx,mapped_existing,high,The view model and interactions are already tested.
-ACCESS-02,unit,apps/web/tests/unit/checkout-session.test.ts,mapped_existing,high,The checkout success state machine now proves guest claim, sign-in-required, and wrong-account branches directly.
+ACCESS-02,unit,apps/web/tests/unit/checkout-session.test.ts,mapped_existing,high,"The checkout success state machine now proves guest claim, sign-in-required, and wrong-account branches directly."
 BLUEPRINT-01,sandbox_e2e,apps/web/tests/e2e/auth-protection.sandbox.spec.ts,mapped_existing,medium,Tagged @default_ship and now checks the canonical /blueprint entry.
-BLUEPRINT-01,integration_ui,apps/web/tests/integration-ui/blueprint-page.test.tsx,mapped_existing,high,Directly proves the combined blueprint surface, overview block, and canonical Continue action.
+BLUEPRINT-01,integration_ui,apps/web/tests/integration-ui/blueprint-page.test.tsx,mapped_existing,high,"Directly proves the combined blueprint surface, overview block, and canonical Continue action."
 BLUEPRINT-01,unit,apps/web/tests/unit/workspace-home-page.test.tsx,mapped_existing,low,Indirect workspace proof remains a useful backstop.
 BLUEPRINT-02,sandbox_e2e,apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts,mapped_existing,medium,Tagged @default_ship and now opens /blueprint directly.
 BLUEPRINT-02,integration_ui,apps/web/tests/integration-ui/blueprint-page.test.tsx,mapped_existing,high,Directly proves the combined blueprint Continue flow and Continue-only save feedback.
@@ -32,7 +32,7 @@ BLUEPRINT-05,sandbox_e2e,apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts,mapped
 BLUEPRINT-05,integration_ui,apps/web/tests/integration-ui/blueprint-page.test.tsx,mapped_existing,high,The combined blueprint proof applies directly to pricing and setup because they now live inside the canonical page.
 BLUEPRINT-05,unit,apps/web/tests/unit/stage-unlock.test.ts,mapped_existing,low,Unlock rules remain a low-level backstop for Build Plan.
 BLUEPRINT-06,sandbox_e2e,apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts,mapped_existing,medium,Tagged @default_ship and now checks /review plus the full-repo download action.
-BLUEPRINT-06,integration_ui,apps/web/tests/integration-ui/blueprint-review-page.test.tsx,mapped_existing,high,Directly proves the Review checkpoint hierarchy, primary Blueprint action, and delayed Execute / Ship reveal.
+BLUEPRINT-06,integration_ui,apps/web/tests/integration-ui/blueprint-review-page.test.tsx,mapped_existing,high,"Directly proves the Review checkpoint hierarchy, primary Blueprint action, and delayed Execute / Ship reveal."
 BLUEPRINT-06,integration,apps/web/tests/integration/blueprint-download-routes.test.ts,mapped_existing,medium,Download routes remain a direct backstop for Review.
 BLUEPRINT-07,sandbox_e2e,apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts,mapped_existing,medium,The current end-to-end proof now follows the canonical blueprint routes in the @default_ship pack.
 BLUEPRINT-07,integration_ui,apps/web/tests/integration-ui/blueprint-page.test.tsx,mapped_existing,high,Directly proves the combined blueprint Continue-only save feedback and the single Continue flow that now define the blueprint interaction contract.
@@ -51,7 +51,7 @@ EXECUTE-01,unit,apps/web/tests/unit/app-workspace-execute-page.test.tsx,mapped_e
 FREEPAID-01,integration_ui,apps/web/tests/integration-ui/checkout-button.test.tsx,mapped_existing,high,Checkout launch now proves the signed-out buy-first CTA without the old 401 redirect path.
 FREEPAID-01,integration,apps/web/tests/integration/stripe-checkout-route.test.ts,mapped_existing,high,The Stripe session-creation route now proves guest checkout plus the pending session cookie.
 FREEPAID-02,sandbox_e2e,apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts,mapped_existing,medium,Tagged @billing_integration and now waits for /blueprint after checkout success.
-FREEPAID-02,unit,apps/web/tests/unit/checkout-claims-actions.test.ts,mapped_existing,high,The post-payment claim action now proves guest recovery, direct signed-in grant, and wrong-account refusal.
+FREEPAID-02,unit,apps/web/tests/unit/checkout-claims-actions.test.ts,mapped_existing,high,"The post-payment claim action now proves guest recovery, direct signed-in grant, and wrong-account refusal."
 STARTER-01,integration_ui,apps/web/tests/integration-ui/starter-repo-access-form.test.tsx,mapped_existing,medium,Starter repo request path is covered.
 STARTER-01,unit,apps/web/tests/unit/starter-repo-script.test.ts,mapped_existing,medium,Repo access automation remains covered.
 CODEX-01,integration,apps/web/tests/integration/codex-route-handlers.test.ts,mapped_existing,medium,Codex route behavior is covered outside the blueprint funnel.
