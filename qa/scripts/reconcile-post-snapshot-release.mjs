@@ -150,6 +150,11 @@ function main() {
 	}
 
 	const repoFullName = resolveGitHubRepo(explicitRepo);
+	if (!process.env.GH_TOKEN?.trim()) {
+		throw new Error(
+			"Missing GH_TOKEN. Configure RELEASE_RECONCILE_GH_TOKEN for the reconcile workflow so it can create pull requests.",
+		);
+	}
 	const associatedPullRequests = readAssociatedPullRequests({
 		mainCommitSha,
 		repoFullName,
