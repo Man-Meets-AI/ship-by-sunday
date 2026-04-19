@@ -12,6 +12,7 @@ Use this fallback only when the normal `dev -> main` release PR is structurally 
 - `bun run release:triage` already showed that the normal release path is blocked.
 - `bun run release:snapshot -- --dry-run` returns `allowed: true`.
 - The open release PR still targets `main`, still uses `dev` as the head branch, still points at the current `origin/dev` SHA, and GitHub reports the structural block through `mergeable=CONFLICTING` or `mergeStateStatus=DIRTY`.
+- Keep that blocked `dev -> main` PR open until the snapshot branch has been created and the replacement production PR is open. Closing it too early removes the proof that snapshot mode is allowed and the command will correctly refuse to run.
 
 ## Forbidden conditions
 
@@ -59,4 +60,4 @@ git push origin :<release-snapshot-branch>
 
 ## Post-merge cleanup
 
-After the snapshot PR merges, delete the local and remote snapshot branch, then move normal feature work back onto a fresh branch from current `origin/dev`. Use a fresh hotfix branch from current `origin/main` for any production-only repairs.
+After the snapshot PR merges, close the superseded blocked `dev -> main` PR, delete the local and remote snapshot branch, then move normal feature work back onto a fresh branch from current `origin/dev`. Use a fresh hotfix branch from current `origin/main` for any production-only repairs.

@@ -262,7 +262,18 @@ function inventoryRecord(
 async function loadExistingRecords() {
 	try {
 		const raw = await readFile(outputPath, "utf8");
-		const { records } = parseCsv(raw);
+		const { malformedRows, records } = parseCsv(raw);
+		if (malformedRows.length > 0) {
+			const lines = malformedRows
+				.map(
+					(detail) =>
+						`line ${detail.lineNumber}: expected ${detail.headersCount} cells, found ${detail.cellCount}`,
+				)
+				.join("; ");
+			throw new Error(
+				`qa/test-inventory.csv has malformed rows (${lines}). This usually means a free-text cell contains an unquoted comma.`,
+			);
+		}
 		return new Map(
 			records.map((record) => [
 				record.file_path,
