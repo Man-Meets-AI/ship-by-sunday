@@ -25,6 +25,20 @@ Branch lifecycle is part of the QA contract:
 - `dev` is the integrated staging branch and the first place to prove the full buyer flow
 - `main` is production, so release evidence must line up with the `dev -> main` promotion path
 
+## Release candidate contract
+
+For QA purposes, a `dev` release candidate is one exact `origin/dev` SHA, one exact preview deployment behind `https://dev.man-meets-ai.com`, one exact preview env pull into `apps/web/.env.local`, and one green staging proof run on that same SHA. If any of those do not line up, the candidate is blocked even if the app "looks fine" in one browser tab.
+
+Use these repo-owned commands before trusting a release candidate:
+
+```bash
+bun run release:triage
+bun run release:billing:doctor -- --env=preview --dry-run
+bun run release:billing:doctor -- --env=production --dry-run
+```
+
+`release:triage` is the control-plane answer for whether the current `dev -> main` path is releasable, metadata-blocked, scope-blocked, or snapshot-only. `release:billing:doctor` is the Stripe preflight that maps preview and production to the correct env file and Stripe mode before hosted billing proof starts.
+
 Start with these commands from the repository root:
 
 ```bash
@@ -132,9 +146,9 @@ Rough old-world translation:
 - Feature branches:
   Run `bun run qa:validate`, then `bun run qa:run-pack -- --pack=default_ship --dry-run`, plus the smallest focused tests needed for the diff.
 - `dev`:
-  Run `bun run qa:validate`, then `bun run qa:personas:prepare -- --pack=default_ship`, then `bun run qa:run-pack -- --pack=default_ship`. Add `billing_integration` when checkout, Stripe, billing, entitlement, or webhook behavior changed. In GitHub Actions on `dev`, that billing decision should come from the release-scope detector automatically, the workflow should auto-bind `dev.man-meets-ai.com` to the exact ready preview deployment, and hosted Convex dev should sync automatically when the release touched `apps/web/convex/`.
+  Run `bun run release:triage` first, then `bun run qa:validate`, then `bun run qa:personas:prepare -- --pack=default_ship`, then `bun run qa:run-pack -- --pack=default_ship`. Add `billing_integration` when checkout, Stripe, billing, entitlement, or webhook behavior changed, and run `bun run release:billing:doctor -- --env=preview` before that hosted billing proof. In GitHub Actions on `dev`, that billing decision should come from the release-scope detector automatically, the workflow should auto-bind `dev.man-meets-ai.com` to the exact ready preview deployment, and hosted Convex dev should sync automatically when the release touched `apps/web/convex/`.
 - `main` or production:
-  Use the same `default_ship` evidence, then add `billing_integration` or the live no-cost Checkout proof when the release changed the commercial path. In GitHub Actions on `main`, `Production Release Proof` should run the same logic automatically after the deploy settles.
+  Use the same `default_ship` evidence, then add `billing_integration` or the live no-cost Checkout proof when the release changed the commercial path. Run `bun run release:billing:doctor -- --env=production` before the hosted billing proof. In GitHub Actions on `main`, `Production Release Proof` should run the same logic automatically after the deploy settles.
 - If public pages, docs surface, or unauthenticated routes changed:
   Run `bun run qa:validate`, then `bun run test:browser-smoke`.
 
@@ -156,6 +170,7 @@ Important: a Playwright run that exits `0` with every test skipped is not browse
 - In this repo, the preferred production proof remains a live no-cost Checkout run using a restricted `100% off` discount, because that exercises `checkout.session.completed`, the webhook grant, `/checkout/success`, and `/blueprint` without requiring a real charge.
 - On `https://www.man-meets-ai.com`, `qa:run-pack -- --pack=billing_integration` should use the dedicated hosted verifier that creates the live Checkout Session directly with a fresh one-time 100%-off coupon already attached. Do not make the production gate depend on typing a promotion code into Stripe’s hosted UI.
 - Before hosted billing proof starts on `dev` or `main`, verify the managed Stripe env and the deployed `/api/stripe/checkout` route against the target host so stale price or product IDs fail fast.
+- If `bun run release:triage` says `snapshot_required`, do not treat that as a QA green light by itself. The snapshot fallback still needs its own dry-run, tree-identity proof, and release-owner approval before QA evidence can move forward.
 - Treat `qa/runs/` plus the latest GitHub Actions run IDs as the durable evidence set and read the latest relevant report for the target environment before rerunning a pack.
 
 ## Fresh-Agent Restart
@@ -163,9 +178,10 @@ Important: a Playwright run that exits `0` with every test skipped is not browse
 When a fresh agent needs to resume this workflow, use this order:
 
 1. `bun run qa:validate`
-2. Read the latest committed `dev` report first, then the latest matching report for the target environment
-3. Decide the target environment before running anything else
-4. Run the smallest relevant pack in that environment
+2. `bun run release:triage`
+3. Read the latest committed `dev` report first, then the latest matching report for the target environment
+4. Decide the target environment before running anything else
+5. Run the smallest relevant pack in that environment
 
 Environment order:
 

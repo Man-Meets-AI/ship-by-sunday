@@ -15,6 +15,13 @@ Land the change end to end. Do not stop at "PR opened" or "checks started".
 - If the current branch is `main`, verify whether the relevant commit already landed; do not create a PR from `main`.
 - Do not ship unrelated `dev` work to `main` just to land one feature. If the `dev` delta contains unrelated risky work, stop and escalate before opening or queueing a release PR.
 
+## Release Gate
+
+- Do not trust a `dev -> main` release path until `bun run release:triage` says what exact `origin/dev` SHA is under review, which staging proof checks are green on that SHA, and whether the normal release path is blocked.
+- If `releasePath.state` is `blocked_metadata` or `blocked_unrelated_dev_scope`, stop and repair the release control plane before opening or reusing a release PR.
+- If `releasePath.state` is `snapshot_required`, stop the normal release path and switch to the documented `release-snapshot` fallback instead of improvising branch surgery.
+- If `readiness.ready` is `false`, treat `readiness.blockers` as the release repair list. Do not wave the release through just because the code diff itself looks small.
+
 ## Procedure
 
 1. Inspect the repo state first.
@@ -22,15 +29,17 @@ Land the change end to end. Do not stop at "PR opened" or "checks started".
    - Run `git fetch origin --prune`.
    - Confirm the current branch, ahead/behind counts, dirty files, remote tracking, and whether a PR already exists.
    - Confirm `gh` is authenticated before relying on PR or Actions commands.
+   - If the current branch is `dev` or you are about to trust or refresh a `dev -> main` PR, run `bun run release:triage` now.
 
 2. Clean the workspace with focused conventional commits.
    - Stage only files that belong to the intended landing scope.
    - Do not absorb or revert unrelated in-flight changes from other work.
    - Use conventional commit messages for every commit.
    - Run the narrowest relevant proof before each commit.
-   - Before a meaningful ship step, prefer `bun run lint`, `bun run fmt:check`, and `bun run typecheck`.
-   - Run `bun run proof:ci` when the CI surface or release path needs a full local proof pass.
+   - Before a meaningful ship step, prefer `bun run lint`, `bun run format:check`, and `bun run typecheck`.
+   - When the current scope justifies the broader local gate, use `bun run check`. For release-control-plane changes, also run `bun run qa:validate` and any narrower commands that `release:triage` or `release:billing:doctor` say are required.
    - Push the source branch once the branch state is clean enough to review.
+   - After pushing, wait until the remote head SHA actually matches the local commit before opening or refreshing a PR. If GitHub briefly says "No commits between..." or shows the old compare view, wait and retry instead of changing the git strategy.
 
 3. Open or refresh the PR.
    - Reuse the existing PR when one already exists for the source branch.
@@ -82,8 +91,10 @@ Land the change end to end. Do not stop at "PR opened" or "checks started".
 9. Stay with the change until it reaches `main`.
    - If the feature PR targets `dev`, wait until it actually lands in `dev`.
    - Then inspect the `dev` -> `main` path.
+   - Run `bun run release:triage` again on the new `dev` head before creating or reusing the release PR.
    - Reuse the existing release PR when one exists.
    - Create the `dev` -> `main` PR only when the current `dev` delta is intentionally ready to ship.
+   - If triage says `snapshot_required`, stop here and switch to `bun run release:snapshot -- --dry-run` plus `.agents/skills/shared/release-snapshot/SKILL.md`.
    - Apply the same review, CI, flake, conflict, and queue loop to the release PR.
    - Finish only when the relevant commit is reachable from `origin/main` and the release proof surface is green.
 
@@ -93,6 +104,9 @@ Land the change end to end. Do not stop at "PR opened" or "checks started".
 - `git fetch origin --prune`
 - `git rev-list --left-right --count origin/<base>...<branch>`
 - `git log --oneline --decorate --graph origin/<base>..<branch>`
+- `bun run release:triage`
+- `bun run release:billing:doctor -- --env=preview --dry-run`
+- `bun run release:snapshot -- --dry-run`
 - `gh pr view`
 - `gh pr create`
 - `gh pr checks --required --watch --fail-fast`
@@ -106,5 +120,6 @@ Land the change end to end. Do not stop at "PR opened" or "checks started".
 - Stop if the repo has mixed-ownership edits that cannot be committed safely.
 - Stop if review finds a substantive bug that you cannot fix confidently in the current pass.
 - Stop if the `dev` -> `main` release path would ship unrelated work that has not been intentionally approved.
+- Stop if `bun run release:triage` returns `blocked_metadata`, `blocked_unrelated_dev_scope`, or `snapshot_required` and the required repair or fallback has not been completed.
 - Stop if GitHub auth, branch protection, or merge-queue policy blocks progress and there is no safe non-admin path.
 - Stop if CI is red and the failure cannot be classified as either a reproducible bug or a genuine flake with evidence.

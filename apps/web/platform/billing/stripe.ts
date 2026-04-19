@@ -33,6 +33,12 @@ function getStripePriceProductId(
 	return typeof priceProduct === "string" ? priceProduct : priceProduct.id;
 }
 
+function getCouponIdFromPromotionCode(promotionCode: Stripe.PromotionCode) {
+	return typeof promotionCode.promotion.coupon === "string"
+		? promotionCode.promotion.coupon
+		: (promotionCode.promotion.coupon?.id ?? null);
+}
+
 export function getStripeLineItem() {
 	if (serverEnv.STRIPE_PRICE_ID) {
 		return {
@@ -109,6 +115,78 @@ export async function assertManagedStripePriceMatchesProductConfig(
 	}
 }
 
+export async function assertManagedStripePromotionCodeMatchesProductConfig(
+	stripe: Stripe,
+) {
+	if (!productConfig.activeOffer || !serverEnv.STRIPE_PROMOTION_CODE_ID) {
+		return;
+	}
+
+	const configuredProductId = requireServerEnv("STRIPE_PRODUCT_ID");
+	const promotionCode = await stripe.promotionCodes.retrieve(
+		serverEnv.STRIPE_PROMOTION_CODE_ID,
+	);
+
+	if (!promotionCode.active) {
+		throw new Error(
+			`Configured Stripe promotion code ${serverEnv.STRIPE_PROMOTION_CODE_ID} is not active.`,
+		);
+	}
+
+	const couponId = getCouponIdFromPromotionCode(promotionCode);
+	if (!couponId) {
+		throw new Error(
+			`Configured Stripe promotion code ${serverEnv.STRIPE_PROMOTION_CODE_ID} is missing its coupon relationship.`,
+		);
+	}
+
+	const coupon = await stripe.coupons.retrieve(couponId);
+	if (coupon.valid === false) {
+		throw new Error(
+			`Configured Stripe promotion code ${serverEnv.STRIPE_PROMOTION_CODE_ID} uses invalid coupon ${coupon.id}.`,
+		);
+	}
+
+	const applicableProducts = coupon.applies_to?.products ?? [];
+	if (
+		applicableProducts.length > 0 &&
+		!applicableProducts.includes(configuredProductId)
+	) {
+		throw new Error(
+			`Configured Stripe promotion code ${serverEnv.STRIPE_PROMOTION_CODE_ID} does not apply to product ${configuredProductId}.`,
+		);
+	}
+
+	const currencySpecificMinimum =
+		promotionCode.restrictions.currency_options?.[productConfig.currency]
+			?.minimum_amount ?? null;
+	const genericMinimumAmount =
+		promotionCode.restrictions.minimum_amount_currency ===
+		productConfig.currency
+			? promotionCode.restrictions.minimum_amount
+			: null;
+	const minimumAmount = currencySpecificMinimum ?? genericMinimumAmount;
+
+	if (
+		promotionCode.restrictions.minimum_amount !== null &&
+		currencySpecificMinimum === null &&
+		genericMinimumAmount === null
+	) {
+		throw new Error(
+			`Configured Stripe promotion code ${serverEnv.STRIPE_PROMOTION_CODE_ID} has minimum-amount restrictions that do not cover ${productConfig.currency} orders.`,
+		);
+	}
+
+	if (
+		typeof minimumAmount === "number" &&
+		minimumAmount > productConfig.priceUsdCents
+	) {
+		throw new Error(
+			`Configured Stripe promotion code ${serverEnv.STRIPE_PROMOTION_CODE_ID} requires at least ${minimumAmount} ${productConfig.currency} cents, but the current order is ${productConfig.priceUsdCents}.`,
+		);
+	}
+}
+
 export function getStripeModeLabel() {
 	return getNormalizedStripeSecretKey().startsWith("sk_test_")
 		? "test"
@@ -157,6 +235,7 @@ export async function assertManagedStripeEnvReadyForRelease(
 	}
 
 	await assertManagedStripePriceMatchesProductConfig(stripe);
+	await assertManagedStripePromotionCodeMatchesProductConfig(stripe);
 }
 
 export function getStripeDashboardUrl(path?: string | null) {

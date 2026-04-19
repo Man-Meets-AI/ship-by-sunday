@@ -55,6 +55,7 @@
 		"stripe:webhook:sync": "node --env-file=.env.local scripts/local-stripe-webhook.mjs sync",
 		"stripe:dev:doctor": "node --env-file=.env.local scripts/local-stripe-doctor.mjs",
 		"stripe:dev:verify": "node --env-file=.env.local scripts/verify-local-stripe-checkout.mjs",
+		"release:billing:doctor": "node scripts/release-billing-doctor.mjs",
 		"stripe:env:verify": "bun scripts/verify-managed-stripe-env.ts",
 		"stripe:hosted:verify:dev": "node --env-file=.env.local scripts/verify-hosted-stripe-checkout.mjs",
 		"stripe:hosted:verify": "node --env-file=.env.production scripts/verify-hosted-stripe-checkout.mjs",
