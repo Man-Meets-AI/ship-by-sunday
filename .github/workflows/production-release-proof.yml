@@ -328,7 +328,7 @@ jobs:
 
       - name: Open or reuse post-snapshot reconcile PR
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.RELEASE_RECONCILE_GH_TOKEN }}
           RELEASE_COMMIT_SHA: ${{ needs.release_scope.outputs.head_sha }}
         run: |
           node qa/scripts/reconcile-post-snapshot-release.mjs \
