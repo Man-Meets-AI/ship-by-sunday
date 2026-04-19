@@ -110,6 +110,33 @@ Relevant deeper reference docs:
 - [docs/PRODUCT_SENSE.md](./docs/PRODUCT_SENSE.md)
 - [docs/QUALITY_SCORE.md](./docs/QUALITY_SCORE.md)
 
+## Asking Codex To Ship
+
+If you want Codex to take a change all the way through GitHub and production, say it directly.
+
+Good prompts:
+
+- `$land this`
+- `ship this to prod`
+- `take this to prod`
+- `land this end to end`
+- `shepherd this through dev and main`
+
+`$land` is the clearest phrasing because it tells Codex to use the repo's shipping skill and stay on the work until the relevant commit reaches `main` and the release proof surface is green.
+
+For this repo, that means:
+
+- feature branch into `dev`
+- then `dev` into `main`
+- and if the normal `dev -> main` PR is structurally blocked, use the repo-owned snapshot fallback instead of improvising Git moves
+
+If you want a lighter touch, say so explicitly. For example:
+
+- `open the PR but do not merge`
+- `get this to dev only`
+- `prepare the prod PR and stop`
+- `ship this, but ask before the final merge`
+
 ## CLI
 
 The repo includes a local Ship by Sunday intake CLI that writes one draft under `.ship-by-sunday/` and generates the same Ship by Sunday Blueprint shape as the protected `/review` flow.
