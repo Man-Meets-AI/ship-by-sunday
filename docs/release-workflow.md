@@ -134,6 +134,7 @@ The fallback contract is simple:
 - build one snapshot branch whose tree exactly matches `origin/dev` on top of `origin/main`
 - prove tree identity before you push or open a PR
 - use the printed rollback commands if validation fails
+- let the repo-owned reconcile automation open or reuse a `main -> dev` PR after the snapshot merges
 - clean up the snapshot branch after merge instead of keeping it around as a second release lane
 
 If `bun run release:snapshot -- --dry-run` exits non-zero, do not force it through. The current repo state does not justify snapshot mode.
@@ -176,6 +177,7 @@ After a release repair, snapshot PR, or hotfix:
 - start emergency production-only work from current `origin/main`
 - delete stale local release-repair or snapshot branches once their PRs are merged or abandoned
 - rerun `bun run release:triage` before trusting an older local `dev` checkout
+- after a snapshot release, merge the reconcile PR from `main` back into `dev` if the automation opened one
 
 ## Explicit non-goal
 
