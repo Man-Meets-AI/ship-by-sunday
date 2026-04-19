@@ -85,9 +85,17 @@ export function parseCsv(text) {
 	}
 
 	const [headers, ...dataRows] = rows;
+	const malformedRows = dataRows
+		.map((row, index) => ({
+			cellCount: row.length,
+			headersCount: headers.length,
+			lineNumber: index + 2,
+			row,
+		}))
+		.filter((detail) => detail.cellCount !== detail.headersCount);
 	const records = dataRows.map((row) =>
 		Object.fromEntries(headers.map((header, index) => [header, row[index] ?? ""])),
 	);
 
-	return { headers, records };
+	return { headers, malformedRows, records };
 }
