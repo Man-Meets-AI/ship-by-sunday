@@ -61,10 +61,22 @@ const allowedDispositions = new Set([
 	"delete",
 ]);
 
-async function readCsv(relativePath) {
+async function readCsv(relativePath, { strictMalformedRows = false } = {}) {
 	const resolvedPath = path.join(repoRoot, relativePath);
 	const raw = await readFile(resolvedPath, "utf8");
-	return parseCsv(raw);
+	const parsed = parseCsv(raw);
+	if (strictMalformedRows && parsed.malformedRows.length > 0) {
+		const lines = parsed.malformedRows
+			.map(
+				(detail) =>
+					`line ${detail.lineNumber}: expected ${detail.headersCount} cells, found ${detail.cellCount}`,
+			)
+			.join("; ");
+		throw new Error(
+			`${relativePath} has malformed rows (${lines}). This usually means a free-text cell contains an unquoted comma.`,
+		);
+	}
+	return parsed;
 }
 
 function assertHeaders(actualHeaders, expectedHeaders, filePath) {
@@ -121,9 +133,15 @@ async function main() {
 	);
 
 	const personaIds = new Set(Object.keys(personaProtocol.personas ?? {}));
-	const journeys = await readCsv("qa/journeys.csv");
-	const coverage = await readCsv("qa/coverage.csv");
-	const inventory = await readCsv("qa/test-inventory.csv");
+	const journeys = await readCsv("qa/journeys.csv", {
+		strictMalformedRows: true,
+	});
+	const coverage = await readCsv("qa/coverage.csv", {
+		strictMalformedRows: true,
+	});
+	const inventory = await readCsv("qa/test-inventory.csv", {
+		strictMalformedRows: true,
+	});
 
 	assertHeaders(journeys.headers, journeyHeaders, "qa/journeys.csv");
 	assertHeaders(coverage.headers, coverageHeaders, "qa/coverage.csv");
