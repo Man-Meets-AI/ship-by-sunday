@@ -10,6 +10,17 @@ This repository ships through short-lived feature branches into `dev`, then prom
 
 Production is healthy only when all three systems agree on the same release candidate from `main`, and staging is healthy when `dev` is the integrated proof point for auth, Convex, and Stripe test-mode billing.
 
+## Release candidate contract
+
+A `dev` release candidate is valid only when these four facts point at the same commit:
+
+- `origin/dev` is the candidate branch and SHA.
+- the staged preview deployment for that SHA is the deployment behind `https://dev.man-meets-ai.com`.
+- the staged env proof comes from the preview app env pulled into `apps/web/.env.local` plus the GitHub Actions environments `dev-staging` and `dev-staging-billing-integration`.
+- the latest `release_scope`, `default_ship`, `billing_integration` when required, and `release_gate` checks are green on that same SHA.
+
+Use `bun run release:triage` from the repository root before trusting or refreshing a `dev -> main` release PR. If `releasePath.state` is `blocked_metadata` or `blocked_unrelated_dev_scope`, stop and repair the release control plane first. If `releasePath.state` is `snapshot_required`, stop the normal release path and switch to the documented snapshot fallback instead of improvising recovery git moves.
+
 ## Branch model
 
 - Feature work starts on short-lived branches created from the current `dev`.
@@ -58,20 +69,22 @@ Create that secret from the Convex dashboard for the production deployment:
    `Review this branch against dev. Have pr_explorer map the affected code paths, reviewer find real risks, and docs_researcher verify the framework APIs that the patch relies on.`
 
 6. Merge the feature branch into `dev` only after the code-centric checks for the staging candidate are green.
-7. Treat `dev` as the release candidate branch. After the merge, wait for the aggregate `release_gate` job from `Dev Staging Proof` on the resulting `dev` commit. That job is the integrated staging proof and must be green before you open the `dev -> main` release pull request.
+7. Treat `dev` as the release candidate branch. After the merge, run `bun run release:triage`. The command must point at the exact `origin/dev` SHA you intend to release and must explain whether the current `dev -> main` path is clean, metadata-blocked, or snapshot-only.
+   Then wait for the aggregate `release_gate` job from `Dev Staging Proof` on that same `dev` commit. That job is the integrated staging proof and must be green before you open or trust the `dev -> main` release pull request.
    If the release touched `apps/web/convex/`, `Dev Staging Proof` should sync hosted Convex dev automatically before browser proof. A green Vercel preview alone is not enough when the staged frontend has outrun hosted Convex dev.
-8. Run the default multi-agent PR review against `main` for the release pull request:
+8. If `bun run release:triage` says `snapshot_required`, stop the normal release path here and use `bun run release:snapshot -- --dry-run` first. Do not hand-roll a snapshot branch.
+9. Run the default multi-agent PR review against `main` for the release pull request:
 
    `Review this branch against main. Have pr_explorer map the affected code paths, reviewer find real risks, and docs_researcher verify the framework APIs that the patch relies on.`
 
-9. Fix substantive findings and merge the `dev -> main` release PR only after `static`, `integration`, `browser-smoke`, and `cli` are green.
-10. Tag the merged `main` commit with the next pre-1.0 version and publish the matching GitHub Release from that tag. Copy or summarize the notes from the corresponding `CHANGELOG.md` section before publishing.
-11. Watch Vercel create the production web deploy from the merged `main` commit.
-12. Watch GitHub Actions run `Convex Production Deploy` for the same merged `main` commit.
-13. Let the `Production Release Proof` workflow wait for the exact Vercel production deployment for the merged commit, then run the hosted post-deploy verification against `https://www.man-meets-ai.com`.
-14. When the release touched checkout, Stripe, entitlement, webhook, or access-handoff behavior, `Production Release Proof` should also run hosted `billing_integration` automatically. Skip this extra proof only for unrelated docs or presentation changes.
-15. Before hosted billing proof starts on `dev` or `main`, verify the managed Stripe env and the deployed `/api/stripe/checkout` route against the target host so stale `STRIPE_PRICE_ID` or `STRIPE_PRODUCT_ID` values fail fast.
-16. Delete the local and remote feature branch after the release settles.
+10. Fix substantive findings and merge the `dev -> main` release PR only after `static`, `integration`, `browser-smoke`, and `cli` are green.
+11. Tag the merged `main` commit with the next pre-1.0 version and publish the matching GitHub Release from that tag. Copy or summarize the notes from the corresponding `CHANGELOG.md` section before publishing.
+12. Watch Vercel create the production web deploy from the merged `main` commit.
+13. Watch GitHub Actions run `Convex Production Deploy` for the same merged `main` commit.
+14. Let the `Production Release Proof` workflow wait for the exact Vercel production deployment for the merged commit, then run the hosted post-deploy verification against `https://www.man-meets-ai.com`.
+15. When the release touched checkout, Stripe, entitlement, webhook, or access-handoff behavior, `Production Release Proof` should also run hosted `billing_integration` automatically. Skip this extra proof only for unrelated docs or presentation changes.
+16. Before hosted billing proof starts on `dev` or `main`, run `bun run release:billing:doctor -- --env=preview` or `--env=production` so stale `STRIPE_PRICE_ID`, stale `STRIPE_PRODUCT_ID`, or a promo code that no longer applies to the current order fails fast.
+17. Delete the local and remote feature branch after the release settles.
 
 Useful verification commands:
 
@@ -79,11 +92,17 @@ Useful verification commands:
 gh run list --repo ParkerRex/mma-shipbysunday --workflow ci.yml --limit 10
 gh run list --repo ParkerRex/mma-shipbysunday --workflow convex-production-deploy.yml --limit 10
 gh run list --repo ParkerRex/mma-shipbysunday --workflow production-release-proof.yml --limit 10
+git rev-parse origin/dev
+git rev-parse origin/main
+git merge-base origin/main origin/dev
+git rev-list --left-right --count origin/main...origin/dev
+bun run release:triage
+bun run release:billing:doctor -- --env=preview --dry-run
+bun run release:billing:doctor -- --env=production --dry-run
+bun run release:snapshot -- --dry-run
 vercel target list
 cd apps/web && bunx convex logs --prod --history 20
 PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run qa:run-pack -- --pack=default_ship
-cd apps/web && bun --env-file=.env.local scripts/verify-managed-stripe-env.ts --expected-mode=test --app-base-url=https://dev.man-meets-ai.com
-cd apps/web && bun --env-file=.env.production scripts/verify-managed-stripe-env.ts --expected-mode=live --app-base-url=https://www.man-meets-ai.com
 ```
 
 For staging or production billing verification in this repo, prefer a restricted live `100% off` discount and confirm the buyer auto-forwards from `/checkout/success` into `/start`. On production, the canonical automation should create the Checkout Session directly with the discount already attached instead of relying on promotion-code entry in Stripe’s hosted UI. Use [docs/internal/observability.md](./internal/observability.md) for the incident-control and webhook-origin drill.
@@ -105,6 +124,19 @@ Historical production billing repair evidence remains in:
 
 - `qa/runs/2026-03-25-prod-billing-integration-webhook-fix.md`
 - `qa/runs/2026-03-25-prod-billing-integration-automatic-rerun.md`
+
+## Snapshot fallback
+
+Use the snapshot fallback only when `bun run release:triage` says the normal `dev -> main` release path is structurally blocked and `bun run release:snapshot -- --dry-run` returns `allowed: true`.
+
+The fallback contract is simple:
+
+- build one snapshot branch whose tree exactly matches `origin/dev` on top of `origin/main`
+- prove tree identity before you push or open a PR
+- use the printed rollback commands if validation fails
+- clean up the snapshot branch after merge instead of keeping it around as a second release lane
+
+If `bun run release:snapshot -- --dry-run` exits non-zero, do not force it through. The current repo state does not justify snapshot mode.
 
 ## Manual Convex dry-run
 
@@ -135,6 +167,15 @@ Use the hotfix path only for production emergencies.
 5. Tag the merged `main` commit with the next patch version and publish the matching changelog-backed GitHub Release.
 6. Merge or cherry-pick the hotfix back into `dev` immediately after release.
 7. Watch the production web and Convex deploys settle before deleting the branch.
+
+## Local reconciliation after a messy release
+
+After a release repair, snapshot PR, or hotfix:
+
+- start new feature work from current `origin/dev`
+- start emergency production-only work from current `origin/main`
+- delete stale local release-repair or snapshot branches once their PRs are merged or abandoned
+- rerun `bun run release:triage` before trusting an older local `dev` checkout
 
 ## Explicit non-goal
 
