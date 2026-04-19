@@ -49,6 +49,7 @@ Use `bun run release:triage` from the repository root before trusting or refresh
 - `apps/web/vercel.json` overrides the Vercel install step to remove cached `node_modules` trees before `bun install --frozen-lockfile`, because switching linkers alone does not rewrite a restored isolated-install cache.
 - GitHub repository secret `CONVEX_DEPLOY_KEY` must exist before remote Convex dry-runs or production deploys can succeed.
 - GitHub repository secret `VERCEL_TOKEN` plus repository variables `VERCEL_PROJECT_ID` and `VERCEL_TEAM_ID` must exist before the release proofs can wait for the exact Vercel deployment for either the staged `dev` commit or the merged `main` commit.
+- GitHub repository secret `RELEASE_RECONCILE_GH_TOKEN` must exist before post-snapshot reconcile automation can open the `main -> dev` PR after a snapshot release. The default `github.token` is not enough in this repo because GitHub Actions is not permitted to create pull requests here.
 - GitHub repository variable `CONVEX_PRODUCTION_DEPLOY_ENABLED` is the live pause switch for automatic Convex production deploys. It is `true` after the first successful dry-run; set it back to `false` if you need to pause automatic `main` deploys.
 
 Create that secret from the Convex dashboard for the production deployment:
@@ -136,6 +137,8 @@ The fallback contract is simple:
 - use the printed rollback commands if validation fails
 - let the repo-owned reconcile automation open or reuse a `main -> dev` PR after the snapshot merges
 - clean up the snapshot branch after merge instead of keeping it around as a second release lane
+
+The reconcile automation uses `RELEASE_RECONCILE_GH_TOKEN`, not the default Actions token. If that secret is missing, the reconcile step should fail with an explicit missing-secret error instead of a generic GitHub GraphQL permission error.
 
 If `bun run release:snapshot -- --dry-run` exits non-zero, do not force it through. The current repo state does not justify snapshot mode.
 
