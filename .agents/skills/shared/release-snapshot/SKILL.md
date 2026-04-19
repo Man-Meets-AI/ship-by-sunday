@@ -60,4 +60,4 @@ git push origin :<release-snapshot-branch>
 
 ## Post-merge cleanup
 
-After the snapshot PR merges, close the superseded blocked `dev -> main` PR, delete the local and remote snapshot branch, then move normal feature work back onto a fresh branch from current `origin/dev`. Use a fresh hotfix branch from current `origin/main` for any production-only repairs.
+After the snapshot PR merges, close the superseded blocked `dev -> main` PR, delete the local and remote snapshot branch, and expect the repo-owned reconcile automation to open or reuse a `main -> dev` PR. Merge that reconcile PR so `dev` catches up to the shipped snapshot result, then move normal feature work back onto a fresh branch from current `origin/dev`. Use a fresh hotfix branch from current `origin/main` for any production-only repairs.

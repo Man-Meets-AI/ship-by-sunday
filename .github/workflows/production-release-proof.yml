@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 concurrency:
   group: production-release-proof-${{ github.ref }}
@@ -306,3 +307,29 @@ jobs:
           fi
 
           echo "Production release proof passed."
+
+  reconcile_dev:
+    if: needs.release_gate.result == 'success'
+    needs:
+      - release_scope
+      - release_gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.12.0
+
+      - name: Open or reuse post-snapshot reconcile PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_COMMIT_SHA: ${{ needs.release_scope.outputs.head_sha }}
+        run: |
+          node qa/scripts/reconcile-post-snapshot-release.mjs \
+            --main-sha="$RELEASE_COMMIT_SHA"
