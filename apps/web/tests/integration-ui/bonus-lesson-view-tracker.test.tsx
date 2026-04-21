@@ -47,6 +47,25 @@ describe("BonusLessonViewTracker", () => {
 		});
 	});
 
+	it("stops retrying after auth or access failures", async () => {
+		markBonusLessonViewedMock.mockRejectedValueOnce(new Error("Unauthorized"));
+
+		const { rerender } = render(
+			<BonusLessonViewTracker lessonKey="iterate-the-product-with-ai" />,
+		);
+
+		await waitFor(() => {
+			expect(markBonusLessonViewedMock).toHaveBeenCalledTimes(1);
+		});
+
+		rerender(
+			<BonusLessonViewTracker lessonKey="iterate-the-product-with-ai" />,
+		);
+
+		await new Promise((resolve) => setTimeout(resolve, 0));
+		expect(markBonusLessonViewedMock).toHaveBeenCalledTimes(1);
+	});
+
 	it("waits for Convex auth readiness before marking the lesson as viewed", async () => {
 		useConvexAuthMock.mockReturnValue({
 			isAuthenticated: false,
