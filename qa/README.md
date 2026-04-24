@@ -25,6 +25,19 @@ Branch lifecycle is part of the QA contract:
 - `dev` is the integrated staging branch and the first place to prove the full buyer flow
 - `main` is production, so release evidence must line up with the `dev -> main` promotion path
 
+## Current CI/CD Proof Path
+
+The current release proof path is the existing workflow set, not the rejected Dub-style harness reset. Preserve these lanes until a later plan replaces them with equal or stronger proof:
+
+- `Dev Staging Proof` on `dev`: run `24736371175`, created 2026-04-21 for commit `36c8360da5d94d9be2ac4485d935389fa5b4fe52`, passed `release_scope`, `default_ship`, and `release_gate`.
+- `CI` on `main`: run `24736015264`, created 2026-04-21 for commit `3c5347c06c039859b7780a61e331cebda9421aea`, passed `qa_control_plane`, `static`, `cli`, `integration`, and `browser-smoke`. Scheduled `CI` run `24874408634` also passed on 2026-04-24 for that same `main` commit.
+- `Production Release Proof` on `main`: run `24736015243`, created 2026-04-21 for commit `3c5347c06c039859b7780a61e331cebda9421aea`, passed `release_scope`, `default_ship`, and `release_gate`.
+- `Convex Production Deploy` on `main`: run `24736015267`, created 2026-04-21 for commit `3c5347c06c039859b7780a61e331cebda9421aea`, passed `deploy`.
+
+Keep QA control-plane validation and `qa:run-pack` proof intact for this path. Do not delete or replace them under the rejected Dub-style harness plan.
+
+Failing or unproven lanes are separate from the release path. `Sandbox E2E Nightly` run `24876267728` failed on 2026-04-24 and is a non-release-critical repair candidate. `Deployment Smoke` has remote failed run `24571382089` from 2026-04-17, but `.github/workflows/deployment-smoke.yml` is absent from the current checkout, `origin/dev`, and `origin/main`; treat it as an orphaned historical Actions surface until a file and fresh passing run exist.
+
 ## Release candidate contract
 
 For QA purposes, a `dev` release candidate is one exact `origin/dev` SHA, one exact preview deployment behind `https://dev.man-meets-ai.com`, one exact preview env pull into `apps/web/.env.local`, and one green staging proof run on that same SHA. If any of those do not line up, the candidate is blocked even if the app "looks fine" in one browser tab.
@@ -164,8 +177,8 @@ Important: a Playwright run that exits `0` with every test skipped is not browse
 
 ## Current resume state
 
-- Start on `dev` first. The latest green integrated staging proof is GitHub Actions run `23865552478` on commit `2b5eccf85141ad90ef2b8af4b85bda4804491189`, and it passed `release_scope`, `default_ship`, forced `billing_integration`, and `release_gate`.
-- Move to `prod` second for release evidence. The latest green production proof is GitHub Actions run `23867770574` on commit `92da71a5218440030828d2b36bfab76a41993b79`, and the matching green Convex production deploy is `23867770585`.
+- Start on `dev` first. The latest green integrated staging proof checked during the 2026-04-24 CI/CD correction slice is GitHub Actions run `24736371175` on commit `36c8360da5d94d9be2ac4485d935389fa5b4fe52`, and it passed `release_scope`, `default_ship`, and `release_gate`; `billing_integration` was skipped because the release scope did not require it.
+- Move to `prod` second for release evidence. The latest green production proof checked during the 2026-04-24 CI/CD correction slice is GitHub Actions run `24736015243` on commit `3c5347c06c039859b7780a61e331cebda9421aea`, and the matching green `CI` and `Convex Production Deploy` runs are `24736015264` and `24736015267`.
 - `qa/runs/2026-04-01-release-proof-final-green.md` is the durable report for that final April 1 release state.
 - In this repo, the preferred production proof remains a live no-cost Checkout run using a restricted `100% off` discount, because that exercises `checkout.session.completed`, the webhook grant, `/checkout/success`, and `/blueprint` without requiring a real charge.
 - On `https://www.man-meets-ai.com`, `qa:run-pack -- --pack=billing_integration` should use the dedicated hosted verifier that creates the live Checkout Session directly with a fresh one-time 100%-off coupon already attached. Do not make the production gate depend on typing a promotion code into Stripe’s hosted UI.

@@ -10,6 +10,19 @@ This repository ships through short-lived feature branches into `dev`, then prom
 
 Production is healthy only when all three systems agree on the same release candidate from `main`, and staging is healthy when `dev` is the integrated proof point for auth, Convex, and Stripe test-mode billing.
 
+## Current CI/CD proof path
+
+As of the 2026-04-24 CI/CD correction slice, the proven release path is the existing workflow set, not the rejected Dub-style harness reset.
+
+- `Dev Staging Proof` is the integrated `dev` proof surface. The current remote evidence is run `24736371175`, created 2026-04-21 for commit `36c8360da5d94d9be2ac4485d935389fa5b4fe52`, with green `release_scope`, `default_ship`, and `release_gate`; `billing_integration` was skipped because the release scope did not require billing proof.
+- `CI` is the code-centric `main` and pull-request proof surface. The current release evidence is run `24736015264`, created 2026-04-21 for commit `3c5347c06c039859b7780a61e331cebda9421aea`, with green `qa_control_plane`, `static`, `cli`, `integration`, and `browser-smoke` jobs. Scheduled `CI` run `24874408634` also passed on 2026-04-24 for the same `main` commit.
+- `Production Release Proof` is the hosted production post-deploy proof surface. The current evidence is run `24736015243`, created 2026-04-21 for commit `3c5347c06c039859b7780a61e331cebda9421aea`, with green `release_scope`, `default_ship`, and `release_gate`; `billing_integration` and `reconcile_dev` were skipped by workflow logic.
+- `Convex Production Deploy` is the production backend deploy surface. The current evidence is run `24736015267`, created 2026-04-21 for commit `3c5347c06c039859b7780a61e331cebda9421aea`, with green `deploy`.
+
+Preserve `.github/workflows/ci.yml`, `.github/workflows/dev-staging-proof.yml`, `.github/workflows/production-release-proof.yml`, and `.github/workflows/convex-production-deploy.yml` unless a later plan replaces them with equal or stronger remote proof.
+
+`Sandbox E2E Nightly` and `Deployment Smoke` are not release-path replacements. `Sandbox E2E Nightly` run `24876267728` failed on 2026-04-24 and should be treated as a non-release-critical repair candidate. `Deployment Smoke` appears in remote workflow metadata and has failed run `24571382089` from 2026-04-17, but `.github/workflows/deployment-smoke.yml` is absent from the current checkout, `origin/dev`, and `origin/main`; treat it as an orphaned historical Actions surface unless a workflow file returns and fresh passing evidence exists.
+
 ## Release candidate contract
 
 A `dev` release candidate is valid only when these four facts point at the same commit:
@@ -90,9 +103,9 @@ Create that secret from the Convex dashboard for the production deployment:
 Useful verification commands:
 
 ```bash
-gh run list --repo ParkerRex/mma-shipbysunday --workflow ci.yml --limit 10
-gh run list --repo ParkerRex/mma-shipbysunday --workflow convex-production-deploy.yml --limit 10
-gh run list --repo ParkerRex/mma-shipbysunday --workflow production-release-proof.yml --limit 10
+gh run list --repo ParkerRex/ship-by-sunday --workflow ci.yml --limit 10
+gh run list --repo ParkerRex/ship-by-sunday --workflow convex-production-deploy.yml --limit 10
+gh run list --repo ParkerRex/ship-by-sunday --workflow production-release-proof.yml --limit 10
 git rev-parse origin/dev
 git rev-parse origin/main
 git merge-base origin/main origin/dev
@@ -147,7 +160,7 @@ If `bun run release:snapshot -- --dry-run` exits non-zero, do not force it throu
 Before the first live production promotion, run the Convex workflow manually in dry-run mode:
 
 ```bash
-gh workflow run convex-production-deploy.yml --repo ParkerRex/mma-shipbysunday -f dry_run=true
+gh workflow run convex-production-deploy.yml --repo ParkerRex/ship-by-sunday -f dry_run=true
 ```
 
 That workflow defaults to dry-run when manually dispatched. A successful run proves the GitHub secret, checkout, Bun install, and `bunx convex deploy --dry-run -y` path are wired correctly.
@@ -155,7 +168,7 @@ That workflow defaults to dry-run when manually dispatched. A successful run pro
 After that dry-run succeeds, enable automatic `main` deploys:
 
 ```bash
-gh variable set CONVEX_PRODUCTION_DEPLOY_ENABLED --repo ParkerRex/mma-shipbysunday --body true
+gh variable set CONVEX_PRODUCTION_DEPLOY_ENABLED --repo ParkerRex/ship-by-sunday --body true
 ```
 
 When that variable is `false`, pushes to `main` log a skip instead of deploying Convex production. When it is `true`, future `main` merges deploy Convex production automatically.

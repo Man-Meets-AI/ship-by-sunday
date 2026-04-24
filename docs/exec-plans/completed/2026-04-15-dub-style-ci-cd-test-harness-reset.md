@@ -1,17 +1,21 @@
 ---
 title: Replace The QA Control Plane With A Dub-Style Thin CI Harness
-status: active
+status: complete
 created_at: 2026-04-15
-completed_at: null
-summary: Replace Ship by Sunday's current QA control plane and release-proof maze with a Dub-style thin CI surface, thin post-deploy verification surface, and a much smaller shared pricing and test helper layer.
-post_build_recap: null
+completed_at: 2026-04-24
+summary: Historical record of the rejected Dub-style harness reset that must not be used as Ship by Sunday's current CI/CD direction.
+post_build_recap: This plan was retired without implementation as the current CI/CD direction because fresh remote evidence proved the existing dev and main release workflows are the release path to preserve.
 read_when:
-  - Open this when the goal is to delete the current QA pack, release-scope, persona-bootstrap, and billing-proof sprawl and replace it with a simpler Dub-style test and deployment harness.
+  - Reviewing why the Dub-style harness reset was rejected.
+  - Checking historical context before changing CI/CD or QA release workflows.
+  - Confirming this file is not an active implementation plan.
 ---
 
 # Replace The QA Control Plane With A Dub-Style Thin CI Harness
 
-This is a living execution plan. It captures the full reset from the repository’s current release and QA orchestration model to a Dub-style model so a future coding agent can execute the migration without needing chat history or tribal knowledge.
+2026-04-24 status correction: this direction has been rejected and this file has been moved to the completed historical plan lane. Do not implement this plan as written. The completed correction slice at `docs/exec-plans/completed/2026-04-24-retire-dub-style-harness-and-codify-cicd.md` codifies the working CI/CD path proven by recent remote runs.
+
+This is a completed historical execution plan record. It captures the rejected reset from the repository’s current release and QA orchestration model to a Dub-style model so future agents can understand the rejected direction without treating it as current work.
 
 This ExecPlan must be maintained in accordance with `docs/exec-plans/PLANS.md`.
 
@@ -35,7 +39,7 @@ The change is successful when this repository no longer depends on `qa:run-pack`
 - [x] 2026-04-15 17:44 EDT — Reorganized `apps/web/tests` into domain folders such as `auth/`, `blueprint-flow/`, `checkout/`, `course/`, `observability/`, and `workspace/`. Vitest now selects non-unit lanes by filename suffix (`.integration`, `.ui`, `.contract`, `.convex-contract`) instead of by directory, shared helpers now live under `apps/web/tests/utils/`, and live docs plus generated starter surfaces now describe the domain-first layout.
 - [x] 2026-04-15 17:56 EDT — Removed the last live stale references and legacy test-script surfaces: `apps/web/package.json` no longer exposes `test:unit` or `test:integration*`, the docs spine (`docs/index.md`, `ARCHITECTURE.md`, `RELIABILITY.md`, `QUALITY_SCORE.md`, `SECURITY.md`, `FRONTEND.md`, `DESIGN.md`, `PRODUCT_SENSE.md`) now describes Ship by Sunday instead of the unrelated worker runtime, and the starter-generator guidance now points at real current skills instead of dead names like `$qa-team`.
 - [x] 2026-04-15 19:44 EDT — Upgraded the Playwright lane from request-level smoke on `next dev` to a production-backed public browser lane. `bun run test:e2e` now boots `next start` by default, the specs are split under `apps/web/playwright/public/`, the PR workflow prebuilds before browser execution, and both browser workflows now upload Playwright reports.
-- [ ] Prove the new harness in GitHub Actions, then record the final removed surfaces and any required GitHub or Vercel settings changes. Local proof is complete through `format`, `lint`, `typecheck`, `test`, `test:contracts`, `build`, and the new production-backed `test:e2e`, but GitHub-hosted proof is still blocked until the new workflow files exist on a pushed branch or the default branch.
+- [x] 2026-04-24 EDT — Retired this plan as a rejected historical direction instead of continuing the Dub-style replacement. The repo now preserves the existing proven `Dev Staging Proof`, `CI`, `Production Release Proof`, and `Convex Production Deploy` path through `docs/exec-plans/completed/2026-04-24-retire-dub-style-harness-and-codify-cicd.md`.
 
 ## Surprises & Discoveries
 
@@ -113,6 +117,8 @@ Rationale: those tests span multiple lesson modes and internal builder surfaces,
 Date: 2026-04-15
 
 ## Outcomes & Retrospective
+
+This plan was not completed by implementing its original Dub-style reset. It was completed by rejecting that direction and removing it from the active execution lane. Fresh GitHub Actions evidence on 2026-04-24 showed the existing `Dev Staging Proof` workflow passing on `dev`, and `CI`, `Production Release Proof`, and `Convex Production Deploy` passing on `main`. Those workflows are the release path to preserve. The completed correction slice is `docs/exec-plans/completed/2026-04-24-retire-dub-style-harness-and-codify-cicd.md`.
 
 The worktree outcome is now concrete. The runtime shipping path is smaller and easier to explain: the root surface is `format`, `lint`, `typecheck`, `test`, `test:contracts`, `build`, and `test:e2e`; the workflow surface is `.github/workflows/pr.yml`, `.github/workflows/deployment-smoke.yml`, and `.github/workflows/convex-production-deploy.yml`; the old root `qa/` folder is gone entirely; browser smoke now lives under `apps/web/playwright/`; shared jsdom setup and app-local test docs live under `apps/web/tests/`; the old authenticated sandbox Playwright lane is gone; the old hosted/local Stripe proof scripts are gone; and checkout/access protection now lives in route integration tests plus offline `convex-test` coverage.
 
@@ -328,8 +334,8 @@ The final implementation summary should also include a cutover inventory in four
 Plan validation note from authoring time:
 
     Attempted:
-    - bun run plans:lint -- --plan docs/exec-plans/active/2026-04-15-dub-style-ci-cd-test-harness-reset.md
-    - bun run markdown:lint -- --paths docs/exec-plans/active/2026-04-15-dub-style-ci-cd-test-harness-reset.md
+    - bun run plans:lint -- --plan docs/exec-plans/completed/2026-04-15-dub-style-ci-cd-test-harness-reset.md
+    - bun run markdown:lint -- --paths docs/exec-plans/completed/2026-04-15-dub-style-ci-cd-test-harness-reset.md
 
     Result:
     - both commands failed because this checkout does not define the scripts "plans:lint" or "markdown:lint" in package.json
