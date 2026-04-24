@@ -1,34 +1,63 @@
-# apps/web/AGENTS.md
+# apps/web
 
-## Ship by Sunday — web app rules
+## Scope
 
-- This product is blueprint-first, not course-first.
-- Root `DESIGN.md` is the canonical visual source of truth for user-facing UI in this repo.
-- Before changing layout, styling, theming, motion, docs chrome, or marketing presentation in `apps/web`, read root `DESIGN.md` and preserve that system unless the task explicitly changes it.
-- Required funnel:
-  Start -> Product -> Design -> Marketing -> Build Plan -> Review & Download
-- Optional post-download library:
-  Execute / Ship
+Use this file for all work under `apps/web`.
+
+This app is blueprint-first, not course-first. The public customer outcome is one Blueprint delivered at Review & Download.
+
+## Read Before Editing
+
+- For any `apps/web` task, start with the repo root `AGENTS.md`.
+- For route, auth, checkout, entitlement, browser QA, release-readiness, or ship-readiness work, also read `qa/AGENTS.md`.
+- For UI layout, styling, theming, motion, docs chrome, marketing presentation, or component presentation, read root `DESIGN.md` and `docs/ship-by-sunday/design-pack/AGENTS.md`.
+- Before changing the public homepage, read `apps/web/content/docs/configure-the-homepage.mdx`.
+- Before changing Convex code, read `apps/web/convex/_generated/ai/guidelines.md`.
+- Before changing Next.js App Router, rendering, route handlers, middleware, config, caching, metadata, or server/client boundaries, read the relevant guide in `apps/web/node_modules/next/dist/docs/`.
+
+## Product Contract
+
+- Required funnel: Start -> Product -> Design -> Marketing -> Build Plan -> Review & Download.
+- Optional post-download library: Execute / Ship.
 - Do not preserve old CEO / Design / Build / Ship framing if it conflicts with blueprint-first logic.
-- Do not turn workflow or ephemeral state into canonical intake.
-- The public outcome is one Blueprint delivered at Review & Download.
 - Do not reintroduce separate pre-review download artifacts or stage-pack contracts into the UI unless the live product changes first.
-- For user-facing UI work, also follow `docs/ship-by-sunday/design-pack/` as the repo-specific frontend design workflow pack.
+- Do not turn workflow or ephemeral state into canonical intake.
+- Use current `apps/web` routes, features, config, and local instruction files as the live product contract. Use older `docs/ship-by-sunday/*.md` planning files only for background context when runtime code does not answer the question.
 
-## Planning behavior
-
-- For major IA, lesson, or funnel work, create an ExecPlan before coding.
-- Explicitly separate fact / workflow / derived / ephemeral.
-- Call out contradictions instead of papering over them.
-- Use older `docs/ship-by-sunday/*.md` planning files only for background context when the live app code does not already answer the question.
-
-## Convex-backed state
+## State Rules
 
 - Convex-backed product state is the source of truth in `apps/web`.
 - Do not mirror `useQuery` results or server-loaded workspace state into React `useState` just to drive normal rendering.
-- Keep local React state only when the reason is clearly UX-only:
-  - editable draft buffer
+- Keep local React state only for clearly UX-only purposes:
+  - editable draft buffers
   - inline validation or save feedback
   - optimistic mutation state
   - client-only acknowledgement that Convex should not store
 - If local state would survive long enough to compete with Convex truth across refresh, route change, or save, remove it.
+
+## UI And Component Rules
+
+- Preserve the existing visual system unless the task explicitly calls for redesign.
+- Keep presentation in components and stateful or behavioral logic in hooks, helpers, or controller layers.
+- Split components above 150 lines when a clean feature-local boundary exists.
+- Use product language in UI copy. Do not leak planning, prompt, or implementation terminology into customer-facing surfaces.
+- For user-facing UI work, also follow `docs/ship-by-sunday/design-pack/`.
+
+## Route And Access Triggers
+
+- If a change touches access checks, checkout success, entitlement, Clerk auth, or protected routes, map the affected journeys in `qa/journeys.csv` before judging proof.
+- If a test or route still uses legacy `/mission` or `/artifacts` wording, treat it as suspect unless the current customer-facing contract still depends on that alias.
+- For checkout or billing changes, keep Stripe-to-Convex handoff proof separate from UI proof.
+
+## Planning Triggers
+
+- For major IA, lesson, funnel, state-model, route, or data-contract work, create or update an ExecPlan before coding.
+- Explicitly separate fact, workflow, derived, and ephemeral state in plans and implementation.
+- Call out contradictions instead of papering over them.
+
+## Local Verification
+
+- Run focused tests for the touched feature first.
+- For UI route changes, prefer focused integration-ui or browser-smoke proof before broad validation.
+- For Convex-backed changes, validate against hosted Convex dev only.
+- Before completing code work, the repo-level gates from root still apply: `bun run format`, `bun lint`, and `bun typecheck`.

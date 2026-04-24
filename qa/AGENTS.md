@@ -1,12 +1,10 @@
-# QA Agent Workflow
+# QA Control Plane
 
-Use this file whenever a task changes routes, auth behavior, entitlement behavior, checkout behavior, browser QA, or ship-readiness evidence.
+## Scope
 
-This folder is the canonical QA control plane. Do not invent alternate scenario lists in a skill folder, a PR comment, or a one-off script. Update the files in `qa/` directly.
+Use this file whenever a task changes routes, auth behavior, entitlement behavior, checkout behavior, browser QA, release-readiness evidence, or ship-readiness evidence.
 
-In phase 1, the main user-facing behavior is `QA Lead`. The specialist roles below are support roles that the lead may use when they materially improve the review. A normal “go talk to our QA team” request should come back as one consolidated verdict, not a committee memo.
-
-Phase 2 delegation stance: for material reviews, the lead should no longer guess about whether to fan out. Use the deterministic specialist pattern below unless the request is truly lightweight.
+`qa/` is the canonical QA control plane. Do not invent alternate scenario lists in a skill folder, PR comment, or one-off script.
 
 ## Read Order
 
@@ -18,50 +16,46 @@ Read these files in order before changing QA decisions:
 4. `qa/coverage.csv`
 5. `qa/test-inventory.csv`
 6. `qa/personas.json`
+7. `qa/current-baseline.md`
+8. latest relevant report under `qa/runs/`
 
 Then inspect only the app code and tests required for the selected scenarios.
 
 Before running a pack, declare the target environment in plain English: `feature branch`, `dev`, `prod`, `main`, or a named test environment. Do not mix evidence from different environments in one report without saying so explicitly.
 
-Branch lifecycle is part of the QA contract:
+## Branch And Environment Contract
 
-- feature branches are preview-only and should stay on dry-run QA or focused proof
-- `dev` is the integrated staging branch where the full buyer flow is first proven
-- `main` is production, so release evidence must match the `dev -> main` promotion path
-
-## Current Resume State
-
-- Feature branches get only preview-safe QA. Use dry-run `default_ship` or focused tests, never real billing proof.
-- Start with `dev`. `qa/runs/2026-03-26-dev-default-ship-local-auth.md` is the current green `default_ship` baseline and is the canonical first debug baseline.
-- `billing_integration` on `dev` has a green rerun in `qa/runs/2026-03-25-dev-billing-integration-rerun.md`. Use that report as the local billing baseline.
-- Move to `prod` second. `default_ship` is now green there too; use `qa/runs/2026-03-25-default-ship-prod-rerun.md` as the current hosted baseline.
-- Hosted `billing_integration` now has both the repair report and the automatic post-fix rerun. Read `qa/runs/2026-03-25-prod-billing-integration-webhook-fix.md` first for the misconfig repair, then `qa/runs/2026-03-25-prod-billing-integration-automatic-rerun.md` for the fresh automatic delivery proof.
-- The key prod invariants are: Stripe posts to the Convex `.convex.site` webhook URL, production Convex has both `STRIPE_WEBHOOK_SECRET` and `STRIPE_SECRET_KEY`, and a fresh live completed no-cost order can patch or insert a `stripe_webhook` access grant without replay.
-- For this repo, prefer a live no-cost Checkout verification using a restricted `100% off` discount instead of a real card charge. That proves the webhook/access handoff without treating prod as a card-testing surface.
-- On production, the canonical `billing_integration` automation should create the Checkout Session directly with that discount already attached. Do not make the production gate depend on manual promotion-code entry in Stripe’s hosted UI.
+- Feature branches are preview-only and should stay on dry-run QA or focused proof.
+- `dev` is the integrated staging branch where the full buyer flow is first proven.
+- `main` is production, so release evidence must match the `dev -> main` promotion path.
+- Workflow order is `dev` first, then `prod`. Use local dev to debug product/runtime issues before collecting hosted ship evidence.
 - Use `qa/runs/` as the durable evidence set and read the latest relevant environment report before rerunning a pack.
+- For production QA, prefer a live no-cost Checkout verification using a restricted `100% off` discount instead of a real card charge. That proves the webhook/access handoff without treating prod as a card-testing surface.
+- On production, canonical billing automation should create the Checkout Session directly with that discount already attached. Do not make the production gate depend on manual promotion-code entry in Stripe's hosted UI.
 
 ## QA Lead
 
-Read the QA control plane in the documented order before app code. Start advisory-first: map the feature to journeys, inspect current proof, identify missing proof, and recommend the smallest next run.
+`QA Lead` is the default user-facing role. A normal "go talk to our QA team" request should return one consolidated verdict, not a committee memo.
 
-Use:
+Start advisory-first:
 
-```bash
-bun run qa:validate
-bun run qa:run-pack -- --pack=default_ship --dry-run
-bun run --cwd apps/web test:integration:ui -- tests/integration-ui/<focused-test>.test.tsx
-```
+1. Map the feature to journeys.
+2. Inspect current proof.
+3. Identify missing proof.
+4. Recommend the smallest next run.
+5. Run only the safe local budget unless the user asks for more.
 
 Default safe local auto-run budget:
 
-- `bun run qa:validate`
-- `bun run qa:run-pack -- --pack=<pack> --dry-run`
-- directly relevant focused `vitest` runs
+```bash
+bun run qa:validate
+bun run qa:run-pack -- --pack=<pack> --dry-run
+bun run --cwd apps/web test:integration:ui -- tests/integration-ui/<focused-test>.test.tsx
+```
 
-Do not automatically run full browser packs, billing flows, or canonical `qa/` truth writes during an ordinary review request. If the user explicitly asks for browser execution and the environment is safe, the lead may use `Browser Runner`. If inventory or coverage updates are needed, the lead may prepare exact edits, but it must ask for confirmation before applying changes to canonical files such as `qa/coverage.csv` or `qa/test-inventory.csv`.
+Do not automatically run full browser packs, billing flows, or canonical `qa/` truth writes during an ordinary review request.
 
-The lead’s answer should cover:
+The lead's answer should cover:
 
 - affected journeys
 - current proof
@@ -70,22 +64,24 @@ The lead’s answer should cover:
 - findings
 - release confidence
 
-Material review specialist pattern:
+## Specialist Pattern
+
+For material reviews, the lead should use the deterministic specialist pattern below unless the request is truly lightweight.
 
 - Use `Scenario Mapper`, `Coverage Analyst`, and `Gap Reviewer` in parallel for feature diff reviews, multi-journey reviews, or any review substantial enough to justify a local review artifact.
 - Add `Browser Runner` only when the user explicitly asks for browser execution and the environment is declared safe.
 - Add `Release Summarizer` after any command-backed review, browser run, or material review where the final verdict should separate proven behavior from missing proof.
 - If specialist inputs disagree, keep the answer consolidated and choose the more conservative confidence call.
 
-## Phase 1 Support Roles
+## Scenario Mapper
 
-### Scenario Mapper
+Read the diff, map changed files to scenario IDs, and state which packs are affected. Prefer product language over file names.
 
-Read the diff, map the changed files to scenario IDs, and state which packs are affected. Prefer product language over file names. Example: a change in `apps/web/features/product-access/` affects `AUTH-02`, `ACCESS-01`, and `BLUEPRINT-01`, not “the access-required component.”
+Example: a change in `apps/web/features/product-access/` affects `AUTH-02`, `ACCESS-01`, and `BLUEPRINT-01`, not "the access-required component."
 
-### Coverage Analyst
+## Coverage Analyst
 
-Keep `qa/test-inventory.csv` current with the real `apps/web/tests/` tree and compare it against `qa/coverage.csv` when proof strength drifts. Every test file must have one row. If a test only proves implementation details, mark it `merge`, `replace`, or `delete` instead of pretending it is ship-critical journey proof.
+Keep `qa/test-inventory.csv` current with the real `apps/web/tests/` tree and compare it against `qa/coverage.csv` when proof strength drifts. Every test file must have one row.
 
 Use:
 
@@ -95,14 +91,17 @@ bun run qa:inventory:check
 bun run qa:validate
 ```
 
-`qa:inventory:sync` preserves curated rows for unchanged files and only uses filename heuristics to seed genuinely new files. If a meaningful mapping still degrades after sync, stop and repair the control plane before concluding the review.
-`qa:inventory:check` is the CI-facing fast fail that reruns inventory sync and then fails if `qa/test-inventory.csv` would change.
+- `qa:inventory:sync` preserves curated rows for unchanged files and only uses filename heuristics to seed genuinely new files.
+- `qa:inventory:check` is the CI-facing fast fail that reruns inventory sync and fails if `qa/test-inventory.csv` would change.
+- If a meaningful mapping still degrades after sync, stop and repair the control plane before concluding the review.
+- If a test only proves implementation details, mark it `merge`, `replace`, or `delete` instead of pretending it is ship-critical journey proof.
+- Do not silently apply canonical inventory or coverage edits during an ordinary QA-team review. Prepare the exact change and ask for confirmation first.
 
-Do not silently apply canonical inventory or coverage edits during an ordinary QA-team review. Prepare the exact change and ask for confirmation first.
+## Browser Runner
 
-### Browser Runner
+Use this role only when the user explicitly asks for browser execution and the environment is declared safe.
 
-Prepare the needed personas, run the smallest relevant browser surface, and record which scenario IDs were actually exercised. This role is opt-in in phase 1. Use it only when the user explicitly asks for browser execution and the environment is declared safe.
+Prepare the needed personas, run the smallest relevant browser surface, and record which scenario IDs were actually exercised.
 
 Use:
 
@@ -117,27 +116,25 @@ PLAYWRIGHT_BASE_URL=<safe_base_url> bun run --cwd apps/web test:e2e:local-auth:d
 
 Environment ownership:
 
-- `qa/personas.local.json` supplies the real QA account emails and passwords.
+- `qa/personas.local.json` supplies the real QA account emails and passwords. It must stay ignored.
 - `apps/web/.env.local` or `QA_ENV_FILE=<path>` supplies the Clerk and Convex environment for provisioning.
 - `PLAYWRIGHT_BASE_URL` supplies the browser target.
 
 Pack policy:
 
-- `default_ship`: run `qa:run-pack -- --pack=default_ship` once the environment is ready on `dev` or production release verification. On feature branches, use only `--dry-run` plus focused tests. This validates the catalog, prepares personas, scaffolds the report, runs browser smoke, runs the blueprint integration-ui suite, and runs the tagged canonical blueprint-route sandbox spec.
-- For blueprint-funnel diffs, the blueprint integration-ui suite is required because it directly proves the stacked Start page, the routed workbench, the Continue-only save and validation flow, and the Review unlock hierarchy.
-- On local dev, prefer the local-auth default-ship lane when sandbox auth is not active. It reuses the same prepared personas and storage-state bootstrap but does not depend on the sandbox gate.
+- `default_ship`: run the full pack on `dev` or production release verification once the environment is ready. On feature branches, use only `--dry-run` plus focused tests.
+- Blueprint-funnel diffs require the blueprint integration-ui suite because it proves the stacked Start page, routed workbench, Continue-only save and validation flow, and Review unlock hierarchy.
+- On local dev, prefer the local-auth default-ship lane when sandbox auth is not active.
 - `extended`: run only the scenarios touched by the diff unless the user asks for a full extended sweep.
-- `billing_integration`: run `qa:run-pack -- --pack=billing_integration` only on `dev` or production release verification when the environment is explicitly safe for test payments and `QA_ALLOW_BILLING_INTEGRATION=1` is set. Do not run it on ordinary feature branches. On local targets, the pack now records `bun run stripe:dev:doctor` as a warning-only preflight and then runs `bun run stripe:dev:verify` after the sandbox billing flow as the hard Stripe-to-Convex proof. A warning about the pinned Stripe CLI project `ship-by-sunday` should be fixed, but it should not override a passing billing handoff by itself. If the pack still regresses, first verify that `bun run dev:stripe` is forwarding to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook` before treating it as an app-auth issue. On `www.man-meets-ai.com`, the pack should switch to the hosted verifier that creates a fresh live zero-cost Checkout Session directly with a one-time 100%-off coupon already attached, then proves the real `/checkout/success` -> `/start` access handoff.
-- Hosted release workflows should fail early on drift. `Dev Staging Proof` should auto-bind `dev.man-meets-ai.com` to the exact ready preview deployment for the tested `dev` commit, sync hosted Convex dev automatically when the release touched `apps/web/convex/`, and verify the managed Stripe env plus the hosted checkout route before the billing pack runs.
-- Run authenticated sandbox work on local `dev` first. The current green local baseline is `default_ship`; use hosted or prod only after the local path is understood.
-- If the sandbox Playwright lane exits with all tests skipped, treat that as missing browser evidence, not as a green pass. Record the skipped state explicitly in the report and call out why the auth environment was inactive.
-- Hosted persona prep must use Clerk env values that match the hosted target. `qa:personas:prepare` and `qa:run-pack` load `apps/web/.env.local` by default; set `QA_ENV_FILE=<path>` or export matching Clerk env vars before targeting prod or any other non-local Clerk instance.
-- Workflow order is `dev` first, then `prod`. Use local dev to debug product/runtime issues before collecting hosted ship evidence. Only use `prod` once the local behavior is understood.
-- For production QA, prefer the single command `PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=<prod-env-file> bun run qa:run-pack -- --pack=default_ship` so persona prep and both browser lanes use the same target assumptions.
+- `billing_integration`: run only on `dev` or production release verification when the environment is explicitly safe for test payments and `QA_ALLOW_BILLING_INTEGRATION=1` is set. Do not run it on ordinary feature branches.
+- If the sandbox Playwright lane exits with all tests skipped, treat that as missing browser evidence, not a green pass.
+- Hosted persona prep must use Clerk env values that match the hosted target. Set `QA_ENV_FILE=<path>` or export matching Clerk env vars before targeting prod or any non-local Clerk instance.
 
-### Gap Reviewer
+## Gap Reviewer
 
-Read `qa/journeys.csv`, `qa/coverage.csv`, the latest report, and the touched diffs together. Find important scenarios that still have `gap`, `rewrite_required`, low-confidence automation, or no recent browser evidence. Flag the missing proof in product language, not in framework language.
+Read `qa/journeys.csv`, `qa/coverage.csv`, the latest report, and the touched diff together.
+
+Flag important scenarios that still have `gap`, `rewrite_required`, low-confidence automation, or no recent browser evidence. Use product language, not framework language.
 
 Use:
 
@@ -145,11 +142,24 @@ Use:
 bun run qa:validate
 ```
 
-Then inspect the rows with `gap` or low confidence in `qa/coverage.csv` and compare them against the latest committed run report.
+Then inspect rows with `gap` or low confidence in `qa/coverage.csv` and compare them against the latest committed run report.
 
-### Release Summarizer
+Use `Gap Reviewer` whenever a diff touches release-critical journeys but the coverage map still shows `gap`, `rewrite_required`, or stale browser evidence.
 
-Create or update `qa/runs/YYYY-MM-DD-<slug>.md` using `qa/templates/run-report.md`. List the pack, personas, scenario IDs, commands run, pass/fail findings, and blocked items. If a flow was not executed, say so plainly.
+## Release Summarizer
+
+Create or update `qa/runs/YYYY-MM-DD-<slug>.md` using `qa/templates/run-report.md`.
+
+Every report must include:
+
+- environment label near the top, such as `Environment: dev-local`, `Environment: prod-www.man-meets-ai.com`, or `Environment: staging-<name>`
+- pack
+- personas
+- scenario IDs
+- commands run
+- pass/fail findings
+- blocked items
+- any flow that was not executed
 
 Use:
 
@@ -159,15 +169,10 @@ bun run qa:ship -- --pack=default_ship --slug=<short-name>
 
 That command scaffolds a local report under `qa/runs/local/`. Promote the final report into committed `qa/runs/` only after the evidence is worth keeping.
 
-Every report must include the environment label near the top. Good examples are `Environment: dev-local`, `Environment: prod-www.man-meets-ai.com`, or `Environment: staging-<name>`.
-
 ## Operating Rules
 
-- Use `QA Lead` as the default user-facing role. Treat the other roles as optional helpers behind the scenes.
 - Do not store secrets in `qa/`. Only `qa/personas.local.json` may hold local credentials, and it must stay ignored.
-- Do not count a unit test as journey proof if it only checks an internal helper and never validates the user-facing behavior.
+- Do not count a unit test as journey proof if it only checks an internal helper and never validates user-facing behavior.
 - If a current test uses `/mission` or `/artifacts`, mark it `rewrite_required` or `rewrite` unless the actual customer-facing contract still depends on that alias.
 - Prefer additive updates. Refresh the inventory, coverage map, and report before deleting legacy tests.
-- Do not update canonical `qa/` truth files during an ordinary QA-team interaction without explicit confirmation.
 - Run `bun run qa:validate` before concluding any QA control plane change is complete.
-- Use `Gap Reviewer` whenever a diff touches release-critical journeys but the coverage map still shows `gap`, `rewrite_required`, or stale browser evidence.
