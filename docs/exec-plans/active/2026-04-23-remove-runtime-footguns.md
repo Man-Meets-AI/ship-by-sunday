@@ -9,6 +9,8 @@ read_when:
   - Resuming runtime hardening work.
   - Investigating recurring client observability, Codex route, public metadata, or bonus lesson incidents.
   - Validating the second Ship by Sunday recovery slice.
+program_id: sbs-codebase-recovery
+planning_brief: docs/programs/active/2026-04-23-sbs-codebase-recovery/planning-brief-1.md
 ---
 
 # Remove Runtime Footguns

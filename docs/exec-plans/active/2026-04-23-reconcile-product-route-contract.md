@@ -9,6 +9,8 @@ read_when:
   - Resuming product route contract work.
   - Changing protected workspace routes, route docs, QA journeys, or post-review navigation.
   - Validating the third Ship by Sunday recovery slice.
+program_id: sbs-codebase-recovery
+planning_brief: docs/programs/active/2026-04-23-sbs-codebase-recovery/planning-brief-1.md
 ---
 
 # Reconcile Product Route Contract

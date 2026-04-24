@@ -9,6 +9,8 @@ read_when:
   - Resuming release or intake control-plane repair.
   - Validating release triage, release intake, or runtime intake exports.
   - Executing the second recovery slice after CI/CD harness retirement.
+program_id: sbs-codebase-recovery
+planning_brief: docs/programs/active/2026-04-23-sbs-codebase-recovery/planning-brief-2.md
 ---
 
 # Repair Release Intake Control Plane
@@ -21,7 +23,7 @@ This ExecPlan must be maintained in accordance with `docs/exec-plans/PLANS.md`.
 
 The release and intake layer should tell a maintainer whether the current Ship by Sunday work is safe to ship. Right now that layer has concrete correctness risks: blocker slugs can normalize incorrectly, documented triage flags can miss the fields the collector reads, runtime intake can group unrelated incidents together, and QA evidence maps new intake tests too generically. The visible outcome of this plan is that release and runtime intake exports produce stable, specific evidence after the rejected Dub-style CI/CD path has been retired.
 
-This plan is the second child slice of the Program packet at `docs/programs/active/2026-04-23-sbs-codebase-recovery/`, originally written from `planning-brief-1.md` and reordered by `planning-brief-2.md`.
+This plan is the second child slice of the Program packet at `docs/programs/active/2026-04-23-sbs-codebase-recovery/`, currently governed by `planning-brief-2.md`.
 
 ## Progress
 
@@ -42,7 +44,7 @@ This plan is the second child slice of the Program packet at `docs/programs/acti
 
 The active Dub-style CI/CD harness plan has been rejected as the first recovery correction. Do not use this release/intake plan to implement or retire that harness direction; the dedicated first slice owns that.
 
-Ship by Sunday's ExecPlan linter rejects unknown frontmatter keys. Worker-style child plan provenance must therefore live in this plan body rather than YAML keys such as `program_id` or `planning_brief`.
+Ship by Sunday's ExecPlan linter accepts paired `program_id` and `planning_brief` frontmatter for Program-owned child plans. This plan now records its Program provenance in frontmatter and keeps the body prose as human-readable context.
 
 `qa/scripts/lib/release-triage-source.mjs` currently parses documented kebab-case flags literally, such as `--base-ref` into `options["base-ref"]`, while `collectReleaseTriageSummary` reads underscore keys such as `options.base_ref`. That means the documented operator flags can be silently ignored unless the parser normalizes option names before returning.
 

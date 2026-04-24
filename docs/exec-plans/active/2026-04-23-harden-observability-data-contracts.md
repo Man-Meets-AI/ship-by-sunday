@@ -9,6 +9,8 @@ read_when:
   - Resuming observability data-contract work.
   - Changing Convex observability schema, incident export, or engineering-intake contracts.
   - Validating the fifth Ship by Sunday recovery slice.
+program_id: sbs-codebase-recovery
+planning_brief: docs/programs/active/2026-04-23-sbs-codebase-recovery/planning-brief-1.md
 ---
 
 # Harden Observability Data Contracts

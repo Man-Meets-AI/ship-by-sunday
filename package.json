@@ -23,6 +23,7 @@
 		"lint:fix": "bun run --cwd apps/web lint:fix",
 		"markdown:lint": "bun run scripts/markdown-metadata/run-lint.ts",
 		"plans:lint": "bun run scripts/exec-plan/run-lint.ts",
+		"programs:lint": "bun run scripts/programs/run-lint.ts",
 		"format": "bun run --cwd apps/web format",
 		"format:check": "bun run --cwd apps/web format:check",
 		"test:unit": "bun run --cwd apps/web test:unit",

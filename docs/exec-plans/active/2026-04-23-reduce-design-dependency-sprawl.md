@@ -9,6 +9,8 @@ read_when:
   - Resuming design-system or dependency cleanup.
   - Auditing icon libraries, heavy visual packages, marketing effects, or nested-card app surfaces.
   - Validating the sixth Ship by Sunday recovery slice.
+program_id: sbs-codebase-recovery
+planning_brief: docs/programs/active/2026-04-23-sbs-codebase-recovery/planning-brief-1.md
 ---
 
 # Reduce Design Dependency Sprawl

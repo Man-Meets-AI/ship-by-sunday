@@ -16,6 +16,7 @@
   - `docs/DESIGN.md`
   - `docs/PRODUCT_SENSE.md`
   - `docs/QUALITY_SCORE.md`
+  - `docs/programs/README.md`
   - `docs/design-docs/index.md`
 - `docs/openai/` and `docs/ship-by-sunday/` are source instruction packs. `docs/generated/` mirrors generated customer-facing output. Do not edit generated mirrors without also updating their source or the generation path.
 - Treat `docs/ship-by-sunday/` as background context unless a local `AGENTS.md`, root `DESIGN.md`, or current runtime code points there as the active contract.
@@ -40,6 +41,7 @@
 - Blueprint compiler output: read `packages/blueprint-compiler/AGENTS.md` before changing compiler schema, canonical facts, generated artifacts, or customer repo output.
 - OpenAI API, ChatGPT Apps SDK, Codex, or OpenAI platform behavior: use the OpenAI developer documentation MCP server before implementing or finalizing conclusions.
 - ExecPlans: for complex features, long-horizon work, migrations, risky integrations, or significant refactors, use an ExecPlan in `docs/exec-plans/active/`. Read `docs/exec-plans/PLANS.md` before authoring or updating one.
+- Programs: for multi-slice initiatives that span several ExecPlans, use a Program packet under `docs/programs/active/`. Read `docs/programs/PROGRAMS.md` before authoring or updating one, and keep the active/completed indexes current.
 - Package or dependency changes: update the matching lockfile in the same change and run the narrow dependency validation the repo provides.
 - Build-time generated files or mirrors: update the source and generated artifact together, and document the generation command when one exists.
 
@@ -93,6 +95,7 @@ Run the narrowest relevant checks first, then broaden as needed. Use `docs/desig
 - QA control plane changes: run `bun run qa:validate`; when inventory changes, also run `bun run qa:inventory:check`.
 - UI changes: verify at least one desktop and one mobile viewport with browser tooling when available.
 - Convex changes: validate against hosted Convex dev and never switch this repo to Convex local mode.
+- Program packet changes: run `bun run programs:lint`, plus `plans:lint` for touched child ExecPlans.
 - Docs-only changes: run the repo markdown or docs validation command when one exists, then run broader gates only when the changed docs affect generated output or operator commands.
 
 If a relevant check cannot run:

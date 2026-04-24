@@ -37,6 +37,7 @@ Root guidance starts at `AGENTS.md` and this docs index. More specific nested `A
 - Product judgment and spec routing: [docs/PRODUCT_SENSE.md](/Users/parkerrex/Developer/ship-by-sunday/docs/PRODUCT_SENSE.md)
 - Quality-score landing surface: [docs/QUALITY_SCORE.md](/Users/parkerrex/Developer/ship-by-sunday/docs/QUALITY_SCORE.md)
 - Planning contract compatibility route: [docs/PLANS.md](/Users/parkerrex/Developer/ship-by-sunday/docs/PLANS.md)
+- Program inventory and contract: [docs/programs/README.md](/Users/parkerrex/Developer/ship-by-sunday/docs/programs/README.md)
 - ExecPlan inventory: [docs/exec-plans/index.md](/Users/parkerrex/Developer/ship-by-sunday/docs/exec-plans/index.md)
 - Product-spec landing zone: [docs/product-specs/index.md](/Users/parkerrex/Developer/ship-by-sunday/docs/product-specs/index.md)
 - Generated-docs landing zone: [docs/generated/index.md](/Users/parkerrex/Developer/ship-by-sunday/docs/generated/index.md)
@@ -49,5 +50,6 @@ Root guidance starts at `AGENTS.md` and this docs index. More specific nested `A
 - Read [docs/ARCHITECTURE.md](/Users/parkerrex/Developer/ship-by-sunday/docs/ARCHITECTURE.md).
 - Read [docs/RELIABILITY.md](/Users/parkerrex/Developer/ship-by-sunday/docs/RELIABILITY.md).
 - Read [docs/PLANS.md](/Users/parkerrex/Developer/ship-by-sunday/docs/PLANS.md).
+- Browse [docs/programs/README.md](/Users/parkerrex/Developer/ship-by-sunday/docs/programs/README.md) for multi-ExecPlan initiatives.
 - Browse [docs/exec-plans/index.md](/Users/parkerrex/Developer/ship-by-sunday/docs/exec-plans/index.md) for active and completed ExecPlans.
 - Use [docs/design-docs/index.md](/Users/parkerrex/Developer/ship-by-sunday/docs/design-docs/index.md) for the deeper repo reference lane.

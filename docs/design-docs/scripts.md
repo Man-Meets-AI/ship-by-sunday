@@ -21,6 +21,7 @@ All commands run from the repository root.
 - `bun run lint:fix`
 - `bun run markdown:lint -- --paths <repo-path-or-dir>`
 - `bun run plans:lint -- --plan <docs/exec-plans/active/...>`
+- `bun run programs:lint`
 - `bun run typecheck`
 - `bun run build`
 
@@ -38,7 +39,8 @@ For frontmatter-driven docs and plans:
 
 - `bun run markdown:lint` validates the repo-owned markdown families that currently have checked-in metadata contracts: the canonical frontmatter-backed docs spine files under `docs/`, ExecPlans under `docs/exec-plans/`, docs MDX pages under `apps/web/content/docs/`, and blog post MDX files under `apps/web/content/blog/`.
 - `bun run plans:lint` applies the stricter ExecPlan body and frontmatter contract from `docs/exec-plans/PLANS.md`.
-- Both commands accept path-scoped arguments so docs-only work can be proved without widening into unrelated files.
+- `bun run programs:lint` validates Program docs, checked-in Program packet folders, versioned planning briefs, current-brief pointers, and Program prompt contracts.
+- `markdown:lint` and `plans:lint` accept path-scoped arguments so docs-only work can be proved without widening into unrelated files.
 
 ## CLI and generator
 

@@ -9,6 +9,8 @@ read_when:
   - Reviewing the completed CI/CD correction slice.
   - Deciding whether to preserve, retire, or repair GitHub Actions workflows.
   - Checking why the Dub-style harness plan must not be implemented.
+program_id: sbs-codebase-recovery
+planning_brief: docs/programs/active/2026-04-23-sbs-codebase-recovery/planning-brief-2.md
 ---
 
 # Retire Dub Style Harness And Codify CI/CD

@@ -4,7 +4,7 @@ title: 'Ship By Sunday Codebase Recovery'
 status: 'active'
 created_at: 2026-04-23
 completed_at: null
-summary: 'Use Worker-style Program packets to coordinate the Ship by Sunday recovery work found in the review.'
+summary: 'Use a checked-in Program packet to coordinate the Ship by Sunday recovery work found in the review.'
 post_build_recap: null
 read_when:
   - 'Planning the Ship by Sunday codebase recovery sequence.'
@@ -16,7 +16,7 @@ read_when:
 
 This is a living initiative document. It keeps the durable initiative-level truth for the Ship by Sunday codebase recovery work identified in the 2026-04-23 review.
 
-This Program follows the Worker Program packet syntax inspected from `/Users/parkerrex/Developer/worker/docs/programs/PROGRAMS.md`. Ship by Sunday does not yet include Worker `programs:lint`, so child ExecPlans remain validated through this repo's `docs/exec-plans/PLANS.md` contract.
+This Program must be maintained in accordance with `docs/programs/PROGRAMS.md`.
 
 ## Purpose / Big Picture
 
@@ -75,9 +75,9 @@ Decision: Create one Program packet instead of a loose priority list.
 Rationale: The work spans several execution slices and would lose important ordering and boundary context if left only in chat.
 Date: 2026-04-23
 
-Decision: Keep child ExecPlan frontmatter compatible with the Ship by Sunday linter.
-Rationale: Worker child plans use `program_id` and `planning_brief` frontmatter, but the Ship by Sunday linter rejects unknown keys today. Provenance belongs in the body until the local linter changes.
-Date: 2026-04-23
+Decision: Use Program-linked child ExecPlan frontmatter.
+Rationale: Ship by Sunday now accepts paired `program_id` and `planning_brief` frontmatter, so child plans can record their Program provenance in the same machine-readable shape as the Program contract.
+Date: 2026-04-24
 
 Decision: Start with release and intake control-plane repair.
 Rationale: The current dirty work contains concrete bugs, and the release/intake layer is the proof surface for later changes.
@@ -102,7 +102,7 @@ Completed child ExecPlans:
 
 - `docs/exec-plans/completed/2026-04-24-retire-dub-style-harness-and-codify-cicd.md`
 
-Each child ExecPlan should name this Program and the immutable planning brief path it was written from in its body. New child plans should use `docs/programs/active/2026-04-23-sbs-codebase-recovery/planning-brief-2.md`.
+Each child ExecPlan should carry `program_id: sbs-codebase-recovery` and the immutable planning brief path it was written from. New child plans should use `docs/programs/active/2026-04-23-sbs-codebase-recovery/planning-brief-2.md`.
 
 ## Next Slice
 
@@ -114,7 +114,7 @@ The CI/CD harness retirement slice is complete. Release and intake repair is now
 
 Do not let this Program become a license for broad cleanup. Each child ExecPlan must stay within its boundary and validate the touched slice.
 
-Do not treat Worker's `programs:lint` as available in this repo. Ship by Sunday currently validates child plans through `plans:lint` and `markdown:lint`.
+Do not let Program validation replace child-plan validation. Program packets use `programs:lint`; child ExecPlans still use `plans:lint` and focused implementation proof.
 
 Do not execute the completed Dub-style harness plan. The completed first child slice retired it and preserved the CI/CD surfaces proven by recent remote runs.
 
@@ -132,6 +132,10 @@ Each child ExecPlan must pass:
 
     bun run plans:lint -- --plan <child-plan-path>
 
+The Program packet must pass:
+
+    bun run programs:lint
+
 Touched child plans should also pass:
 
     bun run markdown:lint -- --paths <child-plan-path>
@@ -144,10 +148,10 @@ Current planning brief:
 
     docs/programs/active/2026-04-23-sbs-codebase-recovery/planning-brief-2.md
 
-Worker syntax source:
+Program contract source:
 
-    /Users/parkerrex/Developer/worker/docs/programs/PROGRAMS.md
-    /Users/parkerrex/Developer/worker/docs/programs/active/2026-04-23-worker-role-goal-kpi-orchestration/program.md
+    docs/programs/PROGRAMS.md
+    docs/programs/README.md
 
 ## Interfaces and Dependencies
 

@@ -30,10 +30,16 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 				"Ship the tracked blueprint compiler as part of the starter repo.",
 		},
 		{
-			pathPattern: "docs/prompts/**",
+			pathPattern: "docs/prompts/execplan*.md",
 			shippingMode: "ship-unchanged",
 			reason:
 				"Ship the ExecPlan prompt assets unchanged under repo-root docs/prompts.",
+		},
+		{
+			pathPattern: "docs/prompts/exec-plan*.md",
+			shippingMode: "ship-unchanged",
+			reason:
+				"Ship the current ExecPlan prompt assets unchanged under repo-root docs/prompts.",
 		},
 		{
 			pathPattern: ".agents/**",
@@ -112,6 +118,18 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 			shippingMode: "exclude",
 			reason:
 				"Do not ship the repo's ExecPlan contracts or active/completed plans inside a customer blueprint snapshot.",
+		},
+		{
+			pathPattern: "docs/programs/**",
+			shippingMode: "exclude",
+			reason:
+				"Do not ship internal Program contracts or active/completed Program packets inside a customer blueprint snapshot.",
+		},
+		{
+			pathPattern: "docs/prompts/program-*.md",
+			shippingMode: "exclude",
+			reason:
+				"Do not ship internal Program prompt assets inside a customer blueprint snapshot.",
 		},
 		{
 			pathPattern: "docs/ship-by-sunday/**",

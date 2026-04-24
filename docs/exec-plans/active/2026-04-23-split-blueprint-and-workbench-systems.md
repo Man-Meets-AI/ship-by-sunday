@@ -9,6 +9,8 @@ read_when:
   - Resuming blueprint or workbench structural cleanup.
   - Adding blueprint fields, workbench upload behavior, or lesson workbench modes.
   - Validating the fourth Ship by Sunday recovery slice.
+program_id: sbs-codebase-recovery
+planning_brief: docs/programs/active/2026-04-23-sbs-codebase-recovery/planning-brief-1.md
 ---
 
 # Split Blueprint And Workbench Systems
