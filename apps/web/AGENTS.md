@@ -58,6 +58,6 @@ This app is blueprint-first, not course-first. The public customer outcome is on
 ## Local Verification
 
 - Run focused tests for the touched feature first.
-- For UI route changes, prefer focused integration-ui or browser-smoke proof before broad validation.
+- For UI route changes, prefer focused integration-ui tests or release-owned browser proof before broad validation.
 - For Convex-backed changes, validate against hosted Convex dev only.
 - Before completing code work, the repo-level gates from root still apply: `bun run format`, `bun lint`, and `bun typecheck`.

@@ -67,7 +67,7 @@ cp apps/web/.env.local.example apps/web/.env.local
 bun run dev
 ```
 
-Use `bun run dev:core` only when you intentionally want the lighter no-Stripe path. Keep the current QA/test harness aligned with `dev/main` unless a separate branch explicitly owns a test-system migration.
+Use `bun run dev:core` only when you intentionally want the lighter no-Stripe path. Source-level tests and `scripts/release/` proof are the current confidence surfaces; do not resurrect the retired QA control plane or helper CLI as local release gates.
 
 ## Next
 

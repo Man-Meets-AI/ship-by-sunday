@@ -26,7 +26,7 @@ read_when:
 
 ## Current State
 
-This lane has the durable contract in [PROGRAMS.md](/Users/parkerrex/Developer/ship-by-sunday/docs/programs/PROGRAMS.md) and its first active Program packet at [active/2026-04-23-sbs-codebase-recovery/program.md](/Users/parkerrex/Developer/ship-by-sunday/docs/programs/active/2026-04-23-sbs-codebase-recovery/program.md).
+This lane has the durable contract in [PROGRAMS.md](/Users/parkerrex/Developer/ship-by-sunday/docs/programs/PROGRAMS.md). There are no active Program packets right now; completed packets remain under [completed/](/Users/parkerrex/Developer/ship-by-sunday/docs/programs/completed/).
 
 The canonical Program shape is now one folder per Program:
 

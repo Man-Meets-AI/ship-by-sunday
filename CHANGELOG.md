@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-04-25
+
+### Changed
+
+- Reset the release operating model around Codex-style PR CI and tag-driven release evidence: retired the disposable QA control plane and helper CLI, moved release proof under `scripts/release`, added `release.json` as the release identity manifest, kept temporary `browser-smoke` and `cli` CI compatibility contexts for branch protection, and removed repo-owned git hook enforcement so local checks are explicit while PR CI remains the merge gate.
+
 ## 2026-04-19
 
 ### Changed

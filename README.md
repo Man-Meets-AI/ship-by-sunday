@@ -13,6 +13,7 @@ Use it before changing any user-facing UI. It documents the shared neutral app t
 - `apps/web/`: the main Next.js product, docs, protected workspace, checkout, and optional Codex runtime.
 - `packages/blueprint-compiler/`: the generator behind the customer-facing Ship by Sunday Blueprint, including the downloaded repo’s generated root `DESIGN.md`, machine-readable design snapshot, and starter-runtime design config.
 - `scripts/release/`: release proof orchestration, release personas, release evidence, and release workflow helpers.
+- `release.json`: the manifest-backed release identity contract for protected `vMAJOR.MINOR.PATCH` tags.
 - `docs/`: the canonical contributor and agent-facing docs spine, plus ExecPlans, prompts, references, and generated analyses.
 
 The protected journey is blueprint-first:
@@ -86,6 +87,16 @@ bun run plans:lint -- --plan docs/exec-plans/active/<plan-file>.md
 bun run check
 ```
 
+Release operators also use:
+
+```bash
+bun run release:triage
+bun run release:snapshot -- --dry-run
+bun run release:manifest:check
+bun run release:evidence:build
+bun run release:proof -- --proof=default_ship --dry-run
+```
+
 For the full command map, use [docs/design-docs/scripts.md](./docs/design-docs/scripts.md).
 
 ## Operations
@@ -93,7 +104,7 @@ For the full command map, use [docs/design-docs/scripts.md](./docs/design-docs/s
 - Docs index: [docs/index.md](./docs/index.md)
 - Observability runbook: [docs/internal/observability.md](./docs/internal/observability.md)
 - Release workflow runbook: [docs/release-workflow.md](./docs/release-workflow.md)
-- Release workflow: [docs/release-workflow.md](./docs/release-workflow.md)
+- Release manifest: [release.json](./release.json)
 - Homepage contract: [apps/web/content/docs/configure-the-homepage.mdx](./apps/web/content/docs/configure-the-homepage.mdx)
 - Public docs index: [apps/web/content/docs/index.mdx](./apps/web/content/docs/index.mdx)
 
@@ -126,6 +137,7 @@ For this repo, that means:
 
 - feature branch into `dev`
 - then `dev` into `main`
+- release manifest and tag evidence stay consistent with the merged `main` commit
 - and if the normal `dev -> main` PR is structurally blocked, use the repo-owned snapshot fallback instead of improvising Git moves
 
 If you want a lighter touch, say so explicitly. For example:

@@ -82,6 +82,9 @@ Do not re-hardwire checkout into hero or pricing, scatter section gating across 
 ### Release Proof
 
 - `scripts/release/` owns release proof orchestration, release personas, release evidence, and hosted proof command wiring.
+- `release.json` owns the release identity contract for protected `vMAJOR.MINOR.PATCH` tags.
+- `.github/workflows/release.yml` owns tag publication and release-evidence assembly once the release reset has reached `main`.
+- The `browser-smoke` and `cli` CI jobs are temporary compatibility contexts for branch protection. They are not proof that the retired browser harness or helper CLI still owns release confidence.
 - Do not invent alternate release-proof formats in a skill folder, PR comment, or one-off script.
 - Release evidence must name the target environment and must not mix local, preview, dev, and prod proof without saying so.
 
@@ -107,6 +110,7 @@ If a relevant check cannot run:
 ## PR And Release Workflow
 
 - This repository ships through short-lived feature branches into `dev`, then promotes the reviewed `dev` release candidate into `main`.
+- Protected release tags are cut from verified `main` commits and must match `release.json`.
 - Do not use a long-lived integration branch.
 - For P0 or P1 production incidents, use the hotfix path from `main`. After the hotfix lands on `main`, merge or cherry-pick it back into `dev` immediately.
 - Before opening a PR, branch from current `dev`, keep the diff scoped, split work into logical conventional commits, and run narrow validation before broad validation.

@@ -21,6 +21,8 @@ Examples:
 - `bun run lint`
 - `bun run typecheck`
 - `bun run release:proof -- --proof=default_ship --dry-run`
+
+For release-sensitive PRs, include `bun run release:triage`, the required hosted proof or dry-run, and any relevant `release:manifest:check` / `release:evidence:build` output. For `dev -> main` release PRs, include the candidate SHA and matching `Dev Staging Proof` run URL.
 -->
 
 ## Release Sensitivity
