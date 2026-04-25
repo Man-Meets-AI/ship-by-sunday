@@ -1,3 +1,4 @@
+import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 
 import {
@@ -9,6 +10,8 @@ import {
 	deliverIncidentNotificationHandler,
 	getIncidentForNotificationArgs,
 	getIncidentForNotificationHandler,
+	listIncidentOccurrencesForEngineeringIntakeHandler,
+	listIncidentsForEngineeringIntakeHandler,
 	markIncidentNotificationDeliveredHandler,
 	markIncidentNotificationFailedHandler,
 	recordIncidentHandler,
@@ -16,6 +19,7 @@ import {
 } from "./observability/model";
 import {
 	incidentDocumentValidator,
+	incidentOccurrenceDocumentValidator,
 	incidentWriteResultValidator,
 	recordIncidentArgs,
 	updateIncidentStatusArgs,
@@ -31,6 +35,34 @@ export const getIncidentForNotification = internalQuery({
 	args: getIncidentForNotificationArgs,
 	returns: v.union(incidentDocumentValidator, v.null()),
 	handler: getIncidentForNotificationHandler,
+});
+
+export const listIncidentsForEngineeringIntake = internalQuery({
+	args: {
+		paginationOpts: paginationOptsValidator,
+	},
+	returns: v.object({
+		continueCursor: v.string(),
+		isDone: v.boolean(),
+		page: v.array(incidentDocumentValidator),
+		pageStatus: v.optional(v.union(v.string(), v.null())),
+		splitCursor: v.optional(v.union(v.string(), v.null())),
+	}),
+	handler: listIncidentsForEngineeringIntakeHandler,
+});
+
+export const listIncidentOccurrencesForEngineeringIntake = internalQuery({
+	args: {
+		paginationOpts: paginationOptsValidator,
+	},
+	returns: v.object({
+		continueCursor: v.string(),
+		isDone: v.boolean(),
+		page: v.array(incidentOccurrenceDocumentValidator),
+		pageStatus: v.optional(v.union(v.string(), v.null())),
+		splitCursor: v.optional(v.union(v.string(), v.null())),
+	}),
+	handler: listIncidentOccurrencesForEngineeringIntakeHandler,
 });
 
 export const markIncidentNotificationDelivered = internalMutation({

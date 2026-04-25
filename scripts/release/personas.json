@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "defaultScope": "ship-by-sunday-clerk-instance",
+  "personas": {
+    "signed_out": {
+      "displayName": "Signed-out visitor",
+      "kind": "anonymous",
+      "prepareBehavior": "fresh_browser_context"
+    },
+    "member_without_access": {
+      "displayName": "Signed-in member without paid access",
+      "kind": "clerk_password",
+      "accountScope": "ship-by-sunday-clerk-instance",
+      "storageStatePath": "apps/web/tests/e2e/.auth/member-without-access.json"
+    },
+    "member_with_access": {
+      "displayName": "Signed-in member with access",
+      "kind": "clerk_password_entitled",
+      "accountScope": "ship-by-sunday-clerk-entitled",
+      "storageStatePath": "apps/web/tests/e2e/.auth/member-with-access.json"
+    }
+  },
+  "packs": {
+    "default_ship": [
+      "signed_out",
+      "member_without_access",
+      "member_with_access"
+    ],
+    "billing_integration": [
+      "member_without_access",
+      "member_with_access"
+    ]
+  },
+  "accounts": {
+    "ship-by-sunday-clerk-instance": {
+      "softwareName": "Ship by Sunday",
+      "provider": "clerk",
+      "scope": "ship-by-sunday-clerk-instance",
+      "authMode": "password",
+      "firstName": "Release",
+      "lastName": "Member",
+      "email": "__set_in_release_personas_local__",
+      "password": "__set_in_release_personas_local__"
+    },
+    "ship-by-sunday-clerk-entitled": {
+      "softwareName": "Ship by Sunday",
+      "provider": "clerk",
+      "scope": "ship-by-sunday-clerk-entitled",
+      "authMode": "password",
+      "firstName": "Release",
+      "lastName": "Entitled",
+      "email": "__set_in_release_personas_local__",
+      "password": "__set_in_release_personas_local__"
+    }
+  }
+}

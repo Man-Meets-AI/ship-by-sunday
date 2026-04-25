@@ -25,7 +25,7 @@ When you need to change the homepage, inspect these files in this order:
 10. `tests/unit/home-page-render-model.test.ts`
 11. `tests/unit/home-page-structured-data.test.ts`
 12. `tests/integration-ui/home-page-primary-cta.test.tsx`
-13. `tests/browser-smoke/app-smoke.spec.ts`
+13. `tests/unit/public-metadata-routes.test.ts`
 
 If you skip that order, it is easy to update copy while missing the render model, or to change visible sections while leaving schema and smoke tests out of sync.
 
@@ -198,21 +198,10 @@ bunx vitest --config vitest.config.ts run --project unit tests/unit/home-page-co
 
 bunx vitest --config vitest.config.ts run --project integration-ui tests/integration-ui/home-page-primary-cta.test.tsx
 
-PLAYWRIGHT_USE_LOCAL_SERVER=1 bunx playwright test --project=browser-smoke tests/browser-smoke/app-smoke.spec.ts --grep "landing page renders the main offer CTA|homepage renders structured SEO data"
+bunx vitest --config vitest.config.ts run --project unit tests/unit/public-metadata-routes.test.ts
 
 bun run build
 ```
-
-For browser smoke, load `.env.local` into the shell first:
-
-```bash
-set -a
-source .env.local
-set +a
-bun run test:browser-smoke
-```
-
-`test:browser-smoke` expects `NEXT_PUBLIC_CONVEX_URL` in the shell environment. Having the value only in `.env.local` is not enough unless you source it first.
 
 ## What a future AI agent should preserve
 

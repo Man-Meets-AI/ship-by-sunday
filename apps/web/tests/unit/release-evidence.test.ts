@@ -1,0 +1,86 @@
+import { describe, expect, it } from "vitest";
+
+import {
+	assertReleaseEvidence,
+	buildReleaseEvidence,
+	proofStateFromStatus,
+} from "../../../../scripts/release/lib/release-evidence.mjs";
+
+const manifest = {
+	schemaVersion: "release-manifest.v1",
+	version: "0.3.0",
+	channel: "stable",
+	gitTag: "v0.3.0",
+	changelogHeading: "## 2026-04-19",
+	releaseEvidenceSchemaVersion: "release-evidence.v1",
+};
+
+function passedProof(
+	url = "https://github.com/parkerrex/ship-by-sunday/actions/runs/1",
+) {
+	return {
+		status: "passed",
+		url,
+		runId: "1",
+		notes: null,
+	};
+}
+
+describe("release evidence", () => {
+	it("builds a valid publishable evidence document", () => {
+		const evidence = buildReleaseEvidence({
+			manifest,
+			tagTargetSha: "main-sha",
+			mainSha: "main-sha",
+			vercel: passedProof("https://vercel.com/deployments/deployment-id"),
+			convex: passedProof(),
+			billing: {
+				status: "not_required",
+				url: null,
+				runId: null,
+				notes: "Release scope was not billing-sensitive.",
+			},
+			auth: passedProof(),
+			entitlement: passedProof(),
+		});
+
+		expect(() =>
+			assertReleaseEvidence(evidence, { publish: true }),
+		).not.toThrow();
+		expect(evidence).toMatchObject({
+			schemaVersion: "release-evidence.v1",
+			gitTag: "v0.3.0",
+			blockers: [],
+		});
+	});
+
+	it("allows dry-run evidence to record unavailable hosted proof", () => {
+		const evidence = buildReleaseEvidence({
+			manifest,
+			tagTargetSha: "main-sha",
+			mainSha: "main-sha",
+		});
+
+		expect(() => assertReleaseEvidence(evidence)).not.toThrow();
+		expect(evidence.blockers).toContain(
+			"Vercel production proof is unavailable.",
+		);
+		expect(() => assertReleaseEvidence(evidence, { publish: true })).toThrow(
+			"release evidence is not publishable",
+		);
+	});
+
+	it("maps GitHub conclusions into release proof states", () => {
+		expect(proofStateFromStatus("success")).toMatchObject({ status: "passed" });
+		expect(proofStateFromStatus("not_required")).toMatchObject({
+			status: "not_required",
+		});
+		expect(proofStateFromStatus("skipped")).toMatchObject({
+			status: "skipped",
+		});
+		expect(proofStateFromStatus("failure")).toMatchObject({ status: "failed" });
+		expect(proofStateFromStatus(undefined)).toMatchObject({
+			status: "unavailable",
+		});
+	});
+});

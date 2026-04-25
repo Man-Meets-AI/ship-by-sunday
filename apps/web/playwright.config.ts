@@ -72,13 +72,6 @@ export default defineConfig({
 	},
 	projects: [
 		{
-			name: "browser-smoke",
-			testMatch: ["browser-smoke/**/*.spec.ts"],
-			use: {
-				...devices["Desktop Chrome"],
-			},
-		},
-		{
 			name: "sandbox-e2e",
 			testMatch: ["e2e/**/*.spec.ts"],
 			use: {

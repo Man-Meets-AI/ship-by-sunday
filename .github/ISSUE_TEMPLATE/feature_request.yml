@@ -29,8 +29,11 @@ body:
       options:
         - apps/web
         - apps/web/convex
+        - Auth or entitlement
+        - Billing or checkout
+        - Release, CI, or deployment tooling
         - packages/*
-        - Build, CI, or deployment tooling
+        - Generated starter output
         - Docs or content
         - Not sure
     validations:
@@ -71,6 +74,13 @@ body:
       placeholder: A first pass only needs to restore the active flow for the current browser session.
     validations:
       required: true
+
+  - type: textarea
+    id: release_sensitivity
+    attributes:
+      label: Release sensitivity
+      description: If this touches auth, entitlement, checkout, billing, deploys, release metadata, or production proof, name that here.
+      placeholder: This touches checkout success and should require billing-sensitive hosted proof before release.
 
   - type: textarea
     id: alternatives

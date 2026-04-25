@@ -35,7 +35,7 @@ If no plan exists yet, use `exec-plan-writer`. If the plan still needs a stress-
 1. Read `AGENTS.md` first.
 2. Read `docs/exec-plans/PLANS.md` next and use it as the maintenance contract.
 3. Read the target ExecPlan carefully.
-4. Read the repo-owned launch or proof docs that the validation path depends on, such as `docs/release-workflow.md`, `docs/references/observability.md`, `qa/README.md`, workflow-local READMEs, or other documented proof surfaces.
+4. Read the repo-owned launch or proof docs that the validation path depends on, such as `docs/release-workflow.md`, `docs/references/observability.md`, workflow-local READMEs, or other documented proof surfaces.
 
 ## Validation Posture
 

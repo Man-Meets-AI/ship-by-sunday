@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
 	buildReleaseTriageSummary,
 	selectLatestCheckRuns,
-} from "../../../../qa/scripts/lib/release-triage.mjs";
+} from "../../../../scripts/release/lib/release-triage.mjs";
 
 describe("release triage helpers", () => {
 	it("keeps the newest check run for each name", () => {

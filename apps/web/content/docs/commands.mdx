@@ -33,45 +33,8 @@ bun run lint
 bun run test:unit
 bun run test:contracts
 bun run test:integration
-set -a; source .env.local; set +a; bun run test:browser-smoke
 bun run check
 ```
-
-## Ship by Sunday CLI
-
-Use the repository-local launcher from the repo root with either `bun run sbs` or `./bin/sbs`. For the longer operating guide, read [Ship by Sunday CLI](/docs/ship-by-sunday-cli).
-
-```bash
-bun run sbs init --fixture complete --json
-bun run sbs schema --json
-bun run sbs stages --json
-bun run sbs fields --stage design --json
-bun run sbs next --json
-bun run sbs validate --json
-bun run sbs set product.product_name "Ship by Sunday CLI" --json
-bun run sbs append scope_in "Blueprint intake" --json
-bun run sbs unset build-plan.domain --json
-bun run sbs mutate --file ./tmp/mutations.json --json
-bun run sbs --help
-bun run sbs --version
-bun run sbs version --json
-bun run sbs completion zsh
-bun run sbs resume
-bun run sbs stage design
-bun run sbs review --stage build-plan --missing-only --json
-bun run sbs export --out -
-bun run sbs export --out ./.ship-by-sunday/export.json
-bun run sbs import --file ./tmp/sbs-cli-complete.json
-cat ./tmp/build-plan-patch.json | bun run sbs apply --stage build-plan --file -
-bun run sbs generate --out ./tmp/sbs-cli-repo --json
-bun run sbs generate --out ./tmp/sbs-cli-repo.zip --zip --json
-bun run sbs generate --out ./tmp/sbs-cli-repo --dry-run --json
-./bin/sbs --help
-./bin/sbs --version
-./bin/sbs completion bash
-```
-
-Use the CLI when you want the blueprint intake and Ship by Sunday Blueprint flow without going through the protected web UI. For the actual draft model, command behavior, and generation notes, read [Ship by Sunday CLI](/docs/ship-by-sunday-cli).
 
 ## Stripe dev QA
 
@@ -95,16 +58,16 @@ bun run clerk:test-user:create:entitled
 bun run clerk:test-user:prepare:entitled
 ```
 
-Use `bun run clerk:test-user:prepare:entitled` for the fastest single-user local debug path. Use `bun run qa:personas:prepare -- --pack=<pack>` when you need the canonical QA control-plane prep for every persona in a pack.
+Use `bun run clerk:test-user:prepare:entitled` for the fastest single-user local debug path. Use `bun run release:personas:prepare -- --proof=<proof>` when you need the release-owned prep for every persona in a hosted proof.
 
-For hosted browser QA against a non-local target, use the root QA commands with matching Clerk env values for that target. `qa/personas.local.json` still supplies the real QA account emails and passwords. `QA_ENV_FILE` only changes which Clerk and Convex environment those identities are provisioned against. It is optional and only needed if you keep a separate hosted or production env file:
+For hosted browser proof against a non-local target, use the root release proof commands with matching Clerk env values for that target. `tmp/release-personas.local.json` supplies the real release proof account emails and passwords by default. `QA_ENV_FILE` only changes which Clerk and Convex environment those identities are provisioned against. It is optional and only needed if you keep a separate hosted or production env file:
 
 ```bash
-PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run qa:personas:prepare -- --pack=default_ship
-PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run qa:run-pack -- --pack=default_ship
+PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run release:personas:prepare -- --proof=default_ship
+PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run release:proof -- --proof=default_ship
 ```
 
-Prefer `qa:run-pack` for hosted verification. It runs persona prep, browser smoke, and the tagged authenticated browser pack with the same target assumptions.
+Prefer `release:proof` for hosted verification. It runs persona prep, readiness checks, and the tagged authenticated browser pack with the same target assumptions.
 
 Use `dev` first, `prod` second:
 
@@ -113,9 +76,9 @@ bun run dev
 PLAYWRIGHT_USE_LOCAL_SERVER=0 PLAYWRIGHT_BASE_URL=http://localhost:3000 bun run --cwd apps/web test:e2e:sandbox:default-ship
 ```
 
-When resuming local billing QA, start from the green rerun in `qa/runs/2026-03-25-dev-billing-integration-rerun.md`. If it regresses, check that `bun run dev:stripe` is forwarding to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook` before treating it as an app-auth failure.
+When resuming local billing proof, start from the green historical rerun in `docs/archive/release-proof-runs/2026-03-25-dev-billing-integration-rerun.md`. If it regresses, check that `bun run dev:stripe` is forwarding to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook` before treating it as an app-auth failure.
 
-For local targets, `bun run qa:run-pack -- --pack=billing_integration` now adds a warning-only `stripe:dev:doctor` preflight and a hard `stripe:dev:verify` follow-through after the sandbox billing flow. A pinned-profile warning should not override a passing billing handoff, but the warning should still be fixed.
+For local targets, `bun run release:proof -- --proof=billing_integration` adds a warning-only `stripe:dev:doctor` preflight and a hard `stripe:dev:verify` follow-through after the sandbox billing flow. A pinned-profile warning should not override a passing billing handoff, but the warning should still be fixed.
 
 Current QA state:
 

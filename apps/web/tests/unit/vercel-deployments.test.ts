@@ -7,7 +7,7 @@ import {
 	deploymentMatchesTarget,
 	extractInlineDeploymentAliases,
 	findMatchingDeployments,
-} from "../../../../qa/scripts/lib/vercel-deployments.mjs";
+} from "../../../../scripts/release/lib/vercel-deployments.mjs";
 
 describe("vercel deployment helpers", () => {
 	it("builds deployment list URLs with preview targets omitted", () => {

@@ -4,6 +4,7 @@ import path from "node:path";
 import { promisify } from "node:util";
 
 import { lintExecPlan } from "../exec-plan/plan-lint";
+import { lintProgramDocument } from "../programs/document-lint";
 import { extractMarkdownH1, parseMarkdownFrontmatter } from "./frontmatter";
 import { FAMILY_RULES, resolveMarkdownMetadataFamily } from "./families";
 
@@ -130,7 +131,7 @@ function validateBlogPostMetadata(
 function validateMetadataForFamily(
 	family: Exclude<
 		ReturnType<typeof resolveMarkdownMetadataFamily>,
-		null | "exec_plan"
+		null | "exec_plan" | "program_doc"
 	>,
 	metadata: Record<string, unknown>,
 	issues: string[],
@@ -183,6 +184,19 @@ export async function lintMarkdownMetadataFile(params: {
 		const report = await lintExecPlan({
 			repoRootDir: params.repoRootDir,
 			planPath: params.repoPath,
+		});
+
+		return {
+			family,
+			issues: report.issues,
+			repoPath: params.repoPath,
+		};
+	}
+
+	if (family === "program_doc") {
+		const report = await lintProgramDocument({
+			repoRootDir: params.repoRootDir,
+			programPath: params.repoPath,
 		});
 
 		return {

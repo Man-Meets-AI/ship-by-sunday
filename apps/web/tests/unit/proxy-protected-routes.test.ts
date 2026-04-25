@@ -31,18 +31,23 @@ describe("proxy protected routes", () => {
 		vi.resetModules();
 	});
 
-	it("protects the canonical blueprint workspace routes", async () => {
+	it("protects canonical and compatibility workspace routes", async () => {
 		await import("@/proxy");
 
 		expect(createRouteMatcherMock).toHaveBeenCalledWith(
 			expect.arrayContaining([
 				"/blueprint(.*)",
 				"/review(.*)",
+				"/settings(.*)",
 				"/execute(.*)",
 				"/mission(.*)",
-				"/lesson(.*)",
 				"/artifacts(.*)",
-				"/settings(.*)",
+				"/start(.*)",
+				"/product(.*)",
+				"/design(.*)",
+				"/marketing(.*)",
+				"/build-plan(.*)",
+				"/lesson(.*)",
 			]),
 		);
 	});
