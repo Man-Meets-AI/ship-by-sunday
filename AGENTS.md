@@ -27,9 +27,10 @@
 2. Identify the owning surface: web app, compiler, docs pack, release proof, or release workflow.
 3. Make the smallest viable change that solves the real problem.
 4. Keep rendering, orchestration, domain logic, and external I/O behind clear boundaries.
-5. Run the narrowest relevant validation first, then broaden as needed.
-6. Update docs or ExecPlans when behavior, public contracts, commands, or operator workflow changes.
-7. Stop and repair failing validation before continuing to unrelated work.
+5. Run the exact production code path you touched before relying on broader validation. Prefer importing and calling the touched functions directly; when that is impractical, create a local probe under ignored `codex-scripts/` that copies only the minimum surrounding production inputs, fixtures, or wiring needed to observe the real behavior.
+6. Run the narrowest relevant validation first, then broaden as needed.
+7. Update docs or ExecPlans when behavior, public contracts, commands, or operator workflow changes.
+8. Stop and repair failing validation before continuing to unrelated work.
 
 ## Path Triggers
 
@@ -93,6 +94,7 @@ Do not re-hardwire checkout into hero or pricing, scatter section gating across 
 Run the narrowest relevant checks first, then broaden as needed. Use `docs/design-docs/scripts.md` for the command map.
 
 - Repo-level completion gate: `bun run format`, `bun lint`, and `bun typecheck` must pass before code tasks are considered complete.
+- Behavior probes: for code changes, run the exact functions, route handlers, scripts, or render paths that were touched so the final summary can describe observed production behavior, not only static confidence. Keep one-off probes, copied fixtures, and throwaway scripts in ignored `codex-scripts/`.
 - Web app changes: run focused unit, integration, browser, or build checks for the touched surface before broader checks.
 - Compiler changes: run compiler-focused tests and any output snapshot or fixture checks that prove the generated contract.
 - Release proof changes: run the narrowest release script or unit test for the touched surface, then use `bun run release:proof -- --proof=default_ship --dry-run` or `bun run release:proof -- --proof=billing_integration --dry-run` when proof orchestration changes.
