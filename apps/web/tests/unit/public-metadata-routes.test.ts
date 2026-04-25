@@ -33,17 +33,19 @@ describe("public metadata routes", () => {
 	it("builds sitemap entries from lightweight public content metadata", async () => {
 		const entries = await sitemap();
 		const urls = entries.map((entry) => entry.url);
+		const metadataBase = new URL(
+			process.env.APP_BASE_URL?.trim() || "http://localhost:3000",
+		).origin;
 
-		expect(urls).toContain("http://localhost:3000/");
-		expect(urls).toContain("http://localhost:3000/blog");
-		expect(urls).toContain("http://localhost:3000/docs/local-setup");
+		expect(urls).toContain(`${metadataBase}/`);
+		expect(urls).toContain(`${metadataBase}/blog`);
+		expect(urls).toContain(`${metadataBase}/docs/local-setup`);
 		expect(urls).toContain(
-			"http://localhost:3000/blog/the-operating-system-beats-the-prompt",
+			`${metadataBase}/blog/the-operating-system-beats-the-prompt`,
 		);
 		expect(
-			entries.find(
-				(entry) => entry.url === "http://localhost:3000/docs/local-setup",
-			)?.lastModified,
+			entries.find((entry) => entry.url === `${metadataBase}/docs/local-setup`)
+				?.lastModified,
 		).toBeInstanceOf(Date);
 	});
 });
