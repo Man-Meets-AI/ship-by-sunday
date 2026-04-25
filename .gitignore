@@ -21,6 +21,7 @@ apps/web/playwright-report
 test-results
 apps/web/test-results
 .codex-user-state
+codex-scripts/
 output/video-pipeline
 apps/web/output/video-pipeline/tmp/
 .venv-video
