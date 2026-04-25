@@ -36,13 +36,17 @@ An older route that still resolves but is no longer the primary product surface.
 
 The only supported Convex development mode in this repo. Local Convex mode is a non-goal.
 
-### Browser smoke
+### Sandbox E2E
 
-The deterministic Playwright lane behind `bun run test:e2e`. It covers the public deployed surface without depending on persona bootstrap or pack routing.
+The scheduled and manually runnable Playwright lane behind `bun run test:e2e:sandbox`. It is useful regression signal for sandbox browser behavior, but it is not the release gate.
 
-### Deployment smoke
+### Hosted release proof
 
-The `deployment_status` workflow that runs the same smoke suite against the real deployed URL and can optionally verify checkout-session creation.
+The release-owned proof path behind `bun run release:proof`. It runs against the target environment with release personas and is the browser proof surface for staging and production release confidence.
+
+### Compatibility CI contexts
+
+Temporary no-op `browser-smoke` and `cli` CI jobs that remain only while branch protection still requires those retired labels. They are not proof that the old browser harness or helper CLI still owns release confidence.
 
 ### ExecPlan
 

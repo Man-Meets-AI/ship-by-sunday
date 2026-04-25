@@ -11,4 +11,4 @@ read_when:
 
 `docs/product-specs/` is reserved for stable product-spec surfaces that should outlive one implementation plan or one generated artifact.
 
-This lane is intentionally light right now. Use [docs/PRODUCT_SENSE.md](../PRODUCT_SENSE.md) and [docs/design-docs/product-contract.md](../design-docs/product-contract.md) for the current product contract.
+This lane is intentionally light right now. Use [docs/PRODUCT_SENSE.md](../PRODUCT_SENSE.md) for the current product sense and stable product-contract guidance until a dedicated product-spec file exists here.

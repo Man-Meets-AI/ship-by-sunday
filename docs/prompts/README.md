@@ -14,6 +14,18 @@ This folder is the canonical home for reusable prompt assets that support durabl
 
 The repo-wide first hop is [docs/index.md](../index.md). Treat this folder as a second-hop docs surface for stable reusable prompts, not as a parallel onboarding entrypoint.
 
+## Prompt Families
+
+The active repo-agent ExecPlan prompts use the hyphenated `exec-plan-*` filenames:
+
+- `exec-plan-outline-from-session.md`
+- `exec-plan-writer.md`
+- `exec-plan-grill.md`
+- `exec-plan-execute.md`
+- `exec-plan-validate.md`
+
+The older `execplan-*` filenames are generated-starter prompt assets that the blueprint compiler still ships through `packages/blueprint-compiler/src/server/template-loader.ts` and `packages/blueprint-compiler/src/blueprints/render-prompt-pack.ts`. Do not delete or rename them unless the compiler path, generated-doc path types, repo-root marker, and tests are migrated in the same change.
+
 Program-aware planning assumes one checked-in Program folder at `docs/programs/<active|completed>/<YYYY-MM-DD-program-id>/`. Inside that folder, `program.md` is the canonical Program document and the planning packet artifacts live beside it. The canonical sequence is:
 
 - research passes
@@ -81,6 +93,36 @@ Program work has two controller prompts, one state-routing prompt, and a set of 
 Every Program prompt has a `Quality gate before returning` block. That gate is part of the contract, not optional phrasing.
 
 ## What Lives Here
+
+- Repo-agent ExecPlan prompts:
+  - `exec-plan-outline-from-session.md`
+  - `exec-plan-writer.md`
+  - `exec-plan-grill.md`
+  - `exec-plan-execute.md`
+  - `exec-plan-validate.md`
+- Generated-starter ExecPlan prompt assets:
+  - `execplan-outline-from-session.md`
+  - `execplan-execution-loop.md`
+  - `execplan-grill.md`
+  - `execplan-writer.md`
+- Program prompts:
+  - `program-orchestrator.md`
+  - `program-funnel.md`
+  - `program-initialize.md`
+  - `program-research-passes.md`
+  - `program-normalize-pass.md`
+  - `program-converged-decision-packet.md`
+  - `program-dependency-graph.md`
+  - `program-plan-split-recommendation.md`
+  - `program-cross-repo-review.md`
+  - `program-planning-brief.md`
+  - `program-doc-synthesis.md`
+  - `program-loop.md`
+  - `program-docs-sync.md`
+  - `program-planning-refresh.md`
+  - `program-completion-review.md`
+
+## Legacy Flat List
 
 - `exec-plan-outline-from-session.md`
 - `exec-plan-writer.md`
