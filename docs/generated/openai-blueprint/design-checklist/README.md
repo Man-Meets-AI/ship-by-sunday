@@ -18,4 +18,6 @@ For the neutral vanilla baseline, use:
 - `docs/openai/design-pack/PLANS.md`
 - `docs/openai/design-pack/documentation.md`
 
-Keep this folder as source basis and historical reference. Use `docs/ship-by-sunday/design-pack/` for real repo UI work and `docs/openai/design-pack/` as the vanilla baseline.
+Keep this folder as source basis and historical reference. The blueprint compiler still reads these files as the design template input through `packages/blueprint-compiler/src/server/template-loader.ts`.
+
+For active human UI work, use `docs/ship-by-sunday/design-pack/`. For the neutral vanilla baseline, use `docs/openai/design-pack/`.

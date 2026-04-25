@@ -12,28 +12,18 @@ Production is healthy only when all three systems agree on the same release cand
 
 ## Current CI/CD Proof Path
 
-As of the 2026-04-24 release-proof reconciliation, helper-retirement, QA-control-plane retirement, and local-hook removal slices, the proven release path is the existing workflow set plus the manifest-backed tag publication layer and release-owned hosted proof commands. Evidence in this section is a dated snapshot, not the live source of truth. For current status, run the `gh run list` commands below and compare each run SHA to the candidate SHA.
+The current workflow strategy is summarized beside the workflow files in `.github/workflows/README.md`. That file is the quickest way to see which workflow owns PR source proof, integrated `dev` proof, production hosted proof, Convex production deploys, tag release evidence, and non-release repair lanes.
 
-- `CI` is the code-centric pull-request, `main` push, scheduled, and manual proof surface from `.github/workflows/ci.yml`. Branch protection currently still asks for `static`, `integration`, `browser-smoke`, and `cli`; `browser-smoke` and `cli` are compatibility no-ops and must not be treated as release evidence.
-- `Dev Staging Proof` is the integrated `dev` branch-push proof surface from `.github/workflows/dev-staging-proof.yml`. It is not one of the required PR status contexts; it proves the merged `dev` tip before that commit is trusted as a release candidate. On push, the workflow scopes the latest `dev` push range; use `bun run release:triage` as the candidate-level authority before trusting the `dev -> main` PR.
-- `Production Release Proof` is the hosted production post-deploy proof surface from `.github/workflows/production-release-proof.yml`. It runs on `main` pushes and manual dispatches after the production web deployment settles; it is not one of the required PR status contexts. The last audited evidence snapshot before the release reset reached `main` was run `24736015243`, created 2026-04-21 for commit `3c5347c06c039859b7780a61e331cebda9421aea`, with green `release_scope`, `default_ship`, and `release_gate`; `billing_integration` and `reconcile_dev` were skipped by workflow logic.
-- `Convex Production Deploy` is the production backend deploy surface from `.github/workflows/convex-production-deploy.yml`. It runs on `main` pushes and manual dispatches and is controlled by the `CONVEX_PRODUCTION_DEPLOY_ENABLED` variable for automatic deploys. The last audited evidence snapshot before the release reset reached `main` was run `24736015267`, created 2026-04-21 for commit `3c5347c06c039859b7780a61e331cebda9421aea`, with green `deploy`.
+- `CI` is the code-centric pull-request, `main` push, scheduled, and manual proof surface from `.github/workflows/ci.yml`. The durable merge-gate jobs are `static` and `integration`.
+- `browser-smoke` and `cli` currently remain as compatibility no-ops because live branch protection still requires those status contexts. They are not release evidence and must not be treated as proof that the retired browser harness or helper CLI still owns release confidence.
+- `Dev Staging Proof` is the integrated `dev` branch-push proof surface from `.github/workflows/dev-staging-proof.yml`. It proves the merged `dev` tip before that commit is trusted as a release candidate. Use `bun run release:triage` as the candidate-level authority before trusting the `dev -> main` PR.
+- `Production Release Proof` is the hosted production post-deploy proof surface from `.github/workflows/production-release-proof.yml`. It runs on `main` pushes and manual dispatches after the production web deployment settles.
+- `Convex Production Deploy` is the production backend deploy surface from `.github/workflows/convex-production-deploy.yml`. It runs on `main` pushes and manual dispatches and is controlled by the `CONVEX_PRODUCTION_DEPLOY_ENABLED` variable for automatic deploys.
+- `Tag Release` is the protected `v*` tag workflow from `.github/workflows/release.yml`. It validates `release.json`, collects release evidence, and publishes the GitHub Release only after evidence is available.
 
-Preserve `.github/workflows/ci.yml`, `.github/workflows/dev-staging-proof.yml`, `.github/workflows/production-release-proof.yml`, and `.github/workflows/convex-production-deploy.yml` unless a later plan replaces them with equal or stronger remote proof. If live branch protection still contains stale retired helper, shallow-browser, or QA-control-plane contexts after this slice merges, remove those external requirements while keeping `static` and `integration`.
+Preserve `.github/workflows/ci.yml`, `.github/workflows/dev-staging-proof.yml`, `.github/workflows/production-release-proof.yml`, `.github/workflows/convex-production-deploy.yml`, and `.github/workflows/release.yml` unless a later plan replaces them with equal or stronger remote proof. Do not remove the compatibility `browser-smoke` and `cli` contexts until branch protection on both `dev` and `main` no longer requires them.
 
-After confirming `static` and `integration` are green on the current `dev` and `main` tips, remove the stale branch-protection compatibility contexts with:
-
-```bash
-printf '%s\n' '{"strict":true,"contexts":["static","integration"]}' > tmp/required-checks-source-proof.json
-gh api --method PATCH repos/ParkerRex/ship-by-sunday/branches/dev/protection/required_status_checks --input tmp/required-checks-source-proof.json
-gh api --method PATCH repos/ParkerRex/ship-by-sunday/branches/main/protection/required_status_checks --input tmp/required-checks-source-proof.json
-gh api repos/ParkerRex/ship-by-sunday/branches/dev/protection/required_status_checks --jq '{strict,contexts,checks}'
-gh api repos/ParkerRex/ship-by-sunday/branches/main/protection/required_status_checks --jq '{strict,contexts,checks}'
-```
-
-`Sandbox E2E Nightly` and `Deployment Smoke` are not release-path replacements. `Sandbox E2E Nightly` is active remotely from `.github/workflows/sandbox-e2e-nightly.yml`, runs on schedule and manual dispatch, and has failed scheduled runs every day in the latest checked window, including run `24876267728` on 2026-04-24. Treat it as a non-release-critical repair candidate, not as a release gate. `Deployment Smoke` is active in remote workflow metadata and has failed run `24571382089` from 2026-04-17, but `.github/workflows/deployment-smoke.yml` is absent from the current checkout, `origin/dev`, and `origin/main`; treat it as an orphaned historical Actions surface unless a workflow file returns and fresh passing evidence exists.
-
-Visible repository rulesets and branch rules returned empty arrays on 2026-04-24 via `gh api repos/ParkerRex/ship-by-sunday/rulesets`, `gh api repos/ParkerRex/ship-by-sunday/rules/branches/main`, and `gh api repos/ParkerRex/ship-by-sunday/rules/branches/dev`. Do not read that as proof that organization-level policy is absent; the branch protection endpoints above remain the authority for required SBS status contexts.
+`Sandbox E2E Nightly` is a non-release repair lane from `.github/workflows/sandbox-e2e-nightly.yml`. It is useful regression signal, but it is not a release gate and does not replace `Dev Staging Proof` or `Production Release Proof`. Historical workflow metadata for absent workflow files is archive context, not current proof.
 
 ## Release candidate contract
 
@@ -105,7 +95,7 @@ Validate the manifest locally with:
 bun run release:manifest:check
 ```
 
-Tag protection should use a GitHub ruleset or equivalent policy for `refs/tags/v*`. The policy should restrict tag creation, update, and deletion to the release automation or maintainers, reject tags that do not match the manifest version, and prevent GitHub Release publication unless the evidence artifact exists for the tag target SHA. Visible repository rulesets returned an empty array on 2026-04-24, so verify live rulesets before trusting protected tag enforcement.
+Tag protection should use a GitHub ruleset or equivalent policy for `refs/tags/v*`. The policy should restrict tag creation, update, and deletion to the release automation or maintainers, reject tags that do not match the manifest version, and prevent GitHub Release publication unless the evidence artifact exists for the tag target SHA. Verify live rulesets before trusting protected tag enforcement.
 
 The machine-readable release evidence artifact is a `release-evidence.v1` document generated by `scripts/release/build-release-evidence.mjs` and uploaded by `.github/workflows/release.yml`. It includes at least:
 
@@ -140,8 +130,8 @@ Hosted proof remains mandatory for a hosted product. Vercel proof must show the 
 
 - GitHub branch protection is enabled on `dev` and `main`.
 - `.github/workflows/ci.yml` should stay code-centric and fail on static or integration regressions through the `static` and `integration` jobs.
-- `dev` requires pull requests and the `static` and `integration` checks. After each merge into `dev`, the resulting branch tip must also pass `Dev Staging Proof` before that `dev` commit is treated as a release candidate for `main`.
-- `main` requires pull requests and the `static` and `integration` checks.
+- `dev` requires pull requests and the `static` and `integration` checks. While branch protection still requires compatibility contexts, `browser-smoke` and `cli` must remain no-op jobs and must not be treated as release evidence. After each merge into `dev`, the resulting branch tip must also pass `Dev Staging Proof` before that `dev` commit is treated as a release candidate for `main`.
+- `main` requires pull requests and the `static` and `integration` checks. While branch protection still requires compatibility contexts, `browser-smoke` and `cli` must remain no-op jobs and must not be treated as release evidence.
 - Vercel project `mma-shipbysunday` is linked to `ParkerRex/mma-shipbysunday` and uses `main` as its production branch.
 - The staging host `https://dev.man-meets-ai.com` must stay aliased to the current `dev` preview deployment. `Dev Staging Proof` should bind that alias automatically to the exact ready preview deployment for the current `dev` commit; manual `vercel alias set` is now a recovery tool, not the normal path.
 - Root `bunfig.toml` forces `install.linker = "hoisted"` so GitHub Actions and Vercel installs do not use Bun's isolated symlink-heavy workspace layout during builds and serverless packaging.

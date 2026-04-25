@@ -58,7 +58,9 @@ Marketing pages generally follow the landing-page rules unless a task-specific p
 
 ## Source policy
 
-This pack is derived from the checked-in design-checklist source docs and should be re-verified whenever those source docs change.
+This pack is the active vanilla baseline for human UI work. It is derived from the checked-in design-checklist source docs and should be re-verified whenever those source docs change.
+
+The blueprint compiler currently reads `docs/openai/design-checklist/` as its design template input. Do not delete or rename the source checklist lane unless the compiler path and generated mirrors are migrated in the same change.
 
 Source basis:
 
