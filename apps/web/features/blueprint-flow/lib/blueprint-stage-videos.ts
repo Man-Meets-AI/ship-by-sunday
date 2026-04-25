@@ -107,6 +107,15 @@ const blueprintSectionMedia: Record<
 			"Review the generated scope defaults, then add domain or contact details only if they matter right now.",
 		body: "The generator can infer a first pass from the core flow. Only touch these fields if you want to steer the output.",
 	},
+	"generated-preview": {
+		kind: "orientation",
+		eyebrow: "Preview",
+		badge: "Generated",
+		title: "Inspect the generated preview",
+		description:
+			"Use this anchor for generated packet references and post-review lesson links.",
+		body: "The preview is generated from the saved blueprint facts and reviewed from the downstream packet surfaces.",
+	},
 };
 
 const blueprintStartPageMedia: BlueprintPageMedia = {

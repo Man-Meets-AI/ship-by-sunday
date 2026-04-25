@@ -4,7 +4,7 @@ import {
 	buildReleaseReconcilePullRequestBody,
 	buildReleaseReconcilePullRequestTitle,
 	isSnapshotReleasePullRequest,
-} from "../../../../qa/scripts/lib/release-reconcile.mjs";
+} from "../../../../scripts/release/lib/release-reconcile.mjs";
 
 describe("release reconcile helpers", () => {
 	it("detects merged snapshot release pull requests", () => {

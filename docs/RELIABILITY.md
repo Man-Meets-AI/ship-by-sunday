@@ -37,7 +37,6 @@ bun run typecheck
 bun run test:unit
 bun run test:contracts
 bun run test:integration
-bun run test:browser-smoke
 bun run build
 ```
 

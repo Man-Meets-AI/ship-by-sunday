@@ -30,7 +30,6 @@ The normal root validation surface on this branch still follows the current Ship
 - `bun run test:unit`
 - `bun run test:contracts`
 - `bun run test:integration`
-- `bun run test:browser-smoke`
 - `bun run build`
 
 Use the narrowest relevant command first, then broaden to the full set when the slice is stable.
@@ -42,11 +41,12 @@ For frontmatter-driven docs and plans:
 - `bun run programs:lint` validates Program docs, checked-in Program packet folders, versioned planning briefs, current-brief pointers, and Program prompt contracts.
 - `markdown:lint` and `plans:lint` accept path-scoped arguments so docs-only work can be proved without widening into unrelated files.
 
-## CLI and generator
+## Blueprint compiler
 
-- `bun run sbs` launches the local Ship by Sunday intake CLI.
-- `bun run sbs:check` validates the CLI plus blueprint-compiler slice end-to-end.
-- `./bin/sbs --help` and `./bin/sbs --version` are safe reference commands.
+- `bun run --cwd packages/blueprint-compiler lint`
+- `bun run --cwd packages/blueprint-compiler format:check`
+- `bun run --cwd packages/blueprint-compiler typecheck`
+- `bun run --cwd packages/blueprint-compiler test`
 
 ## Operations helpers
 
@@ -62,6 +62,13 @@ For frontmatter-driven docs and plans:
 - `bun run clerk:test-user:prepare:entitled`
 - `bun run video:*` commands operate the optional lesson-video pipeline.
 
-## Current note
+## Release proof
 
-The branch keeps the existing `qa:*` command family and app-local test harness from `dev/main`. The new additions here are the docs-spine and markdown/plan linting surfaces, not a full test-system replacement.
+- `bun run release:personas:prepare -- --proof=default_ship`
+- `bun run release:personas:prepare -- --proof=billing_integration`
+- `bun run release:proof -- --proof=default_ship`
+- `bun run release:proof -- --proof=billing_integration`
+- `bun run release:proof -- --proof=default_ship --dry-run`
+- `bun run release:proof -- --proof=billing_integration --dry-run`
+
+Release proof commands use `tmp/release-personas.local.json` by default, or the file named by `RELEASE_PERSONAS_LOCAL_FILE`.

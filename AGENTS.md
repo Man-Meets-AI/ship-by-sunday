@@ -6,7 +6,7 @@
 - Work in this checkout unless the user explicitly names another worktree. Do not touch `.worktrees/` unless the task names one.
 - For work in `apps/web`, also follow `apps/web/AGENTS.md`.
 - For work in `packages/blueprint-compiler`, also follow `packages/blueprint-compiler/AGENTS.md`.
-- For route, auth, checkout, entitlement, browser QA, release-readiness, or ship-readiness work, also follow `qa/AGENTS.md`.
+- For route, auth, checkout, entitlement, browser proof, release-readiness, or ship-readiness work, also read `docs/release-workflow.md`.
 - Root `DESIGN.md` is the canonical visual source of truth for user-facing UI. `docs/DESIGN.md` is supporting reference.
 - Canonical repo-reference docs live in `docs/`. Start with `docs/index.md`, then read only the file relevant to the task:
   - `docs/ARCHITECTURE.md`
@@ -24,7 +24,7 @@
 ## Default Workflow
 
 1. Inspect the relevant code, docs, and nearest instruction files before changing anything.
-2. Identify the owning surface: web app, compiler, QA control plane, docs pack, or release workflow.
+2. Identify the owning surface: web app, compiler, docs pack, release proof, or release workflow.
 3. Make the smallest viable change that solves the real problem.
 4. Keep rendering, orchestration, domain logic, and external I/O behind clear boundaries.
 5. Run the narrowest relevant validation first, then broaden as needed.
@@ -37,7 +37,7 @@
 - User-facing UI: read root `DESIGN.md` and `docs/ship-by-sunday/design-pack/AGENTS.md` before changing layout, styling, theming, motion, docs chrome, marketing presentation, or component presentation.
 - Public homepage: read `apps/web/content/docs/configure-the-homepage.mdx` before editing homepage code or copy. Keep the homepage shell contract below intact.
 - Convex code: use hosted Convex dev only. Do not use Convex local mode. Before changing Convex code, read `apps/web/convex/_generated/ai/guidelines.md`.
-- Routes, auth, checkout, entitlement, browser QA, or release readiness: read `qa/AGENTS.md` and the latest relevant `qa/runs/` report before changing the surface or judging release confidence.
+- Routes, auth, checkout, entitlement, browser proof, or release readiness: read `docs/release-workflow.md` before changing the surface or judging release confidence.
 - Blueprint compiler output: read `packages/blueprint-compiler/AGENTS.md` before changing compiler schema, canonical facts, generated artifacts, or customer repo output.
 - OpenAI API, ChatGPT Apps SDK, Codex, or OpenAI platform behavior: use the OpenAI developer documentation MCP server before implementing or finalizing conclusions.
 - ExecPlans: for complex features, long-horizon work, migrations, risky integrations, or significant refactors, use an ExecPlan in `docs/exec-plans/active/`. Read `docs/exec-plans/PLANS.md` before authoring or updating one.
@@ -79,10 +79,10 @@ Do not re-hardwire checkout into hero or pricing, scatter section gating across 
 - Split large components into feature-local pieces that keep presentation, state, and domain logic separated.
 - Preserve the existing visual system unless the task explicitly calls for redesign.
 
-### QA Control Plane
+### Release Proof
 
-- `qa/` is the canonical QA control plane. Do not invent alternate journey lists, coverage maps, or release-proof formats in a skill folder, PR comment, or one-off script.
-- Do not update canonical QA truth files during an ordinary review unless the user explicitly asks for edits. Prepare the exact change and ask when the request is review-only.
+- `scripts/release/` owns release proof orchestration, release personas, release evidence, and hosted proof command wiring.
+- Do not invent alternate release-proof formats in a skill folder, PR comment, or one-off script.
 - Release evidence must name the target environment and must not mix local, preview, dev, and prod proof without saying so.
 
 ## Verification Matrix
@@ -92,7 +92,7 @@ Run the narrowest relevant checks first, then broaden as needed. Use `docs/desig
 - Repo-level completion gate: `bun run format`, `bun lint`, and `bun typecheck` must pass before code tasks are considered complete.
 - Web app changes: run focused unit, integration, browser, or build checks for the touched surface before broader checks.
 - Compiler changes: run compiler-focused tests and any output snapshot or fixture checks that prove the generated contract.
-- QA control plane changes: run `bun run qa:validate`; when inventory changes, also run `bun run qa:inventory:check`.
+- Release proof changes: run the narrowest release script or unit test for the touched surface, then use `bun run release:proof -- --proof=default_ship --dry-run` or `bun run release:proof -- --proof=billing_integration --dry-run` when proof orchestration changes.
 - UI changes: verify at least one desktop and one mobile viewport with browser tooling when available.
 - Convex changes: validate against hosted Convex dev and never switch this repo to Convex local mode.
 - Program packet changes: run `bun run programs:lint`, plus `plans:lint` for touched child ExecPlans.

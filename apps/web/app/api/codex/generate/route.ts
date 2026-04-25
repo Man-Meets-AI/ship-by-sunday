@@ -2,6 +2,11 @@ import { z } from "zod";
 
 import { apiRouteConfig } from "@/config/product";
 import {
+	getCodexAppServerUnavailableMessage,
+	isCodexAppServerRuntimeError,
+	withCodexAppServerClient,
+} from "@/features/codex/server/app-server-service";
+import {
 	accountIsManagedChatGpt,
 	getApiAuthErrorResponse,
 	getCodexDefaultModel,
@@ -31,15 +36,8 @@ const generateRequestSchema = z.object({
 
 export const runtime = "nodejs";
 
-async function importCodexAppServer() {
-	return import(
-		/* turbopackIgnore: true */ "@/features/codex/server/app-server"
-	);
-}
-
 export async function POST(request: Request) {
 	const requestId = getRequestIdFromRequest(request);
-	const codexAppServer = await importCodexAppServer();
 	let parsedInput: z.infer<typeof generateRequestSchema> | null = null;
 	let session: {
 		userId: string;
@@ -62,7 +60,7 @@ export async function POST(request: Request) {
 		const requestInput = parsed.data;
 		parsedInput = requestInput;
 
-		const output = await codexAppServer.withCodexAppServerClient(
+		const output = await withCodexAppServerClient(
 			{
 				clerkUserId: productAccessSession.userId,
 				requestId,
@@ -178,7 +176,7 @@ export async function POST(request: Request) {
 			{
 				unauthorized: "Sign in before using Codex generation.",
 				forbidden: "Product access is required before using Codex generation.",
-				unavailable: codexAppServer.getCodexAppServerUnavailableMessage(),
+				unavailable: getCodexAppServerUnavailableMessage(),
 			},
 			requestId,
 		);
@@ -214,7 +212,7 @@ export async function POST(request: Request) {
 			source: "codex",
 			defaultMessage: "Codex generation failed.",
 			userId: session?.userId ?? null,
-			capture: !codexAppServer.isCodexAppServerRuntimeError(error),
+			capture: !isCodexAppServerRuntimeError(error),
 		});
 	}
 }

@@ -66,10 +66,10 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 				"Ship generalized starter guidance instead of repo-specific operator rules.",
 		},
 		{
-			pathPattern: "qa/**",
+			pathPattern: "docs/testing/**",
 			shippingMode: "ship-generalized",
 			reason:
-				"Ship a generalized starter QA kit with project-shaped starter CSVs.",
+				"Ship generalized starter verification notes instead of internal test operations.",
 		},
 		{
 			pathPattern: ".github/workflows/**",

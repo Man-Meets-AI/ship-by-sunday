@@ -1,6 +1,6 @@
 # Ship by Sunday
 
-Ship by Sunday is an agent-ready, blueprint-first SaaS starter for turning one product idea into durable design, marketing, build, and prompt handoff packs. The repo includes the public marketing site, protected blueprint workspace, Stripe checkout flow, Clerk auth, Convex backend, blueprint compiler, intake CLI, and the docs/runbook surfaces that support that contract.
+Ship by Sunday is an agent-ready, blueprint-first SaaS starter for turning one product idea into durable design, marketing, build, and prompt handoff packs. The repo includes the public marketing site, protected blueprint workspace, Stripe checkout flow, Clerk auth, Convex backend, blueprint compiler, and the docs/runbook surfaces that support that contract.
 
 ## Design system
 
@@ -12,8 +12,7 @@ Use it before changing any user-facing UI. It documents the shared neutral app t
 
 - `apps/web/`: the main Next.js product, docs, protected workspace, checkout, and optional Codex runtime.
 - `packages/blueprint-compiler/`: the generator behind the customer-facing Ship by Sunday Blueprint, including the downloaded repo’s generated root `DESIGN.md`, machine-readable design snapshot, and starter-runtime design config.
-- `packages/ship-by-sunday-cli/`: local blueprint-intake and snapshot-generation CLI.
-- `qa/`: the current QA control plane, scenario packs, personas, and run evidence.
+- `scripts/release/`: release proof orchestration, release personas, release evidence, and release workflow helpers.
 - `docs/`: the canonical contributor and agent-facing docs spine, plus ExecPlans, prompts, references, and generated analyses.
 
 The protected journey is blueprint-first:
@@ -81,7 +80,6 @@ bun run format:check
 bun run test:unit
 bun run test:contracts
 bun run test:integration
-bun run test:browser-smoke
 bun run build
 bun run markdown:lint -- --paths <repo-path-or-dir>
 bun run plans:lint -- --plan docs/exec-plans/active/<plan-file>.md
@@ -95,7 +93,7 @@ For the full command map, use [docs/design-docs/scripts.md](./docs/design-docs/s
 - Docs index: [docs/index.md](./docs/index.md)
 - Observability runbook: [docs/internal/observability.md](./docs/internal/observability.md)
 - Release workflow runbook: [docs/release-workflow.md](./docs/release-workflow.md)
-- QA control plane: [qa/README.md](./qa/README.md)
+- Release workflow: [docs/release-workflow.md](./docs/release-workflow.md)
 - Homepage contract: [apps/web/content/docs/configure-the-homepage.mdx](./apps/web/content/docs/configure-the-homepage.mdx)
 - Public docs index: [apps/web/content/docs/index.mdx](./apps/web/content/docs/index.mdx)
 
@@ -136,23 +134,6 @@ If you want a lighter touch, say so explicitly. For example:
 - `get this to dev only`
 - `prepare the prod PR and stop`
 - `ship this, but ask before the final merge`
-
-## CLI
-
-The repo includes a local Ship by Sunday intake CLI that writes one draft under `.ship-by-sunday/` and generates the same Ship by Sunday Blueprint shape as the protected `/review` flow.
-
-Common entrypoints:
-
-```bash
-bun run sbs --help
-bun run sbs resume
-bun run sbs next --json
-bun run sbs review --json
-./bin/sbs --version
-./bin/sbs completion zsh
-```
-
-The install story is intentionally simple: clone the repo, run `bun install`, and launch the CLI from the repository root.
 
 ## Docs
 

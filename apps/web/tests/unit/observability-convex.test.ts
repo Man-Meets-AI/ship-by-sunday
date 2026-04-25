@@ -90,8 +90,33 @@ describe("convex/observability", () => {
 		expect(first.shouldNotify).toBe(false);
 		expect(second.shouldNotify).toBe(false);
 		expect(third.shouldNotify).toBe(true);
-		expect(insert).toHaveBeenCalledTimes(1);
-		expect(patch).toHaveBeenCalledTimes(2);
+		expect(insert).toHaveBeenCalledTimes(4);
+		expect(insert).toHaveBeenCalledWith(
+			"incidentOccurrences",
+			expect.objectContaining({
+				incidentId: "incident_1",
+				requestId: "request_1",
+				occurrenceNumber: 1,
+				stack: "stack",
+			}),
+		);
+		expect(insert).toHaveBeenCalledWith(
+			"incidentOccurrences",
+			expect.objectContaining({
+				incidentId: "incident_1",
+				requestId: "request_2",
+				occurrenceNumber: 2,
+			}),
+		);
+		expect(insert).toHaveBeenCalledWith(
+			"incidentOccurrences",
+			expect.objectContaining({
+				incidentId: "incident_1",
+				requestId: "request_3",
+				occurrenceNumber: 3,
+			}),
+		);
+		expect(patch).toHaveBeenCalledTimes(3);
 	});
 
 	it("keeps acked incidents suppressed on repeat until resolved", async () => {
@@ -131,6 +156,7 @@ describe("convex/observability", () => {
 							}),
 						})),
 					})),
+					insert: vi.fn().mockResolvedValue("occurrence_2"),
 					patch: vi.fn().mockResolvedValue(undefined),
 				},
 			} as never,
@@ -210,6 +236,54 @@ describe("convex/observability", () => {
 				deliveryStatus: "suppressed",
 			}),
 		);
+	});
+
+	it("lists occurrence documents through the engineering intake query seam", async () => {
+		const paginate = vi.fn().mockResolvedValue({
+			page: [
+				{
+					_id: "occurrence_1",
+					incidentId: "incident_1",
+					requestId: "request_1",
+				},
+			],
+			isDone: true,
+			continueCursor: "",
+		});
+		const { listIncidentOccurrencesForEngineeringIntakeHandler } =
+			await import("@/convex/observability/model");
+
+		const result = await listIncidentOccurrencesForEngineeringIntakeHandler(
+			{
+				db: {
+					query: vi.fn((tableName) => {
+						expect(tableName).toBe("incidentOccurrences");
+						return {
+							order: vi.fn((direction) => {
+								expect(direction).toBe("desc");
+								return { paginate };
+							}),
+						};
+					}),
+				},
+			} as never,
+			{
+				paginationOpts: {
+					cursor: null,
+					numItems: 10,
+				},
+			},
+		);
+
+		expect(paginate).toHaveBeenCalledWith({
+			cursor: null,
+			numItems: 10,
+		});
+		expect(result.page[0]).toMatchObject({
+			_id: "occurrence_1",
+			incidentId: "incident_1",
+			requestId: "request_1",
+		});
 	});
 
 	it("formats and sends Telegram alerts through the delivery action", async () => {

@@ -25,10 +25,10 @@ vi.mock("@/features/codex/server/route-helpers", async () => {
 	};
 });
 
-vi.mock("@/features/codex/server/app-server", async () => {
+vi.mock("@/features/codex/server/app-server-service", async () => {
 	const actual = await vi.importActual<
-		typeof import("@/features/codex/server/app-server")
-	>("@/features/codex/server/app-server");
+		typeof import("@/features/codex/server/app-server-service")
+	>("@/features/codex/server/app-server-service");
 
 	return {
 		...actual,
@@ -738,6 +738,30 @@ describe("codex route handlers", () => {
 		const body = (await response.json()) as Record<string, unknown>;
 
 		expect(response.status).toBe(500);
+		expect(body.requestId).toBeTruthy();
+	});
+
+	it("returns a mapped unavailable response when the app-server runtime is disabled", async () => {
+		requireProductAccessApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		withCodexAppServerClientMock.mockRejectedValue(
+			new Error("CODEX_APP_SERVER_DISABLED"),
+		);
+
+		const response = await postCodexLoginStart(
+			createRequest("https://example.test/api/codex/account/login/start", {
+				method: "POST",
+			}),
+		);
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(503);
+		expect(body).toMatchObject({
+			error:
+				"Codex app-server is disabled in this deployment. Enable it only on a runtime that can spawn the Codex binary and persist per-user state.",
+		});
 		expect(body.requestId).toBeTruthy();
 	});
 

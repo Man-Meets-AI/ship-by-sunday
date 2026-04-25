@@ -9,7 +9,7 @@ This app is blueprint-first, not course-first. The public customer outcome is on
 ## Read Before Editing
 
 - For any `apps/web` task, start with the repo root `AGENTS.md`.
-- For route, auth, checkout, entitlement, browser QA, release-readiness, or ship-readiness work, also read `qa/AGENTS.md`.
+- For route, auth, checkout, entitlement, browser proof, release-readiness, or ship-readiness work, also read `docs/release-workflow.md`.
 - For UI layout, styling, theming, motion, docs chrome, marketing presentation, or component presentation, read root `DESIGN.md` and `docs/ship-by-sunday/design-pack/AGENTS.md`.
 - Before changing the public homepage, read `apps/web/content/docs/configure-the-homepage.mdx`.
 - Before changing Convex code, read `apps/web/convex/_generated/ai/guidelines.md`.
@@ -45,7 +45,7 @@ This app is blueprint-first, not course-first. The public customer outcome is on
 
 ## Route And Access Triggers
 
-- If a change touches access checks, checkout success, entitlement, Clerk auth, or protected routes, map the affected journeys in `qa/journeys.csv` before judging proof.
+- If a change touches access checks, checkout success, entitlement, Clerk auth, or protected routes, prove the affected route and hosted-release path with the focused app tests first, then use the release proof commands from `docs/release-workflow.md` when judging release confidence.
 - If a test or route still uses legacy `/mission` or `/artifacts` wording, treat it as suspect unless the current customer-facing contract still depends on that alias.
 - For checkout or billing changes, keep Stripe-to-Convex handoff proof separate from UI proof.
 

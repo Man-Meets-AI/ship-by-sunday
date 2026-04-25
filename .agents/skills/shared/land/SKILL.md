@@ -37,7 +37,7 @@ Land the change end to end. Do not stop at "PR opened" or "checks started".
    - Use conventional commit messages for every commit.
    - Run the narrowest relevant proof before each commit.
    - Before a meaningful ship step, prefer `bun run lint`, `bun run format:check`, and `bun run typecheck`.
-   - When the current scope justifies the broader local gate, use `bun run check`. For release-control-plane changes, also run `bun run qa:validate` and any narrower commands that `release:triage` or `release:billing:doctor` say are required.
+   - When the current scope justifies the broader local gate, use `bun run check`. For release-control-plane changes, also run the narrowest affected release proof dry-run and any narrower commands that `release:triage` or `release:billing:doctor` say are required.
    - Push the source branch once the branch state is clean enough to review.
    - After pushing, wait until the remote head SHA actually matches the local commit before opening or refreshing a PR. If GitHub briefly says "No commits between..." or shows the old compare view, wait and retry instead of changing the git strategy.
 

@@ -32,6 +32,7 @@ This plan is the second child slice of the Program packet at `docs/programs/acti
 - [x] 2026-04-23 EDT: Grilled the plan against the live release intake, release triage, runtime intake, QA inventory, and active Dub-style harness-plan surfaces.
 - [x] 2026-04-24 EDT: Reordered this plan to the second recovery slice after the user rejected the Dub-style CI/CD harness direction and made CI/CD path codification the first slice.
 - [x] 2026-04-24 EDT: Re-grilled this plan after the CI/CD harness retirement slice completed, and tightened release triage, generated-at parsing, product-aware runtime identity, QA scenario mapping, and stale CI/CD boundaries before implementation.
+- [x] 2026-04-24 EDT: Deferred implementation to a dedicated release/intake Program because this control-plane work is larger than the current recovery sequence should absorb.
 - [ ] Fix release intake blocker slug normalization and add edge-case tests.
 - [ ] Fix release triage option normalization so documented flags populate the fields the collector reads.
 - [ ] Add product-aware runtime intake grouping and tests.
@@ -86,9 +87,13 @@ Decision: Add explicit QA scenario IDs for engineering intake evidence instead o
 Rationale: The current generated inventory rows for intake tests default to generic content coverage. Release and runtime intake are control-plane evidence surfaces, so `qa/journeys.csv`, `qa/coverage.csv`, and `qa/test-inventory.csv` need specific rows that a future QA review can interpret.
 Date: 2026-04-24
 
+Decision: Defer implementation to a dedicated release/intake Program.
+Rationale: The release triage, intake export, runtime intake grouping, and QA inventory contracts form a larger control-plane repair than this recovery Program should execute next. Keep this plan as the scoped implementation contract, but do not start it until the dedicated Program owns the lane.
+Date: 2026-04-24
+
 ## Outcomes & Retrospective
 
-This plan is active. Fill this section after implementation with the exact release/intake behavior that changed and the commands that passed.
+This plan is active but implementation is deferred. Fill this section after the dedicated release/intake Program resumes implementation with the exact release/intake behavior that changed and the commands that passed.
 
 ## Context and Orientation
 

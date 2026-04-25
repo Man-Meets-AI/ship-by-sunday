@@ -18,4 +18,5 @@ The Program must satisfy [PROGRAMS.md](/Users/parkerrex/Developer/ship-by-sunday
 
 Completed Program folders:
 
-- None yet.
+- `docs/programs/completed/2026-04-24-sbs-runtime-boundary-hardening/`: completed focused runtime boundary hardening slices for client observability, bonus lesson tracking, Codex app-server route boundaries, and public metadata routes.
+- `docs/programs/completed/2026-04-24-sbs-codex-release-reset/`: completed the Codex-style reset of Ship by Sunday CI, release, branch, test, QA, CLI, docs, and GitHub automation surfaces.

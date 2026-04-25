@@ -12,16 +12,28 @@ Production is healthy only when all three systems agree on the same release cand
 
 ## Current CI/CD proof path
 
-As of the 2026-04-24 CI/CD correction slice, the proven release path is the existing workflow set, not the rejected Dub-style harness reset.
+As of the 2026-04-24 release-proof reconciliation, helper-retirement, and QA-control-plane retirement slices, the proven release path is the existing workflow set plus the manifest-backed tag publication layer and release-owned hosted proof commands, not the rejected Dub-style harness reset.
 
-- `Dev Staging Proof` is the integrated `dev` proof surface. The current remote evidence is run `24736371175`, created 2026-04-21 for commit `36c8360da5d94d9be2ac4485d935389fa5b4fe52`, with green `release_scope`, `default_ship`, and `release_gate`; `billing_integration` was skipped because the release scope did not require billing proof.
-- `CI` is the code-centric `main` and pull-request proof surface. The current release evidence is run `24736015264`, created 2026-04-21 for commit `3c5347c06c039859b7780a61e331cebda9421aea`, with green `qa_control_plane`, `static`, `cli`, `integration`, and `browser-smoke` jobs. Scheduled `CI` run `24874408634` also passed on 2026-04-24 for the same `main` commit.
-- `Production Release Proof` is the hosted production post-deploy proof surface. The current evidence is run `24736015243`, created 2026-04-21 for commit `3c5347c06c039859b7780a61e331cebda9421aea`, with green `release_scope`, `default_ship`, and `release_gate`; `billing_integration` and `reconcile_dev` were skipped by workflow logic.
-- `Convex Production Deploy` is the production backend deploy surface. The current evidence is run `24736015267`, created 2026-04-21 for commit `3c5347c06c039859b7780a61e331cebda9421aea`, with green `deploy`.
+- `CI` is the code-centric pull-request, `main` push, scheduled, and manual proof surface from `.github/workflows/ci.yml`. The checked-in required status contexts are `static` and `integration`. Older run `24736015264`, created 2026-04-21 for commit `3c5347c06c039859b7780a61e331cebda9421aea`, also included now-retired shallow-browser, helper, and QA-control-plane status contexts. Scheduled `CI` run `24874408634` also passed on 2026-04-24 for the same `main` commit.
+- `Dev Staging Proof` is the integrated `dev` branch-push proof surface from `.github/workflows/dev-staging-proof.yml`. It is not one of the required PR status contexts; it proves the merged `dev` tip before that commit is trusted as a release candidate. The current remote evidence is run `24736371175`, created 2026-04-21 for commit `36c8360da5d94d9be2ac4485d935389fa5b4fe52`, with green `release_scope`, `default_ship`, and `release_gate`; `billing_integration` was skipped because the release scope did not require billing proof.
+- `Production Release Proof` is the hosted production post-deploy proof surface from `.github/workflows/production-release-proof.yml`. It runs on `main` pushes and manual dispatches after the production web deployment settles; it is not one of the required PR status contexts. The current evidence is run `24736015243`, created 2026-04-21 for commit `3c5347c06c039859b7780a61e331cebda9421aea`, with green `release_scope`, `default_ship`, and `release_gate`; `billing_integration` and `reconcile_dev` were skipped by workflow logic.
+- `Convex Production Deploy` is the production backend deploy surface from `.github/workflows/convex-production-deploy.yml`. It runs on `main` pushes and manual dispatches and is controlled by the `CONVEX_PRODUCTION_DEPLOY_ENABLED` variable for automatic deploys. The current evidence is run `24736015267`, created 2026-04-21 for commit `3c5347c06c039859b7780a61e331cebda9421aea`, with green `deploy`.
 
-Preserve `.github/workflows/ci.yml`, `.github/workflows/dev-staging-proof.yml`, `.github/workflows/production-release-proof.yml`, and `.github/workflows/convex-production-deploy.yml` unless a later plan replaces them with equal or stronger remote proof.
+Preserve `.github/workflows/ci.yml`, `.github/workflows/dev-staging-proof.yml`, `.github/workflows/production-release-proof.yml`, and `.github/workflows/convex-production-deploy.yml` unless a later plan replaces them with equal or stronger remote proof. If live branch protection still contains stale retired helper, shallow-browser, or QA-control-plane contexts after this slice merges, remove those external requirements while keeping `static` and `integration`.
 
-`Sandbox E2E Nightly` and `Deployment Smoke` are not release-path replacements. `Sandbox E2E Nightly` run `24876267728` failed on 2026-04-24 and should be treated as a non-release-critical repair candidate. `Deployment Smoke` appears in remote workflow metadata and has failed run `24571382089` from 2026-04-17, but `.github/workflows/deployment-smoke.yml` is absent from the current checkout, `origin/dev`, and `origin/main`; treat it as an orphaned historical Actions surface unless a workflow file returns and fresh passing evidence exists.
+After the helper-retirement workflow deletion reaches `dev` and `main`, remove the stale branch-protection status context with:
+
+```bash
+printf '%s\n' '{"strict":true,"contexts":["static","integration"]}' > tmp/required-checks-source-proof.json
+gh api --method PATCH repos/ParkerRex/ship-by-sunday/branches/dev/protection/required_status_checks --input tmp/required-checks-source-proof.json
+gh api --method PATCH repos/ParkerRex/ship-by-sunday/branches/main/protection/required_status_checks --input tmp/required-checks-source-proof.json
+gh api repos/ParkerRex/ship-by-sunday/branches/dev/protection/required_status_checks --jq '{strict,contexts,checks}'
+gh api repos/ParkerRex/ship-by-sunday/branches/main/protection/required_status_checks --jq '{strict,contexts,checks}'
+```
+
+`Sandbox E2E Nightly` and `Deployment Smoke` are not release-path replacements. `Sandbox E2E Nightly` is active remotely from `.github/workflows/sandbox-e2e-nightly.yml`, runs on schedule and manual dispatch, and has failed scheduled runs every day in the latest checked window, including run `24876267728` on 2026-04-24. Treat it as a non-release-critical repair candidate, not as a release gate. `Deployment Smoke` is active in remote workflow metadata and has failed run `24571382089` from 2026-04-17, but `.github/workflows/deployment-smoke.yml` is absent from the current checkout, `origin/dev`, and `origin/main`; treat it as an orphaned historical Actions surface unless a workflow file returns and fresh passing evidence exists.
+
+Visible repository rulesets and branch rules returned empty arrays on 2026-04-24 via `gh api repos/ParkerRex/ship-by-sunday/rulesets`, `gh api repos/ParkerRex/ship-by-sunday/rules/branches/main`, and `gh api repos/ParkerRex/ship-by-sunday/rules/branches/dev`. Do not read that as proof that organization-level policy is absent; the branch protection endpoints above remain the authority for required SBS status contexts.
 
 ## Release candidate contract
 
@@ -33,6 +45,17 @@ A `dev` release candidate is valid only when these four facts point at the same 
 - the latest `release_scope`, `default_ship`, `billing_integration` when required, and `release_gate` checks are green on that same SHA.
 
 Use `bun run release:triage` from the repository root before trusting or refreshing a `dev -> main` release PR. If `releasePath.state` is `blocked_metadata` or `blocked_unrelated_dev_scope`, stop and repair the release control plane first. If `releasePath.state` is `snapshot_required`, stop the normal release path and switch to the documented snapshot fallback instead of improvising recovery git moves.
+
+The SBS-owned machine-readable release export lives beside that control-plane answer:
+
+```bash
+bun run engineering:intake:release -- --output tmp/release-intake.v1.json
+bun run engineering:intake:snapshot -- --output tmp/engineering-intake.snapshot.v1.json
+```
+
+`engineering:intake:release` serializes the current release candidate, blocker identities, and evidence links into the frozen `release-intake.v1` contract. `engineering:intake:snapshot` is a read-only derivative that nests the authoritative runtime and release exports unchanged. The snapshot is diagnostic only; it is not a second execution lane and it must not replace the separate authoritative feeds.
+
+Release-critical helper implementations live under `scripts/release/`. That folder owns release personas, hosted release proof orchestration, billing-sensitive proof selection, release evidence, and engineering-intake compatibility fixtures. Historical proof reports live under `docs/archive/release-proof-runs/`; they are evidence records, not an active command surface.
 
 ## Branch model
 
@@ -50,12 +73,75 @@ Use `bun run release:triage` from the repository root before trusting or refresh
 - While the repo is pre-1.0, the minor digit marks the next ordinary release cut from `main`, and the patch digit is reserved for hotfixes and backports. `1.0.0` stays off the table until the product contract is intentionally stabilized.
 - Every GitHub Release must be created from the merged `main` tag and backed by the matching `CHANGELOG.md` entry. Do not publish the release until the changelog section exists.
 
+## Tag release identity contract
+
+This is the release identity contract implemented by the manifest and tag workflow slice. Current promotion still starts with the `dev -> main` path, but release publication now has a checked-in manifest, local validators, a tag workflow, and a fail-closed release evidence artifact.
+
+Stable release tags must use `vMAJOR.MINOR.PATCH`, for example `v0.3.0`. Optional prerelease tags are reserved for future prerelease channels and should use semver prerelease suffixes such as `v0.3.0-rc.1`. Do not introduce another tag family for production releases.
+
+Until a later platform plan proves direct tag deployment is safer, release tags attest the verified `main` production SHA. A release tag is valid only when all of these facts are true at publication time:
+
+- the tag target SHA is the exact merged `main` commit being released
+- the Vercel production deployment behind `https://www.man-meets-ai.com` was created for that same SHA
+- the Convex production deploy was run from that same SHA
+- the production release proof ran against that same SHA
+- the GitHub Release points at that same tag and copies or summarizes the matching `CHANGELOG.md` heading
+
+Historical tags do not have to match the current `origin/main` tip after later releases move the branch forward. Future checks must compare each tag to evidence captured for that tag's target SHA, not to whichever commit `origin/main` points at later.
+
+Package versions are not the release source of truth today. The existing root, app, and workspace package versions still report `0.1.0` while the latest release tag is `v0.2.0`. The release source of truth is now the dedicated `release.json` manifest at the repository root. The manifest currently prepares the next stable release candidate, `v0.3.0`, and must be updated in the release PR before cutting a different protected tag. Its fields are:
+
+- `schemaVersion`: the manifest schema, currently `release-manifest.v1`
+- `version`: semver without the leading `v`
+- `channel`: `stable` or an explicit prerelease channel
+- `gitTag`: the expected `vMAJOR.MINOR.PATCH` tag for the version
+- `changelogHeading`: the exact `CHANGELOG.md` heading for the release notes
+- `releaseEvidenceSchemaVersion`: the evidence artifact schema version
+- `notes`: optional operator notes that are not used for validation
+
+Validate the manifest locally with:
+
+```bash
+bun run release:manifest:check
+```
+
+Tag protection should use a GitHub ruleset or equivalent policy for `refs/tags/v*`. The policy should restrict tag creation, update, and deletion to the release automation or maintainers, reject tags that do not match the manifest version, and prevent GitHub Release publication unless the evidence artifact exists for the tag target SHA. Visible repository rulesets returned an empty array on 2026-04-24, so verify live rulesets before trusting protected tag enforcement.
+
+The machine-readable release evidence artifact is a `release-evidence.v1` document generated by `scripts/release/build-release-evidence.mjs` and uploaded by `.github/workflows/release.yml`. It includes at least:
+
+- `schemaVersion`
+- `version`
+- `gitTag`
+- `tagTargetSha`
+- `mainSha`
+- `branchModel`
+- `releaseChannel`
+- `changelogHeading`
+- `githubReleaseUrl`
+- `workflowRuns` for CI, production release proof, Convex production deploy, and any staging proof that qualified the release candidate
+- `vercel` production deployment id, url, alias, target, project id, and commit SHA
+- `convex` production deployment name, deploy workflow run id, and commit SHA
+- `billing` mode, billing doctor result, and `billing_integration` run when the release is billing-sensitive
+- `auth` and `entitlement` proof references for the `default_ship` production pack
+- `blockers`
+- `generatedAt`
+
+Build a local diagnostic evidence artifact with:
+
+```bash
+bun run release:evidence:build
+```
+
+Hosted proof remains mandatory for a hosted product. Vercel proof must show the production deployment commit SHA equals `tagTargetSha`. Convex proof must show the production deploy ran from `tagTargetSha` or that a previous successful Convex production deploy exists for that same SHA. Billing-sensitive releases must run the production billing doctor and hosted `billing_integration` proof. Auth and entitlement proof must come from the production `default_ship` pack or a documented stronger replacement. Local dry-run evidence may mark these facts as `unavailable`; publish-mode evidence fails closed until required proof is `passed` or explicitly `not_required`.
+
+`.github/workflows/release.yml` runs on `v*` tag pushes and manual dispatch. Manual dispatch is dry-run by default and accepts `git_tag`, `tag_target_sha`, and `dry_run` inputs. A non-dry-run release validates `release.json`, validates that the tag target equals `origin/main`, collects check-run proof for the target SHA, builds `release-evidence.v1`, and only then publishes the GitHub Release.
+
 ## Required standing configuration
 
 - GitHub branch protection is enabled on `dev` and `main`.
-- `.github/workflows/ci.yml` should fail early on QA control-plane drift by running `qa:validate` and checking that `qa:inventory:sync` leaves `qa/test-inventory.csv` unchanged.
-- `dev` requires pull requests and the code-centric CI checks. After each merge into `dev`, the resulting branch tip must also pass `Dev Staging Proof` before that `dev` commit is treated as a release candidate for `main`.
-- `main` requires pull requests and the `static`, `integration`, `browser-smoke`, and `cli` checks.
+- `.github/workflows/ci.yml` should stay code-centric and fail on static or integration regressions through the `static` and `integration` jobs.
+- `dev` requires pull requests and the `static` and `integration` checks. After each merge into `dev`, the resulting branch tip must also pass `Dev Staging Proof` before that `dev` commit is treated as a release candidate for `main`.
+- `main` requires pull requests and the `static` and `integration` checks.
 - Vercel project `mma-shipbysunday` is linked to `ParkerRex/mma-shipbysunday` and uses `main` as its production branch.
 - The staging host `https://dev.man-meets-ai.com` must stay aliased to the current `dev` preview deployment. `Dev Staging Proof` should bind that alias automatically to the exact ready preview deployment for the current `dev` commit; manual `vercel alias set` is now a recovery tool, not the normal path.
 - Root `bunfig.toml` forces `install.linker = "hoisted"` so GitHub Actions and Vercel installs do not use Bun's isolated symlink-heavy workspace layout during builds and serverless packaging.
@@ -63,6 +149,7 @@ Use `bun run release:triage` from the repository root before trusting or refresh
 - GitHub repository secret `CONVEX_DEPLOY_KEY` must exist before remote Convex dry-runs or production deploys can succeed.
 - GitHub repository secret `VERCEL_TOKEN` plus repository variables `VERCEL_PROJECT_ID` and `VERCEL_TEAM_ID` must exist before the release proofs can wait for the exact Vercel deployment for either the staged `dev` commit or the merged `main` commit.
 - GitHub repository secret `RELEASE_RECONCILE_GH_TOKEN` must exist before post-snapshot reconcile automation can open the `main -> dev` PR after a snapshot release. The default `github.token` is not enough in this repo because GitHub Actions is not permitted to create pull requests here.
+- The `Tag Release` workflow requires read access to check runs and write access to contents only in its publish job. It does not replace hosted release proof or the snapshot fallback.
 - GitHub repository variable `CONVEX_PRODUCTION_DEPLOY_ENABLED` is the live pause switch for automatic Convex production deploys. It is `true` after the first successful dry-run; set it back to `false` if you need to pause automatic `main` deploys.
 
 Create that secret from the Convex dashboard for the production deployment:
@@ -91,7 +178,7 @@ Create that secret from the Convex dashboard for the production deployment:
 
    `Review this branch against main. Have pr_explorer map the affected code paths, reviewer find real risks, and docs_researcher verify the framework APIs that the patch relies on.`
 
-10. Fix substantive findings and merge the `dev -> main` release PR only after `static`, `integration`, `browser-smoke`, and `cli` are green.
+10. Fix substantive findings and merge the `dev -> main` release PR only after `static` and `integration` are green.
 11. Tag the merged `main` commit with the next pre-1.0 version and publish the matching GitHub Release from that tag. Copy or summarize the notes from the corresponding `CHANGELOG.md` section before publishing.
 12. Watch Vercel create the production web deploy from the merged `main` commit.
 13. Watch GitHub Actions run `Convex Production Deploy` for the same merged `main` commit.
@@ -111,19 +198,21 @@ git rev-parse origin/main
 git merge-base origin/main origin/dev
 git rev-list --left-right --count origin/main...origin/dev
 bun run release:triage
+bun run engineering:intake:release -- --output tmp/release-intake.v1.json
+bun run engineering:intake:snapshot -- --output tmp/engineering-intake.snapshot.v1.json
 bun run release:billing:doctor -- --env=preview --dry-run
 bun run release:billing:doctor -- --env=production --dry-run
 bun run release:snapshot -- --dry-run
 vercel target list
 cd apps/web && bunx convex logs --prod --history 20
-PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run qa:run-pack -- --pack=default_ship
+PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run release:proof -- --proof=default_ship
 ```
 
 For staging or production billing verification in this repo, prefer a restricted live `100% off` discount and confirm the buyer auto-forwards from `/checkout/success` into `/start`. On production, the canonical automation should create the Checkout Session directly with the discount already attached instead of relying on promotion-code entry in Stripe’s hosted UI. Use [docs/internal/observability.md](./internal/observability.md) for the incident-control and webhook-origin drill.
 
-For the matching QA command:
+For the matching release proof command:
 
-- `qa/personas.local.json` supplies the QA account emails and passwords
+- `tmp/release-personas.local.json` supplies the release proof account emails and passwords by default; set `RELEASE_PERSONAS_LOCAL_FILE` to use a different ignored local file
 - `QA_ENV_FILE` selects the Clerk and Convex env values for the target environment and is resolved from the repository root in CI, for example `apps/web/.env.production`
 - `PLAYWRIGHT_BASE_URL` points the browser pack at the target environment
 - production bootstrap can derive `CONVEX_DEPLOYMENT` from `NEXT_PUBLIC_CONVEX_URL`, so the production env file does not have to carry a separate `CONVEX_DEPLOYMENT` entry
@@ -132,12 +221,12 @@ If persona prep fails on a Clerk publishable-key mismatch, fix env parity before
 
 The current durable release-proof evidence is captured in:
 
-- `qa/runs/2026-04-01-release-proof-final-green.md`
+- `docs/archive/release-proof-runs/2026-04-01-release-proof-final-green.md`
 
 Historical production billing repair evidence remains in:
 
-- `qa/runs/2026-03-25-prod-billing-integration-webhook-fix.md`
-- `qa/runs/2026-03-25-prod-billing-integration-automatic-rerun.md`
+- `docs/archive/release-proof-runs/2026-03-25-prod-billing-integration-webhook-fix.md`
+- `docs/archive/release-proof-runs/2026-03-25-prod-billing-integration-automatic-rerun.md`
 
 ## Snapshot fallback
 

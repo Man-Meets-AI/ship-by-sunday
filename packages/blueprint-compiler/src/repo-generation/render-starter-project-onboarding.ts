@@ -174,7 +174,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 		],
 		agentPrompt:
 			"Verify the shipped starter before we customize it. Run the smallest relevant checks first and call out any real setup drift before we touch product code.",
-		skillTriggers: ["$qa-team", "$testing-practices", "$starter-billing-setup"],
+		skillTriggers: ["$testing-practices", "$starter-billing-setup"],
 		references: [
 			{
 				label: "apps/web/content/docs/local-qa.mdx",
@@ -215,8 +215,8 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 			"Use the shipped docs and wrapper skills as guardrails while the product begins to diverge from the starter.",
 		],
 		agentPrompt:
-			"The starter is stable. Help me pick and implement the first real customer-visible slice, then keep docs and QA aligned as we move away from starter scaffolding.",
-		skillTriggers: ["$starter-first-slice", "$docs", "$qa-team"],
+			"The starter is stable. Help me pick and implement the first real customer-visible slice, then keep docs and tests aligned as we move away from starter scaffolding.",
+		skillTriggers: ["$starter-first-slice", "$docs", "$testing-practices"],
 		references: [
 			{
 				label: "apps/web/content/docs/build-your-product.mdx",

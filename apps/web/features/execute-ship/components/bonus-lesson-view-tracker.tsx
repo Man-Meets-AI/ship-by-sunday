@@ -1,49 +1,65 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useConvexAuth, useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import {
+	BONUS_LESSON_VIEWED_ENDPOINT,
+	BONUS_LESSON_VIEW_ERROR_CODES,
+} from "@/features/execute-ship/lib/bonus-lesson-view-contract";
 
-const TERMINAL_VIEW_TRACKER_ERROR_MESSAGES = new Set([
-	"Unauthorized",
-	"Access required",
-	"Execute / Ship is still locked",
+const TERMINAL_VIEW_TRACKER_ERROR_CODES = new Set<string>([
+	BONUS_LESSON_VIEW_ERROR_CODES.unauthorized,
+	BONUS_LESSON_VIEW_ERROR_CODES.forbidden,
+	BONUS_LESSON_VIEW_ERROR_CODES.notFound,
+	BONUS_LESSON_VIEW_ERROR_CODES.badRequest,
 ]);
 
-function getErrorMessage(error: unknown) {
-	if (error instanceof Error) {
-		return error.message;
-	}
+type BonusLessonViewTrackerResponse = {
+	code?: unknown;
+	error?: unknown;
+};
 
-	if (typeof error === "string") {
-		return error;
-	}
-
-	return null;
+function getTerminalResponseCode(responseBody: BonusLessonViewTrackerResponse) {
+	return typeof responseBody.code === "string" ? responseBody.code : null;
 }
 
-function isTerminalViewTrackerError(error: unknown) {
-	const message = getErrorMessage(error);
-	if (!message) {
+function isTerminalViewTrackerResponse(
+	response: Response,
+	responseBody: BonusLessonViewTrackerResponse,
+) {
+	if (response.ok) {
+		return true;
+	}
+
+	const code = getTerminalResponseCode(responseBody);
+	if (!code) {
 		return false;
 	}
 
-	return Array.from(TERMINAL_VIEW_TRACKER_ERROR_MESSAGES).some(
-		(candidateMessage) =>
-			message === candidateMessage || message.includes(candidateMessage),
-	);
+	return TERMINAL_VIEW_TRACKER_ERROR_CODES.has(code);
+}
+
+async function markBonusLessonViewed(lessonKey: string) {
+	const response = await fetch(BONUS_LESSON_VIEWED_ENDPOINT, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({ lessonKey }),
+		keepalive: true,
+	});
+	const responseBody = (await response
+		.json()
+		.catch(() => ({}))) as BonusLessonViewTrackerResponse;
+
+	return isTerminalViewTrackerResponse(response, responseBody)
+		? "done"
+		: "idle";
 }
 
 export function BonusLessonViewTracker({ lessonKey }: { lessonKey: string }) {
-	const { isAuthenticated, isLoading } = useConvexAuth();
-	const markBonusLessonViewed = useMutation(api.course.markBonusLessonViewed);
 	const markAttemptStateRef = useRef<"idle" | "pending" | "done">("idle");
 
 	useEffect(() => {
-		if (isLoading || !isAuthenticated) {
-			return;
-		}
-
 		if (markAttemptStateRef.current !== "idle") {
 			return;
 		}
@@ -51,15 +67,12 @@ export function BonusLessonViewTracker({ lessonKey }: { lessonKey: string }) {
 		markAttemptStateRef.current = "pending";
 		void (async () => {
 			try {
-				await markBonusLessonViewed({ lessonKey });
-				markAttemptStateRef.current = "done";
-			} catch (error) {
-				markAttemptStateRef.current = isTerminalViewTrackerError(error)
-					? "done"
-					: "idle";
+				markAttemptStateRef.current = await markBonusLessonViewed(lessonKey);
+			} catch {
+				markAttemptStateRef.current = "idle";
 			}
 		})();
-	}, [isAuthenticated, isLoading, lessonKey, markBonusLessonViewed]);
+	}, [lessonKey]);
 
 	return null;
 }

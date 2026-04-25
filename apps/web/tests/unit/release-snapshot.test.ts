@@ -4,7 +4,7 @@ import {
 	buildReleaseSnapshotBranchName,
 	buildReleaseSnapshotPlan,
 	evaluateReleaseSnapshotEligibility,
-} from "../../../../qa/scripts/lib/release-snapshot.mjs";
+} from "../../../../scripts/release/lib/release-snapshot.mjs";
 
 describe("release snapshot helpers", () => {
 	it("builds a deterministic snapshot branch name", () => {

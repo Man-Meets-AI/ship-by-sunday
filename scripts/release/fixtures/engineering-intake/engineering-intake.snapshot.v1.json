@@ -1,0 +1,181 @@
+{
+	"schemaVersion": "engineering-intake.snapshot.v1",
+	"generatedAt": "2026-04-19T15:00:00.000Z",
+	"sourceSystem": "ship_by_sunday",
+	"sourceRepository": "ship-by-sunday",
+	"compatibility": {
+		"policy": "Within v1, additive optional fields are allowed. Any field removal, rename, or semantic redefinition must ship as v2."
+	},
+	"derivativeOf": [
+		"runtime-intake.v1",
+		"release-intake.v1"
+	],
+	"runtime": {
+		"schemaVersion": "runtime-intake.v1",
+		"generatedAt": "2026-04-19T15:00:00.000Z",
+		"sourceSystem": "ship_by_sunday",
+		"sourceRepository": "ship-by-sunday",
+		"compatibility": {
+			"policy": "Within v1, additive optional fields are allowed. Any field removal, rename, or semantic redefinition must ship as v2."
+		},
+		"ownership": {
+			"sourceOfTruth": "ship-by-sunday observability incidents",
+			"lifecycleOwner": "ship-by-sunday observability incidents",
+			"ackOwner": "ship-by-sunday observability incident status route",
+			"resolveOwner": "ship-by-sunday observability incident status route",
+			"notes": "SBS owns runtime incident lifecycle and ack or mute or resolve state through the incidents ledger and status route."
+		},
+		"items": [
+			{
+				"externalId": "sbs:runtime:b7f8f4f893d09d1e",
+				"dedupeKey": "sbs:runtime:b7f8f4f893d09d1e",
+				"severity": "critical",
+				"status": "firing",
+				"summary": "Stripe webhook signature verification failed on /api/stripe/webhook.",
+				"canonicalTitle": "Stripe webhook signature verification failed",
+				"canonicalNotes": "Repeated production webhook failures for the checkout handoff. Query-string noise is stripped before export grouping so _rsc variants stay on one engineering intake record.",
+				"rawTags": [
+					"billing",
+					"production",
+					"stripe",
+					"webhook"
+				],
+				"capturedAt": "2026-04-19T14:59:00.000Z",
+				"firstSeenAt": "2026-04-19T14:52:10.000Z",
+				"lastSeenAt": "2026-04-19T14:58:44.000Z",
+				"occurrenceCount": 7,
+				"nextAction": "Verify the hosted Stripe webhook secret and replay the most recent failing event only after the secret matches production.",
+				"sourceContext": {
+					"sourceSystem": "ship_by_sunday",
+					"sourceLabel": "observability/incident",
+					"sourceRecordRefs": [
+						{
+							"kind": "convex_document",
+							"value": "incidents:js7h1fd9pr1gq2b2fdjz1q9jm57z9c1r",
+							"label": "Grouped Convex incident"
+						},
+						{
+							"kind": "incident_fingerprint_key",
+							"value": "ship-by-sunday:prod:incident_d47c3c6a4bd05ebd",
+							"label": "Incident fingerprint key"
+						}
+					],
+					"projectTitle": "Ship by Sunday",
+					"areaTitle": "Observability",
+					"locationLabel": "Observability / Ship by Sunday",
+					"runtime": {
+						"environment": "prod",
+						"source": "stripe",
+						"surface": "webhook",
+						"canonicalPath": "/api/stripe/webhook",
+						"code": "StripeSignatureVerificationFailed"
+					}
+				},
+				"evidenceRefs": [
+					{
+						"kind": "native_url",
+						"label": "SBS incident detail",
+						"url": "https://www.man-meets-ai.com/observability/incidents/stripe-webhook-signature"
+					},
+					{
+						"kind": "logs_url",
+						"label": "Vercel runtime logs",
+						"url": "https://vercel.com/acme/ship-by-sunday/logs?query=StripeSignatureVerificationFailed"
+					},
+					{
+						"kind": "runbook",
+						"label": "Observability runbook",
+						"url": "https://github.com/parkerrex/ship-by-sunday/blob/dev/docs/internal/observability.md"
+					}
+				]
+			}
+		]
+	},
+	"release": {
+		"schemaVersion": "release-intake.v1",
+		"generatedAt": "2026-04-19T15:00:00.000Z",
+		"sourceSystem": "ship_by_sunday",
+		"sourceRepository": "ship-by-sunday",
+		"compatibility": {
+			"policy": "Within v1, additive optional fields are allowed. Any field removal, rename, or semantic redefinition must ship as v2."
+		},
+		"ownership": {
+			"sourceOfTruth": "ship-by-sunday release triage",
+			"lifecycleOwner": "ship-by-sunday release triage summary",
+			"ackOwner": null,
+			"resolveOwner": "ship-by-sunday release candidate, proof checks, and deployment metadata",
+			"notes": "SBS owns release blocker lifecycle as a derived view over release candidate, proof, and deployment state. Worker will consume but not resolve these facts in plan 3."
+		},
+		"items": [
+			{
+				"externalId": "sbs:release:7a270a0924140f55",
+				"dedupeKey": "sbs:release:7a270a0924140f55",
+				"severity": "high",
+				"status": "active",
+				"blockerKind": "github_check",
+				"blockerKey": "release_gate",
+				"summary": "The dev release candidate is blocked because GitHub check run release_gate has not passed.",
+				"canonicalTitle": "release_gate is blocking the dev release candidate",
+				"canonicalNotes": "Release intake exports one blocker record per candidate SHA plus blocker kind plus blocker key. The blocker clears only when SBS release triage sees updated proof or metadata upstream.",
+				"rawTags": [
+					"dev",
+					"github",
+					"release",
+					"release_gate"
+				],
+				"capturedAt": "2026-04-19T15:00:00.000Z",
+				"candidate": {
+					"ref": "origin/dev",
+					"sha": "candidate-sha-9f3e2c1a",
+					"baseRef": "origin/main",
+					"baseSha": "base-sha-2d71f00b"
+				},
+				"releaseState": {
+					"pathState": "blocked_metadata",
+					"snapshotRequired": false
+				},
+				"sourceContext": {
+					"sourceSystem": "ship_by_sunday",
+					"sourceLabel": "release/triage",
+					"sourceRecordRefs": [
+						{
+							"kind": "release_candidate",
+							"value": "origin/dev@candidate-sha-9f3e2c1a",
+							"label": "Release candidate ref"
+						},
+						{
+							"kind": "github_check",
+							"value": "release_gate",
+							"label": "Blocking check run"
+						},
+						{
+							"kind": "github_pr",
+							"value": "83",
+							"label": "dev -> main release PR"
+						}
+					],
+					"projectTitle": "Ship by Sunday",
+					"areaTitle": "Release Control",
+					"locationLabel": "Release Control / Ship by Sunday"
+				},
+				"evidenceRefs": [
+					{
+						"kind": "github_check",
+						"label": "release_gate check run",
+						"url": "https://github.com/parkerrex/ship-by-sunday/actions/runs/123456789"
+					},
+					{
+						"kind": "github_pr",
+						"label": "Release PR #83",
+						"url": "https://github.com/parkerrex/ship-by-sunday/pull/83"
+					},
+					{
+						"kind": "runbook",
+						"label": "Release workflow runbook",
+						"url": "https://github.com/parkerrex/ship-by-sunday/blob/dev/docs/release-workflow.md"
+					}
+				]
+			}
+		]
+	}
+}

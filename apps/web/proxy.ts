@@ -12,15 +12,24 @@ const clerkAuthorizedParties = getClerkAuthorizedParties();
 const canonicalWorkspaceRoutes = [
 	routeConfig.blueprint,
 	routeConfig.review,
+	routeConfig.settings,
+] as const;
+
+const compatibilityWorkspaceRoutes = [
 	routeConfig.execute,
+	routeConfig.mission,
+	routeConfig.artifacts,
+	"/start",
+	"/product",
+	"/design",
+	"/marketing",
+	"/build-plan",
 ] as const;
 
 const isProtectedRoute = createRouteMatcher([
 	...canonicalWorkspaceRoutes.map((route) => `${route}(.*)`),
-	`${routeConfig.mission}(.*)`,
+	...compatibilityWorkspaceRoutes.map((route) => `${route}(.*)`),
 	"/lesson(.*)",
-	`${routeConfig.artifacts}(.*)`,
-	`${routeConfig.settings}(.*)`,
 ]);
 
 export default disableClerkMiddleware

@@ -42,7 +42,7 @@ describe("customer-safe snapshot contract", () => {
 					shippingMode: "ship-generalized",
 				}),
 				expect.objectContaining({
-					pathPattern: "qa/**",
+					pathPattern: "docs/testing/**",
 					shippingMode: "ship-generalized",
 				}),
 				expect.objectContaining({

@@ -29,8 +29,11 @@ body:
       options:
         - apps/web
         - apps/web/convex
+        - Auth or entitlement
+        - Billing or checkout
+        - Release, CI, or deployment tooling
         - packages/*
-        - Build, CI, or deployment tooling
+        - Generated starter output
         - Docs or content
         - Not sure
     validations:
@@ -62,6 +65,20 @@ body:
     attributes:
       label: Actual behavior
       placeholder: The page reloads unexpectedly, loses state, or shows an error.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: release_sensitivity
+    attributes:
+      label: Release sensitivity
+      description: Does this touch an area that needs hosted proof or release-owner review?
+      options:
+        - No, local/source proof should be enough
+        - Auth, entitlement, checkout, or billing
+        - Vercel, Convex, CI, or release automation
+        - Production data or production incident behavior
+        - Not sure
     validations:
       required: true
 
