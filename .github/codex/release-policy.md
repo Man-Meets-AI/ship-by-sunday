@@ -17,6 +17,8 @@ Use source-level proof first:
 - `bun run typecheck`
 - focused unit, integration, or integration-ui tests for the touched surface
 
+Local git hooks are not repository enforcement. Use focused local checks before pushing, but treat PR CI `static` and `integration` as the durable merge gates. Temporary `browser-smoke` and `cli` contexts are compatibility shims while branch protection catches up.
+
 Use release-owned hosted proof when the change touches auth, entitlement, checkout, billing, deployment, release metadata, or production proof:
 
 - `bun run release:proof -- --proof=default_ship`

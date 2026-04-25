@@ -9,12 +9,10 @@ This document contains foundational mandates for Gemini CLI in this workspace. T
 
 ## Canonical Truth & Source Order
 Use this exact priority order when sources conflict:
-1. `docs/ship-by-sunday/blueprint-contract-and-question-map-2026-03-23.md`
-2. `docs/ship-by-sunday/input-architecture-keep-kill-combine-2026-03-23.md`
-3. `docs/ship-by-sunday/curriculum-reset-funnel-2026-03-23.md`
-4. `docs/ship-by-sunday/repo-input-audit-2026-03-23.md`
-5. `docs/ship-by-sunday/openai-domain-contract-reconciliation-2026-03-23.md`
-6. `docs/ship-by-sunday/original/*` (for voice and examples only)
+1. `AGENTS.md` and nested `AGENTS.md` files
+2. `docs/index.md` and the referenced canonical docs spine
+3. current runtime code in `apps/web/` and `packages/blueprint-compiler/`
+4. `docs/ship-by-sunday/*` historical source packs for background only
 
 ## Repository Layout & Engineering Standards
 - **Feature-First:** Organize code by feature, not by file type. Working in `apps/web/features/` is preferred over route-level logic.
@@ -36,7 +34,7 @@ Use this exact priority order when sources conflict:
 - `bun run dev:full` — Start web + hosted Convex dev + Stripe listener.
 - `bun run build` / `bun run typecheck` — Build and verify.
 - `bun run check` — Full repo check (lint, format, test, build).
-- `bun run test:unit` / `test:contracts` / `test:integration:ui` / `test:browser-smoke` / `test:e2e:sandbox` — Comprehensive test suite.
+- `bun run test:unit` / `test:contracts` / `test:integration` / `test:e2e:sandbox` — Focused and broad test surfaces.
 
 ## Subsystem Rules
 
@@ -54,7 +52,7 @@ Use this exact priority order when sources conflict:
 
 ## Convex & ExecPlans
 - **Convex:** Hosted dev workflow only. No local mode. Read `apps/web/convex/_generated/ai/guidelines.md` before editing.
-- **ExecPlans:** Mandatory for complex features, migrations, or refactors. Store in `.plans/`. Follow `.plans/PLANS.md` exactly. Treat `docs/codex/` as legacy archive only.
+- **ExecPlans:** Mandatory for complex features, migrations, or refactors. Store active plans in `docs/exec-plans/active/`. Follow `docs/exec-plans/PLANS.md` exactly. Treat `docs/codex/` as legacy archive only.
 - **Validation:** Validate immediately after each milestone. Stop and repair if validation fails.
 
 ## Definition of "Done"
