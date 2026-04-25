@@ -81,3 +81,17 @@ jobs:
 
       - name: Run integration tests
         run: bun run test:integration
+
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Browser smoke retired
+        run: echo "browser-smoke is retired; release browser proof now runs through release:proof."
+
+  cli:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Helper CLI retired
+        run: echo "cli is retired; release helper commands now live under scripts/release."
