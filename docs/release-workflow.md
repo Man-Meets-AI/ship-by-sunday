@@ -163,7 +163,7 @@ Create that secret from the Convex dashboard for the production deployment:
 
 1. Branch from the current `dev`.
 2. Keep the diff scoped and split the work into logical conventional commits.
-3. From the repository root, run the narrowest relevant checks first, then broaden as needed. Install the committed local hooks once with `bun run hooks:install`. After that, `git commit` runs `bun run precommit` and `git push` runs `bun run prepush`. Use `bun run check` when the slice justifies a fuller local pass.
+3. From the repository root, run the narrowest relevant checks first, then broaden as needed. Use explicit local commands like `bun run check:fast`, focused tests, and `bun run check` when the slice justifies a fuller local pass. Pushes are not blocked by repository-owned git hooks; PR CI is the required merge gate.
 4. Open a pull request from the feature branch into `dev`.
 5. Run the default multi-agent PR review against `dev`:
 
