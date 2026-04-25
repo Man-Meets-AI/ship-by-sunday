@@ -1,0 +1,260 @@
+name: Tag Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      git_tag:
+        description: Release tag to validate, for example v0.3.0
+        required: false
+        type: string
+      tag_target_sha:
+        description: Explicit tag target SHA for a dry-run or repair validation
+        required: false
+        type: string
+      dry_run:
+        description: Validate and upload evidence without publishing a GitHub Release
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  checks: read
+
+concurrency:
+  group: tag-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate_release_identity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      dry_run: ${{ steps.release_identity.outputs.dry_run }}
+      git_tag: ${{ steps.release_identity.outputs.git_tag }}
+      main_sha: ${{ steps.release_identity.outputs.main_sha }}
+      tag_target_sha: ${{ steps.release_identity.outputs.tag_target_sha }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.12.0
+
+      - name: Resolve release identity
+        id: release_identity
+        env:
+          INPUT_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+          INPUT_GIT_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.git_tag || '' }}
+          INPUT_TAG_TARGET_SHA: ${{ github.event_name == 'workflow_dispatch' && inputs.tag_target_sha || '' }}
+        run: |
+          git fetch --tags origin main
+
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            git_tag="${GITHUB_REF_NAME}"
+            tag_target_sha="$(git rev-list -n 1 "$git_tag")"
+            dry_run="false"
+          else
+            git_tag="${INPUT_GIT_TAG:-$(node -e 'console.log(require("./release.json").gitTag)')}"
+            if [[ -n "$INPUT_TAG_TARGET_SHA" ]]; then
+              tag_target_sha="$INPUT_TAG_TARGET_SHA"
+            elif git rev-parse "$git_tag^{commit}" >/dev/null 2>&1; then
+              tag_target_sha="$(git rev-parse "$git_tag^{commit}")"
+            elif [[ "$INPUT_DRY_RUN" == "true" ]]; then
+              tag_target_sha="$(git rev-parse origin/main)"
+            else
+              echo "Tag $git_tag does not exist and this is not a dry-run." >&2
+              exit 1
+            fi
+            dry_run="$INPUT_DRY_RUN"
+          fi
+
+          main_sha="$(git rev-parse origin/main)"
+
+          echo "git_tag=$git_tag" >> "$GITHUB_OUTPUT"
+          echo "tag_target_sha=$tag_target_sha" >> "$GITHUB_OUTPUT"
+          echo "main_sha=$main_sha" >> "$GITHUB_OUTPUT"
+          echo "dry_run=$dry_run" >> "$GITHUB_OUTPUT"
+
+      - name: Validate release manifest
+        env:
+          GIT_TAG: ${{ steps.release_identity.outputs.git_tag }}
+          MAIN_SHA: ${{ steps.release_identity.outputs.main_sha }}
+          TAG_TARGET_SHA: ${{ steps.release_identity.outputs.tag_target_sha }}
+        run: |
+          node scripts/release/validate-release-manifest.mjs \
+            --manifest=release.json \
+            --changelog=CHANGELOG.md \
+            --tag="$GIT_TAG" \
+            --main-sha="$MAIN_SHA" \
+            --tag-target-sha="$TAG_TARGET_SHA"
+
+  build_release_evidence:
+    needs:
+      - validate_release_identity
+      - collect_hosted_proof
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.12.0
+
+      - name: Build release evidence
+        env:
+          AUTH_STATUS: ${{ needs.collect_hosted_proof.outputs.auth_status }}
+          BILLING_STATUS: ${{ needs.collect_hosted_proof.outputs.billing_status }}
+          CONVEX_STATUS: ${{ needs.collect_hosted_proof.outputs.convex_status }}
+          ENTITLEMENT_STATUS: ${{ needs.collect_hosted_proof.outputs.entitlement_status }}
+          MAIN_SHA: ${{ needs.validate_release_identity.outputs.main_sha }}
+          TAG_TARGET_SHA: ${{ needs.validate_release_identity.outputs.tag_target_sha }}
+          VERCEL_STATUS: ${{ needs.collect_hosted_proof.outputs.vercel_status }}
+        run: |
+          node scripts/release/build-release-evidence.mjs \
+            --manifest=release.json \
+            --output=release-evidence.v1.json \
+            --tag-target-sha="$TAG_TARGET_SHA" \
+            --main-sha="$MAIN_SHA" \
+            --vercel-status="$VERCEL_STATUS" \
+            --convex-status="$CONVEX_STATUS" \
+            --billing-status="$BILLING_STATUS" \
+            --auth-status="$AUTH_STATUS" \
+            --entitlement-status="$ENTITLEMENT_STATUS" \
+            --dry-run
+
+      - name: Upload release evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-evidence-v1
+          path: release-evidence.v1.json
+
+  publish_release:
+    if: needs.validate_release_identity.outputs.dry_run != 'true'
+    needs:
+      - validate_release_identity
+      - collect_hosted_proof
+      - build_release_evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.12.0
+
+      - name: Fail closed until hosted proof is supplied
+        env:
+          AUTH_STATUS: ${{ needs.collect_hosted_proof.outputs.auth_status }}
+          BILLING_STATUS: ${{ needs.collect_hosted_proof.outputs.billing_status }}
+          CONVEX_STATUS: ${{ needs.collect_hosted_proof.outputs.convex_status }}
+          ENTITLEMENT_STATUS: ${{ needs.collect_hosted_proof.outputs.entitlement_status }}
+          MAIN_SHA: ${{ needs.validate_release_identity.outputs.main_sha }}
+          TAG_TARGET_SHA: ${{ needs.validate_release_identity.outputs.tag_target_sha }}
+          VERCEL_STATUS: ${{ needs.collect_hosted_proof.outputs.vercel_status }}
+        run: |
+          node scripts/release/build-release-evidence.mjs \
+            --manifest=release.json \
+            --output=release-evidence.publish-check.json \
+            --tag-target-sha="$TAG_TARGET_SHA" \
+            --main-sha="$MAIN_SHA" \
+            --vercel-status="$VERCEL_STATUS" \
+            --convex-status="$CONVEX_STATUS" \
+            --billing-status="$BILLING_STATUS" \
+            --auth-status="$AUTH_STATUS" \
+            --entitlement-status="$ENTITLEMENT_STATUS" \
+            --validate-publish
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GIT_TAG: ${{ needs.validate_release_identity.outputs.git_tag }}
+          TAG_TARGET_SHA: ${{ needs.validate_release_identity.outputs.tag_target_sha }}
+        run: |
+          gh release create "$GIT_TAG" \
+            --target "$TAG_TARGET_SHA" \
+            --title "$GIT_TAG" \
+            --notes "Release evidence artifact is attached. See CHANGELOG.md for the manifest changelog heading."
+
+          gh release upload "$GIT_TAG" release-evidence.publish-check.json --clobber
+
+  collect_hosted_proof:
+    needs: validate_release_identity
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      auth_status: ${{ steps.proof.outputs.auth_status }}
+      billing_status: ${{ steps.proof.outputs.billing_status }}
+      convex_status: ${{ steps.proof.outputs.convex_status }}
+      entitlement_status: ${{ steps.proof.outputs.entitlement_status }}
+      vercel_status: ${{ steps.proof.outputs.vercel_status }}
+    steps:
+      - name: Collect check-run proof for tag target
+        id: proof
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_TARGET_SHA: ${{ needs.validate_release_identity.outputs.tag_target_sha }}
+        run: |
+          gh api "repos/${GITHUB_REPOSITORY}/commits/${TAG_TARGET_SHA}/check-runs?per_page=100" > check-runs.json
+
+          node - <<'NODE'
+          const fs = require("node:fs");
+
+          const payload = JSON.parse(fs.readFileSync("check-runs.json", "utf8"));
+          const checkRuns = payload.check_runs ?? [];
+
+          function latestRun(name) {
+            return checkRuns
+              .filter((run) => run.name === name)
+              .sort((left, right) => {
+                const leftTime = Date.parse(left.completed_at ?? left.started_at ?? left.created_at ?? 0);
+                const rightTime = Date.parse(right.completed_at ?? right.started_at ?? right.created_at ?? 0);
+                return rightTime - leftTime;
+              })[0] ?? null;
+          }
+
+          function conclusionFor(name) {
+            const run = latestRun(name);
+            if (!run) {
+              return "unavailable";
+            }
+
+            if (run.conclusion === "success") {
+              return "passed";
+            }
+
+            if (run.conclusion === "skipped" && name === "billing_integration") {
+              return "not_required";
+            }
+
+            return run.conclusion ?? "unavailable";
+          }
+
+          const productionReleaseGate = conclusionFor("release_gate");
+          const defaultShip = conclusionFor("default_ship");
+          const billingIntegration = conclusionFor("billing_integration");
+          const convexDeploy = conclusionFor("deploy");
+
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, [
+            `vercel_status=${productionReleaseGate}`,
+            `auth_status=${defaultShip}`,
+            `entitlement_status=${defaultShip}`,
+            `billing_status=${billingIntegration}`,
+            `convex_status=${convexDeploy}`,
+          ].join("\n") + "\n");
+          NODE

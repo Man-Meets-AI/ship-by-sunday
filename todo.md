@@ -2,18 +2,14 @@
 
 ## today
 
-- Review Matt Pocock's workflow for pulling the day's issues and decide which parts of that flow should become the repo's daily operating pattern.
-- Update pricing back to `$500` and add an auto-applied `50%` discount path that stays truthful across checkout, homepage copy, and any visible billing surfaces.
-- Add a reusable banner surface for promo messaging so we can display different discounts without hard-wiring one-off homepage copy each time.
-- Add email support with the smallest viable product boundary first, then wire docs and runtime expectations around the chosen path.
-- Update the docs spine so the canonical root/docs entry points teach the live workflow and pricing/support surfaces.
-- Update the ExecPlan spine so active planning docs, indexes, and prompts point at the live repo contract instead of stale paths or legacy planning surfaces.
-- Update the skills so the built-in repo guidance matches the current product, release, pricing, and support workflow.
-- Pull in whatever can be reused directly from `fix-tests`, especially CI, Playwright, and test-harness improvements that reduce rework on this branch.
-- Reach goal: simplify the test harness further once the core pricing, banner, email, docs, ExecPlan, and skills changes are landed.
+- Execute `docs/exec-plans/active/2026-04-25-codex-style-docs-cleanup.md` so active docs follow the lean Codex-style structure without losing compiler-owned source packs or historical release evidence.
+- Keep the temporary `browser-smoke` and `cli` compatibility CI jobs until live branch protection no longer requires those labels on both `dev` and `main`.
+- Record only concrete SBS-owned repo-quality debt in `docs/exec-plans/tech-debt-tracker.md`; do not import Worker tracker rows.
 
 ## recent
 
+- **2026-04-25 11:45 EDT** — Codex-style docs cleanup on `feature/codex-style-docs-cleanup-2026-04-25`: added the workflow strategy README, restored the root contributor guide, reset wrong-repo tech-debt guidance, clarified generated mirror/source-pack ownership, thinned Program and prompt entrypoints, and left `browser-smoke`/`cli` no-op CI jobs intact because live branch protection still requires them.
+- **2026-04-25 10:20 EDT** — Codex-style release reset docs pass on `docs/release-reset-doc-sync`: pruned the stale active recovery Program and deferred release-intake ExecPlan that still pointed at deleted `qa/` seams, synced root/docs/operator guidance to the `scripts/release` + `release.json` model, removed active prepush/browser-smoke/CLI proof wording, and kept the remaining `browser-smoke`/`cli` jobs documented as temporary branch-protection compatibility contexts. `CHANGELOG.md` updated because this is an operator-facing release-process change.
 - **2026-04-19 15:20 EDT** — Snapshot-reconcile auth contract follow-up on `feat/release-reconcile-automation`: production proof proved the new reconcile job fires automatically after snapshot releases, but GitHub Actions could not create the PR with the default workflow token. Tightened the workflow and helper to require a dedicated `RELEASE_RECONCILE_GH_TOKEN` secret and opened manual reconcile PR `#105` as the one-time cleanup so `main` can be brought back into `dev`. Rechecked `qa:validate`, release docs lint, and the exact branch-drift state before creating the fallback PR.
 - **2026-04-19 10:46 EDT** — Snapshot-reconcile automation follow-up on `feat/release-reconcile-automation`: added repo-owned snapshot-reconcile helpers plus a production-release workflow job that opens or reuses a `main -> dev` reconcile PR after successful snapshot releases, updated the snapshot/release runbooks, and rechecked focused release helper tests, `qa:validate`, markdown lint, and `git diff --check`. `qa:inventory:check` now only needed the new canonical inventory row for `release-reconcile.test.ts`. No `CHANGELOG.md` update because this is release-ops automation, not a buyer-facing feature.
 - **2026-04-19 09:57 EDT** — QA CSV guardrail follow-up on `fix/qa-csv-footguns`: fixed malformed `qa/coverage.csv` rows, taught the shared CSV parser to report malformed-row locations, made `qa:validate` strict about malformed journeys/coverage/inventory rows, added a focused parser regression test, and tightened the two repo-shipped release skills with the live snapshot findings. Rechecked `qa:validate`, `git diff --check`, and the focused `qa-csv` unit lane; `qa:inventory:check` now only depends on committing the new canonical inventory row. No `CHANGELOG.md` update because this is internal QA/release-ops hardening.

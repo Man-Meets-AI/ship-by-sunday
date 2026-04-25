@@ -21,12 +21,12 @@ apps/web/playwright-report
 test-results
 apps/web/test-results
 .codex-user-state
+codex-scripts/
 output/video-pipeline
 apps/web/output/video-pipeline/tmp/
 .venv-video
 .vercel
-qa/personas.local.json
-qa/runs/local/
-qa/reviews/local/
+tmp/
+.worktrees/
 apps/web/tests/e2e/.auth/
 .claude/settings.local.json

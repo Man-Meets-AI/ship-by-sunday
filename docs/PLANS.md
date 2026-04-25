@@ -10,26 +10,29 @@ read_when:
 
 # Plans
 
-This file is the top-level landing page for long-running planning work in this repository. The canonical ExecPlan contract lives under `docs/exec-plans/`.
+This file is the top-level landing page for long-running planning work in this repository. The canonical Program contract lives under `docs/programs/` and the canonical ExecPlan contract lives under `docs/exec-plans/`.
 
 ## Owns
 
 - the top-level route from a generic `PLANS.md` expectation to the real repo contract
-- the repo-wide distinction between plans, product specs, and generated docs
+- the repo-wide distinction between Programs, ExecPlans, product specs, and generated docs
 
 ## Does Not Own
 
-- the canonical ExecPlan rules themselves
+- the canonical Program or ExecPlan rules themselves
 - product-spec requirements
 - generated output indexes
 
 ## Routing
 
-- Use ExecPlans for multi-step implementation, validation, and review loops.
+- Use Programs for durable multi-slice initiatives that coordinate several ExecPlans.
+- Use ExecPlans for one bounded implementation, validation, and review slice.
 - Use product specs for stable behavior and requirement truth.
 - Use generated docs for machine-produced, human-readable checked-in projections.
 
 ## Next
 
+- Read [docs/programs/PROGRAMS.md](/Users/parkerrex/Developer/ship-by-sunday/docs/programs/PROGRAMS.md).
+- Browse [docs/programs/README.md](/Users/parkerrex/Developer/ship-by-sunday/docs/programs/README.md).
 - Read [docs/exec-plans/PLANS.md](/Users/parkerrex/Developer/ship-by-sunday/docs/exec-plans/PLANS.md).
 - Browse [docs/exec-plans/index.md](/Users/parkerrex/Developer/ship-by-sunday/docs/exec-plans/index.md).

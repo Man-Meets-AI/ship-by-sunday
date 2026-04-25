@@ -28,9 +28,10 @@ const stripeSecretKey = normalizeStripeSecretKey(
 const stripePriceId = normalizeStripeSecretKey(
 	process.env.STRIPE_PRICE_ID ?? "",
 );
-const qaPersonaLocalPath = path.resolve(
+const releasePersonaLocalPath = path.resolve(
 	import.meta.dirname,
-	"../../../qa/personas.local.json",
+	"../../..",
+	process.env.RELEASE_PERSONAS_LOCAL_FILE ?? "tmp/release-personas.local.json",
 );
 
 function normalizeStripeSecretKey(secretKey) {
@@ -73,13 +74,13 @@ function parseArgs(argv) {
 }
 
 async function loadQaBuyerCredentials() {
-	const raw = await readFile(qaPersonaLocalPath, "utf8");
+	const raw = await readFile(releasePersonaLocalPath, "utf8");
 	const parsed = JSON.parse(raw);
 	const account = parsed.accounts?.["ship-by-sunday-clerk-instance"];
 
 	if (!account?.email || !account?.password) {
 		throw new Error(
-			"Missing ship-by-sunday-clerk-instance credentials in qa/personas.local.json.",
+			"Missing ship-by-sunday-clerk-instance credentials in tmp/release-personas.local.json or RELEASE_PERSONAS_LOCAL_FILE.",
 		);
 	}
 

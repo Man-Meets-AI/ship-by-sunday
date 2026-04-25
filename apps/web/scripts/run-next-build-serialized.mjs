@@ -72,7 +72,7 @@ async function acquireBuildLock() {
 
 function runNextBuild() {
 	return new Promise((resolve, reject) => {
-		const child = spawn("bunx", ["next", "build"], {
+		const child = spawn("bunx", ["next", "build", "--webpack"], {
 			cwd: appsWebDirectory,
 			env: process.env,
 			stdio: "inherit",

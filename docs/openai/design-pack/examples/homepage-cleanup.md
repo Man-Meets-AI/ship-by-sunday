@@ -82,7 +82,7 @@ The homepage was tightened to feel more editorial and less assembled. Standalone
 ## 10. Verification
 
 - **Manual review:** checked the page in light and dark mode
-- **Automated checks:** lint, format check, unit tests, browser smoke, build
+- **Automated checks:** lint, format check, unit tests, integration-ui checks, build
 - **Reference comparison:** existing product patterns and the intended design direction
 - **Checklist status:** landing-page rules, restraint rules, and verification rules passed
 

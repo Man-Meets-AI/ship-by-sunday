@@ -83,3 +83,36 @@ jobs:
         if: steps.deploy_mode.outputs.label == 'deploy'
         working-directory: apps/web
         run: bunx convex deploy -y
+
+      - name: Write Convex production deploy summary
+        if: always()
+        env:
+          DEPLOY_MODE: ${{ steps.deploy_mode.outputs.label }}
+        run: |
+          node - <<'NODE'
+          const fs = require("node:fs");
+
+          const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+          const summary = {
+            schemaVersion: "release-proof-summary.v1",
+            workflowName: "Convex Production Deploy",
+            runId: process.env.GITHUB_RUN_ID,
+            runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+            runUrl,
+            commitSha: process.env.GITHUB_SHA,
+            deployMode: process.env.DEPLOY_MODE,
+            proof: {
+              convex: process.env.DEPLOY_MODE === "deploy" ? "passed" : process.env.DEPLOY_MODE,
+            },
+            generatedAt: new Date().toISOString(),
+          };
+
+          fs.writeFileSync("convex-production-deploy-summary.json", `${JSON.stringify(summary, null, 2)}\n`);
+          NODE
+
+      - name: Upload Convex production deploy summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: convex-production-deploy-summary
+          path: convex-production-deploy-summary.json

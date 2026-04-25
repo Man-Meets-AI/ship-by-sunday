@@ -37,6 +37,31 @@ jobs:
                 color: "fbca04",
                 description: "Issue needs maintainer review and initial categorization.",
               },
+              {
+                name: "auth",
+                color: "5319e7",
+                description: "Authentication, entitlement, or protected-access behavior.",
+              },
+              {
+                name: "billing",
+                color: "006b75",
+                description: "Stripe, checkout, webhook, or paid-access handoff behavior.",
+              },
+              {
+                name: "docs",
+                color: "0075ca",
+                description: "Documentation, runbook, or public content work.",
+              },
+              {
+                name: "infrastructure",
+                color: "bfdadc",
+                description: "CI, deployment, release, Vercel, Convex, or GitHub policy work.",
+              },
+              {
+                name: "release",
+                color: "d4c5f9",
+                description: "Release candidate, tag, evidence, or hosted proof work.",
+              },
             ];
 
             for (const label of managedLabels) {

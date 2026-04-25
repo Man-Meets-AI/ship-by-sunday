@@ -24,7 +24,7 @@ Make sure all of this is true:
 ## Production checklist
 
 1. Land feature work into `dev` and make sure the release candidate is the code you want to ship.
-2. Run `bun run check` from the repo root before opening the release PR. On contributor machines, install the committed git hooks once with `bun run hooks:install` so `git commit` and `git push` enforce the fast local gate and the code-proof gate automatically.
+2. Run the narrowest relevant local checks from the repo root before opening the release PR, and use `bun run check` when the release slice justifies a full local pass. PR CI is the required merge gate; the repository does not install git hooks that block commits or pushes.
 3. Open a pull request from `dev` into `main`.
 4. Merge only after required GitHub checks pass.
 5. Confirm Vercel creates the production web deploy from `main`.

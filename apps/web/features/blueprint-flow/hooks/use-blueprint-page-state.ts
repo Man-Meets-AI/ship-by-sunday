@@ -1,44 +1,33 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import type { OptimisticLocalStore } from "convex/browser";
 import type { ReactMutation } from "convex/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
 	CanonicalProjectFactKey,
 	CanonicalProjectFactsDraft,
 } from "@shipbysunday/blueprint-compiler";
-import {
-	createCanonicalProjectDefinitionDraft,
-	designPresetDerivedFactKeys,
-	deriveBlueprintFacts,
-	deriveStageStatus,
-	getBlueprintStageDefinition,
-	parseCanonicalProjectFactsDraft,
-	placeholderFriendlyFactKeys,
-} from "@shipbysunday/blueprint-compiler";
-import { PRODUCT_APP_ID } from "@/config/product";
 import { api } from "@/convex/_generated/api";
-import { getReviewAutoDownloadHref } from "@/features/blueprint-flow/lib/review-download-handoff";
 import {
-	blueprintPageSections,
-	type BlueprintPageSectionId,
-} from "@/features/blueprint-flow/lib/blueprint-page-sections";
+	areDraftValuesEqual,
+	buildFlattenedDraftValues,
+	buildNextProjectFacts,
+	buildSavePayloadForBlueprint,
+	clearStaleDerivedDesignFields,
+	stripUntouchedGeneratedScopeFields,
+	type BlueprintPageDraftValues,
+} from "@/features/blueprint-flow/lib/blueprint-page-draft-model";
+import { focusFirstMissingBlueprintField } from "@/features/blueprint-flow/lib/blueprint-page-focus";
+import { applyOptimisticBlueprintWorkspaceUpdate } from "@/features/blueprint-flow/lib/blueprint-page-optimistic-state";
 import {
-	buildSavePayload,
-	buildStageDraftValues,
-} from "@/features/blueprint-flow/lib/blueprint-field-helpers";
+	buildFieldErrors,
+	buildPageFeedback,
+	buildSectionStatuses,
+} from "@/features/blueprint-flow/lib/blueprint-page-validation-model";
 import type { BlueprintStepInlineFeedback } from "@/features/blueprint-flow/lib/blueprint-step-save-feedback";
-import {
-	getBlueprintStageFieldControlId,
-	getBlueprintStageFieldInputId,
-} from "@/features/blueprint-flow/lib/blueprint-step-save-feedback";
-import type { BlueprintWorkspaceState } from "@/features/blueprint-flow/lib/blueprint-workspace-types";
+import { getReviewAutoDownloadHref } from "@/features/blueprint-flow/lib/review-download-handoff";
 
-type SaveProjectDefinitionFactsArgs = {
-	clearedFieldKeys: string[];
-	factsPatch: Record<string, string | number | string[]>;
-};
+export type { BlueprintPageSectionStatus } from "@/features/blueprint-flow/lib/blueprint-page-validation-model";
 
 type SaveProjectDefinitionFactsMutation = ReactMutation<
 	typeof api.blueprint.saveProjectDefinitionFacts
@@ -46,355 +35,6 @@ type SaveProjectDefinitionFactsMutation = ReactMutation<
 type UnlockExecuteShipMutation = ReactMutation<
 	typeof api.blueprint.unlockExecuteShip
 >;
-
-type BlueprintPageDraftValues = Partial<
-	Record<CanonicalProjectFactKey, string>
->;
-
-export type BlueprintPageSectionStatus = {
-	sectionId: BlueprintPageSectionId;
-	isComplete: boolean;
-	missingFactKeys: CanonicalProjectFactKey[];
-};
-
-const OPTIMISTIC_BLUEPRINT_CLERK_USER_ID = "optimistic-local-user";
-const blueprintStage = getBlueprintStageDefinition("blueprint");
-
-function areDraftValuesEqual(
-	left: BlueprintPageDraftValues,
-	right: BlueprintPageDraftValues,
-) {
-	const leftKeys = Object.keys(left);
-	const rightKeys = Object.keys(right);
-	if (leftKeys.length !== rightKeys.length) {
-		return false;
-	}
-
-	return leftKeys.every(
-		(fieldKey) =>
-			left[fieldKey as CanonicalProjectFactKey] ===
-			right[fieldKey as CanonicalProjectFactKey],
-	);
-}
-
-function buildPlaceholdersInUse(facts: CanonicalProjectFactsDraft) {
-	return placeholderFriendlyFactKeys.filter(
-		(fieldKey) => facts[fieldKey] === undefined,
-	);
-}
-
-function buildFlattenedDraftValues(
-	projectFacts: CanonicalProjectFactsDraft,
-	contactEmail?: string,
-) {
-	const stageDraftValues = buildStageDraftValues(projectFacts, blueprintStage);
-	const flattenedDraftValues = Object.values(stageDraftValues).reduce(
-		(accumulator, draftValues) => ({ ...accumulator, ...draftValues }),
-		{} as BlueprintPageDraftValues,
-	);
-
-	if (!flattenedDraftValues.contact_email && contactEmail) {
-		flattenedDraftValues.contact_email = contactEmail;
-	}
-
-	return flattenedDraftValues;
-}
-
-function buildSavePayloadForBlueprint(
-	draftValues: BlueprintPageDraftValues,
-): SaveProjectDefinitionFactsArgs {
-	const payloadByStep = blueprintPageSections.map((step) =>
-		buildSavePayload(step, draftValues),
-	);
-
-	return {
-		clearedFieldKeys: Array.from(
-			new Set(payloadByStep.flatMap((payload) => payload.clearedFieldKeys)),
-		),
-		factsPatch: Object.assign(
-			{},
-			...payloadByStep.map((payload) => payload.factsPatch),
-		),
-	};
-}
-
-function buildNextProjectFacts(
-	currentFacts: CanonicalProjectFactsDraft,
-	args: SaveProjectDefinitionFactsArgs,
-) {
-	const nextFactsSource = { ...currentFacts };
-	for (const fieldKey of args.clearedFieldKeys) {
-		delete nextFactsSource[fieldKey as keyof typeof nextFactsSource];
-	}
-
-	return parseCanonicalProjectFactsDraft({
-		...nextFactsSource,
-		...args.factsPatch,
-	});
-}
-
-function stripUntouchedGeneratedScopeFields({
-	projectFacts,
-	savedBaselineValues,
-	savePayload,
-}: {
-	projectFacts: CanonicalProjectFactsDraft;
-	savedBaselineValues: BlueprintPageDraftValues;
-	savePayload: SaveProjectDefinitionFactsArgs;
-}) {
-	const nextFactsPatch = { ...savePayload.factsPatch };
-	const nextClearedFieldKeys = [...savePayload.clearedFieldKeys];
-
-	for (const fieldKey of ["scope_in", "scope_out"] as const) {
-		if (projectFacts[fieldKey] !== undefined) {
-			continue;
-		}
-		const nextValue = nextFactsPatch[fieldKey];
-		const formattedNextValue = Array.isArray(nextValue)
-			? nextValue.join("\n")
-			: "";
-		if (formattedNextValue !== (savedBaselineValues[fieldKey] ?? "")) {
-			continue;
-		}
-
-		delete nextFactsPatch[fieldKey];
-
-		const clearedIndex = nextClearedFieldKeys.indexOf(fieldKey);
-		if (clearedIndex >= 0) {
-			nextClearedFieldKeys.splice(clearedIndex, 1);
-		}
-	}
-
-	return {
-		clearedFieldKeys: nextClearedFieldKeys,
-		factsPatch: nextFactsPatch,
-	} satisfies SaveProjectDefinitionFactsArgs;
-}
-
-function clearStaleDerivedDesignFields({
-	projectFacts,
-	savePayload,
-	savedBaselineValues,
-	submittedDraftValues,
-}: {
-	projectFacts: CanonicalProjectFactsDraft;
-	savePayload: SaveProjectDefinitionFactsArgs;
-	savedBaselineValues: BlueprintPageDraftValues;
-	submittedDraftValues: BlueprintPageDraftValues;
-}) {
-	const designInputKeys: readonly CanonicalProjectFactKey[] = [
-		"design_preset_id",
-		"theme_preset",
-		"design_references",
-	];
-	const designInputsChanged = designInputKeys.some(
-		(fieldKey) =>
-			(submittedDraftValues[fieldKey] ?? "") !==
-			(savedBaselineValues[fieldKey] ?? ""),
-	);
-	if (!designInputsChanged) {
-		return savePayload;
-	}
-
-	const savedFactsWithoutDerivedDesignFields = { ...projectFacts };
-	for (const fieldKey of designPresetDerivedFactKeys) {
-		delete savedFactsWithoutDerivedDesignFields[fieldKey];
-	}
-	const previouslyDerivedDesignFacts = deriveBlueprintFacts(
-		savedFactsWithoutDerivedDesignFields,
-	);
-	const staleDerivedFieldKeys = designPresetDerivedFactKeys.filter(
-		(fieldKey) => {
-			const currentSavedValue = projectFacts[fieldKey];
-			const previousDerivedValue = previouslyDerivedDesignFacts[fieldKey];
-			if (typeof currentSavedValue !== "string") {
-				return false;
-			}
-
-			return currentSavedValue === previousDerivedValue;
-		},
-	);
-	const clearedFieldKeys = Array.from(
-		new Set([...savePayload.clearedFieldKeys, ...staleDerivedFieldKeys]),
-	);
-
-	return {
-		...savePayload,
-		clearedFieldKeys,
-	} satisfies SaveProjectDefinitionFactsArgs;
-}
-
-function buildOptimisticBlueprintWorkspaceState(
-	currentWorkspaceState: BlueprintWorkspaceState,
-	args: SaveProjectDefinitionFactsArgs,
-): BlueprintWorkspaceState {
-	const nextFacts = buildNextProjectFacts(
-		currentWorkspaceState.projectDefinition?.facts ?? {},
-		args,
-	);
-	const nextStageStatus = deriveStageStatus(nextFacts);
-	const now = Date.now();
-	const currentProjectDefinition = currentWorkspaceState.projectDefinition;
-	const nextProjectDefinition = currentProjectDefinition
-		? {
-				...currentProjectDefinition,
-				facts: nextFacts,
-				placeholdersInUse: buildPlaceholdersInUse(nextFacts),
-				updatedAt: now,
-			}
-		: createCanonicalProjectDefinitionDraft({
-				clerkUserId:
-					currentWorkspaceState.workflowState?.clerkUserId ??
-					OPTIMISTIC_BLUEPRINT_CLERK_USER_ID,
-				productKey: PRODUCT_APP_ID,
-				facts: nextFacts,
-				placeholdersInUse: buildPlaceholdersInUse(nextFacts),
-				createdAt: now,
-				updatedAt: now,
-			});
-
-	return {
-		...currentWorkspaceState,
-		projectDefinition: nextProjectDefinition,
-		firstIncompleteStageId: nextStageStatus.firstIncompleteStageId,
-		blueprintReadiness: nextStageStatus.blueprintReadiness,
-		stageStatuses: nextStageStatus.stageStatuses,
-	};
-}
-
-function applyOptimisticBlueprintWorkspaceUpdate(
-	localStore: OptimisticLocalStore,
-	args: SaveProjectDefinitionFactsArgs,
-) {
-	const currentWorkspaceState = localStore.getQuery(
-		api.blueprint.getBlueprintWorkspaceState,
-		{},
-	);
-	if (!currentWorkspaceState) {
-		return;
-	}
-
-	localStore.setQuery(
-		api.blueprint.getBlueprintWorkspaceState,
-		{},
-		buildOptimisticBlueprintWorkspaceState(currentWorkspaceState, args),
-	);
-}
-
-function hasFactValue(
-	value: CanonicalProjectFactsDraft[CanonicalProjectFactKey],
-) {
-	if (value === undefined || value === null) {
-		return false;
-	}
-	if (typeof value === "string") {
-		return value.trim().length > 0;
-	}
-	if (typeof value === "number") {
-		return Number.isFinite(value);
-	}
-	if (Array.isArray(value)) {
-		return value.length > 0;
-	}
-	return false;
-}
-
-function buildSectionStatuses(
-	facts: CanonicalProjectFactsDraft,
-): BlueprintPageSectionStatus[] {
-	const derivedFacts = deriveBlueprintFacts(facts);
-
-	return blueprintPageSections.map((section) => {
-		const requiredFieldKeys = section.requiredFieldKeys ?? section.fieldKeys;
-		const missingFactKeys = requiredFieldKeys.filter(
-			(fieldKey) => !hasFactValue(derivedFacts[fieldKey]),
-		);
-
-		return {
-			sectionId: section.id,
-			isComplete: missingFactKeys.length === 0,
-			missingFactKeys,
-		};
-	});
-}
-
-function buildFieldErrors(sectionStatuses: BlueprintPageSectionStatus[]) {
-	return Object.fromEntries(
-		sectionStatuses.flatMap((sectionStatus) =>
-			sectionStatus.missingFactKeys.map((fieldKey) => [
-				fieldKey,
-				"Add an answer here before Review can unlock.",
-			]),
-		),
-	);
-}
-
-function formatFieldList(fieldKeys: CanonicalProjectFactKey[]) {
-	return fieldKeys.map((fieldKey) => fieldKey.replaceAll("_", " ")).join(", ");
-}
-
-function buildPageFeedback({
-	hasAnyAnswer,
-	isComplete,
-	previouslyComplete,
-	missingFactKeys,
-}: {
-	hasAnyAnswer: boolean;
-	isComplete: boolean;
-	previouslyComplete: boolean;
-	missingFactKeys: CanonicalProjectFactKey[];
-}): BlueprintStepInlineFeedback | null {
-	if (isComplete) {
-		return {
-			tone: "success",
-			title: "Saved and ready for review.",
-			description: "The blueprint is complete. Continue to Review.",
-		};
-	}
-
-	if (!hasAnyAnswer) {
-		return {
-			tone: "default",
-			title: "Blueprint is still blank.",
-			description: "Add at least one answer before continuing to Review.",
-		};
-	}
-
-	return {
-		tone: previouslyComplete ? "warning" : "default",
-		title: previouslyComplete ? "Blueprint is incomplete." : "Draft saved.",
-		description: `Complete ${formatFieldList(missingFactKeys)} before Review can unlock.`,
-	};
-}
-
-function focusFirstMissingField(sectionStatuses: BlueprintPageSectionStatus[]) {
-	const firstIncompleteSection = sectionStatuses.find(
-		(sectionStatus) => sectionStatus.missingFactKeys.length > 0,
-	);
-	const firstMissingFieldKey = firstIncompleteSection?.missingFactKeys[0];
-	if (!firstIncompleteSection || !firstMissingFieldKey) {
-		return;
-	}
-
-	window.setTimeout(() => {
-		const control = document.getElementById(
-			getBlueprintStageFieldControlId(
-				firstIncompleteSection.sectionId,
-				firstMissingFieldKey,
-			),
-		) as HTMLElement | null;
-		const input = document.getElementById(
-			getBlueprintStageFieldInputId(
-				firstIncompleteSection.sectionId,
-				firstMissingFieldKey,
-			),
-		) as HTMLInputElement | HTMLTextAreaElement | null;
-		const focusTarget = control ?? input;
-
-		focusTarget?.scrollIntoView?.({ behavior: "smooth", block: "center" });
-		focusTarget?.focus?.();
-	}, 0);
-}
 
 export function useBlueprintPageState({
 	navigateToHref,
@@ -589,7 +229,7 @@ export function useBlueprintPageState({
 			setIsSaving(false);
 			setValidationRequested(true);
 			setFeedback(nextFeedback);
-			focusFirstMissingField(nextSectionStatuses);
+			focusFirstMissingBlueprintField(nextSectionStatuses);
 			return;
 		}
 

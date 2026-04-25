@@ -45,11 +45,11 @@ bun run clerk:test-user:prepare:entitled
 
 `bun run clerk:test-user:prepare:entitled` is the fastest path when your hosted Convex dev deployment is already synced into `apps/web/.env.local`, because it creates the entitled Clerk QA user if needed and grants product access on the active hosted dev deployment.
 
-Use `bun run qa:personas:prepare -- --pack=<pack>` when you need the canonical QA control-plane path instead of the one-user local shortcut. The fast helper is for a single entitled debug account. The QA command is the durable multi-persona setup path used by the packs.
+Use `bun run release:personas:prepare -- --proof=<proof>` when you need the release-owned multi-persona path instead of the one-user local shortcut. The fast helper is for a single entitled debug account. The release command is the durable multi-persona setup path used by hosted proofs.
 
 The Playwright sandbox bootstrap is a local test convenience, not a stable auth path. It seeds browser storage state for deterministic personas, but local auth still depends on Clerk syncing into the browser runtime. If the no-access browser lane ever starts behaving like an entitled user, or a signed-in lane flashes `Unauthorized` during hydration, treat that as Convex deployment drift or bootstrap failure first, not as a product-state bug.
 
-The canonical QA credentials live in ignored `qa/personas.local.json`. The root `qa:*` commands and the Playwright sandbox bootstrap both read that file for the no-access and entitled account emails and passwords.
+The canonical release proof credentials live in ignored `tmp/release-personas.local.json`, or in the file named by `RELEASE_PERSONAS_LOCAL_FILE`. The release proof commands and the Playwright sandbox bootstrap both read that file for the no-access and entitled account emails and passwords.
 
 ## Full paid local handoff
 
@@ -84,7 +84,7 @@ bun run dev
 The current scripted proof for the paid handoff is:
 
 ```bash
-QA_ALLOW_BILLING_INTEGRATION=1 PLAYWRIGHT_USE_LOCAL_SERVER=0 PLAYWRIGHT_BASE_URL=http://localhost:3000 bun run qa:run-pack -- --pack=billing_integration
+QA_ALLOW_BILLING_INTEGRATION=1 PLAYWRIGHT_USE_LOCAL_SERVER=0 PLAYWRIGHT_BASE_URL=http://localhost:3000 bun run release:proof -- --proof=billing_integration
 ```
 
 For local targets, the billing pack now runs `bun run stripe:dev:doctor` as a warning-only preflight and `bun run stripe:dev:verify` as the hard post-checkout proof after the sandbox billing journey finishes.
@@ -93,34 +93,30 @@ For local targets, the billing pack now runs `bun run stripe:dev:doctor` as a wa
 
 For any non-local target, keep these boundaries straight:
 
-- `qa/personas.local.json` holds the QA email and password pairs.
+- `tmp/release-personas.local.json` holds the release proof email and password pairs by default.
 - `apps/web/.env.local` or `QA_ENV_FILE=<path>` selects the Clerk and Convex environment where those personas will be created or reused.
 - `PLAYWRIGHT_BASE_URL=<target>` selects the site the browser tests will hit.
 
-Use the root QA control-plane commands for hosted runs instead of stitching Playwright calls together by hand.
+Use the root release proof commands for hosted runs instead of stitching Playwright calls together by hand.
 
 Hosted production example:
 
 ```bash
-PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run qa:run-pack -- --pack=default_ship
+PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run release:proof -- --proof=default_ship
 ```
 
 If the loaded Clerk env does not match the hosted target, persona prep now fails immediately with a Clerk publishable-key mismatch. That is intentional. Fix the env selection before treating any authenticated browser failure as an app bug.
 
 ## Recommended flow checks
 
-For the deterministic browser lane that runs in PR CI:
+For public pages, crawl metadata, auth noindex, and checkout recovery, use source-level tests instead of the retired shallow browser proof lane:
 
 ```bash
-set -a
-source apps/web/.env.local
-set +a
-bun run test:browser-smoke
+bun run --cwd apps/web test:unit -- public-metadata route-metadata home-page structured-data
+bun run --cwd apps/web test:integration:ui -- checkout-success home-page-primary-cta
 ```
 
-This requires `NEXT_PUBLIC_CONVEX_URL` from your hosted Convex dev deployment to be present in the shell environment. Run `bun run dev:convex` first if `apps/web/.env.local` is stale, then source `apps/web/.env.local` before running the smoke lane.
-
-This smoke lane now proves the auth-route shell too: `/sign-in`, `/session-tasks/reset-password`, and `/sso-callback` must all render and emit `noindex`, not just the older `/sign-in` meta-tag check.
+Run `bun run test:integration` from the repository root when the change touches shared app routing or public metadata broadly.
 
 ### Canonical protected-route smoke
 

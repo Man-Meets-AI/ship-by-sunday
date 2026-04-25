@@ -70,7 +70,7 @@ jobs:
             exit 0
           fi
 
-          node qa/scripts/detect-release-scope.mjs --base="$RELEASE_BASE_SHA" --head="$RELEASE_HEAD_SHA"
+          node scripts/release/detect-release-scope.mjs --base="$RELEASE_BASE_SHA" --head="$RELEASE_HEAD_SHA"
 
   default_ship:
     needs: release_scope
@@ -80,11 +80,12 @@ jobs:
       name: dev-staging
     env:
       APP_BASE_URL: https://dev.man-meets-ai.com
-      DEV_STAGING_QA_PERSONAS_LOCAL_JSON: ${{ secrets.DEV_STAGING_QA_PERSONAS_LOCAL_JSON }}
       DEV_STAGING_CONVEX_CONFIG_JSON: ${{ secrets.DEV_STAGING_CONVEX_CONFIG_JSON }}
       NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
       PLAYWRIGHT_BASE_URL: https://dev.man-meets-ai.com
       QA_ENV_FILE: apps/web/.env.local
+      RELEASE_PERSONAS_LOCAL_FILE: tmp/release-personas.local.json
+      RELEASE_PERSONAS_LOCAL_JSON: ${{ secrets.DEV_STAGING_QA_PERSONAS_LOCAL_JSON }}
       RELEASE_COMMIT_SHA: ${{ needs.release_scope.outputs.head_sha }}
       VERCEL_ORG_ID: ${{ vars.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
@@ -112,22 +113,23 @@ jobs:
 
       - name: Wait for matching Vercel dev deployment
         run: |
-          node qa/scripts/wait-for-vercel-production-deployment.mjs \
+          node scripts/release/wait-for-vercel-production-deployment.mjs \
             --commit_sha="$RELEASE_COMMIT_SHA" \
             --target=preview \
             --alias_domain=dev.man-meets-ai.com \
             --assign_alias_if_missing=true
 
       - name: Wait for dev staging host
-        run: node qa/scripts/wait-for-host.mjs --url="$PLAYWRIGHT_BASE_URL" --path=/ --path=/#pricing
+        run: node scripts/release/wait-for-host.mjs --url="$PLAYWRIGHT_BASE_URL" --path=/ --path=/#pricing
 
-      - name: Write QA persona credentials
+      - name: Write release persona credentials
         run: |
-          if [[ -z "$DEV_STAGING_QA_PERSONAS_LOCAL_JSON" ]]; then
+          if [[ -z "$RELEASE_PERSONAS_LOCAL_JSON" ]]; then
             echo "DEV_STAGING_QA_PERSONAS_LOCAL_JSON is not configured." >&2
             exit 1
           fi
-          printf '%s\n' "$DEV_STAGING_QA_PERSONAS_LOCAL_JSON" > qa/personas.local.json
+          mkdir -p tmp
+          printf '%s\n' "$RELEASE_PERSONAS_LOCAL_JSON" > "$RELEASE_PERSONAS_LOCAL_FILE"
 
       - name: Pull staging app env from Vercel preview
         run: |
@@ -168,8 +170,8 @@ jobs:
           set +a
           bunx convex dev --once --typecheck disable
 
-      - name: Run default ship pack on dev
-        run: bun run qa:run-pack -- --pack=default_ship --slug=dev-staging-${{ github.run_id }}
+      - name: Run default ship proof on dev
+        run: bun run release:proof -- --proof=default_ship
 
       - name: Upload Playwright artifacts
         if: failure()
@@ -192,12 +194,13 @@ jobs:
       name: dev-staging-billing-integration
     env:
       APP_BASE_URL: https://dev.man-meets-ai.com
-      DEV_STAGING_QA_PERSONAS_LOCAL_JSON: ${{ secrets.DEV_STAGING_QA_PERSONAS_LOCAL_JSON }}
       DEV_STAGING_CONVEX_CONFIG_JSON: ${{ secrets.DEV_STAGING_CONVEX_CONFIG_JSON }}
       NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
       PLAYWRIGHT_BASE_URL: https://dev.man-meets-ai.com
       QA_ENV_FILE: apps/web/.env.local
       QA_ALLOW_BILLING_INTEGRATION: "1"
+      RELEASE_PERSONAS_LOCAL_FILE: tmp/release-personas.local.json
+      RELEASE_PERSONAS_LOCAL_JSON: ${{ secrets.DEV_STAGING_QA_PERSONAS_LOCAL_JSON }}
       RELEASE_COMMIT_SHA: ${{ needs.release_scope.outputs.head_sha }}
       VERCEL_ORG_ID: ${{ vars.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
@@ -225,22 +228,23 @@ jobs:
 
       - name: Wait for matching Vercel dev deployment
         run: |
-          node qa/scripts/wait-for-vercel-production-deployment.mjs \
+          node scripts/release/wait-for-vercel-production-deployment.mjs \
             --commit_sha="$RELEASE_COMMIT_SHA" \
             --target=preview \
             --alias_domain=dev.man-meets-ai.com \
             --assign_alias_if_missing=true
 
       - name: Wait for dev staging host
-        run: node qa/scripts/wait-for-host.mjs --url="$PLAYWRIGHT_BASE_URL" --path=/ --path=/#pricing
+        run: node scripts/release/wait-for-host.mjs --url="$PLAYWRIGHT_BASE_URL" --path=/ --path=/#pricing
 
-      - name: Write QA persona credentials
+      - name: Write release persona credentials
         run: |
-          if [[ -z "$DEV_STAGING_QA_PERSONAS_LOCAL_JSON" ]]; then
+          if [[ -z "$RELEASE_PERSONAS_LOCAL_JSON" ]]; then
             echo "DEV_STAGING_QA_PERSONAS_LOCAL_JSON is not configured." >&2
             exit 1
           fi
-          printf '%s\n' "$DEV_STAGING_QA_PERSONAS_LOCAL_JSON" > qa/personas.local.json
+          mkdir -p tmp
+          printf '%s\n' "$RELEASE_PERSONAS_LOCAL_JSON" > "$RELEASE_PERSONAS_LOCAL_FILE"
 
       - name: Pull staging app env from Vercel preview
         run: |
@@ -289,7 +293,7 @@ jobs:
             --app-base-url=https://dev.man-meets-ai.com
 
       - name: Run billing integration gate on dev
-        run: bun run qa:run-pack -- --pack=billing_integration --slug=dev-billing-${{ github.run_id }}
+        run: bun run release:proof -- --proof=billing_integration
 
       - name: Upload Playwright artifacts
         if: failure()
@@ -327,3 +331,45 @@ jobs:
           fi
 
           echo "Dev staging release gate passed."
+
+      - name: Write dev staging proof summary
+        if: always()
+        env:
+          BILLING_RESULT: ${{ needs.billing_integration.result }}
+          BILLING_SENSITIVE: ${{ needs.release_scope.outputs.billing_sensitive }}
+          CONVEX_SENSITIVE: ${{ needs.release_scope.outputs.convex_sensitive }}
+          DEFAULT_SHIP_RESULT: ${{ needs.default_ship.result }}
+          RELEASE_BASE_SHA: ${{ needs.release_scope.outputs.base_sha }}
+          RELEASE_COMMIT_SHA: ${{ needs.release_scope.outputs.head_sha }}
+        run: |
+          node - <<'NODE'
+          const fs = require("node:fs");
+
+          const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+          const summary = {
+            schemaVersion: "release-proof-summary.v1",
+            workflowName: "Dev Staging Proof",
+            runId: process.env.GITHUB_RUN_ID,
+            runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+            runUrl,
+            commitSha: process.env.RELEASE_COMMIT_SHA,
+            baseSha: process.env.RELEASE_BASE_SHA,
+            environment: "dev-staging",
+            proof: {
+              billingSensitive: process.env.BILLING_SENSITIVE === "true",
+              convexSensitive: process.env.CONVEX_SENSITIVE === "true",
+              defaultShip: process.env.DEFAULT_SHIP_RESULT,
+              billingIntegration: process.env.BILLING_RESULT,
+            },
+            generatedAt: new Date().toISOString(),
+          };
+
+          fs.writeFileSync("dev-staging-proof-summary.json", `${JSON.stringify(summary, null, 2)}\n`);
+          NODE
+
+      - name: Upload dev staging proof summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dev-staging-proof-summary
+          path: dev-staging-proof-summary.json

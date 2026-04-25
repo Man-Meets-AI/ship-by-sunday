@@ -44,13 +44,6 @@ export function SprintPathUnifiedSection({
 						</ScrollReveal>
 					))}
 				</div>
-				<ScrollReveal delay={0.3}>
-					<div className="border-t border-border/40 pt-6">
-						<p className="max-w-2xl text-sm font-medium leading-7 text-foreground/70">
-							{sprintPathSection.valueFrame}
-						</p>
-					</div>
-				</ScrollReveal>
 				{mechanismSection ? (
 					<ScrollReveal delay={0.4}>
 						<div className="flex flex-col items-center gap-10 border-t border-border/40 pt-10">

@@ -1,6 +1,7 @@
 export type MarkdownMetadataFamily =
 	| "repo_doc"
 	| "exec_plan"
+	| "program_doc"
 	| "web_docs_page"
 	| "blog_post";
 
@@ -21,6 +22,10 @@ const ROOT_DOC_PATHS = new Set([
 	"docs/PRODUCT_SENSE.md",
 	"docs/QUALITY_SCORE.md",
 	"docs/PLANS.md",
+	"docs/programs/README.md",
+	"docs/programs/PROGRAMS.md",
+	"docs/programs/active/index.md",
+	"docs/programs/completed/index.md",
 	"docs/exec-plans/index.md",
 	"docs/exec-plans/PLANS.md",
 	"docs/exec-plans/tech-debt-tracker.md",
@@ -30,7 +35,7 @@ const ROOT_DOC_PATHS = new Set([
 ]);
 
 export const FAMILY_RULES: Record<
-	Exclude<MarkdownMetadataFamily, "exec_plan">,
+	Exclude<MarkdownMetadataFamily, "exec_plan" | "program_doc">,
 	FamilyRule
 > = {
 	repo_doc: {
@@ -68,6 +73,14 @@ export function resolveMarkdownMetadataFamily(
 			repoPath.startsWith("docs/exec-plans/completed/"))
 	) {
 		return "exec_plan";
+	}
+
+	if (
+		repoPath.endsWith("/program.md") &&
+		(repoPath.startsWith("docs/programs/active/") ||
+			repoPath.startsWith("docs/programs/completed/"))
+	) {
+		return "program_doc";
 	}
 
 	if (repoPath.endsWith(".md") && ROOT_DOC_PATHS.has(repoPath)) {

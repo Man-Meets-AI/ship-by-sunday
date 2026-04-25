@@ -82,7 +82,7 @@ The homepage was tightened to feel more editorial and less assembled. Standalone
 ## 10. Verification
 
 - **Manual review:** checked the page in light and dark mode at `/?marketing=1`
-- **Automated checks:** lint, format check, unit tests, CTA integration-ui, targeted browser smoke, build
+- **Automated checks:** lint, format check, unit tests, CTA integration-ui, build
 - **Reference comparison:** existing product patterns and the repo's homepage contract
 - **Checklist status:** landing-page rules, restraint rules, and verification rules passed
 - **Blueprint-first status:** homepage anchors, CTA contract, section order, and truthful structured data were preserved

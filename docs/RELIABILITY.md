@@ -22,6 +22,7 @@ This file owns the repo-wide proof loop and the operational facts that let contr
 ## Does Not Own
 
 - the canonical ExecPlan contract, which lives in `docs/exec-plans/PLANS.md`
+- the canonical Program contract, which lives in `docs/programs/PROGRAMS.md`
 - app-specific setup details that belong in `apps/web/content/docs/*`
 - live machine-local state
 
@@ -36,7 +37,6 @@ bun run typecheck
 bun run test:unit
 bun run test:contracts
 bun run test:integration
-bun run test:browser-smoke
 bun run build
 ```
 
@@ -45,10 +45,11 @@ For docs-only or planning-only changes, use the dedicated markdown layer first:
 ```bash
 bun run markdown:lint -- --paths <repo-path-or-dir>
 bun run plans:lint -- --plan docs/exec-plans/active/<plan-file>.md
+bun run programs:lint
 git diff --check
 ```
 
-`markdown:lint` currently validates the repo-owned frontmatter-backed docs families under the canonical `docs/` spine, `docs/exec-plans/`, `apps/web/content/docs/`, and `apps/web/content/blog/`. `plans:lint` applies the stricter ExecPlan body contract from `docs/exec-plans/PLANS.md`.
+`markdown:lint` currently validates the repo-owned frontmatter-backed docs families under the canonical `docs/` spine, `docs/programs/`, `docs/exec-plans/`, `apps/web/content/docs/`, and `apps/web/content/blog/`. `plans:lint` applies the stricter ExecPlan body contract from `docs/exec-plans/PLANS.md`. `programs:lint` validates Program docs, checked-in Program packet folders, versioned planning briefs, current-brief pointers, and Program prompt contracts.
 
 ## Review Expectations
 
@@ -66,10 +67,11 @@ cp apps/web/.env.local.example apps/web/.env.local
 bun run dev
 ```
 
-Use `bun run dev:core` only when you intentionally want the lighter no-Stripe path. Keep the current QA/test harness aligned with `dev/main` unless a separate branch explicitly owns a test-system migration.
+Use `bun run dev:core` only when you intentionally want the lighter no-Stripe path. Source-level tests and `scripts/release/` proof are the current confidence surfaces; do not resurrect the retired QA control plane or helper CLI as local release gates.
 
 ## Next
 
 - Use [docs/design-docs/scripts.md](/Users/parkerrex/Developer/ship-by-sunday/docs/design-docs/scripts.md) for the current command map.
 - Use [apps/web/content/docs/local-qa.mdx](/Users/parkerrex/Developer/ship-by-sunday/apps/web/content/docs/local-qa.mdx) for the app-local verification runbook.
+- Use [docs/programs/PROGRAMS.md](/Users/parkerrex/Developer/ship-by-sunday/docs/programs/PROGRAMS.md) for the canonical Program contract.
 - Use [docs/exec-plans/PLANS.md](/Users/parkerrex/Developer/ship-by-sunday/docs/exec-plans/PLANS.md) for the canonical ExecPlan contract.

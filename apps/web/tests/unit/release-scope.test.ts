@@ -4,7 +4,7 @@ import {
 	classifyReleaseScope,
 	isBillingSensitivePath,
 	isConvexSensitivePath,
-} from "../../../../qa/scripts/lib/release-scope.mjs";
+} from "../../../../scripts/release/lib/release-scope.mjs";
 
 describe("release scope classifier", () => {
 	it("marks checkout and billing proof files as billing sensitive", () => {
@@ -16,6 +16,17 @@ describe("release scope classifier", () => {
 				"apps/web/scripts/verify-hosted-stripe-checkout.mjs",
 			),
 		).toBe(true);
+		expect(
+			isBillingSensitivePath(
+				"scripts/release/lib/billing-integration-step-planner.mjs",
+			),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath("scripts/release/run-release-proof.mjs"),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath("scripts/release/prepare-release-personas.mjs"),
+		).toBe(true);
 	});
 
 	it("marks convex files as convex sensitive", () => {
@@ -26,6 +37,9 @@ describe("release scope classifier", () => {
 		expect(
 			isConvexSensitivePath("apps/web/features/checkout/server/foo.ts"),
 		).toBe(false);
+		expect(
+			isConvexSensitivePath("scripts/release/detect-release-scope.mjs"),
+		).toBe(true);
 	});
 
 	it("classifies billing and convex changes independently", () => {

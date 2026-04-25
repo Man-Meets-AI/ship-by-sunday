@@ -37,9 +37,15 @@ The observability path depends on these values:
 
 The runtime helpers read these values from `apps/web/platform/env/server.ts` on the Next.js side and `apps/web/convex/env.ts` on the Convex side. If either side is missing the expected value, the route should fail early instead of pretending the transport is healthy.
 
-## Incident Lifecycle
+## Incident Ledger
 
-An incident is the normalized operational record stored in the Convex `incidents` table. Every matching event increments `occurrenceCount`. Telegram delivery increments `deliveryCount` only when a message is actually sent or edited.
+The Convex observability ledger has two tables with different jobs. `incidents` is the rollup table. One row represents one stable fingerprint for a product and environment, and every matching event increments `occurrenceCount`, updates `firstSeenAt` or `lastSeenAt`, and drives status and delivery decisions. `incidentOccurrences` is the event table. One row represents one reported request, browser session, webhook event, or delivery failure, with the request id, path, stack, details, and links that arrived with that occurrence.
+
+Keep the distinction sharp. Rollup fields answer "how often and what state is this class of issue in?" Occurrence fields answer "what happened on this specific request or event?" The `incidents` table still mirrors the latest request-specific fields for compatibility with existing Telegram and export code, but `latestOccurrenceId` points at the durable latest occurrence row and new occurrence-specific behavior should read `incidentOccurrences`.
+
+The engineering-intake runtime export reads `incidents` as the lifecycle source of truth and includes `incidentOccurrences:<id>` source record references when `latestOccurrenceId` is available. Legacy incident rows without `latestOccurrenceId` remain supported; they export with the incident document and fingerprint references only.
+
+## Incident Lifecycle
 
 The status values matter:
 
@@ -77,13 +83,27 @@ For backend inspection, read the incident rows directly from Convex:
 bunx convex data incidents --format jsonLines
 ```
 
-Use the same command with `--prod` when you are verifying a production deployment.
-
-If you need browser-backed proof, use the QA control plane after the narrow tests:
+To inspect request-specific occurrence details, read the occurrence rows:
 
 ```bash
-bun run qa:validate
-bun run qa:run-pack -- --pack=default_ship
+bunx convex data incidentOccurrences --format jsonLines
+```
+
+Use the same command with `--prod` when you are verifying a production deployment.
+
+For the SBS-owned engineering-intake export over those same incidents, run:
+
+```bash
+bun run engineering:intake:runtime -- --output tmp/runtime-intake.v1.json
+```
+
+That command reads the hosted Convex `incidents` ledger through the observability-owned query seam, groups repeated rows by the export-time canonical identity, references latest occurrences when available, and writes the frozen `runtime-intake.v1` contract. It is read-only: it does not mutate incident state, delivery metadata, occurrence rows, or Telegram controls. The shared contract helpers for runtime and release intake live under `scripts/release/lib/engineering-intake-contract.mjs`; `scripts/release/fixtures/engineering-intake/` contains compatibility fixtures, not the owning implementation.
+
+If you need browser-backed proof, use the release proof commands after the narrow tests:
+
+```bash
+bun run release:proof -- --proof=default_ship --dry-run
+bun run release:proof -- --proof=default_ship
 ```
 
 On production releases, the same proof should run against `apps/web/.env.production` and the live site URL.
@@ -122,3 +142,5 @@ If a resolved incident starts firing again, that is expected behavior for the sa
 ## What Good Looks Like
 
 The observability path is healthy when a same-origin client error, a verified Clerk webhook, or a verified Vercel webhook creates a durable incident in Convex, the incident can be acked or muted through the app route, and a later replay changes the row in a way that matches the intended suppression behavior.
+
+The engineering-intake runtime export is healthy when `bun run engineering:intake:runtime` produces a contract-valid JSON document that groups repeated `_rsc` or volatile-path variants into one stable downstream record while preserving SBS lifecycle ownership.

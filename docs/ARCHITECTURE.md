@@ -14,7 +14,7 @@ This file is the canonical repo-wide architecture and ownership map. It explains
 
 ## Owns
 
-- the repo-wide authority split between `docs/`, `apps/web/`, `packages/`, `qa/`, and local tooling state
+- the repo-wide authority split between `docs/`, `apps/web/`, `packages/`, release scripts, and local tooling state
 - the map of first-hop surfaces a newcomer should understand before making a cross-cutting change
 - the explanation of how root entrypoints and subtree owners fit together
 
@@ -22,7 +22,7 @@ This file is the canonical repo-wide architecture and ownership map. It explains
 
 - app implementation details that belong in `apps/web/`
 - compiler implementation details that belong in `packages/blueprint-compiler/`
-- day-to-day QA run evidence that belongs in `qa/`
+- release proof command behavior that belongs in `scripts/release/`
 - machine-local or ignored state
 
 ## Surface Map
@@ -30,7 +30,7 @@ This file is the canonical repo-wide architecture and ownership map. It explains
 - `docs/` owns cross-cutting, agent-facing repository knowledge and stable landing docs.
 - `apps/web/` owns the live product, docs app, checkout routes, auth surfaces, and browser-facing implementation.
 - `packages/blueprint-compiler/` owns generated blueprint docs, snapshot shaping, and starter-output contracts.
-- `qa/` owns the current QA control plane, journey inventory, and run evidence.
+- `scripts/release/` owns release proof orchestration, release personas, release evidence, and release workflow helpers.
 - `.codex/` is a non-canonical local tooling/config surface for repo-local notes or incubation assets. Durable routing and planning truth do not live there.
 
 ## Entry Model

@@ -132,7 +132,7 @@ describe("repo generation", () => {
 				"docs/build/docs/prompt.md",
 				"docs/facts/design-system.json",
 				"apps/web/.env.production.example",
-				"qa/README.md",
+				"docs/testing/README.md",
 				".agents/README.md",
 				".github/workflows/examples/basic-ci.example.yml",
 			]),

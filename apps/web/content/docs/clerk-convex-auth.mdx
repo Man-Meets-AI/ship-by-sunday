@@ -102,7 +102,7 @@ Check these in order:
 5. `NEXT_PUBLIC_CONVEX_URL` and `CONVEX_DEPLOYMENT` are not still pointed at an old or different Convex dev deployment
 6. you restarted the app after changing auth env values
 
-For local browser smoke, remember that the Playwright local-server flow intentionally sets `DISABLE_CLERK_MIDDLEWARE=1`. In that mode, the sign-in route must respect `shouldBypassClerkProtection()` before calling `auth()` during server render. If smoke fails before any auth-route assertions run, check the sign-in route entrypoint and the Clerk bypass helper before treating it as a Clerk misconfiguration.
+For local Playwright checks, remember that the local-server flow intentionally sets `DISABLE_CLERK_MIDDLEWARE=1`. In that mode, the sign-in route must respect `shouldBypassClerkProtection()` before calling `auth()` during server render. If the check fails before any auth-route assertions run, inspect the sign-in route entrypoint and the Clerk bypass helper before treating it as a Clerk misconfiguration.
 
 If the app is using the right local Clerk keys but hosted Convex still trusts the wrong issuer, push the current local frontend API URL into the active hosted dev deployment and rerun the doctor:
 

@@ -43,6 +43,46 @@ export const getIncidentForNotificationArgs = {
 	incidentId: v.id("incidents"),
 };
 
+function buildIncidentOccurrenceDocument({
+	args,
+	incidentId,
+	occurredAt,
+	occurrenceNumber,
+}: {
+	args: RecordIncidentArgs;
+	incidentId: Id<"incidents">;
+	occurredAt: number;
+	occurrenceNumber: number;
+}): Omit<Doc<"incidentOccurrences">, "_id" | "_creationTime"> {
+	const fingerprintKey = `${args.product}:${args.environment}:${args.fingerprint}`;
+
+	return {
+		incidentId,
+		product: args.product,
+		fingerprint: args.fingerprint,
+		fingerprintKey,
+		source: args.source,
+		surface: args.surface,
+		severity: args.severity,
+		title: args.title,
+		summary: args.summary,
+		code: args.code,
+		requestId: args.requestId,
+		pathname: args.pathname,
+		userId: args.userId,
+		externalEventId: args.externalEventId,
+		deploymentId: args.deploymentId,
+		nativeUrl: args.nativeUrl,
+		logsUrl: args.logsUrl,
+		nextAction: args.nextAction,
+		environment: args.environment,
+		stack: args.stack,
+		details: args.details,
+		occurrenceNumber,
+		occurredAt,
+	};
+}
+
 export async function recordIncidentHandler(
 	ctx: MutationCtx,
 	args: RecordIncidentArgs,
@@ -108,7 +148,19 @@ export async function recordIncidentHandler(
 	};
 
 	if (existing) {
-		await ctx.db.patch(existing._id, nextDocument);
+		const latestOccurrenceId = await ctx.db.insert(
+			"incidentOccurrences",
+			buildIncidentOccurrenceDocument({
+				args,
+				incidentId: existing._id,
+				occurredAt: now,
+				occurrenceNumber: occurrenceCount,
+			}),
+		);
+		await ctx.db.patch(existing._id, {
+			...nextDocument,
+			latestOccurrenceId,
+		});
 
 		return {
 			incidentId: existing._id,
@@ -118,6 +170,17 @@ export async function recordIncidentHandler(
 	}
 
 	const incidentId = await ctx.db.insert("incidents", nextDocument);
+	const latestOccurrenceId = await ctx.db.insert(
+		"incidentOccurrences",
+		buildIncidentOccurrenceDocument({
+			args,
+			incidentId,
+			occurredAt: now,
+			occurrenceNumber: occurrenceCount,
+		}),
+	);
+	await ctx.db.patch(incidentId, { latestOccurrenceId });
+
 	return {
 		incidentId,
 		occurrenceCount,
@@ -130,6 +193,36 @@ export async function getIncidentForNotificationHandler(
 	args: { incidentId: Id<"incidents"> },
 ) {
 	return await ctx.db.get(args.incidentId);
+}
+
+export async function listIncidentsForEngineeringIntakeHandler(
+	ctx: QueryCtx,
+	args: {
+		paginationOpts: {
+			cursor: string | null;
+			numItems: number;
+		};
+	},
+) {
+	return await ctx.db
+		.query("incidents")
+		.order("desc")
+		.paginate(args.paginationOpts);
+}
+
+export async function listIncidentOccurrencesForEngineeringIntakeHandler(
+	ctx: QueryCtx,
+	args: {
+		paginationOpts: {
+			cursor: string | null;
+			numItems: number;
+		};
+	},
+) {
+	return await ctx.db
+		.query("incidentOccurrences")
+		.order("desc")
+		.paginate(args.paginationOpts);
 }
 
 export async function markIncidentNotificationDeliveredHandler(

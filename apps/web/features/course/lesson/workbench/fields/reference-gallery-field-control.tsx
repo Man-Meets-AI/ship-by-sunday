@@ -3,75 +3,26 @@
 import { useMutation } from "convex/react";
 import { useEffect, useRef, useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/convex/_generated/api";
 import type {
-	LessonStorageId,
 	ReferenceGalleryItem,
 	ReferenceGalleryValue,
 	WorkbenchField,
 } from "@/features/course/lesson/model/manifest";
-import {
-	getReferenceGalleryCount,
-	isReferenceGalleryValue,
-} from "@/features/course/lesson/model/reference-gallery";
+import { getReferenceGalleryCount } from "@/features/course/lesson/model/reference-gallery";
 import { LayoutGrid } from "./layout-grid";
-
-type UploadState =
-	| { status: "idle" }
-	| { status: "uploading" }
-	| { status: "error"; message: string };
-
-function getEmptyGalleryValue(): ReferenceGalleryValue {
-	return {
-		kind: "reference_gallery",
-		items: [],
-	};
-}
-
-function normalizeGalleryValue(value: unknown): ReferenceGalleryValue {
-	return isReferenceGalleryValue(value) ? value : getEmptyGalleryValue();
-}
-
-function createGalleryItemId() {
-	if (
-		typeof crypto !== "undefined" &&
-		typeof crypto.randomUUID === "function"
-	) {
-		return crypto.randomUUID();
-	}
-
-	return `reference-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-function revokePreviewUrl(item: ReferenceGalleryItem) {
-	if (item.previewUrl?.startsWith("blob:")) {
-		URL.revokeObjectURL(item.previewUrl);
-	}
-}
-
-async function validateImageUrl(url: string) {
-	await new Promise<void>((resolve, reject) => {
-		const image = new Image();
-
-		image.onload = () => resolve();
-		image.onerror = () => reject(new Error("invalid-image-url"));
-		image.src = url;
-	});
-}
-
-function getRemoteImageLabel(url: string) {
-	try {
-		const parsed = new URL(url);
-		const lastSegment = parsed.pathname.split("/").filter(Boolean).at(-1);
-		return lastSegment || parsed.hostname;
-	} catch {
-		return "Reference image";
-	}
-}
+import { ReferenceGalleryAddControls } from "./reference-gallery-add-controls";
+import {
+	createRemoteReferenceGalleryItem,
+	createUploadedReferenceGalleryItem,
+	type ReferenceGalleryUploadState,
+	normalizeReferenceGalleryControlValue,
+	revokeReferenceGalleryPreviewUrl,
+	validateReferenceImageUrl,
+} from "./reference-gallery-field-model";
+import { uploadFilesToLessonStorage } from "./upload-storage";
 
 export function ReferenceGalleryFieldControl({
 	field,
@@ -87,11 +38,11 @@ export function ReferenceGalleryFieldControl({
 	const generateUploadUrl = useMutation(api.uploads.generateUploadUrl);
 	const inputRef = useRef<HTMLInputElement | null>(null);
 	const latestItemsRef = useRef<ReferenceGalleryItem[]>([]);
-	const galleryValue = normalizeGalleryValue(value);
+	const galleryValue = normalizeReferenceGalleryControlValue(value);
 	const minItems = Math.max(field.minItems ?? 1, 1);
 	const savedCount = getReferenceGalleryCount(galleryValue);
 	const [urlInput, setUrlInput] = useState("");
-	const [uploadState, setUploadState] = useState<UploadState>({
+	const [uploadState, setUploadState] = useState<ReferenceGalleryUploadState>({
 		status: "idle",
 	});
 	const [dropActive, setDropActive] = useState(false);
@@ -105,7 +56,7 @@ export function ReferenceGalleryFieldControl({
 	useEffect(() => {
 		return () => {
 			for (const item of latestItemsRef.current) {
-				revokePreviewUrl(item);
+				revokeReferenceGalleryPreviewUrl(item);
 			}
 		};
 	}, []);
@@ -118,37 +69,15 @@ export function ReferenceGalleryFieldControl({
 	}
 
 	async function uploadFile(file: File): Promise<ReferenceGalleryItem> {
-		const uploadUrl = await generateUploadUrl();
-		const response = await fetch(uploadUrl, {
-			method: "POST",
-			headers: {
-				"Content-Type": file.type || "application/octet-stream",
-			},
-			body: file,
+		const [upload] = await uploadFilesToLessonStorage({
+			files: [file],
+			generateUploadUrl,
 		});
-
-		if (!response.ok) {
+		if (!upload) {
 			throw new Error("upload-failed");
 		}
 
-		const result = (await response.json()) as { storageId?: string };
-		if (!result.storageId) {
-			throw new Error("missing-storage-id");
-		}
-		const storageId = result.storageId as LessonStorageId;
-
-		const previewUrl = URL.createObjectURL(file);
-
-		return {
-			id: createGalleryItemId(),
-			source: "upload",
-			fileName: file.name,
-			mimeType: file.type,
-			size: file.size,
-			storageId,
-			url: previewUrl,
-			previewUrl,
-		};
+		return createUploadedReferenceGalleryItem(upload);
 	}
 
 	async function appendFiles(files: File[]) {
@@ -185,15 +114,10 @@ export function ReferenceGalleryFieldControl({
 		setUploadState({ status: "uploading" });
 
 		try {
-			await validateImageUrl(nextUrl);
+			await validateReferenceImageUrl(nextUrl);
 			updateItems([
 				...galleryValue.items,
-				{
-					id: createGalleryItemId(),
-					source: "remote_url",
-					url: nextUrl,
-					fileName: getRemoteImageLabel(nextUrl),
-				},
+				createRemoteReferenceGalleryItem(nextUrl),
 			]);
 			setUrlInput("");
 			setUploadState({ status: "idle" });
@@ -209,56 +133,20 @@ export function ReferenceGalleryFieldControl({
 	function removeItem(itemId: string) {
 		const item = galleryValue.items.find((entry) => entry.id === itemId);
 		if (item) {
-			revokePreviewUrl(item);
+			revokeReferenceGalleryPreviewUrl(item);
 		}
 
 		updateItems(galleryValue.items.filter((entry) => entry.id !== itemId));
 	}
 
 	const addControls = (
-		<div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-			<div className="flex flex-wrap items-center gap-2.5">
-				<Button
-					type="button"
-					onClick={() => inputRef.current?.click()}
-					disabled={isUploading}
-					variant="secondary"
-					size="default"
-				>
-					{isUploading ? "Uploading..." : "Browse images"}
-				</Button>
-				<div className="flex flex-wrap gap-1.5 text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-					<span className="rounded-full border border-border/70 bg-muted/40 px-2.5 py-1">
-						Drag
-					</span>
-					<span className="rounded-full border border-border/70 bg-muted/40 px-2.5 py-1">
-						Paste
-					</span>
-					<span className="rounded-full border border-border/70 bg-muted/40 px-2.5 py-1">
-						Upload
-					</span>
-				</div>
-			</div>
-			<div className="flex w-full flex-1 flex-col gap-2 sm:flex-row lg:max-w-[29rem]">
-				<Input
-					type="url"
-					value={urlInput}
-					onChange={(event) => setUrlInput(event.target.value)}
-					placeholder="Paste a direct image URL"
-					className="min-w-0"
-					disabled={isUploading}
-				/>
-				<Button
-					type="button"
-					onClick={() => void addImageUrl()}
-					disabled={isUploading || urlInput.trim().length === 0}
-					variant="outline"
-					size="default"
-				>
-					Add image URL
-				</Button>
-			</div>
-		</div>
+		<ReferenceGalleryAddControls
+			urlInput={urlInput}
+			isUploading={isUploading}
+			onBrowse={() => inputRef.current?.click()}
+			onUrlInputChange={setUrlInput}
+			onAddImageUrl={() => void addImageUrl()}
+		/>
 	);
 
 	return (

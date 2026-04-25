@@ -1,10 +1,11 @@
 "use client";
 
 import type { WorkbenchField } from "@/features/course/lesson/model/contracts";
-import { normalizeChecklistValue } from "@/features/course/lesson/workbench/fields/value-codecs";
-import { renderChecklistLabel } from "@/features/course/lesson/workbench/fields/checklist-label";
+import {
+	ChecklistFieldRows,
+	getChecklistFieldItems,
+} from "@/features/course/lesson/workbench/fields/checklist-field-rows";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Card,
 	CardContent,
@@ -12,7 +13,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 
 export function StageUnlockReviewCard({
 	field,
@@ -27,7 +27,7 @@ export function StageUnlockReviewCard({
 	invalid: boolean;
 	invalidMessage?: string;
 }) {
-	const checklistItems = normalizeChecklistValue(value, field.options ?? []);
+	const checklistItems = getChecklistFieldItems({ field, value });
 	const checkedCount = checklistItems.filter((item) => item.checked).length;
 
 	return (
@@ -48,38 +48,14 @@ export function StageUnlockReviewCard({
 						guide reference gathering and screen decisions.
 					</CardDescription>
 				</div>
-				<div className="grid gap-2 lg:grid-cols-3">
-					{checklistItems.map((item, index) => {
-						const id = `${field.id}-${index}`;
-						return (
-							<div
-								key={id}
-								className="flex items-start gap-3 rounded-md border border-input px-3 py-2.5"
-							>
-								<Checkbox
-									id={id}
-									checked={item.checked}
-									className="mt-0.5"
-									onCheckedChange={(nextChecked) => {
-										const nextItems = checklistItems.map(
-											(current, currentIndex) =>
-												currentIndex === index
-													? { ...current, checked: Boolean(nextChecked) }
-													: current,
-										);
-										onChange(nextItems);
-									}}
-								/>
-								<Label
-									htmlFor={id}
-									className="min-w-0 flex-1 cursor-pointer text-sm leading-relaxed font-normal text-foreground"
-								>
-									{renderChecklistLabel(item.label)}
-								</Label>
-							</div>
-						);
-					})}
-				</div>
+				<ChecklistFieldRows
+					field={field}
+					value={value}
+					className="grid gap-2 lg:grid-cols-3"
+					rowClassName="rounded-md border border-input"
+					separator="none"
+					onChange={onChange}
+				/>
 				<Alert variant={invalid ? "destructive" : "default"}>
 					<AlertTitle>
 						Ready checks {checkedCount}/{checklistItems.length}
