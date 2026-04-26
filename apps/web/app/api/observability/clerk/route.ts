@@ -1,6 +1,6 @@
 import { verifyWebhook } from "@clerk/backend/webhooks";
 
-import { apiRouteConfig } from "@/config/product";
+import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
 import { normalizeIncidentEvent } from "@/features/observability/lib/incident";
 import { buildClerkWebhookIncident } from "@/features/observability/server/source-adapters/clerk-webhook";
 import { captureServerError } from "@/features/observability/server/capture-server-error";

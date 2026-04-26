@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { getLessonByKey } from "../../features/course/lesson/model/manifest";
+import { getLessonByKey } from "../../features/course/lesson/model/curriculum";
 import { getBlueprintWorkflowStateByClerkUserId } from "../blueprint/workflowState";
 import { loadViewerCourseState } from "./shared";
 import type { CourseQueryCtx } from "./types";

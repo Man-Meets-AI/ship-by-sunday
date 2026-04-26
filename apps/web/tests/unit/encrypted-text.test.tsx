@@ -1,7 +1,7 @@
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
-import { EncryptedText } from "@/components/ui/encrypted-text";
+import { EncryptedText } from "@/features/marketing/components/effects/encrypted-text";
 
 describe("EncryptedText", () => {
 	it("renders stable server markup before the reveal animation starts", () => {

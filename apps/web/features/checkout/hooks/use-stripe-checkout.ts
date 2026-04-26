@@ -2,8 +2,8 @@
 
 import { useCallback, useState } from "react";
 
-import { apiRouteConfig } from "@/config/product";
-import { assert } from "@/features/course/lesson/lib/assert";
+import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
+import { assert } from "@/lib/assert";
 
 export function useStripeCheckout() {
 	const [isLoading, setIsLoading] = useState(false);

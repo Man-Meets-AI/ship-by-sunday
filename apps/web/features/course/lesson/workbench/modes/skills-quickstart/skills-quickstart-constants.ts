@@ -1,8 +1,7 @@
-/** Persisted field ids — keep in sync with lesson 3.16 `workbenchFields`. */
-export const BUILD_SKILLS_USAGE_CHECKLIST_FIELD_ID =
-	"build_skills_usage_checklist";
-export const BUILD_SKILLS_FIRST_TAGGED_PROMPT_FIELD_ID =
-	"build_skills_first_tagged_prompt";
+export {
+	BUILD_SKILLS_FIRST_TAGGED_PROMPT_FIELD_ID,
+	BUILD_SKILLS_USAGE_CHECKLIST_FIELD_ID,
+} from "@/features/course/lesson/model/completion-field-ids";
 
 export const SKILLS_USAGE_CHECKLIST_OPTIONS = [
 	"I picked the right specialist category for this question",

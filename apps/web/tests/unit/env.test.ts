@@ -1,3 +1,5 @@
+vi.mock("server-only", () => ({}));
+
 describe("env helpers", () => {
 	const originalEnv = { ...process.env };
 

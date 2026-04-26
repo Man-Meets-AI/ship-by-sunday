@@ -10,7 +10,7 @@ import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
-import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
+import { useKeyboardShortcut } from "@/features/blueprint-flow/hooks/use-keyboard-shortcut";
 import type { BlueprintStepInlineFeedback } from "@/features/blueprint-flow/lib/blueprint-step-save-feedback";
 import { BlueprintStageSaveFeedback } from "./blueprint-stage-save-feedback";
 import { BlueprintStageStepField } from "./blueprint-stage-step-field";

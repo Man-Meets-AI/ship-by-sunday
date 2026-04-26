@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { SsoCallbackPage } from "@/features/auth/sign-in/sso-callback-page";
+
+import { SsoCallbackPage } from "@/app/(identity)/_components/sso-callback-page";
 
 export const metadata: Metadata = {
 	robots: {

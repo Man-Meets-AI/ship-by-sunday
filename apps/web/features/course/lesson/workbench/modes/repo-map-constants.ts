@@ -1,4 +1,5 @@
-import { apiRouteConfig, routeConfig } from "@/config/product";
+import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
+import { routeConfig } from "@/config/product";
 import { getLessonMapHref } from "@/features/workspace-navigation/lib/lesson-map-href";
 
 /** Coach resource ids — keep in sync with `coachResources` on lesson 3.2. */

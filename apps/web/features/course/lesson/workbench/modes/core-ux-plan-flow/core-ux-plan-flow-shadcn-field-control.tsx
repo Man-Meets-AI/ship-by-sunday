@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { assert } from "@/features/course/lesson/lib/assert";
+import { assert } from "@/lib/assert";
 
 import { normalizeChecklistValue } from "../../fields/value-codecs";
 

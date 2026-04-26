@@ -263,21 +263,6 @@ export const manifestConfig = {
 	},
 } as const;
 
-export const apiRouteConfig = {
-	stripeCheckout: "/api/stripe/checkout",
-	stripeWebhook: "/stripe/webhook",
-	observabilityClerk: "/api/observability/clerk",
-	observabilityVercel: "/api/observability/vercel",
-	observabilityIncidentStatus:
-		"/api/observability/incidents/[incidentId]/status",
-	codexGenerate: "/api/codex/generate",
-	codexAccountRead: "/api/codex/account/read",
-	codexAccountLoginStart: "/api/codex/account/login/start",
-	codexAccountLoginPoll: "/api/codex/account/login/poll",
-	codexAccountRateLimits: "/api/codex/account/rate-limits",
-	codexAccountLogout: "/api/codex/account/logout",
-} as const;
-
 export const apiConfig = {
 	secureHttpProtocol: "https://",
 	stripeApiVersion: "2026-02-25.clover",

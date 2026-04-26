@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
-	getLessonHref,
 	getNextLesson,
 	getPreviousLesson,
 } from "@/features/course/lesson/model/manifest";
+import { getLessonHref } from "@/features/course/lesson/routing/lesson-routes";
 import { getLessonMapHref } from "@/features/workspace-navigation/lib/lesson-map-href";
 
 export function BonusLessonFooter({

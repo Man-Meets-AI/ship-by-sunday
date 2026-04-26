@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { getCheckoutSuccessHref, routeConfig } from "@/config/product";
-import { PostCheckoutSignUpPage } from "@/features/auth/sign-up/post-checkout-sign-up-page";
+import { PostCheckoutSignUpPage } from "@/app/(identity)/_components/post-checkout-sign-up-page";
 import { getSafeRedirectPath } from "@/features/auth/sign-in/sign-in-route-utils";
 import {
 	getCheckoutSessionForRecovery,

@@ -1,15 +1,15 @@
-import { CORE_UX_BUILD_FIELD_IDS } from "@/features/course/lesson/workbench/modes/core-ux-build/core-ux-build-constants";
 import {
 	BUILD_SKILLS_FIRST_TAGGED_PROMPT_FIELD_ID,
 	BUILD_SKILLS_USAGE_CHECKLIST_FIELD_ID,
-} from "@/features/course/lesson/workbench/modes/skills-quickstart/skills-quickstart-constants";
+	CORE_UX_BUILD_FIELD_IDS,
+} from "../completion-field-ids";
 import type {
 	LessonConfig,
 	ObjectiveTaskDefinition,
 	WorkbenchField,
 } from "../manifest";
 import { isReferenceGalleryValue } from "../reference-gallery";
-import { buildStageUnlockSummary } from "../stage-unlock";
+import { getStageUnlockObjectiveTasks } from "../stage-unlock";
 import { isLessonVideoReady as isRenderableLessonVideoReady } from "../video";
 import { normalizeLessonFieldValues } from "./legacy";
 import {
@@ -361,7 +361,7 @@ export function getObjectiveTasks(
 ): ObjectiveTask[] {
 	const values = normalizeLessonFieldValues(lesson, fieldValues);
 	const objectiveMode = getObjectiveMode(lesson);
-	const stageUnlockSummary = buildStageUnlockSummary(
+	const stageUnlockTasks = getStageUnlockObjectiveTasks(
 		lesson,
 		context.pinnedArtifacts ?? [],
 	);
@@ -401,9 +401,9 @@ export function getObjectiveTasks(
 
 	const tasks: ObjectiveTask[] = [];
 
-	if (stageUnlockSummary) {
+	if (stageUnlockTasks.length > 0) {
 		tasks.push(
-			...stageUnlockSummary.tasks.map(
+			...stageUnlockTasks.map(
 				(task) =>
 					({
 						id: task.id,

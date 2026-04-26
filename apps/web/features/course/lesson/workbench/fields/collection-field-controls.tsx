@@ -4,7 +4,7 @@ import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
 
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
-import { assert } from "@/features/course/lesson/lib/assert";
+import { assert } from "@/lib/assert";
 import { ChecklistOptionRow } from "./checklist-option-row";
 import { EditableTableField } from "./editable-table-field";
 import { inputWidthClass } from "./field-styles";

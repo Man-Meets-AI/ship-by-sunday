@@ -1,12 +1,4 @@
-export const CORE_UX_BUILD_FIELD_IDS = {
-	onboardingChecklist: "core_ux_onboarding_checklist",
-	strategyPrompt: "core_ux_strategy_prompt",
-	brandReferences: "core_ux_brand_references",
-	blogLink: "core_ux_blog_link",
-	postMimicImage: "core_ux_post_mimic_image",
-	codexBrief: "core_ux_codex_brief",
-	handoffChecklist: "core_ux_handoff_checklist",
-} as const;
+export { CORE_UX_BUILD_FIELD_IDS } from "@/features/course/lesson/model/completion-field-ids";
 
 export const CORE_UX_BUILD_ONBOARDING_CHECKLIST_OPTIONS = [
 	"Connect ChatGPT",

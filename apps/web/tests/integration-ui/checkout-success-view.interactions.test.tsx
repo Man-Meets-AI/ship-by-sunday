@@ -33,7 +33,7 @@ vi.mock("convex/react", () => ({
 	useQuery: () => useQueryMock(),
 }));
 
-import { CheckoutSuccessView } from "@/features/checkout/components/checkout-success-view";
+import { CheckoutSuccessView } from "@/app/checkout/success/_components/checkout-success-view";
 
 describe("CheckoutSuccessView interactions", () => {
 	beforeEach(() => {

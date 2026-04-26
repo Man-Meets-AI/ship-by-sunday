@@ -1,6 +1,8 @@
 import type { WebhookEvent } from "@clerk/backend/webhooks";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("server-only", () => ({}));
+
 describe("observability source adapters", () => {
 	const originalEnv = { ...process.env };
 

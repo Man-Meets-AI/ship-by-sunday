@@ -3,8 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { apiRouteConfig, timingConfig } from "@/config/product";
-import { assertNever } from "@/features/course/lesson/lib/assert";
+import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
+import { timingConfig } from "@/config/product";
+import { assertNever } from "@/lib/assert";
 import { copyLessonTextToClipboard } from "@/features/course/lesson/lib/copy-course-prompt";
 import type { LessonPromptImport } from "@/features/course/lesson/model/contracts";
 import {

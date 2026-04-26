@@ -1,3 +1,5 @@
+import "server-only";
+
 import { serverEnv } from "@/platform/env/server";
 
 import type { NormalizedObservabilityEvent } from "../lib/error-event";

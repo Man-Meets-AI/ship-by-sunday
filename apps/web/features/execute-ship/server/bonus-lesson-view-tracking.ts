@@ -1,3 +1,5 @@
+import "server-only";
+
 import { auth } from "@clerk/nextjs/server";
 import { fetchMutation } from "convex/nextjs";
 import { ConvexError } from "convex/values";

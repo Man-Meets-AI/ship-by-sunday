@@ -3,7 +3,7 @@ import type {
 	WorkbenchField,
 } from "@/features/course/lesson/model/manifest";
 import { Button } from "@/components/ui/button";
-import { assert, assertNever } from "@/features/course/lesson/lib/assert";
+import { assert, assertNever } from "@/lib/assert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {

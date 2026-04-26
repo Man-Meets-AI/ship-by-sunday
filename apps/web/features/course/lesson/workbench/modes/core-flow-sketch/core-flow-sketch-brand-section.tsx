@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { assert } from "@/features/course/lesson/lib/assert";
+import { assert } from "@/lib/assert";
 import { copyCoursePromptToClipboard } from "@/features/course/lesson/lib/copy-course-prompt";
 import { inputWidthClass } from "@/features/course/lesson/workbench/fields/field-styles";
 

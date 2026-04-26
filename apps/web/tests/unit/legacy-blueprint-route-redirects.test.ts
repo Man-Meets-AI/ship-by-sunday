@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getLegacyBlueprintRouteRedirectHref } from "@/features/blueprint-flow/lib/legacy-blueprint-route-redirects";
+import { getLegacyBlueprintRouteRedirectHref } from "@/app/(workspace)/_lib/legacy-blueprint-route-redirects";
 
 describe("legacy blueprint route redirects", () => {
 	it("maps old stage roots into canonical Blueprint destinations", () => {

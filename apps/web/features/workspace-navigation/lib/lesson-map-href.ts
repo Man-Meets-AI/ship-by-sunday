@@ -1,4 +1,4 @@
-import { routeConfig } from "../../../config/product";
+import { routeConfig } from "@/config/product";
 
 export const SHOW_LESSON_MAP_QUERY_PARAM = "showLessonMap";
 

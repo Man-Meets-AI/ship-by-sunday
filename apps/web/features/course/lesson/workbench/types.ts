@@ -11,8 +11,8 @@ import type {
 	ObjectiveTask,
 	WorkbenchSectionState,
 } from "@/features/course/lesson/model/registry";
-import type { StageUnlockSummary } from "@/features/course/lesson/model/stage-unlock";
 import type { PinnedArtifact } from "@/features/course/lesson/shells";
+import type { WorkbenchStageUnlockSummary } from "./stage-unlock-summary";
 
 export type WorkbenchRendererProps = {
 	lesson: LessonConfig;
@@ -25,7 +25,7 @@ export type WorkbenchRendererProps = {
 	invalidFieldMessages?: Map<string, string>;
 	fieldValuesReady?: boolean;
 	resolvedArtifactPreview?: ArtifactPreview | null;
-	stageUnlockSummary?: StageUnlockSummary | null;
+	stageUnlockSummary?: WorkbenchStageUnlockSummary | null;
 	/** Duplicate footer completion control (e.g. lesson 1.1 welcome panel). */
 	workbenchCompletionSlot?: ReactNode;
 };

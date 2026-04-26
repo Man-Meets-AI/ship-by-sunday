@@ -1,4 +1,4 @@
-import { getLessonHref } from "@/features/course/lesson/model/manifest";
+import { getLessonHref } from "@/features/course/lesson/routing/lesson-routes";
 
 export type SkillRailLesson = {
 	lessonKey: string;

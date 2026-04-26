@@ -33,6 +33,16 @@ This file is the canonical repo-wide architecture and ownership map. It explains
 - `scripts/release/` owns release proof orchestration, release personas, release evidence, and release workflow helpers.
 - `.codex/` is a non-canonical local tooling/config surface for repo-local notes or incubation assets. Durable routing and planning truth do not live there.
 
+## App Structure Map
+
+Within `apps/web`, `app/` owns URL-addressable routes, route groups, route handlers, and private route UI. Route-local wrappers, controllers, view models, and redirect helpers belong under App Router private folders such as `_components`, `_hooks`, and `_lib`.
+
+`features/` owns durable product domains that are reused across routes or need a stable product boundary. Current durable domains include blueprint flow, reusable auth forms and route utilities, checkout button and checkout server helpers, product access checks, course and lesson domain data, workspace shell, workspace navigation, marketing, docs, Codex, and observability.
+
+`platform/` owns environment, auth, billing, Convex, and Next.js platform adapters. `convex/` owns backend state, actions, and HTTP webhook routes. Browser-only route UI should not be imported from Convex code.
+
+`components/ui` owns shared primitives and retained UI inventory. Feature-specific effects and route-specific UI belong with their feature or route owner instead of the shared primitive layer.
+
 ## Entry Model
 
 The root entrypoints stay intentionally small. `README.md` and `AGENTS.md` route into this docs spine first. More specific nested `AGENTS.md` files then narrow the working rules when the task moves into `apps/web/` or `packages/blueprint-compiler/`.

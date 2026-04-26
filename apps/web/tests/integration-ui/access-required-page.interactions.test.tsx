@@ -50,7 +50,7 @@ vi.mock("@/features/checkout/components/checkout-button", () => ({
 	),
 }));
 
-import { AccessRequiredPage } from "@/features/product-access/components/access-required-page";
+import { AccessRequiredPage } from "@/app/(workspace)/_components/access-required/access-required-page";
 
 describe("AccessRequiredPage interactions", () => {
 	beforeEach(() => {

@@ -1,5 +1,5 @@
 import { routeConfig } from "@/config/product";
-import { AppShell } from "@/features/course/shared/components/app-shell";
+import { AppShell } from "@/features/workspace-shell/components/app-shell";
 import { StarterModuleDisabledCard } from "@/features/starter/components/starter-module-disabled-card";
 import { workspaceDisplayConfig } from "@/features/starter/lib/starter-selectors";
 

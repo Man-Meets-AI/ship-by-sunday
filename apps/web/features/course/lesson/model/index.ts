@@ -1,4 +1,5 @@
 export * from "./core-flow";
+export * from "./completion-field-ids";
 export * from "./manifest";
 export {
 	createReferenceGalleryValue,

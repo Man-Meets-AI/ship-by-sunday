@@ -1,9 +1,9 @@
 import {
-	type BlockId,
 	getLesson,
-	getLessonHref,
+	type BlockId,
 } from "@/features/course/lesson/model/manifest";
 import { getBlockById } from "@/features/course/lesson/model/registry";
+import { getLessonHref } from "@/features/course/lesson/routing/lesson-routes";
 
 export type LessonStatus = "available" | "completed" | "in_progress" | "locked";
 export type BlockStatus = "completed" | "active" | "ready" | "locked";

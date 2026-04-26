@@ -3,7 +3,7 @@ import {
 	getReferenceGallerySummary,
 	isReferenceGalleryValue,
 } from "../reference-gallery";
-import { buildStageUnlockSummary } from "../stage-unlock";
+import { buildStageUnlockArtifactPreview } from "../stage-unlock";
 import { formatTablePreview } from "../table";
 import { isFilled } from "./completion";
 import { normalizeLessonFieldValues } from "./legacy";
@@ -190,9 +190,12 @@ export function buildResolvedArtifactPreview(
 	fieldValues: FieldValuesSource,
 	pinnedArtifacts: ArtifactPreview[] = [],
 ): ArtifactPreview {
-	const stageUnlockSummary = buildStageUnlockSummary(lesson, pinnedArtifacts);
-	if (stageUnlockSummary) {
-		return stageUnlockSummary.preview as ArtifactPreview;
+	const stageUnlockPreview = buildStageUnlockArtifactPreview(
+		lesson,
+		pinnedArtifacts,
+	);
+	if (stageUnlockPreview) {
+		return stageUnlockPreview as ArtifactPreview;
 	}
 
 	if (

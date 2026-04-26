@@ -4,7 +4,7 @@ import type { ComponentProps } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { getLessonHref } from "@/features/course/lesson/model/manifest";
+import { getLessonHref } from "@/features/course/lesson/routing/lesson-routes";
 import type { SkillRailLesson } from "@/features/course/shared/utils/skill-rail-navigation";
 
 import {

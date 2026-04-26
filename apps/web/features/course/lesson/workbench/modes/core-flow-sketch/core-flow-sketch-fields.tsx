@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { assert } from "@/features/course/lesson/lib/assert";
+import { assert } from "@/lib/assert";
 import { inputWidthClass } from "@/features/course/lesson/workbench/fields/field-styles";
 import { normalizeChecklistValue } from "@/features/course/lesson/workbench/fields/value-codecs";
 

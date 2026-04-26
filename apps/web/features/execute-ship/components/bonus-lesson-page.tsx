@@ -7,7 +7,7 @@ import type { BlueprintStageStatus } from "@shipbysunday/blueprint-compiler";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LessonShellWatch } from "@/features/course/lesson/shells";
 import { getLessonByKey } from "@/features/course/lesson/model/manifest";
-import { AppShell } from "@/features/course/shared/components/app-shell";
+import { AppShell } from "@/features/workspace-shell/components/app-shell";
 import {
 	buildBonusShellMission,
 	getRecommendedBuildLessonHref,

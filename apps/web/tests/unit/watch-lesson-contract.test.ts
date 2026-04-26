@@ -5,6 +5,8 @@ import {
 	getLessonById,
 	getObjectiveTasks,
 	getStudentFacingLessons,
+	BUILD_SKILLS_FIRST_TAGGED_PROMPT_FIELD_ID,
+	BUILD_SKILLS_USAGE_CHECKLIST_FIELD_ID,
 	lessonSupportsLayoutToggle,
 	normalizeLayoutModeForLesson,
 } from "@/features/course/lesson/model";
@@ -19,11 +21,7 @@ import {
 	SHIP_PHASE_CHECKLIST_OPTIONS,
 	SCOPE_CHECKLIST_OPTIONS,
 } from "@/features/course/lesson/workbench/modes/build-ship-roadmap/build-ship-roadmap-constants";
-import {
-	BUILD_SKILLS_FIRST_TAGGED_PROMPT_FIELD_ID,
-	BUILD_SKILLS_USAGE_CHECKLIST_FIELD_ID,
-	SKILLS_USAGE_CHECKLIST_OPTIONS,
-} from "@/features/course/lesson/workbench/modes/skills-quickstart/skills-quickstart-constants";
+import { SKILLS_USAGE_CHECKLIST_OPTIONS } from "@/features/course/lesson/workbench/modes/skills-quickstart/skills-quickstart-constants";
 
 describe("split lesson baseline (former watch cohort)", () => {
 	it("keeps Bunny-driven lessons in focus-only split layout with workbench video", () => {

@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { NormalizedObservabilityEvent } from "@/features/observability/lib/error-event";
 
+vi.mock("server-only", () => ({}));
+
 const incidentFixture = {
 	product: "ship-by-sunday",
 	environment: "prod",

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { apiRouteConfig } from "@/config/product";
+import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
 import { incidentControlStatusValues } from "@/features/observability/lib/incident";
 import { captureServerError } from "@/features/observability/server/capture-server-error";
 import {

@@ -36,7 +36,7 @@ vi.mock("convex/react", () => ({
 	useQuery: (query: unknown, args: unknown) => useQueryMock(query, args),
 }));
 
-import { CheckoutSuccessView } from "../../features/checkout/components/checkout-success-view";
+import { CheckoutSuccessView } from "@/app/checkout/success/_components/checkout-success-view";
 
 function renderView(
 	checkoutSessionState:

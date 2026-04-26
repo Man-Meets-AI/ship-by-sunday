@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { BlockGroup } from "@/features/course/artifacts/types";
-import { getLessonHref } from "@/features/course/lesson/model/manifest";
+import { getLessonHref } from "@/features/course/lesson/routing/lesson-routes";
 import { ArtifactPreviewContent } from "@/features/course/lesson/workbench/shared/artifact-preview-content";
 
 export type { BlockGroup } from "@/features/course/artifacts/types";

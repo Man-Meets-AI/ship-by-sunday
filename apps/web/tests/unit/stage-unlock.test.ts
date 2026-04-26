@@ -1,6 +1,7 @@
-import { getLessonHref } from "@/features/course/lesson/model";
 import type { LessonConfig } from "@/features/course/lesson/model";
 import { buildStageUnlockSummary } from "@/features/course/lesson/model/stage-unlock";
+import { buildWorkbenchStageUnlockSummary } from "@/features/course/lesson/workbench/stage-unlock-summary";
+import { getLessonHref } from "@/features/course/lesson/routing/lesson-routes";
 
 const ceoStageUnlockLesson = {
 	id: "1.9",
@@ -58,75 +59,84 @@ const ceoStageUnlockLesson = {
 } satisfies LessonConfig;
 
 describe("stage unlock summary", () => {
-	it("routes CEO repair actions through canonical lesson keys", () => {
+	const pinnedArtifacts = [
+		{
+			artifactKey: "user_statement",
+			artifactLabel: "User",
+			artifactType: "brief",
+			lessonKey: "pick-one-user",
+			lessonId: "1.4",
+			lessonTitle: "Pick One User",
+			fieldValues: {
+				selected_problem_owner: "Independent coach",
+				selected_problem_statement: "Loses clients to inconsistent follow-up",
+				problem_when: "After discovery calls",
+			},
+			fields: [],
+		},
+		{
+			artifactKey: "outcome_statement",
+			artifactLabel: "Outcome",
+			artifactType: "brief",
+			lessonKey: "define-the-outcome",
+			lessonId: "1.5",
+			lessonTitle: "Define the Outcome",
+			fieldValues: {
+				messaging_person: "Independent coach",
+				messaging_problem: "Follow-up dies after the call",
+				messaging_what_it_does: "Creates the next touchpoint",
+				messaging_benefit: "Keeps leads moving",
+				outcome_statement_body:
+					"Help coaches book the next step before momentum dies.",
+			},
+			fields: [],
+		},
+		{
+			artifactKey: "research_notes",
+			artifactLabel: "Research",
+			artifactType: "mixed",
+			lessonKey: "light-research-not-a-thesis",
+			lessonId: "1.6",
+			lessonTitle: "Light Research",
+			fieldValues: {
+				research_table: [["Manual follow-up", "Leads go cold"]],
+			},
+			fields: [],
+		},
+		{
+			artifactKey: "core_flow_image",
+			artifactLabel: "Core flow",
+			artifactType: "image",
+			lessonKey: "map-the-core-flow",
+			lessonId: "2.1",
+			lessonTitle: "Map the Core Flow",
+			fieldValues: {
+				__core_flow_image_upload: {
+					kind: "upload",
+					url: "https://example.com/flow.png",
+				},
+			},
+			fields: [],
+		},
+		{
+			artifactKey: "scope_boundary",
+			artifactLabel: "Scope",
+			artifactType: "brief",
+			lessonKey: "map-the-core-flow",
+			lessonId: "2.1",
+			lessonTitle: "Map the Core Flow",
+			fieldValues: {
+				in_scope: ["Capture lead", "Send next-step follow-up"],
+				out_of_scope: ["CRM sync"],
+				v1_rationale: "Keep the first shipped path tight.",
+			},
+			fields: [],
+		},
+	];
+
+	it("keeps CEO repair actions as route-neutral lesson keys", () => {
 		const summary = buildStageUnlockSummary(ceoStageUnlockLesson, [
-			{
-				artifactKey: "user_statement",
-				artifactLabel: "User",
-				artifactType: "brief",
-				lessonId: "1.4",
-				lessonTitle: "Pick One User",
-				fieldValues: {
-					selected_problem_owner: "Independent coach",
-					selected_problem_statement: "Loses clients to inconsistent follow-up",
-					problem_when: "After discovery calls",
-				},
-				fields: [],
-			},
-			{
-				artifactKey: "outcome_statement",
-				artifactLabel: "Outcome",
-				artifactType: "brief",
-				lessonId: "1.5",
-				lessonTitle: "Define the Outcome",
-				fieldValues: {
-					messaging_person: "Independent coach",
-					messaging_problem: "Follow-up dies after the call",
-					messaging_what_it_does: "Creates the next touchpoint",
-					messaging_benefit: "Keeps leads moving",
-					outcome_statement_body:
-						"Help coaches book the next step before momentum dies.",
-				},
-				fields: [],
-			},
-			{
-				artifactKey: "research_notes",
-				artifactLabel: "Research",
-				artifactType: "mixed",
-				lessonId: "1.6",
-				lessonTitle: "Light Research",
-				fieldValues: {
-					research_table: [["Manual follow-up", "Leads go cold"]],
-				},
-				fields: [],
-			},
-			{
-				artifactKey: "core_flow_image",
-				artifactLabel: "Core flow",
-				artifactType: "image",
-				lessonId: "2.1",
-				lessonTitle: "Map the Core Flow",
-				fieldValues: {
-					__core_flow_image_upload: {
-						kind: "upload",
-						url: "https://example.com/flow.png",
-					},
-				},
-				fields: [],
-			},
-			{
-				artifactKey: "scope_boundary",
-				artifactLabel: "Scope",
-				artifactType: "brief",
-				lessonId: "2.1",
-				lessonTitle: "Map the Core Flow",
-				fieldValues: {
-					in_scope: ["Capture lead", "Send next-step follow-up"],
-					out_of_scope: ["CRM sync"],
-					v1_rationale: "Keep the first shipped path tight.",
-				},
-				fields: [],
-			},
+			...pinnedArtifacts,
 		]);
 
 		expect(summary).toBeTruthy();
@@ -134,24 +144,43 @@ describe("stage unlock summary", () => {
 			throw new Error("Expected CEO stage unlock summary.");
 		}
 
+		const sectionActionLessonKeys = Object.fromEntries(
+			summary.sections.map((section) => [
+				section.label,
+				section.action?.lessonKey,
+			]),
+		);
+
+		expect(sectionActionLessonKeys).toMatchObject({
+			"Who Design Is For": "pick-one-user",
+			"Outcome to Deliver": "define-the-outcome",
+			"Evidence to Preserve": "light-research-not-a-thesis",
+			"Core Flow to Keep": "map-the-core-flow",
+			"What Not to Design Yet": "map-the-core-flow",
+		});
+	});
+
+	it("decorates workbench CEO repair actions with canonical lesson hrefs", () => {
+		const summary = buildWorkbenchStageUnlockSummary(
+			ceoStageUnlockLesson,
+			pinnedArtifacts,
+		);
+
+		expect(summary).toBeTruthy();
+		if (!summary) {
+			throw new Error("Expected CEO workbench stage unlock summary.");
+		}
+
 		const sectionActionHrefs = Object.fromEntries(
 			summary.sections.map((section) => [section.label, section.action?.href]),
 		);
 
-		expect(sectionActionHrefs["Who Design Is For"]).toBe(
-			getLessonHref("pick-one-user"),
-		);
-		expect(sectionActionHrefs["Outcome to Deliver"]).toBe(
-			getLessonHref("define-the-outcome"),
-		);
-		expect(sectionActionHrefs["Evidence to Preserve"]).toBe(
-			getLessonHref("light-research-not-a-thesis"),
-		);
-		expect(sectionActionHrefs["Core Flow to Keep"]).toBe(
-			getLessonHref("map-the-core-flow"),
-		);
-		expect(sectionActionHrefs["What Not to Design Yet"]).toBe(
-			getLessonHref("map-the-core-flow"),
-		);
+		expect(sectionActionHrefs).toMatchObject({
+			"Who Design Is For": getLessonHref("pick-one-user"),
+			"Outcome to Deliver": getLessonHref("define-the-outcome"),
+			"Evidence to Preserve": getLessonHref("light-research-not-a-thesis"),
+			"Core Flow to Keep": getLessonHref("map-the-core-flow"),
+			"What Not to Design Yet": getLessonHref("map-the-core-flow"),
+		});
 	});
 });

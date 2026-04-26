@@ -6,7 +6,7 @@ import type { FormEvent } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { assertNever } from "@/features/course/lesson/lib/assert";
+import { assertNever } from "@/lib/assert";
 
 import { SignInResetFields } from "@/features/auth/sign-in/sign-in-reset-fields";
 import type { SignInStep } from "@/features/auth/sign-in/types";

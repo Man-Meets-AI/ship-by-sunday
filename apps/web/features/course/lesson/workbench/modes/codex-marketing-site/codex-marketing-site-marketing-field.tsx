@@ -1,7 +1,7 @@
 "use client";
 
 import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
-import { assert } from "@/features/course/lesson/lib/assert";
+import { assert } from "@/lib/assert";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Field,

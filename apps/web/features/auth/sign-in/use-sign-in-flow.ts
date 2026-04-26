@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 
 import { authViewConfig, routeConfig } from "@/config/product";
-import { assertNever } from "@/features/course/lesson/lib/assert";
+import { assertNever } from "@/lib/assert";
 import { reportClientError } from "@/features/observability/lib/client-error-report";
 
 import {

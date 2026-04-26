@@ -23,7 +23,7 @@ vi.mock("@/features/checkout/server/checkout-session-recovery", () => ({
 		getPendingCheckoutSessionIdFromCookieMock(),
 }));
 
-vi.mock("@/features/auth/sign-in/sign-in-page", () => ({
+vi.mock("@/app/(identity)/_components/sign-in-page", () => ({
 	SignInPage: (props: unknown) => {
 		signInPageMock(props);
 		return null;

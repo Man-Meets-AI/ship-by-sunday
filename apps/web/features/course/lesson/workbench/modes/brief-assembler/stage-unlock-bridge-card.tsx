@@ -1,4 +1,3 @@
-import type { StageUnlockBridge } from "@/features/course/lesson/model/stage-unlock";
 import { Badge } from "@/components/ui/badge";
 import {
 	Card,
@@ -7,6 +6,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import type { StageUnlockBridge } from "../../stage-unlock-summary";
 
 export function StageUnlockBridgeCard({
 	bridge,
