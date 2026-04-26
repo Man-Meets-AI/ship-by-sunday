@@ -1,10 +1,10 @@
 ---
 title: Copy The Codex Branch And Release Model
-status: active
+status: complete
 created_at: 2026-04-25
-completed_at: null
+completed_at: 2026-04-26
 summary: Replace the current dev-centered release control plane with a Codex-style model where feature branches target main, PR checks stay fast, heavier proof runs after main, and releases are cut from protected tags.
-post_build_recap: null
+post_build_recap: Main now contains the former dev product tree plus the Codex-style release model. PR #120 landed the migration, PR #133 removed retired compatibility contexts after branch protection was updated, the dev branch was deleted, and post-merge CI plus production proof passed on main.
 read_when:
   - Resuming the branch and release migration.
   - Replacing dev-to-main release workflows.
@@ -43,7 +43,12 @@ After this plan is implemented, a maintainer should be able to explain the deliv
 - [x] 2026-04-26 EDT: Added SBS-scoped Dependabot coverage for Bun workspaces and GitHub Actions; skipped CODEOWNERS, codespell, blob-size, and Codex issue automation for this slice because they require real owner enforcement or false-positive tuning outside the migration.
 - [x] 2026-04-26 EDT: Ran focused unit proof for release manifest, release evidence, release scope, engineering-intake runtime contract, and runtime export: 5 files and 21 tests passed.
 - [x] 2026-04-26 EDT: Ran required local validation: `bun run format`, `bun run plans:lint`, `bun run markdown:lint`, `git diff --check`, `bun run release:manifest:check`, `bun run release:evidence:build`, `bun run lint`, and `bun run typecheck` all passed.
-- [ ] Local conventional commits are still in progress.
+- [x] 2026-04-26 EDT: Opened and merged PR #120, `ci: adopt Codex-style main branch release model`, into `main` as `1d95f69b0b5f375d73398ad5a35f548fe0c0e7f5`.
+- [x] 2026-04-26 EDT: Verified post-merge `main` workflows for `1d95f69b0b5f375d73398ad5a35f548fe0c0e7f5`: CI, Convex Production Deploy, and Production Release Proof all completed successfully.
+- [x] 2026-04-26 EDT: Updated live `main` branch protection so the required contexts are the durable `static` and `integration` jobs.
+- [x] 2026-04-26 EDT: Disabled the remote-only `Deployment Smoke` workflow and deleted the protected remote `dev` branch after the new `main` state was verified.
+- [x] 2026-04-26 EDT: Opened and merged PR #133, `ci: remove retired compatibility contexts`, into `main` as `aff44bde75cc50f37d8b086ee00b63d424774fb2`.
+- [x] 2026-04-26 EDT: Verified post-merge `main` workflows for `aff44bde75cc50f37d8b086ee00b63d424774fb2`: CI, Convex Production Deploy, and Production Release Proof all completed successfully.
 
 ## Surprises & Discoveries
 
@@ -105,7 +110,9 @@ The Codex `.github` parity pass stayed intentionally narrow. SBS adapted the lif
 
 ## Outcomes & Retrospective
 
-The local repository-file slice is implemented on `codex-style-main-reconciliation`. The branch contains the raw reconciliation commit `2c74c1c`, whose tree exactly matches `origin/dev` and whose parent is `origin/main`, followed by tracked-file changes that replace active docs, workflow wiring, root scripts, and dead release-control-plane files with the Codex-style model. Remote configuration remains pending for the parent landing agent: GitHub branch protection still requires `static`, `integration`, `browser-smoke`, and `cli`; the active remote `Deployment Smoke` workflow still needs disabling or replacement; and the `dev.man-meets-ai.com` Vercel alias still needs a final retire-or-document decision.
+The migration is complete on `main`. PR #120 landed the raw reconciliation commit `2c74c1c`, whose tree exactly matched the former `origin/dev` tree, followed by the tracked-file migration that replaced active docs, workflow wiring, root scripts, and dead release-control-plane files with the Codex-style model. PR #133 then removed the temporary `browser-smoke` and `cli` compatibility jobs after live branch protection was updated to require only `static` and `integration`.
+
+The live repository policy now matches the intended steady state. `main` is the only release branch from this migration, the remote `dev` branch is deleted, the remote-only `Deployment Smoke` workflow is disabled, and current `main` branch protection requires `static` and `integration`. Post-merge checks on `aff44bde75cc50f37d8b086ee00b63d424774fb2` passed for CI, Convex Production Deploy, and Production Release Proof. The `dev.man-meets-ai.com` alias remains documented as non-authoritative compatibility surface rather than release-candidate authority; removing that alias is intentionally a separate live-domain operation.
 
 ## Context and Orientation
 
@@ -245,13 +252,13 @@ Local validation receipt from 2026-04-26:
     Test Files  5 passed (5)
     Tests  21 passed (21)
 
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-04-25-codex-style-branch-release-model.md
-    docs/exec-plans/active/2026-04-25-codex-style-branch-release-model.md: ok
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-04-25-codex-style-branch-release-model.md
+    docs/exec-plans/completed/2026-04-25-codex-style-branch-release-model.md: ok
 
-    bun run markdown:lint -- --paths AGENTS.md README.md CONTRIBUTING.md CHANGELOG.md docs/release-workflow.md docs/design-docs/scripts.md docs/design-docs/integrations.md docs/internal/observability.md .github/workflows/README.md .github/pull_request_template.md .github/codex/release-policy.md apps/web/content/docs/ship-live.mdx apps/web/content/docs/deploy-to-vercel.mdx docs/exec-plans/active/2026-04-25-codex-style-branch-release-model.md
+    bun run markdown:lint -- --paths AGENTS.md README.md CONTRIBUTING.md CHANGELOG.md docs/release-workflow.md docs/design-docs/scripts.md docs/design-docs/integrations.md docs/internal/observability.md .github/workflows/README.md .github/pull_request_template.md .github/codex/release-policy.md apps/web/content/docs/ship-live.mdx apps/web/content/docs/deploy-to-vercel.mdx docs/exec-plans/completed/2026-04-25-codex-style-branch-release-model.md
     apps/web/content/docs/deploy-to-vercel.mdx: ok
     apps/web/content/docs/ship-live.mdx: ok
-    docs/exec-plans/active/2026-04-25-codex-style-branch-release-model.md: ok
+    docs/exec-plans/completed/2026-04-25-codex-style-branch-release-model.md: ok
 
     git diff --check
     passed with no output
@@ -336,8 +343,8 @@ Run these local checks before opening the migration PR:
     bun run typecheck
     bun run release:manifest:check
     bun run release:evidence:build
-    bun run markdown:lint -- --paths docs/release-workflow.md .github/workflows/README.md .github/pull_request_template.md AGENTS.md README.md docs/design-docs/scripts.md docs/exec-plans/active/2026-04-25-codex-style-branch-release-model.md
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-04-25-codex-style-branch-release-model.md
+    bun run markdown:lint -- --paths docs/release-workflow.md .github/workflows/README.md .github/pull_request_template.md AGENTS.md README.md docs/design-docs/scripts.md docs/exec-plans/completed/2026-04-25-codex-style-branch-release-model.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-04-25-codex-style-branch-release-model.md
     git diff --check
 
 Run these repository-shape checks before merging:
