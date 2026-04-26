@@ -28,7 +28,7 @@ vi.mock("@/features/checkout/server/checkout-session-recovery", () => ({
 	isStripeCheckoutSessionPaid: () => true,
 }));
 
-vi.mock("@/features/auth/sign-up/post-checkout-sign-up-page", () => ({
+vi.mock("@/app/(identity)/_components/post-checkout-sign-up-page", () => ({
 	PostCheckoutSignUpPage: ({
 		checkoutEmail,
 		redirectPath,

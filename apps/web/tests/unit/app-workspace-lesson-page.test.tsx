@@ -38,7 +38,7 @@ vi.mock("next/navigation", () => ({
 	notFound: () => notFoundMock(),
 }));
 
-vi.mock("@/features/course/shared/components/app-shell", () => ({
+vi.mock("@/features/workspace-shell/components/app-shell", () => ({
 	AppShell: ({
 		children,
 		localNav,

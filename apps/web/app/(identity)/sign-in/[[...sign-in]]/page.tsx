@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { SignInPage } from "@/features/auth/sign-in/sign-in-page";
+import { SignInPage } from "@/app/(identity)/_components/sign-in-page";
 import {
 	buildSignUpHref,
 	getSafeRedirectPath,

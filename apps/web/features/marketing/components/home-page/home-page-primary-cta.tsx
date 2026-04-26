@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { type HomePageCtaTarget } from "@/config/product";
 import { CheckoutButton } from "@/features/checkout/components/checkout-button";
-import { assertNever } from "@/features/course/lesson/lib/assert";
+import { assertNever } from "@/lib/assert";
 
 type HomePagePrimaryCtaProps = {
 	readonly target: HomePageCtaTarget;

@@ -47,11 +47,11 @@ vi.mock("@clerk/nextjs", () => ({
 
 globalThis.React = React;
 
-import { AppShell } from "@/features/course/shared/components/app-shell";
+import { AppShell } from "@/features/workspace-shell/components/app-shell";
 import type {
 	AppShellLocalNav,
 	AppShellPrimaryNav,
-} from "@/features/course/shared/components/app-shell/app-shell-props";
+} from "@/features/workspace-shell/components/app-shell/app-shell-props";
 
 const blueprintStageStatuses = deriveStageStatus(
 	createCompleteProjectDefinition().facts,

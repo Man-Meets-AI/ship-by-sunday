@@ -1,5 +1,5 @@
-import { getLessonHref } from "../../course/lesson/model/manifest";
-import type { BonusMissionState } from "../../execute-ship/lib/bonus-mission-types";
+import { getLessonHref } from "@/features/course/lesson/routing/lesson-routes";
+import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
 import type { PostReviewNavigationTargets } from "./post-review-destination";
 
 export type WorkspacePrimaryNavState =

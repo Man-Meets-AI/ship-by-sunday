@@ -7,7 +7,6 @@ import {
 	getWorkbenchSectionStates,
 	getWorkbenchSections,
 } from "@/features/course/lesson/model/registry";
-import { buildStageUnlockSummary } from "@/features/course/lesson/model/stage-unlock";
 import { BrandKitWorkbench } from "./modes/brand-kit/brand-kit-workbench";
 import { BriefAssemblerWorkbench } from "./modes/brief-assembler-workbench";
 import { BuildProductIterationWorkbench } from "./modes/build-product-iteration/build-product-iteration-workbench";
@@ -39,6 +38,7 @@ import { TrackerLogWorkbench } from "./modes/tracker-log-workbench";
 import { VisualDirectionWorkbench } from "./modes/visual-direction-workbench";
 import { WorkbenchContainer } from "./shared/workbench-container";
 import { WorkbenchHeader } from "./shared/workbench-header";
+import { buildWorkbenchStageUnlockSummary } from "./stage-unlock-summary";
 import type { WorkbenchModeComponent, WorkbenchRendererProps } from "./types";
 
 const modeRenderers: Record<WorkbenchType, WorkbenchModeComponent> = {
@@ -105,7 +105,10 @@ export function WorkbenchRenderer({
 		fieldValues,
 		pinnedArtifacts,
 	);
-	const stageUnlockSummary = buildStageUnlockSummary(lesson, pinnedArtifacts);
+	const stageUnlockSummary = buildWorkbenchStageUnlockSummary(
+		lesson,
+		pinnedArtifacts,
+	);
 	const workbenchSections = getWorkbenchSections(lesson);
 	const sectionStates = getWorkbenchSectionStates(lesson, fieldValues);
 	const objectiveTasks = getObjectiveTasks(lesson, fieldValues, {

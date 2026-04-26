@@ -20,7 +20,7 @@ vi.mock("@/convex/_generated/api", () => ({
 	},
 }));
 
-vi.mock("@/features/checkout/components/checkout-success-view", () => ({
+vi.mock("@/app/checkout/success/_components/checkout-success-view", () => ({
 	CheckoutSuccessView: () => null,
 }));
 

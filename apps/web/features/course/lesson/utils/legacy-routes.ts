@@ -1,8 +1,8 @@
+import { lessonRegistry } from "@/features/course/lesson/model/manifest";
 import {
 	getLessonHref,
 	legacyRouteAliases,
-	lessonRegistry,
-} from "@/features/course/lesson/model/manifest";
+} from "@/features/course/lesson/routing/lesson-routes";
 
 export const legacyLessonRedirects = {
 	...Object.fromEntries(

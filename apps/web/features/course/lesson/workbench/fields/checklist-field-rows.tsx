@@ -2,7 +2,7 @@
 
 import { Fragment, useId } from "react";
 import { Separator } from "@/components/ui/separator";
-import { assert } from "@/features/course/lesson/lib/assert";
+import { assert } from "@/lib/assert";
 import type {
 	ChecklistItemValue,
 	WorkbenchField,

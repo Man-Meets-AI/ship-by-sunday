@@ -1,11 +1,7 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 
-import {
-	apiRouteConfig,
-	getCheckoutSuccessHref,
-	productConfig,
-	routeConfig,
-} from "@/config/product";
+import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
+import { buildStripeCheckoutSessionCreateParams } from "@/features/checkout/server/checkout-session-params";
 import { captureServerError } from "@/features/observability/server/capture-server-error";
 import { getUnexpectedApiErrorResponse } from "@/features/observability/server/api-error-response";
 import {
@@ -16,9 +12,7 @@ import { buildStripeCheckoutFailureContext } from "@/features/observability/serv
 import { createPendingCheckoutSessionCookieOptions } from "@/features/checkout/lib/pending-checkout-session-cookie";
 import {
 	assertManagedStripePriceMatchesProductConfig,
-	getStripeCheckoutDiscounts,
 	getStripe,
-	getStripeLineItem,
 } from "@/platform/billing/stripe";
 import { getAppBaseUrl } from "@/platform/next/app-url";
 
@@ -36,29 +30,13 @@ export async function POST(request: Request) {
 		const stripe = getStripe();
 		await assertManagedStripePriceMatchesProductConfig(stripe);
 		const user = userId ? await currentUser() : null;
-		const lineItem = getStripeLineItem();
-		const checkoutDiscounts = getStripeCheckoutDiscounts();
-		const session = await stripe.checkout.sessions.create({
-			mode: "payment",
-			...(checkoutDiscounts ? {} : { allow_promotion_codes: true }),
-			billing_address_collection: "auto",
-			cancel_url: `${appBaseUrl}${routeConfig.checkoutCancel}`,
-			success_url: `${appBaseUrl}${getCheckoutSuccessHref("{CHECKOUT_SESSION_ID}")}`,
-			client_reference_id: userId ?? undefined,
-			customer_email: user?.primaryEmailAddress?.emailAddress ?? undefined,
-			...(checkoutDiscounts ? { discounts: checkoutDiscounts } : {}),
-			line_items: [lineItem],
-			metadata: {
-				...(userId ? { clerkUserId: userId } : {}),
-				courseSlug: productConfig.courseSlug,
-			},
-			payment_intent_data: {
-				metadata: {
-					...(userId ? { clerkUserId: userId } : {}),
-					courseSlug: productConfig.courseSlug,
-				},
-			},
-		});
+		const session = await stripe.checkout.sessions.create(
+			buildStripeCheckoutSessionCreateParams({
+				appBaseUrl,
+				clerkUserId: userId,
+				customerEmail: user?.primaryEmailAddress?.emailAddress ?? null,
+			}),
+		);
 
 		if (!session.url) {
 			await captureServerError({

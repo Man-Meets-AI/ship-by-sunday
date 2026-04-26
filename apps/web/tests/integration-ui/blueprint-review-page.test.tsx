@@ -21,7 +21,7 @@ const redirectMock = vi.fn((href: string) => {
 });
 const pushMock = vi.fn();
 
-vi.mock("@/features/course/shared/components/app-shell", () => ({
+vi.mock("@/features/workspace-shell/components/app-shell", () => ({
 	AppShell: ({
 		title,
 		subtitle,
@@ -93,7 +93,7 @@ vi.mock("next/navigation", () => ({
 	}),
 }));
 
-import { BlueprintReviewPage } from "@/features/blueprint-flow/components/blueprint-review-page";
+import { BlueprintReviewPage } from "@/app/(workspace)/review/_components/blueprint-review-page";
 
 describe("BlueprintReviewPage", () => {
 	beforeEach(() => {

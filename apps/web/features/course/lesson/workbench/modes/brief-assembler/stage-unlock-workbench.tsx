@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 
-import type { StageUnlockSection } from "@/features/course/lesson/model/stage-unlock";
 import { Badge } from "@/components/ui/badge";
 import {
 	Card,
@@ -10,6 +9,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import type { WorkbenchModeProps } from "../../types";
+import type { WorkbenchStageUnlockSection } from "../../stage-unlock-summary";
 import { StageUnlockBridgeCard } from "./stage-unlock-bridge-card";
 import { StageUnlockReviewCard } from "./stage-unlock-review-card";
 import { StageUnlockSectionCard } from "./stage-unlock-section-card";
@@ -55,7 +55,7 @@ function getNextStepSupportCopy(preset: "ceo" | "design" | "build") {
 	}
 }
 
-function getSectionGridClass(section: StageUnlockSection) {
+function getSectionGridClass(section: WorkbenchStageUnlockSection) {
 	if (section.galleryImageUrls?.length || section.value.length > 420) {
 		return "lg:col-span-2";
 	}

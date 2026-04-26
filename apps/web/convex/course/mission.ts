@@ -1,7 +1,5 @@
-import {
-	getLessonByKey,
-	getLessonHref,
-} from "../../features/course/lesson/model/manifest";
+import { getLessonByKey } from "../../features/course/lesson/model/curriculum";
+import { getLessonHref } from "../../features/course/lesson/routing/lesson-routes";
 import { getLessonMapHref } from "../../features/workspace-navigation/lib/lesson-map-href";
 import {
 	COURSE_SLUG,

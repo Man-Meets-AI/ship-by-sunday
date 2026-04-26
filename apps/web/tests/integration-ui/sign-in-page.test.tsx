@@ -46,7 +46,7 @@ vi.mock("@/features/observability/lib/client-error-report", () => ({
 	reportClientError: (...args: unknown[]) => reportClientErrorMock(...args),
 }));
 
-import { SignInPage } from "@/features/auth/sign-in/sign-in-page";
+import { SignInPage } from "@/app/(identity)/_components/sign-in-page";
 
 function createSignInMock(overrides?: Partial<Record<string, unknown>>) {
 	return {

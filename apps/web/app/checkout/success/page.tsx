@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { api } from "@/convex/_generated/api";
-import { CheckoutSuccessView } from "@/features/checkout/components/checkout-success-view";
+import { CheckoutSuccessView } from "@/app/checkout/success/_components/checkout-success-view";
 import { getCheckoutSessionState } from "@/features/checkout/server/checkout-session";
 import { getPendingCheckoutSessionIdFromCookie } from "@/features/checkout/server/checkout-session-recovery";
 import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";

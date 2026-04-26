@@ -1,7 +1,6 @@
 import Stripe from "stripe";
 
 import { apiConfig, productConfig } from "@/config/product";
-import { COURSE_SLUG } from "@/features/course/lesson/model/registry";
 import { requireServerEnv, serverEnv } from "@/platform/env/server";
 
 export const STRIPE_API_VERSION = apiConfig.stripeApiVersion;
@@ -54,7 +53,7 @@ export function getStripeLineItem() {
 				name: productConfig.name,
 				description: productConfig.promise,
 				metadata: {
-					courseSlug: COURSE_SLUG,
+					courseSlug: productConfig.courseSlug,
 				},
 			},
 			unit_amount: productConfig.priceUsdCents,

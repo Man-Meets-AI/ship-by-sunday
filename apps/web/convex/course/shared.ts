@@ -3,7 +3,7 @@ import type { LessonConfig } from "../../features/course/lesson/model/contracts"
 import {
 	CURRICULUM_VERSION,
 	getLessonByKey,
-} from "../../features/course/lesson/model/manifest";
+} from "../../features/course/lesson/model/curriculum";
 import {
 	hydrateReferenceGalleryValue,
 	isReferenceGalleryValue,

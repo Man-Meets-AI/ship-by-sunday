@@ -1,13 +1,14 @@
 import type { ArtifactType, LessonConfig, UploadFieldValue } from "./contracts";
 import { CORE_FLOW_IMAGE_FIELD_ID } from "./core-flow";
-import { getLessonHref } from "./curriculum";
 import { getFilledTableRows } from "./table";
 
 const LEGACY_SCOPE_STORYBOARD_SLOTS = 12;
-const EDIT_USER_LESSON_HREF = getLessonHref("pick-one-user");
-const EDIT_OUTCOME_LESSON_HREF = getLessonHref("define-the-outcome");
-const EDIT_EVIDENCE_LESSON_HREF = getLessonHref("light-research-not-a-thesis");
-const EDIT_FLOW_LESSON_HREF = getLessonHref("map-the-core-flow");
+
+export type StageUnlockEditLessonKey =
+	| "pick-one-user"
+	| "define-the-outcome"
+	| "light-research-not-a-thesis"
+	| "map-the-core-flow";
 
 function getLegacyScopeStoryboardStepTitlesForPreview(
 	fieldValues: Record<string, unknown>,
@@ -27,18 +28,19 @@ function getLegacyScopeStoryboardStepTitlesForPreview(
 	return titles;
 }
 
-type StageUnlockPreview = {
+export type StageUnlockPreview = {
 	artifactKey: string;
 	artifactLabel: string;
 	contextTitle?: string;
 	artifactType: ArtifactType;
+	lessonKey: string;
 	lessonId: string;
 	lessonTitle: string;
 	fieldValues: Record<string, unknown>;
 	fields: Array<[string, unknown]>;
 };
 
-type StageUnlockPinnedArtifact = StageUnlockPreview;
+export type StageUnlockPinnedArtifact = StageUnlockPreview;
 
 export type StageUnlockStat = {
 	label: string;
@@ -47,7 +49,7 @@ export type StageUnlockStat = {
 
 export type StageUnlockSectionAction = {
 	label: string;
-	href: string;
+	lessonKey: StageUnlockEditLessonKey;
 };
 
 export type StageUnlockSection = {
@@ -165,6 +167,7 @@ function createPreview(
 		artifactLabel: lesson.artifact.label,
 		contextTitle: lesson.artifact.contextTitle,
 		artifactType: lesson.artifact.type,
+		lessonKey: lesson.lessonKey,
 		lessonId: lesson.id,
 		lessonTitle: lesson.title,
 		fieldValues,
@@ -324,28 +327,34 @@ function buildCeoStageUnlockSummary(
 			{
 				label: "Who Design Is For",
 				value: who,
-				action: { label: "Edit user", href: EDIT_USER_LESSON_HREF },
+				action: { label: "Edit user", lessonKey: "pick-one-user" },
 			},
 			{
 				label: "Outcome to Deliver",
 				value: outcome,
-				action: { label: "Edit outcome", href: EDIT_OUTCOME_LESSON_HREF },
+				action: {
+					label: "Edit outcome",
+					lessonKey: "define-the-outcome",
+				},
 			},
 			{
 				label: "Evidence to Preserve",
 				value: evidence,
-				action: { label: "Edit evidence", href: EDIT_EVIDENCE_LESSON_HREF },
+				action: {
+					label: "Edit evidence",
+					lessonKey: "light-research-not-a-thesis",
+				},
 			},
 			{
 				label: "Core Flow to Keep",
 				value: flow,
 				imageUrl: flowImageUrl,
-				action: { label: "Edit flow", href: EDIT_FLOW_LESSON_HREF },
+				action: { label: "Edit flow", lessonKey: "map-the-core-flow" },
 			},
 			{
 				label: "What Not to Design Yet",
 				value: scope,
-				action: { label: "Edit scope", href: EDIT_FLOW_LESSON_HREF },
+				action: { label: "Edit scope", lessonKey: "map-the-core-flow" },
 			},
 		] as StageUnlockSection[]
 	).filter((section) => section.value.length > 0);
@@ -672,7 +681,7 @@ function buildBuildStageUnlockSummary(
 export function buildStageUnlockSummary(
 	lesson: LessonConfig,
 	pinnedArtifacts: StageUnlockPinnedArtifact[] = [],
-) {
+): StageUnlockSummary | null {
 	const briefAssembler = lesson.briefAssembler;
 	if (lesson.workbench !== "brief_assembler") {
 		return null;
@@ -691,4 +700,18 @@ export function buildStageUnlockSummary(
 		default:
 			return null;
 	}
+}
+
+export function buildStageUnlockArtifactPreview(
+	lesson: LessonConfig,
+	pinnedArtifacts: StageUnlockPinnedArtifact[] = [],
+) {
+	return buildStageUnlockSummary(lesson, pinnedArtifacts)?.preview ?? null;
+}
+
+export function getStageUnlockObjectiveTasks(
+	lesson: LessonConfig,
+	pinnedArtifacts: StageUnlockPinnedArtifact[] = [],
+) {
+	return buildStageUnlockSummary(lesson, pinnedArtifacts)?.tasks ?? [];
 }

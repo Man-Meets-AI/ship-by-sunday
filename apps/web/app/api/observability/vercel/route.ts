@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
-import { apiRouteConfig } from "@/config/product";
+import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
 import { normalizeIncidentEvent } from "@/features/observability/lib/incident";
 import { captureServerError } from "@/features/observability/server/capture-server-error";
 import { ingestErrorEvent } from "@/features/observability/server/ingest-error-event";

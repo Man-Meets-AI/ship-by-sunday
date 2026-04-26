@@ -14,7 +14,13 @@ read_when:
 
 ## Current State
 
-There are no active Program packets right now. Active Program folders belong under `docs/programs/active/<YYYY-MM-DD-program-id>/`. Completed Program packets live under `docs/programs/completed/`.
+There are no active Program packets right now.
+
+Recently completed:
+
+- `docs/programs/completed/2026-04-26-app-structure-refactor/`: completed refactor Program that reduced and disciplined the Ship by Sunday app structure across App Router routes, Convex, Stripe, shared UI, platform boundaries, and durable product domains.
+
+Active Program folders belong under `docs/programs/active/<YYYY-MM-DD-program-id>/`. Completed Program packets live under `docs/programs/completed/`.
 
 Use a Program only when an initiative spans several ExecPlans and needs durable initiative-level truth. Use an ExecPlan for one bounded implementation, validation, and review slice.
 

@@ -1,4 +1,4 @@
-import { AppShell } from "@/features/course/shared/components/app-shell";
+import { AppShell } from "@/features/workspace-shell/components/app-shell";
 import { buildBonusShellMission } from "@/features/execute-ship/lib/bonus-library-presentation";
 import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
 import { LessonMapSurface } from "./lesson-map-surface";

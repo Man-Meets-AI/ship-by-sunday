@@ -26,7 +26,7 @@ vi.mock("@/features/observability/lib/client-error-report", () => ({
 	reportClientError: (...args: unknown[]) => reportClientErrorMock(...args),
 }));
 
-import { SsoCallbackPage } from "@/features/auth/sign-in/sso-callback-page";
+import { SsoCallbackPage } from "@/app/(identity)/_components/sso-callback-page";
 
 function createSignInState(overrides?: Partial<Record<string, unknown>>) {
 	return {

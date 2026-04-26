@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { assert } from "@/features/course/lesson/lib/assert";
+import { assert } from "@/lib/assert";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
 	Select,

@@ -41,7 +41,7 @@ vi.mock("@/features/observability/lib/client-error-report", () => ({
 	reportClientError: (...args: unknown[]) => reportClientErrorMock(...args),
 }));
 
-import { PostCheckoutSignUpPage } from "@/features/auth/sign-up/post-checkout-sign-up-page";
+import { PostCheckoutSignUpPage } from "@/app/(identity)/_components/post-checkout-sign-up-page";
 
 function createSignUpState(overrides?: Partial<Record<string, unknown>>) {
 	const signUp = {

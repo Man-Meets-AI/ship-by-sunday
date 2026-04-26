@@ -1,7 +1,5 @@
-import {
-	getLessonHref,
-	type LessonConfig,
-} from "@/features/course/lesson/model/manifest";
+import type { LessonConfig } from "@/features/course/lesson/model/manifest";
+import { getLessonHref } from "@/features/course/lesson/routing/lesson-routes";
 import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
 import {
 	getBonusBlockPresentation,

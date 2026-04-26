@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ConvexError } from "convex/values";
 
+vi.mock("server-only", () => ({}));
+
 const { authMock, fetchMutationMock } = vi.hoisted(() => ({
 	authMock: vi.fn(),
 	fetchMutationMock: vi.fn(),

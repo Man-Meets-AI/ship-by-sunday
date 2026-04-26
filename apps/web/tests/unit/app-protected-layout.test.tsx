@@ -7,9 +7,12 @@ vi.mock("@/features/product-access/server/product-access", () => ({
 	getServerProductAccess: getServerProductAccessMock,
 }));
 
-vi.mock("@/features/product-access/components/access-required-page", () => ({
-	AccessRequiredPage: () => <div>Access recovery</div>,
-}));
+vi.mock(
+	"@/app/(workspace)/_components/access-required/access-required-page",
+	() => ({
+		AccessRequiredPage: () => <div>Access recovery</div>,
+	}),
+);
 
 describe("protected app layout", () => {
 	beforeEach(() => {

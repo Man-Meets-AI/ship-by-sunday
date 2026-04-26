@@ -1,6 +1,6 @@
 import { api } from "@/convex/_generated/api";
 import { isReviewAutoDownloadEnabled } from "@/features/blueprint-flow/lib/review-download-handoff";
-import { BlueprintReviewPage } from "@/features/blueprint-flow/components/blueprint-review-page";
+import { BlueprintReviewPage } from "@/app/(workspace)/review/_components/blueprint-review-page";
 import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
 
 export default async function Page({

@@ -1,14 +1,23 @@
-import type { AuthPageSupportPanelContent } from "@/features/auth/sign-in/auth-page-support-panel";
 import { getPricingHref } from "@/features/auth/sign-in/sign-in-route-utils";
 import type {
 	SignInAuthError,
 	SignInStep,
 } from "@/features/auth/sign-in/types";
-import { assertNever } from "@/features/course/lesson/lib/assert";
+import { assertNever } from "@/lib/assert";
+
+type SignInPageSupportPanelContent = {
+	action?: {
+		href: string;
+		label: string;
+	};
+	bullets: readonly string[];
+	description: string;
+	title: string;
+};
 
 type SignInPageContent = {
 	description: string;
-	supportPanel: AuthPageSupportPanelContent;
+	supportPanel: SignInPageSupportPanelContent;
 	title: string;
 };
 

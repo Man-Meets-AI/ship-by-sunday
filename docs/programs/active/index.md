@@ -25,4 +25,8 @@ Inside that folder:
 - `program.md` is the canonical Program document
 - the research passes, normalized tracks, synthesis artifacts, planning briefs, and `current-planning-brief.txt` live beside it
 
-There are no active Program folders right now. Completed Program packets live under `docs/programs/completed/`.
+Active Program folders:
+
+- None.
+
+Completed Program packets live under `docs/programs/completed/`.

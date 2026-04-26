@@ -1,5 +1,3 @@
-import { routeConfig } from "@/config/product";
-import { getLessonMapHref } from "@/features/workspace-navigation/lib/lesson-map-href";
 import type {
 	BlockConfig,
 	BlockId,
@@ -436,13 +434,8 @@ export const lessonRouteIndex = Object.fromEntries(
 	lessonRegistry.map((lesson) => [lesson.routeSegment, lesson]),
 ) as Record<string, LessonConfig>;
 
-export const legacyRouteAliases = {
-	"1.0": getLessonMapHref(),
-	...Object.fromEntries(
-		Object.entries(curriculumManifest.legacyRouteAliases ?? {}).map(
-			([legacyId, routeSegment]) => [legacyId, `/lesson/${routeSegment}`],
-		),
-	),
+export const legacyRouteAliasSegments = {
+	...(curriculumManifest.legacyRouteAliases ?? {}),
 } as Record<string, string>;
 
 export function getLessonById(displayLabel: string): LessonConfig | null {
@@ -470,15 +463,6 @@ export function getLesson(identifier: string): LessonConfig | undefined {
 
 export function getLessonDisplayLabel(identifier: string): string | null {
 	return getLesson(identifier)?.displayLabel ?? null;
-}
-
-export function getLessonHref(identifier: string): string {
-	if (identifier === "1.0" || identifier === routeConfig.mission) {
-		return getLessonMapHref();
-	}
-
-	const lesson = getLesson(identifier);
-	return lesson ? `/lesson/${lesson.routeSegment}` : `/lesson/${identifier}`;
 }
 
 export function getPreviousLesson(identifier: string): LessonConfig | null {

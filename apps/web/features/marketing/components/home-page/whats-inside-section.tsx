@@ -1,6 +1,6 @@
 "use client";
 
-import { PointerHighlight } from "@/components/ui/pointer-highlight";
+import { PointerHighlight } from "@/features/marketing/components/effects/pointer-highlight";
 import type { HomePageContent } from "@/features/marketing/content/home";
 import { ScrollReveal } from "./scroll-reveal";
 

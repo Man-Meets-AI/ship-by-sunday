@@ -18,7 +18,7 @@ vi.mock("next/link", () => ({
 	),
 }));
 
-vi.mock("@/features/course/shared/components/app-shell", () => ({
+vi.mock("@/features/workspace-shell/components/app-shell", () => ({
 	AppShell: ({
 		children,
 		title,

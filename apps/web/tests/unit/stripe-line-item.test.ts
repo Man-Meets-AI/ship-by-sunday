@@ -2,7 +2,8 @@ import Stripe from "stripe";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { productConfig } from "@/config/product";
-import { COURSE_SLUG } from "@/features/course/lesson/model/registry";
+
+vi.mock("server-only", () => ({}));
 
 describe("getStripeLineItem", () => {
 	const originalEnv = { ...process.env };
@@ -53,7 +54,7 @@ describe("getStripeLineItem", () => {
 					name: productConfig.name,
 					description: productConfig.promise,
 					metadata: {
-						courseSlug: COURSE_SLUG,
+						courseSlug: productConfig.courseSlug,
 					},
 				},
 				unit_amount: productConfig.priceUsdCents,

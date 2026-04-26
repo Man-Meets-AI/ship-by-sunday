@@ -1,10 +1,10 @@
 import Link from "next/link";
 
-import type { StageUnlockSection } from "@/features/course/lesson/model/stage-unlock";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import type { WorkbenchStageUnlockSection } from "../../stage-unlock-summary";
 
 const sectionHeaderClass = "border-b border-border/60 px-4 py-3 sm:px-5";
 
@@ -45,7 +45,7 @@ export function StageUnlockSectionCard({
 	section,
 	className,
 }: {
-	section: StageUnlockSection;
+	section: WorkbenchStageUnlockSection;
 	className?: string;
 }) {
 	const { bodyLines, sourceLines } = splitSectionLines(section.value);

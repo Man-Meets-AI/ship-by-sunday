@@ -19,7 +19,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { api } from "@/convex/_generated/api";
 import { LessonVideoPlayer } from "@/features/course/lesson/components/lesson-video-player";
-import { assert } from "@/features/course/lesson/lib/assert";
+import { assert } from "@/lib/assert";
 import type {
 	LessonConfig,
 	LessonContent,

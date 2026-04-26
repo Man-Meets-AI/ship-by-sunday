@@ -8,7 +8,6 @@ import { timingConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import {
 	getLessonByKey,
-	getLessonHref,
 	type LessonConfig,
 } from "@/features/course/lesson/model/manifest";
 import {
@@ -19,6 +18,7 @@ import type {
 	CompletionIssue,
 	PersistedFieldValues,
 } from "@/features/course/lesson/model/registry";
+import { getLessonHref } from "@/features/course/lesson/routing/lesson-routes";
 import { getLessonMapHref } from "@/features/workspace-navigation/lib/lesson-map-href";
 
 type CompletionErrorData = {

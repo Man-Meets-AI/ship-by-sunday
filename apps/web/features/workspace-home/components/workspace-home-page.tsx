@@ -1,4 +1,4 @@
-import { AppShell } from "@/features/course/shared/components/app-shell";
+import { AppShell } from "@/features/workspace-shell/components/app-shell";
 import { WorkspaceHomeHero } from "@/features/workspace-home/components/workspace-home-hero";
 import { WorkspaceHomeModuleList } from "@/features/workspace-home/components/workspace-home-module-list";
 import { WorkspaceHomeNextSteps } from "@/features/workspace-home/components/workspace-home-next-steps";

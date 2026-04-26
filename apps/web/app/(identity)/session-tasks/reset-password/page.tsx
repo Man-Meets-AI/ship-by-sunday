@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { TaskResetPassword } from "@clerk/nextjs";
 
-import { AuthPageShell } from "@/features/auth/sign-in/auth-page-shell";
-import { resetPasswordSupportPanelContent } from "@/features/auth/sign-in/identity-route-panel-content";
+import { AuthPageShell } from "@/app/(identity)/_components/auth-page-shell";
+import { resetPasswordSupportPanelContent } from "@/app/(identity)/_lib/identity-route-panel-content";
 import { getTaskRedirectUrlComplete } from "@/features/auth/sign-in/sign-in-route-utils";
 
 export const metadata: Metadata = {

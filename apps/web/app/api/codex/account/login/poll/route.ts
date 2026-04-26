@@ -1,4 +1,4 @@
-import { apiRouteConfig } from "@/config/product";
+import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
 import {
 	getCodexAppServerUnavailableMessage,
 	isCodexAppServerRuntimeError,
