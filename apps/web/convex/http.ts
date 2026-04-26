@@ -9,7 +9,11 @@ import {
 	incidentSurfaceValues,
 	normalizeIncidentEvent,
 } from "../features/observability/lib/incident";
-import { buildStripeWebhookResultIncident } from "../features/observability/server/source-adapters/stripe-failure";
+import {
+	buildStripeWebhookResultIncidentEvent,
+	getStripeModeLabelFromSecretKey,
+	type StripeWebhookIncidentResult,
+} from "../features/observability/lib/stripe-webhook-incident";
 import type { Id } from "./_generated/dataModel";
 import { internal } from "./_generated/api";
 import { httpAction } from "./_generated/server";
@@ -72,6 +76,17 @@ async function recordIncidentAndMaybeNotify(
 	}
 }
 
+function buildConvexStripeWebhookResultIncident(
+	result: StripeWebhookIncidentResult,
+) {
+	return buildStripeWebhookResultIncidentEvent({
+		result,
+		stripeMode: getStripeModeLabelFromSecretKey(
+			requireConvexEnv("STRIPE_SECRET_KEY"),
+		),
+	});
+}
+
 http.route({
 	path: "/stripe/webhook",
 	method: "POST",
@@ -81,7 +96,7 @@ http.route({
 			await recordIncidentAndMaybeNotify(
 				ctx,
 				normalizeIncidentEvent({
-					...buildStripeWebhookResultIncident({
+					...buildConvexStripeWebhookResultIncident({
 						kind: "invalid_signature",
 						message: "Missing stripe-signature header.",
 					}),
@@ -108,7 +123,7 @@ http.route({
 					await recordIncidentAndMaybeNotify(
 						ctx,
 						normalizeIncidentEvent({
-							...buildStripeWebhookResultIncident(result),
+							...buildConvexStripeWebhookResultIncident(result),
 							pathname: "/stripe/webhook",
 						}),
 					);
@@ -120,7 +135,7 @@ http.route({
 					await recordIncidentAndMaybeNotify(
 						ctx,
 						normalizeIncidentEvent({
-							...buildStripeWebhookResultIncident(result),
+							...buildConvexStripeWebhookResultIncident(result),
 							pathname: "/stripe/webhook",
 						}),
 					);
@@ -138,7 +153,7 @@ http.route({
 					await recordIncidentAndMaybeNotify(
 						ctx,
 						normalizeIncidentEvent({
-							...buildStripeWebhookResultIncident(result),
+							...buildConvexStripeWebhookResultIncident(result),
 							pathname: "/stripe/webhook",
 						}),
 					);

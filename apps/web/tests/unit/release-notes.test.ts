@@ -19,7 +19,7 @@ const changelogSource = [
 	"",
 	"### Changelog",
 	"",
-	"Full Changelog: https://github.com/ParkerRex/ship-by-sunday/compare/v0.3.0...v0.4.0",
+	"Full Changelog: https://github.com/Man-Meets-AI/ship-by-sunday/compare/v0.3.0...v0.4.0",
 	"",
 	"## v0.3.0 - 2026-04-25",
 	"",
@@ -41,7 +41,7 @@ const passedProof = {
 	notes: null,
 	runId: "1",
 	status: "passed",
-	url: "https://github.com/ParkerRex/ship-by-sunday/actions/runs/1",
+	url: "https://github.com/Man-Meets-AI/ship-by-sunday/actions/runs/1",
 };
 
 const evidence = {
