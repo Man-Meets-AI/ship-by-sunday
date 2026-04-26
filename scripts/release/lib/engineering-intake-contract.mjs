@@ -6,9 +6,6 @@ export const ENGINEERING_INTAKE_COMPATIBILITY_POLICY =
 	"Within v1, additive optional fields are allowed. Any field removal, rename, or semantic redefinition must ship as v2.";
 
 export const runtimeIntakeSchemaVersion = "runtime-intake.v1";
-export const releaseIntakeSchemaVersion = "release-intake.v1";
-export const engineeringIntakeSnapshotSchemaVersion =
-	"engineering-intake.snapshot.v1";
 
 export const engineeringIntakeSeverityValues = [
 	"medium",
@@ -24,36 +21,14 @@ export const runtimeIntakeStatusValues = [
 	"regressed",
 ];
 
-export const releaseIntakeStatusValues = [
-	"active",
-	"resolved",
-	"superseded",
-	"blocked_metadata",
-];
-
-export const releaseBlockerKindValues = [
-	"github_check",
-	"deployment",
-	"metadata",
-	"release_path",
-];
-
 export const sourceRecordRefKindValues = [
 	"convex_document",
 	"incident_fingerprint_key",
-	"release_candidate",
-	"github_pr",
-	"github_check",
-	"vercel_deployment",
 ];
 
 export const evidenceRefKindValues = [
 	"native_url",
 	"logs_url",
-	"github_check",
-	"github_pr",
-	"vercel_deployment",
-	"vercel_alias",
 	"runbook",
 ];
 
@@ -245,24 +220,6 @@ function assertRuntimeItem(item, label) {
 	);
 }
 
-function assertReleaseItem(item, label) {
-	assertCommonItemFields(item, label);
-	assertEnumValue(item.status, releaseIntakeStatusValues, `${label}.status`);
-	assertEnumValue(item.blockerKind, releaseBlockerKindValues, `${label}.blockerKind`);
-	assertString(item.blockerKey, `${label}.blockerKey`);
-	assertObject(item.candidate, `${label}.candidate`);
-	assertString(item.candidate.ref, `${label}.candidate.ref`);
-	assertString(item.candidate.sha, `${label}.candidate.sha`);
-	assertString(item.candidate.baseRef, `${label}.candidate.baseRef`);
-	assertNullableString(item.candidate.baseSha ?? null, `${label}.candidate.baseSha`);
-	assertObject(item.releaseState, `${label}.releaseState`);
-	assertString(item.releaseState.pathState, `${label}.releaseState.pathState`);
-	assert(
-		typeof item.releaseState.snapshotRequired === "boolean",
-		`${label}.releaseState.snapshotRequired must be a boolean.`,
-	);
-}
-
 export function buildRuntimeIntakeIdentity({
 	canonicalPath,
 	code,
@@ -281,25 +238,6 @@ export function buildRuntimeIntakeIdentity({
 	return {
 		dedupeKey: `sbs:runtime:${digest}`,
 		externalId: `sbs:runtime:${digest}`,
-	};
-}
-
-export function buildReleaseIntakeIdentity({
-	blockerKey,
-	blockerKind,
-	candidateRef,
-	candidateSha,
-}) {
-	const stablePayload = {
-		blockerKey,
-		blockerKind,
-		candidateRef,
-		candidateSha,
-	};
-	const digest = hashIdentity("release-intake", stablePayload);
-	return {
-		dedupeKey: `sbs:release:${digest}`,
-		externalId: `sbs:release:${digest}`,
 	};
 }
 
@@ -324,43 +262,6 @@ export function buildRuntimeIntakeFeed({ generatedAt, items }) {
 	};
 }
 
-export function buildReleaseIntakeFeed({ generatedAt, items }) {
-	return {
-		schemaVersion: releaseIntakeSchemaVersion,
-		generatedAt,
-		sourceSystem: ENGINEERING_INTAKE_SOURCE_SYSTEM,
-		sourceRepository: ENGINEERING_INTAKE_SOURCE_REPOSITORY,
-		compatibility: {
-			policy: ENGINEERING_INTAKE_COMPATIBILITY_POLICY,
-		},
-		ownership: {
-			sourceOfTruth: "ship-by-sunday release triage",
-			lifecycleOwner: "ship-by-sunday release triage summary",
-			ackOwner: null,
-			resolveOwner:
-				"ship-by-sunday release candidate, proof checks, and deployment metadata",
-			notes:
-				"SBS owns release blocker lifecycle as a derived view over release candidate, proof, and deployment state. Worker will consume but not resolve these facts in plan 3.",
-		},
-		items,
-	};
-}
-
-export function buildEngineeringIntakeSnapshot({ generatedAt, release, runtime }) {
-	return {
-		schemaVersion: engineeringIntakeSnapshotSchemaVersion,
-		generatedAt,
-		sourceSystem: ENGINEERING_INTAKE_SOURCE_SYSTEM,
-		sourceRepository: ENGINEERING_INTAKE_SOURCE_REPOSITORY,
-		compatibility: {
-			policy: ENGINEERING_INTAKE_COMPATIBILITY_POLICY,
-		},
-		derivativeOf: [runtime.schemaVersion, release.schemaVersion],
-		runtime,
-		release,
-	};
-}
-
 export function assertRuntimeIntakeFeed(document) {
 	assertCommonFeedEnvelope(document, runtimeIntakeSchemaVersion);
 	assertOwnership(document.ownership, "ownership");
@@ -368,25 +269,6 @@ export function assertRuntimeIntakeFeed(document) {
 	for (const [index, item] of document.items.entries()) {
 		assertRuntimeItem(item, `items[${index}]`);
 	}
-	return document;
-}
-
-export function assertReleaseIntakeFeed(document) {
-	assertCommonFeedEnvelope(document, releaseIntakeSchemaVersion);
-	assertOwnership(document.ownership, "ownership");
-	assertArray(document.items, "items");
-	for (const [index, item] of document.items.entries()) {
-		assertReleaseItem(item, `items[${index}]`);
-	}
-	return document;
-}
-
-export function assertEngineeringIntakeSnapshot(document) {
-	assertCommonFeedEnvelope(document, engineeringIntakeSnapshotSchemaVersion);
-	assertArray(document.derivativeOf, "derivativeOf");
-	assert(document.derivativeOf.length === 2, "derivativeOf must contain runtime and release feed versions.");
-	assertRuntimeIntakeFeed(document.runtime);
-	assertReleaseIntakeFeed(document.release);
 	return document;
 }
 
