@@ -69,9 +69,10 @@ Publish-mode evidence fails closed until required hosted proof is `passed` or ex
 
 ## Required Standing Configuration
 
-- GitHub branch protection is enabled on `main`.
+- The canonical GitHub repository is `Man-Meets-AI/ship-by-sunday`.
+- GitHub branch protection is enabled on `main`. After repository ownership changes, verify this directly before treating `main` as protected; if GitHub returns a plan-gated `403` for branch protection or ruleset APIs, the CLI proof is inconclusive.
 - `main` requires pull requests and the current source checks `static` and `integration`.
-- Vercel project `mma-shipbysunday` uses `main` as its production branch and `apps/web` as its root directory.
+- Vercel project `mma-shipbysunday` is linked to `Man-Meets-AI/ship-by-sunday`, uses `main` as its production branch, and uses `apps/web` as its root directory. For private repository ownership changes, the Vercel GitHub App must also be installed or granted access for `Man-Meets-AI/ship-by-sunday` before automatic `main` production deploys can resume.
 - `https://www.man-meets-ai.com` is the production host used by hosted proof.
 - `https://dev.man-meets-ai.com` is no longer release-candidate authority. The parent landing pass should retire that alias or document it as non-authoritative compatibility.
 - Root `bunfig.toml` forces `install.linker = "hoisted"` so GitHub Actions and Vercel installs do not use Bun's isolated symlink-heavy workspace layout during builds and serverless packaging.
@@ -104,10 +105,10 @@ Publish-mode evidence fails closed until required hosted proof is `passed` or ex
 Useful verification commands:
 
 ```bash
-gh run list --repo ParkerRex/ship-by-sunday --workflow ci.yml --limit 10
-gh run list --repo ParkerRex/ship-by-sunday --workflow convex-production-deploy.yml --limit 10
-gh run list --repo ParkerRex/ship-by-sunday --workflow production-release-proof.yml --limit 10
-gh run list --repo ParkerRex/ship-by-sunday --workflow release.yml --limit 10
+gh run list --repo Man-Meets-AI/ship-by-sunday --workflow ci.yml --limit 10
+gh run list --repo Man-Meets-AI/ship-by-sunday --workflow convex-production-deploy.yml --limit 10
+gh run list --repo Man-Meets-AI/ship-by-sunday --workflow production-release-proof.yml --limit 10
+gh run list --repo Man-Meets-AI/ship-by-sunday --workflow release.yml --limit 10
 git rev-parse origin/main
 bun run release:manifest:check
 bun run release:evidence:build
@@ -122,13 +123,13 @@ For staging or production billing verification in this repo, prefer a restricted
 Before enabling automatic Convex production deploys, run the Convex workflow manually in dry-run mode from `main`:
 
 ```bash
-gh workflow run convex-production-deploy.yml --repo ParkerRex/ship-by-sunday -f dry_run=true
+gh workflow run convex-production-deploy.yml --repo Man-Meets-AI/ship-by-sunday -f dry_run=true
 ```
 
 After that dry-run succeeds, enable automatic `main` deploys:
 
 ```bash
-gh variable set CONVEX_PRODUCTION_DEPLOY_ENABLED --repo ParkerRex/ship-by-sunday --body true
+gh variable set CONVEX_PRODUCTION_DEPLOY_ENABLED --repo Man-Meets-AI/ship-by-sunday --body true
 ```
 
 When that variable is `false`, pushes to `main` log a skip instead of deploying Convex production. When it is `true`, future `main` merges deploy Convex production automatically.
@@ -151,7 +152,7 @@ After a release repair or hotfix:
 - close or delete stale feature branches once their PRs are merged or abandoned
 - keep `release.json` pointed at the next intended tag
 - keep `CHANGELOG.md` aligned with the next intended tag
-- verify `gh workflow list --repo ParkerRex/ship-by-sunday --all` has no active remote-only workflow that operators might mistake for current release proof
+- verify `gh workflow list --repo Man-Meets-AI/ship-by-sunday --all` has no active remote-only workflow that operators might mistake for current release proof
 
 ## What Success Looks Like
 

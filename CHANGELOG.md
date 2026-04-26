@@ -1,6 +1,6 @@
 # Changelog
 
-Release notes are published on the [GitHub Releases page](https://github.com/ParkerRex/ship-by-sunday/releases).
+Release notes are published on the [GitHub Releases page](https://github.com/Man-Meets-AI/ship-by-sunday/releases).
 
 This file keeps the manifest-backed release-note source used by `release.json` and the tag-release workflow. The `release.json` `changelogHeading` must match the next release section before a protected tag is cut.
 
@@ -26,7 +26,7 @@ This file keeps the manifest-backed release-note source used by `release.json` a
 
 ### Changelog
 
-Full Changelog: https://github.com/ParkerRex/ship-by-sunday/compare/v0.2.0...v0.3.0
+Full Changelog: https://github.com/Man-Meets-AI/ship-by-sunday/compare/v0.2.0...v0.3.0
 
 ## v0.2.0 - 2026-04-19
 
