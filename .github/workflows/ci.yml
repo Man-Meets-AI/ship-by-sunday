@@ -83,17 +83,3 @@ jobs:
 
       - name: Run integration tests
         run: bun run test:integration
-
-  browser-smoke:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Browser smoke retired
-        run: echo "browser-smoke is a temporary branch-protection compatibility context; hosted proof runs after main through Production Release Proof."
-
-  cli:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Helper CLI retired
-        run: echo "cli is a temporary branch-protection compatibility context; active source checks are static and integration."

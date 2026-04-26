@@ -8,7 +8,6 @@ The workflows in this directory follow the Codex-style lifecycle: pull requests 
 - The durable merge-gate jobs are `static` and `integration`.
 - `static` runs lint, format check, unit tests, contract tests, and the app build.
 - `integration` runs the integration test suite.
-- `browser-smoke` and `cli` are temporary compatibility no-ops while live branch protection still requires those contexts. They are not release evidence and should be removed only when GitHub required contexts are updated.
 
 ## Post-Merge On `main`
 

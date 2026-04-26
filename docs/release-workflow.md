@@ -17,7 +17,6 @@ Production is healthy only when GitHub, Vercel, and Convex agree on the same `ma
 The current workflow strategy is summarized beside the workflow files in `.github/workflows/README.md`.
 
 - `CI` is the fast source proof surface from `.github/workflows/ci.yml`. It runs on pull requests into `main`, pushes to `main`, schedule, and manual dispatch. The durable merge-gate jobs are `static` and `integration`.
-- `browser-smoke` and `cli` currently remain as compatibility no-ops because live branch protection still requires those status contexts. They are not release evidence and should be removed only when GitHub required contexts are updated.
 - `Production Release Proof` is the hosted production post-deploy proof surface from `.github/workflows/production-release-proof.yml`. It runs on `main` pushes and manual dispatches after the production web deployment settles.
 - `Convex Production Deploy` is the production backend deploy surface from `.github/workflows/convex-production-deploy.yml`. It runs on `main` pushes and manual dispatches and is controlled by the `CONVEX_PRODUCTION_DEPLOY_ENABLED` variable for automatic deploys.
 - `Tag Release` is the protected `v*` tag workflow from `.github/workflows/release.yml`. It validates `release.json`, collects release evidence for the tag target, and publishes the GitHub Release only after evidence is available.
@@ -71,7 +70,7 @@ Publish-mode evidence fails closed until required hosted proof is `passed` or ex
 ## Required Standing Configuration
 
 - GitHub branch protection is enabled on `main`.
-- `main` requires pull requests and source checks that are produced by current workflow jobs. During this migration, live branch protection still requires `static`, `integration`, `browser-smoke`, and `cli`; the last two are compatibility no-ops and should be removed from protection before their jobs are deleted.
+- `main` requires pull requests and the current source checks `static` and `integration`.
 - Vercel project `mma-shipbysunday` uses `main` as its production branch and `apps/web` as its root directory.
 - `https://www.man-meets-ai.com` is the production host used by hosted proof.
 - `https://dev.man-meets-ai.com` is no longer release-candidate authority. The parent landing pass should retire that alias or document it as non-authoritative compatibility.

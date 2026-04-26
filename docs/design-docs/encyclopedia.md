@@ -44,10 +44,6 @@ The scheduled and manually runnable Playwright lane behind `bun run test:e2e:san
 
 The release-owned proof path behind `bun run release:proof`. It runs against the target environment with release personas and is the browser proof surface for staging and production release confidence.
 
-### Compatibility CI contexts
-
-Temporary no-op `browser-smoke` and `cli` CI jobs that remain only while branch protection still requires those retired labels. They are not proof that the old browser harness or helper CLI still owns release confidence.
-
 ### ExecPlan
 
 The long-horizon implementation plan format stored under `docs/exec-plans/`. Use it for complex, risky, or multi-milestone work.
