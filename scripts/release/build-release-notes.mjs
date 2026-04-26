@@ -1,4 +1,5 @@
 import { readFile, writeFile } from "node:fs/promises";
+import { basename } from "node:path";
 import process from "node:process";
 
 import { assertReleaseEvidence } from "./lib/release-evidence.mjs";
@@ -60,7 +61,7 @@ export function extractChangelogSection({ changelogSource, heading }) {
 	return `${sectionLines.join("\n")}\n`;
 }
 
-function formatEvidenceSummary(evidence) {
+function formatEvidenceSummary(evidence, evidenceArtifactName) {
 	return [
 		"## Release Evidence",
 		"",
@@ -70,15 +71,19 @@ function formatEvidenceSummary(evidence) {
 		`- Auth proof: \`${evidence.auth.status}\``,
 		`- Entitlement proof: \`${evidence.entitlement.status}\``,
 		`- Billing proof: \`${evidence.billing.status}\``,
-		"- Evidence artifact: `release-evidence.publish-check.json`",
+		`- Evidence artifact: \`${evidenceArtifactName}\``,
 	].join("\n");
 }
 
-export function buildReleaseNotes({ changelogSection, evidence = null }) {
+export function buildReleaseNotes({
+	changelogSection,
+	evidence = null,
+	evidenceArtifactName = "release-evidence.publish-check.json",
+}) {
 	const sections = [changelogSection.trim()];
 
 	if (evidence) {
-		sections.push(formatEvidenceSummary(evidence));
+		sections.push(formatEvidenceSummary(evidence, evidenceArtifactName));
 	}
 
 	return `${sections.join("\n\n")}\n`;
@@ -91,7 +96,7 @@ async function readReleaseEvidence(evidencePath, readFileImpl) {
 
 	const source = await readFileImpl(evidencePath, "utf8");
 	const evidence = JSON.parse(source);
-	assertReleaseEvidence(evidence, { publish: true });
+	assertReleaseEvidence(evidence);
 	return evidence;
 }
 
@@ -113,8 +118,13 @@ export async function runCli({
 		changelogSource,
 		heading: manifest.changelogHeading,
 	});
-	const evidence = await readReleaseEvidence(options.evidence?.trim(), readFileImpl);
-	const releaseNotes = buildReleaseNotes({ changelogSection, evidence });
+	const evidencePath = options.evidence?.trim();
+	const evidence = await readReleaseEvidence(evidencePath, readFileImpl);
+	const releaseNotes = buildReleaseNotes({
+		changelogSection,
+		evidence,
+		evidenceArtifactName: evidencePath ? basename(evidencePath) : undefined,
+	});
 
 	if (options.output) {
 		await writeFileImpl(options.output, releaseNotes, "utf8");

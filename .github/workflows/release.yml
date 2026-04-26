@@ -135,11 +135,21 @@ jobs:
             --entitlement-status="$ENTITLEMENT_STATUS" \
             --dry-run
 
-      - name: Upload release evidence
+      - name: Build release notes
+        run: |
+          node scripts/release/build-release-notes.mjs \
+            --manifest=release.json \
+            --changelog=CHANGELOG.md \
+            --evidence=release-evidence.v1.json \
+            --output=release-notes.md
+
+      - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
           name: release-evidence-v1
-          path: release-evidence.v1.json
+          path: |
+            release-evidence.v1.json
+            release-notes.md
 
   publish_release:
     if: needs.validate_release_identity.outputs.dry_run != 'true'
