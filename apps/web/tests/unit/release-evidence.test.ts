@@ -9,10 +9,10 @@ import { runCli as buildReleaseEvidenceCli } from "../../../../scripts/release/b
 
 const manifest = {
 	schemaVersion: "release-manifest.v1",
-	version: "0.3.0",
+	version: "0.4.0",
 	channel: "stable",
-	gitTag: "v0.3.0",
-	changelogHeading: "## 2026-04-19",
+	gitTag: "v0.4.0",
+	changelogHeading: "## v0.4.0 - Unreleased",
 	releaseEvidenceSchemaVersion: "release-evidence.v1",
 };
 
@@ -50,7 +50,7 @@ describe("release evidence", () => {
 		).not.toThrow();
 		expect(evidence).toMatchObject({
 			schemaVersion: "release-evidence.v1",
-			gitTag: "v0.3.0",
+			gitTag: "v0.4.0",
 			blockers: [],
 		});
 	});
@@ -89,7 +89,7 @@ describe("release evidence", () => {
 		const evidence = await buildReleaseEvidenceCli({
 			args: [
 				"--manifest=../../release.json",
-				"--tag=v0.3.0",
+				"--tag=v0.4.0",
 				"--tag-target-sha=main-sha",
 				"--main-sha=main-sha",
 				"--vercel-status=passed",
@@ -106,7 +106,7 @@ describe("release evidence", () => {
 			writeStdout: () => undefined,
 		});
 
-		expect(evidence.gitTag).toBe("v0.3.0");
+		expect(evidence.gitTag).toBe("v0.4.0");
 		expect(evidence.blockers).toEqual([]);
 	});
 });

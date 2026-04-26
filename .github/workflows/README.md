@@ -18,7 +18,7 @@ The workflows in this directory follow the Codex-style lifecycle: pull requests 
 ## Tag Publication
 
 - `release.yml` runs on protected `v*` tags and manual dispatch.
-- It validates `release.json`, confirms the tag target is the verified `main` SHA, builds `release-evidence.v1`, and publishes the GitHub Release only after publish-mode evidence passes.
+- It validates `release.json`, confirms the tag target is the verified `main` SHA, builds `release-evidence.v1`, builds release notes from the matching `CHANGELOG.md` section, and publishes the GitHub Release only after publish-mode evidence passes.
 - Tags attest a verified `main` production SHA. They do not replace hosted production proof.
 
 ## Repair And Non-Release Lanes

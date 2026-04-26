@@ -64,6 +64,7 @@
 		"clerk:test-user:prepare:entitled": "bun run --cwd apps/web clerk:test-user:prepare:entitled",
 		"engineering:intake:runtime": "node apps/web/scripts/export-runtime-intake.mjs",
 		"release:manifest:check": "node scripts/release/validate-release-manifest.mjs --manifest=release.json --changelog=CHANGELOG.md",
+		"release:notes:build": "node scripts/release/build-release-notes.mjs --manifest=release.json --changelog=CHANGELOG.md",
 		"release:evidence:build": "node scripts/release/build-release-evidence.mjs --manifest=release.json --output=tmp/release-evidence.v1.json --dry-run",
 		"release:billing:doctor": "bun run --cwd apps/web release:billing:doctor",
 		"release:convex:sync-hosted-dev": "node scripts/release/sync-hosted-convex-dev.mjs",

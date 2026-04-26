@@ -19,7 +19,7 @@ The current workflow strategy is summarized beside the workflow files in `.githu
 - `CI` is the fast source proof surface from `.github/workflows/ci.yml`. It runs on pull requests into `main`, pushes to `main`, schedule, and manual dispatch. The durable merge-gate jobs are `static` and `integration`.
 - `Production Release Proof` is the hosted production post-deploy proof surface from `.github/workflows/production-release-proof.yml`. It runs on `main` pushes and manual dispatches after the production web deployment settles.
 - `Convex Production Deploy` is the production backend deploy surface from `.github/workflows/convex-production-deploy.yml`. It runs on `main` pushes and manual dispatches and is controlled by the `CONVEX_PRODUCTION_DEPLOY_ENABLED` variable for automatic deploys.
-- `Tag Release` is the protected `v*` tag workflow from `.github/workflows/release.yml`. It validates `release.json`, collects release evidence for the tag target, and publishes the GitHub Release only after evidence is available.
+- `Tag Release` is the protected `v*` tag workflow from `.github/workflows/release.yml`. It validates `release.json`, collects release evidence for the tag target, builds the GitHub Release body from the matching `CHANGELOG.md` section, and publishes the GitHub Release only after evidence is available.
 - `Sandbox E2E Nightly` is scheduled and manual regression signal. It is not a release gate and does not replace production proof.
 
 ## Branch Model
@@ -37,7 +37,7 @@ The current workflow strategy is summarized beside the workflow files in `.githu
 - Stable release tags use `vMAJOR.MINOR.PATCH`, for example `v0.3.0`.
 - Optional prerelease tags are reserved for future prerelease channels and should use semver prerelease suffixes such as `v0.3.0-rc.1`.
 - While the repo is pre-1.0, the minor digit marks the next ordinary release cut from `main`, and the patch digit is reserved for hotfixes and backports.
-- Every GitHub Release must be created from the verified `main` tag and backed by the matching `CHANGELOG.md` entry. Do not publish the release until the changelog section exists.
+- Every GitHub Release must be created from the verified `main` tag and backed by the matching `CHANGELOG.md` entry. The release workflow uses that section as the GitHub Release notes and appends the release-evidence summary. Do not publish the release until the changelog section exists.
 
 ## Tag Release Identity Contract
 
@@ -98,7 +98,7 @@ Publish-mode evidence fails closed until required hosted proof is `passed` or ex
 10. When the release touched checkout, Stripe, entitlement, webhook, or access-handoff behavior, make sure `Production Release Proof` also runs hosted `billing_integration`.
 11. Update `release.json` and `CHANGELOG.md` for the next version when the verified `main` commit is ready to publish.
 12. Create the protected `vMAJOR.MINOR.PATCH` tag at the verified `main` commit.
-13. Let `.github/workflows/release.yml` validate the manifest, collect release evidence for that tag target, and publish the GitHub Release.
+13. Let `.github/workflows/release.yml` validate the manifest, collect release evidence for that tag target, build the release notes from the matching changelog section, and publish the GitHub Release.
 14. Delete the local and remote feature branch after the release settles.
 
 Useful verification commands:

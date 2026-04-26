@@ -1,9 +1,9 @@
 {
 	"schemaVersion": "release-manifest.v1",
-	"version": "0.3.0",
+	"version": "0.4.0",
 	"channel": "stable",
-	"gitTag": "v0.3.0",
-	"changelogHeading": "## 2026-04-19",
+	"gitTag": "v0.4.0",
+	"changelogHeading": "## v0.4.0 - Unreleased",
 	"releaseEvidenceSchemaVersion": "release-evidence.v1",
-	"notes": "Next stable release manifest. Update this file on the main-targeting release branch before cutting the protected tag."
+	"notes": "Next stable release manifest. Replace the Unreleased changelog heading with the release date before cutting the protected tag."
 }

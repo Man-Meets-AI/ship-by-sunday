@@ -9,20 +9,20 @@ import {
 const changelogSource = [
 	"# Changelog",
 	"",
-	"## 2026-04-19",
+	"## v0.4.0 - Unreleased",
 	"",
 	"### Changed",
 	"",
-	"- Release workflow work.",
+	"- Release notes are built from CHANGELOG.md.",
 ].join("\n");
 
 function buildManifest(overrides = {}) {
 	return {
 		schemaVersion: "release-manifest.v1",
-		version: "0.3.0",
+		version: "0.4.0",
 		channel: "stable",
-		gitTag: "v0.3.0",
-		changelogHeading: "## 2026-04-19",
+		gitTag: "v0.4.0",
+		changelogHeading: "## v0.4.0 - Unreleased",
 		releaseEvidenceSchemaVersion: "release-evidence.v1",
 		...overrides,
 	};
@@ -32,14 +32,14 @@ describe("release manifest", () => {
 	it("validates the stable release manifest contract", () => {
 		const summary = assertReleaseManifest(buildManifest(), {
 			changelogSource,
-			expectedTag: "v0.3.0",
+			expectedTag: "v0.4.0",
 		});
 
 		expect(summary).toMatchObject({
 			channel: "stable",
-			gitTag: "v0.3.0",
+			gitTag: "v0.4.0",
 			schemaVersion: "release-manifest.v1",
-			version: "0.3.0",
+			version: "0.4.0",
 		});
 	});
 
@@ -47,7 +47,7 @@ describe("release manifest", () => {
 		expect(() =>
 			assertReleaseManifest(buildManifest(), {
 				changelogSource,
-				expectedTag: "v0.4.0",
+				expectedTag: "v0.3.0",
 			}),
 		).toThrow("does not match supplied tag");
 	});
@@ -84,7 +84,7 @@ describe("release manifest", () => {
 	it("parses release manifest JSON", () => {
 		expect(parseReleaseManifest(JSON.stringify(buildManifest()))).toMatchObject(
 			{
-				gitTag: "v0.3.0",
+				gitTag: "v0.4.0",
 			},
 		);
 	});
