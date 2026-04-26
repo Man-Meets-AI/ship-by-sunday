@@ -85,7 +85,7 @@ Do not re-hardwire checkout into hero or pricing, scatter section gating across 
 - `scripts/release/` owns release proof orchestration, release personas, release evidence, and hosted proof command wiring.
 - `release.json` owns the release identity contract for protected `vMAJOR.MINOR.PATCH` tags.
 - `.github/workflows/release.yml` owns tag publication and release-evidence assembly for verified `main` commits.
-- The `browser-smoke` and `cli` CI jobs are temporary compatibility contexts for branch protection. They are not proof that the retired browser harness or helper CLI still owns release confidence.
+- The durable required CI contexts are `static` and `integration`.
 - Do not invent alternate release-proof formats in a skill folder, PR comment, or one-off script.
 - Release evidence must name the target environment and must not mix local, preview, dev, and prod proof without saying so.
 
