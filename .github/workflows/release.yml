@@ -184,6 +184,14 @@ jobs:
             --entitlement-status="$ENTITLEMENT_STATUS" \
             --validate-publish
 
+      - name: Build release notes
+        run: |
+          node scripts/release/build-release-notes.mjs \
+            --manifest=release.json \
+            --changelog=CHANGELOG.md \
+            --evidence=release-evidence.publish-check.json \
+            --output=release-notes.md
+
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -193,7 +201,7 @@ jobs:
           gh release create "$GIT_TAG" \
             --target "$TAG_TARGET_SHA" \
             --title "$GIT_TAG" \
-            --notes "Release evidence artifact is attached. See CHANGELOG.md for the manifest changelog heading."
+            --notes-file release-notes.md
 
           gh release upload "$GIT_TAG" release-evidence.publish-check.json --clobber
 

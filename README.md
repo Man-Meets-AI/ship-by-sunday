@@ -91,6 +91,7 @@ Release operators also use:
 
 ```bash
 bun run release:manifest:check
+bun run release:notes:build
 bun run release:evidence:build
 bun run release:proof -- --proof=default_ship --dry-run
 ```

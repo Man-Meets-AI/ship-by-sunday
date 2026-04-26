@@ -1,14 +1,34 @@
 # Changelog
 
-## 2026-04-25
+Release notes are published on the [GitHub Releases page](https://github.com/ParkerRex/ship-by-sunday/releases).
+
+This file keeps the manifest-backed release-note source used by `release.json` and the tag-release workflow. The `release.json` `changelogHeading` must match the next release section before a protected tag is cut.
+
+## v0.4.0 - Unreleased
 
 ### Changed
 
-- Reset the release operating model around Codex-style PR CI and tag-driven release evidence: retired the disposable QA control plane and helper CLI, moved release proof under `scripts/release`, added `release.json` as the release identity manifest, kept temporary `browser-smoke` and `cli` CI compatibility contexts for branch protection, and removed repo-owned git hook enforcement so local checks are explicit while PR CI remains the merge gate.
-- Consolidated active docs toward the Codex-style structure: added a workflow strategy README beside GitHub Actions, restored a concise contributor guide, reset stale planning and generated-doc entrypoints, clarified generated mirror ownership, and kept `browser-smoke` plus `cli` documented as branch-protection compatibility contexts rather than release proof.
-- Migrated the active release path to feature branches into `main`, post-merge production proof, and protected tag publication, retiring the shared `dev` release-candidate workflow, release triage, snapshot fallback, release-intake exports, and post-snapshot reconcile automation.
+- Added a Codex-style GitHub Release notes path: future tag releases build the release body from the matching `CHANGELOG.md` section, append the publish evidence summary, and keep `CHANGELOG.md` as the manifest-backed source for release notes.
+- Prepared the release manifest for the next stable `v0.4.0` tag after publishing `v0.3.0`.
 
-## 2026-04-19
+## v0.3.0 - 2026-04-25
+
+### Highlights
+
+- Reset the release operating model around Codex-style PR CI and tag-driven release evidence: retired the disposable QA control plane and helper CLI, moved release proof under `scripts/release`, added `release.json` as the release identity manifest, and removed repo-owned git hook enforcement so local checks are explicit while PR CI remains the merge gate.
+- Migrated the active delivery path to short-lived branches into `main`, post-merge production proof, and protected tag publication, retiring the shared `dev` release-candidate workflow, release triage, snapshot fallback, release-intake exports, and post-snapshot reconcile automation.
+- Published `v0.3.0` from verified `main` through the tag-release workflow with attached `release-evidence.publish-check.json`.
+
+### Documentation
+
+- Consolidated active docs toward the Codex-style structure with a workflow strategy README beside GitHub Actions, a concise contributor guide, reset planning and generated-doc entrypoints, and clearer generated mirror ownership.
+- Aligned the documented branch model, required checks, and release policy with the current `static` and `integration` branch-protection gates.
+
+### Changelog
+
+Full Changelog: https://github.com/ParkerRex/ship-by-sunday/compare/v0.2.0...v0.3.0
+
+## v0.2.0 - 2026-04-19
 
 ### Changed
 
