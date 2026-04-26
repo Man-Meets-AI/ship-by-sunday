@@ -1,19 +1,34 @@
 import Stripe from "stripe";
 
-import { apiConfig, productConfig } from "@/config/product";
-import { requireServerEnv, serverEnv } from "@/platform/env/server";
+import { apiConfig } from "@/config/product";
+import {
+	assertManagedStripeEnvConfiguredForRelease as assertManagedStripeConfigConfiguredForRelease,
+	assertManagedStripeEnvReadyForRelease as assertManagedStripeConfigReadyForRelease,
+	assertManagedStripePriceMatchesProductConfig as assertManagedStripeConfigPriceMatchesProductConfig,
+	assertManagedStripePromotionCodeMatchesProductConfig as assertManagedStripeConfigPromotionCodeMatchesProductConfig,
+	assertStripeModeMatchesExpected as assertStripeConfigModeMatchesExpected,
+	getManagedStripeConfigFromEnv,
+	getNormalizedStripeSecretKey as getNormalizedStripeConfigSecretKey,
+	getStripeCheckoutDiscounts as getStripeConfigCheckoutDiscounts,
+	getStripeLineItem as getStripeConfigLineItem,
+	getStripeModeLabel as getStripeConfigModeLabel,
+	type ManagedStripeConfig,
+	type StripeModeLabel,
+} from "@/platform/billing/managed-stripe-config";
+import { serverEnv } from "@/platform/env/server";
 
 export const STRIPE_API_VERSION = apiConfig.stripeApiVersion;
-export type StripeModeLabel = "test" | "live";
+export { normalizeStripeSecretKey } from "@/platform/billing/managed-stripe-config";
+export type { StripeModeLabel };
 
 let stripeClient: Stripe | null = null;
 
-export function normalizeStripeSecretKey(secretKey: string) {
-	return secretKey.replaceAll("\\n", "").replaceAll("\n", "").trim();
+function getManagedStripeConfig(): ManagedStripeConfig {
+	return getManagedStripeConfigFromEnv(serverEnv);
 }
 
 export function getNormalizedStripeSecretKey() {
-	return normalizeStripeSecretKey(requireServerEnv("STRIPE_SECRET_KEY"));
+	return getNormalizedStripeConfigSecretKey(getManagedStripeConfig());
 }
 
 export function getStripe() {
@@ -26,215 +41,58 @@ export function getStripe() {
 	return stripeClient;
 }
 
-function getStripePriceProductId(
-	priceProduct: string | Stripe.Product | Stripe.DeletedProduct,
-) {
-	return typeof priceProduct === "string" ? priceProduct : priceProduct.id;
-}
-
-function getCouponIdFromPromotionCode(promotionCode: Stripe.PromotionCode) {
-	return typeof promotionCode.promotion.coupon === "string"
-		? promotionCode.promotion.coupon
-		: (promotionCode.promotion.coupon?.id ?? null);
-}
-
 export function getStripeLineItem() {
-	if (serverEnv.STRIPE_PRICE_ID) {
-		return {
-			price: serverEnv.STRIPE_PRICE_ID,
-			quantity: 1,
-		};
-	}
-
-	return {
-		price_data: {
-			currency: productConfig.currency,
-			product_data: {
-				name: productConfig.name,
-				description: productConfig.promise,
-				metadata: {
-					courseSlug: productConfig.courseSlug,
-				},
-			},
-			unit_amount: productConfig.priceUsdCents,
-		},
-		quantity: 1,
-	};
+	return getStripeConfigLineItem(getManagedStripeConfig());
 }
 
 export function getStripeCheckoutDiscounts() {
-	if (!productConfig.activeOffer) {
-		return undefined;
-	}
-
-	if (!serverEnv.STRIPE_PROMOTION_CODE_ID) {
-		throw new Error(
-			"Missing STRIPE_PROMOTION_CODE_ID. The active pricing offer requires an auto-applied Stripe promotion code.",
-		);
-	}
-
-	return [
-		{
-			promotion_code: serverEnv.STRIPE_PROMOTION_CODE_ID,
-		},
-	];
+	return getStripeConfigCheckoutDiscounts(getManagedStripeConfig());
 }
 
 export async function assertManagedStripePriceMatchesProductConfig(
 	stripe: Stripe,
 ) {
-	if (!serverEnv.STRIPE_PRICE_ID) {
-		return;
-	}
-
-	const configuredPrice = await stripe.prices.retrieve(
-		serverEnv.STRIPE_PRICE_ID,
+	await assertManagedStripeConfigPriceMatchesProductConfig(
+		stripe,
+		getManagedStripeConfig(),
 	);
-	const configuredProductId = getStripePriceProductId(configuredPrice.product);
-
-	if (configuredPrice.unit_amount !== productConfig.priceUsdCents) {
-		throw new Error(
-			`Configured Stripe price ${serverEnv.STRIPE_PRICE_ID} charges ${configuredPrice.unit_amount} cents, expected ${productConfig.priceUsdCents}.`,
-		);
-	}
-
-	if (configuredPrice.currency !== productConfig.currency) {
-		throw new Error(
-			`Configured Stripe price ${serverEnv.STRIPE_PRICE_ID} uses ${configuredPrice.currency}, expected ${productConfig.currency}.`,
-		);
-	}
-
-	if (
-		serverEnv.STRIPE_PRODUCT_ID &&
-		configuredProductId !== serverEnv.STRIPE_PRODUCT_ID
-	) {
-		throw new Error(
-			`Configured Stripe price ${serverEnv.STRIPE_PRICE_ID} belongs to ${configuredProductId}, expected ${serverEnv.STRIPE_PRODUCT_ID}.`,
-		);
-	}
 }
 
 export async function assertManagedStripePromotionCodeMatchesProductConfig(
 	stripe: Stripe,
 ) {
-	if (!productConfig.activeOffer || !serverEnv.STRIPE_PROMOTION_CODE_ID) {
-		return;
-	}
-
-	const configuredProductId = requireServerEnv("STRIPE_PRODUCT_ID");
-	const promotionCode = await stripe.promotionCodes.retrieve(
-		serverEnv.STRIPE_PROMOTION_CODE_ID,
+	await assertManagedStripeConfigPromotionCodeMatchesProductConfig(
+		stripe,
+		getManagedStripeConfig(),
 	);
-
-	if (!promotionCode.active) {
-		throw new Error(
-			`Configured Stripe promotion code ${serverEnv.STRIPE_PROMOTION_CODE_ID} is not active.`,
-		);
-	}
-
-	const couponId = getCouponIdFromPromotionCode(promotionCode);
-	if (!couponId) {
-		throw new Error(
-			`Configured Stripe promotion code ${serverEnv.STRIPE_PROMOTION_CODE_ID} is missing its coupon relationship.`,
-		);
-	}
-
-	const coupon = await stripe.coupons.retrieve(couponId);
-	if (coupon.valid === false) {
-		throw new Error(
-			`Configured Stripe promotion code ${serverEnv.STRIPE_PROMOTION_CODE_ID} uses invalid coupon ${coupon.id}.`,
-		);
-	}
-
-	const applicableProducts = coupon.applies_to?.products ?? [];
-	if (
-		applicableProducts.length > 0 &&
-		!applicableProducts.includes(configuredProductId)
-	) {
-		throw new Error(
-			`Configured Stripe promotion code ${serverEnv.STRIPE_PROMOTION_CODE_ID} does not apply to product ${configuredProductId}.`,
-		);
-	}
-
-	const currencySpecificMinimum =
-		promotionCode.restrictions.currency_options?.[productConfig.currency]
-			?.minimum_amount ?? null;
-	const genericMinimumAmount =
-		promotionCode.restrictions.minimum_amount_currency ===
-		productConfig.currency
-			? promotionCode.restrictions.minimum_amount
-			: null;
-	const minimumAmount = currencySpecificMinimum ?? genericMinimumAmount;
-
-	if (
-		promotionCode.restrictions.minimum_amount !== null &&
-		currencySpecificMinimum === null &&
-		genericMinimumAmount === null
-	) {
-		throw new Error(
-			`Configured Stripe promotion code ${serverEnv.STRIPE_PROMOTION_CODE_ID} has minimum-amount restrictions that do not cover ${productConfig.currency} orders.`,
-		);
-	}
-
-	if (
-		typeof minimumAmount === "number" &&
-		minimumAmount > productConfig.priceUsdCents
-	) {
-		throw new Error(
-			`Configured Stripe promotion code ${serverEnv.STRIPE_PROMOTION_CODE_ID} requires at least ${minimumAmount} ${productConfig.currency} cents, but the current order is ${productConfig.priceUsdCents}.`,
-		);
-	}
 }
 
 export function getStripeModeLabel() {
-	return getNormalizedStripeSecretKey().startsWith("sk_test_")
-		? "test"
-		: "live";
+	return getStripeConfigModeLabel(getManagedStripeConfig());
 }
 
 export function assertManagedStripeEnvConfiguredForRelease() {
-	if (!serverEnv.STRIPE_PRICE_ID) {
-		throw new Error(
-			"Missing STRIPE_PRICE_ID. Hosted preview and production release proof require a managed Stripe price.",
-		);
-	}
-
-	if (!serverEnv.STRIPE_PRODUCT_ID) {
-		throw new Error(
-			"Missing STRIPE_PRODUCT_ID. Hosted preview and production release proof require a managed Stripe product.",
-		);
-	}
-
-	if (productConfig.activeOffer && !serverEnv.STRIPE_PROMOTION_CODE_ID) {
-		throw new Error(
-			"Missing STRIPE_PROMOTION_CODE_ID. Hosted preview and production release proof require the active Stripe promotion code.",
-		);
-	}
+	assertManagedStripeConfigConfiguredForRelease(getManagedStripeConfig());
 }
 
 export function assertStripeModeMatchesExpected(expectedMode: StripeModeLabel) {
-	const actualMode = getStripeModeLabel();
-	if (actualMode !== expectedMode) {
-		throw new Error(
-			`Configured Stripe secret key is in ${actualMode} mode, expected ${expectedMode}.`,
-		);
-	}
-
-	return actualMode;
+	return assertStripeConfigModeMatchesExpected(
+		getManagedStripeConfig(),
+		expectedMode,
+	);
 }
 
 export async function assertManagedStripeEnvReadyForRelease(
 	stripe: Stripe,
 	{ expectedMode }: { expectedMode?: StripeModeLabel } = {},
 ) {
-	assertManagedStripeEnvConfiguredForRelease();
-
-	if (expectedMode) {
-		assertStripeModeMatchesExpected(expectedMode);
-	}
-
-	await assertManagedStripePriceMatchesProductConfig(stripe);
-	await assertManagedStripePromotionCodeMatchesProductConfig(stripe);
+	await assertManagedStripeConfigReadyForRelease(
+		stripe,
+		getManagedStripeConfig(),
+		{
+			expectedMode,
+		},
+	);
 }
 
 export function getStripeDashboardUrl(path?: string | null) {
@@ -257,8 +115,9 @@ export function getStripeWebhookDashboardUrl() {
 }
 
 export function getStripeProductDashboardUrl() {
-	if (serverEnv.STRIPE_PRODUCT_ID) {
-		return getStripeDashboardUrl(`products/${serverEnv.STRIPE_PRODUCT_ID}`);
+	const config = getManagedStripeConfig();
+	if (config.productId) {
+		return getStripeDashboardUrl(`products/${config.productId}`);
 	}
 
 	return getStripeDashboardUrl("products");

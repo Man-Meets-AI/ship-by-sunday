@@ -1,8 +1,12 @@
 import {
 	assertManagedStripeEnvReadyForRelease,
-	getStripe,
+	getManagedStripeConfigFromEnv,
+	getNormalizedStripeSecretKey,
 	type StripeModeLabel,
-} from "@/platform/billing/stripe";
+} from "@/platform/billing/managed-stripe-config";
+import Stripe from "stripe";
+
+import { apiConfig } from "@/config/product";
 
 function parseArgs(argv: string[]) {
 	let appBaseUrl: string | null = null;
@@ -71,8 +75,12 @@ async function verifyHostedCheckoutRoute(appBaseUrl: string) {
 }
 
 const { appBaseUrl, expectedMode } = parseArgs(process.argv.slice(2));
+const stripeConfig = getManagedStripeConfigFromEnv(process.env);
+const stripe = new Stripe(getNormalizedStripeSecretKey(stripeConfig), {
+	apiVersion: apiConfig.stripeApiVersion,
+});
 
-await assertManagedStripeEnvReadyForRelease(getStripe(), {
+await assertManagedStripeEnvReadyForRelease(stripe, stripeConfig, {
 	expectedMode,
 });
 
