@@ -74,6 +74,17 @@ const evidence = {
 	generatedAt: "2026-04-25T00:00:00.000Z",
 };
 
+const dryRunEvidence = {
+	...evidence,
+	vercel: {
+		notes: "Vercel production proof was not supplied.",
+		runId: null,
+		status: "unavailable",
+		url: null,
+	},
+	blockers: ["Vercel production proof is unavailable."],
+};
+
 describe("release notes", () => {
 	it("extracts the matching changelog section without the next release", () => {
 		const section = extractChangelogSection({
@@ -130,5 +141,37 @@ describe("release notes", () => {
 		expect(notes).toBe(writtenNotes);
 		expect(notes).toContain("### Changed");
 		expect(notes).toContain("## Release Evidence");
+		expect(notes).toContain(
+			"- Evidence artifact: `release-evidence.publish-check.json`",
+		);
+	});
+
+	it("allows dry-run evidence in release-note artifacts", async () => {
+		const notes = await buildReleaseNotesCli({
+			args: [
+				"--manifest=release.json",
+				"--changelog=CHANGELOG.md",
+				"--evidence=release-evidence.v1.json",
+			],
+			readFileImpl: async (path) => {
+				if (path === "release.json") {
+					return JSON.stringify(manifest);
+				}
+
+				if (path === "CHANGELOG.md") {
+					return changelogSource;
+				}
+
+				if (path === "release-evidence.v1.json") {
+					return JSON.stringify(dryRunEvidence);
+				}
+
+				throw new Error(`Unexpected read path: ${path}`);
+			},
+			writeStdout: () => undefined,
+		});
+
+		expect(notes).toContain("- Vercel production proof: `unavailable`");
+		expect(notes).toContain("- Evidence artifact: `release-evidence.v1.json`");
 	});
 });
