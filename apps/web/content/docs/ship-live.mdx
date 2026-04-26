@@ -11,9 +11,9 @@ Shipping live is mostly an environment-parity problem plus a buyer-safety proble
 
 Make sure all of this is true:
 
-- the release candidate is already integrated on `dev`
-- the `dev -> main` release PR is the thing that changes production
-- feature branches have already proven code correctness in preview-only checks
+- the change is on a focused branch from `main`
+- the pull request targets `main`
+- feature branches have already proven code correctness in PR checks
 - the marketing page is clear enough to buy from
 - auth works in the real deployed environment
 - checkout returns to the deployed `/checkout/success`
@@ -23,20 +23,19 @@ Make sure all of this is true:
 
 ## Production checklist
 
-1. Land feature work into `dev` and make sure the release candidate is the code you want to ship.
-2. Run `bun run check` from the repo root before opening the release PR. On contributor machines, install the committed git hooks once with `bun run hooks:install` so `git commit` and `git push` enforce the fast local gate and the code-proof gate automatically.
-3. Open a pull request from `dev` into `main`.
-4. Merge only after required GitHub checks pass.
-5. Confirm Vercel creates the production web deploy from `main`.
-6. Confirm GitHub Actions runs `Convex Production Deploy` for the same `main` merge.
-7. Let GitHub Actions run `Production Release Proof` against the exact Vercel production deployment for the merged commit and then against the public site after the release lands.
-8. Register or verify the live Stripe webhook endpoint.
-9. Confirm product-access grant happens in the deployed environment, not just locally.
-10. Confirm the buyer reaches the protected product after payment.
+1. Open a focused pull request from your feature branch into `main`.
+2. Run the narrowest relevant local checks from the repo root before opening the PR, and use `bun run check` when the release slice justifies a full local pass. PR CI is the required merge gate; the repository does not install git hooks that block commits or pushes.
+3. Merge only after required GitHub checks pass.
+4. Confirm Vercel creates the production web deploy from `main`.
+5. Confirm GitHub Actions runs `Convex Production Deploy` for the same `main` merge, or records an intentional skip when automatic deploys are paused.
+6. Let GitHub Actions run `Production Release Proof` against the exact Vercel production deployment for the merged commit and then against the public site after the release lands.
+7. Register or verify the live Stripe webhook endpoint.
+8. Confirm product-access grant happens in the deployed environment, not just locally.
+9. Confirm the buyer reaches the protected product after payment.
 
 `Production Release Proof` is the primary post-merge browser gate for this repo. It should always run the hosted `default_ship` pass against `https://www.man-meets-ai.com`, loading production auth and Convex values from `QA_ENV_FILE=apps/web/.env.production`. When the merged release changed checkout, Stripe, entitlement, webhook, or access handoff behavior, that workflow should also run the hosted `billing_integration` pass automatically instead of waiting for someone to remember an opt-in rerun.
 
-`Dev Staging Proof` should do the same kind of hygiene on the staging candidate: bind `dev.man-meets-ai.com` to the exact ready preview deployment for the current `dev` commit, sync hosted Convex dev automatically when the release touched `apps/web/convex/`, and verify the managed Stripe env plus `/api/stripe/checkout` before any billing proof starts.
+The retired `dev.man-meets-ai.com` staging alias is no longer release-candidate authority. Use feature-branch previews for inspection and use `main` production proof as the release evidence.
 
 The production proof bootstrap does not require a separate `CONVEX_DEPLOYMENT` line in `apps/web/.env.production`. It derives the production deployment target from `NEXT_PUBLIC_CONVEX_URL` when needed, so the important thing is keeping the production env file truthful to the live Clerk and Convex environment.
 
@@ -69,9 +68,9 @@ After those are correct, let the hosted `billing_integration` run prove one fres
 
 - This repo currently assumes the buyer completes checkout in the same signed-in browser context used to read access state.
 - If you change auth apps, webhook secrets, or Stripe accounts, re-verify the handoff instead of assuming it still works.
-- Hotfixes are allowed to merge into `main`, but they must come from a hotfix branch and be merged or cherry-picked back into `dev` immediately afterward.
+- Hotfixes are allowed to merge into `main`, but they must come from a focused hotfix branch and pass the same production proof as ordinary releases.
 - If a hotfix changes proof/bootstrap behavior, wait for the new `Production Release Proof` run on the hotfix commit instead of trusting the failed run on the previous `main` head.
-- Dedicated Convex-backed preview environments are not part of this release workflow yet. Non-`dev` and non-`main` Vercel branches stay frontend previews only.
+- Dedicated Convex-backed preview environments are not part of this release workflow yet. Non-`main` Vercel branches stay frontend previews only.
 - Do not promise a support or access path in public copy unless it actually exists.
 
 ## What success looks like

@@ -14,11 +14,10 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
 
 concurrency:
   group: production-release-proof-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   release_scope:
@@ -69,7 +68,7 @@ jobs:
             exit 0
           fi
 
-          node qa/scripts/detect-release-scope.mjs --base="$RELEASE_BASE_SHA" --head="$RELEASE_HEAD_SHA"
+          node scripts/release/detect-release-scope.mjs --base="$RELEASE_BASE_SHA" --head="$RELEASE_HEAD_SHA"
 
   default_ship:
     needs: release_scope
@@ -82,8 +81,9 @@ jobs:
       NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
       PLAYWRIGHT_BASE_URL: https://www.man-meets-ai.com
       PRODUCTION_CONVEX_CONFIG_JSON: ${{ secrets.PRODUCTION_CONVEX_CONFIG_JSON }}
-      PRODUCTION_QA_PERSONAS_LOCAL_JSON: ${{ secrets.PRODUCTION_QA_PERSONAS_LOCAL_JSON }}
       QA_ENV_FILE: apps/web/.env.production
+      RELEASE_PERSONAS_LOCAL_FILE: tmp/release-personas.local.json
+      RELEASE_PERSONAS_LOCAL_JSON: ${{ secrets.PRODUCTION_QA_PERSONAS_LOCAL_JSON }}
       RELEASE_COMMIT_SHA: ${{ needs.release_scope.outputs.head_sha }}
       VERCEL_ORG_ID: ${{ vars.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
@@ -111,19 +111,20 @@ jobs:
 
       - name: Wait for matching Vercel production deployment
         run: |
-          node qa/scripts/wait-for-vercel-production-deployment.mjs \
+          node scripts/release/wait-for-vercel-production-deployment.mjs \
             --commit_sha="$RELEASE_COMMIT_SHA"
 
       - name: Wait for public release
-        run: node qa/scripts/wait-for-host.mjs --url="$PLAYWRIGHT_BASE_URL" --path=/ --path=/checkout/success
+        run: node scripts/release/wait-for-host.mjs --url="$PLAYWRIGHT_BASE_URL" --path=/ --path=/checkout/success
 
-      - name: Write QA persona credentials
+      - name: Write release persona credentials
         run: |
-          if [[ -z "$PRODUCTION_QA_PERSONAS_LOCAL_JSON" ]]; then
+          if [[ -z "$RELEASE_PERSONAS_LOCAL_JSON" ]]; then
             echo "PRODUCTION_QA_PERSONAS_LOCAL_JSON is not configured." >&2
             exit 1
           fi
-          printf '%s\n' "$PRODUCTION_QA_PERSONAS_LOCAL_JSON" > qa/personas.local.json
+          mkdir -p tmp
+          printf '%s\n' "$RELEASE_PERSONAS_LOCAL_JSON" > "$RELEASE_PERSONAS_LOCAL_FILE"
 
       - name: Pull production app env from Vercel production
         run: |
@@ -155,8 +156,8 @@ jobs:
           mkdir -p "$HOME/.convex"
           printf '%s\n' "$PRODUCTION_CONVEX_CONFIG_JSON" > "$HOME/.convex/config.json"
 
-      - name: Run production default ship pack
-        run: bun run qa:run-pack -- --pack=default_ship --slug=prod-default-${{ github.run_id }}
+      - name: Run production default ship proof
+        run: bun run release:proof -- --proof=default_ship
 
       - name: Upload Playwright artifacts
         if: failure()
@@ -182,12 +183,13 @@ jobs:
       NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
       PLAYWRIGHT_BASE_URL: https://www.man-meets-ai.com
       PRODUCTION_CONVEX_CONFIG_JSON: ${{ secrets.PRODUCTION_CONVEX_CONFIG_JSON }}
-      PRODUCTION_QA_PERSONAS_LOCAL_JSON: ${{ secrets.PRODUCTION_QA_PERSONAS_LOCAL_JSON }}
       PRODUCTION_STRIPE_SECRET_KEY: ${{ secrets.PRODUCTION_STRIPE_SECRET_KEY }}
       PRODUCTION_STRIPE_WEBHOOK_SECRET: ${{ secrets.PRODUCTION_STRIPE_WEBHOOK_SECRET }}
       QA_ALLOW_BILLING_INTEGRATION: "1"
       QA_ENV_FILE: apps/web/.env.production
       QA_REQUIRE_CONVEX_DEBUG: "1"
+      RELEASE_PERSONAS_LOCAL_FILE: tmp/release-personas.local.json
+      RELEASE_PERSONAS_LOCAL_JSON: ${{ secrets.PRODUCTION_QA_PERSONAS_LOCAL_JSON }}
       RELEASE_COMMIT_SHA: ${{ needs.release_scope.outputs.head_sha }}
       STRIPE_SECRET_KEY: ${{ secrets.PRODUCTION_STRIPE_SECRET_KEY }}
       STRIPE_WEBHOOK_SECRET: ${{ secrets.PRODUCTION_STRIPE_WEBHOOK_SECRET }}
@@ -217,19 +219,20 @@ jobs:
 
       - name: Wait for matching Vercel production deployment
         run: |
-          node qa/scripts/wait-for-vercel-production-deployment.mjs \
+          node scripts/release/wait-for-vercel-production-deployment.mjs \
             --commit_sha="$RELEASE_COMMIT_SHA"
 
       - name: Wait for public release
-        run: node qa/scripts/wait-for-host.mjs --url="$PLAYWRIGHT_BASE_URL" --path=/ --path=/checkout/success
+        run: node scripts/release/wait-for-host.mjs --url="$PLAYWRIGHT_BASE_URL" --path=/ --path=/checkout/success
 
-      - name: Write QA persona credentials
+      - name: Write release persona credentials
         run: |
-          if [[ -z "$PRODUCTION_QA_PERSONAS_LOCAL_JSON" ]]; then
+          if [[ -z "$RELEASE_PERSONAS_LOCAL_JSON" ]]; then
             echo "PRODUCTION_QA_PERSONAS_LOCAL_JSON is not configured." >&2
             exit 1
           fi
-          printf '%s\n' "$PRODUCTION_QA_PERSONAS_LOCAL_JSON" > qa/personas.local.json
+          mkdir -p tmp
+          printf '%s\n' "$RELEASE_PERSONAS_LOCAL_JSON" > "$RELEASE_PERSONAS_LOCAL_FILE"
 
       - name: Pull production app env from Vercel production
         run: |
@@ -268,8 +271,8 @@ jobs:
             --expected-mode=live \
             --app-base-url=https://www.man-meets-ai.com
 
-      - name: Run production billing integration pack
-        run: bun run qa:run-pack -- --pack=billing_integration --slug=prod-billing-${{ github.run_id }}
+      - name: Run production billing integration proof
+        run: bun run release:proof -- --proof=billing_integration
 
       - name: Upload Playwright artifacts
         if: failure()
@@ -308,28 +311,42 @@ jobs:
 
           echo "Production release proof passed."
 
-  reconcile_dev:
-    if: needs.release_gate.result == 'success'
-    needs:
-      - release_scope
-      - release_gate
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24.12.0
-
-      - name: Open or reuse post-snapshot reconcile PR
+      - name: Write production release proof summary
+        if: always()
         env:
-          GH_TOKEN: ${{ secrets.RELEASE_RECONCILE_GH_TOKEN }}
+          BILLING_RESULT: ${{ needs.billing_integration.result }}
+          BILLING_SENSITIVE: ${{ needs.release_scope.outputs.billing_sensitive }}
+          DEFAULT_SHIP_RESULT: ${{ needs.default_ship.result }}
+          RELEASE_BASE_SHA: ${{ needs.release_scope.outputs.base_sha }}
           RELEASE_COMMIT_SHA: ${{ needs.release_scope.outputs.head_sha }}
         run: |
-          node qa/scripts/reconcile-post-snapshot-release.mjs \
-            --main-sha="$RELEASE_COMMIT_SHA"
+          node - <<'NODE'
+          const fs = require("node:fs");
+
+          const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+          const summary = {
+            schemaVersion: "release-proof-summary.v1",
+            workflowName: "Production Release Proof",
+            runId: process.env.GITHUB_RUN_ID,
+            runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+            runUrl,
+            commitSha: process.env.RELEASE_COMMIT_SHA,
+            baseSha: process.env.RELEASE_BASE_SHA,
+            environment: "production",
+            proof: {
+              billingSensitive: process.env.BILLING_SENSITIVE === "true",
+              defaultShip: process.env.DEFAULT_SHIP_RESULT,
+              billingIntegration: process.env.BILLING_RESULT,
+            },
+            generatedAt: new Date().toISOString(),
+          };
+
+          fs.writeFileSync("production-release-proof-summary.json", `${JSON.stringify(summary, null, 2)}\n`);
+          NODE
+
+      - name: Upload production release proof summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-release-proof-summary
+          path: production-release-proof-summary.json

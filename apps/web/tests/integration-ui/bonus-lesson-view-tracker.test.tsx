@@ -2,60 +2,57 @@ import React from "react";
 import { render, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const markBonusLessonViewedMock = vi.fn();
-const useMutationMock = vi.fn(() => markBonusLessonViewedMock);
-const useConvexAuthMock = vi.fn();
-
-vi.mock("convex/react", () => ({
-	useConvexAuth: () => useConvexAuthMock(),
-	useMutation: (...args: unknown[]) => useMutationMock(...args),
-}));
-
-vi.mock("@/convex/_generated/api", () => ({
-	api: {
-		course: {
-			markBonusLessonViewed: "markBonusLessonViewed",
-		},
-	},
-}));
-
 import { BonusLessonViewTracker } from "@/features/execute-ship/components/bonus-lesson-view-tracker";
+import { BONUS_LESSON_VIEWED_ENDPOINT } from "@/features/execute-ship/lib/bonus-lesson-view-contract";
 
 describe("BonusLessonViewTracker", () => {
 	beforeEach(() => {
-		markBonusLessonViewedMock.mockReset();
-		useMutationMock.mockClear();
-		useConvexAuthMock.mockReset();
-		useConvexAuthMock.mockReturnValue({
-			isAuthenticated: true,
-			isLoading: false,
-		});
-		markBonusLessonViewedMock.mockResolvedValue({
-			viewedAt: 123,
-			created: true,
-		});
+		vi.restoreAllMocks();
+		vi.unstubAllGlobals();
 	});
 
-	it("marks the current bonus lesson as viewed on mount", async () => {
+	it("posts the current bonus lesson to the server boundary on mount", async () => {
+		const fetchMock = vi.fn().mockResolvedValue(
+			Response.json({
+				viewedAt: 123,
+				created: true,
+			}),
+		);
+		vi.stubGlobal("fetch", fetchMock);
+
 		render(<BonusLessonViewTracker lessonKey="iterate-the-product-with-ai" />);
 
 		await waitFor(() => {
-			expect(useMutationMock).toHaveBeenCalledWith("markBonusLessonViewed");
-			expect(markBonusLessonViewedMock).toHaveBeenCalledWith({
-				lessonKey: "iterate-the-product-with-ai",
-			});
+			expect(fetchMock).toHaveBeenCalledWith(
+				BONUS_LESSON_VIEWED_ENDPOINT,
+				expect.objectContaining({
+					method: "POST",
+					body: JSON.stringify({
+						lessonKey: "iterate-the-product-with-ai",
+					}),
+				}),
+			);
 		});
 	});
 
-	it("stops retrying after auth or access failures", async () => {
-		markBonusLessonViewedMock.mockRejectedValueOnce(new Error("Unauthorized"));
+	it("stops retrying after terminal server responses", async () => {
+		const fetchMock = vi.fn().mockResolvedValue(
+			Response.json(
+				{
+					error: "Sign in before tracking bonus lesson progress.",
+					code: "UNAUTHORIZED",
+				},
+				{ status: 401 },
+			),
+		);
+		vi.stubGlobal("fetch", fetchMock);
 
 		const { rerender } = render(
 			<BonusLessonViewTracker lessonKey="iterate-the-product-with-ai" />,
 		);
 
 		await waitFor(() => {
-			expect(markBonusLessonViewedMock).toHaveBeenCalledTimes(1);
+			expect(fetchMock).toHaveBeenCalledTimes(1);
 		});
 
 		rerender(
@@ -63,34 +60,18 @@ describe("BonusLessonViewTracker", () => {
 		);
 
 		await new Promise((resolve) => setTimeout(resolve, 0));
-		expect(markBonusLessonViewedMock).toHaveBeenCalledTimes(1);
+		expect(fetchMock).toHaveBeenCalledTimes(1);
 	});
 
-	it("waits for Convex auth readiness before marking the lesson as viewed", async () => {
-		useConvexAuthMock.mockReturnValue({
-			isAuthenticated: false,
-			isLoading: true,
-		});
+	it("keeps network failures non-blocking", async () => {
+		const fetchMock = vi.fn().mockRejectedValue(new Error("network offline"));
+		vi.stubGlobal("fetch", fetchMock);
 
-		const { rerender } = render(
-			<BonusLessonViewTracker lessonKey="iterate-the-product-with-ai" />,
-		);
-
-		expect(markBonusLessonViewedMock).not.toHaveBeenCalled();
-
-		useConvexAuthMock.mockReturnValue({
-			isAuthenticated: true,
-			isLoading: false,
-		});
-
-		rerender(
-			<BonusLessonViewTracker lessonKey="iterate-the-product-with-ai" />,
-		);
+		render(<BonusLessonViewTracker lessonKey="iterate-the-product-with-ai" />);
 
 		await waitFor(() => {
-			expect(markBonusLessonViewedMock).toHaveBeenCalledWith({
-				lessonKey: "iterate-the-product-with-ai",
-			});
+			expect(fetchMock).toHaveBeenCalledTimes(1);
 		});
+		await new Promise((resolve) => setTimeout(resolve, 0));
 	});
 });

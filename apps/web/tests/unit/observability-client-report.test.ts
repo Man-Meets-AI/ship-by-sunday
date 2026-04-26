@@ -5,6 +5,7 @@ import { reportClientError } from "@/features/observability/lib/client-error-rep
 describe("reportClientError", () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
+		vi.unstubAllGlobals();
 	});
 
 	it("uses sendBeacon when available", () => {
@@ -43,5 +44,27 @@ describe("reportClientError", () => {
 				method: "POST",
 			}),
 		);
+	});
+
+	it("swallows rejected fallback fetches", async () => {
+		const transportError = new Error("network offline");
+		const rejectedFetch = Promise.reject(transportError);
+		const catchMock = vi.spyOn(rejectedFetch, "catch");
+		const fetchMock = vi.fn(() => rejectedFetch);
+		vi.stubGlobal("fetch", fetchMock);
+		Object.defineProperty(globalThis.navigator, "sendBeacon", {
+			configurable: true,
+			value: undefined,
+		});
+
+		reportClientError({
+			error: new Error("Client failed"),
+			pathname: "/mission",
+			code: "window_error",
+		});
+
+		expect(fetchMock).toHaveBeenCalledTimes(1);
+		expect(catchMock).toHaveBeenCalledTimes(1);
+		await expect(rejectedFetch.catch(() => undefined)).resolves.toBeUndefined();
 	});
 });

@@ -1,0 +1,9 @@
+{
+	"schemaVersion": "release-manifest.v1",
+	"version": "0.3.0",
+	"channel": "stable",
+	"gitTag": "v0.3.0",
+	"changelogHeading": "## 2026-04-19",
+	"releaseEvidenceSchemaVersion": "release-evidence.v1",
+	"notes": "Next stable release manifest. Update this file on the main-targeting release branch before cutting the protected tag."
+}

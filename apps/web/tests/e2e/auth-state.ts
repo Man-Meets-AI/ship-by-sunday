@@ -2,9 +2,10 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 
 const fallbackQaPassword = "SBS_QA_Codex_8Yv2!mN4#rL7";
-const qaPersonaLocalPath = path.resolve(
+const releasePersonaLocalPath = path.resolve(
 	__dirname,
-	"../../../../qa/personas.local.json",
+	"../../../..",
+	process.env.RELEASE_PERSONAS_LOCAL_FILE ?? "tmp/release-personas.local.json",
 );
 
 type QaPersonaLocalConfig = {
@@ -20,7 +21,7 @@ type QaPersonaLocalConfig = {
 function loadQaPersonaLocalConfig() {
 	try {
 		return JSON.parse(
-			readFileSync(qaPersonaLocalPath, "utf8"),
+			readFileSync(releasePersonaLocalPath, "utf8"),
 		) as QaPersonaLocalConfig;
 	} catch (error) {
 		if (error instanceof Error && "code" in error && error.code === "ENOENT") {
@@ -104,7 +105,7 @@ export function getAuthenticatedE2EPrereqProblems() {
 		!memberWithoutAccessAccount?.email
 	) {
 		problems.push(
-			"Missing non-entitled QA account email. Add `ship-by-sunday-clerk-instance` to qa/personas.local.json or set E2E_NON_ENTITLED_EMAIL.",
+			"Missing non-entitled release account email. Add `ship-by-sunday-clerk-instance` to tmp/release-personas.local.json, set RELEASE_PERSONAS_LOCAL_FILE, or set E2E_NON_ENTITLED_EMAIL.",
 		);
 	}
 
@@ -114,7 +115,7 @@ export function getAuthenticatedE2EPrereqProblems() {
 		!memberWithoutAccessAccount?.password
 	) {
 		problems.push(
-			"Missing non-entitled QA account password. Add `ship-by-sunday-clerk-instance` to qa/personas.local.json or set E2E_NON_ENTITLED_PASSWORD / E2E_SHARED_PASSWORD.",
+			"Missing non-entitled release account password. Add `ship-by-sunday-clerk-instance` to tmp/release-personas.local.json, set RELEASE_PERSONAS_LOCAL_FILE, or set E2E_NON_ENTITLED_PASSWORD / E2E_SHARED_PASSWORD.",
 		);
 	}
 
@@ -123,7 +124,7 @@ export function getAuthenticatedE2EPrereqProblems() {
 		!memberWithAccessAccount?.email
 	) {
 		problems.push(
-			"Missing entitled QA account email. Add `ship-by-sunday-clerk-entitled` to qa/personas.local.json or set E2E_ENTITLED_EMAIL.",
+			"Missing entitled release account email. Add `ship-by-sunday-clerk-entitled` to tmp/release-personas.local.json, set RELEASE_PERSONAS_LOCAL_FILE, or set E2E_ENTITLED_EMAIL.",
 		);
 	}
 
@@ -133,7 +134,7 @@ export function getAuthenticatedE2EPrereqProblems() {
 		!memberWithAccessAccount?.password
 	) {
 		problems.push(
-			"Missing entitled QA account password. Add `ship-by-sunday-clerk-entitled` to qa/personas.local.json or set E2E_ENTITLED_PASSWORD / E2E_SHARED_PASSWORD.",
+			"Missing entitled release account password. Add `ship-by-sunday-clerk-entitled` to tmp/release-personas.local.json, set RELEASE_PERSONAS_LOCAL_FILE, or set E2E_ENTITLED_PASSWORD / E2E_SHARED_PASSWORD.",
 		);
 	}
 

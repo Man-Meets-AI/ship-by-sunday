@@ -29,7 +29,7 @@ The observability-specific signing secrets, ingest token, incident-control token
 - deploy as a normal Next.js app
 - keep the project linked to `ParkerRex/mma-shipbysunday`
 - keep Vercel's production branch on `main`
-- let Preview continue to handle unassigned git branches such as `dev` and feature branches
+- let Preview continue to handle feature branches
 - keep Bun pinned to the repo version
 - use real production Clerk env values
 - use real production Stripe live keys
@@ -53,7 +53,7 @@ Do not leave Convex pointed at:
 
 ## Post-deploy verification
 
-After a release merge to `main`, `Production Release Proof` should confirm all of this with a real test flow. That workflow should wait for the exact Vercel production deployment for the merged commit before it starts browser verification, not just wait for `https://www.man-meets-ai.com` to return `200`.
+After a merge to `main`, `Production Release Proof` should confirm all of this with a real test flow. That workflow should wait for the exact Vercel production deployment for the merged commit before it starts browser verification, not just wait for `https://www.man-meets-ai.com` to return `200`.
 
 1. signed-out visitor hits a protected route and is pushed to sign-in
 2. signed-in user without access reaches `/start` and sees inline recovery
@@ -63,15 +63,15 @@ After a release merge to `main`, `Production Release Proof` should confirm all o
 6. Vercel attributes the production web deploy to `main`
 7. GitHub Actions reports a matching `Convex Production Deploy` run for the same release
 
-The workflow should use the same QA control-plane command for the authenticated production pass:
+The workflow should use the same release proof command for the authenticated production pass:
 
 ```bash
-PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run qa:run-pack -- --pack=default_ship
+PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run release:proof -- --proof=default_ship
 ```
 
 That command assumes:
 
-- `qa/personas.local.json` contains the real QA account emails and passwords
+- `tmp/release-personas.local.json` contains the real release proof account emails and passwords, unless `RELEASE_PERSONAS_LOCAL_FILE` points somewhere else
 - the file referenced by `QA_ENV_FILE` contains the production Clerk and Convex env values
 - the production Clerk instance matches the target site
 - GitHub repository secret `VERCEL_TOKEN` plus repository variables `VERCEL_PROJECT_ID` and `VERCEL_TEAM_ID` can read production deployment metadata so the workflow can wait for the exact release commit before running Playwright
@@ -83,7 +83,7 @@ If persona prep fails with a Clerk publishable-key mismatch, stop there. That me
 For billing-sensitive releases, the same workflow should also run:
 
 ```bash
-PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run qa:run-pack -- --pack=billing_integration
+PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run release:proof -- --proof=billing_integration
 ```
 
 Only billing-sensitive releases should spend that extra live no-cost Checkout proof.

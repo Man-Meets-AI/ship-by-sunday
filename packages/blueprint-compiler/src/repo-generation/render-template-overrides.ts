@@ -36,7 +36,7 @@ function buildStarterRootPackageJson(
 			"test:unit": "bun run --cwd apps/web test:unit",
 			"test:contracts": "bun run --cwd apps/web test:contracts",
 			"test:integration": "bun run --cwd apps/web test:integration",
-			"test:browser-smoke": "bun run --cwd apps/web test:browser-smoke",
+			"test:e2e:sandbox": "bun run --cwd apps/web test:e2e:sandbox",
 			check: "bun run --cwd apps/web check",
 		},
 	};

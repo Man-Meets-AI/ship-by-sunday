@@ -27,7 +27,11 @@ export default async function HomePage() {
 				{homePageRenderModel.sprintPath.isEnabled ? (
 					<SprintPathUnifiedSection
 						sprintPathSection={homePageRenderModel.sprintPath.section}
-						mechanismSection={homePageRenderModel.mechanism.section}
+						mechanismSection={
+							homePageRenderModel.mechanism.isEnabled
+								? homePageRenderModel.mechanism.section
+								: undefined
+						}
 					/>
 				) : null}
 				{homePageRenderModel.whatsInside.isEnabled ? (

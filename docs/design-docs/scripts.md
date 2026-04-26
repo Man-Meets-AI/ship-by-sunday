@@ -20,7 +20,9 @@ All commands run from the repository root.
 - `bun run lint`
 - `bun run lint:fix`
 - `bun run markdown:lint -- --paths <repo-path-or-dir>`
+- `bun run docs:generated:check`
 - `bun run plans:lint -- --plan <docs/exec-plans/active/...>`
+- `bun run programs:lint`
 - `bun run typecheck`
 - `bun run build`
 
@@ -29,7 +31,6 @@ The normal root validation surface on this branch still follows the current Ship
 - `bun run test:unit`
 - `bun run test:contracts`
 - `bun run test:integration`
-- `bun run test:browser-smoke`
 - `bun run build`
 
 Use the narrowest relevant command first, then broaden to the full set when the slice is stable.
@@ -38,13 +39,16 @@ For frontmatter-driven docs and plans:
 
 - `bun run markdown:lint` validates the repo-owned markdown families that currently have checked-in metadata contracts: the canonical frontmatter-backed docs spine files under `docs/`, ExecPlans under `docs/exec-plans/`, docs MDX pages under `apps/web/content/docs/`, and blog post MDX files under `apps/web/content/blog/`.
 - `bun run plans:lint` applies the stricter ExecPlan body and frontmatter contract from `docs/exec-plans/PLANS.md`.
-- Both commands accept path-scoped arguments so docs-only work can be proved without widening into unrelated files.
+- `bun run programs:lint` validates Program docs, checked-in Program packet folders, versioned planning briefs, current-brief pointers, and Program prompt contracts.
+- `markdown:lint` and `plans:lint` accept path-scoped arguments so docs-only work can be proved without widening into unrelated files.
+- `docs:generated:check` verifies that `docs/generated/openai-blueprint/` mirrors `docs/openai/` and `docs/generated/ship-by-sunday-blueprint/` mirrors `docs/ship-by-sunday/`.
 
-## CLI and generator
+## Blueprint compiler
 
-- `bun run sbs` launches the local Ship by Sunday intake CLI.
-- `bun run sbs:check` validates the CLI plus blueprint-compiler slice end-to-end.
-- `./bin/sbs --help` and `./bin/sbs --version` are safe reference commands.
+- `bun run --cwd packages/blueprint-compiler lint`
+- `bun run --cwd packages/blueprint-compiler format:check`
+- `bun run --cwd packages/blueprint-compiler typecheck`
+- `bun run --cwd packages/blueprint-compiler test`
 
 ## Operations helpers
 
@@ -60,6 +64,18 @@ For frontmatter-driven docs and plans:
 - `bun run clerk:test-user:prepare:entitled`
 - `bun run video:*` commands operate the optional lesson-video pipeline.
 
-## Current note
+## Release proof
 
-The branch keeps the existing `qa:*` command family and app-local test harness from `dev/main`. The new additions here are the docs-spine and markdown/plan linting surfaces, not a full test-system replacement.
+- `bun run release:manifest:check`
+- `bun run release:evidence:build`
+- `bun run release:billing:doctor -- --env=preview --dry-run`
+- `bun run release:billing:doctor -- --env=production --dry-run`
+- `bun run release:convex:sync-hosted-dev`
+- `bun run release:personas:prepare -- --proof=default_ship`
+- `bun run release:personas:prepare -- --proof=billing_integration`
+- `bun run release:proof -- --proof=default_ship`
+- `bun run release:proof -- --proof=billing_integration`
+- `bun run release:proof -- --proof=default_ship --dry-run`
+- `bun run release:proof -- --proof=billing_integration --dry-run`
+
+Release proof commands use `tmp/release-personas.local.json` by default, or the file named by `RELEASE_PERSONAS_LOCAL_FILE`.

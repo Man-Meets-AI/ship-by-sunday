@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
 	buildBillingIntegrationSteps,
 	isProductionBillingTarget,
-} from "../../../../qa/scripts/lib/billing-integration-step-planner.mjs";
+} from "../../../../scripts/release/lib/billing-integration-step-planner.mjs";
 
 describe("billing integration step planner", () => {
 	it("treats www.man-meets-ai.com as the production billing target", () => {

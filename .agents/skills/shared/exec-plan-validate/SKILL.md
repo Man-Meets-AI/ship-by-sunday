@@ -35,7 +35,7 @@ If no plan exists yet, use `exec-plan-writer`. If the plan still needs a stress-
 1. Read `AGENTS.md` first.
 2. Read `docs/exec-plans/PLANS.md` next and use it as the maintenance contract.
 3. Read the target ExecPlan carefully.
-4. Read the repo-owned launch or proof docs that the validation path depends on, such as `docs/release-workflow.md`, `docs/references/observability.md`, `qa/README.md`, workflow-local READMEs, or other documented proof surfaces.
+4. Read the repo-owned launch or proof docs that the validation path depends on, such as `docs/release-workflow.md`, `docs/references/observability.md`, workflow-local READMEs, or other documented proof surfaces.
 
 ## Validation Posture
 
@@ -59,7 +59,7 @@ Treat the ExecPlan as the source of truth for what must be proven, and treat rep
 
 ## Repo-Owned Proof Rules
 
-- Prefer documented repo commands such as `bun run test:contracts`, `bun run test:browser-smoke`, `bun run build`, or narrower feature-specific proof commands when the plan touches app behavior.
+- Prefer documented repo commands such as `bun run test:contracts`, `bun run test:integration`, `bun run build`, release-owned browser proof, or narrower feature-specific proof commands when the plan touches app behavior.
 - If the validation path already pre-started a local stack or supplied a preflight report, reuse that live stack instead of restarting it.
 - Treat the plan's own `### Test Commands` as the deterministic proof surface. Expect those commands to be rerun by the wrapper after each validation attempt.
 - Expect the command surface itself to capture at least one deterministic proof artifact before cleanup when the runtime stack is healthy.

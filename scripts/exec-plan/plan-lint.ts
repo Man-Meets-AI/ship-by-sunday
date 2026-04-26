@@ -15,9 +15,16 @@ const REQUIRED_FRONTMATTER_KEYS = [
 	"read_when",
 ] as const;
 
-const ALLOWED_FRONTMATTER_KEYS = new Set(REQUIRED_FRONTMATTER_KEYS);
+const OPTIONAL_FRONTMATTER_KEYS = ["program_id", "planning_brief"] as const;
+const ALLOWED_FRONTMATTER_KEYS = new Set([
+	...REQUIRED_FRONTMATTER_KEYS,
+	...OPTIONAL_FRONTMATTER_KEYS,
+]);
 const ALLOWED_STATUSES = new Set(["active", "complete"]);
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const PROGRAM_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const VERSIONED_PROGRAM_BRIEF_PATH_PATTERN =
+	/^docs\/programs\/(active|completed)\/\d{4}-\d{2}-\d{2}-([a-z0-9]+(?:-[a-z0-9]+)*)\/planning-brief-(\d+)\.md$/;
 const REQUIRED_SECTION_HEADINGS = [
 	"Purpose / Big Picture",
 	"Progress",
@@ -324,6 +331,80 @@ function validatePostBuildRecap(
 	}
 }
 
+function validateProgramLinkage(
+	metadata: Record<string, unknown>,
+	issues: string[],
+): void {
+	const programId = metadata.program_id;
+	const planningBrief = metadata.planning_brief;
+	const hasProgramId = programId !== undefined;
+	const hasPlanningBrief = planningBrief !== undefined;
+
+	if (!hasProgramId && !hasPlanningBrief) {
+		return;
+	}
+
+	if (!hasProgramId) {
+		issues.push(
+			"Frontmatter program_id is required when planning_brief is present.",
+		);
+	}
+
+	if (!hasPlanningBrief) {
+		issues.push(
+			"Frontmatter planning_brief is required when program_id is present.",
+		);
+	}
+
+	if (!hasProgramId || !hasPlanningBrief) {
+		return;
+	}
+
+	if (!isNonEmptyString(programId)) {
+		issues.push("Frontmatter program_id must be a non-empty string.");
+	} else if (!PROGRAM_ID_PATTERN.test(programId)) {
+		issues.push(
+			"Frontmatter program_id must be a stable kebab-case Program id slug.",
+		);
+	}
+
+	if (!isNonEmptyString(planningBrief)) {
+		issues.push("Frontmatter planning_brief must be a non-empty string.");
+		return;
+	}
+
+	if (
+		planningBrief.startsWith("/") ||
+		planningBrief.startsWith("~/") ||
+		planningBrief.includes("://")
+	) {
+		issues.push(
+			"Frontmatter planning_brief must be a repo-relative path, not an absolute path or URL.",
+		);
+	}
+
+	if (planningBrief.endsWith("current-planning-brief.txt")) {
+		issues.push(
+			"Frontmatter planning_brief must point to an immutable versioned planning brief, not current-planning-brief.txt.",
+		);
+	}
+
+	const pathMatch = planningBrief.match(VERSIONED_PROGRAM_BRIEF_PATH_PATTERN);
+	if (!pathMatch) {
+		issues.push(
+			"Frontmatter planning_brief must live under docs/programs/(active|completed)/<YYYY-MM-DD-program-id>/planning-brief-<N>.md.",
+		);
+		return;
+	}
+
+	const pathProgramId = pathMatch[2];
+	if (isNonEmptyString(programId) && pathProgramId !== programId) {
+		issues.push(
+			`Frontmatter planning_brief must live under docs/programs/(active|completed)/<YYYY-MM-DD-${programId}>/ so it matches program_id.`,
+		);
+	}
+}
+
 function validateRequiredSections(body: string, issues: string[]): void {
 	for (const heading of REQUIRED_SECTION_HEADINGS) {
 		if (extractMarkdownSection(body, heading) === null) {
@@ -488,6 +569,7 @@ export async function lintExecPlan(params: {
 	validateDateField(metadata, "completed_at", issues);
 	validateReadWhen(metadata, issues);
 	validatePostBuildRecap(metadata, issues);
+	validateProgramLinkage(metadata, issues);
 
 	const status = metadata.status;
 	if (!isNonEmptyString(status) || !ALLOWED_STATUSES.has(status)) {

@@ -62,7 +62,8 @@ export const customerSafeBlueprintCompilerDirectoryPaths = [
 
 export const blueprintCompilerTemplateSourceTracePaths = [
 	"../../docs/openai/**/*",
-	"../../docs/prompts/**/*",
+	"../../docs/prompts/exec-plan*.md",
+	"../../docs/prompts/execplan*.md",
 ] as const;
 
 const excludedSnapshotFileSuffixes = [
@@ -78,7 +79,11 @@ const excludedSnapshotPathFragments = [
 	"/.venv/",
 	"/coverage/",
 	"/docs/openai/",
+	"docs/openai/",
+	"docs/programs/",
+	"docs/prompts/program-",
 	"/docs/ship-by-sunday/",
+	"docs/ship-by-sunday/",
 	"/output/",
 	"/test-results/",
 ] as const;

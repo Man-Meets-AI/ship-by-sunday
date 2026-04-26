@@ -11,6 +11,8 @@ import { useMDXComponents as getMDXComponents } from "@/mdx-components";
 
 const Wrapper = getMDXComponents().wrapper;
 
+export const dynamicParams = true;
+
 export async function generateStaticParams() {
 	if (!isStarterModuleEnabled("docs")) {
 		return [];

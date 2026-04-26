@@ -5,9 +5,25 @@ import { homedir } from "node:os";
 import path from "node:path";
 
 import { apiConfig, limitConfig, productConfig } from "@/config/product";
+import {
+	CODEX_APP_SERVER_DISABLED_ERROR,
+	CodexAppServerRuntimeError,
+	type CodexAccountResponse,
+	type CodexAppServerClientOptions,
+	type CodexLoginStartResponse,
+	type CodexRateLimitsResponse,
+	type CodexRuntimeIncidentCode,
+	type CodexTurnResult,
+} from "@/features/codex/server/app-server-contracts";
 import { captureServerError } from "@/features/observability/server/capture-server-error";
 
-export const CODEX_APP_SERVER_DISABLED_ERROR = "CODEX_APP_SERVER_DISABLED";
+export {
+	CODEX_APP_SERVER_DISABLED_ERROR,
+	CodexAppServerRuntimeError,
+	getCodexAppServerUnavailableMessage,
+	isCodexAppServerRuntimeError,
+	type CodexRateLimitsResponse,
+} from "@/features/codex/server/app-server-contracts";
 
 type JsonRpcId = number;
 
@@ -44,46 +60,6 @@ type PendingRequest = {
 };
 
 type NotificationListener = (notification: JsonRpcNotification) => void;
-
-type LoginStartResponse = {
-	type: "chatgpt";
-	loginId: string;
-	authUrl: string;
-};
-
-type AccountResponse =
-	| {
-			type: "chatgpt";
-			email: string;
-			planType: string;
-	  }
-	| {
-			type: "apiKey";
-	  };
-
-type RateLimitWindow = {
-	usedPercent: number;
-	windowDurationMins: number | null;
-	resetsAt: number | null;
-};
-
-type RateLimitSnapshot = {
-	limitId: string | null;
-	limitName: string | null;
-	primary: RateLimitWindow | null;
-	secondary: RateLimitWindow | null;
-	credits: {
-		hasCredits: boolean;
-		unlimited: boolean;
-		balance: string;
-	} | null;
-	planType: string | null;
-};
-
-export type CodexRateLimitsResponse = {
-	rateLimits: RateLimitSnapshot;
-	rateLimitsByLimitId: Record<string, RateLimitSnapshot> | null;
-};
 
 type ThreadStartResponse = {
 	thread: {
@@ -129,29 +105,6 @@ type ThreadReadResponse = {
 	};
 };
 
-export type CodexTurnResult = {
-	status: "completed" | "interrupted" | "failed";
-	text: string;
-	errorMessage: string | null;
-};
-
-type CodexAppServerClientOptions = {
-	clerkUserId: string;
-	requestId?: string | null;
-	pathname?: string | null;
-	timeoutMs?: number;
-};
-
-type CodexRuntimeIncidentCode =
-	| "codex_app_server_spawn_failed"
-	| "codex_app_server_process_error"
-	| "codex_app_server_exited"
-	| "codex_app_server_bad_stdout"
-	| "codex_app_server_request_timeout"
-	| "codex_app_server_stdin_write_failed"
-	| "codex_app_server_request_dropped"
-	| "codex_app_server_stderr";
-
 function toErrorMessage(error: unknown) {
 	if (error instanceof Error) {
 		return error.message;
@@ -174,23 +127,6 @@ function normalizeThreadTerminalStatus(
 	return "failed";
 }
 
-export class CodexAppServerRuntimeError extends Error {
-	constructor(
-		public readonly incidentCode: CodexRuntimeIncidentCode,
-		message: string,
-		public readonly incidentDetails: Record<string, unknown> | null = null,
-	) {
-		super(message);
-		this.name = incidentCode;
-	}
-}
-
-export function isCodexAppServerRuntimeError(
-	error: unknown,
-): error is CodexAppServerRuntimeError {
-	return error instanceof CodexAppServerRuntimeError;
-}
-
 function isCodexAppServerEnabled() {
 	const explicit = process.env.CODEX_APP_SERVER_ENABLED?.trim().toLowerCase();
 	if (explicit === "true" || explicit === "1") {
@@ -201,10 +137,6 @@ function isCodexAppServerEnabled() {
 	}
 
 	return !process.env.VERCEL;
-}
-
-export function getCodexAppServerUnavailableMessage() {
-	return "Codex app-server is disabled in this deployment. Enable it only on a runtime that can spawn the Codex binary and persist per-user state.";
 }
 
 async function getCodexUserHome(clerkUserId: string) {
@@ -500,7 +432,7 @@ export class CodexAppServerClient {
 	}
 
 	async loginStartManagedChatGPT() {
-		const response = await this.request<LoginStartResponse>(
+		const response = await this.request<CodexLoginStartResponse>(
 			"account/login/start",
 			{ type: "chatgpt" },
 		);
@@ -520,7 +452,7 @@ export class CodexAppServerClient {
 
 	async readAccount(refreshToken = false) {
 		const result = await this.request<{
-			account: AccountResponse | null;
+			account: CodexAccountResponse | null;
 			requiresOpenaiAuth: boolean;
 		}>("account/read", { refreshToken });
 

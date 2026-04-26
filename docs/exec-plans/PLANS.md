@@ -24,6 +24,8 @@ This repo now ships a dedicated ExecPlan linter and markdown linter. When you to
 
 In this repo, every new or revised ExecPlan must start with YAML front matter that includes `title`, `status`, `created_at`, `completed_at`, `summary`, `post_build_recap`, and `read_when`.
 
+Program-linked ExecPlans may also include `program_id` and `planning_brief`, but those two linkage keys are paired: if either key is present, the other is required. `program_id` is the stable Program id slug. `planning_brief` must be a repo-relative path to one immutable versioned planning brief file such as `docs/programs/active/2026-04-23-example-program/planning-brief-2.md`, never the mutable pointer file `current-planning-brief.txt`.
+
 Before authoring or revising an ExecPlan here, read `AGENTS.md` first. Then inspect the real code, docs, and runtime surfaces the plan touches before deciding what the plan should say.
 
 When a plan needs validation guidance, default to the repo's standard quality surface: `bun run format`, `bun run lint`, `bun run typecheck`, plus any narrower workflow-specific checks that prove the feature actually works.
@@ -84,6 +86,18 @@ Required keys:
 - `post_build_recap`: a short finished-state recap of what actually changed after implementation, or `null` while the plan is still active. This is not the same as `summary`; `summary` is forward-looking and `post_build_recap` is backward-looking.
 - `read_when`: a YAML list of short, concrete triggers for when someone should reopen or reread the plan. Prefer repo-specific situations such as resuming implementation, grilling the plan, validating the final slice, or checking the retrospective.
 
+Optional Program-linkage keys for Program-owned ExecPlans:
+
+- `program_id`: the stable kebab-case Program id slug that owns the ExecPlan.
+- `planning_brief`: a repo-relative path to the exact immutable planning brief revision that the plan was written from.
+
+Program-linkage rules:
+
+- non-Program ExecPlans may omit both `program_id` and `planning_brief`
+- if either `program_id` or `planning_brief` is present, the other is required
+- `planning_brief` must point to a versioned brief file such as `docs/programs/(active|completed)/<YYYY-MM-DD-program-id>/planning-brief-<N>.md`
+- `planning_brief` must never point to `docs/programs/(active|completed)/<YYYY-MM-DD-program-id>/current-planning-brief.txt`, because that file is only the mutable pointer to the current brief
+
 Keep the front matter compact and machine-readable. Do not add extra keys unless a separate repo rule requires them.
 
 Frontmatter status rules:
@@ -128,6 +142,9 @@ Bad frontmatter:
 - `status: complete` with `completed_at: null`
 - `status: complete` with empty or `null` `post_build_recap`
 - `summary` rewritten after the fact to sound like a recap instead of an intended outcome
+- `program_id` without `planning_brief`
+- `planning_brief` without `program_id`
+- `planning_brief` pointing at `current-planning-brief.txt` instead of an immutable brief revision
 
 ## Guidelines
 

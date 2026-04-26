@@ -46,5 +46,5 @@ export function reportClientError(
 		},
 		body: requestBody,
 		keepalive: true,
-	});
+	}).catch(() => undefined);
 }

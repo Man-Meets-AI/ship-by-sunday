@@ -1,5 +1,10 @@
 import { apiRouteConfig } from "@/config/product";
 import {
+	getCodexAppServerUnavailableMessage,
+	isCodexAppServerRuntimeError,
+	withCodexAppServerClient,
+} from "@/features/codex/server/app-server-service";
+import {
 	getApiAuthErrorResponse,
 	requireProductAccessApiSession,
 	upsertViewerCodexConnection,
@@ -12,20 +17,13 @@ import {
 
 export const runtime = "nodejs";
 
-async function importCodexAppServer() {
-	return import(
-		/* turbopackIgnore: true */ "@/features/codex/server/app-server"
-	);
-}
-
 export async function POST(request: Request) {
 	const requestId = getRequestIdFromRequest(request);
-	const codexAppServer = await importCodexAppServer();
 
 	try {
 		const session = await requireProductAccessApiSession();
 
-		const result = await codexAppServer.withCodexAppServerClient(
+		const result = await withCodexAppServerClient(
 			{
 				clerkUserId: session.userId,
 				requestId,
@@ -59,7 +57,7 @@ export async function POST(request: Request) {
 				unauthorized: "Sign in before managing Codex connection.",
 				forbidden:
 					"Product access is required before managing Codex connection.",
-				unavailable: codexAppServer.getCodexAppServerUnavailableMessage(),
+				unavailable: getCodexAppServerUnavailableMessage(),
 			},
 			requestId,
 		);
@@ -73,7 +71,7 @@ export async function POST(request: Request) {
 			pathname: apiRouteConfig.codexAccountLoginStart,
 			source: "codex",
 			defaultMessage: "Unable to start Codex account login.",
-			capture: !codexAppServer.isCodexAppServerRuntimeError(error),
+			capture: !isCodexAppServerRuntimeError(error),
 		});
 	}
 }

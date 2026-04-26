@@ -9,6 +9,7 @@ export const blueprintPageSectionIds = [
 	"design",
 	"pricing",
 	"setup",
+	"generated-preview",
 ] as const;
 
 export type BlueprintPageSectionId = (typeof blueprintPageSectionIds)[number];
@@ -24,6 +25,8 @@ const sectionDescriptionById = {
 		"Choose a pricing model and set the price for the generated starter.",
 	setup:
 		"Refine optional scope and handoff details only where you want to steer the output.",
+	"generated-preview":
+		"Review the generated system preview that downstream packets and lessons reference.",
 } as const satisfies Record<BlueprintPageSectionId, string>;
 
 const blueprintStage = getBlueprintStageDefinition("blueprint");
