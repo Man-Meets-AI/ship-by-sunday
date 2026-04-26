@@ -1,41 +1,36 @@
 # Workflow Strategy
 
-The workflows in this directory are split so pull requests get fast source-level feedback while `dev`, `main`, and protected release tags get the hosted proof that a SaaS release needs.
+The workflows in this directory follow the Codex-style lifecycle: pull requests target `main` and get fast source-level feedback, pushes to `main` get hosted product proof, and protected `v*` tags publish releases from verified `main` commits.
 
-## Pull Requests And Source Proof
+## Pull Requests
 
-- `ci.yml` is the pre-merge and source proof path. It runs on pull requests, pushes to `main`, schedule, and manual dispatch.
+- `ci.yml` is the pre-merge source proof path for pull requests into `main`.
 - The durable merge-gate jobs are `static` and `integration`.
 - `static` runs lint, format check, unit tests, contract tests, and the app build.
 - `integration` runs the integration test suite.
-- `browser-smoke` and `cli` are temporary compatibility jobs while branch protection still requires those contexts. They are no-ops and are not release evidence.
+- `browser-smoke` and `cli` are temporary compatibility no-ops while live branch protection still requires those contexts. They are not release evidence and should be removed only when GitHub required contexts are updated.
 
-## Integrated Staging On `dev`
+## Post-Merge On `main`
 
-- `dev-staging-proof.yml` runs on pushes to `dev` and manual dispatch.
-- It proves the integrated `dev` branch against the staging host and release proof personas.
-- It is the staging release-candidate proof, not a required PR context.
-
-## Production On `main`
-
-- `production-release-proof.yml` runs hosted production proof after pushes to `main` and on manual dispatch.
-- `convex-production-deploy.yml` owns Convex production deployment from `main`; automatic deploys remain controlled by `CONVEX_PRODUCTION_DEPLOY_ENABLED`.
-- These workflows prove the production deployment path after a reviewed `dev -> main` release PR lands.
+- `ci.yml` also runs on pushes to `main` so the merged source tree is rechecked.
+- `production-release-proof.yml` runs hosted production proof after pushes to `main` and on manual dispatch. It waits for the matching Vercel production deployment, runs `default_ship`, and runs `billing_integration` when the release scope requires it.
+- `convex-production-deploy.yml` owns Convex production deployment from `main`. Automatic deploys remain controlled by `CONVEX_PRODUCTION_DEPLOY_ENABLED`.
 
 ## Tag Publication
 
 - `release.yml` runs on protected `v*` tags and manual dispatch.
-- It validates `release.json`, checks release identity, builds `release-evidence.v1`, and publishes the GitHub Release only after evidence is available.
-- Tags attest a verified `main` production SHA; they do not replace hosted production proof.
+- It validates `release.json`, confirms the tag target is the verified `main` SHA, builds `release-evidence.v1`, and publishes the GitHub Release only after publish-mode evidence passes.
+- Tags attest a verified `main` production SHA. They do not replace hosted production proof.
 
 ## Repair And Non-Release Lanes
 
-- `sandbox-e2e-nightly.yml` is a scheduled and manual sandbox browser lane for repair work.
-- It is useful regression signal, but it is not a release gate and does not replace `dev-staging-proof.yml` or `production-release-proof.yml`.
-- Do not treat missing historical workflow metadata as current proof unless the workflow file exists in this directory.
+- `sandbox-e2e-nightly.yml` is scheduled and manual browser regression signal for sandbox coverage.
+- `issue-labels.yml` keeps managed labels available for the issue templates.
+- Remote-only workflows such as `Deployment Smoke` are not current proof unless a tracked workflow file owns them. Disable or replace them during the remote landing pass.
 
 ## Rule Of Thumb
 
 - Keep PR checks fast and source-level.
-- Put hosted environment proof in the `dev`, `main`, and tag workflows that know the target environment.
-- Do not add a required status context unless branch protection and the workflow file can be updated together.
+- Put hosted environment proof after merge on `main`.
+- Put release publication behind protected semver tags.
+- Do not add a required status context unless branch protection and this directory can be updated together.

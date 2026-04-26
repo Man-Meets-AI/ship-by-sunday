@@ -2,6 +2,8 @@ name: CI
 
 on:
   pull_request:
+    branches:
+      - main
   push:
     branches:
       - main
@@ -14,7 +16,7 @@ permissions:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   static:
@@ -87,11 +89,11 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Browser smoke retired
-        run: echo "browser-smoke is retired; release browser proof now runs through release:proof."
+        run: echo "browser-smoke is a temporary branch-protection compatibility context; hosted proof runs after main through Production Release Proof."
 
   cli:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Helper CLI retired
-        run: echo "cli is retired; release helper commands now live under scripts/release."
+        run: echo "cli is a temporary branch-protection compatibility context; active source checks are static and integration."

@@ -1,16 +1,16 @@
 # Contributing
 
-Ship by Sunday ships through short-lived branches into `dev`, then promotes reviewed release candidates from `dev` into `main`.
+Ship by Sunday ships through short-lived feature branches into `main`, then publishes stable releases from protected tags that point at verified `main` commits.
 
 Before changing files, read `AGENTS.md` and the nearest nested instruction file for the surface you are touching. For release, auth, checkout, entitlement, browser proof, or ship-readiness work, also read `docs/release-workflow.md`.
 
 ## Branches And Pull Requests
 
-- Branch from the current `dev` for normal feature work.
+- Branch from the current `main` for normal feature work.
 - Keep the diff scoped to one reviewable change.
 - Use conventional commit messages when committing.
-- Open feature PRs into `dev`.
-- Use the hotfix path from `main` only for P0 or P1 production incidents, then merge or cherry-pick the fix back into `dev`.
+- Open feature PRs into `main`.
+- Use focused hotfix branches from `main` only for P0 or P1 production incidents, and run the same post-merge production proof used for ordinary releases.
 
 ## Local Checks
 

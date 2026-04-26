@@ -66,15 +66,11 @@ For frontmatter-driven docs and plans:
 
 ## Release proof
 
-- `bun run release:triage`
-- `bun run release:snapshot -- --dry-run`
 - `bun run release:manifest:check`
 - `bun run release:evidence:build`
 - `bun run release:billing:doctor -- --env=preview --dry-run`
 - `bun run release:billing:doctor -- --env=production --dry-run`
 - `bun run release:convex:sync-hosted-dev`
-- `bun run engineering:intake:release -- --output tmp/release-intake.v1.json`
-- `bun run engineering:intake:snapshot -- --output tmp/engineering-intake.snapshot.v1.json`
 - `bun run release:personas:prepare -- --proof=default_ship`
 - `bun run release:personas:prepare -- --proof=billing_integration`
 - `bun run release:proof -- --proof=default_ship`

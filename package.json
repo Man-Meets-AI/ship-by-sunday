@@ -63,9 +63,6 @@
 		"clerk:test-user:create:entitled": "bun run --cwd apps/web clerk:test-user:create:entitled",
 		"clerk:test-user:prepare:entitled": "bun run --cwd apps/web clerk:test-user:prepare:entitled",
 		"engineering:intake:runtime": "node apps/web/scripts/export-runtime-intake.mjs",
-		"engineering:intake:release": "node scripts/release/export-release-intake.mjs",
-		"engineering:intake:snapshot": "node scripts/release/export-engineering-intake-snapshot.mjs",
-		"release:triage": "node scripts/release/release-triage.mjs",
 		"release:manifest:check": "node scripts/release/validate-release-manifest.mjs --manifest=release.json --changelog=CHANGELOG.md",
 		"release:evidence:build": "node scripts/release/build-release-evidence.mjs --manifest=release.json --output=tmp/release-evidence.v1.json --dry-run",
 		"release:billing:doctor": "bun run --cwd apps/web release:billing:doctor",
@@ -73,7 +70,6 @@
 		"release:personas:prepare": "node scripts/release/prepare-release-personas.mjs prepare",
 		"release:personas:reset": "node scripts/release/prepare-release-personas.mjs reset",
 		"release:proof": "node scripts/release/run-release-proof.mjs",
-		"release:snapshot": "node scripts/release/release-snapshot.mjs",
 		"release:proof:default-ship": "bun run release:proof -- --proof=default_ship",
 		"release:proof:billing-integration": "bun run release:proof -- --proof=billing_integration"
 	}

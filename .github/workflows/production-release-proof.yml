@@ -14,11 +14,10 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
 
 concurrency:
   group: production-release-proof-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   release_scope:
@@ -351,29 +350,3 @@ jobs:
         with:
           name: production-release-proof-summary
           path: production-release-proof-summary.json
-
-  reconcile_dev:
-    if: needs.release_gate.result == 'success'
-    needs:
-      - release_scope
-      - release_gate
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24.12.0
-
-      - name: Open or reuse post-snapshot reconcile PR
-        env:
-          GH_TOKEN: ${{ secrets.RELEASE_RECONCILE_GH_TOKEN }}
-          RELEASE_COMMIT_SHA: ${{ needs.release_scope.outputs.head_sha }}
-        run: |
-          node scripts/release/reconcile-post-snapshot-release.mjs \
-            --main-sha="$RELEASE_COMMIT_SHA"

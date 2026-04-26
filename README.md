@@ -90,8 +90,6 @@ bun run check
 Release operators also use:
 
 ```bash
-bun run release:triage
-bun run release:snapshot -- --dry-run
 bun run release:manifest:check
 bun run release:evidence:build
 bun run release:proof -- --proof=default_ship --dry-run
@@ -135,16 +133,15 @@ Good prompts:
 
 For this repo, that means:
 
-- feature branch into `dev`
-- then `dev` into `main`
+- feature branch from `main`
+- pull request into `main`
 - release manifest and tag evidence stay consistent with the merged `main` commit
-- and if the normal `dev -> main` PR is structurally blocked, use the repo-owned snapshot fallback instead of improvising Git moves
+- and post-merge hosted proof verifies the exact production deployment from `main`
 
 If you want a lighter touch, say so explicitly. For example:
 
 - `open the PR but do not merge`
-- `get this to dev only`
-- `prepare the prod PR and stop`
+- `prepare the PR and stop`
 - `ship this, but ask before the final merge`
 
 ## Docs

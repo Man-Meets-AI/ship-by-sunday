@@ -5,5 +5,5 @@
 	"gitTag": "v0.3.0",
 	"changelogHeading": "## 2026-04-19",
 	"releaseEvidenceSchemaVersion": "release-evidence.v1",
-	"notes": "Next stable release candidate manifest. Update this file in the release PR before cutting the protected tag."
+	"notes": "Next stable release manifest. Update this file on the main-targeting release branch before cutting the protected tag."
 }

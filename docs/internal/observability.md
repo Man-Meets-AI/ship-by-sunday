@@ -97,7 +97,7 @@ For the SBS-owned engineering-intake export over those same incidents, run:
 bun run engineering:intake:runtime -- --output tmp/runtime-intake.v1.json
 ```
 
-That command reads the hosted Convex `incidents` ledger through the observability-owned query seam, groups repeated rows by the export-time canonical identity, references latest occurrences when available, and writes the frozen `runtime-intake.v1` contract. It is read-only: it does not mutate incident state, delivery metadata, occurrence rows, or Telegram controls. The shared contract helpers for runtime and release intake live under `scripts/release/lib/engineering-intake-contract.mjs`; `scripts/release/fixtures/engineering-intake/` contains compatibility fixtures, not the owning implementation.
+That command reads the hosted Convex `incidents` ledger through the observability-owned query seam, groups repeated rows by the export-time canonical identity, references latest occurrences when available, and writes the frozen `runtime-intake.v1` contract. It is read-only: it does not mutate incident state, delivery metadata, occurrence rows, or Telegram controls. The runtime-intake contract helpers live under `scripts/release/lib/engineering-intake-contract.mjs`; `scripts/release/fixtures/engineering-intake/` contains compatibility fixtures, not the owning implementation.
 
 If you need browser-backed proof, use the release proof commands after the narrow tests:
 

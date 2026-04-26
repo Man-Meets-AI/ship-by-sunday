@@ -29,7 +29,7 @@ The observability-specific signing secrets, ingest token, incident-control token
 - deploy as a normal Next.js app
 - keep the project linked to `ParkerRex/mma-shipbysunday`
 - keep Vercel's production branch on `main`
-- let Preview continue to handle unassigned git branches such as `dev` and feature branches
+- let Preview continue to handle feature branches
 - keep Bun pinned to the repo version
 - use real production Clerk env values
 - use real production Stripe live keys
@@ -53,7 +53,7 @@ Do not leave Convex pointed at:
 
 ## Post-deploy verification
 
-After a release merge to `main`, `Production Release Proof` should confirm all of this with a real test flow. That workflow should wait for the exact Vercel production deployment for the merged commit before it starts browser verification, not just wait for `https://www.man-meets-ai.com` to return `200`.
+After a merge to `main`, `Production Release Proof` should confirm all of this with a real test flow. That workflow should wait for the exact Vercel production deployment for the merged commit before it starts browser verification, not just wait for `https://www.man-meets-ai.com` to return `200`.
 
 1. signed-out visitor hits a protected route and is pushed to sign-in
 2. signed-in user without access reaches `/start` and sees inline recovery

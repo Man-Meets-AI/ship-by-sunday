@@ -30,7 +30,7 @@
 
 - Vercel owns the production web deploy from `main`.
 - GitHub Actions owns the Convex production deploy from `main`.
-- Production is healthy only when the web deploy, Convex deploy, and release candidate all agree on the same `main` commit.
+- Production is healthy only when the web deploy, Convex deploy, hosted proof, and release tag all agree on the same `main` commit.
 
 ## Observability
 

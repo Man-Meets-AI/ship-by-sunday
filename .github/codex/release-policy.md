@@ -4,9 +4,9 @@ Use this file before GitHub-facing work in this repository.
 
 ## Branch Targets
 
-- Feature work targets `dev`.
-- Normal production release PRs promote `dev` into `main`.
-- P0 or P1 hotfixes branch from `main`, land on `main`, and then merge or cherry-pick back into `dev`.
+- Feature work branches from `main` and opens pull requests into `main`.
+- `main` is the single integration and production branch.
+- The old shared `dev` release-candidate branch is retired. Do not open `dev -> main` release pull requests.
 - Stable release tags use `vMAJOR.MINOR.PATCH` and must match `release.json`.
 
 ## Proof
@@ -15,7 +15,7 @@ Use source-level proof first:
 
 - `bun run lint`
 - `bun run typecheck`
-- focused unit, integration, or integration-ui tests for the touched surface
+- focused unit, contract, integration, or integration-ui tests for the touched surface
 
 Local git hooks are not repository enforcement. Use focused local checks before pushing, but treat PR CI `static` and `integration` as the durable merge gates. Temporary `browser-smoke` and `cli` contexts are compatibility shims while branch protection catches up.
 
@@ -25,14 +25,19 @@ Use release-owned hosted proof when the change touches auth, entitlement, checko
 - `QA_ALLOW_BILLING_INTEGRATION=1 bun run release:proof -- --proof=billing_integration`
 - dry-run variants are acceptable for local planning and PR description evidence
 
-Do not use retired commands from the old QA, helper, or shallow browser proof systems as current proof.
+Use release identity proof before publishing or validating a tag:
+
+- `bun run release:manifest:check`
+- `bun run release:evidence:build`
+
+Do not use retired `dev` release-candidate commands, snapshot fallback commands, or old release-intake exports as current proof.
 
 ## Review
 
-Before trusting a release PR into `main`, use the repo review prompt from `AGENTS.md` against the PR base branch. Findings should focus on real bugs, regressions, missing tests, security issues, and incorrect assumptions.
+Review normal pull requests against `main`. Findings should focus on real bugs, regressions, missing tests, security issues, and incorrect assumptions.
 
 ## Boundaries
 
-Do not mutate live branch protection, tag rulesets, GitHub repository settings, or remote release policy unless Parker explicitly asks for that operation.
+Do not mutate live branch protection, tag rulesets, GitHub repository settings, Vercel aliases, or remote release policy unless Parker explicitly asks for that operation.
 
 Do not invent a new release lane. Detailed release policy lives in `docs/release-workflow.md`.
