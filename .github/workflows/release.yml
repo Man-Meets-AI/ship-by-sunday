@@ -117,6 +117,7 @@ jobs:
           BILLING_STATUS: ${{ needs.collect_hosted_proof.outputs.billing_status }}
           CONVEX_STATUS: ${{ needs.collect_hosted_proof.outputs.convex_status }}
           ENTITLEMENT_STATUS: ${{ needs.collect_hosted_proof.outputs.entitlement_status }}
+          GIT_TAG: ${{ needs.validate_release_identity.outputs.git_tag }}
           MAIN_SHA: ${{ needs.validate_release_identity.outputs.main_sha }}
           TAG_TARGET_SHA: ${{ needs.validate_release_identity.outputs.tag_target_sha }}
           VERCEL_STATUS: ${{ needs.collect_hosted_proof.outputs.vercel_status }}
@@ -124,6 +125,7 @@ jobs:
           node scripts/release/build-release-evidence.mjs \
             --manifest=release.json \
             --output=release-evidence.v1.json \
+            --tag="$GIT_TAG" \
             --tag-target-sha="$TAG_TARGET_SHA" \
             --main-sha="$MAIN_SHA" \
             --vercel-status="$VERCEL_STATUS" \
@@ -164,6 +166,7 @@ jobs:
           BILLING_STATUS: ${{ needs.collect_hosted_proof.outputs.billing_status }}
           CONVEX_STATUS: ${{ needs.collect_hosted_proof.outputs.convex_status }}
           ENTITLEMENT_STATUS: ${{ needs.collect_hosted_proof.outputs.entitlement_status }}
+          GIT_TAG: ${{ needs.validate_release_identity.outputs.git_tag }}
           MAIN_SHA: ${{ needs.validate_release_identity.outputs.main_sha }}
           TAG_TARGET_SHA: ${{ needs.validate_release_identity.outputs.tag_target_sha }}
           VERCEL_STATUS: ${{ needs.collect_hosted_proof.outputs.vercel_status }}
@@ -171,6 +174,7 @@ jobs:
           node scripts/release/build-release-evidence.mjs \
             --manifest=release.json \
             --output=release-evidence.publish-check.json \
+            --tag="$GIT_TAG" \
             --tag-target-sha="$TAG_TARGET_SHA" \
             --main-sha="$MAIN_SHA" \
             --vercel-status="$VERCEL_STATUS" \

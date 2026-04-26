@@ -5,6 +5,7 @@ import {
 	buildReleaseEvidence,
 	proofStateFromStatus,
 } from "../../../../scripts/release/lib/release-evidence.mjs";
+import { runCli as buildReleaseEvidenceCli } from "../../../../scripts/release/build-release-evidence.mjs";
 
 const manifest = {
 	schemaVersion: "release-manifest.v1",
@@ -82,5 +83,30 @@ describe("release evidence", () => {
 		expect(proofStateFromStatus(undefined)).toMatchObject({
 			status: "unavailable",
 		});
+	});
+
+	it("uses the explicit tag when workflow dispatch runs on main", async () => {
+		const evidence = await buildReleaseEvidenceCli({
+			args: [
+				"--manifest=../../release.json",
+				"--tag=v0.3.0",
+				"--tag-target-sha=main-sha",
+				"--main-sha=main-sha",
+				"--vercel-status=passed",
+				"--convex-status=passed",
+				"--billing-status=not_required",
+				"--auth-status=passed",
+				"--entitlement-status=passed",
+				"--dry-run",
+			],
+			env: {
+				GITHUB_REF_NAME: "main",
+			},
+			writeFileImpl: async () => undefined,
+			writeStdout: () => undefined,
+		});
+
+		expect(evidence.gitTag).toBe("v0.3.0");
+		expect(evidence.blockers).toEqual([]);
 	});
 });
