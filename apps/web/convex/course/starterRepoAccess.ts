@@ -4,7 +4,7 @@ import { COURSE_SLUG } from "../../features/course/lesson/model/registry";
 import {
 	toGitHubUsernameLower,
 	validateGitHubUsername,
-} from "../../features/starter-repo/lib/github-username";
+} from "../../lib/github-username";
 import { requireGrantedProductAccess } from "../access/model";
 import type {
 	CourseMutationCtx,

@@ -16,8 +16,8 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { api } from "@/convex/_generated/api";
-import { validateGitHubUsername } from "@/features/starter-repo/lib/github-username";
-import type { StarterRepoAccessSurface } from "@/features/starter-repo/lib/starter-repo-access-copy";
+import { validateGitHubUsername } from "@/lib/github-username";
+import type { StarterRepoAccessSurface } from "@/config/starter-repo-access-copy";
 
 export function StarterRepoAccessForm({
 	initialUsername,

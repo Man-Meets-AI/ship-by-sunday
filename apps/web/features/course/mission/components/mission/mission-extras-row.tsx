@@ -12,7 +12,7 @@ import {
 import { productConfig } from "@/config/product";
 import { MissionSectionLabel } from "@/features/course/mission/components/mission/mission-section-label";
 import { isStarterModuleEnabled } from "@/config/starter-selectors";
-import { StarterRepoAccessCard } from "@/features/starter-repo/components/starter-repo-access-card";
+import { StarterRepoAccessCard } from "@/app/(workspace)/_components/starter-repo-access/starter-repo-access-card";
 
 export function MissionExtrasRow() {
 	const starterRepoEnabled = isStarterModuleEnabled("starterRepo");

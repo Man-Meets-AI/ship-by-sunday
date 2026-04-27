@@ -38,11 +38,14 @@ vi.mock("@/features/codex/components/codex-connection-card", () => ({
 	CodexConnectionCard: () => <div data-card="codex">Codex card</div>,
 }));
 
-vi.mock("@/features/starter-repo/components/starter-repo-access-card", () => ({
-	StarterRepoAccessCard: () => (
-		<div data-card="starter-repo">Starter repo card</div>
-	),
-}));
+vi.mock(
+	"@/app/(workspace)/_components/starter-repo-access/starter-repo-access-card",
+	() => ({
+		StarterRepoAccessCard: () => (
+			<div data-card="starter-repo">Starter repo card</div>
+		),
+	}),
+);
 
 vi.mock("@/app/(workspace)/_components/settings-account-card", () => ({
 	SettingsAccountCard: () => <div data-card="account">Account card</div>,

@@ -16,7 +16,7 @@ import type { WorkbenchField } from "@/features/course/lesson/model/manifest";
 import {
 	getStarterRepoTemplateLockReason,
 	type StarterRepoAccessStatus,
-} from "@/features/starter-repo/lib/starter-repo-access-copy";
+} from "@/config/starter-repo-access-copy";
 
 import { BuildProductIterationSetupChecklist } from "./build-product-iteration-setup-checklist";
 import { BuildProductIterationSetupGatingAlert } from "./build-product-iteration-setup-gating-alert";

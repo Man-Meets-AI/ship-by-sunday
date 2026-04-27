@@ -2,7 +2,7 @@ import {
 	normalizeGitHubUsername,
 	toGitHubUsernameLower,
 	validateGitHubUsername,
-} from "@/features/starter-repo/lib/github-username";
+} from "@/lib/github-username";
 
 describe("GitHub username helpers", () => {
 	it("normalizes whitespace and a leading at-sign", () => {

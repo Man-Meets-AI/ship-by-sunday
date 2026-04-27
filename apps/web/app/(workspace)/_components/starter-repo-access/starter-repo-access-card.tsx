@@ -24,7 +24,7 @@ import {
 	getStarterRepoStatusLabel,
 	type StarterRepoAccessStatus,
 	type StarterRepoAccessSurface,
-} from "@/features/starter-repo/lib/starter-repo-access-copy";
+} from "@/config/starter-repo-access-copy";
 import { StarterRepoAccessForm } from "./starter-repo-access-form";
 
 type StarterRepoAccessRecord = {

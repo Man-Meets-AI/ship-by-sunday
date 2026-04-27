@@ -8,7 +8,7 @@ import { getBuildStarterTemplateRepoUrl } from "@/features/course/lesson/model/r
 import {
 	getStarterRepoTemplateLockReason,
 	type StarterRepoAccessStatus,
-} from "@/features/starter-repo/lib/starter-repo-access-copy";
+} from "@/config/starter-repo-access-copy";
 import { FieldList } from "../../fields/field-list";
 import { FocusInlineLessonVideo } from "../../shared/focus-inline-lesson-video";
 import { WorkbenchContainer } from "../../shared/workbench-container";
