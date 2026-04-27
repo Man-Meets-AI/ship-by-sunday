@@ -27,7 +27,7 @@ import {
 } from "@/features/course/artifacts/components/artifacts-page-states";
 import { groupArtifactsByBlock } from "@/features/course/artifacts/lib/group-artifacts-by-block";
 import type { ArtifactPreview } from "@/features/course/lesson/model/registry";
-import { getLessonMapHref } from "@/features/workspace-navigation/lib/lesson-map-href";
+import { getLessonMapHref } from "@/lib/workspace-navigation/lesson-map-href";
 
 function ArtifactsPageContent({
 	artifacts,

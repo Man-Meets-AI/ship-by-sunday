@@ -13,10 +13,10 @@ import {
 	getRecommendedBuildLessonHref,
 } from "@/features/execute-ship/lib/bonus-library-presentation";
 import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
-import { buildPostReviewPrimaryNav } from "@/features/workspace-navigation/lib/build-primary-nav-model";
-import { buildWorkspaceLessonLocalNavModel } from "@/features/workspace-navigation/lib/build-secondary-nav-model";
-import { WorkspaceLocalNavRail } from "@/features/workspace-navigation/components/workspace-local-nav-rail";
-import type { PostReviewNavigationTargets } from "@/features/workspace-navigation/lib/post-review-destination";
+import { buildPostReviewPrimaryNav } from "@/lib/workspace-navigation/build-primary-nav-model";
+import { buildWorkspaceLessonLocalNavModel } from "@/lib/workspace-navigation/build-secondary-nav-model";
+import { WorkspaceLocalNavRail } from "@/app/(workspace)/_components/workspace-navigation/workspace-local-nav-rail";
+import type { PostReviewNavigationTargets } from "@/lib/workspace-navigation/post-review-destination";
 import { BonusLessonFooter } from "./bonus-lesson-footer";
 import { LessonMapSurface } from "./lesson-map-surface";
 import { BonusLessonViewTracker } from "./bonus-lesson-view-tracker";

@@ -1,6 +1,6 @@
 "use client";
 
-import type { PostReviewNavigationTargets } from "@/features/workspace-navigation/lib/post-review-destination";
+import type { PostReviewNavigationTargets } from "@/lib/workspace-navigation/post-review-destination";
 
 import { useReviewDownloadHandoff } from "../_hooks/use-review-download-handoff";
 import { BlueprintReviewHandoffCard } from "./blueprint-review-handoff-card";

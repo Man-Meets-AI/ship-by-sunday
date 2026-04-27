@@ -3,7 +3,7 @@ import {
 	getBlueprintStageDefinition,
 	parseCanonicalProjectFactsDraft,
 } from "../../../../packages/blueprint-compiler/src";
-import { resolveWorkspaceResumeDestination } from "../../features/workspace-navigation/lib/post-review-destination";
+import { resolveWorkspaceResumeDestination } from "../../lib/workspace-navigation/post-review-destination";
 
 import { getProjectDefinitionByClerkUserId } from "./projectDefinition";
 import type { BlueprintQueryCtx } from "./types";

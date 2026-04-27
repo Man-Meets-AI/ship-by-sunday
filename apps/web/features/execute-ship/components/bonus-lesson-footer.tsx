@@ -5,7 +5,7 @@ import {
 	getPreviousLesson,
 } from "@/features/course/lesson/model/manifest";
 import { getLessonHref } from "@/features/course/lesson/routing/lesson-routes";
-import { getLessonMapHref } from "@/features/workspace-navigation/lib/lesson-map-href";
+import { getLessonMapHref } from "@/lib/workspace-navigation/lesson-map-href";
 
 export function BonusLessonFooter({
 	lessonKey,

@@ -9,7 +9,7 @@ import type { SkillRailCompletionCue } from "@/features/course/shared/components
 import type {
 	WorkspacePrimaryNavActionId,
 	WorkspacePrimaryNavItem,
-} from "@/features/workspace-navigation/lib/build-primary-nav-model";
+} from "@/lib/workspace-navigation/build-primary-nav-model";
 
 export type AppShellMissionState = {
 	progressCount: number;

@@ -2,7 +2,7 @@ import {
 	getLegacyLessonRedirect,
 	legacyLessonRedirects,
 } from "@/features/course/lesson/utils/legacy-routes";
-import { getLessonMapHref } from "@/features/workspace-navigation/lib/lesson-map-href";
+import { getLessonMapHref } from "@/lib/workspace-navigation/lesson-map-href";
 
 describe("legacy lesson routes", () => {
 	it("returns the supported compatibility redirects", () => {

@@ -12,18 +12,18 @@ import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-missio
 import {
 	buildLockedPostReviewPrimaryNav,
 	buildPostReviewPrimaryNav,
-} from "@/features/workspace-navigation/lib/build-primary-nav-model";
+} from "@/lib/workspace-navigation/build-primary-nav-model";
 import {
 	buildReviewLocalNavModel,
 	REVIEW_HANDOFF_ID,
 	REVIEW_LESSON_MAP_ID,
 	REVIEW_OVERVIEW_ID,
-} from "@/features/workspace-navigation/lib/build-secondary-nav-model";
-import { WorkspaceLocalNavRail } from "@/features/workspace-navigation/components/workspace-local-nav-rail";
+} from "@/lib/workspace-navigation/build-secondary-nav-model";
+import { WorkspaceLocalNavRail } from "@/app/(workspace)/_components/workspace-navigation/workspace-local-nav-rail";
 import {
 	getDefaultBuildLessonsDestination,
 	type PostReviewNavigationTargets,
-} from "@/features/workspace-navigation/lib/post-review-destination";
+} from "@/lib/workspace-navigation/post-review-destination";
 import { BlueprintVideoCard } from "@/features/blueprint-flow/components/video/blueprint-video-card";
 import { REVIEW_SURFACE_TITLE } from "@/features/blueprint-flow/lib/review-download-handoff";
 import { getBlueprintReviewPageMedia } from "@/features/blueprint-flow/lib/blueprint-stage-videos";

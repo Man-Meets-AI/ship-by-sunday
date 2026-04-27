@@ -2,8 +2,8 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { WorkspacePrimaryNav } from "@/features/workspace-navigation/components/workspace-primary-nav";
-import type { WorkspacePrimaryNavItem } from "@/features/workspace-navigation/lib/build-primary-nav-model";
+import { WorkspacePrimaryNav } from "@/app/(workspace)/_components/workspace-navigation/workspace-primary-nav";
+import type { WorkspacePrimaryNavItem } from "@/lib/workspace-navigation/build-primary-nav-model";
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -19,6 +19,78 @@ vi.mock("next/link", () => ({
 		</a>
 	),
 }));
+
+vi.mock("@/components/ui/navigation-menu", async () => {
+	function passthroughClassName(
+		className: string | undefined,
+		requiredClassName = "",
+	) {
+		return [requiredClassName, className].filter(Boolean).join(" ");
+	}
+
+	return {
+		NavigationMenu: ({
+			children,
+			className,
+			viewport = true,
+		}: {
+			children: React.ReactNode;
+			className?: string;
+			viewport?: boolean;
+		}) => (
+			<nav
+				className={className}
+				data-slot="navigation-menu"
+				data-viewport={String(viewport)}
+			>
+				{children}
+			</nav>
+		),
+		NavigationMenuContent: ({
+			children,
+			className,
+		}: {
+			children: React.ReactNode;
+			className?: string;
+		}) => (
+			<div
+				className={passthroughClassName(
+					className,
+					"group-data-[viewport=false]/navigation-menu:absolute group-data-[viewport=false]/navigation-menu:z-50",
+				)}
+				data-slot="navigation-menu-content"
+			>
+				{children}
+			</div>
+		),
+		NavigationMenuItem: ({ children }: { children: React.ReactNode }) => (
+			<li>{children}</li>
+		),
+		NavigationMenuLink: ({ children }: { children: React.ReactNode }) => (
+			<>{children}</>
+		),
+		NavigationMenuList: ({
+			children,
+			className,
+		}: {
+			children: React.ReactNode;
+			className?: string;
+		}) => <ul className={className}>{children}</ul>,
+		NavigationMenuTrigger: ({
+			children,
+			className,
+			disabled,
+		}: {
+			children: React.ReactNode;
+			className?: string;
+			disabled?: boolean;
+		}) => (
+			<button className={className} disabled={disabled} type="button">
+				{children}
+			</button>
+		),
+	};
+});
 
 const primaryNavItems: WorkspacePrimaryNavItem[] = [
 	{

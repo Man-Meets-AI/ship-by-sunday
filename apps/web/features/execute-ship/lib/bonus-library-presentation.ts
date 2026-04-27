@@ -2,8 +2,8 @@ import { routeConfig } from "@/config/product";
 import type { BlockId } from "@/features/course/lesson/model/manifest";
 import { getLessonHref } from "@/features/course/lesson/routing/lesson-routes";
 import type { AppShellMissionState } from "@/features/workspace-shell/components/app-shell/app-shell-props";
-import { getLessonMapHref } from "@/features/workspace-navigation/lib/lesson-map-href";
-import type { PostReviewNavigationTargets } from "@/features/workspace-navigation/lib/post-review-destination";
+import { getLessonMapHref } from "@/lib/workspace-navigation/lesson-map-href";
+import type { PostReviewNavigationTargets } from "@/lib/workspace-navigation/post-review-destination";
 import type { BonusMissionState } from "./bonus-mission-types";
 
 const blockPresentation = {
