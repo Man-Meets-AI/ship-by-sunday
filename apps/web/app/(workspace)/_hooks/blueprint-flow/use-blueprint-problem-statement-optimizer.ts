@@ -3,9 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import type { CanonicalProjectFactsDraft } from "@shipbysunday/blueprint-compiler";
 import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
-import { getBlueprintStageFieldInputId } from "@/features/blueprint-flow/lib/blueprint-step-save-feedback";
-import type { BlueprintStepDraftValues } from "@/features/blueprint-flow/lib/blueprint-step-save-feedback";
-import { buildBlueprintFieldOptimizationRequest } from "@/features/blueprint-flow/lib/blueprint-field-optimizer";
+import { getBlueprintStageFieldInputId } from "@/lib/blueprint-flow/blueprint-step-save-feedback";
+import type { BlueprintStepDraftValues } from "@/lib/blueprint-flow/blueprint-step-save-feedback";
+import { buildBlueprintFieldOptimizationRequest } from "@/lib/blueprint-flow/blueprint-field-optimizer";
 
 type OptimizerStatus =
 	| "idle"

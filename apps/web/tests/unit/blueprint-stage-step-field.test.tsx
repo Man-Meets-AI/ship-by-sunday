@@ -7,7 +7,7 @@ import {
 	getBlueprintStageDefinition,
 } from "@shipbysunday/blueprint-compiler";
 
-import { BlueprintStageStepField } from "@/features/blueprint-flow/components/blueprint-stage-step-field";
+import { BlueprintStageStepField } from "@/app/(workspace)/_components/blueprint-flow/blueprint-stage-step-field";
 
 describe("BlueprintStageStepField", () => {
 	it("shows the optimizer button only for the problem statement field", () => {

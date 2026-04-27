@@ -12,8 +12,8 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
-import type { BlueprintStepDraftValues } from "@/features/blueprint-flow/lib/blueprint-step-save-feedback";
-import { useBlueprintProblemStatementOptimizer } from "@/features/blueprint-flow/hooks/use-blueprint-problem-statement-optimizer";
+import type { BlueprintStepDraftValues } from "@/lib/blueprint-flow/blueprint-step-save-feedback";
+import { useBlueprintProblemStatementOptimizer } from "@/app/(workspace)/_hooks/blueprint-flow/use-blueprint-problem-statement-optimizer";
 
 export function BlueprintProblemStatementOptimizer({
 	draftValues,

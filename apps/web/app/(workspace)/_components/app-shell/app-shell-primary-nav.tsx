@@ -1,6 +1,6 @@
 "use client";
 
-import { BlueprintStageNav } from "@/features/blueprint-flow/components/blueprint-stage-nav";
+import { BlueprintStageNav } from "@/app/(workspace)/_components/blueprint-flow/blueprint-stage-nav";
 import { WorkspacePrimaryNav } from "@/app/(workspace)/_components/workspace-navigation/workspace-primary-nav";
 import type { AppShellPrimaryNav } from "./app-shell-props";
 

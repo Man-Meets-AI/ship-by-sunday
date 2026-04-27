@@ -1,5 +1,5 @@
 import { api } from "@/convex/_generated/api";
-import { BlueprintPage } from "@/features/blueprint-flow/components/blueprint-page";
+import { BlueprintPage } from "@/app/(workspace)/_components/blueprint-flow/blueprint-page";
 import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
 
 export default async function Page() {

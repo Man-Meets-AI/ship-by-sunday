@@ -3,7 +3,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { BlueprintStageScaleField } from "@/features/blueprint-flow/components/blueprint-stage-scale-field";
+import { BlueprintStageScaleField } from "@/app/(workspace)/_components/blueprint-flow/blueprint-stage-scale-field";
 
 describe("BlueprintStageScaleField", () => {
 	it("renders the severity scale and commits a numeric pain score", async () => {

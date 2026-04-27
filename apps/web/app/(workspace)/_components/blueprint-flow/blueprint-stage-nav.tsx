@@ -6,7 +6,7 @@ import {
 	buildBlueprintStageNavItems,
 	type BlueprintStageNavItem,
 	type BlueprintStageNavState,
-} from "@/features/blueprint-flow/lib/blueprint-stage-nav-model";
+} from "@/lib/blueprint-flow/blueprint-stage-nav-model";
 import { cn } from "@/lib/utils";
 
 function handleControlledNavigation(

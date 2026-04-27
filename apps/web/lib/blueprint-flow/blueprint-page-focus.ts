@@ -1,8 +1,8 @@
 import {
 	getBlueprintStageFieldControlId,
 	getBlueprintStageFieldInputId,
-} from "@/features/blueprint-flow/lib/blueprint-step-save-feedback";
-import type { BlueprintPageSectionStatus } from "@/features/blueprint-flow/lib/blueprint-page-validation-model";
+} from "@/lib/blueprint-flow/blueprint-step-save-feedback";
+import type { BlueprintPageSectionStatus } from "@/lib/blueprint-flow/blueprint-page-validation-model";
 
 export function focusFirstMissingBlueprintField(
 	sectionStatuses: BlueprintPageSectionStatus[],

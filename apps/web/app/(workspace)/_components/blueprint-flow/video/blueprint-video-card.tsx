@@ -1,5 +1,5 @@
 import { LessonVideoPlayer } from "@/features/course/lesson/components/lesson-video-player";
-import type { BlueprintPageMedia } from "@/features/blueprint-flow/lib/blueprint-stage-videos";
+import type { BlueprintPageMedia } from "@/lib/blueprint-flow/blueprint-stage-videos";
 
 export function BlueprintVideoCard({
 	content,

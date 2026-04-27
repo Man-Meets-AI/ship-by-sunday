@@ -1,7 +1,7 @@
 import "server-only";
 
 import { api } from "@/convex/_generated/api";
-import type { BlueprintWorkspaceState } from "@/features/blueprint-flow/lib/blueprint-workspace-types";
+import type { BlueprintWorkspaceState } from "@/lib/blueprint-flow/blueprint-workspace-types";
 import { isExecuteShipUnlocked } from "@/lib/execute-ship/bonus-route-access";
 import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
 

@@ -2,7 +2,7 @@
 
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { BlueprintStageSaveFeedback } from "@/features/blueprint-flow/components/blueprint-stage-save-feedback";
+import { BlueprintStageSaveFeedback } from "@/app/(workspace)/_components/blueprint-flow/blueprint-stage-save-feedback";
 
 describe("BlueprintStageSaveFeedback", () => {
 	it("renders warning feedback as a compact status row with the warning icon", () => {

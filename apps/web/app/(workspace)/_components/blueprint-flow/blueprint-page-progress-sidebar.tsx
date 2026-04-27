@@ -1,8 +1,8 @@
 import { CheckCircle2Icon } from "lucide-react";
 import Link from "next/link";
 import { Progress } from "@/components/ui/progress";
-import type { BlueprintPageSectionStatus } from "@/features/blueprint-flow/hooks/use-blueprint-page-state";
-import { blueprintPageSections } from "@/features/blueprint-flow/lib/blueprint-page-sections";
+import type { BlueprintPageSectionStatus } from "@/app/(workspace)/_hooks/blueprint-flow/use-blueprint-page-state";
+import { blueprintPageSections } from "@/lib/blueprint-flow/blueprint-page-sections";
 import { cn } from "@/lib/utils";
 
 export function BlueprintPageProgressSidebar({

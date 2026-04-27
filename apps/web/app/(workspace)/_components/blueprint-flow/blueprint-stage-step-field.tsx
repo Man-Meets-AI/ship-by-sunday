@@ -16,15 +16,15 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { BlueprintProblemStatementOptimizer } from "@/features/blueprint-flow/components/blueprint-problem-statement-optimizer";
+import { BlueprintProblemStatementOptimizer } from "@/app/(workspace)/_components/blueprint-flow/blueprint-problem-statement-optimizer";
 import {
 	getBlueprintFieldScaleDefinition,
 	blueprintFieldHelperText,
 	blueprintFieldInputKind,
 	blueprintFieldLabel,
 	blueprintFieldPlaceholder,
-} from "@/features/blueprint-flow/lib/blueprint-field-helpers";
-import { getBlueprintStageFieldInputId } from "@/features/blueprint-flow/lib/blueprint-step-save-feedback";
+} from "@/lib/blueprint-flow/blueprint-field-helpers";
+import { getBlueprintStageFieldInputId } from "@/lib/blueprint-flow/blueprint-step-save-feedback";
 import { BlueprintStageListField } from "./blueprint-stage-list-field";
 import { BlueprintStageLinkListField } from "./blueprint-stage-link-list-field";
 import { BlueprintStageScaleField } from "./blueprint-stage-scale-field";

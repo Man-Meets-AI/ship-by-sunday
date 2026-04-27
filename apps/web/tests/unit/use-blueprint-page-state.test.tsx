@@ -16,7 +16,7 @@ vi.mock("@clerk/nextjs", () => ({
 	}),
 }));
 import { api } from "@/convex/_generated/api";
-import { useBlueprintPageState } from "@/features/blueprint-flow/hooks/use-blueprint-page-state";
+import { useBlueprintPageState } from "@/app/(workspace)/_hooks/blueprint-flow/use-blueprint-page-state";
 
 type SaveProjectDefinitionFactsMock = ReactMutation<
 	typeof api.blueprint.saveProjectDefinitionFacts

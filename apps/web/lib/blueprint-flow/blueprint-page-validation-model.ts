@@ -6,8 +6,8 @@ import { deriveBlueprintFacts } from "@shipbysunday/blueprint-compiler";
 import {
 	blueprintPageSections,
 	type BlueprintPageSectionId,
-} from "@/features/blueprint-flow/lib/blueprint-page-sections";
-import type { BlueprintStepInlineFeedback } from "@/features/blueprint-flow/lib/blueprint-step-save-feedback";
+} from "@/lib/blueprint-flow/blueprint-page-sections";
+import type { BlueprintStepInlineFeedback } from "@/lib/blueprint-flow/blueprint-step-save-feedback";
 
 export type BlueprintPageSectionStatus = {
 	sectionId: BlueprintPageSectionId;

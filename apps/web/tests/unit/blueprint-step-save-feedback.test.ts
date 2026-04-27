@@ -3,11 +3,11 @@ import {
 	getBlueprintStageDefinition,
 	type BlueprintStageId,
 } from "@shipbysunday/blueprint-compiler";
-import { buildSavePayload } from "@/features/blueprint-flow/lib/blueprint-field-helpers";
+import { buildSavePayload } from "@/lib/blueprint-flow/blueprint-field-helpers";
 import {
 	classifyBlueprintStepSave,
 	type BlueprintStepDraftValues,
-} from "@/features/blueprint-flow/lib/blueprint-step-save-feedback";
+} from "@/lib/blueprint-flow/blueprint-step-save-feedback";
 
 function getStep(stageId: Exclude<BlueprintStageId, "review">, stepId: string) {
 	const stage = getBlueprintStageDefinition(stageId);

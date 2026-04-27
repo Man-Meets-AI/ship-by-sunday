@@ -10,12 +10,12 @@ import {
 	buildSavePayloadForBlueprint,
 	clearStaleDerivedDesignFields,
 	stripUntouchedGeneratedScopeFields,
-} from "@/features/blueprint-flow/lib/blueprint-page-draft-model";
+} from "@/lib/blueprint-flow/blueprint-page-draft-model";
 import {
 	buildFieldErrors,
 	buildPageFeedback,
 	buildSectionStatuses,
-} from "@/features/blueprint-flow/lib/blueprint-page-validation-model";
+} from "@/lib/blueprint-flow/blueprint-page-validation-model";
 
 function createProjectFacts(factOverrides: Record<string, unknown> = {}) {
 	return {

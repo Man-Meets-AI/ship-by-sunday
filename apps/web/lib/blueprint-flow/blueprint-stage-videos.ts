@@ -1,5 +1,5 @@
 import type { LessonVideoContent } from "@/features/course/lesson/model/contracts";
-import type { BlueprintPageSectionId } from "@/features/blueprint-flow/lib/blueprint-page-sections";
+import type { BlueprintPageSectionId } from "@/lib/blueprint-flow/blueprint-page-sections";
 
 const PACKET_BUNNY_LIBRARY_ID = 619172;
 

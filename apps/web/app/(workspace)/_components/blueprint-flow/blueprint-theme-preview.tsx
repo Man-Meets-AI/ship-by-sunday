@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import type { PresetConfig } from "@/features/blueprint-flow/lib/blueprint-theme-helpers";
+import type { PresetConfig } from "@/lib/blueprint-flow/blueprint-theme-helpers";
 import {
 	buildPreviewCssVars,
 	getGoogleFontsUrl,
-} from "@/features/blueprint-flow/lib/blueprint-theme-tokens";
-import { getPreviewIcons } from "@/features/blueprint-flow/lib/blueprint-theme-icons";
+} from "@/lib/blueprint-flow/blueprint-theme-tokens";
+import { getPreviewIcons } from "@/lib/blueprint-flow/blueprint-theme-icons";
 
 type BlueprintThemePreviewProps = {
 	config: PresetConfig;

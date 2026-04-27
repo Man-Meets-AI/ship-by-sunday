@@ -290,7 +290,7 @@ vi.mock("@/features/course/lesson/components/lesson-video-player", () => ({
 	),
 }));
 
-import { BlueprintPage } from "@/features/blueprint-flow/components/blueprint-page";
+import { BlueprintPage } from "@/app/(workspace)/_components/blueprint-flow/blueprint-page";
 
 describe("BlueprintPage", () => {
 	beforeEach(() => {

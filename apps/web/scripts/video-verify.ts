@@ -1,5 +1,5 @@
 import { lessonMedia } from "../features/course/lesson/model/media";
-import { getBlueprintVideoInventory } from "../features/blueprint-flow/lib/blueprint-stage-videos";
+import { getBlueprintVideoInventory } from "../lib/blueprint-flow/blueprint-stage-videos";
 import { verifyBunnyEmbedUrl } from "../features/course/lesson/lib/video-verification";
 
 type VideoInventoryEntry = {

@@ -1,5 +1,5 @@
 import { api } from "@/convex/_generated/api";
-import { isReviewAutoDownloadEnabled } from "@/features/blueprint-flow/lib/review-download-handoff";
+import { isReviewAutoDownloadEnabled } from "@/lib/blueprint-flow/review-download-handoff";
 import { BlueprintReviewPage } from "@/app/(workspace)/review/_components/blueprint-review-page";
 import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
 

@@ -4,8 +4,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { BlueprintProblemStatementOptimizer } from "@/features/blueprint-flow/components/blueprint-problem-statement-optimizer";
-import { buildBlueprintFieldOptimizationRequest } from "@/features/blueprint-flow/lib/blueprint-field-optimizer";
+import { BlueprintProblemStatementOptimizer } from "@/app/(workspace)/_components/blueprint-flow/blueprint-problem-statement-optimizer";
+import { buildBlueprintFieldOptimizationRequest } from "@/lib/blueprint-flow/blueprint-field-optimizer";
 
 function createJsonResponse(body: unknown, status = 200) {
 	return new Response(JSON.stringify(body), {

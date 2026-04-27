@@ -8,11 +8,11 @@ import {
 	getBlueprintStageDefinition,
 	parseCanonicalProjectFactsDraft,
 } from "@shipbysunday/blueprint-compiler";
-import { blueprintPageSections } from "@/features/blueprint-flow/lib/blueprint-page-sections";
+import { blueprintPageSections } from "@/lib/blueprint-flow/blueprint-page-sections";
 import {
 	buildSavePayload,
 	buildStageDraftValues,
-} from "@/features/blueprint-flow/lib/blueprint-field-helpers";
+} from "@/lib/blueprint-flow/blueprint-field-helpers";
 
 export type SaveProjectDefinitionFactsArgs = {
 	clearedFieldKeys: string[];
