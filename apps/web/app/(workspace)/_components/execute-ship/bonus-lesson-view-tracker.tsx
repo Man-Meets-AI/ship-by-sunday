@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import {
 	BONUS_LESSON_VIEWED_ENDPOINT,
 	BONUS_LESSON_VIEW_ERROR_CODES,
-} from "@/features/execute-ship/lib/bonus-lesson-view-contract";
+} from "@/lib/execute-ship/bonus-lesson-view-contract";
 
 const TERMINAL_VIEW_TRACKER_ERROR_CODES = new Set<string>([
 	BONUS_LESSON_VIEW_ERROR_CODES.unauthorized,

@@ -11,8 +11,8 @@ import { AppShell } from "@/app/(workspace)/_components/app-shell";
 import {
 	buildBonusShellMission,
 	getRecommendedBuildLessonHref,
-} from "@/features/execute-ship/lib/bonus-library-presentation";
-import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
+} from "@/lib/execute-ship/bonus-library-presentation";
+import type { BonusMissionState } from "@/lib/execute-ship/bonus-mission-types";
 import { buildPostReviewPrimaryNav } from "@/lib/workspace-navigation/build-primary-nav-model";
 import { buildWorkspaceLessonLocalNavModel } from "@/lib/workspace-navigation/build-secondary-nav-model";
 import { WorkspaceLocalNavRail } from "@/app/(workspace)/_components/workspace-navigation/workspace-local-nav-rail";

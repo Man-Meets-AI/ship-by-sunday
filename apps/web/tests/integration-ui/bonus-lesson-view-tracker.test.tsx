@@ -2,8 +2,8 @@ import React from "react";
 import { render, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { BonusLessonViewTracker } from "@/features/execute-ship/components/bonus-lesson-view-tracker";
-import { BONUS_LESSON_VIEWED_ENDPOINT } from "@/features/execute-ship/lib/bonus-lesson-view-contract";
+import { BonusLessonViewTracker } from "@/app/(workspace)/_components/execute-ship/bonus-lesson-view-tracker";
+import { BONUS_LESSON_VIEWED_ENDPOINT } from "@/lib/execute-ship/bonus-lesson-view-contract";
 
 describe("BonusLessonViewTracker", () => {
 	beforeEach(() => {

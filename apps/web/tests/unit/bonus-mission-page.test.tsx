@@ -1,7 +1,7 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
+import type { BonusMissionState } from "@/lib/execute-ship/bonus-mission-types";
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -58,8 +58,8 @@ vi.mock("@/components/ui/progress", () => ({
 	}) => <div className={className} data-slot="progress" data-value={value} />,
 }));
 
-import { BonusMissionPage } from "@/features/execute-ship/components/bonus-mission-page";
-import { buildBonusShellMission } from "@/features/execute-ship/lib/bonus-library-presentation";
+import { BonusMissionPage } from "@/app/(workspace)/_components/execute-ship/bonus-mission-page";
+import { buildBonusShellMission } from "@/lib/execute-ship/bonus-library-presentation";
 
 const missionState: BonusMissionState = {
 	exploredCount: 3,

@@ -15,8 +15,8 @@ import {
 } from "@/components/ui/item";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
-import { getBonusBlockPresentation } from "@/features/execute-ship/lib/bonus-library-presentation";
+import type { BonusMissionState } from "@/lib/execute-ship/bonus-mission-types";
+import { getBonusBlockPresentation } from "@/lib/execute-ship/bonus-library-presentation";
 
 type BonusMissionBlock = BonusMissionState["blocks"][number];
 

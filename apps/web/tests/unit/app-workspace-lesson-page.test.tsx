@@ -2,7 +2,9 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { BlueprintWorkspaceState } from "@/features/blueprint-flow/lib/blueprint-workspace-types";
-import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
+import type { BonusMissionState } from "@/lib/execute-ship/bonus-mission-types";
+
+vi.mock("server-only", () => ({}));
 
 const fetchAuthenticatedQueryMock = vi.fn();
 const notFoundMock = vi.fn(() => {
@@ -57,9 +59,12 @@ vi.mock("@/app/(workspace)/_components/app-shell", () => ({
 	),
 }));
 
-vi.mock("@/features/execute-ship/components/bonus-lesson-view-tracker", () => ({
-	BonusLessonViewTracker: () => null,
-}));
+vi.mock(
+	"@/app/(workspace)/_components/execute-ship/bonus-lesson-view-tracker",
+	() => ({
+		BonusLessonViewTracker: () => null,
+	}),
+);
 
 vi.mock("@/platform/convex/server-preload", () => ({
 	fetchAuthenticatedQuery: fetchAuthenticatedQueryMock,

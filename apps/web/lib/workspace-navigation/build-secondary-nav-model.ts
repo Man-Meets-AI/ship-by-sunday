@@ -1,10 +1,10 @@
 import type { LessonConfig } from "@/features/course/lesson/model/manifest";
 import { getLessonHref } from "@/features/course/lesson/routing/lesson-routes";
-import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
+import type { BonusMissionState } from "@/lib/execute-ship/bonus-mission-types";
 import {
 	getBonusBlockPresentation,
 	getOrderedBonusBlocks,
-} from "@/features/execute-ship/lib/bonus-library-presentation";
+} from "@/lib/execute-ship/bonus-library-presentation";
 import type { PostReviewNavigationTargets } from "./post-review-destination";
 import type { WorkspacePrimaryNavState } from "./build-primary-nav-model";
 
