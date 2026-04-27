@@ -3,7 +3,7 @@ import { TaskResetPassword } from "@clerk/nextjs";
 
 import { AuthPageShell } from "@/app/(identity)/_components/auth-page-shell";
 import { resetPasswordSupportPanelContent } from "@/app/(identity)/_lib/identity-route-panel-content";
-import { getTaskRedirectUrlComplete } from "@/features/auth/sign-in/sign-in-route-utils";
+import { getTaskRedirectUrlComplete } from "@/platform/auth/auth-route-utils";
 
 export const metadata: Metadata = {
 	robots: {

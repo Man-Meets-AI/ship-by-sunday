@@ -4,7 +4,7 @@ import { AlertCircleIcon } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-import type { SignInAuthError } from "@/features/auth/sign-in/types";
+import type { SignInAuthError } from "@/platform/auth/auth-route-utils";
 
 type SignInBannerProps = {
 	authError: SignInAuthError | null;

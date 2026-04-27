@@ -6,7 +6,7 @@ import { SignInPage } from "@/app/(identity)/_components/sign-in-page";
 import {
 	buildSignUpHref,
 	getSafeRedirectPath,
-} from "@/features/auth/sign-in/sign-in-route-utils";
+} from "@/platform/auth/auth-route-utils";
 import { getPendingCheckoutSessionIdFromCookie } from "@/platform/billing/checkout/checkout-session-recovery";
 import { shouldBypassClerkProtection } from "@/platform/auth/clerk-middleware-bypass";
 

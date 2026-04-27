@@ -27,6 +27,21 @@ describe("release scope classifier", () => {
 			),
 		).toBe(true);
 		expect(
+			isBillingSensitivePath(
+				"apps/web/app/(identity)/_components/sign-up/post-checkout-sign-up-form.tsx",
+			),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath(
+				"apps/web/app/(identity)/_components/post-checkout-sign-up-page.tsx",
+			),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath(
+				"apps/web/app/(identity)/sign-up/[[...sign-up]]/page.tsx",
+			),
+		).toBe(true);
+		expect(
 			isBillingSensitivePath("scripts/release/run-release-proof.mjs"),
 		).toBe(true);
 		expect(

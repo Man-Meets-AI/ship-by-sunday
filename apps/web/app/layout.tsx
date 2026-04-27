@@ -13,7 +13,7 @@ const bebasNeue = Bebas_Neue({
 import { Toaster } from "@/components/ui/sonner";
 import { generatedDesignSystem } from "@/config/generated-design-system";
 import { manifestConfig, productConfig, routeConfig } from "@/config/product";
-import { sessionTaskUrls } from "@/features/auth/sign-in/sign-in-route-utils";
+import { sessionTaskUrls } from "@/platform/auth/auth-route-utils";
 import { clerkProviderAppearance } from "@/lib/clerk-auth-appearance";
 import { ConvexClientProvider } from "@/platform/convex/convex-client-provider";
 import { publicEnv } from "@/platform/env/public";

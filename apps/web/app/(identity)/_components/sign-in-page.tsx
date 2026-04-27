@@ -1,10 +1,10 @@
 "use client";
 
-import { SignInCredentialsForm } from "@/features/auth/sign-in/sign-in-credentials-form";
-import { getSignInPageContent } from "@/features/auth/sign-in/sign-in-page-content";
-import { SignInResetForm } from "@/features/auth/sign-in/sign-in-reset-form";
-import { SignInVerificationForm } from "@/features/auth/sign-in/sign-in-verification-form";
-import { useSignInFlow } from "@/features/auth/sign-in/use-sign-in-flow";
+import { SignInCredentialsForm } from "@/app/(identity)/_components/sign-in/sign-in-credentials-form";
+import { getSignInPageContent } from "@/app/(identity)/_components/sign-in/sign-in-page-content";
+import { SignInResetForm } from "@/app/(identity)/_components/sign-in/sign-in-reset-form";
+import { SignInVerificationForm } from "@/app/(identity)/_components/sign-in/sign-in-verification-form";
+import { useSignInFlow } from "@/app/(identity)/_components/sign-in/use-sign-in-flow";
 
 import { AuthPageShell } from "./auth-page-shell";
 

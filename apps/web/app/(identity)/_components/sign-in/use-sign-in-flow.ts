@@ -14,12 +14,12 @@ import {
 	getSessionTaskHref,
 	getSafeRedirectPath,
 	getSignInAuthError,
-} from "@/features/auth/sign-in/sign-in-route-utils";
+} from "@/platform/auth/auth-route-utils";
 import type {
 	SignInStep,
 	VerificationMethod,
 	VerificationStatus,
-} from "@/features/auth/sign-in/types";
+} from "@/app/(identity)/_components/sign-in/sign-in-flow-types";
 
 function isVerificationStatus(
 	value: string | null | undefined,

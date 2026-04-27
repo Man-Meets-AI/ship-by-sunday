@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 import { getCheckoutSuccessHref, routeConfig } from "@/config/product";
 import { PostCheckoutSignUpPage } from "@/app/(identity)/_components/post-checkout-sign-up-page";
-import { getSafeRedirectPath } from "@/features/auth/sign-in/sign-in-route-utils";
+import { getSafeRedirectPath } from "@/platform/auth/auth-route-utils";
 import {
 	getCheckoutSessionForRecovery,
 	getStripeCheckoutSessionEmail,

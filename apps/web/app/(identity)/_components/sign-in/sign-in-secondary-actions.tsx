@@ -5,7 +5,7 @@ import { FieldDescription } from "@/components/ui/field";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 
-import { GoogleIcon } from "@/features/auth/sign-in/google-icon";
+import { GoogleIcon } from "@/app/(identity)/_components/sign-in/google-icon";
 
 type SignInSecondaryActionsProps = {
 	isBusy: boolean;

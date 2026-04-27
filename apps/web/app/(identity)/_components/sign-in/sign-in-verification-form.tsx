@@ -7,13 +7,13 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 
-import { getVerificationCopy } from "@/features/auth/sign-in/sign-in-verification-copy";
-import { SignInVerificationActions } from "@/features/auth/sign-in/sign-in-verification-actions";
-import { SignInVerificationFields } from "@/features/auth/sign-in/sign-in-verification-fields";
+import { getVerificationCopy } from "@/app/(identity)/_components/sign-in/sign-in-verification-copy";
+import { SignInVerificationActions } from "@/app/(identity)/_components/sign-in/sign-in-verification-actions";
+import { SignInVerificationFields } from "@/app/(identity)/_components/sign-in/sign-in-verification-fields";
 import type {
 	VerificationMethod,
 	VerificationStatus,
-} from "@/features/auth/sign-in/types";
+} from "@/app/(identity)/_components/sign-in/sign-in-flow-types";
 
 type SignInVerificationFormProps = {
 	activeVerificationMethod: VerificationMethod;

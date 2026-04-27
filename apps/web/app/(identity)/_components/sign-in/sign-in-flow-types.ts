@@ -1,5 +1,3 @@
-export type SignInAuthError = "purchase_required";
-
 export type VerificationMethod =
 	| "email_code"
 	| "phone_code"

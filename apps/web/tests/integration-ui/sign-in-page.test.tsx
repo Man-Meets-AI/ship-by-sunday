@@ -46,6 +46,33 @@ vi.mock("@/lib/observability/client-error-report", () => ({
 	reportClientError: (...args: unknown[]) => reportClientErrorMock(...args),
 }));
 
+vi.mock("@/components/ui/input-otp", () => ({
+	InputOTP: ({
+		children,
+		onChange,
+		value,
+		...props
+	}: React.InputHTMLAttributes<HTMLInputElement> & {
+		children: React.ReactNode;
+		onChange?: (value: string) => void;
+	}) => (
+		<div>
+			<input
+				{...props}
+				value={value}
+				onChange={(event) => onChange?.(event.target.value)}
+			/>
+			{children}
+		</div>
+	),
+	InputOTPGroup: ({ children }: { children: React.ReactNode }) => (
+		<div>{children}</div>
+	),
+	InputOTPSlot: ({ index }: { index: number }) => (
+		<span data-otp-slot={index} />
+	),
+}));
+
 import { SignInPage } from "@/app/(identity)/_components/sign-in-page";
 
 function createSignInMock(overrides?: Partial<Record<string, unknown>>) {

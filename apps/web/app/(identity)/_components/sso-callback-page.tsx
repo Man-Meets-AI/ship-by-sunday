@@ -12,7 +12,7 @@ import {
 	getSessionTaskHref,
 	getSafeRedirectPath,
 	ssoCallbackPath,
-} from "@/features/auth/sign-in/sign-in-route-utils";
+} from "@/platform/auth/auth-route-utils";
 
 import { ssoCallbackSupportPanelContent } from "../_lib/identity-route-panel-content";
 import { AuthPageShell } from "./auth-page-shell";

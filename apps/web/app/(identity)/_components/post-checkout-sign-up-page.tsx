@@ -1,7 +1,7 @@
 "use client";
 
-import { PostCheckoutSignUpForm } from "@/features/auth/sign-up/post-checkout-sign-up-form";
-import { usePostCheckoutSignUpFlow } from "@/features/auth/sign-up/use-post-checkout-sign-up-flow";
+import { PostCheckoutSignUpForm } from "@/app/(identity)/_components/sign-up/post-checkout-sign-up-form";
+import { usePostCheckoutSignUpFlow } from "@/app/(identity)/_components/sign-up/use-post-checkout-sign-up-flow";
 
 import { AuthPageShell } from "./auth-page-shell";
 
