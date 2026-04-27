@@ -1,10 +1,10 @@
 import { importPage } from "nextra/pages";
 
-import { buildDocsMetadata } from "@/features/docs/lib/docs-metadata";
+import { buildDocsMetadata } from "@/app/docs/_lib/docs-metadata";
 import {
 	generateDocsStaticParams,
 	getDocsPageSegments,
-} from "@/features/docs/server/page-paths";
+} from "@/app/docs/_lib/page-paths";
 import { isStarterModuleEnabled } from "@/config/starter-selectors";
 import { useMDXComponents as getMDXComponents } from "@/mdx-components";
 

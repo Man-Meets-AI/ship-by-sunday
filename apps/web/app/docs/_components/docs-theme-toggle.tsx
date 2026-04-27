@@ -9,7 +9,7 @@ import {
 	DOCS_THEME_STORAGE_KEY,
 	getDocsThemeCookieString,
 	isDocsTheme,
-} from "@/features/docs/lib/theme-preferences";
+} from "@/app/docs/_lib/theme-preferences";
 
 export function DocsThemeToggle() {
 	const { resolvedTheme, setTheme } = useTheme();

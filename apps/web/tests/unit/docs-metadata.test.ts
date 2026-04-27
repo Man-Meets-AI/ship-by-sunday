@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
 	buildDocsMetadata,
 	getDocsMetadataDefaults,
-} from "@/features/docs/lib/docs-metadata";
+} from "@/app/docs/_lib/docs-metadata";
 
 describe("docs metadata helpers", () => {
 	it("provides canonical and social defaults for the docs landing page", () => {
