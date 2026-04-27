@@ -1,28 +1,65 @@
 /** @vitest-environment jsdom */
 
-import { act, renderHook } from "@testing-library/react";
+import { act } from "react";
+import { createRoot } from "react-dom/client";
 
-import { useAutosave } from "@/features/shared/hooks/use-autosave";
+import { useAutosave } from "@/hooks/use-autosave";
+
+type AutosaveHookProps = Parameters<typeof useAutosave>[0];
+
+function renderAutosaveHook(initialProps: AutosaveHookProps) {
+	const container = document.createElement("div");
+	document.body.append(container);
+	const root = createRoot(container);
+
+	function TestAutosaveHook(props: AutosaveHookProps) {
+		useAutosave(props);
+		return null;
+	}
+
+	function render(props: AutosaveHookProps) {
+		act(() => {
+			root.render(<TestAutosaveHook {...props} />);
+		});
+	}
+
+	render(initialProps);
+
+	return {
+		rerender(nextProps: AutosaveHookProps) {
+			render(nextProps);
+		},
+		unmount() {
+			act(() => {
+				root.unmount();
+			});
+			container.remove();
+		},
+	};
+}
 
 describe("useAutosave", () => {
+	let actEnvironment: unknown;
+
 	beforeEach(() => {
+		actEnvironment = globalThis.IS_REACT_ACT_ENVIRONMENT;
+		globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 		vi.useFakeTimers();
 	});
 
 	afterEach(() => {
 		vi.useRealTimers();
+		globalThis.IS_REACT_ACT_ENVIRONMENT = actEnvironment;
 	});
 
 	it("runs autosave after the debounce window closes", async () => {
 		const onAutosave = vi.fn();
 
-		renderHook(() =>
-			useAutosave({
-				shouldAutosave: true,
-				delayMs: 100,
-				onAutosave,
-			}),
-		);
+		renderAutosaveHook({
+			shouldAutosave: true,
+			delayMs: 100,
+			onAutosave,
+		});
 
 		await act(async () => {
 			vi.advanceTimersByTime(99);
@@ -39,13 +76,11 @@ describe("useAutosave", () => {
 
 	it("cleans up a pending autosave when the component unmounts", async () => {
 		const onAutosave = vi.fn();
-		const { unmount } = renderHook(() =>
-			useAutosave({
-				shouldAutosave: true,
-				delayMs: 100,
-				onAutosave,
-			}),
-		);
+		const { unmount } = renderAutosaveHook({
+			shouldAutosave: true,
+			delayMs: 100,
+			onAutosave,
+		});
 
 		unmount();
 
@@ -59,21 +94,15 @@ describe("useAutosave", () => {
 	it("uses the latest autosave callback without resetting the timer", async () => {
 		const firstAutosave = vi.fn();
 		const secondAutosave = vi.fn();
-		const { rerender } = renderHook(
-			({ onAutosave }: { onAutosave: () => void }) =>
-				useAutosave({
-					shouldAutosave: true,
-					delayMs: 100,
-					onAutosave,
-				}),
-			{
-				initialProps: {
-					onAutosave: firstAutosave,
-				},
-			},
-		);
+		const { rerender } = renderAutosaveHook({
+			shouldAutosave: true,
+			delayMs: 100,
+			onAutosave: firstAutosave,
+		});
 
 		rerender({
+			shouldAutosave: true,
+			delayMs: 100,
 			onAutosave: secondAutosave,
 		});
 

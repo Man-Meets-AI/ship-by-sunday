@@ -4,7 +4,7 @@ import {
 	getDocsSitemapRoutes,
 	getPublicFileLastModified,
 	getPublishedBlogSitemapRoutes,
-} from "@/features/public-metadata/server/content-route-index";
+} from "./_metadata/content-route-index";
 import { getMetadataBase } from "@/platform/next/metadata-base";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
