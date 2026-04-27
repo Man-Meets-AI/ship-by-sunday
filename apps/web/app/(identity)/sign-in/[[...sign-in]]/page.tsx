@@ -7,7 +7,7 @@ import {
 	buildSignUpHref,
 	getSafeRedirectPath,
 } from "@/features/auth/sign-in/sign-in-route-utils";
-import { getPendingCheckoutSessionIdFromCookie } from "@/features/checkout/server/checkout-session-recovery";
+import { getPendingCheckoutSessionIdFromCookie } from "@/platform/billing/checkout/checkout-session-recovery";
 import { shouldBypassClerkProtection } from "@/platform/auth/clerk-middleware-bypass";
 
 export const metadata: Metadata = {

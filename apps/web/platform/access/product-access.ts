@@ -9,7 +9,7 @@ import {
 	claimCheckoutSessionForViewer,
 	claimLatestPendingCheckoutForViewer,
 	getPendingCheckoutSessionIdFromCookie,
-} from "@/features/checkout/server/checkout-session-recovery";
+} from "@/platform/billing/checkout/checkout-session-recovery";
 import type { ProductAccess } from "@/lib/product-access";
 import { getConvexServerSession } from "@/platform/auth/convex-auth";
 

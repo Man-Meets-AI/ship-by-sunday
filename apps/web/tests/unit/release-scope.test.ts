@@ -22,6 +22,11 @@ describe("release scope classifier", () => {
 			),
 		).toBe(true);
 		expect(
+			isBillingSensitivePath(
+				"apps/web/platform/billing/checkout/checkout-session.ts",
+			),
+		).toBe(true);
+		expect(
 			isBillingSensitivePath("scripts/release/run-release-proof.mjs"),
 		).toBe(true);
 		expect(
@@ -35,7 +40,9 @@ describe("release scope classifier", () => {
 			isConvexSensitivePath("apps/web/convex/checkoutClaimsActions.ts"),
 		).toBe(true);
 		expect(
-			isConvexSensitivePath("apps/web/features/checkout/server/foo.ts"),
+			isConvexSensitivePath(
+				"apps/web/platform/billing/checkout/checkout-session-recovery.ts",
+			),
 		).toBe(false);
 		expect(
 			isConvexSensitivePath("scripts/release/detect-release-scope.mjs"),

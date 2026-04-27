@@ -20,10 +20,10 @@ vi.mock("@/platform/billing/stripe", () => ({
 	}),
 }));
 
-vi.mock("@/features/checkout/server/checkout-session-recovery", async () => {
+vi.mock("@/platform/billing/checkout/checkout-session-recovery", async () => {
 	const actual = await vi.importActual<
-		typeof import("@/features/checkout/server/checkout-session-recovery")
-	>("@/features/checkout/server/checkout-session-recovery");
+		typeof import("@/platform/billing/checkout/checkout-session-recovery")
+	>("@/platform/billing/checkout/checkout-session-recovery");
 
 	return {
 		...actual,
@@ -69,7 +69,7 @@ describe("getCheckoutSessionState", () => {
 
 	it("returns missing_session_id when the success URL has no session id", async () => {
 		const { getCheckoutSessionState } =
-			await import("@/features/checkout/server/checkout-session");
+			await import("@/platform/billing/checkout/checkout-session");
 
 		await expect(getCheckoutSessionState(undefined)).resolves.toEqual({
 			kind: "missing_session_id",
@@ -82,7 +82,7 @@ describe("getCheckoutSessionState", () => {
 		retrieveSessionMock.mockRejectedValue(createStripeInvalidRequestError());
 
 		const { getCheckoutSessionState } =
-			await import("@/features/checkout/server/checkout-session");
+			await import("@/platform/billing/checkout/checkout-session");
 
 		await expect(getCheckoutSessionState("cs_missing")).resolves.toEqual({
 			kind: "invalid_session",
@@ -102,7 +102,7 @@ describe("getCheckoutSessionState", () => {
 		);
 
 		const { getCheckoutSessionState } =
-			await import("@/features/checkout/server/checkout-session");
+			await import("@/platform/billing/checkout/checkout-session");
 
 		await expect(getCheckoutSessionState("cs_wrong_course")).resolves.toEqual({
 			kind: "invalid_session",
@@ -116,7 +116,7 @@ describe("getCheckoutSessionState", () => {
 		authMock.mockResolvedValue({ userId: null });
 
 		const { getCheckoutSessionState } =
-			await import("@/features/checkout/server/checkout-session");
+			await import("@/platform/billing/checkout/checkout-session");
 
 		await expect(getCheckoutSessionState("cs_signed_out")).resolves.toEqual({
 			kind: "sign_in_required",
@@ -136,7 +136,7 @@ describe("getCheckoutSessionState", () => {
 		authMock.mockResolvedValue({ userId: null });
 
 		const { getCheckoutSessionState } =
-			await import("@/features/checkout/server/checkout-session");
+			await import("@/platform/billing/checkout/checkout-session");
 
 		await expect(
 			getCheckoutSessionState("cs_guest_signed_out"),
@@ -168,7 +168,7 @@ describe("getCheckoutSessionState", () => {
 		});
 
 		const { getCheckoutSessionState } =
-			await import("@/features/checkout/server/checkout-session");
+			await import("@/platform/billing/checkout/checkout-session");
 
 		await expect(getCheckoutSessionState("cs_guest_claimed")).resolves.toEqual({
 			kind: "validated",
@@ -192,7 +192,7 @@ describe("getCheckoutSessionState", () => {
 		});
 
 		const { getCheckoutSessionState } =
-			await import("@/features/checkout/server/checkout-session");
+			await import("@/platform/billing/checkout/checkout-session");
 
 		await expect(
 			getCheckoutSessionState("cs_guest_wrong_account"),
@@ -219,7 +219,7 @@ describe("getCheckoutSessionState", () => {
 		});
 
 		const { getCheckoutSessionState } =
-			await import("@/features/checkout/server/checkout-session");
+			await import("@/platform/billing/checkout/checkout-session");
 
 		await expect(getCheckoutSessionState("cs_guest_pending")).resolves.toEqual({
 			kind: "payment_pending",
@@ -244,7 +244,7 @@ describe("getCheckoutSessionState", () => {
 		});
 
 		const { getCheckoutSessionState } =
-			await import("@/features/checkout/server/checkout-session");
+			await import("@/platform/billing/checkout/checkout-session");
 
 		await expect(getCheckoutSessionState("cs_guest_reauth")).resolves.toEqual({
 			kind: "sign_in_required",
@@ -270,7 +270,7 @@ describe("getCheckoutSessionState", () => {
 			});
 
 			const { getCheckoutSessionState } =
-				await import("@/features/checkout/server/checkout-session");
+				await import("@/platform/billing/checkout/checkout-session");
 
 			await expect(getCheckoutSessionState(`cs_${claimKind}`)).resolves.toEqual(
 				{
@@ -286,7 +286,7 @@ describe("getCheckoutSessionState", () => {
 		authMock.mockResolvedValue({ userId: "user_other" });
 
 		const { getCheckoutSessionState } =
-			await import("@/features/checkout/server/checkout-session");
+			await import("@/platform/billing/checkout/checkout-session");
 
 		await expect(getCheckoutSessionState("cs_wrong_account")).resolves.toEqual({
 			kind: "wrong_account",
@@ -303,7 +303,7 @@ describe("getCheckoutSessionState", () => {
 		authMock.mockResolvedValue({ userId: "user_123" });
 
 		const { getCheckoutSessionState } =
-			await import("@/features/checkout/server/checkout-session");
+			await import("@/platform/billing/checkout/checkout-session");
 
 		await expect(getCheckoutSessionState("cs_pending")).resolves.toEqual({
 			kind: "payment_pending",
@@ -330,7 +330,7 @@ describe("getCheckoutSessionState", () => {
 			});
 
 			const { getCheckoutSessionState } =
-				await import("@/features/checkout/server/checkout-session");
+				await import("@/platform/billing/checkout/checkout-session");
 
 			await expect(
 				getCheckoutSessionState(`cs_${paymentStatus}`),

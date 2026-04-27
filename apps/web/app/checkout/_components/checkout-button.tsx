@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { useStripeCheckout } from "@/features/checkout/hooks/use-stripe-checkout";
+import { useStripeCheckout } from "@/app/checkout/_hooks/use-stripe-checkout";
 
 export function CheckoutButton({
 	label,

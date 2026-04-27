@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@/features/checkout/components/checkout-button", () => ({
+vi.mock("@/app/checkout/_components/checkout-button", () => ({
 	CheckoutButton: ({
 		label,
 		className,

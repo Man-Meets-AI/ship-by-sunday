@@ -24,11 +24,11 @@ vi.mock("@/app/checkout/success/_components/checkout-success-view", () => ({
 	CheckoutSuccessView: () => null,
 }));
 
-vi.mock("@/features/checkout/server/checkout-session", () => ({
+vi.mock("@/platform/billing/checkout/checkout-session", () => ({
 	getCheckoutSessionState: vi.fn(),
 }));
 
-vi.mock("@/features/checkout/server/checkout-session-recovery", () => ({
+vi.mock("@/platform/billing/checkout/checkout-session-recovery", () => ({
 	getPendingCheckoutSessionIdFromCookie: vi.fn(),
 }));
 

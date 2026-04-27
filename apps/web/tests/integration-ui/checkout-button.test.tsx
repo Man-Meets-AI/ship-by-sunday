@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { CheckoutButton } from "@/features/checkout/components/checkout-button";
+import { CheckoutButton } from "@/app/checkout/_components/checkout-button";
 
 describe("CheckoutButton interactions", () => {
 	beforeEach(() => {

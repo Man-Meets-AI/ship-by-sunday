@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { productConfig, routeConfig } from "@/config/product";
 import { Button } from "@/components/ui/button";
-import { clearPendingCheckoutSessionCookie } from "@/features/checkout/server/checkout-session-recovery";
+import { clearPendingCheckoutSessionCookie } from "@/platform/billing/checkout/checkout-session-recovery";
 
 export const metadata: Metadata = {
 	robots: {

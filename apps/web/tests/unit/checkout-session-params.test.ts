@@ -23,7 +23,7 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 
 	it("builds the signed-in checkout handoff with the active promotion code", async () => {
 		const { buildStripeCheckoutSessionCreateParams } =
-			await import("@/features/checkout/server/checkout-session-params");
+			await import("@/platform/billing/checkout/checkout-session-params");
 
 		expect(
 			buildStripeCheckoutSessionCreateParams({
@@ -56,7 +56,7 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 
 	it("builds guest checkout metadata without account handoff fields", async () => {
 		const { buildStripeCheckoutSessionCreateParams } =
-			await import("@/features/checkout/server/checkout-session-params");
+			await import("@/platform/billing/checkout/checkout-session-params");
 
 		const params = buildStripeCheckoutSessionCreateParams({
 			appBaseUrl: "https://app.example.com",

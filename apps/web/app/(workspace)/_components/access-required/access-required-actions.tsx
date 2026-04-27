@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { CheckoutButton } from "@/features/checkout/components/checkout-button";
+import { CheckoutButton } from "@/app/checkout/_components/checkout-button";
 import type { AccessActionModel } from "../../_lib/access-required-view-model";
 
 function AccessRequiredActionButton({
