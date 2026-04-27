@@ -1,7 +1,7 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 
 import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
-import { buildStripeCheckoutSessionCreateParams } from "@/features/checkout/server/checkout-session-params";
+import { buildStripeCheckoutSessionCreateParams } from "@/platform/billing/checkout/checkout-session-params";
 import { captureServerError } from "@/features/observability/server/capture-server-error";
 import { getUnexpectedApiErrorResponse } from "@/features/observability/server/api-error-response";
 import {
@@ -9,7 +9,7 @@ import {
 	jsonWithRequestId,
 } from "@/features/observability/server/request-id";
 import { buildStripeCheckoutFailureContext } from "@/features/observability/server/source-adapters/stripe-failure";
-import { createPendingCheckoutSessionCookieOptions } from "@/features/checkout/lib/pending-checkout-session-cookie";
+import { createPendingCheckoutSessionCookieOptions } from "@/platform/billing/checkout/pending-checkout-session-cookie";
 import {
 	assertManagedStripePriceMatchesProductConfig,
 	getStripe,

@@ -10,7 +10,7 @@ import {
 	getStripeCheckoutSessionEmail,
 	isStripeCheckoutSessionForCourse,
 	isStripeCheckoutSessionPaid,
-} from "@/features/checkout/server/checkout-session-recovery";
+} from "@/platform/billing/checkout/checkout-session-recovery";
 import { shouldBypassClerkProtection } from "@/platform/auth/clerk-middleware-bypass";
 
 export const metadata: Metadata = {

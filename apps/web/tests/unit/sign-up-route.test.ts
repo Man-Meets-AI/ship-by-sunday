@@ -19,7 +19,7 @@ vi.mock("@/platform/auth/clerk-middleware-bypass", () => ({
 	shouldBypassClerkProtection: () => shouldBypassClerkProtectionMock(),
 }));
 
-vi.mock("@/features/checkout/server/checkout-session-recovery", () => ({
+vi.mock("@/platform/billing/checkout/checkout-session-recovery", () => ({
 	getCheckoutSessionForRecovery: (...args: unknown[]) =>
 		getCheckoutSessionForRecoveryMock(...args),
 	getStripeCheckoutSessionEmail: (...args: unknown[]) =>

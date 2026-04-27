@@ -21,7 +21,7 @@ vi.mock("@/platform/auth/convex-auth", () => ({
 	getConvexServerSession: getConvexServerSessionMock,
 }));
 
-vi.mock("@/features/checkout/server/checkout-session-recovery", () => ({
+vi.mock("@/platform/billing/checkout/checkout-session-recovery", () => ({
 	claimCheckoutSessionForViewer: (...args: unknown[]) =>
 		claimCheckoutSessionForViewerMock(...args),
 	claimLatestPendingCheckoutForViewer: (...args: unknown[]) =>

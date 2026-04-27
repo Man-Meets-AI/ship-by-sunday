@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 import { routeConfig, timingConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
-import type { CheckoutSessionState } from "@/features/checkout/server/checkout-session";
+import type { CheckoutSessionState } from "@/platform/billing/checkout/checkout-session";
 import type { ProductAccess } from "@/lib/product-access";
 
 import { CheckoutSuccessSurface } from "./checkout-success-view-surface";

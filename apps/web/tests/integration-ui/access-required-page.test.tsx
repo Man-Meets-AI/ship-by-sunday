@@ -44,7 +44,7 @@ vi.mock("@clerk/nextjs", () => ({
 	useUser: () => useUserMock(),
 }));
 
-vi.mock("@/features/checkout/components/checkout-button", () => ({
+vi.mock("@/app/checkout/_components/checkout-button", () => ({
 	CheckoutButton: ({ label }: { label: string }) => (
 		<button data-testid="access-required-buy-access" type="button">
 			{label}
