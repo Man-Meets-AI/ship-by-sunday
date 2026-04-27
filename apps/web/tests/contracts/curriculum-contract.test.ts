@@ -6,7 +6,7 @@ import {
 } from "@/features/course/lesson/model";
 import { legacyLessonRedirects } from "@/features/course/lesson/utils/legacy-routes";
 import { homePageContent } from "@/features/marketing/content/home";
-import { getLessonMapHref } from "@/features/workspace-navigation/lib/lesson-map-href";
+import { getLessonMapHref } from "@/lib/workspace-navigation/lesson-map-href";
 
 describe("curriculum contract", () => {
 	it("keeps unique slugs and embedded content on every lesson", () => {

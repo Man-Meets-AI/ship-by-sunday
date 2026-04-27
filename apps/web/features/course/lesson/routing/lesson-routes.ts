@@ -3,7 +3,7 @@ import {
 	getLesson,
 	legacyRouteAliasSegments,
 } from "@/features/course/lesson/model/curriculum";
-import { getLessonMapHref } from "@/features/workspace-navigation/lib/lesson-map-href";
+import { getLessonMapHref } from "@/lib/workspace-navigation/lesson-map-href";
 
 export const legacyRouteAliases = {
 	"1.0": getLessonMapHref(),

@@ -9,7 +9,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getLessonMapHref } from "@/features/workspace-navigation/lib/lesson-map-href";
+import { getLessonMapHref } from "@/lib/workspace-navigation/lesson-map-href";
 
 export function ArtifactsLoadingState() {
 	return (

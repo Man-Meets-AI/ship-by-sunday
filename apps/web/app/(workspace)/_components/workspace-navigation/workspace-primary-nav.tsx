@@ -14,7 +14,7 @@ import type {
 	WorkspacePrimaryNavActionId,
 	WorkspacePrimaryNavItem,
 	WorkspacePrimaryNavMenuEntry,
-} from "../lib/build-primary-nav-model";
+} from "@/lib/workspace-navigation/build-primary-nav-model";
 
 const topLevelClassName =
 	"inline-flex items-center rounded-md px-2 py-1 text-sm font-medium transition-colors";

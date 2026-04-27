@@ -1,6 +1,6 @@
 import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
 import { routeConfig } from "@/config/product";
-import { getLessonMapHref } from "@/features/workspace-navigation/lib/lesson-map-href";
+import { getLessonMapHref } from "@/lib/workspace-navigation/lesson-map-href";
 
 /** Coach resource ids — keep in sync with `coachResources` on lesson 3.2. */
 export const REPO_MAP_SETUP_GUIDE_LINK_ID = "repo_map_setup_guide" as const;

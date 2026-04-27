@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	buildLockedPostReviewPrimaryNav,
 	buildPostReviewPrimaryNav,
-} from "@/features/workspace-navigation/lib/build-primary-nav-model";
+} from "@/lib/workspace-navigation/build-primary-nav-model";
 
 const missionState = {
 	exploredCount: 2,

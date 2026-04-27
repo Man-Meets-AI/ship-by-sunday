@@ -6,7 +6,7 @@ import {
 
 import type { BlueprintWorkspaceState } from "@/features/blueprint-flow/lib/blueprint-workspace-types";
 import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
-import type { PostReviewNavigationTargets } from "@/features/workspace-navigation/lib/post-review-destination";
+import type { PostReviewNavigationTargets } from "@/lib/workspace-navigation/post-review-destination";
 
 type BlueprintWorkspaceFixtureOptions = {
 	executeShipUnlockedAt?: number;

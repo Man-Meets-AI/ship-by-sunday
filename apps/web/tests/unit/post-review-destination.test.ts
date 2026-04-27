@@ -3,7 +3,7 @@ import { getLessonHref } from "@/features/course/lesson/routing/lesson-routes";
 import {
 	getPostReviewNavigationTargets,
 	resolveWorkspaceResumeDestination,
-} from "@/features/workspace-navigation/lib/post-review-destination";
+} from "@/lib/workspace-navigation/post-review-destination";
 
 describe("post-review destination helpers", () => {
 	it("keeps incomplete blueprint visitors on the blueprint flow", () => {

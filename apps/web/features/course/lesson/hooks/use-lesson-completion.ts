@@ -19,7 +19,7 @@ import type {
 	PersistedFieldValues,
 } from "@/features/course/lesson/model/registry";
 import { getLessonHref } from "@/features/course/lesson/routing/lesson-routes";
-import { getLessonMapHref } from "@/features/workspace-navigation/lib/lesson-map-href";
+import { getLessonMapHref } from "@/lib/workspace-navigation/lesson-map-href";
 
 type CompletionErrorData = {
 	code: "INCOMPLETE_LESSON";

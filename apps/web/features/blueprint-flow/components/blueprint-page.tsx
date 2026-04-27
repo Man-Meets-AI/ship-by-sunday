@@ -17,8 +17,8 @@ import type { BlueprintWorkspaceState } from "@/features/blueprint-flow/lib/blue
 import {
 	buildLockedPostReviewPrimaryNav,
 	buildPostReviewPrimaryNav,
-} from "@/features/workspace-navigation/lib/build-primary-nav-model";
-import type { PostReviewNavigationTargets } from "@/features/workspace-navigation/lib/post-review-destination";
+} from "@/lib/workspace-navigation/build-primary-nav-model";
+import type { PostReviewNavigationTargets } from "@/lib/workspace-navigation/post-review-destination";
 
 export function BlueprintPage({
 	initialBonusMissionState = null,

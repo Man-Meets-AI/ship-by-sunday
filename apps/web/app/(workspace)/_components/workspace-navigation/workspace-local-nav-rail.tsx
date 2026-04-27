@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { SidebarGroupLabel, SidebarSeparator } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import type { WorkspacePrimaryNavState } from "@/features/workspace-navigation/lib/build-primary-nav-model";
+import type { WorkspacePrimaryNavState } from "@/lib/workspace-navigation/build-primary-nav-model";
 import type {
 	WorkspaceLocalNavItem,
 	WorkspaceLocalNavModel,
-} from "../lib/build-secondary-nav-model";
+} from "@/lib/workspace-navigation/build-secondary-nav-model";
 
 function getStateClassName(state: WorkspacePrimaryNavState) {
 	switch (state) {
