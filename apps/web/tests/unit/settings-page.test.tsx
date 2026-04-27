@@ -7,9 +7,12 @@ vi.mock("@/features/workspace-shell/components/app-shell", () => ({
 	),
 }));
 
-vi.mock("@/features/codex/components/codex-connection-card", () => ({
-	CodexConnectionCard: () => <div data-codex-card="true">Codex</div>,
-}));
+vi.mock(
+	"@/app/(workspace)/_components/codex-connection-card/codex-connection-card",
+	() => ({
+		CodexConnectionCard: () => <div data-codex-card="true">Codex</div>,
+	}),
+);
 
 vi.mock(
 	"@/app/(workspace)/_components/starter-repo-access/starter-repo-access-card",

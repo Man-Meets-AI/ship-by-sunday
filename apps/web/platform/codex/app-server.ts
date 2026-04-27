@@ -1,3 +1,5 @@
+import "server-only";
+
 import { type ChildProcessWithoutNullStreams, spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdir } from "node:fs/promises";
@@ -14,7 +16,7 @@ import {
 	type CodexRateLimitsResponse,
 	type CodexRuntimeIncidentCode,
 	type CodexTurnResult,
-} from "@/features/codex/server/app-server-contracts";
+} from "@/platform/codex/app-server-contracts";
 import { captureServerError } from "@/platform/observability/capture-server-error";
 
 export {
@@ -23,7 +25,7 @@ export {
 	getCodexAppServerUnavailableMessage,
 	isCodexAppServerRuntimeError,
 	type CodexRateLimitsResponse,
-} from "@/features/codex/server/app-server-contracts";
+} from "@/platform/codex/app-server-contracts";
 
 type JsonRpcId = number;
 

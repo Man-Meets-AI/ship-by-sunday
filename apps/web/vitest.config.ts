@@ -66,7 +66,7 @@ export default defineConfig({
 				"platform/observability/**/*.{ts,tsx}",
 				"app/api/codex/**/*.ts",
 				"app/api/stripe/checkout/route.ts",
-				"features/codex/server/route-helpers.ts",
+				"app/api/codex/_server/route-helpers.ts",
 				"platform/access/product-access.ts",
 				"platform/billing/checkout/checkout-session.ts",
 			],

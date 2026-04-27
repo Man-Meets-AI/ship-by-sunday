@@ -14,10 +14,10 @@ const {
 	withCodexAppServerClientMock: vi.fn(),
 }));
 
-vi.mock("@/features/codex/server/route-helpers", async () => {
+vi.mock("@/app/api/codex/_server/route-helpers", async () => {
 	const actual = await vi.importActual<
-		typeof import("@/features/codex/server/route-helpers")
-	>("@/features/codex/server/route-helpers");
+		typeof import("@/app/api/codex/_server/route-helpers")
+	>("@/app/api/codex/_server/route-helpers");
 
 	return {
 		...actual,
@@ -27,10 +27,10 @@ vi.mock("@/features/codex/server/route-helpers", async () => {
 	};
 });
 
-vi.mock("@/features/codex/server/app-server-service", async () => {
+vi.mock("@/platform/codex/app-server-service", async () => {
 	const actual = await vi.importActual<
-		typeof import("@/features/codex/server/app-server-service")
-	>("@/features/codex/server/app-server-service");
+		typeof import("@/platform/codex/app-server-service")
+	>("@/platform/codex/app-server-service");
 
 	return {
 		...actual,

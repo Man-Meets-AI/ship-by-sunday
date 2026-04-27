@@ -5,7 +5,7 @@ import { fetchMutation, fetchQuery } from "convex/nextjs";
 
 import { apiConfig, limitConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
-import type { CodexRateLimitsResponse } from "@/features/codex/server/app-server-contracts";
+import type { CodexRateLimitsResponse } from "@/platform/codex/app-server-contracts";
 import type { ProductAccess } from "@/lib/product-access";
 import { jsonWithRequestId } from "@/platform/observability/request-id";
 import { serverEnv } from "@/platform/env/server";

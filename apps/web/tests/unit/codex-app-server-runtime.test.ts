@@ -5,7 +5,7 @@ vi.mock("server-only", () => ({}));
 import {
 	CodexAppServerRuntimeError,
 	isCodexAppServerRuntimeError,
-} from "@/features/codex/server/app-server";
+} from "@/platform/codex/app-server";
 
 describe("codex app-server runtime errors", () => {
 	it("identifies typed runtime incidents", () => {

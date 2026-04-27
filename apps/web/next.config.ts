@@ -19,7 +19,7 @@ const nextConfig: NextConfig = {
 	turbopack: {
 		ignoreIssue: [
 			{
-				path: "**/features/codex/server/app-server.ts",
+				path: "**/platform/codex/app-server.ts",
 			},
 		],
 	},
