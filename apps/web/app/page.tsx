@@ -1,6 +1,6 @@
 import HomePage from "@/features/marketing/components/home-page";
 import { HomePageStructuredData } from "@/features/marketing/components/home-page/home-page-structured-data";
-import { redirectGrantedHomeVisitor } from "@/features/product-access/server/product-access";
+import { redirectGrantedHomeVisitor } from "@/platform/access/product-access";
 import { shouldBypassClerkProtection } from "@/platform/auth/clerk-middleware-bypass";
 
 export default async function Page({

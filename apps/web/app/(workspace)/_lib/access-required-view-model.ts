@@ -1,8 +1,5 @@
 import { assertNever } from "@/lib/assert";
-import type {
-	ProductAccess,
-	ProductAccessStatus,
-} from "@/features/product-access/lib/product-access";
+import type { ProductAccess, ProductAccessStatus } from "@/lib/product-access";
 import { workspaceDisplayConfig } from "@/config/starter-selectors";
 
 export type AccessActionModel =

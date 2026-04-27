@@ -7,7 +7,7 @@ import { startTransition, useEffect, useRef, useState } from "react";
 import { routeConfig, timingConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import { buildSignInHref } from "@/features/auth/sign-in/sign-in-route-utils";
-import type { ProductAccess } from "@/features/product-access/lib/product-access";
+import type { ProductAccess } from "@/lib/product-access";
 import {
 	formatRefreshTime,
 	getAccessViewModel,

@@ -63,7 +63,7 @@ describe("product access server helpers", () => {
 		});
 
 		const { getServerProductAccess } =
-			await import("@/features/product-access/server/product-access");
+			await import("@/platform/access/product-access");
 
 		const access = await getServerProductAccess();
 
@@ -82,7 +82,7 @@ describe("product access server helpers", () => {
 		});
 
 		const { getServerProductAccess } =
-			await import("@/features/product-access/server/product-access");
+			await import("@/platform/access/product-access");
 
 		await expect(getServerProductAccess()).resolves.toEqual({
 			clerkUserId: "user_123",
@@ -103,7 +103,7 @@ describe("product access server helpers", () => {
 		});
 
 		const { getServerProductAccess } =
-			await import("@/features/product-access/server/product-access");
+			await import("@/platform/access/product-access");
 
 		await expect(getServerProductAccess()).resolves.toEqual({
 			hasAccess: true,
@@ -143,7 +143,7 @@ describe("product access server helpers", () => {
 		});
 
 		const { getServerProductAccess } =
-			await import("@/features/product-access/server/product-access");
+			await import("@/platform/access/product-access");
 
 		await expect(getServerProductAccess()).resolves.toEqual({
 			hasAccess: true,
@@ -169,7 +169,7 @@ describe("product access server helpers", () => {
 		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(null);
 
 		const { getServerProductAccess } =
-			await import("@/features/product-access/server/product-access");
+			await import("@/platform/access/product-access");
 
 		await expect(getServerProductAccess()).resolves.toEqual({
 			hasAccess: false,
@@ -207,7 +207,7 @@ describe("product access server helpers", () => {
 		});
 
 		const { getServerProductAccess } =
-			await import("@/features/product-access/server/product-access");
+			await import("@/platform/access/product-access");
 
 		await expect(getServerProductAccess()).resolves.toEqual({
 			hasAccess: true,
@@ -238,7 +238,7 @@ describe("product access server helpers", () => {
 		});
 
 		const { getServerProductAccess } =
-			await import("@/features/product-access/server/product-access");
+			await import("@/platform/access/product-access");
 
 		await expect(getServerProductAccess()).resolves.toEqual({
 			hasAccess: false,
@@ -268,7 +268,7 @@ describe("product access server helpers", () => {
 			});
 
 		const { redirectGrantedHomeVisitor } =
-			await import("@/features/product-access/server/product-access");
+			await import("@/platform/access/product-access");
 
 		await redirectGrantedHomeVisitor({ allowMarketing: false });
 
@@ -277,7 +277,7 @@ describe("product access server helpers", () => {
 
 	it("does nothing when the home page explicitly allows marketing mode", async () => {
 		const { redirectGrantedHomeVisitor } =
-			await import("@/features/product-access/server/product-access");
+			await import("@/platform/access/product-access");
 
 		await redirectGrantedHomeVisitor({ allowMarketing: true });
 
@@ -302,7 +302,7 @@ describe("product access server helpers", () => {
 		});
 
 		const { getServerResumeDestination } =
-			await import("@/features/product-access/server/product-access");
+			await import("@/platform/access/product-access");
 
 		await expect(getServerResumeDestination()).resolves.toBeNull();
 	});
@@ -319,7 +319,7 @@ describe("product access server helpers", () => {
 		});
 
 		const { getServerResumeDestination } =
-			await import("@/features/product-access/server/product-access");
+			await import("@/platform/access/product-access");
 
 		await expect(getServerResumeDestination()).resolves.toBeNull();
 		expect(fetchQueryMock).toHaveBeenCalledTimes(1);
@@ -355,7 +355,7 @@ describe("product access server helpers", () => {
 			});
 
 		const { getServerResumeDestination } =
-			await import("@/features/product-access/server/product-access");
+			await import("@/platform/access/product-access");
 
 		await expect(getServerResumeDestination()).resolves.toEqual({
 			destination: "/lesson/product-review",

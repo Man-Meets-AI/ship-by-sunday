@@ -10,7 +10,7 @@ import {
 	claimLatestPendingCheckoutForViewer,
 	getPendingCheckoutSessionIdFromCookie,
 } from "@/features/checkout/server/checkout-session-recovery";
-import type { ProductAccess } from "@/features/product-access/lib/product-access";
+import type { ProductAccess } from "@/lib/product-access";
 import { getConvexServerSession } from "@/platform/auth/convex-auth";
 
 type ResumeDestination = FunctionReturnType<
