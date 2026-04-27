@@ -1,7 +1,7 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
-vi.mock("@/features/workspace-shell/components/app-shell", () => ({
+vi.mock("@/app/(workspace)/_components/app-shell", () => ({
 	AppShell: ({ children }: { children: React.ReactNode }) => (
 		<div data-product-shell="true">{children}</div>
 	),

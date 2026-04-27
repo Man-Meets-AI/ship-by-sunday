@@ -73,7 +73,7 @@ vi.mock("@clerk/nextjs", () => ({
 	}),
 }));
 
-vi.mock("@/features/workspace-shell/components/app-shell", () => ({
+vi.mock("@/app/(workspace)/_components/app-shell", () => ({
 	AppShell: ({
 		title,
 		children,
@@ -91,6 +91,196 @@ vi.mock("@/features/workspace-shell/components/app-shell", () => ({
 		</div>
 	),
 }));
+
+vi.mock("@/components/ui/collapsible", () => ({
+	Collapsible: ({ children }: { children: React.ReactNode }) => (
+		<div>{children}</div>
+	),
+	CollapsibleContent: ({ children }: { children: React.ReactNode }) => (
+		<div>{children}</div>
+	),
+	CollapsibleTrigger: ({ children }: { children: React.ReactNode }) => (
+		<>{children}</>
+	),
+}));
+
+vi.mock("@/components/ui/alert-dialog", () => ({
+	AlertDialog: ({
+		children,
+		open,
+	}: {
+		children: React.ReactNode;
+		open?: boolean;
+	}) => (open ? <div>{children}</div> : null),
+	AlertDialogAction: ({
+		children,
+		onClick,
+	}: {
+		children: React.ReactNode;
+		onClick?: () => void;
+	}) => (
+		<button type="button" onClick={onClick}>
+			{children}
+		</button>
+	),
+	AlertDialogCancel: ({
+		children,
+		onClick,
+	}: {
+		children: React.ReactNode;
+		onClick?: () => void;
+	}) => (
+		<button type="button" onClick={onClick}>
+			{children}
+		</button>
+	),
+	AlertDialogContent: ({ children }: { children: React.ReactNode }) => (
+		<div>{children}</div>
+	),
+	AlertDialogDescription: ({ children }: { children: React.ReactNode }) => (
+		<p>{children}</p>
+	),
+	AlertDialogFooter: ({ children }: { children: React.ReactNode }) => (
+		<div>{children}</div>
+	),
+	AlertDialogHeader: ({ children }: { children: React.ReactNode }) => (
+		<div>{children}</div>
+	),
+	AlertDialogTitle: ({ children }: { children: React.ReactNode }) => (
+		<h2>{children}</h2>
+	),
+}));
+
+vi.mock("@/components/ui/dialog", () => ({
+	Dialog: ({ children, open }: { children: React.ReactNode; open?: boolean }) =>
+		open ? <div>{children}</div> : null,
+	DialogContent: ({ children }: { children: React.ReactNode }) => (
+		<div>{children}</div>
+	),
+	DialogDescription: ({ children }: { children: React.ReactNode }) => (
+		<p>{children}</p>
+	),
+	DialogFooter: ({ children }: { children: React.ReactNode }) => (
+		<div>{children}</div>
+	),
+	DialogHeader: ({ children }: { children: React.ReactNode }) => (
+		<div>{children}</div>
+	),
+	DialogTitle: ({ children }: { children: React.ReactNode }) => (
+		<h2>{children}</h2>
+	),
+}));
+
+vi.mock("@/components/ui/progress", () => ({
+	Progress: ({
+		className,
+		value,
+	}: {
+		className?: string;
+		value?: number | null;
+	}) => <div className={className} data-slot="progress" data-value={value} />,
+}));
+
+vi.mock("@/components/ui/select", () => {
+	const SelectContext = React.createContext<
+		((nextValue: string) => void) | undefined
+	>(undefined);
+
+	return {
+		Select: ({
+			children,
+			onValueChange,
+		}: {
+			children: React.ReactNode;
+			onValueChange?: (nextValue: string) => void;
+		}) => (
+			<SelectContext.Provider value={onValueChange}>
+				{children}
+			</SelectContext.Provider>
+		),
+		SelectContent: ({ children }: { children: React.ReactNode }) => (
+			<div>{children}</div>
+		),
+		SelectGroup: ({ children }: { children: React.ReactNode }) => (
+			<div>{children}</div>
+		),
+		SelectItem: ({
+			children,
+			className,
+			value,
+		}: {
+			children: React.ReactNode;
+			className?: string;
+			value: string;
+		}) => {
+			const onValueChange = React.useContext(SelectContext);
+			return (
+				<button
+					type="button"
+					role="option"
+					aria-selected="false"
+					className={className}
+					onClick={() => onValueChange?.(value)}
+				>
+					{children}
+				</button>
+			);
+		},
+		SelectTrigger: ({
+			children,
+			className,
+			...props
+		}: React.ButtonHTMLAttributes<HTMLButtonElement> & {
+			children: React.ReactNode;
+		}) => (
+			<button
+				type="button"
+				role="combobox"
+				aria-controls="mock-select-options"
+				aria-expanded="true"
+				className={className}
+				{...props}
+			>
+				{children}
+			</button>
+		),
+		SelectValue: () => null,
+	};
+});
+
+vi.mock("@/components/ui/toggle-group", () => {
+	const ToggleGroupContext = React.createContext<
+		((nextValue: string) => void) | undefined
+	>(undefined);
+
+	return {
+		ToggleGroup: ({
+			children,
+			onValueChange,
+		}: {
+			children: React.ReactNode;
+			onValueChange?: (nextValue: string) => void;
+		}) => (
+			<ToggleGroupContext.Provider value={onValueChange}>
+				<div>{children}</div>
+			</ToggleGroupContext.Provider>
+		),
+		ToggleGroupItem: ({
+			children,
+			value,
+		}: {
+			children: React.ReactNode;
+			value: string;
+		}) => {
+			const onValueChange = React.useContext(ToggleGroupContext);
+			return (
+				<button type="button" onClick={() => onValueChange?.(value)}>
+					{children}
+				</button>
+			);
+		},
+	};
+});
 
 vi.mock("@/features/course/lesson/components/lesson-video-player", () => ({
 	LessonVideoPlayer: ({ title }: { title?: string }) => (

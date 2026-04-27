@@ -23,7 +23,7 @@ vi.mock("next/link", () => ({
 	),
 }));
 
-vi.mock("@/features/workspace-shell/components/app-shell", () => ({
+vi.mock("@/app/(workspace)/_components/app-shell", () => ({
 	AppShell: ({ children }: { children: React.ReactNode }) => (
 		<div>{children}</div>
 	),

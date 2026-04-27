@@ -6,7 +6,7 @@ import type { FunctionReturnType } from "convex/server";
 import { redirect } from "next/navigation";
 import { useState } from "react";
 import { api } from "@/convex/_generated/api";
-import { AppShell } from "@/features/workspace-shell/components/app-shell";
+import { AppShell } from "@/app/(workspace)/_components/app-shell";
 import { LessonMapSurface } from "@/features/execute-ship/components/lesson-map-surface";
 import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
 import {

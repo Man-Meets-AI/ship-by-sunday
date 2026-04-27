@@ -1,6 +1,5 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { ThemeProvider } from "next-themes";
 import { describe, expect, it, vi } from "vitest";
 import {
 	createCompleteProjectDefinition,
@@ -45,13 +44,67 @@ vi.mock("@clerk/nextjs", () => ({
 	}),
 }));
 
+vi.mock(
+	"@/app/(workspace)/_components/app-shell/app-shell-theme-toggle",
+	() => ({
+		AppShellThemeToggle: () => (
+			<button type="button" aria-label="Toggle theme" />
+		),
+	}),
+);
+
+vi.mock("@/app/(workspace)/_components/app-shell/app-shell-user-menu", () => ({
+	AppShellUserMenu: () => (
+		<button type="button" aria-label="Open account menu" />
+	),
+}));
+
+vi.mock("@/components/ui/navigation-menu", () => ({
+	NavigationMenu: ({ children }: { children: React.ReactNode }) => (
+		<nav data-slot="navigation-menu">{children}</nav>
+	),
+	NavigationMenuContent: ({
+		children,
+		className,
+	}: {
+		children: React.ReactNode;
+		className?: string;
+	}) => <div className={className}>{children}</div>,
+	NavigationMenuItem: ({ children }: { children: React.ReactNode }) => (
+		<div>{children}</div>
+	),
+	NavigationMenuLink: ({ children }: { children: React.ReactNode }) => (
+		<>{children}</>
+	),
+	NavigationMenuList: ({
+		children,
+		className,
+	}: {
+		children: React.ReactNode;
+		className?: string;
+	}) => <div className={className}>{children}</div>,
+	NavigationMenuTrigger: ({
+		children,
+		className,
+		disabled,
+	}: {
+		children: React.ReactNode;
+		className?: string;
+		disabled?: boolean;
+	}) => (
+		<button type="button" className={className} disabled={disabled}>
+			{children}
+		</button>
+	),
+}));
+
 globalThis.React = React;
 
-import { AppShell } from "@/features/workspace-shell/components/app-shell";
+import { AppShell } from "@/app/(workspace)/_components/app-shell";
 import type {
 	AppShellLocalNav,
 	AppShellPrimaryNav,
-} from "@/features/workspace-shell/components/app-shell/app-shell-props";
+} from "@/app/(workspace)/_components/app-shell/app-shell-props";
 
 const blueprintStageStatuses = deriveStageStatus(
 	createCompleteProjectDefinition().facts,
@@ -114,11 +167,7 @@ const localNav: AppShellLocalNav = {
 };
 
 function renderAppShell(element: React.ReactElement) {
-	return renderToStaticMarkup(
-		<ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
-			{element}
-		</ThemeProvider>,
-	);
+	return renderToStaticMarkup(element);
 }
 
 describe("AppShell", () => {

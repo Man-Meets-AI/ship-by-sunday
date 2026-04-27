@@ -325,7 +325,17 @@ vi.mock("convex/react", () => ({
 	useQuery: () => missionQueryResult,
 }));
 
-vi.mock("@/features/workspace-shell/components/app-shell", () => ({
+vi.mock("@/components/ui/progress", () => ({
+	Progress: ({
+		className,
+		value,
+	}: {
+		className?: string;
+		value?: number | null;
+	}) => <div className={className} data-slot="progress" data-value={value} />,
+}));
+
+vi.mock("@/app/(workspace)/_components/app-shell", () => ({
 	AppShell: ({
 		children,
 		viewportMode,

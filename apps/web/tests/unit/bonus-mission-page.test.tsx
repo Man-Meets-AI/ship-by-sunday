@@ -19,10 +19,43 @@ vi.mock("next/link", () => ({
 	),
 }));
 
-vi.mock("@/features/workspace-shell/components/app-shell", () => ({
+vi.mock("@/app/(workspace)/_components/app-shell", () => ({
 	AppShell: ({ children }: { children: React.ReactNode }) => (
 		<div>{children}</div>
 	),
+}));
+
+vi.mock("@/components/ui/accordion", () => ({
+	Accordion: ({ children }: { children: React.ReactNode }) => (
+		<div data-slot="accordion">{children}</div>
+	),
+	AccordionContent: ({ children }: { children: React.ReactNode }) => (
+		<div data-slot="accordion-content">{children}</div>
+	),
+	AccordionItem: ({
+		children,
+		value,
+	}: {
+		children: React.ReactNode;
+		value: string;
+	}) => (
+		<div data-slot="accordion-item" data-value={value}>
+			{children}
+		</div>
+	),
+	AccordionTrigger: ({ children }: { children: React.ReactNode }) => (
+		<div data-slot="accordion-trigger">{children}</div>
+	),
+}));
+
+vi.mock("@/components/ui/progress", () => ({
+	Progress: ({
+		className,
+		value,
+	}: {
+		className?: string;
+		value?: number | null;
+	}) => <div className={className} data-slot="progress" data-value={value} />,
 }));
 
 import { BonusMissionPage } from "@/features/execute-ship/components/bonus-mission-page";
