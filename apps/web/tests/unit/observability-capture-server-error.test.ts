@@ -4,7 +4,7 @@ vi.mock("server-only", () => ({}));
 
 const ingestErrorEventMock = vi.fn();
 
-vi.mock("@/features/observability/server/ingest-error-event", () => ({
+vi.mock("@/platform/observability/ingest-error-event", () => ({
 	ingestErrorEvent: (input: unknown) => ingestErrorEventMock(input),
 }));
 
@@ -19,7 +19,7 @@ describe("captureServerError", () => {
 
 	it("ignores Next.js control flow errors", async () => {
 		const { captureServerError } =
-			await import("@/features/observability/server/capture-server-error");
+			await import("@/platform/observability/capture-server-error");
 
 		await captureServerError({
 			source: "next_runtime",
@@ -32,7 +32,7 @@ describe("captureServerError", () => {
 
 	it("normalizes and forwards unexpected errors", async () => {
 		const { captureServerError } =
-			await import("@/features/observability/server/capture-server-error");
+			await import("@/platform/observability/capture-server-error");
 
 		await captureServerError({
 			source: "stripe",

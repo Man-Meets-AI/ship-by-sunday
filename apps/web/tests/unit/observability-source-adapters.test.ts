@@ -23,7 +23,7 @@ describe("observability source adapters", () => {
 
 	it("maps Clerk session revocation events into auth incidents", async () => {
 		const { buildClerkWebhookIncident } =
-			await import("@/features/observability/server/source-adapters/clerk-webhook");
+			await import("@/platform/observability/source-adapters/clerk-webhook");
 		const incident = buildClerkWebhookIncident({
 			type: "session.revoked",
 			object: "event",
@@ -83,8 +83,7 @@ describe("observability source adapters", () => {
 		const {
 			buildStripeCheckoutFailureContext,
 			buildStripeWebhookResultIncident,
-		} =
-			await import("@/features/observability/server/source-adapters/stripe-failure");
+		} = await import("@/platform/observability/source-adapters/stripe-failure");
 		const checkoutContext = buildStripeCheckoutFailureContext({
 			appBaseUrl: "https://www.man-meets-ai.com",
 			userId: "user_123",
@@ -143,7 +142,7 @@ describe("observability source adapters", () => {
 
 	it("maps Vercel production failures and ignores preview noise", async () => {
 		const { buildVercelWebhookIncident } =
-			await import("@/features/observability/server/source-adapters/vercel-webhook");
+			await import("@/platform/observability/source-adapters/vercel-webhook");
 		const incident = buildVercelWebhookIncident({
 			type: "deployment.error",
 			payload: {
@@ -231,7 +230,7 @@ describe("observability source adapters", () => {
 
 	it("renders Telegram messages with the incident stack when the payload fits", async () => {
 		const { renderIncidentMessage } =
-			await import("@/features/observability/telegram/render-incident-message");
+			await import("@/lib/observability/telegram/render-incident-message");
 		const message = renderIncidentMessage({
 			product: "ship-by-sunday",
 			environment: "prod",
@@ -257,7 +256,7 @@ describe("observability source adapters", () => {
 
 	it("truncates oversized Telegram incident payloads", async () => {
 		const { renderIncidentMessage } =
-			await import("@/features/observability/telegram/render-incident-message");
+			await import("@/lib/observability/telegram/render-incident-message");
 		const message = renderIncidentMessage({
 			product: "ship-by-sunday",
 			environment: "prod",

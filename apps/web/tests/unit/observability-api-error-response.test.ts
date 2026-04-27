@@ -2,11 +2,11 @@ import { describe, expect, it, vi } from "vitest";
 
 const captureServerErrorMock = vi.fn();
 
-vi.mock("@/features/observability/server/capture-server-error", () => ({
+vi.mock("@/platform/observability/capture-server-error", () => ({
 	captureServerError: (input: unknown) => captureServerErrorMock(input),
 }));
 
-import { getUnexpectedApiErrorResponse } from "@/features/observability/server/api-error-response";
+import { getUnexpectedApiErrorResponse } from "@/platform/observability/api-error-response";
 
 describe("getUnexpectedApiErrorResponse", () => {
 	it("captures the error and returns a normalized 500 response", async () => {

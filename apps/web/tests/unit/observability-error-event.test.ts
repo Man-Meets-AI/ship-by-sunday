@@ -6,7 +6,7 @@ import {
 	isNextControlFlowError,
 	normalizeErrorStack,
 	normalizeObservabilityEvent,
-} from "@/features/observability/lib/error-event";
+} from "@/lib/observability/error-event";
 
 describe("observability error event helpers", () => {
 	it("normalizes ids in paths when building fingerprints", () => {

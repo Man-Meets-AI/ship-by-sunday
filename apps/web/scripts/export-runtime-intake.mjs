@@ -5,7 +5,7 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
-import { buildRuntimeIntakeExport } from "../features/observability/export/runtime-intake.mjs";
+import { buildRuntimeIntakeExport } from "../lib/observability/runtime-intake.mjs";
 import { loadReleaseEnv } from "../../../scripts/release/lib/release-env.mjs";
 
 const APPS_WEB_DIRECTORY = fileURLToPath(new URL("..", import.meta.url));

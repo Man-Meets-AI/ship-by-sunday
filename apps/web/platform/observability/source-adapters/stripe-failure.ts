@@ -3,7 +3,7 @@ import {
 	productConfig,
 	routeConfig,
 } from "@/config/product";
-import type { IncidentEventInput } from "@/features/observability/lib/incident";
+import type { IncidentEventInput } from "@/lib/observability/incident";
 import {
 	getStripeDashboardUrl,
 	getStripeModeLabel,
@@ -13,7 +13,7 @@ import { serverEnv } from "@/platform/env/server";
 import {
 	buildStripeWebhookResultIncidentEvent,
 	type StripeWebhookIncidentResult,
-} from "../../lib/stripe-webhook-incident";
+} from "@/lib/observability/stripe-webhook-incident";
 
 export type { StripeWebhookIncidentResult };
 

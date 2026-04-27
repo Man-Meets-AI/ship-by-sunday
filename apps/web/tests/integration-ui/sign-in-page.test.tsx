@@ -42,7 +42,7 @@ vi.mock("@clerk/nextjs", () => ({
 	useSignIn: () => useSignInMock(),
 }));
 
-vi.mock("@/features/observability/lib/client-error-report", () => ({
+vi.mock("@/lib/observability/client-error-report", () => ({
 	reportClientError: (...args: unknown[]) => reportClientErrorMock(...args),
 }));
 

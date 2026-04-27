@@ -8,7 +8,7 @@ import {
 	getDefaultSeverity,
 	getIncidentEnvironment,
 	normalizeIncidentEvent,
-} from "@/features/observability/lib/incident";
+} from "@/lib/observability/incident";
 
 describe("incident helpers", () => {
 	const originalEnv = { ...process.env };

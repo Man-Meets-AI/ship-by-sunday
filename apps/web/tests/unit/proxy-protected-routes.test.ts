@@ -18,7 +18,7 @@ vi.mock("@/platform/auth/clerk-middleware-bypass", () => ({
 	shouldBypassClerkProtection: shouldBypassClerkProtectionMock,
 }));
 
-vi.mock("@/features/observability/server/capture-server-error", () => ({
+vi.mock("@/platform/observability/capture-server-error", () => ({
 	captureServerError: vi.fn(),
 }));
 

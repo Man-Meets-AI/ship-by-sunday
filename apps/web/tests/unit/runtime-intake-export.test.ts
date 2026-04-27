@@ -4,7 +4,7 @@ import {
 	buildRuntimeCanonicalPath,
 	buildRuntimeIntakeExport,
 	buildRuntimeIntakeItems,
-} from "@/features/observability/export/runtime-intake.mjs";
+} from "@/lib/observability/runtime-intake.mjs";
 import { assertRuntimeIntakeFeed } from "../../../../scripts/release/lib/engineering-intake-contract.mjs";
 
 function buildIncident(overrides: Record<string, unknown>) {

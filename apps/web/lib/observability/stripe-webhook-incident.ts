@@ -1,4 +1,4 @@
-import type { IncidentEventInput } from "@/features/observability/lib/incident";
+import type { IncidentEventInput } from "@/lib/observability/incident";
 
 export type StripeModeLabel = "test" | "live";
 

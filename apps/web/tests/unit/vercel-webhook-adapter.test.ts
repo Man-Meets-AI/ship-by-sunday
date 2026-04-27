@@ -1,4 +1,4 @@
-import { buildVercelWebhookIncident } from "@/features/observability/server/source-adapters/vercel-webhook";
+import { buildVercelWebhookIncident } from "@/platform/observability/source-adapters/vercel-webhook";
 
 describe("vercel webhook adapter", () => {
 	it("builds an incident for a failed production deployment", () => {

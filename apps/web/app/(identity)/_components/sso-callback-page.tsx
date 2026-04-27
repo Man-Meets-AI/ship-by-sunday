@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 import { Spinner } from "@/components/ui/spinner";
-import { reportClientError } from "@/features/observability/lib/client-error-report";
+import { reportClientError } from "@/lib/observability/client-error-report";
 import {
 	buildSignInHref,
 	getBlockedGoogleSignInHref,

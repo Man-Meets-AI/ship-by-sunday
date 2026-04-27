@@ -61,7 +61,9 @@ export default defineConfig({
 		coverage: {
 			provider: "v8",
 			include: [
-				"features/observability/**/*.{ts,tsx}",
+				"app/_components/{error-boundary-screen,not-found-screen}.tsx",
+				"lib/observability/**/*.{ts,tsx}",
+				"platform/observability/**/*.{ts,tsx}",
 				"app/api/codex/**/*.ts",
 				"app/api/stripe/checkout/route.ts",
 				"features/codex/server/route-helpers.ts",

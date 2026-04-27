@@ -23,7 +23,7 @@ describe("updateIncidentStatus", () => {
 		});
 		vi.stubGlobal("fetch", fetchMock);
 		const { updateIncidentStatus } =
-			await import("@/features/observability/server/update-incident-status");
+			await import("@/platform/observability/update-incident-status");
 
 		await updateIncidentStatus({
 			incidentId: "incident_123",
@@ -54,7 +54,7 @@ describe("updateIncidentStatus", () => {
 		});
 		vi.stubGlobal("fetch", fetchMock);
 		const { updateIncidentStatus } =
-			await import("@/features/observability/server/update-incident-status");
+			await import("@/platform/observability/update-incident-status");
 
 		await updateIncidentStatus({
 			incidentId: "incident_123",
@@ -71,7 +71,7 @@ describe("updateIncidentStatus", () => {
 	it("throws when the Convex transport is not configured", async () => {
 		process.env = {};
 		const { updateIncidentStatus } =
-			await import("@/features/observability/server/update-incident-status");
+			await import("@/platform/observability/update-incident-status");
 
 		await expect(
 			updateIncidentStatus({
@@ -90,7 +90,7 @@ describe("updateIncidentStatus", () => {
 		});
 		vi.stubGlobal("fetch", fetchMock);
 		const { updateIncidentStatus } =
-			await import("@/features/observability/server/update-incident-status");
+			await import("@/platform/observability/update-incident-status");
 
 		await expect(
 			updateIncidentStatus({

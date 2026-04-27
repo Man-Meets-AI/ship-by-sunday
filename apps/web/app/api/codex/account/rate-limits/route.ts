@@ -10,11 +10,11 @@ import {
 	requireProductAccessApiSession,
 	upsertViewerCodexConnection,
 } from "@/features/codex/server/route-helpers";
-import { getUnexpectedApiErrorResponse } from "@/features/observability/server/api-error-response";
+import { getUnexpectedApiErrorResponse } from "@/platform/observability/api-error-response";
 import {
 	getRequestIdFromRequest,
 	jsonWithRequestId,
-} from "@/features/observability/server/request-id";
+} from "@/platform/observability/request-id";
 
 export const runtime = "nodejs";
 
