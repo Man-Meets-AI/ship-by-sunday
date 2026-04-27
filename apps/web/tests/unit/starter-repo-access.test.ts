@@ -3,7 +3,7 @@ import {
 	requestStarterRepoAccessHandler,
 	resetStarterRepoAccessHandler,
 } from "@/convex/course/starterRepoAccess";
-import { COURSE_SLUG } from "@/features/course/lesson/model";
+import { COURSE_SLUG } from "@/lib/course/lesson/model";
 
 const clerkUserId = "user_test_starter_repo";
 

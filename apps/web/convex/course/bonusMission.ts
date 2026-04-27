@@ -3,8 +3,8 @@ import {
 	getOrderedBlocks,
 	getStudentFacingLessons,
 	isLessonImplemented,
-} from "../../features/course/lesson/model/registry";
-import { getLessonByKey } from "../../features/course/lesson/model/curriculum";
+} from "../../lib/course/lesson/model/registry";
+import { getLessonByKey } from "../../lib/course/lesson/model/curriculum";
 import { getBlueprintWorkflowStateByClerkUserId } from "../blueprint/workflowState";
 import { upsertLessonState, loadViewerCourseState } from "./shared";
 import type {

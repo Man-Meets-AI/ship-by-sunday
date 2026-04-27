@@ -4,9 +4,9 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 
-import { getLessonById } from "@/features/course/lesson/model";
-import { FieldControl } from "@/features/course/lesson/workbench/fields/field-control";
-import { WorkbenchRenderer } from "@/features/course/lesson/workbench/renderer";
+import { getLessonById } from "@/lib/course/lesson/model";
+import { FieldControl } from "@/app/(workspace)/_components/course/lesson/workbench/fields/field-control";
+import { WorkbenchRenderer } from "@/app/(workspace)/_components/course/lesson/workbench/renderer";
 
 function StatefulRadioField() {
 	const [value, setValue] = useState("");

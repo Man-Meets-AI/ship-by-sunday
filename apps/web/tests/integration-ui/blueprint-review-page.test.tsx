@@ -73,13 +73,16 @@ vi.mock("@/convex/_generated/api", () => ({
 	},
 }));
 
-vi.mock("@/features/course/lesson/components/lesson-video-player", () => ({
-	LessonVideoPlayer: ({ title }: { title?: string }) => (
-		<div data-testid="blueprint-review-video-player">
-			{title ?? "Lesson video"}
-		</div>
-	),
-}));
+vi.mock(
+	"@/app/(workspace)/_components/course/lesson/components/lesson-video-player",
+	() => ({
+		LessonVideoPlayer: ({ title }: { title?: string }) => (
+			<div data-testid="blueprint-review-video-player">
+				{title ?? "Lesson video"}
+			</div>
+		),
+	}),
+);
 
 vi.mock("convex/react", () => ({
 	useConvexAuth: () => useConvexAuthMock(),

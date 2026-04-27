@@ -3,8 +3,8 @@ import {
 	getLessonByRouteSegment,
 	getStudentFacingLessons,
 	lessonRegistry,
-} from "@/features/course/lesson/model";
-import { legacyLessonRedirects } from "@/features/course/lesson/utils/legacy-routes";
+} from "@/lib/course/lesson/model";
+import { legacyLessonRedirects } from "@/lib/course/lesson/utils/legacy-routes";
 import { homePageContent } from "@/features/marketing/content/home";
 import { getLessonMapHref } from "@/lib/workspace-navigation/lesson-map-href";
 

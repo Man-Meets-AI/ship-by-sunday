@@ -4,7 +4,7 @@ import React from "react";
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { renderChecklistLabel } from "@/features/course/lesson/workbench/fields/checklist-label";
+import { renderChecklistLabel } from "@/app/(workspace)/_components/course/lesson/workbench/fields/checklist-label";
 
 describe("renderChecklistLabel", () => {
 	it("returns plain string when there are no backticks", () => {

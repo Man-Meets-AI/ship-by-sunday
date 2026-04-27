@@ -1,6 +1,6 @@
 import { routeConfig } from "@/config/product";
-import type { BlockId } from "@/features/course/lesson/model/manifest";
-import { getLessonHref } from "@/features/course/lesson/routing/lesson-routes";
+import type { BlockId } from "@/lib/course/lesson/model/manifest";
+import { getLessonHref } from "@/lib/course/lesson/routing/lesson-routes";
 import type { AppShellMissionState } from "@/app/(workspace)/_components/app-shell/app-shell-props";
 import { getLessonMapHref } from "@/lib/workspace-navigation/lesson-map-href";
 import type { PostReviewNavigationTargets } from "@/lib/workspace-navigation/post-review-destination";

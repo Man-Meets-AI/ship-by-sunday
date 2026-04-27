@@ -3,12 +3,12 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { useState } from "react";
 
-import { getLessonById } from "@/features/course/lesson/model";
+import { getLessonById } from "@/lib/course/lesson/model";
 import {
 	ROUTE_ACCESS_CODEX_PROMPT_DEFAULT,
 	ROUTE_ACCESS_FIELD_IDS,
-} from "@/features/course/lesson/workbench/modes/route-access-orientation/route-access-orientation-constants";
-import { WorkbenchRenderer } from "@/features/course/lesson/workbench/renderer";
+} from "@/lib/course/lesson/workbench/modes/route-access-orientation/route-access-orientation-constants";
+import { WorkbenchRenderer } from "@/app/(workspace)/_components/course/lesson/workbench/renderer";
 
 function StatefulWorkbench({
 	lesson,

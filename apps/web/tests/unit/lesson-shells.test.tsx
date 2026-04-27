@@ -14,9 +14,9 @@ vi.mock("next/link", () => ({
 
 globalThis.React = React;
 
-import { getLessonById } from "@/features/course/lesson/model";
-import { LessonShellWatch } from "@/features/course/lesson/shells";
-import { FocusInlineLessonVideo } from "@/features/course/lesson/workbench/shared/focus-inline-lesson-video";
+import { getLessonById } from "@/lib/course/lesson/model";
+import { LessonShellWatch } from "@/app/(workspace)/_components/course/lesson/shells";
+import { FocusInlineLessonVideo } from "@/app/(workspace)/_components/course/lesson/workbench/shared/focus-inline-lesson-video";
 
 describe("LessonShellWatch", () => {
 	it("renders lesson 2.1 inline video for split-baseline lessons", () => {

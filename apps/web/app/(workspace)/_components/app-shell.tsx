@@ -1,7 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { getLesson } from "@/features/course/lesson/model/manifest";
+import { getLesson } from "@/lib/course/lesson/model/manifest";
 import { AppShellFooterRail } from "@/app/(workspace)/_components/app-shell/app-shell-footer-rail";
 import { AppShellHeader } from "@/app/(workspace)/_components/app-shell/app-shell-header";
 import { AppShellLocalNavRail } from "@/app/(workspace)/_components/app-shell/app-shell-local-nav";

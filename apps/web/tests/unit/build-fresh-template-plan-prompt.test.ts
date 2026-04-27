@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildFreshTemplatePlanPrompt } from "@/features/course/lesson/workbench/modes/fresh-template-plan/build-fresh-template-plan-prompt";
+import { buildFreshTemplatePlanPrompt } from "@/app/(workspace)/_components/course/lesson/workbench/modes/fresh-template-plan/build-fresh-template-plan-prompt";
 
 describe("buildFreshTemplatePlanPrompt", () => {
 	it("joins body and reasoning with no optional sections when stack is empty", () => {

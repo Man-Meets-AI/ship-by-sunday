@@ -1,6 +1,6 @@
 "use client";
 
-import type { LessonLayoutMode } from "@/features/course/lesson/model/manifest";
+import type { LessonLayoutMode } from "@/lib/course/lesson/model/manifest";
 import type {
 	AppShellPrimaryNav,
 	AppShellProgressSummary,

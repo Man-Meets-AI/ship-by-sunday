@@ -3,7 +3,7 @@ import {
 	getFilledTableRows,
 	getLabeledTableRows,
 	getTableRows,
-} from "@/features/course/lesson/model/table";
+} from "@/lib/course/lesson/model/table";
 import {
 	getUploadMetadata,
 	getUploadMetadataList,
@@ -12,13 +12,13 @@ import {
 	parseTable,
 	toLineList,
 	toTableText,
-} from "@/features/course/lesson/workbench/fields/value-codecs";
+} from "@/app/(workspace)/_components/course/lesson/workbench/fields/value-codecs";
 import {
 	appendSketchUploads,
 	removeSketchUploadAt,
 	replaceSketchUploads,
-} from "@/features/course/lesson/workbench/modes/sketch-upload-workbench";
-import { formatArtifactValue } from "@/features/course/lesson/workbench/shared/artifact-format";
+} from "@/app/(workspace)/_components/course/lesson/workbench/modes/sketch-upload-workbench";
+import { formatArtifactValue } from "@/app/(workspace)/_components/course/lesson/workbench/shared/artifact-format";
 
 describe("lesson workbench helpers", () => {
 	it("round-trips line-list values", () => {

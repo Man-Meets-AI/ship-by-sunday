@@ -4,7 +4,7 @@ import {
 	getLessonById,
 	lessonSupportsLayoutToggle,
 	normalizeLayoutModeForLesson,
-} from "@/features/course/lesson/model";
+} from "@/lib/course/lesson/model";
 
 describe("lesson layout modes", () => {
 	it("keeps Welcome locked to focus mode", () => {

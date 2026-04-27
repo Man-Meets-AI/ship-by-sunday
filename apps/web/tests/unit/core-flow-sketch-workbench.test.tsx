@@ -16,20 +16,23 @@ vi.mock("next/link", () => ({
 	}) => React.createElement("a", { href, ...props }, children),
 }));
 
-vi.mock("@/features/course/lesson/components/lesson-video-player", () => ({
-	LessonVideoPlayer: () =>
-		React.createElement("div", { "data-testid": "lesson-video-player" }),
-}));
+vi.mock(
+	"@/app/(workspace)/_components/course/lesson/components/lesson-video-player",
+	() => ({
+		LessonVideoPlayer: () =>
+			React.createElement("div", { "data-testid": "lesson-video-player" }),
+	}),
+);
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn() } }));
 
-import { getLessonById } from "@/features/course/lesson/model";
+import { getLessonById } from "@/lib/course/lesson/model";
 import {
 	getObjectiveTasks,
 	getWorkbenchSectionStates,
 	getWorkbenchSections,
-} from "@/features/course/lesson/model/registry";
-import { CoreFlowSketchWorkbench } from "@/features/course/lesson/workbench/modes/core-flow-sketch/core-flow-sketch-workbench";
+} from "@/lib/course/lesson/model/registry";
+import { CoreFlowSketchWorkbench } from "@/app/(workspace)/_components/course/lesson/workbench/modes/core-flow-sketch/core-flow-sketch-workbench";
 
 describe("CoreFlowSketchWorkbench", () => {
 	it("renders tabs, Crazy Eights, pause copy, screen reference, and prerequisites", async () => {

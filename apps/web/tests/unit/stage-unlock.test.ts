@@ -1,7 +1,7 @@
-import type { LessonConfig } from "@/features/course/lesson/model";
-import { buildStageUnlockSummary } from "@/features/course/lesson/model/stage-unlock";
-import { buildWorkbenchStageUnlockSummary } from "@/features/course/lesson/workbench/stage-unlock-summary";
-import { getLessonHref } from "@/features/course/lesson/routing/lesson-routes";
+import type { LessonConfig } from "@/lib/course/lesson/model";
+import { buildStageUnlockSummary } from "@/lib/course/lesson/model/stage-unlock";
+import { buildWorkbenchStageUnlockSummary } from "@/app/(workspace)/_components/course/lesson/workbench/stage-unlock-summary";
+import { getLessonHref } from "@/lib/course/lesson/routing/lesson-routes";
 
 const ceoStageUnlockLesson = {
 	id: "1.9",

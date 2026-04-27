@@ -1,6 +1,6 @@
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getLessonHref } from "@/features/course/lesson/routing/lesson-routes";
+import { getLessonHref } from "@/lib/course/lesson/routing/lesson-routes";
 
 const fetchAuthenticatedQueryMock = vi.fn();
 const redirectMock = vi.fn((href: string) => {

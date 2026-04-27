@@ -11,16 +11,16 @@ vi.mock("convex/react", () => ({
 }));
 
 vi.mock(
-	"@/features/course/lesson/workbench/shared/focus-inline-lesson-video",
+	"@/app/(workspace)/_components/course/lesson/workbench/shared/focus-inline-lesson-video",
 	() => ({
 		FocusInlineLessonVideo: () =>
 			React.createElement("div", { "data-testid": "inline-video" }),
 	}),
 );
 
-import { getLessonById } from "@/features/course/lesson/model";
-import { BRAND_KIT_ARTIFACT_CHECKLIST_OPTIONS } from "@/features/course/lesson/workbench/modes/brand-kit/brand-kit-constants";
-import { WorkbenchRenderer } from "@/features/course/lesson/workbench/renderer";
+import { getLessonById } from "@/lib/course/lesson/model";
+import { BRAND_KIT_ARTIFACT_CHECKLIST_OPTIONS } from "@/lib/course/lesson/workbench/modes/brand-kit/brand-kit-constants";
+import { WorkbenchRenderer } from "@/app/(workspace)/_components/course/lesson/workbench/renderer";
 
 describe("brand kit workbench (lesson 3.9)", () => {
 	it("uses brand_kit_workbench and surfaces resources, checklist, and Stripe branding link", () => {

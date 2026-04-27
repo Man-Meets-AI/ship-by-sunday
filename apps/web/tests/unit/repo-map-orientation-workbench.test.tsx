@@ -3,8 +3,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { getLessonById } from "@/features/course/lesson/model";
-import { WorkbenchRenderer } from "@/features/course/lesson/workbench/renderer";
+import { getLessonById } from "@/lib/course/lesson/model";
+import { WorkbenchRenderer } from "@/app/(workspace)/_components/course/lesson/workbench/renderer";
 
 describe("repo map orientation workbench (lesson 3.2)", () => {
 	it("renders project map, secrets alert, resource buttons, and commands tab", async () => {

@@ -59,11 +59,11 @@ const VENDORED_VAD_SCRIPT_PATH = path.join(
 );
 
 const LESSON_SOURCE_FILES = [
-	"features/course/lesson/model/lessons/start-here.ts",
-	"features/course/lesson/model/lessons/ceo.ts",
-	"features/course/lesson/model/lessons/design.ts",
-	"features/course/lesson/content/build.ts",
-	"features/course/lesson/model/lessons/ship.ts",
+	"lib/course/lesson/model/lessons/start-here.ts",
+	"lib/course/lesson/model/lessons/ceo.ts",
+	"lib/course/lesson/model/lessons/design.ts",
+	"lib/course/lesson/content/build.ts",
+	"lib/course/lesson/model/lessons/ship.ts",
 ];
 
 const SUPPORTED_VIDEO_EXTENSIONS = new Set([
@@ -217,7 +217,7 @@ export function extractLessonMediaMap(source) {
 		source.match(/String\.raw`([\s\S]*)`;/) ?? source.match(/`([\s\S]*)`;/);
 	if (!match) {
 		throw createError(
-			"Could not parse features/course/lesson/model/media.ts JSON payload.",
+			"Could not parse lib/course/lesson/model/media.ts JSON payload.",
 		);
 	}
 

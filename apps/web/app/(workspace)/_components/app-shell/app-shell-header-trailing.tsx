@@ -5,7 +5,7 @@ import { Columns2, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-import type { LessonLayoutMode } from "@/features/course/lesson/model/manifest";
+import type { LessonLayoutMode } from "@/lib/course/lesson/model/manifest";
 
 import { AppShellUserMenu } from "./app-shell-user-menu";
 import { AppShellThemeToggle } from "./app-shell-theme-toggle";

@@ -1,7 +1,7 @@
 import { api } from "@/convex/_generated/api";
 import { notFound } from "next/navigation";
 import { routeConfig } from "@/config/product";
-import { getLessonByRouteSegment } from "@/features/course/lesson/model/manifest";
+import { getLessonByRouteSegment } from "@/lib/course/lesson/model/manifest";
 import { BonusLessonPage } from "@/app/(workspace)/_components/execute-ship/bonus-lesson-page";
 import { BonusRouteStatePanel } from "@/app/(workspace)/_components/execute-ship/bonus-route-state-panel";
 import { buildFallbackPostReviewTargets } from "@/lib/execute-ship/bonus-library-presentation";

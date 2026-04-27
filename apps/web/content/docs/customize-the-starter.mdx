@@ -48,7 +48,7 @@ Those are the highest-risk parts of the starter.
 - keep the public blog route in `app/blog/[[...slug]]/page.tsx`, the editorial UI in `app/blog/_components/**`, route helpers in `app/blog/_lib/**`, and article source files in `content/blog/**`
 - use `starterConfig.modules` before inventing route-level hacks or manual hidden links
 - keep the landing-page offer work inside `features/marketing/**` and `public/`
-- keep the course runtime and lesson model inside `features/course/**`
+- keep shared course contracts inside `lib/course/**` and route-facing course UI inside `app/(workspace)/_components/course/**`
 - keep starter-mode protected home work inside `app/(workspace)/_components/workspace-home/**` and `app/(workspace)/_lib/workspace-home-model.ts`
 - keep the access layer as the source of truth for product access
 - keep the purchase-to-access behavior aligned with the verified checkout and webhook contract

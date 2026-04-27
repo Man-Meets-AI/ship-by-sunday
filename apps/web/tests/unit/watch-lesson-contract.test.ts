@@ -9,19 +9,19 @@ import {
 	BUILD_SKILLS_USAGE_CHECKLIST_FIELD_ID,
 	lessonSupportsLayoutToggle,
 	normalizeLayoutModeForLesson,
-} from "@/features/course/lesson/model";
+} from "@/lib/course/lesson/model";
 import {
 	BUILD_SLICES_FIELD_IDS,
 	BUILD_SLICES_REVIEW_CHECKLIST_OPTIONS,
-} from "@/features/course/lesson/workbench/modes/build-setting-up-slices/build-setting-up-slices-constants";
+} from "@/lib/course/lesson/workbench/modes/build-setting-up-slices/build-setting-up-slices-constants";
 import {
 	BUILD_PHASE_CHECKLIST_OPTIONS,
 	BUILD_SHIP_ROADMAP_FIELD_IDS,
 	SERVICE_ACCOUNT_CHECKLIST_OPTIONS,
 	SHIP_PHASE_CHECKLIST_OPTIONS,
 	SCOPE_CHECKLIST_OPTIONS,
-} from "@/features/course/lesson/workbench/modes/build-ship-roadmap/build-ship-roadmap-constants";
-import { SKILLS_USAGE_CHECKLIST_OPTIONS } from "@/features/course/lesson/workbench/modes/skills-quickstart/skills-quickstart-constants";
+} from "@/lib/course/lesson/workbench/modes/build-ship-roadmap/build-ship-roadmap-constants";
+import { SKILLS_USAGE_CHECKLIST_OPTIONS } from "@/lib/course/lesson/workbench/modes/skills-quickstart/skills-quickstart-constants";
 
 describe("split lesson baseline (former watch cohort)", () => {
 	it("keeps Bunny-driven lessons in focus-only split layout with workbench video", () => {

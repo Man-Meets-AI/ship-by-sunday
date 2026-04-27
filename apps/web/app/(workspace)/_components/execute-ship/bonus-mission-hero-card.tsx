@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getLessonHref } from "@/features/course/lesson/routing/lesson-routes";
+import { getLessonHref } from "@/lib/course/lesson/routing/lesson-routes";
 
 export function BonusMissionHeroCard({
 	exploredCount,

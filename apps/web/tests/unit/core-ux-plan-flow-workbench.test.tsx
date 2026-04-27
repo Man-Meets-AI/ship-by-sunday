@@ -11,19 +11,19 @@ vi.mock("convex/react", () => ({
 }));
 
 vi.mock(
-	"@/features/course/lesson/workbench/shared/focus-inline-lesson-video",
+	"@/app/(workspace)/_components/course/lesson/workbench/shared/focus-inline-lesson-video",
 	() => ({
 		FocusInlineLessonVideo: () =>
 			React.createElement("div", { "data-testid": "inline-video" }),
 	}),
 );
 
-import { getLessonById } from "@/features/course/lesson/model";
+import { getLessonById } from "@/lib/course/lesson/model";
 import {
 	CORE_UX_PLAN_FALLBACK_PROMPT,
 	CORE_UX_PLAN_PLANNING_TRIGGER,
-} from "@/features/course/lesson/workbench/modes/core-ux-plan-flow/core-ux-plan-flow-constants";
-import { WorkbenchRenderer } from "@/features/course/lesson/workbench/renderer";
+} from "@/lib/course/lesson/workbench/modes/core-ux-plan-flow/core-ux-plan-flow-constants";
+import { WorkbenchRenderer } from "@/app/(workspace)/_components/course/lesson/workbench/renderer";
 
 describe("core UX plan flow workbench (lesson 3.10)", () => {
 	it("uses core_ux_plan_flow and surfaces commands, tabs, and planning copy", () => {

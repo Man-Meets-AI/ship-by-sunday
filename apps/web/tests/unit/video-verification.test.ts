@@ -1,7 +1,7 @@
 import {
 	isBunnyEmbedUrl,
 	verifyBunnyEmbedUrl,
-} from "@/features/course/lesson/lib/video-verification";
+} from "@/lib/course/lesson/lib/video-verification";
 
 describe("video verification helpers", () => {
 	it("accepts Bunny embed urls and rejects everything else", () => {

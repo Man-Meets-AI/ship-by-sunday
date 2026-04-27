@@ -7,7 +7,7 @@ import {
 	CORE_UX_BUILD_HANDOFF_CHECKLIST_OPTIONS,
 	CORE_UX_BUILD_ONBOARDING_CHECKLIST_OPTIONS,
 	CORE_UX_BUILD_STRATEGY_FALLBACK_PROMPT,
-} from "@/features/course/lesson/workbench/modes/core-ux-build/core-ux-build-constants";
+} from "@/lib/course/lesson/workbench/modes/core-ux-build/core-ux-build-constants";
 
 describe("core-ux-build constants", () => {
 	it("keeps stable field ids", () => {

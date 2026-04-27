@@ -282,13 +282,16 @@ vi.mock("@/components/ui/toggle-group", () => {
 	};
 });
 
-vi.mock("@/features/course/lesson/components/lesson-video-player", () => ({
-	LessonVideoPlayer: ({ title }: { title?: string }) => (
-		<div data-testid="blueprint-page-video-player">
-			{title ?? "Lesson video"}
-		</div>
-	),
-}));
+vi.mock(
+	"@/app/(workspace)/_components/course/lesson/components/lesson-video-player",
+	() => ({
+		LessonVideoPlayer: ({ title }: { title?: string }) => (
+			<div data-testid="blueprint-page-video-player">
+				{title ?? "Lesson video"}
+			</div>
+		),
+	}),
+);
 
 import { BlueprintPage } from "@/app/(workspace)/_components/blueprint-flow/blueprint-page";
 

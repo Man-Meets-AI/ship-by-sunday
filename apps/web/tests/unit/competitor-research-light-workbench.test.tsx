@@ -16,7 +16,7 @@ vi.mock("next/link", () => ({
 }));
 
 vi.mock(
-	"@/features/course/lesson/workbench/shared/focus-inline-lesson-video",
+	"@/app/(workspace)/_components/course/lesson/workbench/shared/focus-inline-lesson-video",
 	() => ({
 		FocusInlineLessonVideo: () =>
 			React.createElement("div", { "data-testid": "inline-video" }),
@@ -24,13 +24,13 @@ vi.mock(
 );
 
 import { routeConfig } from "@/config/product";
-import { getLessonById } from "@/features/course/lesson/model";
+import { getLessonById } from "@/lib/course/lesson/model";
 import {
 	getObjectiveTasks,
 	getWorkbenchSectionStates,
 	getWorkbenchSections,
-} from "@/features/course/lesson/model/registry";
-import { CompetitorResearchLightWorkbench } from "@/features/course/lesson/workbench/modes/competitor-research-light/competitor-research-light-workbench";
+} from "@/lib/course/lesson/model/registry";
+import { CompetitorResearchLightWorkbench } from "@/app/(workspace)/_components/course/lesson/workbench/modes/competitor-research-light/competitor-research-light-workbench";
 
 describe("CompetitorResearchLightWorkbench", () => {
 	it("renders badges, settings link, tabs, and copy prompt control", () => {

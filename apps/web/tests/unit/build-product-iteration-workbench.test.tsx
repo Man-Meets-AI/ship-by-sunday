@@ -21,7 +21,7 @@ vi.mock("convex/react", () => ({
 	useQuery: () => undefined,
 }));
 
-vi.mock("@/features/course/lesson/lib/copy-course-prompt", () => ({
+vi.mock("@/lib/course/lesson/lib/copy-course-prompt", () => ({
 	copyCoursePromptToClipboard: vi.fn(() => Promise.resolve("copied" as const)),
 }));
 
@@ -31,9 +31,9 @@ vi.mock("sonner", () => ({
 	},
 }));
 
-import { copyCoursePromptToClipboard } from "@/features/course/lesson/lib/copy-course-prompt";
-import { getLessonById } from "@/features/course/lesson/model";
-import { WorkbenchRenderer } from "@/features/course/lesson/workbench/renderer";
+import { copyCoursePromptToClipboard } from "@/lib/course/lesson/lib/copy-course-prompt";
+import { getLessonById } from "@/lib/course/lesson/model";
+import { WorkbenchRenderer } from "@/app/(workspace)/_components/course/lesson/workbench/renderer";
 
 describe("build product iteration workbench (lesson 3.1)", () => {
 	beforeEach(() => {

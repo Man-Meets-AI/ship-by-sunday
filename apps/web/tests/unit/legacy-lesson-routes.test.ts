@@ -1,7 +1,7 @@
 import {
 	getLegacyLessonRedirect,
 	legacyLessonRedirects,
-} from "@/features/course/lesson/utils/legacy-routes";
+} from "@/lib/course/lesson/utils/legacy-routes";
 import { getLessonMapHref } from "@/lib/workspace-navigation/lesson-map-href";
 
 describe("legacy lesson routes", () => {
