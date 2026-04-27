@@ -3,8 +3,8 @@
 import Link from "next/link";
 
 import { routeConfig, type HomePageCtaTarget } from "@/config/product";
-import { PromoBanner } from "@/features/marketing/components/promo-banner";
-import type { HomePageContent } from "@/features/marketing/content/home";
+import { PromoBanner } from "@/app/_components/home-page/promo-banner";
+import type { HomePageContent } from "@/app/_content/home-page";
 
 import { HomePagePrimaryCta } from "./home-page-primary-cta";
 import { PricingIncludesList } from "./pricing-includes-list";

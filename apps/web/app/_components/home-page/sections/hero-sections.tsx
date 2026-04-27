@@ -1,7 +1,7 @@
 "use client";
 
 import { type HomePageCtaTarget } from "@/config/product";
-import type { HomePageContent } from "@/features/marketing/content/home";
+import type { HomePageContent } from "@/app/_content/home-page";
 
 import { HeroAtmosphere } from "./hero-atmosphere";
 import { HomeHeroHeadline } from "./home-hero-headline";

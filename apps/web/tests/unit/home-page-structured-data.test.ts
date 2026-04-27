@@ -8,9 +8,9 @@ import {
 	starterConfig,
 	type StarterHomePageConfig,
 } from "@/config/product";
-import { homePageContent } from "@/features/marketing/content/home";
-import { createHomePageRenderModel } from "@/features/marketing/lib/home-page-render-model";
-import { getHomePageStructuredData } from "@/features/marketing/lib/home-page-structured-data";
+import { homePageContent } from "@/app/_content/home-page";
+import { createHomePageRenderModel } from "@/app/_lib/home-page-render-model";
+import { getHomePageStructuredData } from "@/app/_lib/home-page-structured-data";
 
 describe("home page structured data", () => {
 	it("includes organization, product, and FAQ schema with absolute URLs", () => {

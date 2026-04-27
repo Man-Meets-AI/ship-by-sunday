@@ -18,7 +18,7 @@ This starter is opinionated in one specific way: it gives you the full public-to
 ## Repo shape
 
 - `app/`: route entrypoints
-- `features/`: product code grouped by domain
+- app-private folders and `lib/`: product UI, route helpers, and shared domain contracts grouped by owner
 - `config/product.ts`: starter contract, branding defaults, route constants, and module flags
 - `config/starter-selectors.ts`: starter module selectors plus display config helpers
 - `app/docs/_components/`: docs route disabled-state fallback UI
@@ -74,7 +74,7 @@ The public homepage has a second layer of starter configuration inside the same 
 
 - `starterConfig.homePage.sections` controls the fixed public section order: `hero`, `sprintPath`, `whatsInside`, `starterSystem`, `durability`, `socialProof`, `faq`, `pricing`, and `footer`
 - `starterConfig.homePage.heroPrimaryCta` and `starterConfig.homePage.pricingPrimaryCta` decide whether those calls to action use checkout or a plain link target
-- `features/marketing/lib/home-page-render-model.ts` is the adapter that turns those starter defaults plus `features/marketing/content/home.ts` into the render contract that `features/marketing/components/home-page.tsx` uses
+- `app/_lib/home-page-render-model.ts` is the adapter that turns those starter defaults plus `app/_content/home-page.ts` into the render contract that `app/_components/home-page/home-page.tsx` uses
 
 For the file-by-file operating guide, see [Configure the Homepage](/docs/configure-the-homepage).
 

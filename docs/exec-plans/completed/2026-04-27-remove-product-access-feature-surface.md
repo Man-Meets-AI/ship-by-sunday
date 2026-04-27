@@ -6,7 +6,7 @@ completed_at: 2026-04-27
 summary: Delete the product-access feature folder by moving shared access types and server access orchestration to explicit owners without changing entitlement behavior.
 post_build_recap: Product access types now live under apps/web/lib, server-only access orchestration now lives under apps/web/platform/access, and the old feature folder is deleted. Focused access tests, app format/lint/typecheck, Program/ExecPlan lint, markdown lint, and diff checks passed.
 program_id: remove-feature-folder-surface
-planning_brief: docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-7.md
+planning_brief: docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-7.md
 read_when:
   - Resuming the product-access feature-folder removal slice.
   - Checking why product access server orchestration lives under platform access.

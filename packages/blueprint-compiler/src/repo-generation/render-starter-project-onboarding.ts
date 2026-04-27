@@ -200,8 +200,8 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 				path: "apps/web/config/product.ts",
 			},
 			{
-				label: "apps/web/features/marketing/content/home.ts",
-				path: "apps/web/features/marketing/content/home.ts",
+				label: "apps/web/app/_content/home-page.ts",
+				path: "apps/web/app/_content/home-page.ts",
 			},
 		],
 	},

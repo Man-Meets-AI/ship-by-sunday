@@ -6,7 +6,7 @@ completed_at: 2026-04-27
 summary: Delete the checkout feature folder by moving checkout route UI and server billing helpers to explicit owners without changing Stripe checkout behavior.
 post_build_recap: Checkout UI now lives under app checkout private folders, server-only checkout helpers now live under platform billing checkout, release-scope detection follows the new billing owner, and the old checkout feature folder is deleted. Focused checkout tests, app format/lint/typecheck, Program/ExecPlan lint, markdown lint, and diff checks passed.
 program_id: remove-feature-folder-surface
-planning_brief: docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-9.md
+planning_brief: docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-9.md
 read_when:
   - Resuming the checkout feature-folder removal slice.
   - Checking why checkout UI lives under app checkout private folders.

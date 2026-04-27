@@ -32,9 +32,9 @@ The homepage was tightened to feel more editorial and less assembled. Standalone
 
 ### Routes / screens / components changed
 
-- `apps/web/features/marketing/components/home-page/hero-sections.tsx`
-- `apps/web/features/marketing/components/home-page/durability-section.tsx`
-- `apps/web/features/marketing/components/home-page/pricing-footer-sections.tsx`
+- `apps/web/app/_components/home-page/sections/hero-sections.tsx`
+- `apps/web/app/_components/home-page/sections/durability-section.tsx`
+- `apps/web/app/_components/home-page/sections/pricing-footer-sections.tsx`
 
 ### Out of scope
 

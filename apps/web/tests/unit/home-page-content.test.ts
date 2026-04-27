@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { productConfig } from "@/config/product";
-import { homePageContent } from "@/features/marketing/content/home";
+import { homePageContent } from "@/app/_content/home-page";
 
 describe("home page content", () => {
 	it("anchors the public story around the Sunday promise and starter-system advantage", () => {

@@ -76,14 +76,14 @@ export function renderTemplateOverrides(
 				"## Starter Overrides",
 				"",
 				"- `apps/web/config/product.ts` contains the generated starter product configuration.",
-				"- `apps/web/features/marketing/content/home.ts` contains the generated homepage starter content.",
+				"- `apps/web/app/_content/home-page.ts` contains the generated homepage starter content.",
 				"- `apps/web/config/generated-design-system.ts` contains the generated runtime design system.",
 				"",
 				"## First-Pass Checklist",
 				"",
 				"- [ ] Read `DESIGN.md` and confirm the generated design system is close enough to your intended product before changing UI code.",
 				"- [ ] Replace any remaining placeholder facts, especially domain, support email, and design references, so the starter stops reading like a fixture.",
-				"- [ ] Review `apps/web/config/product.ts` and `apps/web/features/marketing/content/home.ts` for product name, promise, pricing, CTA copy, and homepage content.",
+				"- [ ] Review `apps/web/config/product.ts` and `apps/web/app/_content/home-page.ts` for product name, promise, pricing, CTA copy, and homepage content.",
 				"- [ ] Decide whether you want to keep the internal blueprint and review workflow in the starter. If not, remove those routes and the supporting compiler package deliberately instead of leaving dead surfaces around.",
 				"- [ ] Run the app locally and verify the generated design system feels right on the homepage, protected shell, and any route you plan to keep.",
 				"- [ ] Run `bun run lint`, `bun run typecheck`, and the smallest relevant tests after your first customization pass.",
@@ -131,7 +131,7 @@ export function renderTemplateOverrides(
 			)} as const;\n`,
 		},
 		{
-			path: "apps/web/features/marketing/content/home.ts",
+			path: "apps/web/app/_content/home-page.ts",
 			content: `export const generatedHomePageContent = ${JSON.stringify(
 				{
 					productName: facts.product_name,

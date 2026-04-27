@@ -1,6 +1,6 @@
 "use client";
 
-import type { HomePageContent } from "@/features/marketing/content/home";
+import type { HomePageContent } from "@/app/_content/home-page";
 import { ScrollReveal } from "./scroll-reveal";
 
 import FAQAccordion from "../faq-accordion";

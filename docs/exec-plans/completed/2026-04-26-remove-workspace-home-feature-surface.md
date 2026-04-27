@@ -6,7 +6,7 @@ completed_at: 2026-04-26
 summary: Delete the workspace-home feature folder by moving protected workspace home UI and model code into App Router workspace-owned folders.
 post_build_recap: Workspace home UI and model ownership now live under the workspace App Router group, apps/web/features/workspace-home is deleted, and focused plus app-wide validation passed.
 program_id: remove-feature-folder-surface
-planning_brief: docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-3.md
+planning_brief: docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-3.md
 read_when:
   - Reviewing the completed workspace-home feature-folder removal slice.
   - Checking why workspace home components live under the workspace App Router group.

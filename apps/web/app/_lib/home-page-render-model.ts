@@ -8,7 +8,7 @@ import {
 import {
 	homePageContent,
 	type HomePageContent,
-} from "@/features/marketing/content/home";
+} from "@/app/_content/home-page";
 
 export type HomePageSocialProofVariant = {
 	readonly kind: "founder";

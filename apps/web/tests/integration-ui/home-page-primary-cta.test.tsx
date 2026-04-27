@@ -23,7 +23,7 @@ vi.mock("@/app/checkout/_components/checkout-button", () => ({
 }));
 
 import { routeConfig } from "@/config/product";
-import { HomePagePrimaryCta } from "@/features/marketing/components/home-page/home-page-primary-cta";
+import { HomePagePrimaryCta } from "@/app/_components/home-page/sections/home-page-primary-cta";
 
 describe("HomePagePrimaryCta", () => {
 	it("delegates checkout targets to CheckoutButton", () => {

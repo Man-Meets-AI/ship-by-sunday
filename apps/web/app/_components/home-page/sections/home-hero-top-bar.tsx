@@ -7,8 +7,8 @@ import {
 } from "@/components/product-brand";
 import { Button } from "@/components/ui/button";
 import { routeConfig } from "@/config/product";
-import { PromoBanner } from "@/features/marketing/components/promo-banner";
-import type { HomePageContent } from "@/features/marketing/content/home";
+import { PromoBanner } from "@/app/_components/home-page/promo-banner";
+import type { HomePageContent } from "@/app/_content/home-page";
 
 type Hero = HomePageContent["hero"];
 

@@ -1,7 +1,7 @@
 "use client";
 
-import { PointerHighlight } from "@/features/marketing/components/effects/pointer-highlight";
-import type { HomePageContent } from "@/features/marketing/content/home";
+import { PointerHighlight } from "@/components/ui/pointer-highlight";
+import type { HomePageContent } from "@/app/_content/home-page";
 import { ScrollReveal } from "./scroll-reveal";
 
 type WhatsInsideSection = HomePageContent["whatsInsideSection"];

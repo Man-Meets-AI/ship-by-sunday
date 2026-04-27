@@ -6,7 +6,7 @@ completed_at: 2026-04-27
 summary: Move Blueprint route code out of the feature tree and into route-private, shared library, and route-handler owners without changing Blueprint or Review behavior.
 post_build_recap: Blueprint route UI now lives under workspace route private components, route-local hooks live under workspace private hooks, shared Blueprint contracts live under lib/blueprint-flow, the download helper lives beside its route, and the old blueprint-flow folder is gone.
 program_id: remove-feature-folder-surface
-planning_brief: docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-16.md
+planning_brief: docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-16.md
 read_when:
   - Resuming the blueprint-flow feature-folder removal slice.
   - Checking why Blueprint UI lives under the workspace route group.

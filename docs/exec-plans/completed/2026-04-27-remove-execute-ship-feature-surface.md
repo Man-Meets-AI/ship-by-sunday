@@ -6,7 +6,7 @@ completed_at: 2026-04-27
 summary: Move post-review bonus lesson code out of the feature tree and into route-private, shared library, and route-handler owners without changing bonus route behavior.
 post_build_recap: Bonus lesson UI now lives under the workspace route private components, shared bonus contracts live under lib/execute-ship, server helpers live beside their routes, the stale execute-ship track modules are gone, and focused plus app validation passed.
 program_id: remove-feature-folder-surface
-planning_brief: docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-15.md
+planning_brief: docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-15.md
 read_when:
   - Resuming the execute-ship feature-folder removal slice.
   - Checking why bonus lesson UI lives under the workspace route group.

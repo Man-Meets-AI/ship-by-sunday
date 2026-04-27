@@ -6,7 +6,7 @@ completed_at: 2026-04-27
 summary: Delete the blog feature folder by moving public blog route UI, content constants, metadata helpers, and server content loaders into explicit App Router private owners without changing public blog behavior.
 post_build_recap: Public blog UI, content constants, helper modules, and Nextra content loaders now live under app/blog private folders, the old blog feature folder is deleted, and focused blog tests plus app format/lint/typecheck and plan validation passed.
 program_id: remove-feature-folder-surface
-planning_brief: docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-11.md
+planning_brief: docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-11.md
 read_when:
   - Resuming the blog feature-folder removal slice.
   - Checking why blog code lives under app/blog private folders.
