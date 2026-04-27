@@ -5,9 +5,10 @@ import {
 	generateDocsStaticParams,
 	getDocsPageSegments,
 } from "@/features/docs/server/page-paths";
-import { DocsModuleDisabledState } from "@/features/starter/components/docs-module-disabled-state";
-import { isStarterModuleEnabled } from "@/features/starter/lib/starter-selectors";
+import { isStarterModuleEnabled } from "@/config/starter-selectors";
 import { useMDXComponents as getMDXComponents } from "@/mdx-components";
+
+import { DocsModuleDisabledState } from "../_components/docs-module-disabled-state";
 
 const Wrapper = getMDXComponents().wrapper;
 

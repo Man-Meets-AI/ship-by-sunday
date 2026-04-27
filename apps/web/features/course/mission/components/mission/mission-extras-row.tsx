@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/item";
 import { productConfig } from "@/config/product";
 import { MissionSectionLabel } from "@/features/course/mission/components/mission/mission-section-label";
-import { isStarterModuleEnabled } from "@/features/starter/lib/starter-selectors";
+import { isStarterModuleEnabled } from "@/config/starter-selectors";
 import { StarterRepoAccessCard } from "@/features/starter-repo/components/starter-repo-access-card";
 
 export function MissionExtrasRow() {

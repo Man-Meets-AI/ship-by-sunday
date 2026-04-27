@@ -1,5 +1,5 @@
 import { routeConfig } from "@/config/product";
-import { workspaceDisplayConfig } from "@/features/starter/lib/starter-selectors";
+import { workspaceDisplayConfig } from "@/config/starter-selectors";
 
 export function isPathPrefixActive(pathname: string, href: string) {
 	return pathname === href || pathname.startsWith(`${href}/`);

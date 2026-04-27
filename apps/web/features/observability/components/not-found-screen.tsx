@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 
 import { routeConfig } from "@/config/product";
 import { Button } from "@/components/ui/button";
-import { workspaceDisplayConfig } from "@/features/starter/lib/starter-selectors";
+import { workspaceDisplayConfig } from "@/config/starter-selectors";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 

@@ -3,7 +3,7 @@ import type {
 	ProductAccess,
 	ProductAccessStatus,
 } from "@/features/product-access/lib/product-access";
-import { workspaceDisplayConfig } from "@/features/starter/lib/starter-selectors";
+import { workspaceDisplayConfig } from "@/config/starter-selectors";
 
 export type AccessActionModel =
 	| {

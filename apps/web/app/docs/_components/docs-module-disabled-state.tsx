@@ -1,5 +1,6 @@
 import { routeConfig } from "@/config/product";
-import { StarterModuleDisabledCard } from "@/features/starter/components/starter-module-disabled-card";
+
+import { StarterModuleDisabledCard } from "./starter-module-disabled-card";
 
 export function DocsModuleDisabledState() {
 	return (
