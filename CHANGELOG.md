@@ -4,12 +4,24 @@ Release notes are published on the [GitHub Releases page](https://github.com/Man
 
 This file keeps the manifest-backed release-note source used by `release.json` and the tag-release workflow. The `release.json` `changelogHeading` must match the next release section before a protected tag is cut.
 
-## v0.4.0 - Unreleased
+## v0.4.0 - 2026-04-27
+
+### Highlights
+
+- Completed the feature-folder removal Program: every `apps/web/features` folder is gone, with ownership moved into App Router private folders, app-owned homepage content and library modules, shared UI primitives, `lib`, `platform`, hooks, config, and Convex source owners.
+- Preserved the live product contract while making the app structure explicit: route URLs, checkout, billing, Stripe, promo-code behavior, pricing, Convex schema, generated Convex files, environment behavior, homepage CTA behavior, docs routes, blog routes, course behavior, and protected workspace behavior stayed stable.
+- Delivered the final Program slice through `main` with PR CI, Vercel production deploy, Convex Production Deploy, and hosted Production Release Proof all passing on the merged commit.
 
 ### Changed
 
+- Removed the final marketing feature surface by moving homepage UI into `apps/web/app/_components/home-page`, homepage content into `apps/web/app/_content/home-page.ts`, homepage render and structured-data helpers into `apps/web/app/_lib`, and shared motion/effect primitives directly into `apps/web/components/ui`.
+- Updated the customer-safe starter repo snapshot and generated starter guidance so downloaded starter repos use the app-owned homepage content path instead of the deleted feature directory.
 - Added a Codex-style GitHub Release notes path: future tag releases build the release body from the matching `CHANGELOG.md` section, append the publish evidence summary, and keep `CHANGELOG.md` as the manifest-backed source for release notes.
-- Prepared the release manifest for the next stable `v0.4.0` tag after publishing `v0.3.0`.
+- Finalized the release manifest for the stable `v0.4.0` tag.
+
+### Changelog
+
+Full Changelog: https://github.com/Man-Meets-AI/ship-by-sunday/compare/v0.3.0...v0.4.0
 
 ## v0.3.0 - 2026-04-25
 

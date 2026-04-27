@@ -3,7 +3,7 @@
 	"version": "0.4.0",
 	"channel": "stable",
 	"gitTag": "v0.4.0",
-	"changelogHeading": "## v0.4.0 - Unreleased",
+	"changelogHeading": "## v0.4.0 - 2026-04-27",
 	"releaseEvidenceSchemaVersion": "release-evidence.v1",
-	"notes": "Next stable release manifest. Replace the Unreleased changelog heading with the release date before cutting the protected tag."
+	"notes": "Stable release for the completed feature-folder removal Program and Codex-style release path."
 }
