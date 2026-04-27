@@ -4,7 +4,7 @@ import {
 	getSessionTaskHref,
 	getSafeRedirectPath,
 	getTaskRedirectUrlComplete,
-} from "@/features/auth/sign-in/sign-in-route-utils";
+} from "@/platform/auth/auth-route-utils";
 
 describe("sign-in route utils", () => {
 	it("keeps valid internal redirect paths", () => {

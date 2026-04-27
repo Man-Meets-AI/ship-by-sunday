@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { assertNever } from "@/lib/assert";
 
-import { SignInResetFields } from "@/features/auth/sign-in/sign-in-reset-fields";
-import type { SignInStep } from "@/features/auth/sign-in/types";
+import { SignInResetFields } from "@/app/(identity)/_components/sign-in/sign-in-reset-fields";
+import type { SignInStep } from "@/app/(identity)/_components/sign-in/sign-in-flow-types";
 
 type SignInResetFormProps = {
 	emailAddress: string;

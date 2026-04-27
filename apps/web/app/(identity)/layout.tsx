@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { IdentityLayoutHeader } from "@/features/auth/identity/identity-layout-header";
+import { IdentityLayoutHeader } from "@/app/(identity)/_components/identity-layout-header";
 
 export default function IdentityLayout({ children }: { children: ReactNode }) {
 	return (

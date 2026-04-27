@@ -5,10 +5,10 @@ import type { FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 
-import { SignInBanners } from "@/features/auth/sign-in/sign-in-banners";
-import { SignInCredentialFields } from "@/features/auth/sign-in/sign-in-credential-fields";
-import { SignInSecondaryActions } from "@/features/auth/sign-in/sign-in-secondary-actions";
-import type { SignInAuthError } from "@/features/auth/sign-in/types";
+import { SignInBanners } from "@/app/(identity)/_components/sign-in/sign-in-banners";
+import { SignInCredentialFields } from "@/app/(identity)/_components/sign-in/sign-in-credential-fields";
+import { SignInSecondaryActions } from "@/app/(identity)/_components/sign-in/sign-in-secondary-actions";
+import type { SignInAuthError } from "@/platform/auth/auth-route-utils";
 
 type SignInCredentialsFormProps = {
 	authError: SignInAuthError | null;

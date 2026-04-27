@@ -8,7 +8,7 @@ import {
 	buildSignInHref,
 	getSessionTaskHref,
 	getSafeRedirectPath,
-} from "@/features/auth/sign-in/sign-in-route-utils";
+} from "@/platform/auth/auth-route-utils";
 import { reportClientError } from "@/lib/observability/client-error-report";
 
 type SignUpStep = "create" | "verify";

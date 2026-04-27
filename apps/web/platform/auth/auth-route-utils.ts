@@ -1,7 +1,5 @@
 import { authViewConfig, routeConfig } from "@/config/product";
 
-import type { SignInAuthError } from "@/features/auth/sign-in/types";
-
 export const ssoCallbackPath = "/sso-callback";
 
 export const sessionTaskUrls = {
@@ -9,6 +7,7 @@ export const sessionTaskUrls = {
 } as const;
 
 export type SessionTaskKey = keyof typeof sessionTaskUrls;
+export type SignInAuthError = "purchase_required";
 
 const authErrorParam = "auth_error";
 const redirectUrlParam = "redirect_url";

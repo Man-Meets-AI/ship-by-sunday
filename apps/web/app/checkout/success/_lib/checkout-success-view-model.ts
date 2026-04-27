@@ -3,7 +3,7 @@ import {
 	getSignInRedirectHref,
 	routeConfig,
 } from "@/config/product";
-import { buildSignUpHref } from "@/features/auth/sign-in/sign-in-route-utils";
+import { buildSignUpHref } from "@/platform/auth/auth-route-utils";
 import { assertNever } from "@/lib/assert";
 import type { CheckoutSessionState } from "@/platform/billing/checkout/checkout-session";
 import { workspaceDisplayConfig } from "@/config/starter-selectors";

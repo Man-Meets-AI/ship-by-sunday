@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/input-otp";
 import { Input } from "@/components/ui/input";
 
-import type { SignInStep } from "@/features/auth/sign-in/types";
+import type { SignInStep } from "@/app/(identity)/_components/sign-in/sign-in-flow-types";
 
 type ResetStep = Extract<
 	SignInStep,

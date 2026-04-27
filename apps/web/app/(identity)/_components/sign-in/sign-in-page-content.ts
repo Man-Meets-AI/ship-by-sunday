@@ -1,8 +1,6 @@
-import { getPricingHref } from "@/features/auth/sign-in/sign-in-route-utils";
-import type {
-	SignInAuthError,
-	SignInStep,
-} from "@/features/auth/sign-in/types";
+import { getPricingHref } from "@/platform/auth/auth-route-utils";
+import type { SignInAuthError } from "@/platform/auth/auth-route-utils";
+import type { SignInStep } from "@/app/(identity)/_components/sign-in/sign-in-flow-types";
 import { assertNever } from "@/lib/assert";
 
 type SignInPageSupportPanelContent = {

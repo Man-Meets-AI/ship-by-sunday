@@ -1,7 +1,7 @@
 import type {
 	VerificationMethod,
 	VerificationStatus,
-} from "@/features/auth/sign-in/types";
+} from "@/app/(identity)/_components/sign-in/sign-in-flow-types";
 
 export function getVerificationCopy(
 	method: VerificationMethod,
