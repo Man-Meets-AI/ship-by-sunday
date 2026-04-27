@@ -14,7 +14,7 @@ import {
 	getBlogPageSegments,
 	getBlogSourcePath,
 	normalizeBlogSlug,
-} from "@/features/blog/server/page-paths";
+} from "@/app/blog/_server/page-paths";
 
 describe("blog page paths", () => {
 	it("builds the public route segments and source path for a post", () => {

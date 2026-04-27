@@ -4,13 +4,13 @@ import Link from "next/link";
 
 import { ProductBrand } from "@/components/product-brand";
 import { type HomePageCtaTarget, routeConfig } from "@/config/product";
-import { BlogPostMeta } from "@/features/blog/components/blog-post-meta";
-import { BlogPostPromo } from "@/features/blog/components/blog-post-promo";
-import { BlogRichText } from "@/features/blog/components/blog-rich-text";
-import { BlogPostToc } from "@/features/blog/components/blog-post-toc";
-import type { BlogTocEntry } from "@/features/blog/lib/blog-toc";
-import { getBlogPagePath } from "@/features/blog/server/page-paths";
-import type { BlogPostSummary } from "@/features/blog/server/blog-posts";
+import { BlogPostMeta } from "@/app/blog/_components/blog-post-meta";
+import { BlogPostPromo } from "@/app/blog/_components/blog-post-promo";
+import { BlogRichText } from "@/app/blog/_components/blog-rich-text";
+import { BlogPostToc } from "@/app/blog/_components/blog-post-toc";
+import type { BlogTocEntry } from "@/app/blog/_lib/blog-toc";
+import { getBlogPagePath } from "@/app/blog/_server/page-paths";
+import type { BlogPostSummary } from "@/app/blog/_server/blog-posts";
 
 type BlogPostShellProps = {
 	post: BlogPostSummary;

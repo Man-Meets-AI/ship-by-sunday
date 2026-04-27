@@ -4,7 +4,7 @@ import {
 	buildBlogIndexMetadata,
 	buildBlogPostMetadata,
 	getBlogMetadataDefaults,
-} from "@/features/blog/lib/blog-metadata";
+} from "@/app/blog/_lib/blog-metadata";
 
 describe("blog metadata helpers", () => {
 	it("provides canonical and social defaults for the blog landing page", () => {

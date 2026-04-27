@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 import { productConfig } from "@/config/product";
-import { blogIndexContent } from "@/features/blog/content/blog";
-import { getBlogPagePath } from "@/features/blog/server/page-paths";
-import type { BlogPostSummary } from "@/features/blog/server/blog-posts";
+import { blogIndexContent } from "@/app/blog/_content/blog";
+import { getBlogPagePath } from "@/app/blog/_server/page-paths";
+import type { BlogPostSummary } from "@/app/blog/_server/blog-posts";
 
 function getBlogSocialImage(post?: BlogPostSummary) {
 	if (!post) {

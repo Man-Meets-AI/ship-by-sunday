@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 
 import { type HomePageCtaTarget } from "@/config/product";
-import { BlogPostShell } from "@/features/blog/components/blog-post-shell";
-import type { BlogTocEntry } from "@/features/blog/lib/blog-toc";
-import type { BlogPostSummary } from "@/features/blog/server/blog-posts";
+import { BlogPostShell } from "@/app/blog/_components/blog-post-shell";
+import type { BlogTocEntry } from "@/app/blog/_lib/blog-toc";
+import type { BlogPostSummary } from "@/app/blog/_server/blog-posts";
 
 type BlogPostPageProps = {
 	post: BlogPostSummary;

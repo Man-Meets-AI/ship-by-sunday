@@ -9,15 +9,15 @@ These are the intended extension points for the starter. Change these first inst
 
 ## Best first changes
 
-| Area                   | What to change first                                                                                                    | Verification    |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------- | --------------- |
-| Product config         | Name, promise, price, brand defaults, and homepage section or CTA defaults in `config/product.ts`                       | `bun run build` |
-| Module flags           | `starterConfig.modules` plus the neutral workspace-home fallback                                                        | `bun run build` |
-| Marketing site         | Hero copy, proof, FAQ, screenshots, and pricing sections                                                                | `bun run build` |
-| Public blog surface    | Blog CTA target in `config/product.ts`, editorial copy in `features/blog/content/blog.ts`, and posts in `content/blog/` | `bun run build` |
-| Protected workspace    | Mission framing, lesson chrome, artifacts, and settings surfaces                                                        | `bun run check` |
-| Theme and styling      | Colors, typography, spacing, imagery, and motion defaults                                                               | `bun run build` |
-| Optional build helpers | Starter-template CTA and Codex-assisted build helpers                                                                   | targeted checks |
+| Area                   | What to change first                                                                                                | Verification    |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------- | --------------- |
+| Product config         | Name, promise, price, brand defaults, and homepage section or CTA defaults in `config/product.ts`                   | `bun run build` |
+| Module flags           | `starterConfig.modules` plus the neutral workspace-home fallback                                                    | `bun run build` |
+| Marketing site         | Hero copy, proof, FAQ, screenshots, and pricing sections                                                            | `bun run build` |
+| Public blog surface    | Blog CTA target in `config/product.ts`, editorial copy in `app/blog/_content/blog.ts`, and posts in `content/blog/` | `bun run build` |
+| Protected workspace    | Mission framing, lesson chrome, artifacts, and settings surfaces                                                    | `bun run check` |
+| Theme and styling      | Colors, typography, spacing, imagery, and motion defaults                                                           | `bun run build` |
+| Optional build helpers | Starter-template CTA and Codex-assisted build helpers                                                               | targeted checks |
 
 ## Good first milestone
 
@@ -45,7 +45,7 @@ Those are the highest-risk parts of the starter.
 
 - keep `config/product.ts` as the first place to change product identity and route constants
 - keep homepage shell controls in `starterConfig.homePage` and let `features/marketing/lib/home-page-render-model.ts` translate them into rendering decisions
-- keep the public blog route in `app/blog/[[...slug]]/page.tsx`, the editorial UI in `features/blog/**`, and article source files in `content/blog/**`
+- keep the public blog route in `app/blog/[[...slug]]/page.tsx`, the editorial UI in `app/blog/_components/**`, route helpers in `app/blog/_lib/**`, and article source files in `content/blog/**`
 - use `starterConfig.modules` before inventing route-level hacks or manual hidden links
 - keep the landing-page offer work inside `features/marketing/**` and `public/`
 - keep the course runtime and lesson model inside `features/course/**`

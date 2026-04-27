@@ -1,5 +1,5 @@
-import { formatBlogDate } from "@/features/blog/lib/blog-formatters";
-import type { BlogPostSummary } from "@/features/blog/server/blog-posts";
+import { formatBlogDate } from "@/app/blog/_lib/blog-formatters";
+import type { BlogPostSummary } from "@/app/blog/_server/blog-posts";
 import { cn } from "@/lib/utils";
 
 type BlogPostMetaProps = {

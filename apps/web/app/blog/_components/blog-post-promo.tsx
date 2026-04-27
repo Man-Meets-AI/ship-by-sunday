@@ -1,7 +1,7 @@
 import { ArrowUpRight } from "lucide-react";
 
 import { type HomePageCtaTarget } from "@/config/product";
-import { blogPromoContent } from "@/features/blog/content/blog";
+import { blogPromoContent } from "@/app/blog/_content/blog";
 import { HomePagePrimaryCta } from "@/features/marketing/components/home-page/home-page-primary-cta";
 
 type BlogPostPromoProps = {

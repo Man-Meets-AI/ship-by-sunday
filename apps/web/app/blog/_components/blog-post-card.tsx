@@ -2,9 +2,9 @@ import Link from "next/link";
 
 import { ArrowUpRight } from "lucide-react";
 
-import { BlogMediaFrame } from "@/features/blog/components/blog-media-frame";
-import { BlogPostMeta } from "@/features/blog/components/blog-post-meta";
-import type { BlogPostSummary } from "@/features/blog/server/blog-posts";
+import { BlogMediaFrame } from "@/app/blog/_components/blog-media-frame";
+import { BlogPostMeta } from "@/app/blog/_components/blog-post-meta";
+import type { BlogPostSummary } from "@/app/blog/_server/blog-posts";
 import { cn } from "@/lib/utils";
 
 type BlogPostCardProps = {

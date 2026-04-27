@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import type { BlogTocEntry } from "@/features/blog/lib/blog-toc";
+import type { BlogTocEntry } from "@/app/blog/_lib/blog-toc";
 import { cn } from "@/lib/utils";
 
 type BlogPostTocProps = {
