@@ -21,7 +21,7 @@ export default defineConfig({
 				"app/api/codex/**/*.ts",
 				"app/api/stripe/checkout/route.ts",
 				"features/codex/server/route-helpers.ts",
-				"features/product-access/server/product-access.ts",
+				"platform/access/product-access.ts",
 				"features/checkout/server/checkout-session.ts",
 			],
 			thresholds: {

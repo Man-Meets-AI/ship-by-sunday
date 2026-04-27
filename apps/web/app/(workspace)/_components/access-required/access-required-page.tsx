@@ -1,6 +1,6 @@
 "use client";
 
-import type { ProductAccess } from "@/features/product-access/lib/product-access";
+import type { ProductAccess } from "@/lib/product-access";
 import { useAccessRequiredController } from "../../_hooks/use-access-required-controller";
 import { AccessRequiredShell } from "./access-required-shell";
 

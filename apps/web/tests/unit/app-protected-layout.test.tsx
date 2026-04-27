@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 const getServerProductAccessMock = vi.fn();
 
-vi.mock("@/features/product-access/server/product-access", () => ({
+vi.mock("@/platform/access/product-access", () => ({
 	getServerProductAccess: getServerProductAccessMock,
 }));
 
