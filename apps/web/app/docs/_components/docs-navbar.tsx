@@ -6,7 +6,7 @@ import {
 	productWordmarkClassName,
 } from "@/components/product-brand";
 import { routeConfig } from "@/config/product";
-import { DocsThemeToggle } from "@/features/docs/components/docs-theme-toggle";
+import { DocsThemeToggle } from "@/app/docs/_components/docs-theme-toggle";
 import { docsDisplayConfig } from "@/config/starter-selectors";
 
 const navLinkClassName =
