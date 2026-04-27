@@ -1,12 +1,13 @@
 import { AppShell } from "@/features/workspace-shell/components/app-shell";
-import { WorkspaceHomeHero } from "@/features/workspace-home/components/workspace-home-hero";
-import { WorkspaceHomeModuleList } from "@/features/workspace-home/components/workspace-home-module-list";
-import { WorkspaceHomeNextSteps } from "@/features/workspace-home/components/workspace-home-next-steps";
-import { WorkspaceHomeSetupCards } from "@/features/workspace-home/components/workspace-home-setup-cards";
 import {
 	buildWorkspaceHomeModel,
 	type WorkspaceHomeModel,
-} from "@/features/workspace-home/lib/workspace-home-model";
+} from "@/app/(workspace)/_lib/workspace-home-model";
+
+import { WorkspaceHomeHero } from "./workspace-home-hero";
+import { WorkspaceHomeModuleList } from "./workspace-home-module-list";
+import { WorkspaceHomeNextSteps } from "./workspace-home-next-steps";
+import { WorkspaceHomeSetupCards } from "./workspace-home-setup-cards";
 
 export function WorkspaceHomePage({
 	model = buildWorkspaceHomeModel(),

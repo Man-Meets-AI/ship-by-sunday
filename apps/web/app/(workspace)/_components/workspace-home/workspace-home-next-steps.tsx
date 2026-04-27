@@ -15,7 +15,7 @@ import {
 	ItemMedia,
 	ItemTitle,
 } from "@/components/ui/item";
-import type { WorkspaceHomeStep } from "@/features/workspace-home/lib/workspace-home-model";
+import type { WorkspaceHomeStep } from "@/app/(workspace)/_lib/workspace-home-model";
 
 export function WorkspaceHomeNextSteps({
 	nextSteps,

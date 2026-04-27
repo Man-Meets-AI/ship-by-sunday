@@ -13,7 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import type {
 	WorkspaceHomeModel,
 	WorkspaceHomeQuickAction,
-} from "@/features/workspace-home/lib/workspace-home-model";
+} from "@/app/(workspace)/_lib/workspace-home-model";
 
 export function WorkspaceHomeHero({
 	model,

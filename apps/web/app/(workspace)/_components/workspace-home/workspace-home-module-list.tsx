@@ -16,7 +16,7 @@ import {
 	ItemGroup,
 	ItemTitle,
 } from "@/components/ui/item";
-import type { WorkspaceHomeModuleState } from "@/features/workspace-home/lib/workspace-home-model";
+import type { WorkspaceHomeModuleState } from "@/app/(workspace)/_lib/workspace-home-model";
 
 export function WorkspaceHomeModuleList({
 	modules,
