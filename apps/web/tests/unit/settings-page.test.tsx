@@ -17,7 +17,7 @@ vi.mock("@/features/starter-repo/components/starter-repo-access-card", () => ({
 	),
 }));
 
-vi.mock("@/features/settings/components/settings-account-card", () => ({
+vi.mock("@/app/(workspace)/_components/settings-account-card", () => ({
 	SettingsAccountCard: () => (
 		<div data-settings-account-card="true">Account</div>
 	),
@@ -25,7 +25,7 @@ vi.mock("@/features/settings/components/settings-account-card", () => ({
 
 globalThis.React = React;
 
-import { SettingsPage } from "@/features/settings/components/settings-page";
+import { SettingsPage } from "@/app/(workspace)/settings/_components/settings-page";
 
 describe("SettingsPage", () => {
 	it("includes Codex and account cards without the legacy starter-repo card", () => {

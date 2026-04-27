@@ -26,13 +26,13 @@ The app should be easier to navigate than a broad `features` bucket. This Progra
 
 The Program packet lives under `docs/programs/active/2026-04-26-remove-feature-folder-surface/`.
 
-The research input is `research-pass-feature-folder-surface.md`. The normalized input is `normalized-pass-feature-folder-surface.md`. The convergence artifact is `converged-decision-packet.md`. The dependency artifact is `dependency-graph.md`. The split recommendation is `plan-split-recommendation.md`. The review artifact is `cross-repo-review.md`. The current planning brief is `planning-brief-1.md`, with `current-planning-brief.txt` pointing at it.
+The research input is `research-pass-feature-folder-surface.md`. The normalized input is `normalized-pass-feature-folder-surface.md`. The convergence artifact is `converged-decision-packet.md`. The dependency artifact is `dependency-graph.md`. The split recommendation is `plan-split-recommendation.md`. The review artifact is `cross-repo-review.md`. The planning briefs are `planning-brief-1.md`, `planning-brief-2.md`, and `planning-brief-3.md`, with `current-planning-brief.txt` pointing at the current one.
 
 ## Current State
 
 The previous app-structure Program is complete and archived. It made ownership visible but intentionally left most `apps/web/features` folders in place. A fresh inventory shows nineteen top-level feature folders remain. The smallest non-domain folders are `features/shared`, which contains one generic hook, and `features/public-metadata`, which contains one sitemap helper used only by App Router metadata.
 
-The first child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-remove-generic-feature-surfaces.md`.
+The first child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-remove-generic-feature-surfaces.md`. The second child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-remove-settings-feature-surface.md`.
 
 ## Progress
 
@@ -41,6 +41,9 @@ The first child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-re
 - [x] 2026-04-26 EDT: Created the active Program packet and first child ExecPlan.
 - [x] 2026-04-26 EDT: Moved the generic autosave hook and public metadata sitemap helper out of `apps/web/features`, then deleted `features/shared` and `features/public-metadata`.
 - [x] 2026-04-26 EDT: Completed and archived the generic and public metadata feature-folder removal ExecPlan after focused tests, app format check, app lint, app typecheck, plan lint, Program lint, markdown lint, and `git diff --check` passed.
+- [x] 2026-04-26 EDT: Wrote planning brief 2 and opened the second child ExecPlan for removing the settings feature folder.
+- [x] 2026-04-26 EDT: Executed and completed the settings feature-folder removal slice. Focused settings/workspace-home tests, app format check, app lint, app typecheck, plan lint, Program lint, markdown lint, import scans, and `git diff --check` passed.
+- [x] 2026-04-26 EDT: Wrote planning brief 3 for the next workspace-home feature-folder removal slice.
 
 ## Decision Log
 
@@ -60,17 +63,17 @@ Active child ExecPlans:
 
 Recommended future child ExecPlans:
 
-- Move settings route components into `apps/web/app/(workspace)/settings/_components`.
 - Move workspace home route components and model into `apps/web/app/(workspace)` private folders.
 - Split starter and starter-repo surfaces into route, docs, Convex-safe validation, and course workbench owners.
 
 Completed child ExecPlans:
 
 - `docs/exec-plans/completed/2026-04-26-remove-generic-feature-surfaces.md`
+- `docs/exec-plans/completed/2026-04-26-remove-settings-feature-surface.md`
 
 ## Next Slice
 
-No child ExecPlan is active right now. The next recommended slice is moving settings route components from `apps/web/features/settings` into private folders under `apps/web/app/(workspace)/settings`, while preserving route behavior and keeping starter repository access imports stable.
+No child ExecPlan is active right now. The next recommended slice is moving workspace home route components and `workspace-home-model.ts` out of `apps/web/features/workspace-home` and into App Router workspace-owned folders, while preserving route behavior and keeping starter and starter-repo surfaces untouched.
 
 ## Risks and Watchpoints
 
@@ -95,6 +98,10 @@ For the first slice, acceptance requires import scans proving no references to `
 Initial top-level feature-folder file counts are recorded in `research-pass-feature-folder-surface.md`.
 
 The first planning brief is `docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-1.md`.
+
+The second planning brief is `docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-2.md`.
+
+The third planning brief is `docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-3.md`.
 
 ## Interfaces and Dependencies
 

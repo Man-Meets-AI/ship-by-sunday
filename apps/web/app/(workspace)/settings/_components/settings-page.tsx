@@ -3,7 +3,7 @@ import { CodexConnectionCard } from "@/features/codex/components/codex-connectio
 import { StarterRepoAccessCard } from "@/features/starter-repo/components/starter-repo-access-card";
 import { isStarterModuleEnabled } from "@/features/starter/lib/starter-selectors";
 
-import { SettingsAccountCard } from "./settings-account-card";
+import { SettingsAccountCard } from "../../_components/settings-account-card";
 
 export function SettingsPageContent() {
 	const starterRepoEnabled = isStarterModuleEnabled("starterRepo");
