@@ -1,4 +1,4 @@
-import { homePageContent } from "@/features/marketing/content/home";
+import { homePageContent } from "@/app/_content/home-page";
 import { blogDisplayConfig } from "@/config/starter-selectors";
 
 const heroHeadline = [

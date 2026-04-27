@@ -6,7 +6,7 @@ completed_at: 2026-04-26
 summary: Delete the settings feature folder by moving settings route UI into App Router workspace-owned folders.
 post_build_recap: Settings route UI now lives under App Router workspace folders, SettingsAccountCard is workspace route-group owned, and apps/web/features/settings is deleted with focused and app-wide validation passing.
 program_id: remove-feature-folder-surface
-planning_brief: docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-2.md
 read_when:
   - Resuming the settings feature-folder removal slice.
   - Checking why SettingsAccountCard is workspace-owned during the transition.

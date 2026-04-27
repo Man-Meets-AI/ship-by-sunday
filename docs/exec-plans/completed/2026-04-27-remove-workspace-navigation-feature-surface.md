@@ -6,7 +6,7 @@ completed_at: 2026-04-27
 summary: Delete the workspace-navigation feature folder by moving workspace navigation components, models, and routing helpers to explicit non-feature owners without changing route behavior.
 post_build_recap: Workspace navigation UI now lives under the workspace App Router private component tree, shared navigation models and routing helpers live under apps/web/lib/workspace-navigation, and the old feature folder is deleted. Focused navigation tests, app format/lint/typecheck, Program/ExecPlan lint, markdown lint, and diff checks passed.
 program_id: remove-feature-folder-surface
-planning_brief: docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-6.md
+planning_brief: docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-6.md
 read_when:
   - Resuming the workspace-navigation feature-folder removal slice.
   - Checking why workspace navigation UI lives under the workspace App Router group.

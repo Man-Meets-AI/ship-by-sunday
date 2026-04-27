@@ -5,7 +5,7 @@ import {
 	lessonRegistry,
 } from "@/lib/course/lesson/model";
 import { legacyLessonRedirects } from "@/lib/course/lesson/utils/legacy-routes";
-import { homePageContent } from "@/features/marketing/content/home";
+import { homePageContent } from "@/app/_content/home-page";
 import { getLessonMapHref } from "@/lib/workspace-navigation/lesson-map-href";
 
 describe("curriculum contract", () => {

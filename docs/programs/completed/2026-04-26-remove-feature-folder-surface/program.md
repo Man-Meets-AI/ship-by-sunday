@@ -1,11 +1,11 @@
 ---
 program_id: 'remove-feature-folder-surface'
 title: 'Remove Feature Folder Surface'
-status: 'active'
+status: 'complete'
 created_at: 2026-04-26
-completed_at: null
+completed_at: 2026-04-27
 summary: 'Reduce the remaining apps/web/features tree by moving non-domain code to explicit route, platform, hook, or library homes.'
-post_build_recap: null
+post_build_recap: 'All apps/web/features folders were removed; ownership now lives under App Router private folders, app-owned content/lib modules, shared UI, lib, platform, hooks, config, and Convex source owners.'
 read_when:
   - 'Choosing the next feature-folder reduction slice.'
   - 'Checking why a feature folder should move out of apps/web/features.'
@@ -24,15 +24,15 @@ The app should be easier to navigate than a broad `features` bucket. This Progra
 
 ## Program Inputs
 
-The Program packet lives under `docs/programs/active/2026-04-26-remove-feature-folder-surface/`.
+The Program packet lives under `docs/programs/completed/2026-04-26-remove-feature-folder-surface/`.
 
-The research input is `research-pass-feature-folder-surface.md`. The normalized input is `normalized-pass-feature-folder-surface.md`. The convergence artifact is `converged-decision-packet.md`. The dependency artifact is `dependency-graph.md`. The split recommendation is `plan-split-recommendation.md`. The review artifact is `cross-repo-review.md`. The planning briefs are `planning-brief-1.md`, `planning-brief-2.md`, `planning-brief-3.md`, `planning-brief-4.md`, `planning-brief-5.md`, `planning-brief-6.md`, `planning-brief-7.md`, `planning-brief-8.md`, `planning-brief-9.md`, `planning-brief-10.md`, `planning-brief-11.md`, `planning-brief-12.md`, `planning-brief-13.md`, `planning-brief-14.md`, `planning-brief-15.md`, `planning-brief-16.md`, and `planning-brief-17.md`, with `current-planning-brief.txt` pointing at the current one.
+The research input is `research-pass-feature-folder-surface.md`. The normalized input is `normalized-pass-feature-folder-surface.md`. The convergence artifact is `converged-decision-packet.md`. The dependency artifact is `dependency-graph.md`. The split recommendation is `plan-split-recommendation.md`. The review artifact is `cross-repo-review.md`. The planning briefs are `planning-brief-1.md`, `planning-brief-2.md`, `planning-brief-3.md`, `planning-brief-4.md`, `planning-brief-5.md`, `planning-brief-6.md`, `planning-brief-7.md`, `planning-brief-8.md`, `planning-brief-9.md`, `planning-brief-10.md`, `planning-brief-11.md`, `planning-brief-12.md`, `planning-brief-13.md`, `planning-brief-14.md`, `planning-brief-15.md`, `planning-brief-16.md`, `planning-brief-17.md`, and `planning-brief-18.md`, with `current-planning-brief.txt` pointing at the current one.
 
 ## Current State
 
-The previous app-structure Program is complete and archived. It made ownership visible but intentionally left most `apps/web/features` folders in place. After the first seventeen child slices, one top-level feature folder remains: `marketing`.
+The previous app-structure Program is complete and archived. It made ownership visible but intentionally left most `apps/web/features` folders in place. After the first eighteen child slices, no `apps/web/features` folders remain.
 
-The first child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-remove-generic-feature-surfaces.md`. The second child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-remove-settings-feature-surface.md`. The third child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-remove-workspace-home-feature-surface.md`. The fourth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-remove-starter-feature-surface.md`. The fifth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-remove-starter-repo-feature-surface.md`. The sixth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-workspace-navigation-feature-surface.md`. The seventh child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-product-access-feature-surface.md`. The eighth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-docs-feature-surface.md`. The ninth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-checkout-feature-surface.md`. The tenth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-observability-feature-surface.md`. The eleventh child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-blog-feature-surface.md`. The twelfth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-codex-feature-surface.md`. The thirteenth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-auth-feature-surface.md`. The fourteenth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-workspace-shell-feature-surface.md`. The fifteenth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-execute-ship-feature-surface.md`. The sixteenth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-blueprint-flow-feature-surface.md`. The seventeenth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-course-feature-surface.md`. No child ExecPlan is currently active.
+The first child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-remove-generic-feature-surfaces.md`. The second child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-remove-settings-feature-surface.md`. The third child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-remove-workspace-home-feature-surface.md`. The fourth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-remove-starter-feature-surface.md`. The fifth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-remove-starter-repo-feature-surface.md`. The sixth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-workspace-navigation-feature-surface.md`. The seventh child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-product-access-feature-surface.md`. The eighth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-docs-feature-surface.md`. The ninth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-checkout-feature-surface.md`. The tenth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-observability-feature-surface.md`. The eleventh child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-blog-feature-surface.md`. The twelfth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-codex-feature-surface.md`. The thirteenth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-auth-feature-surface.md`. The fourteenth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-workspace-shell-feature-surface.md`. The fifteenth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-execute-ship-feature-surface.md`. The sixteenth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-blueprint-flow-feature-surface.md`. The seventeenth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-course-feature-surface.md`. The eighteenth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-marketing-feature-surface.md`.
 
 ## Progress
 
@@ -76,6 +76,8 @@ The first child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-re
 - [x] 2026-04-27 EDT: Executed and completed the blueprint-flow feature-folder removal slice. Pure Blueprint unit tests, blueprint download route integration, Blueprint and Review integration-ui tests, review handoff doctor, app format check, app lint, app typecheck, import scans, and Convex schema/generated diff checks passed. Local hook/component unit tests still hit the known duplicate-React Vitest issue in this checkout; clean-install PR static is the authoritative full-unit proof.
 - [x] 2026-04-27 EDT: Wrote planning brief 17 and opened the seventeenth child ExecPlan for removing the course feature folder.
 - [x] 2026-04-27 EDT: Executed and completed the course feature-folder removal slice. Shared course contracts now live under `apps/web/lib/course`, workspace course UI lives under route-private components, course hooks live under route-private hooks, `apps/web/features/course` is deleted, pure course tests and integration-ui tests passed, app format/lint/typecheck passed, and plan/program/markdown lint plus `git diff --check` passed. React-heavy local unit tests still hit the known duplicate-React Vitest issue pending clean CI proof.
+- [x] 2026-04-27 EDT: Wrote planning brief 18 and opened the eighteenth child ExecPlan for removing the final marketing feature folder.
+- [x] 2026-04-27 EDT: Executed and completed the marketing feature-folder removal slice. Homepage route UI now lives under `apps/web/app/_components/home-page`, homepage content and behavior helpers live under `apps/web/app/_content` and `apps/web/app/_lib`, shared effect primitives live under `apps/web/components/ui`, `apps/web/features` is deleted, the blueprint download snapshot no longer scans the deleted feature directory, focused non-React tests and app gates passed, and React-heavy local effect tests still hit the known duplicate-React issue pending clean CI proof.
 
 ## Decision Log
 
@@ -95,7 +97,7 @@ Active child ExecPlans:
 
 Recommended future child ExecPlans:
 
-- Remove the marketing feature folder after the active course slice is complete.
+- None.
 
 Completed child ExecPlans:
 
@@ -116,10 +118,11 @@ Completed child ExecPlans:
 - `docs/exec-plans/completed/2026-04-27-remove-execute-ship-feature-surface.md`
 - `docs/exec-plans/completed/2026-04-27-remove-blueprint-flow-feature-surface.md`
 - `docs/exec-plans/completed/2026-04-27-remove-course-feature-surface.md`
+- `docs/exec-plans/completed/2026-04-27-remove-marketing-feature-surface.md`
 
 ## Next Slice
 
-The next recommended slice is `marketing`, because it is the final remaining top-level feature folder. It needs a fresh planning brief and child ExecPlan before any folder deletion. The slice must preserve homepage behavior, marketing copy, structured data, blog/public-surface behavior, checkout links, pricing, promo code behavior, billing, Stripe, Convex schema, generated Convex files, and environment behavior.
+No required next slice remains inside this Program. Any future cleanup should be justified by a new Program or a focused standalone ExecPlan, not by extending this completed feature-folder removal initiative.
 
 ## Risks and Watchpoints
 
@@ -131,11 +134,11 @@ Do not move route screens without a child ExecPlan that names the route and focu
 
 ## Outcomes & Retrospective
 
-This Program is active. The first seventeen child slices deleted `features/shared`, `features/public-metadata`, `features/settings`, `features/workspace-home`, `features/starter`, `features/starter-repo`, `features/workspace-navigation`, `features/product-access`, `features/docs`, `features/checkout`, `features/observability`, `features/blog`, `features/codex`, `features/auth`, `features/workspace-shell`, `features/execute-ship`, `features/blueprint-flow`, and `features/course`. Later outcomes should reduce the remaining marketing feature surface while keeping behavior stable.
+This Program is complete. The eighteen child slices deleted every `apps/web/features` folder and moved the code to explicit owners: App Router private folders for route UI, `apps/web/app/_content` and `apps/web/app/_lib` for root homepage contracts, `apps/web/components/ui` for shared UI primitives, `apps/web/lib` for shared domain helpers, `apps/web/platform` for server and integration boundaries, `apps/web/hooks` for generic hooks, and `apps/web/config` for starter selectors. The customer-safe starter snapshot now follows those owners instead of including the deleted feature directory. Checkout, billing, Stripe, Convex schema, generated Convex files, environment behavior, route URLs, homepage CTA behavior, public docs routes, blog routes, course behavior, and protected workspace behavior were intentionally preserved. The main lesson is that almost every former feature folder had a clearer owner once route UI, shared contracts, and platform integrations were separated instead of treated as one generic feature surface.
 
 ## Validation and Acceptance
 
-The Program is complete only when no non-domain code remains under `apps/web/features`, remaining feature folders are either durable product domains or have active follow-up plans, docs describe the final ownership map, and every child slice has focused validation plus app lint and typecheck.
+The Program is complete because no `apps/web/features` tree remains, current docs describe the homepage and starter ownership map, and every child slice has focused validation plus app lint and typecheck.
 
 For the first slice, acceptance requires import scans proving no references to `@/features/shared`, `features/shared`, `@/features/public-metadata`, or `features/public-metadata` remain.
 
@@ -143,39 +146,41 @@ For the first slice, acceptance requires import scans proving no references to `
 
 Initial top-level feature-folder file counts are recorded in `research-pass-feature-folder-surface.md`.
 
-The first planning brief is `docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-1.md`.
+The first planning brief is `docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-1.md`.
 
-The second planning brief is `docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-2.md`.
+The second planning brief is `docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-2.md`.
 
-The third planning brief is `docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-3.md`.
+The third planning brief is `docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-3.md`.
 
-The fourth planning brief is `docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-4.md`.
+The fourth planning brief is `docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-4.md`.
 
-The fifth planning brief is `docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-5.md`.
+The fifth planning brief is `docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-5.md`.
 
-The sixth planning brief is `docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-6.md`.
+The sixth planning brief is `docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-6.md`.
 
-The seventh planning brief is `docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-7.md`.
+The seventh planning brief is `docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-7.md`.
 
-The eighth planning brief is `docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-8.md`.
+The eighth planning brief is `docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-8.md`.
 
-The ninth planning brief is `docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-9.md`.
+The ninth planning brief is `docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-9.md`.
 
-The tenth planning brief is `docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-10.md`.
+The tenth planning brief is `docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-10.md`.
 
-The eleventh planning brief is `docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-11.md`.
+The eleventh planning brief is `docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-11.md`.
 
-The twelfth planning brief is `docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-12.md`.
+The twelfth planning brief is `docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-12.md`.
 
-The thirteenth planning brief is `docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-13.md`.
+The thirteenth planning brief is `docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-13.md`.
 
-The fourteenth planning brief is `docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-14.md`.
+The fourteenth planning brief is `docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-14.md`.
 
-The fifteenth planning brief is `docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-15.md`.
+The fifteenth planning brief is `docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-15.md`.
 
-The sixteenth planning brief is `docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-16.md`.
+The sixteenth planning brief is `docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-16.md`.
 
-The seventeenth planning brief is `docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-17.md`.
+The seventeenth planning brief is `docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-17.md`.
+
+The eighteenth planning brief is `docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-18.md`.
 
 ## Interfaces and Dependencies
 

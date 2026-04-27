@@ -6,7 +6,7 @@ completed_at: 2026-04-26
 summary: Delete the generic shared hook and public metadata feature folders by moving their code to clearer app-owned homes.
 post_build_recap: The generic autosave hook now lives in apps/web/hooks, sitemap content indexing now lives under apps/web/app/_metadata, and the features/shared and features/public-metadata folders are deleted with focused and app-wide validation passing.
 program_id: remove-feature-folder-surface
-planning_brief: docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-1.md
+planning_brief: docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-1.md
 read_when:
   - Resuming the first feature-folder reduction slice.
   - Checking why this slice deletes features/shared and features/public-metadata.

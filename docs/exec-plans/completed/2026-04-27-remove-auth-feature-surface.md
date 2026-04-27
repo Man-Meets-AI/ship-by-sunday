@@ -6,7 +6,7 @@ completed_at: 2026-04-27
 summary: Delete the auth feature folder by moving identity route UI into the identity route group and shared auth route helpers into platform auth without changing Clerk or checkout handoff behavior.
 post_build_recap: Identity UI now lives under app/(identity) private folders, shared auth route helpers live under platform/auth, post-checkout sign-up release-scope classification points at the new owner, the old auth feature folder is deleted, and focused auth plus app validation passed.
 program_id: remove-feature-folder-surface
-planning_brief: docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-13.md
+planning_brief: docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-13.md
 read_when:
   - Resuming the auth feature-folder removal slice.
   - Checking why identity UI lives under app/(identity).

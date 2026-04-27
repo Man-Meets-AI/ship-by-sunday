@@ -6,7 +6,7 @@ completed_at: 2026-04-27
 summary: Move the workspace AppShell out of the feature tree and into the workspace route private component surface without changing workspace chrome behavior.
 post_build_recap: AppShell now lives under app/(workspace)/_components, old workspace-shell and unused course AppShell aliases are gone, consumers import the new owner, and focused workspace shell plus app validation passed.
 program_id: remove-feature-folder-surface
-planning_brief: docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-14.md
+planning_brief: docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-14.md
 read_when:
   - Resuming the workspace-shell feature-folder removal slice.
   - Checking why AppShell lives under app/(workspace).

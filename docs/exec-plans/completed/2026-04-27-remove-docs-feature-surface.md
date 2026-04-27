@@ -6,7 +6,7 @@ completed_at: 2026-04-27
 summary: Delete the docs feature folder by moving docs route chrome, metadata helpers, page-path helpers, theme helpers, and styles into docs App Router private folders without changing docs behavior.
 post_build_recap: Docs route chrome, helpers, and styles now live under app/docs private folders, and the old docs feature folder is deleted. Focused docs tests, app format/lint/typecheck, Program/ExecPlan lint, markdown lint, and diff checks passed.
 program_id: remove-feature-folder-surface
-planning_brief: docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-8.md
+planning_brief: docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-8.md
 read_when:
   - Resuming the docs feature-folder removal slice.
   - Checking why docs chrome and helpers live under app/docs private folders.

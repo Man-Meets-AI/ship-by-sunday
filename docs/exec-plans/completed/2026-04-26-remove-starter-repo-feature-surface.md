@@ -6,7 +6,7 @@ completed_at: 2026-04-26
 summary: Delete the starter-repo feature folder by moving GitHub username validation, access copy, and workspace access UI to explicit owners without changing access behavior.
 post_build_recap: GitHub username validation now lives under apps/web/lib, starter-repo access copy under apps/web/config, and starter-repo workspace UI under the workspace App Router component tree. The old feature folder is deleted and focused tests plus app and plan validation passed.
 program_id: remove-feature-folder-surface
-planning_brief: docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-5.md
+planning_brief: docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-5.md
 read_when:
   - Resuming the starter-repo feature-folder removal slice.
   - Checking why starter repo access UI lives under the workspace App Router group.

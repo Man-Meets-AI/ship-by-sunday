@@ -6,7 +6,7 @@ completed_at: 2026-04-27
 summary: Move course code out of the feature tree and into route-private course UI, shared course library, and route hook owners without changing course behavior.
 post_build_recap: Course shared contracts now live under lib/course, workspace course UI and hooks live under route-private owners, and the old course feature folder is gone.
 program_id: remove-feature-folder-surface
-planning_brief: docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-17.md
+planning_brief: docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-17.md
 read_when:
   - Resuming the course feature-folder removal slice.
   - Checking why course model code lives under lib/course.

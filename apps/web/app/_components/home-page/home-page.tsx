@@ -1,16 +1,16 @@
-import { getHomePageRenderModel } from "@/features/marketing/lib/home-page-render-model";
+import { getHomePageRenderModel } from "@/app/_lib/home-page-render-model";
 
 import {
 	CommonQuestionsSection,
 	FooterSection,
 	PricingSectionBlock,
 	SocialProofSection,
-} from "./home-page/closing-sections";
-import { HomeHeroSection } from "./home-page/hero-sections";
-import { DurabilitySectionBlock } from "./home-page/durability-section";
-import { SprintPathUnifiedSection } from "./home-page/sprint-path-unified-section";
-import { StarterSystemSectionBlock } from "./home-page/starter-system-section";
-import { WhatsInsideSection } from "./home-page/whats-inside-section";
+} from "./sections/closing-sections";
+import { HomeHeroSection } from "./sections/hero-sections";
+import { DurabilitySectionBlock } from "./sections/durability-section";
+import { SprintPathUnifiedSection } from "./sections/sprint-path-unified-section";
+import { StarterSystemSectionBlock } from "./sections/starter-system-section";
+import { WhatsInsideSection } from "./sections/whats-inside-section";
 
 export default async function HomePage() {
 	const homePageRenderModel = getHomePageRenderModel();

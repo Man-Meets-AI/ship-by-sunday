@@ -6,7 +6,7 @@ import {
 	starterConfig,
 	type StarterHomePageConfig,
 } from "@/config/product";
-import { createHomePageRenderModel } from "@/features/marketing/lib/home-page-render-model";
+import { createHomePageRenderModel } from "@/app/_lib/home-page-render-model";
 
 describe("home page render model", () => {
 	it("preserves the default section order and checkout CTA defaults", () => {

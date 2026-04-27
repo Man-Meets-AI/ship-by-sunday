@@ -1,5 +1,5 @@
-import HomePage from "@/features/marketing/components/home-page";
-import { HomePageStructuredData } from "@/features/marketing/components/home-page/home-page-structured-data";
+import HomePage from "@/app/_components/home-page/home-page";
+import { HomePageStructuredData } from "@/app/_components/home-page/sections/home-page-structured-data";
 import { redirectGrantedHomeVisitor } from "@/platform/access/product-access";
 import { shouldBypassClerkProtection } from "@/platform/auth/clerk-middleware-bypass";
 

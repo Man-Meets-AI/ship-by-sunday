@@ -2,7 +2,7 @@ import { productConfig, routeConfig } from "@/config/product";
 import {
 	getHomePageRenderModel,
 	type HomePageRenderModel,
-} from "@/features/marketing/lib/home-page-render-model";
+} from "@/app/_lib/home-page-render-model";
 import { getMetadataBase } from "@/platform/next/metadata-base";
 
 const baseUrl = getMetadataBase();

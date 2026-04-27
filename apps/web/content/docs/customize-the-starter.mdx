@@ -44,10 +44,10 @@ Those are the highest-risk parts of the starter.
 ## Safeguards
 
 - keep `config/product.ts` as the first place to change product identity and route constants
-- keep homepage shell controls in `starterConfig.homePage` and let `features/marketing/lib/home-page-render-model.ts` translate them into rendering decisions
+- keep homepage shell controls in `starterConfig.homePage` and let `app/_lib/home-page-render-model.ts` translate them into rendering decisions
 - keep the public blog route in `app/blog/[[...slug]]/page.tsx`, the editorial UI in `app/blog/_components/**`, route helpers in `app/blog/_lib/**`, and article source files in `content/blog/**`
 - use `starterConfig.modules` before inventing route-level hacks or manual hidden links
-- keep the landing-page offer work inside `features/marketing/**` and `public/`
+- keep the landing-page offer work inside `app/_components/home-page, app/_content, and app/_lib` and `public/`
 - keep shared course contracts inside `lib/course/**` and route-facing course UI inside `app/(workspace)/_components/course/**`
 - keep starter-mode protected home work inside `app/(workspace)/_components/workspace-home/**` and `app/(workspace)/_lib/workspace-home-model.ts`
 - keep the access layer as the source of truth for product access
@@ -74,7 +74,7 @@ For the homepage specifically, clean customization now means:
 
 - section visibility comes from `starterConfig.homePage.sections`
 - hero and pricing CTA behavior comes from `starterConfig.homePage.heroPrimaryCta` and `starterConfig.homePage.pricingPrimaryCta`
-- section copy and assets stay in `features/marketing/content/home.ts`
-- `features/marketing/lib/home-page-render-model.ts` remains the single place that combines config with content
+- section copy and assets stay in `app/_content/home-page.ts`
+- `app/_lib/home-page-render-model.ts` remains the single place that combines config with content
 
 If the homepage is part of the change, use [Configure the Homepage](/docs/configure-the-homepage) as the detailed source of truth instead of prompting from memory.

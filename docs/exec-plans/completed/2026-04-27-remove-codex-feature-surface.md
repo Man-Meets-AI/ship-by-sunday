@@ -6,7 +6,7 @@ completed_at: 2026-04-27
 summary: Delete the Codex feature folder by moving Codex connection UI and app-server route/runtime helpers into explicit workspace, API, and platform owners without changing Codex behavior.
 post_build_recap: Codex connection UI now lives under workspace private components, Codex API helpers live beside the API route tree, app-server runtime boundaries live under platform/codex, the old Codex feature folder is deleted, and focused Codex tests plus app format/lint/typecheck and plan validation passed.
 program_id: remove-feature-folder-surface
-planning_brief: docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-12.md
+planning_brief: docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-12.md
 read_when:
   - Resuming the Codex feature-folder removal slice.
   - Checking why Codex UI lives under workspace private folders.

@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
-import { Cover } from "@/features/marketing/components/effects/cover";
-import type { HomePageContent } from "@/features/marketing/content/home";
+import { Cover } from "@/components/ui/cover";
+import type { HomePageContent } from "@/app/_content/home-page";
 
 type Hero = HomePageContent["hero"];
 

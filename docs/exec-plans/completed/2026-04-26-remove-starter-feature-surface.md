@@ -6,7 +6,7 @@ completed_at: 2026-04-26
 summary: Delete the starter feature folder by moving module selector helpers to config ownership and docs disabled-state UI to the docs App Router owner.
 post_build_recap: Starter selector helpers now live under config, docs disabled-state UI lives under the docs App Router owner, apps/web/features/starter is deleted, and focused plus app-wide validation passed.
 program_id: remove-feature-folder-surface
-planning_brief: docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-4.md
+planning_brief: docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-4.md
 read_when:
   - Reviewing the completed starter feature-folder removal slice.
   - Checking why starter selectors live under config.

@@ -14,13 +14,13 @@ This page is the source of truth for future builders and future AI agents who ne
 When you need to change the homepage, inspect these files in this order:
 
 1. `config/product.ts`
-2. `features/marketing/content/home.ts`
-3. `features/marketing/lib/home-page-render-model.ts`
-4. `features/marketing/components/home-page.tsx`
-5. `features/marketing/components/home-page/durability-section.tsx`
-6. `features/marketing/components/home-page/starter-system-section.tsx`
-7. `features/marketing/components/home-page/home-page-primary-cta.tsx`
-8. `features/marketing/lib/home-page-structured-data.ts`
+2. `app/_content/home-page.ts`
+3. `app/_lib/home-page-render-model.ts`
+4. `app/_components/home-page/home-page.tsx`
+5. `app/_components/home-page/sections/durability-section.tsx`
+6. `app/_components/home-page/sections/starter-system-section.tsx`
+7. `app/_components/home-page/sections/home-page-primary-cta.tsx`
+8. `app/_lib/home-page-structured-data.ts`
 9. `tests/unit/home-page-content.test.ts`
 10. `tests/unit/home-page-render-model.test.ts`
 11. `tests/unit/home-page-structured-data.test.ts`
@@ -53,7 +53,7 @@ The homepage also has a fixed canonical order in `homePageSectionOrder`. This is
 
 ### 2. Content layer
 
-`features/marketing/content/home.ts` owns the default copy and assets.
+`app/_content/home-page.ts` owns the default copy and assets.
 
 That file should answer:
 
@@ -66,7 +66,7 @@ That file should not decide whether a section renders.
 
 ### 3. Render model
 
-`features/marketing/lib/home-page-render-model.ts` combines starter config plus homepage content into the render contract used by the page.
+`app/_lib/home-page-render-model.ts` combines starter config plus homepage content into the render contract used by the page.
 
 This file is the behavioral seam. It decides:
 
@@ -102,7 +102,7 @@ Do not rename or remove those casually. Browser smoke checks them today.
 
 Hero and pricing do not own checkout behavior directly anymore.
 
-They both consume the shared `HomePageCtaTarget` model from `config/product.ts` and render through `features/marketing/components/home-page/home-page-primary-cta.tsx`.
+They both consume the shared `HomePageCtaTarget` model from `config/product.ts` and render through `app/_components/home-page/sections/home-page-primary-cta.tsx`.
 
 Current target kinds:
 
@@ -138,7 +138,7 @@ Current rules:
 - `FAQPage` only appears when the FAQ section is visible
 - `Product` only appears when the pricing section is visible and its CTA target still uses checkout
 
-If you change visible sections or pricing intent, update `features/marketing/lib/home-page-structured-data.ts` and the matching tests in the same slice.
+If you change visible sections or pricing intent, update `app/_lib/home-page-structured-data.ts` and the matching tests in the same slice.
 
 Truthful omission is the rule. If a section is gone, its schema should be gone too.
 
@@ -148,7 +148,7 @@ Truthful omission is the rule. If a section is gone, its schema should be gone t
 
 Edit:
 
-- `features/marketing/content/home.ts`
+- `app/_content/home-page.ts`
 - `public/` if assets change
 
 Usually you should not need to touch the render model for pure copy work.
@@ -158,8 +158,8 @@ Usually you should not need to touch the render model for pure copy work.
 Edit:
 
 - `config/product.ts`
-- `features/marketing/lib/home-page-render-model.ts` only if the section has data-fetch side effects
-- `features/marketing/lib/home-page-structured-data.ts` if the section affects schema
+- `app/_lib/home-page-render-model.ts` only if the section has data-fetch side effects
+- `app/_lib/home-page-structured-data.ts` if the section affects schema
 - tests if default public behavior changes
 
 ### Change hero or pricing CTA behavior
@@ -167,19 +167,19 @@ Edit:
 Edit:
 
 - `config/product.ts`
-- `features/marketing/lib/home-page-render-model.ts`
-- `features/marketing/components/home-page/home-page-primary-cta.tsx` only if the target model changes
-- `features/marketing/lib/home-page-structured-data.ts` if pricing is no longer a checkout path
+- `app/_lib/home-page-render-model.ts`
+- `app/_components/home-page/sections/home-page-primary-cta.tsx` only if the target model changes
+- `app/_lib/home-page-structured-data.ts` if pricing is no longer a checkout path
 
 ### Add or remove a top-level section
 
 Edit all of these together:
 
 - `config/product.ts`
-- `features/marketing/content/home.ts`
-- `features/marketing/lib/home-page-render-model.ts`
-- `features/marketing/components/home-page.tsx`
-- `features/marketing/lib/home-page-structured-data.ts`
+- `app/_content/home-page.ts`
+- `app/_lib/home-page-render-model.ts`
+- `app/_components/home-page/home-page.tsx`
+- `app/_lib/home-page-structured-data.ts`
 - smoke tests and unit tests
 - this doc
 
@@ -190,9 +190,9 @@ If you do not update all of those in one slice, the homepage contract will drift
 Run these checks after meaningful homepage changes:
 
 ```bash
-bunx oxlint --deny-warnings config/product.ts features/marketing/components/home-page.tsx features/marketing/components/home-page/durability-section.tsx features/marketing/components/home-page/hero-sections.tsx features/marketing/components/home-page/pricing-footer-sections.tsx features/marketing/components/home-page/home-page-primary-cta.tsx features/marketing/content/home.ts features/marketing/lib/home-page-render-model.ts features/marketing/lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/integration-ui/home-page-primary-cta.test.tsx
+bunx oxlint --deny-warnings config/product.ts app/_components/home-page/home-page.tsx app/_components/home-page/sections/durability-section.tsx app/_components/home-page/sections/hero-sections.tsx app/_components/home-page/sections/pricing-footer-sections.tsx app/_components/home-page/sections/home-page-primary-cta.tsx app/_content/home-page.ts app/_lib/home-page-render-model.ts app/_lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/integration-ui/home-page-primary-cta.test.tsx
 
-bunx oxfmt --check config/product.ts features/marketing/components/home-page.tsx features/marketing/components/home-page/durability-section.tsx features/marketing/components/home-page/hero-sections.tsx features/marketing/components/home-page/pricing-footer-sections.tsx features/marketing/components/home-page/home-page-primary-cta.tsx features/marketing/content/home.ts features/marketing/lib/home-page-render-model.ts features/marketing/lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/integration-ui/home-page-primary-cta.test.tsx
+bunx oxfmt --check config/product.ts app/_components/home-page/home-page.tsx app/_components/home-page/sections/durability-section.tsx app/_components/home-page/sections/hero-sections.tsx app/_components/home-page/sections/pricing-footer-sections.tsx app/_components/home-page/sections/home-page-primary-cta.tsx app/_content/home-page.ts app/_lib/home-page-render-model.ts app/_lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/integration-ui/home-page-primary-cta.test.tsx
 
 bunx vitest --config vitest.config.ts run --project unit tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts
 

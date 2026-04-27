@@ -50,7 +50,7 @@ describe("repo generation", () => {
 				"README.md",
 				"package.json",
 				"apps/web/config/product.ts",
-				"apps/web/features/marketing/content/home.ts",
+				"apps/web/app/_content/home-page.ts",
 			]),
 		);
 
@@ -127,7 +127,7 @@ describe("repo generation", () => {
 				"apps/web/content/docs/index.mdx",
 				"apps/web/config/product.ts",
 				"apps/web/config/generated-design-system.ts",
-				"apps/web/features/marketing/content/home.ts",
+				"apps/web/app/_content/home-page.ts",
 				"docs/index.md",
 				"docs/build/docs/prompt.md",
 				"docs/facts/design-system.json",

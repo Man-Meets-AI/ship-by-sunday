@@ -43,7 +43,6 @@ export const customerSafeAppDirectoryPaths = [
 	"apps/web/content",
 	"apps/web/convex",
 	"apps/web/data",
-	"apps/web/features",
 	"apps/web/hooks",
 	"apps/web/lib",
 	"apps/web/platform",

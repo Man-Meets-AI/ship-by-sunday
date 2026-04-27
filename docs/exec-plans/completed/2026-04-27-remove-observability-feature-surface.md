@@ -6,7 +6,7 @@ completed_at: 2026-04-27
 summary: Delete the observability feature folder by moving route UI, shared incident models, server observability helpers, and runtime export code to explicit owners without changing reporting behavior.
 post_build_recap: App error UI now lives under app private components, shared observability models and export helpers live under lib, server reporting helpers live under platform observability, and the old observability feature folder is deleted. Focused observability tests, app format/lint/typecheck, Program/ExecPlan lint, markdown lint, and diff checks passed.
 program_id: remove-feature-folder-surface
-planning_brief: docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-10.md
+planning_brief: docs/programs/completed/2026-04-26-remove-feature-folder-surface/planning-brief-10.md
 read_when:
   - Resuming the observability feature-folder removal slice.
   - Checking why observability helpers live under lib and platform owners.

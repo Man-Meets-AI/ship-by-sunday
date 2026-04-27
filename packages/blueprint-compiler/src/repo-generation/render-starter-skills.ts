@@ -61,7 +61,7 @@ const STARTER_WRAPPER_SKILLS: StarterWrapperSkill[] = [
 			"Use after the starter is stable and the buyer is ready to shape the real product. Start with identity, homepage, and the first real customer-visible slice.",
 		steps: [
 			"Read `START-HERE.md` and confirm core setup, auth setup, billing setup, and verification are done first.",
-			"Start by updating `apps/web/config/product.ts` and `apps/web/features/marketing/content/home.ts`.",
+			"Start by updating `apps/web/config/product.ts` and `apps/web/app/_content/home-page.ts`.",
 			"Prefer `$copywriting`, `$frontend-design`, `$docs`, and `$testing-practices` as the first follow-on skills.",
 			"Keep auth and billing contracts stable until the product already feels like the buyer's product.",
 		],

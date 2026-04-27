@@ -1,4 +1,4 @@
-import { getHomePageStructuredData } from "@/features/marketing/lib/home-page-structured-data";
+import { getHomePageStructuredData } from "@/app/_lib/home-page-structured-data";
 
 function createHomePageStructuredDataMarkup() {
 	return `<script type="application/ld+json">${getHomePageStructuredData()}</script>`;
