@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildWorkspaceHomeModel } from "@/features/workspace-home/lib/workspace-home-model";
+import { buildWorkspaceHomeModel } from "@/app/(workspace)/_lib/workspace-home-model";
 
 describe("workspace home model", () => {
 	it("derives module counts and starter-mode copy from module flags", () => {
