@@ -10,7 +10,7 @@ type PublicContentRoute = {
 
 const webRoot = path.resolve(
 	path.dirname(fileURLToPath(import.meta.url)),
-	"../../..",
+	"../..",
 );
 const docsContentRoot = path.join(webRoot, "content/docs");
 const blogContentRoot = path.join(webRoot, "content/blog");

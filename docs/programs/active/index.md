@@ -27,6 +27,6 @@ Inside that folder:
 
 Active Program folders:
 
-- None.
+- `docs/programs/active/2026-04-26-remove-feature-folder-surface/`: active initiative to reduce remaining `apps/web/features` surface by moving non-domain code to route, hook, library, platform, or durable domain homes.
 
 Completed Program packets live under `docs/programs/completed/`.
