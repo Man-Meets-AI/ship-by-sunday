@@ -1,5 +1,5 @@
 import { productConfig } from "@/config/product";
-import { CodexConnectionCard } from "@/features/codex/components/codex-connection-card";
+import { CodexConnectionCard } from "@/app/(workspace)/_components/codex-connection-card/codex-connection-card";
 import { StarterRepoAccessCard } from "@/app/(workspace)/_components/starter-repo-access/starter-repo-access-card";
 import { isStarterModuleEnabled } from "@/config/starter-selectors";
 

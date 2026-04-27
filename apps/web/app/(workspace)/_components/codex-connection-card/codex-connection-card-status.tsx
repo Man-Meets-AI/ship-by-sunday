@@ -5,7 +5,7 @@ import {
 	ItemGroup,
 	ItemTitle,
 } from "@/components/ui/item";
-import type { ConnectionState } from "@/features/codex/lib/codex-connection-card";
+import type { ConnectionState } from "@/app/(workspace)/_components/codex-connection-card/codex-connection-card-model";
 
 export function CodexConnectionStatusCard({
 	connection,

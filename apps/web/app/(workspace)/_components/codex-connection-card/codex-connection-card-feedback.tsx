@@ -1,5 +1,5 @@
 import { FieldDescription, FieldError } from "@/components/ui/field";
-import type { FeedbackState } from "@/features/codex/lib/codex-connection-card";
+import type { FeedbackState } from "@/app/(workspace)/_components/codex-connection-card/codex-connection-card-model";
 
 export function CodexConnectionCardFeedback({
 	feedback,

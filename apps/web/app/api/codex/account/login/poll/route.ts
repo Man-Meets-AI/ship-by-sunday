@@ -3,13 +3,13 @@ import {
 	getCodexAppServerUnavailableMessage,
 	isCodexAppServerRuntimeError,
 	withCodexAppServerClient,
-} from "@/features/codex/server/app-server-service";
+} from "@/platform/codex/app-server-service";
 import {
 	accountIsManagedChatGpt,
 	getApiAuthErrorResponse,
 	requireProductAccessApiSession,
 	upsertViewerCodexConnection,
-} from "@/features/codex/server/route-helpers";
+} from "@/app/api/codex/_server/route-helpers";
 import { getUnexpectedApiErrorResponse } from "@/platform/observability/api-error-response";
 import {
 	getRequestIdFromRequest,

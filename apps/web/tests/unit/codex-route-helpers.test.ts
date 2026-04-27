@@ -50,7 +50,7 @@ import {
 	requireApiSession,
 	requireProductAccessApiSession,
 	upsertViewerCodexConnection,
-} from "@/features/codex/server/route-helpers";
+} from "@/app/api/codex/_server/route-helpers";
 
 describe("codex route helpers", () => {
 	beforeEach(() => {

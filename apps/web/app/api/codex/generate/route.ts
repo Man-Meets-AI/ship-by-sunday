@@ -5,7 +5,7 @@ import {
 	getCodexAppServerUnavailableMessage,
 	isCodexAppServerRuntimeError,
 	withCodexAppServerClient,
-} from "@/features/codex/server/app-server-service";
+} from "@/platform/codex/app-server-service";
 import {
 	accountIsManagedChatGpt,
 	getApiAuthErrorResponse,
@@ -14,7 +14,7 @@ import {
 	recordCodexRun,
 	requireProductAccessApiSession,
 	upsertViewerCodexConnection,
-} from "@/features/codex/server/route-helpers";
+} from "@/app/api/codex/_server/route-helpers";
 import { captureServerError } from "@/platform/observability/capture-server-error";
 import { getUnexpectedApiErrorResponse } from "@/platform/observability/api-error-response";
 import {

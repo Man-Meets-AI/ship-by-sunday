@@ -8,7 +8,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCodexConnectionCard } from "@/features/codex/hooks/use-codex-connection-card";
+import { useCodexConnectionCard } from "@/app/(workspace)/_components/codex-connection-card/use-codex-connection-card";
 
 import { CodexConnectionCardActions } from "./codex-connection-card-actions";
 import { CodexConnectionCardFeedback } from "./codex-connection-card-feedback";

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Spinner } from "@/components/ui/spinner";
-import type { RequestState } from "@/features/codex/lib/codex-connection-card";
+import type { RequestState } from "@/app/(workspace)/_components/codex-connection-card/codex-connection-card-model";
 
 export function CodexConnectionCardActions({
 	connected,

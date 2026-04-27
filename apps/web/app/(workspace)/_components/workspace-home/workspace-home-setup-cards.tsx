@@ -1,4 +1,4 @@
-import { CodexConnectionCard } from "@/features/codex/components/codex-connection-card";
+import { CodexConnectionCard } from "@/app/(workspace)/_components/codex-connection-card/codex-connection-card";
 import { SettingsAccountCard } from "@/app/(workspace)/_components/settings-account-card";
 import { StarterRepoAccessCard } from "@/app/(workspace)/_components/starter-repo-access/starter-repo-access-card";
 import type { WorkspaceHomeModel } from "@/app/(workspace)/_lib/workspace-home-model";

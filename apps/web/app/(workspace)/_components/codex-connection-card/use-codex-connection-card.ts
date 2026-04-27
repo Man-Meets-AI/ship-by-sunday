@@ -12,7 +12,7 @@ import {
 	type FeedbackState,
 	type RateLimitsPayload,
 	type RequestState,
-} from "@/features/codex/lib/codex-connection-card";
+} from "@/app/(workspace)/_components/codex-connection-card/codex-connection-card-model";
 
 type ErrorResponse = {
 	error: string;
