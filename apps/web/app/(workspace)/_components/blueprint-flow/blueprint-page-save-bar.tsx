@@ -1,8 +1,8 @@
 import { ArrowRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { BlueprintStageSaveFeedback } from "@/features/blueprint-flow/components/blueprint-stage-save-feedback";
+import { BlueprintStageSaveFeedback } from "@/app/(workspace)/_components/blueprint-flow/blueprint-stage-save-feedback";
 import { Spinner } from "@/components/ui/spinner";
-import type { BlueprintStepInlineFeedback } from "@/features/blueprint-flow/lib/blueprint-step-save-feedback";
+import type { BlueprintStepInlineFeedback } from "@/lib/blueprint-flow/blueprint-step-save-feedback";
 
 export function BlueprintPageSaveBar({
 	feedback,

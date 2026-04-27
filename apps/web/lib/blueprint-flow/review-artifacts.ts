@@ -6,7 +6,7 @@ import {
 import {
 	getBlueprintPageSectionHref,
 	type BlueprintPageSectionId,
-} from "@/features/blueprint-flow/lib/blueprint-page-sections";
+} from "@/lib/blueprint-flow/blueprint-page-sections";
 
 export const reviewArtifacts = [
 	{

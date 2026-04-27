@@ -17,11 +17,11 @@ import {
 	getBlueprintFieldScaleDefinition,
 	blueprintFieldHelperText,
 	blueprintFieldLabel,
-} from "@/features/blueprint-flow/lib/blueprint-field-helpers";
+} from "@/lib/blueprint-flow/blueprint-field-helpers";
 import {
 	getBlueprintStageFieldControlId,
 	getBlueprintStageFieldInputId,
-} from "@/features/blueprint-flow/lib/blueprint-step-save-feedback";
+} from "@/lib/blueprint-flow/blueprint-step-save-feedback";
 
 type BlueprintStageScaleFieldProps = {
 	fieldKey: CanonicalProjectFactKey;

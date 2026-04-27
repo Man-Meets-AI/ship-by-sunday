@@ -12,7 +12,7 @@ vi.mock("@/config/product", () => ({
 import {
 	getReviewAutoDownloadHref,
 	isReviewAutoDownloadEnabled,
-} from "@/features/blueprint-flow/lib/review-download-handoff";
+} from "@/lib/blueprint-flow/review-download-handoff";
 import { useReviewDownloadHandoff } from "@/app/(workspace)/review/_hooks/use-review-download-handoff";
 
 describe("review download handoff", () => {

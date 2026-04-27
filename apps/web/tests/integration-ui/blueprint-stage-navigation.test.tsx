@@ -7,7 +7,7 @@ import {
 	createCompleteProjectDefinition,
 	deriveStageStatus,
 } from "@shipbysunday/blueprint-compiler";
-import type { BlueprintWorkspaceState } from "@/features/blueprint-flow/lib/blueprint-workspace-types";
+import type { BlueprintWorkspaceState } from "@/lib/blueprint-flow/blueprint-workspace-types";
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -26,7 +26,7 @@ vi.mock("next/link", () => ({
 	),
 }));
 
-import { BlueprintStageNav } from "@/features/blueprint-flow/components/blueprint-stage-nav";
+import { BlueprintStageNav } from "@/app/(workspace)/_components/blueprint-flow/blueprint-stage-nav";
 
 function createWorkspaceState(
 	factOverrides: Record<string, unknown> = {},

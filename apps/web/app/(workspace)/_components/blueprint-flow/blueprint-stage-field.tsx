@@ -13,8 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import {
 	blueprintFieldInputKind,
 	blueprintFieldLabel,
-} from "@/features/blueprint-flow/lib/blueprint-field-helpers";
-import { getBlueprintStageFieldInputId } from "@/features/blueprint-flow/lib/blueprint-step-save-feedback";
+} from "@/lib/blueprint-flow/blueprint-field-helpers";
+import { getBlueprintStageFieldInputId } from "@/lib/blueprint-flow/blueprint-step-save-feedback";
 
 export function BlueprintStageField({
 	fieldKey,

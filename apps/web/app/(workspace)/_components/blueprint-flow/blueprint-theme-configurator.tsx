@@ -33,7 +33,7 @@ import {
 	formatFontLabel,
 	formatMenuColorLabel,
 	DEFAULT_THEME_PRESET_CODE,
-} from "@/features/blueprint-flow/lib/blueprint-theme-helpers";
+} from "@/lib/blueprint-flow/blueprint-theme-helpers";
 import { BlueprintThemePreview } from "./blueprint-theme-preview";
 
 type BlueprintThemeConfiguratorProps = {

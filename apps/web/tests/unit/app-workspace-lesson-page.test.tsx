@@ -1,7 +1,7 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { BlueprintWorkspaceState } from "@/features/blueprint-flow/lib/blueprint-workspace-types";
+import type { BlueprintWorkspaceState } from "@/lib/blueprint-flow/blueprint-workspace-types";
 import type { BonusMissionState } from "@/lib/execute-ship/bonus-mission-types";
 
 vi.mock("server-only", () => ({}));

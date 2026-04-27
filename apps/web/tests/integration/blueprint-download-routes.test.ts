@@ -7,7 +7,7 @@ import {
 
 const getBlueprintDownloadContextMock = vi.fn();
 
-vi.mock("@/features/blueprint-flow/server/downloads", () => ({
+vi.mock("@/app/api/download/repo/_server/downloads", () => ({
 	getBlueprintDownloadContext: getBlueprintDownloadContextMock,
 }));
 

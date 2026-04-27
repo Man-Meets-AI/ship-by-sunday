@@ -16,18 +16,18 @@ import {
 	clearStaleDerivedDesignFields,
 	stripUntouchedGeneratedScopeFields,
 	type BlueprintPageDraftValues,
-} from "@/features/blueprint-flow/lib/blueprint-page-draft-model";
-import { focusFirstMissingBlueprintField } from "@/features/blueprint-flow/lib/blueprint-page-focus";
-import { applyOptimisticBlueprintWorkspaceUpdate } from "@/features/blueprint-flow/lib/blueprint-page-optimistic-state";
+} from "@/lib/blueprint-flow/blueprint-page-draft-model";
+import { focusFirstMissingBlueprintField } from "@/lib/blueprint-flow/blueprint-page-focus";
+import { applyOptimisticBlueprintWorkspaceUpdate } from "@/lib/blueprint-flow/blueprint-page-optimistic-state";
 import {
 	buildFieldErrors,
 	buildPageFeedback,
 	buildSectionStatuses,
-} from "@/features/blueprint-flow/lib/blueprint-page-validation-model";
-import type { BlueprintStepInlineFeedback } from "@/features/blueprint-flow/lib/blueprint-step-save-feedback";
-import { getReviewAutoDownloadHref } from "@/features/blueprint-flow/lib/review-download-handoff";
+} from "@/lib/blueprint-flow/blueprint-page-validation-model";
+import type { BlueprintStepInlineFeedback } from "@/lib/blueprint-flow/blueprint-step-save-feedback";
+import { getReviewAutoDownloadHref } from "@/lib/blueprint-flow/review-download-handoff";
 
-export type { BlueprintPageSectionStatus } from "@/features/blueprint-flow/lib/blueprint-page-validation-model";
+export type { BlueprintPageSectionStatus } from "@/lib/blueprint-flow/blueprint-page-validation-model";
 
 type SaveProjectDefinitionFactsMutation = ReactMutation<
 	typeof api.blueprint.saveProjectDefinitionFacts

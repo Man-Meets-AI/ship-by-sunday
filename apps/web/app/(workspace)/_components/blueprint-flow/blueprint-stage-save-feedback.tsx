@@ -2,7 +2,7 @@
 
 import { AlertTriangleIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { BlueprintStepInlineFeedback } from "@/features/blueprint-flow/lib/blueprint-step-save-feedback";
+import type { BlueprintStepInlineFeedback } from "@/lib/blueprint-flow/blueprint-step-save-feedback";
 
 const feedbackToneClassName = {
 	default: "border-border/60 bg-muted/30 text-muted-foreground",

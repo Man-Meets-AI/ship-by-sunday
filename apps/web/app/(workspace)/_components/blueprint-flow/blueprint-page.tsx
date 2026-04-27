@@ -5,15 +5,15 @@ import { useState } from "react";
 import { api } from "@/convex/_generated/api";
 import { AppShell } from "@/app/(workspace)/_components/app-shell";
 import type { BonusMissionState } from "@/lib/execute-ship/bonus-mission-types";
-import { BlueprintStageLeaveDialog } from "@/features/blueprint-flow/components/blueprint-stage-leave-dialog";
-import { BlueprintPageOverview } from "@/features/blueprint-flow/components/blueprint-page-overview";
-import { BlueprintPageProgressSidebar } from "@/features/blueprint-flow/components/blueprint-page-progress-sidebar";
-import { BlueprintPageSaveBar } from "@/features/blueprint-flow/components/blueprint-page-save-bar";
-import { BlueprintPageSectionCard } from "@/features/blueprint-flow/components/blueprint-page-section-card";
-import { useBlueprintPageState } from "@/features/blueprint-flow/hooks/use-blueprint-page-state";
-import { useBlueprintStageLeaveGuard } from "@/features/blueprint-flow/hooks/use-blueprint-stage-leave-guard";
-import { blueprintPageSections } from "@/features/blueprint-flow/lib/blueprint-page-sections";
-import type { BlueprintWorkspaceState } from "@/features/blueprint-flow/lib/blueprint-workspace-types";
+import { BlueprintStageLeaveDialog } from "@/app/(workspace)/_components/blueprint-flow/blueprint-stage-leave-dialog";
+import { BlueprintPageOverview } from "@/app/(workspace)/_components/blueprint-flow/blueprint-page-overview";
+import { BlueprintPageProgressSidebar } from "@/app/(workspace)/_components/blueprint-flow/blueprint-page-progress-sidebar";
+import { BlueprintPageSaveBar } from "@/app/(workspace)/_components/blueprint-flow/blueprint-page-save-bar";
+import { BlueprintPageSectionCard } from "@/app/(workspace)/_components/blueprint-flow/blueprint-page-section-card";
+import { useBlueprintPageState } from "@/app/(workspace)/_hooks/blueprint-flow/use-blueprint-page-state";
+import { useBlueprintStageLeaveGuard } from "@/app/(workspace)/_hooks/blueprint-flow/use-blueprint-stage-leave-guard";
+import { blueprintPageSections } from "@/lib/blueprint-flow/blueprint-page-sections";
+import type { BlueprintWorkspaceState } from "@/lib/blueprint-flow/blueprint-workspace-types";
 import {
 	buildLockedPostReviewPrimaryNav,
 	buildPostReviewPrimaryNav,

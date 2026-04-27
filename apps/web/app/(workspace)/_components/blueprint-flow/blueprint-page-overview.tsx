@@ -1,5 +1,5 @@
 import { Progress } from "@/components/ui/progress";
-import { BLUEPRINT_OVERVIEW_ID } from "@/features/blueprint-flow/lib/blueprint-page-sections";
+import { BLUEPRINT_OVERVIEW_ID } from "@/lib/blueprint-flow/blueprint-page-sections";
 
 export function BlueprintPageOverview({
 	completedSectionCount,

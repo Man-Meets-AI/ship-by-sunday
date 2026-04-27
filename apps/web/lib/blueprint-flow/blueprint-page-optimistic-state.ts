@@ -10,8 +10,8 @@ import { api } from "@/convex/_generated/api";
 import {
 	buildNextProjectFacts,
 	type SaveProjectDefinitionFactsArgs,
-} from "@/features/blueprint-flow/lib/blueprint-page-draft-model";
-import type { BlueprintWorkspaceState } from "@/features/blueprint-flow/lib/blueprint-workspace-types";
+} from "@/lib/blueprint-flow/blueprint-page-draft-model";
+import type { BlueprintWorkspaceState } from "@/lib/blueprint-flow/blueprint-workspace-types";
 
 const OPTIMISTIC_BLUEPRINT_CLERK_USER_ID = "optimistic-local-user";
 

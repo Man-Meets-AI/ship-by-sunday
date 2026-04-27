@@ -6,8 +6,8 @@ import type {
 	CanonicalProjectFactsDraft,
 } from "@shipbysunday/blueprint-compiler";
 import { FieldGroup } from "@/components/ui/field";
-import { BlueprintStageStepField } from "@/features/blueprint-flow/components/blueprint-stage-step-field";
-import { blueprintPageSections } from "@/features/blueprint-flow/lib/blueprint-page-sections";
+import { BlueprintStageStepField } from "@/app/(workspace)/_components/blueprint-flow/blueprint-stage-step-field";
+import { blueprintPageSections } from "@/lib/blueprint-flow/blueprint-page-sections";
 import { cn } from "@/lib/utils";
 
 type BlueprintPageSectionCardProps = {

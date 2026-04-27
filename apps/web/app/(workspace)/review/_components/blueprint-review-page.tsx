@@ -24,10 +24,10 @@ import {
 	getDefaultBuildLessonsDestination,
 	type PostReviewNavigationTargets,
 } from "@/lib/workspace-navigation/post-review-destination";
-import { BlueprintVideoCard } from "@/features/blueprint-flow/components/video/blueprint-video-card";
-import { REVIEW_SURFACE_TITLE } from "@/features/blueprint-flow/lib/review-download-handoff";
-import { getBlueprintReviewPageMedia } from "@/features/blueprint-flow/lib/blueprint-stage-videos";
-import type { BlueprintWorkspaceState } from "@/features/blueprint-flow/lib/blueprint-workspace-types";
+import { BlueprintVideoCard } from "@/app/(workspace)/_components/blueprint-flow/video/blueprint-video-card";
+import { REVIEW_SURFACE_TITLE } from "@/lib/blueprint-flow/review-download-handoff";
+import { getBlueprintReviewPageMedia } from "@/lib/blueprint-flow/blueprint-stage-videos";
+import type { BlueprintWorkspaceState } from "@/lib/blueprint-flow/blueprint-workspace-types";
 import { BlueprintReviewDownloadBridge } from "./blueprint-review-download-bridge";
 
 type BlueprintResumeDestination = FunctionReturnType<

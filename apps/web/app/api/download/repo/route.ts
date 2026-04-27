@@ -1,4 +1,4 @@
-import { getBlueprintDownloadContext } from "@/features/blueprint-flow/server/downloads";
+import { getBlueprintDownloadContext } from "@/app/api/download/repo/_server/downloads";
 import {
 	buildRepoGenerationManifest,
 	getStarterSnapshotArchiveFileName,

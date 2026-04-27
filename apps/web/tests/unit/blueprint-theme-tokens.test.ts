@@ -4,7 +4,7 @@ import {
 	buildPreviewCssVars,
 	getGoogleFontsUrl,
 	getPreviewFontFamily,
-} from "@/features/blueprint-flow/lib/blueprint-theme-tokens";
+} from "@/lib/blueprint-flow/blueprint-theme-tokens";
 
 describe("buildPreviewCssVars", () => {
 	it("returns a CSSProperties-shaped object with semantic tokens", () => {

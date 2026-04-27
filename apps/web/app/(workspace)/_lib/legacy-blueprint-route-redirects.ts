@@ -2,7 +2,7 @@ import { routeConfig } from "@/config/product";
 import {
 	getBlueprintPageSectionHref,
 	type BlueprintPageSectionId,
-} from "@/features/blueprint-flow/lib/blueprint-page-sections";
+} from "@/lib/blueprint-flow/blueprint-page-sections";
 
 export type LegacyBlueprintRoute =
 	| "start"

@@ -10,7 +10,7 @@ import {
 	REVIEW_REDOWNLOAD_LINK_LABEL,
 	REVIEW_SURFACE_LABEL,
 	REVIEW_SURFACE_TITLE,
-} from "../features/blueprint-flow/lib/review-download-handoff";
+} from "../lib/blueprint-flow/review-download-handoff";
 
 type Check = {
 	label: string;

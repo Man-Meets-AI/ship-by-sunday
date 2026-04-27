@@ -5,7 +5,7 @@ import { LinkIcon, XIcon } from "lucide-react";
 import type { CanonicalProjectFactKey } from "@shipbysunday/blueprint-compiler";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { blueprintListFieldItemPlaceholders } from "@/features/blueprint-flow/lib/blueprint-field-helpers";
+import { blueprintListFieldItemPlaceholders } from "@/lib/blueprint-flow/blueprint-field-helpers";
 
 type BlueprintStageLinkListFieldProps = {
 	fieldKey: CanonicalProjectFactKey;
