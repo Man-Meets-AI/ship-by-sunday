@@ -2,7 +2,7 @@ import {
 	isNextControlFlowError,
 	normalizeObservabilityEvent,
 	type ObservabilityEventInput,
-} from "@/features/observability/lib/error-event";
+} from "@/lib/observability/error-event";
 
 const CLIENT_ERROR_ENDPOINT = "/api/observability/client-error";
 

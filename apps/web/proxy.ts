@@ -2,7 +2,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 import { routeConfig } from "@/config/product";
-import { captureServerError } from "@/features/observability/server/capture-server-error";
+import { captureServerError } from "@/platform/observability/capture-server-error";
 import { getClerkAuthorizedParties } from "@/platform/auth/clerk-authorized-parties";
 import { shouldBypassClerkProtection } from "@/platform/auth/clerk-middleware-bypass";
 

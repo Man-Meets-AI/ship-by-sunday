@@ -4,7 +4,7 @@ import {
 	getRequestIdFromRequest,
 	jsonWithRequestId,
 	withRequestId,
-} from "@/features/observability/server/request-id";
+} from "@/platform/observability/request-id";
 
 describe("request id helpers", () => {
 	it("prefers the request header when present", () => {

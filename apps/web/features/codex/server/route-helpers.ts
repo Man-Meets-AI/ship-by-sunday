@@ -7,7 +7,7 @@ import { apiConfig, limitConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import type { CodexRateLimitsResponse } from "@/features/codex/server/app-server-contracts";
 import type { ProductAccess } from "@/lib/product-access";
-import { jsonWithRequestId } from "@/features/observability/server/request-id";
+import { jsonWithRequestId } from "@/platform/observability/request-id";
 import { serverEnv } from "@/platform/env/server";
 
 type ManagedChatGptAccount = {

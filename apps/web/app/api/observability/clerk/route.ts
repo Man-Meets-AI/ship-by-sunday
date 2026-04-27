@@ -1,14 +1,14 @@
 import { verifyWebhook } from "@clerk/backend/webhooks";
 
 import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
-import { normalizeIncidentEvent } from "@/features/observability/lib/incident";
-import { buildClerkWebhookIncident } from "@/features/observability/server/source-adapters/clerk-webhook";
-import { captureServerError } from "@/features/observability/server/capture-server-error";
-import { ingestErrorEvent } from "@/features/observability/server/ingest-error-event";
+import { normalizeIncidentEvent } from "@/lib/observability/incident";
+import { buildClerkWebhookIncident } from "@/platform/observability/source-adapters/clerk-webhook";
+import { captureServerError } from "@/platform/observability/capture-server-error";
+import { ingestErrorEvent } from "@/platform/observability/ingest-error-event";
 import {
 	getRequestIdFromRequest,
 	jsonWithRequestId,
-} from "@/features/observability/server/request-id";
+} from "@/platform/observability/request-id";
 import { serverEnv } from "@/platform/env/server";
 
 export const runtime = "nodejs";

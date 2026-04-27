@@ -1,6 +1,6 @@
 import type { WebhookEvent } from "@clerk/backend/webhooks";
 
-import { buildClerkWebhookIncident } from "@/features/observability/server/source-adapters/clerk-webhook";
+import { buildClerkWebhookIncident } from "@/platform/observability/source-adapters/clerk-webhook";
 
 describe("clerk webhook adapter", () => {
 	it("builds an incident for session.revoked", () => {

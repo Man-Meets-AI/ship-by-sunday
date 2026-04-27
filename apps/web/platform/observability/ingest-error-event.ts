@@ -2,7 +2,7 @@ import "server-only";
 
 import { serverEnv } from "@/platform/env/server";
 
-import type { NormalizedObservabilityEvent } from "../lib/error-event";
+import type { NormalizedObservabilityEvent } from "@/lib/observability/error-event";
 
 const OBSERVABILITY_INGEST_PATH = "/observability/events";
 

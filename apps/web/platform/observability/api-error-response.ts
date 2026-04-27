@@ -1,10 +1,10 @@
-import { jsonWithRequestId } from "@/features/observability/server/request-id";
+import { jsonWithRequestId } from "@/platform/observability/request-id";
 
 import { captureServerError } from "./capture-server-error";
 import type {
 	ObservabilitySeverity,
 	ObservabilitySource,
-} from "../lib/error-event";
+} from "@/lib/observability/error-event";
 
 type UnexpectedApiErrorResponseOptions = {
 	error: unknown;

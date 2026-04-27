@@ -8,11 +8,11 @@ const serverEnv = {
 	OBSERVABILITY_INGEST_TOKEN: "ingest_token",
 };
 
-vi.mock("@/features/observability/server/update-incident-status", () => ({
+vi.mock("@/platform/observability/update-incident-status", () => ({
 	updateIncidentStatus: (input: unknown) => updateIncidentStatusMock(input),
 }));
 
-vi.mock("@/features/observability/server/capture-server-error", () => ({
+vi.mock("@/platform/observability/capture-server-error", () => ({
 	captureServerError: (input: unknown) => captureServerErrorMock(input),
 }));
 

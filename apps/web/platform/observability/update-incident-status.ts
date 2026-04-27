@@ -1,4 +1,4 @@
-import type { IncidentControlStatus } from "@/features/observability/lib/incident";
+import type { IncidentControlStatus } from "@/lib/observability/incident";
 
 const OBSERVABILITY_INCIDENT_STATUS_PATH = "/observability/incidents/status";
 

@@ -12,11 +12,11 @@ vi.mock("@clerk/backend/webhooks", () => ({
 	verifyWebhook: (...args: unknown[]) => verifyWebhookMock(...args),
 }));
 
-vi.mock("@/features/observability/server/ingest-error-event", () => ({
+vi.mock("@/platform/observability/ingest-error-event", () => ({
 	ingestErrorEvent: (input: unknown) => ingestErrorEventMock(input),
 }));
 
-vi.mock("@/features/observability/server/capture-server-error", () => ({
+vi.mock("@/platform/observability/capture-server-error", () => ({
 	captureServerError: (input: unknown) => captureServerErrorMock(input),
 }));
 

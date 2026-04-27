@@ -1,11 +1,11 @@
 import { z } from "zod";
 
-import { normalizeObservabilityEvent } from "@/features/observability/lib/error-event";
-import { ingestErrorEvent } from "@/features/observability/server/ingest-error-event";
+import { normalizeObservabilityEvent } from "@/lib/observability/error-event";
+import { ingestErrorEvent } from "@/platform/observability/ingest-error-event";
 import {
 	getRequestIdFromRequest,
 	jsonWithRequestId,
-} from "@/features/observability/server/request-id";
+} from "@/platform/observability/request-id";
 
 const clientErrorSchema = z.object({
 	message: z.string().min(1),

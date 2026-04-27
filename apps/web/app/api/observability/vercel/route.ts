@@ -1,14 +1,14 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
-import { normalizeIncidentEvent } from "@/features/observability/lib/incident";
-import { captureServerError } from "@/features/observability/server/capture-server-error";
-import { ingestErrorEvent } from "@/features/observability/server/ingest-error-event";
+import { normalizeIncidentEvent } from "@/lib/observability/incident";
+import { captureServerError } from "@/platform/observability/capture-server-error";
+import { ingestErrorEvent } from "@/platform/observability/ingest-error-event";
 import {
 	getRequestIdFromRequest,
 	jsonWithRequestId,
-} from "@/features/observability/server/request-id";
-import { buildVercelWebhookIncident } from "@/features/observability/server/source-adapters/vercel-webhook";
+} from "@/platform/observability/request-id";
+import { buildVercelWebhookIncident } from "@/platform/observability/source-adapters/vercel-webhook";
 import { serverEnv } from "@/platform/env/server";
 
 export const runtime = "nodejs";

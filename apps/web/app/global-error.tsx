@@ -1,6 +1,6 @@
 "use client";
 
-import { ErrorBoundaryScreen } from "@/features/observability/components/error-boundary-screen";
+import { ErrorBoundaryScreen } from "@/app/_components/error-boundary-screen";
 
 export default function GlobalError({
 	error,

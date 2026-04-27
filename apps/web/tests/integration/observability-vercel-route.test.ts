@@ -9,11 +9,11 @@ const serverEnv = {
 	OBSERVABILITY_VERCEL_WEBHOOK_SECRET: "vercel_secret",
 };
 
-vi.mock("@/features/observability/server/ingest-error-event", () => ({
+vi.mock("@/platform/observability/ingest-error-event", () => ({
 	ingestErrorEvent: (input: unknown) => ingestErrorEventMock(input),
 }));
 
-vi.mock("@/features/observability/server/capture-server-error", () => ({
+vi.mock("@/platform/observability/capture-server-error", () => ({
 	captureServerError: (input: unknown) => captureServerErrorMock(input),
 }));
 

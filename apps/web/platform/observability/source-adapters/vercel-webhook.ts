@@ -1,4 +1,4 @@
-import type { IncidentEventInput } from "@/features/observability/lib/incident";
+import type { IncidentEventInput } from "@/lib/observability/incident";
 
 const escalatedVercelDeploymentEventTypes = [
 	"deployment.error",

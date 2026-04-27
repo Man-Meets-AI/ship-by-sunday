@@ -10,7 +10,7 @@ import { BONUS_LESSON_VIEW_ERROR_CODES } from "@/features/execute-ship/lib/bonus
 import {
 	getRequestIdFromRequest,
 	jsonWithRequestId,
-} from "@/features/observability/server/request-id";
+} from "@/platform/observability/request-id";
 
 type BonusLessonViewedRequestBody = {
 	lessonKey: string;

@@ -7,7 +7,7 @@ import { motion } from "motion/react";
 
 import { routeConfig } from "@/config/product";
 import { Button } from "@/components/ui/button";
-import { reportClientError } from "@/features/observability/lib/client-error-report";
+import { reportClientError } from "@/lib/observability/client-error-report";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 

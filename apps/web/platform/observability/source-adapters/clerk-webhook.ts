@@ -1,6 +1,6 @@
 import type { WebhookEvent } from "@clerk/backend/webhooks";
 
-import type { IncidentEventInput } from "@/features/observability/lib/incident";
+import type { IncidentEventInput } from "@/lib/observability/incident";
 
 export function buildClerkWebhookIncident(
 	event: WebhookEvent,

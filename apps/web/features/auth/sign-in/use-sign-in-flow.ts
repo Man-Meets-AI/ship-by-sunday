@@ -6,7 +6,7 @@ import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 
 import { authViewConfig, routeConfig } from "@/config/product";
 import { assertNever } from "@/lib/assert";
-import { reportClientError } from "@/features/observability/lib/client-error-report";
+import { reportClientError } from "@/lib/observability/client-error-report";
 
 import {
 	buildSignInHref,

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { NormalizedObservabilityEvent } from "@/features/observability/lib/error-event";
+import type { NormalizedObservabilityEvent } from "@/lib/observability/error-event";
 
 vi.mock("server-only", () => ({}));
 
@@ -47,7 +47,7 @@ describe("ingestErrorEvent", () => {
 		const fetchMock = vi.fn().mockResolvedValue({ ok: true });
 		vi.stubGlobal("fetch", fetchMock);
 		const { ingestErrorEvent } =
-			await import("@/features/observability/server/ingest-error-event");
+			await import("@/platform/observability/ingest-error-event");
 
 		await ingestErrorEvent(incidentFixture);
 
@@ -70,7 +70,7 @@ describe("ingestErrorEvent", () => {
 		const fetchMock = vi.fn();
 		vi.stubGlobal("fetch", fetchMock);
 		const { ingestErrorEvent } =
-			await import("@/features/observability/server/ingest-error-event");
+			await import("@/platform/observability/ingest-error-event");
 
 		await ingestErrorEvent(incidentFixture);
 
@@ -84,7 +84,7 @@ describe("ingestErrorEvent", () => {
 		const fetchMock = vi.fn().mockRejectedValue(new Error("network failed"));
 		vi.stubGlobal("fetch", fetchMock);
 		const { ingestErrorEvent } =
-			await import("@/features/observability/server/ingest-error-event");
+			await import("@/platform/observability/ingest-error-event");
 
 		await ingestErrorEvent(incidentFixture);
 

@@ -3,19 +3,51 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
+type MotionElementProps = {
+	children?: React.ReactNode;
+	initial?: unknown;
+	animate?: unknown;
+	transition?: unknown;
+	[key: string]: unknown;
+};
+
 const pathnameMock = vi.fn(() => "/mission");
 const reportClientErrorMock = vi.fn();
 const resetMock = vi.fn();
+
+vi.mock("motion/react", async () => {
+	const ReactModule = await import("react");
+	const createMotionComponent = (tagName: string) => {
+		const MotionComponent = ({
+			children,
+			initial: _initial,
+			animate: _animate,
+			transition: _transition,
+			...props
+		}: MotionElementProps) =>
+			ReactModule.createElement(tagName, props, children);
+		MotionComponent.displayName = `MockMotion${tagName}`;
+		return MotionComponent;
+	};
+
+	return {
+		motion: {
+			div: createMotionComponent("div"),
+			h1: createMotionComponent("h1"),
+			p: createMotionComponent("p"),
+		},
+	};
+});
 
 vi.mock("next/navigation", () => ({
 	usePathname: () => pathnameMock(),
 }));
 
-vi.mock("@/features/observability/lib/client-error-report", () => ({
+vi.mock("@/lib/observability/client-error-report", () => ({
 	reportClientError: (input: unknown) => reportClientErrorMock(input),
 }));
 
-import { ErrorBoundaryScreen } from "@/features/observability/components/error-boundary-screen";
+import { ErrorBoundaryScreen } from "@/app/_components/error-boundary-screen";
 
 describe("ErrorBoundaryScreen", () => {
 	it("reports the error and allows retrying", async () => {

@@ -1,7 +1,7 @@
 import type { Instrumentation } from "next";
 
-import { captureServerError } from "@/features/observability/server/capture-server-error";
-import { getRequestIdFromHeaderRecord } from "@/features/observability/server/request-id";
+import { captureServerError } from "@/platform/observability/capture-server-error";
+import { getRequestIdFromHeaderRecord } from "@/platform/observability/request-id";
 
 export async function register() {}
 

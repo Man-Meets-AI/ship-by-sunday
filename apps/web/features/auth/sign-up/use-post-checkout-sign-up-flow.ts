@@ -9,7 +9,7 @@ import {
 	getSessionTaskHref,
 	getSafeRedirectPath,
 } from "@/features/auth/sign-in/sign-in-route-utils";
-import { reportClientError } from "@/features/observability/lib/client-error-report";
+import { reportClientError } from "@/lib/observability/client-error-report";
 
 type SignUpStep = "create" | "verify";
 

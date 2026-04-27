@@ -46,7 +46,7 @@ describe("stripe observability helpers", () => {
 
 	it("builds checkout failure context with configuration details", async () => {
 		const { buildStripeCheckoutFailureContext } =
-			await import("@/features/observability/server/source-adapters/stripe-failure");
+			await import("@/platform/observability/source-adapters/stripe-failure");
 
 		const context = buildStripeCheckoutFailureContext({
 			appBaseUrl: "https://www.man-meets-ai.com",
@@ -68,7 +68,7 @@ describe("stripe observability helpers", () => {
 
 	it("maps Stripe webhook failures to event-aware incidents", async () => {
 		const { buildStripeWebhookResultIncident } =
-			await import("@/features/observability/server/source-adapters/stripe-failure");
+			await import("@/platform/observability/source-adapters/stripe-failure");
 
 		const missingCheckoutEmailIncident = buildStripeWebhookResultIncident({
 			kind: "missing_checkout_email",

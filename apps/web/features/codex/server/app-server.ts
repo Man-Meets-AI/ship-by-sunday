@@ -15,7 +15,7 @@ import {
 	type CodexRuntimeIncidentCode,
 	type CodexTurnResult,
 } from "@/features/codex/server/app-server-contracts";
-import { captureServerError } from "@/features/observability/server/capture-server-error";
+import { captureServerError } from "@/platform/observability/capture-server-error";
 
 export {
 	CODEX_APP_SERVER_DISABLED_ERROR,

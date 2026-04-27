@@ -1,13 +1,13 @@
 import { z } from "zod";
 
 import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
-import { incidentControlStatusValues } from "@/features/observability/lib/incident";
-import { captureServerError } from "@/features/observability/server/capture-server-error";
+import { incidentControlStatusValues } from "@/lib/observability/incident";
+import { captureServerError } from "@/platform/observability/capture-server-error";
 import {
 	getRequestIdFromRequest,
 	jsonWithRequestId,
-} from "@/features/observability/server/request-id";
-import { updateIncidentStatus } from "@/features/observability/server/update-incident-status";
+} from "@/platform/observability/request-id";
+import { updateIncidentStatus } from "@/platform/observability/update-incident-status";
 import { serverEnv } from "@/platform/env/server";
 
 export const runtime = "nodejs";

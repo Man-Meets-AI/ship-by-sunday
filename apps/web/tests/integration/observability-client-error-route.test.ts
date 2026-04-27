@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const ingestErrorEventMock = vi.fn();
 
-vi.mock("@/features/observability/server/ingest-error-event", () => ({
+vi.mock("@/platform/observability/ingest-error-event", () => ({
 	ingestErrorEvent: (input: unknown) => ingestErrorEventMock(input),
 }));
 

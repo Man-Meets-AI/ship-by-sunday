@@ -1,5 +1,5 @@
 import { productConfig } from "@/config/product";
-import { formatStackSnippet } from "@/features/observability/lib/incident";
+import { formatStackSnippet } from "@/lib/observability/incident";
 
 const TELEGRAM_MAX_LENGTH = 3_900;
 

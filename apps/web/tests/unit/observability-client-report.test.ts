@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { reportClientError } from "@/features/observability/lib/client-error-report";
+import { reportClientError } from "@/lib/observability/client-error-report";
 
 describe("reportClientError", () => {
 	beforeEach(() => {
