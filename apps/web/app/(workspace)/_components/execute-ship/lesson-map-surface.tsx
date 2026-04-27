@@ -2,8 +2,8 @@ import { Accordion } from "@/components/ui/accordion";
 import {
 	getOrderedBonusBlocks,
 	getRecommendedBuildLessonHref,
-} from "@/features/execute-ship/lib/bonus-library-presentation";
-import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
+} from "@/lib/execute-ship/bonus-library-presentation";
+import type { BonusMissionState } from "@/lib/execute-ship/bonus-mission-types";
 import { BonusMissionBlockSection } from "./bonus-mission-block-card";
 import { BonusMissionHeroCard } from "./bonus-mission-hero-card";
 

@@ -2,10 +2,10 @@ import { api } from "@/convex/_generated/api";
 import { notFound } from "next/navigation";
 import { routeConfig } from "@/config/product";
 import { getLessonByRouteSegment } from "@/features/course/lesson/model/manifest";
-import { BonusLessonPage } from "@/features/execute-ship/components/bonus-lesson-page";
-import { BonusRouteStatePanel } from "@/features/execute-ship/components/bonus-route-state-panel";
-import { buildFallbackPostReviewTargets } from "@/features/execute-ship/lib/bonus-library-presentation";
-import { loadBonusRouteAccess } from "@/features/execute-ship/server/load-bonus-route-access";
+import { BonusLessonPage } from "@/app/(workspace)/_components/execute-ship/bonus-lesson-page";
+import { BonusRouteStatePanel } from "@/app/(workspace)/_components/execute-ship/bonus-route-state-panel";
+import { buildFallbackPostReviewTargets } from "@/lib/execute-ship/bonus-library-presentation";
+import { loadBonusRouteAccess } from "@/app/(workspace)/lesson/[lessonKey]/_server/load-bonus-route-access";
 import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
 
 export default async function Page({

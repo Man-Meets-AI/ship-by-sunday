@@ -1,6 +1,6 @@
 import { AppShell } from "@/app/(workspace)/_components/app-shell";
-import { buildBonusShellMission } from "@/features/execute-ship/lib/bonus-library-presentation";
-import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
+import { buildBonusShellMission } from "@/lib/execute-ship/bonus-library-presentation";
+import type { BonusMissionState } from "@/lib/execute-ship/bonus-mission-types";
 import { LessonMapSurface } from "./lesson-map-surface";
 
 export function BonusMissionPage({

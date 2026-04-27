@@ -5,7 +5,7 @@ import {
 	createCompleteProjectDefinition,
 	deriveStageStatus,
 } from "@shipbysunday/blueprint-compiler";
-import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
+import type { BonusMissionState } from "@/lib/execute-ship/bonus-mission-types";
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -48,12 +48,15 @@ vi.mock("@/app/(workspace)/_components/app-shell", () => ({
 	),
 }));
 
-vi.mock("@/features/execute-ship/components/bonus-lesson-view-tracker", () => ({
-	BonusLessonViewTracker: () => null,
-}));
+vi.mock(
+	"@/app/(workspace)/_components/execute-ship/bonus-lesson-view-tracker",
+	() => ({
+		BonusLessonViewTracker: () => null,
+	}),
+);
 
-import { BonusLessonPage } from "@/features/execute-ship/components/bonus-lesson-page";
-import { BonusLessonFooter } from "@/features/execute-ship/components/bonus-lesson-footer";
+import { BonusLessonPage } from "@/app/(workspace)/_components/execute-ship/bonus-lesson-page";
+import { BonusLessonFooter } from "@/app/(workspace)/_components/execute-ship/bonus-lesson-footer";
 
 const blueprintStageStatuses = deriveStageStatus(
 	createCompleteProjectDefinition().facts,

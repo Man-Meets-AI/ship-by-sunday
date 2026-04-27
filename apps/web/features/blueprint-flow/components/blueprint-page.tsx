@@ -4,7 +4,7 @@ import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { useState } from "react";
 import { api } from "@/convex/_generated/api";
 import { AppShell } from "@/app/(workspace)/_components/app-shell";
-import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
+import type { BonusMissionState } from "@/lib/execute-ship/bonus-mission-types";
 import { BlueprintStageLeaveDialog } from "@/features/blueprint-flow/components/blueprint-stage-leave-dialog";
 import { BlueprintPageOverview } from "@/features/blueprint-flow/components/blueprint-page-overview";
 import { BlueprintPageProgressSidebar } from "@/features/blueprint-flow/components/blueprint-page-progress-sidebar";

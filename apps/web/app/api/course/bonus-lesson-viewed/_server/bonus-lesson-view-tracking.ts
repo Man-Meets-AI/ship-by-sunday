@@ -6,7 +6,7 @@ import { ConvexError } from "convex/values";
 
 import { apiConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
-import { BONUS_LESSON_VIEW_ERROR_CODES } from "@/features/execute-ship/lib/bonus-lesson-view-contract";
+import { BONUS_LESSON_VIEW_ERROR_CODES } from "@/lib/execute-ship/bonus-lesson-view-contract";
 import {
 	getRequestIdFromRequest,
 	jsonWithRequestId,

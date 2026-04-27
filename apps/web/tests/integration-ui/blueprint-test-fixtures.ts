@@ -5,7 +5,7 @@ import {
 } from "@shipbysunday/blueprint-compiler";
 
 import type { BlueprintWorkspaceState } from "@/features/blueprint-flow/lib/blueprint-workspace-types";
-import type { BonusMissionState } from "@/features/execute-ship/lib/bonus-mission-types";
+import type { BonusMissionState } from "@/lib/execute-ship/bonus-mission-types";
 import type { PostReviewNavigationTargets } from "@/lib/workspace-navigation/post-review-destination";
 
 type BlueprintWorkspaceFixtureOptions = {

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { routeConfig } from "@/config/product";
-import { BonusRouteStatePanel } from "@/features/execute-ship/components/bonus-route-state-panel";
+import { BonusRouteStatePanel } from "@/app/(workspace)/_components/execute-ship/bonus-route-state-panel";
 import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
 
 export default async function Page() {
