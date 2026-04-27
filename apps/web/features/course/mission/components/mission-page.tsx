@@ -13,7 +13,7 @@ import {
 	type MissionState,
 	enrichBlock,
 } from "@/features/course/mission/lib/mission-page-model";
-import { AppShell } from "@/features/workspace-shell/components/app-shell";
+import { AppShell } from "@/app/(workspace)/_components/app-shell";
 
 function MissionPageContent({
 	mission,

@@ -1,6 +1,6 @@
 "use client";
 
-import { AppShell } from "@/features/workspace-shell/components/app-shell";
+import { AppShell } from "@/app/(workspace)/_components/app-shell";
 
 import { SettingsPageContent } from "./settings-page";
 

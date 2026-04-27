@@ -26,13 +26,13 @@ The app should be easier to navigate than a broad `features` bucket. This Progra
 
 The Program packet lives under `docs/programs/active/2026-04-26-remove-feature-folder-surface/`.
 
-The research input is `research-pass-feature-folder-surface.md`. The normalized input is `normalized-pass-feature-folder-surface.md`. The convergence artifact is `converged-decision-packet.md`. The dependency artifact is `dependency-graph.md`. The split recommendation is `plan-split-recommendation.md`. The review artifact is `cross-repo-review.md`. The planning briefs are `planning-brief-1.md`, `planning-brief-2.md`, `planning-brief-3.md`, `planning-brief-4.md`, `planning-brief-5.md`, `planning-brief-6.md`, `planning-brief-7.md`, `planning-brief-8.md`, `planning-brief-9.md`, `planning-brief-10.md`, `planning-brief-11.md`, `planning-brief-12.md`, and `planning-brief-13.md`, with `current-planning-brief.txt` pointing at the current one.
+The research input is `research-pass-feature-folder-surface.md`. The normalized input is `normalized-pass-feature-folder-surface.md`. The convergence artifact is `converged-decision-packet.md`. The dependency artifact is `dependency-graph.md`. The split recommendation is `plan-split-recommendation.md`. The review artifact is `cross-repo-review.md`. The planning briefs are `planning-brief-1.md`, `planning-brief-2.md`, `planning-brief-3.md`, `planning-brief-4.md`, `planning-brief-5.md`, `planning-brief-6.md`, `planning-brief-7.md`, `planning-brief-8.md`, `planning-brief-9.md`, `planning-brief-10.md`, `planning-brief-11.md`, `planning-brief-12.md`, `planning-brief-13.md`, and `planning-brief-14.md`, with `current-planning-brief.txt` pointing at the current one.
 
 ## Current State
 
-The previous app-structure Program is complete and archived. It made ownership visible but intentionally left most `apps/web/features` folders in place. After the first thirteen child slices, five top-level feature folders remain: `blueprint-flow`, `course`, `execute-ship`, `marketing`, and `workspace-shell`.
+The previous app-structure Program is complete and archived. It made ownership visible but intentionally left most `apps/web/features` folders in place. After the first fourteen child slices, four top-level feature folders remain: `blueprint-flow`, `course`, `execute-ship`, and `marketing`.
 
-The first child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-remove-generic-feature-surfaces.md`. The second child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-remove-settings-feature-surface.md`. The third child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-remove-workspace-home-feature-surface.md`. The fourth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-remove-starter-feature-surface.md`. The fifth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-remove-starter-repo-feature-surface.md`. The sixth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-workspace-navigation-feature-surface.md`. The seventh child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-product-access-feature-surface.md`. The eighth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-docs-feature-surface.md`. The ninth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-checkout-feature-surface.md`. The tenth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-observability-feature-surface.md`. The eleventh child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-blog-feature-surface.md`. The twelfth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-codex-feature-surface.md`. The thirteenth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-auth-feature-surface.md`. No child ExecPlan is currently active.
+The first child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-remove-generic-feature-surfaces.md`. The second child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-remove-settings-feature-surface.md`. The third child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-remove-workspace-home-feature-surface.md`. The fourth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-remove-starter-feature-surface.md`. The fifth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-remove-starter-repo-feature-surface.md`. The sixth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-workspace-navigation-feature-surface.md`. The seventh child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-product-access-feature-surface.md`. The eighth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-docs-feature-surface.md`. The ninth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-checkout-feature-surface.md`. The tenth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-observability-feature-surface.md`. The eleventh child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-blog-feature-surface.md`. The twelfth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-codex-feature-surface.md`. The thirteenth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-auth-feature-surface.md`. The fourteenth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-27-remove-workspace-shell-feature-surface.md`. No child ExecPlan is currently active.
 
 ## Progress
 
@@ -68,6 +68,8 @@ The first child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-re
 - [x] 2026-04-27 EDT: Executed and completed the Codex feature-folder removal slice. Focused Codex route helper/runtime, settings, workspace-home, and route-handler tests, app format check, app lint, app typecheck, plan lint, Program lint, markdown lint, import scans, and `git diff --check` passed.
 - [x] 2026-04-27 EDT: Wrote planning brief 13 and opened the thirteenth child ExecPlan for removing the auth feature folder.
 - [x] 2026-04-27 EDT: Executed and completed the auth feature-folder removal slice. Focused auth route utility, route, metadata, proxy, release-scope, sign-in, post-checkout sign-up, SSO callback, access-required, and checkout-success tests, app format check, app lint, app typecheck, plan lint, Program lint, markdown lint, import scans, and `git diff --check` passed.
+- [x] 2026-04-27 EDT: Wrote planning brief 14 and opened the fourteenth child ExecPlan for removing the workspace-shell feature folder.
+- [x] 2026-04-27 EDT: Executed and completed the workspace-shell feature-folder removal slice. Focused AppShell, workspace-home, settings, mission, bonus mission, bonus lesson, blueprint, and review tests, app format check, app lint, app typecheck, import scans, and Convex schema/generated diff checks passed.
 
 ## Decision Log
 
@@ -87,7 +89,7 @@ Active child ExecPlans:
 
 Recommended future child ExecPlans:
 
-- Treat `workspace-shell`, `execute-ship`, `blueprint-flow`, `marketing`, and `course` as larger domain slices that need fresh planning before any folder deletion.
+- Treat `execute-ship`, `blueprint-flow`, `marketing`, and `course` as larger domain slices that need fresh planning before any folder deletion.
 
 Completed child ExecPlans:
 
@@ -104,10 +106,11 @@ Completed child ExecPlans:
 - `docs/exec-plans/completed/2026-04-27-remove-blog-feature-surface.md`
 - `docs/exec-plans/completed/2026-04-27-remove-codex-feature-surface.md`
 - `docs/exec-plans/completed/2026-04-27-remove-auth-feature-surface.md`
+- `docs/exec-plans/completed/2026-04-27-remove-workspace-shell-feature-surface.md`
 
 ## Next Slice
 
-The next recommended slice is `workspace-shell`. It appears smaller than the remaining product-domain folders but still crosses shared workspace chrome and route layout behavior, so it needs a fresh planning brief and child ExecPlan before any folder deletion. The plan must preserve workspace layout behavior, navigation composition, protected route rendering, and production release proof semantics.
+The next recommended slice is `execute-ship`. It is smaller than the remaining blueprint-flow, course, and marketing domains, but it still crosses bonus mission and bonus lesson route behavior, so it needs a fresh planning brief and child ExecPlan before any folder deletion.
 
 ## Risks and Watchpoints
 
@@ -119,7 +122,7 @@ Do not move route screens without a child ExecPlan that names the route and focu
 
 ## Outcomes & Retrospective
 
-This Program is active. The first thirteen child slices deleted `features/shared`, `features/public-metadata`, `features/settings`, `features/workspace-home`, `features/starter`, `features/starter-repo`, `features/workspace-navigation`, `features/product-access`, `features/docs`, `features/checkout`, `features/observability`, `features/blog`, `features/codex`, and `features/auth`. Later outcomes should reduce route-local and generic feature surfaces while keeping behavior stable.
+This Program is active. The first fourteen child slices deleted `features/shared`, `features/public-metadata`, `features/settings`, `features/workspace-home`, `features/starter`, `features/starter-repo`, `features/workspace-navigation`, `features/product-access`, `features/docs`, `features/checkout`, `features/observability`, `features/blog`, `features/codex`, `features/auth`, and `features/workspace-shell`. Later outcomes should reduce route-local and generic feature surfaces while keeping behavior stable.
 
 ## Validation and Acceptance
 
@@ -156,6 +159,8 @@ The eleventh planning brief is `docs/programs/active/2026-04-26-remove-feature-f
 The twelfth planning brief is `docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-12.md`.
 
 The thirteenth planning brief is `docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-13.md`.
+
+The fourteenth planning brief is `docs/programs/active/2026-04-26-remove-feature-folder-surface/planning-brief-14.md`.
 
 ## Interfaces and Dependencies
 

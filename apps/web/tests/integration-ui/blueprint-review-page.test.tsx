@@ -21,7 +21,7 @@ const redirectMock = vi.fn((href: string) => {
 });
 const pushMock = vi.fn();
 
-vi.mock("@/features/workspace-shell/components/app-shell", () => ({
+vi.mock("@/app/(workspace)/_components/app-shell", () => ({
 	AppShell: ({
 		title,
 		subtitle,

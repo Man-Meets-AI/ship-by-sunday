@@ -2,12 +2,12 @@
 
 import { Card } from "@/components/ui/card";
 import { getLesson } from "@/features/course/lesson/model/manifest";
-import { AppShellFooterRail } from "@/features/workspace-shell/components/app-shell/app-shell-footer-rail";
-import { AppShellHeader } from "@/features/workspace-shell/components/app-shell/app-shell-header";
-import { AppShellLocalNavRail } from "@/features/workspace-shell/components/app-shell/app-shell-local-nav";
+import { AppShellFooterRail } from "@/app/(workspace)/_components/app-shell/app-shell-footer-rail";
+import { AppShellHeader } from "@/app/(workspace)/_components/app-shell/app-shell-header";
+import { AppShellLocalNavRail } from "@/app/(workspace)/_components/app-shell/app-shell-local-nav";
 import { cn } from "@/lib/utils";
-import { type AppShellProps } from "@/features/workspace-shell/components/app-shell/app-shell-props";
-import { isBlockActive } from "@/features/workspace-shell/components/app-shell/app-shell-block-status";
+import { type AppShellProps } from "@/app/(workspace)/_components/app-shell/app-shell-props";
+import { isBlockActive } from "@/app/(workspace)/_components/app-shell/app-shell-block-status";
 
 function ShellInner({
 	children,
