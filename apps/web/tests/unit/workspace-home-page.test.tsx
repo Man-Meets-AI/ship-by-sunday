@@ -44,9 +44,32 @@ vi.mock("@/features/starter-repo/components/starter-repo-access-card", () => ({
 	),
 }));
 
-vi.mock("@/features/settings/components/settings-account-card", () => ({
+vi.mock("@/app/(workspace)/_components/settings-account-card", () => ({
 	SettingsAccountCard: () => <div data-card="account">Account card</div>,
 }));
+
+vi.mock("@/features/workspace-home/components/workspace-home-hero", () => ({
+	WorkspaceHomeHero: () => <section>Starter workspace ready</section>,
+}));
+
+vi.mock(
+	"@/features/workspace-home/components/workspace-home-module-list",
+	() => ({
+		WorkspaceHomeModuleList: () => <section>Enabled starter modules</section>,
+	}),
+);
+
+vi.mock(
+	"@/features/workspace-home/components/workspace-home-next-steps",
+	() => ({
+		WorkspaceHomeNextSteps: () => (
+			<section>
+				Next steps
+				<span>Review starter settings</span>
+			</section>
+		),
+	}),
+);
 
 import { WorkspaceHomePage } from "@/features/workspace-home/components/workspace-home-page";
 import { buildWorkspaceHomeModel } from "@/features/workspace-home/lib/workspace-home-model";

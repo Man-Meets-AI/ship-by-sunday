@@ -1,5 +1,5 @@
 import { CodexConnectionCard } from "@/features/codex/components/codex-connection-card";
-import { SettingsAccountCard } from "@/features/settings/components/settings-account-card";
+import { SettingsAccountCard } from "@/app/(workspace)/_components/settings-account-card";
 import { StarterRepoAccessCard } from "@/features/starter-repo/components/starter-repo-access-card";
 import type { WorkspaceHomeModel } from "@/features/workspace-home/lib/workspace-home-model";
 
