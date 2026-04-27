@@ -42,8 +42,7 @@
 		"@next/next/no-script-component-in-head": "error",
 		"no-unused-vars": "error",
 		"import/no-anonymous-default-export": "off",
-		"jsx-a11y/role-supports-aria-props": "off",
-		"react-hooks/set-state-in-effect": "off"
+		"jsx-a11y/role-supports-aria-props": "off"
 	},
 	"overrides": [
 		{
