@@ -38,9 +38,27 @@ vi.mock("convex/react", () => ({
 	useQuery: () => starterRepoRecord,
 }));
 
+vi.mock(
+	"@/app/(workspace)/_components/starter-repo-access/starter-repo-access-form",
+	() => ({
+		StarterRepoAccessForm: ({
+			initialUsername,
+		}: {
+			initialUsername: string;
+		}) => (
+			<div>
+				<input data-slot="input" readOnly value={initialUsername} />
+				<button data-slot="button" type="button">
+					Save GitHub username
+				</button>
+			</div>
+		),
+	}),
+);
+
 globalThis.React = React;
 
-import { StarterRepoAccessCard } from "@/features/starter-repo/components/starter-repo-access-card";
+import { StarterRepoAccessCard } from "@/app/(workspace)/_components/starter-repo-access/starter-repo-access-card";
 
 describe("StarterRepoAccessCard", () => {
 	it("shows the input form before a GitHub username is saved", () => {

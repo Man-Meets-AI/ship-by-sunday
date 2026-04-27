@@ -1,6 +1,6 @@
 import { productConfig } from "@/config/product";
 import { CodexConnectionCard } from "@/features/codex/components/codex-connection-card";
-import { StarterRepoAccessCard } from "@/features/starter-repo/components/starter-repo-access-card";
+import { StarterRepoAccessCard } from "@/app/(workspace)/_components/starter-repo-access/starter-repo-access-card";
 import { isStarterModuleEnabled } from "@/config/starter-selectors";
 
 import { SettingsAccountCard } from "../../_components/settings-account-card";

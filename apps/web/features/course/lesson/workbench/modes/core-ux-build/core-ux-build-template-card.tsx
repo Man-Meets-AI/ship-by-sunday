@@ -17,7 +17,7 @@ import { getBuildStarterTemplateRepoUrl } from "@/features/course/lesson/model/r
 import {
 	getStarterRepoTemplateLockReason,
 	type StarterRepoAccessStatus,
-} from "@/features/starter-repo/lib/starter-repo-access-copy";
+} from "@/config/starter-repo-access-copy";
 
 export function CoreUxBuildTemplateCard() {
 	const { isAuthenticated, isLoading } = useConvexAuth();

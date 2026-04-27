@@ -8,7 +8,7 @@ import { routeConfig } from "@/config/product";
 import {
 	getStarterRepoStatusLabel,
 	type StarterRepoAccessStatus,
-} from "@/features/starter-repo/lib/starter-repo-access-copy";
+} from "@/config/starter-repo-access-copy";
 
 type Props = {
 	templateRepoUrl: string | null;
