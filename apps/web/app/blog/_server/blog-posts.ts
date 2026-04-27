@@ -6,16 +6,13 @@ import { cache } from "react";
 import { importPage } from "nextra/pages";
 import { z } from "zod";
 
-import {
-	normalizeBlogToc,
-	type BlogTocEntry,
-} from "@/features/blog/lib/blog-toc";
+import { normalizeBlogToc, type BlogTocEntry } from "@/app/blog/_lib/blog-toc";
 import {
 	generateBlogStaticParams,
 	getBlogPagePath,
 	getBlogPageSegments,
 	getBlogSourcePath,
-} from "@/features/blog/server/page-paths";
+} from "@/app/blog/_server/page-paths";
 
 const blogPostFrontmatterSchema = z
 	.object({

@@ -1,8 +1,8 @@
-import type { BlogPostSummary } from "@/features/blog/server/blog-posts";
+import type { BlogPostSummary } from "@/app/blog/_server/blog-posts";
 import {
 	getBlogIndexStructuredData,
 	getBlogPostStructuredData,
-} from "@/features/blog/lib/blog-structured-data";
+} from "@/app/blog/_lib/blog-structured-data";
 
 function createStructuredDataMarkup(payload: string) {
 	return `<script type="application/ld+json">${payload}</script>`;

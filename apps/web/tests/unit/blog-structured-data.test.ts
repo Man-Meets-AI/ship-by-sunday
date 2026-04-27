@@ -5,7 +5,7 @@ vi.mock("server-only", () => ({}));
 import {
 	getBlogIndexStructuredData,
 	getBlogPostStructuredData,
-} from "@/features/blog/lib/blog-structured-data";
+} from "@/app/blog/_lib/blog-structured-data";
 
 const blogPostFixture = {
 	title: "The operating system beats the prompt",

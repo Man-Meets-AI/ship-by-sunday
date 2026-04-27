@@ -3,18 +3,18 @@ import { notFound } from "next/navigation";
 import {
 	BlogIndexStructuredData,
 	BlogPostStructuredData,
-} from "@/features/blog/components/blog-structured-data";
-import { BlogIndexPage } from "@/features/blog/components/blog-index-page";
-import { BlogPostPage } from "@/features/blog/components/blog-post-page";
+} from "@/app/blog/_components/blog-structured-data";
+import { BlogIndexPage } from "@/app/blog/_components/blog-index-page";
+import { BlogPostPage } from "@/app/blog/_components/blog-post-page";
 import {
 	buildBlogIndexMetadata,
 	buildBlogPostMetadata,
-} from "@/features/blog/lib/blog-metadata";
-import { normalizeBlogSlug } from "@/features/blog/server/page-paths";
+} from "@/app/blog/_lib/blog-metadata";
+import { normalizeBlogSlug } from "@/app/blog/_server/page-paths";
 import {
 	getPublishedBlogPostBySlug,
 	getPublishedBlogPostSummaries,
-} from "@/features/blog/server/blog-posts";
+} from "@/app/blog/_server/blog-posts";
 import { blogDisplayConfig } from "@/config/starter-selectors";
 
 export const dynamicParams = false;

@@ -1,4 +1,4 @@
-import { BlogMediaFrame } from "@/features/blog/components/blog-media-frame";
+import { BlogMediaFrame } from "@/app/blog/_components/blog-media-frame";
 
 type BlogSplitHeroProps = {
 	eyebrow: string;

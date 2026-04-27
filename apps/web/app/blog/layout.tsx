@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { getBlogMetadataDefaults } from "@/features/blog/lib/blog-metadata";
+import { getBlogMetadataDefaults } from "@/app/blog/_lib/blog-metadata";
 
 export const metadata: Metadata = getBlogMetadataDefaults();
 

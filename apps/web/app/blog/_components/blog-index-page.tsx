@@ -2,9 +2,9 @@ import Link from "next/link";
 
 import { ProductBrand } from "@/components/product-brand";
 import { routeConfig } from "@/config/product";
-import { blogIndexContent } from "@/features/blog/content/blog";
-import { BlogPostCard } from "@/features/blog/components/blog-post-card";
-import type { BlogPostSummary } from "@/features/blog/server/blog-posts";
+import { blogIndexContent } from "@/app/blog/_content/blog";
+import { BlogPostCard } from "@/app/blog/_components/blog-post-card";
+import type { BlogPostSummary } from "@/app/blog/_server/blog-posts";
 
 type BlogIndexPageProps = {
 	posts: BlogPostSummary[];

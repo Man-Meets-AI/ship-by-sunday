@@ -1,7 +1,7 @@
 import { productConfig, routeConfig } from "@/config/product";
-import { blogIndexContent } from "@/features/blog/content/blog";
-import type { BlogPostSummary } from "@/features/blog/server/blog-posts";
-import { getBlogPagePath } from "@/features/blog/server/page-paths";
+import { blogIndexContent } from "@/app/blog/_content/blog";
+import type { BlogPostSummary } from "@/app/blog/_server/blog-posts";
+import { getBlogPagePath } from "@/app/blog/_server/page-paths";
 import { getMetadataBase } from "@/platform/next/metadata-base";
 
 const metadataBase = getMetadataBase();
