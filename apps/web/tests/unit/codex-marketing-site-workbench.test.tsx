@@ -20,8 +20,8 @@ vi.mock("convex/react", () => ({
 	useQuery: () => undefined,
 }));
 
-import { getLessonById } from "@/features/course/lesson/model";
-import { WorkbenchRenderer } from "@/features/course/lesson/workbench/renderer";
+import { getLessonById } from "@/lib/course/lesson/model";
+import { WorkbenchRenderer } from "@/app/(workspace)/_components/course/lesson/workbench/renderer";
 
 describe("codex marketing site workbench (lesson 3.5)", () => {
 	it("renders dependencies, plan-mode alert, prompt card, copy tabs, and handoff", () => {

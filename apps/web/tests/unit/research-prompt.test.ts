@@ -7,7 +7,7 @@ import {
 	parseCompetitorResearchImport,
 	parseScopeBoundaryImport,
 	parseVisualDirectionGuideImport,
-} from "@/features/course/lesson/model/research-prompt";
+} from "@/lib/course/lesson/model/research-prompt";
 
 describe("buildCompetitorResearchPrompt", () => {
 	it("injects the saved user and outcome context into the prompt contract", () => {

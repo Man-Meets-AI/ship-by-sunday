@@ -6,9 +6,9 @@ import {
 	hydrateLessonVideoContent,
 	isLessonVideoReady,
 	resolveLessonVideoUrl,
-} from "@/features/course/lesson/model/video";
-import { getLessonById } from "@/features/course/lesson/model";
-import { resolveLessonVideoAssetId } from "@/features/course/lesson/model/video-assignments";
+} from "@/lib/course/lesson/model/video";
+import { getLessonById } from "@/lib/course/lesson/model";
+import { resolveLessonVideoAssetId } from "@/lib/course/lesson/model/video-assignments";
 
 describe("lesson video helpers", () => {
 	it("builds Bunny embed urls deterministically", () => {

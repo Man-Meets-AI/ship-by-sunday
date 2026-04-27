@@ -8,9 +8,9 @@ import {
 	markLessonViewed,
 	saveLessonDraft,
 } from "@/convex/course";
-import { COURSE_SLUG } from "@/features/course/lesson/model";
-import { CURRICULUM_VERSION } from "@/features/course/lesson/model/curriculum";
-import { getLessonById } from "@/features/course/lesson/model";
+import { COURSE_SLUG } from "@/lib/course/lesson/model";
+import { CURRICULUM_VERSION } from "@/lib/course/lesson/model/curriculum";
+import { getLessonById } from "@/lib/course/lesson/model";
 
 const clerkUserId = "user_test_course_state";
 

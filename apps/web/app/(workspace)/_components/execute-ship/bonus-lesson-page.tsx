@@ -5,8 +5,8 @@ import { useState } from "react";
 import { AlertCircleIcon } from "lucide-react";
 import type { BlueprintStageStatus } from "@shipbysunday/blueprint-compiler";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { LessonShellWatch } from "@/features/course/lesson/shells";
-import { getLessonByKey } from "@/features/course/lesson/model/manifest";
+import { LessonShellWatch } from "@/app/(workspace)/_components/course/lesson/shells";
+import { getLessonByKey } from "@/lib/course/lesson/model/manifest";
 import { AppShell } from "@/app/(workspace)/_components/app-shell";
 import {
 	buildBonusShellMission,

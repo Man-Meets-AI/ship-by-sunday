@@ -5,7 +5,7 @@ import {
 	isInteractiveShortcutTarget,
 	type SkillRailLesson,
 	shouldHandleSkillRailShortcut,
-} from "@/features/course/shared/utils/skill-rail-navigation";
+} from "@/lib/course/shared/utils/skill-rail-navigation";
 
 function createRailLesson(
 	lessonKey: string,

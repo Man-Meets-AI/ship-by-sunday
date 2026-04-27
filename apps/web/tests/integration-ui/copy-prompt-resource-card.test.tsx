@@ -13,8 +13,8 @@ vi.mock("sonner", () => ({
 	},
 }));
 
-import { getLessonById } from "@/features/course/lesson/model";
-import { CopyPromptResourceCard } from "@/features/course/lesson/shells/copy-prompt-resource-card";
+import { getLessonById } from "@/lib/course/lesson/model";
+import { CopyPromptResourceCard } from "@/app/(workspace)/_components/course/lesson/shells/copy-prompt-resource-card";
 
 describe("CopyPromptResourceCard interactions", () => {
 	beforeEach(() => {

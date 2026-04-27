@@ -1,5 +1,5 @@
-import { SkillRailShadcn } from "@/features/course/shared/components/skill-rail-shadcn";
-import type { SkillRailCompletionCue } from "@/features/course/shared/components/skill-rail";
+import { SkillRailShadcn } from "@/app/(workspace)/_components/course/shared/components/skill-rail-shadcn";
+import type { SkillRailCompletionCue } from "@/app/(workspace)/_components/course/shared/components/skill-rail";
 
 type FooterLesson = {
 	lessonKey: string;

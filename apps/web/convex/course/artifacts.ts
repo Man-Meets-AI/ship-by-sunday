@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 
-import { getLessonByKey } from "../../features/course/lesson/model/curriculum";
+import { getLessonByKey } from "../../lib/course/lesson/model/curriculum";
 import {
 	buildResolvedArtifactPreviewForLesson,
 	loadViewerCourseState,

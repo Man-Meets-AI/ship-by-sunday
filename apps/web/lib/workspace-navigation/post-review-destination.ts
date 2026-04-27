@@ -1,7 +1,7 @@
 import { routeConfig } from "@/config/product";
-import type { BlockId } from "@/features/course/lesson/model/manifest";
-import { getLessonHref } from "@/features/course/lesson/routing/lesson-routes";
-import { getStudentFacingLessons } from "@/features/course/lesson/model/registry";
+import type { BlockId } from "@/lib/course/lesson/model/manifest";
+import { getLessonHref } from "@/lib/course/lesson/routing/lesson-routes";
+import { getStudentFacingLessons } from "@/lib/course/lesson/model/registry";
 import { getLessonMapHref } from "./lesson-map-href";
 
 const POST_REVIEW_DEFAULT_BUILD_LESSON_ID = "3.1";

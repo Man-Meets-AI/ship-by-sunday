@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 
 import { api } from "@/convex/_generated/api";
 import { PENDING_CHECKOUT_SESSION_COOKIE_NAME } from "@/platform/billing/checkout/pending-checkout-session-cookie";
-import { COURSE_SLUG } from "@/features/course/lesson/model/registry";
+import { COURSE_SLUG } from "@/lib/course/lesson/model/registry";
 import { getConvexServerSession } from "@/platform/auth/convex-auth";
 import { getStripe } from "@/platform/billing/stripe";
 

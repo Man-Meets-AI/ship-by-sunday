@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import {
 	getNextLesson,
 	getPreviousLesson,
-} from "@/features/course/lesson/model/manifest";
-import { getLessonHref } from "@/features/course/lesson/routing/lesson-routes";
+} from "@/lib/course/lesson/model/manifest";
+import { getLessonHref } from "@/lib/course/lesson/routing/lesson-routes";
 import { getLessonMapHref } from "@/lib/workspace-navigation/lesson-map-href";
 
 export function BonusLessonFooter({

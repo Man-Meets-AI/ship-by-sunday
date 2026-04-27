@@ -3,8 +3,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 globalThis.React = React;
 
-import { RoadmapSprintOverview } from "@/features/course/lesson/workbench/modes/roadmap-sprint-overview";
-import { getLessonById } from "@/features/course/lesson/model";
+import { RoadmapSprintOverview } from "@/app/(workspace)/_components/course/lesson/workbench/modes/roadmap-sprint-overview";
+import { getLessonById } from "@/lib/course/lesson/model";
 
 describe("RoadmapSprintOverview", () => {
 	it("surfaces the next-lesson CTA and sprint framing for lesson 1.2", () => {

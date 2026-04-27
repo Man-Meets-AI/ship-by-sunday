@@ -3,7 +3,7 @@ import {
 	getReferenceGalleryCount,
 	hydrateReferenceGalleryValue,
 	toPersistedReferenceGalleryValue,
-} from "@/features/course/lesson/model";
+} from "@/lib/course/lesson/model";
 
 describe("reference gallery helpers", () => {
 	it("hydrates stored gallery uploads back into public URLs", async () => {

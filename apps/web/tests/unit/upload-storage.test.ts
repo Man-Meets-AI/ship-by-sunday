@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { uploadFilesToLessonStorage } from "@/features/course/lesson/workbench/fields/upload-storage";
+import { uploadFilesToLessonStorage } from "@/app/(workspace)/_components/course/lesson/workbench/fields/upload-storage";
 
 const originalCreateObjectUrl = URL.createObjectURL;
 

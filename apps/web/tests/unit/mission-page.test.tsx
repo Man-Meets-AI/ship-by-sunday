@@ -1,7 +1,7 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import { getLessonById } from "@/features/course/lesson/model";
+import { getLessonById } from "@/lib/course/lesson/model";
 
 const missionState = {
 	progressCount: 20,
@@ -307,7 +307,7 @@ vi.mock("next/link", () => ({
 }));
 
 vi.mock(
-	"@/features/course/mission/components/mission/mission-extras-row",
+	"@/app/(workspace)/_components/course/mission/components/mission/mission-extras-row",
 	() => ({
 		MissionExtrasRow: () => (
 			<div data-extras-row="true">
@@ -357,7 +357,7 @@ vi.mock("@/app/(workspace)/_components/app-shell", () => ({
 
 globalThis.React = React;
 
-import { MissionPage } from "@/features/course/mission/components/mission-page";
+import { MissionPage } from "@/app/(workspace)/_components/course/mission/components/mission-page";
 
 describe("MissionPage", () => {
 	beforeEach(() => {

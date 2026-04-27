@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getLessonHref } from "@/features/course/lesson/routing/lesson-routes";
+import { getLessonHref } from "@/lib/course/lesson/routing/lesson-routes";
 import {
 	getPostReviewNavigationTargets,
 	resolveWorkspaceResumeDestination,

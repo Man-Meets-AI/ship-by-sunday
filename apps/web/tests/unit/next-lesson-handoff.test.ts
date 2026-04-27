@@ -1,9 +1,9 @@
-import { getCompletionButtonLabel } from "@/features/course/lesson/hooks/use-lesson-completion";
-import { getLessonById } from "@/features/course/lesson/model";
+import { getCompletionButtonLabel } from "@/app/(workspace)/_hooks/course/lesson/use-lesson-completion";
+import { getLessonById } from "@/lib/course/lesson/model";
 import {
 	formatHandoffLabelForLesson,
 	getNextLessonHandoffLabel,
-} from "@/features/course/lesson/model/next-lesson-handoff";
+} from "@/lib/course/lesson/model/next-lesson-handoff";
 
 describe("next lesson handoff labels", () => {
 	it("formats id and full title with a colon", () => {

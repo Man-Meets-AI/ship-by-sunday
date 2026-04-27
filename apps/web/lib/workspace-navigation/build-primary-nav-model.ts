@@ -1,4 +1,4 @@
-import { getLessonHref } from "@/features/course/lesson/routing/lesson-routes";
+import { getLessonHref } from "@/lib/course/lesson/routing/lesson-routes";
 import type { BonusMissionState } from "@/lib/execute-ship/bonus-mission-types";
 import type { PostReviewNavigationTargets } from "./post-review-destination";
 

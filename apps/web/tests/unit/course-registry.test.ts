@@ -6,7 +6,7 @@ import {
 	getUnlockedBlockIds,
 	getUnlockedLessonIds,
 	lessonRegistry,
-} from "@/features/course/lesson/model";
+} from "@/lib/course/lesson/model";
 
 const studentFacingIds = [
 	"1.1",
