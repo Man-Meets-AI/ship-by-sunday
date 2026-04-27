@@ -1,5 +1,5 @@
 import { productConfig, routeConfig, starterConfig } from "@/config/product";
-import type { StarterModuleName } from "@/features/starter/lib/starter-selectors";
+import type { StarterModuleName } from "@/config/starter-selectors";
 
 export type WorkspaceHomeModuleState = {
 	id: StarterModuleName;

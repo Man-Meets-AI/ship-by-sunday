@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { getDocsPagePath } from "@/features/docs/server/page-paths";
-import { docsDisplayConfig } from "@/features/starter/lib/starter-selectors";
+import { docsDisplayConfig } from "@/config/starter-selectors";
 
 const docsSiteName = docsDisplayConfig.siteName;
 const docsDescription = docsDisplayConfig.description;

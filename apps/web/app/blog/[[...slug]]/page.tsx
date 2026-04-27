@@ -15,7 +15,7 @@ import {
 	getPublishedBlogPostBySlug,
 	getPublishedBlogPostSummaries,
 } from "@/features/blog/server/blog-posts";
-import { blogDisplayConfig } from "@/features/starter/lib/starter-selectors";
+import { blogDisplayConfig } from "@/config/starter-selectors";
 
 export const dynamicParams = false;
 

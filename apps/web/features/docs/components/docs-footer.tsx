@@ -5,7 +5,7 @@ import { routeConfig } from "@/config/product";
 import {
 	docsDisplayConfig,
 	marketingDisplayConfig,
-} from "@/features/starter/lib/starter-selectors";
+} from "@/config/starter-selectors";
 
 const footerLinkClassName =
 	"text-xs font-semibold uppercase tracking-[0.14em] text-product-muted transition-colors hover:text-product-text";

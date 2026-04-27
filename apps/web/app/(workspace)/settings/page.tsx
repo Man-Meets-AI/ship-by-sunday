@@ -1,4 +1,4 @@
-import { isStarterModuleEnabled } from "@/features/starter/lib/starter-selectors";
+import { isStarterModuleEnabled } from "@/config/starter-selectors";
 
 import { SettingsPageShell } from "./_components/settings-page-shell";
 

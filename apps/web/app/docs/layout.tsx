@@ -6,11 +6,12 @@ import { DOCS_THEME_STORAGE_KEY } from "@/features/docs/lib/theme-preferences";
 import { getDocsMetadataDefaults } from "@/features/docs/lib/docs-metadata";
 import { DocsFooter } from "@/features/docs/components/docs-footer";
 import { DocsNavbar } from "@/features/docs/components/docs-navbar";
-import { DocsModuleDisabledState } from "@/features/starter/components/docs-module-disabled-state";
-import { isStarterModuleEnabled } from "@/features/starter/lib/starter-selectors";
+import { isStarterModuleEnabled } from "@/config/starter-selectors";
 
 import "nextra-theme-docs/style.css";
 import "@/features/docs/styles/docs-theme.css";
+
+import { DocsModuleDisabledState } from "./_components/docs-module-disabled-state";
 
 export const metadata: Metadata = getDocsMetadataDefaults();
 

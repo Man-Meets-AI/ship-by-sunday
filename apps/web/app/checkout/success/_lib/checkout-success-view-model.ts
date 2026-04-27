@@ -6,7 +6,7 @@ import {
 import { buildSignUpHref } from "@/features/auth/sign-in/sign-in-route-utils";
 import { assertNever } from "@/lib/assert";
 import type { CheckoutSessionState } from "@/features/checkout/server/checkout-session";
-import { workspaceDisplayConfig } from "@/features/starter/lib/starter-selectors";
+import { workspaceDisplayConfig } from "@/config/starter-selectors";
 
 export type CheckoutProgressState = "complete" | "active" | "pending";
 

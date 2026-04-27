@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isStarterModuleEnabled } from "@/features/starter/lib/starter-selectors";
+import { isStarterModuleEnabled } from "@/config/starter-selectors";
 
 describe("starter selectors", () => {
 	it("reads enabled modules from an override map", () => {

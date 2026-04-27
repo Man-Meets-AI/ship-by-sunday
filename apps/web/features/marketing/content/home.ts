@@ -2,7 +2,7 @@ import { productConfig, routeConfig } from "@/config/product";
 import {
 	marketingDisplayConfig,
 	workspaceDisplayConfig,
-} from "@/features/starter/lib/starter-selectors";
+} from "@/config/starter-selectors";
 
 const productName = productConfig.name;
 const activePricingOffer = productConfig.activeOffer;

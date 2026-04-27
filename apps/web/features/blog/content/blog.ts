@@ -1,5 +1,5 @@
 import { homePageContent } from "@/features/marketing/content/home";
-import { blogDisplayConfig } from "@/features/starter/lib/starter-selectors";
+import { blogDisplayConfig } from "@/config/starter-selectors";
 
 const heroHeadline = [
 	homePageContent.hero.headlineLead,

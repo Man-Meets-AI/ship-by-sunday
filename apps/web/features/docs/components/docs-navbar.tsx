@@ -7,7 +7,7 @@ import {
 } from "@/components/product-brand";
 import { routeConfig } from "@/config/product";
 import { DocsThemeToggle } from "@/features/docs/components/docs-theme-toggle";
-import { docsDisplayConfig } from "@/features/starter/lib/starter-selectors";
+import { docsDisplayConfig } from "@/config/starter-selectors";
 
 const navLinkClassName =
 	"inline-flex h-8 items-center justify-center rounded-full border border-product-border/60 bg-product-surface/60 px-3 text-sm font-medium text-product-muted transition-colors hover:border-product-border hover:bg-product-surface hover:text-product-text";
