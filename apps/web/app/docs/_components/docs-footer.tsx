@@ -7,13 +7,13 @@ import {
 } from "@/config/starter-selectors";
 
 const footerLinkClassName =
-	"text-xs font-semibold uppercase tracking-[0.14em] text-product-muted transition-colors hover:text-product-text";
+	"inline-flex min-h-11 min-w-11 items-center text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground";
 
 export function DocsFooter() {
 	return (
 		<footer className="sbs-docs-footer">
 			<div>
-				<p className="font-[family:var(--font-bebas-neue),ui-sans-serif,system-ui,sans-serif] text-xl uppercase tracking-[0.08em] text-product-text">
+				<p className="font-[family:var(--font-bebas-neue),ui-sans-serif,system-ui,sans-serif] text-xl uppercase tracking-[0.08em] text-foreground">
 					{docsDisplayConfig.siteName}
 				</p>
 				<p className="mt-1 max-w-2xl text-sm leading-relaxed">

@@ -9,7 +9,7 @@ import { DocsThemeToggle } from "@/app/docs/_components/docs-theme-toggle";
 import { docsDisplayConfig } from "@/config/starter-selectors";
 
 const navLinkClassName =
-	"inline-flex h-8 items-center justify-center rounded-full border border-product-border/60 bg-product-surface/60 px-3 text-sm font-medium text-product-muted transition-colors hover:border-product-border hover:bg-product-surface hover:text-product-text";
+	"inline-flex min-h-11 items-center justify-center rounded-full border border-border/60 bg-background/70 px-4 text-sm font-medium text-muted-foreground transition-colors hover:border-border hover:bg-muted hover:text-foreground";
 
 export function DocsNavbar() {
 	return (
@@ -17,13 +17,14 @@ export function DocsNavbar() {
 			<div className="flex min-w-0 items-center gap-3">
 				<ProductBrand
 					href={routeConfig.home}
+					className="-mx-2 min-h-11 px-2"
 					labelClassName={productWordmarkClassName}
 				/>
-				<span className="hidden text-[0.68rem] uppercase tracking-[0.22em] text-product-muted sm:inline">
+				<span className="hidden text-[0.68rem] uppercase tracking-[0.22em] text-muted-foreground sm:inline">
 					{docsDisplayConfig.siteName}
 				</span>
 			</div>
-			<nav className="flex flex-wrap items-center justify-end gap-2">
+			<nav className="flex w-full flex-wrap items-center justify-start gap-2 sm:w-auto sm:justify-end">
 				<Link href={routeConfig.home} className={navLinkClassName}>
 					Home
 				</Link>

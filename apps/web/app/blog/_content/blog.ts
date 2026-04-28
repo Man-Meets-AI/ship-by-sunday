@@ -13,8 +13,8 @@ export const blogIndexContent = {
 	eyebrow: "Ship by Sunday",
 	titleLead: "Recent essays",
 	titleAccent: "",
-	intro: "",
-	archiveLabel: "Filter",
+	intro: blogDisplayConfig.description,
+	archiveLabel: "Latest field notes",
 	emptyState:
 		"No published essays yet. The route is live, but the first editorial draft is still marked private.",
 	description: blogDisplayConfig.description,
