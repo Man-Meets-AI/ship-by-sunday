@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 
 import { BlogMediaFrame } from "@/app/blog/_components/blog-media-frame";
-import { cn } from "@/lib/utils";
 
 type BlogSplitSectionProps = {
 	orientation: "text-left" | "text-right";
@@ -17,7 +16,6 @@ type BlogSplitSectionProps = {
 };
 
 export function BlogSplitSection({
-	orientation,
 	label,
 	title,
 	intro,
@@ -46,7 +44,7 @@ export function BlogSplitSection({
 		<div className="space-y-5">
 			<p className="text-sm font-medium text-foreground/60">{label}</p>
 			<div className="space-y-4">
-				<h2 className="max-w-3xl text-balance text-3xl font-medium leading-tight tracking-[-0.035em] text-foreground sm:text-4xl">
+				<h2 className="max-w-3xl text-balance text-3xl font-medium leading-tight tracking-normal text-foreground sm:text-4xl">
 					{title}
 				</h2>
 				<p className="max-w-2xl text-pretty text-lg leading-8 text-foreground/70">
@@ -60,12 +58,7 @@ export function BlogSplitSection({
 	);
 
 	return (
-		<section
-			className={cn(
-				"grid gap-8 border-t border-border py-10 sm:gap-10 sm:py-12 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-start",
-				orientation === "text-right" && "lg:[&>*:first-child]:order-2",
-			)}
-		>
+		<section className="grid gap-8 border-t border-border py-10 sm:gap-10 sm:py-12">
 			{textBlock}
 			{mediaBlock}
 		</section>

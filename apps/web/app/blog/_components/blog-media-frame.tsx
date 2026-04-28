@@ -9,6 +9,7 @@ type BlogMediaFrameProps = {
 	posterSrc?: string;
 	priority?: boolean;
 	className?: string;
+	aspectClassName?: string;
 };
 
 export function BlogMediaFrame({
@@ -18,10 +19,11 @@ export function BlogMediaFrame({
 	posterSrc,
 	priority = false,
 	className,
+	aspectClassName,
 }: BlogMediaFrameProps) {
 	return (
 		<div className={cn("relative overflow-hidden bg-muted", className)}>
-			<div className="relative aspect-square w-full">
+			<div className={cn("relative aspect-square w-full", aspectClassName)}>
 				{kind === "image" ? (
 					<Image
 						src={src}
