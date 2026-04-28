@@ -1,15 +1,11 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { generateStaticParamsFor } from "nextra/pages";
-
 const BLOG_ROOT_SEGMENT = "blog";
 const BLOG_CONTENT_ROOT = path.resolve(
 	path.dirname(fileURLToPath(import.meta.url)),
 	"../../../content/blog",
 );
-
-const generateAllStaticParams = generateStaticParamsFor("slug");
 
 export function normalizeBlogSlug(slug?: string[]) {
 	return slug && slug.length > 0 ? slug : [];
@@ -34,23 +30,11 @@ export function getBlogSourcePath(slug: string[]) {
 }
 
 export async function generateBlogStaticParams() {
-	const params = await generateAllStaticParams();
+	const { getPublishedBlogContentEntries } =
+		await import("@/app/_content/public-content-inventory");
+	const entries = await getPublishedBlogContentEntries();
 
-	return params
-		.map((entry) => {
-			const rawSegments = entry.slug;
-			const segments = Array.isArray(rawSegments)
-				? rawSegments
-				: rawSegments
-					? [rawSegments]
-					: [];
-
-			if (segments[0] !== BLOG_ROOT_SEGMENT) {
-				return null;
-			}
-
-			const slug = segments.slice(1);
-			return slug.length > 0 ? { slug } : null;
-		})
-		.filter((value): value is { slug: string[] } => value !== null);
+	return entries.map((entry) => ({
+		slug: entry.slug,
+	}));
 }

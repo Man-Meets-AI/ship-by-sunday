@@ -1,14 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { getPageMap } from "nextra/page-map";
-import { Layout } from "nextra-theme-docs";
 
-import { DOCS_THEME_STORAGE_KEY } from "@/app/docs/_lib/theme-preferences";
+import { getDocsNavigationEntries } from "@/app/_content/public-content-inventory";
+import { DocsShell } from "@/app/docs/_components/docs-shell";
 import { getDocsMetadataDefaults } from "@/app/docs/_lib/docs-metadata";
-import { DocsFooter } from "@/app/docs/_components/docs-footer";
-import { DocsNavbar } from "@/app/docs/_components/docs-navbar";
 import { isStarterModuleEnabled } from "@/config/starter-selectors";
 
-import "nextra-theme-docs/style.css";
 import "@/app/docs/_styles/docs-theme.css";
 
 import { DocsModuleDisabledState } from "./_components/docs-module-disabled-state";
@@ -37,31 +33,9 @@ export default async function DocsLayout({
 		return <DocsModuleDisabledState />;
 	}
 
-	const pageMap = await getPageMap("/docs");
+	const navigationEntries = await getDocsNavigationEntries();
 
 	return (
-		<Layout
-			darkMode={false}
-			editLink={null}
-			feedback={{ content: null }}
-			footer={<DocsFooter />}
-			navbar={<DocsNavbar />}
-			nextThemes={{
-				attribute: "class",
-				defaultTheme: "system",
-				storageKey: DOCS_THEME_STORAGE_KEY,
-				disableTransitionOnChange: true,
-			}}
-			pageMap={pageMap}
-			search={null}
-			sidebar={{
-				defaultMenuCollapseLevel: 1,
-			}}
-			toc={{
-				title: "On this page",
-			}}
-		>
-			{children}
-		</Layout>
+		<DocsShell navigationEntries={navigationEntries}>{children}</DocsShell>
 	);
 }

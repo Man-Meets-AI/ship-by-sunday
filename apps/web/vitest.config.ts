@@ -51,11 +51,38 @@ const alias = [
 	},
 ];
 
+const reactResolve = {
+	alias,
+	dedupe: ["react", "react-dom"],
+};
+
+const reactRenderingDependencies = [
+	/@base-ui\//,
+	/@clerk\/ui/,
+	/@floating-ui\/react/,
+	/@radix-ui\//,
+	/@testing-library\/react/,
+	/@tanstack\/react-store/,
+	/cmdk/,
+	/embla-carousel-react/,
+	/framer-motion/,
+	/input-otp/,
+	/lucide-react/,
+	/motion/,
+	/next-themes/,
+	/radix-ui/,
+	/react-day-picker/,
+	/react-remove-scroll/,
+	/react-remove-scroll-bar/,
+	/react-style-singleton/,
+	/sonner/,
+	/use-callback-ref/,
+	/use-sidecar/,
+	/vaul/,
+];
+
 export default defineConfig({
-	resolve: {
-		alias,
-		dedupe: ["react", "react-dom"],
-	},
+	resolve: reactResolve,
 	test: {
 		globals: true,
 		coverage: {
@@ -80,20 +107,22 @@ export default defineConfig({
 		},
 		projects: [
 			defineProject({
-				resolve: {
-					alias,
-				},
+				resolve: reactResolve,
 				test: {
 					name: "unit",
 					globals: true,
 					environment: "node",
 					include: ["tests/unit/**/*.test.{ts,tsx}"],
+					setupFiles: ["./tests/setup/react-singleton.ts"],
+					server: {
+						deps: {
+							inline: reactRenderingDependencies,
+						},
+					},
 				},
 			}),
 			defineProject({
-				resolve: {
-					alias,
-				},
+				resolve: reactResolve,
 				test: {
 					name: "contracts",
 					globals: true,
@@ -102,9 +131,7 @@ export default defineConfig({
 				},
 			}),
 			defineProject({
-				resolve: {
-					alias,
-				},
+				resolve: reactResolve,
 				test: {
 					name: "integration",
 					globals: true,
@@ -113,9 +140,7 @@ export default defineConfig({
 				},
 			}),
 			defineProject({
-				resolve: {
-					alias,
-				},
+				resolve: reactResolve,
 				test: {
 					name: "integration-ui",
 					globals: true,

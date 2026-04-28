@@ -2,12 +2,12 @@ import type { ReactNode } from "react";
 
 import Link from "next/link";
 
-import { ProductBrand } from "@/components/product-brand";
-import { type HomePageCtaTarget, routeConfig } from "@/config/product";
-import { BlogPostMeta } from "@/app/blog/_components/blog-post-meta";
+import { type HomePageCtaTarget } from "@/config/product";
 import { BlogPostPromo } from "@/app/blog/_components/blog-post-promo";
 import { BlogRichText } from "@/app/blog/_components/blog-rich-text";
-import { BlogPostToc } from "@/app/blog/_components/blog-post-toc";
+import { BlogPostShareRail } from "@/app/blog/_components/blog-post-share-rail";
+import { BlogSurfaceHeader } from "@/app/blog/_components/blog-surface-header";
+import { formatBlogDate } from "@/app/blog/_lib/blog-formatters";
 import type { BlogTocEntry } from "@/app/blog/_lib/blog-toc";
 import { getBlogPagePath } from "@/app/blog/_server/page-paths";
 import type { BlogPostSummary } from "@/app/blog/_server/blog-posts";
@@ -21,66 +21,58 @@ type BlogPostShellProps = {
 
 export function BlogPostShell({
 	post,
-	toc,
 	promoTarget,
 	children,
 }: BlogPostShellProps) {
 	return (
-		<main
-			id="top"
-			className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(222,214,200,0.24),transparent_44%),linear-gradient(180deg,rgba(253,253,253,1),rgba(248,247,243,0.82))] dark:bg-[radial-gradient(circle_at_top,rgba(120,120,120,0.14),transparent_42%),linear-gradient(180deg,rgba(12,12,14,1),rgba(10,10,11,0.92))]"
-		>
-			<div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-				<div className="flex items-center justify-between gap-4">
-					<ProductBrand href={routeConfig.home} uppercase={false} />
-					<Link
-						href={getBlogPagePath()}
-						className="inline-flex h-10 items-center rounded-full border border-border/60 px-4 text-sm font-medium text-foreground/80 transition-colors hover:border-foreground/20 hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-					>
-						Back to blog
-					</Link>
-				</div>
-				<article className="pt-12 sm:pt-16">
-					<header className="border-t border-border/60 pt-6 sm:pt-8">
-						<div className="max-w-4xl space-y-6">
-							<div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-								<span className="font-mono text-[0.72rem] uppercase tracking-[0.24em]">
-									Journal
-								</span>
-								<span className="h-px w-12 bg-border/70" />
-								<span className="text-sm">{post.authorRole}</span>
+		<main id="top" className="min-h-screen bg-background text-foreground">
+			<BlogSurfaceHeader activeHref={getBlogPagePath()} />
+			<article>
+				<header className="border-b border-border">
+					<div className="mx-auto max-w-[1720px] px-4 py-12 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+						<div className="max-w-6xl space-y-6">
+							<div className="space-y-2 text-sm text-foreground/60">
+								<p>{formatBlogDate(post.publishedAt)}</p>
+								<p className="font-medium text-foreground">Field notes</p>
 							</div>
-							<h1 className="font-marketing-display tracking-marketing-section text-balance text-[clamp(4rem,10vw,7.2rem)] font-normal uppercase leading-[0.88] text-foreground">
+							<h1 className="text-balance text-[clamp(3.4rem,8vw,8.25rem)] font-medium leading-[0.9] tracking-[-0.07em] text-foreground">
 								{post.title}
 							</h1>
-							<p className="max-w-3xl text-pretty text-xl leading-relaxed text-foreground/82 sm:text-2xl">
+							<p className="max-w-3xl text-pretty text-xl leading-8 text-foreground/70 sm:text-2xl sm:leading-9">
 								{post.summary}
 							</p>
 						</div>
-						<BlogPostMeta
-							post={post}
-							className="mt-7 border-t border-border/60 pt-5"
-						/>
-					</header>
-					<div className="mt-10 sm:mt-12">
-						<BlogPostPromo target={promoTarget} />
 					</div>
-					<div className="mt-10 grid gap-10 xl:grid-cols-[minmax(0,1fr)_18rem] xl:gap-12">
-						<div>
-							<BlogRichText>{children}</BlogRichText>
+				</header>
+				<div className="mx-auto grid max-w-[1720px] gap-10 px-4 py-10 sm:px-6 sm:py-12 lg:grid-cols-[10rem_minmax(0,52rem)_1fr] lg:px-8">
+					<BlogPostShareRail postPath={post.href} />
+					<div className="min-w-0">
+						<BlogRichText>{children}</BlogRichText>
+						<section className="mt-16 border-t border-border pt-8">
+							<h2 className="text-sm font-medium text-foreground">Author</h2>
+							<p className="mt-4 text-lg font-medium text-foreground">
+								{post.authorName}
+							</p>
+							<p className="text-base leading-7 text-foreground/70">
+								{post.authorRole}
+							</p>
+						</section>
+						<div className="mt-16">
+							<BlogPostPromo target={promoTarget} />
 						</div>
-						<BlogPostToc items={toc} postPath={post.href} />
 					</div>
-					<footer className="mt-16 border-t border-border/60 pt-8">
+				</div>
+				<div className="mx-auto max-w-[1720px] px-4 pb-12 sm:px-6 lg:px-8">
+					<footer className="border-t border-border pt-8">
 						<Link
 							href={getBlogPagePath()}
-							className="inline-flex items-center gap-2 text-sm font-medium text-foreground/80 transition-colors hover:text-foreground"
+							className="inline-flex items-center gap-2 text-sm font-medium text-foreground/70 transition-colors hover:text-foreground"
 						>
-							Return to the editorial index
+							Back to all articles
 						</Link>
 					</footer>
-				</article>
-			</div>
+				</div>
+			</article>
 		</main>
 	);
 }

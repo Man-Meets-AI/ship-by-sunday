@@ -8,12 +8,12 @@ import {
 } from "@/app/blog/_lib/blog-structured-data";
 
 const blogPostFixture = {
-	title: "The operating system beats the prompt",
+	title: "What Ship by Sunday does",
 	description:
-		"Why the fastest weekend builds start with durable product truth instead of another blank AI chat.",
+		"Ship by Sunday turns a rough product idea into product truth, agent-ready packs, and a starter path builders can keep using after the first weekend.",
 	summary:
-		"Strong prompts help. Durable product truth helps more. This first editorial lays out why Ship by Sunday starts with file-shaped context before it asks AI tools to execute.",
-	publishedAt: "2026-03-26",
+		"Ship by Sunday is a blueprint-first shipping system: it captures the product truth, generates agent-ready packs, and gives builders a repo-shaped path for turning AI work into a real product.",
+	publishedAt: "2026-04-27",
 	authorName: "Parker Rex",
 	authorRole: "Founder, Ship by Sunday",
 	featured: true,

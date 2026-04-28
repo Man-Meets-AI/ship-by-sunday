@@ -73,7 +73,7 @@ const STARTER_WRAPPER_SKILLS: StarterWrapperSkill[] = [
 			"Use when editing Next.js code in this starter. Read the installed Next.js docs in node_modules before changing framework behavior.",
 		steps: [
 			"Read `AGENTS.md` first.",
-			"Read the relevant guide in `apps/web/node_modules/next/dist/docs/` before changing Next.js code.",
+			"Read the relevant guide in `node_modules/next/dist/docs/` before changing Next.js code.",
 			"Treat the installed docs as the source of truth for this starter's Next.js version, not live upstream docs.",
 		],
 	},

@@ -1,12 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("nextra/pages", () => ({
-	generateStaticParamsFor: () => async () => [
-		{ slug: ["blog", "the-operating-system-beats-the-prompt"] },
-		{ slug: ["docs", "local-setup"] },
-		{ slug: ["blog"] },
-	],
-}));
+vi.mock("server-only", () => ({}));
 
 import {
 	generateBlogStaticParams,
@@ -34,7 +28,7 @@ describe("blog page paths", () => {
 		);
 	});
 
-	it("discovers blog content paths from the Nextra-managed content tree", async () => {
+	it("discovers published blog content paths from the app-owned content inventory", async () => {
 		await expect(generateBlogStaticParams()).resolves.toEqual([
 			{
 				slug: ["the-operating-system-beats-the-prompt"],

@@ -8,40 +8,39 @@ type BlogPostMetaProps = {
 		"authorName" | "authorRole" | "publishedAt" | "readingTimeText"
 	>;
 	className?: string;
+	showAuthor?: boolean;
 };
 
-export function BlogPostMeta({ post, className }: BlogPostMetaProps) {
+export function BlogPostMeta({
+	post,
+	className,
+	showAuthor = false,
+}: BlogPostMetaProps) {
 	return (
 		<div
 			className={cn(
-				"flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-muted-foreground",
+				"flex flex-wrap items-center gap-x-2 gap-y-1 text-sm leading-6 text-foreground/60",
 				className,
 			)}
 		>
-			<div>
-				<p className="font-mono text-[0.7rem] uppercase tracking-[0.22em]">
-					Published
-				</p>
-				<p className="mt-1 text-sm text-foreground">
-					{formatBlogDate(post.publishedAt)}
-				</p>
-			</div>
-			<div>
-				<p className="font-mono text-[0.7rem] uppercase tracking-[0.22em]">
-					By
-				</p>
-				<p className="mt-1 text-sm text-foreground">
-					{post.authorName}
-					<span className="text-muted-foreground"> · {post.authorRole}</span>
-				</p>
-			</div>
+			<span>Field notes</span>
+			<span aria-hidden="true">·</span>
+			<time dateTime={post.publishedAt}>
+				{formatBlogDate(post.publishedAt)}
+			</time>
 			{post.readingTimeText ? (
-				<div>
-					<p className="font-mono text-[0.7rem] uppercase tracking-[0.22em]">
-						Read time
-					</p>
-					<p className="mt-1 text-sm text-foreground">{post.readingTimeText}</p>
-				</div>
+				<>
+					<span aria-hidden="true">·</span>
+					<span>{post.readingTimeText}</span>
+				</>
+			) : null}
+			{showAuthor ? (
+				<>
+					<span aria-hidden="true">·</span>
+					<span>
+						{post.authorName}, {post.authorRole}
+					</span>
+				</>
 			) : null}
 		</div>
 	);

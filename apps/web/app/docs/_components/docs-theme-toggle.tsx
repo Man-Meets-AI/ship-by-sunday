@@ -1,7 +1,6 @@
 "use client";
 
-import { MoonIcon, SunIcon } from "nextra/icons";
-import { useTheme } from "nextra-theme-docs";
+import { MoonIcon, SunIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -11,42 +10,61 @@ import {
 	isDocsTheme,
 } from "@/app/docs/_lib/theme-preferences";
 
+function getInitialDocsTheme() {
+	const storedTheme = window.localStorage.getItem(DOCS_THEME_STORAGE_KEY);
+	if (isDocsTheme(storedTheme)) {
+		return storedTheme;
+	}
+
+	if (document.documentElement.classList.contains("dark")) {
+		return "dark";
+	}
+
+	return window.matchMedia("(prefers-color-scheme: dark)").matches
+		? "dark"
+		: "light";
+}
+
+function applyDocsTheme(theme: "dark" | "light") {
+	document.documentElement.dataset.productTheme = theme;
+	document.documentElement.classList.remove("light", "dark");
+	document.documentElement.classList.add(theme);
+	window.localStorage.setItem(DOCS_THEME_STORAGE_KEY, theme);
+	document.cookie = getDocsThemeCookieString(theme);
+}
+
 export function DocsThemeToggle() {
-	const { resolvedTheme, setTheme } = useTheme();
+	const [theme, setTheme] = useState<"dark" | "light">("light");
 	const [mounted, setMounted] = useState(false);
 
 	useEffect(() => {
+		const initialTheme = getInitialDocsTheme();
+		setTheme(initialTheme);
+		applyDocsTheme(initialTheme);
 		setMounted(true);
 	}, []);
 
-	useEffect(() => {
-		if (!isDocsTheme(resolvedTheme)) {
-			return;
-		}
-
-		document.documentElement.dataset.productTheme = resolvedTheme;
-		document.documentElement.classList.remove("light", "dark");
-		document.documentElement.classList.add(resolvedTheme);
-		window.localStorage.setItem(DOCS_THEME_STORAGE_KEY, resolvedTheme);
-		document.cookie = getDocsThemeCookieString(resolvedTheme);
-	}, [resolvedTheme]);
-
-	const isDark = mounted ? resolvedTheme === "dark" : false;
+	const isDark = mounted ? theme === "dark" : false;
 	const nextTheme = isDark ? "light" : "dark";
 	const label = mounted ? (isDark ? "Light mode" : "Dark mode") : "Theme";
 	const Icon = isDark ? SunIcon : MoonIcon;
 
+	function handleThemeToggle() {
+		setTheme(nextTheme);
+		applyDocsTheme(nextTheme);
+	}
+
 	return (
 		<Button
 			type="button"
-			onClick={() => setTheme(nextTheme)}
+			onClick={handleThemeToggle}
 			variant="outline"
 			size="sm"
 			className="items-center gap-2 rounded-full border-product-border/60 bg-product-surface/70 px-3 py-1.5 text-xs font-bold tracking-[0.16em]"
 			aria-label={`Switch to ${nextTheme} theme`}
 			title={`Switch to ${nextTheme} theme`}
 		>
-			<Icon height="14" width="14" />
+			<Icon aria-hidden="true" size={14} />
 			<span>{label}</span>
 		</Button>
 	);

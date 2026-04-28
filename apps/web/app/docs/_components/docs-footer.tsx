@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Footer } from "nextra-theme-docs";
 
 import { routeConfig } from "@/config/product";
 import {
@@ -12,31 +11,29 @@ const footerLinkClassName =
 
 export function DocsFooter() {
 	return (
-		<Footer className="border-t border-product-border/50 bg-product-surface/60">
-			<div className="flex w-full flex-col gap-4 text-sm text-product-muted sm:flex-row sm:items-center sm:justify-between">
-				<div>
-					<p className="font-[family:var(--font-bebas-neue),ui-sans-serif,system-ui,sans-serif] text-xl uppercase tracking-[0.08em] text-product-text">
-						{docsDisplayConfig.siteName}
-					</p>
-					<p className="mt-1 max-w-2xl text-sm leading-relaxed">
-						{docsDisplayConfig.description}
-					</p>
-				</div>
-				<div className="flex flex-wrap items-center gap-4">
-					<Link href={routeConfig.home} className={footerLinkClassName}>
-						Home
-					</Link>
-					<Link
-						href={docsDisplayConfig.pricingHref}
-						className={footerLinkClassName}
-					>
-						{marketingDisplayConfig.primaryCtaLabel}
-					</Link>
-					<Link href={routeConfig.signIn} className={footerLinkClassName}>
-						Sign in
-					</Link>
-				</div>
+		<footer className="sbs-docs-footer">
+			<div>
+				<p className="font-[family:var(--font-bebas-neue),ui-sans-serif,system-ui,sans-serif] text-xl uppercase tracking-[0.08em] text-product-text">
+					{docsDisplayConfig.siteName}
+				</p>
+				<p className="mt-1 max-w-2xl text-sm leading-relaxed">
+					{docsDisplayConfig.description}
+				</p>
 			</div>
-		</Footer>
+			<div className="flex flex-wrap items-center gap-4">
+				<Link href={routeConfig.home} className={footerLinkClassName}>
+					Home
+				</Link>
+				<Link
+					href={docsDisplayConfig.pricingHref}
+					className={footerLinkClassName}
+				>
+					{marketingDisplayConfig.primaryCtaLabel}
+				</Link>
+				<Link href={routeConfig.signIn} className={footerLinkClassName}>
+					Sign in
+				</Link>
+			</div>
+		</footer>
 	);
 }
