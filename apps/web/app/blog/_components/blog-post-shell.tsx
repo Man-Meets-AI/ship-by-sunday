@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { type HomePageCtaTarget } from "@/config/product";
 import { BlogPostPromo } from "@/app/blog/_components/blog-post-promo";
+import { BlogPostToc } from "@/app/blog/_components/blog-post-toc";
 import { BlogRichText } from "@/app/blog/_components/blog-rich-text";
 import { BlogPostShareRail } from "@/app/blog/_components/blog-post-share-rail";
 import { BlogSurfaceHeader } from "@/app/blog/_components/blog-surface-header";
@@ -21,6 +22,7 @@ type BlogPostShellProps = {
 
 export function BlogPostShell({
 	post,
+	toc,
 	promoTarget,
 	children,
 }: BlogPostShellProps) {
@@ -61,6 +63,7 @@ export function BlogPostShell({
 							<BlogPostPromo target={promoTarget} />
 						</div>
 					</div>
+					<BlogPostToc items={toc} postPath={post.href} />
 				</div>
 				<div className="mx-auto max-w-[1720px] px-4 pb-12 sm:px-6 lg:px-8">
 					<footer className="border-t border-border pt-8">

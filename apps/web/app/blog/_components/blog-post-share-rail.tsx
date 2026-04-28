@@ -11,7 +11,7 @@ export function BlogPostShareRail({ postPath }: BlogPostShareRailProps) {
 					href={postPath}
 					className="mt-4 inline-block transition-colors hover:text-foreground"
 				>
-					Copy link
+					Permalink
 				</a>
 			</div>
 		</aside>

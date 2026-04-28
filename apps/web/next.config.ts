@@ -5,7 +5,7 @@ import { repoDownloadTraceIncludes } from "./config/vercel-output-tracing";
 
 const withMDX = createMDX({
 	options: {
-		remarkPlugins: ["remark-frontmatter"],
+		remarkPlugins: ["remark-frontmatter", "remark-gfm"],
 	},
 });
 
