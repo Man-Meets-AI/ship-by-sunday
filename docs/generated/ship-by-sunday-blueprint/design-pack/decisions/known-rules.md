@@ -30,4 +30,5 @@ This file is the long-lived memory for Ship by Sunday design defaults and except
 - **2026-03-27:** Landing-page and app/dashboard surfaces need different default rules. Do not force one surface model onto every UI.
 - **2026-03-27:** The repo's default visual direction for public surfaces is restraint, hierarchy, and calm composition over card-driven marketing chrome.
 - **2026-03-27:** Wispy all-caps eyebrow labels are banned on app surfaces; use sentence-case labels instead so the UI reads as operational rather than decorative.
+- **2026-04-27:** The public blog should read as a restrained editorial news surface: neutral background, plain header navigation, thin section rules, square media cards, sentence-case sans-serif headlines, compact category/date metadata, and conversion after the article body rather than before the reading experience.
 - **2026-03-27:** Exceptions are allowed, but only when the plan and post-ship note explain why the default would weaken the result.

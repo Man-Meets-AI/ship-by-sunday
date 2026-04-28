@@ -1,5 +1,3 @@
-import { ArrowUpRight } from "lucide-react";
-
 import { type HomePageCtaTarget } from "@/config/product";
 import { blogPromoContent } from "@/app/blog/_content/blog";
 import { HomePagePrimaryCta } from "@/app/_components/home-page/sections/home-page-primary-cta";
@@ -10,26 +8,23 @@ type BlogPostPromoProps = {
 
 export function BlogPostPromo({ target }: BlogPostPromoProps) {
 	return (
-		<section className="rounded-[32px] border border-border/70 bg-muted/20 p-6 sm:p-7">
-			<div className="flex flex-wrap items-center gap-3">
-				<span className="font-mono text-[0.72rem] uppercase tracking-[0.24em] text-muted-foreground">
-					{blogPromoContent.eyebrow}
-				</span>
-				<ArrowUpRight className="size-4 text-muted-foreground" />
-			</div>
-			<div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+		<section className="border-t border-border pt-8">
+			<p className="text-sm font-medium text-foreground/60">
+				{blogPromoContent.eyebrow}
+			</p>
+			<div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
 				<div className="space-y-3">
-					<h2 className="text-balance text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+					<h2 className="max-w-3xl text-balance text-3xl font-medium leading-tight tracking-[-0.035em] text-foreground sm:text-4xl">
 						{blogPromoContent.title}
 					</h2>
-					<p className="max-w-2xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">
+					<p className="max-w-2xl text-pretty text-base leading-7 text-foreground/70">
 						{blogPromoContent.body}
 					</p>
 				</div>
 				<HomePagePrimaryCta
 					target={target}
 					label={blogPromoContent.ctaLabel}
-					className="h-11 min-w-full px-5 text-sm font-semibold sm:min-w-[16rem]"
+					className="h-11 min-w-full rounded-none px-5 text-sm font-semibold sm:min-w-[16rem]"
 				/>
 			</div>
 		</section>

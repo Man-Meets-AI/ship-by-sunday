@@ -1,43 +1,6 @@
-import { createRequire } from "node:module";
 import { afterEach, vi } from "vitest";
 
-const require = createRequire(import.meta.url);
-const moduleResolver = require("node:module") as {
-	_resolveFilename: (
-		request: string,
-		parent: unknown,
-		isMain: boolean,
-		options?: unknown,
-	) => string;
-};
-const originalResolveFilename = moduleResolver._resolveFilename;
-const rootReactModules = new Map([
-	["react", require.resolve("react")],
-	["react/jsx-runtime", require.resolve("react/jsx-runtime")],
-	["react/jsx-dev-runtime", require.resolve("react/jsx-dev-runtime")],
-	["react-dom", require.resolve("react-dom")],
-	["react-dom/client", require.resolve("react-dom/client")],
-	["react-dom/server", require.resolve("react-dom/server")],
-	["react-dom/test-utils", require.resolve("react-dom/test-utils")],
-]);
-
-for (const [moduleName, modulePath] of rootReactModules) {
-	vi.doMock(moduleName, async () => await import(modulePath));
-}
-
-moduleResolver._resolveFilename = function resolveSingleReactRenderer(
-	request,
-	parent,
-	isMain,
-	options,
-) {
-	const rootReactModule = rootReactModules.get(request);
-	if (rootReactModule) {
-		return rootReactModule;
-	}
-
-	return originalResolveFilename.call(this, request, parent, isMain, options);
-};
+import "./react-singleton";
 
 let cleanupTestingLibrary: null | (() => void) = null;
 

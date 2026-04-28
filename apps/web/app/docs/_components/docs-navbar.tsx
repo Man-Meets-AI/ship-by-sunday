@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Navbar } from "nextra-theme-docs";
 
 import {
 	ProductBrand,
@@ -14,28 +13,28 @@ const navLinkClassName =
 
 export function DocsNavbar() {
 	return (
-		<Navbar
-			logo={
-				<div className="flex items-center gap-3">
-					<ProductBrand labelClassName={productWordmarkClassName} />
-					<span className="hidden text-[0.68rem] uppercase tracking-[0.22em] text-product-muted sm:inline">
-						{docsDisplayConfig.siteName}
-					</span>
-				</div>
-			}
-			logoLink={routeConfig.home}
-			align="right"
-		>
-			<Link href={routeConfig.home} className={navLinkClassName}>
-				Home
-			</Link>
-			<Link href={docsDisplayConfig.pricingHref} className={navLinkClassName}>
-				Pricing
-			</Link>
-			<Link href={routeConfig.signIn} className={navLinkClassName}>
-				Sign in
-			</Link>
-			<DocsThemeToggle />
-		</Navbar>
+		<header className="sbs-docs-navbar">
+			<div className="flex min-w-0 items-center gap-3">
+				<ProductBrand
+					href={routeConfig.home}
+					labelClassName={productWordmarkClassName}
+				/>
+				<span className="hidden text-[0.68rem] uppercase tracking-[0.22em] text-product-muted sm:inline">
+					{docsDisplayConfig.siteName}
+				</span>
+			</div>
+			<nav className="flex flex-wrap items-center justify-end gap-2">
+				<Link href={routeConfig.home} className={navLinkClassName}>
+					Home
+				</Link>
+				<Link href={docsDisplayConfig.pricingHref} className={navLinkClassName}>
+					Pricing
+				</Link>
+				<Link href={routeConfig.signIn} className={navLinkClassName}>
+					Sign in
+				</Link>
+				<DocsThemeToggle />
+			</nav>
+		</header>
 	);
 }

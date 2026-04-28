@@ -10,12 +10,11 @@ const heroHeadline = [
 	.join(" ");
 
 export const blogIndexContent = {
-	eyebrow: "Public editorial surface",
-	titleLead: "Build the operating system",
-	titleAccent: "before the prompt",
-	intro:
-		"Field notes on durable product truth, premium editorial structure, and the context decisions that let AI tools keep shipping after the first sprint.",
-	archiveLabel: "Latest essays",
+	eyebrow: "Ship by Sunday",
+	titleLead: "Recent essays",
+	titleAccent: "",
+	intro: "",
+	archiveLabel: "Filter",
 	emptyState:
 		"No published essays yet. The route is live, but the first editorial draft is still marked private.",
 	description: blogDisplayConfig.description,

@@ -1,35 +1,19 @@
-import { isValidElement, type ReactNode } from "react";
-
-import type { Heading } from "nextra";
+import type { PublicContentHeading } from "@/app/_content/public-content-inventory";
 
 export type BlogTocEntry = {
 	id: string;
-	depth: Heading["depth"];
+	depth: PublicContentHeading["depth"];
 	label: string;
 };
 
-function getNodeText(node: ReactNode): string {
-	if (typeof node === "string" || typeof node === "number") {
-		return String(node);
-	}
-
-	if (Array.isArray(node)) {
-		return node.map(getNodeText).join("");
-	}
-
-	if (isValidElement<{ children?: ReactNode }>(node)) {
-		return getNodeText(node.props.children);
-	}
-
-	return "";
-}
-
-export function normalizeBlogToc(toc: Heading[]): BlogTocEntry[] {
-	return toc
+export function normalizeBlogToc(
+	headings: PublicContentHeading[],
+): BlogTocEntry[] {
+	return headings
 		.map((heading) => ({
 			id: heading.id,
 			depth: heading.depth,
-			label: getNodeText(heading.value).trim(),
+			label: heading.text.trim(),
 		}))
 		.filter((heading) => heading.label.length > 0);
 }

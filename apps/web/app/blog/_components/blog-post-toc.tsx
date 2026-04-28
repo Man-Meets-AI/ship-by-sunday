@@ -15,10 +15,8 @@ export function BlogPostToc({ items, postPath }: BlogPostTocProps) {
 
 	return (
 		<aside className="xl:sticky xl:top-8 xl:self-start">
-			<div className="rounded-[28px] border border-border/70 bg-background/75 p-5 backdrop-blur-sm">
-				<p className="font-mono text-[0.72rem] uppercase tracking-[0.24em] text-muted-foreground">
-					Contents
-				</p>
+			<div className="border-t border-border pt-4">
+				<p className="text-sm font-medium text-foreground">Contents</p>
 				<nav className="mt-5">
 					<ol className="space-y-3">
 						{items.map((item) => (
@@ -26,8 +24,8 @@ export function BlogPostToc({ items, postPath }: BlogPostTocProps) {
 								<Link
 									href={`${postPath}#${item.id}`}
 									className={cn(
-										"block text-sm leading-relaxed text-foreground/78 transition-colors hover:text-foreground",
-										item.depth === 3 && "pl-4 text-muted-foreground",
+										"block text-sm leading-relaxed text-foreground/60 transition-colors hover:text-foreground",
+										item.depth === 3 && "pl-4 text-foreground/50",
 									)}
 								>
 									{item.label}
@@ -36,10 +34,10 @@ export function BlogPostToc({ items, postPath }: BlogPostTocProps) {
 						))}
 					</ol>
 				</nav>
-				<div className="mt-6 border-t border-border/60 pt-4">
+				<div className="mt-6 border-t border-border pt-4">
 					<Link
 						href="#top"
-						className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground transition-colors hover:text-foreground"
+						className="text-sm text-foreground/60 transition-colors hover:text-foreground"
 					>
 						Back to top
 					</Link>

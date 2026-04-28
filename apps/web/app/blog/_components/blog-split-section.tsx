@@ -37,30 +37,23 @@ export function BlogSplitSection({
 				posterSrc={mediaPosterSrc}
 			/>
 			{mediaCaption ? (
-				<p className="font-mono text-[0.72rem] uppercase tracking-[0.22em] text-muted-foreground">
-					{mediaCaption}
-				</p>
+				<p className="text-sm leading-6 text-foreground/60">{mediaCaption}</p>
 			) : null}
 		</div>
 	);
 
 	const textBlock = (
 		<div className="space-y-5">
-			<div className="flex items-center gap-3">
-				<span className="font-mono text-[0.72rem] uppercase tracking-[0.24em] text-muted-foreground">
-					{label}
-				</span>
-				<span className="h-px flex-1 bg-border/70" />
-			</div>
+			<p className="text-sm font-medium text-foreground/60">{label}</p>
 			<div className="space-y-4">
-				<h2 className="text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+				<h2 className="max-w-3xl text-balance text-3xl font-medium leading-tight tracking-[-0.035em] text-foreground sm:text-4xl">
 					{title}
 				</h2>
-				<p className="max-w-2xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
+				<p className="max-w-2xl text-pretty text-lg leading-8 text-foreground/70">
 					{intro}
 				</p>
 			</div>
-			<div className="space-y-4 text-base leading-relaxed text-foreground/88 sm:text-[1.05rem]">
+			<div className="space-y-4 text-base leading-7 text-foreground/80 sm:text-lg sm:leading-8">
 				{children}
 			</div>
 		</div>
@@ -69,7 +62,7 @@ export function BlogSplitSection({
 	return (
 		<section
 			className={cn(
-				"grid gap-8 border-t border-border/60 py-10 sm:gap-10 sm:py-12 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-start",
+				"grid gap-8 border-t border-border py-10 sm:gap-10 sm:py-12 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-start",
 				orientation === "text-right" && "lg:[&>*:first-child]:order-2",
 			)}
 		>

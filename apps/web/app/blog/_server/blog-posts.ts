@@ -3,47 +3,28 @@ import "server-only";
 import type { ComponentType } from "react";
 import { cache } from "react";
 
-import { importPage } from "nextra/pages";
-import { z } from "zod";
-
-import { normalizeBlogToc, type BlogTocEntry } from "@/app/blog/_lib/blog-toc";
 import {
-	generateBlogStaticParams,
-	getBlogPagePath,
-	getBlogPageSegments,
-	getBlogSourcePath,
-} from "@/app/blog/_server/page-paths";
+	getPublishedBlogContentEntries,
+	type BlogContentEntry,
+} from "@/app/_content/public-content-inventory";
+import { normalizeBlogToc, type BlogTocEntry } from "@/app/blog/_lib/blog-toc";
+import { getBlogPagePath } from "@/app/blog/_server/page-paths";
+import { getBlogContentPage } from "@/app/blog/_server/blog-content";
 
-const blogPostFrontmatterSchema = z
-	.object({
-		title: z.string().min(1),
-		description: z.string().min(1),
-		summary: z.string().min(1),
-		publishedAt: z
-			.string()
-			.min(1)
-			.refine((value) => !Number.isNaN(Date.parse(value)), {
-				message: "publishedAt must be a valid ISO date string",
-			}),
-		authorName: z.string().min(1),
-		authorRole: z.string().min(1),
-		featured: z.boolean().optional(),
-		draft: z.boolean().optional(),
-		heroMediaKind: z.enum(["image", "video"]),
-		heroMediaSrc: z.string().min(1),
-		heroPosterSrc: z.string().min(1).optional(),
-	})
-	.superRefine((value, context) => {
-		if (value.heroMediaKind === "video" && !value.heroPosterSrc) {
-			context.addIssue({
-				code: "custom",
-				message: "heroPosterSrc is required when heroMediaKind is video",
-				path: ["heroPosterSrc"],
-			});
-		}
-	});
-
-export type BlogPostSummary = z.infer<typeof blogPostFrontmatterSchema> & {
+export type BlogPostSummary = Pick<
+	BlogContentEntry,
+	| "title"
+	| "description"
+	| "summary"
+	| "publishedAt"
+	| "authorName"
+	| "authorRole"
+	| "featured"
+	| "draft"
+	| "heroMediaKind"
+	| "heroMediaSrc"
+	| "heroPosterSrc"
+> & {
 	slug: string[];
 	href: string;
 	sourcePath: string;
@@ -54,16 +35,6 @@ export type BlogPostRecord = BlogPostSummary & {
 	toc: BlogTocEntry[];
 	Content: ComponentType<{ params?: { slug?: string[] } }>;
 };
-
-function parseBlogPostFrontmatter(rawMetadata: unknown, slug: string[]) {
-	try {
-		return blogPostFrontmatterSchema.parse(rawMetadata);
-	} catch (error) {
-		throw new Error(
-			`Invalid frontmatter for blog post "${slug.join("/")}": ${error instanceof Error ? error.message : "Unknown error"}`,
-		);
-	}
-}
 
 function sortBlogPosts(posts: BlogPostSummary[]) {
 	return [...posts].sort((leftPost, rightPost) => {
@@ -78,32 +49,29 @@ function sortBlogPosts(posts: BlogPostSummary[]) {
 	});
 }
 
+function createBlogPostSummary(entry: BlogContentEntry): BlogPostSummary {
+	return {
+		title: entry.title,
+		description: entry.description,
+		summary: entry.summary,
+		publishedAt: entry.publishedAt,
+		authorName: entry.authorName,
+		authorRole: entry.authorRole,
+		featured: entry.featured,
+		draft: entry.draft,
+		heroMediaKind: entry.heroMediaKind,
+		heroMediaSrc: entry.heroMediaSrc,
+		heroPosterSrc: entry.heroPosterSrc,
+		slug: entry.slug,
+		href: getBlogPagePath(entry.slug),
+		sourcePath: entry.sourcePath,
+	};
+}
+
 const loadPublishedBlogPostSummaries = cache(async () => {
-	const params = await generateBlogStaticParams();
-	const posts: Array<BlogPostSummary | null> = await Promise.all(
-		params.map(async ({ slug }) => {
-			const { metadata } = await importPage(getBlogPageSegments(slug));
-			const parsedMetadata = parseBlogPostFrontmatter(metadata, slug);
+	const entries = await getPublishedBlogContentEntries();
 
-			if (parsedMetadata.draft) {
-				return null;
-			}
-
-			return {
-				...parsedMetadata,
-				slug,
-				href: getBlogPagePath(slug),
-				sourcePath: getBlogSourcePath(slug),
-				readingTimeText: metadata.readingTime?.text,
-			} satisfies BlogPostSummary;
-		}),
-	);
-
-	const publishedPosts = posts.filter(
-		(post): post is BlogPostSummary => post !== null,
-	);
-
-	return sortBlogPosts(publishedPosts);
+	return sortBlogPosts(entries.map(createBlogPostSummary));
 });
 
 export async function getPublishedBlogPostSummaries() {
@@ -112,32 +80,17 @@ export async function getPublishedBlogPostSummaries() {
 
 const loadPublishedBlogPostBySlug = cache(async (slugKey: string) => {
 	const slug = slugKey.split("/").filter(Boolean);
+	const page = await getBlogContentPage(slug);
 
-	try {
-		const importedPage = await importPage(getBlogPageSegments(slug));
-		const parsedMetadata = parseBlogPostFrontmatter(
-			importedPage.metadata,
-			slug,
-		);
-
-		if (parsedMetadata.draft) {
-			return null;
-		}
-
-		return {
-			...parsedMetadata,
-			slug,
-			href: getBlogPagePath(slug),
-			sourcePath: getBlogSourcePath(slug),
-			readingTimeText: importedPage.metadata.readingTime?.text,
-			toc: normalizeBlogToc(importedPage.toc),
-			Content: importedPage.default as ComponentType<{
-				params?: { slug?: string[] };
-			}>,
-		} satisfies BlogPostRecord;
-	} catch {
+	if (!page || page.entry.draft) {
 		return null;
 	}
+
+	return {
+		...createBlogPostSummary(page.entry),
+		toc: normalizeBlogToc(page.entry.headings),
+		Content: page.Content,
+	} satisfies BlogPostRecord;
 });
 
 export async function getPublishedBlogPostBySlug(slug: string[]) {

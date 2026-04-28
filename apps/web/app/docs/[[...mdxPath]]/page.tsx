@@ -1,16 +1,15 @@
-import { importPage } from "nextra/pages";
+import { notFound } from "next/navigation";
 
+import { DocsArticle } from "@/app/docs/_components/docs-article";
 import { buildDocsMetadata } from "@/app/docs/_lib/docs-metadata";
+import { generateDocsStaticParams } from "@/app/docs/_lib/page-paths";
 import {
-	generateDocsStaticParams,
-	getDocsPageSegments,
-} from "@/app/docs/_lib/page-paths";
+	getDocsContentMetadata,
+	getDocsContentPage,
+} from "@/app/docs/_server/docs-content";
 import { isStarterModuleEnabled } from "@/config/starter-selectors";
-import { useMDXComponents as getMDXComponents } from "@/mdx-components";
 
 import { DocsModuleDisabledState } from "../_components/docs-module-disabled-state";
-
-const Wrapper = getMDXComponents().wrapper;
 
 export const dynamicParams = true;
 
@@ -40,7 +39,11 @@ export async function generateMetadata(props: {
 	}
 
 	const { mdxPath } = await props.params;
-	const { metadata } = await importPage(getDocsPageSegments(mdxPath));
+	const metadata = await getDocsContentMetadata(mdxPath);
+	if (!metadata) {
+		notFound();
+	}
+
 	return buildDocsMetadata({ mdxPath, metadata });
 }
 
@@ -52,16 +55,16 @@ export default async function DocsContentPage(props: {
 	}
 
 	const params = await props.params;
-	const {
-		default: MDXContent,
-		toc,
-		metadata,
-		sourceCode,
-	} = await importPage(getDocsPageSegments(params.mdxPath));
+	const page = await getDocsContentPage(params.mdxPath);
+	if (!page) {
+		notFound();
+	}
+
+	const { Content, entry } = page;
 
 	return (
-		<Wrapper metadata={metadata} sourceCode={sourceCode} toc={toc}>
-			<MDXContent {...props} params={params} />
-		</Wrapper>
+		<DocsArticle entry={entry}>
+			<Content />
+		</DocsArticle>
 	);
 }

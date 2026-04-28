@@ -111,8 +111,8 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 				path: "apps/web/content/docs/local-setup.mdx",
 			},
 			{
-				label: "apps/web/node_modules/next/dist/docs/",
-				path: "apps/web/node_modules/next/dist/docs/",
+				label: "node_modules/next/dist/docs/",
+				path: "node_modules/next/dist/docs/",
 			},
 		],
 	},

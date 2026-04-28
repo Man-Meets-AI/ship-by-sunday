@@ -1,14 +1,16 @@
 import path from "node:path";
 import type { NextConfig } from "next";
-import nextra from "nextra";
+import createMDX from "@next/mdx";
 import { repoDownloadTraceIncludes } from "./config/vercel-output-tracing";
 
-const withNextra = nextra({
-	defaultShowCopyCode: true,
-	search: false,
+const withMDX = createMDX({
+	options: {
+		remarkPlugins: ["remark-frontmatter", "remark-gfm"],
+	},
 });
 
 const nextConfig: NextConfig = {
+	pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
 	outputFileTracingRoot: path.join(
 		/* turbopackIgnore: true */ __dirname,
 		"../../",
@@ -37,4 +39,4 @@ const nextConfig: NextConfig = {
 	},
 };
 
-export default withNextra(nextConfig);
+export default withMDX(nextConfig);
