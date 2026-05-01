@@ -68,9 +68,9 @@ export function BlueprintStageListField({
 		(index: number) => {
 			if (index <= 0) return;
 			const next = [...items];
-			const temp = next[index - 1];
+			const previousItem = next[index - 1];
 			next[index - 1] = next[index];
-			next[index] = temp;
+			next[index] = previousItem;
 			updateItems(next);
 			requestAnimationFrame(() => {
 				document.getElementById(`${inputIdPrefix}-${index - 1}`)?.focus();
@@ -83,9 +83,9 @@ export function BlueprintStageListField({
 		(index: number) => {
 			if (index >= items.length - 1) return;
 			const next = [...items];
-			const temp = next[index + 1];
+			const nextItem = next[index + 1];
 			next[index + 1] = next[index];
-			next[index] = temp;
+			next[index] = nextItem;
 			updateItems(next);
 			requestAnimationFrame(() => {
 				document.getElementById(`${inputIdPrefix}-${index + 1}`)?.focus();
