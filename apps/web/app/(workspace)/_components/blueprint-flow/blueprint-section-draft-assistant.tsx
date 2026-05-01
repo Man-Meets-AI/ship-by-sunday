@@ -1,8 +1,10 @@
 "use client";
 
-import type { CanonicalProjectFactsDraft } from "@shipbysunday/blueprint-compiler";
+import type {
+	CanonicalProjectFactKey,
+	CanonicalProjectFactsDraft,
+} from "@shipbysunday/blueprint-compiler";
 import { SparklesIcon } from "lucide-react";
-import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -13,51 +15,41 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
-import type { BlueprintStepDraftValues } from "@/lib/blueprint-flow/blueprint-step-save-feedback";
-import { useBlueprintProblemStatementOptimizer } from "@/app/(workspace)/_hooks/blueprint-flow/use-blueprint-problem-statement-optimizer";
+import { useBlueprintSectionDraftAssistant } from "@/app/(workspace)/_hooks/blueprint-flow/use-blueprint-section-draft-assistant";
+import type {
+	BlueprintDraftableSectionId,
+	BlueprintSectionDraftValues,
+} from "@/lib/blueprint-flow/blueprint-section-draft-assistant";
 
-export type BlueprintProblemStatementOptimizerProps = {
-	autoStartRequestKey?: number;
-	draftValues: BlueprintStepDraftValues;
+export type BlueprintSectionDraftAssistantProps = {
+	draftValues: Partial<Record<CanonicalProjectFactKey, string>>;
 	facts: CanonicalProjectFactsDraft;
-	onApplyOptimizedValue: (nextValue: string) => void;
-	stepId: string;
+	onApplyDraftValues: (draftValues: BlueprintSectionDraftValues) => void;
+	sectionId: BlueprintDraftableSectionId;
+	sectionLabel: string;
 };
 
-export function BlueprintProblemStatementOptimizer({
-	autoStartRequestKey = 0,
+export function BlueprintSectionDraftAssistant({
 	draftValues,
 	facts,
-	onApplyOptimizedValue,
-	stepId,
-}: BlueprintProblemStatementOptimizerProps) {
+	onApplyDraftValues,
+	sectionId,
+	sectionLabel,
+}: BlueprintSectionDraftAssistantProps) {
 	const {
 		closeDialog,
 		isBusy,
 		isDialogOpen,
 		message,
-		requestOptimization,
+		requestSectionDraft,
 		startManagedLogin,
 		status,
-	} = useBlueprintProblemStatementOptimizer({
+	} = useBlueprintSectionDraftAssistant({
 		draftValues,
 		facts,
-		onApplyOptimizedValue,
-		stepId,
+		onApplyDraftValues,
+		sectionId,
 	});
-	const previousAutoStartRequestKey = useRef(0);
-
-	useEffect(() => {
-		if (autoStartRequestKey === 0) {
-			return;
-		}
-		if (previousAutoStartRequestKey.current === autoStartRequestKey) {
-			return;
-		}
-
-		previousAutoStartRequestKey.current = autoStartRequestKey;
-		void requestOptimization();
-	}, [autoStartRequestKey, requestOptimization]);
 
 	return (
 		<>
@@ -66,17 +58,18 @@ export function BlueprintProblemStatementOptimizer({
 				variant="outline"
 				size="sm"
 				disabled={isBusy}
-				onClick={() => void requestOptimization()}
+				aria-label={`Draft ${sectionLabel} with AI`}
+				onClick={() => void requestSectionDraft()}
 			>
 				{isBusy ? (
 					<>
 						<Spinner className="size-3.5" />
-						Optimizing
+						Drafting
 					</>
 				) : (
 					<>
 						<SparklesIcon className="size-3.5" />
-						Optimize
+						Draft with AI
 					</>
 				)}
 			</Button>
@@ -90,10 +83,10 @@ export function BlueprintProblemStatementOptimizer({
 			>
 				<DialogContent className="sm:max-w-md">
 					<DialogHeader>
-						<DialogTitle>Optimize problem statement</DialogTitle>
+						<DialogTitle>Draft {sectionLabel}</DialogTitle>
 						<DialogDescription>
-							AI will sharpen this into a clearer, more specific problem
-							statement and update the field for you.
+							Codex will turn rough notes in this section into editable first
+							draft fields.
 						</DialogDescription>
 					</DialogHeader>
 					{message ? (
@@ -113,7 +106,7 @@ export function BlueprintProblemStatementOptimizer({
 								Connect account
 							</Button>
 						) : status === "error" ? (
-							<Button type="button" onClick={() => void requestOptimization()}>
+							<Button type="button" onClick={() => void requestSectionDraft()}>
 								Try again
 							</Button>
 						) : null}

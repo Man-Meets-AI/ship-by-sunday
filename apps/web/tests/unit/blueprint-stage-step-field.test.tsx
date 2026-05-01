@@ -10,17 +10,14 @@ import {
 import { BlueprintStageStepField } from "@/app/(workspace)/_components/blueprint-flow/blueprint-stage-step-field";
 
 describe("BlueprintStageStepField", () => {
-	it("shows the optimizer button only for the problem statement field", async () => {
+	it("renders field controls without field-level AI actions", () => {
 		const stage = getBlueprintStageDefinition("blueprint");
 		const problemStep = stage.steps.find(
 			(candidate) => candidate.id === "problem",
 		);
-		const foundationStep = stage.steps.find(
-			(candidate) => candidate.id === "foundation",
-		);
 
-		if (!problemStep || !foundationStep) {
-			throw new Error("Missing blueprint steps.");
+		if (!problemStep) {
+			throw new Error("Missing blueprint problem step.");
 		}
 
 		const facts = createCompleteProjectDefinition().facts;
@@ -39,22 +36,8 @@ describe("BlueprintStageStepField", () => {
 		);
 
 		expect(
-			await screen.findByRole("button", { name: "Optimize" }),
+			screen.getByLabelText(/What does Ship by Sunday OS solve/),
 		).toBeTruthy();
-
-		render(
-			<BlueprintStageStepField
-				fieldKey="product_name"
-				facts={facts}
-				draftValues={{ product_name: "Ship by Sunday" }}
-				step={foundationStep}
-				value="Ship by Sunday"
-				onChange={vi.fn()}
-			/>,
-		);
-
-		expect(screen.queryAllByRole("button", { name: "Optimize" })).toHaveLength(
-			1,
-		);
+		expect(screen.queryByRole("button", { name: /Draft/i })).toBeNull();
 	});
 });

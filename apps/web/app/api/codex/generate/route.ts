@@ -21,14 +21,17 @@ import {
 	getRequestIdFromRequest,
 	jsonWithRequestId,
 } from "@/platform/observability/request-id";
+import { blueprintSectionDraftTemplateIdValues } from "@/lib/blueprint-flow/blueprint-section-draft-assistant";
+
+const codexGenerateTemplateIds = [
+	...blueprintSectionDraftTemplateIdValues,
+	"competitor_research",
+	"scope_boundary",
+	"visual_direction_guide",
+] as const;
 
 const generateRequestSchema = z.object({
-	templateId: z.enum([
-		"blueprint_problem_statement",
-		"competitor_research",
-		"scope_boundary",
-		"visual_direction_guide",
-	]),
+	templateId: z.enum(codexGenerateTemplateIds),
 	prompt: z.string().min(1),
 	lessonId: z.string().min(1).optional(),
 	model: z.string().min(1).optional(),

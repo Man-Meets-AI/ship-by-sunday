@@ -162,3 +162,12 @@ If helpful, also record the external official references used for the work:
 - {{official reference 1}}
 - {{official reference 2}}
 - {{official reference 3}}
+
+## Shipped Note: Blueprint Intake Section Draft Assist
+
+- **Date:** 2026-05-01
+- **Surface:** `/blueprint` app workspace
+- **Change:** Foundation, Problem, Outcome, Pricing, and Setup now expose a compact `Draft with AI` action at the section header. The action uses the existing Codex connection flow to turn rough notes in the current intake into editable first-draft field values.
+- **Design direction:** Keep the workspace operational and sparse. The assistant is a quiet outline action beside each draftable section, not a separate card or promotional panel.
+- **Out of scope:** Design and Generated Preview remain excluded because Design has curated visual controls and Generated Preview is compiler-owned.
+- **Verification:** Focused unit, integration, integration-ui, format, lint, and typecheck/build checks were run for the touched blueprint/Codex slice.

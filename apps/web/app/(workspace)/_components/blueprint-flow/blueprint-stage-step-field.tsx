@@ -1,14 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { SparklesIcon } from "lucide-react";
-import {
-	memo,
-	useCallback,
-	useState,
-	type ChangeEvent,
-	type ComponentType,
-} from "react";
+import { memo, type ChangeEvent } from "react";
 import type {
 	CanonicalProjectFactKey,
 	CanonicalProjectFactsDraft,
@@ -22,13 +15,10 @@ import {
 	FieldError,
 	FieldLabel,
 } from "@/components/ui/field";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import type { BlueprintDesignPresetFieldProps } from "@/app/(workspace)/_components/blueprint-flow/blueprint-design-preset-field";
-import type { BlueprintProblemStatementOptimizerProps } from "@/app/(workspace)/_components/blueprint-flow/blueprint-problem-statement-optimizer";
 import type { BlueprintThemeConfiguratorProps } from "@/app/(workspace)/_components/blueprint-flow/blueprint-theme-configurator";
 import {
 	getBlueprintFieldScaleDefinition,
@@ -96,74 +86,6 @@ type BlueprintStageStepFieldProps = {
 	errorMessage?: string;
 	onChange: (fieldKey: CanonicalProjectFactKey, nextValue: string) => void;
 };
-
-type ProblemStatementOptimizerComponent =
-	ComponentType<BlueprintProblemStatementOptimizerProps>;
-
-function LazyBlueprintProblemStatementOptimizer({
-	draftValues,
-	facts,
-	onApplyOptimizedValue,
-	stepId,
-}: BlueprintProblemStatementOptimizerProps) {
-	const [OptimizerComponent, setOptimizerComponent] =
-		useState<ProblemStatementOptimizerComponent | null>(null);
-	const [isLoadingOptimizer, setIsLoadingOptimizer] = useState(false);
-	const [autoStartRequestKey, setAutoStartRequestKey] = useState(0);
-
-	const loadOptimizerAndStart = useCallback(async () => {
-		if (OptimizerComponent) {
-			setAutoStartRequestKey((key) => key + 1);
-			return;
-		}
-
-		setIsLoadingOptimizer(true);
-		try {
-			const optimizerModule =
-				await import("@/app/(workspace)/_components/blueprint-flow/blueprint-problem-statement-optimizer");
-			setOptimizerComponent(
-				() => optimizerModule.BlueprintProblemStatementOptimizer,
-			);
-			setAutoStartRequestKey((key) => key + 1);
-		} finally {
-			setIsLoadingOptimizer(false);
-		}
-	}, [OptimizerComponent]);
-
-	if (OptimizerComponent) {
-		return (
-			<OptimizerComponent
-				autoStartRequestKey={autoStartRequestKey}
-				draftValues={draftValues}
-				facts={facts}
-				onApplyOptimizedValue={onApplyOptimizedValue}
-				stepId={stepId}
-			/>
-		);
-	}
-
-	return (
-		<Button
-			type="button"
-			variant="outline"
-			size="sm"
-			disabled={isLoadingOptimizer}
-			onClick={() => void loadOptimizerAndStart()}
-		>
-			{isLoadingOptimizer ? (
-				<>
-					<Spinner className="size-3.5" />
-					Optimizing
-				</>
-			) : (
-				<>
-					<SparklesIcon className="size-3.5" />
-					Optimize
-				</>
-			)}
-		</Button>
-	);
-}
 
 function BlueprintStageStepFieldComponent({
 	fieldKey,
@@ -304,16 +226,6 @@ function BlueprintStageStepFieldComponent({
 				<FieldLabel htmlFor={inputId}>
 					{blueprintFieldLabel(fieldKey, facts)}
 				</FieldLabel>
-				{fieldKey === "problem_statement" ? (
-					<LazyBlueprintProblemStatementOptimizer
-						stepId={step.id}
-						facts={facts}
-						draftValues={draftValues}
-						onApplyOptimizedValue={(nextValue) => {
-							onChange(fieldKey, nextValue);
-						}}
-					/>
-				) : null}
 			</div>
 			<FieldContent>
 				{renderControl()}
