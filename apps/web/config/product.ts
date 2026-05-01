@@ -119,7 +119,7 @@ export const starterConfig = {
 		shortMark: "MMAI",
 		promise: "Ship a real, durable product by Sunday",
 		metadataDescription:
-			"Ship by Sunday helps you ship a real, durable product by Sunday with contract-first docs packs, an Agent-Ready Starter System, and support built to keep shipping on Monday.",
+			"Ship by Sunday helps technical founders turn phone-started agent work into codebases that convert: lock product truth, train worker roles with agent-ready packs, and ship from a starter path that stays aligned.",
 		images: {
 			founderProof: assetPaths.founderProof,
 			heroPreview: assetPaths.heroPreview,
@@ -141,7 +141,7 @@ export const starterConfig = {
 	marketing: {
 		docsLabel: "Docs",
 		loginLabel: "Sign in",
-		primaryCtaLabel: "Get the system",
+		primaryCtaLabel: "Get the blueprint",
 		previewImageAlt: "Ship by Sunday system preview",
 	},
 	workspace: {

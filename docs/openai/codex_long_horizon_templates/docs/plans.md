@@ -22,6 +22,17 @@
 
 [Describe the intended shape of the solution before implementation sprawls.]
 
+## Source facts to preserve
+
+- Product facts: `docs/facts/project-definition.json`
+- Visual system: `DESIGN.md`
+- Current task contract: `docs/prompt.md`
+- Existing app conventions: [files / folders / tests]
+
+## Active milestone selection
+
+Before implementation begins, mark exactly one milestone as active. The active milestone should be the smallest complete user-visible slice that advances the task without forcing unrelated refactors.
+
 ## Milestone map
 
 | Milestone | Outcome | Acceptance criteria | Validation commands | Status |
@@ -37,6 +48,16 @@
 **Objective**
 
 [What this milestone accomplishes.]
+
+**User-visible result**
+
+[What changes for the user, buyer, operator, or reviewer when this milestone is done.]
+
+**Owned files / boundaries**
+
+- Primary files: [...]
+- Files to avoid unless explicitly needed: [...]
+- External systems touched: [...]
 
 **Tasks**
 
@@ -56,6 +77,12 @@
 ...
 ...
 ```
+
+**Evidence required**
+
+- [ ] Requirement-to-evidence entry added to `docs/documentation.md`.
+- [ ] Validation output summarized with pass/fail/blocked status.
+- [ ] Demo or repro steps recorded when behavior changed.
 
 **Notes / decisions**
 
@@ -125,6 +152,8 @@ If a milestone validation fails:
 3. repair the failure,
 4. rerun validation,
 5. only then continue.
+
+Do not mark a failed validation as a follow-up unless the failure is unrelated to the active milestone and the reason is recorded in `docs/documentation.md`.
 
 ## Risks and unknowns
 

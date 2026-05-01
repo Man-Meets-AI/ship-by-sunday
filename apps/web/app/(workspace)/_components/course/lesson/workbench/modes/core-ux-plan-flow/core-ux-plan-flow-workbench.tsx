@@ -1,9 +1,10 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { WorkbenchModeProps } from "../../types";
+import { WorkbenchHeader } from "../../shared/workbench-header";
+import { WorkbenchMediaLayout } from "../../shared/workbench-media-layout";
 
 import { CoreUxPlanFlowApprovedSummary } from "./core-ux-plan-flow-approved-summary";
 import { CoreUxPlanFlowCommandsCard } from "./core-ux-plan-flow-commands-card";
@@ -14,26 +15,6 @@ import { CoreUxPlanFlowPinnedArtifacts } from "./core-ux-plan-flow-pinned-artifa
 import { CoreUxPlanFlowPlanOutcome } from "./core-ux-plan-flow-plan-outcome";
 import { CoreUxPlanFlowShadcnFields } from "./core-ux-plan-flow-shadcn-fields";
 import { CoreUxPlanFlowStudentWorkspace } from "./core-ux-plan-flow-student-workspace";
-
-function renderLessonTitle(title: string) {
-	const protectedPhrase = "Ship by Sunday";
-	const phraseStart = title.indexOf(protectedPhrase);
-
-	if (phraseStart === -1) {
-		return title;
-	}
-
-	const before = title.slice(0, phraseStart);
-	const after = title.slice(phraseStart + protectedPhrase.length);
-
-	return (
-		<>
-			{before}
-			<span className="whitespace-nowrap">{protectedPhrase}</span>
-			{after}
-		</>
-	);
-}
 
 export function CoreUxPlanFlowWorkbench(props: WorkbenchModeProps) {
 	const {
@@ -92,35 +73,12 @@ export function CoreUxPlanFlowWorkbench(props: WorkbenchModeProps) {
 
 	return (
 		<div className="w-full space-y-4 pb-1">
-			<div className="space-y-3">
-				<div className="flex flex-wrap items-center gap-2 text-muted-foreground">
-					<Badge variant="secondary" className="text-xs font-medium">
-						{lesson.id}
-					</Badge>
-					<Badge variant="outline" className="text-xs font-medium">
-						{lesson.artifact.label}
-					</Badge>
-					{lessonContent.lessonMeta.runtimeLabel ? (
-						<span className="text-xs font-medium text-muted-foreground">
-							{lessonContent.lessonMeta.runtimeLabel}
-						</span>
-					) : null}
-				</div>
-				<h1 className="text-balance text-3xl font-semibold text-foreground sm:text-4xl">
-					{renderLessonTitle(lesson.title)}
-				</h1>
-				<p className="max-w-prose pt-0.5 text-sm leading-relaxed text-muted-foreground sm:text-base">
-					{lessonContent.intro}
-				</p>
-			</div>
+			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
 			<Separator className="bg-border" />
 			{showSplitWorkbenchMedia ? (
-				<div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(300px,0.88fr)_minmax(0,1.12fr)] xl:items-start">
-					<div className="min-w-0 xl:sticky xl:top-0 xl:z-1 xl:self-start">
-						{inlineVideoCard}
-					</div>
-					<div className="min-w-0">{mainColumn}</div>
-				</div>
+				<WorkbenchMediaLayout media={inlineVideoCard}>
+					{mainColumn}
+				</WorkbenchMediaLayout>
 			) : showInlineVideo ? (
 				<>
 					{inlineVideoCard}

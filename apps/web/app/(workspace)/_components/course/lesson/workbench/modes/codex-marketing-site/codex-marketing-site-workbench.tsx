@@ -3,6 +3,8 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import type { WorkbenchModeProps } from "../../types";
+import { WorkbenchHeader } from "../../shared/workbench-header";
+import { WorkbenchMediaLayout } from "../../shared/workbench-media-layout";
 
 import { CODEX_MARKETING_SITE_FIELD_IDS } from "@/lib/course/lesson/workbench/modes/codex-marketing-site/codex-marketing-site-constants";
 import { CodexMarketingSiteAdvancedAccordion } from "./codex-marketing-site-advanced-accordion";
@@ -12,7 +14,6 @@ import { CodexMarketingSiteCopyTabs } from "./codex-marketing-site-copy-tabs";
 import { CodexMarketingSiteDependenciesCard } from "./codex-marketing-site-dependencies-card";
 import { CodexMarketingSiteHandoffCard } from "./codex-marketing-site-handoff-card";
 import { CodexMarketingSiteLessonVideo } from "./codex-marketing-site-lesson-video";
-import { CodexMarketingSitePageHeader } from "./codex-marketing-site-page-header";
 import { CodexMarketingSitePinnedSummary } from "./codex-marketing-site-pinned-summary";
 import { CodexMarketingSitePlanModeAlert } from "./codex-marketing-site-plan-mode-alert";
 import { CodexMarketingSitePromptCard } from "./codex-marketing-site-prompt-card";
@@ -83,18 +84,12 @@ export function CodexMarketingSiteWorkbench({
 
 	return (
 		<div className="w-full space-y-4 pb-1">
-			<CodexMarketingSitePageHeader
-				lesson={lesson}
-				lessonContent={lessonContent}
-			/>
+			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
 			<Separator className="bg-border" />
 			{showSplitWorkbenchMedia ? (
-				<div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(300px,0.88fr)_minmax(0,1.12fr)] xl:items-start">
-					<div className="min-w-0 xl:sticky xl:top-0 xl:z-1 xl:self-start">
-						{inlineVideoCard}
-					</div>
-					<div className="min-w-0">{body}</div>
-				</div>
+				<WorkbenchMediaLayout media={inlineVideoCard}>
+					{body}
+				</WorkbenchMediaLayout>
 			) : showInlineVideo ? (
 				<>
 					{inlineVideoCard}

@@ -143,6 +143,23 @@ describe("repo generation", () => {
 		const forbiddenPaths = snapshotPaths.filter((path) =>
 			isExcludedSnapshotPath(path),
 		);
+		const rootAgentGuide = snapshotFiles.find(
+			(file) => file.path === "AGENTS.md",
+		);
+		const appAgentGuide = snapshotFiles.find(
+			(file) => file.path === "apps/web/AGENTS.md",
+		);
+
+		expect(rootAgentGuide?.content).toContain("docs/build/docs/prompt.md");
+		expect(rootAgentGuide?.content).toContain(
+			"requirement-to-evidence checklist",
+		);
+		expect(appAgentGuide?.content).toContain(
+			"docs/facts/project-definition.json",
+		);
+		expect(appAgentGuide?.content).toContain(
+			"Keep UI rendering, route orchestration, domain logic, and provider I/O in separate files",
+		);
 		expect(forbiddenPaths).toEqual([]);
 	});
 });

@@ -6,6 +6,7 @@ import {
 	productWordmarkClassName,
 } from "@/components/product-brand";
 import { routeConfig } from "@/config/product";
+import { marketingDisplayConfig } from "@/config/starter-selectors";
 import { getBlogPagePath } from "@/app/blog/_server/page-paths";
 
 const blogNavigationLinks = [
@@ -56,7 +57,7 @@ export function BlogSurfaceHeader({ activeHref }: BlogSurfaceHeaderProps) {
 						href={`${routeConfig.home}${routeConfig.pricingHash}`}
 						className="hidden min-h-11 items-center rounded-full bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-foreground/80 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50 sm:inline-flex"
 					>
-						Get the system
+						{marketingDisplayConfig.primaryCtaLabel}
 					</Link>
 					<ThemeToggleButton className="border-border/70 bg-background/70" />
 				</div>

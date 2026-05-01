@@ -27,30 +27,30 @@ export const homePageContent = {
 		docsLabel: marketingDisplayConfig.docsLabel,
 		loginLabel: marketingDisplayConfig.loginLabel,
 		promoBanner,
-		headlineLead: "Ship a real product",
+		headlineLead: "Ship codebases",
 		headlineTailPrefix: "",
-		headlineTailHover: "by Sunday",
-		body: "Ship a durable product in one weekend with a blueprint-first system and a custom starter shaped around what you're building.",
+		headlineTailHover: "that convert",
+		body: "Turn phone-started ideas, async agent loops, and messy AI output into worker-ready context: product truth, role-specific packs, and a starter path agents can use to ship meaningful code.",
 		primaryCta: marketingDisplayConfig.primaryCtaLabel,
 		secondaryCta: {
-			label: "See how Ship Blueprint works",
+			label: "See the worker path",
 			href: routeConfig.systemHash,
 		},
 		eyebrow:
-			"One-time payment. Lifetime access. Start the product intake immediately after checkout so the weekend starts with the real product constraints, not a blank chat.",
+			"One-time payment. Lifetime access. Build the worker layer first so every product, design, marketing, build, and QA role acts from the same decisions.",
 	},
 	sprintPathSection: {
 		label: "System",
-		titlePrefix: "Most AI builds ",
-		titleHighlight: "start with prompts.",
+		titlePrefix: "Agents need ",
+		titleHighlight: "worker context.",
 		intro:
-			"The model is not the part that breaks first. The context is. Weekend AI builds drift because the product truth, scope, design direction, and launch claims live in scattered chats that go stale fast.",
+			"If you want to start work from your phone and let agents ship meaningful code, the risk is not whether a model can write code. It is whether every role knows your decisions, standards, constraints, conversion promise, and next action.",
 		supportingPoints: [
-			"Ship by Sunday captures the product truth first, then compiles contract-first docs packs for design, marketing, build execution, and prompting.",
-			"The packs are file-based and agent-readable, so each tool works from the same scope, constraints, and claims instead of a stale chat summary.",
-			"The same contract-first path feeds the starter system, so the repo, the docs, and the execution path stay aligned instead of drifting apart.",
+			"Ship by Sunday turns your product judgment into role-specific worker packs for product, design, marketing, build, and prompting, so each hat gets explicit decisions instead of vague instructions.",
+			"Those packs are file-based and agent-readable, so Codex, DM-started workflows, and AFK loops can reuse the same source of truth without rebuilding context from chat history.",
+			"The starter path keeps code, docs, CTA claims, and review steps aligned, so agent changes can compound toward a product that ships and converts.",
 		],
-		valueFrame: "Most starters give you code. This gives you blueprint.",
+		valueFrame: "Most starters give you code. This trains the worker layer.",
 		imageAlt:
 			"Diagram showing a product definition turning into Design, Marketing, Build, and Prompt Packs plus a final Blueprint",
 	},
@@ -96,12 +96,18 @@ export const homePageContent = {
 			{
 				question: "Who is this for?",
 				answer:
-					"Technical builders and founder-operators who can get things working, but keep getting stuck between idea, prompts, code, and launch.",
+					"Technical founders and operators who can get AI to produce code, but need a durable worker layer for phone-started loops, role-specific agents, and codebases that have to convert.",
 			},
 			{
 				question: "Why not just use ChatGPT, Claude, or Codex directly?",
 				answer:
-					"You can. The problem is fragments. Ship Blueprint makes those tools work from one source of truth instead of stale chats and half-decisions.",
+					"You can. Ship by Sunday is the worker layer around those tools: one product truth, role-specific packs, and a starter path that keeps the codebase aligned.",
+			},
+			{
+				question:
+					"Can this help with Telegram, Discord, or phone-started agent loops?",
+				answer:
+					"Yes, if you are wiring those loops yourself. Ship by Sunday gives the code-side context those loops need: worker roles, product truth, QA prompts, and repo guidance that agents can reuse.",
 			},
 			{
 				question: "What happens right after I pay?",
@@ -111,58 +117,54 @@ export const homePageContent = {
 	},
 	whatsInsideSection: {
 		label: "By Sunday",
-		title: "Get it Done.",
+		title: "Build the worker layer.",
 		intro:
-			"Enough clarity to build. Enough structure to hand off. No vague prompts, no half-decisions.",
+			"Enough judgment to build. Enough structure to hand off. No vague prompts, no half-decisions.",
 		pillars: [
 			{
 				title: "The product truth",
 				highlightBefore: "Lock ",
-				highlight: "the right user, problem, scope, and promise",
+				highlight:
+					"the user, offer, scope, conversion promise, and constraints",
 				highlightAfter:
 					" before code, so the build starts from something real.",
 				supporting:
-					"This is the clarity layer the rest of the weekend depends on.",
+					"This is the judgment layer every worker role needs before agents touch the repo.",
 			},
 			{
-				title: "The packs",
+				title: "The worker roles",
 				highlightBefore: "Leave with ",
-				highlight: "Design, Marketing, Build, and Prompt Packs",
-				highlightAfter:
-					" that turn the same product truth into usable instructions.",
+				highlight: "Product, Design, Marketing, Build, Prompt, and QA Packs",
+				highlightAfter: " that train each hat you wear at the computer.",
 				supporting:
-					"Each pack carries the context, constraints, and next actions that domain needs.",
+					"Each role gets the context, constraints, and next actions it needs instead of inheriting a stale chat summary.",
 			},
 			{
-				title: "The starter path",
+				title: "The execution path",
 				highlightBefore: "Review the ",
-				highlight: "Ship by Sunday Blueprint path",
+				highlight: "starter path for Codex and async agent loops",
 				highlightAfter:
-					" before execution, so you can verify the repo before handoff.",
+					" so work can start from your phone and still land in a real repo.",
 				supporting:
-					"This is a concrete build system, not random prompts and a hope-based plan.",
+					"This is a concrete build system for meaningful code changes, not random prompts and a hope-based plan.",
 			},
 		],
 	},
 	starterSystemSection: {
-		title: "More than a starter. A system you can keep shipping from.",
-		titleLines: [
-			"More than a starter.",
-			"A system you can",
-			"keep shipping from.",
-		],
+		title: "A worker layer your agents can build from.",
+		titleLines: ["A worker layer.", "Your agents can", "build from."],
 		intro:
-			"The blueprint gives the agents the truth. The starter gives that truth a real product shape: curated design direction, auth, billing, docs, protected workspace, and the seams to keep changing the product without losing the plot.",
+			"The blueprint gives every worker role the truth. The starter gives that truth a real product shape: auth, billing, docs, protected workspace, QA paths, and repo guidance for agents running while you are AFK.",
 		capabilities: [
 			{
-				title: "Product blueprint",
+				title: "Worker blueprint",
 				description:
-					"Start from a repo already shaped around your product, not a dead template you have to reinterpret every session.",
+					"Start from a repo already shaped around your decisions, not a dead template you have to reinterpret every session.",
 			},
 			{
-				title: "Built-in QA",
+				title: "Role-specific packs",
 				description:
-					"Smoke paths, QA prompts, and incident alerts are already in the repo, so shipping does not turn into guesswork the moment something breaks.",
+					"Product, design, marketing, build, prompt, and QA packs give each worker role a clear operating brief.",
 			},
 			{
 				title: "Safer agent changes",
@@ -170,19 +172,19 @@ export const homePageContent = {
 					"Guidance for Clerk, Convex, Stripe, Next.js, React, and Vercel helps agents make changes inside real constraints instead of blind file surgery.",
 			},
 			{
-				title: "Reuse the product truth",
+				title: "Async-ready context",
 				description:
-					"The same product definition feeds the next feature without starting from a blank chat.",
+					"Use the same source of truth from Codex, phone prompts, or your own Telegram and Discord relays without rebuilding the brief.",
 			},
 			{
-				title: "Extend without starting over",
+				title: "Built-in QA",
 				description:
-					"The repo stays aligned to the same contract, so changes build on product truth instead of scattered edits.",
+					"Smoke paths, QA prompts, and incident alerts are already in the repo, so shipping does not turn into guesswork the moment something breaks.",
 			},
 			{
-				title: "Keep one source of truth",
+				title: "Conversion-aware starter",
 				description:
-					"When better models arrive next month, you move faster. You do not restart the project from zero.",
+					"The homepage, docs, checkout claims, and review path stay aligned to the promise you are trying to sell.",
 			},
 			{
 				title: "Curated design direction",
@@ -221,7 +223,7 @@ export const homePageContent = {
 		titleLead: "Ship a real product",
 		titleAccent: "by Sunday",
 		intro:
-			"One payment for Ship Blueprint: the guided blueprint-first run, the Agent-Ready Packs, the Ship by Sunday Blueprint, and the guidance that keeps you shipping after the first weekend.",
+			"One payment for the blueprint-first run that turns phone-started agent work into a reviewable codebase: product truth, worker roles, starter path, and QA prompts that keep the repo aligned.",
 		priceDisplay: productConfig.checkoutPriceDisplay,
 		originalPriceDisplay: activePricingOffer
 			? productConfig.priceDisplay
@@ -231,11 +233,12 @@ export const homePageContent = {
 			productConfig.checkoutPriceDisplay,
 		offerBanner: pricingOfferBanner,
 		eyebrow: "One-time payment. Lifetime access.",
-		ctaTitle: "Get the system",
+		ctaTitle: "Get the blueprint",
 		trustLine: `After checkout, you go straight into the ${workspaceDisplayConfig.homeNoun} to lock the truth, compile the packs, and shape your Blueprint.`,
 		includes: [
 			"Guided product intake and review workspace",
 			"Agent-Ready Packs",
+			"Worker-role setup for product, design, marketing, build, and QA",
 			"Ship by Sunday Blueprint",
 			"Fast Pass Walkthroughs",
 			"Guided Ship Path",

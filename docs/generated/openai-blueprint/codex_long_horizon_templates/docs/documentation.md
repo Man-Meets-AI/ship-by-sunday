@@ -31,6 +31,18 @@
 - **Why:** [...]
 - **Tradeoffs:** [...]
 
+## Assumptions
+
+| Assumption | Why it is safe | Evidence | Revisit when |
+|---|---|---|---|
+| [...] | [...] | [...] | [...] |
+
+## Requirement-to-evidence checklist
+
+| Requirement | Evidence source | Status | Notes |
+|---|---|---|---|
+| [Deliverable, done-when item, validation command, or demo step] | [test, command, browser proof, file diff, or doc update] | [Pass / Fail / Blocked] | [...] |
+
 ## Validation log
 
 ### [YYYY-MM-DD HH:MM] — [Milestone / checkpoint]

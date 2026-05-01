@@ -8,9 +8,16 @@ const headlineLineClass =
 	"font-marketing-display tracking-marketing-section block text-balance text-[clamp(3.5rem,10vw,8.5rem)] font-normal uppercase leading-[0.95] text-foreground transition-all duration-500 hover:tracking-tighter";
 
 export function HomeHeroHeadline({ hero }: { hero: Hero }) {
+	const headlineText = [
+		hero.headlineLead,
+		`${hero.headlineTailPrefix}${hero.headlineTailHover}`,
+	]
+		.filter(Boolean)
+		.join(" ");
+
 	return (
 		<div className="w-full">
-			<h1 className="flex flex-col items-center">
+			<h1 aria-label={headlineText} className="flex flex-col items-center">
 				<span className={headlineLineClass}>{hero.headlineLead}</span>
 				<span className={cn(headlineLineClass, "text-primary/90")}>
 					{hero.headlineTailPrefix}
