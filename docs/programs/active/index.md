@@ -27,6 +27,6 @@ Inside that folder:
 
 Active Program folders:
 
-None currently.
+- None currently.
 
 Completed Program packets live under `docs/programs/completed/`.

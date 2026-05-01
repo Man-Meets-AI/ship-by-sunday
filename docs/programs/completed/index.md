@@ -18,6 +18,7 @@ The Program must satisfy [PROGRAMS.md](/Users/parkerrex/Developer/ship-by-sunday
 
 Completed Program folders:
 
+- `docs/programs/completed/2026-05-01-generated-repo-first-slice-autonomy/`: completed generated customer-repo autonomy initiative that added deterministic Build Pack readiness, derived first-slice planning, package-script-backed validation, review and verification proof, weak-fact blockers, clean-room replay proof, and structural regression snapshots.
 - `docs/programs/completed/2026-04-27-remove-nextra-docs-runtime/`: completed Nextra runtime removal initiative that moved docs and blog public rendering to repo-owned MDX inventory, loaders, navigation, metadata, theme shell, package config, and browser proof while preserving public URLs.
 - `docs/programs/completed/2026-04-26-remove-feature-folder-surface/`: completed feature-folder removal initiative that deleted every `apps/web/features` folder and moved ownership to App Router private folders, shared UI, `lib`, `platform`, hooks, config, and Convex source owners without changing product behavior.
 - `docs/programs/completed/2026-04-26-app-structure-refactor/`: completed app structure refactor slices that made route, Convex, Stripe, shared UI, platform, and durable product-domain ownership explicit without changing business behavior.

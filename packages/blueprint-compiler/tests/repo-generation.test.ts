@@ -9,6 +9,57 @@ import {
 const unresolvedCriticalPlaceholderPattern =
 	/\[(?! )[A-Z][^\]\n]*\]|\[[^\]\n]*\.\.\.[^\]\n]*\]/;
 
+function splitMarkdownTableRow(row: string) {
+	return row
+		.trim()
+		.replace(/^\|/, "")
+		.replace(/\|$/, "")
+		.split("|")
+		.map((cell) => cell.trim());
+}
+
+function parseMarkdownTable(content: string, firstHeader: string) {
+	const lines = content.split("\n");
+	const headerIndex = lines.findIndex(
+		(line) =>
+			line.startsWith("|") && splitMarkdownTableRow(line)[0] === firstHeader,
+	);
+
+	expect(headerIndex).toBeGreaterThanOrEqual(0);
+
+	const headers = splitMarkdownTableRow(lines[headerIndex] ?? "");
+	const rows: Record<string, string>[] = [];
+
+	for (const line of lines.slice(headerIndex + 2)) {
+		if (!line.startsWith("|")) {
+			break;
+		}
+
+		const cells = splitMarkdownTableRow(line);
+		rows.push(
+			Object.fromEntries(
+				headers.map((header, index) => [header, cells[index] ?? ""]),
+			),
+		);
+	}
+
+	return rows;
+}
+
+function stripInlineCode(value: string) {
+	return value.replace(/^`|`$/g, "");
+}
+
+function snapshotText(file: { content: string | Buffer } | undefined) {
+	if (!file) {
+		return "";
+	}
+
+	return typeof file.content === "string"
+		? file.content
+		: file.content.toString();
+}
+
 describe("repo generation", () => {
 	it("builds a repo manifest from the project definition", () => {
 		const manifest = buildRepoGenerationManifest(
@@ -95,6 +146,9 @@ describe("repo generation", () => {
 		expect(packageJson.scripts["codex:skills:install"]).toBe(
 			"bash ./scripts/install-codex-skills.sh",
 		);
+		expect(packageJson.scripts["test:compiler"]).toBe(
+			"bun run --cwd packages/blueprint-compiler test",
+		);
 		expect(skillsManifest.externalSkills).toEqual(
 			expect.arrayContaining([
 				expect.objectContaining({
@@ -133,6 +187,8 @@ describe("repo generation", () => {
 				"apps/web/app/_content/home-page.ts",
 				"docs/index.md",
 				"docs/build/docs/agent-handoff.md",
+				"docs/build/docs/readiness.md",
+				"docs/build/docs/review.md",
 				"docs/build/docs/prompt.md",
 				"docs/facts/design-system.json",
 				"apps/web/.env.production.example",
@@ -177,6 +233,12 @@ describe("repo generation", () => {
 		const agentHandoff = snapshotFiles.find(
 			(file) => file.path === "docs/build/docs/agent-handoff.md",
 		);
+		const buildReadiness = snapshotFiles.find(
+			(file) => file.path === "docs/build/docs/readiness.md",
+		);
+		const buildReview = snapshotFiles.find(
+			(file) => file.path === "docs/build/docs/review.md",
+		);
 		const buildPlans = snapshotFiles.find(
 			(file) => file.path === "docs/build/docs/plans.md",
 		);
@@ -193,9 +255,22 @@ describe("repo generation", () => {
 		expect(rootAgentGuide?.content).toContain(
 			"For product build work, read `docs/build/docs/agent-handoff.md` first",
 		);
+		expect(agentHandoff?.content.indexOf("## Readiness First")).toBeLessThan(
+			agentHandoff?.content.indexOf("## Start Prompt") ??
+				Number.MAX_SAFE_INTEGER,
+		);
 		expect(agentHandoff?.content).toContain("## Start Prompt");
 		expect(agentHandoff?.content).toContain("## Required Source Files");
 		expect(agentHandoff?.content).toContain("## Required Completion Evidence");
+		expect(buildReadiness?.content).toContain("## Readiness Verdict");
+		expect(buildReadiness?.content).toContain("## Derived First Slice Plan");
+		expect(buildReadiness?.content).toContain("## Starter File Reading Order");
+		expect(buildReadiness?.content).toContain("## Validation Manifest");
+		expect(buildReadiness?.content).toContain("## Customer Input Work");
+		expect(buildReadiness?.content).toContain("Confidence state:");
+		expect(buildReadiness?.content).not.toContain("/Users/");
+		expect(buildReadiness?.content).not.toContain("sk-");
+		expect(buildReadiness?.content).not.toContain("current chat context");
 		expect(buildPrompt?.content).toContain("## Authority Order");
 		expect(buildPrompt?.content).toContain("## Implementation Target");
 		expect(buildPrompt?.content).toContain("## Completion Audit Checklist");
@@ -204,9 +279,11 @@ describe("repo generation", () => {
 		expect(buildPlans?.content).toContain("## Detailed Milestone Plans");
 		expect(buildImplement?.content).toContain("## Source Of Truth");
 		expect(buildImplement?.content).toContain("## Preflight Checklist");
-		expect(buildImplement?.content).toContain(
-			"## Suggested Validation Commands",
-		);
+		expect(buildImplement?.content).toContain("## Typed Validation Manifest");
+		expect(buildReview?.content).toContain("## Review Prompt");
+		expect(buildReview?.content).toContain("## Verification Personas");
+		expect(buildReview?.content).toContain("docs/testing/run-report.md");
+		expect(buildReview?.content).toContain("## Evidence Table");
 		expect(buildDocumentation?.content).toContain("## Current Status");
 		expect(buildDocumentation?.content).toContain(
 			"## Requirement-To-Evidence Checklist",
@@ -214,6 +291,8 @@ describe("repo generation", () => {
 
 		for (const buildDoc of [
 			agentHandoff,
+			buildReadiness,
+			buildReview,
 			buildPrompt,
 			buildPlans,
 			buildImplement,
@@ -224,5 +303,55 @@ describe("repo generation", () => {
 				unresolvedCriticalPlaceholderPattern,
 			);
 		}
+	});
+
+	it("clean-room replays the generated build pack command manifest", async () => {
+		const snapshotFiles = await materializeRepoSnapshot(
+			createCompleteProjectDefinition(),
+		);
+		const readiness = snapshotFiles.find(
+			(file) => file.path === "docs/build/docs/readiness.md",
+		);
+		const review = snapshotFiles.find(
+			(file) => file.path === "docs/build/docs/review.md",
+		);
+		const packageJsonFile = snapshotFiles.find(
+			(file) => file.path === "package.json",
+		);
+
+		expect(readiness).toBeDefined();
+		expect(review).toBeDefined();
+		expect(packageJsonFile).toBeDefined();
+
+		const packageJson = JSON.parse(snapshotText(packageJsonFile) || "{}") as {
+			scripts?: Record<string, string>;
+		};
+		const scripts = packageJson.scripts ?? {};
+		const validationRows = parseMarkdownTable(
+			snapshotText(readiness),
+			"Source validation step",
+		);
+		const runnableRows = validationRows.filter(
+			(row) => row.Type === "runnable",
+		);
+
+		expect(runnableRows.length).toBeGreaterThan(0);
+		for (const row of runnableRows) {
+			const scriptName = stripInlineCode(row["Package script"] ?? "");
+			const proofPath = stripInlineCode(row["Proof path"] ?? "");
+
+			expect(scriptName).not.toBe("n/a");
+			expect(scripts[scriptName]).toBeDefined();
+			expect(proofPath).toBe(`bun run ${scriptName}`);
+		}
+
+		expect(snapshotText(readiness)).toContain("## Blockers");
+		expect(snapshotText(readiness)).toContain("## Weak Fact Warnings");
+		expect(snapshotText(readiness)).toContain("## Ask Customer Before");
+		expect(snapshotText(review)).toContain("## Regression Checks");
+		expect(snapshotText(review)).toContain(
+			"| Item | Evidence source | Status | Notes |",
+		);
+		expect(snapshotText(review)).not.toContain("current chat context");
 	});
 });

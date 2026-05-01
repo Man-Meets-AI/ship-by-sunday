@@ -14,10 +14,13 @@ read_when:
 
 ## Current State
 
-There are no active Program packets right now.
+Active:
+
+- None currently.
 
 Recently completed:
 
+- `docs/programs/completed/2026-05-01-generated-repo-first-slice-autonomy/`: completed generated customer-repo autonomy Program that made downloaded repos executable by fresh coding agents without chat history.
 - `docs/programs/completed/2026-04-26-app-structure-refactor/`: completed refactor Program that reduced and disciplined the Ship by Sunday app structure across App Router routes, Convex, Stripe, shared UI, platform boundaries, and durable product domains.
 
 Active Program folders belong under `docs/programs/active/<YYYY-MM-DD-program-id>/`. Completed Program packets live under `docs/programs/completed/`.
