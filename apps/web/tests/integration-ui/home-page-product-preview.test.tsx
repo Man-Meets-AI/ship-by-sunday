@@ -13,7 +13,7 @@ import { homePageContent } from "@/app/_content/home-page";
 import { ProductPreviewSectionBlock } from "@/app/_components/home-page/sections/product-preview-section";
 
 describe("ProductPreviewSectionBlock", () => {
-	it("lets public visitors edit the preview and keeps build/video actions protected by route", async () => {
+	it("lets public visitors edit the preview and routes first-screen actions toward conversion context", async () => {
 		const user = userEvent.setup();
 
 		render(
@@ -25,31 +25,31 @@ describe("ProductPreviewSectionBlock", () => {
 		expect(
 			screen.getByRole("heading", {
 				level: 1,
-				name: "Set up the repo.",
+				name: "Build the worker layer.",
 			}),
 		).toBeTruthy();
-		expect(screen.getByTestId("preview-build-repo").getAttribute("href")).toBe(
-			"/settings",
+		expect(screen.getByTestId("preview-primary-cta").getAttribute("href")).toBe(
+			"#pricing",
 		);
-		expect(screen.getByTestId("preview-watch-video").getAttribute("href")).toBe(
-			"/lesson/welcome-to-ship-by-sunday",
-		);
+		expect(
+			screen.getByTestId("preview-secondary-cta").getAttribute("href"),
+		).toBe("#system");
 
-		const githubInput = screen.getByLabelText("GitHub username");
+		const githubInput = screen.getByLabelText("Codebase GitHub username");
 		await user.clear(githubInput);
 		await user.type(githubInput, "shipper");
 		expect(screen.getAllByText("@shipper").length).toBeGreaterThan(0);
 
-		await user.click(screen.getByRole("tab", { name: "QA" }));
+		await user.click(screen.getByRole("tab", { name: "Proof" }));
 		expect(
-			screen.getByRole("heading", { level: 2, name: "QA path" }),
+			screen.getByRole("heading", { level: 2, name: "Code shipping path" }),
 		).toBeTruthy();
 
-		const repoInviteCheckbox = screen.getByRole("checkbox", {
-			name: "Repo invite ready",
+		const channelLoopCheckbox = screen.getByRole("checkbox", {
+			name: "Channel loop ready",
 		});
-		expect(repoInviteCheckbox.getAttribute("aria-checked")).toBe("false");
-		await user.click(repoInviteCheckbox);
-		expect(repoInviteCheckbox.getAttribute("aria-checked")).toBe("true");
+		expect(channelLoopCheckbox.getAttribute("aria-checked")).toBe("false");
+		await user.click(channelLoopCheckbox);
+		expect(channelLoopCheckbox.getAttribute("aria-checked")).toBe("true");
 	});
 });

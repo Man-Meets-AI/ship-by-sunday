@@ -22,50 +22,91 @@ const pricingOfferBanner = activePricingOffer
 export const homePageContent = {
 	productPreviewSection: {
 		kicker: productName,
-		title: "Set up the repo.",
+		title: "Build the worker layer.",
 		intro:
-			"Play with the setup workspace customers land in after checkout: repo invite, Codex loop, video path, and QA.",
+			"Start a decision from your phone, hand it to a trained worker role, and give agents enough product context to ship reviewed code.",
 		primaryAction: {
-			label: "Build the repo",
-			href: routeConfig.settings,
+			label: "Build the worker layer",
+			href: routeConfig.pricingHash,
 		},
 		secondaryAction: {
-			label: "Watch setup video",
-			href: "/lesson/welcome-to-ship-by-sunday",
+			label: "See the loop",
+			href: routeConfig.systemHash,
 		},
 		unlockNote:
-			"Checkout unlocks saved setup, private videos, and the build actions.",
+			"Checkout opens saved setup, worker role packs, private videos, and the build actions.",
+		previewNote:
+			"Tune the worker preview. Checkout saves the context and opens the build path.",
 		workspace: {
-			title: "Starter repo setup",
-			statusLabel: "Preview mode",
-			githubUsernameLabel: "GitHub username",
+			title: "Worker layer preview",
+			statusLabel: "Buyer preview",
+			githubUsernameLabel: "Codebase GitHub username",
 			githubUsernamePlaceholder: "parkerrex",
 			githubUsernameHelp:
-				"This is where the private starter repo invite gets sent after checkout.",
+				"After checkout, this account receives the private starter repo and worker-layer setup.",
 			tabs: [
 				{
-					id: "repo",
-					label: "Repo",
-					title: "Repo access",
+					id: "source",
+					label: "Source",
+					title: "Decision context",
 					description:
-						"Save the GitHub account that should receive the private starter repo.",
-					items: ["GitHub username", "Invite status", "Starter repo link"],
+						"Capture the product truth, operator taste, and next decision so every run starts from the same context.",
+					items: [
+						{
+							label: "Product truth",
+							detail: "Problem, promise, scope",
+						},
+						{
+							label: "Operator taste",
+							detail: "How you decide and review",
+						},
+						{
+							label: "Next decision",
+							detail: "Ready for the next loop",
+						},
+					],
 				},
 				{
-					id: "codex",
-					label: "Codex",
-					title: "Codex loop",
+					id: "channels",
+					label: "Channels",
+					title: "Phone to agent",
 					description:
-						"Connect your subscription and send worker briefs through the same context.",
-					items: ["Account connection", "Rate-limit check", "Worker prompt"],
+						"Send the same worker brief through Codex, Telegram, Discord, or a phone-started prompt without losing the thread.",
+					items: [
+						{
+							label: "Codex dispatch",
+							detail: "Agent run with repo context",
+						},
+						{
+							label: "Telegram / Discord",
+							detail: "Async loop handoff",
+						},
+						{
+							label: "Worker prompt",
+							detail: "One role, one outcome",
+						},
+					],
 				},
 				{
-					id: "qa",
-					label: "QA",
-					title: "QA path",
+					id: "proof",
+					label: "Proof",
+					title: "Code shipping path",
 					description:
-						"Review the diff, proof, and next action before the loop compounds.",
-					items: ["Diff review", "Browser proof", "Next loop"],
+						"Review the diff, browser proof, and next action before the loop compounds into your worker layer.",
+					items: [
+						{
+							label: "Diff review",
+							detail: "Meaningful code, not random edits",
+						},
+						{
+							label: "Browser proof",
+							detail: "Behavior checked before trust",
+						},
+						{
+							label: "Next loop",
+							detail: "Context feeds forward",
+						},
+					],
 				},
 			],
 			checklist: [
@@ -74,12 +115,12 @@ export const homePageContent = {
 					label: "Product truth locked",
 				},
 				{
-					id: "repo",
-					label: "Repo invite ready",
+					id: "roles",
+					label: "Worker roles trained",
 				},
 				{
-					id: "codex",
-					label: "Codex loop connected",
+					id: "channels",
+					label: "Channel loop ready",
 				},
 				{
 					id: "qa",
@@ -114,7 +155,7 @@ export const homePageContent = {
 		intro:
 			"An exec loop is the repeatable path from decision to agent run to QA to the next decision.",
 		supportingPoints: [
-			"Decide what should happen.",
+			"Start a decision from your phone, desk, Telegram, or Discord.",
 			"Package the decision for the right worker role.",
 			"Run the agent, review the change, and feed the result back into the system.",
 		],
@@ -165,7 +206,7 @@ export const homePageContent = {
 				question:
 					"Can this help with Telegram, Discord, or phone-started agent loops?",
 				answer:
-					"Yes, if you wire the loops. This gives them code-side context to reuse.",
+					"Yes. Ship by Sunday teaches the code-side worker layer those channels can reuse.",
 			},
 			{
 				question: "What happens right after I pay?",
@@ -190,7 +231,7 @@ export const homePageContent = {
 			{
 				label: "Run",
 				description:
-					"Send the agent through Codex, Telegram, Discord, or phone.",
+					"Dispatch the role through Codex, Telegram, Discord, or a phone-started prompt.",
 			},
 			{
 				label: "Review",

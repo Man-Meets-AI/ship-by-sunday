@@ -157,6 +157,19 @@ Edit:
 
 Usually you should not need to touch the render model for pure copy work.
 
+### Change product-preview CTAs
+
+Edit:
+
+- `app/_content/home-page.ts`
+- `tests/unit/home-page-content.test.ts`
+- `tests/integration-ui/home-page-product-preview.test.tsx`
+
+The product-preview first screen is buyer-facing. Keep its CTAs as explicit
+links in the content layer and route them toward the visible conversion or
+education path. Do not use the shared checkout renderer there unless the
+product-preview contract becomes a real checkout action.
+
 ### Turn a section on or off
 
 Edit:

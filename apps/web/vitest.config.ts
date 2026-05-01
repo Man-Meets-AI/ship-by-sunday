@@ -57,28 +57,23 @@ const reactResolve = {
 };
 
 const reactRenderingDependencies = [
-	/@base-ui\//,
 	/@clerk\/ui/,
 	/@floating-ui\/react/,
 	/@radix-ui\//,
 	/@testing-library\/react/,
 	/@tanstack\/react-store/,
-	/cmdk/,
-	/embla-carousel-react/,
 	/framer-motion/,
 	/input-otp/,
 	/lucide-react/,
 	/motion/,
 	/next-themes/,
 	/radix-ui/,
-	/react-day-picker/,
 	/react-remove-scroll/,
 	/react-remove-scroll-bar/,
 	/react-style-singleton/,
 	/sonner/,
 	/use-callback-ref/,
 	/use-sidecar/,
-	/vaul/,
 ];
 
 export default defineConfig({

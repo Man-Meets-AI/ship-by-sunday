@@ -9,7 +9,6 @@ import {
 	Code2,
 	GitBranch,
 	LockKeyhole,
-	Settings2,
 	ShieldCheck,
 } from "lucide-react";
 
@@ -30,7 +29,7 @@ import { ScrollReveal } from "./scroll-reveal";
 type ProductPreviewSection = HomePageContent["productPreviewSection"];
 type ProductPreviewTab = ProductPreviewSection["workspace"]["tabs"][number];
 
-const defaultCheckedChecklistItems = ["truth", "codex"] as const;
+const defaultCheckedChecklistItems = ["truth", "roles"] as const;
 
 function ProductPreviewTopBar() {
 	return (
@@ -70,16 +69,16 @@ function ProductPreviewActions({
 			<Button asChild size="lg" className="h-11 px-5">
 				<Link
 					href={section.primaryAction.href}
-					data-testid="preview-build-repo"
+					data-testid="preview-primary-cta"
 				>
-					<Settings2 data-icon="inline-start" />
 					{section.primaryAction.label}
+					<ArrowRight data-icon="inline-end" />
 				</Link>
 			</Button>
 			<Button asChild size="lg" variant="outline" className="h-11 px-5">
 				<Link
 					href={section.secondaryAction.href}
-					data-testid="preview-watch-video"
+					data-testid="preview-secondary-cta"
 				>
 					<CirclePlay data-icon="inline-start" />
 					{section.secondaryAction.label}
@@ -117,28 +116,22 @@ function ProductPreviewChecklist({
 	);
 }
 
-function ProductPreviewTabPanel({
-	tab,
-	githubUsername,
-}: {
-	readonly tab: ProductPreviewTab;
-	readonly githubUsername: string;
-}) {
+function ProductPreviewTabPanel({ tab }: { readonly tab: ProductPreviewTab }) {
 	return (
 		<div className="grid gap-3 sm:grid-cols-3">
 			{tab.items.map((item, index) => (
 				<div
-					key={item}
+					key={item.label}
 					className="rounded-lg border border-border/60 bg-muted/35 p-3"
 				>
 					<p className="text-xs text-muted-foreground">
 						{String(index + 1).padStart(2, "0")}
 					</p>
-					<p className="mt-1 text-sm font-medium text-foreground">{item}</p>
+					<p className="mt-1 text-sm font-medium text-foreground">
+						{item.label}
+					</p>
 					<p className="mt-2 text-xs leading-5 text-muted-foreground">
-						{index === 0 && tab.id === "repo"
-							? `@${githubUsername || "parkerrex"}`
-							: "Ready after checkout"}
+						{item.detail}
 					</p>
 				</div>
 			))}
@@ -151,7 +144,7 @@ function ProductPreviewWorkbench({
 }: {
 	readonly section: ProductPreviewSection;
 }) {
-	const firstTab = section.workspace.tabs[0]?.id ?? "repo";
+	const firstTab = section.workspace.tabs[0]?.id ?? "source";
 	const [githubUsername, setGithubUsername] = useState<string>(
 		section.workspace.githubUsernamePlaceholder,
 	);
@@ -177,7 +170,7 @@ function ProductPreviewWorkbench({
 	return (
 		<div
 			className="overflow-hidden rounded-xl border border-border/70 bg-background shadow-2xl shadow-foreground/5"
-			aria-label="Public preview of the starter repo setup workspace"
+			aria-label="Public preview of the worker layer workspace"
 			data-testid="product-preview-workbench"
 		>
 			<div className="flex items-center justify-between gap-4 border-b border-border/60 px-4 py-3">
@@ -276,10 +269,7 @@ function ProductPreviewWorkbench({
 										aria-hidden
 									/>
 								</div>
-								<ProductPreviewTabPanel
-									tab={activeTab}
-									githubUsername={githubUsername}
-								/>
+								<ProductPreviewTabPanel tab={activeTab} />
 							</TabsContent>
 						) : null}
 					</Tabs>
@@ -304,7 +294,7 @@ export function ProductPreviewSectionBlock({
 							{section.kicker}
 						</p>
 						<div className="space-y-5">
-							<h1 className="text-balance text-[clamp(3rem,7vw,6.25rem)] font-semibold leading-[0.92] text-foreground">
+							<h1 className="text-balance text-5xl font-semibold leading-[0.92] text-foreground sm:text-7xl lg:text-8xl">
 								{section.title}
 							</h1>
 							<p className="max-w-lg text-pretty text-lg leading-8 text-muted-foreground">
@@ -327,9 +317,7 @@ export function ProductPreviewSectionBlock({
 			</div>
 			<div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
 				<ShieldCheck className="size-4" aria-hidden />
-				<span>
-					Play with the setup. Checkout saves it and opens the build path.
-				</span>
+				<span>{section.previewNote}</span>
 				<ArrowRight className="size-4" aria-hidden />
 			</div>
 		</section>

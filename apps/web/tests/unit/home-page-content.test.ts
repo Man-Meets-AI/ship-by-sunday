@@ -16,21 +16,35 @@ describe("home page content", () => {
 		);
 
 		expect(homePageContent.productPreviewSection.title).toBe(
-			"Set up the repo.",
+			"Build the worker layer.",
+		);
+		expect(homePageContent.productPreviewSection.intro).toContain(
+			"Start a decision from your phone",
 		);
 		expect(homePageContent.productPreviewSection.primaryAction).toEqual({
-			label: "Build the repo",
-			href: "/settings",
+			label: "Build the worker layer",
+			href: "#pricing",
 		});
 		expect(homePageContent.productPreviewSection.secondaryAction).toEqual({
-			label: "Watch setup video",
-			href: "/lesson/welcome-to-ship-by-sunday",
+			label: "See the loop",
+			href: "#system",
 		});
+		expect(homePageContent.productPreviewSection.previewNote).toContain(
+			"worker preview",
+		);
+		expect(
+			homePageContent.productPreviewSection.workspace.githubUsernameLabel,
+		).toBe("Codebase GitHub username");
 		expect(
 			homePageContent.productPreviewSection.workspace.tabs.map(
 				(tab) => tab.label,
 			),
-		).toEqual(["Repo", "Codex", "QA"]);
+		).toEqual(["Source", "Channels", "Proof"]);
+		expect(
+			homePageContent.productPreviewSection.workspace.tabs[0]?.items.map(
+				(item) => item.label,
+			),
+		).toEqual(["Product truth", "Operator taste", "Next decision"]);
 
 		expect(homePageContent.hero.headlineLead).toBe("Ship codebases");
 		expect(homePageContent.hero.headlineTailHover).toBe("that convert");
@@ -55,6 +69,9 @@ describe("home page content", () => {
 		expect(
 			homePageContent.execLoopSection.steps.map((step) => step.label),
 		).toEqual(["Decide", "Brief", "Run", "Review"]);
+		expect(homePageContent.execLoopSection.steps[2]?.description).toContain(
+			"phone-started prompt",
+		);
 		expect(homePageContent.starterSystemSection.title).toBe(
 			"A worker layer your agents can build from.",
 		);

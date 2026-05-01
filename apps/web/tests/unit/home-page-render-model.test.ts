@@ -15,7 +15,7 @@ describe("home page render model", () => {
 		expect(renderModel.sectionOrder).toEqual(homePageSectionOrder);
 		expect(renderModel.productPreview.isEnabled).toBe(true);
 		expect(renderModel.productPreview.section.primaryAction.href).toBe(
-			"/settings",
+			"#pricing",
 		);
 		expect(renderModel.hero.isEnabled).toBe(true);
 		expect(renderModel.hero.primaryCtaTarget).toEqual({ kind: "checkout" });
@@ -36,6 +36,9 @@ describe("home page render model", () => {
 			"QA path",
 			"Conversion-aware repo",
 		]);
+		expect(
+			renderModel.productPreview.section.workspace.tabs.map((tab) => tab.label),
+		).toEqual(["Source", "Channels", "Proof"]);
 		expect(renderModel.durability.isEnabled).toBe(false);
 		expect(renderModel.socialProof.isEnabled).toBe(true);
 		expect(renderModel.socialProof.variant.kind).toBe("founder");
