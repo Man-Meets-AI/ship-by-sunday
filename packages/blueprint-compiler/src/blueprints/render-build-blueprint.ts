@@ -32,6 +32,27 @@ export function renderBuildBlueprint(
 			renderBulletList(facts.acceptance_criteria),
 		),
 	];
+	const productFactInputs = [
+		`- Product name: ${facts.product_name}`,
+		`- Product summary: ${facts.product_summary}`,
+		`- Primary user: ${facts.primary_user}`,
+		`- Problem statement: ${facts.problem_statement}`,
+		`- v1 rationale: ${facts.v1_rationale}`,
+		`- Buyer AI promise: ${facts.buyer_ai_promise}`,
+	].join("\n");
+	const scopeBoundaries = [
+		"### Scope in",
+		"",
+		renderBulletList(facts.scope_in),
+		"",
+		"### Scope out",
+		"",
+		renderBulletList(facts.scope_out),
+		"",
+		"### Non-goals",
+		"",
+		renderBulletList(facts.non_goals),
+	].join("\n");
 
 	return [
 		{
@@ -56,6 +77,10 @@ export function renderBuildBlueprint(
 			path: getGeneratedBuildDetailDocPath("prompt.md"),
 			content: [
 				...buildSummary,
+				"",
+				renderSection("Product Fact Inputs", productFactInputs),
+				"",
+				renderSection("Scope Boundaries", scopeBoundaries),
 				"",
 				renderSection(
 					"Validation Plan",

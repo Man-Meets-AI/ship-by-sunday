@@ -43,6 +43,11 @@ describe("blueprint renderers", () => {
 		expect(readme?.content).toContain("Prompt Pack");
 		expect(marketingReadme?.content).toContain("Marketing Pack");
 		expect(buildPrompt?.content).toContain("Build Pack");
+		expect(buildPrompt?.content).toContain("## Product Fact Inputs");
+		expect(buildPrompt?.content).toContain("### Scope in");
+		expect(buildPrompt?.content).toContain("- Blueprint-first funnel");
+		expect(buildPrompt?.content).toContain("## Authority order");
+		expect(buildPrompt?.content).toContain("## Completion audit checklist");
 		expect(outlinePrompt?.content).toContain("# ExecPlan Outline From Session");
 		expect(executionLoopPrompt?.content).toContain("# ExecPlan Execution Loop");
 	});

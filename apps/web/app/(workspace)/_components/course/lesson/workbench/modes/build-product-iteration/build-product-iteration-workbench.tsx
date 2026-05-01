@@ -3,9 +3,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { WorkbenchModeProps } from "../../types";
+import { WorkbenchHeader } from "../../shared/workbench-header";
+import { WorkbenchMediaLayout } from "../../shared/workbench-media-layout";
 
 import { BuildProductIterationTabs } from "./build-product-iteration-tabs";
-import { BuildProductIterationWorkbenchHeader } from "./build-product-iteration-workbench-header";
 import { BuildProductIterationWorkbenchInlineVideo } from "./build-product-iteration-workbench-inline-video";
 import { BuildProductIterationWorkbenchPinnedArtifacts } from "./build-product-iteration-workbench-pinned-artifacts";
 
@@ -59,18 +60,12 @@ export function BuildProductIterationWorkbench({
 
 	return (
 		<div className="w-full space-y-4 pb-1">
-			<BuildProductIterationWorkbenchHeader
-				lesson={lesson}
-				lessonContent={lessonContent}
-			/>
+			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
 			<Separator className="bg-border" />
 			{showSplitWorkbenchMedia ? (
-				<div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(300px,0.88fr)_minmax(0,1.12fr)] xl:items-start">
-					<div className="min-w-0 xl:sticky xl:top-0 xl:z-1 xl:self-start">
-						{inlineVideoCard}
-					</div>
-					<div className="min-w-0">{body}</div>
-				</div>
+				<WorkbenchMediaLayout media={inlineVideoCard}>
+					{body}
+				</WorkbenchMediaLayout>
 			) : showInlineVideo ? (
 				<>
 					{inlineVideoCard}

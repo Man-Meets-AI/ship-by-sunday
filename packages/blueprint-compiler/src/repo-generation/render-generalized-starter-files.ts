@@ -18,11 +18,14 @@ function renderAssistantGuide(
 			"## Start Here",
 			"",
 			"- Read `README.md`, then open `DESIGN.md`, `docs/index.md`, and `docs/facts/project-definition.json`.",
+			"- For product build work, read `docs/build/AGENTS.md`, `docs/build/docs/prompt.md`, `docs/build/docs/plans.md`, and `docs/build/docs/implement.md` before editing code.",
 			"- Treat `DESIGN.md` as the visual source of truth before changing layout, styling, theming, motion, or component presentation.",
+			"- Treat `docs/facts/project-definition.json` and `docs/build/docs/prompt.md` as the customer build contract; do not build from chat memory alone.",
 			"- When using an AI coding or design tool, explicitly tell it to follow `DESIGN.md` and the generated design snapshot before it proposes UI changes.",
 			"- Use `bun` for JavaScript work and `uv` for Python utilities.",
 			"- Keep diffs scoped, rename vague identifiers, and separate UI rendering from stateful logic.",
 			"- Treat `docs/testing/` as the starter home for verification notes.",
+			"- Before final handoff, update `docs/build/docs/documentation.md` with what changed, validation results, assumptions, and a requirement-to-evidence checklist.",
 		].join("\n"),
 	};
 }
@@ -43,10 +46,12 @@ function renderAppAssistantGuide(
 			"## Start Here",
 			"",
 			"- Read root `DESIGN.md` before changing layout, styling, theming, motion, docs chrome, or component presentation.",
+			"- Read root `docs/facts/project-definition.json` and `docs/build/docs/prompt.md` before changing product behavior.",
 			"- Use `docs/facts/design-system.json` and `apps/web/config/generated-design-system.ts` as the machine-readable design snapshot.",
 			"- Preserve semantic tokens such as `background`, `foreground`, `primary`, `border`, and `sidebar-*` instead of hard-coding colors.",
 			"- Keep the app UI aligned with the generated design system unless the user explicitly changes it.",
 			"- When prompting an AI tool, name the screen goal and tell it to follow `DESIGN.md` rather than inventing a fresh visual style.",
+			"- Keep UI rendering, route orchestration, domain logic, and provider I/O in separate files when a change touches more than one concern.",
 		].join("\n"),
 	};
 }

@@ -23,12 +23,12 @@ describe("home page render model", () => {
 		expect(
 			renderModel.starterSystem.section.capabilities.map((item) => item.title),
 		).toEqual([
-			"Product blueprint",
-			"Built-in QA",
+			"Worker blueprint",
+			"Role-specific packs",
 			"Safer agent changes",
-			"Reuse the product truth",
-			"Extend without starting over",
-			"Keep one source of truth",
+			"Async-ready context",
+			"Built-in QA",
+			"Conversion-aware starter",
 			"Curated design direction",
 		]);
 		expect(renderModel.durability.isEnabled).toBe(false);

@@ -16,6 +16,8 @@ Use this before, during, and after any substantial Codex run.
 - [ ] For bugs: exact repro steps are included.
 - [ ] For UI work: screenshots / mocks / examples are attached when available.
 - [ ] For risky work: rollback expectations are defined.
+- [ ] The task names the product facts, design facts, code paths, and user path that own the work.
+- [ ] Any bracketed placeholders in `docs/prompt.md` were replaced or moved to open questions.
 
 ## 2) Durable Memory Setup
 
@@ -58,6 +60,8 @@ Use this before, during, and after any substantial Codex run.
 ## 5) Execution Discipline
 
 - [ ] Codex reads `AGENTS.md` first.
+- [ ] Codex reads `docs/facts/project-definition.json` before product behavior changes.
+- [ ] Codex reads `DESIGN.md` before UI changes.
 - [ ] Codex reads `docs/prompt.md` before changing code.
 - [ ] Codex follows `docs/plans.md` milestone by milestone.
 - [ ] Codex follows `docs/implement.md` as the runbook.
@@ -66,6 +70,7 @@ Use this before, during, and after any substantial Codex run.
 - [ ] When a check fails, Codex repairs before moving forward.
 - [ ] Scope creep is explicitly rejected unless the plan is updated.
 - [ ] Major course corrections are recorded.
+- [ ] Assumptions are recorded instead of hidden in code defaults.
 
 ## 6) Verification Loop
 
@@ -80,6 +85,7 @@ Use this before, during, and after any substantial Codex run.
 - [ ] If a validation step cannot run, the reason is logged.
 - [ ] Diff review happens before marking work done.
 - [ ] Final behavior is verified, not just compilation.
+- [ ] A requirement-to-evidence checklist maps each deliverable, done-when item, validation command, and demo step to proof.
 
 ## 7) Long-Session Hygiene
 
