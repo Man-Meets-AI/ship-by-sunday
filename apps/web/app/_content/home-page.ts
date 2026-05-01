@@ -187,7 +187,7 @@ export const homePageContent = {
 		titlePrefix: "Exec loops make ",
 		titleHighlight: "agents useful.",
 		intro:
-			"An exec loop is the repeatable path from a decision to a trained role, a code run, QA proof, and the next decision.",
+			"An exec loop is the repeatable path from decision to agent run: train one role, ship code, prove QA, and carry the next decision forward.",
 		supportingPoints: [
 			"Start a decision from your phone, desk, Telegram, or Discord.",
 			"Package the decision with product truth, constraints, and taste for one worker role.",
