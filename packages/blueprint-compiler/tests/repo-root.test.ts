@@ -43,6 +43,7 @@ describe("repo root resolution", () => {
 			expect(snapshotPaths).toEqual(
 				expect.arrayContaining([
 					"docs/index.md",
+					"docs/build/docs/agent-handoff.md",
 					"docs/build/docs/prompt.md",
 					"docs/prompts/execplan-execution-loop.md",
 					"apps/web/config/product.ts",

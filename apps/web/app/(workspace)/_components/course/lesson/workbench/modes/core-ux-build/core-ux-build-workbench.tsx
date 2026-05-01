@@ -4,7 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { FocusInlineLessonVideo } from "../../shared/focus-inline-lesson-video";
 import { WorkbenchContainer } from "../../shared/workbench-container";
 import { WorkbenchHeader } from "../../shared/workbench-header";
-import { WorkbenchMediaLayout } from "../../shared/workbench-media-layout";
+import { WorkbenchMediaPlacement } from "../../shared/workbench-media-layout";
 import type { WorkbenchModeProps } from "../../types";
 
 import { CoreUxBuildMainColumn } from "./core-ux-build-main-column";
@@ -28,12 +28,6 @@ export function CoreUxBuildWorkbench({
 		onFieldChange,
 	});
 
-	const showInlineVideo = lesson.coachVideoPlacement === "workbench";
-	const showSplitWorkbenchMedia =
-		showInlineVideo &&
-		lesson.workbenchMediaLayout === "split" &&
-		layoutMode === "focus";
-
 	const inlineVideoCard = (
 		<FocusInlineLessonVideo coachContent={lessonContent.coach} />
 	);
@@ -53,18 +47,13 @@ export function CoreUxBuildWorkbench({
 		<WorkbenchContainer>
 			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
 			<Separator className="bg-border" />
-			{showSplitWorkbenchMedia ? (
-				<WorkbenchMediaLayout media={inlineVideoCard}>
-					{mainColumn}
-				</WorkbenchMediaLayout>
-			) : showInlineVideo ? (
-				<>
-					{inlineVideoCard}
-					{mainColumn}
-				</>
-			) : (
-				mainColumn
-			)}
+			<WorkbenchMediaPlacement
+				lesson={lesson}
+				layoutMode={layoutMode}
+				media={inlineVideoCard}
+			>
+				{mainColumn}
+			</WorkbenchMediaPlacement>
 		</WorkbenchContainer>
 	);
 }

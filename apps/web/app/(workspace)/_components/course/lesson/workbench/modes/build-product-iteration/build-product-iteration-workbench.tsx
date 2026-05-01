@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { WorkbenchModeProps } from "../../types";
 import { WorkbenchHeader } from "../../shared/workbench-header";
-import { WorkbenchMediaLayout } from "../../shared/workbench-media-layout";
+import { WorkbenchMediaPlacement } from "../../shared/workbench-media-layout";
 
 import { BuildProductIterationTabs } from "./build-product-iteration-tabs";
 import { BuildProductIterationWorkbenchInlineVideo } from "./build-product-iteration-workbench-inline-video";
@@ -21,12 +21,6 @@ export function BuildProductIterationWorkbench({
 	invalidFieldMessages,
 	fields,
 }: WorkbenchModeProps) {
-	const showInlineVideo = lesson.coachVideoPlacement === "workbench";
-	const showSplitWorkbenchMedia =
-		showInlineVideo &&
-		lesson.workbenchMediaLayout === "split" &&
-		layoutMode === "focus";
-
 	const inlineVideoCard = (
 		<BuildProductIterationWorkbenchInlineVideo
 			coachContent={lessonContent.coach}
@@ -62,18 +56,13 @@ export function BuildProductIterationWorkbench({
 		<div className="w-full space-y-4 pb-1">
 			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
 			<Separator className="bg-border" />
-			{showSplitWorkbenchMedia ? (
-				<WorkbenchMediaLayout media={inlineVideoCard}>
-					{body}
-				</WorkbenchMediaLayout>
-			) : showInlineVideo ? (
-				<>
-					{inlineVideoCard}
-					{body}
-				</>
-			) : (
-				body
-			)}
+			<WorkbenchMediaPlacement
+				lesson={lesson}
+				layoutMode={layoutMode}
+				media={inlineVideoCard}
+			>
+				{body}
+			</WorkbenchMediaPlacement>
 		</div>
 	);
 }

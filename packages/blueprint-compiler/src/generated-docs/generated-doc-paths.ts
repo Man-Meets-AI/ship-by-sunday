@@ -27,6 +27,7 @@ export type GeneratedMarketingDocFileName =
 export type GeneratedBuildDocFileName = "AGENTS.md" | "CHECKLIST.md";
 
 export type GeneratedBuildDetailDocFileName =
+	| "agent-handoff.md"
 	| "prompt.md"
 	| "plans.md"
 	| "implement.md"
