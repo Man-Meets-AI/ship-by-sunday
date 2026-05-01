@@ -16,10 +16,9 @@ globalThis.React = React;
 
 import { getLessonById } from "@/lib/course/lesson/model";
 import { LessonShellWatch } from "@/app/(workspace)/_components/course/lesson/shells";
-import { FocusInlineLessonVideo } from "@/app/(workspace)/_components/course/lesson/workbench/shared/focus-inline-lesson-video";
 
 describe("LessonShellWatch", () => {
-	it("renders lesson 2.1 inline video for split-baseline lessons", () => {
+	it("renders lesson 2.1 video in the watch shell", () => {
 		const lesson = getLessonById("2.1");
 		expect(lesson).toBeTruthy();
 		if (!lesson) {
@@ -27,14 +26,19 @@ describe("LessonShellWatch", () => {
 		}
 
 		const markup = renderToStaticMarkup(
-			<FocusInlineLessonVideo coachContent={lesson.content.coach} />,
+			<LessonShellWatch
+				lesson={lesson}
+				coachContent={lesson.content.coach}
+				footer={<div>Footer</div>}
+				pinnedArtifacts={[]}
+			/>,
 		);
 
-		expect(markup).toContain("Watch first");
+		expect(markup).toContain(lesson.title);
 		expect(markup).toContain("<iframe");
 	});
 
-	it("renders Light Research inline video", () => {
+	it("renders Light Research video in the watch shell", () => {
 		const lesson = getLessonById("1.6");
 		expect(lesson).toBeTruthy();
 		if (!lesson) {
@@ -42,10 +46,15 @@ describe("LessonShellWatch", () => {
 		}
 
 		const markup = renderToStaticMarkup(
-			<FocusInlineLessonVideo coachContent={lesson.content.coach} />,
+			<LessonShellWatch
+				lesson={lesson}
+				coachContent={lesson.content.coach}
+				footer={<div>Footer</div>}
+				pinnedArtifacts={[]}
+			/>,
 		);
 
-		expect(markup).toContain("Watch first");
+		expect(markup).toContain(lesson.title);
 		expect(markup).toContain("<iframe");
 	});
 

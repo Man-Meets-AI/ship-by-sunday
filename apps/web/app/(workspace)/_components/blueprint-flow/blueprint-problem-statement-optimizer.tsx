@@ -2,6 +2,7 @@
 
 import type { CanonicalProjectFactsDraft } from "@shipbysunday/blueprint-compiler";
 import { SparklesIcon } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -15,17 +16,21 @@ import { Spinner } from "@/components/ui/spinner";
 import type { BlueprintStepDraftValues } from "@/lib/blueprint-flow/blueprint-step-save-feedback";
 import { useBlueprintProblemStatementOptimizer } from "@/app/(workspace)/_hooks/blueprint-flow/use-blueprint-problem-statement-optimizer";
 
-export function BlueprintProblemStatementOptimizer({
-	draftValues,
-	facts,
-	onApplyOptimizedValue,
-	stepId,
-}: {
+export type BlueprintProblemStatementOptimizerProps = {
+	autoStartRequestKey?: number;
 	draftValues: BlueprintStepDraftValues;
 	facts: CanonicalProjectFactsDraft;
 	onApplyOptimizedValue: (nextValue: string) => void;
 	stepId: string;
-}) {
+};
+
+export function BlueprintProblemStatementOptimizer({
+	autoStartRequestKey = 0,
+	draftValues,
+	facts,
+	onApplyOptimizedValue,
+	stepId,
+}: BlueprintProblemStatementOptimizerProps) {
 	const {
 		closeDialog,
 		isBusy,
@@ -40,6 +45,19 @@ export function BlueprintProblemStatementOptimizer({
 		onApplyOptimizedValue,
 		stepId,
 	});
+	const previousAutoStartRequestKey = useRef(0);
+
+	useEffect(() => {
+		if (autoStartRequestKey === 0) {
+			return;
+		}
+		if (previousAutoStartRequestKey.current === autoStartRequestKey) {
+			return;
+		}
+
+		previousAutoStartRequestKey.current = autoStartRequestKey;
+		void requestOptimization();
+	}, [autoStartRequestKey, requestOptimization]);
 
 	return (
 		<>

@@ -15,7 +15,7 @@ import {
 	SelectTrigger,
 } from "@/components/ui/select";
 
-type BlueprintDesignPresetFieldProps = {
+export type BlueprintDesignPresetFieldProps = {
 	description?: string | null;
 	errorId?: string;
 	inputId: string;

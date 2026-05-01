@@ -1,6 +1,14 @@
 "use client";
 
-import { memo, type ChangeEvent } from "react";
+import dynamic from "next/dynamic";
+import { SparklesIcon } from "lucide-react";
+import {
+	memo,
+	useCallback,
+	useState,
+	type ChangeEvent,
+	type ComponentType,
+} from "react";
 import type {
 	CanonicalProjectFactKey,
 	CanonicalProjectFactsDraft,
@@ -14,9 +22,14 @@ import {
 	FieldError,
 	FieldLabel,
 } from "@/components/ui/field";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
-import { BlueprintProblemStatementOptimizer } from "@/app/(workspace)/_components/blueprint-flow/blueprint-problem-statement-optimizer";
+import type { BlueprintDesignPresetFieldProps } from "@/app/(workspace)/_components/blueprint-flow/blueprint-design-preset-field";
+import type { BlueprintProblemStatementOptimizerProps } from "@/app/(workspace)/_components/blueprint-flow/blueprint-problem-statement-optimizer";
+import type { BlueprintThemeConfiguratorProps } from "@/app/(workspace)/_components/blueprint-flow/blueprint-theme-configurator";
 import {
 	getBlueprintFieldScaleDefinition,
 	blueprintFieldHelperText,
@@ -28,8 +41,51 @@ import { getBlueprintStageFieldInputId } from "@/lib/blueprint-flow/blueprint-st
 import { BlueprintStageListField } from "./blueprint-stage-list-field";
 import { BlueprintStageLinkListField } from "./blueprint-stage-link-list-field";
 import { BlueprintStageScaleField } from "./blueprint-stage-scale-field";
-import { BlueprintDesignPresetField } from "./blueprint-design-preset-field";
-import { BlueprintThemeConfigurator } from "./blueprint-theme-configurator";
+
+const BlueprintDesignPresetField = dynamic<BlueprintDesignPresetFieldProps>(
+	() =>
+		import("@/app/(workspace)/_components/blueprint-flow/blueprint-design-preset-field").then(
+			(module) => module.BlueprintDesignPresetField,
+		),
+	{
+		loading: DesignPresetFieldSkeleton,
+	},
+);
+
+const BlueprintThemeConfigurator = dynamic<BlueprintThemeConfiguratorProps>(
+	() =>
+		import("@/app/(workspace)/_components/blueprint-flow/blueprint-theme-configurator").then(
+			(module) => module.BlueprintThemeConfigurator,
+		),
+	{
+		loading: ThemeConfiguratorSkeleton,
+	},
+);
+
+function DesignPresetFieldSkeleton() {
+	return (
+		<div className="space-y-4">
+			<Skeleton className="h-16 w-full rounded-xl" />
+			<Skeleton className="h-40 w-full rounded-xl" />
+		</div>
+	);
+}
+
+function ThemeConfiguratorSkeleton() {
+	return (
+		<div className="grid items-start gap-6 lg:grid-cols-[1fr_minmax(300px,360px)]">
+			<div className="flex flex-col gap-6">
+				<Skeleton className="h-24 w-full rounded-xl" />
+				<Skeleton className="h-12 w-full rounded-xl" />
+				<div className="grid grid-cols-2 gap-4">
+					<Skeleton className="h-20 w-full rounded-xl" />
+					<Skeleton className="h-20 w-full rounded-xl" />
+				</div>
+			</div>
+			<Skeleton className="h-72 w-full rounded-xl" />
+		</div>
+	);
+}
 
 type BlueprintStageStepFieldProps = {
 	fieldKey: CanonicalProjectFactKey;
@@ -40,6 +96,74 @@ type BlueprintStageStepFieldProps = {
 	errorMessage?: string;
 	onChange: (fieldKey: CanonicalProjectFactKey, nextValue: string) => void;
 };
+
+type ProblemStatementOptimizerComponent =
+	ComponentType<BlueprintProblemStatementOptimizerProps>;
+
+function LazyBlueprintProblemStatementOptimizer({
+	draftValues,
+	facts,
+	onApplyOptimizedValue,
+	stepId,
+}: BlueprintProblemStatementOptimizerProps) {
+	const [OptimizerComponent, setOptimizerComponent] =
+		useState<ProblemStatementOptimizerComponent | null>(null);
+	const [isLoadingOptimizer, setIsLoadingOptimizer] = useState(false);
+	const [autoStartRequestKey, setAutoStartRequestKey] = useState(0);
+
+	const loadOptimizerAndStart = useCallback(async () => {
+		if (OptimizerComponent) {
+			setAutoStartRequestKey((key) => key + 1);
+			return;
+		}
+
+		setIsLoadingOptimizer(true);
+		try {
+			const optimizerModule =
+				await import("@/app/(workspace)/_components/blueprint-flow/blueprint-problem-statement-optimizer");
+			setOptimizerComponent(
+				() => optimizerModule.BlueprintProblemStatementOptimizer,
+			);
+			setAutoStartRequestKey((key) => key + 1);
+		} finally {
+			setIsLoadingOptimizer(false);
+		}
+	}, [OptimizerComponent]);
+
+	if (OptimizerComponent) {
+		return (
+			<OptimizerComponent
+				autoStartRequestKey={autoStartRequestKey}
+				draftValues={draftValues}
+				facts={facts}
+				onApplyOptimizedValue={onApplyOptimizedValue}
+				stepId={stepId}
+			/>
+		);
+	}
+
+	return (
+		<Button
+			type="button"
+			variant="outline"
+			size="sm"
+			disabled={isLoadingOptimizer}
+			onClick={() => void loadOptimizerAndStart()}
+		>
+			{isLoadingOptimizer ? (
+				<>
+					<Spinner className="size-3.5" />
+					Optimizing
+				</>
+			) : (
+				<>
+					<SparklesIcon className="size-3.5" />
+					Optimize
+				</>
+			)}
+		</Button>
+	);
+}
 
 function BlueprintStageStepFieldComponent({
 	fieldKey,
@@ -181,7 +305,7 @@ function BlueprintStageStepFieldComponent({
 					{blueprintFieldLabel(fieldKey, facts)}
 				</FieldLabel>
 				{fieldKey === "problem_statement" ? (
-					<BlueprintProblemStatementOptimizer
+					<LazyBlueprintProblemStatementOptimizer
 						stepId={step.id}
 						facts={facts}
 						draftValues={draftValues}

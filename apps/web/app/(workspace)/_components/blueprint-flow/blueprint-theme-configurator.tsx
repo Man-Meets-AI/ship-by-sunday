@@ -36,7 +36,7 @@ import {
 } from "@/lib/blueprint-flow/blueprint-theme-helpers";
 import { BlueprintThemePreview } from "./blueprint-theme-preview";
 
-type BlueprintThemeConfiguratorProps = {
+export type BlueprintThemeConfiguratorProps = {
 	value: string;
 	onChange: (nextValue: string) => void;
 };

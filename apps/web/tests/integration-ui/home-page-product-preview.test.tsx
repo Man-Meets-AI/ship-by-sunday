@@ -39,6 +39,9 @@ describe("ProductPreviewSectionBlock", () => {
 		await user.clear(githubInput);
 		await user.type(githubInput, "shipper");
 		expect(screen.getAllByText("@shipper").length).toBeGreaterThan(0);
+		expect(screen.getByText("Phone-started decision")).toBeTruthy();
+		expect(screen.getByText("Growth engineer")).toBeTruthy();
+		expect(screen.getByText("Reviewed code output")).toBeTruthy();
 
 		await user.click(screen.getByRole("tab", { name: "Proof" }));
 		expect(

@@ -24,7 +24,7 @@ export const homePageContent = {
 		kicker: productName,
 		title: "Build the worker layer.",
 		intro:
-			"Start a decision from your phone, hand it to a trained worker role, and give agents enough product context to ship reviewed code.",
+			"For technical founders who can get AI to write code, but need it to ship like a trained employee: start from your phone, route the work to the right role, and get reviewed product changes back.",
 		primaryAction: {
 			label: "Build the worker layer",
 			href: routeConfig.pricingHash,
@@ -36,7 +36,41 @@ export const homePageContent = {
 		unlockNote:
 			"Checkout opens saved setup, worker role packs, private videos, and the build actions.",
 		previewNote:
-			"Tune the worker preview. Checkout saves the context and opens the build path.",
+			"Tune the worker preview. Checkout saves the context, role packets, and code-side build path.",
+		loopPacket: {
+			input: {
+				label: "Phone-started decision",
+				title: "Tighten the buyer path before tomorrow.",
+				body: "From Telegram: the homepage explains the product, but the offer still feels abstract. Show the worker loop, route the CTA to checkout, and verify it on mobile.",
+			},
+			role: {
+				label: "Worker role",
+				title: "Growth engineer",
+				status: "Ready for Codex",
+				items: [
+					"Reads product truth and homepage contract",
+					"Ships the smallest conversion patch",
+					"Returns proof and the next loop",
+				],
+			},
+			output: {
+				label: "Reviewed code output",
+				items: [
+					{
+						label: "Scoped diff",
+						detail: "Homepage copy, preview, and CTA route",
+					},
+					{
+						label: "Browser proof",
+						detail: "Desktop and mobile buyer path checked",
+					},
+					{
+						label: "Context update",
+						detail: "What worked feeds the next role",
+					},
+				],
+			},
+		},
 		workspace: {
 			title: "Worker layer preview",
 			statusLabel: "Buyer preview",
@@ -71,7 +105,7 @@ export const homePageContent = {
 					label: "Channels",
 					title: "Phone to agent",
 					description:
-						"Send the same worker brief through Codex, Telegram, Discord, or a phone-started prompt without losing the thread.",
+						"Move the same decision packet through Codex, Telegram, Discord, or a phone-started prompt without losing the thread.",
 					items: [
 						{
 							label: "Codex dispatch",
@@ -139,7 +173,7 @@ export const homePageContent = {
 		headlineLead: "Ship codebases",
 		headlineTailPrefix: "",
 		headlineTailHover: "that convert",
-		body: "Exec loops turn your decisions into worker briefs agents can run from Codex, Telegram, Discord, or your phone.",
+		body: "Ship by Sunday gives your agents the worker layer around Codex: exec loops, role packets, channel handoffs, and QA that feeds the next run.",
 		primaryCta: marketingDisplayConfig.primaryCtaLabel,
 		secondaryCta: {
 			label: "See the loop",
@@ -153,13 +187,14 @@ export const homePageContent = {
 		titlePrefix: "Exec loops make ",
 		titleHighlight: "agents useful.",
 		intro:
-			"An exec loop is the repeatable path from decision to agent run to QA to the next decision.",
+			"An exec loop is the repeatable path from a decision to a trained role, a code run, QA proof, and the next decision.",
 		supportingPoints: [
 			"Start a decision from your phone, desk, Telegram, or Discord.",
-			"Package the decision for the right worker role.",
-			"Run the agent, review the change, and feed the result back into the system.",
+			"Package the decision with product truth, constraints, and taste for one worker role.",
+			"Run the agent, review the change, and feed the result back into the worker layer.",
 		],
-		valueFrame: "Most starters give you code. Exec loops make it compound.",
+		valueFrame:
+			"Most starters give you files. Exec loops make each role compound.",
 		imageAlt:
 			"Diagram showing a product definition turning into Design, Marketing, Build, and Prompt Packs plus a final Blueprint",
 	},
@@ -190,7 +225,7 @@ export const homePageContent = {
 			{
 				question: "What do I actually get at the end?",
 				answer:
-					"Worker packs, a QA path, and repo guidance your agents can reuse.",
+					"Exec loops, worker role packets, channel handoff patterns, a QA path, and repo guidance your agents can reuse.",
 			},
 			{
 				question: "Who is this for?",
@@ -243,25 +278,27 @@ export const homePageContent = {
 		title: "A worker layer your agents can build from.",
 		titleLines: ["A worker layer.", "Your agents can", "build from."],
 		intro:
-			"Decisions become role briefs. Role briefs become agent runs. Agent runs become reviewed product changes.",
+			"Each hat you wear becomes a trained worker role: the decision, context, taste, tools, and proof standard are all explicit before agents touch the code.",
 		capabilities: [
 			{
-				title: "Worker packs",
-				description: "Clear briefs for each role you need agents to play.",
+				title: "Role packets",
+				description:
+					"Turn founder, product, growth, design, build, and QA hats into specific worker instructions.",
 			},
 			{
 				title: "Async channels",
 				description:
-					"Codex, phone prompts, Telegram, and Discord share context.",
+					"Phone prompts, Telegram, Discord, and Codex runs point at the same worker context.",
 			},
 			{
-				title: "QA path",
-				description: "Every loop ends with review, proof, and next action.",
-			},
-			{
-				title: "Conversion-aware repo",
+				title: "Code-side loop",
 				description:
-					"Homepage, docs, checkout, and review stay tied to the offer.",
+					"Agents ship against repo truth, not a blank chat or generic prompt stack.",
+			},
+			{
+				title: "Proof path",
+				description:
+					"Every loop returns the diff, browser proof, risk notes, and the next decision.",
 			},
 		],
 	},
@@ -295,7 +332,7 @@ export const homePageContent = {
 		titleLead: "Ship a real product",
 		titleAccent: "by Sunday",
 		intro:
-			"One payment for the worker layer: exec loops, role packs, starter path, and QA prompts for a reviewable codebase.",
+			"One payment for the code-side worker layer: exec loops, role packets, channel handoffs, starter path, and QA prompts for a reviewable codebase.",
 		priceDisplay: productConfig.checkoutPriceDisplay,
 		originalPriceDisplay: activePricingOffer
 			? productConfig.priceDisplay
@@ -309,9 +346,10 @@ export const homePageContent = {
 		trustLine: `After checkout, open the ${workspaceDisplayConfig.homeNoun}, lock the decisions, and build the first loop.`,
 		includes: [
 			"Exec loop setup",
-			"Agent-ready worker packs",
+			"Role-specific worker packets",
+			"Phone, Telegram, and Discord handoff pattern",
+			"Codex-ready code run path",
 			"Review and QA path",
-			"Guided Ship Path",
 			"Fast Pass Walkthroughs",
 		],
 		bonus: {

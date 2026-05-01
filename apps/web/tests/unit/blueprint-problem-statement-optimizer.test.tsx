@@ -94,6 +94,50 @@ describe("blueprint field optimization", () => {
 		expect(screen.queryByRole("dialog")).toBeNull();
 	});
 
+	it("starts optimization from a lazy-loaded auto-start request", async () => {
+		const onApplyOptimizedValue = vi.fn();
+		const fetchMock = vi.fn().mockResolvedValueOnce(
+			createJsonResponse({
+				ok: true,
+				output: "The user needs a clearer path from idea to launch.",
+			}),
+		);
+
+		vi.stubGlobal("fetch", fetchMock);
+
+		render(
+			<BlueprintProblemStatementOptimizer
+				autoStartRequestKey={1}
+				stepId="problem"
+				facts={{
+					product_name: "Ship by Sunday",
+					product_summary: "A blueprint-first launch system.",
+					primary_user: "Indie founders",
+					problem_statement: "I keep restarting the launch plan.",
+					problem_trigger: "When the week gets busy, the plan falls apart.",
+					problem_severity: "8",
+					success_looks_like: "A clear launch path by Sunday.",
+				}}
+				draftValues={{
+					problem_statement: "I keep restarting the launch plan.",
+				}}
+				onApplyOptimizedValue={onApplyOptimizedValue}
+			/>,
+		);
+
+		await waitFor(() =>
+			expect(fetchMock).toHaveBeenCalledWith(
+				"/api/codex/generate",
+				expect.objectContaining({
+					method: "POST",
+				}),
+			),
+		);
+		expect(onApplyOptimizedValue).toHaveBeenCalledWith(
+			"The user needs a clearer path from idea to launch.",
+		);
+	});
+
 	it("opens the managed login dialog and retries optimization after the account connects", async () => {
 		const user = userEvent.setup();
 		const onApplyOptimizedValue = vi.fn();

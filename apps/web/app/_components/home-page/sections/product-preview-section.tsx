@@ -24,6 +24,7 @@ import {
 import { routeConfig } from "@/config/product";
 import type { HomePageContent } from "@/app/_content/home-page";
 
+import { ProductPreviewLoopPacketBlock } from "./product-preview-loop-packet";
 import { ScrollReveal } from "./scroll-reveal";
 
 type ProductPreviewSection = HomePageContent["productPreviewSection"];
@@ -240,6 +241,8 @@ function ProductPreviewWorkbench({
 					>
 						{section.workspace.githubUsernameHelp}
 					</p>
+
+					<ProductPreviewLoopPacketBlock loopPacket={section.loopPacket} />
 
 					<ProductPreviewChecklist
 						section={section}

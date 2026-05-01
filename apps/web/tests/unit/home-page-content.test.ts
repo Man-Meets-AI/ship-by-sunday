@@ -19,7 +19,7 @@ describe("home page content", () => {
 			"Build the worker layer.",
 		);
 		expect(homePageContent.productPreviewSection.intro).toContain(
-			"Start a decision from your phone",
+			"trained employee",
 		);
 		expect(homePageContent.productPreviewSection.primaryAction).toEqual({
 			label: "Build the worker layer",
@@ -35,6 +35,15 @@ describe("home page content", () => {
 		expect(
 			homePageContent.productPreviewSection.workspace.githubUsernameLabel,
 		).toBe("Codebase GitHub username");
+		expect(homePageContent.productPreviewSection.loopPacket.input.label).toBe(
+			"Phone-started decision",
+		);
+		expect(homePageContent.productPreviewSection.loopPacket.role).toEqual(
+			expect.objectContaining({
+				title: "Growth engineer",
+				status: "Ready for Codex",
+			}),
+		);
 		expect(
 			homePageContent.productPreviewSection.workspace.tabs.map(
 				(tab) => tab.label,
@@ -49,7 +58,7 @@ describe("home page content", () => {
 		expect(homePageContent.hero.headlineLead).toBe("Ship codebases");
 		expect(homePageContent.hero.headlineTailHover).toBe("that convert");
 		expect(homePageContent.hero.body).toBe(
-			"Exec loops turn your decisions into worker briefs agents can run from Codex, Telegram, Discord, or your phone.",
+			"Ship by Sunday gives your agents the worker layer around Codex: exec loops, role packets, channel handoffs, and QA that feeds the next run.",
 		);
 		expect(homePageContent.hero.promoBanner).toEqual({
 			label: "Early member",
@@ -76,16 +85,16 @@ describe("home page content", () => {
 			"A worker layer your agents can build from.",
 		);
 		expect(homePageContent.starterSystemSection.intro).toContain(
-			"reviewed product changes",
+			"trained worker role",
 		);
 		expect(homePageContent.starterSystemSection.capabilities[1]?.title).toBe(
 			"Async channels",
 		);
 		expect(homePageContent.starterSystemSection.capabilities).toEqual([
-			expect.objectContaining({ title: "Worker packs" }),
+			expect.objectContaining({ title: "Role packets" }),
 			expect.objectContaining({ title: "Async channels" }),
-			expect.objectContaining({ title: "QA path" }),
-			expect.objectContaining({ title: "Conversion-aware repo" }),
+			expect.objectContaining({ title: "Code-side loop" }),
+			expect.objectContaining({ title: "Proof path" }),
 		]);
 		expect(homePageContent.durabilitySection.title).toBe(
 			"Ship by Sunday. Keep shipping on Monday.",
@@ -116,7 +125,9 @@ describe("home page content", () => {
 		expect(homePageContent.pricingSection.includes).toEqual(
 			expect.arrayContaining([
 				"Exec loop setup",
-				"Agent-ready worker packs",
+				"Role-specific worker packets",
+				"Phone, Telegram, and Discord handoff pattern",
+				"Codex-ready code run path",
 				"Review and QA path",
 				"Fast Pass Walkthroughs",
 			]),

@@ -18,16 +18,17 @@ When you need to change the homepage, inspect these files in this order:
 3. `app/_lib/home-page-render-model.ts`
 4. `app/_components/home-page/home-page.tsx`
 5. `app/_components/home-page/sections/product-preview-section.tsx`
-6. `app/_components/home-page/sections/durability-section.tsx`
-7. `app/_components/home-page/sections/starter-system-section.tsx`
-8. `app/_components/home-page/sections/home-page-primary-cta.tsx`
-9. `app/_lib/home-page-structured-data.ts`
-10. `tests/unit/home-page-content.test.ts`
-11. `tests/unit/home-page-render-model.test.ts`
-12. `tests/unit/home-page-structured-data.test.ts`
-13. `tests/integration-ui/home-page-product-preview.test.tsx`
-14. `tests/integration-ui/home-page-primary-cta.test.tsx`
-15. `tests/unit/public-metadata-routes.test.ts`
+6. `app/_components/home-page/sections/product-preview-loop-packet.tsx`
+7. `app/_components/home-page/sections/durability-section.tsx`
+8. `app/_components/home-page/sections/starter-system-section.tsx`
+9. `app/_components/home-page/sections/home-page-primary-cta.tsx`
+10. `app/_lib/home-page-structured-data.ts`
+11. `tests/unit/home-page-content.test.ts`
+12. `tests/unit/home-page-render-model.test.ts`
+13. `tests/unit/home-page-structured-data.test.ts`
+14. `tests/integration-ui/home-page-product-preview.test.tsx`
+15. `tests/integration-ui/home-page-primary-cta.test.tsx`
+16. `tests/unit/public-metadata-routes.test.ts`
 
 If you skip that order, it is easy to update copy while missing the render model, or to change visible sections while leaving schema and smoke tests out of sync.
 
@@ -170,6 +171,20 @@ links in the content layer and route them toward the visible conversion or
 education path. Do not use the shared checkout renderer there unless the
 product-preview contract becomes a real checkout action.
 
+### Change product-preview loop packet
+
+Edit:
+
+- `app/_content/home-page.ts`
+- `app/_components/home-page/sections/product-preview-loop-packet.tsx`
+- `tests/unit/home-page-content.test.ts`
+- `tests/integration-ui/home-page-product-preview.test.tsx`
+
+The loop packet is the tangible first-screen proof that a buyer can turn a
+phone-started decision into a specific worker role and reviewed code output.
+Keep it concrete: input, role, output, and proof should stay visible without
+requiring checkout.
+
 ### Turn a section on or off
 
 Edit:
@@ -207,9 +222,9 @@ If you do not update all of those in one slice, the homepage contract will drift
 Run these checks after meaningful homepage changes:
 
 ```bash
-bunx oxlint --deny-warnings config/product.ts app/_components/home-page/home-page.tsx app/_components/home-page/sections/product-preview-section.tsx app/_components/home-page/sections/durability-section.tsx app/_components/home-page/sections/exec-loop-section.tsx app/_components/home-page/sections/hero-sections.tsx app/_components/home-page/sections/pricing-footer-sections.tsx app/_components/home-page/sections/home-page-primary-cta.tsx app/_content/home-page.ts app/_lib/home-page-render-model.ts app/_lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/integration-ui/home-page-product-preview.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx
+bunx oxlint --deny-warnings config/product.ts app/_components/home-page/home-page.tsx app/_components/home-page/sections/product-preview-section.tsx app/_components/home-page/sections/product-preview-loop-packet.tsx app/_components/home-page/sections/durability-section.tsx app/_components/home-page/sections/exec-loop-section.tsx app/_components/home-page/sections/hero-sections.tsx app/_components/home-page/sections/pricing-footer-sections.tsx app/_components/home-page/sections/home-page-primary-cta.tsx app/_content/home-page.ts app/_lib/home-page-render-model.ts app/_lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/integration-ui/home-page-product-preview.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx
 
-bunx oxfmt --check config/product.ts app/_components/home-page/home-page.tsx app/_components/home-page/sections/product-preview-section.tsx app/_components/home-page/sections/durability-section.tsx app/_components/home-page/sections/exec-loop-section.tsx app/_components/home-page/sections/hero-sections.tsx app/_components/home-page/sections/pricing-footer-sections.tsx app/_components/home-page/sections/home-page-primary-cta.tsx app/_content/home-page.ts app/_lib/home-page-render-model.ts app/_lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/integration-ui/home-page-product-preview.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx
+bunx oxfmt --check config/product.ts app/_components/home-page/home-page.tsx app/_components/home-page/sections/product-preview-section.tsx app/_components/home-page/sections/product-preview-loop-packet.tsx app/_components/home-page/sections/durability-section.tsx app/_components/home-page/sections/exec-loop-section.tsx app/_components/home-page/sections/hero-sections.tsx app/_components/home-page/sections/pricing-footer-sections.tsx app/_components/home-page/sections/home-page-primary-cta.tsx app/_content/home-page.ts app/_lib/home-page-render-model.ts app/_lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/integration-ui/home-page-product-preview.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx
 
 bunx vitest --config vitest.config.ts run --project unit tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts
 

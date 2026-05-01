@@ -1,7 +1,7 @@
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Empty, EmptyDescription } from "@/components/ui/empty";
+import { formatArtifactValue } from "@/app/(workspace)/_components/course/artifacts/preview/artifact-value-format";
 import type { LessonExampleContent } from "@/lib/course/lesson/model/contracts";
-import { formatArtifactValue } from "@/app/(workspace)/_components/course/lesson/workbench/shared/artifact-format";
 
 import type { PinnedArtifact } from "./types";
 

@@ -31,11 +31,14 @@ describe("home page render model", () => {
 		expect(
 			renderModel.starterSystem.section.capabilities.map((item) => item.title),
 		).toEqual([
-			"Worker packs",
+			"Role packets",
 			"Async channels",
-			"QA path",
-			"Conversion-aware repo",
+			"Code-side loop",
+			"Proof path",
 		]);
+		expect(renderModel.productPreview.section.loopPacket.role.title).toBe(
+			"Growth engineer",
+		);
 		expect(
 			renderModel.productPreview.section.workspace.tabs.map((tab) => tab.label),
 		).toEqual(["Source", "Channels", "Proof"]);

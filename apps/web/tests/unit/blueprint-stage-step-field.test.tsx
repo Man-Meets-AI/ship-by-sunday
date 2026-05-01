@@ -10,7 +10,7 @@ import {
 import { BlueprintStageStepField } from "@/app/(workspace)/_components/blueprint-flow/blueprint-stage-step-field";
 
 describe("BlueprintStageStepField", () => {
-	it("shows the optimizer button only for the problem statement field", () => {
+	it("shows the optimizer button only for the problem statement field", async () => {
 		const stage = getBlueprintStageDefinition("blueprint");
 		const problemStep = stage.steps.find(
 			(candidate) => candidate.id === "problem",
@@ -38,7 +38,9 @@ describe("BlueprintStageStepField", () => {
 			/>,
 		);
 
-		expect(screen.getByRole("button", { name: "Optimize" })).toBeTruthy();
+		expect(
+			await screen.findByRole("button", { name: "Optimize" }),
+		).toBeTruthy();
 
 		render(
 			<BlueprintStageStepField
