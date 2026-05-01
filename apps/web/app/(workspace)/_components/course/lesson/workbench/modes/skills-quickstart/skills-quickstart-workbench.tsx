@@ -7,7 +7,7 @@ import { ArtifactContext } from "../../shared/artifact-context";
 import { FocusInlineLessonVideo } from "../../shared/focus-inline-lesson-video";
 import { WorkbenchContainer } from "../../shared/workbench-container";
 import { WorkbenchHeader } from "../../shared/workbench-header";
-import { WorkbenchMediaLayout } from "../../shared/workbench-media-layout";
+import { WorkbenchMediaPlacement } from "../../shared/workbench-media-layout";
 import type { WorkbenchModeProps } from "../../types";
 
 import { SkillsCategoryTabs } from "./skills-category-tabs";
@@ -30,12 +30,6 @@ export function SkillsQuickstartWorkbench({
 	fields,
 	layoutMode,
 }: WorkbenchModeProps) {
-	const showInlineVideo = lesson.coachVideoPlacement === "workbench";
-	const showSplitWorkbenchMedia =
-		showInlineVideo &&
-		lesson.workbenchMediaLayout === "split" &&
-		layoutMode === "focus";
-
 	const inlineVideoCard = (
 		<FocusInlineLessonVideo coachContent={lessonContent.coach} />
 	);
@@ -73,18 +67,13 @@ export function SkillsQuickstartWorkbench({
 		<WorkbenchContainer>
 			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
 			<Separator className="bg-border" />
-			{showSplitWorkbenchMedia ? (
-				<WorkbenchMediaLayout media={inlineVideoCard}>
-					{mainColumn}
-				</WorkbenchMediaLayout>
-			) : showInlineVideo ? (
-				<>
-					{inlineVideoCard}
-					{mainColumn}
-				</>
-			) : (
-				mainColumn
-			)}
+			<WorkbenchMediaPlacement
+				lesson={lesson}
+				layoutMode={layoutMode}
+				media={inlineVideoCard}
+			>
+				{mainColumn}
+			</WorkbenchMediaPlacement>
 		</WorkbenchContainer>
 	);
 }

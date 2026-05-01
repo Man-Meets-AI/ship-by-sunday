@@ -4,7 +4,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import type { WorkbenchModeProps } from "../../types";
 import { WorkbenchHeader } from "../../shared/workbench-header";
-import { WorkbenchMediaLayout } from "../../shared/workbench-media-layout";
+import { WorkbenchMediaPlacement } from "../../shared/workbench-media-layout";
 
 import { CODEX_MARKETING_SITE_FIELD_IDS } from "@/lib/course/lesson/workbench/modes/codex-marketing-site/codex-marketing-site-constants";
 import { CodexMarketingSiteAdvancedAccordion } from "./codex-marketing-site-advanced-accordion";
@@ -29,12 +29,6 @@ export function CodexMarketingSiteWorkbench({
 	invalidFieldIds,
 	fields,
 }: WorkbenchModeProps) {
-	const showInlineVideo = lesson.coachVideoPlacement === "workbench";
-	const showSplitWorkbenchMedia =
-		showInlineVideo &&
-		lesson.workbenchMediaLayout === "split" &&
-		layoutMode === "focus";
-
 	const fieldsById = new Map(fields.map((f) => [f.id, f]));
 	const styleField = fieldsById.get(
 		CODEX_MARKETING_SITE_FIELD_IDS.styleReferenceUrl,
@@ -86,18 +80,13 @@ export function CodexMarketingSiteWorkbench({
 		<div className="w-full space-y-4 pb-1">
 			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
 			<Separator className="bg-border" />
-			{showSplitWorkbenchMedia ? (
-				<WorkbenchMediaLayout media={inlineVideoCard}>
-					{body}
-				</WorkbenchMediaLayout>
-			) : showInlineVideo ? (
-				<>
-					{inlineVideoCard}
-					{body}
-				</>
-			) : (
-				body
-			)}
+			<WorkbenchMediaPlacement
+				lesson={lesson}
+				layoutMode={layoutMode}
+				media={inlineVideoCard}
+			>
+				{body}
+			</WorkbenchMediaPlacement>
 		</div>
 	);
 }

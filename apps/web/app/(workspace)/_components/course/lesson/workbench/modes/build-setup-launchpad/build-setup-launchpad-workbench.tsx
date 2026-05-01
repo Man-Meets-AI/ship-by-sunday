@@ -13,7 +13,7 @@ import { FieldList } from "../../fields/field-list";
 import { FocusInlineLessonVideo } from "../../shared/focus-inline-lesson-video";
 import { WorkbenchContainer } from "../../shared/workbench-container";
 import { WorkbenchHeader } from "../../shared/workbench-header";
-import { WorkbenchMediaLayout } from "../../shared/workbench-media-layout";
+import { WorkbenchMediaPlacement } from "../../shared/workbench-media-layout";
 import type { WorkbenchModeProps } from "../../types";
 import { buildSetupInstructorCommandsBlock } from "@/lib/course/lesson/workbench/modes/build-setup-launchpad/build-setup-launchpad-constants";
 import { BuildSetupLaunchpadCommandsBlock } from "./build-setup-launchpad-commands-block";
@@ -68,12 +68,6 @@ export function BuildSetupLaunchpadWorkbench({
 		["build_product_folder_name", "build_setup_prereqs"].includes(f.id),
 	);
 
-	const showInlineVideo = lesson.coachVideoPlacement === "workbench";
-	const showSplitWorkbenchMedia =
-		showInlineVideo &&
-		lesson.workbenchMediaLayout === "split" &&
-		layoutMode === "focus";
-
 	const inlineVideoCard = (
 		<FocusInlineLessonVideo coachContent={lessonContent.coach} />
 	);
@@ -108,18 +102,13 @@ export function BuildSetupLaunchpadWorkbench({
 		<WorkbenchContainer>
 			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
 			<Separator />
-			{showSplitWorkbenchMedia ? (
-				<WorkbenchMediaLayout media={inlineVideoCard}>
-					{launchpadBody}
-				</WorkbenchMediaLayout>
-			) : showInlineVideo ? (
-				<>
-					{inlineVideoCard}
-					{launchpadBody}
-				</>
-			) : (
-				launchpadBody
-			)}
+			<WorkbenchMediaPlacement
+				lesson={lesson}
+				layoutMode={layoutMode}
+				media={inlineVideoCard}
+			>
+				{launchpadBody}
+			</WorkbenchMediaPlacement>
 		</WorkbenchContainer>
 	);
 }

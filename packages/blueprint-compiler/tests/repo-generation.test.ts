@@ -6,6 +6,9 @@ import {
 	renderTemplateOverrides,
 } from "../src/server";
 
+const unresolvedCriticalPlaceholderPattern =
+	/\[(?! )[A-Z][^\]\n]*\]|\[[^\]\n]*\.\.\.[^\]\n]*\]/;
+
 describe("repo generation", () => {
 	it("builds a repo manifest from the project definition", () => {
 		const manifest = buildRepoGenerationManifest(
@@ -129,6 +132,7 @@ describe("repo generation", () => {
 				"apps/web/config/generated-design-system.ts",
 				"apps/web/app/_content/home-page.ts",
 				"docs/index.md",
+				"docs/build/docs/agent-handoff.md",
 				"docs/build/docs/prompt.md",
 				"docs/facts/design-system.json",
 				"apps/web/.env.production.example",
@@ -161,5 +165,64 @@ describe("repo generation", () => {
 			"Keep UI rendering, route orchestration, domain logic, and provider I/O in separate files",
 		);
 		expect(forbiddenPaths).toEqual([]);
+	});
+
+	it("materializes a build pack an agent can start from without chat history", async () => {
+		const snapshotFiles = await materializeRepoSnapshot(
+			createCompleteProjectDefinition(),
+		);
+		const buildPrompt = snapshotFiles.find(
+			(file) => file.path === "docs/build/docs/prompt.md",
+		);
+		const agentHandoff = snapshotFiles.find(
+			(file) => file.path === "docs/build/docs/agent-handoff.md",
+		);
+		const buildPlans = snapshotFiles.find(
+			(file) => file.path === "docs/build/docs/plans.md",
+		);
+		const buildDocumentation = snapshotFiles.find(
+			(file) => file.path === "docs/build/docs/documentation.md",
+		);
+		const buildImplement = snapshotFiles.find(
+			(file) => file.path === "docs/build/docs/implement.md",
+		);
+		const rootAgentGuide = snapshotFiles.find(
+			(file) => file.path === "AGENTS.md",
+		);
+
+		expect(rootAgentGuide?.content).toContain(
+			"For product build work, read `docs/build/docs/agent-handoff.md` first",
+		);
+		expect(agentHandoff?.content).toContain("## Start Prompt");
+		expect(agentHandoff?.content).toContain("## Required Source Files");
+		expect(agentHandoff?.content).toContain("## Required Completion Evidence");
+		expect(buildPrompt?.content).toContain("## Authority Order");
+		expect(buildPrompt?.content).toContain("## Implementation Target");
+		expect(buildPrompt?.content).toContain("## Completion Audit Checklist");
+		expect(buildPrompt?.content).toContain("## Copy-Ready Agent Prompt");
+		expect(buildPlans?.content).toContain("## Active Milestone Selection");
+		expect(buildPlans?.content).toContain("## Detailed Milestone Plans");
+		expect(buildImplement?.content).toContain("## Source Of Truth");
+		expect(buildImplement?.content).toContain("## Preflight Checklist");
+		expect(buildImplement?.content).toContain(
+			"## Suggested Validation Commands",
+		);
+		expect(buildDocumentation?.content).toContain("## Current Status");
+		expect(buildDocumentation?.content).toContain(
+			"## Requirement-To-Evidence Checklist",
+		);
+
+		for (const buildDoc of [
+			agentHandoff,
+			buildPrompt,
+			buildPlans,
+			buildImplement,
+			buildDocumentation,
+		]) {
+			expect(buildDoc?.content).not.toContain("## Base Template");
+			expect(buildDoc?.content).not.toMatch(
+				unresolvedCriticalPlaceholderPattern,
+			);
+		}
 	});
 });

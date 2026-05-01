@@ -4,7 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { WorkbenchModeProps } from "../../types";
 import { WorkbenchHeader } from "../../shared/workbench-header";
-import { WorkbenchMediaLayout } from "../../shared/workbench-media-layout";
+import { WorkbenchMediaPlacement } from "../../shared/workbench-media-layout";
 
 import { CoreUxPlanFlowApprovedSummary } from "./core-ux-plan-flow-approved-summary";
 import { CoreUxPlanFlowCommandsCard } from "./core-ux-plan-flow-commands-card";
@@ -32,12 +32,6 @@ export function CoreUxPlanFlowWorkbench(props: WorkbenchModeProps) {
 	const checklistField = fields.find(
 		(f) => f.id === CORE_UX_PLAN_FIELD_IDS.workflowChecklist,
 	);
-
-	const showInlineVideo = lesson.coachVideoPlacement === "workbench";
-	const showSplitWorkbenchMedia =
-		showInlineVideo &&
-		lesson.workbenchMediaLayout === "split" &&
-		layoutMode === "focus";
 
 	const inlineVideoCard = (
 		<CoreUxPlanFlowInlineVideo coachContent={lessonContent.coach} />
@@ -75,18 +69,13 @@ export function CoreUxPlanFlowWorkbench(props: WorkbenchModeProps) {
 		<div className="w-full space-y-4 pb-1">
 			<WorkbenchHeader lesson={lesson} lessonContent={lessonContent} />
 			<Separator className="bg-border" />
-			{showSplitWorkbenchMedia ? (
-				<WorkbenchMediaLayout media={inlineVideoCard}>
-					{mainColumn}
-				</WorkbenchMediaLayout>
-			) : showInlineVideo ? (
-				<>
-					{inlineVideoCard}
-					{mainColumn}
-				</>
-			) : (
-				mainColumn
-			)}
+			<WorkbenchMediaPlacement
+				lesson={lesson}
+				layoutMode={layoutMode}
+				media={inlineVideoCard}
+			>
+				{mainColumn}
+			</WorkbenchMediaPlacement>
 		</div>
 	);
 }
