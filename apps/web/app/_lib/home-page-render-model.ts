@@ -17,6 +17,10 @@ export type HomePageSocialProofVariant = {
 
 export type HomePageRenderModel = {
 	readonly sectionOrder: readonly HomePageSectionName[];
+	readonly productPreview: {
+		readonly isEnabled: boolean;
+		readonly section: HomePageContent["productPreviewSection"];
+	};
 	readonly hero: {
 		readonly isEnabled: boolean;
 		readonly section: HomePageContent["hero"];
@@ -30,9 +34,9 @@ export type HomePageRenderModel = {
 		readonly isEnabled: boolean;
 		readonly section: HomePageContent["mechanismSection"];
 	};
-	readonly whatsInside: {
+	readonly execLoop: {
 		readonly isEnabled: boolean;
-		readonly section: HomePageContent["whatsInsideSection"];
+		readonly section: HomePageContent["execLoopSection"];
 	};
 	readonly starterSystem: {
 		readonly isEnabled: boolean;
@@ -77,6 +81,10 @@ export function createHomePageRenderModel({
 
 	return {
 		sectionOrder: homePageSectionOrder,
+		productPreview: {
+			isEnabled: homePageConfig.sections.productPreview,
+			section: content.productPreviewSection,
+		},
 		hero: {
 			isEnabled: homePageConfig.sections.hero,
 			section: content.hero,
@@ -90,9 +98,9 @@ export function createHomePageRenderModel({
 			isEnabled: homePageConfig.sections.mechanism,
 			section: content.mechanismSection,
 		},
-		whatsInside: {
-			isEnabled: homePageConfig.sections.whatsInside,
-			section: content.whatsInsideSection,
+		execLoop: {
+			isEnabled: homePageConfig.sections.execLoop,
+			section: content.execLoopSection,
 		},
 		starterSystem: {
 			isEnabled: homePageConfig.sections.starterSystem,

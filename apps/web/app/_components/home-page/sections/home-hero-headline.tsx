@@ -7,17 +7,24 @@ type Hero = HomePageContent["hero"];
 const headlineLineClass =
 	"font-marketing-display tracking-marketing-section block text-balance text-[clamp(3.5rem,10vw,8.5rem)] font-normal uppercase leading-[0.95] text-foreground transition-all duration-500 hover:tracking-tighter";
 
-export function HomeHeroHeadline({ hero }: { hero: Hero }) {
+export function HomeHeroHeadline({
+	hero,
+	headingLevel = "h1",
+}: {
+	hero: Hero;
+	headingLevel?: "h1" | "h2";
+}) {
 	const headlineText = [
 		hero.headlineLead,
 		`${hero.headlineTailPrefix}${hero.headlineTailHover}`,
 	]
 		.filter(Boolean)
 		.join(" ");
+	const Heading = headingLevel;
 
 	return (
 		<div className="w-full">
-			<h1 aria-label={headlineText} className="flex flex-col items-center">
+			<Heading aria-label={headlineText} className="flex flex-col items-center">
 				<span className={headlineLineClass}>{hero.headlineLead}</span>
 				<span className={cn(headlineLineClass, "text-primary/90")}>
 					{hero.headlineTailPrefix}
@@ -25,7 +32,7 @@ export function HomeHeroHeadline({ hero }: { hero: Hero }) {
 						{hero.headlineTailHover}
 					</Cover>
 				</span>
-			</h1>
+			</Heading>
 		</div>
 	);
 }

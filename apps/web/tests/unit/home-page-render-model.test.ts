@@ -13,23 +13,28 @@ describe("home page render model", () => {
 		const renderModel = createHomePageRenderModel();
 
 		expect(renderModel.sectionOrder).toEqual(homePageSectionOrder);
+		expect(renderModel.productPreview.isEnabled).toBe(true);
+		expect(renderModel.productPreview.section.primaryAction.href).toBe(
+			"/settings",
+		);
 		expect(renderModel.hero.isEnabled).toBe(true);
 		expect(renderModel.hero.primaryCtaTarget).toEqual({ kind: "checkout" });
 		expect(renderModel.mechanism.isEnabled).toBe(false);
 		expect(renderModel.mechanism.section.tagline).toBe(
 			"One source of truth. No drift.",
 		);
+		expect(renderModel.execLoop.isEnabled).toBe(true);
+		expect(
+			renderModel.execLoop.section.steps.map((step) => step.label),
+		).toEqual(["Decide", "Brief", "Run", "Review"]);
 		expect(renderModel.starterSystem.isEnabled).toBe(true);
 		expect(
 			renderModel.starterSystem.section.capabilities.map((item) => item.title),
 		).toEqual([
-			"Worker blueprint",
-			"Role-specific packs",
-			"Safer agent changes",
-			"Async-ready context",
-			"Built-in QA",
-			"Conversion-aware starter",
-			"Curated design direction",
+			"Worker packs",
+			"Async channels",
+			"QA path",
+			"Conversion-aware repo",
 		]);
 		expect(renderModel.durability.isEnabled).toBe(false);
 		expect(renderModel.socialProof.isEnabled).toBe(true);
@@ -45,6 +50,7 @@ describe("home page render model", () => {
 			...starterConfig.homePage,
 			sections: {
 				...starterConfig.homePage.sections,
+				productPreview: false,
 				starterSystem: false,
 				durability: false,
 				socialProof: false,
@@ -60,6 +66,7 @@ describe("home page render model", () => {
 		} satisfies StarterHomePageConfig;
 		const renderModel = createHomePageRenderModel({ homePageConfig });
 
+		expect(renderModel.productPreview.isEnabled).toBe(false);
 		expect(renderModel.starterSystem.isEnabled).toBe(false);
 		expect(renderModel.durability.isEnabled).toBe(false);
 		expect(renderModel.socialProof.isEnabled).toBe(false);

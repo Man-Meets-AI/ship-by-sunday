@@ -38,7 +38,7 @@ export function HomeHeroTopBar({ hero }: { hero: Hero }) {
 					</Link>
 					<Button
 						asChild
-						className="h-10 rounded-full bg-foreground px-6 text-sm font-semibold text-background transition-transform hover:scale-105 active:scale-95"
+						className="hidden h-10 rounded-full bg-foreground px-6 text-sm font-semibold text-background transition-transform hover:scale-105 active:scale-95 sm:inline-flex"
 					>
 						<Link href={routeConfig.pricingHash}>{hero.primaryCta}</Link>
 					</Button>

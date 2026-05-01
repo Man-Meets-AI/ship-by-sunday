@@ -17,15 +17,17 @@ When you need to change the homepage, inspect these files in this order:
 2. `app/_content/home-page.ts`
 3. `app/_lib/home-page-render-model.ts`
 4. `app/_components/home-page/home-page.tsx`
-5. `app/_components/home-page/sections/durability-section.tsx`
-6. `app/_components/home-page/sections/starter-system-section.tsx`
-7. `app/_components/home-page/sections/home-page-primary-cta.tsx`
-8. `app/_lib/home-page-structured-data.ts`
-9. `tests/unit/home-page-content.test.ts`
-10. `tests/unit/home-page-render-model.test.ts`
-11. `tests/unit/home-page-structured-data.test.ts`
-12. `tests/integration-ui/home-page-primary-cta.test.tsx`
-13. `tests/unit/public-metadata-routes.test.ts`
+5. `app/_components/home-page/sections/product-preview-section.tsx`
+6. `app/_components/home-page/sections/durability-section.tsx`
+7. `app/_components/home-page/sections/starter-system-section.tsx`
+8. `app/_components/home-page/sections/home-page-primary-cta.tsx`
+9. `app/_lib/home-page-structured-data.ts`
+10. `tests/unit/home-page-content.test.ts`
+11. `tests/unit/home-page-render-model.test.ts`
+12. `tests/unit/home-page-structured-data.test.ts`
+13. `tests/integration-ui/home-page-product-preview.test.tsx`
+14. `tests/integration-ui/home-page-primary-cta.test.tsx`
+15. `tests/unit/public-metadata-routes.test.ts`
 
 If you skip that order, it is easy to update copy while missing the render model, or to change visible sections while leaving schema and smoke tests out of sync.
 
@@ -37,9 +39,10 @@ If you skip that order, it is easy to update copy while missing the render model
 
 That config currently controls:
 
+- `sections.productPreview`
 - `sections.hero`
 - `sections.sprintPath`
-- `sections.whatsInside`
+- `sections.execLoop`
 - `sections.starterSystem`
 - `sections.durability`
 - `sections.socialProof`
@@ -81,15 +84,16 @@ If a future agent adds homepage behavior, add it here first instead of sprinklin
 
 The homepage renders these top-level sections in this fixed order:
 
-1. `hero`
-2. `sprintPath`
-3. `whatsInside`
-4. `starterSystem`
-5. `durability`
-6. `socialProof`
-7. `faq`
-8. `pricing`
-9. `footer`
+1. `productPreview`
+2. `hero`
+3. `sprintPath`
+4. `execLoop`
+5. `starterSystem`
+6. `durability`
+7. `socialProof`
+8. `faq`
+9. `pricing`
+10. `footer`
 
 Two anchors are part of the public contract:
 
@@ -190,13 +194,13 @@ If you do not update all of those in one slice, the homepage contract will drift
 Run these checks after meaningful homepage changes:
 
 ```bash
-bunx oxlint --deny-warnings config/product.ts app/_components/home-page/home-page.tsx app/_components/home-page/sections/durability-section.tsx app/_components/home-page/sections/hero-sections.tsx app/_components/home-page/sections/pricing-footer-sections.tsx app/_components/home-page/sections/home-page-primary-cta.tsx app/_content/home-page.ts app/_lib/home-page-render-model.ts app/_lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/integration-ui/home-page-primary-cta.test.tsx
+bunx oxlint --deny-warnings config/product.ts app/_components/home-page/home-page.tsx app/_components/home-page/sections/product-preview-section.tsx app/_components/home-page/sections/durability-section.tsx app/_components/home-page/sections/exec-loop-section.tsx app/_components/home-page/sections/hero-sections.tsx app/_components/home-page/sections/pricing-footer-sections.tsx app/_components/home-page/sections/home-page-primary-cta.tsx app/_content/home-page.ts app/_lib/home-page-render-model.ts app/_lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/integration-ui/home-page-product-preview.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx
 
-bunx oxfmt --check config/product.ts app/_components/home-page/home-page.tsx app/_components/home-page/sections/durability-section.tsx app/_components/home-page/sections/hero-sections.tsx app/_components/home-page/sections/pricing-footer-sections.tsx app/_components/home-page/sections/home-page-primary-cta.tsx app/_content/home-page.ts app/_lib/home-page-render-model.ts app/_lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/integration-ui/home-page-primary-cta.test.tsx
+bunx oxfmt --check config/product.ts app/_components/home-page/home-page.tsx app/_components/home-page/sections/product-preview-section.tsx app/_components/home-page/sections/durability-section.tsx app/_components/home-page/sections/exec-loop-section.tsx app/_components/home-page/sections/hero-sections.tsx app/_components/home-page/sections/pricing-footer-sections.tsx app/_components/home-page/sections/home-page-primary-cta.tsx app/_content/home-page.ts app/_lib/home-page-render-model.ts app/_lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/integration-ui/home-page-product-preview.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx
 
 bunx vitest --config vitest.config.ts run --project unit tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts
 
-bunx vitest --config vitest.config.ts run --project integration-ui tests/integration-ui/home-page-primary-cta.test.tsx
+bunx vitest --config vitest.config.ts run --project integration-ui tests/integration-ui/home-page-product-preview.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx
 
 bunx vitest --config vitest.config.ts run --project unit tests/unit/public-metadata-routes.test.ts
 
@@ -216,6 +220,7 @@ If you ask an agent to change the homepage, the prompt should say which of these
 The agent should preserve these invariants unless the task explicitly changes them:
 
 - fixed section order
+- product-preview first screen when enabled
 - truthful schema
 - conditional social-proof fetch behavior
 - shared CTA renderer

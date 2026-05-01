@@ -15,20 +15,26 @@ type Hero = HomePageContent["hero"];
 export function HomeHeroSection({
 	hero,
 	primaryCtaTarget,
+	variant = "lead",
 }: {
 	hero: Hero;
 	primaryCtaTarget: HomePageCtaTarget;
+	variant?: "lead" | "supporting";
 }) {
+	const isLead = variant === "lead";
+
 	return (
-		<section className="relative flex w-full flex-col items-center pt-4 pb-16 text-center sm:pt-8 sm:pb-24 lg:pt-10 lg:pb-28">
-			<HeroAtmosphere />
-			<ScrollReveal direction="none" className="relative z-10">
-				<HomeHeroTopBar hero={hero} />
-			</ScrollReveal>
-			<div className="relative z-10 mt-10 flex w-full max-w-4xl flex-col items-center gap-12 sm:mt-14 lg:mt-20">
+		<section className="relative flex w-full flex-col items-center border-t border-border/60 py-20 text-center sm:py-24 lg:py-32">
+			{isLead ? <HeroAtmosphere /> : null}
+			{isLead ? (
+				<ScrollReveal direction="none" className="relative z-10 w-full">
+					<HomeHeroTopBar hero={hero} />
+				</ScrollReveal>
+			) : null}
+			<div className="relative z-10 flex w-full max-w-4xl flex-col items-center gap-12">
 				<ScrollReveal delay={0.15}>
 					<div className="flex flex-col items-center gap-8">
-						<HomeHeroHeadline hero={hero} />
+						<HomeHeroHeadline hero={hero} headingLevel={isLead ? "h1" : "h2"} />
 						<p className="max-w-2xl text-balance text-lg leading-7 text-muted-foreground sm:text-xl lg:text-2xl">
 							{hero.body}
 						</p>

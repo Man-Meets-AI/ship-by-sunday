@@ -9,56 +9,67 @@ describe("home page content", () => {
 			"Ship a real, durable product by Sunday",
 		);
 		expect(productConfig.metadataDescription).toContain(
-			"phone-started agent work",
+			"phone-started exec loops",
 		);
 		expect(productConfig.metadataDescription).toContain(
 			"codebases that convert",
 		);
 
+		expect(homePageContent.productPreviewSection.title).toBe(
+			"Set up the repo.",
+		);
+		expect(homePageContent.productPreviewSection.primaryAction).toEqual({
+			label: "Build the repo",
+			href: "/settings",
+		});
+		expect(homePageContent.productPreviewSection.secondaryAction).toEqual({
+			label: "Watch setup video",
+			href: "/lesson/welcome-to-ship-by-sunday",
+		});
+		expect(
+			homePageContent.productPreviewSection.workspace.tabs.map(
+				(tab) => tab.label,
+			),
+		).toEqual(["Repo", "Codex", "QA"]);
+
 		expect(homePageContent.hero.headlineLead).toBe("Ship codebases");
 		expect(homePageContent.hero.headlineTailHover).toBe("that convert");
 		expect(homePageContent.hero.body).toBe(
-			"Turn phone-started ideas, async agent loops, and messy AI output into worker-ready context: product truth, role-specific packs, and a starter path agents can use to ship meaningful code.",
+			"Exec loops turn your decisions into worker briefs agents can run from Codex, Telegram, Discord, or your phone.",
 		);
 		expect(homePageContent.hero.promoBanner).toEqual({
 			label: "Early member",
-			message: `Get ${productConfig.name} for ${productConfig.checkoutPriceDisplay} instead of ${productConfig.priceDisplay}. ${productConfig.activeOffer?.percentOff}% off auto-applied at checkout, plus FULL TURBO free.`,
+			message: `${productConfig.checkoutPriceDisplay} early member price. FULL TURBO included.`,
 		});
 		expect(homePageContent.hero.loginLabel).toBe("Sign in");
-		expect(homePageContent.hero.secondaryCta.label).toBe("See the worker path");
+		expect(homePageContent.hero.secondaryCta.label).toBe("See the loop");
 		expect(homePageContent.hero.secondaryCta.href).toBe("#system");
 
 		expect(homePageContent.sprintPathSection.titleHighlight).toBe(
-			"worker context.",
+			"agents useful.",
 		);
 		expect(homePageContent.sprintPathSection.intro).toContain(
-			"start work from your phone",
+			"decision to agent run",
 		);
-		expect(homePageContent.whatsInsideSection.title).toBe(
-			"Build the worker layer.",
-		);
-		expect(homePageContent.whatsInsideSection.pillars[1]?.title).toBe(
-			"The worker roles",
-		);
-		expect(homePageContent.whatsInsideSection.pillars[2]?.title).toBe(
-			"The execution path",
-		);
+		expect(homePageContent.execLoopSection.title).toBe("How the loop works.");
+		expect(
+			homePageContent.execLoopSection.steps.map((step) => step.label),
+		).toEqual(["Decide", "Brief", "Run", "Review"]);
 		expect(homePageContent.starterSystemSection.title).toBe(
 			"A worker layer your agents can build from.",
 		);
 		expect(homePageContent.starterSystemSection.intro).toContain(
-			"agents running while you are AFK",
+			"reviewed product changes",
 		);
 		expect(homePageContent.starterSystemSection.capabilities[1]?.title).toBe(
-			"Role-specific packs",
+			"Async channels",
 		);
-		expect(homePageContent.starterSystemSection.capabilities).toEqual(
-			expect.arrayContaining([
-				expect.objectContaining({ title: "Async-ready context" }),
-				expect.objectContaining({ title: "Built-in QA" }),
-				expect.objectContaining({ title: "Curated design direction" }),
-			]),
-		);
+		expect(homePageContent.starterSystemSection.capabilities).toEqual([
+			expect.objectContaining({ title: "Worker packs" }),
+			expect.objectContaining({ title: "Async channels" }),
+			expect.objectContaining({ title: "QA path" }),
+			expect.objectContaining({ title: "Conversion-aware repo" }),
+		]);
 		expect(homePageContent.durabilitySection.title).toBe(
 			"Ship by Sunday. Keep shipping on Monday.",
 		);
@@ -69,12 +80,6 @@ describe("home page content", () => {
 			}),
 			expect.objectContaining({
 				question: "What do I actually get at the end?",
-			}),
-			expect.objectContaining({
-				question: "I already have a starter. Why would I need this?",
-			}),
-			expect.objectContaining({
-				question: "Is this just more planning before coding?",
 			}),
 			expect.objectContaining({
 				question: "Who is this for?",
@@ -93,9 +98,9 @@ describe("home page content", () => {
 
 		expect(homePageContent.pricingSection.includes).toEqual(
 			expect.arrayContaining([
-				"Agent-Ready Packs",
-				"Worker-role setup for product, design, marketing, build, and QA",
-				"Ship by Sunday Blueprint",
+				"Exec loop setup",
+				"Agent-ready worker packs",
+				"Review and QA path",
 				"Fast Pass Walkthroughs",
 			]),
 		);
@@ -107,9 +112,11 @@ describe("home page content", () => {
 		);
 		expect(homePageContent.pricingSection.offerBanner).toEqual({
 			label: "Early member",
-			message: `50% off the ${productConfig.priceDisplay} list price. Auto-applied at checkout.`,
+			message: `${productConfig.checkoutPriceDisplay} early member price. Auto-applied at checkout.`,
 		});
-		expect(homePageContent.pricingSection.ctaTitle).toBe("Get the blueprint");
+		expect(homePageContent.pricingSection.ctaTitle).toBe(
+			"Build the worker layer",
+		);
 	});
 
 	it("keeps the faq focused on the offer", () => {
@@ -118,7 +125,7 @@ describe("home page content", () => {
 			.join("\n");
 
 		expect(faqCopy).not.toContain("The guarantee is about clarity");
-		expect(faqCopy).toContain("Blueprint");
+		expect(faqCopy).toContain("exec loops");
 		expect(faqCopy).toContain("worker layer");
 	});
 });

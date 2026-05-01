@@ -9,17 +9,85 @@ const activePricingOffer = productConfig.activeOffer;
 const promoBanner = activePricingOffer
 	? {
 			label: activePricingOffer.label,
-			message: `Get ${productName} for ${productConfig.checkoutPriceDisplay} instead of ${productConfig.priceDisplay}. ${activePricingOffer.percentOff}% off auto-applied at checkout, plus FULL TURBO free.`,
+			message: `${productConfig.checkoutPriceDisplay} early member price. FULL TURBO included.`,
 		}
 	: null;
 const pricingOfferBanner = activePricingOffer
 	? {
 			label: activePricingOffer.label,
-			message: `${activePricingOffer.percentOff}% off the ${productConfig.priceDisplay} list price. Auto-applied at checkout.`,
+			message: `${productConfig.checkoutPriceDisplay} early member price. Auto-applied at checkout.`,
 		}
 	: null;
 
 export const homePageContent = {
+	productPreviewSection: {
+		kicker: productName,
+		title: "Set up the repo.",
+		intro:
+			"Play with the setup workspace customers land in after checkout: repo invite, Codex loop, video path, and QA.",
+		primaryAction: {
+			label: "Build the repo",
+			href: routeConfig.settings,
+		},
+		secondaryAction: {
+			label: "Watch setup video",
+			href: "/lesson/welcome-to-ship-by-sunday",
+		},
+		unlockNote:
+			"Checkout unlocks saved setup, private videos, and the build actions.",
+		workspace: {
+			title: "Starter repo setup",
+			statusLabel: "Preview mode",
+			githubUsernameLabel: "GitHub username",
+			githubUsernamePlaceholder: "parkerrex",
+			githubUsernameHelp:
+				"This is where the private starter repo invite gets sent after checkout.",
+			tabs: [
+				{
+					id: "repo",
+					label: "Repo",
+					title: "Repo access",
+					description:
+						"Save the GitHub account that should receive the private starter repo.",
+					items: ["GitHub username", "Invite status", "Starter repo link"],
+				},
+				{
+					id: "codex",
+					label: "Codex",
+					title: "Codex loop",
+					description:
+						"Connect your subscription and send worker briefs through the same context.",
+					items: ["Account connection", "Rate-limit check", "Worker prompt"],
+				},
+				{
+					id: "qa",
+					label: "QA",
+					title: "QA path",
+					description:
+						"Review the diff, proof, and next action before the loop compounds.",
+					items: ["Diff review", "Browser proof", "Next loop"],
+				},
+			],
+			checklist: [
+				{
+					id: "truth",
+					label: "Product truth locked",
+				},
+				{
+					id: "repo",
+					label: "Repo invite ready",
+				},
+				{
+					id: "codex",
+					label: "Codex loop connected",
+				},
+				{
+					id: "qa",
+					label: "QA path attached",
+				},
+			],
+		},
+	},
 	assets: {
 		socialProofImage: productConfig.images.founderProof,
 	},
@@ -30,27 +98,27 @@ export const homePageContent = {
 		headlineLead: "Ship codebases",
 		headlineTailPrefix: "",
 		headlineTailHover: "that convert",
-		body: "Turn phone-started ideas, async agent loops, and messy AI output into worker-ready context: product truth, role-specific packs, and a starter path agents can use to ship meaningful code.",
+		body: "Exec loops turn your decisions into worker briefs agents can run from Codex, Telegram, Discord, or your phone.",
 		primaryCta: marketingDisplayConfig.primaryCtaLabel,
 		secondaryCta: {
-			label: "See the worker path",
+			label: "See the loop",
 			href: routeConfig.systemHash,
 		},
 		eyebrow:
-			"One-time payment. Lifetime access. Build the worker layer first so every product, design, marketing, build, and QA role acts from the same decisions.",
+			"One payment. One worker layer. Product, design, marketing, build, and QA stay aligned.",
 	},
 	sprintPathSection: {
 		label: "System",
-		titlePrefix: "Agents need ",
-		titleHighlight: "worker context.",
+		titlePrefix: "Exec loops make ",
+		titleHighlight: "agents useful.",
 		intro:
-			"If you want to start work from your phone and let agents ship meaningful code, the risk is not whether a model can write code. It is whether every role knows your decisions, standards, constraints, conversion promise, and next action.",
+			"An exec loop is the repeatable path from decision to agent run to QA to the next decision.",
 		supportingPoints: [
-			"Ship by Sunday turns your product judgment into role-specific worker packs for product, design, marketing, build, and prompting, so each hat gets explicit decisions instead of vague instructions.",
-			"Those packs are file-based and agent-readable, so Codex, DM-started workflows, and AFK loops can reuse the same source of truth without rebuilding context from chat history.",
-			"The starter path keeps code, docs, CTA claims, and review steps aligned, so agent changes can compound toward a product that ships and converts.",
+			"Decide what should happen.",
+			"Package the decision for the right worker role.",
+			"Run the agent, review the change, and feed the result back into the system.",
 		],
-		valueFrame: "Most starters give you code. This trains the worker layer.",
+		valueFrame: "Most starters give you code. Exec loops make it compound.",
 		imageAlt:
 			"Diagram showing a product definition turning into Design, Marketing, Build, and Prompt Packs plus a final Blueprint",
 	},
@@ -65,7 +133,7 @@ export const homePageContent = {
 	socialProofSection: {
 		label: "Built by someone who ships",
 		headline: "Built by someone who has actually shipped products.",
-		body: "Worked across UX, product, design, and engineering. Helped scale a startup to $73M/year. Stayed through acquisition. Ship by Sunday is new. The operating experience behind it is not.",
+		body: "Built from real UX, product, design, and engineering work, including startup scale to $73M/year and acquisition.",
 	},
 	faqSection: {
 		label: "FAQ",
@@ -76,77 +144,57 @@ export const homePageContent = {
 			{
 				question: "Is this another course or another starter?",
 				answer:
-					"No. Ship by Sunday is a blueprint-first shipping system. The videos help you use it, and the repo is part of it, but the real product is the Ship by Sunday Blueprint you leave with.",
+					"No. It is a worker-layer system for exec loops: decisions, role briefs, agent runs, and QA.",
 			},
 			{
 				question: "What do I actually get at the end?",
 				answer:
-					"You leave with your product truth, the Agent-Ready Packs, and the Ship by Sunday Blueprint.",
-			},
-			{
-				question: "I already have a starter. Why would I need this?",
-				answer:
-					"Because a starter without aligned context is still just code. Ship by Sunday gives your repo the packs and product truth that make AI useful instead of chaotic.",
-			},
-			{
-				question: "Is this just more planning before coding?",
-				answer:
-					"No. It is the minimum brief required to stop re-explaining the product every time you touch AI. The point is to move faster on the right thing.",
+					"Worker packs, a QA path, and repo guidance your agents can reuse.",
 			},
 			{
 				question: "Who is this for?",
 				answer:
-					"Technical founders and operators who can get AI to produce code, but need a durable worker layer for phone-started loops, role-specific agents, and codebases that have to convert.",
+					"Technical founders who can get AI to code, but need phone-started loops and role-specific agents to ship work that converts.",
 			},
 			{
 				question: "Why not just use ChatGPT, Claude, or Codex directly?",
 				answer:
-					"You can. Ship by Sunday is the worker layer around those tools: one product truth, role-specific packs, and a starter path that keeps the codebase aligned.",
+					"Use them. Ship by Sunday supplies the worker layer around them.",
 			},
 			{
 				question:
 					"Can this help with Telegram, Discord, or phone-started agent loops?",
 				answer:
-					"Yes, if you are wiring those loops yourself. Ship by Sunday gives the code-side context those loops need: worker roles, product truth, QA prompts, and repo guidance that agents can reuse.",
+					"Yes, if you wire the loops. This gives them code-side context to reuse.",
 			},
 			{
 				question: "What happens right after I pay?",
-				answer: `You go straight into the ${workspaceDisplayConfig.homeNoun} to lock the truth, compile the packs, and shape your Blueprint.`,
+				answer: `You open the ${workspaceDisplayConfig.homeNoun}, lock the decisions, compile the packs, and start the loop.`,
 			},
 		],
 	},
-	whatsInsideSection: {
-		label: "By Sunday",
-		title: "Build the worker layer.",
+	execLoopSection: {
+		label: "Exec loop",
+		title: "How the loop works.",
 		intro:
-			"Enough judgment to build. Enough structure to hand off. No vague prompts, no half-decisions.",
-		pillars: [
+			"One loop moves a decision into shipped code. The next loop starts smarter.",
+		steps: [
 			{
-				title: "The product truth",
-				highlightBefore: "Lock ",
-				highlight:
-					"the user, offer, scope, conversion promise, and constraints",
-				highlightAfter:
-					" before code, so the build starts from something real.",
-				supporting:
-					"This is the judgment layer every worker role needs before agents touch the repo.",
+				label: "Decide",
+				description: "Name the outcome, constraint, and conversion claim.",
 			},
 			{
-				title: "The worker roles",
-				highlightBefore: "Leave with ",
-				highlight: "Product, Design, Marketing, Build, Prompt, and QA Packs",
-				highlightAfter: " that train each hat you wear at the computer.",
-				supporting:
-					"Each role gets the context, constraints, and next actions it needs instead of inheriting a stale chat summary.",
+				label: "Brief",
+				description: "Turn it into a worker pack for one role.",
 			},
 			{
-				title: "The execution path",
-				highlightBefore: "Review the ",
-				highlight: "starter path for Codex and async agent loops",
-				highlightAfter:
-					" so work can start from your phone and still land in a real repo.",
-				supporting:
-					"This is a concrete build system for meaningful code changes, not random prompts and a hope-based plan.",
+				label: "Run",
+				description:
+					"Send the agent through Codex, Telegram, Discord, or phone.",
+			},
+			{
+				label: "Review",
+				description: "Check the diff, QA path, and update the worker layer.",
 			},
 		],
 	},
@@ -154,42 +202,25 @@ export const homePageContent = {
 		title: "A worker layer your agents can build from.",
 		titleLines: ["A worker layer.", "Your agents can", "build from."],
 		intro:
-			"The blueprint gives every worker role the truth. The starter gives that truth a real product shape: auth, billing, docs, protected workspace, QA paths, and repo guidance for agents running while you are AFK.",
+			"Decisions become role briefs. Role briefs become agent runs. Agent runs become reviewed product changes.",
 		capabilities: [
 			{
-				title: "Worker blueprint",
-				description:
-					"Start from a repo already shaped around your decisions, not a dead template you have to reinterpret every session.",
+				title: "Worker packs",
+				description: "Clear briefs for each role you need agents to play.",
 			},
 			{
-				title: "Role-specific packs",
+				title: "Async channels",
 				description:
-					"Product, design, marketing, build, prompt, and QA packs give each worker role a clear operating brief.",
+					"Codex, phone prompts, Telegram, and Discord share context.",
 			},
 			{
-				title: "Safer agent changes",
-				description:
-					"Guidance for Clerk, Convex, Stripe, Next.js, React, and Vercel helps agents make changes inside real constraints instead of blind file surgery.",
+				title: "QA path",
+				description: "Every loop ends with review, proof, and next action.",
 			},
 			{
-				title: "Async-ready context",
+				title: "Conversion-aware repo",
 				description:
-					"Use the same source of truth from Codex, phone prompts, or your own Telegram and Discord relays without rebuilding the brief.",
-			},
-			{
-				title: "Built-in QA",
-				description:
-					"Smoke paths, QA prompts, and incident alerts are already in the repo, so shipping does not turn into guesswork the moment something breaks.",
-			},
-			{
-				title: "Conversion-aware starter",
-				description:
-					"The homepage, docs, checkout claims, and review path stay aligned to the promise you are trying to sell.",
-			},
-			{
-				title: "Curated design direction",
-				description:
-					"Choose a design direction like Vercel, Linear, or Notion inside the blueprint flow, preview it, then customize the starter theme before generation.",
+					"Homepage, docs, checkout, and review stay tied to the offer.",
 			},
 		],
 	},
@@ -223,7 +254,7 @@ export const homePageContent = {
 		titleLead: "Ship a real product",
 		titleAccent: "by Sunday",
 		intro:
-			"One payment for the blueprint-first run that turns phone-started agent work into a reviewable codebase: product truth, worker roles, starter path, and QA prompts that keep the repo aligned.",
+			"One payment for the worker layer: exec loops, role packs, starter path, and QA prompts for a reviewable codebase.",
 		priceDisplay: productConfig.checkoutPriceDisplay,
 		originalPriceDisplay: activePricingOffer
 			? productConfig.priceDisplay
@@ -233,22 +264,20 @@ export const homePageContent = {
 			productConfig.checkoutPriceDisplay,
 		offerBanner: pricingOfferBanner,
 		eyebrow: "One-time payment. Lifetime access.",
-		ctaTitle: "Get the blueprint",
-		trustLine: `After checkout, you go straight into the ${workspaceDisplayConfig.homeNoun} to lock the truth, compile the packs, and shape your Blueprint.`,
+		ctaTitle: marketingDisplayConfig.primaryCtaLabel,
+		trustLine: `After checkout, open the ${workspaceDisplayConfig.homeNoun}, lock the decisions, and build the first loop.`,
 		includes: [
-			"Guided product intake and review workspace",
-			"Agent-Ready Packs",
-			"Worker-role setup for product, design, marketing, build, and QA",
-			"Ship by Sunday Blueprint",
-			"Fast Pass Walkthroughs",
+			"Exec loop setup",
+			"Agent-ready worker packs",
+			"Review and QA path",
 			"Guided Ship Path",
-			"Product Sense Fundamentals",
+			"Fast Pass Walkthroughs",
 		],
 		bonus: {
 			label: "Additional bonus",
 			title: "FREE BONUS: FULL TURBO",
 			description:
-				"Get FULL TURBO free with your purchase: a 30-video AI course that gives you the practical workflows, prompting patterns, and build reps to move faster after the weekend sprint.",
+				"A 30-video workflow course included free for faster build reps after the sprint.",
 		},
 	},
 	footerWordmark: productName,

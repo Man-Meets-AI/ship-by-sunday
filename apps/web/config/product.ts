@@ -41,10 +41,11 @@ export const routeConfig = {
 } as const;
 
 export const homePageSectionOrder = [
+	"productPreview",
 	"hero",
 	"sprintPath",
 	"mechanism",
-	"whatsInside",
+	"execLoop",
 	"starterSystem",
 	"durability",
 	"socialProof",
@@ -77,10 +78,11 @@ export type StarterPricingOfferConfig = {
 
 export const starterHomePageConfig = {
 	sections: {
+		productPreview: true,
 		hero: true,
 		sprintPath: true,
 		mechanism: false,
-		whatsInside: true,
+		execLoop: true,
 		starterSystem: true,
 		durability: false,
 		socialProof: true,
@@ -119,7 +121,7 @@ export const starterConfig = {
 		shortMark: "MMAI",
 		promise: "Ship a real, durable product by Sunday",
 		metadataDescription:
-			"Ship by Sunday helps technical founders turn phone-started agent work into codebases that convert: lock product truth, train worker roles with agent-ready packs, and ship from a starter path that stays aligned.",
+			"Ship by Sunday helps technical founders turn phone-started exec loops into codebases that convert with worker packs, QA paths, and aligned repo guidance.",
 		images: {
 			founderProof: assetPaths.founderProof,
 			heroPreview: assetPaths.heroPreview,
@@ -141,7 +143,7 @@ export const starterConfig = {
 	marketing: {
 		docsLabel: "Docs",
 		loginLabel: "Sign in",
-		primaryCtaLabel: "Get the blueprint",
+		primaryCtaLabel: "Build the worker layer",
 		previewImageAlt: "Ship by Sunday system preview",
 	},
 	workspace: {
@@ -170,7 +172,7 @@ export const starterConfig = {
 	modules: {
 		docs: true,
 		course: true,
-		starterRepo: false,
+		starterRepo: true,
 		observability: true,
 		codex: true,
 	},
