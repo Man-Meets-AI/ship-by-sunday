@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
 	getNextLesson,
@@ -22,32 +24,52 @@ export function BonusLessonFooter({
 			<p className="text-sm leading-6 text-muted-foreground">
 				Bonus progress updates when you open a lesson here.
 			</p>
-			<div className="flex flex-wrap gap-2 sm:justify-end">
+			<div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+				{previousLesson ? (
+					<Button
+						asChild
+						variant="ghost"
+						size="sm"
+						data-testid="lesson-bonus-footer-previous"
+						className="gap-1.5"
+					>
+						<Link href={getLessonHref(previousLesson.lessonKey)}>
+							<ArrowLeft className="size-3.5" aria-hidden />
+							<span>{previousLesson.displayLabel}</span>
+						</Link>
+					</Button>
+				) : null}
 				{onOpenLessonMap ? (
 					<Button
 						type="button"
-						variant="link"
-						className="h-auto min-h-0 p-0 text-sm"
+						variant="outline"
+						size="sm"
 						onClick={onOpenLessonMap}
+						data-testid="lesson-bonus-footer-lesson-map"
 					>
 						Lesson Map
 					</Button>
 				) : (
-					<Button asChild variant="link" className="h-auto min-h-0 p-0 text-sm">
+					<Button
+						asChild
+						variant="outline"
+						size="sm"
+						data-testid="lesson-bonus-footer-lesson-map"
+					>
 						<Link href={getLessonMapHref()}>Lesson Map</Link>
 					</Button>
 				)}
-				{previousLesson ? (
-					<Button asChild variant="link" className="h-auto min-h-0 p-0 text-sm">
-						<Link href={getLessonHref(previousLesson.lessonKey)}>
-							{previousLesson.displayLabel}
-						</Link>
-					</Button>
-				) : null}
 				{nextLesson ? (
-					<Button asChild variant="link" className="h-auto min-h-0 p-0 text-sm">
+					<Button
+						asChild
+						variant="default"
+						size="sm"
+						data-testid="lesson-bonus-footer-next"
+						className="gap-1.5"
+					>
 						<Link href={getLessonHref(nextLesson.lessonKey)}>
-							{nextLesson.displayLabel}
+							<span>{nextLesson.displayLabel}</span>
+							<ArrowRight className="size-3.5" aria-hidden />
 						</Link>
 					</Button>
 				) : null}
