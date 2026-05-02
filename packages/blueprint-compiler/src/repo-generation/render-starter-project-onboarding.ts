@@ -6,6 +6,7 @@ type OnboardingStep = {
 		| "understand-blueprint"
 		| "boot-repo"
 		| "install-skills"
+		| "linear-workflow"
 		| "core-setup"
 		| "auth-setup"
 		| "billing-setup"
@@ -90,6 +91,32 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 			{
 				label: "scripts/install-codex-skills.sh",
 				path: "scripts/install-codex-skills.sh",
+			},
+		],
+	},
+	{
+		id: "linear-workflow",
+		title: "Set up Linear as your work tracker",
+		internalPhase: "core",
+		customerAction: [
+			"If you use Linear, create one project for this product before asking agents to build.",
+			"Use Linear as the official backlog and status surface. Use GitHub for code, branches, PRs, and CI.",
+			"Create issues with Problem, Outcome, Acceptance Criteria, Validation, and Source sections so agents can act without guessing.",
+			"Move issues through Backlog, Ready, In Progress, In Review, Done, and Canceled deliberately.",
+			"Link PRs, preview deployments, docs, and validation evidence back to the Linear issue before calling work done.",
+		],
+		agentPrompt:
+			"Help me set up Linear for this starter. Create or identify the product project, define the default workflow, and show me the issue template agents should use before implementation starts.",
+		skillTriggers: ["$starter-linear-workflow", "$starter-core-setup"],
+		references: [
+			{ label: "START-HERE.md", path: "START-HERE.md" },
+			{
+				label: "docs/build/docs/agent-handoff.md",
+				path: "docs/build/docs/agent-handoff.md",
+			},
+			{
+				label: "docs/build/docs/readiness.md",
+				path: "docs/build/docs/readiness.md",
 			},
 		],
 	},
@@ -292,11 +319,12 @@ function renderSharedIntro(productName: string) {
 		"- `bun run bootstrap`",
 		"- `bun run codex:skills:install` if Node.js and `npx` are available",
 		"- restart Codex if the new skills do not appear",
+		"- `$starter-linear-workflow` if you use Linear to run the build",
 		"- `$starter-core-setup`",
 		"- `$starter-auth-setup`",
 		"- `$starter-billing-setup`",
 		"",
-		"In Codex, trigger a skill by typing `$` followed by the skill name. The local wrapper skills tell Codex how this starter wants work to be done. The installed external skills add deeper product knowledge for Clerk, Convex, and Stripe.",
+		"In Codex, trigger a skill by typing `$` followed by the skill name. The local wrapper skills tell Codex how this starter wants work to be done. The Linear wrapper teaches agents how to treat issues as the backlog and status source. The installed external skills add deeper product knowledge for Clerk, Convex, and Stripe.",
 		"",
 		"Keep the shipped auth, billing, and protected-access paths intact until the starter is stable as shipped.",
 	].join("\n");

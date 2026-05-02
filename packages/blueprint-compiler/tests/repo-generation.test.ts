@@ -95,6 +95,7 @@ describe("repo generation", () => {
 				"scripts/install-codex-skills.sh",
 				".agents/skills/starter-core-setup/SKILL.md",
 				".agents/skills/starter-auth-setup/SKILL.md",
+				".agents/skills/starter-linear-workflow/SKILL.md",
 				".agents/skills/starter-billing-setup/SKILL.md",
 				".agents/skills/starter-first-slice/SKILL.md",
 				".agents/skills/starter-nextjs-in-this-repo/SKILL.md",
@@ -130,8 +131,16 @@ describe("repo generation", () => {
 			"Run `bun run codex:skills:install`",
 		);
 		expect(readmeOverride?.content).toContain("$starter-core-setup");
+		expect(readmeOverride?.content).toContain("$starter-linear-workflow");
 		expect(readmeOverride?.content).toContain(
 			"`apps/web/config/generated-design-system.ts` contains the generated runtime design system.",
+		);
+		expect(onboardingOverride?.content).toContain(
+			"Set up Linear as your work tracker",
+		);
+		expect(onboardingOverride?.content).toContain("$starter-linear-workflow");
+		expect(onboardingOverride?.content).toContain(
+			"Problem, Outcome, Acceptance Criteria, Validation, and Source",
 		);
 		expect(onboardingOverride?.content).toContain("$starter-billing-setup");
 		expect(onboardingOverride?.content).toContain("$clerk");
@@ -139,6 +148,9 @@ describe("repo generation", () => {
 		expect(onboardingOverride?.content).toContain("Run core setup");
 		expect(onboardingOverride?.content).toContain("Run auth setup");
 		expect(onboardingOverride?.content).toContain("Run billing setup");
+		expect(bootstrapOverride?.content).toContain(
+			"If you use Linear, run \\$starter-linear-workflow before implementation.",
+		);
 		expect(bootstrapOverride?.content).toContain(
 			"Follow START-HERE.md in order: \\$starter-core-setup, then \\$starter-auth-setup, then \\$starter-billing-setup.",
 		);
@@ -179,6 +191,7 @@ describe("repo generation", () => {
 				"scripts/install-codex-skills.sh",
 				".agents/skills/starter-core-setup/SKILL.md",
 				".agents/skills/starter-auth-setup/SKILL.md",
+				".agents/skills/starter-linear-workflow/SKILL.md",
 				".agents/skills/starter-billing-setup/SKILL.md",
 				".agents/skills/external-skills.json",
 				"apps/web/content/docs/index.mdx",
@@ -209,6 +222,9 @@ describe("repo generation", () => {
 		const appAgentGuide = snapshotFiles.find(
 			(file) => file.path === "apps/web/AGENTS.md",
 		);
+		const linearWorkflowSkill = snapshotFiles.find(
+			(file) => file.path === ".agents/skills/starter-linear-workflow/SKILL.md",
+		);
 
 		expect(rootAgentGuide?.content).toContain("docs/build/docs/prompt.md");
 		expect(rootAgentGuide?.content).toContain(
@@ -219,6 +235,12 @@ describe("repo generation", () => {
 		);
 		expect(appAgentGuide?.content).toContain(
 			"Keep UI rendering, route orchestration, domain logic, and provider I/O in separate files",
+		);
+		expect(linearWorkflowSkill?.content).toContain(
+			"Use Linear for backlog state",
+		);
+		expect(linearWorkflowSkill?.content).toContain(
+			"Problem, Outcome, Acceptance Criteria, Validation, and Source",
 		);
 		expect(forbiddenPaths).toEqual([]);
 	});

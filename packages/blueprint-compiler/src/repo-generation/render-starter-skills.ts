@@ -42,6 +42,21 @@ const STARTER_WRAPPER_SKILLS: StarterWrapperSkill[] = [
 		],
 	},
 	{
+		name: "starter-linear-workflow",
+		path: ".agents/skills/starter-linear-workflow/SKILL.md",
+		description:
+			"Use when the buyer wants Linear to be the official backlog, status, and handoff surface for this starter before implementation begins.",
+		steps: [
+			"Read `START-HERE.md` and the Linear work tracker step before creating or changing issues.",
+			"Create or identify one Linear project for this product. Do not scatter starter work across unrelated projects.",
+			"Use Linear for backlog state, ownership, acceptance criteria, blockers, and work history. Use GitHub for code, branches, pull requests, and CI.",
+			"Create implementation issues with these sections: Problem, Outcome, Acceptance Criteria, Validation, and Source.",
+			"Use workflow states deliberately: Backlog, Ready, In Progress, In Review, Done, and Canceled.",
+			"Before marking an issue done, link the PR, preview deployment, docs path, or validation evidence that proves the work.",
+			"If the requested issue is ambiguous, ask for the missing product decision before creating build work.",
+		],
+	},
+	{
 		name: "starter-billing-setup",
 		path: ".agents/skills/starter-billing-setup/SKILL.md",
 		description:
