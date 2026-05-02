@@ -14,6 +14,8 @@ export type CheckoutSessionClaimResult =
 	| {
 			kind: "sign_in_required";
 			sessionId: string;
+			checkoutEmail?: string;
+			currentAccountEmail?: string;
 	  }
 	| {
 			kind: "invalid_session";
@@ -31,6 +33,8 @@ export type CheckoutSessionClaimResult =
 	| {
 			kind: "wrong_account";
 			sessionId: string;
+			checkoutEmail?: string;
+			currentAccountEmail?: string;
 	  }
 	| {
 			kind: "validated";
@@ -41,6 +45,8 @@ export type CheckoutSessionClaimResult =
 export type CheckoutEmailClaimResult =
 	| {
 			kind: "sign_in_required";
+			checkoutEmail?: string;
+			currentAccountEmail?: string;
 	  }
 	| {
 			kind: "no_pending_claim";
@@ -51,6 +57,8 @@ export type CheckoutEmailClaimResult =
 	| {
 			kind: "wrong_account";
 			sessionId: string;
+			checkoutEmail?: string;
+			currentAccountEmail?: string;
 	  }
 	| {
 			kind: "validated";

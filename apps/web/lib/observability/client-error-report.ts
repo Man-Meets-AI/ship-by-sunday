@@ -3,8 +3,7 @@ import {
 	normalizeObservabilityEvent,
 	type ObservabilityEventInput,
 } from "@/lib/observability/error-event";
-
-const CLIENT_ERROR_ENDPOINT = "/api/observability/client-error";
+import { capturePostHogClientException } from "@/lib/observability/posthog-client";
 
 export function reportClientError(
 	input: Omit<ObservabilityEventInput, "source">,
@@ -17,34 +16,16 @@ export function reportClientError(
 		...input,
 		source: "next_client",
 	});
-	const requestBody = JSON.stringify({
-		message: payload.title,
-		stack: payload.stack,
-		details: payload.details,
-		requestId: payload.requestId,
-		pathname: payload.pathname,
-		code: payload.code,
-	});
 
-	const shouldUseBeacon =
-		typeof navigator !== "undefined" &&
-		typeof navigator.sendBeacon === "function" &&
-		requestBody.length < 60_000;
-
-	if (shouldUseBeacon) {
-		navigator.sendBeacon(
-			CLIENT_ERROR_ENDPOINT,
-			new Blob([requestBody], { type: "application/json" }),
-		);
-		return;
-	}
-
-	void fetch(CLIENT_ERROR_ENDPOINT, {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
+	capturePostHogClientException({
+		error: input.error,
+		properties: {
+			source: payload.source,
+			severity: payload.severity,
+			code: payload.code ?? null,
+			requestId: payload.requestId ?? null,
+			pathname: payload.pathname ?? null,
+			title: payload.title,
 		},
-		body: requestBody,
-		keepalive: true,
-	}).catch(() => undefined);
+	});
 }

@@ -9,11 +9,13 @@ import {
 	Field,
 	FieldContent,
 	FieldDescription,
-	FieldError,
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { BlueprintFieldCharacterCounter } from "@/app/(workspace)/_components/blueprint-flow/blueprint-field-character-counter";
+import { BlueprintFieldErrorRegion } from "@/app/(workspace)/_components/blueprint-flow/blueprint-field-error-region";
+import { getBlueprintFieldCharacterBudget } from "@/lib/blueprint-flow/blueprint-field-character-budgets";
 import {
 	blueprintFieldHelperText,
 	blueprintFieldInputKind,
@@ -43,6 +45,16 @@ export function BlueprintStageTextField({
 	const placeholder = blueprintFieldPlaceholder(fieldKey, facts) ?? undefined;
 	const inputKind = blueprintFieldInputKind(fieldKey);
 	const isShortField = fieldKey === "pricing";
+	const characterBudget =
+		inputKind === "textarea"
+			? getBlueprintFieldCharacterBudget(fieldKey)
+			: null;
+	const isOverBudget =
+		characterBudget !== null && value.length > characterBudget;
+	const budgetId = characterBudget !== null ? `${inputId}-budget` : undefined;
+	const describedBy =
+		[errorId, isOverBudget ? budgetId : undefined].filter(Boolean).join(" ") ||
+		undefined;
 	const handleChange = (
 		event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
 	) => onChange(fieldKey, event.target.value);
@@ -63,7 +75,7 @@ export function BlueprintStageTextField({
 						placeholder={placeholder}
 						onChange={handleChange}
 						rows={fieldKey === "section_narrative" ? 6 : 4}
-						aria-describedby={errorId}
+						aria-describedby={describedBy}
 						aria-invalid={errorMessage ? true : undefined}
 					/>
 				) : (
@@ -74,12 +86,23 @@ export function BlueprintStageTextField({
 						value={value}
 						placeholder={placeholder}
 						onChange={handleChange}
-						aria-describedby={errorId}
+						aria-describedby={describedBy}
 						aria-invalid={errorMessage ? true : undefined}
 					/>
 				)}
 				{helperText ? <FieldDescription>{helperText}</FieldDescription> : null}
-				<FieldError id={errorId}>{errorMessage}</FieldError>
+				{isOverBudget && characterBudget !== null && budgetId ? (
+					<BlueprintFieldCharacterCounter
+						budget={characterBudget}
+						count={value.length}
+						fieldKey={fieldKey}
+						id={budgetId}
+					/>
+				) : null}
+				<BlueprintFieldErrorRegion
+					errorId={errorId}
+					errorMessage={errorMessage}
+				/>
 			</FieldContent>
 		</Field>
 	);

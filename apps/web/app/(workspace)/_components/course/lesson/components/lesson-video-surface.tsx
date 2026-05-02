@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { LessonVideoEmptyState } from "@/app/(workspace)/_components/course/lesson/components/lesson-video-empty-state";
 import { LessonVideoMetadata } from "@/app/(workspace)/_components/course/lesson/components/lesson-video-metadata";
 import { LessonVideoPlayer } from "@/app/(workspace)/_components/course/lesson/components/lesson-video-player";
+import { LessonVideoWatchBareWithControls } from "@/app/(workspace)/_components/course/lesson/components/lesson-video-watch-bare-with-controls";
 import type { LessonContent } from "@/lib/course/lesson/model/manifest";
 import { isLessonVideoReady } from "@/lib/course/lesson/model/video";
 import { cn } from "@/lib/utils";
@@ -38,6 +39,12 @@ export function LessonVideoSurface({
 	const isWatchShell = variant === "watch-shell";
 
 	if (video && isLessonVideoReady(video)) {
+		if (isWatchShell && playerFrame === "bare") {
+			return (
+				<LessonVideoWatchBareWithControls video={video} className={className} />
+			);
+		}
+
 		const ratio = (
 			<AspectRatio
 				ratio={16 / 9}
@@ -88,16 +95,7 @@ export function LessonVideoSurface({
 			);
 
 		if (playerFrame === "bare") {
-			return (
-				<div
-					className={cn(
-						isWatchShell ? "mx-auto w-full max-w-5xl" : "w-full",
-						className,
-					)}
-				>
-					{playerBlock}
-				</div>
-			);
+			return <div className={cn("w-full", className)}>{playerBlock}</div>;
 		}
 
 		return (

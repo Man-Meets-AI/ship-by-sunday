@@ -11,7 +11,7 @@ export function DurabilitySectionBlock({
 	durabilitySection: DurabilitySection;
 }) {
 	return (
-		<section className="border-t border-border/40 py-20 lg:py-32">
+		<section className="border-t border-border/40 py-24 lg:py-40">
 			<div className="grid gap-16 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-24">
 				<ScrollReveal>
 					<div className="space-y-3 lg:sticky lg:top-24 lg:h-fit">

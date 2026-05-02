@@ -45,7 +45,15 @@ export function useAccessRequiredController(initialAccess?: ProductAccess) {
 	const currentPath = getCurrentPath(pathname, searchParams);
 	const signInHref = buildSignInHref({ redirectPath: currentPath });
 	const pricingHref = `${routeConfig.home}${routeConfig.pricingHash}`;
-	const access = liveAccess ?? initialAccess;
+	const access =
+		liveAccess &&
+		!liveAccess.hasAccess &&
+		initialAccess?.pendingCheckoutRecovery
+			? {
+					...liveAccess,
+					pendingCheckoutRecovery: initialAccess.pendingCheckoutRecovery,
+				}
+			: (liveAccess ?? initialAccess);
 	const shouldRetryWorkspaceEntry =
 		liveAccess?.hasAccess === true &&
 		workspaceEntryRefreshAttemptCount < MAX_WORKSPACE_ENTRY_REFRESH_ATTEMPTS;

@@ -27,6 +27,6 @@ Inside that folder:
 
 Active Program folders:
 
-- None currently.
+- `docs/programs/active/2026-05-02-customer-agentic-operating-system/`: active Program for the customer-facing agentic operating system across generated repos and mature existing codebases.
 
 Completed Program packets live under `docs/programs/completed/`.

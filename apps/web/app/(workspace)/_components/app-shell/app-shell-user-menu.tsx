@@ -43,8 +43,8 @@ export function AppShellUserMenu() {
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="min-w-52 sm:min-w-56">
-				<DropdownMenuLabel className="font-normal">
-					<div className="truncate text-sm text-foreground">
+				<DropdownMenuLabel className="space-y-0.5 font-normal">
+					<div className="truncate text-sm font-medium text-foreground">
 						{user?.fullName ?? "Account"}
 					</div>
 					{user?.primaryEmailAddress?.emailAddress ? (

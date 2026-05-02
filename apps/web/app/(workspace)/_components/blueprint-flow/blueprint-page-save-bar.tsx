@@ -9,6 +9,7 @@ import {
 	type BlueprintSaveBarPhase,
 	useBlueprintSaveBarPhase,
 } from "@/app/(workspace)/_hooks/blueprint-flow/use-blueprint-save-bar-phase";
+import { useBlueprintSavedRelativeTime } from "@/app/(workspace)/_hooks/blueprint-flow/use-blueprint-saved-relative-time";
 import { cn } from "@/lib/utils";
 import type { BlueprintStepInlineFeedback } from "@/lib/blueprint-flow/blueprint-step-save-feedback";
 
@@ -21,20 +22,24 @@ export function BlueprintPageSaveBar({
 	feedback,
 	isReviewReady,
 	isSaving,
+	lastSavedAt,
 	onSaveAndContinue,
 }: {
 	feedback: BlueprintStepInlineFeedback | null;
 	isReviewReady: boolean;
 	isSaving: boolean;
+	lastSavedAt: number | null;
 	onSaveAndContinue: () => void | Promise<void>;
 }) {
 	const [isErrorDismissed, setIsErrorDismissed] = useState(false);
 	const phase = useBlueprintSaveBarPhase({ feedback, isSaving });
+	const relativeTime = useBlueprintSavedRelativeTime(lastSavedAt);
 	const visibleFeedback =
 		feedback && (feedback.tone !== "destructive" || !isErrorDismissed)
 			? feedback
 			: null;
 	const isBusy = phase !== "idle";
+	const showRelativeTime = !isBusy && relativeTime !== null;
 
 	useEffect(() => {
 		if (feedback?.tone === "destructive") {
@@ -64,11 +69,21 @@ export function BlueprintPageSaveBar({
 				/>
 			) : null}
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-				<p className="text-sm leading-relaxed text-muted-foreground">
-					{isReviewReady
-						? "All sections complete. You can continue to review."
-						: "Complete all sections to unlock review."}
-				</p>
+				<div className="flex flex-col gap-1">
+					<p className="text-sm leading-relaxed text-muted-foreground">
+						{isReviewReady
+							? "All sections complete. You can continue to review."
+							: "Complete all sections to unlock review."}
+					</p>
+					{showRelativeTime ? (
+						<p
+							className="text-xs text-muted-foreground/70"
+							data-testid="blueprint-page-save-bar-last-saved"
+						>
+							{relativeTime}
+						</p>
+					) : null}
+				</div>
 				<Button
 					type="button"
 					size="lg"

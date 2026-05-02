@@ -16,7 +16,7 @@ function StarterSystemCapabilityRow({
 }) {
 	return (
 		<ScrollReveal delay={0.08 * index}>
-			<article className="border-t border-border/40 py-7 lg:py-8">
+			<article className="group relative border-t border-border/40 py-7 pl-4 before:absolute before:inset-y-3 before:left-0 before:w-px before:bg-foreground/0 motion-safe:before:transition-colors motion-safe:before:duration-500 motion-safe:hover:before:bg-foreground/30 lg:py-8">
 				<h3 className="text-[1.15rem] font-semibold leading-tight tracking-tight text-foreground sm:text-[1.3rem]">
 					{capability.title}
 				</h3>

@@ -8,9 +8,9 @@ import {
 	Field,
 	FieldContent,
 	FieldDescription,
-	FieldError,
 	FieldLabel,
 } from "@/components/ui/field";
+import { BlueprintFieldErrorRegion } from "@/app/(workspace)/_components/blueprint-flow/blueprint-field-error-region";
 import { BlueprintStageLinkListField } from "@/app/(workspace)/_components/blueprint-flow/blueprint-stage-link-list-field";
 import { BlueprintStageListField } from "@/app/(workspace)/_components/blueprint-flow/blueprint-stage-list-field";
 import {
@@ -68,7 +68,10 @@ export function BlueprintStageArrayField({
 					/>
 				)}
 				{helperText ? <FieldDescription>{helperText}</FieldDescription> : null}
-				<FieldError id={errorId}>{errorMessage}</FieldError>
+				<BlueprintFieldErrorRegion
+					errorId={errorId}
+					errorMessage={errorMessage}
+				/>
 			</FieldContent>
 		</Field>
 	);

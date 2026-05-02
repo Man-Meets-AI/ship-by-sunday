@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 
 const authMock = vi.fn();
+const currentUserMock = vi.fn();
 const claimCheckoutSessionForViewerMock = vi.fn();
 const retrieveSessionMock = vi.fn();
 
@@ -8,6 +9,7 @@ vi.mock("server-only", () => ({}));
 
 vi.mock("@clerk/nextjs/server", () => ({
 	auth: authMock,
+	currentUser: currentUserMock,
 }));
 
 vi.mock("@/platform/billing/stripe", () => ({
@@ -62,6 +64,8 @@ function createStripeInvalidRequestError() {
 describe("getCheckoutSessionState", () => {
 	beforeEach(() => {
 		authMock.mockReset();
+		currentUserMock.mockReset();
+		currentUserMock.mockResolvedValue(null);
 		claimCheckoutSessionForViewerMock.mockReset();
 		retrieveSessionMock.mockReset();
 		vi.resetModules();
@@ -146,6 +150,32 @@ describe("getCheckoutSessionState", () => {
 		});
 	});
 
+	it("includes the paid checkout email when a guest checkout requires sign-in", async () => {
+		retrieveSessionMock.mockResolvedValue(
+			createCheckoutSession({
+				metadata: {
+					courseSlug: "ship-by-sunday",
+				},
+				client_reference_id: null,
+				customer_details: {
+					email: "buyer@example.com",
+				} as Stripe.Checkout.Session.CustomerDetails,
+			}),
+		);
+		authMock.mockResolvedValue({ userId: null });
+
+		const { getCheckoutSessionState } =
+			await import("@/platform/billing/checkout/checkout-session");
+
+		await expect(
+			getCheckoutSessionState("cs_guest_signed_out_email"),
+		).resolves.toEqual({
+			kind: "sign_in_required",
+			sessionId: "cs_guest_signed_out_email",
+			checkoutEmail: "buyer@example.com",
+		});
+	});
+
 	it("returns validated when the guest checkout claim succeeds for the signed-in viewer", async () => {
 		retrieveSessionMock.mockResolvedValue(
 			createCheckoutSession({
@@ -183,12 +213,22 @@ describe("getCheckoutSessionState", () => {
 					courseSlug: "ship-by-sunday",
 				},
 				client_reference_id: null,
+				customer_details: {
+					email: "buyer@example.com",
+				} as Stripe.Checkout.Session.CustomerDetails,
 			}),
 		);
 		authMock.mockResolvedValue({ userId: "user_other" });
+		currentUserMock.mockResolvedValue({
+			primaryEmailAddress: {
+				emailAddress: "other@example.com",
+			},
+		});
 		claimCheckoutSessionForViewerMock.mockResolvedValue({
 			kind: "wrong_account",
 			sessionId: "cs_guest_wrong_account",
+			checkoutEmail: "buyer@example.com",
+			currentAccountEmail: "other@example.com",
 		});
 
 		const { getCheckoutSessionState } =
@@ -199,6 +239,8 @@ describe("getCheckoutSessionState", () => {
 		).resolves.toEqual({
 			kind: "wrong_account",
 			sessionId: "cs_guest_wrong_account",
+			checkoutEmail: "buyer@example.com",
+			currentAccountEmail: "other@example.com",
 		});
 	});
 
@@ -282,8 +324,19 @@ describe("getCheckoutSessionState", () => {
 	);
 
 	it("returns wrong_account when the signed-in user does not own the checkout", async () => {
-		retrieveSessionMock.mockResolvedValue(createCheckoutSession());
+		retrieveSessionMock.mockResolvedValue(
+			createCheckoutSession({
+				customer_details: {
+					email: "buyer@example.com",
+				} as Stripe.Checkout.Session.CustomerDetails,
+			}),
+		);
 		authMock.mockResolvedValue({ userId: "user_other" });
+		currentUserMock.mockResolvedValue({
+			primaryEmailAddress: {
+				emailAddress: "other@example.com",
+			},
+		});
 
 		const { getCheckoutSessionState } =
 			await import("@/platform/billing/checkout/checkout-session");
@@ -291,6 +344,8 @@ describe("getCheckoutSessionState", () => {
 		await expect(getCheckoutSessionState("cs_wrong_account")).resolves.toEqual({
 			kind: "wrong_account",
 			sessionId: "cs_wrong_account",
+			checkoutEmail: "buyer@example.com",
+			currentAccountEmail: "other@example.com",
 		});
 	});
 

@@ -1,12 +1,17 @@
 "use client";
 
-import { useClerk } from "@clerk/nextjs";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { CheckoutButton } from "@/app/checkout/_components/checkout-button";
 import type { AccessActionModel } from "../../_lib/access-required-view-model";
+
+import { AccessRequiredCheckoutWithError } from "./access-required-checkout-with-error";
+import { AccessRequiredReauthenticateButton } from "./access-required-reauthenticate-button";
+import { AccessRequiredRefreshHint } from "./access-required-refresh-hint";
+
+const ACTION_BUTTON_CLASS =
+	"w-full justify-center transition-colors sm:w-auto sm:min-w-44";
 
 function AccessRequiredActionButton({
 	action,
@@ -17,14 +22,11 @@ function AccessRequiredActionButton({
 	isRetryingAccess: boolean;
 	onRetryAccessCheck: () => void;
 }) {
-	const clerk = useClerk();
-
 	if (action.kind === "checkout") {
 		return (
-			<CheckoutButton
+			<AccessRequiredCheckoutWithError
 				label={action.label}
-				testId="access-required-buy-access"
-				className="w-full justify-center sm:w-auto sm:min-w-44"
+				className={ACTION_BUTTON_CLASS}
 			/>
 		);
 	}
@@ -38,7 +40,7 @@ function AccessRequiredActionButton({
 				disabled={isRetryingAccess}
 				aria-busy={isRetryingAccess ? "true" : "false"}
 				variant={action.variant}
-				className="w-full justify-center sm:w-auto sm:min-w-44"
+				className={ACTION_BUTTON_CLASS}
 			>
 				{isRetryingAccess ? (
 					<>
@@ -54,17 +56,12 @@ function AccessRequiredActionButton({
 
 	if (action.kind === "reauthenticate") {
 		return (
-			<Button
-				type="button"
-				size="lg"
+			<AccessRequiredReauthenticateButton
+				label={action.label}
+				signInHref={action.signInHref}
 				variant={action.variant}
-				className="w-full justify-center sm:w-auto sm:min-w-44"
-				onClick={() => {
-					void clerk.signOut({ redirectUrl: action.signInHref });
-				}}
-			>
-				{action.label}
-			</Button>
+				className={ACTION_BUTTON_CLASS}
+			/>
 		);
 	}
 
@@ -73,7 +70,7 @@ function AccessRequiredActionButton({
 			asChild
 			size="lg"
 			variant={action.variant}
-			className="w-full justify-center sm:w-auto sm:min-w-44"
+			className={ACTION_BUTTON_CLASS}
 		>
 			<Link href={action.href}>{action.label}</Link>
 		</Button>
@@ -94,12 +91,7 @@ export function AccessRequiredActions({
 	return (
 		<div className="flex flex-col gap-3">
 			{actions.some((action) => action.kind === "retry") ? (
-				<p
-					className="text-xs leading-5 text-muted-foreground"
-					aria-live="polite"
-				>
-					{refreshHint}
-				</p>
+				<AccessRequiredRefreshHint refreshHint={refreshHint} />
 			) : null}
 			<div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
 				{actions.map((action, actionIndex) => (

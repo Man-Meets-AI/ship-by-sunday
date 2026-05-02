@@ -36,8 +36,14 @@ export function AppShellHeader({
 			<div className="flex min-w-0 flex-1 items-center gap-x-3">
 				<AppShellWorkspaceNav lesson11Viewport={lesson11Viewport} />
 				{primaryNav ? (
-					<div className="min-w-0 flex-1 overflow-x-auto lg:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-						<AppShellHeaderPrimaryNav primaryNav={primaryNav} />
+					<div className="relative min-w-0 flex-1">
+						<div className="min-w-0 flex-1 overflow-x-auto lg:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+							<AppShellHeaderPrimaryNav primaryNav={primaryNav} />
+						</div>
+						<div
+							aria-hidden
+							className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-background to-transparent lg:hidden"
+						/>
 					</div>
 				) : null}
 			</div>
@@ -47,6 +53,7 @@ export function AppShellHeader({
 				onLayoutModeChange={onLayoutModeChange}
 				progress={progressSummary}
 				lesson11Viewport={lesson11Viewport}
+				primaryNav={primaryNav}
 			/>
 		</div>
 	);

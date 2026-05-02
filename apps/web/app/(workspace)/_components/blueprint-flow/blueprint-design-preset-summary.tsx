@@ -1,6 +1,9 @@
 "use client";
 
 import { ArrowUpRight } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { DesignPresetPreviewBrowserChrome } from "@/app/(workspace)/_components/blueprint-flow/blueprint-design-preset-browser-chrome";
+import { useBlueprintPageReducedMotion } from "@/app/(workspace)/_components/blueprint-flow/blueprint-page-motion";
 
 function formatPreviewHost(url: string): string {
 	try {
@@ -31,6 +34,7 @@ export function BlueprintDesignPresetSummary({
 	summary: string;
 }) {
 	const previewHost = formatPreviewHost(previewPageUrl);
+	const prefersReducedMotion = useBlueprintPageReducedMotion();
 
 	return (
 		<div
@@ -58,14 +62,33 @@ export function BlueprintDesignPresetSummary({
 						</p>
 					</div>
 				</div>
-				{isCustomized ? (
-					<span
-						className="rounded-full border border-border/70 bg-background px-2 py-1 text-[11px] font-medium text-muted-foreground"
-						data-testid="blueprint-page-design-preset-customized"
-					>
-						Customized
-					</span>
-				) : null}
+				<AnimatePresence initial={false}>
+					{isCustomized ? (
+						<motion.span
+							key="customized-pill"
+							initial={
+								prefersReducedMotion
+									? { opacity: 1, scale: 1 }
+									: { opacity: 0, scale: 0.94 }
+							}
+							animate={{ opacity: 1, scale: 1 }}
+							exit={
+								prefersReducedMotion
+									? { opacity: 0 }
+									: { opacity: 0, scale: 0.94 }
+							}
+							transition={
+								prefersReducedMotion
+									? { duration: 0 }
+									: { duration: 0.16, ease: "easeOut" }
+							}
+							className="rounded-full border border-border/70 bg-background px-2 py-1 text-[11px] font-medium text-muted-foreground"
+							data-testid="blueprint-page-design-preset-customized"
+						>
+							Customized
+						</motion.span>
+					) : null}
+				</AnimatePresence>
 			</div>
 			<div className="grid gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_13rem]">
 				<div className="space-y-3">
@@ -99,39 +122,6 @@ export function BlueprintDesignPresetSummary({
 					previewImagePath={previewImagePath}
 				/>
 			</div>
-		</div>
-	);
-}
-
-function DesignPresetPreviewBrowserChrome({
-	addressLabel,
-	label,
-	previewImagePath,
-}: {
-	addressLabel: string;
-	label: string;
-	previewImagePath: string;
-}) {
-	return (
-		<div className="overflow-hidden rounded-lg border border-border/60 bg-background">
-			<div className="flex items-center gap-2 border-b border-border/60 bg-muted/40 px-2 py-1.5">
-				<div className="flex items-center gap-1" aria-hidden="true">
-					<span className="size-1.5 rounded-full bg-foreground/20" />
-					<span className="size-1.5 rounded-full bg-foreground/20" />
-					<span className="size-1.5 rounded-full bg-foreground/20" />
-				</div>
-				<span className="inline-flex max-w-full flex-1 items-center justify-center truncate rounded-sm bg-background/80 px-1.5 py-0.5 text-[9px] text-muted-foreground">
-					{addressLabel}
-				</span>
-				<span className="size-1.5" aria-hidden="true" />
-			</div>
-			{/* biome-ignore lint/performance/noImgElement: preview asset is local */}
-			<img
-				src={previewImagePath}
-				alt={`${label} design inspiration preview`}
-				className="aspect-[4/3] h-full w-full object-cover object-top"
-				loading="lazy"
-			/>
 		</div>
 	);
 }

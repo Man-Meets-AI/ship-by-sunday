@@ -1,13 +1,16 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
+import { useReducedMotion } from "motion/react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { startThemeTransition } from "@/lib/theme/start-theme-transition";
 
 export function AppShellThemeToggle() {
 	const { resolvedTheme, setTheme } = useTheme();
+	const prefersReducedMotion = useReducedMotion();
 	const [mounted, setMounted] = useState(false);
 
 	useEffect(() => {
@@ -19,16 +22,20 @@ export function AppShellThemeToggle() {
 	}
 
 	const toggleTheme = () => {
-		setTheme(resolvedTheme === "dark" ? "light" : "dark");
+		const nextTheme = resolvedTheme === "dark" ? "light" : "dark";
+		startThemeTransition({
+			apply: () => setTheme(nextTheme),
+			allowAnimation: !prefersReducedMotion,
+		});
 	};
 
 	return (
 		<Button
 			type="button"
-			variant="ghost"
+			variant="outline"
 			size="icon"
 			onClick={toggleTheme}
-			className="size-8 shrink-0 rounded-full"
+			className="size-8 shrink-0 rounded-full border-border/70 bg-background/70 text-foreground hover:bg-background/90 motion-reduce:transition-none"
 			aria-label="Toggle theme"
 		>
 			{resolvedTheme === "dark" ? (

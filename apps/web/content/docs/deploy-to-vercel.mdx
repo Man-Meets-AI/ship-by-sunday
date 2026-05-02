@@ -21,6 +21,9 @@ Prepare production values in your hosting dashboards and provider dashboards. Mi
 - Stripe secret key, product id, price id
 - live `STRIPE_WEBHOOK_SECRET`
 - `APP_BASE_URL`
+- PostHog source-map upload values when error tracking is enabled:
+  `NEXT_PUBLIC_POSTHOG_TOKEN`, `NEXT_PUBLIC_POSTHOG_HOST`,
+  `POSTHOG_PROJECT_ID`, and `POSTHOG_API_KEY`
 
 The observability-specific signing secrets, ingest token, incident-control token, and Telegram alerting values are documented in the internal observability runbook.
 
@@ -35,6 +38,8 @@ The observability-specific signing secrets, ingest token, incident-control token
 - use real production Clerk env values
 - use real production Stripe live keys
 - if the app uses observability or any other Convex HTTP actions, set `NEXT_PUBLIC_CONVEX_SITE_URL` to the matching `.convex.site` host
+- if the app uploads PostHog source maps, set `POSTHOG_API_KEY` in Vercel to a project-scoped PostHog personal API key with only the `Source map upload` scope
+- keep PostHog MCP credentials out of Vercel app env; MCP uses operator OAuth or a separate `MCP Server` key outside runtime config
 
 Do not make Vercel responsible for production Convex deploys in this repo. The frontend should build on Vercel, but Convex production promotion now happens from GitHub Actions on `main` through `.github/workflows/convex-production-deploy.yml`.
 
@@ -88,6 +93,14 @@ PLAYWRIGHT_BASE_URL=https://<production-url> QA_ENV_FILE=apps/web/.env.productio
 ```
 
 Only billing-sensitive releases should spend that extra live no-cost Checkout proof.
+
+When PostHog error tracking is enabled, the production build uses `@posthog/nextjs-config` to upload source maps. After the build, run:
+
+```bash
+bun run posthog:proof
+```
+
+That command verifies PostHog env presence and injected source-map chunk IDs without printing secret values. Source maps may be deleted locally after a successful upload. The final manual check is in PostHog: confirm the production symbol set uploaded and a sampled issue resolves to readable application frames.
 
 ## What success looks like
 

@@ -14,6 +14,8 @@ const checkoutClaimActionResultValidator = v.union(
 	v.object({
 		kind: v.literal("sign_in_required"),
 		sessionId: v.string(),
+		checkoutEmail: v.optional(v.string()),
+		currentAccountEmail: v.optional(v.string()),
 	}),
 	v.object({
 		kind: v.literal("invalid_session"),
@@ -31,6 +33,8 @@ const checkoutClaimActionResultValidator = v.union(
 	v.object({
 		kind: v.literal("wrong_account"),
 		sessionId: v.string(),
+		checkoutEmail: v.optional(v.string()),
+		currentAccountEmail: v.optional(v.string()),
 	}),
 	v.object({
 		kind: v.literal("validated"),
@@ -53,6 +57,8 @@ type CheckoutClaimActionResult =
 	| {
 			kind: "sign_in_required";
 			sessionId: string;
+			checkoutEmail?: string;
+			currentAccountEmail?: string;
 	  }
 	| {
 			kind: "invalid_session";
@@ -70,6 +76,8 @@ type CheckoutClaimActionResult =
 	| {
 			kind: "wrong_account";
 			sessionId: string;
+			checkoutEmail?: string;
+			currentAccountEmail?: string;
 	  }
 	| {
 			kind: "validated";
@@ -91,6 +99,8 @@ type SuccessfulCheckoutClaimResult =
 const checkoutEmailClaimActionResultValidator = v.union(
 	v.object({
 		kind: v.literal("sign_in_required"),
+		checkoutEmail: v.optional(v.string()),
+		currentAccountEmail: v.optional(v.string()),
 	}),
 	v.object({
 		kind: v.literal("no_pending_claim"),
@@ -101,6 +111,8 @@ const checkoutEmailClaimActionResultValidator = v.union(
 	v.object({
 		kind: v.literal("wrong_account"),
 		sessionId: v.string(),
+		checkoutEmail: v.optional(v.string()),
+		currentAccountEmail: v.optional(v.string()),
 	}),
 	v.object({
 		kind: v.literal("validated"),
@@ -122,6 +134,8 @@ const checkoutEmailClaimActionResultValidator = v.union(
 type CheckoutEmailClaimActionResult =
 	| {
 			kind: "sign_in_required";
+			checkoutEmail?: string;
+			currentAccountEmail?: string;
 	  }
 	| {
 			kind: "no_pending_claim";
@@ -132,6 +146,8 @@ type CheckoutEmailClaimActionResult =
 	| {
 			kind: "wrong_account";
 			sessionId: string;
+			checkoutEmail?: string;
+			currentAccountEmail?: string;
 	  }
 	| {
 			kind: "validated";
@@ -152,11 +168,21 @@ function getCheckoutEmail(session: Stripe.Checkout.Session) {
 		: null;
 }
 
+function getCurrentAccountEmail(identity: { email?: unknown }) {
+	return typeof identity.email === "string" && identity.email.length > 0
+		? identity.email
+		: undefined;
+}
+
 function mapPendingClaimResult({
 	sessionId,
 	claimResult,
+	checkoutEmail,
+	currentAccountEmail,
 }: {
 	sessionId: string;
+	checkoutEmail?: string;
+	currentAccountEmail?: string;
 	claimResult:
 		| {
 				claim: "claimed" | "already_claimed";
@@ -186,6 +212,8 @@ function mapPendingClaimResult({
 			return {
 				kind: "wrong_account" as const,
 				sessionId,
+				checkoutEmail,
+				currentAccountEmail,
 			};
 		case "missing_claim":
 			return {
@@ -251,12 +279,15 @@ export const claimCheckoutSessionForViewer = action({
 
 		const checkoutSessionClerkUserId =
 			session.metadata?.clerkUserId ?? session.client_reference_id ?? null;
+		const currentAccountEmail = getCurrentAccountEmail(identity);
 
 		if (checkoutSessionClerkUserId) {
 			if (checkoutSessionClerkUserId !== identity.subject) {
 				return {
 					kind: "wrong_account" as const,
 					sessionId: session.id,
+					checkoutEmail: getCheckoutEmail(session) ?? undefined,
+					currentAccountEmail,
 				};
 			}
 
@@ -339,6 +370,8 @@ export const claimCheckoutSessionForViewer = action({
 				return {
 					kind: "wrong_account" as const,
 					sessionId: session.id,
+					checkoutEmail,
+					currentAccountEmail,
 				};
 			case "missing_claim":
 				return {
@@ -402,6 +435,8 @@ export const claimLatestPendingCheckoutForViewer = action({
 
 		return mapPendingClaimResult({
 			sessionId: latestClaim.stripeCheckoutSessionId,
+			checkoutEmail: latestClaim.checkoutEmail,
+			currentAccountEmail: getCurrentAccountEmail(identity),
 			claimResult,
 		});
 	},

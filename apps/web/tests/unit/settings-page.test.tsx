@@ -37,9 +37,10 @@ describe("SettingsPage", () => {
 	it("includes Codex, starter repo, and account cards", () => {
 		const markup = renderToStaticMarkup(<SettingsPage />);
 
-		expect(markup).toContain(
-			"Manage your account, Codex connection, and starter repo access",
-		);
+		expect(markup).toContain("Connect Codex, manage starter repo access");
+		expect(markup).toContain('id="settings-toc"');
+		expect(markup).toContain('id="starter-repo-access"');
+		expect(markup).toContain('id="settings-account"');
 		const codex = markup.indexOf('data-codex-card="true"');
 		const starterRepo = markup.indexOf('data-starter-repo-card="settings"');
 		const account = markup.indexOf('data-settings-account-card="true"');

@@ -16,10 +16,11 @@ read_when:
 
 Active:
 
-- None currently.
+- `docs/programs/active/2026-05-02-customer-agentic-operating-system/`: active Program for making Ship by Sunday install durable Program, ExecPlan, validation, prompt, skill, and agent-loop practices into generated customer repos and mature existing codebases.
 
 Recently completed:
 
+- `docs/programs/completed/2026-05-02-posthog-observability-migration/`: completed PostHog observability migration Program that moved generic analytics, errors, source maps, masked replay defaults, and draft-only Linear triage to PostHog-owned paths while narrowing Convex to provider-specific/runtime-intake duties.
 - `docs/programs/completed/2026-05-01-generated-repo-first-slice-autonomy/`: completed generated customer-repo autonomy Program that made downloaded repos executable by fresh coding agents without chat history.
 - `docs/programs/completed/2026-04-26-app-structure-refactor/`: completed refactor Program that reduced and disciplined the Ship by Sunday app structure across App Router routes, Convex, Stripe, shared UI, platform boundaries, and durable product domains.
 

@@ -1,0 +1,19 @@
+{
+  "plugins": {
+    "convex": {
+      "enabled": true
+    },
+    "posthog": {
+      "enabled": true
+    },
+    "stripe": {
+      "enabled": true
+    },
+    "linear": {
+      "enabled": true
+    },
+    "clerk": {
+      "enabled": true
+    }
+  }
+}

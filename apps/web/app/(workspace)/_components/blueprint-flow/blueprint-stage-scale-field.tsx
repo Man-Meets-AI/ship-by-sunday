@@ -9,10 +9,10 @@ import {
 	Field,
 	FieldContent,
 	FieldDescription,
-	FieldError,
 	FieldTitle,
 } from "@/components/ui/field";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { BlueprintFieldErrorRegion } from "@/app/(workspace)/_components/blueprint-flow/blueprint-field-error-region";
 import {
 	getBlueprintFieldScaleDefinition,
 	blueprintFieldHelperText,
@@ -98,7 +98,10 @@ function BlueprintStageScaleFieldComponent({
 					aria-hidden="true"
 				/>
 				{helperText ? <FieldDescription>{helperText}</FieldDescription> : null}
-				<FieldError id={errorId}>{errorMessage}</FieldError>
+				<BlueprintFieldErrorRegion
+					errorId={errorId}
+					errorMessage={errorMessage}
+				/>
 			</FieldContent>
 		</Field>
 	);

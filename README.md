@@ -38,6 +38,8 @@ cp apps/web/.env.local.example apps/web/.env.local
 
 Set `APP_BASE_URL` to the canonical host you want Stripe to use for checkout success and cancel redirects. For local development, keep it on `http://localhost:3000`.
 
+If you enable PostHog error tracking and source-map upload, set `NEXT_PUBLIC_POSTHOG_TOKEN`, `NEXT_PUBLIC_POSTHOG_HOST`, `POSTHOG_PROJECT_ID`, and `POSTHOG_API_KEY` in `apps/web/.env.local` and in the Vercel project. `POSTHOG_API_KEY` should be a project-scoped PostHog personal API key with only the `Source map upload` scope. Use a separate OAuth login or separate `MCP Server` key for PostHog MCP.
+
 3. Connect the repo to your hosted Convex dev deployment:
 
 ```bash
@@ -82,11 +84,14 @@ bun run test:unit
 bun run test:contracts
 bun run test:integration
 bun run build
+bun run posthog:proof
 bun run markdown:lint -- --paths <repo-path-or-dir>
 bun run public-readiness:lint
 bun run plans:lint -- --plan docs/exec-plans/active/<plan-file>.md
 bun run check
 ```
+
+Run `bun run posthog:proof` after a production build when PostHog is enabled. The command checks required PostHog env presence and injected source-map chunk IDs without printing secret values; operators should still confirm the uploaded symbol set in PostHog.
 
 Release operators also use:
 
@@ -103,6 +108,7 @@ For the full command map, use [docs/design-docs/scripts.md](./docs/design-docs/s
 
 - Docs index: [docs/index.md](./docs/index.md)
 - Observability runbook: [docs/internal/observability.md](./docs/internal/observability.md)
+- Linear runbook: [docs/internal/linear.md](./docs/internal/linear.md)
 - Release workflow runbook: [docs/release-workflow.md](./docs/release-workflow.md)
 - Release manifest: [release.json](./release.json)
 - Homepage contract: [apps/web/content/docs/configure-the-homepage.mdx](./apps/web/content/docs/configure-the-homepage.mdx)

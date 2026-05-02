@@ -136,6 +136,10 @@ Remaining risks:
 - The `order-*` wrappers on `LessonShellSplit` change the DOM structure (three new `<div>` wrappers inside the grid). No route currently uses this shell, so the risk is only realized once the shell is wired into a route. If that happens, a quick visual check at `xl` and sub-`xl` is required to confirm the grid tracks resize correctly with the added flex-column wrappers.
 - The `BonusRouteStatePanel` Card content changed to a `grid sm:grid-cols-[1fr_auto]`; at narrow mobile widths with an unusually long `description`, the body and CTA remain stacked (gap-4). A human visual check is worth doing on the real locked-state fixture.
 
+### v2 addendum (2026-05-02): Split / Focus / Workbench disposition
+
+`LessonShellSplit`, `LessonShellFocus`, and `WorkbenchPanel` were removed from `apps/web/app/(workspace)/_components/course/lesson/shells/index.tsx` because no production route imported them and no active program or compiler output required them. If a future lesson layout needs a three-column split or workbench-only shell, reintroduce it from git history or implement a manifest-driven shell aligned with that route. See [docs/exec-plans/active/2026-05-02-lesson-surface-polish-v2.md](2026-05-02-lesson-surface-polish-v2.md).
+
 ## Context and Orientation
 
 `/lesson/[lessonKey]` is the post-Review bonus lesson surface. The server component `apps/web/app/(workspace)/lesson/[lessonKey]/page.tsx` resolves the `lessonKey` route segment, calls `loadBonusRouteAccess`, and either renders `BonusRouteStatePanel` (locked) or `BonusLessonPage` (unlocked) with pre-fetched `missionState` and `postReviewTargets`.

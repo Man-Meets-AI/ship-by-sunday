@@ -31,7 +31,7 @@ export function AppShellFooterRail({
 	completionCue,
 }: AppShellFooterRailProps) {
 	return (
-		<footer className="sticky bottom-0 z-10 shrink-0 border-t bg-background/95 backdrop-blur xl:hidden">
+		<footer className="sticky bottom-0 z-10 shrink-0 border-t border-border/60 bg-background/95 backdrop-blur motion-reduce:backdrop-blur-none xl:hidden">
 			<div
 				className={
 					viewportMode === "app"

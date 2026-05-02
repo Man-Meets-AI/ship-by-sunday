@@ -1,3 +1,6 @@
+"use client";
+
+import { useClerk } from "@clerk/nextjs";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -14,20 +17,41 @@ type CheckoutSuccessCtaRowProps = {
 export function CheckoutSuccessCtaRow({
 	viewModel,
 }: CheckoutSuccessCtaRowProps) {
+	const clerk = useClerk();
+	const isSignOutAction = viewModel.primaryActionKind === "sign_out";
+
 	return (
 		<div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-			<Button
-				asChild
-				className={cn(
-					"w-full justify-center sm:w-auto sm:min-w-48",
-					PRIMARY_CTA_INVERT_CLASSES,
-				)}
-				data-testid="checkout-success-cta-primary"
-			>
-				<Link href={viewModel.primaryActionHref}>
+			{isSignOutAction ? (
+				<Button
+					type="button"
+					className={cn(
+						"w-full justify-center sm:w-auto sm:min-w-48",
+						PRIMARY_CTA_INVERT_CLASSES,
+					)}
+					data-testid="checkout-success-cta-primary"
+					onClick={() => {
+						void clerk.signOut({
+							redirectUrl: viewModel.primaryActionHref,
+						});
+					}}
+				>
 					{viewModel.primaryActionLabel}
-				</Link>
-			</Button>
+				</Button>
+			) : (
+				<Button
+					asChild
+					className={cn(
+						"w-full justify-center sm:w-auto sm:min-w-48",
+						PRIMARY_CTA_INVERT_CLASSES,
+					)}
+					data-testid="checkout-success-cta-primary"
+				>
+					<Link href={viewModel.primaryActionHref}>
+						{viewModel.primaryActionLabel}
+					</Link>
+				</Button>
+			)}
 			{viewModel.alternateActionHref && viewModel.alternateActionLabel ? (
 				<Button
 					asChild

@@ -28,7 +28,7 @@ export function PricingSectionBlock({
 						<div className="flex flex-col gap-3">
 							<h2 className="flex flex-col gap-1 text-balance text-4xl font-semibold leading-[0.92] tracking-tight sm:text-5xl lg:text-7xl">
 								<span>{pricingSection.titleLead}</span>
-								<span className="text-foreground/90">
+								<span className="text-primary">
 									{pricingSection.titleAccent}
 								</span>
 							</h2>
@@ -71,7 +71,7 @@ export function PricingSectionBlock({
 								target={primaryCtaTarget}
 								label={pricingSection.ctaTitle}
 								testId="pricing-primary-cta"
-								className="h-16 min-w-full rounded-2xl text-lg font-bold motion-safe:transition-transform motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.98]"
+								className="h-16 min-w-full rounded-2xl text-lg font-bold shadow-2xl shadow-foreground/15 motion-safe:transition-all motion-safe:hover:-translate-y-1 motion-safe:hover:shadow-foreground/25"
 							/>
 							<p className="text-center text-sm leading-7 text-muted-foreground">
 								{pricingSection.trustLine}

@@ -204,6 +204,43 @@ describe("convex/checkoutClaimsActions", () => {
 		expect(result).toEqual({
 			kind: "wrong_account",
 			sessionId: "cs_guest_wrong",
+			checkoutEmail: "buyer@example.com",
+			currentAccountEmail: "other@example.com",
+		});
+	});
+
+	it("returns safe account details when a paid checkout belongs to another signed-in Clerk user", async () => {
+		retrieveSessionMock.mockResolvedValue({
+			id: "cs_signed_in_wrong",
+			metadata: {
+				clerkUserId: "user_123",
+				courseSlug: "ship-by-sunday",
+			},
+			client_reference_id: null,
+			customer_details: {
+				email: "buyer@example.com",
+			},
+			payment_status: "paid",
+		});
+		const { claimCheckoutSessionForViewer } =
+			await import("@/convex/checkoutClaimsActions");
+
+		const result = await claimCheckoutSessionForViewer._handler(
+			createActionCtx({
+				identity: {
+					subject: "user_456",
+					email: "other@example.com",
+					emailVerified: true,
+				},
+			}) as never,
+			{ sessionId: "cs_signed_in_wrong" },
+		);
+
+		expect(result).toEqual({
+			kind: "wrong_account",
+			sessionId: "cs_signed_in_wrong",
+			checkoutEmail: "buyer@example.com",
+			currentAccountEmail: "other@example.com",
 		});
 	});
 
@@ -239,6 +276,29 @@ describe("convex/checkoutClaimsActions", () => {
 		});
 		expect(runMutation).toHaveBeenCalledWith(expect.anything(), {
 			stripeCheckoutSessionId: "cs_email_pending_123",
+		});
+	});
+
+	it("returns recovery details when the latest pending checkout is already claimed elsewhere", async () => {
+		const runQuery = vi.fn().mockResolvedValue({
+			stripeCheckoutSessionId: "cs_email_pending_wrong",
+			checkoutEmail: "buyer@example.com",
+		});
+		const runMutation = vi.fn().mockResolvedValue({
+			claim: "claimed_by_other_user",
+		});
+		const { claimLatestPendingCheckoutForViewer } =
+			await import("@/convex/checkoutClaimsActions");
+
+		const result = await claimLatestPendingCheckoutForViewer._handler(
+			createActionCtx({ runMutation, runQuery }) as never,
+		);
+
+		expect(result).toEqual({
+			kind: "wrong_account",
+			sessionId: "cs_email_pending_wrong",
+			checkoutEmail: "buyer@example.com",
+			currentAccountEmail: "buyer@example.com",
 		});
 	});
 });

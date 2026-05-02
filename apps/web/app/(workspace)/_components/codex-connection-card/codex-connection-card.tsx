@@ -5,10 +5,10 @@ import {
 	CardContent,
 	CardDescription,
 	CardHeader,
-	CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCodexConnectionCard } from "@/app/(workspace)/_components/codex-connection-card/use-codex-connection-card";
+import { cn } from "@/lib/utils";
 
 import { CodexConnectionCardActions } from "./codex-connection-card-actions";
 import { CodexConnectionCardFeedback } from "./codex-connection-card-feedback";
@@ -28,10 +28,19 @@ export function CodexConnectionCard() {
 	} = useCodexConnectionCard();
 
 	return (
-		<div id="codex-connection" className="scroll-mt-8">
+		<div
+			id="codex-connection"
+			className="scroll-mt-8"
+			data-testid="codex-connection-card"
+		>
 			<Card>
 				<CardHeader>
-					<CardTitle>Connect your subscription</CardTitle>
+					<h2
+						data-slot="card-title"
+						className="text-base leading-snug font-medium text-foreground"
+					>
+						Connect your subscription
+					</h2>
 					<CardDescription>
 						Use your own ChatGPT/Codex subscription for in-lesson generation.
 					</CardDescription>
@@ -43,8 +52,19 @@ export function CodexConnectionCard() {
 							aria-busy="true"
 							aria-label="Loading connection"
 						>
-							<Skeleton className="h-14 w-full rounded-lg" />
-							<Skeleton className="h-9 w-full max-w-xs" />
+							<div className="rounded-lg border border-border/60 bg-muted/30 p-3 ring-1 ring-foreground/5">
+								<div className="flex gap-3">
+									<Skeleton className="mt-1.5 size-2 shrink-0 rounded-full" />
+									<div className="flex-1 space-y-2">
+										<Skeleton className="h-4 w-28" />
+										<Skeleton className="h-3 w-full max-w-md" />
+									</div>
+								</div>
+							</div>
+							<div className={cn("flex flex-col gap-2 min-[480px]:flex-row")}>
+								<Skeleton className="h-7 w-full min-[480px]:w-40" />
+								<Skeleton className="h-7 w-full min-[480px]:w-40" />
+							</div>
 						</div>
 					) : (
 						<div className="space-y-3">

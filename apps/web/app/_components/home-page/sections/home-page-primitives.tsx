@@ -3,9 +3,6 @@ import { ArrowUpRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-export const homePageSectionClassName =
-	"border-t border-border/60 py-10 sm:py-12";
-
 export function HomePageSecondaryLink({
 	href,
 	label,
@@ -24,7 +21,7 @@ export function HomePageSecondaryLink({
 			)}
 		>
 			<span>{label}</span>
-			<ArrowUpRight className="size-4 motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5" />
+			<ArrowUpRight className="size-4 motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5 motion-safe:group-hover:rotate-12" />
 		</Link>
 	);
 }

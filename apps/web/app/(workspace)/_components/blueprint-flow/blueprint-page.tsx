@@ -102,6 +102,7 @@ export function BlueprintPage({
 				handleSaveAndContinue={handleSaveAndContinue}
 				isReviewReady={isReviewReady}
 				isSaving={isSaving}
+				lastSavedAt={workspaceState.projectDefinition?.updatedAt ?? null}
 			/>
 			<BlueprintStageLeaveDialog
 				isOpen={isDialogOpen}

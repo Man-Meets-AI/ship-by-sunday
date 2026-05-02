@@ -67,11 +67,35 @@ Link the relevant repo evidence when it exists:
 - runtime-intake exports
 - GitHub PRs
 
+## PostHog Bug Triage
+
+PostHog is the source for generic product analytics, error tracking, source-mapped stack traces, and session replay evidence. Linear remains the workflow source of truth for bugs that should become durable work.
+
+The PostHog-to-Linear path starts draft-only. Codex or another agent may inspect PostHog Error Tracking, related replays, deploy evidence, GitHub checks, and existing Linear issues, then draft a ranked report and proposed issue bodies. It must not create, assign, label, close, comment, rerun, or edit Linear issues until a separate action policy approves mutation.
+
+Use `.agents/skills/shared/posthog-linear-triage/SKILL.md` for repo-local triage instructions. Drafted bug issues should use the `man meets ai` team, the `Ship By Sunday` project, and these labels when applicable: `Bug`, `posthog`, `production`, and `observability`.
+
+Every PostHog bug draft should include:
+
+- `Problem`
+- `Observed Evidence`
+- `PostHog Issue`
+- `Replay`
+- `Affected Surface`
+- `Priority Rationale`
+- `Duplicate Check`
+- `Recommended Fix`
+- `Acceptance Criteria`
+- `Validation`
+
+P0 and P1 findings should always draft Linear issues. P2 findings should draft issues only when recurring, affecting paying users, or blocking checkout or access. P3 findings should stay in the triage report unless explicitly selected.
+
 ## Repo Skills
 
 Use these repo-local skills for Linear work:
 
 - `.agents/skills/shared/linear/SKILL.md`
+- `.agents/skills/shared/posthog-linear-triage/SKILL.md`
 - `.agents/skills/shared/debug/SKILL.md`
 
 The `linear` skill owns issue, project, status, label, document, and PR-link

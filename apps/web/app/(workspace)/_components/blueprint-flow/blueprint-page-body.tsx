@@ -1,9 +1,11 @@
 "use client";
 
+import { motion } from "motion/react";
 import type {
 	CanonicalProjectFactKey,
 	CanonicalProjectFactsDraft,
 } from "@shipbysunday/blueprint-compiler";
+import { useBlueprintPageReducedMotion } from "@/app/(workspace)/_components/blueprint-flow/blueprint-page-motion";
 import { BlueprintPageOverview } from "@/app/(workspace)/_components/blueprint-flow/blueprint-page-overview";
 import { BlueprintPageProgressSidebar } from "@/app/(workspace)/_components/blueprint-flow/blueprint-page-progress-sidebar";
 import { BlueprintPageSaveBar } from "@/app/(workspace)/_components/blueprint-flow/blueprint-page-save-bar";
@@ -11,6 +13,8 @@ import { BlueprintPageSectionCard } from "@/app/(workspace)/_components/blueprin
 import type { BlueprintPageSectionStatus } from "@/app/(workspace)/_hooks/blueprint-flow/use-blueprint-page-state";
 import { blueprintPageSections } from "@/lib/blueprint-flow/blueprint-page-sections";
 import type { BlueprintStepInlineFeedback } from "@/lib/blueprint-flow/blueprint-step-save-feedback";
+
+const SECTION_MOUNT_STAGGER_SECONDS = 0.03;
 
 export function BlueprintPageBody({
 	currentDraftValues,
@@ -22,6 +26,7 @@ export function BlueprintPageBody({
 	handleSaveAndContinue,
 	isReviewReady,
 	isSaving,
+	lastSavedAt,
 }: {
 	currentDraftValues: Record<string, string>;
 	currentFacts: CanonicalProjectFactsDraft;
@@ -35,6 +40,7 @@ export function BlueprintPageBody({
 	handleSaveAndContinue: () => void | Promise<void>;
 	isReviewReady: boolean;
 	isSaving: boolean;
+	lastSavedAt: number | null;
 }) {
 	const completedSectionCount = currentSectionStatuses.filter(
 		(s) => s.isComplete,
@@ -45,6 +51,7 @@ export function BlueprintPageBody({
 			sectionStatus,
 		]),
 	);
+	const prefersReducedMotion = useBlueprintPageReducedMotion();
 
 	return (
 		<div className="mx-auto flex w-full max-w-4xl flex-1 gap-8 px-4 pb-20 pt-4 lg:gap-10 xl:gap-12">
@@ -69,22 +76,37 @@ export function BlueprintPageBody({
 					}
 
 					return (
-						<BlueprintPageSectionCard
+						<motion.div
 							key={section.id}
-							draftValues={currentDraftValues}
-							facts={currentFacts}
-							fieldErrors={currentFieldErrors}
-							isComplete={sectionStatus.isComplete}
-							onChange={handleFieldChange}
-							section={section}
-							sectionNumber={index + 1}
-						/>
+							initial={prefersReducedMotion ? false : { opacity: 0, y: 6 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={
+								prefersReducedMotion
+									? { duration: 0 }
+									: {
+											duration: 0.18,
+											delay: index * SECTION_MOUNT_STAGGER_SECONDS,
+											ease: "easeOut",
+										}
+							}
+						>
+							<BlueprintPageSectionCard
+								draftValues={currentDraftValues}
+								facts={currentFacts}
+								fieldErrors={currentFieldErrors}
+								isComplete={sectionStatus.isComplete}
+								onChange={handleFieldChange}
+								section={section}
+								sectionNumber={index + 1}
+							/>
+						</motion.div>
 					);
 				})}
 				<BlueprintPageSaveBar
 					feedback={feedback}
 					isReviewReady={isReviewReady}
 					isSaving={isSaving}
+					lastSavedAt={lastSavedAt}
 					onSaveAndContinue={handleSaveAndContinue}
 				/>
 			</div>

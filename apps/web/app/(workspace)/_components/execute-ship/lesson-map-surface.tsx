@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useRef } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { X } from "lucide-react";
 
@@ -13,6 +13,9 @@ import {
 import type { BonusMissionState } from "@/lib/execute-ship/bonus-mission-types";
 import { BonusMissionBlockSection } from "./bonus-mission-block-card";
 import { BonusMissionHeroCard } from "./bonus-mission-hero-card";
+import { useLessonMapFocusTrap } from "./use-lesson-map-focus-trap";
+
+const LESSON_MAP_HEADING_ID = "lesson-map-heading";
 
 export function LessonMapSurface({
 	id,
@@ -29,46 +32,12 @@ export function LessonMapSurface({
 	const reducedMotion = useReducedMotion() ?? false;
 	const sectionRef = useRef<HTMLElement | null>(null);
 	const headingRef = useRef<HTMLHeadingElement | null>(null);
-	const previousFocusRef = useRef<Element | null>(null);
-
-	useEffect(() => {
-		previousFocusRef.current = document.activeElement;
-		const section = sectionRef.current;
-		const heading = headingRef.current;
-		if (section) {
-			section.scrollIntoView({
-				block: "start",
-				behavior: reducedMotion ? "auto" : "smooth",
-			});
-		}
-		if (heading) {
-			heading.focus({ preventScroll: true });
-		}
-	}, [reducedMotion]);
-
-	const handleDismiss = useCallback(() => {
-		if (!onDismiss) return;
-		const previous = previousFocusRef.current;
-		onDismiss();
-		if (previous instanceof HTMLElement) {
-			requestAnimationFrame(() => previous.focus());
-		}
-	}, [onDismiss]);
-
-	useEffect(() => {
-		if (!onDismiss) return;
-		const handleKey = (event: KeyboardEvent) => {
-			if (event.key === "Escape") {
-				event.stopPropagation();
-				handleDismiss();
-			}
-		};
-		const section = sectionRef.current;
-		section?.addEventListener("keydown", handleKey);
-		return () => {
-			section?.removeEventListener("keydown", handleKey);
-		};
-	}, [handleDismiss, onDismiss]);
+	const { handleDismiss } = useLessonMapFocusTrap({
+		sectionRef,
+		headingRef,
+		onDismiss,
+		reducedMotion,
+	});
 
 	const motionProps = reducedMotion
 		? { initial: { opacity: 1 }, animate: { opacity: 1 } }
@@ -83,6 +52,9 @@ export function LessonMapSurface({
 			ref={sectionRef}
 			id={id}
 			data-testid="lesson-map-surface"
+			role="region"
+			aria-modal="true"
+			aria-labelledby={LESSON_MAP_HEADING_ID}
 			tabIndex={-1}
 			{...motionProps}
 			className="space-y-6 rounded-[28px] border border-border/60 bg-muted/15 p-6 scroll-mt-24 focus:outline-none sm:p-8"
@@ -90,6 +62,7 @@ export function LessonMapSurface({
 			<div className="flex items-start justify-between gap-3">
 				<div className="space-y-2">
 					<h2
+						id={LESSON_MAP_HEADING_ID}
 						ref={headingRef}
 						tabIndex={-1}
 						className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/80 focus:outline-none"

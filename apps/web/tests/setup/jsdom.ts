@@ -37,6 +37,13 @@ Object.defineProperty(window, "scrollTo", {
 	value: vi.fn(),
 });
 
+if (typeof Element.prototype.scrollIntoView !== "function") {
+	Object.defineProperty(Element.prototype, "scrollIntoView", {
+		writable: true,
+		value: vi.fn(),
+	});
+}
+
 class InMemoryStorage implements Storage {
 	private readonly items = new Map<string, string>();
 

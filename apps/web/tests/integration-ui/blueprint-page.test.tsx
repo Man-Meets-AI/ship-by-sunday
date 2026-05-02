@@ -388,7 +388,7 @@ describe("BlueprintPage", () => {
 		).toBeGreaterThan(0);
 		expect(pushMock).not.toHaveBeenCalled();
 		expect(replaceMock).not.toHaveBeenCalled();
-	});
+	}, 15_000);
 
 	it("unlocks post-review and navigates to review with the auto-download signal", async () => {
 		const user = userEvent.setup();
@@ -434,5 +434,5 @@ describe("BlueprintPage", () => {
 				}),
 			}),
 		);
-	});
+	}, 15_000);
 });

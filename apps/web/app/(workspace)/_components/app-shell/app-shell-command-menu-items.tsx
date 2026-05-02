@@ -1,0 +1,246 @@
+"use client";
+
+import { useClerk } from "@clerk/nextjs";
+import { CommandGroup, CommandItem, CommandSeparator } from "cmdk";
+import {
+	Compass,
+	Flag,
+	House,
+	LogOut,
+	Map,
+	Moon,
+	PanelLeft,
+	Settings,
+	Sun,
+	SunMoon,
+} from "lucide-react";
+import { useReducedMotion } from "motion/react";
+import { useTheme } from "next-themes";
+import { usePathname, useRouter } from "next/navigation";
+
+import { useAppShellPreferences } from "@/app/(workspace)/_hooks/app-shell/use-app-shell-preferences";
+import { buildBlueprintStageNavItems } from "@/lib/blueprint-flow/blueprint-stage-nav-model";
+import { startThemeTransition } from "@/lib/theme/start-theme-transition";
+import { routeConfig } from "@/config/product";
+
+import type {
+	WorkspacePrimaryNavItem,
+	WorkspacePrimaryNavMenuEntry,
+} from "@/lib/workspace-navigation/build-primary-nav-model";
+
+import type { AppShellPrimaryNav } from "./app-shell-props";
+import { workspaceMenuLinks } from "./app-shell-user-menu-helpers";
+
+type AppShellCommandMenuItemsProps = {
+	primaryNav: AppShellPrimaryNav | undefined;
+	onSelect: () => void;
+};
+
+const workspaceLinkIcons = {
+	[routeConfig.blueprint]: House,
+	[routeConfig.review]: Flag,
+	[routeConfig.settings]: Settings,
+} as const;
+
+function isVisible<TState extends "active" | "available" | string>(
+	state: TState,
+): boolean {
+	return state === "active" || state === "available";
+}
+
+function flattenPostReviewLinks(
+	items: WorkspacePrimaryNavItem[],
+): { id: string; label: string; href: string }[] {
+	const out: { id: string; label: string; href: string }[] = [];
+	for (const item of items) {
+		if (item.kind === "link" && isVisible(item.state) && item.href !== "#") {
+			out.push({ id: item.id, label: item.label, href: item.href });
+			continue;
+		}
+		if (item.kind === "menu" && isVisible(item.state)) {
+			for (const child of item.items) {
+				if (
+					child.kind === "link" &&
+					isVisible(child.state) &&
+					child.href !== "#"
+				) {
+					out.push({
+						id: `${item.id}.${child.id}`,
+						label: `${item.label}: ${child.label}`,
+						href: child.href,
+					});
+				}
+			}
+		}
+	}
+	return out;
+}
+
+function flattenPostReviewActions(
+	items: WorkspacePrimaryNavItem[],
+): Extract<WorkspacePrimaryNavMenuEntry, { kind: "action" }>[] {
+	const out: Extract<WorkspacePrimaryNavMenuEntry, { kind: "action" }>[] = [];
+	for (const item of items) {
+		if (item.kind === "menu" && isVisible(item.state)) {
+			for (const child of item.items) {
+				if (child.kind === "action" && isVisible(child.state)) {
+					out.push(child);
+				}
+			}
+		}
+	}
+	return out;
+}
+
+export function AppShellCommandMenuItems({
+	primaryNav,
+	onSelect,
+}: AppShellCommandMenuItemsProps) {
+	const router = useRouter();
+	const pathname = usePathname();
+	const { setTheme } = useTheme();
+	const prefersReducedMotion = useReducedMotion();
+	const { preferences, toggleLocalNavCollapsed } = useAppShellPreferences();
+	const clerk = useClerk();
+
+	const navigateTo = (href: string) => {
+		onSelect();
+		router.push(href);
+	};
+
+	const setThemeWithTransition = (theme: "light" | "dark" | "system") => {
+		onSelect();
+		startThemeTransition({
+			apply: () => setTheme(theme),
+			allowAnimation: !prefersReducedMotion,
+		});
+	};
+
+	const blueprintItems = primaryNav
+		? buildBlueprintStageNavItems({
+				currentStageId: primaryNav.currentBlueprintStageId,
+				stageStatuses: primaryNav.stageStatuses,
+			}).filter((item) => isVisible(item.state))
+		: [];
+
+	const postReviewLinks = primaryNav
+		? flattenPostReviewLinks(primaryNav.postReviewItems)
+		: [];
+	const postReviewActions = primaryNav
+		? flattenPostReviewActions(primaryNav.postReviewItems)
+		: [];
+
+	const workspaceLinks = workspaceMenuLinks(pathname ?? "/");
+
+	return (
+		<>
+			{blueprintItems.length > 0 ? (
+				<CommandGroup heading="Blueprint stages">
+					{blueprintItems.map((item) => (
+						<CommandItem
+							key={`blueprint:${item.id}`}
+							value={`Blueprint ${item.label}`}
+							onSelect={() => navigateTo(item.route)}
+						>
+							<Compass className="size-4 shrink-0 text-muted-foreground" />
+							{item.label}
+						</CommandItem>
+					))}
+				</CommandGroup>
+			) : null}
+			{postReviewLinks.length > 0 ? (
+				<CommandGroup heading="Lessons">
+					{postReviewLinks.map((entry) => (
+						<CommandItem
+							key={`postreview:${entry.id}`}
+							value={`Lesson ${entry.label}`}
+							onSelect={() => navigateTo(entry.href)}
+						>
+							<Compass className="size-4 shrink-0 text-muted-foreground" />
+							{entry.label}
+						</CommandItem>
+					))}
+					{postReviewActions.map((action) => (
+						<CommandItem
+							key={`postreview-action:${action.id}`}
+							value={`Action ${action.label}`}
+							onSelect={() => {
+								if (action.actionId === "showLessonMap") {
+									navigateTo(`${routeConfig.review}?showLessonMap=1`);
+								}
+							}}
+						>
+							<Map className="size-4 shrink-0 text-muted-foreground" />
+							{action.label}
+						</CommandItem>
+					))}
+				</CommandGroup>
+			) : null}
+			<CommandGroup heading="Workspace">
+				{workspaceLinks.map((link) => {
+					const Icon =
+						workspaceLinkIcons[link.href as keyof typeof workspaceLinkIcons];
+					return (
+						<CommandItem
+							key={`workspace:${link.href}`}
+							value={`Workspace ${link.label}`}
+							onSelect={() => navigateTo(link.href)}
+						>
+							<Icon className="size-4 shrink-0 text-muted-foreground" />
+							{link.label}
+						</CommandItem>
+					);
+				})}
+				<CommandItem
+					value="Toggle local navigation"
+					onSelect={() => {
+						onSelect();
+						toggleLocalNavCollapsed();
+					}}
+				>
+					<PanelLeft className="size-4 shrink-0 text-muted-foreground" />
+					{preferences.localNavCollapsed
+						? "Expand local navigation"
+						: "Collapse local navigation"}
+				</CommandItem>
+			</CommandGroup>
+			<CommandSeparator className="my-1 h-px bg-border" />
+			<CommandGroup heading="Theme">
+				<CommandItem
+					value="Theme light"
+					onSelect={() => setThemeWithTransition("light")}
+				>
+					<Sun className="size-4 shrink-0 text-muted-foreground" />
+					Light
+				</CommandItem>
+				<CommandItem
+					value="Theme dark"
+					onSelect={() => setThemeWithTransition("dark")}
+				>
+					<Moon className="size-4 shrink-0 text-muted-foreground" />
+					Dark
+				</CommandItem>
+				<CommandItem
+					value="Theme system"
+					onSelect={() => setThemeWithTransition("system")}
+				>
+					<SunMoon className="size-4 shrink-0 text-muted-foreground" />
+					System
+				</CommandItem>
+			</CommandGroup>
+			<CommandSeparator className="my-1 h-px bg-border" />
+			<CommandGroup heading="Account">
+				<CommandItem
+					value="Sign out"
+					onSelect={() => {
+						onSelect();
+						void clerk.signOut({ redirectUrl: routeConfig.home });
+					}}
+				>
+					<LogOut className="size-4 shrink-0 text-muted-foreground" />
+					Sign out
+				</CommandItem>
+			</CommandGroup>
+		</>
+	);
+}

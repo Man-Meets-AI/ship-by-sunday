@@ -1,5 +1,9 @@
 import { assertNever } from "@/lib/assert";
-import type { ProductAccess, ProductAccessStatus } from "@/lib/product-access";
+import type {
+	PaidCheckoutRecovery,
+	ProductAccess,
+	ProductAccessStatus,
+} from "@/lib/product-access";
 import { workspaceDisplayConfig } from "@/config/starter-selectors";
 
 export type AccessActionModel =
@@ -35,6 +39,7 @@ export type AccessPathModel = {
 
 export type AccessViewState =
 	| { kind: "loading" }
+	| { kind: "paid_checkout_recovery"; recovery: PaidCheckoutRecovery }
 	| { kind: Exclude<ProductAccessStatus, "granted"> };
 
 export type AccessViewModel = {
@@ -69,7 +74,22 @@ export function getAccessViewState(
 		return { kind: "loading" };
 	}
 
+	if (access.pendingCheckoutRecovery) {
+		return {
+			kind: "paid_checkout_recovery",
+			recovery: access.pendingCheckoutRecovery,
+		};
+	}
+
 	return { kind: access.status };
+}
+
+function getCheckoutEmailLabel(checkoutEmail: string | undefined) {
+	return checkoutEmail ?? "the checkout email";
+}
+
+function getCurrentAccountLabel(currentAccountEmail: string | undefined) {
+	return currentAccountEmail ?? "the signed-in account";
 }
 
 export function getAccessViewModel({
@@ -119,6 +139,67 @@ export function getAccessViewModel({
 	};
 
 	switch (viewState.kind) {
+		case "paid_checkout_recovery": {
+			const checkoutEmail = getCheckoutEmailLabel(
+				viewState.recovery.checkoutEmail,
+			);
+			const currentAccountEmail = getCurrentAccountLabel(
+				viewState.recovery.currentAccountEmail,
+			);
+			const paymentPending =
+				viewState.recovery.kind === "payment_pending"
+					? `Stripe still reports ${viewState.recovery.paymentStatus}.`
+					: null;
+
+			return {
+				title:
+					viewState.recovery.kind === "payment_pending"
+						? "Paid checkout is still processing"
+						: "Paid checkout needs the right account",
+				shellSubtitle:
+					viewState.recovery.kind === "wrong_account"
+						? `Payment is tied to ${checkoutEmail}, but this browser is signed in as ${currentAccountEmail}.`
+						: `We found a checkout recovery state for ${checkoutEmail}. Resolve that checkout before starting another purchase.`,
+				helperCopy:
+					viewState.recovery.kind === "wrong_account"
+						? `Do not buy again from ${currentAccountEmail}. Sign out, switch to ${checkoutEmail}, then retry the access check.`
+						: "Do not start a second checkout while this paid checkout can still be recovered.",
+				accessStateLabel: "Paid checkout recovery",
+				signedInAccountHint:
+					viewState.recovery.kind === "wrong_account"
+						? `This account does not match the paid checkout email. Switch to ${checkoutEmail} before retrying.`
+						: "Stay on the checkout account while the payment handoff finishes.",
+				statusCalloutTitle: "Purchase found",
+				statusCalloutBody:
+					paymentPending ??
+					`The paid checkout belongs to ${checkoutEmail}. Use that account to attach access.`,
+				helpLeadCopy:
+					"This looks like an account-resolution issue, not a missing purchase.",
+				helpItems: [
+					`Use ${checkoutEmail} to finish access.`,
+					"Do not buy again while this checkout is recoverable.",
+					`After switching accounts, retry the access check or use ${openWorkspaceLabel}.`,
+				],
+				paths: [
+					{
+						tone: "recovery",
+						title: "Recover paid checkout",
+						description:
+							viewState.recovery.kind === "wrong_account"
+								? `Switch from ${currentAccountEmail} to ${checkoutEmail}, then retry the access check.`
+								: "Wait a moment, then retry the access check from the checkout account.",
+						actions: [retryAccessCheck, reauthenticate, backHome],
+					},
+					{
+						tone: "purchase",
+						title: "Do not buy again",
+						description:
+							"This page already knows about a paid checkout or recovery state. Resolve that account first so you do not duplicate the purchase.",
+						actions: [seeOffer],
+					},
+				],
+			};
+		}
 		case "loading":
 			return {
 				title: "Checking product access",

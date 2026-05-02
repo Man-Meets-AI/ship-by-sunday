@@ -17,13 +17,13 @@ export function SprintPathUnifiedSection({
 	mechanismSection?: MechanismSection;
 }) {
 	return (
-		<section id="system" className="py-20 lg:py-32">
+		<section id="system" className="py-24 lg:py-40">
 			<div className="mx-auto flex max-w-4xl flex-col gap-10">
 				<ScrollReveal>
 					<div className="space-y-3">
-						<h2 className="max-w-2xl text-balance text-4xl font-semibold leading-[0.92] tracking-tight sm:text-5xl lg:text-6xl">
+						<h2 className="max-w-2xl text-balance text-4xl font-semibold leading-[0.92] tracking-tight sm:text-5xl lg:text-7xl">
 							{sprintPathSection.titlePrefix}
-							<PointerHighlight containerClassName="text-foreground/90">
+							<PointerHighlight containerClassName="text-primary">
 								{sprintPathSection.titleHighlight}
 							</PointerHighlight>
 						</h2>
