@@ -86,6 +86,8 @@ describe("CheckoutSuccessView", () => {
 		expect(markup).toContain("What happens next");
 		expect(markup).toContain("Open workspace");
 		expect(markup).toContain('href="/blueprint"');
+		expect(markup).not.toContain("Opening your workspace");
+		expect(markup).not.toContain("checkout-success-redirect-affordance");
 	});
 
 	it("shows the automatic redirect state once access is live", () => {
@@ -107,6 +109,12 @@ describe("CheckoutSuccessView", () => {
 		expect(markup).toContain("Redirect armed");
 		expect(markup).toContain("Access confirmed");
 		expect(markup).toContain('href="/blueprint"');
+		expect(markup).toContain("Opening your workspace");
+		expect(markup).toContain(
+			'data-testid="checkout-success-redirect-affordance"',
+		);
+		expect(markup).toContain('data-testid="checkout-success-cta-primary"');
+		expect(markup).toContain('data-testid="checkout-success-cta-tertiary"');
 	});
 
 	it("renders the ready state from preloaded product access without the live query", () => {
