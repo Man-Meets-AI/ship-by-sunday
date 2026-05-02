@@ -292,15 +292,12 @@ export function ProductPreviewSectionBlock({
 			<ProductPreviewTopBar />
 			<div className="grid flex-1 items-start gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-center lg:gap-14">
 				<ScrollReveal>
-					<div className="max-w-xl space-y-7">
-						<p className="text-sm font-semibold text-muted-foreground">
-							{section.kicker}
-						</p>
-						<div className="space-y-5">
-							<h1 className="text-balance text-5xl font-semibold leading-[0.92] text-foreground sm:text-7xl lg:text-8xl">
+					<div className="max-w-xl space-y-5">
+						<div className="space-y-3">
+							<h1 className="text-balance text-5xl font-semibold leading-[0.9] tracking-tight text-foreground sm:text-7xl lg:text-8xl">
 								{section.title}
 							</h1>
-							<p className="max-w-lg text-pretty text-lg leading-8 text-muted-foreground">
+							<p className="max-w-lg text-pretty text-lg leading-7 text-muted-foreground">
 								{section.intro}
 							</p>
 						</div>

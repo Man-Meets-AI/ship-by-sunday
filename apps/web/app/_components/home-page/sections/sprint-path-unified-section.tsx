@@ -20,14 +20,14 @@ export function SprintPathUnifiedSection({
 		<section id="system" className="py-20 lg:py-32">
 			<div className="mx-auto flex max-w-4xl flex-col gap-10">
 				<ScrollReveal>
-					<div className="space-y-6">
-						<h2 className="max-w-2xl text-balance text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
+					<div className="space-y-3">
+						<h2 className="max-w-2xl text-balance text-4xl font-semibold leading-[0.92] tracking-tight sm:text-5xl lg:text-6xl">
 							{sprintPathSection.titlePrefix}
 							<PointerHighlight containerClassName="text-primary/90">
 								{sprintPathSection.titleHighlight}
 							</PointerHighlight>
 						</h2>
-						<p className="max-w-xl text-pretty text-lg leading-7 text-muted-foreground sm:text-xl">
+						<p className="max-w-xl text-pretty text-lg leading-snug text-muted-foreground sm:text-xl">
 							{sprintPathSection.intro}
 						</p>
 					</div>
@@ -46,8 +46,8 @@ export function SprintPathUnifiedSection({
 				</div>
 				{mechanismSection ? (
 					<ScrollReveal delay={0.4}>
-						<div className="flex flex-col items-center gap-10 border-t border-border/40 pt-10">
-							<ol className="flex w-full flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-0">
+						<div className="flex flex-col items-center gap-6 border-t border-border/40 pt-8">
+							<ol className="flex w-full flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-0">
 								{mechanismSection.steps.map((step, i) => (
 									<li key={step} className="flex items-center gap-4">
 										<div className="flex items-center gap-3">

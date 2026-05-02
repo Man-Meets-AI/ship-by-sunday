@@ -21,7 +21,6 @@ const pricingOfferBanner = activePricingOffer
 
 export const homePageContent = {
 	productPreviewSection: {
-		kicker: productName,
 		title: "Build the worker layer.",
 		intro:
 			"For technical founders who can get AI to write code, but need it to ship like a trained employee: start from your phone, route the work to the right role, and get reviewed product changes back.",
@@ -179,11 +178,8 @@ export const homePageContent = {
 			label: "See the loop",
 			href: routeConfig.systemHash,
 		},
-		eyebrow:
-			"One payment. One worker layer. Product, design, marketing, build, and QA stay aligned.",
 	},
 	sprintPathSection: {
-		label: "System",
 		titlePrefix: "Exec loops make ",
 		titleHighlight: "agents useful.",
 		intro:
@@ -207,7 +203,6 @@ export const homePageContent = {
 		tagline: "One source of truth. No drift.",
 	},
 	socialProofSection: {
-		label: "Built by someone who ships",
 		headline: "Built by someone who has actually shipped products.",
 		body: "Built from real UX, product, design, and engineering work, including startup scale to $73M/year and acquisition.",
 		portrait: {
@@ -216,7 +211,6 @@ export const homePageContent = {
 		},
 	},
 	faqSection: {
-		label: "FAQ",
 		titleLead: "Common",
 		titleAccent: "Questions",
 		lead: "",
@@ -254,7 +248,6 @@ export const homePageContent = {
 		],
 	},
 	execLoopSection: {
-		label: "Exec loop",
 		title: "How the loop works.",
 		intro:
 			"One loop moves a decision into shipped code. The next loop starts smarter.",
@@ -307,7 +300,6 @@ export const homePageContent = {
 		],
 	},
 	durabilitySection: {
-		label: "Durability",
 		title: "Ship by Sunday. Keep shipping on Monday.",
 		intro:
 			"The goal is not a one-night demo. The goal is a product you improve as models, tools, and agents change around you.",
@@ -332,7 +324,6 @@ export const homePageContent = {
 			"When better models arrive next month, you move faster. You do not restart the project from zero.",
 	},
 	pricingSection: {
-		label: productName,
 		titleLead: "Ship a real product",
 		titleAccent: "by Sunday",
 		intro:
@@ -345,7 +336,6 @@ export const homePageContent = {
 			activePricingOffer?.discountedPriceDisplay ??
 			productConfig.checkoutPriceDisplay,
 		offerBanner: pricingOfferBanner,
-		eyebrow: "One-time payment. Lifetime access.",
 		ctaTitle: marketingDisplayConfig.primaryCtaLabel,
 		trustLine: `After checkout, open the ${workspaceDisplayConfig.homeNoun}, lock the decisions, and build the first loop.`,
 		includes: [
@@ -357,7 +347,6 @@ export const homePageContent = {
 			"Fast Pass Walkthroughs",
 		],
 		bonus: {
-			label: "Additional bonus",
 			title: "FREE BONUS: FULL TURBO",
 			description:
 				"A 30-video workflow course included free for faster build reps after the sprint.",

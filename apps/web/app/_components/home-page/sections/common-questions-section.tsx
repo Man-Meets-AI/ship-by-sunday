@@ -16,15 +16,13 @@ export function CommonQuestionsSection({
 		<section className="border-t border-border/40 py-24 lg:py-40">
 			<div className="grid gap-16 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-24">
 				<ScrollReveal>
-					<div className="space-y-8">
-						<h2 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl lg:text-7xl">
-							{faqSection.titleLead}
-							<span className="block text-primary/90">
-								{faqSection.titleAccent}
-							</span>
+					<div className="flex flex-col gap-3">
+						<h2 className="flex flex-col gap-1 text-balance text-4xl font-semibold leading-[0.92] tracking-tight sm:text-5xl lg:text-7xl">
+							<span>{faqSection.titleLead}</span>
+							<span className="text-primary/90">{faqSection.titleAccent}</span>
 						</h2>
 						{faqSection.lead ? (
-							<p className="max-w-xl text-pretty text-xl leading-7 text-muted-foreground">
+							<p className="max-w-xl text-pretty text-lg leading-snug text-muted-foreground sm:text-xl">
 								{faqSection.lead}
 							</p>
 						) : null}

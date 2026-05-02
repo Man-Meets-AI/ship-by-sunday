@@ -5,7 +5,7 @@ import type { HomePageContent } from "@/app/_content/home-page";
 type Hero = HomePageContent["hero"];
 
 const headlineLineClass =
-	"font-marketing-display tracking-marketing-section block text-balance text-[clamp(3.5rem,10vw,8.5rem)] font-normal uppercase leading-[0.95] text-foreground transition-all duration-500 hover:tracking-tighter";
+	"font-marketing-display tracking-marketing-section block text-balance text-[clamp(3.5rem,10vw,8.5rem)] font-normal uppercase leading-[0.88] text-foreground transition-all duration-500 hover:tracking-tighter";
 
 export function HomeHeroHeadline({
 	hero,
@@ -24,7 +24,10 @@ export function HomeHeroHeadline({
 
 	return (
 		<div className="w-full">
-			<Heading aria-label={headlineText} className="flex flex-col items-center">
+			<Heading
+				aria-label={headlineText}
+				className="flex flex-col items-center gap-1"
+			>
 				<span className={headlineLineClass}>{hero.headlineLead}</span>
 				<span className={cn(headlineLineClass, "text-primary/90")}>
 					{hero.headlineTailPrefix}

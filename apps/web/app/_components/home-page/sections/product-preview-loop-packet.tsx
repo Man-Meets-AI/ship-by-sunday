@@ -16,25 +16,25 @@ export function ProductPreviewLoopPacketBlock({
 	return (
 		<div className="grid gap-3 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
 			<div className="rounded-lg border border-border/60 bg-muted/25 p-4">
-				<div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase">
-					<MessageSquareText className="size-3.5" aria-hidden />
+				<div className="flex items-center gap-2 text-xs font-medium leading-tight text-muted-foreground">
+					<MessageSquareText className="size-3.5 shrink-0" aria-hidden />
 					{loopPacket.input.label}
 				</div>
-				<p className="mt-3 text-base font-semibold leading-tight text-foreground">
+				<p className="mt-2 text-base font-semibold leading-tight text-foreground">
 					{loopPacket.input.title}
 				</p>
-				<p className="mt-2 text-sm leading-6 text-muted-foreground">
+				<p className="mt-1.5 text-sm leading-snug text-muted-foreground">
 					{loopPacket.input.body}
 				</p>
 			</div>
 			<div className="rounded-lg border border-border/60 bg-background p-4">
 				<div className="flex items-start justify-between gap-3">
 					<div>
-						<div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase">
-							<Workflow className="size-3.5" aria-hidden />
+						<div className="flex items-center gap-2 text-xs font-medium leading-tight text-muted-foreground">
+							<Workflow className="size-3.5 shrink-0" aria-hidden />
 							{loopPacket.role.label}
 						</div>
-						<p className="mt-3 text-base font-semibold text-foreground">
+						<p className="mt-2 text-base font-semibold leading-tight text-foreground">
 							{loopPacket.role.title}
 						</p>
 					</div>
@@ -53,10 +53,10 @@ export function ProductPreviewLoopPacketBlock({
 				</ul>
 			</div>
 			<div className="rounded-lg border border-border/60 bg-background p-4 lg:col-span-2">
-				<p className="text-xs font-semibold text-muted-foreground uppercase">
+				<p className="text-xs font-medium leading-tight text-muted-foreground">
 					{loopPacket.output.label}
 				</p>
-				<div className="mt-3 grid gap-3 sm:grid-cols-3">
+				<div className="mt-2 grid gap-3 sm:grid-cols-3">
 					{loopPacket.output.items.map((item) => (
 						<div key={item.label} className="border-t border-border/50 pt-3">
 							<p className="text-sm font-semibold text-foreground">

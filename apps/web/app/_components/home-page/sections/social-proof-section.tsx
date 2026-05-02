@@ -14,11 +14,11 @@ export function SocialProofSection({
 		<section className="border-t border-border/40 py-24 lg:py-40">
 			<div className="grid gap-12 lg:grid-cols-[minmax(0,0.95fr)_minmax(18rem,0.55fr)] lg:items-center">
 				<ScrollReveal>
-					<div className="max-w-3xl space-y-6">
-						<h2 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl lg:text-7xl">
+					<div className="max-w-3xl space-y-3">
+						<h2 className="text-balance text-4xl font-semibold leading-[0.92] tracking-tight sm:text-5xl lg:text-7xl">
 							{socialProofSection.headline}
 						</h2>
-						<p className="max-w-2xl text-pretty text-lg leading-7 text-muted-foreground sm:text-xl">
+						<p className="max-w-2xl text-pretty text-lg leading-snug text-muted-foreground sm:text-xl">
 							{socialProofSection.body}
 						</p>
 					</div>

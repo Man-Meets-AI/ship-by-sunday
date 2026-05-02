@@ -83,13 +83,10 @@ function ExecLoopVisual({
 				/>
 			</div>
 			<div className="relative z-10 flex size-32 flex-col items-center justify-center rounded-full border border-border/70 bg-background/90 p-4 text-center shadow-2xl shadow-foreground/5 sm:size-40 sm:p-5">
-				<p className="text-[0.65rem] font-semibold text-muted-foreground uppercase">
-					Exec loop
-				</p>
-				<p className="mt-2 text-lg font-semibold sm:text-xl">
+				<p className="text-lg font-semibold leading-tight sm:text-xl">
 					Decide to review
 				</p>
-				<p className="mt-1 text-[0.7rem] leading-4 text-muted-foreground sm:text-xs sm:leading-5">
+				<p className="mt-1.5 text-[0.7rem] leading-snug text-muted-foreground sm:text-xs sm:leading-5">
 					Decision, brief, run, review.
 				</p>
 			</div>
@@ -102,7 +99,7 @@ function ExecLoopVisual({
 						transform: "translate(-50%, -50%)",
 					}}
 				>
-					<p className="text-xs font-semibold text-muted-foreground uppercase">
+					<p className="text-xs font-semibold text-muted-foreground">
 						{String(index + 1).padStart(2, "0")}
 					</p>
 					<p className="mt-1 text-sm font-semibold leading-tight sm:text-base">
@@ -123,15 +120,12 @@ export function ExecLoopSectionBlock({
 		<section className="py-24 lg:py-40">
 			<div className="grid gap-14 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:items-center lg:gap-20">
 				<ScrollReveal>
-					<div className="space-y-8 lg:sticky lg:top-24 lg:h-fit">
-						<p className="text-xs font-semibold text-muted-foreground uppercase">
-							{execLoopSection.label}
-						</p>
-						<div className="space-y-5">
-							<h2 className="text-balance text-4xl font-semibold sm:text-5xl lg:text-7xl">
+					<div className="space-y-5 lg:sticky lg:top-24 lg:h-fit">
+						<div className="space-y-3">
+							<h2 className="text-balance text-4xl font-semibold leading-[0.92] sm:text-5xl lg:text-7xl">
 								{execLoopSection.title}
 							</h2>
-							<p className="max-w-md text-pretty text-lg leading-7 text-muted-foreground">
+							<p className="max-w-md text-pretty text-lg leading-snug text-muted-foreground">
 								{execLoopSection.intro}
 							</p>
 						</div>
