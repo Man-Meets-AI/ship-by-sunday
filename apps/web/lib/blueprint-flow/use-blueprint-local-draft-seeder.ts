@@ -25,6 +25,7 @@ export type BlueprintLocalDraftSeederOptions = {
 	saveProjectDefinitionFacts: SaveProjectDefinitionFactsCaller;
 	loadDraftFromStorage?: () => HomePageBlueprintDraftFields | null;
 	clearDraftFromStorage?: () => void;
+	onSeedSuccess?: () => void;
 };
 
 function buildDraftValuesFromHomeBlueprintFields(
@@ -55,8 +56,14 @@ export function useBlueprintLocalDraftSeeder({
 	saveProjectDefinitionFacts,
 	loadDraftFromStorage = loadHomePageBlueprintDraft,
 	clearDraftFromStorage = clearHomePageBlueprintDraft,
+	onSeedSuccess,
 }: BlueprintLocalDraftSeederOptions): void {
 	const hasRunRef = useRef(false);
+	const onSeedSuccessRef = useRef(onSeedSuccess);
+
+	useEffect(() => {
+		onSeedSuccessRef.current = onSeedSuccess;
+	}, [onSeedSuccess]);
 
 	useEffect(() => {
 		if (hasRunRef.current) {
@@ -96,6 +103,7 @@ export function useBlueprintLocalDraftSeeder({
 		saveProjectDefinitionFacts(savePayload)
 			.then(() => {
 				clearDraftFromStorage();
+				onSeedSuccessRef.current?.();
 			})
 			.catch(() => {
 				hasRunRef.current = false;

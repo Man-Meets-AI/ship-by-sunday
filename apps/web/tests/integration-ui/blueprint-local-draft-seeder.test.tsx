@@ -168,4 +168,77 @@ describe("useBlueprintLocalDraftSeeder", () => {
 		await new Promise((resolve) => setTimeout(resolve, 0));
 		expect(clearDraftFromStorage).not.toHaveBeenCalled();
 	});
+
+	it("invokes onSeedSuccess once after a successful seed and never on skip or failure", async () => {
+		const successOnSeedSuccess = vi.fn();
+		const successSave = vi.fn().mockResolvedValue(null);
+		renderHook(() =>
+			useBlueprintLocalDraftSeeder({
+				isAuthenticated: true,
+				isAuthLoading: false,
+				workspaceState: baseEmptyWorkspaceState,
+				saveProjectDefinitionFacts: successSave,
+				loadDraftFromStorage: vi.fn(() => baseFields),
+				clearDraftFromStorage: vi.fn(),
+				onSeedSuccess: successOnSeedSuccess,
+			}),
+		);
+		await waitFor(() => {
+			expect(successSave).toHaveBeenCalledTimes(1);
+		});
+		await waitFor(() => {
+			expect(successOnSeedSuccess).toHaveBeenCalledTimes(1);
+		});
+
+		const skipFactsOnSeedSuccess = vi.fn();
+		renderHook(() =>
+			useBlueprintLocalDraftSeeder({
+				isAuthenticated: true,
+				isAuthLoading: false,
+				workspaceState: populatedWorkspaceState,
+				saveProjectDefinitionFacts: vi.fn().mockResolvedValue(null),
+				loadDraftFromStorage: vi.fn(() => baseFields),
+				clearDraftFromStorage: vi.fn(),
+				onSeedSuccess: skipFactsOnSeedSuccess,
+			}),
+		);
+		await new Promise((resolve) => setTimeout(resolve, 0));
+		expect(skipFactsOnSeedSuccess).not.toHaveBeenCalled();
+
+		const noDraftOnSeedSuccess = vi.fn();
+		renderHook(() =>
+			useBlueprintLocalDraftSeeder({
+				isAuthenticated: true,
+				isAuthLoading: false,
+				workspaceState: baseEmptyWorkspaceState,
+				saveProjectDefinitionFacts: vi.fn().mockResolvedValue(null),
+				loadDraftFromStorage: vi.fn(() => null),
+				clearDraftFromStorage: vi.fn(),
+				onSeedSuccess: noDraftOnSeedSuccess,
+			}),
+		);
+		await new Promise((resolve) => setTimeout(resolve, 0));
+		expect(noDraftOnSeedSuccess).not.toHaveBeenCalled();
+
+		const failureOnSeedSuccess = vi.fn();
+		const failingSave = vi
+			.fn()
+			.mockRejectedValue(new Error("Convex unavailable"));
+		renderHook(() =>
+			useBlueprintLocalDraftSeeder({
+				isAuthenticated: true,
+				isAuthLoading: false,
+				workspaceState: baseEmptyWorkspaceState,
+				saveProjectDefinitionFacts: failingSave,
+				loadDraftFromStorage: vi.fn(() => baseFields),
+				clearDraftFromStorage: vi.fn(),
+				onSeedSuccess: failureOnSeedSuccess,
+			}),
+		);
+		await waitFor(() => {
+			expect(failingSave).toHaveBeenCalledTimes(1);
+		});
+		await new Promise((resolve) => setTimeout(resolve, 0));
+		expect(failureOnSeedSuccess).not.toHaveBeenCalled();
+	});
 });

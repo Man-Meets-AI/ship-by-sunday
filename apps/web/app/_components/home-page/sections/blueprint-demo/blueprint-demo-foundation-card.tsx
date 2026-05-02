@@ -4,8 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { HomePageContent } from "@/app/_content/home-page";
 
+import { BlueprintDemoSavedLocally } from "./blueprint-demo-saved-locally";
 import { BlueprintDemoSectionCard } from "./blueprint-demo-section-card";
 import type { HomePageBlueprintDraftFields } from "./home-page-blueprint-draft-storage";
+
+const PRODUCT_SUMMARY_SOFT_LIMIT = 120;
 
 type FoundationContent = HomePageContent["productPreviewSection"]["foundation"];
 
@@ -42,6 +45,7 @@ export function BlueprintDemoFoundationCard({
 	description,
 	foundation,
 	fields,
+	lastSavedAt,
 	onFoundationFieldChange,
 }: {
 	readonly sectionNumber: number;
@@ -49,6 +53,7 @@ export function BlueprintDemoFoundationCard({
 	readonly description: string;
 	readonly foundation: FoundationContent;
 	readonly fields: HomePageBlueprintDraftFields;
+	readonly lastSavedAt: number | null;
 	readonly onFoundationFieldChange: (
 		fieldKey: BlueprintDemoFoundationFieldKey,
 		nextValue: string,
@@ -69,6 +74,10 @@ export function BlueprintDemoFoundationCard({
 					const fieldCopy = foundation.fields[contentKey];
 					const fieldId = `blueprint-demo-${stateKey}`;
 					const helperId = `${fieldId}-help`;
+					const value = fields[stateKey];
+					const showSummaryBudget =
+						stateKey === "product_summary" &&
+						value.length > PRODUCT_SUMMARY_SOFT_LIMIT;
 					return (
 						<div key={stateKey} className="space-y-1.5">
 							<label
@@ -81,7 +90,7 @@ export function BlueprintDemoFoundationCard({
 								<Textarea
 									id={fieldId}
 									data-testid={`blueprint-demo-input-${stateKey}`}
-									value={fields[stateKey]}
+									value={value}
 									placeholder={fieldCopy.placeholder}
 									onChange={(event) =>
 										onFoundationFieldChange(stateKey, event.target.value)
@@ -93,7 +102,7 @@ export function BlueprintDemoFoundationCard({
 								<Input
 									id={fieldId}
 									data-testid={`blueprint-demo-input-${stateKey}`}
-									value={fields[stateKey]}
+									value={value}
 									placeholder={fieldCopy.placeholder}
 									onChange={(event) =>
 										onFoundationFieldChange(stateKey, event.target.value)
@@ -106,10 +115,22 @@ export function BlueprintDemoFoundationCard({
 								className="text-xs leading-5 text-muted-foreground"
 							>
 								{fieldCopy.helperText}
+								{showSummaryBudget ? (
+									<span
+										className="ml-1 text-foreground/70"
+										data-testid="blueprint-demo-product-summary-budget"
+									>
+										{value.length} characters - aim for one tight sentence.
+									</span>
+								) : null}
 							</p>
 						</div>
 					);
 				})}
+				<BlueprintDemoSavedLocally
+					lastSavedAt={lastSavedAt}
+					scope="foundation"
+				/>
 			</div>
 		</BlueprintDemoSectionCard>
 	);

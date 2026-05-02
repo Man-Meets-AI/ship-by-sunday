@@ -28,7 +28,7 @@ export function PricingSectionBlock({
 						<div className="flex flex-col gap-3">
 							<h2 className="flex flex-col gap-1 text-balance text-4xl font-semibold leading-[0.92] tracking-tight sm:text-5xl lg:text-7xl">
 								<span>{pricingSection.titleLead}</span>
-								<span className="text-primary/90">
+								<span className="text-foreground/90">
 									{pricingSection.titleAccent}
 								</span>
 							</h2>
@@ -116,7 +116,7 @@ export function FooterSection({
 						</p>
 						<Link
 							href={routeConfig.signIn}
-							className="text-sm text-primary underline-offset-4 transition-colors hover:underline"
+							className="text-sm text-foreground underline-offset-4 transition-colors hover:underline"
 						>
 							Already bought? <span className="ml-1 font-medium">Sign in</span>
 						</Link>

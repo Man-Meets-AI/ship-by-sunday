@@ -45,6 +45,7 @@ import {
 	HOME_PAGE_BLUEPRINT_DRAFT_STORAGE_KEY,
 	parseHomePageBlueprintDraftEnvelope,
 } from "@/app/_components/home-page/sections/blueprint-demo/home-page-blueprint-draft-storage";
+import { blueprintPageSections } from "@/lib/blueprint-flow/blueprint-page-sections";
 
 describe("BlueprintDemoSectionBlock", () => {
 	beforeEach(() => {
@@ -132,5 +133,45 @@ describe("BlueprintDemoSectionBlock", () => {
 			expect(envelope?.fields.pricing_model).toBe("monthly");
 			expect(envelope?.fields.theme_preset.length).toBeGreaterThan(0);
 		});
+	});
+
+	it("exposes a theme toggle in the demo top bar", async () => {
+		render(
+			<BlueprintDemoSectionBlock
+				section={homePageContent.productPreviewSection}
+			/>,
+		);
+
+		const toggle = await screen.findByRole("button", {
+			name: /switch to (dark|light) mode/i,
+		});
+		expect(toggle).toBeTruthy();
+	});
+
+	it("renders each locked card with the canonical 'After checkout' unlock preview line", () => {
+		render(
+			<BlueprintDemoSectionBlock
+				section={homePageContent.productPreviewSection}
+			/>,
+		);
+
+		const lockedSectionIds = [
+			"problem",
+			"outcome",
+			"setup",
+			"generated-preview",
+		] as const;
+		const sectionDescriptionById = new Map(
+			blueprintPageSections.map((section) => [section.id, section.description]),
+		);
+		for (const lockedId of lockedSectionIds) {
+			const lockedNode = screen.getByTestId(
+				`blueprint-demo-locked-${lockedId}`,
+			);
+			expect(lockedNode.textContent).toContain("After checkout:");
+			const expectedDescription = sectionDescriptionById.get(lockedId);
+			expect(expectedDescription).toBeDefined();
+			expect(lockedNode.textContent).toContain(expectedDescription as string);
+		}
 	});
 });

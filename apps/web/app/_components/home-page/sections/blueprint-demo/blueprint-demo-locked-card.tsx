@@ -20,13 +20,24 @@ export function BlueprintDemoLockedCard({
 			label={label}
 			description={description}
 			tone="locked"
+			hideDescription
 		>
 			<div
-				className="flex items-center gap-2 text-xs text-muted-foreground"
+				className="flex items-start gap-2.5 rounded-lg border border-dashed border-border/60 bg-background/40 px-3 py-2.5 text-xs leading-5 text-muted-foreground"
 				data-testid={`blueprint-demo-locked-${sectionId}`}
+				role="group"
+				aria-label={`${label} (locked)`}
 			>
-				<LockKeyhole className="size-3.5" aria-hidden />
-				<span>Unlocks after checkout in the full Blueprint workspace.</span>
+				<LockKeyhole
+					className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/80"
+					aria-hidden
+				/>
+				<span>
+					<span className="font-medium text-foreground/70">
+						After checkout:
+					</span>{" "}
+					{description}
+				</span>
 			</div>
 		</BlueprintDemoSectionCard>
 	);

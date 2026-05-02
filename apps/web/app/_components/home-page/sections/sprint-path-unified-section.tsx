@@ -23,7 +23,7 @@ export function SprintPathUnifiedSection({
 					<div className="space-y-3">
 						<h2 className="max-w-2xl text-balance text-4xl font-semibold leading-[0.92] tracking-tight sm:text-5xl lg:text-6xl">
 							{sprintPathSection.titlePrefix}
-							<PointerHighlight containerClassName="text-primary/90">
+							<PointerHighlight containerClassName="text-foreground/90">
 								{sprintPathSection.titleHighlight}
 							</PointerHighlight>
 						</h2>
@@ -51,7 +51,7 @@ export function SprintPathUnifiedSection({
 								{mechanismSection.steps.map((step, i) => (
 									<li key={step} className="flex items-center gap-4">
 										<div className="flex items-center gap-3">
-											<span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+											<span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-foreground/10 text-sm font-semibold text-foreground">
 												{i + 1}
 											</span>
 											<span className="text-base font-medium leading-tight text-foreground sm:text-lg">

@@ -49,27 +49,125 @@ const productPreviewSections = blueprintPageSections.map((section) => ({
 		: "locked") as BlueprintDemoSectionStatus,
 }));
 
-const productPreviewPresetAccentColors: Record<string, string> = {
-	vercel: "#000000",
-	linear: "#5E6AD2",
-	notion: "#37352F",
-	stripe: "#635BFF",
-	supabase: "#3FCF8E",
-	framer: "#0099FF",
-	raycast: "#FF6363",
-	cursor: "#0DBC79",
+type ProductPreviewAccent = { light: string; dark: string };
+
+const FALLBACK_ACCENT: ProductPreviewAccent = {
+	light: "#71717A",
+	dark: "#A1A1AA",
 };
 
-const productPreviewDesignPresets = designPresetDefinitions.map((preset) => ({
-	id: preset.id,
-	label: preset.label,
-	summary: preset.summary,
-	category: preset.category,
-	logoPath: preset.logoPath,
-	previewImagePath: preset.previewImagePath,
-	referenceUrl: preset.previewPageUrl,
-	accentColor: productPreviewPresetAccentColors[preset.id] ?? "#71717A",
-}));
+const productPreviewPresetAccentColors: Record<string, ProductPreviewAccent> = {
+	vercel: { light: "#000000", dark: "#FAFAFA" },
+	linear: { light: "#5E6AD2", dark: "#7C8AF7" },
+	notion: { light: "#37352F", dark: "#E8E6E1" },
+	stripe: { light: "#635BFF", dark: "#8E88FF" },
+	supabase: { light: "#3FCF8E", dark: "#3FCF8E" },
+	framer: { light: "#0099FF", dark: "#3FB6FF" },
+	raycast: { light: "#FF6363", dark: "#FF8A8A" },
+	cursor: { light: "#0DBC79", dark: "#22D38A" },
+};
+
+type ProductPreviewFontSpecimen = {
+	family: string;
+	fontStack: string;
+	sample: string;
+};
+
+type ProductPreviewLogoDarkMode = "invert" | "preserve";
+
+const productPreviewPresetLogoDarkModes: Record<
+	string,
+	ProductPreviewLogoDarkMode
+> = {
+	vercel: "invert",
+	linear: "preserve",
+	notion: "invert",
+	stripe: "preserve",
+	supabase: "preserve",
+	framer: "invert",
+	raycast: "invert",
+	cursor: "invert",
+};
+
+const productPreviewPresetFontSpecimens: Record<
+	string,
+	ProductPreviewFontSpecimen
+> = {
+	vercel: {
+		family: "Geist",
+		fontStack:
+			'"Geist", "Geist Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+		sample: "Aa Bb Cc — 0123456789",
+	},
+	linear: {
+		family: "Inter",
+		fontStack:
+			'"Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+		sample: "Aa Bb Cc — 0123456789",
+	},
+	notion: {
+		family: "Noto Serif",
+		fontStack: '"Noto Serif", "Lyon", Georgia, "Times New Roman", serif',
+		sample: "Aa Bb Cc — 0123456789",
+	},
+	stripe: {
+		family: "Sohne / Inter",
+		fontStack:
+			'"Sohne", "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+		sample: "Aa Bb Cc — 0123456789",
+	},
+	supabase: {
+		family: "Geist / Inter",
+		fontStack:
+			'"Geist", "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+		sample: "Aa Bb Cc — 0123456789",
+	},
+	framer: {
+		family: "Figtree",
+		fontStack:
+			'"Figtree", "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+		sample: "Aa Bb Cc — 0123456789",
+	},
+	raycast: {
+		family: "Geist",
+		fontStack:
+			'"Geist", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+		sample: "Aa Bb Cc — 0123456789",
+	},
+	cursor: {
+		family: "Geist",
+		fontStack:
+			'"Geist", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+		sample: "Aa Bb Cc — 0123456789",
+	},
+};
+
+const FALLBACK_FONT_SPECIMEN: ProductPreviewFontSpecimen = {
+	family: "Sans",
+	fontStack: "ui-sans-serif, system-ui, sans-serif",
+	sample: "Aa Bb Cc — 0123456789",
+};
+
+const productPreviewDesignPresets = designPresetDefinitions.map((preset) => {
+	const accent = productPreviewPresetAccentColors[preset.id] ?? FALLBACK_ACCENT;
+	const fontSpecimen =
+		productPreviewPresetFontSpecimens[preset.id] ?? FALLBACK_FONT_SPECIMEN;
+	const logoDarkMode: ProductPreviewLogoDarkMode =
+		productPreviewPresetLogoDarkModes[preset.id] ?? "preserve";
+	return {
+		id: preset.id,
+		label: preset.label,
+		summary: preset.summary,
+		category: preset.category,
+		logoPath: preset.logoPath,
+		logoDarkMode,
+		previewImagePath: preset.previewImagePath,
+		referenceUrl: preset.previewPageUrl,
+		accentColor: accent.light,
+		accentColorDark: accent.dark,
+		fontSpecimen,
+	};
+});
 
 const pricingModelScaleOptions =
 	getBlueprintFieldScaleDefinition("pricing_model")?.options ?? [];
@@ -96,8 +194,6 @@ const productPreviewSection = {
 		"Fill the same Blueprint a paying buyer fills. Lock the foundation, pick a design direction, set your price, and we generate the codebase that matches.",
 	unlockNote:
 		"Checkout unlocks Problem, Outcome, Setup, and Generated preview, plus the full theme grid (color, style, radius) in the workspace.",
-	previewNote:
-		"Real intake form. Your answers ride through Stripe and prefill /blueprint right after checkout.",
 	sections: productPreviewSections,
 	foundation: {
 		intro:

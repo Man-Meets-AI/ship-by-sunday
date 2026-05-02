@@ -16,6 +16,8 @@ export type HomePageBlueprintDraftDefaults = {
 	defaultPrice: string;
 };
 
+const SAVE_LOCALLY_DEBOUNCE_MS = 600;
+
 function buildInitialDraftFields(
 	defaults: HomePageBlueprintDraftDefaults,
 ): HomePageBlueprintDraftFields {
@@ -33,6 +35,7 @@ function buildInitialDraftFields(
 
 export type HomePageBlueprintDraftHandle = {
 	fields: HomePageBlueprintDraftFields;
+	lastSavedAt: number | null;
 	setFoundationField: (
 		fieldKey: "product_name" | "product_summary" | "primary_user",
 		nextValue: string,
@@ -49,7 +52,9 @@ export function useHomePageBlueprintDraft(
 	const [fields, setFields] = useState<HomePageBlueprintDraftFields>(() =>
 		buildInitialDraftFields(defaults),
 	);
+	const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
 	const fieldsRef = useRef(fields);
+	const hasUserEditedRef = useRef(false);
 
 	useEffect(() => {
 		fieldsRef.current = fields;
@@ -64,11 +69,25 @@ export function useHomePageBlueprintDraft(
 		fieldsRef.current = storedFields;
 	}, []);
 
+	useEffect(() => {
+		if (!hasUserEditedRef.current) {
+			return;
+		}
+		const handle = window.setTimeout(() => {
+			saveHomePageBlueprintDraft(fieldsRef.current);
+			setLastSavedAt(Date.now());
+		}, SAVE_LOCALLY_DEBOUNCE_MS);
+		return () => {
+			window.clearTimeout(handle);
+		};
+	}, [fields]);
+
 	const setFoundationField = useCallback(
 		(
 			fieldKey: "product_name" | "product_summary" | "primary_user",
 			nextValue: string,
 		) => {
+			hasUserEditedRef.current = true;
 			setFields((currentFields) => ({
 				...currentFields,
 				[fieldKey]: nextValue,
@@ -78,6 +97,7 @@ export function useHomePageBlueprintDraft(
 	);
 
 	const selectDesignPreset = useCallback((presetId: string) => {
+		hasUserEditedRef.current = true;
 		const designSeed = buildDesignPresetFactSeed(presetId);
 		setFields((currentFields) => ({
 			...currentFields,
@@ -88,6 +108,7 @@ export function useHomePageBlueprintDraft(
 
 	const setPricingModel = useCallback(
 		(model: HomePageBlueprintPricingModel) => {
+			hasUserEditedRef.current = true;
 			setFields((currentFields) => ({
 				...currentFields,
 				pricing_model: model,
@@ -97,6 +118,7 @@ export function useHomePageBlueprintDraft(
 	);
 
 	const setPricing = useCallback((price: string) => {
+		hasUserEditedRef.current = true;
 		setFields((currentFields) => ({
 			...currentFields,
 			pricing: price,
@@ -105,10 +127,12 @@ export function useHomePageBlueprintDraft(
 
 	const persistNow = useCallback(() => {
 		saveHomePageBlueprintDraft(fieldsRef.current);
+		setLastSavedAt(Date.now());
 	}, []);
 
 	return {
 		fields,
+		lastSavedAt,
 		setFoundationField,
 		selectDesignPreset,
 		setPricingModel,

@@ -6,14 +6,18 @@ import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
 import { assert } from "@/lib/assert";
 import { capturePostHogProductEvent } from "@/lib/observability/posthog-client";
 
+export type StripeCheckoutPhase = "idle" | "saving" | "redirecting";
+
 export type StripeCheckoutOptions = {
 	onBeforeCheckout?: () => void | Promise<void>;
 };
 
 export function useStripeCheckout(options: StripeCheckoutOptions = {}) {
 	const { onBeforeCheckout } = options;
-	const [isLoading, setIsLoading] = useState(false);
+	const [phase, setPhase] = useState<StripeCheckoutPhase>("idle");
 	const [error, setError] = useState<string | null>(null);
+
+	const isLoading = phase !== "idle";
 
 	const clearError = useCallback(() => {
 		setError(null);
@@ -28,7 +32,7 @@ export function useStripeCheckout(options: StripeCheckoutOptions = {}) {
 			},
 		});
 
-		setIsLoading(true);
+		setPhase(onBeforeCheckout ? "saving" : "redirecting");
 
 		if (onBeforeCheckout) {
 			try {
@@ -39,9 +43,10 @@ export function useStripeCheckout(options: StripeCheckoutOptions = {}) {
 						? callbackError.message
 						: "Unable to prepare checkout.";
 				setError(message);
-				setIsLoading(false);
+				setPhase("idle");
 				return;
 			}
+			setPhase("redirecting");
 		}
 
 		const response = await fetch(apiRouteConfig.stripeCheckout, {
@@ -57,7 +62,7 @@ export function useStripeCheckout(options: StripeCheckoutOptions = {}) {
 
 			assert("error" in data, "Missing checkout error message.");
 			setError(data.error);
-			setIsLoading(false);
+			setPhase("idle");
 			return;
 		}
 
@@ -67,5 +72,5 @@ export function useStripeCheckout(options: StripeCheckoutOptions = {}) {
 		window.location.assign(data.url);
 	}, [onBeforeCheckout]);
 
-	return { startCheckout, isLoading, error, clearError };
+	return { startCheckout, phase, isLoading, error, clearError };
 }

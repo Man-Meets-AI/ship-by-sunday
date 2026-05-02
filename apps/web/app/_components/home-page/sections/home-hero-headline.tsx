@@ -29,7 +29,7 @@ export function HomeHeroHeadline({
 				className="flex flex-col items-center gap-1"
 			>
 				<span className={headlineLineClass}>{hero.headlineLead}</span>
-				<span className={cn(headlineLineClass, "text-primary/90")}>
+				<span className={cn(headlineLineClass, "text-foreground/90")}>
 					{hero.headlineTailPrefix}
 					<Cover className="bg-transparent px-0 py-0 dark:bg-transparent">
 						{hero.headlineTailHover}
