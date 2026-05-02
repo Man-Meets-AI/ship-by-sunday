@@ -1,32 +1,24 @@
-import { reportClientError } from "@/lib/observability/client-error-report";
+import * as Sentry from "@sentry/nextjs";
 
-declare global {
-	interface Window {
-		__observabilityClientInstalled?: boolean;
+Sentry.init({
+	dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+	enabled: Boolean(process.env.NEXT_PUBLIC_SENTRY_DSN),
+	environment:
+		process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT ?? process.env.NODE_ENV,
+	release: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
+	sendDefaultPii: false,
+	tracesSampleRate: getClientTraceSampleRate(),
+});
+
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
+
+function getClientTraceSampleRate() {
+	const configuredRate = Number(
+		process.env.NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE,
+	);
+	if (Number.isFinite(configuredRate)) {
+		return configuredRate;
 	}
-}
 
-if (typeof window !== "undefined" && !window.__observabilityClientInstalled) {
-	window.__observabilityClientInstalled = true;
-
-	window.addEventListener("error", (event) => {
-		reportClientError({
-			error: event.error ?? event.message,
-			pathname: window.location.pathname,
-			code: "window_error",
-			details: {
-				filename: event.filename,
-				line: event.lineno,
-				column: event.colno,
-			},
-		});
-	});
-
-	window.addEventListener("unhandledrejection", (event) => {
-		reportClientError({
-			error: event.reason,
-			pathname: window.location.pathname,
-			code: "unhandled_rejection",
-		});
-	});
+	return process.env.NODE_ENV === "development" ? 1.0 : 0.1;
 }

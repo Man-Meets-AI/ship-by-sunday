@@ -2,15 +2,33 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-const ingestErrorEventMock = vi.fn();
+const captureExceptionMock = vi.fn();
+const setContextMock = vi.fn();
+const setFingerprintMock = vi.fn();
+const setLevelMock = vi.fn();
+const setTagMock = vi.fn();
+const setTagsMock = vi.fn();
 
-vi.mock("@/platform/observability/ingest-error-event", () => ({
-	ingestErrorEvent: (input: unknown) => ingestErrorEventMock(input),
+vi.mock("@sentry/nextjs", () => ({
+	captureException: (input: unknown) => captureExceptionMock(input),
+	withScope: (callback: (scope: unknown) => void) =>
+		callback({
+			setContext: setContextMock,
+			setFingerprint: setFingerprintMock,
+			setLevel: setLevelMock,
+			setTag: setTagMock,
+			setTags: setTagsMock,
+		}),
 }));
 
 describe("captureServerError", () => {
 	beforeEach(() => {
-		ingestErrorEventMock.mockReset();
+		captureExceptionMock.mockReset();
+		setContextMock.mockReset();
+		setFingerprintMock.mockReset();
+		setLevelMock.mockReset();
+		setTagMock.mockReset();
+		setTagsMock.mockReset();
 	});
 
 	afterEach(() => {
@@ -27,29 +45,37 @@ describe("captureServerError", () => {
 			pathname: "/mission",
 		});
 
-		expect(ingestErrorEventMock).not.toHaveBeenCalled();
+		expect(captureExceptionMock).not.toHaveBeenCalled();
 	});
 
-	it("normalizes and forwards unexpected errors", async () => {
+	it("normalizes unexpected errors into Sentry context", async () => {
 		const { captureServerError } =
 			await import("@/platform/observability/capture-server-error");
+		const error = new Error("Stripe failed");
 
 		await captureServerError({
 			source: "stripe",
-			error: new Error("Stripe failed"),
+			error,
 			pathname: "/api/stripe/checkout",
 			requestId: "request_1",
 			code: "stripe_checkout_failed",
 			severity: "high",
 		});
 
-		expect(ingestErrorEventMock).toHaveBeenCalledWith(
+		expect(setLevelMock).toHaveBeenCalledWith("error");
+		expect(setTagsMock).toHaveBeenCalledWith(
 			expect.objectContaining({
 				source: "stripe",
-				requestId: "request_1",
 				code: "stripe_checkout_failed",
-				severity: "high",
+				surface: "billing",
 			}),
 		);
+		expect(setContextMock).toHaveBeenCalledWith(
+			"ship_by_sunday_observability",
+			expect.objectContaining({
+				requestId: "request_1",
+			}),
+		);
+		expect(captureExceptionMock).toHaveBeenCalledWith(error);
 	});
 });

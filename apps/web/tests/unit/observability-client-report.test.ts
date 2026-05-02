@@ -1,70 +1,69 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const captureExceptionMock = vi.fn();
+const setContextMock = vi.fn();
+const setFingerprintMock = vi.fn();
+const setLevelMock = vi.fn();
+const setTagMock = vi.fn();
+const setTagsMock = vi.fn();
+
+vi.mock("@sentry/nextjs", () => ({
+	captureException: (input: unknown) => captureExceptionMock(input),
+	withScope: (callback: (scope: unknown) => void) =>
+		callback({
+			setContext: setContextMock,
+			setFingerprint: setFingerprintMock,
+			setLevel: setLevelMock,
+			setTag: setTagMock,
+			setTags: setTagsMock,
+		}),
+}));
+
 import { reportClientError } from "@/lib/observability/client-error-report";
 
 describe("reportClientError", () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
 		vi.unstubAllGlobals();
+		captureExceptionMock.mockReset();
+		setContextMock.mockReset();
+		setFingerprintMock.mockReset();
+		setLevelMock.mockReset();
+		setTagMock.mockReset();
+		setTagsMock.mockReset();
 	});
 
-	it("uses sendBeacon when available", () => {
-		const sendBeaconMock = vi.fn(() => true);
-		Object.defineProperty(globalThis.navigator, "sendBeacon", {
-			configurable: true,
-			value: sendBeaconMock,
-		});
+	it("captures normalized client errors with Sentry", () => {
+		const error = new Error("Client failed");
 
 		reportClientError({
-			error: new Error("Client failed"),
+			error,
 			pathname: "/mission",
 			code: "window_error",
 		});
 
-		expect(sendBeaconMock).toHaveBeenCalledTimes(1);
-	});
-
-	it("falls back to fetch when sendBeacon is unavailable", () => {
-		const fetchMock = vi.fn().mockResolvedValue({ ok: true });
-		vi.stubGlobal("fetch", fetchMock);
-		Object.defineProperty(globalThis.navigator, "sendBeacon", {
-			configurable: true,
-			value: undefined,
-		});
-
-		reportClientError({
-			error: new Error("Client failed"),
-			pathname: "/mission",
-			code: "window_error",
-		});
-
-		expect(fetchMock).toHaveBeenCalledWith(
-			"/api/observability/client-error",
+		expect(setLevelMock).toHaveBeenCalledWith("warning");
+		expect(setTagsMock).toHaveBeenCalledWith(
 			expect.objectContaining({
-				method: "POST",
+				code: "window_error",
+				source: "next_client",
+				surface: "runtime_error",
 			}),
 		);
+		expect(setTagMock).toHaveBeenCalledWith("pathname", "/mission");
+		expect(captureExceptionMock).toHaveBeenCalledWith(error);
 	});
 
-	it("swallows rejected fallback fetches", async () => {
-		const transportError = new Error("network offline");
-		const rejectedFetch = Promise.reject(transportError);
-		const catchMock = vi.spyOn(rejectedFetch, "catch");
-		const fetchMock = vi.fn(() => rejectedFetch);
-		vi.stubGlobal("fetch", fetchMock);
-		Object.defineProperty(globalThis.navigator, "sendBeacon", {
-			configurable: true,
-			value: undefined,
-		});
-
+	it("turns non-error client failures into an Error for Sentry", () => {
 		reportClientError({
-			error: new Error("Client failed"),
-			pathname: "/mission",
-			code: "window_error",
+			error: "Client failed",
+			pathname: "/start",
+			code: "unhandled_rejection",
 		});
 
-		expect(fetchMock).toHaveBeenCalledTimes(1);
-		expect(catchMock).toHaveBeenCalledTimes(1);
-		await expect(rejectedFetch.catch(() => undefined)).resolves.toBeUndefined();
+		expect(captureExceptionMock).toHaveBeenCalledWith(expect.any(Error));
+		expect(captureExceptionMock.mock.calls[0]?.[0]).toMatchObject({
+			message: "Client failed",
+		});
 	});
 });

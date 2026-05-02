@@ -30,6 +30,10 @@ Run `bun run dev:convex` to connect the repo to your hosted Convex dev deploymen
 - `OBSERVABILITY_INGEST_TOKEN`: shared random secret used by Next.js to authenticate error-ingest requests into Convex
 - `OBSERVABILITY_INCIDENT_CONTROL_TOKEN`: separate bearer token for the maintainer-only incident status route at `/api/observability/incidents/[incidentId]/status`
 - `OBSERVABILITY_VERCEL_WEBHOOK_SECRET`: verifies Vercel deployment webhooks sent to `/api/observability/vercel`
+- `NEXT_PUBLIC_SENTRY_DSN`: public DSN used by the browser, server, and edge runtimes for Sentry bugs and traces
+- `SENTRY_ORG` and `SENTRY_PROJECT`: Sentry source-map upload target
+- `SENTRY_AUTH_TOKEN`: secret token used by CI/builds to upload Sentry source maps
+- `SENTRY_TRACES_SAMPLE_RATE` and `NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE`: optional trace sample-rate overrides
 - `STRIPE_SECRET_KEY`: Stripe API access
 - `STRIPE_WEBHOOK_SECRET`: verifies the Stripe webhook
 - `STRIPE_PRICE_ID`: optional dashboard-managed price; leave it unset locally until your test account has a managed `$500` price that matches the live list-price contract
@@ -38,13 +42,13 @@ Run `bun run dev:convex` to connect the repo to your hosted Convex dev deploymen
 
 With the current early-member pricing slice, the app truth is a `$500` list price plus a `50%` auto-applied offer. That means local/test Stripe parity now has two moving parts: a matching `$500` test price and a matching test promotion code. Until those assets exist in the test account, keep `STRIPE_PRICE_ID` unset locally so checkout uses inline `price_data`, and do not hard-code a guessed public code name like `EARLYSHIP` into repo config. The repo consumes Stripe resource IDs and lets dashboard state own the customer-facing code string.
 
-## Telegram observability
+## Observability
 
-- `TELEGRAM_BOT_TOKEN`: Telegram bot token used for production alerts
-- `TELEGRAM_CHAT_ID`: chat or group id that receives alerts
+- `NEXT_PUBLIC_SENTRY_ENVIRONMENT` and `SENTRY_ENVIRONMENT`: optional labels for Sentry environments
+- `NEXT_PUBLIC_SENTRY_RELEASE` and `SENTRY_RELEASE`: optional labels for Sentry releases
 - `ENABLE_OBSERVABILITY_TEST_TRIGGER`: test-only switch for the Playwright protected-shell failure harness
 
-`OBSERVABILITY_INGEST_TOKEN` is a high-entropy shared secret between the Next.js app and Convex. In production, keep `NEXT_PUBLIC_CONVEX_SITE_URL` aligned with the live Convex HTTP-actions host so observability and other HTTP-action traffic do not fall back to the browser-only client origin.
+`OBSERVABILITY_INGEST_TOKEN` is a high-entropy shared secret between the Next.js app and Convex. In production, keep `NEXT_PUBLIC_CONVEX_SITE_URL` aligned with the live Convex HTTP-actions host so webhook and HTTP-action traffic do not fall back to the browser-only client origin. Telegram delivery should be configured from Sentry Alerts instead of app-owned bot env vars.
 
 ## Optional video pipeline
 

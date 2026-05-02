@@ -1,6 +1,6 @@
 # Observability Runbook
 
-This is the canonical internal guide for the Ship by Sunday observability path. Use it when you need to understand how browser errors, Clerk webhooks, Vercel webhooks, Stripe failures, incident status control, and Telegram delivery fit together in this repo.
+This is the canonical internal guide for the Ship by Sunday observability path. Use it when you need to understand how browser errors, Sentry, Clerk webhooks, Vercel webhooks, Stripe failures, and incident status control fit together in this repo.
 
 The public docs intentionally stay short. This file keeps the full operational story in one place so a maintainer does not have to reconstruct the same `.convex.site` and incident-control rules from multiple pages.
 
@@ -9,6 +9,7 @@ The public docs intentionally stay short. This file keeps the full operational s
 The observability entrypoints are small but distributed:
 
 - `apps/web/app/api/observability/client-error/route.ts` accepts same-origin client error reports, normalizes them, and forwards them to Convex through `ingestErrorEvent`.
+- `apps/web/instrumentation-client.ts`, `apps/web/instrumentation.ts`, `apps/web/sentry.server.config.ts`, and `apps/web/sentry.edge.config.ts` initialize Sentry for browser, server, and edge errors plus sampled traces.
 - `apps/web/app/api/observability/clerk/route.ts` verifies Clerk webhooks, turns them into incidents with `buildClerkWebhookIncident`, and forwards them to Convex.
 - `apps/web/app/api/observability/vercel/route.ts` verifies the `x-vercel-signature` header, turns Vercel deploy events into incidents with `buildVercelWebhookIncident`, and forwards them to Convex.
 - `apps/web/app/api/observability/incidents/[incidentId]/status/route.ts` is the maintainer-only app route for incident control. It validates `acked`, `muted`, `resolved`, or `firing`, then calls `updateIncidentStatus`.
@@ -18,7 +19,7 @@ The observability entrypoints are small but distributed:
 - `apps/web/features/observability/lib/incident.ts` defines the incident types, status values, normalization rules, and defaults.
 - `apps/web/features/observability/server/source-adapters/clerk-webhook.ts`, `apps/web/features/observability/server/source-adapters/vercel-webhook.ts`, and `apps/web/features/observability/server/source-adapters/stripe-failure.ts` translate source-specific events into the shared incident shape.
 - `apps/web/convex/http.ts` exposes `/stripe/webhook`, `/observability/events`, and `/observability/incidents/status` on the Convex HTTP-actions origin.
-- `apps/web/convex/observability.ts` and `apps/web/convex/observability/model.ts` store incidents, update status, and deliver Telegram notifications.
+- `apps/web/convex/observability.ts` and `apps/web/convex/observability/model.ts` store incidents and update status. They no longer deliver Telegram notifications directly; connect Telegram from Sentry Alerts when chat delivery is needed.
 
 The important distinction is that the browser-facing app origin and the Convex HTTP-actions origin are not the same thing. The observability clients prefer `NEXT_PUBLIC_CONVEX_SITE_URL` and only fall back to `NEXT_PUBLIC_CONVEX_URL` if the site URL is missing. In production, the site URL should be present so the app talks to the real HTTP-actions host directly.
 
@@ -33,7 +34,9 @@ The observability path depends on these values:
 - `CLERK_WEBHOOK_SIGNING_SECRET` to verify Clerk webhooks.
 - `OBSERVABILITY_VERCEL_WEBHOOK_SECRET` to verify Vercel webhooks.
 - `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` to let the Stripe webhook handler verify and process paid checkouts.
-- `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` to deliver incident blueprints to Telegram.
+- `NEXT_PUBLIC_SENTRY_DSN` to send browser, server, edge, and trace telemetry to Sentry.
+- `SENTRY_ORG`, `SENTRY_PROJECT`, and `SENTRY_AUTH_TOKEN` to upload source maps at build time.
+- `SENTRY_TRACES_SAMPLE_RATE` and `NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE` to override the default trace sample rate.
 
 The runtime helpers read these values from `apps/web/platform/env/server.ts` on the Next.js side and `apps/web/convex/env.ts` on the Convex side. If either side is missing the expected value, the route should fail early instead of pretending the transport is healthy.
 
@@ -57,15 +60,13 @@ The status values matter:
 
 The control route can set `acked`, `muted`, `resolved`, or `firing`. It cannot set `regressed` directly; Convex sets that automatically when a resolved fingerprint reappears.
 
-The delivery behavior is driven by `apps/web/convex/observability/model.ts`:
+The incident storage behavior is driven by `apps/web/convex/observability/model.ts`:
 
 - fresh incidents are stored with `status = firing`
-- `acked` and `muted` suppress repeat delivery
-- medium-severity incidents wait until the third occurrence before the first delivery
 - a resolved incident that reappears becomes `regressed`
-- the Telegram delivery action retries by editing an existing incident message when possible
+- notification delivery stays out of the app-owned Convex action path; Sentry owns bug alert routing and Telegram can subscribe there
 
-That means the verification signal you care about is not only whether a row exists. You also want to compare `status`, `occurrenceCount`, `deliveryCount`, `deliveryStatus`, and `lastDeliveryAt`.
+That means the verification signal you care about is not only whether a row exists. You also want to compare `status`, `occurrenceCount`, and Sentry issue or trace intake for the same request path.
 
 ## Local Validation
 
@@ -135,12 +136,12 @@ If client errors or provider webhooks stop creating incidents, check these in or
 2. Confirm the relevant signing secret exists for the source you are testing.
 3. Confirm the shared ingest token is identical in the Next.js app and Convex.
 4. Inspect `bunx convex data incidents --format jsonLines` for a fresh row and compare `occurrenceCount`, `deliveryCount`, and `status`.
-5. If Telegram delivery fails, look for a follow-up incident with `source = telegram_delivery`.
+5. If Telegram delivery is needed, configure it as a Sentry alert destination rather than reintroducing app-owned bot delivery.
 
 If a resolved incident starts firing again, that is expected behavior for the same fingerprint. Treat it as a regression, not as a duplicate row bug.
 
 ## What Good Looks Like
 
-The observability path is healthy when a same-origin client error, a verified Clerk webhook, or a verified Vercel webhook creates a durable incident in Convex, the incident can be acked or muted through the app route, and a later replay changes the row in a way that matches the intended suppression behavior.
+The observability path is healthy when browser and server bugs appear in Sentry, sampled traces appear in Sentry, a verified Clerk webhook or Vercel webhook creates a durable incident in Convex, the incident can be acked or muted through the app route, and a later replay changes the row in a way that matches the intended lifecycle behavior.
 
 The engineering-intake runtime export is healthy when `bun run engineering:intake:runtime` produces a contract-valid JSON document that groups repeated `_rsc` or volatile-path variants into one stable downstream record while preserving SBS lifecycle ownership.

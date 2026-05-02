@@ -1,6 +1,7 @@
 import path from "node:path";
 import type { NextConfig } from "next";
 import createMDX from "@next/mdx";
+import { withSentryConfig } from "@sentry/nextjs";
 import { repoDownloadTraceIncludes } from "./config/vercel-output-tracing";
 
 const withMDX = createMDX({
@@ -39,4 +40,15 @@ const nextConfig: NextConfig = {
 	},
 };
 
-export default withMDX(nextConfig);
+export default withSentryConfig(withMDX(nextConfig), {
+	org: process.env.SENTRY_ORG,
+	project: process.env.SENTRY_PROJECT,
+	authToken: process.env.SENTRY_AUTH_TOKEN,
+	silent: !process.env.CI,
+	widenClientFileUpload: true,
+	webpack: {
+		treeshake: {
+			removeDebugLogging: true,
+		},
+	},
+});

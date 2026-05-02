@@ -7,8 +7,6 @@ describe("convex/observability", () => {
 		process.env = {
 			...originalEnv,
 			OBSERVABILITY_INGEST_TOKEN: "ingest_token",
-			TELEGRAM_BOT_TOKEN: "telegram_token",
-			TELEGRAM_CHAT_ID: "12345",
 		};
 		vi.resetModules();
 	});
@@ -18,7 +16,7 @@ describe("convex/observability", () => {
 		vi.restoreAllMocks();
 	});
 
-	it("deduplicates medium-severity incidents until the delivery threshold is reached", async () => {
+	it("deduplicates medium-severity incidents without app-owned delivery", async () => {
 		const insert = vi.fn().mockResolvedValue("incident_1");
 		const patch = vi.fn().mockResolvedValue(undefined);
 		const unique = vi
@@ -89,7 +87,7 @@ describe("convex/observability", () => {
 
 		expect(first.shouldNotify).toBe(false);
 		expect(second.shouldNotify).toBe(false);
-		expect(third.shouldNotify).toBe(true);
+		expect(third.shouldNotify).toBe(false);
 		expect(insert).toHaveBeenCalledTimes(4);
 		expect(insert).toHaveBeenCalledWith(
 			"incidentOccurrences",
@@ -286,54 +284,14 @@ describe("convex/observability", () => {
 		});
 	});
 
-	it("formats and sends Telegram alerts through the delivery action", async () => {
-		const fetchMock = vi.fn().mockResolvedValue({
-			ok: true,
-			text: vi.fn().mockResolvedValue(
-				JSON.stringify({
-					result: {
-						message_id: 99,
-					},
-				}),
-			),
-		});
-		vi.stubGlobal("fetch", fetchMock);
-
+	it("keeps the legacy delivery action side-effect free", async () => {
 		const { deliverIncidentNotificationHandler } =
 			await import("@/convex/observability/model");
 
 		const runMutation = vi.fn().mockResolvedValue(null);
 		await deliverIncidentNotificationHandler(
 			{
-				runQuery: vi.fn().mockResolvedValue({
-					_id: "incident_1",
-					product: "ship-by-sunday",
-					fingerprint: "incident_1",
-					telegramMessageId: undefined,
-					telegramThreadId: undefined,
-					severity: "high",
-					source: "stripe",
-					surface: "billing",
-					status: "firing",
-					environment: "prod",
-					pathname: "/api/stripe/checkout",
-					requestId: "request_123",
-					userId: "user_123",
-					externalEventId: null,
-					deploymentId: null,
-					nativeUrl: "https://dashboard.stripe.com/events",
-					logsUrl: null,
-					nextAction:
-						"Check the Stripe dashboard and the failing checkout or webhook path.",
-					code: "stripe_checkout_failed",
-					title: "Unable to start Stripe checkout.",
-					summary: "code=stripe_checkout_failed | path=/api/stripe/checkout",
-					details: '{"provider":"stripe"}',
-					stack: "stack line 1\nstack line 2",
-					occurrenceCount: 1,
-					firstSeenAt: 1_700_000_000_000,
-					lastSeenAt: 1_700_000_000_000,
-				}),
+				runQuery: vi.fn(),
 				runMutation,
 			} as never,
 			{
@@ -341,94 +299,6 @@ describe("convex/observability", () => {
 			},
 		);
 
-		expect(fetchMock).toHaveBeenCalledWith(
-			expect.stringContaining("/sendMessage"),
-			expect.objectContaining({
-				method: "POST",
-				body: expect.stringContaining("[Ship by Sunday][PROD][Stripe][high]"),
-			}),
-		);
-		expect(runMutation).toHaveBeenCalledWith(
-			expect.anything(),
-			expect.objectContaining({
-				telegramMessageId: 99,
-			}),
-		);
-	});
-
-	it("records a telegram_delivery incident when Telegram delivery fails", async () => {
-		const fetchMock = vi.fn().mockResolvedValue({
-			ok: false,
-			status: 403,
-			text: vi.fn().mockResolvedValue(
-				JSON.stringify({
-					description: "Forbidden: bot was blocked by the user",
-				}),
-			),
-		});
-		vi.stubGlobal("fetch", fetchMock);
-
-		const { deliverIncidentNotificationHandler } =
-			await import("@/convex/observability/model");
-		const runMutation = vi
-			.fn()
-			.mockResolvedValueOnce(null)
-			.mockResolvedValueOnce({
-				incidentId: "incident_telegram",
-				occurrenceCount: 1,
-				shouldNotify: false,
-			});
-
-		await deliverIncidentNotificationHandler(
-			{
-				runQuery: vi.fn().mockResolvedValue({
-					_id: "incident_1",
-					product: "ship-by-sunday",
-					fingerprint: "incident_1",
-					telegramMessageId: undefined,
-					telegramThreadId: undefined,
-					severity: "high",
-					source: "stripe",
-					surface: "billing",
-					status: "firing",
-					environment: "prod",
-					pathname: "/api/stripe/checkout",
-					requestId: "request_123",
-					userId: "user_123",
-					externalEventId: null,
-					deploymentId: null,
-					nativeUrl: "https://dashboard.stripe.com/events",
-					logsUrl: null,
-					nextAction:
-						"Check the Stripe dashboard and the failing checkout or webhook path.",
-					code: "stripe_checkout_failed",
-					title: "Unable to start Stripe checkout.",
-					summary: "code=stripe_checkout_failed | path=/api/stripe/checkout",
-					details: '{"provider":"stripe"}',
-					stack: "stack line 1\nstack line 2",
-					occurrenceCount: 1,
-					firstSeenAt: 1_700_000_000_000,
-					lastSeenAt: 1_700_000_000_000,
-				}),
-				runMutation,
-			} as never,
-			{
-				incidentId: "incident_1" as never,
-			},
-		);
-
-		expect(runMutation.mock.calls[0]?.[1]).toMatchObject({
-			incidentId: "incident_1",
-			message: expect.stringContaining(
-				"Telegram delivery failed with status 403",
-			),
-		});
-		expect(runMutation.mock.calls[1]?.[1]).toMatchObject({
-			source: "telegram_delivery",
-			code: "telegram_delivery_authorization_failed",
-			externalEventId: "telegram_delivery_authorization_failed",
-			environment: "prod",
-			product: "ship-by-sunday",
-		});
+		expect(runMutation).not.toHaveBeenCalled();
 	});
 });
