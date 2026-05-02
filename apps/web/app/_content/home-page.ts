@@ -210,6 +210,10 @@ export const homePageContent = {
 		label: "Built by someone who ships",
 		headline: "Built by someone who has actually shipped products.",
 		body: "Built from real UX, product, design, and engineering work, including startup scale to $73M/year and acquisition.",
+		portrait: {
+			src: "/founder-portrait.jpg",
+			alt: "Founder portrait",
+		},
 	},
 	faqSection: {
 		label: "FAQ",

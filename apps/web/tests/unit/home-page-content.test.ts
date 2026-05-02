@@ -99,6 +99,10 @@ describe("home page content", () => {
 		expect(homePageContent.durabilitySection.title).toBe(
 			"Ship by Sunday. Keep shipping on Monday.",
 		);
+		expect(homePageContent.socialProofSection.portrait).toEqual({
+			src: "/founder-portrait.jpg",
+			alt: "Founder portrait",
+		});
 
 		expect(homePageContent.faqSection.items).toEqual([
 			expect.objectContaining({
