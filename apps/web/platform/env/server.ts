@@ -13,6 +13,7 @@ function normalizeEnvValue(value: string | undefined) {
 
 const serverEnvSchema = z.object({
 	APP_BASE_URL: z.string().url().optional(),
+	CHECKOUT_SUCCESS_FIXTURES: z.string().min(1).optional(),
 	ENABLE_OBSERVABILITY_TEST_TRIGGER: z.string().min(1).optional(),
 	GOOGLE_SITE_VERIFICATION: z.string().min(1).optional(),
 	CLERK_AUTHORIZED_PARTIES: z.string().min(1).optional(),
@@ -37,6 +38,9 @@ const serverEnvSchema = z.object({
 export function loadServerEnv() {
 	return serverEnvSchema.parse({
 		APP_BASE_URL: normalizeEnvValue(process.env.APP_BASE_URL),
+		CHECKOUT_SUCCESS_FIXTURES: normalizeEnvValue(
+			process.env.CHECKOUT_SUCCESS_FIXTURES,
+		),
 		ENABLE_OBSERVABILITY_TEST_TRIGGER: normalizeEnvValue(
 			process.env.ENABLE_OBSERVABILITY_TEST_TRIGGER,
 		),
