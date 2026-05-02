@@ -28,9 +28,9 @@ export function DurabilitySectionBlock({
 						<ScrollReveal key={item.title} delay={0.1 * i}>
 							<article className="border-t border-border/40 py-8">
 								<div className="space-y-1.5">
-									<p className="text-lg font-bold tracking-tight text-foreground/90">
+									<h3 className="text-lg font-bold tracking-tight text-foreground/90">
 										{item.title}
-									</p>
+									</h3>
 									<p className="text-base leading-snug text-muted-foreground">
 										{item.description}
 									</p>
@@ -42,7 +42,7 @@ export function DurabilitySectionBlock({
 			</div>
 			<ScrollReveal delay={0.3}>
 				<div className="mt-12 border-t border-border/40 pt-8">
-					<p className="max-w-3xl text-balance text-base leading-snug text-muted-foreground">
+					<p className="max-w-3xl text-pretty text-base leading-snug text-muted-foreground">
 						{durabilitySection.closing}
 					</p>
 				</div>

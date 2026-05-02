@@ -46,9 +46,8 @@ export function PricingSectionBlock({
 								<PromoBanner
 									label={pricingSection.offerBanner.label}
 									message={pricingSection.offerBanner.message}
-									className="rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3"
+									className="rounded-2xl border border-foreground/15 bg-foreground/5 px-4 py-3"
 									contentClassName="justify-start text-left tracking-[0.12em]"
-									labelClassName="bg-primary text-primary-foreground"
 									messageClassName="text-sm tracking-normal text-foreground/80 normal-case"
 								/>
 							) : null}
@@ -72,7 +71,7 @@ export function PricingSectionBlock({
 								target={primaryCtaTarget}
 								label={pricingSection.ctaTitle}
 								testId="pricing-primary-cta"
-								className="h-20 min-w-full rounded-2xl bg-foreground text-xl font-black text-background transition-transform hover:scale-[1.02] active:scale-[0.98]"
+								className="h-16 min-w-full rounded-2xl text-lg font-bold motion-safe:transition-transform motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.98]"
 							/>
 							<p className="text-center text-sm leading-7 text-muted-foreground">
 								{pricingSection.trustLine}
@@ -83,7 +82,7 @@ export function PricingSectionBlock({
 							<PricingIncludesList items={pricingSection.includes} />
 						</div>
 
-						<div className="rounded-3xl border border-primary/20 bg-primary/5 p-6">
+						<div className="rounded-3xl border border-foreground/15 bg-foreground/5 p-6">
 							<p className="text-xl font-semibold leading-tight tracking-tight text-foreground">
 								{pricingSection.bonus.title}
 							</p>

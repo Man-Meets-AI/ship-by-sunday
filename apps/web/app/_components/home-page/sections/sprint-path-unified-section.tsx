@@ -35,8 +35,8 @@ export function SprintPathUnifiedSection({
 				<div className="grid gap-6">
 					{sprintPathSection.supportingPoints.map((point, i) => (
 						<ScrollReveal key={point} delay={0.08 * (i + 1)}>
-							<div className="group relative flex gap-4 transition-all duration-300">
-								<div className="mt-2.5 size-1.5 shrink-0 rounded-full bg-primary/40 transition-transform group-hover:scale-125 group-hover:bg-primary" />
+							<div className="group relative flex gap-4 motion-safe:transition-all motion-safe:duration-300">
+								<div className="mt-2.5 size-1.5 shrink-0 rounded-full bg-foreground/40 group-hover:bg-foreground motion-safe:transition-transform motion-safe:group-hover:scale-125" />
 								<p className="text-base leading-7 text-foreground/80 sm:text-lg">
 									{point}
 								</p>
@@ -47,7 +47,10 @@ export function SprintPathUnifiedSection({
 				{mechanismSection ? (
 					<ScrollReveal delay={0.4}>
 						<div className="flex flex-col items-center gap-6 border-t border-border/40 pt-8">
-							<ol className="flex w-full flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-0">
+							<ol
+								aria-label="Mechanism steps"
+								className="flex w-full flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-0"
+							>
 								{mechanismSection.steps.map((step, i) => (
 									<li key={step} className="flex items-center gap-4">
 										<div className="flex items-center gap-3">
@@ -59,7 +62,10 @@ export function SprintPathUnifiedSection({
 											</span>
 										</div>
 										{i < mechanismSection.steps.length - 1 ? (
-											<ArrowRight className="hidden size-4 shrink-0 text-muted-foreground/50 sm:block" />
+											<ArrowRight
+												aria-hidden="true"
+												className="hidden size-4 shrink-0 text-muted-foreground/50 sm:block"
+											/>
 										) : null}
 									</li>
 								))}

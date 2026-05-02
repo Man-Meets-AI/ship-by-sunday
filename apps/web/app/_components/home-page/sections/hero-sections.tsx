@@ -46,7 +46,7 @@ export function HomeHeroSection({
 							<HomePagePrimaryCta
 								target={primaryCtaTarget}
 								label={hero.primaryCta}
-								className="h-16 rounded-2xl px-12 text-lg font-bold shadow-2xl shadow-primary/20 transition-all hover:-translate-y-1 hover:shadow-primary/30 sm:min-w-80"
+								className="h-16 rounded-2xl px-12 text-lg font-bold shadow-2xl shadow-foreground/15 motion-safe:transition-all motion-safe:hover:-translate-y-1 motion-safe:hover:shadow-foreground/25 sm:min-w-80"
 							/>
 							<HomePageSecondaryLink
 								href={hero.secondaryCta.href}
@@ -57,7 +57,7 @@ export function HomeHeroSection({
 					</div>
 				</ScrollReveal>
 			</div>
-			<div className="absolute bottom-0 left-1/2 h-px w-3/5 -translate-x-1/2 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+			<div className="absolute bottom-0 left-1/2 h-px w-3/5 -translate-x-1/2 bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
 		</section>
 	);
 }

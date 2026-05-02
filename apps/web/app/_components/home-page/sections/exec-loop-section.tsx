@@ -5,11 +5,14 @@ import { ScrollReveal } from "./scroll-reveal";
 type ExecLoopSection = HomePageContent["execLoopSection"];
 type ExecLoopStep = ExecLoopSection["steps"][number];
 
-const stepPositions = [
-	{ left: "50%", top: "13%" },
-	{ left: "83%", top: "50%" },
-	{ left: "50%", top: "84%" },
-	{ left: "17%", top: "50%" },
+// Position classes per step. Wider margin from the central puck on the smallest
+// viewports prevents label overlap inside the aspect-[16/10] frame at 360-390px;
+// the original 13%/17%/83%/84% layout returns at the `sm:` breakpoint and up.
+const stepPositionClassNames = [
+	"top-[6%] left-1/2 sm:top-[13%]",
+	"top-1/2 left-[88%] sm:left-[83%]",
+	"top-[94%] left-1/2 sm:top-[84%]",
+	"top-1/2 left-[12%] sm:left-[17%]",
 ] as const;
 
 function ExecLoopVisual({
@@ -93,11 +96,9 @@ function ExecLoopVisual({
 			{steps.map((step, index) => (
 				<div
 					key={step.label}
-					className="absolute z-10 w-28 rounded-lg border border-foreground/15 bg-background/95 p-3 shadow-sm sm:w-36"
-					style={{
-						...stepPositions[index % stepPositions.length],
-						transform: "translate(-50%, -50%)",
-					}}
+					className={`absolute z-10 w-20 -translate-x-1/2 -translate-y-1/2 rounded-lg border border-foreground/15 bg-background/95 p-3 shadow-sm sm:w-28 lg:w-36 ${
+						stepPositionClassNames[index % stepPositionClassNames.length]
+					}`}
 				>
 					<p className="text-xs font-semibold text-muted-foreground">
 						{String(index + 1).padStart(2, "0")}
