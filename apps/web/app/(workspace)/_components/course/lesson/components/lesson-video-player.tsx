@@ -10,10 +10,12 @@ export function LessonVideoPlayer({
 	video,
 	className,
 	title,
+	onReady,
 }: {
 	video: LessonVideoContent;
 	className: string;
 	title?: string;
+	onReady?: () => void;
 }) {
 	const src = resolveLessonVideoUrl(video);
 
@@ -31,11 +33,18 @@ export function LessonVideoPlayer({
 				allowFullScreen
 				loading="lazy"
 				referrerPolicy="strict-origin-when-cross-origin"
+				onLoad={onReady}
 			/>
 		);
 	}
 
 	return (
-		<video controls poster={video.posterUrl} className={className} src={src} />
+		<video
+			controls
+			poster={video.posterUrl}
+			className={className}
+			src={src}
+			onLoadedData={onReady}
+		/>
 	);
 }

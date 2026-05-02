@@ -16,14 +16,16 @@ export function LessonVideoMetadata({
 	const content = (
 		<div
 			className={cn(
-				"flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/80",
+				"flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground",
 				className,
 			)}
 		>
 			{title ? <span>{title}</span> : null}
 			{durationLabel ? (
 				<>
-					<span className="text-muted-foreground/40">•</span>
+					<span className="text-muted-foreground/40" aria-hidden>
+						•
+					</span>
 					<span>{durationLabel}</span>
 				</>
 			) : null}
