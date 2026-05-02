@@ -64,10 +64,43 @@ describe("CheckoutSuccessView interactions", () => {
 		expect(replaceMock).not.toHaveBeenCalled();
 
 		await act(async () => {
-			await vi.advanceTimersByTimeAsync(700);
+			await vi.advanceTimersByTimeAsync(699);
+		});
+
+		expect(replaceMock).not.toHaveBeenCalled();
+		expect(
+			screen.getByTestId("checkout-success-redirect-affordance"),
+		).toBeTruthy();
+		expect(screen.getByText("Opening your workspace…")).toBeTruthy();
+
+		await act(async () => {
+			await vi.advanceTimersByTimeAsync(1);
 		});
 
 		expect(replaceMock).toHaveBeenCalledWith("/blueprint");
+	});
+
+	it("does not render the redirect affordance while access is still pending", () => {
+		useConvexAuthMock.mockReturnValue({
+			isAuthenticated: true,
+		});
+		useQueryMock.mockReturnValue({
+			hasAccess: false,
+		});
+
+		render(
+			<CheckoutSuccessView
+				checkoutSessionState={{
+					kind: "validated",
+					sessionId: "cs_pending",
+				}}
+			/>,
+		);
+
+		expect(
+			screen.queryByTestId("checkout-success-redirect-affordance"),
+		).toBeNull();
+		expect(screen.queryByText("Opening your workspace…")).toBeNull();
 	});
 
 	it("rotates the validated status copy while access is still pending", async () => {
