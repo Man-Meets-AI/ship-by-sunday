@@ -12,7 +12,7 @@ One stage-specific slice of the guided product-building flow. The product is blu
 
 A stable top-level protected route such as `/product` or `/build-plan` that redirects into the canonical nested page for that stage.
 
-### Starter Snapshot
+### Ship by Sunday Blueprint
 
 The single generated repo artifact exposed from `/review`. It is the public download contract.
 

@@ -12,7 +12,7 @@ Do not stop at component checks. Test the full buyer journey:
 3. `/checkout/success`
 4. sign-in or post-payment account creation when needed
 5. product-access claim and grant
-6. `/start`
+6. `/blueprint`
 7. the first incomplete blueprint-first stage
 
 ## The four realities
@@ -34,11 +34,11 @@ Every pass should cover these states:
 ## What to confirm
 
 - signed-out users can start checkout directly from the primary CTA
-- users without access land on `/start` and see inline recovery
+- users without access land on `/blueprint` and see inline recovery
 - checkout returns to `/checkout/success`
 - `/checkout/success` offers sign-in or account creation when payment happened before auth
 - the webhook grants access
-- the app recovers automatically into `/start`
+- the app recovers automatically into `/blueprint`
 - the first protected page does not throw a client-side `Unauthorized` error during hydration
 - the next blueprint-first stage loads after access appears
 

@@ -12,11 +12,11 @@ The observability entrypoints are small but distributed:
 - `apps/web/app/api/observability/clerk/route.ts` verifies Clerk webhooks, turns them into incidents with `buildClerkWebhookIncident`, and forwards them to Convex.
 - `apps/web/app/api/observability/vercel/route.ts` verifies the `x-vercel-signature` header, turns Vercel deploy events into incidents with `buildVercelWebhookIncident`, and forwards them to Convex.
 - `apps/web/app/api/observability/incidents/[incidentId]/status/route.ts` is the maintainer-only app route for incident control. It validates `acked`, `muted`, `resolved`, or `firing`, then calls `updateIncidentStatus`.
-- `apps/web/features/observability/server/ingest-error-event.ts` is the shared Next.js client for Convex ingest.
-- `apps/web/features/observability/server/update-incident-status.ts` is the shared Next.js client for incident status updates.
-- `apps/web/features/observability/server/request-id.ts` adds and propagates `x-request-id` so responses can be correlated across the app and Convex.
-- `apps/web/features/observability/lib/incident.ts` defines the incident types, status values, normalization rules, and defaults.
-- `apps/web/features/observability/server/source-adapters/clerk-webhook.ts`, `apps/web/features/observability/server/source-adapters/vercel-webhook.ts`, and `apps/web/features/observability/server/source-adapters/stripe-failure.ts` translate source-specific events into the shared incident shape.
+- `apps/web/platform/observability/ingest-error-event.ts` is the shared Next.js client for Convex ingest.
+- `apps/web/platform/observability/update-incident-status.ts` is the shared Next.js client for incident status updates.
+- `apps/web/platform/observability/request-id.ts` adds and propagates `x-request-id` so responses can be correlated across the app and Convex.
+- `apps/web/lib/observability/incident.ts` defines the incident types, status values, normalization rules, and defaults.
+- `apps/web/platform/observability/source-adapters/clerk-webhook.ts`, `apps/web/platform/observability/source-adapters/vercel-webhook.ts`, and `apps/web/platform/observability/source-adapters/stripe-failure.ts` translate source-specific events into the shared incident shape.
 - `apps/web/convex/http.ts` exposes `/stripe/webhook`, `/observability/events`, and `/observability/incidents/status` on the Convex HTTP-actions origin.
 - `apps/web/convex/observability.ts` and `apps/web/convex/observability/model.ts` store incidents, update status, and deliver Telegram notifications.
 

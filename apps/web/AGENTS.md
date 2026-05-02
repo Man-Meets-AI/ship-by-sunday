@@ -17,10 +17,11 @@ This app is blueprint-first, not course-first. The public customer outcome is on
 
 ## Product Contract
 
-- Required funnel: Start -> Product -> Design -> Marketing -> Build Plan -> Review & Download.
+- Required protected handoff: `/blueprint -> /review`.
+- `/start`, `/product`, `/design`, `/marketing`, and `/build-plan` are compatibility redirects, not the current product journey.
 - Optional post-download library: Execute / Ship.
 - Do not preserve old CEO / Design / Build / Ship framing if it conflicts with blueprint-first logic.
-- Do not reintroduce separate pre-review download artifacts or stage-pack contracts into the UI unless the live product changes first.
+- Do not reintroduce separate pre-review download artifacts or staged download contracts into the UI unless the live product changes first.
 - Do not turn workflow or ephemeral state into canonical intake.
 - Use current `apps/web` routes, features, config, and local instruction files as the live product contract. Use older `docs/ship-by-sunday/*.md` planning files only for background context when runtime code does not answer the question.
 
@@ -48,6 +49,13 @@ This app is blueprint-first, not course-first. The public customer outcome is on
 - If a change touches access checks, checkout success, entitlement, Clerk auth, or protected routes, prove the affected route and hosted-release path with the focused app tests first, then use the release proof commands from `docs/release-workflow.md` when judging release confidence.
 - If a test or route still uses legacy `/mission` or `/artifacts` wording, treat it as suspect unless the current customer-facing contract still depends on that alias.
 - For checkout or billing changes, keep Stripe-to-Convex handoff proof separate from UI proof.
+
+## External Setup Triggers
+
+- If an app change adds or changes required work in Clerk, Convex, Stripe, PostHog, Vercel, GitHub, email, storage, analytics, observability, or any other provider, update the active setup docs in the same change.
+- The doc update must say what to create, where to create it, required names/scopes/permissions, which environment owns it, where values are stored, how to verify it, and what breaks when it is missing.
+- If the requirement affects the generated repo or a customer's future agent, update the generated customer-facing source docs as well as the internal app docs.
+- If no external setup changed, say that explicitly in the final summary for provider/config work.
 
 ## Planning Triggers
 

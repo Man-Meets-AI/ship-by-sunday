@@ -18,7 +18,7 @@ Use it before changing any user-facing UI. It documents the shared neutral app t
 
 The protected journey is blueprint-first:
 
-`Start -> Product -> Design -> Marketing -> Build Plan -> Review & Download`
+`/blueprint -> /review`
 
 The `/review` contract exposes one download artifact, the `Ship by Sunday Blueprint`, not separate design, marketing, or build downloads.
 
@@ -83,6 +83,7 @@ bun run test:contracts
 bun run test:integration
 bun run build
 bun run markdown:lint -- --paths <repo-path-or-dir>
+bun run public-readiness:lint
 bun run plans:lint -- --plan docs/exec-plans/active/<plan-file>.md
 bun run check
 ```

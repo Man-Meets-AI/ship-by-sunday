@@ -27,8 +27,8 @@ The observability-specific signing secrets, ingest token, incident-control token
 ## Vercel checklist
 
 - deploy as a normal Next.js app
-- keep the project `mma-shipbysunday` linked to `Man-Meets-AI/ship-by-sunday`
-- grant the Vercel GitHub App access to `Man-Meets-AI/ship-by-sunday` before reconnecting the project if the repository is private
+- keep the Vercel project linked to the intended GitHub repository before reconnecting it
+- grant the Vercel GitHub App access to the intended GitHub repository before reconnecting the project if the repository is private
 - keep Vercel's production branch on `main`
 - let Preview continue to handle feature branches
 - keep Bun pinned to the repo version
@@ -54,20 +54,20 @@ Do not leave Convex pointed at:
 
 ## Post-deploy verification
 
-After a merge to `main`, `Production Release Proof` should confirm all of this with a real test flow. That workflow should wait for the exact Vercel production deployment for the merged commit before it starts browser verification, not just wait for `https://www.man-meets-ai.com` to return `200`.
+After a merge to `main`, `Production Release Proof` should confirm all of this with a real test flow. That workflow should wait for the exact Vercel production deployment for the merged commit before it starts browser verification, not just wait for the production URL to return `200`.
 
 1. signed-out visitor hits a protected route and is pushed to sign-in
-2. signed-in user without access reaches `/start` and sees inline recovery
+2. signed-in user without access reaches `/blueprint` and sees inline recovery
 3. live checkout returns to `/checkout/success`
 4. webhook grants access
-5. newly granted user reaches `/start`
+5. newly granted user reaches `/blueprint`
 6. Vercel attributes the production web deploy to `main`
 7. GitHub Actions reports a matching `Convex Production Deploy` run for the same release
 
 The workflow should use the same release proof command for the authenticated production pass:
 
 ```bash
-PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run release:proof -- --proof=default_ship
+PLAYWRIGHT_BASE_URL=https://<production-url> QA_ENV_FILE=apps/web/.env.production bun run release:proof -- --proof=default_ship
 ```
 
 That command assumes:
@@ -84,7 +84,7 @@ If persona prep fails with a Clerk publishable-key mismatch, stop there. That me
 For billing-sensitive releases, the same workflow should also run:
 
 ```bash
-PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run release:proof -- --proof=billing_integration
+PLAYWRIGHT_BASE_URL=https://<production-url> QA_ENV_FILE=apps/web/.env.production bun run release:proof -- --proof=billing_integration
 ```
 
 Only billing-sensitive releases should spend that extra live no-cost Checkout proof.

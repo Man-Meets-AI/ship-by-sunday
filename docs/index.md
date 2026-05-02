@@ -22,6 +22,7 @@ read_when:
 
 - detailed implementation docs that belong to `apps/`
 - generated mirrors under `docs/generated/`; those are output/reference material, not primary doctrine
+- historical archives under `docs/archive/`; those stay searchable as evidence but are excluded from the normal current-truth path
 - the canonical ExecPlan contract body under `docs/exec-plans/PLANS.md`
 
 ## How Codex loads repo guidance
@@ -45,6 +46,7 @@ Root guidance starts at `AGENTS.md` and this docs index. More specific nested `A
 - Stable prompt assets: [docs/prompts/README.md](prompts/README.md)
 - Reference landing zone: [docs/internal/README.md](internal/README.md)
 - Durable design notes: [docs/design-docs/index.md](design-docs/index.md)
+- Historical archives: [docs/archive/README.md](archive/README.md)
 
 ## Next
 

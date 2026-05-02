@@ -20,6 +20,7 @@ All commands run from the repository root.
 - `bun run lint`
 - `bun run lint:fix`
 - `bun run markdown:lint -- --paths <repo-path-or-dir>`
+- `bun run public-readiness:lint`
 - `bun run docs:generated:check`
 - `bun run plans:lint -- --plan <docs/exec-plans/active/...>`
 - `bun run programs:lint`
@@ -41,6 +42,8 @@ For frontmatter-driven docs and plans:
 - `bun run plans:lint` applies the stricter ExecPlan body and frontmatter contract from `docs/exec-plans/PLANS.md`.
 - `bun run programs:lint` validates Program docs, checked-in Program packet folders, versioned planning briefs, current-brief pointers, and Program prompt contracts.
 - `markdown:lint` and `plans:lint` accept path-scoped arguments so docs-only work can be proved without widening into unrelated files.
+- `public-readiness:lint` scans the active current-truth docs path for stale `/start` guidance, old `features/` paths, absolute `/Users/...` links, concrete private hosts, internal deployment IDs, and retired product vocabulary. It intentionally excludes historical archives, generated mirrors, source instruction packs, and completed plans.
+- Provider/config changes that create future external setup work must update the active setup docs or generated customer docs in the same change, then run `markdown:lint` on the touched docs plus the relevant focused code check.
 - `docs:generated:check` verifies that `docs/generated/openai-blueprint/` mirrors `docs/openai/` and `docs/generated/ship-by-sunday-blueprint/` mirrors `docs/ship-by-sunday/`.
 
 ## Blueprint compiler

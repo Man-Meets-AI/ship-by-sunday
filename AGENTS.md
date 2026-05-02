@@ -60,6 +60,24 @@
 - Avoid broad config bags, optional overrides, or loose optional fields unless absence is a real supported case.
 - Do not create small helpers that are referenced only once unless they isolate a meaningful boundary.
 
+## Customer Setup Contract
+
+External setup is part of the shipped contract. If a change requires a customer, future customer's agent, operator, or maintainer to configure anything outside the codebase, document that setup in the same change before calling the work done.
+
+This rule applies to third-party accounts, provider projects, labels, dashboards, API keys, personal access tokens, OAuth apps, webhooks, scopes, permissions, repository variables, GitHub secrets, Vercel env, Convex env, Stripe/Clerk/PostHog settings, and generated-repo customer instructions.
+
+The documentation must live where the future worker will actually look: active app docs, `README.md`, `docs/internal/`, release docs, generated customer docs, or the nearest relevant `AGENTS.md`. Do not rely on chat history, local `.env` files, provider dashboards, or memory as the only record.
+
+Document all of this when it applies:
+
+- what must be created
+- where it is created
+- exact names, labels, callback URLs, event types, scopes, roles, or permissions
+- which environment owns it: local, preview, production, maintainer-owned, or customer-owned
+- where resulting values go: `.env.local`, Vercel env, Convex env, GitHub secrets or variables, generated repo files, or provider dashboards
+- how to verify it worked
+- what failure looks like when it is missing or misconfigured
+
 ## Hot Spots
 
 ### Homepage Shell
@@ -140,6 +158,7 @@ Work is done only when:
 - the diff stays within the intended scope
 - docs or plan updates were made where behavior or contracts changed
 - generated mirrors are synced when source-generated contracts changed
+- required external setup is documented in the active docs or generated customer docs when the change creates future customer, operator, or agent work
 - remaining risks, blockers, or follow-ups are clearly stated
 
 ## Constraints

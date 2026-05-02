@@ -15,7 +15,7 @@ Use this exact priority order when sources conflict:
 4. `docs/ship-by-sunday/*` historical source packs for background only
 
 ## Repository Layout & Engineering Standards
-- **Feature-First:** Organize code by feature, not by file type. Working in `apps/web/features/` is preferred over route-level logic.
+- **Ownership-First:** Organize code by the owning route, product domain, or platform boundary already present in `apps/web/`.
 - **Separation of Concerns:** Presentation belongs in components; stateful or behavioral logic belongs in hooks, helpers, or controller layers.
 - **Component Limits:** Never leave a component above **150 lines** if it can be split cleanly into feature-local pieces.
 - **Types & Validation:** Prefer straightforward TypeScript, early returns, shallow control flow, and discriminated unions. Assert at boundaries; fail fast.
@@ -40,8 +40,8 @@ Use this exact priority order when sources conflict:
 
 ### Web App (`apps/web`)
 - **Blueprint-First:** This product is blueprint-first, not course-first.
-- **Funnel:** `Start -> Product -> Design -> Marketing -> Build Plan -> Review & Download`.
-- **Unlock Logic:** Ensure `design blueprint`, `marketing blueprint`, `build blueprint`, and `repo zip` unlock exactly as defined in `apps/web/AGENTS.md`.
+- **Protected Handoff:** The current journey is `/blueprint -> /review`; staged routes are compatibility redirects only.
+- **Unlock Logic:** Ensure the Ship by Sunday Blueprint handoff and optional Execute / Ship bonus library unlock exactly as defined in `apps/web/AGENTS.md`.
 - **Homepage:** Changes to `/` must follow `starterConfig.homePage` in `apps/web/config/product.ts` and related files. Read `apps/web/content/docs/configure-the-homepage.mdx` first.
 
 ### Blueprint Compiler (`packages/blueprint-compiler`)

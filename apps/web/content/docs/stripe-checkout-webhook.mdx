@@ -86,7 +86,7 @@ The starter uses this sequence:
 4. Stripe webhook hits Convex HTTP at `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`
 5. Convex verifies the signature and either grants access directly for a signed-in checkout or stores a durable pending paid checkout keyed by the Stripe session
 6. `/checkout/success` signs the buyer in or creates the account if needed, then claims the purchase when the verified primary email matches the Stripe checkout email
-7. the app redirects into `/start`
+7. the app redirects into `/blueprint`
 
 ## Health checks
 
@@ -107,7 +107,7 @@ The happy path is:
 2. Stripe forwards `checkout.session.completed`
 3. the webhook grants product access
 4. `/checkout/success` stops waiting
-5. the buyer reaches `/start`
+5. the buyer reaches `/blueprint`
 
 ## If this breaks
 
