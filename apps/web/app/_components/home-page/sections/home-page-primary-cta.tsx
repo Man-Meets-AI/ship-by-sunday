@@ -7,14 +7,8 @@ import {
 	type CheckoutButtonLoadingLabels,
 } from "@/app/checkout/_components/checkout-button";
 import { assertNever } from "@/lib/assert";
+import { PRIMARY_CTA_INVERT_CLASSES } from "@/lib/styling/primary-cta-invert-classes";
 import { cn } from "@/lib/utils";
-
-// Use foreground/background tokens so the CTA inverts cleanly in dark mode.
-// The shadcn `--primary` token is owned by the generated design system and
-// does not flip across themes for every preset, which leaves a default
-// `bg-primary` button rendering dark-on-dark on the marketing surface.
-const HOMEPAGE_PRIMARY_CTA_CLASSES =
-	"bg-foreground text-background hover:bg-foreground/90 disabled:bg-foreground disabled:text-background";
 
 type HomePagePrimaryCtaProps = {
 	readonly target: HomePageCtaTarget;
@@ -35,7 +29,7 @@ export function HomePagePrimaryCta({
 	onError,
 	loadingLabels,
 }: HomePagePrimaryCtaProps) {
-	const mergedClassName = cn(HOMEPAGE_PRIMARY_CTA_CLASSES, className);
+	const mergedClassName = cn(PRIMARY_CTA_INVERT_CLASSES, className);
 
 	switch (target.kind) {
 		case "checkout":

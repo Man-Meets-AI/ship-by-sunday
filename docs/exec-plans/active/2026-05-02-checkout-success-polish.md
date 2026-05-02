@@ -102,11 +102,20 @@ Validation matrix:
 
 Diff scope: `git diff --stat -- apps/web/app/checkout/success/ apps/web/tests/integration-ui/checkout-success-view.test.tsx apps/web/tests/integration-ui/checkout-success-view.interactions.test.tsx` reports 4 files changed (3 modified source + 1 modified test), 43 insertions, 90 deletions. The five new files (four sub-components plus this ExecPlan) are tracked in `git status` as `??`. No PostHog observability, `.cursor/`, or other excluded path was touched.
 
-Structural follow-ups worth a separate Linear issue:
+Structural follow-ups:
 
-- The global `--primary` cascade does not flip cleanly under the active design preset. This was already called out by the brief and by the active landing-page polish ExecPlan. When that structural fix lands, the workaround marker on this surface (the `PRIMARY_CTA_CLASSES` constant in `checkout-success-cta-row.tsx`) and the explanatory comment above it should be revisited. The existing `home-page-primary-cta.tsx` carries the same pattern and the same comment; the two should be reconciled in one pass.
-- The shell `CardTitle` is now `text-2xl sm:text-3xl font-semibold tracking-tight` on this surface only. Other shadcn `CardTitle` consumers across the app still inherit the smaller default. If the team wants the larger confirmation header to be a system-wide pattern for "milestone" cards, the shadcn `CardTitle` default could be revisited (but that is a system change, not polish).
-- The integration-ui interaction tests prove the `replaceMock("/blueprint")` call but do not currently assert that the `checkout-success-redirect-affordance` testid renders inside the 700ms window before redirect. The test scaffold supports adding that assertion (the existing `vi.useFakeTimers()` harness is sufficient). It is not added here because the static integration test already covers the affordance presence and absence; the interaction-time assertion is a small follow-up if someone wants stronger behavior coverage.
+Done in a follow-up pass on 2026-05-02:
+
+- Reconciled the duplicated `bg-foreground text-background hover:bg-foreground/90 disabled:bg-foreground disabled:text-background` invert string between `apps/web/app/_components/home-page/sections/home-page-primary-cta.tsx` and `apps/web/app/checkout/success/_components/checkout-success-cta-row.tsx`. Both files now import a shared `PRIMARY_CTA_INVERT_CLASSES` constant from a new `apps/web/lib/styling/primary-cta-invert-classes.ts` module. The colocated docstring on the new module names this as the single deletion target when the structural `--primary` / `--primary-foreground` cascade is fixed elsewhere. Behavior is unchanged; both surfaces continue to render the marketing invert pattern. Validated by the focused `tests/integration-ui/home-page-primary-cta.test.tsx` (3 tests) and `tests/integration-ui/checkout-success-view*.test.tsx` (9 tests) suites passing.
+
+Intentionally not done in this pass:
+
+- The structural fix for the global `--primary` / `--primary-foreground` cascade itself. The original brief explicitly carved this out ("the structural cascade fix is being handled in a separate PR") and the active `docs/exec-plans/active/2026-05-02-landing-page-polish.md` ExecPlan also lists it as out of scope ("Fixing the structural `--primary` / `--primary-foreground` cascade bug. A separate prompt owns that fix; this pass only routes around it."). Doing it here would risk colliding with that other workstream. The shared `PRIMARY_CTA_INVERT_CLASSES` constant gives that future PR a single, well-marked deletion target across both consumers.
+- Promoting the shadcn `CardTitle` default to the larger "milestone" sizing system-wide. This is a true design-system change that would touch many surfaces (`apps/web/components/ui/card.tsx`) and require explicit team buy-in on the new default's effect across every existing card consumer. The local `text-2xl sm:text-3xl font-semibold tracking-tight` override on `/checkout/success` shipped in slice 2 is not in conflict; it just opts this surface in.
+
+Still open:
+
+- The integration-ui interaction tests prove the `replaceMock("/blueprint")` call but do not currently assert that the `checkout-success-redirect-affordance` testid renders inside the 700ms window before redirect. The test scaffold supports adding that assertion (the existing `vi.useFakeTimers()` harness is sufficient). The static integration test already covers the affordance presence and absence; the interaction-time assertion is a small follow-up if stronger behavior coverage is wanted.
 
 ## Context and Orientation
 
