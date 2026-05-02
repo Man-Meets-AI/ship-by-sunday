@@ -15,4 +15,5 @@ The repo-wide first hop is [docs/index.md](../index.md). Use this lane after the
 
 ## Current References
 
+- [linear.md](./linear.md)
 - [observability.md](./observability.md)
