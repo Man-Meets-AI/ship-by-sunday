@@ -4,6 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 const useConvexAuthMock = vi.fn();
 const useQueryMock = vi.fn();
+const signOutMock = vi.fn();
 const replaceMock = vi.fn();
 const refreshMock = vi.fn();
 
@@ -36,14 +37,30 @@ vi.mock("convex/react", () => ({
 	useQuery: (query: unknown, args: unknown) => useQueryMock(query, args),
 }));
 
+vi.mock("@clerk/nextjs", () => ({
+	useClerk: () => ({
+		signOut: signOutMock,
+	}),
+}));
+
 import { CheckoutSuccessView } from "@/app/checkout/success/_components/checkout-success-view";
 
 function renderView(
 	checkoutSessionState:
 		| { kind: "missing_session_id" }
 		| { kind: "invalid_session"; sessionId: string }
-		| { kind: "sign_in_required"; sessionId: string }
-		| { kind: "wrong_account"; sessionId: string }
+		| {
+				kind: "sign_in_required";
+				sessionId: string;
+				checkoutEmail?: string;
+				currentAccountEmail?: string;
+		  }
+		| {
+				kind: "wrong_account";
+				sessionId: string;
+				checkoutEmail?: string;
+				currentAccountEmail?: string;
+		  }
 		| { kind: "payment_pending"; sessionId: string; paymentStatus: string }
 		| { kind: "validated"; sessionId: string },
 	options: {
@@ -62,6 +79,7 @@ describe("CheckoutSuccessView", () => {
 	beforeEach(() => {
 		useConvexAuthMock.mockReset();
 		useQueryMock.mockReset();
+		signOutMock.mockReset();
 		replaceMock.mockReset();
 		refreshMock.mockReset();
 	});
@@ -88,6 +106,7 @@ describe("CheckoutSuccessView", () => {
 		expect(markup).toContain('href="/blueprint"');
 		expect(markup).not.toContain("Opening your workspace");
 		expect(markup).not.toContain("checkout-success-redirect-affordance");
+		expect(markup).not.toContain("checkout-success-status-pulse-armed-ring");
 	});
 
 	it("shows the automatic redirect state once access is live", () => {
@@ -115,6 +134,10 @@ describe("CheckoutSuccessView", () => {
 		);
 		expect(markup).toContain('data-testid="checkout-success-cta-primary"');
 		expect(markup).toContain('data-testid="checkout-success-cta-tertiary"');
+		expect(markup).toContain('data-testid="checkout-success-heading"');
+		expect(markup).toContain(
+			'data-testid="checkout-success-status-pulse-armed-ring"',
+		);
 	});
 
 	it("renders the ready state from preloaded product access without the live query", () => {
@@ -146,12 +169,15 @@ describe("CheckoutSuccessView", () => {
 		const markup = renderView({
 			kind: "sign_in_required",
 			sessionId: "cs_sign_in",
+			checkoutEmail: "buyer@example.com",
 		});
 
 		expect(markup).toContain("Finish access handoff");
 		expect(markup).toContain("Sign in required");
 		expect(markup).toContain("Use the checkout account");
 		expect(markup).toContain("Sign in to continue");
+		expect(markup).toContain("Payment is confirmed for buyer@example.com");
+		expect(markup).toContain("Do not buy again");
 		expect(markup).toContain(
 			'href="/sign-in?redirect_url=%2Fcheckout%2Fsuccess%3Fsession_id%3Dcs_sign_in"',
 		);
@@ -172,14 +198,19 @@ describe("CheckoutSuccessView", () => {
 		const markup = renderView({
 			kind: "wrong_account",
 			sessionId: "cs_wrong_account",
+			checkoutEmail: "buyer@example.com",
+			currentAccountEmail: "other@example.com",
 		});
 
 		expect(markup).toContain("Wrong account for this checkout");
 		expect(markup).toContain("Account mismatch");
 		expect(markup).toContain("Use the checkout account");
 		expect(markup).toContain(
-			"The checkout session belongs to a different Clerk account.",
+			"Payment is tied to buyer@example.com, but this browser is signed in as other@example.com.",
 		);
+		expect(markup).toContain("Do not buy again");
+		expect(markup).toContain("Switch accounts");
+		expect(markup).toContain("Create checkout account");
 	});
 
 	it.each([

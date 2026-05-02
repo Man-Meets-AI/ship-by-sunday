@@ -1,11 +1,22 @@
 import React from "react";
 import { act } from "react";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const useConvexAuthMock = vi.fn();
 const useQueryMock = vi.fn();
 const replaceMock = vi.fn();
+const signOutMock = vi.fn();
+const useReducedMotionMock = vi.fn<() => boolean | null>(() => false);
+
+vi.mock("motion/react", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("motion/react")>();
+	return {
+		...actual,
+		useReducedMotion: () => useReducedMotionMock(),
+	};
+});
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -33,6 +44,12 @@ vi.mock("convex/react", () => ({
 	useQuery: () => useQueryMock(),
 }));
 
+vi.mock("@clerk/nextjs", () => ({
+	useClerk: () => ({
+		signOut: signOutMock,
+	}),
+}));
+
 import { CheckoutSuccessView } from "@/app/checkout/success/_components/checkout-success-view";
 
 describe("CheckoutSuccessView interactions", () => {
@@ -40,6 +57,9 @@ describe("CheckoutSuccessView interactions", () => {
 		useConvexAuthMock.mockReset();
 		useQueryMock.mockReset();
 		replaceMock.mockReset();
+		signOutMock.mockReset();
+		useReducedMotionMock.mockReset();
+		useReducedMotionMock.mockReturnValue(false);
 		vi.useRealTimers();
 	});
 
@@ -134,5 +154,77 @@ describe("CheckoutSuccessView interactions", () => {
 		expect(
 			screen.getByText("Preparing your first workspace step."),
 		).toBeTruthy();
+	});
+
+	it("renders the armed-ring expansion in the access-ready state", () => {
+		useConvexAuthMock.mockReturnValue({
+			isAuthenticated: true,
+		});
+		useQueryMock.mockReturnValue({
+			hasAccess: true,
+		});
+
+		render(
+			<CheckoutSuccessView
+				checkoutSessionState={{
+					kind: "validated",
+					sessionId: "cs_armed",
+				}}
+			/>,
+		);
+
+		expect(
+			screen.getByTestId("checkout-success-status-pulse-armed-ring"),
+		).toBeTruthy();
+	});
+
+	it("suppresses the armed-ring expansion under prefers-reduced-motion", () => {
+		useReducedMotionMock.mockReturnValue(true);
+		useConvexAuthMock.mockReturnValue({
+			isAuthenticated: true,
+		});
+		useQueryMock.mockReturnValue({
+			hasAccess: true,
+		});
+
+		render(
+			<CheckoutSuccessView
+				checkoutSessionState={{
+					kind: "validated",
+					sessionId: "cs_reduced_motion",
+				}}
+			/>,
+		);
+
+		expect(
+			screen.queryByTestId("checkout-success-status-pulse-armed-ring"),
+		).toBeNull();
+	});
+
+	it("signs out before account switching for a wrong-account paid checkout", async () => {
+		useConvexAuthMock.mockReturnValue({
+			isAuthenticated: true,
+		});
+		useQueryMock.mockReturnValue({
+			hasAccess: false,
+		});
+
+		render(
+			<CheckoutSuccessView
+				checkoutSessionState={{
+					kind: "wrong_account",
+					sessionId: "cs_wrong_account",
+					checkoutEmail: "buyer@example.com",
+					currentAccountEmail: "other@example.com",
+				}}
+			/>,
+		);
+
+		await userEvent.click(screen.getByTestId("checkout-success-cta-primary"));
+
+		expect(signOutMock).toHaveBeenCalledWith({
+			redirectUrl:
+				"/sign-in?redirect_url=%2Fcheckout%2Fsuccess%3Fsession_id%3Dcs_wrong_account",
+		});
 	});
 });

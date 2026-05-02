@@ -10,6 +10,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 import { CheckoutSuccessCtaRow } from "./checkout-success-cta-row";
+import { CheckoutSuccessHeading } from "./checkout-success-heading";
 import { CheckoutSuccessProgressStep } from "./checkout-success-progress-step";
 import { CheckoutSuccessRedirectAffordance } from "./checkout-success-redirect-affordance";
 import { CheckoutSuccessStatusPulse } from "./checkout-success-status-pulse";
@@ -43,7 +44,10 @@ export function CheckoutSuccessMainPanel({
 					aria-atomic="true"
 				>
 					<Badge variant="secondary" className="gap-2">
-						<CheckoutSuccessStatusPulse isPolling={!canAutoRedirect} />
+						<CheckoutSuccessStatusPulse
+							isPolling={!canAutoRedirect}
+							triggerArmedTransition={canAutoRedirect}
+						/>
 						{viewModel.statusLabel}
 					</Badge>
 					<Badge variant="outline">
@@ -53,7 +57,7 @@ export function CheckoutSuccessMainPanel({
 				<Separator />
 				<div>
 					<CardTitle className="text-xl font-semibold tracking-tight sm:text-2xl">
-						{viewModel.heading}
+						<CheckoutSuccessHeading heading={viewModel.heading} />
 					</CardTitle>
 					<CardDescription className="mt-2 text-base leading-relaxed">
 						{viewModel.body}
