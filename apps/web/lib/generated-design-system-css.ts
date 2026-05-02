@@ -26,7 +26,7 @@ export function buildGeneratedDesignSystemCss(
 	const { light, dark } = designSystem.preset.tokens;
 
 	return [
-		":root {",
+		":root:not(.dark) {",
 		`  --design-font-sans: ${fontFamily};`,
 		`  --radius: ${designSystem.preset.geometry.base};`,
 		renderCssVariables(light),
