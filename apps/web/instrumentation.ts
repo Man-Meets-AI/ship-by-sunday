@@ -1,20 +1,28 @@
 import type { Instrumentation } from "next";
-import * as Sentry from "@sentry/nextjs";
 
-export async function register() {
-	if (process.env.NEXT_RUNTIME === "nodejs") {
-		await import("./sentry.server.config");
-	}
+import { captureServerError } from "@/platform/observability/capture-server-error";
+import { getRequestIdFromHeaderRecord } from "@/platform/observability/request-id";
 
-	if (process.env.NEXT_RUNTIME === "edge") {
-		await import("./sentry.edge.config");
-	}
-}
+export async function register() {}
 
 export const onRequestError: Instrumentation.onRequestError = async (
 	error,
 	errorRequest,
 	errorContext,
 ) => {
-	Sentry.captureRequestError(error, errorRequest, errorContext);
+	await captureServerError({
+		source: "next_runtime",
+		error,
+		requestId: getRequestIdFromHeaderRecord(errorRequest.headers),
+		pathname: errorRequest.path,
+		code: "next_request_error",
+		details: {
+			method: errorRequest.method,
+			routerKind: errorContext.routerKind,
+			routePath: errorContext.routePath,
+			routeType: errorContext.routeType,
+			renderSource: errorContext.renderSource ?? null,
+			revalidateReason: errorContext.revalidateReason ?? null,
+		},
+	});
 };

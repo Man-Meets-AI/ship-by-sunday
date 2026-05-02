@@ -6,8 +6,10 @@
 	"scripts": {
 		"dev": "bun run dev:full",
 		"dev:core": "concurrently -k -n nextjs,convex -c auto \"bun run dev:web:only\" \"bun run dev:convex\"",
+		"dev:core:webpack": "concurrently -k -n nextjs,convex -c auto \"bun run dev:web:webpack\" \"bun run dev:convex\"",
 		"dev:web": "bun run dev",
 		"dev:web:only": "next dev",
+		"dev:web:webpack": "next dev --webpack",
 		"dev:web:raw": "next dev",
 		"dev:convex": "convex dev",
 		"dev:stripe": "node scripts/dev-stripe-listen-ready.mjs",
@@ -78,7 +80,6 @@
 		"@phosphor-icons/react": "^2.1.10",
 		"@remixicon/react": "^4.9.0",
 		"@remotion/player": "^4.0.455",
-		"@sentry/nextjs": "^10.51.0",
 		"@shipbysunday/blueprint-compiler": "workspace:*",
 		"@shipbysunday/blueprint-presentation": "workspace:*",
 		"@tabler/icons-react": "^3.40.0",

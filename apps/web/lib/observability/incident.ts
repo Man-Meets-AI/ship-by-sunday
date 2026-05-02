@@ -353,7 +353,7 @@ function getDefaultNextAction(source: IncidentSource) {
 		case "convex":
 			return "Check the failing Convex function and recent deploy state.";
 		case "telegram_delivery":
-			return "Treat as a legacy app-owned delivery row and configure Telegram from Sentry Alerts instead.";
+			return "Restore Telegram bot delivery before relying on chat alerts.";
 		case "next_client":
 			return "Reproduce in the browser and inspect the failing client path.";
 		case "next_runtime":

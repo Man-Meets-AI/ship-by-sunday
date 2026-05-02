@@ -227,4 +227,54 @@ describe("observability source adapters", () => {
 			}),
 		).toThrow("Missing payload.deployment.id.");
 	});
+
+	it("renders Telegram messages with the incident stack when the payload fits", async () => {
+		const { renderIncidentMessage } =
+			await import("@/lib/observability/telegram/render-incident-message");
+		const message = renderIncidentMessage({
+			product: "ship-by-sunday",
+			environment: "prod",
+			source: "vercel",
+			surface: "health",
+			severity: "high",
+			status: "firing",
+			title: "Vercel build failed",
+			summary: "Deploy failed while building the production app.",
+			occurrenceCount: 3,
+			firstSeenAt: 1_700_000_000_000,
+			lastSeenAt: 1_700_000_300_000,
+			requestId: "request_123",
+			details: "deploy failed",
+			stack: ["one", "two", "three", "four", "five", "six", "seven"].join("\n"),
+		});
+
+		expect(message).toContain("[Ship by Sunday][PROD][Vercel][high]");
+		expect(message).toContain("request_id: request_123");
+		expect(message).toContain("stack:");
+		expect(message).toContain("one\ntwo\nthree\nfour\nfive\nsix");
+	});
+
+	it("truncates oversized Telegram incident payloads", async () => {
+		const { renderIncidentMessage } =
+			await import("@/lib/observability/telegram/render-incident-message");
+		const message = renderIncidentMessage({
+			product: "ship-by-sunday",
+			environment: "prod",
+			source: "vercel",
+			surface: "health",
+			severity: "high",
+			status: "firing",
+			title: "Vercel build failed",
+			summary: "Deploy failed while building the production app.",
+			occurrenceCount: 3,
+			firstSeenAt: 1_700_000_000_000,
+			lastSeenAt: 1_700_000_300_000,
+			requestId: "request_123",
+			details: "x".repeat(5_000),
+			stack: ["one", "two", "three", "four", "five", "six", "seven"].join("\n"),
+		});
+
+		expect(message).toContain("[TRUNCATED]");
+		expect(message.length).toBeLessThanOrEqual(3_900);
+	});
 });
