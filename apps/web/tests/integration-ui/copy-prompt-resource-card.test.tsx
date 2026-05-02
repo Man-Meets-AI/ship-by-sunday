@@ -49,7 +49,8 @@ describe("CopyPromptResourceCard interactions", () => {
 
 		render(<CopyPromptResourceCard resource={resource} pinnedArtifacts={[]} />);
 
-		fireEvent.click(screen.getByRole("button", { name: "Copy prompt" }));
+		const button = screen.getByTestId("lesson-copy-prompt-button");
+		fireEvent.click(button);
 
 		await waitFor(() => {
 			expect(writeTextMock).toHaveBeenCalledWith(resource.body?.trim());
@@ -60,7 +61,7 @@ describe("CopyPromptResourceCard interactions", () => {
 			);
 		});
 		await waitFor(() => {
-			expect(screen.getByRole("button", { name: "Copied" })).toBeTruthy();
+			expect(screen.getByTestId("lesson-copy-prompt-copied-pill")).toBeTruthy();
 		});
 	});
 });
