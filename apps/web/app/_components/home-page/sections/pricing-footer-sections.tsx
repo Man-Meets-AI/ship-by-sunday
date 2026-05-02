@@ -28,7 +28,7 @@ export function PricingSectionBlock({
 						<div className="flex flex-col gap-3">
 							<h2 className="flex flex-col gap-1 text-balance text-4xl font-semibold leading-[0.92] tracking-tight sm:text-5xl lg:text-7xl">
 								<span>{pricingSection.titleLead}</span>
-								<span className="text-primary">
+								<span className="text-foreground/90">
 									{pricingSection.titleAccent}
 								</span>
 							</h2>
