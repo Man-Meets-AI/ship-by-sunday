@@ -67,10 +67,10 @@
 The homepage contract is split deliberately:
 
 - `starterConfig.homePage` in `apps/web/config/product.ts` is the control plane.
-- `apps/web/features/marketing/content/home.ts` owns copy and assets.
-- `apps/web/features/marketing/lib/home-page-render-model.ts` owns section and CTA behavior.
-- `apps/web/features/marketing/components/home-page/home-page-primary-cta.tsx` is the CTA rendering boundary for hero and pricing.
-- `apps/web/features/marketing/lib/home-page-structured-data.ts` must stay truthful to visible sections.
+- `apps/web/app/_content/home-page.ts` owns copy and assets.
+- `apps/web/app/_lib/home-page-render-model.ts` owns section and CTA behavior.
+- `apps/web/app/_components/home-page/sections/home-page-primary-cta.tsx` is the CTA rendering boundary for hero and pricing.
+- `apps/web/app/_lib/home-page-structured-data.ts` must stay truthful to visible sections.
 
 Do not re-hardwire checkout into hero or pricing, scatter section gating across multiple components, or leave `FAQPage` or `Product` schema behind when the visible homepage no longer supports them.
 

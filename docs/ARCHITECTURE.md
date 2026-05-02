@@ -37,7 +37,9 @@ This file is the canonical repo-wide architecture and ownership map. It explains
 
 Within `apps/web`, `app/` owns URL-addressable routes, route groups, route handlers, and private route UI. Route-local wrappers, controllers, view models, and redirect helpers belong under App Router private folders such as `_components`, `_hooks`, and `_lib`.
 
-`features/` owns durable product domains that are reused across routes or need a stable product boundary. Current durable domains include blueprint flow, reusable auth forms and route utilities, checkout button and checkout server helpers, product access checks, course and lesson domain data, workspace shell, workspace navigation, marketing, docs, Codex, and observability.
+`lib/` owns durable product domains and app-local logic that are reused across routes or need a stable product boundary. Current durable domains include blueprint flow, course and lesson domain data, execute/ship support, workspace navigation, and observability.
+
+Route-local product presentation lives under `app/` private folders. The homepage, blog, docs, workspace, checkout, and identity surfaces use route-owned `_components`, `_content`, `_hooks`, and `_lib` folders when the code only serves that route area.
 
 `platform/` owns environment, auth, billing, Convex, and Next.js platform adapters. `convex/` owns backend state, actions, and HTTP webhook routes. Browser-only route UI should not be imported from Convex code.
 
@@ -49,7 +51,7 @@ The root entrypoints stay intentionally small. `README.md` and `AGENTS.md` route
 
 ## Next
 
-- Read [docs/RELIABILITY.md](/Users/parkerrex/Developer/ship-by-sunday/docs/RELIABILITY.md) for the validation loop and worktree behavior.
-- Use [docs/index.md](/Users/parkerrex/Developer/ship-by-sunday/docs/index.md) for the first-hop docs spine.
-- Use [apps/web/AGENTS.md](/Users/parkerrex/Developer/ship-by-sunday/apps/web/AGENTS.md) for the app-owned implementation surface.
-- Use [packages/blueprint-compiler/AGENTS.md](/Users/parkerrex/Developer/ship-by-sunday/packages/blueprint-compiler/AGENTS.md) for generator-owned snapshot and template work.
+- Read [docs/RELIABILITY.md](RELIABILITY.md) for the validation loop and worktree behavior.
+- Use [docs/index.md](index.md) for the first-hop docs spine.
+- Use [apps/web/AGENTS.md](../apps/web/AGENTS.md) for the app-owned implementation surface.
+- Use [packages/blueprint-compiler/AGENTS.md](../packages/blueprint-compiler/AGENTS.md) for generator-owned snapshot and template work.

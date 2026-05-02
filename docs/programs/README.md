@@ -10,7 +10,7 @@ read_when:
 
 # Programs
 
-`docs/programs/` is the landing lane for durable initiatives that coordinate several ExecPlans. This file is intentionally a route map; the canonical Program contract lives in [PROGRAMS.md](/Users/parkerrex/Developer/ship-by-sunday/docs/programs/PROGRAMS.md).
+`docs/programs/` is the landing lane for durable initiatives that coordinate several ExecPlans. This file is intentionally a route map; the canonical Program contract lives in [PROGRAMS.md](PROGRAMS.md).
 
 ## Current State
 
@@ -29,11 +29,11 @@ Use a Program only when an initiative spans several ExecPlans and needs durable 
 
 ## Canonical Files
 
-- Contract: [PROGRAMS.md](/Users/parkerrex/Developer/ship-by-sunday/docs/programs/PROGRAMS.md)
-- Active inventory: [active/index.md](/Users/parkerrex/Developer/ship-by-sunday/docs/programs/active/index.md)
-- Completed inventory: [completed/index.md](/Users/parkerrex/Developer/ship-by-sunday/docs/programs/completed/index.md)
-- Prompt assets: [docs/prompts/README.md](/Users/parkerrex/Developer/ship-by-sunday/docs/prompts/README.md)
-- ExecPlan inventory: [docs/exec-plans/index.md](/Users/parkerrex/Developer/ship-by-sunday/docs/exec-plans/index.md)
+- Contract: [PROGRAMS.md](PROGRAMS.md)
+- Active inventory: [active/index.md](active/index.md)
+- Completed inventory: [completed/index.md](completed/index.md)
+- Prompt assets: [docs/prompts/README.md](../prompts/README.md)
+- ExecPlan inventory: [docs/exec-plans/index.md](../exec-plans/index.md)
 
 ## Program Loop
 
@@ -50,7 +50,7 @@ Program-linked child ExecPlans must record the exact immutable planning brief pa
 
 ## Prompt Inventory
 
-Program prompt assets live under `docs/prompts/` and are indexed in [docs/prompts/README.md](/Users/parkerrex/Developer/ship-by-sunday/docs/prompts/README.md). The Program prompt inventory is:
+Program prompt assets live under `docs/prompts/` and are indexed in [docs/prompts/README.md](../prompts/README.md). The Program prompt inventory is:
 
 - `docs/prompts/program-orchestrator.md`
 - `docs/prompts/program-initialize.md`

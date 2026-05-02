@@ -14,7 +14,7 @@ Move a Program folder into this directory only after the initiative-level work i
 
 Completed Programs should preserve the durable record of a finished multi-slice effort, including the final Program document, its packet artifacts, and the retrospective.
 
-The Program must satisfy [PROGRAMS.md](/Users/parkerrex/Developer/ship-by-sunday/docs/programs/PROGRAMS.md), use `status: complete`, fill `completed_at`, and include a meaningful retrospective before it moves here.
+The Program must satisfy [PROGRAMS.md](../PROGRAMS.md), use `status: complete`, fill `completed_at`, and include a meaningful retrospective before it moves here.
 
 Completed Program folders:
 

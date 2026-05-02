@@ -39,6 +39,6 @@ This file is the durable landing surface for repo-wide quality scoring in Ship b
 
 ## Next
 
-- Use [docs/exec-plans/tech-debt-tracker.md](/Users/parkerrex/Developer/ship-by-sunday/docs/exec-plans/tech-debt-tracker.md) for the durable repo-quality debt ledger.
-- Use [docs/exec-plans/index.md](/Users/parkerrex/Developer/ship-by-sunday/docs/exec-plans/index.md) for active and completed planning work.
-- Use [docs/RELIABILITY.md](/Users/parkerrex/Developer/ship-by-sunday/docs/RELIABILITY.md) for the current proof loop and validation expectations.
+- Use [docs/exec-plans/tech-debt-tracker.md](exec-plans/tech-debt-tracker.md) for the durable repo-quality debt ledger.
+- Use [docs/exec-plans/index.md](exec-plans/index.md) for active and completed planning work.
+- Use [docs/RELIABILITY.md](RELIABILITY.md) for the current proof loop and validation expectations.

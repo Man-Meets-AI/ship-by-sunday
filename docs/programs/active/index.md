@@ -14,7 +14,7 @@ Keep new and unfinished Program folders in this directory.
 
 An active Program should describe the larger initiative that sits above several ExecPlans and should remain here until the initiative is actually complete.
 
-Use [PROGRAMS.md](/Users/parkerrex/Developer/ship-by-sunday/docs/programs/PROGRAMS.md) as the contract before creating or updating a Program folder in this directory.
+Use [PROGRAMS.md](../PROGRAMS.md) as the contract before creating or updating a Program folder in this directory.
 
 Each active Program lives at:
 

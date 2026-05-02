@@ -32,7 +32,7 @@ This file is the top-level landing page for long-running planning work in this r
 
 ## Next
 
-- Read [docs/programs/PROGRAMS.md](/Users/parkerrex/Developer/ship-by-sunday/docs/programs/PROGRAMS.md).
-- Browse [docs/programs/README.md](/Users/parkerrex/Developer/ship-by-sunday/docs/programs/README.md).
-- Read [docs/exec-plans/PLANS.md](/Users/parkerrex/Developer/ship-by-sunday/docs/exec-plans/PLANS.md).
-- Browse [docs/exec-plans/index.md](/Users/parkerrex/Developer/ship-by-sunday/docs/exec-plans/index.md).
+- Read [docs/programs/PROGRAMS.md](programs/PROGRAMS.md).
+- Browse [docs/programs/README.md](programs/README.md).
+- Read [docs/exec-plans/PLANS.md](exec-plans/PLANS.md).
+- Browse [docs/exec-plans/index.md](exec-plans/index.md).

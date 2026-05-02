@@ -34,5 +34,5 @@ This file owns the repo-wide security and safety expectations for working in the
 
 ## Next
 
-- Use [AGENTS.md](/Users/parkerrex/Developer/ship-by-sunday/AGENTS.md) for the root execution contract.
-- Use [docs/release-workflow.md](/Users/parkerrex/Developer/ship-by-sunday/docs/release-workflow.md) for the closest deployment-owned operations surface.
+- Use [AGENTS.md](../AGENTS.md) for the root execution contract.
+- Use [docs/release-workflow.md](release-workflow.md) for the closest deployment-owned operations surface.
