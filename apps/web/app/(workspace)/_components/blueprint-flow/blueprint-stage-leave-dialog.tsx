@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertTriangleIcon } from "lucide-react";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -21,21 +22,40 @@ export function BlueprintStageLeaveDialog({
 	onStay: () => void;
 }) {
 	return (
-		<AlertDialog open={isOpen}>
-			<AlertDialogContent size="sm">
+		<AlertDialog
+			open={isOpen}
+			onOpenChange={(nextOpen) => {
+				if (!nextOpen) {
+					onStay();
+				}
+			}}
+		>
+			<AlertDialogContent size="sm" data-testid="blueprint-page-leave-dialog">
 				<AlertDialogHeader>
-					<AlertDialogTitle>Leave this blueprint page?</AlertDialogTitle>
+					<AlertDialogTitle className="flex items-center gap-2">
+						<AlertTriangleIcon
+							aria-hidden
+							className="size-4 text-destructive"
+						/>
+						Leave with unsaved changes?
+					</AlertDialogTitle>
 					<AlertDialogDescription>
-						You have unsaved changes on this page. Continue only if you want to
-						leave without saving them.
+						You have unsaved edits on this blueprint. They will be lost if you
+						leave now.
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
-					<AlertDialogCancel onClick={onStay}>Stay</AlertDialogCancel>
+					<AlertDialogCancel
+						onClick={onStay}
+						data-testid="blueprint-page-leave-dialog-stay"
+					>
+						Stay on this page
+					</AlertDialogCancel>
 					<AlertDialogAction
 						variant="destructive"
 						className="bg-destructive text-white hover:bg-destructive/90 dark:bg-destructive dark:text-white dark:hover:bg-destructive/90"
 						onClick={onLeaveWithoutSaving}
+						data-testid="blueprint-page-leave-dialog-leave"
 					>
 						Leave without saving
 					</AlertDialogAction>

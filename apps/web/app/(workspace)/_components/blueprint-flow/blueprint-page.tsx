@@ -6,14 +6,10 @@ import { api } from "@/convex/_generated/api";
 import { AppShell } from "@/app/(workspace)/_components/app-shell";
 import type { BonusMissionState } from "@/lib/execute-ship/bonus-mission-types";
 import { BlueprintLocalDraftSeeder } from "@/app/(workspace)/_components/blueprint-flow/blueprint-local-draft-seeder";
+import { BlueprintPageBody } from "@/app/(workspace)/_components/blueprint-flow/blueprint-page-body";
 import { BlueprintStageLeaveDialog } from "@/app/(workspace)/_components/blueprint-flow/blueprint-stage-leave-dialog";
-import { BlueprintPageOverview } from "@/app/(workspace)/_components/blueprint-flow/blueprint-page-overview";
-import { BlueprintPageProgressSidebar } from "@/app/(workspace)/_components/blueprint-flow/blueprint-page-progress-sidebar";
-import { BlueprintPageSaveBar } from "@/app/(workspace)/_components/blueprint-flow/blueprint-page-save-bar";
-import { BlueprintPageSectionCard } from "@/app/(workspace)/_components/blueprint-flow/blueprint-page-section-card";
 import { useBlueprintPageState } from "@/app/(workspace)/_hooks/blueprint-flow/use-blueprint-page-state";
 import { useBlueprintStageLeaveGuard } from "@/app/(workspace)/_hooks/blueprint-flow/use-blueprint-stage-leave-guard";
-import { blueprintPageSections } from "@/lib/blueprint-flow/blueprint-page-sections";
 import type { BlueprintWorkspaceState } from "@/lib/blueprint-flow/blueprint-workspace-types";
 import {
 	buildLockedPostReviewPrimaryNav,
@@ -79,15 +75,6 @@ export function BlueprintPage({
 		saveProjectDefinitionFacts,
 		unlockExecuteShip,
 	});
-	const completedSectionCount = currentSectionStatuses.filter(
-		(s) => s.isComplete,
-	).length;
-	const sectionStatusById = new Map(
-		currentSectionStatuses.map((sectionStatus) => [
-			sectionStatus.sectionId,
-			sectionStatus,
-		]),
-	);
 
 	return (
 		<AppShell
@@ -105,48 +92,17 @@ export function BlueprintPage({
 			}}
 		>
 			<BlueprintLocalDraftSeeder workspaceState={liveWorkspaceState} />
-			<div className="mx-auto flex w-full max-w-4xl flex-1 gap-10 px-4 pb-20 pt-4">
-				<div className="hidden w-48 shrink-0 xl:block">
-					<div className="sticky top-20">
-						<BlueprintPageProgressSidebar
-							sectionStatuses={currentSectionStatuses}
-						/>
-					</div>
-				</div>
-				<div className="flex w-full min-w-0 max-w-2xl flex-1 flex-col">
-					<BlueprintPageOverview
-						completedSectionCount={completedSectionCount}
-						totalSectionCount={currentSectionStatuses.length}
-					/>
-					{blueprintPageSections.map((section, index) => {
-						const sectionStatus = sectionStatusById.get(section.id);
-						if (!sectionStatus) {
-							throw new Error(
-								`Missing blueprint page section status for ${section.id}`,
-							);
-						}
-
-						return (
-							<BlueprintPageSectionCard
-								key={section.id}
-								draftValues={currentDraftValues}
-								facts={currentFacts}
-								fieldErrors={currentFieldErrors}
-								isComplete={sectionStatus.isComplete}
-								onChange={handleFieldChange}
-								section={section}
-								sectionNumber={index + 1}
-							/>
-						);
-					})}
-					<BlueprintPageSaveBar
-						feedback={feedback}
-						isReviewReady={isReviewReady}
-						isSaving={isSaving}
-						onSaveAndContinue={handleSaveAndContinue}
-					/>
-				</div>
-			</div>
+			<BlueprintPageBody
+				currentDraftValues={currentDraftValues}
+				currentFacts={currentFacts}
+				currentFieldErrors={currentFieldErrors}
+				currentSectionStatuses={currentSectionStatuses}
+				feedback={feedback}
+				handleFieldChange={handleFieldChange}
+				handleSaveAndContinue={handleSaveAndContinue}
+				isReviewReady={isReviewReady}
+				isSaving={isSaving}
+			/>
 			<BlueprintStageLeaveDialog
 				isOpen={isDialogOpen}
 				onLeaveWithoutSaving={leaveWithoutSaving}

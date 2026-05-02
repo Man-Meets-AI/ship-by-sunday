@@ -1,10 +1,12 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
 import { LinkIcon, XIcon } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import type { CanonicalProjectFactKey } from "@shipbysunday/blueprint-compiler";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useBlueprintPageReducedMotion } from "@/app/(workspace)/_components/blueprint-flow/blueprint-page-motion";
+import { useBlueprintStageLinkListField } from "@/app/(workspace)/_hooks/blueprint-flow/use-blueprint-stage-link-list-field";
 import { blueprintListFieldItemPlaceholders } from "@/lib/blueprint-flow/blueprint-field-helpers";
 
 type BlueprintStageLinkListFieldProps = {
@@ -15,17 +17,6 @@ type BlueprintStageLinkListFieldProps = {
 	errorId?: string;
 	errorMessage?: string;
 };
-
-function parseLinks(value: string): string[] {
-	return value
-		.split("\n")
-		.map((line) => line.trim())
-		.filter(Boolean);
-}
-
-function joinLinks(links: string[]): string {
-	return links.join("\n");
-}
 
 function formatLinkLabel(url: string): string {
 	try {
@@ -44,89 +35,71 @@ export function BlueprintStageLinkListField({
 	errorId,
 	errorMessage,
 }: BlueprintStageLinkListFieldProps) {
-	const links = useMemo(() => parseLinks(value), [value]);
 	const placeholders = blueprintListFieldItemPlaceholders(fieldKey);
-	const [inputValue, setInputValue] = useState("");
-	const inputRef = useRef<HTMLInputElement>(null);
-
-	const commitLink = useCallback(
-		(raw: string) => {
-			const trimmed = raw.trim();
-			if (!trimmed) return;
-			const next = [...links, trimmed];
-			onChange(fieldKey, joinLinks(next));
-			setInputValue("");
-		},
-		[fieldKey, links, onChange],
-	);
-
-	const handleRemove = useCallback(
-		(index: number) => {
-			const next = links.filter((_, i) => i !== index);
-			onChange(fieldKey, joinLinks(next));
-		},
-		[fieldKey, links, onChange],
-	);
-
-	const handleKeyDown = useCallback(
-		(event: React.KeyboardEvent<HTMLInputElement>) => {
-			if (event.key === "Enter") {
-				event.preventDefault();
-				commitLink(inputValue);
-			}
-			if (event.key === "Backspace" && inputValue === "" && links.length > 0) {
-				const next = links.slice(0, -1);
-				onChange(fieldKey, joinLinks(next));
-			}
-		},
-		[commitLink, fieldKey, inputValue, links, onChange],
-	);
-
-	const handlePaste = useCallback(
-		(event: React.ClipboardEvent<HTMLInputElement>) => {
-			const pasted = event.clipboardData.getData("text/plain");
-			const pastedLines = pasted
-				.split(/[\n\r]+/)
-				.map((line) => line.trim())
-				.filter(Boolean);
-			if (pastedLines.length <= 1) return;
-
-			event.preventDefault();
-			const next = [...links, ...pastedLines];
-			onChange(fieldKey, joinLinks(next));
-			setInputValue("");
-		},
-		[fieldKey, links, onChange],
-	);
+	const prefersReducedMotion = useBlueprintPageReducedMotion();
+	const {
+		handleInputBlur,
+		handleKeyDown,
+		handlePaste,
+		handleRemove,
+		inputRef,
+		inputValue,
+		links,
+		setInputValue,
+	} = useBlueprintStageLinkListField({ fieldKey, onChange, value });
 
 	const placeholder =
 		links.length === 0 ? (placeholders[0] ?? "Paste a link") : "Add another";
+	const chipMotionTransition = prefersReducedMotion
+		? { duration: 0 }
+		: { duration: 0.16, ease: "easeOut" as const };
+	const chipInitial = prefersReducedMotion
+		? { opacity: 1, scale: 1 }
+		: { opacity: 0, scale: 0.92 };
+	const chipExit = prefersReducedMotion
+		? { opacity: 0 }
+		: { opacity: 0, scale: 0.92 };
 
 	return (
 		<div className="space-y-3">
 			{links.length > 0 ? (
-				<div className="flex flex-wrap gap-2">
-					{links.map((link, index) => (
-						<span
-							key={index}
-							className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border/60 bg-muted/50 py-1 pr-1.5 pl-2.5 text-xs text-foreground transition-colors hover:bg-muted"
-						>
-							<LinkIcon className="size-3 shrink-0 text-muted-foreground" />
-							<span className="truncate" title={link}>
-								{formatLinkLabel(link)}
-							</span>
-							<Button
-								type="button"
-								variant="ghost"
-								size="icon-xs"
-								className="size-4 rounded-full"
-								onClick={() => handleRemove(index)}
-								aria-label={`Remove ${formatLinkLabel(link)}`}
+				<div
+					className="flex flex-wrap gap-2"
+					data-testid="blueprint-page-link-list"
+				>
+					<AnimatePresence initial={false}>
+						{links.map((link, index) => (
+							<motion.span
+								key={`${index}-${link}`}
+								layout={!prefersReducedMotion}
+								initial={chipInitial}
+								animate={{ opacity: 1, scale: 1 }}
+								exit={chipExit}
+								transition={chipMotionTransition}
+								className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border/60 bg-muted/50 py-1 pr-1.5 pl-2.5 text-xs text-foreground transition-colors hover:bg-muted motion-reduce:transition-none"
 							>
-								<XIcon className="size-3" />
-							</Button>
-						</span>
-					))}
+								<LinkIcon className="size-3 shrink-0 text-muted-foreground" />
+								<span className="truncate" title={link}>
+									{formatLinkLabel(link)}
+								</span>
+								<motion.span
+									whileTap={prefersReducedMotion ? undefined : { scale: 0.9 }}
+									className="inline-flex"
+								>
+									<Button
+										type="button"
+										variant="ghost"
+										size="icon-xs"
+										className="size-4 rounded-full"
+										onClick={() => handleRemove(index)}
+										aria-label={`Remove ${formatLinkLabel(link)}`}
+									>
+										<XIcon className="size-3" />
+									</Button>
+								</motion.span>
+							</motion.span>
+						))}
+					</AnimatePresence>
 				</div>
 			) : null}
 			<Input
@@ -136,9 +109,9 @@ export function BlueprintStageLinkListField({
 				type="url"
 				value={inputValue}
 				placeholder={placeholder}
-				onChange={(e) => setInputValue(e.target.value)}
+				onChange={(event) => setInputValue(event.target.value)}
 				onKeyDown={handleKeyDown}
-				onBlur={() => commitLink(inputValue)}
+				onBlur={handleInputBlur}
 				onPaste={handlePaste}
 				aria-describedby={errorId}
 				aria-invalid={errorMessage ? true : undefined}
