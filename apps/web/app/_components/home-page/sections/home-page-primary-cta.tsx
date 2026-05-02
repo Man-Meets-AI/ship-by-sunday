@@ -10,6 +10,7 @@ type HomePagePrimaryCtaProps = {
 	readonly label: string;
 	readonly className?: string;
 	readonly testId?: string;
+	readonly onBeforeCheckout?: () => void | Promise<void>;
 };
 
 export function HomePagePrimaryCta({
@@ -17,11 +18,17 @@ export function HomePagePrimaryCta({
 	label,
 	className,
 	testId,
+	onBeforeCheckout,
 }: HomePagePrimaryCtaProps) {
 	switch (target.kind) {
 		case "checkout":
 			return (
-				<CheckoutButton label={label} className={className} testId={testId} />
+				<CheckoutButton
+					label={label}
+					className={className}
+					testId={testId}
+					onBeforeCheckout={onBeforeCheckout}
+				/>
 			);
 		case "link":
 			return (

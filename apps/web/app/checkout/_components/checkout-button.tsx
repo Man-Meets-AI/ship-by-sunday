@@ -10,12 +10,16 @@ export function CheckoutButton({
 	label,
 	className,
 	testId,
+	onBeforeCheckout,
 }: {
 	label: string;
 	className?: string;
 	testId?: string;
+	onBeforeCheckout?: () => void | Promise<void>;
 }) {
-	const { startCheckout, isLoading, error } = useStripeCheckout();
+	const { startCheckout, isLoading, error } = useStripeCheckout({
+		onBeforeCheckout,
+	});
 	const loadingLabel = "Redirecting...";
 
 	return (

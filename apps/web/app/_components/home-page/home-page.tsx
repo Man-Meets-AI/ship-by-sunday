@@ -7,9 +7,9 @@ import {
 	SocialProofSection,
 } from "./sections/closing-sections";
 import { HomeHeroSection } from "./sections/hero-sections";
+import { BlueprintDemoSectionBlock } from "./sections/blueprint-demo/blueprint-demo-section";
 import { DurabilitySectionBlock } from "./sections/durability-section";
 import { ExecLoopSectionBlock } from "./sections/exec-loop-section";
-import { ProductPreviewSectionBlock } from "./sections/product-preview-section";
 import { SprintPathUnifiedSection } from "./sections/sprint-path-unified-section";
 import { StarterSystemSectionBlock } from "./sections/starter-system-section";
 
@@ -23,7 +23,7 @@ export default async function HomePage() {
 		<main className="bg-background text-foreground">
 			<div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 pt-4 pb-12 sm:px-12 sm:pt-6 sm:pb-20 lg:pt-8">
 				{homePageRenderModel.productPreview.isEnabled ? (
-					<ProductPreviewSectionBlock
+					<BlueprintDemoSectionBlock
 						section={homePageRenderModel.productPreview.section}
 					/>
 				) : null}

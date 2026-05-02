@@ -1,3 +1,7 @@
+import {
+	DEFAULT_DESIGN_PRESET_ID,
+	getBlueprintStageDefinition,
+} from "@shipbysunday/blueprint-compiler";
 import { describe, expect, it } from "vitest";
 
 import { productConfig } from "@/config/product";
@@ -15,45 +19,52 @@ describe("home page content", () => {
 			"codebases that convert",
 		);
 
-		expect(homePageContent.productPreviewSection.title).toBe(
-			"Build the worker layer.",
-		);
-		expect(homePageContent.productPreviewSection.intro).toContain(
-			"trained employee",
-		);
-		expect(homePageContent.productPreviewSection.primaryAction).toEqual({
-			label: "Build the worker layer",
-			href: "#pricing",
-		});
-		expect(homePageContent.productPreviewSection.secondaryAction).toEqual({
-			label: "See the loop",
-			href: "#system",
-		});
-		expect(homePageContent.productPreviewSection.previewNote).toContain(
-			"worker preview",
+		const productPreviewSection = homePageContent.productPreviewSection;
+
+		const canonicalSectionIds = getBlueprintStageDefinition(
+			"blueprint",
+		).steps.map((step) => step.id);
+		expect(productPreviewSection.sections.map((section) => section.id)).toEqual(
+			canonicalSectionIds,
 		);
 		expect(
-			homePageContent.productPreviewSection.workspace.githubUsernameLabel,
-		).toBe("Codebase GitHub username");
-		expect(homePageContent.productPreviewSection.loopPacket.input.label).toBe(
-			"Phone-started decision",
-		);
-		expect(homePageContent.productPreviewSection.loopPacket.role).toEqual(
-			expect.objectContaining({
-				title: "Growth engineer",
-				status: "Ready for Codex",
-			}),
-		);
+			productPreviewSection.sections
+				.filter((section) => section.status === "interactive")
+				.map((section) => section.id),
+		).toEqual(["foundation", "design", "pricing"]);
 		expect(
-			homePageContent.productPreviewSection.workspace.tabs.map(
-				(tab) => tab.label,
+			productPreviewSection.sections
+				.filter((section) => section.status === "locked")
+				.map((section) => section.id),
+		).toEqual(["problem", "outcome", "setup", "generated-preview"]);
+
+		expect(productPreviewSection.foundation.fields.productName.label).toBe(
+			"What's the name?",
+		);
+		expect(productPreviewSection.foundation.fields.productSummary.label).toBe(
+			"What's the one-liner?",
+		);
+		expect(productPreviewSection.foundation.fields.primaryUser.label).toBe(
+			"Who wants this? Who benefits from this?",
+		);
+
+		expect(productPreviewSection.design.defaultPresetId).toBe(
+			DEFAULT_DESIGN_PRESET_ID,
+		);
+		expect(productPreviewSection.design.presets.length).toBeGreaterThan(0);
+		expect(
+			productPreviewSection.design.presets.some(
+				(preset) => preset.id === DEFAULT_DESIGN_PRESET_ID,
 			),
-		).toEqual(["Source", "Channels", "Proof"]);
+		).toBe(true);
+
 		expect(
-			homePageContent.productPreviewSection.workspace.tabs[0]?.items.map(
-				(item) => item.label,
-			),
-		).toEqual(["Product truth", "Operator taste", "Next decision"]);
+			productPreviewSection.pricing.modelOptions.map((option) => option.value),
+		).toEqual(["one_time", "monthly", "yearly"]);
+		expect(productPreviewSection.pricing.defaultModel).toBe("one_time");
+
+		expect(productPreviewSection.cta.label).toBe("Generate my codebase");
+		expect(productPreviewSection.cta.secondaryHref).toBe("#system");
 
 		expect(homePageContent.hero.headlineLead).toBe("Ship codebases");
 		expect(homePageContent.hero.headlineTailHover).toBe("that convert");

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { api } from "@/convex/_generated/api";
 import { AppShell } from "@/app/(workspace)/_components/app-shell";
 import type { BonusMissionState } from "@/lib/execute-ship/bonus-mission-types";
+import { BlueprintLocalDraftSeeder } from "@/app/(workspace)/_components/blueprint-flow/blueprint-local-draft-seeder";
 import { BlueprintStageLeaveDialog } from "@/app/(workspace)/_components/blueprint-flow/blueprint-stage-leave-dialog";
 import { BlueprintPageOverview } from "@/app/(workspace)/_components/blueprint-flow/blueprint-page-overview";
 import { BlueprintPageProgressSidebar } from "@/app/(workspace)/_components/blueprint-flow/blueprint-page-progress-sidebar";
@@ -103,6 +104,7 @@ export function BlueprintPage({
 				onNavigate: requestNavigation,
 			}}
 		>
+			<BlueprintLocalDraftSeeder workspaceState={liveWorkspaceState} />
 			<div className="mx-auto flex w-full max-w-4xl flex-1 gap-10 px-4 pb-20 pt-4">
 				<div className="hidden w-48 shrink-0 xl:block">
 					<div className="sticky top-20">

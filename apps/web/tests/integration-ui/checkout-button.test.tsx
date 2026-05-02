@@ -6,9 +6,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CheckoutButton } from "@/app/checkout/_components/checkout-button";
 
+const capturePostHogProductEventMock = vi.hoisted(() => vi.fn());
+
+vi.mock("@/lib/observability/posthog-client", () => ({
+	capturePostHogProductEvent: (input: unknown) =>
+		capturePostHogProductEventMock(input),
+}));
+
 describe("CheckoutButton interactions", () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
+		capturePostHogProductEventMock.mockReset();
 	});
 
 	it("starts guest checkout without redirecting through sign-in", async () => {
@@ -41,6 +49,12 @@ describe("CheckoutButton interactions", () => {
 
 		expect(fetchMock).toHaveBeenCalledWith("/api/stripe/checkout", {
 			method: "POST",
+		});
+		expect(capturePostHogProductEventMock).toHaveBeenCalledWith({
+			event: "checkout_started",
+			properties: {
+				surface: "checkout_button",
+			},
 		});
 		expect(assignMock).toHaveBeenCalledWith(
 			"https://checkout.stripe.com/pay/cs_guest_123",
@@ -106,5 +120,86 @@ describe("CheckoutButton interactions", () => {
 		expect(assignMock).toHaveBeenCalledWith(
 			"https://checkout.stripe.com/pay/cs_test_123",
 		);
+	});
+
+	it("runs onBeforeCheckout before starting the Stripe redirect", async () => {
+		const assignMock = vi.fn();
+		Object.defineProperty(window, "location", {
+			configurable: true,
+			value: {
+				assign: assignMock,
+			},
+		});
+		const eventOrder: string[] = [];
+		const onBeforeCheckout = vi.fn(async () => {
+			eventOrder.push("before-checkout");
+		});
+		const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(() => {
+			eventOrder.push("fetch");
+			return Promise.resolve(
+				new Response(
+					JSON.stringify({
+						sessionId: "cs_test_123",
+						url: "https://checkout.stripe.com/pay/cs_test_123",
+					}),
+					{
+						status: 200,
+						headers: {
+							"content-type": "application/json",
+						},
+					},
+				),
+			);
+		});
+
+		const user = userEvent.setup();
+		render(
+			<CheckoutButton
+				label="Get instant access"
+				onBeforeCheckout={onBeforeCheckout}
+			/>,
+		);
+
+		await user.click(screen.getByRole("button"));
+
+		await act(async () => {});
+
+		expect(onBeforeCheckout).toHaveBeenCalledTimes(1);
+		expect(fetchMock).toHaveBeenCalledTimes(1);
+		expect(eventOrder).toEqual(["before-checkout", "fetch"]);
+		expect(assignMock).toHaveBeenCalledWith(
+			"https://checkout.stripe.com/pay/cs_test_123",
+		);
+	});
+
+	it("aborts the redirect and re-enables the button when onBeforeCheckout throws", async () => {
+		const assignMock = vi.fn();
+		Object.defineProperty(window, "location", {
+			configurable: true,
+			value: {
+				assign: assignMock,
+			},
+		});
+		const fetchMock = vi.spyOn(globalThis, "fetch");
+		const onBeforeCheckout = vi.fn(() => {
+			throw new Error("Saving draft failed.");
+		});
+
+		const user = userEvent.setup();
+		render(
+			<CheckoutButton
+				label="Get instant access"
+				onBeforeCheckout={onBeforeCheckout}
+			/>,
+		);
+
+		const button = screen.getByRole("button");
+		await user.click(button);
+
+		expect(await screen.findByText("Saving draft failed.")).toBeTruthy();
+		expect(fetchMock).not.toHaveBeenCalled();
+		expect(assignMock).not.toHaveBeenCalled();
+		expect(button.getAttribute("disabled")).toBeNull();
+		expect(button.getAttribute("aria-busy")).toBe("false");
 	});
 });

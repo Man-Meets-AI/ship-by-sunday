@@ -14,8 +14,11 @@ describe("home page render model", () => {
 
 		expect(renderModel.sectionOrder).toEqual(homePageSectionOrder);
 		expect(renderModel.productPreview.isEnabled).toBe(true);
-		expect(renderModel.productPreview.section.primaryAction.href).toBe(
-			"#pricing",
+		expect(renderModel.productPreview.section.cta.label).toBe(
+			"Generate my codebase",
+		);
+		expect(renderModel.productPreview.section.cta.secondaryHref).toBe(
+			"#system",
 		);
 		expect(renderModel.hero.isEnabled).toBe(true);
 		expect(renderModel.hero.primaryCtaTarget).toEqual({ kind: "checkout" });
@@ -36,12 +39,22 @@ describe("home page render model", () => {
 			"Code-side loop",
 			"Proof path",
 		]);
-		expect(renderModel.productPreview.section.loopPacket.role.title).toBe(
-			"Growth engineer",
-		);
 		expect(
-			renderModel.productPreview.section.workspace.tabs.map((tab) => tab.label),
-		).toEqual(["Source", "Channels", "Proof"]);
+			renderModel.productPreview.section.sections.map((section) => section.id),
+		).toEqual([
+			"foundation",
+			"problem",
+			"outcome",
+			"design",
+			"pricing",
+			"setup",
+			"generated-preview",
+		]);
+		expect(
+			renderModel.productPreview.section.sections
+				.filter((section) => section.status === "interactive")
+				.map((section) => section.id),
+		).toEqual(["foundation", "design", "pricing"]);
 		expect(renderModel.durability.isEnabled).toBe(false);
 		expect(renderModel.socialProof.isEnabled).toBe(true);
 		expect(renderModel.socialProof.variant.kind).toBe("founder");

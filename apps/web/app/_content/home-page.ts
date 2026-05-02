@@ -1,8 +1,19 @@
+import {
+	DEFAULT_DESIGN_PRESET_ID,
+	designPresetDefinitions,
+} from "@shipbysunday/blueprint-compiler";
+import {
+	blueprintFieldHelperText,
+	blueprintFieldLabel,
+	blueprintFieldPlaceholder,
+	getBlueprintFieldScaleDefinition,
+} from "@shipbysunday/blueprint-presentation";
 import { productConfig, routeConfig } from "@/config/product";
 import {
 	marketingDisplayConfig,
 	workspaceDisplayConfig,
 } from "@/config/starter-selectors";
+import { blueprintPageSections } from "@/lib/blueprint-flow/blueprint-page-sections";
 
 const productName = productConfig.name;
 const activePricingOffer = productConfig.activeOffer;
@@ -19,149 +30,131 @@ const pricingOfferBanner = activePricingOffer
 		}
 	: null;
 
-export const homePageContent = {
-	productPreviewSection: {
-		title: "Build the worker layer.",
+const interactiveBlueprintDemoSectionIds = [
+	"foundation",
+	"design",
+	"pricing",
+] as const;
+
+type BlueprintDemoSectionStatus = "interactive" | "locked";
+
+const productPreviewSections = blueprintPageSections.map((section) => ({
+	id: section.id,
+	label: section.label,
+	description: section.description,
+	status: (interactiveBlueprintDemoSectionIds.includes(
+		section.id as (typeof interactiveBlueprintDemoSectionIds)[number],
+	)
+		? "interactive"
+		: "locked") as BlueprintDemoSectionStatus,
+}));
+
+const productPreviewPresetAccentColors: Record<string, string> = {
+	vercel: "#000000",
+	linear: "#5E6AD2",
+	notion: "#37352F",
+	stripe: "#635BFF",
+	supabase: "#3FCF8E",
+	framer: "#0099FF",
+	raycast: "#FF6363",
+	cursor: "#0DBC79",
+};
+
+const productPreviewDesignPresets = designPresetDefinitions.map((preset) => ({
+	id: preset.id,
+	label: preset.label,
+	summary: preset.summary,
+	category: preset.category,
+	logoPath: preset.logoPath,
+	previewImagePath: preset.previewImagePath,
+	referenceUrl: preset.previewPageUrl,
+	accentColor: productPreviewPresetAccentColors[preset.id] ?? "#71717A",
+}));
+
+const pricingModelScaleOptions =
+	getBlueprintFieldScaleDefinition("pricing_model")?.options ?? [];
+const productPreviewPricingModelOptions = pricingModelScaleOptions.map(
+	(option) => ({
+		value: option.value as "one_time" | "monthly" | "yearly",
+		label: option.label,
+		ariaLabel: option.ariaLabel,
+	}),
+);
+
+if (productPreviewPricingModelOptions.length !== 3) {
+	throw new Error(
+		"Expected exactly three pricing model options for the homepage Blueprint demo",
+	);
+}
+
+const productPreviewSection = {
+	headline: {
+		prefix: "Spec your product, then ",
+		highlight: "generate the codebase.",
+	},
+	intro:
+		"Fill the same Blueprint a paying buyer fills. Lock the foundation, pick a design direction, set your price, and we generate the codebase that matches.",
+	unlockNote:
+		"Checkout unlocks Problem, Outcome, Setup, and Generated preview, plus the full theme grid (color, style, radius) in the workspace.",
+	previewNote:
+		"Real intake form. Your answers ride through Stripe and prefill /blueprint right after checkout.",
+	sections: productPreviewSections,
+	foundation: {
 		intro:
-			"For technical founders who can get AI to write code, but need it to ship like a trained employee: start from your phone, route the work to the right role, and get reviewed product changes back.",
-		primaryAction: {
-			label: "Build the worker layer",
-			href: routeConfig.pricingHash,
-		},
-		secondaryAction: {
-			label: "See the loop",
-			href: routeConfig.systemHash,
-		},
-		unlockNote:
-			"Checkout opens saved setup, worker role packs, private videos, and the build actions.",
-		previewNote:
-			"Tune the worker preview. Checkout saves the context, role packets, and code-side build path.",
-		loopPacket: {
-			input: {
-				label: "Phone-started decision",
-				title: "Tighten the buyer path before tomorrow.",
-				body: "From Telegram: the homepage explains the product, but the offer still feels abstract. Show the worker loop, route the CTA to checkout, and verify it on mobile.",
+			"These three answers anchor every other section of the Blueprint. Two minutes is plenty.",
+		fields: {
+			productName: {
+				key: "product_name" as const,
+				label: blueprintFieldLabel("product_name"),
+				placeholder: blueprintFieldPlaceholder("product_name") ?? "",
+				helperText: blueprintFieldHelperText("product_name") ?? "",
 			},
-			role: {
-				label: "Worker role",
-				title: "Growth engineer",
-				status: "Ready for Codex",
-				items: [
-					"Reads product truth and homepage contract",
-					"Ships the smallest conversion patch",
-					"Returns proof and the next loop",
-				],
+			productSummary: {
+				key: "product_summary" as const,
+				label: blueprintFieldLabel("product_summary"),
+				placeholder: blueprintFieldPlaceholder("product_summary") ?? "",
+				helperText: blueprintFieldHelperText("product_summary") ?? "",
 			},
-			output: {
-				label: "Reviewed code output",
-				items: [
-					{
-						label: "Scoped diff",
-						detail: "Homepage copy, preview, and CTA route",
-					},
-					{
-						label: "Browser proof",
-						detail: "Desktop and mobile buyer path checked",
-					},
-					{
-						label: "Context update",
-						detail: "What worked feeds the next role",
-					},
-				],
+			primaryUser: {
+				key: "primary_user" as const,
+				label: blueprintFieldLabel("primary_user"),
+				placeholder: blueprintFieldPlaceholder("primary_user") ?? "",
+				helperText: blueprintFieldHelperText("primary_user") ?? "",
 			},
-		},
-		workspace: {
-			title: "Worker layer preview",
-			statusLabel: "Buyer preview",
-			githubUsernameLabel: "Codebase GitHub username",
-			githubUsernamePlaceholder: "parkerrex",
-			githubUsernameHelp:
-				"After checkout, this account receives the private starter repo and worker-layer setup.",
-			tabs: [
-				{
-					id: "source",
-					label: "Source",
-					title: "Decision context",
-					description:
-						"Capture the product truth, operator taste, and next decision so every run starts from the same context.",
-					items: [
-						{
-							label: "Product truth",
-							detail: "Problem, promise, scope",
-						},
-						{
-							label: "Operator taste",
-							detail: "How you decide and review",
-						},
-						{
-							label: "Next decision",
-							detail: "Ready for the next loop",
-						},
-					],
-				},
-				{
-					id: "channels",
-					label: "Channels",
-					title: "Phone to agent",
-					description:
-						"Move the same decision packet through Codex, Telegram, Discord, or a phone-started prompt without losing the thread.",
-					items: [
-						{
-							label: "Codex dispatch",
-							detail: "Agent run with repo context",
-						},
-						{
-							label: "Telegram / Discord",
-							detail: "Async loop handoff",
-						},
-						{
-							label: "Worker prompt",
-							detail: "One role, one outcome",
-						},
-					],
-				},
-				{
-					id: "proof",
-					label: "Proof",
-					title: "Code shipping path",
-					description:
-						"Review the diff, browser proof, and next action before the loop compounds into your worker layer.",
-					items: [
-						{
-							label: "Diff review",
-							detail: "Meaningful code, not random edits",
-						},
-						{
-							label: "Browser proof",
-							detail: "Behavior checked before trust",
-						},
-						{
-							label: "Next loop",
-							detail: "Context feeds forward",
-						},
-					],
-				},
-			],
-			checklist: [
-				{
-					id: "truth",
-					label: "Product truth locked",
-				},
-				{
-					id: "roles",
-					label: "Worker roles trained",
-				},
-				{
-					id: "channels",
-					label: "Channel loop ready",
-				},
-				{
-					id: "qa",
-					label: "QA path attached",
-				},
-			],
 		},
 	},
+	design: {
+		intro:
+			"Pick the brand DNA closest to what you want. Each preset maps to a real, public design system. You can fine-tune the theme grid in the workspace.",
+		label: blueprintFieldLabel("design_preset_id"),
+		helperText: blueprintFieldHelperText("design_preset_id") ?? "",
+		defaultPresetId: DEFAULT_DESIGN_PRESET_ID,
+		presets: productPreviewDesignPresets,
+		previewLinkLabel: "View live reference",
+		previewNote:
+			"Color, style, and radius open in the workspace after checkout so you can stay close to the reference or push further.",
+	},
+	pricing: {
+		intro:
+			"Set what people will pay. You can change this later before you generate the repo.",
+		modelLabel: blueprintFieldLabel("pricing_model"),
+		modelOptions: productPreviewPricingModelOptions,
+		defaultModel: "one_time" as const,
+		defaultPrice: "29",
+		priceHelperText: blueprintFieldHelperText("pricing") ?? "",
+		pricePlaceholder: blueprintFieldPlaceholder("pricing") ?? "",
+	},
+	cta: {
+		label: "Generate my codebase",
+		lockedNote:
+			"We'll save your draft, take you to Stripe, and bring you back to the workspace prefilled with these answers.",
+		secondaryLabel: "See how the loop works",
+		secondaryHref: routeConfig.systemHash,
+	},
+} as const;
+
+export const homePageContent = {
+	productPreviewSection,
 	assets: {
 		socialProofImage: productConfig.images.founderProof,
 	},

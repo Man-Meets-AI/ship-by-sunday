@@ -4,8 +4,14 @@ import { useCallback, useState } from "react";
 
 import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
 import { assert } from "@/lib/assert";
+import { capturePostHogProductEvent } from "@/lib/observability/posthog-client";
 
-export function useStripeCheckout() {
+export type StripeCheckoutOptions = {
+	onBeforeCheckout?: () => void | Promise<void>;
+};
+
+export function useStripeCheckout(options: StripeCheckoutOptions = {}) {
+	const { onBeforeCheckout } = options;
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -15,8 +21,29 @@ export function useStripeCheckout() {
 
 	const startCheckout = useCallback(async () => {
 		setError(null);
+		capturePostHogProductEvent({
+			event: "checkout_started",
+			properties: {
+				surface: "checkout_button",
+			},
+		});
 
 		setIsLoading(true);
+
+		if (onBeforeCheckout) {
+			try {
+				await onBeforeCheckout();
+			} catch (callbackError) {
+				const message =
+					callbackError instanceof Error
+						? callbackError.message
+						: "Unable to prepare checkout.";
+				setError(message);
+				setIsLoading(false);
+				return;
+			}
+		}
+
 		const response = await fetch(apiRouteConfig.stripeCheckout, {
 			method: "POST",
 		});
@@ -38,7 +65,7 @@ export function useStripeCheckout() {
 
 		assert("url" in data, "Missing checkout redirect URL.");
 		window.location.assign(data.url);
-	}, []);
+	}, [onBeforeCheckout]);
 
 	return { startCheckout, isLoading, error, clearError };
 }
