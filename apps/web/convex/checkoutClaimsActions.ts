@@ -769,8 +769,9 @@ export const claimCheckoutSessionForViewer = action({
 			}
 
 			const grantResult: { granted: "inserted" | "patched" } =
-				await ctx.runMutation(internal.access.grantProductAccessFromStripe, {
+				await ctx.runMutation(internal.access.grantProductAccess, {
 					clerkUserId: identity.subject,
+					source: "stripe_checkout",
 					stripeCustomerId:
 						typeof session.customer === "string" ? session.customer : undefined,
 					stripeCheckoutSessionId: session.id,

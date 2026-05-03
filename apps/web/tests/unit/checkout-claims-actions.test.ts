@@ -109,6 +109,7 @@ describe("convex/checkoutClaimsActions", () => {
 			expect.anything(),
 			expect.objectContaining({
 				clerkUserId: "user_123",
+				source: "stripe_checkout",
 				stripeCheckoutSessionId: "cs_test_123",
 				stripeCustomerId: "cus_123",
 				stripePaymentIntentId: "pi_123",

@@ -33,6 +33,7 @@ const releasePersonaLocalPath = path.resolve(
 	"../../..",
 	process.env.RELEASE_PERSONAS_LOCAL_FILE ?? "tmp/release-personas.local.json",
 );
+const expectedWebhookAccessSource = "stripe_webhook";
 
 function normalizeStripeSecretKey(secretKey) {
 	return secretKey.replaceAll("\\n", "").replaceAll("\n", "").trim();
@@ -549,7 +550,7 @@ try {
 		);
 		printCheck(
 			"Product access source",
-			Boolean(productAccess.source),
+			productAccess.source === expectedWebhookAccessSource,
 			`source=${productAccess.source}`,
 		);
 		printCheck(
@@ -597,6 +598,7 @@ try {
 		(requireConvexDebug &&
 			(!productAccess ||
 				productAccess.status !== "granted" ||
+				productAccess.source !== expectedWebhookAccessSource ||
 				productAccess.stripeCheckoutSessionId !== checkoutSession.id))
 	) {
 		process.exitCode = 1;
