@@ -16,7 +16,7 @@ const triggerClassName =
 	"hidden shrink-0 items-center gap-1.5 rounded-full border-border/70 bg-background/70 px-2 text-xs font-medium text-muted-foreground hover:bg-background/90 hover:text-foreground motion-reduce:transition-none sm:inline-flex sm:h-8";
 
 const overlayClassName =
-	"fixed inset-0 z-50 bg-black/40 supports-[backdrop-filter]:backdrop-blur-sm data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 motion-reduce:duration-0 motion-reduce:data-open:animate-none motion-reduce:data-closed:animate-none";
+	"fixed inset-0 z-50 bg-ink/40 supports-[backdrop-filter]:backdrop-blur-sm data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 motion-reduce:duration-0 motion-reduce:data-open:animate-none motion-reduce:data-closed:animate-none";
 
 const contentClassName =
 	"fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl bg-popover text-popover-foreground shadow-lg ring-1 ring-foreground/10 outline-none sm:max-w-lg data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 motion-reduce:duration-0 motion-reduce:data-open:animate-none motion-reduce:data-closed:animate-none";

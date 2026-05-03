@@ -11,7 +11,7 @@ const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
 export function NotFoundScreen() {
 	return (
-		<main className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
+		<main className="min-h-screen bg-ink text-white selection:bg-white selection:text-ink">
 			<div className="mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center px-6 py-20 text-center">
 				<div className="space-y-8">
 					<div className="space-y-4">
@@ -27,9 +27,9 @@ export function NotFoundScreen() {
 							initial={{ opacity: 0, scale: 0.95 }}
 							animate={{ opacity: 1, scale: 1 }}
 							transition={{ duration: 0.7, ease }}
-							className="font-marketing-display text-[clamp(4rem,15vw,12rem)] leading-[0.85] tracking-tighter uppercase"
+							className="font-heading-serif text-[clamp(4rem,15vw,12rem)] leading-[0.88]"
 						>
-							Path Not <span className="text-white/20">Found</span>
+							Path Not <span className="text-white/20 italic">Found</span>
 						</motion.h1>
 					</div>
 
@@ -52,7 +52,7 @@ export function NotFoundScreen() {
 						<Button
 							asChild
 							size="lg"
-							className="h-14 px-8 text-lg rounded-full bg-white text-black hover:bg-white/90"
+							className="h-14 px-8 text-lg rounded-full bg-white text-ink hover:bg-white/90"
 						>
 							<Link href={routeConfig.blueprint}>
 								{workspaceDisplayConfig.openHomeActionLabel}
@@ -61,7 +61,7 @@ export function NotFoundScreen() {
 						<Button
 							asChild
 							size="lg"
-							className="h-14 rounded-full border-white/20 bg-white px-8 text-lg text-black hover:bg-white/90 hover:text-black"
+							className="h-14 rounded-full border-white/20 bg-white px-8 text-lg text-ink hover:bg-white/90 hover:text-ink"
 						>
 							<Link href={routeConfig.home}>Exit to safety</Link>
 						</Button>

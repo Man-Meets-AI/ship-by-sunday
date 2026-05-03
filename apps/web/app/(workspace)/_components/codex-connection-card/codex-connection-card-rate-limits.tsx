@@ -52,7 +52,7 @@ function RateLimitWindowBlock({
 			<ItemContent className="gap-2">
 				<div className="flex flex-wrap items-baseline justify-between gap-2">
 					<ItemTitle>{label}</ItemTitle>
-					<span className="text-right text-sm text-muted-foreground tabular-nums">
+					<span className="text-right text-sm text-muted-foreground font-number">
 						<span className="font-medium text-foreground">
 							{timeWindow.usedPercent}%
 						</span>
@@ -62,7 +62,7 @@ function RateLimitWindowBlock({
 				</div>
 				<p className="text-xs text-muted-foreground">
 					Resets at{" "}
-					<span className="tabular-nums text-foreground/90">{resetLabel}</span>
+					<span className="font-number text-foreground/90">{resetLabel}</span>
 				</p>
 				<Progress value={value} aria-label={`${label} usage ${value}%`} />
 			</ItemContent>
@@ -84,7 +84,7 @@ function SnapshotMeta({ snapshot }: { snapshot: RateLimitSnapshot }) {
 					<dt className="text-xs font-medium text-muted-foreground uppercase">
 						Plan
 					</dt>
-					<dd className="tabular-nums text-foreground">{plan}</dd>
+					<dd className="font-number text-foreground">{plan}</dd>
 				</div>
 			) : null}
 			{credits ? (

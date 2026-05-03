@@ -13,7 +13,7 @@ export function DocsFooter() {
 	return (
 		<footer className="sbs-docs-footer">
 			<div>
-				<p className="font-[family:var(--font-bebas-neue),ui-sans-serif,system-ui,sans-serif] text-xl uppercase tracking-[0.08em] text-foreground">
+				<p className="font-product-wordmark text-xl uppercase tracking-[0.08em] text-foreground">
 					{docsDisplayConfig.siteName}
 				</p>
 				<p className="mt-1 max-w-2xl text-sm leading-relaxed">

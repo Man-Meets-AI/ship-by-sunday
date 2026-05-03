@@ -57,7 +57,7 @@ const FALLBACK_ACCENT: ProductPreviewAccent = {
 };
 
 const productPreviewPresetAccentColors: Record<string, ProductPreviewAccent> = {
-	vercel: { light: "#000000", dark: "#FAFAFA" },
+	vercel: { light: "#111111", dark: "#FAFAFA" },
 	linear: { light: "#5E6AD2", dark: "#7C8AF7" },
 	notion: { light: "#37352F", dark: "#E8E6E1" },
 	stripe: { light: "#635BFF", dark: "#8E88FF" },

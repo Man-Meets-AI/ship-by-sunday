@@ -32,7 +32,7 @@ export function AuthPageShell({
 			>
 				<div className="flex min-w-0 flex-col gap-8 py-6 sm:py-8 lg:py-10 lg:pr-12">
 					<div className="max-w-xl space-y-4">
-						<h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+						<h1 className="font-heading-serif text-3xl font-normal text-foreground sm:text-4xl">
 							{title}
 						</h1>
 						{description ? (

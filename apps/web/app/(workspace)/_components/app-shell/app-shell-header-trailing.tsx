@@ -82,7 +82,7 @@ export function AppShellHeaderTrailing({
 			) : null}
 			{progress ? (
 				<span
-					className="hidden tabular-nums text-xs font-medium text-muted-foreground sm:inline"
+					className="hidden font-number text-xs font-medium text-muted-foreground sm:inline"
 					title={progressLabel ?? undefined}
 				>
 					<span className="sr-only">{progressVerb}: </span>

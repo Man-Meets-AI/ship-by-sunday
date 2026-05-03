@@ -61,7 +61,7 @@ export function BlueprintStageListFieldRow({
 			transition={transition}
 			className="group/row flex items-center gap-2 overflow-hidden"
 		>
-			<span className="w-6 shrink-0 text-right text-xs font-medium tabular-nums text-muted-foreground">
+			<span className="w-6 shrink-0 text-right text-xs font-medium font-number text-muted-foreground">
 				{index + 1}.
 			</span>
 			{canReorder ? (

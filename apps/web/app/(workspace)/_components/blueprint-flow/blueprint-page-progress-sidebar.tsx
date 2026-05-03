@@ -94,7 +94,7 @@ export function BlueprintPageProgressSidebar({
 					<p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
 						Progress
 					</p>
-					<p className="text-xs tabular-nums text-muted-foreground/70">
+					<p className="text-xs font-number text-muted-foreground/70">
 						{completedCount}/{sectionStatuses.length}
 					</p>
 				</div>

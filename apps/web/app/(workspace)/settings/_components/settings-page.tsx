@@ -21,7 +21,9 @@ export function SettingsPageContent() {
 
 			<div className="flex min-w-0 flex-1 flex-col gap-6 lg:max-w-3xl">
 				<div className="space-y-1">
-					<h1 className="text-2xl font-semibold text-foreground">Settings</h1>
+					<h1 className="font-heading-serif text-2xl font-normal text-foreground">
+						Settings
+					</h1>
 					<p className="text-sm text-muted-foreground">{settingsDescription}</p>
 				</div>
 

@@ -247,9 +247,8 @@ html[data-product-theme] {
 
 .sbs-docs-prose h1,
 .sbs-docs-prose h2 {
-	font-family: var(--font-bebas-neue), ui-sans-serif, system-ui, sans-serif;
-	text-transform: uppercase;
-	letter-spacing: 0;
+	font-family: var(--font-instrument-serif), Georgia, "Times New Roman", serif;
+	letter-spacing: -0.04em;
 	line-height: 0.92;
 	color: rgb(var(--product-text));
 }
@@ -313,7 +312,7 @@ html[data-product-theme] {
 	border-radius: 999px;
 	background: rgb(var(--product-surface-strong) / 0.9);
 	padding: 0.18rem 0.55rem;
-	font-size: 0.9em;
+	font-size: 0.75rem;
 }
 
 .sbs-docs-prose pre {

@@ -189,3 +189,12 @@ If helpful, also record the external official references used for the work:
 - **Design direction:** Match the Figma selection's black editorial composition, Instrument Serif display headline, Inter subline, and grey/white selector while keeping the real Blueprint demo and checkout persistence below it.
 - **Out of scope:** No new checkout target, no change to the 7-section Blueprint demo contract, and no external provider setup.
 - **Verification:** Focused homepage content/render-model tests and integration-ui coverage should assert the new hero copy and preserved canonical demo sections, with desktop and mobile browser proof against the Figma screenshot before release.
+
+## Shipped Note: Project Typography Contract
+
+- **Date:** 2026-05-03
+- **Surface:** Global app, public homepage, docs shell, blog, and workspace H1 surfaces.
+- **Change:** Centralized font loading through the app font module. Inter now owns UI text at a 14px default, Berkeley Mono owns code and numeric UI at a 12px code default, Instrument Serif owns H1 headings with `-0.04em` spacing, and Bebas Neue is constrained to the `SHIP BY SUNDAY` wordmark/logo role.
+- **Design direction:** Preserve the restrained operating-system feel while making the typography roles explicit and repeatable across marketing, docs, and app surfaces.
+- **Out of scope:** No generated customer starter font contract changes beyond the active app presentation layer.
+- **Verification:** Run focused app checks, broad repo gates, and desktop/mobile browser proof for the global typography pass before release.

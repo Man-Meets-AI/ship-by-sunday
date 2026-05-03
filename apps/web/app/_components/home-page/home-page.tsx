@@ -20,7 +20,7 @@ export default async function HomePage() {
 		: "lead";
 
 	return (
-		<main className="bg-background text-foreground">
+		<main className="overflow-x-clip bg-background text-foreground">
 			<div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 pt-4 pb-12 sm:px-12 sm:pt-6 sm:pb-20 lg:pt-8">
 				{homePageRenderModel.productPreview.isEnabled ? (
 					<BlueprintDemoSectionBlock

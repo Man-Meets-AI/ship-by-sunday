@@ -1,28 +1,9 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import "@xyflow/react/dist/style.css";
-import { Bebas_Neue, Instrument_Serif, Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 
-const bebasNeue = Bebas_Neue({
-	subsets: ["latin"],
-	weight: "400",
-	variable: "--font-bebas-neue",
-});
-
-const instrumentSerif = Instrument_Serif({
-	subsets: ["latin"],
-	weight: "400",
-	style: ["normal", "italic"],
-	variable: "--font-instrument-serif",
-});
-
-const inter = Inter({
-	subsets: ["latin"],
-	weight: "400",
-	variable: "--font-inter",
-});
-
+import { projectFontVariables } from "@/app/fonts";
 import { Toaster } from "@/components/ui/sonner";
 import { generatedDesignSystem } from "@/config/generated-design-system";
 import { manifestConfig, productConfig, routeConfig } from "@/config/product";
@@ -87,19 +68,11 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en" suppressHydrationWarning>
+		<html lang="en" className={projectFontVariables} suppressHydrationWarning>
 			<head>
-				{generatedDesignSystem.preset.font.googleFontsUrl ? (
-					<link
-						rel="stylesheet"
-						href={generatedDesignSystem.preset.font.googleFontsUrl}
-					/>
-				) : null}
 				<style id="generated-design-system">{generatedDesignSystemCss}</style>
 			</head>
-			<body
-				className={`${bebasNeue.variable} ${instrumentSerif.variable} ${inter.variable}`}
-			>
+			<body>
 				<ClerkProvider
 					appearance={clerkProviderAppearance}
 					signInUrl={routeConfig.signIn}

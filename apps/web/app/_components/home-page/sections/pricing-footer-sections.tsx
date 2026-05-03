@@ -57,7 +57,7 @@ export function PricingSectionBlock({
 										{pricingSection.originalPriceDisplay}
 									</p>
 								) : null}
-								<p className="font-marketing-display text-[clamp(5rem,15vw,10rem)] font-black leading-[0.85] tracking-tighter text-foreground">
+								<p className="font-number text-[clamp(5rem,15vw,10rem)] font-bold leading-[0.85] tracking-tighter text-foreground">
 									{pricingSection.offerPriceDisplay}
 								</p>
 								<span className="text-sm font-medium text-muted-foreground">
@@ -110,7 +110,7 @@ export function FooterSection({
 			<div className="flex flex-col items-center gap-6">
 				<ScrollReveal className="w-full">
 					<div className="flex w-full flex-col items-center justify-between gap-4 sm:flex-row">
-						<p className="font-marketing-display text-lg font-semibold tracking-tight text-foreground">
+						<p className="font-product-wordmark text-lg font-normal tracking-wide text-foreground uppercase">
 							{footerWordmark}
 						</p>
 						<Link

@@ -19,7 +19,7 @@ export function SkillRailShadcnStepBody({
 		<span className="flex min-w-0 max-w-full items-center gap-1.5 sm:gap-2">
 			<span
 				className={cn(
-					"flex size-5 shrink-0 items-center justify-center rounded-full border font-mono text-[10px] font-bold tabular-nums sm:size-6 sm:text-[11px]",
+					"flex size-5 shrink-0 items-center justify-center rounded-full border font-mono text-[10px] font-bold font-number sm:size-6 sm:text-[11px]",
 					state === "done"
 						? "border-primary/35 bg-primary/8 text-foreground"
 						: "border-border text-muted-foreground",
