@@ -18,6 +18,9 @@ type HomePageCheckoutCtaProps = {
 	readonly loadingLabels?: CheckoutButtonLoadingLabels;
 };
 
+const DEFAULT_EXPRESS_CHECKOUT_BUTTON_HEIGHT = 44;
+const TALL_EXPRESS_CHECKOUT_BUTTON_HEIGHT = 55;
+
 export function HomePageCheckoutCta({
 	label,
 	className,
@@ -28,7 +31,9 @@ export function HomePageCheckoutCta({
 }: HomePageCheckoutCtaProps) {
 	const [isExpressCheckoutAvailable, setIsExpressCheckoutAvailable] =
 		useState(false);
-	const expressButtonHeight = className?.includes("h-16") ? 64 : 44;
+	const expressButtonHeight = className?.includes("h-16")
+		? TALL_EXPRESS_CHECKOUT_BUTTON_HEIGHT
+		: DEFAULT_EXPRESS_CHECKOUT_BUTTON_HEIGHT;
 
 	const handleExpressError = useCallback(
 		(message: string | null) => {
