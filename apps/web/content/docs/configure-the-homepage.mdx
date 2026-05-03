@@ -30,21 +30,23 @@ When you need to change the homepage, inspect these files in this order:
 15. `app/_components/home-page/sections/blueprint-demo/use-home-page-blueprint-draft.ts`
 16. `app/_components/home-page/sections/durability-section.tsx`
 17. `app/_components/home-page/sections/starter-system-section.tsx`
-18. `app/_components/home-page/sections/home-page-primary-cta.tsx`
-19. `app/checkout/_components/checkout-button.tsx`
-20. `app/checkout/_hooks/use-stripe-checkout.ts`
-21. `lib/blueprint-flow/use-blueprint-local-draft-seeder.ts`
-22. `app/(workspace)/_components/blueprint-flow/blueprint-local-draft-seeder.tsx`
-23. `app/_lib/home-page-structured-data.ts`
-24. `tests/unit/home-page-content.test.ts`
-25. `tests/unit/home-page-render-model.test.ts`
-26. `tests/unit/home-page-structured-data.test.ts`
-27. `tests/unit/home-page-blueprint-draft-storage.test.ts`
-28. `tests/integration-ui/home-page-product-preview.test.tsx`
-29. `tests/integration-ui/home-page-primary-cta.test.tsx`
-30. `tests/integration-ui/checkout-button.test.tsx`
-31. `tests/integration-ui/blueprint-local-draft-seeder.test.tsx`
-32. `tests/unit/public-metadata-routes.test.ts`
+18. `app/_components/home-page/sections/programs-section.tsx`
+19. `app/_components/home-page/sections/plans-md-section.tsx`
+20. `app/_components/home-page/sections/home-page-primary-cta.tsx`
+21. `app/checkout/_components/checkout-button.tsx`
+22. `app/checkout/_hooks/use-stripe-checkout.ts`
+23. `lib/blueprint-flow/use-blueprint-local-draft-seeder.ts`
+24. `app/(workspace)/_components/blueprint-flow/blueprint-local-draft-seeder.tsx`
+25. `app/_lib/home-page-structured-data.ts`
+26. `tests/unit/home-page-content.test.ts`
+27. `tests/unit/home-page-render-model.test.ts`
+28. `tests/unit/home-page-structured-data.test.ts`
+29. `tests/unit/home-page-blueprint-draft-storage.test.ts`
+30. `tests/integration-ui/home-page-product-preview.test.tsx`
+31. `tests/integration-ui/home-page-primary-cta.test.tsx`
+32. `tests/integration-ui/checkout-button.test.tsx`
+33. `tests/integration-ui/blueprint-local-draft-seeder.test.tsx`
+34. `tests/unit/public-metadata-routes.test.ts`
 
 If you skip that order, it is easy to update copy while missing the render model, or to change visible sections while leaving schema and smoke tests out of sync.
 
@@ -59,11 +61,14 @@ That config currently controls:
 - `sections.productPreview`
 - `sections.hero`
 - `sections.sprintPath`
+- `sections.mechanism`
 - `sections.execLoop`
 - `sections.starterSystem`
 - `sections.durability`
 - `sections.socialProof`
+- `sections.programs`
 - `sections.faq`
+- `sections.plansMd`
 - `sections.pricing`
 - `sections.footer`
 - `heroPrimaryCta`
@@ -99,18 +104,21 @@ If a future agent adds homepage behavior, add it here first instead of sprinklin
 
 ## Current section contract
 
-The homepage renders these top-level sections in this fixed order:
+The homepage can render these top-level sections in this fixed order:
 
 1. `productPreview`
 2. `hero`
 3. `sprintPath`
-4. `execLoop`
-5. `starterSystem`
-6. `durability`
-7. `socialProof`
-8. `faq`
-9. `pricing`
-10. `footer`
+4. `mechanism`
+5. `execLoop`
+6. `starterSystem`
+7. `durability`
+8. `socialProof`
+9. `programs`
+10. `faq`
+11. `plansMd`
+12. `pricing`
+13. `footer`
 
 Two anchors are part of the public contract:
 
@@ -188,8 +196,8 @@ default `I have an idea for a product` branch continues into the interactive
 Blueprint demo that mirrors the real `/blueprint` workspace. The `I have a
 codebase already` branch shows the Figma-sourced codebase audit path. Both
 starting points then continue through the same homepage story: hero, sprint
-path, exec-loop, starter-system, optional durability, social proof, FAQ,
-pricing, and footer.
+path, exec-loop, starter-system, optional durability, social proof, Programs,
+FAQ, PLANS.md, pricing, and footer.
 
 The idea-branch product-preview CTA is a real checkout action: clicking
 "Generate my codebase" persists the latest demo draft to `localStorage` (key
@@ -288,9 +296,9 @@ If you do not update all of those in one slice, the homepage contract will drift
 Run these checks after meaningful homepage changes:
 
 ```bash
-bunx oxlint --deny-warnings config/product.ts app/_components/home-page/home-page.tsx app/_components/home-page/sections/blueprint-demo/blueprint-demo-section.tsx app/_components/home-page/sections/blueprint-demo/blueprint-demo-sidebar.tsx app/_components/home-page/sections/blueprint-demo/blueprint-demo-foundation-card.tsx app/_components/home-page/sections/blueprint-demo/blueprint-demo-design-card.tsx app/_components/home-page/sections/blueprint-demo/blueprint-demo-pricing-card.tsx app/_components/home-page/sections/blueprint-demo/blueprint-demo-locked-card.tsx app/_components/home-page/sections/blueprint-demo/blueprint-demo-cta-bar.tsx app/_components/home-page/sections/blueprint-demo/home-page-blueprint-draft-storage.ts app/_components/home-page/sections/blueprint-demo/use-home-page-blueprint-draft.ts app/_components/home-page/sections/durability-section.tsx app/_components/home-page/sections/exec-loop-section.tsx app/_components/home-page/sections/hero-sections.tsx app/_components/home-page/sections/pricing-footer-sections.tsx app/_components/home-page/sections/home-page-primary-cta.tsx app/checkout/_components/checkout-button.tsx app/checkout/_hooks/use-stripe-checkout.ts lib/blueprint-flow/use-blueprint-local-draft-seeder.ts app/_content/home-page.ts app/_lib/home-page-render-model.ts app/_lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/unit/home-page-blueprint-draft-storage.test.ts tests/integration-ui/home-page-product-preview.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx tests/integration-ui/checkout-button.test.tsx tests/integration-ui/blueprint-local-draft-seeder.test.tsx
+bunx oxlint --deny-warnings config/product.ts app/_components/home-page/home-page.tsx app/_components/home-page/sections/blueprint-demo/blueprint-demo-section.tsx app/_components/home-page/sections/blueprint-demo/blueprint-demo-sidebar.tsx app/_components/home-page/sections/blueprint-demo/blueprint-demo-foundation-card.tsx app/_components/home-page/sections/blueprint-demo/blueprint-demo-design-card.tsx app/_components/home-page/sections/blueprint-demo/blueprint-demo-pricing-card.tsx app/_components/home-page/sections/blueprint-demo/blueprint-demo-locked-card.tsx app/_components/home-page/sections/blueprint-demo/blueprint-demo-cta-bar.tsx app/_components/home-page/sections/blueprint-demo/home-page-blueprint-draft-storage.ts app/_components/home-page/sections/blueprint-demo/use-home-page-blueprint-draft.ts app/_components/home-page/sections/durability-section.tsx app/_components/home-page/sections/exec-loop-section.tsx app/_components/home-page/sections/hero-sections.tsx app/_components/home-page/sections/programs-section.tsx app/_components/home-page/sections/plans-md-section.tsx app/_components/home-page/sections/pricing-footer-sections.tsx app/_components/home-page/sections/home-page-primary-cta.tsx app/checkout/_components/checkout-button.tsx app/checkout/_hooks/use-stripe-checkout.ts lib/blueprint-flow/use-blueprint-local-draft-seeder.ts app/_content/home-page.ts app/_lib/home-page-render-model.ts app/_lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/unit/home-page-blueprint-draft-storage.test.ts tests/integration-ui/home-page-product-preview.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx tests/integration-ui/checkout-button.test.tsx tests/integration-ui/blueprint-local-draft-seeder.test.tsx
 
-bunx oxfmt --check config/product.ts app/_components/home-page/home-page.tsx app/_components/home-page/sections/blueprint-demo app/_components/home-page/sections/durability-section.tsx app/_components/home-page/sections/exec-loop-section.tsx app/_components/home-page/sections/hero-sections.tsx app/_components/home-page/sections/pricing-footer-sections.tsx app/_components/home-page/sections/home-page-primary-cta.tsx app/checkout/_components/checkout-button.tsx app/checkout/_hooks/use-stripe-checkout.ts lib/blueprint-flow/use-blueprint-local-draft-seeder.ts app/_content/home-page.ts app/_lib/home-page-render-model.ts app/_lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/unit/home-page-blueprint-draft-storage.test.ts tests/integration-ui/home-page-product-preview.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx tests/integration-ui/checkout-button.test.tsx tests/integration-ui/blueprint-local-draft-seeder.test.tsx
+bunx oxfmt --check config/product.ts app/_components/home-page/home-page.tsx app/_components/home-page/sections/blueprint-demo app/_components/home-page/sections/durability-section.tsx app/_components/home-page/sections/exec-loop-section.tsx app/_components/home-page/sections/hero-sections.tsx app/_components/home-page/sections/programs-section.tsx app/_components/home-page/sections/plans-md-section.tsx app/_components/home-page/sections/pricing-footer-sections.tsx app/_components/home-page/sections/home-page-primary-cta.tsx app/checkout/_components/checkout-button.tsx app/checkout/_hooks/use-stripe-checkout.ts lib/blueprint-flow/use-blueprint-local-draft-seeder.ts app/_content/home-page.ts app/_lib/home-page-render-model.ts app/_lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/unit/home-page-blueprint-draft-storage.test.ts tests/integration-ui/home-page-product-preview.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx tests/integration-ui/checkout-button.test.tsx tests/integration-ui/blueprint-local-draft-seeder.test.tsx
 
 bunx vitest --config vitest.config.ts run --project unit tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/unit/home-page-blueprint-draft-storage.test.ts
 

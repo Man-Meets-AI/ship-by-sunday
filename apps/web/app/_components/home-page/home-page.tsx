@@ -10,6 +10,8 @@ import { HomeHeroSection } from "./sections/hero-sections";
 import { BlueprintDemoSectionBlock } from "./sections/blueprint-demo/blueprint-demo-section";
 import { DurabilitySectionBlock } from "./sections/durability-section";
 import { ExecLoopSectionBlock } from "./sections/exec-loop-section";
+import { PlansMdSectionBlock } from "./sections/plans-md-section";
+import { ProgramsSectionBlock } from "./sections/programs-section";
 import { SprintPathUnifiedSection } from "./sections/sprint-path-unified-section";
 import { StarterSystemSectionBlock } from "./sections/starter-system-section";
 
@@ -41,9 +43,19 @@ export default async function HomePage() {
 						socialProofSection={homePageRenderModel.socialProof.variant.section}
 					/>
 				) : null}
+				{homePageRenderModel.programs.isEnabled ? (
+					<ProgramsSectionBlock
+						programsSection={homePageRenderModel.programs.section}
+					/>
+				) : null}
 				{homePageRenderModel.faq.isEnabled ? (
 					<CommonQuestionsSection
 						faqSection={homePageRenderModel.faq.section}
+					/>
+				) : null}
+				{homePageRenderModel.plansMd.isEnabled ? (
+					<PlansMdSectionBlock
+						plansMdSection={homePageRenderModel.plansMd.section}
 					/>
 				) : null}
 				{homePageRenderModel.pricing.isEnabled ? (

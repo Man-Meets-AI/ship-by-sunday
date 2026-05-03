@@ -136,6 +136,49 @@ describe("home page content", () => {
 		expect(homePageContent.durabilitySection.title).toBe(
 			"Ship by Sunday. Keep shipping on Monday.",
 		);
+		expect(homePageContent.programsSection.title).toBe("PROGRAMS.md");
+		expect(homePageContent.programsSection.headline).toBe(
+			"PROGRAMS.md is not a bigger ExecPlan.",
+		);
+		expect(
+			homePageContent.programsSection.explainers.map(
+				(explainer) => explainer.title,
+			),
+		).toEqual([
+			"Research Passes",
+			"Normalize Pass",
+			"Converged Decisions Packet",
+			"Dependency Graph",
+			"ExecPlan Split Recommendation",
+			"Planning Brief",
+			"Program Validator",
+			"ExecPlan Loop",
+		]);
+		expect(homePageContent.programsSection.outcome).toBe(
+			"validated shipping slices",
+		);
+		expect(homePageContent.plansMdSection.title).toBe("PLANS.md");
+		expect(homePageContent.plansMdSection.callouts).toEqual([
+			"Detailed instructions",
+			"Persistent task memory",
+			"Loopable execution path",
+		]);
+		expect(
+			homePageContent.plansMdSection.differentiators.map(
+				(differentiator) => differentiator.title,
+			),
+		).toEqual([
+			"Persistent memory for long tasks",
+			"Turns vague intent into executable steps",
+			"Keeps scope from drifting",
+			"A shared source of truth",
+			"Progress survives the chat",
+			"Built for iteration",
+			"Forces verification",
+			"Compresses complexity",
+			"Reduces prompt re-explaining",
+			"Makes autonomy safer",
+		]);
 		expect(homePageContent.socialProofSection.portrait).toEqual({
 			src: "/founder-portrait.jpg",
 			alt: "Founder portrait",

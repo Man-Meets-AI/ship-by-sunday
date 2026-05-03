@@ -203,6 +203,7 @@ describe("BlueprintDemoSectionBlock", () => {
 		expectPageTextToContain(
 			"Built by someone who has actually shipped products.",
 		);
+		expectPageTextToContain("PROGRAMS.md is not a bigger ExecPlan.");
 		expectPageTextToContain("Common Questions");
 		expectPageTextToContain("Ship a real product by Sunday");
 		expect(document.querySelectorAll("#system")).toHaveLength(1);
