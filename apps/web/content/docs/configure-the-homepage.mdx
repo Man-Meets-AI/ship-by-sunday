@@ -182,14 +182,19 @@ Edit:
 - `tests/unit/home-page-content.test.ts`
 - `tests/integration-ui/home-page-product-preview.test.tsx`
 
-The first-screen `productPreview` section now opens with the dark leverage hero
-from the Figma landing-page selection, then continues into the interactive
-Blueprint demo that mirrors the real `/blueprint` workspace. The product-preview
-CTA is a real checkout action: clicking "Generate my codebase" persists the
-latest demo draft to `localStorage` (key `sbs:home-blueprint-draft:v1`) before
-starting Stripe checkout, and a workspace-mounted seeder hydrates that draft into
-Convex on the first authenticated `/blueprint` load when the buyer has no saved
-facts.
+The first-screen `productPreview` section opens with the dark leverage hero from
+the Figma landing-page selection and a two-option starting-point selector. The
+default `I have an idea for a product` branch continues into the interactive
+Blueprint demo that mirrors the real `/blueprint` workspace, then shows the
+existing homepage story up to the social-proof section. The `I have a codebase
+already` branch swaps that below-fold story for the Figma-sourced codebase audit
+path while preserving the shared social proof, FAQ, pricing, and footer below.
+
+The idea-branch product-preview CTA is a real checkout action: clicking
+"Generate my codebase" persists the latest demo draft to `localStorage` (key
+`sbs:home-blueprint-draft:v1`) before starting Stripe checkout, and a
+workspace-mounted seeder hydrates that draft into Convex on the first
+authenticated `/blueprint` load when the buyer has no saved facts.
 
 Hard rules when editing this section:
 
@@ -201,6 +206,10 @@ Hard rules when editing this section:
   rendering in `blueprint-demo-leverage-hero.tsx`. Do not reintroduce the old
   "Spec your product" intro, Blueprint explainer paragraph, or checkout unlock
   note above the demo.
+- Keep codebase-audit branch copy in `productPreviewSection.codebaseBranch` and
+  its rendering in `blueprint-demo-codebase-branch.tsx`. The codebase branch must
+  preserve `id="system"` because the idea branch's sprint-path section owns that
+  anchor only when the idea path is selected.
 - Source field labels and helper text from `@shipbysunday/blueprint-presentation`.
   Source design preset definitions and the canonical
   `buildDesignPresetFactSeed(presetId)` from `@shipbysunday/blueprint-compiler`.

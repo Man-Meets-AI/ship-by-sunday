@@ -171,9 +171,17 @@ describe("BlueprintDemoSectionBlock", () => {
 		});
 
 		expect(ideaOption.getAttribute("aria-pressed")).toBe("true");
+		expect(screen.getByTestId("blueprint-demo-idea-branch")).toBeTruthy();
+		expect(screen.queryByTestId("blueprint-demo-codebase-branch")).toBeNull();
 		await user.click(codebaseOption);
 		expect(codebaseOption.getAttribute("aria-pressed")).toBe("true");
 		expect(ideaOption.getAttribute("aria-pressed")).toBe("false");
+		expect(screen.queryByTestId("blueprint-demo-idea-branch")).toBeNull();
+		expect(screen.getByTestId("blueprint-demo-codebase-branch")).toBeTruthy();
+		expect(screen.getByText(/scan, audit & PR merge queue/i)).toBeTruthy();
+		expect(screen.getByText("The Audit.")).toBeTruthy();
+		expect(screen.getByText("→ DOCS Spine")).toBeTruthy();
+		expect(screen.queryByTestId("blueprint-demo-checkout-cta")).toBeNull();
 	});
 
 	it("exposes a theme toggle in the demo top bar", async () => {

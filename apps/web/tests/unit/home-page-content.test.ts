@@ -75,6 +75,25 @@ describe("home page content", () => {
 		expect(
 			productPreviewSection.leverageHero.options.map((option) => option.label),
 		).toEqual(["I have a codebase already", "I have an idea for a product"]);
+		expect(productPreviewSection.codebaseBranch.intro).toContain(
+			"scan, audit & PR merge queue",
+		);
+		expect(productPreviewSection.codebaseBranch.shippieImage).toEqual({
+			src: "/landing-page/shippie-loop.png",
+			alt: "Shippie",
+		});
+		expect(productPreviewSection.codebaseBranch.auditList.items).toEqual([
+			"DOCS Spine",
+			"Exec Plans Loop",
+			"Oxlint",
+			"Oxfmt",
+			"Design.md",
+			"Agents.md",
+			"Programs.md",
+			"Linting md files",
+			"Token efficient lookup",
+			"Low Hanging Fruit `/goal`",
+		]);
 
 		expect(productPreviewSection.cta.label).toBe("Generate my codebase");
 
@@ -95,7 +114,7 @@ describe("home page content", () => {
 		expect(homePageContent.sprintPathSection.intro).toContain(
 			"decision to agent run",
 		);
-		expect(homePageContent.execLoopSection.title).toBe("How the loop works.");
+		expect(homePageContent.execLoopSection.title).toBe("How Workers Work.");
 		expect(
 			homePageContent.execLoopSection.steps.map((step) => step.label),
 		).toEqual(["Decide", "Brief", "Run", "Review"]);

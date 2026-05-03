@@ -20,6 +20,9 @@ describe("home page render model", () => {
 		expect(renderModel.productPreview.section.leverageHero.headline).toBe(
 			"Install leverage",
 		);
+		expect(
+			renderModel.productPreview.section.codebaseBranch.auditList.title,
+		).toBe("The Audit.");
 		expect(renderModel.hero.isEnabled).toBe(true);
 		expect(renderModel.hero.primaryCtaTarget).toEqual({ kind: "checkout" });
 		expect(renderModel.mechanism.isEnabled).toBe(false);

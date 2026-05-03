@@ -8,7 +8,7 @@ import {
 	blueprintFieldPlaceholder,
 	getBlueprintFieldScaleDefinition,
 } from "@shipbysunday/blueprint-presentation";
-import { productConfig } from "@/config/product";
+import { productConfig, routeConfig } from "@/config/product";
 import {
 	marketingDisplayConfig,
 	workspaceDisplayConfig,
@@ -204,6 +204,46 @@ const productPreviewSection = {
 			},
 		],
 	},
+	codebaseBranch: {
+		shippieName: "Shippie",
+		shippieImage: {
+			src: "/landing-page/shippie-loop.png",
+			alt: "Shippie",
+		},
+		intro:
+			"We don't want to read your codebase. Thats for you and your team. We do want to start installing leverage in the form of a scan, audit & PR merge queue. You're going to work with Shippie. He's trained on every best practice under-the-sun from OpenAI. It's all he does.",
+		auditLead: "You can read more about",
+		auditLinkLabel: "the audit",
+		auditHref: routeConfig.docs,
+		auditBody:
+			"if you want to, but its the fastest way for you to start getting real leverage in your codebase. End game is agentic loops, turn into true workers. So it's not just Shippie doing work. It's Shippie, and his friends. And eventually you making your own.",
+		todoIntro: "So in order to make these workers personalized to you..",
+		todoSetupLine: "we got a few to-dos.",
+		todos: [
+			"Connect ChatGPT (no claude, I know I know...)",
+			"Let Shippie do his thing.",
+			"Connect your GitHub",
+			"PRs start happening",
+		],
+		privacyQuestion: "Wait. What? I thought you we'rent reading our code?",
+		privacyAnswer:
+			"Correct! By connecting ChatGPT, we use Codex's app server harness",
+		auditList: {
+			title: "The Audit.",
+			items: [
+				"DOCS Spine",
+				"Exec Plans Loop",
+				"Oxlint",
+				"Oxfmt",
+				"Design.md",
+				"Agents.md",
+				"Programs.md",
+				"Linting md files",
+				"Token efficient lookup",
+				"Low Hanging Fruit `/goal`",
+			],
+		},
+	},
 	sections: productPreviewSections,
 	foundation: {
 		intro:
@@ -341,9 +381,7 @@ export const homePageContent = {
 		],
 	},
 	execLoopSection: {
-		title: "How the loop works.",
-		intro:
-			"One loop moves a decision into shipped code. The next loop starts smarter.",
+		title: "How Workers Work.",
 		steps: [
 			{
 				label: "Decide",

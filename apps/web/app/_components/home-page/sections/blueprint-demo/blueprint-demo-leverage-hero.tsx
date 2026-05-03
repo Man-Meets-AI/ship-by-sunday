@@ -1,22 +1,22 @@
 "use client";
 
-import { useState } from "react";
-
 import type { HomePageContent } from "@/app/_content/home-page";
 import { cn } from "@/lib/utils";
 
 type BlueprintDemoLeverageHeroContent =
 	HomePageContent["productPreviewSection"]["leverageHero"];
-type LeverageHeroOptionId =
+export type LeverageHeroOptionId =
 	BlueprintDemoLeverageHeroContent["options"][number]["id"];
 
 export function BlueprintDemoLeverageHero({
 	leverageHero,
+	selectedOptionId,
+	onSelectedOptionChange,
 }: {
 	readonly leverageHero: BlueprintDemoLeverageHeroContent;
+	readonly selectedOptionId: LeverageHeroOptionId;
+	readonly onSelectedOptionChange: (optionId: LeverageHeroOptionId) => void;
 }) {
-	const [selectedOptionId, setSelectedOptionId] =
-		useState<LeverageHeroOptionId>(leverageHero.defaultOptionId);
 	const accessibleHeadline = [
 		leverageHero.headline,
 		leverageHero.sublineLead,
@@ -60,7 +60,7 @@ export function BlueprintDemoLeverageHero({
 									key={option.id}
 									type="button"
 									aria-pressed={isSelected}
-									onClick={() => setSelectedOptionId(option.id)}
+									onClick={() => onSelectedOptionChange(option.id)}
 									className={cn(
 										"font-home-option-serif flex min-h-20 items-center justify-center px-5 py-4 text-center text-[1.75rem] leading-none font-normal text-[#111111] transition-colors duration-200 sm:min-h-24 sm:px-6 sm:text-[2rem] lg:min-h-[8.375rem] lg:whitespace-nowrap lg:text-[2.5rem]",
 										isSelected

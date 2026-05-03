@@ -198,3 +198,12 @@ If helpful, also record the external official references used for the work:
 - **Design direction:** Preserve the restrained operating-system feel while making the typography roles explicit and repeatable across marketing, docs, and app surfaces.
 - **Out of scope:** No generated customer starter font contract changes beyond the active app presentation layer.
 - **Verification:** Run focused app checks, broad repo gates, and desktop/mobile browser proof for the global typography pass before release.
+
+## Shipped Note: Homepage Starting-Point Branches
+
+- **Date:** 2026-05-03
+- **Surface:** `/` public homepage.
+- **Change:** The first-screen starting-point selector now controls the below-fold homepage branch. `I have an idea for a product` keeps the real Blueprint demo and the existing homepage story through the section before founder social proof. `I have a codebase already` swaps that branch for the Figma-sourced codebase audit path with Shippie imagery and audit checklist copy.
+- **Design direction:** Preserve the black editorial Figma composition while making the selector a real information-architecture control instead of a cosmetic pressed state.
+- **Out of scope:** No checkout behavior change, no social-proof/pricing/footer branch split, and no external provider setup.
+- **Verification:** Focused homepage content, render-model, and integration-ui tests should cover both branches; desktop and mobile browser proof should confirm the Figma-derived branch remains readable and preserves the `#system` anchor.
