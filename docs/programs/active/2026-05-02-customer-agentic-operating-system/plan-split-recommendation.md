@@ -5,14 +5,14 @@
 1. Reconcile Customer Agentic Source Contract.
    Align generated root guidance, Build Pack docs, prompt naming, skill triggers, snapshot boundaries, package-script promises, and tests before adding the full operating pack. Keep the work compiler-owned.
 
-2. Define Commercial Doctor Pass, Loop Catalog, Flagship Offer, And Landing-Page Story.
-   Define the top-nine opportunity schema, scoring rubric, money-ranked loop catalog, `$250` soon-`$500` flagship offer language, proof requirements, consent boundaries, and first landing-page explanation. This is the commercial bridge between generated repos, broken apps, mature repos, agencies, and operators.
+2. Define Commercial Doctor Pass, Top-Nine Ledger, Flagship Offer, Proof Contract, And Homepage Narrative.
+   Define the top-nine opportunity schema, scoring rubric, money-ranked fulfillment loop catalog, `$250` soon-`$500` flagship offer language, proof and blocked-proof requirements, consent boundaries, two buyer modes, and first homepage explanation. This is the commercial bridge between generated repos, broken apps, mature repos, agencies, and operators without turning the first purchase into SKU sprawl.
 
 3. Harden BYO Execution Surface.
    Make the Codex, API-key, GitHub, and local-runner attachment model explicit. Document consent, storage, permission boundaries, rate-limit behavior, and failure states before product loops depend on a customer-owned execution surface.
 
 4. Ship Doctor-Pass Entry And Opportunity Ledger.
-   Build the first product entry for diagnosis: intake, top-nine output, permission map, proof plan, loop recommendation, blocked-proof state, and next-loop CTA. Keep patching behind explicit execution-surface approval.
+   Build the first product entry for diagnosis: intake, top-nine output, permission map, proof plan, loop recommendation, blocked-proof state, and next-loop CTA. Keep patching behind explicit execution-surface approval and route the existing flagship checkout into the selected first loop.
 
 5. Ship Broken-App Rescue Loop.
    Build the first existing-repo monetization loop around read-only reproduction, root-cause localization, safe patch proposal, focused proof, and honest blocked-proof reporting.
@@ -55,4 +55,4 @@ The first child ExecPlan may update `packages/blueprint-compiler`, generated sta
 
 The active source-contract ExecPlan remains first because it is already started and protects current generated customer output. After that proof lands, the Program should move directly into the commercial doctor pass and loop catalog so the product sells diagnosis and execution rather than education while the broader operating pack follows with clearer commercial pull.
 
-The next slice should explicitly decide the fulfillment catalog and first-page language before implementation spreads. The strongest near-term loop paths inside the flagship offer are doctor pass plus broken-app rescue, billing/auth hardening, conversion/activation, release proof, observability, design, performance, or test hardening. The public first purchase should stay the current `$250`, soon `$500`, offer: diagnosis, selected loop execution, proof, and next-loop recommendation.
+The next slice should explicitly decide the fulfillment catalog and first-page language before implementation spreads. The strongest near-term loop paths inside the flagship offer are doctor pass plus broken-app rescue, billing/auth hardening, conversion/activation, release proof, observability, design, performance, or test hardening. The public first purchase should stay the current `$250`, soon `$500`, offer: diagnosis, top opportunities, selected loop execution, proof or blocked proof, and next-loop recommendation.

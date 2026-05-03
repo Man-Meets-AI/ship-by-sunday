@@ -198,6 +198,6 @@ Do not launch every catalog loop as a separate SKU. The catalog can be shown as 
 
 ## Slice Order Implication
 
-Keep the active source-contract reconciliation first. Immediately after it lands, the next child ExecPlan should define the commercial doctor pass and loop catalog around the flagship offer. That slice should produce the top-nine schema, loop scoring, `$250` soon-`$500` offer language, landing-page story, consent boundaries, proof contracts, and the first fulfillment-loop shortlist.
+Keep the active source-contract reconciliation first. Immediately after it lands, the next child ExecPlan should define the commercial doctor pass and loop catalog around the flagship offer. That slice should produce the top-nine schema, loop scoring, `$250` soon-`$500` offer language, homepage narrative, consent boundaries, proof contracts, and the first fulfillment-loop shortlist.
 
 After that, harden the execution-surface contract, then ship broken-app rescue as the first existing-repo fulfillment path inside the flagship offer. The broader generated operating pack should still ship, but the catalog and doctor pass should lead because they create the common commercial language for every lane.

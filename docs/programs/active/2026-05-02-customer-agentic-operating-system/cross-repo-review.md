@@ -2,7 +2,7 @@
 
 ## Review Summary
 
-The Program split is directionally right, but the first generated-repo slice should be source-contract reconciliation, not full operating-pack shipment. Generated repos are the right first target because the output is controlled, the package manager is known, and compiler tests can prove the contract. After that active proof, the next Program slice should move to the commercial doctor pass, loop catalog, monetization ladder, and landing-page story before broader operating-pack generalization so the initiative has a revenue wedge across new repos, broken apps, mature repos, agencies, and operators.
+The Program split is directionally right, but the first generated-repo slice should be source-contract reconciliation, not full operating-pack shipment. Generated repos are the right first target because the output is controlled, the package manager is known, and compiler tests can prove the contract. After that active proof, the next Program slice should move to the commercial doctor pass, top-nine ledger, flagship offer, proof contract, and homepage narrative before broader operating-pack generalization so the initiative has a revenue wedge across new repos, broken apps, mature repos, agencies, and operators.
 
 ## Risks
 
@@ -40,7 +40,7 @@ The Program needs an execution-surface contract. Before paid loops depend on cus
 
 The first child ExecPlan should be narrower than full pack shipment. It should reconcile the customer-facing source contract: root agent guidance, Build Pack docs, generated prompt naming, generated skill triggers, generated package-script promises, snapshot exclusions, and tests. It should not implement the mature-repo lane, even though the Program has to design for it. The first slice should end with a materialized generated repo whose current agent guidance is coherent and whose future operating-pack extension points are safe.
 
-The next child ExecPlan after source-contract proof should be `Define Commercial Doctor Pass, Loop Catalog, Monetization, And Landing-Page Story`, not the full operating-pack shipment. That plan should produce the top-nine schema, money-ranked loop catalog, scoring rubric, proof contract, package language, consent boundaries, landing-page explanation, and commercial conversion states that later generated-repo, broken-app, and mature-repo slices can share.
+The next child ExecPlan after source-contract proof should be `Define Commercial Doctor Pass, Top-Nine Ledger, Flagship Offer, Proof Contract, And Homepage Narrative`, not the full operating-pack shipment. That plan should produce the top-nine schema, money-ranked fulfillment loop catalog, scoring rubric, proof and blocked-proof contract, package language for the existing `$250` soon-`$500` flagship, consent boundaries, homepage explanation, and commercial conversion states that later generated-repo, broken-app, and mature-repo slices can share.
 
 ## Required Validation
 

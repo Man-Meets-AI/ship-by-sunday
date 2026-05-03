@@ -2,13 +2,13 @@
 
 ## Decision Tracks
 
-The initiative has four customer lanes, one commercial loop-marketplace lane, and one shared infrastructure lane.
+The initiative has four customer lanes, one commercial loop-fulfillment lane, and one shared infrastructure lane.
 
 The new-repo lane installs the agentic operating system into every generated customer repo. It owns generalized Program and ExecPlan contracts, indexes, templates, prompt assets, thin skills, root scripts, generated onboarding, and clean-room materialization tests.
 
 The doctor lane diagnoses product and repo truth, ranks the top nine highest-leverage opportunities, recommends the next loop, and produces a reviewable artifact that can convert either new-repo or existing-repo customers into paid loop execution.
 
-The commercial loop-marketplace lane owns the money-ranked catalog, flagship offer, landing-page story, pricing language, opportunity ledger, and proof-to-next-purchase motion. It makes the product legible as an agent doctor for web apps instead of an abstract agentic methodology.
+The commercial loop-fulfillment lane owns the money-ranked catalog, flagship offer, homepage narrative, pricing language, opportunity ledger, and proof-to-next-purchase motion. It makes the product legible as an agent doctor for web apps instead of an abstract agentic methodology, while keeping the public first purchase to the existing `$250` soon-`$500` flagship instead of a shelf of SKUs.
 
 The broken-app rescue lane handles existing web apps that are stuck, fragile, or failing. It owns read-only reproduction, root-cause localization, safe patch proposals, proof commands, and blocked-proof reports.
 
@@ -34,8 +34,8 @@ Decision: Add a doctor pass before broad existing-repo implementation.
 Rationale: A top-nine opportunity report is easier to sell and easier to prove than a broad promise to transform arbitrary repos. It creates a common input for generated repos, broken apps, and mature codebases while preserving scoped execution through later loops.
 Date: 2026-05-02
 
-Decision: Treat the loop catalog as product inventory.
-Rationale: Loops such as broken-app rescue, design, test, release, billing/auth, performance, docs, observability, and growth are the paid units customers can understand. Programs and ExecPlans remain the durable execution substrate behind those units.
+Decision: Treat the loop catalog as fulfillment inventory behind one flagship offer.
+Rationale: Loops such as broken-app rescue, design, test, release, billing/auth, performance, docs, observability, and growth are the work units customers can understand, but the public first purchase should remain diagnosis plus the first recommended loop. Programs and ExecPlans remain the durable execution substrate behind those units.
 Date: 2026-05-02
 
 Decision: Expand the loop catalog across the full web-app lifecycle.

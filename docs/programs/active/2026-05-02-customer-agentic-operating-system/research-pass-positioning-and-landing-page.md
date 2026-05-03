@@ -20,7 +20,7 @@ Do not lead with "agentic engineering methodology," "operating system," or "Prog
 - AI workers for web apps, guided by diagnosis instead of random prompts.
 - Turn your idea, broken app, or mature repo into a ranked action plan and proven shipped loops.
 - Find the bottleneck. Run the loop. Prove the result.
-- A doctor pass and loop marketplace for web-app progress.
+- A doctor pass and first-loop proof for web-app progress.
 - Bring your web app, repo, or idea. Leave with proof-backed next steps.
 
 ## Two-Liner Options
@@ -41,7 +41,7 @@ Do not lead with "agentic engineering methodology," "operating system," or "Prog
 - Stop guessing what to build next.
 - Diagnose your repo. Run the right loop. Prove the result.
 - Your web app's next best move, ranked and ready to run.
-- A loop marketplace for shipping web apps faster.
+- A doctor-led loop layer for shipping web apps faster.
 - Turn vibe-coded chaos into a proven repair path.
 - Give your SaaS repo a worker layer.
 

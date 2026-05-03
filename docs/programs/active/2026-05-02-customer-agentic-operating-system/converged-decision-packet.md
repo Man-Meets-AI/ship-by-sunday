@@ -2,19 +2,19 @@
 
 ## Converged Direction
 
-Ship by Sunday should become the agent doctor and loop marketplace for web apps: diagnose the app or repo, rank the highest-leverage opportunities, attach a consented execution surface, run scoped worker loops, produce proof, and update source truth.
+Ship by Sunday should become the agent doctor and loop operating layer for web apps: diagnose the app or repo, rank the highest-leverage opportunities, attach a consented execution surface, run the first recommended worker loop, produce proof, and update source truth.
 
 For generated repos, the product should first reconcile the customer-safe source contract, then ship the operating system directly in the downloaded zip: generalized Program and ExecPlan contracts, folder indexes, templates, prompt assets, local skills, validation scripts, onboarding references, and an optional explicit bootstrap for the first Program packet.
 
 For mature repos and broken apps, the product should offer a doctor lane that audits the existing repository and returns a top-nine opportunity report, recommended loop, adoption Program, and first child ExecPlan. That lane must be read-only until the customer reviews the proposed patch.
 
-The immediate commercial direction after source-contract reconciliation is to define the doctor pass, sellable loop catalog, flagship `$250` soon-`$500` offer, and landing-page explanation before broader operating-pack implementation spreads.
+The immediate commercial direction after source-contract reconciliation is to define the doctor pass, top-nine opportunity ledger, fulfillment loop catalog, flagship `$250` soon-`$500` offer, proof contract, consent boundaries, and homepage explanation before broader operating-pack implementation spreads.
 
 ## Product Promise
 
 The promise is not "AI will build your app." The promise is "we diagnose where your web app is stuck, run the right loop with your approved execution surface, and prove what changed." That still means durable source truth, role packets, scoped plans, validation loops, review evidence, and a way to resume work without chat memory.
 
-The first landing-page explanation should be: Ship by Sunday is the agent doctor for web apps. It diagnoses what is blocking your app, ranks the highest-leverage fixes, and runs proven AI worker loops to ship improvements with proof.
+The first homepage explanation should be: Ship by Sunday is the agent doctor for web apps. It diagnoses what is blocking your app, ranks the highest-leverage fixes, and runs proven AI worker loops to ship improvements with proof.
 
 ## Worker Thesis
 
@@ -29,7 +29,7 @@ This reframes the two customer lanes:
 
 The first commercial touch should be a doctor pass, not a course. Customers should be able to connect or generate a repo and receive the top nine highest-leverage opportunities with buyer value, expected revenue or speed impact, confidence, blast radius, proof path, required permissions, recommended loop, price or package language, next action, and blocked-proof state.
 
-The loop catalog is the monetizable inventory. It should cover diagnostic, rescue, debugging, design, growth, onboarding, activation, auth, billing, performance, SEO, conversion, analytics, observability, security, refactor, test hardening, release, migration, dependency upgrade, AI feature integration, admin tooling, mobile responsiveness, accessibility, email, content, support ops, agency/client reporting, and BYO execution loops.
+The loop catalog is the fulfillment inventory behind one simple public purchase. It should cover diagnostic, rescue, debugging, design, growth, onboarding, activation, auth, billing, performance, SEO, conversion, analytics, observability, security, refactor, test hardening, release, migration, dependency upgrade, AI feature integration, admin tooling, mobile responsiveness, accessibility, email, content, support ops, agency/client reporting, and BYO execution loops without making the first buyer choose from a SKU shelf.
 
 The best early money loops are doctor pass, broken-app rescue, billing/auth hardening, conversion/activation, release proof, observability, design, performance, and test hardening. They combine obvious buyer pain, willingness to pay, proof clarity, repeatability, and a natural next purchase.
 
@@ -57,7 +57,7 @@ The first implementation slice belongs to generated customer repos only. It shou
 
 Product and homepage changes should follow as their own slice. They need to present the worker-led multi-lane customer journey truthfully: the generated-codebase lane is live today, while the doctor, broken-app, and mature-codebase lanes need audit, execution-surface, and adoption artifacts before the product can sell them as self-serve.
 
-Landing-page copy should not lead with "agentic engineering methodology" or "operating system." It should make six facts obvious: this is for web apps, it helps new and existing or broken apps, it diagnoses before acting, it runs named AI worker loops, every loop ends with proof or a blocked-proof report, and BYO Codex/AI/GitHub/API-key/local execution requires explicit consent.
+Homepage copy should not lead with "agentic engineering methodology" or "operating system." It should make seven facts obvious: this is for web apps, it helps idea-to-repo builders and existing or broken app owners, it diagnoses before acting, it ranks the top opportunities, it runs the selected AI worker loop inside the flagship purchase, every loop ends with proof or a blocked-proof report, and BYO Codex/AI/GitHub/API-key/local execution requires explicit consent.
 
 The mature-repo lane should be designed in this Program before implementation starts. It likely requires separate slices for audit schema, local scanner or upload flow, doctor pass schema, adoption packet generation, product UI, BYO execution attachment, and safe patch delivery.
 

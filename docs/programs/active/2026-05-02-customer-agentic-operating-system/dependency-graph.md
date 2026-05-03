@@ -5,14 +5,14 @@
 1. Customer agentic source contract for generated repos.
    This comes first because generated repo output already has agent instructions, prompt assets, skills, and Build Pack readiness. The first risk is drift and unsafe promises, so the source contract must be reconciled before adding the full operating pack.
 
-2. Commercial doctor pass, loop catalog, flagship offer, and landing-page story.
-   This depends on coherent source truth but should move ahead of the full generated operating pack because it is the revenue wedge across new repos, broken apps, mature repos, agencies, and operators. It defines the top-nine opportunity schema, money-ranked loop catalog, `$250` soon-`$500` offer language, proof expectations, consent boundaries, and first-page positioning.
+2. Commercial doctor pass, top-nine ledger, flagship offer, proof contract, and homepage narrative.
+   This depends on coherent source truth but should move ahead of the full generated operating pack because it is the revenue wedge across new repos, broken apps, mature repos, agencies, and operators. It defines the top-nine opportunity schema, money-ranked fulfillment loop catalog, `$250` soon-`$500` flagship offer language, proof and blocked-proof expectations, consent boundaries, and first-page positioning without splitting the public purchase into many SKUs.
 
 3. BYO execution surface.
    This depends on the doctor taxonomy because the product must know which loop needs which execution mode. It should define consent, storage, permissions, rate limits, and failure states for Codex app-server, ChatGPT/Codex cloud, API keys, GitHub-connected execution, and local runners.
 
 4. Doctor-pass entry and opportunity ledger.
-   This depends on the doctor taxonomy and execution-surface boundary. It should create the first product path for diagnosis, top-nine reporting, permission mapping, proof planning, loop recommendation, blocked-proof reporting, and conversion into the first paid loop.
+   This depends on the doctor taxonomy and execution-surface boundary. It should create the first product path for diagnosis, top-nine reporting, permission mapping, proof planning, loop recommendation, blocked-proof reporting, and routing the existing flagship checkout into the selected first loop.
 
 5. Broken-app rescue loop.
    This depends on the doctor pass and BYO execution boundary. It is the first existing-repo monetization wedge because the pain is clear and proof can be concrete: reproduce, localize, patch after review, prove, and update source truth.
@@ -56,6 +56,8 @@
 `apps/web/platform/codex/app-server.ts`, `apps/web/app/api/codex/`, and `apps/web/app/(workspace)/_components/codex-connection-card/` are the current BYO Codex connection surfaces that future execution-surface work must account for.
 
 `apps/web/app/_content/home-page.ts` and `apps/web/app/_lib/home-page-render-model.ts` are the current homepage content and behavior surfaces that later landing-page implementation must account for.
+
+`apps/web/config/product.ts`, `apps/web/app/_lib/home-page-structured-data.ts`, `apps/web/app/_components/home-page/sections/home-page-primary-cta.tsx`, `apps/web/app/api/stripe/checkout/`, `apps/web/platform/billing/checkout/`, `apps/web/app/checkout/success/`, `apps/web/app/(workspace)/blueprint`, and `apps/web/app/(workspace)/review` constrain any later offer, CTA, checkout, blueprint, or review-download implementation.
 
 Official Codex docs and Apps SDK docs are dependencies for any slice that claims ChatGPT/Codex login, GitHub-connected cloud execution, MCP tools, OAuth, or ChatGPT app distribution behavior.
 
