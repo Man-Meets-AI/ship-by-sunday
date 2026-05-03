@@ -45,8 +45,10 @@ vi.mock("@clerk/nextjs", () => ({
 }));
 
 vi.mock("@/app/checkout/_components/checkout-button", () => ({
-	CheckoutButton: ({ label }: { label: string }) => (
-		<button type="button">{label}</button>
+	CheckoutButton: ({ label, testId }: { label: string; testId?: string }) => (
+		<button type="button" data-testid={testId}>
+			{label}
+		</button>
 	),
 }));
 

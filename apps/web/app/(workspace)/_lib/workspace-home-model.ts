@@ -50,8 +50,8 @@ const moduleCopy = {
 		description: "Guided mission, lessons, and saved-work surfaces.",
 	},
 	starterRepo: {
-		label: "Blueprint access",
-		description: "Blueprint access and provisioning workflow.",
+		label: "Starter repo access",
+		description: "Private starter repo invite and provisioning workflow.",
 	},
 	codex: {
 		label: "Codex",
@@ -163,11 +163,11 @@ export function buildWorkspaceHomeModel(
 			? [
 					{
 						id: "starter-repo",
-						title: "Claim Blueprint access",
+						title: "Claim starter repo access",
 						description:
-							"Provision or verify Blueprint access before handing the build base to a new operator.",
+							"Provision or verify private starter repo access before handing the build base to a new operator.",
 						actionHref: routeConfig.settings,
-						actionLabel: "Review Blueprint access",
+						actionLabel: "Review starter repo access",
 					},
 				]
 			: []),

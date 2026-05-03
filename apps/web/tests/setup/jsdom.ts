@@ -37,6 +37,48 @@ Object.defineProperty(window, "scrollTo", {
 	value: vi.fn(),
 });
 
+if (typeof Element.prototype.scrollIntoView !== "function") {
+	Object.defineProperty(Element.prototype, "scrollIntoView", {
+		writable: true,
+		value: vi.fn(),
+	});
+}
+
+class InMemoryStorage implements Storage {
+	private readonly items = new Map<string, string>();
+
+	get length() {
+		return this.items.size;
+	}
+
+	clear() {
+		this.items.clear();
+	}
+
+	getItem(key: string) {
+		return this.items.get(key) ?? null;
+	}
+
+	key(index: number) {
+		return Array.from(this.items.keys())[index] ?? null;
+	}
+
+	removeItem(key: string) {
+		this.items.delete(key);
+	}
+
+	setItem(key: string, value: string) {
+		this.items.set(key, value);
+	}
+}
+
+if (typeof window.localStorage.clear !== "function") {
+	Object.defineProperty(window, "localStorage", {
+		configurable: true,
+		value: new InMemoryStorage(),
+	});
+}
+
 class ResizeObserverMock {
 	observe = vi.fn();
 	unobserve = vi.fn();

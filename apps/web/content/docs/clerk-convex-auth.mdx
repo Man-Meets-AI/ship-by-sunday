@@ -16,8 +16,8 @@ Make sure `apps/web/.env.local` has these values:
 ```bash
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
 NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/start
-NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/start
+NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/blueprint
+NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/blueprint
 CLERK_SECRET_KEY=
 CLERK_FRONTEND_API_URL=
 CLERK_AUTHORIZED_PARTIES=http://localhost:3000
@@ -31,7 +31,7 @@ NEXT_PUBLIC_CONVEX_URL=
 1. Create a Clerk app.
 2. Copy `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, and `CLERK_FRONTEND_API_URL`.
 3. If you keep the starter’s custom login page, set `NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in` so Clerk OAuth callbacks resolve to the right route.
-4. Set the Clerk fallback redirect URLs to `/start` so direct visits to auth routes land in the blueprint-first protected shell.
+4. Set the Clerk fallback redirect URLs to `/blueprint` so direct visits to auth routes land in the blueprint-first protected shell.
 5. Keep the Clerk frontend API domain consistent everywhere you wire auth.
 6. Set `CLERK_AUTHORIZED_PARTIES` to the trusted web origins that should be allowed to present Clerk session cookies.
 

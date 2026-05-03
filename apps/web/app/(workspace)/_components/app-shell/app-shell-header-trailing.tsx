@@ -7,12 +7,14 @@ import { Card } from "@/components/ui/card";
 
 import type { LessonLayoutMode } from "@/lib/course/lesson/model/manifest";
 
+import { AppShellCommandMenu } from "./app-shell-command-menu";
 import { AppShellUserMenu } from "./app-shell-user-menu";
 import { AppShellThemeToggle } from "./app-shell-theme-toggle";
 import {
 	AppShellFocusViewIcon,
 	AppShellSplitViewIcon,
 } from "./app-shell-header-icons";
+import type { AppShellPrimaryNav } from "./app-shell-props";
 
 type ProgressSummary = {
 	progressCount: number;
@@ -25,6 +27,7 @@ type AppShellHeaderTrailingProps = {
 	onLayoutModeChange: ((mode: LessonLayoutMode) => void) | undefined;
 	progress: ProgressSummary | undefined;
 	lesson11Viewport?: boolean;
+	primaryNav: AppShellPrimaryNav | undefined;
 };
 
 export function AppShellHeaderTrailing({
@@ -32,6 +35,7 @@ export function AppShellHeaderTrailing({
 	onLayoutModeChange,
 	progress,
 	lesson11Viewport = false,
+	primaryNav,
 }: AppShellHeaderTrailingProps) {
 	const progressVerb = progress?.progressLabel ?? "lessons completed";
 	const progressLabel = progress
@@ -86,6 +90,7 @@ export function AppShellHeaderTrailing({
 				</span>
 			) : null}
 			<div className="flex items-center gap-0.5 pl-0.5 sm:gap-1">
+				<AppShellCommandMenu primaryNav={primaryNav} />
 				<AppShellThemeToggle />
 				<AppShellUserMenu />
 			</div>

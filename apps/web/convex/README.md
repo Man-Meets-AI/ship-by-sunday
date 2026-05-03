@@ -39,7 +39,10 @@ If it fails, update `apps/web/.env.local` so `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
 ```bash
 cd apps/web
 bunx convex env set CLERK_FRONTEND_API_URL "$CLERK_FRONTEND_API_URL"
+bunx convex env set CLERK_SECRET_KEY "$CLERK_SECRET_KEY"
 ```
+
+Paid checkout fulfillment also uses `CLERK_SECRET_KEY` inside Convex to resolve or create the Clerk account for the Stripe checkout email. `bun run stripe:listen:dev` syncs this with the Stripe webhook secrets for local billing QA.
 
 This repo does not support Convex's local backend mode as a first-class workflow. Development means local Next.js plus a hosted Convex dev deployment.
 
@@ -53,7 +56,7 @@ Production Convex deploys now come from GitHub Actions, not from a maintainer's 
 - the same workflow supports `workflow_dispatch`, and manual runs default to `dry_run: true`
 - automatic push deploys stay paused until the GitHub repository variable `CONVEX_PRODUCTION_DEPLOY_ENABLED` is set to `true`
 - the workflow runs `bun install --frozen-lockfile` at the repo root and `bunx convex deploy` from `apps/web`
-- GitHub repository secret `CONVEX_DEPLOY_KEY` must contain a production-scoped deploy key from the Convex dashboard for deployment `helpful-meadowlark-297`
+- GitHub repository secret `CONVEX_DEPLOY_KEY` must contain a production-scoped deploy key from the Convex dashboard for the current production deployment.
 
 Use local `bunx convex deploy --dry-run -y` for validation while preparing release automation, land the workflow on `main`, run the GitHub-hosted dry-run there, and only then set `CONVEX_PRODUCTION_DEPLOY_ENABLED=true` so later `main` merges deploy automatically.
 

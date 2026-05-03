@@ -13,6 +13,7 @@ function normalizeEnvValue(value: string | undefined) {
 
 const serverEnvSchema = z.object({
 	APP_BASE_URL: z.string().url().optional(),
+	CHECKOUT_SUCCESS_FIXTURES: z.string().min(1).optional(),
 	ENABLE_OBSERVABILITY_TEST_TRIGGER: z.string().min(1).optional(),
 	GOOGLE_SITE_VERIFICATION: z.string().min(1).optional(),
 	CLERK_AUTHORIZED_PARTIES: z.string().min(1).optional(),
@@ -22,7 +23,10 @@ const serverEnvSchema = z.object({
 	OBSERVABILITY_INGEST_TOKEN: z.string().min(1).optional(),
 	OBSERVABILITY_INCIDENT_CONTROL_TOKEN: z.string().min(1).optional(),
 	OBSERVABILITY_VERCEL_WEBHOOK_SECRET: z.string().min(1).optional(),
+	POSTHOG_PROJECT_ID: z.string().min(1).optional(),
+	POSTHOG_API_KEY: z.string().min(1).optional(),
 	STRIPE_SECRET_KEY: z.string().min(1).optional(),
+	STRIPE_PUBLISHABLE_KEY: z.string().min(1).optional(),
 	STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
 	STRIPE_PRICE_ID: z.string().min(1).optional(),
 	STRIPE_PRODUCT_ID: z.string().min(1).optional(),
@@ -37,6 +41,9 @@ const serverEnvSchema = z.object({
 export function loadServerEnv() {
 	return serverEnvSchema.parse({
 		APP_BASE_URL: normalizeEnvValue(process.env.APP_BASE_URL),
+		CHECKOUT_SUCCESS_FIXTURES: normalizeEnvValue(
+			process.env.CHECKOUT_SUCCESS_FIXTURES,
+		),
 		ENABLE_OBSERVABILITY_TEST_TRIGGER: normalizeEnvValue(
 			process.env.ENABLE_OBSERVABILITY_TEST_TRIGGER,
 		),
@@ -62,7 +69,12 @@ export function loadServerEnv() {
 		OBSERVABILITY_VERCEL_WEBHOOK_SECRET: normalizeEnvValue(
 			process.env.OBSERVABILITY_VERCEL_WEBHOOK_SECRET,
 		),
+		POSTHOG_PROJECT_ID: normalizeEnvValue(process.env.POSTHOG_PROJECT_ID),
+		POSTHOG_API_KEY: normalizeEnvValue(process.env.POSTHOG_API_KEY),
 		STRIPE_SECRET_KEY: normalizeEnvValue(process.env.STRIPE_SECRET_KEY),
+		STRIPE_PUBLISHABLE_KEY: normalizeEnvValue(
+			process.env.STRIPE_PUBLISHABLE_KEY,
+		),
 		STRIPE_WEBHOOK_SECRET: normalizeEnvValue(process.env.STRIPE_WEBHOOK_SECRET),
 		STRIPE_PRICE_ID: normalizeEnvValue(process.env.STRIPE_PRICE_ID),
 		STRIPE_PRODUCT_ID: normalizeEnvValue(process.env.STRIPE_PRODUCT_ID),

@@ -10,14 +10,19 @@ read_when:
 
 # Programs
 
-`docs/programs/` is the landing lane for durable initiatives that coordinate several ExecPlans. This file is intentionally a route map; the canonical Program contract lives in [PROGRAMS.md](/Users/parkerrex/Developer/ship-by-sunday/docs/programs/PROGRAMS.md).
+`docs/programs/` is the landing lane for durable initiatives that coordinate several ExecPlans. This file is intentionally a route map; the canonical Program contract lives in [PROGRAMS.md](PROGRAMS.md).
 
 ## Current State
 
-There are no active Program packets right now.
+Active:
+
+- `docs/programs/active/2026-05-02-one-click-paid-access/`: active Program for making Ship by Sunday payment nearly one-click while paid access attaches instantly to the checkout email.
+- `docs/programs/active/2026-05-02-customer-agentic-operating-system/`: active Program for making Ship by Sunday install durable Program, ExecPlan, validation, prompt, skill, and agent-loop practices into generated customer repos and mature existing codebases.
 
 Recently completed:
 
+- `docs/programs/completed/2026-05-02-posthog-observability-migration/`: completed PostHog observability migration Program that moved generic analytics, errors, source maps, masked replay defaults, and draft-only Linear triage to PostHog-owned paths while narrowing Convex to provider-specific/runtime-intake duties.
+- `docs/programs/completed/2026-05-01-generated-repo-first-slice-autonomy/`: completed generated customer-repo autonomy Program that made downloaded repos executable by fresh coding agents without chat history.
 - `docs/programs/completed/2026-04-26-app-structure-refactor/`: completed refactor Program that reduced and disciplined the Ship by Sunday app structure across App Router routes, Convex, Stripe, shared UI, platform boundaries, and durable product domains.
 
 Active Program folders belong under `docs/programs/active/<YYYY-MM-DD-program-id>/`. Completed Program packets live under `docs/programs/completed/`.
@@ -26,11 +31,11 @@ Use a Program only when an initiative spans several ExecPlans and needs durable 
 
 ## Canonical Files
 
-- Contract: [PROGRAMS.md](/Users/parkerrex/Developer/ship-by-sunday/docs/programs/PROGRAMS.md)
-- Active inventory: [active/index.md](/Users/parkerrex/Developer/ship-by-sunday/docs/programs/active/index.md)
-- Completed inventory: [completed/index.md](/Users/parkerrex/Developer/ship-by-sunday/docs/programs/completed/index.md)
-- Prompt assets: [docs/prompts/README.md](/Users/parkerrex/Developer/ship-by-sunday/docs/prompts/README.md)
-- ExecPlan inventory: [docs/exec-plans/index.md](/Users/parkerrex/Developer/ship-by-sunday/docs/exec-plans/index.md)
+- Contract: [PROGRAMS.md](PROGRAMS.md)
+- Active inventory: [active/index.md](active/index.md)
+- Completed inventory: [completed/index.md](completed/index.md)
+- Prompt assets: [docs/prompts/README.md](../prompts/README.md)
+- ExecPlan inventory: [docs/exec-plans/index.md](../exec-plans/index.md)
 
 ## Program Loop
 
@@ -47,7 +52,7 @@ Program-linked child ExecPlans must record the exact immutable planning brief pa
 
 ## Prompt Inventory
 
-Program prompt assets live under `docs/prompts/` and are indexed in [docs/prompts/README.md](/Users/parkerrex/Developer/ship-by-sunday/docs/prompts/README.md). The Program prompt inventory is:
+Program prompt assets live under `docs/prompts/` and are indexed in [docs/prompts/README.md](../prompts/README.md). The Program prompt inventory is:
 
 - `docs/prompts/program-orchestrator.md`
 - `docs/prompts/program-initialize.md`

@@ -1,6 +1,4 @@
-import { v } from "convex/values";
-
-import { ConvexError } from "convex/values";
+import { ConvexError, v } from "convex/values";
 
 import { internalMutation, internalQuery } from "./_generated/server";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
@@ -68,8 +66,48 @@ const pendingCheckoutClaimClaimResultValidator = v.union(
 	}),
 );
 
+const paidCheckoutClaimRepairResultValidator = v.union(
+	v.object({
+		repair: v.literal("repaired"),
+		grantResult: v.object({
+			granted: v.union(v.literal("inserted"), v.literal("patched")),
+		}),
+	}),
+	v.object({
+		repair: v.literal("already_claimed_by_target"),
+		grantResult: v.object({
+			granted: v.union(v.literal("inserted"), v.literal("patched")),
+		}),
+	}),
+	v.object({
+		repair: v.literal("claimed_by_other_user"),
+	}),
+	v.object({
+		repair: v.literal("missing_claim"),
+	}),
+	v.object({
+		repair: v.literal("payment_not_paid"),
+	}),
+	v.object({
+		repair: v.literal("checkout_email_mismatch"),
+	}),
+);
+
 export function normalizeCheckoutEmail(email: string) {
 	return email.trim().toLowerCase();
+}
+
+function requireNonEmptySupportInput(value: string, fieldName: string) {
+	const trimmedValue = value.trim();
+	if (!trimmedValue) {
+		throw new ConvexError(`${fieldName} is required`);
+	}
+
+	return trimmedValue;
+}
+
+function isRepairableCheckoutPaymentStatus(paymentStatus: unknown) {
+	return paymentStatus === "paid" || paymentStatus === "no_payment_required";
 }
 
 function requireVerifiedViewerIdentity(ctx: MutationCtx) {
@@ -272,6 +310,100 @@ export const claimPendingCheckoutClaim = internalMutation({
 
 		return {
 			claim: "claimed" as const,
+			grantResult,
+		};
+	},
+});
+
+export const repairPaidCheckoutClaim = internalMutation({
+	args: {
+		stripeCheckoutSessionId: v.string(),
+		checkoutEmail: v.string(),
+		clerkUserId: v.string(),
+	},
+	returns: paidCheckoutClaimRepairResultValidator,
+	handler: async (ctx, args) => {
+		const stripeCheckoutSessionId = requireNonEmptySupportInput(
+			args.stripeCheckoutSessionId,
+			"stripeCheckoutSessionId",
+		);
+		const checkoutEmailNormalized = normalizeCheckoutEmail(
+			requireNonEmptySupportInput(args.checkoutEmail, "checkoutEmail"),
+		);
+		const clerkUserId = requireNonEmptySupportInput(
+			args.clerkUserId,
+			"clerkUserId",
+		);
+		const existingClaim = await getPendingCheckoutClaimBySessionIdRecord(
+			ctx,
+			stripeCheckoutSessionId,
+		);
+
+		if (!existingClaim) {
+			return {
+				repair: "missing_claim" as const,
+			};
+		}
+
+		if (existingClaim.checkoutEmailNormalized !== checkoutEmailNormalized) {
+			return {
+				repair: "checkout_email_mismatch" as const,
+			};
+		}
+
+		if (!isRepairableCheckoutPaymentStatus(existingClaim.paymentStatus)) {
+			return {
+				repair: "payment_not_paid" as const,
+			};
+		}
+
+		if (
+			existingClaim.claimedByClerkUserId &&
+			existingClaim.claimedByClerkUserId !== clerkUserId
+		) {
+			return {
+				repair: "claimed_by_other_user" as const,
+			};
+		}
+
+		if (
+			existingClaim.status === "claimed" &&
+			existingClaim.claimedByClerkUserId !== clerkUserId
+		) {
+			return {
+				repair: "claimed_by_other_user" as const,
+			};
+		}
+
+		const now = Date.now();
+		const grantResult = await upsertProductAccessGrant(ctx, {
+			clerkUserId,
+			source: "stripe_checkout",
+			stripeCustomerId: existingClaim.stripeCustomerId,
+			stripeCheckoutSessionId: existingClaim.stripeCheckoutSessionId,
+			stripePaymentIntentId: existingClaim.stripePaymentIntentId,
+		});
+
+		if (existingClaim.status === "claimed") {
+			await ctx.db.patch(existingClaim._id, {
+				updatedAt: now,
+			});
+
+			return {
+				repair: "already_claimed_by_target" as const,
+				grantResult,
+			};
+		}
+
+		await ctx.db.patch(existingClaim._id, {
+			status: "claimed",
+			claimedByClerkUserId: clerkUserId,
+			claimedAt: now,
+			updatedAt: now,
+		});
+
+		return {
+			repair: "repaired" as const,
 			grantResult,
 		};
 	},

@@ -10,10 +10,14 @@ export function LessonVideoPlayer({
 	video,
 	className,
 	title,
+	onReady,
+	onBunnyIframeRef,
 }: {
 	video: LessonVideoContent;
 	className: string;
 	title?: string;
+	onReady?: () => void;
+	onBunnyIframeRef?: (element: HTMLIFrameElement | null) => void;
 }) {
 	const src = resolveLessonVideoUrl(video);
 
@@ -24,6 +28,7 @@ export function LessonVideoPlayer({
 	if (video.provider === "bunny") {
 		return (
 			<iframe
+				ref={(el) => onBunnyIframeRef?.(el)}
 				src={src}
 				title={video.title ?? title ?? "Lesson video"}
 				className={className}
@@ -31,11 +36,18 @@ export function LessonVideoPlayer({
 				allowFullScreen
 				loading="lazy"
 				referrerPolicy="strict-origin-when-cross-origin"
+				onLoad={onReady}
 			/>
 		);
 	}
 
 	return (
-		<video controls poster={video.posterUrl} className={className} src={src} />
+		<video
+			controls
+			poster={video.posterUrl}
+			className={className}
+			src={src}
+			onLoadedData={onReady}
+		/>
 	);
 }

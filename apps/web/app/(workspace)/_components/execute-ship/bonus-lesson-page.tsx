@@ -1,10 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
-import { AlertCircleIcon } from "lucide-react";
 import type { BlueprintStageStatus } from "@shipbysunday/blueprint-compiler";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LessonShellWatch } from "@/app/(workspace)/_components/course/lesson/shells";
 import { getLessonByKey } from "@/lib/course/lesson/model/manifest";
 import { AppShell } from "@/app/(workspace)/_components/app-shell";
@@ -18,6 +15,7 @@ import { buildWorkspaceLessonLocalNavModel } from "@/lib/workspace-navigation/bu
 import { WorkspaceLocalNavRail } from "@/app/(workspace)/_components/workspace-navigation/workspace-local-nav-rail";
 import type { PostReviewNavigationTargets } from "@/lib/workspace-navigation/post-review-destination";
 import { BonusLessonFooter } from "./bonus-lesson-footer";
+import { BonusLessonIntroAlert } from "./bonus-lesson-intro-alert";
 import { LessonMapSurface } from "./lesson-map-surface";
 import { BonusLessonViewTracker } from "./bonus-lesson-view-tracker";
 
@@ -58,6 +56,8 @@ export function BonusLessonPage({
 			/>
 		),
 	};
+	const openLessonMap = () => setShowLessonMap(true);
+	const dismissLessonMap = () => setShowLessonMap(false);
 
 	return (
 		<>
@@ -83,39 +83,23 @@ export function BonusLessonPage({
 					}),
 					onAction: (actionId) => {
 						if (actionId === "showLessonMap") {
-							setShowLessonMap(true);
+							openLessonMap();
 						}
 					},
 				}}
 			>
 				<div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-5 px-4 pb-10 pt-2">
-					<Alert>
-						<AlertCircleIcon aria-hidden />
-						<AlertTitle>Video-first bonus lesson</AlertTitle>
-						<AlertDescription>
-							Use the blueprint as the brief and keep BUILD as the default path.
-							Browse bonus lessons from{" "}
-							<button
-								type="button"
-								className="font-medium text-foreground underline"
-								onClick={() => setShowLessonMap(true)}
-							>
-								the Lesson Map
-							</button>
-							, and if you need to restart, jump back to{" "}
-							<Link
-								className="font-medium text-foreground underline"
-								href={getRecommendedBuildLessonHref(missionState)}
-							>
-								3.1
-							</Link>
-							.
-						</AlertDescription>
-					</Alert>
+					<BonusLessonIntroAlert
+						onOpenLessonMap={openLessonMap}
+						recommendedBuildLessonHref={getRecommendedBuildLessonHref(
+							missionState,
+						)}
+					/>
 					{showLessonMap ? (
 						<LessonMapSurface
 							missionState={missionState}
 							currentBlockId={lesson.block}
+							onDismiss={dismissLessonMap}
 						/>
 					) : null}
 					<LessonShellWatch
@@ -124,7 +108,7 @@ export function BonusLessonPage({
 						footer={
 							<BonusLessonFooter
 								lessonKey={lessonKey}
-								onOpenLessonMap={() => setShowLessonMap(true)}
+								onOpenLessonMap={openLessonMap}
 							/>
 						}
 						pinnedArtifacts={[]}

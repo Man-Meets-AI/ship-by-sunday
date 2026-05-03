@@ -48,7 +48,7 @@ function BlueprintStageNavLink({
 	onNavigate?: (href: string) => void;
 }) {
 	const linkClassName = cn(
-		"inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+		"inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium transition-colors motion-reduce:transition-none",
 		getStateClassName(item.state),
 	);
 

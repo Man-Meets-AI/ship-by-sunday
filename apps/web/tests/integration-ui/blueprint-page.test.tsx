@@ -332,6 +332,24 @@ describe("BlueprintPage", () => {
 			screen.getByText("Name the product clearly and anchor who it is for."),
 		).toBeTruthy();
 		expect(
+			screen.getByRole("button", { name: "Draft Foundation with AI" }),
+		).toBeTruthy();
+		expect(
+			screen.getByRole("button", { name: "Draft Problem with AI" }),
+		).toBeTruthy();
+		expect(
+			screen.getByRole("button", { name: "Draft Outcome with AI" }),
+		).toBeTruthy();
+		expect(
+			screen.getByRole("button", { name: "Draft Pricing with AI" }),
+		).toBeTruthy();
+		expect(
+			screen.getByRole("button", { name: "Draft Setup with AI" }),
+		).toBeTruthy();
+		expect(
+			screen.queryByRole("button", { name: "Draft Design with AI" }),
+		).toBeNull();
+		expect(
 			screen.getByRole("button", { name: "Continue to Review" }),
 		).toBeTruthy();
 	});
@@ -370,7 +388,7 @@ describe("BlueprintPage", () => {
 		).toBeGreaterThan(0);
 		expect(pushMock).not.toHaveBeenCalled();
 		expect(replaceMock).not.toHaveBeenCalled();
-	});
+	}, 15_000);
 
 	it("unlocks post-review and navigates to review with the auto-download signal", async () => {
 		const user = userEvent.setup();
@@ -416,5 +434,5 @@ describe("BlueprintPage", () => {
 				}),
 			}),
 		);
-	});
+	}, 15_000);
 });

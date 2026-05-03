@@ -18,7 +18,7 @@ Make sure all of this is true:
 - auth works in the real deployed environment
 - checkout returns to the deployed `/checkout/success`
 - the live webhook is registered and verified
-- users with granted access reach `/start`
+- users with granted access reach `/blueprint`
 - the first protected flow is usable after access appears
 
 ## Production checklist
@@ -33,9 +33,9 @@ Make sure all of this is true:
 8. Confirm product-access grant happens in the deployed environment, not just locally.
 9. Confirm the buyer reaches the protected product after payment.
 
-`Production Release Proof` is the primary post-merge browser gate for this repo. It should always run the hosted `default_ship` pass against `https://www.man-meets-ai.com`, loading production auth and Convex values from `QA_ENV_FILE=apps/web/.env.production`. When the merged release changed checkout, Stripe, entitlement, webhook, or access handoff behavior, that workflow should also run the hosted `billing_integration` pass automatically instead of waiting for someone to remember an opt-in rerun.
+`Production Release Proof` is the primary post-merge browser gate for this repo. It should always run the hosted `default_ship` pass against the canonical production URL, loading production auth and Convex values from `QA_ENV_FILE=apps/web/.env.production`. When the merged release changed checkout, Stripe, entitlement, webhook, or access handoff behavior, that workflow should also run the hosted `billing_integration` pass automatically instead of waiting for someone to remember an opt-in rerun.
 
-The retired `dev.man-meets-ai.com` staging alias is no longer release-candidate authority. Use feature-branch previews for inspection and use `main` production proof as the release evidence.
+Retired staging aliases are no longer release-candidate authority. Use feature-branch previews for inspection and use `main` production proof as the release evidence.
 
 The production proof bootstrap does not require a separate `CONVEX_DEPLOYMENT` line in `apps/web/.env.production`. It derives the production deployment target from `NEXT_PUBLIC_CONVEX_URL` when needed, so the important thing is keeping the production env file truthful to the live Clerk and Convex environment.
 
@@ -52,7 +52,7 @@ That verifies the part we actually care about in staging or production:
 - redirect into `/checkout/success`
 - live Stripe webhook delivery
 - Convex product-access grant
-- redirect into `/start`
+- redirect into `/blueprint`
 
 It does **not** prove live card charging or decline behavior. Keep card-path confidence in sandbox or local Stripe testing.
 
@@ -62,7 +62,7 @@ The live Stripe webhook must target the Convex HTTP-actions route, not the app o
 
 Before trusting production billing, verify `STRIPE_WEBHOOK_SECRET` and `STRIPE_SECRET_KEY` on the production Convex deployment. Use the internal observability runbook for the incident-control drill and Telegram delivery checks.
 
-After those are correct, let the hosted `billing_integration` run prove one fresh live no-cost order and verify it auto-forwards back into `/start` without replaying the Stripe event. On production, that proof should create the Checkout Session directly with a fresh one-time `100% off` coupon already attached instead of depending on manual promotion-code entry inside Stripe’s hosted UI. The replay path is a valid repair tool, but the clean production proof is the automatic delivery path.
+After those are correct, let the hosted `billing_integration` run prove one fresh live no-cost order and verify it auto-forwards back into `/blueprint` without replaying the Stripe event. On production, that proof should create the Checkout Session directly with a fresh one-time `100% off` coupon already attached instead of depending on manual promotion-code entry inside Stripe’s hosted UI. The replay path is a valid repair tool, but the clean production proof is the automatic delivery path.
 
 ## Keep these in mind
 

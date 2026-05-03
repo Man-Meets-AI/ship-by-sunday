@@ -1,11 +1,12 @@
 import "server-only";
 
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import type Stripe from "stripe";
 
 import {
 	claimCheckoutSessionForViewer,
 	clearPendingCheckoutSessionCookie,
+	fulfillCheckoutSessionByEmail,
 	getCheckoutSessionForRecovery,
 	isStripeCheckoutSessionForCourse,
 	isStripeCheckoutSessionPaid,
@@ -22,10 +23,14 @@ export type CheckoutSessionState =
 	| {
 			kind: "sign_in_required";
 			sessionId: string;
+			checkoutEmail?: string;
+			currentAccountEmail?: string;
 	  }
 	| {
 			kind: "wrong_account";
 			sessionId: string;
+			checkoutEmail?: string;
+			currentAccountEmail?: string;
 	  }
 	| {
 			kind: "payment_pending";
@@ -40,6 +45,8 @@ export type CheckoutSessionState =
 function getCheckoutStateFromClaimResult(
 	claimResult: Awaited<ReturnType<typeof claimCheckoutSessionForViewer>>,
 	sessionId: string,
+	safeCheckoutEmail: string | undefined,
+	currentAccountEmail: string | undefined,
 ): CheckoutSessionState {
 	switch (claimResult.kind) {
 		case "validated":
@@ -51,6 +58,9 @@ function getCheckoutStateFromClaimResult(
 			return {
 				kind: "wrong_account",
 				sessionId,
+				checkoutEmail: claimResult.checkoutEmail ?? safeCheckoutEmail,
+				currentAccountEmail:
+					claimResult.currentAccountEmail ?? currentAccountEmail,
 			};
 		case "payment_pending":
 			return {
@@ -62,6 +72,9 @@ function getCheckoutStateFromClaimResult(
 			return {
 				kind: "sign_in_required",
 				sessionId,
+				checkoutEmail: claimResult.checkoutEmail ?? safeCheckoutEmail,
+				currentAccountEmail:
+					claimResult.currentAccountEmail ?? currentAccountEmail,
 			};
 		case "invalid_session":
 		case "missing_checkout_email":
@@ -69,8 +82,70 @@ function getCheckoutStateFromClaimResult(
 				kind: "invalid_session",
 				sessionId,
 			};
+		/* c8 ignore next 2 */
 		default:
 			return claimResult satisfies never;
+	}
+}
+
+async function getCurrentAccountEmail() {
+	const user = await currentUser();
+	return user?.primaryEmailAddress?.emailAddress ?? undefined;
+}
+
+function getCheckoutStateFromFulfillmentResult(
+	fulfillmentResult: Awaited<ReturnType<typeof fulfillCheckoutSessionByEmail>>,
+	sessionId: string,
+	currentUserId: string | null | undefined,
+	currentAccountEmail: string | undefined,
+): CheckoutSessionState {
+	switch (fulfillmentResult.kind) {
+		case "fulfilled":
+			if (!currentUserId) {
+				return {
+					kind: "sign_in_required",
+					sessionId,
+					checkoutEmail: fulfillmentResult.checkoutEmail,
+				};
+			}
+
+			if (currentUserId !== fulfillmentResult.clerkUserId) {
+				return {
+					kind: "wrong_account",
+					sessionId,
+					checkoutEmail: fulfillmentResult.checkoutEmail,
+					currentAccountEmail,
+				};
+			}
+
+			return {
+				kind: "validated",
+				sessionId,
+			};
+		case "payment_pending":
+			return {
+				kind: "payment_pending",
+				sessionId,
+				paymentStatus: fulfillmentResult.paymentStatus,
+			};
+		case "invalid_session":
+		case "missing_checkout_email":
+		case "clerk_lookup_failed":
+		case "clerk_create_failed":
+		case "clerk_user_conflict":
+		case "grant_failed":
+			return {
+				kind: "sign_in_required",
+				sessionId,
+				checkoutEmail:
+					"checkoutEmail" in fulfillmentResult
+						? fulfillmentResult.checkoutEmail
+						: undefined,
+				currentAccountEmail,
+			};
+		/* c8 ignore next 2 */
+		default:
+			return fulfillmentResult satisfies never;
 	}
 }
 
@@ -100,6 +175,10 @@ export async function getCheckoutSessionState(
 		};
 	}
 
+	const safeCheckoutEmail = isStripeCheckoutSessionPaid(session)
+		? (session.customer_details?.email ?? undefined)
+		: undefined;
+
 	if (!clerkUserId) {
 		if (!isStripeCheckoutSessionPaid(session)) {
 			return {
@@ -110,15 +189,32 @@ export async function getCheckoutSessionState(
 		}
 
 		const authState = await auth();
-		if (!authState.userId) {
+		const currentAccountEmail = authState.userId
+			? await getCurrentAccountEmail()
+			: undefined;
+		const fulfillmentResult = await fulfillCheckoutSessionByEmail(
+			sessionId,
+			"checkout.success.fulfillment",
+		);
+		const fulfillmentState = getCheckoutStateFromFulfillmentResult(
+			fulfillmentResult,
+			sessionId,
+			authState.userId,
+			currentAccountEmail,
+		);
+
+		if (
+			fulfillmentState.kind === "sign_in_required" &&
+			!fulfillmentState.checkoutEmail &&
+			safeCheckoutEmail
+		) {
 			return {
-				kind: "sign_in_required",
-				sessionId,
+				...fulfillmentState,
+				checkoutEmail: safeCheckoutEmail,
 			};
 		}
 
-		const claimResult = await claimCheckoutSessionForViewer(sessionId);
-		return getCheckoutStateFromClaimResult(claimResult, sessionId);
+		return fulfillmentState;
 	}
 
 	const authState = await auth();
@@ -126,6 +222,7 @@ export async function getCheckoutSessionState(
 		return {
 			kind: "sign_in_required",
 			sessionId,
+			checkoutEmail: safeCheckoutEmail,
 		};
 	}
 
@@ -133,12 +230,19 @@ export async function getCheckoutSessionState(
 		return {
 			kind: "wrong_account",
 			sessionId,
+			checkoutEmail: safeCheckoutEmail,
+			currentAccountEmail: await getCurrentAccountEmail(),
 		};
 	}
 
 	if (isStripeCheckoutSessionPaid(session)) {
 		const claimResult = await claimCheckoutSessionForViewer(sessionId);
-		return getCheckoutStateFromClaimResult(claimResult, sessionId);
+		return getCheckoutStateFromClaimResult(
+			claimResult,
+			sessionId,
+			safeCheckoutEmail,
+			await getCurrentAccountEmail(),
+		);
 	}
 
 	return {

@@ -1,5 +1,6 @@
 export const nextApiRouteConfig = {
 	stripeCheckout: "/api/stripe/checkout",
+	stripeExpressCheckout: "/api/stripe/checkout/express",
 	observabilityClerk: "/api/observability/clerk",
 	observabilityVercel: "/api/observability/vercel",
 	observabilityIncidentStatus:

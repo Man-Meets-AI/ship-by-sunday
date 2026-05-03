@@ -84,6 +84,10 @@ describe("observability source adapters", () => {
 			buildStripeCheckoutFailureContext,
 			buildStripeWebhookResultIncident,
 		} = await import("@/platform/observability/source-adapters/stripe-failure");
+		const {
+			buildStripeWebhookResultIncidentEvent,
+			getStripeModeLabelFromSecretKey,
+		} = await import("@/lib/observability/stripe-webhook-incident");
 		const checkoutContext = buildStripeCheckoutFailureContext({
 			appBaseUrl: "https://www.man-meets-ai.com",
 			userId: "user_123",
@@ -107,6 +111,13 @@ describe("observability source adapters", () => {
 			stripeCustomerId: "cus_456",
 			stripePaymentIntentId: "pi_456",
 			message: "convex unavailable",
+		});
+		const fulfillmentFailedIncident = buildStripeWebhookResultIncident({
+			kind: "fulfillment_failed",
+			eventId: "evt_789",
+			eventType: "checkout.session.completed",
+			sessionId: "cs_789",
+			message: "Clerk unavailable",
 		});
 
 		expect(checkoutContext).toMatchObject({
@@ -137,6 +148,31 @@ describe("observability source adapters", () => {
 		expect(grantFailedIncident.details).toMatchObject({
 			stripeCustomerId: "cus_456",
 			stripePaymentIntentId: "pi_456",
+		});
+		expect(fulfillmentFailedIncident).toMatchObject({
+			code: "stripe_webhook_fulfillment_failed",
+			externalEventId: "evt_789",
+			nativeUrl: "https://dashboard.stripe.com/test/events/evt_789",
+		});
+		expect(fulfillmentFailedIncident.details).toMatchObject({
+			fulfillmentMessage: "Clerk unavailable",
+			sessionId: "cs_789",
+		});
+		expect(getStripeModeLabelFromSecretKey("sk_test_123")).toBe("test");
+		expect(getStripeModeLabelFromSecretKey("sk_live_123")).toBe("live");
+		expect(
+			buildStripeWebhookResultIncidentEvent({
+				result: {
+					kind: "missing_checkout_email",
+					eventId: "",
+					eventType: "checkout.session.completed",
+					sessionId: "cs_live_123",
+				},
+				stripeMode: "live",
+			}),
+		).toMatchObject({
+			logsUrl: "https://dashboard.stripe.com/events",
+			nativeUrl: "https://dashboard.stripe.com/events",
 		});
 	});
 

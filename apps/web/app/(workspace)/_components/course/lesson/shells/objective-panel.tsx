@@ -1,6 +1,5 @@
 "use client";
 
-import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Card,
 	CardDescription,
@@ -8,7 +7,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
 	getLessonByKey,
@@ -16,6 +14,9 @@ import {
 } from "@/lib/course/lesson/model/manifest";
 import type { ObjectiveTask } from "@/lib/course/lesson/model/registry";
 import { cn } from "@/lib/utils";
+
+import { ObjectiveTaskCounter } from "./objective-task-counter";
+import { ObjectiveTaskRow } from "./objective-task-row";
 
 const panelCardClass = "flex min-w-0 flex-col gap-0 py-0 xl:h-full xl:min-h-0";
 const eyebrowClass =
@@ -80,9 +81,10 @@ export function ObjectivePanel({
 					<div className="space-y-4">
 						<div className="flex items-center justify-between gap-2 border-b border-border/50 pb-2">
 							<CardTitle className={eyebrowClass}>Tasks</CardTitle>
-							<p className="font-mono text-[10px] tabular-nums tracking-widest text-muted-foreground">
-								{completedCount}/{objectiveTasks.length}
-							</p>
+							<ObjectiveTaskCounter
+								completedCount={completedCount}
+								totalCount={objectiveTasks.length}
+							/>
 						</div>
 						<div className="space-y-4">
 							{taskGroups.map((group) => (
@@ -93,49 +95,13 @@ export function ObjectivePanel({
 										</CardTitle>
 									) : null}
 									<div className="space-y-1">
-										{group.tasks.map((task) => {
-											const complete = task.status === "complete";
-											const id = task.interactive
-												? `objective-task-${task.id}`
-												: `objective-task-readonly-${task.id}`;
-											return (
-												<div
-													key={task.id}
-													className={cn(
-														"flex gap-3 px-1 py-1",
-														task.interactive ? "items-center" : "items-start",
-													)}
-												>
-													<Checkbox
-														id={id}
-														checked={complete}
-														className={
-															task.interactive
-																? "size-3.5 shrink-0"
-																: "mt-0.5 size-3.5 shrink-0"
-														}
-														disabled={!task.interactive}
-														onCheckedChange={
-															task.interactive
-																? (v) =>
-																		onObjectiveTaskToggle(task.id, Boolean(v))
-																: undefined
-														}
-													/>
-													<Label
-														htmlFor={id}
-														className={cn(
-															"text-[13px] font-normal leading-normal",
-															complete
-																? "text-muted-foreground line-through"
-																: "text-foreground",
-														)}
-													>
-														{task.label}
-													</Label>
-												</div>
-											);
-										})}
+										{group.tasks.map((task) => (
+											<ObjectiveTaskRow
+												key={task.id}
+												task={task}
+												onToggle={onObjectiveTaskToggle}
+											/>
+										))}
 									</div>
 								</div>
 							))}

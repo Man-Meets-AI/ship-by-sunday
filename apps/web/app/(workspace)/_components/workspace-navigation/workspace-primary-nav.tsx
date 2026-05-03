@@ -17,9 +17,9 @@ import type {
 } from "@/lib/workspace-navigation/build-primary-nav-model";
 
 const topLevelClassName =
-	"inline-flex items-center rounded-md px-2 py-1 text-sm font-medium transition-colors";
+	"inline-flex items-center rounded-md px-2 py-1 text-sm font-medium transition-colors motion-reduce:transition-none";
 const menuEntryClassName =
-	"flex w-full items-center rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:text-foreground";
+	"flex w-full items-center rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:text-foreground motion-reduce:transition-none";
 
 function handleControlledNavigation(
 	event: { defaultPrevented: boolean; preventDefault: () => void },
@@ -37,9 +37,9 @@ function handleControlledNavigation(
 function getStateClassName(state: WorkspacePrimaryNavItem["state"]) {
 	switch (state) {
 		case "active":
-			return "font-semibold text-foreground";
+			return "bg-muted/70 font-semibold text-foreground";
 		case "complete":
-			return "text-foreground/70";
+			return "text-foreground/80 hover:bg-muted/60 hover:text-foreground";
 		case "disabled":
 			return "cursor-not-allowed text-muted-foreground/35";
 		default:
@@ -166,7 +166,7 @@ export function WorkspacePrimaryNav({
 							>
 								{item.label}
 							</NavigationMenuTrigger>
-							<NavigationMenuContent className="w-64 p-2">
+							<NavigationMenuContent className="w-full max-w-[min(18rem,calc(100vw-2rem))] p-2 sm:max-w-none sm:w-72">
 								<ul className="grid gap-1">
 									{item.items.map((entry) => (
 										<li key={entry.id}>

@@ -122,6 +122,38 @@ describe("AccessRequiredPage", () => {
 		expect(markup).toContain('href="/#pricing"');
 	});
 
+	it("renders paid checkout recovery before purchase actions when a pending claim is known", () => {
+		useQueryMock.mockReturnValue({
+			hasAccess: false,
+			status: "no_access",
+		});
+
+		const markup = renderToStaticMarkup(
+			<AccessRequiredPage
+				initialAccess={{
+					clerkUserId: "user_other",
+					hasAccess: false,
+					status: "no_access",
+					pendingCheckoutRecovery: {
+						kind: "wrong_account",
+						sessionId: "cs_paid_wrong",
+						checkoutEmail: "buyer@example.com",
+						currentAccountEmail: "other@example.com",
+					},
+				}}
+			/>,
+		);
+
+		expect(markup).toContain("Paid checkout needs the right account");
+		expect(markup).toContain(
+			"Payment is tied to buyer@example.com, but this browser is signed in as other@example.com.",
+		);
+		expect(markup).toContain("Do not buy again");
+		expect(markup).toContain("Recover paid checkout");
+		expect(markup).not.toContain('data-testid="access-required-buy-access"');
+		expect(markup).not.toContain("Buy access now");
+	});
+
 	it("renders the token refresh state separately from signed out", () => {
 		useQueryMock.mockReturnValue({
 			hasAccess: false,

@@ -10,7 +10,7 @@ import {
 	claimLatestPendingCheckoutForViewer,
 	getPendingCheckoutSessionIdFromCookie,
 } from "@/platform/billing/checkout/checkout-session-recovery";
-import type { ProductAccess } from "@/lib/product-access";
+import type { PaidCheckoutRecovery, ProductAccess } from "@/lib/product-access";
 import { getConvexServerSession } from "@/platform/auth/convex-auth";
 
 type ResumeDestination = FunctionReturnType<
@@ -23,6 +23,16 @@ async function refreshViewerProductAccess(token: string) {
 		{},
 		{ token },
 	)) as ProductAccess;
+}
+
+function withPendingCheckoutRecovery(
+	access: ProductAccess,
+	pendingCheckoutRecovery: PaidCheckoutRecovery,
+): ProductAccess {
+	return {
+		...access,
+		pendingCheckoutRecovery,
+	};
 }
 
 export async function getServerProductAccess(): Promise<ProductAccess> {
@@ -58,14 +68,27 @@ export async function getServerProductAccess(): Promise<ProductAccess> {
 		if (claimResult.kind === "validated") {
 			return await refreshViewerProductAccess(session.token);
 		}
+		if (
+			claimResult.kind === "wrong_account" ||
+			claimResult.kind === "sign_in_required" ||
+			claimResult.kind === "payment_pending"
+		) {
+			return withPendingCheckoutRecovery(access, claimResult);
+		}
 	}
 
 	const emailClaimResult = await claimLatestPendingCheckoutForViewer();
-	if (emailClaimResult.kind !== "validated") {
-		return access;
+	if (emailClaimResult.kind === "validated") {
+		return await refreshViewerProductAccess(session.token);
+	}
+	if (
+		emailClaimResult.kind === "wrong_account" ||
+		emailClaimResult.kind === "sign_in_required"
+	) {
+		return withPendingCheckoutRecovery(access, emailClaimResult);
 	}
 
-	return await refreshViewerProductAccess(session.token);
+	return access;
 }
 
 export async function getServerResumeDestination() {

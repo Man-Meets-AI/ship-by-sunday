@@ -16,11 +16,11 @@ function StarterSystemCapabilityRow({
 }) {
 	return (
 		<ScrollReveal delay={0.08 * index}>
-			<article className="border-t border-border/40 py-7 lg:py-8">
+			<article className="group relative border-t border-border/40 py-7 pl-4 before:absolute before:inset-y-3 before:left-0 before:w-px before:bg-foreground/0 motion-safe:before:transition-colors motion-safe:before:duration-500 motion-safe:hover:before:bg-foreground/30 lg:py-8">
 				<h3 className="text-[1.15rem] font-semibold leading-tight tracking-tight text-foreground sm:text-[1.3rem]">
 					{capability.title}
 				</h3>
-				<p className="mt-2 max-w-[38ch] text-[0.95rem] leading-relaxed text-muted-foreground sm:text-base">
+				<p className="mt-1.5 max-w-[38ch] text-[0.95rem] leading-snug text-muted-foreground sm:text-base">
 					{capability.description}
 				</p>
 			</article>
@@ -37,21 +37,18 @@ export function StarterSystemSectionBlock({
 		<section className="py-24 lg:py-40">
 			<div className="grid gap-14 lg:grid-cols-[minmax(0,5fr)_minmax(0,4fr)] lg:gap-20">
 				<ScrollReveal>
-					<div className="space-y-6 lg:sticky lg:top-24 lg:h-fit">
+					<div className="space-y-3 lg:sticky lg:top-24 lg:h-fit">
 						<h2
 							aria-label={starterSystemSection.title}
-							className="text-[clamp(2rem,5vw,3.25rem)] font-semibold leading-[0.95] tracking-tight text-foreground"
+							className="flex flex-col gap-1 text-[clamp(2rem,5vw,3.25rem)] font-semibold leading-[0.9] tracking-tight text-foreground"
 						>
-							{starterSystemSection.titleLines.map((titleLine, index) => (
-								<span
-									key={titleLine}
-									className={index === 0 ? "block" : "mt-2 block sm:mt-3"}
-								>
+							{starterSystemSection.titleLines.map((titleLine) => (
+								<span key={titleLine} className="block">
 									{titleLine}
 								</span>
 							))}
 						</h2>
-						<p className="max-w-[38ch] text-base leading-7 text-muted-foreground sm:text-lg">
+						<p className="max-w-[38ch] text-base leading-snug text-muted-foreground sm:text-lg">
 							{starterSystemSection.intro}
 						</p>
 					</div>

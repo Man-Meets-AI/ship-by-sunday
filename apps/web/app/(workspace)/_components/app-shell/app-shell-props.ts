@@ -5,7 +5,7 @@ import type {
 } from "@shipbysunday/blueprint-compiler";
 
 import type { LessonLayoutMode } from "@/lib/course/lesson/model/manifest";
-import type { SkillRailCompletionCue } from "@/app/(workspace)/_components/course/shared/components/skill-rail";
+import type { SkillRailCompletionCue } from "@/app/(workspace)/_components/course/shared/components/skill-rail-shared";
 import type {
 	WorkspacePrimaryNavActionId,
 	WorkspacePrimaryNavItem,

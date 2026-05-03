@@ -1,3 +1,7 @@
+import {
+	DEFAULT_DESIGN_PRESET_ID,
+	getBlueprintStageDefinition,
+} from "@shipbysunday/blueprint-compiler";
 import { describe, expect, it } from "vitest";
 
 import { productConfig } from "@/config/product";
@@ -9,59 +13,107 @@ describe("home page content", () => {
 			"Ship a real, durable product by Sunday",
 		);
 		expect(productConfig.metadataDescription).toContain(
-			"phone-started agent work",
+			"phone-started exec loops",
 		);
 		expect(productConfig.metadataDescription).toContain(
 			"codebases that convert",
 		);
 
+		const productPreviewSection = homePageContent.productPreviewSection;
+
+		const canonicalSectionIds = getBlueprintStageDefinition(
+			"blueprint",
+		).steps.map((step) => step.id);
+		expect(productPreviewSection.sections.map((section) => section.id)).toEqual(
+			canonicalSectionIds,
+		);
+		expect(
+			productPreviewSection.sections
+				.filter((section) => section.status === "interactive")
+				.map((section) => section.id),
+		).toEqual(["foundation", "design", "pricing"]);
+		expect(
+			productPreviewSection.sections
+				.filter((section) => section.status === "locked")
+				.map((section) => section.id),
+		).toEqual(["problem", "outcome", "setup", "generated-preview"]);
+
+		expect(productPreviewSection.foundation.fields.productName.label).toBe(
+			"What's the name?",
+		);
+		expect(productPreviewSection.foundation.fields.productSummary.label).toBe(
+			"What's the one-liner?",
+		);
+		expect(productPreviewSection.foundation.fields.primaryUser.label).toBe(
+			"Who wants this? Who benefits from this?",
+		);
+
+		expect(productPreviewSection.design.defaultPresetId).toBe(
+			DEFAULT_DESIGN_PRESET_ID,
+		);
+		expect(productPreviewSection.design.presets.length).toBeGreaterThan(0);
+		expect(
+			productPreviewSection.design.presets.some(
+				(preset) => preset.id === DEFAULT_DESIGN_PRESET_ID,
+			),
+		).toBe(true);
+
+		expect(
+			productPreviewSection.pricing.modelOptions.map((option) => option.value),
+		).toEqual(["one_time", "monthly", "yearly"]);
+		expect(productPreviewSection.pricing.defaultModel).toBe("one_time");
+
+		expect(productPreviewSection.cta.label).toBe("Generate my codebase");
+		expect(productPreviewSection.cta.secondaryHref).toBe("#system");
+
 		expect(homePageContent.hero.headlineLead).toBe("Ship codebases");
 		expect(homePageContent.hero.headlineTailHover).toBe("that convert");
 		expect(homePageContent.hero.body).toBe(
-			"Turn phone-started ideas, async agent loops, and messy AI output into worker-ready context: product truth, role-specific packs, and a starter path agents can use to ship meaningful code.",
+			"Ship by Sunday gives your agents the worker layer around Codex: exec loops, role packets, channel handoffs, and QA that feeds the next run.",
 		);
 		expect(homePageContent.hero.promoBanner).toEqual({
 			label: "Early member",
-			message: `Get ${productConfig.name} for ${productConfig.checkoutPriceDisplay} instead of ${productConfig.priceDisplay}. ${productConfig.activeOffer?.percentOff}% off auto-applied at checkout, plus FULL TURBO free.`,
+			message: `${productConfig.checkoutPriceDisplay} early member price. FULL TURBO included.`,
 		});
 		expect(homePageContent.hero.loginLabel).toBe("Sign in");
-		expect(homePageContent.hero.secondaryCta.label).toBe("See the worker path");
+		expect(homePageContent.hero.secondaryCta.label).toBe("See the loop");
 		expect(homePageContent.hero.secondaryCta.href).toBe("#system");
 
 		expect(homePageContent.sprintPathSection.titleHighlight).toBe(
-			"worker context.",
+			"agents useful.",
 		);
 		expect(homePageContent.sprintPathSection.intro).toContain(
-			"start work from your phone",
+			"decision to agent run",
 		);
-		expect(homePageContent.whatsInsideSection.title).toBe(
-			"Build the worker layer.",
-		);
-		expect(homePageContent.whatsInsideSection.pillars[1]?.title).toBe(
-			"The worker roles",
-		);
-		expect(homePageContent.whatsInsideSection.pillars[2]?.title).toBe(
-			"The execution path",
+		expect(homePageContent.execLoopSection.title).toBe("How the loop works.");
+		expect(
+			homePageContent.execLoopSection.steps.map((step) => step.label),
+		).toEqual(["Decide", "Brief", "Run", "Review"]);
+		expect(homePageContent.execLoopSection.steps[2]?.description).toContain(
+			"phone-started prompt",
 		);
 		expect(homePageContent.starterSystemSection.title).toBe(
 			"A worker layer your agents can build from.",
 		);
 		expect(homePageContent.starterSystemSection.intro).toContain(
-			"agents running while you are AFK",
+			"trained worker role",
 		);
 		expect(homePageContent.starterSystemSection.capabilities[1]?.title).toBe(
-			"Role-specific packs",
+			"Async channels",
 		);
-		expect(homePageContent.starterSystemSection.capabilities).toEqual(
-			expect.arrayContaining([
-				expect.objectContaining({ title: "Async-ready context" }),
-				expect.objectContaining({ title: "Built-in QA" }),
-				expect.objectContaining({ title: "Curated design direction" }),
-			]),
-		);
+		expect(homePageContent.starterSystemSection.capabilities).toEqual([
+			expect.objectContaining({ title: "Role packets" }),
+			expect.objectContaining({ title: "Async channels" }),
+			expect.objectContaining({ title: "Code-side loop" }),
+			expect.objectContaining({ title: "Proof path" }),
+		]);
 		expect(homePageContent.durabilitySection.title).toBe(
 			"Ship by Sunday. Keep shipping on Monday.",
 		);
+		expect(homePageContent.socialProofSection.portrait).toEqual({
+			src: "/founder-portrait.jpg",
+			alt: "Founder portrait",
+		});
 
 		expect(homePageContent.faqSection.items).toEqual([
 			expect.objectContaining({
@@ -69,12 +121,6 @@ describe("home page content", () => {
 			}),
 			expect.objectContaining({
 				question: "What do I actually get at the end?",
-			}),
-			expect.objectContaining({
-				question: "I already have a starter. Why would I need this?",
-			}),
-			expect.objectContaining({
-				question: "Is this just more planning before coding?",
 			}),
 			expect.objectContaining({
 				question: "Who is this for?",
@@ -93,9 +139,11 @@ describe("home page content", () => {
 
 		expect(homePageContent.pricingSection.includes).toEqual(
 			expect.arrayContaining([
-				"Agent-Ready Packs",
-				"Worker-role setup for product, design, marketing, build, and QA",
-				"Ship by Sunday Blueprint",
+				"Exec loop setup",
+				"Role-specific worker packets",
+				"Phone, Telegram, and Discord handoff pattern",
+				"Codex-ready code run path",
+				"Review and QA path",
 				"Fast Pass Walkthroughs",
 			]),
 		);
@@ -107,9 +155,11 @@ describe("home page content", () => {
 		);
 		expect(homePageContent.pricingSection.offerBanner).toEqual({
 			label: "Early member",
-			message: `50% off the ${productConfig.priceDisplay} list price. Auto-applied at checkout.`,
+			message: `${productConfig.checkoutPriceDisplay} early member price. Auto-applied at checkout.`,
 		});
-		expect(homePageContent.pricingSection.ctaTitle).toBe("Get the blueprint");
+		expect(homePageContent.pricingSection.ctaTitle).toBe(
+			"Build the worker layer",
+		);
 	});
 
 	it("keeps the faq focused on the offer", () => {
@@ -118,7 +168,7 @@ describe("home page content", () => {
 			.join("\n");
 
 		expect(faqCopy).not.toContain("The guarantee is about clarity");
-		expect(faqCopy).toContain("Blueprint");
+		expect(faqCopy).toContain("exec loops");
 		expect(faqCopy).toContain("worker layer");
 	});
 });

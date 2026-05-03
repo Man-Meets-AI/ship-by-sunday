@@ -1,70 +1,44 @@
 "use client";
 
 import { useConvexAuth, useQuery } from "convex/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
-import { routeConfig, timingConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import type { CheckoutSessionState } from "@/platform/billing/checkout/checkout-session";
 import type { ProductAccess } from "@/lib/product-access";
 
-import { CheckoutSuccessSurface } from "./checkout-success-view-surface";
 import {
-	getCheckoutViewModel,
-	validatedStatusCopy,
-} from "../_lib/checkout-success-view-model";
+	CheckoutSuccessFixtureView,
+	type CheckoutSuccessFixtureProps,
+} from "./checkout-success-fixture-view";
+import { CheckoutSuccessViewContent } from "./checkout-success-view-content";
 
-function CheckoutSuccessViewContent({
+export function CheckoutSuccessView({
 	checkoutSessionState,
-	isAccessReady,
+	initialProductAccess,
+	fixture,
 }: {
 	checkoutSessionState: CheckoutSessionState;
-	isAccessReady: boolean;
+	initialProductAccess?: ProductAccess | null;
+	fixture?: CheckoutSuccessFixtureProps;
 }) {
-	const router = useRouter();
-	const [statusIndex, setStatusIndex] = useState(0);
-	const canAutoRedirect =
-		checkoutSessionState.kind === "validated" && isAccessReady;
-	const viewModel = getCheckoutViewModel(
-		checkoutSessionState,
-		isAccessReady,
-		validatedStatusCopy[statusIndex],
-	);
-
-	useEffect(() => {
-		if (!canAutoRedirect) {
-			return;
-		}
-
-		const timeout = window.setTimeout(() => {
-			router.replace(routeConfig.blueprint);
-		}, timingConfig.checkoutAutoRedirectMs);
-
-		return () => window.clearTimeout(timeout);
-	}, [canAutoRedirect, router]);
-
-	useEffect(() => {
-		if (checkoutSessionState.kind !== "validated" || isAccessReady) {
-			return;
-		}
-
-		const interval = window.setInterval(() => {
-			setStatusIndex((current) => (current + 1) % validatedStatusCopy.length);
-		}, timingConfig.checkoutStatusRotateMs);
-
-		return () => window.clearInterval(interval);
-	}, [checkoutSessionState.kind, isAccessReady]);
-
+	if (fixture) {
+		return (
+			<CheckoutSuccessFixtureView
+				checkoutSessionState={checkoutSessionState}
+				initialProductAccess={initialProductAccess}
+				fixture={fixture}
+			/>
+		);
+	}
 	return (
-		<CheckoutSuccessSurface
-			viewModel={viewModel}
-			canAutoRedirect={canAutoRedirect}
+		<CheckoutSuccessLiveView
+			checkoutSessionState={checkoutSessionState}
+			initialProductAccess={initialProductAccess}
 		/>
 	);
 }
 
-export function CheckoutSuccessView({
+function CheckoutSuccessLiveView({
 	checkoutSessionState,
 	initialProductAccess,
 }: {
@@ -82,6 +56,7 @@ export function CheckoutSuccessView({
 		<CheckoutSuccessViewContent
 			checkoutSessionState={checkoutSessionState}
 			isAccessReady={Boolean(access?.hasAccess)}
+			suppressRedirect={false}
 		/>
 	);
 }

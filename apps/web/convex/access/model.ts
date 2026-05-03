@@ -63,13 +63,32 @@ export async function upsertProductAccessGrant(
 	input: ProductAccessGrantUpsertInput,
 ) {
 	const now = Date.now();
+	const existingStripeGrant = input.stripeCheckoutSessionId
+		? await ctx.db
+				.query("productAccessGrants")
+				.withIndex("by_stripe_checkout_session_id", (q) =>
+					q.eq("stripeCheckoutSessionId", input.stripeCheckoutSessionId!),
+				)
+				.unique()
+		: null;
+
+	if (
+		existingStripeGrant &&
+		existingStripeGrant.clerkUserId !== input.clerkUserId
+	) {
+		throw new ConvexError(
+			`Stripe checkout session already granted to ${existingStripeGrant.clerkUserId}`,
+		);
+	}
+
 	const existingGrant = await getProductAccessGrantByClerkUserId(
 		ctx,
 		input.clerkUserId,
 	);
 
-	if (existingGrant) {
-		await ctx.db.patch(existingGrant._id, {
+	const grantToPatch = existingStripeGrant ?? existingGrant;
+	if (grantToPatch) {
+		await ctx.db.patch(grantToPatch._id, {
 			status: "granted",
 			source: input.source,
 			stripeCustomerId: input.stripeCustomerId,

@@ -20,7 +20,10 @@ export function AppShellUserMenuAccount({
 		return (
 			<>
 				<DropdownMenuItem onSelect={() => clerk.openUserProfile()}>
-					<UserRound className="text-muted-foreground" aria-hidden />
+					<UserRound
+						className="size-4 shrink-0 text-muted-foreground"
+						aria-hidden
+					/>
 					Account
 				</DropdownMenuItem>
 				<DropdownMenuItem
@@ -29,7 +32,7 @@ export function AppShellUserMenuAccount({
 						void clerk.signOut({ redirectUrl: routeConfig.home });
 					}}
 				>
-					<LogOut aria-hidden />
+					<LogOut className="size-4 shrink-0" aria-hidden />
 					Sign out
 				</DropdownMenuItem>
 			</>

@@ -71,7 +71,7 @@ Use `bun run dev:core` only when you intentionally want the lighter no-Stripe pa
 
 ## Next
 
-- Use [docs/design-docs/scripts.md](/Users/parkerrex/Developer/ship-by-sunday/docs/design-docs/scripts.md) for the current command map.
-- Use [apps/web/content/docs/local-qa.mdx](/Users/parkerrex/Developer/ship-by-sunday/apps/web/content/docs/local-qa.mdx) for the app-local verification runbook.
-- Use [docs/programs/PROGRAMS.md](/Users/parkerrex/Developer/ship-by-sunday/docs/programs/PROGRAMS.md) for the canonical Program contract.
-- Use [docs/exec-plans/PLANS.md](/Users/parkerrex/Developer/ship-by-sunday/docs/exec-plans/PLANS.md) for the canonical ExecPlan contract.
+- Use [docs/design-docs/scripts.md](design-docs/scripts.md) for the current command map.
+- Use [apps/web/content/docs/local-qa.mdx](../apps/web/content/docs/local-qa.mdx) for the app-local verification runbook.
+- Use [docs/programs/PROGRAMS.md](programs/PROGRAMS.md) for the canonical Program contract.
+- Use [docs/exec-plans/PLANS.md](exec-plans/PLANS.md) for the canonical ExecPlan contract.

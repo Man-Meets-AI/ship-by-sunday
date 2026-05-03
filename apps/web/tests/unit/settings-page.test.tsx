@@ -34,15 +34,20 @@ globalThis.React = React;
 import { SettingsPage } from "@/app/(workspace)/settings/_components/settings-page";
 
 describe("SettingsPage", () => {
-	it("includes Codex and account cards without the legacy starter-repo card", () => {
+	it("includes Codex, starter repo, and account cards", () => {
 		const markup = renderToStaticMarkup(<SettingsPage />);
 
-		expect(markup).toContain("Manage your account");
+		expect(markup).toContain("Connect Codex, manage starter repo access");
+		expect(markup).toContain('id="settings-toc"');
+		expect(markup).toContain('id="starter-repo-access"');
+		expect(markup).toContain('id="settings-account"');
 		const codex = markup.indexOf('data-codex-card="true"');
+		const starterRepo = markup.indexOf('data-starter-repo-card="settings"');
 		const account = markup.indexOf('data-settings-account-card="true"');
 		expect(codex).toBeGreaterThan(-1);
+		expect(starterRepo).toBeGreaterThan(-1);
 		expect(account).toBeGreaterThan(-1);
-		expect(markup).not.toContain('data-starter-repo-card="settings"');
-		expect(codex).toBeLessThan(account);
+		expect(codex).toBeLessThan(starterRepo);
+		expect(starterRepo).toBeLessThan(account);
 	});
 });

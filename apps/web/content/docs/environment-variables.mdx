@@ -31,6 +31,7 @@ Run `bun run dev:convex` to connect the repo to your hosted Convex dev deploymen
 - `OBSERVABILITY_INCIDENT_CONTROL_TOKEN`: separate bearer token for the maintainer-only incident status route at `/api/observability/incidents/[incidentId]/status`
 - `OBSERVABILITY_VERCEL_WEBHOOK_SECRET`: verifies Vercel deployment webhooks sent to `/api/observability/vercel`
 - `STRIPE_SECRET_KEY`: Stripe API access
+- `STRIPE_PUBLISHABLE_KEY`: safe-to-expose Stripe key used by homepage Express Checkout
 - `STRIPE_WEBHOOK_SECRET`: verifies the Stripe webhook
 - `STRIPE_PRICE_ID`: optional dashboard-managed price; leave it unset locally until your test account has a managed `$500` price that matches the live list-price contract
 - `STRIPE_PRODUCT_ID`: optional product id emitted by the Stripe script
@@ -38,13 +39,26 @@ Run `bun run dev:convex` to connect the repo to your hosted Convex dev deploymen
 
 With the current early-member pricing slice, the app truth is a `$500` list price plus a `50%` auto-applied offer. That means local/test Stripe parity now has two moving parts: a matching `$500` test price and a matching test promotion code. Until those assets exist in the test account, keep `STRIPE_PRICE_ID` unset locally so checkout uses inline `price_data`, and do not hard-code a guessed public code name like `EARLYSHIP` into repo config. The repo consumes Stripe resource IDs and lets dashboard state own the customer-facing code string.
 
-## Telegram observability
+Stripe guest purchase fulfillment runs inside Convex and calls Clerk by checkout email. Keep `CLERK_SECRET_KEY`, `STRIPE_SECRET_KEY`, and `STRIPE_WEBHOOK_SECRET` synced into the active Convex deployment as well as the Next.js runtime.
 
+## PostHog and Telegram observability
+
+- `NEXT_PUBLIC_POSTHOG_TOKEN`: public PostHog project token used by browser analytics; it starts with `phc_`
+- `NEXT_PUBLIC_POSTHOG_HOST`: PostHog browser ingest host; US Cloud uses `https://us.i.posthog.com`
+- `POSTHOG_PROJECT_ID`: numeric PostHog project id used by source-map upload tooling
+- `POSTHOG_API_KEY`: secret PostHog personal API key used only for source-map uploads; create it as a project-scoped key with only the `Source map upload` scope
 - `TELEGRAM_BOT_TOKEN`: Telegram bot token used for production alerts
 - `TELEGRAM_CHAT_ID`: chat or group id that receives alerts
 - `ENABLE_OBSERVABILITY_TEST_TRIGGER`: test-only switch for the Playwright protected-shell failure harness
+- `CHECKOUT_SUCCESS_FIXTURES`: test-only switch that enables the `/checkout/success?fixture=<variant>` deterministic in-memory fixture for capturing the polling -> redirect-armed arc in a real browser. The fixture refuses to activate unless this is set to `1` AND `NODE_ENV !== "production"`. Leave unset outside local development and CI screenshot capture; never set it on a production deployment
 
 `OBSERVABILITY_INGEST_TOKEN` is a high-entropy shared secret between the Next.js app and Convex. In production, keep `NEXT_PUBLIC_CONVEX_SITE_URL` aligned with the live Convex HTTP-actions host so observability and other HTTP-action traffic do not fall back to the browser-only client origin.
+
+`POSTHOG_API_KEY` is not the browser project token and must not use all-access permissions. Use a separate personal API key for MCP or agent tooling if OAuth is unavailable.
+
+`NEXT_PUBLIC_POSTHOG_TOKEN` and `NEXT_PUBLIC_POSTHOG_HOST` are validated as a pair. Set both to enable browser analytics, error tracking, and masked session replay, or leave both unset. `POSTHOG_PROJECT_ID` and `POSTHOG_API_KEY` are production-build values for source-map upload only; set both to enable upload, or omit either one to build without source-map upload. Do not expose the personal API key through a `NEXT_PUBLIC_` variable.
+
+PostHog MCP is an operator setup, not an app env variable. Prefer OAuth through the PostHog AI plugin. If OAuth is unavailable, create a separate project-scoped Personal API Key with only the `MCP Server` scope.
 
 ## Optional video pipeline
 

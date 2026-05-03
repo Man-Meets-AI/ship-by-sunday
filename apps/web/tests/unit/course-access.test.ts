@@ -219,7 +219,7 @@ describe("product access server helpers", () => {
 		expect(fetchQueryMock).toHaveBeenCalledTimes(2);
 	});
 
-	it("keeps the original no-access response when the fallback checkout claim is not validated", async () => {
+	it("keeps paid checkout recovery details when the fallback checkout claim finds the wrong account", async () => {
 		getConvexServerSessionMock.mockResolvedValue({
 			userId: "user_123",
 			token: "token_123",
@@ -235,6 +235,8 @@ describe("product access server helpers", () => {
 		claimCheckoutSessionForViewerMock.mockResolvedValue({
 			kind: "wrong_account",
 			sessionId: "cs_pending_123",
+			checkoutEmail: "buyer@example.com",
+			currentAccountEmail: "other@example.com",
 		});
 
 		const { getServerProductAccess } =
@@ -244,8 +246,14 @@ describe("product access server helpers", () => {
 			hasAccess: false,
 			clerkUserId: "user_123",
 			status: "no_access",
+			pendingCheckoutRecovery: {
+				kind: "wrong_account",
+				sessionId: "cs_pending_123",
+				checkoutEmail: "buyer@example.com",
+				currentAccountEmail: "other@example.com",
+			},
 		});
-		expect(claimLatestPendingCheckoutForViewerMock).toHaveBeenCalledTimes(1);
+		expect(claimLatestPendingCheckoutForViewerMock).not.toHaveBeenCalled();
 		expect(fetchQueryMock).toHaveBeenCalledTimes(1);
 	});
 

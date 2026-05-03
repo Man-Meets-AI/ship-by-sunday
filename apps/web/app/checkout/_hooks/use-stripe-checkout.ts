@@ -4,10 +4,20 @@ import { useCallback, useState } from "react";
 
 import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
 import { assert } from "@/lib/assert";
+import { capturePostHogProductEvent } from "@/lib/observability/posthog-client";
 
-export function useStripeCheckout() {
-	const [isLoading, setIsLoading] = useState(false);
+export type StripeCheckoutPhase = "idle" | "saving" | "redirecting";
+
+export type StripeCheckoutOptions = {
+	onBeforeCheckout?: () => void | Promise<void>;
+};
+
+export function useStripeCheckout(options: StripeCheckoutOptions = {}) {
+	const { onBeforeCheckout } = options;
+	const [phase, setPhase] = useState<StripeCheckoutPhase>("idle");
 	const [error, setError] = useState<string | null>(null);
+
+	const isLoading = phase !== "idle";
 
 	const clearError = useCallback(() => {
 		setError(null);
@@ -15,8 +25,30 @@ export function useStripeCheckout() {
 
 	const startCheckout = useCallback(async () => {
 		setError(null);
+		capturePostHogProductEvent({
+			event: "checkout_started",
+			properties: {
+				surface: "checkout_button",
+			},
+		});
 
-		setIsLoading(true);
+		setPhase(onBeforeCheckout ? "saving" : "redirecting");
+
+		if (onBeforeCheckout) {
+			try {
+				await onBeforeCheckout();
+			} catch (callbackError) {
+				const message =
+					callbackError instanceof Error
+						? callbackError.message
+						: "Unable to prepare checkout.";
+				setError(message);
+				setPhase("idle");
+				return;
+			}
+			setPhase("redirecting");
+		}
+
 		const response = await fetch(apiRouteConfig.stripeCheckout, {
 			method: "POST",
 		});
@@ -30,7 +62,7 @@ export function useStripeCheckout() {
 
 			assert("error" in data, "Missing checkout error message.");
 			setError(data.error);
-			setIsLoading(false);
+			setPhase("idle");
 			return;
 		}
 
@@ -38,7 +70,7 @@ export function useStripeCheckout() {
 
 		assert("url" in data, "Missing checkout redirect URL.");
 		window.location.assign(data.url);
-	}, []);
+	}, [onBeforeCheckout]);
 
-	return { startCheckout, isLoading, error, clearError };
+	return { startCheckout, phase, isLoading, error, clearError };
 }

@@ -1,7 +1,7 @@
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Empty, EmptyDescription } from "@/components/ui/empty";
+import { formatArtifactValue } from "@/app/(workspace)/_components/course/artifacts/preview/artifact-value-format";
 import type { LessonExampleContent } from "@/lib/course/lesson/model/contracts";
-import { formatArtifactValue } from "@/app/(workspace)/_components/course/lesson/workbench/shared/artifact-format";
 
 import type { PinnedArtifact } from "./types";
 
@@ -55,11 +55,11 @@ export function CoachExamplesPanelContent({
 				{pinnedArtifacts.slice(0, 3).map((artifact) => (
 					<div
 						key={artifact.artifactKey}
-						className="space-y-3 rounded-lg border border-border/40 bg-muted/5 p-4"
+						className="space-y-3 rounded-xl border border-border/60 bg-muted/10 p-4 ring-1 ring-foreground/5"
 					>
 						<div className="space-y-1">
-							<p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-								{artifact.lessonTitle}
+							<p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">
+								Pinned from {artifact.lessonTitle}
 							</p>
 							<h3 className="text-sm font-bold tracking-tight text-foreground">
 								{artifact.artifactLabel}
@@ -73,7 +73,7 @@ export function CoachExamplesPanelContent({
 							) : (
 								artifact.fields.slice(0, 2).map(([key, value]) => (
 									<div key={key} className="space-y-1">
-										<p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">
+										<p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/60">
 											{key}
 										</p>
 										<p className="text-[13px] leading-relaxed text-foreground/80">

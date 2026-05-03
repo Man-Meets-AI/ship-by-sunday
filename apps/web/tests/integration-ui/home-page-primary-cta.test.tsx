@@ -6,16 +6,20 @@ vi.mock("@/app/checkout/_components/checkout-button", () => ({
 		label,
 		className,
 		testId,
+		onBeforeCheckout,
 	}: {
 		label: string;
 		className?: string;
 		testId?: string;
+		onBeforeCheckout?: () => void | Promise<void>;
 	}) => (
 		<button
 			type="button"
 			data-kind="checkout"
 			data-testid={testId}
 			className={className}
+			data-has-before-checkout={onBeforeCheckout ? "true" : "false"}
+			onClick={() => void onBeforeCheckout?.()}
 		>
 			{label}
 		</button>
@@ -55,5 +59,24 @@ describe("HomePagePrimaryCta", () => {
 		expect(link.getAttribute("href")).toBe(routeConfig.docs);
 		expect(link.getAttribute("data-testid")).toBe("docs-cta");
 		expect(screen.queryByRole("button", { name: "Read the docs" })).toBeNull();
+	});
+
+	it("forwards onBeforeCheckout to the CheckoutButton on the checkout branch", async () => {
+		const onBeforeCheckout = vi.fn();
+		render(
+			<HomePagePrimaryCta
+				target={{ kind: "checkout" }}
+				label="Generate my codebase"
+				testId="demo-cta"
+				onBeforeCheckout={onBeforeCheckout}
+			/>,
+		);
+
+		const button = screen.getByRole("button", {
+			name: "Generate my codebase",
+		});
+		expect(button.getAttribute("data-has-before-checkout")).toBe("true");
+		button.click();
+		expect(onBeforeCheckout).toHaveBeenCalledTimes(1);
 	});
 });

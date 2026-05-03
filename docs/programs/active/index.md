@@ -14,7 +14,7 @@ Keep new and unfinished Program folders in this directory.
 
 An active Program should describe the larger initiative that sits above several ExecPlans and should remain here until the initiative is actually complete.
 
-Use [PROGRAMS.md](/Users/parkerrex/Developer/ship-by-sunday/docs/programs/PROGRAMS.md) as the contract before creating or updating a Program folder in this directory.
+Use [PROGRAMS.md](../PROGRAMS.md) as the contract before creating or updating a Program folder in this directory.
 
 Each active Program lives at:
 
@@ -27,6 +27,7 @@ Inside that folder:
 
 Active Program folders:
 
-None currently.
+- `docs/programs/active/2026-05-02-one-click-paid-access/`: active Program for making payment nearly one-click with Stripe Link and Express Checkout while guaranteeing access attaches instantly to the purchase email.
+- `docs/programs/active/2026-05-02-customer-agentic-operating-system/`: active Program for the customer-facing agentic operating system across generated repos and mature existing codebases.
 
 Completed Program packets live under `docs/programs/completed/`.

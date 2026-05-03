@@ -1,11 +1,13 @@
 "use client";
 
 import { MoonIcon, SunIcon } from "lucide-react";
+import { useReducedMotion } from "motion/react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { startThemeTransition } from "@/lib/theme/start-theme-transition";
 
 type ResolvedTheme = "dark" | "light";
 
@@ -25,6 +27,7 @@ export function ThemeToggleButton({
 	onResolvedThemeChange,
 }: ThemeToggleButtonProps) {
 	const { resolvedTheme, setTheme } = useTheme();
+	const prefersReducedMotion = useReducedMotion();
 	const [mounted, setMounted] = useState(false);
 
 	useEffect(() => {
@@ -65,7 +68,12 @@ export function ThemeToggleButton({
 	return (
 		<Button
 			type="button"
-			onClick={() => setTheme(nextTheme)}
+			onClick={() =>
+				startThemeTransition({
+					apply: () => setTheme(nextTheme),
+					allowAnimation: !prefersReducedMotion,
+				})
+			}
 			variant="outline"
 			size="icon-sm"
 			className={cn("min-h-11 min-w-11 shrink-0 rounded-full", className)}

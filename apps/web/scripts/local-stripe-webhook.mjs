@@ -5,6 +5,7 @@ import Stripe from "stripe";
 
 const WEBHOOK_ENV_KEY = "STRIPE_WEBHOOK_SECRET";
 const STRIPE_SECRET_ENV_KEY = "STRIPE_SECRET_KEY";
+const CLERK_SECRET_ENV_KEY = "CLERK_SECRET_KEY";
 const ENV_FILE_PATH = path.join(process.cwd(), ".env.local");
 const LOCALHOST_HOSTS = new Set(["127.0.0.1", "0.0.0.0", "localhost"]);
 const ANSI_ESCAPE_PATTERN_SOURCE =
@@ -21,7 +22,7 @@ function printUsage() {
   bun run stripe:webhook:sync -- --secret whsec_...
 
 Commands:
-  listen   Start stripe listen against STRIPE_SECRET_KEY, then sync the printed webhook secret plus Stripe secret into the active hosted Convex dev env.
+  listen   Start stripe listen against STRIPE_SECRET_KEY, then sync the printed webhook secret plus Stripe and Clerk secrets into the active hosted Convex dev env.
   sync     Sync a provided webhook secret into .env.local and the active hosted Convex dev env without starting a listener.`);
 }
 
@@ -211,12 +212,19 @@ async function syncWebhookSecret(secret) {
 	const convexStripeSecretStatus = stripeSecretKey
 		? await syncConvexEnv(STRIPE_SECRET_ENV_KEY, stripeSecretKey)
 		: "skipped (missing STRIPE_SECRET_KEY in app env)";
+	const clerkSecretKey = process.env[CLERK_SECRET_ENV_KEY]?.trim();
+	const convexClerkSecretStatus = clerkSecretKey
+		? await syncConvexEnv(CLERK_SECRET_ENV_KEY, clerkSecretKey)
+		: "skipped (missing CLERK_SECRET_KEY in app env)";
 
 	console.log(`Synced ${WEBHOOK_ENV_KEY}:`);
 	console.log(`- .env.local: ${envFileStatus}`);
 	console.log(`- Convex dev env (${WEBHOOK_ENV_KEY}): ${convexWebhookStatus}`);
 	console.log(
 		`- Convex dev env (${STRIPE_SECRET_ENV_KEY}): ${convexStripeSecretStatus}`,
+	);
+	console.log(
+		`- Convex dev env (${CLERK_SECRET_ENV_KEY}): ${convexClerkSecretStatus}`,
 	);
 	console.log(
 		"- Restart `bun run dev` if it was already running before the secret changed.",

@@ -8,6 +8,7 @@ import type {
 	LessonContent,
 } from "@/lib/course/lesson/model/manifest";
 
+import { CoachPanelMotion } from "./coach-panel-motion";
 import { getCoachPanelSections } from "./coach-panel-sections";
 import type { CoachPanelKey, PinnedArtifact } from "./types";
 
@@ -71,7 +72,7 @@ export function CoachPanel({
 								value={section.key}
 								className="mt-0 py-4 focus-visible:ring-0"
 							>
-								{section.content}
+								<CoachPanelMotion>{section.content}</CoachPanelMotion>
 							</TabsContent>
 						))}
 					</ScrollArea>

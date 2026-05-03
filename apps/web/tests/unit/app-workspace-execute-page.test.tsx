@@ -1,11 +1,15 @@
 import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getLessonHref } from "@/lib/course/lesson/routing/lesson-routes";
 
 const fetchAuthenticatedQueryMock = vi.fn();
+const getServerProductAccessMock = vi.fn();
 const redirectMock = vi.fn((href: string) => {
 	throw new Error(`NEXT_REDIRECT:${href}`);
 });
+
+vi.mock("server-only", () => ({}));
 
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
@@ -39,11 +43,45 @@ vi.mock("@/platform/convex/server-preload", () => ({
 	fetchAuthenticatedQuery: fetchAuthenticatedQueryMock,
 }));
 
+vi.mock("@/platform/access/product-access", () => ({
+	getServerProductAccess: getServerProductAccessMock,
+}));
+
+vi.mock(
+	"@/app/(workspace)/_components/access-required/access-required-page",
+	() => ({
+		AccessRequiredPage: () => <div>Access recovery</div>,
+	}),
+);
+
 describe("workspace execute route", () => {
 	beforeEach(() => {
 		fetchAuthenticatedQueryMock.mockReset();
+		getServerProductAccessMock.mockReset();
+		getServerProductAccessMock.mockResolvedValue({
+			clerkUserId: "user_123",
+			hasAccess: true,
+			status: "granted",
+		});
 		redirectMock.mockClear();
 		vi.resetModules();
+	});
+
+	it("renders access recovery without protected queries when access is missing", async () => {
+		getServerProductAccessMock.mockResolvedValue({
+			clerkUserId: "user_123",
+			hasAccess: false,
+			status: "no_access",
+		});
+
+		const { default: ExecuteRoutePage } =
+			await import("@/app/(workspace)/execute/page");
+
+		const markup = renderToStaticMarkup(await ExecuteRoutePage());
+
+		expect(markup).toContain("Access recovery");
+		expect(fetchAuthenticatedQueryMock).not.toHaveBeenCalled();
+		expect(redirectMock).not.toHaveBeenCalled();
 	});
 
 	it("redirects locked visitors back to review", async () => {

@@ -421,6 +421,30 @@ describe("codex route handlers", () => {
 		expect(withCodexAppServerClientMock).not.toHaveBeenCalled();
 	});
 
+	it("rejects retired blueprint field-level templates before contacting Codex", async () => {
+		requireProductAccessApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+
+		const response = await postCodexGenerate(
+			new Request("https://example.test/api/codex/generate", {
+				method: "POST",
+				headers: {
+					"content-type": "application/json",
+				},
+				body: JSON.stringify({
+					templateId: "blueprint_problem_statement",
+					prompt: "Rewrite this one field.",
+				}),
+			}),
+		);
+
+		expect(response.status).toBe(400);
+		expect(withCodexAppServerClientMock).not.toHaveBeenCalled();
+		expect(recordCodexRunMock).not.toHaveBeenCalled();
+	});
+
 	it("returns a disconnected error when the account is not attached yet", async () => {
 		requireProductAccessApiSessionMock.mockResolvedValue({
 			userId: "user_123",
@@ -548,7 +572,7 @@ describe("codex route handlers", () => {
 		);
 	});
 
-	it("accepts the blueprint problem-statement template and records the run", async () => {
+	it("accepts a blueprint intake section template and records the run", async () => {
 		requireProductAccessApiSessionMock.mockResolvedValue({
 			userId: "user_123",
 			token: "token_123",
@@ -594,8 +618,8 @@ describe("codex route handlers", () => {
 					"content-type": "application/json",
 				},
 				body: JSON.stringify({
-					templateId: "blueprint_problem_statement",
-					prompt: "Rewrite the problem statement with more focus.",
+					templateId: "blueprint_intake_foundation",
+					prompt: "Draft the Foundation section from rough notes.",
 				}),
 			}),
 		);
@@ -609,7 +633,7 @@ describe("codex route handlers", () => {
 		expect(recordCodexRunMock).toHaveBeenCalledWith(
 			{ userId: "user_123", token: "token_123" },
 			expect.objectContaining({
-				templateId: "blueprint_problem_statement",
+				templateId: "blueprint_intake_foundation",
 				status: "success",
 			}),
 		);

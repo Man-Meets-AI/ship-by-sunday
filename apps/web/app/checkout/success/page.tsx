@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { api } from "@/convex/_generated/api";
 import { CheckoutSuccessView } from "@/app/checkout/success/_components/checkout-success-view";
+import { getCheckoutSuccessFixture } from "@/app/checkout/success/_lib/checkout-success-fixtures";
 import { getCheckoutSessionState } from "@/platform/billing/checkout/checkout-session";
 import { getPendingCheckoutSessionIdFromCookie } from "@/platform/billing/checkout/checkout-session-recovery";
 import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
@@ -15,9 +16,24 @@ export const metadata: Metadata = {
 export default async function Page({
 	searchParams,
 }: {
-	searchParams: Promise<{ session_id?: string }>;
+	searchParams: Promise<{ session_id?: string; fixture?: string }>;
 }) {
-	const { session_id: searchSessionId } = await searchParams;
+	const { session_id: searchSessionId, fixture } = await searchParams;
+	const fixturePacket = getCheckoutSuccessFixture({ fixture });
+	if (fixturePacket) {
+		return (
+			<CheckoutSuccessView
+				checkoutSessionState={fixturePacket.checkoutSessionState}
+				initialProductAccess={fixturePacket.initialProductAccess}
+				fixture={{
+					fixtureSlug: fixturePacket.fixtureSlug,
+					fixtureFlipAfterMs: fixturePacket.fixtureFlipAfterMs,
+					fixtureSuppressRedirect: fixturePacket.fixtureSuppressRedirect,
+				}}
+			/>
+		);
+	}
+
 	const sessionId =
 		searchSessionId ??
 		(await getPendingCheckoutSessionIdFromCookie()) ??

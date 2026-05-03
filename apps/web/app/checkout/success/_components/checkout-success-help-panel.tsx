@@ -15,12 +15,19 @@ export function CheckoutSuccessHelpPanel({
 }) {
 	return (
 		<Card>
-			<CardHeader>
-				<CardTitle className="text-base">{viewModel.helpTitle}</CardTitle>
-				<CardDescription>{viewModel.helpLeadCopy}</CardDescription>
+			<CardHeader className="gap-2">
+				<p className="text-[0.7rem] font-medium tracking-[0.18em] text-muted-foreground uppercase">
+					Recovery help
+				</p>
+				<CardTitle className="text-lg font-semibold tracking-tight">
+					{viewModel.helpTitle}
+				</CardTitle>
+				<CardDescription className="leading-relaxed">
+					{viewModel.helpLeadCopy}
+				</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<ul className="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
+				<ul className="list-disc space-y-2.5 pl-5 text-sm leading-relaxed text-muted-foreground">
 					{viewModel.helpItems.map((item) => (
 						<li key={item}>{item}</li>
 					))}

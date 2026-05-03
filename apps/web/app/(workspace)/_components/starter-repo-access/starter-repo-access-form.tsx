@@ -2,7 +2,7 @@
 
 import { useForm } from "@tanstack/react-form";
 import { useMutation } from "convex/react";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { toast } from "sonner";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -15,9 +15,9 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import type { StarterRepoAccessSurface } from "@/config/starter-repo-access-copy";
 import { api } from "@/convex/_generated/api";
 import { validateGitHubUsername } from "@/lib/github-username";
-import type { StarterRepoAccessSurface } from "@/config/starter-repo-access-copy";
 
 export function StarterRepoAccessForm({
 	initialUsername,
@@ -32,6 +32,9 @@ export function StarterRepoAccessForm({
 		api.course.requestStarterRepoAccess,
 	);
 	const [submitError, setSubmitError] = useState<string | null>(null);
+	const hintId = useId();
+	const validationErrorId = useId();
+	const submitErrorId = useId();
 
 	const form = useForm({
 		defaultValues: {
@@ -89,7 +92,13 @@ export function StarterRepoAccessForm({
 					const errors = field.state.meta.errors
 						.map((error) => (typeof error === "string" ? error : null))
 						.filter((error): error is string => Boolean(error));
-
+					const describedBy = [
+						hintId,
+						errors.length > 0 ? validationErrorId : null,
+						submitError ? submitErrorId : null,
+					]
+						.filter(Boolean)
+						.join(" ");
 					return (
 						<Field>
 							<FieldLabel htmlFor={field.name}>GitHub username</FieldLabel>
@@ -108,13 +117,14 @@ export function StarterRepoAccessForm({
 									autoCorrect="off"
 									spellCheck={false}
 									aria-invalid={errors.length > 0}
+									aria-describedby={describedBy || undefined}
 								/>
-								<FieldDescription>
+								<FieldDescription id={hintId}>
 									Use the GitHub username that should receive access to the
 									private starter repo.
 								</FieldDescription>
 								{errors.length > 0 ? (
-									<FieldError>{errors[0]}</FieldError>
+									<FieldError id={validationErrorId}>{errors[0]}</FieldError>
 								) : null}
 							</FieldContent>
 						</Field>
@@ -122,7 +132,7 @@ export function StarterRepoAccessForm({
 				}}
 			</form.Field>
 			{submitError ? (
-				<Alert variant="destructive">
+				<Alert id={submitErrorId} variant="destructive">
 					<AlertDescription>{submitError}</AlertDescription>
 				</Alert>
 			) : null}

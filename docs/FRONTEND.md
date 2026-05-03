@@ -27,9 +27,9 @@ This file owns the repo-wide frontend implementation rules for browser-facing su
 ## Current Rules
 
 - Keep presentation separate from behavior. Move stateful or behavioral logic into hooks, helpers, or controller modules instead of bloating components.
-- Prefer feature-based folders over global `components/`, `hooks/`, or `utils/` buckets that mix unrelated work.
+- Prefer domain-owned folders over global `components/`, `hooks/`, or `utils/` buckets that mix unrelated work.
 - Treat App Router private folders as the home for route-local UI, controller hooks, view models, and redirect helpers. If a module only serves one route group or page, keep it under that route's `_components`, `_hooks`, or `_lib` folder.
-- Keep durable cross-route product UI and domain logic in `features/`. Reusable auth forms, checkout helpers, course domain models, workspace shell/navigation, marketing surfaces, docs, Codex, observability, and product-access checks belong there when they are not owned by one route.
+- Keep durable cross-route product UI and domain logic in `lib/`, `platform/`, or explicit route-owner folders. Reusable course models, workspace navigation, observability, checkout helpers, and product-access checks belong behind those boundaries when they are not owned by one route.
 - Use `platform/` for environment, auth, billing, Convex, and Next.js adapter boundaries. Do not hide platform behavior in broad frontend helper files.
 - Treat compatibility re-exports as temporary migration surfaces. Remove them only with static import proof and focused tests; shared UI inventory and AppShell compatibility require an explicit slice.
 - Avoid oversized components. Split browser-facing components before they become hard to scan.
@@ -38,6 +38,6 @@ This file owns the repo-wide frontend implementation rules for browser-facing su
 
 ## Next
 
-- Use [docs/DESIGN.md](/Users/parkerrex/Developer/ship-by-sunday/docs/DESIGN.md) for visual and interaction doctrine.
-- Use [docs/design-docs/index.md](/Users/parkerrex/Developer/ship-by-sunday/docs/design-docs/index.md) for durable design notes.
-- Use [apps/web/AGENTS.md](/Users/parkerrex/Developer/ship-by-sunday/apps/web/AGENTS.md) for the current frontend-owning app surface.
+- Use [docs/DESIGN.md](DESIGN.md) for visual and interaction doctrine.
+- Use [docs/design-docs/index.md](design-docs/index.md) for durable design notes.
+- Use [apps/web/AGENTS.md](../apps/web/AGENTS.md) for the current frontend-owning app surface.

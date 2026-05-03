@@ -1,25 +1,256 @@
+import {
+	DEFAULT_DESIGN_PRESET_ID,
+	designPresetDefinitions,
+} from "@shipbysunday/blueprint-compiler";
+import {
+	blueprintFieldHelperText,
+	blueprintFieldLabel,
+	blueprintFieldPlaceholder,
+	getBlueprintFieldScaleDefinition,
+} from "@shipbysunday/blueprint-presentation";
 import { productConfig, routeConfig } from "@/config/product";
 import {
 	marketingDisplayConfig,
 	workspaceDisplayConfig,
 } from "@/config/starter-selectors";
+import { blueprintPageSections } from "@/lib/blueprint-flow/blueprint-page-sections";
 
 const productName = productConfig.name;
 const activePricingOffer = productConfig.activeOffer;
 const promoBanner = activePricingOffer
 	? {
 			label: activePricingOffer.label,
-			message: `Get ${productName} for ${productConfig.checkoutPriceDisplay} instead of ${productConfig.priceDisplay}. ${activePricingOffer.percentOff}% off auto-applied at checkout, plus FULL TURBO free.`,
+			message: `${productConfig.checkoutPriceDisplay} early member price. FULL TURBO included.`,
 		}
 	: null;
 const pricingOfferBanner = activePricingOffer
 	? {
 			label: activePricingOffer.label,
-			message: `${activePricingOffer.percentOff}% off the ${productConfig.priceDisplay} list price. Auto-applied at checkout.`,
+			message: `${productConfig.checkoutPriceDisplay} early member price. Auto-applied at checkout.`,
 		}
 	: null;
 
+const interactiveBlueprintDemoSectionIds = [
+	"foundation",
+	"design",
+	"pricing",
+] as const;
+
+type BlueprintDemoSectionStatus = "interactive" | "locked";
+
+const productPreviewSections = blueprintPageSections.map((section) => ({
+	id: section.id,
+	label: section.label,
+	description: section.description,
+	status: (interactiveBlueprintDemoSectionIds.includes(
+		section.id as (typeof interactiveBlueprintDemoSectionIds)[number],
+	)
+		? "interactive"
+		: "locked") as BlueprintDemoSectionStatus,
+}));
+
+type ProductPreviewAccent = { light: string; dark: string };
+
+const FALLBACK_ACCENT: ProductPreviewAccent = {
+	light: "#71717A",
+	dark: "#A1A1AA",
+};
+
+const productPreviewPresetAccentColors: Record<string, ProductPreviewAccent> = {
+	vercel: { light: "#000000", dark: "#FAFAFA" },
+	linear: { light: "#5E6AD2", dark: "#7C8AF7" },
+	notion: { light: "#37352F", dark: "#E8E6E1" },
+	stripe: { light: "#635BFF", dark: "#8E88FF" },
+	supabase: { light: "#3FCF8E", dark: "#3FCF8E" },
+	framer: { light: "#0099FF", dark: "#3FB6FF" },
+	raycast: { light: "#FF6363", dark: "#FF8A8A" },
+	cursor: { light: "#0DBC79", dark: "#22D38A" },
+};
+
+type ProductPreviewFontSpecimen = {
+	family: string;
+	fontStack: string;
+	sample: string;
+};
+
+type ProductPreviewLogoDarkMode = "invert" | "preserve";
+
+const productPreviewPresetLogoDarkModes: Record<
+	string,
+	ProductPreviewLogoDarkMode
+> = {
+	vercel: "invert",
+	linear: "preserve",
+	notion: "invert",
+	stripe: "preserve",
+	supabase: "preserve",
+	framer: "invert",
+	raycast: "invert",
+	cursor: "invert",
+};
+
+const productPreviewPresetFontSpecimens: Record<
+	string,
+	ProductPreviewFontSpecimen
+> = {
+	vercel: {
+		family: "Geist",
+		fontStack:
+			'"Geist", "Geist Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+		sample: "Aa Bb Cc — 0123456789",
+	},
+	linear: {
+		family: "Inter",
+		fontStack:
+			'"Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+		sample: "Aa Bb Cc — 0123456789",
+	},
+	notion: {
+		family: "Noto Serif",
+		fontStack: '"Noto Serif", "Lyon", Georgia, "Times New Roman", serif',
+		sample: "Aa Bb Cc — 0123456789",
+	},
+	stripe: {
+		family: "Sohne / Inter",
+		fontStack:
+			'"Sohne", "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+		sample: "Aa Bb Cc — 0123456789",
+	},
+	supabase: {
+		family: "Geist / Inter",
+		fontStack:
+			'"Geist", "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+		sample: "Aa Bb Cc — 0123456789",
+	},
+	framer: {
+		family: "Figtree",
+		fontStack:
+			'"Figtree", "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+		sample: "Aa Bb Cc — 0123456789",
+	},
+	raycast: {
+		family: "Geist",
+		fontStack:
+			'"Geist", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+		sample: "Aa Bb Cc — 0123456789",
+	},
+	cursor: {
+		family: "Geist",
+		fontStack:
+			'"Geist", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+		sample: "Aa Bb Cc — 0123456789",
+	},
+};
+
+const FALLBACK_FONT_SPECIMEN: ProductPreviewFontSpecimen = {
+	family: "Sans",
+	fontStack: "ui-sans-serif, system-ui, sans-serif",
+	sample: "Aa Bb Cc — 0123456789",
+};
+
+const productPreviewDesignPresets = designPresetDefinitions.map((preset) => {
+	const accent = productPreviewPresetAccentColors[preset.id] ?? FALLBACK_ACCENT;
+	const fontSpecimen =
+		productPreviewPresetFontSpecimens[preset.id] ?? FALLBACK_FONT_SPECIMEN;
+	const logoDarkMode: ProductPreviewLogoDarkMode =
+		productPreviewPresetLogoDarkModes[preset.id] ?? "preserve";
+	return {
+		id: preset.id,
+		label: preset.label,
+		summary: preset.summary,
+		category: preset.category,
+		logoPath: preset.logoPath,
+		logoDarkMode,
+		previewImagePath: preset.previewImagePath,
+		referenceUrl: preset.previewPageUrl,
+		accentColor: accent.light,
+		accentColorDark: accent.dark,
+		fontSpecimen,
+	};
+});
+
+const pricingModelScaleOptions =
+	getBlueprintFieldScaleDefinition("pricing_model")?.options ?? [];
+const productPreviewPricingModelOptions = pricingModelScaleOptions.map(
+	(option) => ({
+		value: option.value as "one_time" | "monthly" | "yearly",
+		label: option.label,
+		ariaLabel: option.ariaLabel,
+	}),
+);
+
+if (productPreviewPricingModelOptions.length !== 3) {
+	throw new Error(
+		"Expected exactly three pricing model options for the homepage Blueprint demo",
+	);
+}
+
+const productPreviewSection = {
+	headline: {
+		prefix: "Spec your product, then ",
+		highlight: "generate the codebase.",
+	},
+	intro:
+		"Fill the same Blueprint a paying buyer fills. Lock the foundation, pick a design direction, set your price, and we generate the codebase that matches.",
+	unlockNote:
+		"Checkout unlocks Problem, Outcome, Setup, and Generated preview, plus the full theme grid (color, style, radius) in the workspace.",
+	sections: productPreviewSections,
+	foundation: {
+		intro:
+			"These three answers anchor every other section of the Blueprint. Two minutes is plenty.",
+		fields: {
+			productName: {
+				key: "product_name" as const,
+				label: blueprintFieldLabel("product_name"),
+				placeholder: blueprintFieldPlaceholder("product_name") ?? "",
+				helperText: blueprintFieldHelperText("product_name") ?? "",
+			},
+			productSummary: {
+				key: "product_summary" as const,
+				label: blueprintFieldLabel("product_summary"),
+				placeholder: blueprintFieldPlaceholder("product_summary") ?? "",
+				helperText: blueprintFieldHelperText("product_summary") ?? "",
+			},
+			primaryUser: {
+				key: "primary_user" as const,
+				label: blueprintFieldLabel("primary_user"),
+				placeholder: blueprintFieldPlaceholder("primary_user") ?? "",
+				helperText: blueprintFieldHelperText("primary_user") ?? "",
+			},
+		},
+	},
+	design: {
+		intro:
+			"Pick the brand DNA closest to what you want. Each preset maps to a real, public design system. You can fine-tune the theme grid in the workspace.",
+		label: blueprintFieldLabel("design_preset_id"),
+		helperText: blueprintFieldHelperText("design_preset_id") ?? "",
+		defaultPresetId: DEFAULT_DESIGN_PRESET_ID,
+		presets: productPreviewDesignPresets,
+		previewLinkLabel: "View live reference",
+		previewNote:
+			"Color, style, and radius open in the workspace after checkout so you can stay close to the reference or push further.",
+	},
+	pricing: {
+		intro:
+			"Set what people will pay. You can change this later before you generate the repo.",
+		modelLabel: blueprintFieldLabel("pricing_model"),
+		modelOptions: productPreviewPricingModelOptions,
+		defaultModel: "one_time" as const,
+		defaultPrice: "29",
+		priceHelperText: blueprintFieldHelperText("pricing") ?? "",
+		pricePlaceholder: blueprintFieldPlaceholder("pricing") ?? "",
+	},
+	cta: {
+		label: "Generate my codebase",
+		lockedNote:
+			"We'll save your draft, take you to Stripe, and bring you back to the workspace prefilled with these answers.",
+		secondaryLabel: "See how the loop works",
+		secondaryHref: routeConfig.systemHash,
+	},
+} as const;
+
 export const homePageContent = {
+	productPreviewSection,
 	assets: {
 		socialProofImage: productConfig.images.founderProof,
 	},
@@ -30,27 +261,25 @@ export const homePageContent = {
 		headlineLead: "Ship codebases",
 		headlineTailPrefix: "",
 		headlineTailHover: "that convert",
-		body: "Turn phone-started ideas, async agent loops, and messy AI output into worker-ready context: product truth, role-specific packs, and a starter path agents can use to ship meaningful code.",
+		body: "Ship by Sunday gives your agents the worker layer around Codex: exec loops, role packets, channel handoffs, and QA that feeds the next run.",
 		primaryCta: marketingDisplayConfig.primaryCtaLabel,
 		secondaryCta: {
-			label: "See the worker path",
+			label: "See the loop",
 			href: routeConfig.systemHash,
 		},
-		eyebrow:
-			"One-time payment. Lifetime access. Build the worker layer first so every product, design, marketing, build, and QA role acts from the same decisions.",
 	},
 	sprintPathSection: {
-		label: "System",
-		titlePrefix: "Agents need ",
-		titleHighlight: "worker context.",
+		titlePrefix: "Exec loops make ",
+		titleHighlight: "agents useful.",
 		intro:
-			"If you want to start work from your phone and let agents ship meaningful code, the risk is not whether a model can write code. It is whether every role knows your decisions, standards, constraints, conversion promise, and next action.",
+			"An exec loop is the repeatable path from decision to agent run: train one role, ship code, prove QA, and carry the next decision forward.",
 		supportingPoints: [
-			"Ship by Sunday turns your product judgment into role-specific worker packs for product, design, marketing, build, and prompting, so each hat gets explicit decisions instead of vague instructions.",
-			"Those packs are file-based and agent-readable, so Codex, DM-started workflows, and AFK loops can reuse the same source of truth without rebuilding context from chat history.",
-			"The starter path keeps code, docs, CTA claims, and review steps aligned, so agent changes can compound toward a product that ships and converts.",
+			"Start a decision from your phone, desk, Telegram, or Discord.",
+			"Package the decision with product truth, constraints, and taste for one worker role.",
+			"Run the agent, review the change, and feed the result back into the worker layer.",
 		],
-		valueFrame: "Most starters give you code. This trains the worker layer.",
+		valueFrame:
+			"Most starters give you files. Exec loops make each role compound.",
 		imageAlt:
 			"Diagram showing a product definition turning into Design, Marketing, Build, and Prompt Packs plus a final Blueprint",
 	},
@@ -63,12 +292,14 @@ export const homePageContent = {
 		tagline: "One source of truth. No drift.",
 	},
 	socialProofSection: {
-		label: "Built by someone who ships",
 		headline: "Built by someone who has actually shipped products.",
-		body: "Worked across UX, product, design, and engineering. Helped scale a startup to $73M/year. Stayed through acquisition. Ship by Sunday is new. The operating experience behind it is not.",
+		body: "Built from real UX, product, design, and engineering work, including startup scale to $73M/year and acquisition.",
+		portrait: {
+			src: "/founder-portrait.jpg",
+			alt: "Founder portrait",
+		},
 	},
 	faqSection: {
-		label: "FAQ",
 		titleLead: "Common",
 		titleAccent: "Questions",
 		lead: "",
@@ -76,77 +307,56 @@ export const homePageContent = {
 			{
 				question: "Is this another course or another starter?",
 				answer:
-					"No. Ship by Sunday is a blueprint-first shipping system. The videos help you use it, and the repo is part of it, but the real product is the Ship by Sunday Blueprint you leave with.",
+					"No. It is a worker-layer system for exec loops: decisions, role briefs, agent runs, and QA.",
 			},
 			{
 				question: "What do I actually get at the end?",
 				answer:
-					"You leave with your product truth, the Agent-Ready Packs, and the Ship by Sunday Blueprint.",
-			},
-			{
-				question: "I already have a starter. Why would I need this?",
-				answer:
-					"Because a starter without aligned context is still just code. Ship by Sunday gives your repo the packs and product truth that make AI useful instead of chaotic.",
-			},
-			{
-				question: "Is this just more planning before coding?",
-				answer:
-					"No. It is the minimum brief required to stop re-explaining the product every time you touch AI. The point is to move faster on the right thing.",
+					"Exec loops, worker role packets, channel handoff patterns, a QA path, and repo guidance your agents can reuse.",
 			},
 			{
 				question: "Who is this for?",
 				answer:
-					"Technical founders and operators who can get AI to produce code, but need a durable worker layer for phone-started loops, role-specific agents, and codebases that have to convert.",
+					"Technical founders who can get AI to code, but need phone-started loops and role-specific agents to ship work that converts.",
 			},
 			{
 				question: "Why not just use ChatGPT, Claude, or Codex directly?",
 				answer:
-					"You can. Ship by Sunday is the worker layer around those tools: one product truth, role-specific packs, and a starter path that keeps the codebase aligned.",
+					"Use them. Ship by Sunday supplies the worker layer around them.",
 			},
 			{
 				question:
 					"Can this help with Telegram, Discord, or phone-started agent loops?",
 				answer:
-					"Yes, if you are wiring those loops yourself. Ship by Sunday gives the code-side context those loops need: worker roles, product truth, QA prompts, and repo guidance that agents can reuse.",
+					"Yes. Ship by Sunday teaches the code-side worker layer those channels can reuse.",
 			},
 			{
 				question: "What happens right after I pay?",
-				answer: `You go straight into the ${workspaceDisplayConfig.homeNoun} to lock the truth, compile the packs, and shape your Blueprint.`,
+				answer: `You open the ${workspaceDisplayConfig.homeNoun}, lock the decisions, compile the packs, and start the loop.`,
 			},
 		],
 	},
-	whatsInsideSection: {
-		label: "By Sunday",
-		title: "Build the worker layer.",
+	execLoopSection: {
+		title: "How the loop works.",
 		intro:
-			"Enough judgment to build. Enough structure to hand off. No vague prompts, no half-decisions.",
-		pillars: [
+			"One loop moves a decision into shipped code. The next loop starts smarter.",
+		steps: [
 			{
-				title: "The product truth",
-				highlightBefore: "Lock ",
-				highlight:
-					"the user, offer, scope, conversion promise, and constraints",
-				highlightAfter:
-					" before code, so the build starts from something real.",
-				supporting:
-					"This is the judgment layer every worker role needs before agents touch the repo.",
+				label: "Decide",
+				description: "Name the outcome, constraint, and conversion claim.",
 			},
 			{
-				title: "The worker roles",
-				highlightBefore: "Leave with ",
-				highlight: "Product, Design, Marketing, Build, Prompt, and QA Packs",
-				highlightAfter: " that train each hat you wear at the computer.",
-				supporting:
-					"Each role gets the context, constraints, and next actions it needs instead of inheriting a stale chat summary.",
+				label: "Brief",
+				description: "Turn it into a worker pack for one role.",
 			},
 			{
-				title: "The execution path",
-				highlightBefore: "Review the ",
-				highlight: "starter path for Codex and async agent loops",
-				highlightAfter:
-					" so work can start from your phone and still land in a real repo.",
-				supporting:
-					"This is a concrete build system for meaningful code changes, not random prompts and a hope-based plan.",
+				label: "Run",
+				description:
+					"Dispatch the role through Codex, Telegram, Discord, or a phone-started prompt.",
+			},
+			{
+				label: "Review",
+				description: "Check the diff, QA path, and update the worker layer.",
 			},
 		],
 	},
@@ -154,47 +364,31 @@ export const homePageContent = {
 		title: "A worker layer your agents can build from.",
 		titleLines: ["A worker layer.", "Your agents can", "build from."],
 		intro:
-			"The blueprint gives every worker role the truth. The starter gives that truth a real product shape: auth, billing, docs, protected workspace, QA paths, and repo guidance for agents running while you are AFK.",
+			"Each hat you wear becomes a trained worker role: the decision, context, taste, tools, and proof standard are all explicit before agents touch the code.",
 		capabilities: [
 			{
-				title: "Worker blueprint",
+				title: "Role packets",
 				description:
-					"Start from a repo already shaped around your decisions, not a dead template you have to reinterpret every session.",
+					"Turn founder, product, growth, design, build, and QA hats into specific worker instructions.",
 			},
 			{
-				title: "Role-specific packs",
+				title: "Async channels",
 				description:
-					"Product, design, marketing, build, prompt, and QA packs give each worker role a clear operating brief.",
+					"Phone prompts, Telegram, Discord, and Codex runs point at the same worker context.",
 			},
 			{
-				title: "Safer agent changes",
+				title: "Code-side loop",
 				description:
-					"Guidance for Clerk, Convex, Stripe, Next.js, React, and Vercel helps agents make changes inside real constraints instead of blind file surgery.",
+					"Agents ship against repo truth, not a blank chat or generic prompt stack.",
 			},
 			{
-				title: "Async-ready context",
+				title: "Proof path",
 				description:
-					"Use the same source of truth from Codex, phone prompts, or your own Telegram and Discord relays without rebuilding the brief.",
-			},
-			{
-				title: "Built-in QA",
-				description:
-					"Smoke paths, QA prompts, and incident alerts are already in the repo, so shipping does not turn into guesswork the moment something breaks.",
-			},
-			{
-				title: "Conversion-aware starter",
-				description:
-					"The homepage, docs, checkout claims, and review path stay aligned to the promise you are trying to sell.",
-			},
-			{
-				title: "Curated design direction",
-				description:
-					"Choose a design direction like Vercel, Linear, or Notion inside the blueprint flow, preview it, then customize the starter theme before generation.",
+					"Every loop returns the diff, browser proof, risk notes, and the next decision.",
 			},
 		],
 	},
 	durabilitySection: {
-		label: "Durability",
 		title: "Ship by Sunday. Keep shipping on Monday.",
 		intro:
 			"The goal is not a one-night demo. The goal is a product you improve as models, tools, and agents change around you.",
@@ -219,11 +413,10 @@ export const homePageContent = {
 			"When better models arrive next month, you move faster. You do not restart the project from zero.",
 	},
 	pricingSection: {
-		label: productName,
 		titleLead: "Ship a real product",
 		titleAccent: "by Sunday",
 		intro:
-			"One payment for the blueprint-first run that turns phone-started agent work into a reviewable codebase: product truth, worker roles, starter path, and QA prompts that keep the repo aligned.",
+			"One payment for the code-side worker layer: exec loops, role packets, channel handoffs, starter path, and QA prompts for a reviewable codebase.",
 		priceDisplay: productConfig.checkoutPriceDisplay,
 		originalPriceDisplay: activePricingOffer
 			? productConfig.priceDisplay
@@ -232,23 +425,20 @@ export const homePageContent = {
 			activePricingOffer?.discountedPriceDisplay ??
 			productConfig.checkoutPriceDisplay,
 		offerBanner: pricingOfferBanner,
-		eyebrow: "One-time payment. Lifetime access.",
-		ctaTitle: "Get the blueprint",
-		trustLine: `After checkout, you go straight into the ${workspaceDisplayConfig.homeNoun} to lock the truth, compile the packs, and shape your Blueprint.`,
+		ctaTitle: marketingDisplayConfig.primaryCtaLabel,
+		trustLine: `After checkout, open the ${workspaceDisplayConfig.homeNoun}, lock the decisions, and build the first loop.`,
 		includes: [
-			"Guided product intake and review workspace",
-			"Agent-Ready Packs",
-			"Worker-role setup for product, design, marketing, build, and QA",
-			"Ship by Sunday Blueprint",
+			"Exec loop setup",
+			"Role-specific worker packets",
+			"Phone, Telegram, and Discord handoff pattern",
+			"Codex-ready code run path",
+			"Review and QA path",
 			"Fast Pass Walkthroughs",
-			"Guided Ship Path",
-			"Product Sense Fundamentals",
 		],
 		bonus: {
-			label: "Additional bonus",
 			title: "FREE BONUS: FULL TURBO",
 			description:
-				"Get FULL TURBO free with your purchase: a 30-video AI course that gives you the practical workflows, prompting patterns, and build reps to move faster after the weekend sprint.",
+				"A 30-video workflow course included free for faster build reps after the sprint.",
 		},
 	},
 	footerWordmark: productName,

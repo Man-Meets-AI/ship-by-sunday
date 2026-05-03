@@ -63,8 +63,8 @@ Use `bun run clerk:test-user:prepare:entitled` for the fastest single-user local
 For hosted browser proof against a non-local target, use the root release proof commands with matching Clerk env values for that target. `tmp/release-personas.local.json` supplies the real release proof account emails and passwords by default. `QA_ENV_FILE` only changes which Clerk and Convex environment those identities are provisioned against. It is optional and only needed if you keep a separate hosted or production env file:
 
 ```bash
-PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run release:personas:prepare -- --proof=default_ship
-PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run release:proof -- --proof=default_ship
+PLAYWRIGHT_BASE_URL=https://<production-url> QA_ENV_FILE=apps/web/.env.production bun run release:personas:prepare -- --proof=default_ship
+PLAYWRIGHT_BASE_URL=https://<production-url> QA_ENV_FILE=apps/web/.env.production bun run release:proof -- --proof=default_ship
 ```
 
 Prefer `release:proof` for hosted verification. It runs persona prep, readiness checks, and the tagged authenticated browser pack with the same target assumptions.

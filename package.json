@@ -10,6 +10,7 @@
 	"scripts": {
 		"dev": "bun run --cwd apps/web dev",
 		"dev:core": "bun run --cwd apps/web dev:core",
+		"dev:core:webpack": "bun run --cwd apps/web dev:core:webpack",
 		"dev:web": "bun run --cwd apps/web dev:web",
 		"dev:convex": "bun run --cwd apps/web dev:convex",
 		"dev:stripe": "bun run --cwd apps/web dev:stripe",
@@ -20,6 +21,8 @@
 		"lint": "bun run --cwd apps/web lint",
 		"lint:fix": "bun run --cwd apps/web lint:fix",
 		"markdown:lint": "bun run scripts/markdown-metadata/run-lint.ts",
+		"public-readiness:lint": "bun run scripts/public-readiness/run-lint.ts",
+		"posthog:proof": "node scripts/observability/posthog-proof.mjs",
 		"docs:generated:check": "diff -qr docs/openai docs/generated/openai-blueprint && diff -qr docs/ship-by-sunday docs/generated/ship-by-sunday-blueprint",
 		"plans:lint": "bun run scripts/exec-plan/run-lint.ts",
 		"programs:lint": "bun run scripts/programs/run-lint.ts",

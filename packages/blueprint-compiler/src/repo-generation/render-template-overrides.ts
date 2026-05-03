@@ -1,46 +1,10 @@
 import type { CanonicalProjectDefinition } from "../canonical-project-definition/project-definition";
 import { GENERATED_DOCS_README_PATH } from "../generated-docs/generated-doc-paths";
 import type { RenderedBlueprintFile } from "../blueprints/render-types";
-import { buildRepoGenerationManifest } from "./build-repo-generation-manifest";
 import { renderStarterBootstrapFile } from "./render-starter-bootstrap";
 import { renderStarterProjectOnboardingFiles } from "./render-starter-project-onboarding";
 import { renderStarterSkillFiles } from "./render-starter-skills";
-
-function buildStarterRootPackageJson(
-	projectDefinition: CanonicalProjectDefinition,
-) {
-	const manifest = buildRepoGenerationManifest(projectDefinition);
-
-	return {
-		name: manifest.repoName,
-		version: "0.1.0",
-		private: true,
-		packageManager: "bun@1.3.5",
-		workspaces: ["apps/web", "packages/*"],
-		scripts: {
-			bootstrap: "bash ./bootstrap.sh",
-			"codex:skills:install": "bash ./scripts/install-codex-skills.sh",
-			dev: "bun run --cwd apps/web dev",
-			"dev:core": "bun run --cwd apps/web dev:core",
-			"dev:web": "bun run --cwd apps/web dev:web",
-			"dev:convex": "bun run --cwd apps/web dev:convex",
-			"dev:stripe": "bun run --cwd apps/web dev:stripe",
-			"dev:full": "bun run --cwd apps/web dev:full",
-			build: "bun run --cwd apps/web build",
-			start: "bun run --cwd apps/web start",
-			typecheck: "bun run --cwd apps/web typecheck",
-			lint: "bun run --cwd apps/web lint",
-			"lint:fix": "bun run --cwd apps/web lint:fix",
-			format: "bun run --cwd apps/web format",
-			"format:check": "bun run --cwd apps/web format:check",
-			"test:unit": "bun run --cwd apps/web test:unit",
-			"test:contracts": "bun run --cwd apps/web test:contracts",
-			"test:integration": "bun run --cwd apps/web test:integration",
-			"test:e2e:sandbox": "bun run --cwd apps/web test:e2e:sandbox",
-			check: "bun run --cwd apps/web check",
-		},
-	};
-}
+import { buildStarterRootPackageJson } from "./starter-root-package-json";
 
 export function renderTemplateOverrides(
 	projectDefinition: CanonicalProjectDefinition,
@@ -93,8 +57,9 @@ export function renderTemplateOverrides(
 				"1. Run `bun run bootstrap` from the repo root.",
 				"2. Run `bun run codex:skills:install` to install the vetted external Codex skills for Convex, Clerk, and Stripe.",
 				"3. Restart Codex if the new skills do not appear.",
-				"4. Follow `START-HERE.md` in order: `$starter-core-setup`, then `$starter-auth-setup`, then `$starter-billing-setup`.",
-				"5. Run `bun run dev` from the repo root once setup is stable.",
+				"4. If you use Linear, run `$starter-linear-workflow` before implementation so your backlog, status workflow, and issue template are clear.",
+				"5. Follow `START-HERE.md` in order: `$starter-core-setup`, then `$starter-auth-setup`, then `$starter-billing-setup`.",
+				"6. Run `bun run dev` from the repo root once setup is stable.",
 				"",
 				"`bootstrap.sh` installs dependencies, prepares `apps/web/.env.local`, opens the official provider setup pages, and can apply the generated shadcn preset in `apps/web`.",
 				"The repo also ships starter-local Codex wrapper skills under `.agents/skills/` plus a one-command external skill installer.",

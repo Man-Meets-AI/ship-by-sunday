@@ -34,6 +34,7 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 		).toEqual({
 			mode: "payment",
 			billing_address_collection: "auto",
+			customer_creation: "always",
 			cancel_url: "https://app.example.com/checkout/cancel",
 			success_url:
 				"https://app.example.com/checkout/success?session_id={CHECKOUT_SESSION_ID}",
@@ -66,6 +67,7 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 
 		expect(params).toMatchObject({
 			client_reference_id: undefined,
+			customer_creation: "always",
 			customer_email: undefined,
 			discounts: [{ promotion_code: "promo_50_off" }],
 			metadata: {
@@ -82,5 +84,39 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 		expect(params.payment_intent_data?.metadata).not.toHaveProperty(
 			"clerkUserId",
 		);
+	});
+
+	it("builds an express checkout session for custom UI", async () => {
+		const { buildStripeExpressCheckoutSessionCreateParams } =
+			await import("@/platform/billing/checkout/checkout-session-params");
+
+		expect(
+			buildStripeExpressCheckoutSessionCreateParams({
+				appBaseUrl: "https://app.example.com",
+				clerkUserId: "user_123",
+				customerEmail: "buyer@example.com",
+			}),
+		).toEqual({
+			mode: "payment",
+			ui_mode: "custom",
+			billing_address_collection: "auto",
+			customer_creation: "always",
+			return_url:
+				"https://app.example.com/checkout/success?session_id={CHECKOUT_SESSION_ID}",
+			client_reference_id: "user_123",
+			customer_email: "buyer@example.com",
+			discounts: [{ promotion_code: "promo_50_off" }],
+			line_items: [{ price: "price_250_managed", quantity: 1 }],
+			metadata: {
+				clerkUserId: "user_123",
+				courseSlug: productConfig.courseSlug,
+			},
+			payment_intent_data: {
+				metadata: {
+					clerkUserId: "user_123",
+					courseSlug: productConfig.courseSlug,
+				},
+			},
+		});
 	});
 });

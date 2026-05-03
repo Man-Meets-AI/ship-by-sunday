@@ -24,6 +24,6 @@ export const blogIndexContent = {
 export const blogPromoContent = {
 	eyebrow: "From the same system",
 	title: heroHeadline,
-	body: `Ship by Sunday turns phone-started agent work into a real product blueprint, role-specific worker packs, and a starter path that keeps the repo aligned after the first ship.`,
+	body: `Ship by Sunday turns phone-started exec loops into worker packs, QA paths, and an aligned starter path.`,
 	ctaLabel: homePageContent.pricingSection.ctaTitle,
 } as const;

@@ -24,7 +24,7 @@ function getStateClassName(state: WorkspacePrimaryNavState) {
 
 function LocalNavItem({ item }: { item: WorkspaceLocalNavItem }) {
 	const itemClassName = cn(
-		"flex h-8 w-full min-w-0 items-center rounded-md px-2 text-left text-sm transition-colors",
+		"flex h-8 w-full min-w-0 items-center rounded-md px-2 text-left text-sm transition-colors motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
 		getStateClassName(item.state),
 	);
 

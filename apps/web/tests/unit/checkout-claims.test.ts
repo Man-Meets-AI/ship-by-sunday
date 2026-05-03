@@ -284,4 +284,233 @@ describe("convex/checkoutClaims", () => {
 		});
 		expect(patch).not.toHaveBeenCalled();
 	});
+
+	it("repairs a paid pending checkout claim for a target Clerk user", async () => {
+		const insert = vi.fn().mockResolvedValue("product_access_grant_1");
+		const patch = vi.fn().mockResolvedValue(undefined);
+		const ctx = createCheckoutClaimsCtx({
+			pendingCheckoutClaim: {
+				_id: "pending_checkout_claim_existing",
+				stripeCheckoutSessionId: "cs_test_from_claim",
+				checkoutEmailNormalized: "buyer@example.com",
+				paymentStatus: "paid",
+				stripeCustomerId: "cus_from_claim",
+				stripePaymentIntentId: "pi_from_claim",
+				status: "pending",
+			},
+			insert,
+			patch,
+		});
+
+		vi.spyOn(Date, "now").mockReturnValue(700);
+
+		await expect(
+			moduleUnderTest.repairPaidCheckoutClaim._handler(ctx as never, {
+				stripeCheckoutSessionId: "cs_test_from_claim",
+				checkoutEmail: " Buyer@Example.com ",
+				clerkUserId: "user_target",
+			}),
+		).resolves.toEqual({
+			repair: "repaired",
+			grantResult: {
+				granted: "inserted",
+			},
+		});
+
+		expect(insert).toHaveBeenCalledWith(
+			"productAccessGrants",
+			expect.objectContaining({
+				clerkUserId: "user_target",
+				status: "granted",
+				source: "stripe_checkout",
+				stripeCustomerId: "cus_from_claim",
+				stripeCheckoutSessionId: "cs_test_from_claim",
+				stripePaymentIntentId: "pi_from_claim",
+				grantedAt: 700,
+				updatedAt: 700,
+			}),
+		);
+		expect(patch).toHaveBeenCalledWith(
+			"pending_checkout_claim_existing",
+			expect.objectContaining({
+				status: "claimed",
+				claimedByClerkUserId: "user_target",
+				claimedAt: 700,
+				updatedAt: 700,
+			}),
+		);
+	});
+
+	it("repeats a repair idempotently for a claim already owned by the target user", async () => {
+		const insert = vi.fn().mockResolvedValue("product_access_grant_1");
+		const patch = vi.fn().mockResolvedValue(undefined);
+		const ctx = createCheckoutClaimsCtx({
+			pendingCheckoutClaim: {
+				_id: "pending_checkout_claim_existing",
+				stripeCheckoutSessionId: "cs_test_from_claim",
+				checkoutEmailNormalized: "buyer@example.com",
+				paymentStatus: "paid",
+				stripeCustomerId: "cus_from_claim",
+				stripePaymentIntentId: "pi_from_claim",
+				status: "claimed",
+				claimedByClerkUserId: "user_target",
+				claimedAt: 600,
+			},
+			productAccessGrant: {
+				_id: "product_access_grant_existing",
+				clerkUserId: "user_target",
+				status: "granted",
+				source: "stripe_checkout",
+			},
+			insert,
+			patch,
+		});
+
+		vi.spyOn(Date, "now").mockReturnValue(800);
+
+		await expect(
+			moduleUnderTest.repairPaidCheckoutClaim._handler(ctx as never, {
+				stripeCheckoutSessionId: "cs_test_from_claim",
+				checkoutEmail: "buyer@example.com",
+				clerkUserId: "user_target",
+			}),
+		).resolves.toEqual({
+			repair: "already_claimed_by_target",
+			grantResult: {
+				granted: "patched",
+			},
+		});
+
+		expect(insert).not.toHaveBeenCalled();
+		expect(patch).toHaveBeenNthCalledWith(
+			1,
+			"product_access_grant_existing",
+			expect.objectContaining({
+				status: "granted",
+				source: "stripe_checkout",
+				stripeCustomerId: "cus_from_claim",
+				stripeCheckoutSessionId: "cs_test_from_claim",
+				stripePaymentIntentId: "pi_from_claim",
+				updatedAt: 800,
+			}),
+		);
+		expect(patch).toHaveBeenNthCalledWith(
+			2,
+			"pending_checkout_claim_existing",
+			{
+				updatedAt: 800,
+			},
+		);
+	});
+
+	it("refuses repair when the checkout claim is missing", async () => {
+		const insert = vi.fn().mockResolvedValue("product_access_grant_1");
+		const patch = vi.fn().mockResolvedValue(undefined);
+		const ctx = createCheckoutClaimsCtx({
+			pendingCheckoutClaim: null,
+			insert,
+			patch,
+		});
+
+		await expect(
+			moduleUnderTest.repairPaidCheckoutClaim._handler(ctx as never, {
+				stripeCheckoutSessionId: "cs_test_missing",
+				checkoutEmail: "buyer@example.com",
+				clerkUserId: "user_target",
+			}),
+		).resolves.toEqual({
+			repair: "missing_claim",
+		});
+
+		expect(insert).not.toHaveBeenCalled();
+		expect(patch).not.toHaveBeenCalled();
+	});
+
+	it("refuses repair when the operator email does not match the checkout email", async () => {
+		const insert = vi.fn().mockResolvedValue("product_access_grant_1");
+		const patch = vi.fn().mockResolvedValue(undefined);
+		const ctx = createCheckoutClaimsCtx({
+			pendingCheckoutClaim: {
+				_id: "pending_checkout_claim_existing",
+				stripeCheckoutSessionId: "cs_test_from_claim",
+				checkoutEmailNormalized: "buyer@example.com",
+				paymentStatus: "paid",
+				status: "pending",
+			},
+			insert,
+			patch,
+		});
+
+		await expect(
+			moduleUnderTest.repairPaidCheckoutClaim._handler(ctx as never, {
+				stripeCheckoutSessionId: "cs_test_from_claim",
+				checkoutEmail: "other@example.com",
+				clerkUserId: "user_target",
+			}),
+		).resolves.toEqual({
+			repair: "checkout_email_mismatch",
+		});
+
+		expect(insert).not.toHaveBeenCalled();
+		expect(patch).not.toHaveBeenCalled();
+	});
+
+	it("refuses repair when a stored checkout claim is not paid", async () => {
+		const insert = vi.fn().mockResolvedValue("product_access_grant_1");
+		const patch = vi.fn().mockResolvedValue(undefined);
+		const ctx = createCheckoutClaimsCtx({
+			pendingCheckoutClaim: {
+				_id: "pending_checkout_claim_existing",
+				stripeCheckoutSessionId: "cs_test_from_claim",
+				checkoutEmailNormalized: "buyer@example.com",
+				paymentStatus: "unpaid",
+				status: "pending",
+			},
+			insert,
+			patch,
+		});
+
+		await expect(
+			moduleUnderTest.repairPaidCheckoutClaim._handler(ctx as never, {
+				stripeCheckoutSessionId: "cs_test_from_claim",
+				checkoutEmail: "buyer@example.com",
+				clerkUserId: "user_target",
+			}),
+		).resolves.toEqual({
+			repair: "payment_not_paid",
+		});
+
+		expect(insert).not.toHaveBeenCalled();
+		expect(patch).not.toHaveBeenCalled();
+	});
+
+	it("refuses repair when the claim is already owned by another Clerk user", async () => {
+		const insert = vi.fn().mockResolvedValue("product_access_grant_1");
+		const patch = vi.fn().mockResolvedValue(undefined);
+		const ctx = createCheckoutClaimsCtx({
+			pendingCheckoutClaim: {
+				_id: "pending_checkout_claim_existing",
+				stripeCheckoutSessionId: "cs_test_from_claim",
+				checkoutEmailNormalized: "buyer@example.com",
+				paymentStatus: "paid",
+				status: "claimed",
+				claimedByClerkUserId: "user_existing",
+			},
+			insert,
+			patch,
+		});
+
+		await expect(
+			moduleUnderTest.repairPaidCheckoutClaim._handler(ctx as never, {
+				stripeCheckoutSessionId: "cs_test_from_claim",
+				checkoutEmail: "buyer@example.com",
+				clerkUserId: "user_target",
+			}),
+		).resolves.toEqual({
+			repair: "claimed_by_other_user",
+		});
+
+		expect(insert).not.toHaveBeenCalled();
+		expect(patch).not.toHaveBeenCalled();
+	});
 });

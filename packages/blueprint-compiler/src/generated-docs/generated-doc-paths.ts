@@ -28,6 +28,8 @@ export type GeneratedBuildDocFileName = "AGENTS.md" | "CHECKLIST.md";
 
 export type GeneratedBuildDetailDocFileName =
 	| "agent-handoff.md"
+	| "readiness.md"
+	| "review.md"
 	| "prompt.md"
 	| "plans.md"
 	| "implement.md"

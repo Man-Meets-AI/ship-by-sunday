@@ -15,7 +15,7 @@ import {
 	type ManagedStripeConfig,
 	type StripeModeLabel,
 } from "@/platform/billing/managed-stripe-config";
-import { serverEnv } from "@/platform/env/server";
+import { requireServerEnv, serverEnv } from "@/platform/env/server";
 
 export const STRIPE_API_VERSION = apiConfig.stripeApiVersion;
 export { normalizeStripeSecretKey } from "@/platform/billing/managed-stripe-config";
@@ -39,6 +39,10 @@ export function getStripe() {
 	}
 
 	return stripeClient;
+}
+
+export function getStripePublishableKey() {
+	return requireServerEnv("STRIPE_PUBLISHABLE_KEY");
 }
 
 export function getStripeLineItem() {

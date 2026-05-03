@@ -4,6 +4,8 @@ import { routeConfig } from "@/config/product";
 import { getLessonByRouteSegment } from "@/lib/course/lesson/model/manifest";
 import { BonusLessonPage } from "@/app/(workspace)/_components/execute-ship/bonus-lesson-page";
 import { BonusRouteStatePanel } from "@/app/(workspace)/_components/execute-ship/bonus-route-state-panel";
+import { AccessRequiredPage } from "@/app/(workspace)/_components/access-required/access-required-page";
+import { loadWorkspacePageAccess } from "@/app/(workspace)/_server/load-workspace-page-access";
 import { buildFallbackPostReviewTargets } from "@/lib/execute-ship/bonus-library-presentation";
 import { loadBonusRouteAccess } from "@/app/(workspace)/lesson/[lessonKey]/_server/load-bonus-route-access";
 import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
@@ -21,6 +23,11 @@ export default async function Page({
 
 	if (!lesson) {
 		notFound();
+	}
+
+	const workspaceAccess = await loadWorkspacePageAccess();
+	if (workspaceAccess.kind === "access_required") {
+		return <AccessRequiredPage initialAccess={workspaceAccess.access} />;
 	}
 
 	const bonusRouteAccess = await loadBonusRouteAccess();

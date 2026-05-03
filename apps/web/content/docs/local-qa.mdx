@@ -102,7 +102,7 @@ Use the root release proof commands for hosted runs instead of stitching Playwri
 Hosted production example:
 
 ```bash
-PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run release:proof -- --proof=default_ship
+PLAYWRIGHT_BASE_URL=https://<production-url> QA_ENV_FILE=apps/web/.env.production bun run release:proof -- --proof=default_ship
 ```
 
 If the loaded Clerk env does not match the hosted target, persona prep now fails immediately with a Clerk publishable-key mismatch. That is intentional. Fix the env selection before treating any authenticated browser failure as an app bug.

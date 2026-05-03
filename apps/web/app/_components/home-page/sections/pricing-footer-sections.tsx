@@ -24,15 +24,15 @@ export function PricingSectionBlock({
 		<section id="pricing" className="border-t border-border/40 py-24 lg:py-40">
 			<div className="grid gap-16 lg:grid-cols-2 lg:gap-24">
 				<ScrollReveal>
-					<div className="space-y-10 lg:sticky lg:top-24 lg:h-fit">
-						<div className="space-y-6">
-							<h2 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl lg:text-7xl">
-								{pricingSection.titleLead}
-								<span className="block text-primary/90">
+					<div className="space-y-6 lg:sticky lg:top-24 lg:h-fit">
+						<div className="flex flex-col gap-3">
+							<h2 className="flex flex-col gap-1 text-balance text-4xl font-semibold leading-[0.92] tracking-tight sm:text-5xl lg:text-7xl">
+								<span>{pricingSection.titleLead}</span>
+								<span className="text-primary">
 									{pricingSection.titleAccent}
 								</span>
 							</h2>
-							<p className="max-w-xl text-pretty text-lg leading-7 text-muted-foreground">
+							<p className="max-w-xl text-pretty text-lg leading-snug text-muted-foreground">
 								{pricingSection.intro}
 							</p>
 						</div>
@@ -40,15 +40,14 @@ export function PricingSectionBlock({
 				</ScrollReveal>
 
 				<ScrollReveal delay={0.15}>
-					<div className="flex flex-col gap-10">
-						<div className="space-y-6">
+					<div className="flex flex-col gap-8">
+						<div className="flex flex-col gap-4">
 							{pricingSection.offerBanner ? (
 								<PromoBanner
 									label={pricingSection.offerBanner.label}
 									message={pricingSection.offerBanner.message}
-									className="rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3"
+									className="rounded-2xl border border-foreground/15 bg-foreground/5 px-4 py-3"
 									contentClassName="justify-start text-left tracking-[0.12em]"
-									labelClassName="bg-primary text-primary-foreground"
 									messageClassName="text-sm tracking-normal text-foreground/80 normal-case"
 								/>
 							) : null}
@@ -72,7 +71,7 @@ export function PricingSectionBlock({
 								target={primaryCtaTarget}
 								label={pricingSection.ctaTitle}
 								testId="pricing-primary-cta"
-								className="h-20 min-w-full rounded-2xl bg-foreground text-xl font-black text-background transition-transform hover:scale-[1.02] active:scale-[0.98]"
+								className="h-16 min-w-full rounded-2xl text-lg font-bold shadow-2xl shadow-foreground/15 motion-safe:transition-all motion-safe:hover:-translate-y-1 motion-safe:hover:shadow-foreground/25"
 							/>
 							<p className="text-center text-sm leading-7 text-muted-foreground">
 								{pricingSection.trustLine}
@@ -83,14 +82,11 @@ export function PricingSectionBlock({
 							<PricingIncludesList items={pricingSection.includes} />
 						</div>
 
-						<div className="rounded-3xl border border-primary/20 bg-primary/5 p-6">
-							<p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">
-								{pricingSection.bonus.label}
-							</p>
-							<p className="mt-3 text-xl font-semibold tracking-tight text-foreground">
+						<div className="rounded-3xl border border-foreground/15 bg-foreground/5 p-6">
+							<p className="text-xl font-semibold leading-tight tracking-tight text-foreground">
 								{pricingSection.bonus.title}
 							</p>
-							<p className="mt-2 text-sm leading-7 text-muted-foreground">
+							<p className="mt-2 text-sm leading-snug text-muted-foreground">
 								{pricingSection.bonus.description}
 							</p>
 						</div>
@@ -119,7 +115,7 @@ export function FooterSection({
 						</p>
 						<Link
 							href={routeConfig.signIn}
-							className="text-sm text-primary underline-offset-4 transition-colors hover:underline"
+							className="text-sm text-foreground underline-offset-4 transition-colors hover:underline"
 						>
 							Already bought? <span className="ml-1 font-medium">Sign in</span>
 						</Link>

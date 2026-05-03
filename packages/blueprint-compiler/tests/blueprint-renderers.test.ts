@@ -1,6 +1,7 @@
 import {
 	DEFAULT_DESIGN_PRESET_ID,
 	buildDesignPresetFactSeed,
+	createCanonicalProjectDefinition,
 	createCompleteProjectDefinition,
 } from "../src";
 import { renderFullBlueprintTree } from "../src/server";
@@ -14,6 +15,43 @@ function findRenderedContent(
 	expect(renderedFile).toBeDefined();
 
 	return renderedFile?.content ?? "";
+}
+
+function splitMarkdownTableRow(row: string) {
+	return row
+		.trim()
+		.replace(/^\|/, "")
+		.replace(/\|$/, "")
+		.split("|")
+		.map((cell) => cell.trim());
+}
+
+function parseMarkdownTable(content: string, firstHeader: string) {
+	const lines = content.split("\n");
+	const headerIndex = lines.findIndex(
+		(line) =>
+			line.startsWith("|") && splitMarkdownTableRow(line)[0] === firstHeader,
+	);
+
+	expect(headerIndex).toBeGreaterThanOrEqual(0);
+
+	const headers = splitMarkdownTableRow(lines[headerIndex] ?? "");
+	const rows: Record<string, string>[] = [];
+
+	for (const line of lines.slice(headerIndex + 2)) {
+		if (!line.startsWith("|")) {
+			break;
+		}
+
+		const cells = splitMarkdownTableRow(line);
+		rows.push(
+			Object.fromEntries(
+				headers.map((header, index) => [header, cells[index] ?? ""]),
+			),
+		);
+	}
+
+	return rows;
 }
 
 const unresolvedPlaceholderPattern =
@@ -33,6 +71,8 @@ describe("blueprint renderers", () => {
 				"docs/design/AGENTS.md",
 				"docs/marketing/README.md",
 				"docs/build/docs/agent-handoff.md",
+				"docs/build/docs/readiness.md",
+				"docs/build/docs/review.md",
 				"docs/build/docs/prompt.md",
 				"docs/prompts/execplan-outline-from-session.md",
 				"docs/prompts/execplan-execution-loop.md",
@@ -48,6 +88,12 @@ describe("blueprint renderers", () => {
 		);
 		const agentHandoff = renderedFiles.find(
 			(file) => file.path === "docs/build/docs/agent-handoff.md",
+		);
+		const buildReadiness = renderedFiles.find(
+			(file) => file.path === "docs/build/docs/readiness.md",
+		);
+		const buildReview = renderedFiles.find(
+			(file) => file.path === "docs/build/docs/review.md",
 		);
 		const buildPlans = renderedFiles.find(
 			(file) => file.path === "docs/build/docs/plans.md",
@@ -78,7 +124,31 @@ describe("blueprint renderers", () => {
 		expect(agentHandoff?.content).toContain(
 			"# Ship by Sunday OS Agent Handoff",
 		);
+		expect(agentHandoff?.content.indexOf("## Readiness First")).toBeLessThan(
+			agentHandoff?.content.indexOf("## Start Prompt") ??
+				Number.MAX_SAFE_INTEGER,
+		);
+		expect(agentHandoff?.content).toContain("docs/build/docs/readiness.md");
 		expect(agentHandoff?.content).toContain("## Start Prompt");
+		expect(buildReadiness?.content).toContain(
+			"# Ship by Sunday OS Build Pack Readiness",
+		);
+		expect(buildReadiness?.content).toContain("## Derived First Slice Plan");
+		expect(buildReadiness?.content).toContain("## Starter File Reading Order");
+		expect(buildReadiness?.content).toContain("docs/build/docs/review.md");
+		expect(buildReadiness?.content).toContain("## Validation Manifest");
+		expect(buildReadiness?.content).toContain(
+			"| Run compiler tests | runnable | `test:compiler` | `bun run test:compiler` |",
+		);
+		expect(buildReadiness?.content).toContain("## Customer Input Work");
+		expect(buildReadiness?.content).toContain("Confidence state:");
+		expect(buildReview?.content).toContain(
+			"# Ship by Sunday OS Review And Verification Pack",
+		);
+		expect(buildReview?.content).toContain("## Review Prompt");
+		expect(buildReview?.content).toContain("## Verification Personas");
+		expect(buildReview?.content).toContain("## Regression Checks");
+		expect(buildReview?.content).toContain("## Evidence Table");
 		expect(buildPlans?.content).toContain("## Milestone Map");
 		expect(buildPlans?.content).toContain(
 			"M1 - Bootstrap the compiler and canonical schema.",
@@ -98,16 +168,20 @@ describe("blueprint renderers", () => {
 		);
 		const criticalBuildDocs = [
 			findRenderedContent(renderedFiles, "docs/build/docs/agent-handoff.md"),
+			findRenderedContent(renderedFiles, "docs/build/docs/readiness.md"),
+			findRenderedContent(renderedFiles, "docs/build/docs/review.md"),
 			findRenderedContent(renderedFiles, "docs/build/docs/prompt.md"),
 			findRenderedContent(renderedFiles, "docs/build/docs/plans.md"),
 			findRenderedContent(renderedFiles, "docs/build/docs/implement.md"),
 			findRenderedContent(renderedFiles, "docs/build/docs/documentation.md"),
 		];
 		const agentHandoff = criticalBuildDocs[0] ?? "";
-		const buildPrompt = criticalBuildDocs[1] ?? "";
-		const buildPlans = criticalBuildDocs[2] ?? "";
-		const buildImplement = criticalBuildDocs[3] ?? "";
-		const buildDocumentation = criticalBuildDocs[4] ?? "";
+		const buildReadiness = criticalBuildDocs[1] ?? "";
+		const buildReview = criticalBuildDocs[2] ?? "";
+		const buildPrompt = criticalBuildDocs[3] ?? "";
+		const buildPlans = criticalBuildDocs[4] ?? "";
+		const buildImplement = criticalBuildDocs[5] ?? "";
+		const buildDocumentation = criticalBuildDocs[6] ?? "";
 
 		for (const content of criticalBuildDocs) {
 			expect(content).not.toContain("## Base Template");
@@ -119,9 +193,27 @@ describe("blueprint renderers", () => {
 		);
 		expect(agentHandoff).toContain("## Required Source Files");
 		expect(agentHandoff).toContain("## Required Completion Evidence");
+		expect(agentHandoff).toContain("## Readiness First");
 		expect(agentHandoff).toContain(
 			"Build M1 for Ship by Sunday OS: Bootstrap the compiler and canonical schema.",
 		);
+		expect(buildReadiness).toContain("## Readiness Verdict");
+		expect(buildReadiness).toContain("## Blockers");
+		expect(buildReadiness).toContain("## Derived First Slice Plan");
+		expect(buildReadiness).toContain("## Starter File Reading Order");
+		expect(buildReadiness).toContain("| Domain | `domain` | placeholder |");
+		expect(buildReadiness).toContain(
+			"| Contact email | `contact_email` | placeholder |",
+		);
+		expect(buildReadiness).toContain(
+			"| Support email | `support_email` | placeholder |",
+		);
+		expect(buildReview).toContain("## Review Prompt");
+		expect(buildReview).toContain("## Verification Personas");
+		expect(buildReview).toContain("docs/testing/run-report.md");
+		expect(buildReview).toContain("## Expected Demo Proof");
+		expect(buildReview).toContain("## Regression Checks");
+		expect(buildReview).toContain("## Evidence Table");
 		expect(buildPrompt).toContain("## Copy-Ready Agent Prompt");
 		expect(buildPrompt).toContain(
 			"Build M1 for Ship by Sunday OS: Bootstrap the compiler and canonical schema.",
@@ -129,9 +221,7 @@ describe("blueprint renderers", () => {
 		expect(buildPrompt).toContain(
 			"- Existing checks to start from: Run compiler tests; Run app build; Run blueprint-flow integration tests",
 		);
-		expect(buildPrompt).toContain(
-			"bun run --cwd packages/blueprint-compiler test",
-		);
+		expect(buildPrompt).toContain("bun run test:compiler");
 		expect(buildPrompt).toContain("bun run build");
 		expect(buildPlans).toContain(
 			"| M1 - Bootstrap the compiler and canonical schema. | A buyer can move through the funnel and download a repo zip.",
@@ -139,7 +229,7 @@ describe("blueprint renderers", () => {
 		expect(buildPlans).toContain("bun run test:integration");
 		expect(buildImplement).toContain("## Source Of Truth");
 		expect(buildImplement).toContain("## Preflight Checklist");
-		expect(buildImplement).toContain("## Suggested Validation Commands");
+		expect(buildImplement).toContain("## Typed Validation Manifest");
 		expect(buildImplement).toContain(
 			"Confirm M1 is active: Bootstrap the compiler and canonical schema.",
 		);
@@ -148,6 +238,27 @@ describe("blueprint renderers", () => {
 		);
 		expect(buildDocumentation).toContain(
 			"| Blueprint compiler | Pending first implementation diff | Not started | |",
+		);
+
+		const validationRows = parseMarkdownTable(
+			buildReadiness,
+			"Source validation step",
+		);
+		expect(validationRows).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					"Source validation step": "Run compiler tests",
+					Type: "runnable",
+					"Package script": "`test:compiler`",
+					"Proof path": "`bun run test:compiler`",
+				}),
+				expect.objectContaining({
+					"Source validation step": "Run app build",
+					Type: "runnable",
+					"Package script": "`build`",
+					"Proof path": "`bun run build`",
+				}),
+			]),
 		);
 	});
 
@@ -187,5 +298,53 @@ describe("blueprint renderers", () => {
 		expect(factsJson?.content).toContain('"price_usd_cents": 2900');
 		expect(readme?.content).toContain("Agent-Ready Packs");
 		expect(readme?.content).toContain("repo zip");
+	});
+
+	it("renders reduced readiness with blocked validation and visible customer-input work", async () => {
+		const renderedFiles = await renderFullBlueprintTree(
+			createCanonicalProjectDefinition({
+				clerkUserId: "user_123",
+				productKey: "ship-by-sunday",
+				facts: {
+					product_name: "Field Ops Portal",
+					product_summary: "A dispatch workspace for field teams.",
+					primary_user: "Field operators",
+					problem_statement: "Dispatch notes are scattered across tools.",
+					problem_trigger:
+						"Operators need one place to see the next job and proof.",
+					problem_severity: "7",
+					success_looks_like:
+						"A dispatcher sees the next job, status, and proof needs.",
+					core_flow: ["Pick next job", "Update status", "Capture proof"],
+					pricing: 99,
+					validation_plan: ["Confirm customer proof workflow"],
+					selected_next_slice: "M1",
+					design_references: ["https://example.com/reference"],
+					open_questions: ["Which proof source is legally required?"],
+				},
+				placeholdersInUse: ["domain", "contact_email", "support_email"],
+				createdAt: 1,
+				updatedAt: 1,
+			}),
+		);
+		const readiness = findRenderedContent(
+			renderedFiles,
+			"docs/build/docs/readiness.md",
+		);
+
+		expect(readiness).toContain("- Confidence state: blocked");
+		expect(readiness).toContain(
+			"| Confirm customer proof workflow | blocked |",
+		);
+		expect(readiness).toContain("| Domain | `domain` | missing |");
+		expect(readiness).toContain(
+			"| Contact email | `contact_email` | missing |",
+		);
+		expect(readiness).toContain(
+			"| Support email | `support_email` | missing |",
+		);
+		expect(readiness).toContain("## Weak Fact Warnings");
+		expect(readiness).toContain("https://example.com/reference");
+		expect(readiness).not.toContain("# Confirm customer proof workflow");
 	});
 });

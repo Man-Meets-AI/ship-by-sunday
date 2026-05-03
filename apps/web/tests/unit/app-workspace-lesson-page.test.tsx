@@ -7,6 +7,7 @@ import type { BonusMissionState } from "@/lib/execute-ship/bonus-mission-types";
 vi.mock("server-only", () => ({}));
 
 const fetchAuthenticatedQueryMock = vi.fn();
+const getServerProductAccessMock = vi.fn();
 const notFoundMock = vi.fn(() => {
 	throw new Error("NEXT_NOT_FOUND");
 });
@@ -69,6 +70,17 @@ vi.mock(
 vi.mock("@/platform/convex/server-preload", () => ({
 	fetchAuthenticatedQuery: fetchAuthenticatedQueryMock,
 }));
+
+vi.mock("@/platform/access/product-access", () => ({
+	getServerProductAccess: getServerProductAccessMock,
+}));
+
+vi.mock(
+	"@/app/(workspace)/_components/access-required/access-required-page",
+	() => ({
+		AccessRequiredPage: () => <div>Access recovery</div>,
+	}),
+);
 
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
@@ -164,9 +176,37 @@ function createBonusMissionState(): BonusMissionState {
 describe("workspace lesson route", () => {
 	beforeEach(() => {
 		fetchAuthenticatedQueryMock.mockReset();
+		getServerProductAccessMock.mockReset();
+		getServerProductAccessMock.mockResolvedValue({
+			clerkUserId: "user_123",
+			hasAccess: true,
+			status: "granted",
+		});
 		notFoundMock.mockClear();
 		vi.resetModules();
 	});
+
+	it("renders access recovery without protected queries when access is missing", async () => {
+		getServerProductAccessMock.mockResolvedValue({
+			clerkUserId: "user_123",
+			hasAccess: false,
+			status: "no_access",
+		});
+
+		const { default: LessonRoutePage } =
+			await import("@/app/(workspace)/lesson/[lessonKey]/page");
+
+		const markup = renderToStaticMarkup(
+			await LessonRoutePage({
+				params: Promise.resolve({ lessonKey: "build-kickoff" }),
+				searchParams: Promise.resolve({}),
+			}),
+		);
+
+		expect(markup).toContain("Access recovery");
+		expect(fetchAuthenticatedQueryMock).not.toHaveBeenCalled();
+		expect(notFoundMock).not.toHaveBeenCalled();
+	}, 15_000);
 
 	it("renders explicit unlock messaging before the bonus lesson is available", async () => {
 		fetchAuthenticatedQueryMock.mockImplementation(async (query) => {
