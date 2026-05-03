@@ -10,7 +10,7 @@ Do not stop at component checks. Test the full buyer journey:
 1. landing page
 2. checkout
 3. `/checkout/success`
-4. sign-in or post-payment account creation when needed
+4. checkout-email Clerk code handoff when payment happened before app auth
 5. product-access claim and grant
 6. `/blueprint`
 7. the first incomplete blueprint-first stage
@@ -36,7 +36,8 @@ Every pass should cover these states:
 - signed-out users can start checkout directly from the primary CTA
 - users without access land on `/blueprint` and see inline recovery
 - checkout returns to `/checkout/success`
-- `/checkout/success` offers sign-in or account creation when payment happened before auth
+- `/checkout/success` offers the checkout-email code handoff when payment happened before auth
+- the handoff does not offer Google, password reset, password-first account creation, or a second purchase
 - the webhook grants access
 - the app recovers automatically into `/blueprint`
 - the first protected page does not throw a client-side `Unauthorized` error during hydration

@@ -120,6 +120,32 @@ describe("AccessRequiredPage interactions", () => {
 		);
 	});
 
+	it("redirects signed-out paid checkout recovery to the email handoff", () => {
+		useQueryMock.mockReturnValue({
+			hasAccess: false,
+			status: "signed_out",
+		});
+
+		render(
+			<AccessRequiredPage
+				initialAccess={{
+					clerkUserId: null,
+					hasAccess: false,
+					status: "signed_out",
+					pendingCheckoutRecovery: {
+						kind: "checkout_email_handoff_required",
+						sessionId: "cs_paid_signed_out",
+						checkoutEmail: "buyer@example.com",
+					},
+				}}
+			/>,
+		);
+
+		expect(replaceMock).toHaveBeenCalledWith(
+			"/checkout/email-handoff?session_id=cs_paid_signed_out&redirect_url=%2Fmission",
+		);
+	});
+
 	it("refreshes access on retry and clears the busy state after the timeout", async () => {
 		vi.useFakeTimers();
 		useQueryMock.mockReturnValue({

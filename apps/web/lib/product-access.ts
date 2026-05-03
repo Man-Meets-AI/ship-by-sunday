@@ -18,6 +18,12 @@ export type PaidCheckoutRecovery =
 			currentAccountEmail?: string;
 	  }
 	| {
+			kind: "checkout_email_handoff_required";
+			sessionId: string;
+			checkoutEmail: string;
+			currentAccountEmail?: string;
+	  }
+	| {
 			kind: "wrong_account";
 			sessionId: string;
 			checkoutEmail?: string;

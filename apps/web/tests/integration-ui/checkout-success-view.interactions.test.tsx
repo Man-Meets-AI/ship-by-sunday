@@ -224,7 +224,7 @@ describe("CheckoutSuccessView interactions", () => {
 
 		expect(signOutMock).toHaveBeenCalledWith({
 			redirectUrl:
-				"/sign-in?redirect_url=%2Fcheckout%2Fsuccess%3Fsession_id%3Dcs_wrong_account",
+				"/checkout/email-handoff?session_id=cs_wrong_account&redirect_url=%2Fcheckout%2Fsuccess%3Fsession_id%3Dcs_wrong_account",
 		});
 	});
 });

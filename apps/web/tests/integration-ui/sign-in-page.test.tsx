@@ -211,7 +211,7 @@ describe("SignInPage", () => {
 		expect(screen.queryByRole("link", { name: "See pricing" })).toBeNull();
 	});
 
-	it("shows the post-checkout create-account path when recovery includes a paid checkout", () => {
+	it("does not render the retired post-checkout create-account path", () => {
 		const signInState = createSignInMock();
 		useSignInMock.mockReturnValue({
 			errors: signInState.errors,
@@ -219,15 +219,13 @@ describe("SignInPage", () => {
 			signIn: signInState.signIn,
 		});
 
-		render(
-			<SignInPage postCheckoutSignUpHref="/sign-up?session_id=cs_test_123&redirect_url=%2Fstart" />,
-		);
+		render(<SignInPage />);
 
 		expect(
-			screen
-				.getByRole("link", { name: "Create the account for this checkout" })
-				.getAttribute("href"),
-		).toBe("/sign-up?session_id=cs_test_123&redirect_url=%2Fstart");
+			screen.queryByRole("link", {
+				name: "Create the account for this checkout",
+			}),
+		).toBeNull();
 	});
 
 	it("submits email and password through Clerk", async () => {

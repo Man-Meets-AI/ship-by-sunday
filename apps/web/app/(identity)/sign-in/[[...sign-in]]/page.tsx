@@ -4,10 +4,9 @@ import { redirect } from "next/navigation";
 
 import { SignInPage } from "@/app/(identity)/_components/sign-in-page";
 import {
-	buildSignUpHref,
+	buildCheckoutEmailHandoffHrefForSuccessRedirect,
 	getSafeRedirectPath,
 } from "@/platform/auth/auth-route-utils";
-import { getPendingCheckoutSessionIdFromCookie } from "@/platform/billing/checkout/checkout-session-recovery";
 import { shouldBypassClerkProtection } from "@/platform/auth/clerk-middleware-bypass";
 
 export const metadata: Metadata = {
@@ -25,18 +24,16 @@ export default async function Page({
 	const { redirect_url: redirectUrl } = await searchParams;
 	const disableClerkAuthLookup = shouldBypassClerkProtection();
 	const safeRedirectPath = getSafeRedirectPath(redirectUrl);
-	const pendingCheckoutSessionId =
-		await getPendingCheckoutSessionIdFromCookie();
-	const postCheckoutSignUpHref = pendingCheckoutSessionId
-		? buildSignUpHref({
-				redirectPath: safeRedirectPath,
-				sessionId: pendingCheckoutSessionId,
-			})
-		: null;
 
 	if (!disableClerkAuthLookup && (await auth()).isAuthenticated) {
-		redirect(safeRedirectPath);
+		return redirect(safeRedirectPath);
 	}
 
-	return <SignInPage postCheckoutSignUpHref={postCheckoutSignUpHref} />;
+	const checkoutEmailHandoffHref =
+		buildCheckoutEmailHandoffHrefForSuccessRedirect(safeRedirectPath);
+	if (checkoutEmailHandoffHref) {
+		return redirect(checkoutEmailHandoffHref);
+	}
+
+	return <SignInPage />;
 }

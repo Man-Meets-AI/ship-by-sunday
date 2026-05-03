@@ -97,11 +97,13 @@ export function getAccessViewModel({
 	signInHref,
 	homeHref,
 	pricingHref,
+	checkoutEmailHandoffHref,
 }: {
 	viewState: AccessViewState;
 	signInHref: string;
 	homeHref: string;
 	pricingHref: string;
+	checkoutEmailHandoffHref?: string | null;
 }): AccessViewModel {
 	const openWorkspaceLabel = workspaceDisplayConfig.openHomeActionLabel;
 	const backHome = {
@@ -146,6 +148,45 @@ export function getAccessViewModel({
 			const currentAccountEmail = getCurrentAccountLabel(
 				viewState.recovery.currentAccountEmail,
 			);
+			if (viewState.recovery.kind === "checkout_email_handoff_required") {
+				const proveCheckoutEmail = {
+					kind: "link" as const,
+					label: "Prove checkout email",
+					href: checkoutEmailHandoffHref ?? signInHref,
+				};
+
+				return {
+					title: "Prove the checkout email",
+					shellSubtitle: `Payment is confirmed for ${checkoutEmail}. Verify that email before opening the protected product.`,
+					helperCopy:
+						"Do not start a second checkout. The paid session is already known; the remaining step is email proof.",
+					accessStateLabel: "Email proof required",
+					statusCalloutTitle: "Purchase found",
+					statusCalloutBody: `The paid checkout belongs to ${checkoutEmail}. Use the Clerk email code for that address to continue.`,
+					helpLeadCopy:
+						"This is a checkout-email proof step, not a missing purchase.",
+					helpItems: [
+						`Use the one-time email code sent to ${checkoutEmail}.`,
+						"Do not use Google or password setup from this handoff.",
+						`After verification, use ${openWorkspaceLabel} to enter the workspace.`,
+					],
+					paths: [
+						{
+							tone: "recovery",
+							title: "Recover paid checkout",
+							description: `Verify ${checkoutEmail}, then return here to open the protected product.`,
+							actions: [proveCheckoutEmail, backHome],
+						},
+						{
+							tone: "purchase",
+							title: "Do not buy again",
+							description:
+								"This page already knows about the paid checkout. Resolve the email proof before considering another purchase.",
+							actions: [seeOffer],
+						},
+					],
+				};
+			}
 			const paymentPending =
 				viewState.recovery.kind === "payment_pending"
 					? `Stripe still reports ${viewState.recovery.paymentStatus}.`

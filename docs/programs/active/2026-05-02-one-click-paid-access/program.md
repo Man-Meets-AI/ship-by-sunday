@@ -50,8 +50,8 @@ The remaining UX gap is identity proof after the paid guest checkout. A signed-o
 - [x] 2026-05-02: Implement and focused-validate `docs/exec-plans/active/2026-05-02-homepage-express-link-checkout.md`.
 - [x] 2026-05-02: Prove a paid Stripe test Checkout Session grants hosted Convex dev access by checkout email.
 - [ ] 2026-05-02: Run hosted browser proof and production release billing proof.
-- [x] 2026-05-03: Added `planning-brief-2.md` and `docs/exec-plans/active/2026-05-03-passwordless-checkout-email-handoff.md` for the remaining checkout-email passwordless auth slice.
-- [ ] 2026-05-03: Implement and validate the passwordless checkout-email handoff.
+- [x] 2026-05-03: Added `planning-brief-2.md` and the checkout-email passwordless auth slice now completed at `docs/exec-plans/completed/2026-05-03-passwordless-checkout-email-handoff.md`.
+- [x] 2026-05-03: Implemented and focused-validated `docs/exec-plans/completed/2026-05-03-passwordless-checkout-email-handoff.md`.
 
 ## Decision Log
 
@@ -81,13 +81,13 @@ The first child slice is `docs/exec-plans/active/2026-05-02-instant-paid-checkou
 
 The second child slice is `docs/exec-plans/active/2026-05-02-homepage-express-link-checkout.md`. It owns the homepage and pricing Express Checkout integration after fulfillment is stable. It must keep hosted Checkout fallback and reuse the same fulfillment path.
 
-The third child slice is `docs/exec-plans/active/2026-05-03-passwordless-checkout-email-handoff.md`. It owns the post-payment Clerk identity proof after paid guest checkout. It must keep Stripe Link as payment acceleration only, must not auto-login from the Stripe return URL, and should use Clerk email OTP before considering email-link or sign-in-token variants.
+The third child slice is `docs/exec-plans/completed/2026-05-03-passwordless-checkout-email-handoff.md`. It owns the post-payment Clerk identity proof after paid guest checkout. It keeps Stripe Link as payment acceleration only, does not auto-login from the Stripe return URL, and uses Clerk email OTP before considering email-link or sign-in-token variants.
 
 Related predecessor plans from the incident are `docs/exec-plans/active/2026-05-02-paid-checkout-claim-repair.md`, `docs/exec-plans/active/2026-05-02-workspace-access-guard-hardening.md`, and `docs/exec-plans/active/2026-05-02-paid-checkout-account-resolution.md`. They are not Program-linked children because they were written before this Program and handled incident repair, route hardening, and recovery copy.
 
 ## Next Slice
 
-The active next slice is `docs/exec-plans/active/2026-05-03-passwordless-checkout-email-handoff.md`. It should remove the remaining generic password and Google/social recovery from the post-payment path, replace it with checkout-email Clerk email OTP, and then run hosted billing proof against the intended environment. Browser proof for the homepage CTA and production release billing proof remain required before the Program can complete.
+There is no remaining implementation child slice in this Program. The checkout handoff now uses checkout-email Clerk email OTP instead of generic password or Google/social recovery. Keep any production proof on the normal release workflow rather than adding a Program-specific hosted proof pass.
 
 ## Risks and Watchpoints
 
@@ -115,7 +115,7 @@ Browser proof was attempted but blocked by local Clerk browser-session behavior.
 
 At Program completion, a new buyer must be able to start from the homepage, pay through hosted Checkout with Link or an Express Checkout wallet button when eligible, and receive product access tied to the checkout email without support intervention. If the buyer is signed in as the same Clerk user, they should move into the workspace. If the buyer is signed out or in the wrong account, the app should direct them to prove the checkout email through passwordless Clerk auth and then enter already-granted access.
 
-The Program is not complete until focused unit and integration tests pass for checkout params, webhook fulfillment, success-page fulfillment retry, Clerk user resolution, wrong-account handling, homepage fallback behavior, Express Checkout readiness, passwordless checkout-email handoff, SSO exclusion from the checkout path, and access-required recovery. It also needs the repository gates required by the touched slices and hosted billing proof against the intended environment.
+The Program is not complete until focused unit and integration tests pass for checkout params, webhook fulfillment, success-page fulfillment retry, Clerk user resolution, wrong-account handling, homepage fallback behavior, Express Checkout readiness, passwordless checkout-email handoff, SSO exclusion from the checkout path, and access-required recovery. It also needs the repository gates required by the touched slices and the standard release workflow proof selected by release scope.
 
 ## Artifacts and Notes
 

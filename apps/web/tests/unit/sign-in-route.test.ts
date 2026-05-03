@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const redirectMock = vi.fn();
 const authMock = vi.fn();
 const shouldBypassClerkProtectionMock = vi.fn(() => false);
-const getPendingCheckoutSessionIdFromCookieMock = vi.fn();
 const signInPageMock = vi.fn();
 
 vi.mock("next/navigation", () => ({
@@ -16,11 +15,6 @@ vi.mock("@clerk/nextjs/server", () => ({
 
 vi.mock("@/platform/auth/clerk-middleware-bypass", () => ({
 	shouldBypassClerkProtection: () => shouldBypassClerkProtectionMock(),
-}));
-
-vi.mock("@/platform/billing/checkout/checkout-session-recovery", () => ({
-	getPendingCheckoutSessionIdFromCookie: () =>
-		getPendingCheckoutSessionIdFromCookieMock(),
 }));
 
 vi.mock("@/app/(identity)/_components/sign-in-page", () => ({
@@ -36,8 +30,6 @@ describe("sign-in route", () => {
 	beforeEach(() => {
 		authMock.mockReset();
 		redirectMock.mockReset();
-		getPendingCheckoutSessionIdFromCookieMock.mockReset();
-		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(null);
 		signInPageMock.mockReset();
 		shouldBypassClerkProtectionMock.mockReset();
 		shouldBypassClerkProtectionMock.mockReturnValue(false);
@@ -80,23 +72,20 @@ describe("sign-in route", () => {
 		expect(result).toBeTruthy();
 	});
 
-	it("passes the post-checkout sign-up link when a pending checkout cookie exists", async () => {
+	it("routes checkout success sign-in attempts to the email handoff", async () => {
 		authMock.mockResolvedValue({
 			isAuthenticated: false,
 		});
-		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue("cs_test_123");
 
-		const result = await Page({
-			searchParams: Promise.resolve({ redirect_url: "/blueprint" }),
+		await Page({
+			searchParams: Promise.resolve({
+				redirect_url: "/checkout/success?session_id=cs_test_123",
+			}),
 		});
 
-		expect(redirectMock).not.toHaveBeenCalled();
-		expect(result).toMatchObject({
-			props: {
-				postCheckoutSignUpHref:
-					"/sign-up?session_id=cs_test_123&redirect_url=%2Fblueprint",
-			},
-		});
+		expect(redirectMock).toHaveBeenCalledWith(
+			"/checkout/email-handoff?session_id=cs_test_123&redirect_url=%2Fcheckout%2Fsuccess%3Fsession_id%3Dcs_test_123",
+		);
 	});
 
 	it("renders the sign-in page without calling Clerk auth when middleware is bypassed", async () => {

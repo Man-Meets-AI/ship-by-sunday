@@ -28,12 +28,12 @@ describe("release scope classifier", () => {
 		).toBe(true);
 		expect(
 			isBillingSensitivePath(
-				"apps/web/app/(identity)/_components/sign-up/post-checkout-sign-up-form.tsx",
+				"apps/web/app/(identity)/_components/checkout-email-handoff/checkout-email-handoff-form.tsx",
 			),
 		).toBe(true);
 		expect(
 			isBillingSensitivePath(
-				"apps/web/app/(identity)/_components/post-checkout-sign-up-page.tsx",
+				"apps/web/app/(identity)/_components/checkout-email-handoff/use-checkout-email-handoff-flow.ts",
 			),
 		).toBe(true);
 		expect(

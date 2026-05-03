@@ -27,6 +27,11 @@ export type CheckoutSessionState =
 			currentAccountEmail?: string;
 	  }
 	| {
+			kind: "checkout_email_handoff_required";
+			sessionId: string;
+			checkoutEmail: string;
+	  }
+	| {
 			kind: "wrong_account";
 			sessionId: string;
 			checkoutEmail?: string;
@@ -103,7 +108,7 @@ function getCheckoutStateFromFulfillmentResult(
 		case "fulfilled":
 			if (!currentUserId) {
 				return {
-					kind: "sign_in_required",
+					kind: "checkout_email_handoff_required",
 					sessionId,
 					checkoutEmail: fulfillmentResult.checkoutEmail,
 				};

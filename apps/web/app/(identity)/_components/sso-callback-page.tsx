@@ -7,6 +7,7 @@ import { useEffect, useRef } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { reportClientError } from "@/lib/observability/client-error-report";
 import {
+	buildCheckoutEmailHandoffHrefForSuccessRedirect,
 	buildSignInHref,
 	getBlockedGoogleSignInHref,
 	getSessionTaskHref,
@@ -41,8 +42,13 @@ export function SsoCallbackPage({ redirectPath }: SsoCallbackPageProps) {
 	const hasRun = useRef(false);
 
 	const safeRedirectPath = getSafeRedirectPath(redirectPath);
-	const signInHref = buildSignInHref({ redirectPath: safeRedirectPath });
-	const blockedGoogleHref = getBlockedGoogleSignInHref(safeRedirectPath);
+	const checkoutEmailHandoffHref =
+		buildCheckoutEmailHandoffHrefForSuccessRedirect(safeRedirectPath);
+	const signInHref =
+		checkoutEmailHandoffHref ??
+		buildSignInHref({ redirectPath: safeRedirectPath });
+	const blockedGoogleHref =
+		checkoutEmailHandoffHref ?? getBlockedGoogleSignInHref(safeRedirectPath);
 
 	useEffect(() => {
 		if (!clerk.loaded || !signIn || !signUp || hasRun.current) {

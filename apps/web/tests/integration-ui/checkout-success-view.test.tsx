@@ -56,6 +56,11 @@ function renderView(
 				currentAccountEmail?: string;
 		  }
 		| {
+				kind: "checkout_email_handoff_required";
+				sessionId: string;
+				checkoutEmail: string;
+		  }
+		| {
 				kind: "wrong_account";
 				sessionId: string;
 				checkoutEmail?: string;
@@ -159,7 +164,7 @@ describe("CheckoutSuccessView", () => {
 		expect(markup).toContain("Access ready");
 	});
 
-	it("renders the sign-in recovery path for a missing authenticated session", () => {
+	it("renders the email-handoff recovery path for a paid checkout email", () => {
 		useConvexAuthMock.mockReturnValue({
 			isAuthenticated: false,
 			isLoading: false,
@@ -175,15 +180,38 @@ describe("CheckoutSuccessView", () => {
 		expect(markup).toContain("Finish access handoff");
 		expect(markup).toContain("Sign in required");
 		expect(markup).toContain("Use the checkout account");
-		expect(markup).toContain("Sign in to continue");
+		expect(markup).toContain("Prove checkout email");
 		expect(markup).toContain("Payment is confirmed for buyer@example.com");
 		expect(markup).toContain("Do not buy again");
 		expect(markup).toContain(
-			'href="/sign-in?redirect_url=%2Fcheckout%2Fsuccess%3Fsession_id%3Dcs_sign_in"',
+			'href="/checkout/email-handoff?session_id=cs_sign_in&amp;redirect_url=%2Fcheckout%2Fsuccess%3Fsession_id%3Dcs_sign_in"',
+		);
+		expect(markup).not.toContain("Create account");
+	});
+
+	it("renders the narrow email-code handoff after signed-out fulfillment", () => {
+		useConvexAuthMock.mockReturnValue({
+			isAuthenticated: false,
+			isLoading: false,
+		});
+		useQueryMock.mockReturnValue(undefined);
+
+		const markup = renderView({
+			kind: "checkout_email_handoff_required",
+			sessionId: "cs_handoff",
+			checkoutEmail: "buyer@example.com",
+		});
+
+		expect(markup).toContain("Email proof required");
+		expect(markup).toContain("Prove checkout email");
+		expect(markup).toContain(
+			"Access is waiting for the Clerk user tied to buyer@example.com",
 		);
 		expect(markup).toContain(
-			'href="/sign-up?session_id=cs_sign_in&amp;redirect_url=%2Fcheckout%2Fsuccess%3Fsession_id%3Dcs_sign_in"',
+			'href="/checkout/email-handoff?session_id=cs_handoff&amp;redirect_url=%2Fcheckout%2Fsuccess%3Fsession_id%3Dcs_handoff"',
 		);
+		expect(markup).not.toContain("Continue with Google");
+		expect(markup).not.toContain("Create account");
 	});
 
 	it("renders the account-mismatch recovery copy", () => {
@@ -210,7 +238,8 @@ describe("CheckoutSuccessView", () => {
 		);
 		expect(markup).toContain("Do not buy again");
 		expect(markup).toContain("Switch accounts");
-		expect(markup).toContain("Create checkout account");
+		expect(markup).toContain("use the email code sent to buyer@example.com");
+		expect(markup).not.toContain("Create checkout account");
 	});
 
 	it.each([

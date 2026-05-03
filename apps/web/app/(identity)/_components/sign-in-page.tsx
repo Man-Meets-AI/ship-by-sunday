@@ -8,11 +8,7 @@ import { useSignInFlow } from "@/app/(identity)/_components/sign-in/use-sign-in-
 
 import { AuthPageShell } from "./auth-page-shell";
 
-export function SignInPage({
-	postCheckoutSignUpHref = null,
-}: {
-	postCheckoutSignUpHref?: string | null;
-}) {
+export function SignInPage() {
 	const flow = useSignInFlow();
 	const content = getSignInPageContent({
 		authError: flow.authError,
@@ -34,7 +30,6 @@ export function SignInPage({
 					passwordError={flow.passwordError}
 					setEmailAddress={flow.setEmailAddress}
 					setPassword={flow.setPassword}
-					signUpHref={postCheckoutSignUpHref}
 					startGoogleSignIn={flow.startGoogleSignIn}
 					startPasswordReset={flow.startPasswordReset}
 					submitPassword={flow.submitPassword}
