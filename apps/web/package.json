@@ -128,7 +128,7 @@
 		"concurrently": "^9.2.1",
 		"jsdom": "^29.0.2",
 		"oxfmt": "^0.46.0",
-		"oxlint": "^1.56.0",
+		"oxlint": "^1.62.0",
 		"postcss": "8.5.8",
 		"tailwindcss": "4.2.4",
 		"typescript": "5.9.3",
