@@ -10,9 +10,7 @@ function StatusDot({ connected }: { connected: boolean }) {
 		<span
 			className={cn(
 				"mt-1.5 size-2 shrink-0 rounded-full",
-				connected
-					? "bg-emerald-600 dark:bg-emerald-400"
-					: "bg-amber-600 dark:bg-amber-400",
+				connected ? "bg-state-success" : "bg-state-warning",
 			)}
 			aria-hidden
 		/>

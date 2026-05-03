@@ -13,7 +13,7 @@ export function AccessRequiredPage({
 		useAccessRequiredController(initialAccess);
 
 	return (
-		<main className="relative min-h-screen overflow-hidden bg-background text-foreground">
+		<main className="relative min-h-screen overflow-hidden bg-background text-foreground tracking-normal">
 			<div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-muted/35 via-background/95 to-background sm:h-72" />
 			<div className="relative">
 				<AccessRequiredShell

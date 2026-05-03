@@ -119,8 +119,8 @@ export function BlueprintReviewPage({
 				},
 			}}
 		>
-			<div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-12 px-4 pb-20 pt-2">
-				<div className="flex flex-col gap-12">
+			<div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-4 pb-16 pt-2">
+				<div className="flex flex-col gap-8">
 					<section id={REVIEW_OVERVIEW_ID} className="space-y-4 scroll-mt-24">
 						<div className="space-y-2">
 							<h2 className="text-2xl font-bold tracking-tight sm:text-3xl">

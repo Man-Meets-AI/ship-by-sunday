@@ -57,8 +57,11 @@
 	--color-muted-foreground: var(--muted-foreground);
 	--color-accent: var(--accent);
 	--color-accent-foreground: var(--accent-foreground);
+	--color-accent-info: var(--accent-info);
 	--color-destructive: var(--destructive);
 	--color-destructive-foreground: var(--destructive-foreground);
+	--color-state-success: var(--state-success);
+	--color-state-warning: var(--state-warning);
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
@@ -102,8 +105,11 @@
 	--muted-foreground: oklch(0.556 0 0);
 	--accent: oklch(0.97 0 0);
 	--accent-foreground: oklch(0.205 0 0);
+	--accent-info: oklch(0.666 0.162 256.624);
 	--destructive: oklch(0.577 0.245 27.325);
 	--destructive-foreground: oklch(0.985 0 0);
+	--state-success: oklch(0.646 0.166 148.084);
+	--state-warning: oklch(0.626 0.125 70.45);
 	--border: oklch(0.922 0 0);
 	--input: oklch(0.922 0 0);
 	--ring: oklch(0.708 0 0);
@@ -137,8 +143,11 @@
 	--muted-foreground: oklch(0.708 0 0);
 	--accent: oklch(0.269 0 0);
 	--accent-foreground: oklch(0.985 0 0);
+	--accent-info: oklch(0.758 0.125 257.657);
 	--destructive: oklch(0.704 0.191 22.216);
 	--destructive-foreground: oklch(0.985 0 0);
+	--state-success: oklch(0.798 0.16 149.085);
+	--state-warning: oklch(0.793 0.116 79.785);
 	--border: oklch(0.99 0 0 / 10%);
 	--input: oklch(0.99 0 0 / 15%);
 	--ring: oklch(0.556 0 0);
@@ -149,8 +158,8 @@
 	--chart-5: oklch(0.645 0.246 16.439);
 	--sidebar: oklch(0.205 0 0);
 	--sidebar-foreground: oklch(0.985 0 0);
-	--sidebar-primary: oklch(0.488 0.243 264.376);
-	--sidebar-primary-foreground: oklch(0.985 0 0);
+	--sidebar-primary: oklch(0.922 0 0);
+	--sidebar-primary-foreground: oklch(0.205 0 0);
 	--sidebar-accent: oklch(0.269 0 0);
 	--sidebar-accent-foreground: oklch(0.985 0 0);
 	--sidebar-border: oklch(0.99 0 0 / 10%);
@@ -189,13 +198,13 @@
 	}
 
 	::selection {
-		background: #111111;
-		color: #f0f0f0;
+		background: var(--foreground);
+		color: var(--background);
 	}
 
 	.dark ::selection {
-		background: #f0f0f0;
-		color: #111111;
+		background: var(--foreground);
+		color: var(--background);
 	}
 }
 

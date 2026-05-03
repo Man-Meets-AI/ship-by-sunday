@@ -89,7 +89,8 @@ Until those values are centralized, treat the docs palette as an established sur
 
 - `Inter` is the canonical UI font through `--font-inter` and `font-sans`.
 - Default UI body text is `14px` (`text-sm`) with generous line-height where copy runs long.
-- Inter UI text uses `-0.02em` letter spacing globally unless a component deliberately applies a more specific tracking utility for labels, logos, or compact controls.
+- Operational app, identity, checkout, and access-required UI use normal letter spacing at shell boundaries so controls, panels, forms, and body copy inherit `0` tracking.
+- Explicit tracking remains allowed for wordmarks, all-caps labels, keyboard shortcuts, code, numeric metadata, editorial headings, blog/docs reading surfaces, and homepage art-directed typography.
 - Body typography should stay clean, readable, and neutral.
 
 ### Code and numbers
@@ -163,6 +164,11 @@ Canonical button behavior lives in [apps/web/components/ui/button.tsx](apps/web/
   - `h-8`
   - `rounded-lg`
   - subtle active press via `active:translate-y-px`
+- Button sizes:
+  - compact: `h-7`
+  - default: `h-8`
+  - large: `h-10`
+  - icon-only: `size-6`, `size-7`, or `size-8`
 - Outline button:
   - quiet border
   - background-driven hover
@@ -196,6 +202,7 @@ Usage rule:
 
 - Use cards when grouping genuinely helps comprehension.
 - Do not default to cards for marketing sections that can read as open layout.
+- Operational app cards and panels should stay at `rounded-xl` or `rounded-2xl`; use larger radii only for explicit editorial, docs, hero, pricing, modal, or composer exceptions.
 
 ### Accordions, lists, and content rows
 

@@ -13,7 +13,7 @@ export function CheckoutSuccessSurface({
 }) {
 	return (
 		<main
-			className="flex min-h-dvh items-start justify-center bg-background px-4 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] text-foreground sm:items-center sm:px-6 sm:py-10"
+			className="flex min-h-dvh items-start justify-center bg-background px-4 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] text-foreground tracking-normal sm:items-center sm:px-6 sm:py-10"
 			data-checkout-fixture={fixtureSlug}
 		>
 			<div className="flex w-full max-w-xl flex-col gap-4">

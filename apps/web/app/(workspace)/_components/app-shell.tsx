@@ -78,9 +78,9 @@ function ShellInner({
 	const shellClassName =
 		viewportMode === "app"
 			? appScrollMode === "page"
-				? "flex min-h-screen flex-col bg-background text-foreground"
-				: "flex min-h-screen flex-col bg-background text-foreground xl:h-dvh xl:overflow-hidden"
-			: "min-h-screen bg-background text-foreground";
+				? "flex min-h-screen flex-col bg-background text-foreground tracking-normal"
+				: "flex min-h-screen flex-col bg-background text-foreground tracking-normal xl:h-dvh xl:overflow-hidden"
+			: "min-h-screen bg-background text-foreground tracking-normal";
 
 	const shellInnerClassName =
 		"mx-auto flex min-h-screen max-w-[1920px] flex-col gap-3 px-2 py-2 sm:px-3 sm:py-3";

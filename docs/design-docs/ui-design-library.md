@@ -244,6 +244,23 @@ Use this checklist before changing a surface and again before calling the visual
 
 Do not add this entire token set to CSS at once. Use it as an audit target, then promote only the roles needed by the touched surface.
 
+First implemented app color utilities:
+
+- `accent.info` maps to `--accent-info` and Tailwind utilities such as `text-accent-info`.
+- `state.success` maps to `--state-success` and Tailwind utilities such as `text-state-success` and `bg-state-success`.
+- `state.warning` maps to `--state-warning` and Tailwind utilities such as `text-state-warning` and `bg-state-warning`.
+- `state.danger` should use the existing `destructive` token until a repeated non-destructive danger role needs its own utility.
+
+Homepage-only custom presentation effects, including the current hero hover `Cover` treatment, are not normalized by the first app color slice unless they are reused inside operational app UI.
+
+Operational app shells should apply normal tracking at the shell boundary. Keep explicit tracking for wordmarks, uppercase labels, keyboard shortcuts, mono metadata, code, blog/docs editorial typography, and homepage art-directed type. The current global body tracking rule is treated as inherited drift for operational UI until a later public-surface pass decides whether it can be removed globally.
+
+Implemented shared button geometry now follows the compact ladder in `apps/web/components/ui/button.tsx`: `sm` is `28px`, `default` is `32px`, `lg` is `40px`, `icon-xs` is `24px`, `icon-sm` is `28px`, and `icon` is `32px`. Route-specific overrides should be rare in operational UI; if a mobile surface needs a larger touch target, add the tap-area override at the caller instead of changing the shared desktop visual ladder.
+
+Operational app panels should stay at `rounded-xl` or `rounded-2xl` unless the surface is a modal, composer, docs/editorial shell, hero/pricing CTA, or an explicitly art-directed homepage section. The review handoff card and lesson-map surface use `rounded-2xl` so protected app handoffs do not inherit oversized marketing-card geometry.
+
+Major app stacks should start from `space.8` (`32px`) and move up only when the route has a clear split-pane or empty-state reason. The access-required shell uses `gap-8` with a `gap-10` desktop split as the current high-water mark for operational access-state spacing.
+
 When implementation work starts:
 
 1. Inventory the surface's current hard-coded colors, text sizes, spacing, and component variants.

@@ -71,7 +71,7 @@ export function BonusMissionBlockSection({
 								</ItemContent>
 								{lesson.status !== "available" && (
 									<ItemActions>
-										<Check className="size-4 text-emerald-500" />
+										<Check className="size-4 text-state-success" />
 									</ItemActions>
 								)}
 							</Link>

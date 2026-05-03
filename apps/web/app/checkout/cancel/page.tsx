@@ -24,7 +24,7 @@ export default async function Page() {
 	await clearPendingCheckoutSessionCookie();
 
 	return (
-		<main className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
+		<main className="flex min-h-screen items-center justify-center bg-background px-4 py-10 tracking-normal">
 			<Card className="w-full max-w-2xl">
 				<CardHeader>
 					<CardDescription>Checkout canceled</CardDescription>
