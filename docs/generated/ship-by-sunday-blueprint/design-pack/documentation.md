@@ -171,3 +171,21 @@ If helpful, also record the external official references used for the work:
 - **Design direction:** Keep the workspace operational and sparse. The assistant is a quiet outline action beside each draftable section, not a separate card or promotional panel.
 - **Out of scope:** Design and Generated Preview remain excluded because Design has curated visual controls and Generated Preview is compiler-owned.
 - **Verification:** Focused unit, integration, integration-ui, format, lint, and typecheck/build checks were run for the touched blueprint/Codex slice.
+
+## Shipped Note: Real Blueprint Demo On The Public Homepage
+
+- **Date:** 2026-05-02
+- **Surface:** `/` public homepage and `/blueprint` workspace.
+- **Change:** The first-screen `productPreview` section now previews the real Blueprint intake. All 7 canonical sections render in canonical order. Foundation, Design, and Pricing are interactive. Problem, Outcome, Setup, and Generated preview are visible-but-locked rows. The "Generate my codebase" CTA persists the demo draft to a versioned `localStorage` envelope (`sbs:home-blueprint-draft:v1`) before starting Stripe checkout. After checkout, a workspace-mounted seeder hydrates those fields into Convex on the first authenticated `/blueprint` load when the buyer has no saved facts, then clears the local draft.
+- **Design direction:** Keep the demo honest by showing the full canonical section sequence even though only three sections are interactive on the public route. Reuse field labels and helpers from `@shipbysunday/blueprint-presentation` and design presets from `@shipbysunday/blueprint-compiler` so the demo cannot drift from the real workspace.
+- **Out of scope:** No homepage interactivity for Problem, Outcome, Setup, or Generated preview. No pre-auth Convex draft session. No free-form `theme_preset` editing on the public route. No Convex schema changes.
+- **Verification:** Focused unit and integration-ui packs for homepage content, render model, structured data, draft storage, demo behavior, primary CTA, checkout button, and post-checkout seeder. Repo-level `bun run --cwd apps/web lint`, `format:check`, `bun typecheck`, `bun lint`, `bun run format`, and `bun run --cwd apps/web build`. Manual browser proof at desktop and mobile viewports at `/?marketing=1`.
+
+## Shipped Note: Figma Leverage Hero On The Public Homepage
+
+- **Date:** 2026-05-03
+- **Surface:** `/` public homepage.
+- **Change:** Removed the old first-screen Blueprint explainer copy ("Spec your product, then generate the codebase.", the paying-buyer Blueprint paragraph, and the checkout unlock note) and replaced that space with the Figma-sourced "Install leverage" hero and two-option starting-point selector.
+- **Design direction:** Match the Figma selection's black editorial composition, Instrument Serif display headline, Inter subline, and grey/white selector while keeping the real Blueprint demo and checkout persistence below it.
+- **Out of scope:** No new checkout target, no change to the 7-section Blueprint demo contract, and no external provider setup.
+- **Verification:** Focused homepage content/render-model tests and integration-ui coverage should assert the new hero copy and preserved canonical demo sections, with desktop and mobile browser proof against the Figma screenshot before release.

@@ -17,8 +17,8 @@ describe("home page render model", () => {
 		expect(renderModel.productPreview.section.cta.label).toBe(
 			"Generate my codebase",
 		);
-		expect(renderModel.productPreview.section.cta.secondaryHref).toBe(
-			"#system",
+		expect(renderModel.productPreview.section.leverageHero.headline).toBe(
+			"Install leverage",
 		);
 		expect(renderModel.hero.isEnabled).toBe(true);
 		expect(renderModel.hero.primaryCtaTarget).toEqual({ kind: "checkout" });

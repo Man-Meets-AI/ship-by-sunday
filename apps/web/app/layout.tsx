@@ -1,13 +1,26 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import "@xyflow/react/dist/style.css";
-import { Bebas_Neue } from "next/font/google";
+import { Bebas_Neue, Instrument_Serif, Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 
 const bebasNeue = Bebas_Neue({
 	subsets: ["latin"],
 	weight: "400",
 	variable: "--font-bebas-neue",
+});
+
+const instrumentSerif = Instrument_Serif({
+	subsets: ["latin"],
+	weight: "400",
+	style: ["normal", "italic"],
+	variable: "--font-instrument-serif",
+});
+
+const inter = Inter({
+	subsets: ["latin"],
+	weight: "400",
+	variable: "--font-inter",
 });
 
 import { Toaster } from "@/components/ui/sonner";
@@ -84,7 +97,9 @@ export default function RootLayout({
 				) : null}
 				<style id="generated-design-system">{generatedDesignSystemCss}</style>
 			</head>
-			<body className={bebasNeue.variable}>
+			<body
+				className={`${bebasNeue.variable} ${instrumentSerif.variable} ${inter.variable}`}
+			>
 				<ClerkProvider
 					appearance={clerkProviderAppearance}
 					signInUrl={routeConfig.signIn}

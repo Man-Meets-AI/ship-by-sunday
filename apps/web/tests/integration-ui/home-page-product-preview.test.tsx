@@ -63,6 +63,26 @@ describe("BlueprintDemoSectionBlock", () => {
 			/>,
 		);
 
+		expect(
+			screen.getByRole("heading", {
+				name: "Install leverage and the loop repeats TOMORROW",
+			}),
+		).toBeTruthy();
+		expect(
+			screen
+				.getByRole("button", {
+					name: "I have an idea for a product",
+				})
+				.getAttribute("aria-pressed"),
+		).toBe("true");
+		expect(
+			screen
+				.getByRole("button", {
+					name: "I have a codebase already",
+				})
+				.getAttribute("aria-pressed"),
+		).toBe("false");
+
 		const sidebarItems = screen.getAllByTestId(
 			/blueprint-demo-sidebar-section-/,
 		);
@@ -133,6 +153,27 @@ describe("BlueprintDemoSectionBlock", () => {
 			expect(envelope?.fields.pricing_model).toBe("monthly");
 			expect(envelope?.fields.theme_preset.length).toBeGreaterThan(0);
 		});
+	});
+
+	it("lets visitors toggle the leverage hero starting point", async () => {
+		const user = userEvent.setup();
+		render(
+			<BlueprintDemoSectionBlock
+				section={homePageContent.productPreviewSection}
+			/>,
+		);
+
+		const codebaseOption = screen.getByRole("button", {
+			name: "I have a codebase already",
+		});
+		const ideaOption = screen.getByRole("button", {
+			name: "I have an idea for a product",
+		});
+
+		expect(ideaOption.getAttribute("aria-pressed")).toBe("true");
+		await user.click(codebaseOption);
+		expect(codebaseOption.getAttribute("aria-pressed")).toBe("true");
+		expect(ideaOption.getAttribute("aria-pressed")).toBe("false");
 	});
 
 	it("exposes a theme toggle in the demo top bar", async () => {

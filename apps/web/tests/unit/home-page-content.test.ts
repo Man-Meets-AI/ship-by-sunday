@@ -63,8 +63,20 @@ describe("home page content", () => {
 		).toEqual(["one_time", "monthly", "yearly"]);
 		expect(productPreviewSection.pricing.defaultModel).toBe("one_time");
 
+		expect(productPreviewSection.leverageHero.headline).toBe(
+			"Install leverage",
+		);
+		expect(productPreviewSection.leverageHero.sublineLead).toBe("and");
+		expect(productPreviewSection.leverageHero.sublineBody).toBe(
+			"the loop repeats",
+		);
+		expect(productPreviewSection.leverageHero.sublineEmphasis).toBe("TOMORROW");
+		expect(productPreviewSection.leverageHero.defaultOptionId).toBe("idea");
+		expect(
+			productPreviewSection.leverageHero.options.map((option) => option.label),
+		).toEqual(["I have a codebase already", "I have an idea for a product"]);
+
 		expect(productPreviewSection.cta.label).toBe("Generate my codebase");
-		expect(productPreviewSection.cta.secondaryHref).toBe("#system");
 
 		expect(homePageContent.hero.headlineLead).toBe("Ship codebases");
 		expect(homePageContent.hero.headlineTailHover).toBe("that convert");
@@ -76,8 +88,6 @@ describe("home page content", () => {
 			message: `${productConfig.checkoutPriceDisplay} early member price. FULL TURBO included.`,
 		});
 		expect(homePageContent.hero.loginLabel).toBe("Sign in");
-		expect(homePageContent.hero.secondaryCta.label).toBe("See the loop");
-		expect(homePageContent.hero.secondaryCta.href).toBe("#system");
 
 		expect(homePageContent.sprintPathSection.titleHighlight).toBe(
 			"agents useful.",

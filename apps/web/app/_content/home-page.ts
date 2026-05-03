@@ -8,7 +8,7 @@ import {
 	blueprintFieldPlaceholder,
 	getBlueprintFieldScaleDefinition,
 } from "@shipbysunday/blueprint-presentation";
-import { productConfig, routeConfig } from "@/config/product";
+import { productConfig } from "@/config/product";
 import {
 	marketingDisplayConfig,
 	workspaceDisplayConfig,
@@ -186,14 +186,24 @@ if (productPreviewPricingModelOptions.length !== 3) {
 }
 
 const productPreviewSection = {
-	headline: {
-		prefix: "Spec your product, then ",
-		highlight: "generate the codebase.",
+	leverageHero: {
+		headline: "Install leverage",
+		sublineLead: "and",
+		sublineBody: "the loop repeats",
+		sublineEmphasis: "TOMORROW",
+		optionGroupLabel: "Choose your starting point",
+		defaultOptionId: "idea",
+		options: [
+			{
+				id: "codebase",
+				label: "I have a codebase already",
+			},
+			{
+				id: "idea",
+				label: "I have an idea for a product",
+			},
+		],
 	},
-	intro:
-		"Fill the same Blueprint a paying buyer fills. Lock the foundation, pick a design direction, set your price, and we generate the codebase that matches.",
-	unlockNote:
-		"Checkout unlocks Problem, Outcome, Setup, and Generated preview, plus the full theme grid (color, style, radius) in the workspace.",
 	sections: productPreviewSections,
 	foundation: {
 		intro:
@@ -244,8 +254,6 @@ const productPreviewSection = {
 		label: "Generate my codebase",
 		lockedNote:
 			"We'll save your draft, take you to Stripe, and bring you back to the workspace prefilled with these answers.",
-		secondaryLabel: "See how the loop works",
-		secondaryHref: routeConfig.systemHash,
 	},
 } as const;
 
@@ -263,10 +271,6 @@ export const homePageContent = {
 		headlineTailHover: "that convert",
 		body: "Ship by Sunday gives your agents the worker layer around Codex: exec loops, role packets, channel handoffs, and QA that feeds the next run.",
 		primaryCta: marketingDisplayConfig.primaryCtaLabel,
-		secondaryCta: {
-			label: "See the loop",
-			href: routeConfig.systemHash,
-		},
 	},
 	sprintPathSection: {
 		titlePrefix: "Exec loops make ",

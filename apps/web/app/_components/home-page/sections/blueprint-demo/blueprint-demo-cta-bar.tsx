@@ -1,10 +1,8 @@
 "use client";
 
 import { OctagonAlert, ShieldCheck, X } from "lucide-react";
-import Link from "next/link";
 import { useCallback, useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import { HomePagePrimaryCta } from "@/app/_components/home-page/sections/home-page-primary-cta";
 import type { HomePageContent } from "@/app/_content/home-page";
 import { cn } from "@/lib/utils";
@@ -74,7 +72,7 @@ export function BlueprintDemoCtaBar({
 					</div>
 				) : null}
 			</div>
-			<div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+			<div className="shrink-0">
 				<HomePagePrimaryCta
 					target={{ kind: "checkout" }}
 					label={cta.label}
@@ -84,14 +82,6 @@ export function BlueprintDemoCtaBar({
 					onError={handleError}
 					loadingLabels={CTA_LOADING_LABELS}
 				/>
-				<Button asChild variant="outline" className="h-11 px-5">
-					<Link
-						href={cta.secondaryHref}
-						data-testid="blueprint-demo-secondary-cta"
-					>
-						{cta.secondaryLabel}
-					</Link>
-				</Button>
 			</div>
 		</div>
 	);

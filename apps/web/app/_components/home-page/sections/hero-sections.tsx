@@ -7,7 +7,6 @@ import { HeroAtmosphere } from "./hero-atmosphere";
 import { HomeHeroHeadline } from "./home-hero-headline";
 import { HomeHeroTopBar } from "./home-hero-top-bar";
 import { HomePagePrimaryCta } from "./home-page-primary-cta";
-import { HomePageSecondaryLink } from "./home-page-primitives";
 import { ScrollReveal } from "./scroll-reveal";
 
 type Hero = HomePageContent["hero"];
@@ -42,18 +41,11 @@ export function HomeHeroSection({
 				</ScrollReveal>
 				<ScrollReveal delay={0.3}>
 					<div className="flex w-full flex-col items-center gap-6">
-						<div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-							<HomePagePrimaryCta
-								target={primaryCtaTarget}
-								label={hero.primaryCta}
-								className="h-16 rounded-2xl px-12 text-lg font-bold shadow-2xl shadow-foreground/15 motion-safe:transition-all motion-safe:hover:-translate-y-1 motion-safe:hover:shadow-foreground/25 sm:min-w-80"
-							/>
-							<HomePageSecondaryLink
-								href={hero.secondaryCta.href}
-								label={hero.secondaryCta.label}
-								className="h-16 px-8 text-base"
-							/>
-						</div>
+						<HomePagePrimaryCta
+							target={primaryCtaTarget}
+							label={hero.primaryCta}
+							className="h-16 rounded-2xl px-12 text-lg font-bold shadow-2xl shadow-foreground/15 motion-safe:transition-all motion-safe:hover:-translate-y-1 motion-safe:hover:shadow-foreground/25 sm:min-w-80"
+						/>
 					</div>
 				</ScrollReveal>
 			</div>

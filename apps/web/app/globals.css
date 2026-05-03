@@ -150,6 +150,17 @@
 		letter-spacing: -0.028em;
 	}
 
+	.font-home-instrument-serif {
+		font-family:
+			var(--font-instrument-serif), Georgia, "Times New Roman", serif;
+		letter-spacing: 0;
+	}
+
+	.font-home-inter {
+		font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+		letter-spacing: 0;
+	}
+
 	/* Slightly tighter than Tailwind `tracking-tight` (-0.025em) for large marketing sans headings */
 	.tracking-marketing-section {
 		letter-spacing: -0.035em;

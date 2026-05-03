@@ -18,31 +18,33 @@ When you need to change the homepage, inspect these files in this order:
 3. `app/_lib/home-page-render-model.ts`
 4. `app/_components/home-page/home-page.tsx`
 5. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-section.tsx`
-6. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-sidebar.tsx`
-7. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-foundation-card.tsx`
-8. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-design-card.tsx`
-9. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-pricing-card.tsx`
-10. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-locked-card.tsx`
-11. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-cta-bar.tsx`
-12. `app/_components/home-page/sections/blueprint-demo/home-page-blueprint-draft-storage.ts`
-13. `app/_components/home-page/sections/blueprint-demo/use-home-page-blueprint-draft.ts`
-14. `app/_components/home-page/sections/durability-section.tsx`
-15. `app/_components/home-page/sections/starter-system-section.tsx`
-16. `app/_components/home-page/sections/home-page-primary-cta.tsx`
-17. `app/checkout/_components/checkout-button.tsx`
-18. `app/checkout/_hooks/use-stripe-checkout.ts`
-19. `lib/blueprint-flow/use-blueprint-local-draft-seeder.ts`
-20. `app/(workspace)/_components/blueprint-flow/blueprint-local-draft-seeder.tsx`
-21. `app/_lib/home-page-structured-data.ts`
-22. `tests/unit/home-page-content.test.ts`
-23. `tests/unit/home-page-render-model.test.ts`
-24. `tests/unit/home-page-structured-data.test.ts`
-25. `tests/unit/home-page-blueprint-draft-storage.test.ts`
-26. `tests/integration-ui/home-page-product-preview.test.tsx`
-27. `tests/integration-ui/home-page-primary-cta.test.tsx`
-28. `tests/integration-ui/checkout-button.test.tsx`
-29. `tests/integration-ui/blueprint-local-draft-seeder.test.tsx`
-30. `tests/unit/public-metadata-routes.test.ts`
+6. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-leverage-hero.tsx`
+7. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-card.tsx`
+8. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-sidebar.tsx`
+9. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-foundation-card.tsx`
+10. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-design-card.tsx`
+11. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-pricing-card.tsx`
+12. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-locked-card.tsx`
+13. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-cta-bar.tsx`
+14. `app/_components/home-page/sections/blueprint-demo/home-page-blueprint-draft-storage.ts`
+15. `app/_components/home-page/sections/blueprint-demo/use-home-page-blueprint-draft.ts`
+16. `app/_components/home-page/sections/durability-section.tsx`
+17. `app/_components/home-page/sections/starter-system-section.tsx`
+18. `app/_components/home-page/sections/home-page-primary-cta.tsx`
+19. `app/checkout/_components/checkout-button.tsx`
+20. `app/checkout/_hooks/use-stripe-checkout.ts`
+21. `lib/blueprint-flow/use-blueprint-local-draft-seeder.ts`
+22. `app/(workspace)/_components/blueprint-flow/blueprint-local-draft-seeder.tsx`
+23. `app/_lib/home-page-structured-data.ts`
+24. `tests/unit/home-page-content.test.ts`
+25. `tests/unit/home-page-render-model.test.ts`
+26. `tests/unit/home-page-structured-data.test.ts`
+27. `tests/unit/home-page-blueprint-draft-storage.test.ts`
+28. `tests/integration-ui/home-page-product-preview.test.tsx`
+29. `tests/integration-ui/home-page-primary-cta.test.tsx`
+30. `tests/integration-ui/checkout-button.test.tsx`
+31. `tests/integration-ui/blueprint-local-draft-seeder.test.tsx`
+32. `tests/unit/public-metadata-routes.test.ts`
 
 If you skip that order, it is easy to update copy while missing the render model, or to change visible sections while leaving schema and smoke tests out of sync.
 
@@ -180,12 +182,14 @@ Edit:
 - `tests/unit/home-page-content.test.ts`
 - `tests/integration-ui/home-page-product-preview.test.tsx`
 
-The first-screen `productPreview` section is now an interactive Blueprint demo
-that mirrors the real `/blueprint` workspace. The product-preview CTA is a real
-checkout action: clicking "Generate my codebase" persists the latest demo draft
-to `localStorage` (key `sbs:home-blueprint-draft:v1`) before starting Stripe
-checkout, and a workspace-mounted seeder hydrates that draft into Convex on the
-first authenticated `/blueprint` load when the buyer has no saved facts.
+The first-screen `productPreview` section now opens with the dark leverage hero
+from the Figma landing-page selection, then continues into the interactive
+Blueprint demo that mirrors the real `/blueprint` workspace. The product-preview
+CTA is a real checkout action: clicking "Generate my codebase" persists the
+latest demo draft to `localStorage` (key `sbs:home-blueprint-draft:v1`) before
+starting Stripe checkout, and a workspace-mounted seeder hydrates that draft into
+Convex on the first authenticated `/blueprint` load when the buyer has no saved
+facts.
 
 Hard rules when editing this section:
 
@@ -193,6 +197,10 @@ Hard rules when editing this section:
   `outcome`, `design`, `pricing`, `setup`, `generated-preview`) in canonical
   order. Foundation, Design, and Pricing are interactive; the other four are
   visible-but-locked rows. Do not renumber.
+- Keep the leverage hero copy in `productPreviewSection.leverageHero` and the
+  rendering in `blueprint-demo-leverage-hero.tsx`. Do not reintroduce the old
+  "Spec your product" intro, Blueprint explainer paragraph, or checkout unlock
+  note above the demo.
 - Source field labels and helper text from `@shipbysunday/blueprint-presentation`.
   Source design preset definitions and the canonical
   `buildDesignPresetFactSeed(presetId)` from `@shipbysunday/blueprint-compiler`.
