@@ -11,6 +11,8 @@ The product has two visual modes that must stay aligned:
 
 Future UI work should preserve that structure instead of inventing a second app-wide palette.
 
+For screenshot-grounded app UI audit targets, use [docs/design-docs/ui-design-library.md](docs/design-docs/ui-design-library.md). That note owns the practical reference for app font sizes, light/dark color roles, spacing, button sizes, control geometry, and drift checks.
+
 ## Visual Theme & Atmosphere
 
 - Base feeling: calm, exact, durable, minimal.

@@ -63,45 +63,43 @@ export function BlueprintDemoSectionBlock({
 				</div>
 			</div>
 			{isIdeaBranchSelected ? (
-				<>
-					<div
-						className="grid gap-8 pt-10 pb-20 sm:pt-14 sm:pb-24 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-10 lg:pt-16"
-						data-testid="blueprint-demo-idea-branch"
-					>
-						<div className="lg:sticky lg:top-24 lg:self-start">
-							<BlueprintDemoSidebar
-								sections={section.sections}
-								progress={sidebarProgress}
-							/>
-						</div>
-						<div className="space-y-5">
-							{section.sections.map((sectionRow, index) => {
-								const sectionNumber = index + 1;
-								const staggerDelay = cardStaggerDelays[index] ?? 0;
-
-								return (
-									<ScrollReveal key={sectionRow.id} delay={staggerDelay}>
-										<BlueprintDemoCard
-											section={section}
-											sectionRow={sectionRow}
-											sectionNumber={sectionNumber}
-											draft={draft}
-										/>
-									</ScrollReveal>
-								);
-							})}
-							<BlueprintDemoCtaBar
-								cta={section.cta}
-								onBeforeCheckout={draft.persistNow}
-							/>
-						</div>
+				<div
+					className="grid gap-8 pt-10 pb-20 sm:pt-14 sm:pb-24 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-10 lg:pt-16"
+					data-testid="blueprint-demo-idea-branch"
+				>
+					<div className="lg:sticky lg:top-24 lg:self-start">
+						<BlueprintDemoSidebar
+							sections={section.sections}
+							progress={sidebarProgress}
+						/>
 					</div>
-					{children}
-					<div className="h-16 sm:hidden" aria-hidden="true" />
-				</>
+					<div className="space-y-5">
+						{section.sections.map((sectionRow, index) => {
+							const sectionNumber = index + 1;
+							const staggerDelay = cardStaggerDelays[index] ?? 0;
+
+							return (
+								<ScrollReveal key={sectionRow.id} delay={staggerDelay}>
+									<BlueprintDemoCard
+										section={section}
+										sectionRow={sectionRow}
+										sectionNumber={sectionNumber}
+										draft={draft}
+									/>
+								</ScrollReveal>
+							);
+						})}
+						<BlueprintDemoCtaBar
+							cta={section.cta}
+							onBeforeCheckout={draft.persistNow}
+						/>
+					</div>
+				</div>
 			) : (
 				<BlueprintDemoCodebaseBranch codebaseBranch={section.codebaseBranch} />
 			)}
+			{children}
+			<div className="h-16 sm:hidden" aria-hidden="true" />
 		</section>
 	);
 }

@@ -40,6 +40,7 @@ vi.mock("@/app/checkout/_components/checkout-button", () => ({
 }));
 
 import { homePageContent } from "@/app/_content/home-page";
+import HomePage from "@/app/_components/home-page/home-page";
 import { BlueprintDemoSectionBlock } from "@/app/_components/home-page/sections/blueprint-demo/blueprint-demo-section";
 import {
 	HOME_PAGE_BLUEPRINT_DRAFT_STORAGE_KEY,
@@ -184,6 +185,32 @@ describe("BlueprintDemoSectionBlock", () => {
 		expect(screen.queryByTestId("blueprint-demo-checkout-cta")).toBeNull();
 	});
 
+	it("keeps the shared homepage sections visible for the codebase starting point", async () => {
+		const user = userEvent.setup();
+		render(await HomePage());
+
+		await user.click(
+			screen.getByRole("button", {
+				name: "I have a codebase already",
+			}),
+		);
+
+		expect(screen.getByTestId("blueprint-demo-codebase-branch")).toBeTruthy();
+		expectPageTextToContain("Ship codebases that convert");
+		expectPageTextToContain("Exec Loops: OpenAI's Weapon of choice");
+		expectPageTextToContain("How Workers Work.");
+		expectPageTextToContain("A worker layer. Your agents can build from.");
+		expectPageTextToContain(
+			"Built by someone who has actually shipped products.",
+		);
+		expectPageTextToContain("Common Questions");
+		expectPageTextToContain("Ship a real product by Sunday");
+		expect(document.querySelectorAll("#system")).toHaveLength(1);
+		expect(document.querySelector("#system")?.textContent).toContain(
+			"Exec Loops:",
+		);
+	});
+
 	it("exposes a theme toggle in the demo top bar", async () => {
 		render(
 			<BlueprintDemoSectionBlock
@@ -224,3 +251,8 @@ describe("BlueprintDemoSectionBlock", () => {
 		}
 	});
 });
+
+function expectPageTextToContain(expectedText: string) {
+	const compactPageText = document.body.textContent?.replace(/\s+/g, "") ?? "";
+	expect(compactPageText).toContain(expectedText.replace(/\s+/g, ""));
+}

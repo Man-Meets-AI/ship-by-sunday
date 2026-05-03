@@ -207,3 +207,12 @@ If helpful, also record the external official references used for the work:
 - **Design direction:** Preserve the black editorial Figma composition while making the selector a real information-architecture control instead of a cosmetic pressed state.
 - **Out of scope:** No checkout behavior change, no social-proof/pricing/footer branch split, and no external provider setup.
 - **Verification:** Focused homepage content, render-model, and integration-ui tests should cover both branches; desktop and mobile browser proof should confirm the Figma-derived branch remains readable and preserves the `#system` anchor.
+
+## Shipped Note: Homepage Shared Starting-Point Continuation
+
+- **Date:** 2026-05-03
+- **Surface:** `/` public homepage.
+- **Change:** The first-screen starting-point selector keeps its branch-specific opening content, but both `I have an idea for a product` and `I have a codebase already` now continue through the same downstream homepage sections: `Ship codebases that convert`, `Exec Loops`, `How Workers Work`, worker-layer explanation, founder proof, FAQ, pricing, and footer.
+- **Design direction:** Preserve the selector as a real starting-context choice without hiding the core worker-layer story from the codebase-audit path.
+- **Out of scope:** No checkout behavior change, no new branch-specific pricing, and no external provider setup.
+- **Verification:** Focused integration-ui coverage should toggle to the codebase branch and confirm the shared section headings remain visible with a single `#system` anchor owned by the Exec Loops section.

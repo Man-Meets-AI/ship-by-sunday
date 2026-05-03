@@ -32,7 +32,7 @@ describe("home page render model", () => {
 		expect(renderModel.execLoop.isEnabled).toBe(true);
 		expect(
 			renderModel.execLoop.section.steps.map((step) => step.label),
-		).toEqual(["Decide", "Brief", "Run", "Review"]);
+		).toEqual(["Shippie", "Healios", "Goalie", "Loopie"]);
 		expect(renderModel.starterSystem.isEnabled).toBe(true);
 		expect(
 			renderModel.starterSystem.section.capabilities.map((item) => item.title),

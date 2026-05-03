@@ -185,10 +185,11 @@ Edit:
 The first-screen `productPreview` section opens with the dark leverage hero from
 the Figma landing-page selection and a two-option starting-point selector. The
 default `I have an idea for a product` branch continues into the interactive
-Blueprint demo that mirrors the real `/blueprint` workspace, then shows the
-existing homepage story up to the social-proof section. The `I have a codebase
-already` branch swaps that below-fold story for the Figma-sourced codebase audit
-path while preserving the shared social proof, FAQ, pricing, and footer below.
+Blueprint demo that mirrors the real `/blueprint` workspace. The `I have a
+codebase already` branch shows the Figma-sourced codebase audit path. Both
+starting points then continue through the same homepage story: hero, sprint
+path, exec-loop, starter-system, optional durability, social proof, FAQ,
+pricing, and footer.
 
 The idea-branch product-preview CTA is a real checkout action: clicking
 "Generate my codebase" persists the latest demo draft to `localStorage` (key
@@ -208,8 +209,8 @@ Hard rules when editing this section:
   note above the demo.
 - Keep codebase-audit branch copy in `productPreviewSection.codebaseBranch` and
   its rendering in `blueprint-demo-codebase-branch.tsx`. The codebase branch must
-  preserve `id="system"` because the idea branch's sprint-path section owns that
-  anchor only when the idea path is selected.
+  not own `id="system"` because the shared sprint-path section owns that anchor
+  for both starting points.
 - Source field labels and helper text from `@shipbysunday/blueprint-presentation`.
   Source design preset definitions and the canonical
   `buildDesignPresetFactSeed(presetId)` from `@shipbysunday/blueprint-compiler`.

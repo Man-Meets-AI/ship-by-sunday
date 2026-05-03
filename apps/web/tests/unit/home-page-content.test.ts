@@ -109,7 +109,7 @@ describe("home page content", () => {
 		expect(homePageContent.hero.loginLabel).toBe("Sign in");
 
 		expect(homePageContent.sprintPathSection.titleHighlight).toBe(
-			"agents useful.",
+			"WEAPON of choice",
 		);
 		expect(homePageContent.sprintPathSection.intro).toContain(
 			"decision to agent run",
@@ -117,10 +117,7 @@ describe("home page content", () => {
 		expect(homePageContent.execLoopSection.title).toBe("How Workers Work.");
 		expect(
 			homePageContent.execLoopSection.steps.map((step) => step.label),
-		).toEqual(["Decide", "Brief", "Run", "Review"]);
-		expect(homePageContent.execLoopSection.steps[2]?.description).toContain(
-			"phone-started prompt",
-		);
+		).toEqual(["Shippie", "Healios", "Goalie", "Loopie"]);
 		expect(homePageContent.starterSystemSection.title).toBe(
 			"A worker layer your agents can build from.",
 		);

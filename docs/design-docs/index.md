@@ -13,6 +13,7 @@ read_when:
 
 ## Current Notes
 
+- [ui-design-library.md](./ui-design-library.md)
 - [integrations.md](./integrations.md)
 - [scripts.md](./scripts.md)
 - [encyclopedia.md](./encyclopedia.md)

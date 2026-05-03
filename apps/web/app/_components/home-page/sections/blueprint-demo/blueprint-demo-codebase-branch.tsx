@@ -14,7 +14,6 @@ export function BlueprintDemoCodebaseBranch({
 }) {
 	return (
 		<section
-			id="system"
 			data-testid="blueprint-demo-codebase-branch"
 			className="relative left-1/2 w-screen -translate-x-1/2 bg-[#111111] px-6 pt-10 pb-24 text-[#ececec] sm:px-12 sm:pt-14 lg:pt-20 lg:pb-36"
 		>

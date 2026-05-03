@@ -313,8 +313,8 @@ export const homePageContent = {
 		primaryCta: marketingDisplayConfig.primaryCtaLabel,
 	},
 	sprintPathSection: {
-		titlePrefix: "Exec loops make ",
-		titleHighlight: "agents useful.",
+		titlePrefix: "Exec Loops: OpenAI's ",
+		titleHighlight: "WEAPON of choice",
 		intro:
 			"An exec loop is the repeatable path from decision to agent run: train one role, ship code, prove QA, and carry the next decision forward.",
 		supportingPoints: [
@@ -384,21 +384,20 @@ export const homePageContent = {
 		title: "How Workers Work.",
 		steps: [
 			{
-				label: "Decide",
-				description: "Name the outcome, constraint, and conversion claim.",
+				label: "Shippie",
+				description: "Gets your code branched, built, and merged.",
 			},
 			{
-				label: "Brief",
-				description: "Turn it into a worker pack for one role.",
+				label: "Healios",
+				description: "Finds broken paths and fixes them fast.",
 			},
 			{
-				label: "Run",
-				description:
-					"Dispatch the role through Codex, Telegram, Discord, or a phone-started prompt.",
+				label: "Goalie",
+				description: "Guards scope and keeps the spec honest.",
 			},
 			{
-				label: "Review",
-				description: "Check the diff, QA path, and update the worker layer.",
+				label: "Loopie",
+				description: "Keeps exec loops queued and running.",
 			},
 		],
 	},

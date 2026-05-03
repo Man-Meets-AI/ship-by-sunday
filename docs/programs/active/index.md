@@ -27,6 +27,7 @@ Inside that folder:
 
 Active Program folders:
 
+- `docs/programs/active/2026-05-03-ui-design-system-alignment/`: active Program for aligning app UI around screenshot-grounded color, typography, spacing, control, and visual proof rules.
 - `docs/programs/active/2026-05-02-one-click-paid-access/`: active Program for making payment nearly one-click with Stripe Link and Express Checkout while guaranteeing access attaches instantly to the purchase email.
 - `docs/programs/active/2026-05-02-customer-agentic-operating-system/`: active Program for the customer-facing agentic operating system across generated repos and mature existing codebases.
 

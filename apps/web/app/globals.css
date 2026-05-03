@@ -40,8 +40,8 @@
 @theme inline {
 	--font-sans: "Inter", "Inter Fallback", ui-sans-serif, system-ui, sans-serif;
 	--font-mono:
-		"Berkeley Mono", ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas,
-		"Liberation Mono", "Courier New", monospace;
+		"Berkeley Mono", "SF Mono", "Roboto Mono", ui-monospace, "SFMono-Regular",
+		Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 	--color-ink: var(--ink);
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);

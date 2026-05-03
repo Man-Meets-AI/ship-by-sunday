@@ -2,7 +2,6 @@
 
 import { ArrowRight } from "lucide-react";
 
-import { PointerHighlight } from "@/components/ui/pointer-highlight";
 import type { HomePageContent } from "@/app/_content/home-page";
 import { ScrollReveal } from "./scroll-reveal";
 
@@ -21,11 +20,22 @@ export function SprintPathUnifiedSection({
 			<div className="mx-auto flex max-w-4xl flex-col gap-10">
 				<ScrollReveal>
 					<div className="space-y-3">
-						<h2 className="max-w-2xl text-balance text-4xl font-semibold leading-[0.92] tracking-tight sm:text-5xl lg:text-7xl">
-							{sprintPathSection.titlePrefix}
-							<PointerHighlight containerClassName="text-foreground/90">
-								{sprintPathSection.titleHighlight}
-							</PointerHighlight>
+						<h2
+							aria-label="Exec Loops: OpenAI's Weapon of choice"
+							className="leading-none"
+						>
+							<span className="block font-heading-serif text-3xl font-normal italic leading-tight sm:text-4xl lg:text-5xl">
+								Exec Loops:
+							</span>
+							<span className="font-home-inter mt-1 block text-sm font-normal uppercase tracking-[0.14em] text-foreground/60 sm:text-base lg:text-lg">
+								OpenAI&apos;s
+							</span>
+							<span className="block font-heading-serif text-5xl font-normal uppercase leading-[0.85] sm:text-6xl lg:text-8xl">
+								Weapon
+							</span>
+							<span className="font-home-inter mt-1 block text-2xl font-normal text-foreground/80 sm:text-3xl lg:mt-2 lg:text-4xl">
+								of choice
+							</span>
 						</h2>
 						<p className="max-w-xl text-pretty text-lg leading-snug text-muted-foreground sm:text-xl">
 							{sprintPathSection.intro}
