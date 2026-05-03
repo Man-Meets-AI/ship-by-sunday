@@ -23,7 +23,6 @@ The workflows in this directory follow the Codex-style lifecycle: pull requests 
 
 ## Repair And Non-Release Lanes
 
-- `sandbox-e2e-nightly.yml` is scheduled and manual browser regression signal for sandbox coverage.
 - `issue-labels.yml` keeps managed labels available for the issue templates.
 - Remote-only workflows such as `Deployment Smoke` are not current proof unless a tracked workflow file owns them. Disable or replace them during the remote landing pass.
 

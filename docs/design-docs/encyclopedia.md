@@ -38,7 +38,7 @@ The only supported Convex development mode in this repo. Local Convex mode is a 
 
 ### Sandbox E2E
 
-The scheduled and manually runnable Playwright lane behind `bun run test:e2e:sandbox`. It is useful regression signal for sandbox browser behavior, but it is not the release gate.
+The manually runnable Playwright lane behind `bun run test:e2e:sandbox`. Release-owned hosted proof calls narrower sandbox scenarios through `bun run release:proof`; there is no standalone nightly production workflow for it.
 
 ### Hosted release proof
 

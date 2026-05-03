@@ -20,7 +20,6 @@ The current workflow strategy is summarized beside the workflow files in `.githu
 - `Production Release Proof` is the hosted production post-deploy proof surface from `.github/workflows/production-release-proof.yml`. It runs on `main` pushes and manual dispatches after the production web deployment settles.
 - `Convex Production Deploy` is the production backend deploy surface from `.github/workflows/convex-production-deploy.yml`. It runs on `main` pushes and manual dispatches and is controlled by the `CONVEX_PRODUCTION_DEPLOY_ENABLED` variable for automatic deploys.
 - `Tag Release` is the protected `v*` tag workflow from `.github/workflows/release.yml`. It validates `release.json`, collects release evidence for the tag target, builds the GitHub Release body from the matching `CHANGELOG.md` section, and publishes the GitHub Release only after evidence is available.
-- `Sandbox E2E Nightly` is scheduled and manual regression signal. It is not a release gate and does not replace production proof.
 
 ## Branch Model
 
