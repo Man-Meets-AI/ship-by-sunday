@@ -14,6 +14,9 @@ import { assert } from "@/lib/assert";
 import { capturePostHogProductEvent } from "@/lib/observability/posthog-client";
 import { cn } from "@/lib/utils";
 
+const STRIPE_EXPRESS_CHECKOUT_MIN_BUTTON_HEIGHT = 40;
+const STRIPE_EXPRESS_CHECKOUT_MAX_BUTTON_HEIGHT = 55;
+
 type ExpressCheckoutSessionResponse = {
 	readonly clientSecret: string;
 	readonly publishableKey: string;
@@ -153,20 +156,21 @@ function ExpressCheckoutElementController({
 }) {
 	const checkoutResult = useCheckoutElements();
 	const [isVisible, setIsVisible] = useState(false);
+	const stripeButtonHeight = getStripeExpressCheckoutButtonHeight(buttonHeight);
 	const options = useMemo(
 		() => ({
-			buttonHeight,
+			buttonHeight: stripeButtonHeight,
 			buttonTheme: undefined,
 			buttonType: undefined,
 			layout: {
 				maxColumns: 1,
 				maxRows: 1,
-				overflow: "never" as const,
+				overflow: "auto" as const,
 			},
 			paymentMethodOrder: ["link", "applePay", "googlePay"],
 			paymentMethods: undefined,
 		}),
-		[buttonHeight],
+		[stripeButtonHeight],
 	);
 
 	useEffect(() => {
@@ -243,5 +247,12 @@ function ExpressCheckoutElementController({
 				onConfirm={handleConfirm}
 			/>
 		</div>
+	);
+}
+
+function getStripeExpressCheckoutButtonHeight(buttonHeight: number) {
+	return Math.min(
+		STRIPE_EXPRESS_CHECKOUT_MAX_BUTTON_HEIGHT,
+		Math.max(STRIPE_EXPRESS_CHECKOUT_MIN_BUTTON_HEIGHT, buttonHeight),
 	);
 }

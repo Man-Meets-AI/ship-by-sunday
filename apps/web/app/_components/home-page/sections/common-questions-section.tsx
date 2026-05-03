@@ -19,7 +19,9 @@ export function CommonQuestionsSection({
 					<div className="flex flex-col gap-3">
 						<h2 className="flex flex-col gap-1 text-balance text-4xl font-semibold leading-[0.92] tracking-tight sm:text-5xl lg:text-7xl">
 							<span>{faqSection.titleLead}</span>
-							<span className="text-primary">{faqSection.titleAccent}</span>
+							<span className="text-foreground/90">
+								{faqSection.titleAccent}
+							</span>
 						</h2>
 						{faqSection.lead ? (
 							<p className="max-w-xl text-pretty text-lg leading-snug text-muted-foreground sm:text-xl">
