@@ -149,7 +149,9 @@ test.describe("member with access", () => {
 		await page.goto("/settings");
 		await expect(page).toHaveURL(/\/settings$/);
 		await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
-		await expect(page.getByText(/Manage your account/i)).toBeVisible();
+		await expect(
+			page.getByRole("button", { name: "Manage account" }),
+		).toBeVisible();
 	});
 });
 
