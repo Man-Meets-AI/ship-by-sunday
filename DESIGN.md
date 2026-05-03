@@ -87,6 +87,7 @@ Until those values are centralized, treat the docs palette as an established sur
 
 - `Inter` is the canonical UI font through `--font-inter` and `font-sans`.
 - Default UI body text is `14px` (`text-sm`) with generous line-height where copy runs long.
+- Inter UI text uses `-0.02em` letter spacing globally unless a component deliberately applies a more specific tracking utility for labels, logos, or compact controls.
 - Body typography should stay clean, readable, and neutral.
 
 ### Code and numbers

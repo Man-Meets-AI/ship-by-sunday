@@ -168,6 +168,7 @@
 
 	body {
 		@apply bg-background text-foreground font-sans text-sm transition-colors duration-300;
+		letter-spacing: -0.02em;
 	}
 
 	code,
@@ -175,9 +176,10 @@
 	pre,
 	samp {
 		font-family:
-			"Berkeley Mono", var(--font-berkeley-mono, ui-monospace),
-			ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas,
-			"Liberation Mono", "Courier New", monospace;
+			"Berkeley Mono", var(--font-berkeley-mono, ui-monospace), ui-monospace,
+			"SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono",
+			"Courier New", monospace;
+		letter-spacing: 0;
 	}
 
 	code,
@@ -216,15 +218,15 @@
 
 	.font-number {
 		font-family:
-			"Berkeley Mono", var(--font-berkeley-mono, ui-monospace),
-			ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas,
-			"Liberation Mono", "Courier New", monospace;
+			"Berkeley Mono", var(--font-berkeley-mono, ui-monospace), ui-monospace,
+			"SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono",
+			"Courier New", monospace;
 		font-variant-numeric: tabular-nums;
 	}
 
 	.font-home-inter {
 		font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-		letter-spacing: 0;
+		letter-spacing: -0.02em;
 	}
 }
 
