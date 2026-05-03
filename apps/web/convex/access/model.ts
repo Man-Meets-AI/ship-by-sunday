@@ -25,6 +25,23 @@ type ProductAccessGrantUpsertInput = {
 	stripePaymentIntentId?: string;
 };
 
+function getNextProductAccessGrantSource({
+	existingSource,
+	incomingSource,
+}: {
+	existingSource: ProductAccessGrantSource;
+	incomingSource: ProductAccessGrantSource;
+}) {
+	if (
+		existingSource === "stripe_webhook" &&
+		incomingSource === "stripe_checkout"
+	) {
+		return existingSource;
+	}
+
+	return incomingSource;
+}
+
 async function requireViewer(ctx: AccessReadCtx) {
 	const identity = await ctx.auth.getUserIdentity();
 	if (!identity) {
@@ -90,7 +107,10 @@ export async function upsertProductAccessGrant(
 	if (grantToPatch) {
 		await ctx.db.patch(grantToPatch._id, {
 			status: "granted",
-			source: input.source,
+			source: getNextProductAccessGrantSource({
+				existingSource: grantToPatch.source,
+				incomingSource: input.source,
+			}),
 			stripeCustomerId: input.stripeCustomerId,
 			stripeCheckoutSessionId: input.stripeCheckoutSessionId,
 			stripePaymentIntentId: input.stripePaymentIntentId,

@@ -171,6 +171,45 @@ describe("convex/access/model", () => {
 		);
 	});
 
+	it("preserves webhook fulfillment source when checkout recovery patches the same grant", async () => {
+		const patch = vi.fn().mockResolvedValue(undefined);
+		const ctx = createAccessCtx({
+			productAccessGrant: createProductAccessGrant("granted", {
+				_id: "product_access_existing",
+				source: "stripe_webhook",
+				stripeCheckoutSessionId: "cs_123",
+				updatedAt: 350,
+			}),
+			patch,
+		});
+
+		vi.spyOn(Date, "now").mockReturnValue(360);
+
+		await expect(
+			moduleUnderTest.grantProductAccessHandler(ctx as never, {
+				clerkUserId,
+				source: "stripe_checkout",
+				stripeCustomerId: "cus_123",
+				stripeCheckoutSessionId: "cs_123",
+				stripePaymentIntentId: "pi_123",
+			}),
+		).resolves.toEqual({
+			granted: "patched",
+		});
+		expect(patch).toHaveBeenCalledWith(
+			"product_access_existing",
+			expect.objectContaining({
+				status: "granted",
+				source: "stripe_webhook",
+				stripeCustomerId: "cus_123",
+				stripeCheckoutSessionId: "cs_123",
+				stripePaymentIntentId: "pi_123",
+				updatedAt: 360,
+				revokedAt: undefined,
+			}),
+		);
+	});
+
 	it("grants product access from the verified Stripe path without a client secret arg", async () => {
 		const insert = vi.fn().mockResolvedValue("product_access_1");
 		const ctx = createAccessCtx({
