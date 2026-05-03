@@ -41,13 +41,17 @@ const nextConfig: NextConfig = {
 };
 
 const nextConfigWithMdx = withMDX(nextConfig);
+const shouldUploadPostHogSourceMaps =
+	process.env.NODE_ENV === "production" &&
+	Boolean(process.env.POSTHOG_API_KEY?.trim()) &&
+	Boolean(process.env.POSTHOG_PROJECT_ID?.trim());
 
 export default withPostHogConfig(nextConfigWithMdx, {
 	personalApiKey: process.env.POSTHOG_API_KEY ?? "",
 	projectId: process.env.POSTHOG_PROJECT_ID,
 	host: process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.i.posthog.com",
 	sourcemaps: {
-		enabled: process.env.NODE_ENV === "production",
+		enabled: shouldUploadPostHogSourceMaps,
 		releaseName: "ship-by-sunday-web",
 		deleteAfterUpload: true,
 	},

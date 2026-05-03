@@ -56,7 +56,7 @@ Stripe guest purchase fulfillment runs inside Convex and calls Clerk by checkout
 
 `POSTHOG_API_KEY` is not the browser project token and must not use all-access permissions. Use a separate personal API key for MCP or agent tooling if OAuth is unavailable.
 
-`NEXT_PUBLIC_POSTHOG_TOKEN` and `NEXT_PUBLIC_POSTHOG_HOST` are validated as a pair. Set both to enable browser analytics, error tracking, and masked session replay, or leave both unset. `POSTHOG_PROJECT_ID` and `POSTHOG_API_KEY` are production-build values for source-map upload only; do not expose the personal API key through a `NEXT_PUBLIC_` variable.
+`NEXT_PUBLIC_POSTHOG_TOKEN` and `NEXT_PUBLIC_POSTHOG_HOST` are validated as a pair. Set both to enable browser analytics, error tracking, and masked session replay, or leave both unset. `POSTHOG_PROJECT_ID` and `POSTHOG_API_KEY` are production-build values for source-map upload only; set both to enable upload, or omit either one to build without source-map upload. Do not expose the personal API key through a `NEXT_PUBLIC_` variable.
 
 PostHog MCP is an operator setup, not an app env variable. Prefer OAuth through the PostHog AI plugin. If OAuth is unavailable, create a separate project-scoped Personal API Key with only the `MCP Server` scope.
 

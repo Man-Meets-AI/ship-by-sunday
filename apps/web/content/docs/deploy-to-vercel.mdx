@@ -38,7 +38,7 @@ The observability-specific signing secrets, ingest token, incident-control token
 - use real production Clerk env values
 - use real production Stripe live keys
 - if the app uses observability or any other Convex HTTP actions, set `NEXT_PUBLIC_CONVEX_SITE_URL` to the matching `.convex.site` host
-- if the app uploads PostHog source maps, set `POSTHOG_API_KEY` in Vercel to a project-scoped PostHog personal API key with only the `Source map upload` scope
+- if the app uploads PostHog source maps, set `POSTHOG_PROJECT_ID` and `POSTHOG_API_KEY` in Vercel; the API key must be a project-scoped PostHog personal API key with only the `Source map upload` scope
 - keep PostHog MCP credentials out of Vercel app env; MCP uses operator OAuth or a separate `MCP Server` key outside runtime config
 
 Do not make Vercel responsible for production Convex deploys in this repo. The frontend should build on Vercel, but Convex production promotion now happens from GitHub Actions on `main` through `.github/workflows/convex-production-deploy.yml`.
