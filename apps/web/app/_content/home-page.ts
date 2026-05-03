@@ -20,13 +20,13 @@ const activePricingOffer = productConfig.activeOffer;
 const promoBanner = activePricingOffer
 	? {
 			label: activePricingOffer.label,
-			message: `${productConfig.checkoutPriceDisplay} early member price. FULL TURBO included.`,
+			message: `${productConfig.checkoutPriceDisplay} Pilot Member price. FULL TURBO included.`,
 		}
 	: null;
 const pricingOfferBanner = activePricingOffer
 	? {
 			label: activePricingOffer.label,
-			message: `${productConfig.checkoutPriceDisplay} early member price. Auto-applied at checkout.`,
+			message: `${productConfig.checkoutPriceDisplay} Pilot Member price. Auto-applied at checkout.`,
 		}
 	: null;
 
@@ -419,8 +419,6 @@ export const homePageContent = {
 	pricingSection: {
 		titleLead: "Ship a real product",
 		titleAccent: "by Sunday",
-		intro:
-			"One payment for the code-side worker layer: exec loops, role packets, channel handoffs, starter path, and QA prompts for a reviewable codebase.",
 		priceDisplay: productConfig.checkoutPriceDisplay,
 		originalPriceDisplay: activePricingOffer
 			? productConfig.priceDisplay

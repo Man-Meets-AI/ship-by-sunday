@@ -102,7 +102,7 @@ export default function Image() {
 					}}
 				>
 					{productConfig.activeOffer
-						? `${productConfig.checkoutPriceDisplay} today with early-member pricing, regularly ${productConfig.priceDisplay}.`
+						? `${productConfig.checkoutPriceDisplay} today with Pilot Member pricing, regularly ${productConfig.priceDisplay}.`
 						: `${productConfig.priceDisplay} one-time.`}{" "}
 					Contract-first packs plus starter blueprint.
 				</div>

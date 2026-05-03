@@ -32,9 +32,6 @@ export function PricingSectionBlock({
 									{pricingSection.titleAccent}
 								</span>
 							</h2>
-							<p className="max-w-xl text-pretty text-lg leading-snug text-muted-foreground">
-								{pricingSection.intro}
-							</p>
 						</div>
 					</div>
 				</ScrollReveal>

@@ -175,21 +175,19 @@ describe("SignInPage", () => {
 			),
 		).toBeTruthy();
 		expect(
-			screen.getByText("Reconnect the workspace tied to your checkout."),
-		).toBeTruthy();
+			screen.queryByText("Reconnect the workspace tied to your checkout."),
+		).toBeNull();
 		expect(screen.getByLabelText("Email")).toBeTruthy();
 		expect(screen.getByLabelText("Password")).toBeTruthy();
 		expect(
 			screen.getByRole("button", { name: "Continue with Google" }),
 		).toBeTruthy();
-		expect(
-			screen.getByRole("link", { name: "See pricing" }).getAttribute("href"),
-		).toBe("/#pricing");
+		expect(screen.queryByRole("link", { name: "See pricing" })).toBeNull();
 		expect(screen.queryByText(/create account/i)).toBeNull();
 		expect(screen.queryByText(/terms of service/i)).toBeNull();
 	});
 
-	it("hides the quiet pricing path when sign-in is recovering a protected route", () => {
+	it("does not render the support panel when sign-in is recovering a protected route", () => {
 		useSearchParamsMock.mockReturnValue(
 			new URLSearchParams("redirect_url=%2Fsettings"),
 		);
@@ -203,8 +201,13 @@ describe("SignInPage", () => {
 		render(<SignInPage />);
 
 		expect(
-			screen.getByText("Sign in, then continue where you left off."),
+			screen.getByText(
+				"Use the account attached to your purchase to continue.",
+			),
 		).toBeTruthy();
+		expect(
+			screen.queryByText("Sign in, then continue where you left off."),
+		).toBeNull();
 		expect(screen.queryByRole("link", { name: "See pricing" })).toBeNull();
 	});
 
@@ -605,8 +608,8 @@ describe("SignInPage", () => {
 			screen.getByText("Google sign-in is for purchased accounts."),
 		).toBeTruthy();
 		expect(
-			screen.getByText("Google did not match a paid account."),
-		).toBeTruthy();
+			screen.queryByText("Google did not match a paid account."),
+		).toBeNull();
 		expect(screen.queryByRole("link", { name: "See pricing" })).toBeNull();
 	});
 });

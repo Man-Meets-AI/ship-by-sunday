@@ -21,11 +21,7 @@ export function SignInPage({
 	});
 
 	return (
-		<AuthPageShell
-			title={content.title}
-			description={content.description}
-			supportPanel={content.supportPanel}
-		>
+		<AuthPageShell title={content.title} description={content.description}>
 			{flow.step.kind === "credentials" ? (
 				<SignInCredentialsForm
 					authError={flow.authError}

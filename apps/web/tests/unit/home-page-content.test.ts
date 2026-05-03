@@ -84,8 +84,8 @@ describe("home page content", () => {
 			"Ship by Sunday gives your agents the worker layer around Codex: exec loops, role packets, channel handoffs, and QA that feeds the next run.",
 		);
 		expect(homePageContent.hero.promoBanner).toEqual({
-			label: "Early member",
-			message: `${productConfig.checkoutPriceDisplay} early member price. FULL TURBO included.`,
+			label: "Pilot Member",
+			message: `${productConfig.checkoutPriceDisplay} Pilot Member price. FULL TURBO included.`,
 		});
 		expect(homePageContent.hero.loginLabel).toBe("Sign in");
 
@@ -164,8 +164,8 @@ describe("home page content", () => {
 			productConfig.checkoutPriceDisplay,
 		);
 		expect(homePageContent.pricingSection.offerBanner).toEqual({
-			label: "Early member",
-			message: `${productConfig.checkoutPriceDisplay} early member price. Auto-applied at checkout.`,
+			label: "Pilot Member",
+			message: `${productConfig.checkoutPriceDisplay} Pilot Member price. Auto-applied at checkout.`,
 		});
 		expect(homePageContent.pricingSection.ctaTitle).toBe(
 			"Build the worker layer",
