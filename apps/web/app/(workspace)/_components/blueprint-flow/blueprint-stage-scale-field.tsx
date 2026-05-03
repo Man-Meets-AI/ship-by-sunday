@@ -84,7 +84,7 @@ function BlueprintStageScaleFieldComponent({
 							key={option.value}
 							value={option.value}
 							aria-label={option.ariaLabel}
-							className="min-w-0 flex-1 px-0 font-medium tabular-nums"
+							className="min-w-0 flex-1 px-0 font-medium font-number"
 						>
 							{option.label}
 						</ToggleGroupItem>

@@ -64,7 +64,7 @@ export function PreviewStatCard({
 				{label}
 			</span>
 			<div className="flex items-baseline gap-1">
-				<span className="text-sm font-semibold tabular-nums">{value}</span>
+				<span className="text-sm font-semibold font-number">{value}</span>
 				<span
 					className="text-[9px] font-medium"
 					style={{ color: "var(--primary)" }}

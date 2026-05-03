@@ -2,17 +2,37 @@ import Link from "next/link";
 
 import {
 	ProductBrand,
-	productWordmarkClassName,
+	productWordmarkFontClassName,
 } from "@/components/product-brand";
 import { routeConfig } from "@/config/product";
 import { ThemeToggleButton } from "@/app/_components/theme-toggle-button";
+import { cn } from "@/lib/utils";
 
-export function BlueprintDemoTopBar() {
+type BlueprintDemoTopBarTone = "default" | "dark";
+
+export function BlueprintDemoTopBar({
+	tone = "default",
+}: {
+	readonly tone?: BlueprintDemoTopBarTone;
+}) {
+	const isDarkTone = tone === "dark";
+	const wordmarkClassName = cn(
+		productWordmarkFontClassName,
+		"whitespace-nowrap text-2xl font-normal leading-none tracking-wide sm:text-3xl",
+		isDarkTone ? "text-white" : "text-foreground",
+	);
+	const navLinkClassName = cn(
+		"transition-colors duration-200",
+		isDarkTone
+			? "text-white/65 hover:text-white"
+			: "text-muted-foreground hover:text-foreground",
+	);
+
 	return (
 		<div className="flex items-center justify-between gap-4 py-3">
 			<ProductBrand
 				href={routeConfig.home}
-				labelClassName={productWordmarkClassName}
+				labelClassName={wordmarkClassName}
 			/>
 			<nav
 				className="flex items-center gap-3 text-sm sm:gap-5"
@@ -20,17 +40,20 @@ export function BlueprintDemoTopBar() {
 			>
 				<Link
 					href={routeConfig.docs}
-					className="hidden text-muted-foreground transition-colors duration-200 hover:text-foreground sm:inline"
+					className={cn("hidden sm:inline", navLinkClassName)}
 				>
 					Docs
 				</Link>
-				<Link
-					href={routeConfig.signIn}
-					className="text-muted-foreground transition-colors duration-200 hover:text-foreground"
-				>
+				<Link href={routeConfig.signIn} className={navLinkClassName}>
 					Sign in
 				</Link>
-				<ThemeToggleButton className="border-border/70 bg-background/70" />
+				<ThemeToggleButton
+					className={cn(
+						isDarkTone
+							? "border-white/25 bg-white/10 text-white hover:bg-white/15 hover:text-white"
+							: "border-border/70 bg-background/70",
+					)}
+				/>
 			</nav>
 		</div>
 	);

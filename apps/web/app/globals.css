@@ -5,8 +5,44 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@font-face {
+	font-family: "Berkeley Mono";
+	src: url("./_fonts/BerkeleyMono-Regular.otf") format("opentype");
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Berkeley Mono";
+	src: url("./_fonts/BerkeleyMono-Oblique.otf") format("opentype");
+	font-style: italic;
+	font-weight: 400;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Berkeley Mono";
+	src: url("./_fonts/BerkeleyMono-Bold.otf") format("opentype");
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Berkeley Mono";
+	src: url("./_fonts/BerkeleyMono-Bold-Oblique.otf") format("opentype");
+	font-style: italic;
+	font-weight: 700;
+	font-display: swap;
+}
+
 @theme inline {
-	--font-sans: var(--design-font-sans, ui-sans-serif, system-ui, sans-serif);
+	--font-sans: "Inter", "Inter Fallback", ui-sans-serif, system-ui, sans-serif;
+	--font-mono:
+		"Berkeley Mono", "SF Mono", "Roboto Mono", ui-monospace, "SFMono-Regular",
+		Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+	--color-ink: var(--ink);
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--color-card: var(--card);
@@ -50,6 +86,8 @@
 
 :root {
 	--radius: 0.625rem;
+	--ink: #111111;
+	--font-berkeley-mono: "Berkeley Mono";
 	--background: oklch(0.99 0 0);
 	--foreground: oklch(0.145 0 0);
 	--card: oklch(0.99 0 0);
@@ -129,7 +167,25 @@
 	}
 
 	body {
-		@apply bg-background text-foreground font-sans transition-colors duration-300;
+		@apply bg-background text-foreground font-sans text-sm transition-colors duration-300;
+		letter-spacing: -0.02em;
+	}
+
+	code,
+	kbd,
+	pre,
+	samp {
+		font-family:
+			"Berkeley Mono", var(--font-berkeley-mono, ui-monospace), ui-monospace,
+			"SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono",
+			"Courier New", monospace;
+		letter-spacing: 0;
+	}
+
+	code,
+	kbd,
+	samp {
+		font-size: 0.75rem;
 	}
 
 	::selection {
@@ -144,15 +200,33 @@
 }
 
 @layer utilities {
-	/* Condensed display for marketing hero + large section titles (scoped; not global h1). */
-	.font-marketing-display {
+	.font-product-wordmark {
 		font-family: var(--font-bebas-neue), ui-sans-serif, system-ui, sans-serif;
-		letter-spacing: -0.028em;
 	}
 
-	/* Slightly tighter than Tailwind `tracking-tight` (-0.025em) for large marketing sans headings */
-	.tracking-marketing-section {
-		letter-spacing: -0.035em;
+	.font-heading-serif {
+		font-family:
+			var(--font-instrument-serif), Georgia, "Times New Roman", serif;
+		letter-spacing: -0.04em;
+	}
+
+	.font-home-option-serif {
+		font-family:
+			var(--font-instrument-serif), Georgia, "Times New Roman", serif;
+		letter-spacing: 0;
+	}
+
+	.font-number {
+		font-family:
+			"Berkeley Mono", var(--font-berkeley-mono, ui-monospace), ui-monospace,
+			"SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono",
+			"Courier New", monospace;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.font-home-inter {
+		font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+		letter-spacing: -0.02em;
 	}
 }
 

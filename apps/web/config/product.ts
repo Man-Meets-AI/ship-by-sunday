@@ -131,7 +131,7 @@ export const starterConfig = {
 		basePriceUsdCents: 50000,
 		currency: "usd",
 		activeOffer: {
-			label: "Early member",
+			label: "Pilot Member",
 			percentOff: 50,
 		} as const satisfies StarterPricingOfferConfig,
 	},

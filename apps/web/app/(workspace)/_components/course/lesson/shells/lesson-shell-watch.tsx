@@ -60,7 +60,7 @@ export function LessonShellWatch({
 							) : null}
 						</div>
 						<div className="space-y-3">
-							<h1 className="max-w-4xl text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+							<h1 className="font-heading-serif max-w-4xl text-balance text-4xl font-normal text-foreground sm:text-5xl">
 								{lesson.title}
 							</h1>
 							<p className="max-w-[64ch] text-base leading-8 text-muted-foreground sm:text-lg">

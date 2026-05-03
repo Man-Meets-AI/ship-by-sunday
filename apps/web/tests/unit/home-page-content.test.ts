@@ -63,8 +63,39 @@ describe("home page content", () => {
 		).toEqual(["one_time", "monthly", "yearly"]);
 		expect(productPreviewSection.pricing.defaultModel).toBe("one_time");
 
+		expect(productPreviewSection.leverageHero.headline).toBe(
+			"Install leverage",
+		);
+		expect(productPreviewSection.leverageHero.sublineLead).toBe("and");
+		expect(productPreviewSection.leverageHero.sublineBody).toBe(
+			"the loop repeats",
+		);
+		expect(productPreviewSection.leverageHero.sublineEmphasis).toBe("TOMORROW");
+		expect(productPreviewSection.leverageHero.defaultOptionId).toBe("idea");
+		expect(
+			productPreviewSection.leverageHero.options.map((option) => option.label),
+		).toEqual(["I have a codebase already", "I have an idea for a product"]);
+		expect(productPreviewSection.codebaseBranch.intro).toContain(
+			"scan, audit & PR merge queue",
+		);
+		expect(productPreviewSection.codebaseBranch.shippieImage).toEqual({
+			src: "/landing-page/shippie-loop.png",
+			alt: "Shippie",
+		});
+		expect(productPreviewSection.codebaseBranch.auditList.items).toEqual([
+			"DOCS Spine",
+			"Exec Plans Loop",
+			"Oxlint",
+			"Oxfmt",
+			"Design.md",
+			"Agents.md",
+			"Programs.md",
+			"Linting md files",
+			"Token efficient lookup",
+			"Low Hanging Fruit `/goal`",
+		]);
+
 		expect(productPreviewSection.cta.label).toBe("Generate my codebase");
-		expect(productPreviewSection.cta.secondaryHref).toBe("#system");
 
 		expect(homePageContent.hero.headlineLead).toBe("Ship codebases");
 		expect(homePageContent.hero.headlineTailHover).toBe("that convert");
@@ -72,26 +103,21 @@ describe("home page content", () => {
 			"Ship by Sunday gives your agents the worker layer around Codex: exec loops, role packets, channel handoffs, and QA that feeds the next run.",
 		);
 		expect(homePageContent.hero.promoBanner).toEqual({
-			label: "Early member",
-			message: `${productConfig.checkoutPriceDisplay} early member price. FULL TURBO included.`,
+			label: "Pilot Member",
+			message: `${productConfig.checkoutPriceDisplay} Pilot Member price. FULL TURBO included.`,
 		});
 		expect(homePageContent.hero.loginLabel).toBe("Sign in");
-		expect(homePageContent.hero.secondaryCta.label).toBe("See the loop");
-		expect(homePageContent.hero.secondaryCta.href).toBe("#system");
 
 		expect(homePageContent.sprintPathSection.titleHighlight).toBe(
-			"agents useful.",
+			"WEAPON of choice",
 		);
 		expect(homePageContent.sprintPathSection.intro).toContain(
 			"decision to agent run",
 		);
-		expect(homePageContent.execLoopSection.title).toBe("How the loop works.");
+		expect(homePageContent.execLoopSection.title).toBe("How Workers Work.");
 		expect(
 			homePageContent.execLoopSection.steps.map((step) => step.label),
-		).toEqual(["Decide", "Brief", "Run", "Review"]);
-		expect(homePageContent.execLoopSection.steps[2]?.description).toContain(
-			"phone-started prompt",
-		);
+		).toEqual(["Shippie", "Healios", "Goalie", "Loopie"]);
 		expect(homePageContent.starterSystemSection.title).toBe(
 			"A worker layer your agents can build from.",
 		);
@@ -154,8 +180,8 @@ describe("home page content", () => {
 			productConfig.checkoutPriceDisplay,
 		);
 		expect(homePageContent.pricingSection.offerBanner).toEqual({
-			label: "Early member",
-			message: `${productConfig.checkoutPriceDisplay} early member price. Auto-applied at checkout.`,
+			label: "Pilot Member",
+			message: `${productConfig.checkoutPriceDisplay} Pilot Member price. Auto-applied at checkout.`,
 		});
 		expect(homePageContent.pricingSection.ctaTitle).toBe(
 			"Build the worker layer",

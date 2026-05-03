@@ -20,13 +20,13 @@ const activePricingOffer = productConfig.activeOffer;
 const promoBanner = activePricingOffer
 	? {
 			label: activePricingOffer.label,
-			message: `${productConfig.checkoutPriceDisplay} early member price. FULL TURBO included.`,
+			message: `${productConfig.checkoutPriceDisplay} Pilot Member price. FULL TURBO included.`,
 		}
 	: null;
 const pricingOfferBanner = activePricingOffer
 	? {
 			label: activePricingOffer.label,
-			message: `${productConfig.checkoutPriceDisplay} early member price. Auto-applied at checkout.`,
+			message: `${productConfig.checkoutPriceDisplay} Pilot Member price. Auto-applied at checkout.`,
 		}
 	: null;
 
@@ -57,7 +57,7 @@ const FALLBACK_ACCENT: ProductPreviewAccent = {
 };
 
 const productPreviewPresetAccentColors: Record<string, ProductPreviewAccent> = {
-	vercel: { light: "#000000", dark: "#FAFAFA" },
+	vercel: { light: "#111111", dark: "#FAFAFA" },
 	linear: { light: "#5E6AD2", dark: "#7C8AF7" },
 	notion: { light: "#37352F", dark: "#E8E6E1" },
 	stripe: { light: "#635BFF", dark: "#8E88FF" },
@@ -186,14 +186,64 @@ if (productPreviewPricingModelOptions.length !== 3) {
 }
 
 const productPreviewSection = {
-	headline: {
-		prefix: "Spec your product, then ",
-		highlight: "generate the codebase.",
+	leverageHero: {
+		headline: "Install leverage",
+		sublineLead: "and",
+		sublineBody: "the loop repeats",
+		sublineEmphasis: "TOMORROW",
+		optionGroupLabel: "Choose your starting point",
+		defaultOptionId: "idea",
+		options: [
+			{
+				id: "codebase",
+				label: "I have a codebase already",
+			},
+			{
+				id: "idea",
+				label: "I have an idea for a product",
+			},
+		],
 	},
-	intro:
-		"Fill the same Blueprint a paying buyer fills. Lock the foundation, pick a design direction, set your price, and we generate the codebase that matches.",
-	unlockNote:
-		"Checkout unlocks Problem, Outcome, Setup, and Generated preview, plus the full theme grid (color, style, radius) in the workspace.",
+	codebaseBranch: {
+		shippieName: "Shippie",
+		shippieImage: {
+			src: "/landing-page/shippie-loop.png",
+			alt: "Shippie",
+		},
+		intro:
+			"We don't want to read your codebase. Thats for you and your team. We do want to start installing leverage in the form of a scan, audit & PR merge queue. You're going to work with Shippie. He's trained on every best practice under-the-sun from OpenAI. It's all he does.",
+		auditLead: "You can read more about",
+		auditLinkLabel: "the audit",
+		auditHref: routeConfig.docs,
+		auditBody:
+			"if you want to, but its the fastest way for you to start getting real leverage in your codebase. End game is agentic loops, turn into true workers. So it's not just Shippie doing work. It's Shippie, and his friends. And eventually you making your own.",
+		todoIntro: "So in order to make these workers personalized to you..",
+		todoSetupLine: "we got a few to-dos.",
+		todos: [
+			"Connect ChatGPT (no claude, I know I know...)",
+			"Let Shippie do his thing.",
+			"Connect your GitHub",
+			"PRs start happening",
+		],
+		privacyQuestion: "Wait. What? I thought you we'rent reading our code?",
+		privacyAnswer:
+			"Correct! By connecting ChatGPT, we use Codex's app server harness",
+		auditList: {
+			title: "The Audit.",
+			items: [
+				"DOCS Spine",
+				"Exec Plans Loop",
+				"Oxlint",
+				"Oxfmt",
+				"Design.md",
+				"Agents.md",
+				"Programs.md",
+				"Linting md files",
+				"Token efficient lookup",
+				"Low Hanging Fruit `/goal`",
+			],
+		},
+	},
 	sections: productPreviewSections,
 	foundation: {
 		intro:
@@ -244,8 +294,6 @@ const productPreviewSection = {
 		label: "Generate my codebase",
 		lockedNote:
 			"We'll save your draft, take you to Stripe, and bring you back to the workspace prefilled with these answers.",
-		secondaryLabel: "See how the loop works",
-		secondaryHref: routeConfig.systemHash,
 	},
 } as const;
 
@@ -263,14 +311,10 @@ export const homePageContent = {
 		headlineTailHover: "that convert",
 		body: "Ship by Sunday gives your agents the worker layer around Codex: exec loops, role packets, channel handoffs, and QA that feeds the next run.",
 		primaryCta: marketingDisplayConfig.primaryCtaLabel,
-		secondaryCta: {
-			label: "See the loop",
-			href: routeConfig.systemHash,
-		},
 	},
 	sprintPathSection: {
-		titlePrefix: "Exec loops make ",
-		titleHighlight: "agents useful.",
+		titlePrefix: "Exec Loops: OpenAI's ",
+		titleHighlight: "WEAPON of choice",
 		intro:
 			"An exec loop is the repeatable path from decision to agent run: train one role, ship code, prove QA, and carry the next decision forward.",
 		supportingPoints: [
@@ -337,26 +381,23 @@ export const homePageContent = {
 		],
 	},
 	execLoopSection: {
-		title: "How the loop works.",
-		intro:
-			"One loop moves a decision into shipped code. The next loop starts smarter.",
+		title: "How Workers Work.",
 		steps: [
 			{
-				label: "Decide",
-				description: "Name the outcome, constraint, and conversion claim.",
+				label: "Shippie",
+				description: "Gets your code branched, built, and merged.",
 			},
 			{
-				label: "Brief",
-				description: "Turn it into a worker pack for one role.",
+				label: "Healios",
+				description: "Finds broken paths and fixes them fast.",
 			},
 			{
-				label: "Run",
-				description:
-					"Dispatch the role through Codex, Telegram, Discord, or a phone-started prompt.",
+				label: "Goalie",
+				description: "Guards scope and keeps the spec honest.",
 			},
 			{
-				label: "Review",
-				description: "Check the diff, QA path, and update the worker layer.",
+				label: "Loopie",
+				description: "Keeps exec loops queued and running.",
 			},
 		],
 	},
@@ -415,8 +456,6 @@ export const homePageContent = {
 	pricingSection: {
 		titleLead: "Ship a real product",
 		titleAccent: "by Sunday",
-		intro:
-			"One payment for the code-side worker layer: exec loops, role packets, channel handoffs, starter path, and QA prompts for a reviewable codebase.",
 		priceDisplay: productConfig.checkoutPriceDisplay,
 		originalPriceDisplay: activePricingOffer
 			? productConfig.priceDisplay

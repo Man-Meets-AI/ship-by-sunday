@@ -38,7 +38,7 @@ export function AccessRequiredStatusPanel({
 				</span>
 			</div>
 			<div className="grid max-w-3xl gap-3">
-				<h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
+				<h1 className="font-heading-serif text-3xl font-normal text-foreground sm:text-5xl">
 					{viewModel.title}
 				</h1>
 				<p className="text-base leading-7 text-foreground/90 sm:text-lg sm:leading-8">

@@ -1,14 +1,17 @@
 "use client";
 
-import { PointerHighlight } from "@/components/ui/pointer-highlight";
+import { useState, type ReactNode } from "react";
+
 import type { HomePageContent } from "@/app/_content/home-page";
 
+import { BlueprintDemoCard } from "./blueprint-demo-card";
+import { BlueprintDemoCodebaseBranch } from "./blueprint-demo-codebase-branch";
 import { BlueprintDemoCtaBar } from "./blueprint-demo-cta-bar";
-import { BlueprintDemoDesignCard } from "./blueprint-demo-design-card";
-import { BlueprintDemoFoundationCard } from "./blueprint-demo-foundation-card";
-import { BlueprintDemoLockedCard } from "./blueprint-demo-locked-card";
+import {
+	BlueprintDemoLeverageHero,
+	type LeverageHeroOptionId,
+} from "./blueprint-demo-leverage-hero";
 import { useBlueprintDemoStaggerDelays } from "./blueprint-demo-motion";
-import { BlueprintDemoPricingCard } from "./blueprint-demo-pricing-card";
 import {
 	BlueprintDemoSidebar,
 	type BlueprintDemoSidebarProgressEntry,
@@ -22,9 +25,13 @@ type BlueprintDemoSection = HomePageContent["productPreviewSection"];
 
 export function BlueprintDemoSectionBlock({
 	section,
+	children,
 }: {
 	readonly section: BlueprintDemoSection;
+	readonly children?: ReactNode;
 }) {
+	const [selectedOptionId, setSelectedOptionId] =
+		useState<LeverageHeroOptionId>(section.leverageHero.defaultOptionId);
 	const draft = useHomePageBlueprintDraft({
 		defaultPresetId: section.design.defaultPresetId,
 		defaultPricingModel: section.pricing.defaultModel,
@@ -39,102 +46,59 @@ export function BlueprintDemoSectionBlock({
 		section.pricing.defaultModel,
 		section.pricing.defaultPrice,
 	);
+	const isIdeaBranchSelected = selectedOptionId === "idea";
 
 	return (
-		<section className="flex min-h-screen flex-col gap-10 pb-20 pt-2 sm:gap-14 sm:pb-24">
-			<BlueprintDemoTopBar />
-			<ScrollReveal>
-				<div className="max-w-3xl space-y-3">
-					<h1
-						data-testid="blueprint-demo-headline"
-						className="text-balance text-4xl font-semibold leading-[0.95] tracking-tight text-foreground sm:text-6xl lg:text-7xl"
-					>
-						{section.headline.prefix}
-						<PointerHighlight containerClassName="text-foreground/90">
-							{section.headline.highlight}
-						</PointerHighlight>
-					</h1>
-					<p className="max-w-2xl text-pretty text-base leading-7 text-muted-foreground sm:text-lg">
-						{section.intro}
-					</p>
-					<p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-						{section.unlockNote}
-					</p>
-				</div>
-			</ScrollReveal>
-			<div className="grid gap-8 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-10">
-				<div className="lg:sticky lg:top-24 lg:self-start">
-					<BlueprintDemoSidebar
-						sections={section.sections}
-						progress={sidebarProgress}
-					/>
-				</div>
-				<div className="space-y-5">
-					{section.sections.map((sectionRow, index) => {
-						const sectionNumber = index + 1;
-						const staggerDelay = cardStaggerDelays[index] ?? 0;
-						const cardElement = (() => {
-							if (sectionRow.id === "foundation") {
-								return (
-									<BlueprintDemoFoundationCard
-										sectionNumber={sectionNumber}
-										label={sectionRow.label}
-										description={sectionRow.description}
-										foundation={section.foundation}
-										fields={draft.fields}
-										lastSavedAt={draft.lastSavedAt}
-										onFoundationFieldChange={draft.setFoundationField}
-									/>
-								);
-							}
-							if (sectionRow.id === "design") {
-								return (
-									<BlueprintDemoDesignCard
-										sectionNumber={sectionNumber}
-										label={sectionRow.label}
-										description={sectionRow.description}
-										design={section.design}
-										fields={draft.fields}
-										lastSavedAt={draft.lastSavedAt}
-										onSelectPreset={draft.selectDesignPreset}
-									/>
-								);
-							}
-							if (sectionRow.id === "pricing") {
-								return (
-									<BlueprintDemoPricingCard
-										sectionNumber={sectionNumber}
-										label={sectionRow.label}
-										description={sectionRow.description}
-										pricing={section.pricing}
-										fields={draft.fields}
-										lastSavedAt={draft.lastSavedAt}
-										onSelectPricingModel={draft.setPricingModel}
-										onPricingChange={draft.setPricing}
-									/>
-								);
-							}
-							return (
-								<BlueprintDemoLockedCard
-									sectionId={sectionRow.id}
-									sectionNumber={sectionNumber}
-									label={sectionRow.label}
-									description={sectionRow.description}
-								/>
-							);
-						})();
-						return (
-							<ScrollReveal key={sectionRow.id} delay={staggerDelay}>
-								{cardElement}
-							</ScrollReveal>
-						);
-					})}
-					<BlueprintDemoCtaBar
-						cta={section.cta}
-						onBeforeCheckout={draft.persistNow}
-					/>
+		<section className="flex flex-col">
+			<div className="relative left-1/2 -mt-4 w-screen -translate-x-1/2 bg-[#111111] text-white sm:-mt-6 lg:-mt-8">
+				<div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 pt-4 pb-12 sm:px-12 sm:pt-6 sm:pb-16 lg:pt-8">
+					<BlueprintDemoTopBar tone="dark" />
+					<ScrollReveal direction="none" className="flex flex-1">
+						<BlueprintDemoLeverageHero
+							leverageHero={section.leverageHero}
+							selectedOptionId={selectedOptionId}
+							onSelectedOptionChange={setSelectedOptionId}
+						/>
+					</ScrollReveal>
 				</div>
 			</div>
+			{isIdeaBranchSelected ? (
+				<div
+					className="grid gap-8 pt-10 pb-20 sm:pt-14 sm:pb-24 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-10 lg:pt-16"
+					data-testid="blueprint-demo-idea-branch"
+				>
+					<div className="lg:sticky lg:top-24 lg:self-start">
+						<BlueprintDemoSidebar
+							sections={section.sections}
+							progress={sidebarProgress}
+						/>
+					</div>
+					<div className="space-y-5">
+						{section.sections.map((sectionRow, index) => {
+							const sectionNumber = index + 1;
+							const staggerDelay = cardStaggerDelays[index] ?? 0;
+
+							return (
+								<ScrollReveal key={sectionRow.id} delay={staggerDelay}>
+									<BlueprintDemoCard
+										section={section}
+										sectionRow={sectionRow}
+										sectionNumber={sectionNumber}
+										draft={draft}
+									/>
+								</ScrollReveal>
+							);
+						})}
+						<BlueprintDemoCtaBar
+							cta={section.cta}
+							onBeforeCheckout={draft.persistNow}
+						/>
+					</div>
+				</div>
+			) : (
+				<BlueprintDemoCodebaseBranch codebaseBranch={section.codebaseBranch} />
+			)}
+			{children}
 			<div className="h-16 sm:hidden" aria-hidden="true" />
 		</section>
 	);

@@ -17,7 +17,10 @@ export function CommonQuestionsSection({
 			<div className="grid gap-16 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-24">
 				<ScrollReveal>
 					<div className="flex flex-col gap-3">
-						<h2 className="flex flex-col gap-1 text-balance text-4xl font-semibold leading-[0.92] tracking-tight sm:text-5xl lg:text-7xl">
+						<h2
+							aria-label={`${faqSection.titleLead} ${faqSection.titleAccent}`}
+							className="flex flex-col gap-1 text-balance text-4xl font-semibold leading-[0.92] tracking-tight sm:text-5xl lg:text-7xl"
+						>
 							<span>{faqSection.titleLead}</span>
 							<span className="text-foreground/90">
 								{faqSection.titleAccent}

@@ -180,3 +180,39 @@ If helpful, also record the external official references used for the work:
 - **Design direction:** Keep the demo honest by showing the full canonical section sequence even though only three sections are interactive on the public route. Reuse field labels and helpers from `@shipbysunday/blueprint-presentation` and design presets from `@shipbysunday/blueprint-compiler` so the demo cannot drift from the real workspace.
 - **Out of scope:** No homepage interactivity for Problem, Outcome, Setup, or Generated preview. No pre-auth Convex draft session. No free-form `theme_preset` editing on the public route. No Convex schema changes.
 - **Verification:** Focused unit and integration-ui packs for homepage content, render model, structured data, draft storage, demo behavior, primary CTA, checkout button, and post-checkout seeder. Repo-level `bun run --cwd apps/web lint`, `format:check`, `bun typecheck`, `bun lint`, `bun run format`, and `bun run --cwd apps/web build`. Manual browser proof at desktop and mobile viewports at `/?marketing=1`.
+
+## Shipped Note: Figma Leverage Hero On The Public Homepage
+
+- **Date:** 2026-05-03
+- **Surface:** `/` public homepage.
+- **Change:** Removed the old first-screen Blueprint explainer copy ("Spec your product, then generate the codebase.", the paying-buyer Blueprint paragraph, and the checkout unlock note) and replaced that space with the Figma-sourced "Install leverage" hero and two-option starting-point selector.
+- **Design direction:** Match the Figma selection's black editorial composition, Instrument Serif display headline, Inter subline, and grey/white selector while keeping the real Blueprint demo and checkout persistence below it.
+- **Out of scope:** No new checkout target, no change to the 7-section Blueprint demo contract, and no external provider setup.
+- **Verification:** Focused homepage content/render-model tests and integration-ui coverage should assert the new hero copy and preserved canonical demo sections, with desktop and mobile browser proof against the Figma screenshot before release.
+
+## Shipped Note: Project Typography Contract
+
+- **Date:** 2026-05-03
+- **Surface:** Global app, public homepage, docs shell, blog, and workspace H1 surfaces.
+- **Change:** Centralized font loading through the app font module. Inter now owns UI text at a 14px default, Berkeley Mono owns code and numeric UI at a 12px code default, Instrument Serif owns H1 headings with `-0.04em` spacing, and Bebas Neue is constrained to the `SHIP BY SUNDAY` wordmark/logo role.
+- **Design direction:** Preserve the restrained operating-system feel while making the typography roles explicit and repeatable across marketing, docs, and app surfaces.
+- **Out of scope:** No generated customer starter font contract changes beyond the active app presentation layer.
+- **Verification:** Run focused app checks, broad repo gates, and desktop/mobile browser proof for the global typography pass before release.
+
+## Shipped Note: Homepage Starting-Point Branches
+
+- **Date:** 2026-05-03
+- **Surface:** `/` public homepage.
+- **Change:** The first-screen starting-point selector now controls the below-fold homepage branch. `I have an idea for a product` keeps the real Blueprint demo and the existing homepage story through the section before founder social proof. `I have a codebase already` swaps that branch for the Figma-sourced codebase audit path with Shippie imagery and audit checklist copy.
+- **Design direction:** Preserve the black editorial Figma composition while making the selector a real information-architecture control instead of a cosmetic pressed state.
+- **Out of scope:** No checkout behavior change, no social-proof/pricing/footer branch split, and no external provider setup.
+- **Verification:** Focused homepage content, render-model, and integration-ui tests should cover both branches; desktop and mobile browser proof should confirm the Figma-derived branch remains readable and preserves the `#system` anchor.
+
+## Shipped Note: Homepage Shared Starting-Point Continuation
+
+- **Date:** 2026-05-03
+- **Surface:** `/` public homepage.
+- **Change:** The first-screen starting-point selector keeps its branch-specific opening content, but both `I have an idea for a product` and `I have a codebase already` now continue through the same downstream homepage sections: `Ship codebases that convert`, `Exec Loops`, `How Workers Work`, worker-layer explanation, founder proof, FAQ, pricing, and footer.
+- **Design direction:** Preserve the selector as a real starting-context choice without hiding the core worker-layer story from the codebase-audit path.
+- **Out of scope:** No checkout behavior change, no new branch-specific pricing, and no external provider setup.
+- **Verification:** Focused integration-ui coverage should toggle to the codebase branch and confirm the shared section headings remain visible with a single `#system` anchor owned by the Exec Loops section.

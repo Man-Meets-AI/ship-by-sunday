@@ -39,7 +39,7 @@ export function ErrorBoundaryScreen({
 	}, [code, error, pathname]);
 
 	return (
-		<main className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
+		<main className="min-h-screen bg-ink text-white selection:bg-white selection:text-ink">
 			<div className="mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center px-6 py-20 text-center">
 				<div className="space-y-12">
 					<div className="space-y-4">
@@ -55,9 +55,9 @@ export function ErrorBoundaryScreen({
 							initial={{ opacity: 0, scale: 0.95 }}
 							animate={{ opacity: 1, scale: 1 }}
 							transition={{ duration: 0.7, ease }}
-							className="font-marketing-display text-[clamp(4rem,14vw,10rem)] leading-[0.85] tracking-tighter uppercase"
+							className="font-heading-serif text-[clamp(4rem,14vw,10rem)] leading-[0.88]"
 						>
-							Logic <span className="text-white/20">Error</span>
+							Logic <span className="text-white/20 italic">Error</span>
 						</motion.h1>
 					</div>
 
@@ -91,7 +91,7 @@ export function ErrorBoundaryScreen({
 						<Button
 							onClick={reset}
 							size="lg"
-							className="h-14 px-8 text-lg rounded-full bg-white text-black hover:bg-white/90"
+							className="h-14 px-8 text-lg rounded-full bg-white text-ink hover:bg-white/90"
 						>
 							Try to recompile
 						</Button>

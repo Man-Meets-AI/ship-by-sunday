@@ -13,7 +13,7 @@ import type { LessonVideoContent } from "@/lib/course/lesson/model/contracts";
 import { cn } from "@/lib/utils";
 
 const PLAYER_CLASS =
-	"relative z-10 h-full w-full rounded-none border-0 bg-black object-cover";
+	"relative z-10 h-full w-full rounded-none border-0 bg-ink object-cover";
 
 export function LessonVideoWatchBareWithControls({
 	video,
@@ -41,13 +41,13 @@ export function LessonVideoWatchBareWithControls({
 				>
 					<AspectRatio
 						ratio={16 / 9}
-						className="relative overflow-hidden bg-black"
+						className="relative overflow-hidden bg-ink"
 					>
 						<div
 							aria-hidden
 							data-testid="lesson-video-loading-backplate"
 							data-loaded={isIframeLoading ? "false" : "true"}
-							className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black transition-opacity duration-300 motion-reduce:transition-none data-[loaded=true]:opacity-0"
+							className="pointer-events-none absolute inset-0 flex items-center justify-center bg-ink transition-opacity duration-300 motion-reduce:transition-none data-[loaded=true]:opacity-0"
 						>
 							<Loader2
 								className="size-6 animate-spin text-muted-foreground/60 motion-reduce:animate-none"

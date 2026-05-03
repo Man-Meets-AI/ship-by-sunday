@@ -14,7 +14,7 @@ import { isLessonVideoReady } from "@/lib/course/lesson/model/video";
 import { cn } from "@/lib/utils";
 
 const PLAYER_CLASS =
-	"relative z-10 h-full w-full rounded-none border-0 bg-black object-cover";
+	"relative z-10 h-full w-full rounded-none border-0 bg-ink object-cover";
 
 export function LessonVideoSurface({
 	coachContent,
@@ -49,7 +49,7 @@ export function LessonVideoSurface({
 			<AspectRatio
 				ratio={16 / 9}
 				className={cn(
-					"relative overflow-hidden bg-black",
+					"relative overflow-hidden bg-ink",
 					playerFrame === "bare" &&
 						"rounded-xl border border-border/60 ring-1 ring-foreground/5",
 				)}
@@ -58,7 +58,7 @@ export function LessonVideoSurface({
 					aria-hidden
 					data-testid="lesson-video-loading-backplate"
 					data-loaded={isIframeLoading ? "false" : "true"}
-					className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black transition-opacity duration-300 motion-reduce:transition-none data-[loaded=true]:opacity-0"
+					className="pointer-events-none absolute inset-0 flex items-center justify-center bg-ink transition-opacity duration-300 motion-reduce:transition-none data-[loaded=true]:opacity-0"
 				>
 					<Loader2
 						className="size-6 animate-spin text-muted-foreground/60 motion-reduce:animate-none"

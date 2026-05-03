@@ -87,7 +87,7 @@ export function MissionSprintRouteRow({
 				</p>
 				<div className="mt-2 flex items-center gap-3">
 					<Progress value={block.pct} className="h-1.5 max-w-32" />
-					<span className="text-xs tabular-nums text-muted-foreground">
+					<span className="text-xs font-number text-muted-foreground">
 						{block.completedCount}/{block.totalLessons}
 					</span>
 				</div>

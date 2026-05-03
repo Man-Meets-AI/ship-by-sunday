@@ -66,7 +66,7 @@ export function CodexConnectionStatusCard({
 								<dt className="shrink-0 text-xs font-medium tracking-wide text-muted-foreground uppercase">
 									Email
 								</dt>
-								<dd className="min-w-0 break-all text-foreground tabular-nums">
+								<dd className="min-w-0 break-all text-foreground font-number">
 									{chatgptAccount.email}
 								</dd>
 							</div>

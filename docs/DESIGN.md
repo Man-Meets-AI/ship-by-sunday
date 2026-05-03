@@ -30,6 +30,7 @@ This file owns the cross-cutting visual and interaction doctrine for the repo. I
 - Use motion to explain state change or hierarchy, not as decoration.
 - Keep operator surfaces dense only when the density improves decision quality.
 - Promote recurring design rules into durable docs instead of hiding them in reviews or chat.
+- Use [docs/design-docs/ui-design-library.md](design-docs/ui-design-library.md) when auditing app UI font sizes, light/dark color roles, spacing, control sizes, or screenshot-grounded visual drift.
 
 ## Next
 

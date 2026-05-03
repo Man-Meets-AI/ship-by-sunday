@@ -23,7 +23,7 @@ export const Cover = ({
 		<div
 			onMouseEnter={() => setHovered(true)}
 			onMouseLeave={() => setHovered(false)}
-			className="group/cover relative inline-block rounded-sm bg-neutral-100 px-2 py-2 transition duration-200 hover:bg-neutral-900 dark:bg-neutral-900"
+			className="group/cover relative inline-block rounded-sm bg-transparent px-2 py-2 transition duration-200 hover:bg-neutral-900 dark:bg-transparent"
 		>
 			<AnimatePresence>
 				{hovered && (

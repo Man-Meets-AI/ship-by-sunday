@@ -14,13 +14,17 @@ export const stepPositionClassNames = [
 
 export function ExecLoopVisual({
 	steps,
+	selectedIndex,
 }: {
 	readonly steps: readonly ExecLoopStep[];
+	readonly selectedIndex: number;
 }) {
+	const selectedStep = steps[selectedIndex];
+
 	return (
 		<div
 			className="relative flex size-full min-h-[18rem] items-center justify-center overflow-hidden bg-background text-foreground"
-			aria-label="Animated exec loop showing decision, brief, run, and review stages"
+			aria-label="Animated exec loop showing worker stages"
 		>
 			<style>
 				{`
@@ -84,27 +88,35 @@ export function ExecLoopVisual({
 			</div>
 			<div className="relative z-10 flex size-32 flex-col items-center justify-center rounded-full border border-border/70 bg-background/90 p-4 text-center shadow-2xl shadow-foreground/5 sm:size-40 sm:p-5">
 				<p className="text-lg font-semibold leading-tight sm:text-xl">
-					Decide to review
+					{selectedStep?.label ?? ""}
 				</p>
 				<p className="mt-1.5 text-[0.7rem] leading-snug text-muted-foreground sm:text-xs sm:leading-5">
-					Decision, brief, run, review.
+					Active worker
 				</p>
 			</div>
-			{steps.map((step, index) => (
-				<div
-					key={step.label}
-					className={`absolute z-10 w-20 -translate-x-1/2 -translate-y-1/2 rounded-lg border border-foreground/15 bg-background/95 p-3 shadow-sm sm:w-28 lg:w-36 ${
-						stepPositionClassNames[index % stepPositionClassNames.length]
-					}`}
-				>
-					<p className="text-xs font-semibold text-muted-foreground">
-						{String(index + 1).padStart(2, "0")}
-					</p>
-					<p className="mt-1 text-sm font-semibold leading-tight sm:text-base">
-						{step.label}
-					</p>
-				</div>
-			))}
+			{steps.map((step, index) => {
+				const isSelected = index === selectedIndex;
+				return (
+					<div
+						key={step.label}
+						className={`absolute z-10 w-20 -translate-x-1/2 -translate-y-1/2 rounded-lg border p-3 shadow-sm transition-colors sm:w-28 lg:w-36 ${
+							stepPositionClassNames[index % stepPositionClassNames.length]
+						} ${
+							isSelected
+								? "border-foreground/50 bg-background shadow-foreground/10"
+								: "border-foreground/15 bg-background/95"
+						}`}
+					>
+						<p
+							className={`mt-1 text-sm font-semibold leading-tight sm:text-base ${
+								isSelected ? "text-foreground" : "text-foreground/60"
+							}`}
+						>
+							{step.label}
+						</p>
+					</div>
+				);
+			})}
 		</div>
 	);
 }

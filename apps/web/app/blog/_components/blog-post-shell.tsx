@@ -37,7 +37,7 @@ export function BlogPostShell({
 								<p>{formatBlogDate(post.publishedAt)}</p>
 								<p className="font-medium text-foreground">Field notes</p>
 							</div>
-							<h1 className="max-w-5xl text-balance text-5xl font-medium leading-[0.95] tracking-normal text-foreground sm:text-7xl lg:text-8xl">
+							<h1 className="font-heading-serif max-w-5xl text-balance text-5xl font-normal leading-[0.95] text-foreground sm:text-7xl lg:text-8xl">
 								{post.title}
 							</h1>
 							<p className="max-w-3xl text-pretty text-xl leading-8 text-foreground/70 sm:text-2xl sm:leading-9">

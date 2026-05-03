@@ -3,20 +3,6 @@ import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
 import { useRef, useEffect, useState, useCallback } from "react";
 
-function measureTightTextWidth(node: HTMLElement): number {
-	const range = document.createRange();
-	range.selectNodeContents(node);
-	const rects = range.getClientRects();
-	if (rects.length <= 1) return node.getBoundingClientRect().width;
-
-	const containerLeft = node.getBoundingClientRect().left;
-	let maxRight = 0;
-	for (const rect of rects) {
-		maxRight = Math.max(maxRight, rect.right - containerLeft);
-	}
-	return maxRight;
-}
-
 export function PointerHighlight({
 	children,
 	rectangleClassName,
@@ -29,13 +15,13 @@ export function PointerHighlight({
 	containerClassName?: string;
 }) {
 	const containerRef = useRef<HTMLSpanElement>(null);
+	const childrenRef = useRef<HTMLSpanElement>(null);
 	const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
 	const measure = useCallback(() => {
-		const node = containerRef.current;
-		if (!node) return;
-		const width = measureTightTextWidth(node);
-		const { height } = node.getBoundingClientRect();
+		const textEl = childrenRef.current;
+		if (!textEl) return;
+		const { width, height } = textEl.getBoundingClientRect();
 		setDimensions({ width, height });
 	}, []);
 
@@ -56,7 +42,7 @@ export function PointerHighlight({
 			className={cn("relative inline-block w-fit", containerClassName)}
 			ref={containerRef}
 		>
-			{children}
+			<span ref={childrenRef}>{children}</span>
 			{dimensions.width > 0 && dimensions.height > 0 && (
 				<motion.span
 					className="pointer-events-none absolute inset-0 z-0"

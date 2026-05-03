@@ -11,6 +11,8 @@ The product has two visual modes that must stay aligned:
 
 Future UI work should preserve that structure instead of inventing a second app-wide palette.
 
+For screenshot-grounded app UI audit targets, use [docs/design-docs/ui-design-library.md](docs/design-docs/ui-design-library.md). That note owns the practical reference for app font sizes, light/dark color roles, spacing, button sizes, control geometry, and drift checks.
+
 ## Visual Theme & Atmosphere
 
 - Base feeling: calm, exact, durable, minimal.
@@ -45,6 +47,7 @@ These are the canonical shared UI tokens. Use these roles before introducing new
 Interpretation:
 
 - The shared system is intentionally neutral. Most UI should read as black, white, and gray first.
+- Never use pure black. The canonical ink value is `#111111`; use semantic foreground tokens or `ink` utilities instead of `#000`, `#000000`, `black`, `bg-black`, `text-black`, or `ring-black`.
 - `primary` is ink-like, not “brand color.” It should carry action and emphasis without turning the interface colorful.
 - Borders are quiet and often further softened with opacity such as `border-border/40` or `border-border/60`.
 
@@ -76,29 +79,35 @@ Until those values are centralized, treat the docs palette as an established sur
 
 ## Typography Rules
 
-### Display / brand type
+### Wordmark / logo type
 
-- `Bebas Neue` is the explicit display and wordmark font, loaded in [apps/web/app/layout.tsx](apps/web/app/layout.tsx) as `--font-bebas-neue`.
-- Use it for:
-  - product wordmarks
-  - marketing hero headlines
-  - large docs editorial headings
-- Styling conventions:
-  - uppercase by default
-  - tight leading around `0.9` to `0.95`
-  - negative tracking for large marketing lines
-  - never use it for dense body copy, forms, or data-heavy UI
+- `Bebas Neue` is retained solely for the `SHIP BY SUNDAY` wordmark and logo surfaces through `--font-bebas-neue` and `.font-product-wordmark`.
+- Do not use Bebas Neue for H1s, section headings, docs editorial headings, dense body copy, forms, or data-heavy UI.
+- Wordmark styling is uppercase by default with tight leading and modest positive tracking.
 
-### Body type
+### UI body type
 
-- The repo does not define a custom body font beyond the shared sans stack used by shadcn/Tailwind and Clerk.
+- `Inter` is the canonical UI font through `--font-inter` and `font-sans`.
+- Default UI body text is `14px` (`text-sm`) with generous line-height where copy runs long.
+- Inter UI text uses `-0.02em` letter spacing globally unless a component deliberately applies a more specific tracking utility for labels, logos, or compact controls.
 - Body typography should stay clean, readable, and neutral.
-- Default body text is usually `text-sm` to `text-lg` with generous line-height (`leading-7`, `leading-relaxed`, or `1.8` in docs).
+
+### Code and numbers
+
+- `Berkeley Mono` is the canonical code and numeric font through `--font-berkeley-mono`, `font-mono`, and `.font-number`.
+- Default code text is `12px`.
+- Use `.font-number` for numeric counters, prices, IDs, timestamps, progress counts, and other number-first UI.
+
+### H1 headings
+
+- H1 headings use `Instrument Serif` through `.font-heading-serif`.
+- H1 letter spacing is `-0.04em`.
+- Use Instrument Serif Italic for intentional H1 emphasis, not for every supporting heading.
 
 ### Hierarchy rules
 
-- Marketing headlines should be large, compressed, and immediate.
-- App and workspace headings should be strong but calmer, typically `font-semibold` with tight tracking instead of display theatrics.
+- Marketing H1s should be large, editorial, and immediate without reverting to Bebas Neue.
+- App and workspace H1s should be calmer but still use the same Instrument Serif heading role.
 - Section leads and supporting copy should stay narrow. Avoid wide text blocks.
 - Use muted text for explanation, not for primary claims or labels that drive action.
 
@@ -198,7 +207,7 @@ Usage rule:
 
 - Docs nav items are rounded pills with quiet fills.
 - Docs pages sit inside a framed editorial article container with larger radius and subtle shadow.
-- Docs headings use the same display font as the product wordmark to keep the marketing and docs voices connected.
+- Docs H1 and major editorial headings use Instrument Serif so docs stay aligned with the product heading system. The Bebas wordmark remains available for the docs footer or logo marks only.
 
 ## Layout / Spacing / Responsive Principles
 
@@ -288,11 +297,10 @@ Motion rules:
 - Do not flood the app with pack-color accents.
 - Do not put badges, proof clutter, or promo chips in the hero by default.
 - Do not solve hierarchy problems with extra cards.
-- Do not use Bebas Neue for dense body copy or form-heavy surfaces.
+- Do not use Bebas Neue outside the `SHIP BY SUNDAY` wordmark or logo surfaces.
 - Do not let docs drift into a separate brand world from the product.
 
 ## Open Questions / Follow-Ups
 
 1. Document the exact source of the docs `product-*` tokens or centralize them into one visible theme source. Right now the docs shell depends on them, but their canonical definitions are not obvious in the repo.
-2. Decide whether the body sans stack should remain implicit or be made explicit as a documented token. The display font is clear; the body type system is currently conventional rather than branded.
-3. If the docs palette is meant to be permanent, map it back into the shared token layer in a deliberate, documented way instead of keeping it semi-hidden inside docs-specific styling.
+2. If the docs palette is meant to be permanent, map it back into the shared token layer in a deliberate, documented way instead of keeping it semi-hidden inside docs-specific styling.

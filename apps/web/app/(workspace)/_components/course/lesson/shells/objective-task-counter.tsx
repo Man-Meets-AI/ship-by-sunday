@@ -35,7 +35,7 @@ export function ObjectiveTaskCounter({
 	return (
 		<p
 			ref={scope}
-			className="font-mono text-[10px] tabular-nums tracking-widest text-muted-foreground"
+			className="font-mono text-[10px] font-number tracking-widest text-muted-foreground"
 			data-testid="lesson-objective-counter"
 			data-complete={isFullyCompleted ? "true" : "false"}
 		>

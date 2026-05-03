@@ -22,7 +22,7 @@ export function AccessRequiredHelpPanel({
 							key={item}
 							className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-2.5"
 						>
-							<span className="text-xs leading-6 text-muted-foreground tabular-nums sm:text-sm">
+							<span className="text-xs leading-6 text-muted-foreground font-number sm:text-sm">
 								{index + 1}.
 							</span>
 							<span className="min-w-0 text-sm leading-6 text-muted-foreground">

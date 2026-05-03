@@ -17,9 +17,12 @@ describe("home page render model", () => {
 		expect(renderModel.productPreview.section.cta.label).toBe(
 			"Generate my codebase",
 		);
-		expect(renderModel.productPreview.section.cta.secondaryHref).toBe(
-			"#system",
+		expect(renderModel.productPreview.section.leverageHero.headline).toBe(
+			"Install leverage",
 		);
+		expect(
+			renderModel.productPreview.section.codebaseBranch.auditList.title,
+		).toBe("The Audit.");
 		expect(renderModel.hero.isEnabled).toBe(true);
 		expect(renderModel.hero.primaryCtaTarget).toEqual({ kind: "checkout" });
 		expect(renderModel.mechanism.isEnabled).toBe(false);
@@ -29,7 +32,7 @@ describe("home page render model", () => {
 		expect(renderModel.execLoop.isEnabled).toBe(true);
 		expect(
 			renderModel.execLoop.section.steps.map((step) => step.label),
-		).toEqual(["Decide", "Brief", "Run", "Review"]);
+		).toEqual(["Shippie", "Healios", "Goalie", "Loopie"]);
 		expect(renderModel.starterSystem.isEnabled).toBe(true);
 		expect(
 			renderModel.starterSystem.section.capabilities.map((item) => item.title),

@@ -40,6 +40,7 @@ vi.mock("@/app/checkout/_components/checkout-button", () => ({
 }));
 
 import { homePageContent } from "@/app/_content/home-page";
+import HomePage from "@/app/_components/home-page/home-page";
 import { BlueprintDemoSectionBlock } from "@/app/_components/home-page/sections/blueprint-demo/blueprint-demo-section";
 import {
 	HOME_PAGE_BLUEPRINT_DRAFT_STORAGE_KEY,
@@ -62,6 +63,26 @@ describe("BlueprintDemoSectionBlock", () => {
 				section={homePageContent.productPreviewSection}
 			/>,
 		);
+
+		expect(
+			screen.getByRole("heading", {
+				name: "Install leverage and the loop repeats TOMORROW",
+			}),
+		).toBeTruthy();
+		expect(
+			screen
+				.getByRole("button", {
+					name: "I have an idea for a product",
+				})
+				.getAttribute("aria-pressed"),
+		).toBe("true");
+		expect(
+			screen
+				.getByRole("button", {
+					name: "I have a codebase already",
+				})
+				.getAttribute("aria-pressed"),
+		).toBe("false");
 
 		const sidebarItems = screen.getAllByTestId(
 			/blueprint-demo-sidebar-section-/,
@@ -135,6 +156,61 @@ describe("BlueprintDemoSectionBlock", () => {
 		});
 	});
 
+	it("lets visitors toggle the leverage hero starting point", async () => {
+		const user = userEvent.setup();
+		render(
+			<BlueprintDemoSectionBlock
+				section={homePageContent.productPreviewSection}
+			/>,
+		);
+
+		const codebaseOption = screen.getByRole("button", {
+			name: "I have a codebase already",
+		});
+		const ideaOption = screen.getByRole("button", {
+			name: "I have an idea for a product",
+		});
+
+		expect(ideaOption.getAttribute("aria-pressed")).toBe("true");
+		expect(screen.getByTestId("blueprint-demo-idea-branch")).toBeTruthy();
+		expect(screen.queryByTestId("blueprint-demo-codebase-branch")).toBeNull();
+		await user.click(codebaseOption);
+		expect(codebaseOption.getAttribute("aria-pressed")).toBe("true");
+		expect(ideaOption.getAttribute("aria-pressed")).toBe("false");
+		expect(screen.queryByTestId("blueprint-demo-idea-branch")).toBeNull();
+		expect(screen.getByTestId("blueprint-demo-codebase-branch")).toBeTruthy();
+		expect(screen.getByText(/scan, audit & PR merge queue/i)).toBeTruthy();
+		expect(screen.getByText("The Audit.")).toBeTruthy();
+		expect(screen.getByText("→ DOCS Spine")).toBeTruthy();
+		expect(screen.queryByTestId("blueprint-demo-checkout-cta")).toBeNull();
+	});
+
+	it("keeps the shared homepage sections visible for the codebase starting point", async () => {
+		const user = userEvent.setup();
+		render(await HomePage());
+
+		await user.click(
+			screen.getByRole("button", {
+				name: "I have a codebase already",
+			}),
+		);
+
+		expect(screen.getByTestId("blueprint-demo-codebase-branch")).toBeTruthy();
+		expectPageTextToContain("Ship codebases that convert");
+		expectPageTextToContain("Exec Loops: OpenAI's Weapon of choice");
+		expectPageTextToContain("How Workers Work.");
+		expectPageTextToContain("A worker layer. Your agents can build from.");
+		expectPageTextToContain(
+			"Built by someone who has actually shipped products.",
+		);
+		expectPageTextToContain("Common Questions");
+		expectPageTextToContain("Ship a real product by Sunday");
+		expect(document.querySelectorAll("#system")).toHaveLength(1);
+		expect(document.querySelector("#system")?.textContent).toContain(
+			"Exec Loops:",
+		);
+	});
+
 	it("exposes a theme toggle in the demo top bar", async () => {
 		render(
 			<BlueprintDemoSectionBlock
@@ -175,3 +251,8 @@ describe("BlueprintDemoSectionBlock", () => {
 		}
 	});
 });
+
+function expectPageTextToContain(expectedText: string) {
+	const compactPageText = document.body.textContent?.replace(/\s+/g, "") ?? "";
+	expect(compactPageText).toContain(expectedText.replace(/\s+/g, ""));
+}

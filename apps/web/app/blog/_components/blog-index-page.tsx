@@ -24,7 +24,7 @@ export function BlogIndexPage({ posts }: BlogIndexPageProps) {
 							<p className="text-sm font-medium text-foreground">
 								{blogIndexContent.eyebrow}
 							</p>
-							<h1 className="mt-5 max-w-5xl text-balance text-5xl font-medium leading-[0.92] tracking-normal text-foreground sm:mt-6 sm:text-7xl md:text-8xl lg:text-9xl">
+							<h1 className="font-heading-serif mt-5 max-w-5xl text-balance text-5xl font-normal leading-[0.92] text-foreground sm:mt-6 sm:text-7xl md:text-8xl lg:text-9xl">
 								{blogIndexContent.titleLead}
 							</h1>
 						</div>

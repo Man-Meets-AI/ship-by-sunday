@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 
 import { routeConfig, type HomePageCtaTarget } from "@/config/product";
@@ -26,15 +27,15 @@ export function PricingSectionBlock({
 				<ScrollReveal>
 					<div className="space-y-6 lg:sticky lg:top-24 lg:h-fit">
 						<div className="flex flex-col gap-3">
-							<h2 className="flex flex-col gap-1 text-balance text-4xl font-semibold leading-[0.92] tracking-tight sm:text-5xl lg:text-7xl">
+							<h2
+								aria-label={`${pricingSection.titleLead} ${pricingSection.titleAccent}`}
+								className="flex flex-col gap-1 text-balance text-4xl font-semibold leading-[0.92] tracking-tight sm:text-5xl lg:text-7xl"
+							>
 								<span>{pricingSection.titleLead}</span>
 								<span className="text-foreground/90">
 									{pricingSection.titleAccent}
 								</span>
 							</h2>
-							<p className="max-w-xl text-pretty text-lg leading-snug text-muted-foreground">
-								{pricingSection.intro}
-							</p>
 						</div>
 					</div>
 				</ScrollReveal>
@@ -43,13 +44,22 @@ export function PricingSectionBlock({
 					<div className="flex flex-col gap-8">
 						<div className="flex flex-col gap-4">
 							{pricingSection.offerBanner ? (
-								<PromoBanner
-									label={pricingSection.offerBanner.label}
-									message={pricingSection.offerBanner.message}
-									className="rounded-2xl border border-foreground/15 bg-foreground/5 px-4 py-3"
-									contentClassName="justify-start text-left tracking-[0.12em]"
-									messageClassName="text-sm tracking-normal text-foreground/80 normal-case"
-								/>
+								<div className="relative">
+									<PromoBanner
+										label={pricingSection.offerBanner.label}
+										message={pricingSection.offerBanner.message}
+										className="rounded-2xl border border-foreground/15 bg-foreground/5 px-4 py-3"
+										contentClassName="justify-start text-left tracking-[0.12em]"
+										messageClassName="text-sm tracking-normal text-foreground/80 normal-case"
+									/>
+									<Image
+										src="/landing-page/pilot-member.png"
+										alt="Pilot member mascot"
+										width={52}
+										height={52}
+										className="absolute right-0 bottom-full translate-y-2 drop-shadow-md"
+									/>
+								</div>
 							) : null}
 							<div className="flex items-baseline gap-3">
 								{pricingSection.originalPriceDisplay ? (
@@ -57,7 +67,7 @@ export function PricingSectionBlock({
 										{pricingSection.originalPriceDisplay}
 									</p>
 								) : null}
-								<p className="font-marketing-display text-[clamp(5rem,15vw,10rem)] font-black leading-[0.85] tracking-tighter text-foreground">
+								<p className="font-number text-[clamp(5rem,15vw,10rem)] font-bold leading-[0.85] tracking-tighter text-foreground">
 									{pricingSection.offerPriceDisplay}
 								</p>
 								<span className="text-sm font-medium text-muted-foreground">
@@ -110,14 +120,14 @@ export function FooterSection({
 			<div className="flex flex-col items-center gap-6">
 				<ScrollReveal className="w-full">
 					<div className="flex w-full flex-col items-center justify-between gap-4 sm:flex-row">
-						<p className="font-marketing-display text-lg font-semibold tracking-tight text-foreground">
+						<p className="font-product-wordmark text-lg font-normal tracking-wide text-foreground uppercase">
 							{footerWordmark}
 						</p>
 						<Link
 							href={routeConfig.signIn}
 							className="text-sm text-foreground underline-offset-4 transition-colors hover:underline"
 						>
-							Already bought? <span className="ml-1 font-medium">Sign in</span>
+							Pilot Members Only
 						</Link>
 					</div>
 				</ScrollReveal>

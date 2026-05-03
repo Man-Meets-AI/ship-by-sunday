@@ -52,7 +52,7 @@ export function ThemeColorGrid({
 								"relative aspect-square w-full rounded-lg transition-all duration-150 motion-reduce:transition-none",
 								isSelected
 									? "ring-2 ring-foreground ring-offset-2 ring-offset-background"
-									: "ring-1 ring-black/[0.06] hover:ring-black/20 dark:ring-white/10 dark:hover:ring-white/25",
+									: "ring-1 ring-ink/[0.06] hover:ring-ink/20 dark:ring-white/10 dark:hover:ring-white/25",
 							)}
 							style={{ backgroundColor: hex }}
 						>

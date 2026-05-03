@@ -33,7 +33,7 @@ export function BlueprintDemoSectionCard({
 			<div className="flex items-start gap-3">
 				<span
 					className={cn(
-						"mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md text-xs font-medium",
+						"mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md font-mono text-xs font-medium",
 						tone === "interactive"
 							? "border border-border/80 text-muted-foreground"
 							: "border border-dashed border-border/60 text-muted-foreground/80",
