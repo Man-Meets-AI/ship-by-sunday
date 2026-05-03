@@ -11,3 +11,4 @@ tests/e2e/.auth
 convex/_generated
 .next-build.lock
 output/video-pipeline
+.vercel

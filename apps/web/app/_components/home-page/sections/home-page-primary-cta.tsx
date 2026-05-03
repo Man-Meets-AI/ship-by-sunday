@@ -2,13 +2,11 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { type HomePageCtaTarget } from "@/config/product";
-import {
-	CheckoutButton,
-	type CheckoutButtonLoadingLabels,
-} from "@/app/checkout/_components/checkout-button";
+import { type CheckoutButtonLoadingLabels } from "@/app/checkout/_components/checkout-button";
 import { assertNever } from "@/lib/assert";
 import { PRIMARY_CTA_INVERT_CLASSES } from "@/lib/styling/primary-cta-invert-classes";
 import { cn } from "@/lib/utils";
+import { HomePageCheckoutCta } from "./home-page-checkout-cta";
 
 type HomePagePrimaryCtaProps = {
 	readonly target: HomePageCtaTarget;
@@ -34,7 +32,7 @@ export function HomePagePrimaryCta({
 	switch (target.kind) {
 		case "checkout":
 			return (
-				<CheckoutButton
+				<HomePageCheckoutCta
 					label={label}
 					className={mergedClassName}
 					testId={testId}

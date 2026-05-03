@@ -31,12 +31,15 @@ Run `bun run dev:convex` to connect the repo to your hosted Convex dev deploymen
 - `OBSERVABILITY_INCIDENT_CONTROL_TOKEN`: separate bearer token for the maintainer-only incident status route at `/api/observability/incidents/[incidentId]/status`
 - `OBSERVABILITY_VERCEL_WEBHOOK_SECRET`: verifies Vercel deployment webhooks sent to `/api/observability/vercel`
 - `STRIPE_SECRET_KEY`: Stripe API access
+- `STRIPE_PUBLISHABLE_KEY`: safe-to-expose Stripe key used by homepage Express Checkout
 - `STRIPE_WEBHOOK_SECRET`: verifies the Stripe webhook
 - `STRIPE_PRICE_ID`: optional dashboard-managed price; leave it unset locally until your test account has a managed `$500` price that matches the live list-price contract
 - `STRIPE_PRODUCT_ID`: optional product id emitted by the Stripe script
 - `STRIPE_PROMOTION_CODE_ID`: required when the active public pricing offer is auto-applied at checkout; use the Stripe promotion-code ID, not the customer-facing code string
 
 With the current early-member pricing slice, the app truth is a `$500` list price plus a `50%` auto-applied offer. That means local/test Stripe parity now has two moving parts: a matching `$500` test price and a matching test promotion code. Until those assets exist in the test account, keep `STRIPE_PRICE_ID` unset locally so checkout uses inline `price_data`, and do not hard-code a guessed public code name like `EARLYSHIP` into repo config. The repo consumes Stripe resource IDs and lets dashboard state own the customer-facing code string.
+
+Stripe guest purchase fulfillment runs inside Convex and calls Clerk by checkout email. Keep `CLERK_SECRET_KEY`, `STRIPE_SECRET_KEY`, and `STRIPE_WEBHOOK_SECRET` synced into the active Convex deployment as well as the Next.js runtime.
 
 ## PostHog and Telegram observability
 

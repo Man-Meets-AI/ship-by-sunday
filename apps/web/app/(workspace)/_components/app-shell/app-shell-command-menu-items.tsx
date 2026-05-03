@@ -42,6 +42,9 @@ const workspaceLinkIcons = {
 	[routeConfig.settings]: Settings,
 } as const;
 
+const commandMenuItemLabelClassName =
+	"min-w-0 flex-1 break-words text-left leading-snug";
+
 function isVisible<TState extends "active" | "available" | string>(
 	state: TState,
 ): boolean {
@@ -143,7 +146,9 @@ export function AppShellCommandMenuItems({
 							onSelect={() => navigateTo(item.route)}
 						>
 							<Compass className="size-4 shrink-0 text-muted-foreground" />
-							{item.label}
+							<span className={commandMenuItemLabelClassName}>
+								{item.label}
+							</span>
 						</CommandItem>
 					))}
 				</CommandGroup>
@@ -157,7 +162,9 @@ export function AppShellCommandMenuItems({
 							onSelect={() => navigateTo(entry.href)}
 						>
 							<Compass className="size-4 shrink-0 text-muted-foreground" />
-							{entry.label}
+							<span className={commandMenuItemLabelClassName}>
+								{entry.label}
+							</span>
 						</CommandItem>
 					))}
 					{postReviewActions.map((action) => (
@@ -171,7 +178,9 @@ export function AppShellCommandMenuItems({
 							}}
 						>
 							<Map className="size-4 shrink-0 text-muted-foreground" />
-							{action.label}
+							<span className={commandMenuItemLabelClassName}>
+								{action.label}
+							</span>
 						</CommandItem>
 					))}
 				</CommandGroup>
@@ -187,7 +196,9 @@ export function AppShellCommandMenuItems({
 							onSelect={() => navigateTo(link.href)}
 						>
 							<Icon className="size-4 shrink-0 text-muted-foreground" />
-							{link.label}
+							<span className={commandMenuItemLabelClassName}>
+								{link.label}
+							</span>
 						</CommandItem>
 					);
 				})}
@@ -199,9 +210,11 @@ export function AppShellCommandMenuItems({
 					}}
 				>
 					<PanelLeft className="size-4 shrink-0 text-muted-foreground" />
-					{preferences.localNavCollapsed
-						? "Expand local navigation"
-						: "Collapse local navigation"}
+					<span className={commandMenuItemLabelClassName}>
+						{preferences.localNavCollapsed
+							? "Expand local navigation"
+							: "Collapse local navigation"}
+					</span>
 				</CommandItem>
 			</CommandGroup>
 			<CommandSeparator className="my-1 h-px bg-border" />
@@ -211,21 +224,21 @@ export function AppShellCommandMenuItems({
 					onSelect={() => setThemeWithTransition("light")}
 				>
 					<Sun className="size-4 shrink-0 text-muted-foreground" />
-					Light
+					<span className={commandMenuItemLabelClassName}>Light</span>
 				</CommandItem>
 				<CommandItem
 					value="Theme dark"
 					onSelect={() => setThemeWithTransition("dark")}
 				>
 					<Moon className="size-4 shrink-0 text-muted-foreground" />
-					Dark
+					<span className={commandMenuItemLabelClassName}>Dark</span>
 				</CommandItem>
 				<CommandItem
 					value="Theme system"
 					onSelect={() => setThemeWithTransition("system")}
 				>
 					<SunMoon className="size-4 shrink-0 text-muted-foreground" />
-					System
+					<span className={commandMenuItemLabelClassName}>System</span>
 				</CommandItem>
 			</CommandGroup>
 			<CommandSeparator className="my-1 h-px bg-border" />
@@ -238,7 +251,7 @@ export function AppShellCommandMenuItems({
 					}}
 				>
 					<LogOut className="size-4 shrink-0 text-muted-foreground" />
-					Sign out
+					<span className={commandMenuItemLabelClassName}>Sign out</span>
 				</CommandItem>
 			</CommandGroup>
 		</>

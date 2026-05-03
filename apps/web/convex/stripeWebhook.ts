@@ -4,11 +4,10 @@ import Stripe from "stripe";
 import { v } from "convex/values";
 
 import { apiConfig, PRODUCT_COURSE_SLUG } from "../config/product";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { internalAction } from "./_generated/server";
 import { requireConvexEnv } from "./env";
 import { productAccessGrantResultValidator } from "./access/validators";
-import { pendingCheckoutClaimWriteResultValidator } from "./checkoutClaims";
 
 const supportedStripeEventTypes = new Set([
 	"checkout.session.async_payment_succeeded",
@@ -27,15 +26,6 @@ const stripeWebhookGrantedResultValidator = v.object({
 	eventType: v.string(),
 	clerkUserId: v.string(),
 	grantResult: productAccessGrantResultValidator,
-});
-
-const stripeWebhookPendingClaimSavedResultValidator = v.object({
-	kind: v.literal("pending_claim_saved"),
-	eventId: v.string(),
-	eventType: v.string(),
-	sessionId: v.string(),
-	checkoutEmail: v.string(),
-	saveResult: pendingCheckoutClaimWriteResultValidator,
 });
 
 const stripeWebhookMissingCheckoutEmailResultValidator = v.object({
@@ -61,6 +51,15 @@ const stripeWebhookGrantFailedResultValidator = v.object({
 	message: v.string(),
 });
 
+const stripeWebhookFulfillmentFailedResultValidator = v.object({
+	kind: v.literal("fulfillment_failed"),
+	eventId: v.string(),
+	eventType: v.string(),
+	sessionId: v.string(),
+	checkoutEmail: v.union(v.string(), v.null()),
+	message: v.string(),
+});
+
 type StripeWebhookActionResult =
 	| {
 			kind: "ignored";
@@ -74,16 +73,6 @@ type StripeWebhookActionResult =
 			clerkUserId: string;
 			grantResult: {
 				granted: "inserted" | "patched";
-			};
-	  }
-	| {
-			kind: "pending_claim_saved";
-			eventId: string;
-			eventType: string;
-			sessionId: string;
-			checkoutEmail: string;
-			saveResult: {
-				saved: "inserted" | "patched";
 			};
 	  }
 	| {
@@ -105,17 +94,20 @@ type StripeWebhookActionResult =
 			stripeCustomerId: string | null;
 			stripePaymentIntentId: string | null;
 			message: string;
+	  }
+	| {
+			kind: "fulfillment_failed";
+			eventId: string;
+			eventType: string;
+			sessionId: string;
+			checkoutEmail: string | null;
+			message: string;
 	  };
 
 type StripeWebhookGrantResult = Extract<
 	StripeWebhookActionResult,
 	{ kind: "granted" }
 >["grantResult"];
-
-type StripeWebhookPendingClaimSaveResult = Extract<
-	StripeWebhookActionResult,
-	{ kind: "pending_claim_saved" }
->["saveResult"];
 
 function getWebhookStripe() {
 	return new Stripe(requireConvexEnv("STRIPE_SECRET_KEY"), {
@@ -138,10 +130,10 @@ export const processStripeWebhook = internalAction({
 	returns: v.union(
 		stripeWebhookIgnoredResultValidator,
 		stripeWebhookGrantedResultValidator,
-		stripeWebhookPendingClaimSavedResultValidator,
 		stripeWebhookMissingCheckoutEmailResultValidator,
 		stripeWebhookInvalidSignatureResultValidator,
 		stripeWebhookGrantFailedResultValidator,
+		stripeWebhookFulfillmentFailedResultValidator,
 	),
 	handler: async (ctx, args): Promise<StripeWebhookActionResult> => {
 		let event: Stripe.Event;
@@ -193,34 +185,41 @@ export const processStripeWebhook = internalAction({
 				};
 			}
 
-			const saveResult = (await ctx.runMutation(
-				internal.checkoutClaims.upsertPendingCheckoutClaimFromStripe,
+			const fulfillmentResult = await ctx.runAction(
+				api.checkoutClaimsActions.fulfillCheckoutSessionByEmail,
 				{
-					stripeCheckoutSessionId: session.id,
-					checkoutEmail,
-					courseSlug: sessionCourseSlug,
-					paymentStatus:
-						session.payment_status === "no_payment_required"
-							? "no_payment_required"
-							: "paid",
-					stripeCustomerId:
-						typeof session.customer === "string" ? session.customer : undefined,
-					stripePaymentIntentId:
-						typeof session.payment_intent === "string"
-							? session.payment_intent
-							: undefined,
+					sessionId: session.id,
 					stripeEventId: event.id,
 					stripeEventType: event.type,
 				},
-			)) as StripeWebhookPendingClaimSaveResult;
+			);
+
+			if (fulfillmentResult.kind === "fulfilled") {
+				return {
+					kind: "granted" as const,
+					eventId: event.id,
+					eventType: event.type,
+					clerkUserId: fulfillmentResult.clerkUserId,
+					grantResult: fulfillmentResult.grantResult,
+				};
+			}
+
+			if (fulfillmentResult.kind === "missing_checkout_email") {
+				return {
+					kind: "missing_checkout_email" as const,
+					eventId: event.id,
+					eventType: event.type,
+					sessionId: session.id,
+				};
+			}
 
 			return {
-				kind: "pending_claim_saved" as const,
+				kind: "fulfillment_failed" as const,
 				eventId: event.id,
 				eventType: event.type,
 				sessionId: session.id,
 				checkoutEmail,
-				saveResult,
+				message: `Paid checkout fulfillment returned ${fulfillmentResult.kind}.`,
 			};
 		}
 

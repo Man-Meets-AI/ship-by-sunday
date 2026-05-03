@@ -22,6 +22,13 @@ export type StripeWebhookIncidentResult =
 			stripeCustomerId: string | null;
 			stripePaymentIntentId: string | null;
 			message: string;
+	  }
+	| {
+			kind: "fulfillment_failed";
+			eventId: string;
+			eventType: string;
+			sessionId: string;
+			message: string;
 	  };
 
 export function getStripeModeLabelFromSecretKey(
@@ -149,6 +156,33 @@ export function buildStripeWebhookResultIncidentEvent({
 				}),
 				nextAction:
 					"Open the Stripe event and the product-access grant state, then fix persistence before replaying the webhook.",
+			};
+		case "fulfillment_failed":
+			return {
+				source: "stripe",
+				error: new Error("Stripe checkout email fulfillment failed."),
+				code: "stripe_webhook_fulfillment_failed",
+				severity: "high",
+				surface: "webhook",
+				externalEventId: result.eventId,
+				details: {
+					path: "/stripe/webhook",
+					stripeMode,
+					eventId: result.eventId,
+					eventType: result.eventType,
+					sessionId: result.sessionId,
+					fulfillmentMessage: result.message,
+				},
+				nativeUrl: getStripeEventDashboardUrl({
+					eventId: result.eventId,
+					stripeMode,
+				}),
+				logsUrl: getStripeEventDashboardUrl({
+					eventId: result.eventId,
+					stripeMode,
+				}),
+				nextAction:
+					"Check Convex Clerk and Stripe secrets, resolve any ambiguous Clerk users for the checkout email, then replay the Stripe webhook.",
 			};
 	}
 }

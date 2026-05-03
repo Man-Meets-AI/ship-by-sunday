@@ -166,7 +166,7 @@ export function WorkspacePrimaryNav({
 							>
 								{item.label}
 							</NavigationMenuTrigger>
-							<NavigationMenuContent className="w-64 p-2">
+							<NavigationMenuContent className="w-full max-w-[min(18rem,calc(100vw-2rem))] p-2 sm:max-w-none sm:w-72">
 								<ul className="grid gap-1">
 									{item.items.map((entry) => (
 										<li key={entry.id}>

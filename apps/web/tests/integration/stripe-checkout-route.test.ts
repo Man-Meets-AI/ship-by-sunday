@@ -10,6 +10,7 @@ const getStripeLineItemMock = vi.fn();
 const getStripeCheckoutDiscountsMock = vi.fn();
 const assertManagedStripePriceMatchesProductConfigMock = vi.fn();
 const getStripeMock = vi.fn();
+const getStripePublishableKeyMock = vi.fn();
 const getStripeModeLabelMock = vi.fn();
 const getStripeDashboardUrlMock = vi.fn();
 const getStripeProductDashboardUrlMock = vi.fn();
@@ -21,6 +22,7 @@ vi.mock("@clerk/nextjs/server", () => ({
 
 vi.mock("@/platform/billing/stripe", () => ({
 	getStripe: getStripeMock,
+	getStripePublishableKey: getStripePublishableKeyMock,
 	getStripeLineItem: getStripeLineItemMock,
 	getStripeCheckoutDiscounts: getStripeCheckoutDiscountsMock,
 	assertManagedStripePriceMatchesProductConfig:
@@ -50,6 +52,7 @@ describe("POST /api/stripe/checkout", () => {
 		getStripeCheckoutDiscountsMock.mockReset();
 		assertManagedStripePriceMatchesProductConfigMock.mockReset();
 		getStripeMock.mockReset();
+		getStripePublishableKeyMock.mockReset();
 		getStripeModeLabelMock.mockReset();
 		getStripeDashboardUrlMock.mockReset();
 		getStripeProductDashboardUrlMock.mockReset();
@@ -62,6 +65,7 @@ describe("POST /api/stripe/checkout", () => {
 		getStripeProductDashboardUrlMock.mockReturnValue(
 			"https://dashboard.stripe.com/test/products",
 		);
+		getStripePublishableKeyMock.mockReturnValue("pk_test_publishable");
 		getStripeCheckoutDiscountsMock.mockReturnValue([
 			{
 				promotion_code: "promo_50_off",
@@ -300,5 +304,73 @@ describe("POST /api/stripe/checkout", () => {
 		expect(
 			assertManagedStripePriceMatchesProductConfigMock,
 		).toHaveBeenCalledWith(expect.anything());
+	});
+
+	it("creates an express checkout session with a client secret", async () => {
+		authMock.mockResolvedValue({ userId: "user_123" });
+		currentUserMock.mockResolvedValue({
+			primaryEmailAddress: {
+				emailAddress: "buyer@example.com",
+			},
+		});
+		getAppBaseUrlMock.mockReturnValue("https://app.example.com");
+		getStripeLineItemMock.mockReturnValue({
+			price_data: {
+				currency: "usd",
+				product_data: { name: "Ship by Sunday" },
+				unit_amount: 50000,
+			},
+			quantity: 1,
+		});
+		assertManagedStripePriceMatchesProductConfigMock.mockResolvedValue(
+			undefined,
+		);
+		getStripeMock.mockReturnValue({
+			checkout: {
+				sessions: {
+					create: createSessionMock,
+				},
+			},
+		});
+		createSessionMock.mockResolvedValue({
+			client_secret: "cs_test_secret_123",
+			id: "cs_express_123",
+		});
+
+		const { POST } =
+			await import("../../app/api/stripe/checkout/express/route");
+
+		const response = await POST(createRequest());
+
+		expect(response.status).toBe(200);
+		expect(await response.json()).toEqual({
+			clientSecret: "cs_test_secret_123",
+			publishableKey: "pk_test_publishable",
+			returnUrl:
+				"https://app.example.com/checkout/success?session_id=cs_express_123",
+			sessionId: "cs_express_123",
+		});
+		expect(createSessionMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				billing_address_collection: "auto",
+				client_reference_id: "user_123",
+				customer_creation: "always",
+				customer_email: "buyer@example.com",
+				discounts: [{ promotion_code: "promo_50_off" }],
+				mode: "payment",
+				return_url:
+					"https://app.example.com/checkout/success?session_id={CHECKOUT_SESSION_ID}",
+				ui_mode: "custom",
+			}),
+		);
+		expect(createSessionMock.mock.calls[0]?.[0]).not.toHaveProperty(
+			"success_url",
+		);
+		expect(createSessionMock.mock.calls[0]?.[0]).not.toHaveProperty(
+			"cancel_url",
+		);
+		expect(response.headers.get("set-cookie")).toContain(
+			"sbs_pending_checkout_session=cs_express_123",
+		);
 	});
 });

@@ -10,6 +10,7 @@ function normalizeEnvValue(value: string | undefined) {
 }
 
 const convexEnvShape = {
+	CLERK_SECRET_KEY: z.string().min(1).optional(),
 	CLERK_FRONTEND_API_URL: z.string().min(1).optional(),
 	OBSERVABILITY_INGEST_TOKEN: z.string().min(1).optional(),
 	STRIPE_SECRET_KEY: z.string().min(1).optional(),

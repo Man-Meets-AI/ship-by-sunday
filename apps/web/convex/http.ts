@@ -143,12 +143,6 @@ http.route({
 						{ error: "Missing Stripe checkout email." },
 						{ status: 400 },
 					);
-				case "pending_claim_saved":
-					return jsonResponse({
-						received: true,
-						pendingClaimSaved: true,
-						saveResult: result.saveResult,
-					});
 				case "grant_failed":
 					await recordIncidentAndMaybeNotify(
 						ctx,
@@ -159,6 +153,18 @@ http.route({
 					);
 					return jsonResponse(
 						{ error: "Unable to grant product access." },
+						{ status: 500 },
+					);
+				case "fulfillment_failed":
+					await recordIncidentAndMaybeNotify(
+						ctx,
+						normalizeIncidentEvent({
+							...buildConvexStripeWebhookResultIncident(result),
+							pathname: "/stripe/webhook",
+						}),
+					);
+					return jsonResponse(
+						{ error: "Unable to fulfill paid checkout." },
 						{ status: 500 },
 					);
 				case "ignored":

@@ -16,13 +16,17 @@ The fourth risk is mature-repo overreach. Existing repos may use npm, pnpm, yarn
 
 The fifth risk is optional tool drift. Linear, external skills, MCPs, Codex app-server runtime, and PostHog triage are valuable later layers, but they need explicit customer setup and safety decisions. They should not become hidden prerequisites for the first generated-repo operating-system slice.
 
+The sixth risk is worker overpromising. Worker-first language is stronger than generic agent language, but it creates a higher proof burden. A worker must have a durable role, source truth, plan state, validation standard, review proof, and loop. If the existing-codebase lane does not yet audit and install those pieces, homepage and sales copy must not imply that mature repos can self-serve the full worker layer today.
+
+OpenAI's current Codex docs support this ordering. The AGENTS guidance says repository-level instruction files keep Codex aware of project norms, while the skills guidance says repeatable workflows should become scoped skills after the workflow is real. That means root and nested guidance should be correct before generated skills or automations become the main customer contract.
+
 ## Missing Work To Carry Into Later Slices
 
 The Program needs a customer-safe prompt and skill versioning policy. If prompts are copied from internal docs, the first implementation slice must strip repo-specific references and test for forbidden internal paths.
 
 The Program needs a mature-repo data boundary. Before product UI is built, the team must decide whether audits run locally, through a GitHub connector, through zip upload, or through a generated prompt pack that a customer's agent runs inside their repo.
 
-The Program needs a product promise update. The public surface should say that Ship by Sunday makes repos agent-ready through Programs, ExecPlans, validation, and review loops. It should not imply that mature repos become production-ready automatically.
+The Program needs a product promise update. The public surface should say that Ship by Sunday makes repos worker-ready through Programs, ExecPlans, validation, and review loops. It should not imply that mature repos become production-ready automatically.
 
 ## First ExecPlan Critique
 

@@ -47,6 +47,7 @@ describe("convex/checkoutClaimsActions", () => {
 	beforeEach(() => {
 		process.env = {
 			...originalEnv,
+			CLERK_SECRET_KEY: "sk_clerk_test_123",
 			STRIPE_SECRET_KEY: "sk_test_123",
 		};
 		retrieveSessionMock.mockReset();
@@ -56,6 +57,7 @@ describe("convex/checkoutClaimsActions", () => {
 
 	afterEach(() => {
 		process.env = { ...originalEnv };
+		vi.unstubAllGlobals();
 		vi.restoreAllMocks();
 	});
 
@@ -300,5 +302,187 @@ describe("convex/checkoutClaimsActions", () => {
 			checkoutEmail: "buyer@example.com",
 			currentAccountEmail: "buyer@example.com",
 		});
+	});
+
+	it("fulfills a paid guest checkout for an existing Clerk user by checkout email", async () => {
+		retrieveSessionMock.mockResolvedValue({
+			id: "cs_guest_fulfill",
+			metadata: {
+				courseSlug: "ship-by-sunday",
+			},
+			client_reference_id: null,
+			customer_details: {
+				email: "Buyer@Example.com",
+			},
+			customer: "cus_123",
+			payment_intent: "pi_123",
+			payment_status: "paid",
+		});
+		const fetchMock = vi.fn().mockResolvedValue({
+			ok: true,
+			status: 200,
+			json: async () => [
+				{
+					id: "user_existing",
+					email_addresses: [{ email_address: "buyer@example.com" }],
+				},
+			],
+		});
+		vi.stubGlobal("fetch", fetchMock);
+		const runMutation = vi
+			.fn()
+			.mockResolvedValueOnce({ saved: "inserted" })
+			.mockResolvedValueOnce({
+				repair: "repaired",
+				grantResult: { granted: "inserted" },
+			});
+		const { fulfillCheckoutSessionByEmail } =
+			await import("@/convex/checkoutClaimsActions");
+
+		const result = await fulfillCheckoutSessionByEmail._handler(
+			createActionCtx({ runMutation }) as never,
+			{
+				sessionId: "cs_guest_fulfill",
+				stripeEventId: "evt_123",
+				stripeEventType: "checkout.session.completed",
+			},
+		);
+
+		expect(result).toEqual({
+			kind: "fulfilled",
+			sessionId: "cs_guest_fulfill",
+			checkoutEmail: "Buyer@Example.com",
+			clerkUserId: "user_existing",
+			clerkUserStatus: "exists",
+			grantResult: { granted: "inserted" },
+		});
+		expect(fetchMock).toHaveBeenCalledTimes(1);
+		expect(runMutation).toHaveBeenNthCalledWith(
+			1,
+			expect.anything(),
+			expect.objectContaining({
+				stripeCheckoutSessionId: "cs_guest_fulfill",
+				checkoutEmail: "Buyer@Example.com",
+				stripeCustomerId: "cus_123",
+				stripePaymentIntentId: "pi_123",
+				stripeEventId: "evt_123",
+				stripeEventType: "checkout.session.completed",
+			}),
+		);
+		expect(runMutation).toHaveBeenNthCalledWith(2, expect.anything(), {
+			stripeCheckoutSessionId: "cs_guest_fulfill",
+			checkoutEmail: "Buyer@Example.com",
+			clerkUserId: "user_existing",
+		});
+	});
+
+	it("creates a Clerk user before fulfilling when the checkout email has no account", async () => {
+		retrieveSessionMock.mockResolvedValue({
+			id: "cs_guest_create",
+			metadata: {
+				courseSlug: "ship-by-sunday",
+			},
+			customer_details: {
+				email: "new@example.com",
+			},
+			payment_status: "paid",
+		});
+		const fetchMock = vi
+			.fn()
+			.mockResolvedValueOnce({
+				ok: true,
+				status: 200,
+				json: async () => [],
+			})
+			.mockResolvedValueOnce({
+				ok: true,
+				status: 200,
+				json: async () => ({ id: "user_created" }),
+			});
+		vi.stubGlobal("fetch", fetchMock);
+		const runMutation = vi
+			.fn()
+			.mockResolvedValueOnce({ saved: "inserted" })
+			.mockResolvedValueOnce({
+				repair: "repaired",
+				grantResult: { granted: "inserted" },
+			});
+		const { fulfillCheckoutSessionByEmail } =
+			await import("@/convex/checkoutClaimsActions");
+
+		const result = await fulfillCheckoutSessionByEmail._handler(
+			createActionCtx({ runMutation }) as never,
+			{
+				sessionId: "cs_guest_create",
+				stripeEventId: "evt_create",
+				stripeEventType: "checkout.session.completed",
+			},
+		);
+
+		expect(result).toMatchObject({
+			kind: "fulfilled",
+			clerkUserId: "user_created",
+			clerkUserStatus: "created",
+		});
+		expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toMatchObject({
+			email_address: ["new@example.com"],
+			skip_password_requirement: true,
+			private_metadata: {
+				shipBySundayPaidCheckoutFulfillment: {
+					checkoutEmail: "new@example.com",
+					stripeCheckoutSessionId: "cs_guest_create",
+				},
+			},
+		});
+	});
+
+	it("refuses fulfillment when multiple Clerk users match the checkout email", async () => {
+		retrieveSessionMock.mockResolvedValue({
+			id: "cs_guest_conflict",
+			metadata: {
+				courseSlug: "ship-by-sunday",
+			},
+			customer_details: {
+				email: "buyer@example.com",
+			},
+			payment_status: "paid",
+		});
+		vi.stubGlobal(
+			"fetch",
+			vi.fn().mockResolvedValue({
+				ok: true,
+				status: 200,
+				json: async () => [
+					{
+						id: "user_1",
+						email_addresses: [{ email_address: "buyer@example.com" }],
+					},
+					{
+						id: "user_2",
+						email_addresses: [{ email_address: "buyer@example.com" }],
+					},
+				],
+			}),
+		);
+		const runMutation = vi.fn().mockResolvedValueOnce({ saved: "inserted" });
+		const { fulfillCheckoutSessionByEmail } =
+			await import("@/convex/checkoutClaimsActions");
+
+		const result = await fulfillCheckoutSessionByEmail._handler(
+			createActionCtx({ runMutation }) as never,
+			{
+				sessionId: "cs_guest_conflict",
+				stripeEventId: "evt_conflict",
+				stripeEventType: "checkout.session.completed",
+			},
+		);
+
+		expect(result).toEqual({
+			kind: "clerk_user_conflict",
+			sessionId: "cs_guest_conflict",
+			checkoutEmail: "buyer@example.com",
+			matchingUserCount: 2,
+		});
+		expect(runMutation).toHaveBeenCalledTimes(1);
 	});
 });

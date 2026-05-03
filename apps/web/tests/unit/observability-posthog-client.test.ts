@@ -80,6 +80,26 @@ describe("PostHog client adapter", () => {
 		});
 	});
 
+	it("uses the default PostHog host when the public host is blank", async () => {
+		process.env.NEXT_PUBLIC_POSTHOG_TOKEN = " phc_test_123 ";
+		process.env.NEXT_PUBLIC_POSTHOG_HOST = " ";
+
+		const { getPostHogBrowserConfig, initializePostHogClient } =
+			await import("@/lib/observability/posthog-client");
+
+		expect(getPostHogBrowserConfig()).toEqual({
+			token: "phc_test_123",
+			host: "https://us.i.posthog.com",
+		});
+		expect(initializePostHogClient()).toBe(true);
+		expect(posthogInitMock).toHaveBeenCalledWith(
+			"phc_test_123",
+			expect.objectContaining({
+				api_host: "https://us.i.posthog.com",
+			}),
+		);
+	});
+
 	it("captures after the SDK has already initialized", async () => {
 		process.env.NEXT_PUBLIC_POSTHOG_TOKEN = "phc_test_123";
 		process.env.NEXT_PUBLIC_POSTHOG_HOST = "https://us.i.posthog.com";
@@ -113,6 +133,37 @@ describe("PostHog client adapter", () => {
 		expect(
 			capturePostHogClientException({
 				error: new Error("Client failed"),
+			}),
+		).toBe(false);
+	});
+
+	it("returns false when product event capture cannot initialize", async () => {
+		delete process.env.NEXT_PUBLIC_POSTHOG_TOKEN;
+
+		const { capturePostHogProductEvent } =
+			await import("@/lib/observability/posthog-client");
+
+		expect(
+			capturePostHogProductEvent({
+				event: "checkout_started",
+			}),
+		).toBe(false);
+		expect(posthogCaptureMock).not.toHaveBeenCalled();
+	});
+
+	it("swallows product event capture failures", async () => {
+		process.env.NEXT_PUBLIC_POSTHOG_TOKEN = "phc_test_123";
+		process.env.NEXT_PUBLIC_POSTHOG_HOST = "https://us.i.posthog.com";
+		posthogCaptureMock.mockImplementationOnce(() => {
+			throw new Error("PostHog unavailable");
+		});
+
+		const { capturePostHogProductEvent } =
+			await import("@/lib/observability/posthog-client");
+
+		expect(
+			capturePostHogProductEvent({
+				event: "checkout_started",
 			}),
 		).toBe(false);
 	});

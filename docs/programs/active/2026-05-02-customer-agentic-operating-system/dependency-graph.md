@@ -11,8 +11,8 @@
 3. Generated repo explicit agentic bootstrap.
    This depends on the operating pack existing. It should create or refresh a first Program packet from generated facts and Build Pack readiness only when the customer asks for it.
 
-4. Product docs and onboarding for the two-lane model.
-   This depends on the generated pack shape because the docs need to point to real files and commands. It can begin before mature-repo ingestion is implemented if it is careful to label the mature lane as upcoming or scoped.
+4. Worker-led product docs and onboarding for the two-lane model.
+   This depends on the generated pack shape because the docs need to point to real files and commands. It can begin before mature-repo ingestion is implemented if it is careful to label the mature lane as upcoming or scoped. The customer-facing distinction should be lane-based: create a new worker-ready codebase, or bring an existing mature repo under a worker operating layer.
 
 5. Mature repo audit model.
    This depends on the operating pack decisions but not on generated repo bootstrap. It defines the input inventory, maturity report, command map, source-truth map, and adoption Program output.

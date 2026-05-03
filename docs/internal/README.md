@@ -17,3 +17,7 @@ The repo-wide first hop is [docs/index.md](../index.md). Use this lane after the
 
 - [linear.md](./linear.md)
 - [observability.md](./observability.md)
+
+## Review prompts
+
+- [Dropdown / overlay width pass](./review-prompts/dropdown-overlay-width-pass.md) — menus and popovers sized from narrow triggers or conflicting `w-*` / `md:w-*` utilities.

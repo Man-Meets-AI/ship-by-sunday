@@ -46,6 +46,7 @@ export function BlueprintStageLeaveDialog({
 				</AlertDialogHeader>
 				<AlertDialogFooter>
 					<AlertDialogCancel
+						className="min-w-0 whitespace-normal px-4"
 						onClick={onStay}
 						data-testid="blueprint-page-leave-dialog-stay"
 					>
@@ -53,7 +54,7 @@ export function BlueprintStageLeaveDialog({
 					</AlertDialogCancel>
 					<AlertDialogAction
 						variant="destructive"
-						className="bg-destructive text-white hover:bg-destructive/90 dark:bg-destructive dark:text-white dark:hover:bg-destructive/90"
+						className="min-w-0 whitespace-normal bg-destructive px-4 text-white hover:bg-destructive/90 dark:bg-destructive dark:text-white dark:hover:bg-destructive/90"
 						onClick={onLeaveWithoutSaving}
 						data-testid="blueprint-page-leave-dialog-leave"
 					>

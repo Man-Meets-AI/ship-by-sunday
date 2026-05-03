@@ -83,7 +83,7 @@ describe("convex/stripeWebhook", () => {
 		expect(runMutation).not.toHaveBeenCalled();
 	});
 
-	it("saves a pending claim when checkout metadata is incomplete but the buyer email exists", async () => {
+	it("fulfills access by checkout email when checkout metadata is incomplete but the buyer email exists", async () => {
 		constructEventMock.mockReturnValue({
 			id: "evt_pending_claim",
 			type: "checkout.session.completed",
@@ -99,11 +99,21 @@ describe("convex/stripeWebhook", () => {
 				},
 			},
 		});
-		const runMutation = vi.fn().mockResolvedValue({ saved: "inserted" });
+		const runMutation = vi.fn();
+		const runAction = vi.fn().mockResolvedValue({
+			kind: "fulfilled",
+			sessionId: "cs_test_123",
+			checkoutEmail: "buyer@example.com",
+			clerkUserId: "user_from_email",
+			clerkUserStatus: "exists",
+			grantResult: {
+				granted: "inserted",
+			},
+		});
 		const { processStripeWebhook } = await import("@/convex/stripeWebhook");
 
 		const result = await processStripeWebhook._handler(
-			{ runMutation } as never,
+			{ runMutation, runAction } as never,
 			{
 				body: "raw-webhook-body",
 				signature: "t=1,v1=signature",
@@ -111,26 +121,20 @@ describe("convex/stripeWebhook", () => {
 		);
 
 		expect(result).toEqual({
-			kind: "pending_claim_saved",
+			kind: "granted",
 			eventId: "evt_pending_claim",
 			eventType: "checkout.session.completed",
-			sessionId: "cs_test_123",
-			checkoutEmail: "buyer@example.com",
-			saveResult: {
-				saved: "inserted",
+			clerkUserId: "user_from_email",
+			grantResult: {
+				granted: "inserted",
 			},
 		});
-		expect(runMutation).toHaveBeenCalledWith(
-			expect.anything(),
-			expect.objectContaining({
-				stripeCheckoutSessionId: "cs_test_123",
-				checkoutEmail: "buyer@example.com",
-				courseSlug: "ship-by-sunday",
-				paymentStatus: "paid",
-				stripeEventId: "evt_pending_claim",
-				stripeEventType: "checkout.session.completed",
-			}),
-		);
+		expect(runAction).toHaveBeenCalledWith(expect.anything(), {
+			sessionId: "cs_test_123",
+			stripeEventId: "evt_pending_claim",
+			stripeEventType: "checkout.session.completed",
+		});
+		expect(runMutation).not.toHaveBeenCalled();
 	});
 
 	it("returns missing_checkout_email when a guest checkout session has no recoverable buyer email", async () => {

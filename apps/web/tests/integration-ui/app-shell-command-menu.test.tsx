@@ -193,4 +193,37 @@ describe("AppShellCommandMenu", () => {
 
 		expect(signOutMock).toHaveBeenCalledTimes(1);
 	});
+
+	it("renders long compound lesson labels with a wrappable label span", async () => {
+		const longChildLabel = `Extra long lesson title ${"x".repeat(80)}`;
+		const navWithLongLesson: AppShellPrimaryNav = {
+			...samplePrimaryNav,
+			postReviewItems: [
+				{
+					kind: "menu",
+					id: "bonus",
+					label: "Bonus",
+					state: "available",
+					items: [
+						{
+							kind: "link",
+							id: "bonus-long",
+							label: longChildLabel,
+							href: "/lesson/long",
+							state: "available",
+						},
+					],
+				},
+			],
+		};
+		render(<AppShellCommandMenu primaryNav={navWithLongLesson} />);
+		fireEvent.keyDown(window, { key: "k", metaKey: true });
+		await screen.findByPlaceholderText(/search workspace/i);
+
+		const compoundLabel = `Bonus: ${longChildLabel}`;
+		const option = screen.getByRole("option", { name: compoundLabel });
+		expect(option).toBeTruthy();
+		const labelSpan = option.querySelector("span.min-w-0.break-words");
+		expect(labelSpan?.textContent).toBe(compoundLabel);
+	});
 });

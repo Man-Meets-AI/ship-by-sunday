@@ -13,7 +13,7 @@ read_when:
 
 ## Planning Context
 
-Ship by Sunday should become the agentic engineering operating system for both new generated repos and mature existing codebases. The first implementation slice should focus on generated customer repos because that path is already controlled by `packages/blueprint-compiler`, already has customer-safe materialization tests, and already emits Build Pack readiness and first-slice planning docs. The first slice should reconcile source truth and drift before it ships the full operating pack.
+Ship by Sunday should become the agentic engineering operating system for both new generated repos and mature existing codebases. The buyer-facing product is a worker layer, and Programs, ExecPlans, validation, review evidence, and loops are the substrate that make workers durable. The first implementation slice should focus on generated customer repos because that path is already controlled by `packages/blueprint-compiler`, already has customer-safe materialization tests, and already emits Build Pack readiness and first-slice planning docs. The first slice should reconcile source truth and drift before it ships the full operating pack.
 
 The Program packet lives at `docs/programs/active/2026-05-02-customer-agentic-operating-system/`.
 
@@ -36,6 +36,8 @@ The child ExecPlan must decide the current source-of-truth model for customer ag
 The child ExecPlan should not emit a seed Program packet yet unless implementation proves that doing so is necessary to reconcile existing source truth. Seed Program generation belongs naturally in a later explicit bootstrap slice.
 
 The child ExecPlan must keep the mature-repo lane as a future Program slice. It can preserve extension points, but it must not build mature-repo product UI.
+
+The child ExecPlan must also preserve the worker-first thesis without changing public positioning in this slice. Homepage, pricing, checkout, and docs hierarchy changes belong in the later worker-led two-lane customer journey slice, after generated-repo source truth is coherent enough to point at real files and commands.
 
 ## Success Criteria
 

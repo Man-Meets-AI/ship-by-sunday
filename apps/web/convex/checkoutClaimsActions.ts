@@ -6,6 +6,7 @@ import { v } from "convex/values";
 import { apiConfig, PRODUCT_COURSE_SLUG } from "../config/product";
 import { internal } from "./_generated/api";
 import { action } from "./_generated/server";
+import type { ActionCtx } from "./_generated/server";
 import { productAccessGrantResultValidator } from "./access/validators";
 import { normalizeCheckoutEmail } from "./checkoutClaims";
 import { requireConvexEnv } from "./env";
@@ -96,6 +97,132 @@ type SuccessfulCheckoutClaimResult =
 			};
 	  };
 
+const checkoutSessionFulfillmentResultValidator = v.union(
+	v.object({
+		kind: v.literal("fulfilled"),
+		sessionId: v.string(),
+		checkoutEmail: v.string(),
+		clerkUserId: v.string(),
+		clerkUserStatus: v.union(v.literal("exists"), v.literal("created")),
+		grantResult: productAccessGrantResultValidator,
+	}),
+	v.object({
+		kind: v.literal("invalid_session"),
+		sessionId: v.string(),
+	}),
+	v.object({
+		kind: v.literal("payment_pending"),
+		sessionId: v.string(),
+		paymentStatus: v.string(),
+	}),
+	v.object({
+		kind: v.literal("missing_checkout_email"),
+		sessionId: v.string(),
+	}),
+	v.object({
+		kind: v.literal("clerk_lookup_failed"),
+		sessionId: v.string(),
+		checkoutEmail: v.string(),
+		message: v.string(),
+	}),
+	v.object({
+		kind: v.literal("clerk_create_failed"),
+		sessionId: v.string(),
+		checkoutEmail: v.string(),
+		message: v.string(),
+	}),
+	v.object({
+		kind: v.literal("clerk_user_conflict"),
+		sessionId: v.string(),
+		checkoutEmail: v.string(),
+		matchingUserCount: v.number(),
+	}),
+	v.object({
+		kind: v.literal("grant_failed"),
+		sessionId: v.string(),
+		checkoutEmail: v.string(),
+		clerkUserId: v.string(),
+		message: v.string(),
+	}),
+);
+
+type CheckoutSessionFulfillmentResult =
+	| {
+			kind: "fulfilled";
+			sessionId: string;
+			checkoutEmail: string;
+			clerkUserId: string;
+			clerkUserStatus: "exists" | "created";
+			grantResult: {
+				granted: "inserted" | "patched";
+			};
+	  }
+	| {
+			kind: "invalid_session";
+			sessionId: string;
+	  }
+	| {
+			kind: "payment_pending";
+			sessionId: string;
+			paymentStatus: string;
+	  }
+	| {
+			kind: "missing_checkout_email";
+			sessionId: string;
+	  }
+	| {
+			kind: "clerk_lookup_failed";
+			sessionId: string;
+			checkoutEmail: string;
+			message: string;
+	  }
+	| {
+			kind: "clerk_create_failed";
+			sessionId: string;
+			checkoutEmail: string;
+			message: string;
+	  }
+	| {
+			kind: "clerk_user_conflict";
+			sessionId: string;
+			checkoutEmail: string;
+			matchingUserCount: number;
+	  }
+	| {
+			kind: "grant_failed";
+			sessionId: string;
+			checkoutEmail: string;
+			clerkUserId: string;
+			message: string;
+	  };
+
+type ClerkUserLookupResult =
+	| {
+			status: "exists";
+			clerkUserId: string;
+	  }
+	| {
+			status: "created";
+			clerkUserId: string;
+	  }
+	| {
+			status: "conflict";
+			matchingUserCount: number;
+	  }
+	| {
+			status: "lookup_failed" | "create_failed";
+			message: string;
+	  };
+
+type ClerkEmailAddressPayload = {
+	email_address?: unknown;
+};
+
+type ClerkUserPayload = {
+	id?: unknown;
+	email_addresses?: unknown;
+};
+
 const checkoutEmailClaimActionResultValidator = v.union(
 	v.object({
 		kind: v.literal("sign_in_required"),
@@ -174,6 +301,320 @@ function getCurrentAccountEmail(identity: { email?: unknown }) {
 		: undefined;
 }
 
+function getMessageFromClerkPayload(payload: unknown, fallback: string) {
+	if (!payload || typeof payload !== "object") {
+		return fallback;
+	}
+
+	const record = payload as {
+		errors?: Array<{ long_message?: unknown; message?: unknown }>;
+		message?: unknown;
+	};
+	const clerkError = record.errors?.[0];
+	if (typeof clerkError?.long_message === "string") {
+		return clerkError.long_message;
+	}
+
+	if (typeof clerkError?.message === "string") {
+		return clerkError.message;
+	}
+
+	if (typeof record.message === "string") {
+		return record.message;
+	}
+
+	return fallback;
+}
+
+function getExactClerkUsersByEmail(users: unknown, email: string) {
+	if (!Array.isArray(users)) {
+		return [];
+	}
+
+	const normalizedEmail = normalizeCheckoutEmail(email);
+	return users.filter((user: ClerkUserPayload) => {
+		if (!Array.isArray(user?.email_addresses)) {
+			return false;
+		}
+
+		return user.email_addresses.some((address: ClerkEmailAddressPayload) => {
+			return (
+				typeof address?.email_address === "string" &&
+				normalizeCheckoutEmail(address.email_address) === normalizedEmail
+			);
+		});
+	});
+}
+
+async function fetchClerkJson({
+	pathname,
+	secretKey,
+	searchParams,
+	init,
+}: {
+	pathname: string;
+	secretKey: string;
+	searchParams?: Record<string, string>;
+	init?: RequestInit;
+}) {
+	const url = new URL(pathname, "https://api.clerk.com");
+	for (const [key, value] of Object.entries(searchParams ?? {})) {
+		url.searchParams.set(key, value);
+	}
+
+	const response = await fetch(url, {
+		...init,
+		headers: {
+			Authorization: `Bearer ${secretKey}`,
+			...init?.headers,
+		},
+	});
+	const body = await response.json().catch(() => null);
+
+	return {
+		ok: response.ok,
+		status: response.status,
+		body,
+	};
+}
+
+async function resolveCheckoutEmailClerkUser({
+	checkoutEmail,
+	stripeCheckoutSessionId,
+}: {
+	checkoutEmail: string;
+	stripeCheckoutSessionId: string;
+}): Promise<ClerkUserLookupResult> {
+	const secretKey = requireConvexEnv("CLERK_SECRET_KEY");
+	const lookup = await fetchClerkJson({
+		pathname: "/v1/users",
+		secretKey,
+		searchParams: {
+			limit: "100",
+			query: normalizeCheckoutEmail(checkoutEmail),
+		},
+	});
+
+	if (!lookup.ok) {
+		return {
+			status: "lookup_failed",
+			message: getMessageFromClerkPayload(
+				lookup.body,
+				`Clerk user lookup failed with status ${lookup.status}.`,
+			),
+		};
+	}
+
+	const exactUsers = getExactClerkUsersByEmail(lookup.body, checkoutEmail);
+	if (exactUsers.length > 1) {
+		return {
+			status: "conflict",
+			matchingUserCount: exactUsers.length,
+		};
+	}
+
+	const existingUser = exactUsers[0] as ClerkUserPayload | undefined;
+	if (typeof existingUser?.id === "string") {
+		return {
+			status: "exists",
+			clerkUserId: existingUser.id,
+		};
+	}
+
+	const created = await fetchClerkJson({
+		pathname: "/v1/users",
+		secretKey,
+		init: {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				email_address: [normalizeCheckoutEmail(checkoutEmail)],
+				skip_password_requirement: true,
+				private_metadata: {
+					shipBySundayPaidCheckoutFulfillment: {
+						checkoutEmail: normalizeCheckoutEmail(checkoutEmail),
+						stripeCheckoutSessionId,
+						source: "checkoutClaimsActions.fulfillCheckoutSessionByEmail",
+						createdAt: new Date().toISOString(),
+					},
+				},
+			}),
+		},
+	});
+
+	if (!created.ok) {
+		return {
+			status: "create_failed",
+			message: getMessageFromClerkPayload(
+				created.body,
+				`Clerk user creation failed with status ${created.status}.`,
+			),
+		};
+	}
+
+	const createdUser = created.body as ClerkUserPayload | null;
+	if (typeof createdUser?.id !== "string") {
+		return {
+			status: "create_failed",
+			message: "Clerk user creation did not return a user id.",
+		};
+	}
+
+	return {
+		status: "created",
+		clerkUserId: createdUser.id,
+	};
+}
+
+function getStripeIds(session: Stripe.Checkout.Session) {
+	return {
+		stripeCustomerId:
+			typeof session.customer === "string" ? session.customer : undefined,
+		stripePaymentIntentId:
+			typeof session.payment_intent === "string"
+				? session.payment_intent
+				: undefined,
+	};
+}
+
+async function fulfillPaidCheckoutSessionByEmail({
+	ctx,
+	session,
+	stripeEventId,
+	stripeEventType,
+}: {
+	ctx: ActionCtx;
+	session: Stripe.Checkout.Session;
+	stripeEventId: string;
+	stripeEventType: string;
+}): Promise<CheckoutSessionFulfillmentResult> {
+	const sessionCourseSlug = session.metadata?.courseSlug ?? PRODUCT_COURSE_SLUG;
+	if (sessionCourseSlug !== PRODUCT_COURSE_SLUG) {
+		return {
+			kind: "invalid_session",
+			sessionId: session.id,
+		};
+	}
+
+	if (
+		session.payment_status !== "paid" &&
+		session.payment_status !== "no_payment_required"
+	) {
+		return {
+			kind: "payment_pending",
+			sessionId: session.id,
+			paymentStatus: session.payment_status,
+		};
+	}
+
+	const checkoutEmail = getCheckoutEmail(session);
+	if (!checkoutEmail) {
+		return {
+			kind: "missing_checkout_email",
+			sessionId: session.id,
+		};
+	}
+
+	const { stripeCustomerId, stripePaymentIntentId } = getStripeIds(session);
+	await ctx.runMutation(
+		internal.checkoutClaims.upsertPendingCheckoutClaimFromStripe,
+		{
+			stripeCheckoutSessionId: session.id,
+			checkoutEmail,
+			courseSlug: sessionCourseSlug,
+			paymentStatus: session.payment_status,
+			stripeCustomerId,
+			stripePaymentIntentId,
+			stripeEventId,
+			stripeEventType,
+		},
+	);
+
+	const clerkUser = await resolveCheckoutEmailClerkUser({
+		checkoutEmail,
+		stripeCheckoutSessionId: session.id,
+	});
+
+	switch (clerkUser.status) {
+		case "lookup_failed":
+			return {
+				kind: "clerk_lookup_failed",
+				sessionId: session.id,
+				checkoutEmail,
+				message: clerkUser.message,
+			};
+		case "create_failed":
+			return {
+				kind: "clerk_create_failed",
+				sessionId: session.id,
+				checkoutEmail,
+				message: clerkUser.message,
+			};
+		case "conflict":
+			return {
+				kind: "clerk_user_conflict",
+				sessionId: session.id,
+				checkoutEmail,
+				matchingUserCount: clerkUser.matchingUserCount,
+			};
+		case "exists":
+		case "created":
+			break;
+		default:
+			return clerkUser satisfies never;
+	}
+
+	try {
+		const repairResult = await ctx.runMutation(
+			internal.checkoutClaims.repairPaidCheckoutClaim,
+			{
+				stripeCheckoutSessionId: session.id,
+				checkoutEmail,
+				clerkUserId: clerkUser.clerkUserId,
+			},
+		);
+
+		switch (repairResult.repair) {
+			case "repaired":
+			case "already_claimed_by_target":
+				return {
+					kind: "fulfilled",
+					sessionId: session.id,
+					checkoutEmail,
+					clerkUserId: clerkUser.clerkUserId,
+					clerkUserStatus: clerkUser.status,
+					grantResult: repairResult.grantResult,
+				};
+			case "claimed_by_other_user":
+			case "missing_claim":
+			case "payment_not_paid":
+			case "checkout_email_mismatch":
+				return {
+					kind: "grant_failed",
+					sessionId: session.id,
+					checkoutEmail,
+					clerkUserId: clerkUser.clerkUserId,
+					message: `Paid checkout repair failed: ${repairResult.repair}.`,
+				};
+			default:
+				return repairResult satisfies never;
+		}
+	} catch (error) {
+		return {
+			kind: "grant_failed",
+			sessionId: session.id,
+			checkoutEmail,
+			clerkUserId: clerkUser.clerkUserId,
+			message:
+				error instanceof Error
+					? error.message
+					: "Unable to fulfill paid checkout access.",
+		};
+	}
+}
+
 function mapPendingClaimResult({
 	sessionId,
 	claimResult,
@@ -223,6 +664,42 @@ function mapPendingClaimResult({
 			return claimResult satisfies never;
 	}
 }
+
+export const fulfillCheckoutSessionByEmail = action({
+	args: {
+		sessionId: v.string(),
+		stripeEventId: v.string(),
+		stripeEventType: v.string(),
+	},
+	returns: checkoutSessionFulfillmentResultValidator,
+	handler: async (ctx, args): Promise<CheckoutSessionFulfillmentResult> => {
+		let session: Stripe.Checkout.Session;
+		try {
+			session = await getStripeClient().checkout.sessions.retrieve(
+				args.sessionId,
+			);
+		} catch (error) {
+			if (
+				error instanceof Stripe.errors.StripeError &&
+				error.type === "StripeInvalidRequestError"
+			) {
+				return {
+					kind: "invalid_session" as const,
+					sessionId: args.sessionId,
+				};
+			}
+
+			throw error;
+		}
+
+		return await fulfillPaidCheckoutSessionByEmail({
+			ctx,
+			session,
+			stripeEventId: args.stripeEventId,
+			stripeEventType: args.stripeEventType,
+		});
+	},
+});
 
 export const claimCheckoutSessionForViewer = action({
 	args: {

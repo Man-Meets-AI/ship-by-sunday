@@ -28,7 +28,7 @@ const inputClassName =
 	"flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none";
 
 const listClassName =
-	"max-h-72 overflow-y-auto p-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:pt-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-item]]:flex [&_[cmdk-item]]:items-center [&_[cmdk-item]]:gap-2 [&_[cmdk-item]]:rounded-md [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-1.5 [&_[cmdk-item]]:text-sm [&_[cmdk-item]]:text-foreground [&_[cmdk-item][data-selected=true]]:bg-accent [&_[cmdk-item][data-selected=true]]:text-accent-foreground [&_[cmdk-item][data-disabled=true]]:opacity-50 [&_[cmdk-item][data-disabled=true]]:cursor-not-allowed";
+	"max-h-72 overflow-y-auto p-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:pt-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-item]]:flex [&_[cmdk-item]]:min-w-0 [&_[cmdk-item]]:items-start [&_[cmdk-item]]:gap-2 [&_[cmdk-item]]:rounded-md [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-1.5 [&_[cmdk-item]]:text-sm [&_[cmdk-item]]:text-foreground [&_[cmdk-item][data-selected=true]]:bg-accent [&_[cmdk-item][data-selected=true]]:text-accent-foreground [&_[cmdk-item][data-disabled=true]]:opacity-50 [&_[cmdk-item][data-disabled=true]]:cursor-not-allowed [&_[cmdk-item]_svg]:mt-0.5";
 
 type AppShellCommandMenuProps = {
 	primaryNav: AppShellPrimaryNav | undefined;

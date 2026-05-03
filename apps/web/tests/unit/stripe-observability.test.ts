@@ -70,6 +70,10 @@ describe("stripe observability helpers", () => {
 		const { buildStripeWebhookResultIncident } =
 			await import("@/platform/observability/source-adapters/stripe-failure");
 
+		const invalidSignatureIncident = buildStripeWebhookResultIncident({
+			kind: "invalid_signature",
+			message: "No signatures found.",
+		});
 		const missingCheckoutEmailIncident = buildStripeWebhookResultIncident({
 			kind: "missing_checkout_email",
 			eventId: "evt_123",
@@ -86,7 +90,22 @@ describe("stripe observability helpers", () => {
 			stripePaymentIntentId: "pi_456",
 			message: "convex unavailable",
 		});
+		const fulfillmentFailedIncident = buildStripeWebhookResultIncident({
+			kind: "fulfillment_failed",
+			eventId: "evt_789",
+			eventType: "checkout.session.completed",
+			sessionId: "cs_789",
+			message: "Clerk unavailable",
+		});
 
+		expect(invalidSignatureIncident).toMatchObject({
+			code: "stripe_webhook_invalid_signature",
+			nativeUrl: "https://dashboard.stripe.com/test/webhooks",
+			logsUrl: "https://dashboard.stripe.com/test/events",
+		});
+		expect(invalidSignatureIncident.details).toMatchObject({
+			verifierMessage: "No signatures found.",
+		});
 		expect(missingCheckoutEmailIncident).toMatchObject({
 			code: "stripe_webhook_missing_checkout_email",
 			externalEventId: "evt_123",
@@ -102,5 +121,26 @@ describe("stripe observability helpers", () => {
 			stripeCustomerId: "cus_456",
 			stripePaymentIntentId: "pi_456",
 		});
+		expect(fulfillmentFailedIncident).toMatchObject({
+			code: "stripe_webhook_fulfillment_failed",
+			externalEventId: "evt_789",
+			nativeUrl: "https://dashboard.stripe.com/test/events/evt_789",
+		});
+		expect(fulfillmentFailedIncident.details).toMatchObject({
+			fulfillmentMessage: "Clerk unavailable",
+			sessionId: "cs_789",
+		});
+	});
+
+	it("infers live mode from live Stripe secret keys", async () => {
+		process.env = {
+			...originalEnv,
+			STRIPE_SECRET_KEY: "sk_live_123",
+		};
+		vi.resetModules();
+
+		const { getStripeModeLabel } = await import("@/platform/billing/stripe");
+
+		expect(getStripeModeLabel()).toBe("live");
 	});
 });

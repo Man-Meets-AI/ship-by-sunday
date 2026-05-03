@@ -39,7 +39,10 @@ If it fails, update `apps/web/.env.local` so `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
 ```bash
 cd apps/web
 bunx convex env set CLERK_FRONTEND_API_URL "$CLERK_FRONTEND_API_URL"
+bunx convex env set CLERK_SECRET_KEY "$CLERK_SECRET_KEY"
 ```
+
+Paid checkout fulfillment also uses `CLERK_SECRET_KEY` inside Convex to resolve or create the Clerk account for the Stripe checkout email. `bun run stripe:listen:dev` syncs this with the Stripe webhook secrets for local billing QA.
 
 This repo does not support Convex's local backend mode as a first-class workflow. Development means local Next.js plus a hosted Convex dev deployment.
 

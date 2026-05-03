@@ -1,11 +1,18 @@
 import { spawn } from "node:child_process";
+import { createRequire } from "node:module";
+import path from "node:path";
 import Stripe from "stripe";
 
-const CONVEX_BIN_PATH = new URL(
-	"../node_modules/convex/bin/main.js",
-	import.meta.url,
-).pathname;
+const require = createRequire(import.meta.url);
+const CONVEX_BIN_PATH = path.join(
+	path.dirname(require.resolve("convex/package.json")),
+	"bin/main.js",
+);
 const LOCALHOST_HOSTS = new Set(["127.0.0.1", "0.0.0.0", "localhost"]);
+const VALID_PRODUCT_ACCESS_SOURCES = new Set([
+	"stripe_checkout",
+	"stripe_webhook",
+]);
 
 function parseArgs(argv) {
 	let sessionId = null;
@@ -171,8 +178,8 @@ printCheck(
 	`status=${session.status}, payment_status=${session.payment_status}`,
 );
 printCheck(
-	"Metadata present",
-	Boolean(clerkUserId) && Boolean(courseSlug),
+	"Course metadata present",
+	Boolean(courseSlug),
 	`clerkUserId=${clerkUserId ?? "missing"}, courseSlug=${courseSlug ?? "missing"}`,
 );
 printCheck(
@@ -187,8 +194,14 @@ printCheck(
 );
 printCheck(
 	"Product access source",
-	productAccess?.source === "stripe_webhook",
-	productAccess ? `source=${productAccess.source}` : "missing",
+	productAccess
+		? VALID_PRODUCT_ACCESS_SOURCES.has(productAccess.source)
+		: false,
+	productAccess
+		? `source=${productAccess.source}`
+		: `missing; expected one of ${Array.from(VALID_PRODUCT_ACCESS_SOURCES).join(
+				", ",
+			)}`,
 );
 printCheck(
 	"Session id linked",
@@ -216,7 +229,7 @@ if (
 	session.payment_status !== "paid" ||
 	!productAccess ||
 	productAccess.status !== "granted" ||
-	productAccess.source !== "stripe_webhook" ||
+	!VALID_PRODUCT_ACCESS_SOURCES.has(productAccess.source) ||
 	productAccess.stripeCheckoutSessionId !== sessionId
 ) {
 	process.exitCode = 1;

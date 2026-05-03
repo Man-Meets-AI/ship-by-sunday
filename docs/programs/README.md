@@ -16,6 +16,7 @@ read_when:
 
 Active:
 
+- `docs/programs/active/2026-05-02-one-click-paid-access/`: active Program for making Ship by Sunday payment nearly one-click while paid access attaches instantly to the checkout email.
 - `docs/programs/active/2026-05-02-customer-agentic-operating-system/`: active Program for making Ship by Sunday install durable Program, ExecPlan, validation, prompt, skill, and agent-loop practices into generated customer repos and mature existing codebases.
 
 Recently completed:

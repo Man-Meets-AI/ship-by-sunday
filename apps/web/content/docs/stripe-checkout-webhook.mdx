@@ -25,13 +25,15 @@ Add these to `.env.local`:
 
 ```bash
 STRIPE_SECRET_KEY=
+STRIPE_PUBLISHABLE_KEY=
 STRIPE_PRODUCT_ID=
 STRIPE_PRICE_ID=
 STRIPE_WEBHOOK_SECRET=
 APP_BASE_URL=
+CLERK_SECRET_KEY=
 ```
 
-This repo uses Stripe-hosted Checkout, so there is no public Stripe key in the tracked env template.
+`STRIPE_PUBLISHABLE_KEY` is safe to expose to the browser. The app returns it from the Express Checkout session route so homepage Link, Apple Pay, and Google Pay buttons can initialize Stripe.js without exposing any secret key.
 
 ## Create the product and price
 
@@ -63,7 +65,7 @@ That helper:
 - checks the pinned Stripe CLI project `ship-by-sunday` and warns with `stripe login --project-name ship-by-sunday` if the CLI context drifted
 - captures the current webhook signing secret
 - writes that secret into `.env.local`
-- syncs that secret and `STRIPE_SECRET_KEY` into the active hosted Convex dev env
+- syncs that secret, `STRIPE_SECRET_KEY`, and `CLERK_SECRET_KEY` into the active hosted Convex dev env
 
 It also expects `.env.local` to contain the `CONVEX_DEPLOYMENT` value that `bun run dev:convex` writes.
 In this repo, that same `bun run dev:convex` sync also needs to leave `NEXT_PUBLIC_CONVEX_SITE_URL` in `.env.local`, because Stripe forwards into the Convex HTTP-actions origin instead of the `.convex.cloud` client origin.
@@ -81,12 +83,27 @@ Start in a safe sandbox or test-mode environment, get the full handoff working t
 The starter uses this sequence:
 
 1. buyer calls `POST /api/stripe/checkout` from the public CTA, whether they are signed in or signed out
-2. Stripe hosts checkout
-3. Stripe returns to `/checkout/success`
-4. Stripe webhook hits Convex HTTP at `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`
-5. Convex verifies the signature and either grants access directly for a signed-in checkout or stores a durable pending paid checkout keyed by the Stripe session
-6. `/checkout/success` signs the buyer in or creates the account if needed, then claims the purchase when the verified primary email matches the Stripe checkout email
-7. the app redirects into `/blueprint`
+2. eligible homepage visitors can instead initialize `POST /api/stripe/checkout/express` and pay through Stripe's Express Checkout Element
+3. Stripe hosts checkout or confirms the Express Checkout Session
+4. Stripe returns to `/checkout/success`
+5. Stripe webhook hits Convex HTTP at `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`
+6. Convex verifies the signature and grants access to the Clerk user that owns the Stripe checkout email, creating that Clerk user when the email has no account yet
+7. `/checkout/success` retries the same paid-session fulfillment if the webhook is delayed, then asks the buyer to sign in with the checkout email when needed
+8. the app redirects into `/blueprint`
+
+Pending checkout claims still exist as fallback and audit records. They are no longer the happy-path customer journey.
+
+## Express Checkout setup
+
+Express Checkout is progressive enhancement. The hosted Checkout button remains visible when no wallet method is available, when Stripe.js fails to initialize, or when provider setup is incomplete.
+
+To make the direct homepage payment button appear:
+
+- Enable Link and the wallet payment methods you want in the Stripe Dashboard payment-method settings for both test and live mode.
+- Register the homepage domain in Stripe payment method domains for both test and live mode.
+- Serve the page over HTTPS outside localhost browser testing.
+- Set `STRIPE_PUBLISHABLE_KEY` beside the matching `STRIPE_SECRET_KEY`.
+- Keep the webhook endpoint pointed at `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`; Express Checkout still fulfills from Checkout Session webhook events.
 
 ## Health checks
 
@@ -115,9 +132,10 @@ The most common failures are:
 
 - the pinned Stripe CLI project `ship-by-sunday` is missing or logged into a different Stripe account than `STRIPE_SECRET_KEY`
 - `.env.local` and Convex do not match on `STRIPE_WEBHOOK_SECRET` or `STRIPE_SECRET_KEY`
-- production Convex is missing `STRIPE_SECRET_KEY`, so the webhook cannot construct Stripe even after the signature verifies
+- production Convex is missing `STRIPE_SECRET_KEY` or `CLERK_SECRET_KEY`, so the webhook cannot construct Stripe or resolve the checkout email in Clerk even after the signature verifies
 - you changed the webhook secret but did not restart the app
 - Clerk/Convex auth is broken, so the buyer cannot be matched to the right access state
+- Express Checkout does not render because the visitor's browser has no eligible wallet, the Stripe publishable key is missing, the domain is not registered, or Link/wallet payment methods are disabled in that Stripe mode
 
 If the doctor says the pinned CLI project is missing or mismatched, repair that exact profile with:
 

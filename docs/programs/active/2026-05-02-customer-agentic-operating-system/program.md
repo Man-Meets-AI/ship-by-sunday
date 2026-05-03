@@ -20,7 +20,7 @@ This Program must be maintained in accordance with `docs/programs/PROGRAMS.md`.
 
 ## Purpose / Big Picture
 
-Ship by Sunday should not merely hand customers a starter repo. It should leave every customer with a repo that knows how to work with agents: durable source truth, scoped ExecPlans, Program-level initiative memory, validation commands, review evidence, and explicit loops that survive beyond chat history.
+Ship by Sunday should not merely hand customers a starter repo. The buyer-facing product is a worker layer: durable, role-aware engineering workers that can take product truth or repo truth and move a codebase through scoped loops. Programs, ExecPlans, validation commands, review evidence, and source-truth docs are the operating substrate that make those workers reliable instead of one-off agents trapped in chat history.
 
 The initiative is moving in the right direction when a newly generated repo contains a customer-safe Program and ExecPlan operating pack, and when a customer with an existing mature repo can receive an adoption Program that respects their current stack instead of forcing the starter workflow onto them.
 
@@ -46,6 +46,8 @@ The current planning brief is `planning-brief-1.md`, with `current-planning-brie
 
 Ship by Sunday already has a strong internal Program and ExecPlan system under `docs/programs/`, `docs/exec-plans/`, `docs/prompts/`, and `scripts/`. Generated customer repos already receive Build Pack readiness, first-slice planning, root agent instructions, onboarding docs, local starter skills, and testing guidance.
 
+The public product surface is already close to worker-first language. The homepage speaks about the worker layer, exec loops, role packets, channel handoffs, QA paths, and generated codebases. The unresolved product issue is that the current customer journey still reads primarily as a generated-codebase path, while the highest-leverage market also includes mature codebases that need an adoption overlay.
+
 Generated customer repos do not yet receive the canonical Program and ExecPlan folder model. The customer-safe snapshot contract currently excludes internal `docs/programs/**`, `docs/exec-plans/**`, and Program prompt assets. That protects customers from internal history but also means the best agentic operating practices are not yet installed in the generated repo.
 
 Mature existing codebases have no first-class product lane yet. The current product flow is blueprint-first and generated-repo-first. The mature-repo opportunity needs a separate audit and adoption workflow that preserves each customer's conventions.
@@ -57,6 +59,7 @@ Mature existing codebases have no first-class product lane yet. The current prod
 - [x] 2026-05-02 EDT: Created this active Program packet and the first planning brief.
 - [x] 2026-05-02 EDT: Created the first child ExecPlan for reconciling the generated-repo agentic source contract.
 - [x] 2026-05-02 EDT: Incorporated subagent critiques about prompt naming drift, skill trigger drift, package-script promises, product-lane overreach, and mature-repo adoption boundaries.
+- [x] 2026-05-02 EDT: Incorporated the worker-first product thesis and the new-codebase versus existing-codebase customer journey into the Program packet.
 - [ ] Implement the first generated-repo source-contract slice.
 - [ ] Refresh the Program with generated-repo proof and choose the customer-safe operating file-set slice.
 - [ ] Design and implement the mature-repo adoption lane.
@@ -65,6 +68,10 @@ Mature existing codebases have no first-class product lane yet. The current prod
 
 Decision: Use one Program for both generated repos and mature existing repos.
 Rationale: The product promise is one operating system with two customer lanes. A single Program keeps shared packaging, validation, prompt, skill, and narrative decisions coherent while child ExecPlans keep implementation slices bounded.
+Date: 2026-05-02
+
+Decision: Treat workers as the purchased outcome and Programs, ExecPlans, and loops as the worker substrate.
+Rationale: Customers want reliable workers more than they want abstract agent methodology. The methodology matters because it makes the worker layer durable: workers get role packets, source truth, plan state, proof loops, and recurrence instead of depending on a single prompt.
 Date: 2026-05-02
 
 Decision: Make generated repo source-contract reconciliation the first implementation lane.
@@ -93,7 +100,7 @@ Recommended future child ExecPlans:
 
 - Ship customer-safe operating system file set.
 - Add explicit generated repo agentic bootstrap.
-- Teach the two-lane product model.
+- Define the worker-led two-lane customer journey.
 - Design mature repo audit contract.
 - Generate mature repo adoption Program.
 - Wire mature repo adoption into the product.
@@ -113,7 +120,7 @@ Do not hide Program creation inside `postinstall`. Use explicit commands and rev
 
 Do not overfit mature-repo adoption to Bun, Next.js, Convex, Stripe, Linear, or the generated starter route map.
 
-Do not let product messaging imply mature repos become production-ready automatically. The truthful promise is agent-readiness: clearer source truth, safer plans, validation, and review loops.
+Do not let product messaging imply mature repos become production-ready automatically. The truthful promise is worker-readiness: clearer source truth, safer plans, validation, review loops, and a first adoption Program that lets agents behave like durable workers inside the customer's actual repo.
 
 ## Outcomes & Retrospective
 

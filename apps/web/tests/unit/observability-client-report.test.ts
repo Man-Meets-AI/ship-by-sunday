@@ -36,6 +36,22 @@ describe("reportClientError", () => {
 		);
 	});
 
+	it("normalizes optional client error fields to null", () => {
+		reportClientError({
+			error: new Error("Client failed"),
+		});
+
+		expect(capturePostHogClientExceptionMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				properties: expect.objectContaining({
+					code: "Error",
+					pathname: null,
+					requestId: null,
+				}),
+			}),
+		);
+	});
+
 	it("ignores Next.js control flow errors", () => {
 		reportClientError({
 			error: new Error("NEXT_REDIRECT"),

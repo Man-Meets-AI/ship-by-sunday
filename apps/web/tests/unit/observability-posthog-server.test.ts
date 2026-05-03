@@ -83,4 +83,39 @@ describe("PostHog server adapter", () => {
 		);
 		expect(posthogFlushMock).toHaveBeenCalledTimes(1);
 	});
+
+	it("reuses the server client and defaults the host", async () => {
+		process.env.NEXT_PUBLIC_POSTHOG_TOKEN = " phc_test_123 ";
+		process.env.NEXT_PUBLIC_POSTHOG_HOST = " ";
+
+		const { capturePostHogServerException } =
+			await import("@/platform/observability/posthog-server");
+
+		expect(
+			capturePostHogServerException({
+				error: new Error("Server failed"),
+			}),
+		).toBe(true);
+		expect(
+			capturePostHogServerException({
+				error: new Error("Server failed again"),
+			}),
+		).toBe(true);
+
+		expect(posthogConstructorMock).toHaveBeenCalledTimes(1);
+		expect(posthogConstructorMock).toHaveBeenCalledWith("phc_test_123", {
+			host: "https://us.i.posthog.com",
+			flushAt: 1,
+			flushInterval: 0,
+		});
+		expect(posthogCaptureExceptionMock).toHaveBeenCalledTimes(2);
+	});
+
+	it("does not flush before the server client exists", async () => {
+		const { flushPostHogServer } =
+			await import("@/platform/observability/posthog-server");
+
+		await expect(flushPostHogServer()).resolves.toBeUndefined();
+		expect(posthogFlushMock).not.toHaveBeenCalled();
+	});
 });
