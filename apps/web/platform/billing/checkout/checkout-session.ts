@@ -5,7 +5,6 @@ import type Stripe from "stripe";
 
 import {
 	claimCheckoutSessionForViewer,
-	clearPendingCheckoutSessionCookie,
 	fulfillCheckoutSessionByEmail,
 	getCheckoutSessionForRecovery,
 	isStripeCheckoutSessionForCourse,
@@ -163,7 +162,6 @@ export async function getCheckoutSessionState(
 
 	const session = await getCheckoutSessionForRecovery(sessionId);
 	if (!session) {
-		await clearPendingCheckoutSessionCookie();
 		return {
 			kind: "invalid_session",
 			sessionId,
@@ -173,7 +171,6 @@ export async function getCheckoutSessionState(
 	const clerkUserId =
 		session.metadata?.clerkUserId ?? session.client_reference_id ?? null;
 	if (!isStripeCheckoutSessionForCourse(session)) {
-		await clearPendingCheckoutSessionCookie();
 		return {
 			kind: "invalid_session",
 			sessionId,

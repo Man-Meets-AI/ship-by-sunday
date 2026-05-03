@@ -36,7 +36,9 @@ export const routeConfig = {
 	signUp: "/sign-up",
 	checkoutSuccess: "/checkout/success",
 	checkoutEmailHandoff: "/checkout/email-handoff",
+	checkoutClearPending: "/checkout/clear-pending",
 	checkoutCancel: "/checkout/cancel",
+	checkoutCancelConfirmed: "/checkout/cancel/confirmed",
 	systemHash: "#system",
 	pricingHash: "#pricing",
 } as const;

@@ -8,7 +8,6 @@ import { api } from "@/convex/_generated/api";
 import {
 	claimCheckoutSessionForViewer,
 	claimLatestPendingCheckoutForViewer,
-	clearPendingCheckoutSessionCookie,
 	getCheckoutSessionForRecovery,
 	getPendingCheckoutSessionIdFromCookie,
 	getStripeCheckoutSessionEmail,
@@ -49,12 +48,10 @@ async function getSignedOutPendingCheckoutRecovery(): Promise<PaidCheckoutRecove
 
 	const session = await getCheckoutSessionForRecovery(pendingCheckoutSessionId);
 	if (!session) {
-		await clearPendingCheckoutSessionCookie();
 		return null;
 	}
 
 	if (!isStripeCheckoutSessionForCourse(session)) {
-		await clearPendingCheckoutSessionCookie();
 		return null;
 	}
 

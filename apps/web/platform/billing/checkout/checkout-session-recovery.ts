@@ -154,15 +154,6 @@ export async function getPendingCheckoutSessionIdFromCookie() {
 	return cookieStore.get(PENDING_CHECKOUT_SESSION_COOKIE_NAME)?.value ?? null;
 }
 
-export async function clearPendingCheckoutSessionCookie() {
-	try {
-		const cookieStore = await cookies();
-		cookieStore.delete(PENDING_CHECKOUT_SESSION_COOKIE_NAME);
-	} catch {
-		// Unit tests and non-request code paths do not always have a request-bound cookie store.
-	}
-}
-
 export async function claimCheckoutSessionForViewer(
 	sessionId: string,
 ): Promise<CheckoutSessionClaimResult> {
@@ -179,10 +170,6 @@ export async function claimCheckoutSessionForViewer(
 		{ sessionId },
 		{ token: session.token },
 	)) as CheckoutSessionClaimResult;
-
-	if (result.kind === "validated" || result.kind === "invalid_session") {
-		await clearPendingCheckoutSessionCookie();
-	}
 
 	return result;
 }

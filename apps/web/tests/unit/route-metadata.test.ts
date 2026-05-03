@@ -29,7 +29,6 @@ vi.mock("@/platform/billing/checkout/checkout-session", () => ({
 }));
 
 vi.mock("@/platform/billing/checkout/checkout-session-recovery", () => ({
-	clearPendingCheckoutSessionCookie: vi.fn(),
 	getCheckoutSessionForRecovery: vi.fn(),
 	getPendingCheckoutSessionIdFromCookie: vi.fn(),
 	getStripeCheckoutSessionEmail: vi.fn(),

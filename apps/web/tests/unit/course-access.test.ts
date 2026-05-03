@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const redirectMock = vi.fn();
 const claimCheckoutSessionForViewerMock = vi.fn();
 const claimLatestPendingCheckoutForViewerMock = vi.fn();
-const clearPendingCheckoutSessionCookieMock = vi.fn();
 const fetchQueryMock = vi.fn();
 const getConvexServerSessionMock = vi.fn();
 const getCheckoutSessionForRecoveryMock = vi.fn();
@@ -31,8 +30,6 @@ vi.mock("@/platform/billing/checkout/checkout-session-recovery", () => ({
 		claimCheckoutSessionForViewerMock(...args),
 	claimLatestPendingCheckoutForViewer: (...args: unknown[]) =>
 		claimLatestPendingCheckoutForViewerMock(...args),
-	clearPendingCheckoutSessionCookie: (...args: unknown[]) =>
-		clearPendingCheckoutSessionCookieMock(...args),
 	getCheckoutSessionForRecovery: (...args: unknown[]) =>
 		getCheckoutSessionForRecoveryMock(...args),
 	getPendingCheckoutSessionIdFromCookie: (...args: unknown[]) =>
@@ -61,7 +58,6 @@ describe("product access server helpers", () => {
 		redirectMock.mockReset();
 		claimCheckoutSessionForViewerMock.mockReset();
 		claimLatestPendingCheckoutForViewerMock.mockReset();
-		clearPendingCheckoutSessionCookieMock.mockReset();
 		fetchQueryMock.mockReset();
 		getConvexServerSessionMock.mockReset();
 		getCheckoutSessionForRecoveryMock.mockReset();

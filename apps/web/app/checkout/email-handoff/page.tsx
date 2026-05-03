@@ -2,12 +2,16 @@ import { auth } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
+import { IdentityPageFrame } from "@/app/(identity)/_components/identity-page-frame";
 import { CheckoutEmailHandoffPage } from "@/app/(identity)/_components/checkout-email-handoff/checkout-email-handoff-page";
 import { getCheckoutSuccessHref, routeConfig } from "@/config/product";
-import { getSafeRedirectPath } from "@/platform/auth/auth-route-utils";
+import {
+	buildClearPendingCheckoutSessionHref,
+	getSafeRedirectPath,
+} from "@/platform/auth/auth-route-utils";
 import { shouldBypassClerkProtection } from "@/platform/auth/clerk-middleware-bypass";
 import {
-	clearPendingCheckoutSessionCookie,
+	fulfillCheckoutSessionByEmail,
 	getCheckoutSessionForRecovery,
 	getStripeCheckoutSessionEmail,
 	isStripeCheckoutSessionForCourse,
@@ -38,13 +42,11 @@ export default async function Page({
 	);
 	const session = await getCheckoutSessionForRecovery(sessionId);
 	if (!session) {
-		await clearPendingCheckoutSessionCookie();
-		return redirect(safeRedirectPath);
+		return redirect(buildClearPendingCheckoutSessionHref(safeRedirectPath));
 	}
 
 	if (!isStripeCheckoutSessionForCourse(session)) {
-		await clearPendingCheckoutSessionCookie();
-		return redirect(safeRedirectPath);
+		return redirect(buildClearPendingCheckoutSessionHref(safeRedirectPath));
 	}
 
 	if (!isStripeCheckoutSessionPaid(session)) {
@@ -60,10 +62,20 @@ export default async function Page({
 		return redirect(safeRedirectPath);
 	}
 
+	const fulfillmentResult = await fulfillCheckoutSessionByEmail(
+		sessionId,
+		"checkout.email_handoff.fulfillment",
+	);
+	if (fulfillmentResult.kind !== "fulfilled") {
+		return redirect(safeRedirectPath);
+	}
+
 	return (
-		<CheckoutEmailHandoffPage
-			checkoutEmail={checkoutEmail}
-			redirectPath={safeRedirectPath}
-		/>
+		<IdentityPageFrame>
+			<CheckoutEmailHandoffPage
+				checkoutEmail={fulfillmentResult.checkoutEmail || checkoutEmail}
+				redirectPath={safeRedirectPath}
+			/>
+		</IdentityPageFrame>
 	);
 }

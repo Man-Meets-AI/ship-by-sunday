@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+	buildClearPendingCheckoutSessionHref,
 	buildCheckoutEmailHandoffHref,
 	buildCheckoutEmailHandoffHrefForSuccessRedirect,
 	getCheckoutSessionIdFromSuccessRedirectPath,
@@ -36,6 +37,15 @@ describe("sign-in route utils", () => {
 		).toBe(
 			"/checkout/email-handoff?session_id=cs_test_123&redirect_url=%2Fcheckout%2Fsuccess%3Fsession_id%3Dcs_test_123",
 		);
+	});
+
+	it("builds cookie-clearing checkout recovery routes with a safe redirect", () => {
+		expect(buildClearPendingCheckoutSessionHref("/blueprint")).toBe(
+			"/checkout/clear-pending?redirect_url=%2Fblueprint",
+		);
+		expect(
+			buildClearPendingCheckoutSessionHref("https://example.com/owned"),
+		).toBe("/checkout/clear-pending?redirect_url=%2Fblueprint");
 	});
 
 	it("extracts checkout session ids from safe checkout success redirects", () => {

@@ -104,6 +104,15 @@ export function buildCheckoutEmailHandoffHref({
 	return `${routeConfig.checkoutEmailHandoff}?${params.toString()}`;
 }
 
+export function buildClearPendingCheckoutSessionHref(
+	redirectPath?: string | null,
+) {
+	const params = new URLSearchParams();
+	params.set(redirectUrlParam, getSafeRedirectPath(redirectPath));
+
+	return `${routeConfig.checkoutClearPending}?${params.toString()}`;
+}
+
 export function getCheckoutSessionIdFromSuccessRedirectPath(
 	rawPath?: string | null,
 ) {
