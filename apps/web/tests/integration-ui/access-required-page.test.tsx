@@ -101,6 +101,37 @@ describe("AccessRequiredPage", () => {
 		expect(markup).not.toContain('data-testid="access-required-buy-access"');
 	});
 
+	it("renders the checkout email handoff path for signed-out paid checkout recovery", () => {
+		useQueryMock.mockReturnValue({
+			hasAccess: false,
+			status: "signed_out",
+		});
+
+		const markup = renderToStaticMarkup(
+			<AccessRequiredPage
+				initialAccess={{
+					clerkUserId: null,
+					hasAccess: false,
+					status: "signed_out",
+					pendingCheckoutRecovery: {
+						kind: "checkout_email_handoff_required",
+						sessionId: "cs_paid_signed_out",
+						checkoutEmail: "buyer@example.com",
+					},
+				}}
+			/>,
+		);
+
+		expect(markup).toContain("Prove the checkout email");
+		expect(markup).toContain("Email proof required");
+		expect(markup).toContain("Payment is confirmed for buyer@example.com");
+		expect(markup).toContain("Prove checkout email");
+		expect(markup).toContain(
+			'href="/checkout/email-handoff?session_id=cs_paid_signed_out&amp;redirect_url=%2Fmission"',
+		);
+		expect(markup).not.toContain('data-testid="access-required-buy-access"');
+	});
+
 	it("renders the retry-and-buy paths when the signed-in account has no access", () => {
 		useQueryMock.mockReturnValue({
 			hasAccess: false,

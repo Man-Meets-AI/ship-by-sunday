@@ -129,6 +129,25 @@ describe("SsoCallbackPage", () => {
 		});
 	});
 
+	it("routes checkout success OAuth leftovers back to the email handoff", async () => {
+		useSignInMock.mockReturnValue({
+			signIn: createSignInState({
+				isTransferable: true,
+			}),
+		});
+		useSignUpMock.mockReturnValue({ signUp: createSignUpState() });
+
+		render(
+			<SsoCallbackPage redirectPath="/checkout/success?session_id=cs_test_123" />,
+		);
+
+		await waitFor(() => {
+			expect(pushMock).toHaveBeenCalledWith(
+				"/checkout/email-handoff?session_id=cs_test_123&redirect_url=%2Fcheckout%2Fsuccess%3Fsession_id%3Dcs_test_123",
+			);
+		});
+	});
+
 	it("signs out the pending session when Clerk returns an unknown task", async () => {
 		const signIn = createSignInState({
 			finalize: vi.fn().mockImplementation(async ({ navigate }) => {

@@ -64,7 +64,8 @@ If the Stripe event exists and the buyer still cannot reach `/blueprint`, check:
 - whether the webhook used the current signing secret
 - whether Convex accepted the same webhook secret and Stripe secret key
 - whether the browser still has the pending checkout session cookie if the buyer recovered from a lost Stripe return tab
-- whether the signed-in account's verified primary email matches the Stripe checkout email before the claim step runs
+- whether `/checkout/email-handoff` can send and verify the Clerk email code for the Stripe checkout email
+- whether the signed-in account matches the Clerk user that owns the Stripe checkout email
 
 ## Fast debug order
 

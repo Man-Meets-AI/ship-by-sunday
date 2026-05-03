@@ -50,9 +50,17 @@ export type HomePageRenderModel = {
 		readonly isEnabled: boolean;
 		readonly variant: HomePageSocialProofVariant;
 	};
+	readonly programs: {
+		readonly isEnabled: boolean;
+		readonly section: HomePageContent["programsSection"];
+	};
 	readonly faq: {
 		readonly isEnabled: boolean;
 		readonly section: HomePageContent["faqSection"];
+	};
+	readonly plansMd: {
+		readonly isEnabled: boolean;
+		readonly section: HomePageContent["plansMdSection"];
 	};
 	readonly pricing: {
 		readonly isEnabled: boolean;
@@ -114,9 +122,17 @@ export function createHomePageRenderModel({
 			isEnabled: homePageConfig.sections.socialProof,
 			variant: socialProofVariant,
 		},
+		programs: {
+			isEnabled: homePageConfig.sections.programs,
+			section: content.programsSection,
+		},
 		faq: {
 			isEnabled: homePageConfig.sections.faq,
 			section: content.faqSection,
+		},
+		plansMd: {
+			isEnabled: homePageConfig.sections.plansMd,
+			section: content.plansMdSection,
 		},
 		pricing: {
 			isEnabled: homePageConfig.sections.pricing,

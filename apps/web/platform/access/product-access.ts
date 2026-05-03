@@ -8,7 +8,11 @@ import { api } from "@/convex/_generated/api";
 import {
 	claimCheckoutSessionForViewer,
 	claimLatestPendingCheckoutForViewer,
+	getCheckoutSessionForRecovery,
 	getPendingCheckoutSessionIdFromCookie,
+	getStripeCheckoutSessionEmail,
+	isStripeCheckoutSessionForCourse,
+	isStripeCheckoutSessionPaid,
 } from "@/platform/billing/checkout/checkout-session-recovery";
 import type { PaidCheckoutRecovery, ProductAccess } from "@/lib/product-access";
 import { getConvexServerSession } from "@/platform/auth/convex-auth";
@@ -35,13 +39,53 @@ function withPendingCheckoutRecovery(
 	};
 }
 
+async function getSignedOutPendingCheckoutRecovery(): Promise<PaidCheckoutRecovery | null> {
+	const pendingCheckoutSessionId =
+		await getPendingCheckoutSessionIdFromCookie();
+	if (!pendingCheckoutSessionId) {
+		return null;
+	}
+
+	const session = await getCheckoutSessionForRecovery(pendingCheckoutSessionId);
+	if (!session) {
+		return null;
+	}
+
+	if (!isStripeCheckoutSessionForCourse(session)) {
+		return null;
+	}
+
+	const checkoutEmail = getStripeCheckoutSessionEmail(session) ?? undefined;
+	if (!isStripeCheckoutSessionPaid(session)) {
+		return {
+			kind: "payment_pending",
+			sessionId: pendingCheckoutSessionId,
+			paymentStatus: session.payment_status,
+			checkoutEmail,
+		};
+	}
+
+	if (!checkoutEmail) {
+		return null;
+	}
+
+	return {
+		kind: "checkout_email_handoff_required",
+		sessionId: pendingCheckoutSessionId,
+		checkoutEmail,
+	};
+}
+
 export async function getServerProductAccess(): Promise<ProductAccess> {
 	const session = await getConvexServerSession();
 	if (!session.userId) {
+		const pendingCheckoutRecovery = await getSignedOutPendingCheckoutRecovery();
+
 		return {
 			clerkUserId: null,
 			hasAccess: false,
 			status: "signed_out",
+			...(pendingCheckoutRecovery ? { pendingCheckoutRecovery } : {}),
 		};
 	}
 

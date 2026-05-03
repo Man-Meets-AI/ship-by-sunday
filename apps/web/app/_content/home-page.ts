@@ -343,6 +343,67 @@ export const homePageContent = {
 			alt: "Founder portrait",
 		},
 	},
+	programsSection: {
+		title: "PROGRAMS.md",
+		subtitle: "Ship By Sundays Sauce",
+		speechBubble: "dang thats a lot of ideas.. and a lot of code.",
+		headline: "PROGRAMS.md is not a bigger ExecPlan.",
+		body: "It is the machine that turns a messy initiative into a sequence of executable ExecPlans.",
+		explainers: [
+			{
+				title: "Research Passes",
+				description:
+					"Multiple angles on the same initiative before anyone commits to a plan.",
+			},
+			{
+				title: "Normalize Pass",
+				description:
+					"Dedupes, reconciles, and turns scattered findings into one coherent track.",
+			},
+			{
+				title: "Converged Decisions Packet",
+				description:
+					"Captures the actual choices: what we are doing, what we are not doing, and why.",
+			},
+			{
+				title: "Dependency Graph",
+				description:
+					"Shows ordering, blockers, risky coupling, and which slices can move independently.",
+			},
+			{
+				title: "ExecPlan Split Recommendation",
+				description:
+					'Converts "big t-shirt work" into bounded, shippable implementation slices.',
+			},
+			{
+				title: "Planning Brief",
+				description:
+					"The handoff artifact. Each ExecPlan starts from a specific brief version, not vibes.",
+			},
+			{
+				title: "Program Validator",
+				description:
+					"Keeps the packet honest: required files, lifecycle state, prompt contracts, and lintable structure.",
+			},
+			{
+				title: "ExecPlan Loop",
+				description:
+					"Ship one slice, sync the Program, refresh the brief, repeat until the initiative is actually done.",
+			},
+		],
+		pipeline: [
+			"big messy set of ideas",
+			"research passes",
+			"normalize pass",
+			"converged decisions packet",
+			"dependency graph",
+			"execplan split recommendation",
+			"planning brief",
+			"execplan loop",
+		],
+		loopSteps: ["write", "grill", "execute"],
+		outcome: "validated shipping slices",
+	},
 	faqSection: {
 		titleLead: "Common",
 		titleAccent: "Questions",
@@ -452,6 +513,81 @@ export const homePageContent = {
 		],
 		closing:
 			"When better models arrive next month, you move faster. You do not restart the project from zero.",
+	},
+	plansMdSection: {
+		title: "PLANS.md",
+		subtitleLead: "OpenAI’s",
+		subtitleEmphasis: "WEAPON",
+		subtitleTail: "of choice",
+		callouts: [
+			"Detailed instructions",
+			"Persistent task memory",
+			"Loopable execution path",
+		],
+		tagline: {
+			lead: "Where ",
+			emphasis: "vague",
+			tail: " requests become executable software work.",
+		},
+		differentiators: [
+			{
+				title: "Persistent memory for long tasks",
+				description:
+					"The agent can return to the plan after context shifts, retries, or interruptions.",
+			},
+			{
+				title: "Turns vague intent into executable steps",
+				description:
+					"Breaks the goal into concrete milestones instead of relying on one-shot prompting.",
+			},
+			{
+				title: "Keeps scope from drifting",
+				description:
+					"Defines what is in-bounds, what is out-of-bounds, and what “done” means.",
+			},
+			{
+				title: "A shared source of truth",
+				description:
+					"Human and AI can both inspect the same plan, update it, and hold work against it.",
+			},
+			{
+				title: "Progress survives the chat",
+				description:
+					"Decisions, blockers, validation steps, and next actions stay written down.",
+			},
+			{
+				title: "Built for iteration",
+				description:
+					"The agent can loop back, revise assumptions, and continue from the last known state.",
+			},
+			{
+				title: "Forces verification",
+				description:
+					"Good plans include tests, checks, proof, and acceptance criteria before calling work finished.",
+			},
+			{
+				title: "Compresses complexity",
+				description:
+					"Big ambiguous tasks become smaller, ordered, reviewable units.",
+			},
+			{
+				title: "Reduces prompt re-explaining",
+				description:
+					"You do not have to restate the whole project every time the agent resumes.",
+			},
+			{
+				title: "Makes autonomy safer",
+				description:
+					"The agent can work independently without freelancing beyond the agreed direction.",
+			},
+		],
+		loop: {
+			ideaLabel: "idea",
+			writeLabel: "write",
+			grillLabel: "grill",
+			executeLabel: "execute",
+			shipLabel: "ship",
+		},
 	},
 	pricingSection: {
 		titleLead: "Ship a real product",

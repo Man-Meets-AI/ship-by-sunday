@@ -45,10 +45,11 @@ That split matters because checkout and access recovery live between those world
 The auth bridge between public and protected surfaces uses three route-group screens:
 
 - `/sign-in` for the branded sign-in UI
+- `/checkout/email-handoff` for the paid checkout email-code handoff
 - `/session-tasks/reset-password` for the Clerk reset-password task inside the same shell
 - `/sso-callback` for OAuth completion
 
-`/sign-up` is not a visible auth product surface in this repo. It redirects to pricing so account creation still flows through checkout.
+`/sign-up` is not a visible auth product surface in this repo. It redirects to pricing, except legacy checkout session links forward to `/checkout/email-handoff`.
 
 ## Starter config and module gating
 
@@ -85,10 +86,10 @@ For the file-by-file operating guide, see [Configure the Homepage](/docs/configu
 3. The app stores the pending Stripe Checkout Session ID in a first-party cookie so the handoff can recover if the Stripe return tab is lost.
 4. Stripe hosts the payment flow and returns to `/checkout/success`.
 5. `POST {NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook` verifies the signature and handles completed checkout events.
-6. If the checkout already belonged to a signed-in Clerk account, Convex can grant access directly. Otherwise the webhook stores a durable pending paid checkout keyed by the Stripe session.
-7. `/checkout/success` becomes the canonical post-payment handoff. If the buyer is not signed in yet, they can sign in or create the account tied to the checkout email there.
-8. Once the signed-in account’s verified primary email matches the Stripe checkout email, the app claims the purchase and grants product access.
-9. `/blueprint` and the other blueprint workspace routes use the same access state and can perform a guarded fallback claim when the browser still holds the pending checkout session cookie.
+6. If the checkout already belonged to a signed-in Clerk account, Convex can grant access directly. Otherwise the webhook grants access to the Clerk user that owns the Stripe checkout email, creating that Clerk user when needed.
+7. `/checkout/success` becomes the canonical post-payment handoff. If the buyer is not signed in yet, it sends them through `/checkout/email-handoff` to prove the Stripe checkout email with Clerk email OTP.
+8. Once Clerk verifies that checkout email, the buyer returns to `/checkout/success` as the user that owns the granted access.
+9. `/blueprint` and the other blueprint workspace routes use the same access state and can route signed-out pending-checkout recovery back to the checkout email handoff when the browser still holds the pending checkout session cookie.
 10. `/review` is the final handoff surface. It makes one auto-download attempt for the Ship by Sunday Blueprint, then leaves the fallback download link visible if the browser blocks the download.
 11. `/mission` and `/lesson/[lessonKey]` now act as the optional post-review bonus library after review unlock, while `/artifacts` still forwards into `/review`.
 12. Returning users with granted access who hit `/` are resumed into the first incomplete blueprint-first stage unless they explicitly force marketing mode.

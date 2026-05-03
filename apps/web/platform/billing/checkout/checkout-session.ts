@@ -5,7 +5,6 @@ import type Stripe from "stripe";
 
 import {
 	claimCheckoutSessionForViewer,
-	clearPendingCheckoutSessionCookie,
 	fulfillCheckoutSessionByEmail,
 	getCheckoutSessionForRecovery,
 	isStripeCheckoutSessionForCourse,
@@ -25,6 +24,11 @@ export type CheckoutSessionState =
 			sessionId: string;
 			checkoutEmail?: string;
 			currentAccountEmail?: string;
+	  }
+	| {
+			kind: "checkout_email_handoff_required";
+			sessionId: string;
+			checkoutEmail: string;
 	  }
 	| {
 			kind: "wrong_account";
@@ -103,7 +107,7 @@ function getCheckoutStateFromFulfillmentResult(
 		case "fulfilled":
 			if (!currentUserId) {
 				return {
-					kind: "sign_in_required",
+					kind: "checkout_email_handoff_required",
 					sessionId,
 					checkoutEmail: fulfillmentResult.checkoutEmail,
 				};
@@ -158,7 +162,6 @@ export async function getCheckoutSessionState(
 
 	const session = await getCheckoutSessionForRecovery(sessionId);
 	if (!session) {
-		await clearPendingCheckoutSessionCookie();
 		return {
 			kind: "invalid_session",
 			sessionId,
@@ -168,7 +171,6 @@ export async function getCheckoutSessionState(
 	const clerkUserId =
 		session.metadata?.clerkUserId ?? session.client_reference_id ?? null;
 	if (!isStripeCheckoutSessionForCourse(session)) {
-		await clearPendingCheckoutSessionCookie();
 		return {
 			kind: "invalid_session",
 			sessionId,

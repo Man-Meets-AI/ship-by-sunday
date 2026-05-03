@@ -14,7 +14,7 @@ If you are new to this stack, do not start by rewriting auth, payments, or acces
 - a public marketing surface on `/`
 - a docs surface on `/docs`
 - a protected product surface on `/blueprint`, compatibility redirects at `/start`, `/product`, `/design`, `/marketing`, and `/build-plan`, the customer-facing `Review` handoff on `/review`, optional `/execute` after review unlock, and `/settings`
-- a custom Clerk sign-in surface on `/sign-in` plus pricing-routed account creation instead of a standalone sign-up UI
+- a custom Clerk sign-in surface on `/sign-in` plus `/checkout/email-handoff` for paid checkout email-code proof
 - Stripe-hosted checkout plus success and cancel flows
 - Convex-backed product-access and resume state
 - a starter contract and module flags in `config/product.ts`

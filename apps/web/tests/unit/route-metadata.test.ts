@@ -29,7 +29,11 @@ vi.mock("@/platform/billing/checkout/checkout-session", () => ({
 }));
 
 vi.mock("@/platform/billing/checkout/checkout-session-recovery", () => ({
+	getCheckoutSessionForRecovery: vi.fn(),
 	getPendingCheckoutSessionIdFromCookie: vi.fn(),
+	getStripeCheckoutSessionEmail: vi.fn(),
+	isStripeCheckoutSessionForCourse: vi.fn(),
+	isStripeCheckoutSessionPaid: vi.fn(),
 }));
 
 vi.mock("@/platform/convex/server-preload", () => ({
@@ -37,6 +41,7 @@ vi.mock("@/platform/convex/server-preload", () => ({
 }));
 
 import { metadata as checkoutSuccessMetadata } from "@/app/checkout/success/page";
+import { metadata as checkoutEmailHandoffMetadata } from "@/app/checkout/email-handoff/page";
 import { metadata as resetPasswordMetadata } from "@/app/(identity)/session-tasks/reset-password/page";
 import { metadata as signInMetadata } from "@/app/(identity)/sign-in/[[...sign-in]]/page";
 import { metadata as ssoCallbackMetadata } from "@/app/(identity)/sso-callback/page";
@@ -54,5 +59,6 @@ describe("route metadata", () => {
 		expectNoindexRobots(resetPasswordMetadata);
 		expectNoindexRobots(ssoCallbackMetadata);
 		expectNoindexRobots(checkoutSuccessMetadata);
+		expectNoindexRobots(checkoutEmailHandoffMetadata);
 	});
 });

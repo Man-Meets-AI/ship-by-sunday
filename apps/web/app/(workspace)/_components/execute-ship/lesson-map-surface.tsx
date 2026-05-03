@@ -57,7 +57,7 @@ export function LessonMapSurface({
 			aria-labelledby={LESSON_MAP_HEADING_ID}
 			tabIndex={-1}
 			{...motionProps}
-			className="space-y-6 rounded-[28px] border border-border/60 bg-muted/15 p-6 scroll-mt-24 focus:outline-none sm:p-8"
+			className="space-y-6 rounded-2xl border border-border/60 bg-muted/15 p-5 scroll-mt-24 focus:outline-none sm:p-6"
 		>
 			<div className="flex items-start justify-between gap-3">
 				<div className="space-y-2">

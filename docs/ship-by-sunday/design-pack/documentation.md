@@ -212,7 +212,25 @@ If helpful, also record the external official references used for the work:
 
 - **Date:** 2026-05-03
 - **Surface:** `/` public homepage.
-- **Change:** The first-screen starting-point selector keeps its branch-specific opening content, but both `I have an idea for a product` and `I have a codebase already` now continue through the same downstream homepage sections: `Ship codebases that convert`, `Exec Loops`, `How Workers Work`, worker-layer explanation, founder proof, FAQ, pricing, and footer.
+- **Change:** The first-screen starting-point selector keeps its branch-specific opening content, but both `I have an idea for a product` and `I have a codebase already` now continue through the same downstream homepage sections: `Ship codebases that convert`, `Exec Loops`, `How Workers Work`, worker-layer explanation, founder proof, Programs, FAQ, PLANS.md, pricing, and footer.
 - **Design direction:** Preserve the selector as a real starting-context choice without hiding the core worker-layer story from the codebase-audit path.
 - **Out of scope:** No checkout behavior change, no new branch-specific pricing, and no external provider setup.
 - **Verification:** Focused integration-ui coverage should toggle to the codebase branch and confirm the shared section headings remain visible with a single `#system` anchor owned by the Exec Loops section.
+
+## Shipped Note: Figma Programs Section On The Public Homepage
+
+- **Date:** 2026-05-03
+- **Surface:** `/` public homepage.
+- **Change:** Added the Figma-sourced `PROGRAMS.md` explainer section above Common Questions. The section introduces Programs as the initiative-level pipeline that turns a messy initiative into research passes, a normalize pass, converged decisions, a dependency graph, an ExecPlan split recommendation, a planning brief, the ExecPlan loop, and validated shipping slices.
+- **Design direction:** Match the supplied black editorial Figma frame with Instrument Serif display type, compact Inter annotations, document-grid art, and a right-side pipeline diagram while adapting the layout for mobile readability.
+- **Out of scope:** No checkout behavior change, no new external setup, and no structured-data expansion because the section is explanatory marketing content rather than FAQ or product-offer schema.
+- **Verification:** Figma context and screenshot were fetched from node `5:220`; focused homepage unit and integration-ui tests, lint, format check, and typecheck/build should pass before release.
+
+## Shipped Note: Figma PLANS.md Section On The Public Homepage
+
+- **Date:** 2026-05-03
+- **Surface:** `/` public homepage.
+- **Change:** Added the Figma-sourced `PLANS.md` explainer section above pricing. The section introduces PLANS.md as the persistent execution artifact that turns vague requests into scoped, testable, loopable software work. The section supports both light and dark app themes.
+- **Design direction:** Match the supplied black editorial Figma frame with the left title lockup, central instruction-document illustration, right-side callouts, lower differentiator list, and loop diagram while adapting the section into a readable stacked mobile layout. The loop diagram uses a character-to-write handoff line, a primary execution loop, and a muted return path instead of generic circular arrows.
+- **Out of scope:** No checkout behavior change, no new external setup, and no structured-data expansion because the section is explanatory marketing content rather than FAQ or product-offer schema.
+- **Verification:** Figma context and screenshot were fetched from node `5:138`; focused homepage unit and integration-ui tests, lint, format check, typecheck, and desktop/mobile browser proof should pass before release.

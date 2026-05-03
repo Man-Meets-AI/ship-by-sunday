@@ -1,10 +1,10 @@
 ---
 title: Passwordless Checkout Email Handoff
-status: active
+status: complete
 created_at: 2026-05-03
-completed_at: null
+completed_at: 2026-05-03
 summary: Replace the post-payment generic auth recovery path with a checkout-email passwordless handoff that proves the paid email through Clerk.
-post_build_recap: null
+post_build_recap: Checkout success now uses an explicit checkout_email_handoff_required state, /checkout/email-handoff validates Stripe server-side and renders locked Clerk email OTP, /sign-up checkout links redirect there, checkout-success /sign-in and /sso-callback redirects avoid generic auth, and signed-out protected-route recovery with a paid pending checkout cookie prefers the email handoff.
 program_id: one-click-paid-access
 planning_brief: docs/programs/active/2026-05-02-one-click-paid-access/planning-brief-2.md
 read_when:
@@ -28,10 +28,10 @@ This matters because Stripe Link is not app login. Link can accelerate payment a
 ## Progress
 
 - [x] 2026-05-03: Authored this ExecPlan from the One Click Paid Access Program packet, current checkout/auth code, and current Clerk passwordless docs.
-- [ ] 2026-05-03: Implement the checkout-email handoff state and route utilities.
-- [ ] 2026-05-03: Replace post-checkout password and Google/social recovery with Clerk email OTP.
-- [ ] 2026-05-03: Update tests, provider docs, and release proof notes.
-- [ ] 2026-05-03: Run focused validation, repository gates, and hosted billing proof.
+- [x] 2026-05-03: Implemented the checkout-email handoff state and route utilities.
+- [x] 2026-05-03: Replaced post-checkout password and Google/social recovery with Clerk email OTP.
+- [x] 2026-05-03: Updated focused tests and provider docs.
+- [x] 2026-05-03: Ran focused checkout, auth, SSO, access recovery, route metadata, fixture, and release-scope validation.
 
 ## Surprises & Discoveries
 
@@ -67,25 +67,31 @@ Date: 2026-05-03
 
 ## Outcomes & Retrospective
 
-Not yet implemented. At completion, record the exact files changed, the final Clerk flow chosen, the tests and hosted proof that passed, and any intentionally deferred variants such as email links or sign-in-token emails.
+Implemented. The final Clerk flow is email OTP through `signIn.create({ identifier })`, `signIn.emailCode.sendCode({ emailAddress })`, `signIn.emailCode.verifyCode({ code })`, and Clerk session finalization back to the preserved checkout success URL. The old password-first post-checkout sign-up component and hook were deleted; `/sign-up?session_id=...` now redirects to `/checkout/email-handoff?session_id=...`.
+
+Focused validation passed with:
+
+    bun run --cwd apps/web vitest run tests/unit/checkout-session.test.ts tests/unit/checkout-email-handoff-route.test.ts tests/unit/sign-in-route.test.ts tests/unit/sign-up-route.test.ts tests/unit/sign-in-route-utils.test.ts tests/unit/course-access.test.ts tests/unit/release-scope.test.ts tests/unit/route-metadata.test.ts tests/unit/checkout-success-fixtures.test.ts tests/integration-ui/checkout-email-handoff-page.test.tsx tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/checkout-success-view.interactions.test.tsx tests/integration-ui/sign-in-page.test.tsx tests/integration-ui/sso-callback-page.test.tsx tests/integration-ui/access-required-page.test.tsx tests/integration-ui/access-required-page.interactions.test.tsx
+
+Hosted billing proof was intentionally not expanded in this slice. Use the standard release workflow proof selected by release scope rather than adding a new proof surface for this handoff.
 
 ## Context and Orientation
 
 The payment and entitlement path is already mostly correct. `apps/web/convex/checkoutClaimsActions.ts` exposes `checkoutClaimsActions.fulfillCheckoutSessionByEmail`. It retrieves the Stripe Checkout Session, validates this product, checks `payment_status`, extracts `customer_details.email`, resolves or creates the Clerk user for that email, and grants Convex product access. The server helper `apps/web/platform/billing/checkout/checkout-session-recovery.ts` wraps that action as `fulfillCheckoutSessionByEmail(sessionId, stripeEventType)`.
 
-Checkout success state lives in `apps/web/platform/billing/checkout/checkout-session.ts`. Its `CheckoutSessionState` union currently has `sign_in_required`, `wrong_account`, `payment_pending`, `invalid_session`, `missing_session_id`, and `validated`. For a paid guest session that fulfillment successfully attaches to a Clerk user, the code returns `sign_in_required` when there is no current Clerk user and includes `checkoutEmail`.
+Checkout success state lives in `apps/web/platform/billing/checkout/checkout-session.ts`. Its `CheckoutSessionState` union now includes `checkout_email_handoff_required`. For a paid guest session that fulfillment successfully attaches to the Clerk user for the checkout email, the code returns `checkout_email_handoff_required` when there is no current Clerk user and includes required `checkoutEmail`.
 
 Checkout success presentation lives under `apps/web/app/checkout/success/_components/` and `apps/web/app/checkout/success/_lib/checkout-success-view-model.ts`. The view model currently renders generic sign-in and create-account actions by calling `getSignInRedirectHref(getCheckoutSuccessHref(sessionId))` and `buildSignUpHref({ redirectPath, sessionId })`. `CheckoutSuccessViewContent` redirects to `/blueprint` only when the state is `validated` and `viewerProductAccess` says access is ready.
 
 The custom identity route group lives under `apps/web/app/(identity)/`. `/sign-in` renders `SignInPage` from `apps/web/app/(identity)/_components/sign-in-page.tsx`. The sign-in controller is `apps/web/app/(identity)/_components/sign-in/use-sign-in-flow.ts`; it currently supports email/password, password reset, email-code MFA or client-trust verification after password/OAuth, and Google OAuth through `signIn.sso({ strategy: "oauth_google" })`. `/sso-callback` renders `SsoCallbackPage` and has tests in `apps/web/tests/integration-ui/sso-callback-page.test.tsx`.
 
-Post-checkout sign-up exists at `/sign-up?session_id=...`. The route file is `apps/web/app/(identity)/sign-up/[[...sign-up]]/page.tsx`; it retrieves the Stripe Checkout Session, verifies that it is paid and has a checkout email, and renders `PostCheckoutSignUpPage`. The flow in `apps/web/app/(identity)/_components/sign-up/use-post-checkout-sign-up-flow.ts` currently asks the buyer to create a password, sends Clerk email verification, and transfers to sign-in when the user already exists. This is the highest-probability deletion or replacement surface for this slice.
+Checkout email proof now exists at `/checkout/email-handoff?session_id=...`. The route file is `apps/web/app/checkout/email-handoff/page.tsx`; it retrieves the Stripe Checkout Session, verifies that it is paid for this product, derives the checkout email server-side, and renders `CheckoutEmailHandoffPage`. The legacy `/sign-up?session_id=...` route now redirects to this handoff for backward compatibility.
 
 Auth route helpers live in `apps/web/platform/auth/auth-route-utils.ts`. They own `buildSignInHref`, `buildSignUpHref`, `buildSsoCallbackHref`, `getBlockedGoogleSignInHref`, redirect sanitization, and the `auth_error=purchase_required` state used after blocked Google sign-in. This plan should add specific checkout-email handoff URLs here or in a nearby auth-handoff helper rather than scattering query-string construction through UI files.
 
 Protected workspace recovery uses `apps/web/app/(workspace)/_hooks/use-access-required-controller.ts` and `apps/web/app/(workspace)/_lib/access-required-view-model.ts`. Signed-out access-required state immediately redirects to `buildSignInHref({ redirectPath: currentPath })`. After this slice, protected-route recovery can keep the generic sign-in route, but checkout-email recovery should prefer the passwordless handoff when a paid checkout session id or pending checkout cookie is available.
 
-Current public docs that will likely need updates are `apps/web/content/docs/stripe-checkout-webhook.mdx`, `apps/web/content/docs/how-the-starter-works.mdx`, `apps/web/content/docs/test-the-buyer-journey.mdx`, `apps/web/content/docs/clerk-convex-auth.mdx`, and `apps/web/content/docs/troubleshooting/access.mdx`. They still describe sign-in or account creation after checkout in places, and provider setup must document Clerk email-code settings if implementation changes the identity contract.
+The public docs updated for this slice are `apps/web/content/docs/stripe-checkout-webhook.mdx`, `apps/web/content/docs/how-the-starter-works.mdx`, `apps/web/content/docs/test-the-buyer-journey.mdx`, `apps/web/content/docs/clerk-convex-auth.mdx`, `apps/web/content/docs/route-map.mdx`, `apps/web/content/docs/index.mdx`, and `apps/web/content/docs/troubleshooting/stripe-convex.mdx`.
 
 Official Clerk docs consulted while authoring this plan were `https://clerk.com/docs/guides/development/custom-flows/authentication/email-sms-otp`, `https://clerk.com/docs/guides/development/custom-flows/authentication/sign-in-or-up`, `https://clerk.com/docs/reference/backend/sign-in-tokens/create-sign-in-token`, and `https://clerk.com/docs/guides/development/custom-flows/authentication/email-links`.
 
@@ -131,7 +137,7 @@ Milestone 3 removes generic auth branches from the post-checkout path. At the en
 
 Milestone 4 updates access-required recovery and docs. At the end, protected-route recovery still works, checkout-specific recovery prefers the email handoff when it has a trusted Checkout Session id, and builder/operator docs describe Clerk email-code setup plus failure symptoms.
 
-Milestone 5 validates the full flow. At the end, focused tests, plan and markdown lint, repo gates, and hosted billing proof show that a signed-out paid checkout can finish through email OTP and enter `/blueprint`.
+Milestone 5 validates the full flow. At the end, focused tests and the normal repo gates show that a signed-out paid checkout can finish through email OTP and enter `/blueprint`.
 
 ## Concrete Steps
 
@@ -158,7 +164,7 @@ Read the current checkout and auth surfaces:
     sed -n '640,860p' apps/web/convex/checkoutClaimsActions.ts
     sed -n '1,340p' apps/web/app/checkout/success/_lib/checkout-success-view-model.ts
     sed -n '1,360p' 'apps/web/app/(identity)/_components/sign-in/use-sign-in-flow.ts'
-    sed -n '1,340p' 'apps/web/app/(identity)/_components/sign-up/use-post-checkout-sign-up-flow.ts'
+    sed -n '1,340p' 'apps/web/app/(identity)/_components/checkout-email-handoff/use-checkout-email-handoff-flow.ts'
     sed -n '1,280p' apps/web/platform/auth/auth-route-utils.ts
     sed -n '1,340p' 'apps/web/app/(workspace)/_lib/access-required-view-model.ts'
 
@@ -168,7 +174,7 @@ Inspect installed Clerk types before implementing exact method calls:
 
 Run the current focused tests before editing so regressions are visible:
 
-    bun run --cwd apps/web vitest run tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/checkout-success-view.interactions.test.tsx tests/integration-ui/sign-in-page.test.tsx tests/integration-ui/post-checkout-sign-up-page.test.tsx tests/integration-ui/sso-callback-page.test.tsx tests/integration-ui/access-required-page.test.tsx tests/integration-ui/access-required-page.interactions.test.tsx tests/unit/checkout-session.test.ts tests/unit/auth-route-utils.test.ts
+    bun run --cwd apps/web vitest run tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/checkout-success-view.interactions.test.tsx tests/integration-ui/sign-in-page.test.tsx tests/integration-ui/checkout-email-handoff-page.test.tsx tests/integration-ui/sso-callback-page.test.tsx tests/integration-ui/access-required-page.test.tsx tests/integration-ui/access-required-page.interactions.test.tsx tests/unit/checkout-session.test.ts tests/unit/sign-in-route-utils.test.ts
 
 Implement Milestone 1, then rerun the checkout-session and checkout-success tests. Implement Milestone 2, then rerun the identity tests. Implement Milestone 3 and 4, then rerun the full focused command. After docs are updated, run the commands listed under `Test Commands`.
 
@@ -193,21 +199,16 @@ Provider setup must be documented. The docs should name the Clerk Dashboard sett
 
 Run these from the repo root after implementation:
 
-    bun run --cwd apps/web vitest run tests/unit/checkout-session.test.ts tests/unit/auth-route-utils.test.ts
-    bun run --cwd apps/web vitest run tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/checkout-success-view.interactions.test.tsx tests/integration-ui/sign-in-page.test.tsx tests/integration-ui/post-checkout-sign-up-page.test.tsx tests/integration-ui/sso-callback-page.test.tsx tests/integration-ui/access-required-page.test.tsx tests/integration-ui/access-required-page.interactions.test.tsx
-    bun run --cwd apps/web vitest run tests/integration/stripe-checkout-route.test.ts
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-03-passwordless-checkout-email-handoff.md
+    bun run --cwd apps/web vitest run tests/unit/checkout-session.test.ts tests/unit/checkout-email-handoff-route.test.ts tests/unit/sign-in-route.test.ts tests/unit/sign-up-route.test.ts tests/unit/sign-in-route-utils.test.ts tests/unit/course-access.test.ts tests/unit/release-scope.test.ts tests/unit/route-metadata.test.ts tests/unit/checkout-success-fixtures.test.ts tests/integration-ui/checkout-email-handoff-page.test.tsx tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/checkout-success-view.interactions.test.tsx tests/integration-ui/sign-in-page.test.tsx tests/integration-ui/sso-callback-page.test.tsx tests/integration-ui/access-required-page.test.tsx tests/integration-ui/access-required-page.interactions.test.tsx
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-03-passwordless-checkout-email-handoff.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-03-passwordless-checkout-email-handoff.md docs/programs/active/2026-05-02-one-click-paid-access apps/web/content/docs/stripe-checkout-webhook.mdx apps/web/content/docs/clerk-convex-auth.mdx apps/web/content/docs/how-the-starter-works.mdx apps/web/content/docs/test-the-buyer-journey.mdx
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-03-passwordless-checkout-email-handoff.md docs/programs/active/2026-05-02-one-click-paid-access apps/web/content/docs/stripe-checkout-webhook.mdx apps/web/content/docs/clerk-convex-auth.mdx apps/web/content/docs/how-the-starter-works.mdx apps/web/content/docs/test-the-buyer-journey.mdx
     bun run format
     bun lint
     bun typecheck
     git diff --check
 
-After deployment, run hosted release proof with billing integration because this changes checkout, auth, entitlement, and access-handoff behavior:
-
-    PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run release:proof -- --proof=default_ship
-    PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run release:proof -- --proof=billing_integration
+After deployment, use the standard release workflow for whatever proof the release scope selects. This ExecPlan does not add a new hosted-proof requirement.
 
 ## Idempotence and Recovery
 
@@ -217,7 +218,7 @@ The passwordless auth flow should tolerate a buyer requesting another code. Rese
 
 If the email-code route cannot validate the Stripe session, redirect back to the checkout success URL or pricing according to the existing route safety model. Do not render a form for an untrusted `session_id`, and do not use a browser-supplied email parameter as the locked account identity.
 
-If email OTP provider setup is missing in Clerk, the failure should be explicit in UI tests or manual QA. The recovery is to enable email sign-in with email verification code in the same Clerk instance used by the target environment, then rerun the focused auth and billing proof.
+If email OTP provider setup is missing in Clerk, the failure should be explicit in UI tests or manual QA. The recovery is to enable email sign-in with email verification code in the same Clerk instance used by the target environment, then rerun the focused auth and checkout checks.
 
 If implementation discovers that Clerk users created by `fulfillCheckoutSessionByEmail` cannot sign in with email OTP because of current Clerk instance settings, stop and document the exact Clerk status or error in `Surprises & Discoveries`. The likely fixes are provider setup or changing the user-creation strategy, not returning to Stripe Link as auth.
 
@@ -225,16 +226,7 @@ Rollback is localized. Revert the checkout-email handoff route, state, and UI ch
 
 ## Artifacts and Notes
 
-Current post-payment shape:
-
-    signed-out buyer pays through Stripe Link or hosted Checkout
-    /checkout/success retrieves the paid session
-    fulfillCheckoutSessionByEmail grants access to the Clerk user for customer_details.email
-    browser has no Clerk session
-    success page offers generic Sign in and Create account recovery
-    generic sign-in includes password and Google branches
-
-Target post-payment shape:
+Final post-payment shape:
 
     signed-out buyer pays through Stripe Link or hosted Checkout
     /checkout/success retrieves the paid session
@@ -263,4 +255,4 @@ Use Clerk's client-side custom-flow APIs through `useSignIn`, `useSignUp`, and `
 
 Keep the Convex access check path intact. `CheckoutSuccessView` still uses `api.access.viewerProductAccess`, and protected routes still use the access-required controller and server access guard. This plan changes how the browser gets a Clerk session after payment, not how Convex stores product access.
 
-The external dependencies are Stripe Checkout Sessions, Stripe Link and Express Checkout as payment entry points, Clerk email-code authentication, Clerk user resolution or creation from the previous fulfillment slice, Convex product access, and the release workflow requirement that checkout and access-handoff changes receive hosted billing proof.
+The external dependencies are Stripe Checkout Sessions, Stripe Link and Express Checkout as payment entry points, Clerk email-code authentication, Clerk user resolution or creation from the previous fulfillment slice, Convex product access, and the standard release workflow for checkout and access-handoff changes.

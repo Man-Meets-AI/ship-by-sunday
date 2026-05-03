@@ -158,7 +158,7 @@ describe("getCheckoutSessionState", () => {
 		});
 	});
 
-	it("includes the paid checkout email when a guest checkout requires sign-in", async () => {
+	it("requires checkout email proof after fulfilling a signed-out guest checkout", async () => {
 		retrieveSessionMock.mockResolvedValue(
 			createCheckoutSession({
 				metadata: {
@@ -188,7 +188,7 @@ describe("getCheckoutSessionState", () => {
 		await expect(
 			getCheckoutSessionState("cs_guest_signed_out_email"),
 		).resolves.toEqual({
-			kind: "sign_in_required",
+			kind: "checkout_email_handoff_required",
 			sessionId: "cs_guest_signed_out_email",
 			checkoutEmail: "buyer@example.com",
 		});

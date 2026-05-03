@@ -1,16 +1,16 @@
 ---
 title: Color Token Alignment
-status: active
+status: complete
 created_at: 2026-05-03
-completed_at: null
+completed_at: 2026-05-03
 summary: Align app UI color tokens and high-value surfaces to the screenshot-grounded light and dark design library.
-post_build_recap: null
+post_build_recap: The first color slice promoted shared accent and state tokens, migrated workspace status and feedback UI to semantic utilities, documented homepage exceptions, and passed lint, typecheck, integration UI, and light/dark browser token proof.
 program_id: ui-design-system-alignment
-planning_brief: docs/programs/active/2026-05-03-ui-design-system-alignment/planning-brief-1.md
+planning_brief: docs/programs/completed/2026-05-03-ui-design-system-alignment/planning-brief-1.md
 read_when:
-  - Implementing the first UI design-system alignment slice.
+  - Reviewing the finished first UI design-system alignment slice.
   - Changing app color tokens, hard-coded neutrals, dark mode, or visual audit rules.
-  - Validating the color slice before moving to typography or spacing.
+  - Preparing the follow-up typography, spacing, or route proof slices.
 ---
 
 # Color Token Alignment
@@ -27,12 +27,12 @@ The user-visible result is that protected app surfaces, checkout handoff UI, ide
 
 ## Progress
 
-- [x] 2026-05-03: Authored this ExecPlan from `docs/programs/active/2026-05-03-ui-design-system-alignment/planning-brief-1.md`.
-- [ ] 2026-05-03: Run the color inventory and classify hard-coded colors by role and exception type.
-- [ ] 2026-05-03: Add or refine the minimum needed color tokens in `apps/web/app/globals.css`.
-- [ ] 2026-05-03: Migrate shared primitives and high-value app surfaces to semantic colors.
-- [ ] 2026-05-03: Update design docs with durable implementation decisions and allowed exceptions.
-- [ ] 2026-05-03: Run focused checks, broad gates, and desktop/mobile visual proof in light and dark mode.
+- [x] 2026-05-03: Authored this ExecPlan from `docs/programs/completed/2026-05-03-ui-design-system-alignment/planning-brief-1.md`.
+- [x] 2026-05-03: Run the color inventory and classify hard-coded colors by role and exception type.
+- [x] 2026-05-03: Add or refine the minimum needed color tokens in `apps/web/app/globals.css`.
+- [x] 2026-05-03: Migrate shared primitives and high-value app surfaces to semantic colors.
+- [x] 2026-05-03: Update design docs with durable implementation decisions and allowed exceptions.
+- [x] 2026-05-03: Run focused checks, broad gates, and desktop/mobile visual proof in light and dark mode.
 
 ## Surprises & Discoveries
 
@@ -43,6 +43,10 @@ Initial planning scan also found intentional hard-coded colors in homepage edito
 Parker clarified on 2026-05-03 that the custom homepage graphics, font treatments, and styles for `Install leverage` / `the loop repeats TOMORROW`, `Exec Loops: OpenAI's WEAPON of choice`, and worker/how-workers-work sections must be ignored by this Program. Treat those as hard exclusions, not drift.
 
 Initial planning scan found a typography conflict: `apps/web/app/globals.css` applies `letter-spacing: -0.02em` to `body`, while the UI design library says operational UI should use `0` tracking. That belongs to the later typography child slice unless a color edit must touch the same rule.
+
+Implementation inventory found that `apps/web/components/ui/cover.tsx` is currently only used by the homepage hero headline, so it is classified as homepage presentation for this slice and left unchanged. If `Cover` is reused inside operational app UI later, its hard-coded neutral and white hover colors should be tokenized before that reuse lands.
+
+The first migration removed the targeted app UI drift for `emerald`, `amber`, `blue-500`, and pointer-specific `neutral` utilities from workspace status and feedback surfaces. Remaining hard-coded colors in the broader inventory are token-source values, homepage/editorial presentation, integration brand content, Open Graph output, or generated preview/demo color.
 
 ## Decision Log
 
@@ -62,13 +66,25 @@ Decision: Do not normalize named homepage editorial sections.
 Rationale: The leverage hero, sprint-path exec-loop section, and worker/how-workers-work graphics are intentional custom homepage art direction. This color slice exists to align app UI, not to restyle those marketing moments.
 Date: 2026-05-03
 
+Decision: Promote `accent.info`, `state.success`, and `state.warning` as the first new Tailwind-backed app color utilities.
+Rationale: These roles have repeated operational UI uses and cannot be expressed cleanly with existing neutral shadcn roles. `state.danger` remains covered by the existing `destructive` token until a separate danger role repeats.
+Date: 2026-05-03
+
+Decision: Keep the homepage hero `Cover` treatment out of the first app color migration.
+Rationale: Current usage is homepage-only presentation, and Parker explicitly asked not to normalize custom homepage graphics, fonts, and styles as part of this Program.
+Date: 2026-05-03
+
 ## Outcomes & Retrospective
 
-This plan is active. Fill this section after implementation with the exact tokens added or changed, the surfaces migrated, the exceptions documented, the visual proof collected, and any remaining color drift intentionally deferred to later Program slices.
+This plan completed the first color alignment slice without widening into typography, spacing, checkout, auth, or homepage redesign. `apps/web/app/globals.css` now exposes `accent.info`, `state.success`, and `state.warning` as Tailwind-backed app color roles, uses a neutral dark `sidebar-primary`, and keeps selection colors on foreground/background tokens instead of hard-coded hex.
+
+The migration covered the high-value operational drift found in the first inventory: pointer highlight accent color, Codex connection status dots, bonus lesson completion checks, and blueprint save feedback warning/success tones. The feedback component also now applies tone-specific border color to the bordered element instead of a wrapper without a border.
+
+The main remaining visual work belongs to later Program slices. The global body tracking mismatch remains a typography task. Hard-coded homepage art, integration brand colors, Open Graph colors, generated preview/demo colors, and the homepage-only hero `Cover` treatment remain documented exceptions rather than unfinished color migration work.
 
 ## Context and Orientation
 
-The high-level design source is root `DESIGN.md`. The detailed screenshot-grounded audit target is `docs/design-docs/ui-design-library.md`. The owning Program is `docs/programs/active/2026-05-03-ui-design-system-alignment/program.md`.
+The high-level design source is root `DESIGN.md`. The detailed screenshot-grounded audit target is `docs/design-docs/ui-design-library.md`. The owning Program is `docs/programs/completed/2026-05-03-ui-design-system-alignment/program.md`.
 
 The app token implementation lives in `apps/web/app/globals.css`. The `@theme inline` block maps CSS variables to Tailwind color utilities. The `:root` block defines light mode values, and the `.dark` block defines dark mode values. Existing semantic colors include `background`, `foreground`, `card`, `popover`, `primary`, `secondary`, `muted`, `accent`, `destructive`, `border`, `input`, `ring`, `chart-*`, and `sidebar-*`.
 
@@ -130,7 +146,7 @@ Read required guidance:
     sed -n '1,260p' docs/design-docs/ui-design-library.md
     sed -n '1,180p' docs/ship-by-sunday/design-pack/AGENTS.md
     sed -n '1,180p' apps/web/AGENTS.md
-    sed -n '1,220p' docs/programs/active/2026-05-03-ui-design-system-alignment/program.md
+    sed -n '1,220p' docs/programs/completed/2026-05-03-ui-design-system-alignment/program.md
 
 Inspect token and primitive sources:
 
@@ -168,9 +184,9 @@ Acceptance is not "no hard-coded colors anywhere." Marketing art, integration br
 
 Run these from the repo root:
 
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-03-color-token-alignment.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-03-color-token-alignment.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-03-color-token-alignment.md docs/programs/active/2026-05-03-ui-design-system-alignment docs/design-docs/ui-design-library.md DESIGN.md docs/DESIGN.md docs/design-docs/index.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-03-color-token-alignment.md docs/programs/completed/2026-05-03-ui-design-system-alignment docs/design-docs/ui-design-library.md DESIGN.md docs/DESIGN.md docs/design-docs/index.md
     bun run format
     bun lint
     bun typecheck
@@ -203,6 +219,38 @@ Initial planning scan examples:
     apps/web/components/ui/cover.tsx and pointer-highlight.tsx contain generic neutral utilities that need classification before reuse in app UI.
 
 Record implementation proof here as the slice proceeds.
+
+Implementation patch:
+
+    apps/web/app/globals.css promotes --accent-info, --state-success, and --state-warning into Tailwind color utilities, makes dark sidebar-primary neutral instead of saturated blue, and moves text selection colors onto foreground/background tokens.
+    apps/web/components/ui/pointer-highlight.tsx uses border-foreground and text-accent-info instead of generic neutral and blue utilities.
+    apps/web/app/(workspace)/_components/codex-connection-card/codex-connection-card-status.tsx uses bg-state-success and bg-state-warning for status dots.
+    apps/web/app/(workspace)/_components/execute-ship/bonus-mission-block-card.tsx uses text-state-success for completed lesson checks.
+    apps/web/app/(workspace)/_components/blueprint-flow/blueprint-stage-save-feedback.tsx uses state tokens for warning/success feedback and applies the tone border to the actual bordered element.
+
+Targeted post-patch inventory:
+
+    rg -n "bg-emerald|text-emerald|border-emerald|bg-amber|text-amber|border-amber|text-blue-500|bg-blue-500|border-neutral-800|dark:border-neutral-200" apps/web/app apps/web/components apps/web/lib -S
+
+The command returned no matches after the first migration.
+
+Validation proof:
+
+    bun run format
+    bun lint
+    bun typecheck
+    bun run format:check
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-03-color-token-alignment.md
+    bun run programs:lint
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-03-color-token-alignment.md docs/programs/completed/2026-05-03-ui-design-system-alignment docs/design-docs/ui-design-library.md DESIGN.md docs/DESIGN.md docs/design-docs/index.md
+    bun run public-readiness:lint
+    bun run --cwd apps/web vitest run --project unit tests/unit/blueprint-stage-save-feedback.test.tsx tests/unit/marketing-effects.test.tsx tests/unit/settings-page.test.tsx tests/unit/mission-extras-row.test.tsx --project integration-ui tests/integration-ui/lesson-map-surface.test.tsx tests/integration-ui/blueprint-page.test.tsx
+    bun run --cwd apps/web test:integration:ui
+    git diff --check
+
+All listed commands passed. The focused Vitest run passed 6 files and 10 tests. The full integration UI suite passed 27 files and 113 tests. `bun typecheck` completed the serialized Next production build and TypeScript pass.
+
+Browser proof used a fresh `next start` server on `http://localhost:3002` from the current build because an already-running dev server at `http://localhost:3000` was serving an older CSS bundle. Protected `/settings` redirected to `/sign-in` without local auth, so direct protected visual proof was blocked by auth. The reachable sign-in shell was checked at desktop `1440x900` and mobile `390x844` in light and dark mode, with no mobile horizontal overflow. Computed token probes confirmed light and dark values for `--accent-info`, `--state-success`, `--state-warning`, `text-accent-info`, `bg-state-success`, `bg-state-warning`, `border-state-success/30`, and `border-state-warning/30`.
 
 ## Interfaces and Dependencies
 

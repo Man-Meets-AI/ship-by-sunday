@@ -14,44 +14,40 @@ import {
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 
-type PostCheckoutSignUpFormProps = {
+type CheckoutEmailHandoffFormProps = {
 	emailAddress: string;
 	emailError: { message?: string } | null;
 	globalErrors: Array<{ message?: string }> | null;
 	isBusy: boolean;
-	password: string;
-	passwordError: { message?: string } | null;
+	isLoaded: boolean;
 	resendVerificationCode: () => Promise<void>;
-	setPassword: (value: string) => void;
 	setVerificationCode: (value: string) => void;
-	step: "create" | "verify";
-	submitSignUp: () => Promise<void>;
+	startEmailCode: () => Promise<void>;
+	step: "send" | "verify";
 	submitVerification: () => Promise<void>;
 	verificationCode: string;
 	verificationError: { message?: string } | null;
 };
 
-export function PostCheckoutSignUpForm({
+export function CheckoutEmailHandoffForm({
 	emailAddress,
 	emailError,
 	globalErrors,
 	isBusy,
-	password,
-	passwordError,
+	isLoaded,
 	resendVerificationCode,
-	setPassword,
 	setVerificationCode,
+	startEmailCode,
 	step,
-	submitSignUp,
 	submitVerification,
 	verificationCode,
 	verificationError,
-}: PostCheckoutSignUpFormProps) {
+}: CheckoutEmailHandoffFormProps) {
 	async function handleSubmit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 
-		if (step === "create") {
-			await submitSignUp();
+		if (step === "send") {
+			await startEmailCode();
 			return;
 		}
 
@@ -63,19 +59,20 @@ export function PostCheckoutSignUpForm({
 			{globalErrors?.length ? (
 				<Alert variant="destructive">
 					<AlertCircleIcon aria-hidden />
-					<AlertTitle>We couldn&apos;t finish the account setup.</AlertTitle>
+					<AlertTitle>We couldn&apos;t prove the checkout email.</AlertTitle>
 					<AlertDescription>
-						{globalErrors[0]?.message ??
-							"Use the checkout email and try again."}
+						{globalErrors[0]?.message ?? "Use a fresh code and try again."}
 					</AlertDescription>
 				</Alert>
 			) : null}
 			<form className="flex flex-col gap-5" onSubmit={handleSubmit}>
 				<FieldGroup>
 					<Field data-invalid={Boolean(emailError) || undefined}>
-						<FieldLabel htmlFor="sign-up-email">Checkout email</FieldLabel>
+						<FieldLabel htmlFor="checkout-email-handoff-email">
+							Checkout email
+						</FieldLabel>
 						<Input
-							id="sign-up-email"
+							id="checkout-email-handoff-email"
 							autoComplete="email"
 							disabled={true}
 							readOnly={true}
@@ -84,28 +81,13 @@ export function PostCheckoutSignUpForm({
 						/>
 						<FieldError errors={[emailError ?? undefined]} />
 					</Field>
-					{step === "create" ? (
-						<Field data-invalid={Boolean(passwordError) || undefined}>
-							<FieldLabel htmlFor="sign-up-password">
-								Create password
+					{step === "verify" ? (
+						<Field data-invalid={Boolean(verificationError) || undefined}>
+							<FieldLabel htmlFor="checkout-email-handoff-code">
+								Email code
 							</FieldLabel>
 							<Input
-								id="sign-up-password"
-								autoComplete="new-password"
-								disabled={isBusy}
-								aria-invalid={Boolean(passwordError) || undefined}
-								placeholder="Create a password"
-								type="password"
-								value={password}
-								onChange={(event) => setPassword(event.target.value)}
-							/>
-							<FieldError errors={[passwordError ?? undefined]} />
-						</Field>
-					) : (
-						<Field data-invalid={Boolean(verificationError) || undefined}>
-							<FieldLabel htmlFor="sign-up-code">Verification code</FieldLabel>
-							<Input
-								id="sign-up-code"
+								id="checkout-email-handoff-code"
 								autoComplete="one-time-code"
 								disabled={isBusy}
 								aria-invalid={Boolean(verificationError) || undefined}
@@ -116,11 +98,11 @@ export function PostCheckoutSignUpForm({
 							/>
 							<FieldError errors={[verificationError ?? undefined]} />
 						</Field>
-					)}
+					) : null}
 				</FieldGroup>
-				<Button className="w-full" disabled={isBusy} type="submit">
+				<Button className="w-full" disabled={!isLoaded || isBusy} type="submit">
 					{isBusy ? <Spinner data-icon="inline-start" /> : null}
-					{step === "create" ? "Create account" : "Verify and continue"}
+					{step === "send" ? "Send email code" : "Verify and continue"}
 				</Button>
 			</form>
 			{step === "verify" ? (
@@ -129,13 +111,12 @@ export function PostCheckoutSignUpForm({
 					variant="link"
 					size="sm"
 					className="h-auto justify-start px-0"
-					disabled={isBusy}
+					disabled={!isLoaded || isBusy}
 					onClick={() => void resendVerificationCode()}
 				>
-					I need a new code
+					Send a new code
 				</Button>
 			) : null}
-			<div id="clerk-captcha" />
 		</div>
 	);
 }

@@ -221,7 +221,7 @@ describe("AppShell", () => {
 		);
 
 		expect(markup).toContain(
-			'class="flex min-h-screen flex-col bg-background text-foreground"',
+			'class="flex min-h-screen flex-col bg-background text-foreground tracking-normal"',
 		);
 		expect(markup).not.toContain("xl:h-dvh");
 		expect(markup).not.toContain("xl:overflow-hidden");

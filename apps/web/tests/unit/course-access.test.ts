@@ -5,7 +5,11 @@ const claimCheckoutSessionForViewerMock = vi.fn();
 const claimLatestPendingCheckoutForViewerMock = vi.fn();
 const fetchQueryMock = vi.fn();
 const getConvexServerSessionMock = vi.fn();
+const getCheckoutSessionForRecoveryMock = vi.fn();
 const getPendingCheckoutSessionIdFromCookieMock = vi.fn();
+const getStripeCheckoutSessionEmailMock = vi.fn();
+const isStripeCheckoutSessionForCourseMock = vi.fn();
+const isStripeCheckoutSessionPaidMock = vi.fn();
 
 vi.mock("server-only", () => ({}));
 
@@ -26,8 +30,16 @@ vi.mock("@/platform/billing/checkout/checkout-session-recovery", () => ({
 		claimCheckoutSessionForViewerMock(...args),
 	claimLatestPendingCheckoutForViewer: (...args: unknown[]) =>
 		claimLatestPendingCheckoutForViewerMock(...args),
+	getCheckoutSessionForRecovery: (...args: unknown[]) =>
+		getCheckoutSessionForRecoveryMock(...args),
 	getPendingCheckoutSessionIdFromCookie: (...args: unknown[]) =>
 		getPendingCheckoutSessionIdFromCookieMock(...args),
+	getStripeCheckoutSessionEmail: (...args: unknown[]) =>
+		getStripeCheckoutSessionEmailMock(...args),
+	isStripeCheckoutSessionForCourse: (...args: unknown[]) =>
+		isStripeCheckoutSessionForCourseMock(...args),
+	isStripeCheckoutSessionPaid: (...args: unknown[]) =>
+		isStripeCheckoutSessionPaidMock(...args),
 }));
 
 vi.mock("@/convex/_generated/api", () => ({
@@ -48,8 +60,18 @@ describe("product access server helpers", () => {
 		claimLatestPendingCheckoutForViewerMock.mockReset();
 		fetchQueryMock.mockReset();
 		getConvexServerSessionMock.mockReset();
+		getCheckoutSessionForRecoveryMock.mockReset();
 		getPendingCheckoutSessionIdFromCookieMock.mockReset();
+		getStripeCheckoutSessionEmailMock.mockReset();
+		isStripeCheckoutSessionForCourseMock.mockReset();
+		isStripeCheckoutSessionPaidMock.mockReset();
 		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(null);
+		getCheckoutSessionForRecoveryMock.mockResolvedValue({
+			payment_status: "paid",
+		});
+		getStripeCheckoutSessionEmailMock.mockReturnValue("buyer@example.com");
+		isStripeCheckoutSessionForCourseMock.mockReturnValue(true);
+		isStripeCheckoutSessionPaidMock.mockReturnValue(true);
 		claimLatestPendingCheckoutForViewerMock.mockResolvedValue({
 			kind: "no_pending_claim",
 		});
@@ -73,6 +95,33 @@ describe("product access server helpers", () => {
 		});
 		expect(fetchQueryMock).not.toHaveBeenCalled();
 		expect(redirectMock).not.toHaveBeenCalled();
+	});
+
+	it("keeps a signed-out pending paid checkout on the email handoff recovery path", async () => {
+		getConvexServerSessionMock.mockResolvedValue({
+			userId: null,
+			token: null,
+		});
+		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(
+			"cs_pending_signed_out",
+		);
+
+		const { getServerProductAccess } =
+			await import("@/platform/access/product-access");
+
+		await expect(getServerProductAccess()).resolves.toEqual({
+			clerkUserId: null,
+			hasAccess: false,
+			status: "signed_out",
+			pendingCheckoutRecovery: {
+				kind: "checkout_email_handoff_required",
+				sessionId: "cs_pending_signed_out",
+				checkoutEmail: "buyer@example.com",
+			},
+		});
+		expect(fetchQueryMock).not.toHaveBeenCalled();
+		expect(claimCheckoutSessionForViewerMock).not.toHaveBeenCalled();
+		expect(claimLatestPendingCheckoutForViewerMock).not.toHaveBeenCalled();
 	});
 
 	it("keeps signed-in users with a missing Convex token on the recovery surface", async () => {
