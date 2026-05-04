@@ -408,6 +408,7 @@ Date: 2026-05-04
 Active child ExecPlans:
 
 - `docs/exec-plans/active/2026-05-02-reconcile-customer-agentic-source-contract.md`
+- `docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md`
 
 Completed child ExecPlans:
 
@@ -415,7 +416,6 @@ Completed child ExecPlans:
 
 Recommended future child ExecPlans:
 
-- `existing-codebase-checkout-intent-routing`: persist `buyerStartingPoint`, `checkoutCtaId`, and `fulfillmentTrack`; route generated buyers to `/codebase`, existing-codebase buyers to `/workspace/setup`, and missing or legacy intent to a choice screen.
 - `existing-codebase-workspace-data-model-and-events`: add separate existing-codebase workspace tables plus the append-only sync-safe runner event stream through the hosted backend.
 - `existing-codebase-setup-ui`: build `/workspace/setup` with Machine Setup, Project Setup, pairing states, blockers, warnings, privacy defaults, default open destination, and `Run doctor pass`.
 - `local-runner-prototype`: build `bunx ship-by-sunday setup pair <token>`, `npx` fallback, daemon and one-shot mode, local `.sbs/` state, `gh` readiness, SBS Codex profiles, config diff/backup/approval, and `codex exec` boundaries.
@@ -433,7 +433,7 @@ Recommended future child ExecPlans:
 
 An active child ExecPlan exists at `docs/exec-plans/active/2026-05-02-reconcile-customer-agentic-source-contract.md`. It should reconcile generated-repo source truth and customer-safety boundaries first because current customer output must not point to missing prompts, skills, scripts, or unsafe planning archives.
 
-After that active child lands, the next recommended Program slice is `existing-codebase-checkout-intent-routing`. That slice should persist `buyerStartingPoint`, `checkoutCtaId`, and `fulfillmentTrack` through the homepage CTA, Stripe checkout metadata, pending checkout claims, product access grants, checkout success, and the fulfillment router. It should keep generated buyers on `/codebase`, send existing-codebase buyers to `/workspace/setup`, and send missing or legacy intent to a small choice screen. It must not build runner UI, daemon behavior, doctor pass, findings, workflow approval, or worker queue controls.
+The existing-codebase checkout-intent child ExecPlan is active. It should persist `buyerStartingPoint`, `checkoutCtaId`, and `fulfillmentTrack` through the homepage CTA, Stripe checkout metadata, pending checkout claims, product access grants, checkout success, and the fulfillment router. It should keep generated buyers on `/codebase`, send existing-codebase buyers to `/workspace/setup`, and send missing or legacy intent to a small choice screen. It must not build runner UI, daemon behavior, doctor pass, findings, workflow approval, or worker queue controls.
 
 The following slice is `existing-codebase-workspace-data-model-and-events`. It should add the separate existing-codebase tables and sync-safe event protocol that later setup, runner, doctor pass, findings, and workflow UI depend on. Only after those contracts exist should `/workspace/setup`, the local runner prototype, doctor pass, findings ledger, first workflow approval, support surfaces, Work-phase workers, broken-app rescue, and managed GitHub Run-phase work proceed in the dependency order recorded in `plan-split-recommendation.md` and `planning-brief-2.md`.
 
