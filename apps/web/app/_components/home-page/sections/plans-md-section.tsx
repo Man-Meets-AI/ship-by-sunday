@@ -9,6 +9,11 @@ const documentLineRows = [
 	{ y: 273, shortY: 305 },
 ] as const;
 const calloutLabelBaselines = [75, 171, 348] as const;
+const plansMdLoopAssetPaths = {
+	cyclePaths: "/landing-page/plans-md-loop-cycle-paths.svg",
+	ideaBubble: "/landing-page/plans-md-loop-idea-bubble.svg",
+	ideaPath: "/landing-page/plans-md-loop-idea-path.svg",
+} as const;
 
 export function PlansMdSectionBlock({
 	plansMdSection,
@@ -122,98 +127,14 @@ function MobilePlanDocument({
 
 function MobileLoopDiagram({ loop }: { readonly loop: PlansMdLoop }) {
 	return (
-		<div className="relative mx-auto aspect-square w-full max-w-[22rem]">
+		<div className="mx-auto w-full max-w-[24rem]">
 			<svg
-				viewBox="0 0 352 352"
-				className="size-full overflow-visible"
+				viewBox="690 720 560 340"
+				className="block h-auto w-full overflow-visible text-current"
 				aria-hidden="true"
 			>
-				<defs>
-					<marker
-						id="plans-mobile-arrow"
-						markerHeight="8"
-						markerWidth="8"
-						orient="auto"
-						refX="7"
-						refY="4"
-					>
-						<path d="M0 0 L8 4 L0 8 Z" fill="currentColor" />
-					</marker>
-					<marker
-						id="plans-mobile-arrow-muted"
-						markerHeight="8"
-						markerWidth="8"
-						orient="auto"
-						refX="7"
-						refY="4"
-					>
-						<path d="M0 0 L8 4 L0 8 Z" fill="currentColor" fillOpacity="0.28" />
-					</marker>
-				</defs>
-				<path
-					d="M64 168 C95 178 113 161 143 146"
-					fill="none"
-					stroke="currentColor"
-					strokeLinecap="round"
-					strokeWidth="1.2"
-				/>
-				<path
-					d="M143 146 C153 93 205 68 246 83 C302 102 318 158 292 206 C265 255 194 261 151 222 C131 204 115 178 109 154"
-					fill="none"
-					markerEnd="url(#plans-mobile-arrow)"
-					stroke="currentColor"
-					strokeWidth="1.35"
-				/>
-				<path
-					d="M136 56 C174 69 197 69 222 55"
-					fill="none"
-					markerEnd="url(#plans-mobile-arrow-muted)"
-					stroke="currentColor"
-					strokeOpacity="0.28"
-					strokeWidth="1.2"
-				/>
-				<path
-					d="M226 61 C289 57 334 122 315 194 C290 270 201 292 129 256"
-					fill="none"
-					markerEnd="url(#plans-mobile-arrow-muted)"
-					stroke="currentColor"
-					strokeOpacity="0.28"
-					strokeWidth="1.2"
-				/>
-				<circle
-					cx="52"
-					cy="148"
-					fill="none"
-					r="7"
-					stroke="currentColor"
-					strokeWidth="1.5"
-				/>
-				<path
-					d="M52 155 V183 M38 164 L66 164 M52 183 L44 206 M52 183 L60 206"
-					fill="none"
-					stroke="currentColor"
-					strokeLinecap="round"
-					strokeWidth="1.5"
-				/>
-				<path
-					d="M57 105 H101 C105 105 113 109 113 117 V133 C113 137 105 145 101 145 H73 L67 157 L71 145 H57 C53 145 45 137 45 133 V117 C45 113 53 105 57 105 Z"
-					fill="none"
-					stroke="currentColor"
-					strokeLinejoin="round"
-					strokeWidth="1.5"
-				/>
+				<LoopDiagramArtwork loop={loop} maskIdPrefix="plans-md-loop-mobile" />
 			</svg>
-			<p className="absolute top-[31%] left-[18%] text-lg tracking-normal">
-				{loop.ideaLabel}
-			</p>
-			<LoopLabel className="top-[16%] left-[63%]">{loop.shipLabel}</LoopLabel>
-			<LoopLabel className="top-[40%] left-[41%]">{loop.writeLabel}</LoopLabel>
-			<LoopLabel className="top-[41%] right-[1%]">
-				{loop.executeLabel}
-			</LoopLabel>
-			<LoopLabel className="bottom-[20%] left-[60%]">
-				{loop.grillLabel}
-			</LoopLabel>
 		</div>
 	);
 }
@@ -236,7 +157,10 @@ function DesktopPlansMdArtwork({
 			<DesktopDifferentiators
 				differentiators={plansMdSection.differentiators}
 			/>
-			<DesktopLoopDiagram loop={plansMdSection.loop} />
+			<LoopDiagramArtwork
+				loop={plansMdSection.loop}
+				maskIdPrefix="plans-md-loop-desktop"
+			/>
 		</svg>
 	);
 }
@@ -373,97 +297,144 @@ function DesktopDifferentiators({
 	);
 }
 
-function DesktopLoopDiagram({ loop }: { readonly loop: PlansMdLoop }) {
+function LoopDiagramArtwork({
+	loop,
+	maskIdPrefix,
+}: {
+	readonly loop: PlansMdLoop;
+	readonly maskIdPrefix: string;
+}) {
+	const maskIds = {
+		cyclePaths: `${maskIdPrefix}-cycle-paths-mask`,
+		ideaBubble: `${maskIdPrefix}-idea-bubble-mask`,
+		ideaPath: `${maskIdPrefix}-idea-path-mask`,
+	} as const;
+
 	return (
 		<g>
 			<defs>
-				<marker
-					id="plans-arrow-white"
-					markerHeight="8"
-					markerWidth="8"
-					orient="auto"
-					refX="7"
-					refY="4"
+				<mask
+					id={maskIds.cyclePaths}
+					maskUnits="userSpaceOnUse"
+					x="844"
+					y="731.5"
+					width="375.999"
+					height="315.847"
 				>
-					<path d="M0 0 L8 4 L0 8 Z" fill="currentColor" />
-				</marker>
-				<marker
-					id="plans-arrow-muted"
-					markerHeight="8"
-					markerWidth="8"
-					orient="auto"
-					refX="7"
-					refY="4"
+					<image
+						href={plansMdLoopAssetPaths.cyclePaths}
+						x="844"
+						y="731.5"
+						width="375.999"
+						height="315.847"
+						preserveAspectRatio="none"
+					/>
+				</mask>
+				<mask
+					id={maskIds.ideaBubble}
+					maskUnits="userSpaceOnUse"
+					x="739.65"
+					y="849.54"
+					width="74.583"
+					height="54.463"
 				>
-					<path d="M0 0 L8 4 L0 8 Z" fill="currentColor" fillOpacity="0.28" />
-				</marker>
+					<image
+						href={plansMdLoopAssetPaths.ideaBubble}
+						x="739.65"
+						y="849.54"
+						width="74.583"
+						height="54.463"
+						preserveAspectRatio="none"
+					/>
+				</mask>
+				<mask
+					id={maskIds.ideaPath}
+					maskUnits="userSpaceOnUse"
+					x="790.5"
+					y="781"
+					width="400.873"
+					height="257.161"
+				>
+					<image
+						href={plansMdLoopAssetPaths.ideaPath}
+						x="790.5"
+						y="781"
+						width="400.873"
+						height="257.161"
+						preserveAspectRatio="none"
+					/>
+				</mask>
 			</defs>
 			<circle
 				cx="740"
 				cy="915"
-				r="10"
+				r="8.5"
 				fill="none"
 				stroke="currentColor"
-				strokeWidth="1.2"
+				strokeWidth="1"
 			/>
-			<path
-				d="M740 925 V973 M721 940 L759 940 M740 973 L731 1007 M740 973 L749 1007"
-				fill="none"
+			<line
+				x1="739"
+				y1="923"
+				x2="739"
+				y2="972"
 				stroke="currentColor"
-				strokeLinecap="round"
-				strokeWidth="1.2"
+				strokeWidth="1"
 			/>
-			<path
-				d="M755 850 H825 C831 850 835 854 835 860 V892 C835 898 831 902 825 902 H769 L760 918 L764 902 H755 C749 902 745 898 745 892 V860 C745 854 749 850 755 850 Z"
-				fill="none"
+			<line
+				x1="739"
+				y1="972"
+				x2="731"
+				y2="1006"
 				stroke="currentColor"
-				strokeLinejoin="round"
-				strokeWidth="1.2"
+				strokeWidth="1"
 			/>
-			<text
-				x="757"
-				y="883"
+			<line
+				x1="739"
+				y1="972"
+				x2="748"
+				y2="1006"
+				stroke="currentColor"
+				strokeWidth="1"
+			/>
+			<line
+				x1="720"
+				y1="937"
+				x2="754.64"
+				y2="943.1"
+				stroke="currentColor"
+				strokeWidth="1"
+			/>
+			<foreignObject x="757" y="861" width="70" height="32">
+				<div className="font-home-inter text-[22px] leading-normal font-normal tracking-[-1.1px] text-current">
+					{loop.ideaLabel}
+				</div>
+			</foreignObject>
+			<rect
+				x="739.65"
+				y="849.54"
+				width="74.583"
+				height="54.463"
 				fill="currentColor"
-				fontFamily="var(--font-inter), ui-sans-serif, system-ui, sans-serif"
-				fontSize="22"
-				letterSpacing="0"
-			>
-				{loop.ideaLabel}
-			</text>
-			<path
-				d="M754 943 C790 954 811 937 833 923 C854 909 874 906 897 906"
-				fill="none"
-				stroke="currentColor"
-				strokeLinecap="round"
-				strokeWidth="1"
+				mask={`url(#${maskIds.ideaBubble})`}
 			/>
 			<path
-				d="M897 906 C914 814 1005 775 1075 798 C1162 827 1189 916 1146 988 C1103 1060 999 1065 925 1012 C891 988 866 955 852 924"
-				fill="none"
-				markerEnd="url(#plans-arrow-white)"
-				stroke="currentColor"
-				strokeWidth="1"
-			/>
-			<path
-				d="M1047 768 C1155 760 1220 870 1187 1000 C1139 1132 985 1170 862 1109"
-				fill="none"
-				markerEnd="url(#plans-arrow-muted)"
-				stroke="currentColor"
-				strokeOpacity="0.28"
-				strokeWidth="1"
-			/>
-			<path
-				d="M890 737 C956 759 995 760 1039 736"
-				fill="none"
-				markerEnd="url(#plans-arrow-muted)"
-				stroke="currentColor"
-				strokeOpacity="0.28"
-				strokeWidth="1"
+				d="M790.5 781H1191.37V1038.16H790.5V781Z"
+				fill="currentColor"
+				mask={`url(#${maskIds.ideaPath})`}
 			/>
 			<LoopLabelSvg x={1041} y={768} label={loop.shipLabel} />
 			<LoopLabelSvg x={897} y={893} label={loop.writeLabel} />
 			<LoopLabelSvg x={1026} y={1025} label={loop.grillLabel} />
 			<LoopLabelSvg x={1162} y={896} label={loop.executeLabel} />
+			<rect
+				x="844"
+				y="731.5"
+				width="375.999"
+				height="315.847"
+				fill="currentColor"
+				mask={`url(#${maskIds.cyclePaths})`}
+			/>
 		</g>
 	);
 }
@@ -479,25 +450,9 @@ function LoopLabelSvg({
 }) {
 	return (
 		<foreignObject x={x} y={y} width="92" height="28">
-			<div className="inline-flex h-[26px] items-center justify-center bg-[#111111] px-0.5 py-0 text-[22px] leading-none tracking-normal text-[#f7f5ef] dark:bg-white dark:text-[#383030]">
+			<div className="font-home-inter inline-flex h-[26px] items-center justify-center bg-[#111111] p-[2px] text-[22px] leading-none font-normal tracking-[-1.1px] text-[#f7f5ef] dark:bg-white dark:text-[#383030]">
 				{label}
 			</div>
 		</foreignObject>
-	);
-}
-
-function LoopLabel({
-	children,
-	className,
-}: {
-	children: string;
-	className: string;
-}) {
-	return (
-		<span
-			className={`absolute bg-[#111111] px-1 py-0.5 text-lg leading-none tracking-normal text-[#f7f5ef] dark:bg-white dark:text-[#383030] ${className}`}
-		>
-			{children}
-		</span>
 	);
 }
