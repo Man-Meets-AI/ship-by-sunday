@@ -16,6 +16,7 @@ marketing-mobile-final.png
 apps/web/*.tsbuildinfo
 coverage
 apps/web/coverage
+packages/local-runner/dist/
 playwright-report
 apps/web/playwright-report
 test-results

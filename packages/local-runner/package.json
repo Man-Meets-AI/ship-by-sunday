@@ -1,0 +1,26 @@
+{
+	"name": "ship-by-sunday",
+	"version": "0.1.0",
+	"private": false,
+	"type": "module",
+	"bin": {
+		"ship-by-sunday": "./dist/cli.js"
+	},
+	"scripts": {
+		"ship-by-sunday": "bun src/cli.ts",
+		"build": "bun build ./src/cli.ts --target=bun --outfile=dist/cli.js && chmod +x dist/cli.js",
+		"lint": "oxlint -c ../../.oxlintrc.json --deny-warnings src tests vitest.config.ts",
+		"format": "oxfmt -c ../../.oxfmtrc.json --ignore-path ../../.gitignore .",
+		"format:check": "oxfmt -c ../../.oxfmtrc.json --ignore-path ../../.gitignore --check .",
+		"typecheck": "tsc --noEmit -p tsconfig.json",
+		"test": "vitest run --config vitest.config.ts",
+		"package:smoke": "bun tests/package-smoke.ts"
+	},
+	"devDependencies": {
+		"@types/node": "25.5.0",
+		"oxfmt": "^0.46.0",
+		"oxlint": "^1.56.0",
+		"typescript": "5.9.3",
+		"vitest": "^4.1.0"
+	}
+}
