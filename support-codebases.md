@@ -1110,7 +1110,8 @@ Avoid until implemented:
 - Keep existing-codebase state in separate workspace tables instead of overloading generated-codebase `projectDefinitions` and `codebaseWorkflowStates`.
 - Use an append-only, sync-safe runner event stream from local runner to hosted backend; derive UI state from backend rows and events instead of browser-daemon access.
 - Split implementation into child ExecPlans in this order: checkout intent, workspace data/events, setup UI, local runner, doctor pass, findings, source-truth workflow, support surfaces, Work-phase workers, broken-app rescue, managed GitHub Run phase, and generated-repo operating pack.
+- Create the first new existing-codebase child ExecPlan at `docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md`, scoped only to intent persistence and routing.
 
 ## Open Questions
 
-- Should we create the first new existing-codebase child ExecPlan now, or finish the active generated-repo source-contract plan first?
+- Should the second new existing-codebase child ExecPlan be created now for workspace data/events, or wait until checkout intent routing is implemented?
