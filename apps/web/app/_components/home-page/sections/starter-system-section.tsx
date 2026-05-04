@@ -37,20 +37,21 @@ export function StarterSystemSectionBlock({
 		<section className="py-24 lg:py-40">
 			<div className="grid gap-14 lg:grid-cols-[minmax(0,5fr)_minmax(0,4fr)] lg:gap-20">
 				<ScrollReveal>
-					<div className="space-y-3 lg:sticky lg:top-24 lg:h-fit">
+					<div className="lg:sticky lg:top-24 lg:h-fit">
 						<h2
-							aria-label={starterSystemSection.title}
-							className="flex flex-col gap-1 text-[clamp(2rem,5vw,3.25rem)] font-semibold leading-[0.9] tracking-tight text-foreground"
+							aria-label={starterSystemSection.heading.ariaLabel}
+							className="leading-none"
 						>
-							{starterSystemSection.titleLines.map((titleLine) => (
-								<span key={titleLine} className="block">
-									{titleLine}
-								</span>
-							))}
+							<span className="block font-heading-serif text-[clamp(2rem,5vw,3.25rem)] font-normal italic leading-[0.9]">
+								{starterSystemSection.heading.lead}
+							</span>
+							<span className="block font-home-inter mt-1 text-base font-normal text-foreground/60 sm:text-lg">
+								{starterSystemSection.heading.detailLead}
+							</span>
+							<span className="block font-home-inter font-normal text-foreground/60 text-base sm:text-lg">
+								{starterSystemSection.heading.detailTail}
+							</span>
 						</h2>
-						<p className="max-w-[38ch] text-base leading-snug text-muted-foreground sm:text-lg">
-							{starterSystemSection.intro}
-						</p>
 					</div>
 				</ScrollReveal>
 				<div className="border-b border-border/40">

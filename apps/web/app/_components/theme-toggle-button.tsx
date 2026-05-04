@@ -60,7 +60,7 @@ export function ThemeToggleButton({
 		return (
 			<span
 				aria-hidden="true"
-				className={cn("inline-flex min-h-11 min-w-11 shrink-0", className)}
+				className={cn("inline-flex min-h-9 min-w-9 shrink-0", className)}
 			/>
 		);
 	}
@@ -76,11 +76,11 @@ export function ThemeToggleButton({
 			}
 			variant="outline"
 			size="icon-sm"
-			className={cn("min-h-11 min-w-11 shrink-0 rounded-full", className)}
+			className={cn("min-h-9 min-w-9 shrink-0 rounded-full", className)}
 			aria-label={`Switch to ${nextTheme} mode`}
 			title={`Switch to ${nextTheme} mode`}
 		>
-			<Icon aria-hidden="true" className="size-4" />
+			<Icon aria-hidden="true" className="size-3.5" />
 		</Button>
 	);
 }

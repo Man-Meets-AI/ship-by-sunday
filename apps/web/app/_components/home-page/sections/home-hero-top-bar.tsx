@@ -37,7 +37,7 @@ export function HomeHeroTopBar({ hero }: { hero: Hero }) {
 					>
 						{hero.loginLabel}
 					</Link>
-					<ThemeToggleButton className="border-border/70 bg-background/70" />
+					<ThemeToggleButton className="border-border/40 bg-transparent text-muted-foreground/60 hover:text-foreground" />
 					<Button
 						asChild
 						className="hidden h-10 rounded-full bg-foreground px-6 text-sm font-semibold text-background transition-transform hover:scale-105 active:scale-95 sm:inline-flex"

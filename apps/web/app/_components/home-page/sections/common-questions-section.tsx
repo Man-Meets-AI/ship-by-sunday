@@ -19,10 +19,12 @@ export function CommonQuestionsSection({
 					<div className="flex flex-col gap-3">
 						<h2
 							aria-label={`${faqSection.titleLead} ${faqSection.titleAccent}`}
-							className="flex flex-col gap-1 text-balance text-4xl font-semibold leading-[0.92] tracking-tight sm:text-5xl lg:text-7xl"
+							className="leading-none"
 						>
-							<span>{faqSection.titleLead}</span>
-							<span className="text-foreground/90">
+							<span className="block font-heading-serif text-xl font-normal italic text-foreground/60 sm:text-2xl lg:text-3xl">
+								{faqSection.titleLead}
+							</span>
+							<span className="block font-home-inter text-4xl font-bold leading-[0.9] sm:text-5xl lg:text-7xl">
 								{faqSection.titleAccent}
 							</span>
 						</h2>

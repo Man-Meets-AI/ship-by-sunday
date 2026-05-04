@@ -39,15 +39,12 @@ export const routeConfig = {
 	checkoutClearPending: "/checkout/clear-pending",
 	checkoutCancel: "/checkout/cancel",
 	checkoutCancelConfirmed: "/checkout/cancel/confirmed",
-	systemHash: "#system",
 	pricingHash: "#pricing",
 } as const;
 
 export const homePageSectionOrder = [
 	"productPreview",
 	"hero",
-	"sprintPath",
-	"mechanism",
 	"execLoop",
 	"starterSystem",
 	"durability",
@@ -85,8 +82,6 @@ export const starterHomePageConfig = {
 	sections: {
 		productPreview: true,
 		hero: true,
-		sprintPath: true,
-		mechanism: false,
 		execLoop: true,
 		starterSystem: true,
 		durability: false,

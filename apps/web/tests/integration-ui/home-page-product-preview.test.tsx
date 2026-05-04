@@ -197,19 +197,19 @@ describe("BlueprintDemoSectionBlock", () => {
 
 		expect(screen.getByTestId("blueprint-demo-codebase-branch")).toBeTruthy();
 		expectPageTextToContain("Ship codebases that convert");
-		expectPageTextToContain("Exec Loops: OpenAI's Weapon of choice");
 		expectPageTextToContain("How Workers Work.");
-		expectPageTextToContain("A worker layer. Your agents can build from.");
-		expectPageTextToContain(
-			"Built by someone who has actually shipped products.",
-		);
+		expectPageTextToContain("A worker layer. each hat, a trained role.");
+		expectPageTextToContain("Role packets");
+		expectPageTextToContain("PARKER, shipper of products,");
+		expectPageTextToContain("startup scale to $73M/year");
 		expectPageTextToContain("PROGRAMS.md is not a bigger ExecPlan.");
 		expectPageTextToContain("Common Questions");
 		expectPageTextToContain("Ship a real product by Sunday");
-		expect(document.querySelectorAll("#system")).toHaveLength(1);
-		expect(document.querySelector("#system")?.textContent).toContain(
-			"Exec Loops:",
+		expectPageTextNotToContain("Exec Loops: OpenAI's Weapon of choice");
+		expectPageTextNotToContain(
+			"An exec loop is the repeatable path from decision to agent run",
 		);
+		expect(document.querySelector("#system")).toBeNull();
 	});
 
 	it("exposes a theme toggle in the demo top bar", async () => {
@@ -256,4 +256,9 @@ describe("BlueprintDemoSectionBlock", () => {
 function expectPageTextToContain(expectedText: string) {
 	const compactPageText = document.body.textContent?.replace(/\s+/g, "") ?? "";
 	expect(compactPageText).toContain(expectedText.replace(/\s+/g, ""));
+}
+
+function expectPageTextNotToContain(expectedText: string) {
+	const compactPageText = document.body.textContent?.replace(/\s+/g, "") ?? "";
+	expect(compactPageText).not.toContain(expectedText.replace(/\s+/g, ""));
 }

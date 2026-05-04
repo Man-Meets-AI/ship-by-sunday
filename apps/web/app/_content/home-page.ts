@@ -312,31 +312,12 @@ export const homePageContent = {
 		body: "Ship by Sunday gives your agents the worker layer around Codex: exec loops, role packets, channel handoffs, and QA that feeds the next run.",
 		primaryCta: marketingDisplayConfig.primaryCtaLabel,
 	},
-	sprintPathSection: {
-		titlePrefix: "Exec Loops: OpenAI's ",
-		titleHighlight: "WEAPON of choice",
-		intro:
-			"An exec loop is the repeatable path from decision to agent run: train one role, ship code, prove QA, and carry the next decision forward.",
-		supportingPoints: [
-			"Start a decision from your phone, desk, Telegram, or Discord.",
-			"Package the decision with product truth, constraints, and taste for one worker role.",
-			"Run the agent, review the change, and feed the result back into the worker layer.",
-		],
-		valueFrame:
-			"Most starters give you files. Exec loops make each role compound.",
-		imageAlt:
-			"Diagram showing a product definition turning into Design, Marketing, Build, and Prompt Packs plus a final Blueprint",
-	},
-	mechanismSection: {
-		steps: [
-			"Lock the Product Truth",
-			"Generate the Agent-Ready Packs",
-			"Build from the Ship Kit",
-		],
-		tagline: "One source of truth. No drift.",
-	},
 	socialProofSection: {
-		headline: "Built by someone who has actually shipped products.",
+		heading: {
+			eyebrow: "Built BY",
+			title: "PARKER, shipper of products,",
+			tail: "teacher of AI.",
+		},
 		body: "Built from real UX, product, design, and engineering work, including startup scale to $73M/year and acquisition.",
 		portrait: {
 			src: "/founder-portrait.jpg",
@@ -463,10 +444,12 @@ export const homePageContent = {
 		],
 	},
 	starterSystemSection: {
-		title: "A worker layer your agents can build from.",
-		titleLines: ["A worker layer.", "Your agents can", "build from."],
-		intro:
-			"Each hat you wear becomes a trained worker role: the decision, context, taste, tools, and proof standard are all explicit before agents touch the code.",
+		heading: {
+			ariaLabel: "A worker layer. Each hat, a trained role.",
+			lead: "A worker layer.",
+			detailLead: "each hat,",
+			detailTail: "a trained role.",
+		},
 		capabilities: [
 			{
 				title: "Role packets",
@@ -590,7 +573,10 @@ export const homePageContent = {
 		},
 	},
 	pricingSection: {
-		titleLead: "Ship a real product",
+		headline: {
+			prefix: "Ship a",
+			rotatingPhrases: ["real product", "new worker"],
+		},
 		titleAccent: "by Sunday",
 		priceDisplay: productConfig.checkoutPriceDisplay,
 		originalPriceDisplay: activePricingOffer

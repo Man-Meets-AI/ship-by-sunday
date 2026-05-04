@@ -108,22 +108,16 @@ describe("home page content", () => {
 		});
 		expect(homePageContent.hero.loginLabel).toBe("Sign in");
 
-		expect(homePageContent.sprintPathSection.titleHighlight).toBe(
-			"WEAPON of choice",
-		);
-		expect(homePageContent.sprintPathSection.intro).toContain(
-			"decision to agent run",
-		);
 		expect(homePageContent.execLoopSection.title).toBe("How Workers Work.");
 		expect(
 			homePageContent.execLoopSection.steps.map((step) => step.label),
 		).toEqual(["Shippie", "Healios", "Goalie", "Loopie"]);
-		expect(homePageContent.starterSystemSection.title).toBe(
-			"A worker layer your agents can build from.",
-		);
-		expect(homePageContent.starterSystemSection.intro).toContain(
-			"trained worker role",
-		);
+		expect(homePageContent.starterSystemSection.heading).toEqual({
+			ariaLabel: "A worker layer. Each hat, a trained role.",
+			lead: "A worker layer.",
+			detailLead: "each hat,",
+			detailTail: "a trained role.",
+		});
 		expect(homePageContent.starterSystemSection.capabilities[1]?.title).toBe(
 			"Async channels",
 		);
@@ -179,6 +173,11 @@ describe("home page content", () => {
 			"Reduces prompt re-explaining",
 			"Makes autonomy safer",
 		]);
+		expect(homePageContent.socialProofSection.heading).toEqual({
+			eyebrow: "Built BY",
+			title: "PARKER, shipper of products,",
+			tail: "teacher of AI.",
+		});
 		expect(homePageContent.socialProofSection.portrait).toEqual({
 			src: "/founder-portrait.jpg",
 			alt: "Founder portrait",
@@ -219,6 +218,10 @@ describe("home page content", () => {
 		expect(homePageContent.pricingSection.originalPriceDisplay).toBe(
 			productConfig.priceDisplay,
 		);
+		expect(homePageContent.pricingSection.headline).toEqual({
+			prefix: "Ship a",
+			rotatingPhrases: ["real product", "new worker"],
+		});
 		expect(homePageContent.pricingSection.offerPriceDisplay).toBe(
 			productConfig.checkoutPriceDisplay,
 		);
