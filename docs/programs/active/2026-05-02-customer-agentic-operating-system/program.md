@@ -431,13 +431,11 @@ Recommended future child ExecPlans:
 
 ## Next Slice
 
-An active child ExecPlan exists at `docs/exec-plans/active/2026-05-02-reconcile-customer-agentic-source-contract.md`. It should reconcile generated-repo source truth and customer-safety boundaries first because current customer output must not point to missing prompts, skills, scripts, or unsafe planning archives.
-
-The existing-codebase checkout-intent child ExecPlan is active. It should persist `buyerStartingPoint`, `checkoutCtaId`, and `fulfillmentTrack` through the homepage CTA, Stripe checkout metadata, pending checkout claims, product access grants, checkout success, and the fulfillment router. It should keep generated buyers on `/codebase`, send existing-codebase buyers to `/workspace/setup`, and send missing or legacy intent to a small choice screen. It must not build runner UI, daemon behavior, doctor pass, findings, workflow approval, or worker queue controls.
+Two active child ExecPlans now exist. `docs/exec-plans/active/2026-05-02-reconcile-customer-agentic-source-contract.md` should reconcile generated-repo source truth and customer-safety boundaries because current customer output must not point to missing prompts, skills, scripts, or unsafe planning archives. `docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md` is the first existing-codebase child plan. It should persist `buyerStartingPoint`, `checkoutCtaId`, and `fulfillmentTrack` through the homepage CTA, Stripe checkout metadata, pending checkout claims, product access grants, checkout success, and the fulfillment router. It should keep generated buyers on `/codebase`, send existing-codebase buyers to `/workspace/setup`, and send missing or legacy intent to a small choice screen. It must not build runner UI, daemon behavior, doctor pass, findings, workflow approval, or worker queue controls.
 
 The following slice is `existing-codebase-workspace-data-model-and-events`. It should add the separate existing-codebase tables and sync-safe event protocol that later setup, runner, doctor pass, findings, and workflow UI depend on. Only after those contracts exist should `/workspace/setup`, the local runner prototype, doctor pass, findings ledger, first workflow approval, support surfaces, Work-phase workers, broken-app rescue, and managed GitHub Run-phase work proceed in the dependency order recorded in `plan-split-recommendation.md` and `planning-brief-2.md`.
 
-If existing-codebase implementation starts before the generated-repo source-contract plan is complete, the checkout-intent plan can be created first as a narrow parallel child ExecPlan. It should use `planning-brief-2.md` as its `planning_brief`, while the active generated-repo source-contract plan continues to use `planning-brief-1.md`.
+The generated-repo source-contract plan can still land first if protecting current output is urgent. The checkout-intent plan can run in parallel because it is narrow and uses `planning-brief-2.md`, while the active generated-repo source-contract plan continues to use `planning-brief-1.md`.
 
 ## Risks and Watchpoints
 
