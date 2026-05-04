@@ -33,7 +33,13 @@ describe("HomePagePrimaryCta", () => {
 	it("delegates checkout targets to CheckoutButton", () => {
 		render(
 			<HomePagePrimaryCta
-				target={{ kind: "checkout" }}
+				target={{
+					kind: "checkout",
+					checkoutIntent: {
+						buyerStartingPoint: "no_codebase",
+						checkoutCtaId: "hero_primary",
+					},
+				}}
 				label="Get instant access"
 				className="cta-size"
 				testId="hero-cta"
@@ -65,7 +71,13 @@ describe("HomePagePrimaryCta", () => {
 		const onBeforeCheckout = vi.fn();
 		render(
 			<HomePagePrimaryCta
-				target={{ kind: "checkout" }}
+				target={{
+					kind: "checkout",
+					checkoutIntent: {
+						buyerStartingPoint: "no_codebase",
+						checkoutCtaId: "codebase_demo_generated",
+					},
+				}}
 				label="Generate my codebase"
 				testId="demo-cta"
 				onBeforeCheckout={onBeforeCheckout}

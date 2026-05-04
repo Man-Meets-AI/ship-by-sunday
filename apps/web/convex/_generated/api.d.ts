@@ -14,6 +14,7 @@ import type * as access_types from "../access/types.js";
 import type * as access_validators from "../access/validators.js";
 import type * as checkoutClaims from "../checkoutClaims.js";
 import type * as checkoutClaimsActions from "../checkoutClaimsActions.js";
+import type * as checkoutIntentValidators from "../checkoutIntentValidators.js";
 import type * as codebase from "../codebase.js";
 import type * as codebase_projectDefinition from "../codebase/projectDefinition.js";
 import type * as codebase_stageReadiness from "../codebase/stageReadiness.js";
@@ -39,6 +40,11 @@ import type * as observability_model from "../observability/model.js";
 import type * as observability_validators from "../observability/validators.js";
 import type * as stripeWebhook from "../stripeWebhook.js";
 import type * as uploads from "../uploads.js";
+import type * as workspace from "../workspace.js";
+import type * as workspace_events from "../workspace/events.js";
+import type * as workspace_model from "../workspace/model.js";
+import type * as workspace_types from "../workspace/types.js";
+import type * as workspace_validators from "../workspace/validators.js";
 
 import type {
   ApiFromModules,
@@ -53,6 +59,7 @@ declare const fullApi: ApiFromModules<{
   "access/validators": typeof access_validators;
   checkoutClaims: typeof checkoutClaims;
   checkoutClaimsActions: typeof checkoutClaimsActions;
+  checkoutIntentValidators: typeof checkoutIntentValidators;
   codebase: typeof codebase;
   "codebase/projectDefinition": typeof codebase_projectDefinition;
   "codebase/stageReadiness": typeof codebase_stageReadiness;
@@ -78,6 +85,11 @@ declare const fullApi: ApiFromModules<{
   "observability/validators": typeof observability_validators;
   stripeWebhook: typeof stripeWebhook;
   uploads: typeof uploads;
+  workspace: typeof workspace;
+  "workspace/events": typeof workspace_events;
+  "workspace/model": typeof workspace_model;
+  "workspace/types": typeof workspace_types;
+  "workspace/validators": typeof workspace_validators;
 }>;
 
 /**

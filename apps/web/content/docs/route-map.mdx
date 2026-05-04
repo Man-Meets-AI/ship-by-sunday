@@ -22,12 +22,22 @@ description: See the main public, protected, and purchase-related routes in one 
 - `/checkout/cancel/confirmed`: checkout canceled confirmation surface
 - `/session-tasks/reset-password`: Clerk password-reset task inside the shared identity shell
 - `/sso-callback`: OAuth callback completion route inside the shared identity shell
-- `/codebase`: canonical protected landing after checkout or sign-in
+- `/codebase`: generated-codebase protected landing after checkout or sign-in when checkout intent resolves to `generated_codebase`
+- `/workspace/choose`: protected legacy-intent choice screen for paid checkouts that predate checkout intent metadata
+- `/workspace/setup`: existing-codebase protected setup console when checkout intent resolves to `existing_codebase_doctor`
 - `/mission`: protected compatibility entry for the post-review Lesson Map; it stays locked until Review unlocks the post-review branch
 
 ## Protected product routes
 
-- `/codebase`: canonical combined codebase workspace with the overview block plus the `foundation`, `problem`, `outcome`, `design`, `pricing`, `setup`, and `generated-preview` sections
+- `/codebase`: generated-codebase workspace with the overview block plus the `foundation`, `problem`, `outcome`, `design`, `pricing`, `setup`, and `generated-preview` sections
+- `/workspace/choose`: protected fulfillment choice for missing or legacy checkout intent; saves the selected fulfillment track before redirecting
+- `/workspace/setup`: existing-codebase setup console for local runner pairing, Machine Setup readiness, Project Setup readiness, privacy defaults, default open destination, and doctor-pass readiness
+- `/workspace/doctor-pass`: planned existing-codebase doctor-pass progress route after setup; it must not stream raw terminal logs by default
+- `/workspace/findings`: planned Top 9 findings ledger after the doctor pass sync preview is approved
+- `/workspace/findings/[findingId]`: planned finding decision route for approving one concrete workflow
+- `/workspace/loops`: planned finding-filtered workflow catalog; not an always-on queue in Crawl
+- `/workspace/runs`: planned doctor-pass and approved-workflow run history; no queue controls in Crawl
+- `/workspace/privacy`: planned local-execution and sync-boundary controls for runner revocation and report deletion
 - `/review`: customer-facing `Review` handoff; it makes one auto-download attempt for the Ship by Sunday Codebase, then keeps the fallback download link visible if the browser blocks the download
 - `/settings`: protected account and product settings
 - `/lesson/[lessonKey]`: canonical post-review lesson route; renders locked messaging before unlock and video-first lessons after unlock

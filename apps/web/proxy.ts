@@ -13,6 +13,8 @@ const canonicalWorkspaceRoutes = [
 	routeConfig.codebase,
 	routeConfig.review,
 	routeConfig.settings,
+	routeConfig.workspaceChoice,
+	routeConfig.workspaceSetup,
 ] as const;
 
 const compatibilityWorkspaceRoutes = [

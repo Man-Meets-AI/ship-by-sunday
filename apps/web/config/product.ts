@@ -1,3 +1,5 @@
+import type { CheckoutIntentInput } from "@/platform/billing/checkout/checkout-intent";
+
 export const PRODUCT_APP_ID = "ship-by-sunday" as const;
 export const PRODUCT_COURSE_SLUG = "ship-by-sunday" as const;
 
@@ -39,6 +41,13 @@ export const routeConfig = {
 	checkoutClearPending: "/checkout/clear-pending",
 	checkoutCancel: "/checkout/cancel",
 	checkoutCancelConfirmed: "/checkout/cancel/confirmed",
+	workspaceChoice: "/workspace/choose",
+	workspaceSetup: "/workspace/setup",
+	workspaceDoctorPass: "/workspace/doctor-pass",
+	workspaceFindings: "/workspace/findings",
+	workspaceLoops: "/workspace/loops",
+	workspaceRuns: "/workspace/runs",
+	workspacePrivacy: "/workspace/privacy",
 	pricingHash: "#pricing",
 } as const;
 
@@ -61,6 +70,7 @@ export type HomePageSectionName = (typeof homePageSectionOrder)[number];
 export type HomePageCtaTarget =
 	| {
 			readonly kind: "checkout";
+			readonly checkoutIntent: CheckoutIntentInput;
 	  }
 	| {
 			readonly kind: "link";
@@ -94,9 +104,17 @@ export const starterHomePageConfig = {
 	},
 	heroPrimaryCta: {
 		kind: "checkout",
+		checkoutIntent: {
+			buyerStartingPoint: "no_codebase",
+			checkoutCtaId: "hero_primary",
+		},
 	},
 	pricingPrimaryCta: {
 		kind: "checkout",
+		checkoutIntent: {
+			buyerStartingPoint: "no_codebase",
+			checkoutCtaId: "pricing_primary",
+		},
 	},
 } as const satisfies StarterHomePageConfig;
 

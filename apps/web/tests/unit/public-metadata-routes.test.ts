@@ -23,6 +23,7 @@ describe("public metadata routes", () => {
 				"/codebase",
 				"/review",
 				"/settings",
+				"/workspace",
 				"/checkout/",
 				"/sso-callback",
 				"/api/",

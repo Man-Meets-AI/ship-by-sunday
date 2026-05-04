@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const authMock = vi.fn();
 const checkoutEmailHandoffPageMock = vi.fn();
-const fulfillCheckoutSessionByEmailMock = vi.fn();
 const getCheckoutSessionForRecoveryMock = vi.fn();
 const getStripeCheckoutSessionEmailMock = vi.fn();
 const isStripeCheckoutSessionForCourseMock = vi.fn();
@@ -23,8 +22,6 @@ vi.mock("@/platform/auth/clerk-middleware-bypass", () => ({
 }));
 
 vi.mock("@/platform/billing/checkout/checkout-session-recovery", () => ({
-	fulfillCheckoutSessionByEmail: (...args: unknown[]) =>
-		fulfillCheckoutSessionByEmailMock(...args),
 	getCheckoutSessionForRecovery: (...args: unknown[]) =>
 		getCheckoutSessionForRecoveryMock(...args),
 	getStripeCheckoutSessionEmail: (...args: unknown[]) =>
@@ -51,7 +48,6 @@ describe("checkout email handoff route", () => {
 	beforeEach(() => {
 		authMock.mockReset();
 		checkoutEmailHandoffPageMock.mockReset();
-		fulfillCheckoutSessionByEmailMock.mockReset();
 		getCheckoutSessionForRecoveryMock.mockReset();
 		getStripeCheckoutSessionEmailMock.mockReset();
 		isStripeCheckoutSessionForCourseMock.mockReset();
@@ -65,16 +61,6 @@ describe("checkout email handoff route", () => {
 			payment_status: "paid",
 		});
 		getStripeCheckoutSessionEmailMock.mockReturnValue("buyer@example.com");
-		fulfillCheckoutSessionByEmailMock.mockResolvedValue({
-			kind: "fulfilled",
-			sessionId: "cs_test_123",
-			checkoutEmail: "buyer@example.com",
-			clerkUserId: "user_123",
-			clerkUserStatus: "exists",
-			grantResult: {
-				granted: "inserted",
-			},
-		});
 		isStripeCheckoutSessionForCourseMock.mockReturnValue(true);
 		isStripeCheckoutSessionPaidMock.mockReturnValue(true);
 		shouldBypassClerkProtectionMock.mockReturnValue(false);
@@ -87,10 +73,6 @@ describe("checkout email handoff route", () => {
 
 		expect(redirectMock).not.toHaveBeenCalled();
 		expect(result.type.name).toBe("IdentityPageFrame");
-		expect(fulfillCheckoutSessionByEmailMock).toHaveBeenCalledWith(
-			"cs_test_123",
-			"checkout.email_handoff.fulfillment",
-		);
 		expect(result.props.children).toMatchObject({
 			props: {
 				checkoutEmail: "buyer@example.com",
@@ -138,13 +120,8 @@ describe("checkout email handoff route", () => {
 		);
 	});
 
-	it("returns to checkout success instead of rendering OTP before fulfillment exists", async () => {
-		fulfillCheckoutSessionByEmailMock.mockResolvedValue({
-			kind: "clerk_lookup_failed",
-			sessionId: "cs_test_123",
-			checkoutEmail: "buyer@example.com",
-			message: "Clerk lookup failed.",
-		});
+	it("returns to checkout success when the session has no checkout email", async () => {
+		getStripeCheckoutSessionEmailMock.mockReturnValue(null);
 
 		await Page({
 			searchParams: Promise.resolve({ session_id: "cs_test_123" }),

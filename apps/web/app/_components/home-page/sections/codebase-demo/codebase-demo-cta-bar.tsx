@@ -74,7 +74,13 @@ export function CodebaseDemoCtaBar({
 			</div>
 			<div className="shrink-0">
 				<HomePagePrimaryCta
-					target={{ kind: "checkout" }}
+					target={{
+						kind: "checkout",
+						checkoutIntent: {
+							buyerStartingPoint: "no_codebase",
+							checkoutCtaId: "codebase_demo_generated",
+						},
+					}}
 					label={cta.label}
 					testId="codebase-demo-checkout-cta"
 					className="h-11 px-5"

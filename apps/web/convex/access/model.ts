@@ -1,5 +1,20 @@
 import { ConvexError, v } from "convex/values";
 
+import {
+	getBuyerStartingPointForFulfillmentTrack,
+	getResolvedCheckoutIntentFields,
+	normalizeCheckoutCtaId,
+	normalizeCheckoutIntent,
+	type BuyerStartingPoint,
+	type CheckoutCtaId,
+	type FulfillmentTrack,
+} from "../../platform/billing/checkout/checkout-intent";
+import {
+	checkoutBuyerStartingPointValidator,
+	checkoutCtaIdValidator,
+	checkoutFulfillmentTrackValidator,
+	checkoutResolvedFulfillmentTrackValidator,
+} from "../checkoutIntentValidators";
 import type {
 	AccessMutationCtx,
 	AccessQueryCtx,
@@ -23,6 +38,9 @@ type ProductAccessGrantUpsertInput = {
 	stripeCustomerId?: string;
 	stripeCheckoutSessionId?: string;
 	stripePaymentIntentId?: string;
+	buyerStartingPoint?: BuyerStartingPoint;
+	checkoutCtaId?: CheckoutCtaId;
+	fulfillmentTrack?: FulfillmentTrack;
 };
 
 function getNextProductAccessGrantSource({
@@ -51,6 +69,16 @@ async function requireViewer(ctx: AccessReadCtx) {
 	return identity.subject;
 }
 
+function getStoredCheckoutIntentFields(
+	intent: {
+		buyerStartingPoint?: BuyerStartingPoint;
+		checkoutCtaId?: CheckoutCtaId;
+		fulfillmentTrack?: FulfillmentTrack;
+	} | null,
+) {
+	return normalizeCheckoutIntent(intent);
+}
+
 export async function getProductAccessGrantByClerkUserId(
 	ctx: AccessReadCtx,
 	clerkUserId: string,
@@ -70,6 +98,21 @@ export async function requireGrantedProductAccess(ctx: AccessReadCtx) {
 
 	if (!accessGrant || accessGrant.status !== "granted") {
 		throw new ConvexError("Access required");
+	}
+
+	return clerkUserId;
+}
+
+export async function requireExistingCodebaseProductAccess(ctx: AccessReadCtx) {
+	const clerkUserId = await requireGrantedProductAccess(ctx);
+	const accessGrant = await getProductAccessGrantByClerkUserId(
+		ctx,
+		clerkUserId,
+	);
+	const checkoutIntent = getStoredCheckoutIntentFields(accessGrant);
+
+	if (checkoutIntent.fulfillmentTrack !== "existing_codebase_doctor") {
+		throw new ConvexError("Existing codebase access required");
 	}
 
 	return clerkUserId;
@@ -105,6 +148,7 @@ export async function upsertProductAccessGrant(
 
 	const grantToPatch = existingStripeGrant ?? existingGrant;
 	if (grantToPatch) {
+		const checkoutIntent = getResolvedCheckoutIntentFields(grantToPatch, input);
 		await ctx.db.patch(grantToPatch._id, {
 			status: "granted",
 			source: getNextProductAccessGrantSource({
@@ -114,6 +158,9 @@ export async function upsertProductAccessGrant(
 			stripeCustomerId: input.stripeCustomerId,
 			stripeCheckoutSessionId: input.stripeCheckoutSessionId,
 			stripePaymentIntentId: input.stripePaymentIntentId,
+			buyerStartingPoint: checkoutIntent.buyerStartingPoint,
+			checkoutCtaId: checkoutIntent.checkoutCtaId,
+			fulfillmentTrack: checkoutIntent.fulfillmentTrack,
 			updatedAt: now,
 			revokedAt: undefined,
 		});
@@ -121,6 +168,7 @@ export async function upsertProductAccessGrant(
 		return { granted: "patched" as const };
 	}
 
+	const checkoutIntent = getStoredCheckoutIntentFields(input);
 	await ctx.db.insert("productAccessGrants", {
 		clerkUserId: input.clerkUserId,
 		status: "granted",
@@ -128,6 +176,9 @@ export async function upsertProductAccessGrant(
 		stripeCustomerId: input.stripeCustomerId,
 		stripeCheckoutSessionId: input.stripeCheckoutSessionId,
 		stripePaymentIntentId: input.stripePaymentIntentId,
+		buyerStartingPoint: checkoutIntent.buyerStartingPoint,
+		checkoutCtaId: checkoutIntent.checkoutCtaId,
+		fulfillmentTrack: checkoutIntent.fulfillmentTrack,
 		grantedAt: now,
 		updatedAt: now,
 	});
@@ -154,6 +205,7 @@ export async function viewerProductAccessHandler(ctx: AccessQueryCtx) {
 		clerkUserId: identity.subject,
 		hasAccess: accessGrant?.status === "granted",
 		status: accessGrant?.status ?? ("no_access" as const),
+		...(accessGrant ? getStoredCheckoutIntentFields(accessGrant) : undefined),
 	};
 }
 
@@ -163,6 +215,9 @@ export const grantProductAccessArgs = {
 	stripeCustomerId: v.optional(v.string()),
 	stripeCheckoutSessionId: v.optional(v.string()),
 	stripePaymentIntentId: v.optional(v.string()),
+	buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
+	checkoutCtaId: v.optional(checkoutCtaIdValidator),
+	fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
 };
 export const grantProductAccessReturns = productAccessGrantResultValidator;
 
@@ -174,6 +229,9 @@ export async function grantProductAccessHandler(
 		stripeCustomerId?: string;
 		stripeCheckoutSessionId?: string;
 		stripePaymentIntentId?: string;
+		buyerStartingPoint?: BuyerStartingPoint;
+		checkoutCtaId?: CheckoutCtaId;
+		fulfillmentTrack?: FulfillmentTrack;
 	},
 ) {
 	return upsertProductAccessGrant(ctx, {
@@ -187,6 +245,9 @@ export const grantProductAccessFromStripeArgs = {
 	stripeCustomerId: v.optional(v.string()),
 	stripeCheckoutSessionId: v.optional(v.string()),
 	stripePaymentIntentId: v.optional(v.string()),
+	buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
+	checkoutCtaId: v.optional(checkoutCtaIdValidator),
+	fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
 };
 export const grantProductAccessFromStripeReturns =
 	productAccessGrantResultValidator;
@@ -198,6 +259,9 @@ export async function grantProductAccessFromStripeHandler(
 		stripeCustomerId?: string;
 		stripeCheckoutSessionId?: string;
 		stripePaymentIntentId?: string;
+		buyerStartingPoint?: BuyerStartingPoint;
+		checkoutCtaId?: CheckoutCtaId;
+		fulfillmentTrack?: FulfillmentTrack;
 	},
 ) {
 	return upsertProductAccessGrant(ctx, {
@@ -206,7 +270,54 @@ export async function grantProductAccessFromStripeHandler(
 		stripeCustomerId: args.stripeCustomerId,
 		stripeCheckoutSessionId: args.stripeCheckoutSessionId,
 		stripePaymentIntentId: args.stripePaymentIntentId,
+		buyerStartingPoint: args.buyerStartingPoint,
+		checkoutCtaId: args.checkoutCtaId,
+		fulfillmentTrack: args.fulfillmentTrack,
 	});
+}
+
+export const resolveViewerFulfillmentTrackArgs = {
+	fulfillmentTrack: checkoutResolvedFulfillmentTrackValidator,
+	checkoutCtaId: v.optional(checkoutCtaIdValidator),
+};
+export const resolveViewerFulfillmentTrackReturns = v.object({
+	fulfillmentTrack: checkoutResolvedFulfillmentTrackValidator,
+});
+
+export async function resolveViewerFulfillmentTrackHandler(
+	ctx: AccessMutationCtx,
+	args: {
+		fulfillmentTrack: Exclude<FulfillmentTrack, "unspecified">;
+		checkoutCtaId?: CheckoutCtaId;
+	},
+) {
+	const clerkUserId = await requireGrantedProductAccess(ctx);
+	const accessGrant = await getProductAccessGrantByClerkUserId(
+		ctx,
+		clerkUserId,
+	);
+	if (!accessGrant) {
+		throw new ConvexError("Access required");
+	}
+	const existingCheckoutIntent = getStoredCheckoutIntentFields(accessGrant);
+	if (existingCheckoutIntent.fulfillmentTrack !== "unspecified") {
+		throw new ConvexError("Fulfillment track already resolved");
+	}
+
+	const now = Date.now();
+	const buyerStartingPoint = getBuyerStartingPointForFulfillmentTrack(
+		args.fulfillmentTrack,
+	);
+	await ctx.db.patch(accessGrant._id, {
+		buyerStartingPoint,
+		checkoutCtaId: normalizeCheckoutCtaId(args.checkoutCtaId),
+		fulfillmentTrack: args.fulfillmentTrack,
+		updatedAt: now,
+	});
+
+	return {
+		fulfillmentTrack: args.fulfillmentTrack,
+	};
 }
 
 export const resetProductAccessArgs = {

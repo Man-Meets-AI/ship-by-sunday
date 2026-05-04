@@ -46,18 +46,30 @@ const FIXTURE_BUILDERS: Record<
 > = {
 	validated_polling: () => ({
 		fixtureSlug: "validated_polling",
-		checkoutSessionState: { kind: "validated", sessionId: "fixture_polling" },
+		checkoutSessionState: {
+			kind: "validated",
+			sessionId: "fixture_polling",
+			fulfillmentTrack: "generated_codebase",
+		},
 		initialProductAccess: validatedAccessPending,
 	}),
 	validated_arc: () => ({
 		fixtureSlug: "validated_arc",
-		checkoutSessionState: { kind: "validated", sessionId: "fixture_arc" },
+		checkoutSessionState: {
+			kind: "validated",
+			sessionId: "fixture_arc",
+			fulfillmentTrack: "generated_codebase",
+		},
 		initialProductAccess: validatedAccessPending,
 		fixtureFlipAfterMs: 2400,
 	}),
 	validated_redirect: () => ({
 		fixtureSlug: "validated_redirect",
-		checkoutSessionState: { kind: "validated", sessionId: "fixture_redirect" },
+		checkoutSessionState: {
+			kind: "validated",
+			sessionId: "fixture_redirect",
+			fulfillmentTrack: "generated_codebase",
+		},
 		initialProductAccess: validatedAccessGranted,
 		fixtureSuppressRedirect: true,
 	}),

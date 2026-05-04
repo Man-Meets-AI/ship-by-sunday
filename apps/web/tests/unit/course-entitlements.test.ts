@@ -102,6 +102,31 @@ describe("convex/access/model", () => {
 			clerkUserId,
 			hasAccess: true,
 			status: "granted",
+			buyerStartingPoint: "unspecified",
+			checkoutCtaId: "unspecified",
+			fulfillmentTrack: "unspecified",
+		});
+	});
+
+	it("returns stored fulfillment intent for a granted viewer", async () => {
+		const ctx = createAccessCtx({
+			productAccessGrant: createProductAccessGrant("granted", {
+				buyerStartingPoint: "existing_codebase",
+				checkoutCtaId: "codebase_demo_existing",
+				fulfillmentTrack: "existing_codebase_doctor",
+			}),
+		});
+		ctx.auth.getUserIdentity.mockResolvedValue({ subject: clerkUserId });
+
+		await expect(
+			moduleUnderTest.viewerProductAccessHandler(ctx as never),
+		).resolves.toEqual({
+			clerkUserId,
+			hasAccess: true,
+			status: "granted",
+			buyerStartingPoint: "existing_codebase",
+			checkoutCtaId: "codebase_demo_existing",
+			fulfillmentTrack: "existing_codebase_doctor",
 		});
 	});
 
@@ -241,6 +266,62 @@ describe("convex/access/model", () => {
 				updatedAt: 400,
 			}),
 		);
+	});
+
+	it("persists a viewer fulfillment choice without accepting a client owner id", async () => {
+		const patch = vi.fn().mockResolvedValue(undefined);
+		const ctx = createAccessCtx({
+			productAccessGrant: createProductAccessGrant("granted", {
+				_id: "product_access_existing",
+				clerkUserId,
+			}),
+			patch,
+		});
+		ctx.auth.getUserIdentity.mockResolvedValue({ subject: clerkUserId });
+		vi.spyOn(Date, "now").mockReturnValue(450);
+
+		await expect(
+			moduleUnderTest.resolveViewerFulfillmentTrackHandler(ctx as never, {
+				fulfillmentTrack: "existing_codebase_doctor",
+				checkoutCtaId: "choice_existing",
+			}),
+		).resolves.toEqual({
+			fulfillmentTrack: "existing_codebase_doctor",
+		});
+
+		expect(patch).toHaveBeenCalledWith(
+			"product_access_existing",
+			expect.objectContaining({
+				buyerStartingPoint: "existing_codebase",
+				checkoutCtaId: "choice_existing",
+				fulfillmentTrack: "existing_codebase_doctor",
+				updatedAt: 450,
+			}),
+		);
+	});
+
+	it("rejects fulfillment choice rewrites after the track is resolved", async () => {
+		const patch = vi.fn().mockResolvedValue(undefined);
+		const ctx = createAccessCtx({
+			productAccessGrant: createProductAccessGrant("granted", {
+				_id: "product_access_existing",
+				clerkUserId,
+				buyerStartingPoint: "no_codebase",
+				checkoutCtaId: "codebase_demo_generated",
+				fulfillmentTrack: "generated_codebase",
+			}),
+			patch,
+		});
+		ctx.auth.getUserIdentity.mockResolvedValue({ subject: clerkUserId });
+
+		await expect(
+			moduleUnderTest.resolveViewerFulfillmentTrackHandler(ctx as never, {
+				fulfillmentTrack: "existing_codebase_doctor",
+				checkoutCtaId: "choice_existing",
+			}),
+		).rejects.toThrow("Fulfillment track already resolved");
+
+		expect(patch).not.toHaveBeenCalled();
 	});
 
 	it("deletes an existing product-access grant when resetting access", async () => {

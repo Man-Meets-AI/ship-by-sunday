@@ -11,6 +11,8 @@ export const nextApiRouteConfig = {
 	codexAccountLoginPoll: "/api/codex/account/login/poll",
 	codexAccountRateLimits: "/api/codex/account/rate-limits",
 	codexAccountLogout: "/api/codex/account/logout",
+	workspaceRunnerPair: "/api/workspace/runner/pair",
+	workspaceRunnerEvents: "/api/workspace/runner/events",
 } as const;
 
 export const convexHttpRouteConfig = {

@@ -48,14 +48,14 @@ describe("blog post loading", () => {
 				label: "It starts by locking the product truth",
 			},
 			{
-				id: "it-turns-that-truth-into-agent-ready-packs",
+				id: "it-turns-that-truth-into-an-agent-ready-codebase",
 				depth: 2,
-				label: "It turns that truth into agent-ready packs",
+				label: "It turns that truth into an agent-ready Codebase",
 			},
 			{
-				id: "it-gives-the-build-a-repo-shaped-path",
+				id: "it-gives-the-build-a-codebase-shaped-path",
 				depth: 2,
-				label: "It gives the build a repo-shaped path",
+				label: "It gives the build a codebase-shaped path",
 			},
 			{
 				id: "the-goal-is-to-keep-shipping-after-the-weekend",

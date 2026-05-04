@@ -39,6 +39,8 @@ describe("proxy protected routes", () => {
 				"/codebase(.*)",
 				"/review(.*)",
 				"/settings(.*)",
+				"/workspace/choose(.*)",
+				"/workspace/setup(.*)",
 				"/execute(.*)",
 				"/mission(.*)",
 				"/artifacts(.*)",

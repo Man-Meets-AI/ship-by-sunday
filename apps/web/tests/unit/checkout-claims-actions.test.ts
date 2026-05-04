@@ -81,8 +81,11 @@ describe("convex/checkoutClaimsActions", () => {
 		retrieveSessionMock.mockResolvedValue({
 			id: "cs_test_123",
 			metadata: {
+				buyerStartingPoint: "existing_codebase",
+				checkoutCtaId: "codebase_demo_existing",
 				clerkUserId: "user_123",
 				courseSlug: "ship-by-sunday",
+				fulfillmentTrack: "existing_codebase_doctor",
 			},
 			client_reference_id: null,
 			customer: "cus_123",
@@ -113,6 +116,9 @@ describe("convex/checkoutClaimsActions", () => {
 				stripeCheckoutSessionId: "cs_test_123",
 				stripeCustomerId: "cus_123",
 				stripePaymentIntentId: "pi_123",
+				buyerStartingPoint: "existing_codebase",
+				checkoutCtaId: "codebase_demo_existing",
+				fulfillmentTrack: "existing_codebase_doctor",
 			}),
 		);
 	});
@@ -164,6 +170,9 @@ describe("convex/checkoutClaimsActions", () => {
 			expect.objectContaining({
 				stripeCheckoutSessionId: "cs_guest_123",
 				checkoutEmail: "buyer@example.com",
+				buyerStartingPoint: "unspecified",
+				checkoutCtaId: "unspecified",
+				fulfillmentTrack: "unspecified",
 			}),
 		);
 		expect(runMutation).toHaveBeenNthCalledWith(2, expect.anything(), {
@@ -309,7 +318,10 @@ describe("convex/checkoutClaimsActions", () => {
 		retrieveSessionMock.mockResolvedValue({
 			id: "cs_guest_fulfill",
 			metadata: {
+				buyerStartingPoint: "existing_codebase",
+				checkoutCtaId: "codebase_demo_existing",
 				courseSlug: "ship-by-sunday",
+				fulfillmentTrack: "existing_codebase_doctor",
 			},
 			client_reference_id: null,
 			customer_details: {
@@ -366,6 +378,9 @@ describe("convex/checkoutClaimsActions", () => {
 				checkoutEmail: "Buyer@Example.com",
 				stripeCustomerId: "cus_123",
 				stripePaymentIntentId: "pi_123",
+				buyerStartingPoint: "existing_codebase",
+				checkoutCtaId: "codebase_demo_existing",
+				fulfillmentTrack: "existing_codebase_doctor",
 				stripeEventId: "evt_123",
 				stripeEventType: "checkout.session.completed",
 			}),

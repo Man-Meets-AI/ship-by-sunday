@@ -5,11 +5,14 @@ import type Stripe from "stripe";
 
 import {
 	claimCheckoutSessionForViewer,
-	fulfillCheckoutSessionByEmail,
 	getCheckoutSessionForRecovery,
 	isStripeCheckoutSessionForCourse,
 	isStripeCheckoutSessionPaid,
 } from "@/platform/billing/checkout/checkout-session-recovery";
+import {
+	readCheckoutIntentFromMetadata,
+	type FulfillmentTrack,
+} from "@/platform/billing/checkout/checkout-intent";
 
 export type CheckoutSessionState =
 	| {
@@ -44,11 +47,13 @@ export type CheckoutSessionState =
 	| {
 			kind: "validated";
 			sessionId: string;
+			fulfillmentTrack: FulfillmentTrack;
 	  };
 
 function getCheckoutStateFromClaimResult(
 	claimResult: Awaited<ReturnType<typeof claimCheckoutSessionForViewer>>,
 	sessionId: string,
+	fulfillmentTrack: FulfillmentTrack,
 	safeCheckoutEmail: string | undefined,
 	currentAccountEmail: string | undefined,
 ): CheckoutSessionState {
@@ -57,6 +62,7 @@ function getCheckoutStateFromClaimResult(
 			return {
 				kind: "validated",
 				sessionId,
+				fulfillmentTrack,
 			};
 		case "wrong_account":
 			return {
@@ -97,62 +103,6 @@ async function getCurrentAccountEmail() {
 	return user?.primaryEmailAddress?.emailAddress ?? undefined;
 }
 
-function getCheckoutStateFromFulfillmentResult(
-	fulfillmentResult: Awaited<ReturnType<typeof fulfillCheckoutSessionByEmail>>,
-	sessionId: string,
-	currentUserId: string | null | undefined,
-	currentAccountEmail: string | undefined,
-): CheckoutSessionState {
-	switch (fulfillmentResult.kind) {
-		case "fulfilled":
-			if (!currentUserId) {
-				return {
-					kind: "checkout_email_handoff_required",
-					sessionId,
-					checkoutEmail: fulfillmentResult.checkoutEmail,
-				};
-			}
-
-			if (currentUserId !== fulfillmentResult.clerkUserId) {
-				return {
-					kind: "wrong_account",
-					sessionId,
-					checkoutEmail: fulfillmentResult.checkoutEmail,
-					currentAccountEmail,
-				};
-			}
-
-			return {
-				kind: "validated",
-				sessionId,
-			};
-		case "payment_pending":
-			return {
-				kind: "payment_pending",
-				sessionId,
-				paymentStatus: fulfillmentResult.paymentStatus,
-			};
-		case "invalid_session":
-		case "missing_checkout_email":
-		case "clerk_lookup_failed":
-		case "clerk_create_failed":
-		case "clerk_user_conflict":
-		case "grant_failed":
-			return {
-				kind: "sign_in_required",
-				sessionId,
-				checkoutEmail:
-					"checkoutEmail" in fulfillmentResult
-						? fulfillmentResult.checkoutEmail
-						: undefined,
-				currentAccountEmail,
-			};
-		/* c8 ignore next 2 */
-		default:
-			return fulfillmentResult satisfies never;
-	}
-}
-
 export async function getCheckoutSessionState(
 	sessionId: string | undefined,
 ): Promise<CheckoutSessionState> {
@@ -180,6 +130,9 @@ export async function getCheckoutSessionState(
 	const safeCheckoutEmail = isStripeCheckoutSessionPaid(session)
 		? (session.customer_details?.email ?? undefined)
 		: undefined;
+	const fulfillmentTrack = readCheckoutIntentFromMetadata(
+		session.metadata,
+	).fulfillmentTrack;
 
 	if (!clerkUserId) {
 		if (!isStripeCheckoutSessionPaid(session)) {
@@ -194,29 +147,31 @@ export async function getCheckoutSessionState(
 		const currentAccountEmail = authState.userId
 			? await getCurrentAccountEmail()
 			: undefined;
-		const fulfillmentResult = await fulfillCheckoutSessionByEmail(
-			sessionId,
-			"checkout.success.fulfillment",
-		);
-		const fulfillmentState = getCheckoutStateFromFulfillmentResult(
-			fulfillmentResult,
-			sessionId,
-			authState.userId,
-			currentAccountEmail,
-		);
+		if (!authState.userId) {
+			if (safeCheckoutEmail) {
+				return {
+					kind: "checkout_email_handoff_required",
+					sessionId,
+					checkoutEmail: safeCheckoutEmail,
+				};
+			}
 
-		if (
-			fulfillmentState.kind === "sign_in_required" &&
-			!fulfillmentState.checkoutEmail &&
-			safeCheckoutEmail
-		) {
 			return {
-				...fulfillmentState,
+				kind: "sign_in_required",
+				sessionId,
 				checkoutEmail: safeCheckoutEmail,
+				currentAccountEmail,
 			};
 		}
 
-		return fulfillmentState;
+		const claimResult = await claimCheckoutSessionForViewer(sessionId);
+		return getCheckoutStateFromClaimResult(
+			claimResult,
+			sessionId,
+			fulfillmentTrack,
+			safeCheckoutEmail,
+			currentAccountEmail,
+		);
 	}
 
 	const authState = await auth();
@@ -242,6 +197,7 @@ export async function getCheckoutSessionState(
 		return getCheckoutStateFromClaimResult(
 			claimResult,
 			sessionId,
+			fulfillmentTrack,
 			safeCheckoutEmail,
 			await getCurrentAccountEmail(),
 		);

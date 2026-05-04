@@ -1,4 +1,9 @@
-import { internalMutation, internalQuery, query } from "./_generated/server";
+import {
+	internalMutation,
+	internalQuery,
+	mutation,
+	query,
+} from "./_generated/server";
 import {
 	getProductAccessDebugArgs,
 	getProductAccessDebugHandler,
@@ -9,6 +14,9 @@ import {
 	grantProductAccessFromStripeReturns,
 	grantProductAccessHandler,
 	grantProductAccessReturns,
+	resolveViewerFulfillmentTrackArgs,
+	resolveViewerFulfillmentTrackHandler,
+	resolveViewerFulfillmentTrackReturns,
 	resetProductAccessArgs,
 	resetProductAccessHandler,
 	resetProductAccessReturns,
@@ -33,6 +41,12 @@ export const grantProductAccessFromStripe = internalMutation({
 	args: grantProductAccessFromStripeArgs,
 	returns: grantProductAccessFromStripeReturns,
 	handler: grantProductAccessFromStripeHandler,
+});
+
+export const resolveViewerFulfillmentTrack = mutation({
+	args: resolveViewerFulfillmentTrackArgs,
+	returns: resolveViewerFulfillmentTrackReturns,
+	handler: resolveViewerFulfillmentTrackHandler,
 });
 
 export const resetProductAccess = internalMutation({

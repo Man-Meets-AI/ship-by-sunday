@@ -42,48 +42,6 @@ export type CheckoutSessionClaimResult =
 			claimResult: unknown;
 	  };
 
-export type CheckoutSessionFulfillmentResult =
-	| {
-			kind: "fulfilled";
-			sessionId: string;
-			checkoutEmail: string;
-			clerkUserId: string;
-			clerkUserStatus: "exists" | "created";
-			grantResult: {
-				granted: "inserted" | "patched";
-			};
-	  }
-	| {
-			kind: "invalid_session";
-			sessionId: string;
-	  }
-	| {
-			kind: "payment_pending";
-			sessionId: string;
-			paymentStatus: Stripe.Checkout.Session.PaymentStatus;
-	  }
-	| {
-			kind: "missing_checkout_email";
-			sessionId: string;
-	  }
-	| {
-			kind:
-				| "clerk_lookup_failed"
-				| "clerk_create_failed"
-				| "clerk_user_conflict";
-			sessionId: string;
-			checkoutEmail: string;
-			message?: string;
-			matchingUserCount?: number;
-	  }
-	| {
-			kind: "grant_failed";
-			sessionId: string;
-			checkoutEmail: string;
-			clerkUserId: string;
-			message: string;
-	  };
-
 export type CheckoutEmailClaimResult =
 	| {
 			kind: "sign_in_required";
@@ -172,20 +130,6 @@ export async function claimCheckoutSessionForViewer(
 	)) as CheckoutSessionClaimResult;
 
 	return result;
-}
-
-export async function fulfillCheckoutSessionByEmail(
-	sessionId: string,
-	stripeEventType: string,
-): Promise<CheckoutSessionFulfillmentResult> {
-	return (await fetchAction(
-		api.checkoutClaimsActions.fulfillCheckoutSessionByEmail,
-		{
-			sessionId,
-			stripeEventId: `${stripeEventType}:${sessionId}`,
-			stripeEventType,
-		},
-	)) as CheckoutSessionFulfillmentResult;
 }
 
 export async function claimLatestPendingCheckoutForViewer(): Promise<CheckoutEmailClaimResult> {

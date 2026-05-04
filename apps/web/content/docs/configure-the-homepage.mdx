@@ -136,7 +136,8 @@ Current target kinds:
 Safe rules:
 
 - if you need a normal link CTA, use `kind: "link"` with `href`
-- if you need checkout, use `kind: "checkout"`
+- if you need checkout, use `kind: "checkout"` with a `checkoutIntent` containing `buyerStartingPoint` and `checkoutCtaId`
+- use `buyerStartingPoint: "no_codebase"` for generated-codebase checkout and `buyerStartingPoint: "existing_codebase"` for existing-codebase setup checkout
 - do not import `CheckoutButton` straight into hero or pricing again
 - if you add a new CTA target kind, update the target union, the render model, the CTA renderer, and the tests together
 

@@ -4,7 +4,8 @@ import Stripe from "stripe";
 import { v } from "convex/values";
 
 import { apiConfig, PRODUCT_COURSE_SLUG } from "../config/product";
-import { api, internal } from "./_generated/api";
+import { readCheckoutIntentFromMetadata } from "../platform/billing/checkout/checkout-intent";
+import { internal } from "./_generated/api";
 import { internalAction } from "./_generated/server";
 import { requireConvexEnv } from "./env";
 import { productAccessGrantResultValidator } from "./access/validators";
@@ -186,7 +187,7 @@ export const processStripeWebhook = internalAction({
 			}
 
 			const fulfillmentResult = await ctx.runAction(
-				api.checkoutClaimsActions.fulfillCheckoutSessionByEmail,
+				internal.checkoutClaimsActions.fulfillCheckoutSessionByEmail,
 				{
 					sessionId: session.id,
 					stripeEventId: event.id,
@@ -236,6 +237,7 @@ export const processStripeWebhook = internalAction({
 						typeof session.payment_intent === "string"
 							? session.payment_intent
 							: undefined,
+					...readCheckoutIntentFromMetadata(session.metadata),
 				},
 			)) as StripeWebhookGrantResult;
 		} catch (error) {

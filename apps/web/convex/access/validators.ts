@@ -1,5 +1,11 @@
 import { v } from "convex/values";
 
+import {
+	checkoutBuyerStartingPointValidator,
+	checkoutCtaIdValidator,
+	checkoutFulfillmentTrackValidator,
+} from "../checkoutIntentValidators";
+
 export const productAccessGrantStatusValidator = v.union(
 	v.literal("granted"),
 	v.literal("pending"),
@@ -32,6 +38,9 @@ export const productAccessReturnValidator = v.object({
 		v.literal("no_access"),
 		productAccessGrantStatusValidator,
 	),
+	buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
+	checkoutCtaId: v.optional(checkoutCtaIdValidator),
+	fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
 });
 
 export const productAccessGrantResultValidator = v.object({
@@ -51,6 +60,9 @@ export const productAccessGrantDocumentValidator = v.object({
 	stripeCustomerId: v.optional(v.string()),
 	stripeCheckoutSessionId: v.optional(v.string()),
 	stripePaymentIntentId: v.optional(v.string()),
+	buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
+	checkoutCtaId: v.optional(checkoutCtaIdValidator),
+	fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
 	grantedAt: v.number(),
 	updatedAt: v.number(),
 	revokedAt: v.optional(v.number()),

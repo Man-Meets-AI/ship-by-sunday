@@ -243,6 +243,10 @@ const productPreviewSection = {
 				"Low Hanging Fruit `/goal`",
 			],
 		},
+		cta: {
+			label: "Set up my codebase",
+			note: "Checkout brings you back to the protected setup entry for a sync-safe doctor pass.",
+		},
 	},
 	sections: productPreviewSections,
 	foundation: {

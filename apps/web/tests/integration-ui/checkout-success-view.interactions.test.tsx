@@ -77,6 +77,7 @@ describe("CheckoutSuccessView interactions", () => {
 				checkoutSessionState={{
 					kind: "validated",
 					sessionId: "cs_validated",
+					fulfillmentTrack: "generated_codebase",
 				}}
 			/>,
 		);
@@ -100,6 +101,32 @@ describe("CheckoutSuccessView interactions", () => {
 		expect(replaceMock).toHaveBeenCalledWith("/codebase");
 	});
 
+	it("arms the existing-codebase setup redirect when access is ready", async () => {
+		vi.useFakeTimers();
+		useConvexAuthMock.mockReturnValue({
+			isAuthenticated: true,
+		});
+		useQueryMock.mockReturnValue({
+			hasAccess: true,
+		});
+
+		render(
+			<CheckoutSuccessView
+				checkoutSessionState={{
+					kind: "validated",
+					sessionId: "cs_existing",
+					fulfillmentTrack: "existing_codebase_doctor",
+				}}
+			/>,
+		);
+
+		await act(async () => {
+			await vi.advanceTimersByTimeAsync(700);
+		});
+
+		expect(replaceMock).toHaveBeenCalledWith("/workspace/setup");
+	});
+
 	it("does not render the redirect affordance while access is still pending", () => {
 		useConvexAuthMock.mockReturnValue({
 			isAuthenticated: true,
@@ -113,6 +140,7 @@ describe("CheckoutSuccessView interactions", () => {
 				checkoutSessionState={{
 					kind: "validated",
 					sessionId: "cs_pending",
+					fulfillmentTrack: "generated_codebase",
 				}}
 			/>,
 		);
@@ -137,6 +165,7 @@ describe("CheckoutSuccessView interactions", () => {
 				checkoutSessionState={{
 					kind: "validated",
 					sessionId: "cs_pending",
+					fulfillmentTrack: "generated_codebase",
 				}}
 			/>,
 		);
@@ -169,6 +198,7 @@ describe("CheckoutSuccessView interactions", () => {
 				checkoutSessionState={{
 					kind: "validated",
 					sessionId: "cs_armed",
+					fulfillmentTrack: "generated_codebase",
 				}}
 			/>,
 		);
@@ -192,6 +222,7 @@ describe("CheckoutSuccessView interactions", () => {
 				checkoutSessionState={{
 					kind: "validated",
 					sessionId: "cs_reduced_motion",
+					fulfillmentTrack: "generated_codebase",
 				}}
 			/>,
 		);

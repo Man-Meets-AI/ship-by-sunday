@@ -24,7 +24,13 @@ describe("home page render model", () => {
 			renderModel.productPreview.section.codebaseBranch.auditList.title,
 		).toBe("The Audit.");
 		expect(renderModel.hero.isEnabled).toBe(true);
-		expect(renderModel.hero.primaryCtaTarget).toEqual({ kind: "checkout" });
+		expect(renderModel.hero.primaryCtaTarget).toEqual({
+			kind: "checkout",
+			checkoutIntent: {
+				buyerStartingPoint: "no_codebase",
+				checkoutCtaId: "hero_primary",
+			},
+		});
 		expect(renderModel.execLoop.isEnabled).toBe(true);
 		expect(
 			renderModel.execLoop.section.steps.map((step) => step.label),
@@ -77,6 +83,10 @@ describe("home page render model", () => {
 		expect(renderModel.pricing.isEnabled).toBe(true);
 		expect(renderModel.pricing.primaryCtaTarget).toEqual({
 			kind: "checkout",
+			checkoutIntent: {
+				buyerStartingPoint: "no_codebase",
+				checkoutCtaId: "pricing_primary",
+			},
 		});
 	});
 

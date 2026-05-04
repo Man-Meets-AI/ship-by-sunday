@@ -5,6 +5,7 @@ import { fetchQuery } from "convex/nextjs";
 import { redirect } from "next/navigation";
 
 import { api } from "@/convex/_generated/api";
+import { routeConfig } from "@/config/product";
 import {
 	claimCheckoutSessionForViewer,
 	claimLatestPendingCheckoutForViewer,
@@ -20,6 +21,15 @@ import { getConvexServerSession } from "@/platform/auth/convex-auth";
 type ResumeDestination = FunctionReturnType<
 	typeof api.codebase.getCodebaseResumeDestination
 >;
+type ExistingCodebaseResumeDestination = {
+	destination: string;
+	kind: "existing_codebase_setup" | "fulfillment_choice";
+	codebaseStageId: null;
+	postReviewTargets: null;
+};
+type ServerResumeDestination =
+	| ResumeDestination
+	| ExistingCodebaseResumeDestination;
 
 async function refreshViewerProductAccess(token: string) {
 	return (await fetchQuery(
@@ -135,10 +145,28 @@ export async function getServerProductAccess(): Promise<ProductAccess> {
 	return access;
 }
 
-export async function getServerResumeDestination() {
+export async function getServerResumeDestination(): Promise<ServerResumeDestination | null> {
 	const access = await getServerProductAccess();
 	if (!access.hasAccess) {
 		return null;
+	}
+
+	if (access.fulfillmentTrack === "existing_codebase_doctor") {
+		return {
+			destination: routeConfig.workspaceSetup,
+			kind: "existing_codebase_setup",
+			codebaseStageId: null,
+			postReviewTargets: null,
+		};
+	}
+
+	if (!access.fulfillmentTrack || access.fulfillmentTrack === "unspecified") {
+		return {
+			destination: routeConfig.workspaceChoice,
+			kind: "fulfillment_choice",
+			codebaseStageId: null,
+			postReviewTargets: null,
+		};
 	}
 
 	const session = await getConvexServerSession();

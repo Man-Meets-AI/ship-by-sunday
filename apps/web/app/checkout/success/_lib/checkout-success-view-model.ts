@@ -6,6 +6,7 @@ import {
 import { buildCheckoutEmailHandoffHref } from "@/platform/auth/auth-route-utils";
 import { assertNever } from "@/lib/assert";
 import type { CheckoutSessionState } from "@/platform/billing/checkout/checkout-session";
+import type { FulfillmentTrack } from "@/platform/billing/checkout/checkout-intent";
 import { workspaceDisplayConfig } from "@/config/starter-selectors";
 
 export type CheckoutProgressState = "complete" | "active" | "pending";
@@ -39,6 +40,41 @@ const workspaceOpenLabel = workspaceDisplayConfig.openHomeActionLabel;
 const workspaceNoun = workspaceDisplayConfig.homeNoun;
 const workspaceRouteStepLabel = workspaceDisplayConfig.firstStepLabel;
 
+type ValidatedFulfillmentRouteModel = {
+	actionHref: string;
+	openLabel: string;
+	noun: string;
+	stepLabel: string;
+};
+
+function getValidatedFulfillmentRouteModel(
+	fulfillmentTrack: FulfillmentTrack,
+): ValidatedFulfillmentRouteModel {
+	switch (fulfillmentTrack) {
+		case "generated_codebase":
+			return {
+				actionHref: routeConfig.codebase,
+				openLabel: workspaceOpenLabel,
+				noun: workspaceNoun,
+				stepLabel: workspaceRouteStepLabel,
+			};
+		case "existing_codebase_doctor":
+			return {
+				actionHref: routeConfig.workspaceSetup,
+				openLabel: "Open setup",
+				noun: "codebase setup",
+				stepLabel: "setup step",
+			};
+		case "unspecified":
+			return {
+				actionHref: routeConfig.workspaceChoice,
+				openLabel: "Choose path",
+				noun: "fulfillment choice",
+				stepLabel: "workspace path",
+			};
+	}
+}
+
 function getCheckoutEmailLabel(checkoutEmail: string | undefined) {
 	return checkoutEmail ?? "the email used at checkout";
 }
@@ -59,17 +95,20 @@ export function getCheckoutViewModel(
 	validatedStatusLabel: string,
 ): CheckoutViewModel {
 	switch (checkoutSessionState.kind) {
-		case "validated":
+		case "validated": {
+			const fulfillmentRoute = getValidatedFulfillmentRouteModel(
+				checkoutSessionState.fulfillmentTrack,
+			);
 			return {
 				shellTitle: "Payment received",
 				shellSubtitle: "We’re unlocking your access now.",
 				statusLabel: isAccessReady ? "Access ready" : validatedStatusLabel,
 				heading: isAccessReady
-					? `Opening ${workspaceNoun}`
+					? `Opening ${fulfillmentRoute.noun}`
 					: "Finalizing access",
 				body: isAccessReady
-					? `Your access is live. Sending you into the ${workspaceNoun} now.`
-					: `This page will send you into the ${workspaceNoun} automatically as soon as access is ready. If it takes longer than a few seconds, use one of the buttons below.`,
+					? `Your access is live. Sending you into the ${fulfillmentRoute.noun} now.`
+					: `This page will send you into the ${fulfillmentRoute.noun} automatically as soon as access is ready. If it takes longer than a few seconds, use one of the buttons below.`,
 				progressSteps: [
 					{
 						label: "Payment confirmed",
@@ -84,35 +123,36 @@ export function getCheckoutViewModel(
 							: "We are polling for the access grant now.",
 					},
 					{
-						label: workspaceOpenLabel,
+						label: fulfillmentRoute.openLabel,
 						state: isAccessReady ? "active" : "pending",
 						detail: isAccessReady
 							? "Redirect is ready."
-							: `${workspaceDisplayConfig.homeLabel} opens once access confirms.`,
+							: `${fulfillmentRoute.stepLabel} opens once access confirms.`,
 					},
 				],
 				helpTitle: isAccessReady ? "Access confirmed" : "What happens next",
 				helpLeadCopy: isAccessReady
-					? "Your purchase and product access are both confirmed. The next step is just getting you into the workspace."
+					? `Your purchase and product access are both confirmed. The next step is just getting you into the ${fulfillmentRoute.noun}.`
 					: "Stripe is done. This page is checking your account access and will forward you automatically once product access is ready.",
 				helpItems: isAccessReady
 					? [
-							`Use ${workspaceOpenLabel} if the redirect has not fired yet.`,
+							`Use ${fulfillmentRoute.openLabel} if the redirect has not fired yet.`,
 							"Refresh this page if the redirect feels stalled.",
 							"Keep this tab if you want a clean post-purchase handoff.",
 						]
 					: [
 							"Keep this tab open for a few seconds while the access grant catches up.",
 							"If you signed in with a different email, fix that first before retrying.",
-							`Use ${workspaceOpenLabel} if you want to retry the ${workspaceNoun} gate now.`,
+							`Use ${fulfillmentRoute.openLabel} if you want to retry the ${fulfillmentRoute.noun} gate now.`,
 						],
-				primaryActionLabel: workspaceOpenLabel,
-				primaryActionHref: routeConfig.codebase,
+				primaryActionLabel: fulfillmentRoute.openLabel,
+				primaryActionHref: fulfillmentRoute.actionHref,
 				primaryActionBody: isAccessReady
-					? `Your access is ready. Open the ${workspaceNoun} now if you do not want to wait for the redirect.`
-					: `If the handoff already finished in the background, this will take you into the ${workspaceNoun}. Otherwise it will re-run the ${workspaceNoun} gate.`,
-				secondaryActionBody: `Use ${workspaceOpenLabel} to retry the ${workspaceNoun} gate if the handoff feels stalled.`,
+					? `Your access is ready. Open the ${fulfillmentRoute.noun} now if you do not want to wait for the redirect.`
+					: `If the handoff already finished in the background, this will take you into the ${fulfillmentRoute.noun}. Otherwise it will re-run the ${fulfillmentRoute.noun} gate.`,
+				secondaryActionBody: `Use ${fulfillmentRoute.openLabel} to retry the ${fulfillmentRoute.noun} gate if the handoff feels stalled.`,
 			};
+		}
 		case "sign_in_required": {
 			const signInCheckoutEmail = getCheckoutEmailLabel(
 				checkoutSessionState.checkoutEmail,

@@ -13,6 +13,12 @@ import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
 import { assert } from "@/lib/assert";
 import { capturePostHogProductEvent } from "@/lib/observability/posthog-client";
 import { cn } from "@/lib/utils";
+import {
+	UNSPECIFIED_CHECKOUT_INTENT,
+	normalizeCheckoutIntent,
+	type CheckoutIntent,
+	type CheckoutIntentInput,
+} from "@/platform/billing/checkout/checkout-intent";
 
 const STRIPE_EXPRESS_CHECKOUT_MIN_BUTTON_HEIGHT = 40;
 const STRIPE_EXPRESS_CHECKOUT_MAX_BUTTON_HEIGHT = 55;
@@ -41,6 +47,7 @@ type ExpressCheckoutButtonState =
 type ExpressCheckoutButtonProps = {
 	readonly className?: string;
 	readonly testId?: string;
+	readonly checkoutIntent?: CheckoutIntentInput;
 	readonly buttonHeight?: number;
 	readonly onBeforeCheckout?: () => void | Promise<void>;
 	readonly onAvailableChange?: (isAvailable: boolean) => void;
@@ -50,6 +57,7 @@ type ExpressCheckoutButtonProps = {
 export function ExpressCheckoutButton({
 	className,
 	testId,
+	checkoutIntent: checkoutIntentInput,
 	buttonHeight = 44,
 	onBeforeCheckout,
 	onAvailableChange,
@@ -61,11 +69,20 @@ export function ExpressCheckoutButton({
 
 	useEffect(() => {
 		let isMounted = true;
+		const checkoutIntent: CheckoutIntent = checkoutIntentInput
+			? normalizeCheckoutIntent(checkoutIntentInput)
+			: UNSPECIFIED_CHECKOUT_INTENT;
 
 		async function prepareExpressCheckout() {
 			try {
 				const response = await fetch(apiRouteConfig.stripeExpressCheckout, {
 					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						checkoutIntent,
+					}),
 				});
 
 				if (!response.ok) {
@@ -101,7 +118,7 @@ export function ExpressCheckoutButton({
 		return () => {
 			isMounted = false;
 		};
-	}, []);
+	}, [checkoutIntentInput]);
 
 	useEffect(() => {
 		if (state.kind !== "unavailable") {
@@ -133,6 +150,7 @@ export function ExpressCheckoutButton({
 					buttonHeight={buttonHeight}
 					returnUrl={state.returnUrl}
 					onBeforeCheckout={onBeforeCheckout}
+					checkoutIntent={checkoutIntentInput}
 					onAvailableChange={onAvailableChange}
 					onError={onError}
 				/>
@@ -144,18 +162,23 @@ export function ExpressCheckoutButton({
 function ExpressCheckoutElementController({
 	buttonHeight,
 	returnUrl,
+	checkoutIntent: checkoutIntentInput,
 	onBeforeCheckout,
 	onAvailableChange,
 	onError,
 }: {
 	readonly buttonHeight: number;
 	readonly returnUrl: string;
+	readonly checkoutIntent?: CheckoutIntentInput;
 	readonly onBeforeCheckout?: () => void | Promise<void>;
 	readonly onAvailableChange?: (isAvailable: boolean) => void;
 	readonly onError?: (message: string | null) => void;
 }) {
 	const checkoutResult = useCheckoutElements();
 	const [isVisible, setIsVisible] = useState(false);
+	const checkoutIntent: CheckoutIntent = checkoutIntentInput
+		? normalizeCheckoutIntent(checkoutIntentInput)
+		: UNSPECIFIED_CHECKOUT_INTENT;
 	const stripeButtonHeight = getStripeExpressCheckoutButtonHeight(buttonHeight);
 	const options = useMemo(
 		() => ({
@@ -202,6 +225,7 @@ function ExpressCheckoutElementController({
 				event: "checkout_started",
 				properties: {
 					surface: "express_checkout",
+					...checkoutIntent,
 				},
 			});
 
@@ -232,7 +256,7 @@ function ExpressCheckoutElementController({
 				onError?.(result.error.message);
 			}
 		},
-		[checkoutResult, onBeforeCheckout, onError, returnUrl],
+		[checkoutIntent, checkoutResult, onBeforeCheckout, onError, returnUrl],
 	);
 
 	if (checkoutResult.type === "error") {

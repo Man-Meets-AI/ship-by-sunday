@@ -48,12 +48,25 @@ describe("CheckoutButton interactions", () => {
 		await user.click(screen.getByRole("button"));
 
 		expect(fetchMock).toHaveBeenCalledWith("/api/stripe/checkout", {
+			body: JSON.stringify({
+				checkoutIntent: {
+					buyerStartingPoint: "unspecified",
+					checkoutCtaId: "unspecified",
+					fulfillmentTrack: "unspecified",
+				},
+			}),
+			headers: {
+				"Content-Type": "application/json",
+			},
 			method: "POST",
 		});
 		expect(capturePostHogProductEventMock).toHaveBeenCalledWith({
 			event: "checkout_started",
 			properties: {
 				surface: "checkout_button",
+				buyerStartingPoint: "unspecified",
+				checkoutCtaId: "unspecified",
+				fulfillmentTrack: "unspecified",
 			},
 		});
 		expect(assignMock).toHaveBeenCalledWith(
@@ -119,6 +132,69 @@ describe("CheckoutButton interactions", () => {
 
 		expect(assignMock).toHaveBeenCalledWith(
 			"https://checkout.stripe.com/pay/cs_test_123",
+		);
+	});
+
+	it("sends the selected checkout intent to Stripe checkout", async () => {
+		const assignMock = vi.fn();
+		Object.defineProperty(window, "location", {
+			configurable: true,
+			value: {
+				assign: assignMock,
+			},
+		});
+		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+			new Response(
+				JSON.stringify({
+					sessionId: "cs_existing_123",
+					url: "https://checkout.stripe.com/pay/cs_existing_123",
+				}),
+				{
+					status: 200,
+					headers: {
+						"content-type": "application/json",
+					},
+				},
+			),
+		);
+
+		const user = userEvent.setup();
+		render(
+			<CheckoutButton
+				label="Set up my codebase"
+				checkoutIntent={{
+					buyerStartingPoint: "existing_codebase",
+					checkoutCtaId: "codebase_demo_existing",
+				}}
+			/>,
+		);
+
+		await user.click(screen.getByRole("button"));
+
+		expect(fetchMock).toHaveBeenCalledWith("/api/stripe/checkout", {
+			body: JSON.stringify({
+				checkoutIntent: {
+					buyerStartingPoint: "existing_codebase",
+					checkoutCtaId: "codebase_demo_existing",
+					fulfillmentTrack: "existing_codebase_doctor",
+				},
+			}),
+			headers: {
+				"Content-Type": "application/json",
+			},
+			method: "POST",
+		});
+		expect(capturePostHogProductEventMock).toHaveBeenCalledWith({
+			event: "checkout_started",
+			properties: {
+				surface: "checkout_button",
+				buyerStartingPoint: "existing_codebase",
+				checkoutCtaId: "codebase_demo_existing",
+				fulfillmentTrack: "existing_codebase_doctor",
+			},
+		});
+		expect(assignMock).toHaveBeenCalledWith(
+			"https://checkout.stripe.com/pay/cs_existing_123",
 		);
 	});
 

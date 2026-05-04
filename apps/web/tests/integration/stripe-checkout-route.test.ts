@@ -36,9 +36,17 @@ vi.mock("@/platform/next/app-url", () => ({
 	getAppBaseUrl: getAppBaseUrlMock,
 }));
 
-function createRequest() {
+function createRequest(body?: unknown) {
 	return new Request("https://example.com/api/stripe/checkout", {
 		method: "POST",
+		...(body
+			? {
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify(body),
+				}
+			: {}),
 	});
 }
 
@@ -116,7 +124,10 @@ describe("POST /api/stripe/checkout", () => {
 				client_reference_id: undefined,
 				customer_email: undefined,
 				metadata: {
+					buyerStartingPoint: "unspecified",
+					checkoutCtaId: "unspecified",
 					courseSlug: "ship-by-sunday",
+					fulfillmentTrack: "unspecified",
 				},
 				line_items: [
 					{
@@ -131,7 +142,10 @@ describe("POST /api/stripe/checkout", () => {
 				discounts: [{ promotion_code: "promo_50_off" }],
 				payment_intent_data: {
 					metadata: {
+						buyerStartingPoint: "unspecified",
+						checkoutCtaId: "unspecified",
 						courseSlug: "ship-by-sunday",
+						fulfillmentTrack: "unspecified",
 					},
 				},
 			}),
@@ -177,7 +191,14 @@ describe("POST /api/stripe/checkout", () => {
 
 		const { POST } = await import("../../app/api/stripe/checkout/route");
 
-		const response = await POST(createRequest());
+		const response = await POST(
+			createRequest({
+				checkoutIntent: {
+					buyerStartingPoint: "existing_codebase",
+					checkoutCtaId: "codebase_demo_existing",
+				},
+			}),
+		);
 
 		expect(response.status).toBe(200);
 		expect(response.headers.get("x-request-id")).toBeTruthy();
@@ -204,14 +225,20 @@ describe("POST /api/stripe/checkout", () => {
 					},
 				],
 				metadata: {
+					buyerStartingPoint: "existing_codebase",
+					checkoutCtaId: "codebase_demo_existing",
 					clerkUserId: "user_123",
 					courseSlug: "ship-by-sunday",
+					fulfillmentTrack: "existing_codebase_doctor",
 				},
 				mode: "payment",
 				payment_intent_data: {
 					metadata: {
+						buyerStartingPoint: "existing_codebase",
+						checkoutCtaId: "codebase_demo_existing",
 						clerkUserId: "user_123",
 						courseSlug: "ship-by-sunday",
+						fulfillmentTrack: "existing_codebase_doctor",
 					},
 				},
 				success_url:
@@ -358,6 +385,18 @@ describe("POST /api/stripe/checkout", () => {
 				customer_email: "buyer@example.com",
 				discounts: [{ promotion_code: "promo_50_off" }],
 				mode: "payment",
+				metadata: expect.objectContaining({
+					buyerStartingPoint: "unspecified",
+					checkoutCtaId: "unspecified",
+					fulfillmentTrack: "unspecified",
+				}),
+				payment_intent_data: {
+					metadata: expect.objectContaining({
+						buyerStartingPoint: "unspecified",
+						checkoutCtaId: "unspecified",
+						fulfillmentTrack: "unspecified",
+					}),
+				},
 				return_url:
 					"https://app.example.com/checkout/success?session_id={CHECKOUT_SESSION_ID}",
 				ui_mode: "custom",
