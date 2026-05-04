@@ -59,7 +59,7 @@ Use this file together with:
 
 - [ ] I preserved the blueprint-first product framing and did not reintroduce old CEO / Design / Build / Ship framing where it conflicts with the live product.
 - [ ] If I touched the public homepage, I read `apps/web/content/docs/configure-the-homepage.mdx` first.
-- [ ] If I touched the public homepage, I preserved the CTA boundary, section order, `#system` and `#pricing` anchors, and truthful structured data.
+- [ ] If I touched the public homepage, I preserved the CTA boundary, current section order, current anchor contract, and truthful structured data.
 - [ ] If I touched workspace or blueprint UI, I treated it as an operating surface, not a marketing page.
 - [ ] I kept unlock logic and blueprint progression readable rather than decorative.
 

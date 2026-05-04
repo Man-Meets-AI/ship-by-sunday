@@ -12,7 +12,6 @@ import { DurabilitySectionBlock } from "./sections/durability-section";
 import { ExecLoopSectionBlock } from "./sections/exec-loop-section";
 import { PlansMdSectionBlock } from "./sections/plans-md-section";
 import { ProgramsSectionBlock } from "./sections/programs-section";
-import { SprintPathUnifiedSection } from "./sections/sprint-path-unified-section";
 import { StarterSystemSectionBlock } from "./sections/starter-system-section";
 
 export default async function HomePage() {
@@ -86,16 +85,6 @@ function HomePageIdeaContinuation({
 					hero={homePageRenderModel.hero.section}
 					primaryCtaTarget={homePageRenderModel.hero.primaryCtaTarget}
 					variant={heroVariant}
-				/>
-			) : null}
-			{homePageRenderModel.sprintPath.isEnabled ? (
-				<SprintPathUnifiedSection
-					sprintPathSection={homePageRenderModel.sprintPath.section}
-					mechanismSection={
-						homePageRenderModel.mechanism.isEnabled
-							? homePageRenderModel.mechanism.section
-							: undefined
-					}
 				/>
 			) : null}
 			{homePageRenderModel.execLoop.isEnabled ? (

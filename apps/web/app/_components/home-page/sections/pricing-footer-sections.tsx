@@ -1,15 +1,76 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import { routeConfig, type HomePageCtaTarget } from "@/config/product";
 import { PromoBanner } from "@/app/_components/home-page/promo-banner";
+import { ThemeToggleButton } from "@/app/_components/theme-toggle-button";
 import type { HomePageContent } from "@/app/_content/home-page";
 
 import { HomePagePrimaryCta } from "./home-page-primary-cta";
 import { PricingIncludesList } from "./pricing-includes-list";
 import { ScrollReveal } from "./scroll-reveal";
+
+const ROTATION_INTERVAL_MS = 2800;
+
+function RotatingPricingHeadline({
+	headline,
+	accent,
+}: {
+	headline: PricingSection["headline"];
+	accent: string;
+}) {
+	const [index, setIndex] = useState(0);
+	const reducedMotion = useReducedMotion() ?? false;
+	const phrases = headline.rotatingPhrases;
+
+	useEffect(() => {
+		if (reducedMotion || phrases.length <= 1) {
+			return;
+		}
+
+		const id = setInterval(
+			() => setIndex((i) => (i + 1) % phrases.length),
+			ROTATION_INTERVAL_MS,
+		);
+		return () => clearInterval(id);
+	}, [phrases.length, reducedMotion]);
+
+	const phrase = phrases[index] ?? phrases[0] ?? "";
+	const phraseNode = reducedMotion ? (
+		<span className="inline">{phrase}</span>
+	) : (
+		<AnimatePresence mode="wait">
+			<motion.span
+				key={phrase}
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				exit={{ opacity: 0 }}
+				transition={{ duration: 0.3, ease: "easeInOut" }}
+				className="inline"
+			>
+				{phrase}
+			</motion.span>
+		</AnimatePresence>
+	);
+
+	return (
+		<h2
+			aria-label={`${headline.prefix} ${phrase} ${accent}`}
+			className="leading-none"
+		>
+			<span className="block font-heading-serif text-4xl font-normal italic leading-[0.9] sm:text-5xl lg:text-7xl">
+				{headline.prefix} {phraseNode}
+			</span>
+			<span className="block font-home-inter mt-1 text-xl font-normal text-foreground/70 sm:text-2xl lg:text-3xl">
+				{accent}
+			</span>
+		</h2>
+	);
+}
 
 type FooterWordmark = HomePageContent["footerWordmark"];
 type PricingSection = HomePageContent["pricingSection"];
@@ -27,15 +88,10 @@ export function PricingSectionBlock({
 				<ScrollReveal>
 					<div className="space-y-6 lg:sticky lg:top-24 lg:h-fit">
 						<div className="flex flex-col gap-3">
-							<h2
-								aria-label={`${pricingSection.titleLead} ${pricingSection.titleAccent}`}
-								className="flex flex-col gap-1 text-balance text-4xl font-semibold leading-[0.92] tracking-tight sm:text-5xl lg:text-7xl"
-							>
-								<span>{pricingSection.titleLead}</span>
-								<span className="text-foreground/90">
-									{pricingSection.titleAccent}
-								</span>
-							</h2>
+							<RotatingPricingHeadline
+								headline={pricingSection.headline}
+								accent={pricingSection.titleAccent}
+							/>
 						</div>
 					</div>
 				</ScrollReveal>
@@ -123,12 +179,15 @@ export function FooterSection({
 						<p className="font-product-wordmark text-lg font-normal tracking-wide text-foreground uppercase">
 							{footerWordmark}
 						</p>
-						<Link
-							href={routeConfig.signIn}
-							className="text-sm text-foreground underline-offset-4 transition-colors hover:underline"
-						>
-							Pilot Members Only
-						</Link>
+						<div className="flex items-center gap-3">
+							<Link
+								href={routeConfig.signIn}
+								className="text-sm text-foreground underline-offset-4 transition-colors hover:underline"
+							>
+								Pilot Members Only
+							</Link>
+							<ThemeToggleButton className="border-border/40 bg-transparent text-muted-foreground/60 hover:text-foreground" />
+						</div>
 					</div>
 				</ScrollReveal>
 			</div>

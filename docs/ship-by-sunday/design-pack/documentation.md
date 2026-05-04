@@ -206,16 +206,25 @@ If helpful, also record the external official references used for the work:
 - **Change:** The first-screen starting-point selector now controls the below-fold homepage branch. `I have an idea for a product` keeps the real Blueprint demo and the existing homepage story through the section before founder social proof. `I have a codebase already` swaps that branch for the Figma-sourced codebase audit path with Shippie imagery and audit checklist copy.
 - **Design direction:** Preserve the black editorial Figma composition while making the selector a real information-architecture control instead of a cosmetic pressed state.
 - **Out of scope:** No checkout behavior change, no social-proof/pricing/footer branch split, and no external provider setup.
-- **Verification:** Focused homepage content, render-model, and integration-ui tests should cover both branches; desktop and mobile browser proof should confirm the Figma-derived branch remains readable and preserves the `#system` anchor.
+- **Verification:** Focused homepage content, render-model, and integration-ui tests should cover both branches; desktop and mobile browser proof should confirm the Figma-derived branch remains readable.
 
 ## Shipped Note: Homepage Shared Starting-Point Continuation
 
 - **Date:** 2026-05-03
 - **Surface:** `/` public homepage.
-- **Change:** The first-screen starting-point selector keeps its branch-specific opening content, but both `I have an idea for a product` and `I have a codebase already` now continue through the same downstream homepage sections: `Ship codebases that convert`, `Exec Loops`, `How Workers Work`, worker-layer explanation, founder proof, Programs, FAQ, PLANS.md, pricing, and footer.
+- **Change:** The first-screen starting-point selector keeps its branch-specific opening content, but both `I have an idea for a product` and `I have a codebase already` now continue through the same downstream homepage sections: `Ship codebases that convert`, `How Workers Work`, worker-layer explanation, founder proof, Programs, FAQ, PLANS.md, pricing, and footer.
 - **Design direction:** Preserve the selector as a real starting-context choice without hiding the core worker-layer story from the codebase-audit path.
 - **Out of scope:** No checkout behavior change, no new branch-specific pricing, and no external provider setup.
-- **Verification:** Focused integration-ui coverage should toggle to the codebase branch and confirm the shared section headings remain visible with a single `#system` anchor owned by the Exec Loops section.
+- **Verification:** Focused integration-ui coverage should toggle to the codebase branch and confirm the shared section headings remain visible without the retired Exec Loops section.
+
+## Shipped Note: Exec Loops Homepage Section Removal
+
+- **Date:** 2026-05-04
+- **Surface:** `/` public homepage.
+- **Change:** Removed the standalone `Exec Loops: OpenAI's Weapon of choice` section, its `#system` anchor, supporting copy, and section control-plane entries from the public homepage contract.
+- **Design direction:** Keep the homepage story moving from the hero directly into the worker explanation without an intermediate editorial section.
+- **Out of scope:** No checkout behavior change, no pricing or structured-data change, and no external provider setup.
+- **Verification:** Focused homepage content, render-model, contract, and integration-ui coverage should assert the removed copy and retired anchor are no longer present.
 
 ## Shipped Note: Figma Programs Section On The Public Homepage
 

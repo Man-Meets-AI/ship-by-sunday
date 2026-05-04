@@ -26,14 +26,6 @@ export type HomePageRenderModel = {
 		readonly section: HomePageContent["hero"];
 		readonly primaryCtaTarget: HomePageCtaTarget;
 	};
-	readonly sprintPath: {
-		readonly isEnabled: boolean;
-		readonly section: HomePageContent["sprintPathSection"];
-	};
-	readonly mechanism: {
-		readonly isEnabled: boolean;
-		readonly section: HomePageContent["mechanismSection"];
-	};
 	readonly execLoop: {
 		readonly isEnabled: boolean;
 		readonly section: HomePageContent["execLoopSection"];
@@ -97,14 +89,6 @@ export function createHomePageRenderModel({
 			isEnabled: homePageConfig.sections.hero,
 			section: content.hero,
 			primaryCtaTarget: homePageConfig.heroPrimaryCta,
-		},
-		sprintPath: {
-			isEnabled: homePageConfig.sections.sprintPath,
-			section: content.sprintPathSection,
-		},
-		mechanism: {
-			isEnabled: homePageConfig.sections.mechanism,
-			section: content.mechanismSection,
 		},
 		execLoop: {
 			isEnabled: homePageConfig.sections.execLoop,

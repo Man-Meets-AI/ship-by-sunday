@@ -17,6 +17,8 @@ This is a living execution plan. Update it at every stopping point so the next c
 
 This ExecPlan must be maintained in accordance with `docs/exec-plans/PLANS.md`.
 
+Current status: the sprint-path / `Exec Loops` homepage section was retired on 2026-05-04. Any sprint-path file paths or slice notes below are historical evidence only and are not instructions for future work.
+
 ## Purpose / Big Picture
 
 Two prior polish passes lifted the public landing page section by section. Pass one (`d1cad98`) covered the Blueprint demo, the shared CTA seam, the post-checkout localStorage seeder, and the most visible `bg-primary` regressions. Pass two (`ff4988e`) covered every other in-scope landing-page section: hero stack, sprint path, exec loop, durability, FAQ, pricing, footer, promo banner, and `HomePageSecondaryLink`. A separate structural fix (`5cf9fd0`) repaired the design-system `--primary` cascade that originally drove the `bg-primary -> bg-foreground` workarounds.

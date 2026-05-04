@@ -23,7 +23,7 @@ describe("curriculum contract", () => {
 	it("keeps product config and public marketing content aligned", () => {
 		const publicBrandCopy = [
 			homePageContent.hero.body,
-			homePageContent.sprintPathSection.supportingPoints.join("\n"),
+			homePageContent.starterSystemSection.heading.ariaLabel,
 			homePageContent.footerWordmark,
 		].join("\n");
 

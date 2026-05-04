@@ -60,8 +60,6 @@ That config currently controls:
 
 - `sections.productPreview`
 - `sections.hero`
-- `sections.sprintPath`
-- `sections.mechanism`
 - `sections.execLoop`
 - `sections.starterSystem`
 - `sections.durability`
@@ -108,24 +106,21 @@ The homepage can render these top-level sections in this fixed order:
 
 1. `productPreview`
 2. `hero`
-3. `sprintPath`
-4. `mechanism`
-5. `execLoop`
-6. `starterSystem`
-7. `durability`
-8. `socialProof`
-9. `programs`
-10. `faq`
-11. `plansMd`
-12. `pricing`
-13. `footer`
+3. `execLoop`
+4. `starterSystem`
+5. `durability`
+6. `socialProof`
+7. `programs`
+8. `faq`
+9. `plansMd`
+10. `pricing`
+11. `footer`
 
-Two anchors are part of the public contract:
+One anchor is part of the public contract:
 
-- `id="system"` from the sprint-path section
 - `id="pricing"` from the pricing section
 
-Do not rename or remove those casually. Browser smoke checks them today.
+Do not rename or remove it casually. Browser smoke checks it today.
 
 ## CTA target contract
 
@@ -195,9 +190,9 @@ the Figma landing-page selection and a two-option starting-point selector. The
 default `I have an idea for a product` branch continues into the interactive
 Blueprint demo that mirrors the real `/blueprint` workspace. The `I have a
 codebase already` branch shows the Figma-sourced codebase audit path. Both
-starting points then continue through the same homepage story: hero, sprint
-path, exec-loop, starter-system, optional durability, social proof, Programs,
-FAQ, PLANS.md, pricing, and footer.
+starting points then continue through the same homepage story: hero, exec-loop,
+starter-system, optional durability, social proof, Programs, FAQ, PLANS.md,
+pricing, and footer.
 
 The idea-branch product-preview CTA is a real checkout action: clicking
 "Generate my codebase" persists the latest demo draft to `localStorage` (key
@@ -216,9 +211,7 @@ Hard rules when editing this section:
   "Spec your product" intro, Blueprint explainer paragraph, or checkout unlock
   note above the demo.
 - Keep codebase-audit branch copy in `productPreviewSection.codebaseBranch` and
-  its rendering in `blueprint-demo-codebase-branch.tsx`. The codebase branch must
-  not own `id="system"` because the shared sprint-path section owns that anchor
-  for both starting points.
+  its rendering in `blueprint-demo-codebase-branch.tsx`.
 - Source field labels and helper text from `@shipbysunday/blueprint-presentation`.
   Source design preset definitions and the canonical
   `buildDesignPresetFactSeed(presetId)` from `@shipbysunday/blueprint-compiler`.
@@ -333,7 +326,7 @@ The agent should preserve these invariants unless the task explicitly changes th
 - truthful schema
 - conditional social-proof fetch behavior
 - shared CTA renderer
-- `system` and `pricing` anchors in the default path
+- `pricing` anchor in the default path
 
 ## What success looks like
 

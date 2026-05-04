@@ -47,7 +47,7 @@ function MobilePlansMdSection({
 					<p className="font-heading-serif text-[2rem] tracking-normal">
 						{plansMdSection.subtitleLead}
 					</p>
-					<p className="font-home-inter -mt-1 text-[2.45rem] leading-none font-normal tracking-normal">
+					<p className="font-home-inter -mt-1 text-[3rem] leading-none font-bold tracking-normal">
 						{plansMdSection.subtitleEmphasis}
 					</p>
 					<p className="font-home-inter text-[1.6rem] leading-none font-normal tracking-normal">
@@ -180,18 +180,27 @@ function MobileLoopDiagram({ loop }: { readonly loop: PlansMdLoop }) {
 					strokeOpacity="0.28"
 					strokeWidth="1.2"
 				/>
-				<circle cx="52" cy="148" fill="none" r="6" stroke="currentColor" />
-				<path
-					d="M52 154 V183 M40 164 L64 168 M52 183 L45 205 M52 183 L59 205"
+				<circle
+					cx="52"
+					cy="148"
 					fill="none"
+					r="7"
 					stroke="currentColor"
-					strokeWidth="1.2"
+					strokeWidth="1.5"
 				/>
 				<path
-					d="M77 103 C57 103 45 113 45 126 C45 138 56 146 70 145 L67 157 L84 144 C105 142 115 132 115 119 C115 109 100 103 77 103 Z"
+					d="M52 155 V183 M38 164 L66 164 M52 183 L44 206 M52 183 L60 206"
 					fill="none"
 					stroke="currentColor"
-					strokeWidth="1.2"
+					strokeLinecap="round"
+					strokeWidth="1.5"
+				/>
+				<path
+					d="M57 105 H101 C105 105 113 109 113 117 V133 C113 137 105 145 101 145 H73 L67 157 L71 145 H57 C53 145 45 137 45 133 V117 C45 113 53 105 57 105 Z"
+					fill="none"
+					stroke="currentColor"
+					strokeLinejoin="round"
+					strokeWidth="1.5"
 				/>
 			</svg>
 			<p className="absolute top-[31%] left-[18%] text-lg tracking-normal">
@@ -238,7 +247,7 @@ function DesktopTitleLockup({
 	readonly plansMdSection: PlansMdSection;
 }) {
 	return (
-		<foreignObject x="276" y="127" width="460" height="210">
+		<foreignObject x="276" y="127" width="480" height="220">
 			<div className="relative h-full text-current">
 				<p className="font-heading-serif absolute top-0 left-0 text-[102px] leading-none tracking-normal italic">
 					{plansMdSection.title}
@@ -246,10 +255,10 @@ function DesktopTitleLockup({
 				<p className="font-heading-serif absolute top-[95px] left-0 text-[42px] leading-none tracking-normal">
 					{plansMdSection.subtitleLead}
 				</p>
-				<p className="font-home-inter absolute top-[94px] left-[129px] text-[62px] leading-none font-normal tracking-normal">
+				<p className="font-home-inter absolute top-[88px] left-[129px] text-[80px] leading-none font-bold tracking-normal">
 					{plansMdSection.subtitleEmphasis}
 				</p>
-				<p className="font-home-inter absolute top-[149px] left-[258px] text-[32px] leading-none font-normal tracking-normal">
+				<p className="font-home-inter absolute top-[170px] left-[258px] text-[32px] leading-none font-normal tracking-normal">
 					{plansMdSection.subtitleTail}
 				</p>
 			</div>
@@ -389,18 +398,27 @@ function DesktopLoopDiagram({ loop }: { readonly loop: PlansMdLoop }) {
 					<path d="M0 0 L8 4 L0 8 Z" fill="currentColor" fillOpacity="0.28" />
 				</marker>
 			</defs>
-			<path
-				d="M739 923 V972 M720 939 L754 945 M739 972 L731 1006 M739 972 L748 1006"
+			<circle
+				cx="740"
+				cy="915"
+				r="10"
 				fill="none"
 				stroke="currentColor"
-				strokeWidth="1"
+				strokeWidth="1.2"
 			/>
-			<circle cx="740" cy="915" r="9" fill="none" stroke="currentColor" />
 			<path
-				d="M780 850 C751 850 739 861 739 879 C739 894 755 903 774 902 L770 917 L789 900 C814 897 825 885 825 869 C825 858 810 850 780 850 Z"
+				d="M740 925 V973 M721 940 L759 940 M740 973 L731 1007 M740 973 L749 1007"
 				fill="none"
 				stroke="currentColor"
-				strokeWidth="1"
+				strokeLinecap="round"
+				strokeWidth="1.2"
+			/>
+			<path
+				d="M755 850 H825 C831 850 835 854 835 860 V892 C835 898 831 902 825 902 H769 L760 918 L764 902 H755 C749 902 745 898 745 892 V860 C745 854 749 850 755 850 Z"
+				fill="none"
+				stroke="currentColor"
+				strokeLinejoin="round"
+				strokeWidth="1.2"
 			/>
 			<text
 				x="757"

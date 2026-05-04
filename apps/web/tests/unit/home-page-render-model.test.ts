@@ -25,10 +25,6 @@ describe("home page render model", () => {
 		).toBe("The Audit.");
 		expect(renderModel.hero.isEnabled).toBe(true);
 		expect(renderModel.hero.primaryCtaTarget).toEqual({ kind: "checkout" });
-		expect(renderModel.mechanism.isEnabled).toBe(false);
-		expect(renderModel.mechanism.section.tagline).toBe(
-			"One source of truth. No drift.",
-		);
 		expect(renderModel.execLoop.isEnabled).toBe(true);
 		expect(
 			renderModel.execLoop.section.steps.map((step) => step.label),

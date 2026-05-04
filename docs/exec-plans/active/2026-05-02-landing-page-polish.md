@@ -17,6 +17,8 @@ This is a living execution plan. Update it at every stopping point so the next c
 
 This ExecPlan must be maintained in accordance with `docs/exec-plans/PLANS.md`.
 
+Current status: the sprint-path / `Exec Loops` homepage section was retired on 2026-05-04. Any sprint-path file paths or slice notes below are historical evidence only and are not instructions for future work.
+
 ## Purpose / Big Picture
 
 The previous polish slice (`d1cad98`) lifted the new Blueprint demo, the shared CTA seam, and the post-checkout localStorage seeder to the craft layer, and corrected the most visibly broken `bg-primary` / `text-primary` accents on the marketing surface. That slice was correct but scoped: every section between the demo and the footer still reads as "shipped" rather than "expensive."
