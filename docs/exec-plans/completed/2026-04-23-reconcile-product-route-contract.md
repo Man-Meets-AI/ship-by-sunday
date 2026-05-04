@@ -4,7 +4,7 @@ status: complete
 created_at: 2026-04-23
 completed_at: 2026-04-24
 summary: Make app routes, docs, QA, redirects, navigation, and post-review language agree on the current Ship by Sunday product route model.
-post_build_recap: The app, docs, QA control plane, and protected-route matcher now agree that Blueprint and Review are canonical while old staged and Execute/Mission URLs are protected compatibility entrypoints.
+post_build_recap: The app, docs, QA control plane, and protected-route matcher now agree that Codebase and Review are canonical while old staged and Execute/Mission URLs are protected compatibility entrypoints.
 read_when:
   - Resuming product route contract work.
   - Changing protected workspace routes, route docs, QA journeys, or post-review navigation.
@@ -32,27 +32,27 @@ This plan is the next active child slice of the Program packet at `docs/programs
 - [x] 2026-04-24 EDT: Inspected the current App Router tree and wrote the canonical route decision into this plan.
 - [x] 2026-04-24 EDT: Updated `apps/web/content/docs/route-map.mdx`, `qa/journeys.csv`, `qa/coverage.csv`, `qa/test-inventory.csv`, and `qa/README.md` to match the chosen route contract.
 - [x] 2026-04-24 EDT: Added missing protected compatibility redirect routes for `/start`, `/product`, `/design`, `/marketing`, and `/build-plan`.
-- [x] 2026-04-24 EDT: Added `apps/web/features/blueprint-flow/lib/legacy-blueprint-route-redirects.ts` and confirmed primary navigation already points at canonical Blueprint, Review, Lesson, and Settings surfaces.
+- [x] 2026-04-24 EDT: Added `apps/web/features/codebase-flow/lib/legacy-codebase-route-redirects.ts` and confirmed primary navigation already points at canonical Codebase, Review, Lesson, and Settings surfaces.
 - [x] 2026-04-24 EDT: Confirmed `/execute` is already a compatibility redirect: locked viewers return to `/review`, and unlocked viewers redirect to the Build Lessons destination.
-- [x] 2026-04-24 EDT: Made the promised `/blueprint#generated-preview` anchor real by adding `generated-preview` to the combined Blueprint page section list and section media.
+- [x] 2026-04-24 EDT: Made the promised `/codebase#generated-preview` anchor real by adding `generated-preview` to the combined Codebase page section list and section media.
 - [x] 2026-04-24 EDT: While running required closeout, repaired the existing dirty-worktree bonus lesson tracker boundary by moving the client-safe tracking constants to `bonus-lesson-view-contract.ts` and making non-terminal responses reset to idle.
-- [x] 2026-04-24 EDT: Validation passed: `bun run --cwd apps/web test:unit -- tests/unit/proxy-protected-routes.test.ts tests/unit/legacy-blueprint-route-redirects.test.ts tests/unit/app-workspace-execute-page.test.tsx tests/unit/app-workspace-mission-page.test.tsx tests/unit/post-review-destination.test.ts` passed with 5 files and 11 tests; `bun run --cwd apps/web test:integration:ui -- tests/integration-ui/blueprint-page.test.tsx` passed with 1 file and 4 tests; `bun run --cwd apps/web test:integration:ui -- tests/integration-ui/bonus-lesson-view-tracker.test.tsx` passed with 1 file and 3 tests; `bun run qa:validate` passed with 25 journeys, 65 coverage rows, 165 inventory rows, and 3 personas; `bun run format` passed; `bun run lint` passed with 0 warnings and 0 errors; `bun run typecheck` passed and the Next route table included `/start`, `/product`, `/product/[stepId]`, `/design`, `/design/[stepId]`, `/marketing`, `/marketing/[stepId]`, `/build-plan`, and `/build-plan/[stepId]`; `bun run plans:lint -- --plan docs/exec-plans/active/2026-04-23-reconcile-product-route-contract.md` passed; `bun run markdown:lint -- --paths docs/exec-plans/active/2026-04-23-reconcile-product-route-contract.md apps/web/content/docs/route-map.mdx qa/README.md` passed; `git diff --check` passed.
+- [x] 2026-04-24 EDT: Validation passed: `bun run --cwd apps/web test:unit -- tests/unit/proxy-protected-routes.test.ts tests/unit/legacy-codebase-route-redirects.test.ts tests/unit/app-workspace-execute-page.test.tsx tests/unit/app-workspace-mission-page.test.tsx tests/unit/post-review-destination.test.ts` passed with 5 files and 11 tests; `bun run --cwd apps/web test:integration:ui -- tests/integration-ui/codebase-page.test.tsx` passed with 1 file and 4 tests; `bun run --cwd apps/web test:integration:ui -- tests/integration-ui/bonus-lesson-view-tracker.test.tsx` passed with 1 file and 3 tests; `bun run qa:validate` passed with 25 journeys, 65 coverage rows, 165 inventory rows, and 3 personas; `bun run format` passed; `bun run lint` passed with 0 warnings and 0 errors; `bun run typecheck` passed and the Next route table included `/start`, `/product`, `/product/[stepId]`, `/design`, `/design/[stepId]`, `/marketing`, `/marketing/[stepId]`, `/build-plan`, and `/build-plan/[stepId]`; `bun run plans:lint -- --plan docs/exec-plans/active/2026-04-23-reconcile-product-route-contract.md` passed; `bun run markdown:lint -- --paths docs/exec-plans/active/2026-04-23-reconcile-product-route-contract.md apps/web/content/docs/route-map.mdx qa/README.md` passed; `git diff --check` passed.
 - [x] 2026-04-24 EDT: Moved this plan to `docs/exec-plans/completed/2026-04-23-reconcile-product-route-contract.md`; `bun run plans:lint -- --plan docs/exec-plans/completed/2026-04-23-reconcile-product-route-contract.md` passed, `bun run markdown:lint -- --paths docs/exec-plans/completed/2026-04-23-reconcile-product-route-contract.md docs/programs/active/2026-04-23-sbs-codebase-recovery/program.md docs/programs/active/2026-04-23-sbs-codebase-recovery/dependency-graph.md apps/web/content/docs/route-map.mdx qa/README.md` passed, `bun run programs:lint` passed, and `git diff --check` passed.
 
 ## Surprises & Discoveries
 
-Earlier completed plans already collapsed the old staged blueprint funnel, but the current tree and docs still contain enough legacy wording to make the contract unclear again. The issue is not simply whether old compatibility routes exist. The issue is whether current docs, QA, and navigation treat them as canonical.
+Earlier completed plans already collapsed the old staged codebase funnel, but the current tree and docs still contain enough legacy wording to make the contract unclear again. The issue is not simply whether old compatibility routes exist. The issue is whether current docs, QA, and navigation treat them as canonical.
 
-Current inspection found `apps/web/app/(workspace)/` only contains route files for `/blueprint`, `/review`, `/execute`, `/mission`, `/lesson/[lessonKey]`, `/artifacts`, and `/settings`. The docs already described `/start`, `/product`, `/design`, `/marketing`, and `/build-plan` as compatibility redirects, but there were no route files for those URLs and `apps/web/proxy.ts` did not protect them. Current `/execute` code is not a bridge page; it redirects to `/review` before post-review unlock and to the Build Lessons destination after unlock. Current `/mission` is a compatibility entry that shows locked guidance before unlock and redirects into the Review Lesson Map after unlock.
+Current inspection found `apps/web/app/(workspace)/` only contains route files for `/codebase`, `/review`, `/execute`, `/mission`, `/lesson/[lessonKey]`, `/artifacts`, and `/settings`. The docs already described `/start`, `/product`, `/design`, `/marketing`, and `/build-plan` as compatibility redirects, but there were no route files for those URLs and `apps/web/proxy.ts` did not protect them. Current `/execute` code is not a bridge page; it redirects to `/review` before post-review unlock and to the Build Lessons destination after unlock. Current `/mission` is a compatibility entry that shows locked guidance before unlock and redirects into the Review Lesson Map after unlock.
 
-The compiler stage definition already included a `generated-preview` Blueprint step, and existing content linked to `/blueprint#generated-preview`, but `apps/web/features/blueprint-flow/lib/blueprint-page-sections.ts` omitted that section from the combined page. The compatibility marketing route would have pointed at a missing anchor without adding the section.
+The compiler stage definition already included a `generated-preview` Codebase step, and existing content linked to `/codebase#generated-preview`, but `apps/web/features/codebase-flow/lib/codebase-page-sections.ts` omitted that section from the combined page. The compatibility marketing route would have pointed at a missing anchor without adding the section.
 
 The dirty worktree already contained an untracked `/api/course/bonus-lesson-viewed` route and bonus lesson view tracker work. Required `bun run typecheck` initially failed because the client tracker and server handler shared the old `bonus-lesson-view-tracking` module boundary, pulling Clerk server auth into the client graph. Splitting the client-safe endpoint/error-code contract into `apps/web/features/execute-ship/lib/bonus-lesson-view-contract.ts` and resetting non-terminal tracker responses to `idle` made the build pass without changing the route-contract decision.
 
 ## Decision Log
 
 Decision: Treat route-contract reconciliation as product truth work, not UI refactor work.
-Rationale: The immediate need is to make routes, docs, QA, and navigation agree. UI restructuring belongs in later blueprint and workbench plans.
+Rationale: The immediate need is to make routes, docs, QA, and navigation agree. UI restructuring belongs in later codebase and workbench plans.
 Date: 2026-04-23
 
 Decision: Keep compatibility redirects only if they are documented as compatibility.
@@ -60,11 +60,11 @@ Rationale: Old URLs can remain useful without being taught as the current produc
 Date: 2026-04-23
 
 Decision: Execute route-contract reconciliation next inside this Program.
-Rationale: CI/CD truth is already codified, release/intake repair is deferred to a dedicated Program, and runtime-boundary implementation has moved to its own dedicated Program. Product route truth is now the next independent correctness lane and should land before blueprint and workbench structural refactors.
+Rationale: CI/CD truth is already codified, release/intake repair is deferred to a dedicated Program, and runtime-boundary implementation has moved to its own dedicated Program. Product route truth is now the next independent correctness lane and should land before codebase and workbench structural refactors.
 Date: 2026-04-24
 
-Decision: Freeze the canonical protected route model as `/blueprint`, `/review`, `/lesson/[lessonKey]`, and `/settings`, with `/execute`, `/mission`, `/artifacts`, `/start`, `/product`, `/design`, `/marketing`, and `/build-plan` documented and implemented only as protected compatibility entrypoints.
-Rationale: `/blueprint` is the canonical intake workspace, `/review` owns the review/download handoff and the post-review Lesson Map surface, `/lesson/[lessonKey]` owns unlocked post-review lesson content, and `/settings` owns account support. Existing code already treats `/execute`, `/mission`, and `/artifacts` as compatibility paths. Legacy blueprint URLs should remain usable but must redirect into canonical Blueprint anchors instead of becoming current product surfaces.
+Decision: Freeze the canonical protected route model as `/codebase`, `/review`, `/lesson/[lessonKey]`, and `/settings`, with `/execute`, `/mission`, `/artifacts`, `/start`, `/product`, `/design`, `/marketing`, and `/build-plan` documented and implemented only as protected compatibility entrypoints.
+Rationale: `/codebase` is the canonical intake workspace, `/review` owns the review/download handoff and the post-review Lesson Map surface, `/lesson/[lessonKey]` owns unlocked post-review lesson content, and `/settings` owns account support. Existing code already treats `/execute`, `/mission`, and `/artifacts` as compatibility paths. Legacy codebase URLs should remain usable but must redirect into canonical Codebase anchors instead of becoming current product surfaces.
 Date: 2026-04-24
 
 Decision: Keep `/execute` as a compatibility redirect instead of rebuilding the old two-CTA bridge page.
@@ -73,21 +73,21 @@ Date: 2026-04-24
 
 ## Outcomes & Retrospective
 
-This plan is complete. The final contract is: `/blueprint`, `/review`, `/lesson/[lessonKey]`, and `/settings` are the canonical protected product routes; `/execute`, `/mission`, `/artifacts`, `/start`, `/product`, `/design`, `/marketing`, and `/build-plan` are protected compatibility routes only. `/execute` redirects locked members to `/review` and unlocked members to the Build Lessons destination. `/mission` shows locked Review guidance before unlock and redirects unlocked members to `/review?showLessonMap=1`. Old staged Blueprint URLs now have real App Router files and redirect into the combined Blueprint page anchors.
+This plan is complete. The final contract is: `/codebase`, `/review`, `/lesson/[lessonKey]`, and `/settings` are the canonical protected product routes; `/execute`, `/mission`, `/artifacts`, `/start`, `/product`, `/design`, `/marketing`, and `/build-plan` are protected compatibility routes only. `/execute` redirects locked members to `/review` and unlocked members to the Build Lessons destination. `/mission` shows locked Review guidance before unlock and redirects unlocked members to `/review?showLessonMap=1`. Old staged Codebase URLs now have real App Router files and redirect into the combined Codebase page anchors.
 
-The implementation updated route files, route docs, QA journeys, QA coverage, test inventory, the proxy protected-route matcher, the combined Blueprint generated-preview anchor, and focused route tests. Required closeout checks passed. The only extra repair was the bonus lesson tracker server/client boundary fix needed to make the existing dirty worktree build pass.
+The implementation updated route files, route docs, QA journeys, QA coverage, test inventory, the proxy protected-route matcher, the combined Codebase generated-preview anchor, and focused route tests. Required closeout checks passed. The only extra repair was the bonus lesson tracker server/client boundary fix needed to make the existing dirty worktree build pass.
 
 ## Context and Orientation
 
-The protected workspace route tree lives under `apps/web/app/(workspace)/`. The current likely canonical surfaces are `/blueprint`, `/review`, `/execute`, `/mission`, `/lesson`, `/artifacts`, and `/settings`. Older wording still references `/start`, `/product`, `/design`, `/marketing`, and `/build-plan`. The route docs live in `apps/web/content/docs/route-map.mdx`. QA route truth lives in `qa/journeys.csv`, `qa/coverage.csv`, `qa/test-inventory.csv`, and `qa/README.md`. Navigation and post-review routing live under `apps/web/features/workspace-navigation/` and course app-shell components.
+The protected workspace route tree lives under `apps/web/app/(workspace)/`. The current likely canonical surfaces are `/codebase`, `/review`, `/execute`, `/mission`, `/lesson`, `/artifacts`, and `/settings`. Older wording still references `/start`, `/product`, `/design`, `/marketing`, and `/build-plan`. The route docs live in `apps/web/content/docs/route-map.mdx`. QA route truth lives in `qa/journeys.csv`, `qa/coverage.csv`, `qa/test-inventory.csv`, and `qa/README.md`. Navigation and post-review routing live under `apps/web/features/workspace-navigation/` and course app-shell components.
 
 ### In Scope
 
-In scope is deciding and documenting the canonical protected route flow, updating route docs, updating QA journeys and coverage rows, adjusting navigation and redirect helpers, making `/execute` truthful, and removing or relabeling legacy course-stage language where it conflicts with blueprint-first product behavior.
+In scope is deciding and documenting the canonical protected route flow, updating route docs, updating QA journeys and coverage rows, adjusting navigation and redirect helpers, making `/execute` truthful, and removing or relabeling legacy course-stage language where it conflicts with codebase-first product behavior.
 
 ### Out Of Scope
 
-Out of scope is splitting `use-blueprint-page-state.ts`, changing download generation internals, redesigning the UI, changing checkout, or changing public marketing pages except where they link to protected routes.
+Out of scope is splitting `use-codebase-page-state.ts`, changing download generation internals, redesigning the UI, changing checkout, or changing public marketing pages except where they link to protected routes.
 
 ## Plan of Work
 
@@ -119,7 +119,7 @@ Milestone 5 validates the slice. At the end, route-focused tests, QA validation,
 
        cd /Users/parkerrex/Developer/ship-by-sunday
        find 'apps/web/app/(workspace)' -maxdepth 3 -type f | sort
-       rg -n 'start|product|design|marketing|build-plan|blueprint|review|execute' apps/web qa docs packages
+       rg -n 'start|product|design|marketing|build-plan|codebase|review|execute' apps/web qa docs packages
 
 2. Update this plan's `Decision Log` with the canonical route decision before code edits.
 

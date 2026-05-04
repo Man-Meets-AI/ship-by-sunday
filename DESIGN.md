@@ -2,7 +2,7 @@
 
 ## Overview / Creative North Star
 
-Ship by Sunday should feel like a durable operating system for shipping, not a hype-y AI landing page and not a generic SaaS dashboard. The visual thesis is restrained, blueprint-first, editorial, and calm under pressure: strong hierarchy, sparse chrome, one obvious next action, and just enough atmosphere to make the system feel intentional.
+Ship by Sunday should feel like a durable operating system for shipping, not a hype-y AI landing page and not a generic SaaS dashboard. The visual thesis is restrained, codebase-first, editorial, and calm under pressure: strong hierarchy, sparse chrome, one obvious next action, and just enough atmosphere to make the system feel intentional.
 
 The product has two visual modes that must stay aligned:
 
@@ -293,7 +293,7 @@ Motion rules:
 - Use display typography sparingly but confidently for brand and major editorial moments.
 - Keep app UI sparse, calm, and operational.
 - Use borders and spacing before adding card chrome.
-- Preserve the blueprint-first story and the fixed homepage structure.
+- Preserve the codebase-first story and the fixed homepage structure.
 - Treat illustration accents as storytelling tools, not as generic UI colors.
 - Keep one clear primary action per surface.
 

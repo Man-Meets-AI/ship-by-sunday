@@ -11,23 +11,23 @@ This ExecPlan must be maintained in accordance with `.plans/PLANS.md`.
 
 ## Purpose / Big Picture
 
-After this change, every new ExecPlan in this repository should be written under `.plans/` instead of `docs/codex/`, and the canonical plan contract should live at `.plans/PLANS.md`. A fresh operator, a prompt-driven planning run, the blueprint-compiler starter snapshot, and the home-level `~/.codex` plus `~/.agents` automation should all agree on that location. Completed historical plan files under `docs/codex/` should remain as archival records rather than being bulk-rewritten. The change works when active callers no longer generate `docs/codex/...` plan paths, the repo ships `.plans/PLANS.md` instead of `docs/codex/PLANS.md`, and targeted grep plus tests show no live dependency left on the old location.
+After this change, every new ExecPlan in this repository should be written under `.plans/` instead of `docs/codex/`, and the canonical plan contract should live at `.plans/PLANS.md`. A fresh operator, a prompt-driven planning run, the codebase-compiler starter snapshot, and the home-level `~/.codex` plus `~/.agents` automation should all agree on that location. Completed historical plan files under `docs/codex/` should remain as archival records rather than being bulk-rewritten. The change works when active callers no longer generate `docs/codex/...` plan paths, the repo ships `.plans/PLANS.md` instead of `docs/codex/PLANS.md`, and targeted grep plus tests show no live dependency left on the old location.
 
 ## Progress
 
 - [x] 2026-04-03 11:02 EDT — Audited the current repo contract in `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `docs/codex/PLANS.md`, and the three ExecPlan prompts under `docs/prompts/`.
-- [x] 2026-04-03 11:03 EDT — Audited blueprint-compiler snapshot and trace contracts in `packages/blueprint-compiler/src/repo-generation/customer-safe-snapshot-contract.ts`, `packages/blueprint-compiler/src/repo-generation/repo-download-source-contract.ts`, and their related tests.
+- [x] 2026-04-03 11:03 EDT — Audited codebase-compiler snapshot and trace contracts in `packages/codebase-compiler/src/repo-generation/customer-safe-snapshot-contract.ts`, `packages/codebase-compiler/src/repo-generation/repo-download-source-contract.ts`, and their related tests.
 - [x] 2026-04-03 11:08 EDT — Audited the home-level workflow callers in `~/.agents/src/workflows/execplan-feature-workflow`, `~/.agents/src/channels/telegram`, `~/.agents/docs/prompts`, `~/.agents/.codex/prompts`, and `~/.codex/agent-prompts`.
-- [x] 2026-04-03 11:18 EDT — Confirmed the live repo contract is already migrated: `.plans/PLANS.md` exists, `docs/codex/PLANS.md` is already a legacy shim, the root agent docs already point new ExecPlans at `.plans/`, and the blueprint-compiler snapshot contracts and tests already ship `.plans/PLANS.md`.
+- [x] 2026-04-03 11:18 EDT — Confirmed the live repo contract is already migrated: `.plans/PLANS.md` exists, `docs/codex/PLANS.md` is already a legacy shim, the root agent docs already point new ExecPlans at `.plans/`, and the codebase-compiler snapshot contracts and tests already ship `.plans/PLANS.md`.
 - [x] 2026-04-03 11:45 EDT — Grilled this ExecPlan against the live repo and updated it to reflect the real remaining work instead of repeating already-complete repo-side migration steps.
-- [x] 2026-04-03 11:31 EDT — Added the repo-owned `docs/prompts/execplan-outline-from-session.md` prompt and extended the blueprint-compiler Prompt Pack so the generated prompt tree now ships the full repo-owned `execplan-*` family.
+- [x] 2026-04-03 11:31 EDT — Added the repo-owned `docs/prompts/execplan-outline-from-session.md` prompt and extended the codebase-compiler Prompt Pack so the generated prompt tree now ships the full repo-owned `execplan-*` family.
 - [x] 2026-04-03 11:38 EDT — Updated `~/.agents/src/workflows/execplan-feature-workflow/prompt-loader.ts` to load `docs/prompts/execplan-outline-from-session.md`, `execplan-writer.md`, `execplan-grill.md`, and `execplan-execution-loop.md` from the target repo.
 - [x] 2026-04-03 11:44 EDT — Updated the shared Telegram launcher prompt text plus the stale `~/.agents` tests so they assert `.plans/*.md` paths and the real `ship-by-sunday` prompt filenames instead of the old `docs/codex` and `exec-plan-*` assumptions.
-- [x] 2026-04-03 11:50 EDT — Validated the repo and shared workflow with targeted grep, blueprint-compiler tests, and `~/.agents` workflow plus Telegram tests. Active callers are aligned; remaining `docs/codex/*` hits are archive-only references.
+- [x] 2026-04-03 11:50 EDT — Validated the repo and shared workflow with targeted grep, codebase-compiler tests, and `~/.agents` workflow plus Telegram tests. Active callers are aligned; remaining `docs/codex/*` hits are archive-only references.
 
 ## Surprises & Discoveries
 
-The repo-side `.plans/` migration is already present in the live working tree. `.plans/PLANS.md` exists, `docs/codex/PLANS.md` is already a legacy shim, the root agent docs already teach `.plans/`, and the blueprint-compiler snapshot contracts and tests already ship `.plans/PLANS.md`. The real remaining risk is not in the repo contract anymore. It is in shared automation outside the repo.
+The repo-side `.plans/` migration is already present in the live working tree. `.plans/PLANS.md` exists, `docs/codex/PLANS.md` is already a legacy shim, the root agent docs already teach `.plans/`, and the codebase-compiler snapshot contracts and tests already ship `.plans/PLANS.md`. The real remaining risk is not in the repo contract anymore. It is in shared automation outside the repo.
 
 The highest-risk remaining breakage is a prompt filename mismatch in `~/.agents`. `prompt-loader.ts` still tries to load `docs/prompts/exec-plan-writer.md`, `exec-plan-grill.md`, `exec-plan-execute.md`, and `exec-plan-outline-from-session.md`, but this repo owns `docs/prompts/execplan-writer.md`, `execplan-grill.md`, and `execplan-execution-loop.md`, and it does not yet ship any outline-distillation prompt file at all. If left unchanged, automated planning can still fail before writing a plan.
 
@@ -39,41 +39,41 @@ The shared Telegram tests had one extra stale expectation beyond the path migrat
 
 ## Decision Log
 
-Decision: Treat `.plans/` as the only canonical location for new ExecPlans, but keep `docs/codex/` as a legacy archive for completed plan records.  
-Rationale: This gives future planning runs one clear path without turning a contract migration into a large provenance rewrite.  
+Decision: Treat `.plans/` as the only canonical location for new ExecPlans, but keep `docs/codex/` as a legacy archive for completed plan records.
+Rationale: This gives future planning runs one clear path without turning a contract migration into a large provenance rewrite.
 Date/Author: 2026-04-03 / Codex
 
-Decision: Do not bulk-move or bulk-rewrite existing dated plan files in `docs/codex/` in this slice.  
-Rationale: Those files are historical implementation records, many other records point at them, and rewriting them would create high-noise churn with little operator value.  
+Decision: Do not bulk-move or bulk-rewrite existing dated plan files in `docs/codex/` in this slice.
+Rationale: Those files are historical implementation records, many other records point at them, and rewriting them would create high-noise churn with little operator value.
 Date/Author: 2026-04-03 / Codex
 
-Decision: Keep the existing `docs/codex/PLANS.md` legacy shim in place for now.  
-Rationale: Historical plans and QA notes reference that path directly, and the shim no longer acts as a live contract or shipped starter artifact.  
+Decision: Keep the existing `docs/codex/PLANS.md` legacy shim in place for now.
+Rationale: Historical plans and QA notes reference that path directly, and the shim no longer acts as a live contract or shipped starter artifact.
 Date/Author: 2026-04-03 / Codex
 
-Decision: Treat the live repo contract as the baseline and do not reopen it in this slice.  
-Rationale: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.plans/PLANS.md`, and the blueprint-compiler snapshot contracts already point at `.plans/`. Reworking those files again would add churn while hiding the real remaining runtime mismatch in `~/.agents`.  
+Decision: Treat the live repo contract as the baseline and do not reopen it in this slice.
+Rationale: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.plans/PLANS.md`, and the codebase-compiler snapshot contracts already point at `.plans/`. Reworking those files again would add churn while hiding the real remaining runtime mismatch in `~/.agents`.
 Date/Author: 2026-04-03 / Codex
 
-Decision: Make the repo own the outline-distillation prompt as part of the same prompt family, using the `execplan-*` naming convention already present in `docs/prompts/`.  
-Rationale: The shared workflow already expects a repo-owned outline prompt. Adding `docs/prompts/execplan-outline-from-session.md` keeps repo prompt ownership consistent instead of baking more `~/.agents`-local prompt assumptions into the runtime path.  
+Decision: Make the repo own the outline-distillation prompt as part of the same prompt family, using the `execplan-*` naming convention already present in `docs/prompts/`.
+Rationale: The shared workflow already expects a repo-owned outline prompt. Adding `docs/prompts/execplan-outline-from-session.md` keeps repo prompt ownership consistent instead of baking more `~/.agents`-local prompt assumptions into the runtime path.
 Date/Author: 2026-04-03 / Codex
 
-Decision: Extend the blueprint-compiler Prompt Pack to ship the new `execplan-outline-from-session.md` prompt.  
-Rationale: Once the repo owns the full ExecPlan prompt family, the generated docs tree and Prompt Pack should expose the same source of truth instead of omitting the first planning step.  
+Decision: Extend the codebase-compiler Prompt Pack to ship the new `execplan-outline-from-session.md` prompt.
+Rationale: Once the repo owns the full ExecPlan prompt family, the generated docs tree and Prompt Pack should expose the same source of truth instead of omitting the first planning step.
 Date/Author: 2026-04-03 / Codex
 
-Decision: Update shared workflow callers and tests after confirming the repo's prompt filenames, not before.  
-Rationale: The source of truth for prompt filenames should live in the repo. The shared workflow must adapt to that source of truth rather than preserve older hyphenated prompt names.  
+Decision: Update shared workflow callers and tests after confirming the repo's prompt filenames, not before.
+Rationale: The source of truth for prompt filenames should live in the repo. The shared workflow must adapt to that source of truth rather than preserve older hyphenated prompt names.
 Date/Author: 2026-04-03 / Codex
 
 ## Outcomes & Retrospective
 
-Final outcome: the live repo and shared planning automation now agree on `.plans/` and the repo-owned `execplan-*` prompt family. `ship-by-sunday` now ships `docs/prompts/execplan-outline-from-session.md` alongside the existing writer, grill, and execution-loop prompts, the blueprint-compiler Prompt Pack includes that new outline prompt, `~/.agents` loads the real repo prompt filenames, and the relevant shared-workflow tests pass against the actual `ship-by-sunday` repo shape. The remaining `docs/codex/*` hits are explicit archive references such as the legacy shim and archive-exclusion rules, not active plan-generation callers.
+Final outcome: the live repo and shared planning automation now agree on `.plans/` and the repo-owned `execplan-*` prompt family. `ship-by-sunday` now ships `docs/prompts/execplan-outline-from-session.md` alongside the existing writer, grill, and execution-loop prompts, the codebase-compiler Prompt Pack includes that new outline prompt, `~/.agents` loads the real repo prompt filenames, and the relevant shared-workflow tests pass against the actual `ship-by-sunday` repo shape. The remaining `docs/codex/*` hits are explicit archive references such as the legacy shim and archive-exclusion rules, not active plan-generation callers.
 
 ## Context and Orientation
 
-The live repo contract already points at `.plans/`. `.plans/PLANS.md` is the active ExecPlan contract, `docs/codex/PLANS.md` is a legacy shim, the root instruction surfaces in `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` already direct new plans into `.plans/`, and the blueprint-compiler snapshot and trace contracts already ship `.plans/PLANS.md` while excluding `.plans/**` history and `docs/codex/**` archive content from starter output.
+The live repo contract already points at `.plans/`. `.plans/PLANS.md` is the active ExecPlan contract, `docs/codex/PLANS.md` is a legacy shim, the root instruction surfaces in `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` already direct new plans into `.plans/`, and the codebase-compiler snapshot and trace contracts already ship `.plans/PLANS.md` while excluding `.plans/**` history and `docs/codex/**` archive content from starter output.
 
 The remaining breakage sits in the shared workflow repo under `~/.agents`. `~/.agents/src/workflows/execplan-feature-workflow/manifest.ts` and `cli.ts` still define the generated path shape and validator behavior, so they must agree on `.plans/YYYY-MM-DD-<slug>.md`. `~/.agents/src/workflows/execplan-feature-workflow/prompt-loader.ts` resolves the repo prompt filenames that automation loads from the target repo. `~/.agents/src/workflows/execplan-feature-workflow/outline-distiller.ts` and `service.ts` both depend on the `outlineFromSession` prompt key, so a missing repo-owned outline prompt is a real runtime failure, not a theoretical cleanup item.
 
@@ -85,7 +85,7 @@ Historical plan files in `docs/codex/*.md`, dated lines in `todo.md`, and some Q
 
 ## Plan of Work
 
-Start from the current repo baseline instead of reopening already-complete repo contract work. Verify that `.plans/PLANS.md`, the root agent docs, and the blueprint-compiler snapshot rules remain correct and leave them unchanged unless validation later proves otherwise.
+Start from the current repo baseline instead of reopening already-complete repo contract work. Verify that `.plans/PLANS.md`, the root agent docs, and the codebase-compiler snapshot rules remain correct and leave them unchanged unless validation later proves otherwise.
 
 Next, close the prompt filename gap. Add a repo-owned `docs/prompts/execplan-outline-from-session.md` prompt so the repo owns the full ExecPlan prompt family. Then update `~/.agents/src/workflows/execplan-feature-workflow/prompt-loader.ts` so it resolves the repo's real prompt filenames: `execplan-outline-from-session.md`, `execplan-writer.md`, `execplan-grill.md`, and `execplan-execution-loop.md`.
 
@@ -99,12 +99,12 @@ Finish with targeted grep and test validation in both repos. If a remaining `doc
 
 ### Milestone 1: Confirm the repo baseline and preserve it
 
-At the end of this milestone, the implementer has verified that the in-repo contract is already migrated and does not accidentally undo it while patching the shared workflow. The touched files should be minimal, ideally only this plan if the baseline is already correct. Success looks like `.plans/PLANS.md`, `docs/codex/PLANS.md`, the root agent docs, and the blueprint-compiler snapshot rules being consciously treated as the fixed baseline for the remaining work.
+At the end of this milestone, the implementer has verified that the in-repo contract is already migrated and does not accidentally undo it while patching the shared workflow. The touched files should be minimal, ideally only this plan if the baseline is already correct. Success looks like `.plans/PLANS.md`, `docs/codex/PLANS.md`, the root agent docs, and the codebase-compiler snapshot rules being consciously treated as the fixed baseline for the remaining work.
 
 Run the baseline check from the repo root:
 
     cd /Users/parkerrex/Projects/ship-by-sunday
-    rg -n "docs/codex|\\.plans" AGENTS.md CLAUDE.md GEMINI.md .plans/PLANS.md docs/codex/PLANS.md packages/blueprint-compiler/src/repo-generation packages/blueprint-compiler/tests
+    rg -n "docs/codex|\\.plans" AGENTS.md CLAUDE.md GEMINI.md .plans/PLANS.md docs/codex/PLANS.md packages/codebase-compiler/src/repo-generation packages/codebase-compiler/tests
 
 Successful output should show `.plans/` as the live location and `docs/codex/PLANS.md` only as a legacy shim or archive exclusion rule.
 
@@ -151,7 +151,7 @@ Begin by freezing the repo baseline instead of reopening it:
     cd /Users/parkerrex/Projects/ship-by-sunday
     sed -n '1,220p' .plans/PLANS.md
     sed -n '1,120p' docs/codex/PLANS.md
-    rg -n "docs/codex|\\.plans" AGENTS.md CLAUDE.md GEMINI.md docs/prompts packages/blueprint-compiler/src/repo-generation packages/blueprint-compiler/tests
+    rg -n "docs/codex|\\.plans" AGENTS.md CLAUDE.md GEMINI.md docs/prompts packages/codebase-compiler/src/repo-generation packages/codebase-compiler/tests
 
 Record any unexpected repo-side drift in this plan before changing the shared workflow.
 
@@ -218,10 +218,10 @@ Repo-side baseline already complete:
     docs/prompts/execplan-writer.md
     docs/prompts/execplan-grill.md
     docs/prompts/execplan-execution-loop.md
-    packages/blueprint-compiler/src/repo-generation/customer-safe-snapshot-contract.ts
-    packages/blueprint-compiler/src/repo-generation/repo-download-source-contract.ts
-    packages/blueprint-compiler/tests/repo-generation.test.ts
-    packages/blueprint-compiler/tests/customer-safe-snapshot-contract.test.ts
+    packages/codebase-compiler/src/repo-generation/customer-safe-snapshot-contract.ts
+    packages/codebase-compiler/src/repo-generation/repo-download-source-contract.ts
+    packages/codebase-compiler/tests/repo-generation.test.ts
+    packages/codebase-compiler/tests/customer-safe-snapshot-contract.test.ts
 
 Highest-risk remaining shared-workflow files:
 
@@ -254,7 +254,7 @@ Expected archive-only areas after implementation:
 Validation proof recorded during completion:
 
     cd /Users/parkerrex/Projects/ship-by-sunday
-    bun test packages/blueprint-compiler/tests/blueprint-renderers.test.ts packages/blueprint-compiler/tests/repo-generation.test.ts packages/blueprint-compiler/tests/customer-safe-snapshot-contract.test.ts
+    bun test packages/codebase-compiler/tests/codebase-renderers.test.ts packages/codebase-compiler/tests/repo-generation.test.ts packages/codebase-compiler/tests/customer-safe-snapshot-contract.test.ts
     6 pass
     0 fail
 
@@ -265,7 +265,7 @@ Validation proof recorded during completion:
 
 Final targeted grep observations:
 
-    repo active surfaces: only archive-intent mentions of `docs/codex/` remain in `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `docs/codex/PLANS.md`, and the blueprint-compiler exclusion rule for `docs/codex/**`
+    repo active surfaces: only archive-intent mentions of `docs/codex/` remain in `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `docs/codex/PLANS.md`, and the codebase-compiler exclusion rule for `docs/codex/**`
     shared workflow active surfaces: no remaining runtime or test callers load `docs/prompts/exec-plan-*` from `ship-by-sunday`, and no runtime callers generate new `docs/codex/*.md` plan paths
 
 ## Interfaces and Dependencies
@@ -274,7 +274,7 @@ Final targeted grep observations:
 
 `docs/prompts/execplan-writer.md`, `docs/prompts/execplan-grill.md`, `docs/prompts/execplan-execution-loop.md`, and the new `docs/prompts/execplan-outline-from-session.md` are the repo-owned prompt interfaces. Their filenames are part of the runtime contract because the shared workflow loads them directly from disk.
 
-`packages/blueprint-compiler/src/repo-generation/customer-safe-snapshot-contract.ts` and `packages/blueprint-compiler/src/repo-generation/repo-download-source-contract.ts` define which root files ship into starter output and which paths are traced as source inputs. They already reflect `.plans/PLANS.md` and must remain aligned with the live repo contract while the shared workflow is patched.
+`packages/codebase-compiler/src/repo-generation/customer-safe-snapshot-contract.ts` and `packages/codebase-compiler/src/repo-generation/repo-download-source-contract.ts` define which root files ship into starter output and which paths are traced as source inputs. They already reflect `.plans/PLANS.md` and must remain aligned with the live repo contract while the shared workflow is patched.
 
 `~/.agents/src/workflows/execplan-feature-workflow/prompt-loader.ts` is the prompt filename interface between the shared workflow and the target repo. `outline-distiller.ts` and `service.ts` depend on the `outlineFromSession` prompt key and therefore on the repo shipping a matching outline prompt file.
 

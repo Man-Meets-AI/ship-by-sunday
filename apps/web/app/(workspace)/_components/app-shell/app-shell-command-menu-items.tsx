@@ -19,7 +19,7 @@ import { useTheme } from "next-themes";
 import { usePathname, useRouter } from "next/navigation";
 
 import { useAppShellPreferences } from "@/app/(workspace)/_hooks/app-shell/use-app-shell-preferences";
-import { buildBlueprintStageNavItems } from "@/lib/blueprint-flow/blueprint-stage-nav-model";
+import { buildCodebaseStageNavItems } from "@/lib/codebase-flow/codebase-stage-nav-model";
 import { startThemeTransition } from "@/lib/theme/start-theme-transition";
 import { routeConfig } from "@/config/product";
 
@@ -37,7 +37,7 @@ type AppShellCommandMenuItemsProps = {
 };
 
 const workspaceLinkIcons = {
-	[routeConfig.blueprint]: House,
+	[routeConfig.codebase]: House,
 	[routeConfig.review]: Flag,
 	[routeConfig.settings]: Settings,
 } as const;
@@ -119,9 +119,9 @@ export function AppShellCommandMenuItems({
 		});
 	};
 
-	const blueprintItems = primaryNav
-		? buildBlueprintStageNavItems({
-				currentStageId: primaryNav.currentBlueprintStageId,
+	const codebaseItems = primaryNav
+		? buildCodebaseStageNavItems({
+				currentStageId: primaryNav.currentCodebaseStageId,
 				stageStatuses: primaryNav.stageStatuses,
 			}).filter((item) => isVisible(item.state))
 		: [];
@@ -137,12 +137,12 @@ export function AppShellCommandMenuItems({
 
 	return (
 		<>
-			{blueprintItems.length > 0 ? (
-				<CommandGroup heading="Blueprint stages">
-					{blueprintItems.map((item) => (
+			{codebaseItems.length > 0 ? (
+				<CommandGroup heading="Codebase stages">
+					{codebaseItems.map((item) => (
 						<CommandItem
-							key={`blueprint:${item.id}`}
-							value={`Blueprint ${item.label}`}
+							key={`codebase:${item.id}`}
+							value={`Codebase ${item.label}`}
 							onSelect={() => navigateTo(item.route)}
 						>
 							<Compass className="size-4 shrink-0 text-muted-foreground" />

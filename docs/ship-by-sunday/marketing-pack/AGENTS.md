@@ -4,7 +4,7 @@ Use this file to define Ship by Sunday-generated marketing GPTs, skills, and rep
 
 ## Global rules for all marketing workflows
 
-- Stable knowledge belongs in the blueprint, not in chat history.
+- Stable knowledge belongs in the codebase, not in chat history.
 - Fresh facts must be verified when the output depends on current information.
 - Every externally visible workflow must define human review before publish.
 - Marketing outputs must stay inside approved claims and do-not-say rules.
@@ -30,7 +30,7 @@ If the output depends on current facts, the workflow must use one of:
 - a fresh uploaded file
 - explicit human confirmation
 
-Do not treat stable blueprint knowledge as automatically current.
+Do not treat stable codebase knowledge as automatically current.
 
 ## Human-check rule
 
@@ -59,6 +59,12 @@ Use these files together:
 - `review-matrix.md`
 - `deliverables.md`
 - `assets/writing-pass.md`
+
+## Remotion video rule
+
+When a marketing workflow changes Remotion code or asks for generated video effects, load the installed Codex Remotion plugin skill first: `remotion:remotion-best-practices`.
+Use the matching plugin rule files for the work, especially composition, timing, animation, assets, images, videos, audio, and captions.
+The active local Remotion effects package is `apps/web/scripts/vendor/for_youtube/execution/video_effects`.
 
 ## Suggested starter workflow types
 

@@ -2,13 +2,13 @@
 
 ## Review Scope
 
-This review pressure-tests the Program against the repo contracts that govern generated customer repos. The relevant surfaces are root `AGENTS.md`, `docs/programs/PROGRAMS.md`, `docs/exec-plans/PLANS.md`, `packages/blueprint-compiler/AGENTS.md`, `packages/blueprint-compiler/src/blueprints/render-build-blueprint.ts`, repo-generation materialization, and compiler tests.
+This review pressure-tests the Program against the repo contracts that govern generated customer repos. The relevant surfaces are root `AGENTS.md`, `docs/programs/PROGRAMS.md`, `docs/exec-plans/PLANS.md`, `packages/codebase-compiler/AGENTS.md`, `packages/codebase-compiler/src/codebases/render-build-codebase.ts`, repo-generation materialization, and compiler tests.
 
 ## Confirmed Fit
 
 The Program belongs under `docs/programs/active/` because the roadmap spans several child ExecPlans and needs initiative-level truth between slices.
 
-The first slice belongs in `packages/blueprint-compiler` because the generated Build Pack is emitted from compiler renderers and materialized into the customer-safe repo snapshot.
+The first slice belongs in `packages/codebase-compiler` because the generated Build Pack is emitted from compiler renderers and materialized into the customer-safe repo snapshot.
 
 The first slice can derive from existing facts. The canonical project definition already has next-slice, scope, acceptance, validation, demo, risks, dependencies, open questions, proof sources, and placeholder-friendly fields.
 

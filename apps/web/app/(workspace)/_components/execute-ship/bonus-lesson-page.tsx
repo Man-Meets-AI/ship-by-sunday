@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { BlueprintStageStatus } from "@shipbysunday/blueprint-compiler";
+import type { CodebaseStageStatus } from "@shipbysunday/codebase-compiler";
 import { LessonShellWatch } from "@/app/(workspace)/_components/course/lesson/shells";
 import { getLessonByKey } from "@/lib/course/lesson/model/manifest";
 import { AppShell } from "@/app/(workspace)/_components/app-shell";
@@ -27,7 +27,7 @@ export function BonusLessonPage({
 	postReviewTargets,
 }: {
 	initialShowLessonMap?: boolean;
-	initialStageStatuses: BlueprintStageStatus[];
+	initialStageStatuses: CodebaseStageStatus[];
 	lessonKey: string;
 	missionState: BonusMissionState;
 	postReviewTargets: PostReviewNavigationTargets;

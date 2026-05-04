@@ -37,7 +37,7 @@ This is the second child slice of the Program at `docs/programs/completed/2026-0
 
 ## Surprises & Discoveries
 
-During plan authoring, the current repo state showed existing Git tags `v0.2.0` and `v0.1.0`. Root `package.json`, `apps/web/package.json`, `packages/ship-by-sunday-cli/package.json`, `packages/blueprint-compiler/package.json`, and `packages/blueprint-presentation/package.json` all still report version `0.1.0`, so the existing package versions are not trustworthy as release identity without a deliberate contract change.
+During plan authoring, the current repo state showed existing Git tags `v0.2.0` and `v0.1.0`. Root `package.json`, `apps/web/package.json`, `packages/ship-by-sunday-cli/package.json`, `packages/codebase-compiler/package.json`, and `packages/codebase-presentation/package.json` all still report version `0.1.0`, so the existing package versions are not trustworthy as release identity without a deliberate contract change.
 
 During plan authoring, `docs/release-workflow.md` already says releases are tagged after the merged `main` commit and backed by `CHANGELOG.md`, while Vercel and Convex production currently track `main`. That makes an attest-the-verified-main-SHA contract the least disruptive first tag model unless live platform checks prove direct tag deployment is already available and safer.
 
@@ -49,7 +49,7 @@ During pre-implementation grill on 2026-04-24, the existing Vercel helper `qa/sc
 
 During execution on 2026-04-24, `git tag --list 'v*' --sort=-creatordate` returned `v0.2.0` and `v0.1.0`. `git rev-list -n 1 v0.2.0` returned `2de857d503bee13d763d3c7ed31d90e985ab3b00`; `git rev-list -n 1 v0.1.0` returned `7c5c179b5ba71346901605b40b6c46e8a7334a42`; `git rev-parse origin/main` returned `3c5347c06c039859b7780a61e331cebda9421aea`; `git rev-parse origin/dev` returned `36c8360da5d94d9be2ac4485d935389fa5b4fe52`.
 
-During execution on 2026-04-24, `rg -n '"version"' package.json apps/web/package.json packages/*/package.json` showed `0.1.0` in root, `apps/web`, `packages/blueprint-compiler`, `packages/blueprint-presentation`, and `packages/ship-by-sunday-cli`. This reconfirmed that package versions are not aligned to the latest GitHub Release tag.
+During execution on 2026-04-24, `rg -n '"version"' package.json apps/web/package.json packages/*/package.json` showed `0.1.0` in root, `apps/web`, `packages/codebase-compiler`, `packages/codebase-presentation`, and `packages/ship-by-sunday-cli`. This reconfirmed that package versions are not aligned to the latest GitHub Release tag.
 
 During execution on 2026-04-24, GitHub returned real published releases for `v0.2.0` and `v0.1.0`. `v0.2.0` is not a draft or prerelease, was published at `2026-04-19T12:52:26Z`, and targets `2de857d503bee13d763d3c7ed31d90e985ab3b00`. `v0.1.0` is not a draft or prerelease, was published at `2026-04-15T02:15:09Z`, and targets `7c5c179b5ba71346901605b40b6c46e8a7334a42`.
 
@@ -296,8 +296,8 @@ Authoring-time evidence from 2026-04-24:
        root package version: 0.1.0
        apps/web package version: 0.1.0
        packages/ship-by-sunday-cli package version: 0.1.0
-       packages/blueprint-compiler package version: 0.1.0
-       packages/blueprint-presentation package version: 0.1.0
+       packages/codebase-compiler package version: 0.1.0
+       packages/codebase-presentation package version: 0.1.0
        current production branch model: feature branches -> dev -> main; Vercel and Convex production track main
        current required branch contexts from first child: static, integration, browser-smoke, cli on both dev and main
        current visible rulesets from first child: empty arrays returned by repo ruleset and branch-rule endpoints

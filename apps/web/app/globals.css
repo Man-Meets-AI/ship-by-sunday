@@ -243,7 +243,7 @@
  * `tw-animate-css` does not ship a `prefers-reduced-motion` guard for the
  * accordion-down/accordion-up keyframes used by the shadcn Accordion. Honor
  * the user preference at the primitive level so every accordion (FAQ,
- * workspace, blueprint flow) opens and closes instantly when reduced motion
+ * workspace, codebase flow) opens and closes instantly when reduced motion
  * is requested instead of replaying a height keyframe.
  */
 @media (prefers-reduced-motion: reduce) {

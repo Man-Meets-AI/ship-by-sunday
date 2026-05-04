@@ -27,7 +27,7 @@ Adopt Codex's release invariants for SBS: a protected semver release tag, versio
 - `docs/release-workflow.md`
 - `package.json`
 - `apps/web/package.json`
-- `packages/blueprint-compiler/package.json`
+- `packages/codebase-compiler/package.json`
 - GitHub Releases and protected tag rulesets
 - Vercel production deployment identity
 - Convex production deployment identity

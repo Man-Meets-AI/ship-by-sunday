@@ -74,7 +74,7 @@ Focused tests, app format check, app lint, app typecheck, active-path plan lint,
 
 ## Context and Orientation
 
-Ship by Sunday's web app lives in `apps/web`. The product contract in `apps/web/AGENTS.md` says the app is blueprint-first, not course-first. The current structure still has shared workspace shell code under `apps/web/features/course/shared/components/app-shell`, and several feature boundaries import each other through relative paths that are hard to find with a simple `rg "@/features"`.
+Ship by Sunday's web app lives in `apps/web`. The product contract in `apps/web/AGENTS.md` says the app is codebase-first, not course-first. The current structure still has shared workspace shell code under `apps/web/features/course/shared/components/app-shell`, and several feature boundaries import each other through relative paths that are hard to find with a simple `rg "@/features"`.
 
 The App Router lives under `apps/web/app`. Route files are mostly thin adapters into `apps/web/features`. Convex backend code lives under `apps/web/convex`. External runtime integrations live under `apps/web/platform`. Shared UI primitives live under `apps/web/components/ui`.
 

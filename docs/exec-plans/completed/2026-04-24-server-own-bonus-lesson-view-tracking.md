@@ -30,7 +30,7 @@ Bonus lesson viewed tracking should not depend on client Convex auth hydration t
 - [x] 2026-04-24 EDT: Moved client ownership to a fetch trigger; `BonusLessonViewTracker` no longer imports `useConvexAuth`, `useMutation`, or `api.course.markBonusLessonViewed`.
 - [x] 2026-04-24 EDT: Added `apps/web/tests/integration/bonus-lesson-viewed-route.test.ts` and updated `apps/web/tests/integration-ui/bonus-lesson-view-tracker.test.tsx`.
 - [x] 2026-04-24 EDT: Focused validation passed: `bun run --cwd apps/web test:integration:node -- tests/integration/bonus-lesson-viewed-route.test.ts` and `bun run --cwd apps/web test:integration:ui -- tests/integration-ui/bonus-lesson-view-tracker.test.tsx`.
-- [x] 2026-04-24 EDT: Closeout checks: `bun run format:check`, `bun run lint`, `bun run qa:validate`, `bun run plans:lint -- --plan docs/exec-plans/completed/2026-04-24-server-own-bonus-lesson-view-tracking.md`, `bun run markdown:lint -- --paths docs/exec-plans/completed/2026-04-24-server-own-bonus-lesson-view-tracking.md docs/programs/completed/2026-04-24-sbs-runtime-boundary-hardening/program.md`, `bun run programs:lint`, and `git diff --check` passed. `bun run typecheck` failed on unrelated untracked route-contract work at `apps/web/features/blueprint-flow/lib/legacy-blueprint-route-redirects.ts:54`.
+- [x] 2026-04-24 EDT: Closeout checks: `bun run format:check`, `bun run lint`, `bun run qa:validate`, `bun run plans:lint -- --plan docs/exec-plans/completed/2026-04-24-server-own-bonus-lesson-view-tracking.md`, `bun run markdown:lint -- --paths docs/exec-plans/completed/2026-04-24-server-own-bonus-lesson-view-tracking.md docs/programs/completed/2026-04-24-sbs-runtime-boundary-hardening/program.md`, `bun run programs:lint`, and `git diff --check` passed. `bun run typecheck` failed on unrelated untracked route-contract work at `apps/web/features/codebase-flow/lib/legacy-codebase-route-redirects.ts:54`.
 
 ## Surprises & Discoveries
 
@@ -156,7 +156,7 @@ Result: passed.
 
        bun run typecheck
 
-Result: failed outside this slice after the Next build compiled. The TypeScript error is in unrelated untracked route-contract work at `apps/web/features/blueprint-flow/lib/legacy-blueprint-route-redirects.ts:54`, where `LegacyBlueprintRoute` can index `sectionByLegacyStep` with a route that has no key.
+Result: failed outside this slice after the Next build compiled. The TypeScript error is in unrelated untracked route-contract work at `apps/web/features/codebase-flow/lib/legacy-codebase-route-redirects.ts:54`, where `LegacyCodebaseRoute` can index `sectionByLegacyStep` with a route that has no key.
 
 ## Interfaces and Dependencies
 

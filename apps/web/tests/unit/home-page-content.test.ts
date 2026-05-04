@@ -1,7 +1,7 @@
 import {
 	DEFAULT_DESIGN_PRESET_ID,
-	getBlueprintStageDefinition,
-} from "@shipbysunday/blueprint-compiler";
+	getCodebaseStageDefinition,
+} from "@shipbysunday/codebase-compiler";
 import { describe, expect, it } from "vitest";
 
 import { productConfig } from "@/config/product";
@@ -21,8 +21,8 @@ describe("home page content", () => {
 
 		const productPreviewSection = homePageContent.productPreviewSection;
 
-		const canonicalSectionIds = getBlueprintStageDefinition(
-			"blueprint",
+		const canonicalSectionIds = getCodebaseStageDefinition(
+			"codebase",
 		).steps.map((step) => step.id);
 		expect(productPreviewSection.sections.map((section) => section.id)).toEqual(
 			canonicalSectionIds,

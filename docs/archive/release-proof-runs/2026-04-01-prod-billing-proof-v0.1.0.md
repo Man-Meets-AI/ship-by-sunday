@@ -17,14 +17,14 @@ Fresh production billing verification for the current `main` release:
 - created a fresh live Checkout Session against the production price with the app’s real `/checkout/success` and `/checkout/cancel` URLs, the signed-in buyer email, and the `courseSlug` metadata expected by the webhook path
 - completed the resulting live no-cost order in a production browser session
 - verified the browser hit `/checkout/success?session_id=...` and auto-forwarded into `/start`
-- verified the final `/start` page no longer showed `Access Required` and did show the normal blueprint `Continue with ...` CTA
+- verified the final `/start` page no longer showed `Access Required` and did show the normal codebase `Continue with ...` CTA
 - verified the Stripe Checkout Session `cs_live_a1ghcpyS0F6WmT1QpcrNS3Vj8AyhiOPWuXD1FdcfVTWLUgkaKNzuLglb6I` ended `status: "complete"`, `payment_status: "paid"`, `amount_total: 0`, `currency: "usd"`, and `customer_email: "Test@test.com"`
 
 ## Passed
 
 - `FREEPAID-01` — Production still creates a live Checkout Session from the real app CTA.
 - `FREEPAID-02` — A fresh live no-cost order completed and auto-forwarded from `/checkout/success` into `/start` for the production QA buyer.
-- The final `/start` page rendered the normal blueprint entry surface instead of the access-recovery screen.
+- The final `/start` page rendered the normal codebase entry surface instead of the access-recovery screen.
 - The fresh live session used the production success URL `https://www.man-meets-ai.com/checkout/success?session_id={CHECKOUT_SESSION_ID}` and completed with total due reduced to zero.
 
 ## Findings

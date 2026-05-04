@@ -30,17 +30,17 @@ The research track classified 157 runnable files as core source-level tests wort
 
 Package preserve paths reported by the source track:
 
-- `packages/blueprint-compiler/tests/blueprint-field-helpers.test.ts`
-- `packages/blueprint-compiler/tests/blueprint-renderers.test.ts`
-- `packages/blueprint-compiler/tests/canonical-project-definition.test.ts`
-- `packages/blueprint-compiler/tests/customer-safe-snapshot-contract.test.ts`
-- `packages/blueprint-compiler/tests/design-preset-catalog.test.ts`
-- `packages/blueprint-compiler/tests/generated-design-system.test.ts`
-- `packages/blueprint-compiler/tests/readiness.test.ts`
-- `packages/blueprint-compiler/tests/repo-generation.test.ts`
-- `packages/blueprint-compiler/tests/repo-root.test.ts`
-- `packages/blueprint-compiler/tests/review-download-zip.test.ts`
-- `packages/blueprint-presentation/tests/blueprint-presentation.test.ts`
+- `packages/codebase-compiler/tests/codebase-field-helpers.test.ts`
+- `packages/codebase-compiler/tests/codebase-renderers.test.ts`
+- `packages/codebase-compiler/tests/canonical-project-definition.test.ts`
+- `packages/codebase-compiler/tests/customer-safe-snapshot-contract.test.ts`
+- `packages/codebase-compiler/tests/design-preset-catalog.test.ts`
+- `packages/codebase-compiler/tests/generated-design-system.test.ts`
+- `packages/codebase-compiler/tests/readiness.test.ts`
+- `packages/codebase-compiler/tests/repo-generation.test.ts`
+- `packages/codebase-compiler/tests/repo-root.test.ts`
+- `packages/codebase-compiler/tests/review-download-zip.test.ts`
+- `packages/codebase-presentation/tests/codebase-presentation.test.ts`
 - `packages/ship-by-sunday-cli/tests/agent-workflows.test.ts`
 - `packages/ship-by-sunday-cli/tests/cli-errors.test.ts`
 - `packages/ship-by-sunday-cli/tests/cli-help.test.ts`
@@ -61,8 +61,8 @@ The CLI tests are preserve candidates only while the CLI exists. If the helper C
 The source track classified these 17 as source-level but not strong standalone release proof. They should be preserved as implementation backstops or merged into stronger scenario tests over time:
 
 - `apps/web/tests/integration-ui/bonus-lesson-view-tracker.test.tsx`
-- `apps/web/tests/unit/blueprint-stage-save-feedback.test.tsx`
-- `apps/web/tests/unit/blueprint-step-save-feedback.test.ts`
+- `apps/web/tests/unit/codebase-stage-save-feedback.test.tsx`
+- `apps/web/tests/unit/codebase-step-save-feedback.test.ts`
 - `apps/web/tests/unit/bonus-course-card.test.tsx`
 - `apps/web/tests/unit/bonus-route-state.test.ts`
 - `apps/web/tests/unit/brand-kit-workbench.test.tsx`
@@ -111,8 +111,8 @@ The source track warned that the first three are still wired into `qa/journeys.c
 The source track named these source-level replacement gaps before browser harness files can be safely deleted:
 
 - `apps/web/app/robots.ts` and `apps/web/app/sitemap.ts`, currently mainly proved by `apps/web/tests/browser-smoke/app-smoke.spec.ts`.
-- signed-out `/blueprint` middleware/redirect behavior, partially covered by protected-layout and sign-in tests but still browser-only for real route redirect proof.
-- entitled `/blueprint -> /review -> /settings` happy path, where component tests exist but route composition is still browser-pack proof.
+- signed-out `/codebase` middleware/redirect behavior, partially covered by protected-layout and sign-in tests but still browser-only for real route redirect proof.
+- entitled `/codebase -> /review -> /settings` happy path, where component tests exist but route composition is still browser-pack proof.
 - checkout success full paid handoff, where source tests cover route/session pieces but real Stripe-hosted return/access grant remains browser/hosted proof.
 - metadata/noindex rendered HTML for docs/auth routes, where source helpers exist but full route render proof is browser-smoke today.
 - QA inventory/control-plane references, which must be updated atomically if harness files are removed.

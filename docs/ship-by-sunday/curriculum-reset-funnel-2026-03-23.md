@@ -9,11 +9,11 @@ If we restarted the curriculum from zero, we would not design “a course with l
 
 We would design:
 - one canonical facts intake
-- three blueprint compilers
+- three codebase compilers
 - one download moment
 - one optional execution track after download
 
-The curriculum would be an input funnel around these blueprint families:
+The curriculum would be an input funnel around these codebase families:
 - `docs/openai/design-checklist/`
 - `docs/openai/openai-marketing-kit/`
 - `docs/openai/codex_long_horizon_templates/`
@@ -24,7 +24,7 @@ The product is:
 - a guided intake experience
 - that collects the exact facts required
 - to generate a custom folder
-- that gives the student a design blueprint, marketing blueprint, build blueprint, and prompt pack
+- that gives the student a design codebase, marketing codebase, build codebase, and prompt pack
 
 Everything else is secondary.
 
@@ -74,9 +74,9 @@ Examples:
 Generated on demand from canonical facts plus repo context.
 
 Outputs:
-- design blueprint
-- marketing blueprint
-- long-horizon build blueprint
+- design codebase
+- marketing codebase
+- long-horizon build codebase
 - prompt pack
 - root README
 - `project-definition.json`
@@ -105,7 +105,7 @@ Examples:
 The app needs one compiler service that:
 - reads canonical facts
 - reads repo context
-- renders blueprint files
+- renders codebase files
 - zips the folder
 - makes it downloadable
 
@@ -114,7 +114,7 @@ The app needs one compiler service that:
 The download moment should be explicit.
 
 Recommended:
-- show blueprint readiness score
+- show codebase readiness score
 - show missing facts blocking generation
 - preview file list
 - allow re-generate after edits
@@ -125,7 +125,7 @@ Recommended:
 
 Purpose:
 - explain the outcome
-- explain the blueprints
+- explain the codebases
 - explain that students are answering questions to generate their operating system
 
 Ask:
@@ -202,7 +202,7 @@ Output:
 
 This module does not exist cleanly in the current curriculum. It should.
 
-## Stage 2. Design blueprint intake
+## Stage 2. Design codebase intake
 
 This should be the actual Design block.
 
@@ -264,9 +264,9 @@ Ask:
 Output:
 - marketing surface block
 
-At the end of Stage 2, the product should be able to generate the full design blueprint.
+At the end of Stage 2, the product should be able to generate the full design codebase.
 
-## Stage 3. Marketing blueprint intake
+## Stage 3. Marketing codebase intake
 
 This is not “write some copy.”
 This is “define the GTM operating system.”
@@ -305,9 +305,9 @@ Ask:
 Output:
 - workflow map for the marketing kit
 
-At the end of Stage 3, the product should be able to generate the marketing blueprint.
+At the end of Stage 3, the product should be able to generate the marketing codebase.
 
-## Stage 4. Build blueprint intake
+## Stage 4. Build codebase intake
 
 This is the long-horizon Codex handoff.
 
@@ -360,9 +360,9 @@ Ask:
 Output:
 - execution-quality block
 
-At the end of Stage 4, the product should be able to generate the long-horizon build blueprint.
+At the end of Stage 4, the product should be able to generate the long-horizon build codebase.
 
-## Stage 5. Blueprint review and download
+## Stage 5. Codebase review and download
 
 This is where the magic folder becomes the product moment.
 
@@ -370,7 +370,7 @@ This is where the magic folder becomes the product moment.
 
 Show:
 - missing facts
-- blueprint previews
+- codebase previews
 - readiness status for:
   - design
   - marketing
@@ -381,9 +381,9 @@ Show:
 Deliver:
 - root README
 - `facts/project-definition.json`
-- design blueprint
-- marketing blueprint
-- build blueprint
+- design codebase
+- marketing codebase
+- build codebase
 - prompt pack
 
 ### Module 20. Optional next-step routing
@@ -395,7 +395,7 @@ After download:
 - run QA
 - prepare deploy
 
-But these are post-blueprint modules, not blueprint-definition modules.
+But these are post-codebase modules, not codebase-definition modules.
 
 ## What I Would Remove Or Demote In A Rebuild
 
@@ -423,17 +423,17 @@ But these are post-blueprint modules, not blueprint-definition modules.
 
 ## Recommended New Unlock Points
 
-### Design blueprint
+### Design codebase
 
 Unlock after:
 - Stage 2
 
-### Marketing blueprint
+### Marketing codebase
 
 Unlock after:
 - Stage 3
 
-### Build blueprint
+### Build codebase
 
 Unlock after:
 - Stage 4
@@ -443,21 +443,21 @@ Unlock after:
 Unlock after:
 - Stage 4
 
-Everything after that is execution support, not blueprint definition.
+Everything after that is execution support, not codebase definition.
 
 ## Why This Funnel Is Better
 
 - It asks only for information that changes the output.
 - It stops mixing teaching state with project definition.
-- It makes the download blueprint the center of gravity.
-- It aligns directly with OpenAI’s blueprint expectations.
+- It makes the download codebase the center of gravity.
+- It aligns directly with OpenAI’s codebase expectations.
 - It makes re-recording viable because each video has one clear input job.
 
 ## Recommended Rebuild Principle
 
 If we re-recorded from scratch, every lesson should answer one question:
 
-What blueprint fact am I collecting right now?
+What codebase fact am I collecting right now?
 
 If the answer is:
 - none
@@ -465,6 +465,6 @@ If the answer is:
 then the lesson is either:
 - orientation
 - workflow scaffolding
-- or unnecessary in the blueprint funnel.
+- or unnecessary in the codebase funnel.
 
 That is the cleanest way to make the curriculum “literally perfect for the best practices.”

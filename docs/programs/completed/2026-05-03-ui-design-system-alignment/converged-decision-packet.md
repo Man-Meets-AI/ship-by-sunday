@@ -16,7 +16,7 @@ The first child ExecPlan is color token alignment. Color is the biggest first re
 
 The Program will not start by rewriting every component. Existing shadcn primitives are already close to the desired compact UI language. The first implementation should add or refine semantic color roles in `apps/web/app/globals.css`, migrate high-value app surfaces away from hard-coded neutrals where needed, and leave intentional marketing/editorial colors alone.
 
-Marketing exceptions remain valid. The homepage leverage hero, codebase branch, integration logo colors, illustration pack colors, and Open Graph images can keep intentional brand colors when those colors are content or art. They should not become precedent for protected app shells, settings, blueprint, checkout handoff, or review surfaces.
+Marketing exceptions remain valid. The homepage leverage hero, codebase branch, integration logo colors, illustration pack colors, and Open Graph images can keep intentional brand colors when those colors are content or art. They should not become precedent for protected app shells, settings, codebase, checkout handoff, or review surfaces.
 
 The Program must specifically ignore the custom homepage graphics, font treatments, and styles for `Install leverage` / `the loop repeats TOMORROW`, `Exec Loops: OpenAI's WEAPON of choice`, and worker/how-workers-work sections. Those sections are intentional editorial surfaces, not design-system drift to be normalized.
 

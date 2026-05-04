@@ -32,7 +32,7 @@ code.
 
 ## What Does Not Transfer
 
-Ship by Sunday has a blueprint compiler package, generated customer-facing docs,
+Ship by Sunday has a codebase compiler package, generated customer-facing docs,
 release proof, Program/ExecPlan planning contracts, hosted Vercel deployment,
 Clerk auth, Convex hosted dev/prod, and Stripe entitlement proof. The reference
 projects do not replace those repo-specific contracts.

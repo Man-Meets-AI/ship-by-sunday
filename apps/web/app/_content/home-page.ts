@@ -1,19 +1,19 @@
 import {
 	DEFAULT_DESIGN_PRESET_ID,
 	designPresetDefinitions,
-} from "@shipbysunday/blueprint-compiler";
+} from "@shipbysunday/codebase-compiler";
 import {
-	blueprintFieldHelperText,
-	blueprintFieldLabel,
-	blueprintFieldPlaceholder,
-	getBlueprintFieldScaleDefinition,
-} from "@shipbysunday/blueprint-presentation";
+	codebaseFieldHelperText,
+	codebaseFieldLabel,
+	codebaseFieldPlaceholder,
+	getCodebaseFieldScaleDefinition,
+} from "@shipbysunday/codebase-presentation";
 import { productConfig, routeConfig } from "@/config/product";
 import {
 	marketingDisplayConfig,
 	workspaceDisplayConfig,
 } from "@/config/starter-selectors";
-import { blueprintPageSections } from "@/lib/blueprint-flow/blueprint-page-sections";
+import { codebasePageSections } from "@/lib/codebase-flow/codebase-page-sections";
 
 const productName = productConfig.name;
 const activePricingOffer = productConfig.activeOffer;
@@ -30,23 +30,23 @@ const pricingOfferBanner = activePricingOffer
 		}
 	: null;
 
-const interactiveBlueprintDemoSectionIds = [
+const interactiveCodebaseDemoSectionIds = [
 	"foundation",
 	"design",
 	"pricing",
 ] as const;
 
-type BlueprintDemoSectionStatus = "interactive" | "locked";
+type CodebaseDemoSectionStatus = "interactive" | "locked";
 
-const productPreviewSections = blueprintPageSections.map((section) => ({
+const productPreviewSections = codebasePageSections.map((section) => ({
 	id: section.id,
 	label: section.label,
 	description: section.description,
-	status: (interactiveBlueprintDemoSectionIds.includes(
-		section.id as (typeof interactiveBlueprintDemoSectionIds)[number],
+	status: (interactiveCodebaseDemoSectionIds.includes(
+		section.id as (typeof interactiveCodebaseDemoSectionIds)[number],
 	)
 		? "interactive"
-		: "locked") as BlueprintDemoSectionStatus,
+		: "locked") as CodebaseDemoSectionStatus,
 }));
 
 type ProductPreviewAccent = { light: string; dark: string };
@@ -170,7 +170,7 @@ const productPreviewDesignPresets = designPresetDefinitions.map((preset) => {
 });
 
 const pricingModelScaleOptions =
-	getBlueprintFieldScaleDefinition("pricing_model")?.options ?? [];
+	getCodebaseFieldScaleDefinition("pricing_model")?.options ?? [];
 const productPreviewPricingModelOptions = pricingModelScaleOptions.map(
 	(option) => ({
 		value: option.value as "one_time" | "monthly" | "yearly",
@@ -181,7 +181,7 @@ const productPreviewPricingModelOptions = pricingModelScaleOptions.map(
 
 if (productPreviewPricingModelOptions.length !== 3) {
 	throw new Error(
-		"Expected exactly three pricing model options for the homepage Blueprint demo",
+		"Expected exactly three pricing model options for the homepage Codebase demo",
 	);
 }
 
@@ -247,33 +247,33 @@ const productPreviewSection = {
 	sections: productPreviewSections,
 	foundation: {
 		intro:
-			"These three answers anchor every other section of the Blueprint. Two minutes is plenty.",
+			"These three answers anchor every other section of the Codebase. Two minutes is plenty.",
 		fields: {
 			productName: {
 				key: "product_name" as const,
-				label: blueprintFieldLabel("product_name"),
-				placeholder: blueprintFieldPlaceholder("product_name") ?? "",
-				helperText: blueprintFieldHelperText("product_name") ?? "",
+				label: codebaseFieldLabel("product_name"),
+				placeholder: codebaseFieldPlaceholder("product_name") ?? "",
+				helperText: codebaseFieldHelperText("product_name") ?? "",
 			},
 			productSummary: {
 				key: "product_summary" as const,
-				label: blueprintFieldLabel("product_summary"),
-				placeholder: blueprintFieldPlaceholder("product_summary") ?? "",
-				helperText: blueprintFieldHelperText("product_summary") ?? "",
+				label: codebaseFieldLabel("product_summary"),
+				placeholder: codebaseFieldPlaceholder("product_summary") ?? "",
+				helperText: codebaseFieldHelperText("product_summary") ?? "",
 			},
 			primaryUser: {
 				key: "primary_user" as const,
-				label: blueprintFieldLabel("primary_user"),
-				placeholder: blueprintFieldPlaceholder("primary_user") ?? "",
-				helperText: blueprintFieldHelperText("primary_user") ?? "",
+				label: codebaseFieldLabel("primary_user"),
+				placeholder: codebaseFieldPlaceholder("primary_user") ?? "",
+				helperText: codebaseFieldHelperText("primary_user") ?? "",
 			},
 		},
 	},
 	design: {
 		intro:
 			"Pick the brand DNA closest to what you want. Each preset maps to a real, public design system. You can fine-tune the theme grid in the workspace.",
-		label: blueprintFieldLabel("design_preset_id"),
-		helperText: blueprintFieldHelperText("design_preset_id") ?? "",
+		label: codebaseFieldLabel("design_preset_id"),
+		helperText: codebaseFieldHelperText("design_preset_id") ?? "",
 		defaultPresetId: DEFAULT_DESIGN_PRESET_ID,
 		presets: productPreviewDesignPresets,
 		previewLinkLabel: "View live reference",
@@ -283,12 +283,12 @@ const productPreviewSection = {
 	pricing: {
 		intro:
 			"Set what people will pay. You can change this later before you generate the repo.",
-		modelLabel: blueprintFieldLabel("pricing_model"),
+		modelLabel: codebaseFieldLabel("pricing_model"),
 		modelOptions: productPreviewPricingModelOptions,
 		defaultModel: "one_time" as const,
 		defaultPrice: "29",
-		priceHelperText: blueprintFieldHelperText("pricing") ?? "",
-		pricePlaceholder: blueprintFieldPlaceholder("pricing") ?? "",
+		priceHelperText: codebaseFieldHelperText("pricing") ?? "",
+		pricePlaceholder: codebaseFieldPlaceholder("pricing") ?? "",
 	},
 	cta: {
 		label: "Generate my codebase",
@@ -491,7 +491,7 @@ export const homePageContent = {
 			{
 				title: "One review handoff",
 				description:
-					"The Ship by Sunday Blueprint gives you one final downloadable handoff that is easier to trust, review, and reuse than scattered prompt history.",
+					"The Ship by Sunday Codebase gives you one final downloadable handoff that is easier to trust, review, and reuse than scattered prompt history.",
 			},
 		],
 		closing:

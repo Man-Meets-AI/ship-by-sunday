@@ -20,7 +20,7 @@ The first child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-ma
 
 The second child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-extract-workspace-shell-from-course.md`. It moved the shared AppShell implementation into `apps/web/features/workspace-shell`, updated first-party imports, kept temporary compatibility exports at the old course-owned shell path, and passed focused and app-level validation.
 
-The third child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-make-route-ownership-visible.md`. It moved the protected workspace access gate and legacy blueprint redirect helper into private `apps/web/app/(workspace)` folders, updated first-party imports and tests, kept temporary compatibility exports, and passed focused and app-level validation.
+The third child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-make-route-ownership-visible.md`. It moved the protected workspace access gate and legacy codebase redirect helper into private `apps/web/app/(workspace)` folders, updated first-party imports and tests, kept temporary compatibility exports, and passed focused and app-level validation.
 
 ## What The Previous Slice Unblocked
 

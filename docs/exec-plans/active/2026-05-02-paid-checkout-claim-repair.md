@@ -59,7 +59,7 @@ After Parker clarified that access should simply work with the email used at che
 
 The coordinator reran the combined checkout/access unit suite after all parallel slices landed:
 
-    bun run --cwd apps/web vitest run tests/unit/checkout-claims.test.ts tests/unit/checkout-claims-actions.test.ts tests/unit/checkout-session.test.ts tests/unit/course-access.test.ts tests/unit/access-required-page.test.tsx tests/unit/app-workspace-blueprint-review-routes.test.tsx tests/unit/app-workspace-mission-page.test.tsx tests/unit/app-workspace-execute-page.test.tsx tests/unit/app-workspace-lesson-page.test.tsx tests/unit/app-protected-layout.test.tsx
+    bun run --cwd apps/web vitest run tests/unit/checkout-claims.test.ts tests/unit/checkout-claims-actions.test.ts tests/unit/checkout-session.test.ts tests/unit/course-access.test.ts tests/unit/access-required-page.test.tsx tests/unit/app-workspace-codebase-review-routes.test.tsx tests/unit/app-workspace-mission-page.test.tsx tests/unit/app-workspace-execute-page.test.tsx tests/unit/app-workspace-lesson-page.test.tsx tests/unit/app-protected-layout.test.tsx
     Test Files  10 passed (10)
     Tests  68 passed (68)
 

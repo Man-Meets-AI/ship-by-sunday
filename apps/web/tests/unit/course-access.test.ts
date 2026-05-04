@@ -47,8 +47,8 @@ vi.mock("@/convex/_generated/api", () => ({
 		access: {
 			viewerProductAccess: "viewerProductAccess",
 		},
-		blueprint: {
-			getBlueprintResumeDestination: "getBlueprintResumeDestination",
+		codebase: {
+			getCodebaseResumeDestination: "getCodebaseResumeDestination",
 		},
 	},
 }));
@@ -319,8 +319,8 @@ describe("product access server helpers", () => {
 			})
 			.mockResolvedValueOnce({
 				destination: "/design",
-				kind: "blueprint_stage",
-				blueprintStageId: "design",
+				kind: "codebase_stage",
+				codebaseStageId: "design",
 				postReviewTargets: null,
 			});
 
@@ -401,7 +401,7 @@ describe("product access server helpers", () => {
 			.mockResolvedValueOnce({
 				destination: "/lesson/product-review",
 				kind: "post_review",
-				blueprintStageId: null,
+				codebaseStageId: null,
 				postReviewTargets: {
 					reviewDestination: "/review",
 					buildLessonsDestination: "/lesson/iterate-the-product-with-ai",
@@ -417,7 +417,7 @@ describe("product access server helpers", () => {
 		await expect(getServerResumeDestination()).resolves.toEqual({
 			destination: "/lesson/product-review",
 			kind: "post_review",
-			blueprintStageId: null,
+			codebaseStageId: null,
 			postReviewTargets: {
 				reviewDestination: "/review",
 				buildLessonsDestination: "/lesson/iterate-the-product-with-ai",

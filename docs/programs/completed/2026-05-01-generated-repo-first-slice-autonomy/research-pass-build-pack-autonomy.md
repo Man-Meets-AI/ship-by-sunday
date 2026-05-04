@@ -2,17 +2,17 @@
 
 ## Scope
 
-This research pass preserves the repo-grounded evidence for the generated-repo autonomy initiative. The initiative starts in `packages/blueprint-compiler` and the generated customer repo surface under `docs/build/`.
+This research pass preserves the repo-grounded evidence for the generated-repo autonomy initiative. The initiative starts in `packages/codebase-compiler` and the generated customer repo surface under `docs/build/`.
 
 ## Repo Evidence
 
-`packages/blueprint-compiler/src/blueprints/render-build-blueprint.ts` currently derives validation commands from `facts.validation_plan` with keyword matching. Unknown steps become shell comments such as `# ${validationStep}`, which makes the generated plan look executable while silently skipping an unrecognized check.
+`packages/codebase-compiler/src/codebases/render-build-codebase.ts` currently derives validation commands from `facts.validation_plan` with keyword matching. Unknown steps become shell comments such as `# ${validationStep}`, which makes the generated plan look executable while silently skipping an unrecognized check.
 
 The Build Pack already generates `docs/build/docs/agent-handoff.md`, `prompt.md`, `plans.md`, `implement.md`, and `documentation.md`. The pack tells an agent what to read and update, but it does not generate a deterministic readiness verdict or a typed validation manifest.
 
 The compiler schema already includes enough source facts for a first readiness slice: `selected_next_slice`, `core_flow`, `must_have_capabilities`, `scope_in`, `scope_out`, `acceptance_criteria`, `validation_plan`, `demo_flow`, `proof_sources`, `open_questions`, and placeholder-friendly `domain`, `contact_email`, and `support_email`. No new canonical fields are required for the first slice.
 
-`packages/blueprint-compiler/tests/blueprint-renderers.test.ts` and `packages/blueprint-compiler/tests/repo-generation.test.ts` mostly assert important sections and substrings. They should be strengthened to assert the generated readiness file, typed validation entries, explicit blockers, visible placeholder work, and customer-safe snapshot content.
+`packages/codebase-compiler/tests/codebase-renderers.test.ts` and `packages/codebase-compiler/tests/repo-generation.test.ts` mostly assert important sections and substrings. They should be strengthened to assert the generated readiness file, typed validation entries, explicit blockers, visible placeholder work, and customer-safe snapshot content.
 
 ## Constraints
 

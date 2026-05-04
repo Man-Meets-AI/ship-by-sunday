@@ -24,7 +24,7 @@ The active repo-agent ExecPlan prompts use the hyphenated `exec-plan-*` filename
 - `exec-plan-execute.md`
 - `exec-plan-validate.md`
 
-The older `execplan-*` filenames are generated-starter prompt assets that the blueprint compiler still ships through `packages/blueprint-compiler/src/server/template-loader.ts` and `packages/blueprint-compiler/src/blueprints/render-prompt-pack.ts`. Do not delete or rename them unless the compiler path, generated-doc path types, repo-root marker, and tests are migrated in the same change.
+The older `execplan-*` filenames are generated-starter prompt assets that the codebase compiler still ships through `packages/codebase-compiler/src/server/template-loader.ts` and `packages/codebase-compiler/src/codebases/render-prompt-pack.ts`. Do not delete or rename them unless the compiler path, generated-doc path types, repo-root marker, and tests are migrated in the same change.
 
 Program-aware planning assumes one checked-in Program folder at `docs/programs/<active|completed>/<YYYY-MM-DD-program-id>/`. Inside that folder, `program.md` is the canonical Program document and the planning packet artifacts live beside it. The canonical sequence is:
 

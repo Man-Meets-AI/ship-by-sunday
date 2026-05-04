@@ -56,7 +56,7 @@ export function buildHostedProofCheckoutSessionParams({
 	};
 }
 
-export function buildHostedProofSignInPath({ redirectPath = "/blueprint" }) {
+export function buildHostedProofSignInPath({ redirectPath = "/codebase" }) {
 	return `/sign-in?redirect_url=${encodeURIComponent(redirectPath)}`;
 }
 

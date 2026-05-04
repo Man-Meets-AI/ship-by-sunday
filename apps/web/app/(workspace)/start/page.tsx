@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
-import { getLegacyBlueprintRouteRedirectHref } from "@/app/(workspace)/_lib/legacy-blueprint-route-redirects";
+import { getLegacyCodebaseRouteRedirectHref } from "@/app/(workspace)/_lib/legacy-codebase-route-redirects";
 
 export default function Page() {
-	redirect(getLegacyBlueprintRouteRedirectHref({ route: "start" }));
+	redirect(getLegacyCodebaseRouteRedirectHref({ route: "start" }));
 }

@@ -24,7 +24,7 @@ Existing focused tests include docs metadata, docs disabled state, public metada
 
 ## Compiler And Starter Assumptions
 
-`packages/blueprint-compiler/src/repo-generation/repo-download-source-contract.ts` includes `apps/web/mdx-components.tsx` in customer-safe app paths. Starter rendering files also mention docs content layout and local Next docs paths. These are package-cleanup slice concerns after the final app-owned rendering shape is known.
+`packages/codebase-compiler/src/repo-generation/repo-download-source-contract.ts` includes `apps/web/mdx-components.tsx` in customer-safe app paths. Starter rendering files also mention docs content layout and local Next docs paths. These are package-cleanup slice concerns after the final app-owned rendering shape is known.
 
 Compiler schema and facts are out of scope for this Program unless a later approved plan explicitly expands the work.
 

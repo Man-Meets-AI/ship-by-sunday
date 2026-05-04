@@ -18,7 +18,7 @@ import type { PaidCheckoutRecovery, ProductAccess } from "@/lib/product-access";
 import { getConvexServerSession } from "@/platform/auth/convex-auth";
 
 type ResumeDestination = FunctionReturnType<
-	typeof api.blueprint.getBlueprintResumeDestination
+	typeof api.codebase.getCodebaseResumeDestination
 >;
 
 async function refreshViewerProductAccess(token: string) {
@@ -147,7 +147,7 @@ export async function getServerResumeDestination() {
 	}
 
 	return (await fetchQuery(
-		api.blueprint.getBlueprintResumeDestination,
+		api.codebase.getCodebaseResumeDestination,
 		{},
 		{ token: session.token },
 	)) as ResumeDestination;

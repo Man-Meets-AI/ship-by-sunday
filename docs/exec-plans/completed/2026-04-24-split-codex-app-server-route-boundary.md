@@ -29,7 +29,7 @@ Codex API routes should import lightweight server contracts, not route-local dyn
 - [x] 2026-04-24 EDT: Split lightweight Codex app-server contracts into `apps/web/features/codex/server/app-server-contracts.ts`.
 - [x] 2026-04-24 EDT: Added `apps/web/features/codex/server/app-server-service.ts` as the route-facing service boundary and removed route-level dynamic import helpers from all Codex API routes.
 - [x] 2026-04-24 EDT: Added focused unavailable-runtime coverage to `apps/web/tests/integration/codex-route-handlers.test.ts`; route tests now cover auth, malformed payloads, disabled runtime, and successful generation/login/account paths.
-- [x] 2026-04-24 EDT: Closed this plan after focused tests, lint, and diff checks. `bun run typecheck` compiled successfully but failed during TypeScript checking on unrelated dirty blueprint-flow work at `apps/web/features/blueprint-flow/components/blueprint-page-progress-sidebar.tsx:4`.
+- [x] 2026-04-24 EDT: Closed this plan after focused tests, lint, and diff checks. `bun run typecheck` compiled successfully but failed during TypeScript checking on unrelated dirty codebase-flow work at `apps/web/features/codebase-flow/components/codebase-page-progress-sidebar.tsx:4`.
 
 ## Surprises & Discoveries
 
@@ -143,7 +143,7 @@ Result: passed. Found 0 warnings and 0 errors.
 
        bun run typecheck
 
-Result: failed on unrelated dirty blueprint-flow work after the Next build compiled successfully. Error: `apps/web/features/blueprint-flow/components/blueprint-page-progress-sidebar.tsx:4` imports missing `BlueprintPageSectionStatus` from `@/features/blueprint-flow/hooks/use-blueprint-page-state`.
+Result: failed on unrelated dirty codebase-flow work after the Next build compiled successfully. Error: `apps/web/features/codebase-flow/components/codebase-page-progress-sidebar.tsx:4` imports missing `CodebasePageSectionStatus` from `@/features/codebase-flow/hooks/use-codebase-page-state`.
 
        bun run plans:lint -- --plan docs/exec-plans/completed/2026-04-24-split-codex-app-server-route-boundary.md
 

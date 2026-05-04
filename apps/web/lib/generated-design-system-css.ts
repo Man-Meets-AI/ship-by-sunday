@@ -1,4 +1,4 @@
-import type { GeneratedDesignSystem } from "@shipbysunday/blueprint-compiler";
+import type { GeneratedDesignSystem } from "@shipbysunday/codebase-compiler";
 
 function renderCssVariables(variables: Record<string, string>) {
 	return Object.entries(variables)

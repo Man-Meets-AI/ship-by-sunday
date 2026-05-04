@@ -44,14 +44,14 @@ For frontmatter-driven docs and plans:
 - `markdown:lint` and `plans:lint` accept path-scoped arguments so docs-only work can be proved without widening into unrelated files.
 - `public-readiness:lint` scans the active current-truth docs path for stale `/start` guidance, old `features/` paths, absolute `/Users/...` links, concrete private hosts, internal deployment IDs, and retired product vocabulary. It intentionally excludes historical archives, generated mirrors, source instruction packs, and completed plans.
 - Provider/config changes that create future external setup work must update the active setup docs or generated customer docs in the same change, then run `markdown:lint` on the touched docs plus the relevant focused code check.
-- `docs:generated:check` verifies that `docs/generated/openai-blueprint/` mirrors `docs/openai/` and `docs/generated/ship-by-sunday-blueprint/` mirrors `docs/ship-by-sunday/`.
+- `docs:generated:check` verifies that `docs/generated/openai-codebase/` mirrors `docs/openai/` and `docs/generated/ship-by-sunday-codebase/` mirrors `docs/ship-by-sunday/`.
 
-## Blueprint compiler
+## Codebase compiler
 
-- `bun run --cwd packages/blueprint-compiler lint`
-- `bun run --cwd packages/blueprint-compiler format:check`
-- `bun run --cwd packages/blueprint-compiler typecheck`
-- `bun run --cwd packages/blueprint-compiler test`
+- `bun run --cwd packages/codebase-compiler lint`
+- `bun run --cwd packages/codebase-compiler format:check`
+- `bun run --cwd packages/codebase-compiler typecheck`
+- `bun run --cwd packages/codebase-compiler test`
 
 ## Operations helpers
 

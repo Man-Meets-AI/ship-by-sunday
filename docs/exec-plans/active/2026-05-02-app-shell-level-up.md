@@ -3,7 +3,7 @@ title: AppShell Chrome Level Up
 status: active
 created_at: 2026-05-02
 completed_at: null
-summary: Lift the workspace AppShell chrome from the Linear/Vercel parity baseline that the prior polish pass landed (`docs/exec-plans/active/2026-05-02-app-shell-polish.md`) to a level where a returning user navigating between `/blueprint`, `/review`, and `/lesson/*` notices a perceptible smoothness lift — a ⌘K command menu, a scroll-aware header shadow, route-change focus restoration, persistent shell preferences with a working local-nav collapse, a shared theme-toggle view transition, dropdown reduced-motion gated at the shared primitive, and a synthesized compact local-nav fallback so every mobile view has a usable local nav.
+summary: Lift the workspace AppShell chrome from the Linear/Vercel parity baseline that the prior polish pass landed (`docs/exec-plans/active/2026-05-02-app-shell-polish.md`) to a level where a returning user navigating between `/codebase`, `/review`, and `/lesson/*` notices a perceptible smoothness lift — a ⌘K command menu, a scroll-aware header shadow, route-change focus restoration, persistent shell preferences with a working local-nav collapse, a shared theme-toggle view transition, dropdown reduced-motion gated at the shared primitive, and a synthesized compact local-nav fallback so every mobile view has a usable local nav.
 post_build_recap: null
 read_when:
   - Resuming the AppShell level-up pass mid-flight.
@@ -21,7 +21,7 @@ This ExecPlan must be maintained in accordance with `docs/exec-plans/PLANS.md`.
 
 The workspace AppShell wraps every authenticated view with a persistent header, optional local nav rail, optional footer skill rail, primary navigation, theme toggle, and user menu. The prior polish pass (`docs/exec-plans/active/2026-05-02-app-shell-polish.md`) landed the parity baseline (semantic header, outline theme toggle, combined primary-nav active state, focus rings, reduced-motion gating on the user menu, footer rail dark-mode parity, skip-to-content link). This level-up pass keeps that contract and adds the missing premium affordances so the shell stops reading as "clean shadcn" and starts reading as a deliberate product surface.
 
-A human can prove the outcome by visiting `/blueprint`, `/review`, and one `/lesson/[key]` route, pressing `⌘K` to open the new command menu and arrow-key + Enter to navigate to a stage, watching the header grow a quiet `shadow-sm` only after scrolling, clicking a primary-nav link and seeing focus land on `#app-shell-main` (the skip-to-content target) rather than on the link itself, collapsing the xl+ local nav rail with the new chevron toggle and reloading to confirm the collapse persists, toggling between light and dark and seeing a cross-fade rather than a hard flip when the API supports it, and resizing to mobile to confirm `/review` and `/lesson/*` now render a `<details>` disclosure for the local nav rather than nothing.
+A human can prove the outcome by visiting `/codebase`, `/review`, and one `/lesson/[key]` route, pressing `⌘K` to open the new command menu and arrow-key + Enter to navigate to a stage, watching the header grow a quiet `shadow-sm` only after scrolling, clicking a primary-nav link and seeing focus land on `#app-shell-main` (the skip-to-content target) rather than on the link itself, collapsing the xl+ local nav rail with the new chevron toggle and reloading to confirm the collapse persists, toggling between light and dark and seeing a cross-fade rather than a hard flip when the API supports it, and resizing to mobile to confirm `/review` and `/lesson/*` now render a `<details>` disclosure for the local nav rather than nothing.
 
 The pass remains surgical: no `AppShellProps` shape change, no nav-model edits, no active-block calculation changes, no leave-guard changes, no theme-provider changes, no new `bg-primary` or `text-primary` styling. One new third-party dependency: `cmdk` pinned at `1.1.1`. Every existing `data-testid` is preserved; new ones are namespaced `app-shell-*`. Every in-scope component stays under 150 lines.
 
@@ -45,11 +45,11 @@ The brief lists the new hook tests under `tests/unit/`, but the `unit` project i
 
 The `cmdk` ships its own `CommandDialog` wrapper, but it does not render a `Dialog.Title`, so Radix logs an a11y warning ("`DialogContent` requires a `DialogTitle`"). Switching to a hand-rolled `Dialog.Root + Portal + Overlay + Content + Title (sr-only) + Description (sr-only) + Command` composition silences the warning, gives the menu a real accessible name, and lets the menu reuse the same `motion-reduce:` overrides the rest of the shell's animated surfaces use.
 
-The blueprint stage IDs in `packages/blueprint-compiler` are `"blueprint" | "review"` (not `north-star | audience | design`), and `BlueprintStageStatus` requires `currentStepIndex` and `missingFactKeys`. The first draft of the command-menu test fixture invented stage IDs and missed those required fields; aligning the fixture to the real shape made the test pass cleanly.
+The codebase stage IDs in `packages/codebase-compiler` are `"codebase" | "review"` (not `north-star | audience | design`), and `CodebaseStageStatus` requires `currentStepIndex` and `missingFactKeys`. The first draft of the command-menu test fixture invented stage IDs and missed those required fields; aligning the fixture to the real shape made the test pass cleanly.
 
-The broader `tests/integration-ui tests/unit` run surfaced three pre-existing test timeouts in the working tree: `tests/integration-ui/blueprint-page.test.tsx > saves partial work on continue and reveals the remaining blockers`, `tests/integration-ui/blueprint-page.test.tsx > re-seeds the design fields when a curated preset is selected`, and several cases in `tests/unit/app-workspace-lesson-page.test.tsx`. A clean bisect confirmed the failures reproduce with all my changes stashed (so they are not caused by this pass). The prior pass already flagged the first one as a concurrency flake; the rest of the new timeouts come from working-tree changes added since the prior pass shipped (the `?? apps/web/tests/unit/app-workspace-blueprint-review-routes.test.tsx` and `M apps/web/tests/unit/app-workspace-lesson-page.test.tsx` files in `git status` belong to other in-flight work). Flagged as inherited flakes, not regressions.
+The broader `tests/integration-ui tests/unit` run surfaced three pre-existing test timeouts in the working tree: `tests/integration-ui/codebase-page.test.tsx > saves partial work on continue and reveals the remaining blockers`, `tests/integration-ui/codebase-page.test.tsx > re-seeds the design fields when a curated preset is selected`, and several cases in `tests/unit/app-workspace-lesson-page.test.tsx`. A clean bisect confirmed the failures reproduce with all my changes stashed (so they are not caused by this pass). The prior pass already flagged the first one as a concurrency flake; the rest of the new timeouts come from working-tree changes added since the prior pass shipped (the `?? apps/web/tests/unit/app-workspace-codebase-review-routes.test.tsx` and `M apps/web/tests/unit/app-workspace-lesson-page.test.tsx` files in `git status` belong to other in-flight work). Flagged as inherited flakes, not regressions.
 
-The audit of `localNav` callers found that both `/review` (`apps/web/app/(workspace)/review/_components/blueprint-review-page.tsx`) and `/lesson/[key]` (`apps/web/app/(workspace)/_components/execute-ship/bonus-lesson-page.tsx`) provide `desktop` only and no `compact`. Rather than asking each page to invent its own compact rail, this pass synthesizes a `<details>` disclosure inside `AppShellLocalNavRail` when `compact` is missing. The disclosure renders the same `desktop` tree wrapped in a `<details>`/`<summary>` so the same nav model drives both densities. This is the brief's "preferred" path applied as a single canonical fallback at the rail boundary rather than per-page duplication.
+The audit of `localNav` callers found that both `/review` (`apps/web/app/(workspace)/review/_components/codebase-review-page.tsx`) and `/lesson/[key]` (`apps/web/app/(workspace)/_components/execute-ship/bonus-lesson-page.tsx`) provide `desktop` only and no `compact`. Rather than asking each page to invent its own compact rail, this pass synthesizes a `<details>` disclosure inside `AppShellLocalNavRail` when `compact` is missing. The disclosure renders the same `desktop` tree wrapped in a `<details>`/`<summary>` so the same nav model drives both densities. This is the brief's "preferred" path applied as a single canonical fallback at the rail boundary rather than per-page duplication.
 
 The product-shell snapshot test (`tests/unit/product-shell.test.tsx`) asserts on the literal aside `className`. The xl+ collapse toggle in slice 4 was therefore added as an additive `mb-2 hidden xl:flex …` button row above the rail content, with the existing aside `className` preserved character-for-character in the default (`collapsed === false`) state so the snapshot test continues to match. The `cn()` order `cn("hidden min-h-0 min-w-0 xl:sticky xl:top-3 xl:block xl:self-start", collapsed ? "xl:pr-0" : "xl:border-r xl:border-border/60 xl:pr-6")` produces exactly `"hidden min-h-0 min-w-0 xl:sticky xl:top-3 xl:block xl:self-start xl:border-r xl:border-border/60 xl:pr-6"` when not collapsed.
 
@@ -110,11 +110,11 @@ Files changed in this pass:
 - `apps/web/app/(workspace)/_components/app-shell/app-shell-header.tsx` — pipes `primaryNav` into `AppShellHeaderTrailing`.
 - `apps/web/app/(workspace)/_components/app-shell/app-shell-header-trailing.tsx` — accepts `primaryNav`, mounts `<AppShellCommandMenu primaryNav={primaryNav} />` between the layout toggle and the theme toggle.
 - `apps/web/app/(workspace)/_components/app-shell/app-shell-command-menu.tsx` — new component. Outline trigger button with a `⌘K` `<kbd>`, hand-rolled Radix Dialog (Root + Portal + Overlay + Content + sr-only Title + sr-only Description) wrapping a cmdk `Command` with `loop`, listens once for `⌘K` / `Ctrl+K` globally, fires `capturePostHogProductEvent({ event: "app_shell_command_menu_opened", properties: { source: "keyboard" | "click" } })` on open, closes on Escape and overlay click.
-- `apps/web/app/(workspace)/_components/app-shell/app-shell-command-menu-items.tsx` — new component. Composes from existing nav models without duplicating them: `buildBlueprintStageNavItems(...)` (filtered to `state === "active" | "available"`), `primaryNav.postReviewItems` (links flattened, menu children flattened, the `showLessonMap` action surfaced as a Map item), `workspaceMenuLinks(pathname)`, theme set (Light / Dark / System through `startThemeTransition`), `Toggle local navigation` (calls the preferences hook), `Sign out` (Clerk `signOut({ redirectUrl: routeConfig.home })`).
+- `apps/web/app/(workspace)/_components/app-shell/app-shell-command-menu-items.tsx` — new component. Composes from existing nav models without duplicating them: `buildCodebaseStageNavItems(...)` (filtered to `state === "active" | "available"`), `primaryNav.postReviewItems` (links flattened, menu children flattened, the `showLessonMap` action surfaced as a Map item), `workspaceMenuLinks(pathname)`, theme set (Light / Dark / System through `startThemeTransition`), `Toggle local navigation` (calls the preferences hook), `Sign out` (Clerk `signOut({ redirectUrl: routeConfig.home })`).
 - `apps/web/tests/setup/jsdom.ts` — adds a no-op `Element.prototype.scrollIntoView` shim so cmdk works in jsdom.
 - `apps/web/tests/integration-ui/use-header-scroll-shadow.test.ts` — new test covering the `0 → 40 → 0` transition both via `window.scrollY` and via inner-element `scrollTop`.
 - `apps/web/tests/integration-ui/use-app-shell-preferences.test.ts` — new test covering default, `localStorage` hydration, malformed-input fallback, write-through, toggle helper, multi-hook subscribe propagation, and the SSR-safe direct-read default.
-- `apps/web/tests/integration-ui/app-shell-command-menu.test.tsx` — new test covering `⌘K` open + Escape close, click-trigger open + click PostHog event, ⌘K open + keyboard PostHog event, blueprint stage navigation via the router, theme item invokes `setTheme`, and Sign out invokes Clerk's `signOut`.
+- `apps/web/tests/integration-ui/app-shell-command-menu.test.tsx` — new test covering `⌘K` open + Escape close, click-trigger open + click PostHog event, ⌘K open + keyboard PostHog event, codebase stage navigation via the router, theme item invokes `setTheme`, and Sign out invokes Clerk's `signOut`.
 - `apps/web/package.json` + `bun.lock` — `cmdk@1.1.1` pinned.
 
 Validation matrix (commands run at 2026-05-02):
@@ -129,9 +129,9 @@ Manual browser proof — captured for the prior pass at the existing running dev
 
 - `marketing-home-dark-fullpage.png`, `marketing-home-light-fullpage.png` (marketing homepage at desktop 1440x900 in both themes)
 - `marketing-header-dark.png`, `marketing-header-light.png` (top-bar crops in both themes)
-- `workspace-blueprint-light-desktop.png`, `workspace-blueprint-dark-desktop.png` (`/blueprint` at desktop 1440x900 in both themes)
-- `workspace-blueprint-header-light-desktop.png`, `workspace-blueprint-header-dark-desktop.png` (workspace header crops in both themes)
-- `workspace-blueprint-dark-mobile.png` (`/blueprint` at mobile 390x844 in dark mode)
+- `workspace-codebase-light-desktop.png`, `workspace-codebase-dark-desktop.png` (`/codebase` at desktop 1440x900 in both themes)
+- `workspace-codebase-header-light-desktop.png`, `workspace-codebase-header-dark-desktop.png` (workspace header crops in both themes)
+- `workspace-codebase-dark-mobile.png` (`/codebase` at mobile 390x844 in dark mode)
 - `workspace-user-menu-open-dark-desktop.png` (user menu open with the prior pass's name + email + Workspace / Review / Settings / Account / Sign out items visible)
 
 The subagent reported "no visible regressions observed" against the prior pass's locked contract. The `?marketing=1` variant rendered identically to `/`. The marketing → workspace handoff (theme toggle chrome, header height, primary-nav active state, user-menu items) read as one product across the captures.
@@ -139,11 +139,11 @@ The subagent reported "no visible regressions observed" against the prior pass's
 What this pass did NOT capture and remains pending for the next operator:
 
 - `/review` and `/lesson/[key]` at desktop 1440 + mobile 390 in light + dark.
-- Mobile light-mode `/blueprint` (only mobile dark was captured).
+- Mobile light-mode `/codebase` (only mobile dark was captured).
 - Keyboard Tab walk sequence (skip-link → brand → stage nav → post-review nav → layout toggle → command menu → theme toggle → user menu) with the focus ring visible at every stop.
 - User menu opened under `prefers-reduced-motion: reduce` (Chrome DevTools rendering panel emulation).
 - Footer rail dark-mode parity at sub-xl widths.
-- All five new affordances from this level-up pass: command menu open via ⌘K and click (normal motion + reduced motion), header shadow rest vs scrolled on `/blueprint`, theme-toggle cross-fade frames (before / during / after), `#app-shell-main` outline visible after a primary-nav click, local-nav collapse persisted across reload, the `<details>` disclosure on `/review` and `/lesson/*` at mobile 390.
+- All five new affordances from this level-up pass: command menu open via ⌘K and click (normal motion + reduced motion), header shadow rest vs scrolled on `/codebase`, theme-toggle cross-fade frames (before / during / after), `#app-shell-main` outline visible after a primary-nav click, local-nav collapse persisted across reload, the `<details>` disclosure on `/review` and `/lesson/*` at mobile 390.
 
 Handoff for the remaining manual browser proof: keep the dev stack on port 3000 (or restart with `bun run --cwd apps/web dev:web`), sign in with `test-entitled@test.com` (password in `.agents/skills/QA-Browser/references/internal-test-accounts.json`), then walk the routes above. Compare each frame to the locked behavior contract in the prior pass's `Outcomes & Retrospective`. If any premium affordance reads worse than the parity baseline (header shadow flickers, focus-restoration steals scroll, command menu pops in late, dropdown animation under reduced motion still plays), repair with the narrowest possible surface change and append a `Surprises & Discoveries` entry here.
 
@@ -157,7 +157,7 @@ Lessons learned: the brief asked the new hook tests to live in `tests/unit/`, bu
 
 ## Context and Orientation
 
-The workspace AppShell lives at `apps/web/app/(workspace)/_components/app-shell.tsx` and is consumed by every authenticated page under `apps/web/app/(workspace)/`. The shell composes a header (`apps/web/app/(workspace)/_components/app-shell/app-shell-header.tsx`) with a primary nav (`apps/web/app/(workspace)/_components/app-shell/app-shell-primary-nav.tsx` driven by the nav models in `apps/web/lib/blueprint-flow/blueprint-stage-nav-model.ts` and `apps/web/lib/workspace-navigation/build-primary-nav-model.ts`), a trailing block with the layout toggle, the new command menu, the theme toggle, and the user menu (`apps/web/app/(workspace)/_components/app-shell/app-shell-header-trailing.tsx`), an optional local nav rail (`apps/web/app/(workspace)/_components/app-shell/app-shell-local-nav.tsx`), and an optional footer skill rail (`apps/web/app/(workspace)/_components/app-shell/app-shell-footer-rail.tsx`).
+The workspace AppShell lives at `apps/web/app/(workspace)/_components/app-shell.tsx` and is consumed by every authenticated page under `apps/web/app/(workspace)/`. The shell composes a header (`apps/web/app/(workspace)/_components/app-shell/app-shell-header.tsx`) with a primary nav (`apps/web/app/(workspace)/_components/app-shell/app-shell-primary-nav.tsx` driven by the nav models in `apps/web/lib/codebase-flow/codebase-stage-nav-model.ts` and `apps/web/lib/workspace-navigation/build-primary-nav-model.ts`), a trailing block with the layout toggle, the new command menu, the theme toggle, and the user menu (`apps/web/app/(workspace)/_components/app-shell/app-shell-header-trailing.tsx`), an optional local nav rail (`apps/web/app/(workspace)/_components/app-shell/app-shell-local-nav.tsx`), and an optional footer skill rail (`apps/web/app/(workspace)/_components/app-shell/app-shell-footer-rail.tsx`).
 
 The marketing top-bar lives at `apps/web/app/_components/topbar.tsx` and consumes the shared theme-toggle primitive at `apps/web/app/_components/theme-toggle-button.tsx`. Shell-local theme work in this pass also touches the marketing primitive so both surfaces share the same view-transition seam at `apps/web/lib/theme/start-theme-transition.ts`.
 
@@ -174,7 +174,7 @@ Telemetry uses `capturePostHogProductEvent({ event, properties })` exported from
 
 ### Out Of Scope
 
-- Any change to `AppShellProps`, the active-block calculation, the leave-guard pattern, the nav models in `apps/web/lib/workspace-navigation/` or `apps/web/lib/blueprint-flow/`, the lesson manifest, the `next-themes` provider config, or the Convex schema.
+- Any change to `AppShellProps`, the active-block calculation, the leave-guard pattern, the nav models in `apps/web/lib/workspace-navigation/` or `apps/web/lib/codebase-flow/`, the lesson manifest, the `next-themes` provider config, or the Convex schema.
 - Any new `bg-primary` or `text-primary` styling.
 - Any sub-`lg` primary-nav behavior shift (the horizontal scroll pattern from the prior pass is preserved). The brief lists "replace the sub-`lg` primary-nav with a disclosure menu tied to the command menu" as stretch only; it is deferred.
 - Any notification surface in the header. Listed as stretch only; deferred.
@@ -252,7 +252,7 @@ Manual browser proof (cannot run as a command; requires authenticated dev sessio
     bun run --cwd apps/web dev:web
     # ensure nothing else holds :3000
     # sign in via Clerk test account (bun run --cwd apps/web clerk:test-user:check / :create)
-    # walk /blueprint, /review, /lesson/[key] at desktop 1440 and mobile 390 in light + dark
+    # walk /codebase, /review, /lesson/[key] at desktop 1440 and mobile 390 in light + dark
     # capture: ⌘K open + click open, reduced-motion vs full-motion, scroll shadow rest/scrolled,
     # theme cross-fade frames, focus ring on #app-shell-main after primary-nav click,
     # local-nav collapse persisted across reload, <details> disclosure on /review and /lesson at mobile
@@ -293,7 +293,7 @@ Public types and modules introduced or modified by this plan:
 - `apps/web/app/(workspace)/_hooks/app-shell/use-app-shell-preferences.ts` exports `useAppShellPreferences()` returning `{ preferences, setPreferences, toggleLocalNavCollapsed }`.
 - `apps/web/app/(workspace)/_hooks/app-shell/use-header-scroll-shadow.ts` exports `useHeaderScrollShadow({ mainId })` returning `boolean`.
 - `apps/web/app/(workspace)/_components/app-shell/app-shell-command-menu.tsx` exports `AppShellCommandMenu({ primaryNav })`. Takes the same `AppShellPrimaryNav | undefined` shape that `AppShellHeader` already receives.
-- `apps/web/app/(workspace)/_components/app-shell/app-shell-command-menu-items.tsx` exports `AppShellCommandMenuItems({ primaryNav, onSelect })`. Composes from `buildBlueprintStageNavItems`, `primaryNav.postReviewItems`, `workspaceMenuLinks`, the shared theme transition helper, the preferences hook, and Clerk's `useClerk().signOut`.
+- `apps/web/app/(workspace)/_components/app-shell/app-shell-command-menu-items.tsx` exports `AppShellCommandMenuItems({ primaryNav, onSelect })`. Composes from `buildCodebaseStageNavItems`, `primaryNav.postReviewItems`, `workspaceMenuLinks`, the shared theme transition helper, the preferences hook, and Clerk's `useClerk().signOut`.
 
 External dependencies:
 

@@ -3,7 +3,7 @@ title: Landing Page Polish
 status: active
 created_at: 2026-05-02
 completed_at: null
-summary: Bring the Blueprint demo's caliber of craft polish to every other public landing-page section by tuning motion, microinteractions, typography rhythm, dark-mode parity, accessibility, and mobile reflow without changing the homepage shell, copy, render-model gating, structured data, or the locked surfaces from commit d1cad98.
+summary: Bring the Codebase demo's caliber of craft polish to every other public landing-page section by tuning motion, microinteractions, typography rhythm, dark-mode parity, accessibility, and mobile reflow without changing the homepage shell, copy, render-model gating, structured data, or the locked surfaces from commit d1cad98.
 post_build_recap: null
 read_when:
   - Resuming the landing-page polish pass mid-flight.
@@ -21,7 +21,7 @@ Current status: the sprint-path / `Exec Loops` homepage section was retired on 2
 
 ## Purpose / Big Picture
 
-The previous polish slice (`d1cad98`) lifted the new Blueprint demo, the shared CTA seam, and the post-checkout localStorage seeder to the craft layer, and corrected the most visibly broken `bg-primary` / `text-primary` accents on the marketing surface. That slice was correct but scoped: every section between the demo and the footer still reads as "shipped" rather than "expensive."
+The previous polish slice (`d1cad98`) lifted the new Codebase demo, the shared CTA seam, and the post-checkout localStorage seeder to the craft layer, and corrected the most visibly broken `bg-primary` / `text-primary` accents on the marketing surface. That slice was correct but scoped: every section between the demo and the footer still reads as "shipped" rather than "expensive."
 
 This pass raises the craft layer on every other section the public homepage mounts. A visitor opening `/?marketing=1` should feel that motion respects `prefers-reduced-motion` everywhere, that microinteractions are snappy and intentional, that typography reads cleanly at 360, 390, 768, and desktop widths, that every brand accent flips correctly in dark mode, that every interactive control has a visible focus ring and a real tap target, and that the section-to-section rhythm is one continuous design system rather than a stack of independently authored blocks.
 
@@ -60,7 +60,7 @@ Slice 4 surfaced that the starter-system `<h2>` `aria-label` is NOT a redundant 
 
 ## Decision Log
 
-Decision: Track this work as a new ExecPlan rather than reopening `2026-05-02-blueprint-demo-polish-2.md`.
+Decision: Track this work as a new ExecPlan rather than reopening `2026-05-02-codebase-demo-polish-2.md`.
 Rationale: That plan is fully executed and has a complete Outcomes & Retrospective. Reopening it would drift its summary semantics. The landing-page polish pass is a separable slice with its own surfaces, validation, and risk profile.
 Date: 2026-05-02
 
@@ -139,7 +139,7 @@ So the future structural-cascade fix can find them and decide whether to revert:
 
 The public homepage entry point is `apps/web/app/_components/home-page/home-page.tsx`. It mounts the following section components conditionally on `getHomePageRenderModel()` from `apps/web/app/_lib/home-page-render-model.ts`:
 
-- `BlueprintDemoSectionBlock` from `sections/blueprint-demo/blueprint-demo-section.tsx` (locked).
+- `CodebaseDemoSectionBlock` from `sections/codebase-demo/codebase-demo-section.tsx` (locked).
 - `HomeHeroSection` from `sections/hero-sections.tsx` (in scope).
 - `SprintPathUnifiedSection` from `sections/sprint-path-unified-section.tsx` (in scope; badge + title accents locked).
 - `ExecLoopSectionBlock` from `sections/exec-loop-section.tsx` (in scope).
@@ -153,10 +153,10 @@ Cross-section primitives in scope:
 - `sections/home-page-primitives.tsx` (`homePageSectionClassName`, `HomePageSecondaryLink`).
 - `sections/provider-icons.tsx` (only if it actually renders on the public homepage today).
 - `sections/scroll-reveal.tsx` (locked - reuse, do not re-implement).
-- `sections/blueprint-demo/blueprint-demo-motion.ts` (locked - reuse the `useReducedMotion` pattern).
+- `sections/codebase-demo/codebase-demo-motion.ts` (locked - reuse the `useReducedMotion` pattern).
 
 Locked surfaces:
-- All `sections/blueprint-demo/*`.
+- All `sections/codebase-demo/*`.
 - `sections/home-page-primary-cta.tsx` and the `bg-foreground text-background hover:bg-foreground/90` invert pattern.
 - `sections/scroll-reveal.tsx` and its reduced-motion guard.
 - `sections/home-hero-top-bar.tsx`.
@@ -166,7 +166,7 @@ Locked surfaces:
 - The title accent + sign-in link color in `pricing-footer-sections.tsx`.
 - The checkmark color in `pricing-includes-list.tsx`.
 - The `productPreviewSection` content + accent maps in `app/_content/home-page.ts`.
-- The checkout seam: `checkout-button.tsx`, `use-stripe-checkout.ts`, `lib/blueprint-flow/use-blueprint-local-draft-seeder.ts`, `app/(workspace)/_components/blueprint-flow/blueprint-local-draft-seeder.tsx`.
+- The checkout seam: `checkout-button.tsx`, `use-stripe-checkout.ts`, `lib/codebase-flow/use-codebase-local-draft-seeder.ts`, `app/(workspace)/_components/codebase-flow/codebase-local-draft-seeder.tsx`.
 - The PostHog observability migration files in the uncommitted working tree (paths under `apps/web/lib/observability/`, `apps/web/platform/`, `apps/web/instrumentation*`, `scripts/observability/`, `docs/programs/completed/2026-05-02-posthog-observability-migration/`, `.cursor/`, `.agents/skills/shared/posthog-linear-triage/`).
 
 This pass uses the existing dependency graph: `motion/react` (`useReducedMotion`, `LayoutGroup`, `motion.*`), `next-themes`, `lucide-react`, `sonner`, shadcn primitives, `tailwind-merge`. No new dependencies are added.
@@ -344,7 +344,7 @@ Manual smoke:
 
 Every slice in this pass is additive. Re-running any slice is safe: motion gates fall through to opacity-only or static state under reduced motion, accent-token swaps preserve the same visual weight in light mode, and the heading promotion in the durability section preserves every visible class.
 
-To roll back any slice, revert the slice's commits. The locked behavior surfaces (Blueprint demo, CTA seam, `data-testid` values, structured data) are unchanged across the pass, so no migration is required either way.
+To roll back any slice, revert the slice's commits. The locked behavior surfaces (Codebase demo, CTA seam, `data-testid` values, structured data) are unchanged across the pass, so no migration is required either way.
 
 If the structural `--primary` / `--primary-foreground` cascade fix lands during this work, only the workarounds introduced in this pass are reverted (not the prior `d1cad98` swaps), and the reversal is called out explicitly in `Outcomes & Retrospective`.
 

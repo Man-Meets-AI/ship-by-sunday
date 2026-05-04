@@ -42,7 +42,7 @@ Move SBS release ownership toward protected semver tags, but adapt the tag workf
 - `qa/scripts/release-triage.mjs`
 - `package.json`
 - `apps/web/package.json`
-- `packages/blueprint-compiler/package.json`
+- `packages/codebase-compiler/package.json`
 - GitHub branch and tag rulesets
 - Vercel production project settings
 - Convex production deploy workflow

@@ -8,9 +8,9 @@
 - `.github/workflows/ci.yml:80-101` runs a dedicated `cli` job through `bun run sbs:check`.
 - `bin/sbs:1-9` execs the CLI source file.
 - `docs/release-workflow.md:67` and `docs/release-workflow.md:103` document `cli` as required proof.
-- The source research found no live `packages/blueprint-compiler` references to `bun run sbs`, `./bin/sbs`, `Ship by Sunday CLI`, `.ship-by-sunday`, or `ship-by-sunday-cli`.
-- The CLI depends on blueprint-compiler APIs, not the other way around.
-- Removing the CLI loses local browserless blueprint intake, `.ship-by-sunday/draft.json`, JSON automation commands, import/export/apply/mutate support, legacy draft import normalization, and local generation from draft facts.
+- The source research found no live `packages/codebase-compiler` references to `bun run sbs`, `./bin/sbs`, `Ship by Sunday CLI`, `.ship-by-sunday`, or `ship-by-sunday-cli`.
+- The CLI depends on codebase-compiler APIs, not the other way around.
+- Removing the CLI loses local browserless codebase intake, `.ship-by-sunday/draft.json`, JSON automation commands, import/export/apply/mutate support, legacy draft import normalization, and local generation from draft facts.
 - Codex's CLI is the product itself; Codex does not justify a separate SBS helper CLI bolted into root scripts.
 
 ## Recommendation
@@ -20,7 +20,7 @@ Delete or retire the helper CLI as a distinct Program slice after unwiring root 
 ## Risks
 
 - Deleting `packages/ship-by-sunday-cli` first would break root `check`, CI, `bin/sbs`, docs, lockfile state, and documented branch protection.
-- Useful draft normalization or local generation behavior could be lost if it is still needed but not moved to `packages/blueprint-compiler` or another non-CLI package.
+- Useful draft normalization or local generation behavior could be lost if it is still needed but not moved to `packages/codebase-compiler` or another non-CLI package.
 - Public docs under `apps/web/content/docs/` would advertise a removed command surface.
 - Branch protection may continue requiring a deleted `cli` context if GitHub settings are not updated.
 

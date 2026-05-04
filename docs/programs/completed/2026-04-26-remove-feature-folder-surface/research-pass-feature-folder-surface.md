@@ -16,7 +16,7 @@ Top-level file counts before this initiative:
 
     18 apps/web/features/auth
     19 apps/web/features/blog
-    40 apps/web/features/blueprint-flow
+    40 apps/web/features/codebase-flow
      6 apps/web/features/checkout
     11 apps/web/features/codex
    350 apps/web/features/course

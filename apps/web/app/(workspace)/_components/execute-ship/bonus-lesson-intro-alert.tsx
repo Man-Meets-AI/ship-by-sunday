@@ -17,8 +17,8 @@ export function BonusLessonIntroAlert({
 			<AlertCircleIcon aria-hidden />
 			<AlertTitle>Video-first bonus lesson</AlertTitle>
 			<AlertDescription>
-				Use the blueprint as the brief and keep BUILD as the default path.
-				Browse bonus lessons from{" "}
+				Use the codebase as the brief and keep BUILD as the default path. Browse
+				bonus lessons from{" "}
 				<button
 					type="button"
 					className="font-medium text-foreground underline"

@@ -9,7 +9,7 @@ Use this file to decide what can be drafted freely, what must be reviewed, and w
 | Social variants | Yes | Yes | Yes |
 | Competitor or market research brief | Yes | Yes if used for public claims | Yes |
 | Internal review brief | Yes | No if it stays internal | Yes |
-| Claim summary from stable blueprint facts | Yes | Yes before public use | Yes |
+| Claim summary from stable codebase facts | Yes | Yes before public use | Yes |
 | Any output using current facts | Yes after verification | Yes | Yes |
 | Anything with pricing, guarantee, or founder proof | No | Yes | Yes |
 

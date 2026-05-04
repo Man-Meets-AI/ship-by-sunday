@@ -62,7 +62,7 @@ Do not change public docs or blog URLs. `/docs`, `/docs/local-setup`, nested doc
 
 Do not change canonical URLs, Open Graph metadata, Twitter metadata, sitemap entries, public metadata tests, disabled docs states, or the generated starter repo's docs assumptions unless a child ExecPlan explicitly owns that update.
 
-Do not touch Stripe, checkout, webhook, pricing, promo code, billing proof, environment behavior, Convex schema, generated Convex files, blueprint compiler schema, or compiler facts.
+Do not touch Stripe, checkout, webhook, pricing, promo code, billing proof, environment behavior, Convex schema, generated Convex files, codebase compiler schema, or compiler facts.
 
 ## Recommended Migration Shape
 

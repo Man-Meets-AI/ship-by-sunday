@@ -8,7 +8,7 @@ post_build_recap: Removed the helper CLI package, launcher, scripts, CI job, act
 read_when:
   - Resuming the fifth child slice of the Codex release reset Program.
   - Removing the helper CLI, root sbs scripts, bin launcher, CLI docs, or cli CI context.
-  - Checking boundaries before changing blueprint compiler generation, browser proof, QA proof, or release workflows.
+  - Checking boundaries before changing codebase compiler generation, browser proof, QA proof, or release workflows.
 program_id: sbs-codex-release-reset
 planning_brief: docs/programs/completed/2026-04-24-sbs-codex-release-reset/planning-brief-5.md
 ---
@@ -23,7 +23,7 @@ This ExecPlan must be maintained in accordance with `docs/exec-plans/PLANS.md`.
 
 Ship by Sunday now has a manifest-backed tag release workflow and release evidence layer, but the repo still treats the old helper CLI as release-critical. A user or maintainer can still discover `bun run sbs`, `./bin/sbs`, `sbs:check`, the `packages/ship-by-sunday-cli/` workspace package, and a required-looking `cli` GitHub Actions job even though the hosted product and compiler-owned review/download path are the real product surfaces.
 
-After this plan is implemented, the repository should no longer expose the helper CLI as a supported product or release gate. Root scripts, CI, active docs, workspace metadata, and branch-protection references should stop naming `sbs`, `sbs:check`, `./bin/sbs`, `packages/ship-by-sunday-cli/`, and a required `cli` context. The web app, `packages/blueprint-compiler`, review/download generation, `release.json`, `scripts/release/`, the `Tag Release` workflow, QA transitional proof, browser proof, and snapshot fallback must keep working.
+After this plan is implemented, the repository should no longer expose the helper CLI as a supported product or release gate. Root scripts, CI, active docs, workspace metadata, and branch-protection references should stop naming `sbs`, `sbs:check`, `./bin/sbs`, `packages/ship-by-sunday-cli/`, and a required `cli` context. The web app, `packages/codebase-compiler`, review/download generation, `release.json`, `scripts/release/`, the `Tag Release` workflow, QA transitional proof, browser proof, and snapshot fallback must keep working.
 
 This is the fifth child slice of the Program at `docs/programs/completed/2026-04-24-sbs-codex-release-reset/`, governed by `planning-brief-5.md`.
 
@@ -32,11 +32,11 @@ This is the fifth child slice of the Program at `docs/programs/completed/2026-04
 - [x] 2026-04-24 EDT: Created this child ExecPlan from `docs/programs/completed/2026-04-24-sbs-codex-release-reset/planning-brief-5.md`.
 - [x] 2026-04-24 EDT: Grilled the plan before implementation and tightened the branch-protection stance: inspect and document live required contexts locally, but do not mutate remote branch protection from a dirty local checkout before the workflow deletion is pushed.
 - [x] 2026-04-24 EDT: Inventory confirmed the helper CLI surface is active before deletion: `packages/ship-by-sunday-cli` exists, `bin/sbs` exists, and `bun pm ls @shipbysunday/ship-by-sunday-cli` lists the workspace package. The before grep found helper CLI references in root `package.json` scripts, `.github/workflows/ci.yml`, `README.md`, `docs/design-docs/scripts.md`, `docs/release-workflow.md`, `qa/README.md`, public docs under `apps/web/content/docs/`, `bun.lock`, and the CLI package itself. The same scan also found unrelated third-party CLI references such as Stripe CLI, Convex CLI, Playwright CLI, Remotion CLI, and vendor/package binary names; those are intentionally out of scope.
-- [x] 2026-04-24 EDT: Import-direction proof passed. `rg -n "@shipbysunday/ship-by-sunday-cli|packages/ship-by-sunday-cli|bin/sbs|bun run sbs|sbs:check" packages/blueprint-compiler apps/web --glob '!apps/web/content/docs/**' --glob '!**/node_modules/**'` returned no matches. `rg -n "@shipbysunday/blueprint-compiler|@shipbysunday/blueprint-compiler/server" packages/ship-by-sunday-cli/src packages/ship-by-sunday-cli/tests` showed the CLI imports the compiler from `generate-command.ts`, `field-contract.ts`, `blueprint-derivation.ts`, `draft-store.ts`, and CLI tests.
+- [x] 2026-04-24 EDT: Import-direction proof passed. `rg -n "@shipbysunday/ship-by-sunday-cli|packages/ship-by-sunday-cli|bin/sbs|bun run sbs|sbs:check" packages/codebase-compiler apps/web --glob '!apps/web/content/docs/**' --glob '!**/node_modules/**'` returned no matches. `rg -n "@shipbysunday/codebase-compiler|@shipbysunday/codebase-compiler/server" packages/ship-by-sunday-cli/src packages/ship-by-sunday-cli/tests` showed the CLI imports the compiler from `generate-command.ts`, `field-contract.ts`, `codebase-derivation.ts`, `draft-store.ts`, and CLI tests.
 - [x] 2026-04-24 EDT: Removed local helper CLI wiring: deleted `packages/ship-by-sunday-cli/`, deleted `bin/sbs`, removed root `sbs` and `sbs:check` scripts, changed root `check` to `bun run --cwd apps/web check`, deleted the `.github/workflows/ci.yml` `cli` job, removed active helper CLI docs/navigation, and ran `bun install`. `bun install` reported 1390 installs across 1490 packages and no further changes; the lockfile no longer contains `@shipbysunday/ship-by-sunday-cli` or `packages/ship-by-sunday-cli`.
 - [x] 2026-04-24 EDT: Parsed `.github/workflows/ci.yml` with `ruby -e 'require "yaml"; YAML.load_file(".github/workflows/ci.yml"); puts "ci yaml ok"'`; it printed `ci yaml ok` after Ruby emitted local gem-extension warnings for `ffi` and `io-console`.
 - [x] 2026-04-24 EDT: Inspected live GitHub branch protection read-only per the grilled plan. `dev` still reports `strict: true` and contexts/checks `static`, `integration`, `browser-smoke`, and `cli`. `main` still reports `strict: true` and contexts/checks `static`, `integration`, `browser-smoke`, and `cli`. The plan intentionally did not patch remote protection from this dirty local checkout before the workflow deletion is pushed; `docs/release-workflow.md` now records the exact post-merge `gh api --method PATCH` commands to remove only the retired helper context.
-- [x] 2026-04-24 EDT: Focused validation passed. `bun install --frozen-lockfile` checked 1390 installs across 1490 packages with no changes. `bun run --cwd packages/blueprint-compiler lint` found 0 warnings/errors across 47 files. `bun run --cwd packages/blueprint-compiler format:check` passed across 50 files. `bun run --cwd packages/blueprint-compiler typecheck` passed. `bun run --cwd packages/blueprint-compiler test` passed 10 files / 31 tests. `bun run --cwd apps/web test:unit -- release-manifest release-evidence` passed 2 files / 10 tests. `bun run --cwd apps/web test:integration -- blueprint` passed 4 files / 12 tests with existing jsdom `Not implemented: navigation to another Document` notices.
+- [x] 2026-04-24 EDT: Focused validation passed. `bun install --frozen-lockfile` checked 1390 installs across 1490 packages with no changes. `bun run --cwd packages/codebase-compiler lint` found 0 warnings/errors across 47 files. `bun run --cwd packages/codebase-compiler format:check` passed across 50 files. `bun run --cwd packages/codebase-compiler typecheck` passed. `bun run --cwd packages/codebase-compiler test` passed 10 files / 31 tests. `bun run --cwd apps/web test:unit -- release-manifest release-evidence` passed 2 files / 10 tests. `bun run --cwd apps/web test:integration -- codebase` passed 4 files / 12 tests with existing jsdom `Not implemented: navigation to another Document` notices.
 - [x] 2026-04-24 EDT: Release and workflow validation passed. `bun run release:manifest:check` returned `ok: true` for `release.json`, channel `stable`, `gitTag: v0.3.0`, schema `release-manifest.v1`, and evidence schema `release-evidence.v1`. `bun run release:evidence:build` wrote dry-run `tmp/release-evidence.v1.json` for `v0.3.0` with expected unavailable hosted-proof blockers. `ruby -e 'require "yaml"; Dir[".github/workflows/*.yml"].each { |file| YAML.load_file(file) }; puts "workflow yaml ok"'` passed after Ruby emitted local gem-extension warnings for `ffi` and `io-console`.
 - [x] 2026-04-24 EDT: Broad validation passed. `bun run format` finished in 406ms on 1002 files. `bun run lint` found 0 warnings/errors across 942 files. `bun run typecheck` passed after waiting for the serialized Next build lock; Next compiled in 101s, TypeScript finished in 12.7s, and 71 static pages generated.
 - [x] 2026-04-24 EDT: Plan, docs, Program, and root check validation passed. `bun run plans:lint -- --plan docs/exec-plans/completed/2026-04-24-retire-the-helper-cli.md` passed. `bun run markdown:lint -- --paths docs/exec-plans/completed/2026-04-24-retire-the-helper-cli.md README.md docs/design-docs/scripts.md docs/release-workflow.md qa/README.md apps/web/content/docs` passed. `bun run programs:lint` passed. `git diff --check` passed. Extra proof `bun run check` now enters `bun run --cwd apps/web check` directly and passed lint, format check, unit tests (134 files / 507 tests), contract tests (1 file / 4 tests), integration tests (26 files / 119 tests), coverage-critical tests (17 files / 115 tests, 97.89% statements), and final Next build (compiled in 92s, TypeScript finished in 12.9s, 71 static pages generated).
@@ -44,9 +44,9 @@ This is the fifth child slice of the Program at `docs/programs/completed/2026-04
 
 ## Surprises & Discoveries
 
-During plan authoring, repo inspection found no direct import from `apps/web` or `packages/blueprint-compiler` into `@shipbysunday/ship-by-sunday-cli`, `packages/ship-by-sunday-cli`, `bin/sbs`, `bun run sbs`, or `sbs:check` outside active docs. This supports the expected default: delete the CLI instead of migrating behavior. The implementer must rerun the audit immediately before deletion because the worktree is dirty and other agents may have changed files.
+During plan authoring, repo inspection found no direct import from `apps/web` or `packages/codebase-compiler` into `@shipbysunday/ship-by-sunday-cli`, `packages/ship-by-sunday-cli`, `bin/sbs`, `bun run sbs`, or `sbs:check` outside active docs. This supports the expected default: delete the CLI instead of migrating behavior. The implementer must rerun the audit immediately before deletion because the worktree is dirty and other agents may have changed files.
 
-During plan authoring, the CLI imports `@shipbysunday/blueprint-compiler` and `@shipbysunday/blueprint-compiler/server`, especially from `packages/ship-by-sunday-cli/src/commands/generate-command.ts` and `packages/ship-by-sunday-cli/src/blueprint-derivation.ts`. The dependency direction is CLI-to-compiler, not compiler-to-CLI.
+During plan authoring, the CLI imports `@shipbysunday/codebase-compiler` and `@shipbysunday/codebase-compiler/server`, especially from `packages/ship-by-sunday-cli/src/commands/generate-command.ts` and `packages/ship-by-sunday-cli/src/codebase-derivation.ts`. The dependency direction is CLI-to-compiler, not compiler-to-CLI.
 
 During plan authoring, the active public docs that clearly advertise the helper CLI are `apps/web/content/docs/ship-by-sunday-cli.mdx`, `apps/web/content/docs/commands.mdx`, `apps/web/content/docs/index.mdx`, and `apps/web/content/docs/_meta.ts`. These are different from unrelated Stripe CLI and Convex CLI references, which must stay unless a later task changes those operational surfaces.
 
@@ -57,7 +57,7 @@ During the pre-implementation grill on 2026-04-24, live GitHub required-status r
 ## Decision Log
 
 Decision: Default to deleting the helper CLI rather than migrating it.
-Rationale: `planning-brief-5.md` says the CLI is downstream of `packages/blueprint-compiler`, and repo inspection supports that direction. Keeping CLI behavior alive somewhere else would preserve the bespoke surface this Program is trying to retire unless a concrete compiler or web dependency is found.
+Rationale: `planning-brief-5.md` says the CLI is downstream of `packages/codebase-compiler`, and repo inspection supports that direction. Keeping CLI behavior alive somewhere else would preserve the bespoke surface this Program is trying to retire unless a concrete compiler or web dependency is found.
 Date: 2026-04-24
 
 Decision: Preserve unrelated Stripe CLI and Convex CLI documentation.
@@ -80,17 +80,17 @@ Date: 2026-04-24
 
 This plan is complete. The helper CLI package, repo-local launcher, root scripts, CI job, public docs page, public docs navigation, and active docs references are removed. `package.json` no longer exposes `sbs` or `sbs:check`, and root `check` now runs the web app check directly. `.github/workflows/ci.yml` no longer defines the `cli` job.
 
-The compiler and hosted product boundaries remain intact. `packages/blueprint-compiler` still validates independently, the web release manifest/evidence tests pass, and release helpers under `scripts/release/` remain the release-owned automation boundary.
+The compiler and hosted product boundaries remain intact. `packages/codebase-compiler` still validates independently, the web release manifest/evidence tests pass, and release helpers under `scripts/release/` remain the release-owned automation boundary.
 
 Live branch protection still reported the stale `cli` required context on both `dev` and `main` during read-only inspection. The pre-implementation grill explicitly said not to mutate those remote settings from this dirty local checkout before the workflow deletion is pushed, so this plan records the exact post-merge `gh api --method PATCH` operator commands in `docs/release-workflow.md`.
 
 ## Context and Orientation
 
-The helper CLI is the repo-local Ship by Sunday command surface exposed by the root `package.json` scripts `sbs` and `sbs:check`, the checked-in launcher `bin/sbs`, and the workspace package `packages/ship-by-sunday-cli/`. It asks or imports blueprint facts, stores one local draft under `.ship-by-sunday/`, and calls `packages/blueprint-compiler` to review readiness or generate a customer-safe repo snapshot.
+The helper CLI is the repo-local Ship by Sunday command surface exposed by the root `package.json` scripts `sbs` and `sbs:check`, the checked-in launcher `bin/sbs`, and the workspace package `packages/ship-by-sunday-cli/`. It asks or imports codebase facts, stores one local draft under `.ship-by-sunday/`, and calls `packages/codebase-compiler` to review readiness or generate a customer-safe repo snapshot.
 
-The compiler is a separate product boundary at `packages/blueprint-compiler/`. It owns the canonical project definition schema, readiness logic, generated blueprint files, review/download zip, repo generation manifest, starter snapshot contract, and server exports consumed by the web app. The compiler must survive this slice. The implementer should think of the CLI as one frontend that uses the compiler, not as the owner of compiler behavior.
+The compiler is a separate product boundary at `packages/codebase-compiler/`. It owns the canonical project definition schema, readiness logic, generated codebase files, review/download zip, repo generation manifest, starter snapshot contract, and server exports consumed by the web app. The compiler must survive this slice. The implementer should think of the CLI as one frontend that uses the compiler, not as the owner of compiler behavior.
 
-The web review/download path is separate from the CLI. The protected user journey is `/blueprint -> /review`, and the compiler-backed download behavior is exercised through `apps/web` code and tests. Removing the CLI must not remove or weaken web review/download generation, starter repo generation, design preset generation, or generated docs used by the hosted product.
+The web review/download path is separate from the CLI. The protected user journey is `/codebase -> /review`, and the compiler-backed download behavior is exercised through `apps/web` code and tests. Removing the CLI must not remove or weaken web review/download generation, starter repo generation, design preset generation, or generated docs used by the hosted product.
 
 The current `CI` workflow at `.github/workflows/ci.yml` has jobs named `qa_control_plane`, `static`, `cli`, `integration`, and `browser-smoke`. The `cli` job installs dependencies and runs `bun run sbs:check`. After this plan is implemented, that job should be gone, and branch protection should no longer require a `cli` context.
 
@@ -102,7 +102,7 @@ QA and browser proof are transitional but still active. `qa:run-pack`, QA invent
 
 In scope is retiring `packages/ship-by-sunday-cli/`, `bin/sbs`, root `sbs` and `sbs:check` scripts, the `cli` CI job in `.github/workflows/ci.yml`, the root `check` dependency on `sbs:check`, CLI tests, active CLI docs, workspace and lockfile metadata for the CLI package, and release docs that treat `cli` as required proof.
 
-In scope is first proving whether any CLI-only behavior is required by `packages/blueprint-compiler` or the web review/download generation path. The expected default is deletion, not migration. If the proof finds a real compiler or web dependency, only that specific non-CLI behavior may move behind an existing non-CLI boundary, and the implementer must update this plan before doing it.
+In scope is first proving whether any CLI-only behavior is required by `packages/codebase-compiler` or the web review/download generation path. The expected default is deletion, not migration. If the proof finds a real compiler or web dependency, only that specific non-CLI behavior may move behind an existing non-CLI boundary, and the implementer must update this plan before doing it.
 
 In scope is updating `README.md`, `docs/design-docs/scripts.md`, `docs/release-workflow.md`, `qa/README.md` only where it names `cli` as a required context, `apps/web/content/docs/commands.mdx`, `apps/web/content/docs/ship-by-sunday-cli.mdx`, `apps/web/content/docs/_meta.ts`, and `apps/web/content/docs/index.mdx` so active docs no longer advertise the helper CLI.
 
@@ -112,13 +112,13 @@ In scope is inspecting live GitHub branch protection for `dev` and `main`, remov
 
 Out of scope is deleting QA control-plane files, deleting QA inventories, deleting QA personas, removing `qa:run-pack`, replacing or deleting browser proof, deleting `browser-smoke`, deleting sandbox e2e, deleting snapshot fallback, changing `release.json` semantics, removing `scripts/release/`, rewriting the `Tag Release` workflow beyond CLI references, changing `Dev Staging Proof`, changing `Production Release Proof`, changing `Convex Production Deploy`, adding CODEOWNERS, adding broad GitHub policy automation, adding broad `.github/codex` automation, rotating credentials, redesigning product routes, rewriting the release workflow beyond CLI references, or doing final historical docs archive cleanup.
 
-Out of scope is deleting or rewriting `packages/blueprint-compiler`, web review/download generation, generated starter behavior, release manifest tests, release evidence tests, application tests, auth, checkout, entitlement, metadata, public route behavior, or course/workbench product surfaces.
+Out of scope is deleting or rewriting `packages/codebase-compiler`, web review/download generation, generated starter behavior, release manifest tests, release evidence tests, application tests, auth, checkout, entitlement, metadata, public route behavior, or course/workbench product surfaces.
 
 Out of scope is removing unrelated third-party CLI references such as Stripe CLI local guardrails, Convex CLI deployment commands, Codex CLI docs, or vendor docs that happen to contain the generic word `CLI`.
 
 ## Plan of Work
 
-Start with an audit, not deletion. Rerun focused greps across root scripts, workflows, active docs, package manifests, lockfile, compiler, and web app to identify helper CLI references and to distinguish them from unrelated third-party CLI references. Prove there are no imports from `packages/blueprint-compiler` or `apps/web` into the CLI package. Read the files that the audit points to before editing.
+Start with an audit, not deletion. Rerun focused greps across root scripts, workflows, active docs, package manifests, lockfile, compiler, and web app to identify helper CLI references and to distinguish them from unrelated third-party CLI references. Prove there are no imports from `packages/codebase-compiler` or `apps/web` into the CLI package. Read the files that the audit points to before editing.
 
 Next remove the command and package surface. Delete `packages/ship-by-sunday-cli/` and `bin/sbs`, remove root scripts `sbs` and `sbs:check`, and change root `check` so it remains truthful without the CLI. The likely replacement is `bun run --cwd apps/web check`, because `sbs:check` was the only root-level compiler aggregator. Do not add a new compiler aggregator unless the audit proves the compiler needs an ordinary non-CLI root check; the compiler-focused validation commands in this plan still prove the compiler after deletion.
 
@@ -130,7 +130,7 @@ Finally refresh dependency metadata with the repo's existing Bun workflow and va
 
 ## Milestones
 
-Milestone 1 proves the deletion boundary. At the end of this milestone, the implementer has current grep output showing all active helper CLI references and import-direction proof showing that `packages/blueprint-compiler` and `apps/web` do not depend on the CLI. Success means the implementer can name whether this is pure deletion or whether a specific non-CLI behavior must move before deletion.
+Milestone 1 proves the deletion boundary. At the end of this milestone, the implementer has current grep output showing all active helper CLI references and import-direction proof showing that `packages/codebase-compiler` and `apps/web` do not depend on the CLI. Success means the implementer can name whether this is pure deletion or whether a specific non-CLI behavior must move before deletion.
 
 Milestone 2 removes local command and package wiring. At the end of this milestone, `packages/ship-by-sunday-cli/`, `bin/sbs`, root `sbs`, root `sbs:check`, root `check`'s dependency on `sbs:check`, CLI tests, and workspace/lockfile entries are gone. Success means `bun install --frozen-lockfile` no longer expects the CLI package, `bun run check` no longer calls `sbs:check`, and compiler-focused tests still pass.
 
@@ -154,14 +154,14 @@ Milestone 5 validates the slice and updates living artifacts. At the end of this
 
 2. Run the before grep audit for active helper CLI references:
 
-       rg -n "packages/ship-by-sunday-cli|@shipbysunday/ship-by-sunday-cli|bin/sbs|\\./bin/sbs|bun run sbs|sbs:check|ship-by-sunday-cli|Ship by Sunday CLI|intake CLI|helper CLI|\\bcli\\b" package.json bun.lock .github/workflows README.md docs/release-workflow.md docs/design-docs/scripts.md qa/README.md apps/web/content/docs packages/ship-by-sunday-cli packages/blueprint-compiler apps/web --glob '!docs/exec-plans/**' --glob '!docs/programs/**' --glob '!tmp/**'
+       rg -n "packages/ship-by-sunday-cli|@shipbysunday/ship-by-sunday-cli|bin/sbs|\\./bin/sbs|bun run sbs|sbs:check|ship-by-sunday-cli|Ship by Sunday CLI|intake CLI|helper CLI|\\bcli\\b" package.json bun.lock .github/workflows README.md docs/release-workflow.md docs/design-docs/scripts.md qa/README.md apps/web/content/docs packages/ship-by-sunday-cli packages/codebase-compiler apps/web --glob '!docs/exec-plans/**' --glob '!docs/programs/**' --glob '!tmp/**'
 
    Classify matches into helper CLI references, unrelated third-party CLI references, and historical references. Do not delete unrelated Stripe CLI, Convex CLI, Codex CLI, or vendor CLI references.
 
 3. Prove import direction before deletion:
 
-       rg -n "@shipbysunday/ship-by-sunday-cli|packages/ship-by-sunday-cli|bin/sbs|bun run sbs|sbs:check" packages/blueprint-compiler apps/web --glob '!apps/web/content/docs/**' --glob '!**/node_modules/**'
-       rg -n "@shipbysunday/blueprint-compiler|@shipbysunday/blueprint-compiler/server" packages/ship-by-sunday-cli/src packages/ship-by-sunday-cli/tests
+       rg -n "@shipbysunday/ship-by-sunday-cli|packages/ship-by-sunday-cli|bin/sbs|bun run sbs|sbs:check" packages/codebase-compiler apps/web --glob '!apps/web/content/docs/**' --glob '!**/node_modules/**'
+       rg -n "@shipbysunday/codebase-compiler|@shipbysunday/codebase-compiler/server" packages/ship-by-sunday-cli/src packages/ship-by-sunday-cli/tests
 
    Expected observation: the first command prints no runtime imports from compiler or web into the CLI; the second command shows the CLI importing the compiler. If the first command finds a real runtime dependency, stop and update this plan before deleting the package.
 
@@ -217,14 +217,14 @@ Milestone 5 validates the slice and updates living artifacts. At the end of this
 
 8. Run focused validation before broad validation:
 
-       bun run --cwd packages/blueprint-compiler lint
-       bun run --cwd packages/blueprint-compiler format:check
-       bun run --cwd packages/blueprint-compiler typecheck
-       bun run --cwd packages/blueprint-compiler test
+       bun run --cwd packages/codebase-compiler lint
+       bun run --cwd packages/codebase-compiler format:check
+       bun run --cwd packages/codebase-compiler typecheck
+       bun run --cwd packages/codebase-compiler test
        bun run --cwd apps/web test:unit -- release-manifest release-evidence
-       bun run --cwd apps/web test:integration -- blueprint
+       bun run --cwd apps/web test:integration -- codebase
 
-   If the exact app test filters do not match this repo's runner, choose the nearest focused tests that cover release manifest/evidence and review/download or blueprint generation, then record the exact commands that ran.
+   If the exact app test filters do not match this repo's runner, choose the nearest focused tests that cover release manifest/evidence and review/download or codebase generation, then record the exact commands that ran.
 
 9. Run release and workflow checks:
 
@@ -244,7 +244,7 @@ Milestone 5 validates the slice and updates living artifacts. At the end of this
 
 11. Run the after grep audit:
 
-       rg -n "packages/ship-by-sunday-cli|@shipbysunday/ship-by-sunday-cli|bin/sbs|\\./bin/sbs|bun run sbs|sbs:check|ship-by-sunday-cli|Ship by Sunday CLI|intake CLI|helper CLI|required .*cli|\\bcli\\b" package.json bun.lock .github/workflows README.md docs/release-workflow.md docs/design-docs/scripts.md qa/README.md apps/web/content/docs packages/blueprint-compiler apps/web --glob '!docs/exec-plans/**' --glob '!docs/programs/**' --glob '!docs/codex/**' --glob '!docs/generated/**' --glob '!docs/ship-by-sunday/**' --glob '!tmp/**'
+       rg -n "packages/ship-by-sunday-cli|@shipbysunday/ship-by-sunday-cli|bin/sbs|\\./bin/sbs|bun run sbs|sbs:check|ship-by-sunday-cli|Ship by Sunday CLI|intake CLI|helper CLI|required .*cli|\\bcli\\b" package.json bun.lock .github/workflows README.md docs/release-workflow.md docs/design-docs/scripts.md qa/README.md apps/web/content/docs packages/codebase-compiler apps/web --glob '!docs/exec-plans/**' --glob '!docs/programs/**' --glob '!docs/codex/**' --glob '!docs/generated/**' --glob '!docs/ship-by-sunday/**' --glob '!tmp/**'
 
    Expected observation: no active helper CLI references remain. Unrelated Stripe CLI, Convex CLI, Codex CLI, and vendor references may remain and should be explicitly classified rather than deleted.
 
@@ -263,7 +263,7 @@ Milestone 5 validates the slice and updates living artifacts. At the end of this
 
 The slice is accepted only when the helper CLI is gone from active repo surfaces and the remaining product/release proof still works. A human should be able to read `package.json`, `.github/workflows/ci.yml`, `README.md`, `docs/release-workflow.md`, `docs/design-docs/scripts.md`, and public docs without seeing `bun run sbs`, `./bin/sbs`, `sbs:check`, `packages/ship-by-sunday-cli/`, or a required `cli` context as active instructions.
 
-The compiler and web app must still prove the hosted product path. `packages/blueprint-compiler` tests must pass. Focused web tests for blueprint generation, review/download, or release evidence must pass. `release.json`, `scripts/release/`, `Tag Release`, release evidence, QA transitional proof, browser proof, and snapshot fallback must remain present.
+The compiler and web app must still prove the hosted product path. `packages/codebase-compiler` tests must pass. Focused web tests for codebase generation, review/download, or release evidence must pass. `release.json`, `scripts/release/`, `Tag Release`, release evidence, QA transitional proof, browser proof, and snapshot fallback must remain present.
 
 Live branch protection must be handled explicitly. If credentials allow mutation, `dev` and `main` required status checks must no longer include `cli` and must still include `static`, `integration`, and `browser-smoke` until Plan 6 changes browser proof. If credentials do not allow mutation, the final plan update must state the exact command attempted, the exact failure, and the exact operator action required before the remote release model is fully reconciled.
 
@@ -271,12 +271,12 @@ Live branch protection must be handled explicitly. If credentials allow mutation
 
 Run these from `/Users/parkerrex/Developer/ship-by-sunday` after implementation:
 
-    rg -n "packages/ship-by-sunday-cli|@shipbysunday/ship-by-sunday-cli|bin/sbs|\\./bin/sbs|bun run sbs|sbs:check|ship-by-sunday-cli|Ship by Sunday CLI|intake CLI|helper CLI" package.json bun.lock .github/workflows README.md docs/release-workflow.md docs/design-docs/scripts.md qa/README.md apps/web/content/docs packages/blueprint-compiler apps/web --glob '!docs/exec-plans/**' --glob '!docs/programs/**' --glob '!docs/codex/**' --glob '!docs/generated/**' --glob '!docs/ship-by-sunday/**' --glob '!tmp/**'
+    rg -n "packages/ship-by-sunday-cli|@shipbysunday/ship-by-sunday-cli|bin/sbs|\\./bin/sbs|bun run sbs|sbs:check|ship-by-sunday-cli|Ship by Sunday CLI|intake CLI|helper CLI" package.json bun.lock .github/workflows README.md docs/release-workflow.md docs/design-docs/scripts.md qa/README.md apps/web/content/docs packages/codebase-compiler apps/web --glob '!docs/exec-plans/**' --glob '!docs/programs/**' --glob '!docs/codex/**' --glob '!docs/generated/**' --glob '!docs/ship-by-sunday/**' --glob '!tmp/**'
     ruby -e 'require "yaml"; Dir[".github/workflows/*.yml"].each { |file| YAML.load_file(file) }; puts "workflow yaml ok"'
-    bun run --cwd packages/blueprint-compiler lint
-    bun run --cwd packages/blueprint-compiler format:check
-    bun run --cwd packages/blueprint-compiler typecheck
-    bun run --cwd packages/blueprint-compiler test
+    bun run --cwd packages/codebase-compiler lint
+    bun run --cwd packages/codebase-compiler format:check
+    bun run --cwd packages/codebase-compiler typecheck
+    bun run --cwd packages/codebase-compiler test
     bun run release:manifest:check
     bun run release:evidence:build
     bun run format
@@ -287,7 +287,7 @@ Run these from `/Users/parkerrex/Developer/ship-by-sunday` after implementation:
     bun run programs:lint
     git diff --check
 
-Also run the nearest focused app tests for review/download or blueprint generation after inspecting the current test names. If the chosen command differs from the examples in `Concrete Steps`, record the exact command and why it is the nearest proof.
+Also run the nearest focused app tests for review/download or codebase generation after inspecting the current test names. If the chosen command differs from the examples in `Concrete Steps`, record the exact command and why it is the nearest proof.
 
 ## Idempotence and Recovery
 
@@ -297,7 +297,7 @@ If deleting the workspace package causes lockfile churn beyond CLI metadata, sto
 
 If branch-protection mutation fails, do not recreate the `cli` job just to satisfy remote policy. Keep the local repo state aligned with the intended slice, document the remote policy blocker, and leave the exact `gh api` update command for an operator with permissions.
 
-If focused compiler or web generation tests fail after CLI deletion, treat that as evidence that the deletion boundary was wrong. Inspect the failing import or behavior, move only the specific reusable non-CLI behavior into `packages/blueprint-compiler` or an existing web boundary, update this plan's Decision Log, and rerun the focused tests before continuing.
+If focused compiler or web generation tests fail after CLI deletion, treat that as evidence that the deletion boundary was wrong. Inspect the failing import or behavior, move only the specific reusable non-CLI behavior into `packages/codebase-compiler` or an existing web boundary, update this plan's Decision Log, and rerun the focused tests before continuing.
 
 If docs grep finds historical references under completed ExecPlans, `docs/codex/`, generated historical docs, changelog entries, or Program packet artifacts, do not delete them for this slice. Historical archives may mention the CLI. Active truth surfaces must not.
 
@@ -321,9 +321,9 @@ Plan authoring observed these active helper CLI surfaces:
 
 Plan authoring observed this dependency direction:
 
-    packages/ship-by-sunday-cli/src/commands/generate-command.ts imports @shipbysunday/blueprint-compiler and @shipbysunday/blueprint-compiler/server
-    packages/ship-by-sunday-cli/src/blueprint-derivation.ts imports @shipbysunday/blueprint-compiler
-    packages/blueprint-compiler and apps/web did not report direct runtime imports from the helper CLI in the focused audit excluding active docs
+    packages/ship-by-sunday-cli/src/commands/generate-command.ts imports @shipbysunday/codebase-compiler and @shipbysunday/codebase-compiler/server
+    packages/ship-by-sunday-cli/src/codebase-derivation.ts imports @shipbysunday/codebase-compiler
+    packages/codebase-compiler and apps/web did not report direct runtime imports from the helper CLI in the focused audit excluding active docs
 
 Final validation receipts for implementation are recorded in `Progress`: branch-protection read-only inspection, workflow YAML parse, compiler lint/format/typecheck/tests, release manifest and evidence checks, broad root gates, `bun run check`, docs and plan lint, Program lint, diff hygiene, and after-grep audit.
 
@@ -337,9 +337,9 @@ Final validation receipts for implementation are recorded in `Progress`: branch-
 
 GitHub branch protection for `dev` and `main` is an external dependency. The checked-in workflow file and live required status contexts must agree. The target required contexts after this slice are `static`, `integration`, and `browser-smoke` until a later plan changes browser proof.
 
-`packages/blueprint-compiler/` is the compiler boundary that must remain. It owns canonical facts, readiness, blueprint rendering, review/download zip generation, repo snapshot generation, and customer-safe output contracts.
+`packages/codebase-compiler/` is the compiler boundary that must remain. It owns canonical facts, readiness, codebase rendering, review/download zip generation, repo snapshot generation, and customer-safe output contracts.
 
-`apps/web` is the hosted product boundary that must remain. It owns `/blueprint`, `/review`, checkout, auth, entitlement, docs, and release-related tests.
+`apps/web` is the hosted product boundary that must remain. It owns `/codebase`, `/review`, checkout, auth, entitlement, docs, and release-related tests.
 
 `release.json`, `scripts/release/`, `.github/workflows/release.yml`, `.github/workflows/dev-staging-proof.yml`, `.github/workflows/production-release-proof.yml`, and `.github/workflows/convex-production-deploy.yml` are release infrastructure from earlier Program slices. They are dependencies of this slice because the helper CLI should no longer be needed for release identity or release evidence.
 

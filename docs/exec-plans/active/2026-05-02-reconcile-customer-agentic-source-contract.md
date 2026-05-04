@@ -57,21 +57,21 @@ This plan is active. Fill this section after implementation with what changed, w
 
 ## Context and Orientation
 
-The generated customer repo zip is assembled through the review download path. `apps/web/app/api/download/repo/route.ts` gates the request. `apps/web/app/api/download/repo/_server/downloads.ts` loads the customer's project definition. `packages/blueprint-compiler/src/bundle/build-review-download-zip.ts` creates the archive. `packages/blueprint-compiler/src/repo-generation/materialize-repo-snapshot.ts` materializes the snapshot.
+The generated customer repo zip is assembled through the review download path. `apps/web/app/api/download/repo/route.ts` gates the request. `apps/web/app/api/download/repo/_server/downloads.ts` loads the customer's project definition. `packages/codebase-compiler/src/bundle/build-review-download-zip.ts` creates the archive. `packages/codebase-compiler/src/repo-generation/materialize-repo-snapshot.ts` materializes the snapshot.
 
-The generated repo is a mix of tracked starter files and rendered overrides. `packages/blueprint-compiler/src/repo-generation/render-generalized-starter-files.ts` renders root agent guidance and testing notes. `packages/blueprint-compiler/src/repo-generation/render-starter-project-onboarding.ts` renders `START-HERE.md` and the docs landing page. `packages/blueprint-compiler/src/repo-generation/render-starter-skills.ts` renders local skills. `packages/blueprint-compiler/src/repo-generation/starter-root-package-json.ts` owns generated root scripts. `packages/blueprint-compiler/src/blueprints/render-prompt-pack.ts` renders prompt assets under `docs/prompts/`.
+The generated repo is a mix of tracked starter files and rendered overrides. `packages/codebase-compiler/src/repo-generation/render-generalized-starter-files.ts` renders root agent guidance and testing notes. `packages/codebase-compiler/src/repo-generation/render-starter-project-onboarding.ts` renders `START-HERE.md` and the docs landing page. `packages/codebase-compiler/src/repo-generation/render-starter-skills.ts` renders local skills. `packages/codebase-compiler/src/repo-generation/starter-root-package-json.ts` owns generated root scripts. `packages/codebase-compiler/src/codebases/render-prompt-pack.ts` renders prompt assets under `docs/prompts/`.
 
-The current customer-safe snapshot contract in `packages/blueprint-compiler/src/repo-generation/customer-safe-snapshot-contract.ts` excludes internal `docs/programs/**`, `docs/exec-plans/**`, and Program prompt assets. Preserve that safety boundary. Before adding generalized customer-safe artifacts, reconcile the guidance that already ships so it does not point to missing skills, missing scripts, old prompt contracts, or wrong Build Pack paths.
+The current customer-safe snapshot contract in `packages/codebase-compiler/src/repo-generation/customer-safe-snapshot-contract.ts` excludes internal `docs/programs/**`, `docs/exec-plans/**`, and Program prompt assets. Preserve that safety boundary. Before adding generalized customer-safe artifacts, reconcile the guidance that already ships so it does not point to missing skills, missing scripts, old prompt contracts, or wrong Build Pack paths.
 
 ### In Scope
 
 This plan includes source-contract reconciliation for generated repo agent guidance. It covers root assistant guides, `START-HERE.md`, Build Pack docs, prompt pack naming and contents, local and external skill trigger availability, generated package-script promises, customer-safe snapshot boundaries, materialization tests, and documentation references needed for a fresh agent to use the current generated repo without missing-path drift.
 
-This plan may update `packages/blueprint-compiler/src/generated-docs/generated-doc-paths.ts`, `packages/blueprint-compiler/src/server/template-loader.ts`, `packages/blueprint-compiler/src/blueprints/render-prompt-pack.ts`, `packages/blueprint-compiler/src/blueprints/render-build-blueprint.ts`, `packages/blueprint-compiler/src/repo-generation/render-generalized-starter-files.ts`, `packages/blueprint-compiler/src/repo-generation/render-starter-project-onboarding.ts`, `packages/blueprint-compiler/src/repo-generation/render-starter-skills.ts`, `packages/blueprint-compiler/src/repo-generation/starter-root-package-json.ts`, `packages/blueprint-compiler/src/repo-generation/customer-safe-snapshot-contract.ts`, `packages/blueprint-compiler/src/repo-generation/repo-download-source-contract.ts`, and focused compiler tests.
+This plan may update `packages/codebase-compiler/src/generated-docs/generated-doc-paths.ts`, `packages/codebase-compiler/src/server/template-loader.ts`, `packages/codebase-compiler/src/codebases/render-prompt-pack.ts`, `packages/codebase-compiler/src/codebases/render-build-codebase.ts`, `packages/codebase-compiler/src/repo-generation/render-generalized-starter-files.ts`, `packages/codebase-compiler/src/repo-generation/render-starter-project-onboarding.ts`, `packages/codebase-compiler/src/repo-generation/render-starter-skills.ts`, `packages/codebase-compiler/src/repo-generation/starter-root-package-json.ts`, `packages/codebase-compiler/src/repo-generation/customer-safe-snapshot-contract.ts`, `packages/codebase-compiler/src/repo-generation/repo-download-source-contract.ts`, and focused compiler tests.
 
 ### Out Of Scope
 
-This plan does not ship the full Program and ExecPlan operating pack, implement mature-repo adoption, repository upload, GitHub app ingestion, audit scoring, public homepage repositioning, pricing changes, auth changes, billing changes, checkout changes, Convex runtime changes, provider setup changes, blueprint intake schema changes, or generated app route changes.
+This plan does not ship the full Program and ExecPlan operating pack, implement mature-repo adoption, repository upload, GitHub app ingestion, audit scoring, public homepage repositioning, pricing changes, auth changes, billing changes, checkout changes, Convex runtime changes, provider setup changes, codebase intake schema changes, or generated app route changes.
 
 This plan does not ship internal completed Programs, active internal ExecPlans, release evidence, `docs/codex/**`, `docs/ship-by-sunday/**`, or local operator history into customer repos.
 
@@ -101,22 +101,22 @@ The fourth milestone is Program refresh. It is complete when focused compiler te
 
 From the repo root, inspect the relevant generated repo surfaces:
 
-    sed -n '1,220p' packages/blueprint-compiler/src/repo-generation/customer-safe-snapshot-contract.ts
-    sed -n '1,220p' packages/blueprint-compiler/src/repo-generation/repo-download-source-contract.ts
-    sed -n '1,260p' packages/blueprint-compiler/src/repo-generation/render-generalized-starter-files.ts
-    sed -n '1,260p' packages/blueprint-compiler/src/repo-generation/render-starter-skills.ts
-    sed -n '1,180p' packages/blueprint-compiler/src/repo-generation/starter-root-package-json.ts
-    sed -n '1,180p' packages/blueprint-compiler/src/blueprints/render-prompt-pack.ts
+    sed -n '1,220p' packages/codebase-compiler/src/repo-generation/customer-safe-snapshot-contract.ts
+    sed -n '1,220p' packages/codebase-compiler/src/repo-generation/repo-download-source-contract.ts
+    sed -n '1,260p' packages/codebase-compiler/src/repo-generation/render-generalized-starter-files.ts
+    sed -n '1,260p' packages/codebase-compiler/src/repo-generation/render-starter-skills.ts
+    sed -n '1,180p' packages/codebase-compiler/src/repo-generation/starter-root-package-json.ts
+    sed -n '1,180p' packages/codebase-compiler/src/codebases/render-prompt-pack.ts
 
 After implementation, run focused compiler validation:
 
-    bun run --cwd packages/blueprint-compiler test -- tests/repo-generation.test.ts tests/review-download-zip.test.ts tests/customer-safe-snapshot-contract.test.ts
+    bun run --cwd packages/codebase-compiler test -- tests/repo-generation.test.ts tests/review-download-zip.test.ts tests/customer-safe-snapshot-contract.test.ts
 
 Run package checks:
 
-    bun run --cwd packages/blueprint-compiler typecheck
-    bun run --cwd packages/blueprint-compiler format:check
-    bun run --cwd packages/blueprint-compiler lint
+    bun run --cwd packages/codebase-compiler typecheck
+    bun run --cwd packages/codebase-compiler format:check
+    bun run --cwd packages/codebase-compiler lint
 
 Run planning validation:
 
@@ -135,10 +135,10 @@ The generated repo should not expose commands that are not implemented. If this 
 
 Run these commands from the repo root:
 
-    bun run --cwd packages/blueprint-compiler test -- tests/repo-generation.test.ts tests/review-download-zip.test.ts tests/customer-safe-snapshot-contract.test.ts
-    bun run --cwd packages/blueprint-compiler typecheck
-    bun run --cwd packages/blueprint-compiler format:check
-    bun run --cwd packages/blueprint-compiler lint
+    bun run --cwd packages/codebase-compiler test -- tests/repo-generation.test.ts tests/review-download-zip.test.ts tests/customer-safe-snapshot-contract.test.ts
+    bun run --cwd packages/codebase-compiler typecheck
+    bun run --cwd packages/codebase-compiler format:check
+    bun run --cwd packages/codebase-compiler lint
     bun run plans:lint -- --plan docs/exec-plans/active/2026-05-02-reconcile-customer-agentic-source-contract.md
     bun run programs:lint
     bun run markdown:lint -- --paths docs/programs/active/2026-05-02-customer-agentic-operating-system docs/exec-plans/active/2026-05-02-reconcile-customer-agentic-source-contract.md
@@ -162,4 +162,4 @@ The most relevant prior Program is `docs/programs/completed/2026-05-01-generated
 
 ## Interfaces and Dependencies
 
-This plan depends on `packages/blueprint-compiler/AGENTS.md`, `docs/programs/PROGRAMS.md`, `docs/exec-plans/PLANS.md`, `packages/blueprint-compiler/src/repo-generation/customer-safe-snapshot-contract.ts`, `packages/blueprint-compiler/src/repo-generation/repo-download-source-contract.ts`, `packages/blueprint-compiler/src/repo-generation/render-generalized-starter-files.ts`, `packages/blueprint-compiler/src/repo-generation/render-starter-project-onboarding.ts`, `packages/blueprint-compiler/src/repo-generation/render-starter-skills.ts`, `packages/blueprint-compiler/src/repo-generation/starter-root-package-json.ts`, `packages/blueprint-compiler/src/blueprints/render-build-blueprint.ts`, `packages/blueprint-compiler/src/blueprints/render-prompt-pack.ts`, and focused compiler tests under `packages/blueprint-compiler/tests/`.
+This plan depends on `packages/codebase-compiler/AGENTS.md`, `docs/programs/PROGRAMS.md`, `docs/exec-plans/PLANS.md`, `packages/codebase-compiler/src/repo-generation/customer-safe-snapshot-contract.ts`, `packages/codebase-compiler/src/repo-generation/repo-download-source-contract.ts`, `packages/codebase-compiler/src/repo-generation/render-generalized-starter-files.ts`, `packages/codebase-compiler/src/repo-generation/render-starter-project-onboarding.ts`, `packages/codebase-compiler/src/repo-generation/render-starter-skills.ts`, `packages/codebase-compiler/src/repo-generation/starter-root-package-json.ts`, `packages/codebase-compiler/src/codebases/render-build-codebase.ts`, `packages/codebase-compiler/src/codebases/render-prompt-pack.ts`, and focused compiler tests under `packages/codebase-compiler/tests/`.

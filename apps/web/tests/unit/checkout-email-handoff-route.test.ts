@@ -116,13 +116,13 @@ describe("checkout email handoff route", () => {
 
 		await Page({
 			searchParams: Promise.resolve({
-				redirect_url: "/blueprint",
+				redirect_url: "/codebase",
 				session_id: "cs_missing",
 			}),
 		});
 
 		expect(redirectMock).toHaveBeenCalledWith(
-			"/checkout/clear-pending?redirect_url=%2Fblueprint",
+			"/checkout/clear-pending?redirect_url=%2Fcodebase",
 		);
 	});
 

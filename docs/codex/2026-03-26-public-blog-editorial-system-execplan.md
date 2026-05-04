@@ -18,7 +18,7 @@ Ship by Sunday currently has a public homepage on `/` and a public docs surface 
 
 - [x] 2026-03-26 16:46 EDT: Read `AGENTS.md`, `apps/web/AGENTS.md`, `docs/codex/PLANS.md`, and `docs/prompts/execplan-writer.md` before writing this plan.
 - [x] 2026-03-26 16:46 EDT: Inspected the current public content system in `apps/web/app/docs/layout.tsx`, `apps/web/app/docs/[[...mdxPath]]/page.tsx`, `apps/web/features/docs/server/page-paths.ts`, `apps/web/mdx-components.tsx`, `apps/web/app/sitemap.ts`, `apps/web/app/robots.ts`, `apps/web/config/product.ts`, and the homepage entry surfaces under `apps/web/features/marketing/`.
-- [x] 2026-03-26 16:46 EDT: Confirmed from the installed Nextra blueprint types that `getPageMap('/blog')` is a supported route pattern, so the blog can reuse the existing Nextra content pipeline instead of adding a second MDX compiler stack.
+- [x] 2026-03-26 16:46 EDT: Confirmed from the installed Nextra codebase types that `getPageMap('/blog')` is a supported route pattern, so the blog can reuse the existing Nextra content pipeline instead of adding a second MDX compiler stack.
 - [x] 2026-03-26 16:46 EDT: Chose the v1 architecture: Nextra-powered MDX discovery and static params, but a custom feature-owned editorial shell for `/blog` instead of the docs theme wrapper.
 - [x] 2026-03-26 17:22 EDT: Grilled the plan against the repo and resolved the high-impact design branches: posts use `draft: true` gating, `/blog` is a programmatic React index instead of `content/blog/index.mdx`, the blog is built-in rather than toggleable, discoverability on the landing page is footer-only next to the Ship by Sunday wordmark, the only v1 docs mention lives in `apps/web/content/docs/customize-the-starter.mdx`, and each post gets one shared sponsor-style promo block near the top that defaults to the homepage hero headline and links to `/#pricing`.
 - [x] 2026-03-26 18:01 EDT: Implemented the new `apps/web/features/blog/` feature folder, route files under `apps/web/app/blog/`, strict `zod` frontmatter loading in `apps/web/features/blog/server/blog-posts.ts`, and local media assets under `apps/web/public/blog/`.
@@ -29,7 +29,7 @@ Ship by Sunday currently has a public homepage on `/` and a public docs surface 
 - [x] 2026-03-26 18:55 EDT: Added article and index JSON-LD, a sticky table-of-contents rail powered by Nextra `toc`, reading-time support in the post record, and a tighter OpenAI-style editorial title block plus mobile visual QA for `/blog/the-operating-system-beats-the-prompt`.
 - [x] 2026-03-26 18:55 EDT: Re-ran `bun run lint`, `bun run format:check`, targeted unit tests including `tests/unit/blog-structured-data.test.ts`, and browser smoke against the already-running dev server with `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 bunx playwright test --project=browser-smoke tests/browser-smoke/app-smoke.spec.ts`.
 - [x] 2026-03-26 18:55 EDT: Fixed the published-date timezone regression in `apps/web/features/blog/lib/blog-formatters.ts` after visual QA showed `2026-03-26` rendering as March 25 in US timezones, and added `apps/web/tests/unit/blog-formatters.test.ts`.
-- [ ] Re-run a clean whole-repo `cd apps/web && bun run build` after the unrelated blueprint-flow worktree changes are repaired. As of 2026-03-26 18:55 EDT, the repo build is blocked by non-blog type errors in `apps/web/features/blueprint-flow/components/blueprint-stage-page.tsx` and its in-flight companion files.
+- [ ] Re-run a clean whole-repo `cd apps/web && bun run build` after the unrelated codebase-flow worktree changes are repaired. As of 2026-03-26 18:55 EDT, the repo build is blocked by non-blog type errors in `apps/web/features/codebase-flow/components/codebase-stage-page.tsx` and its in-flight companion files.
 
 ## Surprises & Discoveries
 
@@ -53,7 +53,7 @@ The footer integration did not require a shared public-footer extraction. `apps/
 
 The blog now has enough metadata and structure to support richer search ingestion. Adding JSON-LD was straightforward, but the more interesting discovery was that the most valuable SEO change was not another metadata field. It was letting the article surface expose a real table of contents and a cleaner editorial heading hierarchy so the public HTML communicates page structure more clearly.
 
-Validation on this pass had to route around unrelated dirty-worktree failures. The blog-specific browser smoke suite passed when pointed at the already-running dev server with `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000`, but a fresh local server bootstrap through the Playwright `webServer` hook failed because blueprint-flow files outside the blog work were mid-refactor. The blog implementation itself was not the blocking factor.
+Validation on this pass had to route around unrelated dirty-worktree failures. The blog-specific browser smoke suite passed when pointed at the already-running dev server with `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000`, but a fresh local server bootstrap through the Playwright `webServer` hook failed because codebase-flow files outside the blog work were mid-refactor. The blog implementation itself was not the blocking factor.
 
 Evidence snippets from repo inspection:
 
@@ -148,7 +148,7 @@ Current outcome after the first implementation loop: Milestone 1 is complete and
 
 Final outcome: all four milestones are complete. The public surface now includes a real `/blog` index, a premium first article at `/blog/the-operating-system-beats-the-prompt`, footer-only discoverability on the homepage, blog entries in `robots.txt` and `sitemap.xml`, short docs mentions, narrow unit coverage, browser smoke coverage, and a passing production build. The main remaining follow-up is still editorial tooling: if publishing frequency increases, the next project should be a CMS or author workflow layer rather than more route work.
 
-Follow-up after the SEO pass: the blog now also emits JSON-LD, exposes a real table of contents rail, and uses a stronger editorial header that is materially closer to the OpenAI-style reference the user asked for. The only remaining execution gap is repository hygiene outside the blog feature: a clean whole-repo `bun run build` is currently blocked by unrelated blueprint-flow refactor changes already present in the worktree.
+Follow-up after the SEO pass: the blog now also emits JSON-LD, exposes a real table of contents rail, and uses a stronger editorial header that is materially closer to the OpenAI-style reference the user asked for. The only remaining execution gap is repository hygiene outside the blog feature: a clean whole-repo `bun run build` is currently blocked by unrelated codebase-flow refactor changes already present in the worktree.
 
 When the work is complete, update this section with the actual shipped surface, the validation evidence, the final route list, and any residual gaps such as missing taxonomy or planned CMS migration.
 
@@ -380,9 +380,9 @@ Also observed on 2026-03-26 18:09 EDT:
 Current limitation observed on 2026-03-26 18:55 EDT:
 
     bun run build
-    Fails in unrelated blueprint-flow code:
-    ./features/blueprint-flow/components/blueprint-stage-page.tsx:132
-    Property 'stage' does not exist on BlueprintStageProgressPanel props
+    Fails in unrelated codebase-flow code:
+    ./features/codebase-flow/components/codebase-stage-page.tsx:132
+    Property 'stage' does not exist on CodebaseStageProgressPanel props
 
 ## Validation and Acceptance
 
@@ -454,7 +454,7 @@ Do not copy OpenAI’s branding. Borrow only the structural lessons that matter 
 
 ## Interfaces and Dependencies
 
-The plan assumes the existing dependencies in `apps/web/package.json` remain the source of truth. No new MDX compiler dependency should be added for v1. Use the existing `nextra` blueprint for `importPage`, `generateStaticParamsFor`, and `getPageMap`. Use existing `next`, `react`, `zod`, and built-in Next image support. Use native `<video>` with posters instead of adding a third-party player.
+The plan assumes the existing dependencies in `apps/web/package.json` remain the source of truth. No new MDX compiler dependency should be added for v1. Use the existing `nextra` codebase for `importPage`, `generateStaticParamsFor`, and `getPageMap`. Use existing `next`, `react`, `zod`, and built-in Next image support. Use native `<video>` with posters instead of adding a third-party player.
 
 These interfaces should exist by the end of the work:
 

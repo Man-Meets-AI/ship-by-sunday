@@ -1,27 +1,27 @@
-import { getBlueprintDownloadContext } from "@/app/api/download/repo/_server/downloads";
+import { getCodebaseDownloadContext } from "@/app/api/download/repo/_server/downloads";
 import {
 	buildRepoGenerationManifest,
 	getStarterSnapshotArchiveFileName,
-} from "@shipbysunday/blueprint-compiler";
+} from "@shipbysunday/codebase-compiler";
 
 export const runtime = "nodejs";
 
-async function importBlueprintCompilerServer() {
-	return import("@shipbysunday/blueprint-compiler/server");
+async function importCodebaseCompilerServer() {
+	return import("@shipbysunday/codebase-compiler/server");
 }
 
 export async function GET() {
-	const context = await getBlueprintDownloadContext();
+	const context = await getCodebaseDownloadContext();
 	if (!context) {
 		return new Response("Unauthorized", { status: 401 });
 	}
 
-	if (!context.workspaceState.blueprintReadiness.review.isReady) {
-		return new Response("Blueprint is not ready yet", { status: 409 });
+	if (!context.workspaceState.codebaseReadiness.review.isReady) {
+		return new Response("Codebase is not ready yet", { status: 409 });
 	}
 
-	const blueprintCompilerServer = await importBlueprintCompilerServer();
-	const archive = await blueprintCompilerServer.buildReviewDownloadZip(
+	const codebaseCompilerServer = await importCodebaseCompilerServer();
+	const archive = await codebaseCompilerServer.buildReviewDownloadZip(
 		context.canonicalProjectDefinition,
 	);
 	const manifest = buildRepoGenerationManifest(

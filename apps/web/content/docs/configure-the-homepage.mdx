@@ -17,17 +17,17 @@ When you need to change the homepage, inspect these files in this order:
 2. `app/_content/home-page.ts`
 3. `app/_lib/home-page-render-model.ts`
 4. `app/_components/home-page/home-page.tsx`
-5. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-section.tsx`
-6. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-leverage-hero.tsx`
-7. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-card.tsx`
-8. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-sidebar.tsx`
-9. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-foundation-card.tsx`
-10. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-design-card.tsx`
-11. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-pricing-card.tsx`
-12. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-locked-card.tsx`
-13. `app/_components/home-page/sections/blueprint-demo/blueprint-demo-cta-bar.tsx`
-14. `app/_components/home-page/sections/blueprint-demo/home-page-blueprint-draft-storage.ts`
-15. `app/_components/home-page/sections/blueprint-demo/use-home-page-blueprint-draft.ts`
+5. `app/_components/home-page/sections/codebase-demo/codebase-demo-section.tsx`
+6. `app/_components/home-page/sections/codebase-demo/codebase-demo-leverage-hero.tsx`
+7. `app/_components/home-page/sections/codebase-demo/codebase-demo-card.tsx`
+8. `app/_components/home-page/sections/codebase-demo/codebase-demo-sidebar.tsx`
+9. `app/_components/home-page/sections/codebase-demo/codebase-demo-foundation-card.tsx`
+10. `app/_components/home-page/sections/codebase-demo/codebase-demo-design-card.tsx`
+11. `app/_components/home-page/sections/codebase-demo/codebase-demo-pricing-card.tsx`
+12. `app/_components/home-page/sections/codebase-demo/codebase-demo-locked-card.tsx`
+13. `app/_components/home-page/sections/codebase-demo/codebase-demo-cta-bar.tsx`
+14. `app/_components/home-page/sections/codebase-demo/home-page-codebase-draft-storage.ts`
+15. `app/_components/home-page/sections/codebase-demo/use-home-page-codebase-draft.ts`
 16. `app/_components/home-page/sections/durability-section.tsx`
 17. `app/_components/home-page/sections/starter-system-section.tsx`
 18. `app/_components/home-page/sections/programs-section.tsx`
@@ -35,17 +35,17 @@ When you need to change the homepage, inspect these files in this order:
 20. `app/_components/home-page/sections/home-page-primary-cta.tsx`
 21. `app/checkout/_components/checkout-button.tsx`
 22. `app/checkout/_hooks/use-stripe-checkout.ts`
-23. `lib/blueprint-flow/use-blueprint-local-draft-seeder.ts`
-24. `app/(workspace)/_components/blueprint-flow/blueprint-local-draft-seeder.tsx`
+23. `lib/codebase-flow/use-codebase-local-draft-seeder.ts`
+24. `app/(workspace)/_components/codebase-flow/codebase-local-draft-seeder.tsx`
 25. `app/_lib/home-page-structured-data.ts`
 26. `tests/unit/home-page-content.test.ts`
 27. `tests/unit/home-page-render-model.test.ts`
 28. `tests/unit/home-page-structured-data.test.ts`
-29. `tests/unit/home-page-blueprint-draft-storage.test.ts`
+29. `tests/unit/home-page-codebase-draft-storage.test.ts`
 30. `tests/integration-ui/home-page-product-preview.test.tsx`
 31. `tests/integration-ui/home-page-primary-cta.test.tsx`
 32. `tests/integration-ui/checkout-button.test.tsx`
-33. `tests/integration-ui/blueprint-local-draft-seeder.test.tsx`
+33. `tests/integration-ui/codebase-local-draft-seeder.test.tsx`
 34. `tests/unit/public-metadata-routes.test.ts`
 
 If you skip that order, it is easy to update copy while missing the render model, or to change visible sections while leaving schema and smoke tests out of sync.
@@ -177,7 +177,7 @@ Edit:
 
 Usually you should not need to touch the render model for pure copy work.
 
-### Change Blueprint demo copy or fields
+### Change Codebase demo copy or fields
 
 Edit:
 
@@ -188,7 +188,7 @@ Edit:
 The first-screen `productPreview` section opens with the dark leverage hero from
 the Figma landing-page selection and a two-option starting-point selector. The
 default `I have an idea for a product` branch continues into the interactive
-Blueprint demo that mirrors the real `/blueprint` workspace. The `I have a
+Codebase demo that mirrors the real `/codebase` workspace. The `I have a
 codebase already` branch shows the Figma-sourced codebase audit path. Both
 starting points then continue through the same homepage story: hero, exec-loop,
 starter-system, optional durability, social proof, Programs, FAQ, PLANS.md,
@@ -196,25 +196,25 @@ pricing, and footer.
 
 The idea-branch product-preview CTA is a real checkout action: clicking
 "Generate my codebase" persists the latest demo draft to `localStorage` (key
-`sbs:home-blueprint-draft:v1`) before starting Stripe checkout, and a
+`sbs:home-codebase-draft:v1`) before starting Stripe checkout, and a
 workspace-mounted seeder hydrates that draft into Convex on the first
-authenticated `/blueprint` load when the buyer has no saved facts.
+authenticated `/codebase` load when the buyer has no saved facts.
 
 Hard rules when editing this section:
 
-- Always show all 7 canonical Blueprint sections (`foundation`, `problem`,
+- Always show all 7 canonical Codebase sections (`foundation`, `problem`,
   `outcome`, `design`, `pricing`, `setup`, `generated-preview`) in canonical
   order. Foundation, Design, and Pricing are interactive; the other four are
   visible-but-locked rows. Do not renumber.
 - Keep the leverage hero copy in `productPreviewSection.leverageHero` and the
-  rendering in `blueprint-demo-leverage-hero.tsx`. Do not reintroduce the old
-  "Spec your product" intro, Blueprint explainer paragraph, or checkout unlock
+  rendering in `codebase-demo-leverage-hero.tsx`. Do not reintroduce the old
+  "Spec your product" intro, Codebase explainer paragraph, or checkout unlock
   note above the demo.
 - Keep codebase-audit branch copy in `productPreviewSection.codebaseBranch` and
-  its rendering in `blueprint-demo-codebase-branch.tsx`.
-- Source field labels and helper text from `@shipbysunday/blueprint-presentation`.
+  its rendering in `codebase-demo-codebase-branch.tsx`.
+- Source field labels and helper text from `@shipbysunday/codebase-presentation`.
   Source design preset definitions and the canonical
-  `buildDesignPresetFactSeed(presetId)` from `@shipbysunday/blueprint-compiler`.
+  `buildDesignPresetFactSeed(presetId)` from `@shipbysunday/codebase-compiler`.
   Do not edit `theme_preset` directly on the homepage; only set it via
   `buildDesignPresetFactSeed(presetId).theme_preset`.
 - The bottom CTA must persist the latest draft via the shared
@@ -222,27 +222,27 @@ Hard rules when editing this section:
   the redirect runs. Do not import `CheckoutButton` directly into the demo and
   do not bypass the callback.
 
-### Change Blueprint demo persistence or seeder behavior
+### Change Codebase demo persistence or seeder behavior
 
 Edit:
 
-- `app/_components/home-page/sections/blueprint-demo/home-page-blueprint-draft-storage.ts`
-- `app/_components/home-page/sections/blueprint-demo/use-home-page-blueprint-draft.ts`
+- `app/_components/home-page/sections/codebase-demo/home-page-codebase-draft-storage.ts`
+- `app/_components/home-page/sections/codebase-demo/use-home-page-codebase-draft.ts`
 - `app/checkout/_hooks/use-stripe-checkout.ts`
 - `app/checkout/_components/checkout-button.tsx`
 - `app/_components/home-page/sections/home-page-primary-cta.tsx`
-- `lib/blueprint-flow/use-blueprint-local-draft-seeder.ts`
-- `app/(workspace)/_components/blueprint-flow/blueprint-local-draft-seeder.tsx`
-- `tests/unit/home-page-blueprint-draft-storage.test.ts`
-- `tests/integration-ui/blueprint-local-draft-seeder.test.tsx`
+- `lib/codebase-flow/use-codebase-local-draft-seeder.ts`
+- `app/(workspace)/_components/codebase-flow/codebase-local-draft-seeder.tsx`
+- `tests/unit/home-page-codebase-draft-storage.test.ts`
+- `tests/integration-ui/codebase-local-draft-seeder.test.tsx`
 - `tests/integration-ui/checkout-button.test.tsx`
 
 Hard rules:
 
 - `localStorage` envelope is versioned: `{ version: 1, savedAt, fields }`.
   Reject wrong versions, corrupt JSON, unknown keys, and non-finite or
-  negative pricing strings. The single key is `sbs:home-blueprint-draft:v1`.
-- The seeder must run client-side under the workspace blueprint flow, wait
+  negative pricing strings. The single key is `sbs:home-codebase-draft:v1`.
+- The seeder must run client-side under the workspace codebase flow, wait
   for authenticated `workspaceState`, and only call
   `saveProjectDefinitionFacts` when the workspace facts are empty
   (`Object.keys(workspaceState.projectDefinition?.facts ?? {}).length === 0`).
@@ -289,13 +289,13 @@ If you do not update all of those in one slice, the homepage contract will drift
 Run these checks after meaningful homepage changes:
 
 ```bash
-bunx oxlint --deny-warnings config/product.ts app/_components/home-page/home-page.tsx app/_components/home-page/sections/blueprint-demo/blueprint-demo-section.tsx app/_components/home-page/sections/blueprint-demo/blueprint-demo-sidebar.tsx app/_components/home-page/sections/blueprint-demo/blueprint-demo-foundation-card.tsx app/_components/home-page/sections/blueprint-demo/blueprint-demo-design-card.tsx app/_components/home-page/sections/blueprint-demo/blueprint-demo-pricing-card.tsx app/_components/home-page/sections/blueprint-demo/blueprint-demo-locked-card.tsx app/_components/home-page/sections/blueprint-demo/blueprint-demo-cta-bar.tsx app/_components/home-page/sections/blueprint-demo/home-page-blueprint-draft-storage.ts app/_components/home-page/sections/blueprint-demo/use-home-page-blueprint-draft.ts app/_components/home-page/sections/durability-section.tsx app/_components/home-page/sections/exec-loop-section.tsx app/_components/home-page/sections/hero-sections.tsx app/_components/home-page/sections/programs-section.tsx app/_components/home-page/sections/plans-md-section.tsx app/_components/home-page/sections/pricing-footer-sections.tsx app/_components/home-page/sections/home-page-primary-cta.tsx app/checkout/_components/checkout-button.tsx app/checkout/_hooks/use-stripe-checkout.ts lib/blueprint-flow/use-blueprint-local-draft-seeder.ts app/_content/home-page.ts app/_lib/home-page-render-model.ts app/_lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/unit/home-page-blueprint-draft-storage.test.ts tests/integration-ui/home-page-product-preview.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx tests/integration-ui/checkout-button.test.tsx tests/integration-ui/blueprint-local-draft-seeder.test.tsx
+bunx oxlint --deny-warnings config/product.ts app/_components/home-page/home-page.tsx app/_components/home-page/sections/codebase-demo/codebase-demo-section.tsx app/_components/home-page/sections/codebase-demo/codebase-demo-sidebar.tsx app/_components/home-page/sections/codebase-demo/codebase-demo-foundation-card.tsx app/_components/home-page/sections/codebase-demo/codebase-demo-design-card.tsx app/_components/home-page/sections/codebase-demo/codebase-demo-pricing-card.tsx app/_components/home-page/sections/codebase-demo/codebase-demo-locked-card.tsx app/_components/home-page/sections/codebase-demo/codebase-demo-cta-bar.tsx app/_components/home-page/sections/codebase-demo/home-page-codebase-draft-storage.ts app/_components/home-page/sections/codebase-demo/use-home-page-codebase-draft.ts app/_components/home-page/sections/durability-section.tsx app/_components/home-page/sections/exec-loop-section.tsx app/_components/home-page/sections/hero-sections.tsx app/_components/home-page/sections/programs-section.tsx app/_components/home-page/sections/plans-md-section.tsx app/_components/home-page/sections/pricing-footer-sections.tsx app/_components/home-page/sections/home-page-primary-cta.tsx app/checkout/_components/checkout-button.tsx app/checkout/_hooks/use-stripe-checkout.ts lib/codebase-flow/use-codebase-local-draft-seeder.ts app/_content/home-page.ts app/_lib/home-page-render-model.ts app/_lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/unit/home-page-codebase-draft-storage.test.ts tests/integration-ui/home-page-product-preview.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx tests/integration-ui/checkout-button.test.tsx tests/integration-ui/codebase-local-draft-seeder.test.tsx
 
-bunx oxfmt --check config/product.ts app/_components/home-page/home-page.tsx app/_components/home-page/sections/blueprint-demo app/_components/home-page/sections/durability-section.tsx app/_components/home-page/sections/exec-loop-section.tsx app/_components/home-page/sections/hero-sections.tsx app/_components/home-page/sections/programs-section.tsx app/_components/home-page/sections/plans-md-section.tsx app/_components/home-page/sections/pricing-footer-sections.tsx app/_components/home-page/sections/home-page-primary-cta.tsx app/checkout/_components/checkout-button.tsx app/checkout/_hooks/use-stripe-checkout.ts lib/blueprint-flow/use-blueprint-local-draft-seeder.ts app/_content/home-page.ts app/_lib/home-page-render-model.ts app/_lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/unit/home-page-blueprint-draft-storage.test.ts tests/integration-ui/home-page-product-preview.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx tests/integration-ui/checkout-button.test.tsx tests/integration-ui/blueprint-local-draft-seeder.test.tsx
+bunx oxfmt --check config/product.ts app/_components/home-page/home-page.tsx app/_components/home-page/sections/codebase-demo app/_components/home-page/sections/durability-section.tsx app/_components/home-page/sections/exec-loop-section.tsx app/_components/home-page/sections/hero-sections.tsx app/_components/home-page/sections/programs-section.tsx app/_components/home-page/sections/plans-md-section.tsx app/_components/home-page/sections/pricing-footer-sections.tsx app/_components/home-page/sections/home-page-primary-cta.tsx app/checkout/_components/checkout-button.tsx app/checkout/_hooks/use-stripe-checkout.ts lib/codebase-flow/use-codebase-local-draft-seeder.ts app/_content/home-page.ts app/_lib/home-page-render-model.ts app/_lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/unit/home-page-codebase-draft-storage.test.ts tests/integration-ui/home-page-product-preview.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx tests/integration-ui/checkout-button.test.tsx tests/integration-ui/codebase-local-draft-seeder.test.tsx
 
-bunx vitest --config vitest.config.ts run --project unit tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/unit/home-page-blueprint-draft-storage.test.ts
+bunx vitest --config vitest.config.ts run --project unit tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/unit/home-page-codebase-draft-storage.test.ts
 
-bunx vitest --config vitest.config.ts run --project integration-ui tests/integration-ui/home-page-product-preview.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx tests/integration-ui/checkout-button.test.tsx tests/integration-ui/blueprint-local-draft-seeder.test.tsx
+bunx vitest --config vitest.config.ts run --project integration-ui tests/integration-ui/home-page-product-preview.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx tests/integration-ui/checkout-button.test.tsx tests/integration-ui/codebase-local-draft-seeder.test.tsx
 
 bunx vitest --config vitest.config.ts run --project unit tests/unit/public-metadata-routes.test.ts
 
@@ -306,7 +306,7 @@ The product-preview CTA is now a real checkout action. Browser proof must
 include a desktop and mobile viewport at `/?marketing=1` (so
 `redirectGrantedHomeVisitor` does not bounce an entitled local account).
 Verify the demo draft is written to `localStorage` immediately before the
-Stripe redirect, survives the round trip, and prefills `/blueprint` on the
+Stripe redirect, survives the round trip, and prefills `/codebase` on the
 first authenticated load when the buyer has no saved facts.
 
 ## What a future AI agent should preserve

@@ -121,7 +121,7 @@ describe("split lesson baseline (former watch cohort)", () => {
 			BUILD_SLICES_FIELD_IDS.planningPath,
 			BUILD_SLICES_FIELD_IDS.coreUxOrPrompt,
 			BUILD_SLICES_FIELD_IDS.referenceLink,
-			BUILD_SLICES_FIELD_IDS.blueprint,
+			BUILD_SLICES_FIELD_IDS.codebase,
 			BUILD_SLICES_FIELD_IDS.selectedSlice,
 			BUILD_SLICES_FIELD_IDS.reviewChecklist,
 			BUILD_SLICES_FIELD_IDS.userFlowSketch,
@@ -139,7 +139,7 @@ describe("split lesson baseline (former watch cohort)", () => {
 				[BUILD_SLICES_FIELD_IDS.planningPath]: "plan_skill",
 				[BUILD_SLICES_FIELD_IDS.coreUxOrPrompt]:
 					"User lands, connects account, runs first action.",
-				[BUILD_SLICES_FIELD_IDS.blueprint]: "- Slice A\n- Slice B",
+				[BUILD_SLICES_FIELD_IDS.codebase]: "- Slice A\n- Slice B",
 				[BUILD_SLICES_FIELD_IDS.selectedSlice]:
 					"Slice A: wire the empty state CTA",
 				[BUILD_SLICES_FIELD_IDS.reviewChecklist]: reviewDone,

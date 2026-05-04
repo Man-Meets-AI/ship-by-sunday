@@ -10,7 +10,7 @@ const disableClerkMiddleware = shouldBypassClerkProtection();
 const clerkAuthorizedParties = getClerkAuthorizedParties();
 
 const canonicalWorkspaceRoutes = [
-	routeConfig.blueprint,
+	routeConfig.codebase,
 	routeConfig.review,
 	routeConfig.settings,
 ] as const;

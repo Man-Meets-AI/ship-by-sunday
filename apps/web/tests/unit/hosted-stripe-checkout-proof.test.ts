@@ -62,7 +62,7 @@ describe("hosted Stripe checkout proof helpers", () => {
 
 	it("builds the hosted proof sign-in path", () => {
 		expect(buildHostedProofSignInPath({})).toBe(
-			"/sign-in?redirect_url=%2Fblueprint",
+			"/sign-in?redirect_url=%2Fcodebase",
 		);
 	});
 

@@ -24,4 +24,4 @@ Rationale: The current shell-comment fallback hides unknown validation steps. Ty
 
 ## First Slice Acceptance
 
-The first child ExecPlan is accepted when the generated blueprint tree and materialized repo both include `docs/build/docs/readiness.md`, agent handoff points to readiness before the copy-ready prompt, validation entries are typed, placeholder and weak-fact work is visible, and focused compiler validation passes.
+The first child ExecPlan is accepted when the generated codebase tree and materialized repo both include `docs/build/docs/readiness.md`, agent handoff points to readiness before the copy-ready prompt, validation entries are typed, placeholder and weak-fact work is visible, and focused compiler validation passes.

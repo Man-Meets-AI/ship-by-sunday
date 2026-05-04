@@ -29,7 +29,7 @@ Browser error reporting should explain failures without creating another failure
 - [x] 2026-04-24 EDT: Added a rejected-fetch regression test for the fallback transport.
 - [x] 2026-04-24 EDT: Updated the browser fallback fetch path to catch rejected sends with `.catch(() => undefined)`.
 - [x] 2026-04-24 EDT: Focused observability test passed: `bun run --cwd apps/web test:unit -- tests/unit/observability-client-report.test.ts`.
-- [x] 2026-04-24 EDT: Closeout checks: `bun run format:check`, `bun run lint`, `bun run plans:lint -- --plan docs/exec-plans/completed/2026-04-24-harden-client-observability-transport.md`, `bun run markdown:lint -- --paths docs/exec-plans/completed/2026-04-24-harden-client-observability-transport.md docs/programs/completed/2026-04-24-sbs-runtime-boundary-hardening/program.md`, `bun run programs:lint`, and `git diff --check` passed. `bun run typecheck` failed on unrelated untracked route-contract work at `apps/web/features/blueprint-flow/lib/legacy-blueprint-route-redirects.ts:51`.
+- [x] 2026-04-24 EDT: Closeout checks: `bun run format:check`, `bun run lint`, `bun run plans:lint -- --plan docs/exec-plans/completed/2026-04-24-harden-client-observability-transport.md`, `bun run markdown:lint -- --paths docs/exec-plans/completed/2026-04-24-harden-client-observability-transport.md docs/programs/completed/2026-04-24-sbs-runtime-boundary-hardening/program.md`, `bun run programs:lint`, and `git diff --check` passed. `bun run typecheck` failed on unrelated untracked route-contract work at `apps/web/features/codebase-flow/lib/legacy-codebase-route-redirects.ts:51`.
 
 ## Surprises & Discoveries
 
@@ -132,7 +132,7 @@ Result: passed.
 
        bun run typecheck
 
-Result: failed outside this slice after the Next build compiled. The TypeScript error is in unrelated untracked route-contract work at `apps/web/features/blueprint-flow/lib/legacy-blueprint-route-redirects.ts:51`, where `LegacyBlueprintRoute` can index `sectionByLegacyStep` with a route that has no key.
+Result: failed outside this slice after the Next build compiled. The TypeScript error is in unrelated untracked route-contract work at `apps/web/features/codebase-flow/lib/legacy-codebase-route-redirects.ts:51`, where `LegacyCodebaseRoute` can index `sectionByLegacyStep` with a route that has no key.
 
 ## Interfaces and Dependencies
 

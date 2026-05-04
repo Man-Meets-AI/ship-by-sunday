@@ -4,7 +4,7 @@
 
 Use this file for all work under `apps/web`.
 
-This app is blueprint-first, not course-first. The public customer outcome is one Blueprint delivered at Review & Download.
+This app is codebase-first, not course-first. The public customer outcome is one Codebase delivered at Review & Download.
 
 ## Read Before Editing
 
@@ -17,10 +17,10 @@ This app is blueprint-first, not course-first. The public customer outcome is on
 
 ## Product Contract
 
-- Required protected handoff: `/blueprint -> /review`.
+- Required protected handoff: `/codebase -> /review`.
 - `/start`, `/product`, `/design`, `/marketing`, and `/build-plan` are compatibility redirects, not the current product journey.
 - Optional post-download library: Execute / Ship.
-- Do not preserve old CEO / Design / Build / Ship framing if it conflicts with blueprint-first logic.
+- Do not preserve old CEO / Design / Build / Ship framing if it conflicts with codebase-first logic.
 - Do not reintroduce separate pre-review download artifacts or staged download contracts into the UI unless the live product changes first.
 - Do not turn workflow or ephemeral state into canonical intake.
 - Use current `apps/web` routes, features, config, and local instruction files as the live product contract. Use older `docs/ship-by-sunday/*.md` planning files only for background context when runtime code does not answer the question.

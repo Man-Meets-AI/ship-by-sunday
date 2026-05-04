@@ -30,9 +30,9 @@ The version source of truth is unresolved. Codex validates tags against `codex-r
 
 The future home for release-critical helpers is unresolved. The QA track proves that `qa/scripts` contains release/intake logic that cannot be deleted blindly. The Program still needs to decide whether those helpers move under `.github/scripts`, `scripts/release`, `apps/web/features/observability/export`, a package, or another repo-owned boundary.
 
-The helper CLI capability boundary is unresolved. The CLI itself should be retired, but the Program still needs to decide whether draft normalization, reduced fact derivation, import/export, or local generation from facts should move to `packages/blueprint-compiler` or be intentionally dropped.
+The helper CLI capability boundary is unresolved. The CLI itself should be retired, but the Program still needs to decide whether draft normalization, reduced fact derivation, import/export, or local generation from facts should move to `packages/codebase-compiler` or be intentionally dropped.
 
-The final browser proof shape is unresolved. The direction is smaller and release-scoped, but SBS still needs replacement proof for robots/sitemap, signed-out `/blueprint`, entitled `/blueprint -> /review -> /settings`, checkout success handoff, and metadata/noindex behavior.
+The final browser proof shape is unresolved. The direction is smaller and release-scoped, but SBS still needs replacement proof for robots/sitemap, signed-out `/codebase`, entitled `/codebase -> /review -> /settings`, checkout success handoff, and metadata/noindex behavior.
 
 Credentials and QA account references need verification. The QA track reported a real-looking QA credential reference, but this packet does not confirm it. Any deletion or migration touching that area must first inspect the actual file and handle rotation if needed.
 
@@ -52,7 +52,7 @@ SBS has no reported protected release tag ruleset yet, while Codex protects rele
 
 SBS `qa/` is both QA control plane and release infrastructure. The future Program cannot treat `qa/` deletion as a simple folder removal.
 
-SBS helper CLI is not an upstream dependency of generated starter output. The CLI depends on blueprint compiler APIs; generated starter and web review download do not appear to depend on the CLI.
+SBS helper CLI is not an upstream dependency of generated starter output. The CLI depends on codebase compiler APIs; generated starter and web review download do not appear to depend on the CLI.
 
 SBS tests are mostly source-level and worth preserving. The current Program direction is a test strategy reset, not a test-suite purge.
 

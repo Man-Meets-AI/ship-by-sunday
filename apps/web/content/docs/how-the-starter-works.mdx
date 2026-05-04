@@ -36,7 +36,7 @@ The runtime splits into three clear surfaces:
 
 - public marketing surface on `/`
 - public docs surface on `/docs` when the docs module is enabled
-- protected product surface on `/blueprint`, legacy redirect surfaces at `/start`, `/product`, `/design`, `/marketing`, and `/build-plan`, the customer-facing `Review` surface on `/review`, optional `/execute` after review unlock, and `/settings`
+- protected product surface on `/codebase`, legacy redirect surfaces at `/start`, `/product`, `/design`, `/marketing`, and `/build-plan`, the customer-facing `Review` surface on `/review`, optional `/execute` after review unlock, and `/settings`
 
 That split matters because checkout and access recovery live between those worlds.
 
@@ -65,7 +65,7 @@ Important module flags:
 Current behavior:
 
 - if `docs` is off, docs links hide and `/docs` renders a disabled-state surface
-- the canonical protected flow now uses `/blueprint` as the first landing surface and `/review` as the final handoff; `/start` and the stage-entry routes stay as compatibility redirects
+- the canonical protected flow now uses `/codebase` as the first landing surface and `/review` as the final handoff; `/start` and the stage-entry routes stay as compatibility redirects
 - `/mission` and `/lesson/[lessonKey]` now act as the optional post-review bonus library after the Execute / Ship unlock, while `/artifacts` still forwards into `/review`
 - the legacy `starterRepo` module is now off by default, so starter-repo cards are hidden from the visible protected app unless someone explicitly re-enables that obsolete path
 
@@ -89,22 +89,22 @@ For the file-by-file operating guide, see [Configure the Homepage](/docs/configu
 6. If the checkout already belonged to a signed-in Clerk account, Convex can grant access directly. Otherwise the webhook grants access to the Clerk user that owns the Stripe checkout email, creating that Clerk user when needed.
 7. `/checkout/success` becomes the canonical post-payment handoff. If the buyer is not signed in yet, it sends them through `/checkout/email-handoff` to prove the Stripe checkout email with Clerk email OTP.
 8. Once Clerk verifies that checkout email, the buyer returns to `/checkout/success` as the user that owns the granted access.
-9. `/blueprint` and the other blueprint workspace routes use the same access state and can route signed-out pending-checkout recovery back to the checkout email handoff when the browser still holds the pending checkout session cookie.
-10. `/review` is the final handoff surface. It makes one auto-download attempt for the Ship by Sunday Blueprint, then leaves the fallback download link visible if the browser blocks the download.
+9. `/codebase` and the other codebase workspace routes use the same access state and can route signed-out pending-checkout recovery back to the checkout email handoff when the browser still holds the pending checkout session cookie.
+10. `/review` is the final handoff surface. It makes one auto-download attempt for the Ship by Sunday Codebase, then leaves the fallback download link visible if the browser blocks the download.
 11. `/mission` and `/lesson/[lessonKey]` now act as the optional post-review bonus library after review unlock, while `/artifacts` still forwards into `/review`.
-12. Returning users with granted access who hit `/` are resumed into the first incomplete blueprint-first stage unless they explicitly force marketing mode.
+12. Returning users with granted access who hit `/` are resumed into the first incomplete codebase-first stage unless they explicitly force marketing mode.
 
-Protected app routes also start from server-fetched blueprint-workspace or access data before the client-side Convex subscriptions take over. That avoids a hydration-time auth race where the browser can briefly act signed out even though the server already proved access.
+Protected app routes also start from server-fetched codebase-workspace or access data before the client-side Convex subscriptions take over. That avoids a hydration-time auth race where the browser can briefly act signed out even though the server already proved access.
 
 ## Review output contract
 
-`/review` is the customer-facing Review handoff for the blueprint-first flow. It is not a manual download dashboard.
+`/review` is the customer-facing Review handoff for the codebase-first flow. It is not a manual download dashboard.
 
-On first entry, the page makes one automatic attempt to download the Ship by Sunday Blueprint. If the browser blocks that download, the fallback link stays visible so the buyer can fetch it manually.
+On first entry, the page makes one automatic attempt to download the Ship by Sunday Codebase. If the browser blocks that download, the fallback link stays visible so the buyer can fetch it manually.
 
 What the buyer gets:
 
-- one `Ship by Sunday Blueprint` zip
+- one `Ship by Sunday Codebase` zip
 - one repo folder when the zip is unpacked
 - generated Design, Marketing, Build, facts, and prompt materials under repo-root `docs/`
 - generalized starter-safe operator surfaces such as `.agents/`, workflow examples, and `apps/web/.env.production.example`

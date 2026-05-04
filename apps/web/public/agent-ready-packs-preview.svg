@@ -40,5 +40,5 @@
 
   <rect x="526" y="842" width="548" height="92" rx="30" fill="#2C221B"/>
   <text x="582" y="882" fill="#7FE0C6" font-family="ui-sans-serif, system-ui" font-size="22" font-weight="700">FINAL HANDOFF</text>
-  <text x="582" y="916" fill="#FFF7ED" font-family="ui-sans-serif, system-ui" font-size="28">Blueprint before execution.</text>
+  <text x="582" y="916" fill="#FFF7ED" font-family="ui-sans-serif, system-ui" font-size="28">Codebase before execution.</text>
 </svg>

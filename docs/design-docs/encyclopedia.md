@@ -4,15 +4,15 @@ This is the short repo glossary for agents and operators.
 
 ## Terms
 
-### Blueprint
+### Codebase
 
-One stage-specific slice of the guided product-building flow. The product is blueprint-first, so blueprint stages are the main planning and UX unit.
+One stage-specific slice of the guided product-building flow. The product is codebase-first, so codebase stages are the main planning and UX unit.
 
 ### Stage-entry route
 
 A stable top-level protected route such as `/product` or `/build-plan` that redirects into the canonical nested page for that stage.
 
-### Ship by Sunday Blueprint
+### Ship by Sunday Codebase
 
 The single generated repo artifact exposed from `/review`. It is the public download contract.
 
@@ -22,7 +22,7 @@ The terminal protected stage where the user verifies the generated materials and
 
 ### Canonical fact
 
-A durable, user-meaningful input that should survive across generation and downstream rendering. Canonical facts belong in the blueprint model, not in ad hoc workflow notes.
+A durable, user-meaningful input that should survive across generation and downstream rendering. Canonical facts belong in the codebase model, not in ad hoc workflow notes.
 
 ### Derived output
 

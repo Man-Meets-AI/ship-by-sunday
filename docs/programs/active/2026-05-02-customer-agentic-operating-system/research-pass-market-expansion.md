@@ -8,7 +8,7 @@ How should this Program change if the business goal is to capture as many web-ap
 
 The current Program correctly identifies the worker layer as the buyer-facing product, but it still reads too much like an implementation roadmap for generated repo artifacts. The stronger commercial frame is that Ship by Sunday should become the agent doctor for web apps: diagnose the repo, prescribe the highest-leverage loops, attach the customer's execution surface, and keep running scoped work until the app improves.
 
-The market should not be limited to people starting from a blueprint. The broadest web-app market has at least four lanes:
+The market should not be limited to people starting from a codebase. The broadest web-app market has at least four lanes:
 
 - new app builders who want a fresh worker-ready repo
 - vibe-coded app owners whose apps are broken, fragile, or stuck
@@ -47,7 +47,7 @@ The strongest monetization model is layered:
 
 The current public offer already has a paid generated-codebase path. The better approach is not to wait until every operating-system artifact is generalized before testing a bigger market. After the active source-contract slice, the next revenue-oriented slice should define the doctor pass and loop taxonomy so the product can sell diagnosis and repeatable loops while generated-repo packaging continues in parallel or immediately after.
 
-The doctor pass should become the shared checkout handoff. Whether the customer starts from the homepage Blueprint, a broken existing repo, a GitHub import, or a concierge intake, the first paid experience should answer:
+The doctor pass should become the shared checkout handoff. Whether the customer starts from the homepage Codebase, a broken existing repo, a GitHub import, or a concierge intake, the first paid experience should answer:
 
 - what is the app trying to become?
 - what is the current repo or generated repo capable of today?

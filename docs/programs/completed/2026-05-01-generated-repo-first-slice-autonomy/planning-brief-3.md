@@ -23,11 +23,11 @@ The user has now asked to continue until the autonomy guarantee is done. Treat t
 
 Exact next plan title: `Complete Generated Repo First Slice Autonomy`.
 
-Exact scope: complete the remaining Program roadmap inside `packages/blueprint-compiler` and generated Build Pack docs. The completion pass should derive a structured first-slice plan from `core_flow`, `must_have_capabilities`, `scope_in`, `scope_out`, `acceptance_criteria`, `selected_next_slice`, and generated starter files; harden validation command resolution against generated `package.json`; generate a review and verification pack mapped to `docs/testing/run-report.md`; broaden weak-fact detection; add clean-room replay proof; and replace substring-only checks with structural tests that parse the generated docs and command manifest.
+Exact scope: complete the remaining Program roadmap inside `packages/codebase-compiler` and generated Build Pack docs. The completion pass should derive a structured first-slice plan from `core_flow`, `must_have_capabilities`, `scope_in`, `scope_out`, `acceptance_criteria`, `selected_next_slice`, and generated starter files; harden validation command resolution against generated `package.json`; generate a review and verification pack mapped to `docs/testing/run-report.md`; broaden weak-fact detection; add clean-room replay proof; and replace substring-only checks with structural tests that parse the generated docs and command manifest.
 
 Exact implementation boundaries: keep the work compiler-owned, derive from existing facts first, preserve the readiness manifest as the central confidence and blocker source, and do not touch auth, billing, checkout, Convex runtime, app routes, provider setup, generated mirrors, or required intake fields.
 
-Exact validation boundaries: run focused compiler tests for blueprint rendering, repo generation, canonical project definitions, and clean-room replay coverage, then package typecheck, package format check, package lint, plan lint, Program lint, markdown lint for touched planning docs, and repo-level gates as needed.
+Exact validation boundaries: run focused compiler tests for codebase rendering, repo generation, canonical project definitions, and clean-room replay coverage, then package typecheck, package format check, package lint, plan lint, Program lint, markdown lint for touched planning docs, and repo-level gates as needed.
 
 Why it is next: readiness now exists, but fresh-agent execution still needs a derived first-slice plan, package-script-aware validation manifest, QA/review script, broader weak-fact visibility, and replay proof before the Program can truthfully claim generated-repo autonomy.
 

@@ -6,7 +6,7 @@ plan_status: "done"
 
 # Move the Web Application Into `apps/web`
 
-This document is a living execution plan for relocating the current single-root Next.js application into `apps/web`, introducing an app-local `package.json`, and turning the repository root into the workspace and orchestration layer for blueprint management, repo docs, deployment coordination, and top-level agent routing.
+This document is a living execution plan for relocating the current single-root Next.js application into `apps/web`, introducing an app-local `package.json`, and turning the repository root into the workspace and orchestration layer for codebase management, repo docs, deployment coordination, and top-level agent routing.
 
 This ExecPlan must be maintained in accordance with `docs/codex/PLANS.md` and updated as progress, discoveries, and decisions accumulate.
 
@@ -14,7 +14,7 @@ This ExecPlan must be maintained in accordance with `docs/codex/PLANS.md` and up
 
 The repository currently makes the whole repo feel like the app root. After this change, the web product should live under `apps/web` as a real application root with its own dependency manifest, which creates a real application boundary and makes room for a focused `apps/web/AGENTS.md` plus a narrower lesson-specific `AGENTS.md` deeper in the course tree. A contributor should be able to distinguish repo-wide assets such as root `docs/`, `packages/`, the root workspace manifest, and the root `AGENTS.md` from the actual Next app, its Convex backend, its scripts, and its tests.
 
-This slice is only about filesystem and tooling organization. It does not split the docs experience into a second app, redesign the lesson system, or implement blueprint-compiler behavior.
+This slice is only about filesystem and tooling organization. It does not split the docs experience into a second app, redesign the lesson system, or implement codebase-compiler behavior.
 
 ## Progress
 
@@ -42,15 +42,15 @@ The current environment flow is a real risk. The repo has root `.env.local`, `.e
 
 There is no root `convex.json`. The current Convex CLI behavior depends on running `convex dev` from the directory that contains the `convex/` folder, so moving `convex/` into `apps/web` means the command strategy must move with it.
 
-The original version of this plan assumed the root `package.json` would remain the only dependency manifest. That is too weak once `apps/web` becomes both the real app root and the Vercel deployment root. The grilled plan now assumes `apps/web/package.json` will own the app dependencies and scripts, while the root blueprint becomes a workspace coordinator.
+The original version of this plan assumed the root `package.json` would remain the only dependency manifest. That is too weak once `apps/web` becomes both the real app root and the Vercel deployment root. The grilled plan now assumes `apps/web/package.json` will own the app dependencies and scripts, while the root codebase becomes a workspace coordinator.
 
 GitHub Actions currently shells through root `bun run ...` commands in `.github/workflows/ci.yml`, so CI can stay stable if the root command surface remains stable. Vercel is different because the project root directory is configured outside git and must be updated manually during rollout.
 
-During execution, the first attempt to remove all root dependencies while leaving root scripts unchanged failed because root `bun run` scripts did not automatically resolve workspace-installed binaries from `apps/web`. The root blueprint must explicitly delegate into `apps/web` instead of assuming hoisted CLI availability.
+During execution, the first attempt to remove all root dependencies while leaving root scripts unchanged failed because root `bun run` scripts did not automatically resolve workspace-installed binaries from `apps/web`. The root codebase must explicitly delegate into `apps/web` instead of assuming hoisted CLI availability.
 
 Running app-local formatter and lint commands from `apps/web` revealed that app-local tooling needs its own ignore file. Without `apps/web/.gitignore`, `oxfmt` scanned generated `.next` output and reported an unusable flood of formatting noise.
 
-`@clerk/backend/webhooks` was imported directly in `apps/web/app/api/observability/clerk/route.ts` but not declared in the app dependency manifest. The build only surfaced this once the app blueprint became the true dependency owner, so the move exposed a real missing direct dependency.
+`@clerk/backend/webhooks` was imported directly in `apps/web/app/api/observability/clerk/route.ts` but not declared in the app dependency manifest. The build only surfaced this once the app codebase became the true dependency owner, so the move exposed a real missing direct dependency.
 
 The browser-smoke command still requires explicit env loading via `set -a; source apps/web/.env.local; set +a; ...`. That behavior was not introduced by the move, but the app-local env path now needs to be used consistently.
 
@@ -66,23 +66,23 @@ Decision: keep root `docs/` where it is, but move product docs with the app unde
 
 Decision: do not create `apps/docs` in this slice. Rationale: the Nextra docs are part of the existing web app, not a separate application boundary. Splitting them into `apps/docs` would be a larger product and deployment change. Date: 2026-03-24.
 
-Decision: add `apps/web/package.json` and convert the repo root into a workspace coordinator. Rationale: once `apps/web` becomes the real app root and Vercel deploy root, the app should own its dependency manifest locally rather than relying on a proxy root blueprint shape. Date: 2026-03-24.
+Decision: add `apps/web/package.json` and convert the repo root into a workspace coordinator. Rationale: once `apps/web` becomes the real app root and Vercel deploy root, the app should own its dependency manifest locally rather than relying on a proxy root codebase shape. Date: 2026-03-24.
 
 Decision: reconfigure the existing Vercel project to use `apps/web` as the root directory instead of creating a second project. Rationale: this keeps the migration scoped to one application and one deployment target and avoids duplicate environment management. Date: 2026-03-24.
 
 Decision: move the tracked env example into `apps/web` and treat local ignored env files as a manual operator migration step during execution. Rationale: the app will execute from `apps/web`, but private local files cannot be safely relocated by assumption. Date: 2026-03-24.
 
-Decision: leave `packages/blueprint-compiler/` outside `apps/web`. Rationale: the requested structure treats it as a separate blueprint boundary rather than web-app code. Date: 2026-03-24.
+Decision: leave `packages/codebase-compiler/` outside `apps/web`. Rationale: the requested structure treats it as a separate codebase boundary rather than web-app code. Date: 2026-03-24.
 
-Decision: limit the initial root workspace list to `apps/web` and only add `packages/blueprint-compiler` later when it has a real dependency manifest. Rationale: the blueprint-compiler directory currently contains instructions but no implementation blueprint surface. Date: 2026-03-24.
+Decision: limit the initial root workspace list to `apps/web` and only add `packages/codebase-compiler` later when it has a real dependency manifest. Rationale: the codebase-compiler directory currently contains instructions but no implementation codebase surface. Date: 2026-03-24.
 
 Decision: make the root command surface delegate into `apps/web` with `bun --cwd apps/web run ...` instead of relying on workspace dependency hoisting. Rationale: the first execution pass showed that root `bun run` scripts could not resolve app-local binaries after the dependency move. Date: 2026-03-24.
 
-Decision: use Bun’s `bun run --cwd apps/web <script>` form for root delegation instead of `bun --cwd apps/web run <script>`. Rationale: the latter only printed Bun’s help output, while the former correctly executed the app blueprint scripts. Date: 2026-03-24.
+Decision: use Bun’s `bun run --cwd apps/web <script>` form for root delegation instead of `bun --cwd apps/web run <script>`. Rationale: the latter only printed Bun’s help output, while the former correctly executed the app codebase scripts. Date: 2026-03-24.
 
 Decision: add `apps/web/.gitignore` in addition to the root `.gitignore`. Rationale: app-local formatter and lint commands now run from `apps/web` and need a local ignore source for generated files such as `.next/`, `coverage/`, and Playwright artifacts. Date: 2026-03-24.
 
-Decision: add `@clerk/backend` as a direct dependency of `apps/web/package.json`. Rationale: `@clerk/backend/webhooks` is imported directly by the app and was no longer available through an implicit transitive path once the app blueprint became the actual dependency owner. Date: 2026-03-24.
+Decision: add `@clerk/backend` as a direct dependency of `apps/web/package.json`. Rationale: `@clerk/backend/webhooks` is imported directly by the app and was no longer available through an implicit transitive path once the app codebase became the actual dependency owner. Date: 2026-03-24.
 
 Decision: update the existing Vercel project root through the authenticated Vercel project API rather than leaving the change as a manual-only step. Rationale: the local machine already had an authenticated Vercel CLI session and linked project metadata, which allowed the rollout step to be completed and verified during execution. Date: 2026-03-24.
 
@@ -98,7 +98,7 @@ The remaining gaps are not move regressions. `bun run format:check` still report
 
 Today the web app is spread across root-level directories and files. Route entrypoints live in `app/`, shared UI in `components/`, product and course logic in `features/`, environment and server helpers in `platform/`, app docs content in `content/docs/`, static assets in `public/`, tests in `tests/`, CLI helpers in `scripts/`, and Convex functions in `convex/`. Product docs route wiring lives in `app/docs/[[...mdxPath]]/page.tsx` and `app/docs/layout.tsx`, supported by `features/docs/*`, `content/docs/*`, and `mdx-components.tsx`.
 
-The root `package.json` currently runs Next, Convex, Vitest, Playwright, and many Node scripts as though the repository root is the app root. The root `tsconfig.json` maps `@/*` to `./*`, which works only because the app currently lives at the root. The root `components.json` points shadcn at `app/globals.css` and root-relative aliases. The root `.gitignore` ignores `.next`, `coverage`, `playwright-report`, and `test-results` only at the repo root. `.github/workflows/ci.yml` currently depends on those root blueprint scripts. The Vercel project linked in `.vercel/project.json` is external to git and must be reconfigured manually to point at `apps/web`.
+The root `package.json` currently runs Next, Convex, Vitest, Playwright, and many Node scripts as though the repository root is the app root. The root `tsconfig.json` maps `@/*` to `./*`, which works only because the app currently lives at the root. The root `components.json` points shadcn at `app/globals.css` and root-relative aliases. The root `.gitignore` ignores `.next`, `coverage`, `playwright-report`, and `test-results` only at the repo root. `.github/workflows/ci.yml` currently depends on those root codebase scripts. The Vercel project linked in `.vercel/project.json` is external to git and must be reconfigured manually to point at `apps/web`.
 
 The intended post-move shape is:
 
@@ -138,7 +138,7 @@ The intended post-move shape is:
           vitest.config.ts
           .env.local.example
 
-This plan assumes root `docs/` stays as repo documentation, `packages/blueprint-compiler/` remains outside `apps/web`, the existing Vercel project is repointed at `apps/web`, and the initial workspace scope includes `apps/web` only.
+This plan assumes root `docs/` stays as repo documentation, `packages/codebase-compiler/` remains outside `apps/web`, the existing Vercel project is repointed at `apps/web`, and the initial workspace scope includes `apps/web` only.
 
 ## Plan of Work
 
@@ -156,7 +156,7 @@ Milestone 1 establishes the new dependency-tool and workspace shape. At the end 
 
 Milestone 2 establishes `apps/web` as the real application root. At the end of this milestone, all app-owned directories and app-root configuration files live under `apps/web`, and the repository tree no longer suggests that the whole repo is a single Next app. Success is proven when a filesystem audit shows the app consolidated under `apps/web` and the root retaining only repo-wide assets.
 
-Milestone 3 repairs orchestration, environment handling, CI assumptions, and tool execution. At the end of this milestone, root blueprint scripts run Next, Convex, tests, and local scripts against `apps/web`, CI still shells through the root command surface, the tracked env example is in the app root, and `.gitignore` covers app-local generated outputs. Success is proven when `bun run dev:web`, `bun run dev:convex`, `bun run build`, and representative test commands work from the repo root without path hacks scattered across the codebase.
+Milestone 3 repairs orchestration, environment handling, CI assumptions, and tool execution. At the end of this milestone, root codebase scripts run Next, Convex, tests, and local scripts against `apps/web`, CI still shells through the root command surface, the tracked env example is in the app root, and `.gitignore` covers app-local generated outputs. Success is proven when `bun run dev:web`, `bun run dev:convex`, `bun run build`, and representative test commands work from the repo root without path hacks scattered across the codebase.
 
 Milestone 4 restores documentation, updates deployment, validates the migration end to end, and leaves the tree ready for follow-on agent scoping. At the end of this milestone, durable docs that describe file locations no longer reference the old root-level app layout, the existing Vercel project has `apps/web` as its root directory, local env expectations are explicit, and the repo is ready for `apps/web/AGENTS.md` plus deeper lesson-specific agent files. Success is proven by passing the agreed validation commands, confirming the external deployment reconfiguration, and verifying that the remaining root directories are truly repo-wide rather than app-specific.
 
@@ -176,7 +176,7 @@ Milestone 4 restores documentation, updates deployment, validates the migration 
    Required outcomes:
      The root dependency manifest becomes the workspace and orchestration layer.
      `apps/web/package.json` becomes the dependency and script owner for the web app.
-     The initial workspace scope includes `apps/web` and does not require `packages/blueprint-compiler` to become a blueprint yet.
+     The initial workspace scope includes `apps/web` and does not require `packages/codebase-compiler` to become a codebase yet.
      The public root command surface remains stable so CI and local usage can keep calling `bun run dev:web`, `bun run build`, and the existing test commands.
 
 2. Create `apps/web` and move the app-owned directories with history preservation.
@@ -355,4 +355,4 @@ Evidence gathered during planning and execution:
 
 This plan directly depends on the root `package.json` workspace and command surface, the future `apps/web/package.json`, the root `.gitignore`, `.github/workflows/ci.yml`, the app-owned config files that define the Next root, the docs route in `app/docs`, the docs support code in `features/docs`, the MDX content in `content/docs`, the Convex backend in `convex/`, the app scripts in `scripts/`, the test infrastructure in `tests/`, and the external Vercel project settings.
 
-The most important interfaces that must remain stable after the move are the root blueprint commands consumed by developers and CI, the app-local dependency manifest in `apps/web/package.json`, the `@/*` import alias inside the app, the Next middleware entry in `proxy.ts`, the instrumentation entrypoints, the product docs route wiring, the Convex environment flow that currently writes and reads `.env.local`, and the Vercel project’s deployment root. The follow-on `AGENTS.md` work depends on this filesystem boundary existing first, but the content of those files is intentionally out of scope for this plan.
+The most important interfaces that must remain stable after the move are the root codebase commands consumed by developers and CI, the app-local dependency manifest in `apps/web/package.json`, the `@/*` import alias inside the app, the Next middleware entry in `proxy.ts`, the instrumentation entrypoints, the product docs route wiring, the Convex environment flow that currently writes and reads `.env.local`, and the Vercel project’s deployment root. The follow-on `AGENTS.md` work depends on this filesystem boundary existing first, but the content of those files is intentionally out of scope for this plan.

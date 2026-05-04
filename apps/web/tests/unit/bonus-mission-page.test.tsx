@@ -152,7 +152,7 @@ describe("BonusMissionPage", () => {
 		);
 
 		expect(markup).toContain(
-			"Your Ship by Sunday Blueprint is ready. Build is next.",
+			"Your Ship by Sunday Codebase is ready. Build is next.",
 		);
 		expect(markup).toContain("Build");
 		expect(markup).toContain("Product");
@@ -162,7 +162,7 @@ describe("BonusMissionPage", () => {
 		expect(markup).toContain('href="/lesson/iterate-the-product-with-ai"');
 		expect(markup).toContain("Continue in Build");
 		expect(markup).toContain("Review the full library");
-		expect(markup).not.toContain("Blueprint complete");
+		expect(markup).not.toContain("Codebase complete");
 		expect(markup).not.toContain("Completed earlier");
 		expect(markup).not.toContain(">CEO<");
 		expect(markup).not.toContain(">DESIGN<");

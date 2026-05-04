@@ -421,7 +421,7 @@ describe("codex route handlers", () => {
 		expect(withCodexAppServerClientMock).not.toHaveBeenCalled();
 	});
 
-	it("rejects retired blueprint field-level templates before contacting Codex", async () => {
+	it("rejects retired codebase field-level templates before contacting Codex", async () => {
 		requireProductAccessApiSessionMock.mockResolvedValue({
 			userId: "user_123",
 			token: "token_123",
@@ -434,7 +434,7 @@ describe("codex route handlers", () => {
 					"content-type": "application/json",
 				},
 				body: JSON.stringify({
-					templateId: "blueprint_problem_statement",
+					templateId: "codebase_problem_statement",
 					prompt: "Rewrite this one field.",
 				}),
 			}),
@@ -572,7 +572,7 @@ describe("codex route handlers", () => {
 		);
 	});
 
-	it("accepts a blueprint intake section template and records the run", async () => {
+	it("accepts a codebase intake section template and records the run", async () => {
 		requireProductAccessApiSessionMock.mockResolvedValue({
 			userId: "user_123",
 			token: "token_123",
@@ -618,7 +618,7 @@ describe("codex route handlers", () => {
 					"content-type": "application/json",
 				},
 				body: JSON.stringify({
-					templateId: "blueprint_intake_foundation",
+					templateId: "codebase_intake_foundation",
 					prompt: "Draft the Foundation section from rough notes.",
 				}),
 			}),
@@ -633,7 +633,7 @@ describe("codex route handlers", () => {
 		expect(recordCodexRunMock).toHaveBeenCalledWith(
 			{ userId: "user_123", token: "token_123" },
 			expect.objectContaining({
-				templateId: "blueprint_intake_foundation",
+				templateId: "codebase_intake_foundation",
 				status: "success",
 			}),
 		);

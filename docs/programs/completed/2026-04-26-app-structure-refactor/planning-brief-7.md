@@ -20,13 +20,13 @@ The first child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-ma
 
 The second child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-extract-workspace-shell-from-course.md`. It moved the shared AppShell implementation into `apps/web/features/workspace-shell`, updated first-party imports, kept temporary compatibility exports at the old course-owned shell path, and passed focused and app-level validation.
 
-The third child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-make-route-ownership-visible.md`. It moved the protected workspace access gate and legacy blueprint redirect helper into private `apps/web/app/(workspace)` folders, updated first-party imports and tests, kept temporary compatibility exports, and passed focused and app-level validation.
+The third child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-make-route-ownership-visible.md`. It moved the protected workspace access gate and legacy codebase redirect helper into private `apps/web/app/(workspace)` folders, updated first-party imports and tests, kept temporary compatibility exports, and passed focused and app-level validation.
 
 The fourth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-make-identity-route-ownership-visible.md`. It moved identity route wrapper screens and support shell code into private `apps/web/app/(identity)` folders, updated first-party imports and tests, kept temporary compatibility exports, and passed focused and app-level validation.
 
 The fifth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-finish-route-ownership-visibility.md`. It moved checkout success wrappers, review route wrappers, and API route path contracts into App Router private folders, kept compatibility exports, and passed focused and app-level validation.
 
-The sixth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-clean-shared-ui-and-hooks.md`. It moved marketing-only visual effects and the blueprint-only keyboard shortcut hook into feature-owned paths, kept compatibility exports, and passed focused and app-level validation without deleting shared UI inventory.
+The sixth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-clean-shared-ui-and-hooks.md`. It moved marketing-only visual effects and the codebase-only keyboard shortcut hook into feature-owned paths, kept compatibility exports, and passed focused and app-level validation without deleting shared UI inventory.
 
 ## What The Previous Slice Unblocked
 

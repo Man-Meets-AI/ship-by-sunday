@@ -103,7 +103,7 @@ Do not turn the color slice into a homepage redesign, typography refactor, spaci
 
 Do not treat every hard-coded color as a bug. Integration logo colors, marketing illustration colors, Figma-derived hero colors, Open Graph image colors, and generated preview theme colors can be intentional content.
 
-Do not restyle the named custom homepage editorial sections. This includes `apps/web/app/_components/home-page/sections/blueprint-demo/blueprint-demo-leverage-hero.tsx`, `apps/web/app/_components/home-page/sections/sprint-path-unified-section.tsx`, `apps/web/app/_components/home-page/sections/exec-loop-section.tsx`, `apps/web/app/_components/home-page/sections/exec-loop/exec-loop-visual.tsx`, and their related content in `apps/web/app/_content/home-page.ts`.
+Do not restyle the named custom homepage editorial sections. This includes `apps/web/app/_components/home-page/sections/codebase-demo/codebase-demo-leverage-hero.tsx`, `apps/web/app/_components/home-page/sections/sprint-path-unified-section.tsx`, `apps/web/app/_components/home-page/sections/exec-loop-section.tsx`, `apps/web/app/_components/home-page/sections/exec-loop/exec-loop-visual.tsx`, and their related content in `apps/web/app/_content/home-page.ts`.
 
 Do not add a hidden third palette. New color roles should live in `apps/web/app/globals.css` and be documented in the design library when they become durable.
 

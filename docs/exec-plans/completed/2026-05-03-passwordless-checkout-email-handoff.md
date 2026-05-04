@@ -21,7 +21,7 @@ This ExecPlan must be maintained in accordance with `docs/exec-plans/PLANS.md`.
 
 ## Purpose / Big Picture
 
-After Stripe confirms payment for a signed-out buyer, Ship by Sunday should show a narrow handoff: payment is confirmed for the checkout email, product access is already waiting for that email, and the only remaining step is to prove that email through Clerk. Today the buyer can land in a generic sign-in or create-account recovery path with password and Google/social branches. After this plan, the post-checkout path uses a passwordless Clerk email-code flow for the checkout email and then returns the buyer to `/checkout/success`, where the already-granted access can open `/blueprint`.
+After Stripe confirms payment for a signed-out buyer, Ship by Sunday should show a narrow handoff: payment is confirmed for the checkout email, product access is already waiting for that email, and the only remaining step is to prove that email through Clerk. Today the buyer can land in a generic sign-in or create-account recovery path with password and Google/social branches. After this plan, the post-checkout path uses a passwordless Clerk email-code flow for the checkout email and then returns the buyer to `/checkout/success`, where the already-granted access can open `/codebase`.
 
 This matters because Stripe Link is not app login. Link can accelerate payment and help Stripe collect the payer email, but Clerk is still the application identity boundary. The visible proof of success is a signed-out buyer paying through Stripe, landing on `/checkout/success?session_id=...`, seeing a clear checkout-email handoff instead of generic auth recovery, entering the one-time code sent by Clerk, and reaching the protected workspace without buying again or choosing Google.
 
@@ -81,7 +81,7 @@ The payment and entitlement path is already mostly correct. `apps/web/convex/che
 
 Checkout success state lives in `apps/web/platform/billing/checkout/checkout-session.ts`. Its `CheckoutSessionState` union now includes `checkout_email_handoff_required`. For a paid guest session that fulfillment successfully attaches to the Clerk user for the checkout email, the code returns `checkout_email_handoff_required` when there is no current Clerk user and includes required `checkoutEmail`.
 
-Checkout success presentation lives under `apps/web/app/checkout/success/_components/` and `apps/web/app/checkout/success/_lib/checkout-success-view-model.ts`. The view model currently renders generic sign-in and create-account actions by calling `getSignInRedirectHref(getCheckoutSuccessHref(sessionId))` and `buildSignUpHref({ redirectPath, sessionId })`. `CheckoutSuccessViewContent` redirects to `/blueprint` only when the state is `validated` and `viewerProductAccess` says access is ready.
+Checkout success presentation lives under `apps/web/app/checkout/success/_components/` and `apps/web/app/checkout/success/_lib/checkout-success-view-model.ts`. The view model currently renders generic sign-in and create-account actions by calling `getSignInRedirectHref(getCheckoutSuccessHref(sessionId))` and `buildSignUpHref({ redirectPath, sessionId })`. `CheckoutSuccessViewContent` redirects to `/codebase` only when the state is `validated` and `viewerProductAccess` says access is ready.
 
 The custom identity route group lives under `apps/web/app/(identity)/`. `/sign-in` renders `SignInPage` from `apps/web/app/(identity)/_components/sign-in-page.tsx`. The sign-in controller is `apps/web/app/(identity)/_components/sign-in/use-sign-in-flow.ts`; it currently supports email/password, password reset, email-code MFA or client-trust verification after password/OAuth, and Google OAuth through `signIn.sso({ strategy: "oauth_google" })`. `/sso-callback` renders `SsoCallbackPage` and has tests in `apps/web/tests/integration-ui/sso-callback-page.test.tsx`.
 
@@ -137,7 +137,7 @@ Milestone 3 removes generic auth branches from the post-checkout path. At the en
 
 Milestone 4 updates access-required recovery and docs. At the end, protected-route recovery still works, checkout-specific recovery prefers the email handoff when it has a trusted Checkout Session id, and builder/operator docs describe Clerk email-code setup plus failure symptoms.
 
-Milestone 5 validates the full flow. At the end, focused tests and the normal repo gates show that a signed-out paid checkout can finish through email OTP and enter `/blueprint`.
+Milestone 5 validates the full flow. At the end, focused tests and the normal repo gates show that a signed-out paid checkout can finish through email OTP and enter `/codebase`.
 
 ## Concrete Steps
 
@@ -187,7 +187,7 @@ If a command fails because a named test file has been moved or renamed, locate t
 
 ## Validation and Acceptance
 
-Acceptance is user-visible. A signed-out buyer who completes a paid Stripe Checkout Session for Ship by Sunday should land on `/checkout/success?session_id=...`, see payment confirmed for the checkout email, start a Clerk email-code handoff for that exact email, enter the code, and return to the success page as the Clerk user that owns the granted access. The success page should then open `/blueprint` when product access is ready.
+Acceptance is user-visible. A signed-out buyer who completes a paid Stripe Checkout Session for Ship by Sunday should land on `/checkout/success?session_id=...`, see payment confirmed for the checkout email, start a Clerk email-code handoff for that exact email, enter the code, and return to the success page as the Clerk user that owns the granted access. The success page should then open `/codebase` when product access is ready.
 
 The post-checkout path is not acceptable if it offers Google sign-in, asks the buyer to create a password as the primary path, suggests buying again, or treats Stripe Link as app authentication. The implementation is also not acceptable if a copied Stripe success URL can create a Clerk session without proving the checkout email through Clerk.
 
@@ -234,7 +234,7 @@ Final post-payment shape:
     success page shows only the checkout-email handoff
     Clerk sends an email code to the checkout email
     buyer enters the code and Clerk creates the app session
-    /checkout/success validates the matching user and opens /blueprint
+    /checkout/success validates the matching user and opens /codebase
 
 Official docs facts used for this plan:
 

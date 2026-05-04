@@ -6,7 +6,7 @@ How should Ship by Sunday help customers with existing mature codebases adopt Pr
 
 ## Findings
 
-The live Ship by Sunday flow is blueprint-first. Product intake leads to `/review`, and `/review` downloads a generated customer repo. The current product docs under `apps/web/content/docs/` teach local setup, auth, billing, buyer-journey testing, the build loop, prompting patterns, parallel agents, and shipping. They do not yet define a first-class path where a customer points Ship by Sunday at an existing repo and receives an adoption Program.
+The live Ship by Sunday flow is codebase-first. Product intake leads to `/review`, and `/review` downloads a generated customer repo. The current product docs under `apps/web/content/docs/` teach local setup, auth, billing, buyer-journey testing, the build loop, prompting patterns, parallel agents, and shipping. They do not yet define a first-class path where a customer points Ship by Sunday at an existing repo and receives an adoption Program.
 
 The mature-repo opportunity is structurally different from greenfield generation. A mature repo already has code, tests, CI, docs, source-of-truth drift, release rules, incidents, and ownership habits. The product should not overwrite those conventions. It should install an operating layer around them: a source-of-truth map, validation command map, agent instructions, Program and ExecPlan contracts, prompt assets, thin skills, and a first adoption Program.
 

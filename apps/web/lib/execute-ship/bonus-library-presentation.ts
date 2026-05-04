@@ -22,7 +22,7 @@ const blockPresentation = {
 	BUILD: {
 		label: "Build",
 		summary:
-			"This is the main continuation path. Turn the Ship by Sunday Blueprint into working software, one slice at a time.",
+			"This is the main continuation path. Turn the Ship by Sunday Codebase into working software, one slice at a time.",
 		kind: "featured",
 	},
 	SHIP: {

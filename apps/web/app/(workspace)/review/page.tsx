@@ -1,8 +1,8 @@
 import { api } from "@/convex/_generated/api";
-import { isReviewAutoDownloadEnabled } from "@/lib/blueprint-flow/review-download-handoff";
+import { isReviewAutoDownloadEnabled } from "@/lib/codebase-flow/review-download-handoff";
 import { AccessRequiredPage } from "@/app/(workspace)/_components/access-required/access-required-page";
 import { loadWorkspacePageAccess } from "@/app/(workspace)/_server/load-workspace-page-access";
-import { BlueprintReviewPage } from "@/app/(workspace)/review/_components/blueprint-review-page";
+import { CodebaseReviewPage } from "@/app/(workspace)/review/_components/codebase-review-page";
 import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
 
 export default async function Page({
@@ -16,13 +16,13 @@ export default async function Page({
 	}
 
 	const initialWorkspaceState = await fetchAuthenticatedQuery(
-		api.blueprint.getBlueprintWorkspaceState,
+		api.codebase.getCodebaseWorkspaceState,
 		{},
 	);
 	const { download, showLessonMap } = await searchParams;
 
 	if (!initialWorkspaceState) {
-		throw new Error("Blueprint workspace state missing");
+		throw new Error("Codebase workspace state missing");
 	}
 
 	const isUnlocked = Boolean(
@@ -30,7 +30,7 @@ export default async function Page({
 	);
 	const initialResumeDestination = isUnlocked
 		? await fetchAuthenticatedQuery(
-				api.blueprint.getBlueprintResumeDestination,
+				api.codebase.getCodebaseResumeDestination,
 				{},
 			)
 		: null;
@@ -40,7 +40,7 @@ export default async function Page({
 			: null;
 
 	return (
-		<BlueprintReviewPage
+		<CodebaseReviewPage
 			initialWorkspaceState={initialWorkspaceState}
 			initialPostReviewTargets={
 				initialResumeDestination?.postReviewTargets ?? null

@@ -9,7 +9,7 @@ import {
 test.describe.configure({ mode: "serial" });
 test.skip(
 	!shouldRunAuthenticatedE2E,
-	"Set E2E_RUN_SANDBOX=1 or E2E_RUN_LOCAL_AUTH=1 plus PLAYWRIGHT_BASE_URL to run authenticated blueprint browser handoff checks.",
+	"Set E2E_RUN_SANDBOX=1 or E2E_RUN_LOCAL_AUTH=1 plus PLAYWRIGHT_BASE_URL to run authenticated codebase browser handoff checks.",
 );
 
 function getStripePayButton(page: Page) {
@@ -120,11 +120,11 @@ async function completeStripeSandboxCheckout(page: Page) {
 test.describe("member with access", () => {
 	test.use({ storageState: memberWithAccessStorageStatePath });
 
-	test("@default_ship can open the canonical blueprint flow and settings", async ({
+	test("@default_ship can open the canonical codebase flow and settings", async ({
 		page,
 	}) => {
-		await page.goto("/blueprint");
-		await expect(page).toHaveURL(/\/blueprint$/);
+		await page.goto("/codebase");
+		await expect(page).toHaveURL(/\/codebase$/);
 		await expect(
 			page.getByRole("button", { name: "Continue to Review" }),
 		).toBeVisible();
@@ -142,7 +142,7 @@ test.describe("member with access", () => {
 		).toBeVisible();
 		await expect(
 			page.getByRole("link", {
-				name: "Need the Ship by Sunday Blueprint again? Download it here.",
+				name: "Need the Ship by Sunday Codebase again? Download it here.",
 			}),
 		).toBeVisible();
 
@@ -158,7 +158,7 @@ test.describe("member with access", () => {
 test.describe("member without access", () => {
 	test.use({ storageState: memberWithoutAccessStorageStatePath });
 
-	test("@billing_integration full paid handoff moves from checkout success into the blueprint entry", async ({
+	test("@billing_integration full paid handoff moves from checkout success into the codebase entry", async ({
 		page,
 	}) => {
 		test.setTimeout(120_000);
@@ -178,13 +178,11 @@ test.describe("member without access", () => {
 		await page.waitForURL(/\/checkout\/success\?session_id=/, {
 			timeout: 60_000,
 		});
-		await page.waitForURL(/\/blueprint/, {
+		await page.waitForURL(/\/codebase/, {
 			timeout: 60_000,
 		});
 
-		await expect(
-			page.getByRole("heading", { name: "Blueprint" }),
-		).toBeVisible();
+		await expect(page.getByRole("heading", { name: "Codebase" })).toBeVisible();
 		await expect(
 			page.getByRole("button", { name: "Continue to Review" }),
 		).toBeVisible();

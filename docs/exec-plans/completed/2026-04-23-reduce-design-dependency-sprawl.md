@@ -4,7 +4,7 @@ status: complete
 created_at: 2026-04-23
 completed_at: 2026-04-24
 summary: Remove unused heavy visuals, standardize icon usage, and reduce design-system drift with build-backed proof and without redesigning the product.
-post_build_recap: Removed unused heavy visual dependencies and dead visual modules; retained blueprint icon-library packages because they back the user-selectable preset compiler path.
+post_build_recap: Removed unused heavy visual dependencies and dead visual modules; retained codebase icon-library packages because they back the user-selectable preset compiler path.
 read_when:
   - Resuming design-system or dependency cleanup.
   - Auditing icon libraries, heavy visual packages, marketing effects, or nested-card app surfaces.
@@ -27,9 +27,9 @@ This plan is the sixth child slice of the Program packet at `docs/programs/activ
 
 ## Progress
 
-- [x] 2026-04-23 EDT: Identified design dependency sprawl as lower priority than release, runtime, route, blueprint, and observability correctness.
+- [x] 2026-04-23 EDT: Identified design dependency sprawl as lower priority than release, runtime, route, codebase, and observability correctness.
 - [x] 2026-04-24 EDT: Read `DESIGN.md`, `docs/DESIGN.md`, `docs/FRONTEND.md`, and `apps/web/AGENTS.md` before changing public visual code.
-- [x] 2026-04-24 EDT: Audited icon libraries and heavy visual dependencies with import scans. `apps/web/features/blueprint-flow/lib/blueprint-theme-icons.tsx`, `blueprint-theme-configurator.tsx`, `blueprint-theme-preview.tsx`, and the blueprint compiler preset model prove the non-lucide icon libraries back the user-selectable `iconLibrary` theme option. `apps/web/components/ui/globe.tsx`, `apps/web/features/marketing/components/home-page/github-activity-graph.tsx`, and `tech-stack-cloud.tsx` have no live imports. `apps/web/components/ui/cover.tsx` is live and pulls `@tsparticles/*` only through `SparklesCore`.
+- [x] 2026-04-24 EDT: Audited icon libraries and heavy visual dependencies with import scans. `apps/web/features/codebase-flow/lib/codebase-theme-icons.tsx`, `codebase-theme-configurator.tsx`, `codebase-theme-preview.tsx`, and the codebase compiler preset model prove the non-lucide icon libraries back the user-selectable `iconLibrary` theme option. `apps/web/components/ui/globe.tsx`, `apps/web/features/marketing/components/home-page/github-activity-graph.tsx`, and `tech-stack-cloud.tsx` have no live imports. `apps/web/components/ui/cover.tsx` is live and pulls `@tsparticles/*` only through `SparklesCore`.
 - [x] 2026-04-24 EDT: Removed unused visual modules `apps/web/components/ui/globe.tsx`, `apps/web/components/ui/icon-cloud.tsx`, `apps/web/features/marketing/components/home-page/github-activity-graph.tsx`, and `tech-stack-cloud.tsx`. Removed the live `SparklesCore` particle dependency by replacing the `Cover` hover with deterministic local motion and deleting `apps/web/components/ui/sparkles.tsx`.
 - [x] 2026-04-24 EDT: Removed package dependencies `@react-three/drei`, `@react-three/fiber`, `three`, `three-globe`, `@types/three`, `@tsparticles/engine`, `@tsparticles/react`, `@tsparticles/slim`, `cobe`, and `heat-graph` from `apps/web/package.json`; refreshed `bun.lock` with `bun install`.
 - [x] 2026-04-24 EDT: Re-ran import scans: `rg -n "@react-three|three-globe|from ['\"]three['\"]|@tsparticles|heat-graph|cobe|@types/three" apps/web packages package.json apps/web/package.json bun.lock --glob '!node_modules/**'` returned no matches; `rg -n "components/ui/(globe|sparkles|icon-cloud)|@/components/ui/(globe|sparkles|icon-cloud)|github-activity-graph|tech-stack-cloud|GithubActivityGraph|TechStackCloud|SparklesCore|\\bWorld\\b" apps/web packages --glob '!node_modules/**'` returned no matches.
@@ -42,7 +42,7 @@ This plan is the sixth child slice of the Program packet at `docs/programs/activ
 
 The cleanup should not start as a redesign. The repository guidance explicitly favors shadcn-vanilla components, lucide icons, feature-complete controls, and operational surfaces that are dense and easy to scan. That guidance is enough to remove clear sprawl, but not enough to justify broad visual rewrites without a specific product goal.
 
-The user hunch about "the thing that compiles it" was correct: the blueprint theme configurator exposes an icon-library selector and the compiler resolves a `PresetConfig` that includes the theme preset. The icon library packages are intentionally retained for that selector in this slice, even though ordinary UI icons should remain lucide-first.
+The user hunch about "the thing that compiles it" was correct: the codebase theme configurator exposes an icon-library selector and the compiler resolves a `PresetConfig` that includes the theme preset. The icon library packages are intentionally retained for that selector in this slice, even though ordinary UI icons should remain lucide-first.
 
 ## Decision Log
 
@@ -58,8 +58,8 @@ Decision: Default icon cleanup to lucide-first.
 Rationale: The repository guidance prefers lucide where an icon exists, and multiple eager icon libraries increase maintenance and bundle risk.
 Date: 2026-04-23
 
-Decision: Retain the non-lucide icon libraries for the blueprint theme selector.
-Rationale: `PresetConfig["iconLibrary"]` is a user-facing theme choice in the blueprint configurator and preview, and the compiler consumes the preset as part of the generated design system. Removing those packages would break a supported theme preview path rather than reduce accidental sprawl.
+Decision: Retain the non-lucide icon libraries for the codebase theme selector.
+Rationale: `PresetConfig["iconLibrary"]` is a user-facing theme choice in the codebase configurator and preview, and the compiler consumes the preset as part of the generated design system. Removing those packages would break a supported theme preview path rather than reduce accidental sprawl.
 Date: 2026-04-24
 
 Decision: Remove unused 3D globe, heat graph, and tech-stack-cloud components, then replace the live particle sparkle hover with a deterministic local effect.
@@ -70,13 +70,13 @@ Date: 2026-04-24
 
 This plan is complete. The app package no longer carries the unused 3D globe stack, Cobe, heat graph, or particle engine dependencies. The dead visual modules were deleted after import proof, and the live homepage `Cover` hover no longer initializes `@tsparticles`; it uses a deterministic local motion treatment instead.
 
-The blueprint icon-library packages remain intentionally installed. The audit proved they are not accidental UI drift: they support the blueprint theme configurator's `iconLibrary` selector and the preset/compiler path. Ordinary UI icon usage remains lucide-first, while the theme preview keeps the domain-specific exception.
+The codebase icon-library packages remain intentionally installed. The audit proved they are not accidental UI drift: they support the codebase theme configurator's `iconLibrary` selector and the preset/compiler path. Ordinary UI icon usage remains lucide-first, while the theme preview keeps the domain-specific exception.
 
 Build and browser proof passed after using the repo's documented local Clerk bypass. The first screenshot attempt without `DISABLE_CLERK_MIDDLEWARE=1 PLAYWRIGHT_USE_LOCAL_SERVER=1` captured the known Clerk redirect-loop error page, which is an environment setup issue rather than a regression from this slice.
 
 ## Context and Orientation
 
-The relevant surfaces include marketing components, blueprint theme preview components, app package dependencies, global styles, and user-facing docs that describe design tokens. Root `DESIGN.md` is the canonical visual source for user-facing UI. For work in `apps/web`, also follow `apps/web/AGENTS.md`.
+The relevant surfaces include marketing components, codebase theme preview components, app package dependencies, global styles, and user-facing docs that describe design tokens. Root `DESIGN.md` is the canonical visual source for user-facing UI. For work in `apps/web`, also follow `apps/web/AGENTS.md`.
 
 ### In Scope
 
@@ -88,7 +88,7 @@ Out of scope is a homepage redesign, a brand redesign, broad layout rewrites, ch
 
 ## Plan of Work
 
-Start by reading `DESIGN.md`, `docs/DESIGN.md`, `docs/FRONTEND.md`, and `apps/web/AGENTS.md`. Then audit dependency usage in `apps/web/package.json`, marketing components, and blueprint preview components.
+Start by reading `DESIGN.md`, `docs/DESIGN.md`, `docs/FRONTEND.md`, and `apps/web/AGENTS.md`. Then audit dependency usage in `apps/web/package.json`, marketing components, and codebase preview components.
 
 Use `rg` and import scans to identify visual packages that have no live imports. For each candidate removal, confirm there are no generated or dynamic references. Remove one dependency or visual module at a time and run build-backed proof.
 
@@ -175,8 +175,8 @@ Program source for this plan:
 High-signal files from the review:
 
        apps/web/features/marketing/
-       apps/web/features/blueprint-flow/components/blueprint-theme-preview.tsx
-       apps/web/features/blueprint-flow/components/blueprint-theme-configurator.tsx
+       apps/web/features/codebase-flow/components/codebase-theme-preview.tsx
+       apps/web/features/codebase-flow/components/codebase-theme-configurator.tsx
        apps/web/package.json
        DESIGN.md
        docs/DESIGN.md

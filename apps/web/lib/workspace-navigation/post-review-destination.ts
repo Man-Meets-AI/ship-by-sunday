@@ -7,7 +7,7 @@ import { getLessonMapHref } from "./lesson-map-href";
 const POST_REVIEW_DEFAULT_BUILD_LESSON_ID = "3.1";
 const studentFacingLessons = getStudentFacingLessons();
 
-export type BlueprintResumeStageId = "blueprint" | "review";
+export type CodebaseResumeStageId = "codebase" | "review";
 
 export type PostReviewLessonState = {
 	lessonKey?: string | null;
@@ -27,20 +27,20 @@ export type PostReviewNavigationTargets = {
 export type WorkspaceResumeDestination =
 	| {
 			destination: string;
-			kind: "blueprint_stage";
-			blueprintStageId: BlueprintResumeStageId;
+			kind: "codebase_stage";
+			codebaseStageId: CodebaseResumeStageId;
 			postReviewTargets: null;
 	  }
 	| {
 			destination: string;
 			kind: "review";
-			blueprintStageId: "review";
+			codebaseStageId: "review";
 			postReviewTargets: null;
 	  }
 	| {
 			destination: string;
 			kind: "post_review";
-			blueprintStageId: null;
+			codebaseStageId: null;
 			postReviewTargets: PostReviewNavigationTargets;
 	  };
 
@@ -138,19 +138,19 @@ export function getPostReviewNavigationTargets(
 export function resolveWorkspaceResumeDestination({
 	executeShipUnlockedAt,
 	firstIncompleteStageId,
-	blueprintStageDestination,
+	codebaseStageDestination,
 	postReviewLessonStates,
 }: {
 	executeShipUnlockedAt: number | null;
-	firstIncompleteStageId: BlueprintResumeStageId;
-	blueprintStageDestination: string;
+	firstIncompleteStageId: CodebaseResumeStageId;
+	codebaseStageDestination: string;
 	postReviewLessonStates: readonly PostReviewLessonState[];
 }): WorkspaceResumeDestination {
 	if (firstIncompleteStageId !== "review") {
 		return {
-			destination: blueprintStageDestination,
-			kind: "blueprint_stage",
-			blueprintStageId: firstIncompleteStageId,
+			destination: codebaseStageDestination,
+			kind: "codebase_stage",
+			codebaseStageId: firstIncompleteStageId,
 			postReviewTargets: null,
 		};
 	}
@@ -159,7 +159,7 @@ export function resolveWorkspaceResumeDestination({
 		return {
 			destination: routeConfig.review,
 			kind: "review",
-			blueprintStageId: "review",
+			codebaseStageId: "review",
 			postReviewTargets: null,
 		};
 	}
@@ -172,7 +172,7 @@ export function resolveWorkspaceResumeDestination({
 	return {
 		destination: postReviewTargets.latestLessonDestination,
 		kind: "post_review",
-		blueprintStageId: null,
+		codebaseStageId: null,
 		postReviewTargets,
 	};
 }

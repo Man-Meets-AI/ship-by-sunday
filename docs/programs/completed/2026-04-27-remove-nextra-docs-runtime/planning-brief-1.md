@@ -44,7 +44,7 @@ Do not change public docs or blog URLs.
 
 Do not rewrite content copy except for minimal syntax fixes required by the migration.
 
-Do not touch Stripe, checkout, webhook, pricing, promo code, billing proof, environment behavior, Convex schema, generated Convex files, blueprint compiler schema, or blueprint compiler facts.
+Do not touch Stripe, checkout, webhook, pricing, promo code, billing proof, environment behavior, Convex schema, generated Convex files, codebase compiler schema, or codebase compiler facts.
 
 Do not remove `nextra` or `nextra-theme-docs` until all runtime imports, tests, config hooks, CSS dependencies, and starter assumptions are gone or intentionally updated.
 

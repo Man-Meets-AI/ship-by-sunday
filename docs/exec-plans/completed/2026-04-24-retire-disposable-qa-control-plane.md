@@ -44,7 +44,7 @@ Plan authoring found that the repo is ahead of the previous stale handoff. `plan
 
 The remaining QA surface is not one system. Root `package.json` still exposes `qa:inventory:sync`, `qa:inventory:check`, `qa:validate`, `qa:personas:prepare`, `qa:personas:reset`, `qa:ship`, `qa:team`, and `qa:run-pack`. `.github/workflows/ci.yml` still has a `qa_control_plane` job that directly runs `node qa/scripts/validate.mjs` and `node qa/scripts/generate-test-inventory.mjs && git diff --exit-code -- qa/test-inventory.csv`. `Dev Staging Proof` and `Production Release Proof` still write `qa/personas.local.json` and run `bun run qa:run-pack` for `default_ship` and, when billing-sensitive, `billing_integration`.
 
-`qa/scripts/run-pack.mjs` now mostly coordinates release proof rather than testing unique QA logic. It validates the QA control plane, prepares personas, scaffolds a run report, runs the blueprint integration-ui proof suite, and runs either `apps/web` sandbox Playwright commands or hosted Stripe verifier commands. Billing steps are already built by `scripts/release/lib/billing-integration-step-planner.mjs`, which means part of the release-proof logic has moved to the release boundary but is still invoked through the QA pack wrapper.
+`qa/scripts/run-pack.mjs` now mostly coordinates release proof rather than testing unique QA logic. It validates the QA control plane, prepares personas, scaffolds a run report, runs the codebase integration-ui proof suite, and runs either `apps/web` sandbox Playwright commands or hosted Stripe verifier commands. Billing steps are already built by `scripts/release/lib/billing-integration-step-planner.mjs`, which means part of the release-proof logic has moved to the release boundary but is still invoked through the QA pack wrapper.
 
 `qa/scripts/validate.mjs` makes the disposable bookkeeping sticky. It requires `qa/README.md`, `qa/AGENTS.md`, `qa/glossary.md`, `qa/personas.example.json`, `qa/templates/*`, `qa/runs/README.md`, `qa/reviews/README.md`, `qa/test-inventory.csv`, `qa/scripts/team.mjs`, `.agents/skills/qa-team/SKILL.md`, `.codex/config.toml`, and several `.codex/agents/*.toml` files. It then validates `qa/journeys.csv`, `qa/coverage.csv`, and `qa/test-inventory.csv` against current test files. Deleting any of those files while `qa:validate` or `qa_control_plane` remains active will immediately fail CI.
 
@@ -52,7 +52,7 @@ The current `qa/` directory still contains historical release evidence under `qa
 
 The deferred active plan `docs/exec-plans/active/2026-04-23-repair-release-intake-control-plane.md` still exists. This plan must not absorb release-intake correctness, runtime-intake grouping, or engineering-intake contract repair. If inventory finds a QA fixture or evidence map that the active intake repair needs, preserve it or explicitly mark it as owned by that other plan.
 
-Implementation found one additional active source of QA reintroduction: generated customer starter output under `packages/blueprint-compiler` still emitted `qa/` files and `$qa-team` prompts. That was not historical evidence; it would have shipped the retired operating model to customers. The generated starter now emits lightweight `docs/testing/` notes instead.
+Implementation found one additional active source of QA reintroduction: generated customer starter output under `packages/codebase-compiler` still emitted `qa/` files and `$qa-team` prompts. That was not historical evidence; it would have shipped the retired operating model to customers. The generated starter now emits lightweight `docs/testing/` notes instead.
 
 The `docs/codex/` archive and `todo.md` still contain historical references to `qa:*`, `qa/`, and QA-control-plane work. Those are historical records, not active instructions. The after-grep audit excludes legacy archives and historical proof reports.
 
@@ -67,7 +67,7 @@ Rationale: `.github/workflows/ci.yml`, root scripts, public docs, release docs, 
 Date: 2026-04-24
 
 Decision: Preserve sandbox e2e specs unless a same-strength replacement is proven.
-Rationale: `apps/web/tests/e2e/auth-protection.sandbox.spec.ts` and `apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts` still own authenticated browser behavior for `/blueprint`, `/review`, `/settings`, and billing handoff. Source tests complement them but do not fully replace hosted Clerk, Convex, Stripe, and browser session proof.
+Rationale: `apps/web/tests/e2e/auth-protection.sandbox.spec.ts` and `apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts` still own authenticated browser behavior for `/codebase`, `/review`, `/settings`, and billing handoff. Source tests complement them but do not fully replace hosted Clerk, Convex, Stripe, and browser session proof.
 Date: 2026-04-24
 
 Decision: Do not mutate release-intake repair in this slice.
@@ -96,7 +96,7 @@ Replacement proof commands:
 
 Retained hosted proof semantics:
 
-- `default_ship` still prepares personas, runs the blueprint integration-ui subset, and runs authenticated browser proof.
+- `default_ship` still prepares personas, runs the codebase integration-ui subset, and runs authenticated browser proof.
 - `billing_integration` still enforces `QA_ALLOW_BILLING_INTEGRATION=1`, selects local sandbox versus hosted Stripe verifier behavior through the release-owned billing step planner, and rejects only-skipped browser proof.
 - Workflow job names `default_ship`, `billing_integration`, and `release_gate` stayed stable for release evidence collection.
 
@@ -139,7 +139,7 @@ Out of scope is deleting source-level unit, contract, integration, integration-u
 
 Start with a read-only inventory. Search root scripts, workflows, docs, public docs, `.agents/skills/qa-team`, `.codex/agents`, `qa/`, `apps/web/tests`, `apps/web/playwright.config.ts`, and `scripts/release/` for `qa:`, `qa/`, `qa_control_plane`, `qa:run-pack`, `default_ship`, `billing_integration`, personas, journeys, coverage, test inventory, and run reports. Classify each match as one of these owners: release proof that must survive, source-test inventory bookkeeping, persona and auth bootstrap machinery, historical evidence, QA-team review scaffolding, CI drift detection, or active documentation. Record the classification in this plan before deleting anything.
 
-Next build the replacement command path for hosted proof. For `default_ship`, preserve the behavior that `qa:run-pack` currently provides: environment loading, persona preparation, blueprint integration-ui proof, and either local-auth or sandbox authenticated browser proof. For `billing_integration`, preserve the safety gate `QA_ALLOW_BILLING_INTEGRATION=1`, hosted dev versus hosted production verifier selection, local Stripe guardrails for local targets, and the no-only-skipped-browser-evidence check. Prefer release-owned scripts under `scripts/release/` or direct app commands over new QA wrappers. Update `Dev Staging Proof` and `Production Release Proof` to call the replacement commands only after they pass locally in dry-run or list mode.
+Next build the replacement command path for hosted proof. For `default_ship`, preserve the behavior that `qa:run-pack` currently provides: environment loading, persona preparation, codebase integration-ui proof, and either local-auth or sandbox authenticated browser proof. For `billing_integration`, preserve the safety gate `QA_ALLOW_BILLING_INTEGRATION=1`, hosted dev versus hosted production verifier selection, local Stripe guardrails for local targets, and the no-only-skipped-browser-evidence check. Prefer release-owned scripts under `scripts/release/` or direct app commands over new QA wrappers. Update `Dev Staging Proof` and `Production Release Proof` to call the replacement commands only after they pass locally in dry-run or list mode.
 
 Then unwind CI and root scripts in dependency order. Remove or replace `qa_control_plane` from `.github/workflows/ci.yml` only after `qa:validate` and `qa:inventory:check` are no longer expected proof. Remove `check:fast`'s dependency on `qa:validate` if that command is retired. Remove root `qa:*` scripts only after workflows and docs no longer call them. Keep `qa:convex:sync-hosted-dev` out of the deletion set because it already points at `scripts/release/sync-hosted-convex-dev.mjs`, not `qa/scripts`.
 
@@ -199,7 +199,7 @@ Milestone 5 validates the slice and updates living artifacts. At the end, focuse
        bun run --cwd apps/web test:e2e:sandbox -- --list
        bun run --cwd apps/web test:e2e:sandbox:default-ship -- --list
        QA_ALLOW_BILLING_INTEGRATION=1 bun run --cwd apps/web test:e2e:sandbox:billing-integration -- --list
-       bun run --cwd apps/web test:integration:ui -- tests/integration-ui/blueprint-page.test.tsx tests/integration-ui/blueprint-review-page.test.tsx tests/integration-ui/legacy-blueprint-route-redirects.test.tsx
+       bun run --cwd apps/web test:integration:ui -- tests/integration-ui/codebase-page.test.tsx tests/integration-ui/codebase-review-page.test.tsx tests/integration-ui/legacy-codebase-route-redirects.test.tsx
 
    The list commands prove the retained browser specs are still discoverable without spending live billing or requiring hosted credentials.
 
@@ -239,7 +239,7 @@ Milestone 5 validates the slice and updates living artifacts. At the end, focuse
 
 12. Run the after-grep audit:
 
-       rg -n "qa:|qa/|qa_control_plane|run-pack|QA control plane|canonical QA|qa-team|journeys.csv|coverage.csv|test-inventory.csv" package.json .github/workflows README.md docs apps/web/content/docs apps/web/tests scripts/release .agents .codex packages/blueprint-compiler --glob '!**/docs/exec-plans/**' --glob '!**/docs/programs/**' --glob '!**/docs/ship-by-sunday/**' --glob '!**/docs/archive/**' --glob '!**/docs/codex/**'
+       rg -n "qa:|qa/|qa_control_plane|run-pack|QA control plane|canonical QA|qa-team|journeys.csv|coverage.csv|test-inventory.csv" package.json .github/workflows README.md docs apps/web/content/docs apps/web/tests scripts/release .agents .codex packages/codebase-compiler --glob '!**/docs/exec-plans/**' --glob '!**/docs/programs/**' --glob '!**/docs/ship-by-sunday/**' --glob '!**/docs/archive/**' --glob '!**/docs/codex/**'
 
    Expected observation: active references either point to retained release-owned persona or hosted-proof code, or there are no matches outside historical/archive material and this active plan.
 
@@ -272,14 +272,14 @@ After implementation, root scripts and workflows should not call deleted QA scri
 
 Run these commands from `/Users/parkerrex/Developer/ship-by-sunday` after implementation, plus any new focused tests for moved wrapper code:
 
-       rg -n "qa:|qa/|qa_control_plane|run-pack|QA control plane|canonical QA|qa-team|journeys.csv|coverage.csv|test-inventory.csv" package.json .github/workflows README.md docs apps/web/content/docs apps/web/tests scripts/release .agents .codex packages/blueprint-compiler --glob '!**/docs/exec-plans/**' --glob '!**/docs/programs/**' --glob '!**/docs/ship-by-sunday/**' --glob '!**/docs/archive/**' --glob '!**/docs/codex/**'
+       rg -n "qa:|qa/|qa_control_plane|run-pack|QA control plane|canonical QA|qa-team|journeys.csv|coverage.csv|test-inventory.csv" package.json .github/workflows README.md docs apps/web/content/docs apps/web/tests scripts/release .agents .codex packages/codebase-compiler --glob '!**/docs/exec-plans/**' --glob '!**/docs/programs/**' --glob '!**/docs/ship-by-sunday/**' --glob '!**/docs/archive/**' --glob '!**/docs/codex/**'
        bun run --cwd apps/web test:e2e:sandbox -- --list
        bun run --cwd apps/web test:e2e:sandbox:default-ship -- --list
        QA_ALLOW_BILLING_INTEGRATION=1 bun run --cwd apps/web test:e2e:sandbox:billing-integration -- --list
        bun run release:proof -- --proof=default_ship --dry-run
        QA_ALLOW_BILLING_INTEGRATION=1 bun run release:proof -- --proof=billing_integration --dry-run
        bun run --cwd apps/web test:unit -- release-proof-command engineering-intake-contract release-scope
-       bun run --cwd packages/blueprint-compiler test -- repo-generation review-download-zip customer-safe-snapshot-contract --testTimeout=30000
+       bun run --cwd packages/codebase-compiler test -- repo-generation review-download-zip customer-safe-snapshot-contract --testTimeout=30000
        bun run release:manifest:check
        bun run release:evidence:build
        ruby -e 'require "yaml"; Dir[".github/workflows/*.yml"].each { |file| YAML.load_file(file) }; puts "workflow yaml ok"'
@@ -328,10 +328,10 @@ Current retained proof surfaces observed during plan authoring:
 Final validation receipts from 2026-04-24 EDT:
 
        rg active QA audit: passed with no active matches outside excluded legacy archives and historical proof reports
-       bun run release:proof -- --proof=default_ship --dry-run: passed and planned persona prep, blueprint integration-ui proof, and authenticated browser proof
+       bun run release:proof -- --proof=default_ship --dry-run: passed and planned persona prep, codebase integration-ui proof, and authenticated browser proof
        QA_ALLOW_BILLING_INTEGRATION=1 bun run release:proof -- --proof=billing_integration --dry-run: passed and planned Stripe doctor, persona prep, billing sandbox browser proof, and Stripe handoff verification
        bun run --cwd apps/web test:unit -- release-proof-command engineering-intake-contract release-scope: 3 files, 10 tests passed
-       bun run --cwd packages/blueprint-compiler test -- repo-generation review-download-zip customer-safe-snapshot-contract --testTimeout=30000: 3 files, 6 tests passed
+       bun run --cwd packages/codebase-compiler test -- repo-generation review-download-zip customer-safe-snapshot-contract --testTimeout=30000: 3 files, 6 tests passed
        bun run --cwd apps/web test:e2e:sandbox -- --list: listed 7 retained sandbox tests
        bun run --cwd apps/web test:e2e:sandbox:default-ship -- --list: listed 5 default_ship tests
        QA_ALLOW_BILLING_INTEGRATION=1 bun run --cwd apps/web test:e2e:sandbox:billing-integration -- --list: listed 1 billing_integration test
@@ -342,7 +342,7 @@ Final validation receipts from 2026-04-24 EDT:
        bun run lint: passed with 0 warnings and 0 errors
        bun run typecheck: passed through Next build and TypeScript
        bun run plans:lint -- --plan docs/exec-plans/active/2026-04-24-retire-disposable-qa-control-plane.md: passed before completion move
-       bun run markdown:lint -- --paths docs/exec-plans/active/2026-04-24-retire-disposable-qa-control-plane.md README.md docs/release-workflow.md docs/RELIABILITY.md docs/design-docs/scripts.md apps/web/content/docs packages/blueprint-compiler/src/repo-generation packages/blueprint-compiler/tests: passed
+       bun run markdown:lint -- --paths docs/exec-plans/active/2026-04-24-retire-disposable-qa-control-plane.md README.md docs/release-workflow.md docs/RELIABILITY.md docs/design-docs/scripts.md apps/web/content/docs packages/codebase-compiler/src/repo-generation packages/codebase-compiler/tests: passed
        bun run programs:lint: passed
        git diff --check: passed
 

@@ -5,7 +5,7 @@ import {
 	isLessonImplemented,
 } from "../../lib/course/lesson/model/registry";
 import { getLessonByKey } from "../../lib/course/lesson/model/curriculum";
-import { getBlueprintWorkflowStateByClerkUserId } from "../blueprint/workflowState";
+import { getCodebaseWorkflowStateByClerkUserId } from "../codebase/workflowState";
 import { upsertLessonState, loadViewerCourseState } from "./shared";
 import type {
 	CourseMutationCtx,
@@ -43,7 +43,7 @@ async function requireBonusViewerState(
 	ctx: CourseQueryCtx | CourseMutationCtx,
 ) {
 	const viewerState = await loadViewerCourseState(ctx);
-	const workflowState = await getBlueprintWorkflowStateByClerkUserId(
+	const workflowState = await getCodebaseWorkflowStateByClerkUserId(
 		ctx,
 		viewerState.clerkUserId,
 	);

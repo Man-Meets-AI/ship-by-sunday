@@ -23,7 +23,7 @@ the active subagent limit before a seventh worker could start.
 ## Current Inventory
 
 `apps/web/app` is a thin route tree. Most routes delegate immediately to feature
-modules. Examples include `apps/web/app/page.tsx`, `apps/web/app/(workspace)/blueprint/page.tsx`,
+modules. Examples include `apps/web/app/page.tsx`, `apps/web/app/(workspace)/codebase/page.tsx`,
 `apps/web/app/(workspace)/review/page.tsx`,
 `apps/web/app/(workspace)/lesson/[lessonKey]/page.tsx`, and
 `apps/web/app/checkout/success/page.tsx`.
@@ -35,7 +35,7 @@ workspace access is enforced by `apps/web/app/(workspace)/layout.tsx` and
 `/product`, `/design`, `/marketing`, `/build-plan`, and `/lesson(.*)`.
 
 `apps/web/features` is the main product map today. The active feature folders
-include `auth`, `blog`, `blueprint-flow`, `checkout`, `codex`, `course`,
+include `auth`, `blog`, `codebase-flow`, `checkout`, `codex`, `course`,
 `docs`, `execute-ship`, `marketing`, `observability`, `product-access`,
 `public-metadata`, `settings`, `shared`, `starter`, `starter-repo`,
 `workspace-home`, and `workspace-navigation`.
@@ -46,7 +46,7 @@ surfaces, workbench rendering, video behavior, and the shared workspace app
 shell.
 
 `apps/web/convex` is mostly cleanly separated into thin public API facades plus
-domain files. `apps/web/convex/blueprint.ts` and `apps/web/convex/course.ts`
+domain files. `apps/web/convex/codebase.ts` and `apps/web/convex/course.ts`
 delegate to validators and handlers under subfolders. Convex client wiring is
 centralized in `apps/web/platform/convex`.
 
@@ -84,7 +84,7 @@ helpers. `apps/web/features/course/shared/components/app-shell.tsx` is a client
 component imported by multiple non-course surfaces while it imports lesson model
 data from `apps/web/features/course/lesson/model/manifest`.
 
-`BlueprintReviewPage` is a large client route component that imports
+`CodebaseReviewPage` is a large client route component that imports
 `redirect()` from Next, uses live Convex queries, builds workspace navigation,
 and renders review UI. This makes route control harder to see from
 `apps/web/app/(workspace)/review/page.tsx`.
@@ -121,12 +121,12 @@ compatibility aliases.
 `apps/web/features/course/shared/components/app-shell.tsx` imports course lesson
 model state and renders shared shell behavior.
 
-`apps/web/features/blueprint-flow/components/blueprint-review-page.tsx` is a
+`apps/web/features/codebase-flow/components/codebase-review-page.tsx` is a
 client route-level component that performs route control and cross-feature
 composition.
 
-`apps/web/convex/blueprint/workflowState.ts` unlocks Execute / Ship once access
-is granted, but does not independently enforce blueprint readiness before
+`apps/web/convex/codebase/workflowState.ts` unlocks Execute / Ship once access
+is granted, but does not independently enforce codebase readiness before
 unlock.
 
 `apps/web/platform/billing/stripe.ts` owns the Stripe client, price assertions,
@@ -191,7 +191,7 @@ apps/web/
   app/
     (identity)/
     (workspace)/
-      blueprint/
+      codebase/
         page.tsx
         _components/
         _hooks/
@@ -209,14 +209,14 @@ apps/web/
     ui/
     product-brand.tsx
   convex/
-    blueprint/
+    codebase/
     billing/
     course/
     observability/
     schema.ts
     http.ts
   features/
-    blueprint-flow/
+    codebase-flow/
     checkout/
     course/
     execute-ship/

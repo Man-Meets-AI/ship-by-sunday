@@ -24,7 +24,7 @@ export const starterRepoConfig = {
 
 export const routeConfig = {
 	home: "/",
-	blueprint: "/blueprint",
+	codebase: "/codebase",
 	review: "/review",
 	execute: "/execute",
 	docs: "/docs",
@@ -373,7 +373,7 @@ export const courseResourceConfig = {
 } as const;
 
 export const authViewConfig = {
-	fallbackRedirectUrl: routeConfig.blueprint,
+	fallbackRedirectUrl: routeConfig.codebase,
 } as const;
 
 export function getSignInRedirectHref(redirectPath: string) {

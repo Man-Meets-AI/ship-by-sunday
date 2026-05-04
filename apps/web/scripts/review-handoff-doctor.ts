@@ -10,7 +10,7 @@ import {
 	REVIEW_REDOWNLOAD_LINK_LABEL,
 	REVIEW_SURFACE_LABEL,
 	REVIEW_SURFACE_TITLE,
-} from "../lib/blueprint-flow/review-download-handoff";
+} from "../lib/codebase-flow/review-download-handoff";
 
 type Check = {
 	label: string;
@@ -57,7 +57,7 @@ const checks = [
 	),
 	check(
 		"review artifact label",
-		REVIEW_ARTIFACT_LABEL === "Ship by Sunday Blueprint",
+		REVIEW_ARTIFACT_LABEL === "Ship by Sunday Codebase",
 		REVIEW_ARTIFACT_LABEL,
 	),
 	check(
@@ -93,7 +93,7 @@ const hasFailure = checks.some((result) => !result.ok);
 if (hasFailure) {
 	console.error("");
 	console.error(
-		"Fix the failed review-handoff contract above before treating the /blueprint -> /review flow as validated.",
+		"Fix the failed review-handoff contract above before treating the /codebase -> /review flow as validated.",
 	);
 	process.exit(1);
 }

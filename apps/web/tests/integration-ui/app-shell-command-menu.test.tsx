@@ -21,7 +21,7 @@ const captureProductEventMock = vi.fn();
 
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({ push: pushMock }),
-	usePathname: () => "/blueprint",
+	usePathname: () => "/codebase",
 }));
 
 vi.mock("next-themes", () => ({
@@ -42,9 +42,9 @@ vi.mock("@/lib/observability/posthog-client", () => ({
 		captureProductEventMock(...(args as Parameters<Mock>)),
 }));
 
-const blueprintStageStatuses = [
+const codebaseStageStatuses = [
 	{
-		stageId: "blueprint" as const,
+		stageId: "codebase" as const,
 		isUnlocked: true,
 		isComplete: false,
 		currentStepIndex: 0,
@@ -61,8 +61,8 @@ const blueprintStageStatuses = [
 
 const samplePrimaryNav: AppShellPrimaryNav = {
 	kind: "combined",
-	currentBlueprintStageId: "blueprint",
-	stageStatuses: blueprintStageStatuses,
+	currentCodebaseStageId: "codebase",
+	stageStatuses: codebaseStageStatuses,
 	postReviewItems: [
 		{
 			kind: "link",
@@ -160,16 +160,16 @@ describe("AppShellCommandMenu", () => {
 		);
 	});
 
-	it("navigates via the router when a blueprint stage item is selected", async () => {
+	it("navigates via the router when a codebase stage item is selected", async () => {
 		const user = userEvent.setup();
 		renderMenu();
 		fireEvent.keyDown(window, { key: "k", metaKey: true });
 		await screen.findByPlaceholderText(/search workspace/i);
 
-		await user.click(screen.getByRole("option", { name: /^Blueprint$/i }));
+		await user.click(screen.getByRole("option", { name: /^Codebase$/i }));
 
 		expect(pushMock).toHaveBeenCalled();
-		expect(pushMock.mock.calls[0]?.[0]).toMatch(/blueprint/i);
+		expect(pushMock.mock.calls[0]?.[0]).toMatch(/codebase/i);
 	});
 
 	it("invokes setTheme when a theme item is selected", async () => {

@@ -21,8 +21,8 @@
         "@posthog/nextjs-config": "^1.9.16",
         "@remixicon/react": "^4.9.0",
         "@remotion/player": "^4.0.455",
-        "@shipbysunday/blueprint-compiler": "workspace:*",
-        "@shipbysunday/blueprint-presentation": "workspace:*",
+        "@shipbysunday/codebase-compiler": "workspace:*",
+        "@shipbysunday/codebase-presentation": "workspace:*",
         "@stripe/react-stripe-js": "^6.3.0",
         "@stripe/stripe-js": "^9.4.0",
         "@tabler/icons-react": "^3.40.0",
@@ -75,8 +75,8 @@
         "vitest": "^4.1.0",
       },
     },
-    "packages/blueprint-compiler": {
-      "name": "@shipbysunday/blueprint-compiler",
+    "packages/codebase-compiler": {
+      "name": "@shipbysunday/codebase-compiler",
       "version": "0.1.0",
       "dependencies": {
         "jszip": "^3.10.1",
@@ -91,11 +91,11 @@
         "vitest": "^4.1.0",
       },
     },
-    "packages/blueprint-presentation": {
-      "name": "@shipbysunday/blueprint-presentation",
+    "packages/codebase-presentation": {
+      "name": "@shipbysunday/codebase-presentation",
       "version": "0.1.0",
       "dependencies": {
-        "@shipbysunday/blueprint-compiler": "workspace:*",
+        "@shipbysunday/codebase-compiler": "workspace:*",
       },
       "devDependencies": {
         "@types/node": "25.5.0",
@@ -803,9 +803,9 @@
 
     "@sec-ant/readable-stream": ["@sec-ant/readable-stream@0.4.1", "", {}, "sha512-831qok9r2t8AlxLko40y2ebgSDhenenCatLVeW/uBtnHPyhHOvG0C7TvfgecV+wHzIm5KUICgzmVpWS+IMEAeg=="],
 
-    "@shipbysunday/blueprint-compiler": ["@shipbysunday/blueprint-compiler@workspace:packages/blueprint-compiler"],
+    "@shipbysunday/codebase-compiler": ["@shipbysunday/codebase-compiler@workspace:packages/codebase-compiler"],
 
-    "@shipbysunday/blueprint-presentation": ["@shipbysunday/blueprint-presentation@workspace:packages/blueprint-presentation"],
+    "@shipbysunday/codebase-presentation": ["@shipbysunday/codebase-presentation@workspace:packages/codebase-presentation"],
 
     "@sinclair/typebox": ["@sinclair/typebox@0.27.10", "", {}, "sha512-MTBk/3jGLNB2tVxv6uLlFh1iu64iYOQ2PbdOSK3NW8JZsmlaOh2q6sdtKowBhfw8QFLmYNzTW4/oK4uATIi6ZA=="],
 

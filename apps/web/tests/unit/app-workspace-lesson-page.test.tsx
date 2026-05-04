@@ -1,7 +1,7 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { BlueprintWorkspaceState } from "@/lib/blueprint-flow/blueprint-workspace-types";
+import type { CodebaseWorkspaceState } from "@/lib/codebase-flow/codebase-workspace-types";
 import type { BonusMissionState } from "@/lib/execute-ship/bonus-mission-types";
 
 vi.mock("server-only", () => ({}));
@@ -84,9 +84,9 @@ vi.mock(
 
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
-		blueprint: {
-			getBlueprintWorkspaceState: "getBlueprintWorkspaceState",
-			getBlueprintResumeDestination: "getBlueprintResumeDestination",
+		codebase: {
+			getCodebaseWorkspaceState: "getCodebaseWorkspaceState",
+			getCodebaseResumeDestination: "getCodebaseResumeDestination",
 		},
 		course: {
 			getBonusRouteState: "getBonusRouteState",
@@ -97,7 +97,7 @@ vi.mock("@/convex/_generated/api", () => ({
 
 function createWorkspaceState(
 	executeShipUnlockedAt?: number,
-): BlueprintWorkspaceState {
+): CodebaseWorkspaceState {
 	return {
 		projectDefinition: null,
 		workflowState: executeShipUnlockedAt
@@ -110,8 +110,8 @@ function createWorkspaceState(
 				}
 			: null,
 		firstIncompleteStageId: "review",
-		blueprintReadiness: {} as BlueprintWorkspaceState["blueprintReadiness"],
-		stageStatuses: [] as BlueprintWorkspaceState["stageStatuses"],
+		codebaseReadiness: {} as CodebaseWorkspaceState["codebaseReadiness"],
+		stageStatuses: [] as CodebaseWorkspaceState["stageStatuses"],
 	};
 }
 
@@ -210,7 +210,7 @@ describe("workspace lesson route", () => {
 
 	it("renders explicit unlock messaging before the bonus lesson is available", async () => {
 		fetchAuthenticatedQueryMock.mockImplementation(async (query) => {
-			if (query === "getBlueprintWorkspaceState") {
+			if (query === "getCodebaseWorkspaceState") {
 				return createWorkspaceState();
 			}
 
@@ -235,7 +235,7 @@ describe("workspace lesson route", () => {
 
 	it("keeps the restored lesson route reachable after unlock", async () => {
 		fetchAuthenticatedQueryMock.mockImplementation(async (query) => {
-			if (query === "getBlueprintWorkspaceState") {
+			if (query === "getCodebaseWorkspaceState") {
 				return createWorkspaceState(123);
 			}
 
@@ -247,11 +247,11 @@ describe("workspace lesson route", () => {
 				return createBonusMissionState();
 			}
 
-			if (query === "getBlueprintResumeDestination") {
+			if (query === "getCodebaseResumeDestination") {
 				return {
 					destination: "/lesson/build-kickoff",
 					kind: "post_review",
-					blueprintStageId: null,
+					codebaseStageId: null,
 					postReviewTargets: {
 						reviewDestination: "/review",
 						buildLessonsDestination: "/lesson/build-kickoff",
@@ -279,7 +279,7 @@ describe("workspace lesson route", () => {
 
 		expect(markup).toContain("Video-first bonus lesson");
 		expect(markup).toContain(
-			"Use the blueprint as the brief and keep BUILD as the default path.",
+			"Use the codebase as the brief and keep BUILD as the default path.",
 		);
 		expect(markup).toContain("Build Kickoff");
 		expect(markup).toContain("Lesson Map");
@@ -291,9 +291,9 @@ describe("workspace lesson route", () => {
 		expect(localNavMarkup).not.toContain("3.1");
 	});
 
-	it("falls back to local post-review targets when the resume destination is blueprint-first", async () => {
+	it("falls back to local post-review targets when the resume destination is codebase-first", async () => {
 		fetchAuthenticatedQueryMock.mockImplementation(async (query) => {
-			if (query === "getBlueprintWorkspaceState") {
+			if (query === "getCodebaseWorkspaceState") {
 				return createWorkspaceState(123);
 			}
 
@@ -305,11 +305,11 @@ describe("workspace lesson route", () => {
 				return createBonusMissionState();
 			}
 
-			if (query === "getBlueprintResumeDestination") {
+			if (query === "getCodebaseResumeDestination") {
 				return {
 					destination: "/build-plan",
-					kind: "blueprint_stage",
-					blueprintStageId: "build-plan",
+					kind: "codebase_stage",
+					codebaseStageId: "build-plan",
 					postReviewTargets: null,
 				};
 			}
@@ -340,7 +340,7 @@ describe("workspace lesson route", () => {
 
 	it("returns not found for an unknown lesson route segment", async () => {
 		fetchAuthenticatedQueryMock.mockImplementation(async (query) => {
-			if (query === "getBlueprintWorkspaceState") {
+			if (query === "getCodebaseWorkspaceState") {
 				return createWorkspaceState(123);
 			}
 
@@ -352,11 +352,11 @@ describe("workspace lesson route", () => {
 				return createBonusMissionState();
 			}
 
-			if (query === "getBlueprintResumeDestination") {
+			if (query === "getCodebaseResumeDestination") {
 				return {
 					destination: "/lesson/build-kickoff",
 					kind: "post_review",
-					blueprintStageId: null,
+					codebaseStageId: null,
 					postReviewTargets: {
 						reviewDestination: "/review",
 						buildLessonsDestination: "/lesson/build-kickoff",

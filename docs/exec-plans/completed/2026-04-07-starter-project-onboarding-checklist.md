@@ -6,24 +6,24 @@ plan_status: done
 
 # Add A Starter Project Onboarding Checklist
 
-This document is a living execution plan for adding a compiled onboarding checklist to the starter repo so a buyer and their coding agent can move from a fresh blueprint to real project work without guessing.
+This document is a living execution plan for adding a compiled onboarding checklist to the starter repo so a buyer and their coding agent can move from a fresh codebase to real project work without guessing.
 
 This ExecPlan follows `.plans/PLANS.md` and must be maintained in accordance with it.
 
 ## Purpose / Big Picture
 
-Today the compiled starter gives buyers a generated `README.md`, `DESIGN.md`, a docs surface, and now an in-progress root bootstrap script, but it still does not tell them in one place what to do after the repo lands on disk. It also does not yet give them a project-local skill layer that explains how Codex should work inside this starter beyond the repo-wide `AGENTS.md` rules. The new feature should add one clear guide that explains the real order of work in a single prescribed sequence: understand the blueprint, boot the repo, install the Codex skills, run core setup, run auth setup, run billing setup, verify the fragile auth and billing seams, and only then start shaping the product. After this change, a novice should be able to open the compiled starter, find one guide immediately, and follow it step by step whether they are working alone or with Codex. The change works when the compiled snapshot contains a visible onboarding guide, links to it from the existing entry points, ships stable repo-local wrapper skills for the starter’s most important workflows, and includes a one-command installer for the vetted external skills you want customers to add after download.
+Today the compiled starter gives buyers a generated `README.md`, `DESIGN.md`, a docs surface, and now an in-progress root bootstrap script, but it still does not tell them in one place what to do after the repo lands on disk. It also does not yet give them a project-local skill layer that explains how Codex should work inside this starter beyond the repo-wide `AGENTS.md` rules. The new feature should add one clear guide that explains the real order of work in a single prescribed sequence: understand the codebase, boot the repo, install the Codex skills, run core setup, run auth setup, run billing setup, verify the fragile auth and billing seams, and only then start shaping the product. After this change, a novice should be able to open the compiled starter, find one guide immediately, and follow it step by step whether they are working alone or with Codex. The change works when the compiled snapshot contains a visible onboarding guide, links to it from the existing entry points, ships stable repo-local wrapper skills for the starter’s most important workflows, and includes a one-command installer for the vetted external skills you want customers to add after download.
 
 ## Progress
 
-- [x] 2026-04-07 16:11 EDT — Read `.plans/PLANS.md`, the current starter bootstrap renderer in `packages/blueprint-compiler/src/repo-generation/render-starter-bootstrap.ts`, the current compiled README override in `packages/blueprint-compiler/src/repo-generation/render-template-overrides.ts`, the current docs entry pages in `apps/web/content/docs/index.mdx` and `apps/web/content/docs/local-setup.mdx`, and the repo tracker in `todo.md`.
+- [x] 2026-04-07 16:11 EDT — Read `.plans/PLANS.md`, the current starter bootstrap renderer in `packages/codebase-compiler/src/repo-generation/render-starter-bootstrap.ts`, the current compiled README override in `packages/codebase-compiler/src/repo-generation/render-template-overrides.ts`, the current docs entry pages in `apps/web/content/docs/index.mdx` and `apps/web/content/docs/local-setup.mdx`, and the repo tracker in `todo.md`.
 - [x] 2026-04-07 16:11 EDT — Gathered research from three independent subagent passes covering repo-local onboarding gaps, failure modes, and current official tooling behavior for Bun, shadcn, Clerk, Convex, and Stripe.
 - [x] 2026-04-07 16:18 EDT — Grilled the plan against `docs/prompts/execplan-grill.md`, inspected the real snapshot contract files, and resolved the highest-impact ambiguities from the repo without asking the user.
 - [x] 2026-04-08 00:00 EDT — Researched the official Codex skills and plugin model, the local Next.js and Convex version-coupled guidance paths, the existing starter product config references to `openai/skills`, and the practical separation between bundled repo-local skills and post-download external-skill installation.
-- [x] 2026-04-08 15:22 EDT — Implemented the generated onboarding renderer in `packages/blueprint-compiler/src/repo-generation/render-starter-project-onboarding.ts` and wired it into the starter snapshot as `START-HERE.md` plus the generated docs override at `apps/web/content/docs/index.mdx`.
-- [x] 2026-04-08 15:22 EDT — Implemented the generated starter-local skill layer in `packages/blueprint-compiler/src/repo-generation/render-starter-skills.ts`, including wrapper skills under `.agents/skills`, the external skill manifest, and `scripts/install-codex-skills.sh`.
-- [x] 2026-04-08 15:22 EDT — Wired the generated entry points in `packages/blueprint-compiler/src/repo-generation/render-template-overrides.ts` and `packages/blueprint-compiler/src/repo-generation/render-starter-bootstrap.ts` so buyers are pointed to `START-HERE.md` and `bun run codex:skills:install`.
-- [x] 2026-04-08 15:22 EDT — Extended `packages/blueprint-compiler/tests/repo-generation.test.ts` and `packages/blueprint-compiler/tests/review-download-zip.test.ts` to cover `START-HERE.md`, the docs index override, the wrapper skills, the external skill manifest, and the generated install script.
+- [x] 2026-04-08 15:22 EDT — Implemented the generated onboarding renderer in `packages/codebase-compiler/src/repo-generation/render-starter-project-onboarding.ts` and wired it into the starter snapshot as `START-HERE.md` plus the generated docs override at `apps/web/content/docs/index.mdx`.
+- [x] 2026-04-08 15:22 EDT — Implemented the generated starter-local skill layer in `packages/codebase-compiler/src/repo-generation/render-starter-skills.ts`, including wrapper skills under `.agents/skills`, the external skill manifest, and `scripts/install-codex-skills.sh`.
+- [x] 2026-04-08 15:22 EDT — Wired the generated entry points in `packages/codebase-compiler/src/repo-generation/render-template-overrides.ts` and `packages/codebase-compiler/src/repo-generation/render-starter-bootstrap.ts` so buyers are pointed to `START-HERE.md` and `bun run codex:skills:install`.
+- [x] 2026-04-08 15:22 EDT — Extended `packages/codebase-compiler/tests/repo-generation.test.ts` and `packages/codebase-compiler/tests/review-download-zip.test.ts` to cover `START-HERE.md`, the docs index override, the wrapper skills, the external skill manifest, and the generated install script.
 - [x] 2026-04-08 15:23 EDT — Ran the required package-level and root-level validation commands and confirmed the generated external skill installer script passes `bash -n`.
 
 ## Surprises & Discoveries
@@ -32,11 +32,11 @@ The existing starter already has a public docs page named `apps/web/content/docs
 
 The current `apps/web/content/docs/local-setup.mdx` already states that the local setup order is Clerk, then Convex, then Stripe. The subagent review agreed that the guide should preserve that sequence. The pain point is not “how do I open provider dashboards”; it is “how do I keep local env values, hosted Convex development, Clerk, and Stripe aligned so the starter actually works.”
 
-The current bootstrap work in `packages/blueprint-compiler/src/repo-generation/render-starter-bootstrap.ts` is useful, but it is not the same thing as the onboarding guide the user asked for. The bootstrap is a command-line helper. The requested guide is a durable artifact in the compiled starter that explains the full journey from blueprint to project work, including which Codex skills to use in each phase. The implementation must keep those two surfaces aligned without forcing the shell script to become a giant wall of prose.
+The current bootstrap work in `packages/codebase-compiler/src/repo-generation/render-starter-bootstrap.ts` is useful, but it is not the same thing as the onboarding guide the user asked for. The bootstrap is a command-line helper. The requested guide is a durable artifact in the compiled starter that explains the full journey from codebase to project work, including which Codex skills to use in each phase. The implementation must keep those two surfaces aligned without forcing the shell script to become a giant wall of prose.
 
 The subagent tooling pass also confirmed that the shadcn preset step is less trivial than it looks. The downloaded starter should prefer `apply --preset` against an existing project, and that step depends on `npx` or equivalent Node tooling in practice. The onboarding guide should therefore explain that the preset step is optional and should not block the rest of the journey.
 
-The snapshot contract in `packages/blueprint-compiler/src/repo-generation/repo-download-source-contract.ts` already includes all of `apps/web/content`, and `packages/blueprint-compiler/src/repo-generation/materialize-repo-snapshot.ts` already merges override files cleanly on top of included directories. That means a generated override for `apps/web/content/docs/index.mdx` is a better fit than introducing a second onboarding page plus navigation work. The docs surface already has the right route and title.
+The snapshot contract in `packages/codebase-compiler/src/repo-generation/repo-download-source-contract.ts` already includes all of `apps/web/content`, and `packages/codebase-compiler/src/repo-generation/materialize-repo-snapshot.ts` already merges override files cleanly on top of included directories. That means a generated override for `apps/web/content/docs/index.mdx` is a better fit than introducing a second onboarding page plus navigation work. The docs surface already has the right route and title.
 
 Official Codex documentation draws a clean line between skills as the authoring format and plugins as the installable distribution unit. Repo-local skills belong in `.agents/skills`, while external reusable skills should be installed after download rather than baked into a static starter zip. This matters because “latest skill” and “latest framework guidance” are different problems. The Next.js and Convex guidance the starter needs should stay local and version-coupled to the installed repo, specifically `apps/web/node_modules/next/dist/docs/` and `apps/web/convex/_generated/ai/guidelines.md`, instead of pointing buyers at drifting live docs.
 
@@ -54,7 +54,7 @@ The external repos also exposed real trigger names that are customer-usable toda
 
 Decision: The onboarding feature will be implemented as compiled starter artifacts, not as hand-maintained docs copied manually into the generated repo.
 
-Rationale: The user explicitly asked for this to become part of the starter repo that the compiler emits. Keeping the guide in `packages/blueprint-compiler` means every compiled starter receives the same onboarding contract and tests can enforce its presence.
+Rationale: The user explicitly asked for this to become part of the starter repo that the compiler emits. Keeping the guide in `packages/codebase-compiler` means every compiled starter receives the same onboarding contract and tests can enforce its presence.
 
 Date: 2026-04-07
 
@@ -76,7 +76,7 @@ Rationale: The repo already contains fragile but trustworthy doctor scripts for 
 
 Date: 2026-04-07
 
-Decision: The initial guide will use a static curated skill map taken from the current repo skill inventory rather than deriving skills from blueprint facts.
+Decision: The initial guide will use a static curated skill map taken from the current repo skill inventory rather than deriving skills from codebase facts.
 
 Rationale: The necessary skill mapping follows repo subsystems rather than customer-entered product facts. For example, auth work uses `clerk`, data work uses `convex`, billing work uses `stripe-best-practices`, UI work uses `frontend-design` and `shadcn`, QA work uses `qa-team` and `testing-practices`, and docs sync uses `docs`. Making that mapping static keeps the guide deterministic and testable.
 
@@ -138,21 +138,21 @@ This result matches the original purpose better than the prior setup story becau
 
 ## Context and Orientation
 
-The relevant generator boundary is `packages/blueprint-compiler`. That package decides which files are injected into the compiled starter. The current root-facing starter artifacts are assembled in `packages/blueprint-compiler/src/repo-generation/render-template-overrides.ts`, which already overrides the generated `README.md` and root `package.json`. The current in-progress bootstrap command is rendered from `packages/blueprint-compiler/src/repo-generation/render-starter-bootstrap.ts`. Those two files are the existing root entry points that a buyer will see first, so they must either link to or mention the new onboarding guide.
+The relevant generator boundary is `packages/codebase-compiler`. That package decides which files are injected into the compiled starter. The current root-facing starter artifacts are assembled in `packages/codebase-compiler/src/repo-generation/render-template-overrides.ts`, which already overrides the generated `README.md` and root `package.json`. The current in-progress bootstrap command is rendered from `packages/codebase-compiler/src/repo-generation/render-starter-bootstrap.ts`. Those two files are the existing root entry points that a buyer will see first, so they must either link to or mention the new onboarding guide.
 
 The starter already has one place that references external skills material: `apps/web/config/product.ts` exposes links to `https://github.com/openai/skills` and the `openai/skills` zip in the Codex lesson configuration. That proves the product already has a concept of skills as part of the teaching story, but it is not yet part of the compiled starter repo contract itself.
 
 The compiled starter also ships the app docs from `apps/web/content/docs`. The two most relevant existing pages are `apps/web/content/docs/index.mdx`, which is already the “Start Here” page, and `apps/web/content/docs/local-setup.mdx`, which already explains the correct provider order and local boot process. The grilled plan resolves that the onboarding guide should reuse `apps/web/content/docs/index.mdx` as the docs-surface entry point rather than add a second onboarding page. The file `apps/web/content/docs/_meta.ts` therefore remains unchanged in the first pass unless implementation reveals a real navigation need.
 
-The tests that protect the starter snapshot contract are already present in `packages/blueprint-compiler/tests/repo-generation.test.ts` and `packages/blueprint-compiler/tests/review-download-zip.test.ts`. Those tests currently check that generated files such as `README.md`, `DESIGN.md`, and the bootstrap script land in the materialized snapshot and zip. The onboarding feature should extend those tests or add a focused new test so the onboarding guide cannot silently disappear in a later change.
+The tests that protect the starter snapshot contract are already present in `packages/codebase-compiler/tests/repo-generation.test.ts` and `packages/codebase-compiler/tests/review-download-zip.test.ts`. Those tests currently check that generated files such as `README.md`, `DESIGN.md`, and the bootstrap script land in the materialized snapshot and zip. The onboarding feature should extend those tests or add a focused new test so the onboarding guide cannot silently disappear in a later change.
 
 In this plan, “core setup” means getting the starter booted locally and understanding the repo without yet relying on auth or billing. “Auth setup” means wiring Clerk and Convex so protected routes and identity-dependent behavior work. “Billing setup” means wiring Stripe so checkout and paid-access handoff work. A “skill” means one of the named Codex instruction bundles already available in this repository, such as `shadcn`, `frontend-design`, `clerk`, `convex`, `stripe-best-practices`, `qa-team`, `testing-practices`, and `docs`. A “wrapper skill” means a repo-local skill that teaches Codex how to use this starter safely and where to read local version-coupled guidance. An “external skill manifest” means a checked-in data file that lists vetted exact install commands to run later, after the buyer downloads the starter.
 
-The working tree already contains uncommitted bootstrap-related edits in `packages/blueprint-compiler/src/repo-generation/render-template-overrides.ts`, `packages/blueprint-compiler/src/repo-generation/render-starter-bootstrap.ts`, and the corresponding compiler tests. Any implementation following this plan must preserve those edits and build on them instead of overwriting them.
+The working tree already contains uncommitted bootstrap-related edits in `packages/codebase-compiler/src/repo-generation/render-template-overrides.ts`, `packages/codebase-compiler/src/repo-generation/render-starter-bootstrap.ts`, and the corresponding compiler tests. Any implementation following this plan must preserve those edits and build on them instead of overwriting them.
 
 ## Plan of Work
 
-The implementation should start by freezing the content contract of the onboarding guide in code before wiring it into entry points. Create a new generator module inside `packages/blueprint-compiler/src/repo-generation/` whose job is to describe the onboarding phases once and render them into two outputs: a root Markdown file named `START-HERE.md` for someone opening the repo in an editor, and an MDX override for `apps/web/content/docs/index.mdx` for someone using the starter’s `/docs` surface. The content model should encode the phases that came out of planning in one prescribed order: understand the blueprint, boot the repo, install the skills, run core setup, run auth setup, run billing setup, verify the baseline, replace the generated identity where appropriate, remove starter surfaces intentionally, and begin the first real product slice. The implementation may still structure the content internally around core setup, auth setup, and billing setup, but the buyer-facing guide must never present those as optional lanes to choose from.
+The implementation should start by freezing the content contract of the onboarding guide in code before wiring it into entry points. Create a new generator module inside `packages/codebase-compiler/src/repo-generation/` whose job is to describe the onboarding phases once and render them into two outputs: a root Markdown file named `START-HERE.md` for someone opening the repo in an editor, and an MDX override for `apps/web/content/docs/index.mdx` for someone using the starter’s `/docs` surface. The content model should encode the phases that came out of planning in one prescribed order: understand the codebase, boot the repo, install the skills, run core setup, run auth setup, run billing setup, verify the baseline, replace the generated identity where appropriate, remove starter surfaces intentionally, and begin the first real product slice. The implementation may still structure the content internally around core setup, auth setup, and billing setup, but the buyer-facing guide must never present those as optional lanes to choose from.
 
 In the same initiative, add a second generator module for the starter-local skill layer. That module should emit a small set of wrapper skills into `.agents/skills` so Codex lands with starter-specific guidance without needing a marketplace round trip. The initial wrapper set should cover four starter concerns: core repo boot, auth setup, billing setup, and the first real implementation slice. The Next.js and Convex wrappers should explicitly point Codex to `apps/web/node_modules/next/dist/docs/` and `apps/web/convex/_generated/ai/guidelines.md` respectively before editing those subsystems.
 
@@ -164,7 +164,7 @@ The first implementation pass should also emit a machine-readable external-skill
 
 The generated installer should run those commands in order and then tell the buyer to restart Codex if the new skills do not appear.
 
-After the renderers exist, wire the root entry points. Update `packages/blueprint-compiler/src/repo-generation/render-template-overrides.ts` so the generated `README.md` points at the new root guide near the top and so the generated `package.json` or bootstrap copy can reference both the onboarding guide and the presence of starter-local skills if that improves discoverability. Add a root package script such as `codex:skills:install` that runs the generated installer script. Keep the README concise. It should not duplicate the entire guide. It should tell the buyer where the durable guide lives, that the repo includes local Codex skills under `.agents/skills`, and that they can install the vetted external skills in one command.
+After the renderers exist, wire the root entry points. Update `packages/codebase-compiler/src/repo-generation/render-template-overrides.ts` so the generated `README.md` points at the new root guide near the top and so the generated `package.json` or bootstrap copy can reference both the onboarding guide and the presence of starter-local skills if that improves discoverability. Add a root package script such as `codex:skills:install` that runs the generated installer script. Keep the README concise. It should not duplicate the entire guide. It should tell the buyer where the durable guide lives, that the repo includes local Codex skills under `.agents/skills`, and that they can install the vetted external skills in one command.
 
 Then wire the docs-surface entry points. Override `apps/web/content/docs/index.mdx` using the same onboarding content so `/docs` itself becomes the full onboarding journey. Preserve the useful lower-level links into `local-setup`, `clerk-convex-auth`, `stripe-checkout-webhook`, `local-qa`, and `build-your-product`, but make those subordinate references rather than the primary journey.
 
@@ -191,18 +191,18 @@ At the end of this milestone, the compiler tests prove the onboarding files and 
 Start in the repository root and inspect the existing generator and docs entry points again before editing anything:
 
     cd /Users/parkerrex/Developer/ship-by-sunday
-    sed -n '1,240p' packages/blueprint-compiler/src/repo-generation/render-template-overrides.ts
-    sed -n '1,260p' packages/blueprint-compiler/src/repo-generation/render-starter-bootstrap.ts
+    sed -n '1,240p' packages/codebase-compiler/src/repo-generation/render-template-overrides.ts
+    sed -n '1,260p' packages/codebase-compiler/src/repo-generation/render-starter-bootstrap.ts
     sed -n '1,240p' apps/web/content/docs/index.mdx
     sed -n '1,260p' apps/web/content/docs/local-setup.mdx
 
 You should see the generated README override, the bootstrap renderer, the current docs “Start Here” page, and the existing provider-order guidance.
 
-Create a new generator module in `packages/blueprint-compiler/src/repo-generation/`. Give it a domain-specific name such as `render-starter-project-onboarding.ts`. That file should export one function that returns the rendered onboarding files and one shared data structure describing the onboarding phases. Each phase should include a short title, a plain-language goal, the customer action, the agent prompt, the skill list, and any internal tags needed to distinguish the core setup work, the auth work, and the billing work. In the rendered buyer-facing text, these should appear as steps in order, not as branches the customer must choose between.
+Create a new generator module in `packages/codebase-compiler/src/repo-generation/`. Give it a domain-specific name such as `render-starter-project-onboarding.ts`. That file should export one function that returns the rendered onboarding files and one shared data structure describing the onboarding phases. Each phase should include a short title, a plain-language goal, the customer action, the agent prompt, the skill list, and any internal tags needed to distinguish the core setup work, the auth work, and the billing work. In the rendered buyer-facing text, these should appear as steps in order, not as branches the customer must choose between.
 
-Create a second generator module in `packages/blueprint-compiler/src/repo-generation/` for the wrapper skills, for example `render-starter-skills.ts`. That file should emit `RenderedBlueprintFile[]` entries under `.agents/skills/` for starter-local workflows such as `starter-core-setup`, `starter-auth-setup`, `starter-billing-setup`, and `starter-first-slice`. Keep each wrapper skill small and repo-specific. The Next.js-facing wrapper must point to `apps/web/node_modules/next/dist/docs/` before editing framework code, and the Convex-facing wrapper must point to `apps/web/convex/_generated/ai/guidelines.md` before editing Convex code.
+Create a second generator module in `packages/codebase-compiler/src/repo-generation/` for the wrapper skills, for example `render-starter-skills.ts`. That file should emit `RenderedCodebaseFile[]` entries under `.agents/skills/` for starter-local workflows such as `starter-core-setup`, `starter-auth-setup`, `starter-billing-setup`, and `starter-first-slice`. Keep each wrapper skill small and repo-specific. The Next.js-facing wrapper must point to `apps/web/node_modules/next/dist/docs/` before editing framework code, and the Convex-facing wrapper must point to `apps/web/convex/_generated/ai/guidelines.md` before editing Convex code.
 
-Update `packages/blueprint-compiler/src/repo-generation/render-template-overrides.ts` so it includes the new root onboarding file in the returned `RenderedBlueprintFile[]` list and so the generated `README.md` points to it near the top. If the current bootstrap output should mention the guide in its closing “next steps,” update `packages/blueprint-compiler/src/repo-generation/render-starter-bootstrap.ts` in the same change so the shell helper and durable guide stay aligned.
+Update `packages/codebase-compiler/src/repo-generation/render-template-overrides.ts` so it includes the new root onboarding file in the returned `RenderedCodebaseFile[]` list and so the generated `README.md` points to it near the top. If the current bootstrap output should mention the guide in its closing “next steps,” update `packages/codebase-compiler/src/repo-generation/render-starter-bootstrap.ts` in the same change so the shell helper and durable guide stay aligned.
 
 Have the skill renderer also emit a starter-local external skill manifest file, using a precise path such as `.agents/skills/external-skills.json`, and a generated installer shell script such as `scripts/install-codex-skills.sh`. That file should explain in comments or adjacent generated docs that repo-local wrapper skills are shipped, while external skills are installed later from explicit pinned commands. The initial manifest entries must be the exact commands below:
 
@@ -228,18 +228,18 @@ Add the docs-surface output using the same renderer by emitting an override for 
 After the renderer and entry points are in place, update the compiler tests:
 
     cd /Users/parkerrex/Developer/ship-by-sunday
-    sed -n '1,220p' packages/blueprint-compiler/tests/repo-generation.test.ts
-    sed -n '1,160p' packages/blueprint-compiler/tests/review-download-zip.test.ts
+    sed -n '1,220p' packages/codebase-compiler/tests/repo-generation.test.ts
+    sed -n '1,160p' packages/codebase-compiler/tests/review-download-zip.test.ts
 
 Extend those tests or add a small dedicated test so they assert the new root onboarding file `START-HERE.md`, the overridden docs onboarding file at `apps/web/content/docs/index.mdx`, the presence of wrapper skills under `.agents/skills/`, the generated installer script, and the README reference. Keep the assertions specific enough to catch regression without snapshotting whole files. Also assert a representative skill string such as `shadcn`, a representative lane label such as `billing`, a wrapper skill path such as `.agents/skills/starter-auth-setup/SKILL.md`, and the exact strings `get-convex/agent-skills`, `clerk/skills`, and `stripe-best-practices` so the content contract does not silently flatten back into a generic setup page.
 
 When the code is ready, run the narrow package checks first:
 
     cd /Users/parkerrex/Developer/ship-by-sunday
-    bun run --cwd packages/blueprint-compiler format:check
-    bun run --cwd packages/blueprint-compiler lint
-    bun run --cwd packages/blueprint-compiler typecheck
-    bun run --cwd packages/blueprint-compiler test
+    bun run --cwd packages/codebase-compiler format:check
+    bun run --cwd packages/codebase-compiler lint
+    bun run --cwd packages/codebase-compiler typecheck
+    bun run --cwd packages/codebase-compiler test
 
 Expected success is that all four commands exit cleanly. The test run should report the compiler suite passing, including the updated snapshot-contract assertions.
 
@@ -254,7 +254,7 @@ Expected success is that the root formatter, linter, and typecheck complete with
 
 ## Validation and Acceptance
 
-This feature is complete when a buyer can open the compiled starter repo and immediately find one durable guide that explains the full path from fresh blueprint to working on their product. The guide must live in the root of the compiled starter and also be reachable from the app docs surface. It must describe the onboarding phases in order, including which steps are customer actions, which are agent prompts, and which Codex skills should be used in each phase.
+This feature is complete when a buyer can open the compiled starter repo and immediately find one durable guide that explains the full path from fresh codebase to working on their product. The guide must live in the root of the compiled starter and also be reachable from the app docs surface. It must describe the onboarding phases in order, including which steps are customer actions, which are agent prompts, and which Codex skills should be used in each phase.
 
 This feature also requires that the compiled starter lands with starter-local wrapper skills under `.agents/skills` so Codex has repo-specific setup guidance on day one. External skills may still require post-download installation, but the starter must explain that distinction clearly.
 
@@ -264,7 +264,7 @@ Acceptance is behavioral, not structural. A human validator should be able to do
 
 Open the generated root `README.md` and see a prominent pointer to the onboarding guide.
 
-Open the onboarding guide and see the phases laid out in one obvious order: understanding the blueprint, booting the repo, installing skills, running core setup, running auth setup, running billing setup, proving the baseline, replacing the generated identity where appropriate, removing starter scaffolding intentionally, and beginning the first real product slice.
+Open the onboarding guide and see the phases laid out in one obvious order: understanding the codebase, booting the repo, installing skills, running core setup, running auth setup, running billing setup, proving the baseline, replacing the generated identity where appropriate, removing starter scaffolding intentionally, and beginning the first real product slice.
 
 Open the generated app docs and find the same journey surfaced directly at `/docs` without having to piece it together from several unrelated setup pages.
 
@@ -277,10 +277,10 @@ Run the generated external skill install command, see the exact Clerk, Convex, a
 Run the validation commands below and see them all pass:
 
     cd /Users/parkerrex/Developer/ship-by-sunday
-    bun run --cwd packages/blueprint-compiler format:check
-    bun run --cwd packages/blueprint-compiler lint
-    bun run --cwd packages/blueprint-compiler typecheck
-    bun run --cwd packages/blueprint-compiler test
+    bun run --cwd packages/codebase-compiler format:check
+    bun run --cwd packages/codebase-compiler lint
+    bun run --cwd packages/codebase-compiler typecheck
+    bun run --cwd packages/codebase-compiler test
     bun run format
     bun run lint
     bun run typecheck
@@ -330,16 +330,16 @@ It should also contain an explicit skill-trigger tip in this style:
 
 Observed proof from the compiler validation loop:
 
-    bun run --cwd packages/blueprint-compiler format:check
+    bun run --cwd packages/codebase-compiler format:check
     All matched files use the correct format.
 
-    bun run --cwd packages/blueprint-compiler lint
+    bun run --cwd packages/codebase-compiler lint
     Found 0 warnings and 0 errors.
 
-    bun run --cwd packages/blueprint-compiler typecheck
+    bun run --cwd packages/codebase-compiler typecheck
     exited with code 0
 
-    bun run --cwd packages/blueprint-compiler test
+    bun run --cwd packages/codebase-compiler test
     Test Files  9 passed (9)
     Tests  25 passed (25)
 
@@ -363,9 +363,9 @@ Observed proof for the generated installer shell:
 
 ## Interfaces and Dependencies
 
-The new renderer module in `packages/blueprint-compiler/src/repo-generation/` should return `RenderedBlueprintFile[]`, the same internal file contract used by the rest of the starter compiler. The root wiring remains in `packages/blueprint-compiler/src/repo-generation/render-template-overrides.ts`. If the bootstrap script needs to mention the onboarding guide, that change belongs in `packages/blueprint-compiler/src/repo-generation/render-starter-bootstrap.ts`.
+The new renderer module in `packages/codebase-compiler/src/repo-generation/` should return `RenderedCodebaseFile[]`, the same internal file contract used by the rest of the starter compiler. The root wiring remains in `packages/codebase-compiler/src/repo-generation/render-template-overrides.ts`. If the bootstrap script needs to mention the onboarding guide, that change belongs in `packages/codebase-compiler/src/repo-generation/render-starter-bootstrap.ts`.
 
-The starter-local skill renderer should also return `RenderedBlueprintFile[]` and should emit only repo-local skills and starter-owned metadata. It should not depend on live network access or marketplace lookups at compile time.
+The starter-local skill renderer should also return `RenderedCodebaseFile[]` and should emit only repo-local skills and starter-owned metadata. It should not depend on live network access or marketplace lookups at compile time.
 
 The docs-side files live under `apps/web/content/docs/`. In the first implementation pass, the onboarding guide should override `apps/web/content/docs/index.mdx` directly and should not require a `_meta.ts` change. If later work adds a second onboarding page or a dedicated checklist route, that follow-up should revisit `_meta.ts` in a separate plan.
 

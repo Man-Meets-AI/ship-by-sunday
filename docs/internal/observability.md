@@ -146,7 +146,7 @@ The observability path depends on these values:
 - `CLERK_WEBHOOK_SIGNING_SECRET` to verify Clerk webhooks.
 - `OBSERVABILITY_VERCEL_WEBHOOK_SECRET` to verify Vercel webhooks.
 - `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` to let the Stripe webhook handler verify and process paid checkouts.
-- `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` to deliver incident blueprints to Telegram.
+- `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` to deliver incident codebases to Telegram.
 - `NEXT_PUBLIC_POSTHOG_TOKEN`, `NEXT_PUBLIC_POSTHOG_HOST`, `POSTHOG_PROJECT_ID`, and `POSTHOG_API_KEY` to run PostHog analytics, error tracking, replay, and source-map upload.
 
 The runtime helpers read these values from `apps/web/platform/env/server.ts` on the Next.js side and `apps/web/convex/env.ts` on the Convex side. If either side is missing the expected value, the route should fail early instead of pretending the transport is healthy.

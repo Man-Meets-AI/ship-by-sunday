@@ -7,7 +7,7 @@ import {
 	SocialProofSection,
 } from "./sections/closing-sections";
 import { HomeHeroSection } from "./sections/hero-sections";
-import { BlueprintDemoSectionBlock } from "./sections/blueprint-demo/blueprint-demo-section";
+import { CodebaseDemoSectionBlock } from "./sections/codebase-demo/codebase-demo-section";
 import { DurabilitySectionBlock } from "./sections/durability-section";
 import { ExecLoopSectionBlock } from "./sections/exec-loop-section";
 import { PlansMdSectionBlock } from "./sections/plans-md-section";
@@ -23,14 +23,14 @@ export default async function HomePage() {
 		<main className="overflow-x-clip bg-background text-foreground">
 			<div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 pt-4 pb-12 sm:px-12 sm:pt-6 sm:pb-20 lg:pt-8">
 				{shouldRenderProductPreview ? (
-					<BlueprintDemoSectionBlock
+					<CodebaseDemoSectionBlock
 						section={homePageRenderModel.productPreview.section}
 					>
 						<HomePageIdeaContinuation
 							homePageRenderModel={homePageRenderModel}
 							heroVariant="supporting"
 						/>
-					</BlueprintDemoSectionBlock>
+					</CodebaseDemoSectionBlock>
 				) : (
 					<HomePageIdeaContinuation
 						homePageRenderModel={homePageRenderModel}

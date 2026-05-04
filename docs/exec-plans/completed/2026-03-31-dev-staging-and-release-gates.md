@@ -212,9 +212,9 @@ Useful evidence captured during implementation:
    - `ruby -e 'require "yaml"; YAML.load_file(".github/workflows/ci.yml"); YAML.load_file(".github/workflows/dev-staging-proof.yml"); puts "workflow yaml ok"'`
      `workflow yaml ok`
 
-   Blueprint transcript:
-   - `node -e 'JSON.parse(require("fs").readFileSync("package.json","utf8")); console.log("blueprint json ok")'`
-     `blueprint json ok`
+   Codebase transcript:
+   - `node -e 'JSON.parse(require("fs").readFileSync("package.json","utf8")); console.log("codebase json ok")'`
+     `codebase json ok`
 
    Diff hygiene transcript:
    - `git diff --check -- ...`

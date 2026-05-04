@@ -11,7 +11,7 @@ This document contains foundational mandates for Gemini CLI in this workspace. T
 Use this exact priority order when sources conflict:
 1. `AGENTS.md` and nested `AGENTS.md` files
 2. `docs/index.md` and the referenced canonical docs spine
-3. current runtime code in `apps/web/` and `packages/blueprint-compiler/`
+3. current runtime code in `apps/web/` and `packages/codebase-compiler/`
 4. `docs/ship-by-sunday/*` historical source packs for background only
 
 ## Repository Layout & Engineering Standards
@@ -39,13 +39,13 @@ Use this exact priority order when sources conflict:
 ## Subsystem Rules
 
 ### Web App (`apps/web`)
-- **Blueprint-First:** This product is blueprint-first, not course-first.
-- **Protected Handoff:** The current journey is `/blueprint -> /review`; staged routes are compatibility redirects only.
-- **Unlock Logic:** Ensure the Ship by Sunday Blueprint handoff and optional Execute / Ship bonus library unlock exactly as defined in `apps/web/AGENTS.md`.
+- **Codebase-First:** This product is codebase-first, not course-first.
+- **Protected Handoff:** The current journey is `/codebase -> /review`; staged routes are compatibility redirects only.
+- **Unlock Logic:** Ensure the Ship by Sunday Codebase handoff and optional Execute / Ship bonus library unlock exactly as defined in `apps/web/AGENTS.md`.
 - **Homepage:** Changes to `/` must follow `starterConfig.homePage` in `apps/web/config/product.ts` and related files. Read `apps/web/content/docs/configure-the-homepage.mdx` first.
 
-### Blueprint Compiler (`packages/blueprint-compiler`)
-- **Compiler First:** Treat as a blueprint compiler with repo-generation side effects.
+### Codebase Compiler (`packages/codebase-compiler`)
+- **Compiler First:** Treat as a codebase compiler with repo-generation side effects.
 - **Derivation:** Prefer derivation over recollection. Do not re-ask downstream for upstream data.
 - **Pricing:** Belongs in `Build Plan`.
 - **Customer-Safe:** Repo snapshots must exclude machine-local junk, generated output, and unresolved symlinks.

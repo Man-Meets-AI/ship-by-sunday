@@ -2,7 +2,7 @@
 
 ## Canonical rules
 
-- Build work must trace back to stable blueprint facts.
+- Build work must trace back to stable codebase facts.
 - `scope_in`, `scope_out`, and `non_goals` are mandatory for non-trivial work.
 - Review-route and starter-snapshot impact must be explicit.
 - Validation is part of the product output, not optional cleanup.
@@ -16,4 +16,4 @@
 
 ## Dated decisions
 
-- **2026-03-27:** The Ship by Sunday build pack extends the vanilla long-horizon baseline and is the custom build blueprint for this repo.
+- **2026-03-27:** The Ship by Sunday build pack extends the vanilla long-horizon baseline and is the custom build codebase for this repo.

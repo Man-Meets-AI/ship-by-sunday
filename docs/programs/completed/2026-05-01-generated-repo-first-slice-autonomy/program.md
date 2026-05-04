@@ -53,7 +53,7 @@ The generated-repo autonomy roadmap is complete. Generated Build Packs now deriv
 ## Progress
 
 - [x] 2026-05-01 EDT: Created the Program packet and first child ExecPlan for the Build Pack Readiness Manifest.
-- [x] 2026-05-01 EDT: Implemented the Build Pack Readiness Manifest in `packages/blueprint-compiler`.
+- [x] 2026-05-01 EDT: Implemented the Build Pack Readiness Manifest in `packages/codebase-compiler`.
 - [x] 2026-05-01 EDT: Validated focused compiler tests, planning lint, package gates, repo format, repo lint, repo typecheck, and diff whitespace checks for the first slice.
 - [x] 2026-05-01 EDT: Wrote `planning-brief-2.md`, marked `planning-brief-1.md` superseded, and advanced `current-planning-brief.txt` to the Derived First Slice Planner.
 - [x] 2026-05-01 EDT: Wrote `planning-brief-3.md`, marked `planning-brief-2.md` superseded, and opened the completion ExecPlan.
@@ -118,7 +118,7 @@ The completion pass finished the remaining roadmap. Generated repos now include 
 
 At the Program level, completion requires generated repos to include deterministic readiness, derived first-slice planning, typed command manifests, review and verification proof, weak-fact blockers, clean-room replay proof, and structural regression tests that parse generated docs rather than only checking substrings.
 
-The completion pass satisfies that bar in `packages/blueprint-compiler`. Focused compiler tests, package typecheck, package format check, package lint, planning lint, Program lint, markdown lint, repo format, repo lint, repo typecheck, and diff whitespace checks passed before the Program was marked complete.
+The completion pass satisfies that bar in `packages/codebase-compiler`. Focused compiler tests, package typecheck, package format check, package lint, planning lint, Program lint, markdown lint, repo format, repo lint, repo typecheck, and diff whitespace checks passed before the Program was marked complete.
 
 ## Artifacts and Notes
 
@@ -130,4 +130,4 @@ The completed first child ExecPlan is `docs/exec-plans/completed/2026-05-01-buil
 
 ## Interfaces and Dependencies
 
-This Program depends on root `AGENTS.md`, `docs/programs/PROGRAMS.md`, `docs/exec-plans/PLANS.md`, `packages/blueprint-compiler/AGENTS.md`, the canonical project-definition schema, generated Build Pack renderers, repo-generation materialization, and compiler tests.
+This Program depends on root `AGENTS.md`, `docs/programs/PROGRAMS.md`, `docs/exec-plans/PLANS.md`, `packages/codebase-compiler/AGENTS.md`, the canonical project-definition schema, generated Build Pack renderers, repo-generation materialization, and compiler tests.

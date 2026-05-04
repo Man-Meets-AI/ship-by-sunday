@@ -54,7 +54,7 @@ Scope: Unwire `packages/ship-by-sunday-cli`, `bin/sbs`, CLI tests, `sbs:*` scrip
 
 Why it stands alone: The CLI is conceptually disposable but operationally wired into checks and docs. This plan has an observable outcome: the repo no longer exposes or requires the helper CLI, while web review download and generated starter paths still work.
 
-What it must not absorb: Do not delete QA control-plane files, rewrite release workflows, remove browser harness tests, or redesign blueprint generation. CLI retirement should not become a QA or product refactor.
+What it must not absorb: Do not delete QA control-plane files, rewrite release workflows, remove browser harness tests, or redesign codebase generation. CLI retirement should not become a QA or product refactor.
 
 ## Plan 6
 

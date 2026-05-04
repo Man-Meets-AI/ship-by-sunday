@@ -1,4 +1,4 @@
 {
 	"$schema": "https://openapi.vercel.sh/vercel.json",
-	"installCommand": "cd ../.. && rm -rf node_modules apps/web/node_modules packages/blueprint-compiler/node_modules && bun install --frozen-lockfile"
+	"installCommand": "cd ../.. && rm -rf node_modules apps/web/node_modules packages/codebase-compiler/node_modules && bun install --frozen-lockfile"
 }

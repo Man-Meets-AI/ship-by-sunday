@@ -1,5 +1,5 @@
 import { lessonMedia } from "../lib/course/lesson/model/media";
-import { getBlueprintVideoInventory } from "../lib/blueprint-flow/blueprint-stage-videos";
+import { getCodebaseVideoInventory } from "../lib/codebase-flow/codebase-stage-videos";
 import { verifyBunnyEmbedUrl } from "../lib/course/lesson/lib/video-verification";
 
 type VideoInventoryEntry = {
@@ -33,8 +33,8 @@ function getLessonVideoInventory(): VideoInventoryEntry[] {
 	});
 }
 
-function getBlueprintStageVideoInventory(): VideoInventoryEntry[] {
-	return getBlueprintVideoInventory().flatMap((entry) => {
+function getCodebaseStageVideoInventory(): VideoInventoryEntry[] {
+	return getCodebaseVideoInventory().flatMap((entry) => {
 		if (
 			entry.video.status !== "ready" ||
 			entry.video.provider !== "bunny" ||
@@ -46,7 +46,7 @@ function getBlueprintStageVideoInventory(): VideoInventoryEntry[] {
 
 		return [
 			{
-				key: `blueprint:${entry.key}`,
+				key: `codebase:${entry.key}`,
 				title: entry.title,
 				url:
 					entry.video.url ??
@@ -59,7 +59,7 @@ function getBlueprintStageVideoInventory(): VideoInventoryEntry[] {
 async function main() {
 	const inventory = [
 		...getLessonVideoInventory(),
-		...getBlueprintStageVideoInventory(),
+		...getCodebaseStageVideoInventory(),
 	];
 	const failures: string[] = [];
 

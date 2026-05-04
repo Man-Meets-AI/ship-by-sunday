@@ -18,7 +18,7 @@ read_when:
 
 The fifth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-24-retire-the-helper-cli.md`. It removed `packages/ship-by-sunday-cli/`, `bin/sbs`, root `sbs` and `sbs:check` scripts, the `cli` CI job, active helper CLI docs, and public docs navigation. Root `check` now runs the web app check directly.
 
-The helper CLI was deleted rather than migrated because fresh import-direction proof showed `apps/web` and `packages/blueprint-compiler` do not import the CLI. The CLI imported `packages/blueprint-compiler`, so compiler-owned generation behavior survived without moving CLI code.
+The helper CLI was deleted rather than migrated because fresh import-direction proof showed `apps/web` and `packages/codebase-compiler` do not import the CLI. The CLI imported `packages/codebase-compiler`, so compiler-owned generation behavior survived without moving CLI code.
 
 Validation for Plan 5 passed: focused compiler lint/format/typecheck/tests, release manifest/evidence checks, workflow YAML parsing, format, lint, typecheck, plan lint, markdown lint, Program lint, `git diff --check`, helper-reference grep audits, and extra `bun run check`.
 
@@ -38,7 +38,7 @@ QA control-plane retirement is still downstream. Plan 6 may update transitional 
 
 Plan 6 should be titled `Replace Browser Harness Proof With Source And Release Proof`.
 
-The next slice should first inventory browser and e2e proof surfaces, source-level coverage that already replaces them, and gaps named by the research: robots/sitemap, signed-out `/blueprint`, entitled `/blueprint -> /review -> /settings`, checkout success paid handoff, metadata/noindex rendered HTML, and QA inventory references for any removed harness files.
+The next slice should first inventory browser and e2e proof surfaces, source-level coverage that already replaces them, and gaps named by the research: robots/sitemap, signed-out `/codebase`, entitled `/codebase -> /review -> /settings`, checkout success paid handoff, metadata/noindex rendered HTML, and QA inventory references for any removed harness files.
 
 The next slice may add or adjust unit/integration/integration-ui tests under `apps/web/tests/` to cover behavior currently proved only by browser-smoke or sandbox e2e. It may remove or demote browser harness files only after replacement proof lands and the plan records the replacement.
 

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getLegacyBlueprintRouteRedirectHref } from "@/app/(workspace)/_lib/legacy-blueprint-route-redirects";
+import { getLegacyCodebaseRouteRedirectHref } from "@/app/(workspace)/_lib/legacy-codebase-route-redirects";
 
 export default async function Page({
 	params,
@@ -8,7 +8,5 @@ export default async function Page({
 }) {
 	const { stepId } = await params;
 
-	redirect(
-		getLegacyBlueprintRouteRedirectHref({ route: "build-plan", stepId }),
-	);
+	redirect(getLegacyCodebaseRouteRedirectHref({ route: "build-plan", stepId }));
 }

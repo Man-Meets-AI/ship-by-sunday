@@ -47,9 +47,9 @@ The first child ExecPlan is `docs/exec-plans/active/2026-05-02-reconcile-custome
 
 ## Boundary Rules
 
-The first child ExecPlan must not change auth, billing, checkout, Convex runtime, provider setup, blueprint intake schema, mature-repo upload flows, public homepage copy, or public pricing.
+The first child ExecPlan must not change auth, billing, checkout, Convex runtime, provider setup, codebase intake schema, mature-repo upload flows, public homepage copy, or public pricing.
 
-The first child ExecPlan may update `packages/blueprint-compiler`, generated starter docs, generated starter skills, generated prompt wiring, customer-safe snapshot contracts, output tracing, and compiler tests. It should not add package scripts for validators until the validator implementation also ships.
+The first child ExecPlan may update `packages/codebase-compiler`, generated starter docs, generated starter skills, generated prompt wiring, customer-safe snapshot contracts, output tracing, and compiler tests. It should not add package scripts for validators until the validator implementation also ships.
 
 ## Commercial Sequencing Note
 

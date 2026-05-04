@@ -70,17 +70,17 @@ const PRIVATE_IDENTIFIER_PATTERNS = [
 const STALE_PRODUCT_VOCABULARY_PATTERNS = [
 	{
 		pattern: /\bShip Kit\b/u,
-		message: "Use Ship by Sunday Blueprint instead of stale Ship Kit vocabulary.",
+		message: "Use Ship by Sunday Codebase instead of stale Ship Kit vocabulary.",
 	},
 	{
 		pattern: /\bStarter Snapshot\b/u,
 		message:
-			"Use Ship by Sunday Blueprint instead of stale Starter Snapshot vocabulary.",
+			"Use Ship by Sunday Codebase instead of stale Starter Snapshot vocabulary.",
 	},
 	{
 		pattern: /\bAgent-Ready Packs\b/u,
 		message:
-			"Use Ship by Sunday Blueprint language instead of stale Agent-Ready Packs vocabulary.",
+			"Use Ship by Sunday Codebase language instead of stale Agent-Ready Packs vocabulary.",
 	},
 	{
 		pattern: /\bstage-pack\b/u,
@@ -176,7 +176,7 @@ function collectIssuesForFile(repoPath: string, text: string): PublicReadinessIs
 			issues.push({
 				line: lineNumber,
 				message:
-					"Old staged journey found. Current protected truth is /blueprint -> /review.",
+					"Old staged journey found. Current protected truth is /codebase -> /review.",
 				repoPath,
 			});
 		}
@@ -185,7 +185,7 @@ function collectIssuesForFile(repoPath: string, text: string): PublicReadinessIs
 			issues.push({
 				line: lineNumber,
 				message:
-					"`/start` is only a compatibility redirect. Current route guidance should use `/blueprint`.",
+					"`/start` is only a compatibility redirect. Current route guidance should use `/codebase`.",
 				repoPath,
 			});
 		}

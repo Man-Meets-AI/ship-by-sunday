@@ -1,5 +1,5 @@
 ---
-summary: Reduce the public Ship by Sunday price from $500 to $250 in this branch without leaving checkout, metadata, social previews, scripts, or tests charging or advertising the old amount. Preserve the existing blueprint-first positioning and the current dirty worktree while making the lower price truthful everywhere a buyer can see or pay it.
+summary: Reduce the public Ship by Sunday price from $500 to $250 in this branch without leaving checkout, metadata, social previews, scripts, or tests charging or advertising the old amount. Preserve the existing codebase-first positioning and the current dirty worktree while making the lower price truthful everywhere a buyer can see or pay it.
 read_when: Open this when implementing the approved $250 Ship by Sunday price change on the current feature branch and you need the full repository map, Stripe caveats, and validation steps in one place.
 plan_status: done
 ---
@@ -54,7 +54,7 @@ Decision: Treat the scope as a truthful price-drop implementation, not a full of
 Rationale: The user explicitly approved the lower price on this branch and asked for the execution plan now. The implementation must make the current offer truthful at `$250`, but it should not silently widen into a broader messaging overhaul.
 Date/Author: 2026-04-09 / Codex
 
-Decision: Preserve the existing blueprint-first positioning and visual system while changing the price.
+Decision: Preserve the existing codebase-first positioning and visual system while changing the price.
 Rationale: `apps/web/AGENTS.md` and `DESIGN.md` both make the homepage contract clear. This slice should not reframe the product as course-first, done-for-you, or generic starter-ware just because the price moved.
 Date/Author: 2026-04-09 / Codex
 

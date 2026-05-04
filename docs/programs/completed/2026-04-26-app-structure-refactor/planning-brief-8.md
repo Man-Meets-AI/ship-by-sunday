@@ -16,7 +16,7 @@ read_when:
 
 This is the eighth planning brief for the app structure refactor Program.
 
-The first seven child ExecPlans are complete. They made selected cross-feature imports explicit, moved shared assertions to `apps/web/lib/assert.ts`, added server-only guards, extracted the shared workspace shell from course ownership, moved route-owned wrapper surfaces into App Router private folders, moved marketing-only effects and a blueprint-only hook out of generic shared locations, and moved persisted course completion field IDs into the lesson model.
+The first seven child ExecPlans are complete. They made selected cross-feature imports explicit, moved shared assertions to `apps/web/lib/assert.ts`, added server-only guards, extracted the shared workspace shell from course ownership, moved route-owned wrapper surfaces into App Router private folders, moved marketing-only effects and a codebase-only hook out of generic shared locations, and moved persisted course completion field IDs into the lesson model.
 
 The current Program recommendation is to continue course-domain cleanup without moving `apps/web/features/course/lesson/model/manifest.ts`, course registry barrels, route screens, Convex schema, generated Convex files, or billing-sensitive behavior. A full workbench renderer move remains too broad because lesson content, field definitions, registry helpers, and tests still have high fan-in. The smaller dependency now visible is that `apps/web/features/course/lesson/model/curriculum.ts` imports `apps/web/config/product.ts` and `apps/web/features/workspace-navigation/lib/lesson-map-href.ts` only to build lesson hrefs and legacy route aliases.
 

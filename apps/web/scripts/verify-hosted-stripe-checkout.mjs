@@ -346,7 +346,7 @@ async function waitForHostedCheckoutReturn(page) {
 	await page.waitForURL(
 		(url) =>
 			/\/checkout\/success\?session_id=/.test(url.toString()) ||
-			/\/(start|blueprint)(\?|$)/.test(url.toString()),
+			/\/(start|codebase)(\?|$)/.test(url.toString()),
 		{
 			timeout: 120_000,
 			waitUntil: "commit",
@@ -357,8 +357,8 @@ async function waitForHostedCheckoutReturn(page) {
 		console.log("Reached /checkout/success");
 	}
 
-	if (!/\/(start|blueprint)(\?|$)/.test(page.url())) {
-		await page.waitForURL(/\/(start|blueprint)(\?|$)/, {
+	if (!/\/(start|codebase)(\?|$)/.test(page.url())) {
+		await page.waitForURL(/\/(start|codebase)(\?|$)/, {
 			timeout: 120_000,
 			waitUntil: "commit",
 		});
@@ -381,14 +381,14 @@ async function verifyAuthorizedWorkspace(page, { baseUrl, timeoutMs }) {
 		const deadline = Date.now() + timeoutMs;
 
 		while (Date.now() < deadline) {
-			await verificationPage.goto(`${baseUrl}/blueprint`, {
+			await verificationPage.goto(`${baseUrl}/codebase`, {
 				waitUntil: "networkidle",
 			});
 
 			const accessRequiredVisible =
 				await isAccessRequiredScreenVisible(verificationPage);
 			const headingVisible = await verificationPage
-				.getByRole("heading", { name: "Blueprint" })
+				.getByRole("heading", { name: "Codebase" })
 				.isVisible()
 				.catch(() => false);
 			const reviewButtonVisible = await verificationPage
@@ -532,7 +532,7 @@ try {
 	printCheck(
 		"Hosted success redirect",
 		/\/checkout\/success\?session_id=/.test(page.url()) ||
-			/\/(start|blueprint)/.test(page.url()),
+			/\/(start|codebase)/.test(page.url()),
 		page.url(),
 	);
 	printCheck(

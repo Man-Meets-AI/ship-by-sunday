@@ -63,7 +63,7 @@ describe("CheckoutSuccessView interactions", () => {
 		vi.useRealTimers();
 	});
 
-	it("arms the blueprint redirect once access is ready", async () => {
+	it("arms the codebase redirect once access is ready", async () => {
 		vi.useFakeTimers();
 		useConvexAuthMock.mockReturnValue({
 			isAuthenticated: true,
@@ -97,7 +97,7 @@ describe("CheckoutSuccessView interactions", () => {
 			await vi.advanceTimersByTimeAsync(1);
 		});
 
-		expect(replaceMock).toHaveBeenCalledWith("/blueprint");
+		expect(replaceMock).toHaveBeenCalledWith("/codebase");
 	});
 
 	it("does not render the redirect affordance while access is still pending", () => {

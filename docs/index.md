@@ -27,7 +27,7 @@ read_when:
 
 ## How Codex loads repo guidance
 
-Root guidance starts at `AGENTS.md` and this docs index. More specific nested `AGENTS.md` files override broader guidance when you work deeper in the tree. In this repo the active owner files are [apps/web/AGENTS.md](../apps/web/AGENTS.md) and [packages/blueprint-compiler/AGENTS.md](../packages/blueprint-compiler/AGENTS.md).
+Root guidance starts at `AGENTS.md` and this docs index. More specific nested `AGENTS.md` files override broader guidance when you work deeper in the tree. In this repo the active owner files are [apps/web/AGENTS.md](../apps/web/AGENTS.md) and [packages/codebase-compiler/AGENTS.md](../packages/codebase-compiler/AGENTS.md).
 
 ## First Hop
 

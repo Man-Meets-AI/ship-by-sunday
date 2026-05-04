@@ -58,7 +58,7 @@ export default async function globalSetup(config: FullConfig) {
 				email: memberWithoutAccessEmail,
 				kind: "reset",
 			});
-			await syncBlueprintProgressState({
+			await syncCodebaseProgressState({
 				clerkUserId,
 				kind: "reset",
 			});
@@ -74,7 +74,7 @@ export default async function globalSetup(config: FullConfig) {
 				email: memberWithAccessEmail,
 				kind: "grant",
 			});
-			await syncBlueprintProgressState({
+			await syncCodebaseProgressState({
 				clerkUserId,
 				kind: "seed_complete",
 			});
@@ -187,7 +187,7 @@ async function signIn(
 		pageErrors: string[];
 	},
 ) {
-	const signInPath = "/sign-in?redirect_url=%2Fblueprint";
+	const signInPath = "/sign-in?redirect_url=%2Fcodebase";
 	await page.goto(signInPath, {
 		waitUntil: "networkidle",
 	});
@@ -217,12 +217,12 @@ async function signIn(
 	await page.getByLabel(/^password$/i).fill(password);
 	await page.getByRole("button", { name: /^sign in$/i }).click();
 	try {
-		await page.waitForURL((url) => url.pathname === "/blueprint", {
+		await page.waitForURL((url) => url.pathname === "/codebase", {
 			timeout: 15_000,
 		});
 	} catch (error) {
 		throw new Error(
-			`Playwright auth bootstrap reached the sign-in form for ${email} but never returned to /blueprint. ${await describeAuthBootstrapPage(page, diagnostics)}. ${formatAuthBootstrapError(error)}`,
+			`Playwright auth bootstrap reached the sign-in form for ${email} but never returned to /codebase. ${await describeAuthBootstrapPage(page, diagnostics)}. ${formatAuthBootstrapError(error)}`,
 		);
 	}
 	try {
@@ -246,7 +246,7 @@ async function signIn(
 		);
 	} catch (error) {
 		throw new Error(
-			`Playwright auth bootstrap reached /blueprint for ${email}, but Clerk never exposed a user/session pair. ${await describeAuthBootstrapPage(page, diagnostics)}. ${formatAuthBootstrapError(error)}`,
+			`Playwright auth bootstrap reached /codebase for ${email}, but Clerk never exposed a user/session pair. ${await describeAuthBootstrapPage(page, diagnostics)}. ${formatAuthBootstrapError(error)}`,
 		);
 	}
 
@@ -417,7 +417,7 @@ async function syncProductAccessState({
 	);
 }
 
-async function syncBlueprintProgressState({
+async function syncCodebaseProgressState({
 	clerkUserId,
 	kind,
 }: {
@@ -427,14 +427,14 @@ async function syncBlueprintProgressState({
 	const result =
 		kind === "seed_complete"
 			? await runConvexInternalCommand({
-					functionName: "blueprint:seedCompleteProjectDefinitionForQa",
+					functionName: "codebase:seedCompleteProjectDefinitionForQa",
 					args: {
 						clerkUserId,
 					},
 					env: process.env,
 				})
 			: await runConvexInternalCommand({
-					functionName: "blueprint:resetProjectDefinitionForQa",
+					functionName: "codebase:resetProjectDefinitionForQa",
 					args: {
 						clerkUserId,
 					},
@@ -447,8 +447,8 @@ async function syncBlueprintProgressState({
 
 	const actionLabel =
 		kind === "seed_complete"
-			? "seed complete blueprint progress"
-			: "reset blueprint progress";
+			? "seed complete codebase progress"
+			: "reset codebase progress";
 	throw new Error(
 		`Failed to ${actionLabel} for ${clerkUserId}. ${result.stderr || result.stdout || "No command output."}`,
 	);

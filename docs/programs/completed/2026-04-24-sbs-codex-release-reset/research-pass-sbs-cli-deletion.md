@@ -27,7 +27,7 @@ Core CLI package files:
 - `packages/ship-by-sunday-cli/vitest.config.ts:1-8`
 - `packages/ship-by-sunday-cli/README.md:1-37`
 
-The package declares `bin.sbs` and depends on `@shipbysunday/blueprint-compiler` and `@shipbysunday/blueprint-presentation`.
+The package declares `bin.sbs` and depends on `@shipbysunday/codebase-compiler` and `@shipbysunday/codebase-presentation`.
 
 Source functionality includes:
 
@@ -36,8 +36,8 @@ Source functionality includes:
 - local draft state in `src/draft/draft-paths.ts:3-24`, which defines `.ship-by-sunday/draft.json`
 - draft normalization, atomic writes/recovery, import/export, patching, mutation, and auto-init in `src/draft/draft-store.ts:52-60`, `src/draft/draft-store.ts:274-382`, `src/draft/draft-store.ts:398-425`, `src/draft/draft-store.ts:526-560`, and `src/draft/draft-store.ts:598-755`
 - reduced CLI fact model in `src/field-contract.ts:7-32` and `src/field-contract.ts:108-163`
-- legacy/facts conversion in `src/blueprint-derivation.ts:104-178`
-- canonical project fact derivation for compiler generation after `src/blueprint-derivation.ts:176`
+- legacy/facts conversion in `src/codebase-derivation.ts:104-178`
+- canonical project fact derivation for compiler generation after `src/codebase-derivation.ts:176`
 - starter generation bridge in `src/commands/generate-command.ts:1-6`, `src/commands/generate-command.ts:103-217`, and `src/commands/generate-command.ts:231-303`
 
 Tests that disappear with the package:
@@ -73,9 +73,9 @@ Historical or status-only references include `CHANGELOG.md:53-55`, `CHANGELOG.md
 
 ## Generated Starter And Compiler Impact
 
-The source track found no live references to `bun run sbs`, `./bin/sbs`, `Ship by Sunday CLI`, `.ship-by-sunday`, or `ship-by-sunday-cli` inside `packages/blueprint-compiler` source/tests or generated starter renderers.
+The source track found no live references to `bun run sbs`, `./bin/sbs`, `Ship by Sunday CLI`, `.ship-by-sunday`, or `ship-by-sunday-cli` inside `packages/codebase-compiler` source/tests or generated starter renderers.
 
-The generated starter is not coupled to the CLI. The coupling points the other way: the CLI depends on blueprint-compiler APIs for schema/defaults and repo/zip generation.
+The generated starter is not coupled to the CLI. The coupling points the other way: the CLI depends on codebase-compiler APIs for schema/defaults and repo/zip generation.
 
 Deleting the CLI therefore should not directly break the protected web `/review` download path or generated starter output, assuming root scripts, CI, branch protection, and docs are unwired.
 
@@ -107,14 +107,14 @@ Historical/docs-only:
 
 If the CLI is thrown away and not replaced immediately, the web app and generated starter can still work, but these capabilities disappear:
 
-- local, browserless blueprint intake and `.ship-by-sunday/draft.json` workflows
+- local, browserless codebase intake and `.ship-by-sunday/draft.json` workflows
 - JSON automation contract for `schema`, `stages`, `fields`, `next`, `validate`, and `review`
 - import/export/apply/mutate support for agents
 - legacy/facts-only draft import normalization
 - local zip/directory generation from a draft without Clerk/Convex/browser
 - regression coverage proving CLI-created drafts still generate the same compiler output
 
-If any of those capabilities matter without a CLI, reusable pieces should move into `packages/blueprint-compiler` or a small non-CLI package: draft normalization/import, reduced fact derivation, readiness review, and local generation from facts. The command parser, banner/help/theme, shell completion, and `./bin/sbs` launcher can die.
+If any of those capabilities matter without a CLI, reusable pieces should move into `packages/codebase-compiler` or a small non-CLI package: draft normalization/import, reduced fact derivation, readiness review, and local generation from facts. The command parser, banner/help/theme, shell completion, and `./bin/sbs` launcher can die.
 
 ## Codex Contrast
 

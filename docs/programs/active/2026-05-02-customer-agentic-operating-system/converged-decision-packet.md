@@ -53,7 +53,7 @@ Bring-your-own AI/Codex is a margin and distribution advantage only when the cus
 
 ## Boundaries
 
-The first implementation slice belongs to generated customer repos only. It should reconcile source truth, prompt naming, skill trigger availability, snapshot boundaries, and validation promises before adding new operating-system artifacts. It should not build mature-repo ingestion, change checkout, change provider setup, change auth, change Convex runtime, change blueprint intake, or redesign the app.
+The first implementation slice belongs to generated customer repos only. It should reconcile source truth, prompt naming, skill trigger availability, snapshot boundaries, and validation promises before adding new operating-system artifacts. It should not build mature-repo ingestion, change checkout, change provider setup, change auth, change Convex runtime, change codebase intake, or redesign the app.
 
 Product and homepage changes should follow as their own slice. They need to present the worker-led multi-lane customer journey truthfully: the generated-codebase lane is live today, while the doctor, broken-app, and mature-codebase lanes need audit, execution-surface, and adoption artifacts before the product can sell them as self-serve.
 
