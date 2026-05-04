@@ -63,6 +63,55 @@ OpenAI docs currently support several Codex surfaces:
 
 The strongest architecture should not bet everything on `codex app-server`. Ship by Sunday should model execution as a first-class product concept and support multiple execution surfaces. It should also model loops as workflow packets, not as Codex prompts. A workflow can include deterministic probes, user context, Codex interpretation, Codex write work, proof commands, stop conditions, and sync policy.
 
+## Codex Source Research Notes
+
+Local Codex source under `/Users/bazelrex/Developer/codex` changes the near-term implementation plan in useful ways.
+
+`codex exec --json` is the right first local automation boundary:
+
+- it emits newline-delimited typed events to stdout
+- it sends diagnostics to stderr
+- it already uses an in-process app-server client internally
+- it supports `--cd`, `--profile`, `--sandbox`, `--output-schema`, and stdin prompts
+- it exposes `thread.started.thread_id`, so SBS can persist exact resume handles
+- it returns schema-constrained final assistant text that SBS still needs to parse and validate
+
+Direct `codex app-server` integration is a later daemon capability, not the Crawl blocker:
+
+- transports include stdio, websocket, Unix socket, and off
+- browser-style `Origin` headers are rejected by Codex websocket
+- auth on websocket is explicit and must not be skipped
+- each connection needs initialization
+- approvals and elicitation can be bidirectional server requests, not only event notifications
+- events are thread-scoped, so reconnect and resume need explicit handling
+
+Codex config setup has to respect the real config model:
+
+- user config lives at `~/.codex/config.toml`
+- project `.codex/config.toml` cannot set key user-level profile/provider fields
+- `[profiles.<name>]` handles model, reasoning, tools, sandbox, and approval defaults
+- `[permissions.<name>]` handles filesystem and network posture
+- custom permission profiles require explicit default or runtime selection
+- project trust is based on canonical paths and explicit `untrusted` must be preserved
+- read-only Crawl should not require trust mutation
+- write-capable Walk workflows can request trust or explicit runtime permissions after approval
+
+Auth storage should be inspected only as state, not as data:
+
+- `cli_auth_credentials_store` can be `file`, `keyring`, `auto`, or `ephemeral`
+- keyring-backed auth can remove fallback `auth.json`
+- SBS can warn when file-based auth storage is detected
+- SBS must not read, print, sync, or back up credential contents
+- a `codex-config` backup is a config hygiene artifact, not a portable auth backup
+
+The local runner should copy Codex's packaging discipline:
+
+- validate the customer-visible packed command, not only source modules
+- run a fake pairing API in tests and assert request shape
+- use temp repo, temp runner home, and temp Codex home fixtures
+- prove idempotence and failure modes such as invalid token, expired token, wrong repo root, network failure, already paired state, and no secret leakage
+- commit generated contract schemas or fixtures for web/backend/runner boundaries when the pairing and event contracts become shared
+
 ## Execution Surfaces
 
 Use one explicit execution-surface model instead of treating Codex app-server as the whole product.
@@ -994,13 +1043,13 @@ Keep one Program and split implementation into dependency-ordered child ExecPlan
    - config diff/backup/approval
    - `codex exec` boundaries
 5. `doctor-pass-and-sync-preview`
+   - `/workspace/doctor-pass` stage progress and sync preview
    - passive probes
    - sync-safe `codebase-intake` JSON
    - local Markdown report
    - branchless doctor pass
    - sync preview approval
 6. `findings-ledger-and-decision-screens`
-   - `/workspace/doctor-pass`
    - `/workspace/findings`
    - `/workspace/findings/[findingId]`
    - dense Top 9 findings
@@ -1111,7 +1160,11 @@ Avoid until implemented:
 - Use an append-only, sync-safe runner event stream from local runner to hosted backend; derive UI state from backend rows and events instead of browser-daemon access.
 - Split implementation into child ExecPlans in this order: checkout intent, workspace data/events, setup UI, local runner, doctor pass, findings, source-truth workflow, support surfaces, Work-phase workers, broken-app rescue, managed GitHub Run phase, and generated-repo operating pack.
 - Create the first new existing-codebase child ExecPlan at `docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md`, scoped only to intent persistence and routing.
+- Create the second new existing-codebase child ExecPlan at `docs/exec-plans/active/2026-05-04-existing-codebase-workspace-data-model-and-events.md`, scoped to Convex workspace tables, validators, sync-safe event ingestion, and backend-derived state.
+- Create the third new existing-codebase child ExecPlan at `docs/exec-plans/active/2026-05-04-existing-codebase-setup-ui.md`, scoped to `/workspace/setup`, Machine Setup, Project Setup, pairing states, blockers, warnings, privacy defaults, default open destination, and `Run doctor pass`.
+- Create the fourth new existing-codebase child ExecPlan at `docs/exec-plans/active/2026-05-04-local-runner-prototype.md`, scoped to the new local runner package, `bunx`/`npx` pairing, foreground daemon, one-shot boundary, local `.sbs/` state, `gh` readiness, SBS Codex profiles, config diff/backup/approval, and `codex exec` boundaries.
+- Create the fifth new existing-codebase child ExecPlan at `docs/exec-plans/active/2026-05-04-doctor-pass-and-sync-preview.md`, scoped to passive probes, `.sbs/codebase-intake.py` sync-safe JSON plus local Markdown, branchless doctor pass through local runner and `codex exec`, local reports, sync preview approval, and findings upload only after approval.
 
 ## Open Questions
 
-- Should the second new existing-codebase child ExecPlan be created now for workspace data/events, or wait until checkout intent routing is implemented?
+- Should the sixth existing-codebase child ExecPlan be created now for findings ledger and decision screens, or wait until checkout intent, workspace data/events, setup UI, local runner, and doctor-pass implementation start?

@@ -56,13 +56,15 @@ The codebase-support scratch note is `support-codebases.md` at the repository ro
 
 The package and update-channel scratch note is `package-discussion.md` at the repository root. It is a later strategic reference for recurring value and trusted upgrade authority. It must not pull the near-term Program away from existing-codebase doctor-pass support.
 
+The local Codex source checkout at `/Users/bazelrex/Developer/codex` is an implementation reference for runner planning, especially `codex exec` JSONL behavior, app-server transports and protocol, config/profile/trust handling, auth storage, and package validation patterns. Official OpenAI developer docs remain the external product contract; local source keeps SBS implementation plans realistic.
+
 The current planning brief is `planning-brief-2.md`, with `current-planning-brief.txt` pointing at the current versioned brief. `planning-brief-1.md` still owns the active generated-repo source-contract child ExecPlan. `planning-brief-2.md` owns the existing-codebase child ExecPlan split for checkout intent, workspace state, local runner setup, doctor pass, findings, first workflow approval, and later workers.
 
 ## Current State
 
 Ship by Sunday already has a strong internal Program and ExecPlan system under `docs/programs/`, `docs/exec-plans/`, `docs/prompts/`, and `scripts/`. Generated customer repos already receive Build Pack readiness, first-slice planning, root agent instructions, onboarding docs, local starter skills, and testing guidance.
 
-The public product surface is already close to worker-first language. `apps/web/config/product.ts` sets the live flagship price to `$500` with a 50 percent active offer, so checkout displays the current `$250` Pilot Member purchase. `starterConfig.homePage.heroPrimaryCta` and `pricingPrimaryCta` both target checkout, and `apps/web/app/_content/home-page.ts` currently sells "Build the worker layer," "Ship codebases that convert," "Generate my codebase," exec loops, role packets, channel handoffs, and QA. The unresolved product issue is that the current customer journey still reads primarily as a generated-codebase path, while the highest-leverage market also includes broken vibe-coded apps, mature codebases, agencies, and operators who need diagnosis and loop execution before they care about methodology.
+The public product surface is already close to worker-first language. `apps/web/config/product.ts` sets the live flagship price to `$500` with a 50 percent active offer, so checkout displays the current `$250` Pilot Member purchase. `starterConfig.homePage.heroPrimaryCta` and `pricingPrimaryCta` both target generated-codebase checkout intent, while the product-preview existing-codebase branch now carries existing-codebase checkout intent into `/workspace/setup`. `apps/web/app/_content/home-page.ts` currently sells "Build the worker layer," "Ship codebases that convert," "Generate my codebase," exec loops, role packets, channel handoffs, and QA. The remaining product issue is that the broader journey still needs the setup, doctor-pass, findings, and first-loop surfaces behind the existing-codebase route.
 
 The live app flow is codebase-first. `apps/web/AGENTS.md`, `apps/web/content/docs/route-map.mdx`, and the routes under `apps/web/app/(workspace)/codebase` and `apps/web/app/(workspace)/review` make `/codebase` the canonical protected workspace and `/review` the customer-facing download handoff. Checkout is owned by `apps/web/app/api/stripe/checkout/route.ts`, `apps/web/platform/billing/checkout/checkout-session-params.ts`, the Stripe webhook docs under `apps/web/content/docs/stripe-checkout-webhook.mdx`, and the success path under `apps/web/app/checkout/success/`. That means the next commercial copy slice can change homepage narrative and offer framing, but it must not pretend the app already has mature-repo upload, repo audit, or arbitrary repair flows.
 
@@ -95,6 +97,8 @@ Internally, a loop should be modeled as a workflow packet, not as a Codex prompt
 The app already has an optional Codex app-server connection surface for paid users to connect their ChatGPT/Codex subscription for in-app generation. The current implementation lives in `apps/web/platform/codex/app-server.ts`, `apps/web/platform/codex/app-server-service.ts`, `apps/web/platform/codex/app-server-contracts.ts`, `apps/web/app/api/codex/`, and `apps/web/app/(workspace)/_components/codex-connection-card/`. It is protected by product access, stores per-user Codex state under a hashed home directory, spawns `codex app-server`, and records account status plus rate-limit snapshots in Convex. It is disabled by default on Vercel unless `CODEX_APP_SERVER_ENABLED` says otherwise, and the generated production env template sets `CODEX_APP_SERVER_ENABLED=false`.
 
 Official OpenAI developer docs, checked through the OpenAI developer documentation MCP server during the 2026-05-03 and 2026-05-04 refreshes, support Codex through app, IDE extension, CLI, and cloud surfaces. They also describe ChatGPT or API-key sign-in, GitHub-connected Codex cloud environments, project-scoped `.codex/config.toml` only after trust, Apps SDK MCP tools plus optional UI, and app-review requirements around privacy, tool annotations, and test cases. The 2026-05-04 technical read also confirmed that `codex exec` is the stable non-interactive path for running Codex against a chosen workspace, while `codex app-server` is experimental and best treated as one surface, not the foundation of all codebase support. This means "bring your own AI" should be a real strategy, but the Program must frame it as explicit, consented execution surfaces rather than implying silent attachment to a user's Codex account.
+
+The 2026-05-04 local Codex source read tightened the runner strategy. `codex exec --json` emits typed JSONL events and already uses an in-process app-server client, so it is the right first automation boundary for Crawl. Direct app-server relay is a later daemon capability because it needs initialize handshakes, bidirectional JSON-RPC for approvals and server requests, thread-scoped subscriptions, reconnect behavior, and secure transport choices. Codex config also separates `[profiles.<name>]` from `[permissions.<name>]`, strips important profile/provider keys from project-local config, evaluates trust by canonical path, and treats auth storage as user machine state. SBS setup therefore has to be parse-backed, reversible, narrow, and explicit.
 
 The existing-codebase lane should be designed around local privacy by default and greater hosted capability by consent. In local runner mode, the customer runs Ship by Sunday pairing code inside their repo, Codex runs on their machine, and Ship by Sunday receives only approved structured reports: top-nine findings, scores, proof command summaries, file references, permission requirements, blocked-proof states, selected loop ids, and next recommendations. Raw source files, long code snippets, full terminal logs, secrets, and Codex transcripts should stay local unless the customer explicitly shares them. Managed GitHub and Codex cloud handoff can become more hands-off modes, but they must name the repo access, storage, PR, and review boundaries before they are used for paid loops. Managed GitHub should not be required for the first doctor pass.
 
@@ -160,6 +164,15 @@ The package/update-channel idea is valuable but later. `package-discussion.md` a
 - [x] 2026-05-04 EDT: Baked in the existing-codebase UX spine: homepage intent split, setup as guided onboarding, local runner as Bun-first CLI plus `.sbs/` local state, doctor pass before loop setup, Top 9 finding detail, first loop approval, proof, and later Worker Home.
 - [x] 2026-05-04 EDT: Refined the existing-codebase architecture around workflow packets, deterministic probes, Machine Setup, Project Setup, SBS-managed Codex execution profiles, required local `gh` readiness, a persistent local daemon, runner health, and sync-safe probe outputs.
 - [x] 2026-05-04 EDT: Created `planning-brief-2.md`, refreshed `plan-split-recommendation.md`, and split existing-codebase implementation into child ExecPlan slugs for checkout intent, workspace data/events, setup UI, local runner, doctor pass, findings, first workflow approval, support surfaces, Work-phase workers, broken-app rescue, managed GitHub Run phase, and generated-repo operating pack.
+- [x] 2026-05-04 EDT: Reviewed local Codex source for `codex exec` JSONL, app-server transport and protocol, config/profile/permission/trust handling, auth storage, and packaged CLI validation; folded those constraints into the local runner plan.
+- [x] 2026-05-04 EDT: Created the fifth existing-codebase child ExecPlan, `docs/exec-plans/active/2026-05-04-doctor-pass-and-sync-preview.md`, scoped to passive probes, local reports, `codex exec` interpretation, sync preview approval, and findings upload after approval.
+- [x] 2026-05-04 EDT: Implemented the first existing-codebase workspace data/events backend slice in `apps/web/convex/workspace.ts` and `apps/web/convex/workspace/`, adding separate Convex tables for workspace projects, runner bindings, repository bindings, doctor-pass runs, codebase findings, workflow runs, and append-only runner events, with focused workspace unit tests, app typecheck, and app lint passing.
+- [x] 2026-05-04 EDT: Implemented checkout intent routing for the existing-codebase lane: checkout CTAs now send `buyerStartingPoint`, `checkoutCtaId`, and `fulfillmentTrack`; Stripe metadata, pending checkout claims, and product access grants persist the normalized intent; checkout success routes generated buyers to `/codebase`, existing-codebase buyers to `/workspace/setup`, and legacy missing intent to `/workspace/choose`.
+- [x] 2026-05-04 EDT: Tightened the first Crawl security boundaries after review: runner event ingestion is internal until runner-token auth exists, sync preview approval stays user-owned, revoked runners cannot resume by heartbeat, deleted findings are hidden by default, embedded local paths are rejected, returning buyers route from `fulfillmentTrack`, and checkout email fulfillment is webhook/internal-only.
+- [x] 2026-05-04 EDT: Implemented the first `/workspace/setup` UI slice for existing-codebase buyers: setup now prepares a backend-owned pairing token, renders the `bunx` and `npx` pairing commands, shows Machine Setup and Project Setup readiness rows, privacy defaults, default open destination, daemon and one-shot status affordances, and protects `/workspace/choose` plus `/workspace/setup` through the Clerk proxy.
+- [x] 2026-05-04 EDT: Hardened the existing-codebase setup lane after review: `/workspace/setup` and workspace Convex APIs now require `existing_codebase_doctor`, generated-codebase buyers stay on `/codebase`, legacy grants without fulfillment metadata route to `/workspace/choose`, setup readiness rows require per-check events, and the enabled setup CTA creates a doctor-pass run row without executing probes.
+- [x] 2026-05-04 EDT: Implemented the Local Runner Prototype slice: `packages/local-runner` now owns the customer-visible `ship-by-sunday` binary, `setup pair`, `setup check`, foreground daemon, one-shot, local `.sbs/` metadata, user-home runner credentials, event outbox retry, Machine Setup, Project Setup, SBS Codex config preview/apply/rollback, and `codex exec --json` wrapper. The app now exposes narrow token-authenticated runner pair/events routes that store only hashed runner credentials.
+- [x] 2026-05-04 EDT: Hardened the Local Runner Prototype after review: runner credential hashes are server-only and redacted from public workspace state, setup pairing tokens are one-use, local credential replacement requires explicit `setup pair --repair`, readiness probes are bounded, Codex permission profiles use the current nested filesystem/network schema, `codex exec` thread ids persist locally, and package smoke now proves packed `bunx` plus `npx` command paths.
 - [ ] Implement the first generated-repo source-contract slice.
 - [ ] Refresh the Program with generated-repo proof and choose the commercial doctor-pass slice.
 - [ ] Define the existing-codebase Crawl contract: buyer intent, Machine Setup, Project Setup, local runner pairing, Codex profile/config hygiene, required `gh` readiness, deterministic probes, read-only doctor pass, structured report schema, sync preview, and Top 9 findings ledger.
@@ -248,7 +261,11 @@ Rationale: The first paid existing-codebase screen can show ChatGPT/Codex connec
 Date: 2026-05-04
 
 Decision: Persist buyer starting point through checkout before routing fulfillment differently.
-Rationale: The current Stripe and Convex access flow does not durably know whether a buyer entered from `I have an idea` or `I have a codebase`. Before the app can fulfill those promises differently, checkout should persist `buyerStartingPoint`, `checkoutCtaId`, and `fulfillmentTrack` through Stripe metadata, pending checkout claims, product access grants, and success routing.
+Rationale: The current Stripe and Convex access flow does not durably know whether a buyer entered from `I have an idea` or `I have a codebase`. Before the app can fulfill those promises differently, checkout should persist `buyerStartingPoint`, `checkoutCtaId`, and `fulfillmentTrack` through Stripe metadata, pending checkout claims, product access grants, and success routing. Returning buyers should route from stored `fulfillmentTrack` before generated-codebase resume state, and checkout email fulfillment should stay on the Stripe webhook/internal path because it can create or repair access.
+Date: 2026-05-04
+
+Decision: Make `/workspace/setup` the first backend-derived existing-codebase console.
+Rationale: Existing-codebase buyers need a real protected onboarding surface before the local runner package exists. The setup console now derives pairing commands, runner state, setup rows, privacy defaults, and CTA readiness from Convex rows and sync-safe events instead of direct daemon access or hard-coded durable fake state.
 Date: 2026-05-04
 
 Decision: Route existing-codebase fulfillment into a protected `/workspace/*` spine.
@@ -257,6 +274,18 @@ Date: 2026-05-04
 
 Decision: Defer the package/update-channel strategy until existing-codebase support works.
 Rationale: `package-discussion.md` is directionally valuable because recurring trust can come from best-practice migrations, prompt updates, production recipes, and upgrade PRs. However, it is a later business model. Crawl, Walk, and Work must first prove that a customer can point Ship by Sunday at an existing repo, keep raw code local by default, receive a useful doctor report, approve useful loop work, and keep a local worker running with proof. Without that, an update registry would be premature infrastructure.
+Date: 2026-05-04
+
+Decision: Use `codex exec --json` as the first local automation API.
+Rationale: The local Codex source shows that `codex exec` already wraps the app-server runtime for headless work and emits a structured JSONL event stream that SBS can parse, redact, and summarize. It gives Crawl a smaller, customer-visible process boundary than direct app-server integration. The app-server relay remains important for later Work and Run phases, but it should not block the first doctor-pass runner.
+Date: 2026-05-04
+
+Decision: Treat Codex config optimization as narrow, schema-aware setup work in Crawl.
+Rationale: Codex config separates user-level profiles from permission profiles, validates custom permissions, strips important profile/provider keys from project-local config, and preserves explicit project trust state. SBS should install only parse-backed, reversible, SBS-owned config entries during Crawl, warn about auth storage hygiene without reading credentials, and defer whole-config optimization to a later advanced workflow.
+Date: 2026-05-04
+
+Decision: Require packed-runner proof before setup UI ships the command.
+Rationale: Codex validates package behavior through the installed binary path and structured process tests. SBS should prove `bunx ship-by-sunday setup pair <token>` through a staged or packed artifact against a fake pairing API, not only by importing source modules.
 Date: 2026-05-04
 
 Decision: Sequence existing-codebase support as crawl, walk, work, then run.
@@ -320,7 +349,15 @@ Rationale: The current `/codebase` backend tables are for generated-repo product
 Date: 2026-05-04
 
 Decision: Use an append-only sync-safe runner event protocol through the hosted backend.
-Rationale: The web app needs live setup, doctor-pass, and workflow status without reading local files or talking directly to the customer's daemon. The first protocol should be a typed event stream from the local runner to the hosted backend, with the browser subscribing to backend-derived state. Each event should include `eventId`, `projectId`, `runnerId`, `runId`, `eventType`, `createdAt`, `schemaVersion`, and a narrow payload. First event types should cover pairing, heartbeat, setup check start and completion, doctor stage start, probe completion, sync preview readiness, approved findings, workflow approval request, workflow start, proof completion, blocked workflow, and runner revocation. Events must not include raw source, raw logs, local absolute paths, secrets, or Codex transcripts.
+Rationale: The web app needs live setup, doctor-pass, and workflow status without reading local files or talking directly to the customer's daemon. The first protocol should be a typed event stream from the local runner to the hosted backend, with the browser subscribing to backend-derived state. Each event should include `eventId`, `projectId`, `runnerId`, `runId`, `eventType`, `createdAt`, `schemaVersion`, and a narrow payload. First event types should cover pairing, heartbeat, setup check start and completion, doctor stage start, probe completion, sync preview readiness, workflow approval request, workflow start, proof completion, blocked workflow, and runner revocation. Sync preview approval remains a user-owned mutation, not a runner-forgeable event. Events must not include raw source, raw logs, local absolute paths, secrets, or Codex transcripts.
+Date: 2026-05-04
+
+Decision: Authenticate local runners with setup-token pairing plus hashed durable runner credentials.
+Rationale: The local runner cannot use Clerk browser auth from a customer terminal. The browser creates a short-lived setup token, `setup pair <token>` exchanges it for one durable runner token, and event ingestion authenticates by hashing the bearer token before Convex sees it. The runner token lives only in the user-owned runner home; repo-local `.sbs/` stores non-secret metadata.
+Date: 2026-05-04
+
+Decision: Keep runner credential hashes server-only and consume setup pairing tokens after first bind.
+Rationale: A stored runner credential hash is bearer-equivalent for event ingestion if exposed. Existing-codebase setup can show short-lived pairing tokens to the browser, but successful pairing must consume that token and public workspace state must redact the durable credential hash.
 Date: 2026-05-04
 
 Decision: Make the first local runner a Bun-first CLI with local `.sbs/` state.
@@ -409,6 +446,10 @@ Active child ExecPlans:
 
 - `docs/exec-plans/active/2026-05-02-reconcile-customer-agentic-source-contract.md`
 - `docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md`
+- `docs/exec-plans/active/2026-05-04-existing-codebase-workspace-data-model-and-events.md`
+- `docs/exec-plans/active/2026-05-04-existing-codebase-setup-ui.md`
+- `docs/exec-plans/active/2026-05-04-local-runner-prototype.md`
+- `docs/exec-plans/active/2026-05-04-doctor-pass-and-sync-preview.md`
 
 Completed child ExecPlans:
 
@@ -416,11 +457,7 @@ Completed child ExecPlans:
 
 Recommended future child ExecPlans:
 
-- `existing-codebase-workspace-data-model-and-events`: add separate existing-codebase workspace tables plus the append-only sync-safe runner event stream through the hosted backend.
-- `existing-codebase-setup-ui`: build `/workspace/setup` with Machine Setup, Project Setup, pairing states, blockers, warnings, privacy defaults, default open destination, and `Run doctor pass`.
-- `local-runner-prototype`: build `bunx ship-by-sunday setup pair <token>`, `npx` fallback, daemon and one-shot mode, local `.sbs/` state, `gh` readiness, SBS Codex profiles, config diff/backup/approval, and `codex exec` boundaries.
-- `doctor-pass-and-sync-preview`: productize passive probes, including `.sbs/codebase-intake.py` as sync-safe JSON plus local Markdown, and gate findings upload behind sync preview approval.
-- `findings-ledger-and-decision-screens`: build `/workspace/doctor-pass`, `/workspace/findings`, and `/workspace/findings/[findingId]` around stage progress, dense Top 9 rows, finding detail, evidence refs without raw source, permissions, and `Approve workflow`.
+- `findings-ledger-and-decision-screens`: build `/workspace/findings` and `/workspace/findings/[findingId]` around dense Top 9 rows, finding detail, evidence refs without raw source, permissions, and `Approve workflow`.
 - `source-truth-agent-readiness-workflow`: ship the first Walk workflow packet, approval sheet, SBS profile selection, write lease, timestamped branch, docs and `.sbs/` write boundary, proof output, local diff, and explicit `Open PR`.
 - `workspace-support-surfaces`: build `/workspace/runs`, `/workspace/loops`, and `/workspace/privacy` for Crawl and Walk status, finding-filtered workflow catalog, local execution boundaries, revocation, and deletion controls.
 - `existing-codebase-work-phase-workers`: add approved queue, recurring jobs, heartbeat, run history, pause and stop controls, proof sync, blocked-state reporting, multi-machine support, and one active write lease per project.
@@ -431,11 +468,11 @@ Recommended future child ExecPlans:
 
 ## Next Slice
 
-Two active child ExecPlans now exist. `docs/exec-plans/active/2026-05-02-reconcile-customer-agentic-source-contract.md` should reconcile generated-repo source truth and customer-safety boundaries because current customer output must not point to missing prompts, skills, scripts, or unsafe planning archives. `docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md` is the first existing-codebase child plan. It should persist `buyerStartingPoint`, `checkoutCtaId`, and `fulfillmentTrack` through the homepage CTA, Stripe checkout metadata, pending checkout claims, product access grants, checkout success, and the fulfillment router. It should keep generated buyers on `/codebase`, send existing-codebase buyers to `/workspace/setup`, and send missing or legacy intent to a small choice screen. It must not build runner UI, daemon behavior, doctor pass, findings, workflow approval, or worker queue controls.
+Six active child ExecPlans now exist. `docs/exec-plans/active/2026-05-02-reconcile-customer-agentic-source-contract.md` still owns generated-repo source truth and customer-safety boundaries. The existing-codebase foundation slices now have checkout intent routing, workspace data/events, setup UI, and the Local Runner Prototype implementation in the working tree, with evidence recorded in their plans. `docs/exec-plans/active/2026-05-04-doctor-pass-and-sync-preview.md` is the next Crawl slice: it should productize passive probes, including `.sbs/codebase-intake.py` as sync-safe JSON plus local Markdown, run branchless doctor pass through the local runner and `codex exec`, write local reports, and gate findings upload behind sync preview approval.
 
-The following slice is `existing-codebase-workspace-data-model-and-events`. It should add the separate existing-codebase tables and sync-safe event protocol that later setup, runner, doctor pass, findings, and workflow UI depend on. Only after those contracts exist should `/workspace/setup`, the local runner prototype, doctor pass, findings ledger, first workflow approval, support surfaces, Work-phase workers, broken-app rescue, and managed GitHub Run-phase work proceed in the dependency order recorded in `plan-split-recommendation.md` and `planning-brief-2.md`.
+The following slice after doctor pass is `findings-ledger-and-decision-screens`. It should build `/workspace/findings` and `/workspace/findings/[findingId]` from approved uploaded findings, with dense Top 9 rows, finding detail, buyer impact, proof path, evidence refs without raw source, permission requirements, recommended workflow, and `Approve workflow`. It must not reimplement doctor-pass probe execution, sync preview approval, branch creation, managed GitHub, or worker queues.
 
-The generated-repo source-contract plan can still land first if protecting current output is urgent. The checkout-intent plan can run in parallel because it is narrow and uses `planning-brief-2.md`, while the active generated-repo source-contract plan continues to use `planning-brief-1.md`.
+The generated-repo source-contract plan can still land first if protecting current output is urgent. It continues to use `planning-brief-1.md`, while the existing-codebase Crawl sequence continues from `planning-brief-2.md`.
 
 ## Risks and Watchpoints
 

@@ -28,16 +28,26 @@ This plan is intentionally narrow. It creates the durable intent and routing con
 ## Progress
 
 - [x] 2026-05-04 EDT: Created this child ExecPlan from `planning-brief-2.md`.
-- [ ] Inspect current homepage CTA, checkout route, Stripe session parameter, checkout success, Convex checkout claim, product access grant, route map, and protected workspace surfaces immediately before implementation.
-- [ ] Define the intent types and parse/validation helpers.
-- [ ] Persist intent in checkout request input, Stripe metadata, pending checkout claims, product access grants, and checkout success state.
-- [ ] Add route constants and fulfillment routing for `/codebase`, `/workspace/setup`, and the missing-intent choice screen.
-- [ ] Add focused unit, integration, and UI tests for the new routing contract.
-- [ ] Refresh the owning Program and this ExecPlan with validation evidence.
+- [x] 2026-05-04 EDT: Inspected current homepage CTA, checkout route, Stripe session parameter, checkout success, Convex checkout claim, product access grant, route map, and protected workspace surfaces immediately before implementation.
+- [x] 2026-05-04 EDT: Defined the intent types and parse/validation helpers in the checkout billing boundary plus Convex validators.
+- [x] 2026-05-04 EDT: Persisted intent in checkout request input, Stripe session metadata, payment intent metadata, pending checkout claims, product access grants, and checkout success state.
+- [x] 2026-05-04 EDT: Added route constants and fulfillment routing for `/codebase`, `/workspace/setup`, and `/workspace/choose`.
+- [x] 2026-05-04 EDT: Added focused unit, integration, and UI tests for metadata propagation, Convex durability, success routing, and homepage CTA intent wiring.
+- [x] 2026-05-04 EDT: Refreshed the owning Program and this ExecPlan with validation evidence for the checkout intent routing slice.
+- [x] 2026-05-04 EDT: Validation passed: `bun run --cwd apps/web test:unit -- tests/unit/checkout-session-params.test.ts tests/unit/checkout-session.test.ts tests/unit/checkout-claims.test.ts tests/unit/checkout-claims-actions.test.ts tests/unit/convex-product-access-grant.test.ts`.
+- [x] 2026-05-04 EDT: Validation passed: `bun run --cwd apps/web test:integration -- tests/integration/stripe-checkout-route.test.ts`.
+- [x] 2026-05-04 EDT: Validation passed using the repo's actual UI script: `bun run --cwd apps/web test:integration:ui -- tests/integration-ui/checkout-button.test.tsx tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/checkout-success-view.interactions.test.tsx`.
+- [x] 2026-05-04 EDT: Additional homepage validation passed: `bun run --cwd apps/web test:unit -- tests/unit/home-page-render-model.test.ts tests/unit/home-page-primary-cta.test.tsx tests/unit/home-page-content.test.ts` and `bun run --cwd apps/web test:integration:ui -- tests/integration-ui/home-page-primary-cta.test.tsx tests/integration-ui/home-page-product-preview.test.tsx`.
+- [x] 2026-05-04 EDT: App static validation passed: `bun run --cwd apps/web format`, `bun run --cwd apps/web lint`, and `bun run --cwd apps/web typecheck`.
+- [x] 2026-05-04 EDT: Planning and docs validation passed: `bun run plans:lint -- --plan docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md`, `bun run programs:lint`, and `bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md apps/web/content/docs/route-map.mdx apps/web/content/docs/configure-the-homepage.mdx`.
+- [x] 2026-05-04 EDT: Browser proof passed on local `http://localhost:3024`: existing-codebase homepage branch rendered the `Set up my codebase` CTA on desktop `1440x1000` and mobile `390x844`.
+- [x] 2026-05-04 EDT: Addressed review-found fulfillment routing and action-scope gaps: returning existing-codebase buyers now resume to `/workspace/setup`, missing intent resumes to `/workspace/choose`, and checkout email fulfillment is webhook/internal-only rather than a public unauthenticated Convex action.
 
 ## Surprises & Discoveries
 
-No implementation discoveries have been recorded yet.
+- 2026-05-04 EDT: `apps/web/package.json` does not have the plan's `test:integration-ui` script. The equivalent local script is `bun run --cwd apps/web test:integration:ui -- ...`; that command passed for the focused checkout UI tests.
+- 2026-05-04 EDT: The existing-codebase homepage branch had no checkout CTA, so selected starting point could not reach Stripe. The implementation adds a narrow existing-codebase checkout CTA only on that branch and leaves the real setup UX to the setup plan.
+- 2026-05-04 EDT: Local browser proof surfaced existing Clerk development-key redirect-loop warnings while the public homepage still rendered. This is environment noise, not a checkout intent routing failure.
 
 ## Decision Log
 
@@ -51,6 +61,18 @@ Date: 2026-05-04
 
 Decision: Route missing or legacy intent to a choice screen instead of defaulting to existing-codebase setup.
 Rationale: Existing purchases and old checkout links may not carry the new metadata. A small choice screen is safer than silently sending a generated-codebase buyer into setup or an existing-codebase buyer into `/codebase`.
+Date: 2026-05-04
+
+Decision: Keep homepage hero and pricing checkout intent on the generated-codebase track, and use the product-preview existing-codebase branch for existing-codebase checkout.
+Rationale: Hero and pricing CTAs do not know the visitor's selected branch. The branch-specific CTA is the only current surface with an explicit existing-codebase selection.
+Date: 2026-05-04
+
+Decision: Keep checkout email fulfillment on the internal webhook/server path.
+Rationale: Fulfillment by checkout email can create or repair Clerk-linked access, so it must not be a public unauthenticated Convex action callable by arbitrary clients with a session id. Public recovery remains limited to signed-in claim flows, while the Stripe webhook uses an internal action for guest-email fulfillment.
+Date: 2026-05-04
+
+Decision: Route returning granted viewers from stored `fulfillmentTrack` before generated-codebase resume state.
+Rationale: Existing-codebase buyers should not be redirected into `/codebase` just because the generated-codebase resume query has a default destination. Product access intent is the durable lane selector; generated-codebase resume state only applies to generated-codebase grants.
 Date: 2026-05-04
 
 ## Outcomes & Retrospective
