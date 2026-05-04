@@ -31,7 +31,7 @@ The reference repos support the direction but should not be copied literally.
 WorkOS and Next SaaS are smaller route-first examples. HackerAI shows a larger
 Convex app can keep top-level `app`, `components`, `convex`, `hooks`, `lib`,
 `packages`, and `types`. Ship by Sunday still needs its Program/ExecPlan system,
-blueprint compiler package, hosted release proof, and product-specific route
+codebase compiler package, hosted release proof, and product-specific route
 aliases.
 
 ## Tensions Or Open Questions
@@ -55,7 +55,7 @@ migration plan. It should not be hidden inside folder cleanup.
 
 ## Strongest Repo Facts
 
-`apps/web/AGENTS.md` says the app is blueprint-first, not course-first, while the
+`apps/web/AGENTS.md` says the app is codebase-first, not course-first, while the
 largest shared shell still lives under a course path.
 
 `apps/web/proxy.ts` duplicates route truth by protecting canonical routes and

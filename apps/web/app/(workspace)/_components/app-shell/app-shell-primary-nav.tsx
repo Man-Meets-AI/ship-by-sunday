@@ -1,6 +1,6 @@
 "use client";
 
-import { BlueprintStageNav } from "@/app/(workspace)/_components/blueprint-flow/blueprint-stage-nav";
+import { CodebaseStageNav } from "@/app/(workspace)/_components/codebase-flow/codebase-stage-nav";
 import { WorkspacePrimaryNav } from "@/app/(workspace)/_components/workspace-navigation/workspace-primary-nav";
 import type { AppShellPrimaryNav } from "./app-shell-props";
 
@@ -11,8 +11,8 @@ export function AppShellPrimaryNav({
 }) {
 	return (
 		<div className="flex min-w-max items-center gap-x-3">
-			<BlueprintStageNav
-				currentStageId={primaryNav.currentBlueprintStageId}
+			<CodebaseStageNav
+				currentStageId={primaryNav.currentCodebaseStageId}
 				stageStatuses={primaryNav.stageStatuses}
 				onLinkNavigate={primaryNav.onLinkNavigate}
 				onNavigate={primaryNav.onNavigate}

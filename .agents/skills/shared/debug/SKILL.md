@@ -81,7 +81,7 @@ are local snapshots and may be stale.
 1. Confirm the Linear issue and current state.
 2. Search the repo and local artifacts by Linear identifier, issue title,
    related PR number, branch name, or distinctive error text.
-3. Identify the owning surface: web app, blueprint compiler, generated output,
+3. Identify the owning surface: web app, codebase compiler, generated output,
    docs pack, release proof, or release workflow.
 4. Read the nearest `AGENTS.md` and relevant docs before judging the failure.
 5. Trace the smallest production path that should prove the issue.

@@ -8,8 +8,8 @@ import type { AppShellLocalNav } from "./app-shell-props";
 
 function getLocalNavLabel(kind: AppShellLocalNav["kind"]) {
 	switch (kind) {
-		case "blueprint":
-			return "Blueprint local navigation";
+		case "codebase":
+			return "Codebase local navigation";
 		case "review":
 			return "Review local navigation";
 		case "workspace":

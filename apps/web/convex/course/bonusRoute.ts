@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { getLessonByKey } from "../../lib/course/lesson/model/curriculum";
-import { getBlueprintWorkflowStateByClerkUserId } from "../blueprint/workflowState";
+import { getCodebaseWorkflowStateByClerkUserId } from "../codebase/workflowState";
 import { loadViewerCourseState } from "./shared";
 import type { CourseQueryCtx } from "./types";
 
@@ -19,7 +19,7 @@ function getLessonStateTimestamp(state: {
 
 export async function getBonusRouteStateHandler(ctx: CourseQueryCtx) {
 	const viewerState = await loadViewerCourseState(ctx);
-	const workflowState = await getBlueprintWorkflowStateByClerkUserId(
+	const workflowState = await getCodebaseWorkflowStateByClerkUserId(
 		ctx,
 		viewerState.clerkUserId,
 	);

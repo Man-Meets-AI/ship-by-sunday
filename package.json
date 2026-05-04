@@ -23,7 +23,7 @@
 		"markdown:lint": "bun run scripts/markdown-metadata/run-lint.ts",
 		"public-readiness:lint": "bun run scripts/public-readiness/run-lint.ts",
 		"posthog:proof": "node scripts/observability/posthog-proof.mjs",
-		"docs:generated:check": "diff -qr docs/openai docs/generated/openai-blueprint && diff -qr docs/ship-by-sunday docs/generated/ship-by-sunday-blueprint",
+		"docs:generated:check": "diff -qr docs/openai docs/generated/openai-codebase && diff -qr docs/ship-by-sunday docs/generated/ship-by-sunday-codebase",
 		"plans:lint": "bun run scripts/exec-plan/run-lint.ts",
 		"programs:lint": "bun run scripts/programs/run-lint.ts",
 		"format": "bun run --cwd apps/web format",

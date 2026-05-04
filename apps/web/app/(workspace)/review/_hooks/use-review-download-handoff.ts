@@ -6,7 +6,7 @@ import {
 	REVIEW_AUTO_DOWNLOAD_QUERY_PARAM,
 	REVIEW_AUTO_DOWNLOAD_STATUS,
 	REVIEW_DOWNLOAD_HREF,
-} from "@/lib/blueprint-flow/review-download-handoff";
+} from "@/lib/codebase-flow/review-download-handoff";
 
 function clearReviewAutoDownloadQueryParam() {
 	if (typeof window === "undefined") {

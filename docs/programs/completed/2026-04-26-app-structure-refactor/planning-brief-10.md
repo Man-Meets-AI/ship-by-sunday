@@ -16,7 +16,7 @@ read_when:
 
 This is the tenth planning brief for the app structure refactor Program.
 
-The first nine child ExecPlans are complete. They made boundary imports explicit, extracted the shared workspace shell, moved route-owned wrapper surfaces into App Router private folders, moved marketing-only effects and a blueprint-only hook out of generic shared locations, moved persisted completion field IDs into the lesson model, moved lesson URL construction out of the curriculum model, and kept stage-unlock model summaries route-neutral.
+The first nine child ExecPlans are complete. They made boundary imports explicit, extracted the shared workspace shell, moved route-owned wrapper surfaces into App Router private folders, moved marketing-only effects and a codebase-only hook out of generic shared locations, moved persisted completion field IDs into the lesson model, moved lesson URL construction out of the curriculum model, and kept stage-unlock model summaries route-neutral.
 
 The current Program recommendation is to make billing and Stripe boundaries auditable without changing behavior. The inspected billing surface shows that `apps/web/app/api/stripe/checkout/route.ts` still owns both App Router request orchestration and the full Stripe Checkout Session parameter object. The billing platform helper at `apps/web/platform/billing/stripe.ts` also imports the course registry only to read the canonical course slug, even though `apps/web/config/product.ts` already owns `productConfig.courseSlug`.
 

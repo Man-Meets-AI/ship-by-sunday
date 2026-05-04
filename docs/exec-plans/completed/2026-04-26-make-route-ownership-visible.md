@@ -4,7 +4,7 @@ status: complete
 created_at: 2026-04-26
 completed_at: 2026-04-26
 summary: Move the first route-owned workspace access and legacy redirect surfaces into App Router private folders without changing access or redirect behavior.
-post_build_recap: Workspace access gate UI and legacy blueprint redirect helpers now live under apps/web/app/(workspace) private folders with old feature paths kept as compatibility exports and focused plus app validation passed.
+post_build_recap: Workspace access gate UI and legacy codebase redirect helpers now live under apps/web/app/(workspace) private folders with old feature paths kept as compatibility exports and focused plus app validation passed.
 program_id: app-structure-refactor
 planning_brief: docs/programs/completed/2026-04-26-app-structure-refactor/planning-brief-3.md
 read_when:
@@ -28,9 +28,9 @@ This slice is behavior-neutral. It should not change protected-route coverage, a
 ## Progress
 
 - [x] 2026-04-26 EDT: Confirmed the first two child ExecPlans are complete and the Program names `Make Route Ownership Visible` as the next recommended slice.
-- [x] 2026-04-26 EDT: Inspected App Router pages, product access gate consumers, legacy blueprint redirect consumers, and focused tests before editing.
+- [x] 2026-04-26 EDT: Inspected App Router pages, product access gate consumers, legacy codebase redirect consumers, and focused tests before editing.
 - [x] 2026-04-26 EDT: Moved workspace access gate UI, controller, and view model into private `(workspace)` App Router folders.
-- [x] 2026-04-26 EDT: Moved the legacy blueprint redirect helper into `apps/web/app/(workspace)/_lib/`.
+- [x] 2026-04-26 EDT: Moved the legacy codebase redirect helper into `apps/web/app/(workspace)/_lib/`.
 - [x] 2026-04-26 EDT: Updated first-party imports and tests to the new App Router paths.
 - [x] 2026-04-26 EDT: Left temporary compatibility re-exports at the old feature paths.
 - [x] 2026-04-26 EDT: Focused route-ownership unit and integration-ui tests passed.
@@ -41,15 +41,15 @@ This slice is behavior-neutral. It should not change protected-route coverage, a
 
 2026-04-26 EDT: The access gate split has a clean route-local boundary. `AccessRequiredPage`, its presentation components, `useAccessRequiredController`, and `access-required-view-model.ts` are consumed by `apps/web/app/(workspace)/layout.tsx` and tests. The durable access-domain pieces, `apps/web/features/product-access/server/product-access.ts` and `apps/web/features/product-access/lib/product-access.ts`, are also consumed by the homepage redirect, Codex server route helpers, checkout success view, and course access tests, so they stay in the feature.
 
-2026-04-26 EDT: `legacy-blueprint-route-redirects.ts` is route-owned compatibility logic. Its only production consumers are the App Router compatibility pages under `apps/web/app/(workspace)/start`, `product`, `design`, `marketing`, and `build-plan`, plus its focused unit test.
+2026-04-26 EDT: `legacy-codebase-route-redirects.ts` is route-owned compatibility logic. Its only production consumers are the App Router compatibility pages under `apps/web/app/(workspace)/start`, `product`, `design`, `marketing`, and `build-plan`, plus its focused unit test.
 
-2026-04-26 EDT: After the move, `rg 'features/product-access/(components|hooks|lib/access-required-view-model)|features/blueprint-flow/lib/legacy-blueprint-route-redirects' apps/web/app apps/web/features apps/web/tests --glob '!node_modules'` produced no matches. The old feature files now contain only compatibility re-exports to `@/app/(workspace)/...` paths.
+2026-04-26 EDT: After the move, `rg 'features/product-access/(components|hooks|lib/access-required-view-model)|features/codebase-flow/lib/legacy-codebase-route-redirects' apps/web/app apps/web/features apps/web/tests --glob '!node_modules'` produced no matches. The old feature files now contain only compatibility re-exports to `@/app/(workspace)/...` paths.
 
 2026-04-26 EDT: The first post-move format check failed only on `tests/unit/app-protected-layout.test.tsx` after its mock import changed to the longer App Router path. Running the repo formatter repaired that mechanical import layout, and the focused tests still passed afterward.
 
 ## Decision Log
 
-Decision: Start route ownership with the workspace access gate and legacy blueprint redirect helper.
+Decision: Start route ownership with the workspace access gate and legacy codebase redirect helper.
 Rationale: Both are route-owned, well-tested, and behavior-neutral to move. Identity flows, checkout success, review preload, and API route contracts are more sensitive and should not be mixed into this slice.
 Date: 2026-04-26
 
@@ -63,7 +63,7 @@ Date: 2026-04-26
 
 ## Outcomes & Retrospective
 
-This plan is complete. First-party route code and tests now import the workspace access gate from `@/app/(workspace)/_components/access-required/access-required-page` and legacy redirect helpers from `@/app/(workspace)/_lib/legacy-blueprint-route-redirects`. The old product-access UI, access gate hook, access gate view-model, and legacy redirect feature paths remain as thin compatibility re-exports.
+This plan is complete. First-party route code and tests now import the workspace access gate from `@/app/(workspace)/_components/access-required/access-required-page` and legacy redirect helpers from `@/app/(workspace)/_lib/legacy-codebase-route-redirects`. The old product-access UI, access gate hook, access gate view-model, and legacy redirect feature paths remain as thin compatibility re-exports.
 
 Focused route-ownership unit tests, access-required integration-ui tests, app format check, app lint, app typecheck, active-path plan lint, Program lint, markdown lint, and `git diff --check` passed. The implementation did not move route pages, identity screens, checkout success screens, review preload logic, API route contracts, course registry or manifest files, Convex schema or generated files, Stripe checkout or billing behavior, UI inventory, or the unrelated stashed scrollbar styling.
 
@@ -73,13 +73,13 @@ Ship by Sunday's web app lives in `apps/web`. The App Router lives under `apps/w
 
 The protected workspace layout is `apps/web/app/(workspace)/layout.tsx`. It calls `getServerProductAccess` from `apps/web/features/product-access/server/product-access.ts` to decide whether protected workspace children can render. When access is missing, it renders an access gate page. That access gate UI is currently in `apps/web/features/product-access/components`, with a controller hook in `apps/web/features/product-access/hooks/use-access-required-controller.ts` and UI view-model logic in `apps/web/features/product-access/lib/access-required-view-model.ts`.
 
-The old stage routes are compatibility routes under `apps/web/app/(workspace)/start`, `product`, `design`, `marketing`, and `build-plan`. They redirect into the canonical Blueprint page. Their helper currently lives in `apps/web/features/blueprint-flow/lib/legacy-blueprint-route-redirects.ts`, even though it only supports those route files.
+The old stage routes are compatibility routes under `apps/web/app/(workspace)/start`, `product`, `design`, `marketing`, and `build-plan`. They redirect into the canonical Codebase page. Their helper currently lives in `apps/web/features/codebase-flow/lib/legacy-codebase-route-redirects.ts`, even though it only supports those route files.
 
 ### In Scope
 
 Move the access gate page, access gate presentation components, access gate controller hook, and access gate view-model helper into private folders under `apps/web/app/(workspace)/`.
 
-Move the legacy blueprint route redirect helper into `apps/web/app/(workspace)/_lib/`.
+Move the legacy codebase route redirect helper into `apps/web/app/(workspace)/_lib/`.
 
 Update first-party route files and tests to import the moved modules from the new App Router private paths.
 
@@ -95,7 +95,7 @@ Do not move identity sign-in, sign-up, SSO callback, or reset-password screens.
 
 Do not move checkout success screens or change checkout session, Stripe, billing, pricing, promo code, billing proof, webhook, or environment behavior.
 
-Do not move review route preload logic, Blueprint review components, API route request contracts, course lesson registry files, course manifest files, Convex schema, generated Convex files, public Convex function names, or hosted Convex configuration.
+Do not move review route preload logic, Codebase review components, API route request contracts, course lesson registry files, course manifest files, Convex schema, generated Convex files, public Convex function names, or hosted Convex configuration.
 
 Do not delete top-level feature folders or `components/ui` inventory.
 
@@ -111,7 +111,7 @@ Move `apps/web/features/product-access/components/access-required-page.tsx`, `ac
 
 Update imports inside the moved access gate files to use local relative imports for route-local files and `@/features/product-access/lib/product-access` for the durable `ProductAccess` type. Keep `apps/web/features/product-access/server/product-access.ts` unchanged.
 
-Move `apps/web/features/blueprint-flow/lib/legacy-blueprint-route-redirects.ts` to `apps/web/app/(workspace)/_lib/legacy-blueprint-route-redirects.ts`. Update the compatibility route pages and `apps/web/tests/unit/legacy-blueprint-route-redirects.test.ts` to import from the new App Router private path.
+Move `apps/web/features/codebase-flow/lib/legacy-codebase-route-redirects.ts` to `apps/web/app/(workspace)/_lib/legacy-codebase-route-redirects.ts`. Update the compatibility route pages and `apps/web/tests/unit/legacy-codebase-route-redirects.test.ts` to import from the new App Router private path.
 
 Replace the old product-access UI, hook, and view-model files with compatibility re-exports from the new route-local paths. Replace the old legacy redirect helper with a compatibility re-export from the new route-local path.
 
@@ -143,17 +143,17 @@ Read the Program and this planning brief:
 Record baseline imports:
 
     rg 'features/product-access/(components|hooks|lib/access-required-view-model)' apps/web --glob '!node_modules'
-    rg 'features/blueprint-flow/lib/legacy-blueprint-route-redirects|app/\\(workspace\\)/_lib/legacy-blueprint-route-redirects' apps/web --glob '!node_modules'
+    rg 'features/codebase-flow/lib/legacy-codebase-route-redirects|app/\\(workspace\\)/_lib/legacy-codebase-route-redirects' apps/web --glob '!node_modules'
 
 After the moves and import updates, prove first-party consumers use the App Router paths and old feature paths are compatibility exports:
 
     rg 'features/product-access/(components|hooks|lib/access-required-view-model)' apps/web --glob '!node_modules'
-    rg 'features/blueprint-flow/lib/legacy-blueprint-route-redirects' apps/web --glob '!node_modules'
-    rg 'app/\\(workspace\\)/(_components/access-required|_hooks/use-access-required-controller|_lib/(access-required-view-model|legacy-blueprint-route-redirects))' apps/web --glob '!node_modules'
+    rg 'features/codebase-flow/lib/legacy-codebase-route-redirects' apps/web --glob '!node_modules'
+    rg 'app/\\(workspace\\)/(_components/access-required|_hooks/use-access-required-controller|_lib/(access-required-view-model|legacy-codebase-route-redirects))' apps/web --glob '!node_modules'
 
 Run focused route-ownership tests:
 
-    bun run --cwd apps/web test:unit -- tests/unit/access-required-page.test.tsx tests/unit/app-protected-layout.test.tsx tests/unit/legacy-blueprint-route-redirects.test.ts
+    bun run --cwd apps/web test:unit -- tests/unit/access-required-page.test.tsx tests/unit/app-protected-layout.test.tsx tests/unit/legacy-codebase-route-redirects.test.ts
     bun run --cwd apps/web test:integration:ui -- tests/integration-ui/access-required-page.test.tsx tests/integration-ui/access-required-page.interactions.test.tsx
 
 Then run app and plan checks:
@@ -168,17 +168,17 @@ Then run app and plan checks:
 
 ## Validation and Acceptance
 
-This slice is accepted when the workspace access gate UI lives under `apps/web/app/(workspace)/_components/access-required`, its controller and view-model helper live under private `(workspace)` folders, legacy blueprint redirect helpers live under `apps/web/app/(workspace)/_lib`, first-party imports use those App Router paths, old feature paths are compatibility re-exports only, and focused plus app-level validation pass.
+This slice is accepted when the workspace access gate UI lives under `apps/web/app/(workspace)/_components/access-required`, its controller and view-model helper live under private `(workspace)` folders, legacy codebase redirect helpers live under `apps/web/app/(workspace)/_lib`, first-party imports use those App Router paths, old feature paths are compatibility re-exports only, and focused plus app-level validation pass.
 
 Protected workspace behavior must remain unchanged. `tests/unit/app-protected-layout.test.tsx` must still prove `getServerProductAccess` runs before protected children render, and access-required unit and integration-ui tests must still prove loading, signed-out, no-access, token-missing, retry, refresh, and reauthentication states.
 
-Legacy route alias behavior must remain unchanged. `tests/unit/legacy-blueprint-route-redirects.test.ts` must still prove `/start`, `/product`, `/design`, `/marketing`, and `/build-plan` compatibility destinations.
+Legacy route alias behavior must remain unchanged. `tests/unit/legacy-codebase-route-redirects.test.ts` must still prove `/start`, `/product`, `/design`, `/marketing`, and `/build-plan` compatibility destinations.
 
 ### Test Commands
 
 Run these commands from repo root after implementation:
 
-    bun run --cwd apps/web test:unit -- tests/unit/access-required-page.test.tsx tests/unit/app-protected-layout.test.tsx tests/unit/legacy-blueprint-route-redirects.test.ts
+    bun run --cwd apps/web test:unit -- tests/unit/access-required-page.test.tsx tests/unit/app-protected-layout.test.tsx tests/unit/legacy-codebase-route-redirects.test.ts
     bun run --cwd apps/web test:integration:ui -- tests/integration-ui/access-required-page.test.tsx tests/integration-ui/access-required-page.interactions.test.tsx
     bun run format:check
     bun run --cwd apps/web lint
@@ -216,7 +216,7 @@ Baseline route-owned access gate fan-in:
 
 Focused validation passed:
 
-    bun run --cwd apps/web test:unit -- tests/unit/access-required-page.test.tsx tests/unit/app-protected-layout.test.tsx tests/unit/legacy-blueprint-route-redirects.test.ts
+    bun run --cwd apps/web test:unit -- tests/unit/access-required-page.test.tsx tests/unit/app-protected-layout.test.tsx tests/unit/legacy-codebase-route-redirects.test.ts
     Test Files  3 passed (3)
     Tests  7 passed (7)
 
@@ -261,14 +261,14 @@ Baseline legacy redirect fan-in:
     apps/web/app/(workspace)/marketing/[stepId]/page.tsx
     apps/web/app/(workspace)/build-plan/page.tsx
     apps/web/app/(workspace)/build-plan/[stepId]/page.tsx
-    apps/web/tests/unit/legacy-blueprint-route-redirects.test.ts
+    apps/web/tests/unit/legacy-codebase-route-redirects.test.ts
 
 Post-move scan:
 
-    rg 'features/product-access/(components|hooks|lib/access-required-view-model)|features/blueprint-flow/lib/legacy-blueprint-route-redirects' apps/web/app apps/web/features apps/web/tests --glob '!node_modules'
+    rg 'features/product-access/(components|hooks|lib/access-required-view-model)|features/codebase-flow/lib/legacy-codebase-route-redirects' apps/web/app apps/web/features apps/web/tests --glob '!node_modules'
     no matches
 
-    rg 'app/\(workspace\)/(_components/access-required|_hooks/use-access-required-controller|_lib/(access-required-view-model|legacy-blueprint-route-redirects))' apps/web/app apps/web/features apps/web/tests --glob '!node_modules'
+    rg 'app/\(workspace\)/(_components/access-required|_hooks/use-access-required-controller|_lib/(access-required-view-model|legacy-codebase-route-redirects))' apps/web/app apps/web/features apps/web/tests --glob '!node_modules'
     apps/web/app/(workspace)/layout.tsx
     apps/web/app/(workspace)/start/page.tsx
     apps/web/app/(workspace)/product/page.tsx
@@ -281,7 +281,7 @@ Post-move scan:
     apps/web/app/(workspace)/build-plan/[stepId]/page.tsx
     apps/web/tests/unit/access-required-page.test.tsx
     apps/web/tests/unit/app-protected-layout.test.tsx
-    apps/web/tests/unit/legacy-blueprint-route-redirects.test.ts
+    apps/web/tests/unit/legacy-codebase-route-redirects.test.ts
     apps/web/tests/integration-ui/access-required-page.test.tsx
     apps/web/tests/integration-ui/access-required-page.interactions.test.tsx
 
@@ -289,4 +289,4 @@ Post-move scan:
 
 The moved access gate remains a client UI surface. It depends on Clerk client hooks, Convex React hooks, Next navigation hooks, shared UI primitives, `CheckoutButton`, `routeConfig`, `timingConfig`, `ProductAccess`, and `getServerProductAccess` in the workspace layout. Only the UI/controller/view-model ownership changes; the access-domain server function and product-access type remain in `features/product-access`.
 
-The moved legacy redirect helper depends on `routeConfig` and `getBlueprintPageSectionHref`. It is route compatibility logic, not blueprint domain state. The compatibility export at `apps/web/features/blueprint-flow/lib/legacy-blueprint-route-redirects.ts` should stay thin until a later cleanup slice removes old feature-path imports.
+The moved legacy redirect helper depends on `routeConfig` and `getCodebasePageSectionHref`. It is route compatibility logic, not codebase domain state. The compatibility export at `apps/web/features/codebase-flow/lib/legacy-codebase-route-redirects.ts` should stay thin until a later cleanup slice removes old feature-path imports.

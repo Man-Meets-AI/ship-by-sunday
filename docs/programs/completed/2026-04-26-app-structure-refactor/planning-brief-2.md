@@ -20,7 +20,7 @@ The first child ExecPlan is complete at `docs/exec-plans/completed/2026-04-26-ma
 
 ## What The Previous Slice Unblocked
 
-The Program packet identified `apps/web/features/course/shared/components/app-shell` as the first large structural move after baseline safety. That shell is consumed by blueprint, review, settings, starter, execute-ship, workspace-home, course mission, and tests, so its current course path hides a cross-workspace ownership boundary.
+The Program packet identified `apps/web/features/course/shared/components/app-shell` as the first large structural move after baseline safety. That shell is consumed by codebase, review, settings, starter, execute-ship, workspace-home, course mission, and tests, so its current course path hides a cross-workspace ownership boundary.
 
 The first slice made selected import edges easier to inspect and left `AppShell` untouched. The next slice can now move the shell code itself while keeping the runtime behavior stable.
 
@@ -32,7 +32,7 @@ Exact scope: move `apps/web/features/course/shared/components/app-shell.tsx` and
 
 Exact implementation boundaries: do not move route screens into `app`, do not rename or delete top-level feature folders, do not move course lesson registry or manifest files, do not modify Convex schema or generated files, do not change Stripe checkout, webhook, pricing, promo code, billing proof, or environment behavior, do not delete `components/ui` inventory, and do not include the unrelated stashed scrollbar styling change.
 
-Exact validation boundaries: run focused AppShell and shell-consumer unit tests first, then focused blueprint integration-ui tests that mock the shell, then `bun run --cwd apps/web lint`, `bun run --cwd apps/web typecheck`, plan lint, Program lint, markdown lint, and `git diff --check`.
+Exact validation boundaries: run focused AppShell and shell-consumer unit tests first, then focused codebase integration-ui tests that mock the shell, then `bun run --cwd apps/web lint`, `bun run --cwd apps/web typecheck`, plan lint, Program lint, markdown lint, and `git diff --check`.
 
 Why it is next: route-local colocation and course-domain splitting both depend on the cross-workspace shell no longer being hidden under `features/course/shared`. Moving the shell first makes later route and course cleanup easier to reason about without touching billing or Convex behavior.
 

@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
 	createCompleteProjectDefinition,
 	deriveStageStatus,
-} from "@shipbysunday/blueprint-compiler";
+} from "@shipbysunday/codebase-compiler";
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -106,13 +106,13 @@ import type {
 	AppShellPrimaryNav,
 } from "@/app/(workspace)/_components/app-shell/app-shell-props";
 
-const blueprintStageStatuses = deriveStageStatus(
+const codebaseStageStatuses = deriveStageStatus(
 	createCompleteProjectDefinition().facts,
 ).stageStatuses;
 
 const primaryNav: AppShellPrimaryNav = {
 	kind: "combined",
-	stageStatuses: blueprintStageStatuses,
+	stageStatuses: codebaseStageStatuses,
 	postReviewItems: [
 		{
 			kind: "link",
@@ -161,9 +161,9 @@ const primaryNav: AppShellPrimaryNav = {
 };
 
 const localNav: AppShellLocalNav = {
-	kind: "blueprint",
-	compact: <div>Compact blueprint rail</div>,
-	desktop: <div>Desktop blueprint rail</div>,
+	kind: "codebase",
+	compact: <div>Compact codebase rail</div>,
+	desktop: <div>Desktop codebase rail</div>,
 };
 
 function renderAppShell(element: React.ReactElement) {
@@ -189,9 +189,9 @@ describe("AppShell", () => {
 		expect(markup).toContain("Bonus");
 		expect(markup).toContain("overflow-x-auto lg:overflow-visible");
 		expect(markup).toContain("9/28");
-		expect(markup).toContain('data-shell-local-nav-kind="blueprint"');
-		expect(markup).toContain("Compact blueprint rail");
-		expect(markup).toContain("Desktop blueprint rail");
+		expect(markup).toContain('data-shell-local-nav-kind="codebase"');
+		expect(markup).toContain("Compact codebase rail");
+		expect(markup).toContain("Desktop codebase rail");
 		expect(markup).toContain(
 			"hidden min-h-0 min-w-0 xl:sticky xl:top-3 xl:block xl:self-start xl:border-r xl:border-border/60 xl:pr-6",
 		);
@@ -201,14 +201,14 @@ describe("AppShell", () => {
 		expect(markup).not.toContain("Open CEO");
 	});
 
-	it("links the header brand to the blueprint page and keeps account chrome visible", () => {
+	it("links the header brand to the codebase page and keeps account chrome visible", () => {
 		const markup = renderAppShell(
 			<AppShell showSkillRail={false} primaryNav={primaryNav}>
 				<div>Body</div>
 			</AppShell>,
 		);
 
-		expect(markup).toContain('href="/blueprint"');
+		expect(markup).toContain('href="/codebase"');
 		expect(markup).toContain('aria-label="Ship by Sunday"');
 		expect(markup).toContain('aria-label="Open account menu"');
 	});
@@ -236,6 +236,6 @@ describe("AppShell", () => {
 
 		expect(markup).not.toContain("9/28");
 		expect(markup).not.toContain("Build Lessons");
-		expect(markup).not.toContain("Desktop blueprint rail");
+		expect(markup).not.toContain("Desktop codebase rail");
 	});
 });

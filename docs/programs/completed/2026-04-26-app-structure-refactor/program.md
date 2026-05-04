@@ -20,7 +20,7 @@ This Program must be maintained in accordance with `docs/programs/PROGRAMS.md`.
 
 ## Purpose / Big Picture
 
-This initiative exists because the app structure has drifted from the current blueprint-first product contract. The most important symptom is not the existence of `features/` itself; it is that route-local UI, shared workspace shell code, course domain code, Convex-safe backend logic, Stripe billing behavior, and shared UI inventory are not consistently separated.
+This initiative exists because the app structure has drifted from the current codebase-first product contract. The most important symptom is not the existence of `features/` itself; it is that route-local UI, shared workspace shell code, course domain code, Convex-safe backend logic, Stripe billing behavior, and shared UI inventory are not consistently separated.
 
 The intended end state is a route-readable Next.js App Router, a clear Convex backend boundary, auditable Stripe and checkout responsibilities, a small shared UI primitive layer, and a reduced `features/` folder that contains only durable cross-route product domains.
 
@@ -75,13 +75,13 @@ The first child ExecPlan has been completed at `docs/exec-plans/completed/2026-0
 
 The second child ExecPlan has been completed at `docs/exec-plans/completed/2026-04-26-extract-workspace-shell-from-course.md`. It moved the shared AppShell implementation out of course ownership into `apps/web/features/workspace-shell`, updated first-party imports to the new path, and left temporary compatibility exports at the old course-owned path while keeping route behavior stable.
 
-The third child ExecPlan has been completed at `docs/exec-plans/completed/2026-04-26-make-route-ownership-visible.md`. It started route ownership by moving the protected workspace access gate and legacy blueprint redirect helper into private `apps/web/app/(workspace)` folders, updated first-party imports and tests, and left temporary compatibility exports at the old feature paths.
+The third child ExecPlan has been completed at `docs/exec-plans/completed/2026-04-26-make-route-ownership-visible.md`. It started route ownership by moving the protected workspace access gate and legacy codebase redirect helper into private `apps/web/app/(workspace)` folders, updated first-party imports and tests, and left temporary compatibility exports at the old feature paths.
 
 The fourth child ExecPlan has been completed at `docs/exec-plans/completed/2026-04-26-make-identity-route-ownership-visible.md`. It moved identity route wrapper screens and support shell code into private `apps/web/app/(identity)` folders, updated first-party imports and tests, and left temporary compatibility exports at the old auth feature paths.
 
 The fifth child ExecPlan has been completed at `docs/exec-plans/completed/2026-04-26-finish-route-ownership-visibility.md`. It finished the current route ownership visibility pass by moving checkout success wrappers, review route wrappers, and API route path contracts into App Router private folders while leaving billing, Convex, and request behavior unchanged.
 
-The sixth child ExecPlan has been completed at `docs/exec-plans/completed/2026-04-26-clean-shared-ui-and-hooks.md`. It moved marketing-only effects and the blueprint-only keyboard hook to feature-owned paths while preserving compatibility exports and avoiding UI inventory deletion.
+The sixth child ExecPlan has been completed at `docs/exec-plans/completed/2026-04-26-clean-shared-ui-and-hooks.md`. It moved marketing-only effects and the codebase-only keyboard hook to feature-owned paths while preserving compatibility exports and avoiding UI inventory deletion.
 
 The seventh child ExecPlan has been completed at `docs/exec-plans/completed/2026-04-26-split-course-completion-field-ids-from-workbench.md`. It started the course-domain split by moving persisted completion field IDs into the lesson model and keeping workbench constants as compatibility exports.
 
@@ -114,7 +114,7 @@ The final state is a readable App Router route map, a shared workspace shell out
 - [x] 2026-04-26 EDT: Wrote planning brief 5 and opened the fifth child ExecPlan for checkout, review, and API route ownership visibility.
 - [x] 2026-04-26 EDT: Executed and completed the remaining route-ownership child ExecPlan. Focused checkout, review, API route, API client, format, app lint, app typecheck, plan, Program, markdown, and diff checks passed.
 - [x] 2026-04-26 EDT: Wrote planning brief 6 and opened the sixth child ExecPlan for shared UI and hook cleanup.
-- [x] 2026-04-26 EDT: Executed and completed the shared UI and hook cleanup child ExecPlan. Focused marketing effect, encrypted text, blueprint, homepage contract, format, app lint, app typecheck, plan, Program, markdown, and diff checks passed.
+- [x] 2026-04-26 EDT: Executed and completed the shared UI and hook cleanup child ExecPlan. Focused marketing effect, encrypted text, codebase, homepage contract, format, app lint, app typecheck, plan, Program, markdown, and diff checks passed.
 - [x] 2026-04-26 EDT: Wrote planning brief 7 and opened the seventh child ExecPlan for splitting course completion field IDs from workbench constants.
 - [x] 2026-04-26 EDT: Executed and completed the course completion field ID split child ExecPlan. Focused course registry, watch-lesson contract, core UX build constants, course state lifecycle, stage unlock, format, app lint, app typecheck, plan, Program, markdown, and diff checks passed.
 - [x] 2026-04-26 EDT: Wrote planning brief 8 and opened the eighth child ExecPlan for splitting lesson routing from the curriculum model.
@@ -137,7 +137,7 @@ Rationale: High-fan-in files such as `apps/web/config/product.ts`, `apps/web/fea
 Date: 2026-04-26
 
 Decision: Treat external references as architecture inspiration only.
-Rationale: The reference repos support route-visible App Router structure and clear backend boundaries, but Ship by Sunday has repo-specific Program/ExecPlan, blueprint compiler, generated docs, release proof, Vercel, Clerk, Convex, and Stripe constraints.
+Rationale: The reference repos support route-visible App Router structure and clear backend boundaries, but Ship by Sunday has repo-specific Program/ExecPlan, codebase compiler, generated docs, release proof, Vercel, Clerk, Convex, and Stripe constraints.
 Date: 2026-04-26
 
 Decision: Keep billing and Convex schema moves late.
@@ -157,7 +157,7 @@ Rationale: Checkout success wrappers, review wrappers, and API route path consta
 Date: 2026-04-26
 
 Decision: Make shared UI cleanup compatibility-preserving before deleting inventory.
-Rationale: The shared UI scan found marketing-only motion effects and a blueprint-only keyboard hook that can move now, but also found shared primitives, shadcn inventory, and cross-feature visuals that should not be deleted or moved without a dedicated proof pass.
+Rationale: The shared UI scan found marketing-only motion effects and a codebase-only keyboard hook that can move now, but also found shared primitives, shadcn inventory, and cross-feature visuals that should not be deleted or moved without a dedicated proof pass.
 Date: 2026-04-26
 
 Decision: Start course-domain cleanup with persisted completion field IDs.

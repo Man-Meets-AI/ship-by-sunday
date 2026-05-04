@@ -8,13 +8,13 @@ describe("checkout clear pending route", () => {
 	it("clears the pending checkout cookie and redirects to a safe path", () => {
 		const response = GET(
 			new NextRequest(
-				"https://shipbysunday.test/checkout/clear-pending?redirect_url=%2Fblueprint",
+				"https://shipbysunday.test/checkout/clear-pending?redirect_url=%2Fcodebase",
 			),
 		);
 
 		expect(response.status).toBe(307);
 		expect(response.headers.get("location")).toBe(
-			"https://shipbysunday.test/blueprint",
+			"https://shipbysunday.test/codebase",
 		);
 		expect(response.headers.get("set-cookie")).toContain(
 			`${PENDING_CHECKOUT_SESSION_COOKIE_NAME}=`,
@@ -29,7 +29,7 @@ describe("checkout clear pending route", () => {
 		);
 
 		expect(response.headers.get("location")).toBe(
-			"https://shipbysunday.test/blueprint",
+			"https://shipbysunday.test/codebase",
 		);
 	});
 });

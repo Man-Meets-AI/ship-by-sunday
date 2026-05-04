@@ -25,7 +25,7 @@ Final April 1 release shepherding evidence for the shipped `main` head:
 ## Findings
 
 - `medium` — The staging alias `dev.man-meets-ai.com` drifted to an older preview deployment during release shepherding and had to be manually repointed before the final forced `dev` proof could verify the correct frontend commit.
-- `low` — `Production Release Proof` surfaced one flaky annotation in the final green run because the review page had two links matching `Download Blueprint`. The workflow still passed because the pack did not treat that flaky assertion as a release gate.
+- `low` — `Production Release Proof` surfaced one flaky annotation in the final green run because the review page had two links matching `Download Codebase`. The workflow still passed because the pack did not treat that flaky assertion as a release gate.
 
 ## Blocked
 

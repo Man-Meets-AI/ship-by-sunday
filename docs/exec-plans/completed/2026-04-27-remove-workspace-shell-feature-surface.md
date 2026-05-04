@@ -21,22 +21,22 @@ This ExecPlan must be maintained in accordance with `docs/exec-plans/PLANS.md`.
 
 ## Purpose / Big Picture
 
-Workspace route chrome should live with the workspace route group instead of in a broad feature bucket. The AppShell renders the protected workspace header, navigation, optional local rail, layout mode controls, account menu, and mobile footer rail for blueprint, review, course, execute/ship, settings, and workspace-home surfaces. After this slice, `apps/web/features/workspace-shell` should be gone while the rendered shell markup, navigation destinations, protected route behavior, and production release proof selection stay the same.
+Workspace route chrome should live with the workspace route group instead of in a broad feature bucket. The AppShell renders the protected workspace header, navigation, optional local rail, layout mode controls, account menu, and mobile footer rail for codebase, review, course, execute/ship, settings, and workspace-home surfaces. After this slice, `apps/web/features/workspace-shell` should be gone while the rendered shell markup, navigation destinations, protected route behavior, and production release proof selection stay the same.
 
 ## Progress
 
 - [x] 2026-04-27 EDT: Created branch `codex/remove-workspace-shell-feature-surface` from verified `main` at `ddbfec1`.
 - [x] 2026-04-27 EDT: Confirmed `apps/web/features/workspace-shell` contains the AppShell entrypoint and fourteen AppShell-private subcomponent, prop, and helper files.
-- [x] 2026-04-27 EDT: Confirmed current consumers are blueprint-flow, course mission pages, execute-ship bonus pages, workspace review, workspace home, settings, and focused tests.
+- [x] 2026-04-27 EDT: Confirmed current consumers are codebase-flow, course mission pages, execute-ship bonus pages, workspace review, workspace home, settings, and focused tests.
 - [x] 2026-04-27 EDT: Confirmed `apps/web/features/course/shared/components/app-shell` has no direct consumers and only re-exports the old workspace-shell modules.
 - [x] 2026-04-27 EDT: Read the local Next.js project-structure documentation for route groups and private folders. Private `_components` folders opt files out of routing and are intended for route-owned UI logic.
 - [x] 2026-04-27 EDT: Created planning brief 14 and this active child ExecPlan.
 - [x] 2026-04-27 EDT: Moved AppShell and its private subcomponents to `apps/web/app/(workspace)/_components/app-shell`.
-- [x] 2026-04-27 EDT: Updated blueprint-flow, course, execute-ship, workspace review, workspace home, settings, and focused tests to import AppShell from the new workspace private owner.
+- [x] 2026-04-27 EDT: Updated codebase-flow, course, execute-ship, workspace review, workspace home, settings, and focused tests to import AppShell from the new workspace private owner.
 - [x] 2026-04-27 EDT: Deleted `apps/web/features/workspace-shell`, deleted the unused `apps/web/features/course/shared/components/app-shell` alias, and confirmed old-path scans return no app or script matches.
 - [x] 2026-04-27 EDT: Focused AppShell and route-consumer unit tests passed: 8 files and 21 tests.
-- [x] 2026-04-27 EDT: Focused blueprint and review integration-ui tests passed: 2 files and 9 tests.
-- [x] 2026-04-27 EDT: App format check, app lint, and app typecheck passed. The typecheck build output still includes `/blueprint`, `/review`, `/mission`, `/lesson/[lessonKey]`, `/execute`, `/settings`, and `/start`.
+- [x] 2026-04-27 EDT: Focused codebase and review integration-ui tests passed: 2 files and 9 tests.
+- [x] 2026-04-27 EDT: App format check, app lint, and app typecheck passed. The typecheck build output still includes `/codebase`, `/review`, `/mission`, `/lesson/[lessonKey]`, `/execute`, `/settings`, and `/start`.
 - [x] 2026-04-27 EDT: Convex schema/generated diff check returned no changes.
 
 ## Surprises & Discoveries
@@ -59,7 +59,7 @@ Date: 2026-04-27
 
 ## Outcomes & Retrospective
 
-This slice is complete. AppShell and its private subcomponents now live under `apps/web/app/(workspace)/_components/app-shell`. Blueprint-flow, course, execute-ship, workspace review, workspace home, settings, and tests import the new workspace private owner. `apps/web/features/workspace-shell` and the unused course AppShell compatibility alias are deleted. AppShell props, layout class expectations, navigation destinations, route URLs, protected workspace access, checkout, billing, Convex schema, generated Convex files, and production release proof semantics were intentionally unchanged.
+This slice is complete. AppShell and its private subcomponents now live under `apps/web/app/(workspace)/_components/app-shell`. Codebase-flow, course, execute-ship, workspace review, workspace home, settings, and tests import the new workspace private owner. `apps/web/features/workspace-shell` and the unused course AppShell compatibility alias are deleted. AppShell props, layout class expectations, navigation destinations, route URLs, protected workspace access, checkout, billing, Convex schema, generated Convex files, and production release proof semantics were intentionally unchanged.
 
 ## Context and Orientation
 
@@ -67,7 +67,7 @@ This slice is complete. AppShell and its private subcomponents now live under `a
 
 `apps/web/app/(workspace)/_components` already owns route-local workspace UI. It contains access-required UI, workspace navigation, workspace-home components, settings support components, starter-repo access, and Codex connection UI. Moving AppShell there keeps all protected workspace route chrome in one explicit route-private owner.
 
-Current AppShell consumers include `apps/web/features/blueprint-flow/components/blueprint-page.tsx`, `apps/web/features/course/mission/components/mission-page.tsx`, `apps/web/features/execute-ship/components/bonus-mission-page.tsx`, `apps/web/features/execute-ship/components/bonus-lesson-page.tsx`, `apps/web/app/(workspace)/review/_components/blueprint-review-page.tsx`, `apps/web/app/(workspace)/_components/workspace-home/workspace-home-page.tsx`, and `apps/web/app/(workspace)/settings/_components/settings-page-shell.tsx`.
+Current AppShell consumers include `apps/web/features/codebase-flow/components/codebase-page.tsx`, `apps/web/features/course/mission/components/mission-page.tsx`, `apps/web/features/execute-ship/components/bonus-mission-page.tsx`, `apps/web/features/execute-ship/components/bonus-lesson-page.tsx`, `apps/web/app/(workspace)/review/_components/codebase-review-page.tsx`, `apps/web/app/(workspace)/_components/workspace-home/workspace-home-page.tsx`, and `apps/web/app/(workspace)/settings/_components/settings-page-shell.tsx`.
 
 ### In Scope
 
@@ -81,9 +81,9 @@ Update the Program packet and this ExecPlan as implementation and validation com
 
 ### Out Of Scope
 
-Do not change AppShell props, layout class names, navigation destinations, route URLs, protected workspace access, Clerk behavior, checkout, billing, Stripe, pricing, promo code behavior, Convex schema, generated Convex files, course mission state, blueprint compiler behavior, production release proof semantics, or remaining feature folders.
+Do not change AppShell props, layout class names, navigation destinations, route URLs, protected workspace access, Clerk behavior, checkout, billing, Stripe, pricing, promo code behavior, Convex schema, generated Convex files, course mission state, codebase compiler behavior, production release proof semantics, or remaining feature folders.
 
-Do not move `apps/web/features/blueprint-flow`, `apps/web/features/course`, `apps/web/features/execute-ship`, or `apps/web/features/marketing` in this slice.
+Do not move `apps/web/features/codebase-flow`, `apps/web/features/course`, `apps/web/features/execute-ship`, or `apps/web/features/marketing` in this slice.
 
 ## Plan of Work
 
@@ -101,7 +101,7 @@ The second milestone is consumer import cleanup. It is complete when app, featur
 
 The third milestone is stale re-export removal. It is complete when the unused course AppShell compatibility re-export folder is absent and scans prove nothing imported it.
 
-The fourth milestone is validation. It is complete when focused AppShell, workspace home, settings, blueprint, review, mission, bonus mission, bonus lesson, app format check, app lint, app typecheck, plan lint, Program lint, markdown lint, and `git diff --check` all pass.
+The fourth milestone is validation. It is complete when focused AppShell, workspace home, settings, codebase, review, mission, bonus mission, bonus lesson, app format check, app lint, app typecheck, plan lint, Program lint, markdown lint, and `git diff --check` all pass.
 
 ## Concrete Steps
 
@@ -119,14 +119,14 @@ The first and third scans should return no app or script matches. The `find` com
 
 ## Validation and Acceptance
 
-Acceptance requires `apps/web/features/workspace-shell` to be deleted, all old workspace-shell feature imports to be gone, AppShell markup tests to keep the same navigation and shell class expectations, and the route surfaces that consume AppShell to pass their focused tests. App typecheck must still build the protected workspace routes, including `/blueprint`, `/review`, `/mission`, `/lesson/[lessonKey]`, `/execute`, `/settings`, and `/start`.
+Acceptance requires `apps/web/features/workspace-shell` to be deleted, all old workspace-shell feature imports to be gone, AppShell markup tests to keep the same navigation and shell class expectations, and the route surfaces that consume AppShell to pass their focused tests. App typecheck must still build the protected workspace routes, including `/codebase`, `/review`, `/mission`, `/lesson/[lessonKey]`, `/execute`, `/settings`, and `/start`.
 
 ### Test Commands
 
 Run these commands from repo root:
 
     bun run --cwd apps/web test:unit -- tests/unit/product-shell.test.tsx tests/unit/workspace-home-page.test.tsx tests/unit/settings-page.test.tsx tests/unit/mission-page.test.tsx tests/unit/app-workspace-mission-page.test.tsx tests/unit/app-workspace-lesson-page.test.tsx tests/unit/bonus-mission-page.test.tsx tests/unit/bonus-lesson-page.test.tsx
-    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/blueprint-page.test.tsx tests/integration-ui/blueprint-review-page.test.tsx
+    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/codebase-page.test.tsx tests/integration-ui/codebase-review-page.test.tsx
     bun run --cwd apps/web format:check
     bun run --cwd apps/web lint
     bun run --cwd apps/web typecheck
@@ -155,4 +155,4 @@ The final app/script scan should return no matches for old workspace-shell paths
 
 ## Interfaces and Dependencies
 
-The workspace-shell slice depends on Next.js App Router route groups and private folders, the protected workspace route group under `apps/web/app/(workspace)`, AppShell consumers in blueprint-flow, course, execute-ship, review, settings, and workspace home, the shared workspace navigation model under `apps/web/lib/workspace-navigation`, Clerk account menu hooks, `next-themes`, and production release proof for the merged `main` commit.
+The workspace-shell slice depends on Next.js App Router route groups and private folders, the protected workspace route group under `apps/web/app/(workspace)`, AppShell consumers in codebase-flow, course, execute-ship, review, settings, and workspace home, the shared workspace navigation model under `apps/web/lib/workspace-navigation`, Clerk account menu hooks, `next-themes`, and production release proof for the merged `main` commit.

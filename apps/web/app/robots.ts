@@ -16,7 +16,7 @@ export default function robots(): MetadataRoute.Robots {
 					"/sign-up",
 					"/session-tasks",
 					"/access-required",
-					"/blueprint",
+					"/codebase",
 					"/start",
 					"/product",
 					"/design",

@@ -4,12 +4,12 @@
 
 - The source research reported 180 runnable test/spec files: 157 under `apps/web/tests` and 23 under `packages/*/tests`.
 - The source research classified most source-level tests as worth preserving.
-- Package tests include 10 blueprint-compiler tests, 1 blueprint-presentation test, and 12 helper CLI tests.
+- Package tests include 10 codebase-compiler tests, 1 codebase-presentation test, and 12 helper CLI tests.
 - CLI tests should disappear if the helper CLI disappears, unless reusable behavior moves elsewhere.
 - The source research classified 17 source tests as merge-only backstops rather than strong standalone release proof.
 - The source research marked `apps/web/tests/unit/use-autosave.test.tsx`, `apps/web/tests/unit/legacy-lesson-routes.test.ts`, and `apps/web/tests/unit/mission-page.test.tsx` as stale rewrite/delete candidates.
 - The source research classified the browser-smoke/e2e harness files and generated auth failure artifacts as QA-harness delete candidates after replacement coverage lands.
-- Replacement gaps remain for robots/sitemap, signed-out `/blueprint` redirect behavior, entitled `/blueprint -> /review -> /settings`, checkout success handoff, and metadata/noindex rendered HTML.
+- Replacement gaps remain for robots/sitemap, signed-out `/codebase` redirect behavior, entitled `/codebase -> /review -> /settings`, checkout success handoff, and metadata/noindex rendered HTML.
 
 ## Recommendation
 
@@ -34,8 +34,8 @@ Do not gut all SBS tests. Preserve source-level tests, delete or rewrite stale t
 - `apps/web/tests/e2e/auth-state.ts`
 - `apps/web/tests/e2e/global-setup.ts`
 - `apps/web/tests/e2e/.auth/bootstrap-failures/*`
-- `packages/blueprint-compiler/tests/**`
-- `packages/blueprint-presentation/tests/**`
+- `packages/codebase-compiler/tests/**`
+- `packages/codebase-presentation/tests/**`
 - `packages/ship-by-sunday-cli/tests/**`
 - `qa/test-inventory.csv`
 - `qa/journeys.csv`

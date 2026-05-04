@@ -104,7 +104,7 @@ def get_keyframes(input_path: str) -> list[float]:
     cmd = [
         "ffprobe", "-v", "error",
         "-select_streams", "v:0",
-        "-show_entries", "blueprint=pts_time,flags",
+        "-show_entries", "codebase=pts_time,flags",
         "-of", "json",
         input_path
     ]
@@ -113,10 +113,10 @@ def get_keyframes(input_path: str) -> list[float]:
     keyframes = []
     try:
         data = json.loads(result.stdout)
-        for blueprint in data.get("blueprints", []):
+        for codebase in data.get("codebases", []):
             # Keyframes have 'K' in flags
-            if "K" in blueprint.get("flags", ""):
-                pts = blueprint.get("pts_time")
+            if "K" in codebase.get("flags", ""):
+                pts = codebase.get("pts_time")
                 if pts is not None:
                     keyframes.append(float(pts))
     except (json.JSONDecodeError, KeyError):

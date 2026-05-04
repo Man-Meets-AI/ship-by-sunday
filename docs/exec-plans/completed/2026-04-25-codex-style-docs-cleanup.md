@@ -41,9 +41,9 @@ Codex keeps most top-level documentation intentionally small. Its root `README.m
 
 `docs/exec-plans/active/` did not exist in this checkout even though `docs/exec-plans/PLANS.md` says unfinished ExecPlans belong there. Creating this plan reintroduces the active lane and should make future references real again.
 
-Some cleanup candidates are wired into code and cannot be deleted as a simple docs prune. The blueprint compiler still reads `docs/prompts/execplan-*` files, uses `docs/prompts/execplan-execution-loop.md` as a repo-root marker, and loads `docs/openai/design-checklist/*` even though the newer docs call `docs/openai/design-pack/` the vanilla baseline.
+Some cleanup candidates are wired into code and cannot be deleted as a simple docs prune. The codebase compiler still reads `docs/prompts/execplan-*` files, uses `docs/prompts/execplan-execution-loop.md` as a repo-root marker, and loads `docs/openai/design-checklist/*` even though the newer docs call `docs/openai/design-pack/` the vanilla baseline.
 
-`docs/generated/openai-blueprint/` currently mirrors `docs/openai/`, and `docs/generated/ship-by-sunday-blueprint/` currently mirrors `docs/ship-by-sunday/`. Generated mirrors are not proof of customer starter output; customer output proof belongs to blueprint compiler render and repo-generation tests.
+`docs/generated/openai-codebase/` currently mirrors `docs/openai/`, and `docs/generated/ship-by-sunday-codebase/` currently mirrors `docs/ship-by-sunday/`. Generated mirrors are not proof of customer starter output; customer output proof belongs to codebase compiler render and repo-generation tests.
 
 Live branch protection currently requires `static`, `integration`, `browser-smoke`, and `cli` for both `dev` and `main`. The no-op `browser-smoke` and `cli` jobs cannot be removed during this cleanup unless branch protection is updated first and rechecked. Until then, they are compatibility contexts, not release evidence.
 
@@ -89,9 +89,9 @@ Remaining follow-up: remove the compatibility CI jobs only after branch protecti
 
 This repository has several different documentation lanes. Active repo docs live at `README.md`, `AGENTS.md`, `docs/index.md`, and top-level `docs/*.md` files such as `docs/RELIABILITY.md`, `docs/QUALITY_SCORE.md`, and `docs/release-workflow.md`. Public product docs for the web app live under `apps/web/content/docs/`. GitHub release and automation policy lives under `.github/`, especially `.github/codex/release-policy.md` and `.github/workflows/*.yml`.
 
-Planning docs live in `docs/exec-plans/`, `docs/programs/`, and `docs/prompts/`. `docs/exec-plans/PLANS.md` is the contract for this file. `docs/programs/PROGRAMS.md` is the canonical Program contract. Prompt files have two families: `docs/prompts/exec-plan-*`, which current Program docs route agents toward, and `docs/prompts/execplan-*`, which the blueprint compiler still ships into generated starter repos.
+Planning docs live in `docs/exec-plans/`, `docs/programs/`, and `docs/prompts/`. `docs/exec-plans/PLANS.md` is the contract for this file. `docs/programs/PROGRAMS.md` is the canonical Program contract. Prompt files have two families: `docs/prompts/exec-plan-*`, which current Program docs route agents toward, and `docs/prompts/execplan-*`, which the codebase compiler still ships into generated starter repos.
 
-Source-pack docs live under `docs/openai/` and `docs/ship-by-sunday/`. These are not ordinary active repo docs. The blueprint compiler reads selected `docs/openai/*` files through `packages/blueprint-compiler/src/server/template-loader.ts` and ships prompt assets through `packages/blueprint-compiler/src/blueprints/render-prompt-pack.ts`. Generated mirror docs live under `docs/generated/`. A generated mirror is a checked-in copy of source-pack material, not the same as a rendered customer starter repository.
+Source-pack docs live under `docs/openai/` and `docs/ship-by-sunday/`. These are not ordinary active repo docs. The codebase compiler reads selected `docs/openai/*` files through `packages/codebase-compiler/src/server/template-loader.ts` and ships prompt assets through `packages/codebase-compiler/src/codebases/render-prompt-pack.ts`. Generated mirror docs live under `docs/generated/`. A generated mirror is a checked-in copy of source-pack material, not the same as a rendered customer starter repository.
 
 The Codex reference repo at `~/Developer/codex` uses a leaner shape: a short root README, contributor rules in `AGENTS.md`, CI strategy in `.github/workflows/README.md`, module READMEs near owning code, and deeper docs only for stable design or protocol decisions. Ship by Sunday should copy that organization principle, not every Codex file or policy. Ship by Sunday still needs SaaS-specific docs for Vercel, Convex, Stripe, Clerk, hosted proof, and the `dev` to `main` release path.
 
@@ -99,7 +99,7 @@ The Codex reference repo at `~/Developer/codex` uses a leaner shape: a short roo
 
 In scope is adding or updating active documentation so the repo has one clear workflow strategy entrypoint, one clear command map, and one clear generated-doc/source-pack ownership model. In scope is creating a short root `CONTRIBUTING.md`, because the README already links there and Codex's small contributor guide is the right model. In scope is repairing broken active links such as the missing `docs/design-docs/product-contract.md` reference. In scope is resetting or removing active references to Worker-specific tech debt. In scope is thinning duplicated Program and prompt entrypoints without deleting compiler-owned files until code and tests are migrated.
 
-In scope is updating code only when the cleanup requires it to make docs truthful, such as changing blueprint compiler references from one prompt or source-pack family to another. If code changes are made, they must be limited to documentation ownership, generated starter docs, or compiler path references needed by this cleanup.
+In scope is updating code only when the cleanup requires it to make docs truthful, such as changing codebase compiler references from one prompt or source-pack family to another. If code changes are made, they must be limited to documentation ownership, generated starter docs, or compiler path references needed by this cleanup.
 
 ### Out Of Scope
 
@@ -115,9 +115,9 @@ Then repair broken and stale active documentation pointers. Create a small root 
 
 Next, split durable release runbook content from volatile evidence. Keep `docs/release-workflow.md` as the canonical release runbook, but remove dated run IDs, failed workflow snapshots, and branch-protection mutation recipes from the durable path. Historical evidence belongs in PRs, GitHub runs, `docs/archive/release-proof-runs/`, or a clearly labeled archive note.
 
-After the active docs are truthful, define source-pack and generated-mirror ownership. Update `docs/generated/index.md` to say `docs/generated/openai-blueprint/` mirrors `docs/openai/` and `docs/generated/ship-by-sunday-blueprint/` mirrors `docs/ship-by-sunday/`. Add or document a repeatable mirror check. Decide whether `docs/openai/design-checklist/` remains the compiler input and historical source basis, or whether the compiler should switch to `docs/openai/design-pack/`. The preferred final shape is that `docs/openai/design-pack/` is the vanilla baseline for active use, while `docs/openai/design-checklist/` is explicitly historical source basis.
+After the active docs are truthful, define source-pack and generated-mirror ownership. Update `docs/generated/index.md` to say `docs/generated/openai-codebase/` mirrors `docs/openai/` and `docs/generated/ship-by-sunday-codebase/` mirrors `docs/ship-by-sunday/`. Add or document a repeatable mirror check. Decide whether `docs/openai/design-checklist/` remains the compiler input and historical source basis, or whether the compiler should switch to `docs/openai/design-pack/`. The preferred final shape is that `docs/openai/design-pack/` is the vanilla baseline for active use, while `docs/openai/design-checklist/` is explicitly historical source basis.
 
-Then reconcile prompt and Program duplication. Do not delete `docs/prompts/execplan-*` until `packages/blueprint-compiler/src/server/template-loader.ts`, `packages/blueprint-compiler/src/generated-docs/generated-doc-paths.ts`, `packages/blueprint-compiler/src/repo-root.ts`, `packages/blueprint-compiler/src/blueprints/render-prompt-pack.ts`, and matching tests no longer require those files. If the repo keeps both prompt families, label one as repo-agent prompts and one as generated-starter prompts so readers do not treat them as competing current truth. Thin `docs/programs/README.md`, `docs/programs/active/index.md`, and `docs/prompts/README.md` so `docs/programs/PROGRAMS.md` remains the canonical Program contract.
+Then reconcile prompt and Program duplication. Do not delete `docs/prompts/execplan-*` until `packages/codebase-compiler/src/server/template-loader.ts`, `packages/codebase-compiler/src/generated-docs/generated-doc-paths.ts`, `packages/codebase-compiler/src/repo-root.ts`, `packages/codebase-compiler/src/codebases/render-prompt-pack.ts`, and matching tests no longer require those files. If the repo keeps both prompt families, label one as repo-agent prompts and one as generated-starter prompts so readers do not treat them as competing current truth. Thin `docs/programs/README.md`, `docs/programs/active/index.md`, and `docs/prompts/README.md` so `docs/programs/PROGRAMS.md` remains the canonical Program contract.
 
 Finally, record the CI compatibility gate. Current branch protection requires `browser-smoke` and `cli`, so the implementation should leave the no-op jobs in `.github/workflows/ci.yml` and keep compatibility-shim language truthful. If branch protection is updated before this milestone runs, query it again; only then may the implementation remove the no-op jobs and the compatibility-shim language from `.github/codex/release-policy.md` and `docs/release-workflow.md`.
 
@@ -133,11 +133,11 @@ This milestone fixes active docs that point at missing, wrong-repo, or stale sur
 
 ### Milestone 3: Source-Pack And Generated-Mirror Boundary
 
-This milestone makes `docs/openai/`, `docs/ship-by-sunday/`, and `docs/generated/` understandable and safe to edit. It defines which docs are primary edit targets, which are generated mirrors, and which compiler tests prove customer starter output. It resolves or records the `design-checklist` versus `design-pack` compiler-input mismatch. Success is shown by mirror diff checks and blueprint compiler tests if compiler references change.
+This milestone makes `docs/openai/`, `docs/ship-by-sunday/`, and `docs/generated/` understandable and safe to edit. It defines which docs are primary edit targets, which are generated mirrors, and which compiler tests prove customer starter output. It resolves or records the `design-checklist` versus `design-pack` compiler-input mismatch. Success is shown by mirror diff checks and codebase compiler tests if compiler references change.
 
 ### Milestone 4: Prompt And Program Entry Point Thinning
 
-This milestone removes active confusion around `exec-plan-*` versus `execplan-*` prompt files and around Program docs that repeat the same contract. It either migrates compiler references and tests before retiring older prompt names, or marks the older names as generated-starter-owned. It keeps `docs/programs/PROGRAMS.md` canonical and makes nearby README/index files route instead of re-explaining the whole system. Success is shown by Program lint, plan lint for this plan, and blueprint compiler tests if prompt paths change.
+This milestone removes active confusion around `exec-plan-*` versus `execplan-*` prompt files and around Program docs that repeat the same contract. It either migrates compiler references and tests before retiring older prompt names, or marks the older names as generated-starter-owned. It keeps `docs/programs/PROGRAMS.md` canonical and makes nearby README/index files route instead of re-explaining the whole system. Success is shown by Program lint, plan lint for this plan, and codebase compiler tests if prompt paths change.
 
 ### Milestone 5: Branch-Protection Compatibility Gate
 
@@ -145,7 +145,7 @@ This milestone records the live branch-protection gate around the no-op `browser
 
 ### Milestone 6: Final Validation And Handoff
 
-This milestone runs the full relevant proof set, updates this ExecPlan's living sections, and prepares the final PR handoff. Success is shown by passing markdown lint, plan lint, Program lint, mirror checks, blueprint compiler checks when relevant, root format/lint/typecheck if code changed, and clean diff hygiene.
+This milestone runs the full relevant proof set, updates this ExecPlan's living sections, and prepares the final PR handoff. Success is shown by passing markdown lint, plan lint, Program lint, mirror checks, codebase compiler checks when relevant, root format/lint/typecheck if code changed, and clean diff hygiene.
 
 ## Concrete Steps
 
@@ -185,25 +185,25 @@ This milestone runs the full relevant proof set, updates this ExecPlan's living 
 
 5. Define generated mirror policy and verify current mirror state:
 
-       diff -qr docs/openai docs/generated/openai-blueprint
-       diff -qr docs/ship-by-sunday docs/generated/ship-by-sunday-blueprint
+       diff -qr docs/openai docs/generated/openai-codebase
+       diff -qr docs/ship-by-sunday docs/generated/ship-by-sunday-codebase
        sed -n '1,120p' docs/generated/index.md
 
    Expected observation today is no output from both `diff -qr` commands. If that changes during implementation, either sync the mirrors from source or explain why the mirror policy changed.
 
 6. Resolve source-pack and design-pack ownership:
 
-       rg -n "design-checklist|design-pack" docs/openai docs/ship-by-sunday docs/generated packages/blueprint-compiler/src packages/blueprint-compiler/tests --glob '!docs/archive/**'
-       sed -n '1,140p' packages/blueprint-compiler/src/server/template-loader.ts
+       rg -n "design-checklist|design-pack" docs/openai docs/ship-by-sunday docs/generated packages/codebase-compiler/src packages/codebase-compiler/tests --glob '!docs/archive/**'
+       sed -n '1,140p' packages/codebase-compiler/src/server/template-loader.ts
 
    If switching compiler input from `docs/openai/design-checklist/*` to `docs/openai/design-pack/*`, update code, tests, generated mirrors, and docs in one slice. If not switching, update docs to say `design-checklist` remains compiler input and `design-pack` is active baseline material derived from it.
 
 7. Reconcile prompt families:
 
-       rg -n "execplan-|exec-plan-" docs/prompts docs/programs packages/blueprint-compiler/src packages/blueprint-compiler/tests
-       sed -n '1,140p' packages/blueprint-compiler/src/repo-root.ts
-       sed -n '1,160p' packages/blueprint-compiler/src/generated-docs/generated-doc-paths.ts
-       sed -n '1,140p' packages/blueprint-compiler/src/blueprints/render-prompt-pack.ts
+       rg -n "execplan-|exec-plan-" docs/prompts docs/programs packages/codebase-compiler/src packages/codebase-compiler/tests
+       sed -n '1,140p' packages/codebase-compiler/src/repo-root.ts
+       sed -n '1,160p' packages/codebase-compiler/src/generated-docs/generated-doc-paths.ts
+       sed -n '1,140p' packages/codebase-compiler/src/codebases/render-prompt-pack.ts
 
    Do not remove `docs/prompts/execplan-*` until all compiler references and tests are updated. If keeping both families, update `docs/prompts/README.md` to state which family is for repo agents and which is shipped to generated starter repos.
 
@@ -233,7 +233,7 @@ This milestone runs the full relevant proof set, updates this ExecPlan's living 
 
 The cleanup is accepted when active documentation gives a consistent current model without forcing readers through stale, duplicated, or historical lanes. A contributor should find one workflow strategy doc beside the workflow files, one command map with links from other docs, an accurate contributor guide link, no active Worker-specific tech-debt tracker, no broken product-contract pointer, and no generated mirror presented as primary doctrine.
 
-Compiler-owned docs are accepted only when tests prove the generated starter still contains the expected prompt and docs assets. If prompt paths or source-pack paths change, `packages/blueprint-compiler` tests must pass. If prompt paths do not change, docs must clearly explain why both prompt families exist.
+Compiler-owned docs are accepted only when tests prove the generated starter still contains the expected prompt and docs assets. If prompt paths or source-pack paths change, `packages/codebase-compiler` tests must pass. If prompt paths do not change, docs must clearly explain why both prompt families exist.
 
 CI compatibility cleanup is accepted only when branch protection and PR CI agree. With the current branch-protection state, acceptance means the no-op jobs remain and docs accurately call them compatibility contexts. Removing no-op jobs is not allowed until `dev` and `main` branch protection no longer require those contexts and the next PR does not wait on missing required checks.
 
@@ -244,12 +244,12 @@ Run these commands from `/Users/parkerrex/Developer/ship-by-sunday` for the fina
        bun run markdown:lint -- --paths README.md CONTRIBUTING.md AGENTS.md GEMINI.md .github/codex .github/workflows/README.md docs/index.md docs/QUALITY_SCORE.md docs/RELIABILITY.md docs/release-workflow.md docs/design-docs docs/exec-plans docs/product-specs docs/programs docs/prompts docs/generated apps/web/content/docs
        bun run plans:lint -- --plan docs/exec-plans/completed/2026-04-25-codex-style-docs-cleanup.md
        bun run programs:lint
-       diff -qr docs/openai docs/generated/openai-blueprint
-       diff -qr docs/ship-by-sunday docs/generated/ship-by-sunday-blueprint
-       bun run --cwd packages/blueprint-compiler format:check
-       bun run --cwd packages/blueprint-compiler lint
-       bun run --cwd packages/blueprint-compiler typecheck
-       bun run --cwd packages/blueprint-compiler test
+       diff -qr docs/openai docs/generated/openai-codebase
+       diff -qr docs/ship-by-sunday docs/generated/ship-by-sunday-codebase
+       bun run --cwd packages/codebase-compiler format:check
+       bun run --cwd packages/codebase-compiler lint
+       bun run --cwd packages/codebase-compiler typecheck
+       bun run --cwd packages/codebase-compiler test
        git diff --check
 
    If implementation changes TypeScript, package scripts, workflow YAML, or compiler code beyond documentation text, also run the root quality surface:
@@ -271,7 +271,7 @@ Most changes in this plan are text edits and can be safely retried. Before makin
 
 Generated mirror cleanup must remain source-first. If `docs/generated/*` diverges from `docs/openai/*` or `docs/ship-by-sunday/*` accidentally, either resync from the source pack or revert the generated-only change. Do not hand-edit generated mirrors as the primary source of truth.
 
-Prompt cleanup must be code-aware. If removing or renaming prompt files breaks blueprint compiler tests or repo-root detection, restore the old files or add explicit compatibility shims until the compiler migration is complete. Never delete `docs/prompts/execplan-*` just because `docs/prompts/exec-plan-*` looks newer.
+Prompt cleanup must be code-aware. If removing or renaming prompt files breaks codebase compiler tests or repo-root detection, restore the old files or add explicit compatibility shims until the compiler migration is complete. Never delete `docs/prompts/execplan-*` just because `docs/prompts/exec-plan-*` looks newer.
 
 CI compatibility cleanup must be reversible. If `browser-smoke` or `cli` no-op jobs are removed and branch protection still waits on them, restore the jobs immediately or update branch protection before rerunning PR CI. Record the recovery in `Surprises & Discoveries` and `Decision Log`.
 
@@ -285,8 +285,8 @@ Read-only research identified these concrete current issues:
        docs/exec-plans/tech-debt-tracker.md contained Worker-specific debt: fixed by resetting the active tracker to SBS-owned debt only.
        docs/product-specs/index.md linked to missing docs/design-docs/product-contract.md: fixed by routing to docs/PRODUCT_SENSE.md until a dedicated product spec exists.
        docs/prompts contains both exec-plan-* and execplan-* families: fixed by documenting repo-agent versus generated-starter ownership.
-       packages/blueprint-compiler still references docs/prompts/execplan-*: preserved intentionally and covered by blueprint compiler tests.
-       packages/blueprint-compiler/src/repo-root.ts uses docs/prompts/execplan-execution-loop.md as a marker: preserved intentionally.
+       packages/codebase-compiler still references docs/prompts/execplan-*: preserved intentionally and covered by codebase compiler tests.
+       packages/codebase-compiler/src/repo-root.ts uses docs/prompts/execplan-execution-loop.md as a marker: preserved intentionally.
        docs/generated was linked from docs/index.md as a landing zone: fixed by demoting it to generated mirror reference material.
        docs/openai/design-pack is the human-facing vanilla baseline while template-loader.ts still reads docs/openai/design-checklist: fixed by documenting the compiler input boundary.
        .github/workflows/ci.yml still has no-op browser-smoke and cli compatibility jobs: preserved because branch protection still requires them.
@@ -300,9 +300,9 @@ Milestone 1 validation:
 Milestone validation receipts:
 
        bun run markdown:lint -- --paths CONTRIBUTING.md docs/exec-plans/tech-debt-tracker.md docs/product-specs/index.md docs/design-docs/encyclopedia.md todo.md README.md docs/QUALITY_SCORE.md docs/exec-plans/index.md
-       bun run markdown:lint -- --paths docs/generated/index.md docs/index.md docs/openai/design-checklist/README.md docs/openai/design-pack/README.md docs/generated/openai-blueprint/design-checklist/README.md docs/generated/openai-blueprint/design-pack/README.md
+       bun run markdown:lint -- --paths docs/generated/index.md docs/index.md docs/openai/design-checklist/README.md docs/openai/design-pack/README.md docs/generated/openai-codebase/design-checklist/README.md docs/generated/openai-codebase/design-pack/README.md
        bun run docs:generated:check
-       bun run --cwd packages/blueprint-compiler test
+       bun run --cwd packages/codebase-compiler test
        bun run programs:lint
        bun run markdown:lint -- --paths docs/programs docs/prompts
        gh api repos/ParkerRex/ship-by-sunday/branches/dev/protection --jq '.required_status_checks.contexts'
@@ -314,10 +314,10 @@ Final validation receipts:
        bun run plans:lint -- --plan docs/exec-plans/completed/2026-04-25-codex-style-docs-cleanup.md
        bun run programs:lint
        bun run docs:generated:check
-       bun run --cwd packages/blueprint-compiler format:check
-       bun run --cwd packages/blueprint-compiler lint
-       bun run --cwd packages/blueprint-compiler typecheck
-       bun run --cwd packages/blueprint-compiler test
+       bun run --cwd packages/codebase-compiler format:check
+       bun run --cwd packages/codebase-compiler lint
+       bun run --cwd packages/codebase-compiler typecheck
+       bun run --cwd packages/codebase-compiler test
        bun run format
        bun lint
        bun typecheck
@@ -341,8 +341,8 @@ Useful Codex model files to inspect during implementation:
 
 `docs/design-docs/scripts.md` is the preferred command map. README, reliability docs, release docs, and public docs should link to it rather than maintain separate long command inventories.
 
-`docs/openai/` and `docs/ship-by-sunday/` are source-pack lanes. `docs/generated/` is a generated mirror lane. Customer starter output is validated through `packages/blueprint-compiler` tests, not by reading `docs/generated/` alone.
+`docs/openai/` and `docs/ship-by-sunday/` are source-pack lanes. `docs/generated/` is a generated mirror lane. Customer starter output is validated through `packages/codebase-compiler` tests, not by reading `docs/generated/` alone.
 
-`packages/blueprint-compiler/src/server/template-loader.ts`, `packages/blueprint-compiler/src/generated-docs/generated-doc-paths.ts`, `packages/blueprint-compiler/src/repo-root.ts`, `packages/blueprint-compiler/src/blueprints/render-prompt-pack.ts`, and matching tests own any prompt or source-pack path migration.
+`packages/codebase-compiler/src/server/template-loader.ts`, `packages/codebase-compiler/src/generated-docs/generated-doc-paths.ts`, `packages/codebase-compiler/src/repo-root.ts`, `packages/codebase-compiler/src/codebases/render-prompt-pack.ts`, and matching tests own any prompt or source-pack path migration.
 
 `docs/programs/PROGRAMS.md` is the canonical Program contract. `docs/programs/README.md`, `docs/programs/active/index.md`, and `docs/prompts/README.md` should route to canonical contracts instead of competing with them.

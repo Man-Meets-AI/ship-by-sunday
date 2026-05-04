@@ -125,7 +125,7 @@ The second child settled the release tag pattern, future `release.json` version 
 
 The final planning brief pointer names `docs/programs/completed/2026-04-24-sbs-codex-release-reset/planning-brief-9.md`.
 
-The fifth child retired the helper CLI surface from checked-in code and docs: `packages/ship-by-sunday-cli/`, `bin/sbs`, root `sbs` and `sbs:check`, the `cli` CI job, active helper CLI docs, public docs navigation, and checked-in release-doc required-context references are gone. The child preserved the web app, `packages/blueprint-compiler`, `release.json`, `scripts/release/`, the `Tag Release` workflow, QA transitional proof, browser proof, and snapshot fallback. Live branch protection was inspected read-only and still reported the stale helper context on `dev` and `main`; post-merge operator commands are recorded in `docs/release-workflow.md`.
+The fifth child retired the helper CLI surface from checked-in code and docs: `packages/ship-by-sunday-cli/`, `bin/sbs`, root `sbs` and `sbs:check`, the `cli` CI job, active helper CLI docs, public docs navigation, and checked-in release-doc required-context references are gone. The child preserved the web app, `packages/codebase-compiler`, `release.json`, `scripts/release/`, the `Tag Release` workflow, QA transitional proof, browser proof, and snapshot fallback. Live branch protection was inspected read-only and still reported the stale helper context on `dev` and `main`; post-merge operator commands are recorded in `docs/release-workflow.md`.
 
 The sixth child replaced the shallow browser-smoke proof lane with source-level proof and removed `browser-smoke` from checked-in package scripts, Playwright config, and CI.
 
@@ -324,7 +324,7 @@ Do not let Plan 9 become implementation cleanup. It should update active docs, a
 
 Do not rewrite historical evidence just to make search output clean. Old changelog entries, completed ExecPlans, historical proof reports, and `docs/codex` archives can mention retired systems as history.
 
-Do not delete `packages/blueprint-compiler` or product generation paths while retiring the CLI. The CLI is downstream of the compiler. If deletion reveals reusable draft or generation logic that the web app still needs, move only that specific behavior into an existing non-CLI boundary and prove it with focused tests.
+Do not delete `packages/codebase-compiler` or product generation paths while retiring the CLI. The CLI is downstream of the compiler. If deletion reveals reusable draft or generation logic that the web app still needs, move only that specific behavior into an existing non-CLI boundary and prove it with focused tests.
 
 ## Outcomes & Retrospective
 

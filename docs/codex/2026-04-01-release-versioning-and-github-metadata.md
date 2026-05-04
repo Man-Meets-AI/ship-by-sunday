@@ -99,7 +99,7 @@ The main authoritative files and surfaces this plan must touch are:
 - GitHub repository About metadata
 - Git tags and GitHub Releases
 
-The current release candidate on `main` is the merge commit `71034dee51ff38b91c7ab2759149f861c4d64268`. There are no tags yet, and the repo-level blueprint versions already report `0.1.0`, so the first release tag can be created directly from the current `main` tip as `v0.1.0` once the release policy docs and fresh production billing proof are complete.
+The current release candidate on `main` is the merge commit `71034dee51ff38b91c7ab2759149f861c4d64268`. There are no tags yet, and the repo-level codebase versions already report `0.1.0`, so the first release tag can be created directly from the current `main` tip as `v0.1.0` once the release policy docs and fresh production billing proof are complete.
 
 ## Plan of Work
 

@@ -1,3 +1,3 @@
-import { buildRepoDownloadTraceIncludes } from "@shipbysunday/blueprint-compiler/server";
+import { buildRepoDownloadTraceIncludes } from "@shipbysunday/codebase-compiler/server";
 
 export const repoDownloadTraceIncludes = buildRepoDownloadTraceIncludes();

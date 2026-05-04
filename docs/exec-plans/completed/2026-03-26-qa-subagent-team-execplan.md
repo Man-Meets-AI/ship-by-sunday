@@ -23,29 +23,29 @@ The important behavioral proof is not only that files exist. It is that a fresh 
 - [x] 2026-03-26 20:28 EDT — Confirmed the current control-plane blocker that must be fixed before the new team can be trusted: `bun run qa:validate` currently fails because `qa/test-inventory.csv` is missing a row for `apps/web/tests/integration-ui/execute-ship-page.test.tsx`.
 - [x] 2026-03-26 21:26 EDT — Grilled the plan against the desired operating model. Locked the core phase-1 stance: chat-first `qa-lead` is the main product experience, specialist roles are optional support behind the scenes, local review artifacts are created only for material reviews, canonical `qa/` truth changes require a review-first confirmation step, and the lead may auto-run only the minimal safe local set (`qa:validate`, `qa:run-pack --dry-run`, and directly relevant focused `vitest` runs).
 - [x] 2026-03-26 21:26 EDT — Locked the explicit execution rule for phase 1: when the user explicitly asks the QA team to run browser QA, `qa-lead` may delegate to `browser-runner` and use the existing browser and pack workflow under the current `qa/AGENTS.md` safety rules.
-- [x] 2026-03-26 21:51 EDT — Closed Milestone 1. `bun run qa:validate` was already green in the current tree, but `bun run qa:inventory:sync` still degraded curated blueprint and execute mappings back to heuristic defaults. Updated `qa/scripts/generate-test-inventory.mjs` so sync preserves existing curated rows for known files and only falls back to heuristics for genuinely new files. Also repaired the two blueprint-stage inventory rows whose unquoted rationale commas made the CSV non-idempotent under parsing. Re-ran `bun run qa:inventory:sync` and `bun run qa:validate` successfully.
+- [x] 2026-03-26 21:51 EDT — Closed Milestone 1. `bun run qa:validate` was already green in the current tree, but `bun run qa:inventory:sync` still degraded curated codebase and execute mappings back to heuristic defaults. Updated `qa/scripts/generate-test-inventory.mjs` so sync preserves existing curated rows for known files and only falls back to heuristics for genuinely new files. Also repaired the two codebase-stage inventory rows whose unquoted rationale commas made the CSV non-idempotent under parsing. Re-ran `bun run qa:inventory:sync` and `bun run qa:validate` successfully.
 - [x] 2026-03-26 21:55 EDT — Closed Milestone 2. Added repo-scoped `.codex/config.toml` plus six QA role files under `.codex/agents/`, with `qa_lead` as the default lead-first role and the rest framed as optional support specialists.
 - [x] 2026-03-26 21:56 EDT — Closed Milestones 3 and 4. Added `.agents/skills/qa-team/SKILL.md`, `qa/scripts/team.mjs`, `qa/templates/team-review.md`, `qa/reviews/README.md`, `.gitignore` coverage for `qa/reviews/local/`, and root `package.json` script wiring. Updated `qa/AGENTS.md`, `qa/README.md`, and `qa/scripts/validate.mjs` so the lead-first QA team is documented and checked by the fast validator.
-- [x] 2026-03-26 22:00 EDT — Closed Milestone 5 with a negative feature verdict. Scaffolded `qa/reviews/local/2026-03-26-blueprint-stage-save-feedback.md`, ran the focused QA-team proof on the blueprint-stage save-feedback slice, and recorded the outcome. Structural QA-team proof is green (`qa:validate`, `qa:team --dry-run`, `codex --help`, `codex exec` smoke). The reviewed blueprint-flow slice itself is not merge-safe in the latest worktree state because the focused blueprint-stage integration-ui suite is red and `bun run --cwd apps/web lint` fails on blueprint-flow files.
-- [x] 2026-03-26 22:25 EDT — Followed the negative blueprint-stage verdict to repair the in-scope regressions. Restored the blueprint-stage page count, first-missing-field focus after incomplete saves, and sidebar missing-field labels. The narrowed proof is green again: `tests/integration-ui/blueprint-stage-page.test.tsx`, `tests/integration-ui/blueprint-stage-sidebar.test.tsx`, and `tests/unit/blueprint-step-save-feedback.test.ts` now pass. Branch-wide `apps/web` lint is still red, but the remaining blockers are outside this narrowed blueprint-stage review (`features/observability/components/error-boundary-screen.tsx` and `components/ui/sparkles.tsx`).
+- [x] 2026-03-26 22:00 EDT — Closed Milestone 5 with a negative feature verdict. Scaffolded `qa/reviews/local/2026-03-26-codebase-stage-save-feedback.md`, ran the focused QA-team proof on the codebase-stage save-feedback slice, and recorded the outcome. Structural QA-team proof is green (`qa:validate`, `qa:team --dry-run`, `codex --help`, `codex exec` smoke). The reviewed codebase-flow slice itself is not merge-safe in the latest worktree state because the focused codebase-stage integration-ui suite is red and `bun run --cwd apps/web lint` fails on codebase-flow files.
+- [x] 2026-03-26 22:25 EDT — Followed the negative codebase-stage verdict to repair the in-scope regressions. Restored the codebase-stage page count, first-missing-field focus after incomplete saves, and sidebar missing-field labels. The narrowed proof is green again: `tests/integration-ui/codebase-stage-page.test.tsx`, `tests/integration-ui/codebase-stage-sidebar.test.tsx`, and `tests/unit/codebase-step-save-feedback.test.ts` now pass. Branch-wide `apps/web` lint is still red, but the remaining blockers are outside this narrowed codebase-stage review (`features/observability/components/error-boundary-screen.tsx` and `components/ui/sparkles.tsx`).
 - [x] 2026-03-26 22:26 EDT — Cleared the remaining branch-wide lint blockers with minimal unrelated cleanup in `features/observability/components/error-boundary-screen.tsx` and `components/ui/sparkles.tsx`. `bun run --cwd apps/web lint` is now green again.
-- [x] 2026-03-26 22:27 EDT — Final validation passed for the implemented slice: `bun run qa:validate`, `bunx vitest run --project integration-ui tests/integration-ui/blueprint-stage-page.test.tsx tests/integration-ui/blueprint-stage-sidebar.test.tsx`, `bunx vitest run --project unit tests/unit/blueprint-step-save-feedback.test.ts`, `bun run --cwd apps/web lint`, and `bun run build`.
-- [x] 2026-03-26 22:39 EDT — Completed the first concrete Phase 2 slice. Codified deterministic fan-out for material reviews in `.codex/agents/qa-lead.toml`, `.agents/skills/qa-team/SKILL.md`, `qa/AGENTS.md`, `qa/README.md`, `qa/templates/team-review.md`, and `qa/scripts/team.mjs`. `bun run qa:team -- --slug=blueprint-stage-save-feedback --base=main --dry-run` now emits explicit advisory and execution specialist plans.
+- [x] 2026-03-26 22:27 EDT — Final validation passed for the implemented slice: `bun run qa:validate`, `bunx vitest run --project integration-ui tests/integration-ui/codebase-stage-page.test.tsx tests/integration-ui/codebase-stage-sidebar.test.tsx`, `bunx vitest run --project unit tests/unit/codebase-step-save-feedback.test.ts`, `bun run --cwd apps/web lint`, and `bun run build`.
+- [x] 2026-03-26 22:39 EDT — Completed the first concrete Phase 2 slice. Codified deterministic fan-out for material reviews in `.codex/agents/qa-lead.toml`, `.agents/skills/qa-team/SKILL.md`, `qa/AGENTS.md`, `qa/README.md`, `qa/templates/team-review.md`, and `qa/scripts/team.mjs`. `bun run qa:team -- --slug=codebase-stage-save-feedback --base=main --dry-run` now emits explicit advisory and execution specialist plans.
 - [x] 2026-03-26 22:40 EDT — Verified that the deeper delegation is real, not just documented. A bounded `codex exec` material-review smoke visibly spawned the advisory QA trio (`journey_mapper`, `coverage_analyst`, `gap_reviewer`) alongside the repo’s standard review helpers before producing the verdict.
-- [x] 2026-03-26 22:42 EDT — Used the Phase 2 smoke findings to repair canonical QA-truth drift. Updated `qa/journeys.csv`, `qa/coverage.csv`, `qa/test-inventory.csv`, `qa/AGENTS.md`, and `qa/README.md` so the blueprint workbench is now described as autosave-backed save feedback plus a single `Continue` action instead of the stale two-intent save model. Added the newly present `apps/web/tests/unit/use-autosave.test.tsx` to inventory and revalidated the control plane.
-- [x] 2026-03-26 22:38 EDT — Restored the broader blueprint-funnel QA contract after the Phase 2 smoke surfaced adjacent Start and Review regressions. Re-added the blueprint page titles expected by the integration-ui mocks, then reran `bun run --cwd apps/web test:integration:ui -- tests/integration-ui/blueprint-start-page.test.tsx tests/integration-ui/blueprint-stage-page.test.tsx tests/integration-ui/blueprint-review-page.test.tsx tests/integration-ui/blueprint-stage-sidebar.test.tsx` successfully with 4 files and 12 tests passing.
+- [x] 2026-03-26 22:42 EDT — Used the Phase 2 smoke findings to repair canonical QA-truth drift. Updated `qa/journeys.csv`, `qa/coverage.csv`, `qa/test-inventory.csv`, `qa/AGENTS.md`, and `qa/README.md` so the codebase workbench is now described as autosave-backed save feedback plus a single `Continue` action instead of the stale two-intent save model. Added the newly present `apps/web/tests/unit/use-autosave.test.tsx` to inventory and revalidated the control plane.
+- [x] 2026-03-26 22:38 EDT — Restored the broader codebase-funnel QA contract after the Phase 2 smoke surfaced adjacent Start and Review regressions. Re-added the codebase page titles expected by the integration-ui mocks, then reran `bun run --cwd apps/web test:integration:ui -- tests/integration-ui/codebase-start-page.test.tsx tests/integration-ui/codebase-stage-page.test.tsx tests/integration-ui/codebase-review-page.test.tsx tests/integration-ui/codebase-stage-sidebar.test.tsx` successfully with 4 files and 12 tests passing.
 - [x] 2026-03-26 22:45 EDT — Re-ran the broader validation surface on the latest state after the Phase 2 QA-truth alignment edits. `bun run qa:validate` is green with 126 inventory rows, and `bun run build` is green again.
 - [x] 2026-03-26 22:47 EDT — Added command-backed review support to the local QA artifact workflow. `qa/scripts/team.mjs`, `qa/templates/team-review.md`, `qa/reviews/README.md`, `qa/README.md`, and `.agents/skills/qa-team/SKILL.md` now distinguish advisory versus command-backed reviews, carry an environment label, and preserve explicit command evidence for `release_summarizer`.
 - [x] 2026-03-26 22:47 EDT — Fixed a real Phase 2 scaffold bug: `qa:team` argument parsing was truncating command strings that contained `=` (for example `--pack=default_ship`). Updated `qa/scripts/team.mjs` to split CLI arguments on the first `=` only, then revalidated both advisory and command-backed dry runs.
-- [x] 2026-03-26 22:49 EDT — Generated and filled a real command-backed local review artifact at `qa/reviews/local/2026-03-26-blueprint-stage-save-feedback.md`. The artifact now records the actual command evidence (`qa:validate`, `qa:run-pack --dry-run`, the full blueprint integration-ui subset, the unit save-feedback test, lint, and build) and a release-summarizer-ready merge-confidence verdict.
-- [x] 2026-03-26 23:37 EDT — Command-backed QA review surfaced another live control-plane drift: `apps/web/tests/unit/use-blueprint-stage-step-state.test.tsx` existed without an inventory row, causing `qa:validate` to fail. Added a curated row to `qa/test-inventory.csv` that maps it to the shared blueprint-workbench contract and revalidated the control plane at 127 inventory rows.
-- [x] 2026-03-26 23:49 EDT — Ran the optional safe-environment browser proof on `dev-local`. `PLAYWRIGHT_BASE_URL=http://localhost:3000 bun run qa:run-pack -- --pack=default_ship --slug=phase2-browser-proof` passed after aligning stale browser assertions with the current blueprint-stage and review-page copy. Browser smoke, the blueprint integration-ui subset, and the local-auth `@default_ship` Playwright lane all completed successfully. Recorded the result in `qa/runs/local/2026-03-26-phase2-browser-proof-default_ship.md` and upgraded the command-backed review artifact to a browser-backed `dev-local` verdict.
+- [x] 2026-03-26 22:49 EDT — Generated and filled a real command-backed local review artifact at `qa/reviews/local/2026-03-26-codebase-stage-save-feedback.md`. The artifact now records the actual command evidence (`qa:validate`, `qa:run-pack --dry-run`, the full codebase integration-ui subset, the unit save-feedback test, lint, and build) and a release-summarizer-ready merge-confidence verdict.
+- [x] 2026-03-26 23:37 EDT — Command-backed QA review surfaced another live control-plane drift: `apps/web/tests/unit/use-codebase-stage-step-state.test.tsx` existed without an inventory row, causing `qa:validate` to fail. Added a curated row to `qa/test-inventory.csv` that maps it to the shared codebase-workbench contract and revalidated the control plane at 127 inventory rows.
+- [x] 2026-03-26 23:49 EDT — Ran the optional safe-environment browser proof on `dev-local`. `PLAYWRIGHT_BASE_URL=http://localhost:3000 bun run qa:run-pack -- --pack=default_ship --slug=phase2-browser-proof` passed after aligning stale browser assertions with the current codebase-stage and review-page copy. Browser smoke, the codebase integration-ui subset, and the local-auth `@default_ship` Playwright lane all completed successfully. Recorded the result in `qa/runs/local/2026-03-26-phase2-browser-proof-default_ship.md` and upgraded the command-backed review artifact to a browser-backed `dev-local` verdict.
 
 ## Surprises & Discoveries
 
-The repository is further along than a greenfield plan would suggest. `qa/AGENTS.md` already names the right operating roles, `qa/README.md` already describes packs and environments clearly, and `qa/scripts/run-pack.mjs` already codifies the blueprint-funnel integration-ui proof plus browser pack workflow. This work should therefore extend the existing operating system, not replace it with a parallel one.
+The repository is further along than a greenfield plan would suggest. `qa/AGENTS.md` already names the right operating roles, `qa/README.md` already describes packs and environments clearly, and `qa/scripts/run-pack.mjs` already codifies the codebase-funnel integration-ui proof plus browser pack workflow. This work should therefore extend the existing operating system, not replace it with a parallel one.
 
-The most important missing layer is Codex-specific, not QA-specific. There is no project `.codex/config.toml` yet, so Codex currently has no repo-scoped subagent roster for QA work. The official customization order also matters here: in practical repository terms, `AGENTS.md` defines conventions, skills blueprint repeatable workflows, and subagents should be added after those layers exist rather than used as a substitute for them.
+The most important missing layer is Codex-specific, not QA-specific. There is no project `.codex/config.toml` yet, so Codex currently has no repo-scoped subagent roster for QA work. The official customization order also matters here: in practical repository terms, `AGENTS.md` defines conventions, skills codebase repeatable workflows, and subagents should be added after those layers exist rather than used as a substitute for them.
 
 The current validator already proves why a real control plane matters. `bun run qa:validate` fails today with `qa/test-inventory.csv is missing an inventory row for apps/web/tests/integration-ui/execute-ship-page.test.tsx`. That means the first step of the new team cannot be role choreography; it must be making the existing source of truth accurate enough that the new roles are operating on live data.
 
@@ -55,23 +55,23 @@ The implementation needs a sharper split between “one strong QA mind” and �
 
 The control boundary around writes also needed to be frozen more precisely. The QA team can auto-create ignored local review artifacts for material reviews, and the lead can auto-run the minimal safe local set, but canonical `qa/coverage.csv`, `qa/test-inventory.csv`, and similar source-of-truth files should not change just because the user said “talk to QA.” The lead may prepare those changes, but it must ask for confirmation before applying them.
 
-Milestone 1 revealed a subtler control-plane problem than the original missing-row blocker. In the current tree, `bun run qa:validate` was already green, but `bun run qa:inventory:sync` was not idempotent: it overwrote curated scenario mappings such as `EXECUTE-01`, `BLUEPRINT-09`, and `BLUEPRINT-08` with generic heuristic defaults. That meant the inventory looked healthy until someone refreshed it, at which point the QA semantics silently regressed.
+Milestone 1 revealed a subtler control-plane problem than the original missing-row blocker. In the current tree, `bun run qa:validate` was already green, but `bun run qa:inventory:sync` was not idempotent: it overwrote curated scenario mappings such as `EXECUTE-01`, `CODEBASE-09`, and `CODEBASE-08` with generic heuristic defaults. That meant the inventory looked healthy until someone refreshed it, at which point the QA semantics silently regressed.
 
-The root cause was twofold. First, `qa/scripts/generate-test-inventory.mjs` always regenerated rows from filename heuristics instead of preserving the already-curated inventory entries for unchanged files. Second, two blueprint-stage inventory rows included comma-containing rationale text without CSV quoting, so any parser-based round-trip truncated them. The practical fix was to preserve existing rows for known files, use heuristics only for genuinely new files, and quote those blueprint-stage rationale fields so sync remains stable.
+The root cause was twofold. First, `qa/scripts/generate-test-inventory.mjs` always regenerated rows from filename heuristics instead of preserving the already-curated inventory entries for unchanged files. Second, two codebase-stage inventory rows included comma-containing rationale text without CSV quoting, so any parser-based round-trip truncated them. The practical fix was to preserve existing rows for known files, use heuristics only for genuinely new files, and quote those codebase-stage rationale fields so sync remains stable.
 
-The recent-feature proof also exposed the exact behavior this QA team is supposed to make easy to see: infrastructure health and feature health are not the same thing. The lead-first QA layer validated cleanly and the `codex exec` smoke path did pick up the `qa-team` skill plus the repo-scoped QA roles, but the blueprint-flow slice it reviewed ended in a negative verdict on the latest worktree state. The focused unit save-feedback proof stayed green, while the focused integration-ui blueprint-stage suite later flipped red and `bun run --cwd apps/web lint` failed on blueprint-flow files. That is the right outcome for the system: the team worked, and it caught a real issue instead of papering it over.
+The recent-feature proof also exposed the exact behavior this QA team is supposed to make easy to see: infrastructure health and feature health are not the same thing. The lead-first QA layer validated cleanly and the `codex exec` smoke path did pick up the `qa-team` skill plus the repo-scoped QA roles, but the codebase-flow slice it reviewed ended in a negative verdict on the latest worktree state. The focused unit save-feedback proof stayed green, while the focused integration-ui codebase-stage suite later flipped red and `bun run --cwd apps/web lint` failed on codebase-flow files. That is the right outcome for the system: the team worked, and it caught a real issue instead of papering it over.
 
-Continuing execution also proved the value of keeping the review scope explicit. The blueprint-stage save-feedback slice was repairable without touching the broader unrelated lint blockers elsewhere in the branch. After restoring page-position feedback, first-invalid-field focus, and the sidebar’s human-readable missing-field labels, the narrowed blueprint-stage proof turned green again while branch-wide lint still stayed red on unrelated files. The QA artifact now reflects that narrower positive verdict instead of the earlier all-branch negative one.
+Continuing execution also proved the value of keeping the review scope explicit. The codebase-stage save-feedback slice was repairable without touching the broader unrelated lint blockers elsewhere in the branch. After restoring page-position feedback, first-invalid-field focus, and the sidebar’s human-readable missing-field labels, the narrowed codebase-stage proof turned green again while branch-wide lint still stayed red on unrelated files. The QA artifact now reflects that narrower positive verdict instead of the earlier all-branch negative one.
 
-The unrelated lint blockers also turned out to be cheap to clear once the blueprint-stage slice was stable again. That let the branch return to a green lint gate without reopening the blueprint-flow changeset or muddying the QA-team proof.
+The unrelated lint blockers also turned out to be cheap to clear once the codebase-stage slice was stable again. That let the branch return to a green lint gate without reopening the codebase-flow changeset or muddying the QA-team proof.
 
-With build green as well, Phase 1 now has the stronger outcome the plan wanted: the repo-scoped QA team exists, the fast QA control-plane checks are green, the example blueprint-stage slice was reviewed and repaired back to green, and the standard app lint/build gates pass again.
+With build green as well, Phase 1 now has the stronger outcome the plan wanted: the repo-scoped QA team exists, the fast QA control-plane checks are green, the example codebase-stage slice was reviewed and repaired back to green, and the standard app lint/build gates pass again.
 
-The Phase 2 smoke uncovered a different class of problem than code regression: stale QA language. Once the lead actually fanned out to `journey_mapper`, `coverage_analyst`, and `gap_reviewer`, the specialists all converged on the same gap: the live blueprint workbench had moved to autosave-backed save feedback and a single `Continue` action, while the canonical QA rows still described “Save and continue / Save and stay.” That mismatch would have kept producing conservative or confusing QA verdicts even when the code was healthy.
+The Phase 2 smoke uncovered a different class of problem than code regression: stale QA language. Once the lead actually fanned out to `journey_mapper`, `coverage_analyst`, and `gap_reviewer`, the specialists all converged on the same gap: the live codebase workbench had moved to autosave-backed save feedback and a single `Continue` action, while the canonical QA rows still described “Save and continue / Save and stay.” That mismatch would have kept producing conservative or confusing QA verdicts even when the code was healthy.
 
 The smoke also surfaced a new untracked test file, `apps/web/tests/unit/use-autosave.test.tsx`. That was useful evidence that the autosave model had become real enough to deserve canonical QA vocabulary, and it proved the inventory/validator discipline from Milestone 1 was still doing its job.
 
-Later command-backed review work exposed the same class of issue again with `apps/web/tests/unit/use-blueprint-stage-step-state.test.tsx`. That repetition is useful, not alarming: it shows the stronger review workflow is actually exercising the control plane, not just the app code. The right response was the same as Milestone 1: keep the inventory truthful as the test tree evolves.
+Later command-backed review work exposed the same class of issue again with `apps/web/tests/unit/use-codebase-stage-step-state.test.tsx`. That repetition is useful, not alarming: it shows the stronger review workflow is actually exercising the control plane, not just the app code. The right response was the same as Milestone 1: keep the inventory truthful as the test tree evolves.
 
 Evidence from current repo inspection:
 
@@ -80,7 +80,7 @@ Evidence from current repo inspection:
 
     qa/scripts/run-pack.mjs
     default_ship already runs qa:validate, qa:personas:prepare, browser smoke,
-    the blueprint integration-ui suite, and the default-ship browser pack.
+    the codebase integration-ui suite, and the default-ship browser pack.
 
 ## Decision Log
 
@@ -141,28 +141,28 @@ Rationale: the user wants the team to “kinda do it all” when asked explicitl
 Date/Author: 2026-03-26 / Codex
 
 Decision: `qa:inventory:sync` must preserve curated inventory rows for unchanged test files and use filename heuristics only for newly discovered files.
-Rationale: the inventory file is both generated and curated. Rebuilding every row from heuristics makes the control plane look green while silently discarding richer QA mappings such as `EXECUTE-01`, `BLUEPRINT-08`, and `BLUEPRINT-09`. Preserving known rows keeps sync idempotent and still lets the script create starter rows for brand-new tests.
+Rationale: the inventory file is both generated and curated. Rebuilding every row from heuristics makes the control plane look green while silently discarding richer QA mappings such as `EXECUTE-01`, `CODEBASE-08`, and `CODEBASE-09`. Preserving known rows keeps sync idempotent and still lets the script create starter rows for brand-new tests.
 Date/Author: 2026-03-26 / Codex
 
 Decision: material QA reviews should use deterministic specialist fan-out instead of ad hoc lead-only judgment.
 Rationale: Phase 1 proved the lead-first experience worked, but the boundary between “lightweight question” and “material review” was still too soft. Phase 2 now makes feature diff reviews predictable: `journey_mapper`, `coverage_analyst`, and `gap_reviewer` fan out by default for material advisory reviews, while `browser_runner` and `release_summarizer` remain explicit escalation roles.
 Date/Author: 2026-03-26 / Codex
 
-Decision: the canonical QA truth must describe the live blueprint workbench as autosave-backed save feedback plus one primary `Continue` action.
-Rationale: the blueprint-flow implementation and tests no longer expose the older dual save-intent model. Leaving the old wording in `qa/` would make the QA team conservative for the wrong reason and would turn valid behavior into apparent drift.
+Decision: the canonical QA truth must describe the live codebase workbench as autosave-backed save feedback plus one primary `Continue` action.
+Rationale: the codebase-flow implementation and tests no longer expose the older dual save-intent model. Leaving the old wording in `qa/` would make the QA team conservative for the wrong reason and would turn valid behavior into apparent drift.
 Date/Author: 2026-03-26 / Codex
 
 ## Outcomes & Retrospective
 
-Implementation is complete for the current scope of this plan. The repository now has the intended two-layer QA system: `qa/` remains the product-readable operating system, and the repo-scoped Codex roles plus `qa-team` skill form the execution layer that makes the system feel like a real team. Phase 1 shipped the lead-first interface, support roster, local review artifacts, and validator-backed control-plane health. Phase 2 shipped deterministic material-review fan-out, command-backed artifact scaffolds, release-summarizer-ready verdict flow, and canonical QA-truth alignment with the live blueprint-workbench contract.
+Implementation is complete for the current scope of this plan. The repository now has the intended two-layer QA system: `qa/` remains the product-readable operating system, and the repo-scoped Codex roles plus `qa-team` skill form the execution layer that makes the system feel like a real team. Phase 1 shipped the lead-first interface, support roster, local review artifacts, and validator-backed control-plane health. Phase 2 shipped deterministic material-review fan-out, command-backed artifact scaffolds, release-summarizer-ready verdict flow, and canonical QA-truth alignment with the live codebase-workbench contract.
 
 The obvious risk is overbuilding orchestration before the existing control plane is clean. This plan intentionally starts with `qa:validate` health and inventory correctness before adding `.codex/` files or role prompts. A second risk is role sprawl. This plan avoids that by keeping the first roster to six roles total and by making browser execution opt-in or environment-gated rather than automatic on every feature.
 
 The first lesson from execution is that “green validator” was not enough. The inventory refresh path also had to preserve curated meaning, otherwise the QA layer would drift the next time someone ran the documented sync command. That gap is now closed.
 
-The second lesson is that the real proof milestone should stay outcome-first. Phase 1 is complete because the QA team now exists as a real repo-scoped interface, not because the example feature was green. In fact, the more useful proof was that the team returned a structured negative verdict when the blueprint-flow worktree drifted into failing integration-ui and lint states.
+The second lesson is that the real proof milestone should stay outcome-first. Phase 1 is complete because the QA team now exists as a real repo-scoped interface, not because the example feature was green. In fact, the more useful proof was that the team returned a structured negative verdict when the codebase-flow worktree drifted into failing integration-ui and lint states.
 
-The third lesson is that the QA artifact should track the latest scoped truth, not the first observed failure. The blueprint-stage slice was initially red, then repaired back to green in-scope, while unrelated branch-level lint blockers remained. The review artifact and this plan now both distinguish between those two states.
+The third lesson is that the QA artifact should track the latest scoped truth, not the first observed failure. The codebase-stage slice was initially red, then repaired back to green in-scope, while unrelated branch-level lint blockers remained. The review artifact and this plan now both distinguish between those two states.
 
 The fourth lesson is that better delegation quickly exposes truth drift. Once the lead reliably fanned out to the advisory specialists, the team became better at spotting when `qa/` itself was stale. That ended up being the real value of Phase 2: not more roles, but more reliable use of the existing ones and tighter alignment between repo reality and the control plane.
 
@@ -174,7 +174,7 @@ The optional browser follow-up was eventually run as well. That strengthened the
 
 The repository already has a journey-first QA operating system created in the earlier initiative documented at `docs/codex/2026-03-25-journey-first-qa-operating-system-execplan.md`. That work established the `qa/` control plane, the journey catalog in `qa/journeys.csv`, the coverage map in `qa/coverage.csv`, the full test inventory in `qa/test-inventory.csv`, the persona protocol in `qa/personas.json`, the run report template in `qa/templates/run-report.md`, the validator in `qa/scripts/validate.mjs`, and the pack orchestrator in `qa/scripts/run-pack.mjs`. This new plan is not allowed to replace that system. It must layer repo-scoped Codex role configuration and a team workflow on top of it.
 
-The current QA system already has the right nouns. `qa/AGENTS.md` defines five responsibilities: scenario mapper, test auditor, browser runner, gap reviewer, and release summarizer. `qa/README.md` explains the pack model: `default_ship`, `extended`, and `billing_integration`. `qa/scripts/run-pack.mjs` already executes those packs in plain Node and Bun commands. The current blueprint-funnel proof is especially important because the `default_ship` pack already runs browser smoke, the blueprint integration-ui suite, and the default-ship Playwright browser pack. The new subagent team must understand and reuse those existing commands instead of inventing different ones. In phase 1, `qa-lead` is the primary behavior layer and the rest of the roster is support, not mandatory fan-out.
+The current QA system already has the right nouns. `qa/AGENTS.md` defines five responsibilities: scenario mapper, test auditor, browser runner, gap reviewer, and release summarizer. `qa/README.md` explains the pack model: `default_ship`, `extended`, and `billing_integration`. `qa/scripts/run-pack.mjs` already executes those packs in plain Node and Bun commands. The current codebase-funnel proof is especially important because the `default_ship` pack already runs browser smoke, the codebase integration-ui suite, and the default-ship Playwright browser pack. The new subagent team must understand and reuse those existing commands instead of inventing different ones. In phase 1, `qa-lead` is the primary behavior layer and the rest of the roster is support, not mandatory fan-out.
 
 The repository does not yet have a project `.codex/` directory. That means the project currently has no checked-in Codex role definitions and no repo-scoped multi-agent configuration. The shared-skill side does exist: `.agents/skills/` is already part of the repo and includes `.agents/skills/qa-Browser/SKILL.md`. In practical terms, this means the implementation can safely add a new checked-in `.codex/config.toml` plus `.codex/agents/*.toml`, and it can add a new `.agents/skills/qa-team/` skill without colliding with existing project-local Codex config.
 
@@ -229,7 +229,7 @@ The names above are prescriptive for the first pass. A novice should not have to
 
 ## Plan of Work
 
-Start by repairing the current QA source of truth, because the new team cannot credibly reason over a broken inventory. The first implementation slice should make `bun run qa:validate` pass again by reconciling `qa/test-inventory.csv` with the live `apps/web/tests/` tree and by confirming any new blueprint-funnel tests are properly represented. Do that before adding any `.codex/` files. The QA team should never be built on known-stale coverage data.
+Start by repairing the current QA source of truth, because the new team cannot credibly reason over a broken inventory. The first implementation slice should make `bun run qa:validate` pass again by reconciling `qa/test-inventory.csv` with the live `apps/web/tests/` tree and by confirming any new codebase-funnel tests are properly represented. Do that before adding any `.codex/` files. The QA team should never be built on known-stale coverage data.
 
 Once the control plane is clean, add repo-scoped Codex role configuration. Create `.codex/config.toml` with multi-agent enabled and a lead-first role roster that points to per-role config files under `.codex/agents/`. In phase 1, `qa-lead` is the real product experience. The specialist role files should exist as thin support configs, but the lead should be able to do the whole job itself and only delegate when it judges that specialist help materially improves the review. The role files should point back to `qa/AGENTS.md` and the relevant `qa/` CSV or Markdown files instead of embedding a second policy document inside TOML.
 
@@ -237,13 +237,13 @@ After the role files exist, add a new shared skill at `.agents/skills/qa-team/`.
 
 Then add a small review-artifact layer. Create `qa/templates/team-review.md` plus `qa/reviews/README.md`, add `qa/reviews/local/` to `.gitignore`, and introduce a helper such as `qa/scripts/team.mjs` exposed as `bun run qa:team`. The helper should scaffold a dated local review folder or summary file using the current diff or an explicit base ref. It does not need to run Codex itself. Its main job is to support material reviews, not every lightweight chat. The lead may auto-create these ignored artifacts only when the review is substantial because it touched multiple journeys, ran commands, or produced a meaningful verdict.
 
-Finally, update the QA docs and validate the full flow on a real recent diff. `qa/AGENTS.md` should add a named `QA Lead` responsibility and rename or clarify the existing `Test Auditor` role into `Coverage Analyst`. `qa/README.md` should explain the difference between advisory reviews, safe local auto-run, explicit browser execution, and durable run evidence. The implementation must then prove the new team on a recent feature, such as the blueprint-stage save-feedback slice, by showing that the team maps it to `BLUEPRINT-02`, `BLUEPRINT-03`, `BLUEPRINT-04`, `BLUEPRINT-05`, and `BLUEPRINT-07`, recognizes the new integration-ui and unit proof, and correctly identifies whether browser evidence is still missing or already satisfied.
+Finally, update the QA docs and validate the full flow on a real recent diff. `qa/AGENTS.md` should add a named `QA Lead` responsibility and rename or clarify the existing `Test Auditor` role into `Coverage Analyst`. `qa/README.md` should explain the difference between advisory reviews, safe local auto-run, explicit browser execution, and durable run evidence. The implementation must then prove the new team on a recent feature, such as the codebase-stage save-feedback slice, by showing that the team maps it to `CODEBASE-02`, `CODEBASE-03`, `CODEBASE-04`, `CODEBASE-05`, and `CODEBASE-07`, recognizes the new integration-ui and unit proof, and correctly identifies whether browser evidence is still missing or already satisfied.
 
 ## Milestones
 
 ### Milestone 1: Restore QA control-plane health before adding subagents
 
-At the end of this milestone, `bun run qa:validate` passes again, `qa/test-inventory.csv` includes every current file under `apps/web/tests/`, and the current blueprint-funnel proof files are represented accurately enough that the new team can trust the control plane. This milestone should touch `qa/test-inventory.csv`, possibly `qa/coverage.csv`, and `qa/scripts/validate.mjs` only if the validator itself needs adjustment for legitimate new test types.
+At the end of this milestone, `bun run qa:validate` passes again, `qa/test-inventory.csv` includes every current file under `apps/web/tests/`, and the current codebase-funnel proof files are represented accurately enough that the new team can trust the control plane. This milestone should touch `qa/test-inventory.csv`, possibly `qa/coverage.csv`, and `qa/scripts/validate.mjs` only if the validator itself needs adjustment for legitimate new test types.
 
 Success for this milestone means a fresh agent can run `bun run qa:validate` from the repository root and get a clean result instead of the current missing-inventory-row error. That is the minimum trustworthy foundation for the rest of the plan.
 
@@ -267,7 +267,7 @@ Success means there is no ambiguity about whether `qa/` or `.codex/` is the sour
 
 ### Milestone 5: Phase 1 proof plus Phase 2 boundary
 
-At the end of this milestone, the team has been exercised against one recent feature slice, ideally the blueprint-stage save-feedback change. The review should produce a local team artifact for the material review showing the affected journeys, existing proof, remaining gaps, recommended runs, and final QA confidence. If the user explicitly asks for browser execution and a safe environment is available, `qa-lead` may delegate to `browser-runner` and use the existing browser workflow under `qa/AGENTS.md`. The milestone should also leave an explicit documented boundary that phase 2 is about deeper delegation and smarter fan-out, not about making the basic QA team useful for the first time.
+At the end of this milestone, the team has been exercised against one recent feature slice, ideally the codebase-stage save-feedback change. The review should produce a local team artifact for the material review showing the affected journeys, existing proof, remaining gaps, recommended runs, and final QA confidence. If the user explicitly asks for browser execution and a safe environment is available, `qa-lead` may delegate to `browser-runner` and use the existing browser workflow under `qa/AGENTS.md`. The milestone should also leave an explicit documented boundary that phase 2 is about deeper delegation and smarter fan-out, not about making the basic QA team useful for the first time.
 
 Success means the QA team feels real in practice, not only in files. A human should be able to ask the team about a feature and receive one coherent, lightly role-labeled answer, and should also be able to explicitly request browser execution without leaving the QA-team workflow.
 
@@ -310,7 +310,7 @@ Add `.agents/skills/qa-team/SKILL.md`, `qa/templates/team-review.md`, `qa/review
 Recommended command surface for the first implementation:
 
     $ cd /Users/parkerrex/Projects/ship-by-sunday
-    $ bun run qa:team -- --slug=blueprint-stage-save-feedback --base=main --dry-run
+    $ bun run qa:team -- --slug=codebase-stage-save-feedback --base=main --dry-run
 
 The expected observation is a created or planned local review artifact plus a short summary of the changed files and the recommended QA-team invocation. The helper does not need to launch Codex automatically in the first version.
 
@@ -321,10 +321,10 @@ When Milestone 4 starts, update the QA docs and validate the whole control plane
 
 The expected observation is still a clean validator result. If the validator is extended to assert the new `.codex/` or `qa/reviews/` assets, record that behavior in this plan once implementation proves it.
 
-When Milestone 5 starts, prove the team on the blueprint-stage save-feedback feature or another recent blueprint-funnel diff. The minimum advisory proof should include:
+When Milestone 5 starts, prove the team on the codebase-stage save-feedback feature or another recent codebase-funnel diff. The minimum advisory proof should include:
 
-    affected journeys: BLUEPRINT-02, BLUEPRINT-03, BLUEPRINT-04, BLUEPRINT-05, BLUEPRINT-07
-    current proof: blueprint-stage integration-ui tests and blueprint-step classifier unit test
+    affected journeys: CODEBASE-02, CODEBASE-03, CODEBASE-04, CODEBASE-05, CODEBASE-07
+    current proof: codebase-stage integration-ui tests and codebase-step classifier unit test
     gap judgment: browser pack still checks route reachability only unless stronger browser proof has been added by then
     verdict: merge-safe or ship-safe with stated confidence and remaining gaps
 
@@ -334,7 +334,7 @@ If a safe browser environment is declared and browser execution is explicitly re
     $ bun run qa:run-pack -- --pack=default_ship --dry-run
 
     $ cd /Users/parkerrex/Projects/ship-by-sunday/apps/web
-    $ bunx vitest run --project integration-ui tests/integration-ui/blueprint-stage-page.test.tsx tests/integration-ui/blueprint-stage-sidebar.test.tsx
+    $ bunx vitest run --project integration-ui tests/integration-ui/codebase-stage-page.test.tsx tests/integration-ui/codebase-stage-sidebar.test.tsx
 
 Use `dev` first, then `prod`, and only when the environment is explicitly safe and correctly configured as described in `qa/README.md` and `qa/AGENTS.md`.
 
@@ -354,7 +354,7 @@ The fifth acceptance criterion is that the advisory-first workflow is safe by de
 
 The sixth acceptance criterion is that the underlying control plane remains healthy. `bun run qa:validate` must pass after the implementation, and any new QA-team-specific files that become part of the control plane should be checked by that validator or by an equally fast companion check.
 
-The seventh acceptance criterion is that the system is proven on a recent real feature diff. A QA-team review of a recent blueprint-funnel change must produce an understandable verdict in product language, not implementation language.
+The seventh acceptance criterion is that the system is proven on a recent real feature diff. A QA-team review of a recent codebase-funnel change must produce an understandable verdict in product language, not implementation language.
 
 The eighth acceptance criterion is that canonical `qa/` truth remains controlled. During a normal QA-team interaction, the lead may prepare exact updates to files like `qa/coverage.csv` or `qa/test-inventory.csv`, but it must ask for confirmation before applying them.
 
@@ -363,7 +363,7 @@ The minimum validation set for this initiative should be:
     $ cd /Users/parkerrex/Projects/ship-by-sunday
     $ bun run qa:inventory:sync
     $ bun run qa:validate
-    $ bun run qa:team -- --slug=blueprint-stage-save-feedback --base=main --dry-run
+    $ bun run qa:team -- --slug=codebase-stage-save-feedback --base=main --dry-run
     $ bun run build
 
 If Codex CLI is available in the implementation environment, add a manual smoke proof:
@@ -400,8 +400,8 @@ The most important design constraint to preserve during implementation is that t
     bun run qa:validate
     -> qa/test-inventory.csv is missing an inventory row for apps/web/tests/integration-ui/execute-ship-page.test.tsx
 
-    Current blueprint-funnel pack behavior:
-    qa/scripts/run-pack.mjs already runs browser smoke, the blueprint integration-ui suite,
+    Current codebase-funnel pack behavior:
+    qa/scripts/run-pack.mjs already runs browser smoke, the codebase integration-ui suite,
     and the default-ship browser pack for default_ship.
 
     Desired final user invocation:
@@ -436,7 +436,7 @@ The most important design constraint to preserve during implementation is that t
     qa/reviews/README.md
 
     Manual smoke proof:
-    codex exec "Go talk to our QA team about the blueprint-stage-save-feedback feature diff against main..."
+    codex exec "Go talk to our QA team about the codebase-stage-save-feedback feature diff against main..."
     -> skill activated, repo QA roles engaged, advisory-first QA verdict returned.
 
     Phase-2 delegation proof:
@@ -447,16 +447,16 @@ The most important design constraint to preserve during implementation is that t
     plus the repo's standard read-only review helpers
 
     Material review artifact:
-    qa/reviews/local/2026-03-26-blueprint-stage-save-feedback.md
+    qa/reviews/local/2026-03-26-codebase-stage-save-feedback.md
 
     Browser-backed local run evidence:
     qa/runs/local/2026-03-26-phase2-browser-proof-default_ship.md
 
-    Latest blueprint-flow verdict from that artifact:
+    Latest codebase-flow verdict from that artifact:
     focused unit proof green
-    focused blueprint-stage integration-ui proof green
+    focused codebase-stage integration-ui proof green
     branch-wide apps/web lint green
-    feature verdict: ship-safe on dev-local for the blueprint-funnel UI slice; hosted or prod evidence remains separate work when needed
+    feature verdict: ship-safe on dev-local for the codebase-funnel UI slice; hosted or prod evidence remains separate work when needed
 
     Canonical QA-truth alignment after Phase 2:
     qa/journeys.csv now describes autosave-backed save feedback plus one Continue action

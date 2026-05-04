@@ -41,14 +41,14 @@ vi.mock("@/app/checkout/_components/checkout-button", () => ({
 
 import { homePageContent } from "@/app/_content/home-page";
 import HomePage from "@/app/_components/home-page/home-page";
-import { BlueprintDemoSectionBlock } from "@/app/_components/home-page/sections/blueprint-demo/blueprint-demo-section";
+import { CodebaseDemoSectionBlock } from "@/app/_components/home-page/sections/codebase-demo/codebase-demo-section";
 import {
-	HOME_PAGE_BLUEPRINT_DRAFT_STORAGE_KEY,
-	parseHomePageBlueprintDraftEnvelope,
-} from "@/app/_components/home-page/sections/blueprint-demo/home-page-blueprint-draft-storage";
-import { blueprintPageSections } from "@/lib/blueprint-flow/blueprint-page-sections";
+	HOME_PAGE_CODEBASE_DRAFT_STORAGE_KEY,
+	parseHomePageCodebaseDraftEnvelope,
+} from "@/app/_components/home-page/sections/codebase-demo/home-page-codebase-draft-storage";
+import { codebasePageSections } from "@/lib/codebase-flow/codebase-page-sections";
 
-describe("BlueprintDemoSectionBlock", () => {
+describe("CodebaseDemoSectionBlock", () => {
 	beforeEach(() => {
 		window.localStorage.clear();
 	});
@@ -59,7 +59,7 @@ describe("BlueprintDemoSectionBlock", () => {
 
 	it("renders all 7 canonical sections in order with foundation, design, and pricing interactive", () => {
 		render(
-			<BlueprintDemoSectionBlock
+			<CodebaseDemoSectionBlock
 				section={homePageContent.productPreviewSection}
 			/>,
 		);
@@ -85,70 +85,66 @@ describe("BlueprintDemoSectionBlock", () => {
 		).toBe("false");
 
 		const sidebarItems = screen.getAllByTestId(
-			/blueprint-demo-sidebar-section-/,
+			/codebase-demo-sidebar-section-/,
 		);
 		expect(sidebarItems.map((item) => item.dataset.testid)).toEqual([
-			"blueprint-demo-sidebar-section-foundation",
-			"blueprint-demo-sidebar-section-problem",
-			"blueprint-demo-sidebar-section-outcome",
-			"blueprint-demo-sidebar-section-design",
-			"blueprint-demo-sidebar-section-pricing",
-			"blueprint-demo-sidebar-section-setup",
-			"blueprint-demo-sidebar-section-generated-preview",
+			"codebase-demo-sidebar-section-foundation",
+			"codebase-demo-sidebar-section-problem",
+			"codebase-demo-sidebar-section-outcome",
+			"codebase-demo-sidebar-section-design",
+			"codebase-demo-sidebar-section-pricing",
+			"codebase-demo-sidebar-section-setup",
+			"codebase-demo-sidebar-section-generated-preview",
 		]);
 
+		expect(screen.getByTestId("codebase-demo-section-foundation")).toBeTruthy();
+		expect(screen.getByTestId("codebase-demo-section-design")).toBeTruthy();
+		expect(screen.getByTestId("codebase-demo-section-pricing")).toBeTruthy();
+		expect(screen.getByTestId("codebase-demo-locked-problem")).toBeTruthy();
+		expect(screen.getByTestId("codebase-demo-locked-outcome")).toBeTruthy();
+		expect(screen.getByTestId("codebase-demo-locked-setup")).toBeTruthy();
 		expect(
-			screen.getByTestId("blueprint-demo-section-foundation"),
-		).toBeTruthy();
-		expect(screen.getByTestId("blueprint-demo-section-design")).toBeTruthy();
-		expect(screen.getByTestId("blueprint-demo-section-pricing")).toBeTruthy();
-		expect(screen.getByTestId("blueprint-demo-locked-problem")).toBeTruthy();
-		expect(screen.getByTestId("blueprint-demo-locked-outcome")).toBeTruthy();
-		expect(screen.getByTestId("blueprint-demo-locked-setup")).toBeTruthy();
-		expect(
-			screen.getByTestId("blueprint-demo-locked-generated-preview"),
+			screen.getByTestId("codebase-demo-locked-generated-preview"),
 		).toBeTruthy();
 	});
 
 	it("typing into Foundation, choosing a Design preset, and toggling pricing model updates the draft and persists before checkout", async () => {
 		const user = userEvent.setup();
 		render(
-			<BlueprintDemoSectionBlock
+			<CodebaseDemoSectionBlock
 				section={homePageContent.productPreviewSection}
 			/>,
 		);
 
 		const productNameInput = screen.getByTestId(
-			"blueprint-demo-input-product_name",
+			"codebase-demo-input-product_name",
 		);
 		await user.type(productNameInput, "Telemetry Pro");
 		expect((productNameInput as HTMLInputElement).value).toBe("Telemetry Pro");
 
-		const linearChip = screen.getByTestId(
-			"blueprint-demo-design-preset-linear",
-		);
+		const linearChip = screen.getByTestId("codebase-demo-design-preset-linear");
 		await user.click(linearChip);
 		expect(linearChip.getAttribute("aria-checked")).toBe("true");
 
 		const monthlyToggle = screen.getByTestId(
-			"blueprint-demo-pricing-model-monthly",
+			"codebase-demo-pricing-model-monthly",
 		);
 		await user.click(monthlyToggle);
 		expect(monthlyToggle.getAttribute("aria-checked")).toBe("true");
 		expect(
-			screen.getByTestId("blueprint-demo-pricing-label").textContent,
+			screen.getByTestId("codebase-demo-pricing-label").textContent,
 		).toContain("monthly");
 
-		const checkoutButton = screen.getByTestId("blueprint-demo-checkout-cta");
+		const checkoutButton = screen.getByTestId("codebase-demo-checkout-cta");
 		expect(checkoutButton.textContent).toContain("Generate my codebase");
 		await user.click(checkoutButton);
 
 		await waitFor(() => {
 			const raw = window.localStorage.getItem(
-				HOME_PAGE_BLUEPRINT_DRAFT_STORAGE_KEY,
+				HOME_PAGE_CODEBASE_DRAFT_STORAGE_KEY,
 			);
 			expect(raw).not.toBeNull();
-			const envelope = parseHomePageBlueprintDraftEnvelope(raw ?? "");
+			const envelope = parseHomePageCodebaseDraftEnvelope(raw ?? "");
 			expect(envelope?.fields.product_name).toBe("Telemetry Pro");
 			expect(envelope?.fields.design_preset_id).toBe("linear");
 			expect(envelope?.fields.pricing_model).toBe("monthly");
@@ -159,7 +155,7 @@ describe("BlueprintDemoSectionBlock", () => {
 	it("lets visitors toggle the leverage hero starting point", async () => {
 		const user = userEvent.setup();
 		render(
-			<BlueprintDemoSectionBlock
+			<CodebaseDemoSectionBlock
 				section={homePageContent.productPreviewSection}
 			/>,
 		);
@@ -172,17 +168,17 @@ describe("BlueprintDemoSectionBlock", () => {
 		});
 
 		expect(ideaOption.getAttribute("aria-pressed")).toBe("true");
-		expect(screen.getByTestId("blueprint-demo-idea-branch")).toBeTruthy();
-		expect(screen.queryByTestId("blueprint-demo-codebase-branch")).toBeNull();
+		expect(screen.getByTestId("codebase-demo-idea-branch")).toBeTruthy();
+		expect(screen.queryByTestId("codebase-demo-codebase-branch")).toBeNull();
 		await user.click(codebaseOption);
 		expect(codebaseOption.getAttribute("aria-pressed")).toBe("true");
 		expect(ideaOption.getAttribute("aria-pressed")).toBe("false");
-		expect(screen.queryByTestId("blueprint-demo-idea-branch")).toBeNull();
-		expect(screen.getByTestId("blueprint-demo-codebase-branch")).toBeTruthy();
+		expect(screen.queryByTestId("codebase-demo-idea-branch")).toBeNull();
+		expect(screen.getByTestId("codebase-demo-codebase-branch")).toBeTruthy();
 		expect(screen.getByText(/scan, audit & PR merge queue/i)).toBeTruthy();
 		expect(screen.getByText("The Audit.")).toBeTruthy();
 		expect(screen.getByText("→ DOCS Spine")).toBeTruthy();
-		expect(screen.queryByTestId("blueprint-demo-checkout-cta")).toBeNull();
+		expect(screen.queryByTestId("codebase-demo-checkout-cta")).toBeNull();
 	});
 
 	it("keeps the shared homepage sections visible for the codebase starting point", async () => {
@@ -195,7 +191,7 @@ describe("BlueprintDemoSectionBlock", () => {
 			}),
 		);
 
-		expect(screen.getByTestId("blueprint-demo-codebase-branch")).toBeTruthy();
+		expect(screen.getByTestId("codebase-demo-codebase-branch")).toBeTruthy();
 		expectPageTextToContain("Ship codebases that convert");
 		expectPageTextToContain("How Workers Work.");
 		expectPageTextToContain("A worker layer. each hat, a trained role.");
@@ -214,7 +210,7 @@ describe("BlueprintDemoSectionBlock", () => {
 
 	it("exposes a theme toggle in the demo top bar", async () => {
 		render(
-			<BlueprintDemoSectionBlock
+			<CodebaseDemoSectionBlock
 				section={homePageContent.productPreviewSection}
 			/>,
 		);
@@ -227,7 +223,7 @@ describe("BlueprintDemoSectionBlock", () => {
 
 	it("renders each locked card with the canonical 'After checkout' unlock preview line", () => {
 		render(
-			<BlueprintDemoSectionBlock
+			<CodebaseDemoSectionBlock
 				section={homePageContent.productPreviewSection}
 			/>,
 		);
@@ -239,12 +235,10 @@ describe("BlueprintDemoSectionBlock", () => {
 			"generated-preview",
 		] as const;
 		const sectionDescriptionById = new Map(
-			blueprintPageSections.map((section) => [section.id, section.description]),
+			codebasePageSections.map((section) => [section.id, section.description]),
 		);
 		for (const lockedId of lockedSectionIds) {
-			const lockedNode = screen.getByTestId(
-				`blueprint-demo-locked-${lockedId}`,
-			);
+			const lockedNode = screen.getByTestId(`codebase-demo-locked-${lockedId}`);
 			expect(lockedNode.textContent).toContain("After checkout:");
 			const expectedDescription = sectionDescriptionById.get(lockedId);
 			expect(expectedDescription).toBeDefined();

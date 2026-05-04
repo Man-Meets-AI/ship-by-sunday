@@ -3,7 +3,7 @@
 ## Recommended Program Split
 
 1. Build Pack Readiness Manifest.
-   Generate a deterministic readiness report from existing Blueprint facts, add typed validation entries, expose weak facts and placeholders, link readiness from handoff, and strengthen compiler tests.
+   Generate a deterministic readiness report from existing Codebase facts, add typed validation entries, expose weak facts and placeholders, link readiness from handoff, and strengthen compiler tests.
 
 2. Derived First Slice Planner.
    Replace generic selected-next-slice prose with a structured first-slice plan derived from product flow, capabilities, scope, acceptance criteria, and starter files.

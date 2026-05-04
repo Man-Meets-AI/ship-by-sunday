@@ -10,7 +10,7 @@ export function isStarterModuleEnabled(
 }
 
 export const workspaceDisplayConfig = {
-	homeHref: routeConfig.blueprint,
+	homeHref: routeConfig.codebase,
 	homeLabel: starterConfig.workspace.homeLabel,
 	homeNoun: starterConfig.workspace.homeNoun,
 	homeSubtitle: starterConfig.workspace.homeSubtitle,

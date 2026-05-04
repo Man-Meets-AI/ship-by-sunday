@@ -35,7 +35,7 @@ The first polish pass made the bonus lesson surface calm. This pass closes defer
 ## Surprises & Discoveries
 
 - Vitest `matchMedia` does not drive `motion/react` `useReducedMotion` in this repo; the lesson-video-controls test uses `vi.mock("motion/react", …)` with a hoisted flag to assert reduced-motion wiring on the controls row.
-- One full parallel vitest run showed rare flakes in `blueprint-page` and `app-workspace-lesson-page` tests; immediate re-runs passed (651/651).
+- One full parallel vitest run showed rare flakes in `codebase-page` and `app-workspace-lesson-page` tests; immediate re-runs passed (651/651).
 - Bunny keyboard forwarding assumes a player.js-compatible embed. Outbound messages are covered by tests; in-player `getPaused` responses depend on the live Bunny build—operators should confirm play/pause once per environment.
 
 ## Decision Log

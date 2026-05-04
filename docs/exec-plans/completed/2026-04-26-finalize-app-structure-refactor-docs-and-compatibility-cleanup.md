@@ -42,7 +42,7 @@ After this slice, proven-unused route-local compatibility exports will be gone, 
 
 ## Surprises & Discoveries
 
-2026-04-26 EDT: The selected route-local compatibility exports have no first-party code or test imports, but nearby durable feature files are still heavily used. The cleanup must delete only the wrapper exports, not whole feature areas such as auth route utilities, checkout button code, product-access server/lib code, or blueprint flow domain code.
+2026-04-26 EDT: The selected route-local compatibility exports have no first-party code or test imports, but nearby durable feature files are still heavily used. The cleanup must delete only the wrapper exports, not whole feature areas such as auth route utilities, checkout button code, product-access server/lib code, or codebase flow domain code.
 
 2026-04-26 EDT: `apps/web/components/ui` compatibility exports and the old course-owned AppShell re-export layer are also unused by first-party app code, but they remain explicitly out of scope for this final pass because the user and Program boundaries call out shared UI inventory and AppShell as higher-risk boundaries.
 
@@ -76,7 +76,7 @@ Ship by Sunday's app lives in `apps/web`. The current ownership map after the co
 
 App Router route groups under `apps/web/app` own route-local page wrappers and private route UI. The protected workspace group owns access-required UI in `apps/web/app/(workspace)/_components` and legacy route redirects in `apps/web/app/(workspace)/_lib`. The identity group owns sign-in, sign-up, SSO callback, reset-password shells, and identity support copy in `apps/web/app/(identity)`. Checkout success owns its display wrappers in `apps/web/app/checkout/success`. API route path contracts live under `apps/web/app/api/_lib`.
 
-Durable product domains remain under `apps/web/features`. Examples include `features/blueprint-flow`, `features/auth` for reusable auth forms and route utilities, `features/checkout` for checkout button, checkout server helpers, and checkout recovery, `features/product-access` for shared product-access types and server checks, `features/course` for course and lesson domain data, `features/workspace-shell` for shared workspace chrome, `features/workspace-navigation`, `features/marketing`, `features/docs`, `features/codex`, and `features/observability`.
+Durable product domains remain under `apps/web/features`. Examples include `features/codebase-flow`, `features/auth` for reusable auth forms and route utilities, `features/checkout` for checkout button, checkout server helpers, and checkout recovery, `features/product-access` for shared product-access types and server checks, `features/course` for course and lesson domain data, `features/workspace-shell` for shared workspace chrome, `features/workspace-navigation`, `features/marketing`, `features/docs`, `features/codex`, and `features/observability`.
 
 The platform layer under `apps/web/platform` owns environment, auth, billing, Convex, and Next platform helpers. Convex backend code lives under `apps/web/convex`. Shared UI primitives remain under `apps/web/components/ui`.
 
@@ -84,7 +84,7 @@ The platform layer under `apps/web/platform` owns environment, auth, billing, Co
 
 Delete unused compatibility files for route-local wrappers:
 
-`apps/web/features/auth/sign-in/auth-page-shell.tsx`, `apps/web/features/auth/sign-in/auth-page-support-panel.tsx`, `apps/web/features/auth/sign-in/identity-route-panel-content.ts`, `apps/web/features/auth/sign-in/sign-in-page.tsx`, `apps/web/features/auth/sign-in/sso-callback-page.tsx`, `apps/web/features/auth/sign-up/post-checkout-sign-up-page.tsx`, `apps/web/features/product-access/components/access-required-*.tsx`, `apps/web/features/product-access/hooks/use-access-required-controller.ts`, `apps/web/features/product-access/lib/access-required-view-model.ts`, `apps/web/features/blueprint-flow/components/blueprint-review-page.tsx`, `apps/web/features/blueprint-flow/components/review/blueprint-review-download-bridge.tsx`, `apps/web/features/blueprint-flow/components/review/blueprint-review-handoff-card.tsx`, `apps/web/features/blueprint-flow/hooks/use-review-download-handoff.ts`, `apps/web/features/blueprint-flow/lib/legacy-blueprint-route-redirects.ts`, `apps/web/features/checkout/components/checkout-success-*.tsx`, `apps/web/features/checkout/components/checkout-success-view-model.ts`, and `apps/web/hooks/use-keyboard-shortcut.ts`.
+`apps/web/features/auth/sign-in/auth-page-shell.tsx`, `apps/web/features/auth/sign-in/auth-page-support-panel.tsx`, `apps/web/features/auth/sign-in/identity-route-panel-content.ts`, `apps/web/features/auth/sign-in/sign-in-page.tsx`, `apps/web/features/auth/sign-in/sso-callback-page.tsx`, `apps/web/features/auth/sign-up/post-checkout-sign-up-page.tsx`, `apps/web/features/product-access/components/access-required-*.tsx`, `apps/web/features/product-access/hooks/use-access-required-controller.ts`, `apps/web/features/product-access/lib/access-required-view-model.ts`, `apps/web/features/codebase-flow/components/codebase-review-page.tsx`, `apps/web/features/codebase-flow/components/review/codebase-review-download-bridge.tsx`, `apps/web/features/codebase-flow/components/review/codebase-review-handoff-card.tsx`, `apps/web/features/codebase-flow/hooks/use-review-download-handoff.ts`, `apps/web/features/codebase-flow/lib/legacy-codebase-route-redirects.ts`, `apps/web/features/checkout/components/checkout-success-*.tsx`, `apps/web/features/checkout/components/checkout-success-view-model.ts`, and `apps/web/hooks/use-keyboard-shortcut.ts`.
 
 Remove `export { apiRouteConfig } from "@/app/api/_lib/api-route-config";` from `apps/web/config/product.ts`.
 
@@ -132,19 +132,19 @@ Read the Program, current planning brief, and this plan:
 
 Record baseline import evidence:
 
-    rg '@/features/product-access/(components|hooks|lib/access-required-view-model)|@/features/blueprint-flow/(lib/legacy-blueprint-route-redirects|hooks/use-review-download-handoff|components/blueprint-review-page|components/review/blueprint-review-(download-bridge|handoff-card))|@/features/auth/sign-in/(auth-page-shell|auth-page-support-panel|identity-route-panel-content|sign-in-page|sso-callback-page)|@/features/auth/sign-up/post-checkout-sign-up-page|@/features/checkout/components/checkout-success|@/hooks/use-keyboard-shortcut' apps/web --glob '!node_modules'
+    rg '@/features/product-access/(components|hooks|lib/access-required-view-model)|@/features/codebase-flow/(lib/legacy-codebase-route-redirects|hooks/use-review-download-handoff|components/codebase-review-page|components/review/codebase-review-(download-bridge|handoff-card))|@/features/auth/sign-in/(auth-page-shell|auth-page-support-panel|identity-route-panel-content|sign-in-page|sso-callback-page)|@/features/auth/sign-up/post-checkout-sign-up-page|@/features/checkout/components/checkout-success|@/hooks/use-keyboard-shortcut' apps/web --glob '!node_modules'
     rg 'apiRouteConfig' apps/web --glob '!node_modules'
 
 After cleanup, prove the deleted path imports stay gone:
 
-    rg '@/features/product-access/(components|hooks|lib/access-required-view-model)|@/features/blueprint-flow/(lib/legacy-blueprint-route-redirects|hooks/use-review-download-handoff|components/blueprint-review-page|components/review/blueprint-review-(download-bridge|handoff-card))|@/features/auth/sign-in/(auth-page-shell|auth-page-support-panel|identity-route-panel-content|sign-in-page|sso-callback-page)|@/features/auth/sign-up/post-checkout-sign-up-page|@/features/checkout/components/checkout-success|@/hooks/use-keyboard-shortcut' apps/web --glob '!node_modules'
+    rg '@/features/product-access/(components|hooks|lib/access-required-view-model)|@/features/codebase-flow/(lib/legacy-codebase-route-redirects|hooks/use-review-download-handoff|components/codebase-review-page|components/review/codebase-review-(download-bridge|handoff-card))|@/features/auth/sign-in/(auth-page-shell|auth-page-support-panel|identity-route-panel-content|sign-in-page|sso-callback-page)|@/features/auth/sign-up/post-checkout-sign-up-page|@/features/checkout/components/checkout-success|@/hooks/use-keyboard-shortcut' apps/web --glob '!node_modules'
     rg 'export \\{ apiRouteConfig \\}' apps/web/config/product.ts
 
 Run focused tests:
 
-    bun run --cwd apps/web test:unit -- tests/unit/sign-in-route.test.ts tests/unit/sign-up-route.test.ts tests/unit/route-metadata.test.ts tests/unit/access-required-page.test.tsx tests/unit/app-protected-layout.test.tsx tests/unit/legacy-blueprint-route-redirects.test.ts tests/unit/review-download-handoff.test.tsx tests/unit/checkout-session-params.test.ts tests/unit/stripe-line-item.test.ts
+    bun run --cwd apps/web test:unit -- tests/unit/sign-in-route.test.ts tests/unit/sign-up-route.test.ts tests/unit/route-metadata.test.ts tests/unit/access-required-page.test.tsx tests/unit/app-protected-layout.test.tsx tests/unit/legacy-codebase-route-redirects.test.ts tests/unit/review-download-handoff.test.tsx tests/unit/checkout-session-params.test.ts tests/unit/stripe-line-item.test.ts
     bun run --cwd apps/web test:integration -- tests/integration/stripe-checkout-route.test.ts
-    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/sign-in-page.test.tsx tests/integration-ui/sso-callback-page.test.tsx tests/integration-ui/post-checkout-sign-up-page.test.tsx tests/integration-ui/access-required-page.test.tsx tests/integration-ui/access-required-page.interactions.test.tsx tests/integration-ui/blueprint-review-page.test.tsx tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/checkout-success-view.interactions.test.tsx tests/integration-ui/checkout-button.test.tsx
+    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/sign-in-page.test.tsx tests/integration-ui/sso-callback-page.test.tsx tests/integration-ui/post-checkout-sign-up-page.test.tsx tests/integration-ui/access-required-page.test.tsx tests/integration-ui/access-required-page.interactions.test.tsx tests/integration-ui/codebase-review-page.test.tsx tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/checkout-success-view.interactions.test.tsx tests/integration-ui/checkout-button.test.tsx
 
 Then run app and plan checks:
 
@@ -164,11 +164,11 @@ This slice is accepted when selected route-local compatibility exports are delet
 
 Run these commands from repo root after implementation:
 
-    rg '@/features/product-access/(components|hooks|lib/access-required-view-model)|@/features/blueprint-flow/(lib/legacy-blueprint-route-redirects|hooks/use-review-download-handoff|components/blueprint-review-page|components/review/blueprint-review-(download-bridge|handoff-card))|@/features/auth/sign-in/(auth-page-shell|auth-page-support-panel|identity-route-panel-content|sign-in-page|sso-callback-page)|@/features/auth/sign-up/post-checkout-sign-up-page|@/features/checkout/components/checkout-success|@/hooks/use-keyboard-shortcut' apps/web --glob '!node_modules'
+    rg '@/features/product-access/(components|hooks|lib/access-required-view-model)|@/features/codebase-flow/(lib/legacy-codebase-route-redirects|hooks/use-review-download-handoff|components/codebase-review-page|components/review/codebase-review-(download-bridge|handoff-card))|@/features/auth/sign-in/(auth-page-shell|auth-page-support-panel|identity-route-panel-content|sign-in-page|sso-callback-page)|@/features/auth/sign-up/post-checkout-sign-up-page|@/features/checkout/components/checkout-success|@/hooks/use-keyboard-shortcut' apps/web --glob '!node_modules'
     rg 'export \\{ apiRouteConfig \\}' apps/web/config/product.ts
-    bun run --cwd apps/web test:unit -- tests/unit/sign-in-route.test.ts tests/unit/sign-up-route.test.ts tests/unit/route-metadata.test.ts tests/unit/access-required-page.test.tsx tests/unit/app-protected-layout.test.tsx tests/unit/legacy-blueprint-route-redirects.test.ts tests/unit/review-download-handoff.test.tsx tests/unit/checkout-session-params.test.ts tests/unit/stripe-line-item.test.ts
+    bun run --cwd apps/web test:unit -- tests/unit/sign-in-route.test.ts tests/unit/sign-up-route.test.ts tests/unit/route-metadata.test.ts tests/unit/access-required-page.test.tsx tests/unit/app-protected-layout.test.tsx tests/unit/legacy-codebase-route-redirects.test.ts tests/unit/review-download-handoff.test.tsx tests/unit/checkout-session-params.test.ts tests/unit/stripe-line-item.test.ts
     bun run --cwd apps/web test:integration -- tests/integration/stripe-checkout-route.test.ts
-    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/sign-in-page.test.tsx tests/integration-ui/sso-callback-page.test.tsx tests/integration-ui/post-checkout-sign-up-page.test.tsx tests/integration-ui/access-required-page.test.tsx tests/integration-ui/access-required-page.interactions.test.tsx tests/integration-ui/blueprint-review-page.test.tsx tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/checkout-success-view.interactions.test.tsx tests/integration-ui/checkout-button.test.tsx
+    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/sign-in-page.test.tsx tests/integration-ui/sso-callback-page.test.tsx tests/integration-ui/post-checkout-sign-up-page.test.tsx tests/integration-ui/access-required-page.test.tsx tests/integration-ui/access-required-page.interactions.test.tsx tests/integration-ui/codebase-review-page.test.tsx tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/checkout-success-view.interactions.test.tsx tests/integration-ui/checkout-button.test.tsx
     bun run format:check
     bun run --cwd apps/web lint
     bun run --cwd apps/web typecheck
@@ -207,7 +207,7 @@ Focused validation targets:
     apps/web/tests/unit/route-metadata.test.ts
     apps/web/tests/unit/access-required-page.test.tsx
     apps/web/tests/unit/app-protected-layout.test.tsx
-    apps/web/tests/unit/legacy-blueprint-route-redirects.test.ts
+    apps/web/tests/unit/legacy-codebase-route-redirects.test.ts
     apps/web/tests/unit/review-download-handoff.test.tsx
     apps/web/tests/unit/checkout-session-params.test.ts
     apps/web/tests/unit/stripe-line-item.test.ts
@@ -217,7 +217,7 @@ Focused validation targets:
     apps/web/tests/integration-ui/post-checkout-sign-up-page.test.tsx
     apps/web/tests/integration-ui/access-required-page.test.tsx
     apps/web/tests/integration-ui/access-required-page.interactions.test.tsx
-    apps/web/tests/integration-ui/blueprint-review-page.test.tsx
+    apps/web/tests/integration-ui/codebase-review-page.test.tsx
     apps/web/tests/integration-ui/checkout-success-view.test.tsx
     apps/web/tests/integration-ui/checkout-success-view.interactions.test.tsx
     apps/web/tests/integration-ui/checkout-button.test.tsx

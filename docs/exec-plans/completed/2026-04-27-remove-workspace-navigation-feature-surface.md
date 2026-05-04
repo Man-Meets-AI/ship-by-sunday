@@ -54,7 +54,7 @@ This slice is complete. `apps/web/features/workspace-navigation` was deleted, th
 
 `apps/web/features/workspace-navigation/components/workspace-primary-nav.tsx` is a client component used by AppShell and focused integration-ui tests. `apps/web/features/workspace-navigation/components/workspace-local-nav-rail.tsx` is a client component used by Review and bonus lesson surfaces.
 
-`apps/web/features/workspace-navigation/lib/build-primary-nav-model.ts` builds the post-review top navigation model. `build-secondary-nav-model.ts` builds Review and lesson local rail models. `lesson-map-href.ts` builds the Review route query string for showing the lesson map. `post-review-destination.ts` resolves protected workspace resume destinations and is imported by Convex `apps/web/convex/blueprint/stageReadiness.ts`.
+`apps/web/features/workspace-navigation/lib/build-primary-nav-model.ts` builds the post-review top navigation model. `build-secondary-nav-model.ts` builds Review and lesson local rail models. `lesson-map-href.ts` builds the Review route query string for showing the lesson map. `post-review-destination.ts` resolves protected workspace resume destinations and is imported by Convex `apps/web/convex/codebase/stageReadiness.ts`.
 
 ### In Scope
 
@@ -62,7 +62,7 @@ Move workspace navigation components to `apps/web/app/(workspace)/_components/wo
 
 Move workspace navigation model and routing helpers to `apps/web/lib/workspace-navigation`.
 
-Update first-party imports in AppShell, Review, blueprint flow, execute/ship, course, Convex files, and tests, then delete `apps/web/features/workspace-navigation`.
+Update first-party imports in AppShell, Review, codebase flow, execute/ship, course, Convex files, and tests, then delete `apps/web/features/workspace-navigation`.
 
 ### Out Of Scope
 
@@ -128,8 +128,8 @@ Baseline import scan:
 
     rg '@/features/workspace-navigation|features/workspace-navigation|workspace-primary-nav|workspace-local-nav-rail|post-review-destination|lesson-map-href' apps/web/app apps/web/features apps/web/convex apps/web/tests
 
-The scan found consumers in AppShell, Review, blueprint flow, execute/ship bonus lesson surfaces, course lesson/artifact helpers, Convex `stageReadiness` and `mission`, and focused tests.
+The scan found consumers in AppShell, Review, codebase flow, execute/ship bonus lesson surfaces, course lesson/artifact helpers, Convex `stageReadiness` and `mission`, and focused tests.
 
 ## Interfaces and Dependencies
 
-Workspace navigation depends on Next.js App Router private folders, the shared UI primitives in `apps/web/components/ui`, route configuration in `apps/web/config/product.ts`, course lesson routing and registry helpers, execute/ship bonus mission presentation helpers, and Convex-safe route resolution in `apps/web/convex/blueprint/stageReadiness.ts`.
+Workspace navigation depends on Next.js App Router private folders, the shared UI primitives in `apps/web/components/ui`, route configuration in `apps/web/config/product.ts`, course lesson routing and registry helpers, execute/ship bonus mission presentation helpers, and Convex-safe route resolution in `apps/web/convex/codebase/stageReadiness.ts`.

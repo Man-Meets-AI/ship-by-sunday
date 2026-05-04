@@ -4,7 +4,7 @@ status: complete
 created_at: 2026-04-24
 completed_at: 2026-04-24
 summary: Slim sitemap and docs route dependencies while making docs catch-all behavior explicit.
-post_build_recap: Sitemap now reads public docs and blog route metadata from a filesystem-only public content index instead of Nextra/blog rendering loaders, and the docs catch-all route explicitly exports its dynamic params behavior. Focused sitemap proof passes; full build/typecheck are blocked by unrelated dirty blueprint-flow type errors.
+post_build_recap: Sitemap now reads public docs and blog route metadata from a filesystem-only public content index instead of Nextra/blog rendering loaders, and the docs catch-all route explicitly exports its dynamic params behavior. Focused sitemap proof passes; full build/typecheck are blocked by unrelated dirty codebase-flow type errors.
 read_when:
   - Resuming the public metadata route hardening slice.
   - Changing sitemap or docs catch-all route behavior.
@@ -30,7 +30,7 @@ Public metadata routes should be boring, explicit, and light. After this slice, 
 - [x] 2026-04-24 EDT: Updated `apps/web/app/sitemap.ts` to consume the lightweight public metadata index and avoid importing blog rendering/frontmatter records or docs Nextra static-param helpers.
 - [x] 2026-04-24 EDT: Made `apps/web/app/docs/[[...mdxPath]]/page.tsx` catch-all behavior explicit with `export const dynamicParams = true`.
 - [x] 2026-04-24 EDT: Added `apps/web/tests/unit/public-metadata-routes.test.ts` to prove `/sitemap.xml` includes `/docs/local-setup` and the published blog post with last-modified metadata.
-- [x] 2026-04-24 EDT: Validation recorded. Focused sitemap test and lint passed. Build/typecheck compiled successfully but failed during TypeScript checking on unrelated dirty blueprint-flow files.
+- [x] 2026-04-24 EDT: Validation recorded. Focused sitemap test and lint passed. Build/typecheck compiled successfully but failed during TypeScript checking on unrelated dirty codebase-flow files.
 
 ## Surprises & Discoveries
 
@@ -133,7 +133,7 @@ Result: passed. All touched metadata-route files use the correct format.
 
        bun run format:check
 
-Result: failed on unrelated dirty files outside this slice: `apps/web/features/blueprint-flow/lib/blueprint-page-validation-model.ts` and `apps/web/features/course/lesson/workbench/fields/checklist-field-rows.tsx`.
+Result: failed on unrelated dirty files outside this slice: `apps/web/features/codebase-flow/lib/codebase-page-validation-model.ts` and `apps/web/features/course/lesson/workbench/fields/checklist-field-rows.tsx`.
 
        bun run lint
 
@@ -141,11 +141,11 @@ Result: passed. Found 0 warnings and 0 errors.
 
        bun run --cwd apps/web build
 
-Result: failed on unrelated dirty blueprint-flow TypeScript after Next compiled successfully. Error: `apps/web/features/blueprint-flow/components/blueprint-page-progress-sidebar.tsx:4` imports missing `BlueprintPageSectionStatus` from `@/features/blueprint-flow/hooks/use-blueprint-page-state`.
+Result: failed on unrelated dirty codebase-flow TypeScript after Next compiled successfully. Error: `apps/web/features/codebase-flow/components/codebase-page-progress-sidebar.tsx:4` imports missing `CodebasePageSectionStatus` from `@/features/codebase-flow/hooks/use-codebase-page-state`.
 
        bun run typecheck
 
-Result: failed on unrelated dirty blueprint-flow TypeScript after Next compiled successfully. Error: `apps/web/features/blueprint-flow/hooks/use-blueprint-page-state.ts:71` cannot find name `BlueprintStepInlineFeedback`.
+Result: failed on unrelated dirty codebase-flow TypeScript after Next compiled successfully. Error: `apps/web/features/codebase-flow/hooks/use-codebase-page-state.ts:71` cannot find name `CodebaseStepInlineFeedback`.
 
        bun run plans:lint -- --plan docs/exec-plans/completed/2026-04-24-harden-public-metadata-routes.md
 

@@ -26,7 +26,7 @@ const proofDefinitions = {
 				env: personaPrepareEnv,
 			},
 			{
-				label: "Run the blueprint integration-ui proof suite",
+				label: "Run the codebase integration-ui proof suite",
 				command: [
 					"bun",
 					"run",
@@ -34,9 +34,20 @@ const proofDefinitions = {
 					"apps/web",
 					"test:integration:ui",
 					"--",
-					"tests/integration-ui/blueprint-page.test.tsx",
-					"tests/integration-ui/blueprint-review-page.test.tsx",
-					"tests/integration-ui/legacy-blueprint-route-redirects.test.tsx",
+					"tests/integration-ui/codebase-page.test.tsx",
+					"tests/integration-ui/codebase-review-page.test.tsx",
+				],
+			},
+			{
+				label: "Run the legacy codebase route redirect proof",
+				command: [
+					"bun",
+					"run",
+					"--cwd",
+					"apps/web",
+					"test:unit",
+					"--",
+					"tests/unit/legacy-codebase-route-redirects.test.ts",
 				],
 			},
 			{

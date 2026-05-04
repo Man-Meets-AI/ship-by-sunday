@@ -90,7 +90,7 @@ Update route pages, root layout, workspace access, checkout success, tests, rele
 
 Do not change route URLs, query parameter names, redirect sanitization behavior, Clerk environment behavior, Clerk middleware behavior, checkout session recovery, Stripe checkout, pricing, promo code behavior, Convex schema, generated Convex files, AppShell, protected route policy, public auth copy, sign-in/sign-up form behavior, or production release proof semantics.
 
-Do not move `apps/web/features/blueprint-flow`, `apps/web/features/course`, `apps/web/features/execute-ship`, `apps/web/features/marketing`, or `apps/web/features/workspace-shell` in this slice.
+Do not move `apps/web/features/codebase-flow`, `apps/web/features/course`, `apps/web/features/execute-ship`, `apps/web/features/marketing`, or `apps/web/features/workspace-shell` in this slice.
 
 ## Plan of Work
 

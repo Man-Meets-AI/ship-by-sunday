@@ -34,13 +34,13 @@ describe("sign-up route", () => {
 	it("preserves a safe post-handoff redirect path", async () => {
 		await Page({
 			searchParams: Promise.resolve({
-				redirect_url: "/blueprint",
+				redirect_url: "/codebase",
 				session_id: "cs_test_123",
 			}),
 		});
 
 		expect(redirectMock).toHaveBeenCalledWith(
-			"/checkout/email-handoff?session_id=cs_test_123&redirect_url=%2Fblueprint",
+			"/checkout/email-handoff?session_id=cs_test_123&redirect_url=%2Fcodebase",
 		);
 	});
 });

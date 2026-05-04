@@ -17,7 +17,7 @@
 ## Blocking Edges
 
 `features/course/shared/components/app-shell` blocks clear workspace ownership.
-It depends on course lesson model state and is consumed by blueprint, review,
+It depends on course lesson model state and is consumed by codebase, review,
 settings, starter, execute-ship, workspace-home, and tests.
 
 `features/course/lesson/model` blocks early course moves. Its manifest and
@@ -28,7 +28,7 @@ tests.
 routes, homepage, pricing, Stripe API version, starter repo config, and metadata.
 
 `apps/web/proxy.ts` blocks route alias consolidation. It must preserve protected
-coverage for `/blueprint`, `/review`, `/settings`, `/execute`, `/mission`,
+coverage for `/codebase`, `/review`, `/settings`, `/execute`, `/mission`,
 `/artifacts`, `/start`, `/product`, `/design`, `/marketing`, `/build-plan`, and
 `/lesson(.*)`.
 

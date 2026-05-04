@@ -8,10 +8,10 @@ describe("marketing visual effects", () => {
 	it("renders moved homepage effect exports from shared UI paths", () => {
 		const coverMarkup = renderToString(<Cover>Sunday</Cover>);
 		const pointerMarkup = renderToString(
-			<PointerHighlight>blueprint</PointerHighlight>,
+			<PointerHighlight>codebase</PointerHighlight>,
 		);
 
 		expect(coverMarkup).toContain("Sunday");
-		expect(pointerMarkup).toContain("blueprint");
+		expect(pointerMarkup).toContain("codebase");
 	});
 });

@@ -30,10 +30,10 @@ Users should be able to visit `/docs`, `/docs/local-setup`, `/blog`, and the cur
 - [x] 2026-04-27 EDT: Program research identified the release-sensitive behavior to preserve.
 - [x] 2026-04-27 EDT: This ExecPlan was created from `docs/programs/completed/2026-04-27-remove-nextra-docs-runtime/planning-brief-1.md`.
 - [x] 2026-04-27 EDT: Inventory, docs rendering, blog rendering, and package cleanup slices are complete.
-- [x] 2026-04-27 EDT: Grilled against `docs/programs/completed/2026-04-27-remove-nextra-docs-runtime/planning-brief-5.md`; the plan now uses the final completed child-plan paths, web-only dev command, local browser smoke probes, and source-adjacent blueprint compiler tests.
+- [x] 2026-04-27 EDT: Grilled against `docs/programs/completed/2026-04-27-remove-nextra-docs-runtime/planning-brief-5.md`; the plan now uses the final completed child-plan paths, web-only dev command, local browser smoke probes, and source-adjacent codebase compiler tests.
 - [x] 2026-04-27 EDT: Final import and package scans passed with no Nextra runtime, package, or lockfile matches.
 - [x] 2026-04-27 EDT: Focused docs, blog, metadata, sitemap, and route metadata unit tests passed.
-- [x] 2026-04-27 EDT: Blueprint compiler repo-generation and review-download zip tests passed.
+- [x] 2026-04-27 EDT: Codebase compiler repo-generation and review-download zip tests passed.
 - [x] 2026-04-27 EDT: `bun install --frozen-lockfile`, `bun lint`, and `bun typecheck` passed.
 - [x] 2026-04-27 EDT: Browser smoke passed for `/docs`, `/docs/local-setup`, `/blog`, and `/blog/the-operating-system-beats-the-prompt` in desktop and mobile viewports.
 
@@ -53,7 +53,7 @@ Decision: Include blog browser smoke if blog was touched, which this Program exp
 
 ## Outcomes & Retrospective
 
-Final hardening passed. There is no Nextra runtime dependency remaining in active app or blueprint-compiler code, and `apps/web/package.json` plus `bun.lock` no longer contain `nextra` or `nextra-theme-docs`.
+Final hardening passed. There is no Nextra runtime dependency remaining in active app or codebase-compiler code, and `apps/web/package.json` plus `bun.lock` no longer contain `nextra` or `nextra-theme-docs`.
 
 Browser smoke covered desktop `1280x900` and mobile `390x844` viewports for `/docs`, `/docs/local-setup`, `/blog`, and `/blog/the-operating-system-beats-the-prompt`. The docs smoke verified title, H1, body content, sidebar, desktop TOC visibility, mobile TOC hiding, and theme toggle application. The blog smoke verified title, H1, expected body content, and article contents rail behavior. The dev server logged the existing local Clerk development-key/session-refresh warning, but no Nextra warning and no docs/blog hydration warning appeared during the final run.
 
@@ -63,7 +63,7 @@ No validation checks were skipped. The broad `bun typecheck` build generated 71 
 
 By the time this slice starts, docs and blog should render through app-owned code, and package cleanup should have removed `nextra` and `nextra-theme-docs` from app dependencies and lockfile. This slice should not implement new rendering behavior. It validates and fixes only defects found while proving the final state.
 
-Relevant surfaces include `apps/web/app/docs`, `apps/web/app/blog`, `apps/web/app/_metadata/content-route-index.ts`, `apps/web/app/sitemap.ts`, `apps/web/package.json`, `bun.lock`, `packages/blueprint-compiler/src/repo-generation/`, and all child ExecPlans in this Program.
+Relevant surfaces include `apps/web/app/docs`, `apps/web/app/blog`, `apps/web/app/_metadata/content-route-index.ts`, `apps/web/app/sitemap.ts`, `apps/web/package.json`, `bun.lock`, `packages/codebase-compiler/src/repo-generation/`, and all child ExecPlans in this Program.
 
 ### In Scope
 
@@ -99,7 +99,7 @@ Milestone 4 proves repository hygiene. Success means lint, typecheck, Program li
 
 From `/Users/parkerrex/Developer/ship-by-sunday`, confirm the final dependency state:
 
-    rg -n "from ['\"]nextra|from ['\"]nextra-theme-docs|nextra/pages|nextra/page-map|nextra/icons|nextra-theme-docs/style.css" apps/web packages/blueprint-compiler
+    rg -n "from ['\"]nextra|from ['\"]nextra-theme-docs|nextra/pages|nextra/page-map|nextra/icons|nextra-theme-docs/style.css" apps/web packages/codebase-compiler
 
 Run focused tests before broad checks. If a focused test fails, fix the root cause in the owning app surface and rerun the same test.
 
@@ -115,12 +115,12 @@ This slice is accepted when the final state has no Nextra runtime dependency, do
 
 Run these commands from `/Users/parkerrex/Developer/ship-by-sunday` after implementation:
 
-    ! rg -n "from ['\"]nextra|from ['\"]nextra-theme-docs|nextra/pages|nextra/page-map|nextra/icons|nextra-theme-docs/style.css" apps/web packages/blueprint-compiler
+    ! rg -n "from ['\"]nextra|from ['\"]nextra-theme-docs|nextra/pages|nextra/page-map|nextra/icons|nextra-theme-docs/style.css" apps/web packages/codebase-compiler
     ! rg -n "\"nextra\"|\"nextra-theme-docs\"" apps/web/package.json bun.lock
     rg -n "\"@next/mdx\"|\"@mdx-js/loader\"|\"@mdx-js/react\"|\"@types/mdx\"|\"remark-frontmatter\"" apps/web/package.json bun.lock
     bun install --frozen-lockfile
     bun run --cwd apps/web test:unit -- tests/unit/public-content-inventory.test.ts tests/unit/docs-page-paths.test.ts tests/unit/docs-content-loader.test.ts tests/unit/docs-navigation-components.test.tsx tests/unit/docs-metadata.test.ts tests/unit/docs-disabled-state.test.tsx tests/unit/blog-page-paths.test.ts tests/unit/blog-posts.test.ts tests/unit/blog-metadata.test.ts tests/unit/blog-structured-data.test.ts tests/unit/blog-formatters.test.ts tests/unit/public-metadata-routes.test.ts tests/unit/route-metadata.test.ts
-    bun test packages/blueprint-compiler/tests/repo-generation.test.ts packages/blueprint-compiler/tests/review-download-zip.test.ts
+    bun test packages/codebase-compiler/tests/repo-generation.test.ts packages/codebase-compiler/tests/review-download-zip.test.ts
     bun lint
     bun typecheck
     bun run --cwd apps/web dev:web:only
@@ -151,12 +151,12 @@ The Program can stay complete because every child ExecPlan has an accurate retro
 
 Validation results recorded on 2026-04-27 EDT:
 
-- `! rg -n "from ['\"]nextra|from ['\"]nextra-theme-docs|nextra/pages|nextra/page-map|nextra/icons|nextra-theme-docs/style.css" apps/web packages/blueprint-compiler`: passed with no matches.
+- `! rg -n "from ['\"]nextra|from ['\"]nextra-theme-docs|nextra/pages|nextra/page-map|nextra/icons|nextra-theme-docs/style.css" apps/web packages/codebase-compiler`: passed with no matches.
 - `! rg -n "\"nextra\"|\"nextra-theme-docs\"" apps/web/package.json bun.lock`: passed with no matches.
 - `rg -n "\"@next/mdx\"|\"@mdx-js/loader\"|\"@mdx-js/react\"|\"@types/mdx\"|\"remark-frontmatter\"" apps/web/package.json bun.lock`: passed and showed the direct MDX dependencies.
 - `bun install --frozen-lockfile`: passed with no changes.
 - `bun run --cwd apps/web test:unit -- tests/unit/public-content-inventory.test.ts tests/unit/docs-page-paths.test.ts tests/unit/docs-content-loader.test.ts tests/unit/docs-navigation-components.test.tsx tests/unit/docs-metadata.test.ts tests/unit/docs-disabled-state.test.tsx tests/unit/blog-page-paths.test.ts tests/unit/blog-posts.test.ts tests/unit/blog-metadata.test.ts tests/unit/blog-structured-data.test.ts tests/unit/blog-formatters.test.ts tests/unit/public-metadata-routes.test.ts tests/unit/route-metadata.test.ts`: 13 files and 29 tests passed.
-- `bun test packages/blueprint-compiler/tests/repo-generation.test.ts packages/blueprint-compiler/tests/review-download-zip.test.ts`: 4 tests passed.
+- `bun test packages/codebase-compiler/tests/repo-generation.test.ts packages/codebase-compiler/tests/review-download-zip.test.ts`: 4 tests passed.
 - `bun lint`: passed with 0 warnings and 0 errors.
 - `bun typecheck`: passed and generated 71 static pages.
 - `bun codex-scripts/docs-browser-smoke.mjs` against `bun run --cwd apps/web dev:web:only`: passed for desktop and mobile `/docs` and `/docs/local-setup`.

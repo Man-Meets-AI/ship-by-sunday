@@ -1,5 +1,5 @@
 ---
-summary: Improve the Ship by Sunday CLI human-facing experience without changing the blueprint contract or breaking JSON and non-TTY automation. Rework the no-arg entry surface, startup banner, help system, prompt flow, and regression coverage around the existing Bun CLI blueprint.
+summary: Improve the Ship by Sunday CLI human-facing experience without changing the codebase contract or breaking JSON and non-TTY automation. Rework the no-arg entry surface, startup banner, help system, prompt flow, and regression coverage around the existing Bun CLI codebase.
 read_when: Open this plan when changing how a human discovers, starts, navigates, or safely exits `bun run sbs` from a real terminal.
 plan_status: done
 ---
@@ -20,12 +20,12 @@ The user-visible proof is straightforward. In a real terminal, `bun run sbs`, `b
 
 ## Progress
 
-- [x] 2026-03-31 10:55 EDT — Read `/Users/parkerrex/.agents/docs/prompts/exec-plan-writer.md`, `AGENTS.md`, and `docs/codex/PLANS.md`, then inspected the live CLI entrypoint, parser, banner renderer, prompt implementation, README usage notes, and blueprint-local tests before drafting this ExecPlan.
-- [x] 2026-03-31 11:02 EDT — Grilled the plan against the live CLI blueprint, removed the optional no-arg menu branch, froze the startup and help contract, and pinned the prompt exit and non-TTY behavior to the existing save-after-each-field durability model.
+- [x] 2026-03-31 10:55 EDT — Read `/Users/parkerrex/.agents/docs/prompts/exec-plan-writer.md`, `AGENTS.md`, and `docs/codex/PLANS.md`, then inspected the live CLI entrypoint, parser, banner renderer, prompt implementation, README usage notes, and codebase-local tests before drafting this ExecPlan.
+- [x] 2026-03-31 11:02 EDT — Grilled the plan against the live CLI codebase, removed the optional no-arg menu branch, froze the startup and help contract, and pinned the prompt exit and non-TTY behavior to the existing save-after-each-field durability model.
 - [x] 2026-03-31 12:13 EDT — Implemented the command catalog, workflow-oriented help renderer, lightweight version trust surface, and the no-arg TTY startup surface with repository identity and recommended next commands.
 - [x] 2026-03-31 12:13 EDT — Refactored the interactive stage prompt into a pure session controller plus readline adapter, added `:clear` and `:quit`, and turned closed or cancelled prompts into explicit outcomes instead of the old `readline was closed` failure path.
 - [x] 2026-03-31 12:13 EDT — Added regression coverage for startup routing, help/version behavior, prompt control flow, non-TTY safeguards, and repository entry-surface content, then updated the README and CLI docs to match the new contract.
-- [x] 2026-03-31 12:16 EDT — Ran the full blueprint validation set (`test`, `typecheck`, `lint`, and `format:check`) and completed manual terminal proof for the human startup surface, grouped help, version output, JSON cleanliness, non-TTY prompt rejection, and `:quit` exit flow.
+- [x] 2026-03-31 12:16 EDT — Ran the full codebase validation set (`test`, `typecheck`, `lint`, and `format:check`) and completed manual terminal proof for the human startup surface, grouped help, version output, JSON cleanliness, non-TTY prompt rejection, and `:quit` exit flow.
 
 ## Surprises & Discoveries
 
@@ -42,9 +42,9 @@ Subcommand help does not exist today. The parser only recognizes `help`, `--help
 
 The interactive prompt is tightly coupled to real process stdin and stdout through `node:readline/promises` in `packages/ship-by-sunday-cli/src/prompts/prompt-stage.ts`. It currently supports only two affordances: an empty answer keeps the existing value and `!clear` removes it. It does not show stage progress, it does not advertise a safe exit path, and closed stdin does not degrade well. A live prompt run with a temporary repo root surfaced `readline was closed` after an incomplete multiline interaction, and a closed stdin run could stall on the first question instead of failing fast with a clear message.
 
-The existing automation contract is already narrow and valuable. `packages/ship-by-sunday-cli/src/cli.ts` suppresses themed output only for `--json` or `export --out -`. `packages/ship-by-sunday-cli/src/cli-json.ts` always includes the blueprint version in JSON responses, and the blueprint-local test suite already proves field mutation, import and export, review filtering, and help output. This slice should build on those seams rather than invent a new transport.
+The existing automation contract is already narrow and valuable. `packages/ship-by-sunday-cli/src/cli.ts` suppresses themed output only for `--json` or `export --out -`. `packages/ship-by-sunday-cli/src/cli-json.ts` always includes the codebase version in JSON responses, and the codebase-local test suite already proves field mutation, import and export, review filtering, and help output. This slice should build on those seams rather than invent a new transport.
 
-The blueprint already has the right injection seam for a prompt refactor. `packages/ship-by-sunday-cli/src/commands/stage-command.ts` and `packages/ship-by-sunday-cli/src/commands/resume-command.ts` accept a `promptStage` function and only own routing plus the final “saved” message. The plan should preserve that seam and move prompt orchestration behind it rather than widening command responsibilities.
+The codebase already has the right injection seam for a prompt refactor. `packages/ship-by-sunday-cli/src/commands/stage-command.ts` and `packages/ship-by-sunday-cli/src/commands/resume-command.ts` accept a `promptStage` function and only own routing plus the final “saved” message. The plan should preserve that seam and move prompt orchestration behind it rather than widening command responsibilities.
 
 Implementation also confirmed one parser edge and one prompt edge. `--version` needed to become its own parsed command kind so the handler layer could skip command execution entirely, and the prompt layer needed to return a structured interrupted outcome so `:quit` and Ctrl+C could stay success-path exits with a resume hint.
 
@@ -68,7 +68,7 @@ Implementation also confirmed one parser edge and one prompt edge. `--version` n
 
 2026-03-31 — Decision: non-interactive prompt attempts and broken prompt stdin should raise an `invalid_state` CLI error with exit code `2` and actionable guidance to run the command in a real terminal or use JSON and file-based commands instead. Rationale: prompt commands are valid commands, but the environment is not valid for interactive execution; making that explicit is more accurate than treating it as an unknown failure.
 
-2026-03-31 — Decision: human-readable `--version` output will be exactly one line in the form `Ship by Sunday CLI v<blueprint-version>`. Rationale: this reuses the same version source as JSON mode and gives operators a stable string that is easy to read and easy to assert in tests.
+2026-03-31 — Decision: human-readable `--version` output will be exactly one line in the form `Ship by Sunday CLI v<codebase-version>`. Rationale: this reuses the same version source as JSON mode and gives operators a stable string that is easy to read and easy to assert in tests.
 
 2026-03-31 — Decision: split prompt orchestration into a pure session/controller module and a readline adapter, instead of keeping all question formatting and signal handling inside `prompt-stage.ts`. Rationale: the interactive flow needed to be testable at the control-token level without mixing it with Node-specific readline mechanics.
 
@@ -78,21 +78,21 @@ Implementation also confirmed one parser edge and one prompt edge. `--version` n
 
 The scoped UX cleanup is complete. `bun run sbs` now has a deliberate TTY landing surface, help and version routing are trustable and side-effect free, and the interactive stage flow clearly explains how to continue, clear, quit, or recover without leaking readline errors.
 
-The most useful lesson from the slice is that the CLI needed a small command catalog and a session/controller split more than it needed new UI chrome. Once those seams existed, the rest of the work stayed narrow: no blueprint contract changes, no draft storage changes, and no JSON regressions. The remaining follow-up is only opportunistic copy tuning if future operator feedback shows a gap.
+The most useful lesson from the slice is that the CLI needed a small command catalog and a session/controller split more than it needed new UI chrome. Once those seams existed, the rest of the work stayed narrow: no codebase contract changes, no draft storage changes, and no JSON regressions. The remaining follow-up is only opportunistic copy tuning if future operator feedback shows a gap.
 
 ## Context and Orientation
 
-The relevant code starts at the repository root `package.json`, which exposes `bun run sbs` and delegates into `packages/ship-by-sunday-cli/package.json`. The blueprint entrypoint is `packages/ship-by-sunday-cli/src/cli.ts`. That file builds render options, decides whether the banner should be suppressed, writes the banner in TTY mode, and then calls `runCli()` from `packages/ship-by-sunday-cli/src/run-cli.ts`.
+The relevant code starts at the repository root `package.json`, which exposes `bun run sbs` and delegates into `packages/ship-by-sunday-cli/package.json`. The codebase entrypoint is `packages/ship-by-sunday-cli/src/cli.ts`. That file builds render options, decides whether the banner should be suppressed, writes the banner in TTY mode, and then calls `runCli()` from `packages/ship-by-sunday-cli/src/run-cli.ts`.
 
-`packages/ship-by-sunday-cli/src/run-cli.ts` is the current human-facing hub. It contains the static `printHelp()` function, parses argv by calling `packages/ship-by-sunday-cli/src/parse-cli-command.ts`, resolves the repository root through `resolveRepoRootPath()` from `@shipbysunday/blueprint-compiler`, dispatches command handlers, and normalizes errors through `packages/ship-by-sunday-cli/src/cli-errors.ts`. This is the best place to move from a one-off help dump to a command catalog and workflow-aware renderer. The new contract should keep `runCli()` as the place that decides whether a parsed command becomes help, version, or a real handler call.
+`packages/ship-by-sunday-cli/src/run-cli.ts` is the current human-facing hub. It contains the static `printHelp()` function, parses argv by calling `packages/ship-by-sunday-cli/src/parse-cli-command.ts`, resolves the repository root through `resolveRepoRootPath()` from `@shipbysunday/codebase-compiler`, dispatches command handlers, and normalizes errors through `packages/ship-by-sunday-cli/src/cli-errors.ts`. This is the best place to move from a one-off help dump to a command catalog and workflow-aware renderer. The new contract should keep `runCli()` as the place that decides whether a parsed command becomes help, version, or a real handler call.
 
 The banner and themed line formatting live in `packages/ship-by-sunday-cli/src/theme/render-banner.ts` and `packages/ship-by-sunday-cli/src/theme/render-theme.ts`. The banner already has the visual treatment; it lacks orientation details. This slice should keep the visual style subordinate to clarity, which means improving what the banner says before making it fancier. The current global write in `packages/ship-by-sunday-cli/src/cli.ts` is too blunt. It must be replaced with a startup renderer that is invoked only for the no-arg TTY entry surface, not for every command.
 
-The interactive stage flow lives in `packages/ship-by-sunday-cli/src/prompts/prompt-stage.ts`. It reads and writes the canonical local draft through `packages/ship-by-sunday-cli/src/draft/draft-store.ts`, which persists one file at `.ship-by-sunday/draft.json` under the resolved repository root. Stage structure, step labels, field labels, helper text, and readiness all come from `@shipbysunday/blueprint-compiler`, especially `deriveStageStatus`, `getBlueprintStageDefinition`, `buildStepDraftValues`, `blueprintFieldLabel`, `blueprintFieldHelperText`, and `blueprintFieldPromptKind`. This slice must keep those compiler-driven semantics intact and only improve the operator-facing presentation and flow control around them.
+The interactive stage flow lives in `packages/ship-by-sunday-cli/src/prompts/prompt-stage.ts`. It reads and writes the canonical local draft through `packages/ship-by-sunday-cli/src/draft/draft-store.ts`, which persists one file at `.ship-by-sunday/draft.json` under the resolved repository root. Stage structure, step labels, field labels, helper text, and readiness all come from `@shipbysunday/codebase-compiler`, especially `deriveStageStatus`, `getCodebaseStageDefinition`, `buildStepDraftValues`, `codebaseFieldLabel`, `codebaseFieldHelperText`, and `codebaseFieldPromptKind`. This slice must keep those compiler-driven semantics intact and only improve the operator-facing presentation and flow control around them.
 
-The test surface is already blueprint-local. `packages/ship-by-sunday-cli/tests/cli-help.test.ts` covers top-level help and unknown commands. `packages/ship-by-sunday-cli/tests/stage-command.test.ts` proves `resume` and `stage` routing. `packages/ship-by-sunday-cli/tests/agent-workflows.test.ts` proves JSON-first and file-based automation workflows. These tests are the right foundation for regression coverage; the main missing piece is a testable abstraction around the prompt session itself.
+The test surface is already codebase-local. `packages/ship-by-sunday-cli/tests/cli-help.test.ts` covers top-level help and unknown commands. `packages/ship-by-sunday-cli/tests/stage-command.test.ts` proves `resume` and `stage` routing. `packages/ship-by-sunday-cli/tests/agent-workflows.test.ts` proves JSON-first and file-based automation workflows. These tests are the right foundation for regression coverage; the main missing piece is a testable abstraction around the prompt session itself.
 
-The README is the only current human-facing CLI doc surface. The relevant section is `README.md` under “CLI Blueprint Intake”. It enumerates commands but does not describe a human-first startup story. Update that section only after the runtime contract is frozen.
+The README is the only current human-facing CLI doc surface. The relevant section is `README.md` under “CLI Codebase Intake”. It enumerates commands but does not describe a human-first startup story. Update that section only after the runtime contract is frozen.
 
 The current shape is small enough to keep the refactor local. The relevant files today are:
 
@@ -105,7 +105,7 @@ The current shape is small enough to keep the refactor local. The relevant files
       prompts/prompt-stage.ts
       draft/draft-store.ts
 
-The target structure after this slice should stay close to the current blueprint but separate human-facing concerns by feature:
+The target structure after this slice should stay close to the current codebase but separate human-facing concerns by feature:
 
     packages/ship-by-sunday-cli/src/
       cli.ts
@@ -134,7 +134,7 @@ Once the contract is fixed, rebuild the startup surface and help surfaces around
 
 After startup and help are stable, refactor the stage prompt into a controller plus a terminal adapter. Keep the canonical field ordering, helper text, draft persistence, and blank-or-clear semantics, but change the clear token to `:clear` and add `:quit`. The operator should know which stage they are in, which step they are answering, how many steps remain, how to clear a field, how to keep the current value, and how to leave safely and resume later. Closed stdin and Ctrl+C should become explicit, recoverable behaviors rather than accidental runtime failures.
 
-Finish by adding regression tests and small README updates that prove both modes still work: human TTY usage and machine-safe non-TTY or JSON usage. Keep the changes scoped to `packages/ship-by-sunday-cli/` and the relevant README section unless implementation reveals a real cross-blueprint requirement.
+Finish by adding regression tests and small README updates that prove both modes still work: human TTY usage and machine-safe non-TTY or JSON usage. Keep the changes scoped to `packages/ship-by-sunday-cli/` and the relevant README section unless implementation reveals a real cross-codebase requirement.
 
 ## Milestones
 
@@ -164,11 +164,11 @@ Run `script -q /dev/null bun run sbs stage product` for the TTY proof and one no
 
 ### Milestone 4: Lock the behavior with regression tests and README notes
 
-At the end of this milestone, the blueprint test suite covers the new startup routing, help behavior, version output, prompt exit semantics, and automation guards. The README explains the human-first startup flow without obscuring the documented JSON-first command set for agents and scripts.
+At the end of this milestone, the codebase test suite covers the new startup routing, help behavior, version output, prompt exit semantics, and automation guards. The README explains the human-first startup flow without obscuring the documented JSON-first command set for agents and scripts.
 
 Touch `packages/ship-by-sunday-cli/tests/cli-help.test.ts`, add prompt-session tests under `packages/ship-by-sunday-cli/tests/`, update `packages/ship-by-sunday-cli/tests/stage-command.test.ts` as needed, and update the CLI section in `README.md`. Do not broaden documentation work beyond those surfaces in this slice.
 
-Run blueprint-local `test`, `typecheck`, `lint`, and `format:check`, then rerun the manual TTY and non-TTY walkthroughs from the repository root. Success looks like a fresh operator being able to follow the README and verify both human and automation behavior without guessing.
+Run codebase-local `test`, `typecheck`, `lint`, and `format:check`, then rerun the manual TTY and non-TTY walkthroughs from the repository root. Success looks like a fresh operator being able to follow the README and verify both human and automation behavior without guessing.
 
 ## Concrete Steps
 
@@ -246,7 +246,7 @@ If a manual prompt test is interrupted, recovery should be simple. Re-run `bun r
 These are the post-implementation proof points gathered from live repository runs on 2026-03-31:
 
     $ script -q /dev/null bun run sbs
-    Ship by Sunday CLI • local blueprint intake and blueprint generation
+    Ship by Sunday CLI • local codebase intake and codebase generation
     Repository: ship-by-sunday
     Working root: /Users/parkerrex/Projects/ship-by-sunday
     Recommended next commands
@@ -301,8 +301,8 @@ The command catalog should be the human-facing metadata source, not a second par
 
 The prompt flow depends on `node:readline/promises` today. That standard library module is acceptable for this slice and should be preferred. Do not bring in a new prompt dependency or menu framework for this work. If implementation uncovers a hard blocker inside readline, stop and update this plan before widening scope.
 
-The canonical product and stage model lives in `@shipbysunday/blueprint-compiler`. The important dependencies are `deriveStageStatus`, `getBlueprintStageDefinition`, `buildStepDraftValues`, `getBlueprintStepLabel`, `blueprintFieldLabel`, `blueprintFieldHelperText`, `blueprintFieldPromptKind`, `normalizeProblemSeverityValue`, `normalizeProblemUrgencyValue`, and `resolveRepoRootPath`. This slice must not fork or duplicate stage metadata. Help grouping may describe workflows in human terms, but command behavior must still reflect the live compiler-backed stage contract.
+The canonical product and stage model lives in `@shipbysunday/codebase-compiler`. The important dependencies are `deriveStageStatus`, `getCodebaseStageDefinition`, `buildStepDraftValues`, `getCodebaseStepLabel`, `codebaseFieldLabel`, `codebaseFieldHelperText`, `codebaseFieldPromptKind`, `normalizeProblemSeverityValue`, `normalizeProblemUrgencyValue`, and `resolveRepoRootPath`. This slice must not fork or duplicate stage metadata. Help grouping may describe workflows in human terms, but command behavior must still reflect the live compiler-backed stage contract.
 
 Persistence depends on `packages/ship-by-sunday-cli/src/draft/draft-store.ts` and `packages/ship-by-sunday-cli/src/draft/draft-paths.ts`. Keep the draft directory `.ship-by-sunday/` and file name `draft.json` unchanged. The UX slice should change prompts, help, and trust signals, not storage internals.
 
-Machine-readable output depends on `packages/ship-by-sunday-cli/src/cli-json.ts`, which already includes `version` in every JSON result. Human-readable version output should reuse the same blueprint version source. Error behavior depends on `packages/ship-by-sunday-cli/src/cli-errors.ts`; the prompt non-TTY guard and closed-stdin path should use `invalid_state` with exit code `2`, while `:quit` and Ctrl+C remain clean exit `0` paths that do not emit stack traces or unknown failures.
+Machine-readable output depends on `packages/ship-by-sunday-cli/src/cli-json.ts`, which already includes `version` in every JSON result. Human-readable version output should reuse the same codebase version source. Error behavior depends on `packages/ship-by-sunday-cli/src/cli-errors.ts`; the prompt non-TTY guard and closed-stdin path should use `invalid_state` with exit code `2`, while `:quit` and Ctrl+C remain clean exit `0` paths that do not emit stack traces or unknown failures.

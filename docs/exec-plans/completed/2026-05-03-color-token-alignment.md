@@ -78,7 +78,7 @@ Date: 2026-05-03
 
 This plan completed the first color alignment slice without widening into typography, spacing, checkout, auth, or homepage redesign. `apps/web/app/globals.css` now exposes `accent.info`, `state.success`, and `state.warning` as Tailwind-backed app color roles, uses a neutral dark `sidebar-primary`, and keeps selection colors on foreground/background tokens instead of hard-coded hex.
 
-The migration covered the high-value operational drift found in the first inventory: pointer highlight accent color, Codex connection status dots, bonus lesson completion checks, and blueprint save feedback warning/success tones. The feedback component also now applies tone-specific border color to the bordered element instead of a wrapper without a border.
+The migration covered the high-value operational drift found in the first inventory: pointer highlight accent color, Codex connection status dots, bonus lesson completion checks, and codebase save feedback warning/success tones. The feedback component also now applies tone-specific border color to the bordered element instead of a wrapper without a border.
 
 The main remaining visual work belongs to later Program slices. The global body tracking mismatch remains a typography task. Hard-coded homepage art, integration brand colors, Open Graph colors, generated preview/demo colors, and the homepage-only hero `Cover` treatment remain documented exceptions rather than unfinished color migration work.
 
@@ -90,11 +90,11 @@ The app token implementation lives in `apps/web/app/globals.css`. The `@theme in
 
 Shared UI primitives live in `apps/web/components/ui/`. Relevant primitives for this slice include `button.tsx`, `input.tsx`, `textarea.tsx`, `select.tsx`, `card.tsx`, `tabs.tsx`, `dropdown-menu.tsx`, `dialog.tsx`, `alert.tsx`, `badge.tsx`, `sidebar.tsx`, `tooltip.tsx`, and `code-block.tsx`. Many already use semantic tokens; do not rewrite them unless the inventory proves color drift.
 
-Representative app surfaces live under `apps/web/app/(workspace)/`, `apps/web/app/(identity)/`, and `apps/web/app/checkout/`. High-value color surfaces include the app shell, local navigation, blueprint flow, settings page, checkout success page, access-required pages, review handoff, and Codex connection cards.
+Representative app surfaces live under `apps/web/app/(workspace)/`, `apps/web/app/(identity)/`, and `apps/web/app/checkout/`. High-value color surfaces include the app shell, local navigation, codebase flow, settings page, checkout success page, access-required pages, review handoff, and Codex connection cards.
 
 Marketing and content surfaces under `apps/web/app/_components/home-page/`, `apps/web/app/_content/home-page.ts`, and `apps/web/app/opengraph-image.tsx` contain intentional brand and editorial colors. They are not the primary target of this slice.
 
-Hard homepage exclusions are `apps/web/app/_components/home-page/sections/blueprint-demo/blueprint-demo-leverage-hero.tsx` and `productPreviewSection.leverageHero` for `Install leverage` / `the loop repeats TOMORROW`; `apps/web/app/_components/home-page/sections/sprint-path-unified-section.tsx` and `homePageContent.sprintPathSection` for `Exec Loops: OpenAI's WEAPON of choice`; and `apps/web/app/_components/home-page/sections/exec-loop-section.tsx`, `apps/web/app/_components/home-page/sections/exec-loop/exec-loop-visual.tsx`, and `homePageContent.execLoopSection` for worker/how-workers-work graphics. Do not change their colors, custom type, section art, graphics, or layout as part of this plan.
+Hard homepage exclusions are `apps/web/app/_components/home-page/sections/codebase-demo/codebase-demo-leverage-hero.tsx` and `productPreviewSection.leverageHero` for `Install leverage` / `the loop repeats TOMORROW`; `apps/web/app/_components/home-page/sections/sprint-path-unified-section.tsx` and `homePageContent.sprintPathSection` for `Exec Loops: OpenAI's WEAPON of choice`; and `apps/web/app/_components/home-page/sections/exec-loop-section.tsx`, `apps/web/app/_components/home-page/sections/exec-loop/exec-loop-visual.tsx`, and `homePageContent.execLoopSection` for worker/how-workers-work graphics. Do not change their colors, custom type, section art, graphics, or layout as part of this plan.
 
 Before implementation, run `git status --short`. The worktree may include unrelated app UI changes and image assets. Preserve unrelated user changes and avoid broad formatting churn.
 
@@ -114,7 +114,7 @@ Next, inventory color usage. Use `rg` to find hard-coded hex colors, raw OKLCH o
 
 Then decide the first-wave token shape. Prefer mapping screenshot roles into existing shadcn tokens when the role already exists. Add new roles only when a repeated app UI role cannot be expressed clearly with existing tokens. If new Tailwind color utilities are needed, add `--color-*` mappings in the `@theme inline` block and matching light and dark CSS variables in `:root` and `.dark`.
 
-After the token decision, migrate high-value surfaces. Start with shared primitives only where the primitive itself uses hard-coded neutrals or generic neutral utilities. Then migrate protected app shell, workspace navigation, blueprint flow, settings, checkout success, access-required, identity, and review surfaces as needed. Keep edits small and feature-local.
+After the token decision, migrate high-value surfaces. Start with shared primitives only where the primitive itself uses hard-coded neutrals or generic neutral utilities. Then migrate protected app shell, workspace navigation, codebase flow, settings, checkout success, access-required, identity, and review surfaces as needed. Keep edits small and feature-local.
 
 Update documentation after implementation clarifies durable rules. If a new token becomes part of the app contract, add it to `docs/design-docs/ui-design-library.md`. If an exception is intentionally left hard-coded, document why it is content, art, or marketing expression.
 
@@ -172,7 +172,7 @@ For browser proof, start the dev server only after focused checks are stable:
 
     bun run dev:core
 
-Then verify at least one desktop viewport and one mobile viewport in both light and dark mode. Prefer protected app UI such as `/blueprint` or `/settings` when local auth is available. If auth is blocked, verify reachable app-adjacent routes and record the auth blocker exactly.
+Then verify at least one desktop viewport and one mobile viewport in both light and dark mode. Prefer protected app UI such as `/codebase` or `/settings` when local auth is available. If auth is blocked, verify reachable app-adjacent routes and record the auth blocker exactly.
 
 ## Validation and Acceptance
 
@@ -214,8 +214,8 @@ Initial planning scan examples:
     apps/web/app/globals.css owns current OKLCH semantic color variables.
     apps/web/components/ui/button.tsx already uses bg-primary, text-primary-foreground, bg-muted, border-border, and ring tokens.
     apps/web/app/_content/home-page.ts contains intentional integration brand colors.
-    apps/web/app/_components/home-page/sections/blueprint-demo/blueprint-demo-codebase-branch.tsx contains intentional Figma-derived editorial colors.
-    apps/web/app/_components/home-page/sections/blueprint-demo/blueprint-demo-leverage-hero.tsx, sprint-path-unified-section.tsx, exec-loop-section.tsx, and exec-loop/exec-loop-visual.tsx are hard-excluded custom homepage editorial surfaces.
+    apps/web/app/_components/home-page/sections/codebase-demo/codebase-demo-codebase-branch.tsx contains intentional Figma-derived editorial colors.
+    apps/web/app/_components/home-page/sections/codebase-demo/codebase-demo-leverage-hero.tsx, sprint-path-unified-section.tsx, exec-loop-section.tsx, and exec-loop/exec-loop-visual.tsx are hard-excluded custom homepage editorial surfaces.
     apps/web/components/ui/cover.tsx and pointer-highlight.tsx contain generic neutral utilities that need classification before reuse in app UI.
 
 Record implementation proof here as the slice proceeds.
@@ -226,7 +226,7 @@ Implementation patch:
     apps/web/components/ui/pointer-highlight.tsx uses border-foreground and text-accent-info instead of generic neutral and blue utilities.
     apps/web/app/(workspace)/_components/codex-connection-card/codex-connection-card-status.tsx uses bg-state-success and bg-state-warning for status dots.
     apps/web/app/(workspace)/_components/execute-ship/bonus-mission-block-card.tsx uses text-state-success for completed lesson checks.
-    apps/web/app/(workspace)/_components/blueprint-flow/blueprint-stage-save-feedback.tsx uses state tokens for warning/success feedback and applies the tone border to the actual bordered element.
+    apps/web/app/(workspace)/_components/codebase-flow/codebase-stage-save-feedback.tsx uses state tokens for warning/success feedback and applies the tone border to the actual bordered element.
 
 Targeted post-patch inventory:
 
@@ -244,7 +244,7 @@ Validation proof:
     bun run programs:lint
     bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-03-color-token-alignment.md docs/programs/completed/2026-05-03-ui-design-system-alignment docs/design-docs/ui-design-library.md DESIGN.md docs/DESIGN.md docs/design-docs/index.md
     bun run public-readiness:lint
-    bun run --cwd apps/web vitest run --project unit tests/unit/blueprint-stage-save-feedback.test.tsx tests/unit/marketing-effects.test.tsx tests/unit/settings-page.test.tsx tests/unit/mission-extras-row.test.tsx --project integration-ui tests/integration-ui/lesson-map-surface.test.tsx tests/integration-ui/blueprint-page.test.tsx
+    bun run --cwd apps/web vitest run --project unit tests/unit/codebase-stage-save-feedback.test.tsx tests/unit/marketing-effects.test.tsx tests/unit/settings-page.test.tsx tests/unit/mission-extras-row.test.tsx --project integration-ui tests/integration-ui/lesson-map-surface.test.tsx tests/integration-ui/codebase-page.test.tsx
     bun run --cwd apps/web test:integration:ui
     git diff --check
 

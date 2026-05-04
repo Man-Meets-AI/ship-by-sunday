@@ -17,9 +17,9 @@ describe("sign-in route utils", () => {
 
 	it("falls back for invalid redirect paths", () => {
 		expect(getSafeRedirectPath("https://example.com/settings")).toBe(
-			"/blueprint",
+			"/codebase",
 		);
-		expect(getSafeRedirectPath("//example.com/settings")).toBe("/blueprint");
+		expect(getSafeRedirectPath("//example.com/settings")).toBe("/codebase");
 	});
 
 	it("builds task routes that preserve the redirect target", () => {
@@ -40,12 +40,12 @@ describe("sign-in route utils", () => {
 	});
 
 	it("builds cookie-clearing checkout recovery routes with a safe redirect", () => {
-		expect(buildClearPendingCheckoutSessionHref("/blueprint")).toBe(
-			"/checkout/clear-pending?redirect_url=%2Fblueprint",
+		expect(buildClearPendingCheckoutSessionHref("/codebase")).toBe(
+			"/checkout/clear-pending?redirect_url=%2Fcodebase",
 		);
 		expect(
 			buildClearPendingCheckoutSessionHref("https://example.com/owned"),
-		).toBe("/checkout/clear-pending?redirect_url=%2Fblueprint");
+		).toBe("/checkout/clear-pending?redirect_url=%2Fcodebase");
 	});
 
 	it("extracts checkout session ids from safe checkout success redirects", () => {
@@ -54,9 +54,7 @@ describe("sign-in route utils", () => {
 				"/checkout/success?session_id=cs_test_123",
 			),
 		).toBe("cs_test_123");
-		expect(
-			getCheckoutSessionIdFromSuccessRedirectPath("/blueprint"),
-		).toBeNull();
+		expect(getCheckoutSessionIdFromSuccessRedirectPath("/codebase")).toBeNull();
 		expect(
 			buildCheckoutEmailHandoffHrefForSuccessRedirect(
 				"/checkout/success?session_id=cs_test_123",
@@ -73,7 +71,7 @@ describe("sign-in route utils", () => {
 	it("uses the sanitized redirect target for task completion", () => {
 		expect(getTaskRedirectUrlComplete("/settings")).toBe("/settings");
 		expect(getTaskRedirectUrlComplete("https://example.com/settings")).toBe(
-			"/blueprint",
+			"/codebase",
 		);
 	});
 });

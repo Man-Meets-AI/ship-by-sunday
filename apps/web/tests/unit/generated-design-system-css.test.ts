@@ -1,7 +1,7 @@
 import {
 	buildDesignPresetFactSeed,
 	buildGeneratedDesignSystem,
-} from "@shipbysunday/blueprint-compiler";
+} from "@shipbysunday/codebase-compiler";
 import { describe, expect, it } from "vitest";
 
 import { buildGeneratedDesignSystemCss } from "@/lib/generated-design-system-css";

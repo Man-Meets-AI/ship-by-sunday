@@ -39,7 +39,7 @@ CI and release workflow reshaping depends on release identity and hosted proof d
 
 Helper CLI retirement can happen after the required-check and command surfaces are unwired. The CLI is not an upstream dependency of generated starter output, but it is still wired into root `check`, the `cli` CI job, `bin/sbs`, release docs, public docs, and branch-protection expectations.
 
-Browser harness replacement must happen before QA browser/e2e deletion. The Program identified replacement gaps for robots/sitemap, signed-out `/blueprint`, entitled `/blueprint -> /review -> /settings`, checkout success, and metadata/noindex behavior. Removing harness files first loses proof.
+Browser harness replacement must happen before QA browser/e2e deletion. The Program identified replacement gaps for robots/sitemap, signed-out `/codebase`, entitled `/codebase -> /review -> /settings`, checkout success, and metadata/noindex behavior. Removing harness files first loses proof.
 
 Disposable QA deletion follows release-helper relocation and replacement proof. Once release-critical helpers and test-critical browser proof no longer depend on `qa/`, QA journey, coverage, inventory, run reports, run-pack scripts, and QA-specific agent prompts can be removed or archived.
 

@@ -40,7 +40,7 @@ Users should not see public behavior change in this slice. The proof is import s
 
 ## Surprises & Discoveries
 
-`packages/blueprint-compiler/src/repo-generation/repo-download-source-contract.ts` includes `apps/web/mdx-components.tsx` in the customer-safe app file list. Starter rendering code also mentions docs content layout and local Next docs paths. Those assumptions need review after the final rendering shape is known.
+`packages/codebase-compiler/src/repo-generation/repo-download-source-contract.ts` includes `apps/web/mdx-components.tsx` in the customer-safe app file list. Starter rendering code also mentions docs content layout and local Next docs paths. Those assumptions need review after the final rendering shape is known.
 
 `bun.lock` contains many MDX and theme transitive dependencies through Nextra. The final package diff should remove only what is no longer needed and preserve any direct dependencies required by the app-owned renderer.
 
@@ -70,7 +70,7 @@ Starter generation no longer points at `apps/web/node_modules/next/dist/docs/`; 
 
 The app package manifest is `apps/web/package.json`. The workspace lockfile is `bun.lock`. Current Nextra config is in `apps/web/next.config.ts`, which wraps the Next config with `nextra`. Current global MDX component bridging is in `apps/web/mdx-components.tsx`.
 
-Starter repository assumptions are in `packages/blueprint-compiler/src/repo-generation/repo-download-source-contract.ts` and related starter rendering surfaces under `packages/blueprint-compiler/src/repo-generation/`. These should be updated only to match the final app-owned docs and blog runtime shape.
+Starter repository assumptions are in `packages/codebase-compiler/src/repo-generation/repo-download-source-contract.ts` and related starter rendering surfaces under `packages/codebase-compiler/src/repo-generation/`. These should be updated only to match the final app-owned docs and blog runtime shape.
 
 ### In Scope
 
@@ -106,7 +106,7 @@ Milestone 3 updates starter assumptions and CSS leftovers. Success means compile
 
 From `/Users/parkerrex/Developer/ship-by-sunday`, run the blocking import scan:
 
-    rg -n "from ['\"]nextra|from ['\"]nextra-theme-docs|nextra/pages|nextra/page-map|nextra/icons|nextra-theme-docs/style.css" apps/web packages/blueprint-compiler
+    rg -n "from ['\"]nextra|from ['\"]nextra-theme-docs|nextra/pages|nextra/page-map|nextra/icons|nextra-theme-docs/style.css" apps/web packages/codebase-compiler
 
 If the scan finds runtime imports in docs or blog code, stop. Do not edit packages.
 
@@ -124,12 +124,12 @@ This slice is accepted when `nextra` and `nextra-theme-docs` are gone from the a
 
 Run these commands from `/Users/parkerrex/Developer/ship-by-sunday` after implementation:
 
-    rg -n "from ['\"]nextra|from ['\"]nextra-theme-docs|nextra/pages|nextra/page-map|nextra/icons|nextra-theme-docs/style.css" apps/web packages/blueprint-compiler
+    rg -n "from ['\"]nextra|from ['\"]nextra-theme-docs|nextra/pages|nextra/page-map|nextra/icons|nextra-theme-docs/style.css" apps/web packages/codebase-compiler
     rg -n "\"nextra\"|\"nextra-theme-docs\"" apps/web/package.json bun.lock
     rg -n "\"@next/mdx\"|\"@mdx-js/loader\"|\"@mdx-js/react\"|\"@types/mdx\"|\"remark-frontmatter\"" apps/web/package.json bun.lock
     bun install --frozen-lockfile
     bun run --cwd apps/web test:unit -- tests/unit/docs-metadata.test.ts tests/unit/docs-disabled-state.test.tsx tests/unit/blog-page-paths.test.ts tests/unit/blog-metadata.test.ts tests/unit/blog-structured-data.test.ts tests/unit/public-metadata-routes.test.ts
-    bun test packages/blueprint-compiler/tests/repo-generation.test.ts packages/blueprint-compiler/tests/review-download-zip.test.ts
+    bun test packages/codebase-compiler/tests/repo-generation.test.ts packages/codebase-compiler/tests/review-download-zip.test.ts
     bun lint
     bun typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-04-27-remove-nextra-config-packages-and-starter-assumptions.md
@@ -151,12 +151,12 @@ The final package diff should be narrow. Do not opportunistically upgrade unrela
 
 Validation results recorded on 2026-04-27 EDT:
 
-- `! rg -n "from ['\"]nextra|from ['\"]nextra-theme-docs|nextra/pages|nextra/page-map|nextra/icons|nextra-theme-docs/style.css" apps/web packages/blueprint-compiler`: passed with no matches.
+- `! rg -n "from ['\"]nextra|from ['\"]nextra-theme-docs|nextra/pages|nextra/page-map|nextra/icons|nextra-theme-docs/style.css" apps/web packages/codebase-compiler`: passed with no matches.
 - `! rg -n "\"nextra\"|\"nextra-theme-docs\"" apps/web/package.json bun.lock`: passed with no matches.
 - `rg -n "\"@next/mdx\"|\"@mdx-js/loader\"|\"@mdx-js/react\"|\"@types/mdx\"|\"remark-frontmatter\"" apps/web/package.json bun.lock`: passed and showed the direct MDX dependencies.
 - `bun install --frozen-lockfile`: passed with no changes.
 - `bun run --cwd apps/web test:unit -- tests/unit/public-content-inventory.test.ts tests/unit/docs-page-paths.test.ts tests/unit/docs-content-loader.test.ts tests/unit/docs-navigation-components.test.tsx tests/unit/docs-metadata.test.ts tests/unit/docs-disabled-state.test.tsx tests/unit/blog-page-paths.test.ts tests/unit/blog-posts.test.ts tests/unit/blog-metadata.test.ts tests/unit/blog-structured-data.test.ts tests/unit/public-metadata-routes.test.ts`: 11 files and 26 tests passed.
-- `bun test packages/blueprint-compiler/tests/repo-generation.test.ts packages/blueprint-compiler/tests/review-download-zip.test.ts`: 4 tests passed. The original broad filter `bun test packages/blueprint-compiler/src/repo-generation` matched no test files, so the source-adjacent repo-generation tests were run directly.
+- `bun test packages/codebase-compiler/tests/repo-generation.test.ts packages/codebase-compiler/tests/review-download-zip.test.ts`: 4 tests passed. The original broad filter `bun test packages/codebase-compiler/src/repo-generation` matched no test files, so the source-adjacent repo-generation tests were run directly.
 - `bun lint`: passed with 0 warnings and 0 errors.
 - `bun typecheck`: passed and generated 71 static pages, including docs and blog routes, without the previous Nextra shallow-clone warning.
 

@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import type {
-	BlueprintStageId,
-	BlueprintStageStatus,
-} from "@shipbysunday/blueprint-compiler";
+	CodebaseStageId,
+	CodebaseStageStatus,
+} from "@shipbysunday/codebase-compiler";
 
 import type { LessonLayoutMode } from "@/lib/course/lesson/model/manifest";
 import type { SkillRailCompletionCue } from "@/app/(workspace)/_components/course/shared/components/skill-rail-shared";
@@ -42,8 +42,8 @@ export type AppShellProgressSummary = {
 
 export type AppShellPrimaryNav = {
 	kind: "combined";
-	currentBlueprintStageId?: BlueprintStageId;
-	stageStatuses: BlueprintStageStatus[];
+	currentCodebaseStageId?: CodebaseStageId;
+	stageStatuses: CodebaseStageStatus[];
 	postReviewItems: WorkspacePrimaryNavItem[];
 	onLinkNavigate?: (
 		event: { preventDefault: () => void },
@@ -55,7 +55,7 @@ export type AppShellPrimaryNav = {
 
 export type AppShellLocalNav =
 	| {
-			kind: "blueprint";
+			kind: "codebase";
 			desktop: ReactNode;
 			compact?: ReactNode;
 	  }

@@ -45,7 +45,7 @@ This slice is behavior-neutral. It should not change checkout session creation, 
 
 ## Surprises & Discoveries
 
-2026-04-26 EDT: `apps/web/features/blueprint-flow/lib/review-download-handoff.ts` is not route-private. It is consumed by the review route, blueprint page state, Execute / Ship track constants, and focused tests, so it stays in the blueprint-flow feature for this slice.
+2026-04-26 EDT: `apps/web/features/codebase-flow/lib/review-download-handoff.ts` is not route-private. It is consumed by the review route, codebase page state, Execute / Ship track constants, and focused tests, so it stays in the codebase-flow feature for this slice.
 
 2026-04-26 EDT: `apiRouteConfig.stripeWebhook` points at the Convex HTTP webhook path `/stripe/webhook`, not a Next route under `apps/web/app/api`. The new API route config must keep that distinction explicit so this route-ownership work does not imply a Next Stripe webhook.
 
@@ -69,7 +69,7 @@ Decision: Keep checkout session creation, checkout recovery, and Stripe helpers 
 Rationale: Those files are part of the release-sensitive billing cluster and belong in the later billing and Stripe boundary slice.
 Date: 2026-04-26
 
-Decision: Keep `review-download-handoff.ts` in the blueprint-flow feature.
+Decision: Keep `review-download-handoff.ts` in the codebase-flow feature.
 Rationale: It is a durable review contract consumed by multiple feature surfaces, while the hook and visual handoff wrappers are route-local to the review route.
 Date: 2026-04-26
 
@@ -89,7 +89,7 @@ Ship by Sunday's web app lives in `apps/web`. The App Router lives under `apps/w
 
 The checkout success route is `apps/web/app/checkout/success/page.tsx`. It preloads checkout session state and product access, then renders `CheckoutSuccessView` from `apps/web/features/checkout/components/checkout-success-view.tsx`. The view and its checkout-success helper components are route-local UI for this page. Checkout session creation, checkout session interpretation, Stripe helpers, and checkout recovery helpers remain in their existing server/platform homes.
 
-The review route is `apps/web/app/(workspace)/review/page.tsx`. It preloads the blueprint workspace state, optional post-review targets, and optional bonus mission state, then renders `BlueprintReviewPage` from `apps/web/features/blueprint-flow/components/blueprint-review-page.tsx`. The review page, download bridge, handoff card, and auto-download hook are route-local review UI/control. The pure review download constants in `apps/web/features/blueprint-flow/lib/review-download-handoff.ts` remain in the blueprint-flow feature because other feature code consumes them.
+The review route is `apps/web/app/(workspace)/review/page.tsx`. It preloads the codebase workspace state, optional post-review targets, and optional bonus mission state, then renders `CodebaseReviewPage` from `apps/web/features/codebase-flow/components/codebase-review-page.tsx`. The review page, download bridge, handoff card, and auto-download hook are route-local review UI/control. The pure review download constants in `apps/web/features/codebase-flow/lib/review-download-handoff.ts` remain in the codebase-flow feature because other feature code consumes them.
 
 The API route tree is `apps/web/app/api`. Next API path constants currently live in `apps/web/config/product.ts` as `apiRouteConfig`, beside homepage, pricing, product, asset, and metadata configuration. This slice moves that route path contract to `apps/web/app/api/_lib/api-route-config.ts` and keeps a compatibility export from `apps/web/config/product.ts`.
 
@@ -97,7 +97,7 @@ The API route tree is `apps/web/app/api`. Next API path constants currently live
 
 Move `apps/web/features/checkout/components/checkout-success-view.tsx`, `checkout-success-view-surface.tsx`, `checkout-success-main-panel.tsx`, `checkout-success-help-panel.tsx`, and `checkout-success-view-model.ts` into private folders under `apps/web/app/checkout/success/`.
 
-Move `apps/web/features/blueprint-flow/components/blueprint-review-page.tsx`, `apps/web/features/blueprint-flow/components/review/blueprint-review-download-bridge.tsx`, `apps/web/features/blueprint-flow/components/review/blueprint-review-handoff-card.tsx`, and `apps/web/features/blueprint-flow/hooks/use-review-download-handoff.ts` into private folders under `apps/web/app/(workspace)/review/`.
+Move `apps/web/features/codebase-flow/components/codebase-review-page.tsx`, `apps/web/features/codebase-flow/components/review/codebase-review-download-bridge.tsx`, `apps/web/features/codebase-flow/components/review/codebase-review-handoff-card.tsx`, and `apps/web/features/codebase-flow/hooks/use-review-download-handoff.ts` into private folders under `apps/web/app/(workspace)/review/`.
 
 Create `apps/web/app/api/_lib/api-route-config.ts` for the Next API route path contract and the explicit Convex HTTP webhook path contract. Update first-party imports to use that route-contract path. Keep `apps/web/config/product.ts` exporting `apiRouteConfig` as a compatibility surface.
 
@@ -157,23 +157,23 @@ Read the Program, the current planning brief, and this plan:
 
 Record baseline imports:
 
-    rg 'features/checkout/components/checkout-success|features/blueprint-flow/components/blueprint-review-page|features/blueprint-flow/components/review/blueprint-review|features/blueprint-flow/hooks/use-review-download-handoff|apiRouteConfig' apps/web --glob '!node_modules'
+    rg 'features/checkout/components/checkout-success|features/codebase-flow/components/codebase-review-page|features/codebase-flow/components/review/codebase-review|features/codebase-flow/hooks/use-review-download-handoff|apiRouteConfig' apps/web --glob '!node_modules'
 
 After the moves and import updates, prove first-party consumers use the App Router paths and old feature paths are compatibility exports:
 
-    rg 'features/checkout/components/checkout-success|features/blueprint-flow/components/blueprint-review-page|features/blueprint-flow/components/review/blueprint-review|features/blueprint-flow/hooks/use-review-download-handoff' apps/web/app apps/web/tests --glob '!node_modules'
-    rg 'app/(checkout/success|\\(workspace\\)/review|api)/_.*(checkout-success|blueprint-review|use-review-download-handoff|api-route-config)|app/api/_lib/api-route-config' apps/web --glob '!node_modules'
+    rg 'features/checkout/components/checkout-success|features/codebase-flow/components/codebase-review-page|features/codebase-flow/components/review/codebase-review|features/codebase-flow/hooks/use-review-download-handoff' apps/web/app apps/web/tests --glob '!node_modules'
+    rg 'app/(checkout/success|\\(workspace\\)/review|api)/_.*(checkout-success|codebase-review|use-review-download-handoff|api-route-config)|app/api/_lib/api-route-config' apps/web --glob '!node_modules'
 
 Run focused checkout and review tests:
 
-    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/checkout-success-view.interactions.test.tsx tests/integration-ui/blueprint-review-page.test.tsx
+    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/checkout-success-view.interactions.test.tsx tests/integration-ui/codebase-review-page.test.tsx
     bun run --cwd apps/web test:unit -- tests/unit/review-download-handoff.test.tsx tests/unit/route-metadata.test.ts
 
 Run focused API route and API client tests:
 
     bun run --cwd apps/web test:integration -- tests/integration/stripe-checkout-route.test.ts tests/integration/codex-route-handlers.test.ts tests/integration/observability-client-error-route.test.ts tests/integration/observability-clerk-route.test.ts tests/integration/observability-vercel-route.test.ts tests/integration/observability-incident-status-route.test.ts
     bun run --cwd apps/web test:integration:ui -- tests/integration-ui/checkout-button.test.tsx
-    bun run --cwd apps/web test:unit -- tests/unit/blueprint-problem-statement-optimizer.test.tsx
+    bun run --cwd apps/web test:unit -- tests/unit/codebase-problem-statement-optimizer.test.tsx
 
 Then run app and plan checks:
 
@@ -193,17 +193,17 @@ Checkout success behavior must remain unchanged. Focused tests must still prove 
 
 Review behavior must remain unchanged. Focused tests must still prove the review handoff, fallback download link, one-time auto-download, local nav, Build Lessons CTA, and locked review redirect behavior.
 
-API request behavior must remain unchanged. Focused tests must still prove Stripe checkout route behavior, Codex route handlers, observability route handlers, checkout button API client calls, and blueprint problem-statement optimizer API client calls.
+API request behavior must remain unchanged. Focused tests must still prove Stripe checkout route behavior, Codex route handlers, observability route handlers, checkout button API client calls, and codebase problem-statement optimizer API client calls.
 
 ### Test Commands
 
 Run these commands from repo root after implementation:
 
-    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/checkout-success-view.interactions.test.tsx tests/integration-ui/blueprint-review-page.test.tsx
+    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/checkout-success-view.interactions.test.tsx tests/integration-ui/codebase-review-page.test.tsx
     bun run --cwd apps/web test:unit -- tests/unit/review-download-handoff.test.tsx tests/unit/route-metadata.test.ts
     bun run --cwd apps/web test:integration -- tests/integration/stripe-checkout-route.test.ts tests/integration/codex-route-handlers.test.ts tests/integration/observability-client-error-route.test.ts tests/integration/observability-clerk-route.test.ts tests/integration/observability-vercel-route.test.ts tests/integration/observability-incident-status-route.test.ts
     bun run --cwd apps/web test:integration:ui -- tests/integration-ui/checkout-button.test.tsx
-    bun run --cwd apps/web test:unit -- tests/unit/blueprint-problem-statement-optimizer.test.tsx
+    bun run --cwd apps/web test:unit -- tests/unit/codebase-problem-statement-optimizer.test.tsx
     bun run format:check
     bun run --cwd apps/web lint
     bun run --cwd apps/web typecheck
@@ -242,14 +242,14 @@ Baseline route-owned checkout wrapper fan-in:
 Baseline route-owned review wrapper fan-in:
 
     apps/web/app/(workspace)/review/page.tsx
-    apps/web/tests/integration-ui/blueprint-review-page.test.tsx
+    apps/web/tests/integration-ui/codebase-review-page.test.tsx
     apps/web/tests/unit/review-download-handoff.test.tsx
 
 Baseline API route path contract fan-in includes App Router route handlers, feature API clients, checkout button tests, Codex route tests, observability route tests, and Stripe checkout route tests.
 
 Focused checkout and review validation passed:
 
-    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/checkout-success-view.interactions.test.tsx tests/integration-ui/blueprint-review-page.test.tsx
+    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/checkout-success-view.interactions.test.tsx tests/integration-ui/codebase-review-page.test.tsx
     Test Files  3 passed (3)
     Tests  14 passed (14)
 
@@ -267,7 +267,7 @@ Focused API route and API client validation passed:
     Test Files  1 passed (1)
     Tests  3 passed (3)
 
-    bun run --cwd apps/web test:unit -- tests/unit/blueprint-problem-statement-optimizer.test.tsx
+    bun run --cwd apps/web test:unit -- tests/unit/codebase-problem-statement-optimizer.test.tsx
     Test Files  1 passed (1)
     Tests  3 passed (3)
 
@@ -299,4 +299,4 @@ Plan and diff validation passed after archival:
 
 ## Interfaces and Dependencies
 
-This plan depends on `apps/web/app/checkout/success`, `apps/web/app/(workspace)/review`, `apps/web/app/api`, `apps/web/features/checkout`, `apps/web/features/blueprint-flow`, `apps/web/features/codex`, `apps/web/features/observability`, `apps/web/config/product.ts`, Clerk, Convex React hooks, local Next App Router route-handler and client-component behavior, `docs/release-workflow.md`, `apps/web/AGENTS.md`, the root `AGENTS.md`, `docs/programs/PROGRAMS.md`, and `docs/exec-plans/PLANS.md`.
+This plan depends on `apps/web/app/checkout/success`, `apps/web/app/(workspace)/review`, `apps/web/app/api`, `apps/web/features/checkout`, `apps/web/features/codebase-flow`, `apps/web/features/codex`, `apps/web/features/observability`, `apps/web/config/product.ts`, Clerk, Convex React hooks, local Next App Router route-handler and client-component behavior, `docs/release-workflow.md`, `apps/web/AGENTS.md`, the root `AGENTS.md`, `docs/programs/PROGRAMS.md`, and `docs/exec-plans/PLANS.md`.

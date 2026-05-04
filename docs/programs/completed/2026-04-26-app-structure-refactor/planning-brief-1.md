@@ -18,7 +18,7 @@ This is the first planning brief for the app structure refactor Program.
 
 ## What The Research Found
 
-The current app is blueprint-first by product contract, but some core shared
+The current app is codebase-first by product contract, but some core shared
 workspace UI still lives under course paths. `features/course` is the largest
 and most overloaded feature, and `features/course/shared/components/app-shell`
 is already a cross-workspace shell.

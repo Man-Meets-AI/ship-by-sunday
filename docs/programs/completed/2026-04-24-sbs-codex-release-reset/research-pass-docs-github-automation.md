@@ -49,7 +49,7 @@ Active working contracts include:
 - `AGENTS.md:1`
 - `apps/web/AGENTS.md:1`
 - `qa/AGENTS.md:1`
-- `packages/blueprint-compiler/AGENTS.md:1`
+- `packages/codebase-compiler/AGENTS.md:1`
 
 `qa/README.md:1` makes `qa/` the active QA control plane and names `.codex/config.toml` plus `.codex/agents/*.toml` as the repo-scoped QA role layer.
 

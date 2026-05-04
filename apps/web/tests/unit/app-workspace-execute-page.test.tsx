@@ -13,8 +13,8 @@ vi.mock("server-only", () => ({}));
 
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
-		blueprint: {
-			getBlueprintResumeDestination: "getBlueprintResumeDestination",
+		codebase: {
+			getCodebaseResumeDestination: "getCodebaseResumeDestination",
 		},
 	},
 }));
@@ -86,11 +86,11 @@ describe("workspace execute route", () => {
 
 	it("redirects locked visitors back to review", async () => {
 		fetchAuthenticatedQueryMock.mockImplementation(async (query) => {
-			if (query === "getBlueprintResumeDestination") {
+			if (query === "getCodebaseResumeDestination") {
 				return {
 					destination: "/review",
 					kind: "review",
-					blueprintStageId: "review",
+					codebaseStageId: "review",
 					postReviewTargets: null,
 				};
 			}
@@ -109,11 +109,11 @@ describe("workspace execute route", () => {
 
 	it("redirects unlocked visitors into the canonical build lessons target", async () => {
 		fetchAuthenticatedQueryMock.mockImplementation(async (query) => {
-			if (query === "getBlueprintResumeDestination") {
+			if (query === "getCodebaseResumeDestination") {
 				return {
 					destination: getLessonHref("iterate-the-product-with-ai"),
 					kind: "post_review",
-					blueprintStageId: null,
+					codebaseStageId: null,
 					postReviewTargets: {
 						reviewDestination: "/review",
 						buildLessonsDestination: getLessonHref(

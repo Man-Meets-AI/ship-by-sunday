@@ -36,7 +36,7 @@ The release workflow and hosted proof surfaces remain active and must not be rew
 
 QA and browser proof remain transitional surfaces. The CLI retirement slice may remove the `cli` CI job and CLI-owned tests, but it must not delete `qa:run-pack`, QA inventories, QA personas, `browser-smoke`, sandbox e2e, or browser harness files. Replacement browser proof and disposable QA retirement are still downstream Plans 6 and 7.
 
-Source-level product tests must be preserved. Removing the helper CLI package must not remove `packages/blueprint-compiler`, web review/download behavior, starter repo generation used by the product, release manifest tests, release evidence tests, or application tests that prove public, auth, checkout, entitlement, metadata, and generated starter behavior.
+Source-level product tests must be preserved. Removing the helper CLI package must not remove `packages/codebase-compiler`, web review/download behavior, starter repo generation used by the product, release manifest tests, release evidence tests, or application tests that prove public, auth, checkout, entitlement, metadata, and generated starter behavior.
 
 ## Boundary Changes
 
@@ -44,7 +44,7 @@ Plan 5 should now be titled `Retire The Helper CLI`.
 
 The next slice is destructive, but narrowly destructive. Its scope is to remove the local helper CLI product surface and all direct wiring that makes it release-critical: `packages/ship-by-sunday-cli/`, `bin/sbs`, CLI tests, root `sbs` and `sbs:check` scripts, the `cli` CI job, root `check` dependency on `sbs:check`, CLI docs, and release docs that require `cli` proof.
 
-The next slice must decide whether any CLI-only behavior should survive outside the CLI before deleting files. The default is deletion, not migration. Only reusable behavior that is required by web review/download generation or a release helper should move, and the plan must name the destination and tests before implementation. The current research says the CLI depends on `packages/blueprint-compiler`, not the other way around, so the expected outcome is that `packages/blueprint-compiler` and web generation remain without CLI code.
+The next slice must decide whether any CLI-only behavior should survive outside the CLI before deleting files. The default is deletion, not migration. Only reusable behavior that is required by web review/download generation or a release helper should move, and the plan must name the destination and tests before implementation. The current research says the CLI depends on `packages/codebase-compiler`, not the other way around, so the expected outcome is that `packages/codebase-compiler` and web generation remain without CLI code.
 
 The next slice may update `.github/workflows/ci.yml` to remove the `cli` job and may update branch-protection documentation to remove `cli` from required contexts. It may inspect or mutate live GitHub branch protection if credentials and operator intent allow it, but it must record exact commands and results. If live branch protection still requires `cli` and cannot be changed locally, the plan may still update checked-in repo artifacts but must record the external policy as a blocker before claiming the release model is complete.
 
@@ -66,9 +66,9 @@ Plan 8 remains downstream. Removing the `cli` status context may require branch-
 
 Exact next plan title: `Retire The Helper CLI`.
 
-Exact scope: remove the helper CLI as a supported repo product and release gate. The plan should unwind root scripts, CI, docs, tests, package files, launcher files, branch-protection references, and lockfile entries so the repository no longer exposes `bun run sbs`, `./bin/sbs`, `sbs:check`, or a `cli` CI context. It should preserve the web app, `packages/blueprint-compiler`, generated starter behavior used by web routes, release helpers, release manifest/evidence helpers, QA transitional proof, and browser proof.
+Exact scope: remove the helper CLI as a supported repo product and release gate. The plan should unwind root scripts, CI, docs, tests, package files, launcher files, branch-protection references, and lockfile entries so the repository no longer exposes `bun run sbs`, `./bin/sbs`, `sbs:check`, or a `cli` CI context. It should preserve the web app, `packages/codebase-compiler`, generated starter behavior used by web routes, release helpers, release manifest/evidence helpers, QA transitional proof, and browser proof.
 
-Exact implementation boundaries: first inventory all CLI references with `rg`, then prove whether `packages/blueprint-compiler` or web runtime code imports the CLI. If they do not, delete `packages/ship-by-sunday-cli/` and `bin/sbs`, remove the package from workspace and lockfile state, remove root scripts that only serve the CLI, remove the `cli` job from `.github/workflows/ci.yml`, and update docs that advertise or require the CLI. If an import or behavior dependency appears, move only that non-CLI behavior behind an existing non-CLI boundary before deleting the CLI package.
+Exact implementation boundaries: first inventory all CLI references with `rg`, then prove whether `packages/codebase-compiler` or web runtime code imports the CLI. If they do not, delete `packages/ship-by-sunday-cli/` and `bin/sbs`, remove the package from workspace and lockfile state, remove root scripts that only serve the CLI, remove the `cli` job from `.github/workflows/ci.yml`, and update docs that advertise or require the CLI. If an import or behavior dependency appears, move only that non-CLI behavior behind an existing non-CLI boundary before deleting the CLI package.
 
 Exact policy boundaries: update checked-in docs to say the required branch checks after CLI retirement are the remaining truthful contexts, expected to be `static`, `integration`, and `browser-smoke` until Plan 6 changes browser proof. Inspect live GitHub branch protection for `dev` and `main`; if authorized and safe, remove the `cli` required context after the workflow file no longer emits it. If not authorized, record the exact `gh api` read result and the required operator action.
 
@@ -80,7 +80,7 @@ Why it is next now: the Program has already reconciled proof truth, defined tag 
 
 Branch protection can block merges after the workflow stops emitting `cli`. The next plan must treat live GitHub policy as part of the work, not as a doc footnote. If it cannot mutate branch protection, it must leave a precise operator command or blocker.
 
-Deleting the CLI can accidentally remove reusable generation behavior if the implementer treats `packages/ship-by-sunday-cli` and `packages/blueprint-compiler` as one system. The plan must prove import direction before deletion and preserve compiler-owned generation behavior.
+Deleting the CLI can accidentally remove reusable generation behavior if the implementer treats `packages/ship-by-sunday-cli` and `packages/codebase-compiler` as one system. The plan must prove import direction before deletion and preserve compiler-owned generation behavior.
 
 Docs may keep the CLI alive socially even after code deletion. Active public docs, README text, release docs, script docs, command docs, and metadata navigation need a grep audit so the retired surface does not remain user-facing.
 

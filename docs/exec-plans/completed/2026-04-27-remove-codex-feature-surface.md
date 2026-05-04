@@ -84,7 +84,7 @@ Update route handlers, workspace consumers, tests, coverage config, Next config,
 
 Do not change route URLs, API methods, response shapes, Codex app-server JSON-RPC method names, login polling semantics, runtime enablement environment variables, per-user state hashing, request-id behavior, observability incident semantics, product-access rules, Convex schema, generated Convex files, checkout, Stripe, pricing, promotion-code behavior, billing proof, AppShell, or production release proof semantics.
 
-Do not move `apps/web/features/auth`, `apps/web/features/blueprint-flow`, `apps/web/features/course`, `apps/web/features/execute-ship`, `apps/web/features/marketing`, or `apps/web/features/workspace-shell` in this slice.
+Do not move `apps/web/features/auth`, `apps/web/features/codebase-flow`, `apps/web/features/course`, `apps/web/features/execute-ship`, `apps/web/features/marketing`, or `apps/web/features/workspace-shell` in this slice.
 
 ## Plan of Work
 

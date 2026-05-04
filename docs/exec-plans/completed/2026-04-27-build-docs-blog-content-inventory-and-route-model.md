@@ -92,7 +92,7 @@ It also owns focused tests for the inventory, a new docs page-path test, updates
 
 ### Out Of Scope
 
-Do not change `/docs` page rendering, docs layout rendering, blog page rendering, Nextra config, packages, lockfile entries, docs theme CSS, content copy, public URLs, Stripe, checkout, billing, environment behavior, Convex files, blueprint compiler schema, or generated mirrors.
+Do not change `/docs` page rendering, docs layout rendering, blog page rendering, Nextra config, packages, lockfile entries, docs theme CSS, content copy, public URLs, Stripe, checkout, billing, environment behavior, Convex files, codebase compiler schema, or generated mirrors.
 
 Do not remove `nextra` or `nextra-theme-docs` in this slice.
 

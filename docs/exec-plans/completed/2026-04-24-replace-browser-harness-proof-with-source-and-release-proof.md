@@ -31,7 +31,7 @@ This is the sixth child slice of the Program at `docs/programs/completed/2026-04
 
 - [x] 2026-04-24 EDT: Created this child ExecPlan from `docs/programs/completed/2026-04-24-sbs-codex-release-reset/planning-brief-6.md`.
 - [x] 2026-04-24 EDT: Inventoried browser-smoke, sandbox e2e, QA-pack, and release-proof browser surfaces. The active app-owned files are `apps/web/tests/browser-smoke/app-smoke.spec.ts`, `apps/web/tests/e2e/auth-protection.sandbox.spec.ts`, `apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts`, and their support files; the `.auth/bootstrap-failures` files are generated local artifacts and not tracked proof.
-- [x] 2026-04-24 EDT: Mapped active browser behavior. Public homepage, crawl, blog, docs, auth noindex, and checkout-success recovery move to source-level unit or integration-ui proof; authenticated `/blueprint`, `/review`, `/settings`, and billing handoff remain sandbox or release-scoped hosted proof.
+- [x] 2026-04-24 EDT: Mapped active browser behavior. Public homepage, crawl, blog, docs, auth noindex, and checkout-success recovery move to source-level unit or integration-ui proof; authenticated `/codebase`, `/review`, `/settings`, and billing handoff remain sandbox or release-scoped hosted proof.
 - [x] 2026-04-24 EDT: Added or confirmed source-level replacement proof for public metadata routes, protected route noindex metadata, homepage render/schema contracts, checkout-success recovery, docs metadata, and blog metadata before deleting the shallow browser-smoke file.
 - [x] 2026-04-24 EDT: Removed the `browser-smoke` Playwright project, package scripts, root script, and GitHub CI job while retaining `sandbox-e2e`, authenticated sandbox specs, `qa:run-pack`, and hosted release proof workflows.
 - [x] 2026-04-24 EDT: Updated checked-in QA inventory, coverage, journeys, release docs, command docs, local QA docs, and QA runner docs so public/crawl/metadata proof points at source tests and authenticated hosted behavior remains separate.
@@ -39,15 +39,15 @@ This is the sixth child slice of the Program at `docs/programs/completed/2026-04
 
 ## Surprises & Discoveries
 
-Plan authoring identified the replacement gaps carried forward from Program research: robots/sitemap, signed-out `/blueprint`, entitled `/blueprint -> /review -> /settings`, checkout success paid handoff, metadata/noindex rendered HTML, and QA inventory references for any removed harness files.
+Plan authoring identified the replacement gaps carried forward from Program research: robots/sitemap, signed-out `/codebase`, entitled `/codebase -> /review -> /settings`, checkout success paid handoff, metadata/noindex rendered HTML, and QA inventory references for any removed harness files.
 
 Live branch protection may still require the stale retired `cli` context until the helper CLI deletion lands and an operator removes it remotely. This plan should not confuse that external policy cleanup with browser-proof migration.
 
 The read-only inventory on 2026-04-24 found that `apps/web/tests/browser-smoke/app-smoke.spec.ts` is a Playwright request-level suite, not an interactive browser journey. It checks marketing-page copy and anchors, checkout-success recovery copy, homepage structured data, robots and sitemap text, blog metadata, docs canonical metadata, and auth-page noindex. Existing source tests already cover most of those contracts, and this slice will add the missing source-level robots and route noindex checks before deleting the shallow smoke file.
 
-The same inventory found that `apps/web/tests/e2e/auth-protection.sandbox.spec.ts` and `apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts` still own real authenticated behavior: signed-out `/blueprint` redirect, redirect-preserving sign-in, no-access recovery, entitled `/blueprint` rendering, `/review`, `/settings`, and the billing handoff from Checkout back to `/blueprint`. Those behaviors are not safe to delete in this slice because they depend on hosted Clerk, Convex, Stripe, entitlement, and browser session state.
+The same inventory found that `apps/web/tests/e2e/auth-protection.sandbox.spec.ts` and `apps/web/tests/e2e/buyer-handoff.sandbox.spec.ts` still own real authenticated behavior: signed-out `/codebase` redirect, redirect-preserving sign-in, no-access recovery, entitled `/codebase` rendering, `/review`, `/settings`, and the billing handoff from Checkout back to `/codebase`. Those behaviors are not safe to delete in this slice because they depend on hosted Clerk, Convex, Stripe, entitlement, and browser session state.
 
-The focused public metadata replacement test exposed that `/blueprint` was missing from `robots.ts` disallow rules even though it is a canonical protected route. This slice added `/blueprint` to the robots disallow list and kept the source test as the owner for that contract.
+The focused public metadata replacement test exposed that `/codebase` was missing from `robots.ts` disallow rules even though it is a canonical protected route. This slice added `/codebase` to the robots disallow list and kept the source test as the owner for that contract.
 
 `bun run qa:inventory:check` fails while this branch is uncommitted because the intended `qa/test-inventory.csv` updates differ from HEAD. The generator was still proven idempotent by diffing before and after `node qa/scripts/generate-test-inventory.mjs`; after these inventory changes land, the normal inventory check should pass.
 
@@ -73,7 +73,7 @@ Date: 2026-04-24
 
 This plan is complete. It deleted the shallow `apps/web/tests/browser-smoke/app-smoke.spec.ts` lane, removed the `browser-smoke` CI job and package scripts, kept the `sandbox-e2e` Playwright project and authenticated specs, kept `qa:run-pack`, and updated docs and QA inventory so public/crawl/metadata proof points at source tests instead of a required browser context.
 
-Replacement proof now lives in `apps/web/tests/unit/public-metadata-routes.test.ts`, `apps/web/tests/unit/route-metadata.test.ts`, existing homepage unit and integration-ui CTA tests, existing checkout success integration-ui tests, and existing docs/blog metadata tests. `apps/web/app/robots.ts` now disallows `/blueprint` alongside the other protected surfaces.
+Replacement proof now lives in `apps/web/tests/unit/public-metadata-routes.test.ts`, `apps/web/tests/unit/route-metadata.test.ts`, existing homepage unit and integration-ui CTA tests, existing checkout success integration-ui tests, and existing docs/blog metadata tests. `apps/web/app/robots.ts` now disallows `/codebase` alongside the other protected surfaces.
 
 The checked-in required-check story now names `static` and `integration`. `qa_control_plane` remains a CI drift detector, but it is not branch-required in this slice. Live branch protection was not mutated; `docs/release-workflow.md` records post-merge operator commands to remove stale `cli` and `browser-smoke` required contexts together after the workflow deletion lands.
 
@@ -129,7 +129,7 @@ Milestone 5 closes out. At the end, focused tests, remaining browser proof where
 
 2. Map existing source tests for known gaps:
 
-       rg -n "robots|sitemap|metadata|noindex|blueprint|review|settings|checkout/success|entitlement|access" apps/web/tests/unit apps/web/tests/integration apps/web/tests/integration-ui
+       rg -n "robots|sitemap|metadata|noindex|codebase|review|settings|checkout/success|entitlement|access" apps/web/tests/unit apps/web/tests/integration apps/web/tests/integration-ui
 
 3. Update this plan with the mapping before deleting browser files.
 
@@ -141,7 +141,7 @@ Milestone 5 closes out. At the end, focused tests, remaining browser proof where
 
        bun run --cwd apps/web test:unit -- public-metadata route-metadata home-page structured-data
 
-   Passed after adding `/blueprint` to `robots.ts`; 7 files and 13 tests passed.
+   Passed after adding `/codebase` to `robots.ts`; 7 files and 13 tests passed.
 
        bun run --cwd apps/web test:integration:ui -- checkout-success home-page-primary-cta
 
@@ -149,7 +149,7 @@ Milestone 5 closes out. At the end, focused tests, remaining browser proof where
 
        bun run qa:run-pack -- --pack=default_ship --dry-run
 
-   Passed; the dry run now plans QA validate, persona prep, report scaffold, the blueprint integration-ui proof suite, and the default-ship sandbox browser pack, without a browser-smoke step.
+   Passed; the dry run now plans QA validate, persona prep, report scaffold, the codebase integration-ui proof suite, and the default-ship sandbox browser pack, without a browser-smoke step.
 
        bun run qa:validate
 
@@ -167,7 +167,7 @@ Milestone 5 closes out. At the end, focused tests, remaining browser proof where
 
    Passed; 3 files and 4 tests passed.
 
-       bun run --cwd apps/web test:integration -- blueprint checkout
+       bun run --cwd apps/web test:integration -- codebase checkout
 
    Passed; 9 files and 32 tests passed, with existing jsdom navigation notices.
 
@@ -196,7 +196,7 @@ Milestone 5 closes out. At the end, focused tests, remaining browser proof where
        bun run programs:lint
        git diff --check
 
-   `bun run format` passed and reported `oxfmt` across 1002 files. `bun run lint` passed with 0 warnings and 0 errors across 942 files. `bun run typecheck` passed; the Next build compiled successfully, ran TypeScript, generated 71 static pages, and listed the expected app routes including `/`, `/blueprint`, `/checkout/success`, `/docs/[[...mdxPath]]`, `/review`, `/settings`, `/robots.txt`, and `/sitemap.xml`.
+   `bun run format` passed and reported `oxfmt` across 1002 files. `bun run lint` passed with 0 warnings and 0 errors across 942 files. `bun run typecheck` passed; the Next build compiled successfully, ran TypeScript, generated 71 static pages, and listed the expected app routes including `/`, `/codebase`, `/checkout/success`, `/docs/[[...mdxPath]]`, `/review`, `/settings`, `/robots.txt`, and `/sitemap.xml`.
 
    `bun run plans:lint -- --plan docs/exec-plans/completed/2026-04-24-replace-browser-harness-proof-with-source-and-release-proof.md` passed. `bun run markdown:lint -- --paths docs/exec-plans/completed/2026-04-24-replace-browser-harness-proof-with-source-and-release-proof.md docs/programs/completed/2026-04-24-sbs-codex-release-reset/program.md docs/programs/completed/2026-04-24-sbs-codex-release-reset/planning-brief-6.md docs/programs/completed/2026-04-24-sbs-codex-release-reset/planning-brief-7.md docs/release-workflow.md qa/README.md qa/AGENTS.md qa/coverage.csv qa/journeys.csv qa/test-inventory.csv README.md docs/RELIABILITY.md docs/design-docs/scripts.md apps/web/content/docs/commands.mdx apps/web/content/docs/configure-the-homepage.mdx apps/web/content/docs/local-qa.mdx` passed for the metadata-backed files it reports. `bun run programs:lint` passed for Program docs, packets, and prompts. `git diff --check` passed.
 

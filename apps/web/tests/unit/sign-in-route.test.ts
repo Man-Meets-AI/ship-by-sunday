@@ -47,7 +47,7 @@ describe("sign-in route", () => {
 		expect(redirectMock).toHaveBeenCalledWith("/settings");
 	});
 
-	it("redirects authenticated visits without a target to the blueprint page", async () => {
+	it("redirects authenticated visits without a target to the codebase page", async () => {
 		authMock.mockResolvedValue({
 			isAuthenticated: true,
 		});
@@ -56,7 +56,7 @@ describe("sign-in route", () => {
 			searchParams: Promise.resolve({}),
 		});
 
-		expect(redirectMock).toHaveBeenCalledWith("/blueprint");
+		expect(redirectMock).toHaveBeenCalledWith("/codebase");
 	});
 
 	it("renders the sign-in page for signed-out visits", async () => {

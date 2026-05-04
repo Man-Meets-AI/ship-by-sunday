@@ -12,7 +12,7 @@ export default async function Page() {
 	}
 
 	const resumeDestination = await fetchAuthenticatedQuery(
-		api.blueprint.getBlueprintResumeDestination,
+		api.codebase.getCodebaseResumeDestination,
 		{},
 	);
 

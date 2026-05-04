@@ -36,7 +36,7 @@ describe("proxy protected routes", () => {
 
 		expect(createRouteMatcherMock).toHaveBeenCalledWith(
 			expect.arrayContaining([
-				"/blueprint(.*)",
+				"/codebase(.*)",
 				"/review(.*)",
 				"/settings(.*)",
 				"/execute(.*)",

@@ -3,14 +3,14 @@ title: Clean Shared UI And Hooks
 status: complete
 created_at: 2026-04-26
 completed_at: 2026-04-26
-summary: Move non-primitive marketing effects and a blueprint-only keyboard hook into their owning features while preserving compatibility exports.
-post_build_recap: Marketing-only effect implementations now live under the marketing feature, the blueprint-only keyboard shortcut hook now lives under blueprint-flow, compatibility exports preserve old paths, and focused plus app validation passed.
+summary: Move non-primitive marketing effects and a codebase-only keyboard hook into their owning features while preserving compatibility exports.
+post_build_recap: Marketing-only effect implementations now live under the marketing feature, the codebase-only keyboard shortcut hook now lives under codebase-flow, compatibility exports preserve old paths, and focused plus app validation passed.
 program_id: app-structure-refactor
 planning_brief: docs/programs/completed/2026-04-26-app-structure-refactor/planning-brief-6.md
 read_when:
   - Resuming the shared UI and hook cleanup slice.
   - Checking why shared UI inventory was preserved instead of deleted.
-  - Validating that marketing visual effects and the blueprint keyboard hook moved without behavior changes.
+  - Validating that marketing visual effects and the codebase keyboard hook moved without behavior changes.
 ---
 
 # Clean Shared UI And Hooks
@@ -21,7 +21,7 @@ This ExecPlan must be maintained in accordance with `docs/exec-plans/PLANS.md`.
 
 ## Purpose / Big Picture
 
-The shared UI folder should read as the app's reusable primitive layer, not a miscellaneous home for marketing motion effects and feature-specific hooks. After this slice, marketing-only visual effects will live under the marketing feature, the blueprint-only keyboard shortcut hook will live under blueprint-flow, and the old paths will remain as compatibility exports so the migration is behavior-neutral.
+The shared UI folder should read as the app's reusable primitive layer, not a miscellaneous home for marketing motion effects and feature-specific hooks. After this slice, marketing-only visual effects will live under the marketing feature, the codebase-only keyboard shortcut hook will live under codebase-flow, and the old paths will remain as compatibility exports so the migration is behavior-neutral.
 
 This slice does not redesign the homepage, remove shadcn inventory, or change runtime behavior. It makes ownership visible while keeping the app and tests working exactly as before.
 
@@ -32,10 +32,10 @@ This slice does not redesign the homepage, remove shadcn inventory, or change ru
 - [x] 2026-04-26 EDT: Wrote planning brief 6 and opened this active child ExecPlan.
 - [x] 2026-04-26 EDT: Moved marketing-style effect implementations into `apps/web/features/marketing/components/effects` and kept old `apps/web/components/ui` paths as compatibility exports.
 - [x] 2026-04-26 EDT: Updated first-party marketing imports and focused encrypted-text tests to use feature-owned effect paths.
-- [x] 2026-04-26 EDT: Moved the keyboard shortcut hook into `apps/web/features/blueprint-flow/hooks` and kept the old global hook path as a compatibility export.
+- [x] 2026-04-26 EDT: Moved the keyboard shortcut hook into `apps/web/features/codebase-flow/hooks` and kept the old global hook path as a compatibility export.
 - [x] 2026-04-26 EDT: Added focused `marketing-effects.test.tsx` coverage for the moved marketing effect exports.
 - [x] 2026-04-26 EDT: Confirmed no first-party imports remain from the old `components/ui` effect paths or old global keyboard shortcut hook path.
-- [x] 2026-04-26 EDT: Focused marketing effect, encrypted text, blueprint page, homepage content, homepage render-model, homepage structured-data, and homepage CTA tests passed.
+- [x] 2026-04-26 EDT: Focused marketing effect, encrypted text, codebase page, homepage content, homepage render-model, homepage structured-data, and homepage CTA tests passed.
 - [x] 2026-04-26 EDT: App format check, app lint, and app typecheck passed after the shared UI and hook moves.
 - [x] 2026-04-26 EDT: Completed-path plan lint, Program lint, markdown lint, and `git diff --check` passed after archival.
 
@@ -59,9 +59,9 @@ Date: 2026-04-26
 
 ## Outcomes & Retrospective
 
-This plan is complete. Marketing-style effect implementations now live under `apps/web/features/marketing/components/effects`, first-party marketing imports and focused tests use those paths, and the old `apps/web/components/ui` effect paths remain as compatibility exports. The blueprint keyboard shortcut hook now lives under `apps/web/features/blueprint-flow/hooks`, the blueprint stage card imports it from that feature path, and the old global hook path remains as a compatibility export.
+This plan is complete. Marketing-style effect implementations now live under `apps/web/features/marketing/components/effects`, first-party marketing imports and focused tests use those paths, and the old `apps/web/components/ui` effect paths remain as compatibility exports. The codebase keyboard shortcut hook now lives under `apps/web/features/codebase-flow/hooks`, the codebase stage card imports it from that feature path, and the old global hook path remains as a compatibility export.
 
-Focused marketing-effect, encrypted-text, blueprint, homepage contract, format, app lint, app typecheck, plan, Program, markdown, and diff validation passed. The implementation did not delete shared UI inventory, move `DottedGlowBackground`, move `use-mobile`, move or delete `use-autosave`, change homepage content, change homepage section visibility, change CTA behavior, change structured data, change route behavior, change Convex, change Stripe checkout, change webhook behavior, change pricing, change promo code behavior, change billing proof, change environment behavior, or include the unrelated stashed scrollbar styling.
+Focused marketing-effect, encrypted-text, codebase, homepage contract, format, app lint, app typecheck, plan, Program, markdown, and diff validation passed. The implementation did not delete shared UI inventory, move `DottedGlowBackground`, move `use-mobile`, move or delete `use-autosave`, change homepage content, change homepage section visibility, change CTA behavior, change structured data, change route behavior, change Convex, change Stripe checkout, change webhook behavior, change pricing, change promo code behavior, change billing proof, change environment behavior, or include the unrelated stashed scrollbar styling.
 
 ## Context and Orientation
 
@@ -71,7 +71,7 @@ The marketing homepage imports `Cover` from `apps/web/components/ui/cover.tsx` t
 
 The files `apps/web/components/ui/encrypted-text.tsx`, `apps/web/components/ui/hero-highlight.tsx`, and `apps/web/components/ui/text-hover-effect.tsx` are also marketing-style motion effects. The current production import scan finds no first-party production consumers for them, but `apps/web/tests/unit/encrypted-text.test.tsx` exercises `EncryptedText`.
 
-The keyboard shortcut hook lives at `apps/web/hooks/use-keyboard-shortcut.ts`, but the only current first-party consumer is `apps/web/features/blueprint-flow/components/blueprint-stage-step-card.tsx`. That makes it feature-owned in practice.
+The keyboard shortcut hook lives at `apps/web/hooks/use-keyboard-shortcut.ts`, but the only current first-party consumer is `apps/web/features/codebase-flow/components/codebase-stage-step-card.tsx`. That makes it feature-owned in practice.
 
 ### In Scope
 
@@ -81,7 +81,7 @@ Update first-party marketing imports and focused tests to import the moved effec
 
 Keep the old `apps/web/components/ui` effect files as temporary compatibility exports to the new marketing-owned files.
 
-Move `apps/web/hooks/use-keyboard-shortcut.ts` to `apps/web/features/blueprint-flow/hooks/use-keyboard-shortcut.ts`, update the blueprint stage card import, and keep the old global hook path as a temporary compatibility export.
+Move `apps/web/hooks/use-keyboard-shortcut.ts` to `apps/web/features/codebase-flow/hooks/use-keyboard-shortcut.ts`, update the codebase stage card import, and keep the old global hook path as a temporary compatibility export.
 
 Add focused test coverage that renders the moved marketing effect exports from their new feature-owned path.
 
@@ -103,7 +103,7 @@ Start by preserving the baseline import evidence for the marketing effect files,
 
 Create the marketing effects folder and move the five marketing-style effect files into it. Replace the old `components/ui` files with compatibility exports. Update the homepage sections and focused tests to import the new feature-owned paths.
 
-Move the keyboard shortcut hook into the blueprint-flow feature and replace the old global hook file with a compatibility export. Update the blueprint stage card to import the hook from the feature-owned path.
+Move the keyboard shortcut hook into the codebase-flow feature and replace the old global hook file with a compatibility export. Update the codebase stage card to import the hook from the feature-owned path.
 
 Run focused tests immediately after the code move, then run app-level and plan-level validation. Keep this ExecPlan and the Program current as implementation and validation results become real.
 
@@ -113,7 +113,7 @@ The first milestone is plan and baseline evidence. It is complete when planning 
 
 The second milestone is marketing effect ownership. It is complete when the marketing-style effect files live under `apps/web/features/marketing/components/effects`, first-party imports use those paths, the old `components/ui` effect files are compatibility exports, and focused marketing-effect tests pass.
 
-The third milestone is blueprint hook ownership. It is complete when the keyboard shortcut hook lives under `apps/web/features/blueprint-flow/hooks`, the blueprint stage card imports it from there, the old global hook path is a compatibility export, and focused blueprint tests pass.
+The third milestone is codebase hook ownership. It is complete when the keyboard shortcut hook lives under `apps/web/features/codebase-flow/hooks`, the codebase stage card imports it from there, the old global hook path is a compatibility export, and focused codebase tests pass.
 
 The fourth milestone is validation. It is complete when focused tests, app format check, app lint, app typecheck, plan lint, Program lint, markdown lint, and `git diff --check` pass.
 
@@ -138,12 +138,12 @@ Record baseline imports:
 After the moves and import updates, prove first-party consumers use the feature-owned paths and old paths remain compatibility exports:
 
     rg 'from "@/components/ui/(cover|pointer-highlight|encrypted-text|hero-highlight|text-hover-effect)"|from "@/hooks/use-keyboard-shortcut"' apps/web --glob '!node_modules'
-    rg 'features/marketing/components/effects/(cover|pointer-highlight|encrypted-text|hero-highlight|text-hover-effect)|features/blueprint-flow/hooks/use-keyboard-shortcut' apps/web --glob '!node_modules'
+    rg 'features/marketing/components/effects/(cover|pointer-highlight|encrypted-text|hero-highlight|text-hover-effect)|features/codebase-flow/hooks/use-keyboard-shortcut' apps/web --glob '!node_modules'
 
 Run focused tests:
 
     bun run --cwd apps/web test:unit -- tests/unit/marketing-effects.test.tsx tests/unit/encrypted-text.test.tsx
-    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/blueprint-page.test.tsx
+    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/codebase-page.test.tsx
     bun run --cwd apps/web test:unit -- tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts
     bun run --cwd apps/web test:integration:ui -- tests/integration-ui/home-page-primary-cta.test.tsx
 
@@ -159,18 +159,18 @@ Then run app and plan checks:
 
 ## Validation and Acceptance
 
-This slice is accepted because the marketing-style effect implementations live under `apps/web/features/marketing/components/effects`, first-party marketing imports and focused tests use those new paths, the old `components/ui` effect paths are compatibility exports, the keyboard shortcut hook lives under `apps/web/features/blueprint-flow/hooks`, the blueprint stage card imports it from that feature path, and the old global hook path remains a compatibility export.
+This slice is accepted because the marketing-style effect implementations live under `apps/web/features/marketing/components/effects`, first-party marketing imports and focused tests use those new paths, the old `components/ui` effect paths are compatibility exports, the keyboard shortcut hook lives under `apps/web/features/codebase-flow/hooks`, the codebase stage card imports it from that feature path, and the old global hook path remains a compatibility export.
 
 The shared UI primitive inventory must remain present. `DottedGlowBackground`, `use-mobile`, and `use-autosave` must remain in their existing homes for this slice.
 
-Focused tests must prove the new marketing effect exports render, the encrypted text server markup remains stable, blueprint page behavior still works, and homepage content, render model, structured data, and primary CTA behavior remain unchanged.
+Focused tests must prove the new marketing effect exports render, the encrypted text server markup remains stable, codebase page behavior still works, and homepage content, render model, structured data, and primary CTA behavior remain unchanged.
 
 ### Test Commands
 
 Run these commands from repo root after implementation:
 
     bun run --cwd apps/web test:unit -- tests/unit/marketing-effects.test.tsx tests/unit/encrypted-text.test.tsx
-    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/blueprint-page.test.tsx
+    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/codebase-page.test.tsx
     bun run --cwd apps/web test:unit -- tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts
     bun run --cwd apps/web test:integration:ui -- tests/integration-ui/home-page-primary-cta.test.tsx
     bun run format:check
@@ -187,7 +187,7 @@ The moves are safe to retry because old paths remain compatibility exports. If a
 
 If a moved effect is found to have a non-marketing production consumer, stop and record the consumer in `Surprises & Discoveries` before deciding whether the implementation should stay in marketing, return to `components/ui`, or move to a neutral shared effects folder in a later slice.
 
-If focused tests fail, repair path and module-boundary issues before considering behavior changes. This slice should not change homepage copy, structure, animation behavior, blueprint save behavior, routes, Convex, Stripe, or billing behavior.
+If focused tests fail, repair path and module-boundary issues before considering behavior changes. This slice should not change homepage copy, structure, animation behavior, codebase save behavior, routes, Convex, Stripe, or billing behavior.
 
 Do not broaden recovery into deleting unused UI inventory, moving `DottedGlowBackground`, moving route screens, course-domain cleanup, billing cleanup, or final feature-folder deletion.
 
@@ -208,9 +208,9 @@ Baseline marketing-only effect fan-in:
     apps/web/features/marketing/components/home-page/whats-inside-section.tsx
     apps/web/tests/unit/encrypted-text.test.tsx
 
-Baseline blueprint keyboard hook fan-in:
+Baseline codebase keyboard hook fan-in:
 
-    apps/web/features/blueprint-flow/components/blueprint-stage-step-card.tsx
+    apps/web/features/codebase-flow/components/codebase-stage-step-card.tsx
 
 Deferred shared visual and hook surfaces:
 
@@ -229,9 +229,9 @@ Focused marketing effect and encrypted-text validation passed:
     Test Files  2 passed (2)
     Tests  2 passed (2)
 
-Focused blueprint validation passed:
+Focused codebase validation passed:
 
-    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/blueprint-page.test.tsx
+    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/codebase-page.test.tsx
     Test Files  1 passed (1)
     Tests  4 passed (4)
 
@@ -273,4 +273,4 @@ Completed-path plan and Program validation passed:
 
 ## Interfaces and Dependencies
 
-This plan depends on `docs/programs/completed/2026-04-26-app-structure-refactor/program.md`, `docs/programs/completed/2026-04-26-app-structure-refactor/planning-brief-6.md`, `docs/exec-plans/PLANS.md`, `docs/programs/PROGRAMS.md`, root `DESIGN.md`, `docs/FRONTEND.md`, `apps/web/content/docs/configure-the-homepage.mdx`, `apps/web/components/ui`, `apps/web/features/marketing/components/home-page`, `apps/web/features/blueprint-flow/components/blueprint-stage-step-card.tsx`, `apps/web/tests/unit`, and `apps/web/tests/integration-ui`.
+This plan depends on `docs/programs/completed/2026-04-26-app-structure-refactor/program.md`, `docs/programs/completed/2026-04-26-app-structure-refactor/planning-brief-6.md`, `docs/exec-plans/PLANS.md`, `docs/programs/PROGRAMS.md`, root `DESIGN.md`, `docs/FRONTEND.md`, `apps/web/content/docs/configure-the-homepage.mdx`, `apps/web/components/ui`, `apps/web/features/marketing/components/home-page`, `apps/web/features/codebase-flow/components/codebase-stage-step-card.tsx`, `apps/web/tests/unit`, and `apps/web/tests/integration-ui`.

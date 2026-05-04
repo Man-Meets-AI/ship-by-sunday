@@ -21,7 +21,7 @@ This ExecPlan must be maintained in accordance with `docs/exec-plans/PLANS.md`.
 
 ## Purpose / Big Picture
 
-Before this slice, the shared workspace shell was stored under `apps/web/features/course/shared/components`, even though blueprint, review, settings, starter, execute-ship, workspace-home, and course routes all used it. That made the product look course-first in places where the current app contract is blueprint-first and workspace-oriented. After this slice, first-party code imports the shell from `apps/web/features/workspace-shell`, while the visible app behavior remains the same.
+Before this slice, the shared workspace shell was stored under `apps/web/features/course/shared/components`, even though codebase, review, settings, starter, execute-ship, workspace-home, and course routes all used it. That made the product look course-first in places where the current app contract is codebase-first and workspace-oriented. After this slice, first-party code imports the shell from `apps/web/features/workspace-shell`, while the visible app behavior remains the same.
 
 This slice is behavior-neutral. It should not change route screens, checkout, Convex schema, billing state, generated output, or visible UI.
 
@@ -40,11 +40,11 @@ This slice is behavior-neutral. It should not change route screens, checkout, Co
 
 2026-04-26 EDT: The shell implementation contains optional course-specific affordances. `AppShell` imports `getLesson` from the course lesson manifest to infer the current block and a lesson 1.1 viewport tweak, and the footer rail still renders course-owned skill rail components. Generic workspace pages already pass `showSkillRail={false}` or omit mission state, so this slice can move ownership without requiring a deeper course-domain split.
 
-2026-04-26 EDT: First-party static imports are concentrated in a small set of route-facing feature components and tests. Visible production consumers include blueprint flow pages, execute-ship bonus pages, settings shell, starter disabled state, workspace home, and course mission.
+2026-04-26 EDT: First-party static imports are concentrated in a small set of route-facing feature components and tests. Visible production consumers include codebase flow pages, execute-ship bonus pages, settings shell, starter disabled state, workspace home, and course mission.
 
 2026-04-26 EDT: The old course-owned shell path now exists only as compatibility re-exports. A post-move import scan over `apps/web/features`, `apps/web/app`, and `apps/web/tests` found no remaining `features/course/shared/components/app-shell` import strings.
 
-2026-04-26 EDT: The first integration-ui batch hit a transient `blueprint-page` timeout with a Radix select focus exception. The isolated `blueprint-page` file passed immediately afterward, and the same three-file focused integration-ui batch then passed, so no code change was needed for that transient test-environment failure.
+2026-04-26 EDT: The first integration-ui batch hit a transient `codebase-page` timeout with a Radix select focus exception. The isolated `codebase-page` file passed immediately afterward, and the same three-file focused integration-ui batch then passed, so no code change was needed for that transient test-environment failure.
 
 ## Decision Log
 
@@ -70,7 +70,7 @@ Focused shell unit tests, focused integration-ui tests, app format check, app li
 
 Ship by Sunday's web app lives in `apps/web`. The App Router is under `apps/web/app`, durable feature code is under `apps/web/features`, external runtime integrations are under `apps/web/platform`, Convex backend code is under `apps/web/convex`, and shared UI primitives are under `apps/web/components/ui`.
 
-The shell implementation used to live at `apps/web/features/course/shared/components/app-shell.tsx`, with related files under `apps/web/features/course/shared/components/app-shell/`. It renders shared workspace chrome: header brand and navigation, primary nav, account menu, theme toggle, optional local navigation rail, and optional skill rail footer. Although it lived under course, it was used by blueprint, review, settings, starter, execute-ship, workspace-home, course mission, and tests.
+The shell implementation used to live at `apps/web/features/course/shared/components/app-shell.tsx`, with related files under `apps/web/features/course/shared/components/app-shell/`. It renders shared workspace chrome: header brand and navigation, primary nav, account menu, theme toggle, optional local navigation rail, and optional skill rail footer. Although it lived under course, it was used by codebase, review, settings, starter, execute-ship, workspace-home, course mission, and tests.
 
 The final home is `apps/web/features/workspace-shell/components/app-shell.tsx` plus `apps/web/features/workspace-shell/components/app-shell/`. The old course path is now a compatibility layer that re-exports the new shell module and submodules.
 
@@ -150,7 +150,7 @@ After the move and import updates, prove first-party consumers use the new path 
 Run focused tests for shell and immediate shell consumers:
 
     bun run --cwd apps/web test:unit -- tests/unit/product-shell.test.tsx tests/unit/mission-page.test.tsx tests/unit/bonus-lesson-page.test.tsx tests/unit/bonus-mission-page.test.tsx tests/unit/settings-page.test.tsx tests/unit/workspace-home-page.test.tsx tests/unit/app-workspace-lesson-page.test.tsx tests/unit/app-workspace-mission-page.test.tsx
-    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/blueprint-page.test.tsx tests/integration-ui/blueprint-review-page.test.tsx tests/integration-ui/workspace-primary-nav.test.tsx
+    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/codebase-page.test.tsx tests/integration-ui/codebase-review-page.test.tsx tests/integration-ui/workspace-primary-nav.test.tsx
 
 Then run app and plan checks:
 
@@ -174,7 +174,7 @@ No route screen, checkout, Convex schema, generated Convex file, Stripe webhook,
 Run these commands from repo root after implementation:
 
     bun run --cwd apps/web test:unit -- tests/unit/product-shell.test.tsx tests/unit/mission-page.test.tsx tests/unit/bonus-lesson-page.test.tsx tests/unit/bonus-mission-page.test.tsx tests/unit/settings-page.test.tsx tests/unit/workspace-home-page.test.tsx tests/unit/app-workspace-lesson-page.test.tsx tests/unit/app-workspace-mission-page.test.tsx
-    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/blueprint-page.test.tsx tests/integration-ui/blueprint-review-page.test.tsx tests/integration-ui/workspace-primary-nav.test.tsx
+    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/codebase-page.test.tsx tests/integration-ui/codebase-review-page.test.tsx tests/integration-ui/workspace-primary-nav.test.tsx
     bun run --cwd apps/web lint
     bun run --cwd apps/web typecheck
     bun run format:check
@@ -207,8 +207,8 @@ Baseline shell fan-in before edits:
     apps/web/features/execute-ship/components/bonus-lesson-page.tsx
     apps/web/features/settings/components/settings-page-shell.tsx
     apps/web/features/course/mission/components/mission-page.tsx
-    apps/web/features/blueprint-flow/components/blueprint-page.tsx
-    apps/web/features/blueprint-flow/components/blueprint-review-page.tsx
+    apps/web/features/codebase-flow/components/codebase-page.tsx
+    apps/web/features/codebase-flow/components/codebase-review-page.tsx
     apps/web/features/starter/components/course-module-disabled-state.tsx
     apps/web/features/workspace-home/components/workspace-home-page.tsx
     apps/web/tests/unit/product-shell.test.tsx
@@ -216,8 +216,8 @@ Baseline shell fan-in before edits:
     apps/web/tests/unit/mission-page.test.tsx
     apps/web/tests/unit/settings-page.test.tsx
     apps/web/tests/unit/workspace-home-page.test.tsx
-    apps/web/tests/integration-ui/blueprint-page.test.tsx
-    apps/web/tests/integration-ui/blueprint-review-page.test.tsx
+    apps/web/tests/integration-ui/codebase-page.test.tsx
+    apps/web/tests/integration-ui/codebase-review-page.test.tsx
 
 Post-move scan:
 
@@ -229,8 +229,8 @@ Post-move scan:
     apps/web/features/execute-ship/components/bonus-lesson-page.tsx
     apps/web/features/settings/components/settings-page-shell.tsx
     apps/web/features/course/mission/components/mission-page.tsx
-    apps/web/features/blueprint-flow/components/blueprint-page.tsx
-    apps/web/features/blueprint-flow/components/blueprint-review-page.tsx
+    apps/web/features/codebase-flow/components/codebase-page.tsx
+    apps/web/features/codebase-flow/components/codebase-review-page.tsx
     apps/web/features/starter/components/course-module-disabled-state.tsx
     apps/web/features/workspace-home/components/workspace-home-page.tsx
     apps/web/tests/unit/product-shell.test.tsx
@@ -238,8 +238,8 @@ Post-move scan:
     apps/web/tests/unit/mission-page.test.tsx
     apps/web/tests/unit/settings-page.test.tsx
     apps/web/tests/unit/workspace-home-page.test.tsx
-    apps/web/tests/integration-ui/blueprint-page.test.tsx
-    apps/web/tests/integration-ui/blueprint-review-page.test.tsx
+    apps/web/tests/integration-ui/codebase-page.test.tsx
+    apps/web/tests/integration-ui/codebase-review-page.test.tsx
 
 Focused validation passed:
 
@@ -247,7 +247,7 @@ Focused validation passed:
     Test Files  8 passed (8)
     Tests  21 passed (21)
 
-    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/blueprint-page.test.tsx tests/integration-ui/blueprint-review-page.test.tsx tests/integration-ui/workspace-primary-nav.test.tsx
+    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/codebase-page.test.tsx tests/integration-ui/codebase-review-page.test.tsx tests/integration-ui/workspace-primary-nav.test.tsx
     Test Files  3 passed (3)
     Tests  10 passed (10)
 
@@ -279,6 +279,6 @@ Plan and diff validation passed before archival:
 
 ## Interfaces and Dependencies
 
-`AppShell` is a client component. It imports UI primitives from `apps/web/components/ui`, route configuration from `apps/web/config/product.ts`, workspace navigation components from `apps/web/features/workspace-navigation`, blueprint stage types from `@shipbysunday/blueprint-compiler`, Clerk client hooks from `@clerk/nextjs`, and optional course lesson and skill rail modules from `apps/web/features/course`.
+`AppShell` is a client component. It imports UI primitives from `apps/web/components/ui`, route configuration from `apps/web/config/product.ts`, workspace navigation components from `apps/web/features/workspace-navigation`, codebase stage types from `@shipbysunday/codebase-compiler`, Clerk client hooks from `@clerk/nextjs`, and optional course lesson and skill rail modules from `apps/web/features/course`.
 
 The compatibility layer depends on the broad `@/*` alias defined for the web app. It should remain a thin re-export layer so later Program slices can delete it confidently after import scans prove the old path is unused.

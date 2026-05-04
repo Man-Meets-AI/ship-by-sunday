@@ -1,4 +1,4 @@
-import { buildGeneratedDesignSystem } from "@shipbysunday/blueprint-compiler";
+import { buildGeneratedDesignSystem } from "@shipbysunday/codebase-compiler";
 
 export const generatedDesignSystem = buildGeneratedDesignSystem({
 	product_name: "Ship by Sunday",

@@ -43,21 +43,21 @@
 
 ## Critical Dependencies
 
-`packages/blueprint-compiler/src/repo-generation/customer-safe-snapshot-contract.ts` must keep internal archives excluded while allowing new generalized artifacts.
+`packages/codebase-compiler/src/repo-generation/customer-safe-snapshot-contract.ts` must keep internal archives excluded while allowing new generalized artifacts.
 
-`packages/blueprint-compiler/src/repo-generation/starter-root-package-json.ts` owns generated root scripts for new repos.
+`packages/codebase-compiler/src/repo-generation/starter-root-package-json.ts` owns generated root scripts for new repos.
 
-`packages/blueprint-compiler/src/repo-generation/render-starter-project-onboarding.ts` and `render-generalized-starter-files.ts` own the generated onboarding and agent guidance.
+`packages/codebase-compiler/src/repo-generation/render-starter-project-onboarding.ts` and `render-generalized-starter-files.ts` own the generated onboarding and agent guidance.
 
-`packages/blueprint-compiler/src/repo-generation/render-starter-skills.ts` owns generated local skills.
+`packages/codebase-compiler/src/repo-generation/render-starter-skills.ts` owns generated local skills.
 
-`packages/blueprint-compiler/tests/repo-generation.test.ts`, `review-download-zip.test.ts`, and `customer-safe-snapshot-contract.test.ts` should prove generated output.
+`packages/codebase-compiler/tests/repo-generation.test.ts`, `review-download-zip.test.ts`, and `customer-safe-snapshot-contract.test.ts` should prove generated output.
 
 `apps/web/platform/codex/app-server.ts`, `apps/web/app/api/codex/`, and `apps/web/app/(workspace)/_components/codex-connection-card/` are the current BYO Codex connection surfaces that future execution-surface work must account for.
 
 `apps/web/app/_content/home-page.ts` and `apps/web/app/_lib/home-page-render-model.ts` are the current homepage content and behavior surfaces that later landing-page implementation must account for.
 
-`apps/web/config/product.ts`, `apps/web/app/_lib/home-page-structured-data.ts`, `apps/web/app/_components/home-page/sections/home-page-primary-cta.tsx`, `apps/web/app/api/stripe/checkout/`, `apps/web/platform/billing/checkout/`, `apps/web/app/checkout/success/`, `apps/web/app/(workspace)/blueprint`, and `apps/web/app/(workspace)/review` constrain any later offer, CTA, checkout, blueprint, or review-download implementation.
+`apps/web/config/product.ts`, `apps/web/app/_lib/home-page-structured-data.ts`, `apps/web/app/_components/home-page/sections/home-page-primary-cta.tsx`, `apps/web/app/api/stripe/checkout/`, `apps/web/platform/billing/checkout/`, `apps/web/app/checkout/success/`, `apps/web/app/(workspace)/codebase`, and `apps/web/app/(workspace)/review` constrain any later offer, CTA, checkout, codebase, or review-download implementation.
 
 Official Codex docs and Apps SDK docs are dependencies for any slice that claims ChatGPT/Codex login, GitHub-connected cloud execution, MCP tools, OAuth, or ChatGPT app distribution behavior.
 

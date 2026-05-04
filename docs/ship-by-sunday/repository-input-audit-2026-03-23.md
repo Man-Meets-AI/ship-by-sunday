@@ -7,7 +7,7 @@ Scope: planning only
 
 The product has a real input system already, but it is fragmented. I found 21 active lesson surfaces with structured fields and 148 active lesson fields across CEO, Design, and Build, plus a small number of non-lesson input surfaces such as starter-repo access and local-only deploy secrets. The lesson system is well structured for capture and autosave, but most inputs stay lesson-local instead of being normalized once and reused downstream.
 
-The strongest current coverage is early product-definition capture: problem, user, outcome, research, core flow, and some build/setup constraints. The weakest current coverage is design-spec quality, long-horizon execution quality, and final-blueprint assembly. There is no active code path that turns student answers into one canonical design spec, one durable long-horizon file stack, or one combined repo blueprint. Instead, the current product emits scattered artifacts: lesson previews, copied prompts, static PDFs, static starter-repo links, and a few local handoff blueprints.
+The strongest current coverage is early product-definition capture: problem, user, outcome, research, core flow, and some build/setup constraints. The weakest current coverage is design-spec quality, long-horizon execution quality, and final-codebase assembly. There is no active code path that turns student answers into one canonical design spec, one durable long-horizon file stack, or one combined repo codebase. Instead, the current product emits scattered artifacts: lesson previews, copied prompts, static PDFs, static starter-repo links, and a few local handoff codebases.
 
 Two major dormant assets exist and should shape the minimal-diff plan:
 
@@ -22,8 +22,8 @@ The cleanest path is not a redesign. It is:
 4. Reuse the dormant prompt/template infrastructure.
 5. Generate three first-class outputs from the canonical model:
    - design spec
-   - long-horizon plan blueprint
-   - starter handoff blueprint
+   - long-horizon plan codebase
+   - starter handoff codebase
 
 ## Repo map of relevant flows and code paths
 
@@ -36,8 +36,8 @@ The cleanest path is not a redesign. It is:
 | Prompt import + Codex generation infrastructure | `features/course/lesson/workbench/shared/prompt-import-card.tsx`, `app/api/codex/generate/route.ts`, `features/codex/server/app-server.ts` | Would render inside lessons that set `promptImport` | Zod request validation in `app/api/codex/generate/route.ts` | Local pasted-response state in `prompt-import-card.tsx`; optional `codexRuns` logging in Convex | Current lesson source files do not set `promptImport`; pipeline exists but is dormant |
 | Starter template access | `features/starter-repo/components/starter-repo-access-form.tsx`, `features/starter-repo/components/starter-repo-access-card.tsx` | Mission / settings / build cards | Strong username validation in `features/starter-repo/lib/github-username.ts` and mutation validation in `convex/course/starterRepoAccess.ts` | `starterRepoAccess` table in `convex/schema.ts` | GitHub provisioning automation in `scripts/starter-repo-access.mjs` and `scripts/lib/starter-repo-access.mjs` |
 | Static doc-pack / starter links | `config/product.ts`, `features/course/lesson/model/resources.ts` | Welcome/build cards and resource links | None beyond link presence | Static config only | Exposes static PDFs and starter repo URL; not personalized from student inputs |
-| Deploy handoff | `features/course/lesson/content/build.ts` lesson 3.14 fields; local-only secrets in `features/course/lesson/workbench/modes/production-deploy-handoff/production-deploy-handoff-secrets-panel.tsx` | `production-deploy-handoff-workbench.tsx` | Required checklist/product/domain fields via completion logic | Product/domain save to `lessonStates`; secrets remain browser-local only | `production-deploy-handoff-readme-prompt-card.tsx` and `production-deploy-handoff-secrets-panel.tsx` build clipboard blueprints |
-| New long-horizon templates folder | `docs/codex_long_horizon_templates/AGENTS.md`, `CHECKLIST.md`, `docs/prompt.md`, `docs/plans.md`, `docs/implement.md`, `docs/documentation.md` | Not rendered in current app | Not referenced by app validation | Standalone files only | Not wired into docs routing, downloads, lesson resources, starter-template flow, or blueprint assembly |
+| Deploy handoff | `features/course/lesson/content/build.ts` lesson 3.14 fields; local-only secrets in `features/course/lesson/workbench/modes/production-deploy-handoff/production-deploy-handoff-secrets-panel.tsx` | `production-deploy-handoff-workbench.tsx` | Required checklist/product/domain fields via completion logic | Product/domain save to `lessonStates`; secrets remain browser-local only | `production-deploy-handoff-readme-prompt-card.tsx` and `production-deploy-handoff-secrets-panel.tsx` build clipboard codebases |
+| New long-horizon templates folder | `docs/codex_long_horizon_templates/AGENTS.md`, `CHECKLIST.md`, `docs/prompt.md`, `docs/plans.md`, `docs/implement.md`, `docs/documentation.md` | Not rendered in current app | Not referenced by app validation | Standalone files only | Not wired into docs routing, downloads, lesson resources, starter-template flow, or codebase assembly |
 
 ## What the product asks for today, exactly
 
@@ -184,7 +184,7 @@ Exact field inventory:
 - `build_slices_planning_path`: Planning path [text; required]
 - `build_slices_core_ux_or_prompt`: Core UX or planning prompt [textarea; required]
 - `build_slices_reference_link`: Reference link (optional) [url; optional]
-- `build_slices_blueprint`: Slices blueprint (planner output) [textarea; required]
+- `build_slices_codebase`: Slices codebase (planner output) [textarea; required]
 - `build_slices_selected_slice`: Next slice to build [textarea; required]
 - `build_slices_review_checklist`: Review before build [checklist; required]
 - `build_slices_user_flow_sketch`: User flow sketch (optional) [textarea; optional]
@@ -219,7 +219,7 @@ Exact field inventory:
 - `core_ux_blog_link`: Blog link (source material) [url; required]
 - `core_ux_post_mimic_image`: Image upload (post to mimic) [image_upload; required]
 - `core_ux_codex_brief`: Codex implementation brief (dictate or edit) [textarea; required]
-- `core_ux_handoff_checklist`: Handoff blueprint [checklist; required]
+- `core_ux_handoff_checklist`: Handoff codebase [checklist; required]
 
 ### 3.12 Core UX Build 3 (BUILD / checkout_qa_loop)
 - `checkout_qa_preflight`: Testing preflight checklist [checklist; required]
@@ -254,7 +254,7 @@ Exact field inventory:
    - Definition / render: `features/course/lesson/workbench/modes/production-deploy-handoff/production-deploy-handoff-secrets-panel.tsx`
    - Validation: none beyond raw input
    - Storage: not persisted; browser session only
-   - Consumption: clipboard-only full handoff blueprint
+   - Consumption: clipboard-only full handoff codebase
 
 3. Prompt-import pasted response
    - Visible local-only field: `pastedResponse`
@@ -281,7 +281,7 @@ Exact field inventory:
 | Default `fresh_template_plan_manual_prompt` | `fresh-template-plan-workbench.tsx`, `fresh-template-plan-constants.ts` | Seeded automatically if empty | Long-horizon planning prompt scaffold exists, but not fed by prior student inputs |
 | Default `fresh_template_plan_reasoning` | `fresh-template-plan-workbench.tsx` | Defaults to `medium` | Good hidden default, but no rationale guidance from student complexity data |
 | Default QA prompt display | `checkout-qa-loop-prompt-panel.tsx`, `checkout-qa-loop-constants.ts` | Shows instructor template when empty | Not saved unless edited; does not interpolate current product data |
-| Deploy secrets | `production-deploy-handoff-secrets-panel.tsx` | Browser-local only, intentionally unsaved | Correct for security, but makes the final handoff blueprint ephemeral |
+| Deploy secrets | `production-deploy-handoff-secrets-panel.tsx` | Browser-local only, intentionally unsaved | Correct for security, but makes the final handoff codebase ephemeral |
 | Legacy migrated fields | `features/course/lesson/model/registry/legacy.ts` | Migrates legacy reference-board, sketch-upload, and visual-direction fields | Important because visual-direction/scope infrastructure exists even though active lessons do not use it |
 
 ## Canonical input matrix
@@ -312,17 +312,17 @@ Status legend:
 | Marketing site brief | product, audience, problem, pain, frequency, why matters, outcome, capability | Build 3.5 | `features/course/lesson/content/build.ts`, `codex-marketing-site-brief-block.tsx` | Completion only | `lessonStates` | Used only as manual brief fields beside static prompt | Narrative, copy discipline, CTA inputs | Prompt spec context | Partial | Stop re-entering these manually; derive them from shared product brief and only ask for missing marketing-specific nuance |
 | Marketing copy outputs | eyebrow, subheader, primary CTA, secondary CTA, promise, highlights, FAQ | Build 3.5 | `content/build.ts`, `codex-marketing-site-copy-tabs.tsx` | Completion only | `lessonStates` | Artifact preview only | Copy structure | Not a long-horizon requirement | Covered | Keep as output fields, not shared foundation |
 | Marketing style reference | `codex_marketing_style_reference_url` | Build 3.5 | `content/build.ts`, `codex-marketing-site-style-workflow.tsx` | URL field only | `lessonStates` | Manual style pass only | Visual references / mood board | UI-context attachment | Partial | Expand to multi-reference gallery and desired style attributes |
-| Route/access model | public pages, paywalled pages, route map, access-stack note | Build 3.6 | `features/course/lesson/content/build.ts` | Completion only | `lessonStates` | Local planning only | Product/workspace IA | Architecture intent / file ownership | Partial | Keep, but merge into the final build plan blueprint rather than a standalone lesson artifact |
+| Route/access model | public pages, paywalled pages, route map, access-stack note | Build 3.6 | `features/course/lesson/content/build.ts` | Completion only | `lessonStates` | Local planning only | Product/workspace IA | Architecture intent / file ownership | Partial | Keep, but merge into the final build plan codebase rather than a standalone lesson artifact |
 | Long-horizon planning prompt config | manual prompt, reasoning depth, reference path, stack flags, other stack notes | Build 3.7 | `features/course/lesson/content/build.ts`, `fresh-template-plan-prompt-controls.tsx`, `build-fresh-template-plan-prompt.ts` | Completion only; reasoning enum parser | `lessonStates` | Clipboard-only planning prompt; optional saved Codex plan | Spec / constraints only indirectly | Plan, reasoning level, context, stack | Partial | Keep, but auto-assemble from shared brief and wire to durable spec templates |
-| Planner output and slice choice | planning path, core UX or planning prompt, reference link, blueprint, selected slice, review checklist | Build 3.8 | `features/course/lesson/content/build.ts`, `build-setting-up-slices-guide.tsx` | Completion only | `lessonStates` | Artifact preview only | Implementation decomposition | Milestones / next slice / dependencies | Partial | Convert into structured slice objects and a single authoritative milestone plan blueprint |
+| Planner output and slice choice | planning path, core UX or planning prompt, reference link, codebase, selected slice, review checklist | Build 3.8 | `features/course/lesson/content/build.ts`, `build-setting-up-slices-guide.tsx` | Completion only | `lessonStates` | Artifact preview only | Implementation decomposition | Milestones / next slice / dependencies | Partial | Convert into structured slice objects and a single authoritative milestone plan codebase |
 | Brand system basics | app name, initials, domain, primary hex, accent hex, naming, icon, wordmark | Build 3.9 | `features/course/lesson/content/build.ts` | Completion only | `lessonStates` plus upload storage | Artifact previews, later manual use | Design system tokens and assets | None directly | Partial | Add typography roles, surface/text tokens, visual thesis, and usage rules |
-| Build plan brief | release distribution, local bridge, buyer AI promise, install destination, slices, affected areas, risks, dependencies | Build 3.10 | `features/course/lesson/content/build.ts`, `core-ux-plan-flow-constants.ts`, `core-ux-plan-flow-approved-summary.tsx` | Completion only | `lessonStates` | Summary card only | Some product/distribution context | Strong overlap with long-horizon plan requirements | Partial | This should become the core of the long-horizon blueprint, but it is currently too narrow and too manual |
-| Core UX build handoff | strategy prompt, brand references, blog link, mimic image, Codex brief, handoff checklist | Build 3.11 | `features/course/lesson/content/build.ts`, `core-ux-build-constants.ts`, `core-ux-build-handoff-card.tsx` | Completion only; uploads structurally validated | `lessonStates`, upload storage | Copy-to-clipboard prompt/brief only | Visual references, imagery, implementation handoff | Prompt context, deliverable context | Partial | Strong foundation; add explicit design-spec sections so it becomes a real implementation blueprint |
+| Build plan brief | release distribution, local bridge, buyer AI promise, install destination, slices, affected areas, risks, dependencies | Build 3.10 | `features/course/lesson/content/build.ts`, `core-ux-plan-flow-constants.ts`, `core-ux-plan-flow-approved-summary.tsx` | Completion only | `lessonStates` | Summary card only | Some product/distribution context | Strong overlap with long-horizon plan requirements | Partial | This should become the core of the long-horizon codebase, but it is currently too narrow and too manual |
+| Core UX build handoff | strategy prompt, brand references, blog link, mimic image, Codex brief, handoff checklist | Build 3.11 | `features/course/lesson/content/build.ts`, `core-ux-build-constants.ts`, `core-ux-build-handoff-card.tsx` | Completion only; uploads structurally validated | `lessonStates`, upload storage | Copy-to-clipboard prompt/brief only | Visual references, imagery, implementation handoff | Prompt context, deliverable context | Partial | Strong foundation; add explicit design-spec sections so it becomes a real implementation codebase |
 | Checkout QA setup and report | preflight, QA prompt, QA report, current step, last issue, browser running, scenario | Build 3.12 | `features/course/lesson/content/build.ts`, `checkout-qa-loop-prompt-panel.tsx` | Completion only | `lessonStates` | Clipboard QA prompt; report artifact | Visual verification / browser QA | Validation loop / smoke flow | Partial | Keep; interpolate current product/route context into the QA prompt automatically |
-| Production deploy context | deploy steps, product name, domain, success checks | Build 3.14 | `features/course/lesson/content/build.ts`, `production-deploy-handoff-context-fields-card.tsx` | Completion only | `lessonStates` | README prompt + context block | Not design-specific | Deploy/run/demo context | Partial | Keep, but fold into final repo blueprint / launch blueprint |
-| Production secrets | cloudflare token, stripe secret, clerk keys | Deploy secrets panel | `production-deploy-handoff-secrets-panel.tsx` | None | Browser-local only | Clipboard-only full blueprint | N/A | Secrets / env handoff | Partial | Correctly local-only, but the workflow is ephemeral and not integrated with the final blueprint |
+| Production deploy context | deploy steps, product name, domain, success checks | Build 3.14 | `features/course/lesson/content/build.ts`, `production-deploy-handoff-context-fields-card.tsx` | Completion only | `lessonStates` | README prompt + context block | Not design-specific | Deploy/run/demo context | Partial | Keep, but fold into final repo codebase / launch codebase |
+| Production secrets | cloudflare token, stripe secret, clerk keys | Deploy secrets panel | `production-deploy-handoff-secrets-panel.tsx` | None | Browser-local only | Clipboard-only full codebase | N/A | Secrets / env handoff | Partial | Correctly local-only, but the workflow is ephemeral and not integrated with the final codebase |
 | Skill usage / tagged prompt | checklist, first tagged prompt | Build 3.16 | `features/course/lesson/content/build.ts` | Completion only | `lessonStates` | Artifact only | Reusable workflow extraction | Skills / reusable workflow | Partial | Keep as training support, not part of product-definition core |
-| Starter repo provisioning | `githubUsername` | Mission, settings, build cards | `features/starter-repo/components/starter-repo-access-form.tsx`, `convex/course/starterRepoAccess.ts`, `scripts/starter-repo-access.mjs` | Strong username validation | `starterRepoAccess` table | GitHub invite automation and template gating | N/A | Repo/blueprint access | Covered | Keep exactly; this is one of the few non-lesson inputs with strong validation and real downstream effect |
+| Starter repo provisioning | `githubUsername` | Mission, settings, build cards | `features/starter-repo/components/starter-repo-access-form.tsx`, `convex/course/starterRepoAccess.ts`, `scripts/starter-repo-access.mjs` | Strong username validation | `starterRepoAccess` table | GitHub invite automation and template gating | N/A | Repo/codebase access | Covered | Keep exactly; this is one of the few non-lesson inputs with strong validation and real downstream effect |
 | Prompt import / Codex generation | `templateId`, `prompt`, `lessonId`, `model`, pasted response | Dormant infrastructure | `prompt-import-card.tsx`, `app/api/codex/generate/route.ts`, `research-prompt.ts` | Zod request validation + parser validation | Local UI state plus `codexRuns` logging | Would populate structured fields automatically | Strong potential for design prompt import | Strong potential for long-horizon plan import | Missing in active workflow | Wire this before building new generation infrastructure |
 | Long-horizon durable-memory templates | `AGENTS.md`, `CHECKLIST.md`, `docs/prompt.md`, `docs/plans.md`, `docs/implement.md`, `docs/documentation.md` templates | Standalone docs folder | `docs/codex_long_horizon_templates/*` | None | Files only | None today | Reusable design/build guidance indirectly | Directly maps to long-horizon durable-memory requirements | Missing in active workflow | Promote into starter/doc-pack workflow and link from active lessons/docs |
 
@@ -342,14 +342,14 @@ Normalization approach:
 | Milestone plan with acceptance criteria and validation commands | `fresh_template_plan_*`, `build_slices_*`, `ux_plan_*` collect planning fragments | Partial | Ask some, derive some, template the rest | No current output creates a milestone plan file with commands and stop-and-fix rule |
 | Stop-and-fix rule | Present in templates (`docs/plans.md`, `CHECKLIST.md`) only | Partial | System-template | Not represented in active student workflow |
 | Decision log / architecture intent | `ux_plan_plan_affected_areas`, `ux_plan_plan_risks`, `ux_plan_plan_dependencies` | Partial | Ask directly + system-template | Needs promotion into durable file output |
-| Rollback strategy | Not actively collected | Missing | Ask directly or template | Should be part of the long-horizon plan blueprint |
+| Rollback strategy | Not actively collected | Missing | Ask directly or template | Should be part of the long-horizon plan codebase |
 | Repo-level AGENTS plus nested memory files | Repo root `AGENTS.md` exists; new template stack exists in `docs/codex_long_horizon_templates/` | Partial | System-template | Not wired into starter or course handoff |
 | Live status log | `docs/codex_long_horizon_templates/docs/documentation.md` only | Partial | System-template | No current output populates a running status file |
 | Environment/bootstrap/worktree strategy | Build kickoff and repo-map lessons collect setup status | Partial | Ask some, template some | Setup is covered; worktree/isolation strategy is not |
-| Validation commands and smoke/demo flow | QA and deploy lessons capture some smoke flow pieces | Partial | Ask some, derive some | Needs one centralized validation section in the final plan blueprint |
+| Validation commands and smoke/demo flow | QA and deploy lessons capture some smoke flow pieces | Partial | Ask some, derive some | Needs one centralized validation section in the final plan codebase |
 | Thread/session hygiene, compaction, subagents | Not actively collected; only explained in docs/checklists/templates | Not applicable as direct student input | System-template | Belongs in the starter doc pack, not in product-definition forms |
 | Worktrees and concurrent isolation | Not actively collected | Not applicable as direct student input | System-template | Same as above |
-| Skills/MCP/automation extraction | Skills quickstart lesson exists | Partial | Ask lightly, mostly system-template | Training exists, but no blueprint output captures recommended skills by project |
+| Skills/MCP/automation extraction | Skills quickstart lesson exists | Partial | Ask lightly, mostly system-template | Training exists, but no codebase output captures recommended skills by project |
 | Final handoff summary with risks and next steps | Current system has scattered artifacts and status checklists | Partial | Derive + system-template | No single final summary object exists |
 
 ## Checklist coverage matrix: design
@@ -383,7 +383,7 @@ Normalization approach:
 | Responsive safety / mobile constraints | No explicit fields | Missing | Ask directly or template | Could be generated from design spec, but needs at least one explicit constraint field |
 | Browser verification expectations | QA lessons exist later | Partial | System-template + derive | Not collected as design intent |
 | Figma round-trip / design source of truth | `core_brand_path` mentions Figma or Canva; no active Figma-node intake | Partial | Ask directly when relevant | Dormant `visual_direction` infrastructure suggests a natural next step |
-| Reusable design guidance via AGENTS / skills | Present in docs and new templates, not wired into student flow | Partial | System-template | Should land in final blueprint rather than be re-asked |
+| Reusable design guidance via AGENTS / skills | Present in docs and new templates, not wired into student flow | Partial | System-template | Should land in final codebase rather than be re-asked |
 
 ## Gap analysis
 
@@ -420,7 +420,7 @@ Normalization approach:
 8. Rollback / recovery plan
    - Missing entirely.
 
-9. Final blueprint manifest
+9. Final codebase manifest
    - No active output says: include starter repo X, doc pack Y, generated prompt Z, validations Q.
 
 10. Source-of-truth preference
@@ -445,7 +445,7 @@ Normalization approach:
    - Active lesson configs do not use `promptImport` or `briefAssembler`.
 
 5. Final output assembly is missing
-   - No code path assembles one design spec, one long-horizon blueprint, or one repo handoff blueprint from the captured data.
+   - No code path assembles one design spec, one long-horizon codebase, or one repo handoff codebase from the captured data.
 
 6. The new durable-memory template stack is not part of any current workflow
    - It is exactly the right shape for long-horizon outputs, but it is disconnected from the course product.
@@ -517,7 +517,7 @@ Add or normalize these:
 4. Stop-and-fix rule
 5. Rollback plan
 6. Decision log
-7. Final handoff blueprint manifest
+7. Final handoff codebase manifest
 
 ### Derived / system-generated
 
@@ -529,7 +529,7 @@ Do not ask directly unless needed:
 4. Assembled README deploy prompt
 5. Design spec markdown
 6. Long-horizon durable-memory file set
-7. Repo blueprint manifest
+7. Repo codebase manifest
 
 ## Before / after structural model
 
@@ -540,7 +540,7 @@ Do not ask directly unless needed:
 - Pinned artifacts shown, not normalized
 - Static prompt templates copied manually
 - Static PDFs and starter repo URL linked separately
-- No final blueprint assembler
+- No final codebase assembler
 
 ### After
 
@@ -548,7 +548,7 @@ Do not ask directly unless needed:
 - Flow-specific deltas layered on top
 - Derived outputs generated from the canonical brief
 - Reused dormant prompt-import infrastructure
-- Durable-memory templates wired into final blueprint generation
+- Durable-memory templates wired into final codebase generation
 - Starter repo + doc pack + build prompt assembled from one source
 
 ## Checklist-template folder audit
@@ -583,7 +583,7 @@ Audit judgment:
 
 - This folder is high-value and should be used.
 - It is not wired into any current workflow.
-- It is the clearest candidate for the long-horizon portion of the final repo/doc-pack/build-prompt blueprint.
+- It is the clearest candidate for the long-horizon portion of the final repo/doc-pack/build-prompt codebase.
 
 ## Implementation plan
 
@@ -638,7 +638,7 @@ Goal: use what already exists instead of inventing another pipeline.
 
 4. Parse returned outputs back into structured fields using the existing parser pattern in `research-prompt.ts`
 
-### Phase 4: assemble final blueprint outputs
+### Phase 4: assemble final codebase outputs
 
 Goal: produce the actual outcome the product promises.
 
@@ -649,7 +649,7 @@ Add generators for:
 3. `plans.md`
 4. `implement.md`
 5. `documentation.md`
-6. blueprint manifest:
+6. codebase manifest:
    - starter repo URL
    - static PDF/doc resources
    - generated prompts
@@ -688,10 +688,10 @@ Planning-only recommendation:
 
 1. Add fixture-based tests for canonical brief mapping
 2. Add parser tests for generated/imported prompt outputs
-3. Add one integration test per generated blueprint:
+3. Add one integration test per generated codebase:
    - design spec
    - long-horizon file stack
-   - starter handoff blueprint
+   - starter handoff codebase
 4. Add regression checks for:
    - lesson completion
    - artifact preview rendering
@@ -707,13 +707,13 @@ Planning-only recommendation:
 
 ### Assumptions
 
-1. The intended future product outcome is a generated blueprint, not just a teaching workspace.
+1. The intended future product outcome is a generated codebase, not just a teaching workspace.
 2. Existing lesson order should mostly stay intact.
 3. Minimal-diff means adding mapping/generation layers before restructuring lessons.
 
 ### Open questions
 
-1. Should the final repo blueprint be generated inside this repo or in the gated starter repo?
+1. Should the final repo codebase be generated inside this repo or in the gated starter repo?
 2. Is the long-horizon template folder meant to ship to students as-is, or serve as internal generation templates?
 3. Should marketing-site copy remain a manually refined exercise, or become generated from the shared brief with only delta edits?
 
@@ -727,8 +727,8 @@ Planning-only recommendation:
 6. Activate the dormant `promptImport` plus `/api/codex/generate` path for at least one real lesson.
 7. Convert free-text slice planning into structured milestone data.
 8. Generate one final design spec markdown artifact instead of scattering design intent across notes and copied prompts.
-9. Generate one final long-horizon blueprint from the new template stack instead of leaving `prompt.md` / `plans.md` / `implement.md` / `documentation.md` standalone.
-10. Keep deploy secrets local, but attach a generated non-secret blueprint manifest so the final handoff is reproducible.
+9. Generate one final long-horizon codebase from the new template stack instead of leaving `prompt.md` / `plans.md` / `implement.md` / `documentation.md` standalone.
+10. Keep deploy secrets local, but attach a generated non-secret codebase manifest so the final handoff is reproducible.
 
 ## Final judgment
 
@@ -739,4 +739,4 @@ The best plan is not to add a giant new form. It is to:
 1. normalize what already exists,
 2. add a small missing set of high-value fields,
 3. wire the dormant prompt and durable-memory infrastructure,
-4. generate the final blueprint from that shared model.
+4. generate the final codebase from that shared model.

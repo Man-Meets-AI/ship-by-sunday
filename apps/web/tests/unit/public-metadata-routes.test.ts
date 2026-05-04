@@ -20,7 +20,7 @@ describe("public metadata routes", () => {
 				"/sign-up",
 				"/session-tasks",
 				"/access-required",
-				"/blueprint",
+				"/codebase",
 				"/review",
 				"/settings",
 				"/checkout/",

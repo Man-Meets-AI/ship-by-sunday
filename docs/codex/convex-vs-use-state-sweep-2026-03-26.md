@@ -1,5 +1,5 @@
 ---
-summary: "A sweep of `useState` usage in `apps/web` that classifies each instance as Convex-worthy, local UI state, or derivable state. The conclusion is that no obvious high-confidence Convex migrations remain after the lesson-state and blueprint-state work."
+summary: "A sweep of `useState` usage in `apps/web` that classifies each instance as Convex-worthy, local UI state, or derivable state. The conclusion is that no obvious high-confidence Convex migrations remain after the lesson-state and codebase-state work."
 read_when: "Open this when you want to check whether a new local state candidate belongs in Convex or should stay browser-local."
 plan_status: "done"
 ---
@@ -17,7 +17,7 @@ I swept all current `useState` usage in `apps/web` and classified each occurrenc
 - `Local UI state`: browser-only interaction state, secret entry, animation state, upload progress, or temporary form flow state that should stay client-local
 - `Ref or derived candidate`: not a Convex concern, but possibly simplifiable without `useState`
 
-Current conclusion: after the lesson-state and blueprint-state work, there are no additional obvious `Convex candidate` cases left in `apps/web`.
+Current conclusion: after the lesson-state and codebase-state work, there are no additional obvious `Convex candidate` cases left in `apps/web`.
 
 ## Convex Candidates
 
@@ -26,8 +26,8 @@ Current conclusion: after the lesson-state and blueprint-state work, there are n
 Notes:
 
 - `apps/web/features/course/lesson/hooks/use-lesson-state.ts` is no longer on this list. It now uses Convex-backed lesson truth with a local pending patch buffer.
-- `apps/web/features/blueprint-flow/hooks/use-blueprint-stage-step-state.ts` is no longer on this list. It now uses Convex-backed blueprint truth with local unsaved-change and validation state only.
-- `apps/web/features/blueprint-flow/components/review/blueprint-review-download-bridge.tsx` is no longer on this list for execute unlock state. It now derives unlock from live workspace state.
+- `apps/web/features/codebase-flow/hooks/use-codebase-stage-step-state.ts` is no longer on this list. It now uses Convex-backed codebase truth with local unsaved-change and validation state only.
+- `apps/web/features/codebase-flow/components/review/codebase-review-download-bridge.tsx` is no longer on this list for execute unlock state. It now derives unlock from live workspace state.
 
 ## Local UI State
 
@@ -57,9 +57,9 @@ These are not good Convex migrations. They are intentionally browser-local or pe
   - `isStartingGoogle`
   - Reason: auth form inputs and flow progress
 
-### Blueprint flow
+### Codebase flow
 
-- `apps/web/features/blueprint-flow/hooks/use-blueprint-stage-step-state.ts`
+- `apps/web/features/codebase-flow/hooks/use-codebase-stage-step-state.ts`
   - `hasUnsavedChanges`
   - `validationStateByStepId`
   - `invalidFieldKeysByStepId`
@@ -68,7 +68,7 @@ These are not good Convex migrations. They are intentionally browser-local or pe
   - `isSaving`
   - Reason: inline validation, save feedback, and pending draft behavior on top of Convex truth
 
-- `apps/web/features/blueprint-flow/components/review/blueprint-review-download-bridge.tsx`
+- `apps/web/features/codebase-flow/components/review/codebase-review-download-bridge.tsx`
   - `hasRequestedStarterDownload`
   - `isUnlockPending`
   - Reason: client-only acknowledgement of a browser download plus in-flight mutation state

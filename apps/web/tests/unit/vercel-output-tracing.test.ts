@@ -1,4 +1,4 @@
-import { buildRepoDownloadTraceIncludes } from "@shipbysunday/blueprint-compiler/server";
+import { buildRepoDownloadTraceIncludes } from "@shipbysunday/codebase-compiler/server";
 import { repoDownloadTraceIncludes } from "@/config/vercel-output-tracing";
 
 describe("vercel output tracing", () => {

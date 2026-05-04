@@ -17,7 +17,7 @@ The current QA control plane is broad and actively wired:
 - `.github/workflows/ci.yml`, `.github/workflows/dev-staging-proof.yml`, `.github/workflows/production-release-proof.yml`, and `.github/workflows/sandbox-e2e-nightly.yml` reference QA proof or QA environment behavior.
 - `.github/workflows/convex-production-deploy.yml` is adjacent to the release path but does not directly reference `qa/` according to the source track.
 
-Docs references are spread through `AGENTS.md`, `apps/web/AGENTS.md`, `qa/README.md`, `docs/release-workflow.md`, `docs/internal/observability.md`, `apps/web/content/docs/commands.mdx`, `apps/web/content/docs/deploy-to-vercel.mdx`, `README.md`, `CHANGELOG.md`, active/completed ExecPlans, and generated starter templates in `packages/blueprint-compiler`.
+Docs references are spread through `AGENTS.md`, `apps/web/AGENTS.md`, `qa/README.md`, `docs/release-workflow.md`, `docs/internal/observability.md`, `apps/web/content/docs/commands.mdx`, `apps/web/content/docs/deploy-to-vercel.mdx`, `README.md`, `CHANGELOG.md`, active/completed ExecPlans, and generated starter templates in `packages/codebase-compiler`.
 
 The source track also reported a tracked `QA-Browser` account reference file under `.agents` with real-looking QA credentials. If accurate, retirement should include credential review and rotation, not only deletion.
 

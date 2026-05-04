@@ -33,7 +33,7 @@ The public homepage should keep rendering the same offer, copy, CTA behavior, st
 - [x] 2026-04-27 EDT: Deleted the empty `apps/web/features` tree and confirmed current `apps/web` scans return no `features/marketing` references.
 - [x] 2026-04-27 EDT: Focused pure homepage, public metadata, blog, curriculum contract, and HomePagePrimaryCta integration-ui tests passed locally.
 - [x] 2026-04-27 EDT: App format check, app lint, app typecheck, plan lint, Program lint, markdown lint, old-path scans, Convex schema/generated diff check, local built-homepage smoke, and `git diff --check` passed.
-- [x] 2026-04-27 EDT: PR integration CI caught the blueprint download snapshot still including the deleted `apps/web/features` directory. Updated the customer-safe repo snapshot manifest and generated starter guidance to use `apps/web/app/_content/home-page.ts`.
+- [x] 2026-04-27 EDT: PR integration CI caught the codebase download snapshot still including the deleted `apps/web/features` directory. Updated the customer-safe repo snapshot manifest and generated starter guidance to use `apps/web/app/_content/home-page.ts`.
 
 ## Surprises & Discoveries
 
@@ -41,7 +41,7 @@ The marketing folder contains the root homepage, homepage content, render-model 
 
 The local React render-to-string tests for `EncryptedText` and marketing effects still hit this checkout's known duplicate-React `Invalid hook call` issue through the motion/framer-motion dependency graph. Pure homepage contracts, integration-ui proof, app lint, and app typecheck pass locally; clean-install PR static is the authoritative full-unit proof for those React-heavy unit files.
 
-The blueprint compiler customer-safe snapshot manifest still listed `apps/web/features` as an included directory after the folder was deleted. That was a real integration failure in the download route, so the snapshot contract now follows the new app-owned homepage content path instead of recreating a compatibility folder.
+The codebase compiler customer-safe snapshot manifest still listed `apps/web/features` as an included directory after the folder was deleted. That was a real integration failure in the download route, so the snapshot contract now follows the new app-owned homepage content path instead of recreating a compatibility folder.
 
 ## Decision Log
 
@@ -59,7 +59,7 @@ Date: 2026-04-27
 
 ## Outcomes & Retrospective
 
-This slice is complete. `apps/web/features/marketing` and the empty `apps/web/features` container have been deleted. Homepage UI now lives under `apps/web/app/_components/home-page`, homepage content lives at `apps/web/app/_content/home-page.ts`, homepage render-model and structured-data helpers live under `apps/web/app/_lib`, and the shared effect primitives live directly in the existing `apps/web/components/ui` files. The blueprint download snapshot no longer tries to scan `apps/web/features`, and generated starter instructions now point to the app-owned homepage content path. Visible homepage copy, section order, CTA behavior, structured data rules, blog route behavior, public metadata behavior, checkout, billing, Stripe, Convex schema, generated Convex files, and environment behavior were intentionally unchanged.
+This slice is complete. `apps/web/features/marketing` and the empty `apps/web/features` container have been deleted. Homepage UI now lives under `apps/web/app/_components/home-page`, homepage content lives at `apps/web/app/_content/home-page.ts`, homepage render-model and structured-data helpers live under `apps/web/app/_lib`, and the shared effect primitives live directly in the existing `apps/web/components/ui` files. The codebase download snapshot no longer tries to scan `apps/web/features`, and generated starter instructions now point to the app-owned homepage content path. Visible homepage copy, section order, CTA behavior, structured data rules, blog route behavior, public metadata behavior, checkout, billing, Stripe, Convex schema, generated Convex files, and environment behavior were intentionally unchanged.
 
 ## Context and Orientation
 
@@ -126,7 +126,7 @@ The old-path scan should return no current source or current docs references. Th
 ## Validation and Acceptance
 
 Acceptance requires `apps/web/features/marketing` and the empty `apps/web/features` container to be deleted, all current marketing feature imports and current docs ownership references to be gone, the homepage render model and structured data tests to pass, public metadata and blog consumers to remain aligned, app format/lint/typecheck to pass, and production proof to pass after merge.
-The blueprint download route and compiler repo-generation tests must also pass because the customer-safe starter snapshot used to include the deleted feature directory.
+The codebase download route and compiler repo-generation tests must also pass because the customer-safe starter snapshot used to include the deleted feature directory.
 
 ### Test Commands
 

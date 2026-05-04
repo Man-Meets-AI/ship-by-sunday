@@ -132,4 +132,4 @@ The scan found consumers in `apps/web/app/page.tsx`, workspace layout/access-req
 
 ## Interfaces and Dependencies
 
-Product access depends on `apps/web/platform/auth/convex-auth.ts`, Convex `api.access.viewerProductAccess`, Convex `api.blueprint.getBlueprintResumeDestination`, checkout session recovery in `apps/web/features/checkout/server/checkout-session-recovery.ts`, Next.js `redirect`, and the release workflow rule that checkout, entitlement, and access-handoff behavior need production proof after merge.
+Product access depends on `apps/web/platform/auth/convex-auth.ts`, Convex `api.access.viewerProductAccess`, Convex `api.codebase.getCodebaseResumeDestination`, checkout session recovery in `apps/web/features/checkout/server/checkout-session-recovery.ts`, Next.js `redirect`, and the release workflow rule that checkout, entitlement, and access-handoff behavior need production proof after merge.

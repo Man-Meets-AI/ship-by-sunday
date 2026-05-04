@@ -12,7 +12,7 @@ The strongest buyer frame is worker-first. Customers do not wake up wanting "age
 
 Programs and ExecPlans are therefore not separate products competing with workers. They are how Ship by Sunday makes workers real. ExecPlans are the unit of bounded execution, Programs are cross-slice initiative memory, and loops are the recurrence pattern that turns each completed pass into better source truth for the next pass.
 
-The current product flow is still one-lane in practice. Customers buy, complete `/blueprint`, reach `/review`, and download the generated repo. The generated repo opens at `START-HERE.md`, then guides core setup, auth setup, billing setup, verification, product identity changes, and first-slice work.
+The current product flow is still one-lane in practice. Customers buy, complete `/codebase`, reach `/review`, and download the generated repo. The generated repo opens at `START-HERE.md`, then guides core setup, auth setup, billing setup, verification, product identity changes, and first-slice work.
 
 The mature-codebase lane is not yet a real product surface. Existing copy can imply it by talking about codebases, repo truth, worker layers, and operating systems, but there is no flow for connecting or auditing an existing repo, no adoption output contract, and no mature-repo-specific review proof.
 
@@ -23,7 +23,7 @@ The product should teach two lanes:
 
 Top-of-funnel messaging should make both lanes legible without pretending both are equally implemented today:
 
-- New codebase lane: blueprint intake to generated repo to `START-HERE.md` to Build Pack readiness to first worker loop.
+- New codebase lane: codebase intake to generated repo to `START-HERE.md` to Build Pack readiness to first worker loop.
 - Existing codebase lane: repo audit to source-truth map to adoption Program to first child ExecPlan to safe worker loop.
 
 The new-codebase lane sells speed from idea to working repo. The existing-codebase lane sells leverage on a repo the customer already values. Both should ladder up to the same worker-layer promise, but they need different proof, onboarding, and risk language.

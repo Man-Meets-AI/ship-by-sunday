@@ -23,7 +23,7 @@ A buyer who just handed Ship by Sunday their money lands on `/checkout/success` 
 
 This pass raises the craft layer on `/checkout/success` only. After this work, a buyer should see a confidently sized headline, a status frame that signals a calm working system rather than a hopeful spinner, progress steps that crossfade rather than snap, a clear primary CTA in the marketing invert pattern, a "Opening your workspace…" affordance during the auto-redirect window, and a layout that reads cleanly at 390px and 1440px in both light and dark mode.
 
-A human can prove this by visiting `/checkout/success?session_id=test` against the dev server with a fixture that returns a `validated` checkout session and a Convex access query that initially returns `{ hasAccess: false }` and later flips to `{ hasAccess: true }`. They should see the polling status, watch the `validatedStatusCopy` rotate every 1600ms, observe the icon crossfade on the access-handoff step, then see the redirect-armed affordance fade in for the 700ms window before `router.replace("/blueprint")` fires. They should toggle `prefers-reduced-motion: reduce` in browser devtools and confirm every new animation falls back to a static render. They should resize between 390px and 1440px and confirm the help panel never clips below the fold without affordance and the CTA cluster never wraps awkwardly.
+A human can prove this by visiting `/checkout/success?session_id=test` against the dev server with a fixture that returns a `validated` checkout session and a Convex access query that initially returns `{ hasAccess: false }` and later flips to `{ hasAccess: true }`. They should see the polling status, watch the `validatedStatusCopy` rotate every 1600ms, observe the icon crossfade on the access-handoff step, then see the redirect-armed affordance fade in for the 700ms window before `router.replace("/codebase")` fires. They should toggle `prefers-reduced-motion: reduce` in browser devtools and confirm every new animation falls back to a static render. They should resize between 390px and 1440px and confirm the help panel never clips below the fold without affordance and the CTA cluster never wraps awkwardly.
 
 ## Progress
 
@@ -88,11 +88,11 @@ Source-changing slices:
 
 Test deltas:
 - `apps/web/tests/integration-ui/checkout-success-view.test.tsx` gained five assertions: positive presence of the redirect affordance copy and `data-testid="checkout-success-redirect-affordance"`, positive presence of the new `checkout-success-cta-primary` and `checkout-success-cta-tertiary` testids, and explicit absence of both the affordance and its testid in the polling state. The existing assertions for "Polling access", "Redirect armed", "Open workspace", "Opening workspace", "Access ready", "Access confirmed", "Finalizing access", "Confirming your product access.", "What happens next", "Use the checkout account", "Account mismatch", "Sign in to continue", "Wrong account for this checkout", "Missing checkout session", "Session invalid", and "Go home" are all preserved unchanged.
-- `apps/web/tests/integration-ui/checkout-success-view.interactions.test.tsx` was not modified. Its existing assertions on `replaceMock("/blueprint")` after 700ms and on the rotating `validatedStatusCopy` strings still pass against the polished tree.
+- `apps/web/tests/integration-ui/checkout-success-view.interactions.test.tsx` was not modified. Its existing assertions on `replaceMock("/codebase")` after 700ms and on the rotating `validatedStatusCopy` strings still pass against the polished tree.
 
 Validation matrix:
 - focused vitest (`tests/integration-ui/checkout-success-view*.test.tsx`): 9/9 passed.
-- broader vitest (`tests/integration-ui` + `tests/unit`): 590/590 passed after one transient flake on `tests/integration-ui/blueprint-page.test.tsx` (a 5s timeout under heavy parallel load on a file untouched by this slice; passed cleanly on isolated re-run).
+- broader vitest (`tests/integration-ui` + `tests/unit`): 590/590 passed after one transient flake on `tests/integration-ui/codebase-page.test.tsx` (a 5s timeout under heavy parallel load on a file untouched by this slice; passed cleanly on isolated re-run).
 - `bun run format`: 0 issues across 771 files.
 - `bun lint`: 0 warnings, 0 errors across 711 files.
 - `bun typecheck`: full `next build` succeeded; `/checkout/success` is in the route manifest as `ƒ /checkout/success`.
@@ -107,7 +107,7 @@ Structural follow-ups:
 Done in a follow-up pass on 2026-05-02:
 
 - Reconciled the duplicated `bg-foreground text-background hover:bg-foreground/90 disabled:bg-foreground disabled:text-background` invert string between `apps/web/app/_components/home-page/sections/home-page-primary-cta.tsx` and `apps/web/app/checkout/success/_components/checkout-success-cta-row.tsx`. Both files now import a shared `PRIMARY_CTA_INVERT_CLASSES` constant from a new `apps/web/lib/styling/primary-cta-invert-classes.ts` module. The colocated docstring on the new module names this as the single deletion target when the structural `--primary` / `--primary-foreground` cascade is fixed elsewhere. Behavior is unchanged; both surfaces continue to render the marketing invert pattern.
-- Strengthened the interaction-time coverage of the redirect affordance in `apps/web/tests/integration-ui/checkout-success-view.interactions.test.tsx`. The "arms the blueprint redirect once access is ready" test now advances fake timers to t=699ms, asserts the `checkout-success-redirect-affordance` testid and "Opening your workspace…" copy are present and that `replaceMock` has not yet fired, then advances 1ms more and asserts `replaceMock("/blueprint")`. A new "does not render the redirect affordance while access is still pending" test asserts both the testid and the copy are absent when `useQueryMock` returns `{ hasAccess: false }`.
+- Strengthened the interaction-time coverage of the redirect affordance in `apps/web/tests/integration-ui/checkout-success-view.interactions.test.tsx`. The "arms the codebase redirect once access is ready" test now advances fake timers to t=699ms, asserts the `checkout-success-redirect-affordance` testid and "Opening your workspace…" copy are present and that `replaceMock` has not yet fired, then advances 1ms more and asserts `replaceMock("/codebase")`. A new "does not render the redirect affordance while access is still pending" test asserts both the testid and the copy are absent when `useQueryMock` returns `{ hasAccess: false }`.
 
 Intentionally not done in this pass:
 
@@ -118,7 +118,7 @@ Intentionally not done in this pass:
 
 `/checkout/success` is the post-Stripe handoff surface. `apps/web/app/checkout/success/page.tsx` is a server component that resolves the Stripe `session_id` from the URL or recovery cookie, validates it via `getCheckoutSessionState`, and prefetches `viewerProductAccess` from Convex when the session is `validated`. It then renders `CheckoutSuccessView` with the session state and the prefetched access.
 
-`apps/web/app/checkout/success/_components/checkout-success-view.tsx` is a client component that subscribes to `viewerProductAccess` via Convex, polls until access is ready, rotates `validatedStatusCopy` every `timingConfig.checkoutStatusRotateMs` (1600ms), and calls `router.replace(routeConfig.blueprint)` after `timingConfig.checkoutAutoRedirectMs` (700ms) once `canAutoRedirect` flips true.
+`apps/web/app/checkout/success/_components/checkout-success-view.tsx` is a client component that subscribes to `viewerProductAccess` via Convex, polls until access is ready, rotates `validatedStatusCopy` every `timingConfig.checkoutStatusRotateMs` (1600ms), and calls `router.replace(routeConfig.codebase)` after `timingConfig.checkoutAutoRedirectMs` (700ms) once `canAutoRedirect` flips true.
 
 `apps/web/app/checkout/success/_components/checkout-success-view-surface.tsx` is the layout shell: a `min-h-screen` `<main>` wrapping a single `max-w-lg` column with the main panel above the help panel.
 
@@ -155,7 +155,7 @@ Token rules from `DESIGN.md` to honor:
 - New dependencies. The plan uses existing `motion/react`, `lucide-react`, and shadcn primitives only.
 - The global `--primary` cascade fix; that work is owned by a separate PR. This plan removes the local `bg-primary` instance on this surface and does not introduce new ones.
 - The PostHog observability work and `.cursor/` settings present in the working tree on the same branch. Every `git add` is explicit by file.
-- Other surfaces (homepage, blueprint, review, docs).
+- Other surfaces (homepage, codebase, review, docs).
 
 ## Plan of Work
 
@@ -280,14 +280,14 @@ Expected vitest output for the new redirect-affordance assertion:
 
      PASS  apps/web/tests/integration-ui/checkout-success-view.interactions.test.tsx
        CheckoutSuccessView interactions
-         ✓ arms the blueprint redirect once access is ready
+         ✓ arms the codebase redirect once access is ready
          ✓ rotates the validated status copy while access is still pending
          ✓ surfaces the redirect affordance once access is ready
 
 ## Interfaces and Dependencies
 
 This plan depends on packages already in `apps/web`:
-- `motion/react` for `useReducedMotion`, `motion.div`, and `AnimatePresence` (already used by `apps/web/components/ui/cover.tsx` and `apps/web/app/_components/home-page/sections/blueprint-demo/blueprint-demo-saved-locally.tsx`).
+- `motion/react` for `useReducedMotion`, `motion.div`, and `AnimatePresence` (already used by `apps/web/components/ui/cover.tsx` and `apps/web/app/_components/home-page/sections/codebase-demo/codebase-demo-saved-locally.tsx`).
 - `lucide-react` for `Loader2`, `CheckCircle2`, `Circle` (already imported by `checkout-success-main-panel.tsx`).
 - shadcn primitives in `apps/web/components/ui/` (`Card`, `CardContent`, `CardDescription`, `CardFooter`, `CardHeader`, `CardTitle`, `Badge`, `Button`, `Separator`).
 - `cn` from `apps/web/lib/utils.ts`.

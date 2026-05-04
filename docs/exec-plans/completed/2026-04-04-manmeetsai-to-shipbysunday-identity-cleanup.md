@@ -17,18 +17,18 @@ Ship by Sunday already uses the new brand in the repo root name, product config,
 
 - [x] 2026-04-04 11:16 EDT — Read `.plans/PLANS.md`, `.docs/scripts.md`, the root agent contract, and the current workspace manifests before freezing the plan.
 - [x] 2026-04-04 11:16 EDT — Used three `gpt-5.4-mini` high-effort subagents plus local grep to inventory the remaining `manmeetsai` surfaces across package metadata, runtime imports, CI, QA, and historical docs.
-- [x] 2026-04-04 11:16 EDT — Confirmed the app already isolates most compiler usage through `@blueprint-compiler` path aliases in `apps/web/tsconfig.json` and `apps/web/vitest.config.ts`, which reduces the live runtime blast radius.
+- [x] 2026-04-04 11:16 EDT — Confirmed the app already isolates most compiler usage through `@codebase-compiler` path aliases in `apps/web/tsconfig.json` and `apps/web/vitest.config.ts`, which reduces the live runtime blast radius.
 - [x] 2026-04-04 11:16 EDT — Confirmed the current dirty worktree contains unrelated in-flight app changes, so this rename must avoid overwriting or “cleaning up” any existing user edits.
 - [x] 2026-04-04 11:37 EDT — Completed Milestone 1 package-scope rename. `@manmeetsai` was replaced with `@shipbysunday` across the compiler and CLI manifests, matching workspace dependencies, direct runtime imports, CLI tests, the web `transpilePackages` list, and the CLI README heading. A fresh grep over `apps/web`, `packages`, and `bun.lock` returned zero `@manmeetsai` hits.
 - [x] 2026-04-04 11:20 EDT — User clarified that all website and Clerk hostnames stay on `man-meets-ai`. Domain migration is out of scope for this plan and any grep over those hosts is an allowed live exception.
 - [x] 2026-04-04 11:44 EDT — Completed Milestone 2 non-domain live cleanup by renaming the QA helper user-agent in `qa/scripts/lib/clerk-target.mjs` to `shipbysunday-qa-auth-check/1.0`. Targeted formatting passed. `bun run qa:inventory:sync` passed, and `bun run qa:validate` passed on rerun after one transient missing-row error.
 - [x] 2026-04-04 11:44 EDT — Completed Milestone 3 archive cleanup. Rewrote stale narrative references to the old package scope, generalized archive-only repo alias mentions where they were not needed as evidence, renamed `docs/codex/2026-03-23-manmeetsai-incident-bus-telegram-plan.md` to `docs/codex/2026-03-23-ship-by-sunday-incident-bus-telegram-plan.md`, and updated archive references accordingly.
-- [x] 2026-04-04 11:37 EDT — Ran the Milestone 1 narrow validation loop. `packages/blueprint-compiler` passed `lint`, `format:check`, `typecheck`, and `test`. `packages/ship-by-sunday-cli` passed `lint`, `format:check`, `typecheck`, and `test`. `apps/web` passed `lint`, a targeted `oxfmt --check` over the touched files, a focused integration run for `tests/integration/blueprint-download-routes.test.ts`, and a full `bun run build`. The full workspace `apps/web` `format:check` remains blocked by unrelated dirty files outside this rename slice and is recorded below.
+- [x] 2026-04-04 11:37 EDT — Ran the Milestone 1 narrow validation loop. `packages/codebase-compiler` passed `lint`, `format:check`, `typecheck`, and `test`. `packages/ship-by-sunday-cli` passed `lint`, `format:check`, `typecheck`, and `test`. `apps/web` passed `lint`, a targeted `oxfmt --check` over the touched files, a focused integration run for `tests/integration/codebase-download-routes.test.ts`, and a full `bun run build`. The full workspace `apps/web` `format:check` remains blocked by unrelated dirty files outside this rename slice and is recorded below.
 - [x] 2026-04-04 11:50 EDT — Completed Milestone 4 final validation. Root `bun run format`, `bun run format:check`, `bun run lint`, `bun run typecheck`, `bun run sbs:check`, `bun run build`, and `bun run check` all passed. The earlier broad `apps/web` formatting failure did not reproduce on rerun and is now treated as transient rather than a standing blocker.
 
 ## Surprises & Discoveries
 
-The live code rename is smaller than the raw grep count suggests. `apps/web` mostly imports the compiler through `@blueprint-compiler` and `@blueprint-compiler/server` aliases defined in `apps/web/tsconfig.json` and mirrored in `apps/web/vitest.config.ts`. That means the web feature tree does not need a broad import rewrite. The direct old-scope code changes are concentrated in workspace manifests, a small set of runtime imports, the web app `transpilePackages` list, a handful of CLI imports and tests, the QA helper user-agent string, and the generated `bun.lock`.
+The live code rename is smaller than the raw grep count suggests. `apps/web` mostly imports the compiler through `@codebase-compiler` and `@codebase-compiler/server` aliases defined in `apps/web/tsconfig.json` and mirrored in `apps/web/vitest.config.ts`. That means the web feature tree does not need a broad import rewrite. The direct old-scope code changes are concentrated in workspace manifests, a small set of runtime imports, the web app `transpilePackages` list, a handful of CLI imports and tests, the QA helper user-agent string, and the generated `bun.lock`.
 
 The largest residue set is not package metadata. It is operational and archival identity: `.env.production`, `apps/web/.env.production`, `.github/workflows/dev-staging-proof.yml`, `.github/workflows/production-release-proof.yml`, `qa/README.md`, `qa/AGENTS.md`, multiple product docs under `apps/web/content/docs/`, and many historical reports still reference `https://www.man-meets-ai.com`, `https://dev.man-meets-ai.com`, `https://clerk.man-meets-ai.com`, `accounts.man-meets-ai.com`, or repo and Vercel identifiers like `mma-shipbysunday` and `man-meets-ai-simple`. After the user clarification, the hostname subset of that inventory is not a bug. It is an intentional live contract that this plan must preserve.
 
@@ -36,11 +36,11 @@ The checked-in Playwright auth fixtures remain a trap, but now for the opposite 
 
 The repository currently contains real secrets in `.env.production` and `apps/web/.env.production`. This plan does not change or re-emit those values. Any implementation must avoid leaking those secrets into logs, notes, or chat, and should not touch the hostname-bearing fields in those files because the domains are intentionally preserved.
 
-The current worktree is dirty with unrelated app changes, deleted files, and new files under `apps/web/features/blueprint-flow/`, plus plan and design changes. This rename must be additive and surgical. It must not attempt to reconcile unrelated git state or revert anything outside the rename surface.
+The current worktree is dirty with unrelated app changes, deleted files, and new files under `apps/web/features/codebase-flow/`, plus plan and design changes. This rename must be additive and surgical. It must not attempt to reconcile unrelated git state or revert anything outside the rename surface.
 
-The first broad app validation surfaced an apparent blocker in the dirty tree rather than in this rename. `bun run format:check` from `apps/web` initially reported four files outside the Milestone 1 edit set: `features/blueprint-flow/components/blueprint-review-page.tsx`, `features/blueprint-flow/hooks/use-review-download-handoff.ts`, `scripts/review-handoff-doctor.ts`, and `tests/integration-ui/blueprint-page.test.tsx`. Because those files were outside the rename slice and already dirty or untracked, the immediate recovery was to keep them untouched and switch to targeted formatting checks on the Milestone 1 files. Later reruns of root `bun run format:check`, `bun run format`, and `bun run check` all passed cleanly, so the original failure appears to have been transient rather than a persistent repo blocker.
+The first broad app validation surfaced an apparent blocker in the dirty tree rather than in this rename. `bun run format:check` from `apps/web` initially reported four files outside the Milestone 1 edit set: `features/codebase-flow/components/codebase-review-page.tsx`, `features/codebase-flow/hooks/use-review-download-handoff.ts`, `scripts/review-handoff-doctor.ts`, and `tests/integration-ui/codebase-page.test.tsx`. Because those files were outside the rename slice and already dirty or untracked, the immediate recovery was to keep them untouched and switch to targeted formatting checks on the Milestone 1 files. Later reruns of root `bun run format:check`, `bun run format`, and `bun run check` all passed cleanly, so the original failure appears to have been transient rather than a persistent repo blocker.
 
-The QA control-plane validation exposed one transient mismatch after `qa:inventory:sync`: the first `bun run qa:validate` complained that `qa/test-inventory.csv` was missing `apps/web/tests/integration-ui/blueprint-test-fixtures.ts`, even though the synced file already contained that row. A direct inspection confirmed the row was present, and an immediate rerun of `bun run qa:validate` passed cleanly. Treat that first failure as transient evidence, not as a persistent inventory gap.
+The QA control-plane validation exposed one transient mismatch after `qa:inventory:sync`: the first `bun run qa:validate` complained that `qa/test-inventory.csv` was missing `apps/web/tests/integration-ui/codebase-test-fixtures.ts`, even though the synced file already contained that row. A direct inspection confirmed the row was present, and an immediate rerun of `bun run qa:validate` passed cleanly. Treat that first failure as transient evidence, not as a persistent inventory gap.
 
 The remaining non-domain identity hits after Milestone 3 are deliberate exceptions rather than stale drift. The active ExecPlan still names the old identity because it is the artifact driving this migration. `docs/release-workflow.md` still references the live GitHub and Vercel repo/project identifiers because those are current external contracts, and several `docs/codex/*` files still include `mma-shipbysunday` inside preserved code blocks or command transcripts that act as historical evidence.
 
@@ -50,7 +50,7 @@ Decision: split the work into package identity, non-domain repo identity, and ar
 Rationale: the package rename is mechanical and low-risk, while domains are now explicitly fixed as `man-meets-ai` by user instruction. Archives are numerous and should not block the safe runtime rename slice.
 Date/Author: 2026-04-04 / Codex
 
-Decision: keep the `@blueprint-compiler` alias layer intact.
+Decision: keep the `@codebase-compiler` alias layer intact.
 Rationale: those aliases already shield `apps/web` from workspace scope churn. Replacing them would widen the diff for no user-visible benefit and would violate the repo preference for the smallest viable change.
 Date/Author: 2026-04-04 / Codex
 
@@ -84,13 +84,13 @@ The final validation set is green. Root `bun run format`, `bun run format:check`
 
 ## Context and Orientation
 
-The repository root `package.json` defines the Bun workspaces and the root command surface. The live app is `apps/web`. The relevant workspaces for this rename are `packages/blueprint-compiler`, `packages/ship-by-sunday-cli`, and `packages/blueprint-presentation`.
+The repository root `package.json` defines the Bun workspaces and the root command surface. The live app is `apps/web`. The relevant workspaces for this rename are `packages/codebase-compiler`, `packages/ship-by-sunday-cli`, and `packages/codebase-presentation`.
 
-The authoritative package identity files are the workspace manifests. `packages/blueprint-compiler/package.json` now names the compiler package `@shipbysunday/blueprint-compiler`. `packages/ship-by-sunday-cli/package.json` now names the CLI package `@shipbysunday/ship-by-sunday-cli` and depends on the compiler under that scope. `packages/blueprint-presentation/package.json` depends on the compiler under `@shipbysunday/blueprint-compiler`, and `apps/web/package.json` matches that same workspace dependency.
+The authoritative package identity files are the workspace manifests. `packages/codebase-compiler/package.json` now names the compiler package `@shipbysunday/codebase-compiler`. `packages/ship-by-sunday-cli/package.json` now names the CLI package `@shipbysunday/ship-by-sunday-cli` and depends on the compiler under that scope. `packages/codebase-presentation/package.json` depends on the compiler under `@shipbysunday/codebase-compiler`, and `apps/web/package.json` matches that same workspace dependency.
 
-The live runtime import surface is now aligned. `apps/web/next.config.ts` lists `@shipbysunday/blueprint-compiler` in `transpilePackages`. `apps/web/app/api/download/repo/route.ts`, `packages/blueprint-presentation/src/index.ts`, `packages/ship-by-sunday-cli/src/blueprint-derivation.ts`, `packages/ship-by-sunday-cli/src/draft/draft-store.ts`, `packages/ship-by-sunday-cli/src/commands/generate-command.ts`, the affected CLI tests, and `apps/web/tests/integration/blueprint-download-routes.test.ts` all reference the compiler through the `@shipbysunday` scope. `bun.lock` has been regenerated to match.
+The live runtime import surface is now aligned. `apps/web/next.config.ts` lists `@shipbysunday/codebase-compiler` in `transpilePackages`. `apps/web/app/api/download/repo/route.ts`, `packages/codebase-presentation/src/index.ts`, `packages/ship-by-sunday-cli/src/codebase-derivation.ts`, `packages/ship-by-sunday-cli/src/draft/draft-store.ts`, `packages/ship-by-sunday-cli/src/commands/generate-command.ts`, the affected CLI tests, and `apps/web/tests/integration/codebase-download-routes.test.ts` all reference the compiler through the `@shipbysunday` scope. `bun.lock` has been regenerated to match.
 
-The app already contains an isolation layer that should remain in place. `apps/web/tsconfig.json` maps `@blueprint-compiler` and `@blueprint-compiler/server` to the workspace source files, and `apps/web/vitest.config.ts` mirrors those aliases. These aliases mean most web feature files do not care what the workspace npm scope is.
+The app already contains an isolation layer that should remain in place. `apps/web/tsconfig.json` maps `@codebase-compiler` and `@codebase-compiler/server` to the workspace source files, and `apps/web/vitest.config.ts` mirrors those aliases. These aliases mean most web feature files do not care what the workspace npm scope is.
 
 The operational identity surface splits into two groups. Hostname-bearing surfaces such as `.env.production`, `apps/web/.env.production`, `.github/workflows/dev-staging-proof.yml`, `.github/workflows/production-release-proof.yml`, product docs under `apps/web/content/docs/`, `qa/README.md`, `qa/AGENTS.md`, and `docs/release-workflow.md` intentionally keep the `man-meets-ai` domains. Non-domain strings were cleaned where they were clearly stale, including the QA helper user-agent in `qa/scripts/lib/clerk-target.mjs`. Repo or project labels such as the live GitHub and Vercel identifiers remain preserved when they still describe a real external contract or appear inside evidence-bearing transcripts.
 
@@ -100,7 +100,7 @@ The repo still has a historical tail, but it is much narrower now. `.plans/`, `d
 
 ## Plan of Work
 
-Start with the package-scope rename because it is the smallest safe slice and the repo already exposes its authoritative sources. Rename the workspace package names in `packages/blueprint-compiler/package.json` and `packages/ship-by-sunday-cli/package.json` into the `@shipbysunday/*` scope. Update all workspace dependencies that must match those names in `apps/web/package.json`, `packages/blueprint-presentation/package.json`, and `packages/ship-by-sunday-cli/package.json`. Update `apps/web/next.config.ts` so the web build transpiles the renamed compiler package. Replace the remaining direct `@manmeetsai/blueprint-compiler` imports in runtime code, CLI code, and tests, but leave the `@blueprint-compiler` app aliases untouched. Regenerate `bun.lock` and prove that the package layer still resolves.
+Start with the package-scope rename because it is the smallest safe slice and the repo already exposes its authoritative sources. Rename the workspace package names in `packages/codebase-compiler/package.json` and `packages/ship-by-sunday-cli/package.json` into the `@shipbysunday/*` scope. Update all workspace dependencies that must match those names in `apps/web/package.json`, `packages/codebase-presentation/package.json`, and `packages/ship-by-sunday-cli/package.json`. Update `apps/web/next.config.ts` so the web build transpiles the renamed compiler package. Replace the remaining direct `@manmeetsai/codebase-compiler` imports in runtime code, CLI code, and tests, but leave the `@codebase-compiler` app aliases untouched. Regenerate `bun.lock` and prove that the package layer still resolves.
 
 Once the package identity is stable, clean only the non-domain repo identity drift. Keep `.env.production`, `apps/web/.env.production`, `.github/workflows/dev-staging-proof.yml`, `.github/workflows/production-release-proof.yml`, hostname-bearing product docs, hostname-based tests, and the checked-in `.auth` fixtures unchanged. Limit this slice to strings such as the QA user-agent in `qa/scripts/lib/clerk-target.mjs`, package-facing README headings, and any repo or project labels that still say `manmeetsai` but are not actual live domain contracts.
 
@@ -138,18 +138,18 @@ Expected observation: the hits should be concentrated in the workspace manifests
 
 Implement the package rename by editing these files first:
 
-    packages/blueprint-compiler/package.json
+    packages/codebase-compiler/package.json
     packages/ship-by-sunday-cli/package.json
-    packages/blueprint-presentation/package.json
+    packages/codebase-presentation/package.json
     apps/web/package.json
     apps/web/next.config.ts
     apps/web/app/api/download/repo/route.ts
-    packages/blueprint-presentation/src/index.ts
-    packages/ship-by-sunday-cli/src/blueprint-derivation.ts
+    packages/codebase-presentation/src/index.ts
+    packages/ship-by-sunday-cli/src/codebase-derivation.ts
     packages/ship-by-sunday-cli/src/draft/draft-store.ts
     packages/ship-by-sunday-cli/src/commands/generate-command.ts
     packages/ship-by-sunday-cli/tests/*.test.ts
-    apps/web/tests/integration/blueprint-download-routes.test.ts
+    apps/web/tests/integration/codebase-download-routes.test.ts
 
 After those edits, regenerate the lockfile:
 
@@ -160,7 +160,7 @@ Expected observation: `bun.lock` updates the workspace names and resolutions to 
 
 Validate the package slice narrowly before touching any non-domain cleanup:
 
-    $ cd /Users/parkerrex/Projects/ship-by-sunday/packages/blueprint-compiler
+    $ cd /Users/parkerrex/Projects/ship-by-sunday/packages/codebase-compiler
     $ bun run lint
     $ bun run format:check
     $ bun run typecheck
@@ -241,7 +241,7 @@ Expected observation: formatting, lint, typecheck, CLI checks, build, and the br
 
 ## Validation and Acceptance
 
-The package-scope acceptance criteria are concrete. `packages/blueprint-compiler/package.json` and `packages/ship-by-sunday-cli/package.json` must both expose `@shipbysunday/*` names. The corresponding workspace dependencies must match. `apps/web/next.config.ts` and the remaining direct imports and mocks must no longer reference `@manmeetsai/blueprint-compiler`. `bun.lock` must be regenerated and consistent with the manifests. Grep over `apps/web`, `packages`, and `bun.lock` must show zero `@manmeetsai` hits.
+The package-scope acceptance criteria are concrete. `packages/codebase-compiler/package.json` and `packages/ship-by-sunday-cli/package.json` must both expose `@shipbysunday/*` names. The corresponding workspace dependencies must match. `apps/web/next.config.ts` and the remaining direct imports and mocks must no longer reference `@manmeetsai/codebase-compiler`. `bun.lock` must be regenerated and consistent with the manifests. Grep over `apps/web`, `packages`, and `bun.lock` must show zero `@manmeetsai` hits.
 
 The non-domain identity acceptance criteria are also concrete. The QA user agent and any other touched non-domain strings must no longer say `manmeetsai`. Hostname-bearing `man-meets-ai` references in env files, workflows, docs, tests, and auth fixtures are accepted live contracts and must remain unchanged. Grep over the touched non-domain surfaces must show no stale `manmeetsai` hits outside any explicitly documented archival exception.
 
@@ -275,11 +275,11 @@ Observed Milestone 1 proof:
     $ rg -n --hidden --glob '!**/node_modules/**' --glob '!**/.git/**' '@manmeetsai' apps/web packages bun.lock
     <no output>
 
-    packages/blueprint-compiler: lint, format:check, typecheck, test — passed
+    packages/codebase-compiler: lint, format:check, typecheck, test — passed
     packages/ship-by-sunday-cli: lint, format:check, typecheck, test — passed
     apps/web: lint — passed
     apps/web: targeted oxfmt --check on package/runtime files — passed
-    apps/web: bunx vitest run --project integration tests/integration/blueprint-download-routes.test.ts — passed
+    apps/web: bunx vitest run --project integration tests/integration/codebase-download-routes.test.ts — passed
     apps/web: bun run build — passed
 
 Observed Milestone 2 and 3 proof:
@@ -314,9 +314,9 @@ Observed final root proof:
 
 The most important live package files at plan creation time were:
 
-    packages/blueprint-compiler/package.json
+    packages/codebase-compiler/package.json
     packages/ship-by-sunday-cli/package.json
-    packages/blueprint-presentation/package.json
+    packages/codebase-presentation/package.json
     apps/web/package.json
     apps/web/next.config.ts
     apps/web/app/api/download/repo/route.ts
@@ -336,12 +336,12 @@ The most important preserved hostname files at plan creation time were:
 
 The workspace package interfaces are defined by these manifest names and imports:
 
-    packages/blueprint-compiler/package.json
+    packages/codebase-compiler/package.json
     packages/ship-by-sunday-cli/package.json
-    packages/blueprint-presentation/package.json
+    packages/codebase-presentation/package.json
     apps/web/package.json
 
-The web build depends on the compiler package name appearing in `apps/web/next.config.ts` under `transpilePackages`. The web runtime download route depends on the compiler server entry point imported in `apps/web/app/api/download/repo/route.ts`. The presentation package depends on the compiler types imported in `packages/blueprint-presentation/src/index.ts`. The CLI depends on the compiler package in `packages/ship-by-sunday-cli/src/blueprint-derivation.ts`, `packages/ship-by-sunday-cli/src/draft/draft-store.ts`, and `packages/ship-by-sunday-cli/src/commands/generate-command.ts`.
+The web build depends on the compiler package name appearing in `apps/web/next.config.ts` under `transpilePackages`. The web runtime download route depends on the compiler server entry point imported in `apps/web/app/api/download/repo/route.ts`. The presentation package depends on the compiler types imported in `packages/codebase-presentation/src/index.ts`. The CLI depends on the compiler package in `packages/ship-by-sunday-cli/src/codebase-derivation.ts`, `packages/ship-by-sunday-cli/src/draft/draft-store.ts`, and `packages/ship-by-sunday-cli/src/commands/generate-command.ts`.
 
 The app alias layer must remain intact in:
 

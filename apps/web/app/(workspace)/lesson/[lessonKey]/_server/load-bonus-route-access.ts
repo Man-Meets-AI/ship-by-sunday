@@ -1,29 +1,29 @@
 import "server-only";
 
 import { api } from "@/convex/_generated/api";
-import type { BlueprintWorkspaceState } from "@/lib/blueprint-flow/blueprint-workspace-types";
+import type { CodebaseWorkspaceState } from "@/lib/codebase-flow/codebase-workspace-types";
 import { isExecuteShipUnlocked } from "@/lib/execute-ship/bonus-route-access";
 import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
 
 export type BonusRouteAccess = {
-	workspaceState: BlueprintWorkspaceState;
+	workspaceState: CodebaseWorkspaceState;
 	isUnlocked: boolean;
 	hasStartedBonusLesson: boolean;
 };
 
-function requireBlueprintWorkspaceState(
-	workspaceState: BlueprintWorkspaceState | null,
-): BlueprintWorkspaceState {
+function requireCodebaseWorkspaceState(
+	workspaceState: CodebaseWorkspaceState | null,
+): CodebaseWorkspaceState {
 	if (!workspaceState) {
-		throw new Error("Blueprint workspace state missing");
+		throw new Error("Codebase workspace state missing");
 	}
 
 	return workspaceState;
 }
 
 export async function loadBonusRouteAccess(): Promise<BonusRouteAccess> {
-	const workspaceState = requireBlueprintWorkspaceState(
-		await fetchAuthenticatedQuery(api.blueprint.getBlueprintWorkspaceState, {}),
+	const workspaceState = requireCodebaseWorkspaceState(
+		await fetchAuthenticatedQuery(api.codebase.getCodebaseWorkspaceState, {}),
 	);
 	const isUnlocked = isExecuteShipUnlocked(workspaceState);
 

@@ -89,7 +89,7 @@ The starter uses this sequence:
 5. Stripe webhook hits Convex HTTP at `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`
 6. Convex verifies the signature and grants access to the Clerk user that owns the Stripe checkout email, creating that Clerk user when the email has no account yet
 7. `/checkout/success` retries the same paid-session fulfillment if the webhook is delayed, then sends signed-out buyers through `/checkout/email-handoff` to prove the Stripe checkout email with Clerk email OTP
-8. after Clerk verifies that email, `/checkout/success` validates the matching user and redirects into `/blueprint`
+8. after Clerk verifies that email, `/checkout/success` validates the matching user and redirects into `/codebase`
 
 Pending checkout claims still exist as fallback and audit records. They are no longer the happy-path customer journey.
 
@@ -125,7 +125,7 @@ The happy path is:
 3. the webhook grants product access
 4. signed-out buyers prove the checkout email through Clerk email code
 5. `/checkout/success` stops waiting
-6. the buyer reaches `/blueprint`
+6. the buyer reaches `/codebase`
 
 ## If this breaks
 

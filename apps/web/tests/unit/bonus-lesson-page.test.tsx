@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
 	createCompleteProjectDefinition,
 	deriveStageStatus,
-} from "@shipbysunday/blueprint-compiler";
+} from "@shipbysunday/codebase-compiler";
 import type { BonusMissionState } from "@/lib/execute-ship/bonus-mission-types";
 
 vi.mock("next/link", () => ({
@@ -58,7 +58,7 @@ vi.mock(
 import { BonusLessonPage } from "@/app/(workspace)/_components/execute-ship/bonus-lesson-page";
 import { BonusLessonFooter } from "@/app/(workspace)/_components/execute-ship/bonus-lesson-footer";
 
-const blueprintStageStatuses = deriveStageStatus(
+const codebaseStageStatuses = deriveStageStatus(
 	createCompleteProjectDefinition().facts,
 ).stageStatuses;
 import { AppShellFooterRail } from "@/app/(workspace)/_components/app-shell/app-shell-footer-rail";
@@ -172,7 +172,7 @@ describe("BonusLessonPage", () => {
 	it("renders the watch shell without the old workbench", () => {
 		const markup = renderToStaticMarkup(
 			<BonusLessonPage
-				initialStageStatuses={blueprintStageStatuses}
+				initialStageStatuses={codebaseStageStatuses}
 				lessonKey="build-kickoff"
 				missionState={missionState}
 				postReviewTargets={{
@@ -187,7 +187,7 @@ describe("BonusLessonPage", () => {
 
 		expect(markup).toContain("Video-first bonus lesson");
 		expect(markup).toContain(
-			"Use the blueprint as the brief and keep BUILD as the default path.",
+			"Use the codebase as the brief and keep BUILD as the default path.",
 		);
 		expect(markup).toContain("Build Kickoff");
 		expect(markup).toContain("Lesson Map");
@@ -216,7 +216,7 @@ describe("BonusLessonPage", () => {
 	it("keeps static prompt cards on the bonus lesson surface", () => {
 		const markup = renderToStaticMarkup(
 			<BonusLessonPage
-				initialStageStatuses={blueprintStageStatuses}
+				initialStageStatuses={codebaseStageStatuses}
 				lessonKey="light-research-not-a-thesis"
 				missionState={missionState}
 				postReviewTargets={{

@@ -2,7 +2,7 @@
 
 Date: 2026-03-23
 Mode: Planning only
-Goal: reframe the current lesson-state system around the live canonical project-definition model, then decide what to keep, kill, and combine based on the blueprint compiler contract instead of older prompt-pack assumptions.
+Goal: reframe the current lesson-state system around the live canonical project-definition model, then decide what to keep, kill, and combine based on the codebase compiler contract instead of older prompt-pack assumptions.
 
 ## Core Judgment
 
@@ -10,16 +10,16 @@ The right move is to stop treating current lesson fields as the product schema.
 
 The product schema should be:
 - facts: stable truths about the student’s app
-- derived docs: generated blueprints and handoff artifacts
+- derived docs: generated codebases and handoff artifacts
 - workflow state: teaching/process progress
 - ephemeral runtime: local-only volatile state
 
-That split matches the current Ship by Sunday blueprint layers and the live blueprint compiler:
-- `packages/blueprint-compiler/src/canonical-project-definition/schema.ts`
-- `packages/blueprint-compiler/src/stages/stage-definitions.ts`
-- `packages/blueprint-compiler/src/blueprints/`
+That split matches the current Ship by Sunday codebase layers and the live codebase compiler:
+- `packages/codebase-compiler/src/canonical-project-definition/schema.ts`
+- `packages/codebase-compiler/src/stages/stage-definitions.ts`
+- `packages/codebase-compiler/src/codebases/`
 
-Neither blueprint expects workflow checklists, copied-prompt confirmations, browser toggles, or legacy starter-repo invite fields to be the canonical project definition.
+Neither codebase expects workflow checklists, copied-prompt confirmations, browser toggles, or legacy starter-repo invite fields to be the canonical project definition.
 
 ## The Four Buckets
 
@@ -41,11 +41,11 @@ Definition:
 - should be the main product outputs for Codex handoff
 
 In this repo, the target derived docs are:
-- the generated design blueprint
-- the generated marketing blueprint
-- the generated build blueprint
+- the generated design codebase
+- the generated marketing codebase
+- the generated build codebase
 - the shipped ExecPlan prompt assets under `docs/prompts/`
-- the customer-safe blueprint
+- the customer-safe codebase
 
 ### 3. Workflow State
 
@@ -71,9 +71,9 @@ Examples:
 
 This should stay out of canonical persistence unless there is a separate secure operational need.
 
-## What The Live Blueprint Actually Wants
+## What The Live Codebase Actually Wants
 
-The current blueprint compiler wants one pre-review fact contract grouped into Product, Design, Marketing, and Build Plan. Those stages already exist in `packages/blueprint-compiler/src/stages/stage-definitions.ts`.
+The current codebase compiler wants one pre-review fact contract grouped into Product, Design, Marketing, and Build Plan. Those stages already exist in `packages/codebase-compiler/src/stages/stage-definitions.ts`.
 
 ### Product inputs
 
@@ -263,7 +263,7 @@ Do not keep `starter_repo_github_username` in canonical facts. The live compiler
 
 These should be generated, not manually stored as first-class truth.
 
-#### Design blueprint
+#### Design codebase
 
 Generate from facts plus repo context:
 - `docs/design/AGENTS.md`
@@ -271,7 +271,7 @@ Generate from facts plus repo context:
 - `docs/design/PLANS.md`
 - `docs/design/documentation.md`
 
-#### Marketing blueprint
+#### Marketing codebase
 
 Generate from facts plus repo context:
 - `docs/marketing/README.md`
@@ -280,7 +280,7 @@ Generate from facts plus repo context:
 - `docs/marketing/PLANS.md`
 - `docs/marketing/documentation.md`
 
-#### Build blueprint
+#### Build codebase
 
 Generate from facts plus repo context:
 - `docs/build/AGENTS.md`
@@ -297,9 +297,9 @@ Ship the static ExecPlan assets:
 - `docs/prompts/execplan-grill.md`
 - `docs/prompts/execplan-writer.md`
 
-#### Repo blueprint
+#### Repo codebase
 
-Generate one blueprint that includes:
+Generate one codebase that includes:
 - the shared facts snapshot
 - the generated design, marketing, and build docs
 - the shipped ExecPlan prompt assets
@@ -477,11 +477,11 @@ The repo currently stores them in the same `lessonStates.fieldValues` blob as pr
 ### Derived docs that are missing as first-class outputs
 
 Missing live outputs:
-- generated design blueprint
-- generated marketing blueprint
-- generated build blueprint
+- generated design codebase
+- generated marketing codebase
+- generated build codebase
 - shipped ExecPlan prompt assets inside the starter repo
-- final repo blueprint
+- final repo codebase
 
 ### Runtime that is already mostly handled correctly
 
@@ -491,11 +491,11 @@ Good current behavior:
 Bad current behavior:
 - QA live-status fields are persisted like durable lesson state even though they are session-only
 
-## Blueprint-Aligned Keep / Kill / Combine Rules
+## Codebase-Aligned Keep / Kill / Combine Rules
 
 ### Rule 1
 
-If a field is needed to fill the current blueprint compiler schema or any generated file under `docs/design/`, `docs/marketing/`, or `docs/build/`, it is probably a fact.
+If a field is needed to fill the current codebase compiler schema or any generated file under `docs/design/`, `docs/marketing/`, or `docs/build/`, it is probably a fact.
 
 ### Rule 2
 
@@ -532,8 +532,8 @@ The repo should move from:
 
 to:
 - canonical project facts
-- generated blueprint outputs
+- generated codebase outputs
 - workflow state
 - ephemeral runtime
 
-The live blueprint compiler contract is already the right destination. The remaining work is migration discipline, not inventing another schema.
+The live codebase compiler contract is already the right destination. The remaining work is migration discipline, not inventing another schema.

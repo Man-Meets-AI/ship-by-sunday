@@ -26,7 +26,7 @@ The post-review bonus lesson surface should no longer be hidden in a broad `feat
 ## Progress
 
 - [x] 2026-04-27 EDT: Created branch `codex/remove-execute-ship-feature-surface` from verified `main` at `530929e`.
-- [x] 2026-04-27 EDT: Confirmed four top-level feature folders remain before this slice: `blueprint-flow`, `course`, `execute-ship`, and `marketing`.
+- [x] 2026-04-27 EDT: Confirmed four top-level feature folders remain before this slice: `codebase-flow`, `course`, `execute-ship`, and `marketing`.
 - [x] 2026-04-27 EDT: Confirmed `apps/web/features/execute-ship` contains route UI, shared bonus presentation helpers, one client-safe view-tracking contract, and two server route helpers.
 - [x] 2026-04-27 EDT: Confirmed `execute-ship-track-detail.tsx` and `execute-ship-tracks.ts` only reference each other and have no live app or test consumers.
 - [x] 2026-04-27 EDT: Read the local Next.js project-structure and route-handler documentation. Private `_components` folders opt files out of routing, and route handlers live under `app` with the Web Request and Response APIs.
@@ -44,7 +44,7 @@ The post-review bonus lesson surface should no longer be hidden in a broad `feat
 
 ## Surprises & Discoveries
 
-The old execute-ship track data and track detail renderer are dead code in the current app tree. The live `/execute` route redirects from the blueprint resume destination instead of rendering those track modules. Removing those two files is part of deleting the obsolete feature surface, not a user-visible route change.
+The old execute-ship track data and track detail renderer are dead code in the current app tree. The live `/execute` route redirects from the codebase resume destination instead of rendering those track modules. Removing those two files is part of deleting the obsolete feature surface, not a user-visible route change.
 
 `apps/web/features/execute-ship/server/load-bonus-route-access.ts` imports authenticated server preload code but does not currently carry `import "server-only"`. After the move, the loader should be explicitly server-only so a future client import fails at build time.
 
@@ -55,7 +55,7 @@ Rationale: `BonusLessonPage`, `BonusMissionPage`, `LessonMapSurface`, locked-sta
 Date: 2026-04-27
 
 Decision: Move shared bonus presentation contracts to `apps/web/lib/execute-ship`.
-Rationale: Workspace navigation, blueprint review, blueprint flow, and route UI all consume bonus mission types and presentation helpers, so those modules are shared app contracts rather than route-private components.
+Rationale: Workspace navigation, codebase review, codebase flow, and route UI all consume bonus mission types and presentation helpers, so those modules are shared app contracts rather than route-private components.
 Date: 2026-04-27
 
 Decision: Move server helpers beside their App Router callers.
@@ -72,7 +72,7 @@ This slice is complete. Bonus route UI now lives under `apps/web/app/(workspace)
 
 ## Context and Orientation
 
-`apps/web/features/execute-ship` currently holds the post-review bonus lesson surface. The live route entrypoints are `apps/web/app/(workspace)/lesson/[lessonKey]/page.tsx`, `apps/web/app/(workspace)/mission/page.tsx`, `apps/web/app/(workspace)/execute/page.tsx`, and `apps/web/app/api/course/bonus-lesson-viewed/route.ts`. The review page at `apps/web/app/(workspace)/review/_components/blueprint-review-page.tsx` can reveal the same Lesson Map.
+`apps/web/features/execute-ship` currently holds the post-review bonus lesson surface. The live route entrypoints are `apps/web/app/(workspace)/lesson/[lessonKey]/page.tsx`, `apps/web/app/(workspace)/mission/page.tsx`, `apps/web/app/(workspace)/execute/page.tsx`, and `apps/web/app/api/course/bonus-lesson-viewed/route.ts`. The review page at `apps/web/app/(workspace)/review/_components/codebase-review-page.tsx` can reveal the same Lesson Map.
 
 The shared bonus mission state type comes from `api.course.getBonusMissionState` through `apps/web/features/execute-ship/lib/bonus-mission-types.ts`. `apps/web/features/execute-ship/lib/bonus-library-presentation.ts` maps that state into user-facing labels, default lesson destinations, AppShell mission props, and fallback post-review navigation targets. `apps/web/lib/workspace-navigation/build-primary-nav-model.ts` and `apps/web/lib/workspace-navigation/build-secondary-nav-model.ts` consume those shared contracts.
 
@@ -94,13 +94,13 @@ Update the Program packet and this ExecPlan as implementation and validation com
 
 ### Out Of Scope
 
-Do not change route URLs, redirect destinations, post-review unlock semantics, bonus mission state, bonus viewed tracking behavior, AppShell props or layout, checkout, billing, Stripe, pricing, promo code behavior, Convex schema, generated Convex files, environment behavior, blueprint compiler behavior, course lesson content, marketing, or remaining feature folders.
+Do not change route URLs, redirect destinations, post-review unlock semantics, bonus mission state, bonus viewed tracking behavior, AppShell props or layout, checkout, billing, Stripe, pricing, promo code behavior, Convex schema, generated Convex files, environment behavior, codebase compiler behavior, course lesson content, marketing, or remaining feature folders.
 
-Do not move `apps/web/features/blueprint-flow`, `apps/web/features/course`, or `apps/web/features/marketing` in this slice.
+Do not move `apps/web/features/codebase-flow`, `apps/web/features/course`, or `apps/web/features/marketing` in this slice.
 
 ## Plan of Work
 
-First, move the shared library files to `apps/web/lib/execute-ship` and update imports in workspace navigation, blueprint flow, review, route UI, and tests. Keep the exported names unchanged so this is an ownership move rather than a behavior rewrite.
+First, move the shared library files to `apps/web/lib/execute-ship` and update imports in workspace navigation, codebase flow, review, route UI, and tests. Keep the exported names unchanged so this is an ownership move rather than a behavior rewrite.
 
 Next, move bonus route UI components to `apps/web/app/(workspace)/_components/execute-ship`. Update route entrypoints and tests to import that route-private owner. Keep rendered copy, AppShell props, local navigation behavior, and Lesson Map behavior unchanged.
 
@@ -142,7 +142,7 @@ Run these commands from repo root:
 
     bun run --cwd apps/web test:unit -- tests/unit/bonus-mission-page.test.tsx tests/unit/bonus-lesson-page.test.tsx tests/unit/app-workspace-mission-page.test.tsx tests/unit/app-workspace-lesson-page.test.tsx tests/unit/mission-page.test.tsx
     bun run --cwd apps/web test:integration:node -- tests/integration/bonus-lesson-viewed-route.test.ts
-    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/bonus-lesson-view-tracker.test.tsx tests/integration-ui/blueprint-review-page.test.tsx tests/integration-ui/blueprint-page.test.tsx
+    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/bonus-lesson-view-tracker.test.tsx tests/integration-ui/codebase-review-page.test.tsx tests/integration-ui/codebase-page.test.tsx
     bun run --cwd apps/web format:check
     bun run --cwd apps/web lint
     bun run --cwd apps/web typecheck
@@ -171,4 +171,4 @@ The scan shows current app and test consumers of the execute-ship surface plus h
 
 ## Interfaces and Dependencies
 
-This slice depends on Next.js App Router private folder colocation, the protected workspace route group under `apps/web/app/(workspace)`, the bonus viewed API route under `apps/web/app/api/course/bonus-lesson-viewed`, the shared workspace navigation models under `apps/web/lib/workspace-navigation`, the Convex course bonus mission API, the blueprint workspace state API, Clerk server auth, and production release proof for the merged `main` commit.
+This slice depends on Next.js App Router private folder colocation, the protected workspace route group under `apps/web/app/(workspace)`, the bonus viewed API route under `apps/web/app/api/course/bonus-lesson-viewed`, the shared workspace navigation models under `apps/web/lib/workspace-navigation`, the Convex course bonus mission API, the codebase workspace state API, Clerk server auth, and production release proof for the merged `main` commit.

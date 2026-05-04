@@ -18,7 +18,7 @@ read_when:
 
 The sixth child ExecPlan is complete at `docs/exec-plans/completed/2026-04-24-replace-browser-harness-proof-with-source-and-release-proof.md`. It removed the shallow `browser-smoke` PR lane from checked-in code by deleting `apps/web/tests/browser-smoke/app-smoke.spec.ts`, removing the `browser-smoke` Playwright project, removing root and app browser-smoke package scripts, removing the `browser-smoke` CI job, and updating active docs and QA inventory references.
 
-Public homepage, crawl, sitemap, robots, route noindex, docs/blog metadata, and checkout-success recovery proof now lives in source-level unit and integration-ui tests. The new source proof also exposed and fixed a protected-route crawl gap by adding `/blueprint` to the robots disallow list.
+Public homepage, crawl, sitemap, robots, route noindex, docs/blog metadata, and checkout-success recovery proof now lives in source-level unit and integration-ui tests. The new source proof also exposed and fixed a protected-route crawl gap by adding `/codebase` to the robots disallow list.
 
 The sixth child intentionally retained `sandbox-e2e`, `auth-protection.sandbox.spec.ts`, `buyer-handoff.sandbox.spec.ts`, `qa:run-pack`, QA personas, QA inventories, QA reports, and hosted `default_ship` and `billing_integration` release proof workflows. Those surfaces are now the main remaining bespoke QA control plane.
 

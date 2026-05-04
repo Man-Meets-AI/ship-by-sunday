@@ -5,7 +5,7 @@
 - Follow the nearest `AGENTS.md` for the files you are changing.
 - Work in this checkout unless the user explicitly names another worktree. Do not touch `.worktrees/` unless the task names one.
 - For work in `apps/web`, also follow `apps/web/AGENTS.md`.
-- For work in `packages/blueprint-compiler`, also follow `packages/blueprint-compiler/AGENTS.md`.
+- For work in `packages/codebase-compiler`, also follow `packages/codebase-compiler/AGENTS.md`.
 - For route, auth, checkout, entitlement, browser proof, release-readiness, or ship-readiness work, also read `docs/release-workflow.md`.
 - Root `DESIGN.md` is the canonical visual source of truth for user-facing UI. `docs/DESIGN.md` is supporting reference.
 - Canonical repo-reference docs live in `docs/`. Start with `docs/index.md`, then read only the file relevant to the task:
@@ -39,7 +39,7 @@
 - Public homepage: read `apps/web/content/docs/configure-the-homepage.mdx` before editing homepage code or copy. Keep the homepage shell contract below intact.
 - Convex code: use hosted Convex dev only. Do not use Convex local mode. Before changing Convex code, read `apps/web/convex/_generated/ai/guidelines.md`.
 - Routes, auth, checkout, entitlement, browser proof, or release readiness: read `docs/release-workflow.md` before changing the surface or judging release confidence.
-- Blueprint compiler output: read `packages/blueprint-compiler/AGENTS.md` before changing compiler schema, canonical facts, generated artifacts, or customer repo output.
+- Codebase compiler output: read `packages/codebase-compiler/AGENTS.md` before changing compiler schema, canonical facts, generated artifacts, or customer repo output.
 - OpenAI API, ChatGPT Apps SDK, Codex, or OpenAI platform behavior: use the OpenAI developer documentation MCP server before implementing or finalizing conclusions.
 - ExecPlans: for complex features, long-horizon work, migrations, risky integrations, or significant refactors, use an ExecPlan in `docs/exec-plans/active/`. Read `docs/exec-plans/PLANS.md` before authoring or updating one.
 - Programs: for multi-slice initiatives that span several ExecPlans, use a Program packet under `docs/programs/active/`. Read `docs/programs/PROGRAMS.md` before authoring or updating one, and keep the active/completed indexes current.

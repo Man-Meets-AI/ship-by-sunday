@@ -30,7 +30,7 @@ Before authoring or revising an ExecPlan here, read `AGENTS.md` first. Then insp
 
 When a plan needs validation guidance, default to the repo's standard quality surface: `bun run format`, `bun run lint`, `bun run typecheck`, plus any narrower workflow-specific checks that prove the feature actually works.
 
-When a plan changes durable repo behavior, the plan should name the writeback surfaces that must be updated at the end of implementation, such as `README.md`, `AGENTS.md`, `docs/*`, `.github/workflows/*`, `apps/web/content/docs/*`, or generator-owned docs under `packages/blueprint-compiler/src/repo-generation/`.
+When a plan changes durable repo behavior, the plan should name the writeback surfaces that must be updated at the end of implementation, such as `README.md`, `AGENTS.md`, `docs/*`, `.github/workflows/*`, `apps/web/content/docs/*`, or generator-owned docs under `packages/codebase-compiler/src/repo-generation/`.
 
 ## How to use ExecPlans and PLANS.md
 

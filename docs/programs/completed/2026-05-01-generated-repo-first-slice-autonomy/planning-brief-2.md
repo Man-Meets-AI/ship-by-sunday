@@ -3,7 +3,7 @@ title: Derived First Slice Planner Planning Brief 2
 program_id: generated-repo-first-slice-autonomy
 brief_version: 2
 status: superseded
-summary: Define the next generated-repo autonomy slice that derives a structured first-slice plan from existing Blueprint facts and starter files.
+summary: Define the next generated-repo autonomy slice that derives a structured first-slice plan from existing Codebase facts and starter files.
 read_when:
   - Writing or resuming the Derived First Slice Planner child ExecPlan.
   - Checking what follows the Build Pack readiness manifest slice.
@@ -25,7 +25,7 @@ Exact scope: replace generic first-slice prose with a structured plan derived fr
 
 Exact implementation boundaries: keep the work compiler-owned, derive from existing facts first, preserve the readiness manifest as the confidence and blocker source, and do not touch auth, billing, checkout, Convex runtime, app routes, provider setup, generated mirrors, or required intake fields.
 
-Exact validation boundaries: run focused compiler tests for blueprint rendering and repo generation, then package typecheck, package format check, package lint, plan lint, Program lint, markdown lint for touched planning docs, and repo-level gates as needed.
+Exact validation boundaries: run focused compiler tests for codebase rendering and repo generation, then package typecheck, package format check, package lint, plan lint, Program lint, markdown lint for touched planning docs, and repo-level gates as needed.
 
 Why it is next: the readiness manifest now names confidence and blockers, but the actual first-slice plan still leans on `selected_next_slice` free text. A structured derived planner is the next prerequisite for clean-room execution.
 

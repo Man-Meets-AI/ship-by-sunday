@@ -14,8 +14,8 @@ The first slice is the Build Pack Readiness Manifest because it creates the miss
 
 ## Normalized Boundaries
 
-The first slice is compiler-only. It may change `packages/blueprint-compiler/src/blueprints`, add a readiness model under `packages/blueprint-compiler/src`, update generated-doc path typing, and strengthen compiler tests. It must not change app runtime behavior, provider setup, Convex runtime, checkout, billing, generated mirrors, or required intake fields.
+The first slice is compiler-only. It may change `packages/codebase-compiler/src/codebases`, add a readiness model under `packages/codebase-compiler/src`, update generated-doc path typing, and strengthen compiler tests. It must not change app runtime behavior, provider setup, Convex runtime, checkout, billing, generated mirrors, or required intake fields.
 
 ## Normalized Proof
 
-The first slice is proved when `renderFullBlueprintTree()` includes `docs/build/docs/readiness.md`, the materialized repo snapshot includes the same customer-safe file, `agent-handoff.md` links to readiness before the copy-ready prompt, and tests cover complete plus reduced project definitions with typed validation entries and explicit customer-input work.
+The first slice is proved when `renderFullCodebaseTree()` includes `docs/build/docs/readiness.md`, the materialized repo snapshot includes the same customer-safe file, `agent-handoff.md` links to readiness before the copy-ready prompt, and tests cover complete plus reduced project definitions with typed validation entries and explicit customer-input work.

@@ -2,7 +2,7 @@
 
 This folder is the Ship by Sunday custom build-pack layer that sits on top of the vanilla long-horizon baseline in `docs/openai/codex_long_horizon_templates/`.
 
-It is the template for the customer-facing `docs/build/` blueprint that should be generated into the blueprint after the review route.
+It is the template for the customer-facing `docs/build/` codebase that should be generated into the codebase after the review route.
 
 ## What this pack is for
 
@@ -26,7 +26,7 @@ It is the template for the customer-facing `docs/build/` blueprint that should b
 - copied prompts or browser/session state as canonical truth
 - marketing strategy, brand-system exploration, or unrelated design work
 - secrets, deploy credentials, or ephemeral operational toggles
-- scope expansion beyond the agreed v1 without updating the blueprint facts first
+- scope expansion beyond the agreed v1 without updating the codebase facts first
 
 ## Files in this pack
 
@@ -36,7 +36,7 @@ It is the template for the customer-facing `docs/build/` blueprint that should b
 - `docs/plans.md` - milestone plan template
 - `docs/implement.md` - execution runbook
 - `docs/documentation.md` - live status and handoff log
-- `examples/review-route-build-slice.md` - a concrete golden-example blueprint
+- `examples/review-route-build-slice.md` - a concrete golden-example codebase
 
 ## Ship by Sunday source basis
 
@@ -46,5 +46,5 @@ It is the template for the customer-facing `docs/build/` blueprint that should b
 - `docs/openai/codex_long_horizon_templates/docs/plans.md`
 - `docs/openai/codex_long_horizon_templates/docs/implement.md`
 - `docs/openai/codex_long_horizon_templates/docs/documentation.md`
-- `docs/ship-by-sunday/blueprint-contract-and-question-map-2026-03-23.md`
+- `docs/ship-by-sunday/codebase-contract-and-question-map-2026-03-23.md`
 - `docs/ship-by-sunday/input-architecture-keep-kill-combine-2026-03-23.md`

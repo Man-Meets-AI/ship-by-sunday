@@ -71,7 +71,7 @@ The main design target is `docs/design-docs/ui-design-library.md`. It defines a 
 
 Root `DESIGN.md` is the high-level source of truth. It says shared controls default to `rounded-lg`, cards default to `rounded-xl`, and marketing CTAs or docs/editorial panels can intentionally use larger silhouettes.
 
-The highest-leverage implementation surface is `apps/web/components/ui/button.tsx`. It owns the shared button variants and sizes used across workspace, identity, checkout, settings, blueprint, and course surfaces. Nearby primitives include `apps/web/components/ui/input.tsx`, `apps/web/components/ui/textarea.tsx`, `apps/web/components/ui/card.tsx`, `apps/web/components/ui/item.tsx`, and `apps/web/components/ui/sidebar.tsx`.
+The highest-leverage implementation surface is `apps/web/components/ui/button.tsx`. It owns the shared button variants and sizes used across workspace, identity, checkout, settings, codebase, and course surfaces. Nearby primitives include `apps/web/components/ui/input.tsx`, `apps/web/components/ui/textarea.tsx`, `apps/web/components/ui/card.tsx`, `apps/web/components/ui/item.tsx`, and `apps/web/components/ui/sidebar.tsx`.
 
 Workspace shell geometry lives under `apps/web/app/(workspace)/_components/app-shell/` and `apps/web/app/(workspace)/_components/app-shell.tsx`. Identity routes live under `apps/web/app/(identity)/`. Checkout handoff routes live under `apps/web/app/checkout/`.
 
@@ -190,15 +190,15 @@ Initial inventory categories:
     Shared primitive near-match: Button default and icon default are already 32px; input default is 32px; shared card radius is rounded-xl.
     Mobile/input exception: input and textarea use text-base on mobile and md:text-sm to avoid iOS zoom while keeping desktop density.
     Intentional larger surface exceptions: homepage hero/pricing CTAs, blog/docs chrome, error screens, and named homepage editorial sections.
-    Route-specific review needed: blueprint/review and course surfaces have some large panels and button overrides that need route-level judgment rather than a shared primitive rewrite.
+    Route-specific review needed: codebase/review and course surfaces have some large panels and button overrides that need route-level judgment rather than a shared primitive rewrite.
 
 Record implementation proof here as the slice proceeds.
 
 Implementation patch:
 
     apps/web/components/ui/button.tsx now maps sm/default/lg to 28px/32px/40px, maps icon-xs/icon-sm/icon to 24px/28px/32px, uses 13px compact button text, and keeps default button geometry unchanged.
-    apps/web/app/(workspace)/review/_components/blueprint-review-handoff-card.tsx now uses rounded-2xl, tighter padding, compact app heading/body scale, and the shared lg button geometry instead of a 56px CTA override.
-    apps/web/app/(workspace)/review/_components/blueprint-review-page.tsx reduces the review page vertical stack from 48px to 32px and bottom padding from 80px to 64px.
+    apps/web/app/(workspace)/review/_components/codebase-review-handoff-card.tsx now uses rounded-2xl, tighter padding, compact app heading/body scale, and the shared lg button geometry instead of a 56px CTA override.
+    apps/web/app/(workspace)/review/_components/codebase-review-page.tsx reduces the review page vertical stack from 48px to 32px and bottom padding from 80px to 64px.
     apps/web/app/(workspace)/_components/execute-ship/lesson-map-surface.tsx now uses rounded-2xl and 20px/24px padding instead of a 28px radius with larger padding.
     apps/web/app/(workspace)/_components/access-required/access-required-shell.tsx now uses 32px major spacing and a 40px desktop split gap instead of repeated 40px/48px gaps.
     DESIGN.md and docs/design-docs/ui-design-library.md document the implemented button ladder, operational panel radius rule, and access-state spacing baseline.

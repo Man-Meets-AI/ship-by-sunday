@@ -1,6 +1,6 @@
 # Ship by Sunday Marketing Checklist
 
-Use this checklist to gate a customer-product marketing blueprint before it is treated as usable.
+Use this checklist to gate a customer-product marketing codebase before it is treated as usable.
 
 ## 1. Core inputs
 
@@ -22,7 +22,7 @@ Use this checklist to gate a customer-product marketing blueprint before it is t
 - [ ] Direct-response asset types are named when relevant: cold open, porch close, VSL opener, full VSL.
 - [ ] Stable knowledge and fresh inputs are clearly separated.
 - [ ] Output contracts exist for the workflows that matter.
-- [ ] Deliverables are tied to actual blueprint outputs, not generic marketing busywork.
+- [ ] Deliverables are tied to actual codebase outputs, not generic marketing busywork.
 
 ## 3. Governance
 
@@ -36,7 +36,7 @@ Use this checklist to gate a customer-product marketing blueprint before it is t
 
 ## 4. Practical usefulness
 
-- [ ] A marketer could use this blueprint without rereading the whole intake history.
+- [ ] A marketer could use this codebase without rereading the whole intake history.
 - [ ] The channel list is narrow enough to be actionable.
 - [ ] The claims are specific enough to write from.
 - [ ] The restrictions are clear enough to prevent bad copy drift.

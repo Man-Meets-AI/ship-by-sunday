@@ -53,7 +53,7 @@ Fix it by:
 
 Do not assume this is a Stripe bug first.
 
-## Symptom: a user with granted access still cannot reach `/blueprint`
+## Symptom: a user with granted access still cannot reach `/codebase`
 
 Check these in order:
 
@@ -70,12 +70,12 @@ For the local granted-access QA user:
 bun run clerk:test-user:prepare:entitled
 ```
 
-If the granted-access test user still cannot reach `/blueprint`, stop guessing and confirm the signed-in email shown on `/access-required`, then confirm the access row plus auth template path.
+If the granted-access test user still cannot reach `/codebase`, stop guessing and confirm the signed-in email shown on `/access-required`, then confirm the access row plus auth template path.
 
 ## What success looks like
 
 Access is healthy when:
 
-- users without access reach `/blueprint` and see inline recovery
-- users with granted access reach `/blueprint`
+- users without access reach `/codebase` and see inline recovery
+- users with granted access reach `/codebase`
 - a newly paid user leaves `/checkout/success` and reaches the protected workspace without manual intervention

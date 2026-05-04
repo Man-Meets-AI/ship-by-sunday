@@ -1,20 +1,20 @@
 import "server-only";
 
 import { fetchQuery } from "convex/nextjs";
-import { createCanonicalProjectDefinition } from "@shipbysunday/blueprint-compiler";
+import { createCanonicalProjectDefinition } from "@shipbysunday/codebase-compiler";
 import type { FunctionReturnType } from "convex/server";
 import { api } from "@/convex/_generated/api";
 import { getConvexServerSession } from "@/platform/auth/convex-auth";
 
-type BlueprintWorkspaceState = FunctionReturnType<
-	typeof api.blueprint.getBlueprintWorkspaceState
+type CodebaseWorkspaceState = FunctionReturnType<
+	typeof api.codebase.getCodebaseWorkspaceState
 >;
 
-export async function getBlueprintDownloadContext(): Promise<{
+export async function getCodebaseDownloadContext(): Promise<{
 	canonicalProjectDefinition: ReturnType<
 		typeof createCanonicalProjectDefinition
 	>;
-	workspaceState: BlueprintWorkspaceState;
+	workspaceState: CodebaseWorkspaceState;
 	token: string;
 } | null> {
 	const session = await getConvexServerSession();
@@ -24,13 +24,9 @@ export async function getBlueprintDownloadContext(): Promise<{
 
 	const [access, projectDefinition, workspaceState] = await Promise.all([
 		fetchQuery(api.access.viewerProductAccess, {}, { token: session.token }),
+		fetchQuery(api.codebase.getProjectDefinition, {}, { token: session.token }),
 		fetchQuery(
-			api.blueprint.getProjectDefinition,
-			{},
-			{ token: session.token },
-		),
-		fetchQuery(
-			api.blueprint.getBlueprintWorkspaceState,
+			api.codebase.getCodebaseWorkspaceState,
 			{},
 			{ token: session.token },
 		),

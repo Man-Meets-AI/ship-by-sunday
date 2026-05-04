@@ -32,7 +32,7 @@ A human proves this by visiting `/lesson/build-kickoff` (or any implemented Watc
 - [x] 2026-05-02: Slice 2 - lesson video chrome: bare frame is now `rounded-xl border-border/60 ring-1 ring-foreground/5` with a `bg-black` Loader2 shimmer that clears on iframe `onLoad`; metadata raised from `text-muted-foreground/80` to `text-muted-foreground` at `0.18em` tracking; empty-state eyebrow aligned to the Slice 1 token.
 - [x] 2026-05-02: Slice 3 - coach panel: tab panels now crossfade via new `CoachPanelMotion` (reduced-motion-gated); pinned-artifact fallback chrome upgraded to `rounded-xl border-border/60 bg-muted/10 ring-1 ring-foreground/5` + "Pinned from <lesson>" eyebrow.
 - [x] 2026-05-02: Slice 4 - objective panel: new `ObjectiveTaskRow` adds `transition-colors hover:bg-muted/30 focus-within:bg-muted/30` plus a 0.18s label pulse on uncomplete → complete; new `ObjectiveTaskCounter` pulses 500ms once on 100% completion, both reduced-motion-gated. Main panel slimmed to 122 lines.
-- [x] 2026-05-02: Slice 5 - copy-prompt card: new `CopyPromptIconSwap` crossfades `Clipboard` → `Check`; "Copied" pill mirrors `BlueprintDemoSavedLocally` in an `aria-live="polite"` region; added `data-testid="lesson-copy-prompt-button"` and `data-testid="lesson-copy-prompt-copied-pill"`.
+- [x] 2026-05-02: Slice 5 - copy-prompt card: new `CopyPromptIconSwap` crossfades `Clipboard` → `Check`; "Copied" pill mirrors `CodebaseDemoSavedLocally` in an `aria-live="polite"` region; added `data-testid="lesson-copy-prompt-button"` and `data-testid="lesson-copy-prompt-copied-pill"`.
 - [x] 2026-05-02: Slice 6 - helpful links + transcript: extracted `LessonWatchSecondaryContent`; transcript now reads as `border-l border-border/40 pl-4` quoted scaffolding at `text-[13px] leading-7 text-muted-foreground`; helpful links use `rounded-xl border-border/60 hover:bg-muted/30` with trailing `ArrowUpRight` (external) / `ArrowRight` (internal) that color on hover.
 - [x] 2026-05-02: Slice 7 - lesson map reveal: converted `LessonMapSurface` to client with motion.section entrance (0.22s fade + 8px translate; reduced-motion-gated), focus-to-heading on mount, `document.activeElement` capture, focus restore on dismiss via `requestAnimationFrame`, Escape-to-close via `keydown` listener, "Close" button with `X` icon. Extracted `BonusLessonIntroAlert` to keep `BonusLessonPage` under 150 lines. Added `data-testid="lesson-map-surface"` and `data-testid="lesson-map-dismiss"`.
 - [x] 2026-05-02: Slice 8 - bonus footer: rewrote to tiered hierarchy - Previous is `variant="ghost" size="sm"` with leading `ArrowLeft`; Lesson Map is `variant="outline" size="sm"`; Next is `variant="default" size="sm"` with trailing `ArrowRight`. Mobile stacks `flex-col`. Added `data-testid="lesson-bonus-footer-previous"`, `-lesson-map`, `-next`.
@@ -64,7 +64,7 @@ Decision: Do not touch the Bunny iframe player chrome, keyboard shortcut wiring,
 Rationale: These are owned by the Bunny embed. Re-implementing them locally would break the vendor contract and is out of scope. Flag them as follow-up.
 Date: 2026-05-02
 
-Decision: Use `motion/react` `AnimatePresence` + `useReducedMotion` for every new animation, matching the `BlueprintDemoSavedLocally` and checkout-success-polish patterns already blessed in this repo.
+Decision: Use `motion/react` `AnimatePresence` + `useReducedMotion` for every new animation, matching the `CodebaseDemoSavedLocally` and checkout-success-polish patterns already blessed in this repo.
 Rationale: Consistency with the existing motion vocabulary. No new dependency. `useReducedMotion` gating is the repo convention for accessibility.
 Date: 2026-05-02
 
@@ -364,7 +364,7 @@ Expected fixture for the manual Watch proof:
     lessonKey: "build-kickoff"
     bonusRouteAccess.isUnlocked: true
     missionState: from fetchAuthenticatedQuery(api.course.getBonusMissionState)
-    postReviewTargets: from fetchAuthenticatedQuery(api.blueprint.getBlueprintResumeDestination)
+    postReviewTargets: from fetchAuthenticatedQuery(api.codebase.getCodebaseResumeDestination)
 
 Expected fixture for the manual locked proof:
 
@@ -391,7 +391,7 @@ Expected new testids on the bonus footer:
 
 This plan depends on packages already in `apps/web`:
 
-- `motion/react` for `useReducedMotion`, `motion.*`, `AnimatePresence` (already in use on the homepage blueprint demo and in the checkout-success polish).
+- `motion/react` for `useReducedMotion`, `motion.*`, `AnimatePresence` (already in use on the homepage codebase demo and in the checkout-success polish).
 - `lucide-react` for `Clipboard`, `Check`, `ArrowRight`, `ArrowLeft`, `ArrowUpRight`, `Loader2`, `X` icons.
 - shadcn primitives in `apps/web/components/ui/`: `Card`, `CardContent`, `CardHeader`, `CardTitle`, `CardDescription`, `CardFooter`, `Button`, `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`, `ScrollArea`, `Checkbox`, `Label`, `Textarea`, `Alert`, `AlertDescription`, `AlertTitle`, `Separator`, `AspectRatio`, `Empty`, `EmptyHeader`, `EmptyTitle`, `EmptyDescription`, `Accordion`.
 - `cn` from `apps/web/lib/utils.ts`.

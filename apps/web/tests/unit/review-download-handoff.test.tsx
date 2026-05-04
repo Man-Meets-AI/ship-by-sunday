@@ -12,7 +12,7 @@ vi.mock("@/config/product", () => ({
 import {
 	getReviewAutoDownloadHref,
 	isReviewAutoDownloadEnabled,
-} from "@/lib/blueprint-flow/review-download-handoff";
+} from "@/lib/codebase-flow/review-download-handoff";
 import { useReviewDownloadHandoff } from "@/app/(workspace)/review/_hooks/use-review-download-handoff";
 
 describe("review download handoff", () => {
@@ -40,7 +40,7 @@ describe("review download handoff", () => {
 
 		expect(result.current.downloadHref).toBe("/api/download/repo");
 		expect(result.current.fallbackLinkLabel).toBe(
-			"Need the Ship by Sunday Blueprint again? Download it here.",
+			"Need the Ship by Sunday Codebase again? Download it here.",
 		);
 	});
 

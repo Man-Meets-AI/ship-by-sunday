@@ -20,7 +20,7 @@ This track is required because the blog route imports `nextra/pages` and a `next
 
 ## Track 4: Package, Config, CSS, And Starter Cleanup
 
-Remove `nextra` and `nextra-theme-docs` only after Tracks 2 and 3 remove all runtime imports. This track owns `apps/web/package.json`, `bun.lock`, `apps/web/next.config.ts`, `apps/web/mdx-components.tsx`, theme CSS leftovers, Nextra import scans, and starter repository generation assumptions such as `packages/blueprint-compiler/src/repo-generation/repo-download-source-contract.ts`.
+Remove `nextra` and `nextra-theme-docs` only after Tracks 2 and 3 remove all runtime imports. This track owns `apps/web/package.json`, `bun.lock`, `apps/web/next.config.ts`, `apps/web/mdx-components.tsx`, theme CSS leftovers, Nextra import scans, and starter repository generation assumptions such as `packages/codebase-compiler/src/repo-generation/repo-download-source-contract.ts`.
 
 This track must not change compiler schema or facts unless a later approved plan explicitly expands scope.
 
@@ -36,4 +36,4 @@ Keep MDX as the content format unless an implementation slice proves a lower-ris
 
 Do not remove dependencies until import scans prove Nextra is gone from runtime code and tests.
 
-Do not touch Stripe, checkout, webhook, pricing, promo code, billing proof, environment behavior, Convex schema, generated Convex files, or blueprint compiler schema and facts.
+Do not touch Stripe, checkout, webhook, pricing, promo code, billing proof, environment behavior, Convex schema, generated Convex files, or codebase compiler schema and facts.

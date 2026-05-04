@@ -1,6 +1,6 @@
 # Ship by Sunday
 
-Ship by Sunday is an agent-ready, blueprint-first SaaS starter for turning one product idea into durable design, marketing, build, and prompt handoff packs. The repo includes the public marketing site, protected blueprint workspace, Stripe checkout flow, Clerk auth, Convex backend, blueprint compiler, and the docs/runbook surfaces that support that contract.
+Ship by Sunday is an agent-ready, codebase-first SaaS starter for turning one product idea into durable design, marketing, build, and prompt handoff packs. The repo includes the public marketing site, protected codebase workspace, Stripe checkout flow, Clerk auth, Convex backend, codebase compiler, and the docs/runbook surfaces that support that contract.
 
 ## Design system
 
@@ -11,16 +11,16 @@ Use it before changing any user-facing UI. It documents the shared neutral app t
 ## What lives here
 
 - `apps/web/`: the main Next.js product, docs, protected workspace, checkout, and optional Codex runtime.
-- `packages/blueprint-compiler/`: the generator behind the customer-facing Ship by Sunday Blueprint, including the downloaded repo’s generated root `DESIGN.md`, machine-readable design snapshot, and starter-runtime design config.
+- `packages/codebase-compiler/`: the generator behind the customer-facing Ship by Sunday Codebase, including the downloaded repo’s generated root `DESIGN.md`, machine-readable design snapshot, and starter-runtime design config.
 - `scripts/release/`: release proof orchestration, release personas, release evidence, and release workflow helpers.
 - `release.json`: the manifest-backed release identity contract for protected `vMAJOR.MINOR.PATCH` tags.
 - `docs/`: the canonical contributor and agent-facing docs spine, plus ExecPlans, prompts, references, and generated analyses.
 
-The protected journey is blueprint-first:
+The protected journey is codebase-first:
 
-`/blueprint -> /review`
+`/codebase -> /review`
 
-The `/review` contract exposes one download artifact, the `Ship by Sunday Blueprint`, not separate design, marketing, or build downloads.
+The `/review` contract exposes one download artifact, the `Ship by Sunday Codebase`, not separate design, marketing, or build downloads.
 
 ## Quick start
 

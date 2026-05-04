@@ -16,7 +16,7 @@ read_when:
 
 This is the ninth planning brief for the app structure refactor Program.
 
-The first eight child ExecPlans are complete. They made boundary imports explicit, extracted the shared workspace shell, moved route-owned wrapper surfaces into App Router private folders, moved marketing-only effects and a blueprint-only hook out of generic shared locations, moved persisted completion field IDs into the lesson model, and moved lesson URL construction out of `apps/web/features/course/lesson/model/curriculum.ts`.
+The first eight child ExecPlans are complete. They made boundary imports explicit, extracted the shared workspace shell, moved route-owned wrapper surfaces into App Router private folders, moved marketing-only effects and a codebase-only hook out of generic shared locations, moved persisted completion field IDs into the lesson model, and moved lesson URL construction out of `apps/web/features/course/lesson/model/curriculum.ts`.
 
 The current Program recommendation is to continue course-domain cleanup without moving `apps/web/features/course/lesson/model/manifest.ts`, course registry barrels, route screens, Convex schema, generated Convex files, or billing-sensitive behavior. The next visible boundary smell is `apps/web/features/course/lesson/model/stage-unlock.ts`: it is imported by registry artifact and objective code, but it also imports lesson routing so stage-unlock sections can render workbench edit links.
 

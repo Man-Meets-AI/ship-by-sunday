@@ -1334,7 +1334,7 @@ So in that guide with every single little step in it, you will see that
 You'll need a password for stripe a password for convex and a password for all the basically other services that we use
 So that's clerk as well for authentication
 And then you have agents dot MD. This is the directions for your
-Agents to read and then you have blueprint dot JSON. This is just a big file
+Agents to read and then you have codebase dot JSON. This is just a big file
 Let me open it. This is a big file that has all these commands for how to start your app
 This is what the agents gonna read to know
 how to do stuff how to
@@ -2656,8 +2656,8 @@ So it's going to provide you with slices.
 And no, it's not pizza, but I'll draw a slice of pizza because I thought of it.
 And once you get those slices, what that is, it's going to look, and I'll just show you
 right now, it's going to look at the work that you've presented and it's going to provide
-you with a blueprint.
-And that blueprint includes these slices.
+you with a codebase.
+And that codebase includes these slices.
 So in traditional software development, you would look at all the work and you kind of
 want to break it apart into, you guessed it, slices because it makes it a lot easier
 for a system to build to, or well, before for a team of people to actually go and implement

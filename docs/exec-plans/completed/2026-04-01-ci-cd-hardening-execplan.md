@@ -23,7 +23,7 @@ The repository already has a good skeleton for code-centric CI and a separate `d
 - [x] 2026-04-01 09:34 EDT: Grilled the ExecPlan, resolved the hook mechanism, the advisory sandbox-lane strategy, the production verification strategy, and the post-merge semantics for production proof.
 - [x] 2026-04-01 10:03 EDT: Implemented the repo-side hardening slice. Added committed `.githooks/`, a root hook installer, a shared release-scope detector, a hosted wait-for-host helper, a Vercel deployment wait helper, automatic billing detection in `Dev Staging Proof`, a dedicated `Production Release Proof` workflow, and a dedicated `Sandbox E2E Nightly` workflow so generic CI no longer contains the advisory deep lane.
 - [x] 2026-04-01 10:20 EDT: Tightened the first implementation after review. Expanded the detector to cover workflow and QA-pack enforcement surfaces plus `apps/web/app/access-required/`, made manual workflow reruns classify the checked-out release automatically instead of defaulting billing proof to `false`, and made `Production Release Proof` wait for the exact Vercel production deployment for the release commit before it begins public-site QA.
-- [x] 2026-04-01 10:16 EDT: Ran local validation for the repo-side changes. `bun run hooks:install`, `bun run precommit`, `bun run prepush`, `node qa/scripts/detect-release-scope.mjs --base=HEAD^ --head=HEAD`, `node qa/scripts/wait-for-host.mjs --url=http://example.com --path=/ --timeout_ms=10000 --interval_ms=1000`, `node --check qa/scripts/wait-for-vercel-production-deployment.mjs`, workflow YAML parsing, blueprint JSON parsing, and `git diff --check` all passed.
+- [x] 2026-04-01 10:16 EDT: Ran local validation for the repo-side changes. `bun run hooks:install`, `bun run precommit`, `bun run prepush`, `node qa/scripts/detect-release-scope.mjs --base=HEAD^ --head=HEAD`, `node qa/scripts/wait-for-host.mjs --url=http://example.com --path=/ --timeout_ms=10000 --interval_ms=1000`, `node --check qa/scripts/wait-for-vercel-production-deployment.mjs`, workflow YAML parsing, codebase JSON parsing, and `git diff --check` all passed.
 - [x] 2026-04-01 10:41 EDT: Verified the canonical production QA persona prep path against `apps/web/.env.production` with `PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run qa:personas:prepare -- --pack=default_ship`. Both the no-access and entitled prod QA accounts already existed and the entitlement prep path completed cleanly.
 - [x] 2026-04-01 10:43 EDT: Created the GitHub deployment environments `production-release-proof` and `production-billing-integration` via `gh api`.
 - [x] 2026-04-01 10:45 EDT: Wrote the production rollout secrets via `gh`: environment secrets `PRODUCTION_QA_PERSONAS_LOCAL_JSON`, `PRODUCTION_WEB_ENV_LOCAL`, `PRODUCTION_CONVEX_CONFIG_JSON`, and `VERCEL_TOKEN` on both `production-release-proof` and `production-billing-integration`, plus `PRODUCTION_STRIPE_SECRET_KEY` and `PRODUCTION_STRIPE_WEBHOOK_SECRET` on `production-billing-integration`.
@@ -44,56 +44,56 @@ The local workspace's Node TLS trust is stricter than the shell `curl` trust bun
 
 ## Decision Log
 
-Decision: create a new ExecPlan instead of reopening `docs/codex/2026-03-31-dev-staging-and-release-gates.md`.  
-Rationale: the earlier plan is already marked `done` and captured the branch and environment model. This work is a follow-on hardening slice that deserves its own living implementation record.  
+Decision: create a new ExecPlan instead of reopening `docs/codex/2026-03-31-dev-staging-and-release-gates.md`.
+Rationale: the earlier plan is already marked `done` and captured the branch and environment model. This work is a follow-on hardening slice that deserves its own living implementation record.
 Date: 2026-04-01
 
-Decision: keep the fast local `pre-commit` gate small, but add an enforced `pre-push` gate that runs the narrow web application confidence set: unit tests, contract tests, integration tests, and build.  
-Rationale: the feedback is specifically about local proof being too light. Running everything at `pre-commit` would make the inner loop unnecessarily slow, while `pre-push` is the right place to require code-level confidence without involving remote environments or billing side effects.  
+Decision: keep the fast local `pre-commit` gate small, but add an enforced `pre-push` gate that runs the narrow web application confidence set: unit tests, contract tests, integration tests, and build.
+Rationale: the feedback is specifically about local proof being too light. Running everything at `pre-commit` would make the inner loop unnecessarily slow, while `pre-push` is the right place to require code-level confidence without involving remote environments or billing side effects.
 Date: 2026-04-01
 
-Decision: add an in-repository git hook system instead of relying on docs that tell contributors to remember `bun run precommit`.  
-Rationale: the repo currently has no committed hook configuration. If the goal is real enforcement, the repository needs actual hook files and one setup path, not just script names.  
+Decision: add an in-repository git hook system instead of relying on docs that tell contributors to remember `bun run precommit`.
+Rationale: the repo currently has no committed hook configuration. If the goal is real enforcement, the repository needs actual hook files and one setup path, not just script names.
 Date: 2026-04-01
 
-Decision: implement the local hook system with committed `.githooks/` files and a root install command that sets `git config core.hooksPath .githooks`, rather than adding Husky.  
-Rationale: this is the smallest enforcement mechanism that keeps the repo self-contained, avoids a new blueprint dependency, and makes the hook path explicit to a novice.  
+Decision: implement the local hook system with committed `.githooks/` files and a root install command that sets `git config core.hooksPath .githooks`, rather than adding Husky.
+Rationale: this is the smallest enforcement mechanism that keeps the repo self-contained, avoids a new codebase dependency, and makes the hook path explicit to a novice.
 Date: 2026-04-01
 
-Decision: treat billing proof as mandatory for billing-sensitive releases, not literally for every change in the repository.  
-Rationale: forcing a real checkout handoff for a docs-only change would create noise and needless side effects. The safer and more honest rule is: if checkout, webhook, entitlement, access handoff, or billing configuration paths changed, billing proof must run automatically and cannot remain manual.  
+Decision: treat billing proof as mandatory for billing-sensitive releases, not literally for every change in the repository.
+Rationale: forcing a real checkout handoff for a docs-only change would create noise and needless side effects. The safer and more honest rule is: if checkout, webhook, entitlement, access handoff, or billing configuration paths changed, billing proof must run automatically and cannot remain manual.
 Date: 2026-04-01
 
-Decision: implement billing-sensitivity as a repository-owned scope detector instead of a manual GitHub workflow input.  
-Rationale: manual opt-in is exactly the current weakness. A repo-local detector can classify a change based on touched files and drive both staging and production verification consistently.  
+Decision: implement billing-sensitivity as a repository-owned scope detector instead of a manual GitHub workflow input.
+Rationale: manual opt-in is exactly the current weakness. A repo-local detector can classify a change based on touched files and drive both staging and production verification consistently.
 Date: 2026-04-01
 
-Decision: production verification should be a GitHub Actions workflow that targets `https://www.man-meets-ai.com`, writes artifacts, and runs `qa:run-pack` rather than a checklist that lives only in docs.  
-Rationale: the repo already knows how to run hosted QA against a target URL. Reusing that mechanism is smaller and safer than inventing a second verification system.  
+Decision: production verification should be a GitHub Actions workflow that targets `https://www.man-meets-ai.com`, writes artifacts, and runs `qa:run-pack` rather than a checklist that lives only in docs.
+Rationale: the repo already knows how to run hosted QA against a target URL. Reusing that mechanism is smaller and safer than inventing a second verification system.
 Date: 2026-04-01
 
-Decision: the production verification workflow must wait for the exact Vercel production deployment for the release commit before it polls the public site and runs hosted QA.  
-Rationale: a plain public-domain readiness poll can go green against the previous production site while the new deployment is still building or waiting for alias assignment. Commit-aware deployment waiting is necessary to make the release evidence trustworthy.  
+Decision: the production verification workflow must wait for the exact Vercel production deployment for the release commit before it polls the public site and runs hosted QA.
+Rationale: a plain public-domain readiness poll can go green against the previous production site while the new deployment is still building or waiting for alias assignment. Commit-aware deployment waiting is necessary to make the release evidence trustworthy.
 Date: 2026-04-01
 
-Decision: production verification is a required post-merge proof on `main`, not a pre-merge branch-protection check on the release pull request.  
-Rationale: the public site can only verify the deployed production release after `main` moves and Vercel rolls out. The pre-merge release safety signal remains `dev` staging proof on the same commit lineage.  
+Decision: production verification is a required post-merge proof on `main`, not a pre-merge branch-protection check on the release pull request.
+Rationale: the public site can only verify the deployed production release after `main` moves and Vercel rolls out. The pre-merge release safety signal remains `dev` staging proof on the same commit lineage.
 Date: 2026-04-01
 
-Decision: do not make GitHub Actions deploy the Vercel frontend.  
-Rationale: the repository contract in `docs/release-workflow.md` says Vercel owns production web deploys while GitHub owns release policy and Convex production deploys. This plan hardens verification after the Vercel deploy, not the ownership model itself.  
+Decision: do not make GitHub Actions deploy the Vercel frontend.
+Rationale: the repository contract in `docs/release-workflow.md` says Vercel owns production web deploys while GitHub owns release policy and Convex production deploys. This plan hardens verification after the Vercel deploy, not the ownership model itself.
 Date: 2026-04-01
 
-Decision: remove the advisory `e2e-sandbox` job from `.github/workflows/ci.yml` and, if the team wants to keep scheduled soak coverage, re-home it to a dedicated workflow that is clearly non-release and non-required.  
-Rationale: the current problem is not just that the job is non-blocking. It is that it lives inside `CI` while not participating in ordinary release safety. The blocking browser surface should be `dev` staging proof, while soak coverage can remain separate and honest about its role.  
+Decision: remove the advisory `e2e-sandbox` job from `.github/workflows/ci.yml` and, if the team wants to keep scheduled soak coverage, re-home it to a dedicated workflow that is clearly non-release and non-required.
+Rationale: the current problem is not just that the job is non-blocking. It is that it lives inside `CI` while not participating in ordinary release safety. The blocking browser surface should be `dev` staging proof, while soak coverage can remain separate and honest about its role.
 Date: 2026-04-01
 
-Decision: name the shared diff classifier `qa/scripts/detect-release-scope.mjs`, name the public readiness helper `qa/scripts/wait-for-host.mjs`, and name the new production workflow `.github/workflows/production-release-proof.yml`.  
-Rationale: the repo already centers QA orchestration under `qa/scripts/`, so keeping the new helpers there makes the staging and production workflows easier to navigate for a novice.  
+Decision: name the shared diff classifier `qa/scripts/detect-release-scope.mjs`, name the public readiness helper `qa/scripts/wait-for-host.mjs`, and name the new production workflow `.github/workflows/production-release-proof.yml`.
+Rationale: the repo already centers QA orchestration under `qa/scripts/`, so keeping the new helpers there makes the staging and production workflows easier to navigate for a novice.
 Date: 2026-04-01
 
-Decision: add aggregate `release_gate` jobs so the staging and production workflows emit one unambiguous result even when `billing_integration` is conditional.  
-Rationale: a conditional job alone is a weak operator signal. The aggregate gate can always run, fail when billing proof was required but missing, and stay green when billing proof was correctly skipped. That makes the `dev` branch promotion decision much clearer even though the integrated staging proof still happens after merge to `dev`.  
+Decision: add aggregate `release_gate` jobs so the staging and production workflows emit one unambiguous result even when `billing_integration` is conditional.
+Rationale: a conditional job alone is a weak operator signal. The aggregate gate can always run, fail when billing proof was required but missing, and stay green when billing proof was correctly skipped. That makes the `dev` branch promotion decision much clearer even though the integrated staging proof still happens after merge to `dev`.
 Date: 2026-04-01
 
 ## Outcomes & Retrospective
@@ -112,7 +112,7 @@ The code-centric CI workflow lives at `.github/workflows/ci.yml`. It now contain
 
 The integrated staging proof workflow lives at `.github/workflows/dev-staging-proof.yml`. It writes `qa/personas.local.json` from a secret, writes `apps/web/.env.local` from a secret, configures Convex CLI auth, runs `bun run qa:run-pack -- --pack=default_ship`, and uses `qa/scripts/detect-release-scope.mjs` to decide whether `billing_integration` must also run. The aggregate `release_gate` job makes that conditional behavior legible because it always reports one pass or fail result for the staging candidate after the merge to `dev`.
 
-The QA pack model lives in `qa/scripts/run-pack.mjs` and the docs in `qa/README.md`. `default_ship` already runs the QA control-plane validation, persona preparation, browser smoke, a blueprint integration-ui subset, and an authenticated browser pack. `billing_integration` already runs persona preparation plus `apps/web`'s `test:e2e:sandbox:billing-integration`, and on local targets it also runs `stripe:dev:doctor` and `stripe:dev:verify`. These packs are good building blocks; they only need to be wired into the right release stages.
+The QA pack model lives in `qa/scripts/run-pack.mjs` and the docs in `qa/README.md`. `default_ship` already runs the QA control-plane validation, persona preparation, browser smoke, a codebase integration-ui subset, and an authenticated browser pack. `billing_integration` already runs persona preparation plus `apps/web`'s `test:e2e:sandbox:billing-integration`, and on local targets it also runs `stripe:dev:doctor` and `stripe:dev:verify`. These packs are good building blocks; they only need to be wired into the right release stages.
 
 The browser runner configuration for local and hosted Playwright flows lives in `apps/web/playwright.config.ts`. The `browser-smoke` project covers shallow browser proof, while `sandbox-e2e` is the deeper authenticated browser project. Hosted runs are controlled by `PLAYWRIGHT_BASE_URL`, and local-server runs are controlled by `PLAYWRIGHT_USE_LOCAL_SERVER=1`.
 
@@ -256,12 +256,12 @@ Third, workflow files must be syntactically and structurally valid. After editin
 Fourth, repository docs and dependency manifests must stay parseable and clean:
 
     cd /Users/parkerrex/Projects/ship-by-sunday
-    node -e 'JSON.parse(require("fs").readFileSync("package.json","utf8")); console.log("root blueprint json ok")'
-    node -e 'JSON.parse(require("fs").readFileSync("apps/web/package.json","utf8")); console.log("apps/web blueprint json ok")'
+    node -e 'JSON.parse(require("fs").readFileSync("package.json","utf8")); console.log("root codebase json ok")'
+    node -e 'JSON.parse(require("fs").readFileSync("apps/web/package.json","utf8")); console.log("apps/web codebase json ok")'
     bun run qa:validate
     git diff --check
 
-   Expected observation: both blueprint files parse, `qa:validate` remains green, and `git diff --check` prints nothing.
+   Expected observation: both codebase files parse, `qa:validate` remains green, and `git diff --check` prints nothing.
 
 Fifth, acceptance must be observable from the repo contract itself. A novice reading the final repository state must be able to answer these questions without chat history:
 
@@ -320,9 +320,9 @@ Useful evidence gathered during implementation:
     - Re-ran workflow YAML parsing
     - Re-ran `git diff --check`
 
-    Blueprint parsing transcript:
-    - `root blueprint json ok`
-    - `apps/web blueprint json ok`
+    Codebase parsing transcript:
+    - `root codebase json ok`
+    - `apps/web codebase json ok`
 
     Full local code-proof transcript:
     - `bun run prepush`

@@ -21,10 +21,10 @@ import {
 	getRequestIdFromRequest,
 	jsonWithRequestId,
 } from "@/platform/observability/request-id";
-import { blueprintSectionDraftTemplateIdValues } from "@/lib/blueprint-flow/blueprint-section-draft-assistant";
+import { codebaseSectionDraftTemplateIdValues } from "@/lib/codebase-flow/codebase-section-draft-assistant";
 
 const codexGenerateTemplateIds = [
-	...blueprintSectionDraftTemplateIdValues,
+	...codebaseSectionDraftTemplateIdValues,
 	"competitor_research",
 	"scope_boundary",
 	"visual_direction_guide",

@@ -1,6 +1,6 @@
 ---
 summary: Factor the shared TypeScript compiler options used by the three non-web workspace packages into one base config while leaving `apps/web` on its own Next-specific tsconfig.
-read_when: Open this when you need to remove duplicated TypeScript config from `packages/blueprint-compiler`, `packages/blueprint-presentation`, and `packages/ship-by-sunday-cli` without touching `apps/web`.
+read_when: Open this when you need to remove duplicated TypeScript config from `packages/codebase-compiler`, `packages/codebase-presentation`, and `packages/ship-by-sunday-cli` without touching `apps/web`.
 plan_status: done
 ---
 
@@ -20,7 +20,7 @@ This matters because the next time the TypeScript settings need to change, a mai
 
 - [x] 2026-04-04 12:42 EDT — Read `AGENTS.md`, `.plans/PLANS.md`, `.docs/scripts.md`, the workspace manifests, and the non-web package tsconfig files; confirmed the three package configs are identical today and `apps/web` has a separate Next-specific config.
 - [x] 2026-04-04 13:00 EDT — Created `packages/tsconfig.base.json` and switched the three non-web package configs to extend it while leaving `apps/web/tsconfig.json` untouched.
-- [x] 2026-04-04 13:08 EDT — Validation exposed a stale `packages/blueprint-presentation/tests/blueprint-presentation.test.ts` assertion using the removed `"build-plan"` stage id; updated it to `"blueprint"` so the touched package could pass its own proof.
+- [x] 2026-04-04 13:08 EDT — Validation exposed a stale `packages/codebase-presentation/tests/codebase-presentation.test.ts` assertion using the removed `"build-plan"` stage id; updated it to `"codebase"` so the touched package could pass its own proof.
 - [x] 2026-04-04 13:11 EDT — Ran the package and root validation commands successfully, including the direct formatter check for `packages/tsconfig.base.json`.
 
 ## Surprises & Discoveries
@@ -33,7 +33,7 @@ There is no existing `tsconfig.base.json` or similar shared config anywhere in t
 
 One more boundary matters for validation: the new shared base file will sit at `packages/tsconfig.base.json`, which is above the package directories. That means the package-local `format:check` scripts will not validate the new file automatically, so the plan needs one direct root-level formatter check for that sibling file.
 
-Validation exposed a package-level type error in `packages/blueprint-presentation/tests/blueprint-presentation.test.ts`. The failing assertion still used the removed `"build-plan"` stage id even though the shared stage ids are now `"blueprint"` and `"review"`. The smallest honest recovery was to update the stale test to the canonical `"blueprint"` stage so the package could pass the validation the plan already required.
+Validation exposed a package-level type error in `packages/codebase-presentation/tests/codebase-presentation.test.ts`. The failing assertion still used the removed `"build-plan"` stage id even though the shared stage ids are now `"codebase"` and `"review"`. The smallest honest recovery was to update the stale test to the canonical `"codebase"` stage so the package could pass the validation the plan already required.
 
 ## Decision Log
 
@@ -51,11 +51,11 @@ Date/Author: 2026-04-04 / Codex
 
 ## Outcomes & Retrospective
 
-Completed. The shared base file is in place, all three non-web package configs now extend it, and `apps/web/tsconfig.json` remained untouched. The only surprise during validation was the stale blueprint-presentation test assertion, which was corrected to the current stage id so the required package proof could pass.
+Completed. The shared base file is in place, all three non-web package configs now extend it, and `apps/web/tsconfig.json` remained untouched. The only surprise during validation was the stale codebase-presentation test assertion, which was corrected to the current stage id so the required package proof could pass.
 
 ## Context and Orientation
 
-The repository root `package.json` defines the Bun workspace layout: `apps/web` and `packages/*`. The three target packages are `packages/blueprint-compiler`, `packages/blueprint-presentation`, and `packages/ship-by-sunday-cli`. Each package currently has its own `typecheck` script that runs `tsc --noEmit -p tsconfig.json`, plus `format:check` and `lint` scripts that operate inside that package directory.
+The repository root `package.json` defines the Bun workspace layout: `apps/web` and `packages/*`. The three target packages are `packages/codebase-compiler`, `packages/codebase-presentation`, and `packages/ship-by-sunday-cli`. Each package currently has its own `typecheck` script that runs `tsc --noEmit -p tsconfig.json`, plus `format:check` and `lint` scripts that operate inside that package directory.
 
 Here, a “shared TypeScript base config” means one JSON file that holds the common `compilerOptions` block. A package `tsconfig.json` “extends” that base file when it inherits those options and then adds or overrides only the settings that are unique to that package, such as its `include` list. The non-web packages all currently share the same `compilerOptions` block and the same `include` list (`src/**/*.ts`, `tests/**/*.ts`, and `vitest.config.ts`), while `apps/web/tsconfig.json` is intentionally different because it includes DOM libraries, JSX, Next's TypeScript plugin, and path aliases for the web app.
 
@@ -67,7 +67,7 @@ This change is internal. It should not add new runtime behavior, new package scr
 
 Create `packages/tsconfig.base.json` first, and copy the shared `compilerOptions` from one of the existing package configs without inventing new defaults. Keep the file limited to the shared settings only. Do not move the package `include` patterns into the base file unless a later discovery shows they truly belong there, because the current goal is to factor out the shared compiler options, not to create a workspace-wide project reference.
 
-Then update `packages/blueprint-compiler/tsconfig.json`, `packages/blueprint-presentation/tsconfig.json`, and `packages/ship-by-sunday-cli/tsconfig.json` so each one extends `../tsconfig.base.json` and keeps only its local `include` array. Preserve the package entrypoint at `tsconfig.json` because the existing `typecheck` scripts already call `tsc --noEmit -p tsconfig.json` directly.
+Then update `packages/codebase-compiler/tsconfig.json`, `packages/codebase-presentation/tsconfig.json`, and `packages/ship-by-sunday-cli/tsconfig.json` so each one extends `../tsconfig.base.json` and keeps only its local `include` array. Preserve the package entrypoint at `tsconfig.json` because the existing `typecheck` scripts already call `tsc --noEmit -p tsconfig.json` directly.
 
 Leave `apps/web/tsconfig.json` unchanged. Its `jsx`, DOM libraries, Next plugin, and path aliases are intentionally different, so routing it through the shared package base would be the wrong abstraction for this initiative. No changes to the root workspace scripts are expected.
 
@@ -79,7 +79,7 @@ At the end of this milestone, `packages/tsconfig.base.json` exists and contains 
 
 ### Milestone 2 — Convert the three non-web packages to inherit from the base
 
-At the end of this milestone, `packages/blueprint-compiler/tsconfig.json`, `packages/blueprint-presentation/tsconfig.json`, and `packages/ship-by-sunday-cli/tsconfig.json` all extend `../tsconfig.base.json` and keep only their local `include` lists. `apps/web/tsconfig.json` must remain unchanged. This milestone is independently verifiable by reading the four tsconfig files and by checking that the web app was not touched.
+At the end of this milestone, `packages/codebase-compiler/tsconfig.json`, `packages/codebase-presentation/tsconfig.json`, and `packages/ship-by-sunday-cli/tsconfig.json` all extend `../tsconfig.base.json` and keep only their local `include` lists. `apps/web/tsconfig.json` must remain unchanged. This milestone is independently verifiable by reading the four tsconfig files and by checking that the web app was not touched.
 
 ### Milestone 3 — Prove the workspace still passes validation
 
@@ -92,8 +92,8 @@ Work from the repository root unless a step explicitly says otherwise.
 First, inspect the current package configs so the diff stays honest about what is being factored out:
 
     cd /Users/parkerrex/Projects/ship-by-sunday
-    sed -n '1,120p' packages/blueprint-compiler/tsconfig.json
-    sed -n '1,120p' packages/blueprint-presentation/tsconfig.json
+    sed -n '1,120p' packages/codebase-compiler/tsconfig.json
+    sed -n '1,120p' packages/codebase-presentation/tsconfig.json
     sed -n '1,120p' packages/ship-by-sunday-cli/tsconfig.json
 
 Expected observation: the three files contain the same `compilerOptions` block and the same `include` list.
@@ -119,11 +119,11 @@ Expected observation: `packages/tsconfig.base.json` is already correctly formatt
 
 Validate the package-level commands next, because the root scripts do not exercise these configs:
 
-    cd /Users/parkerrex/Projects/ship-by-sunday/packages/blueprint-compiler
+    cd /Users/parkerrex/Projects/ship-by-sunday/packages/codebase-compiler
     bun run format:check
     bun run typecheck
 
-    cd /Users/parkerrex/Projects/ship-by-sunday/packages/blueprint-presentation
+    cd /Users/parkerrex/Projects/ship-by-sunday/packages/codebase-presentation
     bun run format:check
     bun run typecheck
 
@@ -146,7 +146,7 @@ Expected observation: all three commands exit cleanly. If any command reports un
 
 The change is complete when there is one shared file at `packages/tsconfig.base.json`, the three non-web package `tsconfig.json` files extend it, and `apps/web/tsconfig.json` is unchanged. A maintainer should be able to confirm that by reading the four files and seeing exactly one shared source of truth for the non-web package compiler options.
 
-The direct command proof is that `bunx oxfmt -c .oxfmtrc.json --ignore-path .gitignore --check packages/tsconfig.base.json`, `bun run --cwd packages/blueprint-compiler format:check`, `bun run --cwd packages/blueprint-compiler typecheck`, `bun run --cwd packages/blueprint-presentation format:check`, `bun run --cwd packages/blueprint-presentation typecheck`, `bun run --cwd packages/ship-by-sunday-cli format:check`, and `bun run --cwd packages/ship-by-sunday-cli typecheck` all succeed, followed by the root `bun run format`, `bun run lint`, and `bun run typecheck` gates.
+The direct command proof is that `bunx oxfmt -c .oxfmtrc.json --ignore-path .gitignore --check packages/tsconfig.base.json`, `bun run --cwd packages/codebase-compiler format:check`, `bun run --cwd packages/codebase-compiler typecheck`, `bun run --cwd packages/codebase-presentation format:check`, `bun run --cwd packages/codebase-presentation typecheck`, `bun run --cwd packages/ship-by-sunday-cli format:check`, and `bun run --cwd packages/ship-by-sunday-cli typecheck` all succeed, followed by the root `bun run format`, `bun run lint`, and `bun run typecheck` gates.
 
 ## Idempotence and Recovery
 
@@ -161,15 +161,15 @@ The most useful artifact to capture after implementation is the final diff showi
 A good short proof snippet should look structurally like this:
 
     packages/tsconfig.base.json
-    packages/blueprint-compiler/tsconfig.json
-    packages/blueprint-presentation/tsconfig.json
+    packages/codebase-compiler/tsconfig.json
+    packages/codebase-presentation/tsconfig.json
     packages/ship-by-sunday-cli/tsconfig.json
 
 And the validation transcript worth keeping is the successful command sequence with no diagnostics:
 
     $ bunx oxfmt -c .oxfmtrc.json --ignore-path .gitignore --check packages/tsconfig.base.json
-    $ bun run --cwd packages/blueprint-compiler typecheck
-    $ bun run --cwd packages/blueprint-presentation typecheck
+    $ bun run --cwd packages/codebase-compiler typecheck
+    $ bun run --cwd packages/codebase-presentation typecheck
     $ bun run --cwd packages/ship-by-sunday-cli typecheck
     $ bun run format
     $ bun run lint

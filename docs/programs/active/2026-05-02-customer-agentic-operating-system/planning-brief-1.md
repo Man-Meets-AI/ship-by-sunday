@@ -13,7 +13,7 @@ read_when:
 
 ## Planning Context
 
-Ship by Sunday should become the agentic engineering operating system for both new generated repos and mature existing codebases. The buyer-facing product is a worker layer, and Programs, ExecPlans, validation, review evidence, and loops are the substrate that make workers durable. The first implementation slice should focus on generated customer repos because that path is already controlled by `packages/blueprint-compiler`, already has customer-safe materialization tests, and already emits Build Pack readiness and first-slice planning docs. The first slice should reconcile source truth and drift before it ships the full operating pack.
+Ship by Sunday should become the agentic engineering operating system for both new generated repos and mature existing codebases. The buyer-facing product is a worker layer, and Programs, ExecPlans, validation, review evidence, and loops are the substrate that make workers durable. The first implementation slice should focus on generated customer repos because that path is already controlled by `packages/codebase-compiler`, already has customer-safe materialization tests, and already emits Build Pack readiness and first-slice planning docs. The first slice should reconcile source truth and drift before it ships the full operating pack.
 
 The Program packet lives at `docs/programs/active/2026-05-02-customer-agentic-operating-system/`.
 
@@ -25,7 +25,7 @@ Exact target path: `docs/exec-plans/active/2026-05-02-reconcile-customer-agentic
 
 Exact scope: reconcile the existing generated-repo agent source contract before adding new operating-pack artifacts. The slice should inspect and align root `AGENTS.md`/`CLAUDE.md`/`GEMINI.md`, `START-HERE.md`, Build Pack docs, prompt asset naming, skill trigger availability, customer-safe exclusions, generated package-script promises, and clean-room tests.
 
-Exact implementation boundaries: stay inside `packages/blueprint-compiler`, generated starter guidance, generated docs and prompt pack wiring, generated skill files, customer-safe snapshot contracts, output tracing where required, and compiler tests. Do not change auth, billing, checkout, Convex runtime, app routes, provider setup, blueprint intake schema, mature-repo upload flows, public homepage copy, or public pricing.
+Exact implementation boundaries: stay inside `packages/codebase-compiler`, generated starter guidance, generated docs and prompt pack wiring, generated skill files, customer-safe snapshot contracts, output tracing where required, and compiler tests. Do not change auth, billing, checkout, Convex runtime, app routes, provider setup, codebase intake schema, mature-repo upload flows, public homepage copy, or public pricing.
 
 Exact validation boundaries: run focused compiler tests for repo generation, review download zip behavior, customer-safe snapshot contracts, and any new materialized clean-room checks. Then run package typecheck, package format check, package lint, `bun run plans:lint -- --plan docs/exec-plans/active/2026-05-02-reconcile-customer-agentic-source-contract.md`, `bun run programs:lint`, markdown lint for the Program and child ExecPlan, and broader repo gates as needed.
 

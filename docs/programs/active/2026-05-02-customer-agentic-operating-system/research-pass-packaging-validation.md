@@ -10,7 +10,7 @@ The internal repo uses dedicated linters: `scripts/exec-plan/plan-lint.ts` valid
 
 The external `plans-and-programs` starter proves a smaller no-dependency validator can be copied easily, but its `scripts/validate.mjs` is intentionally hard-coded to the starter's seed example. That is useful as a teaching artifact, not a drop-in customer linter for Ship by Sunday.
 
-Generated customer repos already use Bun and root scripts through `packages/blueprint-compiler/src/repo-generation/starter-root-package-json.ts`, so greenfield generated repos can safely receive `plans:lint`, `programs:lint`, and `agentic:check` scripts. Mature repo adoption must discover and preserve the existing package manager. It can still ship scripts as recommendations or a separate tool path rather than overwriting `package.json`.
+Generated customer repos already use Bun and root scripts through `packages/codebase-compiler/src/repo-generation/starter-root-package-json.ts`, so greenfield generated repos can safely receive `plans:lint`, `programs:lint`, and `agentic:check` scripts. Mature repo adoption must discover and preserve the existing package manager. It can still ship scripts as recommendations or a separate tool path rather than overwriting `package.json`.
 
 The generated customer-safe snapshot contract currently excludes internal Program and ExecPlan docs, which prevents leakage of internal history and local assumptions. This is a good boundary. The Program should introduce new generalized renderer-owned artifacts instead of weakening that boundary.
 
