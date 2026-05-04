@@ -956,24 +956,98 @@ This keeps the second workflow adaptive while making observability the default f
 
 ## Implementation Sequence
 
-Practical build order:
+Keep one Program and split implementation into dependency-ordered child ExecPlans. Use the repo date when each ExecPlan file is created.
 
-1. Add checkout intent tracking:
+1. `existing-codebase-checkout-intent-routing`
    - `buyerStartingPoint=no_codebase | existing_codebase | unspecified`
    - `checkoutCtaId`
    - `fulfillmentTrack`
    - Stripe metadata
    - Convex pending checkout claim
    - Convex product access grant
-2. Add codebase setup route and UI.
-3. Define Machine Setup and Project Setup contracts.
-4. Define workflow packet contracts and output schemas.
-5. Productize deterministic `codebase-intake` with sync-safe JSON.
-6. Build local runner prototype around `bunx`, daemon pairing, SBS profiles, `gh`, and `codex exec`.
-7. Add structured findings upload and Top 9 findings ledger UI.
-8. Add approval flow for first write workflow.
-9. Add PR or local-diff delivery.
-10. Add recurring queue mode after the first approved workflow works.
+   - generated buyers to `/codebase`
+   - existing-codebase buyers to `/workspace/setup`
+   - missing or legacy intent to a small choice screen
+2. `existing-codebase-workspace-data-model-and-events`
+   - separate workspace tables
+   - runner bindings
+   - repository bindings
+   - doctor-pass runs
+   - findings
+   - append-only sync-safe runner event stream
+3. `existing-codebase-setup-ui`
+   - `/workspace/setup`
+   - Machine Setup
+   - Project Setup
+   - local runner pairing states
+   - blockers and warnings
+   - privacy defaults
+   - `Run doctor pass`
+4. `local-runner-prototype`
+   - `bunx ship-by-sunday setup pair <token>`
+   - `npx` fallback
+   - daemon mode
+   - one-shot mode
+   - local `.sbs/` state
+   - `gh` readiness
+   - SBS Codex profiles
+   - config diff/backup/approval
+   - `codex exec` boundaries
+5. `doctor-pass-and-sync-preview`
+   - passive probes
+   - sync-safe `codebase-intake` JSON
+   - local Markdown report
+   - branchless doctor pass
+   - sync preview approval
+6. `findings-ledger-and-decision-screens`
+   - `/workspace/doctor-pass`
+   - `/workspace/findings`
+   - `/workspace/findings/[findingId]`
+   - dense Top 9 findings
+   - no raw source by default
+   - `Approve workflow`
+7. `source-truth-agent-readiness-workflow`
+   - workflow packet
+   - approval sheet
+   - SBS profile selection
+   - write lease
+   - timestamped branch
+   - docs and `.sbs/` write boundary
+   - local proof
+   - local diff
+   - explicit `Open PR`
+8. `workspace-support-surfaces`
+   - `/workspace/runs`
+   - `/workspace/loops`
+   - `/workspace/privacy`
+   - run history
+   - finding-filtered workflow catalog
+   - local execution and sync boundaries
+9. `existing-codebase-work-phase-workers`
+   - approved queue
+   - recurring jobs
+   - heartbeat
+   - pause and stop controls
+   - proof sync
+   - blocked-state reporting
+   - one active write lease per project
+10. `broken-app-rescue-loop`
+   - concrete failure intake
+   - read-only reproduction
+   - root-cause localization
+   - patch only after approval
+11. `managed-github-run-phase`
+   - premium or concierge mode
+   - explicit repo access
+   - branch and PR authority
+   - CI visibility
+   - audit log
+   - revocation
+12. `generated-repo-operating-pack`
+   - customer-safe Program/ExecPlan file set
+   - explicit generated-repo bootstrap
+   - prompts, skills, package scripts, tests
+   - no hidden `postinstall`
 
 ## Copy Boundaries
 
@@ -1035,7 +1109,8 @@ Avoid until implemented:
 - Make `/workspace/privacy` a local-execution and sync-boundary control page with runner identity, project binding, last sync preview, raw source/log/transcript sharing disabled by default, revoke/delete controls, and managed GitHub disabled unless explicitly enabled later.
 - Keep existing-codebase state in separate workspace tables instead of overloading generated-codebase `projectDefinitions` and `codebaseWorkflowStates`.
 - Use an append-only, sync-safe runner event stream from local runner to hosted backend; derive UI state from backend rows and events instead of browser-daemon access.
+- Split implementation into child ExecPlans in this order: checkout intent, workspace data/events, setup UI, local runner, doctor pass, findings, source-truth workflow, support surfaces, Work-phase workers, broken-app rescue, managed GitHub Run phase, and generated-repo operating pack.
 
 ## Open Questions
 
-- How should the implementation work split into child ExecPlans?
+- Should we create the first new existing-codebase child ExecPlan now, or finish the active generated-repo source-contract plan first?
