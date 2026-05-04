@@ -56,7 +56,7 @@ The codebase-support scratch note is `support-codebases.md` at the repository ro
 
 The package and update-channel scratch note is `package-discussion.md` at the repository root. It is a later strategic reference for recurring value and trusted upgrade authority. It must not pull the near-term Program away from existing-codebase doctor-pass support.
 
-The current planning brief is `planning-brief-1.md`, with `current-planning-brief.txt` pointing at the current versioned brief. The market-expansion, loop-catalog, monetization, and positioning research passes sharpen the commercial north star but do not supersede the active child ExecPlan.
+The current planning brief is `planning-brief-2.md`, with `current-planning-brief.txt` pointing at the current versioned brief. `planning-brief-1.md` still owns the active generated-repo source-contract child ExecPlan. `planning-brief-2.md` owns the existing-codebase child ExecPlan split for checkout intent, workspace state, local runner setup, doctor pass, findings, first workflow approval, and later workers.
 
 ## Current State
 
@@ -159,6 +159,7 @@ The package/update-channel idea is valuable but later. `package-discussion.md` a
 - [x] 2026-05-04 EDT: Split always-on local workers from package/update-channel strategy by adding a Work phase between Walk and Run.
 - [x] 2026-05-04 EDT: Baked in the existing-codebase UX spine: homepage intent split, setup as guided onboarding, local runner as Bun-first CLI plus `.sbs/` local state, doctor pass before loop setup, Top 9 finding detail, first loop approval, proof, and later Worker Home.
 - [x] 2026-05-04 EDT: Refined the existing-codebase architecture around workflow packets, deterministic probes, Machine Setup, Project Setup, SBS-managed Codex execution profiles, required local `gh` readiness, a persistent local daemon, runner health, and sync-safe probe outputs.
+- [x] 2026-05-04 EDT: Created `planning-brief-2.md`, refreshed `plan-split-recommendation.md`, and split existing-codebase implementation into child ExecPlan slugs for checkout intent, workspace data/events, setup UI, local runner, doctor pass, findings, first workflow approval, support surfaces, Work-phase workers, broken-app rescue, managed GitHub Run phase, and generated-repo operating pack.
 - [ ] Implement the first generated-repo source-contract slice.
 - [ ] Refresh the Program with generated-repo proof and choose the commercial doctor-pass slice.
 - [ ] Define the existing-codebase Crawl contract: buyer intent, Machine Setup, Project Setup, local runner pairing, Codex profile/config hygiene, required `gh` readiness, deterministic probes, read-only doctor pass, structured report schema, sync preview, and Top 9 findings ledger.
@@ -398,6 +399,10 @@ Decision: Model runner health as separate runner, machine, project binding, and 
 Rationale: A single online/offline dot hides the difference between a healthy daemon, a broken Codex setup, an unbound repo, a missing proof command, and a write lease conflict. The first health model should expose `Runner`, `MachineHealth`, `ProjectBinding`, and `ProjectHealth`, then render runner, machine setup, project setup, queue, proof, sync, and permissions in the web app.
 Date: 2026-05-04
 
+Decision: Split existing-codebase implementation into dependency-ordered child ExecPlans.
+Rationale: The product is too broad for one mega-plan, but it should remain one Program so routing, privacy, runner, findings, workflow, and future worker decisions stay coherent. The accepted split is checkout intent routing; workspace data model and events; setup UI; local runner prototype; doctor pass and sync preview; findings ledger and decision screens; `source-truth-agent-readiness` workflow; runs, loops, and privacy support surfaces; Work-phase workers; broken-app rescue; managed GitHub Run phase; and generated-repo operating pack. Crawl depends on the first six existing-codebase slices, Walk starts with source-truth readiness, Work starts after one approved workflow works, and Run waits for proven local demand.
+Date: 2026-05-04
+
 ## Slice Ledger
 
 Active child ExecPlans:
@@ -410,37 +415,29 @@ Completed child ExecPlans:
 
 Recommended future child ExecPlans:
 
-- Define existing-codebase UX spine: homepage intent split, checkout routing, setup onboarding, local runner pairing, doctor pass, Top 9 findings, finding detail, and first loop approval.
-- Define existing-codebase Crawl: buyer intent, Machine Setup, Project Setup, local runner pairing, deterministic codebase intake, read-only doctor pass, structured findings sync preview, and Top 9 findings ledger.
-- Define Machine Setup and Codex profile hygiene: local Codex auth, `gh` auth, SBS-managed `config.toml` block, diff/backup/approval flow, credential-store warnings, sanitized `codex-config` backup, and drift detection.
-- Productize deterministic codebase intake: evolve `.sbs/codebase-intake.py` into a runner-owned probe with JSON output, stable finding IDs, severity/confidence, sync-safe summaries, and local-only Markdown reports.
-- Define workflow packet schema: deterministic probes, user bottleneck context, Codex interpretation, Codex write job, proof contract, write lease, stop conditions, local artifacts, and sync policy.
-- Define execution-surface contracts starting with `local_runner`, then `codex_cloud_handoff`, `managed_github`, `generated_repo`, and `codex_app_server`.
-- Build the local runner prototype around `bunx ship-by-sunday setup pair`, daemon-backed pairing, `codex exec`, SBS execution profiles, read-only doctor workflows, local `.sbs/` state, structured output schemas, pairing tokens, sync preview, and approved findings sync.
-- Build runner daemon health and event relay: durable runner identity, heartbeat, setup events, health stack, approval events, queue status, proof status, token rotation, revocation, and one active write lease per project.
-- Persist checkout intent and route `existing_codebase` buyers into the codebase setup state.
-- Ship existing-codebase Walk with `source-truth-agent-readiness` as the first proof-backed write workflow: first-loop approval, local diff or PR handoff, proof or blocked proof, and next-loop recommendation.
-- Ship `observability-debuggability` as the likely second write workflow after source truth and command proof are in place.
-- Ship existing-codebase Work: persistent local worker pairing, approved loop queue, run history, heartbeat, pause or stop controls, proof sync, and blocked-state reporting.
-- Ship broken-app rescue as the conditional high-value fulfillment loop for customers who arrive with a concrete failure, with read-only reproduction before patching.
-- Ship customer-safe operating system file set for generated repos.
-- Add explicit generated repo agentic bootstrap.
-- Define the worker-led multi-lane customer journey across idea-to-repo, broken-app rescue, mature repo, agency, and operator modes.
-- Design mature repo audit contract.
-- Generate mature repo adoption Program.
-- Wire mature repo adoption into the product.
-- Harden cross-lane review and validation.
+- `existing-codebase-checkout-intent-routing`: persist `buyerStartingPoint`, `checkoutCtaId`, and `fulfillmentTrack`; route generated buyers to `/codebase`, existing-codebase buyers to `/workspace/setup`, and missing or legacy intent to a choice screen.
+- `existing-codebase-workspace-data-model-and-events`: add separate existing-codebase workspace tables plus the append-only sync-safe runner event stream through the hosted backend.
+- `existing-codebase-setup-ui`: build `/workspace/setup` with Machine Setup, Project Setup, pairing states, blockers, warnings, privacy defaults, default open destination, and `Run doctor pass`.
+- `local-runner-prototype`: build `bunx ship-by-sunday setup pair <token>`, `npx` fallback, daemon and one-shot mode, local `.sbs/` state, `gh` readiness, SBS Codex profiles, config diff/backup/approval, and `codex exec` boundaries.
+- `doctor-pass-and-sync-preview`: productize passive probes, including `.sbs/codebase-intake.py` as sync-safe JSON plus local Markdown, and gate findings upload behind sync preview approval.
+- `findings-ledger-and-decision-screens`: build `/workspace/doctor-pass`, `/workspace/findings`, and `/workspace/findings/[findingId]` around stage progress, dense Top 9 rows, finding detail, evidence refs without raw source, permissions, and `Approve workflow`.
+- `source-truth-agent-readiness-workflow`: ship the first Walk workflow packet, approval sheet, SBS profile selection, write lease, timestamped branch, docs and `.sbs/` write boundary, proof output, local diff, and explicit `Open PR`.
+- `workspace-support-surfaces`: build `/workspace/runs`, `/workspace/loops`, and `/workspace/privacy` for Crawl and Walk status, finding-filtered workflow catalog, local execution boundaries, revocation, and deletion controls.
+- `existing-codebase-work-phase-workers`: add approved queue, recurring jobs, heartbeat, run history, pause and stop controls, proof sync, blocked-state reporting, multi-machine support, and one active write lease per project.
+- `broken-app-rescue-loop`: add the conditional concrete-failure workflow with read-only reproduction before patch approval.
+- `managed-github-run-phase`: add premium or concierge managed GitHub execution after local Crawl, Walk, and Work prove demand.
+- `generated-repo-operating-pack`: after the active generated-repo source-contract plan lands, ship the customer-safe Program and ExecPlan file set, explicit generated-repo bootstrap, prompts, skills, package scripts, and tests.
 - Explore package/update-channel mechanics only after existing-codebase Crawl, Walk, and Work prove repeated worker demand.
 
 ## Next Slice
 
 An active child ExecPlan exists at `docs/exec-plans/active/2026-05-02-reconcile-customer-agentic-source-contract.md`. It should reconcile generated-repo source truth and customer-safety boundaries first because current customer output must not point to missing prompts, skills, scripts, or unsafe planning archives.
 
-After that active child lands, the next recommended Program slice is `Define Existing-Codebase UX Spine And Crawl Contract`. That slice should stay focused on making the first existing-codebase AHA real. It should define the homepage intent split, checkout intent contract, success routing, Machine Setup, Project Setup, codebase setup UI, local-runner pairing model, persistent daemon status model, local `.sbs/` artifact contract, deterministic probe contract, `codebase-intake` JSON/report shape, read-only doctor pass, structured findings schema, sync preview, source-leakage guardrails, Top 9 findings ledger, finding detail, permission map, proof and blocked-proof fields, and the route from finding recommendation to the later first approved workflow.
+After that active child lands, the next recommended Program slice is `existing-codebase-checkout-intent-routing`. That slice should persist `buyerStartingPoint`, `checkoutCtaId`, and `fulfillmentTrack` through the homepage CTA, Stripe checkout metadata, pending checkout claims, product access grants, checkout success, and the fulfillment router. It should keep generated buyers on `/codebase`, send existing-codebase buyers to `/workspace/setup`, and send missing or legacy intent to a small choice screen. It must not build runner UI, daemon behavior, doctor pass, findings, workflow approval, or worker queue controls.
 
-That next slice must name the exact implementation owners it will later constrain: `apps/web/config/product.ts` for routes, modules, and CTA targets; `apps/web/app/_content/home-page.ts` for homepage intent copy and existing-codebase promise language; `apps/web/app/_lib/home-page-render-model.ts` and `apps/web/app/_lib/home-page-structured-data.ts` for section behavior and schema truth; `apps/web/app/_components/home-page/sections/home-page-primary-cta.tsx` for CTA rendering; checkout code under `apps/web/app/api/stripe/checkout/`, `apps/web/platform/billing/checkout/`, and `apps/web/app/checkout/success/` for buyer intent persistence; future codebase setup routes and workspace surfaces; Codex connection surfaces under `apps/web/platform/codex/`, `apps/web/app/api/codex/`, and `apps/web/app/(workspace)/_components/codex-connection-card/`; local runner pairing, daemon, event relay, and health surfaces if created; future CLI package surfaces for `setup pair`, `daemon start`, `project doctor`, `.sbs/` reports, and sync preview; and deterministic probe surfaces such as `.sbs/codebase-intake.py` if promoted into the product.
+The following slice is `existing-codebase-workspace-data-model-and-events`. It should add the separate existing-codebase tables and sync-safe event protocol that later setup, runner, doctor pass, findings, and workflow UI depend on. Only after those contracts exist should `/workspace/setup`, the local runner prototype, doctor pass, findings ledger, first workflow approval, support surfaces, Work-phase workers, broken-app rescue, and managed GitHub Run-phase work proceed in the dependency order recorded in `plan-split-recommendation.md` and `planning-brief-2.md`.
 
-The Walk slice comes after Crawl. Walk should add finding detail, first-loop approval, permission mode selection through SBS profiles, expected touched areas, proof requirements, required secrets or provider access, stop condition, write lease, local diff or PR handoff, proof or blocked-proof output, and the next-loop recommendation. The default first Walk workflow should be `source-truth-agent-readiness`; `observability-debuggability` should follow after source truth and command proof make runtime work safer; `broken-app-triage` can become the first write workflow only when the customer arrives with a concrete failure. The Work slice comes after Walk and should add the always-on local worker layer: approved queue, run history, heartbeat, pause or stop controls, proof sync, blocked-state reporting, recurring approved loops, and multi-machine handling with one active write lease per project. Run-phase work such as managed GitHub automation, parallel workers, richer scheduling, campaign catalog, and business packaging must wait until Crawl, Walk, and Work are proven. Update registries, migration graphs, dependency channels, and prompt-pack refreshes remain later strategy.
+If existing-codebase implementation starts before the generated-repo source-contract plan is complete, the checkout-intent plan can be created first as a narrow parallel child ExecPlan. It should use `planning-brief-2.md` as its `planning_brief`, while the active generated-repo source-contract plan continues to use `planning-brief-1.md`.
 
 ## Risks and Watchpoints
 
@@ -554,7 +551,7 @@ Program completion also requires `bun run programs:lint`, relevant `plans:lint` 
 
 ## Artifacts and Notes
 
-The current planning brief is `docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-1.md`.
+The current planning brief is `docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`.
 
 The first child ExecPlan is `docs/exec-plans/active/2026-05-02-reconcile-customer-agentic-source-contract.md`.
 

@@ -2,7 +2,7 @@
 title: Customer Agentic Operating System Planning Brief 1
 program_id: customer-agentic-operating-system
 brief_version: 1
-status: current
+status: superseded
 summary: Write the first child ExecPlan for reconciling generated-repo agent guidance before shipping the full customer-safe operating pack.
 read_when:
   - Writing the first child ExecPlan for the customer agentic operating system Program.
