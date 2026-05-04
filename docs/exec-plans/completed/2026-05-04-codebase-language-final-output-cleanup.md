@@ -1,12 +1,12 @@
 ---
 title: Codebase Language Final Output Cleanup
-status: active
+status: complete
 created_at: 2026-05-04
-completed_at: null
+completed_at: 2026-05-04
 summary: Finish the remaining public and generated-output language cleanup so Codebase is the primary customer-facing noun.
-post_build_recap: null
+post_build_recap: Public blog copy, compiler-generated Codebase output, package presentation placeholders, and focused tests now use Codebase as the primary customer-facing noun while preserving compatibility-sensitive implementation names.
 program_id: codebase-language-migration
-planning_brief: docs/programs/active/2026-05-04-codebase-language-migration/planning-brief-1.md
+planning_brief: docs/programs/completed/2026-05-04-codebase-language-migration/planning-brief-1.md
 read_when:
   - Finishing the Codebase Language Migration Program.
   - Updating public blog copy or generated customer Codebase output labels.
@@ -29,10 +29,10 @@ The observable outcome is simple: a targeted current-language scan no longer fin
 
 - [x] 2026-05-04 EDT: Created this final child ExecPlan from the active Codebase Language Migration Program.
 - [x] 2026-05-04 EDT: Inspected the active Program packet, public language research, package/generated-output research, runtime contract research, app instructions, compiler instructions, root design guidance, Program lint, markdown lint, generated mirror check, and public-readiness lint before editing.
-- [ ] Update public blog copy and tests so the article uses agent-ready Codebase language as the primary noun.
-- [ ] Update generated customer Codebase output labels and onboarding copy without renaming compatibility-sensitive skill or file identifiers.
-- [ ] Run focused blog, compiler, public-readiness, generated-doc, Program, plan, markdown, and diff validation.
-- [ ] Complete this ExecPlan and move the owning Program to completed with a retrospective.
+- [x] 2026-05-04 EDT: Updated public blog copy and tests so the article uses agent-ready Codebase language as the primary noun.
+- [x] 2026-05-04 EDT: Updated generated customer Codebase output labels and onboarding copy without renaming compatibility-sensitive skill or file identifiers.
+- [x] 2026-05-04 EDT: Ran focused blog, compiler, public-readiness, generated-doc, Program, plan, markdown, and diff validation.
+- [x] 2026-05-04 EDT: Completed this ExecPlan and moved the owning Program to completed with a retrospective.
 
 ## Surprises & Discoveries
 
@@ -50,7 +50,9 @@ Date: 2026-05-04
 
 ## Outcomes & Retrospective
 
-This plan is active. Fill this section after implementation with the exact files changed, validation evidence, any intentionally preserved implementation names, and the Program completion result.
+This plan completed the final Codebase Language Migration cleanup. Public blog copy now frames the buyer-facing output as an agent-ready Codebase. Compiler-generated customer output now labels the delivered docs as Codebase Materials and describes onboarding, assistant guides, snapshot reasons, and setup instructions around the Codebase noun. Package presentation placeholders now say Codebase for the generated artifact.
+
+The cleanup intentionally preserved compatibility-sensitive implementation names, including `$starter-*` local skill trigger names, source-pack folder names, and helper identifiers. The owning Program moved to `docs/programs/completed/2026-05-04-codebase-language-migration/`.
 
 ## Context and Orientation
 
@@ -109,9 +111,9 @@ Then run Program and docs validation:
 
     bun run public-readiness:lint
     bun run docs:generated:check
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-04-codebase-language-final-output-cleanup.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-codebase-language-final-output-cleanup.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-04-codebase-language-final-output-cleanup.md docs/programs
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-codebase-language-final-output-cleanup.md docs/programs
     git diff --check
 
 ## Validation and Acceptance
@@ -129,9 +131,9 @@ Run these commands from the repo root:
     bun run --cwd packages/codebase-presentation typecheck
     bun run public-readiness:lint
     bun run docs:generated:check
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-04-codebase-language-final-output-cleanup.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-codebase-language-final-output-cleanup.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-04-codebase-language-final-output-cleanup.md docs/programs
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-codebase-language-final-output-cleanup.md docs/programs
     git diff --check
 
 ## Idempotence and Recovery
@@ -159,6 +161,19 @@ Targeted scans found current-language drift in:
     packages/codebase-compiler/src/repo-generation/render-starter-project-onboarding.ts
     packages/codebase-presentation/src/index.ts
 
+Final validation passed:
+
+    targeted public/generated-output old noun scan
+    bun run --cwd apps/web test:unit -- tests/unit/blog-metadata.test.ts tests/unit/blog-structured-data.test.ts tests/unit/blog-posts.test.ts tests/unit/codebase-page-state-model.test.ts tests/unit/use-codebase-page-state.test.tsx
+    bun run --cwd packages/codebase-compiler test -- codebase-renderers.test.ts repo-generation.test.ts canonical-project-definition.test.ts codebase-field-helpers.test.ts readiness.test.ts
+    bun run --cwd packages/codebase-presentation typecheck
+    bun run public-readiness:lint
+    bun run docs:generated:check
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-codebase-language-final-output-cleanup.md
+    bun run programs:lint
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-codebase-language-final-output-cleanup.md docs/programs
+    git diff --check
+
 ## Interfaces and Dependencies
 
-This plan depends on the Codebase Language Migration Program at `docs/programs/active/2026-05-04-codebase-language-migration/program.md`, the Program contract in `docs/programs/PROGRAMS.md`, the ExecPlan contract in `docs/exec-plans/PLANS.md`, app instructions in `apps/web/AGENTS.md`, compiler instructions in `packages/codebase-compiler/AGENTS.md`, public blog metadata tests, codebase compiler render tests, package presentation typecheck, `bun run docs:generated:check`, and `bun run public-readiness:lint`.
+This plan depends on the Codebase Language Migration Program at `docs/programs/completed/2026-05-04-codebase-language-migration/program.md`, the Program contract in `docs/programs/PROGRAMS.md`, the ExecPlan contract in `docs/exec-plans/PLANS.md`, app instructions in `apps/web/AGENTS.md`, compiler instructions in `packages/codebase-compiler/AGENTS.md`, public blog metadata tests, codebase compiler render tests, package presentation typecheck, `bun run docs:generated:check`, and `bun run public-readiness:lint`.

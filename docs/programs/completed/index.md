@@ -18,6 +18,7 @@ The Program must satisfy [PROGRAMS.md](../PROGRAMS.md), use `status: complete`, 
 
 Completed Program folders:
 
+- `docs/programs/completed/2026-05-04-codebase-language-migration/`: completed direct Codebase language migration across public language, Program packets, package surfaces, generated output, and validation metadata.
 - `docs/programs/completed/2026-05-03-ui-design-system-alignment/`: completed app UI design-system alignment initiative that created the screenshot-grounded design library, promoted first semantic color roles, reset operational shell tracking, normalized compact control geometry, documented spacing/radius rules, and proved representative light/dark routes.
 - `docs/programs/completed/2026-05-02-posthog-observability-migration/`: completed PostHog observability migration that added Next.js PostHog browser and server capture, production source-map upload proof, masked replay defaults, draft-only PostHog-to-Linear triage, MCP operator instructions, and narrowed Convex away from generic client/runtime telemetry.
 - `docs/programs/completed/2026-05-01-generated-repo-first-slice-autonomy/`: completed generated customer-repo autonomy initiative that added deterministic Build Pack readiness, derived first-slice planning, package-script-backed validation, review and verification proof, weak-fact blockers, clean-room replay proof, and structural regression snapshots.
