@@ -28,7 +28,7 @@ const completeProjectFacts: CanonicalProjectFacts = {
 	problem_severity: "8",
 	problem_urgency: "Needs attention soon",
 	outcome_statement: "Leave with a build-ready Ship by Sunday Codebase.",
-	success_looks_like: "A founder downloads a working codebase and repo zip.",
+	success_looks_like: "A founder downloads a working Codebase zip.",
 	user_benefit:
 		"They can move directly into implementation without re-briefing.",
 	evidence_summary:
@@ -110,7 +110,7 @@ const completeProjectFacts: CanonicalProjectFacts = {
 		"Pair codebase previews with repo screenshots and exact file names.",
 	objective: "Build the codebase compiler and codebase-first runtime.",
 	user_visible_outcome:
-		"A buyer can move through the funnel and download a repo zip.",
+		"A buyer can move through the funnel and download a Codebase zip.",
 	constraints: [
 		"Web-app only",
 		"Download-only delivery",
@@ -132,7 +132,7 @@ const completeProjectFacts: CanonicalProjectFacts = {
 		"Run codebase-flow integration tests",
 	],
 	demo_flow:
-		"Complete the funnel, download the stage packs, then download the repo zip with docs/ at the root.",
+		"Complete the funnel, review the Codebase materials, then download the Codebase zip with docs/ at the root.",
 	risks: ["Schema drift", "Missing route tracing", "Legacy route confusion"],
 	dependencies: [
 		"Next.js tracing config",

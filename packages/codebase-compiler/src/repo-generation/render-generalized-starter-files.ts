@@ -11,7 +11,7 @@ function renderAssistantGuide(
 		content: [
 			`# ${title}`,
 			"",
-			`This starter repo for ${productName} ships generated planning material under \`docs/\` plus the runnable app under \`apps/web\`.`,
+			`This generated Codebase for ${productName} ships planning material under \`docs/\` plus the runnable app under \`apps/web\`.`,
 			"",
 			productSummary,
 			"",
@@ -24,7 +24,7 @@ function renderAssistantGuide(
 			"- When using an AI coding or design tool, explicitly tell it to follow `DESIGN.md` and the generated design snapshot before it proposes UI changes.",
 			"- Use `bun` for JavaScript work and `uv` for Python utilities.",
 			"- Keep diffs scoped, rename vague identifiers, and separate UI rendering from stateful logic.",
-			"- Treat `docs/testing/` as the starter home for verification notes.",
+			"- Treat `docs/testing/` as the Codebase home for verification notes.",
 			"- Before final handoff, update `docs/build/docs/documentation.md` with what changed, validation results, assumptions, and a requirement-to-evidence checklist.",
 		].join("\n"),
 	};
@@ -62,7 +62,7 @@ function renderVerificationPersonas(productName: string) {
 			{
 				id: "founder-operator",
 				name: "Founder Operator",
-				goal: `Turn ${productName} into a usable starter repo quickly.`,
+				goal: `Turn ${productName} into a usable Codebase quickly.`,
 			},
 			{
 				id: "design-partner",
@@ -123,14 +123,14 @@ export function renderGeneralizedStarterFiles(
 		{
 			path: ".agents/skills/README.md",
 			content:
-				"# Starter Skills\n\nUse this folder for reusable project-safe agent instructions and checklists.\n",
+				"# Codebase Skills\n\nUse this folder for reusable project-safe agent instructions and checklists.\n",
 		},
 		{
 			path: ".github/workflows/examples/README.md",
 			content: [
 				"# Workflow Examples",
 				"",
-				"These files are safe starter examples. Copy one into `.github/workflows/` and adapt the secrets, branches, and deploy steps for your own environment before enabling it.",
+				"These files are safe Codebase examples. Copy one into `.github/workflows/` and adapt the secrets, branches, and deploy steps for your own environment before enabling it.",
 			].join("\n"),
 		},
 		{
@@ -158,7 +158,7 @@ export function renderGeneralizedStarterFiles(
 			content: [
 				"# Testing",
 				"",
-				"Use this folder for lightweight verification notes that matter for your starter repo.",
+				"Use this folder for lightweight verification notes that matter for your Codebase.",
 				"",
 				"- Keep the fastest repeatable checks in `README.md`.",
 				"- Keep real test reports short and tied to observable user outcomes.",

@@ -172,12 +172,12 @@ const codebaseFieldPresentations: Partial<
 	design_preset_id: {
 		label: "Choose a design direction",
 		helperText:
-			"Pick a curated starting point first. You can customize the starter theme right after.",
+			"Pick a curated starting point first. You can customize the Codebase theme right after.",
 	},
 	theme_preset: {
 		label: "Theme overrides",
 		helperText:
-			"Adjust the starter theme after choosing a design direction. The preset code feeds directly into your generated repo.",
+			"Adjust the Codebase theme after choosing a design direction. The preset code feeds directly into your generated Codebase.",
 	},
 	pricing: {
 		label: (facts) => {
@@ -207,13 +207,13 @@ const codebaseListFieldPlaceholders: Partial<
 	core_flow: [
 		"Fill out the codebase",
 		"Review generated artifacts",
-		"Download the starter repo",
+		"Download the Codebase",
 		"Customize and deploy",
 		"Start collecting payments",
 	],
 	scope_in: [
 		"Codebase intake form",
-		"AI-generated starter repo",
+		"AI-generated Codebase",
 		"Stripe checkout",
 		"Vercel deploy pipeline",
 	],

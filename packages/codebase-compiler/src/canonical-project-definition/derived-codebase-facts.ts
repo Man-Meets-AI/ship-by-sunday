@@ -61,7 +61,7 @@ const DEFAULT_CREATIVE_SPEC =
 const DEFAULT_OBJECTIVE =
 	"Build the codebase compiler and codebase-first runtime.";
 const DEFAULT_USER_VISIBLE_OUTCOME =
-	"A buyer can move through the funnel and download a repo zip.";
+	"A buyer can move through the funnel and download a Codebase zip.";
 const DEFAULT_CONSTRAINTS = [
 	"Web-app only",
 	"Download-only delivery",
@@ -84,7 +84,7 @@ const DEFAULT_VALIDATION_PLAN = [
 	"Run codebase-flow integration tests",
 ];
 const DEFAULT_DEMO_FLOW =
-	"Complete the funnel, download the stage packs, then download the repo zip with docs/ at the root.";
+	"Complete the funnel, review the Codebase materials, then download the Codebase zip with docs/ at the root.";
 const DEFAULT_RISKS = [
 	"Schema drift",
 	"Missing route tracing",

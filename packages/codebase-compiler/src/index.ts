@@ -43,8 +43,8 @@ export {
 } from "./readiness/derive-stage-status";
 export { createCompleteProjectDefinition } from "./fixtures/complete-project-definition";
 export {
-	AGENT_READY_PACKS_LABEL,
 	BUILD_PACK_LABEL,
+	CODEBASE_MATERIALS_LABEL,
 	DESIGN_PACK_LABEL,
 	MARKETING_PACK_LABEL,
 	PROMPT_PACK_LABEL,

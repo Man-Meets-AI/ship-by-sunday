@@ -40,10 +40,10 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 		customerAction: [
 			"Read `README.md` for the repo overview.",
 			"Read `DESIGN.md` for the generated visual system and product feel.",
-			"Skim `docs/index.md` so you know what packs and setup docs are already included.",
+			"Skim `docs/index.md` so you know what Codebase materials and setup docs are already included.",
 		],
 		agentPrompt:
-			"Summarize this starter repo before changing code. Tell me what is product-specific, what is starter scaffolding, and what I should leave alone until setup is stable.",
+			"Summarize this generated Codebase before changing code. Tell me what is product-specific, what is setup scaffolding, and what I should leave alone until setup is stable.",
 		skillTriggers: ["$starter-core-setup"],
 		references: [
 			{ label: "README.md", path: "README.md" },
@@ -61,7 +61,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 			"If the bootstrap opens provider pages, keep those tabs for later steps instead of filling them immediately.",
 		],
 		agentPrompt:
-			"Help me boot this starter locally without touching auth or billing yet. Follow the starter bootstrap contract and keep the diff scoped to setup only.",
+			"Help me boot this Codebase locally without touching auth or billing yet. Follow the bootstrap contract and keep the diff scoped to setup only.",
 		skillTriggers: ["$starter-core-setup"],
 		references: [{ label: "bootstrap.sh", path: "bootstrap.sh" }],
 	},
@@ -76,7 +76,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 			"Use the local wrapper skills first. Use the external skills when you need deeper domain help.",
 		],
 		agentPrompt:
-			"Confirm which local starter skills already ship in this repo and which external skills were installed, then tell me which one I should use first.",
+			"Confirm which local Codebase skills already ship in this repo and which external skills were installed, then tell me which one I should use first.",
 		skillTriggers: [
 			"$starter-core-setup",
 			"$starter-auth-setup",
@@ -106,7 +106,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 			"Link PRs, preview deployments, docs, and validation evidence back to the Linear issue before calling work done.",
 		],
 		agentPrompt:
-			"Help me set up Linear for this starter. Create or identify the product project, define the default workflow, and show me the issue template agents should use before implementation starts.",
+			"Help me set up Linear for this Codebase. Create or identify the product project, define the default workflow, and show me the issue template agents should use before implementation starts.",
 		skillTriggers: ["$starter-linear-workflow", "$starter-core-setup"],
 		references: [
 			{ label: "START-HERE.md", path: "START-HERE.md" },
@@ -127,10 +127,10 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 		customerAction: [
 			"In Codex, run `$starter-core-setup`.",
 			"Follow the local setup guidance until the homepage, docs, and app shell boot cleanly.",
-			"Do not change auth, checkout, or protected access code before the starter runs locally.",
+			"Do not change auth, checkout, or protected access code before the Codebase runs locally.",
 		],
 		agentPrompt:
-			"Run the core starter setup path for this repo. Keep auth and billing untouched until the basic local boot is stable.",
+			"Run the core Codebase setup path for this repo. Keep auth and billing untouched until the basic local boot is stable.",
 		skillTriggers: ["$starter-core-setup", "$starter-nextjs-in-this-repo"],
 		references: [
 			{
@@ -153,7 +153,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 			"Keep this repo’s auth contract intact until sign-in and protected routes work end to end.",
 		],
 		agentPrompt:
-			"Set up auth for this starter in the supported order: Clerk first, then Convex, then verification. Use the repo-local guidance before making framework changes.",
+			"Set up auth for this Codebase in the supported order: Clerk first, then Convex, then verification. Use the repo-local guidance before making framework changes.",
 		skillTriggers: [
 			"$starter-auth-setup",
 			"$clerk",
@@ -178,10 +178,10 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 		customerAction: [
 			"In Codex, run `$starter-billing-setup`.",
 			"Set up Stripe after auth is stable, then run the billing doctor and webhook verification flow.",
-			"Do not rewrite checkout or webhook code until the starter’s paid-access handoff works as shipped.",
+			"Do not rewrite checkout or webhook code until the Codebase's paid-access handoff works as shipped.",
 		],
 		agentPrompt:
-			"Set up billing for this starter after auth is stable. Keep the checkout and webhook contract intact, then verify the billing handoff before changing product flows.",
+			"Set up billing for this Codebase after auth is stable. Keep the checkout and webhook contract intact, then verify the billing handoff before changing product flows.",
 		skillTriggers: ["$starter-billing-setup", "$stripe-best-practices"],
 		references: [
 			{
@@ -192,15 +192,15 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 	},
 	{
 		id: "verify-starter",
-		title: "Verify the starter works",
+		title: "Verify the Codebase works",
 		internalPhase: "billing",
 		customerAction: [
-			"Confirm the app boots, sign-in works, and the protected starter shell behaves correctly.",
+			"Confirm the app boots, sign-in works, and the protected Codebase shell behaves correctly.",
 			"Confirm the billing doctor and verification flow both pass before touching checkout or access code.",
-			"Only move on once the starter is stable as shipped.",
+			"Only move on once the Codebase is stable as shipped.",
 		],
 		agentPrompt:
-			"Verify the shipped starter before we customize it. Run the smallest relevant checks first and call out any real setup drift before we touch product code.",
+			"Verify the shipped Codebase before we customize it. Run the smallest relevant checks first and call out any real setup drift before we touch product code.",
 		skillTriggers: ["$testing-practices", "$starter-billing-setup"],
 		references: [
 			{
@@ -216,10 +216,10 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 		customerAction: [
 			"Rewrite the name, promise, pricing, and homepage copy before deeper refactors.",
 			"Use the generated product config and home content as your first product seam.",
-			"Keep the starter’s fragile auth and billing seams intact until the product already feels like yours.",
+			"Keep the Codebase's fragile auth and billing seams intact until the product already feels like yours.",
 		],
 		agentPrompt:
-			"Update the generated starter identity to match my product before touching auth or billing. Start with the product config and homepage content, then tell me what still looks like starter scaffolding.",
+			"Update the generated Codebase identity to match my product before touching auth or billing. Start with the product config and homepage content, then tell me what still looks like setup scaffolding.",
 		skillTriggers: ["$starter-first-slice", "$copywriting", "$frontend-design"],
 		references: [
 			{
@@ -238,11 +238,11 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 		internalPhase: "product",
 		customerAction: [
 			"In Codex, run `$starter-first-slice`.",
-			"Pick the first real customer-visible slice after the starter is stable.",
-			"Use the shipped docs and wrapper skills as guardrails while the product begins to diverge from the starter.",
+			"Pick the first real customer-visible slice after the Codebase is stable.",
+			"Use the shipped docs and wrapper skills as guardrails while the product begins to diverge from setup scaffolding.",
 		],
 		agentPrompt:
-			"The starter is stable. Help me pick and implement the first real customer-visible slice, then keep docs and tests aligned as we move away from starter scaffolding.",
+			"The Codebase is stable. Help me pick and implement the first real customer-visible slice, then keep docs and tests aligned as we move away from setup scaffolding.",
 		skillTriggers: ["$starter-first-slice", "$docs", "$testing-practices"],
 		references: [
 			{
@@ -324,9 +324,9 @@ function renderSharedIntro(productName: string) {
 		"- `$starter-auth-setup`",
 		"- `$starter-billing-setup`",
 		"",
-		"In Codex, trigger a skill by typing `$` followed by the skill name. The local wrapper skills tell Codex how this starter wants work to be done. The Linear wrapper teaches agents how to treat issues as the backlog and status source. The installed external skills add deeper product knowledge for Clerk, Convex, and Stripe.",
+		"In Codex, trigger a skill by typing `$` followed by the skill name. The local wrapper skills tell Codex how this Codebase wants work to be done. The Linear wrapper teaches agents how to treat issues as the backlog and status source. The installed external skills add deeper product knowledge for Clerk, Convex, and Stripe.",
 		"",
-		"Keep the shipped auth, billing, and protected-access paths intact until the starter is stable as shipped.",
+		"Keep the shipped auth, billing, and protected-access paths intact until the Codebase is stable as shipped.",
 	].join("\n");
 }
 
@@ -351,7 +351,7 @@ export function renderStarterProjectOnboardingFiles(
 			content: [
 				"---",
 				'title: "Start Here"',
-				`description: "Boot ${productName}, install the recommended Codex skills, and follow the starter in the right order before customizing the product."`,
+				`description: "Boot ${productName}, install the recommended Codex skills, and follow the Codebase setup in the right order before customizing the product."`,
 				"---",
 				"",
 				"# Start Here",

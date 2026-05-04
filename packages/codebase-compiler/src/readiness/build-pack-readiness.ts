@@ -603,7 +603,7 @@ function buildReviewPack(
 			},
 			{
 				name: "Regression reviewer",
-				lens: "Did protected starter setup, auth, billing, provider configuration, and unrelated routes remain untouched unless explicitly in scope?",
+				lens: "Did protected Codebase setup, auth, billing, provider configuration, and unrelated routes remain untouched unless explicitly in scope?",
 				evidence: "Diff review plus typed validation results.",
 			},
 		],

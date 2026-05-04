@@ -111,7 +111,7 @@ describe("codebase renderers", () => {
 			(file) => file.path === "docs/prompts/execplan-outline-from-session.md",
 		);
 
-		expect(readme?.content).toContain("Agent-Ready Packs");
+		expect(readme?.content).toContain("Codebase Materials");
 		expect(readme?.content).toContain("Design Pack");
 		expect(readme?.content).toContain("Prompt Pack");
 		expect(marketingReadme?.content).toContain("Marketing Pack");
@@ -224,7 +224,7 @@ describe("codebase renderers", () => {
 		expect(buildPrompt).toContain("bun run test:compiler");
 		expect(buildPrompt).toContain("bun run build");
 		expect(buildPlans).toContain(
-			"| M1 - Bootstrap the compiler and canonical schema. | A buyer can move through the funnel and download a repo zip.",
+			"| M1 - Bootstrap the compiler and canonical schema. | A buyer can move through the funnel and download a Codebase zip.",
 		);
 		expect(buildPlans).toContain("bun run test:integration");
 		expect(buildImplement).toContain("## Source Of Truth");
@@ -274,7 +274,7 @@ describe("codebase renderers", () => {
 						"They need a clear codebase and repo handoff immediately.",
 					problem_severity: "8",
 					success_looks_like:
-						"A founder downloads a working codebase and repo zip.",
+						"A founder downloads a working Codebase zip.",
 					core_flow: [
 						"Capture product facts",
 						"Unlock codebases",
@@ -296,8 +296,8 @@ describe("codebase renderers", () => {
 			`"theme_preset": "${buildDesignPresetFactSeed(DEFAULT_DESIGN_PRESET_ID).theme_preset}"`,
 		);
 		expect(factsJson?.content).toContain('"price_usd_cents": 2900');
-		expect(readme?.content).toContain("Agent-Ready Packs");
-		expect(readme?.content).toContain("repo zip");
+		expect(readme?.content).toContain("Codebase Materials");
+		expect(readme?.content).toContain("Codebase zip");
 	});
 
 	it("renders reduced readiness with blocked validation and visible customer-input work", async () => {
