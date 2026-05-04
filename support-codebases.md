@@ -263,6 +263,68 @@ Primary actions:
 
 The screen should make it obvious that Ship by Sunday is coordinating local Codex work and approved structured findings, not browsing the customer's source. Do not include a raw source viewer in the first version.
 
+## Existing-Codebase Backend Model
+
+Do not overload the generated-repo `/codebase` tables for existing-codebase support. Current generated-codebase state such as `projectDefinitions` and `codebaseWorkflowStates` should remain focused on product facts, generated repo readiness, and review handoff.
+
+Create a separate existing-codebase workspace model:
+
+- `workspaceProjects`
+- `workspaceRunnerBindings`
+- `workspaceRepositoryBindings`
+- `doctorPassRuns`
+- `codebaseFindings`
+- `workflowRuns`
+
+First-version synced state should include only sync-safe fields:
+
+- project identity
+- fulfillment track
+- runner status
+- runner mode
+- repository remote or display label
+- setup health
+- doctor-pass status
+- findings metadata
+- sync preview state
+- workflow/proof status
+- revocation and deletion timestamps
+
+Do not store raw source, raw logs, local absolute paths, secrets, or Codex transcripts by default. Store evidence refs as paths or repo-relative refs only after sync preview approval, and keep full local reports in `.sbs/`.
+
+## Runner Event Protocol
+
+The first runner-to-web protocol should be a small typed event stream from the local runner to the hosted backend. The browser should subscribe to hosted backend state and events; it should not talk directly to the local daemon or read local files.
+
+Every event should be append-only and sync-safe:
+
+- `eventId`
+- `projectId`
+- `runnerId`
+- `runId`
+- `eventType`
+- `createdAt`
+- `schemaVersion`
+- narrow payload
+
+First event types:
+
+- `runner.paired`
+- `runner.heartbeat`
+- `setup.check.started`
+- `setup.check.completed`
+- `doctor.stage.started`
+- `doctor.probe.completed`
+- `doctor.sync_preview.ready`
+- `doctor.findings.approved`
+- `workflow.approval.requested`
+- `workflow.started`
+- `workflow.proof.completed`
+- `workflow.blocked`
+- `runner.revoked`
+
+Events must not contain raw source, raw logs, local absolute paths, secrets, or Codex transcripts. UI state should be derived from durable rows plus this event stream, so reconnects, refreshes, and audit history work without trusting browser-local daemon state.
+
 ## No-Codebase User Journey
 
 Ideal new-codebase journey:
@@ -971,7 +1033,9 @@ Avoid until implemented:
 - Make `/workspace/findings/[findingId]` a workflow decision screen with `Approve workflow` as the primary action and no raw source by default.
 - Make `/workspace/doctor-pass` a stage-progress screen with probe rows, bottleneck questions, local report access, and explicit sync preview approval.
 - Make `/workspace/privacy` a local-execution and sync-boundary control page with runner identity, project binding, last sync preview, raw source/log/transcript sharing disabled by default, revoke/delete controls, and managed GitHub disabled unless explicitly enabled later.
+- Keep existing-codebase state in separate workspace tables instead of overloading generated-codebase `projectDefinitions` and `codebaseWorkflowStates`.
+- Use an append-only, sync-safe runner event stream from local runner to hosted backend; derive UI state from backend rows and events instead of browser-daemon access.
 
 ## Open Questions
 
-- What is the first durable backend data model for existing-codebase projects?
+- How should the implementation work split into child ExecPlans?
