@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Code2, Loader2, Sparkles } from "lucide-react";
+import { ArrowRight, Code2, ListVideo, Loader2, Sparkles } from "lucide-react";
 import { useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -14,6 +14,7 @@ type ChoiceState = FulfillmentTrack | null;
 
 const fulfillmentChoices = [
 	{
+		kind: "fulfillment",
 		fulfillmentTrack: "generated_codebase",
 		checkoutCtaId: "choice_generated",
 		title: "Generate a new codebase",
@@ -23,6 +24,7 @@ const fulfillmentChoices = [
 		icon: Sparkles,
 	},
 	{
+		kind: "fulfillment",
 		fulfillmentTrack: "existing_codebase_doctor",
 		checkoutCtaId: "choice_existing",
 		title: "Set up an existing codebase",
@@ -33,6 +35,23 @@ const fulfillmentChoices = [
 	},
 ] as const;
 
+const tutorialVideosChoice = {
+	kind: "link",
+	id: "tutorial-videos",
+	title: "Watch tutorial videos",
+	description:
+		"Open the video library first without choosing or changing your product path.",
+	href: routeConfig.tutorials,
+	icon: ListVideo,
+} as const;
+
+const workspacePathChoices = [
+	...fulfillmentChoices,
+	tutorialVideosChoice,
+] as const;
+
+type WorkspacePathChoice = (typeof workspacePathChoices)[number];
+
 export function WorkspaceFulfillmentChoice() {
 	const router = useRouter();
 	const resolveFulfillmentTrack = useMutation(
@@ -41,9 +60,12 @@ export function WorkspaceFulfillmentChoice() {
 	const [pendingChoice, setPendingChoice] = useState<ChoiceState>(null);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-	async function chooseFulfillmentPath(
-		choice: (typeof fulfillmentChoices)[number],
-	) {
+	async function chooseWorkspacePath(choice: WorkspacePathChoice) {
+		if (choice.kind === "link") {
+			router.replace(choice.href);
+			return;
+		}
+
 		setPendingChoice(choice.fulfillmentTrack);
 		setErrorMessage(null);
 
@@ -76,17 +98,23 @@ export function WorkspaceFulfillmentChoice() {
 					</p>
 				</div>
 
-				<div className="mt-8 grid gap-4 md:grid-cols-2">
-					{fulfillmentChoices.map((choice) => {
+				<div className="mt-8 grid gap-4 md:grid-cols-3">
+					{workspacePathChoices.map((choice) => {
 						const Icon = choice.icon;
-						const isPending = pendingChoice === choice.fulfillmentTrack;
+						const choiceKey =
+							choice.kind === "fulfillment"
+								? choice.fulfillmentTrack
+								: choice.id;
+						const isPending =
+							choice.kind === "fulfillment" &&
+							pendingChoice === choice.fulfillmentTrack;
 						const isDisabled = pendingChoice !== null;
 
 						return (
 							<button
-								key={choice.fulfillmentTrack}
+								key={choiceKey}
 								type="button"
-								onClick={() => void chooseFulfillmentPath(choice)}
+								onClick={() => void chooseWorkspacePath(choice)}
 								disabled={isDisabled}
 								className={cn(
 									"group flex min-h-52 flex-col rounded-xl border border-border/60 bg-card p-5 text-left shadow-sm shadow-foreground/5 transition-colors hover:border-foreground/25 hover:bg-muted/30 disabled:pointer-events-none disabled:opacity-60",

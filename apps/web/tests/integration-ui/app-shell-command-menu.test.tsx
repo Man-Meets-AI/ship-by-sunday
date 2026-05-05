@@ -119,16 +119,16 @@ describe("AppShellCommandMenu", () => {
 		const user = userEvent.setup();
 		renderMenu();
 
-		expect(screen.queryByPlaceholderText(/search workspace/i)).toBeNull();
+		expect(screen.queryByPlaceholderText(/search actions/i)).toBeNull();
 
 		fireEvent.keyDown(window, { key: "k", metaKey: true });
 
-		const input = await screen.findByPlaceholderText(/search workspace/i);
+		const input = await screen.findByPlaceholderText(/search actions/i);
 		expect(input).toBeTruthy();
 
 		await user.keyboard("{Escape}");
 		await waitFor(() => {
-			expect(screen.queryByPlaceholderText(/search workspace/i)).toBeNull();
+			expect(screen.queryByPlaceholderText(/search actions/i)).toBeNull();
 		});
 	});
 
@@ -138,9 +138,7 @@ describe("AppShellCommandMenu", () => {
 
 		await user.click(screen.getByTestId("app-shell-command-menu-trigger"));
 
-		expect(
-			await screen.findByPlaceholderText(/search workspace/i),
-		).toBeTruthy();
+		expect(await screen.findByPlaceholderText(/search actions/i)).toBeTruthy();
 		expect(captureProductEventMock).toHaveBeenCalledWith(
 			expect.objectContaining({
 				event: "app_shell_command_menu_opened",
@@ -164,7 +162,7 @@ describe("AppShellCommandMenu", () => {
 		const user = userEvent.setup();
 		renderMenu();
 		fireEvent.keyDown(window, { key: "k", metaKey: true });
-		await screen.findByPlaceholderText(/search workspace/i);
+		await screen.findByPlaceholderText(/search actions/i);
 
 		await user.click(screen.getByRole("option", { name: /^Codebase$/i }));
 
@@ -172,11 +170,24 @@ describe("AppShellCommandMenu", () => {
 		expect(pushMock.mock.calls[0]?.[0]).toMatch(/codebase/i);
 	});
 
+	it("navigates to Tutorial Videos from the workspace command group", async () => {
+		const user = userEvent.setup();
+		renderMenu();
+		fireEvent.keyDown(window, { key: "k", metaKey: true });
+		await screen.findByPlaceholderText(/search actions/i);
+
+		await user.click(
+			screen.getByRole("option", { name: /^Tutorial Videos$/i }),
+		);
+
+		expect(pushMock).toHaveBeenCalledWith("/tutorials");
+	});
+
 	it("invokes setTheme when a theme item is selected", async () => {
 		const user = userEvent.setup();
 		renderMenu();
 		fireEvent.keyDown(window, { key: "k", metaKey: true });
-		await screen.findByPlaceholderText(/search workspace/i);
+		await screen.findByPlaceholderText(/search actions/i);
 
 		await user.click(screen.getByRole("option", { name: /^Dark$/i }));
 
@@ -187,7 +198,7 @@ describe("AppShellCommandMenu", () => {
 		const user = userEvent.setup();
 		renderMenu();
 		fireEvent.keyDown(window, { key: "k", metaKey: true });
-		await screen.findByPlaceholderText(/search workspace/i);
+		await screen.findByPlaceholderText(/search actions/i);
 
 		await user.click(screen.getByRole("option", { name: /sign out/i }));
 
@@ -218,7 +229,7 @@ describe("AppShellCommandMenu", () => {
 		};
 		render(<AppShellCommandMenu primaryNav={navWithLongLesson} />);
 		fireEvent.keyDown(window, { key: "k", metaKey: true });
-		await screen.findByPlaceholderText(/search workspace/i);
+		await screen.findByPlaceholderText(/search actions/i);
 
 		const compoundLabel = `Bonus: ${longChildLabel}`;
 		const option = screen.getByRole("option", { name: compoundLabel });

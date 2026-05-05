@@ -18,6 +18,11 @@ export function workspaceMenuLinks(pathname: string) {
 			active: isPathPrefixActive(pathname, routeConfig.review),
 		},
 		{
+			href: routeConfig.tutorials,
+			label: "Tutorial Videos",
+			active: isPathPrefixActive(pathname, routeConfig.tutorials),
+		},
+		{
 			href: routeConfig.settings,
 			label: workspaceDisplayConfig.settingsLabel,
 			active: isPathPrefixActive(pathname, routeConfig.settings),

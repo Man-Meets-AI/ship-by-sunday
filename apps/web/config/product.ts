@@ -23,6 +23,7 @@ export const routeConfig = {
 	codebase: "/codebase",
 	review: "/review",
 	execute: "/execute",
+	tutorials: "/tutorials",
 	docs: "/docs",
 	blog: "/blog",
 	mission: "/mission",

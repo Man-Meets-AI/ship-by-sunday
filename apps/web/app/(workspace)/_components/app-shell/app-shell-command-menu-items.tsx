@@ -6,6 +6,7 @@ import {
 	Compass,
 	Flag,
 	House,
+	ListVideo,
 	LogOut,
 	Map,
 	Moon,
@@ -39,6 +40,7 @@ type AppShellCommandMenuItemsProps = {
 const workspaceLinkIcons = {
 	[routeConfig.codebase]: House,
 	[routeConfig.review]: Flag,
+	[routeConfig.tutorials]: ListVideo,
 	[routeConfig.settings]: Settings,
 } as const;
 

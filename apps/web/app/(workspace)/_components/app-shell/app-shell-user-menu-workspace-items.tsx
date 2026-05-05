@@ -1,4 +1,4 @@
-import { Flag, House, Settings } from "lucide-react";
+import { Flag, House, ListVideo, Settings } from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -13,6 +13,7 @@ import { workspaceMenuLinks } from "./app-shell-user-menu-helpers";
 const workspaceLinkIcons = {
 	[routeConfig.codebase]: House,
 	[routeConfig.review]: Flag,
+	[routeConfig.tutorials]: ListVideo,
 	[routeConfig.settings]: Settings,
 } as const;
 

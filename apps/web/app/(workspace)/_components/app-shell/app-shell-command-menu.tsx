@@ -102,7 +102,7 @@ export function AppShellCommandMenu({ primaryNav }: AppShellCommandMenuProps) {
 							Command menu
 						</DialogPrimitive.Title>
 						<DialogPrimitive.Description className="sr-only">
-							Search the workspace and run quick actions.
+							Search product pages and run quick actions.
 						</DialogPrimitive.Description>
 						<Command label="Command menu" loop>
 							<div className={inputWrapperClassName}>
@@ -111,7 +111,7 @@ export function AppShellCommandMenu({ primaryNav }: AppShellCommandMenuProps) {
 									aria-hidden
 								/>
 								<CommandInput
-									placeholder="Search workspace…"
+									placeholder="Search actions…"
 									className={inputClassName}
 								/>
 							</div>
