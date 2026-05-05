@@ -731,12 +731,12 @@ function formatBranchTimestamp(timestamp: number) {
 	const date = new Date(timestamp);
 	const pad = (value: number) => value.toString().padStart(2, "0");
 	return [
-		date.getFullYear(),
-		pad(date.getMonth() + 1),
-		pad(date.getDate()),
+		date.getUTCFullYear(),
+		pad(date.getUTCMonth() + 1),
+		pad(date.getUTCDate()),
 		"-",
-		pad(date.getHours()),
-		pad(date.getMinutes()),
+		pad(date.getUTCHours()),
+		pad(date.getUTCMinutes()),
 	].join("");
 }
 

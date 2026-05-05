@@ -116,7 +116,7 @@ describe("workspace findings read model", () => {
 		const detail = buildWorkspaceFindingDetailModel(
 			[createFinding()],
 			"finding-source-truth-readiness",
-			1_777_942_800_000,
+			Date.UTC(2026, 4, 4, 21, 0),
 		);
 
 		expect(detail).toMatchObject({
@@ -175,7 +175,7 @@ describe("workspace findings read model", () => {
 				}),
 			],
 			"finding-broken-app",
-			new Date(2026, 4, 4, 21, 0).getTime(),
+			Date.UTC(2026, 4, 4, 21, 0),
 		);
 
 		expect(detail?.workflowApproval).toMatchObject({
@@ -207,7 +207,7 @@ describe("workspace findings read model", () => {
 				}),
 			],
 			"finding-observability",
-			new Date(2026, 4, 5, 10, 0).getTime(),
+			Date.UTC(2026, 4, 5, 10, 0),
 		);
 
 		expect(detail?.workflowApproval).toMatchObject({
@@ -248,7 +248,7 @@ describe("workspace findings read model", () => {
 				}),
 			],
 			"finding-mature-adoption",
-			new Date(2026, 4, 5, 11, 0).getTime(),
+			Date.UTC(2026, 4, 5, 11, 0),
 		);
 
 		expect(detail?.workflowApproval).toMatchObject({

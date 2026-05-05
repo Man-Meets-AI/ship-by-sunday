@@ -111,7 +111,7 @@ describe("WorkspaceFindingDetailPage", () => {
 				findingRouteId="finding-source-truth-readiness"
 				projectId="workspaceProjects_1"
 				activeRunnerId="workspaceRunnerBindings_1"
-				approvalTimestamp={1_777_942_800_000}
+				approvalTimestamp={Date.UTC(2026, 4, 4, 21, 0)}
 			/>,
 		);
 
@@ -224,7 +224,7 @@ describe("WorkspaceFindingDetailPage", () => {
 				findingRouteId="finding-broken-app"
 				projectId="workspaceProjects_1"
 				activeRunnerId="workspaceRunnerBindings_1"
-				approvalTimestamp={new Date(2026, 4, 4, 21, 0).getTime()}
+				approvalTimestamp={Date.UTC(2026, 4, 4, 21, 0)}
 			/>,
 		);
 
@@ -279,7 +279,7 @@ describe("WorkspaceFindingDetailPage", () => {
 				findingRouteId="finding-observability"
 				projectId="workspaceProjects_1"
 				activeRunnerId="workspaceRunnerBindings_1"
-				approvalTimestamp={new Date(2026, 4, 5, 10, 0).getTime()}
+				approvalTimestamp={Date.UTC(2026, 4, 5, 10, 0)}
 			/>,
 		);
 
