@@ -196,25 +196,13 @@ export function ExistingCodebaseSetupPage({
 							{model.subtitle}
 						</p>
 					</div>
-					<div className="grid gap-2 rounded-xl border border-border/60 bg-background p-4 text-sm">
-						<div className="flex items-center justify-between gap-3">
-							<span className="text-muted-foreground">Project</span>
-							<span className="truncate font-medium text-foreground">
-								{model.projectLabel}
-							</span>
-						</div>
-						<div className="flex items-center justify-between gap-3">
-							<span className="text-muted-foreground">Repository</span>
-							<span className="truncate font-medium text-foreground">
-								{model.repositoryLabel}
-							</span>
-						</div>
-						<div className="flex items-center justify-between gap-3">
-							<span className="text-muted-foreground">Runner</span>
-							<span className="truncate font-medium text-foreground">
-								{model.pairing.activeRunnerLabel}
-							</span>
-						</div>
+					<div className="grid min-w-0 gap-2 rounded-xl border border-border/60 bg-background p-4 text-sm">
+						<SetupSummaryRow label="Project" value={model.projectLabel} />
+						<SetupSummaryRow label="Repository" value={model.repositoryLabel} />
+						<SetupSummaryRow
+							label="Runner"
+							value={model.pairing.activeRunnerLabel}
+						/>
 					</div>
 				</header>
 
@@ -267,5 +255,19 @@ export function ExistingCodebaseSetupPage({
 				</div>
 			</div>
 		</AppShell>
+	);
+}
+
+function SetupSummaryRow({ label, value }: { label: string; value: string }) {
+	return (
+		<div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
+			<span className="text-muted-foreground">{label}</span>
+			<span
+				className="min-w-0 truncate text-right font-medium text-foreground"
+				title={value}
+			>
+				{value}
+			</span>
+		</div>
 	);
 }

@@ -208,6 +208,7 @@ describe("ExistingCodebaseSetupPage", () => {
 		expect(
 			screen.getByRole("heading", { name: "Existing codebase setup" }),
 		).toBeTruthy();
+		expect(screen.getByText("Pending Project Setup")).toBeTruthy();
 		expect(
 			screen.getByText("bunx ship-by-sunday setup pair sbs_pair_test_token"),
 		).toBeTruthy();

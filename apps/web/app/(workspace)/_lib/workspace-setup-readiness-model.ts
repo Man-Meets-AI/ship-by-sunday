@@ -708,7 +708,7 @@ function getRepositoryLabel(
 	repositoryBinding: WorkspaceSetupRepositoryBinding,
 ) {
 	if (!repositoryBinding) {
-		return "Repo root will appear after the runner verifies Project Setup.";
+		return "Pending Project Setup";
 	}
 
 	const remoteName = [

@@ -67,10 +67,7 @@ export function WorkspaceFulfillmentChoice() {
 		<main className="min-h-dvh bg-background text-foreground tracking-normal">
 			<div className="mx-auto flex min-h-dvh w-full max-w-5xl flex-col justify-center px-4 py-10 sm:px-6 lg:px-8">
 				<div className="max-w-2xl">
-					<p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
-						Checkout path
-					</p>
-					<h1 className="mt-3 font-heading-serif text-4xl leading-none tracking-[-0.04em] sm:text-5xl">
+					<h1 className="font-heading-serif text-4xl leading-none tracking-[-0.04em] sm:text-5xl">
 						Choose your workspace path
 					</h1>
 					<p className="mt-4 max-w-xl text-base leading-7 text-muted-foreground">
