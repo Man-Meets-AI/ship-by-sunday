@@ -11,9 +11,9 @@ export function WorkspaceSupportMetric({
 	value: number;
 }) {
 	return (
-		<div className="flex items-center justify-between gap-3">
+		<div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
 			<span className="text-muted-foreground">{label}</span>
-			<span className="font-mono text-xs font-medium text-foreground">
+			<span className="min-w-0 truncate text-right font-mono text-xs font-medium text-foreground">
 				{value}
 			</span>
 		</div>

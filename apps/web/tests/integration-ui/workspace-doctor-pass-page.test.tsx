@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -120,6 +120,15 @@ describe("WorkspaceDoctorPassPage", () => {
 			),
 		).toBeTruthy();
 		expect(screen.getByText("Raw source is not uploaded.")).toBeTruthy();
+		const summaryPanel = screen.getByRole("region", { name: "What happened" });
+		expect(
+			within(summaryPanel)
+				.getAllByRole("listitem")
+				.filter(
+					(summaryItem) =>
+						summaryItem.getAttribute("data-summary-status") === "complete",
+				),
+		).toHaveLength(4);
 		expect(
 			screen.getAllByText("Waiting for your approval.").length,
 		).toBeGreaterThan(0);
@@ -240,6 +249,9 @@ describe("WorkspaceDoctorPassPage", () => {
 	});
 
 	it("shows failed run status and next action", async () => {
+		const blockedReason =
+			"Codebase intake probe was not found under .sbs/intake-probe.";
+
 		render(
 			<WorkspaceDoctorPassPage
 				initialSyncPreviewState={
@@ -250,7 +262,7 @@ describe("WorkspaceDoctorPassPage", () => {
 							syncPreviewStatus: "not_ready",
 							syncPreviewDigest: undefined,
 							syncPreviewFindingsCount: undefined,
-							blockedReason: "Codex interpretation failed.",
+							blockedReason,
 						},
 					} as never
 				}
@@ -260,9 +272,11 @@ describe("WorkspaceDoctorPassPage", () => {
 		expect(
 			screen.getByRole("heading", { name: "Doctor Pass needs attention" }),
 		).toBeTruthy();
-		expect(
-			screen.getAllByText("Codex interpretation failed.").length,
-		).toBeGreaterThan(0);
+		expect(screen.getAllByText(blockedReason).length).toBeGreaterThan(0);
+		const constrainedHeaderStatus = screen
+			.getAllByText(blockedReason)
+			.find((element) => element.getAttribute("title") === blockedReason);
+		expect(constrainedHeaderStatus?.className).toContain("truncate");
 		expect(
 			screen.getByText(/Next action: rerun Doctor Pass locally/),
 		).toBeTruthy();

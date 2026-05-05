@@ -64,16 +64,16 @@ export function WorkspaceFindingsPage({
 							and keep local evidence behind refs.
 						</p>
 					</div>
-					<div className="grid gap-2 rounded-xl border border-border/60 bg-background p-4 text-sm">
-						<div className="flex items-center justify-between gap-3">
+					<div className="grid min-w-0 gap-2 overflow-hidden rounded-xl border border-border/60 bg-background p-4 text-sm">
+						<div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
 							<span className="text-muted-foreground">Uploaded</span>
-							<span className="font-mono text-xs font-medium text-foreground">
+							<span className="min-w-0 truncate text-right font-mono text-xs font-medium text-foreground">
 								{ledgerModel.totalCount}
 							</span>
 						</div>
-						<div className="flex items-center justify-between gap-3">
+						<div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
 							<span className="text-muted-foreground">Visible</span>
-							<span className="font-mono text-xs font-medium text-foreground">
+							<span className="min-w-0 truncate text-right font-mono text-xs font-medium text-foreground">
 								{ledgerModel.filteredCount}
 							</span>
 						</div>

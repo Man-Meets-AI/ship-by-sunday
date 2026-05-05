@@ -263,25 +263,27 @@ function RunStatusPanel({
 	statusLabel: string;
 }) {
 	return (
-		<div className="grid gap-2 rounded-xl border border-border/60 bg-background p-4 text-sm">
-			<div className="flex items-center justify-between gap-3">
-				<span className="text-muted-foreground">Run</span>
-				<span className="truncate font-medium text-foreground">
-					{doctorPassRun?._id ?? "Waiting"}
-				</span>
-			</div>
-			<div className="flex items-center justify-between gap-3">
-				<span className="text-muted-foreground">Now</span>
-				<span className="truncate font-medium text-foreground">
-					{statusLabel}
-				</span>
-			</div>
-			<div className="flex items-center justify-between gap-3">
-				<span className="text-muted-foreground">Preview</span>
-				<span className="truncate font-medium text-foreground">
-					{doctorPassRun?.syncPreviewStatus ?? "not_ready"}
-				</span>
-			</div>
+		<div className="grid min-w-0 gap-2 overflow-hidden rounded-xl border border-border/60 bg-background p-4 text-sm">
+			<RunStatusRow label="Run" value={doctorPassRun?._id ?? "Waiting"} />
+			<RunStatusRow label="Now" value={statusLabel} />
+			<RunStatusRow
+				label="Preview"
+				value={doctorPassRun?.syncPreviewStatus ?? "not_ready"}
+			/>
+		</div>
+	);
+}
+
+function RunStatusRow({ label, value }: { label: string; value: string }) {
+	return (
+		<div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
+			<span className="text-muted-foreground">{label}</span>
+			<span
+				className="min-w-0 truncate text-right font-medium text-foreground"
+				title={value}
+			>
+				{value}
+			</span>
 		</div>
 	);
 }
@@ -292,33 +294,68 @@ function StatusSummaryPanel({
 	doctorPassRun: DoctorPassRun;
 }) {
 	const findingsCount = doctorPassRun?.syncPreviewFindingsCount ?? 0;
-	const summaryLines = doctorPassRun
+	const summaryItems = doctorPassRun
 		? [
-				`The local runner inspected this repo and found ${formatCount(
-					findingsCount,
-					"item",
-				)}.`,
-				"Raw source is not uploaded.",
-				"Only approved structured findings sync to Ship by Sunday.",
-				"Excluded artifacts stay local.",
+				{
+					label: `The local runner inspected this repo and found ${formatCount(
+						findingsCount,
+						"item",
+					)}.`,
+					status: "complete",
+				},
+				{ label: "Raw source is not uploaded.", status: "complete" },
+				{
+					label: "Only approved structured findings sync to Ship by Sunday.",
+					status: "complete",
+				},
+				{ label: "Excluded artifacts stay local.", status: "complete" },
 			]
 		: [
-				"Doctor Pass has not produced a local report yet.",
-				"Raw source is not uploaded.",
-				"Only approved structured findings sync to Ship by Sunday.",
+				{
+					label: "Doctor Pass has not produced a local report yet.",
+					status: "pending",
+				},
+				{ label: "Raw source is not uploaded.", status: "complete" },
+				{
+					label: "Only approved structured findings sync to Ship by Sunday.",
+					status: "complete",
+				},
 			];
 
 	return (
-		<section className="rounded-xl border border-border/60 bg-background p-5">
+		<section
+			aria-labelledby="workspace-doctor-pass-summary-heading"
+			className="rounded-xl border border-border/60 bg-background p-5"
+		>
 			<div className="flex items-start gap-3">
 				<ListChecks className="mt-0.5 size-4 text-foreground" aria-hidden />
 				<div className="min-w-0">
-					<h2 className="text-base font-semibold text-foreground">
+					<h2
+						id="workspace-doctor-pass-summary-heading"
+						className="text-base font-semibold text-foreground"
+					>
 						What happened
 					</h2>
 					<ul className="mt-3 grid gap-2 text-sm leading-6 text-muted-foreground">
-						{summaryLines.map((line) => (
-							<li key={line}>{line}</li>
+						{summaryItems.map((item) => (
+							<li
+								key={item.label}
+								className="flex items-start gap-2.5"
+								data-summary-status={item.status}
+							>
+								{item.status === "complete" ? (
+									<CheckCircle2
+										className="mt-1 size-4 shrink-0 text-state-success"
+										aria-hidden
+									/>
+								) : (
+									<Circle
+										className="mt-1 size-4 shrink-0 text-muted-foreground/70"
+										aria-hidden
+									/>
+								)}
+								<span>{item.label}</span>
+							</li>
 						))}
 					</ul>
 				</div>
