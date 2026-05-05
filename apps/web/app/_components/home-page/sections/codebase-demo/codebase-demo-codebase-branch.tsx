@@ -54,7 +54,10 @@ export function CodebaseDemoCodebaseBranch({
 						<p>{codebaseBranch.privacyAnswer}</p>
 					</div>
 				</article>
-				<div className="font-heading-serif mt-16 w-full max-w-[29.125rem] text-[#ececec] sm:mt-20">
+				<div
+					id="doctor-pass-audit"
+					className="font-heading-serif mt-16 w-full max-w-[29.125rem] scroll-mt-24 text-[#ececec] sm:mt-20"
+				>
 					<h2 className="text-[clamp(2.5rem,6vw,3.875rem)] leading-none font-normal tracking-[-0.04em]">
 						{codebaseBranch.auditList.title}
 					</h2>

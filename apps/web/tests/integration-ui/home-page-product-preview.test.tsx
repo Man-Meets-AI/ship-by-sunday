@@ -185,6 +185,12 @@ describe("CodebaseDemoSectionBlock", () => {
 		expect(screen.getAllByText(/private doctor pass/i).length).toBeGreaterThan(
 			0,
 		);
+		expect(
+			screen.getByRole("link", { name: "the audit" }).getAttribute("href"),
+		).toBe("#doctor-pass-audit");
+		expect(document.querySelector("#doctor-pass-audit")?.textContent).toContain(
+			"The Doctor Pass.",
+		);
 		expect(screen.getByText("The Doctor Pass.")).toBeTruthy();
 		expect(screen.getByText("→ Local runner pairing")).toBeTruthy();
 		expect(screen.queryByTestId("codebase-demo-checkout-cta")).toBeNull();

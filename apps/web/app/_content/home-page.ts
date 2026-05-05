@@ -8,7 +8,7 @@ import {
 	codebaseFieldPlaceholder,
 	getCodebaseFieldScaleDefinition,
 } from "@shipbysunday/codebase-presentation";
-import { productConfig, routeConfig } from "@/config/product";
+import { productConfig } from "@/config/product";
 import {
 	marketingDisplayConfig,
 	workspaceDisplayConfig,
@@ -214,7 +214,7 @@ const productPreviewSection = {
 			"Bring the app you already have. Ship by Sunday runs the private doctor pass through your local runner first: Shippie reads approved sync-safe reports, ranks the Top 9 findings, and keeps raw source, secrets, long logs, and Codex transcripts on your machine by default.",
 		auditLead: "You can read more about",
 		auditLinkLabel: "the audit",
-		auditHref: routeConfig.docs,
+		auditHref: "#doctor-pass-audit",
 		auditBody:
 			"if you want to, but the point is simple: diagnose the highest-leverage blocker, approve one bounded worker loop, and leave with proof or an honest blocked-proof report.",
 		todoIntro: "To start the private doctor pass,",
