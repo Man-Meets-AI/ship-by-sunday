@@ -34,6 +34,8 @@ const releasePersonaLocalPath = path.resolve(
 	process.env.RELEASE_PERSONAS_LOCAL_FILE ?? "tmp/release-personas.local.json",
 );
 const expectedWebhookAccessSource = "stripe_webhook";
+const hostedCheckoutWorkspacePathPattern =
+	/\/(start|codebase|workspace\/choose)(\?|$)/;
 
 function normalizeStripeSecretKey(secretKey) {
 	return secretKey.replaceAll("\\n", "").replaceAll("\n", "").trim();
@@ -346,7 +348,7 @@ async function waitForHostedCheckoutReturn(page) {
 	await page.waitForURL(
 		(url) =>
 			/\/checkout\/success\?session_id=/.test(url.toString()) ||
-			/\/(start|codebase)(\?|$)/.test(url.toString()),
+			hostedCheckoutWorkspacePathPattern.test(url.toString()),
 		{
 			timeout: 120_000,
 			waitUntil: "commit",
@@ -357,8 +359,8 @@ async function waitForHostedCheckoutReturn(page) {
 		console.log("Reached /checkout/success");
 	}
 
-	if (!/\/(start|codebase)(\?|$)/.test(page.url())) {
-		await page.waitForURL(/\/(start|codebase)(\?|$)/, {
+	if (!hostedCheckoutWorkspacePathPattern.test(page.url())) {
+		await page.waitForURL(hostedCheckoutWorkspacePathPattern, {
 			timeout: 120_000,
 			waitUntil: "commit",
 		});
@@ -532,7 +534,7 @@ try {
 	printCheck(
 		"Hosted success redirect",
 		/\/checkout\/success\?session_id=/.test(page.url()) ||
-			/\/(start|codebase)/.test(page.url()),
+			hostedCheckoutWorkspacePathPattern.test(page.url()),
 		page.url(),
 	);
 	printCheck(
