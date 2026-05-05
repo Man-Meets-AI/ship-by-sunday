@@ -103,6 +103,15 @@ describe("WorkspaceLoopsPage", () => {
 						category: "observability",
 						recommendedWorkflowId: "observability-debuggability",
 					}),
+					createFinding({
+						_id: "codebaseFindings_3",
+						findingId: "finding-mature-adoption",
+						rank: 3,
+						status: "ready",
+						title: "Mature repo needs adoption",
+						category: "other",
+						recommendedWorkflowId: "mature-repo-adoption",
+					}),
 				]}
 				initialRunHistory={createRunHistory()}
 			/>,
@@ -114,7 +123,11 @@ describe("WorkspaceLoopsPage", () => {
 		expect(screen.getByText("Source Truth Agent Readiness")).toBeTruthy();
 		expect(screen.getByText("Workflow Proof Completed")).toBeTruthy();
 		expect(screen.getByText("Observability Debuggability")).toBeTruthy();
-		expect(screen.getByText("available now")).toBeTruthy();
+		expect(screen.getByText("Mature Repo Adoption")).toBeTruthy();
+		expect(
+			screen.getByText("Workspace write for local adoption audit"),
+		).toBeTruthy();
+		expect(screen.getAllByText("available now").length).toBeGreaterThan(0);
 		expect(screen.getByText("Workflow packet contract")).toBeTruthy();
 		expect(screen.getByText("Evidence and probes")).toBeTruthy();
 		expect(screen.getByText("Customer bottleneck")).toBeTruthy();

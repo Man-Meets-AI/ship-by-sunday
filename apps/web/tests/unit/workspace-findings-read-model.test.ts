@@ -236,6 +236,62 @@ describe("workspace findings read model", () => {
 		);
 	});
 
+	it("builds mature repo adoption as a .sbs-only adoption packet", () => {
+		const detail = buildWorkspaceFindingDetailModel(
+			[
+				createFinding({
+					findingId: "finding-mature-adoption",
+					category: "other",
+					title: "Mature repo needs an adoption packet",
+					permissionRequired: "workspace_write",
+					recommendedWorkflowId: "mature-repo-adoption",
+				}),
+			],
+			"finding-mature-adoption",
+			new Date(2026, 4, 5, 11, 0).getTime(),
+		);
+
+		expect(detail?.workflowApproval).toMatchObject({
+			workflowId: "mature-repo-adoption",
+			workflowKind: "mature_repo_adoption",
+			workflowCommandName: "mature-repo-adoption",
+			confirmationFlag: "--confirm-adoption-audit",
+			branchName: "sbs/mature-repo-adoption-20260505-1100",
+			profileName: "sbs-workspace-write",
+			proofCommands: [
+				"git status --short",
+				"git diff --name-only",
+				"git diff --check",
+			],
+		});
+		expect(detail?.workflowApproval.expectedOutputs).toEqual(
+			expect.arrayContaining([
+				"sync-safe repo convention audit",
+				"adoption Program packet draft",
+				"first child ExecPlan draft",
+			]),
+		);
+		expect(detail?.workflowApproval.allowedTouchTargets).toEqual(
+			expect.arrayContaining([
+				".sbs/runs/<workflow-run-id>/**",
+				".sbs/mature-repo/**",
+				"repo convention metadata only",
+			]),
+		);
+		expect(detail?.workflowApproval.disallowedTouchTargets).toEqual(
+			expect.arrayContaining([
+				"branch pushes",
+				"pull requests",
+				"raw logs",
+				"raw source",
+				"Codex transcripts",
+			]),
+		);
+		expect(detail?.workflowApproval.stopConditions.join(" ")).toContain(
+			"generated-starter rewrites",
+		);
+	});
+
 	it("does not build detail state for deleted or missing findings", () => {
 		expect(
 			buildWorkspaceFindingDetailModel(

@@ -6,7 +6,7 @@ completed_at: 2026-05-05
 summary: Add a bounded observability/debuggability workflow after source-truth readiness without silently changing runtime code, provider setup, dependencies, CI, PRs, or source-sharing boundaries.
 post_build_recap: Observability/debuggability is now a first-class approved local-runner workflow that writes sync-safe `.sbs` audit/proof artifacts and keeps runtime/provider implementation behind later approval.
 program_id: customer-agentic-operating-system
-planning_brief: docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
 read_when:
   - Implementing or reviewing the observability/debuggability workflow.
   - Checking local-runner approval boundaries for observability work.
@@ -113,7 +113,7 @@ Edit:
     packages/local-runner/src/cli.ts
     focused tests under apps/web/tests and packages/local-runner/tests
     docs/internal/observability.md
-    docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md
+    docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md
     docs/exec-plans/active/2026-05-05-observability-debuggability.md
 
 Run the focused runner and workspace tests before broad gates. If the workflow command regresses to `source-truth-readiness`, fix the approval model instead of adding UI-specific conditionals. If the runner tries to execute provider, package, CI, push, PR, or source-sharing work, reduce the implementation back to `.sbs` audit/proof artifacts and blocked-proof metadata.
@@ -136,7 +136,7 @@ These commands passed from `/Users/bazelrex/Developer/ship-by-sunday`:
     bun typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-05-observability-debuggability.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-05-observability-debuggability.md docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md docs/internal/observability.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-05-observability-debuggability.md docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md docs/internal/observability.md
     git diff --check
 
 The focused runner suite covered packet support, CLI help, branch creation, sync-safe audit proof, event redaction, and dirty-worktree blocked proof. The focused app suites covered approval/read models, Convex workflow approval and resolution, loops/runs read models, and the finding detail command UI.

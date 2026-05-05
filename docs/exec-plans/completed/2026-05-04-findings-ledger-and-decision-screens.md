@@ -6,7 +6,7 @@ completed_at: 2026-05-04
 summary: Build the existing-codebase findings ledger and finding decision screens from approved doctor-pass output without exposing raw source or starting workflows.
 post_build_recap: '`/workspace/findings` and `/workspace/findings/[findingId]` now render from approved uploaded findings, with dense filters, recommended-first ranking, safe evidence refs, and a bounded workflow decision placeholder.'
 program_id: customer-agentic-operating-system
-planning_brief: docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
 read_when:
   - Implementing `/workspace/findings` or `/workspace/findings/[findingId]`.
   - Reviewing the Top 9 findings ledger, finding detail decision UI, or workflow approval placeholder.
@@ -35,7 +35,7 @@ The observable result is a protected existing-codebase workspace path where uplo
 - [x] 2026-05-04 EDT: Added focused unit and integration-ui tests for the findings read model, ledger filters, empty state, decision content, bounded `Approve workflow`, evidence copying, and forbidden branch, PR, queue, raw-source, raw-log, and transcript surfaces.
 - [x] 2026-05-04 EDT: Focused validation passed: `bun run --cwd apps/web test:unit -- tests/unit/workspace-findings-read-model.test.ts` passed, 1 file and 4 tests; `bun run --cwd apps/web test:integration:ui -- tests/integration-ui/workspace-findings-page.test.tsx tests/integration-ui/workspace-finding-detail-page.test.tsx` passed, 2 files and 4 tests, with the pre-existing `--localstorage-file` warning.
 - [x] 2026-05-04 EDT: App validation passed: `bun run --cwd apps/web format:check`, `bun run --cwd apps/web lint`, and `bun run --cwd apps/web typecheck`. Typecheck completed a Next production build and listed `/workspace/findings` plus `/workspace/findings/[findingId]` in the route manifest.
-- [x] 2026-05-04 EDT: Planning validation passed before final move: `bun run plans:lint -- --plan docs/exec-plans/active/2026-05-04-findings-ledger-and-decision-screens.md`, `bun run programs:lint`, `bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-04-findings-ledger-and-decision-screens.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md`, and `git diff --check`.
+- [x] 2026-05-04 EDT: Planning validation passed before final move: `bun run plans:lint -- --plan docs/exec-plans/active/2026-05-04-findings-ledger-and-decision-screens.md`, `bun run programs:lint`, `bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-04-findings-ledger-and-decision-screens.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md`, and `git diff --check`.
 - [x] 2026-05-04 EDT: Browser proof was attempted by starting `bun run --cwd apps/web dev:web:only -- -p 3104` and requesting `/workspace/findings`; the route rendered the protected Access Required state because the local browser was signed out with `x-clerk-auth-reason: dev-browser-missing`, so authenticated desktop/mobile findings screenshots could not be captured in this environment.
 - [x] 2026-05-04 EDT: Filled the retrospective and marked this ExecPlan complete.
 - [x] 2026-05-04 EDT: Review patch removed evidence summaries from the browser decision view model and detail screen so source-like text cannot be smuggled through `evidenceRefs[*].summary`; regression tests now include `export const runtime = "edge";` as a blocked source-like summary.
@@ -163,7 +163,7 @@ Run planning validation:
 
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-findings-ledger-and-decision-screens.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-findings-ledger-and-decision-screens.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-findings-ledger-and-decision-screens.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md
     git diff --check
 
 If browser auth allows it, start the app and inspect desktop and mobile for `/workspace/findings` and `/workspace/findings/<findingId>`. Verify dense rows, working filters, `Recommended first`, decision content, and no raw source/log/transcript, branch, PR, or queue controls.
@@ -186,7 +186,7 @@ Run these commands from the repo root after implementation:
     bun run --cwd apps/web lint
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-findings-ledger-and-decision-screens.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-findings-ledger-and-decision-screens.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-findings-ledger-and-decision-screens.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md
     git diff --check
 
 If Convex read helpers are added, add focused unit tests for finding reads, deleted or hidden findings, authorization, and unsafe field exclusion, then run those tests explicitly before completing the plan.
@@ -201,7 +201,7 @@ If implementation discovers that the existing `listWorkspaceFindings` query cann
 
 ## Artifacts and Notes
 
-The owning Program is `docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md`.
+The owning Program is `docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md`.
 
 The prior completed doctor-pass plan is `docs/exec-plans/completed/2026-05-04-doctor-pass-and-sync-preview.md`.
 

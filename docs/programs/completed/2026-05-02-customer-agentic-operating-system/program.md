@@ -1,15 +1,15 @@
 ---
 program_id: customer-agentic-operating-system
 title: Customer Agentic Operating System
-status: active
+status: complete
 created_at: 2026-05-02
-completed_at: null
+completed_at: 2026-05-05
 summary: Make Ship by Sunday the agent doctor and loop operating layer for web-app builders across generated repos, broken apps, and mature existing codebases.
-post_build_recap: null
+post_build_recap: Shipped the generated-repo operating pack, existing-codebase doctor-pass lane, local runner, findings, approved workflow loops, Work-phase workers, broken-app rescue, managed GitHub consent boundary, mature-repo adoption lane, execution-surface and workflow-packet contracts, and update-channel contract; no required implementation slice remains in this Program.
 read_when:
-  - Planning generated customer repo Program and ExecPlan support.
-  - Designing mature repo adoption for existing customer codebases.
-  - Writing or refreshing child ExecPlans for the customer agentic operating system.
+- Planning generated customer repo Program and ExecPlan support.
+- Designing mature repo adoption for existing customer codebases.
+- Reviewing the completed customer agentic operating system Program.
 ---
 
 # Customer Agentic Operating System
@@ -38,7 +38,7 @@ The initiative is moving in the right direction when a newly generated repo cont
 
 ## Program Inputs
 
-The Program packet lives under `docs/programs/active/2026-05-02-customer-agentic-operating-system/`.
+The Program packet lives under `docs/programs/completed/2026-05-02-customer-agentic-operating-system/`.
 
 The durable research inputs are `research-pass-generated-repo-operating-system.md`, `research-pass-mature-repo-adoption.md`, `research-pass-packaging-validation.md`, `research-pass-product-ux.md`, `research-pass-market-expansion.md`, `research-pass-loop-catalog-and-monetization.md`, and `research-pass-positioning-and-landing-page.md`.
 
@@ -58,7 +58,7 @@ The package and update-channel scratch note is `package-discussion.md` at the re
 
 The local Codex source checkout at `/Users/bazelrex/Developer/codex` is an implementation reference for runner planning, especially `codex exec` JSONL behavior, app-server transports and protocol, config/profile/trust handling, auth storage, and package validation patterns. Official OpenAI developer docs remain the external product contract; local source keeps SBS implementation plans realistic.
 
-The current planning brief is `planning-brief-2.md`, with `current-planning-brief.txt` pointing at the current versioned brief. `planning-brief-1.md` still owns the active generated-repo source-contract child ExecPlan. `planning-brief-2.md` owns the existing-codebase child ExecPlan split for checkout intent, workspace state, local runner setup, doctor pass, findings, first workflow approval, and later workers.
+The final planning brief is `planning-brief-2.md`, with `current-planning-brief.txt` pointing at that versioned brief. `planning-brief-1.md` owned the generated-repo source-contract and operating-pack child ExecPlans. `planning-brief-2.md` owned the existing-codebase child ExecPlan split for checkout intent, workspace state, local runner setup, doctor pass, findings, first workflow approval, later workers, managed GitHub consent, mature-repo adoption, execution-surface and workflow-packet contracts, update-channel contract, and Program completion.
 
 ## Current State
 
@@ -140,9 +140,9 @@ Generated customer repos now receive a customer-safe Program and ExecPlan folder
 
 The generated-repo flow is concretely owned by `apps/web/app/api/download/repo/route.ts`, `apps/web/app/api/download/repo/_server/downloads.ts`, `packages/codebase-compiler/src/bundle/build-review-download-zip.ts`, `packages/codebase-compiler/src/repo-generation/materialize-repo-snapshot.ts`, `packages/codebase-compiler/src/repo-generation/render-generalized-starter-files.ts`, `packages/codebase-compiler/src/repo-generation/render-starter-project-onboarding.ts`, `packages/codebase-compiler/src/repo-generation/render-starter-skills.ts`, `packages/codebase-compiler/src/repo-generation/render-starter-operating-pack.ts`, `packages/codebase-compiler/src/repo-generation/starter-root-package-json.ts`, and materialization tests under `packages/codebase-compiler/tests/`. Current generated root scripts include `bootstrap`, `codex:skills:install`, `programs:lint`, `plans:lint`, `agentic:check`, app dev/build/check/test scripts, and `test:compiler`.
 
-Mature existing codebases have no first-class product lane yet. The current product flow is codebase-first and generated-repo-first. The mature-repo lane needs a separate audit and adoption workflow that preserves each customer's conventions. The broken-app rescue wedge now has its first contract: customers with a concrete failure can approve a `broken-app-triage` workflow that runs read-only Git diagnostics, writes local `.sbs` proof artifacts, and syncs only structured status. Package scripts, tests, builds, source patching, branch pushing, PR opening, migrations, installs, raw-source upload, and raw-log sharing still require later explicit approval. Public copy can sell diagnosis-first existing-app help as planned or concierge/beta, but it must not imply automated mature-repo transformation or automatic repair is live.
+Mature existing codebases now have a first adoption lane. Customers can approve `mature-repo-adoption`, run it through the local runner, and receive `.sbs` adoption audit, adoption Program draft, first ExecPlan draft, proof, and sync preview artifacts that preserve detected conventions instead of applying generated-starter assumptions. The broken-app rescue wedge also has its first contract: customers with a concrete failure can approve a `broken-app-triage` workflow that runs read-only Git diagnostics, writes local `.sbs` proof artifacts, and syncs only structured status. Package scripts, tests, builds, source patching, branch pushing, PR opening, migrations, installs, raw-source upload, and raw-log sharing still require later explicit approval. Public copy can sell diagnosis-first existing-app help as planned or concierge/beta, but it must not imply automated mature-repo transformation or automatic repair is live.
 
-The package/update-channel idea is valuable but later. `package-discussion.md` argues that Ship by Sunday can eventually become a trusted update channel for agent-built SaaS through manifests, migrations, prompt pack refreshes, production-pattern updates, and generated upgrade PRs. That is a strong recurring-value path, but it depends on the same foundations the existing-codebase lane needs first: repo detection, source ownership boundaries, local execution, structured reports, proof, rollback, customer-approved patches, and repeated worker-loop demand. The Program should therefore treat the update channel as a later strategic expansion after Crawl, Walk, and Work are proven, not the current product target.
+The package/update-channel idea is valuable but later. `package-discussion.md` argues that Ship by Sunday can eventually become a trusted update channel for agent-built SaaS through manifests, migrations, prompt pack refreshes, production-pattern updates, and generated upgrade PRs. That is a strong recurring-value path, but it depends on the same foundations the existing-codebase lane needs first: repo detection, source ownership boundaries, local execution, structured reports, proof, rollback, customer-approved patches, and repeated worker-loop demand. The first update-channel contract now lives at `docs/internal/update-channel.md`; it defines demand triggers, repo-mode differences, provenance, file ownership classes, approval boundaries, proof, rollback, handoff, and failure modes before any executable updater exists.
 
 ## Progress
 
@@ -185,6 +185,10 @@ The package/update-channel idea is valuable but later. `package-discussion.md` a
 - [x] 2026-05-05 EDT: Implemented the Observability Debuggability slice as the second post-source-truth workflow: finding approvals now generate the correct `observability-debuggability` local command and confirmation flag, Convex accepts and resolves approved observability workflow packets, and the local runner creates an approved local branch plus sync-safe `.sbs` audit/proof artifacts without runtime edits, provider setup, dependency changes, package scripts, CI-affecting commands, pushes, PRs, raw-source sharing, or raw-log sharing.
 - [x] 2026-05-05 EDT: Completed the Execution Surface Contract Refresh slice: `docs/internal/execution-surfaces.md` now defines consent, storage, command authority, provider access, raw-source visibility, PR authority, proof delivery, revocation/failure states, and sync boundaries for `local_runner`, `codex_cloud_handoff`, `managed_github`, `generated_repo`, and `codex_app_server`; `/workspace/privacy` now summarizes those five surfaces without adding GitHub actions, hosted execution, branch pushes, PR creation, CI reruns, provider setup, raw-source sharing, or new secrets.
 - [x] 2026-05-05 EDT: Completed the Loop Workflow Packet Contract slice: `docs/internal/workflow-packets.md` now defines the shared packet lifecycle for deterministic probes, user bottleneck context, optional Codex interpretation and write work, execution surface selection, proof commands, stop conditions, sync policy, blocked proof, proof delivery, and revocation; `/workspace/loops` now shows the contract without adding queue controls, provider setup, hosted execution, branch pushes, PR creation, CI reruns, raw-source sharing, raw-log sharing, or new workflow ids.
+- [x] 2026-05-05 EDT: Completed the Mature Repo Adoption Lane slice: findings can now recommend `mature-repo-adoption`, Convex validates the bounded approval packet, `/workspace/loops` lists the adoption workflow, and the local runner writes `.sbs` audit/program/ExecPlan/proof artifacts only after explicit terminal confirmation, without source edits, generated-starter rewrites, provider setup, package changes, CI-affecting commands, branch pushes, PR creation, raw-source sharing, raw-log sharing, or new secrets.
+- [x] 2026-05-05 EDT: Completed the Package Update Channel Contract slice: `docs/internal/update-channel.md` now defines the future update-channel demand trigger, generated-versus-mature repo modes, manifest concept, provenance, file ownership classes, permission boundary, lifecycle, proof, rollback, customer review handoff, and blocked failure modes without adding a registry, updater, migration runner, manifest renderer, package scripts, PR automation, hosted executor, raw-source sharing, or new secrets.
+- [x] 2026-05-05 EDT: Closed out stale active child ExecPlans for checkout intent routing, workspace data/events, setup UI, and local runner prototype. Their implementation and validation evidence was already recorded on 2026-05-04; the plans now live under `docs/exec-plans/completed/` and the Program ledger has no active implementation child selected.
+- [x] 2026-05-05 EDT: Completed the Program archival slice: no active child ExecPlans remain, all required Program outcomes have a completed child plan or explicit future contract, and this Program is moving to `docs/programs/completed/`.
 - [x] Define the existing-codebase Crawl contract: buyer intent, Machine Setup, Project Setup, local runner pairing, Codex profile/config hygiene, required `gh` readiness, deterministic probes, read-only doctor pass, structured report schema, sync preview, and Top 9 findings ledger.
 - [x] Define the execution-surface contract for local runner first, then Codex cloud handoff, managed GitHub, generated repo, and app-server paths.
 - [x] Define the loop workflow-packet contract for deterministic probes, user bottleneck context, Codex interpretation, Codex write jobs, proof commands, stop conditions, and sync policy.
@@ -194,7 +198,7 @@ The package/update-channel idea is valuable but later. `package-discussion.md` a
 - [x] Ship `observability-debuggability` as the likely second write workflow after source truth and command proof make runtime work safer.
 - [x] Ship the Work phase: persistent local worker pairing, approved loop queue, run history, heartbeat, pause or stop controls, proof sync, and blocked-state reporting.
 - [x] Ship broken-app rescue as the conditional high-value path for customers who arrive with a concrete failure.
-- [ ] Design and implement the mature-repo adoption lane.
+- [x] Design and implement the mature-repo adoption lane.
 
 ## Decision Log
 
@@ -474,6 +478,14 @@ Decision: Define workflow packets as the shared loop authority boundary.
 Rationale: Existing-codebase loops must stay evidence-first and approval-bound as new workflows are added. A workflow packet now means deterministic probes, customer bottleneck context, optional Codex interpretation, optional Codex write policy, selected execution surface, allowed and disallowed touch targets, proof commands, sync policy, blocked-proof states, proof delivery, and revocation behavior. This keeps future loops from becoming prompt-only work orders or silently widening into provider, PR, CI, source-sharing, or hosted execution authority.
 Date: 2026-05-05
 
+Decision: Ship mature repo adoption as a `.sbs` overlay workflow.
+Rationale: Mature repos need adoption artifacts that respect the repo's current conventions before any source or provider work. The first `mature-repo-adoption` lane creates a local branch and writes only `.sbs/runs/<workflow-run-id>/**` and `.sbs/mature-repo/**` artifacts: workflow packet, sync-safe convention audit, adoption Program draft, first ExecPlan draft, proof, and sync preview. Runtime edits, root docs mutation, package changes, CI changes, provider setup, generated-starter rewrites, pushes, PRs, raw logs, raw source, and transcripts remain behind later explicit workflow packets.
+Date: 2026-05-05
+
+Decision: Keep update-channel work contract-only until demand and provenance are proven.
+Rationale: `package-discussion.md` makes a strong case for manifests, migrations, prompt-pack refreshes, and upgrade PRs, but those mechanics would create high-trust update authority. The first slice therefore defines demand triggers, generated-versus-mature repo differences, file ownership classes, provenance, approval boundaries, proof, rollback, review handoff, and blocked failure modes before any registry, updater, migration runner, PR automation, hosted execution, or raw-source path exists.
+Date: 2026-05-05
+
 Decision: Model runner health as separate runner, machine, project binding, and project health state.
 Rationale: A single online/offline dot hides the difference between a healthy daemon, a broken Codex setup, an unbound repo, a missing proof command, and a write lease conflict. The first health model should expose `Runner`, `MachineHealth`, `ProjectBinding`, and `ProjectHealth`, then render runner, machine setup, project setup, queue, proof, sync, and permissions in the web app.
 Date: 2026-05-04
@@ -486,14 +498,15 @@ Date: 2026-05-04
 
 Active child ExecPlans:
 
-- `docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md`
-- `docs/exec-plans/active/2026-05-04-existing-codebase-workspace-data-model-and-events.md`
-- `docs/exec-plans/active/2026-05-04-existing-codebase-setup-ui.md`
-- `docs/exec-plans/active/2026-05-04-local-runner-prototype.md`
+- None. This Program is complete.
 
 Completed child ExecPlans:
 
 - `docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md`
+- `docs/exec-plans/completed/2026-05-04-existing-codebase-checkout-intent-routing.md`
+- `docs/exec-plans/completed/2026-05-04-existing-codebase-workspace-data-model-and-events.md`
+- `docs/exec-plans/completed/2026-05-04-existing-codebase-setup-ui.md`
+- `docs/exec-plans/completed/2026-05-04-local-runner-prototype.md`
 - `docs/exec-plans/completed/2026-05-04-doctor-pass-and-sync-preview.md`
 - `docs/exec-plans/completed/2026-05-04-findings-ledger-and-decision-screens.md`
 - `docs/exec-plans/completed/2026-05-04-source-truth-agent-readiness-workflow.md`
@@ -506,19 +519,19 @@ Completed child ExecPlans:
 - `docs/exec-plans/completed/2026-05-05-observability-debuggability.md`
 - `docs/exec-plans/completed/2026-05-05-execution-surface-contract-refresh.md`
 - `docs/exec-plans/completed/2026-05-05-loop-workflow-packet-contract.md`
+- `docs/exec-plans/completed/2026-05-05-mature-repo-adoption-lane.md`
+- `docs/exec-plans/completed/2026-05-05-package-update-channel-contract.md`
+- `docs/exec-plans/completed/2026-05-05-customer-agentic-operating-system-program-completion.md`
 
 Recommended future child ExecPlans:
 
-- `mature-repo-adoption-lane`: design and implement the first mature-repository adoption lane that audits an existing repo, preserves conventions, emits a Program packet and first child ExecPlan, and reports blocked proof honestly without assuming the generated starter stack.
-- Explore package/update-channel mechanics only after existing-codebase Crawl, Walk, and Work prove repeated worker demand.
+- None inside this Program. Future update-channel implementation, concrete migration recipes, generated-repo manifest rendering, mature-repo update planning, or another paid loop should start from a new Program or fresh demand-backed planning brief.
 
 ## Next Slice
 
-The loop workflow-packet contract is now complete. It defines the shared loop boundary in docs and exposes the packet contract on `/workspace/loops` without adding new execution.
+No required next slice remains inside this Program.
 
-The next Program slice should be `mature-repo-adoption-lane`: design and implement the first mature-repository adoption path now that Crawl, Walk, Work, broken-app, managed GitHub consent, execution-surface boundaries, and workflow-packet boundaries are explicit. The child ExecPlan should preserve each repo's package manager, framework, commands, docs, tests, provider boundaries, and source truth; emit a customer-safe Program packet plus first child ExecPlan or blocked-proof report; and avoid forcing generated-starter assumptions onto mature repos.
-
-The next slice must not implement package/update-channel mechanics, broad provider access, dependency installs, migrations, branch pushes, PR opening, CI-affecting commands, raw-log/source sharing, hosted execution, or generated-starter rewrites unless its child ExecPlan names those permissions and proof requirements and the implementation requires visible customer approval.
+The package update-channel contract is complete and remains the boundary for future work. If update-channel implementation, a concrete migration recipe, generated-repo manifest rendering, mature-repo update planning, or another paid loop becomes necessary later, start a new Program or a fresh demand-backed planning brief and child ExecPlan. That future work must not build a package registry, update bot, broad provider access, dependency upgrade engine, migration runner, branch pusher, PR opener, CI rerunner, raw-log/source sharing path, hosted executor, or generated-starter rewrite path unless the new plan names those permissions and proof requirements and the implementation requires visible customer approval.
 
 ## Risks and Watchpoints
 
@@ -531,6 +544,8 @@ Do not hide Program creation inside `postinstall`. Use explicit commands and rev
 Do not overfit mature-repo adoption to Bun, Next.js, Convex, Stripe, Linear, or the generated starter route map.
 
 Do not let product messaging imply mature repos become production-ready automatically. The truthful promise is worker-readiness: clearer source truth, safer plans, validation, review loops, and a first adoption Program that lets agents behave like durable workers inside the customer's actual repo.
+
+Do not turn mature-repo adoption into silent repo mutation. The current workflow writes `.sbs` adoption artifacts only. Source edits, package updates, docs mutation, provider setup, CI changes, branch pushes, PRs, raw source, raw logs, and transcripts still need later explicit workflow packets.
 
 Do not sell "attach your Codex" as a hidden or automatic action. The customer must explicitly connect the ChatGPT/Codex account, API key, GitHub repo, local runner, and permission mode used by any loop.
 
@@ -564,9 +579,11 @@ Do not silently optimize the customer's whole Codex config during Crawl. Install
 
 Do not fragment the first purchase into too many SKUs. The public offer should stay the current `$250`, soon `$500`, flagship promise. Doctor pass, selected loop, and proof are included; additional loop purchases, subscription, emergency rescue, agency tier, and concierge review should appear only where fulfillment, checkout, entitlement, and support can honestly handle them.
 
-Do not let the homepage imply the current generated-repo checkout already includes self-serve mature-repo ingestion or automatic repair. The truthful public story can say the system is being aimed at ideas, broken apps, existing SaaS repos, and client apps, but each lane must be labeled according to actual proof: live generated-repo path, planned doctor-pass contract, concierge/beta existing-app support, or future mature-repo adoption.
+Do not let the homepage imply the current generated-repo checkout already includes automatic mature-repo transformation or automatic repair. The truthful public story can say the system is aimed at ideas, broken apps, existing SaaS repos, and client apps, but each lane must be labeled according to actual proof: live generated-repo path, private local doctor-pass support, consented `.sbs` mature-repo adoption artifacts, concierge managed GitHub consent, or future implementation work.
 
 Do not let `package-discussion.md` turn into current scope. Trusted update-channel mechanics are valuable later, but the existing-codebase Program must first prove local setup, read-only diagnosis, structured findings, one approved loop, and always-on local worker demand.
+
+Do not treat `docs/internal/update-channel.md` as updater permission. It is a contract and checklist for future slices, not a registry, manifest, migration runner, package manager command, dependency upgrade path, branch push, PR authority, hosted executor, or raw-source sharing approval.
 
 Do not turn managed GitHub consent into managed GitHub execution. The current Run-phase slice stores only the consent packet and audit trail. A later integration must still prove GitHub App setup, selected-repository install, token storage, operator access, PR authority, raw-source visibility, and proof actions before any off-machine work runs.
 
@@ -582,7 +599,11 @@ Do not turn the generated operating pack into a copy of this repo's internal pla
 
 ## Outcomes & Retrospective
 
-This Program is active. It should complete only after generated repos ship the customer-safe operating pack, after the doctor pass and loop catalog can rank and execute real work with proof, and after the mature or broken-repo adoption lane has a durable, validated product path or a deliberately scoped first release with remaining work recorded.
+This Program is complete. It started as a broad strategy for making Ship by Sunday more than a one-time generated starter, and it finishes with a concrete operating layer across generated repos, existing codebases, broken apps, mature repos, and future update-channel strategy.
+
+Generated repos now receive customer-safe Program and ExecPlan contracts, generated active Program and first ExecPlan packets, validation scripts, prompt assets, starter instructions, and structural compiler proof without leaking internal Program archives. Existing-codebase buyers have a protected workspace spine, checkout intent routing, setup onboarding, local runner pairing, doctor-pass sync preview, Top 9 findings, finding decision screens, workflow approval, proof-backed source-truth and observability workflows, runs/loops/privacy support surfaces, and Work-phase queue controls. Broken-app rescue has a read-only diagnostics lane. Managed GitHub has a concierge consent and audit boundary before execution. Mature repos have a local `.sbs` adoption lane that preserves conventions and emits adoption Program/ExecPlan artifacts without source mutation. Execution surfaces, workflow packets, and update-channel strategy now have internal contracts that prevent future slices from silently widening authority.
+
+The main lesson is that the product promise works only when each execution surface names consent, storage, raw-source visibility, proof, revocation, and handoff rules before implementation. The durable remaining ideas, especially package/update-channel mechanics and deeper managed or hosted execution, are intentionally future work and must begin from a new demand-backed planning brief or Program rather than being smuggled into this completed initiative.
 
 ## Validation and Acceptance
 
@@ -591,6 +612,8 @@ At the Program level, acceptance requires proof across all lanes.
 Generated-repo acceptance requires materialized customer repos to include the operating pack, root validation scripts, prompt assets, skills, and customer-safe docs without internal archive leakage. Compiler tests must prove the output structurally, not only through substring checks.
 
 Mature-repo acceptance requires an adoption workflow that audits an existing repo, preserves its conventions, emits a Program packet and first child ExecPlan, and reports blocked proof or missing facts honestly.
+
+Update-channel acceptance requires the contract to stay ahead of implementation. Future update work must name a demand trigger, repo mode, manifest or adoption proof, provenance, ownership classification, approvals, proof commands, rollback, review handoff, and failure modes before any registry, updater, migration runner, package command, dependency upgrade, PR automation, hosted execution, or raw-source path exists.
 
 Commercial acceptance requires a normal web-app builder with an existing codebase to understand why they should run the doctor pass before trusting broader worker claims. The homepage must split `I have an idea` from `I have a codebase`, the existing-codebase CTA must promise a private codebase doctor pass, and the first proof promise must cover local/privacy-forward diagnosis, top findings, proof or blocked-proof fields, and one recommended next action without introducing update-channel complexity.
 
@@ -644,21 +667,23 @@ Program completion also requires `bun run programs:lint`, relevant `plans:lint` 
 
 ## Artifacts and Notes
 
-The current planning brief is `docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`.
+The current planning brief is `docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`.
 
 The first child ExecPlan is complete at `docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md`.
 
 The most relevant prior Program is `docs/programs/completed/2026-05-01-generated-repo-first-slice-autonomy/`.
 
-The market-expansion research pass is `docs/programs/active/2026-05-02-customer-agentic-operating-system/research-pass-market-expansion.md`.
+The market-expansion research pass is `docs/programs/completed/2026-05-02-customer-agentic-operating-system/research-pass-market-expansion.md`.
 
-The loop-catalog and monetization research pass is `docs/programs/active/2026-05-02-customer-agentic-operating-system/research-pass-loop-catalog-and-monetization.md`.
+The loop-catalog and monetization research pass is `docs/programs/completed/2026-05-02-customer-agentic-operating-system/research-pass-loop-catalog-and-monetization.md`.
 
-The positioning and landing-page research pass is `docs/programs/active/2026-05-02-customer-agentic-operating-system/research-pass-positioning-and-landing-page.md`.
+The positioning and landing-page research pass is `docs/programs/completed/2026-05-02-customer-agentic-operating-system/research-pass-positioning-and-landing-page.md`.
 
 The codebase-support scratch note is `support-codebases.md`.
 
 The later package/update-channel scratch note is `package-discussion.md`.
+
+The update-channel contract is `docs/internal/update-channel.md`.
 
 The 2026-05-03 source refresh inspected `apps/web/config/product.ts`, `apps/web/app/_content/home-page.ts`, `apps/web/app/_lib/home-page-render-model.ts`, `apps/web/content/docs/configure-the-homepage.mdx`, `apps/web/content/docs/route-map.mdx`, `apps/web/content/docs/build-your-product.mdx`, `apps/web/content/docs/the-build-loop.mdx`, `apps/web/content/docs/stripe-checkout-webhook.mdx`, `apps/web/content/docs/customize-the-starter.mdx`, `apps/web/app/api/stripe/checkout/route.ts`, `apps/web/platform/billing/checkout/checkout-session-params.ts`, `apps/web/app/(workspace)/codebase/page.tsx`, `apps/web/app/(workspace)/review/_components/codebase-review-page.tsx`, `apps/web/platform/codex/`, `apps/web/app/api/codex/`, `apps/web/app/(workspace)/_components/codex-connection-card/`, `packages/codebase-compiler/AGENTS.md`, `packages/codebase-compiler/src/repo-generation/`, `packages/codebase-compiler/src/codebases/render-prompt-pack.ts`, `packages/codebase-compiler/src/server/template-loader.ts`, and generated-repo tests.
 

@@ -274,6 +274,7 @@ describe("repo generation", () => {
 				"docs/PLANS.md",
 				"docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md",
 				"docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md",
+				"docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md",
 			]),
 		);
 		const forbiddenPaths = snapshotPaths.filter((path) =>

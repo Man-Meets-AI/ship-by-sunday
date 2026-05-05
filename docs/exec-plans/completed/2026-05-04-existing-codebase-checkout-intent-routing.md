@@ -1,12 +1,12 @@
 ---
 title: Existing Codebase Checkout Intent Routing
-status: active
+status: complete
 created_at: 2026-05-04
-completed_at: null
+completed_at: 2026-05-04
 summary: Persist buyer starting point through checkout so generated-codebase buyers continue to `/codebase` and existing-codebase buyers route to `/workspace/setup`.
-post_build_recap: null
+post_build_recap: Shipped checkout intent fields through homepage checkout, Stripe metadata, pending checkout claims, product access grants, checkout success routing, route constants, protected choice/setup routes, docs, focused tests, browser proof, and review hardening.
 program_id: customer-agentic-operating-system
-planning_brief: docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
 read_when:
   - Implementing checkout intent tracking for generated-codebase versus existing-codebase fulfillment.
   - Updating homepage CTAs, Stripe checkout metadata, Convex access grants, or checkout success routing.
@@ -39,7 +39,7 @@ This plan is intentionally narrow. It creates the durable intent and routing con
 - [x] 2026-05-04 EDT: Validation passed using the repo's actual UI script: `bun run --cwd apps/web test:integration:ui -- tests/integration-ui/checkout-button.test.tsx tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/checkout-success-view.interactions.test.tsx`.
 - [x] 2026-05-04 EDT: Additional homepage validation passed: `bun run --cwd apps/web test:unit -- tests/unit/home-page-render-model.test.ts tests/unit/home-page-primary-cta.test.tsx tests/unit/home-page-content.test.ts` and `bun run --cwd apps/web test:integration:ui -- tests/integration-ui/home-page-primary-cta.test.tsx tests/integration-ui/home-page-product-preview.test.tsx`.
 - [x] 2026-05-04 EDT: App static validation passed: `bun run --cwd apps/web format`, `bun run --cwd apps/web lint`, and `bun run --cwd apps/web typecheck`.
-- [x] 2026-05-04 EDT: Planning and docs validation passed: `bun run plans:lint -- --plan docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md`, `bun run programs:lint`, and `bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md apps/web/content/docs/route-map.mdx apps/web/content/docs/configure-the-homepage.mdx`.
+- [x] 2026-05-04 EDT: Planning and docs validation passed: `bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-existing-codebase-checkout-intent-routing.md`, `bun run programs:lint`, and `bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-existing-codebase-checkout-intent-routing.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md apps/web/content/docs/route-map.mdx apps/web/content/docs/configure-the-homepage.mdx`.
 - [x] 2026-05-04 EDT: Browser proof passed on local `http://localhost:3024`: existing-codebase homepage branch rendered the `Set up my codebase` CTA on desktop `1440x1000` and mobile `390x844`.
 - [x] 2026-05-04 EDT: Addressed review-found fulfillment routing and action-scope gaps: returning existing-codebase buyers now resume to `/workspace/setup`, missing intent resumes to `/workspace/choose`, and checkout email fulfillment is webhook/internal-only rather than a public unauthenticated Convex action.
 
@@ -77,7 +77,9 @@ Date: 2026-05-04
 
 ## Outcomes & Retrospective
 
-This plan is active. Fill this section after implementation with the actual fields, routes, tests, and any intentionally deferred follow-up.
+This plan is complete. Checkout now carries `buyerStartingPoint`, `checkoutCtaId`, and `fulfillmentTrack` through request input, Stripe checkout session metadata, payment intent metadata, pending checkout claims, product access grants, and checkout success state. Generated-codebase buyers route to `/codebase`, existing-codebase buyers route to `/workspace/setup`, and missing or legacy intent routes to `/workspace/choose`.
+
+Review hardening kept checkout email fulfillment on the webhook/internal path and made returning granted viewers route from stored `fulfillmentTrack` before generated-codebase resume state. The slice intentionally stopped at intent and routing; Machine Setup, Project Setup, local runner behavior, doctor-pass probes, findings, workflow packets, and worker queues remained downstream.
 
 ## Context and Orientation
 
@@ -149,9 +151,9 @@ After implementation, run the focused checkout and route tests first:
 
 Run planning and static validation:
 
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-existing-codebase-checkout-intent-routing.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md apps/web/content/docs/route-map.mdx
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-existing-codebase-checkout-intent-routing.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md apps/web/content/docs/route-map.mdx
     git diff --check
 
 Broaden before completion:
@@ -174,9 +176,9 @@ Run these commands from the repo root:
     bun run --cwd apps/web test:integration-ui -- tests/integration-ui/checkout-button.test.tsx tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/checkout-success-view.interactions.test.tsx
     bun run --cwd apps/web lint
     bun run --cwd apps/web typecheck
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-existing-codebase-checkout-intent-routing.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md apps/web/content/docs/route-map.mdx
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-existing-codebase-checkout-intent-routing.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md apps/web/content/docs/route-map.mdx
     git diff --check
 
 If implementation changes the visible homepage or protected route UI, add browser proof for one desktop and one mobile viewport before marking the plan complete.
@@ -193,9 +195,9 @@ If tests reveal existing paid checkout fixtures lack intent fields, update fixtu
 
 ## Artifacts and Notes
 
-Owning Program: `docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md`.
+Owning Program: `docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md`.
 
-Planning brief: `docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`.
+Planning brief: `docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`.
 
 Scratch note: `support-codebases.md`.
 

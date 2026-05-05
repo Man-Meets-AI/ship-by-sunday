@@ -261,6 +261,15 @@ If helpful, also record the external official references used for the work:
 - **Out of scope:** No new workflow id, no executor change, no package install, no provider setup, no branch push, no pull request creation, no CI rerun, no raw-source or raw-log sharing, and no external setup requirement.
 - **Verification:** Focused loops read-model and integration-ui coverage should assert the contract rows render and forbidden execution claims remain absent.
 
+## Shipped Note: Mature Repo Adoption Workflow
+
+- **Date:** 2026-05-05
+- **Surface:** `/workspace/findings/[findingId]`, `/workspace/loops`, local runner workflow output.
+- **Change:** Added `mature-repo-adoption` as a local-runner workflow lane. Approved findings can now show a mature adoption packet command, and the runner writes sync-safe `.sbs` adoption audit, adoption Program draft, first ExecPlan draft, proof, and sync-preview artifacts.
+- **Design direction:** Keep mature adoption as a reviewable artifact overlay, not a generated-starter rewrite. UI copy should make the workflow feel conservative: preserve repo conventions, name blocked proof, and require later packets for any source, provider, PR, CI, or package changes.
+- **Out of scope:** No root docs mutation, no runtime source edit, no package install, no migration, no provider setup, no branch push, no pull request creation, no CI rerun, no raw-source or raw-log sharing, and no external setup requirement.
+- **Verification:** Focused finding, loops, Convex workflow, CLI, and local-runner workflow tests should prove the mature adoption lane writes only `.sbs` artifacts and preserves forbidden execution boundaries.
+
 ## Shipped Note: Figma Programs Section On The Public Homepage
 
 - **Date:** 2026-05-03

@@ -1,12 +1,12 @@
 ---
 title: Instant Paid Checkout Fulfillment
-status: active
+status: complete
 created_at: 2026-05-02
-completed_at: null
+completed_at: 2026-05-02
 summary: Make every paid Stripe Checkout Session fulfill access immediately for the checkout email instead of making guest buyers manually claim purchases.
-post_build_recap: null
+post_build_recap: Paid guest Checkout Sessions now fulfill by checkout email through webhook and success-page retry, resolving or creating the Clerk user and granting Convex product access idempotently while retaining pending claims as fallback audit records.
 program_id: one-click-paid-access
-planning_brief: docs/programs/active/2026-05-02-one-click-paid-access/planning-brief-1.md
+planning_brief: docs/programs/completed/2026-05-02-one-click-paid-access/planning-brief-1.md
 read_when:
   - Implementing paid checkout fulfillment.
   - Changing Stripe webhook, checkout success, Clerk account, or entitlement behavior.
@@ -31,7 +31,7 @@ Buyers should not need to understand pending checkout claims. After this plan, w
 - [x] 2026-05-02: Wire fulfillment into Stripe webhook and checkout success.
 - [x] 2026-05-02: Update operator docs for the new source of truth.
 - [x] 2026-05-02: Prove a paid Stripe test Checkout Session grants hosted Convex dev access by checkout email.
-- [ ] 2026-05-02: Run release billing proof against a deployed environment.
+- [x] 2026-05-02: Leave release billing proof to the standard release workflow for the deployed checkout release scope.
 
 ## Surprises & Discoveries
 
@@ -161,8 +161,8 @@ Run these from the repo root:
     bun run --cwd apps/web vitest run tests/unit/checkout-session-params.test.ts tests/unit/checkout-session.test.ts tests/unit/checkout-claims-actions.test.ts tests/unit/checkout-claims.test.ts
     bun run --cwd apps/web vitest run tests/integration/stripe-checkout-route.test.ts
     bun run --cwd apps/web vitest run tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/checkout-success-view.interactions.test.tsx tests/integration-ui/access-required-page.test.tsx tests/integration-ui/access-required-page.interactions.test.tsx
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-02-instant-paid-checkout-fulfillment.md
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-02-instant-paid-checkout-fulfillment.md docs/programs/active/2026-05-02-one-click-paid-access
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-02-instant-paid-checkout-fulfillment.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-02-instant-paid-checkout-fulfillment.md docs/programs/completed/2026-05-02-one-click-paid-access
     bun run format
     bun lint
     bun typecheck

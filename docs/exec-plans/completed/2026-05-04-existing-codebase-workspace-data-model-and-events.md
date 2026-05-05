@@ -1,12 +1,12 @@
 ---
 title: Existing Codebase Workspace Data Model And Events
-status: active
+status: complete
 created_at: 2026-05-04
-completed_at: null
+completed_at: 2026-05-04
 summary: Add the durable existing-codebase workspace tables and sync-safe runner event protocol that setup, doctor pass, findings, and workflow screens will derive from.
-post_build_recap: null
+post_build_recap: Shipped the separate existing-codebase Convex workspace model, sync-safe event validators, workspace queries and mutations, privacy guards, focused tests, and review hardening for internal runner ingestion, revocation, deletion markers, and local-path rejection.
 program_id: customer-agentic-operating-system
-planning_brief: docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
 read_when:
   - Implementing Convex state for existing-codebase projects, runner bindings, repository bindings, doctor-pass runs, findings, workflow runs, or runner events.
   - Designing `/workspace/setup`, `/workspace/doctor-pass`, `/workspace/findings`, `/workspace/runs`, `/workspace/loops`, or `/workspace/privacy` data reads.
@@ -33,7 +33,7 @@ This plan creates the state contract only. It does not build the setup UI, local
 - [x] 2026-05-04 EDT: Added separate Convex schema tables and indexes for `workspaceProjects`, `workspaceRunnerBindings`, `workspaceRepositoryBindings`, `doctorPassRuns`, `codebaseFindings`, `workflowRuns`, and `workspaceRunnerEvents` without modifying `projectDefinitions` or `codebaseWorkflowStates`.
 - [x] 2026-05-04 EDT: Added authenticated `apps/web/convex/workspace.ts` queries and mutations for project creation/loading, runner and repository binding, doctor-pass and workflow run shells, idempotent runner event ingestion, heartbeat and sync-preview reads, findings reads and sync, runner revocation, finding deletion markers, and project deletion markers.
 - [x] 2026-05-04 EDT: Added focused unit tests in `apps/web/tests/unit/workspace-data-model.test.ts`, `apps/web/tests/unit/workspace-runner-events.test.ts`, and `apps/web/tests/unit/workspace-privacy-contract.test.ts`, with a small fake Convex test database helper.
-- [x] 2026-05-04 EDT: Refreshed the owning Program and this ExecPlan. Validation passed with `bun run --cwd apps/web test:unit -- tests/unit/workspace-data-model.test.ts tests/unit/workspace-runner-events.test.ts tests/unit/workspace-privacy-contract.test.ts`, `bun run --cwd apps/web typecheck`, `bun run --cwd apps/web lint`, `bun run plans:lint -- --plan docs/exec-plans/active/2026-05-04-existing-codebase-workspace-data-model-and-events.md`, `bun run programs:lint`, `bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-04-existing-codebase-workspace-data-model-and-events.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md`, and `git diff --check`.
+- [x] 2026-05-04 EDT: Refreshed the owning Program and this ExecPlan. Validation passed with `bun run --cwd apps/web test:unit -- tests/unit/workspace-data-model.test.ts tests/unit/workspace-runner-events.test.ts tests/unit/workspace-privacy-contract.test.ts`, `bun run --cwd apps/web typecheck`, `bun run --cwd apps/web lint`, `bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-existing-codebase-workspace-data-model-and-events.md`, `bun run programs:lint`, `bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-existing-codebase-workspace-data-model-and-events.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md`, and `git diff --check`.
 - [x] 2026-05-04 EDT: Addressed review-found security and privacy gaps: runner event ingestion is internal for this slice, revoked runners cannot resume by heartbeat, runner events cannot approve sync previews, default findings reads hide deletion markers, and embedded local absolute paths are rejected in sync-safe text.
 
 ## Surprises & Discoveries
@@ -76,7 +76,9 @@ Date: 2026-05-04
 
 ## Outcomes & Retrospective
 
-This plan is active. Fill this section after implementation with the actual schema, functions, tests, remaining risks, and any intentionally deferred fields.
+This plan is complete. The app now has separate existing-codebase workspace tables for projects, runner bindings, repository bindings, doctor-pass runs, findings, workflow runs, and append-only runner events. The implementation added validators, domain types, model helpers, sync-safe event payloads, authenticated workspace functions, idempotent event ingestion, privacy guards, runner revocation, finding deletion markers, and sync-preview approval boundaries without overloading generated-codebase tables.
+
+The review pass tightened the security posture: runner event ingestion stayed internal until runner-token auth existed, revoked runners cannot resume by heartbeat, runner events cannot approve sync previews, deleted findings are hidden by default, and embedded local absolute paths are rejected in sync-safe text.
 
 ## Context and Orientation
 
@@ -86,7 +88,7 @@ The existing product access helpers live in `apps/web/convex/access/model.ts`. N
 
 The current Codex connection table is `codexConnections`. This plan should not merge local runner state into `codexConnections`; Codex connection tells whether the account/app-server connection exists, while runner bindings tell whether a specific local machine is paired to an existing-codebase project.
 
-Before implementing, read `apps/web/AGENTS.md`, `apps/web/convex/_generated/ai/guidelines.md`, `docs/release-workflow.md`, `docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`, and `docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md`.
+Before implementing, read `apps/web/AGENTS.md`, `apps/web/convex/_generated/ai/guidelines.md`, `docs/release-workflow.md`, `docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`, and `docs/exec-plans/completed/2026-05-04-existing-codebase-checkout-intent-routing.md`.
 
 ### In Scope
 
@@ -142,7 +144,7 @@ Read required local docs before changing Convex code:
     sed -n '1,220p' apps/web/AGENTS.md
     sed -n '1,260p' apps/web/convex/_generated/ai/guidelines.md
     sed -n '1,220p' docs/release-workflow.md
-    sed -n '1,220p' docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md
+    sed -n '1,220p' docs/exec-plans/completed/2026-05-04-existing-codebase-checkout-intent-routing.md
 
 Implement the schema and functions in additive files. Expected ownership is:
 
@@ -167,9 +169,9 @@ Run focused validation:
 
 Run planning validation:
 
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-04-existing-codebase-workspace-data-model-and-events.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-existing-codebase-workspace-data-model-and-events.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-04-existing-codebase-workspace-data-model-and-events.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-existing-codebase-workspace-data-model-and-events.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md
     git diff --check
 
 If the implementation needs live Convex proof, use hosted Convex dev only. Do not switch this repo to Convex local mode.
@@ -189,9 +191,9 @@ Run these commands from the repo root:
     bun run --cwd apps/web test:unit -- tests/unit/workspace-data-model.test.ts tests/unit/workspace-runner-events.test.ts tests/unit/workspace-privacy-contract.test.ts
     bun run --cwd apps/web typecheck
     bun run --cwd apps/web lint
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-04-existing-codebase-workspace-data-model-and-events.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-existing-codebase-workspace-data-model-and-events.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-04-existing-codebase-workspace-data-model-and-events.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-existing-codebase-workspace-data-model-and-events.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md
     git diff --check
 
 If implementation adds visible placeholder routes or reads from these queries in UI, add the narrow integration or integration-ui tests for those routes before completion.
@@ -208,11 +210,11 @@ If a field is likely to grow without bound, move it to a child table instead of 
 
 ## Artifacts and Notes
 
-Owning Program: `docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md`.
+Owning Program: `docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md`.
 
-Planning brief: `docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`.
+Planning brief: `docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`.
 
-Prior child plan: `docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md`.
+Prior child plan: `docs/exec-plans/completed/2026-05-04-existing-codebase-checkout-intent-routing.md`.
 
 Scratch note: `support-codebases.md`.
 
@@ -220,4 +222,4 @@ The canonical existing-codebase object is a `finding`, not an `opportunity`.
 
 ## Interfaces and Dependencies
 
-This plan depends on `apps/web/AGENTS.md`, `docs/release-workflow.md`, `apps/web/convex/_generated/ai/guidelines.md`, `apps/web/convex/schema.ts`, `apps/web/convex/access/model.ts`, `apps/web/convex/access/validators.ts`, `apps/web/convex/codebase/validators.ts`, `apps/web/convex/codex.ts`, `apps/web/convex/codexValidators.ts`, `apps/web/content/docs/route-map.mdx`, `docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md`, `docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`, and the future workspace setup, doctor-pass, findings, runs, loops, privacy, local runner, and workflow approval ExecPlans.
+This plan depends on `apps/web/AGENTS.md`, `docs/release-workflow.md`, `apps/web/convex/_generated/ai/guidelines.md`, `apps/web/convex/schema.ts`, `apps/web/convex/access/model.ts`, `apps/web/convex/access/validators.ts`, `apps/web/convex/codebase/validators.ts`, `apps/web/convex/codex.ts`, `apps/web/convex/codexValidators.ts`, `apps/web/content/docs/route-map.mdx`, `docs/exec-plans/completed/2026-05-04-existing-codebase-checkout-intent-routing.md`, `docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`, and the future workspace setup, doctor-pass, findings, runs, loops, privacy, local runner, and workflow approval ExecPlans.

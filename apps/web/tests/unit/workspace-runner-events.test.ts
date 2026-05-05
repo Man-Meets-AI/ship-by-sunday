@@ -923,6 +923,120 @@ describe("workspace runner events", () => {
 		});
 	});
 
+	it("approves and resolves mature repo adoption as a supported local audit workflow", async () => {
+		const { ctx, project, runner } = await createProjectAndRunner();
+		await ctx.db.patch(runner._id, {
+			runnerCredentialHash: "sha256:runner-credential",
+		});
+		const doctorPassRun = await startWorkspaceDoctorPassRun._handler(
+			ctx as never,
+			{
+				projectId: project._id,
+				runnerId: runner._id,
+				runnerMode: "daemon",
+			},
+		);
+		const findingDocumentId = await ctx.db.insert("codebaseFindings", {
+			projectId: project._id,
+			doctorPassRunId: doctorPassRun._id,
+			findingId: "finding-mature-adoption",
+			rank: 3,
+			status: "needs_approval",
+			title: "Mature repo needs an adoption packet",
+			category: "other",
+			severity: "medium",
+			confidence: 0.82,
+			buyerImpact: "Future agent work needs a repo-specific operating layer.",
+			blastRadius: "low",
+			proofPath: "Review local mature repo adoption proof.",
+			proofability: "partial",
+			permissionRequired: "workspace_write",
+			recommendedWorkflowId: "mature-repo-adoption",
+			whyThisNow:
+				"The repo has useful conventions that should be preserved before larger changes.",
+			evidenceRefs: [],
+			syncSensitivity: "low",
+			localReportRef:
+				".sbs/reports/doctor-pass/run-1/mature-repo-adoption.json",
+			createdAt: 1,
+			updatedAt: 1,
+		});
+
+		const workflowRun = await requestWorkspaceWorkflowRun._handler(
+			ctx as never,
+			{
+				projectId: project._id,
+				findingDocumentId,
+				runnerId: runner._id,
+				workflowId: "mature-repo-adoption",
+				workflowVersion: "v1",
+				branchName: "sbs/mature-repo-adoption-20260505-1100",
+				profileName: "sbs-workspace-write",
+				expectedOutputs: [
+					"mature repo adoption workflow packet",
+					"sync-safe repo convention audit",
+					"adoption Program packet draft",
+					"first child ExecPlan draft",
+					"local proof or blocked-proof summary",
+				],
+				allowedTouchTargets: [
+					".sbs/runs/<workflow-run-id>/**",
+					".sbs/mature-repo/**",
+					"repo convention metadata only",
+				],
+				disallowedTouchTargets: [
+					"runtime app code",
+					"environment files",
+					"dependency manifests",
+					"dependency locks",
+					"database migrations",
+					"provider configuration",
+					"generated folders",
+					"package scripts",
+					"root agent instructions",
+					"CI configuration",
+					"CI-affecting commands",
+					"branch pushes",
+					"pull requests",
+					"raw logs",
+					"raw source",
+					"Codex transcripts",
+				],
+				proofCommands: [
+					"git status --short",
+					"git diff --name-only",
+					"git diff --check",
+				],
+				syncPolicySummary:
+					"Only approved structured workflow metadata, proof status, command names, artifact names, and repo-relative refs sync. Local code, command output, and Codex session history stay on the machine.",
+				stopConditions: [
+					"worktree is dirty before branch creation",
+					"write lease expires before adoption audit starts",
+					"requested work needs generated-starter rewrites, provider setup, package installs, migrations, CI, PRs, branch pushes, raw source, raw logs, or Codex transcripts",
+					"proof command fails",
+				],
+				rollbackNotes:
+					"Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the mature adoption branch after reviewing local proof.",
+			},
+		);
+		const resolvedWorkflowRun =
+			await getWorkspaceWorkflowRunByCredential._handler(ctx as never, {
+				runnerCredentialHash: "sha256:runner-credential",
+				projectId: project._id,
+				runnerId: runner._id,
+				workflowRunId: workflowRun._id,
+			});
+
+		expect(resolvedWorkflowRun).toMatchObject({
+			workflowRunId: workflowRun._id,
+			workflowId: "mature-repo-adoption",
+			branchName: "sbs/mature-repo-adoption-20260505-1100",
+			profileName: "sbs-workspace-write",
+			localWorkflowPacketRef: `.sbs/runs/${workflowRun._id}/workflow-packet.json`,
+			localProofRef: `.sbs/runs/${workflowRun._id}/proof.json`,
+		});
+	});
+
 	it("rejects observability approvals that drift from the shipped audit packet", async () => {
 		const { ctx, project, runner } = await createProjectAndRunner();
 		const doctorPassRun = await startWorkspaceDoctorPassRun._handler(

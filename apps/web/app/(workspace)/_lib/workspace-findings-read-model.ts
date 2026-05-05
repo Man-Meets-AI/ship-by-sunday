@@ -145,6 +145,7 @@ export type WorkspaceWorkflowApprovalModel = {
 		| "source_truth"
 		| "observability_debuggability"
 		| "broken_app_readonly"
+		| "mature_repo_adoption"
 		| "generic";
 	workflowCommandName: string;
 	confirmationFlag: string;
@@ -241,6 +242,7 @@ const workflowLabels: Record<string, string> = {
 	"source-truth-agent-readiness": "Source Truth Agent Readiness",
 	"observability-debuggability": "Observability Debuggability",
 	"broken-app-triage": "Broken App Triage",
+	"mature-repo-adoption": "Mature Repo Adoption",
 	"revenue-path-audit": "Revenue Path Audit",
 	"ux-conversion-snapshot": "UX Conversion Snapshot",
 	"proof-harness": "Proof Harness",
@@ -318,7 +320,9 @@ export function buildWorkspaceFindingDetailModel(
 	const allowedTouchTargets = getAllowedTouchTargets(
 		finding.recommendedWorkflowId,
 	);
-	const disallowedTouchTargets = getDisallowedTouchTargets();
+	const disallowedTouchTargets = getDisallowedTouchTargets(
+		finding.recommendedWorkflowId,
+	);
 	const syncPolicySummary =
 		"Only approved structured workflow metadata, proof status, command names, artifact names, and repo-relative refs sync. Local code, command output, and Codex session history stay on the machine.";
 
@@ -490,6 +494,15 @@ function getExpectedOutputs(workflowId: string) {
 			"next recommended workflow",
 		];
 	}
+	if (workflowId === "mature-repo-adoption") {
+		return [
+			"mature repo adoption workflow packet",
+			"sync-safe repo convention audit",
+			"adoption Program packet draft",
+			"first child ExecPlan draft",
+			"local proof or blocked-proof summary",
+		];
+	}
 
 	return [
 		"scoped workflow packet",
@@ -522,6 +535,13 @@ function getAllowedTouchTargets(workflowId: string) {
 			"repo-relative observability signal metadata only",
 		];
 	}
+	if (workflowId === "mature-repo-adoption") {
+		return [
+			".sbs/runs/<workflow-run-id>/**",
+			".sbs/mature-repo/**",
+			"repo convention metadata only",
+		];
+	}
 
 	return [
 		"finding-scoped files after approval",
@@ -530,8 +550,8 @@ function getAllowedTouchTargets(workflowId: string) {
 	];
 }
 
-function getDisallowedTouchTargets() {
-	return [
+function getDisallowedTouchTargets(workflowId: string) {
+	const disallowedTouchTargets = [
 		"runtime app code",
 		"environment files",
 		"dependency manifests",
@@ -540,6 +560,20 @@ function getDisallowedTouchTargets() {
 		"provider configuration",
 		"generated folders",
 		"package scripts",
+	];
+	if (workflowId !== "mature-repo-adoption") {
+		return disallowedTouchTargets;
+	}
+	return [
+		...disallowedTouchTargets,
+		"root agent instructions",
+		"CI configuration",
+		"CI-affecting commands",
+		"branch pushes",
+		"pull requests",
+		"raw logs",
+		"raw source",
+		"Codex transcripts",
 	];
 }
 
@@ -596,6 +630,9 @@ function getWorkflowKind(
 	if (workflowId === "observability-debuggability") {
 		return "observability_debuggability";
 	}
+	if (workflowId === "mature-repo-adoption") {
+		return "mature_repo_adoption";
+	}
 	return "generic";
 }
 
@@ -613,6 +650,9 @@ function getWorkflowConfirmationFlag(workflowId: string) {
 	if (workflowId === "observability-debuggability") {
 		return "--confirm-observability-audit";
 	}
+	if (workflowId === "mature-repo-adoption") {
+		return "--confirm-adoption-audit";
+	}
 	return "--confirm-local-writes";
 }
 
@@ -622,6 +662,9 @@ function getWorkflowBranchName(workflowId: string, approvalTimestamp: number) {
 	}
 	if (workflowId === "broken-app-triage") {
 		return `sbs/broken-app-triage-${formatBranchTimestamp(approvalTimestamp)}`;
+	}
+	if (workflowId === "mature-repo-adoption") {
+		return `sbs/mature-repo-adoption-${formatBranchTimestamp(approvalTimestamp)}`;
 	}
 	return `sbs/${workflowId}-${formatBranchTimestamp(approvalTimestamp)}`;
 }
@@ -652,6 +695,14 @@ function getWorkflowStopConditions(workflowId: string) {
 			"proof command fails",
 		];
 	}
+	if (workflowId === "mature-repo-adoption") {
+		return [
+			"worktree is dirty before branch creation",
+			"write lease expires before adoption audit starts",
+			"requested work needs generated-starter rewrites, provider setup, package installs, migrations, CI, PRs, branch pushes, raw source, raw logs, or Codex transcripts",
+			"proof command fails",
+		];
+	}
 
 	return [
 		"worktree is dirty before branch creation",
@@ -669,6 +720,9 @@ function getWorkflowRollbackNotes(
 	}
 	if (workflowKind === "observability_debuggability") {
 		return "Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the observability branch after reviewing local proof.";
+	}
+	if (workflowKind === "mature_repo_adoption") {
+		return "Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the mature adoption branch after reviewing local proof.";
 	}
 	return "Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the source-truth branch after reviewing local proof.";
 }

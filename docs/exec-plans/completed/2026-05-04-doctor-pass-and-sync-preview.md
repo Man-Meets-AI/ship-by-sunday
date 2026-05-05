@@ -6,7 +6,7 @@ completed_at: 2026-05-04
 summary: Productize the branchless existing-codebase doctor pass so passive local probes and `codex exec` produce local reports, a sync-safe preview, and approved findings upload.
 post_build_recap: The doctor-pass slice now has scanner Markdown/JSON output under `.sbs/intake-probe/`, local-runner `doctor-pass run/upload`, branchless local artifacts, Codex JSONL interpretation, approval-gated runner upload, and a minimal `/workspace/doctor-pass` approval page.
 program_id: customer-agentic-operating-system
-planning_brief: docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
 read_when:
   - Implementing the existing-codebase doctor pass after setup and local runner pairing exist.
   - Productizing `.sbs/intake-probe/codebase-intake.py`, passive probes, sync-safe findings JSON, or sync preview approval.
@@ -111,7 +111,7 @@ The web/backend side now has credential-backed runner routes for starting a doct
 
 ## Context and Orientation
 
-The existing-codebase workspace Program lives at `docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md`. The relevant scratch note is `support-codebases.md`. The active setup route plan is `docs/exec-plans/active/2026-05-04-existing-codebase-setup-ui.md`. The backend state plan is `docs/exec-plans/active/2026-05-04-existing-codebase-workspace-data-model-and-events.md`. The local runner plan is `docs/exec-plans/active/2026-05-04-local-runner-prototype.md`.
+The existing-codebase workspace Program lives at `docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md`. The relevant scratch note is `support-codebases.md`. The active setup route plan is `docs/exec-plans/completed/2026-05-04-existing-codebase-setup-ui.md`. The backend state plan is `docs/exec-plans/completed/2026-05-04-existing-codebase-workspace-data-model-and-events.md`. The local runner plan is `docs/exec-plans/completed/2026-05-04-local-runner-prototype.md`.
 
 The scanner prototype lives in `.sbs/intake-probe/codebase-intake.py` with notes in `.sbs/intake-probe/codebase-intake.README.md`. It currently performs a passive filesystem and Git scan, skips dependency folders, generated folders, lockfiles, local env files, and AI/editor tooling, detects stack and command surfaces, flags passive risk signals, and writes an interpretive Markdown report. This plan turns that script into one passive probe inside a larger doctor-pass run.
 
@@ -184,9 +184,9 @@ From the repo root, inspect the current scanner and dependency plans before impl
     sed -n '1,260p' .sbs/intake-probe/codebase-intake.README.md
     sed -n '1,220p' .sbs/intake-probe/codebase-intake.py
     rg -n "def parse_args|def main|REPORT_NAME|write_report|--deep|include-tooling" .sbs/intake-probe/codebase-intake.py
-    sed -n '1,260p' docs/exec-plans/active/2026-05-04-existing-codebase-workspace-data-model-and-events.md
-    sed -n '1,260p' docs/exec-plans/active/2026-05-04-existing-codebase-setup-ui.md
-    sed -n '1,260p' docs/exec-plans/active/2026-05-04-local-runner-prototype.md
+    sed -n '1,260p' docs/exec-plans/completed/2026-05-04-existing-codebase-workspace-data-model-and-events.md
+    sed -n '1,260p' docs/exec-plans/completed/2026-05-04-existing-codebase-setup-ui.md
+    sed -n '1,260p' docs/exec-plans/completed/2026-05-04-local-runner-prototype.md
 
 Read required docs before code changes:
 
@@ -262,7 +262,7 @@ Run planning validation:
 
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-doctor-pass-and-sync-preview.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-doctor-pass-and-sync-preview.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md .sbs/intake-probe/codebase-intake.README.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-doctor-pass-and-sync-preview.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md .sbs/intake-probe/codebase-intake.README.md
     git diff --check
 
 If visible UI changes are implemented, start the app and capture one desktop and one mobile browser proof for `/workspace/doctor-pass`. The proof should show stage progress, local-only labels, sync-safe labels, and the sync preview approval panel without text overlap.
@@ -299,7 +299,7 @@ Run these commands from the repo root after implementation:
     bun run --cwd apps/web lint
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-doctor-pass-and-sync-preview.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-doctor-pass-and-sync-preview.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md .sbs/intake-probe/codebase-intake.README.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-doctor-pass-and-sync-preview.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md .sbs/intake-probe/codebase-intake.README.md
     git diff --check
 
 If the local runner package, web API, or UI slices are not implemented yet when scanner work lands, run the scanner commands and planning validation, then record the missing downstream surfaces in `Progress` instead of claiming the whole doctor-pass plan is complete.
@@ -318,16 +318,16 @@ Deep scans remain separate. If a user later approves deep commands, that should 
 
 ## Artifacts and Notes
 
-Owning Program: `docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md`.
+Owning Program: `docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md`.
 
-Planning brief: `docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`.
+Planning brief: `docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`.
 
 Prior child plans:
 
-    docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md
-    docs/exec-plans/active/2026-05-04-existing-codebase-workspace-data-model-and-events.md
-    docs/exec-plans/active/2026-05-04-existing-codebase-setup-ui.md
-    docs/exec-plans/active/2026-05-04-local-runner-prototype.md
+    docs/exec-plans/completed/2026-05-04-existing-codebase-checkout-intent-routing.md
+    docs/exec-plans/completed/2026-05-04-existing-codebase-workspace-data-model-and-events.md
+    docs/exec-plans/completed/2026-05-04-existing-codebase-setup-ui.md
+    docs/exec-plans/completed/2026-05-04-local-runner-prototype.md
 
 Scratch note: `support-codebases.md`.
 
@@ -410,9 +410,9 @@ Validation evidence recorded during implementation:
     bun run programs:lint
     Program docs, Program packets, and Program prompts all passed
 
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-doctor-pass-and-sync-preview.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md .sbs/intake-probe/codebase-intake.README.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-doctor-pass-and-sync-preview.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md .sbs/intake-probe/codebase-intake.README.md
     docs/exec-plans/completed/2026-05-04-doctor-pass-and-sync-preview.md: ok
-    docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md: ok
+    docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md: ok
 
     git diff --check
     passed
@@ -433,7 +433,7 @@ Blocked runs should end with a sync-safe blocked state instead of partial findin
 
 ## Interfaces and Dependencies
 
-This plan depends on `.sbs/intake-probe/codebase-intake.py`, `.sbs/intake-probe/codebase-intake.README.md`, `packages/local-runner/`, `apps/web/convex/workspace/`, `apps/web/app/(workspace)/workspace/doctor-pass/page.tsx`, `docs/exec-plans/active/2026-05-04-existing-codebase-workspace-data-model-and-events.md`, `docs/exec-plans/active/2026-05-04-existing-codebase-setup-ui.md`, `docs/exec-plans/active/2026-05-04-local-runner-prototype.md`, `docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`, and `support-codebases.md`.
+This plan depends on `.sbs/intake-probe/codebase-intake.py`, `.sbs/intake-probe/codebase-intake.README.md`, `packages/local-runner/`, `apps/web/convex/workspace/`, `apps/web/app/(workspace)/workspace/doctor-pass/page.tsx`, `docs/exec-plans/completed/2026-05-04-existing-codebase-workspace-data-model-and-events.md`, `docs/exec-plans/completed/2026-05-04-existing-codebase-setup-ui.md`, `docs/exec-plans/completed/2026-05-04-local-runner-prototype.md`, `docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`, and `support-codebases.md`.
 
 The scanner JSON schema must be stable enough for the local runner to consume. The Top 9 output schema must be stable enough for local validation, sync preview generation, and backend findings upload. The backend findings validators must be narrower than the local findings file. The web UI should read doctor-pass run state and sync preview state from backend rows and events, not from direct browser-daemon access.
 

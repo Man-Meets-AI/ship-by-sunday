@@ -6,7 +6,7 @@ completed_at: 2026-05-05
 summary: Define and expose the consent, storage, proof, source-visibility, and authority boundaries for every Ship by Sunday execution surface before further paid-loop expansion.
 post_build_recap: The internal execution-surface contract and workspace privacy UI now name separate authority boundaries for local runner, Codex cloud handoff, managed GitHub, generated repo, and Codex app server without adding new execution.
 program_id: customer-agentic-operating-system
-planning_brief: docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
 read_when:
   - Implementing or reviewing execution-surface boundaries.
   - Updating workspace privacy, managed GitHub, Codex cloud handoff, generated repo, or Codex app-server behavior.
@@ -57,7 +57,7 @@ The Program now records the completed execution-surface contract, marks that Pro
 
 ## Context and Orientation
 
-The Program-owned next slice is recorded in `docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md`. The current planning brief is `docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`. The relevant customer-facing surface is `/workspace/privacy`, implemented by `apps/web/app/(workspace)/_components/existing-codebase-support/workspace-privacy-page.tsx`, `apps/web/app/(workspace)/_components/existing-codebase-support/workspace-privacy-panels.tsx`, and `apps/web/app/(workspace)/_lib/workspace-support-read-model.ts`.
+The Program-owned next slice is recorded in `docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md`. The current planning brief is `docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`. The relevant customer-facing surface is `/workspace/privacy`, implemented by `apps/web/app/(workspace)/_components/existing-codebase-support/workspace-privacy-page.tsx`, `apps/web/app/(workspace)/_components/existing-codebase-support/workspace-privacy-panels.tsx`, and `apps/web/app/(workspace)/_lib/workspace-support-read-model.ts`.
 
 The durable operator reference should live under `docs/internal/` because this contract guides future product and provider work. The documentation index is `docs/internal/README.md`.
 
@@ -108,7 +108,7 @@ Edit these files:
     apps/web/app/(workspace)/_components/existing-codebase-support/workspace-privacy-page.tsx
     apps/web/tests/unit/workspace-support-read-model.test.ts
     apps/web/tests/integration-ui/workspace-privacy-page.test.tsx
-    docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md
+    docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md
     docs/exec-plans/active/2026-05-05-execution-surface-contract-refresh.md
 
 After implementation, move the plan to:
@@ -134,7 +134,7 @@ These commands are the required proof from `/Users/bazelrex/Developer/ship-by-su
     bun typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-05-execution-surface-contract-refresh.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-05-execution-surface-contract-refresh.md docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md docs/internal/README.md docs/internal/execution-surfaces.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-05-execution-surface-contract-refresh.md docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md docs/internal/README.md docs/internal/execution-surfaces.md
     git diff --check
 
 ## Idempotence and Recovery

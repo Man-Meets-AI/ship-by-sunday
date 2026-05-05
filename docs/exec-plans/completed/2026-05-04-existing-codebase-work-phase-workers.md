@@ -6,7 +6,7 @@ completed_at: 2026-05-04
 summary: Add the Work-phase local worker queue, daemon claiming path, queue controls, proof-safe state transitions, and validation for approved existing-codebase workflow jobs.
 post_build_recap: Added approved workflow queue claiming through the runner credential API, daemon `--work --confirm-local-writes` execution, `/workspace/runs` worker queue controls, pause/resume/stop mutations, and focused tests without adding PR delivery, managed GitHub, or raw-source sharing.
 program_id: customer-agentic-operating-system
-planning_brief: docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
 read_when:
   - Resuming existing-codebase worker queue, local daemon, or Work-phase execution work.
   - Validating approved workflow queue, pause/resume/stop controls, or one active write lease per project.
@@ -158,7 +158,7 @@ Broader validation passed after the final implementation:
     bun typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-existing-codebase-work-phase-workers.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-existing-codebase-work-phase-workers.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-existing-codebase-work-phase-workers.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md
     git diff --check
 
 ## Idempotence and Recovery

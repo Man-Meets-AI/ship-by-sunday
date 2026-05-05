@@ -27,7 +27,6 @@ Inside that folder:
 
 Active Program folders:
 
-- `docs/programs/active/2026-05-02-one-click-paid-access/`: active Program for making payment nearly one-click with Stripe Link and Express Checkout while guaranteeing access attaches instantly to the purchase email.
-- `docs/programs/active/2026-05-02-customer-agentic-operating-system/`: active Program for the customer-facing agentic operating system across generated repos and mature existing codebases.
+- None.
 
 Completed Program packets live under `docs/programs/completed/`.

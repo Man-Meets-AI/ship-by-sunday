@@ -6,7 +6,7 @@ completed_at: 2026-05-05
 summary: Make generated customer repo agent guidance coherent before shipping the full Program and ExecPlan operating pack.
 post_build_recap: Reconciled generated START-HERE skill triggers with shipped wrapper skills and the external-skill manifest, codified the no-hyphen `execplan-*` prompt asset family as the generated Codebase contract, and added clean-room compiler tests for trigger/script/source-contract coherence.
 program_id: customer-agentic-operating-system
-planning_brief: docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-1.md
+planning_brief: docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-1.md
 read_when:
   - Reconciling generated-repo agent instructions, prompts, skills, scripts, and customer-safe output boundaries.
   - Preparing to ship customer-safe Program and ExecPlan artifacts in generated repos.
@@ -27,7 +27,7 @@ The user-visible result is a downloaded repo whose agent guidance points to file
 
 ## Progress
 
-- [x] 2026-05-02 EDT: Created this child ExecPlan from `docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-1.md`.
+- [x] 2026-05-02 EDT: Created this child ExecPlan from `docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-1.md`.
 - [x] 2026-05-02 EDT: Renamed and narrowed the plan after subagent review found the source-contract reconciliation should precede full operating-pack shipment.
 - [x] 2026-05-05 EDT: Inspected the current generated repo materialization path, template overrides, starter onboarding, wrapper skills, root package scripts, prompt-pack rendering, customer-safe exclusions, review-download zip tests, and compiler instructions immediately before implementation.
 - [x] 2026-05-05 EDT: Reconciled prompt naming by making the no-hyphen `execplan-*` prompt asset family the generated Codebase contract; removed the hyphenated `exec-plan*` family from the download trace and customer-safe shipping contract.
@@ -133,7 +133,7 @@ Run planning validation:
 
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/programs/active/2026-05-02-customer-agentic-operating-system docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md
+    bun run markdown:lint -- --paths docs/programs/completed/2026-05-02-customer-agentic-operating-system docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md
     git diff --check
 
 ## Validation and Acceptance
@@ -167,7 +167,7 @@ Validation evidence from 2026-05-05 EDT:
     bun run programs:lint
     Passed.
 
-    bun run markdown:lint -- --paths docs/programs/active/2026-05-02-customer-agentic-operating-system docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md
+    bun run markdown:lint -- --paths docs/programs/completed/2026-05-02-customer-agentic-operating-system docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md
     Passed.
 
     bun run format
@@ -190,9 +190,9 @@ If generated customer artifacts accidentally include internal planning history, 
 
 ## Artifacts and Notes
 
-The owning Program is `docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md`.
+The owning Program is `docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md`.
 
-The planning brief is `docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-1.md`.
+The planning brief is `docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-1.md`.
 
 The most relevant prior Program is `docs/programs/completed/2026-05-01-generated-repo-first-slice-autonomy/program.md`.
 

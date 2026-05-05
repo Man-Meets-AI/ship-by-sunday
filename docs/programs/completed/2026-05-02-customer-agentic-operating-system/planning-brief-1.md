@@ -15,7 +15,7 @@ read_when:
 
 Ship by Sunday should become the agentic engineering operating system for both new generated repos and mature existing codebases. The buyer-facing product is a worker layer, and Programs, ExecPlans, validation, review evidence, and loops are the substrate that make workers durable. The first implementation slice should focus on generated customer repos because that path is already controlled by `packages/codebase-compiler`, already has customer-safe materialization tests, and already emits Build Pack readiness and first-slice planning docs. The first slice should reconcile source truth and drift before it ships the full operating pack.
 
-The Program packet lives at `docs/programs/active/2026-05-02-customer-agentic-operating-system/`.
+The Program packet lives at `docs/programs/completed/2026-05-02-customer-agentic-operating-system/`.
 
 ## Next Plan Recommendation
 

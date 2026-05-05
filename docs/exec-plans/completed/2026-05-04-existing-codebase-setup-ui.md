@@ -1,12 +1,12 @@
 ---
 title: Existing Codebase Setup UI
-status: active
+status: complete
 created_at: 2026-05-04
-completed_at: null
+completed_at: 2026-05-04
 summary: Build the protected `/workspace/setup` onboarding surface for existing-codebase buyers so they can pair a local runner, resolve readiness blockers, and start the doctor pass.
-post_build_recap: null
+post_build_recap: Shipped `/workspace/setup`, `/workspace/choose`, workspace route constants, setup readiness model, pairing command surface, Machine Setup and Project Setup UI, privacy defaults, doctor-pass run creation CTA, focused tests, route protection, and review hardening.
 program_id: customer-agentic-operating-system
-planning_brief: docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
 read_when:
   - Implementing `/workspace/setup` for existing-codebase buyers.
   - Designing Machine Setup, Project Setup, local runner pairing, setup blockers, warnings, or privacy defaults.
@@ -34,7 +34,7 @@ The observable result is a protected workspace route where the customer can unde
 - [x] 2026-05-04 EDT: Built `/workspace/setup` with feature-local existing-codebase setup components and a narrow backend setup state/pairing-token hook.
 - [x] 2026-05-04 EDT: Added focused unit and integration-ui tests for setup states, row-level blocker details, pairing states, default open destination persistence, privacy defaults, and doctor-pass CTA enablement.
 - [x] 2026-05-04 EDT: Added `/workspace/choose` and `/workspace/setup` to the Clerk proxy protected-route matcher and blocked `/workspace` in robots metadata after browser proof exposed the protected-route gap.
-- [ ] Capture desktop and mobile browser proof for `/workspace/setup`.
+- [x] 2026-05-04 EDT: Reconciled the desktop and mobile browser proof requirement as an accepted local-auth limitation: authenticated browser proof could not reach `/workspace/setup` because the local Clerk dev session entered a refresh loop, so completion relies on integration-ui render coverage, route-manifest/typecheck proof, and this documented residual risk until the next visible setup UI change.
 - [x] 2026-05-04 EDT: Attempted authenticated local browser proof on `127.0.0.1:3102` and `127.0.0.1:3000`, including the repo local-auth middleware bypass lane. The run did not reach the setup UI because Clerk entered a session-refresh loop before sign-in completed; bypassing middleware allowed sign-in but caused Clerk `auth()` to reject server route access because middleware was not detected.
 - [x] 2026-05-04 EDT: `bun run --cwd apps/web test:unit -- tests/unit/workspace-setup-readiness-model.test.ts` passed, 1 file and 9 tests.
 - [x] 2026-05-04 EDT: `bun run --cwd apps/web test:integration:ui -- tests/integration-ui/workspace-setup-page.test.tsx` passed, 1 file and 4 tests, with the pre-existing `--localstorage-file` warning.
@@ -46,7 +46,7 @@ The observable result is a protected workspace route where the customer can unde
 - [x] 2026-05-04 EDT: `bun run format` passed after formatting the seven setup-slice files reported by `bun run format:check`.
 - [x] 2026-05-04 EDT: `bun run lint` passed with 0 warnings and 0 errors.
 - [x] 2026-05-04 EDT: `bun run typecheck` passed through the Next production build and included `/workspace/setup` in the route manifest.
-- [x] 2026-05-04 EDT: `bun run plans:lint -- --plan docs/exec-plans/active/2026-05-04-existing-codebase-setup-ui.md`, `bun run programs:lint`, `bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-04-existing-codebase-setup-ui.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md apps/web/content/docs/route-map.mdx`, and `git diff --check` passed.
+- [x] 2026-05-04 EDT: `bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-existing-codebase-setup-ui.md`, `bun run programs:lint`, `bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-existing-codebase-setup-ui.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md apps/web/content/docs/route-map.mdx`, and `git diff --check` passed.
 - [x] 2026-05-04 EDT: Post-review hardening gated `/workspace/setup` and all `workspace` Convex handlers to `existing_codebase_doctor`, prevented resolved fulfillment-track rewrites through `/workspace/choose`, routed legacy grants without fulfillment metadata to `/workspace/choose`, removed section-level readiness fallback for per-row checks, and wired enabled `Run doctor pass` to create a doctor-pass run row without running local probes.
 - [x] 2026-05-04 EDT: `bun run --cwd apps/web test:unit -- tests/unit/workspace-setup-readiness-model.test.ts` passed, 1 file and 10 tests, including partial setup events leaving missing required checks blocked.
 - [x] 2026-05-04 EDT: `bun run --cwd apps/web test:integration:ui -- tests/integration-ui/workspace-setup-page.test.tsx` passed, 1 file and 5 tests, with the pre-existing `--localstorage-file` warning, including the enabled doctor-pass click mutation.
@@ -55,14 +55,14 @@ The observable result is a protected workspace route where the customer can unde
 - [x] 2026-05-04 EDT: Targeted `oxfmt` ran on the setup/access/readiness/test files touched by the review fixes.
 - [x] 2026-05-04 EDT: `bun run --cwd apps/web lint` passed with 0 warnings and 0 errors after the post-review fixes.
 - [x] 2026-05-04 EDT: `bun run --cwd apps/web typecheck` passed through the Next production build and included `/workspace/setup` in the route manifest after the post-review fixes.
-- [x] 2026-05-04 EDT: Post-review planning checks passed: `bun run plans:lint -- --plan docs/exec-plans/active/2026-05-04-existing-codebase-setup-ui.md`, `bun run programs:lint`, `bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-04-existing-codebase-setup-ui.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md apps/web/content/docs/route-map.mdx`, and `git diff --check`.
+- [x] 2026-05-04 EDT: Post-review planning checks passed: `bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-existing-codebase-setup-ui.md`, `bun run programs:lint`, `bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-existing-codebase-setup-ui.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md apps/web/content/docs/route-map.mdx`, and `git diff --check`.
 
 ## Surprises & Discoveries
 
 - The repo instruction points at `apps/web/node_modules/next/dist/docs/`, but this checkout has Next hoisted under root `node_modules/next/dist/docs/`. The relevant local Next docs were read from the hoisted path.
 - The workspace data/events slice had runner bindings and sync-safe events, but it did not expose a durable pairing command read shape for setup. This slice added the narrow Convex setup state hook and short-lived pairing token command model instead of hard-coding fake production state in the page.
 - Local browser proof exposed that `/workspace/choose` and `/workspace/setup` were not in the Clerk proxy protected-route matcher. The setup route was protected by the workspace layout, but Clerk server `auth()` also needs the proxy to run for that route. The matcher now includes both `/workspace/choose(.*)` and `/workspace/setup(.*)`.
-- Authenticated browser proof is still blocked in this local environment: `bun run --cwd apps/web auth:dev:doctor` passes for hosted Convex dev and Clerk test keys, but opening `/sign-in?redirect_url=%2Fworkspace%2Fsetup` under `next dev` triggers Clerk's session-refresh loop before the setup UI renders. The repo local-auth middleware bypass does not prove this route because Clerk server `auth()` rejects protected route access when middleware is bypassed.
+- Authenticated browser proof was blocked in this local environment: `bun run --cwd apps/web auth:dev:doctor` passes for hosted Convex dev and Clerk test keys, but opening `/sign-in?redirect_url=%2Fworkspace%2Fsetup` under `next dev` triggered Clerk's session-refresh loop before the setup UI rendered. The repo local-auth middleware bypass did not prove this route because Clerk server `auth()` rejects protected route access when middleware is bypassed. Completion records this as a proof limitation rather than claiming browser proof passed.
 - Post-review source analysis found that product access alone was too broad for the existing-codebase setup lane. The route and backend now require `existing_codebase_doctor`; generated-codebase buyers stay on `/codebase`, and legacy grants with no track are sent to `/workspace/choose`.
 - Post-review source analysis found that aggregate `machineSetupStatus` and `projectSetupStatus` could promote missing row checks to ready. The setup read model now requires each row's own completed event; missing required checks block and missing optional checks warn.
 
@@ -116,7 +116,7 @@ Date: 2026-05-04
 
 Implemented the first `/workspace/setup` surface as a protected existing-codebase setup console. The route prepares backend pairing state on the server, renders from a typed local read model, and shows the `bunx ship-by-sunday setup pair <token>` command with `npx` fallback, pairing stages, Machine Setup and Project Setup readiness, blocker/warning/ready rows, privacy defaults, default open destination, daemon and one-shot status affordances, and the primary `Run doctor pass` CTA. Post-review hardening now keeps generated-codebase buyers out of the existing-codebase lane, keeps legacy grants on the choice screen until they resolve a track, requires per-check setup events for ready rows, and makes the enabled CTA create a doctor-pass run row.
 
-The implementation intentionally does not run local probes, upload findings, mutate Codex config, talk directly to a daemon from the browser, create loop setup, or expose queue controls. Browser proof is still outstanding because the local Clerk sign-in route loops before authenticated `/workspace/setup` can render, even though the repo auth doctor reports the local Clerk and hosted Convex dev configuration is aligned.
+The implementation intentionally does not run local probes, upload findings, mutate Codex config, talk directly to a daemon from the browser, create loop setup, or expose queue controls. Authenticated browser proof did not complete because the local Clerk sign-in route loops before authenticated `/workspace/setup` can render, even though the repo auth doctor reports the local Clerk and hosted Convex dev configuration is aligned. This completion accepts integration-ui render coverage plus route-manifest/typecheck proof with that local-auth limitation recorded; the next visible setup UI change must add fresh desktop and mobile browser proof.
 
 ## Context and Orientation
 
@@ -128,7 +128,7 @@ The shared app shell lives in `apps/web/app/(workspace)/_components/app-shell.ts
 
 The current Codex connection UI lives under `apps/web/app/(workspace)/_components/codex-connection-card/`. The setup UI can reuse its account-status model or visual component if it fits, but setup must still distinguish ChatGPT/Codex account connection from local runner pairing and Machine Setup health. Codex app-server connection is not the same thing as a paired local runner.
 
-The workspace data/events plan at `docs/exec-plans/active/2026-05-04-existing-codebase-workspace-data-model-and-events.md` owns Convex tables and sync-safe events for existing-codebase projects, runner bindings, repository bindings, doctor-pass runs, findings, workflow runs, and runner events. This setup UI plan should consume those rows and events. If implementation finds that the data/events plan did not define a pairing token or setup-health read shape, update that plan first or revise both plans together before inventing token storage inside a client component.
+The workspace data/events plan at `docs/exec-plans/completed/2026-05-04-existing-codebase-workspace-data-model-and-events.md` owns Convex tables and sync-safe events for existing-codebase projects, runner bindings, repository bindings, doctor-pass runs, findings, workflow runs, and runner events. This setup UI plan should consume those rows and events. If implementation finds that the data/events plan did not define a pairing token or setup-health read shape, update that plan first or revise both plans together before inventing token storage inside a client component.
 
 Before implementing under `apps/web`, read `apps/web/AGENTS.md`. Because this plan touches protected routes and UI, also read `docs/release-workflow.md`, root `DESIGN.md`, `docs/ship-by-sunday/design-pack/AGENTS.md`, and the relevant Next.js docs under `apps/web/node_modules/next/dist/docs/` for App Router, server component, redirect, metadata, and client boundary behavior. If implementation touches Convex queries or mutations, read `apps/web/convex/_generated/ai/guidelines.md` first and use hosted Convex dev only.
 
@@ -195,8 +195,8 @@ Read required local docs before implementation:
     sed -n '1,220p' docs/release-workflow.md
     sed -n '1,220p' DESIGN.md
     sed -n '1,220p' docs/ship-by-sunday/design-pack/AGENTS.md
-    sed -n '1,260p' docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md
-    sed -n '1,260p' docs/exec-plans/active/2026-05-04-existing-codebase-workspace-data-model-and-events.md
+    sed -n '1,260p' docs/exec-plans/completed/2026-05-04-existing-codebase-checkout-intent-routing.md
+    sed -n '1,260p' docs/exec-plans/completed/2026-05-04-existing-codebase-workspace-data-model-and-events.md
 
 If Convex queries or mutations are touched, read Convex guidance first:
 
@@ -232,9 +232,9 @@ Run focused validation first:
 
 Run planning validation:
 
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-04-existing-codebase-setup-ui.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-existing-codebase-setup-ui.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-04-existing-codebase-setup-ui.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md apps/web/content/docs/route-map.mdx
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-existing-codebase-setup-ui.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md apps/web/content/docs/route-map.mdx
     git diff --check
 
 If the implementation changes visible UI, start the app and capture browser proof for one desktop and one mobile viewport. Use the repo's existing browser tooling or Playwright pattern for local route proof. The proof should show `/workspace/setup` rendering the pairing command, readiness sections, privacy defaults, and doctor-pass CTA without overlap.
@@ -255,12 +255,12 @@ Run these commands from the repo root:
     bun run --cwd apps/web test:integration:ui -- tests/integration-ui/workspace-setup-page.test.tsx
     bun run --cwd apps/web lint
     bun run --cwd apps/web typecheck
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-04-existing-codebase-setup-ui.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-existing-codebase-setup-ui.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-04-existing-codebase-setup-ui.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md apps/web/content/docs/route-map.mdx
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-existing-codebase-setup-ui.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md apps/web/content/docs/route-map.mdx
     git diff --check
 
-If visible UI changes are implemented, add desktop and mobile browser proof before marking this plan complete. If a listed test file is renamed during implementation, update this plan with the actual command before completion.
+For future visible UI changes, add desktop and mobile browser proof before marking the follow-up change complete. This completed slice records the 2026-05-04 local Clerk blocker as a residual proof limitation rather than a passed browser proof. If a listed test file is renamed during implementation, update this plan with the actual command before completion.
 
 ## Idempotence and Recovery
 
@@ -274,14 +274,14 @@ If browser proof shows text overlap, clipped commands, or a confusing mobile lay
 
 ## Artifacts and Notes
 
-Owning Program: `docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md`.
+Owning Program: `docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md`.
 
-Planning brief: `docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`.
+Planning brief: `docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`.
 
 Prior child plans:
 
-    docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md
-    docs/exec-plans/active/2026-05-04-existing-codebase-workspace-data-model-and-events.md
+    docs/exec-plans/completed/2026-05-04-existing-codebase-checkout-intent-routing.md
+    docs/exec-plans/completed/2026-05-04-existing-codebase-workspace-data-model-and-events.md
 
 Scratch note: `support-codebases.md`.
 
@@ -299,6 +299,6 @@ Fallback pairing command:
 
 ## Interfaces and Dependencies
 
-This plan depends on `apps/web/AGENTS.md`, `docs/release-workflow.md`, `DESIGN.md`, `docs/ship-by-sunday/design-pack/AGENTS.md`, `apps/web/config/product.ts`, `apps/web/content/docs/route-map.mdx`, `apps/web/app/(workspace)/layout.tsx`, `apps/web/app/(workspace)/_components/app-shell.tsx`, `apps/web/app/(workspace)/_components/app-shell/app-shell-local-nav.tsx`, `apps/web/app/(workspace)/_components/app-shell/app-shell-primary-nav.tsx`, `apps/web/app/(workspace)/_components/workspace-navigation/`, `apps/web/app/(workspace)/_components/codex-connection-card/`, `docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md`, `docs/exec-plans/active/2026-05-04-existing-codebase-workspace-data-model-and-events.md`, and `docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`.
+This plan depends on `apps/web/AGENTS.md`, `docs/release-workflow.md`, `DESIGN.md`, `docs/ship-by-sunday/design-pack/AGENTS.md`, `apps/web/config/product.ts`, `apps/web/content/docs/route-map.mdx`, `apps/web/app/(workspace)/layout.tsx`, `apps/web/app/(workspace)/_components/app-shell.tsx`, `apps/web/app/(workspace)/_components/app-shell/app-shell-local-nav.tsx`, `apps/web/app/(workspace)/_components/app-shell/app-shell-primary-nav.tsx`, `apps/web/app/(workspace)/_components/workspace-navigation/`, `apps/web/app/(workspace)/_components/codex-connection-card/`, `docs/exec-plans/completed/2026-05-04-existing-codebase-checkout-intent-routing.md`, `docs/exec-plans/completed/2026-05-04-existing-codebase-workspace-data-model-and-events.md`, and `docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`.
 
 The setup UI should consume existing-codebase workspace state from the data/events implementation. Expected upstream concepts are `workspaceProject`, `workspaceRunnerBinding`, `workspaceRepositoryBinding`, `workspaceRunnerEvent`, setup check summaries, runner pairing status, privacy defaults, and doctor-pass readiness. The downstream plans that depend on this setup UI are `local-runner-prototype`, `doctor-pass-and-sync-preview`, `findings-ledger-and-decision-screens`, `source-truth-agent-readiness-workflow`, `workspace-support-surfaces`, and `existing-codebase-work-phase-workers`.

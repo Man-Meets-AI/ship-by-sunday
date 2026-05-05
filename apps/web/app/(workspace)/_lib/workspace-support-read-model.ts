@@ -407,6 +407,17 @@ const workflowDefinitions: WorkflowCatalogDefinition[] = [
 		riskLevel: "Medium",
 	},
 	{
+		id: "mature-repo-adoption",
+		name: "Mature Repo Adoption",
+		category: "Adoption",
+		whenUseful:
+			"An existing repo needs agent-ready source truth, validation mapping, and a first safe adoption plan without starter rewrites.",
+		requiredPermission: "Workspace write for local adoption audit",
+		typicalProof:
+			"Sync-safe convention audit, adoption Program packet, first ExecPlan draft, and blocked-proof notes.",
+		riskLevel: "Low",
+	},
+	{
 		id: "test-hardening",
 		name: "Test Hardening",
 		category: "Testing",

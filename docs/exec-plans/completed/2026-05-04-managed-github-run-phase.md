@@ -6,7 +6,7 @@ completed_at: 2026-05-04
 summary: Add the premium managed GitHub consent and audit boundary so off-machine execution cannot begin without explicit repository scope, PR authority, storage, raw-source, proof, and revocation terms.
 post_build_recap: Added Convex managed GitHub consent and audit state, `/workspace/privacy` concierge request and revocation controls, operator setup docs, and focused validation without adding GitHub API calls or off-machine execution.
 program_id: customer-agentic-operating-system
-planning_brief: docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
 read_when:
   - Resuming managed GitHub Run-phase work.
   - Checking off-machine execution consent, storage, raw-source, or PR boundaries.
@@ -143,7 +143,7 @@ Additional validation evidence from 2026-05-05 local:
     bun run programs:lint
     Passed.
 
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-managed-github-run-phase.md docs/programs/active/2026-05-02-customer-agentic-operating-system docs/internal/managed-github-execution.md support-codebases.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-managed-github-run-phase.md docs/programs/completed/2026-05-02-customer-agentic-operating-system docs/internal/managed-github-execution.md support-codebases.md
     Passed.
 
     git diff --check

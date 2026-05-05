@@ -2,6 +2,7 @@ import { readRunnerCredential } from "../core/local-runner-home";
 import { readLocalProjectState } from "../core/local-project-state";
 import { resolveRepositoryRoot } from "../core/repository-root";
 import { runBrokenAppTriageWorkflow } from "../core/broken-app-triage-workflow";
+import { runMatureRepoAdoptionWorkflow } from "../core/mature-repo-adoption-workflow";
 import { runObservabilityDebuggabilityWorkflow } from "../core/observability-debuggability-workflow";
 import { runSourceTruthWorkflow } from "../core/source-truth-workflow";
 import { resolveApprovedWorkflowRun } from "../core/workflow-run-api";
@@ -15,6 +16,7 @@ type WorkflowCommandOptions = {
 	confirmLocalWrites?: boolean;
 	confirmObservabilityAudit?: boolean;
 	confirmReadOnlyReproduction?: boolean;
+	confirmAdoptionAudit?: boolean;
 };
 
 export async function runWorkflowCommand(argv: string[]) {
@@ -22,11 +24,12 @@ export async function runWorkflowCommand(argv: string[]) {
 	if (
 		(workflowName !== "source-truth-readiness" &&
 			workflowName !== "observability-debuggability" &&
-			workflowName !== "broken-app-triage") ||
+			workflowName !== "broken-app-triage" &&
+			workflowName !== "mature-repo-adoption") ||
 		action !== "run"
 	) {
 		throw new Error(
-			"Usage: ship-by-sunday workflow <source-truth-readiness|observability-debuggability|broken-app-triage> run --workflow-run-id <id>",
+			"Usage: ship-by-sunday workflow <source-truth-readiness|observability-debuggability|broken-app-triage|mature-repo-adoption> run --workflow-run-id <id>",
 		);
 	}
 
@@ -85,6 +88,14 @@ export async function runWorkflowCommand(argv: string[]) {
 						confirmObservabilityAudit:
 							options.confirmObservabilityAudit === true,
 					})
+				: workflowName === "mature-repo-adoption"
+					? await runMatureRepoAdoptionWorkflow({
+							repositoryRoot,
+							state,
+							credential,
+							approvedWorkflowRun,
+							confirmAdoptionAudit: options.confirmAdoptionAudit === true,
+						})
 			: await runSourceTruthWorkflow({
 					repositoryRoot,
 					state,
@@ -104,6 +115,12 @@ export async function runWorkflowCommand(argv: string[]) {
 	} else if (workflowName === "observability-debuggability") {
 		console.log(
 			`Observability workflow wrote ${result.localRunDirectoryRef}.`,
+		);
+		console.log(`Branch: ${result.branchName}.`);
+		console.log(`Proof status: ${result.proofStatus}.`);
+	} else if (workflowName === "mature-repo-adoption") {
+		console.log(
+			`Mature repo adoption workflow wrote ${result.localRunDirectoryRef}.`,
 		);
 		console.log(`Branch: ${result.branchName}.`);
 		console.log(`Proof status: ${result.proofStatus}.`);
@@ -144,6 +161,8 @@ function parseWorkflowCommandOptions(argv: string[]): WorkflowCommandOptions {
 			options.confirmObservabilityAudit = true;
 		} else if (arg === "--confirm-read-only-reproduction") {
 			options.confirmReadOnlyReproduction = true;
+		} else if (arg === "--confirm-adoption-audit") {
+			options.confirmAdoptionAudit = true;
 		} else {
 			throw new Error(`Unknown workflow option: ${arg}`);
 		}

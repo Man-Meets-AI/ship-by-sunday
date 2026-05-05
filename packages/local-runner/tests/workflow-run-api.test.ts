@@ -29,6 +29,69 @@ function createCredential(): RunnerCredential {
 	};
 }
 
+function createMatureRepoAdoptionPacket(overrides: Record<string, unknown> = {}) {
+	return {
+		workflowRunId: "workflowRuns_mature",
+		workflowId: "mature-repo-adoption",
+		workflowVersion: "v1",
+		branchName: "sbs/mature-repo-adoption-20260505-1100",
+		profileName: "sbs-workspace-write",
+		writeLeaseId: "lease_workflowRuns_mature",
+		writeLeaseExpiresAt: 4_102_444_800_000,
+		writeLeaseDurationMinutes: 30,
+		dirtyStatePolicy: "require_clean_worktree",
+		expectedOutputs: [
+			"mature repo adoption workflow packet",
+			"sync-safe repo convention audit",
+			"adoption Program packet draft",
+			"first child ExecPlan draft",
+			"local proof or blocked-proof summary",
+		],
+		allowedTouchTargets: [
+			".sbs/runs/<workflow-run-id>/**",
+			".sbs/mature-repo/**",
+			"repo convention metadata only",
+		],
+		disallowedTouchTargets: [
+			"runtime app code",
+			"environment files",
+			"dependency manifests",
+			"dependency locks",
+			"database migrations",
+			"provider configuration",
+			"generated folders",
+			"package scripts",
+			"root agent instructions",
+			"CI configuration",
+			"CI-affecting commands",
+			"branch pushes",
+			"pull requests",
+			"raw logs",
+			"raw source",
+			"Codex transcripts",
+		],
+		proofCommands: [
+			"git status --short",
+			"git diff --name-only",
+			"git diff --check",
+		],
+		syncPolicySummary:
+			"Only approved structured workflow metadata, proof status, command names, artifact names, and repo-relative refs sync. Local code, command output, and Codex session history stay on the machine.",
+		stopConditions: [
+			"worktree is dirty before branch creation",
+			"write lease expires before adoption audit starts",
+			"requested work needs generated-starter rewrites, provider setup, package installs, migrations, CI, PRs, branch pushes, raw source, raw logs, or Codex transcripts",
+			"proof command fails",
+		],
+		rollbackNotes:
+			"Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the mature adoption branch after reviewing local proof.",
+		localWorkflowPacketRef:
+			".sbs/runs/workflowRuns_mature/workflow-packet.json",
+		localProofRef: ".sbs/runs/workflowRuns_mature/proof.json",
+		...overrides,
+	};
+}
+
 describe("workflow run API", () => {
 	it("claims the next approved workflow packet from the worker queue", async () => {
 		const requests: unknown[] = [];
@@ -120,5 +183,31 @@ describe("workflow run API", () => {
 		});
 
 		expect(workflowRun?.workflowId).toBe("observability-debuggability");
+	});
+
+	it("accepts mature repo adoption workflow packets from the worker queue", async () => {
+		const workflowRun = await claimApprovedWorkflowRun({
+			state: createState(),
+			credential: createCredential(),
+			fetchWorkflowRun: async () =>
+				Response.json(createMatureRepoAdoptionPacket()),
+		});
+
+		expect(workflowRun?.workflowId).toBe("mature-repo-adoption");
+	});
+
+	it("rejects mature repo adoption workflow packets that omit disallowed authorities", async () => {
+		await expect(
+			claimApprovedWorkflowRun({
+				state: createState(),
+				credential: createCredential(),
+				fetchWorkflowRun: async () =>
+					Response.json(
+						createMatureRepoAdoptionPacket({
+							disallowedTouchTargets: ["runtime app code"],
+						}),
+					),
+			}),
+		).rejects.toThrow("Mature repo adoption disallowed touch targets");
 	});
 });

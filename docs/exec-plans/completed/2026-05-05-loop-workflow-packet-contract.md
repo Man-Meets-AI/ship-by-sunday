@@ -6,7 +6,7 @@ completed_at: 2026-05-05
 summary: Define the shared workflow-packet contract that every existing-codebase loop must satisfy before expanding loop types or execution surfaces.
 post_build_recap: The internal workflow-packet contract and workspace loops UI now name the shared loop boundary for evidence, context, execution surface, Codex interpretation, writes, proof, sync, and revocation without adding new execution.
 program_id: customer-agentic-operating-system
-planning_brief: docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
 read_when:
   - Adding or reviewing an existing-codebase workflow packet.
   - Updating `/workspace/loops`, finding approval, Convex workflow runs, or local-runner packet artifacts.
@@ -52,7 +52,7 @@ The Program now records this completed slice, marks the workflow-packet task com
 
 ## Context and Orientation
 
-The Program-owned next slice is recorded in `docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md`. The current planning brief is `docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`.
+The Program-owned next slice is recorded in `docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md`. The current planning brief is `docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`.
 
 The shipped packet producers are `packages/local-runner/src/core/source-truth-workflow.ts`, `packages/local-runner/src/core/observability-debuggability-workflow.ts`, and `packages/local-runner/src/core/broken-app-triage-workflow.ts`. The runner API shape is `ApprovedWorkflowRunPacket` in `packages/local-runner/src/core/workflow-run-api.ts`. The workspace approval read model is `apps/web/app/(workspace)/_lib/workspace-findings-read-model.ts`. The loops catalog is built by `buildWorkspaceLoopsModel` in `apps/web/app/(workspace)/_lib/workspace-support-read-model.ts` and rendered by `apps/web/app/(workspace)/_components/existing-codebase-support/workspace-loops-page.tsx` plus `workspace-loops-catalog.tsx`.
 
@@ -105,7 +105,7 @@ Edit these files:
     apps/web/app/(workspace)/_components/existing-codebase-support/workspace-loops-page.tsx
     apps/web/tests/unit/workspace-support-read-model.test.ts
     apps/web/tests/integration-ui/workspace-loops-page.test.tsx
-    docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md
+    docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md
     docs/exec-plans/active/2026-05-05-loop-workflow-packet-contract.md
 
 After implementation, move the plan to:
@@ -129,7 +129,7 @@ These commands are the required proof from `/Users/bazelrex/Developer/ship-by-su
     bun typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-05-loop-workflow-packet-contract.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-05-loop-workflow-packet-contract.md docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md docs/internal/README.md docs/internal/workflow-packets.md docs/ship-by-sunday/design-pack/documentation.md docs/generated/ship-by-sunday-codebase/design-pack/documentation.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-05-loop-workflow-packet-contract.md docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md docs/internal/README.md docs/internal/workflow-packets.md docs/ship-by-sunday/design-pack/documentation.md docs/generated/ship-by-sunday-codebase/design-pack/documentation.md
     git diff --check
 
 ## Idempotence and Recovery

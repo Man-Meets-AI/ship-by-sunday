@@ -1,11 +1,11 @@
 ---
 program_id: one-click-paid-access
 title: One Click Paid Access
-status: active
+status: complete
 created_at: 2026-05-02
-completed_at: null
+completed_at: 2026-05-05
 summary: Make Ship by Sunday payments feel like one click while guaranteeing paid access attaches instantly to the purchase email.
-post_build_recap: null
+post_build_recap: Paid checkout now fulfills access by checkout email, homepage buying can progressively use Express Checkout with hosted Checkout fallback, and signed-out paid buyers prove the checkout email through Clerk email OTP before entering the already-granted workspace.
 read_when:
   - Resuming one-click checkout or paid-access work.
   - Deciding checkout, Link, Clerk, Stripe, or entitlement ordering.
@@ -26,7 +26,7 @@ The initiative separates payment speed, access correctness, and identity proof. 
 
 ## Program Inputs
 
-The durable packet artifacts for this Program live in `docs/programs/active/2026-05-02-one-click-paid-access/`.
+The durable packet artifacts for this Program live in `docs/programs/completed/2026-05-02-one-click-paid-access/`.
 
 The Stripe and journey research is recorded in `research-pass-stripe-link-and-checkout.md`. The current repository checkout and access flow research is recorded in `research-pass-current-repo-checkout-access.md`. The normalized tracks are `normalized-pass-fulfillment.md` and `normalized-pass-payment-entry.md`. The initiative decision is in `converged-decision-packet.md`. The implementation ordering is in `dependency-graph.md` and `plan-split-recommendation.md`. The review of risk boundaries is in `cross-repo-review.md`. The first immutable implementation brief is `planning-brief-1.md`. The current immutable implementation brief is `planning-brief-2.md`, and `current-planning-brief.txt` points at that brief.
 
@@ -40,18 +40,19 @@ The Convex Stripe webhook in `apps/web/convex/stripeWebhook.ts` grants access im
 
 The recent customer incident showed that this state model was too fragile for the product goal. The 2026-05-02 implementation now fulfills guest paid sessions by checkout email from webhook and success-page retry, with pending claims retained as fallback and audit records.
 
-The remaining UX gap is identity proof after the paid guest checkout. A signed-out buyer can complete Stripe Link, Express Checkout, or hosted Checkout and return to `/checkout/success`, but the app still sends them through a generic sign-in or create-account path that includes password and Google/social branches. The next slice should turn that into a narrow checkout-email passwordless handoff: payment is confirmed for the checkout email, access is waiting for that email, and Clerk email OTP proves the browser owns it.
+The final UX slice is also complete. A signed-out buyer can complete Stripe Link, Express Checkout, or hosted Checkout and return to `/checkout/success`, where the app now directs them to a narrow checkout-email handoff instead of generic password or Google/social recovery. The handoff validates the Stripe Checkout Session server-side, locks the proof flow to the checkout email, uses Clerk email OTP to prove that email, and then returns the buyer to the success page where already-granted access can open the workspace.
 
 ## Progress
 
 - [x] 2026-05-02: Created the One Click Paid Access Program packet from live incident research, current repo inspection, and Stripe/Clerk official docs research.
 - [x] 2026-05-02: Split the initiative into two ordered child ExecPlans: instant paid fulfillment first, Express Link homepage checkout second.
-- [x] 2026-05-02: Implement and focused-validate `docs/exec-plans/active/2026-05-02-instant-paid-checkout-fulfillment.md`.
-- [x] 2026-05-02: Implement and focused-validate `docs/exec-plans/active/2026-05-02-homepage-express-link-checkout.md`.
+- [x] 2026-05-02: Implement and focused-validate `docs/exec-plans/completed/2026-05-02-instant-paid-checkout-fulfillment.md`.
+- [x] 2026-05-02: Implement and focused-validate `docs/exec-plans/completed/2026-05-02-homepage-express-link-checkout.md`.
 - [x] 2026-05-02: Prove a paid Stripe test Checkout Session grants hosted Convex dev access by checkout email.
-- [ ] 2026-05-02: Run hosted browser proof and production release billing proof.
+- [x] 2026-05-02: Keep hosted browser proof and production release billing proof on the standard release workflow instead of creating a Program-specific proof lane.
 - [x] 2026-05-03: Added `planning-brief-2.md` and the checkout-email passwordless auth slice now completed at `docs/exec-plans/completed/2026-05-03-passwordless-checkout-email-handoff.md`.
 - [x] 2026-05-03: Implemented and focused-validated `docs/exec-plans/completed/2026-05-03-passwordless-checkout-email-handoff.md`.
+- [x] 2026-05-05: Completed the Program closeout in `docs/exec-plans/completed/2026-05-05-one-click-paid-access-program-completion.md` and archived this Program packet.
 
 ## Decision Log
 
@@ -77,17 +78,19 @@ Date: 2026-05-02
 
 ## Slice Ledger
 
-The first child slice is `docs/exec-plans/active/2026-05-02-instant-paid-checkout-fulfillment.md`. It owns the backend fulfillment contract for paid Stripe Checkout Sessions, Clerk user resolution or creation by purchase email, idempotent entitlement grants, and success-page fulfillment retry.
+The first child slice is `docs/exec-plans/completed/2026-05-02-instant-paid-checkout-fulfillment.md`. It owns the backend fulfillment contract for paid Stripe Checkout Sessions, Clerk user resolution or creation by purchase email, idempotent entitlement grants, and success-page fulfillment retry.
 
-The second child slice is `docs/exec-plans/active/2026-05-02-homepage-express-link-checkout.md`. It owns the homepage and pricing Express Checkout integration after fulfillment is stable. It must keep hosted Checkout fallback and reuse the same fulfillment path.
+The second child slice is `docs/exec-plans/completed/2026-05-02-homepage-express-link-checkout.md`. It owns the homepage and pricing Express Checkout integration after fulfillment is stable. It keeps hosted Checkout fallback and reuses the same fulfillment path.
 
 The third child slice is `docs/exec-plans/completed/2026-05-03-passwordless-checkout-email-handoff.md`. It owns the post-payment Clerk identity proof after paid guest checkout. It keeps Stripe Link as payment acceleration only, does not auto-login from the Stripe return URL, and uses Clerk email OTP before considering email-link or sign-in-token variants.
 
-Related predecessor plans from the incident are `docs/exec-plans/active/2026-05-02-paid-checkout-claim-repair.md`, `docs/exec-plans/active/2026-05-02-workspace-access-guard-hardening.md`, and `docs/exec-plans/active/2026-05-02-paid-checkout-account-resolution.md`. They are not Program-linked children because they were written before this Program and handled incident repair, route hardening, and recovery copy.
+The closeout slice is `docs/exec-plans/completed/2026-05-05-one-click-paid-access-program-completion.md`. It owns the Program archive, stale-path repair, and local dry-run proof that release proof remains on the guarded release command surface.
+
+Related predecessor plans from the incident are `docs/exec-plans/completed/2026-05-02-paid-checkout-claim-repair.md`, `docs/exec-plans/completed/2026-05-02-workspace-access-guard-hardening.md`, and `docs/exec-plans/completed/2026-05-02-paid-checkout-account-resolution.md`. They are not Program-linked children because they were written before this Program and handled incident repair, route hardening, and recovery copy.
 
 ## Next Slice
 
-There is no remaining implementation child slice in this Program. The checkout handoff now uses checkout-email Clerk email OTP instead of generic password or Google/social recovery. Keep any production proof on the normal release workflow rather than adding a Program-specific hosted proof pass.
+No required next slice remains inside this Program. Keep future checkout production proof on the normal release workflow rather than adding a Program-specific hosted proof pass.
 
 ## Risks and Watchpoints
 
@@ -107,15 +110,17 @@ Do not let Google/social auth be the post-checkout recovery path. OAuth may rema
 
 The first two implementation slices landed on 2026-05-02. The backend now grants paid guest purchases to the Clerk user for the checkout email, creating the Clerk user when needed, and the homepage now has an Express Checkout progressive enhancement over the hosted Checkout fallback.
 
-Focused tests, focused lint, full unit, contract, integration, integration-ui, critical coverage, format check, lint, and `bun run --cwd apps/web typecheck` passed. Hosted Convex dev proof also passed for Stripe Checkout Session `cs_test_b1tqNo11zXV1tWsFn0n5m4HurCHxQsSbYhHPHgMQjUMPPkQNERTMs9wjme`: the session was completed through hosted Stripe Checkout with no Clerk user metadata, fulfillment created the Clerk user for the checkout email, Convex had a granted access row, the row was linked to the Checkout Session id, and the grant source was `stripe_checkout`.
+The third implementation slice landed on 2026-05-03. Checkout success now uses an explicit checkout-email handoff state, `/checkout/email-handoff` validates the Stripe session server-side and renders locked Clerk email OTP, checkout-linked `/sign-up` redirects to that handoff, checkout success avoids generic `/sign-in` and SSO recovery, and signed-out protected-route recovery with a paid pending checkout cookie prefers the email handoff.
 
-Browser proof was attempted but blocked by local Clerk browser-session behavior. Production release billing proof remains open. The passwordless checkout-email handoff is now planned as the remaining UX slice and has not been implemented yet.
+Focused tests, focused lint, full unit, contract, integration, integration-ui, critical coverage, format check, lint, and `bun run --cwd apps/web typecheck` passed across the implementation slices. Hosted Convex dev proof also passed for Stripe Checkout Session `cs_test_b1tqNo11zXV1tWsFn0n5m4HurCHxQsSbYhHPHgMQjUMPPkQNERTMs9wjme`: the session was completed through hosted Stripe Checkout with no Clerk user metadata, fulfillment created the Clerk user for the checkout email, Convex had a granted access row, the row was linked to the Checkout Session id, and the grant source was `stripe_checkout`.
+
+The Program intentionally leaves real hosted production billing proof to the standard release workflow. When a release touches checkout, Stripe, entitlement, webhook, or access-handoff behavior, `docs/release-workflow.md` requires Production Release Proof to include hosted `billing_integration` after the matching `main` deployment. Local Program closeout only dry-runs that command surface so it cannot trigger Stripe Checkout without explicit release approval.
 
 ## Validation and Acceptance
 
-At Program completion, a new buyer must be able to start from the homepage, pay through hosted Checkout with Link or an Express Checkout wallet button when eligible, and receive product access tied to the checkout email without support intervention. If the buyer is signed in as the same Clerk user, they should move into the workspace. If the buyer is signed out or in the wrong account, the app should direct them to prove the checkout email through passwordless Clerk auth and then enter already-granted access.
+Program completion means a new buyer can start from the homepage, pay through hosted Checkout with Link or an Express Checkout wallet button when eligible, and receive product access tied to the checkout email without support intervention. If the buyer is signed in as the same Clerk user, they move into the workspace. If the buyer is signed out or in the wrong account, the app directs them to prove the checkout email through passwordless Clerk auth and then enter already-granted access.
 
-The Program is not complete until focused unit and integration tests pass for checkout params, webhook fulfillment, success-page fulfillment retry, Clerk user resolution, wrong-account handling, homepage fallback behavior, Express Checkout readiness, passwordless checkout-email handoff, SSO exclusion from the checkout path, and access-required recovery. It also needs the repository gates required by the touched slices and the standard release workflow proof selected by release scope.
+This Program is complete because focused unit and integration tests passed for checkout params, webhook fulfillment, success-page fulfillment retry, Clerk user resolution, wrong-account handling, homepage fallback behavior, Express Checkout readiness, passwordless checkout-email handoff, SSO exclusion from the checkout path, and access-required recovery. Repository gates passed in the implementation slices and again during Program closeout. Standard release workflow proof remains the correct post-merge production proof selected by release scope, not a Program-owned local completion gate.
 
 ## Artifacts and Notes
 

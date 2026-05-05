@@ -6,7 +6,7 @@ completed_at: 2026-05-05
 summary: Ship a customer-safe Program and ExecPlan operating pack inside generated repos so agents can plan, validate, and resume product work without internal Ship by Sunday archives.
 post_build_recap: Generated repos now include customer-safe Program and ExecPlan contracts, an active Program packet, a first active ExecPlan, explicit operating-pack validation scripts, package-script wiring, onboarding references, and structural compiler proof.
 program_id: customer-agentic-operating-system
-planning_brief: docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-1.md
+planning_brief: docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-1.md
 read_when:
   - Implementing generated-repo Program or ExecPlan output.
   - Validating generated customer operating-pack files and scripts.
@@ -119,7 +119,7 @@ Run planning and repo validation before completion:
     bun typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-05-generated-repo-operating-pack.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-05-generated-repo-operating-pack.md docs/programs/active/2026-05-02-customer-agentic-operating-system
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-05-generated-repo-operating-pack.md docs/programs/completed/2026-05-02-customer-agentic-operating-system
     git diff --check
 
 ## Validation and Acceptance
@@ -160,7 +160,7 @@ Run these commands from `/Users/bazelrex/Developer/ship-by-sunday`:
     bun run programs:lint
     Passed.
 
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-05-generated-repo-operating-pack.md docs/programs/active/2026-05-02-customer-agentic-operating-system
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-05-generated-repo-operating-pack.md docs/programs/completed/2026-05-02-customer-agentic-operating-system
     Passed.
 
     git diff --check
@@ -172,7 +172,7 @@ Generated operating-pack files must be deterministic for the same project defini
 
 ## Artifacts and Notes
 
-The owning Program is `docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md`.
+The owning Program is `docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md`.
 
 The slice builds on `docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md`.
 

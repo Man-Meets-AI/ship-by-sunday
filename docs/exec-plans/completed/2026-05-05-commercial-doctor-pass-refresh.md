@@ -6,7 +6,7 @@ completed_at: 2026-05-05
 summary: Refresh the public offer language so generated-codebase delivery and existing-codebase doctor-pass support match shipped proof.
 post_build_recap: Public homepage copy now leads with the agent doctor promise, preserves generated and existing-codebase checkout intent, and removes unsupported automatic GitHub or raw-source claims.
 program_id: customer-agentic-operating-system
-planning_brief: docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
 read_when:
   - Resuming the commercial doctor-pass copy refresh.
   - Checking homepage claims against shipped existing-codebase proof.
@@ -100,7 +100,7 @@ Edit:
     apps/web/tests/unit/home-page-render-model.test.ts
     apps/web/tests/integration-ui/home-page-product-preview.test.tsx
     docs/ship-by-sunday/design-pack/documentation.md
-    docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md
+    docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md
     docs/exec-plans/active/2026-05-05-commercial-doctor-pass-refresh.md
 
 Run the focused homepage tests before broader gates. The expected observation is a passing Vitest summary with the homepage content, render model, and product preview suites green. If these tests fail because copy assertions are stale, update the assertions to the new commercial contract. If they fail because the checkout intent changed, repair the runtime code or revert that behavior change inside this slice.
@@ -122,7 +122,7 @@ Run these commands from `/Users/bazelrex/Developer/ship-by-sunday`:
     bun typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-05-commercial-doctor-pass-refresh.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-05-commercial-doctor-pass-refresh.md docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md docs/ship-by-sunday/design-pack/documentation.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-05-commercial-doctor-pass-refresh.md docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md docs/ship-by-sunday/design-pack/documentation.md
     git diff --check
 
 ## Idempotence and Recovery
@@ -135,4 +135,4 @@ The key proof artifacts are the focused homepage test transcripts, the root vali
 
 ## Interfaces and Dependencies
 
-This slice depends on the homepage control plane in `apps/web/config/product.ts`, public content in `apps/web/app/_content/home-page.ts`, checkout intent normalization under `apps/web/platform/billing/checkout/`, protected workspace routes under `apps/web/app/(workspace)/workspace/`, and the Program packet under `docs/programs/active/2026-05-02-customer-agentic-operating-system/`.
+This slice depends on the homepage control plane in `apps/web/config/product.ts`, public content in `apps/web/app/_content/home-page.ts`, checkout intent normalization under `apps/web/platform/billing/checkout/`, protected workspace routes under `apps/web/app/(workspace)/workspace/`, and the Program packet under `docs/programs/completed/2026-05-02-customer-agentic-operating-system/`.

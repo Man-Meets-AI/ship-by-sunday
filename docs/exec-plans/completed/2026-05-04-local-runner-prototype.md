@@ -1,12 +1,12 @@
 ---
 title: Local Runner Prototype
-status: active
+status: complete
 created_at: 2026-05-04
-completed_at: null
+completed_at: 2026-05-04
 summary: Build the Bun-first local runner prototype that pairs an existing repo with Ship by Sunday, checks local readiness, manages SBS Codex profiles safely, and exposes daemon and one-shot execution boundaries.
 post_build_recap: The prototype now ships a Bun-first `packages/local-runner` package named `ship-by-sunday`, narrow token-authenticated runner pair/event API routes, repo-local non-secret `.sbs/` state, user-home runner credentials, sync-safe queued event delivery, setup checks, Codex config preview/apply, foreground daemon, one-shot, and a tested `codex exec --json` wrapper boundary.
 program_id: customer-agentic-operating-system
-planning_brief: docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
 read_when:
   - Implementing `bunx ship-by-sunday setup pair <token>` or the local runner package.
   - Designing local `.sbs/` state, runner pairing, daemon mode, one-shot mode, `gh` readiness, SBS Codex profiles, or Codex config patching.
@@ -38,10 +38,10 @@ The visible proof is not a full doctor pass. The proof is that the runner can pa
 - [x] 2026-05-04 EDT: Updated package naming so the monorepo root stays private as `ship-by-sunday-site`, while the local runner workspace package owns the customer-visible `ship-by-sunday` package name. Updated `bun.lock` with the new workspace.
 - [x] 2026-05-04 EDT: Focused local runner validation passed: `bun run --cwd packages/local-runner test`, `bun run --cwd packages/local-runner lint`, `bun run --cwd packages/local-runner typecheck`, `bun run --cwd packages/local-runner format:check`, `bun run --cwd packages/local-runner build`, `bun run --cwd packages/local-runner ship-by-sunday -- --help`, and `bun run --cwd packages/local-runner package:smoke`.
 - [x] 2026-05-04 EDT: Focused app validation for touched API/Convex surfaces passed: `bun run --cwd apps/web test:unit -- tests/unit/workspace-data-model.test.ts tests/unit/workspace-runner-events.test.ts`, `bun run --cwd apps/web test:integration -- tests/integration/workspace-runner-api.test.ts`, `bun run --cwd apps/web lint`, and `bun run --cwd apps/web typecheck`.
-- [x] 2026-05-04 EDT: Planning and diff validation passed: `bun run plans:lint -- --plan docs/exec-plans/active/2026-05-04-local-runner-prototype.md`, `bun run programs:lint`, `bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-04-local-runner-prototype.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md`, and `git diff --check`.
+- [x] 2026-05-04 EDT: Planning and diff validation passed: `bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-local-runner-prototype.md`, `bun run programs:lint`, `bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-local-runner-prototype.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md`, and `git diff --check`.
 - [x] 2026-05-04 EDT: Fixed review findings after implementation review. Runner credential hashes are now redacted from public workspace state, setup pairing tokens are consumed on first bind, `setup pair` refuses a different local pairing token unless `--repair` is explicit, setup probes use bounded subprocess timeouts, the managed Codex block uses current `[profiles.<name>]` plus nested `[permissions.<name>.filesystem/network]` schema, `codex exec` thread ids persist under local `.sbs/runs/`, and package smoke exercises packed `bunx --package <tgz>` plus `npx --package <tgz>` command paths.
 - [x] 2026-05-04 EDT: Review-fix focused validation passed: `bun run --cwd packages/local-runner test`, `bun run --cwd packages/local-runner lint`, `bun run --cwd packages/local-runner typecheck`, `bun run --cwd packages/local-runner format:check`, `bun run --cwd packages/local-runner build`, `bun run --cwd packages/local-runner ship-by-sunday -- --help`, `bun run --cwd packages/local-runner package:smoke`, `bun run --cwd apps/web test:unit -- tests/unit/workspace-data-model.test.ts tests/unit/workspace-runner-events.test.ts`, `bun run --cwd apps/web test:integration -- tests/integration/workspace-runner-api.test.ts`, `bun run --cwd apps/web lint`, and `bun run --cwd apps/web typecheck`.
-- [x] 2026-05-04 EDT: Review-fix planning and repo validation passed: `bun run plans:lint -- --plan docs/exec-plans/active/2026-05-04-local-runner-prototype.md`, `bun run programs:lint`, `bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-04-local-runner-prototype.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md`, `bun run format:check`, `bun lint`, `bun typecheck`, and `git diff --check`.
+- [x] 2026-05-04 EDT: Review-fix planning and repo validation passed: `bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-local-runner-prototype.md`, `bun run programs:lint`, `bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-local-runner-prototype.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md`, `bun run format:check`, `bun lint`, `bun typecheck`, and `git diff --check`.
 
 ## Surprises & Discoveries
 
@@ -161,7 +161,7 @@ The current in-app Codex account surface is separate from the local runner. `app
 
 The scratch deterministic scanner lives at `.sbs/codebase-intake.py` with `.sbs/codebase-intake.README.md`. It is useful context for later doctor-pass probes, but this plan does not productize it. The runner can copy or stage it only in a later `doctor-pass-and-sync-preview` plan. This prototype may define where scanner artifacts will live, such as `.sbs/reports/`, but it should not implement Top 9 findings or Markdown report generation.
 
-The existing-codebase backend data contract is owned by `docs/exec-plans/active/2026-05-04-existing-codebase-workspace-data-model-and-events.md`. That plan defines workspace projects, runner bindings, repository bindings, doctor-pass runs, findings, workflow runs, and sync-safe runner events. The setup UI contract is owned by `docs/exec-plans/active/2026-05-04-existing-codebase-setup-ui.md`. This runner plan should implement the local side of those contracts and should update the upstream plans if the needed pairing token, event ingestion, or setup-health shape is missing.
+The existing-codebase backend data contract is owned by `docs/exec-plans/completed/2026-05-04-existing-codebase-workspace-data-model-and-events.md`. That plan defines workspace projects, runner bindings, repository bindings, doctor-pass runs, findings, workflow runs, and sync-safe runner events. The setup UI contract is owned by `docs/exec-plans/completed/2026-05-04-existing-codebase-setup-ui.md`. This runner plan should implement the local side of those contracts and should update the upstream plans if the needed pairing token, event ingestion, or setup-health shape is missing.
 
 OpenAI Codex configuration must follow official docs as checked through the OpenAI developer docs MCP. User-level config is `~/.codex/config.toml`. Project `.codex/config.toml` layers are loaded only after project trust. `codex exec` is the non-interactive execution command, and sandbox plus approval policy are the relevant safety controls. The runner must not rely on `codex app-server` as the local execution foundation.
 
@@ -240,8 +240,8 @@ From the repo root, inspect current package and Codex surfaces before editing:
 
 Read the active dependency plans before implementation:
 
-    sed -n '1,260p' docs/exec-plans/active/2026-05-04-existing-codebase-workspace-data-model-and-events.md
-    sed -n '1,260p' docs/exec-plans/active/2026-05-04-existing-codebase-setup-ui.md
+    sed -n '1,260p' docs/exec-plans/completed/2026-05-04-existing-codebase-workspace-data-model-and-events.md
+    sed -n '1,260p' docs/exec-plans/completed/2026-05-04-existing-codebase-setup-ui.md
 
 Refresh official Codex docs through the OpenAI developer docs MCP before changing Codex-specific behavior. The relevant docs to confirm are the Codex CLI reference for `codex exec`, the Codex config reference for `~/.codex/config.toml`, and the sandbox and approvals guide.
 
@@ -301,9 +301,9 @@ If the implementation touches app API or Convex event ingestion, run the focused
 
 Run planning validation:
 
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-04-local-runner-prototype.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-local-runner-prototype.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-04-local-runner-prototype.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-local-runner-prototype.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md
     git diff --check
 
 If a real `codex` binary and authenticated account are available in the implementation environment, add an optional local smoke that runs a harmless read-only `codex exec` command in a temporary Git repo. If Codex is unavailable, record that limitation and rely on the fake-binary integration proof.
@@ -329,9 +329,9 @@ Run these commands from the repo root:
     bun run --cwd packages/local-runner build
     bun run --cwd packages/local-runner ship-by-sunday -- --help
     bun run --cwd packages/local-runner package:smoke
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-04-local-runner-prototype.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-local-runner-prototype.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-04-local-runner-prototype.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-local-runner-prototype.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md
     git diff --check
 
 If web API or Convex surfaces are touched, also run:
@@ -357,15 +357,15 @@ Stopping the foreground daemon should not delete local state or revoke the runne
 
 ## Artifacts and Notes
 
-Owning Program: `docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md`.
+Owning Program: `docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md`.
 
-Planning brief: `docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`.
+Planning brief: `docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`.
 
 Prior child plans:
 
-    docs/exec-plans/active/2026-05-04-existing-codebase-checkout-intent-routing.md
-    docs/exec-plans/active/2026-05-04-existing-codebase-workspace-data-model-and-events.md
-    docs/exec-plans/active/2026-05-04-existing-codebase-setup-ui.md
+    docs/exec-plans/completed/2026-05-04-existing-codebase-checkout-intent-routing.md
+    docs/exec-plans/completed/2026-05-04-existing-codebase-workspace-data-model-and-events.md
+    docs/exec-plans/completed/2026-05-04-existing-codebase-setup-ui.md
 
 Scratch note: `support-codebases.md`.
 
@@ -413,7 +413,7 @@ Local Codex source references checked for this plan:
 
 ## Interfaces and Dependencies
 
-This plan depends on `package.json`, `packages/`, `apps/web/platform/codex/app-server.ts`, `apps/web/platform/codex/app-server-service.ts`, `apps/web/platform/codex/app-server-contracts.ts`, `.sbs/codebase-intake.py`, `.sbs/codebase-intake.README.md`, `docs/design-docs/integrations.md`, `docs/exec-plans/active/2026-05-04-existing-codebase-workspace-data-model-and-events.md`, `docs/exec-plans/active/2026-05-04-existing-codebase-setup-ui.md`, and `docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`.
+This plan depends on `package.json`, `packages/`, `apps/web/platform/codex/app-server.ts`, `apps/web/platform/codex/app-server-service.ts`, `apps/web/platform/codex/app-server-contracts.ts`, `.sbs/codebase-intake.py`, `.sbs/codebase-intake.README.md`, `docs/design-docs/integrations.md`, `docs/exec-plans/completed/2026-05-04-existing-codebase-workspace-data-model-and-events.md`, `docs/exec-plans/completed/2026-05-04-existing-codebase-setup-ui.md`, and `docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md`.
 
 The runner package should expose a binary named `ship-by-sunday`, command modules for setup, daemon, one-shot, and Codex smoke boundaries, and core modules for local state, event outbox, setup checks, GitHub readiness, Codex readiness, Codex config management, and `codex exec` spawning. If app API endpoints are needed, they must use the workspace data/events Convex functions and preserve the sync-safe event contract.
 

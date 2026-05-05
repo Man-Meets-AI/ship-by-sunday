@@ -16,7 +16,7 @@ read_when:
 
 The Program has shifted from broad agentic operating-system strategy into a concrete existing-codebase product lane. Generated-repo buyers continue to `/codebase`. Existing-codebase buyers should route to `/workspace/setup`, pair a local runner, run a private doctor pass, approve sync-safe Top 9 findings, approve one workflow packet, and receive proof or blocked proof. The default privacy posture is local execution: Ship by Sunday coordinates the work and stores only approved structured state, not raw source, raw terminal logs, local absolute paths, secrets, or Codex transcripts.
 
-This brief supersedes `planning-brief-1.md` for new existing-codebase child ExecPlans. The older brief remains the source for the active generated-repo source-contract plan at `docs/exec-plans/active/2026-05-02-reconcile-customer-agentic-source-contract.md`.
+This brief superseded `planning-brief-1.md` for existing-codebase child ExecPlans. The older brief remains the source for the completed generated-repo source-contract plan at `docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md`.
 
 ## Route And Product Contract
 

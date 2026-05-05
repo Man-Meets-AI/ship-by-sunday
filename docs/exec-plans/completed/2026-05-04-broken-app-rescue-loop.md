@@ -6,7 +6,7 @@ completed_at: 2026-05-04
 summary: Add the conditional broken-app rescue workflow that starts with approved read-only diagnostics, local proof, and a later patch boundary.
 post_build_recap: Added `broken-app-triage` as a supported workflow packet, approval-sheet variant, local runner read-only diagnostics executor, daemon worker dispatch path, Top 9 recommendation hook, sync-safe proof artifacts, and focused tests without adding source patching, package-script execution, PRs, installs, migrations, or raw-log/source sync.
 program_id: customer-agentic-operating-system
-planning_brief: docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
 read_when:
   - Reviewing broken-app rescue, concrete-failure triage, or read-only diagnostics behavior.
   - Extending `broken-app-triage` into a later patch-approval workflow.
@@ -151,7 +151,7 @@ Broader validation passed after the final implementation:
     bun typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-broken-app-rescue-loop.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-broken-app-rescue-loop.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-broken-app-rescue-loop.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md
     git diff --check
 
 ## Idempotence and Recovery
@@ -178,7 +178,7 @@ Implemented files include:
 - `apps/web/tests/unit/workspace-findings-read-model.test.ts`
 - `apps/web/tests/unit/workspace-runner-events.test.ts`
 - `apps/web/tests/integration-ui/workspace-finding-detail-page.test.tsx`
-- `docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md`
+- `docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md`
 - `support-codebases.md`
 
 The customer-visible direct command is:

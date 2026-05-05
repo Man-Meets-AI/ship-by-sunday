@@ -6,7 +6,7 @@ completed_at: 2026-05-04
 summary: Let existing-codebase customers approve and run the first low-risk source-truth workflow from a finding decision screen, with local branch proof and sync-safe workflow state.
 post_build_recap: The finding detail screen now creates an approved source-truth workflow run, Convex stores approval and lease metadata, and the local runner can create the branch, write source-truth proof artifacts, update AGENTS.md after terminal confirmation, and sync safe proof events.
 program_id: customer-agentic-operating-system
-planning_brief: docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
 read_when:
   - Resuming the source-truth workflow slice.
   - Validating first-workflow approval, runner execution, or proof sync.
@@ -32,7 +32,7 @@ After the doctor pass and findings ledger, a customer needs one concrete next st
 - [x] 2026-05-04 EDT: Added the local runner `workflow source-truth-readiness run` command with dirty-state blocking, branch creation, local proof artifacts, terminal confirmation for `AGENTS.md`, and sync-safe workflow events.
 - [x] 2026-05-04 EDT: Added focused tests for the findings read model, finding detail UI approval, Convex workflow approval and event state, and local runner source-truth proof.
 - [x] 2026-05-04 EDT: Validation passed: `bun run --cwd packages/local-runner test`, `bun run --cwd packages/local-runner test -- tests/source-truth-workflow.test.ts`, `bun run --cwd packages/local-runner lint`, `bun run --cwd packages/local-runner typecheck`, `bun run --cwd packages/local-runner format:check`, `bun run --cwd packages/local-runner build`, `bun run --cwd packages/local-runner package:smoke`, `bun run --cwd packages/local-runner ship-by-sunday -- --help`, `bun run --cwd apps/web test:unit -- tests/unit/workspace-findings-read-model.test.ts`, `bun run --cwd apps/web test:unit -- tests/unit/workspace-runner-events.test.ts`, `bun run --cwd apps/web test:unit -- tests/unit/workspace-privacy-contract.test.ts`, `bun run --cwd apps/web test:integration:ui -- tests/integration-ui/workspace-finding-detail-page.test.tsx`, `bun run --cwd apps/web lint`, `bun run --cwd apps/web format:check`, and `bun run --cwd apps/web typecheck`.
-- [x] 2026-05-04 EDT: Planning validation passed: `bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-source-truth-agent-readiness-workflow.md`, `bun run programs:lint`, `bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-source-truth-agent-readiness-workflow.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md`, and `git diff --check`.
+- [x] 2026-05-04 EDT: Planning validation passed: `bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-source-truth-agent-readiness-workflow.md`, `bun run programs:lint`, `bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-source-truth-agent-readiness-workflow.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md`, and `git diff --check`.
 - [x] 2026-05-04 EDT: Browser proof was not run because the route is protected and requires a live authenticated existing-codebase workspace with approved findings and a paired runner. The integration UI test renders the actual decision component with seeded findings, runner ids, and mutation calls across the approval path.
 
 ## Surprises & Discoveries
@@ -143,7 +143,7 @@ Run these from `/Users/bazelrex/Developer/ship-by-sunday`:
     bun run --cwd packages/local-runner package:smoke
     bun run plans:lint -- --plan docs/exec-plans/active/2026-05-04-source-truth-agent-readiness-workflow.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-04-source-truth-agent-readiness-workflow.md docs/programs/active/2026-05-02-customer-agentic-operating-system
+    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-04-source-truth-agent-readiness-workflow.md docs/programs/completed/2026-05-02-customer-agentic-operating-system
     git diff --check
 
 If visible UI changes can be run locally, start the app on an available port and verify desktop and mobile views of `/workspace/findings/[findingId]`. The approval sheet should fit without overlap, `Create branch and run workflow` should be visible, `Open PR` should not be present, and no raw source/log/transcript text should appear.

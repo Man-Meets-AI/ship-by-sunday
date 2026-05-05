@@ -64,6 +64,7 @@ const DOCTOR_PASS_LOCAL_SCHEMA_VERSION = "doctor-pass-local.v1";
 const SOURCE_TRUTH_WORKFLOW_ID = "source-truth-agent-readiness";
 const OBSERVABILITY_WORKFLOW_ID = "observability-debuggability";
 const BROKEN_APP_TRIAGE_WORKFLOW_ID = "broken-app-triage";
+const MATURE_REPO_ADOPTION_WORKFLOW_ID = "mature-repo-adoption";
 const OBSERVABILITY_PROFILE_NAME = "sbs-workspace-write";
 const DEFAULT_WORKFLOW_VERSION = "v1";
 const WORKFLOW_APPROVAL_SCHEMA_VERSION = "workspace.workflow-approval.v1";
@@ -101,6 +102,17 @@ const WORKFLOW_DISALLOWED_TOUCH_TARGETS = [
 	"generated folders",
 	"package scripts",
 ] as const;
+const MATURE_REPO_ADOPTION_DISALLOWED_TOUCH_TARGETS = [
+	...WORKFLOW_DISALLOWED_TOUCH_TARGETS,
+	"root agent instructions",
+	"CI configuration",
+	"CI-affecting commands",
+	"branch pushes",
+	"pull requests",
+	"raw logs",
+	"raw source",
+	"Codex transcripts",
+] as const;
 const OBSERVABILITY_PROOF_COMMANDS = [
 	"git status --short",
 	"git diff --name-only",
@@ -116,6 +128,26 @@ const OBSERVABILITY_STOP_CONDITIONS = [
 ] as const;
 const OBSERVABILITY_ROLLBACK_NOTES =
 	"Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the observability branch after reviewing local proof.";
+const MATURE_REPO_ADOPTION_EXPECTED_OUTPUTS = [
+	"mature repo adoption workflow packet",
+	"sync-safe repo convention audit",
+	"adoption Program packet draft",
+	"first child ExecPlan draft",
+	"local proof or blocked-proof summary",
+] as const;
+const MATURE_REPO_ADOPTION_ALLOWED_TOUCH_TARGETS = [
+	".sbs/runs/<workflow-run-id>/**",
+	".sbs/mature-repo/**",
+	"repo convention metadata only",
+] as const;
+const MATURE_REPO_ADOPTION_STOP_CONDITIONS = [
+	"worktree is dirty before branch creation",
+	"write lease expires before adoption audit starts",
+	"requested work needs generated-starter rewrites, provider setup, package installs, migrations, CI, PRs, branch pushes, raw source, raw logs, or Codex transcripts",
+	"proof command fails",
+] as const;
+const MATURE_REPO_ADOPTION_ROLLBACK_NOTES =
+	"Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the mature adoption branch after reviewing local proof.";
 
 export const getWorkspaceProjectStateArgs = {
 	projectId: v.optional(v.id("workspaceProjects")),
@@ -498,6 +530,65 @@ function assertObservabilityWorkflowApprovalPacket(args: {
 	}
 }
 
+function assertMatureRepoAdoptionWorkflowApprovalPacket(args: {
+	profileName: string;
+	dirtyStatePolicy?: "require_clean_worktree" | "checkpoint_required";
+	expectedOutputs: string[];
+	allowedTouchTargets: string[];
+	disallowedTouchTargets: string[];
+	proofCommands: string[];
+	syncPolicySummary: string;
+	stopConditions: string[];
+	rollbackNotes: string;
+}) {
+	if (args.profileName !== OBSERVABILITY_PROFILE_NAME) {
+		throw new ConvexError("Mature repo adoption profile name is not approved");
+	}
+	if (
+		args.dirtyStatePolicy !== undefined &&
+		args.dirtyStatePolicy !== "require_clean_worktree"
+	) {
+		throw new ConvexError(
+			"Mature repo adoption requires a clean-worktree policy",
+		);
+	}
+	assertExactTextList(
+		args.expectedOutputs,
+		MATURE_REPO_ADOPTION_EXPECTED_OUTPUTS,
+		"Mature repo adoption expectedOutputs",
+	);
+	assertExactTextList(
+		args.allowedTouchTargets,
+		MATURE_REPO_ADOPTION_ALLOWED_TOUCH_TARGETS,
+		"Mature repo adoption allowedTouchTargets",
+	);
+	assertExactTextList(
+		args.disallowedTouchTargets,
+		MATURE_REPO_ADOPTION_DISALLOWED_TOUCH_TARGETS,
+		"Mature repo adoption disallowedTouchTargets",
+	);
+	assertExactTextList(
+		args.proofCommands,
+		OBSERVABILITY_PROOF_COMMANDS,
+		"Mature repo adoption proofCommands",
+	);
+	if (args.syncPolicySummary !== WORKFLOW_SYNC_POLICY_SUMMARY) {
+		throw new ConvexError(
+			"Mature repo adoption syncPolicySummary does not match the approved workflow packet",
+		);
+	}
+	assertExactTextList(
+		args.stopConditions,
+		MATURE_REPO_ADOPTION_STOP_CONDITIONS,
+		"Mature repo adoption stopConditions",
+	);
+	if (args.rollbackNotes !== MATURE_REPO_ADOPTION_ROLLBACK_NOTES) {
+		throw new ConvexError(
+			"Mature repo adoption rollbackNotes does not match the approved workflow packet",
+		);
+	}
+}
+
 function normalizeWriteLeaseDurationMinutes(durationMinutes?: number) {
 	const duration = durationMinutes ?? DEFAULT_WORKFLOW_WRITE_LEASE_MINUTES;
 	if (!Number.isFinite(duration) || duration <= 0 || duration > 60) {
@@ -851,7 +942,8 @@ function requireSupportedWorkflowRun(
 	if (
 		workflowRun.workflowId !== SOURCE_TRUTH_WORKFLOW_ID &&
 		workflowRun.workflowId !== OBSERVABILITY_WORKFLOW_ID &&
-		workflowRun.workflowId !== BROKEN_APP_TRIAGE_WORKFLOW_ID
+		workflowRun.workflowId !== BROKEN_APP_TRIAGE_WORKFLOW_ID &&
+		workflowRun.workflowId !== MATURE_REPO_ADOPTION_WORKFLOW_ID
 	) {
 		throw new ConvexError("Workflow is not supported by the local runner");
 	}
@@ -1787,7 +1879,8 @@ export async function requestWorkspaceWorkflowRunHandler(
 	if (
 		args.workflowId !== SOURCE_TRUTH_WORKFLOW_ID &&
 		args.workflowId !== OBSERVABILITY_WORKFLOW_ID &&
-		args.workflowId !== BROKEN_APP_TRIAGE_WORKFLOW_ID
+		args.workflowId !== BROKEN_APP_TRIAGE_WORKFLOW_ID &&
+		args.workflowId !== MATURE_REPO_ADOPTION_WORKFLOW_ID
 	) {
 		throw new ConvexError("Workflow is not supported by the local runner");
 	}
@@ -1838,6 +1931,15 @@ export async function requestWorkspaceWorkflowRunHandler(
 	}
 	if (args.workflowId === OBSERVABILITY_WORKFLOW_ID) {
 		assertObservabilityWorkflowApprovalPacket(args);
+	}
+	if (
+		args.workflowId === MATURE_REPO_ADOPTION_WORKFLOW_ID &&
+		!/^sbs\/mature-repo-adoption-\d{8}-\d{4}$/.test(args.branchName)
+	) {
+		throw new ConvexError("Mature repo adoption branch name is not approved");
+	}
+	if (args.workflowId === MATURE_REPO_ADOPTION_WORKFLOW_ID) {
+		assertMatureRepoAdoptionWorkflowApprovalPacket(args);
 	}
 
 	const existingWorkflowRun = await findActiveWorkflowRunByFinding(ctx, {

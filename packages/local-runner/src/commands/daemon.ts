@@ -15,6 +15,7 @@ import {
 	type SetupCheckStatus,
 } from "../core/runner-events";
 import { runBrokenAppTriageWorkflow } from "../core/broken-app-triage-workflow";
+import { runMatureRepoAdoptionWorkflow } from "../core/mature-repo-adoption-workflow";
 import { runObservabilityDebuggabilityWorkflow } from "../core/observability-debuggability-workflow";
 import { runSourceTruthWorkflow } from "../core/source-truth-workflow";
 import { claimApprovedWorkflowRun } from "../core/workflow-run-api";
@@ -27,6 +28,7 @@ type DaemonOptions = {
 	work?: boolean;
 	confirmLocalWrites?: boolean;
 	confirmObservabilityAudit?: boolean;
+	confirmAdoptionAudit?: boolean;
 	intervalMs: number;
 };
 
@@ -66,6 +68,7 @@ async function runDaemonStart(argv: string[]) {
 					confirmLocalWrites: options.confirmLocalWrites === true,
 					confirmObservabilityAudit:
 						options.confirmObservabilityAudit === true,
+					confirmAdoptionAudit: options.confirmAdoptionAudit === true,
 				});
 			}
 		if (options.once) {
@@ -173,10 +176,12 @@ async function claimAndRunNextWorkflow({
 	repositoryRoot,
 	confirmLocalWrites,
 	confirmObservabilityAudit,
+	confirmAdoptionAudit,
 }: {
 	repositoryRoot: string;
 	confirmLocalWrites: boolean;
 	confirmObservabilityAudit: boolean;
+	confirmAdoptionAudit: boolean;
 }) {
 	if (!confirmLocalWrites) {
 		throw new Error(
@@ -231,6 +236,15 @@ async function claimAndRunNextWorkflow({
 			confirmObservabilityAudit,
 		});
 	}
+	if (approvedWorkflowRun.workflowId === "mature-repo-adoption") {
+		return await runMatureRepoAdoptionWorkflow({
+			repositoryRoot,
+			state,
+			credential,
+			approvedWorkflowRun,
+			confirmAdoptionAudit,
+		});
+	}
 	throw new Error(
 		`Unsupported approved workflow: ${approvedWorkflowRun.workflowId}`,
 	);
@@ -253,6 +267,8 @@ function parseDaemonOptions(argv: string[]): DaemonOptions {
 			options.confirmLocalWrites = true;
 		} else if (arg === "--confirm-observability-audit") {
 			options.confirmObservabilityAudit = true;
+		} else if (arg === "--confirm-adoption-audit") {
+			options.confirmAdoptionAudit = true;
 		} else if (arg === "--interval-ms") {
 			options.intervalMs = Number(
 				requireOptionValue(argv, index, "--interval-ms"),

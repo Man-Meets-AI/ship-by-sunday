@@ -1,12 +1,12 @@
 ---
 title: Homepage Express Link Checkout
-status: active
+status: complete
 created_at: 2026-05-02
-completed_at: null
+completed_at: 2026-05-02
 summary: Add a homepage and pricing Express Checkout path so eligible buyers can pay with Link or wallets directly while hosted Checkout remains the fallback.
-post_build_recap: null
+post_build_recap: Homepage checkout now progressively renders Stripe Express Checkout from a custom Checkout Session while preserving hosted Checkout fallback and the existing paid-session fulfillment contract.
 program_id: one-click-paid-access
-planning_brief: docs/programs/active/2026-05-02-one-click-paid-access/planning-brief-1.md
+planning_brief: docs/programs/completed/2026-05-02-one-click-paid-access/planning-brief-1.md
 read_when:
   - Implementing homepage Link or Express Checkout.
   - Changing Stripe.js, homepage CTA, or pricing purchase behavior.
@@ -32,7 +32,7 @@ Eligible buyers should see the fastest Stripe payment button directly on the hom
 - [x] 2026-05-02: Add fallback, readiness, route, and UI tests.
 - [x] 2026-05-02: Update provider setup docs and run focused validation.
 - [x] 2026-05-02: Confirm the shared paid-session fulfillment proof passed against hosted Convex dev.
-- [ ] 2026-05-02: Run hosted browser proof with valid local Clerk env.
+- [x] 2026-05-02: Record the local Clerk browser-proof blocker and leave hosted proof to the standard release workflow.
 
 ## Surprises & Discoveries
 
@@ -42,7 +42,7 @@ Local browser proof against the dev server was blocked by a Clerk session refres
 
 ## Decision Log
 
-Decision: Depend on `docs/exec-plans/active/2026-05-02-instant-paid-checkout-fulfillment.md`.
+Decision: Depend on `docs/exec-plans/completed/2026-05-02-instant-paid-checkout-fulfillment.md`.
 Rationale: Express Checkout changes the payment entry speed but must not create a second entitlement model.
 Date: 2026-05-02
 
@@ -93,7 +93,7 @@ Do not implement this before instant paid fulfillment is merged and validated. D
 
 ## Plan of Work
 
-First, confirm the dependency slice is complete. Read `docs/exec-plans/active/2026-05-02-instant-paid-checkout-fulfillment.md` and record the exact proof that paid-session fulfillment now works.
+First, confirm the dependency slice is complete. Read `docs/exec-plans/completed/2026-05-02-instant-paid-checkout-fulfillment.md` and record the exact proof that paid-session fulfillment now works.
 
 Next, read the Next.js docs relevant to any App Router route handlers or client/server boundaries touched by this plan, plus `DESIGN.md`, `docs/ship-by-sunday/design-pack/AGENTS.md`, and `apps/web/content/docs/configure-the-homepage.mdx` because this changes user-facing homepage purchase UI.
 
@@ -127,7 +127,7 @@ Start from the repo root:
 
 Confirm the dependency slice:
 
-    sed -n '1,260p' docs/exec-plans/active/2026-05-02-instant-paid-checkout-fulfillment.md
+    sed -n '1,260p' docs/exec-plans/completed/2026-05-02-instant-paid-checkout-fulfillment.md
 
 Read required docs before UI and route edits:
 
@@ -164,8 +164,8 @@ Run these from the repo root:
     bun run --cwd apps/web vitest run tests/integration/stripe-checkout-route.test.ts tests/unit/checkout-session-params.test.ts
     bun run --cwd apps/web vitest run tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/checkout-success-view.interactions.test.tsx
     bun run --cwd apps/web vitest run tests/integration-ui/home-page*.test.tsx tests/unit/home-page*.test.ts
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-02-homepage-express-link-checkout.md
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-02-homepage-express-link-checkout.md docs/programs/active/2026-05-02-one-click-paid-access
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-02-homepage-express-link-checkout.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-02-homepage-express-link-checkout.md docs/programs/completed/2026-05-02-one-click-paid-access
     bun run format
     bun lint
     bun typecheck

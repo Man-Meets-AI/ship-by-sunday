@@ -65,6 +65,8 @@ Existing shipped workflows may not yet serialize every key under those exact nam
 
 `broken-app-triage` is a local runner read-only diagnostics packet. It can write `.sbs/runs/<workflow-run-id>/**` proof artifacts and run only approved read-only diagnostic commands. It disallows source patching, package installs, tests/builds unless explicitly approved as safe diagnostics, migrations, provider CLIs, branch pushes, pull requests, raw logs, raw source, and automatic repair. A repair patch requires a later packet.
 
+`mature-repo-adoption` is a local runner adoption audit packet. It can create an approved local branch and write `.sbs/runs/<workflow-run-id>/**` plus `.sbs/mature-repo/**`. It inspects sync-safe repo convention metadata such as package manager, package script names, dependency names, docs refs, agent instruction refs, CI refs, and release refs. It emits an adoption audit, adoption Program draft, first child ExecPlan draft, proof, and sync preview. It disallows generated-starter rewrites, root docs mutation, runtime code edits, env files, dependency manifests, lockfiles, migrations, provider configuration, CI changes, package scripts, branch pushes, pull requests, raw logs, raw source, and Codex transcripts.
+
 ## Future Change Checklist
 
 Before adding or widening a workflow packet, update this document and the customer-facing surface that explains the boundary. The change must name:

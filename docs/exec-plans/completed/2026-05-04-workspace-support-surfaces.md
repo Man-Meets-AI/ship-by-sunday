@@ -6,7 +6,7 @@ completed_at: 2026-05-04
 summary: Build the Crawl and Walk support pages for run history, finding-filtered workflows, and local privacy controls without introducing worker queues.
 post_build_recap: Added protected `/workspace/runs`, `/workspace/loops`, and `/workspace/privacy` support surfaces backed by sync-safe workspace read models, focused tests, and existing runner revocation plus synced-finding deletion controls.
 program_id: customer-agentic-operating-system
-planning_brief: docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-02-customer-agentic-operating-system/planning-brief-2.md
 read_when:
   - Resuming `/workspace/runs`, `/workspace/loops`, or `/workspace/privacy` work.
   - Validating Crawl and Walk support surfaces.
@@ -133,7 +133,7 @@ Run these commands from `/Users/bazelrex/Developer/ship-by-sunday`:
     bun run --cwd apps/web lint
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-workspace-support-surfaces.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-workspace-support-surfaces.md docs/programs/active/2026-05-02-customer-agentic-operating-system support-codebases.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-workspace-support-surfaces.md docs/programs/completed/2026-05-02-customer-agentic-operating-system support-codebases.md
     git diff --check
 
 Local authenticated browser proof remains limited by the existing Clerk local session-refresh issue recorded in the setup UI plan. The focused integration UI tests cover the rendered route components for desktop-like DOM output and the Next production build proves the routes compile into the app manifest.
