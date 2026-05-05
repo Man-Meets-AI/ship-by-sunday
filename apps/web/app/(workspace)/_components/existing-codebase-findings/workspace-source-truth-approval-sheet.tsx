@@ -3,9 +3,8 @@
 import Link from "next/link";
 import {
 	AlertTriangle,
-	CheckCircle2,
 	Clipboard,
-	ShieldCheck,
+	GitBranchPlus,
 	Terminal,
 } from "lucide-react";
 
@@ -66,24 +65,19 @@ export function WorkspaceSourceTruthApprovalSheet({
 
 	return (
 		<aside className="grid gap-5 lg:sticky lg:top-20">
-			<section className="rounded-xl border border-border/60 bg-background p-4">
-				<div className="flex items-start gap-3">
-					<ShieldCheck className="mt-0.5 size-4 text-foreground" aria-hidden />
-					<div className="min-w-0">
-						<h2 className="text-sm font-semibold text-foreground">
-							Workflow approval
-						</h2>
-						<p className="mt-1 text-sm leading-6 text-muted-foreground">
-							{isBrokenAppReadOnly
-								? "Approve this bounded packet, then run read-only diagnostics locally before any patch is allowed."
-								: isObservabilityAudit
-									? "Approve this bounded packet, then run the local observability audit without changing runtime code or provider setup."
-									: "Approve this bounded packet, then run the command locally to create the branch and proof."}
-						</p>
-					</div>
-				</div>
+			<section className="rounded-xl border border-border/60 bg-background p-5">
+				<h2 className="text-base font-semibold text-foreground">
+					Workflow approval
+				</h2>
+				<p className="mt-2 text-sm leading-6 text-muted-foreground">
+					{isBrokenAppReadOnly
+						? "Approve the bounded packet, then run read-only diagnostics locally before any patch is allowed."
+						: isObservabilityAudit
+							? "Approve the bounded packet, then run the local observability audit without changing runtime code or provider setup."
+							: "Approve the bounded packet, then run the local command to create the branch and proof."}
+				</p>
 
-				<div className="mt-4 grid gap-3 text-sm">
+				<div className="mt-4 grid gap-2 rounded-lg border border-border/60 bg-muted/20 p-3 text-sm">
 					<ApprovalFact label="Branch" value={approval.branchName} mono />
 					<ApprovalFact label="Profile" value={approval.profileName} />
 					<ApprovalFact
@@ -97,17 +91,23 @@ export function WorkspaceSourceTruthApprovalSheet({
 						type="button"
 						onClick={onApproveWorkflow}
 						disabled={!canApprove || actionState === "submitting"}
+						className="justify-center"
 					>
+						<GitBranchPlus className="size-4" aria-hidden />
 						{actionState === "submitting"
 							? "Creating workflow run"
 							: primaryActionLabel}
-						<CheckCircle2 className="size-4" aria-hidden />
 					</Button>
-					<Button type="button" variant="outline" onClick={onCopyEvidenceRef}>
-						Copy local evidence ref
+					<Button
+						type="button"
+						variant="outline"
+						className="justify-center"
+						onClick={onCopyEvidenceRef}
+					>
 						<Clipboard className="size-4" aria-hidden />
+						Copy local evidence ref
 					</Button>
-					<Button asChild variant="ghost">
+					<Button asChild variant="ghost" className="justify-center">
 						<Link href={routeConfig.workspaceFindings}>Not now</Link>
 					</Button>
 				</div>
@@ -204,13 +204,13 @@ function ApprovalFact({
 	mono?: boolean;
 }) {
 	return (
-		<div className="min-w-0">
+		<div className="grid min-w-0 grid-cols-[5rem_minmax(0,1fr)] items-start gap-3">
 			<p className="text-xs font-medium text-muted-foreground">{label}</p>
 			<p
 				className={
 					mono
-						? "mt-1 break-words font-mono text-xs text-foreground"
-						: "mt-1 break-words text-sm text-foreground"
+						? "break-words font-mono text-xs text-foreground"
+						: "break-words text-sm text-foreground"
 				}
 			>
 				{value}
