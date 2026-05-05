@@ -99,7 +99,7 @@ Edit:
     docs/internal/update-channel.md
     docs/internal/README.md
     docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md
-    docs/exec-plans/active/2026-05-05-package-update-channel-contract.md
+    docs/exec-plans/completed/2026-05-05-package-update-channel-contract.md
 
 After implementation, move the plan to:
 

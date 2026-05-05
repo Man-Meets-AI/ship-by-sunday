@@ -221,4 +221,42 @@ describe("workspace codebase, review, and setup routes", () => {
 		expect(fetchAuthenticatedMutationMock).not.toHaveBeenCalled();
 		expect(redirectMock).toHaveBeenCalledWith("/codebase");
 	});
+
+	it("redirects existing-codebase viewers away from generated-codebase codebase", async () => {
+		getServerProductAccessMock.mockResolvedValue({
+			clerkUserId: "user_123",
+			hasAccess: true,
+			status: "granted",
+			fulfillmentTrack: "existing_codebase_doctor",
+		});
+
+		const { default: CodebaseRoutePage } =
+			await import("@/app/(workspace)/codebase/page");
+
+		await expect(CodebaseRoutePage()).rejects.toThrow(
+			"redirect:/workspace/setup",
+		);
+		expect(fetchAuthenticatedQueryMock).not.toHaveBeenCalled();
+		expect(redirectMock).toHaveBeenCalledWith("/workspace/setup");
+	});
+
+	it("redirects unresolved viewers away from generated-codebase review", async () => {
+		getServerProductAccessMock.mockResolvedValue({
+			clerkUserId: "user_123",
+			hasAccess: true,
+			status: "granted",
+			fulfillmentTrack: "unspecified",
+		});
+
+		const { default: ReviewRoutePage } =
+			await import("@/app/(workspace)/review/page");
+
+		await expect(
+			ReviewRoutePage({
+				searchParams: Promise.resolve({}),
+			}),
+		).rejects.toThrow("redirect:/workspace/choose");
+		expect(fetchAuthenticatedQueryMock).not.toHaveBeenCalled();
+		expect(redirectMock).toHaveBeenCalledWith("/workspace/choose");
+	});
 });

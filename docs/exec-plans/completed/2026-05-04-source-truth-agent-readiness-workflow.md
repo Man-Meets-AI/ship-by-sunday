@@ -141,9 +141,9 @@ Run these from `/Users/bazelrex/Developer/ship-by-sunday`:
     bun run --cwd packages/local-runner lint
     bun run --cwd packages/local-runner typecheck
     bun run --cwd packages/local-runner package:smoke
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-04-source-truth-agent-readiness-workflow.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-04-source-truth-agent-readiness-workflow.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-04-source-truth-agent-readiness-workflow.md docs/programs/completed/2026-05-02-customer-agentic-operating-system
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-04-source-truth-agent-readiness-workflow.md docs/programs/completed/2026-05-02-customer-agentic-operating-system
     git diff --check
 
 If visible UI changes can be run locally, start the app on an available port and verify desktop and mobile views of `/workspace/findings/[findingId]`. The approval sheet should fit without overlap, `Create branch and run workflow` should be visible, `Open PR` should not be present, and no raw source/log/transcript text should appear.

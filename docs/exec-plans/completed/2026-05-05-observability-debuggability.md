@@ -114,7 +114,7 @@ Edit:
     focused tests under apps/web/tests and packages/local-runner/tests
     docs/internal/observability.md
     docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md
-    docs/exec-plans/active/2026-05-05-observability-debuggability.md
+    docs/exec-plans/completed/2026-05-05-observability-debuggability.md
 
 Run the focused runner and workspace tests before broad gates. If the workflow command regresses to `source-truth-readiness`, fix the approval model instead of adding UI-specific conditionals. If the runner tries to execute provider, package, CI, push, PR, or source-sharing work, reduce the implementation back to `.sbs` audit/proof artifacts and blocked-proof metadata.
 

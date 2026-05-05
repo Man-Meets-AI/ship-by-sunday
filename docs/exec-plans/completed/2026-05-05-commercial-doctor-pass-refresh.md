@@ -101,7 +101,7 @@ Edit:
     apps/web/tests/integration-ui/home-page-product-preview.test.tsx
     docs/ship-by-sunday/design-pack/documentation.md
     docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md
-    docs/exec-plans/active/2026-05-05-commercial-doctor-pass-refresh.md
+    docs/exec-plans/completed/2026-05-05-commercial-doctor-pass-refresh.md
 
 Run the focused homepage tests before broader gates. The expected observation is a passing Vitest summary with the homepage content, render model, and product preview suites green. If these tests fail because copy assertions are stale, update the assertions to the new commercial contract. If they fail because the checkout intent changed, repair the runtime code or revert that behavior change inside this slice.
 

@@ -96,7 +96,7 @@ Edit or move:
     docs/programs/active/index.md
     docs/programs/completed/index.md
     docs/exec-plans/completed/*.md
-    docs/exec-plans/active/2026-05-05-customer-agentic-operating-system-program-completion.md
+    docs/exec-plans/completed/2026-05-05-customer-agentic-operating-system-program-completion.md
 
 After Program archival, the Program folder should exist at:
 

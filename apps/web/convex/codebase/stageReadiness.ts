@@ -15,7 +15,7 @@ import {
 	getCodebaseWorkflowStateByClerkUserId,
 	serializeCodebaseWorkflowState,
 } from "./workflowState";
-import { requireGrantedProductAccess } from "../access/model";
+import { requireGeneratedCodebaseProductAccess } from "../access/model";
 import { loadViewerCourseState } from "../course/shared";
 
 export const getCodebaseWorkspaceStateArgs = {};
@@ -26,7 +26,7 @@ export const getCodebaseResumeDestinationReturns =
 	codebaseResumeDestinationValidator;
 
 export async function getCodebaseWorkspaceStateHandler(ctx: CodebaseQueryCtx) {
-	const clerkUserId = await requireGrantedProductAccess(ctx);
+	const clerkUserId = await requireGeneratedCodebaseProductAccess(ctx);
 	const [projectDefinition, workflowState] = await Promise.all([
 		getProjectDefinitionByClerkUserId(ctx, clerkUserId),
 		getCodebaseWorkflowStateByClerkUserId(ctx, clerkUserId),

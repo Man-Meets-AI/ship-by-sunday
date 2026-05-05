@@ -15,6 +15,11 @@ const canonicalWorkspaceRoutes = [
 	routeConfig.settings,
 	routeConfig.workspaceChoice,
 	routeConfig.workspaceSetup,
+	routeConfig.workspaceDoctorPass,
+	routeConfig.workspaceFindings,
+	routeConfig.workspaceLoops,
+	routeConfig.workspaceRuns,
+	routeConfig.workspacePrivacy,
 ] as const;
 
 const compatibilityWorkspaceRoutes = [

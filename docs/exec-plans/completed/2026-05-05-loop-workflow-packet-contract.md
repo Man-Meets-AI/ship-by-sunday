@@ -106,7 +106,7 @@ Edit these files:
     apps/web/tests/unit/workspace-support-read-model.test.ts
     apps/web/tests/integration-ui/workspace-loops-page.test.tsx
     docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md
-    docs/exec-plans/active/2026-05-05-loop-workflow-packet-contract.md
+    docs/exec-plans/completed/2026-05-05-loop-workflow-packet-contract.md
 
 After implementation, move the plan to:
 

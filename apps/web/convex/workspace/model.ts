@@ -531,7 +531,9 @@ function assertObservabilityWorkflowApprovalPacket(args: {
 }
 
 function assertMatureRepoAdoptionWorkflowApprovalPacket(args: {
+	workflowVersion?: string;
 	profileName: string;
+	writeLeaseDurationMinutes?: number;
 	dirtyStatePolicy?: "require_clean_worktree" | "checkpoint_required";
 	expectedOutputs: string[];
 	allowedTouchTargets: string[];
@@ -543,6 +545,22 @@ function assertMatureRepoAdoptionWorkflowApprovalPacket(args: {
 }) {
 	if (args.profileName !== OBSERVABILITY_PROFILE_NAME) {
 		throw new ConvexError("Mature repo adoption profile name is not approved");
+	}
+	if (
+		args.workflowVersion !== undefined &&
+		args.workflowVersion !== DEFAULT_WORKFLOW_VERSION
+	) {
+		throw new ConvexError(
+			"Mature repo adoption workflow version is not approved",
+		);
+	}
+	if (
+		args.writeLeaseDurationMinutes !== undefined &&
+		args.writeLeaseDurationMinutes !== DEFAULT_WORKFLOW_WRITE_LEASE_MINUTES
+	) {
+		throw new ConvexError(
+			"Mature repo adoption write lease duration is not approved",
+		);
 	}
 	if (
 		args.dirtyStatePolicy !== undefined &&

@@ -109,6 +109,119 @@ async function createSourceTruthFinding({
 	});
 }
 
+async function createMatureRepoAdoptionFinding({
+	ctx,
+	projectId,
+	runnerId,
+}: {
+	ctx: ReturnType<typeof createWorkspaceTestCtx>["ctx"];
+	projectId: string;
+	runnerId: string;
+}) {
+	const doctorPassRun = await startWorkspaceDoctorPassRun._handler(
+		ctx as never,
+		{
+			projectId: projectId as never,
+			runnerId: runnerId as never,
+			runnerMode: "daemon",
+		},
+	);
+	return await ctx.db.insert("codebaseFindings", {
+		projectId,
+		doctorPassRunId: doctorPassRun._id,
+		findingId: "finding-mature-adoption",
+		rank: 3,
+		status: "needs_approval",
+		title: "Mature repo needs an adoption packet",
+		category: "other",
+		severity: "medium",
+		confidence: 0.82,
+		buyerImpact: "Future agent work needs a repo-specific operating layer.",
+		blastRadius: "low",
+		proofPath: "Review local mature repo adoption proof.",
+		proofability: "partial",
+		permissionRequired: "workspace_write",
+		recommendedWorkflowId: "mature-repo-adoption",
+		whyThisNow:
+			"The repo has useful conventions that should be preserved before larger changes.",
+		evidenceRefs: [],
+		syncSensitivity: "low",
+		localReportRef: ".sbs/reports/doctor-pass/run-1/mature-repo-adoption.json",
+		createdAt: 1,
+		updatedAt: 1,
+	});
+}
+
+function buildMatureRepoAdoptionApprovalArgs({
+	projectId,
+	findingDocumentId,
+	runnerId,
+	workflowVersion = "v1",
+	writeLeaseDurationMinutes = 30,
+}: {
+	projectId: string;
+	findingDocumentId: string;
+	runnerId: string;
+	workflowVersion?: string;
+	writeLeaseDurationMinutes?: number;
+}) {
+	return {
+		projectId: projectId as never,
+		findingDocumentId: findingDocumentId as never,
+		runnerId: runnerId as never,
+		workflowId: "mature-repo-adoption",
+		workflowVersion,
+		branchName: "sbs/mature-repo-adoption-20260505-1100",
+		profileName: "sbs-workspace-write",
+		writeLeaseDurationMinutes,
+		expectedOutputs: [
+			"mature repo adoption workflow packet",
+			"sync-safe repo convention audit",
+			"adoption Program packet draft",
+			"first child ExecPlan draft",
+			"local proof or blocked-proof summary",
+		],
+		allowedTouchTargets: [
+			".sbs/runs/<workflow-run-id>/**",
+			".sbs/mature-repo/**",
+			"repo convention metadata only",
+		],
+		disallowedTouchTargets: [
+			"runtime app code",
+			"environment files",
+			"dependency manifests",
+			"dependency locks",
+			"database migrations",
+			"provider configuration",
+			"generated folders",
+			"package scripts",
+			"root agent instructions",
+			"CI configuration",
+			"CI-affecting commands",
+			"branch pushes",
+			"pull requests",
+			"raw logs",
+			"raw source",
+			"Codex transcripts",
+		],
+		proofCommands: [
+			"git status --short",
+			"git diff --name-only",
+			"git diff --check",
+		],
+		syncPolicySummary:
+			"Only approved structured workflow metadata, proof status, command names, artifact names, and repo-relative refs sync. Local code, command output, and Codex session history stay on the machine.",
+		stopConditions: [
+			"worktree is dirty before branch creation",
+			"write lease expires before adoption audit starts",
+			"requested work needs generated-starter rewrites, provider setup, package installs, migrations, CI, PRs, branch pushes, raw source, raw logs, or Codex transcripts",
+			"proof command fails",
+		],
+		rollbackNotes:
+			"Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the mature adoption branch after reviewing local proof.",
+	};
+}
+
 describe("workspace runner events", () => {
 	afterEach(() => {
 		vi.restoreAllMocks();
@@ -1035,6 +1148,50 @@ describe("workspace runner events", () => {
 			localWorkflowPacketRef: `.sbs/runs/${workflowRun._id}/workflow-packet.json`,
 			localProofRef: `.sbs/runs/${workflowRun._id}/proof.json`,
 		});
+	});
+
+	it("rejects mature repo adoption approvals with an unsupported workflow version", async () => {
+		const { ctx, project, runner } = await createProjectAndRunner();
+		const findingDocumentId = await createMatureRepoAdoptionFinding({
+			ctx,
+			projectId: project._id,
+			runnerId: runner._id,
+		});
+
+		await expect(
+			requestWorkspaceWorkflowRun._handler(
+				ctx as never,
+				buildMatureRepoAdoptionApprovalArgs({
+					projectId: project._id,
+					findingDocumentId,
+					runnerId: runner._id,
+					workflowVersion: "v2",
+				}),
+			),
+		).rejects.toThrow("Mature repo adoption workflow version is not approved");
+	});
+
+	it("rejects mature repo adoption approvals with a non-default write lease", async () => {
+		const { ctx, project, runner } = await createProjectAndRunner();
+		const findingDocumentId = await createMatureRepoAdoptionFinding({
+			ctx,
+			projectId: project._id,
+			runnerId: runner._id,
+		});
+
+		await expect(
+			requestWorkspaceWorkflowRun._handler(
+				ctx as never,
+				buildMatureRepoAdoptionApprovalArgs({
+					projectId: project._id,
+					findingDocumentId,
+					runnerId: runner._id,
+					writeLeaseDurationMinutes: 60,
+				}),
+			),
+		).rejects.toThrow(
+			"Mature repo adoption write lease duration is not approved",
+		);
 	});
 
 	it("rejects observability approvals that drift from the shipped audit packet", async () => {

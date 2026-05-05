@@ -109,7 +109,7 @@ Edit these files:
     apps/web/tests/unit/workspace-support-read-model.test.ts
     apps/web/tests/integration-ui/workspace-privacy-page.test.tsx
     docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md
-    docs/exec-plans/active/2026-05-05-execution-surface-contract-refresh.md
+    docs/exec-plans/completed/2026-05-05-execution-surface-contract-refresh.md
 
 After implementation, move the plan to:
 

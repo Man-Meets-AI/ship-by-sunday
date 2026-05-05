@@ -134,9 +134,9 @@ From the repo root, inspect the current surfaces before editing:
     sed -n '1,260p' apps/web/convex/workspace.ts
     rg -n "listWorkspaceFindings|codebaseFinding|requestWorkspaceWorkflowRun" apps/web/convex/workspace apps/web/tests
 
-Create the plan file if it does not exist:
+Confirm the archived plan file exists:
 
-    test -f docs/exec-plans/active/2026-05-04-findings-ledger-and-decision-screens.md
+    test -f docs/exec-plans/completed/2026-05-04-findings-ledger-and-decision-screens.md
 
 Implement expected ownership:
 

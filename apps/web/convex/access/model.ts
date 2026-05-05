@@ -118,6 +118,23 @@ export async function requireExistingCodebaseProductAccess(ctx: AccessReadCtx) {
 	return clerkUserId;
 }
 
+export async function requireGeneratedCodebaseProductAccess(
+	ctx: AccessReadCtx,
+) {
+	const clerkUserId = await requireGrantedProductAccess(ctx);
+	const accessGrant = await getProductAccessGrantByClerkUserId(
+		ctx,
+		clerkUserId,
+	);
+	const checkoutIntent = getStoredCheckoutIntentFields(accessGrant);
+
+	if (checkoutIntent.fulfillmentTrack !== "generated_codebase") {
+		throw new ConvexError("Generated codebase access required");
+	}
+
+	return clerkUserId;
+}
+
 export async function upsertProductAccessGrant(
 	ctx: AccessMutationCtx,
 	input: ProductAccessGrantUpsertInput,
