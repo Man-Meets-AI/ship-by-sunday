@@ -73,6 +73,7 @@ export default async function globalSetup(config: FullConfig) {
 				clerkUserId,
 				email: memberWithAccessEmail,
 				kind: "grant",
+				fulfillmentTrack: "generated_codebase",
 			});
 			await syncCodebaseProgressState({
 				clerkUserId,
@@ -217,12 +218,10 @@ async function signIn(
 	await page.getByLabel(/^password$/i).fill(password);
 	await page.getByRole("button", { name: /^sign in$/i }).click();
 	try {
-		await page.waitForURL((url) => url.pathname === "/codebase", {
-			timeout: 15_000,
-		});
+		await waitForSignedInWorkspaceLanding(page);
 	} catch (error) {
 		throw new Error(
-			`Playwright auth bootstrap reached the sign-in form for ${email} but never returned to /codebase. ${await describeAuthBootstrapPage(page, diagnostics)}. ${formatAuthBootstrapError(error)}`,
+			`Playwright auth bootstrap reached the sign-in form for ${email} but never reached an authenticated workspace landing page. ${await describeAuthBootstrapPage(page, diagnostics)}. ${formatAuthBootstrapError(error)}`,
 		);
 	}
 	try {
@@ -246,7 +245,7 @@ async function signIn(
 		);
 	} catch (error) {
 		throw new Error(
-			`Playwright auth bootstrap reached /codebase for ${email}, but Clerk never exposed a user/session pair. ${await describeAuthBootstrapPage(page, diagnostics)}. ${formatAuthBootstrapError(error)}`,
+			`Playwright auth bootstrap reached an authenticated workspace landing page for ${email}, but Clerk never exposed a user/session pair. ${await describeAuthBootstrapPage(page, diagnostics)}. ${formatAuthBootstrapError(error)}`,
 		);
 	}
 
@@ -265,6 +264,18 @@ async function signIn(
 	}
 
 	return clerkUserId;
+}
+
+async function waitForSignedInWorkspaceLanding(page: Page) {
+	await page.waitForURL(
+		(url) =>
+			url.pathname === "/codebase" ||
+			url.pathname === "/workspace/choose" ||
+			url.pathname === "/workspace/setup",
+		{
+			timeout: 15_000,
+		},
+	);
 }
 
 async function describeAuthBootstrapPage(
@@ -364,10 +375,12 @@ async function syncProductAccessState({
 	clerkUserId,
 	email,
 	kind,
+	fulfillmentTrack,
 }: {
 	clerkUserId: string;
 	email: string;
 	kind: "grant" | "reset";
+	fulfillmentTrack?: "generated_codebase" | "existing_codebase_doctor";
 }) {
 	if (kind === "reset") {
 		const pendingClaimResetResult = await runConvexInternalCommand({
@@ -392,6 +405,7 @@ async function syncProductAccessState({
 					args: {
 						clerkUserId,
 						source: "manual",
+						...(fulfillmentTrack ? { fulfillmentTrack } : {}),
 					},
 					env: {
 						...process.env,
