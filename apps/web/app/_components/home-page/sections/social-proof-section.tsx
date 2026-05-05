@@ -1,6 +1,3 @@
-"use client";
-
-import { useRef, useState } from "react";
 import type { HomePageContent } from "@/app/_content/home-page";
 import { ScrollReveal } from "./scroll-reveal";
 
@@ -45,30 +42,11 @@ function DitheredFounderPortrait({
 }: {
 	portrait: SocialProofSectionContent["portrait"];
 }) {
-	const figureRef = useRef<HTMLElement>(null);
-	const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
-
-	function handleMouseMove(e: React.MouseEvent<HTMLElement>) {
-		const rect = figureRef.current?.getBoundingClientRect();
-		if (!rect) return;
-		setCursor({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-	}
-
-	const revealMask = cursor
-		? `radial-gradient(circle 80px at ${cursor.x}px ${cursor.y}px, black 30%, transparent 75%)`
-		: undefined;
-
 	return (
-		<figure
-			ref={figureRef}
-			className="relative aspect-square w-full max-w-xs cursor-crosshair overflow-hidden rounded-2xl border border-border/50 bg-muted sm:max-w-sm lg:ml-auto"
-			onMouseMove={handleMouseMove}
-			onMouseLeave={() => setCursor(null)}
-		>
-			{/* Grayscale base */}
+		<figure className="group relative aspect-square w-full max-w-xs overflow-hidden rounded-2xl border border-border/50 bg-muted sm:max-w-sm lg:ml-auto">
 			<img
 				alt={portrait.alt}
-				className="h-full w-full object-cover grayscale contrast-125 saturate-0"
+				className="h-full w-full object-cover grayscale saturate-0 contrast-125 transition-[filter] duration-200 ease-out group-hover:grayscale-0 group-hover:saturate-100 group-hover:contrast-100"
 				decoding="async"
 				loading="lazy"
 				src={portrait.src}
@@ -86,19 +64,6 @@ function DitheredFounderPortrait({
 			<div
 				aria-hidden="true"
 				className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.24),rgba(0,0,0,0.24))] mix-blend-soft-light"
-			/>
-			{/* Color reveal — spotlight masked to cursor position */}
-			<img
-				alt=""
-				aria-hidden="true"
-				className="pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-150"
-				style={
-					revealMask
-						? { maskImage: revealMask, WebkitMaskImage: revealMask, opacity: 1 }
-						: { opacity: 0 }
-				}
-				decoding="async"
-				src={portrait.src}
 			/>
 		</figure>
 	);
