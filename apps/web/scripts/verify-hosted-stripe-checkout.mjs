@@ -397,8 +397,15 @@ async function verifyAuthorizedWorkspace(page, { baseUrl, timeoutMs }) {
 				.getByRole("button", { name: /Continue to Review/i })
 				.isVisible()
 				.catch(() => false);
+			const workspaceChoiceHeadingVisible = await verificationPage
+				.getByRole("heading", { name: "Choose your workspace path" })
+				.isVisible()
+				.catch(() => false);
 
-			if (!accessRequiredVisible && (headingVisible || reviewButtonVisible)) {
+			if (
+				!accessRequiredVisible &&
+				(headingVisible || reviewButtonVisible || workspaceChoiceHeadingVisible)
+			) {
 				return {
 					accessRequiredVisible,
 					authorized: true,
