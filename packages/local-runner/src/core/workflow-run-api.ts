@@ -1,5 +1,16 @@
 import type { RunnerCredential } from "./local-runner-home";
 import type { LocalProjectState } from "./local-project-state";
+import {
+	DOCS_SPINE_ADOPTION_ALLOWED_TOUCH_TARGETS,
+	DOCS_SPINE_ADOPTION_DISALLOWED_TOUCH_TARGETS,
+	DOCS_SPINE_ADOPTION_EXPECTED_OUTPUTS,
+	DOCS_SPINE_ADOPTION_PROOF_COMMANDS,
+	DOCS_SPINE_ADOPTION_ROLLBACK_NOTES,
+	DOCS_SPINE_ADOPTION_STOP_CONDITIONS,
+	DOCS_SPINE_ADOPTION_SYNC_POLICY_SUMMARY,
+	DOCS_SPINE_ADOPTION_WORKFLOW_ID,
+	DOCS_SPINE_ADOPTION_WORKFLOW_VERSION,
+} from "../workflows/docs-spine-adoption/manifest";
 
 export const WORKFLOW_RUN_RESOLVE_ENDPOINT =
 	"/api/workspace/runner/workflow-runs/resolve";
@@ -57,7 +68,8 @@ export type ApprovedWorkflowRunPacket = {
 		| "source-truth-agent-readiness"
 		| "observability-debuggability"
 		| "broken-app-triage"
-		| "mature-repo-adoption";
+		| "mature-repo-adoption"
+		| typeof DOCS_SPINE_ADOPTION_WORKFLOW_ID;
 	workflowVersion: string;
 	branchName: string;
 	profileName: string;
@@ -170,7 +182,8 @@ function assertApprovedWorkflowRunPacket(
 		packet.workflowId !== "source-truth-agent-readiness" &&
 		packet.workflowId !== "observability-debuggability" &&
 		packet.workflowId !== "broken-app-triage" &&
-		packet.workflowId !== "mature-repo-adoption"
+		packet.workflowId !== "mature-repo-adoption" &&
+		packet.workflowId !== DOCS_SPINE_ADOPTION_WORKFLOW_ID
 	) {
 		throw new Error("Approved workflow run is not supported.");
 	}
@@ -182,6 +195,9 @@ function assertApprovedWorkflowRunPacket(
 	}
 	if (packet.workflowId === "mature-repo-adoption") {
 		assertMatureRepoAdoptionPacket(packet);
+	}
+	if (packet.workflowId === DOCS_SPINE_ADOPTION_WORKFLOW_ID) {
+		assertDocsSpineAdoptionPacket(packet);
 	}
 }
 
@@ -244,6 +260,66 @@ function assertMatureRepoAdoptionPacket(packet: ApprovedWorkflowRunPacket) {
 	}
 	if (packet.localProofRef !== `.sbs/runs/${packet.workflowRunId}/proof.json`) {
 		throw new Error("Mature repo adoption proof ref is not approved.");
+	}
+}
+
+function assertDocsSpineAdoptionPacket(packet: ApprovedWorkflowRunPacket) {
+	if (packet.workflowVersion !== DOCS_SPINE_ADOPTION_WORKFLOW_VERSION) {
+		throw new Error("Docs spine adoption workflow version is not approved.");
+	}
+	if (packet.profileName !== "sbs-workspace-write") {
+		throw new Error("Docs spine adoption profile is not approved.");
+	}
+	if (!/^sbs\/docs-spine-adoption-\d{8}-\d{4}$/.test(packet.branchName)) {
+		throw new Error("Docs spine adoption branch is not approved.");
+	}
+	if (packet.writeLeaseDurationMinutes !== 30) {
+		throw new Error(
+			"Docs spine adoption write lease duration is not approved.",
+		);
+	}
+	if (packet.dirtyStatePolicy !== "require_clean_worktree") {
+		throw new Error("Docs spine adoption requires a clean-worktree policy.");
+	}
+	assertExactTextList(
+		packet.expectedOutputs,
+		DOCS_SPINE_ADOPTION_EXPECTED_OUTPUTS,
+		"Docs spine adoption expected outputs",
+	);
+	assertExactTextList(
+		packet.allowedTouchTargets,
+		DOCS_SPINE_ADOPTION_ALLOWED_TOUCH_TARGETS,
+		"Docs spine adoption allowed touch targets",
+	);
+	assertExactTextList(
+		packet.disallowedTouchTargets,
+		DOCS_SPINE_ADOPTION_DISALLOWED_TOUCH_TARGETS,
+		"Docs spine adoption disallowed touch targets",
+	);
+	assertExactTextList(
+		packet.proofCommands,
+		DOCS_SPINE_ADOPTION_PROOF_COMMANDS,
+		"Docs spine adoption proof commands",
+	);
+	if (packet.syncPolicySummary !== DOCS_SPINE_ADOPTION_SYNC_POLICY_SUMMARY) {
+		throw new Error("Docs spine adoption sync policy is not approved.");
+	}
+	assertExactTextList(
+		packet.stopConditions,
+		DOCS_SPINE_ADOPTION_STOP_CONDITIONS,
+		"Docs spine adoption stop conditions",
+	);
+	if (packet.rollbackNotes !== DOCS_SPINE_ADOPTION_ROLLBACK_NOTES) {
+		throw new Error("Docs spine adoption rollback notes are not approved.");
+	}
+	if (
+		packet.localWorkflowPacketRef !==
+		`.sbs/runs/${packet.workflowRunId}/workflow-packet.json`
+	) {
+		throw new Error("Docs spine adoption workflow packet ref is not approved.");
+	}
+	if (packet.localProofRef !== `.sbs/runs/${packet.workflowRunId}/proof.json`) {
+		throw new Error("Docs spine adoption proof ref is not approved.");
 	}
 }
 

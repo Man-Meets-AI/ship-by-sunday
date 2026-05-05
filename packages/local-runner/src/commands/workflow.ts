@@ -2,6 +2,7 @@ import { readRunnerCredential } from "../core/local-runner-home";
 import { readLocalProjectState } from "../core/local-project-state";
 import { resolveRepositoryRoot } from "../core/repository-root";
 import { runBrokenAppTriageWorkflow } from "../core/broken-app-triage-workflow";
+import { runDocsSpineAdoptionWorkflow } from "../core/docs-spine-adoption-workflow";
 import { runMatureRepoAdoptionWorkflow } from "../core/mature-repo-adoption-workflow";
 import { runObservabilityDebuggabilityWorkflow } from "../core/observability-debuggability-workflow";
 import { runSourceTruthWorkflow } from "../core/source-truth-workflow";
@@ -17,6 +18,7 @@ type WorkflowCommandOptions = {
 	confirmObservabilityAudit?: boolean;
 	confirmReadOnlyReproduction?: boolean;
 	confirmAdoptionAudit?: boolean;
+	confirmDocsSpineAdoption?: boolean;
 };
 
 export async function runWorkflowCommand(argv: string[]) {
@@ -25,11 +27,12 @@ export async function runWorkflowCommand(argv: string[]) {
 		(workflowName !== "source-truth-readiness" &&
 			workflowName !== "observability-debuggability" &&
 			workflowName !== "broken-app-triage" &&
-			workflowName !== "mature-repo-adoption") ||
+			workflowName !== "mature-repo-adoption" &&
+			workflowName !== "docs-spine-adoption") ||
 		action !== "run"
 	) {
 		throw new Error(
-			"Usage: ship-by-sunday workflow <source-truth-readiness|observability-debuggability|broken-app-triage|mature-repo-adoption> run --workflow-run-id <id>",
+			"Usage: ship-by-sunday workflow <source-truth-readiness|observability-debuggability|broken-app-triage|mature-repo-adoption|docs-spine-adoption> run --workflow-run-id <id>",
 		);
 	}
 
@@ -94,13 +97,22 @@ export async function runWorkflowCommand(argv: string[]) {
 							approvedWorkflowRun,
 							confirmAdoptionAudit: options.confirmAdoptionAudit === true,
 						})
-					: await runSourceTruthWorkflow({
-							repositoryRoot,
-							state,
-							credential,
-							approvedWorkflowRun,
-							confirmLocalWrites: options.confirmLocalWrites === true,
-						});
+					: workflowName === "docs-spine-adoption"
+						? await runDocsSpineAdoptionWorkflow({
+								repositoryRoot,
+								state,
+								credential,
+								approvedWorkflowRun,
+								confirmDocsSpineAdoption:
+									options.confirmDocsSpineAdoption === true,
+							})
+						: await runSourceTruthWorkflow({
+								repositoryRoot,
+								state,
+								credential,
+								approvedWorkflowRun,
+								confirmLocalWrites: options.confirmLocalWrites === true,
+							});
 
 	if (options.json) {
 		console.log(JSON.stringify(result, null, 2));
@@ -120,13 +132,32 @@ export async function runWorkflowCommand(argv: string[]) {
 		);
 		console.log(`Branch: ${result.branchName}.`);
 		console.log(`Proof status: ${result.proofStatus}.`);
+	} else if (workflowName === "docs-spine-adoption") {
+		console.log(
+			`Docs spine adoption workflow wrote ${result.localRunDirectoryRef}.`,
+		);
+		console.log(`Branch: ${result.branchName}.`);
+		console.log(`Proof status: ${result.proofStatus}.`);
 	} else {
 		console.log(`Source-truth workflow wrote ${result.localRunDirectoryRef}.`);
 		console.log(`Branch: ${result.branchName}.`);
 		console.log(`Proof status: ${result.proofStatus}.`);
 	}
 
-	return result.status === "blocked" ? 1 : 0;
+	return getWorkflowCommandExitCode(result);
+}
+
+export function getWorkflowCommandExitCode(result: {
+	status: string;
+	proofStatus: string;
+}) {
+	if (result.status === "blocked") {
+		return 1;
+	}
+	if (result.proofStatus !== "passed") {
+		return 1;
+	}
+	return 0;
 }
 
 function parseWorkflowCommandOptions(argv: string[]): WorkflowCommandOptions {
@@ -159,6 +190,8 @@ function parseWorkflowCommandOptions(argv: string[]): WorkflowCommandOptions {
 			options.confirmReadOnlyReproduction = true;
 		} else if (arg === "--confirm-adoption-audit") {
 			options.confirmAdoptionAudit = true;
+		} else if (arg === "--confirm-docs-spine-adoption") {
+			options.confirmDocsSpineAdoption = true;
 		} else {
 			throw new Error(`Unknown workflow option: ${arg}`);
 		}

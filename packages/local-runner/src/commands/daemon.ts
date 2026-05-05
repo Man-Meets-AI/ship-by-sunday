@@ -15,6 +15,7 @@ import {
 	type SetupCheckStatus,
 } from "../core/runner-events";
 import { runBrokenAppTriageWorkflow } from "../core/broken-app-triage-workflow";
+import { runDocsSpineAdoptionWorkflow } from "../core/docs-spine-adoption-workflow";
 import { runMatureRepoAdoptionWorkflow } from "../core/mature-repo-adoption-workflow";
 import { runObservabilityDebuggabilityWorkflow } from "../core/observability-debuggability-workflow";
 import { runSourceTruthWorkflow } from "../core/source-truth-workflow";
@@ -29,6 +30,7 @@ type DaemonOptions = {
 	confirmLocalWrites?: boolean;
 	confirmObservabilityAudit?: boolean;
 	confirmAdoptionAudit?: boolean;
+	confirmDocsSpineAdoption?: boolean;
 	intervalMs: number;
 };
 
@@ -68,6 +70,7 @@ async function runDaemonStart(argv: string[]) {
 				confirmLocalWrites: options.confirmLocalWrites === true,
 				confirmObservabilityAudit: options.confirmObservabilityAudit === true,
 				confirmAdoptionAudit: options.confirmAdoptionAudit === true,
+				confirmDocsSpineAdoption: options.confirmDocsSpineAdoption === true,
 			});
 		}
 		if (options.once) {
@@ -176,11 +179,13 @@ async function claimAndRunNextWorkflow({
 	confirmLocalWrites,
 	confirmObservabilityAudit,
 	confirmAdoptionAudit,
+	confirmDocsSpineAdoption,
 }: {
 	repositoryRoot: string;
 	confirmLocalWrites: boolean;
 	confirmObservabilityAudit: boolean;
 	confirmAdoptionAudit: boolean;
+	confirmDocsSpineAdoption: boolean;
 }) {
 	if (!confirmLocalWrites) {
 		throw new Error(
@@ -190,6 +195,11 @@ async function claimAndRunNextWorkflow({
 	if (!confirmObservabilityAudit) {
 		throw new Error(
 			"daemon start --work requires --confirm-observability-audit because the queue can claim observability audit jobs.",
+		);
+	}
+	if (!confirmDocsSpineAdoption) {
+		throw new Error(
+			"daemon start --work requires --confirm-docs-spine-adoption because the queue can claim docs-spine adoption jobs.",
 		);
 	}
 
@@ -244,6 +254,15 @@ async function claimAndRunNextWorkflow({
 			confirmAdoptionAudit,
 		});
 	}
+	if (approvedWorkflowRun.workflowId === "docs-spine-adoption") {
+		return await runDocsSpineAdoptionWorkflow({
+			repositoryRoot,
+			state,
+			credential,
+			approvedWorkflowRun,
+			confirmDocsSpineAdoption,
+		});
+	}
 	throw new Error(
 		`Unsupported approved workflow: ${approvedWorkflowRun.workflowId}`,
 	);
@@ -268,6 +287,8 @@ function parseDaemonOptions(argv: string[]): DaemonOptions {
 			options.confirmObservabilityAudit = true;
 		} else if (arg === "--confirm-adoption-audit") {
 			options.confirmAdoptionAudit = true;
+		} else if (arg === "--confirm-docs-spine-adoption") {
+			options.confirmDocsSpineAdoption = true;
 		} else if (arg === "--interval-ms") {
 			options.intervalMs = Number(
 				requireOptionValue(argv, index, "--interval-ms"),

@@ -72,6 +72,9 @@ upload`, includes a visible stepper from local run through upload, and shows
   `Uploaded findings do not match approved preview` after approval. That means
   the runner and backend are not hashing the approved findings with the same
   canonical payload contract, even if the findings appear unchanged.
+  Observed: fresh run `20260505T202908Z-77c50c13` with preview digest
+  `sha256:9afee1742f14f7c61c2912e41f7ac50f469448b2fcae109afdda36ebd9d0fa65`
+  still failed upload after approval with this exact error.
   Addressed: fresh run `20260505T204201Z-56640b39` /
   `m97djh73b8dda4jrd9yvgqy3xh8640qx` used preview digest
   `sha256:51147b7880774d858d6d843c0182a2309a70e3e1fd1197c6ba9fc3126cc7ecef`;
@@ -79,6 +82,10 @@ upload`, includes a visible stepper from local run through upload, and shows
   `patchedCount: 0`, wrote `upload-result.json`, and Convex showed
   `status: findings_uploaded`, `syncPreviewStatus: uploaded`, and 9 uploaded
   findings.
+  Rechecked: fresh smoke run `20260505T205048Z-ce1cc569` /
+  `m97e1f0ty8dgz9wf2t57vq1kfx864ndx` uploaded successfully after browser
+  approval with `insertedCount: 4`, `patchedCount: 0`, and wrote
+  `.sbs/reports/doctor-pass/20260505T205048Z-ce1cc569/upload-result.json`.
 
 - [x] Verify Doctor Pass Top 9 schema is accepted by Codex.
 
@@ -100,6 +107,35 @@ upload`, includes a visible stepper from local run through upload, and shows
 - Pairing mode: daemon / one-shot
 - Pairing token regenerated at:
 - Runner command used:
+
+## Intended Customer Setup Journey
+
+The customer should not need a public npm package, `bunx`, `npx`, or a local
+source checkout of this repo to start. The production setup path should be a
+browser-generated, one-time installer command from `man-meets-ai.com` that
+downloads or updates the Ship by Sunday runner, pairs the current repo, and
+initializes the repo-local SBS workspace.
+
+Target shape:
+
+```bash
+curl -fsSL https://www.man-meets-ai.com/install | sh -s -- \
+  --pair <pairing-token> \
+  --repo . \
+  --api-url https://www.man-meets-ai.com
+```
+
+Expected: the installer is signed or checksum-verified, idempotent, and installs
+the runner under `~/.sbs/bin` or `~/.sbs/runner`; machine credentials stay in
+`~/.sbs/runner`; repo-local state, workflow packs, Doctor Pass artifacts, intake
+probe output, and proof refs live under the customer repo's `.sbs/`. Browser
+setup should feel like `Install runner`, `Initialize repo`, `Review Codex
+config`, `Run Doctor Pass`, and `Approve findings upload`, not like manual
+package-manager debugging.
+
+Failure: the customer must know package-store mechanics, copy a source checkout
+path such as `packages/local-runner/src/cli.ts`, manually discover
+`.sbs/intake-probe`, or infer the setup order from terminal-only commands.
 
 ## 1. Confirm The Package Works
 
@@ -282,11 +318,43 @@ be approved before findings sync`; after browser approval, inserted and
   Expected: doctor-pass status, local report refs, and sync preview are visible.
   Failure: run exists locally but page has no trace of it.
 
+- [x] Workspace run summary cards are data-dense and operator-friendly.
+
+  Expected: the top-right summary card on workspace pages shows the full or
+  copyable run id, local run id when relevant, current state, next required
+  actor, finding count, preview digest short hash, and a timestamp without
+  truncating the value that operators need to compare with terminal output.
+  Failure: the card truncates the run id, uses vague labels like `Now`, or
+  forces the tester to infer whether the app is waiting on the browser, runner,
+  backend, or a manual CLI command.
+  Addressed: `/workspace/doctor-pass`, `/workspace/setup`,
+  `/workspace/findings`, and `/workspace/runs` now use the dense operator
+  summary pattern with copyable IDs, explicit state/owner/next-action rows, and
+  relevant counts or digest/timestamp details.
+
 - [ ] `/workspace/findings`
 
   Expected: synced findings appear with clear severity/status.
   Failure: empty list after upload, duplicates, raw local paths, raw source, or
   raw logs.
+
+- [ ] Repeated Doctor Pass uploads reconcile findings predictably.
+
+  Expected: the Findings page makes it clear whether it is showing the latest
+  Doctor Pass snapshot or the cumulative project ledger. Running Doctor Pass
+  multiple times should not produce duplicate-looking rows for the same
+  underlying issue. If findings are cumulative, the UI needs run filters,
+  superseded/active labels, and copy that explains the ledger. If findings are
+  latest-snapshot, stale findings from older runs should be hidden or marked
+  superseded after a new upload. Information architecture should treat findings
+  as candidate work items for the bot: operators need easy views for active
+  todos, latest run output, all historical findings, hidden/suppressed findings,
+  and grouped duplicates/same-underlying-issue clusters.
+  Failure: uploading several Doctor Pass runs leaves mixed old and new findings
+  in the same `Top 9 ledger`, with repeated ranks/titles such as multiple
+  intake-probe or Codex-auth findings, and no clear way to tell which run owns
+  each row, which items are current bot todos, or which old rows should be
+  ignored.
 
 - [ ] `/workspace/findings/<findingId>`
 
@@ -314,6 +382,27 @@ be approved before findings sync`; after browser approval, inserted and
   `bun run --cwd apps/web test:integration:ui -- workspace-finding-detail-page.test.tsx`;
   app typecheck also passed.
 
+- [ ] Finding workflow actions respect local-runner workflow support.
+
+  Expected: ready findings only show active workflow-start actions when the
+  recommended workflow is supported by the paired local runner. If the workflow
+  is not implemented yet, the UI should show a disabled or informative state
+  such as `This workflow is not available in the local runner yet`, and should
+  not call the backend. If the backend rejects the request anyway, the page
+  should render a friendly inline product error instead of the Next.js raw error
+  overlay.
+  Failure: clicking a ready finding workflow action produces
+  `Workflow is not supported by the local runner` from
+  `workspace:requestWorkspaceWorkflowRun`.
+  Observed: request id `134a84a54dedc72c` failed with
+  `Workflow is not supported by the local runner` at
+  `apps/web/convex/workspace/model.ts:2145`.
+  Focused validation: `bun run --cwd apps/web test:integration:ui --
+  workspace-finding-detail-page.test.tsx` passed with unsupported no-call,
+  supported request, and sanitized backend rejection coverage; `bun run --cwd
+  apps/web typecheck` passed. Manual smoke against a live unsupported finding is
+  still required before checking this item off.
+
 - [ ] `/workspace/runs`
 
   Expected: doctor-pass and approved workflow history show clear statuses.
@@ -325,12 +414,17 @@ be approved before findings sync`; after browser approval, inserted and
   approved workflow runs.
   Failure: browser can start arbitrary local work directly.
 
-- [ ] `/workspace/privacy`
+- [x] `/workspace/privacy`
 
   Expected: runner identity, repo binding, local execution boundary, raw-sharing
   defaults, and revoke controls are clear.
   Failure: unclear machine/repo binding or any implication that raw source/logs
   are uploaded by default.
+  Addressed: the page now opens with a dense privacy summary, compact execution
+  boundary rows, a two-bucket data boundary, and hosted-state controls that
+  distinguish browser actions from terminal-managed local files and runner
+  credentials. Execution-surface and managed GitHub policy inventory no longer
+  appears on this local-runner privacy screen.
 
 ## 7. Daemon Heartbeat
 

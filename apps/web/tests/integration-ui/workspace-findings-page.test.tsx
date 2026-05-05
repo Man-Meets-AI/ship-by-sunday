@@ -67,6 +67,11 @@ function createFinding(
 describe("WorkspaceFindingsPage", () => {
 	it("renders dense ranked findings and filters by category", async () => {
 		const user = userEvent.setup();
+		const writeTextMock = vi.fn().mockResolvedValue(undefined);
+		Object.defineProperty(navigator, "clipboard", {
+			configurable: true,
+			value: { writeText: writeTextMock },
+		});
 		render(
 			<WorkspaceFindingsPage
 				initialFindings={[
@@ -85,6 +90,12 @@ describe("WorkspaceFindingsPage", () => {
 		);
 
 		expect(screen.getByRole("heading", { name: "Top 9 ledger" })).toBeTruthy();
+		expect(
+			screen.getByRole("region", { name: "Findings summary" }),
+		).toBeTruthy();
+		expect(screen.getByText("Uploaded findings")).toBeTruthy();
+		expect(screen.getByText("Open finding")).toBeTruthy();
+		expect(screen.getByText("run-1")).toBeTruthy();
 		expect(screen.getByText("Recommended first")).toBeTruthy();
 		expect(
 			screen.getByRole("link", {
@@ -109,6 +120,8 @@ describe("WorkspaceFindingsPage", () => {
 		expect(
 			screen.getByTestId("workspace-findings-local-nav").textContent,
 		).toContain("Findings");
+		await user.click(screen.getByRole("button", { name: "Copy Local run" }));
+		expect(writeTextMock).toHaveBeenCalledWith("run-1");
 
 		await user.selectOptions(
 			screen.getByLabelText("Category"),

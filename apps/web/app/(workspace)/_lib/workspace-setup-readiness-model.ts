@@ -939,7 +939,6 @@ export function buildExistingCodebaseWorkspaceLocalNavModel(
 			{
 				id: "existing-codebase",
 				label: "Existing codebase",
-				description: "Setup, diagnosis, proof, and privacy.",
 				items: [
 					item("setup", "Setup", routeConfig.workspaceSetup, "available"),
 					item(

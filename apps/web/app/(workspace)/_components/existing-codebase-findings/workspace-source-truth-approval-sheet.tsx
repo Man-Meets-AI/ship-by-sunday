@@ -161,6 +161,16 @@ function getWorkflowActionState(
 ): WorkflowActionState {
 	switch (detail.status) {
 		case "ready":
+			if (!detail.workflowApproval.isSupportedByLocalRunner) {
+				return {
+					kind: "unavailable",
+					title: "Workflow unavailable",
+					buttonLabel: "Workflow unavailable",
+					description:
+						"This workflow is not available in the local runner yet.",
+					reason: detail.workflowApproval.workflowId,
+				};
+			}
 			return { kind: "ready" };
 		case "blocked":
 			return {

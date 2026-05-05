@@ -474,7 +474,7 @@ export function useSignInFlow() {
 		availableVerificationMethods,
 		emailAddress,
 		emailError: errors.fields.identifier,
-		globalErrors: getRenderableErrors(errors.global ?? errors.raw),
+		globalErrors: getRenderableErrors(errors.global),
 		isBusy,
 		isLoaded: Boolean(signIn),
 		newPassword,

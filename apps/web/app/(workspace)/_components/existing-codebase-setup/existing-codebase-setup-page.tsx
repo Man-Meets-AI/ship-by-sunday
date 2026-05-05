@@ -7,6 +7,7 @@ import type { FunctionReturnType } from "convex/server";
 
 import { AppShell } from "@/app/(workspace)/_components/app-shell";
 import { WorkspaceLocalNavRail } from "@/app/(workspace)/_components/workspace-navigation/workspace-local-nav-rail";
+import { WorkspaceOperatorSummaryCard } from "@/app/(workspace)/_components/workspace-operator-summary-card";
 import {
 	showWorkspaceActionErrorToast,
 	showWorkspaceActionSuccessToast,
@@ -261,14 +262,22 @@ export function ExistingCodebaseSetupPage({
 							{model.subtitle}
 						</p>
 					</div>
-					<div className="grid min-w-0 gap-2 rounded-xl border border-border/60 bg-background p-4 text-sm">
-						<SetupSummaryRow label="Project" value={model.projectLabel} />
-						<SetupSummaryRow label="Repository" value={model.repositoryLabel} />
-						<SetupSummaryRow
-							label="Runner"
-							value={model.pairing.activeRunnerLabel}
-						/>
-					</div>
+					<WorkspaceOperatorSummaryCard
+						title="Setup summary"
+						rows={[
+							{ label: "Project", value: model.projectLabel },
+							{ label: "Repository", value: model.repositoryLabel },
+							{ label: "Runner", value: model.pairing.activeRunnerLabel },
+							{ label: "State", value: model.pairing.statusLabel },
+							{ label: "Owner", value: "Human" },
+							{
+								label: "Next",
+								value: model.doctorPassAction.disabled
+									? "Resolve setup blockers"
+									: "Run Doctor Pass",
+							},
+						]}
+					/>
 				</header>
 
 				<SetupPairingPanel
@@ -311,19 +320,5 @@ export function ExistingCodebaseSetupPage({
 				</div>
 			</div>
 		</AppShell>
-	);
-}
-
-function SetupSummaryRow({ label, value }: { label: string; value: string }) {
-	return (
-		<div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
-			<span className="text-muted-foreground">{label}</span>
-			<span
-				className="min-w-0 truncate text-right font-medium text-foreground"
-				title={value}
-			>
-				{value}
-			</span>
-		</div>
 	);
 }

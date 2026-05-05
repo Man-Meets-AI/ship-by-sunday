@@ -1,11 +1,11 @@
 ---
-title: 'Programs'
-summary: 'Landing lane for durable multi-slice initiative docs that sit above individual ExecPlans.'
-docType: 'readme'
-status: 'active'
+title: "Programs"
+summary: "Landing lane for durable multi-slice initiative docs that sit above individual ExecPlans."
+docType: "readme"
+status: "active"
 read_when:
-  - 'You need the first-hop docs surface for a multi-ExecPlan initiative.'
-  - 'You are deciding whether work belongs in a Program doc or an ExecPlan.'
+  - "You need the first-hop docs surface for a multi-ExecPlan initiative."
+  - "You are deciding whether work belongs in a Program doc or an ExecPlan."
 ---
 
 # Programs
@@ -16,7 +16,8 @@ read_when:
 
 Active:
 
-- None.
+- `docs/programs/active/2026-05-05-admin-user-impersonation/`: Clerk actor-token admin impersonation, Convex actor visibility, audit logging, support UI, and release proof.
+- `docs/programs/active/2026-05-05-docs-spine-adoption-operating-loop/`: deterministic local-runner docs-spine adoption for mature repos; scaffold, scanner facts, and synthesis packets complete, apply-and-proof next.
 
 Recently completed:
 

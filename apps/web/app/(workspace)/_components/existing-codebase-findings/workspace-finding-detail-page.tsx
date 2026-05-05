@@ -49,7 +49,9 @@ const unavailableWorkflowMessages = {
 		"This finding still needs approval. Approve the finding before starting a workflow.",
 	running:
 		"A workflow is already running for this finding. Review the current run state before starting another workflow.",
-} as const satisfies Record<UnavailableWorkflowStatus, string>;
+	unsupported:
+		"This workflow is not available in the local runner yet.",
+} as const satisfies Record<UnavailableWorkflowStatus | "unsupported", string>;
 
 export function WorkspaceFindingDetailPage({
 	initialFindings,
@@ -112,6 +114,12 @@ export function WorkspaceFindingDetailPage({
 
 		if (detail.status !== "ready") {
 			setActionError(getUnavailableWorkflowMessage(detail));
+			setActionState("error");
+			return;
+		}
+
+		if (!detail.workflowApproval.isSupportedByLocalRunner) {
+			setActionError(unavailableWorkflowMessages.unsupported);
 			setActionState("error");
 			return;
 		}
@@ -256,6 +264,9 @@ function FindingDecisionContent({
 							{detail.whyNow}
 						</p>
 					</DecisionSection>
+					<DecisionSection title="Workflow bounds">
+						<WorkflowBoundsGrid approval={detail.workflowApproval} />
+					</DecisionSection>
 					<DecisionSection title="Evidence refs">
 						<div className="divide-y divide-border/60">
 							{detail.evidenceRefs.map((ref) => (
@@ -283,6 +294,72 @@ function FindingDecisionContent({
 				/>
 			</div>
 		</>
+	);
+}
+
+function WorkflowBoundsGrid({
+	approval,
+}: {
+	approval: WorkspaceFindingDetailModel["workflowApproval"];
+}) {
+	return (
+		<div className="grid overflow-hidden rounded-lg border border-border/60 sm:grid-cols-2 xl:grid-cols-3">
+			<WorkflowBoundsGroup
+				title="Expected outputs"
+				items={approval.expectedOutputs}
+			/>
+			<WorkflowBoundsGroup
+				title="Allowed touch targets"
+				items={approval.allowedTouchTargets}
+			/>
+			<WorkflowBoundsGroup
+				title="Disallowed touch targets"
+				items={approval.disallowedTouchTargets}
+			/>
+			<WorkflowBoundsGroup
+				title="Proof commands"
+				items={approval.proofCommands}
+				mono
+			/>
+			<WorkflowBoundsGroup
+				title="Stop conditions"
+				items={approval.stopConditions}
+			/>
+			<WorkflowBoundsGroup
+				title="Sync and rollback"
+				items={[approval.syncPolicySummary, approval.rollbackNotes]}
+			/>
+		</div>
+	);
+}
+
+function WorkflowBoundsGroup({
+	title,
+	items,
+	mono,
+}: {
+	title: string;
+	items: string[];
+	mono?: boolean;
+}) {
+	return (
+		<div className="min-w-0 border-border/60 p-3 sm:border-r sm:border-b xl:[&:nth-child(3n)]:border-r-0 xl:[&:nth-last-child(-n+3)]:border-b-0">
+			<h3 className="text-xs font-medium text-muted-foreground">{title}</h3>
+			<ul className="mt-2 flex flex-wrap gap-1.5">
+				{items.map((item) => (
+					<li
+						key={item}
+						className={
+							mono
+								? "max-w-full rounded-md bg-muted px-2 py-1 font-mono text-xs leading-5 text-foreground"
+								: "max-w-full rounded-md bg-muted px-2 py-1 text-xs leading-5 text-foreground"
+						}
+					>
+						<span className="break-words">{item}</span>
+					</li>
+				))}
+			</ul>
+		</div>
 	);
 }
 
@@ -355,7 +432,7 @@ function getWorkflowRequestErrorMessage(error: unknown) {
 		message.includes("Workflow is not supported") ||
 		message.includes("Workflow must match")
 	) {
-		return "This workflow is unavailable for the selected finding. Refresh Findings and try again.";
+		return unavailableWorkflowMessages.unsupported;
 	}
 	return "Workflow request failed. Review the finding status and try again.";
 }

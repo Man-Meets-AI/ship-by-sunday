@@ -418,6 +418,17 @@ const workflowDefinitions: WorkflowCatalogDefinition[] = [
 		riskLevel: "Low",
 	},
 	{
+		id: "docs-spine-adoption",
+		name: "Docs Spine Adoption",
+		category: "Adoption",
+		whenUseful:
+			"A mature repo is ready to install a repo-specific Program, ExecPlan, docs, prompt, lint, and proof spine after the audit pass.",
+		requiredPermission: "Workspace write for local docs-spine scaffold",
+		typicalProof:
+			"Docs-spine manifest, minimal repo facts, local proof, sync preview, and blocked parity facts.",
+		riskLevel: "Low",
+	},
+	{
 		id: "test-hardening",
 		name: "Test Hardening",
 		category: "Testing",

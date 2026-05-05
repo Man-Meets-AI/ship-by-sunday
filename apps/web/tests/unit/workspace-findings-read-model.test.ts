@@ -143,6 +143,7 @@ describe("workspace findings read model", () => {
 		expect(detail?.disallowedTouchTargets).toContain("environment files");
 		expect(detail?.workflowApproval).toMatchObject({
 			workflowId: "source-truth-agent-readiness",
+			isSupportedByLocalRunner: true,
 			workflowVersion: "v1",
 			branchName: "sbs/source-truth-readiness-20260504-2100",
 			profileName: "sbs-workspace-write",
@@ -161,6 +162,30 @@ describe("workspace findings read model", () => {
 		expect(renderedText).not.toContain("raw source");
 		expect(renderedText).not.toContain("raw terminal");
 		expect(renderedText).not.toContain("transcript");
+	});
+
+	it("marks ready findings with unsupported workflows as unavailable to the local runner", () => {
+		const detail = buildWorkspaceFindingDetailModel(
+			[
+				createFinding({
+					findingId: "finding-proof-harness",
+					category: "proof",
+					title: "Proof harness is missing",
+					status: "ready",
+					recommendedWorkflowId: "proof-harness",
+				}),
+			],
+			"finding-proof-harness",
+			Date.UTC(2026, 4, 4, 21, 0),
+		);
+
+		expect(detail?.status).toBe("ready");
+		expect(detail?.recommendedWorkflowLabel).toBe("Proof Harness");
+		expect(detail?.workflowApproval).toMatchObject({
+			workflowId: "proof-harness",
+			isSupportedByLocalRunner: false,
+			workflowKind: "generic",
+		});
 	});
 
 	it("builds broken-app triage as read-only diagnostics before patch approval", () => {
@@ -289,6 +314,64 @@ describe("workspace findings read model", () => {
 		);
 		expect(detail?.workflowApproval.stopConditions.join(" ")).toContain(
 			"generated-starter rewrites",
+		);
+	});
+
+	it("builds docs spine adoption as a .sbs-only workflow packet", () => {
+		const detail = buildWorkspaceFindingDetailModel(
+			[
+				createFinding({
+					findingId: "finding-docs-spine-adoption",
+					category: "other",
+					title: "Docs spine adoption needs a deterministic loop",
+					permissionRequired: "workspace_write",
+					recommendedWorkflowId: "docs-spine-adoption",
+				}),
+			],
+			"finding-docs-spine-adoption",
+			Date.UTC(2026, 4, 5, 12, 0),
+		);
+
+		expect(detail?.workflowApproval).toMatchObject({
+			workflowId: "docs-spine-adoption",
+			workflowKind: "docs_spine_adoption",
+			workflowCommandName: "docs-spine-adoption",
+			confirmationFlag: "--confirm-docs-spine-adoption",
+			branchName: "sbs/docs-spine-adoption-20260505-1200",
+			profileName: "sbs-workspace-write",
+			proofCommands: [
+				"git status --short",
+				"git diff --name-only",
+				"git diff --check",
+			],
+		});
+		expect(detail?.workflowApproval.expectedOutputs).toEqual(
+			expect.arrayContaining([
+				"docs spine adoption workflow packet",
+				"docs spine adoption manifest",
+				"repo facts and scanner artifacts",
+				"bounded Codex synthesis packets",
+				"local proof or blocked-proof summary",
+				"sync preview metadata",
+			]),
+		);
+		expect(detail?.workflowApproval.allowedTouchTargets).toEqual([
+			".sbs/runs/<workflow-run-id>/**",
+			".sbs/docs-spine-adoption/**",
+		]);
+		expect(detail?.workflowApproval.disallowedTouchTargets).toEqual(
+			expect.arrayContaining([
+				"docs spine Markdown application",
+				"branch pushes",
+				"pull requests",
+				"raw logs",
+				"raw source",
+				"Codex transcripts",
+			]),
+		);
+		expect(detail?.workflowApproval.syncPolicySummary).toContain("docs drafts");
+		expect(detail?.workflowApproval.stopConditions.join(" ")).toContain(
+			"docs application",
 		);
 	});
 

@@ -1,5 +1,6 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import type { WorkspaceRunHistoryState } from "@/app/(workspace)/_lib/workspace-support-read-model";
@@ -87,7 +88,13 @@ function createRunHistory(): WorkspaceRunHistoryState {
 }
 
 describe("WorkspaceRunsPage", () => {
-	it("renders doctor-pass and workflow run history without queue controls", () => {
+	it("renders doctor-pass and workflow run history without queue controls", async () => {
+		const user = userEvent.setup();
+		const writeTextMock = vi.fn().mockResolvedValue(undefined);
+		Object.defineProperty(navigator, "clipboard", {
+			configurable: true,
+			value: { writeText: writeTextMock },
+		});
 		render(
 			<WorkspaceRunsPage
 				initialRunHistory={createRunHistory()}
@@ -96,6 +103,11 @@ describe("WorkspaceRunsPage", () => {
 		);
 
 		expect(screen.getByRole("heading", { name: "Run history" })).toBeTruthy();
+		expect(screen.getByRole("region", { name: "Runs summary" })).toBeTruthy();
+		expect(screen.getByText("Runs recorded")).toBeTruthy();
+		expect(screen.getByText("Inspect run history")).toBeTruthy();
+		expect(screen.getByText("doctorPassRuns_1")).toBeTruthy();
+		expect(screen.getAllByText("run-1").length).toBeGreaterThan(0);
 		expect(screen.getByText("Doctor pass run-1")).toBeTruthy();
 		expect(screen.getByText("2026-05-04 21:00 UTC")).toBeTruthy();
 		expect(
@@ -121,6 +133,8 @@ describe("WorkspaceRunsPage", () => {
 		expect(
 			screen.getByTestId("workspace-runs-local-nav").textContent,
 		).toContain("Runs");
+		await user.click(screen.getByRole("button", { name: "Copy Server run" }));
+		expect(writeTextMock).toHaveBeenCalledWith("doctorPassRuns_1");
 
 		const visibleText = document.body.textContent?.toLowerCase() ?? "";
 		expect(visibleText).not.toContain("worker queue");
@@ -136,7 +150,7 @@ describe("WorkspaceRunsPage", () => {
 			/>,
 		);
 
-		expect(screen.getByText("No runs yet")).toBeTruthy();
+		expect(screen.getByRole("heading", { name: "No runs yet" })).toBeTruthy();
 		expect(
 			screen
 				.getByRole("link", { name: "Open Doctor Pass" })

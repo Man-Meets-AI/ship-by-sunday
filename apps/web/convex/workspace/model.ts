@@ -70,6 +70,7 @@ const SOURCE_TRUTH_WORKFLOW_ID = "source-truth-agent-readiness";
 const OBSERVABILITY_WORKFLOW_ID = "observability-debuggability";
 const BROKEN_APP_TRIAGE_WORKFLOW_ID = "broken-app-triage";
 const MATURE_REPO_ADOPTION_WORKFLOW_ID = "mature-repo-adoption";
+const DOCS_SPINE_ADOPTION_WORKFLOW_ID = "docs-spine-adoption";
 const OBSERVABILITY_PROFILE_NAME = "sbs-workspace-write";
 const DEFAULT_WORKFLOW_VERSION = "v1";
 const WORKFLOW_APPROVAL_SCHEMA_VERSION = "workspace.workflow-approval.v1";
@@ -153,6 +154,64 @@ const MATURE_REPO_ADOPTION_STOP_CONDITIONS = [
 ] as const;
 const MATURE_REPO_ADOPTION_ROLLBACK_NOTES =
 	"Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the mature adoption branch after reviewing local proof.";
+const DOCS_SPINE_ADOPTION_EXPECTED_OUTPUTS = [
+	"docs spine adoption workflow packet",
+	"docs spine adoption manifest",
+	"repo facts and scanner artifacts",
+	"bounded Codex synthesis packets",
+	"local proof or blocked-proof summary",
+	"sync preview metadata",
+] as const;
+const DOCS_SPINE_ADOPTION_ALLOWED_TOUCH_TARGETS = [
+	".sbs/runs/<workflow-run-id>/**",
+	".sbs/docs-spine-adoption/**",
+] as const;
+const DOCS_SPINE_ADOPTION_REQUIRED_STATIC_ARTIFACT_REFS = [
+	".sbs/docs-spine-adoption/manifest.json",
+	".sbs/docs-spine-adoption/facts/repo-facts.json",
+	".sbs/docs-spine-adoption/facts/source-truth-map.json",
+	".sbs/docs-spine-adoption/facts/command-proof-map.json",
+	".sbs/docs-spine-adoption/facts/docs-gap-report.json",
+	".sbs/docs-spine-adoption/facts/architecture-signals.json",
+	".sbs/docs-spine-adoption/facts/security-signals.json",
+	".sbs/docs-spine-adoption/facts/quality-score-baseline.json",
+	".sbs/docs-spine-adoption/facts/instruction-surface-map.json",
+	".sbs/docs-spine-adoption/facts/skill-trigger-map.json",
+	".sbs/docs-spine-adoption/facts/generated-surface-map.json",
+	".sbs/docs-spine-adoption/facts/validation-surface-map.json",
+	".sbs/docs-spine-adoption/facts/performance-timings.json",
+	".sbs/docs-spine-adoption/drafts/codex-synthesis-packet.json",
+	".sbs/docs-spine-adoption/drafts/docs-index-draft.json",
+	".sbs/docs-spine-adoption/drafts/program-packet-draft.json",
+	".sbs/docs-spine-adoption/drafts/exec-plan-draft.json",
+	".sbs/docs-spine-adoption/drafts/agent-instructions-draft.json",
+	".sbs/docs-spine-adoption/drafts/prompt-assets-draft.json",
+	".sbs/docs-spine-adoption/drafts/validation-proof-notes.json",
+	".sbs/docs-spine-adoption/drafts/quality-score-notes.json",
+	".sbs/docs-spine-adoption/drafts/parity-checklist-draft.json",
+] as const;
+const DOCS_SPINE_ADOPTION_DISALLOWED_TOUCH_TARGETS = [
+	...WORKFLOW_DISALLOWED_TOUCH_TARGETS,
+	"root agent instructions",
+	"CI configuration",
+	"CI-affecting commands",
+	"docs spine Markdown application",
+	"branch pushes",
+	"pull requests",
+	"raw logs",
+	"raw source",
+	"Codex transcripts",
+] as const;
+const DOCS_SPINE_ADOPTION_SYNC_POLICY_SUMMARY =
+	"Only approved structured workflow metadata, proof status, command names, artifact names, and repo-relative refs sync. Local code, command output, docs drafts, and Codex session history stay on the machine.";
+const DOCS_SPINE_ADOPTION_STOP_CONDITIONS = [
+	"worktree is dirty before branch creation",
+	"write lease expires before docs spine scaffold starts",
+	"requested work needs docs application, provider setup, package installs, migrations, CI, PRs, branch pushes, raw source, raw logs, or Codex transcripts",
+	"proof command fails",
+] as const;
+const DOCS_SPINE_ADOPTION_ROLLBACK_NOTES =
+	"Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the docs spine adoption branch after reviewing local proof.";
 
 export const getWorkspaceProjectStateArgs = {
 	projectId: v.optional(v.id("workspaceProjects")),
@@ -612,6 +671,83 @@ function assertMatureRepoAdoptionWorkflowApprovalPacket(args: {
 	}
 }
 
+function assertDocsSpineAdoptionWorkflowApprovalPacket(args: {
+	workflowVersion?: string;
+	profileName: string;
+	writeLeaseDurationMinutes?: number;
+	dirtyStatePolicy?: "require_clean_worktree" | "checkpoint_required";
+	expectedOutputs: string[];
+	allowedTouchTargets: string[];
+	disallowedTouchTargets: string[];
+	proofCommands: string[];
+	syncPolicySummary: string;
+	stopConditions: string[];
+	rollbackNotes: string;
+}) {
+	if (args.profileName !== OBSERVABILITY_PROFILE_NAME) {
+		throw new ConvexError("Docs spine adoption profile name is not approved");
+	}
+	if (
+		args.workflowVersion !== undefined &&
+		args.workflowVersion !== DEFAULT_WORKFLOW_VERSION
+	) {
+		throw new ConvexError(
+			"Docs spine adoption workflow version is not approved",
+		);
+	}
+	if (
+		args.writeLeaseDurationMinutes !== undefined &&
+		args.writeLeaseDurationMinutes !== DEFAULT_WORKFLOW_WRITE_LEASE_MINUTES
+	) {
+		throw new ConvexError(
+			"Docs spine adoption write lease duration is not approved",
+		);
+	}
+	if (
+		args.dirtyStatePolicy !== undefined &&
+		args.dirtyStatePolicy !== "require_clean_worktree"
+	) {
+		throw new ConvexError(
+			"Docs spine adoption requires a clean-worktree policy",
+		);
+	}
+	assertExactTextList(
+		args.expectedOutputs,
+		DOCS_SPINE_ADOPTION_EXPECTED_OUTPUTS,
+		"Docs spine adoption expectedOutputs",
+	);
+	assertExactTextList(
+		args.allowedTouchTargets,
+		DOCS_SPINE_ADOPTION_ALLOWED_TOUCH_TARGETS,
+		"Docs spine adoption allowedTouchTargets",
+	);
+	assertExactTextList(
+		args.disallowedTouchTargets,
+		DOCS_SPINE_ADOPTION_DISALLOWED_TOUCH_TARGETS,
+		"Docs spine adoption disallowedTouchTargets",
+	);
+	assertExactTextList(
+		args.proofCommands,
+		OBSERVABILITY_PROOF_COMMANDS,
+		"Docs spine adoption proofCommands",
+	);
+	if (args.syncPolicySummary !== DOCS_SPINE_ADOPTION_SYNC_POLICY_SUMMARY) {
+		throw new ConvexError(
+			"Docs spine adoption syncPolicySummary does not match the approved workflow packet",
+		);
+	}
+	assertExactTextList(
+		args.stopConditions,
+		DOCS_SPINE_ADOPTION_STOP_CONDITIONS,
+		"Docs spine adoption stopConditions",
+	);
+	if (args.rollbackNotes !== DOCS_SPINE_ADOPTION_ROLLBACK_NOTES) {
+		throw new ConvexError(
+			"Docs spine adoption rollbackNotes does not match the approved workflow packet",
+		);
+	}
+}
+
 function normalizeWriteLeaseDurationMinutes(durationMinutes?: number) {
 	const duration = durationMinutes ?? DEFAULT_WORKFLOW_WRITE_LEASE_MINUTES;
 	if (!Number.isFinite(duration) || duration <= 0 || duration > 60) {
@@ -994,7 +1130,8 @@ function requireSupportedWorkflowRun(
 		workflowRun.workflowId !== SOURCE_TRUTH_WORKFLOW_ID &&
 		workflowRun.workflowId !== OBSERVABILITY_WORKFLOW_ID &&
 		workflowRun.workflowId !== BROKEN_APP_TRIAGE_WORKFLOW_ID &&
-		workflowRun.workflowId !== MATURE_REPO_ADOPTION_WORKFLOW_ID
+		workflowRun.workflowId !== MATURE_REPO_ADOPTION_WORKFLOW_ID &&
+		workflowRun.workflowId !== DOCS_SPINE_ADOPTION_WORKFLOW_ID
 	) {
 		throw new ConvexError("Workflow is not supported by the local runner");
 	}
@@ -1054,6 +1191,91 @@ function isTerminalWorkflowRunStatus(status: string) {
 		status === "canceled" ||
 		status === "deleted"
 	);
+}
+
+function getUnexpectedDocsSpineProofRefs({
+	workflowId,
+	workflowRunId,
+	touchedFileRefs,
+	createdArtifactRefs,
+}: {
+	workflowId: string;
+	workflowRunId: string;
+	touchedFileRefs?: string[];
+	createdArtifactRefs?: string[];
+}) {
+	if (workflowId !== DOCS_SPINE_ADOPTION_WORKFLOW_ID) {
+		return [];
+	}
+	return [...(touchedFileRefs ?? []), ...(createdArtifactRefs ?? [])].filter(
+		(ref) => !isApprovedDocsSpineTouchedRef(ref, workflowRunId),
+	);
+}
+
+function getMissingDocsSpineProofArtifactRefs({
+	workflowId,
+	workflowRunId,
+	createdArtifactRefs,
+}: {
+	workflowId: string;
+	workflowRunId: string;
+	createdArtifactRefs?: string[];
+}) {
+	if (workflowId !== DOCS_SPINE_ADOPTION_WORKFLOW_ID) {
+		return [];
+	}
+	const createdArtifactRefSet = new Set(createdArtifactRefs ?? []);
+	return getRequiredDocsSpineProofArtifactRefs(workflowRunId).filter(
+		(ref) => !createdArtifactRefSet.has(ref),
+	);
+}
+
+function getRequiredDocsSpineProofArtifactRefs(workflowRunId: string) {
+	return [
+		`.sbs/runs/${workflowRunId}/workflow-packet.json`,
+		`.sbs/runs/${workflowRunId}/proof.json`,
+		`.sbs/runs/${workflowRunId}/sync-preview.json`,
+		...DOCS_SPINE_ADOPTION_REQUIRED_STATIC_ARTIFACT_REFS,
+	];
+}
+
+function isApprovedDocsSpineTouchedRef(ref: string, workflowRunId: string) {
+	if (!isRepoRelativeRef(ref)) {
+		return false;
+	}
+	return (
+		ref.startsWith(`.sbs/runs/${workflowRunId}/`) ||
+		ref.startsWith(".sbs/docs-spine-adoption/")
+	);
+}
+
+function isRepoRelativeRef(ref: string) {
+	if (
+		ref.length === 0 ||
+		ref.startsWith("/") ||
+		ref.startsWith("\\\\") ||
+		/^[A-Za-z]:[\\/]/.test(ref) ||
+		ref.includes("\\")
+	) {
+		return false;
+	}
+	return !ref
+		.split("/")
+		.some((segment) => segment === "" || segment === "." || segment === "..");
+}
+
+function buildDocsSpineUnexpectedProofRefsReason(proofRefs: string[]) {
+	const displayedRefs = proofRefs.slice(0, 5).join(", ");
+	const suffix =
+		proofRefs.length > 5 ? `, and ${proofRefs.length - 5} more` : "";
+	return `Docs spine adoption proof reported refs outside the approved .sbs write roots: ${displayedRefs}${suffix}`;
+}
+
+function buildDocsSpineMissingProofRefsReason(proofRefs: string[]) {
+	const displayedRefs = proofRefs.slice(0, 5).join(", ");
+	const suffix =
+		proofRefs.length > 5 ? `, and ${proofRefs.length - 5} more` : "";
+	return `Docs spine adoption proof is missing required docs-spine artifact refs: ${displayedRefs}${suffix}`;
 }
 
 function isClaimableWorkflowRunStatus(status: string) {
@@ -1974,7 +2196,8 @@ export async function requestWorkspaceWorkflowRunHandler(
 		args.workflowId !== SOURCE_TRUTH_WORKFLOW_ID &&
 		args.workflowId !== OBSERVABILITY_WORKFLOW_ID &&
 		args.workflowId !== BROKEN_APP_TRIAGE_WORKFLOW_ID &&
-		args.workflowId !== MATURE_REPO_ADOPTION_WORKFLOW_ID
+		args.workflowId !== MATURE_REPO_ADOPTION_WORKFLOW_ID &&
+		args.workflowId !== DOCS_SPINE_ADOPTION_WORKFLOW_ID
 	) {
 		throw new ConvexError("Workflow is not supported by the local runner");
 	}
@@ -2034,6 +2257,15 @@ export async function requestWorkspaceWorkflowRunHandler(
 	}
 	if (args.workflowId === MATURE_REPO_ADOPTION_WORKFLOW_ID) {
 		assertMatureRepoAdoptionWorkflowApprovalPacket(args);
+	}
+	if (
+		args.workflowId === DOCS_SPINE_ADOPTION_WORKFLOW_ID &&
+		!/^sbs\/docs-spine-adoption-\d{8}-\d{4}$/.test(args.branchName)
+	) {
+		throw new ConvexError("Docs spine adoption branch name is not approved");
+	}
+	if (args.workflowId === DOCS_SPINE_ADOPTION_WORKFLOW_ID) {
+		assertDocsSpineAdoptionWorkflowApprovalPacket(args);
 	}
 
 	const existingWorkflowRun = await findActiveWorkflowRunByFinding(ctx, {
@@ -2626,6 +2858,51 @@ async function applyEventDerivedState(
 				args.workflowRunId,
 			);
 			if (isTerminalWorkflowRunStatus(workflowRun.status)) {
+				return;
+			}
+			const unexpectedDocsSpineProofRefs = getUnexpectedDocsSpineProofRefs({
+				workflowId: workflowRun.workflowId,
+				workflowRunId: workflowRun._id,
+				touchedFileRefs: args.payload.touchedFileRefs,
+				createdArtifactRefs: args.payload.createdArtifactRefs,
+			});
+			const missingDocsSpineProofArtifactRefs =
+				getMissingDocsSpineProofArtifactRefs({
+					workflowId: workflowRun.workflowId,
+					workflowRunId: workflowRun._id,
+					createdArtifactRefs: args.payload.createdArtifactRefs,
+				});
+			const docsSpineProofRefsBlockedReason =
+				unexpectedDocsSpineProofRefs.length > 0
+					? buildDocsSpineUnexpectedProofRefsReason(
+							unexpectedDocsSpineProofRefs,
+						)
+					: missingDocsSpineProofArtifactRefs.length > 0
+						? buildDocsSpineMissingProofRefsReason(
+								missingDocsSpineProofArtifactRefs,
+							)
+						: null;
+			if (docsSpineProofRefsBlockedReason) {
+				await ctx.db.patch(workflowRun._id, {
+					status: "blocked" as const,
+					proofStatus: "blocked" as const,
+					deliveryStatus: "blocked" as const,
+					proofSummary: docsSpineProofRefsBlockedReason,
+					blockedReason: docsSpineProofRefsBlockedReason,
+					touchedFileRefs: args.payload.touchedFileRefs,
+					createdArtifactRefs: args.payload.createdArtifactRefs,
+					proofCommandResults: args.payload.proofCommandResults,
+					nextRecommendedWorkflowId: args.payload.nextRecommendedWorkflowId,
+					completedAt: args.createdAt,
+					updatedAt: now,
+				});
+				if (workflowRun.findingDocumentId) {
+					await ctx.db.patch(workflowRun.findingDocumentId, {
+						status: "blocked" as const,
+						blockedReason: docsSpineProofRefsBlockedReason,
+						updatedAt: now,
+					});
+				}
 				return;
 			}
 			await ctx.db.patch(workflowRun._id, {

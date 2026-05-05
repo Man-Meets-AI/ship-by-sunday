@@ -18,10 +18,10 @@ const {
 	toastErrorMock,
 	toastSuccessMock,
 } = vi.hoisted(() => ({
-		reportClientErrorMock: vi.fn(),
-		routerPushMock: vi.fn(),
-		toastErrorMock: vi.fn(),
-		toastSuccessMock: vi.fn(),
+	reportClientErrorMock: vi.fn(),
+	routerPushMock: vi.fn(),
+	toastErrorMock: vi.fn(),
+	toastSuccessMock: vi.fn(),
 }));
 
 vi.mock("@/convex/_generated/api", () => ({
@@ -270,6 +270,8 @@ describe("ExistingCodebaseSetupPage", () => {
 		expect(screen.getAllByText("Disabled by default").length).toBeGreaterThan(
 			2,
 		);
+		expect(screen.getByRole("region", { name: "Setup summary" })).toBeTruthy();
+		expect(screen.getByText("Resolve setup blockers")).toBeTruthy();
 		expect(screen.getByText("Default open destination")).toBeTruthy();
 		expect(
 			(

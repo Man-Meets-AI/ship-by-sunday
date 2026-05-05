@@ -269,6 +269,61 @@ describe("WorkspaceFindingDetailPage", () => {
 		expect(document.body.textContent).not.toContain("ConvexError");
 	});
 
+	it("renders unsupported ready workflows as unavailable and never requests a workflow", async () => {
+		const user = userEvent.setup();
+		const writeTextMock = vi.fn().mockResolvedValue(undefined);
+		Object.defineProperty(navigator, "clipboard", {
+			configurable: true,
+			value: { writeText: writeTextMock },
+		});
+
+		render(
+			<WorkspaceFindingDetailPage
+				initialFindings={[
+					createFinding({
+						findingId: "finding-proof-harness",
+						title: "Proof harness is missing",
+						category: "proof",
+						recommendedWorkflowId: "proof-harness",
+					}),
+				]}
+				findingRouteId="finding-proof-harness"
+				projectId="workspaceProjects_1"
+				activeRunnerId="workspaceRunnerBindings_1"
+				approvalTimestamp={Date.UTC(2026, 4, 4, 21, 0)}
+			/>,
+		);
+
+		expect(screen.getByText("Proof Harness")).toBeTruthy();
+		expect(
+			screen.getByText(
+				"This workflow is not available in the local runner yet.",
+			),
+		).toBeTruthy();
+		expect(screen.getByText("Reason: proof-harness")).toBeTruthy();
+		expect(
+			screen.queryByRole("button", {
+				name: /Create branch and run workflow/i,
+			}),
+		).toBeNull();
+		const unavailableWorkflowButton = screen.getByRole("button", {
+			name: /Workflow unavailable/i,
+		}) as HTMLButtonElement;
+		expect(unavailableWorkflowButton.disabled).toBe(true);
+
+		await user.click(unavailableWorkflowButton);
+		await user.click(
+			screen.getByRole("button", { name: /Copy local evidence ref/i }),
+		);
+
+		expect(writeTextMock).toHaveBeenCalledWith("AGENTS.md:1-40");
+		expect(requestWorkflowRunMock).not.toHaveBeenCalled();
+		expect(document.body.textContent).not.toContain(
+			"workspace:requestWorkspaceWorkflowRun",
+		);
+		expect(document.body.textContent).not.toContain("ConvexError");
+	});
+
 	it("keeps non-ready workflow states from starting duplicate runs", () => {
 		const unavailableStates: Array<{
 			status: WorkspaceFindingDocument["status"];
@@ -358,6 +413,41 @@ describe("WorkspaceFindingDetailPage", () => {
 		);
 		expect(document.body.textContent).not.toContain("ConvexError");
 		expect(document.body.textContent).not.toContain("604cef4c0fefa456");
+	});
+
+	it("shows a friendly inline error when the backend rejects an unsupported workflow", async () => {
+		const user = userEvent.setup();
+		requestWorkflowRunMock.mockRejectedValue(
+			new Error(
+				"[CONVEX M(workspace:requestWorkspaceWorkflowRun)] Uncaught ConvexError: Workflow is not supported by the local runner\nRequest ID: 134a84a54dedc72c",
+			),
+		);
+
+		render(
+			<WorkspaceFindingDetailPage
+				initialFindings={[createFinding()]}
+				findingRouteId="finding-source-truth-readiness"
+				projectId="workspaceProjects_1"
+				activeRunnerId="workspaceRunnerBindings_1"
+				approvalTimestamp={Date.UTC(2026, 4, 4, 21, 0)}
+			/>,
+		);
+
+		await user.click(
+			screen.getByRole("button", { name: /Create branch and run workflow/i }),
+		);
+
+		expect(
+			await screen.findByText(
+				"This workflow is not available in the local runner yet.",
+			),
+		).toBeTruthy();
+		expect(requestWorkflowRunMock).toHaveBeenCalledOnce();
+		expect(document.body.textContent).not.toContain(
+			"workspace:requestWorkspaceWorkflowRun",
+		);
+		expect(document.body.textContent).not.toContain("ConvexError");
+		expect(document.body.textContent).not.toContain("134a84a54dedc72c");
 	});
 
 	it("renders unavailable state for a missing finding", () => {

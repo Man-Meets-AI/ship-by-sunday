@@ -21,6 +21,10 @@ import {
 } from "@/app/(workspace)/_components/existing-codebase-doctor-pass/workspace-doctor-pass-panels";
 import { WorkspaceLocalNavRail } from "@/app/(workspace)/_components/workspace-navigation/workspace-local-nav-rail";
 import {
+	WorkspaceOperatorSummaryCard,
+	type WorkspaceOperatorSummaryRow,
+} from "@/app/(workspace)/_components/workspace-operator-summary-card";
+import {
 	showWorkspaceActionErrorToast,
 	showWorkspaceActionSuccessToast,
 } from "@/app/(workspace)/_lib/workspace-action-feedback";
@@ -61,7 +65,8 @@ export function WorkspaceDoctorPassPage({
 	const syncPreviewState =
 		liveSyncPreviewState ?? lastMutationState ?? initialSyncPreviewState;
 	const doctorPassRun = syncPreviewState.doctorPassRun;
-	const localRunId = getLocalRunId(doctorPassRun?.localReportRef);
+	const localRunId =
+		doctorPassRun?.localRunId ?? getLocalRunId(doctorPassRun?.localReportRef);
 	const presentation = getDoctorPassPresentation(doctorPassRun);
 	const localNavModel = useMemo(
 		() => buildExistingCodebaseWorkspaceLocalNavModel("doctor-pass"),
@@ -136,9 +141,12 @@ export function WorkspaceDoctorPassPage({
 							{presentation.subtitle}
 						</p>
 					</div>
-					<RunStatusPanel
-						doctorPassRun={doctorPassRun}
-						statusLabel={presentation.statusLabel}
+					<WorkspaceOperatorSummaryCard
+						title="Run summary"
+						rows={buildDoctorPassOperatorSummaryRows({
+							doctorPassRun,
+							localRunId,
+						})}
 					/>
 				</header>
 
@@ -179,30 +187,29 @@ function ApprovalPanel({
 }) {
 	return (
 		<aside className="grid gap-5 lg:sticky lg:top-20">
-			<section className="rounded-xl border border-border/60 bg-background p-4">
-				<div className="flex items-start gap-3">
-					<ShieldCheck className="mt-0.5 size-4 text-foreground" aria-hidden />
-					<div className="min-w-0 space-y-1">
+			<section className="rounded-xl border border-border/60 bg-background p-3">
+				<div className="grid gap-3">
+					<div className="flex items-center gap-2">
+						<ShieldCheck className="size-4 text-foreground" aria-hidden />
 						<h2 className="text-sm font-semibold text-foreground">Approval</h2>
-						<p className="text-sm leading-6 text-muted-foreground">
-							{approvalCopy}
-						</p>
 					</div>
+					<p className="text-sm leading-5 text-muted-foreground">
+						{approvalCopy}
+					</p>
 				</div>
 				{doctorPassRun?.syncPreviewStatus === "uploaded" ? (
-					<div className="mt-4 grid gap-2">
-						<Button asChild size="lg" className="w-full">
+					<div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
+						<Button asChild className="w-full">
 							<Link href={routeConfig.workspaceFindings}>View findings</Link>
 						</Button>
-						<Button asChild variant="outline" size="lg" className="w-full">
+						<Button asChild variant="outline" className="w-full">
 							<Link href={routeConfig.workspaceRuns}>View runs</Link>
 						</Button>
 					</div>
 				) : (
 					<Button
 						type="button"
-						size="lg"
-						className="mt-4 w-full"
+						className="mt-3 w-full"
 						disabled={!canApprove || approvalState === "approving"}
 						onClick={onApprove}
 						data-testid="workspace-doctor-pass-approve"
@@ -219,39 +226,6 @@ function ApprovalPanel({
 				/>
 			</section>
 		</aside>
-	);
-}
-
-function RunStatusPanel({
-	doctorPassRun,
-	statusLabel,
-}: {
-	doctorPassRun: DoctorPassRun;
-	statusLabel: string;
-}) {
-	return (
-		<div className="grid min-w-0 gap-2 overflow-hidden rounded-xl border border-border/60 bg-background p-4 text-sm">
-			<RunStatusRow label="Run" value={doctorPassRun?._id ?? "Waiting"} />
-			<RunStatusRow label="Now" value={statusLabel} />
-			<RunStatusRow
-				label="Preview"
-				value={doctorPassRun?.syncPreviewStatus ?? "not_ready"}
-			/>
-		</div>
-	);
-}
-
-function RunStatusRow({ label, value }: { label: string; value: string }) {
-	return (
-		<div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
-			<span className="text-muted-foreground">{label}</span>
-			<span
-				className="min-w-0 truncate text-right font-medium text-foreground"
-				title={value}
-			>
-				{value}
-			</span>
-		</div>
 	);
 }
 
@@ -476,11 +450,7 @@ function UploadInstruction({
 		return null;
 	}
 	if (doctorPassRun.syncPreviewStatus === "ready") {
-		return (
-			<p className="mt-3 text-sm leading-6 text-muted-foreground">
-				Click approval only if these structured findings are okay to upload.
-			</p>
-		);
+		return null;
 	}
 	if (doctorPassRun.syncPreviewStatus === "approved") {
 		if (doctorPassRun.runnerMode === "daemon") {
@@ -675,6 +645,141 @@ function getDoctorPassPresentation(doctorPassRun: DoctorPassRun) {
 	};
 }
 
+function buildDoctorPassOperatorSummaryRows({
+	doctorPassRun,
+	localRunId,
+}: {
+	doctorPassRun: DoctorPassRun;
+	localRunId: string | null;
+}): WorkspaceOperatorSummaryRow[] {
+	if (!doctorPassRun) {
+		return [
+			{ label: "State", value: "Not run yet" },
+			{ label: "Owner", value: "Human" },
+			{ label: "Next", value: "Run Doctor Pass locally" },
+		];
+	}
+
+	const operatorState = getDoctorPassOperatorState(doctorPassRun);
+	const rows: WorkspaceOperatorSummaryRow[] = [
+		{
+			label: "Server run",
+			value: doctorPassRun._id,
+			copyValue: doctorPassRun._id,
+			mono: true,
+		},
+	];
+
+	if (localRunId) {
+		rows.push({
+			label: "Local run",
+			value: localRunId,
+			copyValue: localRunId,
+			mono: true,
+		});
+	}
+
+	const digest = doctorPassRun.syncPreviewDigest;
+	if (digest) {
+		rows.push({
+			label: "Digest",
+			value: formatDigestLabel(digest),
+			copyValue: digest,
+			mono: true,
+			title: digest,
+		});
+	}
+
+	rows.push(
+		{ label: "State", value: operatorState.state },
+		{ label: "Owner", value: operatorState.owner },
+		{ label: "Next", value: operatorState.nextAction },
+	);
+
+	const findingsCount =
+		doctorPassRun.findingsCount ?? doctorPassRun.syncPreviewFindingsCount;
+	if (typeof findingsCount === "number") {
+		rows.push({ label: "Findings", value: String(findingsCount), mono: true });
+	}
+	if (typeof doctorPassRun.excludedArtifactCount === "number") {
+		rows.push({
+			label: "Excluded",
+			value: String(doctorPassRun.excludedArtifactCount),
+			mono: true,
+		});
+	}
+
+	rows.push({
+		label: operatorState.timestampLabel,
+		value: formatTimestamp(operatorState.timestamp),
+		mono: true,
+	});
+
+	return rows;
+}
+
+function getDoctorPassOperatorState(doctorPassRun: NonNullable<DoctorPassRun>) {
+	if (doctorPassRun.syncPreviewStatus === "uploaded") {
+		return {
+			state: "Uploaded",
+			owner: "Human",
+			nextAction: "Open Findings",
+			timestampLabel: "Updated",
+			timestamp: doctorPassRun.updatedAt,
+		};
+	}
+	if (doctorPassRun.syncPreviewStatus === "approved") {
+		return {
+			state: "Approved, waiting for runner upload",
+			owner: "Runner",
+			nextAction: "Run/keep local runner upload active",
+			timestampLabel: "Approved",
+			timestamp:
+				getSyncPreviewApprovedAt(doctorPassRun) ?? doctorPassRun.updatedAt,
+		};
+	}
+	if (doctorPassRun.syncPreviewStatus === "ready") {
+		return {
+			state: "Waiting for browser approval",
+			owner: "Human",
+			nextAction: "Click Approve findings upload",
+			timestampLabel: "Updated",
+			timestamp: doctorPassRun.updatedAt,
+		};
+	}
+	if (doctorPassRun.status === "failed" || doctorPassRun.status === "blocked") {
+		return {
+			state: "Failed",
+			owner: "Human",
+			nextAction: "Inspect failed run",
+			timestampLabel: "Updated",
+			timestamp: doctorPassRun.updatedAt,
+		};
+	}
+	return {
+		state: "Running locally",
+		owner:
+			doctorPassRun.currentStage === "codex_interpretation_running"
+				? "Codebot"
+				: "Runner",
+		nextAction: "Keep local runner active",
+		timestampLabel: "Started",
+		timestamp: doctorPassRun.startedAt,
+	};
+}
+
+function getSyncPreviewApprovedAt(doctorPassRun: NonNullable<DoctorPassRun>) {
+	return "syncPreviewApprovedAt" in doctorPassRun &&
+		typeof doctorPassRun.syncPreviewApprovedAt === "number"
+		? doctorPassRun.syncPreviewApprovedAt
+		: null;
+}
+
+function formatDigestLabel(digest: string) {
+	const digestValue = digest.startsWith("sha256:") ? digest.slice(7) : digest;
+	return `sha256:${digestValue.slice(0, 12)}`;
+}
+
 function formatCount(count: number, noun: string) {
 	return `${count} ${noun}${count === 1 ? "" : "s"}`;
 }
@@ -684,4 +789,13 @@ function getLocalRunId(localReportRef: string | undefined) {
 		/^\.sbs\/reports\/doctor-pass\/([^/]+)\//,
 	);
 	return match?.[1] ?? null;
+}
+
+function formatTimestamp(timestamp: number) {
+	const date = new Date(timestamp);
+	if (Number.isNaN(date.getTime())) {
+		return "Unknown";
+	}
+
+	return date.toISOString().replace("T", " ").slice(0, 16) + " UTC";
 }

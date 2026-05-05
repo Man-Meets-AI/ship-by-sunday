@@ -1,11 +1,9 @@
-import { EyeOff, GitBranch, ShieldCheck } from "lucide-react";
+import { EyeOff } from "lucide-react";
 
 import {
 	buildWorkspacePrivacyModel,
-	type WorkspaceExecutionSurfaceRow,
 	type WorkspacePrivacySharingRow,
 } from "@/app/(workspace)/_lib/workspace-support-read-model";
-import { Button } from "@/components/ui/button";
 import { WorkspaceSupportFact } from "./workspace-support-shared";
 
 type WorkspacePrivacyModel = ReturnType<typeof buildWorkspacePrivacyModel>;
@@ -16,11 +14,16 @@ export function PrivacyStatusPanel({
 	privacyModel: WorkspacePrivacyModel;
 }) {
 	return (
-		<section className="rounded-xl border border-border/60 bg-background p-5">
-			<h2 className="text-base font-semibold text-foreground">
-				Execution boundary
-			</h2>
-			<div className="mt-4 grid gap-3 sm:grid-cols-2">
+		<section className="rounded-xl border border-border/60 bg-background p-4">
+			<div className="flex items-center justify-between gap-3">
+				<h2 className="text-base font-semibold text-foreground">
+					Execution boundary
+				</h2>
+				<span className="rounded-full border border-border/60 px-2 py-1 font-mono text-[11px] text-muted-foreground">
+					local lane
+				</span>
+			</div>
+			<div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
 				<WorkspaceSupportFact
 					label="Runner mode"
 					value={privacyModel.runnerModeLabel}
@@ -47,107 +50,58 @@ export function PrivacySharingPanel({
 }: {
 	rows: WorkspacePrivacySharingRow[];
 }) {
+	const localRows = rows.filter((row) => row.statusLabel === "Disabled");
+	const syncRows = rows.filter((row) => row.statusLabel !== "Disabled");
+
 	return (
-		<section className="rounded-xl border border-border/60 bg-background p-5">
-			<div className="flex items-start gap-3">
-				<EyeOff className="mt-0.5 size-4 text-foreground" aria-hidden />
+		<section className="rounded-xl border border-border/60 bg-background p-4">
+			<div className="flex items-center gap-2">
+				<EyeOff className="size-4 text-foreground" aria-hidden />
 				<div className="min-w-0">
 					<h2 className="text-base font-semibold text-foreground">
-						Sharing defaults
+						Data boundary
 					</h2>
-					<p className="mt-2 text-sm leading-6 text-muted-foreground">
-						The default local lane syncs structured state only after approval.
-					</p>
 				</div>
 			</div>
-			<div className="mt-4 divide-y divide-border/60">
-				{rows.map((row) => (
-					<div
-						key={row.id}
-						className="grid gap-2 py-3 first:pt-0 sm:grid-cols-[12rem_minmax(0,1fr)_8rem] sm:items-start"
-					>
-						<p className="font-medium text-foreground">{row.label}</p>
-						<p className="text-sm leading-6 text-muted-foreground">
-							{row.description}
-						</p>
-						<p className="text-sm text-foreground">{row.statusLabel}</p>
-					</div>
-				))}
+			<div className="mt-3 grid gap-3 md:grid-cols-2">
+				<PrivacyBoundaryBucket
+					label="Stays local"
+					status="Not uploaded"
+					rows={localRows}
+				/>
+				<PrivacyBoundaryBucket
+					label="Can sync"
+					status="Approval required"
+					rows={syncRows}
+				/>
 			</div>
 		</section>
 	);
 }
 
-export function ExecutionSurfacesPanel({
-	rows,
-}: {
-	rows: WorkspaceExecutionSurfaceRow[];
-}) {
-	return (
-		<section className="rounded-xl border border-border/60 bg-background p-5">
-			<div className="flex items-start gap-3">
-				<ShieldCheck className="mt-0.5 size-4 text-foreground" aria-hidden />
-				<div className="min-w-0">
-					<h2 className="text-base font-semibold text-foreground">
-						Execution surfaces
-					</h2>
-					<p className="mt-2 text-sm leading-6 text-muted-foreground">
-						Each surface has a separate consent, storage, command, proof, and
-						sync boundary.
-					</p>
-				</div>
-			</div>
-			<div className="mt-4 divide-y divide-border/60">
-				{rows.map((row) => (
-					<div key={row.id} className="grid gap-3 py-4 first:pt-0">
-						<div className="grid gap-1 sm:grid-cols-[12rem_minmax(0,1fr)]">
-							<p className="font-medium text-foreground">{row.label}</p>
-							<p className="text-sm text-foreground">{row.statusLabel}</p>
-						</div>
-						<div className="grid gap-2 text-sm leading-6 text-muted-foreground sm:grid-cols-2">
-							<ExecutionSurfaceFact label="Consent" value={row.consentLabel} />
-							<ExecutionSurfaceFact label="Storage" value={row.storageLabel} />
-							<ExecutionSurfaceFact
-								label="Commands"
-								value={row.commandAuthorityLabel}
-							/>
-							<ExecutionSurfaceFact
-								label="Provider"
-								value={row.providerAccessLabel}
-							/>
-							<ExecutionSurfaceFact label="PR" value={row.prAuthorityLabel} />
-							<ExecutionSurfaceFact
-								label="Proof"
-								value={row.proofDeliveryLabel}
-							/>
-							<ExecutionSurfaceFact
-								label="Sync"
-								value={row.syncBoundaryLabel}
-							/>
-							<ExecutionSurfaceFact
-								label="Failure"
-								value={row.failureStateLabel}
-							/>
-						</div>
-					</div>
-				))}
-			</div>
-		</section>
-	);
-}
-
-function ExecutionSurfaceFact({
+function PrivacyBoundaryBucket({
 	label,
-	value,
+	rows,
+	status,
 }: {
 	label: string;
-	value: string;
+	rows: WorkspacePrivacySharingRow[];
+	status: string;
 }) {
 	return (
-		<p>
-			<span className="font-medium text-foreground">{label}: </span>
-			{value}
-		</p>
+		<div className="rounded-lg border border-border/60 bg-muted/15 p-3">
+			<div className="flex items-center justify-between gap-3">
+				<p className="text-sm font-medium text-foreground">{label}</p>
+				<span className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+					{status}
+				</span>
+			</div>
+			<ul className="mt-2 grid gap-1 text-sm leading-5 text-muted-foreground">
+				{rows.map((row) => (
+					<li key={row.id}>{row.label}</li>
+				))}
+			</ul>
+		</div>
 	);
 }
 
@@ -157,11 +111,11 @@ export function PrivacySyncPreviewPanel({
 	privacyModel: WorkspacePrivacyModel;
 }) {
 	return (
-		<section className="rounded-xl border border-border/60 bg-background p-5">
+		<section className="rounded-xl border border-border/60 bg-background p-4">
 			<h2 className="text-base font-semibold text-foreground">
 				Last sync preview
 			</h2>
-			<div className="mt-4 grid gap-3 sm:grid-cols-2">
+			<div className="mt-3 grid gap-3 sm:grid-cols-3">
 				<WorkspaceSupportFact
 					label="Status"
 					value={privacyModel.lastSyncPreviewLabel}
@@ -177,105 +131,6 @@ export function PrivacySyncPreviewPanel({
 					mono
 				/>
 			</div>
-		</section>
-	);
-}
-
-export function ManagedGithubPanel({
-	privacyModel,
-	actionState,
-	onRequest,
-	onRevoke,
-}: {
-	privacyModel: WorkspacePrivacyModel;
-	actionState: "idle" | "submitting" | "done" | "error";
-	onRequest: () => void;
-	onRevoke: () => void;
-}) {
-	const managedGithub = privacyModel.managedGithub;
-	const primaryAction = managedGithub.canRevoke ? onRevoke : onRequest;
-	const primaryLabel = managedGithub.canRevoke
-		? actionState === "submitting"
-			? "Revoking request"
-			: "Revoke request"
-		: actionState === "submitting"
-			? "Requesting review"
-			: "Request concierge review";
-
-	return (
-		<section className="rounded-xl border border-border/60 bg-background p-5">
-			<div className="flex items-start gap-3">
-				<GitBranch className="mt-0.5 size-4 text-foreground" aria-hidden />
-				<div className="min-w-0">
-					<h2 className="text-base font-semibold text-foreground">
-						Managed GitHub
-					</h2>
-					<p className="mt-2 text-sm leading-6 text-muted-foreground">
-						Premium concierge execution stays off until this consent packet is
-						requested and later approved for a specific action.
-					</p>
-				</div>
-			</div>
-
-			<div className="mt-4 grid gap-3">
-				<WorkspaceSupportFact
-					label="Status"
-					value={managedGithub.statusLabel}
-				/>
-				<WorkspaceSupportFact
-					label="Repository"
-					value={managedGithub.repositoryLabel}
-				/>
-			</div>
-
-			<div className="mt-4 divide-y divide-border/60">
-				{managedGithub.boundaryRows.map((row) => (
-					<div
-						key={row.id}
-						className="grid gap-2 py-3 first:pt-0 sm:grid-cols-[11rem_minmax(0,1fr)]"
-					>
-						<p className="text-sm font-medium text-foreground">{row.label}</p>
-						<p className="text-sm leading-6 text-muted-foreground">
-							{row.value}
-						</p>
-					</div>
-				))}
-			</div>
-
-			{managedGithub.auditRows.length > 0 ? (
-				<div className="mt-4 border-t border-border/60 pt-4">
-					<h3 className="text-sm font-semibold text-foreground">Audit log</h3>
-					<div className="mt-2 grid gap-2">
-						{managedGithub.auditRows.map((row) => (
-							<p
-								key={row.id}
-								className="text-sm leading-6 text-muted-foreground"
-							>
-								<span className="font-mono text-xs text-foreground">
-									{row.timestampLabel}
-								</span>{" "}
-								{row.label}
-							</p>
-						))}
-					</div>
-				</div>
-			) : null}
-
-			<p className="mt-4 text-sm leading-6 text-muted-foreground">
-				{managedGithub.actionNote}
-			</p>
-			<Button
-				type="button"
-				className="mt-4 w-full"
-				variant="outline"
-				disabled={
-					actionState === "submitting" ||
-					(!managedGithub.canRequest && !managedGithub.canRevoke)
-				}
-				onClick={primaryAction}
-			>
-				{primaryLabel}
-			</Button>
 		</section>
 	);
 }

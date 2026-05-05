@@ -4,22 +4,24 @@ import { useMemo } from "react";
 
 import { AppShell } from "@/app/(workspace)/_components/app-shell";
 import { WorkspaceLocalNavRail } from "@/app/(workspace)/_components/workspace-navigation/workspace-local-nav-rail";
+import {
+	WorkspaceOperatorSummaryCard,
+	type WorkspaceOperatorSummaryRow,
+} from "@/app/(workspace)/_components/workspace-operator-summary-card";
 import type { WorkspaceFindingDocument } from "@/app/(workspace)/_lib/workspace-findings-read-model";
 import { buildExistingCodebaseWorkspaceLocalNavModel } from "@/app/(workspace)/_lib/workspace-setup-readiness-model";
 import type {
 	ManagedGithubExecutionState,
+	WorkspacePrivacyModel,
 	WorkspacePrivacySetupState,
 	WorkspacePrivacySyncPreviewState,
 } from "@/app/(workspace)/_lib/workspace-support-read-model";
 import { PrivacyActionPanel } from "./workspace-privacy-action-panel";
 import {
-	ExecutionSurfacesPanel,
-	ManagedGithubPanel,
 	PrivacySharingPanel,
 	PrivacyStatusPanel,
 	PrivacySyncPreviewPanel,
 } from "./workspace-privacy-panels";
-import { WorkspaceSupportFact } from "./workspace-support-shared";
 import { useWorkspacePrivacyActions } from "./use-workspace-privacy-actions";
 
 export function WorkspacePrivacyPage({
@@ -44,10 +46,7 @@ export function WorkspacePrivacyPage({
 		canRevokeRunner,
 		deleteState,
 		handleDeleteFindings,
-		handleRequestManagedGithub,
-		handleRevokeManagedGithub,
 		handleRevokeRunner,
-		managedGithubActionState,
 		privacyModel,
 		revokeState,
 	} = useWorkspacePrivacyActions({
@@ -74,41 +73,24 @@ export function WorkspacePrivacyPage({
 					<div className="min-w-0">
 						<p className="text-sm font-medium text-muted-foreground">Privacy</p>
 						<h1 className="mt-2 font-heading-serif text-4xl leading-none tracking-[-0.04em] text-foreground sm:text-5xl">
-							Local execution controls
+							Privacy controls
 						</h1>
 						<p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground sm:text-base">
-							Review what is paired, what can sync, and which local artifacts
-							stay on the customer machine.
+							Verify runner pairing, sync boundaries, and hosted-state controls
+							before approving local evidence.
 						</p>
 					</div>
-					<div className="grid min-w-0 gap-2 overflow-hidden rounded-xl border border-border/60 bg-background p-4 text-sm">
-						<WorkspaceSupportFact
-							label="Project"
-							value={privacyModel.projectLabel}
-						/>
-						<WorkspaceSupportFact
-							label="Repository"
-							value={privacyModel.repositoryLabel}
-						/>
-						<WorkspaceSupportFact
-							label="Runner"
-							value={privacyModel.runnerIdentityLabel}
-						/>
-					</div>
+					<WorkspaceOperatorSummaryCard
+						title="Privacy summary"
+						rows={buildPrivacySummaryRows(privacyModel)}
+					/>
 				</header>
 
 				<div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(19rem,0.36fr)] lg:items-start">
 					<div className="grid gap-5">
 						<PrivacyStatusPanel privacyModel={privacyModel} />
-						<ExecutionSurfacesPanel rows={privacyModel.executionSurfaceRows} />
 						<PrivacySharingPanel rows={privacyModel.sharingRows} />
 						<PrivacySyncPreviewPanel privacyModel={privacyModel} />
-						<ManagedGithubPanel
-							privacyModel={privacyModel}
-							actionState={managedGithubActionState}
-							onRequest={() => void handleRequestManagedGithub()}
-							onRevoke={() => void handleRevokeManagedGithub()}
-						/>
 					</div>
 					<aside className="grid gap-5 lg:sticky lg:top-20">
 						<PrivacyActionPanel
@@ -135,4 +117,49 @@ export function WorkspacePrivacyPage({
 			</div>
 		</AppShell>
 	);
+}
+
+function buildPrivacySummaryRows(
+	privacyModel: WorkspacePrivacyModel,
+): WorkspaceOperatorSummaryRow[] {
+	const rows: WorkspaceOperatorSummaryRow[] = [
+		{ label: "Project", value: privacyModel.projectLabel },
+		{ label: "Repo", value: privacyModel.repositoryLabel },
+		{ label: "Runner", value: privacyModel.runnerIdentityLabel },
+	];
+
+	if (privacyModel.runnerId) {
+		rows.push({
+			label: "Runner ID",
+			value: privacyModel.runnerId,
+			copyValue: privacyModel.runnerId,
+			mono: true,
+		});
+	}
+
+	rows.push(
+		{ label: "State", value: privacyModel.runnerHealthLabel },
+		{ label: "Sync", value: privacyModel.lastSyncPreviewLabel },
+		{
+			label: "Findings",
+			value: privacyModel.structuredFindingsCountLabel,
+			mono: true,
+		},
+		{ label: "Next", value: getPrivacyNextAction(privacyModel) },
+	);
+
+	return rows;
+}
+
+function getPrivacyNextAction(privacyModel: WorkspacePrivacyModel) {
+	if (privacyModel.runnerHealthLabel.toLowerCase().includes("blocked")) {
+		return "Open Setup";
+	}
+	if (privacyModel.lastSyncPreviewLabel === "Uploaded") {
+		return "Open Findings";
+	}
+	if (privacyModel.lastSyncPreviewLabel === "Ready") {
+		return "Approve findings upload";
+	}
+	return "Keep local runner paired";
 }
